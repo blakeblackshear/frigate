@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Clase Borrada",
-      "deletedImage": "Imágenes Borradas",
+      "deletedCategory_one": "Se eliminó {{count}} clase",
+      "deletedCategory_many": "Se eliminaron {{count}} clases",
+      "deletedCategory_other": "Se eliminaron {{count}} clases",
+      "deletedImage_one": "Se eliminó {{count}} imagen",
+      "deletedImage_many": "Se eliminaron {{count}} imágenes",
+      "deletedImage_other": "Se eliminaron {{count}} imágenes",
       "deletedModel_one": "Borrado con éxito {{count}} modelo",
       "deletedModel_many": "Borrados con éxito {{count}} modelos",
       "deletedModel_other": "Borrados con éxito {{count}} modelos",
@@ -21,7 +25,8 @@
       "trainedModel": "Modelo entrenado correctamente.",
       "trainingModel": "Entrenamiento del modelo iniciado correctamente.",
       "updatedModel": "Configuración del modelo actualizada correctamente",
-      "renamedCategory": "Clase renombrada correctamente a {{name}}"
+      "renamedCategory": "Clase renombrada correctamente a {{name}}",
+      "reclassifiedImage": "Imagen reclasificada con éxito"
     },
     "error": {
       "deleteImageFailed": "Fallo al borrar: {{errorMessage}}",
@@ -31,13 +36,14 @@
       "trainingFailed": "El entrenamiento del modelo ha fallado. Revisa los registros de Frigate para más detalles.",
       "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}",
       "trainingFailedToStart": "No se pudo iniciar el entrenamiento del modelo: {{errorMessage}}",
-      "renameCategoryFailed": "Falló el renombrado de la clase: {{errorMessage}}"
+      "renameCategoryFailed": "Fallo al renombrar la clase:{{errorMessage}}",
+      "reclassifyFailed": "Error al reclasificar la imagen: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Borrar Clase",
     "desc": "¿Esta seguro de que quiere borrar la clase {{name}}? Esto borrará permanentemente todas las imágenes asociadas y requerirá reentrenar el modelo.",
-    "minClassesTitle": "No se puede Borrar la Clase",
+    "minClassesTitle": "No se puede borrar la clase",
     "minClassesDesc": "Un modelo de clasificación debe tener al menos 2 clases. Añade otra clase antes de borrar esta."
   },
   "deleteModel": {
@@ -51,7 +57,20 @@
     "title": "Editar modelo de clasificación",
     "descriptionState": "Edita las clases para este modelo de clasificación de estados. Los cambios requerirán un reentrenamiento de modelo.",
     "descriptionObject": "Edita el tipo de objeto y el tipo de clasificación para este modelo de clasificación de objetos.",
-    "stateClassesInfo": "Nota: El cambio de las clases de estado requiere reentrenar el modelo con las clases actualizadas."
+    "stateClassesInfo": "Modelo actualizado. Vuelva a entrenar el modelo para que los cambios de clase surtan efecto.",
+    "enabled": "Activado",
+    "enabledDesc": "Ejecuta este modelo. Cuando se desactiva, deja de funcionar y ya no clasifica.",
+    "saveAttempts": "Guardar intentos",
+    "saveAttemptsDesc": "Número de imágenes de intentos de clasificación que se conservarán para la interfaz de usuario de clasificaciones recientes.",
+    "motion": "Ejecutar en movimiento",
+    "motionDesc": "Ejecutar la clasificación cuando se detecte movimiento dentro del cultivo configurado.",
+    "interval": "Intervalo",
+    "intervalDesc": "Segundos entre ciclos de clasificación periódica. Dejar en blanco para que se ejecute solo con detección de movimiento.",
+    "intervalPlaceholder": "Sin intervalo",
+    "errors": {
+      "saveAttemptsInvalid": "Los intentos de guardado deben ser un número entero de 0 o mayor",
+      "intervalInvalid": "El intervalo debe ser un número entero mayor que 0"
+    }
   },
   "tooltip": {
     "noChanges": "No se han realizado cambios en el conjunto de datos desde el último entrenamiento.",
@@ -60,9 +79,9 @@
     "noNewImages": "No hay imágenes nuevas para entrenar. Clasifica antes más imágenes del conjunto de datos."
   },
   "details": {
-    "scoreInfo": "La puntuación representa la confianza media de clasificación en todas las detecciones de este objeto.",
+    "scoreInfo": "La puntuación representa la confianza promedio de la clasificación en todas las detecciones de este objeto.",
     "unknown": "Desconocido",
-    "none": "Ninguna"
+    "none": "Ninguno"
   },
   "categorizeImage": "Clasificar Imagen",
   "menu": {
@@ -140,11 +159,16 @@
       "generateSuccess": "Imágenes de ejemplo generadas correctamente",
       "missingStatesWarning": {
         "title": "Faltan Ejemplos de Estado",
-        "description": "Se recomienda seleccionar ejemplos para todos los estados para obtener mejores resultados. Puede continuar sin seleccionar todos los estados, pero el modelo no se entrenará hasta que todos los estados tengan imágenes. Después de continuar, use la vista \"Clasificaciones recientes\" para clasificar las imágenes de los estados faltantes y luego entrene el modelo."
+        "description": "No todas las clases tienen ejemplos. Prueba a generar nuevos ejemplos para encontrar la clase que falta, o continúa y usa la vista de Clasificaciones recientes para añadir imágenes más tarde."
       },
       "allImagesRequired_one": "Por favor clasifique todas las imágenes. Queda {{count}} imagen.",
       "allImagesRequired_many": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes.",
-      "allImagesRequired_other": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes."
+      "allImagesRequired_other": "Por favor clasifique todas las imágenes. Quedan {{count}} imágenes.",
+      "refreshConfirm": {
+        "description": "Esta acción generará un nuevo conjunto de imágenes y eliminará todas las selecciones, incluidas las clases anteriores. Deberás volver a seleccionar ejemplos para todas las clases.",
+        "title": "¿Generar nuevos ejemplos?"
+      },
+      "refreshExamples": "Generar nuevos ejemplos"
     },
     "title": "Crear nueva Clasificación"
   },
@@ -155,7 +179,7 @@
     "desc_other": "¿Está seguro de que quiere eliminar {{count}} imágenes de {{dataset}}? Esta acción no puede ser deshecha y requerirá reentrenar el modelo."
   },
   "deleteTrainImages": {
-    "title": "Borrar Imágenes de Entrenamiento",
+    "title": "Borrar imágenes de entrenamiento",
     "desc_one": "¿Está seguro de que quiere eliminar {{count}} imagen? Esta acción no puede ser deshecha.",
     "desc_many": "¿Está seguro de que quiere eliminar {{count}} imágenes? Esta acción no puede ser deshecha.",
     "desc_other": "¿Está seguro de que quiere eliminar {{count}} imágenes? Esta acción no puede ser deshecha."
@@ -188,5 +212,8 @@
       "description": "Cree un modelo personalizado para monitorear y clasificar los cambios de estado en áreas específicas de la cámara.",
       "buttonText": "Crear modelo de estado"
     }
-  }
+  },
+  "reclassifyImage": "Reclasificar imagen",
+  "reclassifyImageAs": "Reclasificar imagen como:",
+  "disabled": "Desactivado"
 }

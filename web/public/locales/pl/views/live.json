@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Na żywo - Frigate",
+  "documentTitle": {
+    "default": "Transmisja - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}}- Na żywo - Frigate",
   "lowBandwidthMode": "Tryb niskiej przepustowości",
   "twoWayTalk": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "Kliknij w ramce, aby wyśrodkować kamerę",
         "enable": "Włącz kliknięcie do przesuwania",
-        "disable": "Wyłącz kliknięcie do przesuwania"
+        "disable": "Wyłącz kliknięcie do przesuwania",
+        "enableWithZoom": "Włącz kliknij, aby przesunąć / przeciągnij, aby przybliżyć"
       },
       "left": {
         "label": "Przesuń kamerę PTZ w lewo"
@@ -55,7 +58,8 @@
   },
   "recording": {
     "enable": "Włącz nagrywanie",
-    "disable": "Wyłącz nagrywanie"
+    "disable": "Wyłącz nagrywanie",
+    "disabledInConfig": "Nagrywanie musi być najpierw włączone w Ustawieniach dla tej kamery."
   },
   "snapshots": {
     "enable": "Włącz zrzuty ekranu",
@@ -126,7 +130,8 @@
     "snapshots": "Zrzuty ekranu",
     "audioDetection": "Wykrywanie dźwięku",
     "autotracking": "Automatyczne śledzenie",
-    "transcription": "Stenogram"
+    "transcription": "Stenogram",
+    "camera": "Kamera"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -149,7 +154,9 @@
   },
   "camera": {
     "disable": "Wyłącz kamerę",
-    "enable": "Włącz kamerę"
+    "enable": "Włącz kamerę",
+    "turnOn": "Włącz kamerę",
+    "turnOff": "Wyłącz kamerę"
   },
   "autotracking": {
     "enable": "Włącz automatyczne śledzenie",

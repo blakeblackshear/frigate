@@ -22,8 +22,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Classe excluída",
-      "deletedImage": "Imagens excluídas",
+      "deletedCategory_one": "Classe excluída",
+      "deletedCategory_many": "",
+      "deletedCategory_other": "",
+      "deletedImage_one": "Imagens excluídas",
+      "deletedImage_many": "",
+      "deletedImage_other": "",
       "categorizedImage": "Imagem classificada com sucesso",
       "trainedModel": "Modelo treinado com sucesso.",
       "trainingModel": "Treinamento do modelo iniciado com sucesso.",
@@ -47,5 +51,8 @@
     "minClassesTitle": "Não é possível excluir a classe",
     "minClassesDesc": "Um modelo de classificação deve ter pelo menos duas classes. Adicione outra classe antes de excluir esta."
   },
-  "documentTitle": "Modelos de Classificação – Frigate"
+  "documentTitle": "Modelos de Classificação – Frigate",
+  "description": {
+    "invalidName": "Nome inválido. Os nomes podem incluir apenas letras, números, espaços, apóstrofos, sublinhados e hífens."
+  }
 }

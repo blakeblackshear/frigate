@@ -1,9 +1,9 @@
 import ActivityIndicator from "../indicators/activity-indicator";
-import { LuTrash } from "react-icons/lu";
 import { Button } from "../ui/button";
-import { useCallback, useState } from "react";
-import { isDesktop, isMobile } from "react-device-detect";
-import { FaDownload, FaPlay, FaShareAlt } from "react-icons/fa";
+import { Progress } from "../ui/progress";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isMobile } from "react-device-detect";
+import { FiMoreVertical } from "react-icons/fi";
 import { Skeleton } from "../ui/skeleton";
 import {
   Dialog,
@@ -14,38 +14,192 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import { DeleteClipType, Export } from "@/types/export";
-import { MdEditSquare } from "react-icons/md";
+import { DeleteClipType, Export, ExportCase, ExportJob } from "@/types/export";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
 import { useTranslation } from "react-i18next";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import BlurredIconButton from "../button/BlurredIconButton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { FaFolder, FaVideo } from "react-icons/fa";
+import { HiSquare2Stack } from "react-icons/hi2";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import useContextMenu from "@/hooks/use-contextmenu";
+import axios from "axios";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
-type ExportProps = {
+type CaseCardProps = {
+  className: string;
+  exportCase: ExportCase;
+  exports: Export[];
+  onSelect: () => void;
+};
+export function CaseCard({
+  className,
+  exportCase,
+  exports,
+  onSelect,
+}: CaseCardProps) {
+  const { t } = useTranslation(["views/exports"]);
+  const firstExport = useMemo(
+    () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
+    [exports],
+  );
+  const cameraCount = useMemo(
+    () => new Set(exports.map((exp) => exp.camera)).size,
+    [exports],
+  );
+
+  return (
+    <div
+      className={cn(
+        "relative flex aspect-video size-full cursor-pointer items-center justify-center overflow-hidden rounded-lg bg-secondary md:rounded-2xl",
+        className,
+      )}
+      onClick={() => onSelect()}
+    >
+      {firstExport && (
+        <img
+          className="absolute inset-0 size-full object-cover"
+          src={`${baseUrl}${firstExport.thumb_path.replace("/media/frigate/", "")}`}
+          alt=""
+        />
+      )}
+      {!firstExport && (
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/80 to-muted" />
+      )}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute right-1 top-1 z-40 flex items-center gap-2 rounded-lg bg-black/50 px-2 py-1 text-xs text-white">
+        <div className="flex items-center gap-1">
+          <HiSquare2Stack className="size-3" />
+          <div>{exports.length}</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <FaVideo className="size-3" />
+          <div>{cameraCount}</div>
+        </div>
+      </div>
+      <div className="absolute inset-x-2 bottom-2 z-20 text-white">
+        <div className="flex items-center justify-start gap-2">
+          <FaFolder />
+          <div className="truncate smart-capitalize">{exportCase.name}</div>
+        </div>
+        {exports.length === 0 && (
+          <div className="mt-1 text-xs text-white/80">
+            {t("caseCard.emptyCase")}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+type ExportCardProps = {
   className: string;
   exportedRecording: Export;
+  isSelected?: boolean;
+  selectionMode?: boolean;
   onSelect: (selected: Export) => void;
+  onContextSelect?: (selected: Export) => void;
   onRename: (original: string, update: string) => void;
   onDelete: ({ file, exportName }: DeleteClipType) => void;
+  onAssignToCase?: (selected: Export) => void;
+  onRemoveFromCase?: (selected: Export) => void;
 };
-
-export default function ExportCard({
+export function ExportCard({
   className,
   exportedRecording,
+  isSelected,
+  selectionMode,
   onSelect,
+  onContextSelect,
   onRename,
   onDelete,
-}: ExportProps) {
-  const { t } = useTranslation(["views/exports"]);
+  onAssignToCase,
+  onRemoveFromCase,
+}: ExportCardProps) {
+  const { t } = useTranslation(["views/exports", "views/replay"]);
+  const navigate = useNavigate();
   const isAdmin = useIsAdmin();
-  const [hovered, setHovered] = useState(false);
   const [loading, setLoading] = useState(
     exportedRecording.thumb_path.length > 0,
   );
+  const [isStartingReplay, setIsStartingReplay] = useState(false);
+
+  const handleDebugReplay = useCallback(() => {
+    setIsStartingReplay(true);
+
+    axios
+      .post("debug_replay/start_from_export", {
+        export_id: exportedRecording.id,
+      })
+      .then((response) => {
+        if (response.status === 202 || response.status === 200) {
+          navigate("/replay");
+        }
+      })
+      .catch((error) => {
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+
+        if (error.response?.status === 409) {
+          toast.error(t("dialog.toast.alreadyActive", { ns: "views/replay" }), {
+            position: "top-center",
+            closeButton: true,
+            dismissible: false,
+            action: (
+              <a
+                href={`${baseUrl}replay`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button>
+                  {t("dialog.toast.goToReplay", { ns: "views/replay" })}
+                </Button>
+              </a>
+            ),
+          });
+        } else {
+          toast.error(
+            t("dialog.toast.error", {
+              ns: "views/replay",
+              error: errorMessage,
+            }),
+            { position: "top-center" },
+          );
+        }
+      })
+      .finally(() => {
+        setIsStartingReplay(false);
+      });
+  }, [exportedRecording.id, navigate, t]);
+
+  // Resync the skeleton state whenever the backing export changes. The
+  // list keys by id now, so in practice the component remounts instead
+  // of receiving new props — but this keeps the card honest if a parent
+  // ever reuses the instance across different exports.
+  useEffect(() => {
+    setLoading(exportedRecording.thumb_path.length > 0);
+  }, [exportedRecording.thumb_path]);
+
+  // selection
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  useContextMenu(cardRef, () => {
+    if (!exportedRecording.in_progress && onContextSelect) {
+      onContextSelect(exportedRecording);
+    }
+  });
 
   // editing name
 
@@ -103,7 +257,7 @@ export default function ExportCard({
           {editName && (
             <>
               <Input
-                className="text-md mt-3"
+                className="mt-3"
                 type="search"
                 placeholder={editName?.original}
                 value={
@@ -121,7 +275,6 @@ export default function ExportCard({
               <DialogFooter>
                 <Button
                   aria-label={t("editExport.saveExport")}
-                  size="sm"
                   variant="select"
                   disabled={(editName?.update?.length ?? 0) == 0}
                   onClick={() => submitRename()}
@@ -135,13 +288,20 @@ export default function ExportCard({
       </Dialog>
 
       <div
+        ref={cardRef}
         className={cn(
-          "relative flex aspect-video items-center justify-center rounded-lg bg-black md:rounded-2xl",
+          "relative flex aspect-video cursor-pointer items-center justify-center rounded-lg bg-black md:rounded-2xl",
           className,
         )}
-        onMouseEnter={isDesktop ? () => setHovered(true) : undefined}
-        onMouseLeave={isDesktop ? () => setHovered(false) : undefined}
-        onClick={isDesktop ? undefined : () => setHovered(!hovered)}
+        onClick={(e) => {
+          if (!exportedRecording.in_progress) {
+            if ((selectionMode || e.ctrlKey || e.metaKey) && onContextSelect) {
+              onContextSelect(exportedRecording);
+            } else {
+              onSelect(exportedRecording);
+            }
+          }
+        }}
       >
         {exportedRecording.in_progress ? (
           <ActivityIndicator />
@@ -158,104 +318,211 @@ export default function ExportCard({
             )}
           </>
         )}
-        {hovered && (
-          <>
-            <div className="absolute inset-0 rounded-lg bg-black bg-opacity-60 md:rounded-2xl" />
-            <div className="absolute right-3 top-2">
-              <div className="flex items-center justify-center gap-4">
-                {!exportedRecording.in_progress && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <BlurredIconButton
-                        onClick={() =>
-                          shareOrCopy(
-                            `${baseUrl}export?id=${exportedRecording.id}`,
-                            exportedRecording.name.replaceAll("_", " "),
-                          )
-                        }
-                      >
-                        <FaShareAlt className="size-4" />
-                      </BlurredIconButton>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("tooltip.shareExport")}</TooltipContent>
-                  </Tooltip>
-                )}
-                {!exportedRecording.in_progress && (
+        {!exportedRecording.in_progress && !selectionMode && (
+          <div className="absolute bottom-2 right-3 z-40">
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <BlurredIconButton
+                  aria-label={t("tooltip.editName")}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <FiMoreVertical className="size-5" />
+                </BlurredIconButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  aria-label={t("tooltip.shareExport")}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    shareOrCopy(
+                      `${baseUrl}export?id=${exportedRecording.id}`,
+                      exportedRecording.name.replaceAll("_", " "),
+                    );
+                  }}
+                >
+                  {t("tooltip.shareExport")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  aria-label={t("tooltip.downloadVideo")}
+                >
                   <a
                     download
                     href={`${baseUrl}${exportedRecording.video_path.replace("/media/frigate/", "")}`}
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <BlurredIconButton>
-                          <FaDownload className="size-4" />
-                        </BlurredIconButton>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {t("tooltip.downloadVideo")}
-                      </TooltipContent>
-                    </Tooltip>
+                    {t("tooltip.downloadVideo")}
                   </a>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("title", { ns: "views/replay" })}
+                    disabled={isStartingReplay}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDebugReplay();
+                    }}
+                  >
+                    {isStartingReplay
+                      ? t("dialog.starting", { ns: "views/replay" })
+                      : t("title", { ns: "views/replay" })}
+                  </DropdownMenuItem>
                 )}
-                {isAdmin && !exportedRecording.in_progress && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <BlurredIconButton
-                        onClick={() =>
-                          setEditName({
-                            original: exportedRecording.name,
-                            update: undefined,
-                          })
-                        }
-                      >
-                        <MdEditSquare className="size-4" />
-                      </BlurredIconButton>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("tooltip.editName")}</TooltipContent>
-                  </Tooltip>
+                {isAdmin && onAssignToCase && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("tooltip.assignToCase")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAssignToCase(exportedRecording);
+                    }}
+                  >
+                    {t("tooltip.assignToCase")}
+                  </DropdownMenuItem>
+                )}
+                {isAdmin && onRemoveFromCase && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("tooltip.removeFromCase")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemoveFromCase(exportedRecording);
+                    }}
+                  >
+                    {t("tooltip.removeFromCase")}
+                  </DropdownMenuItem>
                 )}
                 {isAdmin && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <BlurredIconButton
-                        onClick={() =>
-                          onDelete({
-                            file: exportedRecording.id,
-                            exportName: exportedRecording.name,
-                          })
-                        }
-                      >
-                        <LuTrash className="size-4 fill-destructive text-destructive hover:text-white" />
-                      </BlurredIconButton>
-                    </TooltipTrigger>
-                    <TooltipContent>{t("tooltip.deleteExport")}</TooltipContent>
-                  </Tooltip>
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("tooltip.editName")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditName({
+                        original: exportedRecording.name,
+                        update: undefined,
+                      });
+                    }}
+                  >
+                    {t("tooltip.editName")}
+                  </DropdownMenuItem>
                 )}
-              </div>
-            </div>
-
-            {!exportedRecording.in_progress && (
-              <Button
-                className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer text-white hover:bg-transparent hover:text-white"
-                aria-label={t("button.play", { ns: "common" })}
-                variant="ghost"
-                onClick={() => {
-                  onSelect(exportedRecording);
-                }}
-              >
-                <FaPlay />
-              </Button>
-            )}
-          </>
+                {isAdmin && (
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    aria-label={t("tooltip.deleteExport")}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete({
+                        file: exportedRecording.id,
+                        exportName: exportedRecording.name,
+                      });
+                    }}
+                  >
+                    {t("tooltip.deleteExport")}
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         )}
         {loading && (
           <Skeleton className="absolute inset-0 aspect-video rounded-lg md:rounded-2xl" />
         )}
         <ImageShadowOverlay />
-        <div className="absolute bottom-2 left-3 flex items-end text-white smart-capitalize">
-          {exportedRecording.name.replaceAll("_", " ")}
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 z-10 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] md:rounded-2xl",
+            isSelected
+              ? "shadow-selected outline-selected"
+              : "outline-transparent duration-500",
+          )}
+        />
+        <div className="absolute bottom-2 left-3 right-12 z-30 text-white">
+          <div className="truncate smart-capitalize">
+            {exportedRecording.name.replaceAll("_", " ")}
+          </div>
         </div>
       </div>
     </>
+  );
+}
+
+type ActiveExportJobCardProps = {
+  className?: string;
+  job: ExportJob;
+};
+
+export function ActiveExportJobCard({
+  className = "",
+  job,
+}: ActiveExportJobCardProps) {
+  const { t } = useTranslation(["views/exports", "common"]);
+  const cameraName = useCameraFriendlyName(job.camera);
+  const displayName = useMemo(() => {
+    if (job.name && job.name.length > 0) {
+      return job.name.replaceAll("_", " ");
+    }
+
+    return t("jobCard.defaultName", {
+      camera: cameraName,
+    });
+  }, [cameraName, job.name, t]);
+
+  const step = job.current_step
+    ? job.current_step
+    : job.status === "queued"
+      ? "queued"
+      : "preparing";
+  const percent = Math.round(job.progress_percent ?? 0);
+
+  const stepLabel = useMemo(() => {
+    switch (step) {
+      case "queued":
+        return t("jobCard.queued");
+      case "preparing":
+        return t("jobCard.preparing");
+      case "copying":
+        return t("jobCard.copying");
+      case "encoding":
+        return t("jobCard.encoding");
+      case "encoding_retry":
+        return t("jobCard.encodingRetry");
+      case "finalizing":
+        return t("jobCard.finalizing");
+      default:
+        return t("jobCard.running");
+    }
+  }, [step, t]);
+
+  const hasDeterminateProgress =
+    step === "copying" || step === "encoding" || step === "encoding_retry";
+
+  return (
+    <div
+      className={cn(
+        "relative flex aspect-video items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-secondary/40 md:rounded-2xl",
+        className,
+      )}
+    >
+      <div className="flex w-full max-w-xs flex-col items-center gap-2 space-y-2 px-6 text-center">
+        <div className="text-xs text-muted-foreground">
+          {stepLabel}
+          {hasDeterminateProgress && ` · ${percent}%`}
+        </div>
+        {step === "queued" ? (
+          <ActivityIndicator className="size-5" />
+        ) : hasDeterminateProgress ? (
+          <Progress value={percent} className="h-2 w-full" />
+        ) : (
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
+            <div className="absolute inset-y-0 left-0 w-1/2 animate-pulse bg-primary" />
+          </div>
+        )}
+        <div className="text-sm font-medium text-primary">{displayName}</div>
+      </div>
+    </div>
   );
 }

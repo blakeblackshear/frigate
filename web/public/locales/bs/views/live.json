@@ -1,0 +1,199 @@
+{
+  "documentTitle": {
+    "default": "Uživo - Frigate",
+    "withCamera": "{{camera}} - Uživo - Frigate"
+  },
+  "lowBandwidthMode": "Nizopojasni režim",
+  "twoWayTalk": {
+    "enable": "Omogući dvostrani razgovor",
+    "disable": "Onemogući dvostrani razgovor"
+  },
+  "cameraAudio": {
+    "enable": "Omogući zvuk kamere",
+    "disable": "Onemogući zvuk kamere"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kliknite unutar okvira da biste centrirali kameru",
+        "enable": "Omogući klik za pomak",
+        "enableWithZoom": "Omogući klik za pomak / povucite za uvećanje",
+        "disable": "Onemogući klik za pomak"
+      },
+      "left": {
+        "label": "Pomaknite PTZ kameru ulevo"
+      },
+      "up": {
+        "label": "Pomaknite PTZ kameru gore"
+      },
+      "down": {
+        "label": "Pomaknite PTZ kameru dolje"
+      },
+      "right": {
+        "label": "Pomaknite PTZ kameru udesno"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Uvećajte PTZ kameru"
+      },
+      "out": {
+        "label": "Umanjite PTZ kameru"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Fokusirajte PTZ kameru unapred"
+      },
+      "out": {
+        "label": "Fokusirajte PTZ kameru unazad"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kliknite unutar okvira da biste centrirali PTZ kameru"
+      }
+    },
+    "presets": "Preseti PTZ kamere"
+  },
+  "camera": {
+    "enable": "Omogući kameru",
+    "disable": "Onemogući kameru"
+  },
+  "muteCameras": {
+    "enable": "Utišajte sve kamere",
+    "disable": "Ponovo uključite zvuk za sve kamere"
+  },
+  "detect": {
+    "enable": "Omogući detekciju",
+    "disable": "Onemogući detekciju"
+  },
+  "recording": {
+    "enable": "Omogući snimanje",
+    "disable": "Onemogući snimanje"
+  },
+  "snapshots": {
+    "enable": "Omogući snimke",
+    "disable": "Onemogući snimke"
+  },
+  "snapshot": {
+    "takeSnapshot": "Preuzmi trenutni snimak",
+    "noVideoSource": "Nema dostupnog video izvora za snimak.",
+    "captureFailed": "Neuspješno snimanje trenutnog snimka.",
+    "downloadStarted": "Preuzimanje trenutnog snimka započeto."
+  },
+  "audioDetect": {
+    "enable": "Omogući detekciju zvuka",
+    "disable": "Onemogući detekciju zvuka"
+  },
+  "transcription": {
+    "enable": "Omogući prepoznavanje zvuka uživo",
+    "disable": "Onemogući prepoznavanje zvuka uživo"
+  },
+  "autotracking": {
+    "enable": "Omogući automatsko praćenje",
+    "disable": "Onemogući automatsko praćenje"
+  },
+  "streamStats": {
+    "enable": "Prikaži statistiku prijenosa",
+    "disable": "Sakrij statistiku prijenosa"
+  },
+  "manualRecording": {
+    "title": "Na zahtjev",
+    "tips": "Preuzmi trenutni snimak ili pokreni ručni događaj na temelju postavki trajanja snimanja ove kamere.",
+    "playInBackground": {
+      "label": "Ponovno postavi stream",
+      "desc": "Omogući ovu opciju da nastavi streamanje kada je pokazivač sakriven."
+    },
+    "showStats": {
+      "label": "Prikaži statistiku",
+      "desc": "Omogući ovu opciju da prikaže statistiku prijenosa kao preklapanje na toku kamere."
+    },
+    "debugView": "Pregled za otklanjanje grešaka",
+    "start": "Počni snimanje na zahtjev",
+    "started": "Pokrenuto ručno snimanje na zahtjev.",
+    "failedToStart": "Neuspješno pokretanje ručnog snimanja na zahtjev.",
+    "recordDisabledTips": "Kako je snimanje onemogućeno ili ograničeno u konfiguraciji za ovu kameru, spremat će se samo snimak.",
+    "end": "Završi snimanje na zahtjev",
+    "ended": "Završeno ručno snimanje na zahtjev.",
+    "failedToEnd": "Neuspješno završavanje ručnog snimanja na zahtjev."
+  },
+  "streamingSettings": "Postavke streamanja",
+  "notifications": "Obavještenja",
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Pauziraj za: "
+  },
+  "stream": {
+    "title": "Tok",
+    "audio": {
+      "tips": {
+        "title": "Audio mora biti izlaz iz vaše kamere i konfiguriran u go2rtc za ovaj stream."
+      },
+      "available": "Audio je dostupan za ovaj stream",
+      "unavailable": "Audio nije dostupan za ovaj stream"
+    },
+    "debug": {
+      "picker": "Izbor streama nije dostupan u režimu debuga. Pregled debuga uvijek koristi stream dodeljen ulozi detekcije."
+    },
+    "twoWayTalk": {
+      "tips": "Vaš uređaj mora podržavati funkciju, a WebRTC mora biti konfiguriran za dvosmernu komunikaciju.",
+      "available": "Dvosmerna komunikacija je dostupna za ovaj stream",
+      "unavailable": "Dvosmerna komunikacija nije dostupna za ovaj stream"
+    },
+    "lowBandwidth": {
+      "tips": "Živo prikazivanje je u režimu niske propusnosti zbog buferiranja ili grešaka u streamu.",
+      "resetStream": "Ponovno postavi stream"
+    },
+    "playInBackground": {
+      "label": "Ponovno postavi stream",
+      "tips": "Omogući ovu opciju da nastavi streamanje kada je pokazivač sakriven."
+    }
+  },
+  "cameraSettings": {
+    "title": "{{camera}} Postavke",
+    "cameraEnabled": "Kamera omogućena",
+    "objectDetection": "Detekcija objekata",
+    "recording": "Snimanje",
+    "snapshots": "Snimci",
+    "audioDetection": "Detekcija zvuka",
+    "transcription": "Transkripcija zvuka",
+    "autotracking": "Autotračenje"
+  },
+  "history": {
+    "label": "Prikaži povijesne snimke"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Sve",
+      "motion": "Kretanje",
+      "active_objects": "Aktivni objekti"
+    }
+  },
+  "editLayout": {
+    "label": "Uredi raspored",
+    "group": {
+      "label": "Uredi grupu kamera"
+    },
+    "exitEdit": "Izađi iz uređivanja"
+  },
+  "noCameras": {
+    "title": "Nema konfiguriranih kamera",
+    "description": "Počnite tako što ćete povezati kameru s Frigate.",
+    "buttonText": "Dodaj kameru",
+    "restricted": {
+      "title": "Nema dostupnih kamera",
+      "description": "Nemate dozvolu za pregled bilo koje kamere u ovoj grupi."
+    },
+    "default": {
+      "title": "Nema konfiguriranih kamera",
+      "description": "Počnite tako što ćete povezati kameru s Frigate.",
+      "buttonText": "Dodaj kameru"
+    },
+    "group": {
+      "title": "Nema kamera u grupi",
+      "description": "Ova grupa kamera nema dodeljene ili omogućene kamere.",
+      "buttonText": "Upravljajte grupama"
+    }
+  }
+}

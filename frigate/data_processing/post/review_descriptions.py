@@ -19,9 +19,15 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.camera import CameraConfig
 from frigate.config.camera.review import GenAIReviewConfig, ImageSourceEnum
-from frigate.const import CACHE_DIR, CLIPS_DIR, UPDATE_REVIEW_DESCRIPTION
+from frigate.const import (
+    ATTRIBUTE_LABEL_DISPLAY_MAP,
+    CACHE_DIR,
+    CLIPS_DIR,
+    UPDATE_REVIEW_DESCRIPTION,
+)
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
+from frigate.genai.manager import GenAIClientManager
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import get_image_from_recording
@@ -33,6 +39,8 @@ logger = logging.getLogger(__name__)
 
 RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 MIN_RECORDING_DURATION = 10
+MAX_IMAGE_TOKENS = 24000
+MAX_FRAMES_PER_SECOND = 1
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -41,34 +49,51 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         config: FrigateConfig,
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
-        client: GenAIClient,
+        genai_manager: GenAIClientManager,
     ):
         super().__init__(config, metrics, None)
         self.requestor = requestor
         self.metrics = metrics
-        self.genai_client = client
+        self.genai_manager = genai_manager
         self.review_desc_speed = InferenceSpeed(self.metrics.review_desc_speed)
-        self.review_descs_dps = EventsPerSecond()
-        self.review_descs_dps.start()
+        self.review_desc_dps = EventsPerSecond()
+        self.review_desc_dps.start()
 
     def calculate_frame_count(
         self,
         camera: str,
+        duration: float,
         image_source: ImageSourceEnum = ImageSourceEnum.preview,
         height: int = 480,
     ) -> int:
-        """Calculate optimal number of frames based on context size, image source, and resolution.
+        """Calculate optimal number of frames based on event duration, context size,
+        image source, and resolution.
 
-        Token usage varies by resolution: larger images (ultrawide aspect ratios) use more tokens.
-        Estimates ~1 token per 1250 pixels. Targets 98% context utilization with safety margin.
-        Capped at 20 frames.
+        Per-image token cost is asked of the GenAI provider so providers that know
+        their model's true cost (e.g. llama.cpp can probe the loaded mmproj) can
+        diverge from the default ~1-token-per-1250-pixels heuristic. The frame
+        budget is bounded by:
+          - remaining context window after prompt + response reservations
+          - a fixed MAX_IMAGE_TOKENS ceiling
+          - MAX_FRAMES_PER_SECOND x duration, to avoid drowning short events in
+            near-duplicate frames where the model latches onto the redundant middle
+            and skips the start/end action
         """
-        context_size = self.genai_client.get_context_size()
+        client = self.genai_manager.description_client
+
+        if client is None:
+            return 3
+
+        context_size = client.get_context_size()
         camera_config = self.config.cameras[camera]
 
         detect_width = camera_config.detect.width
         detect_height = camera_config.detect.height
-        aspect_ratio = detect_width / detect_height
+
+        if not detect_width or not detect_height:
+            aspect_ratio = 16 / 9
+        else:
+            aspect_ratio = detect_width / detect_height
 
         if image_source == ImageSourceEnum.recordings:
             if aspect_ratio >= 1:
@@ -90,19 +115,25 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 width = target_width
                 height = int(target_width / aspect_ratio)
 
-        pixels_per_image = width * height
-        tokens_per_image = pixels_per_image / 1250
+        tokens_per_image = client.estimate_image_tokens(width, height)
         prompt_tokens = 3800
         response_tokens = 300
-        available_tokens = context_size - prompt_tokens - response_tokens
-        max_frames = int(available_tokens / tokens_per_image)
+        context_budget = context_size - prompt_tokens - response_tokens
+        image_token_budget = min(context_budget, MAX_IMAGE_TOKENS)
+        max_frames_by_tokens = int(image_token_budget / tokens_per_image)
+        max_frames_by_duration = int(duration * MAX_FRAMES_PER_SECOND)
+        max_frames = min(max_frames_by_tokens, max_frames_by_duration)
+        return max(max_frames, 3)
 
-        return min(max(max_frames, 3), 20)
-
-    def process_data(self, data, data_type):
-        self.metrics.review_desc_dps.value = self.review_descs_dps.eps()
+    def process_data(
+        self, data: dict[str, Any], data_type: PostProcessDataEnum
+    ) -> None:
+        self.metrics.review_desc_dps.value = self.review_desc_dps.eps()
 
         if data_type != PostProcessDataEnum.review:
+            return
+
+        if self.genai_manager.description_client is None:
             return
 
         camera = data["after"]["camera"]
@@ -143,10 +174,13 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     additional_buffer_per_side = (MIN_RECORDING_DURATION - duration) / 2
                     buffer_extension = min(5, additional_buffer_per_side)
 
+                final_data["start_time"] -= buffer_extension
+                final_data["end_time"] += buffer_extension
+
                 thumbs = self.get_recording_frames(
                     camera,
-                    final_data["start_time"] - buffer_extension,
-                    final_data["end_time"] + buffer_extension,
+                    final_data["start_time"],
+                    final_data["end_time"],
                     height=480,  # Use 480p for good balance between quality and token usage
                 )
 
@@ -186,12 +220,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 )
 
             # kickoff analysis
-            self.review_descs_dps.update()
+            self.review_desc_dps.update()
             threading.Thread(
                 target=run_analysis,
                 args=(
                     self.requestor,
-                    self.genai_client,
+                    self.genai_manager.description_client,
                     self.review_desc_speed,
                     camera_config,
                     final_data,
@@ -202,7 +236,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 ),
             ).start()
 
-    def handle_request(self, topic, request_data):
+    def handle_request(self, topic: str, request_data: dict[str, Any]) -> str | None:
         if topic == EmbeddingsRequestEnum.summarize_review.value:
             start_ts = request_data["start_ts"]
             end_ts = request_data["end_ts"]
@@ -307,7 +341,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     os.path.join(CLIPS_DIR, "genai-requests", f"{start_ts}-{end_ts}")
                 ).mkdir(parents=True, exist_ok=True)
 
-            return self.genai_client.generate_review_summary(
+            client = self.genai_manager.description_client
+
+            if client is None:
+                return None
+
+            return client.generate_review_summary(
                 start_ts,
                 end_ts,
                 events_with_context,
@@ -324,15 +363,20 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         end_time: float,
     ) -> list[str]:
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
-        file_start = f"preview_{camera}"
-        start_file = f"{file_start}-{start_time}.webp"
-        end_file = f"{file_start}-{end_time}.webp"
-        all_frames = []
+        file_start = f"preview_{camera}-"
+        start_file = f"{file_start}{start_time}.webp"
+        end_file = f"{file_start}{end_time}.webp"
 
-        for file in sorted(os.listdir(preview_dir)):
-            if not file.startswith(file_start):
-                continue
+        camera_files = [
+            entry.name
+            for entry in os.scandir(preview_dir)
+            if entry.name.startswith(file_start)
+        ]
+        camera_files.sort()
 
+        all_frames: list[str] = []
+
+        for file in camera_files:
             if file < start_file:
                 if len(all_frames):
                     all_frames[0] = os.path.join(preview_dir, file)
@@ -348,7 +392,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             all_frames.append(os.path.join(preview_dir, file))
 
         frame_count = len(all_frames)
-        desired_frame_count = self.calculate_frame_count(camera)
+        desired_frame_count = self.calculate_frame_count(
+            camera, duration=end_time - start_time
+        )
 
         if frame_count <= desired_frame_count:
             return all_frames
@@ -372,7 +418,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         """Get frames from recordings at specified timestamps."""
         duration = end_time - start_time
         desired_frame_count = self.calculate_frame_count(
-            camera, ImageSourceEnum.recordings, height
+            camera, duration, ImageSourceEnum.recordings, height
         )
 
         # Calculate evenly spaced timestamps throughout the duration
@@ -465,7 +511,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             thumb_data = cv2.imread(thumb_path)
 
             if thumb_data is None:
-                logger.warning(
+                logger.warning(  # type: ignore[unreachable]
                     "Could not read preview frame at %s, skipping", thumb_path
                 )
                 continue
@@ -488,13 +534,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         return thumbs
 
 
-@staticmethod
 def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
     review_inference_speed: InferenceSpeed,
     camera_config: CameraConfig,
-    final_data: dict[str, str],
+    final_data: dict[str, Any],
     thumbs: list[bytes],
     genai_config: GenAIReviewConfig,
     labelmap_objects: list[str],
@@ -528,16 +573,17 @@ def run_analysis(
     for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
         object_type = verified_label.replace("-verified", "").replace("_", " ")
         name = titlecase(sub_labels_list[i].replace("_", " "))
-        unified_objects.append(f"{name} ({object_type})")
+        unified_objects.append(f"{name} ← {object_type}")
 
     for label in objects_list:
         if "-verified" in label:
             continue
         elif label in labelmap_objects:
-            object_type = titlecase(label.replace("_", " "))
+            object_type = label.replace("_", " ")
 
             if label in attribute_labels:
-                unified_objects.append(f"{object_type} (delivery/service)")
+                display_name = ATTRIBUTE_LABEL_DISPLAY_MAP.get(label, object_type)
+                unified_objects.append(f"{display_name} (delivery/service)")
             else:
                 unified_objects.append(object_type)
 

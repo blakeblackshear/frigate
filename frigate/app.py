@@ -4,11 +4,11 @@ import multiprocessing as mp
 import os
 import secrets
 import shutil
+from collections.abc import Callable
 from multiprocessing import Queue
 from multiprocessing.managers import DictProxy, SyncManager
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
-from typing import Optional
 
 import psutil
 import uvicorn
@@ -30,6 +30,8 @@ from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
+from frigate.config.holder import ConfigHolder
+from frigate.config.profile_manager import ProfileManager
 from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
@@ -43,10 +45,16 @@ from frigate.const import (
 )
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
+from frigate.debug_replay import (
+    DebugReplayManager,
+    cleanup_replay_cameras,
+)
 from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
 from frigate.events.maintainer import EventProcessor
+from frigate.jobs.export import reap_stale_exports
+from frigate.jobs.motion_search import stop_all_motion_search_jobs
 from frigate.log import _stop_logging
 from frigate.models import (
     Event,
@@ -75,6 +83,7 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
+from frigate.util.process import FrigateProcess
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
@@ -87,33 +96,32 @@ class FrigateApp:
         self, config: FrigateConfig, manager: SyncManager, stop_event: MpEvent
     ) -> None:
         self.metrics_manager = manager
-        self.audio_process: Optional[mp.Process] = None
+        self.audio_process: mp.Process | None = None
         self.stop_event = stop_event
         self.detection_queue: Queue = mp.Queue()
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: DictProxy = self.metrics_manager.dict()
-        self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics(
-                self.metrics_manager, list(config.classification.custom.keys())
-            )
-            if (
-                config.semantic_search.enabled
-                or any(
-                    c.objects.genai.enabled or c.review.genai.enabled
-                    for c in config.cameras.values()
-                )
-                or config.lpr.enabled
-                or config.face_recognition.enabled
-                or len(config.classification.custom) > 0
-            )
-            else None
+
+        self.embeddings_metrics = DataProcessorMetrics(
+            self.metrics_manager, list(config.classification.custom.keys())
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
-        self.embeddings: Optional[EmbeddingsContext] = None
-        self.config = config
+        self.embeddings: EmbeddingsContext | None = None
+        self.config_holder = ConfigHolder(config)
+
+    @property
+    def config(self) -> FrigateConfig:
+        """The current config, not the one Frigate booted with.
+
+        Read through the holder so the deferred watchdog factories below build
+        a replacement process from the config as it is now. There is no setter
+        on purpose: a plain attribute would let a caller pin this back to a
+        single object and reintroduce the staleness.
+        """
+        return self.config_holder.config
 
     def ensure_dirs(self) -> None:
         dirs = [
@@ -135,9 +143,12 @@ class FrigateApp:
         for d in dirs:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
-                os.makedirs(d)
+                os.makedirs(d, exist_ok=True)
             else:
                 logger.debug(f"Skipping directory: {d}")
+
+    def init_debug_replay_manager(self) -> None:
+        self.replay_manager = DebugReplayManager()
 
     def init_camera_metrics(self) -> None:
         # create camera_metrics
@@ -177,17 +188,6 @@ class FrigateApp:
             except PermissionError:
                 logger.error("Unable to write to /config to save DB state")
 
-        def cleanup_timeline_db(db: SqliteExtDatabase) -> None:
-            db.execute_sql(
-                "DELETE FROM timeline WHERE source_id NOT IN (SELECT id FROM event);"
-            )
-
-            try:
-                with open(f"{CONFIG_DIR}/.timeline", "w") as f:
-                    f.write(str(datetime.datetime.now().timestamp()))
-            except PermissionError:
-                logger.error("Unable to write to /config to save DB state")
-
         # Migrate DB schema
         migrate_db = SqliteExtDatabase(self.config.database.path)
 
@@ -203,11 +203,6 @@ class FrigateApp:
             )
 
         router.run()
-
-        # this is a temporary check to clean up user DB from beta
-        # will be removed before final release
-        if not os.path.exists(f"{CONFIG_DIR}/.timeline"):
-            cleanup_timeline_db(migrate_db)
 
         # check if vacuum needs to be run
         if os.path.exists(f"{CONFIG_DIR}/.vacuum"):
@@ -274,7 +269,7 @@ class FrigateApp:
                 10
                 * len([c for c in self.config.cameras.values() if c.enabled_in_config]),
             ),
-            load_vec_extension=self.config.semantic_search.enabled,
+            load_vec_extension=True,
         )
         models = [
             Event,
@@ -340,6 +335,12 @@ class FrigateApp:
             self.ptz_metrics,
             comms,
         )
+
+    def init_profile_manager(self) -> None:
+        self.profile_manager = ProfileManager(
+            self.config, self.inter_config_updater, self.dispatcher
+        )
+        self.dispatcher.profile_manager = self.profile_manager
 
     def start_detectors(self) -> None:
         for name in self.config.cameras.keys():
@@ -419,18 +420,11 @@ class FrigateApp:
         self.camera_maintainer.start()
 
     def start_audio_processor(self) -> None:
-        audio_cameras = [
-            c
-            for c in self.config.cameras.values()
-            if c.enabled and c.audio.enabled_in_config
-        ]
-
-        if audio_cameras:
-            self.audio_process = AudioProcessor(
-                self.config, audio_cameras, self.camera_metrics, self.stop_event
-            )
-            self.audio_process.start()
-            self.processes["audio_detector"] = self.audio_process.pid or 0
+        self.audio_process = AudioProcessor(
+            self.config, self.camera_metrics, self.stop_event
+        )
+        self.audio_process.start()
+        self.processes["audio_detector"] = self.audio_process.pid or 0
 
     def start_timeline_processor(self) -> None:
         self.timeline_processor = TimelineProcessor(
@@ -474,6 +468,47 @@ class FrigateApp:
 
     def start_watchdog(self) -> None:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
+
+        # (attribute on self, key in self.processes, factory)
+        specs: list[tuple[str, str, Callable[[], FrigateProcess]]] = [
+            (
+                "embedding_process",
+                "embeddings",
+                lambda: EmbeddingProcess(
+                    self.config, self.embeddings_metrics, self.stop_event
+                ),
+            ),
+            (
+                "recording_process",
+                "recording",
+                lambda: RecordProcess(self.config, self.stop_event),
+            ),
+            (
+                "review_segment_process",
+                "review_segment",
+                lambda: ReviewProcess(self.config, self.stop_event),
+            ),
+            (
+                "output_processor",
+                "output",
+                lambda: OutputProcess(self.config, self.stop_event),
+            ),
+        ]
+
+        for attr, key, factory in specs:
+            if not hasattr(self, attr):
+                continue
+
+            def on_restart(
+                proc: FrigateProcess, _attr: str = attr, _key: str = key
+            ) -> None:
+                setattr(self, _attr, proc)
+                self.processes[_key] = proc.pid or 0
+
+            self.frigate_watchdog.register(
+                key, getattr(self, attr), factory, on_restart
+            )
+
         self.frigate_watchdog.start()
 
     def init_auth(self) -> None:
@@ -531,6 +566,7 @@ class FrigateApp:
         set_file_limit()
 
         # Start frigate services.
+        self.init_debug_replay_manager()
         self.init_camera_metrics()
         self.init_queues()
         self.init_database()
@@ -541,9 +577,26 @@ class FrigateApp:
         self.init_embeddings_manager()
         self.bind_database()
         self.check_db_data_migrations()
+
+        # Clean up any stale replay camera artifacts (filesystem + DB)
+        cleanup_replay_cameras()
+
+        # Reap any Export rows still marked in_progress from a previous
+        # session (crash, kill, broken migration). Runs synchronously before
+        # uvicorn binds so no API request can observe a stale row.
+        reap_stale_exports()
+
         self.init_inter_process_communicator()
         self.start_detectors()
         self.init_dispatcher()
+        self.init_profile_manager()
+
+        # workers get a copy of the config and can miss the broadcast below, so
+        # apply both layers here. must stay after init_profile_manager(), which
+        # snapshots the base config that profile deactivation resets to
+        self.profile_manager.restore_persisted_profile_to_config()
+        self.dispatcher.reapply_runtime_state_to_config()
+
         self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
@@ -557,6 +610,11 @@ class FrigateApp:
         self.start_event_cleanup()
         self.start_record_cleanup()
         self.start_watchdog()
+
+        # publish for the recording/review/embeddings processes, which start
+        # before the config can be corrected, and for the retained MQTT states
+        self.profile_manager.restore_persisted_profile()
+        self.dispatcher.restore_runtime_state()
 
         self.init_auth()
 
@@ -572,6 +630,10 @@ class FrigateApp:
                     self.stats_emitter,
                     self.event_metadata_updater,
                     self.inter_config_updater,
+                    self.replay_manager,
+                    self.dispatcher,
+                    self.profile_manager,
+                    config_holder=self.config_holder,
                 ),
                 host="127.0.0.1",
                 port=5001,
@@ -585,6 +647,9 @@ class FrigateApp:
 
         # used by the docker healthcheck
         Path("/dev/shm/.frigate-is-stopping").touch()
+
+        # Cancel any running motion search jobs before setting stop_event
+        stop_all_motion_search_jobs()
 
         self.stop_event.set()
 
@@ -637,6 +702,7 @@ class FrigateApp:
         self.record_cleanup.join()
         self.stats_emitter.join()
         self.frigate_watchdog.join()
+        self.camera_maintainer.join()
         self.db.stop()
 
         # Save embeddings stats to disk

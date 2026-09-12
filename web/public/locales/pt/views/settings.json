@@ -28,7 +28,8 @@
     "triggers": "Gatilhos",
     "cameraManagement": "Gestão",
     "cameraReview": "Rever",
-    "roles": "Papéis"
+    "roles": "Papéis",
+    "profiles": "Perfis"
   },
   "dialog": {
     "unsavedChanges": {

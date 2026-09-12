@@ -8,9 +8,7 @@ from frigate.util.builtin import clean_camera_user_pass, escape_special_characte
 class TestUserPassCleanup(unittest.TestCase):
     def setUp(self) -> None:
         self.rtsp_with_pass = "rtsp://user:password@192.168.0.2:554/live"
-        self.rtsp_with_special_pass = (
-            "rtsp://user:password`~!@#$%^&*()-_;',.<>:\"\{\}\[\]@@192.168.0.2:554/live"
-        )
+        self.rtsp_with_special_pass = "rtsp://user:password`~!@#$%^&*()-_;',.<>:\"\\{\\}\\[\\]@@192.168.0.2:554/live"
         self.rtsp_no_pass = "rtsp://192.168.0.3:554/live"
 
     def test_cleanup(self):

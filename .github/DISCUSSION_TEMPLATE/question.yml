@@ -10,9 +10,12 @@ body:
 
         **If you are looking for support, start a new discussion and use a support category.**
 
+        By posting here you agree to follow our [AI policy][ai-policy]. Posts that appear to be written by an AI on your behalf may be closed without a response.
+
         [discussions]: https://www.github.com/blakeblackshear/frigate/discussions
         [docs]: https://docs.frigate.video
         [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
+        [ai-policy]: https://github.com/blakeblackshear/frigate/blob/dev/AI_POLICY.md
   - type: textarea
     id: description
     attributes:

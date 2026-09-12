@@ -1,0 +1,80 @@
+{
+    "documentTitle": "Пошук руху - Frigate",
+    "title": "Пошук руху",
+    "description": "Намалюйце шматвугольнік, каб задаць вобласць цікавасці, і ўкажыце прамежак часу для пошуку змен руху ў гэтай вобласці.",
+    "selectCamera": "Пошук руху загружаецца",
+    "startSearch": "Пачаць пошук",
+    "searchStarted": "Пошук пачаты",
+    "searchCancelled": "Пошук скасаваны",
+    "cancelSearch": "Скасаваць",
+    "searching": "Пошук выконваецца.",
+    "scanning": "Сканіраванне {{time}}",
+    "searchComplete": "Пошук завершаны",
+    "noResultsYet": "Запусціце пошук, каб знайсці змены руху ў выбранай вобласці",
+    "noChangesFound": "У выбранай вобласці змен пікселяў не выяўлена",
+    "changesFound_one": "Знойдзена {{count}} змена руху",
+    "changesFound_few": "Знойдзена {{count}} змены руху",
+    "changesFound_many": "Знойдзена {{count}} змен руху",
+    "framesProcessed": "Апрацаваны {{count}} кадр",
+    "jumpToTime": "Перайсці на гэты час",
+    "results": "Вынікі",
+    "showSegmentHeatmap": "Цеплавая карта",
+    "newSearch": "Новы пошук",
+    "clearResults": "Ачысціць вынікі",
+    "clearROI": "Ачысціць шматвугольнік",
+    "polygonControls": {
+        "points_one": "{{count}} пункт",
+        "points_few": "{{count}} пункты",
+        "points_many": "{{count}} пунктаў",
+        "undo": "Адрабіць апошні пункт",
+        "reset": "Скінуць шматвугольнік",
+        "drawMode": "Маляваць",
+        "moveMode": "Перамяшчаць"
+    },
+    "motionHeatmapLabel": "Цеплавая карта руху",
+    "dialog": {
+        "title": "Пошук руху",
+        "cameraLabel": "Камера",
+        "previewAlt": "Перадпрагляд камеры {{camera}}"
+    },
+    "timeRange": {
+        "title": "Прамежак пошуку",
+        "start": "Час пачатку",
+        "end": "Час заканчэння"
+    },
+    "settings": {
+        "title": "Налады пошуку",
+        "parallelMode": "Паралельны рэжым",
+        "parallelModeDesc": "Сканіраваць некалькі прамежкаў запісу адначасова (хутчэй, але патрабуе больш рэсурсаў на дэкадаванне)",
+        "threshold": "Парог адчувальнасці",
+        "thresholdDesc": "Меншыя значэнні выяўляюць меншыя змены (1-255)",
+        "minArea": "Мінімальная вобласць змены",
+        "minAreaDesc": "Мінімальны памер асобнай вобласці руху ў працэнтах ад вобласці цікавасці",
+        "maxResults": "Максімум вынікаў",
+        "maxResultsDesc": "Спыніцца пасля такой колькасці супадзенняў па метках часу"
+    },
+    "errors": {
+        "noCamera": "Выберыце камеру",
+        "noROI": "Намалюйце вобласць цікавасці",
+        "noTimeRange": "Выберыце прамежак часу",
+        "invalidTimeRange": "Час заканчэння мусіць быць пазней за час пачатку",
+        "searchFailed": "Пошук не ўдаўся: {{message}}",
+        "polygonTooSmall": "Шматвугольнік мусіць мець не меней за 3 пункты",
+        "unknown": "Невядомая памылка"
+    },
+    "changePercentage": "Зменена на {{percentage}}%",
+    "metrics": {
+        "title": "Метрыкі пошуку",
+        "segmentsScanned": "Прасканіравана сегментаў",
+        "segmentsProcessed": "Апрацавана",
+        "segmentsSkippedInactive": "Прапушчана (няма актыўнасці)",
+        "segmentsSkippedHeatmap": "Прапушчана (няма перакрыцця з вобласцю)",
+        "fallbackFullRange": "Рэзервовае сканіраванне ўсяго прамежку",
+        "framesDecoded": "Дэкадавана кадраў",
+        "wallTime": "Час пошуку",
+        "segmentErrors": "Памылкі сегментаў",
+        "seconds": "{{seconds}} с",
+        "minutesSeconds": "{{minutes}} хв {{seconds}} с",
+        "scanSummary": "сегментаў: {{segments}} · {{time}}"
+    }
+}

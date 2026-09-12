@@ -1,0 +1,73 @@
+{
+  "search": "Пошук",
+  "savedSearches": "Захаваныя пошукі",
+  "searchFor": "Шукаць {{inputValue}}",
+  "button": {
+    "clear": "Ачысціць пошук",
+    "save": "Захаваць пошук",
+    "delete": "Выдаліць захаваны пошук",
+    "filterInformation": "Звесткі пра фільтры",
+    "filterActive": "Фільтры актыўныя"
+  },
+  "trackedObjectId": "ID аб'екта пад адсочваннем",
+  "filter": {
+    "label": {
+      "cameras": "Камеры",
+      "labels": "Меткі",
+      "zones": "Зоны",
+      "sub_labels": "Падметкі",
+      "attributes": "Атрыбуты",
+      "search_type": "Тып пошуку",
+      "time_range": "Прамежак часу",
+      "before": "Да",
+      "after": "Пасля",
+      "min_score": "Мін. бал",
+      "max_score": "Макс. бал",
+      "min_speed": "Мін. хуткасць",
+      "max_speed": "Макс. хуткасць",
+      "recognized_license_plate": "Распазнаны нумарны знак",
+      "has_clip": "Мае кліп",
+      "has_snapshot": "Мае здымак"
+    },
+    "searchType": {
+      "thumbnail": "Паменшаная выява",
+      "description": "Апісанне"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Дата «before» мусіць быць пазней за дату «after».",
+        "afterDatebeEarlierBefore": "Дата «after» мусіць быць раней за дату «before».",
+        "minScoreMustBeLessOrEqualMaxScore": "«min_score» мусіць быць меншым або роўным «max_score».",
+        "maxScoreMustBeGreaterOrEqualMinScore": "«max_score» мусіць быць большым або роўным «min_score».",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "«min_speed» мусіць быць меншым або роўным «max_speed».",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "«max_speed» мусіць быць большым або роўным «min_speed»."
+      }
+    },
+    "tips": {
+      "title": "Як карыстацца тэкставымі фільтрамі",
+      "desc": {
+        "text": "Фільтры дапамагаюць звузіць вынікі пошуку. Вось як ужываць іх у полі ўводу:",
+        "step1": "Набярыце назву ключа фільтра і двукроп'е (напрыклад «cameras:»).",
+        "step2": "Выберыце значэнне з падказак або набярыце сваё.",
+        "step3": "Каб ужыць некалькі фільтраў, дадавайце іх адзін за адным праз прабел.",
+        "step4": "Фільтры па даце (before: і after:) выкарыстоўваюць фармат {{DateFormat}}.",
+        "step5": "Фільтр прамежку часу выкарыстоўвае фармат {{exampleTime}}.",
+        "step6": "Каб прыбраць фільтр, націсніце «x» побач з ім.",
+        "exampleLabel": "Прыклад:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Значэнні фільтра",
+      "noFilters": "Фільтры",
+      "activeFilters": "Актыўныя фільтры"
+    }
+  },
+  "similaritySearch": {
+    "title": "Пошук па падабенстве",
+    "active": "Пошук па падабенстве актыўны",
+    "clear": "Ачысціць пошук па падабенстве"
+  },
+  "placeholder": {
+    "search": "Пошук…"
+  }
+}

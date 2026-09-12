@@ -2,11 +2,12 @@ import logging
 import threading
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Dict
+from typing import Any
 
 from frigate.comms.events_updater import EventEndPublisher, EventUpdateSubscriber
 from frigate.config import FrigateConfig
 from frigate.config.classification import ObjectClassificationType
+from frigate.const import REPLAY_CAMERA_PREFIX
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event
 from frigate.util.builtin import to_relative_box
@@ -14,7 +15,7 @@ from frigate.util.builtin import to_relative_box
 logger = logging.getLogger(__name__)
 
 
-def should_update_db(prev_event: Event, current_event: Event) -> bool:
+def should_update_db(prev_event: dict[str, Any], current_event: dict[str, Any]) -> bool:
     """If current_event has updated fields and (clip or snapshot)."""
     # If event is ending and was previously saved, always update to set end_time
     # This ensures events are properly ended even when alerts/detections are disabled
@@ -46,7 +47,9 @@ def should_update_db(prev_event: Event, current_event: Event) -> bool:
     return False
 
 
-def should_update_state(prev_event: Event, current_event: Event) -> bool:
+def should_update_state(
+    prev_event: dict[str, Any], current_event: dict[str, Any]
+) -> bool:
     """If current event should update state, but not necessarily update the db."""
     if prev_event["stationary"] != current_event["stationary"]:
         return True
@@ -73,7 +76,7 @@ class EventProcessor(threading.Thread):
         super().__init__(name="event_processor")
         self.config = config
         self.timeline_queue = timeline_queue
-        self.events_in_process: Dict[str, Event] = {}
+        self.events_in_process: dict[str, dict[str, Any]] = {}
         self.stop_event = stop_event
 
         self.event_receiver = EventUpdateSubscriber()
@@ -91,7 +94,7 @@ class EventProcessor(threading.Thread):
             if update == None:
                 continue
 
-            source_type, event_type, camera, _, event_data = update
+            source_type, event_type, camera, _, event_data = update  # type: ignore[misc]
 
             logger.debug(
                 f"Event received: {source_type} {event_type} {camera} {event_data['id']}"
@@ -139,52 +142,56 @@ class EventProcessor(threading.Thread):
         self,
         event_type: str,
         camera: str,
-        event_data: Event,
+        event_data: dict[str, Any],
     ) -> None:
         """handle tracked object event updates."""
         updated_db = False
 
         if should_update_db(self.events_in_process[event_data["id"]], event_data):
             updated_db = True
-            camera_config = self.config.cameras[camera]
+            camera_config = self.config.cameras.get(camera)
+            if camera_config is None:
+                return
+
             width = camera_config.detect.width
             height = camera_config.detect.height
+
+            if width is None or height is None:
+                return
+
             first_detector = list(self.config.detectors.values())[0]
 
             start_time = event_data["start_time"]
             end_time = (
                 None if event_data["end_time"] is None else event_data["end_time"]
             )
+            snapshot = event_data["snapshot"]
             # score of the snapshot
-            score = (
-                None
-                if event_data["snapshot"] is None
-                else event_data["snapshot"]["score"]
-            )
+            score = None if snapshot is None else snapshot["score"]
             # detection region in the snapshot
             region = (
                 None
-                if event_data["snapshot"] is None
+                if snapshot is None
                 else to_relative_box(
                     width,
                     height,
-                    event_data["snapshot"]["region"],
+                    snapshot["region"],
                 )
             )
             # bounding box for the snapshot
             box = (
                 None
-                if event_data["snapshot"] is None
+                if snapshot is None
                 else to_relative_box(
                     width,
                     height,
-                    event_data["snapshot"]["box"],
+                    snapshot["box"],
                 )
             )
 
             attributes = (
                 None
-                if event_data["snapshot"] is None
+                if snapshot is None
                 else [
                     {
                         "box": to_relative_box(
@@ -195,8 +202,13 @@ class EventProcessor(threading.Thread):
                         "label": a["label"],
                         "score": a["score"],
                     }
-                    for a in event_data["snapshot"]["attributes"]
+                    for a in snapshot["attributes"]
                 ]
+            )
+            snapshot_frame_time = None if snapshot is None else snapshot["frame_time"]
+            snapshot_area = None if snapshot is None else snapshot["area"]
+            snapshot_estimated_speed = (
+                None if snapshot is None else snapshot["current_estimated_speed"]
             )
 
             # keep these from being set back to false because the event
@@ -217,8 +229,12 @@ class EventProcessor(threading.Thread):
                 Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
-                Event.model_hash: first_detector.model.model_hash,
-                Event.model_type: first_detector.model.model_type,
+                Event.model_hash: first_detector.model.model_hash
+                if first_detector.model
+                else None,
+                Event.model_type: first_detector.model.model_type
+                if first_detector.model
+                else None,
                 Event.detector_type: first_detector.type,
                 Event.data: {
                     "box": box,
@@ -226,6 +242,10 @@ class EventProcessor(threading.Thread):
                     "score": score,
                     "top_score": event_data["top_score"],
                     "attributes": attributes,
+                    "snapshot_clean": event_data.get("snapshot_clean", False),
+                    "snapshot_frame_time": snapshot_frame_time,
+                    "snapshot_area": snapshot_area,
+                    "snapshot_estimated_speed": snapshot_estimated_speed,
                     "average_estimated_speed": event_data["average_estimated_speed"],
                     "velocity_angle": event_data["velocity_angle"],
                     "type": "object",
@@ -278,11 +298,15 @@ class EventProcessor(threading.Thread):
 
         if event_type == EventStateEnum.end:
             del self.events_in_process[event_data["id"]]
-            self.event_end_publisher.publish((event_data["id"], camera, updated_db))
+            self.event_end_publisher.publish((event_data["id"], camera, updated_db))  # type: ignore[arg-type]
 
     def handle_external_detection(
-        self, event_type: EventStateEnum, event_data: Event
+        self, event_type: EventStateEnum, event_data: dict[str, Any]
     ) -> None:
+        # Skip replay cameras
+        if event_data.get("camera", "").startswith(REPLAY_CAMERA_PREFIX):
+            return
+
         if event_type == EventStateEnum.start:
             event = {
                 Event.id: event_data["id"],
@@ -299,8 +323,11 @@ class EventProcessor(threading.Thread):
                     "type": event_data["type"],
                     "score": event_data["score"],
                     "top_score": event_data["score"],
+                    "snapshot_clean": event_data.get("snapshot_clean", False),
                 },
             }
+            if event_data.get("draw") is not None:
+                event[Event.data]["draw"] = event_data["draw"]
             if event_data.get("recognized_license_plate") is not None:
                 event[Event.data]["recognized_license_plate"] = event_data[
                     "recognized_license_plate"

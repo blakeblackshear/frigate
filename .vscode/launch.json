@@ -6,6 +6,23 @@
       "type": "debugpy",
       "request": "launch",
       "module": "frigate"
+    },
+    {
+      "type": "editor-browser",
+      "request": "launch",
+      "name": "Vite: Launch in integrated browser",
+      "url": "http://localhost:5173"
+    },
+    {
+      "type": "editor-browser",
+      "request": "launch",
+      "name": "Nginx: Launch in integrated browser",
+      "url": "http://localhost:5000"
+    },
+    {
+      "type": "editor-browser",
+      "request": "attach",
+      "name": "Attach to integrated browser"
     }
   ]
 }

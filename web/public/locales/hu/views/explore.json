@@ -35,6 +35,10 @@
     "audioTranscription": {
       "label": "Átírás",
       "aria": "Hangátirat kérése"
+    },
+    "viewTrackingDetails": {
+      "label": "A követés részleteinek megtekintése",
+      "aria": "Követési adatok megjelenítése"
     }
   },
   "details": {
@@ -119,7 +123,9 @@
         "success": "Követett tárgy sikeresen törölve."
       }
     },
-    "tooltip": "{{type}} egyezés {{confidence}}%-os megbízhatósággal"
+    "tooltip": "{{type}} egyezés {{confidence}}%-os megbízhatósággal",
+    "nextTrackedObject": "Következő követett objektum",
+    "previousTrackedObject": "Előző követett objektum"
   },
   "generativeAI": "Generatív MI",
   "exploreIsUnavailable": {
@@ -231,7 +237,7 @@
       "attribute": {
         "other": "{{label}} felismerve mint {{attribute}}"
       },
-      "external": "{{label}} érzékelve",
+      "external": "{{label}} észlelve",
       "header": {
         "zones": "Zónák",
         "ratio": "Arány",
@@ -240,7 +246,8 @@
       },
       "visible": "{{label}} észlelve",
       "entered_zone": "{{label}} belépett {{zones}}",
-      "gone": "{{label}} maradt"
+      "gone": "{{label}} továbbhaladt",
+      "stationary": "{{label}} mozdulatlanná vált"
     },
     "title": "Követési adatok",
     "noImageFound": "Nem található kép ehhez az időbélyeghez.",

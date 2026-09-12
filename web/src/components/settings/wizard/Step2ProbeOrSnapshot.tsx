@@ -202,11 +202,31 @@ export default function Step2ProbeOrSnapshot({
         const candidateUris = (response.data.rtsp_candidates || [])
           .filter((c: { source: string }) => c.source === "GetStreamUri")
           .map((c: { uri: string }) => c.uri);
-        onUpdate({
+
+        const update: Partial<WizardFormData> = {
           probeMode: true,
           probeCandidates: candidateUris,
           candidateTests: {},
-        });
+        };
+
+        const manufacturer: string = response.data.manufacturer || "";
+        if (
+          manufacturer.toLowerCase().includes("reolink") &&
+          wizardData.host &&
+          wizardData.username &&
+          wizardData.password
+        ) {
+          const protocol = await detectReolinkCamera(
+            wizardData.host,
+            wizardData.username,
+            wizardData.password,
+          );
+          if (protocol === "http-flv") {
+            update.brandTemplate = "reolink";
+          }
+        }
+
+        onUpdate(update);
       } else {
         setProbeError(response.data?.message || "Probe failed");
       }
@@ -626,7 +646,7 @@ function ProbeFooterButtons({
           <ActivityIndicator className="size-4" />
           {t("cameraWizard.step2.probing")}
         </div>
-        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+        <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
           <Button type="button" onClick={onBack} disabled className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
@@ -649,7 +669,7 @@ function ProbeFooterButtons({
     return (
       <div className="space-y-4">
         <div className="text-sm text-destructive">{probeError}</div>
-        <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+        <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
           <Button type="button" onClick={onBack} className="sm:flex-1">
             {t("button.back", { ns: "common" })}
           </Button>
@@ -670,7 +690,7 @@ function ProbeFooterButtons({
   // If manual mode, show Continue when test succeeded, otherwise show Test (calls onManualTest)
   if (mode === "manual") {
     return (
-      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
         <Button type="button" onClick={onBack} className="sm:flex-1">
           {t("button.back", { ns: "common" })}
         </Button>
@@ -707,7 +727,7 @@ function ProbeFooterButtons({
 
   // Default probe footer
   return (
-    <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+    <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
       <Button type="button" onClick={onBack} className="sm:flex-1">
         {t("button.back", { ns: "common" })}
       </Button>

@@ -52,10 +52,18 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/var/cache/apt \
     --mount=type=cache,target=/root/.ccache \
     /deps/build_sqlite_vec.sh
 
+# Build intel-media-driver from source against bookworm's system libva so it
+# works with Debian 12's glibc/libstdc++ (pre-built noble/trixie packages
+# require glibc 2.38 which is not available on bookworm).
+FROM base AS intel-media-driver
+ARG DEBIAN_FRONTEND
+RUN --mount=type=bind,source=docker/main/build_intel_media_driver.sh,target=/deps/build_intel_media_driver.sh \
+    /deps/build_intel_media_driver.sh
+
 FROM scratch AS go2rtc
 ARG TARGETARCH
 WORKDIR /rootfs/usr/local/go2rtc/bin
-ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.10/go2rtc_linux_${TARGETARCH}" go2rtc
+ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.14/go2rtc_linux_${TARGETARCH}" go2rtc
 
 FROM wget AS tempio
 ARG TARGETARCH
@@ -73,10 +81,10 @@ RUN --mount=type=bind,source=docker/main/install_tempio.sh,target=/deps/install_
 FROM base_host AS ov-converter
 ARG DEBIAN_FRONTEND
 
-# Install OpenVino Runtime and Dev library
+# Install OpenVINO for model conversion
 COPY docker/main/requirements-ov.txt /requirements-ov.txt
 RUN apt-get -qq update \
-    && apt-get -qq install -y wget python3 python3-dev python3-distutils gcc pkg-config libhdf5-dev \
+    && apt-get -qq install -y wget python3 python3-distutils \
     && wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
     && python3 get-pip.py "pip" \
@@ -200,6 +208,7 @@ RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
 COPY --from=sqlite-vec /usr/local/lib/ /usr/local/lib/
+COPY --from=intel-media-driver /rootfs/ /
 COPY --from=go2rtc /rootfs/ /
 COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
@@ -256,8 +265,8 @@ ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PA
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
-ENV DEFAULT_FFMPEG_VERSION="7.0"
-ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:5.0"
+ENV DEFAULT_FFMPEG_VERSION="8.0"
+ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:7.0:5.0"
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
@@ -265,6 +274,12 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
+
+# Install Axera Engine
+RUN pip3 install https://github.com/AXERA-TECH/pyaxengine/releases/download/0.1.3-frigate/axengine-0.1.3-py3-none-any.whl
+
+ENV PATH="${PATH}:/usr/bin/axcl"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/axcl"
 
 # Install MemryX runtime (requires libgomp (OpenMP) in the final docker image)
 RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_memryx.sh \

@@ -1,54 +1,57 @@
 {
-  "documentTitle.withCamera": "{{camera}} - Langsung - Frigate",
-  "documentTitle": "Langsung - Frigate",
-  "lowBandwidthMode": "Mode Bandwith-Rendah",
+  "documentTitle.withCamera": "{{camera}} - Live - Frigate",
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
+  "lowBandwidthMode": "Mode bandwidth rendah",
   "twoWayTalk": {
-    "enable": "Nyalakan Komunikasi dua arah",
-    "disable": "Nonaktifkan Komunikasi Dua Arah"
+    "enable": "Aktifkan Audio Dua Arah",
+    "disable": "Nonaktifkan Audio Dua Arah"
   },
   "cameraAudio": {
-    "enable": "Nyalakan Audio Kamera",
-    "disable": "Matikan Audio Kamera"
+    "enable": "Aktifkan Audio Kamera",
+    "disable": "Nonaktifkan Audio Kamera"
   },
   "ptz": {
     "move": {
       "clickMove": {
-        "label": "Klik kotak ini untuk menengahkan kamera",
-        "enable": "Aktifkan klik untuk bergerak",
-        "disable": "Non-aktifkan klik untuk bergerak"
+        "label": "Klik pada frame untuk memusatkan kamera",
+        "enable": "Aktifkan klik untuk memindahkan",
+        "disable": "Nonaktifkan klik untuk memindahkan",
+        "enableWithZoom": "Aktifkan klik untuk memindahkan / seret untuk memperbesar"
       },
       "left": {
-        "label": "Geser kamera PTZ ke kiri"
+        "label": "Gerakkan kamera PTZ ke kiri"
       },
       "up": {
-        "label": "Geser kamera PTZ keatas"
+        "label": "Gerakkan kamera PTZ ke atas"
       },
       "down": {
-        "label": "Geser kamera PTZ kebawah"
+        "label": "Gerakkan kamera PTZ ke bawah"
       },
       "right": {
-        "label": "Geser kamera PTZ ke kanan"
+        "label": "Gerakkan kamera PTZ ke kanan"
       }
     },
     "zoom": {
       "in": {
-        "label": "Perbesar kamera PTZ"
+        "label": "Perbesar zoom kamera PTZ"
       },
       "out": {
-        "label": "Perkecil kamera PTZ"
+        "label": "Perkecil zoom kamera PTZ"
       }
     },
     "focus": {
       "in": {
-        "label": "Fokus kamera PTZ kedalam"
+        "label": "Fokuskan kamera PTZ ke dalam"
       },
       "out": {
-        "label": "Fokus kamera PTZ keluar"
+        "label": "Fokuskan kamera PTZ ke luar"
       }
     },
     "frame": {
       "center": {
-        "label": "Klik pada frame untuk menengahkan kamera PTZ"
+        "label": "Klik pada frame untuk memusatkan kamera PTZ"
       }
     },
     "presets": "Preset kamera PTZ"
@@ -59,10 +62,139 @@
   },
   "muteCameras": {
     "enable": "Bisukan Semua Kamera",
-    "disable": "Bunyikan Semua Kamera"
+    "disable": "Suarakan Semua Kamera"
   },
   "detect": {
-    "enable": "Aktifkan Pendeteksi",
-    "disable": "Nonaktifkan Pendeteksi"
+    "enable": "Aktifkan Deteksi",
+    "disable": "Nonaktifkan Deteksi"
+  },
+  "recording": {
+    "enable": "Aktifkan Perekaman",
+    "disable": "Nonaktifkan Perekaman",
+    "disabledInConfig": "Perekaman harus terlebih dahulu diaktifkan di Pengaturan untuk kamera ini."
+  },
+  "snapshots": {
+    "enable": "Aktifkan Snapshot",
+    "disable": "Nonaktifkan Snapshot"
+  },
+  "snapshot": {
+    "takeSnapshot": "Unduh snapshot instan",
+    "noVideoSource": "Tidak ada sumber video yang tersedia untuk snapshot.",
+    "captureFailed": "Gagal mengambil snapshot.",
+    "downloadStarted": "Pengunduhan snapshot dimulai."
+  },
+  "audioDetect": {
+    "enable": "Aktifkan Deteksi Audio",
+    "disable": "Nonaktifkan Deteksi Audio"
+  },
+  "transcription": {
+    "enable": "Aktifkan Transkripsi Audio Langsung",
+    "disable": "Nonaktifkan Transkripsi Audio Langsung"
+  },
+  "autotracking": {
+    "enable": "Aktifkan Pelacakan Otomatis",
+    "disable": "Nonaktifkan Pelacakan Otomatis"
+  },
+  "streamStats": {
+    "enable": "Tampilkan Statistik Stream",
+    "disable": "Sembunyikan Statistik Stream"
+  },
+  "manualRecording": {
+    "title": "Sesuai Permintaan",
+    "tips": "Unduh snapshot instan atau mulai event manual berdasarkan pengaturan retensi rekaman kamera ini.",
+    "playInBackground": {
+      "label": "Putar di latar belakang",
+      "desc": "Aktifkan opsi ini untuk melanjutkan streaming saat pemutar disembunyikan."
+    },
+    "showStats": {
+      "label": "Tampilkan Statistik",
+      "desc": "Aktifkan opsi ini untuk menampilkan statistik stream sebagai overlay pada umpan kamera."
+    },
+    "debugView": "Tampilan Debug",
+    "start": "Mulai perekaman sesuai permintaan",
+    "started": "Perekaman manual sesuai permintaan dimulai.",
+    "failedToStart": "Gagal memulai perekaman manual sesuai permintaan.",
+    "recordDisabledTips": "Karena perekaman dinonaktifkan atau dibatasi dalam konfigurasi untuk kamera ini, hanya snapshot yang akan disimpan.",
+    "end": "Akhiri perekaman sesuai permintaan",
+    "ended": "Perekaman manual sesuai permintaan diakhiri.",
+    "failedToEnd": "Gagal mengakhiri perekaman manual sesuai permintaan."
+  },
+  "streamingSettings": "Pengaturan Streaming",
+  "notifications": "Notifikasi",
+  "audio": "Audio",
+  "suspend": {
+    "forTime": "Tangguhkan selama: "
+  },
+  "stream": {
+    "title": "Stream",
+    "audio": {
+      "tips": {
+        "title": "Audio harus dikeluarkan oleh kamera Anda dan dikonfigurasi di go2rtc untuk stream ini."
+      },
+      "available": "Audio tersedia untuk stream ini",
+      "unavailable": "Audio tidak tersedia untuk stream ini"
+    },
+    "debug": {
+      "picker": "Pemilihan stream tidak tersedia dalam mode debug. Tampilan debug selalu menggunakan stream yang ditetapkan ke peran detect."
+    },
+    "twoWayTalk": {
+      "tips": "Perangkat Anda harus mendukung fitur ini dan WebRTC harus dikonfigurasi untuk audio dua arah.",
+      "available": "Audio dua arah tersedia untuk stream ini",
+      "unavailable": "Audio dua arah tidak tersedia untuk stream ini"
+    },
+    "lowBandwidth": {
+      "tips": "Tampilan live berada dalam mode bandwidth rendah karena buffering atau kesalahan stream.",
+      "resetStream": "Atur ulang stream"
+    },
+    "playInBackground": {
+      "label": "Putar di latar belakang",
+      "tips": "Aktifkan opsi ini untuk melanjutkan streaming saat pemutar disembunyikan."
+    }
+  },
+  "cameraSettings": {
+    "title": "Pengaturan {{camera}}",
+    "cameraEnabled": "Kamera Diaktifkan",
+    "objectDetection": "Deteksi Objek",
+    "recording": "Perekaman",
+    "snapshots": "Snapshot",
+    "audioDetection": "Deteksi Audio",
+    "transcription": "Transkripsi Audio",
+    "autotracking": "Pelacakan Otomatis"
+  },
+  "history": {
+    "label": "Tampilkan rekaman historis"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Semua",
+      "motion": "Gerakan",
+      "active_objects": "Objek Aktif"
+    }
+  },
+  "editLayout": {
+    "label": "Edit Tata Letak",
+    "group": {
+      "label": "Edit Grup Kamera"
+    },
+    "exitEdit": "Keluar dari Mode Edit"
+  },
+  "noCameras": {
+    "title": "Tidak Ada Kamera yang Dikonfigurasi",
+    "description": "Mulai dengan menghubungkan kamera ke Frigate.",
+    "buttonText": "Tambahkan Kamera",
+    "restricted": {
+      "title": "Tidak Ada Kamera yang Tersedia",
+      "description": "Anda tidak memiliki izin untuk melihat kamera apa pun di grup ini."
+    },
+    "default": {
+      "title": "Tidak Ada Kamera yang Dikonfigurasi",
+      "description": "Mulai dengan menghubungkan kamera ke Frigate.",
+      "buttonText": "Tambahkan Kamera"
+    },
+    "group": {
+      "title": "Tidak Ada Kamera dalam Grup",
+      "description": "Grup kamera ini tidak memiliki kamera yang ditetapkan atau diaktifkan.",
+      "buttonText": "Kelola Grup"
+    }
   }
 }

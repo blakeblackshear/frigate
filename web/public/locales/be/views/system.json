@@ -1,0 +1,269 @@
+{
+  "documentTitle": {
+    "cameras": "Статыстыка камер - Frigate",
+    "storage": "Статыстыка сховішча - Frigate",
+    "general": "Агульная статыстыка - Frigate",
+    "enrichments": "Статыстыка ўзбагачэнняў - Frigate",
+    "logs": {
+      "frigate": "Журналы Frigate - Frigate",
+      "go2rtc": "Журналы go2rtc - Frigate",
+      "nginx": "Журналы Nginx - Frigate",
+      "websocket": "Журналы паведамленняў - Frigate"
+    }
+  },
+  "title": "Сістэма",
+  "metrics": "Сістэмныя метрыкі",
+  "logs": {
+    "websocket": {
+      "label": "Паведамленні",
+      "pause": "Паўза",
+      "resume": "Працягнуць",
+      "clear": "Ачысціць",
+      "filter": {
+        "all": "Усе топікі",
+        "topics": "Топікі",
+        "events": "Падзеі",
+        "reviews": "Разгляды",
+        "classification": "Класіфікацыя",
+        "face_recognition": "Распазнаванне асобы",
+        "lpr": "LPR",
+        "camera_activity": "Актыўнасць камеры",
+        "system": "Сістэма",
+        "camera": "Камера",
+        "all_cameras": "Усе камеры",
+        "cameras_count_one": "{{count}} камера",
+        "cameras_count_other": "{{count}} камеры"
+      },
+      "empty": "Паведамленняў пакуль не запісана",
+      "count_one": "{{count}} паведамленне",
+      "count_other": "{{count}} паведамлення",
+      "expanded": {
+        "payload": "Карысная нагрузка"
+      }
+    },
+    "download": {
+      "label": "Спампаваць журналы"
+    },
+    "copy": {
+      "label": "Скапіяваць у буфер абмену",
+      "success": "Журналы скапіяваны ў буфер абмену",
+      "error": "Не ўдалося скапіяваць журналы ў буфер абмену"
+    },
+    "type": {
+      "label": "Тып",
+      "timestamp": "Метка часу",
+      "tag": "Тэг",
+      "message": "Паведамленне"
+    },
+    "tips": "Журналы паступаюць з сервера ў рэальным часе",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Памылка атрымання журналаў: {{errorMessage}}",
+        "whileStreamingLogs": "Памылка пры атрыманні плыні журналаў: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Агульныя",
+    "detector": {
+      "title": "Дэтэктары",
+      "inferenceSpeed": "Хуткасць вывядзення дэтэктара",
+      "temperature": "Тэмпература дэтэктара",
+      "cpuUsage": "Выкарыстанне CPU дэтэктарам",
+      "cpuUsageInformation": "CPU, выкарыстаны на падрыхтоўку ўваходных і выходных даных для мадэляў дэтэктавання. Гэта значэнне не вымярае само вывядзенне, нават калі выкарыстоўваецца GPU або паскаральнік.",
+      "memoryUsage": "Выкарыстанне памяці дэтэктарам"
+    },
+    "hardwareInfo": {
+      "title": "Звесткі пра абсталяванне",
+      "gpuUsage": "Выкарыстанне GPU",
+      "gpuMemory": "Памяць GPU",
+      "gpuEncoder": "Кадавальнік GPU",
+      "gpuCompute": "Вылічэнні / кадаванне GPU",
+      "gpuDecoder": "Дэкадавальнік GPU",
+      "gpuTemperature": "Тэмпература GPU",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Вывад vainfo",
+          "returnCode": "Код вяртання: {{code}}",
+          "processOutput": "Вывад працэсу:",
+          "processError": "Памылка працэсу:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Вывад Nvidia SMI",
+          "name": "Назва: {{name}}",
+          "driver": "Драйвер: {{driver}}",
+          "cudaComputerCapability": "Вылічальныя магчымасці CUDA: {{cuda_compute}}",
+          "vbios": "Звесткі пра VBios: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Закрыць звесткі пра GPU"
+        },
+        "copyInfo": {
+          "label": "Скапіяваць звесткі пра GPU"
+        },
+        "toast": {
+          "success": "Звесткі пра GPU скапіяваны ў буфер абмену"
+        }
+      },
+      "npuUsage": "Выкарыстанне NPU",
+      "npuMemory": "Памяць NPU",
+      "npuTemperature": "Тэмпература NPU"
+    },
+    "otherProcesses": {
+      "title": "Іншыя працэсы",
+      "processCpuUsage": "Выкарыстанне CPU працэсам",
+      "processMemoryUsage": "Выкарыстанне памяці працэсам",
+      "series": {
+        "go2rtc": "go2rtc",
+        "recording": "запіс",
+        "review_segment": "сегмент разгляду",
+        "embeddings": "убудаванні",
+        "audio_detector": "дэтэктар гуку"
+      }
+    }
+  },
+  "storage": {
+    "title": "Сховішча",
+    "overview": "Агляд",
+    "recordings": {
+      "title": "Запісы",
+      "tips": "Гэта значэнне паказвае агульны аб'ём сховішча, заняты запісамі ў базе даных Frigate. Frigate не адсочвае месца, занятае ўсімі файламі на дыску.",
+      "earliestRecording": "Самы ранні даступны запіс:"
+    },
+    "shm": {
+      "title": "Выдзеленая памяць SHM (агульная памяць)",
+      "warning": "Бягучы памер SHM {{total}} МБ занадта малы. Павялічце яго прынамсі да {{min_shm}} МБ.",
+      "frameLifetime": {
+        "title": "Час жыцця кадра",
+        "description": "Колькасць слотаў кадраў у агульнай памяці для кожнай камеры: {{frames}}. Пры частаце кадраў самай хуткай камеры кожны кадр даступны прыблізна {{lifetime}} с, пакуль не будзе перазапісаны."
+      }
+    },
+    "cameraStorage": {
+      "title": "Сховішча камер",
+      "camera": "Камера",
+      "unusedStorageInformation": "Звесткі пра нявыкарыстанае месца",
+      "storageUsed": "Сховішча",
+      "percentageOfTotalUsed": "Працэнт ад агульнага",
+      "bandwidth": "Паласа прапускання",
+      "unused": {
+        "title": "Нявыкарыстана",
+        "tips": "Гэта значэнне можа недакладна адлюстроўваць вольнае месца, даступнае Frigate, калі на дыску ёсць іншыя файлы акрамя запісаў Frigate. Frigate не адсочвае месца па-за сваімі запісамі."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Камеры",
+    "overview": "Агляд",
+    "info": {
+      "aspectRatio": "фарматныя суадносіны",
+      "cameraProbeInfo": "Звесткі зандзіравання камеры {{camera}}",
+      "streamDataFromFFPROBE": "Даныя плыні атрыманы праз <code>ffprobe</code>.",
+      "fetching": "Атрыманне даных камеры",
+      "stream": "Плынь {{idx}}",
+      "video": "Відэа:",
+      "codec": "Кодэк:",
+      "resolution": "Разрозненне:",
+      "fps": "FPS:",
+      "unknown": "Невядома",
+      "audio": "Гук:",
+      "error": "Памылка: {{error}}",
+      "tips": {
+        "title": "Звесткі зандзіравання камеры"
+      },
+      "keyframes": {
+        "title": "Аналіз ключавых кадраў",
+        "analyzing": "Аналіз ключавых кадраў… засталося секунд: {{seconds}}",
+        "stillAnalyzing": "Аналіз ключавых кадраў працягваецца…",
+        "recordStream": "Плынь запісу:",
+        "keyframeCount": "Заўважана ключавых кадраў:",
+        "observedDuration": "Назіраная працягласць:",
+        "gap": "Прамежак паміж ключавымі кадрамі (мін. / сяр. / макс.):",
+        "segmentLength": "Даўжыня сегмента запісу:",
+        "ok": "Ключавыя кадры прыблізна кожныя {{seconds}} с, гэта добра для запісу і прайгравання.",
+        "warning": "Рэдкія або нераўнамерныя ключавыя кадры (найбольшы прамежак каля {{seconds}} с), верагодна разумны кодэк (H.264+/H.265+), гэта не рэкамендуецца.",
+        "error": "Прамежак паміж ключавымі кадрамі (каля {{seconds}} с) перавышае даўжыню сегмента запісу ({{segmentTime}} с). Некаторыя сегменты могуць застацца без ключавога кадра, што ламае прайграванне. Адключыце разумны кодэк «+» на камеры або скараціце інтэрвал ключавых кадраў.",
+        "unknown": "Не ўдалося вызначыць інтэрвал ключавых кадраў.",
+        "recordDisabled": "Для гэтай камеры запіс адключаны."
+      }
+    },
+    "framesAndDetections": "Кадры / дэтэктаванні",
+    "noCameras": {
+      "title": "Камер не знойдзена"
+    },
+    "label": {
+      "camera": "камера",
+      "detect": "дэтэктаваць",
+      "skipped": "прапушчана",
+      "ffmpeg": "FFMPEG",
+      "capture": "захоп",
+      "overallFramesPerSecond": "агульная колькасць кадраў на секунду",
+      "overallDetectionsPerSecond": "агульная колькасць дэтэктаванняў на секунду",
+      "overallSkippedDetectionsPerSecond": "агульная колькасць прапушчаных дэтэктаванняў на секунду",
+      "cameraFfmpeg": "FFmpeg {{camName}}",
+      "cameraCapture": "захоп {{camName}}",
+      "cameraDetect": "дэтэктаванне {{camName}}",
+      "cameraGpu": "GPU {{camName}}",
+      "cameraFramesPerSecond": "кадраў на секунду {{camName}}",
+      "cameraDetectionsPerSecond": "дэтэктаванняў на секунду {{camName}}",
+      "cameraSkippedDetectionsPerSecond": "прапушчаных дэтэктаванняў на секунду {{camName}}"
+    },
+    "connectionQuality": {
+      "title": "Якасць злучэння",
+      "excellent": "Выдатная",
+      "fair": "Здавальняючая",
+      "poor": "Слабая",
+      "unusable": "Непрыдатная",
+      "fps": "FPS",
+      "expectedFps": "Чаканы FPS",
+      "reconnectsLastHour": "Перападключэнні (за апошнюю гадзіну)",
+      "stallsLastHour": "Затрымкі (за апошнюю гадзіну)"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Даныя зандзіравання скапіяваны ў буфер абмену."
+      },
+      "error": {
+        "unableToProbeCamera": "Не ўдалося зандзіраваць камеру: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Апошняе абнаўленне: ",
+  "stats": {
+    "ffmpegHighCpuUsage": "{{camera}} моцна нагружае CPU праз FFmpeg ({{ffmpegAvg}}%)",
+    "detectHighCpuUsage": "{{camera}} моцна нагружае CPU дэтэктаваннем ({{detectAvg}}%)",
+    "healthy": "Сістэма спраўная",
+    "reindexingEmbeddings": "Пераіндэксацыя ўбудаванняў (гатова {{processed}}%)",
+    "cameraIsOffline": "{{camera}} па-за сеткай",
+    "detectIsSlow": "{{detect}} працуе павольна ({{speed}} мс)",
+    "detectIsVerySlow": "{{detect}} працуе вельмі павольна ({{speed}} мс)",
+    "shmTooLow": "Выдзеленую памяць /dev/shm ({{total}} МБ) трэба павялічыць прынамсі да {{min}} МБ.",
+    "debugReplayActive": "Сеанс адладачнага паўтору актыўны"
+  },
+  "enrichments": {
+    "title": "Узбагачэнні",
+    "infPerSecond": "Вывядзенняў на секунду",
+    "averageInf": "Сярэдні час вывядзення",
+    "embeddings": {
+      "image_embedding": "Убудаванне відарыса",
+      "text_embedding": "Убудаванне тэксту",
+      "face_recognition": "Распазнаванне асобы",
+      "plate_recognition": "Распазнаванне нумарнога знака",
+      "image_embedding_speed": "Хуткасць убудавання відарыса",
+      "face_embedding_speed": "Хуткасць убудавання твару",
+      "face_recognition_speed": "Хуткасць распазнавання асобы",
+      "plate_recognition_speed": "Хуткасць распазнавання нумарнога знака",
+      "text_embedding_speed": "Хуткасць убудавання тэксту",
+      "yolov9_plate_detection_speed": "Хуткасць дэтэктавання нумарнога знака YOLOv9",
+      "yolov9_plate_detection": "Дэтэктаванне нумарнога знака YOLOv9",
+      "review_description": "Апісанне разгляду",
+      "review_description_speed": "Хуткасць апісання разгляду",
+      "review_description_events_per_second": "Апісанне разгляду",
+      "object_description": "Апісанне аб'екта",
+      "object_description_speed": "Хуткасць апісання аб'екта",
+      "object_description_events_per_second": "Апісанне аб'екта",
+      "classification": "Класіфікацыя {{name}}",
+      "classification_speed": "Хуткасць класіфікацыі {{name}}",
+      "classification_events_per_second": "Падзей класіфікацыі {{name}} на секунду"
+    }
+  }
+}

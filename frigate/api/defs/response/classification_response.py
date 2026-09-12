@@ -1,9 +1,7 @@
-from typing import Dict, List, Optional
-
 from pydantic import BaseModel, Field, RootModel
 
 
-class FacesResponse(RootModel[Dict[str, List[str]]]):
+class FacesResponse(RootModel[dict[str, list[str]]]):
     """Response model for the get_faces endpoint.
 
     Returns a mapping of face names to lists of image filenames.
@@ -17,7 +15,7 @@ class FacesResponse(RootModel[Dict[str, List[str]]]):
         }
     """
 
-    root: Dict[str, List[str]] = Field(
+    root: dict[str, list[str]] = Field(
         default_factory=dict,
         description="Dictionary mapping face names to lists of image filenames",
     )
@@ -30,9 +28,9 @@ class FaceRecognitionResponse(BaseModel):
     """
 
     success: bool = Field(description="Whether the face recognition was successful")
-    score: Optional[float] = Field(
+    score: float | None = Field(
         default=None, description="Confidence score of the recognition (0-1)"
     )
-    face_name: Optional[str] = Field(
+    face_name: str | None = Field(
         default=None, description="The recognized face name if successful"
     )

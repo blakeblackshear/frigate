@@ -25,6 +25,7 @@ export type MotionReviewTimelineProps = {
   timestampSpread: number;
   timelineStart: number;
   timelineEnd: number;
+  scrollToTime?: number;
   showHandlebar?: boolean;
   handlebarTime?: number;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
@@ -41,8 +42,8 @@ export type MotionReviewTimelineProps = {
   events: ReviewSegment[];
   motion_events: MotionData[];
   noRecordingRanges?: RecordingSegment[];
-  contentRef: RefObject<HTMLDivElement>;
-  timelineRef?: RefObject<HTMLDivElement>;
+  contentRef: RefObject<HTMLDivElement | null>;
+  timelineRef?: RefObject<HTMLDivElement | null>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
   dense?: boolean;
   isZooming: boolean;
@@ -58,6 +59,7 @@ export function MotionReviewTimeline({
   timestampSpread,
   timelineStart,
   timelineEnd,
+  scrollToTime,
   showHandlebar = false,
   handlebarTime,
   setHandlebarTime,
@@ -175,6 +177,15 @@ export function MotionReviewTimeline({
     },
     [],
   );
+
+  // allow callers to request the timeline center on a specific time
+  useEffect(() => {
+    if (scrollToTime == undefined) return;
+
+    setTimeout(() => {
+      scrollToSegment(alignStartDateToTimeline(scrollToTime), true, "auto");
+    }, 0);
+  }, [scrollToTime, scrollToSegment, alignStartDateToTimeline]);
 
   // keep handlebar centered when zooming
   useEffect(() => {

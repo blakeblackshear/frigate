@@ -1,14 +1,29 @@
 # Stationary Objects
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 An object is considered stationary when it is being tracked and has been in a very similar position for a certain number of frames. This number is defined in the configuration under `detect -> stationary -> threshold`, and is 10x the frame rate (or 10 seconds) by default. Once an object is considered stationary, it will remain stationary until motion occurs within the object at which point object detection will start running again. If the object changes location, it will be considered active.
 
 ## Why does it matter if an object is stationary?
 
-Once an object becomes stationary, object detection will not be continually run on that object. This serves to reduce resource usage and redundant detections when there has been no motion near the tracked object. This also means that Frigate is contextually aware, and can for example [filter out recording segments](record.md#what-do-the-different-retain-modes-mean) to only when the object is considered active. Motion alone does not determine if an object is "active" for active_objects segment retention. Lighting changes for a parked car won't make an object active.
+Once an object becomes stationary, object detection will not be continually run on that object. This serves to reduce resource usage and redundant detections when there has been no motion near the tracked object. This also means that Frigate is contextually aware, and can for example [filter out recording segments](record.md#configuring-recording-retention) to only when the object is considered active. Motion alone does not determine if an object is "active" for active_objects segment retention. Lighting changes for a parked car won't make an object active.
 
 ## Tuning stationary behavior
 
-The default config is:
+Configure how Frigate handles stationary objects.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Object detection" />.
+
+- Set **Stationary objects config > Stationary interval** to the frequency for running detection on stationary objects (default: 50). Once stationary, detection runs every nth frame to verify the object is still present. There is no way to disable stationary object tracking with this value.
+- Set **Stationary objects config > Stationary threshold** to the number of frames an object must remain relatively still before it is considered stationary (default: 50)
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 detect:
@@ -17,11 +32,8 @@ detect:
     threshold: 50
 ```
 
-`interval` is defined as the frequency for running detection on stationary objects. This means that by default once an object is considered stationary, detection will not be run on it until motion is detected or until the interval (every 50th frame by default). With `interval >= 1`, every nth frames detection will be run to make sure the object is still there.
-
-NOTE: There is no way to disable stationary object tracking with this value.
-
-`threshold` is the number of frames an object needs to remain relatively still before it is considered stationary.
+</TabItem>
+</ConfigTabs>
 
 ## Why does Frigate track stationary objects?
 
@@ -31,7 +43,7 @@ Let's look at an example use case: I want to record any cars that enter my drive
 
 One might simply think "Why not just run object detection any time there is motion around the driveway area and notify if the bounding box is in that zone?"
 
-With that approach, what video is related to the car that entered the driveway? Did it come from the left or right? Was it parked across the street for an hour before turning into the driveway? One approach is to just record 24/7 or for motion (on any changed changed pixels) and not attempt to do that at all. This is what most other NVRs do. Just don't even try to identify a start and end for that object since it's hard and you will be wrong some portion of the time.
+With that approach, what video is related to the car that entered the driveway? Did it come from the left or right? Was it parked across the street for an hour before turning into the driveway? One approach is to just record 24/7 or for motion (on any changed pixels) and not attempt to do that at all. This is what most other NVRs do. Just don't even try to identify a start and end for that object since it's hard and you will be wrong some portion of the time.
 
 Couldn't you just look at when motion stopped and started? Motion for a video feed is nothing more than looking for pixels that are different than they were in previous frames. If the car entered the driveway while someone was mowing the grass, how would you know which motion was for the car and which was for the person when they mow along the driveway or street? What if another car was driving the other direction on the street? Or what if its a windy day and the bush by your mailbox is blowing around?
 
@@ -49,4 +61,4 @@ Now you have to determine which of the bounding boxes in this frame should be ma
 
 Now let's assume that those other 3 cars were already being tracked as stationary objects, so the car driving down the street is a new 4th car. The object tracker knows we have had 3 cars and we now have 4. As the new car approaches the parked cars, the bounding boxes for all 4 cars is predicted based on the previous frames. The predicted boxes for the parked cars is pretty much a 100% overlap with the bounding boxes in the new frame. The parked cars are slam dunk matches to the tracking ids they had before and the only one left is the remaining bounding box which gets assigned to the new car. This results in a much lower error rate. Not perfect, but better.
 
-The most difficult scenario that causes IDs to be assigned incorrectly is when an object completely occludes another object. When a car drives in front of another car and its no longer visible, a bounding box disappeared and it's a bit of a toss up when assigning the id since it's difficult to know which one is in front of the other. This happens for cars passing in front of other cars fairly often. It's something that we want to improve in the future.
+The most difficult scenario that causes IDs to be assigned incorrectly is when an object completely occludes another object. When a car drives in front of another car and it's no longer visible, a bounding box disappeared and it's a bit of a toss up when assigning the id since it's difficult to know which one is in front of the other. This happens for cars passing in front of other cars fairly often. It's something that we want to improve in the future.

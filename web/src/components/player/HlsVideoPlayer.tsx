@@ -1,5 +1,6 @@
 import {
   MutableRefObject,
+  ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -46,17 +47,21 @@ type HlsVideoPlayerProps = {
   frigateControls?: boolean;
   inpointOffset?: number;
   onClipEnded?: (currentTime: number) => void;
+  onClipPrevious?: (diff: number) => void;
   onPlayerLoaded?: () => void;
   onTimeUpdate?: (time: number) => void;
   onPlaying?: () => void;
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onUploadFrame?: (playTime: number) => Promise<AxiosResponse> | undefined;
+  getSnapshotUrl?: (playTime: number) => string | undefined;
+  onSnapshot?: (playTime: number) => Promise<void> | void;
   toggleFullscreen?: () => void;
   onError?: (error: RecordingPlayerError) => void;
   isDetailMode?: boolean;
   camera?: string;
   currentTimeOverride?: number;
+  transformedOverlay?: ReactNode;
 };
 
 export default function HlsVideoPlayer({
@@ -70,17 +75,21 @@ export default function HlsVideoPlayer({
   frigateControls = true,
   inpointOffset = 0,
   onClipEnded,
+  onClipPrevious,
   onPlayerLoaded,
   onTimeUpdate,
   onPlaying,
   onSeekToTime,
   setFullResolution,
   onUploadFrame,
+  getSnapshotUrl,
+  onSnapshot,
   toggleFullscreen,
   onError,
   isDetailMode = false,
   camera,
   currentTimeOverride,
+  transformedOverlay,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -91,7 +100,7 @@ export default function HlsVideoPlayer({
 
   // playback
 
-  const hlsRef = useRef<Hls>();
+  const hlsRef = useRef<Hls>(undefined);
   const [useHlsCompat, setUseHlsCompat] = useState(false);
   const [loadedMetadata, setLoadedMetadata] = useState(false);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
@@ -213,7 +222,11 @@ export default function HlsVideoPlayer({
 
   const [tallCamera, setTallCamera] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [muted, setMuted] = useUserPersistence("hlsPlayerMuted", true);
+  const [persistedMuted, setPersistedMuted] = useUserPersistence(
+    "hlsPlayerMuted",
+    true,
+  );
+  const [temporaryMuted, setTemporaryMuted] = useState(false);
   const [volume, setVolume] = useOverlayState("playerVolume", 1.0);
   const [defaultPlaybackRate] = useUserPersistence("playbackRate", 1);
   const [playbackRate, setPlaybackRate] = useOverlayState(
@@ -223,11 +236,22 @@ export default function HlsVideoPlayer({
   const [mobileCtrlTimeout, setMobileCtrlTimeout] = useState<NodeJS.Timeout>();
   const [controls, setControls] = useState(isMobile);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [isSnapshotLoading, setIsSnapshotLoading] = useState(false);
   const [zoomScale, setZoomScale] = useState(1.0);
   const [videoDimensions, setVideoDimensions] = useState<{
     width: number;
     height: number;
   }>({ width: 0, height: 0 });
+
+  const muted = persistedMuted || temporaryMuted;
+
+  const onSetMuted = useCallback(
+    (muted: boolean) => {
+      setTemporaryMuted(false);
+      setPersistedMuted(muted);
+    },
+    [setPersistedMuted],
+  );
 
   useEffect(() => {
     if (!isDesktop) {
@@ -268,6 +292,21 @@ export default function HlsVideoPlayer({
     return currentTime + inpointOffset;
   }, [videoRef, inpointOffset]);
 
+  const handleSnapshot = useCallback(async () => {
+    const frameTime = getVideoTime();
+
+    if (!frameTime || !onSnapshot) {
+      return;
+    }
+
+    setIsSnapshotLoading(true);
+    try {
+      await onSnapshot(frameTime);
+    } finally {
+      setIsSnapshotLoading(false);
+    }
+  }, [getVideoTime, onSnapshot]);
+
   return (
     <TransformWrapper
       minScale={1.0}
@@ -291,21 +330,28 @@ export default function HlsVideoPlayer({
             seek: true,
             playbackRate: true,
             plusUpload: isAdmin && config?.plus?.enabled == true,
+            snapshot: !!onSnapshot,
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}
-          setMuted={(muted) => setMuted(muted)}
+          setMuted={onSetMuted}
           playbackRate={playbackRate ?? 1}
           hotKeys={hotKeys}
           onPlayPause={onPlayPause}
           onSeek={(diff) => {
             const currentTime = videoRef.current?.currentTime;
 
-            if (!videoRef.current || !currentTime) {
+            if (!videoRef.current || currentTime == undefined) {
               return;
             }
 
-            videoRef.current.currentTime = Math.max(0, currentTime + diff);
+            const newTime = currentTime + diff;
+
+            if (newTime < 0 && onClipPrevious) {
+              onClipPrevious(diff);
+            } else {
+              videoRef.current.currentTime = Math.max(0, newTime);
+            }
           }}
           onSetPlaybackRate={(rate) => {
             setPlaybackRate(rate, true);
@@ -313,6 +359,13 @@ export default function HlsVideoPlayer({
             if (videoRef.current) {
               videoRef.current.playbackRate = rate;
             }
+          }}
+          getSnapshotUrl={() => {
+            const frameTime = getVideoTime();
+            if (!frameTime || !getSnapshotUrl) {
+              return undefined;
+            }
+            return getSnapshotUrl(frameTime);
           }}
           onUploadFrame={async () => {
             const frameTime = getVideoTime();
@@ -331,6 +384,8 @@ export default function HlsVideoPlayer({
               }
             }
           }}
+          onSnapshot={onSnapshot ? handleSnapshot : undefined}
+          snapshotLoading={isSnapshotLoading}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
           containerRef={containerRef}
@@ -350,157 +405,178 @@ export default function HlsVideoPlayer({
           height: isMobile ? "100%" : undefined,
         }}
       >
-        {isDetailMode &&
-          camera &&
-          currentTime != null &&
-          loadedMetadata &&
-          videoDimensions.width > 0 &&
-          videoDimensions.height > 0 && (
-            <div
-              className={cn(
-                "absolute inset-0 z-50",
-                isDesktop
-                  ? "size-full"
-                  : "mx-auto flex items-center justify-center portrait:max-h-[50dvh]",
-              )}
-              style={{
-                aspectRatio: `${videoDimensions.width} / ${videoDimensions.height}`,
-              }}
-            >
-              <ObjectTrackOverlay
-                key={`overlay-${currentTime}`}
-                camera={camera}
-                showBoundingBoxes={!isPlaying}
-                currentTime={currentTime}
-                videoWidth={videoDimensions.width}
-                videoHeight={videoDimensions.height}
-                className="absolute inset-0 z-10"
-                onSeekToTime={(timestamp, play) => {
-                  if (onSeekToTime) {
-                    onSeekToTime(timestamp, play);
-                  }
+        <div className="relative size-full">
+          {transformedOverlay}
+          {isDetailMode &&
+            camera &&
+            currentTime != null &&
+            loadedMetadata &&
+            videoDimensions.width > 0 &&
+            videoDimensions.height > 0 && (
+              <div
+                className={cn(
+                  "absolute inset-0 z-50",
+                  isDesktop
+                    ? "size-full"
+                    : "mx-auto flex items-center justify-center portrait:max-h-[50dvh]",
+                )}
+                style={{
+                  aspectRatio: `${videoDimensions.width} / ${videoDimensions.height}`,
                 }}
-              />
-            </div>
-          )}
-        <video
-          ref={videoRef}
-          className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"} cursor-pointer`}
-          preload="auto"
-          autoPlay
-          controls={!frigateControls}
-          playsInline
-          muted={muted}
-          onClick={
-            isDesktop
-              ? () => {
-                  if (zoomScale == 1.0) onPlayPause(!isPlaying);
-                }
-              : undefined
-          }
-          onVolumeChange={() => {
-            setVolume(videoRef.current?.volume ?? 1.0, true);
-            if (!frigateControls) {
-              setMuted(videoRef.current?.muted);
-            }
-          }}
-          onPlay={() => {
-            setIsPlaying(true);
-
-            if (isMobile) {
-              setControls(true);
-              setMobileCtrlTimeout(setTimeout(() => setControls(false), 4000));
-            }
-          }}
-          onPlaying={onPlaying}
-          onPause={() => {
-            setIsPlaying(false);
-            clearTimeout(bufferTimeout);
-
-            if (isMobile && mobileCtrlTimeout) {
-              clearTimeout(mobileCtrlTimeout);
-            }
-          }}
-          onWaiting={() => {
-            if (onError != undefined) {
-              if (videoRef.current?.paused) {
-                return;
-              }
-
-              setBufferTimeout(
-                setTimeout(() => {
-                  if (
-                    document.visibilityState === "visible" &&
-                    videoRef.current
-                  ) {
-                    onError("stalled");
+              >
+                <ObjectTrackOverlay
+                  camera={camera}
+                  showBoundingBoxes={!isPlaying}
+                  currentTime={currentTime}
+                  videoWidth={videoDimensions.width}
+                  videoHeight={videoDimensions.height}
+                  className="absolute inset-0 z-10"
+                  onSeekToTime={(timestamp, play) => {
+                    if (onSeekToTime) {
+                      onSeekToTime(timestamp, play);
+                    }
+                  }}
+                />
+              </div>
+            )}
+          <video
+            ref={videoRef}
+            className={`size-full rounded-lg bg-black md:rounded-2xl ${loadedMetadata ? "" : "invisible"} cursor-pointer`}
+            preload="auto"
+            autoPlay
+            controls={!frigateControls}
+            playsInline
+            muted={muted}
+            onClick={
+              isDesktop
+                ? () => {
+                    if (zoomScale == 1.0) onPlayPause(!isPlaying);
                   }
-                }, 3000),
-              );
+                : undefined
             }
-          }}
-          onProgress={() => {
-            if (onError != undefined) {
-              if (videoRef.current?.paused) {
+            onVolumeChange={() => {
+              if (!videoRef.current) {
                 return;
               }
 
-              if (bufferTimeout) {
-                clearTimeout(bufferTimeout);
-                setBufferTimeout(undefined);
+              setVolume(videoRef.current.volume ?? 1.0, true);
+
+              if (frigateControls) {
+                if (videoRef.current.muted && !persistedMuted) {
+                  setTemporaryMuted(true);
+                } else if (!videoRef.current.muted && temporaryMuted) {
+                  setTemporaryMuted(false);
+                }
+              } else {
+                setPersistedMuted(videoRef.current.muted);
               }
-            }
-          }}
-          onTimeUpdate={() => {
-            if (!onTimeUpdate) {
-              return;
-            }
+            }}
+            onPlay={() => {
+              setIsPlaying(true);
 
-            const frameTime = getVideoTime();
+              if (isMobile) {
+                setControls(true);
+                setMobileCtrlTimeout(
+                  setTimeout(() => setControls(false), 4000),
+                );
+              }
+            }}
+            onPlaying={onPlaying}
+            onPause={() => {
+              setIsPlaying(false);
+              clearTimeout(bufferTimeout);
 
-            if (frameTime) {
-              onTimeUpdate(frameTime);
-            }
-          }}
-          onLoadedData={() => {
-            onPlayerLoaded?.();
-            handleLoadedMetadata();
+              if (isMobile && mobileCtrlTimeout) {
+                clearTimeout(mobileCtrlTimeout);
+              }
+            }}
+            onSeeking={() => {
+              // iOS ManagedMediaSource gates hls.js fragment loading off
+              // while paused and never resumes it on seek, so a seek
+              // into unbuffered media would never complete
+              hlsRef.current?.resumeBuffering();
+            }}
+            onWaiting={() => {
+              if (onError != undefined) {
+                if (videoRef.current?.paused) {
+                  return;
+                }
 
-            if (videoRef.current) {
-              if (playbackRate) {
-                videoRef.current.playbackRate = playbackRate;
+                setBufferTimeout(
+                  setTimeout(() => {
+                    if (
+                      document.visibilityState === "visible" &&
+                      videoRef.current
+                    ) {
+                      onError("stalled");
+                    }
+                  }, 3000),
+                );
+              }
+            }}
+            onProgress={() => {
+              if (onError != undefined) {
+                if (videoRef.current?.paused) {
+                  return;
+                }
+
+                if (bufferTimeout) {
+                  clearTimeout(bufferTimeout);
+                  setBufferTimeout(undefined);
+                }
+              }
+            }}
+            onTimeUpdate={() => {
+              if (!onTimeUpdate) {
+                return;
               }
 
-              if (volume) {
-                videoRef.current.volume = volume;
+              const frameTime = getVideoTime();
+
+              if (frameTime) {
+                onTimeUpdate(frameTime);
               }
-            }
-          }}
-          onEnded={() => {
-            if (onClipEnded) {
-              onClipEnded(getVideoTime() ?? 0);
-            }
-          }}
-          onError={(e) => {
-            if (
-              !hlsRef.current &&
-              // @ts-expect-error code does exist
-              unsupportedErrorCodes.includes(e.target.error.code) &&
-              videoRef.current
-            ) {
-              setLoadedMetadata(false);
-              setUseHlsCompat(true);
-            } else {
-              toast.error(
+            }}
+            onLoadedData={() => {
+              onPlayerLoaded?.();
+              handleLoadedMetadata();
+
+              if (videoRef.current) {
+                if (playbackRate) {
+                  videoRef.current.playbackRate = playbackRate;
+                }
+
+                if (volume) {
+                  videoRef.current.volume = volume;
+                }
+              }
+            }}
+            onEnded={() => {
+              if (onClipEnded) {
+                onClipEnded(getVideoTime() ?? 0);
+              }
+            }}
+            onError={(e) => {
+              if (
+                !hlsRef.current &&
                 // @ts-expect-error code does exist
-                `Failed to play recordings (error ${e.target.error.code}): ${e.target.error.message}`,
-                {
-                  position: "top-center",
-                },
-              );
-            }
-          }}
-        />
+                unsupportedErrorCodes.includes(e.target.error.code) &&
+                videoRef.current
+              ) {
+                setLoadedMetadata(false);
+                setUseHlsCompat(true);
+              } else {
+                toast.error(
+                  // @ts-expect-error code does exist
+                  `Failed to play recordings (error ${e.target.error.code}): ${e.target.error.message}`,
+                  {
+                    position: "top-center",
+                  },
+                );
+              }
+            }}
+          />
+        </div>
       </TransformComponent>
     </TransformWrapper>
   );

@@ -4,10 +4,11 @@ import base64
 import json
 import logging
 import os
+import sys
 import threading
 from json.decoder import JSONDecodeError
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Union
+from typing import Any
 
 import regex
 from pathvalidate import ValidationError, sanitize_filename
@@ -20,6 +21,7 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.classification import kickoff_model_training
+from frigate.util.path import safe_join
 from frigate.util.process import FrigateProcess
 
 from .maintainer import EmbeddingMaintainer
@@ -32,7 +34,7 @@ class EmbeddingProcess(FrigateProcess):
     def __init__(
         self,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics | None,
+        metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(
@@ -52,6 +54,14 @@ class EmbeddingProcess(FrigateProcess):
             self.stop_event,
         )
         maintainer.start()
+        maintainer.join()
+
+        # If the maintainer thread exited but no shutdown was requested, it
+        # crashed. Surface as a non-zero exit so the watchdog restarts us
+        # instead of treating the silent thread death as a clean shutdown.
+        if not self.stop_event.is_set():
+            logger.error("Embeddings maintainer thread exited unexpectedly")
+            sys.exit(1)
 
 
 class EmbeddingsContext:
@@ -64,7 +74,7 @@ class EmbeddingsContext:
         # load stats from disk
         stats_file = os.path.join(CONFIG_DIR, ".search_stats.json")
         try:
-            with open(stats_file, "r") as f:
+            with open(stats_file) as f:
                 data = json.loads(f.read())
                 self.thumb_stats.from_dict(data["thumb_stats"])
                 self.desc_stats.from_dict(data["desc_stats"])
@@ -89,7 +99,7 @@ class EmbeddingsContext:
         self.requestor.stop()
 
     def search_thumbnail(
-        self, query: Union[Event, str], event_ids: list[str] = None
+        self, query: Event | str, event_ids: list[str] = None
     ) -> list[tuple[str, float]]:
         if query.__class__ == Event:
             cursor = self.db.execute_sql(
@@ -205,14 +215,14 @@ class EmbeddingsContext:
         )
 
     def get_face_ids(self, name: str) -> list[str]:
-        sql_query = f"""
+        sql_query = """
             SELECT
                 id
             FROM vec_descriptions
-            WHERE id LIKE '%{name}%'
+            WHERE id LIKE ?
         """
 
-        return self.db.execute_sql(sql_query).fetchall()
+        return self.db.execute_sql(sql_query, (f"%{name}%",)).fetchall()
 
     def reprocess_face(self, face_file: str) -> dict[str, Any]:
         return self.requestor.send_data(
@@ -225,11 +235,16 @@ class EmbeddingsContext:
         )
 
     def delete_face_ids(self, face: str, ids: list[str]) -> None:
-        folder = os.path.join(FACE_DIR, face)
-        for id in ids:
-            file_path = os.path.join(folder, id)
+        folder = safe_join(FACE_DIR, face)
 
-            if os.path.isfile(file_path):
+        if folder is None:
+            logger.warning("Not deleting faces for invalid name %s", face)
+            return
+
+        for id in ids:
+            file_path = safe_join(folder, id)
+
+            if file_path and os.path.isfile(file_path):
                 os.unlink(file_path)
 
         if face != "train" and len(os.listdir(folder)) == 0:
@@ -246,7 +261,7 @@ class EmbeddingsContext:
             sanitized_old_name = sanitize_filename(old_name, replacement_text="_")
             sanitized_new_name = sanitize_filename(new_name, replacement_text="_")
         except ValidationError as e:
-            raise ValueError(f"Invalid face name: {str(e)}")
+            raise ValueError(f"Invalid face name: {str(e)}") from e
 
         if not regex.match(valid_name_pattern, old_name):
             raise ValueError(f"Invalid old face name: {old_name}")

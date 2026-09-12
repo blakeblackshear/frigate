@@ -14,8 +14,9 @@ try:
 except ModuleNotFoundError:
     TRT_SUPPORT = False
 
-from pydantic import Field
-from typing_extensions import Literal
+from typing import Literal
+
+from pydantic import ConfigDict, Field
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
@@ -46,11 +47,19 @@ if TRT_SUPPORT:
 
 
 class TensorRTDetectorConfig(BaseDetectorConfig):
+    """TensorRT detector for Nvidia Jetson devices using serialized TensorRT engines for accelerated inference."""
+
+    model_config = ConfigDict(
+        title="TensorRT",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: int = Field(default=0, title="GPU Device Index")
+    device: int = Field(
+        default=0, title="GPU Device Index", description="The GPU device index to use."
+    )
 
 
-class HostDeviceMem(object):
+class HostDeviceMem:
     """Simple helper data class that's a little nicer to use than a 2-tuple."""
 
     def __init__(self, host_mem, device_mem, nbytes, size):

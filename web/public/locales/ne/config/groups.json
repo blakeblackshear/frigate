@@ -1,0 +1,44 @@
+{
+    "audio": {
+        "global": {
+            "detection": "विश्वव्यापी पत्ता-लगाउने",
+            "sensitivity": "विश्वव्यापी संवेदनशीलता"
+        },
+        "cameras": {
+            "detection": "पत्ता-लगाउने",
+            "sensitivity": "संवेदनशीलता"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "विश्वव्यापी उपस्थिति"
+        },
+        "cameras": {
+            "appearance": "उपस्थिति"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "विश्वव्यापी संवेदनशीलता",
+            "algorithm": "विश्वव्यापी एल्गोरिथम"
+        },
+        "cameras": {
+            "sensitivity": "संवेदनशीलता",
+            "algorithm": "एल्गोरिथ्म"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "विश्वव्यापी प्रदर्शन"
+        },
+        "cameras": {
+            "display": "प्रदर्शन"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "विश्वव्यापी रिजोल्युसन",
+            "tracking": "विश्वव्यापी ट्र्याकिङ"
+        }
+    }
+}

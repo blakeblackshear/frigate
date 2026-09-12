@@ -3,31 +3,146 @@ id: snapshots
 title: Snapshots
 ---
 
-Frigate can save a snapshot image to `/media/frigate/clips` for each object that is detected named as `<camera>-<id>.jpg`. They are also accessible [via the api](../integrations/api/event-snapshot-events-event-id-snapshot-jpg-get.api.mdx)
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
 
-Snapshots are accessible in the UI in the Explore pane. This allows for quick submission to the Frigate+ service.
+A snapshot is a single still image that captures a tracked object at its best moment: the clearest frame Frigate saw while following that object across the scene. Unlike a [recording](./record.md), which is continuous video, a snapshot is one representative image saved per tracked object once tracking ends.
 
-To only save snapshots for objects that enter a specific zone, [see the zone docs](./zones.md#restricting-snapshots-to-specific-zones)
+When snapshots are enabled, Frigate saves one image to `/media/frigate/clips` for each tracked object, named `<camera>-<id>-clean.webp`. A clean image is always stored without any annotations (no timestamp, bounding boxes, or cropping) so you have an unmodified copy of the original frame. Annotations like bounding boxes and timestamps are applied on demand when a snapshot is requested [via the HTTP API](../integrations/api/event-snapshot-events-event-id-snapshot-jpg-get.api.mdx). See [Rendering](#rendering) below.
 
-Snapshots sent via MQTT are configured in the [config file](/configuration) under `cameras -> your_camera -> mqtt`
+A few things to keep in mind:
+
+- Snapshots are saved per tracked object, so a camera with no detected objects produces no snapshots even if recording is enabled.
+- Snapshots and recordings are configured and retained independently. Enabling one does not enable the other.
+- Snapshots are accessible in the UI in the Explore pane, which allows for quick submission to the Frigate+ service.
+- To only save snapshots for objects that enter a specific zone, [see the zone docs](./zones.md#restricting-snapshots-to-specific-zones).
+- Snapshots sent via MQTT are configured separately under the camera MQTT settings, not here.
+
+## Enabling Snapshots
+
+Enable snapshot saving and configure the default settings that apply to all cameras.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Snapshots" />.
+
+- Set **Enable snapshots** to on
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+snapshots:
+  enabled: True
+```
+
+</TabItem>
+</ConfigTabs>
+
+To override snapshot settings for a specific camera:
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Snapshots" /> and select your camera.
+
+- Set **Enable snapshots** to on
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+cameras:
+  front_door:
+    snapshots:
+      enabled: True
+```
+
+</TabItem>
+</ConfigTabs>
+
+## Snapshot Options
+
+Configure how snapshots are rendered and stored. These settings control the defaults applied when snapshots are requested via the API.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Snapshots" />.
+
+| Field                    | Description                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| **Enable snapshots**     | Enable or disable saving snapshots for tracked objects                         |
+| **Timestamp overlay**    | Overlay a timestamp on snapshots from API                                      |
+| **Bounding box overlay** | Draw bounding boxes for tracked objects on snapshots from API                  |
+| **Crop snapshot**        | Crop snapshots from API to the detected object's bounding box                  |
+| **Snapshot height**      | Height in pixels to resize snapshots to; leave empty to preserve original size |
+| **Snapshot quality**     | Encode quality for saved snapshots (0-100)                                     |
+| **Required zones**       | Zones an object must enter for a snapshot to be saved                          |
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+snapshots:
+  enabled: True
+  timestamp: False
+  bounding_box: True
+  crop: False
+  height: 175
+  required_zones: []
+  quality: 60
+```
+
+</TabItem>
+</ConfigTabs>
+
+## Snapshot Retention
+
+Configure how long snapshots are retained on disk. Per-object retention overrides allow different retention periods for specific object types.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Snapshots" />.
+
+| Field                                              | Description                                                                         |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Snapshot retention > Default retention**         | Number of days to retain snapshots (default: 10)                                    |
+| **Snapshot retention > Object retention > Person** | Per-object overrides for retention days (e.g., keep `person` snapshots for 15 days) |
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+snapshots:
+  enabled: True
+  retain:
+    default: 10
+    objects:
+      person: 15
+```
+
+</TabItem>
+</ConfigTabs>
 
 ## Frame Selection
 
-Frigate does not save every frame — it picks a single "best" frame for each tracked object and uses it for both the snapshot and clean copy. As the object is tracked across frames, Frigate continuously evaluates whether the current frame is better than the previous best based on detection confidence, object size, and the presence of key attributes like faces or license plates. Frames where the object touches the edge of the frame are deprioritized. The snapshot is written to disk once tracking ends using whichever frame was determined to be the best.
+Frigate does not save every frame. It picks a single "best" frame for each tracked object based on detection confidence, object size, and the presence of key attributes like faces or license plates. Frames where the object touches the edge of the frame are deprioritized. That best frame is written to disk once tracking ends.
 
-MQTT snapshots are published more frequently — each time a better thumbnail frame is found during tracking, or when the current best image is older than `best_image_timeout` (default: 60s). These use their own annotation settings configured under `cameras -> your_camera -> mqtt`.
+MQTT snapshots are published more frequently: each time a better thumbnail frame is found during tracking, or when the current best image is older than `best_image_timeout` (default: 60s). These use their own annotation settings configured under the camera MQTT settings.
 
-## Clean Copy
+## Rendering
 
-Frigate can produce up to two snapshot files per event, each used in different places:
+Frigate stores a single clean snapshot on disk:
 
-| Version | File | Annotations | Used by |
-| --- | --- | --- | --- |
-| **Regular snapshot** | `<camera>-<id>.jpg` | Respects your `timestamp`, `bounding_box`, `crop`, and `height` settings | API (`/api/events/<id>/snapshot.jpg`), MQTT (`<camera>/<label>/snapshot`), Explore pane in the UI |
-| **Clean copy** | `<camera>-<id>-clean.webp` | Always unannotated — no bounding box, no timestamp, no crop, full resolution | API (`/api/events/<id>/snapshot-clean.webp`), [Frigate+](/plus/first_model) submissions, "Download Clean Snapshot" in the UI |
+| API / Use                                | Result                                                                                                |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Stored file                              | `<camera>-<id>-clean.webp`, always unannotated                                                        |
+| `/api/events/<id>/snapshot.jpg`          | Starts from the camera's `snapshots` defaults, then applies any query param overrides at request time |
+| `/api/events/<id>/snapshot-clean.webp`   | Returns the same stored snapshot without annotations                                                  |
+| [Frigate+](/plus/first_model) submission | Uses the same stored clean snapshot                                                                   |
 
-MQTT snapshots are configured separately under `cameras -> your_camera -> mqtt` and are unrelated to the clean copy.
-
-The clean copy is required for submitting events to [Frigate+](/plus/first_model) — if you plan to use Frigate+, keep `clean_copy` enabled regardless of your other snapshot settings.
-
-If you are not using Frigate+ and `timestamp`, `bounding_box`, and `crop` are all disabled, the regular snapshot is already effectively clean, so `clean_copy` provides no benefit and only uses additional disk space. You can safely set `clean_copy: False` in this case.
+MQTT snapshots are configured separately under the camera MQTT settings and are unrelated to the stored event snapshot.

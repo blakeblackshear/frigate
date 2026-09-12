@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
-from typing import Any, AnyStr, Optional
+from typing import Any, AnyStr
 
 import cv2
 import numpy as np
@@ -67,7 +67,7 @@ def has_better_attr(current_thumb, new_obj, attr_label) -> bool:
 
 
 def is_better_thumbnail(
-    label: str,
+    label_attributes: list[str],
     current_thumb: dict[str, Any],
     new_obj: dict[str, Any],
     frame_shape: tuple[int, int],
@@ -76,20 +76,12 @@ def is_better_thumbnail(
     # cutoff images are less ideal, but they should also be smaller?
     # better scores are obviously better too
 
-    # check face on person
-    if label == "person":
-        if has_better_attr(current_thumb, new_obj, "face"):
+    for attr_label in label_attributes:
+        if has_better_attr(current_thumb, new_obj, attr_label):
             return True
-        # if the current thumb has a face attr, dont update unless it gets better
-        if any([a["label"] == "face" for a in current_thumb["attributes"]]):
-            return False
 
-    # check license_plate on car
-    if label in ["car", "motorcycle"]:
-        if has_better_attr(current_thumb, new_obj, "license_plate"):
-            return True
-        # if the current thumb has a license_plate attr, dont update unless it gets better
-        if any([a["label"] == "license_plate" for a in current_thumb["attributes"]]):
+        # if the current thumb has the attr, dont update unless it gets better
+        if any([a["label"] == attr_label for a in current_thumb["attributes"]]):
             return False
 
     # if the new_thumb is on an edge, and the current thumb is not
@@ -268,6 +260,229 @@ def draw_box_with_label(
         color=(0, 0, 0),
         thickness=2,
     )
+
+
+def get_image_quality_params(ext: str, quality: int | None) -> list[int]:
+    if ext in ("jpg", "jpeg"):
+        return [int(cv2.IMWRITE_JPEG_QUALITY), quality if quality is not None else 70]
+
+    if ext == "webp":
+        return [int(cv2.IMWRITE_WEBP_QUALITY), quality if quality is not None else 60]
+
+    return []
+
+
+def relative_box_to_absolute(
+    frame_shape: tuple[int, ...], box: list[float] | tuple[float, ...] | None
+) -> tuple[int, int, int, int] | None:
+    if box is None or len(box) != 4:
+        return None
+
+    frame_height = frame_shape[0]
+    frame_width = frame_shape[1]
+    x_min = int(box[0] * frame_width)
+    y_min = int(box[1] * frame_height)
+    x_max = x_min + int(box[2] * frame_width)
+    y_max = y_min + int(box[3] * frame_height)
+
+    x_min = max(0, min(frame_width - 1, x_min))
+    y_min = max(0, min(frame_height - 1, y_min))
+    x_max = max(x_min + 1, min(frame_width - 1, x_max))
+    y_max = max(y_min + 1, min(frame_height - 1, y_max))
+
+    return (x_min, y_min, x_max, y_max)
+
+
+def _format_snapshot_label(
+    score: float | None,
+    area: int | None,
+    box: tuple[int, int, int, int] | None,
+    estimated_speed: float = 0,
+) -> str:
+    score_value = score or 0
+    score_text = (
+        f"{int(score_value * 100)}%" if score_value <= 1 else f"{int(score_value)}%"
+    )
+
+    if area is None and box is not None:
+        area = int((box[2] - box[0]) * (box[3] - box[1]))
+
+    label = f"{score_text} {int(area or 0)}"
+    if estimated_speed:
+        label = f"{label} {estimated_speed:.1f}"
+
+    return label
+
+
+def draw_snapshot_bounding_boxes(
+    frame: np.ndarray,
+    label: str,
+    box: tuple[int, int, int, int] | None,
+    score: float | None,
+    area: int | None,
+    attributes: list[dict[str, Any]] | None,
+    color: tuple[int, int, int],
+    estimated_speed: float = 0,
+) -> None:
+    if box is None:
+        return
+
+    draw_box_with_label(
+        frame,
+        box[0],
+        box[1],
+        box[2],
+        box[3],
+        label,
+        _format_snapshot_label(score, area, box, estimated_speed),
+        thickness=2,
+        color=color,
+    )
+
+    for attribute in attributes or []:
+        attribute_box = attribute.get("box")
+        if attribute_box is None:
+            continue
+
+        box_area = int(
+            (attribute_box[2] - attribute_box[0])
+            * (attribute_box[3] - attribute_box[1])
+        )
+        draw_box_with_label(
+            frame,
+            attribute_box[0],
+            attribute_box[1],
+            attribute_box[2],
+            attribute_box[3],
+            attribute.get("label", "attribute"),
+            f"{attribute.get('score', 0):.0%} {box_area}",
+            thickness=2,
+            color=color,
+        )
+
+
+def _get_snapshot_overlay_box_label(
+    score: float | int | None, box: tuple[int, int, int, int]
+) -> str:
+    area = int((box[2] - box[0]) * (box[3] - box[1]))
+
+    if score is None:
+        return f"- {area}"
+
+    score_value = float(score)
+    score_text = (
+        f"{int(score_value * 100)}%" if score_value <= 1 else f"{int(score_value)}%"
+    )
+    return f"{score_text} {area}"
+
+
+def draw_snapshot_overlay_boxes(
+    frame: np.ndarray,
+    overlay_boxes: list[dict[str, Any]] | None,
+    default_label: str,
+    default_color: tuple[int, int, int],
+) -> None:
+    for overlay_box in overlay_boxes or []:
+        box = overlay_box.get("box")
+        if box is None:
+            continue
+
+        box_color = overlay_box.get("color", default_color)
+        color = (
+            tuple(box_color) if isinstance(box_color, (list, tuple)) else default_color
+        )
+        draw_box_with_label(
+            frame,
+            box[0],
+            box[1],
+            box[2],
+            box[3],
+            overlay_box.get("label", default_label),
+            _get_snapshot_overlay_box_label(overlay_box.get("score"), box),
+            thickness=2,
+            color=color,
+        )
+
+
+def get_snapshot_bytes(
+    frame: np.ndarray,
+    frame_time: float,
+    ext: str,
+    *,
+    timestamp: bool = False,
+    bounding_box: bool = False,
+    crop: bool = False,
+    height: int | None = None,
+    quality: int | None = None,
+    label: str,
+    box: tuple[int, int, int, int] | None,
+    score: float | None,
+    area: int | None,
+    attributes: list[dict[str, Any]] | None,
+    color: tuple[int, int, int],
+    overlay_boxes: list[dict[str, Any]] | None = None,
+    timestamp_style: Any | None = None,
+    estimated_speed: float = 0,
+) -> tuple[bytes | None, float]:
+    best_frame = frame.copy()
+    crop_box = box
+
+    if crop_box is None and overlay_boxes and len(overlay_boxes) == 1:
+        crop_box = overlay_boxes[0].get("box")
+
+    if bounding_box and box:
+        draw_snapshot_bounding_boxes(
+            best_frame,
+            label,
+            box,
+            score,
+            area,
+            attributes,
+            color,
+            estimated_speed,
+        )
+
+    if bounding_box and overlay_boxes:
+        draw_snapshot_overlay_boxes(best_frame, overlay_boxes, label, color)
+
+    if crop and crop_box:
+        region = calculate_region(
+            best_frame.shape,
+            crop_box[0],
+            crop_box[1],
+            crop_box[2],
+            crop_box[3],
+            300,
+            multiplier=1.1,
+        )
+        best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
+
+    if height:
+        width = int(height * best_frame.shape[1] / best_frame.shape[0])
+        best_frame = cv2.resize(
+            best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
+        )
+
+    if timestamp and timestamp_style is not None:
+        colors = timestamp_style.color
+        draw_timestamp(
+            best_frame,
+            frame_time,
+            timestamp_style.format,
+            font_effect=timestamp_style.effect,
+            font_thickness=timestamp_style.thickness,
+            font_color=(colors.blue, colors.green, colors.red),
+            position=timestamp_style.position,
+        )
+
+    ret, img = cv2.imencode(
+        f".{ext}", best_frame, get_image_quality_params(ext, quality)
+    )
+
+    if ret:
+        return img.tobytes(), frame_time
+
+    return None, frame_time
 
 
 def grab_cv2_contours(cnts):
@@ -698,7 +913,7 @@ def yuv_region_2_bgr(frame, region):
         raise
 
 
-def intersection(box_a, box_b) -> Optional[list[int]]:
+def intersection(box_a, box_b) -> list[int] | None:
     """Return intersection box or None if boxes do not intersect."""
     if (
         box_a[2] < box_b[0]
@@ -771,7 +986,7 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def write(self, name: str) -> Optional[memoryview]:
+    def write(self, name: str) -> memoryview | None:
         pass
 
     @abstractmethod
@@ -798,7 +1013,7 @@ class UntrackedSharedMemory(_mpshm.SharedMemory):
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         create: bool = False,
         size: int = 0,
         *,
@@ -852,7 +1067,7 @@ class SharedMemoryFrameManager(FrameManager):
         self.shm_store[name] = shm
         return shm.buf
 
-    def write(self, name: str) -> Optional[memoryview]:
+    def write(self, name: str) -> memoryview | None:
         try:
             if name in self.shm_store:
                 shm = self.shm_store[name]
@@ -864,12 +1079,27 @@ class SharedMemoryFrameManager(FrameManager):
             logger.info(f"the file {name} not found")
             return None
 
-    def get(self, name: str, shape) -> Optional[np.ndarray]:
+    def get(self, name: str, shape) -> np.ndarray | None:
         try:
-            if name in self.shm_store:
-                shm = self.shm_store[name]
-            else:
+            required = int(np.prod(shape))
+            shm = self.shm_store.get(name)
+            if shm is not None and shm.size != required:
+                # stale cached ref from a same-name recreate — drop and reopen
+                try:
+                    shm.close()
+                except Exception:
+                    pass
+                self.shm_store.pop(name, None)
+                shm = None
+            if shm is None:
                 shm = UntrackedSharedMemory(name=name)
+                if shm.size != required:
+                    # mid-recreate: OS segment doesn't match shape yet; skip
+                    try:
+                        shm.close()
+                    except Exception:
+                        pass
+                    return None
                 self.shm_store[name] = shm
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:
@@ -947,10 +1177,10 @@ def run_ffmpeg_snapshot(
     ffmpeg,
     input_path: str,
     codec: str,
-    seek_time: Optional[float] = None,
-    height: Optional[int] = None,
-    timeout: Optional[int] = None,
-) -> tuple[Optional[bytes], str]:
+    seek_time: float | None = None,
+    height: int | None = None,
+    timeout: int | None = None,
+) -> tuple[bytes | None, str]:
     """Run ffmpeg to extract a snapshot/image from a video source."""
     ffmpeg_cmd = [
         ffmpeg.ffmpeg_path,
@@ -1000,8 +1230,8 @@ def get_image_from_recording(
     file_path: str,
     relative_frame_time: float,
     codec: str,
-    height: Optional[int] = None,
-) -> Optional[Any]:
+    height: int | None = None,
+) -> Any | None:
     """retrieve a frame from given time in recording file."""
 
     image_data, _ = run_ffmpeg_snapshot(
@@ -1023,7 +1253,7 @@ def get_histogram(image, x_min, y_min, x_max, y_max):
 
 def create_thumbnail(
     yuv_frame: np.ndarray, box: tuple[int, int, int, int], height=500
-) -> Optional[bytes]:
+) -> bytes | None:
     """Return jpg thumbnail of a region of the frame."""
     frame = cv2.cvtColor(yuv_frame, cv2.COLOR_YUV2BGR_I420)
     region = calculate_region(

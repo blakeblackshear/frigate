@@ -1,0 +1,77 @@
+{
+    "documentTitle": "Pretraga pokreta - Frigate",
+    "title": "Pretraga pokreta",
+    "description": "Nacrtaj poligon da biste definirali regiju interesa, a zatim navedite vremenski raspon za pretragu promjena pokreta unutar te regije.",
+    "selectCamera": "Pretraga pokreta učitava se",
+    "startSearch": "Počni pretragu",
+    "searchStarted": "Pretraga započeta",
+    "searchCancelled": "Pretraga otkazana",
+    "cancelSearch": "Otkaži",
+    "searching": "Pretraga u toku.",
+    "searchComplete": "Pretraga završena",
+    "noResultsYet": "Pokrenite pretragu da biste pronašli promjene pokreta u odabranoj regiji",
+    "noChangesFound": "Nisu otkrivene promjene piksela u odabranoj regiji",
+    "changesFound_one": "Pronađeno {{count}} promjena pokreta",
+    "changesFound_few": "Pronađeno {{count}} nekoliko pokreta",
+    "changesFound_other": "Pronađeno {{count}} promjene pokreta",
+    "framesProcessed": "{{count}} okvir procesiran",
+    "jumpToTime": "Preskoči na ovo vrijeme",
+    "results": "Rezultati",
+    "showSegmentHeatmap": "Top mapa",
+    "newSearch": "Nova pretraga",
+    "clearResults": "Očisti rezultate",
+    "clearROI": "Očisti poligon",
+    "polygonControls": {
+        "points_one": "{{count}} tačka",
+        "points_few": "{{count}} tačke",
+        "points_other": "{{count}} tačke",
+        "undo": "Poništi posljednju tačku",
+        "reset": "Ponovi poligon"
+    },
+    "motionHeatmapLabel": "Top mapa pokreta",
+    "dialog": {
+        "title": "Pretraga pokreta",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Pregled kamere za {{camera}}"
+    },
+    "timeRange": {
+        "title": "Opseg pretrage",
+        "start": "Početno vrijeme",
+        "end": "Krajnje vrijeme"
+    },
+    "settings": {
+        "title": "Postavke pretrage",
+        "parallelMode": "Paralelni način",
+        "parallelModeDesc": "Skeniranje više segmenata snimaka istovremeno (brže, ali značajno intenzivnije za CPU)",
+        "threshold": "Praga osjetljivosti",
+        "thresholdDesc": "Niže vrijednosti detektiraju manje promjene (1-255)",
+        "minArea": "Minimalna površina promjene",
+        "minAreaDesc": "Minimalni postotak područja interesa koji mora promijeniti da bi se smatrao značajnim",
+        "frameSkip": "Preskoči okvir",
+        "frameSkipDesc": "Obrađujte svaki N-ti okvir. Postavite ovo na brzinu okvira vaše kamere da biste obradili jedan okvir po sekundi (npr. 5 za 5 FPS kameru, 30 za 30 FPS kameru). Više vrijednosti će biti brže, ali mogu propustiti kratke događaje pokreta.",
+        "maxResults": "Maksimalni rezultati",
+        "maxResultsDesc": "Zaustavi nakon ovog broja odgovarajućih vremenskih oznaka"
+    },
+    "errors": {
+        "noCamera": "Molimo odaberite kameru",
+        "noROI": "Molimo nacrtajte područje interesa",
+        "noTimeRange": "Molimo odaberite vremenski opseg",
+        "invalidTimeRange": "Krajnje vrijeme mora biti nakon početnog vremena",
+        "searchFailed": "Pretraga neuspješna: {{message}}",
+        "polygonTooSmall": "Poligon mora imati najmanje 3 točke",
+        "unknown": "Nepoznata greška"
+    },
+    "changePercentage": "{{percentage}}% promijenjeno",
+    "metrics": {
+        "title": "Metrike pretrage",
+        "segmentsScanned": "Skenirani segmenti",
+        "segmentsProcessed": "Obrađeno",
+        "segmentsSkippedInactive": "Preskočeno (bez aktivnosti)",
+        "segmentsSkippedHeatmap": "Preskočeno (bez preklapanja ROI)",
+        "fallbackFullRange": "Povratni put skeniranje cijelog opsega",
+        "framesDecoded": "Dekodirani okviri",
+        "wallTime": "Vrijeme pretrage",
+        "segmentErrors": "Greške segmenta",
+        "seconds": "{{seconds}}s"
+    }
+}

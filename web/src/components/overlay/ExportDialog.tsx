@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,25 +12,60 @@ import { Label } from "../ui/label";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Button } from "../ui/button";
 import { ExportMode } from "@/types/filter";
-import { FaArrowDown, FaArrowRight, FaCalendarAlt } from "react-icons/fa";
+import { FaArrowDown } from "react-icons/fa";
+import { LuAudioLines } from "react-icons/lu";
 import axios from "axios";
 import { toast } from "sonner";
 import { Input } from "../ui/input";
 import { TimeRange } from "@/types/timeline";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
 import useSWR from "swr";
-import { FrigateConfig } from "@/types/frigateConfig";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { TimezoneAwareCalendar } from "./ReviewActivityCalendar";
-import { SelectSeparator } from "../ui/select";
-import { isDesktop, isIOS, isMobile } from "react-device-detect";
+import {
+  BatchExportBody,
+  BatchExportResponse,
+  CameraActivity,
+  ExportCase,
+  StartExportResponse,
+} from "@/types/export";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "../ui/command";
+import { IconRenderer } from "../icons/IconPicker";
+import * as LuIcons from "react-icons/lu";
+import { isDesktop, isMobile } from "react-device-detect";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import SaveExportOverlay from "./SaveExportOverlay";
-import { getUTCOffset } from "@/utils/dateUtil";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { GenericVideoPlayer } from "../player/GenericVideoPlayer";
 import { useTranslation } from "react-i18next";
+import { CustomTimeSelector } from "./CustomTimeSelector";
+import { Event } from "@/types/event";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Textarea } from "../ui/textarea";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+import { isReplayCamera } from "@/utils/cameraUtil";
+import { isValidIconName } from "@/utils/iconUtil";
 
 const EXPORT_OPTIONS = [
   "1",
@@ -42,10 +77,16 @@ const EXPORT_OPTIONS = [
   "custom",
 ] as const;
 type ExportOption = (typeof EXPORT_OPTIONS)[number];
+export type ExportTab = "export" | "multi";
+
+// length of a range seeded around the current playback time
+const MULTI_CAMERA_RANGE_SECONDS = 3600;
+const TIMELINE_SELECTION_SECONDS = 60;
 
 type ExportDialogProps = {
   camera: string;
   latestTime: number;
+  earliestTime: number;
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
@@ -54,9 +95,11 @@ type ExportDialogProps = {
   setMode: (mode: ExportMode) => void;
   setShowPreview: (showPreview: boolean) => void;
 };
+
 export default function ExportDialog({
   camera,
   latestTime,
+  earliestTime,
   currentTime,
   range,
   mode,
@@ -67,64 +110,158 @@ export default function ExportDialog({
 }: ExportDialogProps) {
   const { t } = useTranslation(["components/dialog"]);
   const [name, setName] = useState("");
+  const [selectedCaseId, setSelectedCaseId] = useState<string | undefined>();
+  const [singleNewCaseName, setSingleNewCaseName] = useState("");
+  const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
+  const [batchCaseSelection, setBatchCaseSelection] = useState("new");
+  const [newCaseName, setNewCaseName] = useState("");
+  const [newCaseDescription, setNewCaseDescription] = useState("");
+  const [activeTab, setActiveTab] = useState<ExportTab>("export");
+  const [isStartingExport, setIsStartingExport] = useState(false);
+  const previousModeRef = useRef<ExportMode>(mode);
+  const preTimelineRangeRef = useRef<TimeRange | undefined>(undefined);
 
-  const onStartExport = useCallback(() => {
+  useEffect(() => {
+    const previousMode = previousModeRef.current;
+
+    if (mode === "select" && previousMode === "none") {
+      setActiveTab("export");
+    }
+
+    if (mode === "select" && previousMode === "timeline_multi") {
+      setActiveTab("multi");
+    }
+
+    if (mode === "none") {
+      setActiveTab("export");
+    }
+
+    previousModeRef.current = mode;
+  }, [mode]);
+
+  const onStartExport = useCallback(async () => {
+    if (isStartingExport) {
+      return false;
+    }
+
     if (!range) {
-      toast.error(t("export.toast.error.noVaildTimeSelected"), {
+      toast.error(t("export.toast.error.noValidTimeSelected"), {
         position: "top-center",
       });
-      return;
+      return false;
     }
 
     if (range.before < range.after) {
       toast.error(t("export.toast.error.endTimeMustAfterStartTime"), {
         position: "top-center",
       });
+      return false;
+    }
+
+    setIsStartingExport(true);
+
+    try {
+      let exportCaseId: string | undefined = selectedCaseId;
+
+      if (selectedCaseId === "new" && singleNewCaseName.trim().length > 0) {
+        const caseResp = await axios.post("cases", {
+          name: singleNewCaseName.trim(),
+          description: singleNewCaseDescription.trim() || undefined,
+        });
+        exportCaseId = caseResp.data?.id;
+      } else if (selectedCaseId === "new" || selectedCaseId === "none") {
+        exportCaseId = undefined;
+      }
+
+      await axios.post<StartExportResponse>(
+        `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
+        {
+          source: "recordings",
+          name,
+          export_case_id: exportCaseId,
+        },
+      );
+
+      toast.success(t("export.toast.queued"), {
+        position: "top-center",
+        action: (
+          <a
+            href={`${baseUrl}export`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button>{t("export.toast.view")}</Button>
+          </a>
+        ),
+      });
+      setName("");
+      setSelectedCaseId(undefined);
+      setSingleNewCaseName("");
+      setSingleNewCaseDescription("");
+      setBatchCaseSelection("new");
+      setNewCaseName("");
+      setNewCaseDescription("");
+      setRange(undefined);
+      setMode("none");
+      return true;
+    } catch (error) {
+      const apiError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.detail ||
+        "Unknown error";
+      toast.error(
+        t("export.toast.error.failed", {
+          error: errorMessage,
+        }),
+        { position: "top-center" },
+      );
+      return false;
+    } finally {
+      setIsStartingExport(false);
+    }
+  }, [
+    camera,
+    isStartingExport,
+    name,
+    range,
+    selectedCaseId,
+    singleNewCaseDescription,
+    singleNewCaseName,
+    setMode,
+    setRange,
+    t,
+  ]);
+
+  const handleCancel = useCallback(() => {
+    if (mode == "timeline_multi") {
+      setRange(preTimelineRangeRef.current);
+      setMode("select");
       return;
     }
 
-    axios
-      .post(
-        `export/${camera}/start/${Math.round(range.after)}/end/${Math.round(range.before)}`,
-        {
-          playback: "realtime",
-          name,
-        },
-      )
-      .then((response) => {
-        if (response.status == 200) {
-          toast.success(t("export.toast.success"), {
-            position: "top-center",
-            action: (
-              <a href="/export" target="_blank" rel="noopener noreferrer">
-                <Button>{t("export.toast.view")}</Button>
-              </a>
-            ),
-          });
-          setName("");
-          setRange(undefined);
-          setMode("none");
-        }
-      })
-      .catch((error) => {
-        const errorMessage =
-          error.response?.data?.message ||
-          error.response?.data?.detail ||
-          "Unknown error";
-        toast.error(
-          t("export.toast.error.failed", {
-            error: errorMessage,
-          }),
-          { position: "top-center" },
-        );
-      });
-  }, [camera, name, range, setRange, setName, setMode, t]);
-
-  const handleCancel = useCallback(() => {
     setName("");
+    setSelectedCaseId(undefined);
+    setSingleNewCaseName("");
+    setSingleNewCaseDescription("");
+    setBatchCaseSelection("new");
+    setNewCaseName("");
+    setNewCaseDescription("");
     setMode("none");
     setRange(undefined);
-  }, [setMode, setRange]);
+    setActiveTab("export");
+  }, [mode, setMode, setRange]);
+
+  const onSelectFromTimeline = useCallback(
+    (initialRange: TimeRange) => {
+      preTimelineRangeRef.current = range;
+      setRange(initialRange);
+      setMode("timeline_multi");
+    },
+    [range, setMode, setRange],
+  );
 
   const Overlay = isDesktop ? Dialog : Drawer;
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
@@ -140,60 +277,88 @@ export default function ExportDialog({
       />
       <SaveExportOverlay
         className="pointer-events-none absolute left-1/2 top-8 z-50 -translate-x-1/2"
-        show={mode == "timeline"}
+        show={mode == "timeline" || mode == "timeline_multi"}
+        hidePreview={mode == "timeline_multi"}
+        isSaving={isStartingExport}
+        saveLabel={
+          mode == "timeline_multi"
+            ? t("export.fromTimeline.useThisRange")
+            : undefined
+        }
         onPreview={() => setShowPreview(true)}
-        onSave={() => onStartExport()}
+        onSave={() => {
+          if (mode == "timeline_multi") {
+            setActiveTab("multi");
+            setMode("select");
+            return;
+          }
+
+          void onStartExport();
+        }}
         onCancel={handleCancel}
       />
       <Overlay
         open={mode == "select"}
         onOpenChange={(open) => {
           if (!open) {
-            setMode("none");
+            handleCancel();
           }
         }}
       >
-        <Trigger asChild>
-          <Button
-            className="flex items-center gap-2"
-            aria-label={t("menu.export", { ns: "common" })}
-            size="sm"
-            onClick={() => {
-              const now = new Date(latestTime * 1000);
-              let start = 0;
-              now.setHours(now.getHours() - 1);
-              start = now.getTime() / 1000;
-              setRange({
-                before: latestTime,
-                after: start,
-              });
-              setMode("select");
-            }}
-          >
-            <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
-            {isDesktop && (
-              <div className="text-primary">
-                {t("menu.export", { ns: "common" })}
-              </div>
-            )}
-          </Button>
-        </Trigger>
+        {!isDesktop && (
+          <Trigger asChild>
+            <Button
+              className="flex items-center gap-2"
+              aria-label={t("menu.export", { ns: "common" })}
+              size="sm"
+              onClick={() => {
+                const now = new Date(latestTime * 1000);
+                now.setHours(now.getHours() - 1);
+                setActiveTab("export");
+                setRange({
+                  before: latestTime,
+                  after: now.getTime() / 1000,
+                });
+                setMode("select");
+              }}
+            >
+              <FaArrowDown className="rounded-md bg-secondary-foreground fill-secondary p-1" />
+            </Button>
+          </Trigger>
+        )}
         <Content
           className={
             isDesktop
-              ? "sm:rounded-lg md:rounded-2xl"
+              ? "scrollbar-container max-h-[90dvh] overflow-y-auto sm:rounded-lg md:rounded-2xl"
               : "mx-4 rounded-lg px-4 pb-4 md:rounded-2xl"
           }
         >
           <ExportContent
             latestTime={latestTime}
+            earliestTime={earliestTime}
             currentTime={currentTime}
             range={range}
             name={name}
+            selectedCaseId={selectedCaseId}
+            singleNewCaseName={singleNewCaseName}
+            singleNewCaseDescription={singleNewCaseDescription}
+            batchCaseSelection={batchCaseSelection}
+            newCaseName={newCaseName}
+            newCaseDescription={newCaseDescription}
+            activeTab={activeTab}
+            isStartingExport={isStartingExport}
             onStartExport={onStartExport}
+            setActiveTab={setActiveTab}
             setName={setName}
+            setSelectedCaseId={setSelectedCaseId}
+            setSingleNewCaseName={setSingleNewCaseName}
+            setSingleNewCaseDescription={setSingleNewCaseDescription}
+            setBatchCaseSelection={setBatchCaseSelection}
+            setNewCaseName={setNewCaseName}
+            setNewCaseDescription={setNewCaseDescription}
             setRange={setRange}
             setMode={setMode}
+            onSelectFromTimeline={onSelectFromTimeline}
             onCancel={handleCancel}
           />
         </Content>
@@ -204,28 +369,233 @@ export default function ExportDialog({
 
 type ExportContentProps = {
   latestTime: number;
+  earliestTime: number;
   currentTime: number;
   range?: TimeRange;
   name: string;
-  onStartExport: () => void;
+  selectedCaseId?: string;
+  singleNewCaseName: string;
+  singleNewCaseDescription: string;
+  batchCaseSelection: string;
+  newCaseName: string;
+  newCaseDescription: string;
+  activeTab: ExportTab;
+  isStartingExport: boolean;
+  onStartExport: () => Promise<boolean>;
+  setActiveTab: (tab: ExportTab) => void;
   setName: (name: string) => void;
+  setSelectedCaseId: (caseId: string | undefined) => void;
+  setSingleNewCaseName: (name: string) => void;
+  setSingleNewCaseDescription: (description: string) => void;
+  setBatchCaseSelection: (caseId: string) => void;
+  setNewCaseName: (name: string) => void;
+  setNewCaseDescription: (description: string) => void;
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
+  onSelectFromTimeline: (range: TimeRange) => void;
   onCancel: () => void;
 };
+
 export function ExportContent({
   latestTime,
+  earliestTime,
   currentTime,
   range,
   name,
+  selectedCaseId,
+  singleNewCaseName,
+  singleNewCaseDescription,
+  batchCaseSelection,
+  newCaseName,
+  newCaseDescription,
+  activeTab,
+  isStartingExport,
   onStartExport,
+  setActiveTab,
   setName,
+  setSelectedCaseId,
+  setSingleNewCaseName,
+  setSingleNewCaseDescription,
+  setBatchCaseSelection,
+  setNewCaseName,
+  setNewCaseDescription,
   setRange,
   setMode,
+  onSelectFromTimeline,
   onCancel,
 }: ExportContentProps) {
   const { t } = useTranslation(["components/dialog"]);
+  const isAdmin = useIsAdmin();
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
+  const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
+  const { data: config } = useSWR<FrigateConfig>("config");
+  const [debouncedRange, setDebouncedRange] = useState<TimeRange | undefined>(
+    range,
+  );
+  const [selectedCameraIds, setSelectedCameraIds] = useState<string[]>([]);
+  const [hasManualCameraSelection, setHasManualCameraSelection] =
+    useState(false);
+  const [isStartingBatchExport, setIsStartingBatchExport] = useState(false);
+  const [cameraSearch, setCameraSearch] = useState("");
+  const [cameraMenuOpen, setCameraMenuOpen] = useState(false);
+  const cameraMenuRef = useRef<HTMLDivElement>(null);
+  const multiRangeKey = useMemo(() => {
+    if (activeTab !== "multi" || !range) {
+      return undefined;
+    }
+
+    return `${Math.round(range.after)}-${Math.round(range.before)}`;
+  }, [activeTab, range]);
+
+  useEffect(() => {
+    if (activeTab !== "multi") {
+      setDebouncedRange(undefined);
+      return;
+    }
+
+    if (!range) {
+      setDebouncedRange(undefined);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedRange(range);
+    }, 300);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [activeTab, range]);
+
+  useEffect(() => {
+    setHasManualCameraSelection(false);
+  }, [multiRangeKey]);
+
+  const buildRangeAroundCurrentTime = useCallback(
+    (durationSeconds: number): TimeRange => ({
+      after: Math.max(earliestTime, currentTime - durationSeconds / 2),
+      before: Math.min(latestTime, currentTime + durationSeconds / 2),
+    }),
+    [currentTime, earliestTime, latestTime],
+  );
+
+  const clampRangeToTimeline = useCallback(
+    (candidate?: TimeRange): TimeRange => {
+      const fallback = buildRangeAroundCurrentTime(TIMELINE_SELECTION_SECONDS);
+
+      if (!candidate) {
+        return fallback;
+      }
+
+      const after = Math.min(
+        latestTime,
+        Math.max(earliestTime, candidate.after),
+      );
+      const before = Math.min(
+        latestTime,
+        Math.max(earliestTime, candidate.before),
+      );
+
+      return before > after ? { after, before } : fallback;
+    },
+    [buildRangeAroundCurrentTime, earliestTime, latestTime],
+  );
+
+  useEffect(() => {
+    if (activeTab !== "multi" || range) {
+      return;
+    }
+
+    setRange(buildRangeAroundCurrentTime(MULTI_CAMERA_RANGE_SECONDS));
+  }, [activeTab, buildRangeAroundCurrentTime, range, setRange]);
+
+  const { data: events, isLoading: isEventsLoading } = useSWR<Event[]>(
+    activeTab === "multi" && debouncedRange
+      ? [
+          "events",
+          {
+            after: Math.round(debouncedRange.after),
+            before: Math.round(debouncedRange.before),
+            limit: 500,
+          },
+        ]
+      : null,
+  );
+
+  const cameraActivities = useMemo<CameraActivity[]>(() => {
+    const allCameraIds = Object.keys(config?.cameras ?? {}).filter(
+      (name) => !isReplayCamera(name),
+    );
+    const byCamera = new Map<string, Event[]>();
+
+    events?.forEach((event) => {
+      const bucket = byCamera.get(event.camera);
+      if (bucket) {
+        bucket.push(event);
+      } else {
+        byCamera.set(event.camera, [event]);
+      }
+    });
+
+    const rangeStart = debouncedRange?.after ?? 0;
+    const rangeEnd = debouncedRange?.before ?? 0;
+    const rangeDuration = Math.max(1, rangeEnd - rangeStart);
+
+    return allCameraIds.map((cameraId) => {
+      const cameraEvents = byCamera.get(cameraId) ?? [];
+      const segments = cameraEvents
+        .map((event) => {
+          // Event end_time is null for in-progress events; fall back to start.
+          const eventEnd = event.end_time ?? event.start_time;
+          const start = Math.max(
+            0,
+            Math.min(1, (event.start_time - rangeStart) / rangeDuration),
+          );
+          const end = Math.max(
+            0,
+            Math.min(1, (eventEnd - rangeStart) / rangeDuration),
+          );
+          return { start, end: Math.max(end, start) };
+        })
+        .sort((a, b) => a.start - b.start);
+
+      return {
+        camera: cameraId,
+        count: cameraEvents.length,
+        hasDetections: cameraEvents.length > 0,
+        segments,
+      };
+    });
+  }, [config?.cameras, debouncedRange, events]);
+
+  useEffect(() => {
+    if (
+      activeTab !== "multi" ||
+      !config ||
+      isEventsLoading ||
+      hasManualCameraSelection
+    ) {
+      return;
+    }
+
+    setSelectedCameraIds(
+      cameraActivities
+        .filter((activity) => activity.hasDetections)
+        .map((activity) => activity.camera),
+    );
+  }, [
+    activeTab,
+    cameraActivities,
+    config,
+    hasManualCameraSelection,
+    isEventsLoading,
+  ]);
+
+  const selectedCameraCount = selectedCameraIds.length;
+  const canStartBatchExport =
+    Boolean(range && range.before > range.after) &&
+    selectedCameraCount > 0 &&
+    !isStartingBatchExport &&
+    (batchCaseSelection !== "new" || newCaseName.trim().length > 0) &&
+    batchCaseSelection.length > 0;
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -233,6 +603,7 @@ export function ExportContent({
 
       const now = new Date(latestTime * 1000);
       let start = 0;
+
       switch (option) {
         case "1":
           now.setHours(now.getHours() - 1);
@@ -257,6 +628,8 @@ export function ExportContent({
         case "custom":
           start = latestTime - 3600;
           break;
+        default:
+          start = latestTime - 3600;
       }
 
       setRange({
@@ -267,318 +640,718 @@ export function ExportContent({
     [latestTime, setRange],
   );
 
-  return (
-    <div className="w-full">
-      {isDesktop && (
-        <>
-          <DialogHeader>
-            <DialogTitle>{t("menu.export", { ns: "common" })}</DialogTitle>
-          </DialogHeader>
-          <SelectSeparator className="my-4 bg-secondary" />
-        </>
-      )}
-      <RadioGroup
-        className={`flex flex-col gap-4 ${isDesktop ? "" : "mt-4"}`}
-        onValueChange={(value) => onSelectTime(value as ExportOption)}
-      >
-        {EXPORT_OPTIONS.map((opt) => {
-          return (
-            <div key={opt} className="flex items-center gap-2">
-              <RadioGroupItem
-                className={
-                  opt == selectedOption
-                    ? "bg-selected from-selected/50 to-selected/90 text-selected"
-                    : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
-                }
-                id={opt}
-                value={opt}
-              />
-              <Label className="cursor-pointer smart-capitalize" htmlFor={opt}>
-                {isNaN(parseInt(opt))
-                  ? opt == "timeline"
-                    ? t("export.time.fromTimeline")
-                    : t("export.time." + opt)
-                  : t("export.time.lastHour", {
-                      count: parseInt(opt),
-                    })}
-              </Label>
-            </div>
-          );
-        })}
-      </RadioGroup>
-      {selectedOption == "custom" && (
-        <CustomTimeSelector
-          latestTime={latestTime}
-          range={range}
-          setRange={setRange}
-        />
-      )}
-      <Input
-        className="text-md my-6"
-        type="search"
-        placeholder={t("export.name.placeholder")}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
-      <DialogFooter
-        className={isDesktop ? "" : "mt-3 flex flex-col-reverse gap-4"}
-      >
-        <div
-          className={`cursor-pointer p-2 text-center ${isDesktop ? "" : "w-full"}`}
-          onClick={onCancel}
-        >
-          {t("button.cancel", { ns: "common" })}
-        </div>
-        <Button
-          className={isDesktop ? "" : "w-full"}
-          aria-label={t("export.selectOrExport")}
-          variant="select"
-          size="sm"
-          onClick={() => {
-            if (selectedOption == "timeline") {
-              setRange({ before: currentTime + 30, after: currentTime - 30 });
-              setMode("timeline");
-            } else {
-              onStartExport();
-              setSelectedOption("1");
-              setMode("none");
-            }
-          }}
-        >
-          {selectedOption == "timeline"
-            ? t("export.select")
-            : t("export.export")}
-        </Button>
-      </DialogFooter>
-    </div>
+  const toggleCameraSelection = useCallback((cameraId: string) => {
+    setHasManualCameraSelection(true);
+    setSelectedCameraIds((previous) =>
+      previous.includes(cameraId)
+        ? previous.filter((selectedId) => selectedId !== cameraId)
+        : [...previous, cameraId],
+    );
+  }, []);
+
+  const availableCameraIds = useMemo(
+    () => cameraActivities.map((activity) => activity.camera),
+    [cameraActivities],
   );
-}
 
-type CustomTimeSelectorProps = {
-  latestTime: number;
-  range?: TimeRange;
-  setRange: (range: TimeRange | undefined) => void;
-};
-function CustomTimeSelector({
-  latestTime,
-  range,
-  setRange,
-}: CustomTimeSelectorProps) {
-  const { t } = useTranslation(["components/dialog"]);
-  const { data: config } = useSWR<FrigateConfig>("config");
-
-  // times
-
-  const timezoneOffset = useMemo(
+  const activeCameraIds = useMemo(
     () =>
-      config?.ui.timezone
-        ? Math.round(getUTCOffset(new Date(), config.ui.timezone))
-        : undefined,
-    [config?.ui.timezone],
+      cameraActivities
+        .filter((activity) => activity.hasDetections)
+        .map((activity) => activity.camera),
+    [cameraActivities],
   );
-  const localTimeOffset = useMemo(
+
+  const cameraGroups = useMemo(
     () =>
-      Math.round(
-        getUTCOffset(
-          new Date(),
-          Intl.DateTimeFormat().resolvedOptions().timeZone,
-        ),
-      ),
-    [],
+      Object.entries(config?.camera_groups ?? {})
+        .map(([name, group]) => ({
+          name,
+          icon: group.icon,
+          order: group.order,
+          cameras: group.cameras.filter((cameraId) =>
+            availableCameraIds.includes(cameraId),
+          ),
+        }))
+        .filter((group) => group.cameras.length > 0)
+        .sort((a, b) => a.order - b.order),
+    [config?.camera_groups, availableCameraIds],
   );
 
-  const startTime = useMemo(() => {
-    let time = range?.after || latestTime - 3600;
+  // Filter the rendered camera cards by the search query
+  const filteredCameraActivities = useMemo(() => {
+    const query = cameraSearch.trim().toLowerCase();
+    if (!query) {
+      return cameraActivities;
+    }
+    return cameraActivities.filter((activity) => {
+      const friendlyName = resolveCameraName(config, activity.camera);
+      return (
+        activity.camera.toLowerCase().includes(query) ||
+        friendlyName.toLowerCase().includes(query)
+      );
+    });
+  }, [cameraActivities, cameraSearch, config]);
 
-    if (timezoneOffset) {
-      time = time + (timezoneOffset - localTimeOffset) * 60;
+  // Group/all/activity selection replaces the current selection
+  const applyCameraSelection = useCallback((cameraIds: string[]) => {
+    setHasManualCameraSelection(true);
+    setSelectedCameraIds(cameraIds);
+    setCameraMenuOpen(false);
+  }, []);
+
+  // Close the dropdown when focus leaves the camera selection control entirely
+  const handleCameraInputBlur = useCallback((event: React.FocusEvent) => {
+    if (
+      cameraMenuRef.current &&
+      !cameraMenuRef.current.contains(event.relatedTarget as Node)
+    ) {
+      setCameraMenuOpen(false);
+    }
+  }, []);
+
+  // Reset the search and dropdown when leaving the multi-camera tab
+  useEffect(() => {
+    if (activeTab !== "multi") {
+      setCameraSearch("");
+      setCameraMenuOpen(false);
+    }
+  }, [activeTab]);
+
+  const startBatchExport = useCallback(async () => {
+    if (isStartingBatchExport) {
+      return;
     }
 
-    return time;
-  }, [range, latestTime, timezoneOffset, localTimeOffset]);
-  const endTime = useMemo(() => {
-    let time = range?.before || latestTime;
-
-    if (timezoneOffset) {
-      time = time + (timezoneOffset - localTimeOffset) * 60;
+    if (!range) {
+      toast.error(t("export.toast.error.noValidTimeSelected"), {
+        position: "top-center",
+      });
+      return;
     }
 
-    return time;
-  }, [range, latestTime, timezoneOffset, localTimeOffset]);
-  const formattedStart = useFormattedTimestamp(
-    startTime,
-    config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestamp.24hour", { ns: "common" })
-      : t("time.formattedTimestamp.12hour", { ns: "common" }),
-  );
-  const formattedEnd = useFormattedTimestamp(
-    endTime,
-    config?.ui.time_format == "24hour"
-      ? t("time.formattedTimestamp.24hour", { ns: "common" })
-      : t("time.formattedTimestamp.12hour", { ns: "common" }),
-  );
+    if (range.before <= range.after) {
+      toast.error(t("export.toast.error.endTimeMustAfterStartTime"), {
+        position: "top-center",
+      });
+      return;
+    }
 
-  const startClock = useMemo(() => {
-    const date = new Date(startTime * 1000);
-    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
-  }, [startTime]);
-  const endClock = useMemo(() => {
-    const date = new Date(endTime * 1000);
-    return `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`;
-  }, [endTime]);
+    const payload: BatchExportBody = {
+      items: selectedCameraIds.map((cameraId) => ({
+        camera: cameraId,
+        start_time: Math.round(range.after),
+        end_time: Math.round(range.before),
+        friendly_name: name
+          ? `${name} - ${resolveCameraName(config, cameraId)}`
+          : undefined,
+      })),
+    };
 
-  // calendars
+    if (isAdmin && batchCaseSelection !== "none") {
+      if (batchCaseSelection === "new") {
+        payload.new_case_name = newCaseName.trim();
+        payload.new_case_description = newCaseDescription.trim() || undefined;
+      } else {
+        payload.export_case_id = batchCaseSelection;
+      }
+    }
 
-  const [startOpen, setStartOpen] = useState(false);
-  const [endOpen, setEndOpen] = useState(false);
+    setIsStartingBatchExport(true);
+
+    try {
+      const response = await axios.post<BatchExportResponse>(
+        "exports/batch",
+        payload,
+      );
+      const results = response.data.results;
+      const successfulResults = results.filter((result) => result.success);
+      const failedResults = results.filter((result) => !result.success);
+      const failedSummary = failedResults
+        .map((result) => {
+          const cameraName = resolveCameraName(config, result.camera);
+          return result.error ? `${cameraName}: ${result.error}` : cameraName;
+        })
+        .join(", ");
+      const exportCaseId = response.data.export_case_id;
+      const viewCaseAction = exportCaseId ? (
+        <a
+          href={`${baseUrl}export?caseId=${exportCaseId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button>{t("export.toast.view")}</Button>
+        </a>
+      ) : undefined;
+
+      if (failedResults.length > 0 && successfulResults.length > 0) {
+        toast.success(
+          t("export.toast.batchQueuedPartial", {
+            successful: successfulResults.length,
+            total: results.length,
+            failedCameras: failedResults
+              .map((result) => resolveCameraName(config, result.camera))
+              .join(", "),
+          }),
+          {
+            position: "top-center",
+            description: failedSummary,
+            action: viewCaseAction,
+          },
+        );
+      } else if (failedResults.length > 0) {
+        toast.error(
+          t("export.toast.batchQueueFailed", {
+            total: results.length,
+            failedCameras: failedResults
+              .map((result) => resolveCameraName(config, result.camera))
+              .join(", "),
+          }),
+          {
+            position: "top-center",
+            description: failedSummary,
+          },
+        );
+      } else {
+        toast.success(
+          t("export.toast.batchQueuedSuccess", {
+            count: successfulResults.length,
+          }),
+          { position: "top-center", action: viewCaseAction },
+        );
+      }
+
+      if (successfulResults.length > 0) {
+        setName("");
+        setSelectedCaseId(undefined);
+        setBatchCaseSelection("new");
+        setNewCaseName("");
+        setNewCaseDescription("");
+        setRange(undefined);
+        setMode("none");
+        setActiveTab("export");
+      }
+    } catch (error) {
+      const apiError = error as {
+        response?: { data?: { message?: string; detail?: string } };
+      };
+      const errorMessage =
+        apiError.response?.data?.message ||
+        apiError.response?.data?.detail ||
+        "Unknown error";
+
+      toast.error(
+        t("export.toast.error.failed", {
+          error: errorMessage,
+        }),
+        { position: "top-center" },
+      );
+    } finally {
+      setIsStartingBatchExport(false);
+    }
+  }, [
+    batchCaseSelection,
+    config,
+    isAdmin,
+    isStartingBatchExport,
+    name,
+    newCaseDescription,
+    newCaseName,
+    range,
+    selectedCameraIds,
+    setActiveTab,
+    setBatchCaseSelection,
+    setMode,
+    setName,
+    setNewCaseDescription,
+    setNewCaseName,
+    setRange,
+    setSelectedCaseId,
+    t,
+  ]);
 
   return (
     <div
-      className={`mt-3 flex items-center rounded-lg bg-secondary text-secondary-foreground ${isDesktop ? "mx-8 gap-2 px-2" : "pl-2"}`}
+      className={cn(
+        "flex w-full flex-col",
+        !isDesktop && "max-h-[80dvh] min-h-0",
+      )}
     >
-      <FaCalendarAlt />
-      <div className="flex flex-wrap items-center">
-        <Popover
-          modal={false}
-          open={startOpen}
-          onOpenChange={(open) => {
-            if (!open) {
-              setStartOpen(false);
-            }
-          }}
+      {isDesktop && (
+        <DialogHeader className="mb-4">
+          <DialogTitle>{t("menu.export", { ns: "common" })}</DialogTitle>
+        </DialogHeader>
+      )}
+
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => {
+          const tab = value as ExportTab;
+          if (tab === "multi") {
+            setRange(buildRangeAroundCurrentTime(MULTI_CAMERA_RANGE_SECONDS));
+            setBatchCaseSelection(selectedCaseId ?? "new");
+          } else {
+            onSelectTime(selectedOption);
+          }
+
+          setActiveTab(tab);
+        }}
+        className={cn("w-full", !isDesktop && "flex min-h-0 flex-1 flex-col")}
+      >
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="export">{t("export.tabs.export")}</TabsTrigger>
+          <TabsTrigger value="multi">
+            {t("export.tabs.multiCamera")}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent
+          value="export"
+          className={cn(
+            "mt-4 space-y-4",
+            !isDesktop && "min-h-0 flex-1 overflow-y-auto pr-1",
+          )}
         >
-          <PopoverTrigger asChild>
-            <Button
-              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-              aria-label={t("export.time.start.title")}
-              variant={startOpen ? "select" : "default"}
-              size="sm"
-              onClick={() => {
-                setStartOpen(true);
-                setEndOpen(false);
-              }}
-            >
-              {formattedStart}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            disablePortal={isDesktop}
-            className="flex flex-col items-center"
+          <RadioGroup
+            className={`flex flex-col gap-4 ${isDesktop ? "" : "mt-1"}`}
+            onValueChange={(value) => onSelectTime(value as ExportOption)}
+            value={selectedOption}
           >
-            <TimezoneAwareCalendar
-              timezone={config?.ui.timezone}
-              selectedDay={new Date(startTime * 1000)}
-              onSelect={(day) => {
-                if (!day) {
-                  return;
+            {EXPORT_OPTIONS.map((opt) => (
+              <div key={opt} className="flex items-center gap-2">
+                <RadioGroupItem
+                  className={
+                    opt == selectedOption
+                      ? "bg-selected from-selected/50 to-selected/90 text-selected"
+                      : "bg-secondary from-secondary/50 to-secondary/90 text-secondary"
+                  }
+                  id={opt}
+                  value={opt}
+                />
+                <Label
+                  className="cursor-pointer smart-capitalize"
+                  htmlFor={opt}
+                >
+                  {isNaN(parseInt(opt))
+                    ? opt == "timeline"
+                      ? t("export.time.fromTimeline")
+                      : t(`export.time.${opt}`)
+                    : t("export.time.lastHour", {
+                        count: parseInt(opt),
+                      })}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+
+          {selectedOption == "custom" && (
+            <CustomTimeSelector
+              latestTime={latestTime}
+              range={range}
+              setRange={setRange}
+              startLabel={t("export.time.start.title")}
+              endLabel={t("export.time.end.title")}
+            />
+          )}
+
+          <Input
+            type="search"
+            placeholder={t("export.name.placeholder")}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          {isAdmin && (
+            <div className="space-y-2">
+              <Label className="text-sm text-primary">
+                {t("export.case.label")}
+              </Label>
+              <Select
+                value={selectedCaseId || "none"}
+                onValueChange={(value) =>
+                  setSelectedCaseId(value === "none" ? undefined : value)
                 }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("export.case.placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    {t("label.none", { ns: "common" })}
+                  </SelectItem>
+                  {cases
+                    ?.sort((a, b) => a.name.localeCompare(b.name))
+                    .map((caseItem) => (
+                      <SelectItem key={caseItem.id} value={caseItem.id}>
+                        {caseItem.name}
+                      </SelectItem>
+                    ))}
+                  <SelectSeparator />
+                  <SelectItem value="new">
+                    {t("export.case.newCaseOption")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {selectedCaseId === "new" && (
+                <div className="space-y-2 pt-1">
+                  <Input
+                    placeholder={t("export.case.newCaseNamePlaceholder")}
+                    value={singleNewCaseName}
+                    onChange={(e) => setSingleNewCaseName(e.target.value)}
+                  />
+                  <Textarea
+                    placeholder={t("export.case.newCaseDescriptionPlaceholder")}
+                    value={singleNewCaseDescription}
+                    onChange={(e) =>
+                      setSingleNewCaseDescription(e.target.value)
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
 
-                setRange({
-                  before: endTime,
-                  after: day.getTime() / 1000 + 1,
-                });
-              }}
-            />
-            <SelectSeparator className="bg-secondary" />
-            <input
-              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-              id="startTime"
-              type="time"
-              value={startClock}
-              step={isIOS ? "60" : "1"}
-              onChange={(e) => {
-                const clock = e.target.value;
-                const [hour, minute, second] = isIOS
-                  ? [...clock.split(":"), "00"]
-                  : clock.split(":");
-
-                const start = new Date(startTime * 1000);
-                start.setHours(
-                  parseInt(hour),
-                  parseInt(minute),
-                  parseInt(second ?? 0),
-                  0,
-                );
-                setRange({
-                  before: endTime,
-                  after: start.getTime() / 1000,
-                });
-              }}
-            />
-          </PopoverContent>
-        </Popover>
-        <FaArrowRight className="size-4 text-primary" />
-        <Popover
-          modal={false}
-          open={endOpen}
-          onOpenChange={(open) => {
-            if (!open) {
-              setEndOpen(false);
-            }
-          }}
+        <TabsContent
+          value="multi"
+          className={cn(
+            "mt-4 space-y-4",
+            !isDesktop && "min-h-0 flex-1 overflow-y-auto pr-1",
+          )}
         >
-          <PopoverTrigger asChild>
-            <Button
-              className={`text-primary ${isDesktop ? "" : "text-xs"}`}
-              aria-label={t("export.time.end.title")}
-              variant={endOpen ? "select" : "default"}
-              size="sm"
-              onClick={() => {
-                setEndOpen(true);
-                setStartOpen(false);
-              }}
+          <div className="space-y-2">
+            <Label className="text-sm text-primary">
+              {t("export.multiCamera.timeRange")}
+            </Label>
+            <div className="flex items-center gap-2">
+              <div className="min-w-0 flex-1 [&>div]:!mx-0 [&>div]:!mt-0">
+                <CustomTimeSelector
+                  latestTime={latestTime}
+                  range={range}
+                  setRange={setRange}
+                  startLabel={t("export.time.start.title")}
+                  endLabel={t("export.time.end.title")}
+                />
+              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="size-9 shrink-0 p-0"
+                    aria-label={t("export.multiCamera.selectFromTimeline")}
+                    onClick={() => {
+                      setActiveTab("multi");
+                      onSelectFromTimeline(clampRangeToTimeline(range));
+                    }}
+                  >
+                    <LuAudioLines className="size-4 -rotate-90" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipPortal>
+                  <TooltipContent>
+                    {t("export.multiCamera.selectFromTimeline")}
+                  </TooltipContent>
+                </TooltipPortal>
+              </Tooltip>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label className="text-sm text-primary">
+                {t("export.multiCamera.cameraSelection")}
+              </Label>
+              {availableCameraIds.length > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  {t("export.multiCamera.selectedCount", {
+                    selected: selectedCameraCount,
+                    total: availableCameraIds.length,
+                  })}
+                </span>
+              )}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {t("export.multiCamera.cameraSelectionHelp")}
+            </div>
+            {!isEventsLoading && availableCameraIds.length > 0 && (
+              <div className="relative" ref={cameraMenuRef}>
+                <Command
+                  shouldFilter={false}
+                  className="overflow-visible rounded-md border bg-secondary/40"
+                >
+                  <CommandInput
+                    value={cameraSearch}
+                    onValueChange={setCameraSearch}
+                    onFocus={() => setCameraMenuOpen(true)}
+                    onBlur={handleCameraInputBlur}
+                    placeholder={t("export.multiCamera.searchOrSelectGroup")}
+                  />
+                  {/* Hide the actions/groups menu while a search query is
+                      active so it doesn't cover the filtered camera cards. */}
+                  {cameraMenuOpen && cameraSearch.trim().length === 0 && (
+                    <CommandList className="absolute top-full z-10 mt-1 max-h-72 w-full rounded-md border bg-background shadow-md">
+                      <CommandGroup>
+                        <CommandItem
+                          value="action:select-all"
+                          className="cursor-pointer"
+                          onSelect={() =>
+                            applyCameraSelection(availableCameraIds)
+                          }
+                        >
+                          <span>{t("export.multiCamera.selectAll")}</span>
+                          <span className="ml-auto text-xs text-muted-foreground">
+                            {availableCameraIds.length}
+                          </span>
+                        </CommandItem>
+                        <CommandItem
+                          value="action:clear"
+                          className="cursor-pointer"
+                          onSelect={() => applyCameraSelection([])}
+                        >
+                          {t("export.multiCamera.clearSelection")}
+                        </CommandItem>
+                        <CommandItem
+                          value="action:activity"
+                          className="cursor-pointer"
+                          onSelect={() => applyCameraSelection(activeCameraIds)}
+                        >
+                          <span>
+                            {t("export.multiCamera.selectWithActivity")}
+                          </span>
+                          <span className="ml-auto text-xs text-muted-foreground">
+                            {activeCameraIds.length}
+                          </span>
+                        </CommandItem>
+                      </CommandGroup>
+                      {cameraGroups.length > 0 && (
+                        <>
+                          <CommandSeparator />
+                          <CommandGroup
+                            heading={t("export.multiCamera.selectGroup")}
+                          >
+                            {cameraGroups.map((group) => (
+                              <CommandItem
+                                key={group.name}
+                                value={`group:${group.name}`}
+                                className="cursor-pointer"
+                                onSelect={() =>
+                                  applyCameraSelection(group.cameras)
+                                }
+                              >
+                                <IconRenderer
+                                  icon={
+                                    isValidIconName(group.icon)
+                                      ? LuIcons[group.icon]
+                                      : LuIcons.LuFolder
+                                  }
+                                  className="mr-2 size-4 text-secondary-foreground"
+                                />
+                                <span className="truncate">{group.name}</span>
+                                <span className="ml-auto text-xs text-muted-foreground">
+                                  {group.cameras.length}
+                                </span>
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </>
+                      )}
+                    </CommandList>
+                  )}
+                </Command>
+              </div>
+            )}
+            <div
+              className={cn(
+                "scrollbar-container space-y-2",
+                isDesktop && "max-h-64 overflow-y-auto p-0.5 pr-1",
+              )}
             >
-              {formattedEnd}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            disablePortal={isDesktop}
-            className="flex flex-col items-center"
-          >
-            <TimezoneAwareCalendar
-              timezone={config?.ui.timezone}
-              selectedDay={new Date(endTime * 1000)}
-              onSelect={(day) => {
-                if (!day) {
-                  return;
-                }
+              {isEventsLoading && (
+                <div className="px-2 py-4 text-sm text-muted-foreground">
+                  {t("export.multiCamera.checkingActivity")}
+                </div>
+              )}
+              {!isEventsLoading && cameraActivities.length === 0 && (
+                <div className="px-2 py-4 text-sm text-muted-foreground">
+                  {t("export.multiCamera.noCameras")}
+                </div>
+              )}
+              {!isEventsLoading &&
+                cameraActivities.length > 0 &&
+                filteredCameraActivities.length === 0 && (
+                  <div className="px-2 py-4 text-sm text-muted-foreground">
+                    {t("export.multiCamera.noMatchingCameras")}
+                  </div>
+                )}
+              {filteredCameraActivities.map((activity) => {
+                const isSelected = selectedCameraIds.includes(activity.camera);
 
-                setRange({
-                  after: startTime,
-                  before: day.getTime() / 1000,
-                });
-              }}
-            />
-            <SelectSeparator className="bg-secondary" />
-            <input
-              className="text-md mx-4 w-full border border-input bg-background p-1 text-secondary-foreground hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
-              id="endTime"
-              type="time"
-              value={endClock}
-              step={isIOS ? "60" : "1"}
-              onChange={(e) => {
-                const clock = e.target.value;
-                const [hour, minute, second] = isIOS
-                  ? [...clock.split(":"), "00"]
-                  : clock.split(":");
-
-                const end = new Date(endTime * 1000);
-                end.setHours(
-                  parseInt(hour),
-                  parseInt(minute),
-                  parseInt(second ?? 0),
-                  0,
+                return (
+                  <button
+                    key={activity.camera}
+                    type="button"
+                    aria-pressed={isSelected}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-md border px-3 py-2 text-left transition-colors",
+                      isSelected
+                        ? "border-selected bg-selected/10 ring-1 ring-selected"
+                        : "border-transparent bg-secondary/40 hover:bg-secondary/70",
+                      !activity.hasDetections &&
+                        !isSelected &&
+                        "text-muted-foreground",
+                    )}
+                    onClick={() => toggleCameraSelection(activity.camera)}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate text-sm font-medium text-primary">
+                          {resolveCameraName(config, activity.camera)}
+                        </span>
+                        <span className="shrink-0 text-xs text-muted-foreground">
+                          {t("export.multiCamera.detectionCount", {
+                            count: activity.count,
+                          })}
+                        </span>
+                      </div>
+                      <div className="relative mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                        {activity.segments.map((segment, index) => {
+                          const leftPct = segment.start * 100;
+                          const widthPct = Math.max(
+                            (segment.end - segment.start) * 100,
+                            1,
+                          );
+                          return (
+                            <div
+                              key={index}
+                              className="absolute top-0 h-full rounded-full bg-selected"
+                              style={{
+                                left: `${leftPct}%`,
+                                width: `${widthPct}%`,
+                              }}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </button>
                 );
-                setRange({
-                  before: end.getTime() / 1000,
-                  after: startTime,
-                });
-              }}
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-sm text-primary">
+              {t("export.multiCamera.nameLabel")}
+            </Label>
+            <Input
+              type="search"
+              placeholder={t("export.multiCamera.namePlaceholder")}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
-          </PopoverContent>
-        </Popover>
-      </div>
+          </div>
+
+          {isAdmin && (
+            <div className="space-y-2">
+              <Label className="text-sm text-primary">
+                {t("export.case.label")}
+              </Label>
+              <Select
+                value={batchCaseSelection}
+                onValueChange={(value) => setBatchCaseSelection(value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t("export.case.placeholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    {t("label.none", { ns: "common" })}
+                  </SelectItem>
+                  {cases
+                    ?.sort((a, b) => a.name.localeCompare(b.name))
+                    .map((caseItem) => (
+                      <SelectItem key={caseItem.id} value={caseItem.id}>
+                        {caseItem.name}
+                      </SelectItem>
+                    ))}
+                  <SelectSeparator />
+                  <SelectItem value="new">
+                    {t("export.case.newCaseOption")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              {batchCaseSelection === "new" && (
+                <div className="space-y-2 pt-1">
+                  <Input
+                    placeholder={t("export.case.newCaseNamePlaceholder")}
+                    value={newCaseName}
+                    onChange={(event) => setNewCaseName(event.target.value)}
+                  />
+                  <Textarea
+                    placeholder={t("export.case.newCaseDescriptionPlaceholder")}
+                    value={newCaseDescription}
+                    onChange={(event) =>
+                      setNewCaseDescription(event.target.value)
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {isDesktop && <SelectSeparator className="my-4 bg-secondary" />}
+      <DialogFooter className="mt-3 sm:mt-0">
+        <Button
+          aria-label={t("button.cancel", { ns: "common" })}
+          onClick={onCancel}
+        >
+          {t("button.cancel", { ns: "common" })}
+        </Button>
+        {activeTab === "export" ? (
+          <Button
+            aria-label={t("export.selectOrExport")}
+            variant="select"
+            disabled={isStartingExport}
+            onClick={async () => {
+              if (selectedOption == "timeline") {
+                setRange(
+                  buildRangeAroundCurrentTime(TIMELINE_SELECTION_SECONDS),
+                );
+                setMode("timeline");
+              } else {
+                const didQueue = await onStartExport();
+                if (didQueue) {
+                  setSelectedOption("1");
+                }
+              }
+            }}
+          >
+            {isStartingExport
+              ? t("export.queueing")
+              : selectedOption == "timeline"
+                ? t("export.select")
+                : t("export.export")}
+          </Button>
+        ) : (
+          <Button
+            aria-label={t("export.multiCamera.exportButton", {
+              count: selectedCameraCount,
+            })}
+            variant="select"
+            disabled={!canStartBatchExport}
+            onClick={() => void startBatchExport()}
+          >
+            {isStartingBatchExport
+              ? t("export.multiCamera.queueingButton")
+              : t("export.multiCamera.exportButton", {
+                  count: selectedCameraCount,
+                })}
+          </Button>
+        )}
+      </DialogFooter>
     </div>
   );
 }

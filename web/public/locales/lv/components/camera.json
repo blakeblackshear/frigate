@@ -33,7 +33,7 @@
         "title": "Straumēšanas iestatījumi{{cameraName}}",
         "desc": "Mainiet šīs kameru grupas paneļa tiešraides straumes iestatījumus. <em>Šie iestatījumi ir atkarīgi no ierīces/pārlūkprogrammas.</em>",
         "audioIsAvailable": "Šai straumei ir pieejams audio",
-        "audioIsUnavailable": "Šai straumei nav pieejams audio.",
+        "audioIsUnavailable": "Šai straumei nav pieejams audio",
         "audio": {
           "tips": {
             "title": "Šai straumei audio ir jāizvada no kameras un tas ir jākonfigurē go2rtc."
@@ -67,7 +67,10 @@
           "desc": "Iespējojiet šo opciju tikai tad, ja kameras tiešraides straumē tiek rādīti krāsu artefakti un attēla labajā pusē ir diagonāla līnija."
         }
       }
-    }
+    },
+    "showAll": "Parādīt visas kameru grupas",
+    "showLess": "Rādīt mazāk",
+    "editGroups": "Rediģēt kameru grupas"
   },
   "debug": {
     "options": {
@@ -81,6 +84,7 @@
     "zones": "Zonas",
     "mask": "Maska",
     "motion": "Kustība",
-    "regions": "Reģioni"
+    "regions": "Reģioni",
+    "paths": "Ceļi"
   }
 }

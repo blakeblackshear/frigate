@@ -1,0 +1,98 @@
+{
+  "description": {
+    "addFace": "Dodajte novu kolekciju u Biblioteku lica prema učitavanju svoje prve slike.",
+    "placeholder": "Unesite ime za ovu kolekciju",
+    "invalidName": "Neprihvatljivo ime. Imena mogu sadržavati samo slova, brojeve, razmake, aposrofe, donje crte i crte.",
+    "nameCannotContainHash": "Ime ne može sadržavati #."
+  },
+  "details": {
+    "unknown": "Nepoznato",
+    "timestamp": "Vremenski pečat",
+    "scoreInfo": "Ocjena je težinski prosjek svih ocjena lica, težinski određen prema veličini lica u svakoj slici."
+  },
+  "train": {
+    "titleShort": "Nedavno",
+    "title": "Najnovije prepoznavanja",
+    "aria": "Odaberite nedavna prepoznavanja",
+    "empty": "Nema nedavnih pokušaja prepoznavanja lica"
+  },
+  "documentTitle": "Biblioteka lica - Frigate",
+  "uploadFaceImage": {
+    "title": "Učitajte sliku lica",
+    "desc": "Učitajte sliku za skeniranje lica i uključite za {{pageToggle}}"
+  },
+  "collections": "Kolekcije",
+  "createFaceLibrary": {
+    "new": "Stvori novo lice",
+    "nextSteps": "Da biste izgradili čvrstu osnovu:<li>Koristite karticu Najnovije prepoznavanja da biste odabrali i trenirali se na slikama za svaku detektiranu osobu.</li><li>Fokusirajte se na slike iz pravog ugla za najbolje rezultate; izbjegavajte slike za treniranje koje prikazuju lica pod uglom.</li></ul>"
+  },
+  "steps": {
+    "faceName": "Unesite ime lica",
+    "uploadFace": "Učitajte sliku lica",
+    "nextSteps": "Sljedeći koraci",
+    "description": {
+      "uploadFace": "Učitajte sliku od {{name}} koja prikazuje njihovo lice iz pravog ugla. Slika ne mora biti izrezana samo na njihovo lice."
+    }
+  },
+  "deleteFaceLibrary": {
+    "title": "Izbrišite ime",
+    "desc": "Da li ste sigurni da želite izbrisati kolekciju {{name}}? Ovo će trajno izbrisati sva povezana lica."
+  },
+  "deleteFaceAttempts": {
+    "title": "Izbrišite lica",
+    "desc_one": "Da li ste sigurni da želite izbrisati {{count}} lice? Ova akcija ne može se poništiti.",
+    "desc_few": "Da li ste sigurni da želite izbrisati {{count}} lica? Ova akcija ne može se poništiti.",
+    "desc_other": "Da li ste sigurni da želite izbrisati {{count}} lica? Ova akcija ne može se poništiti."
+  },
+  "renameFace": {
+    "title": "Preimenujte lice",
+    "desc": "Unesite novo ime za {{name}}"
+  },
+  "button": {
+    "deleteFaceAttempts": "Izbrišite lica",
+    "addFace": "Dodaj lice",
+    "renameFace": "Preimenuj lice",
+    "deleteFace": "Obriši lice",
+    "uploadImage": "Prenesi sliku",
+    "reprocessFace": "Ponovno obradi lice"
+  },
+  "imageEntry": {
+    "validation": {
+      "selectImage": "Molimo izaberite datoteku slike."
+    },
+    "dropActive": "Pustite sliku ovdje…",
+    "dropInstructions": "Povucite i ispišite, zalijepite sliku ovdje ili kliknite za odabir",
+    "maxSize": "Maksimalna veličina: {{size}}MB"
+  },
+  "nofaces": "Nema dostupnih lica",
+  "trainFaceAs": "Obuči lice kao:",
+  "trainFace": "Obuči lice",
+  "reclassifyFaceAs": "Ponovno klasificiraj lice kao:",
+  "reclassifyFace": "Ponovno klasificiraj lice",
+  "toast": {
+    "success": {
+      "uploadedImage": "Uspješno prenesena slika.",
+      "addFaceLibrary": "{{name}} je uspješno dodan u biblioteku lica!",
+      "deletedFace_one": "Uspješno obrisano {{count}} lice.",
+      "deletedFace_few": "Uspješno obrisana {{count}} lica.",
+      "deletedFace_other": "Uspješno obrisana {{count}} lica.",
+      "deletedName_one": "{{count}} lice je uspješno obrisano.",
+      "deletedName_few": "{{count}} lica su uspješno obrisana.",
+      "deletedName_other": "{{count}} lica su uspješno obrisana.",
+      "renamedFace": "Uspješno preimenovan lice na {{name}}",
+      "trainedFace": "Uspješno obučeno lice.",
+      "reclassifiedFace": "Uspješno ponovno klasificirano lice.",
+      "updatedFaceScore": "Uspješno ažurirana ocjena lica na {{name}} ({{score}})."
+    },
+    "error": {
+      "uploadingImageFailed": "Nije uspješno prenijeti sliku: {{errorMessage}}",
+      "addFaceLibraryFailed": "Nije uspješno postaviti ime lica: {{errorMessage}}",
+      "deleteFaceFailed": "Neuspješno brisanje: {{errorMessage}}",
+      "deleteNameFailed": "Nije uspješno obrisati ime: {{errorMessage}}",
+      "renameFaceFailed": "Nije uspješno preimenovati lice: {{errorMessage}}",
+      "trainFailed": "Nije uspješno trenirati: {{errorMessage}}",
+      "reclassifyFailed": "Nije uspješno ponovno klasifikovati lice: {{errorMessage}}",
+      "updateFaceScoreFailed": "Nije uspješno ažurirati bodove lica: {{errorMessage}}"
+    }
+  }
+}

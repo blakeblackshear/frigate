@@ -1,0 +1,28 @@
+import type { SectionConfigOverrides } from "./types";
+
+const timestampStyle: SectionConfigOverrides = {
+  base: {
+    sectionDocs: "/configuration/advanced/reference",
+    restartRequired: [],
+    fieldOrder: ["position", "format", "thickness", "color"],
+    hiddenFields: ["effect", "enabled_in_config"],
+    advancedFields: [],
+    uiSchema: {
+      position: {
+        "ui:size": "xs",
+        "ui:options": { enumI18nPrefix: "timestampPosition" },
+      },
+      format: {
+        "ui:size": "xs",
+      },
+    },
+  },
+  global: {
+    restartRequired: [],
+  },
+  camera: {
+    restartRequired: [],
+  },
+};
+
+export default timestampStyle;

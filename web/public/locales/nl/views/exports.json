@@ -3,7 +3,9 @@
   "search": "Zoek",
   "toast": {
     "error": {
-      "renameExportFailed": "Het is niet gelukt om de export te hernoemen: {{errorMessage}}"
+      "renameExportFailed": "Het is niet gelukt om de export te hernoemen: {{errorMessage}}",
+      "assignCaseFailed": "Kan toewijzing aan dossier niet bijwerken: {{errorMessage}}",
+      "caseSaveFailed": "Mislukt om zaak op te slaan: {{errorMessage}}"
     }
   },
   "editExport": {
@@ -12,12 +14,54 @@
     "desc": "Voer een nieuwe naam in voor deze export."
   },
   "noExports": "Geen export gevonden",
-  "deleteExport": "Verwijder Export",
+  "deleteExport": {
+    "label": "Verwijder export"
+  },
   "deleteExport.desc": "Weet je zeker dat je dit wilt wissen: {{exportName}}?",
   "tooltip": {
     "shareExport": "Deel export",
     "downloadVideo": "Download video",
     "editName": "Naam bewerken",
-    "deleteExport": "Verwijder export"
+    "deleteExport": "Verwijder export",
+    "assignToCase": "Toevoegen aan dossier",
+    "removeFromCase": "Van zaak verwijderen"
+  },
+  "headings": {
+    "cases": "Gevallen",
+    "uncategorizedExports": "Ongecategoriseerde exporten"
+  },
+  "caseDialog": {
+    "title": "Toevoegen aan dossier",
+    "description": "Kies een bestaand dossier of maak een nieuw dossier aan.",
+    "selectLabel": "Dossier",
+    "newCaseOption": "Nieuw dossier aanmaken",
+    "nameLabel": "Dossiernaam",
+    "descriptionLabel": "Beschrijving"
+  },
+  "deleteCase": {
+    "desc": "Weet je zeker dat je {{caseName}} wilt verwijderen?"
+  },
+  "caseCard": {
+    "emptyCase": "Nog geen exports"
+  },
+  "caseEditor": {
+    "createTitle": "Zaak aanmaken",
+    "editTitle": "Zaak wijzigen",
+    "namePlaceholder": "Zaaknaam",
+    "descriptionPlaceholder": "Voeg notities of context toe voor deze zaak"
+  },
+  "addExportDialog": {
+    "title": "Voeg export toe aan {{caseName}}",
+    "searchPlaceholder": "Zoek ongecategoriseerde exports",
+    "empty": "Geen niet-gecategoriseerde exports voldoen aan deze zoekopdracht.",
+    "addButton_one": "Voeg 1 export toe",
+    "addButton_other": "Voeg {{count}} exports toe",
+    "adding": "Toevoegen..."
+  },
+  "toolbar": {
+    "newCase": "Nieuwe zaak",
+    "addExport": "Export toevoegen",
+    "editCase": "Wijzig zaak",
+    "deleteCase": "Verwijder zaak"
   }
 }

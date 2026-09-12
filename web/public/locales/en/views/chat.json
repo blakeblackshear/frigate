@@ -1,0 +1,72 @@
+{
+  "documentTitle": "Chat - Frigate",
+  "title": "Frigate Chat",
+  "subtitle": "Your AI assistant for camera management and insights",
+  "placeholder": "Ask anything...",
+  "error": "Something went wrong. Please try again.",
+  "processing": "Processing...",
+  "toolsUsed": "Used: {{tools}}",
+  "showTools": "Show tools ({{count}})",
+  "hideTools": "Hide tools",
+  "call": "Call",
+  "result": "Result",
+  "arguments": "Arguments:",
+  "response": "Response:",
+  "attachment_chip_label": "{{label}} on {{camera}}",
+  "attachment_chip_remove": "Remove attachment",
+  "open_in_explore": "Open in Explore",
+  "attach_event_aria": "Attach event {{eventId}}",
+  "attachment_picker_paste_label": "Or paste event ID",
+  "attachment_picker_attach": "Attach",
+  "attachment_picker_placeholder": "Attach an event",
+  "quick_reply_find_similar": "Find similar sightings",
+  "quick_reply_tell_me_more": "Tell me more about this",
+  "quick_reply_when_else": "When else was it seen?",
+  "quick_reply_find_similar_text": "Find similar sightings to this.",
+  "quick_reply_tell_me_more_text": "Tell me more about this one.",
+  "quick_reply_when_else_text": "When else was this seen?",
+  "anchor": "Reference",
+  "similarity_score": "Similarity",
+  "no_similar_objects_found": "No similar objects found.",
+  "semantic_search_required": "Semantic search must be enabled to find similar objects.",
+  "send": "Send",
+  "suggested_requests": "Try asking:",
+  "starting_requests": {
+    "show_recent_events": "Show recent events",
+    "show_camera_status": "Show camera status",
+    "recap": "What happened while I was away?",
+    "watch_camera": "Watch a camera for activity"
+  },
+  "starting_requests_prompts": {
+    "show_recent_events": "Show me the recent events from the last hour",
+    "show_camera_status": "What is the current status of my cameras?",
+    "recap": "What happened while I was away?",
+    "watch_camera": "Watch the front door and let me know if anyone shows up"
+  },
+  "new_chat": "New chat",
+  "settings": {
+    "title": "Chat settings",
+    "show_stats": {
+      "title": "Show stats",
+      "desc": "Show generation rate and context size for chat responses.",
+      "while_generating": "While generating",
+      "always": "Always"
+    },
+    "auto_scroll": {
+      "title": "Auto-scroll",
+      "desc": "Follow new messages as they arrive."
+    }
+  },
+  "stats": {
+    "context": "{{tokens}} tokens",
+    "tokens_per_second": "{{rate}} t/s"
+  },
+  "reasoning": {
+    "active": "Reasoning…",
+    "show": "Show reasoning",
+    "hide": "Hide reasoning"
+  },
+  "thinking": {
+    "toggle": "Toggle thinking"
+  }
+}

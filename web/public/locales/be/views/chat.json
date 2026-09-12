@@ -1,0 +1,72 @@
+{
+    "documentTitle": "Чат - Frigate",
+    "title": "Чат Frigate",
+    "subtitle": "Ваш памочнік ШІ для кіравання камерамі і аналізу",
+    "placeholder": "Спытайце што заўгодна…",
+    "error": "Нешта пайшло не так. Паспрабуйце зноў.",
+    "processing": "Апрацоўка…",
+    "toolsUsed": "Скарыстана: {{tools}}",
+    "showTools": "Паказаць інструменты ({{count}})",
+    "hideTools": "Схаваць інструменты",
+    "call": "Выклік",
+    "result": "Вынік",
+    "arguments": "Аргументы:",
+    "response": "Адказ:",
+    "attachment_chip_label": "{{label}} на {{camera}}",
+    "attachment_chip_remove": "Прыбраць укладанне",
+    "open_in_explore": "Адкрыць у аглядзе",
+    "attach_event_aria": "Прымацаваць падзею {{eventId}}",
+    "attachment_picker_paste_label": "Або ўстаўце ID падзеі",
+    "attachment_picker_attach": "Прымацаваць",
+    "attachment_picker_placeholder": "Прымацуйце падзею",
+    "quick_reply_find_similar": "Знайсці падобныя выпадкі",
+    "quick_reply_tell_me_more": "Раскажы падрабязней",
+    "quick_reply_when_else": "Калі яшчэ гэта бачылі?",
+    "quick_reply_find_similar_text": "Знайдзі выпадкі, падобныя да гэтага.",
+    "quick_reply_tell_me_more_text": "Раскажы падрабязней пра гэты.",
+    "quick_reply_when_else_text": "Калі яшчэ гэта бачылі?",
+    "anchor": "Спасылка",
+    "similarity_score": "Падабенства",
+    "no_similar_objects_found": "Падобных аб'ектаў не знойдзена.",
+    "semantic_search_required": "Каб шукаць падобныя аб'екты, трэба ўключыць семантычны пошук.",
+    "send": "Адправіць",
+    "suggested_requests": "Паспрабуйце спытаць:",
+    "starting_requests": {
+        "show_recent_events": "Паказаць апошнія падзеі",
+        "show_camera_status": "Паказаць стан камер",
+        "recap": "Што адбылося, пакуль мяне не было?",
+        "watch_camera": "Сачыць за камерай"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Пакажы падзеі за апошнюю гадзіну",
+        "show_camera_status": "Які зараз стан маіх камер?",
+        "recap": "Што адбылося, пакуль мяне не было?",
+        "watch_camera": "Сачы за ўваходнымі дзвярыма і паведам, калі хтосьці з'явіцца"
+    },
+    "new_chat": "Новы чат",
+    "settings": {
+        "title": "Налады чата",
+        "show_stats": {
+            "title": "Паказваць статыстыку",
+            "desc": "Паказваць хуткасць генерацыі і памер кантэксту для адказаў чата.",
+            "while_generating": "Пры генерацыі",
+            "always": "Заўсёды"
+        },
+        "auto_scroll": {
+            "title": "Аўтапракрутка",
+            "desc": "Сачыць за новымі паведамленнямі па меры паступлення."
+        }
+    },
+    "stats": {
+        "context": "такенаў: {{tokens}}",
+        "tokens_per_second": "{{rate}} т/с"
+    },
+    "reasoning": {
+        "active": "Разважанне…",
+        "show": "Паказаць разважанне",
+        "hide": "Схаваць разважанне"
+    },
+    "thinking": {
+        "toggle": "Пераключыць разважанне"
+    }
+}

@@ -1,5 +1,6 @@
 """Event apis."""
 
+import asyncio
 import base64
 import datetime
 import json
@@ -9,15 +10,12 @@ import random
 import string
 from functools import reduce
 from pathlib import Path
-from typing import List
 from urllib.parse import unquote
 
-import cv2
 import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from pathvalidate import sanitize_filename
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
@@ -57,11 +55,12 @@ from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.config.classification import ObjectClassificationType
-from frigate.const import CLIPS_DIR, TRIGGER_DIR
+from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
-from frigate.util.file import get_event_thumbnail_bytes
+from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
+from frigate.util.path import get_trigger_thumbnail_path, safe_join
 from frigate.util.time import get_dst_transitions, get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -97,7 +96,7 @@ def _build_attribute_filter_clause(attributes: str):
 )
 def events(
     params: EventsQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     camera = params.camera
     cameras = params.cameras
@@ -171,7 +170,7 @@ def events(
     ]
 
     if camera != "all":
-        clauses.append((Event.camera == camera))
+        clauses.append(Event.camera == camera)
 
     if cameras != "all":
         requested = set(cameras.split(","))
@@ -181,11 +180,11 @@ def events(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((Event.camera << camera_list))
+    clauses.append(Event.camera << camera_list)
 
     if labels != "all":
         label_list = labels.split(",")
-        clauses.append((Event.label << label_list))
+        clauses.append(Event.label << label_list)
 
     if sub_labels != "all":
         # use matching so joined sub labels are included
@@ -196,19 +195,24 @@ def events(
 
         if "None" in filtered_sub_labels:
             filtered_sub_labels.remove("None")
-            sub_label_clauses.append((Event.sub_label.is_null()))
+            sub_label_clauses.append(Event.sub_label.is_null())
 
         for label in filtered_sub_labels:
+            lowered = label.lower()
             sub_label_clauses.append(
-                (Event.sub_label.cast("text") == label)
-            )  # include exact matches
+                fn.LOWER(Event.sub_label.cast("text")) == lowered
+            )  # include exact matches (case-insensitive)
 
-            # include this label when part of a list
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*, {label}*"))
+            # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
+            sub_label_clauses.append(
+                fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*"
+            )
+            sub_label_clauses.append(
+                fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*"
+            )
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
-        clauses.append((sub_label_clause))
+        clauses.append(sub_label_clause)
 
     if attributes != "all":
         # Custom classification results are stored as data[model_name] = result_value
@@ -252,19 +256,19 @@ def events(
 
         if "None" in filtered_zones:
             filtered_zones.remove("None")
-            zone_clauses.append((Event.zones.length() == 0))
+            zone_clauses.append(Event.zones.length() == 0)
 
         for zone in filtered_zones:
-            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+            zone_clauses.append(Event.zones.cast("text") % f'*"{zone}"*')
 
         zone_clause = reduce(operator.or_, zone_clauses)
-        clauses.append((zone_clause))
+        clauses.append(zone_clause)
 
     if after:
-        clauses.append((Event.start_time > after))
+        clauses.append(Event.start_time > after)
 
     if before:
-        clauses.append((Event.start_time < before))
+        clauses.append(Event.start_time < before)
 
     if time_range != DEFAULT_TIME_RANGE:
         # get timezone arg to ensure browser times are used
@@ -284,62 +288,60 @@ def events(
         # should use or operator
         if time_after > time_before:
             clauses.append(
-                (
-                    reduce(
-                        operator.or_,
-                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
-                    )
+                reduce(
+                    operator.or_,
+                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            clauses.append((start_hour_fun > time_after))
-            clauses.append((start_hour_fun < time_before))
+            clauses.append(start_hour_fun > time_after)
+            clauses.append(start_hour_fun < time_before)
 
     if has_clip is not None:
-        clauses.append((Event.has_clip == has_clip))
+        clauses.append(Event.has_clip == has_clip)
 
     if has_snapshot is not None:
-        clauses.append((Event.has_snapshot == has_snapshot))
+        clauses.append(Event.has_snapshot == has_snapshot)
 
     if in_progress is not None:
-        clauses.append((Event.end_time.is_null(in_progress)))
+        clauses.append(Event.end_time.is_null(in_progress))
 
     if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
     if favorites:
-        clauses.append((Event.retain_indefinitely == favorites))
+        clauses.append(Event.retain_indefinitely == favorites)
 
     if max_score is not None:
-        clauses.append((Event.data["score"] <= max_score))
+        clauses.append(Event.data["score"] <= max_score)
 
     if min_score is not None:
-        clauses.append((Event.data["score"] >= min_score))
+        clauses.append(Event.data["score"] >= min_score)
 
     if max_speed is not None:
-        clauses.append((Event.data["average_estimated_speed"] <= max_speed))
+        clauses.append(Event.data["average_estimated_speed"] <= max_speed)
 
     if min_speed is not None:
-        clauses.append((Event.data["average_estimated_speed"] >= min_speed))
+        clauses.append(Event.data["average_estimated_speed"] >= min_speed)
 
     if min_length is not None:
-        clauses.append(((Event.end_time - Event.start_time) >= min_length))
+        clauses.append((Event.end_time - Event.start_time) >= min_length)
 
     if max_length is not None:
-        clauses.append(((Event.end_time - Event.start_time) <= max_length))
+        clauses.append((Event.end_time - Event.start_time) <= max_length)
 
     if is_submitted is not None:
         if is_submitted == 0:
-            clauses.append((Event.plus_id.is_null()))
+            clauses.append(Event.plus_id.is_null())
         elif is_submitted > 0:
-            clauses.append((Event.plus_id != ""))
+            clauses.append(Event.plus_id != "")
 
     if event_id is not None:
-        clauses.append((Event.id == event_id))
+        clauses.append(Event.id == event_id)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     if sort:
         if sort == "score_asc":
@@ -382,7 +384,7 @@ def events(
 )
 def events_explore(
     limit: int = 10,
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     # get distinct labels for all events
     distinct_labels = (
@@ -510,7 +512,7 @@ async def event_ids(ids: str, request: Request):
 def events_search(
     request: Request,
     params: EventsSearchQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     query = params.query
     search_type = params.search_type
@@ -590,12 +592,12 @@ def events_search(
         filtered = requested.intersection(allowed_cameras)
         if not filtered:
             return JSONResponse(content=[])
-        event_filters.append((Event.camera << list(filtered)))
+        event_filters.append(Event.camera << list(filtered))
     else:
-        event_filters.append((Event.camera << allowed_cameras))
+        event_filters.append(Event.camera << allowed_cameras)
 
     if labels != "all":
-        event_filters.append((Event.label << labels.split(",")))
+        event_filters.append(Event.label << labels.split(","))
 
     if sub_labels != "all":
         # use matching so joined sub labels are included
@@ -606,18 +608,23 @@ def events_search(
 
         if "None" in filtered_sub_labels:
             filtered_sub_labels.remove("None")
-            sub_label_clauses.append((Event.sub_label.is_null()))
+            sub_label_clauses.append(Event.sub_label.is_null())
 
         for label in filtered_sub_labels:
+            lowered = label.lower()
             sub_label_clauses.append(
-                (Event.sub_label.cast("text") == label)
-            )  # include exact matches
+                fn.LOWER(Event.sub_label.cast("text")) == lowered
+            )  # include exact matches (case-insensitive)
 
-            # include this label when part of a list
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*{label},*"))
-            sub_label_clauses.append((Event.sub_label.cast("text") % f"*, {label}*"))
+            # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
+            sub_label_clauses.append(
+                fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*"
+            )
+            sub_label_clauses.append(
+                fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*"
+            )
 
-        event_filters.append((reduce(operator.or_, sub_label_clauses)))
+        event_filters.append(reduce(operator.or_, sub_label_clauses))
 
     if attributes != "all":
         # Custom classification results are stored as data[model_name] = result_value
@@ -631,12 +638,12 @@ def events_search(
 
         if "None" in filtered_zones:
             filtered_zones.remove("None")
-            zone_clauses.append((Event.zones.length() == 0))
+            zone_clauses.append(Event.zones.length() == 0)
 
         for zone in filtered_zones:
-            zone_clauses.append((Event.zones.cast("text") % f'*"{zone}"*'))
+            zone_clauses.append(Event.zones.cast("text") % f'*"{zone}"*')
 
-        event_filters.append((reduce(operator.or_, zone_clauses)))
+        event_filters.append(reduce(operator.or_, zone_clauses))
 
     if recognized_license_plate != "all":
         filtered_recognized_license_plates = recognized_license_plate.split(",")
@@ -664,43 +671,43 @@ def events_search(
             )
 
         recognized_license_plate_clause = reduce(operator.or_, clauses_for_plates)
-        event_filters.append((recognized_license_plate_clause))
+        event_filters.append(recognized_license_plate_clause)
 
     if after:
-        event_filters.append((Event.start_time > after))
+        event_filters.append(Event.start_time > after)
 
     if before:
-        event_filters.append((Event.start_time < before))
+        event_filters.append(Event.start_time < before)
 
     if has_clip is not None:
-        event_filters.append((Event.has_clip == has_clip))
+        event_filters.append(Event.has_clip == has_clip)
 
     if has_snapshot is not None:
-        event_filters.append((Event.has_snapshot == has_snapshot))
+        event_filters.append(Event.has_snapshot == has_snapshot)
 
     if is_submitted is not None:
         if is_submitted == 0:
-            event_filters.append((Event.plus_id.is_null()))
+            event_filters.append(Event.plus_id.is_null())
         elif is_submitted > 0:
-            event_filters.append((Event.plus_id != ""))
+            event_filters.append(Event.plus_id != "")
 
     if min_score is not None and max_score is not None:
-        event_filters.append((Event.data["score"].between(min_score, max_score)))
+        event_filters.append(Event.data["score"].between(min_score, max_score))
     else:
         if min_score is not None:
-            event_filters.append((Event.data["score"] >= min_score))
+            event_filters.append(Event.data["score"] >= min_score)
         if max_score is not None:
-            event_filters.append((Event.data["score"] <= max_score))
+            event_filters.append(Event.data["score"] <= max_score)
 
     if min_speed is not None and max_speed is not None:
         event_filters.append(
-            (Event.data["average_estimated_speed"].between(min_speed, max_speed))
+            Event.data["average_estimated_speed"].between(min_speed, max_speed)
         )
     else:
         if min_speed is not None:
-            event_filters.append((Event.data["average_estimated_speed"] >= min_speed))
+            event_filters.append(Event.data["average_estimated_speed"] >= min_speed)
         if max_speed is not None:
-            event_filters.append((Event.data["average_estimated_speed"] <= max_speed))
+            event_filters.append(Event.data["average_estimated_speed"] <= max_speed)
 
     if time_range != DEFAULT_TIME_RANGE:
         tz_name = params.timezone
@@ -718,17 +725,15 @@ def events_search(
         # should use or operator
         if time_after > time_before:
             event_filters.append(
-                (
-                    reduce(
-                        operator.or_,
-                        [(start_hour_fun > time_after), (start_hour_fun < time_before)],
-                    )
+                reduce(
+                    operator.or_,
+                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            event_filters.append((start_hour_fun > time_after))
-            event_filters.append((start_hour_fun < time_before))
+            event_filters.append(start_hour_fun > time_after)
+            event_filters.append(start_hour_fun < time_before)
 
     # Perform semantic search
     search_results = {}
@@ -736,6 +741,15 @@ def events_search(
         try:
             search_event: Event = Event.get(Event.id == event_id)
         except DoesNotExist:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Event not found",
+                },
+                status_code=404,
+            )
+
+        if search_event.camera not in allowed_cameras:
             return JSONResponse(
                 content={
                     "success": False,
@@ -875,7 +889,7 @@ def events_search(
 @router.get("/events/summary", dependencies=[Depends(allow_any_authenticated())])
 def events_summary(
     params: EventsSummaryQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     tz_name = params.timezone
     has_clip = params.has_clip
@@ -884,13 +898,13 @@ def events_summary(
     clauses = []
 
     if has_clip is not None:
-        clauses.append((Event.has_clip == has_clip))
+        clauses.append(Event.has_clip == has_clip)
 
     if has_snapshot is not None:
-        clauses.append((Event.has_snapshot == has_snapshot))
+        clauses.append(Event.has_snapshot == has_snapshot)
 
     if len(clauses) == 0:
-        clauses.append((True))
+        clauses.append(True)
 
     time_range_query = (
         Event.select(
@@ -1081,30 +1095,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             content=({"success": False, "message": message}), status_code=400
         )
 
-    # load clean.webp or clean.png (legacy)
     try:
-        filename_webp = f"{event.camera}-{event.id}-clean.webp"
-        filename_png = f"{event.camera}-{event.id}-clean.png"
-
-        image_path = None
-        if os.path.exists(os.path.join(CLIPS_DIR, filename_webp)):
-            image_path = os.path.join(CLIPS_DIR, filename_webp)
-        elif os.path.exists(os.path.join(CLIPS_DIR, filename_png)):
-            image_path = os.path.join(CLIPS_DIR, filename_png)
-
-        if image_path is None:
-            logger.error(f"Unable to find clean snapshot for event: {event.id}")
-            return JSONResponse(
-                content=(
-                    {
-                        "success": False,
-                        "message": "Unable to find clean snapshot for event",
-                    }
-                ),
-                status_code=400,
-            )
-
-        image = cv2.imread(image_path)
+        image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
     except Exception:
         logger.error(f"Unable to load clean snapshot for event: {event.id}")
         return JSONResponse(
@@ -1114,17 +1106,22 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             status_code=400,
         )
 
-    if image is None or image.size == 0:
-        logger.error(f"Unable to load clean snapshot for event: {event.id}")
+    if not is_clean_snapshot or image is None or image.size == 0:
+        logger.error(f"Unable to find clean snapshot for event: {event.id}")
         return JSONResponse(
             content=(
-                {"success": False, "message": "Unable to load clean snapshot for event"}
+                {
+                    "success": False,
+                    "message": "Unable to find clean snapshot for event",
+                }
             ),
             status_code=400,
         )
 
     try:
-        plus_id = request.app.frigate_config.plus_api.upload_image(image, event.camera)
+        plus_id = await asyncio.to_thread(
+            request.app.frigate_config.plus_api.upload_image, image, event.camera
+        )
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse(
@@ -1140,7 +1137,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         box = event.data["box"]
 
         try:
-            request.app.frigate_config.plus_api.add_annotation(
+            await asyncio.to_thread(
+                request.app.frigate_config.plus_api.add_annotation,
                 event.plus_id,
                 box,
                 event.label,
@@ -1230,7 +1228,8 @@ async def false_positive(request: Request, event_id: str):
     )
 
     try:
-        request.app.frigate_config.plus_api.add_false_positive(
+        await asyncio.to_thread(
+            request.app.frigate_config.plus_api.add_false_positive,
             event.plus_id,
             region,
             box,
@@ -1453,10 +1452,10 @@ async def set_attributes(
             continue
 
         # Get available labels from dataset directory
-        dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(model_key), "dataset")
+        dataset_dir = safe_join(CLIPS_DIR, model_key, "dataset")
         available_labels = set()
 
-        if os.path.exists(dataset_dir):
+        if dataset_dir and os.path.exists(dataset_dir):
             for category_name in os.listdir(dataset_dir):
                 category_dir = os.path.join(dataset_dir, category_name)
                 if os.path.isdir(category_dir):
@@ -1539,15 +1538,18 @@ async def set_description(
     event.data["description"] = new_description
     event.save()
 
-    # If semantic search is enabled, update the index
-    if request.app.frigate_config.semantic_search.enabled:
-        context: EmbeddingsContext = request.app.embeddings
+    context: EmbeddingsContext | None = request.app.embeddings
+
+    if context is not None:
         if len(new_description) > 0:
-            context.update_description(
-                event_id,
-                new_description,
-            )
+            # If semantic search is enabled, update the index
+            if request.app.frigate_config.semantic_search.enabled:
+                context.update_description(
+                    event_id,
+                    new_description,
+                )
         else:
+            # embeddings are always cleaned up so they don't outlive their description
             context.db.delete_embeddings_description(event_ids=[event_id])
 
     response_message = (
@@ -1676,9 +1678,11 @@ async def delete_single_event(event_id: str, request: Request) -> dict:
     event.delete_instance()
     Timeline.delete().where(Timeline.source_id == event_id).execute()
 
-    # If semantic search is enabled, update the index
-    if request.app.frigate_config.semantic_search.enabled:
-        context: EmbeddingsContext = request.app.embeddings
+    # embeddings are always cleaned up, even when semantic search is disabled,
+    # so that they don't outlive their events
+    context: EmbeddingsContext | None = request.app.embeddings
+
+    if context is not None:
         context.db.delete_embeddings_thumbnail(event_ids=[event_id])
         context.db.delete_embeddings_description(event_ids=[event_id])
 
@@ -1744,6 +1748,7 @@ async def delete_events(request: Request, body: EventsDeleteBody):
     NOTES:
     - Creating a manual event does not trigger an update to /events MQTT topic.
     - If a duration is set to null, the event will need to be ended manually by calling /events/{event_id}/end.
+    - The review item is an alert unless the label is listed in the camera's review -> detections -> labels config.
     """,
 )
 def create_event(
@@ -1782,6 +1787,7 @@ def create_event(
             body.duration,
             "api",
             body.draw,
+            body.pre_capture,
         ),
         EventMetadataTypeEnum.manual_event_create.value,
     )
@@ -1953,18 +1959,13 @@ def create_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                os.makedirs(
-                    os.path.join(TRIGGER_DIR, sanitize_filename(camera_name)),
-                    exist_ok=True,
-                )
-                with open(
-                    os.path.join(
-                        TRIGGER_DIR,
-                        sanitize_filename(camera_name),
-                        f"{sanitize_filename(body.data)}.webp",
-                    ),
-                    "wb",
-                ) as f:
+                webp_path = get_trigger_thumbnail_path(camera_name, body.data)
+
+                if webp_path is None:
+                    raise ValueError(f"Invalid trigger thumbnail path for {body.data}")
+
+                os.makedirs(os.path.dirname(webp_path), exist_ok=True)
+                with open(webp_path, "wb") as f:
                     f.write(thumbnail)
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
@@ -2036,10 +2037,16 @@ def update_trigger_embedding(
         if body.type == "description":
             embedding = context.generate_description_embedding(body.data)
         elif body.type == "thumbnail":
-            webp_file = sanitize_filename(body.data) + ".webp"
-            webp_path = os.path.join(
-                TRIGGER_DIR, sanitize_filename(camera_name), webp_file
-            )
+            webp_path = get_trigger_thumbnail_path(camera_name, body.data)
+
+            if webp_path is None:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Invalid data for {body.type} trigger",
+                    },
+                    status_code=400,
+                )
 
             try:
                 event: Event = Event.get(Event.id == body.data)
@@ -2096,13 +2103,14 @@ def update_trigger_embedding(
             # Update existing trigger
             if trigger.data != body.data:  # Delete old thumbnail only if data changes
                 try:
-                    os.remove(
-                        os.path.join(
-                            TRIGGER_DIR,
-                            sanitize_filename(camera_name),
-                            f"{trigger.data}.webp",
+                    old_path = get_trigger_thumbnail_path(camera_name, trigger.data)
+
+                    if old_path is None:
+                        raise ValueError(
+                            f"Invalid trigger thumbnail path for {trigger.data}"
                         )
-                    )
+
+                    os.remove(old_path)
                     logger.debug(
                         f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
                     )
@@ -2136,12 +2144,13 @@ def update_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera_name))
-                os.makedirs(camera_path, exist_ok=True)
-                with open(
-                    os.path.join(camera_path, f"{sanitize_filename(body.data)}.webp"),
-                    "wb",
-                ) as f:
+                thumbnail_path = get_trigger_thumbnail_path(camera_name, body.data)
+
+                if thumbnail_path is None:
+                    raise ValueError(f"Invalid trigger thumbnail path for {body.data}")
+
+                os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
+                with open(thumbnail_path, "wb") as f:
                     f.write(thumbnail)
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
@@ -2212,11 +2221,12 @@ def delete_trigger_embedding(
             )
 
         try:
-            os.remove(
-                os.path.join(
-                    TRIGGER_DIR, sanitize_filename(camera_name), f"{trigger.data}.webp"
-                )
-            )
+            thumbnail_path = get_trigger_thumbnail_path(camera_name, trigger.data)
+
+            if thumbnail_path is None:
+                raise ValueError(f"Invalid trigger thumbnail path for {trigger.data}")
+
+            os.remove(thumbnail_path)
             logger.debug(
                 f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
             )

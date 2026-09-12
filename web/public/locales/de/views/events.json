@@ -14,7 +14,9 @@
       "description": "Überprüfungselemente können nur für eine Kamera erstellt werden, wenn Aufzeichnungen für diese Kamera aktiviert sind."
     }
   },
-  "timeline": "Zeitleiste",
+  "timeline": {
+    "label": "Zeitleiste"
+  },
   "timeline.aria": "Zeitleiste auswählen",
   "events": {
     "label": "Ereignisse",
@@ -23,7 +25,9 @@
   },
   "documentTitle": "Überprüfung - Frigate",
   "recordings": {
-    "documentTitle": "Aufnahmen - Frigate"
+    "documentTitle": "Aufnahmen - Frigate",
+    "invalidSharedLink": "Der Link zur zeitgestempelten Aufzeichnung kann aufgrund eines Parsing-Fehlers nicht geöffnet werden.",
+    "invalidSharedCamera": "Der Link zur zeitgestempelten Aufzeichnung kann nicht geöffnet werden, da es sich um eine unbekannte oder nicht autorisierte Kamera handelt."
   },
   "calendarFilter": {
     "last24Hours": "Letzte 24 Stunden"
@@ -63,5 +67,31 @@
   "normalActivity": "normal",
   "needsReview": "benötigt Überprüfung",
   "securityConcern": "Sicherheitsbedenken",
-  "select_all": "alle"
+  "select_all": "alle",
+  "motionSearch": {
+    "menuItem": "Bewegungssuche",
+    "openMenu": "Kamera Optionen"
+  },
+  "motionPreviews": {
+    "menuItem": "Bewegungsvorschau anzeigen",
+    "title": "Bewegungsvorschau: {{camera}}",
+    "mobileSettingsTitle": "Einstellungen für die Bewegungsvorschau",
+    "mobileSettingsDesc": "Passen Sie die Wiedergabegeschwindigkeit, die Dimmung und den Zuschnitt an und wählen Sie ein Datum aus, um Clips mit ausschließlich erkannten Bewegungen zu überprüfen.",
+    "dim": "düster",
+    "dimAria": "Dimmintensität einstellen",
+    "dimDesc": "Erhöhen Sie die Dimmung, um die Sichtbarkeit des Bewegungsbereichs zu verbessern.",
+    "speed": "Geschwindigkeit",
+    "speedAria": "Vorschau-Wiedergabegeschwindigkeit auswählen",
+    "speedDesc": "Wählen Sie aus, wie schnell die Vorschau-Clips abgespielt werden sollen.",
+    "back": "zurück",
+    "empty": "Keine Vorschau verfügbar",
+    "noPreview": "Vorschau nicht verfügbar",
+    "seekAria": "{{camera}} Player suchen bis {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Wählen Sie Bereiche aus, um nur Clips mit Bewegungen in diesen Regionen anzuzeigen.",
+    "filterClear": "Säubern",
+    "crop": "Auf Filterbereich zuschneiden",
+    "cropAria": "Vorschauen auf die gefilterten Bereiche zuschneiden ein- oder ausschalten",
+    "cropDesc": "Zeigt eine vergrößerte Vorschau der ausgewählten Filterbereiche an, statt das vollständige Bild zu zeigen."
+  }
 }

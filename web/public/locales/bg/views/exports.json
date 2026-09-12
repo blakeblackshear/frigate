@@ -17,7 +17,58 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Неуспешно преименуване на експорт: {{errorMessage}}"
+      "renameExportFailed": "Неуспешно преименуване на експорт: {{errorMessage}}",
+      "assignCaseFailed": "Неуспешно обновяване на възложен случай: {{errorMessage}}",
+      "caseSaveFailed": "Неуспешно запазен случай: {{errorMessage}}",
+      "caseDeleteFailed": "Неуспешно изтрит случай: {{errorMessage}}"
+    }
+  },
+  "deleteCase": {
+    "desc": "Сигурен ли сте, че искате да изтриете {{caseName}}?",
+    "label": "Изтрии случай"
+  },
+  "caseDialog": {
+    "nameLabel": "Име на случай",
+    "descriptionLabel": "Описание"
+  },
+  "toolbar": {
+    "editCase": "Редактирай случай",
+    "deleteCase": "Изтрии случай"
+  },
+  "caseCard": {
+    "emptyCase": "Все още няма експорти"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} експортиране",
+    "queued": "На опашката",
+    "running": "В ход",
+    "preparing": "Подготвяне",
+    "copying": "Копиране",
+    "encoding": "Енкодиране",
+    "encodingRetry": "Енкодиране (повторно)",
+    "finalizing": "Финализиране"
+  },
+  "caseView": {
+    "noDescription": "Без описание",
+    "createdAt": "Създаден {{value}}",
+    "exportCount_one": "1 експорт",
+    "exportCount_other": "{{count}} експорти",
+    "cameraCount_one": "1 камера",
+    "cameraCount_other": "{{count}} камери",
+    "showMore": "Покажи повече",
+    "showLess": "Покажи по-малко"
+  },
+  "bulkActions": {
+    "delete": "Изтрии",
+    "deleteNow": "Изтрии сега"
+  },
+  "bulkDelete": {
+    "title": "Изтрии експорти",
+    "desc_one": "Сигурни ли сте , че искате да изтриете {{count}} експорта?"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Успешно изтрити експорти"
     }
   }
 }

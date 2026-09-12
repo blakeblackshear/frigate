@@ -81,7 +81,8 @@
     "thisMonth": "החודש",
     "inProgress": "בתהליך",
     "invalidStartTime": "זמן התחלה לא תקין",
-    "invalidEndTime": "זמן סיום לא תקין"
+    "invalidEndTime": "זמן סיום לא תקין",
+    "never": "אף פעם"
   },
   "unit": {
     "speed": {
@@ -146,7 +147,8 @@
     "download": "הורדה",
     "info": "מידע",
     "next": "הבא",
-    "continue": "המשך"
+    "continue": "המשך",
+    "add": "להוסיף"
   },
   "menu": {
     "system": "מערכת",

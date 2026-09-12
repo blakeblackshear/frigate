@@ -6,9 +6,9 @@ export function LiveGridIcon({ layout }: LiveIconProps) {
   return (
     <div className="flex size-full flex-col gap-0.5 overflow-hidden rounded-md">
       <div
-        className={`h-1 w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
+        className={`w-full flex-1 ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
       />
-      <div className="flex h-1 w-full gap-0.5">
+      <div className="flex w-full flex-1 gap-0.5">
         <div
           className={`w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
         />
@@ -16,7 +16,7 @@ export function LiveGridIcon({ layout }: LiveIconProps) {
           className={`w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
         />
       </div>
-      <div className="flex h-1 w-full gap-0.5">
+      <div className="flex w-full flex-1 gap-0.5">
         <div
           className={`w-full ${layout == "grid" ? "bg-selected" : "bg-muted-foreground"}`}
         />

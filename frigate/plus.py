@@ -4,7 +4,7 @@ import logging
 import os
 import re
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 import cv2
 import requests
@@ -105,9 +105,9 @@ class PlusApi:
 
     def upload_image(self, image: ndarray, camera: str) -> str:
         r = self._get("image/signed_urls")
-        presigned_urls = r.json()
         if not r.ok:
             raise Exception("Unable to get signed urls")
+        presigned_urls = r.json()
 
         # resize and submit original
         files = {"file": get_jpg_bytes(image, 1920, 85)}
@@ -140,8 +140,8 @@ class PlusApi:
     def add_false_positive(
         self,
         plus_id: str,
-        region: List[float],
-        bbox: List[float],
+        region: list[float],
+        bbox: list[float],
         score: float,
         label: str,
         model_hash: str,
@@ -184,7 +184,7 @@ class PlusApi:
     def add_annotation(
         self,
         plus_id: str,
-        bbox: List[float],
+        bbox: list[float],
         label: str,
         difficult: bool = False,
     ) -> None:

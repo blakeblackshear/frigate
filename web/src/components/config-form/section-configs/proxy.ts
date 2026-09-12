@@ -1,0 +1,38 @@
+import type { SectionConfigOverrides } from "./types";
+
+const proxy: SectionConfigOverrides = {
+  base: {
+    sectionDocs: "/configuration/authentication#proxy",
+    restartRequired: [],
+    fieldOrder: [
+      "header_map",
+      "logout_url",
+      "auth_secret",
+      "default_role",
+      "separator",
+    ],
+    advancedFields: ["header_map", "auth_secret", "separator"],
+    liveValidate: true,
+    uiSchema: {
+      logout_url: {
+        "ui:options": { size: "lg" },
+      },
+      auth_secret: {
+        "ui:widget": "password",
+        "ui:options": { size: "md" },
+      },
+      default_role: {
+        "ui:widget": "defaultRole",
+        "ui:options": { size: "sm" },
+      },
+      header_map: {
+        "ui:after": { render: "ProxyRoleMap" },
+      },
+      "header_map.role_map": {
+        "ui:widget": "hidden",
+      },
+    },
+  },
+};
+
+export default proxy;

@@ -1,0 +1,941 @@
+{
+    "label": "Konfiguracija kamere",
+    "name": {
+        "label": "Ime kamere",
+        "description": "Ime kamere je obvezno"
+    },
+    "friendly_name": {
+        "label": "Prijazno ime",
+        "description": "Prijazno ime kamere, ki se uporablja v vmesniku Frigate"
+    },
+    "enabled": {
+        "label": "Omogočeno",
+        "description": "Omogočeno"
+    },
+    "audio": {
+        "label": "Avdio dogodki",
+        "description": "Nastavitve za zaznavanje dogodkov na podlagi zvoka za to kamero.",
+        "enabled": {
+            "label": "Omogoči zaznavanje zvoka",
+            "description": "Omogoči ali onemogoči zaznavanje zvočnih dogodkov za to kamero."
+        },
+        "max_not_heard": {
+            "label": "Časovna omejitev konca",
+            "description": "Število sekund brez nastavljenega tipa zvoka, preden se avdio dogodek zaključi."
+        },
+        "min_volume": {
+            "label": "Najmanjša glasnost",
+            "description": "Najnižji prag glasnosti RMS za zagon zaznavanja; nižje vrednosti povečajo občutljivost (npr. 200 visoka, 500 srednja, 1000 nizka)."
+        },
+        "listen": {
+            "label": "Tipi zvokov za poslušanje",
+            "description": "Seznam tipov avdio dogodkov za zaznavanje (npr. lajež, požarni alarm, krik, govor, vpitje)."
+        },
+        "filters": {
+            "label": "Avdio filtri",
+            "description": "Nastavitve filtrov za posamezne tipe zvoka (npr. pragovi zaupanja) za zmanjšanje lažnih pozitivnih rezultatov."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje zvoka",
+            "description": "Pove, ali je bilo zaznavanje zvoka prvotno omogočeno v statični konfiguracijski datoteki."
+        },
+        "num_threads": {
+            "label": "Niti za zaznavanje",
+            "description": "Število niti za obdelavo zaznavanja zvoka."
+        }
+    },
+    "audio_transcription": {
+        "label": "Transkripcija zvoka",
+        "description": "Nastavitve za transkripcijo zvoka v živo in govora, ki se uporablja za dogodke in podnapise v živo.",
+        "enabled": {
+            "label": "Omogoči transkripcijo",
+            "description": "Omogoči ali onemogoči ročno sproženo transkripcijo zvočnih dogodkov."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje transkripcije"
+        },
+        "live_enabled": {
+            "label": "Transkripcija v živo",
+            "description": "Omogoči sprotno transkripcijo zvoka ob prejemu."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye (Ptičja perspektiva)",
+        "description": "Nastavitve za sestavljen pogled Birdseye, ki združi več virov kamer v eno postavitev.",
+        "enabled": {
+            "label": "Omogoči Birdseye",
+            "description": "Vklopi ali izklopi funkcijo Birdseye."
+        },
+        "mode": {
+            "label": "Način sledenja",
+            "description": "Način vključitve kamer v Birdseye: 'objects' (objekti), 'motion' (gibanje) ali 'continuous' (neprekinjeno)."
+        },
+        "order": {
+            "label": "Položaj",
+            "description": "Številčna vrednost, ki določa vrstni red kamere v postavitvi Birdseye."
+        }
+    },
+    "detect": {
+        "label": "Zaznavanje objektov",
+        "description": "Nastavitve za vlogo zaznavanja, ki se uporablja za iskanje objektov in inicializacijo sledilnikov.",
+        "enabled": {
+            "label": "Zaznavanje omogočeno",
+            "description": "Omogoči ali onemogoči zaznavanje objektov za to kamero. Zaznavanje mora biti omogočeno, da sledenje objektom deluje."
+        },
+        "height": {
+            "label": "Višina zaznavanja",
+            "description": "Višina (v pikslih) slik za tok zaznavanja; pusti prazno za uporabo izvorne ločljivosti."
+        },
+        "width": {
+            "label": "Širina zaznavanja",
+            "description": "Širina (v pikslih) slik za tok zaznavanja; pusti prazno za uporabo izvorne ločljivosti."
+        },
+        "fps": {
+            "label": "FPS zaznavanja",
+            "description": "Želeno število slik na sekundo za zaznavanje; nižje vrednosti zmanjšajo porabo procesorja (priporočeno je 5)."
+        },
+        "min_initialized": {
+            "label": "Najmanj slik za inicializacijo",
+            "description": "Število zaporednih zaznav, potrebnih pred ustvarjanjem sledenega objekta. Povečaj za manj lažnih zaznav."
+        },
+        "max_disappeared": {
+            "label": "Največ slik ob izginotju",
+            "description": "Število slik brez zaznave, preden se sledeni objekt šteje za izginulega."
+        },
+        "stationary": {
+            "label": "Konfiguracija nepremičnih objektov",
+            "description": "Nastavitve za zaznavanje in upravljanje objektov, ki nekaj časa ostanejo na mestu.",
+            "interval": {
+                "label": "Interval nepremičnosti",
+                "description": "Kako pogosto (v slikah) naj se preveri prisotnost nepremičnega objekta."
+            },
+            "threshold": {
+                "label": "Prag nepremičnosti",
+                "description": "Število slik brez spremembe položaja, potrebnih, da se objekt označi za nepremičnega."
+            },
+            "max_frames": {
+                "label": "Največ slik",
+                "description": "Omejuje, kako dolgo se sledi nepremičnim objektom, preden se zavržejo.",
+                "default": {
+                    "label": "Privzeto največ slik",
+                    "description": "Privzeto največje število slik za sledenje nepremičnemu objektu."
+                },
+                "objects": {
+                    "label": "Največ slik za objekt",
+                    "description": "Posebne omejitve za posamezne tipe objektov."
+                }
+            },
+            "classifier": {
+                "label": "Omogoči vizualni klasifikator",
+                "description": "Uporabi vizualni klasifikator za potrditev nepremičnih objektov, tudi če se okvirji rahlo premikajo."
+            }
+        },
+        "annotation_offset": {
+            "label": "Odmik anotacij",
+            "description": "Število milisekund za premik oznak zaznavanja, da se bolje ujemajo s posnetki; lahko je pozitivno ali negativno."
+        }
+    },
+    "face_recognition": {
+        "label": "Prepoznava obrazov",
+        "description": "Nastavitve za zaznavanje in prepoznavanje obrazov za to kamero.",
+        "enabled": {
+            "label": "Omogoči prepoznavo obrazov",
+            "description": "Omogoči ali onemogoči prepoznavanje obrazov."
+        },
+        "min_area": {
+            "label": "Najmanjša površina obraza",
+            "description": "Najmanjša površina (v pikslih) okvirja obraza, potrebna za poskus prepoznave."
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg",
+        "description": "Nastavitve FFmpeg, vključno s potjo do binarne datoteke, argumenti, možnostmi strojnega pospeševanja in argumenti izhoda po vlogah.",
+        "path": {
+            "label": "Pot do FFmpeg",
+            "description": "Pot do binarne datoteke FFmpeg, ki naj se uporabi, ali vzdevek različice (\"5.0\" ali \"7.0\")."
+        },
+        "global_args": {
+            "label": "Globalni argumenti FFmpeg",
+            "description": "Globalni argumenti, posredovani procesom FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumenti strojnega pospeševanja",
+            "description": "Argumenti za strojno pospeševanje FFmpeg. Priporočljive so prednastavitve glede na ponudnika."
+        },
+        "input_args": {
+            "label": "Vhodni argumenti",
+            "description": "Vhodni argumenti, uporabljeni za vhodne tokove FFmpeg."
+        },
+        "output_args": {
+            "label": "Izhodni argumenti",
+            "description": "Privzeti izhodni argumenti, uporabljeni za različne vloge FFmpeg, kot sta zaznavanje in snemanje.",
+            "detect": {
+                "label": "Izhodni argumenti za zaznavanje",
+                "description": "Privzeti izhodni argumenti za tokove z vlogo zaznavanja (detect)."
+            },
+            "record": {
+                "label": "Izhodni argumenti za snemanje",
+                "description": "Privzeti izhodni argumenti za tokove z vlogo snemanja (record)."
+            }
+        },
+        "retry_interval": {
+            "label": "Čas ponovnega poskusa FFmpeg",
+            "description": "Število sekund čakanja pred ponovnim poskusom povezave s tokom kamere po napaki. Privzeto je 10."
+        },
+        "apple_compatibility": {
+            "label": "Združljivost z Apple napravami",
+            "description": "Omogoči označevanje HEVC za boljšo združljivost z Applovimi predvajalniki pri snemanju v H.265."
+        },
+        "gpu": {
+            "label": "Indeks GPU",
+            "description": "Privzeti indeks grafične kartice (GPU), uporabljen za strojno pospeševanje, če je na voljo."
+        },
+        "inputs": {
+            "label": "Vhodi kamere",
+            "description": "Seznam definicij vhodnih tokov (poti in vloge) za to kamero.",
+            "path": {
+                "label": "Vhodna pot",
+                "description": "URL ali pot do vhodnega toka kamere."
+            },
+            "roles": {
+                "label": "Vloge vhoda",
+                "description": "Vloge za ta vhodni tok."
+            },
+            "global_args": {
+                "label": "Globalni argumenti FFmpeg",
+                "description": "Globalni argumenti FFmpeg za ta vhodni tok."
+            },
+            "hwaccel_args": {
+                "label": "Argumenti strojnega pospeševanja",
+                "description": "Argumenti strojnega pospeševanja za ta vhodni tok."
+            },
+            "input_args": {
+                "label": "Vhodni argumenti",
+                "description": "Vhodni argumenti, specifični za ta tok."
+            }
+        }
+    },
+    "live": {
+        "label": "Predvajanje v živo",
+        "description": "Nastavitve, ki jih uporablja spletni vmesnik za nadzor izbire toka v živo, ločljivosti in kakovosti.",
+        "streams": {
+            "label": "Imena tokov v živo",
+            "description": "Preslikava konfiguriranih imen tokov v imena restream/go2rtc, uporabljena za predvajanje v živo."
+        },
+        "height": {
+            "label": "Višina v živo",
+            "description": "Višina (v pikslih) za upodabljanje jsmpeg toka v živo v spletnem vmesniku; mora biti <= višini toka za zaznavanje."
+        },
+        "quality": {
+            "label": "Kakovost v živo",
+            "description": "Kakovost kodiranja za jsmpeg tok (1 najvišja, 31 najnižja)."
+        }
+    },
+    "lpr": {
+        "label": "Prepoznava registrskih tablic (LPR)",
+        "description": "Nastavitve prepoznave registrskih tablic, vključno s pragi detekcije, formatiranjem in znanimi tablicami.",
+        "enabled": {
+            "label": "Omogoči LPR",
+            "description": "Omogoči ali onemogoči LPR na tej kameri."
+        },
+        "expire_time": {
+            "label": "Sekunde do poteka",
+            "description": "Čas v sekundah, po katerem nevidna tablica poteče iz sledilnika (samo za namenske LPR kamere)."
+        },
+        "min_area": {
+            "label": "Najmanjša površina tablice",
+            "description": "Najmanjša površina tablice (v pikslih) za poskus prepoznave."
+        },
+        "enhancement": {
+            "label": "Stopnja izboljšave",
+            "description": "Stopnja izboljšave (0-10) slik tablic pred OCR; stopnje nad 5 so priporočljive le za nočne posnetke."
+        }
+    },
+    "motion": {
+        "label": "Zaznavanje gibanja",
+        "description": "Privzete nastavitve zaznavanja gibanja za to kamero.",
+        "enabled": {
+            "label": "Omogoči zaznavanje gibanja",
+            "description": "Omogoči ali onemogoči zaznavanje gibanja za to kamero."
+        },
+        "threshold": {
+            "label": "Prag gibanja",
+            "description": "Prag razlike v pikslih, ki ga uporablja detektor gibanja; višje vrednosti zmanjšajo občutljivost (razpon 1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Prag za strele",
+            "description": "Prag za zaznavanje in ignoriranje kratkih svetlobnih skokov (nižje je bolj občutljivo). To ne prepreči snemanja, le ustavi analizo dodatnih okvirjev ob blisku."
+        },
+        "skip_motion_threshold": {
+            "label": "Prag za preskok gibanja",
+            "description": "Če se v enem okvirju spremeni večji delež slike od tega, detektor ne bo vrnil okvirjev gibanja in se bo takoj umeril. To zmanjša lažne pozitivne rezultate med nevihtami. Razpon 0.0 do 1.0."
+        },
+        "improve_contrast": {
+            "label": "Izboljšaj kontrast",
+            "description": "Uporabi izboljšavo kontrasta na okvirjih pred analizo gibanja za boljšo detekcijo."
+        },
+        "contour_area": {
+            "label": "Površina konture",
+            "description": "Najmanjša površina konture v pikslih, potrebna, da se gibanje upošteva."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Faktor alfa mešanja, uporabljen pri razlikovanju okvirjev za izračun gibanja."
+        },
+        "frame_alpha": {
+            "label": "Alfa okvirja",
+            "description": "Vrednost alfa, uporabljena pri mešanju okvirjev za predobdelavo gibanja."
+        },
+        "frame_height": {
+            "label": "Višina okvirja",
+            "description": "Višina v pikslih, na katero se spremeni velikost okvirja pri izračunu gibanja."
+        },
+        "mask": {
+            "label": "Koordinate maske",
+            "description": "Urejene koordinate x,y, ki določajo poligon maske gibanja za vključitev ali izključitev območij."
+        },
+        "mqtt_off_delay": {
+            "label": "Zakasnitev izklopa MQTT",
+            "description": "Število sekund čakanja po zadnjem zaznanem gibanju pred objavo stanja 'off' na MQTT."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje gibanja",
+            "description": "Pove, ali je bilo zaznavanje gibanja omogočeno v prvotni statični konfiguraciji."
+        },
+        "raw_mask": {
+            "label": "Surova maska"
+        }
+    },
+    "objects": {
+        "label": "Objekti",
+        "description": "Privzete nastavitve sledenja objektom, vključno s tem, katere oznake naj se sledijo, in filtri za posamezne objekte.",
+        "track": {
+            "label": "Objekti za sledenje",
+            "description": "Seznam oznak objektov za sledenje na tej kameri."
+        },
+        "filters": {
+            "label": "Filtri objektov",
+            "description": "Filtri za zaznane objekte za zmanjšanje lažnih pozitivnih rezultatov (površina, razmerje, zaupanje).",
+            "min_area": {
+                "label": "Najmanjša površina objekta",
+                "description": "Najmanjša površina okvirja (v pikslih ali odstotkih), potrebna za to vrsto objekta."
+            },
+            "max_area": {
+                "label": "Največja površina objekta",
+                "description": "Največja dovoljena površina okvirja za to vrsto objekta."
+            },
+            "min_ratio": {
+                "label": "Najmanjše razmerje stranic",
+                "description": "Najmanjše razmerje širina/višina, potrebno za veljavnost okvirja."
+            },
+            "max_ratio": {
+                "label": "Največje razmerje stranic",
+                "description": "Največje dovoljeno razmerje širina/višina."
+            },
+            "threshold": {
+                "label": "Prag zaupanja",
+                "description": "Povprečni prag zaupanja detekcije, potreben, da se objekt šteje za pravega."
+            },
+            "min_score": {
+                "label": "Najmanjše zaupanje",
+                "description": "Najmanjše zaupanje detekcije v enem okvirju, da se objekt upošteva."
+            },
+            "mask": {
+                "label": "Maska filtra",
+                "description": "Koordinate poligona, ki določajo, kje znotraj okvirja velja ta filter."
+            },
+            "raw_mask": {
+                "label": "Surova maska"
+            }
+        },
+        "mask": {
+            "label": "Maska objekta",
+            "description": "Poligon maske, uporabljen za preprečevanje zaznavanja objektov na določenih območij."
+        },
+        "raw_mask": {
+            "label": "Surova maska"
+        },
+        "genai": {
+            "label": "GenAI konfiguracija objektov",
+            "description": "GenAI možnosti za opisovanje sledenih objektov in pošiljanje okvirjev za generiranje.",
+            "enabled": {
+                "label": "Omogoči GenAI",
+                "description": "Privzeto omogoči GenAI generiranje opisov za sledene objekte."
+            },
+            "use_snapshot": {
+                "label": "Uporabi posnetke",
+                "description": "Za generiranje GenAI opisov uporabi posnetke (snapshots) namesto sličic (thumbnails)."
+            },
+            "prompt": {
+                "label": "Navodilo za opis (Prompt)",
+                "description": "Privzeta predloga navodila, uporabljena pri generiranju opisov z GenAI."
+            },
+            "object_prompts": {
+                "label": "Navodila za specifične objekte",
+                "description": "Navodila po meri za specifične oznake objektov."
+            },
+            "objects": {
+                "label": "GenAI objekti",
+                "description": "Seznam oznak objektov, ki naj se privzeto pošiljajo GenAI-ju."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Območja, v katera mora objekt vstopiti, da je primeren za GenAI opis."
+            },
+            "debug_save_thumbnails": {
+                "label": "Shrani sličice",
+                "description": "Shrani sličice, poslane GenAI-ju, za namene razhroščevanja in pregleda."
+            },
+            "send_triggers": {
+                "label": "GenAI sprožilci",
+                "description": "Določa, kdaj naj se okvirji pošljejo GenAI-ju (ob koncu, po posodobitvah itd.).",
+                "tracked_object_end": {
+                    "label": "Pošlji ob koncu",
+                    "description": "Pošlji zahtevo GenAI-ju, ko se sledenje objektu konča."
+                },
+                "after_significant_updates": {
+                    "label": "Zgodnji GenAI sprožilec",
+                    "description": "Pošlji zahtevo GenAI-ju po določenem številu pomembnih posodobitev sledenega objekta."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Prvotno GenAI stanje",
+                "description": "Pove, ali je bil GenAI omogočen v prvotni statični konfiguraciji."
+            }
+        }
+    },
+    "record": {
+        "label": "Snemanje",
+        "description": "Nastavitve snemanja in hrambe za to kamero.",
+        "enabled": {
+            "label": "Omogoči snemanje",
+            "description": "Omogoči ali onemogoči snemanje za to kamero."
+        },
+        "expire_interval": {
+            "label": "Interval čiščenja posnetkov",
+            "description": "Minute med cikli čiščenja, ki odstranijo potekle segmente snemanja."
+        },
+        "continuous": {
+            "label": "Neprekinjena hramba",
+            "description": "Število dni hrambe posnetkov ne glede na objekte ali gibanje. Nastavi na 0, če želiš hraniti le opozorila in detekcije.",
+            "days": {
+                "label": "Dni hrambe",
+                "description": "Število dni za hrambo posnetkov."
+            }
+        },
+        "motion": {
+            "label": "Hramba ob gibanju",
+            "description": "Število dni hrambe posnetkov, ki jih sproži gibanje, ne glede na objekte.",
+            "days": {
+                "label": "Dni hrambe",
+                "description": "Število dni za hrambo posnetkov."
+            }
+        },
+        "detections": {
+            "label": "Hramba detekcij",
+            "description": "Nastavitve hrambe za dogodke zaznavanja, vključno s trajanjem pred in po zajemu.",
+            "pre_capture": {
+                "label": "Sekunde pred zajemom",
+                "description": "Število sekund pred dogodkom zaznavanja, ki se vključi v posnetek."
+            },
+            "post_capture": {
+                "label": "Sekunde po zajemu",
+                "description": "Število sekund po dogodku zaznavanja, ki se vključi v posnetek."
+            },
+            "retain": {
+                "label": "Hramba dogodkov",
+                "description": "Nastavitve hrambe za posnetke dogodkov zaznavanja.",
+                "days": {
+                    "label": "Dni hrambe",
+                    "description": "Število dni za hrambo posnetkov dogodkov zaznavanja."
+                },
+                "mode": {
+                    "label": "Način hrambe",
+                    "description": "Način hrambe: all (vsi segmenti), motion (segmenti z gibanjem) ali active_objects (segmenti z aktivnimi objekti)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Hramba opozoril",
+            "description": "Nastavitve hrambe za dogodke opozoril.",
+            "pre_capture": {
+                "label": "Sekunde pred zajemom",
+                "description": "Število sekund pred dogodkom opozorila, ki se vključi v posnetek."
+            },
+            "post_capture": {
+                "label": "Sekunde po zajemu",
+                "description": "Število sekund po dogodku opozorila, ki se vključi v posnetek."
+            },
+            "retain": {
+                "label": "Hramba dogodkov",
+                "description": "Nastavitve hrambe za posnetke dogodkov opozoril.",
+                "days": {
+                    "label": "Dni hrambe",
+                    "description": "Število dni za hrambo posnetkov dogodkov opozoril."
+                },
+                "mode": {
+                    "label": "Način hrambe",
+                    "description": "Način hrambe posnetkov opozoril."
+                }
+            }
+        },
+        "export": {
+            "label": "Konfiguracija izvoza",
+            "description": "Nastavitve za izvoz posnetkov, kot sta časovni zamik (timelapse) in strojno pospeševanje.",
+            "hwaccel_args": {
+                "label": "Argumenti strojnega pospeševanja za izvoz",
+                "description": "Argumenti strojnega pospeševanja za operacije izvoza in transkodiranja."
+            }
+        },
+        "preview": {
+            "label": "Konfiguracija predogleda",
+            "description": "Nastavitve kakovosti predogledov snemanja v vmesniku.",
+            "quality": {
+                "label": "Kakovost predogleda",
+                "description": "Stopnja kakovosti predogleda (zelo nizka, nizka, srednja, visoka, zelo visoka)."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje snemanja",
+            "description": "Pove, ali je bilo snemanje omogočeno v prvotni statični konfiguraciji."
+        }
+    },
+    "review": {
+        "label": "Pregled",
+        "description": "Nastavitve, ki nadzorujejo opozorila, zaznave in GenAI povzetke pregledov za to kamero.",
+        "alerts": {
+            "label": "Konfiguracija opozoril",
+            "description": "Nastavitve za objekte, ki sprožijo opozorila, in njihovo hrambo.",
+            "enabled": {
+                "label": "Omogoči opozorila",
+                "description": "Omogoči ali onemogoči generiranje opozoril za to kamero."
+            },
+            "labels": {
+                "label": "Oznake opozoril",
+                "description": "Seznam oznak objektov, ki štejejo kot opozorila (npr. avto, oseba)."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Območja, v katera mora objekt vstopiti, da postane opozorilo; pusti prazno za katerokoli območje."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno stanje opozoril",
+                "description": "Sledi, ali so bila opozorila prvotno omogočena."
+            },
+            "cutoff_time": {
+                "label": "Čas zaključka opozorila",
+                "description": "Število sekund čakanja po končani aktivnosti, preden se opozorilo zaključi."
+            }
+        },
+        "detections": {
+            "label": "Konfiguracija detekcij",
+            "description": "Nastavitve za ustvarjanje dogodkov zaznavanja (ki niso opozorila) in čas hrambe.",
+            "enabled": {
+                "label": "Omogoči detekcije",
+                "description": "Omogoči ali onemogoči dogodke zaznav za to kamero."
+            },
+            "labels": {
+                "label": "Oznake detekcij",
+                "description": "Seznam oznak objektov, ki štejejo kot dogodki zaznavanja."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Območja, v katera mora objekt vstopiti, da postane detekcija."
+            },
+            "cutoff_time": {
+                "label": "Čas zaključka detekcije",
+                "description": "Število sekund čakanja po končani aktivnosti, preden se detekcija zaključi."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno stanje detekcij",
+                "description": "Sledi, ali so bile detekcije prvotno omogočene."
+            }
+        },
+        "genai": {
+            "label": "GenAI konfiguracija",
+            "description": "Nadzira uporabo generativne UI za izdelavo opisov in povzetkov postavk pregleda.",
+            "enabled": {
+                "label": "Omogoči GenAI opise",
+                "description": "Omogoči ali onemogoči GenAI opise in povzetke za postavke pregleda."
+            },
+            "alerts": {
+                "label": "Omogoči GenAI za opozorila",
+                "description": "Uporabi GenAI za generiranje opisov opozoril."
+            },
+            "detections": {
+                "label": "Omogoči GenAI za detekcije",
+                "description": "Uporabi GenAI za generiranje opisov detekcij."
+            },
+            "image_source": {
+                "label": "Vir slik za pregled",
+                "description": "Vir slik za GenAI ('preview' ali 'recordings'); 'recordings' nudi višjo kakovost, a porabi več žetonov."
+            },
+            "additional_concerns": {
+                "label": "Dodatni pomisleki",
+                "description": "Seznam dodatnih navodil ali opomb, ki naj jih GenAI upošteva pri ocenjevanju aktivnosti."
+            },
+            "debug_save_thumbnails": {
+                "label": "Shrani sličice",
+                "description": "Shrani sličice, poslane ponudniku GenAI, za namene razhroščevanja."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno GenAI stanje",
+                "description": "Sledi, ali je bil GenAI pregled prvotno omogočen."
+            },
+            "preferred_language": {
+                "label": "Prednostni jezik",
+                "description": "Jezik, ki se zahteva od ponudnika GenAI za generirane odgovore."
+            },
+            "activity_context_prompt": {
+                "label": "Navodilo za kontekst aktivnosti",
+                "description": "Navodilo po meri, ki opisuje, kaj je in kaj ni sumljiva aktivnost, za boljšo orientacijo GenAI-ja."
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Semantično iskanje",
+        "description": "Nastavitve za semantično iskanje, ki gradi in poizveduje po vložitvah objektov (embeddings) za iskanje podobnih elementov.",
+        "triggers": {
+            "label": "Sprožilci",
+            "description": "Dejanja in kriteriji ujemanja za sprožilce semantičnega iskanja na določeni kameri.",
+            "friendly_name": {
+                "label": "Prijazno ime",
+                "description": "Izbirno ime, ki se prikaže v vmesniku za ta sprožilec."
+            },
+            "enabled": {
+                "label": "Omogoči ta sprožilec",
+                "description": "Vklopi ali izklopi ta sprožilec semantičnega iskanja."
+            },
+            "type": {
+                "label": "Vrsta sprožilca",
+                "description": "Vrsta sprožilca: 'thumbnail' (ujemanje s sliko) ali 'description' (ujemanje z besedilom)."
+            },
+            "data": {
+                "label": "Vsebina sprožilca",
+                "description": "Besedilna fraza ali ID sličice za primerjavo s sledenimi objekti."
+            },
+            "threshold": {
+                "label": "Prag sprožilca",
+                "description": "Najmanjša ocena podobnosti (0-1), potrebna za aktivacijo tega sprožilca."
+            },
+            "actions": {
+                "label": "Dejanja sprožilca",
+                "description": "Seznam dejanj ob ujemanju (obvestilo, pod-oznaka, atribut)."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Posnetki (Snapshots)",
+        "description": "Nastavitve za shranjene JPEG posnetke sledenih objektov za to kamero.",
+        "enabled": {
+            "label": "Posnetki omogočeni",
+            "description": "Omogoči ali onemogoči shranjevanje posnetkov za to kamero."
+        },
+        "clean_copy": {
+            "label": "Shrani čisto kopijo",
+            "description": "Poleg označenih shrani tudi čisto kopijo posnetkov brez anotacij."
+        },
+        "timestamp": {
+            "label": "Prekrivna časovna značka",
+            "description": "Na shranjene posnetke dodaj časovno značko."
+        },
+        "bounding_box": {
+            "label": "Prekrivni okvirji (Bounding box)",
+            "description": "Na shranjene posnetke nariši okvirje za sledene objekte."
+        },
+        "crop": {
+            "label": "Obreži posnetek",
+            "description": "Shranjene posnetke obreži na okvir zaznanega objekta."
+        },
+        "required_zones": {
+            "label": "Zahtevana območja",
+            "description": "Območja, v katera mora objekt vstopiti, da se posnetek shrani."
+        },
+        "height": {
+            "label": "Višina posnetka",
+            "description": "Višina (v pikslih) za shranjene posnetke; pusti prazno za izvorno velikost."
+        },
+        "retain": {
+            "label": "Hramba posnetkov",
+            "description": "Nastavitve hrambe za posnetke, vključno s privzetimi dnevi in povoženji po objektih.",
+            "default": {
+                "label": "Privzeta hramba",
+                "description": "Privzeto število dni za hrambo posnetkov."
+            },
+            "mode": {
+                "label": "Način hrambe",
+                "description": "Način hrambe posnetkov."
+            },
+            "objects": {
+                "label": "Hramba po objektih",
+                "description": "Posebne nastavitve dni hrambe za posamezne vrste objektov."
+            }
+        },
+        "quality": {
+            "label": "Kakovost JPEG",
+            "description": "Kakovost kodiranja JPEG za shranjene posnetke (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "label": "Slog časovne značke",
+        "description": "Možnosti oblikovanja časovnih žigov na posnetkih in slikah.",
+        "position": {
+            "label": "Položaj časovne značke",
+            "description": "Položaj časovne značke na sliki (tl/tr/bl/br - zgoraj levo/desno, spodaj levo/desno)."
+        },
+        "format": {
+            "label": "Format časovne značke",
+            "description": "Niz za format datuma in časa (Python datetime koda)."
+        },
+        "color": {
+            "label": "Barva časovne značke",
+            "description": "RGB vrednosti barve za besedilo časovne značke (vse vrednosti 0-255).",
+            "red": {
+                "label": "Rdeča",
+                "description": "Rdeča komponenta (0-255) barve."
+            },
+            "green": {
+                "label": "Zelena",
+                "description": "Zelena komponenta (0-255) barve."
+            },
+            "blue": {
+                "label": "Modra",
+                "description": "Modra komponenta (0-255) barve."
+            }
+        },
+        "thickness": {
+            "label": "Debelina časovne značke",
+            "description": "Debelina črte besedila časovne značke."
+        },
+        "effect": {
+            "label": "Učinek časovne značke",
+            "description": "Vizualni učinek za besedilo (brez, polno, senca)."
+        }
+    },
+    "best_image_timeout": {
+        "label": "Časovna omejitev za najboljšo sliko",
+        "description": "Kako dolgo naj se čaka na sliko z najvišjo oceno zaupanja."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Nastavitve objavljanja slik preko MQTT.",
+        "enabled": {
+            "label": "Pošlji sliko",
+            "description": "Omogoči objavljanje slik objektov na MQTT teme za to kamero."
+        },
+        "timestamp": {
+            "label": "Dodaj časovni žig",
+            "description": "Na slike, objavljene preko MQTT, dodaj časovni žig."
+        },
+        "bounding_box": {
+            "label": "Dodaj okvir zaznave",
+            "description": "Na slike, objavljene preko MQTT, nariši okvirje zaznave."
+        },
+        "crop": {
+            "label": "Izreži sliko",
+            "description": "Izreži slike za MQTT na velikost okvirja zaznanega objekta."
+        },
+        "height": {
+            "label": "Višina slike",
+            "description": "Višina (v pikslih) slik, objavljenih preko MQTT."
+        },
+        "required_zones": {
+            "label": "Zahtevane cone",
+            "description": "Cone, v katere mora objekt vstopiti, da se MQTT slika objavi."
+        },
+        "quality": {
+            "label": "Kakovost JPEG",
+            "description": "Kakovost JPEG za slike, objavljene preko MQTT (0-100)."
+        }
+    },
+    "notifications": {
+        "label": "Obvestila",
+        "description": "Nastavitve za omogočanje in nadzor obvestil za to kamero.",
+        "enabled": {
+            "label": "Omogoči obvestila",
+            "description": "Omogoči ali onemogoči obvestila za to kamero."
+        },
+        "email": {
+            "label": "E-pošta za obvestila",
+            "description": "E-poštni naslov, ki se uporablja za potisna obvestila ali ga zahtevajo določeni ponudniki obvestil."
+        },
+        "cooldown": {
+            "label": "Obdobje mirovanja (Cooldown)",
+            "description": "Čas mirovanja (v sekundah) med obvestili, da preprečiš zasipanje prejemnikov s sporočili."
+        },
+        "enabled_in_config": {
+            "label": "Prvotno stanje obvestil",
+            "description": "Pove, ali so bila obvestila omogočena v prvotni statični konfiguraciji."
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Nastavitve ONVIF povezave in PTZ samodejnega sledenja za to kamero.",
+        "host": {
+            "label": "ONVIF gostitelj",
+            "description": "Naslov gostitelja za storitev ONVIF za to kamero."
+        },
+        "port": {
+            "label": "ONVIF vrata (port)",
+            "description": "Številka vrat za storitev ONVIF."
+        },
+        "user": {
+            "label": "ONVIF uporabniško ime",
+            "description": "Uporabniško ime za ONVIF avtentikacijo."
+        },
+        "password": {
+            "label": "ONVIF geslo",
+            "description": "Geslo za ONVIF avtentikacijo."
+        },
+        "tls_insecure": {
+            "label": "Onemogoči TLS preverjanje",
+            "description": "Preskoči preverjanje TLS (nevarno; uporabljaj le v varnih omrežjih)."
+        },
+        "autotracking": {
+            "label": "Samodejno sledenje",
+            "description": "Samodejno sledi premikajočim se objektom in jih drži v sredini okvirja s premiki PTZ kamere.",
+            "enabled": {
+                "label": "Omogoči samodejno sledenje",
+                "description": "Vklopi ali izklopi samodejno PTZ sledenje zaznanim objektom."
+            },
+            "calibrate_on_startup": {
+                "label": "Umeri ob zagonu",
+                "description": "Izmeri hitrosti motorjev PTZ ob zagonu za boljšo natančnost sledenja."
+            },
+            "zooming": {
+                "label": "Način povečave",
+                "description": "Nadzor povečave: onemogočeno, absolutno (najbolj združljivo) ali relativno."
+            },
+            "zoom_factor": {
+                "label": "Faktor povečave",
+                "description": "Nadzor stopnje povečave na sledenih objektih (0.1 do 0.75)."
+            },
+            "track": {
+                "label": "Sledeni objekti",
+                "description": "Seznam vrst objektov, ki sprožijo samodejno sledenje."
+            },
+            "required_zones": {
+                "label": "Zahtevana območja",
+                "description": "Objekti morajo vstopiti v eno od teh območij, preden se sledenje začne."
+            },
+            "return_preset": {
+                "label": "Prednastavitev za vrnitev",
+                "description": "Ime ONVIF prednastavitve (preset), na katero se kamera vrne po končanem sledenju."
+            },
+            "timeout": {
+                "label": "Čas do vrnitve",
+                "description": "Koliko sekund naj kamera čaka po izgubi objekta, preden se vrne v prvotni položaj."
+            },
+            "movement_weights": {
+                "label": "Uteži premikanja",
+                "description": "Vrednosti umerjanja, ki se generirajo samodejno. Ne spreminjaj ročno."
+            },
+            "enabled_in_config": {
+                "label": "Prvotno stanje sledenja",
+                "description": "Interno polje za sledenje stanja sledenja v konfiguraciji."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Prezri časovno neskladje",
+            "description": "Prezri razlike v sinhronizaciji časa med kamero in strežnikom za ONVIF komunikacijo."
+        }
+    },
+    "type": {
+        "label": "Vrsta kamere",
+        "description": "Vrsta kamere"
+    },
+    "ui": {
+        "label": "Uporabniški vmesnik kamere",
+        "description": "Vrstni red prikaza in vidnost te kamere v vmesniku. Vrstni red vpliva na privzeto nadzorno ploščo. Za natančnejši nadzor uporabi skupine kamer.",
+        "order": {
+            "label": "Vrstni red v vmesniku",
+            "description": "Številčni vrstni red za razvrščanje kamere v vmesniku (nadzorna plošča in seznami); višje številke se pojavijo kasneje."
+        },
+        "dashboard": {
+            "label": "Prikaži v vmesniku",
+            "description": "Preklopi vidnost kamere povsod v vmesniku Frigate. Če to onemogočiš, boš moral ročno urediti konfiguracijo, da bo kamera spet vidna."
+        }
+    },
+    "webui_url": {
+        "label": "URL kamere",
+        "description": "URL za neposreden obisk spletnega vmesnika kamere s strani sistema."
+    },
+    "zones": {
+        "label": "Cone",
+        "description": "Cone ti omogočajo določitev specifičnega območja slike, da lahko ugotoviš, ali je objekt znotraj določenega predela.",
+        "friendly_name": {
+            "label": "Ime cone",
+            "description": "Uporabniku prijazno ime cone, prikazano v vmesniku Frigate. Če ni nastavljeno, bo uporabljena formatirana različica imena cone."
+        },
+        "enabled": {
+            "label": "Omogočeno",
+            "description": "Omogoči ali onemogoči to cono. Onemogočene cone se med delovanjem prezrejo."
+        },
+        "enabled_in_config": {
+            "label": "Sledi prvotnemu stanju cone."
+        },
+        "filters": {
+            "label": "Filtri cone",
+            "description": "Filtri, ki se uporabijo za objekte znotraj te cone. Uporabljajo se za zmanjšanje lažnih zadetkov ali omejitev objektov, ki štejejo kot prisotni v coni.",
+            "min_area": {
+                "label": "Najmanjša površina objekta",
+                "description": "Najmanjša površina okvirja (v pikslih ali odstotkih), potrebna za to vrsto objekta. Lahko so piksli (celo število) ali odstotek (decimalno število med 0.000001 in 0.99)."
+            },
+            "max_area": {
+                "label": "Največja površina objekta",
+                "description": "Največja dovoljena površina okvirja (v pikslih ali odstotkih) za to vrsto objekta. Lahko so piksli (celo število) ali odstotek (decimalno število med 0.000001 in 0.99)."
+            },
+            "min_ratio": {
+                "label": "Najmanjše razmerje stranic",
+                "description": "Najmanjše razmerje širina/višina, potrebno za ustreznost okvirja."
+            },
+            "max_ratio": {
+                "label": "Največje razmerje stranic",
+                "description": "Največje dovoljeno razmerje širina/višina za ustreznost okvirja."
+            },
+            "threshold": {
+                "label": "Prag zaupanja",
+                "description": "Povprečni prag zaupanja zaznavanja, potreben, da se objekt v coni šteje za resničen zadetek."
+            },
+            "min_score": {
+                "label": "Najmanjše zaupanje",
+                "description": "Najmanjše zaupanje zaznave v posamezni sliki, potrebno za upoštevanje objekta."
+            },
+            "mask": {
+                "label": "Maska filtra",
+                "description": "Koordinate poligona, ki določa, kje znotraj slike se ta filter uporabi."
+            },
+            "raw_mask": {
+                "label": "Surova maska"
+            }
+        },
+        "coordinates": {
+            "label": "Koordinate",
+            "description": "Koordinate poligona, ki določa območje cone. Lahko je z vejico ločen niz ali seznam nizov koordinat. Koordinate morajo biti relativne (0-1) ali absolutne (starejši sistemi)."
+        },
+        "distances": {
+            "label": "Razdalje v realnem svetu",
+            "description": "Izbirne realne razdalje za vsako stran štirikotnika cone, ki se uporabljajo za izračun hitrosti ali razdalje. Če je nastavljeno, mora imeti natanko 4 vrednosti."
+        },
+        "inertia": {
+            "label": "Slike vztrajnosti (Inertia frames)",
+            "description": "Število zaporednih slik, v katerih mora biti objekt zaznan v coni, preden se šteje za prisotnega. Pomaga filtrirati prehodne zaznave."
+        },
+        "loitering_time": {
+            "label": "Sekunde postopanja (Loitering)",
+            "description": "Število sekund, ki jih mora objekt preživeti v coni, da se šteje za postopanje. Nastavi na 0, če želiš onemogočiti zaznavanje postopanja."
+        },
+        "speed_threshold": {
+            "label": "Najmanjša hitrost",
+            "description": "Najmanjša hitrost (v realnih enotah, če so nastavljene razdalje), potrebna, da se objekt šteje za prisotnega v coni. Uporablja se za sprožilce con na podlagi hitrosti."
+        },
+        "objects": {
+            "label": "Objekti sprožilci",
+            "description": "Seznam vrst objektov (iz labelmap), ki lahko sprožijo to cono. Če je prazno, se upoštevajo vsi objekti."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Prvotno stanje kamere",
+        "description": "Sledi prvotnemu stanju kamere v konfiguraciji."
+    }
+}

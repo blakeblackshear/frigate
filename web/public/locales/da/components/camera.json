@@ -31,7 +31,7 @@
       "setting": {
         "label": "Kamera Streaming Indstillinger",
         "title": "{{cameraName}} Streaming Indstillinger",
-        "desc": "Skift de live streaming muligheder for denne kameragruppes dashboard. <em> Disse indstillinger er enheds- og browserspecifikke.</em>",
+        "desc": "Skift indstillingerne for direkte visning af denne kameragruppes dashboard. <em> Disse indstillinger er enheds- og browserspecifikke.</em>",
         "audioIsAvailable": "Lyd er tilgængelig for denne stream",
         "audioIsUnavailable": "Lyd er ikke tilgængelig for denne strøm",
         "audio": {
@@ -67,7 +67,10 @@
           "desc": "Aktivér kun denne mulighed, hvis kameraets live stream viser farve artefakter og har en diagonal linje på højre side af billedet."
         }
       }
-    }
+    },
+    "showAll": "Vis alle kameragrupper",
+    "showLess": "Vis mindre",
+    "editGroups": "Rediger kameragrupper"
   },
   "debug": {
     "options": {
@@ -81,6 +84,7 @@
     "zones": "Zoner",
     "mask": "Maske",
     "motion": "Bevægelse",
-    "regions": "Regioner"
+    "regions": "Regioner",
+    "paths": "Stier"
   }
 }

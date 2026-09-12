@@ -2,7 +2,7 @@ import { isDesktop, isIOS, isMobile, isSafari } from "react-device-detect";
 import { SearchResult } from "@/types/search";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { getIconForLabel } from "@/utils/iconUtil";
 import { useApiHost } from "@/api";
 import { Button } from "../../ui/button";
@@ -241,7 +241,7 @@ function AnnotationSettings({
 
   return (
     <div className="ml-2">
-      <Overlay modal={isDesktop} open={open} onOpenChange={handleOpenChange}>
+      <Overlay open={open} onOpenChange={handleOpenChange}>
         <Trigger asChild>
           <Button
             type="button"
@@ -269,7 +269,6 @@ function AnnotationSettings({
               : "mx-1 max-h-[75dvh] overflow-hidden rounded-t-2xl px-4 pb-4"
           }
           {...contentProps}
-          {...(isDesktop ? { disablePortal: true } : {})}
           data-annotation-popover
         >
           <AnnotationSettingsPane
@@ -323,6 +322,7 @@ function DialogContentComponent({
       <TrackingDetails
         className={cn(isDesktop ? "size-full" : "flex flex-col gap-4")}
         event={search as unknown as Event}
+        isAnnotationSettingsOpen={isPopoverOpen}
         tabs={
           isDesktop ? (
             <TabsWithActions
@@ -768,9 +768,10 @@ function ObjectDetailsTab({
     setShowNavigationButtons,
   ]);
 
+  const is24Hour = use24HourTime(config);
   const formattedDate = useFormattedTimestamp(
     search?.start_time ?? 0,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestampMonthDayYearHourMinute.24hour", {
           ns: "common",
         })
@@ -956,8 +957,9 @@ function ObjectDetailsTab({
             toast.success(
               t("details.item.toast.success.regenerate", {
                 provider: capitalizeAll(
-                  config?.genai.provider.replaceAll("_", " ") ??
-                    t("generativeAI"),
+                  Object.values(config?.genai ?? {})
+                    .find((agent) => agent?.roles?.includes("descriptions"))
+                    ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
                 ),
               }),
               {
@@ -975,8 +977,9 @@ function ObjectDetailsTab({
           toast.error(
             t("details.item.toast.error.regenerate", {
               provider: capitalizeAll(
-                config?.genai.provider.replaceAll("_", " ") ??
-                  t("generativeAI"),
+                Object.values(config?.genai ?? {})
+                  .find((agent) => agent?.roles?.includes("descriptions"))
+                  ?.provider?.replaceAll("_", " ") ?? t("generativeAI"),
               ),
               errorMessage,
             }),
@@ -1237,10 +1240,14 @@ function ObjectDetailsTab({
     search?.plus_id ? "submitted" : "reviewing",
   );
 
-  useEffect(
-    () => setState(search?.plus_id ? "submitted" : "reviewing"),
-    [search],
-  );
+  // a submission request outlives the object it was made for, so the
+  // response handler needs to know which object is on screen now
+  const displayedIdRef = useRef(search?.id);
+
+  useEffect(() => {
+    displayedIdRef.current = search?.id;
+    setState(search?.plus_id ? "submitted" : "reviewing");
+  }, [search]);
 
   const onSubmitToPlus = useCallback(
     async (falsePositive: boolean) => {
@@ -1248,30 +1255,51 @@ function ObjectDetailsTab({
         return;
       }
 
-      falsePositive
-        ? axios.put(`events/${search.id}/false_positive`)
-        : axios.post(`events/${search.id}/plus`, {
-            include_annotation: 1,
-          });
+      const eventId = search.id;
 
-      setState("submitted");
-      setSearch({ ...search, plus_id: "new_upload" });
-      mutate(
-        (key) => isEventsKey(key),
-        (currentData: SearchResult[][] | SearchResult[] | undefined) =>
-          mapSearchResults(currentData, (event) =>
-            event.id === search.id
-              ? { ...event, plus_id: "new_upload" }
-              : event,
-          ),
-        {
-          optimisticData: true,
-          rollbackOnError: true,
-          revalidate: false,
-        },
-      );
+      try {
+        const resp = falsePositive
+          ? await axios.put(`events/${eventId}/false_positive`)
+          : await axios.post(`events/${eventId}/plus`, {
+              include_annotation: 1,
+            });
+
+        if (resp.status !== 200 || !resp.data?.success) {
+          throw new Error();
+        }
+
+        if (displayedIdRef.current === eventId) {
+          setState("submitted");
+        }
+
+        mutate(
+          (key) => isEventsKey(key),
+          (currentData: SearchResult[][] | SearchResult[] | undefined) =>
+            mapSearchResults(currentData, (event) =>
+              event.id === eventId
+                ? { ...event, plus_id: "new_upload" }
+                : event,
+            ),
+          {
+            optimisticData: true,
+            rollbackOnError: true,
+            revalidate: false,
+          },
+        );
+      } catch {
+        if (displayedIdRef.current === eventId) {
+          setState("reviewing");
+        }
+
+        // the toast is not object specific, so it is always shown to avoid
+        // silently dropping a failed submission
+        toast.error(
+          t("explore.plus.review.toast.error", { ns: "components/dialog" }),
+          { position: "top-center" },
+        );
+      }
     },
-    [search, mutate, mapSearchResults, setSearch, isEventsKey],
+    [search, mutate, mapSearchResults, isEventsKey, t],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);
@@ -1566,7 +1594,7 @@ function ObjectDetailsTab({
                       {t("button.yes", { ns: "common" })}
                     </Button>
                     <Button
-                      className="flex-1 text-white"
+                      className="flex-1"
                       aria-label={t("button.no", { ns: "common" })}
                       variant="destructive"
                       onClick={() => {
@@ -1703,7 +1731,7 @@ function ObjectDetailsTab({
         ) : (
           <div className="flex flex-col gap-2">
             <Textarea
-              className="text-md h-32 md:text-sm"
+              className="h-32 md:text-sm"
               placeholder={t("details.description.placeholder")}
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
@@ -1838,7 +1866,7 @@ export function ObjectSnapshotTab({
                   <img
                     ref={imgRef}
                     className="mx-auto max-h-[60dvh] rounded-lg bg-background object-contain"
-                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg`}
+                    src={`${baseUrl}api/events/${search?.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`}
                     alt={`${search?.label}`}
                     loading={isSafari ? "eager" : "lazy"}
                     onLoad={() => {

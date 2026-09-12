@@ -6,7 +6,7 @@ import numpy as np
 try:
     from tflite_runtime.interpreter import Interpreter, load_delegate
 except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
+    from ai_edge_litert.interpreter import Interpreter, load_delegate
 
 
 logger = logging.getLogger(__name__)

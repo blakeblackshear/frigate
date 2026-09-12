@@ -2,10 +2,10 @@
   "exploreIsUnavailable": {
     "downloadingModels": {
       "tips": {
-        "context": "Potser voldreu reindexar les incrustacions dels objectes seguits un cop s'hagin descarregat els models.",
+        "context": "Potser voldreu reindexar els vectors dels objectes seguits un cop s'hagin descarregat els models.",
         "documentation": "Llegir la documentació"
       },
-      "context": "Frigate està descarregant els models d'embeddings necessaris per a donar suport a la funció de cerca semàntica. Això pot trigar diversos minuts, depenent de la velocitat de la teva connexió de xarxa.",
+      "context": "El Frigate està baixant els models de vectors necessaris per a admetre la funció de Cerca Semàntica. Això pot trigar uns quants minuts depenent de la velocitat de la vostra connexió de xarxa.",
       "setup": {
         "visionModel": "Model de visió",
         "visionModelFeatureExtractor": "Extractor de característiques del model de visió",
@@ -172,7 +172,8 @@
     "attributes": "Atributs de classificació",
     "title": {
       "label": "Títol"
-    }
+    },
+    "scoreInfo": "Informació de la partitura"
   },
   "searchResult": {
     "tooltip": "S'ha identificat {{type}} amb una confiança del {{confidence}}%",
@@ -234,13 +235,23 @@
     "downloadCleanSnapshot": {
       "label": "Descarrega la instantània neta",
       "aria": "Descarrega la instantània neta"
+    },
+    "debugReplay": {
+      "label": "Depura la repetició",
+      "aria": "Mostra aquest objecte rastrejat a la vista de reproducció de depuració"
+    },
+    "more": {
+      "aria": "Més"
     }
   },
   "noTrackedObjects": "No s'han trobat objectes rastrejats",
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar la supressió",
-      "desc": "Eliminant aquest objecte seguit borrarà l'snapshot, qualsevol embedding gravat, i qualsevol detall de seguiment. Les imatges gravades d'aquest objecte seguit en l'historial <em>NO</em> seràn eliminades.<br /><br />Estas segur que vols continuar?"
+      "desc": "En eliminar aquest objecte detectat, s'esborrarà la instantània, els vectors desats i qualsevol entrada associada als detalls de seguiment d'aquest objecte. El metratge enregistrat d'aquest objecte detectat a la vista de l'Historial <em>NO</em> s'esborrarà.<br /><br />Segur que voleu continuar?"
+    },
+    "toast": {
+      "error": "S'ha produït un error en suprimir aquest objecte rastrejat: {{errorMessage}}"
     }
   },
   "fetchingTrackedObjectsFailed": "Error al obtenir objectes rastrejats: {{errorMessage}}",
@@ -271,25 +282,28 @@
         "faceOrLicense_plate": "{{attribute}} detectat per {{label}}",
         "other": "{{label}} reconegut com a {{attribute}}"
       },
-      "gone": "{{label}} esquerra",
+      "gone": "{{label}} ha sortit",
       "heard": "{{label}} sentit",
       "external": "{{label}} detectat",
       "header": {
         "zones": "Zones",
         "ratio": "Ràtio",
         "area": "Àrea",
-        "score": "Puntuació"
+        "score": "Puntuació",
+        "computedScore": "Puntuació calculada",
+        "topScore": "Puntuació superior",
+        "toggleAdvancedScores": "Commuta les puntuacions avançades"
       }
     },
     "annotationSettings": {
       "title": "Configuració d'anotacions",
       "showAllZones": {
         "title": "Mostra totes les Zones",
-        "desc": "Mostra sempre les zones amb marcs on els objectes hagin entrat a la zona."
+        "desc": "Mostra sempre les zones amb fotogrames on els objectes hagin entrat a la zona."
       },
       "offset": {
         "label": "Òfset d'Anotació",
-        "desc": "Aquestes dades provenen del flux de detecció de la càmera, però se superposen a les imatges del flux de gravació. És poc probable que els dos fluxos estiguin perfectament sincronitzats. Com a resultat, el quadre delimitador i les imatges no s'alinearan perfectament. Tanmateix, es pot utilitzar el camp <code>annotation_offset</code> per ajustar-ho.",
+        "desc": "Aquestes dades provenen del canal de detecció de la càmera, però estan sobreposades a les imatges del canal de registre. És poc probable que els dos corrents estiguin perfectament sincronitzats. Com a resultat, la caixa contenidora i les imatges no s'alinearan perfectament. Podeu utilitzar aquest paràmetre per a compensar les anotacions cap endavant o cap enrere en el temps per a alinear-les millor amb el metratge gravat.",
         "millisecondsToOffset": "Millisegons per l'òfset de detecció d'anotacions per. <em>Per defecte: 0</em>",
         "tips": "Reduïu el valor si la reproducció del vídeo es troba per davant dels quadres i els punts de ruta, i augmenteu-lo si es troba per darrere. Aquest valor pot ser negatiu.",
         "toast": {

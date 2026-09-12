@@ -16,15 +16,15 @@ from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
 from frigate.data_processing.types import PostProcessDataEnum
-from frigate.genai import GenAIClient
+from frigate.genai.manager import GenAIClientManager
 from frigate.models import Event
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
-from frigate.util.file import get_event_thumbnail_bytes
+from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
 from frigate.util.image import create_thumbnail, ensure_jpeg_bytes
 
 if TYPE_CHECKING:
-    from frigate.embeddings import Embeddings
+    from frigate.embeddings.embeddings import Embeddings
 
 from ..post.api import PostProcessorApi
 from ..types import DataProcessorMetrics
@@ -41,7 +41,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         embeddings: "Embeddings",
         requestor: InterProcessRequestor,
         metrics: DataProcessorMetrics,
-        client: GenAIClient,
+        genai_manager: GenAIClientManager,
         semantic_trigger_processor: SemanticTriggerProcessor | None,
     ):
         super().__init__(config, metrics, None)
@@ -49,7 +49,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         self.embeddings = embeddings
         self.requestor = requestor
         self.metrics = metrics
-        self.genai_client = client
+        self.genai_manager = genai_manager
         self.semantic_trigger_processor = semantic_trigger_processor
         self.tracked_events: dict[str, list[Any]] = {}
         self.early_request_sent: dict[str, bool] = {}
@@ -63,8 +63,10 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         """Handle an update to a frame for an object."""
         camera_config = self.config.cameras[camera]
 
-        # no need to save our own thumbnails if genai is not enabled
-        # or if the object has become stationary
+        if not camera_config.objects.genai.enabled:
+            return
+
+        # no need to save our own thumbnails if the object has become stationary
         if not data["stationary"]:
             if data["id"] not in self.tracked_events:
                 self.tracked_events[data["id"]] = []
@@ -139,7 +141,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         ):
             self._process_genai_description(event, camera_config, thumbnail)
         else:
-            self.cleanup_event(event.id)
+            self.cleanup_event(str(event.id))
 
     def __regenerate_description(self, event_id: str, source: str, force: bool) -> None:
         """Regenerate the description for an event."""
@@ -149,16 +151,16 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             logger.error(f"Event {event_id} not found for description regeneration")
             return
 
-        if self.genai_client is None:
-            logger.error("GenAI not enabled")
-            return
-
-        camera_config = self.config.cameras[event.camera]
+        camera_config = self.config.cameras[str(event.camera)]
         if not camera_config.objects.genai.enabled and not force:
             logger.error(f"GenAI not enabled for camera {event.camera}")
             return
 
         thumbnail = get_event_thumbnail_bytes(event)
+
+        if thumbnail is None:
+            logger.error("No thumbnail available for %s", event.id)
+            return
 
         # ensure we have a jpeg to pass to the model
         thumbnail = ensure_jpeg_bytes(thumbnail)
@@ -187,13 +189,18 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             )
         )
 
-        self._genai_embed_description(event, embed_image)
+        self._genai_embed_description(
+            event, [img for img in embed_image if img is not None]
+        )
 
     def process_data(self, frame_data: dict, data_type: PostProcessDataEnum) -> None:
         """Process a frame update."""
         self.metrics.object_desc_dps.value = self.object_desc_dps.eps()
 
         if data_type != PostProcessDataEnum.tracked_object:
+            return
+
+        if self.genai_manager.description_client is None:
             return
 
         state: str | None = frame_data.get("state", None)
@@ -232,51 +239,44 @@ class ObjectDescriptionProcessor(PostProcessorApi):
     def _read_and_crop_snapshot(self, event: Event) -> bytes | None:
         """Read, decode, and crop the snapshot image."""
 
-        snapshot_file = os.path.join(CLIPS_DIR, f"{event.camera}-{event.id}.jpg")
-
-        if not os.path.isfile(snapshot_file):
-            logger.error(
-                f"Cannot load snapshot for {event.id}, file not found: {snapshot_file}"
-            )
-            return None
-
         try:
-            with open(snapshot_file, "rb") as image_file:
-                snapshot_image = image_file.read()
+            img, _ = load_event_snapshot_image(event)
+            if img is None:
+                logger.error(f"Cannot load snapshot for {event.id}, file not found")
+                return None
 
-                img = cv2.imdecode(
-                    np.frombuffer(snapshot_image, dtype=np.int8),
-                    cv2.IMREAD_COLOR,
-                )
+            # Crop snapshot based on region
+            # provide full image if region doesn't exist (manual events)
+            height, width = img.shape[:2]
+            x1_rel, y1_rel, width_rel, height_rel = event.data.get(  # type: ignore[attr-defined]
+                "region", [0, 0, 1, 1]
+            )
+            x1, y1 = int(x1_rel * width), int(y1_rel * height)
 
-                # Crop snapshot based on region
-                # provide full image if region doesn't exist (manual events)
-                height, width = img.shape[:2]
-                x1_rel, y1_rel, width_rel, height_rel = event.data.get(
-                    "region", [0, 0, 1, 1]
-                )
-                x1, y1 = int(x1_rel * width), int(y1_rel * height)
+            cropped_image = img[
+                y1 : y1 + int(height_rel * height),
+                x1 : x1 + int(width_rel * width),
+            ]
 
-                cropped_image = img[
-                    y1 : y1 + int(height_rel * height),
-                    x1 : x1 + int(width_rel * width),
-                ]
+            _, buffer = cv2.imencode(".jpg", cropped_image)
 
-                _, buffer = cv2.imencode(".jpg", cropped_image)
-
-                return buffer.tobytes()
+            return buffer.tobytes()
         except Exception:
             return None
 
     def _process_genai_description(
-        self, event: Event, camera_config: CameraConfig, thumbnail
+        self, event: Event, camera_config: CameraConfig, thumbnail: bytes
     ) -> None:
+        event_id = str(event.id)
+
         if event.has_snapshot and camera_config.objects.genai.use_snapshot:
             snapshot_image = self._read_and_crop_snapshot(event)
+
             if not snapshot_image:
+                self.cleanup_event(event_id)
                 return
 
-        num_thumbnails = len(self.tracked_events.get(event.id, []))
+        num_thumbnails = len(self.tracked_events.get(event_id, []))
 
         # ensure we have a jpeg to pass to the model
         thumbnail = ensure_jpeg_bytes(thumbnail)
@@ -288,7 +288,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             else (
                 [
                     data["thumbnail"][:] if data.get("thumbnail") else None
-                    for data in self.tracked_events[event.id]
+                    for data in self.tracked_events[event_id]
                     if data.get("thumbnail")
                 ]
                 if num_thumbnails > 0
@@ -297,22 +297,22 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         )
 
         if camera_config.objects.genai.debug_save_thumbnails and num_thumbnails > 0:
-            logger.debug(f"Saving {num_thumbnails} thumbnails for event {event.id}")
+            logger.debug(f"Saving {num_thumbnails} thumbnails for event {event_id}")
 
-            Path(os.path.join(CLIPS_DIR, f"genai-requests/{event.id}")).mkdir(
+            Path(os.path.join(CLIPS_DIR, f"genai-requests/{event_id}")).mkdir(
                 parents=True, exist_ok=True
             )
 
-            for idx, data in enumerate(self.tracked_events[event.id], 1):
+            for idx, data in enumerate(self.tracked_events[event_id], 1):
                 jpg_bytes: bytes | None = data["thumbnail"]
 
                 if jpg_bytes is None:
-                    logger.warning(f"Unable to save thumbnail {idx} for {event.id}.")
+                    logger.warning(f"Unable to save thumbnail {idx} for {event_id}.")
                 else:
                     with open(
                         os.path.join(
                             CLIPS_DIR,
-                            f"genai-requests/{event.id}/{idx}.jpg",
+                            f"genai-requests/{event_id}/{idx}.jpg",
                         ),
                         "wb",
                     ) as j:
@@ -321,7 +321,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         # Generate the description. Call happens in a thread since it is network bound.
         threading.Thread(
             target=self._genai_embed_description,
-            name=f"_genai_embed_description_{event.id}",
+            name=f"_genai_embed_description_{event_id}",
             daemon=True,
             args=(
                 event,
@@ -330,13 +330,18 @@ class ObjectDescriptionProcessor(PostProcessorApi):
         ).start()
 
         # Clean up tracked events and early request state
-        self.cleanup_event(event.id)
+        self.cleanup_event(event_id)
 
     def _genai_embed_description(self, event: Event, thumbnails: list[bytes]) -> None:
         """Embed the description for an event."""
         start = datetime.datetime.now().timestamp()
-        camera_config = self.config.cameras[event.camera]
-        description = self.genai_client.generate_object_description(
+        camera_config = self.config.cameras[str(event.camera)]
+        client = self.genai_manager.description_client
+
+        if client is None:
+            return
+
+        description = client.generate_object_description(
             camera_config, thumbnails, event
         )
 
@@ -357,7 +362,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
 
         # Embed the description
         if self.config.semantic_search.enabled:
-            self.embeddings.embed_description(event.id, description)
+            self.embeddings.embed_description(str(event.id), description)
 
             # Check semantic trigger for this description
             if self.semantic_trigger_processor is not None:

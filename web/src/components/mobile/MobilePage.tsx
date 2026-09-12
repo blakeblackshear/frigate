@@ -55,9 +55,9 @@ export function MobilePage({
   });
 
   return (
-    <MobilePageContext.Provider value={{ open, onOpenChange: setOpen }}>
+    <MobilePageContext value={{ open, onOpenChange: setOpen }}>
       {children}
-    </MobilePageContext.Provider>
+    </MobilePageContext>
   );
 }
 
@@ -102,7 +102,7 @@ export function MobilePagePortal({
 type MobilePageContentProps = {
   children: React.ReactNode;
   className?: string;
-  scrollerRef?: React.RefObject<HTMLDivElement>;
+  scrollerRef?: React.RefObject<HTMLDivElement | null>;
 };
 
 export function MobilePageContent({
@@ -146,9 +146,10 @@ export function MobilePageContent({
         <motion.div
           ref={containerRef}
           className={cn(
-            "fixed inset-0 z-50 mb-12 bg-background",
-            isPWA && "mb-16",
-            "landscape:mb-14 landscape:md:mb-16",
+            "fixed inset-0 z-50 bg-background",
+            isPWA
+              ? "mb-[calc(3rem+env(safe-area-inset-bottom))] md:mb-[calc(4rem+env(safe-area-inset-bottom))]"
+              : "mb-12 md:mb-16",
             className,
           )}
           initial={{ x: "100%" }}

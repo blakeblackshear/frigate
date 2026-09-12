@@ -113,7 +113,8 @@
     "attributes": "Klasifikavimo Atributai",
     "title": {
       "label": "Antraštė"
-    }
+    },
+    "scoreInfo": "Balo Informacija"
   },
   "trackedObjectsCount_one": "{{count}} sekamas objektas ",
   "trackedObjectsCount_few": "{{count}} sekami objektai ",
@@ -170,6 +171,9 @@
     "confirmDelete": {
       "desc": "Trinant šį sekamą objektą taip pat bus pašalintos momentinės iškarpos, išsaugoti įterpiai ir kitos susios sekimo detalės. Šių sekamų objektų įrašyta filmuota medžiaga Istorijos vaizde ištrinta <em>NEBUS</em>.<br /><br />Ar esate įsitikinę, kad norite tęsti?",
       "title": "Patvirtinti Ištrynimą"
+    },
+    "toast": {
+      "error": "Klaida trinant šį susektą objektą: {{errorMessage}}"
     }
   },
   "trackedObjectDetails": "Sekamų Objektų Detalės",
@@ -224,12 +228,19 @@
       "label": "Slėpti objektų kelią"
     },
     "downloadCleanSnapshot": {
-      "label": "Atsisiųsti švarią nuotrauką",
-      "aria": "Atsisiųsti švarią nuotrauką"
+      "label": "Atsisiųsti nuotrauką",
+      "aria": "Atsisiųsti nuotrauką"
     },
     "viewTrackingDetails": {
       "label": "Žiūrėti sekimo detales",
       "aria": "Rodyti sekimo detales"
+    },
+    "debugReplay": {
+      "label": "Derinimo Peržiūra",
+      "aria": "Peržiūrėti šį susektą objektą derinimo peržiūros vaizde"
+    },
+    "more": {
+      "aria": "Daugiau"
     }
   },
   "noTrackedObjects": "Sekamų Objektų Nerasta",
@@ -276,7 +287,10 @@
         "zones": "Zonos",
         "ratio": "Santykis",
         "area": "Plotas",
-        "score": "Balas"
+        "score": "Balas",
+        "computedScore": "Apskaičiuotas Balas",
+        "topScore": "Aukščiausias Balas",
+        "toggleAdvancedScores": "Perjungti išplėstinius įverčius"
       }
     },
     "annotationSettings": {

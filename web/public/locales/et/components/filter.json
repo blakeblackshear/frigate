@@ -4,13 +4,16 @@
     "toast": {
       "error": "Jälgitavate objektide kustutamine ei õnnestunud: {{errorMessage}}",
       "success": "Jälgitavate objektide kustutamine õnnestus."
-    }
+    },
+    "title": "Kinnita kustutamine",
+    "desc": "Nende {{objectLength}} jälgitava objekti kustutamine eemaldab tõmmise salvestuse, kõik seotud salvestatud sissekanded ja kõik seotud objekti elutsükli kirjed. Ajaloo vaates salvestatud videomaterjali nende jälgitavate objektide kohta <em>EI</em> kustutata.<br /><br/>Kas soovid kindlasti jätkata?<br/><br/>Hoia <em>Shift</em>-klahvi all, et seda teateakent tulevikus vahele jätta."
   },
   "cameras": {
     "all": {
       "title": "Kõik kaamerad",
       "short": "Kaamerad"
-    }
+    },
+    "label": "Kaamerate filter"
   },
   "labels": {
     "all": {
@@ -38,7 +41,8 @@
       "defaultView": {
         "title": "Vaikimisi vaade",
         "summary": "Kokkuvõte",
-        "unfilteredGrid": "Filtreerimata ruudustik"
+        "unfilteredGrid": "Filtreerimata ruudustik",
+        "desc": "Kui filtreid pole valitud, näita viimaste jälgitud objektide kokkuvõtet sildi kohta või näita filtreerimata ruudustikuvaadet."
       },
       "gridColumns": {
         "title": "Ruudustiku veerud",
@@ -48,16 +52,26 @@
         "options": {
           "thumbnailImage": "Pisipilt",
           "description": "Kirjeldus"
-        }
+        },
+        "label": "Otsinguallikas",
+        "desc": "Vali, kas soovid otsida sinu jälgitavate objektide pisipilte või kirjeldusi."
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Vali kuupäev, mille alusel tahad filtreerida"
       }
     }
   },
   "logSettings": {
     "loading": {
-      "title": "Laadin"
+      "title": "Laadin",
+      "desc": "Kui logipaneeli vaade on keritud lõpuni, siis kuvatakse lisanduvad logikirjed automaatselt kohe."
     },
     "disableLogStreaming": "Keela logi voogedastus",
-    "allLogs": "Kõik logid"
+    "allLogs": "Kõik logid",
+    "label": "Logimistase filtri jaoks",
+    "filterBySeverity": "Kriitilisus filtri jaoks"
   },
   "classes": {
     "label": "Klassid",
@@ -83,6 +97,44 @@
   "estimatedSpeed": "Hinnanguline kiirus: ({{unit}})",
   "features": {
     "label": "Omadused",
-    "hasSnapshot": "Leidub hetkvõte"
+    "hasSnapshot": "Leidub hetkvõte",
+    "hasVideoClip": "Videoklipp on olemas",
+    "submittedToFrigatePlus": {
+      "label": "Saadetud teenusesse Frigate+",
+      "tips": "Sa pead filtreerima jälgitavaid objekte, millel on tõmmis.<br /><br />Kui jälgitaval objektil pole tõmmist, siis teda Frigate+ teenusesse saata ei saa."
+    }
+  },
+  "attributes": {
+    "label": "Klassifitseerimisatribuudid",
+    "all": "Kõik atribuudid"
+  },
+  "sort": {
+    "label": "Järjestus",
+    "dateAsc": "Kuupäev (kasvavalt)",
+    "dateDesc": "Kuupäev (kahanevalt)",
+    "scoreAsc": "Objekti punktiskoor (kasvavalt)",
+    "scoreDesc": "Objekti punktiskoor (kahanevalt)",
+    "speedAsc": "Hinnanguline kiirus (kasvavalt)",
+    "speedDesc": "Hinnanguline kiirus (kahanevalt)",
+    "relevance": "Teemakohasus"
+  },
+  "review": {
+    "showReviewed": "Näita ülevaadatuid"
+  },
+  "motion": {
+    "showMotionOnly": "Näita vaid liikumisega klippe"
+  },
+  "zoneMask": {
+    "filterBy": "Tsoonimask filtri jaoks"
+  },
+  "recognizedLicensePlates": {
+    "title": "Tuvastatud sõiduki numbrimärgid",
+    "loadFailed": "Tuvastatud sõiduki numbrimärkide laadimine ei õnnestunud.",
+    "loading": "Laadin tuvastatud sõiduki numbrimärke…",
+    "placeholder": "Sõidukite numbrimärkide otsimiseks kirjuta midagi…",
+    "noLicensePlatesFound": "Sõidukite numbrimärke ei leidu.",
+    "selectPlatesFromList": "Vali loendist üks või enam sõiduki numbrimärki.",
+    "selectAll": "Vali kõik",
+    "clearAll": "Eemalda kõik"
   }
 }

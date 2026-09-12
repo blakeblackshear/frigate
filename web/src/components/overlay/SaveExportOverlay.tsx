@@ -7,6 +7,9 @@ import { useTranslation } from "react-i18next";
 type SaveExportOverlayProps = {
   className: string;
   show: boolean;
+  hidePreview?: boolean;
+  saveLabel?: string;
+  isSaving?: boolean;
   onPreview: () => void;
   onSave: () => void;
   onCancel: () => void;
@@ -14,6 +17,9 @@ type SaveExportOverlayProps = {
 export default function SaveExportOverlay({
   className,
   show,
+  hidePreview = false,
+  saveLabel,
+  isSaving = false,
   onPreview,
   onSave,
   onCancel,
@@ -32,29 +38,36 @@ export default function SaveExportOverlay({
           className="flex items-center gap-1 text-primary"
           aria-label={t("button.cancel", { ns: "common" })}
           size="sm"
+          disabled={isSaving}
           onClick={onCancel}
         >
           <LuX />
           {t("button.cancel", { ns: "common" })}
         </Button>
+        {!hidePreview && (
+          <Button
+            className="flex items-center gap-1"
+            aria-label={t("export.fromTimeline.previewExport")}
+            size="sm"
+            disabled={isSaving}
+            onClick={onPreview}
+          >
+            <LuVideo />
+            {t("export.fromTimeline.previewExport")}
+          </Button>
+        )}
         <Button
           className="flex items-center gap-1"
-          aria-label={t("export.fromTimeline.previewExport")}
-          size="sm"
-          onClick={onPreview}
-        >
-          <LuVideo />
-          {t("export.fromTimeline.previewExport")}
-        </Button>
-        <Button
-          className="flex items-center gap-1"
-          aria-label={t("export.fromTimeline.saveExport")}
+          aria-label={saveLabel || t("export.fromTimeline.saveExport")}
           variant="select"
           size="sm"
+          disabled={isSaving}
           onClick={onSave}
         >
           <FaCompactDisc />
-          {t("export.fromTimeline.saveExport")}
+          {isSaving
+            ? t("export.fromTimeline.queueingExport")
+            : saveLabel || t("export.fromTimeline.saveExport")}
         </Button>
       </div>
     </div>

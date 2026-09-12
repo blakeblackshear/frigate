@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Gyvai - Frigate",
+  "documentTitle": {
+    "default": "Tiesiogiai - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Tiesiogiai - Frigate",
   "lowBandwidthMode": "Mažo-pralaidumo Rėžimas",
   "cameraAudio": {
@@ -26,14 +28,16 @@
     "recording": "Įrašinėjimas",
     "snapshots": "Momentinės Nuotraukos",
     "transcription": "Garso Transkripcija",
-    "autotracking": "Automatinis sekimas"
+    "autotracking": "Automatinis sekimas",
+    "camera": "Kamera"
   },
   "ptz": {
     "move": {
       "clickMove": {
         "label": "Norint išcentruoti kamerą, spragtelti kadre",
         "enable": "Įjungti paspaudimą, kad judinti",
-        "disable": "Išjungti paspaudimą kad judinti"
+        "disable": "Išjungti paspaudimą kad judinti",
+        "enableWithZoom": "Įgalinti valdymą spustelėjimu ir mastelio keitimą vilkimu"
       },
       "left": {
         "label": "Pasukti PTZ kamerą į kairę"
@@ -73,7 +77,9 @@
   },
   "camera": {
     "enable": "Įjungti Kamerą",
-    "disable": "Išjungti Kamerą"
+    "disable": "Išjungti Kamerą",
+    "turnOn": "Įjungti Kamerą",
+    "turnOff": "Išjungti Kamerą"
   },
   "muteCameras": {
     "enable": "Užtildyti Visas Kameras",
@@ -81,7 +87,8 @@
   },
   "recording": {
     "enable": "Įjungti Įrašymus",
-    "disable": "Įšjungti Įrašymus"
+    "disable": "Įšjungti Įrašymus",
+    "disabledInConfig": "Išpradžių šiai kamerai nustatymuose turi būti įjungtas įrašinėjimas."
   },
   "snapshots": {
     "enable": "Įjungti Momentines Nuotraukas",

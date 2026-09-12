@@ -5,7 +5,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 
 from frigate.camera import PTZMetrics
-from frigate.config import MotionConfig
+from frigate.config.config import RuntimeMotionConfig
 from frigate.motion import MotionDetector
 from frigate.util.image import grab_cv2_contours
 
@@ -15,22 +15,23 @@ logger = logging.getLogger(__name__)
 class ImprovedMotionDetector(MotionDetector):
     def __init__(
         self,
-        frame_shape,
-        config: MotionConfig,
+        frame_shape: tuple[int, ...],
+        config: RuntimeMotionConfig,
         fps: int,
-        ptz_metrics: PTZMetrics = None,
-        name="improved",
-        blur_radius=1,
-        interpolation=cv2.INTER_NEAREST,
-        contrast_frame_history=50,
-    ):
+        ptz_metrics: PTZMetrics | None = None,
+        name: str = "improved",
+        blur_radius: int = 1,
+        interpolation: int = cv2.INTER_NEAREST,
+        contrast_frame_history: int = 50,
+    ) -> None:
         self.name = name
         self.config = config
         self.frame_shape = frame_shape
-        self.resize_factor = frame_shape[0] / config.frame_height
+        frame_height = config.frame_height or frame_shape[0]
+        self.resize_factor = frame_shape[0] / frame_height
         self.motion_frame_size = (
-            config.frame_height,
-            config.frame_height * frame_shape[1] // frame_shape[0],
+            frame_height,
+            frame_height * frame_shape[1] // frame_shape[0],
         )
         self.avg_frame = np.zeros(self.motion_frame_size, np.float32)
         self.motion_frame_count = 0
@@ -44,20 +45,20 @@ class ImprovedMotionDetector(MotionDetector):
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
         self.ptz_metrics = ptz_metrics
-        self.last_stop_time = None
+        self.last_stop_time: float | None = None
 
-    def is_calibrating(self):
+    def is_calibrating(self) -> bool:
         return self.calibrating
 
-    def detect(self, frame):
-        motion_boxes = []
+    def detect(self, frame: np.ndarray) -> list[tuple[int, int, int, int]]:
+        motion_boxes: list[tuple[int, int, int, int]] = []
 
         if not self.config.enabled:
             return motion_boxes
 
         # if ptz motor is moving from autotracking, quickly return
         # a single box that is 80% of the frame
-        if (
+        if self.ptz_metrics is not None and (
             self.ptz_metrics.autotracker_enabled.value
             and not self.ptz_metrics.motor_stopped.is_set()
         ):
@@ -130,19 +131,19 @@ class ImprovedMotionDetector(MotionDetector):
 
         # dilate the thresholded image to fill in holes, then find contours
         # on thresholded image
-        thresh_dilated = cv2.dilate(thresh, None, iterations=1)
+        thresh_dilated = cv2.dilate(thresh, None, iterations=1)  # type: ignore[call-overload]
         contours = cv2.findContours(
             thresh_dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
         )
         contours = grab_cv2_contours(contours)
 
         # loop over the contours
-        total_contour_area = 0
+        total_contour_area: float = 0
         for c in contours:
             # if the contour is big enough, count it as motion
             contour_area = cv2.contourArea(c)
             total_contour_area += contour_area
-            if contour_area > self.config.contour_area:
+            if contour_area > (self.config.contour_area or 0):
                 x, y, w, h = cv2.boundingRect(c)
                 motion_boxes.append(
                     (
@@ -159,7 +160,7 @@ class ImprovedMotionDetector(MotionDetector):
 
         # check if the motor has just stopped from autotracking
         # if so, reassign the average to the current frame so we begin with a new baseline
-        if (
+        if self.ptz_metrics is not None and (
             # ensure we only do this for cameras with autotracking enabled
             self.ptz_metrics.autotracker_enabled.value
             and self.ptz_metrics.motor_stopped.is_set()
@@ -176,11 +177,32 @@ class ImprovedMotionDetector(MotionDetector):
             motion_boxes = []
             pct_motion = 0
 
+        # skip motion entirely if the scene change percentage exceeds configured
+        # threshold. this is useful to ignore lighting storms, IR mode switches,
+        # etc. rather than registering them as brief motion and then recalibrating.
+        # note: skipping means the frame is dropped and **no recording will be
+        # created**, which could hide a legitimate object if the camera is actively
+        # auto‑tracking. the alternative is to allow motion and accept a small
+        # recording that can be reviewed in the timeline. disabled by default (None).
+        if (
+            self.config.skip_motion_threshold is not None
+            and pct_motion > self.config.skip_motion_threshold
+        ):
+            # force a recalibration so we transition to the new background
+            self.calibrating = True
+            return []
+
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated
         if pct_motion < 0.05 and len(motion_boxes) <= 4:
             self.calibrating = False
 
-        # if calibrating or the motion contours are > 80% of the image area (lightning, ir, ptz) recalibrate
+        # if calibrating or the motion contours are > 80% of the image area
+        # (lightning, ir, ptz) recalibrate. the lightning threshold does **not**
+        # stop motion detection entirely; it simply halts additional processing for
+        # the current frame once the percentage crosses the threshold. this helps
+        # reduce false positive object detections and CPU usage during high‑motion
+        # events. recordings continue to be generated because users expect data
+        # while a PTZ camera is moving.
         if self.calibrating or pct_motion > self.config.lightning_threshold:
             self.calibrating = True
 
@@ -233,7 +255,7 @@ class ImprovedMotionDetector(MotionDetector):
 
     def update_mask(self) -> None:
         resized_mask = cv2.resize(
-            self.config.mask,
+            self.config.rasterized_mask,
             dsize=(self.motion_frame_size[1], self.motion_frame_size[0]),
             interpolation=cv2.INTER_AREA,
         )

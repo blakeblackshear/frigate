@@ -15,7 +15,9 @@
       "description": "Les activités ne peuvent être générées pour une caméra que si l'enregistrement est activé pour celle-ci."
     }
   },
-  "timeline": "Chronologie",
+  "timeline": {
+    "label": "Chronologie"
+  },
   "events": {
     "label": "Événements",
     "aria": "Sélectionner les événements",

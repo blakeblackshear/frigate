@@ -6,8 +6,13 @@ import {
   calculateInpointOffset,
   calculateSeekPosition,
 } from "@/utils/videoUtil";
+import { playWithTemporaryMuteFallback } from "@/utils/videoUtil.ts";
 
 type PlayerMode = "playback" | "scrubbing";
+
+// how long a seek may wait for its `seeked` event before playback starts
+// anyway; long enough that a normally completing seek always wins
+const SEEK_PLAY_FALLBACK_MS = 1000;
 
 export class DynamicVideoController {
   // main state
@@ -105,15 +110,24 @@ export class DynamicVideoController {
 
   waitAndPlay() {
     return new Promise((resolve) => {
+      let fallback: NodeJS.Timeout | undefined;
+
       const onSeekedHandler = () => {
+        clearTimeout(fallback);
         this.playerController.removeEventListener("seeked", onSeekedHandler);
-        this.playerController.play();
+        playWithTemporaryMuteFallback(this.playerController);
         resolve(undefined);
       };
 
       this.playerController.addEventListener("seeked", onSeekedHandler, {
         once: true,
       });
+
+      // iOS ManagedMediaSource pauses hls.js buffering, so `seeked` may
+      // never fire; playing is what prompts WebKit to resume streaming
+      if ("ManagedMediaSource" in window) {
+        fallback = setTimeout(onSeekedHandler, SEEK_PLAY_FALLBACK_MS);
+      }
     });
   }
 

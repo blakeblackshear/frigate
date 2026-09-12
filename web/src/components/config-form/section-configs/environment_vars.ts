@@ -1,0 +1,22 @@
+import type { SectionConfigOverrides } from "./types";
+
+const environmentVars: SectionConfigOverrides = {
+  base: {
+    sectionDocs: "/configuration/advanced/system#environment_vars",
+    fieldOrder: [],
+    advancedFields: [],
+    uiSchema: {
+      additionalProperties: {
+        "ui:options": {
+          size: "lg",
+          additionalPropertyKeyLabel:
+            "configForm.additionalProperties.variableNameLabel",
+          additionalPropertyKeyPlaceholder:
+            "configForm.additionalProperties.variableNamePlaceholder",
+        },
+      },
+    },
+  },
+};
+
+export default environmentVars;

@@ -31,6 +31,7 @@ import Chip from "@/components/indicators/Chip";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
 import { Trans, useTranslation } from "react-i18next";
+import { use24HourTime } from "@/hooks/use-date-utils";
 import { useNavigate } from "react-router-dom";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
@@ -77,6 +78,7 @@ export default function SearchView({
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
   });
+  const is24Hour = use24HourTime(config);
   const navigate = useNavigate();
 
   const { data: exploreEvents } = useSWR<SearchResult[]>(
@@ -191,10 +193,7 @@ export default function SearchView({
       sub_labels: allSubLabels,
       ...(hasCustomClassificationModels && { attributes: allAttributes }),
       search_type: ["thumbnail", "description"] as SearchSource[],
-      time_range:
-        config?.ui.time_format == "24hour"
-          ? ["00:00-23:59"]
-          : ["12:00AM-11:59PM"],
+      time_range: is24Hour ? ["00:00-23:59"] : ["12:00AM-11:59PM"],
       before: [formatDateToLocaleString()],
       after: [formatDateToLocaleString(-5)],
       min_score: ["50"],
@@ -209,6 +208,7 @@ export default function SearchView({
     }),
     [
       config,
+      is24Hour,
       allLabels,
       allZones,
       allSubLabels,
@@ -419,7 +419,7 @@ export default function SearchView({
   >();
 
   // keep track of previous ref to outline thumbnail when dialog closes
-  const prevSearchDetailRef = useRef<SearchResult | undefined>();
+  const prevSearchDetailRef = useRef<SearchResult | undefined>(undefined);
 
   useEffect(() => {
     if (searchDetail === undefined && prevSearchDetailRef.current) {
@@ -619,7 +619,9 @@ export default function SearchView({
                 return (
                   <div
                     key={value.id}
-                    ref={(item) => (itemRefs.current[index] = item)}
+                    ref={(item) => {
+                      itemRefs.current[index] = item;
+                    }}
                     data-start={value.start_time}
                     className="relative flex flex-col rounded-lg"
                   >

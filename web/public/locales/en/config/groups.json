@@ -1,0 +1,73 @@
+{
+  "audio": {
+    "global": {
+      "detection": "Global Detection",
+      "sensitivity": "Global Sensitivity"
+    },
+    "cameras": {
+      "detection": "Detection",
+      "sensitivity": "Sensitivity"
+    }
+  },
+  "timestamp_style": {
+    "global": {
+      "appearance": "Global Appearance"
+    },
+    "cameras": {
+      "appearance": "Appearance"
+    }
+  },
+  "motion": {
+    "global": {
+      "sensitivity": "Global Sensitivity",
+      "algorithm": "Global Algorithm"
+    },
+    "cameras": {
+      "sensitivity": "Sensitivity",
+      "algorithm": "Algorithm"
+    }
+  },
+  "snapshots": {
+    "global": {
+      "display": "Global Display"
+    },
+    "cameras": {
+      "display": "Display"
+    }
+  },
+  "detect": {
+    "global": {
+      "resolution": "Global Resolution",
+      "tracking": "Global Tracking"
+    },
+    "cameras": {
+      "resolution": "Resolution",
+      "tracking": "Tracking"
+    }
+  },
+  "objects": {
+    "global": {
+      "tracking": "Global Tracking",
+      "filtering": "Global Filtering"
+    },
+    "cameras": {
+      "tracking": "Tracking",
+      "filtering": "Filtering"
+    }
+  },
+  "record": {
+    "global": {
+      "retention": "Global Retention",
+      "events": "Global Events"
+    },
+    "cameras": {
+      "retention": "Retention",
+      "events": "Events"
+    }
+  },
+  "ffmpeg": {
+    "cameras": {
+      "cameraFfmpeg": "Camera-specific FFmpeg arguments"
+    }
+  }
+}

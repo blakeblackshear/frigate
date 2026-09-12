@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Ao Vivo - Frigate",
+  "documentTitle": {
+    "default": "Ao vivo - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
   "lowBandwidthMode": "Modo de baixa largura de banda",
   "twoWayTalk": {
@@ -15,7 +17,8 @@
       "clickMove": {
         "label": "Clique no quadro para centralizar a câmera",
         "enable": "Ativar clique para mover",
-        "disable": "Desativar clique para mover"
+        "disable": "Desativar clique para mover",
+        "enableWithZoom": "Habilitar clicar para mover / arrastar para zoom"
       },
       "left": {
         "label": "Mova a câmera PTZ para a esquerda"
@@ -55,7 +58,9 @@
   },
   "camera": {
     "enable": "Ativar Câmera",
-    "disable": "Desabilitar Câmera"
+    "disable": "Desabilitar Câmera",
+    "turnOn": "Ligar a câmera",
+    "turnOff": "Desligar a câmera"
   },
   "muteCameras": {
     "enable": "Silenciar Todas as Câmeras",
@@ -67,7 +72,8 @@
   },
   "recording": {
     "enable": "Ativar Gravação",
-    "disable": "Desativar Gravação"
+    "disable": "Desativar Gravação",
+    "disabledInConfig": "A gravação deve ser habilitada primeiro nas configurações desta câmera."
   },
   "snapshots": {
     "enable": "Permitir Capturas de Imagem",
@@ -147,7 +153,8 @@
     "snapshots": "Capturas de Imagem",
     "audioDetection": "Detecção de Áudio",
     "autotracking": "Auto Rastreamento",
-    "transcription": "Transcrição de Áudio"
+    "transcription": "Transcrição de Áudio",
+    "camera": "Câmera"
   },
   "history": {
     "label": "Exibir gravação histórica"
@@ -174,7 +181,21 @@
   "noCameras": {
     "title": "Nenhuma Câmera Configurada",
     "description": "Inicie conectando uma câmera ao Frigate.",
-    "buttonText": "Adicionar Câmera"
+    "buttonText": "Adicionar Câmera",
+    "restricted": {
+      "title": "Nenhuma Câmera Disponível",
+      "description": "Você não tem permissão para ver quaisquer câmeras neste grupo."
+    },
+    "default": {
+      "title": "Nenhuma Câmera Configurada",
+      "description": "Comece conectando uma câmera ao Frigate.",
+      "buttonText": "Adicionar Câmera"
+    },
+    "group": {
+      "title": "Nenhuma Câmera no Grupo",
+      "description": "Este grupo de câmeras não tem nenhuma câmera atribuída ou habilitada.",
+      "buttonText": "Gerenciar Grupos"
+    }
   },
   "snapshot": {
     "takeSnapshot": "Baixar captura de imagem instantânea",

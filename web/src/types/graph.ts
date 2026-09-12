@@ -24,8 +24,8 @@ export const EmbeddingThreshold = {
 } as Threshold;
 
 export const GenAIThreshold = {
-  warning: 30000,
-  error: 60000,
+  warning: 60,
+  error: 120,
 } as Threshold;
 
 export const DetectorTempThreshold = {

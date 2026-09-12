@@ -40,7 +40,7 @@
         },
         "label": "Innstillinger for kamerastrømming",
         "title": "{{cameraName}} strømmeinnstillinger",
-        "desc": "Endre direktestrømmingsalternativene for denne kameragruppens dashbord. <em>Disse innstillingene er spesifikke for enhet/nettleser.</em>",
+        "desc": "Endre alternativene for direktestrømming for denne kameragruppens dashbord. <em>Disse innstillingene er spesifikke for enhet/nettleser.</em>",
         "audioIsAvailable": "Lyd er tilgjengelig for denne strømmen",
         "audioIsUnavailable": "Lyd er ikke tilgjengelig for denne strømmen",
         "audio": {
@@ -68,7 +68,10 @@
       "desc": "Velg kameraer for denne gruppen."
     },
     "icon": "Ikon",
-    "success": "Kameragruppen ({{name}}) er lagret."
+    "success": "Kameragruppen ({{name}}) er lagret.",
+    "showAll": "Vis alle kameragrupper",
+    "showLess": "Vis mindre",
+    "editGroups": "Rediger kameragrupper"
   },
   "debug": {
     "options": {
@@ -77,11 +80,12 @@
       "showOptions": "Vis alternativer",
       "hideOptions": "Skjul alternativer"
     },
-    "boundingBox": "Avgrensningsboks",
+    "boundingBox": "Markeringsramme",
     "timestamp": "Tidsstempel",
     "zones": "Soner",
     "mask": "Maske",
     "motion": "Bevegelse",
-    "regions": "Regioner"
+    "regions": "Regioner",
+    "paths": "Stier"
   }
 }

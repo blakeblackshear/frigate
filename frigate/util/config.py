@@ -4,17 +4,59 @@ import asyncio
 import logging
 import os
 import shutil
-from typing import Any, Optional, Union
+from typing import Any
 
 from ruamel.yaml import YAML
 
-from frigate.const import CONFIG_DIR, EXPORT_DIR
+from frigate.const import (
+    CONFIG_DIR,
+    DEFAULT_FFMPEG_VERSION,
+    EXPORT_DIR,
+    INCLUDED_FFMPEG_VERSIONS,
+    REDACTED_CREDENTIAL_SENTINEL,
+)
+from frigate.util.builtin import deep_merge
 from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.17-0"
+CURRENT_CONFIG_VERSION = "0.18-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
+
+
+def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
+    """Resolve an ffmpeg version alias or custom path to a binary path.
+
+    A bare version alias that is no longer bundled (for example one that was
+    dropped when the default version changed) falls back to the default
+    bundled version so existing configs keep working across an upgrade or a
+    revert. Custom install paths (anything absolute) are used as-is.
+    """
+    if path == "default" or (
+        not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS
+    ):
+        version = DEFAULT_FFMPEG_VERSION
+    elif path in INCLUDED_FFMPEG_VERSIONS:
+        version = path
+    else:
+        return f"{path}/bin/{binary}"
+
+    return f"/usr/lib/ffmpeg/{version}/bin/{binary}"
+
+
+def redact_credential(obj: dict[str, Any], key: str) -> None:
+    """Replace obj[key] with the redaction sentinel if a value is saved, else drop.
+
+    Used when shaping the /config response so saved credentials never leave
+    the server. The frontend recognizes REDACTED_CREDENTIAL_SENTINEL, renders
+    the field as empty with a "saved — leave blank to keep" placeholder, and
+    /config/set strips it from any incoming payload so the YAML value is
+    preserved when the user doesn't touch the field.
+    """
+    if obj.get(key):
+        obj[key] = REDACTED_CREDENTIAL_SENTINEL
+    else:
+        obj.pop(key, None)
 
 
 def find_config_file() -> str:
@@ -36,7 +78,7 @@ def migrate_frigate_config(config_file: str):
 
     yaml = YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
-    with open(config_file, "r") as f:
+    with open(config_file) as f:
         config: dict[str, dict[str, Any]] = yaml.load(f)
 
     if config is None:
@@ -97,6 +139,13 @@ def migrate_frigate_config(config_file: str):
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.17-0"
+
+    if previous_version < "0.18-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.18-0...")
+        new_config = migrate_018_0(config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+        previous_version = "0.18-0"
 
     logger.info("Finished frigate config migration...")
 
@@ -427,12 +476,197 @@ def migrate_017_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     return new_config
 
 
+def _convert_legacy_mask_to_dict(
+    mask: str | list | None, mask_type: str = "motion_mask", label: str = ""
+) -> dict[str, dict[str, Any]]:
+    """Convert legacy mask format (str or list[str]) to new dict format.
+
+    Args:
+        mask: Legacy mask format (string or list of strings)
+        mask_type: Type of mask for naming ("motion_mask" or "object_mask")
+        label: Optional label for object masks (e.g., "person")
+
+    Returns:
+        Dictionary with mask_id as key and mask config as value
+    """
+    if not mask:
+        return {}
+
+    result = {}
+
+    if isinstance(mask, str):
+        if mask:
+            mask_id = f"{mask_type}_1"
+            friendly_name = (
+                f"Object Mask 1 ({label})"
+                if label
+                else f"{mask_type.replace('_', ' ').title()} 1"
+            )
+            result[mask_id] = {
+                "friendly_name": friendly_name,
+                "enabled": True,
+                "coordinates": mask,
+            }
+    elif isinstance(mask, list):
+        for i, coords in enumerate(mask):
+            if coords:
+                mask_id = f"{mask_type}_{i + 1}"
+                friendly_name = (
+                    f"Object Mask {i + 1} ({label})"
+                    if label
+                    else f"{mask_type.replace('_', ' ').title()} {i + 1}"
+                )
+                result[mask_id] = {
+                    "friendly_name": friendly_name,
+                    "enabled": True,
+                    "coordinates": coords,
+                }
+
+    return result
+
+
+def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Handle migrating frigate config to 0.18-0"""
+    new_config = config.copy()
+
+    # Migrate GenAI to new format
+    genai = new_config.get("genai")
+
+    if genai and genai.get("provider"):
+        genai["roles"] = ["descriptions", "chat"]
+        new_config["genai"] = {"default": genai}
+
+    # Remove deprecated sync_recordings from global record config
+    if new_config.get("record", {}).get("sync_recordings") is not None:
+        del new_config["record"]["sync_recordings"]
+
+    # Remove deprecated timelapse_args from global record export config
+    if new_config.get("record", {}).get("export", {}).get("timelapse_args") is not None:
+        del new_config["record"]["export"]["timelapse_args"]
+        # Remove export section if empty
+        if not new_config.get("record", {}).get("export"):
+            del new_config["record"]["export"]
+        # Remove record section if empty
+        if not new_config.get("record"):
+            del new_config["record"]
+
+    # Migrate global motion masks
+    global_motion = new_config.get("motion", {})
+    if global_motion and "mask" in global_motion:
+        mask = global_motion.get("mask")
+        if mask is not None and not isinstance(mask, dict):
+            new_config["motion"]["mask"] = _convert_legacy_mask_to_dict(
+                mask, "motion_mask"
+            )
+
+    # Migrate global object masks
+    global_objects = new_config.get("objects", {})
+    if global_objects and "mask" in global_objects:
+        mask = global_objects.get("mask")
+        if mask is not None and not isinstance(mask, dict):
+            new_config["objects"]["mask"] = _convert_legacy_mask_to_dict(
+                mask, "object_mask"
+            )
+
+    # Migrate global object filters masks
+    if global_objects and "filters" in global_objects:
+        for obj_name, filter_config in global_objects.get("filters", {}).items():
+            if isinstance(filter_config, dict) and "mask" in filter_config:
+                mask = filter_config.get("mask")
+                if mask is not None and not isinstance(mask, dict):
+                    new_config["objects"]["filters"][obj_name]["mask"] = (
+                        _convert_legacy_mask_to_dict(mask, "object_mask", obj_name)
+                    )
+
+    # Remove deprecated sync_recordings and migrate masks for camera-specific configs
+    for name, camera in config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
+
+        if camera_config.get("record", {}).get("sync_recordings") is not None:
+            del camera_config["record"]["sync_recordings"]
+
+        if (
+            camera_config.get("record", {}).get("export", {}).get("timelapse_args")
+            is not None
+        ):
+            del camera_config["record"]["export"]["timelapse_args"]
+            # Remove export section if empty
+            if not camera_config.get("record", {}).get("export"):
+                del camera_config["record"]["export"]
+            # Remove record section if empty
+            if not camera_config.get("record"):
+                del camera_config["record"]
+
+        # Migrate camera motion masks
+        camera_motion = camera_config.get("motion", {})
+        if camera_motion and "mask" in camera_motion:
+            mask = camera_motion.get("mask")
+            if mask is not None and not isinstance(mask, dict):
+                camera_config["motion"]["mask"] = _convert_legacy_mask_to_dict(
+                    mask, "motion_mask"
+                )
+
+        # Migrate camera global object masks
+        camera_objects = camera_config.get("objects", {})
+        if camera_objects and "mask" in camera_objects:
+            mask = camera_objects.get("mask")
+            if mask is not None and not isinstance(mask, dict):
+                camera_config["objects"]["mask"] = _convert_legacy_mask_to_dict(
+                    mask, "object_mask"
+                )
+
+        # Migrate camera object filter masks
+        if camera_objects and "filters" in camera_objects:
+            for obj_name, filter_config in camera_objects.get("filters", {}).items():
+                if isinstance(filter_config, dict) and "mask" in filter_config:
+                    mask = filter_config.get("mask")
+                    if mask is not None and not isinstance(mask, dict):
+                        camera_config["objects"]["filters"][obj_name]["mask"] = (
+                            _convert_legacy_mask_to_dict(mask, "object_mask", obj_name)
+                        )
+
+        new_config["cameras"][name] = camera_config
+
+    # Remove deprecated clean_copy from global snapshots config
+    if new_config.get("snapshots", {}).get("clean_copy") is not None:
+        del new_config["snapshots"]["clean_copy"]
+        if not new_config["snapshots"]:
+            del new_config["snapshots"]
+
+    # Remove deprecated clean_copy from camera snapshots configs
+    for name, camera in new_config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
+
+        if camera_config.get("snapshots", {}).get("clean_copy") is not None:
+            del camera_config["snapshots"]["clean_copy"]
+            if not camera_config["snapshots"]:
+                del camera_config["snapshots"]
+
+        new_config["cameras"][name] = camera_config
+
+    # Remove deprecated date_style and time_style from global ui config
+    global_ui = new_config.get("ui", {})
+    if global_ui.get("date_style") is not None:
+        del new_config["ui"]["date_style"]
+    if global_ui.get("time_style") is not None:
+        del new_config["ui"]["time_style"]
+    # Remove ui section if empty
+    if "ui" in new_config and not new_config["ui"]:
+        del new_config["ui"]
+
+    new_config["version"] = "0.18-0"
+    return new_config
+
+
 def get_relative_coordinates(
-    mask: Optional[Union[str, list]], frame_shape: tuple[int, int]
-) -> Union[str, list]:
+    mask: str | list | None,
+    frame_shape: tuple[int, int],
+    camera_name: str = "",
+) -> str | list:
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
+    where = f" for camera {camera_name}" if camera_name else ""
     if mask:
         if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
             relative_masks = []
@@ -447,7 +681,7 @@ def get_relative_coordinates(
 
                         if x > frame_shape[1] or y > frame_shape[0]:
                             logger.error(
-                                f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                                f"Not applying mask due to invalid coordinates{where}. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                             )
                             continue
 
@@ -470,7 +704,7 @@ def get_relative_coordinates(
 
                 if x > frame_shape[1] or y > frame_shape[0]:
                     logger.error(
-                        f"Not applying mask due to invalid coordinates. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
+                        f"Not applying mask due to invalid coordinates{where}. {x},{y} is outside of the detection resolution {frame_shape[1]}x{frame_shape[0]}. Use the editor in the UI to correct the mask."
                     )
                     return []
 
@@ -486,7 +720,7 @@ def get_relative_coordinates(
 
 
 def convert_area_to_pixels(
-    area_value: Union[int, float], frame_shape: tuple[int, int]
+    area_value: int | float, frame_shape: tuple[int, int]
 ) -> int:
     """
     Convert area specification to pixels.
@@ -526,3 +760,115 @@ class StreamInfoRetriever:
         info = asyncio.run(get_video_properties(ffmpeg, path))
         self.stream_cache[path] = info
         return info
+
+
+def apply_section_update(camera_config, section: str, update: dict) -> str | None:
+    """Merge an update dict into a camera config section and rebuild runtime variants.
+
+    For motion and object filter sections, the plain Pydantic models are rebuilt
+    as RuntimeMotionConfig / RuntimeFilterConfig so that rasterized numpy masks
+    are recomputed.  This mirrors the logic in FrigateConfig.post_validation.
+
+    Args:
+        camera_config: The CameraConfig instance to update.
+        section: Config section name (e.g. "motion", "objects").
+        update: Nested dict of field updates to merge.
+
+    Returns:
+        None on success, or an error message string on failure.
+    """
+    from frigate.config.config import RuntimeFilterConfig, RuntimeMotionConfig
+
+    current = getattr(camera_config, section, None)
+    if current is None:
+        return f"Section '{section}' not found on camera '{camera_config.name}'"
+
+    try:
+        frame_shape = camera_config.frame_shape
+
+        if section == "motion":
+            merged = deep_merge(
+                current.model_dump(exclude_unset=True),
+                update,
+                override=True,
+            )
+            camera_config.motion = RuntimeMotionConfig(
+                frame_shape=frame_shape, **merged
+            )
+
+        elif section == "objects":
+            merged = deep_merge(
+                current.model_dump(),
+                update,
+                override=True,
+            )
+            new_objects = current.__class__.model_validate(merged)
+
+            # Preserve private _all_objects from original config
+            try:
+                new_objects._all_objects = current._all_objects
+            except AttributeError:
+                pass
+
+            # Rebuild RuntimeFilterConfig with merged global + per-object masks
+            for obj_name, filt in new_objects.filters.items():
+                merged_mask = dict(filt.mask)
+                if new_objects.mask:
+                    for gid, gmask in new_objects.mask.items():
+                        merged_mask[f"global_{gid}"] = gmask
+
+                new_objects.filters[obj_name] = RuntimeFilterConfig(
+                    frame_shape=frame_shape,
+                    mask=merged_mask,
+                    **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
+                )
+            camera_config.objects = new_objects
+
+        elif section == "detect":
+            # apply detect first so frame_shape reflects the new resolution
+            # before we rebuild mask-dependent runtime configs below
+            merged = deep_merge(current.model_dump(), update, override=True)
+            camera_config.detect = current.__class__.model_validate(merged)
+
+            new_frame_shape = camera_config.frame_shape
+
+            # rebuild motion's rasterized_mask at the new frame_shape
+            if camera_config.motion is not None:
+                camera_config.motion = RuntimeMotionConfig(
+                    frame_shape=new_frame_shape,
+                    **camera_config.motion.model_dump(exclude_unset=True),
+                )
+
+            # rebuild per-object filter masks at the new frame_shape
+            for obj_name, filt in camera_config.objects.filters.items():
+                merged_mask = dict(filt.mask)
+                if camera_config.objects.mask:
+                    for gid, gmask in camera_config.objects.mask.items():
+                        merged_mask[f"global_{gid}"] = gmask
+
+                camera_config.objects.filters[obj_name] = RuntimeFilterConfig(
+                    frame_shape=new_frame_shape,
+                    mask=merged_mask,
+                    **filt.model_dump(exclude_unset=True, exclude={"mask", "raw_mask"}),
+                )
+
+            # Regenerate zone contours and per-zone filter masks at the new
+            # frame_shape so zone outlines and membership stay relative
+            for zone in camera_config.zones.values():
+                if zone.filters:
+                    for zone_obj_name, zone_filter in zone.filters.items():
+                        zone.filters[zone_obj_name] = RuntimeFilterConfig(
+                            frame_shape=new_frame_shape,
+                            **zone_filter.model_dump(exclude_unset=True),
+                        )
+                zone.generate_contour(new_frame_shape)
+
+        else:
+            merged = deep_merge(current.model_dump(), update, override=True)
+            setattr(camera_config, section, current.__class__.model_validate(merged))
+
+    except Exception:
+        logger.exception("Config validation error")
+        return "Validation error. Check logs for details."
+
+    return None

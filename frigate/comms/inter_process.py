@@ -3,8 +3,9 @@
 import logging
 import multiprocessing as mp
 import threading
+from collections.abc import Callable
 from multiprocessing.synchronize import Event as MpEvent
-from typing import Any, Callable
+from typing import Any
 
 import zmq
 
@@ -61,8 +62,8 @@ class InterProcessCommunicator(Communicator):
     def stop(self) -> None:
         self.stop_event.set()
         self.reader_thread.join()
-        self.socket.close()
-        self.context.destroy()
+        self.socket.close(linger=0)
+        self.context.destroy(linger=0)
 
 
 class InterProcessRequestor:
@@ -82,5 +83,5 @@ class InterProcessRequestor:
             return ""
 
     def stop(self) -> None:
-        self.socket.close()
-        self.context.destroy()
+        self.socket.close(linger=0)
+        self.context.destroy(linger=0)

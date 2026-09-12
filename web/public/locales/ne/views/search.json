@@ -1,0 +1,22 @@
+{
+  "search": "खोज्नुहोस्",
+  "savedSearches": "सुरक्षित गरिएका खोजहरू",
+  "searchFor": "खोज्नुहोस् {{inputValue}}",
+  "button": {
+    "clear": "खोज खाली गर्नुहोस्",
+    "save": "खोज बचत गर्नुहोस्",
+    "delete": "सुरक्षित गरिएको खोज मेटाउनुहोस्",
+    "filterInformation": "फिल्टर जानकारी",
+    "filterActive": "फिल्टरहरू सक्रिय छन्"
+  },
+  "trackedObjectId": "ट्र्याक गरिएको वस्तु ID",
+  "filter": {
+    "label": {
+      "cameras": "क्यामेराहरू",
+      "labels": "लेबलहरू",
+      "zones": "क्षेत्रहरू",
+      "sub_labels": "उप लेबलहरू",
+      "attributes": "विशेषताहरू"
+    }
+  }
+}

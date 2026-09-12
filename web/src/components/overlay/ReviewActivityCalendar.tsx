@@ -3,7 +3,7 @@ import { Calendar } from "../ui/calendar";
 import { ButtonHTMLAttributes, useEffect, useMemo, useRef } from "react";
 import { FaCircle } from "react-icons/fa";
 import { getUTCOffset } from "@/utils/dateUtil";
-import { type DayButtonProps, TZDate } from "react-day-picker";
+import { type DayButtonProps } from "react-day-picker";
 import { LAST_24_HOURS_KEY } from "@/types/filter";
 import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,33 @@ import useSWR from "swr";
 import { useTimezone } from "@/hooks/use-date-utils";
 
 type WeekStartsOnType = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+function formatCalendarDay(day: Date): string {
+  const y = day.getFullYear();
+  const m = String(day.getMonth() + 1).padStart(2, "0");
+  const d = String(day.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getTodayInTimezone(timezone?: string): {
+  year: number;
+  month: number;
+  day: number;
+  offset: number;
+} {
+  const now = new Date();
+  const offset = Math.round(getUTCOffset(now, timezone));
+
+  // shifting by the offset makes the UTC getters read the timezone's wall clock
+  const wallClock = new Date(now.getTime() + offset * 60000);
+
+  return {
+    year: wallClock.getUTCFullYear(),
+    month: wallClock.getUTCMonth(),
+    day: wallClock.getUTCDate(),
+    offset,
+  };
+}
 
 type ReviewActivityCalendarProps = {
   reviewSummary?: ReviewSummary;
@@ -30,68 +57,49 @@ export default function ReviewActivityCalendar({
   const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
 
   const disabledDates = useMemo(() => {
-    const tomorrow = new Date();
-    tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
-    const future = new Date();
-    future.setFullYear(tomorrow.getFullYear() + 10);
-    return { from: tomorrow, to: future };
-  }, []);
+    // day cells are TZDate in `timezone`, so the cutoff must be a real instant
+    const { year, month, day, offset } = getTodayInTimezone(timezone);
+    // midday: ranges match by calendar day, so this dodges DST edges
+    const from = new Date(Date.UTC(year, month, day + 1, 12) - offset * 60000);
+    const to = new Date(from);
+    to.setFullYear(from.getFullYear() + 10);
+    return { from, to };
+  }, [timezone]);
 
   const modifiers = useMemo(() => {
-    const recordings: Date[] = [];
-    const alerts: Date[] = [];
-    const detections: Date[] = [];
+    const recordingsSet = new Set<string>();
+    const alertsSet = new Set<string>();
+    const detectionsSet = new Set<string>();
 
-    // Handle recordings
     if (recordingsSummary) {
-      Object.keys(recordingsSummary).forEach((date) => {
-        if (date === LAST_24_HOURS_KEY) {
-          return;
+      for (const date of Object.keys(recordingsSummary)) {
+        if (date !== LAST_24_HOURS_KEY) {
+          recordingsSet.add(date);
         }
-
-        const parts = date.split("-");
-        const cal = new TZDate(date + "T00:00:00", timezone);
-
-        cal.setFullYear(
-          parseInt(parts[0]),
-          parseInt(parts[1]) - 1,
-          parseInt(parts[2]),
-        );
-
-        recordings.push(cal);
-      });
+      }
     }
 
-    // Handle reviews if present
     if (reviewSummary) {
-      Object.entries(reviewSummary).forEach(([date, data]) => {
-        if (date === LAST_24_HOURS_KEY) {
-          return;
-        }
-
-        const parts = date.split("-");
-        const cal = new TZDate(date + "T00:00:00", timezone);
-
-        cal.setFullYear(
-          parseInt(parts[0]),
-          parseInt(parts[1]) - 1,
-          parseInt(parts[2]),
-        );
+      for (const [date, data] of Object.entries(reviewSummary)) {
+        if (date === LAST_24_HOURS_KEY) continue;
 
         if (data.total_alert > data.reviewed_alert) {
-          alerts.push(cal);
+          alertsSet.add(date);
         } else if (data.total_detection > data.reviewed_detection) {
-          detections.push(cal);
+          detectionsSet.add(date);
         }
-      });
+      }
     }
 
-    return { alerts, detections, recordings };
-  }, [reviewSummary, recordingsSummary, timezone]);
+    return {
+      recordings: (day: Date) => recordingsSet.has(formatCalendarDay(day)),
+      alerts: (day: Date) => alertsSet.has(formatCalendarDay(day)),
+      detections: (day: Date) => detectionsSet.has(formatCalendarDay(day)),
+    };
+  }, [reviewSummary, recordingsSummary]);
 
   return (
     <Calendar
-      key={selectedDay ? selectedDay.toISOString() : "reset"}
       mode="single"
       disabled={disabledDates}
       showOutsideDays={false}
@@ -170,60 +178,54 @@ type TimezoneAwareCalendarProps = {
   timezone?: string;
   selectedDay?: Date;
   onSelect: (day?: Date) => void;
+  recordingsSummary?: RecordingsSummary;
 };
 export function TimezoneAwareCalendar({
   timezone,
   selectedDay,
   onSelect,
+  recordingsSummary,
 }: TimezoneAwareCalendarProps) {
   const [weekStartsOn] = useUserPersistence("weekStartsOn", 0);
 
-  const timezoneOffset = useMemo(
-    () =>
-      timezone ? Math.round(getUTCOffset(new Date(), timezone)) : undefined,
-    [timezone],
-  );
-  const disabledDates = useMemo(() => {
-    const tomorrow = new Date();
-
-    if (timezoneOffset) {
-      tomorrow.setHours(
-        tomorrow.getHours() + 24,
-        tomorrow.getMinutes() + timezoneOffset,
-        0,
-        0,
-      );
-    } else {
-      tomorrow.setHours(tomorrow.getHours() + 24, -1, 0, 0);
-    }
-
-    const future = new Date();
-    future.setFullYear(tomorrow.getFullYear() + 10);
-    return { from: tomorrow, to: future };
-  }, [timezoneOffset]);
-
-  const today = useMemo(() => {
-    if (!timezoneOffset) {
+  // When a recordings summary is supplied, underline days that have footage
+  const recordingsModifier = useMemo(() => {
+    if (!recordingsSummary) {
       return undefined;
     }
+    const recordingsSet = new Set<string>();
+    for (const date of Object.keys(recordingsSummary)) {
+      if (date !== LAST_24_HOURS_KEY) {
+        recordingsSet.add(date);
+      }
+    }
+    return {
+      recordings: (day: Date) => recordingsSet.has(formatCalendarDay(day)),
+    };
+  }, [recordingsSummary]);
 
-    const date = new Date();
-    const utc = Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate(),
-      date.getUTCHours(),
-      date.getUTCMinutes(),
-      date.getUTCSeconds(),
-    );
-    const todayUtc = new Date(utc);
-    todayUtc.setMinutes(todayUtc.getMinutes() + timezoneOffset, 0, 0);
-    return todayUtc;
-  }, [timezoneOffset]);
+  // callers pre-shift dates so the local clock reads `timezone`, so boundaries
+  // are built in local time rather than as instants
+  const { year, month, day } = useMemo(
+    () => getTodayInTimezone(timezone),
+    [timezone],
+  );
+
+  const disabledDates = useMemo(() => {
+    // midday: ranges match by calendar day, so this dodges DST edges
+    const from = new Date(year, month, day + 1, 12);
+    const to = new Date(from);
+    to.setFullYear(from.getFullYear() + 10);
+    return { from, to };
+  }, [year, month, day]);
+
+  const today = useMemo(
+    () => new Date(year, month, day, 12),
+    [year, month, day],
+  );
 
   return (
     <Calendar
-      key={selectedDay ? selectedDay.toISOString() : "reset"}
       mode="single"
       disabled={disabledDates}
       showOutsideDays={false}
@@ -232,6 +234,10 @@ export function TimezoneAwareCalendar({
       onSelect={onSelect}
       defaultMonth={selectedDay ?? new Date()}
       weekStartsOn={(weekStartsOn ?? 0) as WeekStartsOnType}
+      modifiers={recordingsModifier}
+      components={
+        recordingsModifier ? { DayButton: ReviewActivityDay } : undefined
+      }
     />
   );
 }

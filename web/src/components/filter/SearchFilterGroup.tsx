@@ -127,12 +127,16 @@ export default function SearchFilterGroup({
 
   const filterValues = useMemo(
     () => ({
-      cameras: allowedCameras,
+      cameras: [...allowedCameras].sort(
+        (a, b) =>
+          (config?.cameras[a]?.ui?.order ?? 0) -
+          (config?.cameras[b]?.ui?.order ?? 0),
+      ),
       labels: Object.values(allLabels || {}),
       zones: Object.values(allZones || {}),
       search_type: ["thumbnail", "description"] as SearchSource[],
     }),
-    [allLabels, allZones, allowedCameras],
+    [config, allLabels, allZones, allowedCameras],
   );
 
   const availableSortTypes = useMemo(() => {

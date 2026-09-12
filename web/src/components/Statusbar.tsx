@@ -4,8 +4,13 @@ import {
   StatusMessage,
 } from "@/context/statusbar-provider";
 import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
+import { cn } from "@/lib/utils";
+import type { ProfilesApiResponse } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useContext, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 
 import { FaCheck } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
@@ -14,6 +19,7 @@ import { Link } from "react-router-dom";
 
 export default function Statusbar() {
   const { t } = useTranslation(["views/system"]);
+  const isAdmin = useIsAdmin();
 
   const { messages, addMessage, clearMessages } = useContext(
     StatusBarMessagesContext,
@@ -45,6 +51,21 @@ export default function Statusbar() {
       );
     });
   }, [potentialProblems, addMessage, clearMessages]);
+
+  const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
+
+  const activeProfile = useMemo(() => {
+    if (!profilesData?.active_profile || !profilesData.profiles) return null;
+    const info = profilesData.profiles.find(
+      (p) => p.name === profilesData.active_profile,
+    );
+    const allNames = profilesData.profiles.map((p) => p.name).sort();
+    return {
+      name: profilesData.active_profile,
+      friendlyName: info?.friendly_name ?? profilesData.active_profile,
+      color: getProfileColor(profilesData.active_profile, allNames),
+    };
+  }, [profilesData]);
 
   const { payload: reindexState } = useEmbeddingsReindexProgress();
 
@@ -97,8 +118,7 @@ export default function Statusbar() {
             case "amd-vaapi":
               gpuTitle = "AMD GPU";
               break;
-            case "intel-vaapi":
-            case "intel-qsv":
+            case "intel-gpu":
               gpuTitle = "Intel GPU";
               break;
             case "rockchip":
@@ -136,6 +156,34 @@ export default function Statusbar() {
             </Link>
           );
         })}
+        {activeProfile &&
+          (isAdmin ? (
+            <Link to="/settings?page=profiles">
+              <div className="flex cursor-pointer items-center gap-2 text-sm hover:underline">
+                <span
+                  className={cn(
+                    "size-2 shrink-0 rounded-full",
+                    activeProfile.color.dot,
+                  )}
+                />
+                <span className="max-w-[150px] truncate">
+                  {activeProfile.friendlyName}
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex items-center gap-2 text-sm">
+              <span
+                className={cn(
+                  "size-2 shrink-0 rounded-full",
+                  activeProfile.color.dot,
+                )}
+              />
+              <span className="max-w-[150px] truncate">
+                {activeProfile.friendlyName}
+              </span>
+            </div>
+          ))}
       </div>
       <div className="no-scrollbar flex h-full max-w-[50%] items-center gap-2 overflow-x-auto">
         {Object.entries(messages).length === 0 ? (

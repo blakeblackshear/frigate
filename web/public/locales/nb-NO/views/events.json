@@ -9,7 +9,9 @@
       "description": "Inspeksjonselementer kan kun opprettes for et kamera når opptak er aktivert for det kameraet."
     }
   },
-  "timeline": "Tidslinje",
+  "timeline": {
+    "label": "Tidslinje"
+  },
   "events": {
     "label": "Hendelser",
     "aria": "Velg hendelser",
@@ -29,7 +31,9 @@
   "timeline.aria": "Velg tidslinje",
   "documentTitle": "Inspeksjon - Frigate",
   "recordings": {
-    "documentTitle": "Opptak - Frigate"
+    "documentTitle": "Opptak - Frigate",
+    "invalidSharedLink": "Kunne ikke åpne tidsstemplet opptakslenke på grunn av tolkningsfeil.",
+    "invalidSharedCamera": "Kunne ikke åpne tidsstemplet opptakslenke på grunn av et ukjent eller uautorisert kamera."
   },
   "calendarFilter": {
     "last24Hours": "Siste 24 timer"
@@ -37,7 +41,7 @@
   "markAsReviewed": "Merk som inspisert",
   "markTheseItemsAsReviewed": "Merk disse elementene som inspiserte",
   "selected_one": "{{count}} valgt",
-  "selected_other": "{{count}} valgt",
+  "selected_other": "{{count}} valgte",
   "detected": "detektert",
   "suspiciousActivity": "Mistenkelig aktivitet",
   "threateningActivity": "Truende aktivitet",
@@ -63,5 +67,31 @@
   "normalActivity": "Normal",
   "needsReview": "Trenger inspeksjon",
   "securityConcern": "Sikkerhetsrisiko",
-  "select_all": "Alle"
+  "select_all": "Alle",
+  "motionSearch": {
+    "menuItem": "Bevegelsessøk",
+    "openMenu": "Kameravalg"
+  },
+  "motionPreviews": {
+    "menuItem": "Vis forhåndsvisning av bevegelse",
+    "title": "Bevegelsesvisning: {{camera}}",
+    "mobileSettingsTitle": "Innstillinger for forhåndsvisning",
+    "mobileSettingsDesc": "Juster avspillingshastighet, dimming og beskjæring, og velg en dato for å inspisere klipp med kun bevegelse.",
+    "dim": "Dimming",
+    "dimAria": "Juster dimmestyrke",
+    "dimDesc": "Øk dimming for å gjøre bevegelsesområder tydeligere.",
+    "speed": "Hastighet",
+    "speedAria": "Velg avspillingshastighet",
+    "speedDesc": "Velg hvor raskt klippene skal spilles av.",
+    "back": "Tilbake",
+    "empty": "Ingen forhåndsvisninger tilgjengelig",
+    "noPreview": "Forhåndsvisning utilgjengelig",
+    "seekAria": "Flytt {{camera}}-avspilleren til {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Velg områder for å kun vise klipp med bevegelse i disse sonene.",
+    "filterClear": "Tøm",
+    "crop": "Beskjær til filter",
+    "cropAria": "Slå av/på forhåndsvisning av beskjæring for de filtrerte områdene",
+    "cropDesc": "Zoom forhåndsvisninger inn på de valgte filterområdene i stedet for å vise hele bildet."
+  }
 }

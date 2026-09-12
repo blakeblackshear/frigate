@@ -9,7 +9,8 @@
     "clear": "Tühjenda otsing",
     "save": "Salvesta otsing",
     "delete": "Kustuta salvestatud otsing",
-    "filterInformation": "Filtri teave"
+    "filterInformation": "Filtri teave",
+    "filterActive": "Filtreid valituna"
   },
   "filter": {
     "label": {
@@ -17,7 +18,56 @@
       "cameras": "Kaamerad",
       "labels": "Sildid",
       "zones": "Tsoonid",
-      "sub_labels": "Alamsildid"
+      "sub_labels": "Alamsildid",
+      "attributes": "Omadused",
+      "search_type": "Otsingutüüp",
+      "time_range": "Ajavahemik",
+      "before": "Enne",
+      "after": "Pärast",
+      "min_score": "Minimaalne punktiskoor",
+      "max_score": "Maksimaalne punktiskoor",
+      "min_speed": "Miinimumkiirus",
+      "max_speed": "Maksimumkiirus",
+      "recognized_license_plate": "Tuvastatud sõiduki numbrimärk",
+      "has_clip": "Klipp on olemas"
+    },
+    "searchType": {
+      "thumbnail": "Pisipilt",
+      "description": "Kirjeldus"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "„Enne“ kuupäev peab olema varasem, kui „Pärast“ kuupäev.",
+        "afterDatebeEarlierBefore": "„Pärast“ kuupäev peab olema hilisem, kui „Enne“ kuupäev.",
+        "minScoreMustBeLessOrEqualMaxScore": "Minimaalne punktiskoor peab olema väiksem või võrdne kui maksimaalne punktiskoor.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "Maksimaalne punktiskoor peab olema suurem või võrdne kui minimaalne punktiskoor.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "Minimaalne kiirus peab olema väiksem või võrdne kui maksimaalne kiirus.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "Maksimaalne kiirus peab olema suurem või võrdne kui minimaalne kiirus."
+      }
+    },
+    "tips": {
+      "title": "Kuidas saad kasutada tekstifiltreid",
+      "desc": {
+        "text": "Filtrid aitavad sul otsingutulemusi kitsendada. Siin on juhised nende kasutamiseks sisestusväljal:",
+        "step1": "Sisesta filtri nimi, millele järgnev koolon (nt, „cameras:“).",
+        "step2": "Vali soovitatud väärtus või sisesta enda oma.",
+        "step3": "Kasuta mitmeid filtreid lisades neid üksteise järgi ning eraldades tühikuga.",
+        "step4": "Kuupäevafiltrid (before: ja after:) kasutavad {{DateFormat}} vormingut.",
+        "step5": "Ajavahemiku filter kasutab {{exampleTime}} vormingut.",
+        "step6": "Filtreid saad eemaldada klõpsates nende kõrval leiduvad märget „x“.",
+        "exampleLabel": "Näide:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Filtri väärtused",
+      "noFilters": "Filtrid",
+      "activeFilters": "Aktiivsed filtrid"
     }
+  },
+  "trackedObjectId": "Jälgitava objekti tunnus",
+  "similaritySearch": {
+    "title": "Sarnaste objektide otsing",
+    "active": "Sarnaste objektide otsing on aktiivne",
+    "clear": "Eemalda sarnaste objektide otsing"
   }
 }

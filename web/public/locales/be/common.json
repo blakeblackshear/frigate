@@ -1,0 +1,332 @@
+{
+  "time": {
+    "untilForTime": "Да {{time}}",
+    "untilForRestart": "Да перазапуску Frigate.",
+    "untilRestart": "Да перазапуску",
+    "never": "Ніколі",
+    "ago": "{{timeAgo}} таму",
+    "justNow": "Толькі што",
+    "today": "Сёння",
+    "yesterday": "Учора",
+    "last7": "Апошнія 7 дзён",
+    "last14": "Апошнія 14 дзён",
+    "last30": "Апошнія 30 дзён",
+    "thisWeek": "Гэты тыдзень",
+    "lastWeek": "Мінулы тыдзень",
+    "thisMonth": "Гэты месяц",
+    "lastMonth": "Мінулы месяц",
+    "5minutes": "5 хвілін",
+    "10minutes": "10 хвілін",
+    "30minutes": "30 хвілін",
+    "1hour": "1 гадзіна",
+    "12hours": "12 гадзін",
+    "24hours": "24 гадзіны",
+    "pm": "вечара",
+    "am": "раніцы",
+    "yr": "{{time}} г",
+    "year_one": "{{time}} год",
+    "year_few": "{{time}} гады",
+    "year_many": "{{time}} гадоў",
+    "mo": "{{time}} мес",
+    "month_one": "{{time}} месяц",
+    "month_few": "{{time}} месяцы",
+    "month_many": "{{time}} месяцаў",
+    "d": "{{time}} д",
+    "day_one": "{{time}} дзень",
+    "day_few": "{{time}} дні",
+    "day_many": "{{time}} дзён",
+    "h": "{{time}} гадз",
+    "hour_one": "{{time}} гадзіна",
+    "hour_few": "{{time}} гадзіны",
+    "hour_many": "{{time}} гадзін",
+    "m": "{{time}} хв",
+    "minute_one": "{{time}} хвіліна",
+    "minute_few": "{{time}} хвіліны",
+    "minute_many": "{{time}} хвілін",
+    "s": "{{time}} с",
+    "second_one": "{{time}} секунда",
+    "second_few": "{{time}} секунды",
+    "second_many": "{{time}} секунд",
+    "formattedTimestamp": {
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd.MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinute": {
+      "12hour": "h:mm aaa",
+      "24hour": "HH:mm"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM yyyy",
+      "24hour": "d MMM yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "inProgress": "Выконваецца",
+    "invalidStartTime": "Памылковы час пачатку",
+    "invalidEndTime": "Памылковы час заканчэння"
+  },
+  "unit": {
+    "speed": {
+      "mph": "міль/г",
+      "kph": "км/г"
+    },
+    "length": {
+      "feet": "футы",
+      "meters": "метры"
+    },
+    "data": {
+      "kbps": "кБ/с",
+      "mbps": "МБ/с",
+      "gbps": "ГБ/с",
+      "kbph": "кБ/гадз",
+      "mbph": "МБ/гадз",
+      "gbph": "ГБ/гадз"
+    }
+  },
+  "label": {
+    "back": "Назад",
+    "hide": "Схаваць {{item}}",
+    "show": "Паказаць {{item}}",
+    "ID": "ID",
+    "none": "Няма",
+    "all": "Усе",
+    "other": "Іншае"
+  },
+  "list": {
+    "two": "{{0}} і {{1}}",
+    "many": "{{items}} і {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Неабавязкова",
+    "internalID": "Унутраны ID, які Frigate выкарыстоўвае ў канфігурацыі і базе даных"
+  },
+  "button": {
+    "add": "Дадаць",
+    "apply": "Прымяніць",
+    "applying": "Прымяненне…",
+    "reset": "Скінуць",
+    "undo": "Адрабіць",
+    "done": "Гатова",
+    "enabled": "Уключана",
+    "enable": "Уключыць",
+    "disabled": "Адключана",
+    "disable": "Адключыць",
+    "save": "Захаваць",
+    "saving": "Захаванне…",
+    "cancel": "Скасаваць",
+    "close": "Закрыць",
+    "copy": "Капіяваць",
+    "copiedToClipboard": "Скапіявана ў буфер абмену",
+    "back": "Назад",
+    "history": "Гісторыя",
+    "fullscreen": "На ўвесь экран",
+    "exitFullscreen": "Выйсці з поўнаэкраннага рэжыму",
+    "pictureInPicture": "Picture in Picture",
+    "twoWayTalk": "Двухбаковая размова",
+    "cameraAudio": "Гук камеры",
+    "on": "Укл.",
+    "off": "Выкл.",
+    "edit": "Рэдагаваць",
+    "copyCoordinates": "Скапіяваць каардынаты",
+    "delete": "Выдаліць",
+    "yes": "Так",
+    "no": "Не",
+    "download": "Спампоўка",
+    "info": "Звесткі",
+    "suspended": "Прыпынена",
+    "unsuspended": "Аднавіць",
+    "play": "Прайграць",
+    "unselect": "Зняць выбар",
+    "export": "Экспарт",
+    "deleteNow": "Выдаліць зараз",
+    "next": "Далей",
+    "continue": "Працягнуць",
+    "modified": "Зменена",
+    "overridden": "Перавызначана",
+    "resetToGlobal": "Скінуць да глабальнага",
+    "resetToDefault": "Скінуць да прадвызначанага",
+    "saveAll": "Захаваць усё",
+    "savingAll": "Захаванне ўсяго…",
+    "undoAll": "Адрабіць усё",
+    "retry": "Паўтарыць"
+  },
+  "menu": {
+    "system": "Сістэма",
+    "systemMetrics": "Сістэмныя метрыкі",
+    "configuration": "Канфігурацыя",
+    "systemLogs": "Журналы сістэмы",
+    "profiles": "Профілі",
+    "settings": "Налады",
+    "configurationEditor": "Рэдактар канфігурацыі",
+    "languages": "Мовы",
+    "language": {
+      "en": "English (англійская)",
+      "es": "Español (іспанская)",
+      "zhCN": "简体中文 (кітайская спрошчаная)",
+      "zhHant": "繁體中文 (кітайская традыцыйная)",
+      "hi": "हिन्दी (хіндзі)",
+      "fr": "Français (французская)",
+      "ar": "العربية (арабская)",
+      "pt": "Português (партугальская)",
+      "ptBR": "Português brasileiro (бразільская партугальская)",
+      "ru": "Русский (руская)",
+      "de": "Deutsch (нямецкая)",
+      "ja": "日本語 (японская)",
+      "tr": "Türkçe (турэцкая)",
+      "it": "Italiano (італьянская)",
+      "nl": "Nederlands (нідэрландская)",
+      "sv": "Svenska (шведская)",
+      "cs": "Čeština (чэшская)",
+      "nb": "Norsk Bokmål (нарвежская букмол)",
+      "ko": "한국어 (карэйская)",
+      "vi": "Tiếng Việt (в'етнамская)",
+      "fa": "فارسی (персідская)",
+      "pl": "Polski (польская)",
+      "uk": "Українська (украінская)",
+      "he": "עברית (іўрыт)",
+      "el": "Ελληνικά (грэчаская)",
+      "ro": "Română (румынская)",
+      "hu": "Magyar (венгерская)",
+      "fi": "Suomi (фінская)",
+      "da": "Dansk (дацкая)",
+      "sk": "Slovenčina (славацкая)",
+      "yue": "粵語 (кантонская)",
+      "th": "ไทย (тайская)",
+      "ca": "Català (каталонская)",
+      "hr": "Hrvatski (харвацкая)",
+      "bs": "Bosanski (баснійская)",
+      "sr": "Српски (сербская)",
+      "sl": "Slovenščina (славенская)",
+      "lt": "Lietuvių (літоўская)",
+      "bg": "Български (балгарская)",
+      "gl": "Galego (галісійская)",
+      "id": "Bahasa Indonesia (інданезійская)",
+      "ur": "اردو (урду)",
+      "withSystem": {
+        "label": "Выкарыстоўваць мову з налад сістэмы"
+      },
+      "be": "Беларуская"
+    },
+    "appearance": "Выгляд",
+    "darkMode": {
+      "label": "Цёмны рэжым",
+      "light": "Светлы",
+      "dark": "Цёмны",
+      "withSystem": {
+        "label": "Выкарыстоўваць светлы або цёмны рэжым з налад сістэмы"
+      }
+    },
+    "withSystem": "Сістэма",
+    "theme": {
+      "label": "Тэма",
+      "blue": "Сіняя",
+      "green": "Зялёная",
+      "nord": "Nord",
+      "red": "Чырвоная",
+      "highcontrast": "Высокая кантраснасць",
+      "default": "Прадвызначаны"
+    },
+    "help": "Даведка",
+    "documentation": {
+      "title": "Дакументацыя",
+      "label": "Дакументацыя Frigate"
+    },
+    "restart": "Перазапусціць Frigate",
+    "live": {
+      "title": "Эфір",
+      "allCameras": "Усе камеры",
+      "cameras": {
+        "title": "Камеры",
+        "count_one": "{{count}} камера",
+        "count_few": "{{count}} камеры",
+        "count_many": "{{count}} камер"
+      }
+    },
+    "review": "Разгляд",
+    "explore": "Агляд",
+    "export": "Экспарт",
+    "actions": "Дзеянні",
+    "uiPlayground": "Пясочніца інтэрфейсу",
+    "features": "Магчымасці",
+    "faceLibrary": "Бібліятэка асоб",
+    "classification": "Класіфікацыя",
+    "chat": "Чат",
+    "user": {
+      "title": "Карыстальнік",
+      "account": "Акаўнт",
+      "current": "Бягучы карыстальнік: {{user}}",
+      "anonymous": "ананімны",
+      "logout": "Выхад",
+      "setPassword": "Задаць пароль"
+    }
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL скапіяваны ў буфер абмену.",
+    "save": {
+      "title": "Захаваць",
+      "error": {
+        "title": "Не ўдалося захаваць змены канфігурацыі: {{errorMessage}}",
+        "noMessage": "Не ўдалося захаваць змены канфігурацыі"
+      },
+      "success": "Змены канфігурацыі захаваны."
+    }
+  },
+  "role": {
+    "title": "Роля",
+    "admin": "Адміністратар",
+    "viewer": "Назіральнік",
+    "desc": "Адміністратары маюць поўны доступ да ўсіх магчымасцей інтэрфейсу Frigate. Назіральнікі могуць толькі праглядаць камеры, элементы разгляду і архіўныя відэа."
+  },
+  "pagination": {
+    "label": "нумарацыя старонак",
+    "previous": {
+      "title": "Папярэдні",
+      "label": "Перайсці на папярэднюю старонку"
+    },
+    "next": {
+      "title": "Далей",
+      "label": "Перайсці на наступную старонку"
+    },
+    "more": "Больш старонак"
+  },
+  "accessDenied": {
+    "documentTitle": "Доступ забаронены - Frigate",
+    "title": "Доступ забаронены",
+    "desc": "У вас няма дазволу на прагляд гэтай старонкі."
+  },
+  "notFound": {
+    "documentTitle": "Не знойдзена - Frigate",
+    "title": "404",
+    "desc": "Старонка не знойдзена"
+  },
+  "selectItem": "Выбраць {{item}}",
+  "readTheDocumentation": "Чытаць дакументацыю",
+  "information": {
+    "pixels": "{{area}} пікс"
+  },
+  "no_items": "Няма элементаў",
+  "validation_errors": "Памылкі праверкі",
+  "credentialField": {
+    "savedPlaceholder": "Захавана - пакіньце пустым, каб не мяняць"
+  }
+}

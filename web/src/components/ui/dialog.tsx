@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { cva, type VariantProps } from "class-variance-authority";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHistoryBack } from "@/hooks/use-history-back";
@@ -107,15 +108,32 @@ const DialogHeader = ({
 );
 DialogHeader.displayName = "DialogHeader";
 
+const dialogFooterVariants = cva("flex flex-col-reverse gap-2 sm:flex-row", {
+  variants: {
+    variant: {
+      // 1-2 action buttons: full-width stacked on mobile, right-aligned auto on desktop.
+      // [&>button] only targets real button children, so non-button siblings are untouched.
+      actions: "sm:justify-end [&>button]:w-full sm:[&>button]:w-auto",
+      // context content (text/popover) alongside actions: space-between on desktop.
+      // flex-col (not -reverse) keeps the context above the buttons when stacked on mobile.
+      split: "flex-col sm:items-center sm:justify-between",
+      // alignment only; never touches children. Escape hatch for unusual content.
+      plain: "sm:justify-end",
+    },
+  },
+  defaultVariants: {
+    variant: "actions",
+  },
+});
+
 const DialogFooter = ({
   className,
+  variant,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: React.HTMLAttributes<HTMLDivElement> &
+  VariantProps<typeof dialogFooterVariants>) => (
   <div
-    className={cn(
-      "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      className,
-    )}
+    className={cn(dialogFooterVariants({ variant }), className)}
     {...props}
   />
 );

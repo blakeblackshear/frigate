@@ -37,6 +37,9 @@ export default defineConfig({
       },
     },
   },
+  esbuild: {
+    keepNames: true,
+  },
   build: {
     rollupOptions: {
       input: {

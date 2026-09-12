@@ -17,7 +17,7 @@ class PostProcessorApi(ABC):
         self,
         config: FrigateConfig,
         metrics: DataProcessorMetrics,
-        model_runner: DataProcessorModelRunner,
+        model_runner: DataProcessorModelRunner | None,
     ) -> None:
         self.config = config
         self.metrics = metrics
@@ -41,12 +41,25 @@ class PostProcessorApi(ABC):
     @abstractmethod
     def handle_request(
         self, topic: str, request_data: dict[str, Any]
-    ) -> dict[str, Any] | None:
+    ) -> dict[str, Any] | str | None:
         """Handle metadata requests.
         Args:
             request_data (dict): containing data about requested change to process.
 
         Returns:
             None if request was not handled, otherwise return response.
+        """
+        pass
+
+    def update_config(self, topic: str, payload: Any) -> None:
+        """Handle a config change notification.
+
+        Called for every config update published under ``config/``.
+        Processors should override this to check the topic and act only
+        on changes relevant to them. Default is a no-op.
+
+        Args:
+            topic: The config topic that changed.
+            payload: The updated configuration object.
         """
         pass

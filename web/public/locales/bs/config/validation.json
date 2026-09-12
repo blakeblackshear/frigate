@@ -1,0 +1,32 @@
+{
+    "minimum": "Bar {{limit}}",
+    "maximum": "Mora biti najviše {{limit}}",
+    "exclusiveMinimum": "Mora biti veći od {{limit}}",
+    "exclusiveMaximum": "Mora biti manje od {{limit}}",
+    "minLength": "Bar {{limit}} znak(ovi)",
+    "maxLength": "Mora biti najviše {{limit}} znak(ovi)",
+    "minItems": "Mora imati bar {{limit}} stavke",
+    "maxItems": "Mora imati najviše {{limit}} stavke",
+    "pattern": "Neispravan format",
+    "required": "Ovo polje je obavezno",
+    "type": "Neispravan tip vrijednosti",
+    "enum": "Mora biti jedan od dopuštenih vrijednosti",
+    "const": "Vrijednost se ne podudara s očekivanom konstantom",
+    "uniqueItems": "Sve stavke moraju biti jedinstvene",
+    "format": "Neispravan format",
+    "additionalProperties": "Nepoznato svojstvo nije dozvoljeno",
+    "oneOf": "Mora se podudarati s točno jednim od dopuštenih shema",
+    "anyOf": "Mora se podudarati s bar jednim od dopuštenih shema",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Zaglavlje uloge je obavezno kada su konfigurirane mapiranja uloga."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Svaka uloga može biti dodijeljena samo jednom ulaznom toku.",
+            "detectRequired": "Bar jedan ulazni tok mora biti dodijeljen ulozi 'detektirati'.",
+            "hwaccelDetectOnly": "Samo ulazni tok s ulogom detektiranja može definirati argumente ubrzavanja hardvera."
+        }
+    }
+}

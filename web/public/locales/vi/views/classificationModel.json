@@ -12,8 +12,8 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Lớp Đã Bị Xoá",
-      "deletedImage": "Hình ảnh đã bị xóa",
+      "deletedCategory_other": "Lớp Đã Bị Xoá",
+      "deletedImage_other": "Hình ảnh đã bị xóa",
       "deletedModel_other": "Đã xóa thành công {{count}} mô hình",
       "categorizedImage": "Phân Loại Hình Ảnh Thành Công",
       "trainedModel": "Đã huấn luyện mô hình thành công.",
@@ -33,7 +33,9 @@
     }
   },
   "details": {
-    "scoreInfo": "Điểm số cho biết mức độ tự tin trung bình mà hệ thống xác định được cho tất cả các lần phát hiện đối tượng này."
+    "scoreInfo": "Điểm số cho biết mức độ tự tin trung bình mà hệ thống xác định được cho tất cả các lần phát hiện đối tượng này.",
+    "none": "Không có",
+    "unknown": "Không rõ"
   },
   "tooltip": {
     "trainingInProgress": "Mô hình hiện đang được huấn luyện",

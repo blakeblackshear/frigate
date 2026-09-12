@@ -14,8 +14,8 @@ const BlurredIconButton = forwardRef<HTMLDivElement, BlurredIconButtonProps>(
         )}
         {...rest}
       >
-        <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-0 blur-sm transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
-        <div className="relative z-10 cursor-pointer text-white/85 hover:text-white">
+        <div className="pointer-events-none absolute inset-0 m-auto size-5 scale-95 rounded-full bg-black opacity-30 blur-md transition-all duration-200 group-hover:scale-100 group-hover:opacity-100 group-hover:blur-xl" />
+        <div className="relative z-10 cursor-pointer text-white/85 drop-shadow-[0_1px_1px_rgba(0,0,0,0.9)] hover:text-white">
           {children}
         </div>
       </div>

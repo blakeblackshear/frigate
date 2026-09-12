@@ -25,6 +25,7 @@ const localeMap: Record<string, () => Promise<Locale>> = {
   fa: () => import("date-fns/locale/fa-IR").then((module) => module.faIR),
   pl: () => import("date-fns/locale/pl").then((module) => module.pl),
   uk: () => import("date-fns/locale/uk").then((module) => module.uk),
+  be: () => import("date-fns/locale/be").then((module) => module.be),
   he: () => import("date-fns/locale/he").then((module) => module.he),
   el: () => import("date-fns/locale/el").then((module) => module.el),
   ro: () => import("date-fns/locale/ro").then((module) => module.ro),
@@ -34,10 +35,14 @@ const localeMap: Record<string, () => Promise<Locale>> = {
   sk: () => import("date-fns/locale/sk").then((module) => module.sk),
   "yue-Hant": () =>
     import("date-fns/locale/zh-HK").then((module) => module.zhHK),
+  "zh-Hant": () =>
+    import("date-fns/locale/zh-TW").then((module) => module.zhTW),
   lt: () => import("date-fns/locale/lt").then((module) => module.lt),
   th: () => import("date-fns/locale/th").then((module) => module.th),
   ca: () => import("date-fns/locale/ca").then((module) => module.ca),
   hr: () => import("date-fns/locale/hr").then((module) => module.hr),
+  bs: () => import("date-fns/locale/bs").then((module) => module.bs),
+  sl: () => import("date-fns/locale/sl").then((module) => module.sl),
 };
 
 export function useDateLocale(): Locale {

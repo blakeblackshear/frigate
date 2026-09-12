@@ -12,7 +12,7 @@ There are many possible causes for a USB coral not being detected and some are O
 
 :::tip
 
-Using `lsusb` or checking the hardware page in HA OS will show as `1a6e:089a Global Unichip Corp.` until Frigate runs an inferance using the coral. So don't worry about the identification until after Frigate has attempted to detect the coral.
+Using `lsusb` or checking the hardware page in HA OS will show as `1a6e:089a Global Unichip Corp.` until Frigate runs an inference using the coral. So don't worry about the identification until after Frigate has attempted to detect the coral.
 
 :::
 
@@ -43,13 +43,13 @@ Some users have reported that this older device runs an older kernel causing iss
 3. Start the docker container with Coral TPU enabled in the config
 4. The TPU would be detected but a few moments later it would disconnect.
 5. While leaving the TPU device plugged in, restart the NAS using the reboot command in the UI. Do NOT unplug the NAS/power it off etc.
-6. Open the control panel - info scree. The coral TPU will now be recognised as a USB Device - google inc
+6. Open the control panel - info screen. The coral TPU will now be recognized as a USB Device - google inc
 7. Start the frigate container. Everything should work now!
 
 ### QNAP NAS
 
-QNAP NAS devices, such as the TS-253A, may use connected Coral TPU devices if [QuMagie](https://www.qnap.com/en/software/qumagie) is installed along with its QNAP AI Core extension. If any of the features—`facial recognition`, `object recognition`, or `similar photo recognition`—are enabled, Container Station applications such as `Frigate` or `CodeProject.AI Server` will be unable to initialize the TPU device in use.
-To allow the Coral TPU device to be discovered, the you must either:
+QNAP NAS devices, such as the TS-253A, may use connected Coral TPU devices if [QuMagie](https://www.qnap.com/en/software/qumagie) is installed along with its QNAP AI Core extension. If any of the features (`facial recognition`, `object recognition`, or `similar photo recognition`) are enabled, Container Station applications such as `Frigate` or `CodeProject.AI Server` will be unable to initialize the TPU device in use.
+To allow the Coral TPU device to be discovered, you must either:
 
 1. [Disable the AI recognition features in QuMagie](https://docs.qnap.com/application/qumagie/2.x/en-us/configuring-qnap-ai-core-settings-FB13CE03.html),
 2. Remove the QNAP AI Core extension or
@@ -76,7 +76,7 @@ This is an issue due to outdated gasket driver when being used with new linux ke
 
 ### Not detected on Raspberry Pi5
 
-A kernel update to the RPi5 means an upate to config.txt is required, see [the raspberry pi forum for more info](https://forums.raspberrypi.com/viewtopic.php?t=363682&sid=cb59b026a412f0dc041595951273a9ca&start=25)
+A kernel update to the RPi5 means an update to config.txt is required, see [the raspberry pi forum for more info](https://forums.raspberrypi.com/viewtopic.php?t=363682&sid=cb59b026a412f0dc041595951273a9ca&start=25)
 
 Specifically, add the following to config.txt
 
@@ -87,7 +87,7 @@ dtoverlay=pcie-32bit-dma-pi5
 
 ## Only One PCIe Coral Is Detected With Coral Dual EdgeTPU
 
-Coral Dual EdgeTPU is one card with two identical TPU cores. Each core has it's own PCIe interface and motherboard needs to have two PCIe busses on the m.2 slot to make them both work.
+Coral Dual EdgeTPU is one card with two identical TPU cores. Each core has its own PCIe interface and motherboard needs to have two PCIe busses on the m.2 slot to make them both work.
 
 E-key slot implemented to full m.2 electromechanical specification has two PCIe busses. Most motherboard manufacturers implement only one PCIe bus in m.2 E-key connector (this is why only one TPU is working). Some SBCs can have only USB bus on m.2 connector, ie none of TPUs will work.
 

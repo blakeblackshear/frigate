@@ -1,7 +1,8 @@
 import logging
 import random
 import string
-from typing import Any, Sequence, cast
+from collections.abc import Sequence
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -44,6 +45,17 @@ def distance(detection: np.ndarray, estimate: np.ndarray) -> float:
 
     estimate_dim = np.diff(estimate, axis=0).flatten()
     detection_dim = np.diff(detection, axis=0).flatten()
+
+    # Guard against degenerate or non-finite boxes
+    if (
+        not np.all(np.isfinite(estimate_dim))
+        or not np.all(np.isfinite(detection_dim))
+        or estimate_dim[0] <= 0
+        or estimate_dim[1] <= 0
+        or detection_dim[0] <= 0
+        or detection_dim[1] <= 0
+    ):
+        return float("inf")
 
     # get bottom center positions
     detection_position = np.array(
@@ -630,9 +642,11 @@ class NorfairTracker(ObjectTracker):
             self.deregister(self.track_id_map[e_id], e_id)
 
         # update list of object boxes that don't have a tracked object yet
-        tracked_object_boxes = [obj["box"] for obj in self.tracked_objects.values()]
+        tracked_object_boxes = {
+            tuple(obj["box"]) for obj in self.tracked_objects.values()
+        }
         self.untracked_object_boxes = [
-            o[2] for o in detections if o[2] not in tracked_object_boxes
+            o[2] for o in detections if tuple(o[2]) not in tracked_object_boxes
         ]
 
     def print_objects_as_table(self, tracked_objects: Sequence) -> None:

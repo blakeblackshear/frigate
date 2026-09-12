@@ -2,9 +2,11 @@ import {
   LuActivity,
   LuGithub,
   LuLanguages,
+  LuLayers,
   LuLifeBuoy,
   LuList,
   LuLogOut,
+  LuMessageSquare,
   LuMoon,
   LuSquarePen,
   LuScanFace,
@@ -69,6 +71,9 @@ import SetPasswordDialog from "../overlay/SetPasswordDialog";
 import { toast } from "sonner";
 import axios from "axios";
 import { FrigateConfig } from "@/types/frigateConfig";
+import type { ProfilesApiResponse } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 import { supportedLanguageKeys } from "@/lib/const";
 
@@ -77,14 +82,28 @@ import { MdCategory } from "react-icons/md";
 
 type GeneralSettingsProps = {
   className?: string;
+  large?: boolean;
 };
 
-export default function GeneralSettings({ className }: GeneralSettingsProps) {
+export default function GeneralSettings({
+  className,
+  large,
+}: GeneralSettingsProps) {
   const { t } = useTranslation(["common", "views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
   const { data: profile } = useSWR("profile");
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: profilesData, mutate: updateProfiles } =
+    useSWR<ProfilesApiResponse>("profiles");
   const logoutUrl = config?.proxy?.logout_url || "/api/logout";
+
+  const hasChatAgent = useMemo(
+    () =>
+      Object.values(config?.genai ?? {}).some((agent) =>
+        agent?.roles?.includes("chat"),
+      ),
+    [config?.genai],
+  );
 
   // languages
 
@@ -94,6 +113,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       "nb-NO": "nb",
       "yue-Hant": "yue",
       "zh-CN": "zhCN",
+      "zh-Hant": "zhHant",
       "pt-BR": "ptBR",
     };
 
@@ -104,6 +124,41 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
       };
     });
   }, [t]);
+
+  // profiles
+
+  const allProfileNames = useMemo(
+    () => profilesData?.profiles?.map((p) => p.name) ?? [],
+    [profilesData],
+  );
+
+  const profileFriendlyNames = useMemo(() => {
+    const map = new Map<string, string>();
+    profilesData?.profiles?.forEach((p) => map.set(p.name, p.friendly_name));
+    return map;
+  }, [profilesData]);
+
+  const hasProfiles = allProfileNames.length > 0;
+
+  const handleActivateProfile = async (profileName: string | null) => {
+    try {
+      await axios.put("camera/*/set/profile", { value: profileName ?? "none" });
+      await updateProfiles();
+      toast.success(
+        profileName
+          ? t("profiles.activated", {
+              ns: "views/settings",
+              profile: profileFriendlyNames.get(profileName) ?? profileName,
+            })
+          : t("profiles.deactivated", { ns: "views/settings" }),
+        { position: "top-center" },
+      );
+    } catch {
+      toast.error(t("profiles.activateFailed", { ns: "views/settings" }), {
+        position: "top-center",
+      });
+    }
+  };
 
   // settings
 
@@ -164,7 +219,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
 
   return (
     <>
-      <Container modal={!isDesktop}>
+      <Container>
         <Trigger>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -174,10 +229,13 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   isDesktop
                     ? "cursor-pointer rounded-lg bg-secondary text-secondary-foreground hover:bg-muted"
                     : "text-secondary-foreground",
+                  large && "size-12",
                   className,
                 )}
               >
-                <LuSettings className="size-5 md:m-[6px]" />
+                <LuSettings
+                  className={cn("md:m-[6px]", large ? "size-6" : "size-5")}
+                />
               </div>
             </TooltipTrigger>
             <TooltipPortal>
@@ -199,7 +257,7 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
           className={
             isDesktop
               ? "scrollbar-container mr-5 w-72 overflow-y-auto"
-              : "max-h-[75dvh] overflow-hidden p-2"
+              : "max-h-[75dvh] overflow-hidden"
           }
         >
           {!isDesktop && (
@@ -212,7 +270,12 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
               </DrawerDescription>
             </>
           )}
-          <div className="scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden">
+          <div
+            className={cn(
+              "scrollbar-container w-full flex-col overflow-y-auto overflow-x-hidden",
+              !isDesktop && "p-2",
+            )}
+          >
             {isMobile && (
               <div className="mb-2">
                 <DropdownMenuLabel>
@@ -289,6 +352,118 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span>{t("menu.systemLogs")}</span>
                     </MenuItem>
                   </Link>
+                  {hasProfiles && (
+                    <SubItem>
+                      <SubItemTrigger
+                        className={
+                          isDesktop
+                            ? "cursor-pointer"
+                            : "flex items-center p-2 text-sm"
+                        }
+                      >
+                        <LuLayers className="mr-2 size-4" />
+                        <span>{t("menu.profiles")}</span>
+                      </SubItemTrigger>
+                      <Portal>
+                        <SubItemContent
+                          className={
+                            isDesktop ? "" : "w-[92%] rounded-lg md:rounded-2xl"
+                          }
+                        >
+                          {!isDesktop && (
+                            <>
+                              <DialogTitle className="sr-only">
+                                {t("menu.profiles")}
+                              </DialogTitle>
+                              <DialogDescription className="sr-only">
+                                {t("menu.profiles")}
+                              </DialogDescription>
+                            </>
+                          )}
+                          <span tabIndex={0} className="sr-only" />
+                          <MenuItem
+                            className={
+                              isDesktop
+                                ? "cursor-pointer"
+                                : "flex items-center p-2 text-sm"
+                            }
+                            aria-label={t("profiles.baseConfig", {
+                              ns: "views/settings",
+                            })}
+                            onClick={() => handleActivateProfile(null)}
+                          >
+                            <div className="flex w-full items-center justify-between gap-2">
+                              <span className="ml-6 mr-2">
+                                {t("profiles.baseConfig", {
+                                  ns: "views/settings",
+                                })}
+                              </span>
+                              {!profilesData?.active_profile && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-xs text-primary-variant"
+                                >
+                                  {t("profiles.active", {
+                                    ns: "views/settings",
+                                  })}
+                                </Badge>
+                              )}
+                            </div>
+                          </MenuItem>
+                          {allProfileNames.map((profileName) => {
+                            const color = getProfileColor(
+                              profileName,
+                              allProfileNames,
+                            );
+                            const isActive =
+                              profilesData?.active_profile === profileName;
+                            return (
+                              <MenuItem
+                                key={profileName}
+                                className={
+                                  isDesktop
+                                    ? "cursor-pointer"
+                                    : "flex items-center p-2 text-sm"
+                                }
+                                aria-label={
+                                  profileFriendlyNames.get(profileName) ??
+                                  profileName
+                                }
+                                onClick={() =>
+                                  handleActivateProfile(profileName)
+                                }
+                              >
+                                <div className="flex w-full items-center justify-between gap-2">
+                                  <div className="flex items-center gap-2">
+                                    <span
+                                      className={cn(
+                                        "ml-2 size-2 shrink-0 rounded-full",
+                                        color.dot,
+                                      )}
+                                    />
+                                    <span>
+                                      {profileFriendlyNames.get(profileName) ??
+                                        profileName}
+                                    </span>
+                                  </div>
+                                  {isActive && (
+                                    <Badge
+                                      variant="secondary"
+                                      className="text-xs text-primary-variant"
+                                    >
+                                      {t("profiles.active", {
+                                        ns: "views/settings",
+                                      })}
+                                    </Badge>
+                                  )}
+                                </div>
+                              </MenuItem>
+                            );
+                          })}
+                        </SubItemContent>
+                      </Portal>
+                    </SubItem>
+                  )}
                 </DropdownMenuGroup>
               </>
             )}
@@ -329,21 +504,25 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                   </Link>
                 </>
               )}
-              {isAdmin && isMobile && config?.face_recognition.enabled && (
-                <>
-                  <Link to="/faces">
-                    <MenuItem
-                      className="flex w-full items-center p-2 text-sm"
-                      aria-label={t("menu.faceLibrary")}
-                    >
-                      <LuScanFace className="mr-2 size-4" />
-                      <span>{t("menu.faceLibrary")}</span>
-                    </MenuItem>
-                  </Link>
-                </>
-              )}
-              {isAdmin && isMobile && (
-                <>
+            </DropdownMenuGroup>
+            {isMobile && isAdmin && (
+              <>
+                <DropdownMenuLabel className="mt-1">
+                  {t("menu.features")}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup className="flex flex-col">
+                  {config?.face_recognition.enabled && (
+                    <Link to="/faces">
+                      <MenuItem
+                        className="flex w-full items-center p-2 text-sm"
+                        aria-label={t("menu.faceLibrary")}
+                      >
+                        <LuScanFace className="mr-2 size-4" />
+                        <span>{t("menu.faceLibrary")}</span>
+                      </MenuItem>
+                    </Link>
+                  )}
                   <Link to="/classification">
                     <MenuItem
                       className="flex w-full items-center p-2 text-sm"
@@ -353,9 +532,20 @@ export default function GeneralSettings({ className }: GeneralSettingsProps) {
                       <span>{t("menu.classification")}</span>
                     </MenuItem>
                   </Link>
-                </>
-              )}
-            </DropdownMenuGroup>
+                  {hasChatAgent && (
+                    <Link to="/chat">
+                      <MenuItem
+                        className="flex w-full items-center p-2 text-sm"
+                        aria-label={t("menu.chat")}
+                      >
+                        <LuMessageSquare className="mr-2 size-4" />
+                        <span>{t("menu.chat")}</span>
+                      </MenuItem>
+                    </Link>
+                  )}
+                </DropdownMenuGroup>
+              </>
+            )}
             <DropdownMenuLabel className={isDesktop ? "mt-3" : "mt-1"}>
               {t("menu.appearance")}
             </DropdownMenuLabel>

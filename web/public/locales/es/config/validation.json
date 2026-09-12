@@ -1,0 +1,35 @@
+{
+    "minimum": "Debe ser al menos {{limit}}",
+    "maximum": "Debe ser como mucho {{limit}}",
+    "exclusiveMinimum": "Debe ser mayor que {{limit}}",
+    "exclusiveMaximum": "Debe ser menor que {{limit}}",
+    "minLength": "Debe ser al menos {{limit}} carácter(es)",
+    "maxLength": "Debe ser como máximo {{limit}} carácter(es)",
+    "minItems": "Debe tener al menos {{limit}} objetos",
+    "maxItems": "Debe tener como máximo {{limit}} objetos",
+    "pattern": "Formato no válido",
+    "required": "Este campo es requerido",
+    "type": "Tipo de valor no válido",
+    "enum": "Debe ser uno de los valores permitidos",
+    "const": "El valor no coincide con la constante esperada",
+    "uniqueItems": "Todos los objetos deben ser únicos",
+    "format": "Formato no válido",
+    "additionalProperties": "No se permite una propiedad desconocida",
+    "oneOf": "Debe coincidir exactamente con uno de los esquemas permitidos",
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Cada rol solo puede asignarse a un flujo de entrada.",
+            "detectRequired": "Al menos un flujo de entrada debe tener asignado el rol 'detect'.",
+            "hwaccelDetectOnly": "Solo el flujo de entrada con la función \"detect\" puede definir argumentos de aceleración por hardware."
+        }
+    },
+    "anyOf": "Debe coincidir con al menos uno de los esquemas permitidos",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Se requiere el encabezado de rol cuando hay mapeos de roles configurados."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Debe ser un número par."
+    }
+}

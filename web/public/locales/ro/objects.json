@@ -116,5 +116,17 @@
   "an_post": "An Post",
   "postnl": "PostNL",
   "nzpost": "NZPost",
-  "postnord": "PostNord"
+  "postnord": "PostNord",
+  "canada_post": "Canada Post",
+  "royal_mail": "Royal Mail",
+  "school_bus": "Autobus Scolar",
+  "skunk": "Sconcs",
+  "kangaroo": "Cangur",
+  "baby": "Bebeluș",
+  "baby_stroller": "Cărucior de copii",
+  "rickshaw": "Ricșă",
+  "Rodent": "Rozătoare",
+  "rodent": "Rozătoare",
+  "garbage_truck": "Mașină de gunoi",
+  "possum": "Oposum"
 }

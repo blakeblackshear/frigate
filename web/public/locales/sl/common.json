@@ -2,35 +2,35 @@
   "time": {
     "untilForTime": "Do {{time}}",
     "untilRestart": "Do ponovnega zagona",
-    "ago": "{{timeAgo}} nazaj",
-    "justNow": "Zdaj",
-    "untilForRestart": "Dokler se Frigate ne zažene ponovno.",
+    "ago": "pred {{timeAgo}}",
+    "justNow": "Ravnokar",
+    "untilForRestart": "Dokler se Frigate ne ponovno zažene.",
     "thisWeek": "Ta teden",
     "lastWeek": "Prejšnji teden",
     "thisMonth": "Ta mesec",
     "year_one": "{{time}} leto",
-    "year_two": "{{time}} leti",
-    "year_few": "{{time}} leta",
+    "year_two": "",
+    "year_few": "",
     "year_other": "{{time}} let",
     "second_one": "{{time}} sekunda",
-    "second_two": "{{time}} sekundi",
-    "second_few": "{{time}} sekunde",
+    "second_two": "",
+    "second_few": "",
     "second_other": "{{time}} sekund",
     "month_one": "{{time}} mesec",
-    "month_two": "{{time}} meseca",
-    "month_few": "{{time}} meseci",
+    "month_two": "",
+    "month_few": "",
     "month_other": "{{time}} mesecev",
     "day_one": "{{time}} dan",
-    "day_two": "{{time}} dneva",
-    "day_few": "{{time}} dnevi",
+    "day_two": "",
+    "day_few": "",
     "day_other": "{{time}} dni",
     "hour_one": "{{time}} ura",
-    "hour_two": "{{time}} uri",
-    "hour_few": "{{time}} ure",
+    "hour_two": "",
+    "hour_few": "",
     "hour_other": "{{time}} ur",
     "minute_one": "{{time}} minuta",
-    "minute_two": "{{time}} minuti",
-    "minute_few": "{{time}} minute",
+    "minute_two": "",
+    "minute_few": "",
     "minute_other": "{{time}} minut",
     "10minutes": "10 minut",
     "lastMonth": "Prejšnji mesec",
@@ -44,21 +44,21 @@
     "12hours": "12 ur",
     "24hours": "24 ur",
     "30minutes": "30 minut",
-    "am": "am",
-    "pm": "pm",
-    "mo": "{{time}}mes",
-    "d": "{{time}}d",
-    "h": "{{time}}h",
-    "m": "{{time}}m",
-    "s": "{{time}}s",
-    "yr": "{{time}}l.",
+    "am": "dop.",
+    "pm": "pop.",
+    "mo": "{{time}} m",
+    "d": "{{time}} d",
+    "h": "{{time}} u",
+    "m": "{{time}} min",
+    "s": "{{time}} s",
+    "yr": "{{time}} l",
     "formattedTimestamp": {
-      "12hour": "d MMM, h:mm:ss aaa",
-      "24hour": "d MMM, HH:mm:ss"
+      "12hour": "d. MMM, h:mm:ss aaa",
+      "24hour": "d. MMM, HH:mm:ss"
     },
     "formattedTimestamp2": {
-      "12hour": "dd/MM h:mm:ssa",
-      "24hour": "d MMM HH:mm:ss"
+      "12hour": "d. MM. h:mm:ssa",
+      "24hour": "d. MMM HH:mm:ss"
     },
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
@@ -69,24 +69,24 @@
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "d MMM, h:mm aaa",
-      "24hour": "d MMM, HH:mm"
+      "12hour": "d. MMM, h:mm aaa",
+      "24hour": "d. MMM, HH:mm"
     },
     "formattedTimestampMonthDayYear": {
-      "12hour": "d MMM, yyyy",
-      "24hour": "d MMM, yyyy"
+      "12hour": "d. MMM yyyy",
+      "24hour": "d. MMM yyyy"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "d MMM yyyy, h:mm aaa",
-      "24hour": "d MMM yyyy, HH:mm"
+      "12hour": "d. MMM yyyy, h:mm aaa",
+      "24hour": "d. MMM yyyy, HH:mm"
     },
-    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampMonthDay": "d. MMM",
     "formattedTimestampFilename": {
       "12hour": "dd-MM-yy-h-mm-ss-a",
       "24hour": "dd-MM-yy-HH-mm-ss"
     },
-    "invalidStartTime": "Napačen čas začetka",
-    "invalidEndTime": "Napačen čas konca",
+    "invalidStartTime": "Neveljaven čas začetka",
+    "invalidEndTime": "Neveljaven čas konca",
     "inProgress": "V teku",
     "never": "Nikoli"
   },
@@ -94,23 +94,23 @@
     "live": {
       "cameras": {
         "count_one": "{{count}} kamera",
-        "count_two": "{{count}} kameri",
-        "count_few": "{{count}} kamere",
+        "count_two": "",
+        "count_few": "",
         "count_other": "{{count}} kamer",
         "title": "Kamere"
       },
-      "allCameras": "Vse Kamere",
-      "title": "V Živo"
+      "allCameras": "Vse kamere",
+      "title": "V živo"
     },
-    "explore": "Brskanje",
+    "explore": "Razišči",
     "theme": {
       "nord": "Nord",
-      "label": "Teme",
+      "label": "Tema",
       "blue": "Modra",
       "green": "Zelena",
       "red": "Rdeča",
-      "highcontrast": "Visok Kontrast",
-      "default": "Privzeto"
+      "highcontrast": "Visok kontrast",
+      "default": "Privzeta"
     },
     "review": "Pregled",
     "system": "Sistem",
@@ -118,57 +118,58 @@
     "configuration": "Konfiguracija",
     "systemLogs": "Sistemski dnevniki",
     "settings": "Nastavitve",
-    "configurationEditor": "Urejevalnik Konfiguracije",
+    "configurationEditor": "Urejevalnik konfiguracije",
     "languages": "Jeziki",
     "language": {
-      "en": "English (angleščina)",
-      "es": "Español (španščina)",
-      "zhCN": "简体中文 (poenostavljena kitajščina)",
-      "hi": "हिन्दी (hindijščina)",
-      "fr": "Français (francoščina)",
-      "ar": "العربية (arabščina)",
-      "pt": "Português (portugalščina)",
-      "ru": "Русский (ruščina)",
-      "de": "Deutsch (nemščina)",
-      "ja": "日本語 (japonščina)",
-      "tr": "Türkçe (turščina)",
-      "it": "Italiano (italijanščina)",
-      "nl": "Nederlands (nizozemščina)",
-      "sv": "Svenska (švedščina)",
-      "cs": "Čeština (češčina)",
-      "nb": "Norsk Bokmål (norveščina, bokmal)",
-      "ko": "한국어 (korejščina)",
-      "vi": "Tiếng Việt (vietnamščina)",
-      "fa": "فارسی (perzijščina)",
-      "pl": "Polski (poljščina)",
-      "uk": "Українська (ukrajinščina)",
-      "he": "עברית (hebrejščina)",
-      "el": "Ελληνικά (grščina)",
-      "ro": "Română (romunščina)",
-      "hu": "Magyar (madžarščina)",
-      "fi": "Suomi (finščina)",
-      "da": "Dansk (danščina)",
-      "sk": "Slovenčina (slovaščina)",
-      "yue": "粵語 (kantonščina)",
-      "th": "ไทย (tajščina)",
-      "sr": "Српски (srbščina)",
-      "sl": "Slovenščina (Slovenščina )",
-      "bg": "Български (bulgarščina)",
+      "en": "Angleščina (English)",
+      "es": "Španščina (Español)",
+      "zhCN": "Kitajščina (简体中文)",
+      "hi": "Hindi (हिन्दी)",
+      "fr": "Francoščina (Français)",
+      "ar": "Arabščina (العربية)",
+      "pt": "Portugalščina (Português)",
+      "ru": "Ruščina (Русский)",
+      "de": "Nemščina (Deutsch)",
+      "ja": "Japonščina (日本語)",
+      "tr": "Turščina (Türkçe)",
+      "it": "Italijanščina (Italiano)",
+      "nl": "Nizozemščina (Nederlands)",
+      "sv": "Švedščina (Svenska)",
+      "cs": "Češčina (Čeština)",
+      "nb": "Norveščina (Norsk Bokmål)",
+      "ko": "Korejščina (한국어)",
+      "vi": "Vietnamščina (Tiếng Việt)",
+      "fa": "Perzijščina (فارسی)",
+      "pl": "Poljščina (Polski)",
+      "uk": "Ukrajinščina (Українська)",
+      "he": "Hebrejščina (עברית)",
+      "el": "Grščina (Ελληνικά)",
+      "ro": "Romunščina (Română)",
+      "hu": "Madžarščina (Magyar)",
+      "fi": "Finščina (Suomi)",
+      "da": "Danščina (Dansk)",
+      "sk": "Slovaščina (Slovenčina)",
+      "yue": "Kantonščina (粵語)",
+      "th": "Tajščina (ไทย)",
+      "sr": "Srbska (Српски)",
+      "sl": "Slovenščina",
+      "bg": "Bolgarščina (Български)",
       "withSystem": {
         "label": "Uporabi sistemske nastavitve za jezik"
       },
-      "ptBR": "Português brasileiro (Brazilska portugalščina)",
-      "ca": "Català (Katalonščina)",
-      "lt": "Lietuvių (Litovščina)",
-      "gl": "Galego (Galicijščina)",
-      "id": "Bahasa Indonesia (Indonezijščina)",
-      "ur": "اردو (Urdujščina)"
+      "ptBR": "Brazilsko portugalsko (Português brasileiro)",
+      "ca": "Katalonščina (Català)",
+      "lt": "Litovščina (Lietuvių)",
+      "gl": "Galicijščina (Galego)",
+      "id": "Indonezijščina (Bahasa Indonesia)",
+      "ur": "Urdu (اردو)",
+      "hr": "Hrvaščina (Hrvatski)"
     },
-    "appearance": "Izgled",
+    "appearance": "Videz",
     "darkMode": {
-      "label": "Temni Način",
-      "light": "Svetlo",
-      "dark": "Temno",
+      "label": "Temni način",
+      "light": "Svetel",
+      "dark": "Temen",
       "withSystem": {
         "label": "Uporabi sistemske nastavitve za svetel ali temen način"
       }
@@ -179,66 +180,79 @@
       "title": "Dokumentacija",
       "label": "Frigate dokumentacija"
     },
-    "restart": "Znova Zaženi Frigate",
+    "restart": "Ponovno zaženi Frigate",
     "export": "Izvoz",
-    "faceLibrary": "Zbirka Obrazov",
+    "faceLibrary": "Knjižnica obrazov",
     "user": {
       "title": "Uporabnik",
       "account": "Račun",
-      "current": "Trenutni Uporabnik: {{user}}",
+      "current": "Trenutni uporabnik: {{user}}",
       "anonymous": "anonimen",
       "logout": "Odjava",
-      "setPassword": "Nastavi Geslo"
+      "setPassword": "Nastavi geslo"
     },
-    "uiPlayground": "UI Peskovnik",
-    "classification": "Klasifikacija"
+    "uiPlayground": "UI Playground",
+    "classification": "Klasifikacija",
+    "actions": "Dejanja",
+    "chat": "Klepet"
   },
   "button": {
-    "apply": "Uporabi",
+    "apply": "Uveljavi",
     "reset": "Ponastavi",
     "done": "Končano",
-    "disable": "Izklopi",
+    "disable": "Onemogoči",
     "close": "Zapri",
     "back": "Nazaj",
-    "pictureInPicture": "Slika v Sliki",
+    "pictureInPicture": "Slika v sliki",
     "history": "Zgodovina",
     "disabled": "Onemogočeno",
     "copy": "Kopiraj",
-    "exitFullscreen": "Izhod iz Celozaslonskega načina",
-    "enabled": "Omogočen",
-    "enable": "Vklopi",
+    "exitFullscreen": "Izhod iz celozaslonskega načina",
+    "enabled": "Omogočeno",
+    "enable": "Omogoči",
     "save": "Shrani",
-    "saving": "Shranjevanje …",
+    "saving": "Shranjujem…",
     "cancel": "Prekliči",
     "fullscreen": "Celozaslonski način",
-    "twoWayTalk": "Dvosmerni Pogovor",
-    "cameraAudio": "Zvok Kamere",
-    "on": "Vključen",
-    "off": "Izključen",
+    "twoWayTalk": "Dvosmerni pogovor",
+    "cameraAudio": "Zvok kamere",
+    "on": "VKLOP",
+    "off": "IZKLOP",
     "edit": "Uredi",
     "copyCoordinates": "Kopiraj koordinate",
     "delete": "Izbriši",
     "yes": "Da",
     "no": "Ne",
     "download": "Prenesi",
-    "info": "Info",
-    "suspended": "Začasno ustavljeno",
-    "unsuspended": "Obnovi",
+    "info": "Informacije",
+    "suspended": "Prekinjeno",
+    "unsuspended": "Nadaljuj",
     "play": "Predvajaj",
-    "unselect": "Odznači",
-    "export": "Izvoz",
-    "deleteNow": "Izbriši Zdaj",
+    "unselect": "Počisti izbiro",
+    "export": "Izvozi",
+    "deleteNow": "Izbriši zdaj",
     "next": "Naprej",
-    "continue": "Nadaljuj"
+    "continue": "Nadaljuj",
+    "add": "Dodaj",
+    "applying": "Uveljavljam…",
+    "undo": "Razveljavi",
+    "copiedToClipboard": "Kopirano v odložišče",
+    "modified": "Spremenjeno",
+    "overridden": "Povoženo",
+    "resetToGlobal": "Ponastavi na globalno",
+    "resetToDefault": "Ponastavi na privzeto",
+    "saveAll": "Shrani vse",
+    "savingAll": "Shranjujem vse…",
+    "undoAll": "Razveljavi vse"
   },
   "unit": {
     "speed": {
       "kph": "km/h",
-      "mph": "mi/h"
+      "mph": "mph"
     },
     "length": {
-      "feet": "čevelj",
-      "meters": "metri"
+      "feet": "čevljev",
+      "meters": "metrov"
     },
     "data": {
       "kbps": "kB/s",
@@ -250,34 +264,34 @@
     }
   },
   "label": {
-    "back": "Pojdi nazaj",
+    "back": "Nazaj",
     "hide": "Skrij {{item}}",
-    "show": "Prikaži {{item}}",
+    "show": "Pokaži {{item}}",
     "ID": "ID",
     "none": "Brez",
     "all": "Vse",
-    "other": "Drugo"
+    "other": "Ostalo"
   },
   "pagination": {
     "next": {
       "label": "Pojdi na naslednjo stran",
       "title": "Naprej"
     },
-    "label": "paginacija",
+    "label": "strani",
     "previous": {
-      "title": "Prejšnji",
+      "title": "Nazaj",
       "label": "Pojdi na prejšnjo stran"
     },
     "more": "Več strani"
   },
   "selectItem": "Izberi {{item}}",
   "toast": {
-    "copyUrlToClipboard": "Povezava kopirana v odložišče.",
+    "copyUrlToClipboard": "URL kopiran v odložišče.",
     "save": {
       "title": "Shrani",
       "error": {
-        "title": "Napaka pri shranjevanju sprememb: {{errorMessage}}",
-        "noMessage": "Napaka pri shranjevanju sprememb konfiguracije"
+        "title": "Napaka pri shranjevanju konfiguracije: {{errorMessage}}",
+        "noMessage": "Spremembe konfiguracije ni bilo mogoče shraniti"
       }
     }
   },
@@ -285,27 +299,27 @@
     "title": "Vloga",
     "admin": "Administrator",
     "viewer": "Gledalec",
-    "desc": "Administratorji imajo poln dostop do vseh funkcij Frigate uporabniškega vmesnika. Gledalci so omejeni na gledanje kamer, zgodovine posnetkov in pregledovanje dogodkov."
+    "desc": "Administratorji imajo poln dostop do vseh funkcij. Gledalci so omejeni na ogled kamer, pregled dogodkov in zgodovinskih posnetkov."
   },
   "accessDenied": {
     "documentTitle": "Dostop zavrnjen - Frigate",
-    "title": "Dostop Zavrnjen",
-    "desc": "Nimate pravic za ogled te strani."
+    "title": "Dostop zavrnjen",
+    "desc": "Nimaš dovoljenja za ogled te strani."
   },
   "notFound": {
-    "documentTitle": "Ni Najdeno - Frigate",
+    "documentTitle": "Ni mogoče najti - Frigate",
     "title": "404",
-    "desc": "Stran ni najdena"
+    "desc": "Stran ne obstaja"
   },
-  "readTheDocumentation": "Preberite dokumentacijo",
+  "readTheDocumentation": "Preberi dokumentacijo",
   "list": {
     "two": "{{0}} in {{1}}",
-    "many": "{{items}}, in {{last}}",
+    "many": "{{items}} in {{last}}",
     "separatorWithSpace": ", "
   },
   "field": {
     "optional": "Izbirno",
-    "internalID": "Interni ID, ki ga Frigate uporablja v konfiguraciji in podatkovni bazi"
+    "internalID": "Notranji ID, ki ga Frigate uporablja v konfiguraciji in bazi podatkov"
   },
   "information": {
     "pixels": "{{area}}px"

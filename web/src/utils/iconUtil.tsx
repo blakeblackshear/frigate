@@ -1,9 +1,12 @@
 import { IconName } from "@/components/icons/IconPicker";
+import SkunkIcon from "@/components/icons/SkunkIcon";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { EventType } from "@/types/search";
 import { BsPersonWalking } from "react-icons/bs";
 import {
   FaAmazon,
+  FaBaby,
+  FaBabyCarriage,
   FaBicycle,
   FaBus,
   FaCarSide,
@@ -24,6 +27,8 @@ import {
   FaUsps,
 } from "react-icons/fa";
 import {
+  GiBarbecue,
+  GiCow,
   GiDeer,
   GiFox,
   GiGoat,
@@ -32,7 +37,9 @@ import {
   GiPostStamp,
   GiRabbit,
   GiRaccoonHead,
+  GiRat,
   GiSailboat,
+  GiSeatedMouse,
   GiSoundWaves,
   GiSquirrel,
 } from "react-icons/gi";
@@ -40,6 +47,7 @@ import { LuBox, LuLassoSelect, LuScanBarcode } from "react-icons/lu";
 import * as LuIcons from "react-icons/lu";
 import { MdRecordVoiceOver } from "react-icons/md";
 import { PiBirdFill } from "react-icons/pi";
+import { HiMiniTruck } from "react-icons/hi2";
 
 export function getAttributeLabels(config?: FrigateConfig) {
   if (!config) {
@@ -74,6 +82,12 @@ export function getIconForLabel(
 
   switch (label) {
     // objects
+    case "baby":
+      return <FaBaby key={iconKey} className={className} />;
+    case "baby_stroller":
+      return <FaBabyCarriage key={iconKey} className={className} />;
+    case "bbq_grill":
+      return <GiBarbecue key={iconKey} className={className} />;
     case "bear":
       return <GiPolarBear key={iconKey} className={className} />;
     case "bicycle":
@@ -90,6 +104,8 @@ export function getIconForLabel(
       return <FaCarSide key={iconKey} className={className} />;
     case "cat":
       return <FaCat key={iconKey} className={className} />;
+    case "cow":
+      return <GiCow key={iconKey} className={className} />;
     case "deer":
       return <GiDeer key={iconKey} className={className} />;
     case "animal":
@@ -98,6 +114,8 @@ export function getIconForLabel(
       return <FaDog key={iconKey} className={className} />;
     case "fox":
       return <GiFox key={iconKey} className={className} />;
+    case "garbage_truck":
+      return <HiMiniTruck key={iconKey} className={className} />;
     case "goat":
       return <GiGoat key={iconKey} className={className} />;
     case "horse":
@@ -114,18 +132,22 @@ export function getIconForLabel(
       return <LuBox key={iconKey} className={className} />;
     case "person":
       return <BsPersonWalking key={iconKey} className={className} />;
+    case "possum":
+      return <GiSeatedMouse key={iconKey} className={className} />;
     case "rabbit":
       return <GiRabbit key={iconKey} className={className} />;
     case "raccoon":
       return <GiRaccoonHead key={iconKey} className={className} />;
     case "robot_lawnmower":
       return <FaHockeyPuck key={iconKey} className={className} />;
+    case "rodent":
+      return <GiRat key={iconKey} className={className} />;
     case "sports_ball":
       return <FaFootballBall key={iconKey} className={className} />;
     case "skunk":
-      return <GiSquirrel key={iconKey} className={className} />;
+      return <SkunkIcon key={iconKey} className={className} />;
     case "squirrel":
-      return <LuIcons.LuSquirrel key={iconKey} className={className} />;
+      return <GiSquirrel key={iconKey} className={className} />;
     case "umbrella":
       return <FaUmbrella key={iconKey} className={className} />;
     case "waste_bin":

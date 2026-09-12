@@ -26,6 +26,7 @@ type NameAndIdFieldsProps<T extends FieldValues = FieldValues> = {
   placeholderName?: string;
   placeholderId?: string;
   idVisible?: boolean;
+  idDisabled?: boolean;
 };
 
 export default function NameAndIdFields<T extends FieldValues = FieldValues>({
@@ -41,6 +42,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   placeholderName,
   placeholderId,
   idVisible,
+  idDisabled,
 }: NameAndIdFieldsProps<T>) {
   const { t } = useTranslation(["common"]);
   const { watch, setValue, trigger, formState } = useFormContext<T>();
@@ -59,6 +61,9 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   const effectiveProcessId = processId || defaultProcessId;
 
   useEffect(() => {
+    if (idDisabled) {
+      return;
+    }
     const subscription = watch((value, { name }) => {
       if (name === nameField) {
         hasUserTypedRef.current = true;
@@ -68,7 +73,15 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
       }
     });
     return () => subscription.unsubscribe();
-  }, [watch, setValue, trigger, nameField, idField, effectiveProcessId]);
+  }, [
+    watch,
+    setValue,
+    trigger,
+    nameField,
+    idField,
+    effectiveProcessId,
+    idDisabled,
+  ]);
 
   // Auto-expand if there's an error on the ID field after user has typed
   useEffect(() => {
@@ -99,11 +112,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
               </span>
             </div>
             <FormControl>
-              <Input
-                className="text-md"
-                placeholder={placeholderName}
-                {...field}
-              />
+              <Input placeholder={placeholderName} {...field} />
             </FormControl>
             {nameDescription && (
               <FormDescription>{nameDescription}</FormDescription>
@@ -121,8 +130,8 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
               <FormLabel>{idLabel ?? t("label.ID")}</FormLabel>
               <FormControl>
                 <Input
-                  className="text-md"
                   placeholder={placeholderId}
+                  disabled={idDisabled}
                   {...field}
                 />
               </FormControl>

@@ -117,30 +117,23 @@ export default function RoleChangeDialog({
           </Select>
         </div>
 
-        <DialogFooter className="flex gap-3 sm:justify-end">
-          <div className="flex flex-1 flex-col justify-end">
-            <div className="flex flex-row gap-2 pt-5">
-              <Button
-                className="flex flex-1"
-                aria-label={t("button.cancel", { ns: "common" })}
-                variant="outline"
-                onClick={onCancel}
-                type="button"
-              >
-                {t("button.cancel", { ns: "common" })}
-              </Button>
-              <Button
-                variant="select"
-                aria-label={t("button.save", { ns: "common" })}
-                className="flex flex-1"
-                onClick={() => onSave(selectedRole)}
-                type="button"
-                disabled={selectedRole === currentRole}
-              >
-                {t("button.save", { ns: "common" })}
-              </Button>
-            </div>
-          </div>
+        <DialogFooter>
+          <Button
+            aria-label={t("button.cancel", { ns: "common" })}
+            onClick={onCancel}
+            type="button"
+          >
+            {t("button.cancel", { ns: "common" })}
+          </Button>
+          <Button
+            variant="select"
+            aria-label={t("button.save", { ns: "common" })}
+            onClick={() => onSave(selectedRole)}
+            type="button"
+            disabled={selectedRole === currentRole}
+          >
+            {t("button.save", { ns: "common" })}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

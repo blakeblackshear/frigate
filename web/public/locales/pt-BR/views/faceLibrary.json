@@ -6,7 +6,7 @@
     "subLabelScore": "Pontuação do Sub-Rótulo",
     "scoreInfo": "A pontuação do sub-rótulo é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
     "faceDesc": "Detalhes do objeto rastreado que gerou este rosto",
-    "timestamp": "Carimbo de data e hora"
+    "timestamp": "Estampa de Tempo"
   },
   "selectItem": "Selecione {{item}}",
   "imageEntry": {
@@ -59,7 +59,8 @@
   "description": {
     "placeholder": "Informe um nome para esta coleção",
     "addFace": "Adicione uma nova coleção à Biblioteca Facial subindo a sua primeira imagem.",
-    "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens."
+    "invalidName": "Nome inválido. Nomes podem conter letras, números, espacos, apóstrofos, sublinhado e hífens.",
+    "nameCannotContainHash": "O nome não pode conter #."
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
   "uploadFaceImage": {
@@ -71,7 +72,11 @@
     "title": "Reconhecimentos Recentes",
     "aria": "Selecionar reconhecimentos recentes",
     "empty": "Não há tentativas recentes de reconhecimento facial",
-    "titleShort": "Recente"
+    "titleShort": "Recente",
+    "emptyNoLibrary": {
+      "title": "Carregue uma foto de rosto",
+      "description": "Você deve adicionar pelo menos um rosto à biblioteca para que o reconhecimento facial funcione."
+    }
   },
   "selectFace": "Selecionar Rosto",
   "trainFaceAs": "Treinar Rosto como:",
@@ -88,7 +93,8 @@
       "renamedFace": "O rosto foi renomeado com sucesso para {{name}}",
       "deletedName_one": "{{count}} rosto foi deletado com sucesso.",
       "deletedName_many": "{{count}} rostos foram deletados com sucesso.",
-      "deletedName_other": "{{count}} rostos foram deletados com sucesso."
+      "deletedName_other": "{{count}} rostos foram deletados com sucesso.",
+      "reclassifiedFace": "Rosto reclassificado com sucesso."
     },
     "error": {
       "uploadingImageFailed": "Falha ao enviar a imagem: {{errorMessage}}",
@@ -97,7 +103,10 @@
       "deleteNameFailed": "Falha ao deletar nome: {{errorMessage}}",
       "renameFaceFailed": "Falha ao renomear rosto: {{errorMessage}}",
       "trainFailed": "Falha ao treinar: {{errorMessage}}",
-      "updateFaceScoreFailed": "Falha ao atualizar pontuação de rosto: {{errorMessage}}"
+      "updateFaceScoreFailed": "Falha ao atualizar pontuação de rosto: {{errorMessage}}",
+      "reclassifyFailed": "Falha ao reclassificar o rosto: {{errorMessage}}"
     }
-  }
+  },
+  "reclassifyFaceAs": "Reclassificar rosto como:",
+  "reclassifyFace": "Reclassificar rosto"
 }

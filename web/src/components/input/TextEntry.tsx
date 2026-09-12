@@ -77,7 +77,7 @@ export default function TextEntry({
               <FormControl>
                 <Input
                   {...field}
-                  className="text-md w-full"
+                  className="w-full"
                   placeholder={placeholder}
                   type="text"
                 />

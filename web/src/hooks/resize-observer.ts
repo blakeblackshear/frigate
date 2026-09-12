@@ -31,25 +31,24 @@ export function useResizeObserver(...refs: RefType[]) {
     [],
   );
 
+  // Resolve refs to actual DOM elements for use as stable effect dependencies.
+  // Rest params create a new array each call, but the underlying elements are
+  // stable DOM nodes, so spreading them into the dep array avoids re-running
+  // the effect on every render.
+  const elements = refs.map((ref) =>
+    ref instanceof Window ? document.body : ref.current,
+  );
+
   useEffect(() => {
-    refs.forEach((ref) => {
-      if (ref instanceof Window) {
-        resizeObserver.observe(document.body);
-      } else if (ref.current) {
-        resizeObserver.observe(ref.current);
-      }
+    elements.forEach((el) => {
+      if (el) resizeObserver.observe(el);
     });
 
     return () => {
-      refs.forEach((ref) => {
-        if (ref instanceof Window) {
-          resizeObserver.unobserve(document.body);
-        } else if (ref.current) {
-          resizeObserver.unobserve(ref.current);
-        }
-      });
+      resizeObserver.disconnect();
     };
-  }, [refs, resizeObserver]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...elements, resizeObserver]);
 
   if (dimensions.length == refs.length) {
     return dimensions;

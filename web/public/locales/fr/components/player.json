@@ -4,7 +4,8 @@
   "noPreviewFound": "Aucun aperçu trouvé",
   "submitFrigatePlus": {
     "title": "Soumettre cette image à Frigate+ ?",
-    "submit": "Soumettre"
+    "submit": "Soumettre",
+    "previewError": "Impossible de télécharger le snapshot. L'enregistrement ne pas disponible sur cette période."
   },
   "streamOffline": {
     "title": "Flux hors ligne",
@@ -47,5 +48,6 @@
     "success": {
       "submittedFrigatePlus": "Image soumise avec succès à Frigate+"
     }
-  }
+  },
+  "cameraOff": "La camera est éteinte"
 }

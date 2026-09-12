@@ -133,14 +133,26 @@
     "unsuspended": "再開",
     "play": "再生",
     "unselect": "選択解除",
-    "export": "書き出し",
+    "export": "エクスポート",
     "deleteNow": "今すぐ削除",
     "next": "次へ",
-    "continue": "続行"
+    "continue": "続行",
+    "add": "追加",
+    "applying": "適用中…",
+    "undo": "元に戻す",
+    "copiedToClipboard": "クリップボードにコピーしました",
+    "modified": "変更あり",
+    "overridden": "上書き済み",
+    "resetToGlobal": "グローバル設定にリセット",
+    "resetToDefault": "デフォルトにリセット",
+    "saveAll": "すべて保存",
+    "savingAll": "すべて保存中…",
+    "undoAll": "すべて元に戻す",
+    "retry": "再試行"
   },
   "menu": {
     "system": "システム",
-    "systemMetrics": "システムモニター",
+    "systemMetrics": "システムメトリクス",
     "configuration": "設定",
     "systemLogs": "システムログ",
     "settings": "設定",
@@ -181,7 +193,7 @@
     },
     "review": "レビュー",
     "explore": "ブラウズ",
-    "export": "書き出し",
+    "export": "エクスポート",
     "uiPlayground": "UI テスト環境",
     "faceLibrary": "顔データベース",
     "user": {
@@ -235,9 +247,15 @@
       "withSystem": {
         "label": "システム設定に従う"
       },
-      "hr": "Hrvatski (クロアチア語)"
+      "hr": "Hrvatski (クロアチア語)",
+      "bs": "Bosanski (ボスニア語)",
+      "zhHant": "繁體中文 (繁体字中国語)"
     },
-    "classification": "分類"
+    "classification": "分類",
+    "profiles": "プロファイル",
+    "actions": "操作",
+    "features": "機能",
+    "chat": "チャット"
   },
   "toast": {
     "copyUrlToClipboard": "URLをクリップボードにコピーしました。",
@@ -246,7 +264,8 @@
       "error": {
         "title": "設定変更の保存に失敗しました: {{errorMessage}}",
         "noMessage": "設定変更の保存に失敗しました"
-      }
+      },
+      "success": "設定変更を保存しました。"
     }
   },
   "role": {
@@ -289,5 +308,10 @@
   "field": {
     "optional": "任意",
     "internalID": "Frigate が設定で使用する内部 ID です"
+  },
+  "no_items": "項目がありません",
+  "validation_errors": "入力エラー",
+  "credentialField": {
+    "savedPlaceholder": "保存済み — 変更しない場合は空欄"
   }
 }

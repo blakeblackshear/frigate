@@ -3,6 +3,10 @@ id: audio_detectors
 title: Audio Detectors
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+
 Frigate provides a builtin audio detector which runs on the CPU. Compared to object detection in images, audio detection is a relatively lightweight operation so the only option is to run the detection on a CPU.
 
 ## Configuration
@@ -11,7 +15,17 @@ Audio events work by detecting a type of audio and creating an event, the event 
 
 ### Enabling Audio Events
 
-Audio events can be enabled for all cameras or only for specific cameras.
+Audio events can be enabled globally or for specific cameras.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+**Global:** Navigate to <NavPath path="Settings > Global configuration > Audio events" /> and set **Enable audio detection** to on.
+
+**Per-camera:** Navigate to <NavPath path="Settings > Camera configuration > Audio events" /> and set **Enable audio detection** to on for the desired camera.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 
@@ -26,6 +40,9 @@ cameras:
       enabled: True # <- enable audio events for the front_camera
 ```
 
+</TabItem>
+</ConfigTabs>
+
 If you are using multiple streams then you must set the `audio` role on the stream that is going to be used for audio detection, this can be any stream but the stream must have audio included.
 
 :::note
@@ -33,6 +50,14 @@ If you are using multiple streams then you must set the `audio` role on the stre
 The ffmpeg process for capturing audio will be a separate connection to the camera along with the other roles assigned to the camera, for this reason it is recommended that the go2rtc restream is used for this purpose. See [the restream docs](/configuration/restream.md) for more information.
 
 :::
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > Streams (FFmpeg)" /> and add an input with the `audio` role pointing to a stream that includes audio.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -48,9 +73,12 @@ cameras:
             - detect
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Configuring Minimum Volume
 
-The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that Frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widely between camera models so it is important to run tests to see what volume levels are. The Debug view in the Frigate UI has an Audio tab for cameras that have the `audio` role assigned where a graph and the current levels are is displayed. The `min_volume` parameter should be set to the minimum the `RMS` level required to run audio detection.
+The audio detector uses volume levels in the same way that motion in a camera feed is used for object detection. This means that Frigate will not run audio detection unless the audio volume is above the configured level in order to reduce resource usage. Audio levels can vary widely between camera models so it is important to run tests to see what volume levels are. The [Debug view](/usage/live#the-single-camera-view) in the Frigate UI has an Audio tab for cameras that have the `audio` role assigned where a graph and the current levels are displayed. The `min_volume` parameter should be set to the minimum the `RMS` level required to run audio detection.
 
 :::tip
 
@@ -60,7 +88,18 @@ Volume is considered motion for recordings, this means when the `record -> retai
 
 ### Configuring Audio Events
 
-The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `scream`, `speech`, and `yell` are enabled but these can be customized.
+The included audio model has over [500 different types](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) of audio that can be detected, many of which are not practical. By default `bark`, `fire_alarm`, `speech`, and `yell` are enabled but these can be customized.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Audio events" />.
+
+- Set **Enable audio detection** to on
+- Set **Listen types** to include the audio types you want to detect
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 audio:
@@ -68,20 +107,106 @@ audio:
   listen:
     - bark
     - fire_alarm
-    - scream
     - speech
     - yell
 ```
 
+</TabItem>
+</ConfigTabs>
+
+### Common Audio Labels
+
+The labelmap includes hundreds of sound types. The labels below are the ones most users may find practical, grouped by what they're typically used for. Use the exact label string from the left column in your `listen` config, or search for the label in the Frigate UI directly.
+
+Some labels cover several related sounds: `yell` is triggered by shouting, yelling, children shouting, and screaming; `crying` covers baby cries, sobbing, and whimpering; and `speech` covers ordinary talking and conversation.
+
+**Safety and security**
+
+| Label            | Detects                            |
+| ---------------- | ---------------------------------- |
+| `yell`           | Shouting, yelling, screaming       |
+| `fire_alarm`     | Fire and smoke alarm sirens        |
+| `smoke_detector` | Smoke detector beeps               |
+| `alarm`          | General alarm sounds               |
+| `car_alarm`      | Car alarms                         |
+| `siren`          | Emergency vehicle and civil sirens |
+| `glass`          | Glass clinking                     |
+| `shatter`        | Breaking glass                     |
+| `breaking`       | Something breaking                 |
+| `gunshot`        | Gunshots                           |
+| `explosion`      | Explosions                         |
+
+**People and activity**
+
+| Label       | Detects                  |
+| ----------- | ------------------------ |
+| `speech`    | Talking and conversation |
+| `laughter`  | Laughing                 |
+| `crying`    | Baby crying and sobbing  |
+| `cough`     | Coughing                 |
+| `footsteps` | Footsteps and walking    |
+| `knock`     | Knocking on a door       |
+| `doorbell`  | Doorbell                 |
+| `ding-dong` | Doorbell chime           |
+
+**Pets and animals**
+
+| Label      | Detects          |
+| ---------- | ---------------- |
+| `bark`     | Dog barking      |
+| `dog`      | Other dog sounds |
+| `howl`     | Howling          |
+| `growling` | Growling         |
+| `meow`     | Cat meowing      |
+| `cat`      | Other cat sounds |
+| `hiss`     | Hissing          |
+
+**Vehicles and driveway**
+
+| Label             | Detects              |
+| ----------------- | -------------------- |
+| `car`             | Passing cars         |
+| `honk`            | Car horns            |
+| `truck`           | Trucks               |
+| `reversing_beeps` | Vehicle backup beeps |
+| `motorcycle`      | Motorcycles          |
+| `engine_starting` | Engines starting     |
+
+:::tip
+
+Frequently-heard labels like `speech` can generate a lot of events, and each event could save a snapshot and recording based on your configuration, so start with a focused set and expand from there. The defaults (`bark`, `fire_alarm`, `speech`, `yell`) plus a few of the safety labels above cover most needs. See the [full audio labelmap](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt) or the Frigate UI for every available type.
+
+:::
+
 ### Audio Transcription
 
-Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI’s open-source Whisper models via `faster-whisper`. The goal of this feature is to support Semantic Search for `speech` audio events. Frigate is not intended to act as a continuous, fully-automatic speech transcription service — automatically transcribing all speech (or queuing many audio events for transcription) requires substantial CPU (or GPU) resources and is impractical on most systems. For this reason, transcriptions for events are initiated manually from the UI or the API rather than being run continuously in the background.
+Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI's open-source Whisper models via `faster-whisper`. The goal of this feature is to support Semantic Search for `speech` audio events. Frigate is not intended to act as a continuous, fully-automatic speech transcription service. Automatically transcribing all speech (or queuing many audio events for transcription) requires substantial CPU (or GPU) resources and is impractical on most systems. For this reason, transcriptions for events are initiated manually from the UI or the API rather than being run continuously in the background.
+
+:::info
+
+Audio transcription requires a one-time internet connection to download the Whisper or Sherpa-ONNX model on first use. Once cached, transcription runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+
+:::
 
 Transcription accuracy also depends heavily on the quality of your camera's microphone and recording conditions. Many cameras use inexpensive microphones, and distance to the speaker, low audio bitrate, or background noise can significantly reduce transcription quality. If you need higher accuracy, more robust long-running queues, or large-scale automatic transcription, consider using the HTTP API in combination with an automation platform and a cloud transcription service.
 
 #### Configuration
 
-To enable transcription, enable it in your config. Note that audio detection must also be enabled as described above in order to use audio transcription features.
+To enable transcription, configure it globally and optionally disable for specific cameras. Audio detection must also be enabled as described above.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+**Global:** Navigate to <NavPath path="Settings > Enrichments > Audio transcription" />.
+
+- Set **Enable audio transcription** to on
+- Set **Transcription device** to the desired device
+- Set **Model size** to the desired size
+
+**Per-camera:** Navigate to <NavPath path="Settings > Camera configuration > Audio transcription" /> to enable or disable transcription for a specific camera.
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 audio_transcription:
@@ -99,6 +224,9 @@ cameras:
     audio_transcription:
       enabled: False
 ```
+
+</TabItem>
+</ConfigTabs>
 
 :::note
 
@@ -128,7 +256,7 @@ The only field that is valid at the camera level is `enabled`.
 
 #### Live transcription
 
-The single camera Live view in the Frigate UI supports live transcription of audio for streams defined with the `audio` role. Use the Enable/Disable Live Audio Transcription button/switch to toggle transcription processing. When speech is heard, the UI will display a black box over the top of the camera stream with text. The MQTT topic `frigate/<camera_name>/audio/transcription` will also be updated in real-time with transcribed text.
+The single camera Live view in the Frigate UI supports live transcription of audio for streams defined with the `audio` role. Use the Enable/Disable Live Audio Transcription button/switch to toggle transcription processing, or toggle it outside of the UI with the [`frigate/<camera_name>/audio_transcription/set`](/integrations/mqtt#frigatecamera_nameaudio_transcriptionset) MQTT topic or the HTTP API. When speech is heard, the UI will display a black box over the top of the camera stream with text. The MQTT topic `frigate/<camera_name>/audio/transcription` will also be updated in real-time with transcribed text.
 
 Results can be error-prone due to a number of factors, including:
 
@@ -144,9 +272,9 @@ If you have CUDA hardware, you can experiment with the `large` `whisper` model o
 
 #### Transcription and translation of `speech` audio events
 
-Any `speech` events in Explore can be transcribed and/or translated through the Transcribe button in the Tracked Object Details pane.
+Any `speech` events in Explore can be transcribed and/or translated through the Transcribe button (the microphone icon) in the Tracked Object Details pane.
 
-In order to use transcription and translation for past events, you must enable audio detection and define `speech` as an audio type to listen for in your config. To have `speech` events translated into the language of your choice, set the `language` config parameter with the correct [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+In order to use transcription and translation for past events, you must enable audio detection and define `speech` as an audio type to listen for. To have `speech` events translated into the language of your choice, set the `language` config parameter with the correct [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
 
 The transcribed/translated speech will appear in the description box in the Tracked Object Details pane. If Semantic Search is enabled, embeddings are generated for the transcription text and are fully searchable using the description search type.
 
@@ -162,16 +290,16 @@ Recorded `speech` events will always use a `whisper` model, regardless of the `m
 
 1. Why doesn't Frigate automatically transcribe all `speech` events?
 
-   Frigate does not implement a queue mechanism for speech transcription, and adding one is not trivial. A proper queue would need backpressure, prioritization, memory/disk buffering, retry logic, crash recovery, and safeguards to prevent unbounded growth when events outpace processing. That’s a significant amount of complexity for a feature that, in most real-world environments, would mostly just churn through low-value noise.
+   Frigate does not implement a queue mechanism for speech transcription, and adding one is not trivial. A proper queue would need backpressure, prioritization, memory/disk buffering, retry logic, crash recovery, and safeguards to prevent unbounded growth when events outpace processing. That's a significant amount of complexity for a feature that, in most real-world environments, would mostly just churn through low-value noise.
 
    Because transcription is **serialized (one event at a time)** and speech events can be generated far faster than they can be processed, an auto-transcribe toggle would very quickly create an ever-growing backlog and degrade core functionality. For the amount of engineering and risk involved, it adds **very little practical value** for the majority of deployments, which are often on low-powered, edge hardware.
 
-   If you hear speech that’s actually important and worth saving/indexing for the future, **just press the transcribe button in Explore** on that specific `speech` event - that keeps things explicit, reliable, and under your control.
+   If you hear speech that's actually important and worth saving/indexing for the future, **just press the transcribe button (the microphone icon) in Explore** on that specific `speech` event - that keeps things explicit, reliable, and under your control.
 
    Other options are being considered for future versions of Frigate to add transcription options that support external `whisper` Docker containers. A single transcription service could then be shared by Frigate and other applications (for example, Home Assistant Voice), and run on more powerful machines when available.
 
 2. Why don't you save live transcription text and use that for `speech` events?
 
-   There’s no guarantee that a `speech` event is even created from the exact audio that went through the transcription model. Live transcription and `speech` event creation are **separate, asynchronous processes**. Even when both are correctly configured, trying to align the **precise start and end time of a speech event** with whatever audio the model happened to be processing at that moment is unreliable.
+   There's no guarantee that a `speech` event is even created from the exact audio that went through the transcription model. Live transcription and `speech` event creation are **separate, asynchronous processes**. Even when both are correctly configured, trying to align the **precise start and end time of a speech event** with whatever audio the model happened to be processing at that moment is unreliable.
 
-   Automatically persisting that data would often result in **misaligned, partial, or irrelevant transcripts**, while still incurring all of the CPU, storage, and privacy costs of transcription. That’s why Frigate treats transcription as an **explicit, user-initiated action** rather than an automatic side-effect of every `speech` event.
+   Automatically persisting that data would often result in **misaligned, partial, or irrelevant transcripts**, while still incurring all of the CPU, storage, and privacy costs of transcription. That's why Frigate treats transcription as an **explicit, user-initiated action** rather than an automatic side-effect of every `speech` event.

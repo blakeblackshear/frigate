@@ -6,6 +6,7 @@ import { isDesktop } from "react-device-detect";
 import { FaCompactDisc } from "react-icons/fa";
 import { HiTrash } from "react-icons/hi";
 import { ReviewSegment } from "@/types/review";
+import { MAX_BATCH_EXPORT_ITEMS } from "@/types/export";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,7 @@ import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import MultiExportDialog from "../overlay/MultiExportDialog";
 
 type ReviewActionGroupProps = {
   selectedReviews: ReviewSegment[];
@@ -164,6 +166,29 @@ export default function ReviewActionGroup({
               )}
             </Button>
           )}
+          {selectedReviews.length >= 2 &&
+            selectedReviews.length <= MAX_BATCH_EXPORT_ITEMS && (
+              <MultiExportDialog
+                selectedReviews={selectedReviews}
+                onStarted={() => {
+                  onClearSelected();
+                  pullLatestData();
+                }}
+              >
+                <Button
+                  className="flex items-center gap-2 p-2"
+                  aria-label={t("recording.button.export")}
+                  size="sm"
+                >
+                  <FaCompactDisc className="text-secondary-foreground" />
+                  {isDesktop && (
+                    <div className="text-primary">
+                      {t("recording.button.export")}
+                    </div>
+                  )}
+                </Button>
+              </MultiExportDialog>
+            )}
           <Button
             className="flex items-center gap-2 p-2"
             aria-label={

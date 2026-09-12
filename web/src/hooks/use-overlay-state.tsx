@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { usePersistence } from "./use-persistence";
 import { useUserPersistence } from "./use-user-persistence";
@@ -12,20 +19,28 @@ export function useOverlayState<S>(
   const location = useLocation();
   const navigate = useNavigate();
 
-  const currentLocationState = useMemo(() => location.state, [location]);
+  const locationRef = useRef(location);
+  locationRef.current = location;
 
   const setOverlayStateValue = useCallback(
     (value: S, replace: boolean = false) => {
-      const newLocationState = { ...currentLocationState };
+      const loc = locationRef.current;
+      const currentValue = loc.state?.[key] as S | undefined;
+
+      if (Object.is(currentValue, value)) {
+        return;
+      }
+
+      const newLocationState = { ...loc.state };
       newLocationState[key] = value;
-      navigate(location.pathname + (preserveSearch ? location.search : ""), {
+      navigate(loc.pathname + (preserveSearch ? loc.search : ""), {
         state: newLocationState,
         replace,
       });
     },
-    // we know that these deps are correct
+    // locationRef is stable so we don't need it in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [key, currentLocationState, navigate],
+    [key, navigate, preserveSearch],
   );
 
   const overlayStateValue = useMemo<S | undefined>(
@@ -47,7 +62,9 @@ export function usePersistedOverlayState<S extends string>(
 ] {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentLocationState = useMemo(() => location.state, [location]);
+
+  const locationRef = useRef(location);
+  locationRef.current = location;
 
   // currently selected value
 
@@ -63,14 +80,21 @@ export function usePersistedOverlayState<S extends string>(
 
   const setOverlayStateValue = useCallback(
     (value: S | undefined, replace: boolean = false) => {
+      const loc = locationRef.current;
+      const currentValue = loc.state?.[key] as S | undefined;
+
+      if (Object.is(currentValue, value)) {
+        return;
+      }
+
       setPersistedValue(value);
-      const newLocationState = { ...currentLocationState };
+      const newLocationState = { ...loc.state };
       newLocationState[key] = value;
-      navigate(location.pathname, { state: newLocationState, replace });
+      navigate(loc.pathname, { state: newLocationState, replace });
     },
-    // we know that these deps are correct
+    // locationRef is stable so we don't need it in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [key, currentLocationState, navigate],
+    [key, navigate, setPersistedValue],
   );
 
   return [
@@ -98,7 +122,9 @@ export function useUserPersistedOverlayState<S extends string>(
   const { auth } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const currentLocationState = useMemo(() => location.state, [location]);
+
+  const locationRef = useRef(location);
+  locationRef.current = location;
 
   // currently selected value from URL state
   const overlayStateValue = useMemo<S | undefined>(
@@ -112,14 +138,21 @@ export function useUserPersistedOverlayState<S extends string>(
 
   const setOverlayStateValue = useCallback(
     (value: S | undefined, replace: boolean = false) => {
+      const loc = locationRef.current;
+      const currentValue = loc.state?.[key] as S | undefined;
+
+      if (Object.is(currentValue, value)) {
+        return;
+      }
+
       setPersistedValue(value);
-      const newLocationState = { ...currentLocationState };
+      const newLocationState = { ...loc.state };
       newLocationState[key] = value;
-      navigate(location.pathname, { state: newLocationState, replace });
+      navigate(loc.pathname, { state: newLocationState, replace });
     },
-    // we know that these deps are correct
+    // locationRef is stable so we don't need it in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [key, currentLocationState, navigate, setPersistedValue],
+    [key, navigate, setPersistedValue],
   );
 
   // Don't return a value until auth has finished loading
@@ -142,17 +175,21 @@ export function useHashState<S extends string>(): [
   const location = useLocation();
   const navigate = useNavigate();
 
+  const locationRef = useRef(location);
+  locationRef.current = location;
+
   const setHash = useCallback(
     (value: S | undefined) => {
+      const loc = locationRef.current;
       if (!value) {
-        navigate(location.pathname);
+        navigate(loc.pathname);
       } else {
-        navigate(`${location.pathname}#${value}`, { state: location.state });
+        navigate(`${loc.pathname}#${value}`, { state: loc.state });
       }
     },
-    // we know that these deps are correct
+    // locationRef is stable so we don't need it in deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [location, navigate],
+    [navigate],
   );
 
   const hash = useMemo(
@@ -170,36 +207,51 @@ export function useSearchEffect(
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [pendingRemoval, setPendingRemoval] = useState(false);
+  const processedRef = useRef<string | null>(null);
 
-  const param = useMemo(() => {
-    const param = searchParams.get(key);
+  const currentParam = searchParams.get(key);
 
-    if (!param) {
-      return undefined;
-    }
-
-    return [key, decodeURIComponent(param)];
-  }, [searchParams, key]);
-
+  // Process the param via callback (once per unique param value)
   useEffect(() => {
-    if (!param) {
+    if (currentParam == null || currentParam === processedRef.current) {
       return;
     }
 
-    const remove = callback(param[1]);
+    const decoded = decodeURIComponent(currentParam);
+    const shouldRemove = callback(decoded);
 
-    if (remove) {
-      navigate(location.pathname + location.hash, {
-        state: location.state,
-        replace: true,
-      });
+    if (shouldRemove) {
+      processedRef.current = currentParam;
+      setPendingRemoval(true);
     }
+  }, [currentParam, callback, key]);
+
+  // Remove the search param in a separate render cycle so that any state
+  // changes from the callback (e.g., overlay state navigations) are already
+  // reflected in location.state before we navigate to strip the param.
+  useEffect(() => {
+    if (!pendingRemoval) {
+      return;
+    }
+
+    setPendingRemoval(false);
+    navigate(location.pathname + location.hash, {
+      state: location.state,
+      replace: true,
+    });
   }, [
-    param,
-    location.state,
+    pendingRemoval,
+    navigate,
     location.pathname,
     location.hash,
-    callback,
-    navigate,
+    location.state,
   ]);
+
+  // Reset tracking when param is removed from the URL
+  useEffect(() => {
+    if (currentParam == null) {
+      processedRef.current = null;
+    }
+  }, [currentParam]);
 }

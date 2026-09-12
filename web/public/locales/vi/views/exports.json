@@ -19,5 +19,9 @@
     "downloadVideo": "Tải video",
     "editName": "Chỉnh sửa tên",
     "deleteExport": "Xóa bản xuất"
+  },
+  "headings": {
+    "cases": "Các trường hợp",
+    "uncategorizedExports": "Xuất chưa được phân loại"
   }
 }

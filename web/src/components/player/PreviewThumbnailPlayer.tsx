@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { isIOS, isMobile, isSafari } from "react-device-detect";
 import Chip from "@/components/indicators/Chip";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { useSwipeable } from "react-swipeable";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
@@ -174,9 +174,10 @@ export default function PreviewThumbnailPlayer({
 
   // date
 
+  const is24Hour = use24HourTime(config);
   const formattedDate = useFormattedTimestamp(
     review.start_time,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestampMonthDayHourMinute.24hour", { ns: "common" })
       : t("time.formattedTimestampMonthDayHourMinute.12hour", { ns: "common" }),
     config?.ui?.timezone,

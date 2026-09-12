@@ -1,0 +1,73 @@
+{
+    "audio": {
+        "global": {
+            "detection": "Detecció global",
+            "sensitivity": "Sensibilitat global"
+        },
+        "cameras": {
+            "detection": "Detecció",
+            "sensitivity": "Sensibilitat"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Aparença global"
+        },
+        "cameras": {
+            "appearance": "Aparença"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Sensibilitat global",
+            "algorithm": "Algorisme global"
+        },
+        "cameras": {
+            "sensitivity": "Sensibilitat",
+            "algorithm": "Algorisme"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Visualització global"
+        },
+        "cameras": {
+            "display": "Mostra"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Resolució global",
+            "tracking": "Seguiment global"
+        },
+        "cameras": {
+            "resolution": "Resolució",
+            "tracking": "Seguiment"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Seguiment global",
+            "filtering": "Filtratge global"
+        },
+        "cameras": {
+            "tracking": "Seguiment",
+            "filtering": "Filtra"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Retenció global",
+            "events": "Esdeveniments globals"
+        },
+        "cameras": {
+            "retention": "Retenció",
+            "events": "Esdeveniment"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Arguments específics del FFmpeg"
+        }
+    }
+}

@@ -28,7 +28,8 @@
     "triggers": "Tetikler",
     "cameraManagement": "Yönetim",
     "cameraReview": "İncele",
-    "roles": "Roller"
+    "roles": "Roller",
+    "profiles": "Profiller"
   },
   "general": {
     "title": "Kullanıcı Arayüzü Ayarları",

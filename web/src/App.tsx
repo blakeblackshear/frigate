@@ -11,7 +11,6 @@ import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import { AuthProvider } from "@/context/auth-context";
 import useSWR from "swr";
 import { FrigateConfig } from "./types/frigateConfig";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
@@ -27,8 +26,10 @@ const Settings = lazy(() => import("@/pages/Settings"));
 const UIPlayground = lazy(() => import("@/pages/UIPlayground"));
 const FaceLibrary = lazy(() => import("@/pages/FaceLibrary"));
 const Classification = lazy(() => import("@/pages/ClassificationModel"));
+const Chat = lazy(() => import("@/pages/Chat"));
 const Logs = lazy(() => import("@/pages/Logs"));
 const AccessDenied = lazy(() => import("@/pages/AccessDenied"));
+const Replay = lazy(() => import("@/pages/Replay"));
 
 function App() {
   const { data: config } = useSWR<FrigateConfig>("config", {
@@ -37,13 +38,11 @@ function App() {
 
   return (
     <Providers>
-      <AuthProvider>
-        <BrowserRouter basename={window.baseUrl}>
-          <Wrapper>
-            {config?.safe_mode ? <SafeAppView /> : <DefaultAppView />}
-          </Wrapper>
-        </BrowserRouter>
-      </AuthProvider>
+      <BrowserRouter basename={window.baseUrl}>
+        <Wrapper>
+          {config?.safe_mode ? <SafeAppView /> : <DefaultAppView />}
+        </Wrapper>
+      </BrowserRouter>
     </Providers>
   );
 }
@@ -79,21 +78,19 @@ function DefaultAppView() {
         className={cn(
           "absolute right-0 top-0 overflow-hidden",
           isMobile
-            ? `bottom-${isPWA ? 16 : 12} left-0 md:bottom-16 landscape:bottom-14 landscape:md:bottom-16`
+            ? isPWA
+              ? "bottom-[calc(3rem+env(safe-area-inset-bottom))] left-0 pt-[env(safe-area-inset-top)] md:bottom-[calc(4rem+env(safe-area-inset-bottom))] landscape:pl-[env(safe-area-inset-left)] landscape:pr-[env(safe-area-inset-right)]"
+              : "bottom-12 left-0 md:bottom-16"
             : "bottom-8 left-[52px]",
         )}
       >
-        <Suspense>
+        <Suspense
+          fallback={
+            <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          }
+        >
           <Routes>
-            <Route
-              element={
-                mainRouteRoles ? (
-                  <ProtectedRoute requiredRoles={mainRouteRoles} />
-                ) : (
-                  <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
-                )
-              }
-            >
+            <Route element={<ProtectedRoute requiredRoles={mainRouteRoles} />}>
               <Route index element={<Live />} />
               <Route path="/review" element={<Events />} />
               <Route path="/explore" element={<Explore />} />
@@ -106,7 +103,9 @@ function DefaultAppView() {
               <Route path="/logs" element={<Logs />} />
               <Route path="/faces" element={<FaceLibrary />} />
               <Route path="/classification" element={<Classification />} />
-              <Route path="/playground" element={<UIPlayground />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/playground" element={<UIPlayground />} />{" "}
+              <Route path="/replay" element={<Replay />} />{" "}
             </Route>
             <Route path="/unauthorized" element={<AccessDenied />} />
             <Route path="*" element={<Redirect to="/" />} />

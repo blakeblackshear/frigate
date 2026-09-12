@@ -1,0 +1,128 @@
+{
+  "search": "Pretraga",
+  "documentTitle": "Izvoz - Frigate",
+  "selected_one": "{{count}} odabrano",
+  "selected_other": "{{count}} odabrano",
+  "noExports": "Nijedan izvoz nije pronađen",
+  "headings": {
+    "cases": "Slučajevi",
+    "uncategorizedExports": "Nekategorizirani izvozi"
+  },
+  "deleteExport": {
+    "label": "Obriši izvoz",
+    "desc": "Da li ste sigurni da želite da obrišete {{exportName}}?"
+  },
+  "editExport": {
+    "title": "Preimenuj izvoz",
+    "desc": "Unesite novi naziv za ovaj izvoz.",
+    "saveExport": "Sačuvaj izvoz"
+  },
+  "tooltip": {
+    "shareExport": "Dijeli izvoz",
+    "downloadVideo": "Preuzmi video",
+    "editName": "Uredi naziv",
+    "deleteExport": "Obriši izvoz",
+    "assignToCase": "Dodaj u slučaj",
+    "removeFromCase": "Ukloni iz slučaja"
+  },
+  "toolbar": {
+    "newCase": "Novi slučaj",
+    "addExport": "Dodaj izvoz",
+    "editCase": "Uredi slučaj",
+    "deleteCase": "Obriši slučaj"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Neuspješno preimenovanje izvoza: {{errorMessage}}",
+      "assignCaseFailed": "Neuspješno ažuriranje dodjele slučaja: {{errorMessage}}",
+      "caseSaveFailed": "Neuspješno čuvanje slučaja: {{errorMessage}}",
+      "caseDeleteFailed": "Neuspješno brisanje slučaja: {{errorMessage}}"
+    }
+  },
+  "deleteCase": {
+    "label": "Obriši slučaj",
+    "desc": "Da li ste sigurni da želite da obrišete {{caseName}}?",
+    "descKeepExports": "Izvozi će ostati dostupni kao nekategorizirani izvozi.",
+    "descDeleteExports": "Svi izvozi u ovom slučaju trajno će biti obrisani.",
+    "deleteExports": "Takođe izbriši izvoze"
+  },
+  "caseDialog": {
+    "title": "Dodaj u slučaj",
+    "description": "Odaberite postojeći slučaj ili napravite novi.",
+    "selectLabel": "Slučaj",
+    "newCaseOption": "Napravite novi slučaj",
+    "nameLabel": "Ime slučaja",
+    "descriptionLabel": "Opis"
+  },
+  "caseCard": {
+    "emptyCase": "Nema još izvoza"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} izvoz",
+    "queued": "U redu",
+    "running": "Pokretanje",
+    "preparing": "Priprema",
+    "copying": "Kopiranje",
+    "encoding": "Kodiranje",
+    "encodingRetry": "Kodiranje (ponovi)",
+    "finalizing": "Završavanje"
+  },
+  "caseView": {
+    "noDescription": "Nema opisa",
+    "createdAt": "Kreirano {{value}}",
+    "exportCount_one": "1 izvoz",
+    "exportCount_other": "{{count}} izvozi",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kamere",
+    "showMore": "Prikaži više",
+    "showLess": "Prikaži manje",
+    "emptyTitle": "Ovaj slučaj je prazan",
+    "emptyDescription": "Dodaj postojet će nekategorizirane izvoze kako bi slučaj ostao organizovan.",
+    "emptyDescriptionNoExports": "Nema dostupnih nekategoriziranih izvoza koje je moguće dodati još."
+  },
+  "caseEditor": {
+    "createTitle": "Kreiraj slučaj",
+    "editTitle": "Uredi slučaj",
+    "namePlaceholder": "Ime slučaja",
+    "descriptionPlaceholder": "Dodaj napomene ili kontekst za ovaj slučaj"
+  },
+  "addExportDialog": {
+    "title": "Dodaj izvoz u {{caseName}}",
+    "searchPlaceholder": "Pretraga nekategoriziranih izvoza",
+    "empty": "Nema nekategoriziranih izvoza koji odgovaraju ovoj pretrazi.",
+    "addButton_one": "Dodaj 1 izvoz",
+    "addButton_other": "Dodaj {{count}} izvoza",
+    "adding": "Dodavanje..."
+  },
+  "bulkActions": {
+    "addToCase": "Dodaj u slučaj",
+    "moveToCase": "Premjesti u slučaj",
+    "removeFromCase": "Ukloni iz slučaja",
+    "delete": "Obriši",
+    "deleteNow": "Obriši sada"
+  },
+  "bulkDelete": {
+    "title": "Obriši izvoze",
+    "desc_one": "Sigurni li ste da želite obrisati {{count}} izvoz?",
+    "desc_other": "Sigurni li ste da želite obrisati {{count}} izvoze?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Ukloni iz slučaja",
+    "desc_one": "Ukloni {{count}} izvoz iz ovog slučaja?",
+    "desc_other": "Ukloni {{count}} izvoze iz ovog slučaja?",
+    "descKeepExports": "Izvozi će biti premješteni u nekategorizirane.",
+    "descDeleteExports": "Izvozi će biti trajno obrisani.",
+    "deleteExports": "Umjesto toga, obriši izvoze"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Uspješno obrisani izvozi",
+      "reassign": "Uspješno ažurirana dodjela slučaja",
+      "remove": "Uspješno uklonjeni izvozi iz slučaja"
+    },
+    "error": {
+      "deleteFailed": "Neuspješno brisanje izvoza: {{errorMessage}}",
+      "reassignFailed": "Neuspješno ažuriranje dodjele slučaja: {{errorMessage}}"
+    }
+  }
+}

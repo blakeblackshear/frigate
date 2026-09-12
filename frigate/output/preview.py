@@ -22,7 +22,6 @@ from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_encode,
 )
 from frigate.models import Previews
-from frigate.track.object_processing import TrackedObject
 from frigate.util.image import copy_yuv_to_position, get_blank_yuv_frame, get_yuv_crop
 
 logger = logging.getLogger(__name__)
@@ -47,6 +46,15 @@ PREVIEW_QUALITY_BIT_RATES = {
     RecordQualityEnum.high: 9864,
     RecordQualityEnum.very_high: 10096,
 }
+# the -qmax param for ffmpeg prevents the encoder from overly compressing frames while still trying to hit the bitrate target
+# lower values are higher quality. This is especially important for iniitial frames in the segment
+PREVIEW_QMAX_PARAM = {
+    RecordQualityEnum.very_low: "",
+    RecordQualityEnum.low: "",
+    RecordQualityEnum.medium: "",
+    RecordQualityEnum.high: " -qmax 25",
+    RecordQualityEnum.very_high: " -qmax 25",
+}
 
 
 def get_cache_image_name(camera: str, frame_time: float) -> str:
@@ -55,6 +63,53 @@ def get_cache_image_name(camera: str, frame_time: float) -> str:
         CACHE_DIR,
         f"{FOLDER_PREVIEW_FRAMES}/preview_{camera}-{frame_time}.{PREVIEW_FRAME_TYPE}",
     )
+
+
+def get_most_recent_preview_frame(
+    camera: str, before: float | None = None
+) -> str | None:
+    """Get the most recent preview frame for a camera."""
+    if not os.path.exists(PREVIEW_CACHE_DIR):
+        return None
+
+    try:
+        # files are named preview_{camera}-{timestamp}.webp
+        # we want the largest timestamp that is less than or equal to before
+        preview_files = [
+            f
+            for f in os.listdir(PREVIEW_CACHE_DIR)
+            if f.startswith(f"preview_{camera}-")
+            and f.endswith(f".{PREVIEW_FRAME_TYPE}")
+        ]
+
+        if not preview_files:
+            return None
+
+        # sort by timestamp in descending order
+        # filenames are like preview_front-1712345678.901234.webp
+        preview_files.sort(reverse=True)
+
+        if before is None:
+            return os.path.join(PREVIEW_CACHE_DIR, preview_files[0])
+
+        for file_name in preview_files:
+            try:
+                # Extract timestamp: preview_front-1712345678.901234.webp
+                # Split by dash and extension
+                timestamp_part = file_name.split("-")[-1].split(
+                    f".{PREVIEW_FRAME_TYPE}"
+                )[0]
+                timestamp = float(timestamp_part)
+
+                if timestamp <= before:
+                    return os.path.join(PREVIEW_CACHE_DIR, file_name)
+            except (ValueError, IndexError):
+                continue
+
+        return None
+    except Exception as e:
+        logger.error(f"Error searching for most recent preview frame: {e}")
+        return None
 
 
 class FFMpegConverter(threading.Thread):
@@ -80,7 +135,7 @@ class FFMpegConverter(threading.Thread):
             config.ffmpeg.ffmpeg_path,
             "default",
             input="-f concat -y -protocol_whitelist pipe,file -safe 0 -threads 1 -i /dev/stdin",
-            output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
+            output=f"-threads 1 -g {PREVIEW_KEYFRAME_INTERVAL} -bf 0 -b:v {PREVIEW_QUALITY_BIT_RATES[self.config.record.preview.quality]}{PREVIEW_QMAX_PARAM[self.config.record.preview.quality]} {FPS_VFR_PARAM} -movflags +faststart -pix_fmt yuv420p {self.path}",
             type=EncodeTypeEnum.preview,
         )
 
@@ -93,16 +148,18 @@ class FFMpegConverter(threading.Thread):
             if t_idx == item_count - 1:
                 # last frame does not get a duration
                 playlist.append(
-                    f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"
+                    f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"  # type: ignore[arg-type]
                 )
                 continue
 
             playlist.append(
-                f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"
+                f"file '{get_cache_image_name(self.config.name, self.frame_times[t_idx])}'"  # type: ignore[arg-type]
             )
             playlist.append(
                 f"duration {self.frame_times[t_idx + 1] - self.frame_times[t_idx]}"
             )
+
+        Path(self.path).parent.mkdir(parents=True, exist_ok=True)
 
         try:
             p = sp.run(
@@ -145,30 +202,33 @@ class FFMpegConverter(threading.Thread):
         # unlink files from cache
         # don't delete last frame as it will be used as first frame in next segment
         for t in self.frame_times[0:-1]:
-            Path(get_cache_image_name(self.config.name, t)).unlink(missing_ok=True)
+            Path(get_cache_image_name(self.config.name, t)).unlink(missing_ok=True)  # type: ignore[arg-type]
 
 
 class PreviewRecorder:
     def __init__(self, config: CameraConfig) -> None:
         self.config = config
-        self.start_time = 0
-        self.last_output_time = 0
+        self.camera_name: str = config.name or ""
+        self.start_time: float = 0
+        self.last_output_time: float = 0
         self.offline = False
-        self.output_frames = []
+        self.output_frames: list[float] = []
 
-        if config.detect.width > config.detect.height:
+        if config.detect.width is None or config.detect.height is None:
+            raise ValueError("Detect width and height must be set for previews.")
+
+        self.detect_width: int = config.detect.width
+        self.detect_height: int = config.detect.height
+
+        if self.detect_width > self.detect_height:
             self.out_height = PREVIEW_HEIGHT
             self.out_width = (
-                int((config.detect.width / config.detect.height) * self.out_height)
-                // 4
-                * 4
+                int((self.detect_width / self.detect_height) * self.out_height) // 4 * 4
             )
         else:
             self.out_width = PREVIEW_HEIGHT
             self.out_height = (
-                int((config.detect.height / config.detect.width) * self.out_width)
-                // 4
-                * 4
+                int((self.detect_height / self.detect_width) * self.out_width) // 4 * 4
             )
 
         # create communication for finished previews
@@ -191,10 +251,9 @@ class PreviewRecorder:
             "v2": v2,
         }
 
-        # end segment at end of hour
+        # end segment at end of hour (use UTC to avoid DST issues)
         self.segment_end = (
-            (datetime.datetime.now() + datetime.timedelta(hours=1))
-            .astimezone(datetime.timezone.utc)
+            (datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=1))
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
@@ -206,14 +265,13 @@ class PreviewRecorder:
 
         # check for existing items in cache
         start_ts = (
-            datetime.datetime.now()
-            .astimezone(datetime.timezone.utc)
+            datetime.datetime.now(datetime.UTC)
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
 
-        file_start = f"preview_{config.name}"
-        start_file = f"{file_start}-{start_ts}.webp"
+        file_start = f"preview_{config.name}-"
+        start_file = f"{file_start}{start_ts}.webp"
 
         for file in sorted(os.listdir(os.path.join(CACHE_DIR, FOLDER_PREVIEW_FRAMES))):
             if not file.startswith(file_start):
@@ -241,14 +299,16 @@ class PreviewRecorder:
 
     def reset_frame_cache(self, frame_time: float) -> None:
         self.segment_end = (
-            (datetime.datetime.now() + datetime.timedelta(hours=1))
-            .astimezone(datetime.timezone.utc)
+            (
+                datetime.datetime.fromtimestamp(frame_time, tz=datetime.UTC)
+                + datetime.timedelta(hours=1)
+            )
             .replace(minute=0, second=0, microsecond=0)
             .timestamp()
         )
         self.start_time = frame_time
         self.last_output_time = frame_time
-        self.output_frames: list[float] = []
+        self.output_frames = []
 
     def should_write_frame(
         self,
@@ -288,7 +348,9 @@ class PreviewRecorder:
 
     def write_frame_to_cache(self, frame_time: float, frame: np.ndarray) -> None:
         # resize yuv frame
-        small_frame = np.zeros((self.out_height * 3 // 2, self.out_width), np.uint8)
+        small_frame: np.ndarray = np.zeros(
+            (self.out_height * 3 // 2, self.out_width), np.uint8
+        )
         copy_yuv_to_position(
             small_frame,
             (0, 0),
@@ -301,14 +363,17 @@ class PreviewRecorder:
             small_frame,
             cv2.COLOR_YUV2BGR_I420,
         )
-        cv2.imwrite(
-            get_cache_image_name(self.config.name, frame_time),
+        cache_path = get_cache_image_name(self.camera_name, frame_time)
+
+        if not cv2.imwrite(
+            cache_path,
             small_frame,
             [
                 int(cv2.IMWRITE_WEBP_QUALITY),
                 PREVIEW_QUALITY_WEBP[self.config.record.preview.quality],
             ],
-        )
+        ):
+            logger.error("Failed to write preview frame to %s", cache_path)
 
     def write_data(
         self,
@@ -342,7 +407,7 @@ class PreviewRecorder:
                 ).start()
             else:
                 logger.debug(
-                    f"Not saving preview for {self.config.name} because there are no saved frames."
+                    f"Not saving preview for {self.camera_name} because there are no saved frames."
                 )
 
             self.reset_frame_cache(frame_time)
@@ -362,9 +427,7 @@ class PreviewRecorder:
         if not self.offline:
             self.write_frame_to_cache(
                 frame_time,
-                get_blank_yuv_frame(
-                    self.config.detect.width, self.config.detect.height
-                ),
+                get_blank_yuv_frame(self.detect_width, self.detect_height),
             )
             self.offline = True
 
@@ -377,9 +440,9 @@ class PreviewRecorder:
                 return
 
             old_frame_path = get_cache_image_name(
-                self.config.name, self.output_frames[-1]
+                self.camera_name, self.output_frames[-1]
             )
-            new_frame_path = get_cache_image_name(self.config.name, frame_time)
+            new_frame_path = get_cache_image_name(self.camera_name, frame_time)
             shutil.copy(old_frame_path, new_frame_path)
 
             # save last frame to ensure consistent duration
@@ -393,13 +456,12 @@ class PreviewRecorder:
             self.reset_frame_cache(frame_time)
 
     def stop(self) -> None:
-        self.config_subscriber.stop()
         self.requestor.stop()
 
 
 def get_active_objects(
-    frame_time: float, camera_config: CameraConfig, all_objects: list[TrackedObject]
-) -> list[TrackedObject]:
+    frame_time: float, camera_config: CameraConfig, all_objects: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """get active objects for detection."""
     return [
         o

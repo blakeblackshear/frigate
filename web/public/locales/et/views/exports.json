@@ -2,7 +2,9 @@
   "documentTitle": "Eksport Frigate'ist",
   "search": "Otsi",
   "noExports": "Eksporditud sisu ei leidu",
-  "deleteExport": "Kustuta eksporditud sisu",
+  "deleteExport": {
+    "label": "Kustuta eksporditud sisu"
+  },
   "deleteExport.desc": "Kas sa oled kindel et soovid „{{exportName}}“ kustutada?",
   "editExport": {
     "title": "Muuda eksporditud sisu nime",
@@ -13,11 +15,67 @@
     "shareExport": "Jaga eksporditud sisu",
     "downloadVideo": "Laadi video alla",
     "editName": "Muuda nime",
-    "deleteExport": "Kustuta eksporditud sisu"
+    "deleteExport": "Kustuta eksporditud sisu",
+    "assignToCase": "Lisa juhtumile",
+    "removeFromCase": "Eemalda juhtumist"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Eksporditud sisu nime muutmine ei õnnestunud: {{errorMessage}}"
+      "renameExportFailed": "Eksporditud sisu nime muutmine ei õnnestunud: {{errorMessage}}",
+      "assignCaseFailed": "Juhtumiga seose uuendamine ei õnnestunud: {{errorMessage}}",
+      "caseSaveFailed": "Juhtumi salvestamine ei õnnestunud: {{errorMessage}}",
+      "caseDeleteFailed": "Juhtumi kustutamine ei õnnestunud: {{errorMessage}}"
     }
+  },
+  "headings": {
+    "cases": "Juhtumid",
+    "uncategorizedExports": "Kategooriata eksportimised"
+  },
+  "caseDialog": {
+    "title": "Lisa juhtumile",
+    "selectLabel": "Juhtum",
+    "newCaseOption": "Lisa uus juhtum",
+    "nameLabel": "Juhtumi nimi",
+    "descriptionLabel": "Kirjeldus",
+    "description": "Vali olemasolev juhtum või lisa uus."
+  },
+  "toolbar": {
+    "newCase": "Uus juhtum",
+    "addExport": "Lisa eksportimiseks",
+    "editCase": "Muuda juhtumit",
+    "deleteCase": "Kustuta juhtum"
+  },
+  "deleteCase": {
+    "label": "Kustuta juhtum",
+    "desc": "Kas oled kindel, et soovid „{{caseName}}“ juhtumi kustutada?"
+  },
+  "caseCard": {
+    "emptyCase": "Eksportimise veel pole"
+  },
+  "jobCard": {
+    "defaultName": "Eksportimine kaamerast „{{camera}}“",
+    "queued": "Lisatud järjekorda",
+    "running": "Töös",
+    "preparing": "Ettevalmistamisel",
+    "copying": "Kopeerimisel",
+    "encoding": "Kodeerimisel",
+    "encodingRetry": "Kodeerimisel (uuesti)",
+    "finalizing": "Lõpetamisel"
+  },
+  "caseView": {
+    "noDescription": "Kirjeldust pole",
+    "createdAt": "Loodud {{value}}",
+    "exportCount_one": "1 eksportimine",
+    "exportCount_other": "{{count}} eksportimist",
+    "cameraCount_one": "1 kaamera",
+    "cameraCount_other": "{{count}} kaamerat",
+    "showMore": "Näita rohkem",
+    "showLess": "Näita vähem",
+    "emptyTitle": "See juhtum on tühi"
+  },
+  "caseEditor": {
+    "namePlaceholder": "Juhtumi nimi",
+    "editTitle": "Muuda juhtumit",
+    "createTitle": "Lisa juhtum"
   }
 }

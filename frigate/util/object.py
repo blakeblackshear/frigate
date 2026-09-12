@@ -35,6 +35,11 @@ logger = logging.getLogger(__name__)
 GRID_SIZE = 8
 
 
+def create_empty_regions_grid() -> list[list[dict[str, Any]]]:
+    """Create a region grid with no learned sizes."""
+    return [[{"sizes": []} for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+
 def get_camera_regions_grid(
     name: str,
     detect: DetectConfig,
@@ -47,12 +52,7 @@ def get_camera_regions_grid(
         grid = regions.grid
         last_update = regions.last_update
     except DoesNotExist:
-        grid = []
-        for x in range(GRID_SIZE):
-            row = []
-            for y in range(GRID_SIZE):
-                row.append({"sizes": []})
-            grid.append(row)
+        grid = create_empty_regions_grid()
         last_update = 0
 
     # get events for timeline entries
@@ -62,11 +62,12 @@ def get_camera_regions_grid(
         .where((Event.false_positive == None) | (Event.false_positive == False))
         .where(Event.start_time > last_update)
     )
-    valid_event_ids = [e["id"] for e in events.dicts()]
-    logger.debug(f"Found {len(valid_event_ids)} new events for {name}")
+
+    event_count = events.count()
+    logger.debug(f"Found {event_count} new events for {name}")
 
     # no new events, return as is
-    if not valid_event_ids:
+    if event_count == 0:
         return grid
 
     new_update = datetime.datetime.now().timestamp()
@@ -78,7 +79,7 @@ def get_camera_regions_grid(
                 Timeline.data,
             ]
         )
-        .where(Timeline.source_id << valid_event_ids)
+        .where(Timeline.source_id << events)
         .limit(10000)
         .dicts()
     )
@@ -248,20 +249,20 @@ def is_object_filtered(obj, objects_to_track, object_filters):
         if obj_settings.max_ratio < object_ratio:
             return True
 
-        if obj_settings.mask is not None:
+        if obj_settings.rasterized_mask is not None:
             # compute the coordinates of the object and make sure
             # the location isn't outside the bounds of the image (can happen from rounding)
             object_xmin = object_box[0]
             object_xmax = object_box[2]
             object_ymax = object_box[3]
-            y_location = min(int(object_ymax), len(obj_settings.mask) - 1)
+            y_location = min(int(object_ymax), len(obj_settings.rasterized_mask) - 1)
             x_location = min(
                 int((object_xmax + object_xmin) / 2.0),
-                len(obj_settings.mask[0]) - 1,
+                len(obj_settings.rasterized_mask[0]) - 1,
             )
 
             # if the object is in a masked location, don't add it to detected objects
-            if obj_settings.mask[y_location][x_location] == 0:
+            if obj_settings.rasterized_mask[y_location][x_location] == 0:
                 return True
 
     return False
@@ -338,18 +339,13 @@ def reduce_boxes(boxes, iou_threshold=0.0):
 
 def average_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
     """Return a box that is the average of a list of boxes."""
-    x_mins = []
-    y_mins = []
-    x_max = []
-    y_max = []
-
-    for box in boxes:
-        x_mins.append(box[0])
-        y_mins.append(box[1])
-        x_max.append(box[2])
-        y_max.append(box[3])
-
-    return [np.mean(x_mins), np.mean(y_mins), np.mean(x_max), np.mean(y_max)]
+    n = len(boxes)
+    return [
+        sum(box[0] for box in boxes) / n,
+        sum(box[1] for box in boxes) / n,
+        sum(box[2] for box in boxes) / n,
+        sum(box[3] for box in boxes) / n,
+    ]
 
 
 def median_of_boxes(boxes: list[list[int, int, int, int]]) -> list[int, int, int, int]:
@@ -400,13 +396,13 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
     # determined by the max_region size minus half the box + 20%
     # TODO: see if we can do this with numpy
     cluster_candidates = []
-    used_boxes = []
+    used_boxes = set()
     # loop over each box
     for current_index, b in enumerate(boxes):
         if current_index in used_boxes:
             continue
         cluster = [current_index]
-        used_boxes.append(current_index)
+        used_boxes.add(current_index)
         cluster_boundary = get_cluster_boundary(b, min_region)
         # find all other boxes that fit inside the boundary
         for compare_index, compare_box in enumerate(boxes):
@@ -435,7 +431,7 @@ def get_cluster_candidates(frame_shape, min_region, boxes):
 
             if should_cluster:
                 cluster.append(compare_index)
-                used_boxes.append(compare_index)
+                used_boxes.add(compare_index)
         cluster_candidates.append(cluster)
 
     # return the unique clusters only
@@ -557,6 +553,7 @@ def reduce_detections(
                 current_detection = sorted_by_area[current_detection_idx]
                 current_label = current_detection[0]
                 current_box = current_detection[2]
+                current_area = area(current_box)
                 overlap = 0
                 for to_check_idx in range(
                     min(current_detection_idx + 1, len(sorted_by_area)),
@@ -567,14 +564,14 @@ def reduce_detections(
                     # if area of current detection / area of check < 5% they should not be compared
                     # this covers cases where a large car parked in a driveway doesn't block detections
                     # of cars in the street behind it
-                    if area(current_box) / area(to_check) < 0.05:
+                    if current_area / area(to_check) < 0.05:
                         continue
 
                     intersect_box = intersection(current_box, to_check)
                     # if % of smaller detection is inside of another detection, consolidate
-                    if intersect_box is not None and area(intersect_box) / area(
-                        current_box
-                    ) > LABEL_CONSOLIDATION_MAP.get(
+                    if intersect_box is not None and area(
+                        intersect_box
+                    ) / current_area > LABEL_CONSOLIDATION_MAP.get(
                         current_label, LABEL_CONSOLIDATION_DEFAULT
                     ):
                         overlap = 1

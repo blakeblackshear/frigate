@@ -12,10 +12,12 @@
     "motion": "还没有画面变动类数据",
     "recordingsDisabled": {
       "title": "必须要开启录制功能",
-      "description": "必须要摄像头启用录制功能时，才可为其创建回放项目。"
+      "description": "必须要摄像头开启录制功能时，才可为其创建回放项目。"
     }
   },
-  "timeline": "时间线",
+  "timeline": {
+    "label": "时间线"
+  },
   "timeline.aria": "选择时间线",
   "events": {
     "label": "事件",
@@ -24,7 +26,9 @@
   },
   "documentTitle": "核查 - Frigate",
   "recordings": {
-    "documentTitle": "回放 - Frigate"
+    "documentTitle": "回放 - Frigate",
+    "invalidSharedLink": "由于解析错误，无法打开带时间戳的录制链接。",
+    "invalidSharedCamera": "由于摄像头未知或未获授权，无法打开带时间戳的录制链接。"
   },
   "calendarFilter": {
     "last24Hours": "过去24小时"
@@ -64,5 +68,31 @@
   "normalActivity": "正常",
   "needsReview": "需要核查",
   "securityConcern": "安全隐患",
-  "select_all": "所有"
+  "select_all": "所有",
+  "motionSearch": {
+    "menuItem": "画面变动搜索",
+    "openMenu": "摄像头选项"
+  },
+  "motionPreviews": {
+    "menuItem": "查看画面变动预览",
+    "title": "画面变动预览：{{camera}}",
+    "mobileSettingsTitle": "画面变动预览设置",
+    "mobileSettingsDesc": "调整播放速度，亮度以及画面裁剪，并选择日期以仅查看画面变动的片段。",
+    "dim": "变暗",
+    "dimAria": "调整变暗强度",
+    "dimDesc": "增加变暗程度可以提高画面变动区域的可见性。",
+    "speed": "速度",
+    "speedAria": "选择预览播放速度",
+    "speedDesc": "选择预览片段的播放速度。",
+    "back": "返回",
+    "empty": "没有可用的预览",
+    "noPreview": "预览不可用",
+    "seekAria": "将 {{camera}} 播放器定位到 {{time}}",
+    "filter": "筛选",
+    "filterDesc": "选择区域以仅显示在这些区域中有画面变动的片段。",
+    "filterClear": "清除",
+    "crop": "裁剪至筛选区域",
+    "cropAria": "切换预览画面裁剪到筛选区域",
+    "cropDesc": "只预览筛选区域，而不是显示整个画面。"
+  }
 }

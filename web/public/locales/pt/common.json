@@ -90,7 +90,8 @@
     },
     "inProgress": "Em andamento",
     "invalidStartTime": "Horário de início inválido",
-    "invalidEndTime": "Horário de término inválido"
+    "invalidEndTime": "Horário de término inválido",
+    "never": "Nunca"
   },
   "unit": {
     "speed": {
@@ -146,7 +147,19 @@
     "next": "Seguinte",
     "play": "Tocar",
     "pictureInPicture": "Imagem sobre Imagem",
-    "continue": "Continuar"
+    "continue": "Continuar",
+    "add": "Adicionar",
+    "applying": "A aplicar…",
+    "undo": "Desfazer",
+    "copiedToClipboard": "Copiado para a área de transferência",
+    "modified": "Modificado",
+    "overridden": "Substituído",
+    "resetToGlobal": "Redefinir para o Global",
+    "resetToDefault": "Redefinir para o Padrão",
+    "saveAll": "Gravar Tudo",
+    "savingAll": "A gravar tudo…",
+    "undoAll": "Desfazer Tudo",
+    "retry": "Tente novamente"
   },
   "label": {
     "back": "Voltar",
@@ -154,7 +167,8 @@
     "show": "Exibir {{item}}",
     "ID": "ID",
     "none": "Nenhum",
-    "all": "Todos"
+    "all": "Todos",
+    "other": "Outros"
   },
   "menu": {
     "user": {
@@ -226,7 +240,10 @@
       "bg": "Búlgaro",
       "gl": "Galego",
       "id": "Indonésio Bahasa",
-      "ur": "Urdu"
+      "ur": "Urdu",
+      "hr": "Hrvatski (Croata)",
+      "bs": "Bosanski (Bósnio)",
+      "zhHant": "繁體中文 (Chinês Tradicional)"
     },
     "appearance": "Aparência",
     "darkMode": {
@@ -257,7 +274,11 @@
     "explore": "Explorar",
     "review": "Rever",
     "uiPlayground": "Área de Testes da IU",
-    "classification": "Classificação"
+    "classification": "Classificação",
+    "profiles": "Perfis",
+    "actions": "Ações",
+    "features": "Funcionalidades",
+    "chat": "Chat"
   },
   "pagination": {
     "previous": {
@@ -284,7 +305,8 @@
       "error": {
         "noMessage": "Não foi possível guardar as alterações da configuração",
         "title": "Não foi possível guardar as alterações da configuração: {{errorMessage}}"
-      }
+      },
+      "success": "Alterações gravadas com sucesso."
     }
   },
   "accessDenied": {
@@ -310,5 +332,10 @@
   "field": {
     "optional": "Opcional",
     "internalID": "o Frigate utiliza o ID na configuração e no banco de dados"
+  },
+  "no_items": "Sem elementos",
+  "validation_errors": "Erros de validação",
+  "credentialField": {
+    "savedPlaceholder": "Gravado - deixar em branco para manter a atual"
   }
 }

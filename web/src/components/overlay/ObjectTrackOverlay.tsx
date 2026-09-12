@@ -127,8 +127,12 @@ export default function ObjectTrackOverlay({
     },
   );
 
-  const getZonesFriendlyNames = (zones: string[], config: FrigateConfig) => {
-    return zones?.map((zone) => resolveZoneName(config, zone)) ?? [];
+  const getZonesFriendlyNames = (
+    zones: string[],
+    config: FrigateConfig,
+    cameraId?: string,
+  ) => {
+    return zones?.map((zone) => resolveZoneName(config, zone, cameraId)) ?? [];
   };
 
   const timelineResults = useMemo(() => {
@@ -151,7 +155,7 @@ export default function ObjectTrackOverlay({
         data: {
           ...event.data,
           zones_friendly_names: config
-            ? getZonesFriendlyNames(event.data?.zones, config)
+            ? getZonesFriendlyNames(event.data?.zones, config, event.camera)
             : [],
         },
       }));

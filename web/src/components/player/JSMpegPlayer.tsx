@@ -118,6 +118,8 @@ export default function JSMpegPlayer({
     const videoWrapper = videoRef.current;
     const canvas = canvasRef.current;
     let videoElement: JSMpeg.VideoElement | null = null;
+    let socket: WebSocket | null = null;
+    let socketMessageHandler: ((event: MessageEvent) => void) | null = null;
 
     let frameCount = 0;
 
@@ -152,12 +154,14 @@ export default function JSMpegPlayer({
           videoElement.player.source &&
           videoElement.player.source.socket
         ) {
-          const socket = videoElement.player.source.socket;
-          socket.addEventListener("message", (event: MessageEvent) => {
+          socket = videoElement.player.source.socket as WebSocket;
+          socketMessageHandler = (event: MessageEvent) => {
             if (event.data instanceof ArrayBuffer) {
               bytesReceivedRef.current += event.data.byteLength;
             }
-          });
+          };
+
+          socket.addEventListener("message", socketMessageHandler);
         }
 
         // Update stats every second
@@ -197,11 +201,23 @@ export default function JSMpegPlayer({
         }
         if (videoElement) {
           try {
-            // this causes issues in react strict mode
-            // https://stackoverflow.com/questions/76822128/issue-with-cycjimmy-jsmpeg-player-in-react-18-cannot-read-properties-of-null-o
-            videoElement.destroy();
+            videoElement.player?.destroy();
             // eslint-disable-next-line no-empty
           } catch (e) {}
+
+          if (videoWrapper) {
+            videoWrapper.innerHTML = "";
+            // @ts-expect-error playerInstance is set by jsmpeg
+            videoWrapper.playerInstance = null;
+          }
+        }
+        if (socket) {
+          if (socketMessageHandler) {
+            socket.removeEventListener("message", socketMessageHandler);
+          }
+
+          socket = null;
+          socketMessageHandler = null;
         }
       };
     }

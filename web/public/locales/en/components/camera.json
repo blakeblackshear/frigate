@@ -2,7 +2,10 @@
   "group": {
     "label": "Camera Groups",
     "add": "Add Camera Group",
+    "showAll": "Show all camera groups",
+    "showLess": "Show less",
     "edit": "Edit Camera Group",
+    "editGroups": "Edit Camera Groups",
     "delete": {
       "label": "Delete Camera Group",
       "confirm": {
@@ -81,6 +84,7 @@
     "zones": "Zones",
     "mask": "Mask",
     "motion": "Motion",
-    "regions": "Regions"
+    "regions": "Regions",
+    "paths": "Paths"
   }
 }

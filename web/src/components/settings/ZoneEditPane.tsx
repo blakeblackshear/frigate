@@ -24,7 +24,6 @@ import { Label } from "../ui/label";
 import PolygonEditControls from "./PolygonEditControls";
 import { FaCheckCircle } from "react-icons/fa";
 import axios from "axios";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { flattenPoints, interpolatePoints } from "@/utils/canvasUtil";
 import ActivityIndicator from "../indicators/activity-indicator";
@@ -35,6 +34,7 @@ import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
 import NameAndIdFields from "../input/NameAndIdFields";
+import { useZoneState } from "@/api/ws";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -49,6 +49,7 @@ type ZoneEditPaneProps = {
   setActiveLine: React.Dispatch<React.SetStateAction<number | undefined>>;
   snapPoints: boolean;
   setSnapPoints: React.Dispatch<React.SetStateAction<boolean>>;
+  editingProfile?: string | null;
 };
 
 export default function ZoneEditPane({
@@ -64,6 +65,7 @@ export default function ZoneEditPane({
   setActiveLine,
   snapPoints,
   setSnapPoints,
+  editingProfile,
 }: ZoneEditPaneProps) {
   const { t } = useTranslation(["views/settings"]);
   const { getLocaleDocUrl } = useDocDomain();
@@ -76,7 +78,7 @@ export default function ZoneEditPane({
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
+      .filter((conf) => conf.enabled_in_config)
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
@@ -88,6 +90,35 @@ export default function ZoneEditPane({
     }
   }, [polygons, activePolygonIndex]);
 
+  const zoneName = polygon?.name || "";
+  const { send: sendZoneState } = useZoneState(polygon?.camera || "", zoneName);
+
+  const isExistingZone = !!polygon && polygon.name.length > 0;
+
+  const idDisabled = useMemo(() => {
+    if (!isExistingZone || !polygon) {
+      return false;
+    }
+    if (editingProfile) {
+      return true;
+    }
+    const cam = config?.cameras[polygon.camera];
+    if (!cam) {
+      return false;
+    }
+    const inRequiredZones =
+      cam.review.alerts.required_zones.includes(polygon.name) ||
+      cam.review.detections.required_zones.includes(polygon.name) ||
+      cam.objects.genai.required_zones.includes(polygon.name) ||
+      cam.snapshots.required_zones.includes(polygon.name) ||
+      cam.mqtt.required_zones.includes(polygon.name) ||
+      cam.onvif.autotracking.required_zones.includes(polygon.name);
+    const hasProfileOverride = Object.values(cam.profiles ?? {}).some(
+      (profile) => profile?.zones && polygon.name in profile.zones,
+    );
+    return inRequiredZones || hasProfileOverride;
+  }, [config, polygon, editingProfile, isExistingZone]);
+
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
       return config.cameras[polygon.camera];
@@ -95,15 +126,23 @@ export default function ZoneEditPane({
   }, [polygon, config]);
 
   const [lineA, lineB, lineC, lineD] = useMemo(() => {
-    const distances =
-      polygon?.camera &&
-      polygon?.name &&
-      config?.cameras[polygon.camera]?.zones[polygon.name]?.distances;
+    if (!polygon?.camera || !polygon?.name || !config) {
+      return [undefined, undefined, undefined, undefined];
+    }
+
+    // Check profile zone first, then base
+    const profileZone = editingProfile
+      ? config.cameras[polygon.camera]?.profiles?.[editingProfile]?.zones?.[
+          polygon.name
+        ]
+      : undefined;
+    const baseZone = config.cameras[polygon.camera]?.zones[polygon.name];
+    const distances = profileZone?.distances ?? baseZone?.distances;
 
     return Array.isArray(distances)
       ? distances.map((value) => parseFloat(value) || 0)
       : [undefined, undefined, undefined, undefined];
-  }, [polygon, config]);
+  }, [polygon, config, editingProfile]);
 
   const formSchema = z
     .object({
@@ -178,6 +217,7 @@ export default function ZoneEditPane({
             message: t("masksAndZones.form.zoneName.error.alreadyExists"),
           },
         ),
+      enabled: z.boolean().default(true),
       inertia: z.coerce
         .number()
         .min(1, {
@@ -193,7 +233,7 @@ export default function ZoneEditPane({
         })
         .optional()
         .or(z.literal("")),
-      isFinished: z.boolean().refine(() => polygon?.isFinished === true, {
+      isFinished: z.boolean().refine((val) => val === true, {
         message: t("masksAndZones.form.polygonDrawing.error.mustBeFinished"),
       }),
       objects: z.array(z.string()).optional(),
@@ -265,20 +305,29 @@ export default function ZoneEditPane({
       },
     );
 
+  // Resolve zone data: profile zone takes priority over base
+  const resolvedZoneData = useMemo(() => {
+    if (!polygon?.camera || !polygon?.name || !config) return undefined;
+    const cam = config.cameras[polygon.camera];
+    if (!cam) return undefined;
+    const profileZone = editingProfile
+      ? cam.profiles?.[editingProfile]?.zones?.[polygon.name]
+      : undefined;
+    return profileZone ?? cam.zones[polygon.name];
+  }, [polygon, config, editingProfile]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    mode: "onBlur",
+    mode: "onChange",
     defaultValues: {
       name: polygon?.name ?? "",
       friendly_name: polygon?.friendly_name ?? polygon?.name ?? "",
-      inertia:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.inertia,
-      loitering_time:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.loitering_time,
+      enabled:
+        resolvedZoneData?.enabled !== undefined
+          ? resolvedZoneData.enabled
+          : (polygon?.enabled ?? true),
+      inertia: resolvedZoneData?.inertia ?? 3,
+      loitering_time: resolvedZoneData?.loitering_time ?? 0,
       isFinished: polygon?.isFinished ?? false,
       objects: polygon?.objects ?? [],
       speedEstimation: !!(lineA || lineB || lineC || lineD),
@@ -286,31 +335,42 @@ export default function ZoneEditPane({
       lineB,
       lineC,
       lineD,
-      speed_threshold:
-        polygon?.camera &&
-        polygon?.name &&
-        config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold,
+      speed_threshold: resolvedZoneData?.speed_threshold,
     },
   });
 
+  const watchSpeedEstimation = form.watch("speedEstimation");
+  const watchLineA = form.watch("lineA");
+  const watchLineB = form.watch("lineB");
+  const watchLineC = form.watch("lineC");
+  const watchLineD = form.watch("lineD");
+
+  const canSave =
+    form.formState.isValid &&
+    (!watchSpeedEstimation ||
+      (!!watchLineA && !!watchLineB && !!watchLineC && !!watchLineD));
+
   useEffect(() => {
-    if (
-      form.watch("speedEstimation") &&
-      polygon &&
-      polygon.points.length !== 4
-    ) {
+    if (watchSpeedEstimation && polygon && polygon.points.length !== 4) {
       toast.error(
         t("masksAndZones.zones.speedThreshold.toast.error.pointLengthError"),
       );
       form.setValue("speedEstimation", false);
     }
-  }, [polygon, form, t]);
+  }, [polygon, form, t, watchSpeedEstimation]);
+
+  useEffect(() => {
+    if (polygon?.isFinished !== undefined) {
+      form.setValue("isFinished", polygon.isFinished, { shouldValidate: true });
+    }
+  }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
     async (
       {
         name: zoneName,
         friendly_name,
+        enabled,
         inertia,
         loitering_time,
         objects: form_objects,
@@ -326,6 +386,16 @@ export default function ZoneEditPane({
       if (!scaledWidth || !scaledHeight || !polygon) {
         return;
       }
+
+      // Determine config path prefix based on profile mode
+      const pathPrefix = editingProfile
+        ? `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${zoneName}`
+        : `cameras.${polygon.camera}.zones.${zoneName}`;
+
+      const oldPathPrefix = editingProfile
+        ? `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${polygon.name}`
+        : `cameras.${polygon.camera}.zones.${polygon.name}`;
+
       let mutatedConfig = config;
       let alertQueries = "";
       let detectionQueries = "";
@@ -334,55 +404,76 @@ export default function ZoneEditPane({
 
       if (renamingZone) {
         // rename - delete old zone and replace with new
-        const zoneInAlerts =
-          cameraConfig?.review.alerts.required_zones.includes(polygon.name) ??
-          false;
-        const zoneInDetections =
-          cameraConfig?.review.detections.required_zones.includes(
+        let renameAlertQueries = "";
+        let renameDetectionQueries = "";
+
+        // Only handle review queries for base config (not profiles)
+        if (!editingProfile) {
+          const zoneInAlerts =
+            cameraConfig?.review.alerts.required_zones.includes(polygon.name) ??
+            false;
+          const zoneInDetections =
+            cameraConfig?.review.detections.required_zones.includes(
+              polygon.name,
+            ) ?? false;
+
+          ({
+            alertQueries: renameAlertQueries,
+            detectionQueries: renameDetectionQueries,
+          } = reviewQueries(
             polygon.name,
-          ) ?? false;
+            false,
+            false,
+            polygon.camera,
+            cameraConfig?.review.alerts.required_zones || [],
+            cameraConfig?.review.detections.required_zones || [],
+          ));
 
-        const {
-          alertQueries: renameAlertQueries,
-          detectionQueries: renameDetectionQueries,
-        } = reviewQueries(
-          polygon.name,
-          false,
-          false,
-          polygon.camera,
-          cameraConfig?.review.alerts.required_zones || [],
-          cameraConfig?.review.detections.required_zones || [],
-        );
+          try {
+            await axios.put(
+              `config/set?${oldPathPrefix}${renameAlertQueries}${renameDetectionQueries}`,
+              {
+                requires_restart: 0,
+                update_topic: `config/cameras/${polygon.camera}/zones`,
+              },
+            );
 
-        try {
-          await axios.put(
-            `config/set?cameras.${polygon.camera}.zones.${polygon.name}${renameAlertQueries}${renameDetectionQueries}`,
-            {
+            // Wait for the config to be updated
+            mutatedConfig = await updateConfig();
+          } catch {
+            toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+              position: "top-center",
+            });
+            setIsLoading(false);
+            return;
+          }
+
+          // make sure new zone name is readded to review
+          ({ alertQueries, detectionQueries } = reviewQueries(
+            zoneName,
+            zoneInAlerts,
+            zoneInDetections,
+            polygon.camera,
+            mutatedConfig?.cameras[polygon.camera]?.review.alerts
+              .required_zones || [],
+            mutatedConfig?.cameras[polygon.camera]?.review.detections
+              .required_zones || [],
+          ));
+        } else {
+          // Profile mode: just delete the old profile zone path
+          try {
+            await axios.put(`config/set?${oldPathPrefix}`, {
               requires_restart: 0,
-              update_topic: `config/cameras/${polygon.camera}/zones`,
-            },
-          );
-
-          // Wait for the config to be updated
-          mutatedConfig = await updateConfig();
-        } catch (error) {
-          toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
-            position: "top-center",
-          });
-          return;
+            });
+            mutatedConfig = await updateConfig();
+          } catch {
+            toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
+              position: "top-center",
+            });
+            setIsLoading(false);
+            return;
+          }
         }
-
-        // make sure new zone name is readded to review
-        ({ alertQueries, detectionQueries } = reviewQueries(
-          zoneName,
-          zoneInAlerts,
-          zoneInDetections,
-          polygon.camera,
-          mutatedConfig?.cameras[polygon.camera]?.review.alerts
-            .required_zones || [],
-          mutatedConfig?.cameras[polygon.camera]?.review.detections
-            .required_zones || [],
-        ));
       }
 
       const coordinates = flattenPoints(
@@ -390,10 +481,7 @@ export default function ZoneEditPane({
       ).join(",");
 
       let objectQueries = objects
-        .map(
-          (object) =>
-            `&cameras.${polygon?.camera}.zones.${zoneName}.objects=${object}`,
-        )
+        .map((object) => `&${pathPrefix}.objects=${object}`)
         .join("");
 
       const same_objects =
@@ -404,53 +492,55 @@ export default function ZoneEditPane({
 
       // deleting objects
       if (!objectQueries && !same_objects && !renamingZone) {
-        objectQueries = `&cameras.${polygon?.camera}.zones.${zoneName}.objects`;
+        objectQueries = `&${pathPrefix}.objects`;
       }
 
       let inertiaQuery = "";
       if (inertia) {
-        inertiaQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.inertia=${inertia}`;
+        inertiaQuery = `&${pathPrefix}.inertia=${inertia}`;
       }
 
       let loiteringTimeQuery = "";
       if (loitering_time >= 0) {
-        loiteringTimeQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.loitering_time=${loitering_time}`;
+        loiteringTimeQuery = `&${pathPrefix}.loitering_time=${loitering_time}`;
       }
 
       let distancesQuery = "";
       const distances = [lineA, lineB, lineC, lineD].filter(Boolean).join(",");
       if (speedEstimation) {
-        distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances=${distances}`;
+        distancesQuery = `&${pathPrefix}.distances=${distances}`;
       } else {
         if (distances != "") {
-          distancesQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.distances`;
+          distancesQuery = `&${pathPrefix}.distances`;
         }
       }
 
       let speedThresholdQuery = "";
       if (speed_threshold >= 0 && speedEstimation) {
-        speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold=${speed_threshold}`;
+        speedThresholdQuery = `&${pathPrefix}.speed_threshold=${speed_threshold}`;
       } else {
-        if (
-          polygon?.camera &&
-          polygon?.name &&
-          config?.cameras[polygon.camera]?.zones[polygon.name]?.speed_threshold
-        ) {
-          speedThresholdQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.speed_threshold`;
+        if (resolvedZoneData?.speed_threshold) {
+          speedThresholdQuery = `&${pathPrefix}.speed_threshold`;
         }
       }
 
       let friendlyNameQuery = "";
       if (friendly_name && friendly_name !== zoneName) {
-        friendlyNameQuery = `&cameras.${polygon?.camera}.zones.${zoneName}.friendly_name=${encodeURIComponent(friendly_name)}`;
+        friendlyNameQuery = `&${pathPrefix}.friendly_name=${encodeURIComponent(friendly_name)}`;
       }
+
+      const enabledQuery = `&${pathPrefix}.enabled=${enabled ? "True" : "False"}`;
+
+      const updateTopic = editingProfile
+        ? undefined
+        : `config/cameras/${polygon.camera}/zones`;
 
       axios
         .put(
-          `config/set?cameras.${polygon?.camera}.zones.${zoneName}.coordinates=${coordinates}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
+          `config/set?${pathPrefix}.coordinates=${coordinates}${enabledQuery}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
           {
             requires_restart: 0,
-            update_topic: `config/cameras/${polygon.camera}/zones`,
+            update_topic: updateTopic,
           },
         )
         .then((res) => {
@@ -464,6 +554,11 @@ export default function ZoneEditPane({
               },
             );
             updateConfig();
+            // Only publish WS state for base config when zone has a name and
+            // wasn't renamed (the hook is bound to the old name).
+            if (!editingProfile && polygon?.name && !renamingZone) {
+              sendZoneState(enabled ? "ON" : "OFF");
+            }
           } else {
             toast.error(
               t("toast.save.error.title", {
@@ -504,6 +599,9 @@ export default function ZoneEditPane({
       setIsLoading,
       cameraConfig,
       t,
+      sendZoneState,
+      editingProfile,
+      resolvedZoneData,
     ],
   );
 
@@ -533,7 +631,6 @@ export default function ZoneEditPane({
 
   return (
     <>
-      <Toaster position="top-center" closeButton={true} />
       <Heading as="h3" className="my-2">
         {polygon.name.length
           ? t("masksAndZones.zones.edit")
@@ -580,6 +677,29 @@ export default function ZoneEditPane({
             nameLabel={t("masksAndZones.zones.name.title")}
             nameDescription={t("masksAndZones.zones.name.tips")}
             placeholderName={t("masksAndZones.zones.name.inputPlaceHolder")}
+            idDisabled={idDisabled}
+          />
+          <FormField
+            control={form.control}
+            name="enabled"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <FormLabel>
+                    {t("masksAndZones.zones.enabled.title")}
+                  </FormLabel>
+                  <FormDescription>
+                    {t("masksAndZones.zones.enabled.description")}
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
 
           <Separator className="my-2 flex bg-secondary" />
@@ -591,7 +711,7 @@ export default function ZoneEditPane({
                 <FormLabel>{t("masksAndZones.zones.inertia.title")}</FormLabel>
                 <FormControl>
                   <Input
-                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="3"
                     {...field}
                   />
@@ -616,7 +736,7 @@ export default function ZoneEditPane({
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                    className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                     placeholder="0"
                     {...field}
                   />
@@ -704,7 +824,7 @@ export default function ZoneEditPane({
                 </div>
                 <FormDescription>
                   {t("masksAndZones.zones.speedEstimation.desc")}
-                  <div className="mt-2 flex items-center text-primary">
+                  <span className="mt-2 flex items-center text-primary">
                     <Link
                       to={getLocaleDocUrl(
                         "configuration/zones#speed-estimation",
@@ -716,7 +836,7 @@ export default function ZoneEditPane({
                       {t("readTheDocumentation", { ns: "common" })}
                       <LuExternalLink className="ml-2 inline-flex size-3" />
                     </Link>
-                  </div>
+                  </span>
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -746,7 +866,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(1)}
                           onBlur={() => setActiveLine(undefined)}
@@ -773,7 +893,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(2)}
                           onBlur={() => setActiveLine(undefined)}
@@ -800,7 +920,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(3)}
                           onBlur={() => setActiveLine(undefined)}
@@ -827,7 +947,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                           onFocus={() => setActiveLine(4)}
                           onBlur={() => setActiveLine(undefined)}
@@ -854,7 +974,7 @@ export default function ZoneEditPane({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
+                          className="w-full border border-input bg-background p-2 hover:bg-accent hover:text-accent-foreground dark:[color-scheme:dark]"
                           {...field}
                         />
                       </FormControl>
@@ -887,14 +1007,14 @@ export default function ZoneEditPane({
             </Button>
             <Button
               variant="select"
-              disabled={isLoading}
+              disabled={isLoading || !canSave}
               className="flex flex-1"
               aria-label={t("button.save", { ns: "common" })}
               type="submit"
             >
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
-                  <ActivityIndicator />
+                  <ActivityIndicator className="size-4" />
                   <span>{t("button.saving", { ns: "common" })}</span>
                 </div>
               ) : (

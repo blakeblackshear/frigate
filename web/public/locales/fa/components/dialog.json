@@ -1,12 +1,13 @@
 {
   "restart": {
     "title": "آیا برای راه اندازی مجدد Frigate مطمئن هستید؟",
-    "button": "ری‌استارت",
+    "button": "راه‌اندازی دوباره",
     "restarting": {
       "title": "فریگیت در حال ری‌استارت شدن",
       "content": "صفحه تا {{countdown}} ثانیه دیگر مجددا بارگزاری خواهد شد.",
       "button": "بارگزاری مجدد هم اکنون اجرا شود"
-    }
+    },
+    "description": "این کار به‌طور موقت Frigate را هنگام راه‌اندازی مجدد متوقف می‌کند."
   },
   "explore": {
     "plus": {
@@ -23,6 +24,9 @@
         },
         "state": {
           "submitted": "ارسال شد"
+        },
+        "toast": {
+          "error": "ارسال به Frigate+ انجام نشد. لطفاً اتصال شبکه خود را بررسی کرده و دوباره تلاش کنید."
         }
       }
     },
@@ -49,21 +53,86 @@
       "error": {
         "endTimeMustAfterStartTime": "زمان پایان باید بعد از زمان شروع باشد",
         "noVaildTimeSelected": "بازهٔ زمانی معتبر انتخاب نشده است",
-        "failed": "شروع خروجی‌گیری ناموفق بود: {{error}}"
+        "failed": "شروع خروجی‌گیری ناموفق بود: {{error}}",
+        "noValidTimeSelected": "بازهٔ زمانی معتبر انتخاب نشده است"
       },
       "success": "ساخت خروجی با موفقیت آغاز شد. فایل را در صفحه خروجی‌ها مشاهده کنید.",
-      "view": "مشاهده"
+      "view": "مشاهده",
+      "queued": "خروجی در صف قرار گرفت. پیشرفت را در صفحهٔ خروجی‌ها مشاهده کنید.",
+      "batchSuccess_one": "۱ خروجی شروع شد. در حال باز کردن مورد.",
+      "batchSuccess_other": "{{count}} خروجی شروع شد. در حال باز کردن مورد.",
+      "batchPartial": "{{successful}} از {{total}} خروجی شروع شد. دوربین‌های ناموفق: {{failedCameras}}",
+      "batchFailed": "شروع {{total}} خروجی ناموفق بود. دوربین‌های ناموفق: {{failedCameras}}",
+      "batchQueuedSuccess_one": "۱ خروجی در صف قرار گرفت.",
+      "batchQueuedSuccess_other": "{{count}} خروجی در صف قرار گرفت.",
+      "batchQueuedPartial": "{{successful}} از {{total}} خروجی در صف قرار گرفت. دوربین‌های ناموفق: {{failedCameras}}",
+      "batchQueueFailed": "صف‌بندی {{total}} خروجی ناموفق بود. دوربین‌های ناموفق: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "ذخیرهٔ خروجی",
-      "previewExport": "پیش‌نمایش خروجی"
+      "previewExport": "پیش‌نمایش خروجی",
+      "queueingExport": "در حال صف‌بندی خروجی...",
+      "useThisRange": "استفاده از این بازه"
     },
     "name": {
       "placeholder": "برای خروجی نام بگذارید"
     },
     "select": "انتخاب",
     "export": "خروجی",
-    "selectOrExport": "انتخاب یا خروجی"
+    "selectOrExport": "انتخاب یا خروجی",
+    "multiCamera": {
+      "selectGroup": "انتخاب گروه",
+      "noMatchingCameras": "هیچ دوربینی با جستجوی شما مطابقت ندارد",
+      "checkingActivity": "در حال بررسی فعالیت دوربین...",
+      "noCameras": "هیچ دوربینی در دسترس نیست",
+      "detectionCount_one": "1 شیء ردیابی شده",
+      "detectionCount_other": "{{count}} شیء ردیابی شده",
+      "nameLabel": "نام خروجی",
+      "namePlaceholder": "نام پایه اختیاری برای این خروجی‌ها",
+      "queueingButton": "به صف کردن خروجی‌ها...",
+      "exportButton_one": "خروجی 1 دوربین",
+      "exportButton_other": "خروجی {{count}} دوربین",
+      "timeRange": "محدوده زمانی",
+      "selectFromTimeline": "انتخاب از تایم‌لاین",
+      "cameraSelection": "دوربین‌ها",
+      "cameraSelectionHelp": "دوربین‌هایی که در این بازه زمانی دارای اشیاء ردیابی‌شده هستند، از قبل انتخاب شده‌اند",
+      "searchOrSelectGroup": "جستجو یا انتخاب گروه دوربین...",
+      "selectAll": "انتخاب همه دوربین‌ها",
+      "clearSelection": "پاک کردن انتخاب‌ها",
+      "selectWithActivity": "دوربین‌های دارای اشیاء ردیابی‌شده",
+      "selectedCount": "{{selected}} / {{total}} انتخاب شده"
+    },
+    "multi": {
+      "title_one": "خروجی ۱ بازبینی",
+      "title_other": "خروجی {{count}} بازبینی",
+      "description": "از هر بازبینی انتخاب‌شده خروجی بگیرید. تمام خروجی‌ها تحت یک پرونده واحد گروه‌بندی خواهند شد.",
+      "descriptionNoCase": "از هر بازبینی انتخاب‌شده خروجی بگیرید.",
+      "caseNamePlaceholder": "بازبینی خروجی - {{date}}",
+      "exportButton_one": "خروجی 1 بازبینی",
+      "exportButton_other": "خروجی {{count}} بازبینی",
+      "exportingButton": "خروجی گرفتن...",
+      "toast": {
+        "started_one": "۱ خروجی شروع شد.",
+        "started_other": "{{count}} خروجی شروع شد.",
+        "startedNoCase_one": "۱ خروجی آغاز شد.",
+        "startedNoCase_other": "{{count}} خروجی آغاز شد.",
+        "partial": "{{successful}} از {{total}} خروجی آغاز شد. موارد ناموفق: {{failedItems}}",
+        "failed": "شروع {{total}} خروجی ناموفق بود. ناموفق: {{failedItems}}"
+      }
+    },
+    "case": {
+      "newCaseOption": "ایجاد پرونده جدید",
+      "newCaseNamePlaceholder": "نام پرونده جدید",
+      "newCaseDescriptionPlaceholder": "توضیحات مورد",
+      "label": "مورد",
+      "nonAdminHelp": "یک مورد جدید برای این خروجی‌ها ایجاد خواهد شد.",
+      "placeholder": "انتخاب یک مورد"
+    },
+    "queueing": "در حال قرار دادن خروجی در صف...",
+    "tabs": {
+      "export": "تک دوربین",
+      "multiCamera": "چند-دوربین"
+    }
   },
   "streaming": {
     "label": "جریان",
@@ -109,6 +178,14 @@
       "markAsReviewed": "علامت‌گذاری به‌عنوان بازبینی‌شده",
       "markAsUnreviewed": "علامت‌گذاری به‌عنوان بازبینی‌نشده",
       "deleteNow": "حذف فوری"
+    },
+    "shareTimestamp": {
+      "label": "اشتراک‌گذاری مهر زمانی",
+      "title": "اشتراک‌گذاری مهر زمانی",
+      "description": "یک نشانی اینترنتی با مهر زمانی از موقعیت فعلی پخش‌کننده به اشتراک بگذارید یا یک مهر زمانی سفارشی انتخاب کنید. توجه کنید که این یک لینک اشتراک‌گذاری عمومی نیست و فقط برای کاربرانی که به Frigate و این دوربین دسترسی دارند قابل دسترسی است.",
+      "custom": "مهر زمانی سفارشی",
+      "button": "اشتراک‌گذاری نشانی مهر زمانی",
+      "shareTitle": "مهر زمانی بازبینی فریگیت: {{camera}}"
     }
   },
   "imagePicker": {

@@ -135,7 +135,18 @@
     "download": "下載",
     "unsuspended": "取消暫停",
     "unselect": "取消選取",
-    "continue": "繼續"
+    "continue": "繼續",
+    "add": "新增",
+    "undo": "復原",
+    "copiedToClipboard": "已複製到剪貼簿",
+    "modified": "已修改",
+    "overridden": "已覆寫",
+    "resetToGlobal": "重設為全域設定",
+    "resetToDefault": "重設為預設值",
+    "saveAll": "全部儲存",
+    "savingAll": "正在儲存全部…",
+    "undoAll": "全部復原",
+    "applying": "套用中…"
   },
   "menu": {
     "system": "系統",
@@ -237,7 +248,9 @@
       "setPassword": "設定密碼"
     },
     "help": "幫助",
-    "classification": "分類"
+    "classification": "分類",
+    "actions": "行動",
+    "chat": "聊天"
   },
   "role": {
     "admin": "管理員",

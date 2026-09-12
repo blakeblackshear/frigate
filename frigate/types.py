@@ -8,7 +8,7 @@ from frigate.object_detection.base import ObjectDetectProcess
 
 class StatsTrackingTypes(TypedDict):
     camera_metrics: dict[str, CameraMetrics]
-    embeddings_metrics: DataProcessorMetrics | None
+    embeddings_metrics: DataProcessorMetrics
     detectors: dict[str, ObjectDetectProcess]
     started: int
     latest_frigate_version: str
@@ -24,6 +24,15 @@ class ModelStatusTypesEnum(str, Enum):
     training = "training"
     complete = "complete"
     failed = "failed"
+
+
+class JobStatusTypesEnum(str, Enum):
+    pending = "pending"
+    queued = "queued"
+    running = "running"
+    success = "success"
+    failed = "failed"
+    cancelled = "cancelled"
 
 
 class TrackedObjectUpdateTypesEnum(str, Enum):

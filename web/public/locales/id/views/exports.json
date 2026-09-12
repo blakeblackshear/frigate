@@ -1,23 +1,128 @@
 {
-  "documentTitle": "Expor - Frigate",
-  "search": "Cari",
-  "noExports": "Ekspor tidak ditemukan",
-  "deleteExport": "Hapus Ekspor",
-  "deleteExport.desc": "Apakah Anda yakin ingin menghapus {{exportName}}?",
+  "documentTitle": "Ekspor - Frigate",
+  "search": "Pencarian",
+  "noExports": "Tidak ada ekspor ditemukan",
+  "deleteExport": {
+    "label": "Hapus Ekspor"
+  },
+  "deleteExport.desc": "Anda yakin ingin menghapus {{exportName}}?",
   "editExport": {
-    "title": "Ganti Nama Ekspor",
+    "title": "Ubah Nama Ekspor",
     "desc": "Masukkan nama baru untuk ekspor ini.",
     "saveExport": "Simpan Ekspor"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Gagal mengganti nama ekspor: {{errorMessage}}"
+      "renameExportFailed": "Gagal mengubah nama ekspor: {{errorMessage}}",
+      "assignCaseFailed": "Gagal memperbarui penetapan kasus: {{errorMessage}}",
+      "caseSaveFailed": "Gagal menyimpan kasus: {{errorMessage}}",
+      "caseDeleteFailed": "Gagal menghapus kasus: {{errorMessage}}"
     }
   },
   "tooltip": {
-    "shareExport": "Bagikan Ekspor",
-    "downloadVideo": "Unduh Video",
+    "shareExport": "Bagikan ekspor",
+    "downloadVideo": "Unduh video",
     "editName": "Ubah nama",
-    "deleteExport": "Hapus ekspor"
+    "deleteExport": "Hapus ekspor",
+    "assignToCase": "Tambahkan ke kasus",
+    "removeFromCase": "Hapus dari kasus"
+  },
+  "headings": {
+    "cases": "Kasus",
+    "uncategorizedExports": "Ekspor Tanpa Kategori"
+  },
+  "toolbar": {
+    "newCase": "Kasus Baru",
+    "addExport": "Tambahkan Ekspor",
+    "editCase": "Edit Kasus",
+    "deleteCase": "Hapus Kasus"
+  },
+  "deleteCase": {
+    "label": "Hapus Kasus",
+    "desc": "Anda yakin ingin menghapus {{caseName}}?",
+    "descKeepExports": "Ekspor akan tetap tersedia sebagai ekspor tanpa kategori.",
+    "descDeleteExports": "Semua ekspor dalam kasus ini akan dihapus secara permanen.",
+    "deleteExports": "Hapus juga ekspor"
+  },
+  "caseDialog": {
+    "title": "Tambahkan ke kasus",
+    "description": "Pilih kasus yang sudah ada atau buat yang baru.",
+    "selectLabel": "Kasus",
+    "newCaseOption": "Buat kasus baru",
+    "nameLabel": "Nama kasus",
+    "descriptionLabel": "Deskripsi"
+  },
+  "caseCard": {
+    "emptyCase": "Belum ada ekspor"
+  },
+  "jobCard": {
+    "defaultName": "Ekspor {{camera}}",
+    "queued": "Dalam antrean",
+    "running": "Sedang berjalan",
+    "preparing": "Menyiapkan",
+    "copying": "Menyalin",
+    "encoding": "Menyandi",
+    "encodingRetry": "Menyandi (coba lagi)",
+    "finalizing": "Menyelesaikan"
+  },
+  "caseView": {
+    "noDescription": "Tidak ada deskripsi",
+    "createdAt": "Dibuat {{value}}",
+    "exportCount_one": "1 ekspor",
+    "exportCount_other": "{{count}} ekspor",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kamera",
+    "showMore": "Tampilkan lebih banyak",
+    "showLess": "Tampilkan lebih sedikit",
+    "emptyTitle": "Kasus ini kosong",
+    "emptyDescription": "Tambahkan ekspor tanpa kategori yang sudah ada agar kasus tetap terorganisasi.",
+    "emptyDescriptionNoExports": "Belum ada ekspor tanpa kategori yang tersedia untuk ditambahkan."
+  },
+  "caseEditor": {
+    "createTitle": "Buat Kasus",
+    "editTitle": "Edit Kasus",
+    "namePlaceholder": "Nama kasus",
+    "descriptionPlaceholder": "Tambahkan catatan atau konteks untuk kasus ini"
+  },
+  "addExportDialog": {
+    "title": "Tambahkan Ekspor ke {{caseName}}",
+    "searchPlaceholder": "Cari ekspor tanpa kategori",
+    "empty": "Tidak ada ekspor tanpa kategori yang cocok dengan pencarian ini.",
+    "addButton_one": "Tambahkan 1 Ekspor",
+    "addButton_other": "Tambahkan {{count}} Ekspor",
+    "adding": "Menambahkan..."
+  },
+  "selected_one": "{{count}} dipilih",
+  "selected_other": "{{count}} dipilih",
+  "bulkActions": {
+    "addToCase": "Tambahkan ke Kasus",
+    "moveToCase": "Pindahkan ke Kasus",
+    "removeFromCase": "Hapus dari Kasus",
+    "delete": "Hapus",
+    "deleteNow": "Hapus Sekarang"
+  },
+  "bulkDelete": {
+    "title": "Hapus Ekspor",
+    "desc_one": "Anda yakin ingin menghapus {{count}} ekspor?",
+    "desc_other": "Anda yakin ingin menghapus {{count}} ekspor?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Hapus dari Kasus",
+    "desc_one": "Hapus {{count}} ekspor dari kasus ini?",
+    "desc_other": "Hapus {{count}} ekspor dari kasus ini?",
+    "descKeepExports": "Ekspor akan dipindahkan ke tanpa kategori.",
+    "descDeleteExports": "Ekspor akan dihapus secara permanen.",
+    "deleteExports": "Hapus ekspor saja"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Berhasil menghapus ekspor",
+      "reassign": "Berhasil memperbarui penetapan kasus",
+      "remove": "Berhasil menghapus ekspor dari kasus"
+    },
+    "error": {
+      "deleteFailed": "Gagal menghapus ekspor: {{errorMessage}}",
+      "reassignFailed": "Gagal memperbarui penetapan kasus: {{errorMessage}}"
+    }
   }
 }

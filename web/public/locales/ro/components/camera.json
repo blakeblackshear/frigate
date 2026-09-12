@@ -67,8 +67,11 @@
           "desc": "Activează această opțiune doar dacă stream-ul live al camerei afișează artefacte de culoare și are o linie diagonală pe partea dreaptă a imaginii."
         }
       },
-      "birdseye": "Vedere de ansamblu"
-    }
+      "birdseye": "Birdseye"
+    },
+    "showAll": "Arată toate grupurile de camere",
+    "showLess": "Arată mai puțin",
+    "editGroups": "Editează grupurile de camere"
   },
   "debug": {
     "options": {
@@ -82,6 +85,7 @@
     "zones": "Zone",
     "mask": "Mască",
     "motion": "Mișcare",
-    "regions": "Regiuni"
+    "regions": "Regiuni",
+    "paths": "Căi"
   }
 }

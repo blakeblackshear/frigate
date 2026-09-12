@@ -13,5 +13,11 @@
     "error": {
       "renameExportFailed": "ผิดพลาดในการแก้ไขชื่อการส่งออก: {{errorMessage}}"
     }
+  },
+  "headings": {
+    "cases": "กรณี"
+  },
+  "tooltip": {
+    "editName": "เปลี่ยนชื่อ"
   }
 }

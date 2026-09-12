@@ -82,6 +82,24 @@ class TestRegion(unittest.TestCase):
 
         assert len(cluster_candidates) == 2
 
+    def test_cluster_candidates_partition_boxes(self):
+        # every box index must appear in exactly one cluster (no box used twice,
+        # none dropped) - the invariant the used-box tracking enforces
+        boxes = [
+            (100, 100, 200, 200),
+            (202, 150, 252, 200),
+            (210, 160, 260, 210),
+            (900, 900, 950, 950),
+            (905, 905, 955, 955),
+        ]
+
+        cluster_candidates = get_cluster_candidates(
+            self.frame_shape, self.min_region_size, boxes
+        )
+
+        assigned = [idx for cluster in cluster_candidates for idx in cluster]
+        self.assertEqual(sorted(assigned), list(range(len(boxes))))
+
     def test_transliterate_to_latin(self):
         self.assertEqual(transliterate_to_latin("frégate"), "fregate")
         self.assertEqual(transliterate_to_latin("utilité"), "utilite")

@@ -109,7 +109,8 @@
     "cameraManagement": "จัดการกล้อง - Frigate",
     "enrichments": "การตั้งค่าของเพิ่มเติม - Frigate",
     "motionTuner": "ปรับแต่งการเคลื่อนไหว - Frigate",
-    "object": "ดีบั๊ก - Frigate"
+    "object": "ดีบั๊ก - Frigate",
+    "cameraReview": "แสดงการตั้งค่าของกล้อง - Frigate"
   },
   "menu": {
     "notifications": "การแจ้งเตือน",

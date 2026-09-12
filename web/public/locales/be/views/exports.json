@@ -1,0 +1,128 @@
+{
+  "documentTitle": "Экспарт - Frigate",
+  "search": "Пошук",
+  "noExports": "Экспартаў не знойдзена",
+  "headings": {
+    "cases": "Справы",
+    "uncategorizedExports": "Экспарты без катэгорыі"
+  },
+  "deleteExport": {
+    "label": "Выдаліць экспарт",
+    "desc": "Сапраўды выдаліць {{exportName}}?"
+  },
+  "editExport": {
+    "title": "Перайменаваць экспарт",
+    "desc": "Увядзіце новую назву гэтага экспарту.",
+    "saveExport": "Захаваць экспарт"
+  },
+  "tooltip": {
+    "shareExport": "Падзяліцца экспартам",
+    "downloadVideo": "Спампаваць відэа",
+    "editName": "Рэдагаваць назву",
+    "deleteExport": "Выдаліць экспарт",
+    "assignToCase": "Дадаць у справу",
+    "removeFromCase": "Прыбраць са справы"
+  },
+  "toolbar": {
+    "newCase": "Новая справа",
+    "addExport": "Дадаць экспарт",
+    "editCase": "Рэдагаваць справу",
+    "deleteCase": "Выдаліць справу"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Не ўдалося перайменаваць экспарт: {{errorMessage}}",
+      "assignCaseFailed": "Не ўдалося абнавіць прывязку да справы: {{errorMessage}}",
+      "caseSaveFailed": "Не ўдалося захаваць справу: {{errorMessage}}",
+      "caseDeleteFailed": "Не ўдалося выдаліць справу: {{errorMessage}}"
+    }
+  },
+  "deleteCase": {
+    "label": "Выдаліць справу",
+    "desc": "Сапраўды выдаліць {{caseName}}?",
+    "descKeepExports": "Экспарты застануцца даступнымі як экспарты без катэгорыі.",
+    "descDeleteExports": "Усе экспарты гэтай справы будуць выдалены назаўсёды.",
+    "deleteExports": "Таксама выдаліць экспарты"
+  },
+  "caseDialog": {
+    "title": "Дадаць у справу",
+    "description": "Выберыце наяўную справу або стварыце новую.",
+    "selectLabel": "Справа",
+    "newCaseOption": "Стварыць новую справу",
+    "nameLabel": "Назва справы",
+    "descriptionLabel": "Апісанне"
+  },
+  "caseCard": {
+    "emptyCase": "Пакуль няма экспартаў"
+  },
+  "jobCard": {
+    "defaultName": "Экспарт {{camera}}",
+    "queued": "У чарзе",
+    "running": "Выконваецца",
+    "preparing": "Падрыхтоўка",
+    "copying": "Капіяванне",
+    "encoding": "Кадаванне",
+    "encodingRetry": "Кадаванне (паўтор)",
+    "finalizing": "Завяршэнне"
+  },
+  "caseView": {
+    "noDescription": "Без апісання",
+    "createdAt": "Створана {{value}}",
+    "exportCount_one": "1 экспарт",
+    "exportCount_other": "{{count}} экспарту",
+    "cameraCount_one": "1 камера",
+    "cameraCount_other": "{{count}} камеры",
+    "showMore": "Паказаць больш",
+    "showLess": "Паказаць меней",
+    "emptyTitle": "Гэта справа пустая",
+    "emptyDescription": "Дадайце наяўныя экспарты без катэгорыі, каб справа была ўпарадкаванай.",
+    "emptyDescriptionNoExports": "Пакуль няма экспартаў без катэгорыі, якія можна дадаць."
+  },
+  "caseEditor": {
+    "createTitle": "Стварыць справу",
+    "editTitle": "Рэдагаваць справу",
+    "namePlaceholder": "Назва справы",
+    "descriptionPlaceholder": "Дадайце нататкі або кантэкст для гэтай справы"
+  },
+  "addExportDialog": {
+    "title": "Дадаць экспарт у {{caseName}}",
+    "searchPlaceholder": "Пошук экспартаў без катэгорыі",
+    "empty": "Няма экспартаў без катэгорыі, якія адпавядаюць запыту.",
+    "addButton_one": "Дадаць 1 экспарт",
+    "addButton_other": "Дадаць {{count}} экспарту",
+    "adding": "Даданне…"
+  },
+  "selected_one": "Выбрана: {{count}}",
+  "selected_other": "Выбрана: {{count}}",
+  "bulkActions": {
+    "addToCase": "Дадаць у справу",
+    "moveToCase": "Перамясціць у справу",
+    "removeFromCase": "Прыбраць са справы",
+    "delete": "Выдаліць",
+    "deleteNow": "Выдаліць зараз"
+  },
+  "bulkDelete": {
+    "title": "Выдаліць экспарты",
+    "desc_one": "Сапраўды выдаліць {{count}} экспарт?",
+    "desc_other": "Сапраўды выдаліць {{count}} экспарту?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Прыбраць са справы",
+    "desc_one": "Прыбраць {{count}} экспарт з гэтай справы?",
+    "desc_other": "Прыбраць {{count}} экспарту з гэтай справы?",
+    "descKeepExports": "Экспарты будуць перанесены ў катэгорыю «без катэгорыі».",
+    "descDeleteExports": "Экспарты будуць выдалены назаўсёды.",
+    "deleteExports": "Замест гэтага выдаліць экспарты"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Экспарты выдалены",
+      "reassign": "Прывязка да справы абноўлена",
+      "remove": "Экспарты прыбраны са справы"
+    },
+    "error": {
+      "deleteFailed": "Не ўдалося выдаліць экспарты: {{errorMessage}}",
+      "reassignFailed": "Не ўдалося абнавіць прывязку да справы: {{errorMessage}}"
+    }
+  }
+}

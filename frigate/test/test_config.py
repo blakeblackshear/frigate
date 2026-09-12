@@ -151,6 +151,22 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.track
 
+    def test_deep_merge_override_replaces_list_values(self):
+        base = {"objects": {"track": ["person", "face"]}}
+        update = {"objects": {"track": ["person"]}}
+
+        merged = deep_merge(base, update, override=True)
+
+        assert merged["objects"]["track"] == ["person"]
+
+    def test_deep_merge_merge_lists_still_appends(self):
+        base = {"track": ["person"]}
+        update = {"track": ["face"]}
+
+        merged = deep_merge(base, update, override=True, merge_lists=True)
+
+        assert merged["track"] == ["person", "face"]
+
     def test_override_birdseye(self):
         config = {
             "mqtt": {"host": "mqtt"},
@@ -272,6 +288,61 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.filters
 
+    def test_default_audio_filters(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "audio": {"listen": ["speech", "yell"]},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert set(frigate_config.cameras["back"].audio.filters.keys()) == {
+            "speech",
+            "yell",
+        }
+
+    def test_override_audio_filters(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "audio": {
+                        "listen": ["speech", "yell"],
+                        "filters": {"speech": {"threshold": 0.9}},
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert "speech" in frigate_config.cameras["back"].audio.filters
+        assert frigate_config.cameras["back"].audio.filters["speech"].threshold == 0.9
+        assert "yell" in frigate_config.cameras["back"].audio.filters
+        assert "babbling" not in frigate_config.cameras["back"].audio.filters
+
     def test_inherit_object_filters(self):
         config = {
             "mqtt": {"host": "mqtt"},
@@ -326,6 +397,43 @@ class TestConfig(unittest.TestCase):
         assert "dog" in frigate_config.cameras["back"].objects.filters
         assert frigate_config.cameras["back"].objects.filters["dog"].threshold == 0.7
 
+    def test_unsupported_tracked_object_pruned_from_track_and_filters(self):
+        # "unicorn" is not in the model labelmap, so it must be removed from the
+        # tracked objects AND from the object filters, otherwise a stale filter
+        # entry lingers in the parsed config.
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                    "objects": {
+                        "track": ["person", "unicorn"],
+                        "filters": {
+                            "person": {"threshold": 0.7},
+                            "unicorn": {"threshold": 0.7},
+                        },
+                    },
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        objects = frigate_config.cameras["back"].objects
+        assert "unicorn" not in objects.track
+        assert "unicorn" not in objects.filters
+        # supported entries are left untouched
+        assert "person" in objects.track
+        assert "person" in objects.filters
+
     def test_global_object_mask(self):
         config = {
             "mqtt": {"host": "mqtt"},
@@ -343,8 +451,24 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "objects": {
-                        "mask": "0,0,1,1,0,1",
-                        "filters": {"dog": {"mask": "1,1,1,1,1,1"}},
+                        "mask": {
+                            "global_mask_1": {
+                                "friendly_name": "Global Mask 1",
+                                "enabled": True,
+                                "coordinates": "0,0,1,1,0,1",
+                            }
+                        },
+                        "filters": {
+                            "dog": {
+                                "mask": {
+                                    "dog_mask_1": {
+                                        "friendly_name": "Dog Mask 1",
+                                        "enabled": True,
+                                        "coordinates": "1,1,1,1,1,1",
+                                    }
+                                }
+                            }
+                        },
                     },
                 }
             },
@@ -353,8 +477,10 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         back_camera = frigate_config.cameras["back"]
         assert "dog" in back_camera.objects.filters
-        assert len(back_camera.objects.filters["dog"].raw_mask) == 2
-        assert len(back_camera.objects.filters["person"].raw_mask) == 1
+        # dog filter has its own mask + global mask merged
+        assert len(back_camera.objects.filters["dog"].mask) == 2
+        # person filter only has the global mask
+        assert len(back_camera.objects.filters["person"].mask) == 1
 
     def test_motion_mask_relative_matches_explicit(self):
         config = {
@@ -373,9 +499,13 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "motion": {
-                        "mask": [
-                            "0,0,200,100,600,300,800,400",
-                        ]
+                        "mask": {
+                            "explicit_mask": {
+                                "friendly_name": "Explicit Mask",
+                                "enabled": True,
+                                "coordinates": "0,0,200,100,600,300,800,400",
+                            }
+                        }
                     },
                 },
                 "relative": {
@@ -390,9 +520,13 @@ class TestConfig(unittest.TestCase):
                         "fps": 5,
                     },
                     "motion": {
-                        "mask": [
-                            "0.0,0.0,0.25,0.25,0.75,0.75,1.0,1.0",
-                        ]
+                        "mask": {
+                            "relative_mask": {
+                                "friendly_name": "Relative Mask",
+                                "enabled": True,
+                                "coordinates": "0.0,0.0,0.25,0.25,0.75,0.75,1.0,1.0",
+                            }
+                        }
                     },
                 },
             },
@@ -400,8 +534,8 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert np.array_equal(
-            frigate_config.cameras["explicit"].motion.mask,
-            frigate_config.cameras["relative"].motion.mask,
+            frigate_config.cameras["explicit"].motion.rasterized_mask,
+            frigate_config.cameras["relative"].motion.rasterized_mask,
         )
 
     def test_default_input_args(self):
@@ -904,6 +1038,7 @@ class TestConfig(unittest.TestCase):
 
         config = {
             "mqtt": {"host": "mqtt"},
+            "detectors": {"cpu": {"type": "cpu"}},
             "model": {"path": "plus://test"},
             "cameras": {
                 "back": {
@@ -1087,7 +1222,7 @@ class TestConfig(unittest.TestCase):
     def test_global_detect_merge(self):
         config = {
             "mqtt": {"host": "mqtt"},
-            "detect": {"max_disappeared": 1, "height": 720},
+            "detect": {"max_disappeared": 1, "height": 720, "width": 1280},
             "cameras": {
                 "back": {
                     "ffmpeg": {
@@ -1166,7 +1301,7 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert frigate_config.cameras["back"].snapshots.bounding_box
-        assert frigate_config.cameras["back"].snapshots.quality == 70
+        assert frigate_config.cameras["back"].snapshots.quality == 60
 
     def test_global_snapshots_merge(self):
         config = {
@@ -1573,6 +1708,61 @@ class TestConfig(unittest.TestCase):
         }
 
         self.assertRaises(ValueError, lambda: FrigateConfig(**config))
+
+
+class TestAttributeFilterDefaults(unittest.TestCase):
+    """Verify attribute filter min_score handling at config load."""
+
+    def setUp(self):
+        self.minimal = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {
+                        "height": 1080,
+                        "width": 1920,
+                        "fps": 5,
+                    },
+                }
+            },
+        }
+
+    def _build_config(self, object_filters: dict | None = None) -> FrigateConfig:
+        config = deep_merge({}, self.minimal)
+        if object_filters is not None:
+            config.setdefault("objects", {})["filters"] = object_filters
+        return FrigateConfig(**config)
+
+    def test_attribute_with_no_filter_gets_default_min_score(self):
+        """Attribute with no user-provided filter gets created with min_score=0.7."""
+        config = self._build_config()
+        face_filter = config.objects.filters.get("face")
+        self.assertIsNotNone(face_filter)
+        self.assertEqual(face_filter.min_score, 0.7)
+
+    def test_attribute_filter_without_min_score_gets_bumped(self):
+        """If user sets some FilterConfig field but not min_score, min_score is bumped to 0.7."""
+        config = self._build_config({"face": {"min_area": 500}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_area, 500)
+        self.assertEqual(face_filter.min_score, 0.7)
+
+    def test_attribute_filter_explicit_min_score_half_is_preserved(self):
+        """User-provided min_score=0.5 must NOT be silently rewritten to 0.7."""
+        config = self._build_config({"face": {"min_score": 0.5}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_score, 0.5)
+
+    def test_attribute_filter_explicit_min_score_other_value_is_preserved(self):
+        """Sanity: explicit non-0.5 values pass through unchanged."""
+        config = self._build_config({"face": {"min_score": 0.3}})
+        face_filter = config.objects.filters["face"]
+        self.assertEqual(face_filter.min_score, 0.3)
 
 
 if __name__ == "__main__":

@@ -3,9 +3,19 @@ id: record
 title: Recording
 ---
 
-Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy in the config. Frigate chooses the largest matching retention value between the recording retention and the tracked object retention when determining if a recording should be removed.
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
 
-New recording segments are written from the camera stream to cache, they are only moved to disk if they match the setup recording retention policy.
+Recordings can be enabled and are stored at `/media/frigate/recordings`. The folder structure for the recordings is `YYYY-MM-DD/HH/<camera_name>/MM.SS.mp4` in **UTC time**. These recordings are written directly from your camera stream without re-encoding. Each camera supports a configurable retention policy. Frigate chooses the largest matching retention value between the recording retention and the tracked object retention when determining if a recording should be removed.
+
+New recording segments are written from the camera stream to cache, they are only moved to disk if they pass a validation check and match the setup recording retention policy.
+
+:::tip
+
+To keep a specific clip beyond your retention window, [export](/usage/exports) it rather than increasing retention for the whole camera. Exports are saved separately and are never removed by retention.
+
+:::
 
 H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other browsers require recordings to be encoded with H264.
 
@@ -13,7 +23,23 @@ H265 recordings can be viewed in Chrome 108+, Edge and Safari only. All other br
 
 ### Most conservative: Ensure all video is saved
 
-For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following config will store all video for 3 days. After 3 days, only video containing motion will be saved for 7 days. After 7 days, only video containing motion and overlapping with alerts or detections will be retained until 30 days have passed.
+For users deploying Frigate in environments where it is important to have contiguous video stored even if there was no detectable motion, the following configuration will store all video for 3 days. After 3 days, only video containing motion will be saved for 7 days. After 7 days, only video containing motion and overlapping with alerts or detections will be retained until 30 days have passed.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+- Set **Enable recording** to on
+- Set **Continuous retention > Retention days** to `3`
+- Set **Motion retention > Retention days** to `7`
+- Set **Alert retention > Event retention > Retention days** to `30`
+- Set **Alert retention > Event retention > Retention mode** to `all`
+- Set **Detection retention > Event retention > Retention days** to `30`
+- Set **Detection retention > Event retention > Retention mode** to `all`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -32,9 +58,27 @@ record:
       mode: all
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Reduced storage: Only saving video when motion is detected
 
-In order to reduce storage requirements, you can adjust your config to only retain video where motion / activity was detected.
+To reduce storage requirements, configure recording to only retain video where motion or activity was detected.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+- Set **Enable recording** to on
+- Set **Motion retention > Retention days** to `3`
+- Set **Alert retention > Event retention > Retention days** to `30`
+- Set **Alert retention > Event retention > Retention mode** to `motion`
+- Set **Detection retention > Event retention > Retention days** to `30`
+- Set **Detection retention > Event retention > Retention mode** to `motion`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -51,9 +95,25 @@ record:
       mode: motion
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ### Minimum: Alerts only
 
-If you only want to retain video that occurs during activity caused by tracked object(s), this config will discard video unless an alert is ongoing.
+If you only want to retain video that occurs during activity caused by tracked object(s), this configuration will discard video unless an alert is ongoing.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+- Set **Enable recording** to on
+- Set **Continuous retention > Retention days** to `0`
+- Set **Alert retention > Event retention > Retention days** to `30`
+- Set **Alert retention > Event retention > Retention mode** to `motion`
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -66,9 +126,78 @@ record:
       mode: motion
 ```
 
-## Will Frigate delete old recordings if my storage runs out?
+</TabItem>
+</ConfigTabs>
 
-If there is less than an hour left of storage, the oldest hour of recordings will be deleted and a message will be printed in the Frigate logs. This emergency cleanup deletes the oldest recordings first regardless of retention settings to reclaim space as quickly as possible.
+## Pre-capture and Post-capture
+
+The `pre_capture` and `post_capture` settings control how many seconds of video are included before and after an alert or detection. These can be configured independently for alerts and detections, and can be set globally or overridden per camera.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" /> for global defaults, or <NavPath path="Settings > Camera configuration > (select camera) > Recording" /> to override for a specific camera.
+
+| Field                                          | Description                                          |
+| ---------------------------------------------- | ---------------------------------------------------- |
+| **Alert retention > Pre-capture seconds**      | Seconds of video to include before an alert event    |
+| **Alert retention > Post-capture seconds**     | Seconds of video to include after an alert event     |
+| **Detection retention > Pre-capture seconds**  | Seconds of video to include before a detection event |
+| **Detection retention > Post-capture seconds** | Seconds of video to include after a detection event  |
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+record:
+  enabled: True
+  alerts:
+    pre_capture: 5 # seconds before the alert to include
+    post_capture: 5 # seconds after the alert to include
+  detections:
+    pre_capture: 5 # seconds before the detection to include
+    post_capture: 5 # seconds after the detection to include
+```
+
+</TabItem>
+</ConfigTabs>
+
+- **Default**: 5 seconds for both pre and post capture.
+- **Pre-capture maximum**: 60 seconds.
+- These settings apply per review category (alerts and detections), not per object type.
+
+### How pre/post capture interacts with retention mode
+
+The `pre_capture` and `post_capture` values define the **time window** around a review item, but only recording segments that also match the configured **retention mode** are actually kept on disk.
+
+- **`mode: all`**: Retains every segment within the capture window, regardless of whether motion was detected.
+- **`mode: motion`** (default): Only retains segments within the capture window that contain motion. This includes segments with active tracked objects, since object motion implies motion. Segments without any motion are discarded even if they fall within the pre/post capture range.
+- **`mode: active_objects`**: Only retains segments within the capture window where tracked objects were actively moving. Segments with general motion but no active objects are discarded.
+
+This means that with the default `motion` mode, you may see less footage than the configured pre/post capture duration if parts of the capture window had no motion.
+
+To guarantee the full pre/post capture duration is always retained:
+
+```yaml
+record:
+  enabled: True
+  alerts:
+    pre_capture: 10
+    post_capture: 10
+    retain:
+      days: 30
+      mode: all # retains all segments within the capture window
+```
+
+:::note
+
+Because recording segments are written in 10 second chunks, pre-capture timing depends on segment boundaries. The actual pre-capture footage may be slightly shorter or longer than the exact configured value.
+
+:::
+
+### Where to view pre/post capture footage
+
+Pre and post capture footage is included in the **recording timeline**, visible in the History view. Note that pre/post capture settings only affect which recording segments are **retained on disk**. They do not change the start and end points shown in the UI. The History view will still center on the review item's actual time range, but you can scrub backward and forward through the retained pre/post capture footage on the timeline. The Explore view shows object-specific clips that are trimmed to when the tracked object was actually visible, so pre/post capture time will not be reflected there.
 
 ## Configuring Recording Retention
 
@@ -82,7 +211,21 @@ Retention configs support decimals meaning they can be configured to retain `0.5
 
 ### Continuous and Motion Recording
 
-The number of days to retain continuous and motion recordings can be set via the following config where X is a number, by default continuous recording is disabled.
+The number of days to retain continuous and motion recordings can be configured. By default, continuous recording is disabled.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+| Field                                     | Description                                  |
+| ----------------------------------------- | -------------------------------------------- |
+| **Enable recording**                      | Enable or disable recording for all cameras  |
+| **Continuous retention > Retention days** | Number of days to keep continuous recordings |
+| **Motion retention > Retention days**     | Number of days to keep motion recordings     |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -93,11 +236,28 @@ record:
     days: 2 # <- number of days to keep motion recordings
 ```
 
-Continuous recording supports different retention modes [which are described below](#what-do-the-different-retain-modes-mean)
+</TabItem>
+</ConfigTabs>
+
+Continuous recording supports different retention modes [which are described below](#configuring-recording-retention).
 
 ### Object Recording
 
-The number of days to record review items can be specified for review items classified as alerts as well as tracked objects.
+The number of days to retain recordings for review items can be specified for items classified as alerts as well as tracked objects.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Recording" />.
+
+| Field                                                      | Description                                 |
+| ---------------------------------------------------------- | ------------------------------------------- |
+| **Enable recording**                                       | Enable or disable recording for all cameras |
+| **Alert retention > Event retention > Retention days**     | Number of days to keep alert recordings     |
+| **Detection retention > Event retention > Retention days** | Number of days to keep detection recordings |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 record:
@@ -110,9 +270,10 @@ record:
       days: 10 # <- number of days to keep detections recordings
 ```
 
-This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
+</TabItem>
+</ConfigTabs>
 
-**WARNING**: Recordings still must be enabled in the config. If a camera has recordings disabled in the config, enabling via the methods listed above will have no effect.
+This configuration will retain recording segments that overlap with alerts and detections for 10 days. Because multiple tracked objects can reference the same recording segments, this avoids storing duplicate footage for overlapping tracked objects and reduces overall storage needs.
 
 ## Can I have "continuous" recordings, but only at certain times?
 
@@ -122,25 +283,52 @@ Using Frigate UI, Home Assistant, or MQTT, cameras can be automated to only reco
 
 Footage can be exported from Frigate by right-clicking (desktop) or long pressing (mobile) on a review item in the Review pane or by clicking the Export button in the History view. Exported footage is then organized and searchable through the Export view, accessible from the main navigation bar.
 
-### Time-lapse export
+### Custom export with FFmpeg arguments
 
-Time lapse exporting is available only via the [HTTP API](../integrations/api/export-recording-export-camera-name-start-start-time-end-end-time-post.api.mdx).
+For advanced use cases, the [custom export HTTP API](../integrations/api/export-recording-custom-export-custom-camera-name-start-start-time-end-end-time-post.api.mdx) lets you pass custom FFmpeg arguments when exporting a recording:
 
-When exporting a time-lapse the default speed-up is 25x with 30 FPS. This means that every 25 seconds of (real-time) recording is condensed into 1 second of time-lapse video (always without audio) with a smoothness of 30 FPS.
-
-To configure the speed-up factor, the frame rate and further custom settings, the configuration parameter `timelapse_args` can be used. The below configuration example would change the time-lapse speed to 60x (for fitting 1 hour of recording into 1 minute of time-lapse) with 25 FPS:
-
-```yaml {3-4}
-record:
-  enabled: True
-  export:
-    timelapse_args: "-vf setpts=PTS/60 -r 25"
 ```
+POST /export/custom/{camera_name}/start/{start_time}/end/{end_time}
+```
+
+The request body accepts `ffmpeg_input_args` and `ffmpeg_output_args` to control encoding, frame rate, filters, and other FFmpeg options. If neither is provided, Frigate defaults to time-lapse output settings (25x speed, 30 FPS) with audio removed (`-an`). When providing your own `ffmpeg_input_args`, include `-an` if you want audio stripped from the export.
+
+The following example exports a time-lapse at 60x speed with 25 FPS:
+
+```json
+{
+  "name": "Front Door Time-lapse",
+  "ffmpeg_output_args": "-vf setpts=PTS/60 -r 25"
+}
+```
+
+#### CPU fallback
+
+If hardware acceleration is configured and the export fails (e.g., the GPU is unavailable), set `cpu_fallback: true` in the request body to automatically retry using software encoding.
+
+```json
+{
+  "name": "My Export",
+  "ffmpeg_output_args": "-c:v libx264 -crf 23",
+  "cpu_fallback": true
+}
+```
+
+:::note
+
+Non-admin users are restricted from using FFmpeg arguments that can access the filesystem (e.g., `-filter_complex`, file paths, and protocol references). Admin users have full control over FFmpeg arguments.
+
+:::
 
 :::tip
 
-When using `hwaccel_args` globally hardware encoding is used for time lapse generation. The encoder determines its own behavior so the resulting file size may be undesirably large.
-To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (where `n` stands for the value of the quantisation parameter). The value can be adjusted to get an acceptable tradeoff between quality and file size for the given scenario.
+When `hwaccel_args` is configured, hardware encoding is used for exports. This can be overridden per camera (e.g., when camera resolution exceeds hardware encoder limits) by setting a camera-level `hwaccel_args`. Using an unrecognized value or empty string falls back to software encoding (libx264).
+
+:::
+
+:::tip
+
+To reduce output file size, add the FFmpeg parameter `-qp n` to `ffmpeg_output_args` (where `n` is the quantization parameter). Adjust the value to balance quality and file size for your scenario.
 
 :::
 
@@ -148,19 +336,78 @@ To reduce the output file size the ffmpeg parameter `-qp n` can be utilized (whe
 
 Apple devices running the Safari browser may fail to playback h.265 recordings. The [apple compatibility option](../configuration/camera_specific.md#h265-cameras-via-safari) should be used to ensure seamless playback on Apple devices.
 
-## Syncing Recordings With Disk
+## Syncing Media Files With Disk
 
-In some cases the recordings files may be deleted but Frigate will not know this has happened. Recordings sync can be enabled which will tell Frigate to check the file system and delete any db entries for files which don't exist.
+Media files (event snapshots, event thumbnails, review thumbnails, previews, exports, and recordings) can become orphaned when database entries are deleted but the corresponding files remain on disk.
 
-```yaml
-record:
-  sync_recordings: True
-```
+Normal operation may leave small numbers of orphaned files until Frigate's scheduled cleanup, but crashes, configuration changes, or upgrades may cause more orphaned files that Frigate does not clean up. This feature checks the file system for media files and removes any that are not referenced in the database.
 
-This feature is meant to fix variations in files, not completely delete entries in the database. If you delete all of your media, don't use `sync_recordings`, just stop Frigate, delete the `frigate.db` database, and restart.
+The Maintenance pane in the Frigate UI or an API endpoint `POST /api/media/sync` can be used to trigger a media sync. When using the API, a job ID is returned and the operation continues on the server. Status can be checked with the `/api/media/sync/status/{job_id}` endpoint.
+
+Setting `verbose: true` writes a detailed report of every orphaned file and database entry to `/config/media_sync/<job_id>.txt`. For recordings, the report separates orphaned database entries (DB records whose files are missing from disk) from orphaned files (files on disk with no corresponding database record).
 
 :::warning
 
-The sync operation uses considerable CPU resources and in most cases is not needed, only enable when necessary.
+This operation uses considerable CPU resources and includes a safety threshold that aborts if more than 50% of files would be deleted. Only run when necessary. If you set `force: true` the safety threshold will be bypassed; do not use `force` unless you are certain the deletions are intended.
 
 :::
+
+## Understanding storage usage
+
+The storage usage Frigate reports will not exactly match what the operating system reports with `df` or `du`. This is expected, not a bug. The sections below explain how Frigate derives its storage figures and why they differ from the disk's own accounting.
+
+### How Frigate measures recording usage
+
+The **Recordings** value on the Storage Metrics page (<NavPath path="System > Storage" />), and the per-camera **Camera Storage** breakdown, is the sum of the recording segment sizes Frigate has written, taken from Frigate's database. It is **not** computed by a scan of the disk. Frigate tracks usage this way by design: repeatedly walking the entire drive to total its size would keep hard drives spun up and add unnecessary I/O.
+
+The disk **total** shown beside it, and the free-space figure Frigate uses to decide when to delete recordings, instead come from the operating system's report for the whole filesystem mounted at `/media/frigate`. As a result, the **Unused** value on the page is _total disk capacity minus Frigate's recordings_, not the drive's real free space, which will be lower whenever anything else is stored on the disk.
+
+### What counts toward usage, and why it won't match `df`
+
+Only **recording segments** (`/media/frigate/recordings`) are included in the recordings storage total. Plenty of other things consume real disk space but are **not** part of that number:
+
+- **Snapshots and thumbnails** (`/media/frigate/clips`): see [Snapshots](/configuration/snapshots). These are retained independently of recordings.
+- **Preview videos** and **review thumbnails** (also under `/media/frigate/clips`).
+- **Exports** (`/media/frigate/exports`): exports are never removed by retention.
+- **The database, downloaded detection models, and face / license plate training images** (stored under `/config`).
+- **Debug images from enrichments** (`/media/frigate/clips`): when enabled, License Plate Recognition's `debug_save_plates` and GenAI's `debug_save_thumbnails` save plate crops and request images for troubleshooting.
+
+These files are the usual explanation for an "other" or seemingly unaccounted bucket of space: it is real, it is Frigate's, and it simply isn't part of the _recordings_ total. They are also why comparing the **Recordings** figure to `df -h` always shows a gap: `df` additionally counts any non-Frigate data on the disk, filesystem overhead and reserved blocks (ext4 reserves ~5% for root by default, so a disk can read "full" before recordings approach the total), and recently deleted recordings whose space has not yet been reclaimed.
+
+:::tip
+
+The Storage page is not intended to be a system-wide disk monitor: it shows how much space _Frigate's recordings_ use. To see true disk usage, use `df -h` (free space) and `du -sh` (per-directory usage) on the host.
+
+:::
+
+### Free space and the `/media/frigate` mount
+
+Frigate reports the capacity and free space of whatever filesystem is actually mounted at `/media/frigate` **inside the container**. If an external drive or network share isn't truly mounted there (a missing `/etc/fstab` entry, a share that was offline when the container started, or a host that doesn't pass the path through), the container falls back to the host's OS disk, and Frigate will correctly report that smaller disk instead of the drive you intended.
+
+If the reported capacity doesn't match your drive, the mount is the place to look, not Frigate. Verify what is actually mounted from inside the container:
+
+```bash
+docker exec -it frigate df -h /media/frigate
+docker exec -it frigate mount | grep media
+```
+
+See the [storage mount layout](/frigate/installation#storage) for how the volumes are expected to be configured.
+
+### The `/tmp/cache` area is separate
+
+Recording segments are first written to `/tmp/cache`, a small, in-memory (`tmpfs`) area, before being checked and moved to `/media/frigate/recordings`. Because it is separate and small, `/tmp/cache` can fill up and produce `No space left on device` errors even when the recordings disk has plenty of room. They are different storage areas. See [Recordings troubleshooting](/troubleshooting/recordings) for diagnosing cache and slow-storage issues.
+
+### When the metrics don't match what's on disk
+
+Because usage is tracked in the database, deleting recording files directly on disk, or files left behind after an upgrade, will not update the reported usage, and can even push it above 100%. Frigate is unaware of files it didn't record and won't count or remove them automatically. Use [Syncing Media Files With Disk](#syncing-media-files-with-disk) to reconcile the database with what is actually on disk.
+
+## Will Frigate delete old recordings if my storage runs out?
+
+Yes. Frigate continuously checks the **free space of the disk** holding `/media/frigate/recordings`. This is different from adding up the size of every recording: free space is a single number the operating system already tracks, so Frigate can ask for it instantly without reading through your files or spinning up the disk, which is exactly why it relies on this check rather than scanning the drive. When less than roughly one hour of recording space remains (estimated from the current recording bitrate, **not** a fixed percentage), Frigate deletes the oldest recordings to reclaim space and logs a message. This emergency cleanup removes the oldest recordings first **regardless of retention settings**.
+
+Two consequences follow from this being based on whole-disk free space:
+
+- Because the check uses the disk's real free space, **anything** filling the drive, including non-Frigate files, can trigger deletion of your oldest recordings.
+- Cleanup can run while a meaningful percentage of the disk is still free (for example, with high bitrates or many cameras), because the threshold is "less than ~1 hour of recording headroom," not "X% full."
+
+Frequent emergency cleanups usually mean your configured retention exceeds what the disk can hold. Reduce your retention days so the normal retention cleanup keeps up and the emergency path rarely triggers.

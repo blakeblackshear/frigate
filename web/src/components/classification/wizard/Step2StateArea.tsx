@@ -14,6 +14,7 @@ import Konva from "konva";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { useApiHost } from "@/api";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import Heading from "@/components/ui/heading";
 import { isMobile } from "react-device-detect";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,7 @@ export default function Step2StateArea({
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const popoverContainerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const rectRef = useRef<Konva.Rect>(null);
@@ -62,13 +64,14 @@ export default function Step2StateArea({
 
     const selectedCameraNames = cameraAreas.map((ca) => ca.camera);
     return Object.entries(config.cameras)
-      .sort()
       .filter(
         ([name, cam]) =>
           cam.enabled &&
           cam.enabled_in_config &&
+          !isReplayCamera(name) &&
           !selectedCameraNames.includes(name),
       )
+      .sort(([, a], [, b]) => a.ui.order - b.ui.order)
       .map(([name]) => ({
         name,
         displayName: resolveCameraName(config, name),
@@ -222,7 +225,7 @@ export default function Step2StateArea({
   const canContinue = cameraAreas.length > 0;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div ref={popoverContainerRef} className="flex flex-col gap-4">
       <div
         className={cn(
           "flex gap-4 overflow-hidden",
@@ -238,11 +241,7 @@ export default function Step2StateArea({
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">{t("wizard.step2.cameras")}</h3>
             {availableCameras.length > 0 ? (
-              <Popover
-                open={isPopoverOpen}
-                onOpenChange={setIsPopoverOpen}
-                modal={true}
-              >
+              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
@@ -257,6 +256,7 @@ export default function Step2StateArea({
                   className="scrollbar-container w-64 border bg-background p-3 shadow-lg"
                   align="start"
                   sideOffset={5}
+                  container={popoverContainerRef.current}
                   onOpenAutoFocus={(e) => e.preventDefault()}
                 >
                   <div className="flex flex-col gap-2">
@@ -460,7 +460,7 @@ export default function Step2StateArea({
         </div>
       </div>
 
-      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
         <Button type="button" onClick={onBack} className="sm:flex-1">
           {t("button.back", { ns: "common" })}
         </Button>

@@ -6,7 +6,7 @@ import {
   ThreatLevel,
   THREAT_LEVEL_LABELS,
 } from "@/types/review";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { MdAutoAwesome } from "react-icons/md";
@@ -95,11 +95,12 @@ export function GenAISummaryDialog({
   const Trigger = isDesktop ? DialogTrigger : DrawerTrigger;
   const Content = isDesktop ? DialogContent : DrawerContent;
 
+  const onOpenRef = useRef(onOpen);
+  onOpenRef.current = onOpen;
+
   useEffect(() => {
-    if (onOpen) {
-      onOpen(open);
-    }
-  }, [open, onOpen]);
+    onOpenRef.current?.(open);
+  }, [open]);
 
   if (!aiAnalysis) {
     return null;
@@ -108,7 +109,7 @@ export function GenAISummaryDialog({
   return (
     <Overlay open={open} onOpenChange={setOpen}>
       <Trigger asChild>
-        <div>{children}</div>
+        <div className="min-w-0">{children}</div>
       </Trigger>
       <Content
         className={cn(

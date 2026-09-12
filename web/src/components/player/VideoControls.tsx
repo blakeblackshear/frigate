@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { isDesktop, isMobileOnly, isSafari } from "react-device-detect";
+import { LuFolderX } from "react-icons/lu";
+import { isMobileOnly, isSafari } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ import {
 } from "../ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { FaCompress, FaExpand } from "react-icons/fa";
+import { TbCameraDown } from "react-icons/tb";
 import { useTranslation } from "react-i18next";
 
 type VideoControls = {
@@ -40,6 +42,7 @@ type VideoControls = {
   seek?: boolean;
   playbackRate?: boolean;
   plusUpload?: boolean;
+  snapshot?: boolean;
   fullscreen?: boolean;
 };
 
@@ -48,6 +51,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   seek: true,
   playbackRate: true,
   plusUpload: false,
+  snapshot: false,
   fullscreen: false,
 };
 const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
@@ -71,6 +75,9 @@ type VideoControlsProps = {
   onSeek: (diff: number) => void;
   onSetPlaybackRate: (rate: number) => void;
   onUploadFrame?: () => void;
+  getSnapshotUrl?: () => string | undefined;
+  onSnapshot?: () => void;
+  snapshotLoading?: boolean;
   toggleFullscreen?: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
@@ -92,6 +99,9 @@ export default function VideoControls({
   onSeek,
   onSetPlaybackRate,
   onUploadFrame,
+  getSnapshotUrl,
+  onSnapshot,
+  snapshotLoading = false,
   toggleFullscreen,
   containerRef,
 }: VideoControlsProps) {
@@ -195,7 +205,7 @@ export default function VideoControls({
   return (
     <div
       className={cn(
-        "z-50 flex w-auto items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
+        "z-50 flex w-auto select-none items-center justify-between gap-4 rounded-lg bg-background/60 px-4 py-2 text-primary sm:flex-nowrap sm:gap-8",
         className,
         isMobileOnly &&
           Object.values(features).filter((feat) => feat).length >
@@ -243,7 +253,6 @@ export default function VideoControls({
       )}
       {features.playbackRate && (
         <DropdownMenu
-          modal={!isDesktop}
           onOpenChange={(open) => {
             if (setControlsOpen) {
               setControlsOpen(open);
@@ -288,8 +297,28 @@ export default function VideoControls({
             }
           }}
           onUploadFrame={onUploadFrame}
+          getSnapshotUrl={getSnapshotUrl}
           containerRef={containerRef}
           fullscreen={fullscreen}
+        />
+      )}
+      {features.snapshot && onSnapshot && (
+        <TbCameraDown
+          className={cn(
+            "size-5",
+            snapshotLoading
+              ? "cursor-not-allowed opacity-50"
+              : "cursor-pointer",
+          )}
+          onClick={(e: React.MouseEvent<SVGElement>) => {
+            e.stopPropagation();
+
+            if (snapshotLoading) {
+              return;
+            }
+
+            onSnapshot();
+          }}
         />
       )}
       {features.fullscreen && toggleFullscreen && (
@@ -306,6 +335,7 @@ type FrigatePlusUploadButtonProps = {
   onOpen: () => void;
   onClose: () => void;
   onUploadFrame: () => void;
+  getSnapshotUrl?: () => string | undefined;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   fullscreen?: boolean;
 };
@@ -314,12 +344,14 @@ function FrigatePlusUploadButton({
   onOpen,
   onClose,
   onUploadFrame,
+  getSnapshotUrl,
   containerRef,
   fullscreen,
 }: FrigatePlusUploadButtonProps) {
   const { t } = useTranslation(["components/player"]);
 
-  const [videoImg, setVideoImg] = useState<string>();
+  const [previewUrl, setPreviewUrl] = useState<string>();
+  const [previewError, setPreviewError] = useState(false);
 
   return (
     <AlertDialog
@@ -334,6 +366,13 @@ function FrigatePlusUploadButton({
           className="size-5 cursor-pointer"
           onClick={() => {
             onOpen();
+            setPreviewError(false);
+
+            const snapshotUrl = getSnapshotUrl?.();
+            if (snapshotUrl) {
+              setPreviewUrl(snapshotUrl);
+              return;
+            }
 
             if (video) {
               const videoSize = [video.clientWidth, video.clientHeight];
@@ -345,7 +384,7 @@ function FrigatePlusUploadButton({
 
               if (context) {
                 context.drawImage(video, 0, 0, videoSize[0], videoSize[1]);
-                setVideoImg(canvas.toDataURL("image/webp"));
+                setPreviewUrl(canvas.toDataURL("image/webp"));
               }
             }
           }}
@@ -362,14 +401,29 @@ function FrigatePlusUploadButton({
         <AlertDialogHeader>
           <AlertDialogTitle>{t("submitFrigatePlus.title")}</AlertDialogTitle>
         </AlertDialogHeader>
-        <img className="aspect-video w-full object-contain" src={videoImg} />
+        {previewError ? (
+          <div className="flex aspect-video w-full flex-col items-center justify-center gap-2 text-center text-muted-foreground">
+            <LuFolderX className="size-12" />
+            <span>{t("submitFrigatePlus.previewError")}</span>
+          </div>
+        ) : (
+          <img
+            className="aspect-video w-full object-contain"
+            src={previewUrl}
+            onError={() => setPreviewError(true)}
+          />
+        )}
         <AlertDialogFooter>
-          <AlertDialogAction className="bg-selected" onClick={onUploadFrame}>
-            {t("submitFrigatePlus.submit")}
-          </AlertDialogAction>
           <AlertDialogCancel>
             {t("button.cancel", { ns: "common" })}
           </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-selected text-white"
+            onClick={onUploadFrame}
+            disabled={previewError}
+          >
+            {t("submitFrigatePlus.submit")}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

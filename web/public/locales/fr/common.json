@@ -1,6 +1,6 @@
 {
   "time": {
-    "untilForRestart": "Jusqu'au redémarrage de Frigate",
+    "untilForRestart": "Jusqu'à ce que Frigate redémarre.",
     "untilRestart": "Jusqu'au redémarrage",
     "untilForTime": "Jusqu'à {{time}}",
     "justNow": "À l'instant",
@@ -102,7 +102,7 @@
     "close": "Fermer",
     "copy": "Copier",
     "back": "Retour",
-    "history": "Chronologie",
+    "history": "Historique",
     "pictureInPicture": "Image dans l'image",
     "twoWayTalk": "Conversation bidirectionnelle",
     "off": "OFF",
@@ -129,7 +129,19 @@
     "deleteNow": "Supprimer maintenant",
     "download": "Télécharger",
     "done": "Terminé",
-    "continue": "Continuer"
+    "continue": "Continuer",
+    "add": "Ajouter",
+    "undo": "Annuler",
+    "copiedToClipboard": "Copié dans le presse-papiers",
+    "modified": "Modifié",
+    "overridden": "Surpassé",
+    "resetToGlobal": "Réinitialiser aux réglages globaux",
+    "resetToDefault": "Réinitialiser aux réglages par défaut",
+    "saveAll": "Tout enregistrer",
+    "savingAll": "Enregistrement de tout en cours…",
+    "undoAll": "Tout annuler",
+    "applying": "Enregistrement …",
+    "retry": "Réessayer"
   },
   "menu": {
     "configuration": "Configuration",
@@ -176,7 +188,9 @@
       "gl": "Galego (Galicien)",
       "id": "Bahasa Indonesia (Indonésien)",
       "ur": "اردو (Ourdou)",
-      "hr": "Hrvatski (Croate)"
+      "hr": "Hrvatski (Croate)",
+      "bs": "Bosanski (Bosnien)",
+      "zhHant": "繁體中文 (chinois traditionnel)"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -233,7 +247,11 @@
     "uiPlayground": "Bac à sable de l'interface",
     "faceLibrary": "Bibliothèque de visages",
     "languages": "Langues",
-    "classification": "Classification"
+    "classification": "Classification",
+    "profiles": "Profils",
+    "actions": "Actions",
+    "features": "Fonctionnalités",
+    "chat": "Discuter"
   },
   "toast": {
     "save": {
@@ -241,9 +259,10 @@
       "error": {
         "noMessage": "Echec lors de l'enregistrement des changements de configuration",
         "title": "Échec de l'enregistrement des changements de configuration : {{errorMessage}}"
-      }
+      },
+      "success": "Modifications enregistrées avec succès."
     },
-    "copyUrlToClipboard": "URL copiée dans le presse-papiers"
+    "copyUrlToClipboard": "URL copiée dans le presse-papiers."
   },
   "role": {
     "title": "Rôle",
@@ -313,5 +332,10 @@
     "two": "{{0}} et {{1}}",
     "many": "{{items}}, et {{last}}",
     "separatorWithSpace": ", "
+  },
+  "no_items": "Aucun élément",
+  "validation_errors": "Erreurs de validation",
+  "credentialField": {
+    "savedPlaceholder": "Enregistré — laissez vide pour conserver la version actuelle"
   }
 }

@@ -29,7 +29,7 @@ You can open `chrome://media-internals/` in another tab and then try to playback
 
 ### What do I do if my cameras sub stream is not good enough?
 
-Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that a suitable resolution, the main stream can be resized.
+Frigate generally [recommends cameras with configurable sub streams](/frigate/hardware.md). However, if your camera does not have a sub stream that is a suitable resolution, the main stream can be resized.
 
 To do this efficiently the following setup is required:
 
@@ -38,6 +38,20 @@ To do this efficiently the following setup is required:
 3. Set the desired detection resolution for `detect -> width` and `detect -> height`.
 
 When this is done correctly, the GPU will do the decoding and scaling which will result in a small increase in CPU usage but with better results.
+
+### How can I rotate my camera's video feed?
+
+Rotation is best done in the camera's firmware settings (usually called rotate, flip, or corridor mode) so the video arrives already rotated and no extra processing is needed. Check there first.
+
+If your camera does not support rotation, go2rtc's ffmpeg module can rotate the stream with the `#rotate` parameter (`90`, `180`, `270`, or `-90`), but this is not recommended: rotation requires transcoding (re-encoding) the video, which significantly increases CPU usage, especially for high resolution streams.
+
+```yaml
+go2rtc:
+  streams:
+    my_camera: "ffmpeg:rtsp://user:password@192.168.1.10:554/stream#video=h264#hardware#rotate=90"
+```
+
+Point the camera's inputs at the restream as described in the [restream docs](/configuration/restream.md), and swap `detect -> width` and `detect -> height` to match the rotated resolution.
 
 ### My mjpeg stream or snapshots look green and crazy
 
@@ -49,13 +63,13 @@ This almost always means that the width/height defined for your camera are not c
 
 These messages in the logs are expected in certain situations. Frigate checks the integrity of the recordings before storing. Occasionally these cached files will be invalid and cleaned up automatically.
 
-### "On connect called"
+### "MQTT connected" repeats in the logs
 
-If you see repeated "On connect called" messages in your logs, check for another instance of Frigate. This happens when multiple Frigate containers are trying to connect to MQTT with the same `client_id`.
+If you see repeated "MQTT connected" messages in your logs, check for another instance of Frigate. This happens when multiple Frigate containers are trying to connect to MQTT with the same `client_id`.
 
 ### Error: Database Is Locked
 
-SQLite does not work well on a network share, if the `/media` folder is mapped to a network share then [this guide](../configuration/advanced.md#database) should be used to move the database to a location on the internal drive.
+SQLite does not work well on a network share, if the `/media` folder is mapped to a network share then [this guide](../configuration/advanced/system.md#database) should be used to move the database to a location on the internal drive.
 
 ### Unable to publish to MQTT: client is not connected
 
@@ -65,9 +79,17 @@ This is because Frigate does not run in host mode so localhost points to the Fri
 
 ### How do I know if my camera is offline
 
-A camera being offline can be detected via MQTT or /api/stats, the camera_fps for any offline camera will be 0.
+Frigate publishes a per-role health status to [`frigate/<camera_name>/status/<role>`](/integrations/mqtt#frigatecamera_namestatusrole), where `<role>` is each enabled role on the camera (`detect`, `record`, and `audio`). The published value is one of:
 
-Also, Home Assistant will mark any offline camera as being unavailable when the camera is offline.
+- `online`: Frigate's process for that role is running normally
+- `offline`: the process is down and Frigate is restarting it
+- `disabled`: the camera is turned off, either at runtime or in the configuration file
+
+These reflect the state of Frigate's process for that role, not the camera's reachability, so an unreachable camera alternates between `offline` and `online` as the watchdog restarts ffmpeg. Wait for the status to hold steady (for example with Home Assistant's `for:`) rather than acting on a single message.
+
+Because the status is per role, a camera whose substream is fine but whose recording stream has dropped will report `online` for `detect` and `offline` for `record`. The status is republished whenever it changes.
+
+You can also detect an offline camera through `/api/stats`, where `camera_fps` will be 0.
 
 ### How can I view the Frigate log files without using the Web UI?
 
@@ -111,18 +133,51 @@ TCP ensures that all data packets arrive in the correct order. This is crucial f
 
 You can still configure Frigate to use UDP by using ffmpeg input args or the preset `preset-rtsp-udp`. See the [ffmpeg presets](/configuration/ffmpeg_presets) documentation.
 
-### Why does Frigate keep creating new events for my parked car?
+### Frigate is slow to start up with a "probing detect stream" message in the logs
 
-Stationary tracking is designed to _prevent_ this — a parked car should stay one tracked object and not generate new events. If you're getting repeated events for the same car, it's likely that Frigate is losing the tracked object and re-detecting it as a new one.
+When `detect.width` and `detect.height` are not set, Frigate probes each camera's detect stream on startup (and when saving the config) to auto-detect its resolution. For RTSP streams Frigate probes with ffprobe and automatically retries over TCP if UDP doesn't respond, with a 5 second timeout per attempt. A camera that cannot be reached over either transport will add up to ~10 seconds to startup before Frigate falls through with default dimensions, which may show up as width `0` and height `0` in Camera Probe Info under System Metrics.
 
-Open one of the events in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
+To skip the probe entirely and make startup instant, set `detect.width` and `detect.height` explicitly in your camera config:
+
+```yaml
+cameras:
+  my_camera:
+    detect:
+      width: 1280
+      height: 720
+```
+
+### What is the `version` key in my config file?
+
+`version` records the config format that your config was last migrated to. On startup Frigate compares it against the format the running version expects, and if it is older it copies your config to `/config/backup_config.yaml`, rewrites it to the new format, and updates `version` as the final step. A config with no `version` key is assumed to predate 0.14 and is migrated from there.
+
+Frigate manages this key for you, so do not set or edit it. Raising it makes Frigate skip migrations your config still needs, and lowering it re-runs migrations against config that has already been converted. Either can leave you with a config that no longer validates.
+
+### Why does Frigate keep creating new tracked objects for my parked car?
+
+Stationary tracking is designed to _prevent_ this: a parked car should remain a single tracked object rather than generating new ones. If you're repeatedly getting new tracked objects for the same car, it's likely that Frigate is losing the object and re-detecting it as a new one.
+
+Open one of the tracked objects in Explore → **Tracking Details**. If the detection scores are low (< 70% or so), the model isn't confident the parked car is a car. This is common with the free [COCO-trained](https://cocodataset.org/#explore) object detection models on steep/top-down angles, partially occluded cars, foliage, or low-light footage. When detections fall below `min_score` for too many frames the tracker loses the object, and the next confident frame creates a brand new one.
 
 What helps:
 
-- **Improve the view** — even a small angle change that gets more of the car visible could lift scores enough to stabilize tracking.
-- **Use a more accurate model** — switching from `mobiledet` to `yolov9`, or stepping up to a larger variant like `yolov9-s` over `yolov9-t`, can help (at the cost of inference time, and still on the COCO dataset). The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup.
-- **Don't set `detect -> stationary -> max_frames` for `car`** — it artificially ends tracking and forces re-detection as a new object. See [Stationary Objects](../configuration/stationary_objects.md).
-- **Restrict alerts to the areas you care about** with `required_zones` — see [Zones](../configuration/zones.md#restricting-alerts-and-detections-to-specific-zones). Make sure those zones use the default `loitering_time: 0` unless you specifically want the review item to stay open until the car leaves.
+- **Improve the view**: even a small angle change that gets more of the car visible could lift scores enough to stabilize tracking.
+- **Use a more accurate model**: switching from `mobiledet` to `yolov9`, or stepping up to a larger variant like `yolov9-s` over `yolov9-t`, can help (at the cost of inference time, and still on the COCO dataset). The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup.
+- **Don't set `detect -> stationary -> max_frames` for `car`**: it artificially ends tracking and forces re-detection as a new object. See [Stationary Objects](../configuration/stationary_objects.md).
+- **Restrict alerts to the areas you care about** with `required_zones`. See [Zones](../configuration/zones.md#restricting-alerts-and-detections-to-specific-zones). Make sure those zones use the default `loitering_time: 0` unless you specifically want the review item to stay open until the car leaves.
 - **Filter impossible locations** with [object filter masks](../configuration/masks.md#object-filter-masks) if cars are being detected on rooftops, treetops, etc.
 
-See [Object Filters](../configuration/object_filters.md) for more on tuning `min_score` and `threshold` — note that raising them too high will make this exact problem worse.
+See [Object Filters](../configuration/object_filters.md) for more on tuning `min_score` and `threshold`. Note that raising them too high will make this exact problem worse.
+
+### How do I correct Frigate when it detects something as the wrong object?
+
+Frigate's object detection relies on a machine learning [model](../frigate/glossary.md#model), and the free [COCO-trained](https://cocodataset.org/#explore) models that ship with Frigate can misidentify objects in scenes they weren't trained on. There are two ways to handle this, depending on whether you want to _teach_ the model or just _suppress_ the bad result.
+
+**Train or fine-tune a model with your own images.** The most durable fix is to improve the model itself. The biggest gains usually come from fine-tuning a model on images from your own cameras so it learns your specific scene. Some tools are freely available, and [Frigate+](https://frigate.video/plus) is a paid option that does this - models are trained on security-camera footage and can be fine-tuned on images you submit from your own setup. When Frigate mislabels something, open the tracked object in Explore, select the **Snapshot** tab, and use **Submit to Frigate+** to send the example with the correct label (or mark it as a [false positive](../frigate/glossary.md#false-positive)). Once you've submitted examples and [requested a model](../plus/first_model.md), the retrained model will be more accurate for your cameras. See [Submitting examples to Frigate+](../integrations/plus.md#submit-examples) for the full workflow.
+
+**Suppress the misidentification with filters.** You can use filters to stop a specific false positive from being tracked:
+
+- Tune `min_score` / `threshold`, or add `min_area` / `max_area` / `min_ratio` / `max_ratio` filters. See [Object Filters](../configuration/object_filters.md).
+- If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
+
+Filters and masks only hide the incorrect result - they don't teach Frigate what the object actually is. For that, fine-tune your own model or use Frigate+.

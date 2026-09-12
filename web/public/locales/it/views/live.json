@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Dal vivo - Frigate",
+  "documentTitle": {
+    "default": "In diretta - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Dal vivo - Frigate",
   "lowBandwidthMode": "Modalità a bassa larghezza di banda",
   "twoWayTalk": {
@@ -7,7 +9,7 @@
     "disable": "Disabilita audio bidirezionale"
   },
   "snapshots": {
-    "enable": "Abilita istantanee",
+    "enable": "Abilita Istantanee",
     "disable": "Disabilita istantanee"
   },
   "manualRecording": {
@@ -35,10 +37,11 @@
     "autotracking": "Tracciamento automatico",
     "title": "Impostazioni di {{camera}}",
     "cameraEnabled": "Telecamera abilitata",
-    "objectDetection": "Rilevamento di oggetti",
+    "objectDetection": "Rilevamento oggetti",
     "recording": "Registrazione",
     "audioDetection": "Rilevamento audio",
-    "transcription": "Trascrizione audio"
+    "transcription": "Trascrizione audio",
+    "camera": "Telecamera"
   },
   "history": {
     "label": "Mostra filmati storici"
@@ -54,8 +57,9 @@
     "move": {
       "clickMove": {
         "enable": "Abilita clic per spostare",
-        "disable": "Disabilita il clic per spostare",
-        "label": "Fai clic nella cornice per centrare la telecamera"
+        "disable": "Disabilita clic per spostare",
+        "label": "Fai clic nella cornice per centrare la telecamera",
+        "enableWithZoom": "Abilita clic per muovere / trascina per ingrandire"
       },
       "left": {
         "label": "Sposta la telecamera PTZ a sinistra"
@@ -95,7 +99,9 @@
   },
   "camera": {
     "enable": "Abilita telecamera",
-    "disable": "Disabilita telecamera"
+    "disable": "Disabilita telecamera",
+    "turnOn": "Attiva la telecamera",
+    "turnOff": "Disattiva la telecamera"
   },
   "muteCameras": {
     "enable": "Muta tutte le telecamere",
@@ -107,7 +113,8 @@
   },
   "recording": {
     "enable": "Abilita registrazione",
-    "disable": "Disabilita registrazione"
+    "disable": "Disabilita registrazione",
+    "disabledInConfig": "Per questa telecamera è necessario prima abilitare la registrazione nelle impostazioni."
   },
   "audioDetect": {
     "enable": "Abilita rilevamento audio",
@@ -128,7 +135,7 @@
     "title": "Trasmissione",
     "audio": {
       "tips": {
-        "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questa trasmissione.",
+        "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questo flusso.",
         "documentation": "Leggi la documentazione "
       },
       "unavailable": "L'audio non è disponibile per questo flusso",
@@ -154,7 +161,7 @@
   },
   "effectiveRetainMode": {
     "modes": {
-      "all": "Tutto",
+      "all": "Tutti",
       "motion": "Movimento",
       "active_objects": "Oggetti attivi"
     },
@@ -191,7 +198,7 @@
     }
   },
   "snapshot": {
-    "takeSnapshot": "Scarica l'istantanea attuale",
+    "takeSnapshot": "Scarica istantanea attuale",
     "noVideoSource": "Nessuna sorgente video disponibile per l'istantanea.",
     "captureFailed": "Impossibile catturare l'istantanea.",
     "downloadStarted": "Scaricamento istantanea avviato."

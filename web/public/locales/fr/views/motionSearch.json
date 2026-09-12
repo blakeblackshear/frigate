@@ -1,0 +1,51 @@
+{
+    "documentTitle": "Recherche de mouvement - Frigate",
+    "title": "Recherche de mouvement",
+    "description": "Dessinez un polygone pour définir la zonecible, et spécifiez une fourchette de temps pour chercher les mouvements dans cette zone.",
+    "selectCamera": "Recherche de mouvement en cours de chargement",
+    "startSearch": "Commencer la recherche",
+    "searchStarted": "Recherche démarrée",
+    "searchCancelled": "Recherche annulée",
+    "cancelSearch": "Annuler recherche",
+    "searching": "Recherche en cours.",
+    "searchComplete": "Recherche terminée",
+    "noResultsYet": "Lancez une recherche pour trouver les changements de mouvement dans la zone sélectionnée",
+    "noChangesFound": "Aucun changement de pixel détecté dans la zone sélectionnée",
+    "changesFound_one": "{{count}} changement de mouvement détecté",
+    "changesFound_many": "{{count}} changements de mouvement détectés",
+    "changesFound_other": "{{count}} changements de mouvement détectés",
+    "framesProcessed": "{{count}} images traitées",
+    "jumpToTime": "Aller à ce moment",
+    "results": "Résultats",
+    "showSegmentHeatmap": "Carte thermique",
+    "newSearch": "Nouvelle recherche",
+    "clearResults": "Effacer les résultats",
+    "clearROI": "Effacer le polygone",
+    "polygonControls": {
+        "points_one": "{{count}} point",
+        "points_many": "{{count}} points",
+        "points_other": "{{count}} points",
+        "undo": "Annuler le dernier point",
+        "reset": "Réinitialiser le polygone",
+        "drawMode": "Dessiner",
+        "moveMode": "Déplacer"
+    },
+    "motionHeatmapLabel": "Carte thermique des mouvements",
+    "dialog": {
+        "title": "Recherche de mouvement",
+        "cameraLabel": "Caméra",
+        "previewAlt": "Aperçu de la caméra {{camera}}"
+    },
+    "timeRange": {
+        "title": "Plage de recherche",
+        "start": "Début de la plage de recherche",
+        "end": "Fin de la plage de recherche"
+    },
+    "settings": {
+        "title": "Paramètres de recherche",
+        "parallelMode": "Mode parallèle",
+        "parallelModeDesc": "Scanner plusieurs plages d'enregistrement simultanément (plus rapide ; nécessite plus de ressources de décodage)",
+        "threshold": "Seuil de sensitivité",
+        "thresholdDesc": "Des valeurs basses détectent de plus petits changements (1-255)"
+    }
+}

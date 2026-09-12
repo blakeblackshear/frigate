@@ -2,7 +2,7 @@
   "documentTitle": "Klasifikasi Model - Frigate",
   "details": {
     "scoreInfo": "Skor tersebut mewakili rata-rata kepercayaan klasifikasi di seluruh deteksi objek ini.",
-    "none": "Tidak ada",
+    "none": "Tidak Ada",
     "unknown": "Tidak diketahui"
   },
   "button": {
@@ -23,8 +23,8 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Class Dihapus",
-      "deletedImage": "Image dihapus",
+      "deletedCategory_other": "Class Dihapus",
+      "deletedImage_other": "Image dihapus",
       "deletedModel_other": "Berhasil menghapus {{count}} model",
       "categorizedImage": "Berhasil Mengklasifikasikan Gambar",
       "trainedModel": "Berhasil melatih model.",

@@ -1,11 +1,23 @@
 import Logo from "@/components/Logo";
 import NewReviewData from "@/components/dynamic/NewReviewData";
+import CalendarFilterButton from "@/components/filter/CalendarFilterButton";
 import ReviewActionGroup from "@/components/filter/ReviewActionGroup";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import PreviewThumbnailPlayer from "@/components/player/PreviewThumbnailPlayer";
 import EventReviewTimeline from "@/components/timeline/EventReviewTimeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { VolumeSlider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useScrollLockout } from "@/hooks/use-mouse-listener";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -22,6 +34,8 @@ import {
   ZoomLevel,
 } from "@/types/review";
 import { getChunkedTimeRange } from "@/utils/timelineUtil";
+import { isReplayCamera } from "@/utils/cameraUtil";
+import { getEndOfDayTimestamp } from "@/utils/dateUtil";
 import axios from "axios";
 import {
   MutableRefObject,
@@ -34,9 +48,19 @@ import {
 import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import { LuFolderCheck, LuFolderX } from "react-icons/lu";
 import { MdCircle } from "react-icons/md";
+import { FiMoreVertical } from "react-icons/fi";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import useSWR from "swr";
 import MotionReviewTimeline from "@/components/timeline/MotionReviewTimeline";
+import { baseUrl } from "@/api/baseUrl";
 import { Button } from "@/components/ui/button";
+import BlurredIconButton from "@/components/button/BlurredIconButton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -45,7 +69,10 @@ import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
 import { TimeRange } from "@/types/timeline";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
-import { useCameraMotionNextTimestamp } from "@/hooks/use-camera-activity";
+import {
+  useCameraMotionNextTimestamp,
+  useCameraMotionOnlyRanges,
+} from "@/hooks/use-camera-activity";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import scrollIntoView from "scroll-into-view-if-needed";
@@ -57,6 +84,20 @@ import { GiSoundWaves } from "react-icons/gi";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTranslation } from "react-i18next";
+import { FaCog, FaFilter } from "react-icons/fa";
+import MotionRegionFilterGrid from "@/components/filter/MotionRegionFilterGrid";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import ReviewActivityCalendar from "@/components/overlay/ReviewActivityCalendar";
+import PlatformAwareDialog from "@/components/overlay/dialog/PlatformAwareDialog";
+import MotionPreviewsPane from "./MotionPreviewsPane";
 import { EmptyCard } from "@/components/card/EmptyCard";
 import { EmptyCardData } from "@/types/card";
 
@@ -74,8 +115,14 @@ type EventViewProps = {
   setShowReviewed: (show: boolean) => void;
   setSeverity: (severity: ReviewSeverity) => void;
   markItemAsReviewed: (review: ReviewSegment) => void;
-  markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
+  markItemsAsReviewed: (
+    currentItems: ReviewSegment[],
+    itemsToMarkReviewed?: ReviewSegment[] | undefined,
+  ) => void;
   onOpenRecording: (recordingInfo: RecordingStartingPoint) => void;
+  motionPreviewsCamera: string | null;
+  setMotionPreviewsCamera: (camera: string | null) => void;
+  setMotionSearchCamera: (camera: string) => void;
   pullLatestData: () => void;
   updateFilter: (filter: ReviewFilter) => void;
 };
@@ -93,8 +140,11 @@ export default function EventView({
   setShowReviewed,
   setSeverity,
   markItemAsReviewed,
-  markAllItemsAsReviewed,
+  markItemsAsReviewed,
   onOpenRecording,
+  motionPreviewsCamera,
+  setMotionPreviewsCamera,
+  setMotionSearchCamera,
   pullLatestData,
   updateFilter,
 }: EventViewProps) {
@@ -233,13 +283,17 @@ export default function EventView({
           { playback: "realtime", image_path: review.thumb_path },
         )
         .then((response) => {
-          if (response.status == 200) {
+          if (response.status < 300) {
             toast.success(
               t("export.toast.success", { ns: "components/dialog" }),
               {
                 position: "top-center",
                 action: (
-                  <a href="/export" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href={`${baseUrl}export`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button>
                       {t("export.toast.view", { ns: "components/dialog" })}
                     </Button>
@@ -275,6 +329,15 @@ export default function EventView({
     100,
   );
 
+  const motionPreviewsOpen =
+    severity === "significant_motion" && motionPreviewsCamera != null;
+
+  useEffect(() => {
+    if (severity !== "significant_motion") {
+      setMotionPreviewsCamera(null);
+    }
+  }, [setMotionPreviewsCamera, severity]);
+
   // review filter info
 
   const reviewFilterList = useMemo<FilterList>(() => {
@@ -302,124 +365,136 @@ export default function EventView({
   return (
     <div className="flex size-full flex-col pt-2 md:py-2">
       <Toaster closeButton={true} />
-      <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
-        {isMobile && (
-          <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
-        )}
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={severityToggle}
-          onValueChange={(value: ReviewSeverity) =>
-            value ? setSeverityToggle(value) : null
-          } // don't allow the severity to be unselected
-        >
-          <ToggleGroupItem
-            className={cn(severityToggle != "alert" && "text-muted-foreground")}
-            value="alert"
-            aria-label={t("alerts")}
+      {!motionPreviewsOpen && (
+        <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:pl-3">
+          {isMobile && (
+            <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
+          )}
+          <ToggleGroup
+            className="*:rounded-md *:px-3 *:py-4"
+            type="single"
+            size="sm"
+            value={severityToggle}
+            onValueChange={(value: ReviewSeverity) =>
+              value ? setSeverityToggle(value) : null
+            } // don't allow the severity to be unselected
           >
-            <div
+            <ToggleGroupItem
               className={cn(
-                "flex size-6 items-center justify-center rounded text-severity_alert sm:hidden",
-                severityToggle == "alert" ? "font-semibold" : "font-medium",
+                severityToggle != "alert" && "text-muted-foreground",
               )}
+              value="alert"
+              aria-label={t("alerts")}
             >
-              {reviewCounts.alert > -1 ? (
-                reviewCounts.alert
-              ) : (
-                <ActivityIndicator className="size-4" />
-              )}
-            </div>
-            <div className="hidden items-center sm:flex">
-              <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
-              <div className="hidden md:flex md:flex-row md:items-center">
-                {t("alerts")}
+              <div
+                className={cn(
+                  "flex size-6 items-center justify-center rounded text-severity_alert sm:hidden",
+                  severityToggle == "alert" ? "font-semibold" : "font-medium",
+                )}
+              >
                 {reviewCounts.alert > -1 ? (
-                  ` ∙ ${reviewCounts.alert}`
+                  reviewCounts.alert
                 ) : (
-                  <ActivityIndicator className="ml-2 size-4" />
+                  <ActivityIndicator className="size-4" />
                 )}
               </div>
-            </div>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            className={cn(
-              severityToggle != "detection" && "text-muted-foreground",
-            )}
-            value="detection"
-            aria-label={t("detections")}
-          >
-            <div
+              <div className="hidden items-center sm:flex">
+                <MdCircle className="size-2 text-severity_alert md:mr-[10px]" />
+                <div className="hidden md:flex md:flex-row md:items-center">
+                  {t("alerts")}
+                  {reviewCounts.alert > -1 ? (
+                    ` ∙ ${reviewCounts.alert}`
+                  ) : (
+                    <ActivityIndicator className="ml-2 size-4" />
+                  )}
+                </div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
               className={cn(
-                "flex size-6 items-center justify-center rounded text-severity_detection sm:hidden",
-                severityToggle == "detection" ? "font-semibold" : "font-medium",
+                severityToggle != "detection" && "text-muted-foreground",
               )}
+              value="detection"
+              aria-label={t("detections")}
             >
-              {reviewCounts.detection > -1 ? (
-                reviewCounts.detection
-              ) : (
-                <ActivityIndicator className="size-4" />
-              )}
-            </div>
-            <div className="hidden items-center sm:flex">
-              <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
-              <div className="hidden md:flex md:flex-row md:items-center">
-                {t("detections")}
+              <div
+                className={cn(
+                  "flex size-6 items-center justify-center rounded text-severity_detection sm:hidden",
+                  severityToggle == "detection"
+                    ? "font-semibold"
+                    : "font-medium",
+                )}
+              >
                 {reviewCounts.detection > -1 ? (
-                  ` ∙ ${reviewCounts.detection}`
+                  reviewCounts.detection
                 ) : (
-                  <ActivityIndicator className="ml-2 size-4" />
+                  <ActivityIndicator className="size-4" />
                 )}
               </div>
-            </div>
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            className={cn(
-              "rounded-lg px-3 py-4",
-              severityToggle != "significant_motion" && "text-muted-foreground",
-            )}
-            value="significant_motion"
-            aria-label={t("motion.label")}
-          >
-            <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion sm:hidden" />
-            <div className="hidden items-center sm:flex">
-              <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
-              <div className="hidden md:block">{t("motion.label")}</div>
-            </div>
-          </ToggleGroupItem>
-        </ToggleGroup>
+              <div className="hidden items-center sm:flex">
+                <MdCircle className="size-2 text-severity_detection md:mr-[10px]" />
+                <div className="hidden md:flex md:flex-row md:items-center">
+                  {t("detections")}
+                  {reviewCounts.detection > -1 ? (
+                    ` ∙ ${reviewCounts.detection}`
+                  ) : (
+                    <ActivityIndicator className="ml-2 size-4" />
+                  )}
+                </div>
+              </div>
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              className={cn(
+                "rounded-lg px-3 py-4",
+                severityToggle != "significant_motion" &&
+                  "text-muted-foreground",
+              )}
+              value="significant_motion"
+              aria-label={t("motion.label")}
+            >
+              <GiSoundWaves className="size-6 rotate-90 text-severity_significant_motion sm:hidden" />
+              <div className="hidden items-center sm:flex">
+                <MdCircle className="size-2 text-severity_significant_motion md:mr-[10px]" />
+                <div className="hidden md:block">{t("motion.label")}</div>
+              </div>
+            </ToggleGroupItem>
+          </ToggleGroup>
 
-        {selectedReviews.length <= 0 ? (
-          <ReviewFilterGroup
-            filters={
-              severity == "significant_motion"
-                ? ["cameras", "date", "motionOnly"]
-                : ["cameras", "reviewed", "date", "general"]
-            }
-            currentSeverity={severityToggle}
-            reviewSummary={reviewSummary}
-            recordingsSummary={recordingsSummary}
-            filter={filter}
-            motionOnly={motionOnly}
-            filterList={reviewFilterList}
-            showReviewed={showReviewed}
-            setShowReviewed={setShowReviewed}
-            onUpdateFilter={updateFilter}
-            setMotionOnly={setMotionOnly}
-          />
-        ) : (
-          <ReviewActionGroup
-            selectedReviews={selectedReviews}
-            setSelectedReviews={setSelectedReviews}
-            onExport={exportReview}
-            pullLatestData={pullLatestData}
-          />
+          {selectedReviews.length <= 0 ? (
+            <ReviewFilterGroup
+              filters={
+                severity == "significant_motion"
+                  ? ["cameras", "date", "motionOnly"]
+                  : ["cameras", "reviewed", "date", "general"]
+              }
+              currentSeverity={severityToggle}
+              reviewSummary={reviewSummary}
+              recordingsSummary={recordingsSummary}
+              filter={filter}
+              motionOnly={motionOnly}
+              filterList={reviewFilterList}
+              showReviewed={showReviewed}
+              setShowReviewed={setShowReviewed}
+              onUpdateFilter={updateFilter}
+              setMotionOnly={setMotionOnly}
+            />
+          ) : (
+            <ReviewActionGroup
+              selectedReviews={selectedReviews}
+              setSelectedReviews={setSelectedReviews}
+              onExport={exportReview}
+              pullLatestData={pullLatestData}
+            />
+          )}
+        </div>
+      )}
+
+      <div
+        className={cn(
+          "h-full min-h-0 overflow-hidden",
+          motionPreviewsOpen ? "flex flex-col" : "flex",
         )}
-      </div>
-
-      <div className="flex h-full overflow-hidden">
+      >
         {severity != "significant_motion" && (
           <DetectionReview
             contentRef={contentRef}
@@ -435,7 +510,7 @@ export default function EventView({
             loading={severity != severityToggle}
             emptyCardData={emptyCardData}
             markItemAsReviewed={markItemAsReviewed}
-            markAllItemsAsReviewed={markAllItemsAsReviewed}
+            markItemsAsReviewed={markItemsAsReviewed}
             onSelectReview={onSelectReview}
             onSelectAllReviews={onSelectAllReviews}
             setSelectedReviews={setSelectedReviews}
@@ -448,10 +523,16 @@ export default function EventView({
             contentRef={contentRef}
             reviewItems={reviewItems}
             relevantPreviews={relevantPreviews}
+            reviewSummary={reviewSummary}
+            recordingsSummary={recordingsSummary}
             timeRange={timeRange}
             startTime={startTime}
             filter={filter}
             motionOnly={motionOnly}
+            updateFilter={updateFilter}
+            motionPreviewsCamera={motionPreviewsCamera}
+            setMotionPreviewsCamera={setMotionPreviewsCamera}
+            setMotionSearchCamera={setMotionSearchCamera}
             emptyCardData={emptyCardData}
             onOpenRecording={onOpenRecording}
           />
@@ -480,7 +561,10 @@ type DetectionReviewProps = {
   loading: boolean;
   emptyCardData: EmptyCardData;
   markItemAsReviewed: (review: ReviewSegment) => void;
-  markAllItemsAsReviewed: (currentItems: ReviewSegment[]) => void;
+  markItemsAsReviewed: (
+    currentItems: ReviewSegment[],
+    itemsToMarkReviewed?: ReviewSegment[] | undefined,
+  ) => void;
   onSelectReview: (
     review: ReviewSegment,
     ctrl: boolean,
@@ -504,7 +588,7 @@ function DetectionReview({
   loading,
   emptyCardData,
   markItemAsReviewed,
-  markAllItemsAsReviewed,
+  markItemsAsReviewed,
   onSelectReview,
   onSelectAllReviews,
   setSelectedReviews,
@@ -719,12 +803,7 @@ function DetectionReview({
           break;
         case "r":
           if (selectedReviews.length > 0 && !modifiers.repeat) {
-            currentItems?.forEach((item) => {
-              if (selectedReviews.some((r) => r.id === item.id)) {
-                item.has_been_reviewed = true;
-                markItemAsReviewed(item);
-              }
-            });
+            markItemsAsReviewed(currentItems || [], selectedReviews);
             setSelectedReviews([]);
             return true;
           }
@@ -834,7 +913,7 @@ function DetectionReview({
                   variant="select"
                   onClick={() => {
                     setSelectedReviews([]);
-                    markAllItemsAsReviewed(currentItems ?? []);
+                    markItemsAsReviewed(currentItems ?? []);
                   }}
                 >
                   {t("markTheseItemsAsReviewed")}
@@ -899,10 +978,16 @@ type MotionReviewProps = {
     significant_motion: ReviewSegment[];
   };
   relevantPreviews?: Preview[];
+  reviewSummary?: ReviewSummary;
+  recordingsSummary?: RecordingsSummary;
   timeRange: TimeRange;
   startTime?: number;
   filter?: ReviewFilter;
   motionOnly?: boolean;
+  updateFilter: (filter: ReviewFilter) => void;
+  motionPreviewsCamera: string | null;
+  setMotionPreviewsCamera: (camera: string | null) => void;
+  setMotionSearchCamera: (camera: string) => void;
   emptyCardData: EmptyCardData;
   onOpenRecording: (data: RecordingStartingPoint) => void;
 };
@@ -910,13 +995,20 @@ function MotionReview({
   contentRef,
   reviewItems,
   relevantPreviews,
+  reviewSummary,
+  recordingsSummary,
   timeRange,
   startTime,
   filter,
   motionOnly = false,
+  updateFilter,
+  motionPreviewsCamera,
+  setMotionPreviewsCamera,
+  setMotionSearchCamera,
   emptyCardData,
   onOpenRecording,
 }: MotionReviewProps) {
+  const { t } = useTranslation(["views/events", "common"]);
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
   const allowedCameras = useAllowedCameras();
@@ -928,7 +1020,13 @@ function MotionReview({
 
     const selectedCams = filter?.cameras;
     const cameras = Object.values(config.cameras).filter((cam) => {
+      if (isReplayCamera(cam.name)) {
+        return false;
+      }
       if (!allowedCameras.includes(cam.name)) {
+        return false;
+      }
+      if (cam.ui?.review === false) {
         return false;
       }
       if (selectedCams && !selectedCams.includes(cam.name)) {
@@ -939,6 +1037,11 @@ function MotionReview({
 
     return cameras.sort((a, b) => a.ui.order - b.ui.order);
   }, [config, filter, allowedCameras]);
+
+  const reviewCamerasParam = useMemo(
+    () => reviewCameras.map((cam) => cam.name).join(","),
+    [reviewCameras],
+  );
 
   const videoPlayersRef = useRef<{ [camera: string]: PreviewController }>({});
 
@@ -959,7 +1062,16 @@ function MotionReview({
       before: alignedBefore,
       after: alignedAfter,
       scale: segmentDuration / 2,
-      cameras: filter?.cameras?.join(",") ?? null,
+      cameras: reviewCamerasParam,
+    },
+  ]);
+
+  const { data: overlapReviewSegments } = useSWR<ReviewSegment[]>([
+    "review",
+    {
+      before: alignedBefore,
+      after: alignedAfter,
+      cameras: reviewCamerasParam,
     },
   ]);
 
@@ -975,19 +1087,29 @@ function MotionReview({
       return timeRangeSegments.ranges.length - 1;
     }
 
-    return timeRangeSegments.ranges.findIndex(
+    const index = timeRangeSegments.ranges.findIndex(
       (seg) => seg.after <= startTime && seg.before >= startTime,
     );
+
+    if (index === -1) {
+      return timeRangeSegments.ranges.length - 1;
+    }
+
+    return index;
     // only render once
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(initialIndex);
   const [currentTime, setCurrentTime] = useState<number>(
-    startTime ?? timeRangeSegments.ranges[selectedRangeIdx]?.before,
+    startTime ??
+      timeRangeSegments.ranges[selectedRangeIdx]?.before ??
+      timeRangeSegments.end,
   );
   const currentTimeRange = useMemo(
-    () => timeRangeSegments.ranges[selectedRangeIdx],
+    () =>
+      timeRangeSegments.ranges[selectedRangeIdx] ??
+      timeRangeSegments.ranges[timeRangeSegments.ranges.length - 1],
     [selectedRangeIdx, timeRangeSegments],
   );
 
@@ -1025,17 +1147,99 @@ function MotionReview({
 
   const [playbackRate, setPlaybackRate] = useState(8);
   const [controlsOpen, setControlsOpen] = useState(false);
+  const [dimStrength, setDimStrength] = useState(82);
+  const [isPreviewSettingsOpen, setIsPreviewSettingsOpen] = useState(false);
+  const [motionFilterCells, setMotionFilterCells] = useState<Set<number>>(
+    new Set(),
+  );
+  const [pendingFilterCells, setPendingFilterCells] = useState<Set<number>>(
+    new Set(),
+  );
+  const [isRegionFilterOpen, setIsRegionFilterOpen] = useState(false);
+  const [cropToFilter, setCropToFilter] = useState(true);
+
+  // reset filter when camera changes
+  useEffect(() => {
+    setMotionFilterCells(new Set());
+    setPendingFilterCells(new Set());
+  }, [motionPreviewsCamera]);
+
+  const objectReviewItems = useMemo(
+    () =>
+      (overlapReviewSegments ?? []).filter(
+        (item) =>
+          item.severity === "alert" ||
+          item.severity === "detection" ||
+          (item.data.detections?.length ?? 0) > 0 ||
+          (item.data.objects?.length ?? 0) > 0,
+      ),
+    [overlapReviewSegments],
+  );
 
   const nextTimestamp = useCameraMotionNextTimestamp(
     timeRangeSegments.end,
     segmentDuration,
     motionOnly,
-    reviewItems?.all ?? [],
+    objectReviewItems,
     motionData ?? [],
     currentTime,
   );
 
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
+
+  const selectedMotionPreviewCamera = useMemo(
+    () =>
+      reviewCameras.find((camera) => camera.name === motionPreviewsCamera) ??
+      null,
+    [motionPreviewsCamera, reviewCameras],
+  );
+
+  const onUpdateSelectedDay = useCallback(
+    (day?: Date) => {
+      updateFilter({
+        ...filter,
+        after: day == undefined ? undefined : day.getTime() / 1000,
+        before: day == undefined ? undefined : getEndOfDayTimestamp(day),
+      });
+    },
+    [filter, updateFilter],
+  );
+
+  const selectedCameraMotionData = useMemo(() => {
+    if (!motionPreviewsCamera) {
+      return [];
+    }
+
+    return (motionData ?? []).filter((item) => {
+      const cameras = item.camera.split(",").map((camera) => camera.trim());
+      return cameras.includes(motionPreviewsCamera);
+    });
+  }, [motionData, motionPreviewsCamera]);
+
+  const selectedCameraReviewItems = useMemo(() => {
+    if (!motionPreviewsCamera) {
+      return [];
+    }
+
+    return objectReviewItems.filter(
+      (item) => item.camera === motionPreviewsCamera,
+    );
+  }, [motionPreviewsCamera, objectReviewItems]);
+
+  const motionPreviewRanges = useCameraMotionOnlyRanges(
+    segmentDuration,
+    selectedCameraReviewItems,
+    selectedCameraMotionData,
+  );
+
+  useEffect(() => {
+    if (
+      motionPreviewsCamera &&
+      !reviewCameras.some((camera) => camera.name === motionPreviewsCamera)
+    ) {
+      setMotionPreviewsCamera(null);
+    }
+  }, [motionPreviewsCamera, reviewCameras, setMotionPreviewsCamera]);
 
   useEffect(() => {
     if (nextTimestamp) {
@@ -1126,9 +1330,281 @@ function MotionReview({
 
   return (
     <>
-      <div className="no-scrollbar flex flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4">
+      {selectedMotionPreviewCamera && (
+        <>
+          <div className="relative mb-2 flex h-11 items-center justify-between pl-2 pr-2 md:px-3">
+            <Button
+              className="flex items-center gap-2.5 rounded-lg"
+              aria-label={t("label.back", { ns: "common" })}
+              size="sm"
+              onClick={() => setMotionPreviewsCamera(null)}
+            >
+              <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+              {isDesktop && (
+                <div className="text-primary">
+                  {t("button.back", { ns: "common" })}
+                </div>
+              )}
+            </Button>
+
+            <div className="flex items-center gap-2">
+              {isDesktop && (
+                <CalendarFilterButton
+                  reviewSummary={reviewSummary}
+                  recordingsSummary={recordingsSummary}
+                  day={
+                    filter?.after == undefined
+                      ? undefined
+                      : new Date(filter.after * 1000)
+                  }
+                  updateSelectedDay={onUpdateSelectedDay}
+                />
+              )}
+              <Dialog
+                open={isRegionFilterOpen}
+                onOpenChange={(open) => {
+                  if (open) {
+                    setPendingFilterCells(new Set(motionFilterCells));
+                  }
+                  setIsRegionFilterOpen(open);
+                }}
+              >
+                <DialogTrigger asChild>
+                  <Button
+                    className={cn(
+                      isDesktop ? "flex items-center gap-2" : "rounded-lg",
+                    )}
+                    size="sm"
+                    variant={motionFilterCells.size > 0 ? "select" : "default"}
+                    aria-label={t("motionPreviews.filter")}
+                  >
+                    <FaFilter
+                      className={
+                        motionFilterCells.size > 0
+                          ? "text-selected-foreground"
+                          : "text-secondary-foreground"
+                      }
+                    />
+                    {isDesktop && t("motionPreviews.filter")}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-[85%] md:max-w-[70%] lg:max-w-[60%]">
+                  <DialogHeader>
+                    <DialogTitle>{t("motionPreviews.filter")}</DialogTitle>
+                    <DialogDescription>
+                      {t("motionPreviews.filterDesc")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <MotionRegionFilterGrid
+                    camera={selectedMotionPreviewCamera}
+                    selectedCells={pendingFilterCells}
+                    onCellsChange={setPendingFilterCells}
+                  />
+                  <DialogFooter>
+                    <Button
+                      disabled={pendingFilterCells.size === 0}
+                      onClick={() => {
+                        setPendingFilterCells(new Set());
+                      }}
+                    >
+                      {t("motionPreviews.filterClear")}
+                    </Button>
+                    <Button
+                      variant="select"
+                      onClick={() => {
+                        setMotionFilterCells(new Set(pendingFilterCells));
+                        setIsRegionFilterOpen(false);
+                      }}
+                    >
+                      {t("button.apply", { ns: "common" })}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <PlatformAwareDialog
+                trigger={
+                  <Button
+                    className={cn(
+                      isDesktop ? "flex items-center gap-2" : "rounded-lg",
+                    )}
+                    size="sm"
+                    aria-label={
+                      isDesktop
+                        ? t("motionPreviews.mobileSettingsTitle")
+                        : t("filters", { ns: "views/recording" })
+                    }
+                  >
+                    <FaCog className="text-secondary-foreground" />
+                    {isDesktop && t("motionPreviews.mobileSettingsTitle")}
+                  </Button>
+                }
+                content={
+                  <div className="space-y-4 py-2">
+                    {!isDesktop && (
+                      <div className="space-y-1">
+                        <div>{t("motionPreviews.mobileSettingsTitle")}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {t("motionPreviews.mobileSettingsDesc")}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-3">
+                      <div className="space-y-0.5">
+                        <Label
+                          className="cursor-pointer"
+                          htmlFor="motionPreviewSpeed"
+                        >
+                          {t("motionPreviews.speed")}
+                        </Label>
+                        <div className="text-xs text-muted-foreground">
+                          {t("motionPreviews.speedDesc")}
+                        </div>
+                      </div>
+                      <Select
+                        value={String(playbackRate)}
+                        onValueChange={(value) =>
+                          setPlaybackRate(Number(value))
+                        }
+                      >
+                        <SelectTrigger
+                          id="motionPreviewSpeed"
+                          className="h-10 w-full"
+                          aria-label={t("motionPreviews.speedAria")}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {[4, 8, 12, 16].map((speed) => (
+                            <SelectItem key={speed} value={String(speed)}>
+                              {speed}x
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="space-y-0.5">
+                        <Label>{t("motionPreviews.dim")}</Label>
+                        <div className="text-xs text-muted-foreground">
+                          {t("motionPreviews.dimDesc")}
+                        </div>
+                      </div>
+                      <div className="px-1 py-2">
+                        <VolumeSlider
+                          className="w-full"
+                          min={25}
+                          max={95}
+                          step={1}
+                          value={[dimStrength]}
+                          aria-label={t("motionPreviews.dimAria")}
+                          onValueChange={(values) => {
+                            const nextValue = values[0];
+                            if (nextValue == undefined) {
+                              return;
+                            }
+
+                            setDimStrength(nextValue);
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-0.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <Label
+                          className="cursor-pointer"
+                          htmlFor="cropToFilter"
+                        >
+                          {t("motionPreviews.crop")}
+                        </Label>
+                        <Switch
+                          id="cropToFilter"
+                          checked={cropToFilter}
+                          onCheckedChange={setCropToFilter}
+                          aria-label={t("motionPreviews.cropAria")}
+                        />
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {t("motionPreviews.cropDesc")}
+                      </div>
+                    </div>
+
+                    {!isDesktop && (
+                      <>
+                        <SelectSeparator />
+
+                        <div className="flex w-full flex-row justify-center">
+                          <ReviewActivityCalendar
+                            recordingsSummary={recordingsSummary}
+                            selectedDay={
+                              filter?.after == undefined
+                                ? undefined
+                                : new Date(filter.after * 1000)
+                            }
+                            onSelect={(day) => {
+                              onUpdateSelectedDay(day);
+                              setIsPreviewSettingsOpen(false);
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-center p-2">
+                          <Button
+                            aria-label={t("button.reset", { ns: "common" })}
+                            onClick={() => {
+                              onUpdateSelectedDay(undefined);
+                              setIsPreviewSettingsOpen(false);
+                            }}
+                          >
+                            {t("button.reset", { ns: "common" })}
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                }
+                contentClassName={cn(
+                  isDesktop
+                    ? "w-80"
+                    : "scrollbar-container max-h-[75dvh] overflow-y-auto overflow-x-hidden px-4",
+                )}
+                open={isPreviewSettingsOpen}
+                onOpenChange={setIsPreviewSettingsOpen}
+              />
+            </div>
+          </div>
+
+          <MotionPreviewsPane
+            camera={selectedMotionPreviewCamera}
+            contentRef={contentRef}
+            cameraPreviews={relevantPreviews}
+            motionRanges={motionPreviewRanges}
+            isLoadingMotionRanges={
+              motionData == undefined || overlapReviewSegments == undefined
+            }
+            playbackRate={playbackRate}
+            nonMotionAlpha={dimStrength / 100}
+            motionFilterCells={motionFilterCells}
+            cropToFilter={cropToFilter}
+            onSeek={(timestamp) => {
+              onOpenRecording({
+                camera: selectedMotionPreviewCamera.name,
+                startTime: timestamp,
+                severity: "significant_motion",
+              });
+            }}
+          />
+        </>
+      )}
+      <div
+        className={cn(
+          "no-scrollbar flex min-w-0 flex-1 flex-wrap content-start gap-2 overflow-y-auto md:gap-4",
+          selectedMotionPreviewCamera && "hidden",
+        )}
+      >
         <div
-          ref={contentRef}
+          ref={selectedMotionPreviewCamera ? undefined : contentRef}
           className={cn(
             "no-scrollbar grid w-full grid-cols-1",
             isMobile && "landscape:grid-cols-2",
@@ -1181,6 +1657,36 @@ function MotionReview({
                     <div
                       className={`review-item-ring pointer-events-none absolute inset-0 z-20 size-full rounded-lg outline outline-[3px] -outline-offset-[2.8px] ${detectionType ? `outline-severity_${detectionType} shadow-severity_${detectionType}` : "outline-transparent duration-500"}`}
                     />
+                    <div className="absolute bottom-2 right-2 z-30">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <BlurredIconButton
+                            aria-label={t("motionSearch.openMenu")}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <FiMoreVertical className="size-5" />
+                          </BlurredIconButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMotionPreviewsCamera(camera.name);
+                            }}
+                          >
+                            {t("motionPreviews.menuItem")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setMotionSearchCamera(camera.name);
+                            }}
+                          >
+                            {t("motionSearch.menuItem")}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </>
                 ) : (
                   <Skeleton
@@ -1192,66 +1698,70 @@ function MotionReview({
           })}
         </div>
       </div>
-      <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
-        {motionData ? (
-          <MotionReviewTimeline
-            segmentDuration={segmentDuration}
-            timestampSpread={15}
-            timelineStart={timeRangeSegments.end}
-            timelineEnd={timeRangeSegments.start}
-            motionOnly={motionOnly}
-            showHandlebar
-            handlebarTime={currentTime}
-            setHandlebarTime={setCurrentTime}
-            events={reviewItems?.all ?? []}
-            motion_events={motionData ?? []}
-            contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => {
-              if (playing && scrubbing) {
-                setPlaying(false);
-              }
+      {!selectedMotionPreviewCamera && (
+        <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
+          {motionData ? (
+            <MotionReviewTimeline
+              segmentDuration={segmentDuration}
+              timestampSpread={15}
+              timelineStart={timeRangeSegments.end}
+              timelineEnd={timeRangeSegments.start}
+              motionOnly={motionOnly}
+              showHandlebar
+              handlebarTime={currentTime}
+              setHandlebarTime={setCurrentTime}
+              events={reviewItems?.all ?? []}
+              motion_events={motionData ?? []}
+              contentRef={contentRef}
+              onHandlebarDraggingChange={(scrubbing) => {
+                if (playing && scrubbing) {
+                  setPlaying(false);
+                }
 
-              setScrubbing(scrubbing);
-            }}
-            dense={isMobileOnly}
-            isZooming={false}
-            zoomDirection={null}
-            alwaysShowMotionLine={true}
-          />
-        ) : (
-          <Skeleton className="size-full" />
-        )}
-      </div>
+                setScrubbing(scrubbing);
+              }}
+              dense={isMobileOnly}
+              isZooming={false}
+              zoomDirection={null}
+              alwaysShowMotionLine={true}
+            />
+          ) : (
+            <Skeleton className="size-full" />
+          )}
+        </div>
+      )}
 
-      <VideoControls
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-secondary"
-        features={{
-          volume: false,
-          seek: true,
-          playbackRate: true,
-          fullscreen: false,
-        }}
-        isPlaying={playing}
-        show={!scrubbing || controlsOpen}
-        playbackRates={[4, 8, 12, 16]}
-        playbackRate={playbackRate}
-        setControlsOpen={setControlsOpen}
-        onPlayPause={setPlaying}
-        onSeek={(diff) => {
-          const wasPlaying = playing;
+      {!selectedMotionPreviewCamera && (
+        <VideoControls
+          className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-secondary"
+          features={{
+            volume: false,
+            seek: true,
+            playbackRate: true,
+            fullscreen: false,
+          }}
+          isPlaying={playing}
+          show={!scrubbing || controlsOpen}
+          playbackRates={[4, 8, 12, 16]}
+          playbackRate={playbackRate}
+          setControlsOpen={setControlsOpen}
+          onPlayPause={setPlaying}
+          onSeek={(diff) => {
+            const wasPlaying = playing;
 
-          if (wasPlaying) {
-            setPlaying(false);
-          }
+            if (wasPlaying) {
+              setPlaying(false);
+            }
 
-          setCurrentTime(currentTime + diff);
+            setCurrentTime(currentTime + diff);
 
-          if (wasPlaying) {
-            setTimeout(() => setPlaying(true), 100);
-          }
-        }}
-        onSetPlaybackRate={setPlaybackRate}
-      />
+            if (wasPlaying) {
+              setTimeout(() => setPlaying(true), 100);
+            }
+          }}
+          onSetPlaybackRate={setPlaybackRate}
+        />
+      )}
     </>
   );
 }

@@ -1,0 +1,60 @@
+{
+  "title": "Debug Replay",
+  "description": "Replay camera recordings for debugging. The object list shows a time-delayed summary of detected objects and the Messages tab shows a stream of Frigate's internal messages from the replay footage.",
+  "websocket_messages": "Messages",
+  "dialog": {
+    "title": "Start Debug Replay",
+    "description": "Create a temporary replay camera that loops historical footage for debugging object detection and tracking issues. The replay camera will have the same detection configuration as the source camera. Choose a time range to begin.",
+    "camera": "Source Camera",
+    "timeRange": "Time Range",
+    "preset": {
+      "1m": "Last 1 Minute",
+      "5m": "Last 5 Minutes",
+      "timeline": "From Timeline",
+      "custom": "Custom"
+    },
+    "startButton": "Start Replay",
+    "selectFromTimeline": "Select",
+    "starting": "Starting replay...",
+    "startLabel": "Start",
+    "endLabel": "End",
+    "toast": {
+      "error": "Failed to start debug replay: {{error}}",
+      "alreadyActive": "A replay session is already active",
+      "noRecordings": "No recordings found in the selected time range",
+      "stopError": "Failed to stop debug replay: {{error}}",
+      "goToReplay": "Go to Replay"
+    }
+  },
+  "page": {
+    "noSession": "No Active Debug Replay Session",
+    "noSessionDesc": "Start a Debug Replay from History view by clicking the Actions button in the toolbar and choosing Debug Replay.",
+    "goToRecordings": "Go to History",
+    "preparingClip": "Preparing clip…",
+    "preparingClipDesc": "Frigate is stitching together recordings for the selected time range. This can take a minute for longer ranges.",
+    "startingCamera": "Starting Debug Replay…",
+    "startError": {
+      "title": "Failed to start Debug Replay",
+      "back": "Back to History"
+    },
+    "sourceCamera": "Source Camera",
+    "replayCamera": "Replay Camera",
+    "initializingReplay": "Initializing Debug Replay...",
+    "stoppingReplay": "Stopping Debug Replay...",
+    "stopReplay": "Stop Replay",
+    "confirmStop": {
+      "title": "Stop Debug Replay?",
+      "description": "This will stop the session and clean up all temporary data. Are you sure?",
+      "confirm": "Stop Replay",
+      "cancel": "Cancel"
+    },
+    "activity": "Activity",
+    "objects": "Object List",
+    "audioDetections": "Audio Detections",
+    "noActivity": "No activity detected",
+    "activeTracking": "Active tracking",
+    "noActiveTracking": "No active tracking",
+    "configuration": "Configuration",
+    "configurationDesc": "Fine tune motion detection and object tracking settings for the Debug Replay camera. No changes are saved to your Frigate configuration file."
+  }
+}

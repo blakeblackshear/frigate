@@ -106,7 +106,7 @@
   },
   "trackedObjectDelete": {
     "title": "Confirmă ștergerea",
-    "desc": "Ștergerea acestor {{objectLength}} obiecte urmărite elimină snapshot-ul, orice încorporări salvate și orice înregistrări asociate ciclului de viață al obiectului. Filmările înregistrate ale acestor obiecte urmărite în vizualizarea Istoric <em>NU</em> vor fi șterse. <br /><br />Ești sigur că dorești să continui?<br /><br />Țineți apăsată tasta <em>Shift</em> pentru a sări peste acest dialog în viitor.",
+    "desc": "Ștergerea acestor {{objectLength}} obiecte urmărite elimină snapshot-ul, orice înglobări salvate și orice înregistrări asociate ciclului de viață al obiectului. Filmările înregistrate ale acestor obiecte urmărite în vizualizarea Istoric <em>NU</em> vor fi șterse. <br /><br />Ești sigur că dorești să continui?<br /><br />Țineți apăsată tasta <em>Shift</em> pentru a sări peste acest dialog în viitor.",
     "toast": {
       "success": "Obiectele urmărite au fost șterse cu succes.",
       "error": "Ștergerea obiectelor urmărite a eșuat: {{errorMessage}}"

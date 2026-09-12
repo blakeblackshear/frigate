@@ -610,19 +610,16 @@ class TestHttpReview(BaseTestHttp):
             response = client.get("/review/activity/motion", params=params)
             assert response.status_code == 200
             response_json = response.json()
-            assert len(response_json) == 61
+            # Only buckets with an actual recording are returned. Empty
+            # gap-fill buckets between the two recordings are dropped.
+            assert len(response_json) == 2
             self.assertDictEqual(
                 {"motion": 50.5, "camera": "front_door", "start_time": now + 1},
                 response_json[0],
             )
-            for item in response_json[1:-1]:
-                self.assertDictEqual(
-                    {"motion": 0.0, "camera": "", "start_time": item["start_time"]},
-                    item,
-                )
             self.assertDictEqual(
                 {"motion": 100.0, "camera": "front_door", "start_time": one_m + 1},
-                response_json[len(response_json) - 1],
+                response_json[1],
             )
 
     ####################################################################################################################

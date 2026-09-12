@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Frigate - Live",
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Frigate - Live",
   "lowBandwidthMode": "Mod Latime de Banda Limitata",
   "twoWayTalk": {
@@ -19,7 +21,8 @@
       "clickMove": {
         "label": "Apasă în cadrul imaginii pentru a centra camera",
         "enable": "Activează mutarea prin clic",
-        "disable": "Dezactivează mutarea prin clic"
+        "disable": "Dezactivează mutarea prin clic",
+        "enableWithZoom": "Activează clic pentru mutare / trage pentru zoom"
       },
       "left": {
         "label": "Mișcă camera PTZ spre stânga"
@@ -55,7 +58,9 @@
   },
   "camera": {
     "enable": "Activează camera",
-    "disable": "Dezactivează camera"
+    "disable": "Dezactivează camera",
+    "turnOn": "Camera este pornittă",
+    "turnOff": "Oprește camera"
   },
   "muteCameras": {
     "enable": "Dezactivează sunetul pentru toate camerele",
@@ -67,11 +72,12 @@
   },
   "recording": {
     "enable": "Activează înregistrarea",
-    "disable": "Dezactivează înregistrarea"
+    "disable": "Dezactivează înregistrarea",
+    "disabledInConfig": "Înregistrarea trebuie mai întâi activată în Setări pentru această cameră."
   },
   "snapshots": {
     "disable": "Dezactivează snapshoturile",
-    "enable": "Activează snapshoturile"
+    "enable": "Activează snapshot-urile"
   },
   "audioDetect": {
     "enable": "Activează detectarea audio",
@@ -147,7 +153,8 @@
     "snapshots": "Snapshot-uri",
     "audioDetection": "Detectare sunet",
     "autotracking": "Urmărire automată",
-    "transcription": "Transcriere audio"
+    "transcription": "Transcriere audio",
+    "camera": "Cameră"
   },
   "history": {
     "label": "Afișează înregistrările istorice"

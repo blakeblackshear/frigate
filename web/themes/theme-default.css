@@ -113,8 +113,8 @@
     --foreground: hsl(0, 0%, 100%);
     --foreground: 0, 0%, 100%;
 
-    --card: hsl(0, 0%, 15%);
-    --card: 0, 0%, 15%;
+    --card: hsl(0, 0%, 12%);
+    --card: 0, 0%, 12%;
 
     --card-foreground: hsl(210, 40%, 98%);
     --card-foreground: 210 40% 98%;

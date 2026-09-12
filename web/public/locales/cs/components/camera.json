@@ -68,7 +68,10 @@
       "desc": "Vyberte kamery pro tuto skupinu."
     },
     "icon": "Ikona",
-    "success": "Skupina kamer {{name}} byla uložena."
+    "success": "Skupina kamer {{name}} byla uložena.",
+    "showAll": "Zobrazit všechny skupiny kamer",
+    "showLess": "Zobrazit méně",
+    "editGroups": "Upravit skupiny kamer"
   },
   "debug": {
     "options": {
@@ -82,6 +85,7 @@
     "regions": "Kraje",
     "timestamp": "Časové razítko",
     "boundingBox": "Ohraničení",
-    "mask": "Maska"
+    "mask": "Maska",
+    "paths": "Cesty"
   }
 }

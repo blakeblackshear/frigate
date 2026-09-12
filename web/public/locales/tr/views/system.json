@@ -141,7 +141,11 @@
       }
     },
     "title": "Kameralar",
-    "overview": "Genel"
+    "overview": "Genel",
+    "connectionQuality": {
+      "expectedFps": "Beklenen FPS",
+      "fps": "FPS"
+    }
   },
   "lastRefreshed": "Son güncelleme: ",
   "stats": {

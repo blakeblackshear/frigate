@@ -115,8 +115,11 @@
     "internalID": "The Internal ID Frigate uses in the configuration and database"
   },
   "button": {
+    "add": "Add",
     "apply": "Apply",
+    "applying": "Applying…",
     "reset": "Reset",
+    "undo": "Undo",
     "done": "Done",
     "enabled": "Enabled",
     "enable": "Enable",
@@ -127,6 +130,7 @@
     "cancel": "Cancel",
     "close": "Close",
     "copy": "Copy",
+    "copiedToClipboard": "Copied to clipboard",
     "back": "Back",
     "history": "History",
     "fullscreen": "Fullscreen",
@@ -150,13 +154,22 @@
     "export": "Export",
     "deleteNow": "Delete Now",
     "next": "Next",
-    "continue": "Continue"
+    "continue": "Continue",
+    "modified": "Modified",
+    "overridden": "Overridden",
+    "resetToGlobal": "Reset to Global",
+    "resetToDefault": "Reset to Default",
+    "saveAll": "Save All",
+    "savingAll": "Saving All…",
+    "undoAll": "Undo All",
+    "retry": "Retry"
   },
   "menu": {
     "system": "System",
     "systemMetrics": "System metrics",
     "configuration": "Configuration",
     "systemLogs": "System logs",
+    "profiles": "Profiles",
     "settings": "Settings",
     "configurationEditor": "Configuration Editor",
     "languages": "Languages",
@@ -164,6 +177,7 @@
       "en": "English (English)",
       "es": "Español (Spanish)",
       "zhCN": "简体中文 (Simplified Chinese)",
+      "zhHant": "繁體中文 (Traditional Chinese)",
       "hi": "हिन्दी (Hindi)",
       "fr": "Français (French)",
       "ar": "العربية (Arabic)",
@@ -183,6 +197,7 @@
       "fa": "فارسی (Persian)",
       "pl": "Polski (Polish)",
       "uk": "Українська (Ukrainian)",
+      "be": "Беларуская (Belarusian)",
       "he": "עברית (Hebrew)",
       "el": "Ελληνικά (Greek)",
       "ro": "Română (Romanian)",
@@ -194,6 +209,7 @@
       "th": "ไทย (Thai)",
       "ca": "Català (Catalan)",
       "hr": "Hrvatski (Croatian)",
+      "bs": "Bosanski (Bosnian)",
       "sr": "Српски (Serbian)",
       "sl": "Slovenščina (Slovenian)",
       "lt": "Lietuvių (Lithuanian)",
@@ -242,9 +258,12 @@
     "review": "Review",
     "explore": "Explore",
     "export": "Export",
+    "actions": "Actions",
     "uiPlayground": "UI Playground",
+    "features": "Features",
     "faceLibrary": "Face Library",
     "classification": "Classification",
+    "chat": "Chat",
     "user": {
       "title": "User",
       "account": "Account",
@@ -261,7 +280,8 @@
       "error": {
         "title": "Failed to save config changes: {{errorMessage}}",
         "noMessage": "Failed to save config changes"
-      }
+      },
+      "success": "Successfully saved config changes."
     }
   },
   "role": {
@@ -296,5 +316,10 @@
   "readTheDocumentation": "Read the documentation",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "no_items": "No items",
+  "validation_errors": "Validation Errors",
+  "credentialField": {
+    "savedPlaceholder": "Saved — leave blank to keep current"
   }
 }

@@ -90,7 +90,7 @@
   "laptop": "Laptop",
   "mouse": "Maus",
   "goat": "Ziege",
-  "keyboard": "Klaviatur",
+  "keyboard": "Klavier",
   "cell_phone": "Handy",
   "remote": "Fernbedienung",
   "airplane": "Flugzeug",
@@ -116,5 +116,16 @@
   "desk": "Schreibtisch",
   "raccoon": "Waschbär",
   "rabbit": "Kaninchen",
-  "gls": "GLS"
+  "gls": "GLS",
+  "canada_post": "Kanada Post",
+  "royal_mail": "Royal-Mail",
+  "school_bus": "Schulbus",
+  "skunk": "Stinktier",
+  "kangaroo": "Känguruh",
+  "baby": "Baby",
+  "baby_stroller": "Kinderwagen",
+  "rickshaw": "Rikscha",
+  "rodent": "Nagetier",
+  "garbage_truck": "Müllwagen",
+  "possum": "Opossum"
 }

@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { isReplayCamera } from "@/utils/cameraUtil";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { Button } from "@/components/ui/button";
 import { LuX } from "react-icons/lu";
@@ -36,11 +37,18 @@ export default function ObjectPathPlotter() {
   const [currentPage, setCurrentPage] = useState(1);
   const eventsPerPage = 20;
 
+  const cameraNames = useMemo(() => {
+    if (!config) return [];
+    return Object.keys(config.cameras)
+      .filter((name) => !isReplayCamera(name))
+      .sort((a, b) => config.cameras[a].ui.order - config.cameras[b].ui.order);
+  }, [config]);
+
   useEffect(() => {
-    if (config && !selectedCamera) {
-      setSelectedCamera(Object.keys(config.cameras)[0]);
+    if (cameraNames.length > 0 && !selectedCamera) {
+      setSelectedCamera(cameraNames[0]);
     }
-  }, [config, selectedCamera]);
+  }, [cameraNames, selectedCamera]);
 
   const searchQuery = useMemo(() => {
     if (!selectedCamera) return null;
@@ -143,12 +151,11 @@ export default function ObjectPathPlotter() {
                 <SelectValue placeholder="Select camera" />
               </SelectTrigger>
               <SelectContent>
-                {config &&
-                  Object.keys(config.cameras).map((cameraName) => (
-                    <SelectItem key={cameraName} value={cameraName}>
-                      {cameraName}
-                    </SelectItem>
-                  ))}
+                {cameraNames.map((cameraName) => (
+                  <SelectItem key={cameraName} value={cameraName}>
+                    {cameraName}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={timeRange} onValueChange={setTimeRange}>

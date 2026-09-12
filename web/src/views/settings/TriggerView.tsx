@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { Toaster } from "@/components/ui/sonner";
 import useSWR from "swr";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -39,6 +38,7 @@ import { Trigger, TriggerAction, TriggerType } from "@/types/trigger";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
+import { use24HourTime } from "@/hooks/use-date-utils";
 import { Link } from "react-router-dom";
 import { useTriggers } from "@/api/ws";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
@@ -89,6 +89,7 @@ export default function TriggerView({
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
+  const is24Hour = use24HourTime(config);
   const { data: trigger_status, mutate } = useSWR(
     config?.cameras[selectedCamera]?.semantic_search?.triggers &&
       Object.keys(config.cameras[selectedCamera].semantic_search.triggers)
@@ -441,7 +442,6 @@ export default function TriggerView({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <Toaster position="top-center" closeButton={true} />
       <div
         className={cn(
           "scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto pb-2",
@@ -484,8 +484,8 @@ export default function TriggerView({
         ) : (
           <>
             <div className="mb-5 flex flex-row items-center justify-between gap-2">
-              <div className="flex flex-col items-start">
-                <Heading as="h4" className="mb-2">
+              <div className="flex max-w-5xl flex-col items-start">
+                <Heading as="h4" className="mb-1">
                   {t("triggers.management.title")}
                 </Heading>
                 <p className="text-sm text-muted-foreground">
@@ -493,6 +493,17 @@ export default function TriggerView({
                     camera: cameraName,
                   })}
                 </p>
+                <div className="mt-1 flex items-center text-sm text-primary-variant">
+                  <Link
+                    to={getLocaleDocUrl("configuration/semantic_search")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline"
+                  >
+                    {t("readTheDocumentation", { ns: "common" })}{" "}
+                    <LuExternalLink className="ml-2 inline-flex size-3" />
+                  </Link>
+                </div>
               </div>
               <Button
                 className="flex items-center gap-2 self-start sm:self-auto"
@@ -581,20 +592,19 @@ export default function TriggerView({
                                           ?.last_triggered,
                                         {
                                           timezone: config.ui.timezone,
-                                          date_format:
-                                            config.ui.time_format == "24hour"
-                                              ? t(
-                                                  "time.formattedTimestamp2.24hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                )
-                                              : t(
-                                                  "time.formattedTimestamp2.12hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                ),
+                                          date_format: is24Hour
+                                            ? t(
+                                                "time.formattedTimestamp2.24hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              )
+                                            : t(
+                                                "time.formattedTimestamp2.12hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              ),
                                           time_style: "medium",
                                           date_style: "medium",
                                         },
@@ -742,20 +752,19 @@ export default function TriggerView({
                                           ?.last_triggered,
                                         {
                                           timezone: config.ui.timezone,
-                                          date_format:
-                                            config.ui.time_format == "24hour"
-                                              ? t(
-                                                  "time.formattedTimestamp2.24hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                )
-                                              : t(
-                                                  "time.formattedTimestamp2.12hour",
-                                                  {
-                                                    ns: "common",
-                                                  },
-                                                ),
+                                          date_format: is24Hour
+                                            ? t(
+                                                "time.formattedTimestamp2.24hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              )
+                                            : t(
+                                                "time.formattedTimestamp2.12hour",
+                                                {
+                                                  ns: "common",
+                                                },
+                                              ),
                                           time_style: "medium",
                                           date_style: "medium",
                                         },

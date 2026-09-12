@@ -116,6 +116,11 @@ export function useUserPersistence<S>(
       return;
     }
 
+    // Skip reload if we're already loaded for this key
+    if (loadedKeyRef.current === namespacedKey) {
+      return;
+    }
+
     // Reset state when key changes - this prevents stale writes
     loadedKeyRef.current = null;
     migrationAttemptedRef.current = false;

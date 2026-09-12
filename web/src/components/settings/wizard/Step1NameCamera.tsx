@@ -87,7 +87,8 @@ export default function Step1NameCamera({
         .string()
         .optional()
         .refine(
-          (val) => !val || val.startsWith("rtsp://"),
+          (val) =>
+            !val || val.startsWith("rtsp://") || val.startsWith("rtsps://"),
           t("cameraWizard.step1.errors.customUrlRtspRequired"),
         ),
     })
@@ -171,7 +172,7 @@ export default function Step1NameCamera({
                 </FormLabel>
                 <FormControl>
                   <Input
-                    className="text-md h-8"
+                    className="h-8"
                     placeholder={t("cameraWizard.step1.cameraNamePlaceholder")}
                     {...field}
                   />
@@ -192,7 +193,7 @@ export default function Step1NameCamera({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="text-md h-8"
+                      className="h-8"
                       placeholder="192.168.1.100"
                       {...field}
                     />
@@ -212,7 +213,7 @@ export default function Step1NameCamera({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="text-md h-8"
+                      className="h-8"
                       placeholder={t("cameraWizard.step1.usernamePlaceholder")}
                       {...field}
                     />
@@ -233,7 +234,7 @@ export default function Step1NameCamera({
                   <FormControl>
                     <div className="relative">
                       <Input
-                        className="text-md h-8 pr-10"
+                        className="h-8 pr-10"
                         type={showPassword ? "text" : "password"}
                         placeholder={t(
                           "cameraWizard.step1.passwordPlaceholder",
@@ -316,7 +317,7 @@ export default function Step1NameCamera({
                   </FormLabel>
                   <FormControl>
                     <Input
-                      className="text-md h-8"
+                      className="h-8"
                       type="text"
                       {...field}
                       placeholder="80"
@@ -377,7 +378,7 @@ export default function Step1NameCamera({
                           );
                           return selectedBrand &&
                             selectedBrand.value != "other" ? (
-                            <Popover modal={true}>
+                            <Popover>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="ghost"
@@ -440,7 +441,7 @@ export default function Step1NameCamera({
                       </FormLabel>
                       <FormControl>
                         <Input
-                          className="text-md h-8"
+                          className="h-8"
                           placeholder="rtsp://username:password@host:port/path"
                           {...field}
                         />
@@ -455,7 +456,7 @@ export default function Step1NameCamera({
         </form>
       </Form>
 
-      <div className="flex flex-col gap-3 pt-3 sm:flex-row sm:justify-end sm:gap-4">
+      <div className="flex flex-col-reverse gap-2 pt-3 sm:flex-row sm:justify-end">
         <Button type="button" onClick={onCancel} className="sm:flex-1">
           {t("button.cancel", { ns: "common" })}
         </Button>

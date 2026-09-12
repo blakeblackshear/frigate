@@ -16,31 +16,53 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import { isMobile } from "react-device-detect";
 import { FaVideo } from "react-icons/fa";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
+import type { ConfigSectionData, JsonObject } from "@/types/configForm";
+import isEqual from "lodash/isEqual";
+import { maskCredentials } from "@/utils/credentialMask";
 import useSWR from "swr";
 import FilterSwitch from "@/components/filter/FilterSwitch";
 import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
-import CameraReviewSettingsView from "@/views/settings/CameraReviewSettingsView";
 import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
-import NotificationView from "@/views/settings/NotificationsSettingsView";
-import EnrichmentsSettingsView from "@/views/settings/EnrichmentsSettingsView";
 import UiSettingsView from "@/views/settings/UiSettingsView";
+import ProfilesView from "@/views/settings/ProfilesView";
 import FrigatePlusSettingsView from "@/views/settings/FrigatePlusSettingsView";
+import MediaSyncSettingsView from "@/views/settings/MediaSyncSettingsView";
+import RegionGridSettingsView from "@/views/settings/RegionGridSettingsView";
+import Go2RtcStreamsSettingsView from "@/views/settings/Go2RtcStreamsSettingsView";
+import DetectorsAndModelSettingsView from "@/views/settings/DetectorsAndModelSettingsView";
+import {
+  SingleSectionPage,
+  type SettingsPageProps,
+  type SectionStatus,
+} from "@/views/settings/SingleSectionPage";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useInitialCameraState } from "@/api/ws";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
+import { useAllCameraOverrides } from "@/hooks/use-config-override";
 import TriggerView from "@/views/settings/TriggerView";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import {
@@ -67,40 +89,344 @@ import {
   MobilePageHeader,
   MobilePageTitle,
 } from "@/components/mobile/MobilePage";
+import { Toaster } from "@/components/ui/sonner";
+import axios from "axios";
+import { toast } from "sonner";
+import { mutate } from "swr";
+import { RJSFSchema } from "@rjsf/utils";
+import {
+  buildConfigDataForPath,
+  buildHiddenFieldContext,
+  flattenOverrides,
+  getSectionConfig,
+  parseProfileFromSectionPath,
+  prepareSectionSavePayload,
+  PROFILE_ELIGIBLE_SECTIONS,
+  resolveHiddenFieldEntries,
+  sanitizeSectionData,
+} from "@/utils/configUtil";
+import type { ProfileState, ProfilesApiResponse } from "@/types/profile";
+import { getProfileColor } from "@/utils/profileColors";
+import { isReplayCamera } from "@/utils/cameraUtil";
+import { ProfileSectionDropdown } from "@/components/settings/ProfileSectionDropdown";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
+import RestartDialog from "@/components/overlay/dialog/RestartDialog";
+import SaveAllPreviewPopover, {
+  type SaveAllPreviewItem,
+} from "@/components/overlay/detail/SaveAllPreviewPopover";
+import { useRestart } from "@/api/ws";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { TooltipPortal } from "@radix-ui/react-tooltip";
 
 const allSettingsViews = [
-  "ui",
-  "enrichments",
-  "cameraManagement",
+  "uiSettings",
+  "profiles",
+  "globalDetect",
+  "globalRecording",
+  "globalSnapshots",
+  "globalFfmpeg",
+  "globalMotion",
+  "globalObjects",
+  "globalReview",
+  "globalAudioEvents",
+  "globalLivePlayback",
+  "globalTimestampStyle",
+  "systemDatabase",
+  "systemTls",
+  "systemAuthentication",
+  "systemNetworking",
+  "systemProxy",
+  "systemUi",
+  "systemLogging",
+  "systemEnvironmentVariables",
+  "systemTelemetry",
+  "systemBirdseye",
+  "systemDetectorsAndModel",
+  "systemMqtt",
+  "systemGo2rtcStreams",
+  "integrationSemanticSearch",
+  "integrationGenerativeAi",
+  "integrationFaceRecognition",
+  "integrationLpr",
+  "integrationObjectClassification",
+  "integrationAudioTranscription",
+  "cameraDetect",
+  "cameraFfmpeg",
+  "cameraRecording",
+  "cameraSnapshots",
+  "cameraMotion",
+  "cameraObjects",
   "cameraReview",
+  "cameraAudioEvents",
+  "cameraAudioTranscription",
+  "cameraNotifications",
+  "cameraLivePlayback",
+  "cameraBirdseye",
+  "cameraFaceRecognition",
+  "cameraLpr",
+  "cameraMqttConfig",
+  "cameraOnvif",
+  "cameraTimestampStyle",
+  "cameraManagement",
   "masksAndZones",
   "motionTuner",
+  "enrichments",
   "triggers",
   "debug",
   "users",
   "roles",
   "notifications",
   "frigateplus",
+  "mediaSync",
+  "regionGrid",
 ] as const;
 type SettingsType = (typeof allSettingsViews)[number];
+
+const parsePendingDataKey = (pendingDataKey: string) => {
+  if (pendingDataKey.includes("::")) {
+    const idx = pendingDataKey.indexOf("::");
+    return {
+      scope: "camera" as const,
+      cameraName: pendingDataKey.slice(0, idx),
+      sectionPath: pendingDataKey.slice(idx + 2),
+    };
+  }
+
+  return {
+    scope: "global" as const,
+    cameraName: undefined,
+    sectionPath: pendingDataKey,
+  };
+};
+
+const createSectionPage = (
+  sectionKey: string,
+  level: "global" | "camera",
+  options?: { showOverrideIndicator?: boolean },
+) => {
+  return (props: SettingsPageProps) => (
+    <SingleSectionPage
+      sectionKey={sectionKey}
+      level={level}
+      showOverrideIndicator={options?.showOverrideIndicator}
+      {...props}
+    />
+  );
+};
+
+const GlobalDetectSettingsPage = createSectionPage("detect", "global");
+const GlobalRecordingSettingsPage = createSectionPage("record", "global");
+const GlobalSnapshotsSettingsPage = createSectionPage("snapshots", "global");
+const GlobalFfmpegSettingsPage = createSectionPage("ffmpeg", "global");
+const GlobalMotionSettingsPage = createSectionPage("motion", "global");
+const GlobalObjectsSettingsPage = createSectionPage("objects", "global");
+const GlobalReviewSettingsPage = createSectionPage("review", "global");
+const GlobalAudioEventsSettingsPage = createSectionPage("audio", "global");
+const GlobalLivePlaybackSettingsPage = createSectionPage("live", "global");
+const GlobalTimestampStyleSettingsPage = createSectionPage(
+  "timestamp_style",
+  "global",
+);
+
+const SystemDatabaseSettingsPage = createSectionPage("database", "global");
+const SystemTlsSettingsPage = createSectionPage("tls", "global");
+const SystemAuthenticationSettingsPage = createSectionPage("auth", "global");
+const SystemNetworkingSettingsPage = createSectionPage("networking", "global");
+const SystemProxySettingsPage = createSectionPage("proxy", "global");
+const SystemUiSettingsPage = createSectionPage("ui", "global");
+const SystemLoggingSettingsPage = createSectionPage("logger", "global");
+const SystemEnvironmentVariablesSettingsPage = createSectionPage(
+  "environment_vars",
+  "global",
+);
+const SystemTelemetrySettingsPage = createSectionPage("telemetry", "global");
+const SystemBirdseyeSettingsPage = createSectionPage("birdseye", "global");
+const NotificationsSettingsPage = createSectionPage("notifications", "global");
+
+const SystemMqttSettingsPage = createSectionPage("mqtt", "global");
+const IntegrationSemanticSearchSettingsPage = createSectionPage(
+  "semantic_search",
+  "global",
+);
+const IntegrationGenerativeAiSettingsPage = createSectionPage(
+  "genai",
+  "global",
+);
+const IntegrationFaceRecognitionSettingsPage = createSectionPage(
+  "face_recognition",
+  "global",
+);
+const IntegrationLprSettingsPage = createSectionPage("lpr", "global");
+const IntegrationObjectClassificationSettingsPage = createSectionPage(
+  "classification",
+  "global",
+);
+const IntegrationAudioTranscriptionSettingsPage = createSectionPage(
+  "audio_transcription",
+  "global",
+);
+
+const CameraDetectSettingsPage = createSectionPage("detect", "camera");
+const CameraFfmpegSettingsPage = createSectionPage("ffmpeg", "camera");
+const CameraRecordingSettingsPage = createSectionPage("record", "camera");
+const CameraSnapshotsSettingsPage = createSectionPage("snapshots", "camera");
+const CameraMotionSettingsPage = createSectionPage("motion", "camera");
+const CameraObjectsSettingsPage = createSectionPage("objects", "camera");
+const CameraReviewSettingsPage = createSectionPage("review", "camera");
+const CameraAudioEventsSettingsPage = createSectionPage("audio", "camera");
+const CameraAudioTranscriptionSettingsPage = createSectionPage(
+  "audio_transcription",
+  "camera",
+);
+const CameraNotificationsSettingsPage = createSectionPage(
+  "notifications",
+  "camera",
+);
+const CameraLivePlaybackSettingsPage = createSectionPage("live", "camera");
+const CameraBirdseyeSettingsPage = createSectionPage("birdseye", "camera");
+const CameraFaceRecognitionSettingsPage = createSectionPage(
+  "face_recognition",
+  "camera",
+);
+const CameraLprSettingsPage = createSectionPage("lpr", "camera");
+const CameraMqttConfigSettingsPage = createSectionPage("mqtt", "camera", {
+  showOverrideIndicator: false,
+});
+const CameraOnvifSettingsPage = createSectionPage("onvif", "camera", {
+  showOverrideIndicator: false,
+});
+const CameraTimestampStyleSettingsPage = createSectionPage(
+  "timestamp_style",
+  "camera",
+);
 
 const settingsGroups = [
   {
     label: "general",
-    items: [{ key: "ui", component: UiSettingsView }],
+    items: [{ key: "uiSettings", component: UiSettingsView }],
+  },
+  {
+    label: "globalConfig",
+    items: [
+      { key: "profiles", component: ProfilesView },
+      { key: "cameraManagement", component: CameraManagementView },
+      { key: "globalDetect", component: GlobalDetectSettingsPage },
+      { key: "globalObjects", component: GlobalObjectsSettingsPage },
+      { key: "globalMotion", component: GlobalMotionSettingsPage },
+      { key: "globalFfmpeg", component: GlobalFfmpegSettingsPage },
+      { key: "globalRecording", component: GlobalRecordingSettingsPage },
+      { key: "globalSnapshots", component: GlobalSnapshotsSettingsPage },
+      { key: "globalReview", component: GlobalReviewSettingsPage },
+      { key: "globalAudioEvents", component: GlobalAudioEventsSettingsPage },
+      {
+        key: "globalLivePlayback",
+        component: GlobalLivePlaybackSettingsPage,
+      },
+      {
+        key: "globalTimestampStyle",
+        component: GlobalTimestampStyleSettingsPage,
+      },
+    ],
   },
   {
     label: "cameras",
     items: [
-      { key: "cameraManagement", component: CameraManagementView },
-      { key: "cameraReview", component: CameraReviewSettingsView },
-      { key: "masksAndZones", component: MasksAndZonesView },
+      { key: "cameraDetect", component: CameraDetectSettingsPage },
+      { key: "cameraObjects", component: CameraObjectsSettingsPage },
+      { key: "cameraMotion", component: CameraMotionSettingsPage },
       { key: "motionTuner", component: MotionTunerView },
+      { key: "cameraFfmpeg", component: CameraFfmpegSettingsPage },
+      { key: "cameraRecording", component: CameraRecordingSettingsPage },
+      { key: "cameraSnapshots", component: CameraSnapshotsSettingsPage },
+      { key: "masksAndZones", component: MasksAndZonesView },
+      { key: "cameraReview", component: CameraReviewSettingsPage },
+      { key: "cameraAudioEvents", component: CameraAudioEventsSettingsPage },
+      {
+        key: "cameraAudioTranscription",
+        component: CameraAudioTranscriptionSettingsPage,
+      },
+      { key: "cameraBirdseye", component: CameraBirdseyeSettingsPage },
+      {
+        key: "cameraLivePlayback",
+        component: CameraLivePlaybackSettingsPage,
+      },
+      {
+        key: "cameraNotifications",
+        component: CameraNotificationsSettingsPage,
+      },
+      {
+        key: "cameraFaceRecognition",
+        component: CameraFaceRecognitionSettingsPage,
+      },
+      { key: "cameraLpr", component: CameraLprSettingsPage },
+      { key: "cameraOnvif", component: CameraOnvifSettingsPage },
+      { key: "cameraMqttConfig", component: CameraMqttConfigSettingsPage },
+      {
+        key: "cameraTimestampStyle",
+        component: CameraTimestampStyleSettingsPage,
+      },
     ],
   },
   {
     label: "enrichments",
-    items: [{ key: "enrichments", component: EnrichmentsSettingsView }],
+    items: [
+      {
+        key: "integrationSemanticSearch",
+        component: IntegrationSemanticSearchSettingsPage,
+      },
+      {
+        key: "integrationGenerativeAi",
+        component: IntegrationGenerativeAiSettingsPage,
+      },
+      {
+        key: "integrationFaceRecognition",
+        component: IntegrationFaceRecognitionSettingsPage,
+      },
+      { key: "integrationLpr", component: IntegrationLprSettingsPage },
+      {
+        key: "integrationObjectClassification",
+        component: IntegrationObjectClassificationSettingsPage,
+      },
+      { key: "triggers", component: TriggerView },
+      {
+        key: "integrationAudioTranscription",
+        component: IntegrationAudioTranscriptionSettingsPage,
+      },
+    ],
+  },
+  {
+    label: "system",
+    items: [
+      {
+        key: "systemGo2rtcStreams",
+        component: Go2RtcStreamsSettingsView,
+      },
+      {
+        key: "systemDetectorsAndModel",
+        component: DetectorsAndModelSettingsView,
+      },
+      { key: "systemDatabase", component: SystemDatabaseSettingsPage },
+      { key: "systemMqtt", component: SystemMqttSettingsPage },
+      { key: "systemBirdseye", component: SystemBirdseyeSettingsPage },
+      { key: "systemTls", component: SystemTlsSettingsPage },
+      {
+        key: "systemAuthentication",
+        component: SystemAuthenticationSettingsPage,
+      },
+      { key: "systemNetworking", component: SystemNetworkingSettingsPage },
+      { key: "systemProxy", component: SystemProxySettingsPage },
+      { key: "systemUi", component: SystemUiSettingsPage },
+      { key: "systemLogging", component: SystemLoggingSettingsPage },
+      {
+        key: "systemEnvironmentVariables",
+        component: SystemEnvironmentVariablesSettingsPage,
+      },
+      { key: "systemTelemetry", component: SystemTelemetrySettingsPage },
+    ],
   },
   {
     label: "users",
@@ -111,26 +437,135 @@ const settingsGroups = [
   },
   {
     label: "notifications",
-    items: [
-      { key: "notifications", component: NotificationView },
-      { key: "triggers", component: TriggerView },
-    ],
+    items: [{ key: "notifications", component: NotificationsSettingsPage }],
   },
   {
     label: "frigateplus",
     items: [{ key: "frigateplus", component: FrigatePlusSettingsView }],
   },
+  {
+    label: "maintenance",
+    items: [
+      { key: "mediaSync", component: MediaSyncSettingsView },
+      { key: "regionGrid", component: RegionGridSettingsView },
+    ],
+  },
 ];
 
 const CAMERA_SELECT_BUTTON_PAGES = [
   "debug",
+  "cameraDetect",
+  "cameraFfmpeg",
+  "cameraRecording",
+  "cameraSnapshots",
+  "cameraMotion",
+  "cameraObjects",
   "cameraReview",
+  "cameraAudioEvents",
+  "cameraAudioTranscription",
+  "cameraNotifications",
+  "cameraLivePlayback",
+  "cameraBirdseye",
+  "cameraFaceRecognition",
+  "cameraLpr",
+  "cameraMqttConfig",
+  "cameraOnvif",
+  "cameraTimestampStyle",
   "masksAndZones",
   "motionTuner",
   "triggers",
+  "regionGrid",
 ];
 
-const ALLOWED_VIEWS_FOR_VIEWER = ["ui", "debug", "notifications"];
+const ALLOWED_VIEWS_FOR_VIEWER = ["uiSettings", "notifications"];
+
+// keys for camera sections
+const CAMERA_SECTION_MAPPING: Record<string, SettingsType> = {
+  detect: "cameraDetect",
+  ffmpeg: "cameraFfmpeg",
+  record: "cameraRecording",
+  snapshots: "cameraSnapshots",
+  motion: "cameraMotion",
+  objects: "cameraObjects",
+  review: "cameraReview",
+  audio: "cameraAudioEvents",
+  audio_transcription: "cameraAudioTranscription",
+  notifications: "cameraNotifications",
+  live: "cameraLivePlayback",
+  birdseye: "cameraBirdseye",
+  face_recognition: "cameraFaceRecognition",
+  lpr: "cameraLpr",
+  mqtt: "cameraMqttConfig",
+  onvif: "cameraOnvif",
+  timestamp_style: "cameraTimestampStyle",
+};
+
+// Reverse mapping: page key → config section key
+const REVERSE_CAMERA_SECTION_MAPPING: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(CAMERA_SECTION_MAPPING).map(([section, page]) => [
+      page,
+      section,
+    ]),
+  );
+// masksAndZones is a composite page, not in CAMERA_SECTION_MAPPING
+REVERSE_CAMERA_SECTION_MAPPING["masksAndZones"] = "masksAndZones";
+
+// Pages where the profile dropdown should appear
+const PROFILE_DROPDOWN_PAGES = new Set(
+  Object.entries(REVERSE_CAMERA_SECTION_MAPPING)
+    .filter(
+      ([, sectionKey]) =>
+        PROFILE_ELIGIBLE_SECTIONS.has(sectionKey) ||
+        sectionKey === "masksAndZones",
+    )
+    .map(([pageKey]) => pageKey),
+);
+
+// keys for global sections
+const GLOBAL_SECTION_MAPPING: Record<string, SettingsType> = {
+  detect: "globalDetect",
+  ffmpeg: "globalFfmpeg",
+  record: "globalRecording",
+  snapshots: "globalSnapshots",
+  motion: "globalMotion",
+  objects: "globalObjects",
+  review: "globalReview",
+  audio: "globalAudioEvents",
+  live: "globalLivePlayback",
+  timestamp_style: "globalTimestampStyle",
+  notifications: "notifications",
+};
+
+const ENRICHMENTS_SECTION_MAPPING: Record<string, SettingsType> = {
+  semantic_search: "integrationSemanticSearch",
+  genai: "integrationGenerativeAi",
+  face_recognition: "integrationFaceRecognition",
+  lpr: "integrationLpr",
+  classification: "integrationObjectClassification",
+  audio_transcription: "integrationAudioTranscription",
+};
+
+const SYSTEM_SECTION_MAPPING: Record<string, SettingsType> = {
+  go2rtc_streams: "systemGo2rtcStreams",
+  database: "systemDatabase",
+  mqtt: "systemMqtt",
+  tls: "systemTls",
+  auth: "systemAuthentication",
+  networking: "systemNetworking",
+  proxy: "systemProxy",
+  ui: "systemUi",
+  logger: "systemLogging",
+  environment_vars: "systemEnvironmentVariables",
+  telemetry: "systemTelemetry",
+  birdseye: "systemBirdseye",
+  detectors: "systemDetectorsAndModel",
+  model: "systemDetectorsAndModel",
+};
+
+const CAMERA_SECTION_KEYS = new Set<SettingsType>(
+  Object.values(CAMERA_SECTION_MAPPING),
+);
 
 const getCurrentComponent = (page: SettingsType) => {
   for (const group of settingsGroups) {
@@ -148,18 +583,20 @@ function MobileMenuItem({
   onSelect,
   onClose,
   className,
+  label,
 }: {
   item: { key: string };
   onSelect: (key: string) => void;
   onClose?: () => void;
   className?: string;
+  label?: ReactNode;
 }) {
   const { t } = useTranslation(["views/settings"]);
 
   return (
     <div
       className={cn(
-        "inline-flex h-10 w-full cursor-pointer items-center justify-between whitespace-nowrap rounded-md px-4 py-2 pr-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex h-10 w-full cursor-pointer items-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-primary-variant disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       onClick={() => {
@@ -167,19 +604,57 @@ function MobileMenuItem({
         onClose?.();
       }}
     >
-      <div className="smart-capitalize">{t("menu." + item.key)}</div>
-      <LuChevronRight className="size-4" />
+      <div className="w-full">
+        {label ?? <div>{t("menu." + item.key)}</div>}
+      </div>
     </div>
   );
 }
 
 export default function Settings() {
   const { t } = useTranslation(["views/settings"]);
-  const [page, setPage] = useState<SettingsType>("ui");
+  const [page, setPage] = useState<SettingsType>("uiSettings");
   const [pageToggle, setPageToggle] = useOptimisticState(page, setPage, 100);
   const [contentMobileOpen, setContentMobileOpen] = useState(false);
+  const [sectionStatusByKey, setSectionStatusByKey] = useState<
+    Partial<Record<SettingsType, SectionStatus>>
+  >({});
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
+    () =>
+      // all collapsed by default
+      new Set(
+        settingsGroups.filter((g) => g.items.length > 1).map((g) => g.label),
+      ),
+  );
+
+  const toggleGroupCollapsed = useCallback((label: string) => {
+    setCollapsedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }, []);
+
+  // Auto-expand the group containing the active page whenever pageToggle changes
+  useEffect(() => {
+    const containingGroup = settingsGroups.find((group) =>
+      group.items.some((item) => item.key === pageToggle),
+    );
+    if (!containingGroup) return;
+    setCollapsedGroups((prev) => {
+      if (!prev.has(containingGroup.label)) return prev;
+      const next = new Set(prev);
+      next.delete(containingGroup.label);
+      return next;
+    });
+  }, [pageToggle]);
 
   const { data: config } = useSWR<FrigateConfig>("config");
+  const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
 
   const [searchParams] = useSearchParams();
 
@@ -187,13 +662,41 @@ export default function Settings() {
 
   const isAdmin = useIsAdmin();
 
+  // for unmasked go2rtc stream sources
+  const { data: rawPaths } = useSWR<{
+    go2rtc: { streams: Record<string, string | string[]> };
+  }>(isAdmin ? "config/raw_paths" : null);
+
   const visibleSettingsViews = !isAdmin
     ? ALLOWED_VIEWS_FOR_VIEWER
     : allSettingsViews;
 
-  // TODO: confirm leave page
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+
+  // Store pending form data keyed by "sectionKey" or "cameraName::sectionKey"
+  const [pendingDataBySection, setPendingDataBySection] = useState<
+    Record<string, ConfigSectionData>
+  >({});
+
+  // Profile editing state
+  const [editingProfile, setEditingProfile] = useState<
+    Record<string, string | null>
+  >({});
+  const [profilesUIEnabled, setProfilesUIEnabled] = useState(false);
+
+  const allProfileNames = useMemo(() => {
+    if (!config?.profiles) return [];
+    return Object.keys(config.profiles).sort();
+  }, [config]);
+
+  const profileFriendlyNames = useMemo(() => {
+    const map = new Map<string, string>();
+    if (profilesData?.profiles) {
+      profilesData.profiles.forEach((p) => map.set(p.name, p.friendly_name));
+    }
+    return map;
+  }, [profilesData]);
 
   const navigate = useNavigate();
 
@@ -203,11 +706,14 @@ export default function Settings() {
     }
 
     return Object.values(config.cameras)
-      .filter((conf) => conf.ui.dashboard && conf.enabled_in_config)
+      .filter((conf) => conf.enabled_in_config && !isReplayCamera(conf.name))
       .sort((aConf, bConf) => aConf.ui.order - bConf.ui.order);
   }, [config]);
 
   const [selectedCamera, setSelectedCamera] = useState<string>("");
+
+  // Get all camera overrides for the selected camera
+  const cameraOverrides = useAllCameraOverrides(config, selectedCamera);
 
   const { payload: allCameraStates } = useInitialCameraState(
     cameras.length > 0 ? cameras[0].name : "",
@@ -232,15 +738,499 @@ export default function Settings() {
 
   const [filterZoneMask, setFilterZoneMask] = useState<PolygonType[]>();
 
+  // Save All state
+  const [isSavingAll, setIsSavingAll] = useState(false);
+  const [isAnySectionSaving, setIsAnySectionSaving] = useState(false);
+  const [restartDialogOpen, setRestartDialogOpen] = useState(false);
+  const { send: sendRestart } = useRestart();
+  const { data: fullSchema } = useSWR<RJSFSchema>("config/schema.json");
+
+  const hasPendingChanges = Object.keys(pendingDataBySection).length > 0;
+  const hasPendingValidationErrors = useMemo(
+    () =>
+      Object.values(sectionStatusByKey).some(
+        (status) => !!status && status.hasChanges && status.hasValidationErrors,
+      ),
+    [sectionStatusByKey],
+  );
+  const pendingChangesPreview = useMemo<SaveAllPreviewItem[]>(() => {
+    if (!config || !fullSchema) return [];
+
+    const items: SaveAllPreviewItem[] = [];
+    Object.entries(pendingDataBySection).forEach(
+      ([pendingDataKey, pendingData]) => {
+        const payload = prepareSectionSavePayload({
+          pendingDataKey,
+          pendingData,
+          config,
+          fullSchema,
+        });
+
+        if (!payload) return;
+
+        const { scope, cameraName, sectionPath } =
+          parsePendingDataKey(pendingDataKey);
+        const { isProfile, profileName, actualSection } =
+          parseProfileFromSectionPath(sectionPath);
+        const flattened = flattenOverrides(payload.sanitizedOverrides);
+        const displaySection = isProfile ? actualSection : sectionPath;
+
+        flattened.forEach(({ path, value }) => {
+          const fieldPath = path ? `${displaySection}.${path}` : displaySection;
+          items.push({
+            scope,
+            cameraName,
+            profileName: isProfile
+              ? (profileFriendlyNames.get(profileName!) ?? profileName)
+              : undefined,
+            fieldPath,
+            value,
+          });
+        });
+      },
+    );
+
+    // go2rtc streams aren't schema-backed, so build their preview items directly
+    if ("go2rtc_streams" in pendingDataBySection) {
+      const live =
+        (pendingDataBySection["go2rtc_streams"] as Record<string, string[]>) ??
+        {};
+      const saved: Record<string, string[]> = {};
+      for (const [name, urls] of Object.entries(
+        rawPaths?.go2rtc?.streams ?? {},
+      )) {
+        saved[name] = Array.isArray(urls) ? urls : [urls];
+      }
+
+      // Added or changed streams
+      for (const [name, urls] of Object.entries(live)) {
+        if (name in saved && isEqual(urls, saved[name])) continue;
+        const masked = urls.map((url) => maskCredentials(url));
+        items.push({
+          scope: "global",
+          fieldPath: `go2rtc.streams.${name}`,
+          value: masked.length === 1 ? masked[0] : masked,
+        });
+      }
+
+      // Deleted streams (present in saved config, absent from pending)
+      for (const name of Object.keys(saved)) {
+        if (name in live) continue;
+        items.push({
+          scope: "global",
+          fieldPath: `go2rtc.streams.${name}`,
+          value: "",
+        });
+      }
+    }
+
+    return items.sort((left, right) => {
+      const scopeCompare = left.scope.localeCompare(right.scope);
+      if (scopeCompare !== 0) return scopeCompare;
+      const cameraCompare = (left.cameraName ?? "").localeCompare(
+        right.cameraName ?? "",
+      );
+      if (cameraCompare !== 0) return cameraCompare;
+      return left.fieldPath.localeCompare(right.fieldPath);
+    });
+  }, [
+    config,
+    fullSchema,
+    pendingDataBySection,
+    profileFriendlyNames,
+    rawPaths,
+  ]);
+
+  // Map a pendingDataKey to SettingsType menu key for clearing section status
+  const pendingKeyToMenuKey = useCallback(
+    (pendingDataKey: string): SettingsType | undefined => {
+      let sectionPath: string;
+      let level: "global" | "camera";
+
+      if (pendingDataKey.includes("::")) {
+        sectionPath = pendingDataKey.slice(pendingDataKey.indexOf("::") + 2);
+        level = "camera";
+      } else {
+        sectionPath = pendingDataKey;
+        level = "global";
+      }
+
+      // For profile keys like "profiles.armed.detect", extract the actual section
+      const { actualSection } = parseProfileFromSectionPath(sectionPath);
+
+      if (level === "camera") {
+        return CAMERA_SECTION_MAPPING[actualSection] as
+          | SettingsType
+          | undefined;
+      }
+      return (
+        (GLOBAL_SECTION_MAPPING[actualSection] as SettingsType | undefined) ??
+        (ENRICHMENTS_SECTION_MAPPING[actualSection] as
+          | SettingsType
+          | undefined) ??
+        (SYSTEM_SECTION_MAPPING[actualSection] as SettingsType | undefined)
+      );
+    },
+    [],
+  );
+
+  // Show save/undo all buttons only when at least one pending change lives
+  // outside the currently visible page. Map each pending key to its menu key
+  // (e.g. both `detectors` and `model` collapse to `systemDetectorsAndModel`)
+  // so a composite page with two pending config-sections still counts as one.
+  const showSaveAllButtons = useMemo(() => {
+    const pendingKeys = Object.keys(pendingDataBySection);
+    if (pendingKeys.length === 0) return false;
+
+    for (const key of pendingKeys) {
+      const menuKey = pendingKeyToMenuKey(key);
+      if (menuKey !== pageToggle) return true;
+      if (key.includes("::")) {
+        const cameraName = key.slice(0, key.indexOf("::"));
+        if (cameraName !== selectedCamera) return true;
+      }
+    }
+    return false;
+  }, [pendingDataBySection, pendingKeyToMenuKey, pageToggle, selectedCamera]);
+
+  const handleSaveAll = useCallback(async () => {
+    if (
+      !config ||
+      !fullSchema ||
+      !hasPendingChanges ||
+      hasPendingValidationErrors
+    )
+      return;
+
+    setIsSavingAll(true);
+    let successCount = 0;
+    let failCount = 0;
+    let anyNeedsRestart = false;
+    const savedKeys: string[] = [];
+    // Pending entries that have been successfully PUT — cleared in one batch
+    // after `mutate("config")` resolves
+    const keysToClear: string[] = [];
+
+    // `detectors` and `model` are owned by DetectorsAndModelSettingsView
+    const hasPendingDetectors = "detectors" in pendingDataBySection;
+    const hasPendingModel = "model" in pendingDataBySection;
+    if (hasPendingDetectors || hasPendingModel) {
+      try {
+        const pendingDetectors = hasPendingDetectors
+          ? pendingDataBySection.detectors
+          : undefined;
+        const pendingModel = hasPendingModel
+          ? pendingDataBySection.model
+          : undefined;
+
+        // Hidden-field lists come from the section configs themselves so
+        // they stay in sync with what the embedded forms strip on render
+        const detectorHiddenFields = resolveHiddenFieldEntries(
+          getSectionConfig("detectors", "global").hiddenFields,
+          buildHiddenFieldContext(config, "global"),
+        );
+        const modelHiddenFields = resolveHiddenFieldEntries(
+          getSectionConfig("model", "global").hiddenFields,
+          buildHiddenFieldContext(config, "global"),
+        );
+        const sanitizedDetectors =
+          pendingDetectors !== undefined
+            ? sanitizeSectionData(pendingDetectors, detectorHiddenFields)
+            : undefined;
+        const sanitizedModel =
+          pendingModel !== undefined
+            ? sanitizeSectionData(pendingModel, modelHiddenFields)
+            : undefined;
+
+        // Pre-clear conditions: detector keys differ from saved config (rename
+        // or add/remove), OR the model save flips between Plus and Custom modes
+        let detectorKeysChanged = false;
+        if (sanitizedDetectors && typeof sanitizedDetectors === "object") {
+          const pendingKeySet = Object.keys(
+            sanitizedDetectors as JsonObject,
+          ).sort();
+          const savedKeySet = Object.keys(config.detectors ?? {}).sort();
+          detectorKeysChanged =
+            JSON.stringify(pendingKeySet) !== JSON.stringify(savedKeySet);
+        }
+        let modelTabChanged = false;
+        if (sanitizedModel && typeof sanitizedModel === "object") {
+          const newPath = (sanitizedModel as { path?: string }).path;
+          const oldPath = config.model?.path;
+          const newIsPlus =
+            typeof newPath === "string" && newPath.startsWith("plus://");
+          const oldIsPlus =
+            typeof oldPath === "string" && oldPath.startsWith("plus://");
+          modelTabChanged = newIsPlus !== oldIsPlus;
+        }
+
+        if (detectorKeysChanged || modelTabChanged) {
+          try {
+            await axios.put("config/set", {
+              requires_restart: 0,
+              config_data: { detectors: null, model: null },
+            });
+          } catch {
+            // best-effort cleanup; the merge-write below will surface any
+            // real error.
+          }
+        }
+
+        const combinedConfigData: Record<string, unknown> = {};
+        if (sanitizedDetectors !== undefined) {
+          combinedConfigData.detectors = sanitizedDetectors;
+        }
+        if (sanitizedModel !== undefined) {
+          combinedConfigData.model = sanitizedModel;
+        }
+
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: combinedConfigData,
+        });
+
+        if (hasPendingDetectors) {
+          keysToClear.push("detectors");
+          savedKeys.push("detectors");
+        }
+        if (hasPendingModel) {
+          keysToClear.push("model");
+          savedKeys.push("model");
+        }
+
+        if (hasPendingDetectors || hasPendingModel) {
+          successCount++;
+          anyNeedsRestart = true;
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(
+          "Save All – error saving detectors/model atomically",
+          error,
+        );
+        if (hasPendingDetectors || hasPendingModel) {
+          failCount++;
+        }
+      }
+    }
+
+    // go2rtc streams are owned by Go2RtcStreamsSettingsView
+    if ("go2rtc_streams" in pendingDataBySection) {
+      try {
+        const liveStreams =
+          (pendingDataBySection["go2rtc_streams"] as Record<
+            string,
+            string[]
+          >) ?? {};
+        const streamsPayload: Record<string, string[] | string> = {
+          ...liveStreams,
+        };
+        const deletedStreamNames = Object.keys(
+          config.go2rtc?.streams ?? {},
+        ).filter((name) => !(name in liveStreams));
+        for (const deleted of deletedStreamNames) {
+          streamsPayload[deleted] = "";
+        }
+
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: { go2rtc: { streams: streamsPayload } },
+        });
+
+        // Update the running go2rtc instance to match
+        const go2rtcUpdates: Promise<unknown>[] = [];
+        for (const [streamName, urls] of Object.entries(liveStreams)) {
+          if (urls[0]) {
+            go2rtcUpdates.push(
+              axios.put(
+                `go2rtc/streams/${streamName}?src=${encodeURIComponent(urls[0])}`,
+              ),
+            );
+          }
+        }
+        for (const deleted of deletedStreamNames) {
+          go2rtcUpdates.push(axios.delete(`go2rtc/streams/${deleted}`));
+        }
+        await Promise.allSettled(go2rtcUpdates);
+
+        keysToClear.push("go2rtc_streams");
+        savedKeys.push("go2rtc_streams");
+        successCount++;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Save All – error saving go2rtc streams", error);
+        failCount++;
+      }
+    }
+
+    const pendingKeys = Object.keys(pendingDataBySection).filter(
+      (key) =>
+        key !== "detectors" && key !== "model" && key !== "go2rtc_streams",
+    );
+
+    for (const key of pendingKeys) {
+      const pendingData = pendingDataBySection[key];
+
+      try {
+        const payload = prepareSectionSavePayload({
+          pendingDataKey: key,
+          pendingData,
+          config,
+          fullSchema,
+        });
+
+        if (!payload) {
+          // No actual overrides — schedule the pending entry for clearing
+          keysToClear.push(key);
+          successCount++;
+          continue;
+        }
+
+        const configData = buildConfigDataForPath(
+          payload.basePath,
+          payload.sanitizedOverrides,
+        );
+        await axios.put("config/set", {
+          requires_restart: payload.needsRestart ? 1 : 0,
+          update_topic: payload.updateTopic,
+          config_data: configData,
+        });
+
+        if (payload.needsRestart) {
+          anyNeedsRestart = true;
+        }
+
+        // Defer clearing the pending entry until after mutate("config") resolves
+        keysToClear.push(key);
+        savedKeys.push(key);
+        successCount++;
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Save All – error saving", key, error);
+        failCount++;
+      }
+    }
+
+    // Refresh config from server once — must complete before clearing the
+    // pending entries so consumers don't observe a moment where pending is
+    // empty AND config is still stale
+    await mutate("config");
+    mutate("config/raw_paths");
+
+    if (keysToClear.length > 0) {
+      setPendingDataBySection((prev) => {
+        const next = { ...prev };
+        for (const key of keysToClear) {
+          delete next[key];
+        }
+        return next;
+      });
+    }
+
+    // Clear hasChanges in sidebar for all successfully saved sections
+    if (savedKeys.length > 0) {
+      setSectionStatusByKey((prev) => {
+        const updated = { ...prev };
+        for (const key of savedKeys) {
+          const menuKey = pendingKeyToMenuKey(key);
+          if (menuKey && updated[menuKey]) {
+            updated[menuKey] = {
+              ...updated[menuKey],
+              hasChanges: false,
+              hasValidationErrors: false,
+            };
+          }
+        }
+        return updated;
+      });
+    }
+
+    // Aggregate toast
+    const totalCount = successCount + failCount;
+    if (failCount === 0) {
+      if (anyNeedsRestart) {
+        toast.success(
+          t("toast.saveAllSuccessRestartRequired", {
+            ns: "views/settings",
+            count: successCount,
+          }),
+          {
+            duration: 10000,
+            action: (
+              <a onClick={() => setRestartDialogOpen(true)}>
+                <Button>
+                  {t("restart.button", { ns: "components/dialog" })}
+                </Button>
+              </a>
+            ),
+          },
+        );
+      } else {
+        toast.success(
+          t("toast.saveAllSuccess", {
+            ns: "views/settings",
+            count: successCount,
+          }),
+        );
+      }
+    } else if (successCount > 0) {
+      toast.warning(
+        t("toast.saveAllPartial", {
+          ns: "views/settings",
+          count: totalCount,
+          successCount,
+          totalCount,
+          failCount,
+        }),
+      );
+    } else {
+      toast.error(t("toast.saveAllFailure", { ns: "views/settings" }));
+    }
+
+    setIsSavingAll(false);
+  }, [
+    config,
+    fullSchema,
+    hasPendingChanges,
+    hasPendingValidationErrors,
+    pendingDataBySection,
+    pendingKeyToMenuKey,
+    t,
+  ]);
+
+  const handleUndoAll = useCallback(() => {
+    const pendingKeys = Object.keys(pendingDataBySection);
+    if (pendingKeys.length === 0) return;
+
+    setPendingDataBySection({});
+    setUnsavedChanges(false);
+    setEditingProfile({});
+
+    setSectionStatusByKey((prev) => {
+      const updated = { ...prev };
+      for (const key of pendingKeys) {
+        const menuKey = pendingKeyToMenuKey(key);
+        if (menuKey && updated[menuKey]) {
+          updated[menuKey] = {
+            ...updated[menuKey],
+            hasChanges: false,
+            hasValidationErrors: false,
+          };
+        }
+      }
+      return updated;
+    });
+  }, [pendingDataBySection, pendingKeyToMenuKey]);
+
   const handleDialog = useCallback(
     (save: boolean) => {
       if (unsavedChanges && save) {
-        // TODO
+        handleSaveAll();
       }
       setConfirmationDialogOpen(false);
       setUnsavedChanges(false);
     },
-    [unsavedChanges],
+    [unsavedChanges, handleSaveAll],
   );
 
   useEffect(() => {
@@ -271,7 +1261,7 @@ export default function Settings() {
         !isAdmin &&
         !ALLOWED_VIEWS_FOR_VIEWER.includes(page as SettingsType)
       ) {
-        setPageToggle("ui");
+        setPageToggle("uiSettings");
       } else {
         setPageToggle(page as SettingsType);
       }
@@ -301,16 +1291,440 @@ export default function Settings() {
     }
   }, [t, contentMobileOpen]);
 
+  // Profile state handlers
+  const handleSelectProfile = useCallback(
+    (camera: string, _section: string, profile: string | null) => {
+      setEditingProfile((prev) => {
+        if (profile === null) {
+          const { [camera]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [camera]: profile };
+      });
+    },
+    [],
+  );
+
+  const handleDeleteProfileSection = useCallback(
+    async (camera: string, section: string, profile: string) => {
+      try {
+        await axios.put("config/set", {
+          requires_restart: 0,
+          config_data: {
+            cameras: {
+              [camera]: {
+                profiles: {
+                  [profile]: {
+                    [section]: "",
+                  },
+                },
+              },
+            },
+          },
+        });
+        await mutate("config");
+        // Switch back to base config
+        handleSelectProfile(camera, section, null);
+        toast.success(
+          t("profiles.deleteSectionSuccess", {
+            ns: "views/settings",
+            section: t(`configForm.sections.${section}`, {
+              ns: "views/settings",
+              defaultValue: section,
+            }),
+            profile: profileFriendlyNames.get(profile) ?? profile,
+          }),
+        );
+      } catch {
+        toast.error(t("toast.save.error.title", { ns: "common" }));
+      }
+    },
+    [handleSelectProfile, profileFriendlyNames, t],
+  );
+
+  const profileState: ProfileState = useMemo(
+    () => ({
+      editingProfile,
+      allProfileNames,
+      profileFriendlyNames,
+      onSelectProfile: handleSelectProfile,
+      onDeleteProfileSection: handleDeleteProfileSection,
+    }),
+    [
+      editingProfile,
+      allProfileNames,
+      profileFriendlyNames,
+      handleSelectProfile,
+      handleDeleteProfileSection,
+    ],
+  );
+
+  // Header profile dropdown: derive section key from current page
+  const currentSectionKey = useMemo(
+    () => REVERSE_CAMERA_SECTION_MAPPING[pageToggle] ?? null,
+    [pageToggle],
+  );
+
+  const headerEditingProfile = useMemo(() => {
+    if (!selectedCamera || !currentSectionKey) return null;
+    return editingProfile[selectedCamera] ?? null;
+  }, [selectedCamera, currentSectionKey, editingProfile]);
+
+  const showProfileDropdown =
+    PROFILE_DROPDOWN_PAGES.has(pageToggle) &&
+    !!selectedCamera &&
+    (allProfileNames.length > 0 || profilesUIEnabled);
+
+  const headerHasProfileData = useCallback(
+    (profileName: string): boolean => {
+      if (!config || !selectedCamera || !currentSectionKey) return false;
+      const profileData =
+        config.cameras[selectedCamera]?.profiles?.[profileName];
+      if (!profileData) return false;
+
+      if (currentSectionKey === "masksAndZones") {
+        const hasZones =
+          profileData.zones && Object.keys(profileData.zones).length > 0;
+        const hasMotionMasks =
+          profileData.motion?.mask &&
+          Object.keys(profileData.motion.mask).length > 0;
+        const hasObjectMasks =
+          (profileData.objects?.mask &&
+            Object.keys(profileData.objects.mask).length > 0) ||
+          (profileData.objects?.filters &&
+            Object.values(profileData.objects.filters).some(
+              (f) => f.mask && Object.keys(f.mask).length > 0,
+            ));
+        return !!(hasZones || hasMotionMasks || hasObjectMasks);
+      }
+
+      return !!profileData[currentSectionKey as keyof typeof profileData];
+    },
+    [config, selectedCamera, currentSectionKey],
+  );
+
+  const handleDeleteProfileForCurrentSection = useCallback(
+    async (profileName: string) => {
+      if (!selectedCamera || !currentSectionKey) return;
+
+      if (currentSectionKey === "masksAndZones") {
+        try {
+          const profileData =
+            config?.cameras?.[selectedCamera]?.profiles?.[profileName];
+          if (!profileData) return;
+
+          // Build a targeted delete payload that only removes mask-related
+          // sub-keys, not the entire motion/objects sections
+          const deletePayload: JsonObject = {};
+
+          if (profileData.zones !== undefined) {
+            deletePayload.zones = "";
+          }
+
+          if (profileData.motion?.mask !== undefined) {
+            deletePayload.motion = { mask: "" };
+          }
+
+          if (profileData.objects) {
+            const objDelete: JsonObject = {};
+            if (profileData.objects.mask !== undefined) {
+              objDelete.mask = "";
+            }
+            if (profileData.objects.filters) {
+              const filtersDelete: JsonObject = {};
+              for (const [filterName, filterVal] of Object.entries(
+                profileData.objects.filters,
+              )) {
+                if (filterVal.mask !== undefined) {
+                  filtersDelete[filterName] = { mask: "" };
+                }
+              }
+              if (Object.keys(filtersDelete).length > 0) {
+                objDelete.filters = filtersDelete;
+              }
+            }
+            if (Object.keys(objDelete).length > 0) {
+              deletePayload.objects = objDelete;
+            }
+          }
+
+          if (Object.keys(deletePayload).length === 0) return;
+
+          await axios.put("config/set", {
+            requires_restart: 0,
+            config_data: {
+              cameras: {
+                [selectedCamera]: {
+                  profiles: {
+                    [profileName]: deletePayload,
+                  },
+                },
+              },
+            },
+          });
+          await mutate("config");
+          handleSelectProfile(selectedCamera, "masksAndZones", null);
+          toast.success(
+            t("profiles.deleteSectionSuccess", {
+              ns: "views/settings",
+              section: t("configForm.sections.masksAndZones", {
+                ns: "views/settings",
+              }),
+              profile: profileFriendlyNames.get(profileName) ?? profileName,
+            }),
+          );
+        } catch {
+          toast.error(t("toast.save.error.title", { ns: "common" }));
+        }
+      } else {
+        await handleDeleteProfileSection(
+          selectedCamera,
+          currentSectionKey,
+          profileName,
+        );
+      }
+    },
+    [
+      selectedCamera,
+      currentSectionKey,
+      config,
+      handleSelectProfile,
+      handleDeleteProfileSection,
+      profileFriendlyNames,
+      t,
+    ],
+  );
+
+  const handleSectionStatusChange = useCallback(
+    (sectionKey: string, level: "global" | "camera", status: SectionStatus) => {
+      // Map section keys to menu keys based on level
+      let menuKey: string;
+      if (level === "camera") {
+        menuKey = CAMERA_SECTION_MAPPING[sectionKey] || sectionKey;
+      } else {
+        menuKey =
+          GLOBAL_SECTION_MAPPING[sectionKey] ||
+          ENRICHMENTS_SECTION_MAPPING[sectionKey] ||
+          SYSTEM_SECTION_MAPPING[sectionKey] ||
+          sectionKey;
+      }
+
+      setSectionStatusByKey((prev) => ({
+        ...prev,
+        [menuKey]: status,
+      }));
+    },
+    [],
+  );
+
+  const handlePendingDataChange = useCallback(
+    (
+      sectionKey: string,
+      cameraName: string | undefined,
+      data: ConfigSectionData | null,
+    ) => {
+      const pendingDataKey = cameraName
+        ? `${cameraName}::${sectionKey}`
+        : sectionKey;
+
+      setPendingDataBySection((prev) => {
+        if (data === null) {
+          const { [pendingDataKey]: _, ...rest } = prev;
+          return rest;
+        }
+        return {
+          ...prev,
+          [pendingDataKey]: data,
+        };
+      });
+    },
+    [],
+  );
+
+  const handleSectionSavingChange = useCallback((saving: boolean) => {
+    setIsAnySectionSaving(saving);
+  }, []);
+
+  // The active profile being edited for the selected camera
+  const activeEditingProfile = selectedCamera
+    ? (editingProfile[selectedCamera] ?? null)
+    : null;
+
+  // Profile color for the active editing profile
+  const activeProfileColor = useMemo(
+    () =>
+      activeEditingProfile
+        ? getProfileColor(activeEditingProfile, allProfileNames)
+        : undefined,
+    [activeEditingProfile, allProfileNames],
+  );
+
+  // Initialize override status for all camera sections
+  useEffect(() => {
+    if (!selectedCamera || !cameraOverrides) return;
+
+    const overrideMap: Partial<
+      Record<
+        SettingsType,
+        Pick<SectionStatus, "hasChanges" | "isOverridden" | "overrideSource">
+      >
+    > = {};
+
+    // Build a set of menu keys that have pending changes for this camera
+    const pendingMenuKeys = new Set<string>();
+    const cameraPrefix = `${selectedCamera}::`;
+    for (const key of Object.keys(pendingDataBySection)) {
+      if (key.startsWith(cameraPrefix)) {
+        const menuKey = pendingKeyToMenuKey(key);
+        if (menuKey) pendingMenuKeys.add(menuKey);
+      }
+    }
+
+    // Get profile data if a profile is being edited
+    const profileData = activeEditingProfile
+      ? config?.cameras?.[selectedCamera]?.profiles?.[activeEditingProfile]
+      : undefined;
+
+    // Set override status for all camera sections using the shared mapping
+    Object.entries(CAMERA_SECTION_MAPPING).forEach(
+      ([sectionKey, settingsKey]) => {
+        const globalOverridden = cameraOverrides.includes(sectionKey);
+
+        // Check if the active profile overrides this section
+        const profileOverrides = profileData
+          ? !!profileData[sectionKey as keyof typeof profileData]
+          : false;
+
+        overrideMap[settingsKey] = {
+          hasChanges: pendingMenuKeys.has(settingsKey),
+          isOverridden: profileOverrides || globalOverridden,
+          overrideSource: profileOverrides
+            ? "profile"
+            : globalOverridden
+              ? "global"
+              : undefined,
+        };
+      },
+    );
+
+    setSectionStatusByKey((prev) => {
+      // Merge and update both hasChanges and isOverridden for camera sections
+      const merged = { ...prev };
+      Object.entries(overrideMap).forEach(([key, status]) => {
+        const existingStatus = merged[key as SettingsType];
+        merged[key as SettingsType] = {
+          hasChanges: status.hasChanges,
+          isOverridden: status.isOverridden,
+          overrideSource: status.overrideSource,
+          hasValidationErrors: existingStatus?.hasValidationErrors ?? false,
+        };
+      });
+      return merged;
+    });
+  }, [
+    selectedCamera,
+    cameraOverrides,
+    pendingDataBySection,
+    pendingKeyToMenuKey,
+    activeEditingProfile,
+    config,
+  ]);
+
+  const renderMenuItemLabel = useCallback(
+    (key: SettingsType) => {
+      const status = sectionStatusByKey[key];
+      const showOverrideDot =
+        CAMERA_SECTION_KEYS.has(key) && status?.isOverridden;
+      const showUnsavedDot = status?.hasChanges;
+
+      const isProfileOverride =
+        status?.overrideSource === "profile" && activeProfileColor;
+      const dotColor = isProfileOverride
+        ? activeProfileColor.dot
+        : "bg-selected";
+
+      const overrideTooltip = isProfileOverride
+        ? t("menuDot.overrideProfile", {
+            profile: activeEditingProfile
+              ? (profileFriendlyNames.get(activeEditingProfile) ??
+                activeEditingProfile)
+              : "",
+          })
+        : t("menuDot.overrideGlobal");
+
+      return (
+        <div className="flex w-full min-w-0 items-center justify-between pr-4 md:pr-0">
+          <div className="min-w-0 flex-1 whitespace-normal break-words">
+            {t("menu." + key)}
+          </div>
+          {(showOverrideDot || showUnsavedDot) && (
+            <div className="ml-2 flex shrink-0 items-center gap-2">
+              {showOverrideDot && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className={cn(
+                        "inline-block size-2 rounded-full",
+                        dotColor,
+                      )}
+                    />
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent side="right">
+                      {overrideTooltip}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              )}
+              {showUnsavedDot && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-block size-2 rounded-full bg-unsaved" />
+                  </TooltipTrigger>
+                  <TooltipPortal>
+                    <TooltipContent side="right">
+                      {t("menuDot.unsaved")}
+                    </TooltipContent>
+                  </TooltipPortal>
+                </Tooltip>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    },
+    [
+      sectionStatusByKey,
+      t,
+      activeProfileColor,
+      activeEditingProfile,
+      profileFriendlyNames,
+    ],
+  );
+
   if (isMobile) {
     return (
       <>
+        <Toaster position="top-center" closeButton={true} />
         {!contentMobileOpen && (
-          <div className="flex size-full flex-col">
+          <div
+            key={`mobile-menu-${selectedCamera}`}
+            className="flex size-full flex-col"
+          >
             <div className="sticky -top-2 z-50 mb-2 bg-background p-4">
-              <div className="flex items-center justify-center">
+              <div className="relative flex w-full items-center justify-center">
                 <Logo className="h-8" />
+                <div className="absolute right-0">
+                  <CameraSelectButton
+                    allCameras={cameras}
+                    selectedCamera={selectedCamera}
+                    setSelectedCamera={setSelectedCamera}
+                    cameraEnabledStates={cameraEnabledStates}
+                    currentPage={page}
+                  />
+                </div>
               </div>
-              <div className="flex flex-row text-center">
+              <div className="flex flex-row items-center">
                 <h2 className="ml-2 text-lg">
                   {t("menu.settings", { ns: "common" })}
                 </h2>
@@ -323,39 +1737,115 @@ export default function Settings() {
                   visibleSettingsViews.includes(item.key as SettingsType),
                 );
                 if (filteredItems.length === 0) return null;
+                const isMultiItem = filteredItems.length > 1;
+                const renderedExpanded =
+                  !isMultiItem || !collapsedGroups.has(group.label);
+                const items = filteredItems.map((item) => (
+                  <MobileMenuItem
+                    key={item.key}
+                    item={item}
+                    className={cn(filteredItems.length == 1 && "pl-2")}
+                    label={renderMenuItemLabel(item.key as SettingsType)}
+                    onSelect={(key) => {
+                      if (
+                        !isAdmin &&
+                        !ALLOWED_VIEWS_FOR_VIEWER.includes(key as SettingsType)
+                      ) {
+                        setPageToggle("uiSettings");
+                      } else {
+                        setPageToggle(key as SettingsType);
+                      }
+                      setContentMobileOpen(true);
+                    }}
+                  />
+                ));
                 return (
                   <div key={group.label} className="mb-3">
-                    {filteredItems.length > 1 && (
-                      <h3 className="mb-2 ml-2 text-sm font-medium text-secondary-foreground">
-                        <div className="smart-capitalize">
-                          {t("menu." + group.label)}
-                        </div>
-                      </h3>
+                    {isMultiItem ? (
+                      <Collapsible
+                        open={renderedExpanded}
+                        onOpenChange={() => toggleGroupCollapsed(group.label)}
+                      >
+                        <CollapsibleTrigger className="flex min-h-10 w-full items-center justify-between rounded-md py-2 pl-2 pr-2 text-sm font-medium text-secondary-foreground">
+                          <div className="flex flex-col justify-start gap-0.5 text-left">
+                            {t("menu." + group.label)}
+                            {group.label === "cameras" &&
+                              renderedExpanded &&
+                              selectedCamera && (
+                                <div className="max-w-full break-words text-xs text-secondary-foreground/80 smart-capitalize">
+                                  <CameraNameLabel camera={selectedCamera} />
+                                </div>
+                              )}
+                          </div>
+                          <LuChevronRight
+                            className={cn(
+                              "size-4 shrink-0 transition-transform duration-200",
+                              renderedExpanded && "rotate-90",
+                            )}
+                          />
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>{items}</CollapsibleContent>
+                      </Collapsible>
+                    ) : (
+                      items
                     )}
-                    {filteredItems.map((item) => (
-                      <MobileMenuItem
-                        key={item.key}
-                        item={item}
-                        className={cn(filteredItems.length == 1 && "pl-2")}
-                        onSelect={(key) => {
-                          if (
-                            !isAdmin &&
-                            !ALLOWED_VIEWS_FOR_VIEWER.includes(
-                              key as SettingsType,
-                            )
-                          ) {
-                            setPageToggle("ui");
-                          } else {
-                            setPageToggle(key as SettingsType);
-                          }
-                          setContentMobileOpen(true);
-                        }}
-                      />
-                    ))}
                   </div>
                 );
               })}
             </div>
+            {showSaveAllButtons && (
+              <div className="sticky bottom-0 z-50 mt-2 bg-background p-4">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-unsaved">
+                      {t("unsavedChanges", {
+                        ns: "views/settings",
+                        defaultValue: "You have unsaved changes",
+                      })}
+                    </span>
+                    <SaveAllPreviewPopover
+                      items={pendingChangesPreview}
+                      className="h-7 w-7"
+                      align="center"
+                      side="top"
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleUndoAll}
+                    variant="outline"
+                    size="sm"
+                    disabled={isSavingAll || isAnySectionSaving}
+                    className="flex w-full items-center justify-center gap-2"
+                  >
+                    {t("button.undoAll", {
+                      ns: "common",
+                      defaultValue: "Undo All",
+                    })}
+                  </Button>
+                  <Button
+                    onClick={handleSaveAll}
+                    variant="select"
+                    size="sm"
+                    disabled={
+                      isSavingAll ||
+                      isAnySectionSaving ||
+                      hasPendingValidationErrors
+                    }
+                    className="flex w-full items-center justify-center gap-2"
+                  >
+                    {isSavingAll ? (
+                      <>
+                        <ActivityIndicator className="h-4 w-4" />
+                        {t("button.savingAll", { ns: "common" })}
+                      </>
+                    ) : (
+                      t("button.saveAll", { ns: "common" })
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
         <MobilePage
@@ -369,23 +1859,41 @@ export default function Settings() {
               className="top-0 mb-0"
               onClose={() => navigate(-1)}
               actions={
-                CAMERA_SELECT_BUTTON_PAGES.includes(pageToggle) ? (
-                  <div className="flex items-center gap-2">
-                    {pageToggle == "masksAndZones" && (
-                      <ZoneMaskFilterButton
-                        selectedZoneMask={filterZoneMask}
-                        updateZoneMaskFilter={setFilterZoneMask}
+                <div className="flex items-center gap-2">
+                  {CAMERA_SELECT_BUTTON_PAGES.includes(pageToggle) && (
+                    <>
+                      {pageToggle == "masksAndZones" && (
+                        <ZoneMaskFilterButton
+                          selectedZoneMask={filterZoneMask}
+                          updateZoneMaskFilter={setFilterZoneMask}
+                        />
+                      )}
+                      {showProfileDropdown && currentSectionKey && (
+                        <ProfileSectionDropdown
+                          allProfileNames={allProfileNames}
+                          profileFriendlyNames={profileFriendlyNames}
+                          editingProfile={headerEditingProfile}
+                          hasProfileData={headerHasProfileData}
+                          onSelectProfile={(profile) =>
+                            handleSelectProfile(
+                              selectedCamera,
+                              currentSectionKey,
+                              profile,
+                            )
+                          }
+                          iconOnly
+                        />
+                      )}
+                      <CameraSelectButton
+                        allCameras={cameras}
+                        selectedCamera={selectedCamera}
+                        setSelectedCamera={setSelectedCamera}
+                        cameraEnabledStates={cameraEnabledStates}
+                        currentPage={page}
                       />
-                    )}
-                    <CameraSelectButton
-                      allCameras={cameras}
-                      selectedCamera={selectedCamera}
-                      setSelectedCamera={setSelectedCamera}
-                      cameraEnabledStates={cameraEnabledStates}
-                      currentPage={page}
-                    />
-                  </div>
-                ) : undefined
+                    </>
+                  )}
+                </div>
               }
             >
               <MobilePageTitle>{t("menu." + page)}</MobilePageTitle>
@@ -400,6 +1908,17 @@ export default function Settings() {
                     selectedCamera={selectedCamera}
                     setUnsavedChanges={setUnsavedChanges}
                     selectedZoneMask={filterZoneMask}
+                    onSectionStatusChange={handleSectionStatusChange}
+                    pendingDataBySection={pendingDataBySection}
+                    onPendingDataChange={handlePendingDataChange}
+                    profileState={profileState}
+                    onDeleteProfileSection={
+                      handleDeleteProfileForCurrentSection
+                    }
+                    profilesUIEnabled={profilesUIEnabled}
+                    setProfilesUIEnabled={setProfilesUIEnabled}
+                    isSavingAll={isSavingAll}
+                    onSectionSavingChange={handleSectionSavingChange}
                   />
                 );
               })()}
@@ -431,37 +1950,110 @@ export default function Settings() {
             </AlertDialogContent>
           </AlertDialog>
         )}
+        <RestartDialog
+          isOpen={restartDialogOpen}
+          onClose={() => setRestartDialogOpen(false)}
+          onRestart={() => sendRestart("restart")}
+        />
       </>
     );
   }
 
   return (
     <div className="flex h-full flex-col">
+      <Toaster position="top-center" closeButton={true} />
       <div className="flex min-h-16 items-center justify-between border-b border-secondary p-3">
-        <Heading as="h3" className="mb-0">
-          {t("menu.settings", { ns: "common" })}
-        </Heading>
-        {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
-          <div className="flex items-center gap-2">
-            {pageToggle == "masksAndZones" && (
-              <ZoneMaskFilterButton
-                selectedZoneMask={filterZoneMask}
-                updateZoneMaskFilter={setFilterZoneMask}
+        <div className="mr-2 flex w-full items-center justify-between gap-3">
+          <Heading as="h3" className="mb-0">
+            {t("menu.settings", { ns: "common" })}
+          </Heading>
+        </div>
+        <div className="flex items-center gap-2">
+          {showSaveAllButtons && (
+            <div
+              className={cn(
+                "flex flex-row items-center gap-2",
+                CAMERA_SELECT_BUTTON_PAGES.includes(page) &&
+                  "border-r border-secondary pr-5",
+              )}
+            >
+              <SaveAllPreviewPopover
+                items={pendingChangesPreview}
+                className="size-8"
+                align="end"
+                side="bottom"
               />
-            )}
-            <CameraSelectButton
-              allCameras={cameras}
-              selectedCamera={selectedCamera}
-              setSelectedCamera={setSelectedCamera}
-              cameraEnabledStates={cameraEnabledStates}
-              currentPage={page}
-            />
-          </div>
-        )}
+              <Button
+                onClick={handleUndoAll}
+                variant="outline"
+                size="sm"
+                disabled={isSavingAll || isAnySectionSaving}
+                className="flex items-center justify-center gap-2"
+              >
+                {t("button.undoAll", {
+                  ns: "common",
+                  defaultValue: "Undo All",
+                })}
+              </Button>
+              <Button
+                variant="select"
+                size="sm"
+                onClick={handleSaveAll}
+                disabled={
+                  isSavingAll ||
+                  isAnySectionSaving ||
+                  hasPendingValidationErrors
+                }
+                className="flex items-center justify-center gap-2"
+              >
+                {isSavingAll ? (
+                  <>
+                    <ActivityIndicator className="mr-2 size-4" />
+                    {t("button.savingAll", { ns: "common" })}
+                  </>
+                ) : (
+                  t("button.saveAll", { ns: "common" })
+                )}
+              </Button>
+            </div>
+          )}
+          {CAMERA_SELECT_BUTTON_PAGES.includes(page) && (
+            <>
+              {pageToggle == "masksAndZones" && (
+                <ZoneMaskFilterButton
+                  selectedZoneMask={filterZoneMask}
+                  updateZoneMaskFilter={setFilterZoneMask}
+                />
+              )}
+              {showProfileDropdown && currentSectionKey && (
+                <ProfileSectionDropdown
+                  allProfileNames={allProfileNames}
+                  profileFriendlyNames={profileFriendlyNames}
+                  editingProfile={headerEditingProfile}
+                  hasProfileData={headerHasProfileData}
+                  onSelectProfile={(profile) =>
+                    handleSelectProfile(
+                      selectedCamera,
+                      currentSectionKey,
+                      profile,
+                    )
+                  }
+                />
+              )}
+              <CameraSelectButton
+                allCameras={cameras}
+                selectedCamera={selectedCamera}
+                setSelectedCamera={setSelectedCamera}
+                cameraEnabledStates={cameraEnabledStates}
+                currentPage={page}
+              />
+            </>
+          )}
+        </div>
       </div>
-      <SidebarProvider>
-        <Sidebar variant="inset" className="relative mb-8 pl-0 pt-0">
-          <SidebarContent className="scrollbar-container mb-24 overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
+      <SidebarProvider className="relative h-full min-h-0 flex-1">
+        <Sidebar variant="inset" className="absolute h-full pl-0 pt-0">
+          <SidebarContent className="scrollbar-container overflow-y-auto border-r-[1px] border-secondary bg-background py-2">
             <SidebarMenu>
               {settingsGroups.map((group) => {
                 const filteredItems = group.items.filter((item) =>
@@ -474,7 +2066,7 @@ export default function Settings() {
                       <SidebarMenu>
                         <SidebarMenuItem>
                           <SidebarMenuButton
-                            className="ml-0"
+                            className="ml-0 h-auto min-h-8 py-1.5"
                             isActive={pageToggle === filteredItems[0].key}
                             onClick={() => {
                               if (
@@ -483,7 +2075,7 @@ export default function Settings() {
                                   filteredItems[0].key as SettingsType,
                                 )
                               ) {
-                                setPageToggle("ui");
+                                setPageToggle("uiSettings");
                               } else {
                                 setPageToggle(
                                   filteredItems[0].key as SettingsType,
@@ -491,54 +2083,106 @@ export default function Settings() {
                               }
                             }}
                           >
-                            <div className="smart-capitalize">
-                              {t("menu." + filteredItems[0].key)}
-                            </div>
+                            {renderMenuItemLabel(
+                              filteredItems[0].key as SettingsType,
+                            )}
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       </SidebarMenu>
                     ) : (
-                      <>
-                        <SidebarGroupLabel
-                          className={cn(
-                            "ml-2 cursor-default pl-0 text-sm",
-                            filteredItems.some(
-                              (item) => pageToggle === item.key,
-                            )
-                              ? "text-primary"
-                              : "text-sidebar-foreground/80",
-                          )}
-                        >
-                          <div className="smart-capitalize">
-                            {t("menu." + group.label)}
-                          </div>
-                        </SidebarGroupLabel>
-                        <SidebarMenuSub className="mx-2 border-0">
-                          {filteredItems.map((item) => (
-                            <SidebarMenuSubItem key={item.key}>
-                              <SidebarMenuSubButton
-                                isActive={pageToggle === item.key}
-                                onClick={() => {
-                                  if (
-                                    !isAdmin &&
-                                    !ALLOWED_VIEWS_FOR_VIEWER.includes(
-                                      item.key as SettingsType,
-                                    )
-                                  ) {
-                                    setPageToggle("ui");
-                                  } else {
-                                    setPageToggle(item.key as SettingsType);
-                                  }
-                                }}
+                      (() => {
+                        const hasActiveItem = filteredItems.some(
+                          (item) => pageToggle === item.key,
+                        );
+                        const renderedExpanded = !collapsedGroups.has(
+                          group.label,
+                        );
+                        return (
+                          <Collapsible
+                            open={renderedExpanded}
+                            onOpenChange={() =>
+                              toggleGroupCollapsed(group.label)
+                            }
+                          >
+                            <SidebarGroupLabel
+                              asChild
+                              className={cn(
+                                "ml-2 pl-0 text-sm",
+                                hasActiveItem
+                                  ? "text-primary"
+                                  : "text-sidebar-foreground/80",
+                              )}
+                            >
+                              <CollapsibleTrigger
+                                className={cn(
+                                  "flex w-full items-center justify-between",
+                                  renderedExpanded &&
+                                    group.label == "cameras" &&
+                                    "mb-2",
+                                )}
                               >
-                                <div className="w-full cursor-pointer smart-capitalize">
-                                  {t("menu." + item.key)}
+                                <div className="flex flex-col justify-start gap-0.5 text-left">
+                                  {t("menu." + group.label)}
+                                  {group.label === "cameras" &&
+                                    renderedExpanded &&
+                                    selectedCamera && (
+                                      <div
+                                        className={cn(
+                                          "max-w-full break-words text-xs smart-capitalize",
+                                          hasActiveItem
+                                            ? "text-primary/60"
+                                            : "text-sidebar-foreground/80",
+                                        )}
+                                      >
+                                        <CameraNameLabel
+                                          camera={selectedCamera}
+                                        />
+                                      </div>
+                                    )}
                                 </div>
-                              </SidebarMenuSubButton>
-                            </SidebarMenuSubItem>
-                          ))}
-                        </SidebarMenuSub>
-                      </>
+                                <LuChevronRight
+                                  className={cn(
+                                    "size-4 shrink-0 transition-transform duration-200",
+                                    renderedExpanded && "rotate-90",
+                                  )}
+                                />
+                              </CollapsibleTrigger>
+                            </SidebarGroupLabel>
+                            <CollapsibleContent>
+                              <SidebarMenuSub className="mx-2 border-0 md:mx-0">
+                                {filteredItems.map((item) => (
+                                  <SidebarMenuSubItem key={item.key}>
+                                    <SidebarMenuSubButton
+                                      className="h-auto w-full py-1.5"
+                                      isActive={pageToggle === item.key}
+                                      onClick={() => {
+                                        if (
+                                          !isAdmin &&
+                                          !ALLOWED_VIEWS_FOR_VIEWER.includes(
+                                            item.key as SettingsType,
+                                          )
+                                        ) {
+                                          setPageToggle("uiSettings");
+                                        } else {
+                                          setPageToggle(
+                                            item.key as SettingsType,
+                                          );
+                                        }
+                                      }}
+                                    >
+                                      <div className="w-full cursor-pointer">
+                                        {renderMenuItemLabel(
+                                          item.key as SettingsType,
+                                        )}
+                                      </div>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        );
+                      })()
                     )}
                   </SidebarGroup>
                 );
@@ -547,7 +2191,11 @@ export default function Settings() {
           </SidebarContent>
         </Sidebar>
         <SidebarInset>
-          <div className="scrollbar-container mb-24 flex-1 overflow-y-auto p-2 pr-0">
+          <div
+            className={cn(
+              "scrollbar-container flex-1 overflow-y-auto pl-2 pr-0 pt-2",
+            )}
+          >
             {(() => {
               const CurrentComponent = getCurrentComponent(page);
               if (!CurrentComponent) return null;
@@ -556,6 +2204,15 @@ export default function Settings() {
                   selectedCamera={selectedCamera}
                   setUnsavedChanges={setUnsavedChanges}
                   selectedZoneMask={filterZoneMask}
+                  onSectionStatusChange={handleSectionStatusChange}
+                  pendingDataBySection={pendingDataBySection}
+                  onPendingDataChange={handlePendingDataChange}
+                  profileState={profileState}
+                  onDeleteProfileSection={handleDeleteProfileForCurrentSection}
+                  profilesUIEnabled={profilesUIEnabled}
+                  setProfilesUIEnabled={setProfilesUIEnabled}
+                  isSavingAll={isSavingAll}
+                  onSectionSavingChange={handleSectionSavingChange}
                 />
               );
             })()}
@@ -587,6 +2244,11 @@ export default function Settings() {
           </AlertDialog>
         )}
       </SidebarProvider>
+      <RestartDialog
+        isOpen={restartDialogOpen}
+        onClose={() => setRestartDialogOpen(false)}
+        onRestart={() => sendRestart("restart")}
+      />
     </div>
   );
 }
@@ -688,7 +2350,6 @@ function CameraSelectButton({
 
   return (
     <DropdownMenu
-      modal={false}
       open={open}
       onOpenChange={(open: boolean) => {
         if (!open) {

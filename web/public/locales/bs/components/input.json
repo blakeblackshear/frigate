@@ -1,0 +1,10 @@
+{
+  "button": {
+    "downloadVideo": {
+      "label": "Preuzimanje videa",
+      "toast": {
+        "success": "Vaš video stavke pregleda je započelo preuzimanje."
+      }
+    }
+  }
+}

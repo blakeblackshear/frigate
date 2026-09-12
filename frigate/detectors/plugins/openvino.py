@@ -1,9 +1,9 @@
 import logging
+from typing import Literal
 
 import numpy as np
 import openvino as ov
-from pydantic import Field
-from typing_extensions import Literal
+from pydantic import ConfigDict, Field
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import OpenVINOModelRunner
@@ -20,8 +20,18 @@ DETECTOR_KEY = "openvino"
 
 
 class OvDetectorConfig(BaseDetectorConfig):
+    """OpenVINO detector for AMD and Intel CPUs, Intel GPUs and Intel VPU hardware."""
+
+    model_config = ConfigDict(
+        title="OpenVINO",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default=None, title="Device Type")
+    device: str = Field(
+        default=None,
+        title="Device Type",
+        description="The device to use for OpenVINO inference (e.g. 'CPU', 'GPU', 'NPU').",
+    )
 
 
 class OvDetector(DetectionApi):
@@ -41,6 +51,12 @@ class OvDetector(DetectionApi):
 
         self.h = detector_config.model.height
         self.w = detector_config.model.width
+
+        logger.info(
+            "Loading OpenVINO model %s on device %s",
+            detector_config.model.path,
+            detector_config.device,
+        )
 
         self.runner = OpenVINOModelRunner(
             model_path=detector_config.model.path,
@@ -210,12 +226,12 @@ class OvDetector(DetectionApi):
 
             conf_mask = (image_pred[:, 4] * class_conf.squeeze() >= 0.3).squeeze()
             # Detections ordered as (x1, y1, x2, y2, obj_conf, class_conf, class_pred)
-            detections = np.concatenate(
+            predictions = np.concatenate(
                 (image_pred[:, :5], class_conf, class_pred), axis=1
             )
-            detections = detections[conf_mask]
+            predictions = predictions[conf_mask]
 
-            ordered = detections[detections[:, 5].argsort()[::-1]][:20]
+            ordered = predictions[predictions[:, 5].argsort()[::-1]][:20]
 
             for i, object_detected in enumerate(ordered):
                 detections[i] = self.process_yolo(

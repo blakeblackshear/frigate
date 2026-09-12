@@ -119,7 +119,7 @@ export default function IconPicker({
             placeholder={t("iconPicker.search.placeholder", {
               ns: "components/icons",
             })}
-            className="text-md mb-3 md:text-sm"
+            className="mb-3 md:text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -153,11 +153,15 @@ export default function IconPicker({
 }
 
 type IconRendererProps = {
-  icon: IconType;
+  icon: IconType | undefined;
   size?: number;
   className?: string;
 };
 
 export function IconRenderer({ icon, size, className }: IconRendererProps) {
+  if (!icon) {
+    return null;
+  }
+
   return <>{React.createElement(icon, { size, className })}</>;
 }

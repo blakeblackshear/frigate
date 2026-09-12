@@ -7,12 +7,40 @@
     "logs": {
       "frigate": "Frigate Logs - Frigate",
       "go2rtc": "Go2RTC Logs - Frigate",
-      "nginx": "Nginx Logs - Frigate"
+      "nginx": "Nginx Logs - Frigate",
+      "websocket": "Messages Logs - Frigate"
     }
   },
   "title": "System",
   "metrics": "System metrics",
   "logs": {
+    "websocket": {
+      "label": "Messages",
+      "pause": "Pause",
+      "resume": "Resume",
+      "clear": "Clear",
+      "filter": {
+        "all": "All topics",
+        "topics": "Topics",
+        "events": "Events",
+        "reviews": "Reviews",
+        "classification": "Classification",
+        "face_recognition": "Face Recognition",
+        "lpr": "LPR",
+        "camera_activity": "Camera activity",
+        "system": "System",
+        "camera": "Camera",
+        "all_cameras": "All cameras",
+        "cameras_count_one": "{{count}} Camera",
+        "cameras_count_other": "{{count}} Cameras"
+      },
+      "empty": "No messages captured yet",
+      "count_one": "{{count}} message",
+      "count_other": "{{count}} messages",
+      "expanded": {
+        "payload": "Payload"
+      }
+    },
     "download": {
       "label": "Download Logs"
     },
@@ -50,7 +78,9 @@
       "gpuUsage": "GPU Usage",
       "gpuMemory": "GPU Memory",
       "gpuEncoder": "GPU Encoder",
+      "gpuCompute": "GPU Compute / Encode",
       "gpuDecoder": "GPU Decoder",
+      "gpuTemperature": "GPU Temperature",
       "gpuInfo": {
         "vainfoOutput": {
           "title": "Vainfo Output",
@@ -77,11 +107,7 @@
       },
       "npuUsage": "NPU Usage",
       "npuMemory": "NPU Memory",
-      "intelGpuWarning": {
-        "title": "Intel GPU Stats Warning",
-        "message": "GPU stats unavailable",
-        "description": "This is a known bug in Intel's GPU stats reporting tools (intel_gpu_top) where it will break and repeatedly return a GPU usage of 0% even in cases where hardware acceleration and object detection are correctly running on the (i)GPU. This is not a Frigate bug. You can restart the host to temporarily fix the issue and confirm that the GPU is working correctly. This does not affect performance."
-      }
+      "npuTemperature": "NPU Temperature"
     },
     "otherProcesses": {
       "title": "Other Processes",
@@ -106,7 +132,11 @@
     },
     "shm": {
       "title": "SHM (shared memory) allocation",
-      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB."
+      "warning": "The current SHM size of {{total}}MB is too small. Increase it to at least {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Frame lifetime",
+        "description": "Each camera has {{frames}} frame slots in shared memory. At the fastest camera's frame rate, each frame is available for approximately {{lifetime}}s before being overwritten."
+      }
     },
     "cameraStorage": {
       "title": "Camera Storage",
@@ -139,9 +169,27 @@
       "error": "Error: {{error}}",
       "tips": {
         "title": "Camera Probe Info"
+      },
+      "keyframes": {
+        "title": "Keyframe analysis",
+        "analyzing": "Analyzing keyframes... {{seconds}} seconds remaining",
+        "stillAnalyzing": "Still analyzing keyframes...",
+        "recordStream": "Record stream:",
+        "keyframeCount": "Keyframes observed:",
+        "observedDuration": "Observed duration:",
+        "gap": "Keyframe gap (min / avg / max):",
+        "segmentLength": "Recording segment length:",
+        "ok": "Keyframes every ~{{seconds}}s, good for recording and playback.",
+        "warning": "Sparse or variable keyframes (longest gap ~{{seconds}}s), likely a smart codec (H.264+/H.265+), this is not recommended.",
+        "error": "Keyframe gap (~{{seconds}}s) exceeds the recording segment length ({{segmentTime}}s). Some segments may have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
+        "unknown": "Couldn't determine keyframe spacing.",
+        "recordDisabled": "Recording is disabled for this camera."
       }
     },
     "framesAndDetections": "Frames / Detections",
+    "noCameras": {
+      "title": "No Cameras Found"
+    },
     "label": {
       "camera": "camera",
       "detect": "detect",
@@ -154,9 +202,21 @@
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "{{camName}} capture",
       "cameraDetect": "{{camName}} detect",
+      "cameraGpu": "{{camName}} GPU",
       "cameraFramesPerSecond": "{{camName}} frames per second",
       "cameraDetectionsPerSecond": "{{camName}} detections per second",
       "cameraSkippedDetectionsPerSecond": "{{camName}} skipped detections per second"
+    },
+    "connectionQuality": {
+      "title": "Connection Quality",
+      "excellent": "Excellent",
+      "fair": "Fair",
+      "poor": "Poor",
+      "unusable": "Unusable",
+      "fps": "FPS",
+      "expectedFps": "Expected FPS",
+      "reconnectsLastHour": "Reconnects (last hour)",
+      "stallsLastHour": "Stalls (last hour)"
     },
     "toast": {
       "success": {
@@ -176,7 +236,8 @@
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
-    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB."
+    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB.",
+    "debugReplayActive": "Debug replay session is active"
   },
   "enrichments": {
     "title": "Enrichments",

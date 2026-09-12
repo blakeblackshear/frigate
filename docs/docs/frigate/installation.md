@@ -3,6 +3,11 @@ id: installation
 title: Installation
 ---
 
+import ShmCalculator from '@site/src/components/ShmCalculator'
+import DockerComposeGenerator from '@site/src/components/DockerComposeGenerator'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 Frigate is a Docker container that can be run on any Docker host including as a [Home Assistant App](https://www.home-assistant.io/apps/). Note that the Home Assistant App is **not** the same thing as the integration. The [integration](/integrations/home-assistant) is required to integrate Frigate into Home Assistant, whether you are running Frigate as a standalone Docker container or as a Home Assistant App.
 
 :::tip
@@ -73,26 +78,37 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose).
+The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose). If raising the shm size does not help, check your [process and file limits](#process-and-file-limits) as well.
 
 The Frigate container also stores logs in shm, which can take up to **40MB**, so make sure to take this into account in your math as well.
 
-You can calculate the **minimum** shm size for each camera with the following formula using the resolution specified for detect:
-
-```console
-# Template for one camera without logs, replace <width> and <height>
-$ python -c 'print("{:.2f}MB".format((<width> * <height> * 1.5 * 20 + 270480) / 1048576))'
-
-# Example for 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format((1280 * 720 * 1.5 * 20 + 270480) / 1048576 + 40))'
-66.63MB
-
-# Example for eight cameras detecting at 1280x720, including logs
-$ python -c 'print("{:.2f}MB".format(((1280 * 720 * 1.5 * 20 + 270480) / 1048576) * 8 + 40))'
-253MB
-```
+<ShmCalculator/>
 
 The shm size cannot be set per container for Home Assistant Apps. However, this is probably not required since by default Home Assistant Supervisor allocates `/dev/shm` with half the size of your total memory. If your machine has 8GB of memory, chances are that Frigate will have access to up to 4GB without any additional configuration.
+
+### Process and file limits
+
+Frigate runs many processes and opens a number of shared memory files. Installs with a large number of cameras can exceed the default limits your container runtime applies.
+
+Hitting the PID limit logs `RuntimeError: can't start new thread`, often followed by a "Bus error" that makes it look like an shm sizing problem. Compare the current count against the max from inside the container:
+
+```bash
+cat /sys/fs/cgroup/pids.current
+cat /sys/fs/cgroup/pids.max
+```
+
+If these are close, raise the limit with [`--pids-limit`](https://docs.docker.com/engine/containers/resource_constraints/) (or `service.pids_limit` in Docker Compose).
+
+Running out of file descriptors logs `OSError: [Errno 24] Too many open files`. Raise the limit in Docker Compose:
+
+```yaml
+services:
+  frigate:
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+```
 
 ## Extra Steps for Specific Hardware
 
@@ -102,7 +118,7 @@ The following sections contain additional setup steps that are only required if 
 
 By default, the Raspberry Pi limits the amount of memory available to the GPU. In order to use ffmpeg hardware acceleration, you must increase the available memory by setting `gpu_mem` to the maximum recommended value in `config.txt` as described in the [official docs](https://www.raspberrypi.org/documentation/computers/config_txt.html#memory-options).
 
-Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with it's own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
+Additionally, the USB Coral draws a considerable amount of power. If using any other USB devices such as an SSD, you will experience instability due to the Pi not providing enough power to USB devices. You will need to purchase an external USB hub with its own power supply. Some have reported success with <a href="https://amzn.to/3a2mH0P" target="_blank" rel="nofollow noopener sponsored">this</a> (affiliate link).
 
 ### Hailo-8
 
@@ -282,7 +298,7 @@ If you are using `docker run`, add this option to your command `--device /dev/ha
 
 #### Configuration
 
-Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8l) to complete the setup.
+Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8) to complete the setup.
 
 ### MemryX MX3
 
@@ -445,10 +461,55 @@ or add these options to your `docker run` command:
 
 Next, you should configure [hardware object detection](/configuration/object_detectors#synaptics) and [hardware video processing](/configuration/hardware_acceleration_video#synaptics).
 
+### AXERA
+
+AXERA accelerators are available in an M.2 form factor, compatible with both Raspberry Pi and Orange Pi. This form factor has also been successfully tested on x86 platforms, making it a versatile choice for various computing environments.
+
+#### Installation
+
+Using AXERA accelerators requires the installation of the AXCL driver. We provide a convenient Linux script to complete this installation.
+
+Follow these steps for installation:
+
+1. Copy or download [this script](https://github.com/ivanshi1108/assets/releases/download/v0.16.2/user_installation.sh).
+2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
+3. Run the script with `./user_installation.sh`
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - /dev/axcl_host
+  - /dev/ax_mmb_dev
+  - /dev/msg_userdev
+volumes:
+  - /usr/bin/axcl:/usr/bin/axcl
+  - /usr/lib/axcl:/usr/lib/axcl
+```
+
+If you are using `docker run`, add this option to your command `--device /dev/axcl_host --device /dev/ax_mmb_dev --device /dev/msg_userdev`
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#axera) to complete the setup.
+
 ## Docker
 
 Running through Docker with Docker Compose is the recommended install method.
 
+<Tabs>
+  <TabItem value="domestic" label="Docker Compose Generator" default>
+
+Generate a Frigate Docker Compose configuration based on your hardware and requirements.
+
+<DockerComposeGenerator/>
+
+  </TabItem>
+  <TabItem value="original" label="Example Docker Compose File">
 ```yaml
 services:
   frigate:
@@ -463,7 +524,8 @@ services:
       - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://github.com/jnicolson/gasket-builder
       - /dev/video11:/dev/video11 # For Raspberry Pi 4B
       - /dev/dri/renderD128:/dev/dri/renderD128 # AMD / Intel GPU, needs to be updated for your hardware
-      - /dev/accel:/dev/accel # Intel NPU
+      - /dev/kfd:/dev/kfd # AMD Kernel Fusion Driver for ROCm
+      - /dev/accel:/dev/accel # AMD / Intel NPU
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /path/to/your/config:/config
@@ -481,6 +543,10 @@ services:
     environment:
       FRIGATE_RTSP_PASSWORD: "password"
 ```
+  </TabItem>
+</Tabs>
+
+**Docker CLI**
 
 If you can't use Docker Compose, you can run the container with something similar to this:
 
@@ -557,7 +623,7 @@ There are several variants of the App available:
 
 If you are using hardware acceleration for ffmpeg, you **may** need to use the _Full Access_ variant of the App. This is because the Frigate App runs in a container with limited access to the host system. The _Full Access_ variant allows you to disable _Protection mode_ and give Frigate full access to the host system.
 
-You can also edit the Frigate configuration file through the [VS Code App](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](../configuration/index.md#accessing-app-config-dir).
+You can also edit the Frigate configuration file through the [VS Code App](https://github.com/hassio-addons/addon-vscode) or similar. In that case, the configuration file will be at `/addon_configs/<addon_directory>/config.yml`, where `<addon_directory>` is specific to the variant of the Frigate App you are running. See the list of directories [here](../configuration/config.md#accessing-app-config-dir).
 
 ## Kubernetes
 
@@ -706,7 +772,7 @@ Failure to remap port 5000 on the host will result in the WebUI and all API endp
 
 :::
 
-Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native swift app). The difference in inference speeds is negligable, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
+Docker containers on macOS can be orchestrated by either [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/) or [OrbStack](https://orbstack.dev) (native Swift app). The difference in inference speeds is negligible, however CPU, power consumption and container start times will be lower on OrbStack because it is a native Swift application.
 
 To allow Frigate to use the Apple Silicon Neural Engine / Processing Unit (NPU) the host must be running [Apple Silicon Detector](../configuration/object_detectors.md#apple-silicon-detector) on the host (outside Docker)
 
@@ -725,7 +791,7 @@ services:
       - /path/to/your/recordings:/recordings
     ports:
       - "8971:8971"
-      # If exposing on macOS map to a diffent host port like 5001 or any orher port with no conflicts
+      # If exposing on macOS map to a different host port like 5001 or any other port with no conflicts
       # - "5001:5000" # Internal unauthenticated access. Expose carefully.
       - "8554:8554" # RTSP feeds
     extra_hosts:

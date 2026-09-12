@@ -21,7 +21,11 @@
     "title": "Recente herkenningen",
     "aria": "Selecteer recente herkenningen",
     "empty": "Er zijn geen recente pogingen tot gezichtsherkenning",
-    "titleShort": "Recent"
+    "titleShort": "Recent",
+    "emptyNoLibrary": {
+      "title": "Een gezicht uploaden",
+      "description": "U moet ten minste één gezicht aan de bibliotheek toevoegen om gezichtsherkenning te laten werken."
+    }
   },
   "selectFace": "Selecteer gezicht",
   "toast": {
@@ -32,7 +36,8 @@
       "updateFaceScoreFailed": "Niet gelukt om gezichtsscore bij te werken: {{errorMessage}}",
       "uploadingImageFailed": "Afbeelding uploaden mislukt: {{errorMessage}}",
       "trainFailed": "Trainen mislukt: {{errorMessage}}",
-      "renameFaceFailed": "Het is niet gelukt om het gezicht te hernoemen: {{errorMessage}}"
+      "renameFaceFailed": "Het is niet gelukt om het gezicht te hernoemen: {{errorMessage}}",
+      "reclassifyFailed": "Opnieuw classificeren van gezicht mislukt: {{errorMessage}}"
     },
     "success": {
       "deletedFace_one": "{{count}} gezicht is succesvol verwijderd.",
@@ -43,7 +48,8 @@
       "deletedName_other": "{{count}} gezichten zijn succesvol verwijderd.",
       "uploadedImage": "Afbeelding succesvol geüpload.",
       "addFaceLibrary": "{{name}} is succesvol toegevoegd aan de Gezichtenbibliotheek!",
-      "renamedFace": "Gezicht succesvol hernoemd naar {{name}}"
+      "renamedFace": "Gezicht succesvol hernoemd naar {{name}}",
+      "reclassifiedFace": "Gezicht succesvol geherclassificeerd."
     }
   },
   "imageEntry": {
@@ -98,5 +104,7 @@
   },
   "collections": "Collecties",
   "nofaces": "Geen gezichten beschikbaar",
-  "pixels": "{{area}}px"
+  "pixels": "{{area}}px",
+  "reclassifyFaceAs": "Herclassificeer ‘Face’ als:",
+  "reclassifyFace": "Gezicht opnieuw classificeren"
 }

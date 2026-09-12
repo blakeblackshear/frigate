@@ -27,6 +27,9 @@ jobs:
       - name: Lint
         run: npm run lint
         working-directory: ./web
+      - name: Check i18n keys
+        run: npm run i18n:extract:ci
+        working-directory: ./web
 
   web_test:
     name: Web - Test
@@ -46,6 +49,37 @@ jobs:
       # - name: Test
       #   run: npm run test
       #   working-directory: ./web
+
+  web_e2e:
+    name: Web - E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20.x
+      - run: npm install
+        working-directory: ./web
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+        working-directory: ./web
+      - name: Build web for E2E
+        run: npm run e2e:build
+        working-directory: ./web
+      - name: Run E2E tests
+        run: npm run e2e
+        working-directory: ./web
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            web/test-results/
+            web/playwright-report/
+          retention-days: 7
 
   python_checks:
     runs-on: ubuntu-latest
@@ -91,5 +125,7 @@ jobs:
         run: devcontainer up --workspace-folder .
       - name: Run mypy in devcontainer
         run: devcontainer exec --workspace-folder . bash -lc "python3 -u -m mypy --config-file frigate/mypy.ini frigate"
+      - name: Check API spec is up to date
+        run: devcontainer exec --workspace-folder . bash -lc "python3 generate_api_auth_spec.py --check"
       - name: Run unit tests in devcontainer
         run: devcontainer exec --workspace-folder . bash -lc "python3 -u -m unittest"

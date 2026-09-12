@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 const useImageLoaded = (): [
-  React.RefObject<HTMLImageElement>,
+  React.RefObject<HTMLImageElement | null>,
   boolean,
   () => void,
 ] => {

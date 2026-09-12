@@ -9,7 +9,7 @@
   "stop_sign": "停止標示",
   "parking_meter": "停車柱",
   "bench": "長椅",
-  "motorcycle": "摩托車",
+  "motorcycle": "機車",
   "airplane": "飛機",
   "bus": "巴士",
   "train": "火車",
@@ -116,5 +116,16 @@
   "nzpost": "紐西蘭郵政（NZ Post）",
   "postnord": "北歐郵政（PostNord）",
   "gls": "GLS 快遞",
-  "dpd": "DPD 快遞"
+  "dpd": "DPD 快遞",
+  "canada_post": "加拿大郵政",
+  "royal_mail": "英國皇家郵政",
+  "school_bus": "校車",
+  "skunk": "臭鼬",
+  "kangaroo": "袋鼠",
+  "baby": "嬰兒",
+  "baby_stroller": "嬰兒推車",
+  "rickshaw": "人力車",
+  "rodent": "齧齒動物",
+  "possum": "負鼠",
+  "garbage_truck": "垃圾車"
 }

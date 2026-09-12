@@ -99,7 +99,7 @@
     "label": "日志级别筛选",
     "filterBySeverity": "按严重程度筛选日志",
     "loading": {
-      "title": "加载中",
+      "title": "实时加载",
       "desc": "当日志面板滚动到底部时，新的日志会自动流式加载。"
     },
     "disableLogStreaming": "禁用日志流式加载",

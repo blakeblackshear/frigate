@@ -1,0 +1,93 @@
+/*
+ * FAQ entry: collapsible on mobile, static heading + expanded answer on
+ * desktop. The split is pure CSS (Docusaurus breakpoint: 996px) so there is
+ * no hydration flash. The answer is always rendered into the DOM, so search
+ * engines and the docs AI bot can read it regardless of layout or state.
+ */
+
+.item {
+  scroll-margin-top: calc(var(--ifm-navbar-height) + 1rem);
+}
+
+.heading {
+  margin: 0;
+}
+
+/* Mobile: the heading text is a full-width clickable toggle row. */
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.85rem 0;
+  border: none;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toggle::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--ifm-transition-fast, 200ms) ease;
+}
+
+.item[data-open] .toggle::before {
+  transform: rotate(45deg);
+}
+
+.question {
+  flex: 1;
+  min-width: 0;
+}
+
+.content {
+  display: none;
+  padding: 0 0 0.85rem;
+}
+
+.item[data-open] .content {
+  display: block;
+}
+
+/* Hide the hover hash link on mobile (no hover; avoids a stray empty line). */
+.heading :global(.hash-link) {
+  display: none;
+}
+
+/* Desktop: render as a normal expanded heading + answer. */
+@media (min-width: 997px) {
+  .heading {
+    margin: 1.75rem 0 0.85rem;
+  }
+
+  .toggle {
+    display: inline;
+    width: auto;
+    padding: 0;
+    border: none;
+    cursor: default;
+  }
+
+  .toggle::before {
+    display: none;
+  }
+
+  .content {
+    display: block;
+    padding: 0 0 0.5rem 1rem;
+    border-left: 2px solid var(--ifm-color-emphasis-200);
+  }
+
+  .heading :global(.hash-link) {
+    display: inline;
+  }
+}

@@ -8,13 +8,21 @@
     }
   },
   "noExports": "Ei vietyjä kohteita",
-  "deleteExport": "Poista viety kohde",
+  "deleteExport": {
+    "label": "Poista vienti"
+  },
   "editExport": {
     "title": "Nimeä uudelleen",
     "desc": "Anna uusi nimi viedylle kohteelle.",
     "saveExport": "Tallenna vienti"
   },
   "tooltip": {
-    "editName": "Muokkaa nimeä"
+    "editName": "Muokkaa nimeä",
+    "shareExport": "Jaa vienti",
+    "downloadVideo": "Lataa video"
+  },
+  "headings": {
+    "cases": "Tapaukset",
+    "uncategorizedExports": "Kategorisoimattomat viennit"
   }
 }

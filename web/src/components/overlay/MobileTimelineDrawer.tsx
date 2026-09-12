@@ -40,7 +40,7 @@ export default function MobileTimelineDrawer({
             setDrawer(false);
           }}
         >
-          {t("timeline")}
+          {t("timeline.label")}
         </div>
         <div
           className={`mx-4 w-full py-2 text-center smart-capitalize ${selected == "events" ? "rounded-lg bg-secondary" : ""}`}

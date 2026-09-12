@@ -24,6 +24,13 @@ export type CameraStats = {
   pid: number;
   process_fps: number;
   skipped_fps: number;
+  connection_quality: "excellent" | "fair" | "poor" | "unusable";
+  expected_fps: number;
+  reconnects_last_hour: number;
+  stalls_last_hour: number;
+  ffmpeg_cpu?: string;
+  capture_cpu?: string;
+  detect_cpu?: string;
 };
 
 export type CpuStats = {
@@ -37,6 +44,9 @@ export type DetectorStats = {
   detection_start: number;
   inference_speed: number;
   pid: number;
+  temperature?: number;
+  cpu?: string;
+  mem?: string;
 };
 
 export type EmbeddingsStats = {
@@ -48,19 +58,28 @@ export type EmbeddingsStats = {
 
 export type ExtraProcessStats = {
   pid: number;
+  cpu?: string;
+  mem?: string;
 };
 
+export type GpuVendor = "intel" | "amd" | "nvidia" | "rockchip" | "rpi";
+
 export type GpuStats = {
+  vendor?: GpuVendor;
   gpu: string;
   mem: string;
   enc?: string;
   dec?: string;
+  compute?: string;
   pstate?: string;
+  temp?: number;
+  clients?: { [pid: string]: string };
 };
 
 export type NpuStats = {
   npu: number;
   mem: string;
+  temp?: number;
 };
 
 export type GpuInfo = "vainfo" | "nvinfo";
@@ -68,7 +87,6 @@ export type GpuInfo = "vainfo" | "nvinfo";
 export type ServiceStats = {
   last_updated: number;
   storage: { [path: string]: StorageStats };
-  temperatures: { [apex: string]: number };
   uptime: number;
   latest_version: string;
   version: string;
@@ -80,6 +98,7 @@ export type StorageStats = {
   used: number;
   mount_type: string;
   min_shm?: number;
+  shm_frame_count?: number;
 };
 
 export type PotentialProblem = {
@@ -115,4 +134,23 @@ export type Ffprobe = {
       width?: number;
     }[];
   };
+};
+
+export type KeyframeSeverity =
+  | "ok"
+  | "warning"
+  | "error"
+  | "unknown"
+  | "record_disabled";
+
+export type KeyframeAnalysis = {
+  severity: KeyframeSeverity;
+  stream_index?: number;
+  keyframe_count?: number;
+  max_gap?: number | null;
+  mean_gap?: number | null;
+  min_gap?: number | null;
+  duration_observed?: number | null;
+  segment_time?: number;
+  thresholds?: { warning: number; error: number };
 };

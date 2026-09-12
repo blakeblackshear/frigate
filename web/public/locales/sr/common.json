@@ -75,5 +75,9 @@
       "24hour": "MM-dd-yy-HH-mm-ss"
     }
   },
-  "readTheDocumentation": "Прочитајте документацију"
+  "readTheDocumentation": "Прочитајте документацију",
+  "menu": {
+    "system": "Систем",
+    "profiles": "Профили"
+  }
 }

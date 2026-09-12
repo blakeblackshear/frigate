@@ -10,7 +10,7 @@ import MotionSegment from "./MotionSegment";
 import { ReviewSegment, MotionData } from "@/types/review";
 
 type VirtualizedMotionSegmentsProps = {
-  timelineRef: React.RefObject<HTMLDivElement>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
   segments: number[];
   events: ReviewSegment[];
   motion_events: MotionData[];
@@ -19,7 +19,7 @@ type VirtualizedMotionSegmentsProps = {
   showMinimap: boolean;
   minimapStartTime?: number;
   minimapEndTime?: number;
-  contentRef: React.RefObject<HTMLDivElement>;
+  contentRef: React.RefObject<HTMLDivElement | null>;
   setHandlebarTime?: React.Dispatch<React.SetStateAction<number>>;
   dense: boolean;
   motionOnly: boolean;
@@ -77,7 +77,9 @@ export const VirtualizedMotionSegments = forwardRef<
           Math.ceil((scrollTop + clientHeight) / SEGMENT_HEIGHT) +
             OVERSCAN_COUNT,
         );
-        setVisibleRange({ start, end });
+        setVisibleRange((prev) =>
+          prev.start === start && prev.end === end ? prev : { start, end },
+        );
       }
     }, [segments.length, timelineRef]);
 

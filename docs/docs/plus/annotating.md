@@ -19,7 +19,7 @@ For the best results, follow these guidelines. You may also want to review the d
 
 ## AI suggested labels
 
-If you have an active Frigate+ subscription, new uploads will be scanned for the objects configured for you camera and you will see suggested labels as light blue boxes when annotating in Frigate+. These suggestions are processed via a queue and typically complete within a minute after uploading, but processing times can be longer.
+If you have an active Frigate+ subscription, new uploads will be scanned for the objects configured for your camera and you will see suggested labels as light blue boxes when annotating in Frigate+. These suggestions are processed via a queue and typically complete within a minute after uploading, but processing times can be longer.
 
 ![Suggestions](/img/plus/suggestions.webp)
 

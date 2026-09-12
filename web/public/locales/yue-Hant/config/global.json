@@ -1,0 +1,564 @@
+{
+    "audio": {
+        "label": "聲音事件",
+        "enabled": {
+            "label": "啟用聲音偵測"
+        },
+        "max_not_heard": {
+            "label": "結束逾時",
+            "description": "當指定聲音類型消失多少秒後，聲音事件會結束。"
+        },
+        "min_volume": {
+            "label": "最低音量",
+            "description": "執行聲音偵測所需的最低 RMS 音量閾值；數值越低靈敏度越高（例如：200 高、500 中、1000 低）。"
+        },
+        "listen": {
+            "label": "監聽聲音類型",
+            "description": "要偵測的聲音事件類型清單（例如：狗吠、火警、尖叫、說話、大叫）。"
+        },
+        "filters": {
+            "label": "聲音過濾器",
+            "description": "針對每種聲音類型的過濾設定，例如信心值門檻，用來減少誤判。"
+        },
+        "enabled_in_config": {
+            "label": "原始聲音偵測狀態",
+            "description": "表示在原始靜態設定檔中是否已啟用聲音偵測。"
+        },
+        "num_threads": {
+            "label": "偵測執行緒數量",
+            "description": "用於聲音偵測處理的執行緒數量。"
+        }
+    },
+    "audio_transcription": {
+        "label": "聲音轉錄",
+        "description": "用於事件及即時字幕的語音與即時聲音轉錄設定。",
+        "live_enabled": {
+            "label": "即時轉錄",
+            "description": "在接收聲音時啟用串流即時轉錄。"
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Birdseye 合成畫面的設定，可將多個鏡頭畫面合併成單一佈局。",
+        "enabled": {
+            "label": "啟用 Birdseye",
+            "description": "啟用或停用 Birdseye 功能。"
+        },
+        "mode": {
+            "label": "追蹤模式",
+            "description": "鏡頭在 Birdseye 中的顯示模式：objects（物件）、motion（動作）、continuous（持續）。"
+        },
+        "order": {
+            "label": "位置",
+            "description": "控制鏡頭在 Birdseye 佈局中排序的數值位置。"
+        }
+    },
+    "detect": {
+        "label": "物件偵測",
+        "description": "用於執行物件偵測及初始化追蹤器的 detect 角色設定。",
+        "enabled": {
+            "label": "啟用偵測"
+        },
+        "height": {
+            "label": "偵測高度",
+            "description": "偵測串流所使用影像幀的高度（像素）；留空會使用原始解析度。"
+        },
+        "width": {
+            "label": "偵測闊度",
+            "description": "偵測串流所使用影像幀的闊度（像素）；留空會使用原始解析度。"
+        },
+        "fps": {
+            "label": "偵測 FPS",
+            "description": "每秒執行偵測的幀數；數值越低 CPU 使用量越少（建議值為 5，只有在追蹤非常快速移動物件時才提高，最多 10）。"
+        },
+        "min_initialized": {
+            "label": "最少初始化幀數",
+            "description": "建立追蹤物件前所需的連續偵測幀數。提高數值可減少誤初始化。預設值為 fps 的一半。"
+        },
+        "max_disappeared": {
+            "label": "最大消失幀數",
+            "description": "當連續多少幀沒有偵測到物件後，該追蹤物件會被視為消失。"
+        },
+        "stationary": {
+            "label": "靜止物件設定",
+            "description": "用於偵測及管理長時間保持靜止的物件。",
+            "interval": {
+                "label": "靜止檢查間隔",
+                "description": "每隔多少幀執行一次偵測檢查以確認物件是否靜止。"
+            },
+            "threshold": {
+                "label": "靜止判定幀數",
+                "description": "當物件位置在多少幀內沒有變化時，會被標記為靜止。"
+            },
+            "max_frames": {
+                "label": "最大幀數",
+                "description": "限制靜止物件被追蹤的最長幀數，之後會被移除。",
+                "default": {
+                    "label": "預設最大幀數",
+                    "description": "預設追蹤靜止物件的最大幀數。"
+                },
+                "objects": {
+                    "label": "物件最大幀數",
+                    "description": "針對不同物件設定追蹤靜止物件的最大幀數。"
+                }
+            },
+            "classifier": {
+                "label": "啟用視覺分類器",
+                "description": "使用視覺分類器在邊界框抖動時仍能偵測真正靜止的物件。"
+            }
+        },
+        "annotation_offset": {
+            "label": "標註時間偏移",
+            "description": "用於調整偵測標註的毫秒偏移，使時間線上的框與錄影更準確對齊，可為正或負值。"
+        }
+    },
+    "face_recognition": {
+        "label": "人臉識別",
+        "enabled": {
+            "label": "啟用人臉識別"
+        },
+        "min_area": {
+            "label": "最小人臉面積",
+            "description": "嘗試識別前所需的人臉偵測框最小面積（像素）。"
+        }
+    },
+    "ffmpeg": {
+        "label": "FFmpeg 設定",
+        "description": "FFmpeg 設定，包括程式路徑、參數、硬件加速選項及不同角色的輸出參數。",
+        "path": {
+            "label": "FFmpeg 路徑",
+            "description": "FFmpeg 可執行檔路徑或版本別名（例如 \"5.0\" 或 \"7.0\"）。"
+        },
+        "global_args": {
+            "label": "FFmpeg 全域參數",
+            "description": "傳遞給 FFmpeg 程序的全域參數。"
+        },
+        "hwaccel_args": {
+            "label": "硬件加速參數",
+            "description": "FFmpeg 硬件加速參數，建議使用對應供應商的預設設定。"
+        },
+        "input_args": {
+            "label": "輸入參數",
+            "description": "套用於 FFmpeg 輸入串流的參數。"
+        },
+        "output_args": {
+            "label": "輸出參數",
+            "description": "不同 FFmpeg 角色（例如 detect、record）使用的預設輸出參數。",
+            "detect": {
+                "label": "偵測輸出參數",
+                "description": "detect 角色串流的預設輸出參數。"
+            },
+            "record": {
+                "label": "錄影輸出參數",
+                "description": "record 角色串流的預設輸出參數。"
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg 重試時間",
+            "description": "當鏡頭串流失敗後，等待多少秒再嘗試重新連線。預設為 10。"
+        },
+        "apple_compatibility": {
+            "label": "Apple 相容模式",
+            "description": "在錄製 H.265 時啟用 HEVC 標記，以改善 Apple 播放器相容性。"
+        },
+        "gpu": {
+            "label": "GPU 編號",
+            "description": "若可用，硬件加速所使用的預設 GPU 編號。"
+        },
+        "inputs": {
+            "label": "鏡頭輸入",
+            "description": "此鏡頭的輸入串流定義清單（路徑及角色）。",
+            "path": {
+                "label": "輸入路徑",
+                "description": "鏡頭輸入串流 URL 或路徑。"
+            },
+            "roles": {
+                "label": "輸入角色",
+                "description": "此輸入串流的角色。"
+            },
+            "global_args": {
+                "label": "FFmpeg 全域參數",
+                "description": "此輸入串流的 FFmpeg 全域參數。"
+            },
+            "hwaccel_args": {
+                "label": "硬件加速參數",
+                "description": "此輸入串流的硬件加速參數。"
+            },
+            "input_args": {
+                "label": "輸入參數",
+                "description": "此串流專用的輸入參數。"
+            }
+        }
+    },
+    "live": {
+        "label": "即時播放",
+        "streams": {
+            "label": "即時串流名稱",
+            "description": "將設定的串流名稱對應到 restream / go2rtc 名稱以供即時播放。"
+        },
+        "height": {
+            "label": "即時畫面高度",
+            "description": "在 Web UI 顯示 jsmpeg 即時串流的高度（像素）；必須小於或等於偵測串流高度。"
+        },
+        "quality": {
+            "label": "即時畫面品質",
+            "description": "jsmpeg 串流的編碼品質（1 最高，31 最低）。"
+        }
+    },
+    "lpr": {
+        "label": "車牌識別",
+        "description": "車牌識別設定，包括偵測閾值、格式化及已知車牌。",
+        "enabled": {
+            "label": "啟用車牌識別"
+        },
+        "expire_time": {
+            "label": "過期秒數",
+            "description": "當車牌在指定秒數內沒有再次出現時會從追蹤器中過期（只適用於專用 LPR 鏡頭）。"
+        },
+        "min_area": {
+            "label": "最小車牌面積",
+            "description": "嘗試識別所需的最小車牌面積（像素）。"
+        },
+        "enhancement": {
+            "label": "增強等級",
+            "description": "在 OCR 前對車牌裁剪圖像套用的增強等級（0-10）；數值越高不一定效果更好，5 以上通常只對夜間車牌有效，需小心使用。"
+        }
+    },
+    "motion": {
+        "label": "移動偵測",
+        "enabled": {
+            "label": "啟用移動偵測"
+        },
+        "threshold": {
+            "label": "移動閾值",
+            "description": "移動偵測使用的像素差異閾值；數值越高靈敏度越低（範圍 1-255）。"
+        },
+        "lightning_threshold": {
+            "label": "閃光閾值",
+            "description": "用於偵測並忽略短暫光線變化的閾值（數值越低越敏感，範圍 0.3 至 1.0）。這不會完全阻止移動偵測；當超過閾值時偵測器只會停止分析額外影像幀。"
+        },
+        "skip_motion_threshold": {
+            "label": "跳過移動閾值",
+            "description": "如果單一影像幀有超過此比例的畫面改變，偵測器會不回傳移動框並立即重新校準。這可在閃電、暴風雨等情況節省 CPU 並減少誤判，但可能會錯過真正事件，例如 PTZ 鏡頭自動追蹤物件。這是在丟失少量錄影資料與需要檢查一些短片之間的取捨。"
+        },
+        "improve_contrast": {
+            "label": "改善對比",
+            "description": "在進行移動分析前改善影像對比以協助偵測。"
+        },
+        "contour_area": {
+            "label": "輪廓面積",
+            "description": "移動輪廓被計算所需的最小像素面積。"
+        },
+        "delta_alpha": {
+            "label": "Delta alpha 值",
+            "description": "用於影像差分計算移動時的 alpha 混合係數。"
+        },
+        "frame_alpha": {
+            "label": "影像幀 alpha 值",
+            "description": "用於移動預處理時影像幀混合的 alpha 值。"
+        },
+        "frame_height": {
+            "label": "影像幀高度",
+            "description": "在計算移動時縮放影像幀的高度（像素）。"
+        },
+        "mask": {
+            "label": "遮罩座標",
+            "description": "定義移動遮罩多邊形的 x,y 座標順序，用於包含或排除特定區域。"
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT 關閉延遲",
+            "description": "最後一次移動後等待多少秒才發佈 MQTT 的「off」狀態。"
+        },
+        "enabled_in_config": {
+            "label": "原始移動偵測狀態",
+            "description": "表示在原始靜態設定中是否已啟用移動偵測。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        }
+    },
+    "objects": {
+        "label": "物件",
+        "description": "物件追蹤的預設設定，包括要追蹤的標籤及每個物件的過濾器。",
+        "track": {
+            "label": "要追蹤的物件"
+        },
+        "filters": {
+            "label": "物件過濾器",
+            "description": "套用於偵測物件的過濾器以減少誤判（面積、比例、信心值）。",
+            "min_area": {
+                "label": "最小物件面積",
+                "description": "此物件類型所需的最小偵測框面積（像素或百分比）。可以是像素（整數）或百分比（介於 0.000001 和 0.99 之間的浮點數）。"
+            },
+            "max_area": {
+                "label": "最大物件面積",
+                "description": "此物件類型允許的最大偵測框面積（像素或百分比）。可以是像素（整數）或百分比（介於 0.000001 和 0.99 之間的浮點數）。"
+            },
+            "min_ratio": {
+                "label": "最小長寬比",
+                "description": "偵測框符合條件所需的最小寬高比。"
+            },
+            "max_ratio": {
+                "label": "最大長寬比",
+                "description": "偵測框允許的最大寬高比。"
+            },
+            "threshold": {
+                "label": "信心值閾值",
+                "description": "物件被視為真正偵測結果所需的平均信心值閾值。"
+            },
+            "min_score": {
+                "label": "最低信心值",
+                "description": "物件被計算所需的單一影像幀最低信心值。"
+            },
+            "mask": {
+                "label": "過濾遮罩",
+                "description": "定義此過濾器在畫面中生效位置的多邊形座標。"
+            },
+            "raw_mask": {
+                "label": "原始遮罩"
+            }
+        },
+        "mask": {
+            "label": "物件遮罩",
+            "description": "用於防止在指定區域進行物件偵測的遮罩多邊形。"
+        },
+        "raw_mask": {
+            "label": "原始遮罩"
+        },
+        "genai": {
+            "label": "GenAI 物件設定",
+            "description": "用於描述被追蹤物件並傳送影像幀作生成用途的 GenAI 設定。",
+            "enabled": {
+                "label": "啟用 GenAI",
+                "description": "預設為被追蹤物件啟用 GenAI 描述生成功能。"
+            },
+            "use_snapshot": {
+                "label": "使用快照",
+                "description": "使用物件快照而不是縮圖來生成 GenAI 描述。"
+            },
+            "prompt": {
+                "label": "描述提示詞",
+                "description": "使用 GenAI 生成描述時使用的預設提示模板。"
+            },
+            "object_prompts": {
+                "label": "物件提示詞",
+                "description": "為特定物件標籤自訂 GenAI 輸出的提示詞。"
+            },
+            "objects": {
+                "label": "GenAI 物件",
+                "description": "預設會傳送到 GenAI 的物件標籤清單。"
+            },
+            "required_zones": {
+                "label": "必要區域",
+                "description": "物件必須進入的區域，才會生成 GenAI 描述。"
+            },
+            "debug_save_thumbnails": {
+                "label": "儲存縮圖",
+                "description": "儲存傳送到 GenAI 的縮圖以供除錯及檢視。"
+            },
+            "send_triggers": {
+                "label": "GenAI 觸發條件",
+                "description": "定義何時將影像幀傳送到 GenAI（例如結束時、更新後等）。",
+                "tracked_object_end": {
+                    "label": "結束時傳送",
+                    "description": "當追蹤物件結束時向 GenAI 發送請求。"
+                },
+                "after_significant_updates": {
+                    "label": "提前 GenAI 觸發",
+                    "description": "當追蹤物件出現指定數量的重要更新後向 GenAI 發送請求。"
+                }
+            },
+            "enabled_in_config": {
+                "label": "原始 GenAI 狀態",
+                "description": "表示在原始靜態設定中是否啟用了 GenAI。"
+            }
+        }
+    },
+    "record": {
+        "label": "錄影",
+        "enabled": {
+            "label": "啟用錄影"
+        },
+        "expire_interval": {
+            "label": "錄影清理間隔",
+            "description": "清理過期錄影片段的間隔時間（分鐘）。"
+        },
+        "continuous": {
+            "label": "持續錄影保存",
+            "description": "無論是否有物件或移動都保留錄影的天數。如果只想保留警報和偵測記錄，請設定為 0。",
+            "days": {
+                "label": "保存日數",
+                "description": "錄影保存日數。"
+            }
+        },
+        "motion": {
+            "label": "移動錄影保存",
+            "description": "由動作觸發的錄影保存日數（不論是否有追蹤物件）。如果只想保留警報和偵測記錄，請設定為 0。",
+            "days": {
+                "label": "保存日數",
+                "description": "錄影保存日數。"
+            }
+        },
+        "detections": {
+            "label": "偵測錄影保存",
+            "description": "偵測事件錄影的保存設定，包括事件前後錄影時間。",
+            "pre_capture": {
+                "label": "事件前錄影秒數",
+                "description": "在偵測事件前包含於錄影中的秒數。"
+            },
+            "post_capture": {
+                "label": "事件後錄影秒數",
+                "description": "在偵測事件後包含於錄影中的秒數。"
+            },
+            "retain": {
+                "label": "事件保存",
+                "description": "偵測事件錄影的保存設定。",
+                "days": {
+                    "label": "保存日數",
+                    "description": "偵測事件錄影保存日數。"
+                },
+                "mode": {
+                    "label": "保存模式",
+                    "description": "保存模式：all（保存所有片段）、motion（保存有移動的片段）、active_objects（保存有移動物件的片段）。"
+                }
+            }
+        },
+        "alerts": {
+            "label": "警報錄影保存",
+            "description": "警報事件錄影保存設定，包括事件前後錄影時間。",
+            "pre_capture": {
+                "label": "事件前錄影秒數",
+                "description": "在偵測事件前包含於錄影中的秒數。"
+            },
+            "post_capture": {
+                "label": "事件後錄影秒數",
+                "description": "在偵測事件後包含於錄影中的秒數。"
+            },
+            "retain": {
+                "label": "事件保存",
+                "description": "偵測事件錄影保存設定。",
+                "days": {
+                    "label": "保存日數",
+                    "description": "偵測事件錄影保存日數。"
+                },
+                "mode": {
+                    "label": "保存模式",
+                    "description": "保存模式：all（保存所有片段）、motion（保存有移動的片段）、active_objects（保存有移動物件的片段）。"
+                }
+            }
+        },
+        "export": {
+            "label": "匯出設定",
+            "description": "匯出錄影（例如縮時影片）時使用的設定，包括硬件加速。",
+            "hwaccel_args": {
+                "label": "匯出硬件加速參數",
+                "description": "用於匯出或轉碼操作的硬件加速參數。"
+            }
+        },
+        "preview": {
+            "label": "預覽設定",
+            "description": "控制 UI 中錄影預覽品質的設定。",
+            "quality": {
+                "label": "預覽品質",
+                "description": "預覽品質等級（very_low、low、medium、high、very_high）。"
+            }
+        },
+        "enabled_in_config": {
+            "label": "原始錄影狀態",
+            "description": "表示在原始靜態設定中是否已啟用錄影。"
+        }
+    },
+    "review": {
+        "label": "審查",
+        "alerts": {
+            "label": "警報設定",
+            "description": "哪些追蹤物件會產生警報以及警報保存方式的設定。",
+            "enabled": {
+                "label": "啟用警報"
+            },
+            "labels": {
+                "label": "警報標籤",
+                "description": "符合警報條件的物件標籤清單（例如 car、person）。"
+            },
+            "required_zones": {
+                "label": "必要區域",
+                "description": "物件必須進入的區域才會被視為警報；留空表示任何區域都可以。"
+            },
+            "enabled_in_config": {
+                "label": "原始警報狀態",
+                "description": "追蹤原始靜態設定中是否啟用了警報。"
+            },
+            "cutoff_time": {
+                "label": "警報截止時間",
+                "description": "在沒有觸發警報活動後等待多少秒才結束警報。"
+            }
+        },
+        "detections": {
+            "label": "偵測設定",
+            "description": "建立偵測事件（非警報）及其保存時間的設定。",
+            "enabled": {
+                "label": "啟用偵測事件"
+            },
+            "labels": {
+                "label": "偵測標籤",
+                "description": "符合偵測事件條件的物件標籤清單。"
+            },
+            "required_zones": {
+                "label": "必要區域",
+                "description": "物件必須進入的區域才會被視為偵測事件；留空表示任何區域。"
+            },
+            "cutoff_time": {
+                "label": "偵測截止時間",
+                "description": "在沒有觸發偵測活動後等待多少秒才結束偵測事件。"
+            },
+            "enabled_in_config": {
+                "label": "原始偵測狀態",
+                "description": "追蹤原始靜態設定中是否啟用了偵測事件。"
+            }
+        },
+        "genai": {
+            "label": "GenAI 設定",
+            "enabled_in_config": {
+                "label": "原始 GenAI 狀態"
+            },
+            "preferred_language": {
+                "label": "偏好語言",
+                "description": "向 GenAI 服務請求生成回應時使用的偏好語言。"
+            },
+            "activity_context_prompt": {
+                "label": "活動情境提示",
+                "description": "用於描述哪些行為屬於或不屬於可疑活動的自訂提示詞，以提供 GenAI 摘要情境。"
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "語意搜尋",
+        "triggers": {
+            "label": "觸發器",
+            "friendly_name": {
+                "label": "顯示名稱"
+            }
+        }
+    },
+    "snapshots": {
+        "label": "快照",
+        "enabled": {
+            "label": "啟用快照"
+        },
+        "clean_copy": {
+            "label": "保存原始副本",
+            "description": "啟用或停用此鏡頭保存快照。"
+        },
+        "timestamp": {
+            "label": "時間戳疊加",
+            "description": "在保存的快照上顯示時間戳。"
+        },
+        "bounding_box": {
+            "label": "偵測框疊加",
+            "description": "在保存的快照上顯示追蹤物件的邊界框。"
+        },
+        "crop": {
+            "label": "裁剪快照"
+        }
+    }
+}

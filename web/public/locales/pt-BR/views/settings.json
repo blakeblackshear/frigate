@@ -7,11 +7,16 @@
     "masksAndZones": "Editor de Máscara e Zona - Frigate",
     "motionTuner": "Ajuste de Movimento - Frigate",
     "object": "Debug - Frigate",
-    "general": "Configurações de Interface de Usuário - Frigate",
+    "general": "Configurações da interface - Frigate",
     "frigatePlus": "Frigate+ Configurações- Frigate",
     "notifications": "Configurações de notificação - Frigate",
     "cameraManagement": "Gerenciar Câmeras - Frigate",
-    "cameraReview": "Configurações de Revisão de Câmera - Frigate"
+    "cameraReview": "Configurações de Revisão de Câmera - Frigate",
+    "globalConfig": "Configuração Global - Frigate",
+    "cameraConfig": "Configuração da Câmera - Frigate",
+    "maintenance": "Manutenção - Frigate",
+    "profiles": "Perfis - Frigate",
+    "detectorsAndModel": "Detectores e modelo - Frigate"
   },
   "menu": {
     "ui": "UI",
@@ -26,7 +31,54 @@
     "triggers": "Gatilhos",
     "roles": "Papéis",
     "cameraManagement": "Gerenciamento",
-    "cameraReview": "Revisar"
+    "cameraReview": "Revisar",
+    "general": "Geral",
+    "globalConfig": "Configuração global",
+    "system": "Sistema",
+    "integrations": "Integrações",
+    "uiSettings": "Configurações de interface",
+    "profiles": "Perfis",
+    "globalDetect": "Detecção de objeto",
+    "globalRecording": "Gravando",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Detecção de movimento",
+    "globalObjects": "Objetos",
+    "globalReview": "Revisar",
+    "globalSnapshots": "Instantâneos",
+    "globalAudioEvents": "Detecção de áudio",
+    "globalLivePlayback": "Reprodução ao vivo",
+    "globalTimestampStyle": "Estilo de carimbo de data/hora",
+    "systemDatabase": "Banco de dados",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autenticação",
+    "systemNetworking": "Rede",
+    "systemProxy": "Proxy",
+    "systemUi": "IU",
+    "systemLogging": "Registro",
+    "systemEnvironmentVariables": "Variáveis de ambiente",
+    "systemTelemetry": "Telemetria",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "Detectores e modelo",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "Fluxo de go2rtc",
+    "integrationSemanticSearch": "Busca semântica",
+    "integrationGenerativeAi": "IA generativa",
+    "integrationFaceRecognition": "Reconhecimento facial",
+    "integrationLpr": "Reconhecimento de placas",
+    "integrationObjectClassification": "Classificação de objetos",
+    "integrationAudioTranscription": "Transcrição de áudio",
+    "cameraDetect": "Detecção de objetos",
+    "cameraFfmpeg": "Fluxos (FFmpeg)",
+    "cameraRecording": "Gravação",
+    "cameraSnapshots": "Instantâneos",
+    "cameraMotion": "Detecção de movimento",
+    "cameraObjects": "Objetos",
+    "cameraConfigReview": "Análise",
+    "cameraAudioEvents": "Detecção de áudio",
+    "cameraAudioTranscription": "Transcrição de áudio",
+    "cameraNotifications": "Notificações",
+    "cameraLivePlayback": "Reprodução ao vivo"
   },
   "dialog": {
     "unsavedChanges": {
@@ -244,7 +296,7 @@
       }
     },
     "motionMaskLabel": "Máscara de Movimento {{number}}",
-    "objectMaskLabel": "Máscara de Objeto {{number}} ({{label}})",
+    "objectMaskLabel": "Máscara de Objeto {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -385,7 +437,7 @@
       "add": "Nova Máscara de Movimento",
       "edit": "Editar Máscara de Movimento",
       "context": {
-        "title": "Máscaras de movimento são usadas para prevenir typos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas com <em> muita parcimônia</em>, excesso de mascaramento tornará mais difícil de objetos serem rastreados.",
+        "title": "Máscaras de movimento são usadas para prevenir tipos de movimento não desejados de ativarem uma detecção (exemplo: galhos de árvores, timestamps de câmeras). Máscaras de movimento devem ser usadas <em>com moderação</em>. Excesso de mascaramento tornará o rastreamento de objetos mais difícil.",
         "documentation": "Leia a documentação"
       },
       "point_one": "{{count}} ponto",
@@ -671,7 +723,7 @@
       "title": "Configuração de Captura de Imagem",
       "desc": "Envios ao Frigate+ requerem tanto a captura de imagem normais quanto a captura de imagem <code>clean_copy</code> estarem habilitadas na sua configuração.",
       "documentation": "Leia a documentação",
-      "cleanCopyWarning": "Algumas câmeras possuem captura de imagem habilitada porém têm a cópia limpa desabilitada. Você precisa habilitar a <code>clean_copy</code> nas suas configurações de captura de imagem para poder submeter imagems dessa câmera ao Frigate+.",
+      "cleanCopyWarning": "Algumas câmeras estão com os snapshots desativados",
       "table": {
         "camera": "Câmera",
         "snapshots": "Capturas de Imagem",
@@ -900,12 +952,29 @@
       "errors": {
         "brandOrCustomUrlRequired": "Selecione a marca da câmera com o host/IP or selecione 'Outro' com uma URL customizada",
         "nameRequired": "Nome para a câmera requerido",
-        "nameLength": "O nome da câmera deve ter 64 caracteres ou menos"
+        "nameLength": "O nome da câmera deve ter 64 caracteres ou menos",
+        "invalidCharacters": "Nome da câmera contém caracteres inválidos",
+        "nameExists": "Nome da câmera já existe"
       },
       "testing": {
         "probingMetadata": "Inferindo o metadata da câmera...",
         "fetchingSnapshot": "Buscando a captura de imagem da câmera..."
       }
     }
+  },
+  "button": {
+    "overriddenGlobal": "Substituir (Global)",
+    "overriddenGlobalTooltip": "Esta câmera substitui as configurações globais desta seção",
+    "overriddenBaseConfig": "Substituído (Configuração base)",
+    "overriddenBaseConfigTooltip": "O perfil {{profile}} substitui as configurações desta seção",
+    "overriddenBaseConfigNoDeltas": "O perfil {{profile}} substitui esta seção, mas nenhum valor de campo difere da configuração base.",
+    "overriddenInCameras": {
+      "profilePrefix": "{{profile}} perfil: {{fields}}"
+    }
+  },
+  "menuDot": {
+    "overrideGlobal": "Esta seção substitui a configuração global",
+    "overrideProfile": "Esta seção é substituída pelo perfil {{profile}}",
+    "unsaved": "Esta seção contém alterações não salvas"
   }
 }

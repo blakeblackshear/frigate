@@ -12,8 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory": "Classe Apagada",
-      "deletedImage": "Imagens Apagadas",
+      "deletedCategory_one": "{{count}} classe removida",
+      "deletedCategory_many": "{{count}} classes removidas",
+      "deletedCategory_other": "{{count}} classes removidas",
+      "deletedImage_one": "{{count}} imagem removida",
+      "deletedImage_many": "{{count}} imagens removidas",
+      "deletedImage_other": "{{count}} imagens removidas",
       "categorizedImage": "Imagem Classificada com Sucesso",
       "trainedModel": "Modelo treinado com sucesso.",
       "trainingModel": "Treinamento do modelo iniciado com sucesso.",
@@ -21,17 +25,19 @@
       "deletedModel_many": "{{count}} modelos excluídos com sucesso",
       "deletedModel_other": "{{count}} modelos excluídos com sucesso",
       "updatedModel": "Configuração do modelo atualizada com sucesso",
-      "renamedCategory": "Classe renomeada para {{name}} com sucesso"
+      "renamedCategory": "Classe renomeada para {{name}} com sucesso",
+      "reclassifiedImage": "Imagem reclassificada com sucesso"
     },
     "error": {
-      "deleteImageFailed": "Falha ao deletar:{{errorMessage}}",
-      "deleteCategoryFailed": "Falha ao deletar classe:{{errorMessage}}",
+      "deleteImageFailed": "Falha ao excluir:{{errorMessage}}",
+      "deleteCategoryFailed": "Falha ao excluir classe:{{errorMessage}}",
       "categorizeFailed": "Falha ao categorizar imagem:{{errorMessage}}",
       "deleteModelFailed": "Falha ao excluir o modelo: {{errorMessage}}",
       "trainingFailed": "Treinamento do modelo falhou. Verifique os logs do Frigate para mais detalhes.",
       "trainingFailedToStart": "Falha ao iniciar o treinamento do modelo: {{errorMessage}}",
       "updateModelFailed": "Falha ao atualizar modelo: {{errorMessage}}",
-      "renameCategoryFailed": "Falha ao renomear classe: {{errorMessage}}"
+      "renameCategoryFailed": "Falha ao renomear classe: {{errorMessage}}",
+      "reclassifyFailed": "Falha ao reclassificar imagem: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -88,7 +94,14 @@
   },
   "noModels": {
     "object": {
-      "title": "Nenhum Modelo de Classificação de Objetos"
+      "title": "Nenhum Modelo de Classificação de Objetos",
+      "description": "Crie um modelo personalizado para classificar objetos detectados.",
+      "buttonText": "Criar modelo de objeto"
+    },
+    "state": {
+      "title": "Modelos de Classificação Sem Estado",
+      "description": "Crie um modelo personalizado para monitorar e classificar mudanças de estado em áreas específicas da câmera.",
+      "buttonText": "Criar modelo de estado"
     }
   },
   "deleteDatasetImages": {
@@ -98,5 +111,13 @@
     "title": "Editar Modelo de Classificação",
     "descriptionState": "Edite as classes deste modelo de classificação de estado. As alterações exigirão treinar novamente o modelo.",
     "descriptionObject": "Edite o tipo de objeto e tipo de classificação para este modelo de classificação de objeto."
+  },
+  "reclassifyImageAs": "Reclassificar imagem como:",
+  "reclassifyImage": "Reclassificar imagem",
+  "wizard": {
+    "title": "Criar nova classificação",
+    "steps": {
+      "nameAndDefine": "Nomear e definir"
+    }
   }
 }

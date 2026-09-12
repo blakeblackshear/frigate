@@ -12,7 +12,9 @@
       "tips.documentation": "อ่านเอกสาร "
     }
   },
-  "documentTitle": "สด - Frigate",
+  "documentTitle": {
+    "default": "ถ่ายทอดสด - Frigate"
+  },
   "lowBandwidthMode": "โหมดแบนด์วิดท์ต่ำ",
   "twoWayTalk": {
     "enable": "เปิดใช้งานการสนทนาสองทาง",
@@ -45,5 +47,12 @@
   },
   "recording": {
     "disable": "ปิดการบันทึก"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "คลิกที่ภาพ เพื่อเลือกตำแหน่งที่จะตั้งค่าให้เป็นศูนย์กลางภาพ"
+      }
+    }
   }
 }

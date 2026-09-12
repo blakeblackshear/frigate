@@ -1,0 +1,87 @@
+{
+  "group": {
+    "label": "Grupe kamere",
+    "add": "Dodaj grupu kamere",
+    "edit": "Uredi grupu kamera",
+    "delete": {
+      "label": "Obriši grupu kamere",
+      "confirm": {
+        "title": "Potvrdi brisanje",
+        "desc": "Sigurno li želite da obrišete grupu kamere <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Ime",
+      "placeholder": "Unesite ime…",
+      "errorMessage": {
+        "mustLeastCharacters": "Ime grupe kamere mora imati najmanje 2 karaktera.",
+        "exists": "Ime grupe kamere već postoji.",
+        "nameMustNotPeriod": "Ime grupe kamere ne smije sadržavati tačku.",
+        "invalid": "Neispravno ime grupe kamere."
+      }
+    },
+    "cameras": {
+      "label": "Kamere",
+      "desc": "Odaberite kamere za ovu grupu."
+    },
+    "icon": "Ikona",
+    "success": "Grupa kamere ({{name}}) je sačuvana.",
+    "camera": {
+      "birdseye": "Birdseye",
+      "setting": {
+        "label": "Postavke prenošenja kamere",
+        "title": "Postavke prenošenja {{cameraName}}",
+        "desc": "Promijenite opcije uživo prenošenja za tablicu upravljanja ove grupe kamere. <em>Ove postavke su specifične za uređaj/pretvarač.</em>",
+        "audioIsAvailable": "Audio je dostupan za ovaj stream",
+        "audioIsUnavailable": "Zvuk nije dostupan za ovaj tok",
+        "audio": {
+          "tips": {
+            "title": "Audio mora biti izlaz iz vaše kamere i konfiguriran u go2rtc za ovaj stream."
+          }
+        },
+        "stream": "Tok",
+        "placeholder": "Odaberite tok",
+        "streamMethod": {
+          "label": "Način prenošenja",
+          "placeholder": "Odaberite način prenošenja",
+          "method": {
+            "noStreaming": {
+              "label": "Bez prenošenja",
+              "desc": "Slike kamere će se ažurirati samo jednom na minut i neće se dogoditi uživo prenošenje."
+            },
+            "smartStreaming": {
+              "label": "Pametno prenošenje (preporučeno)",
+              "desc": "Pametno prenošenje će ažurirati sliku kamere jednom na minut kada se ne događa detektovana aktivnost kako bi se uštedjelo na širovini i resursima. Kada se detektuje aktivnost, slika se glatko prebacuje u uživo prenošenje."
+            },
+            "continuousStreaming": {
+              "label": "Neprekidno prenošenje",
+              "desc": {
+                "title": "Slika kamere uvijek će biti živo prenošenje kada je vidljiva na ploči, čak i ako se ne detektira aktivnost.",
+                "warning": "Neprekidno prenošenje može uzrokovati visoku upotrebu širine pojasa i probleme s performansama. Koristite s oprezom."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Režim kompatibilnosti",
+          "desc": "Omogućite ovu opciju samo ako se živo prenošenje vaše kamere prikazuje s bojnim artefaktima i dijagonalnom linijom na desnoj strani slike."
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Postavke",
+      "title": "Opcije",
+      "showOptions": "Prikaži opcije",
+      "hideOptions": "Sakrij opcije"
+    },
+    "boundingBox": "Okvir",
+    "timestamp": "Vremenski pečat",
+    "zones": "Zone",
+    "mask": "Maska",
+    "motion": "Kretanje",
+    "regions": "Regije",
+    "paths": "Putanje"
+  }
+}

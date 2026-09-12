@@ -15,8 +15,10 @@
       "description": "Review items can only be created for a camera when recordings are enabled for that camera."
     }
   },
-  "timeline": "Timeline",
-  "timeline.aria": "Select timeline",
+  "timeline": {
+    "label": "Timeline",
+    "aria": "Select timeline"
+  },
   "zoomIn": "Zoom In",
   "zoomOut": "Zoom Out",
   "events": {
@@ -43,7 +45,9 @@
   },
   "documentTitle": "Review - Frigate",
   "recordings": {
-    "documentTitle": "Recordings - Frigate"
+    "documentTitle": "Recordings - Frigate",
+    "invalidSharedLink": "Unable to open timestamped recording link due to parsing error.",
+    "invalidSharedCamera": "Unable to open timestamped recording link due to an unknown or unauthorized camera."
   },
   "calendarFilter": {
     "last24Hours": "Last 24 Hours"
@@ -61,5 +65,31 @@
   "detected": "detected",
   "normalActivity": "Normal",
   "needsReview": "Needs review",
-  "securityConcern": "Security concern"
+  "securityConcern": "Security concern",
+  "motionSearch": {
+    "menuItem": "Motion Search",
+    "openMenu": "Camera options"
+  },
+  "motionPreviews": {
+    "menuItem": "View motion previews",
+    "title": "Motion previews: {{camera}}",
+    "mobileSettingsTitle": "Motion Preview Settings",
+    "mobileSettingsDesc": "Adjust playback speed, dimming, and cropping, and choose a date to review motion-only clips.",
+    "dim": "Dim",
+    "dimAria": "Adjust dimming intensity",
+    "dimDesc": "Increase dimming to increase motion area visibility.",
+    "speed": "Speed",
+    "speedAria": "Select preview playback speed",
+    "speedDesc": "Choose how quickly preview clips play.",
+    "back": "Back",
+    "empty": "No previews available",
+    "noPreview": "Preview unavailable",
+    "seekAria": "Seek {{camera}} player to {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Select areas to only show clips with motion in those regions.",
+    "filterClear": "Clear",
+    "crop": "Crop to filter",
+    "cropAria": "Toggle cropping previews to the filtered areas",
+    "cropDesc": "Zoom previews into the selected filter areas instead of showing the full frame."
+  }
 }

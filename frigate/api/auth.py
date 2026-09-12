@@ -11,7 +11,7 @@ import secrets
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
+from urllib.parse import parse_qs, urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -26,11 +26,22 @@ from frigate.api.defs.request.app_body import (
     AppPutRoleBody,
 )
 from frigate.api.defs.tags import Tags
+from frigate.api.media_auth import (
+    check_camera_access,
+    deny_response_for_media_uri,
+    is_role_restricted,
+)
 from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
+
+# In-memory cache to track which clients we've logged for an anonymous access event.
+# Keyed by a hashed value combining remote address + user-agent. The value is
+# an expiration timestamp (float).
+FIRST_LOAD_TTL_SECONDS = 60 * 60 * 24 * 7  # 7 days
+_first_load_seen: dict[str, float] = {}
 
 
 def require_admin_by_default():
@@ -41,7 +52,7 @@ def require_admin_by_default():
     endpoints require admin access unless explicitly overridden with
     allow_public(), allow_any_authenticated(), or require_role().
 
-    Port 5000 (internal) always has admin role set by the /auth endpoint,
+    Internal port always has admin role set by the /auth endpoint,
     so this check passes automatically for internal requests.
 
     Certain paths are exempted from the global admin check because they must
@@ -58,6 +69,7 @@ def require_admin_by_default():
         "/logout",
         # Authenticated user endpoints (allow_any_authenticated)
         "/profile",
+        "/profiles",
         # Public info endpoints (allow_public)
         "/",
         "/version",
@@ -73,6 +85,7 @@ def require_admin_by_default():
         "/sub_labels",
         "/plus/models",
         "/recognized_license_plates",
+        "/classification/attributes",
         "/timeline",
         "/timeline/hourly",
         "/recordings/storage",
@@ -81,7 +94,9 @@ def require_admin_by_default():
         "/go2rtc/streams",
         "/event_ids",
         "/events",
+        "/cases",
         "/exports",
+        "/jobs/export",
     }
 
     # Path prefixes that should be exempt (for paths with parameters)
@@ -94,7 +109,9 @@ def require_admin_by_default():
         "/go2rtc/streams/",  # /go2rtc/streams/{camera}
         "/users/",  # /users/{username}/password (has own auth)
         "/preview/",  # /preview/{file}/thumbnail.jpg
+        "/cases/",  # /cases/{case_id}
         "/exports/",  # /exports/{export_id}
+        "/jobs/export/",  # /jobs/export/{export_id}
         "/vod/",  # /vod/{camera_name}/...
         "/notifications/",  # /notifications/pubkey, /notifications/register
     )
@@ -129,7 +146,7 @@ def require_admin_by_default():
             pass
 
         # For all other paths, require admin role
-        # Port 5000 (internal) requests have admin role set automatically
+        # Internal port requests have admin role set automatically
         role = request.headers.get("remote-role")
         if role == "admin":
             return
@@ -140,6 +157,17 @@ def require_admin_by_default():
         )
 
     return admin_checker
+
+
+def _is_authenticated(request: Request) -> bool:
+    """
+    Helper to determine if a request is from an authenticated user.
+
+    Returns True if the request has a valid authenticated user (not anonymous).
+    Internal port requests are considered anonymous despite having admin role.
+    """
+    username = request.headers.get("remote-user")
+    return username is not None and username != "anonymous"
 
 
 def allow_public():
@@ -170,6 +198,7 @@ def allow_any_authenticated():
 
     Rejects:
     - Requests with no remote-user header (did not pass through /auth endpoint)
+    - External port requests with anonymous user (auth disabled, no proxy auth)
 
     Example:
         @router.get("/authenticated-endpoint", dependencies=[Depends(allow_any_authenticated())])
@@ -178,8 +207,14 @@ def allow_any_authenticated():
     async def auth_checker(request: Request):
         # Ensure a remote-user has been set by the /auth endpoint
         username = request.headers.get("remote-user")
-        if username is None:
-            raise HTTPException(status_code=401, detail="Authentication required")
+
+        # Internal port requests have admin role and should be allowed
+        role = request.headers.get("remote-role")
+
+        if role != "admin":
+            if username is None or not _is_authenticated(request):
+                raise HTTPException(status_code=401, detail="Authentication required")
+
         return
 
     return auth_checker
@@ -219,7 +254,14 @@ rateLimiter = RateLimiter()
 
 
 def get_remote_addr(request: Request):
-    route = list(reversed(request.headers.get("x-forwarded-for").split(",")))
+    # fall back to the direct TCP peer when no proxy chain is present
+    direct_addr = request.client.host if request.client else None
+
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if not forwarded_for:
+        return direct_addr or "127.0.0.1"
+
+    route = list(reversed(forwarded_for.split(",")))
     logger.debug(f"IP Route: {[r for r in route]}")
     trusted_proxies = []
     for proxy in request.app.frigate_config.auth.trusted_proxies:
@@ -256,13 +298,17 @@ def get_remote_addr(request: Request):
             logger.debug(f"First untrusted IP: {str(ip)}")
             return str(ip)
 
-    # if there wasn't anything in the route, just return the default
-    remote_addr = None
+    # every hop in the route was trusted, so fall back to the direct peer
+    return direct_addr or "127.0.0.1"
 
-    if hasattr(request, "remote_addr"):
-        remote_addr = request.remote_addr
 
-    return remote_addr or "127.0.0.1"
+def _cleanup_first_load_seen() -> None:
+    """Cleanup expired entries in the in-memory first-load cache."""
+    now = time.time()
+    # Build list for removal to avoid mutating dict during iteration
+    expired = [k for k, exp in _first_load_seen.items() if exp <= now]
+    for k in expired:
+        del _first_load_seen[k]
 
 
 def get_jwt_secret() -> str:
@@ -344,7 +390,7 @@ def verify_password(password, password_hash):
     return secrets.compare_digest(password_hash, compare_hash)
 
 
-def validate_password_strength(password: str) -> tuple[bool, Optional[str]]:
+def validate_password_strength(password: str) -> tuple[bool, str | None]:
     """
     Validate password strength.
 
@@ -370,13 +416,19 @@ def create_encoded_jwt(user, role, expiration, secret):
     )
 
 
-def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, expiration, secure):
+def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, max_age, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
+    # SameSite is intentionally left unset (browsers default to Lax). Setting
+    # SameSite=Lax/Strict would stop the cookie from being sent in cross-origin
+    # iframes, breaking embedded views such as the Home Assistant Frigate card.
+    # CSRF is instead mitigated by requiring a custom X-CSRF-TOKEN header, which
+    # cross-origin pages cannot set without a CORS preflight that Frigate never
+    # grants (see check_csrf in api/fastapi_app.py).
     response.set_cookie(
         key=cookie_name,
         value=encoded_jwt,
         httponly=True,
-        expires=expiration,
+        max_age=max_age,
         secure=secure,
     )
 
@@ -393,7 +445,7 @@ async def get_current_user(request: Request):
     return {"username": username, "role": role}
 
 
-def require_role(required_roles: List[str]):
+def require_role(required_roles: list[str]):
     async def role_checker(request: Request):
         proxy_config: ProxyConfig = request.app.frigate_config.proxy
         config_roles = list(request.app.frigate_config.auth.roles.keys())
@@ -573,8 +625,14 @@ def auth(request: Request):
     success_response = Response("", status_code=202)
 
     # dont require auth if the request is on the internal port
-    # this header is set by Frigate's nginx proxy, so it cant be spoofed
-    if int(request.headers.get("x-server-port", default=0)) == 5000:
+    # this header is set by Frigate's nginx proxy, so it cant be spoofed.
+    # the port is the boot-time snapshot rather than the live config value:
+    # nginx's listeners are fixed at container start, so an in-memory config
+    # change must never move the port that is trusted here
+    if (
+        int(request.headers.get("x-server-port", default=0))
+        == request.app.auth_internal_port
+    ):
         success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
         return success_response
@@ -588,6 +646,9 @@ def auth(request: Request):
     ):
         logger.debug("X-Proxy-Secret header does not match configured secret value")
         return fail_response
+
+    original_url = request.headers.get("x-original-url")
+    frigate_config = request.app.frigate_config
 
     # if auth is disabled, just apply the proxy header map and return success
     if not auth_config.enabled:
@@ -605,6 +666,15 @@ def auth(request: Request):
         role = resolve_role(request.headers, proxy_config, config_roles_set)
 
         success_response.headers["remote-role"] = role
+
+        deny_status = deny_response_for_media_uri(original_url, role, frigate_config)
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
+        deny_status = deny_response_for_go2rtc_stream(original_url, role, request)
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
         return success_response
 
     # now apply authentication
@@ -693,12 +763,21 @@ def auth(request: Request):
                 success_response,
                 JWT_COOKIE_NAME,
                 new_encoded_jwt,
-                new_expiration,
+                JWT_SESSION_LENGTH,
                 JWT_COOKIE_SECURE,
             )
 
         success_response.headers["remote-user"] = user
         success_response.headers["remote-role"] = role
+
+        deny_status = deny_response_for_media_uri(original_url, role, frigate_config)
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
+        deny_status = deny_response_for_go2rtc_stream(original_url, role, request)
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
         return success_response
     except Exception as e:
         logger.error(f"Error parsing jwt: {e}")
@@ -719,9 +798,29 @@ def profile(request: Request):
     roles_dict = request.app.frigate_config.auth.roles
     allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
 
-    return JSONResponse(
+    response = JSONResponse(
         content={"username": username, "role": role, "allowed_cameras": allowed_cameras}
     )
+
+    if username == "anonymous":
+        try:
+            remote_addr = get_remote_addr(request)
+        except Exception:
+            remote_addr = (
+                request.client.host if hasattr(request, "client") else "unknown"
+            )
+
+        ua = request.headers.get("user-agent", "")
+        key_material = f"{remote_addr}|{ua}"
+        cache_key = hashlib.sha256(key_material.encode()).hexdigest()
+
+        _cleanup_first_load_seen()
+        now = time.time()
+        if cache_key not in _first_load_seen:
+            _first_load_seen[cache_key] = now + FIRST_LOAD_TTL_SECONDS
+            logger.info(f"Anonymous user access from {remote_addr} ua={ua[:200]}")
+
+    return response
 
 
 @router.get(
@@ -748,6 +847,11 @@ limiter = Limiter(key_func=get_remote_addr)
 )
 @limiter.limit(limit_value=rateLimiter.get_limit)
 def login(request: Request, body: AppPostLoginBody):
+    if not request.app.frigate_config.auth.enabled:
+        return JSONResponse(
+            content={"message": "Authentication is disabled"}, status_code=404
+        )
+
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
     JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
     JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
@@ -772,7 +876,11 @@ def login(request: Request, body: AppPostLoginBody):
         encoded_jwt = create_encoded_jwt(user, role, expiration, request.app.jwt_token)
         response = Response("", 200)
         set_jwt_cookie(
-            response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
+            response,
+            JWT_COOKIE_NAME,
+            encoded_jwt,
+            JWT_SESSION_LENGTH,
+            JWT_COOKIE_SECURE,
         )
         # Clear admin_first_time_login flag after successful admin login so the
         # UI stops showing the first-time login documentation link.
@@ -864,6 +972,7 @@ def delete_user(request: Request, username: str):
     summary="Update user password",
     description="Updates a user's password. Users can only change their own password unless they have admin role. Requires the current password to verify identity for non-admin users. Password must be at least 12 characters long. If user changes their own password, a new JWT cookie is automatically issued.",
 )
+@limiter.limit(limit_value=rateLimiter.get_limit)
 async def update_password(
     request: Request,
     username: str,
@@ -877,10 +986,11 @@ async def update_password(
     current_username = current_user.get("username")
     current_role = current_user.get("role")
 
-    # viewers can only change their own password
-    if current_role == "viewer" and current_username != username:
+    # Only admins may target another account. This has to cover every non-admin
+    # role rather than just viewer, since custom roles are arbitrary names
+    if current_role != "admin" and current_username != username:
         raise HTTPException(
-            status_code=403, detail="Viewers can only update their own password"
+            status_code=403, detail="Users can only update their own password"
         )
 
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
@@ -934,7 +1044,11 @@ async def update_password(
         )
         # Set new JWT cookie on response
         set_jwt_cookie(
-            response, JWT_COOKIE_NAME, encoded_jwt, expiration, JWT_COOKIE_SECURE
+            response,
+            JWT_COOKIE_NAME,
+            encoded_jwt,
+            JWT_SESSION_LENGTH,
+            JWT_COOKIE_SECURE,
         )
 
     return response
@@ -979,7 +1093,7 @@ async def update_role(
 
 
 async def require_camera_access(
-    camera_name: Optional[str] = None,
+    camera_name: str | None = None,
     request: Request = None,
 ):
     """Dependency to enforce camera access based on user role."""
@@ -1000,19 +1114,19 @@ async def require_camera_access(
         raise HTTPException(status_code=current_user.status_code, detail=detail)
 
     role = current_user["role"]
-    all_camera_names = set(request.app.frigate_config.cameras.keys())
-    roles_dict = request.app.frigate_config.auth.roles
-    allowed_cameras = User.get_allowed_cameras(role, roles_dict, all_camera_names)
+    frigate_config = request.app.frigate_config
 
-    # Admin or full access bypasses
-    if role == "admin" or not roles_dict.get(role):
+    if check_camera_access(role, camera_name, frigate_config):
         return
 
-    if camera_name not in allowed_cameras:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
-        )
+    all_camera_names = set(frigate_config.cameras.keys())
+    allowed_cameras = User.get_allowed_cameras(
+        role, frigate_config.auth.roles, all_camera_names
+    )
+    raise HTTPException(
+        status_code=403,
+        detail=f"Access denied to camera '{camera_name}'. Allowed: {allowed_cameras}",
+    )
 
 
 def _get_stream_owner_cameras(request: Request, stream_name: str) -> set[str]:
@@ -1029,8 +1143,68 @@ def _get_stream_owner_cameras(request: Request, stream_name: str) -> set[str]:
     return owner_cameras
 
 
+# nginx proxies these paths straight to go2rtc with authentication-only checks
+# (see auth_request.conf). Each names the desired stream via the `src` query
+# param, so the camera-level check must happen here in the `/auth` subrequest —
+# `require_go2rtc_stream_access` only guards the REST `/go2rtc/streams/{name}`
+# endpoint, not these proxied live-stream paths.
+GO2RTC_STREAM_PROXY_PATHS = frozenset(
+    {
+        "/live/mse/api/ws",
+        "/live/webrtc/api/ws",
+        "/api/go2rtc/webrtc",
+    }
+)
+
+
+def deny_response_for_go2rtc_stream(
+    original_url: str | None, role: str | None, request: Request
+) -> int | None:
+    """Block role-restricted users from go2rtc live streams they cannot access.
+
+    Returns 403 when any `src` stream named in `original_url` resolves to a
+    camera outside the role's allow-list (or when no `src` is provided on a
+    stream-proxy path), otherwise None. Mirrors the resolution logic in
+    `require_go2rtc_stream_access` so substream names map to their owning
+    camera correctly.
+    """
+    if not original_url:
+        return None
+
+    parsed = urlparse(original_url)
+    if parsed.path not in GO2RTC_STREAM_PROXY_PATHS:
+        return None
+
+    frigate_config = request.app.frigate_config
+
+    # admin and full-access roles (no allow-list) bypass the camera check
+    if not role or not is_role_restricted(role, frigate_config):
+        return None
+
+    sources = parse_qs(parsed.query).get("src", [])
+    if not sources:
+        # a stream-proxy request naming no stream has nothing legitimate to
+        # show a restricted user
+        return 403
+
+    allowed_cameras = set(
+        User.get_allowed_cameras(
+            role,
+            frigate_config.auth.roles,
+            set(frigate_config.cameras.keys()),
+        )
+    )
+
+    # deny if any requested source resolves outside the allow-list
+    for src in sources:
+        if not (_get_stream_owner_cameras(request, src) & allowed_cameras):
+            return 403
+
+    return None
+
+
 async def require_go2rtc_stream_access(
-    stream_name: Optional[str] = None,
+    stream_name: str | None = None,
     request: Request = None,
 ):
     """Dependency to enforce go2rtc stream access based on owning camera access."""
@@ -1080,3 +1254,23 @@ async def get_allowed_cameras_for_filter(request: Request):
     all_camera_names = set(request.app.frigate_config.cameras.keys())
     roles_dict = request.app.frigate_config.auth.roles
     return User.get_allowed_cameras(role, roles_dict, all_camera_names)
+
+
+async def require_full_camera_access(
+    request: Request,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    """Dependency for endpoints returning data that spans every camera.
+
+    Some responses cannot be meaningfully scoped to a subset of cameras, so
+    rather than filter them the endpoint is limited to callers who can already
+    see every camera. Admin and viewer always qualify; a custom role qualifies
+    only when its camera list covers all configured cameras.
+    """
+    all_camera_names = set(request.app.frigate_config.cameras.keys())
+
+    if not all_camera_names.issubset(allowed_cameras):
+        raise HTTPException(
+            status_code=403,
+            detail="Access to all cameras is required for this endpoint",
+        )

@@ -64,6 +64,12 @@
     "fromTimeline": {
       "saveExport": "Exportálás mentése",
       "previewExport": "Exportálás Előnézet"
+    },
+    "case": {
+      "newCaseOption": "Új eset létrehozása",
+      "newCaseNamePlaceholder": "Új eset neve",
+      "newCaseDescriptionPlaceholder": "Eset leírása",
+      "label": "Eset"
     }
   },
   "streaming": {

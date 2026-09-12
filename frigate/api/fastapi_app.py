@@ -1,6 +1,6 @@
+import asyncio
 import logging
 import re
-from typing import Optional
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -16,21 +16,30 @@ from frigate.api import app as main_app
 from frigate.api import (
     auth,
     camera,
+    chat,
     classification,
+    debug_replay,
     event,
     export,
     media,
+    motion_search,
     notification,
     preview,
+    record,
     review,
 )
 from frigate.api.auth import get_jwt_secret, limiter, require_admin_by_default
+from frigate.comms.dispatcher import Dispatcher
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
 )
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
+from frigate.config.holder import ConfigHolder
+from frigate.config.profile_manager import ProfileManager
+from frigate.debug_replay import DebugReplayManager, debug_replay_auto_stop_watchdog
 from frigate.embeddings import EmbeddingsContext
+from frigate.genai import GenAIClientManager
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
@@ -55,14 +64,18 @@ class RemoteUserPlugin(Plugin):
 def create_fastapi_app(
     frigate_config: FrigateConfig,
     database: SqliteQueueDatabase,
-    embeddings: Optional[EmbeddingsContext],
+    embeddings: EmbeddingsContext | None,
     detected_frames_processor,
     storage_maintainer: StorageMaintainer,
     onvif: OnvifController,
     stats_emitter: StatsEmitter,
     event_metadata_updater: EventMetadataPublisher,
     config_publisher: CameraConfigUpdatePublisher,
+    replay_manager: DebugReplayManager,
+    dispatcher: Dispatcher | None = None,
+    profile_manager: ProfileManager | None = None,
     enforce_default_admin: bool = True,
+    config_holder: ConfigHolder | None = None,
 ):
     logger.info("Starting FastAPI app")
     app = FastAPI(
@@ -105,6 +118,11 @@ def create_fastapi_app(
     @app.on_event("startup")
     async def startup():
         logger.info("FastAPI started")
+        asyncio.create_task(
+            debug_replay_auto_stop_watchdog(
+                replay_manager, frigate_config, config_publisher
+            )
+        )
 
     # Rate limiter (used for login endpoint)
     if frigate_config.auth.failed_login_rate_limit is None:
@@ -120,6 +138,7 @@ def create_fastapi_app(
     # Order of include_router matters: https://fastapi.tiangolo.com/tutorial/path-params/#order-matters
     app.include_router(auth.router)
     app.include_router(camera.router)
+    app.include_router(chat.router)
     app.include_router(classification.router)
     app.include_router(review.router)
     app.include_router(main_app.router)
@@ -128,8 +147,14 @@ def create_fastapi_app(
     app.include_router(export.router)
     app.include_router(event.router)
     app.include_router(media.router)
+    app.include_router(motion_search.router)
+    app.include_router(record.router)
+    app.include_router(debug_replay.router)
     # App Properties
     app.frigate_config = frigate_config
+    # snapshot the port nginx bound at startup, the live config can be swapped
+    app.auth_internal_port = frigate_config.networking.listen.internal_port
+    app.genai_manager = GenAIClientManager(frigate_config)
     app.embeddings = embeddings
     app.detected_frames_processor = detected_frames_processor
     app.storage_maintainer = storage_maintainer
@@ -138,6 +163,10 @@ def create_fastapi_app(
     app.stats_emitter = stats_emitter
     app.event_metadata_updater = event_metadata_updater
     app.config_publisher = config_publisher
+    app.replay_manager = replay_manager
+    app.dispatcher = dispatcher
+    app.profile_manager = profile_manager
+    app.config_holder = config_holder
 
     if frigate_config.auth.enabled:
         secret = get_jwt_secret()

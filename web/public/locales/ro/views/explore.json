@@ -12,10 +12,10 @@
         "trackedObjectsProcessed": "Obiecte urmărite procesate: ",
         "thumbnailsEmbedded": "Miniaturi încorporate: "
       },
-      "context": "Funcția de căutare poate fi utilizată după ce reindexarea obiectelor urmărite este finalizată."
+      "context": "Funcția de căutare poate fi utilizată după ce reindexarea obiectelor înglobate este finalizată."
     },
     "downloadingModels": {
-      "context": "Frigate descarcă modelele de încorporare necesare pentru a susține funcția de Căutare Semantică. Acest lucru poate dura câteva minute, în funcție de viteza conexiunii rețelei dvs.",
+      "context": "Frigate descarcă modelele de înglobare necesare pentru a susține funcția de Căutare Semantică. Acest lucru poate dura câteva minute, în funcție de viteza conexiunii rețelei dvs.",
       "setup": {
         "visionModel": "Model viziune",
         "visionModelFeatureExtractor": "Extractor de caracteristici pentru modelul de viziune",
@@ -23,7 +23,7 @@
         "textTokenizer": "Tokenizer text"
       },
       "tips": {
-        "context": "S-ar putea să dorești să reindexezi încorporările obiectelor urmărite odată ce modelele sunt descărcate.",
+        "context": "S-ar putea să dorești să reindexezi înglobările obiectelor urmărite odată ce modelele sunt descărcate.",
         "documentation": "Citește documentația"
       },
       "error": "A apărut o eroare. Verifică jurnalele Frigate."
@@ -120,7 +120,7 @@
     },
     "editSubLabel": {
       "title": "Editează subeticheta",
-      "desc": "Introdu o sub-etichetă nouă pentru acest {{label}}",
+      "desc": "Introdu o sub-etichetă nouă pentru acest/această {{label}}",
       "descNoLabel": "Introduceți o nouă subetichetă pentru acest obiect urmărit"
     },
     "editLPR": {
@@ -170,7 +170,8 @@
     "attributes": "Atribute de clasificare",
     "title": {
       "label": "Titlu"
-    }
+    },
+    "scoreInfo": "Informații scor"
   },
   "exploreMore": "Explorează mai multe obiecte cu {{label}}",
   "trackedObjectDetails": "Detalii despre obiectul urmărit",
@@ -226,12 +227,22 @@
     "downloadCleanSnapshot": {
       "label": "Descarcă un snapshot curat",
       "aria": "Descarcă snapshot curat"
+    },
+    "debugReplay": {
+      "label": "Reluare depanare",
+      "aria": "Vezi acest obiect urmărit în vizualizarea de reluare de depanare"
+    },
+    "more": {
+      "aria": "Mai mult"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmă ștergerea",
-      "desc": "Ștergerea acestui obiect urmărit elimină snapshot-ul, orice încorporări salvate și orice intrări asociate detaliilor de urmărire. Materialul video înregistrat al acestui obiect urmărit în vizualizarea Istoric <em>NU</em> va fi șters.<br /><br />Ești sigur că vrei să continui?"
+      "desc": "Ștergerea acestui obiect urmărit elimină snapshot-ul, orice înglobări salvate și orice intrări asociate detaliilor de urmărire. Materialul video înregistrat al acestui obiect urmărit în vizualizarea Istoric <em>NU</em> va fi șters.<br /><br />Ești sigur că vrei să continui?"
+    },
+    "toast": {
+      "error": "Eroare la ștergerea acestui obiect urmărit: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Nu au fost găsite obiecte urmărite",
@@ -278,7 +289,10 @@
         "zones": "Zone",
         "ratio": "Raport",
         "area": "Aria",
-        "score": "Scor"
+        "score": "Scor",
+        "computedScore": "Scor calculat",
+        "topScore": "Cel mai mare scor",
+        "toggleAdvancedScores": "Comută scorurile avansate"
       }
     },
     "annotationSettings": {

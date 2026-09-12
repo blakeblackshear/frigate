@@ -29,7 +29,7 @@ from .api import PostProcessorApi
 logger = logging.getLogger(__name__)
 
 
-class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
+class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):  # type: ignore[misc]
     def __init__(
         self,
         config: FrigateConfig,
@@ -47,6 +47,16 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         self.sub_label_publisher = sub_label_publisher
         super().__init__(config, metrics, model_runner)
 
+    CONFIG_UPDATE_TOPIC = "config/lpr"
+
+    def update_config(self, topic: str, payload: Any) -> None:
+        """Update LPR config at runtime."""
+        if topic != self.CONFIG_UPDATE_TOPIC:
+            return
+
+        self.lpr_config = payload
+        logger.debug("LPR post-processor config updated dynamically")
+
     def process_data(
         self, data: dict[str, Any], data_type: PostProcessDataEnum
     ) -> None:
@@ -61,7 +71,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         # don't run LPR post processing for now
         return
 
-        event_id = data["event_id"]
+        event_id = data["event_id"]  # type: ignore[unreachable]
         camera_name = data["camera"]
 
         if data_type == PostProcessDataEnum.recording:
@@ -92,10 +102,8 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
                 Recordings.start_time,
             )
             .where(
-                (
-                    (frame_time >= Recordings.start_time)
-                    & (frame_time <= Recordings.end_time)
-                )
+                (frame_time >= Recordings.start_time)
+                & (frame_time <= Recordings.end_time)
             )
             .where(Recordings.camera == camera_name)
             .order_by(Recordings.start_time.desc())
@@ -215,7 +223,7 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
         logger.debug(f"Post processing plate: {event_id}, {frame_time}")
         self.lpr_process(keyframe_obj_data, frame)
 
-    def handle_request(self, topic, request_data) -> dict[str, Any] | None:
+    def handle_request(self, topic: str, request_data: dict) -> dict[str, Any] | None:
         if topic == EmbeddingsRequestEnum.reprocess_plate.value:
             event = request_data["event"]
 
@@ -232,3 +240,5 @@ class LicensePlatePostProcessor(LicensePlateProcessingMixin, PostProcessorApi):
                 "message": "Successfully requested reprocessing of license plate.",
                 "success": True,
             }
+
+        return None

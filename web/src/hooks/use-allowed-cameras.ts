@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { AuthContext } from "@/context/auth-context";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
+import { isReplayCamera } from "@/utils/cameraUtil";
 
 export function useAllowedCameras() {
   const { auth } = useContext(AuthContext);
@@ -12,11 +13,13 @@ export function useAllowedCameras() {
   if (
     auth.user?.role === "viewer" ||
     auth.user?.role === "admin" ||
-    !auth.isAuthenticated // anonymous port 5000
+    !auth.isAuthenticated // anonymous internal port
   ) {
-    // return all cameras
-    return config?.cameras ? Object.keys(config.cameras) : [];
+    // return all cameras, excluding replay cameras
+    return config?.cameras
+      ? Object.keys(config.cameras).filter((name) => !isReplayCamera(name))
+      : [];
   }
 
-  return auth.allowedCameras || [];
+  return (auth.allowedCameras || []).filter((name) => !isReplayCamera(name));
 }

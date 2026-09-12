@@ -16,7 +16,9 @@
       "description": "Només es poden revisar temes quan s'han activat les gravacions de la càmera."
     }
   },
-  "timeline": "Línia de temps",
+  "timeline": {
+    "label": "Línia de temps"
+  },
   "timeline.aria": "Seleccionar línia de temps",
   "events": {
     "label": "Esdeveniments",
@@ -25,7 +27,9 @@
   },
   "documentTitle": "Revisió - Frigate",
   "recordings": {
-    "documentTitle": "Enregistraments - Frigate"
+    "documentTitle": "Enregistraments - Frigate",
+    "invalidSharedLink": "No s'ha pogut obrir l'enllaç d'enregistrament amb marques de temps a causa d'un error d'anàlisi.",
+    "invalidSharedCamera": "No s'ha pogut obrir l'enllaç d'enregistrament amb marques de temps a causa d'una càmera desconeguda o no autoritzada."
   },
   "calendarFilter": {
     "last24Hours": "Últimes 24 hores"
@@ -63,5 +67,31 @@
   "normalActivity": "Normal",
   "needsReview": "Necessita revisió",
   "securityConcern": "Preocupació per la seguretat",
-  "select_all": "Tots"
+  "select_all": "Tots",
+  "motionSearch": {
+    "menuItem": "Cerca de moviment",
+    "openMenu": "Opcions de la càmera"
+  },
+  "motionPreviews": {
+    "menuItem": "Visualitza les vistes prèvies del moviment",
+    "title": "Vista prèvia del moviment: {{camera}}",
+    "mobileSettingsTitle": "Configuració de la vista prèvia del moviment",
+    "mobileSettingsDesc": "Ajusteu la velocitat de reproducció, l'enfosquiment i l'escapçament, i trieu una data per a revisar clips només en moviment.",
+    "dim": "Atenuar",
+    "dimAria": "Ajusta la intensitat de l'enfosquiment",
+    "dimDesc": "Incrementa l'enfosquiment per augmentar la visibilitat de l'àrea de moviment.",
+    "speed": "Velocitat",
+    "speedAria": "Selecciona la velocitat de reproducció de la vista prèvia",
+    "speedDesc": "Trieu la rapidesa amb què es reprodueixen els clips de vista prèvia.",
+    "back": "Enrere",
+    "empty": "No hi ha cap vista prèvia disponible",
+    "noPreview": "Vista prèvia no disponible",
+    "seekAria": "Cerca el reproductor {{camera}} a {{time}}",
+    "filter": "Filtre",
+    "filterDesc": "Seleccioneu àrees per a mostrar només clips amb moviment en aquestes regions.",
+    "filterClear": "Neteja",
+    "crop": "Escapça per filtrar",
+    "cropAria": "Commuta la vista prèvia d'escapçament a les àrees filtrades",
+    "cropDesc": "Amplia les vistes prèvies a les àrees de filtre seleccionades en lloc de mostrar el fotograma complet."
+  }
 }

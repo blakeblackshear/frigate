@@ -1,10 +1,10 @@
 import { ForwardedRef, forwardRef } from "react";
 import { IconType } from "react-icons";
 
-interface IconWrapperProps {
+interface IconWrapperProps extends React.HTMLAttributes<HTMLDivElement> {
   icon: IconType;
   className?: string;
-  [key: string]: any;
+  disabled?: boolean;
 }
 
 const IconWrapper = forwardRef(

@@ -1,0 +1,190 @@
+import { parseRestreamStreamName } from "../theme/fields/streamSource";
+import type { SectionConfigOverrides } from "./types";
+
+const arrayAsTextWidget = {
+  "ui:widget": "ArrayAsTextWidget",
+  "ui:options": {
+    suppressMultiSchema: true,
+  },
+};
+
+const ffmpegArgsWidget = (
+  presetField: string,
+  extraOptions?: Record<string, unknown>,
+) => ({
+  "ui:widget": "FfmpegArgsWidget",
+  "ui:options": {
+    suppressMultiSchema: true,
+    ffmpegPresetField: presetField,
+    ...extraOptions,
+  },
+});
+
+const ffmpeg: SectionConfigOverrides = {
+  base: {
+    sectionDocs: "/configuration/ffmpeg_presets",
+    fieldMessages: [
+      {
+        key: "hwaccel-manual-not-recommended",
+        field: "hwaccel_args",
+        position: "after",
+        messageKey: "configMessages.ffmpeg.hwaccelManualNotRecommended",
+        severity: "warning",
+        condition: (ctx) => {
+          // Manual mode is active when hwaccel_args is an explicit args list
+          // or a non-preset string
+          const value = ctx.formData?.hwaccel_args;
+          if (Array.isArray(value)) {
+            return value.length > 0;
+          }
+          if (typeof value === "string") {
+            return !value.startsWith("preset-");
+          }
+          return false;
+        },
+      },
+      {
+        key: "inputs-missing-go2rtc-stream",
+        field: "inputs",
+        position: "before",
+        messageKey: "configMessages.ffmpeg.inputsMissingGo2rtcStream",
+        severity: "warning",
+        docLink: "/configuration/restream",
+        condition: (ctx) => {
+          const streams = ctx.fullConfig?.go2rtc?.streams;
+          const inputs = ctx.formData?.inputs;
+          if (!Array.isArray(inputs)) {
+            return false;
+          }
+
+          return inputs.some((input) => {
+            const path = (input as { path?: unknown } | null)?.path;
+            const streamName = parseRestreamStreamName(
+              typeof path === "string" ? path : undefined,
+            );
+            return streamName !== undefined && !(streamName in (streams ?? {}));
+          });
+        },
+      },
+    ],
+    fieldDocs: {
+      hwaccel_args: "/configuration/ffmpeg_presets#hwaccel-presets",
+      "inputs.hwaccel_args": "/configuration/ffmpeg_presets#hwaccel-presets",
+      input_args: "/configuration/ffmpeg_presets#input-args-presets",
+      "inputs.input_args": "/configuration/ffmpeg_presets#input-args-presets",
+      output_args: "/configuration/ffmpeg_presets#output-args-presets",
+      "inputs.output_args": "/configuration/ffmpeg_presets#output-args-presets",
+      "output_args.record": "/configuration/ffmpeg_presets#output-args-presets",
+      "inputs.roles": "/configuration/cameras/#setting-up-camera-inputs",
+      apple_compatibility:
+        "/configuration/camera_specific#h265-cameras-via-safari",
+    },
+    restartRequired: [],
+    fieldOrder: [
+      "inputs",
+      "global_args",
+      "input_args",
+      "hwaccel_args",
+      "output_args",
+      "apple_compatibility",
+      "path",
+      "gpu",
+    ],
+    hiddenFields: ["retry_interval"],
+    advancedFields: ["path", "global_args", "gpu"],
+    overrideFields: [
+      "inputs",
+      "path",
+      "global_args",
+      "input_args",
+      "hwaccel_args",
+      "output_args",
+      "apple_compatibility",
+      "gpu",
+    ],
+    uiSchema: {
+      path: {
+        "ui:options": { size: "md" },
+      },
+      global_args: arrayAsTextWidget,
+      hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
+      input_args: ffmpegArgsWidget("input_args"),
+      output_args: {
+        detect: arrayAsTextWidget,
+        record: ffmpegArgsWidget("output_args.record"),
+        items: {
+          detect: arrayAsTextWidget,
+          record: ffmpegArgsWidget("output_args.record"),
+        },
+      },
+      inputs: {
+        "ui:field": "CameraInputsField",
+        items: {
+          path: {
+            "ui:options": { size: "full" },
+          },
+          roles: {
+            "ui:widget": "inputRoles",
+            "ui:options": {
+              showArrayItemDescription: true,
+            },
+          },
+          global_args: {
+            "ui:widget": "hidden",
+          },
+          hwaccel_args: ffmpegArgsWidget("hwaccel_args", {
+            allowInherit: true,
+            hideDescription: true,
+            forceSplitLayout: true,
+            showArrayItemDescription: true,
+          }),
+          input_args: ffmpegArgsWidget("input_args", {
+            allowInherit: true,
+            hideDescription: true,
+            forceSplitLayout: true,
+            showArrayItemDescription: true,
+          }),
+          output_args: {
+            items: {
+              detect: arrayAsTextWidget,
+              record: ffmpegArgsWidget("output_args.record"),
+            },
+          },
+        },
+      },
+    },
+  },
+  global: {
+    restartRequired: [],
+    fieldOrder: [
+      "hwaccel_args",
+      "path",
+      "global_args",
+      "input_args",
+      "output_args",
+      "apple_compatibility",
+      "gpu",
+    ],
+    advancedFields: ["global_args", "input_args", "output_args", "path", "gpu"],
+    uiSchema: {
+      path: {
+        "ui:options": { size: "md" },
+      },
+      global_args: arrayAsTextWidget,
+      hwaccel_args: ffmpegArgsWidget("hwaccel_args"),
+      input_args: ffmpegArgsWidget("input_args"),
+      output_args: {
+        detect: arrayAsTextWidget,
+        record: ffmpegArgsWidget("output_args.record"),
+      },
+    },
+  },
+  camera: {
+    fieldGroups: {
+      cameraFfmpeg: ["input_args", "hwaccel_args", "output_args"],
+    },
+    restartRequired: [],
+  },
+};
+
+export default ffmpeg;

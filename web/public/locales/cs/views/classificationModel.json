@@ -23,11 +23,15 @@
   },
   "toast": {
     "success": {
-      "deletedImage": "Smazat obrázky",
+      "deletedImage_one": "Smazat obrázky",
+      "deletedImage_few": "",
+      "deletedImage_other": "",
       "deletedModel_one": "Úspěšně odstraněný {{count}} model",
       "deletedModel_few": "Úspěšně odstraněné {{count}} modely",
       "deletedModel_other": "Úspěšně odstraněných {{count}} modelů",
-      "deletedCategory": "Smazat třídu",
+      "deletedCategory_one": "Smazat třídu",
+      "deletedCategory_few": "",
+      "deletedCategory_other": "",
       "categorizedImage": "Obrázek úspěšně klasifikován",
       "trainedModel": "Úspěšně vytrénovaný model.",
       "trainingModel": "Trénování modelu bylo úspěšně zahájeno.",

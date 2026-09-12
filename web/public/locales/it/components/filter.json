@@ -89,7 +89,7 @@
       "success": "Oggetti tracciati eliminati correttamente.",
       "error": "Impossibile eliminare gli oggetti tracciati: {{errorMessage}}"
     },
-    "desc": "L'eliminazione di questi {{objectLength}} oggetti tracciati rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate al ciclo di vita dell'oggetto. Il filmato registrato di questi oggetti tracciati nella vista Storico <em>NON</em> verrà eliminato.<br /><br />Vuoi procedere?<br /><br />Tieni premuto il tasto <em>Maiusc</em> per ignorare questa finestra di dialogo in futuro.",
+    "desc": "L'eliminazione di questi {{objectLength}} oggetti tracciati rimuove l'istantanea, eventuali incorporamenti salvati e tutte le voci associate al ciclo di vita dell'oggetto. Il filmato registrato di questi oggetti tracciati nella vista della Cronologia <em>NON</em> verrà eliminato.<br /><br />Vuoi procedere?<br /><br />Tieni premuto il tasto <em>Maiusc</em> per ignorare questa finestra di dialogo in futuro.",
     "title": "Conferma eliminazione"
   },
   "recognizedLicensePlates": {

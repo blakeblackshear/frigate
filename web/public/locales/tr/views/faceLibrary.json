@@ -3,7 +3,8 @@
   "description": {
     "placeholder": "Bu koleksiyona bir isim verin",
     "addFace": "İlk görselinizi yükleyerek Yüz Kütüphanesi’ne yeni bir koleksiyon ekleyin.",
-    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir."
+    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir.",
+    "nameCannotContainHash": "İsim, # içeremez."
   },
   "details": {
     "person": "İnsan",

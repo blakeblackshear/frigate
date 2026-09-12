@@ -1,19 +1,20 @@
 import logging
 import math
 import os
+from typing import Literal
 
 import cv2
 import numpy as np
-from pydantic import Field
-from typing_extensions import Literal
+from pydantic import ConfigDict, Field
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.model import xyxy_to_xywh_for_nms
 
 try:
     from tflite_runtime.interpreter import Interpreter, load_delegate
 except ModuleNotFoundError:
-    from tensorflow.lite.python.interpreter import Interpreter, load_delegate
+    from ai_edge_litert.interpreter import Interpreter, load_delegate
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +22,18 @@ DETECTOR_KEY = "edgetpu"
 
 
 class EdgeTpuDetectorConfig(BaseDetectorConfig):
+    """EdgeTPU detector that runs TensorFlow Lite models compiled for Coral EdgeTPU using the EdgeTPU delegate."""
+
+    model_config = ConfigDict(
+        title="EdgeTPU",
+    )
+
     type: Literal[DETECTOR_KEY]
-    device: str = Field(default=None, title="Device Type")
+    device: str = Field(
+        default=None,
+        title="Device Type",
+        description="The device to use for EdgeTPU inference (e.g. 'usb', 'pci').",
+    )
 
 
 class EdgeTpuTfl(DetectionApi):
@@ -287,7 +298,7 @@ class EdgeTpuTfl(DetectionApi):
             # until after filtering out redundant boxes
             # Shift the logit scores to be non-negative (required by cv2)
             indices = cv2.dnn.NMSBoxes(
-                bboxes=boxes_filtered_decoded,
+                bboxes=xyxy_to_xywh_for_nms(boxes_filtered_decoded),
                 scores=max_scores_filtered_shiftedpositive,
                 score_threshold=(
                     self.min_logit_value + self.logit_shift_to_positive_values

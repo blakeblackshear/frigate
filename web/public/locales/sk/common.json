@@ -1,9 +1,9 @@
 {
   "time": {
-    "untilForTime": "Do{{time}}",
+    "untilForTime": "Do {{time}}",
     "untilForRestart": "Do reštartu Frigate.",
     "untilRestart": "Do reštartu",
-    "ago": "{{timeAgo}} pred časom",
+    "ago": "pred {{timeAgo}}",
     "justNow": "Práve teraz",
     "today": "Dnes",
     "yesterday": "Včera",
@@ -23,32 +23,32 @@
     "am": "ráno",
     "yr": "{{time}}r",
     "pm": "popoludní",
-    "year_one": "{{time}}rok",
-    "year_few": "{{time}}rokov",
-    "year_other": "{{time}}rokov",
+    "year_one": "{{time}} rok",
+    "year_few": "{{time}} roky",
+    "year_other": "{{time}} rokov",
     "mo": "{{time}}mes",
-    "month_one": "{{time}}mesiac",
+    "month_one": "{{time}} mesiac",
     "month_few": "{{time}} mesiace",
-    "month_other": "{{time}} mesiaca",
+    "month_other": "{{time}} mesiacov",
     "d": "{{time}}d",
-    "day_one": "{{time}}deň",
-    "day_few": "{{time}}dni",
-    "day_other": "{{time}}dni",
+    "day_one": "{{time}} deň",
+    "day_few": "{{time}} dni",
+    "day_other": "{{time}} dní",
     "h": "{{time}}h",
-    "hour_one": "{{time}}hodina",
-    "hour_few": "{{time}}hodiny",
-    "hour_other": "{{time}}hodin",
+    "hour_one": "{{time}} hodina",
+    "hour_few": "{{time}} hodiny",
+    "hour_other": "{{time}} hodín",
     "m": "{{time}} min",
     "s": "{{time}}s",
-    "minute_one": "{{time}}minuta",
-    "minute_few": "{{time}}minuty",
-    "minute_other": "{{time}}minut",
-    "second_one": "{{time}}sekunda",
-    "second_few": "{{time}}sekundy",
-    "second_other": "{{time}}sekund",
+    "minute_one": "{{time}} minúta",
+    "minute_few": "{{time}} minúty",
+    "minute_other": "{{time}} minút",
+    "second_one": "{{time}} sekunda",
+    "second_few": "{{time}} sekundy",
+    "second_other": "{{time}} sekúnd",
     "formattedTimestamp": {
-      "12hour": "Deň MMM, h:mm:ss aaa",
-      "24hour": "Deň MMM, HH:mm:ss"
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
     },
     "formattedTimestamp2": {
       "12hour": "MM/dd h:mm:ssa",
@@ -98,7 +98,7 @@
       "kbps": "kB/s",
       "mbps": "MB/s",
       "gbps": "GB/s",
-      "kbph": "kb/hour",
+      "kbph": "kb/hodina",
       "mbph": "MB/hodinu",
       "gbph": "GB/hodinu"
     }
@@ -149,7 +149,16 @@
     "unsuspended": "Zrušte pozastavenie",
     "play": "Hrať",
     "unselect": "Zrušte výber",
-    "continue": "Pokračovať"
+    "continue": "Pokračovať",
+    "copiedToClipboard": "Skopírované do schránky",
+    "modified": "Upravené",
+    "overridden": "Prepísané",
+    "resetToGlobal": "Obnoviť na globálne",
+    "resetToDefault": "Obnoviť predvolené",
+    "saveAll": "Uložiť všetko",
+    "savingAll": "Ukladá sa všetko…",
+    "undoAll": "Vrátiť späť všetko",
+    "retry": "Skúste to znova"
   },
   "menu": {
     "system": "Systém",
@@ -210,9 +219,9 @@
       "allCameras": "Všetky kamery",
       "cameras": {
         "title": "Kamery",
-        "count_one": "{{count}}kamera",
-        "count_few": "{{count}}kamery",
-        "count_other": "{{count}}kamier"
+        "count_one": "{{count}} kamera",
+        "count_few": "{{count}} kamery",
+        "count_other": "{{count}} kamier"
       }
     },
     "export": "Exportovať",
@@ -252,7 +261,11 @@
     },
     "review": "Recenzia",
     "explore": "Preskúmať",
-    "classification": "Klasifikácia"
+    "classification": "Klasifikácia",
+    "profiles": "Profily",
+    "actions": "Akcie",
+    "features": "Vlastnosti",
+    "chat": "Chat"
   },
   "toast": {
     "copyUrlToClipboard": "Adresa URL bola skopírovaná do schránky.",
@@ -261,7 +274,8 @@
       "error": {
         "title": "Chyba pri ukladaní zmien konfigurácie: {{errorMessage}}",
         "noMessage": "Chyba pri ukladaní zmien konfigurácie"
-      }
+      },
+      "success": "Zmeny konfigurácie boli úspešne uložené."
     }
   },
   "role": {
@@ -303,5 +317,10 @@
   "field": {
     "optional": "Voliteľné",
     "internalID": "Interné ID Frigate používa v konfigurácii a databáze"
+  },
+  "no_items": "Žiadne položky",
+  "validation_errors": "Chyby overenia",
+  "credentialField": {
+    "savedPlaceholder": "Uložené – pre aktuálne informácie nechajte prázdne"
   }
 }

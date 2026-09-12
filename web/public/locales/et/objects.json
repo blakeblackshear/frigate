@@ -116,5 +116,17 @@
   "nzpost": "NZPost-i sõiduk",
   "postnord": "PostNordi sõiduk",
   "gls": "GLS-i sõiduk",
-  "dpd": "DPD sõiduk"
+  "dpd": "DPD sõiduk",
+  "canada_post": "Canada Post",
+  "royal_mail": "Royal Mail",
+  "school_bus": "Koolibuss",
+  "skunk": "Vinukloom (skunk)",
+  "kangaroo": "Känguru",
+  "baby": "Väikelaps",
+  "baby_stroller": "Lapsevanker",
+  "rickshaw": "Rikša",
+  "Rodent": "Näriline",
+  "rodent": "Näriline",
+  "possum": "Opossum",
+  "garbage_truck": "Prügiauto"
 }

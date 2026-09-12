@@ -3,6 +3,8 @@ __pycache__
 .mypy_cache
 *.swp
 debug
+.claude/*
+.mcp.json
 .vscode/*
 !.vscode/launch.json
 config/*
@@ -10,6 +12,7 @@ config/*
 models
 *.mp4
 *.db
+*.db-*
 *.csv
 frigate/version.py
 web/build
@@ -20,3 +23,8 @@ core
 !/web/**/*.ts
 .idea/*
 .ipynb_checkpoints
+
+# Auto-generated Docker Compose Generator config files
+docs/src/components/DockerComposeGenerator/config/devices.ts
+docs/src/components/DockerComposeGenerator/config/hardware.ts
+docs/src/components/DockerComposeGenerator/config/ports.ts

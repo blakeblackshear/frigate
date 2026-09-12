@@ -4,21 +4,23 @@
     "authentication": "Autentifikavimo Nustatymai - Frigate",
     "camera": "Kameros Nustatymai - Frigate",
     "object": "Debug - Frigate",
-    "general": "Vizualiniai Nustatymai - Frigate",
+    "general": "Išvaizdos Parametrai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
     "notifications": "Pranešimų Nustatymai - Frigate",
     "motionTuner": "Judesio Derinimas - Frigate",
     "enrichments": "Patobulinimų Nustatymai - Frigate",
     "masksAndZones": "Maskavimo ir Zonų redaktorius - Frigate",
     "cameraManagement": "Valdyti Kameras - Frigate",
-    "cameraReview": "Kameros Peržiūros Nustatymai - Frigate"
+    "cameraReview": "Kameros Peržiūros Nustatymai - Frigate",
+    "globalConfig": "Visuotiniai Parametrai — Frigate",
+    "cameraConfig": "Kameros Parametrai — Frigate"
   },
   "menu": {
     "ui": "UI",
     "enrichments": "Patobulinimai",
     "cameras": "Kameros Nustatymai",
     "masksAndZones": "Maskavimai / Zonos",
-    "motionTuner": "Judesio Derintojas",
+    "motionTuner": "Judesio Derinimas",
     "debug": "Debug",
     "users": "Vartotojai",
     "notifications": "Pranešimai",
@@ -26,7 +28,10 @@
     "triggers": "Trigeriai",
     "roles": "Rolės",
     "cameraManagement": "Valdymas",
-    "cameraReview": "Peržiūra"
+    "cameraReview": "Peržiūra",
+    "profiles": "Profiliai",
+    "integrationLpr": "Registracijos numerių atpažinimas",
+    "cameraLpr": "Registracijos numerių atpažinimas"
   },
   "dialog": {
     "unsavedChanges": {
@@ -345,7 +350,7 @@
       }
     },
     "motionMaskLabel": "Judesio Maskuotė {{number}}",
-    "objectMaskLabel": "Obejkto Maskuotė {{number}} {{label}}",
+    "objectMaskLabel": "Obejkto Maskuotė {{number}}",
     "form": {
       "zoneName": {
         "error": {
@@ -440,7 +445,7 @@
       "desc": "Rodyti apribojančius stačiakampius aplink sekamus objektus",
       "colors": {
         "label": "Objektus Apribojančių Stačiakampių Spalvos",
-        "info": "<li>Pradžioje, skirtingos spalvos bus priskirtos kiekvienai objekto etiketei</li><li>Tamsiai mėlyna plona linija simbolizuoja, kad objektas esamu momentu dar nėra aptiktas</li><li>Pilka linija nurodo kad objektas yra aptiktas kaip nejudantis</li><li> Stora linija nurodo kad objektas yra automatiškai sekamas (kai įjungta)</li>"
+        "info": "<li>Pradžioje, skirtingos spalvos bus priskirtos kiekvienai objekto etiketei</li><li>Tamsiai mėlyna plona linija simbolizuoja, kad objektas esamu momentu dar nėra aptiktas</li><li>Pilka linija nurodo kad objektas yra aptiktas kaip nejudantis</li><li>Stora linija nurodo kad objektas yra automatiškai sekamas (kai įjungta)</li>"
       }
     },
     "timestamp": {
@@ -541,7 +546,7 @@
           "admin": "Admin",
           "adminDesc": "Pilna prieiga prie visų funkcijų.",
           "viewer": "Žiūrovas",
-          "viewerDesc": "Leidžiama prie Tiesioginio vaizdo tinklelio, Peržiūrų, Paieškų ir Eksportavimo funkcijų.",
+          "viewerDesc": "Leidžiama prie Tiesioginio vaizdo tinklelio, Peržiūrų, Paieškų ir Išrašų funkcijų.",
           "customDesc": "Specializuota rolė su prieiga prie konkrečios kameros."
         }
       }
@@ -746,7 +751,7 @@
     "snapshotConfig": {
       "title": "Momentinių kadrų Konfiguravimas",
       "desc": "Pateikti į Frigate+ reikalauja abiejų, momentinių kadrų ir <code>švarios_kopijos</code>momentinių kadrų įjungimo jūsų konfiguracijoje.",
-      "cleanCopyWarning": "Kai kurios kameros turi momentinius kadrus įjungtus tačiau švari kopija išjungta. Turite įjungti <code>švarią_kopiją</code> savo momentinės kopijos nustatymuose, kad galėtumėte teikti paveikslėlius į Frigate+.",
+      "cleanCopyWarning": "Kai kurios kameros turi momentinius kadrus išjungtus",
       "table": {
         "camera": "Kamera",
         "snapshots": "Momentiniai Kadrai",
@@ -1000,6 +1005,24 @@
       "estimatedBandwidth": "Tikėtinas Greitis",
       "roles": "Rolės",
       "ffmpegModule": "Naudoti srauto pritaikymo rėžimą"
+    }
+  },
+  "cameraManagement": {
+    "deleteCameraDialog": {
+      "deleteExports": "Taip pat ištrinti išrašus šiai kamerai"
+    },
+    "streams": {
+      "saved": "Išsaugota"
+    }
+  },
+  "maintenance": {
+    "sync": {
+      "exports": "Išrašus"
+    }
+  },
+  "birdseye": {
+    "cameraOrder": {
+      "saved": "Išsaugota"
     }
   }
 }

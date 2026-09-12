@@ -4,48 +4,1950 @@
     "camera": "Pengaturan Kamera - Frigate",
     "classification": "Pengaturan Klasifikasi - Frigate",
     "authentication": "Pengaturan Autentikasi - Frigate",
-    "masksAndZones": "Editor Mask dan Zona - Frigate",
+    "masksAndZones": "Editor Masker dan Zona - Frigate",
     "motionTuner": "Penyetel Gerakan - Frigate",
-    "general": "Frigate - Pengaturan Umum",
+    "general": "Pengaturan UI - Frigate",
     "object": "Debug - Frigate",
-    "enrichments": "Frigate - Pengaturan Pengayaan",
-    "cameraManagement": "Pengaturan Kamera - Frigate",
-    "cameraReview": "Pengaturan Ulasan Kamera - Frigate",
+    "enrichments": "Pengaturan Pengayaan - Frigate",
+    "cameraManagement": "Kelola Kamera - Frigate",
+    "cameraReview": "Pengaturan Tinjauan Kamera - Frigate",
     "frigatePlus": "Pengaturan Frigate+ - Frigate",
-    "notifications": "Pengaturan Notifikasi - Frigate"
+    "notifications": "Pengaturan Notifikasi - Frigate",
+    "globalConfig": "Konfigurasi Global - Frigate",
+    "cameraConfig": "Konfigurasi Kamera - Frigate",
+    "detectorsAndModel": "Detektor dan model - Frigate",
+    "maintenance": "Pemeliharaan - Frigate",
+    "profiles": "Profil - Frigate"
   },
   "menu": {
-    "cameraManagement": "Manajemen",
+    "cameraManagement": "Manajemen kamera",
     "notifications": "Notifikasi",
-    "ui": "Antarmuka Pengguna",
-    "enrichments": "Peningkatan",
-    "cameraReview": "Ulasan",
-    "motionTuner": "Pengatur Gerak",
+    "ui": "UI",
+    "enrichments": "Pengayaan",
+    "cameraReview": "Tinjauan",
+    "motionTuner": "Penyetel gerakan",
     "triggers": "Pemicu",
     "users": "Pengguna",
     "roles": "Peran",
     "frigateplus": "Frigate+",
-    "masksAndZones": "Mask / Zona",
-    "debug": "Debug"
+    "masksAndZones": "Masker / Zona",
+    "debug": "Debug",
+    "general": "Umum",
+    "globalConfig": "Konfigurasi global",
+    "system": "Sistem",
+    "integrations": "Integrasi",
+    "cameras": "Konfigurasi kamera",
+    "uiSettings": "Pengaturan UI",
+    "profiles": "Profil",
+    "globalDetect": "Deteksi objek",
+    "globalRecording": "Perekaman",
+    "globalSnapshots": "Cuplikan",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Deteksi gerakan",
+    "globalObjects": "Objek",
+    "globalReview": "Tinjauan",
+    "globalAudioEvents": "Deteksi audio",
+    "globalLivePlayback": "Pemutaran langsung",
+    "globalTimestampStyle": "Gaya stempel waktu",
+    "systemDatabase": "Basis data",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autentikasi",
+    "systemNetworking": "Jaringan",
+    "systemProxy": "Proksi",
+    "systemUi": "UI",
+    "systemLogging": "Pencatatan log",
+    "systemEnvironmentVariables": "Variabel lingkungan",
+    "systemTelemetry": "Telemetri",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "Detektor dan model",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "Stream go2rtc",
+    "integrationSemanticSearch": "Pencarian semantik",
+    "integrationGenerativeAi": "AI generatif",
+    "integrationFaceRecognition": "Pengenalan wajah",
+    "integrationLpr": "Pengenalan pelat nomor",
+    "integrationObjectClassification": "Klasifikasi objek",
+    "integrationAudioTranscription": "Transkripsi audio",
+    "cameraDetect": "Deteksi objek",
+    "cameraFfmpeg": "FFmpeg",
+    "cameraRecording": "Perekaman",
+    "cameraSnapshots": "Cuplikan",
+    "cameraMotion": "Deteksi gerakan",
+    "cameraObjects": "Objek",
+    "cameraConfigReview": "Tinjauan",
+    "cameraAudioEvents": "Deteksi audio",
+    "cameraAudioTranscription": "Transkripsi audio",
+    "cameraNotifications": "Notifikasi",
+    "cameraLivePlayback": "Pemutaran langsung",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Pengenalan wajah",
+    "cameraLpr": "Pengenalan pelat nomor",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "UI Kamera",
+    "cameraTimestampStyle": "Gaya stempel waktu",
+    "cameraMqtt": "MQTT Kamera",
+    "maintenance": "Pemeliharaan",
+    "mediaSync": "Sinkronisasi media",
+    "regionGrid": "Grid wilayah"
   },
   "dialog": {
     "unsavedChanges": {
       "title": "Anda memiliki perubahan yang belum disimpan.",
-      "desc": "Apakah Anda ingin menyimpan perubahan Anda sebelum melanjutkan?"
+      "desc": "Apakah Anda ingin menyimpan perubahan sebelum melanjutkan?"
     }
   },
   "cameraSetting": {
     "camera": "Kamera",
-    "noCamera": "Tidak Ada Kamera"
+    "noCamera": "Tidak ada kamera"
   },
   "general": {
-    "title": "Pengaturan Antarmuka Pengguna",
+    "title": "Pengaturan UI",
     "liveDashboard": {
-      "title": "Dashboard Langsung",
+      "title": "Dasbor Langsung",
       "automaticLiveView": {
         "label": "Tampilan Langsung Otomatis",
-        "desc": "Secara otomatis beralih ke tampilan langsung kamera saat aktivitas terdeteksi. Menonaktifkan opsi ini menyebabkan gambar statis kamera di dasbor langsung hanya diperbarui sekali per menit."
+        "desc": "Secara otomatis beralih ke tampilan langsung kamera saat aktivitas terdeteksi. Menonaktifkan opsi ini menyebabkan gambar kamera statis pada dasbor Langsung hanya diperbarui sekali per menit."
+      },
+      "playAlertVideos": {
+        "label": "Putar Video Peringatan",
+        "desc": "Secara default, peringatan terbaru di dasbor Langsung diputar sebagai video kecil yang berulang. Nonaktifkan opsi ini untuk hanya menampilkan gambar statis dari peringatan terbaru pada perangkat/browser ini."
+      },
+      "displayCameraNames": {
+        "label": "Selalu Tampilkan Nama Kamera",
+        "desc": "Selalu tampilkan nama kamera dalam chip pada dasbor tampilan langsung multi-kamera."
+      },
+      "liveFallbackTimeout": {
+        "label": "Batas Waktu Fallback Pemutar Langsung",
+        "desc": "Saat stream langsung kualitas tinggi kamera tidak tersedia, alihkan ke mode bandwidth rendah setelah sekian detik. Default: 3."
+      }
+    },
+    "storedLayouts": {
+      "title": "Tata Letak Tersimpan",
+      "desc": "Tata letak kamera dalam grup kamera dapat diseret/diubah ukurannya. Posisi disimpan di penyimpanan lokal browser Anda.",
+      "clearAll": "Hapus Semua Tata Letak"
+    },
+    "cameraGroupStreaming": {
+      "title": "Pengaturan Streaming Grup Kamera",
+      "desc": "Pengaturan streaming untuk setiap grup kamera disimpan di penyimpanan lokal browser Anda.",
+      "clearAll": "Hapus Semua Pengaturan Streaming"
+    },
+    "recordingsViewer": {
+      "title": "Penampil Rekaman",
+      "defaultPlaybackRate": {
+        "label": "Kecepatan Pemutaran Default",
+        "desc": "Kecepatan pemutaran default untuk pemutaran rekaman."
+      }
+    },
+    "calendar": {
+      "title": "Kalender",
+      "firstWeekday": {
+        "label": "Hari Pertama dalam Minggu",
+        "desc": "Hari saat minggu pada kalender tinjauan dimulai.",
+        "sunday": "Minggu",
+        "monday": "Senin"
+      }
+    },
+    "toast": {
+      "success": {
+        "clearStoredLayout": "Tata letak tersimpan untuk {{cameraName}} telah dihapus",
+        "clearStreamingSettings": "Pengaturan streaming untuk semua grup kamera telah dihapus."
+      },
+      "error": {
+        "clearStoredLayoutFailed": "Gagal menghapus tata letak tersimpan: {{errorMessage}}",
+        "clearStreamingSettingsFailed": "Gagal menghapus pengaturan streaming: {{errorMessage}}"
       }
     }
+  },
+  "configMessages": {
+    "audioTranscription": {
+      "audioDetectionDisabled": "Deteksi audio tidak diaktifkan untuk kamera ini. Transkripsi audio memerlukan deteksi audio yang aktif."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Mengatur FPS deteksi lebih dari 5 tidak direkomendasikan. Nilai yang lebih tinggi dapat menyebabkan masalah performa dan tidak akan memberikan manfaat apa pun.",
+      "disabled": "Deteksi objek dinonaktifkan. Cuplikan, item tinjauan, dan pengayaan seperti pengenalan wajah, pengenalan pelat nomor, dan AI Generatif tidak akan berfungsi.",
+      "resolutionShouldBeMultipleOfFour": "Untuk hasil terbaik, lebar dan tinggi deteksi sebaiknya merupakan kelipatan 4. Nilai genap lainnya dapat menyebabkan artefak visual atau distorsi ringan pada stream deteksi.",
+      "aspectRatioMismatch": "Lebar dan tinggi yang Anda masukkan tidak cocok dengan rasio aspek resolusi deteksi saat ini. Ini dapat menghasilkan gambar yang meregang atau terdistorsi.",
+      "maxFramesSet": "Menetapkan frame maksimum akan menimpa perilaku default dan menonaktifkan pelacakan objek diam. Hanya sedikit situasi yang memerlukan ini, gunakan dengan hati-hati.",
+      "squareResolution": "Resolusi deteksi berbentuk persegi tidak lazim. Lebar dan tinggi deteksi harus sesuai dengan rasio aspek kamera Anda, misalnya 16:9, bukan dimensi model deteksi objek. Rasio aspek yang tidak sesuai dapat meregangkan gambar dan mengurangi akurasi deteksi.",
+      "resolutionHigh": "Resolusi deteksi ini lebih tinggi daripada yang direkomendasikan dan dapat meningkatkan penggunaan sumber daya tanpa meningkatkan akurasi deteksi. Resolusi deteksi 1080p atau lebih rendah direkomendasikan untuk sebagian besar kamera.",
+      "globalResolutionMultipleCameras": "Resolusi deteksi global ditetapkan saat beberapa kamera dikonfigurasi. Kecuali semua kamera memiliki resolusi dan rasio aspek yang sama, lebar dan tinggi deteksi sebaiknya ditentukan per kamera agar sesuai dengan rasio aspek asli masing-masing kamera."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Pengayaan pengenalan wajah harus diaktifkan agar fitur pengenalan wajah berfungsi pada kamera ini.",
+      "personNotTracked": "Pengenalan wajah memerlukan objek 'person' untuk dilacak. Aktifkan 'person' di Objek untuk kamera ini.",
+      "modelSizeLarge": "Model 'large' memerlukan GPU atau NPU untuk performa yang wajar. Gunakan 'small' pada sistem yang hanya menggunakan CPU."
+    },
+    "lpr": {
+      "globalDisabled": "Pengayaan pengenalan pelat nomor harus diaktifkan agar fitur LPR berfungsi pada kamera ini.",
+      "vehicleNotTracked": "Pengenalan pelat nomor memerlukan 'car' atau 'motorcycle' untuk dilacak. Aktifkan 'car' atau 'motorcycle' di Objek untuk kamera ini.",
+      "modelSizeLarge": "Model 'large' dioptimalkan untuk pelat nomor multi-baris. Model 'small' memberikan performa lebih baik daripada 'large' dan sebaiknya digunakan kecuali wilayah Anda menggunakan format pelat multi-baris."
+    },
+    "review": {
+      "recordDisabled": "Perekaman dinonaktifkan, item tinjauan tidak akan dibuat.",
+      "detectDisabled": "Deteksi objek dinonaktifkan. Item tinjauan memerlukan objek yang terdeteksi untuk mengategorikan alert dan deteksi.",
+      "allNonAlertDetections": "Semua aktivitas non-alert akan disertakan sebagai deteksi.",
+      "genaiImageSourceRecordingsRecordDisabled": "Sumber gambar disetel ke 'rekaman', tetapi perekaman dinonaktifkan. Frigate akan kembali ke gambar pratinjau."
+    },
+    "audio": {
+      "noAudioRole": "Tidak ada stream yang memiliki peran audio yang didefinisikan. Anda harus mengaktifkan peran audio agar deteksi audio berfungsi."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Anda harus mengonfigurasi penyedia GenAI dengan peran 'deskripsi' agar deskripsi dapat dibuat."
+    },
+    "record": {
+      "noRecordRole": "Tidak ada stream yang memiliki peran record yang didefinisikan. Perekaman tidak akan berfungsi."
+    },
+    "birdseye": {
+      "objectsModeDetectDisabled": "Birdseye disetel ke mode 'objects', tetapi deteksi objek dinonaktifkan untuk kamera ini. Kamera tidak akan muncul di Birdseye."
+    },
+    "snapshots": {
+      "detectDisabled": "Deteksi objek dinonaktifkan. Cuplikan dihasilkan dari objek yang terlacak dan tidak akan dibuat."
+    },
+    "detectors": {
+      "mixedTypes": "Semua detektor harus menggunakan tipe yang sama. Hapus detektor yang ada untuk menggunakan tipe yang berbeda.",
+      "mixedTypesSuggestion": "Semua detektor harus menggunakan tipe yang sama. Hapus detektor yang ada atau pilih {{type}}."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Ukuran 'small' dengan model Jina V2 memiliki RAM tinggi dan biaya inferensi. Model 'large' dengan GPU diskrit direkomendasikan."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Pelacakan otomatis memerlukan setidaknya satu zona. Tentukan zona untuk kamera ini di Masker / Zona, lalu tetapkan sebagai zona wajib di bawah."
+    }
+  },
+  "button": {
+    "overriddenGlobal": "Ditimpa (Global)",
+    "overriddenGlobalTooltip": "Kamera ini menimpa pengaturan konfigurasi global di bagian ini",
+    "overriddenGlobalHeading_other": "Kamera ini menimpa {{count}} bidang dari konfigurasi global:",
+    "overriddenGlobalNoDeltas": "Kamera ini menimpa konfigurasi global, tetapi tidak ada nilai bidang yang berbeda.",
+    "overriddenBaseConfig": "Ditimpa (Konfigurasi Dasar)",
+    "overriddenBaseConfigTooltip": "Profil {{profile}} menimpa pengaturan konfigurasi di bagian ini",
+    "overriddenBaseConfigHeading_other": "Profil {{profile}} menimpa {{count}} bidang dari konfigurasi dasar:",
+    "overriddenBaseConfigNoDeltas": "Profil {{profile}} menimpa bagian ini, tetapi tidak ada nilai bidang yang berbeda dari konfigurasi dasar.",
+    "overriddenInCameras": {
+      "label_other": "Ditimpa di {{count}} kamera",
+      "tooltip_other": "{{count}} kamera menimpa nilai di bagian ini. Klik untuk melihat detail.",
+      "heading_other": "Bagian global ini memiliki bidang yang ditimpa di {{count}} kamera.",
+      "othersField_other": "{{count}} lainnya",
+      "profilePrefix": "Profil {{profile}}: {{fields}}"
+    }
+  },
+  "menuDot": {
+    "overrideGlobal": "Bagian ini menimpa konfigurasi global",
+    "overrideProfile": "Bagian ini ditimpa oleh profil {{profile}}",
+    "unsaved": "Bagian ini memiliki perubahan yang belum disimpan"
+  },
+  "saveAllPreview": {
+    "title": "Perubahan yang akan disimpan",
+    "triggerLabel": "Tinjau perubahan yang tertunda",
+    "empty": "Tidak ada perubahan yang tertunda.",
+    "scope": {
+      "label": "Cakupan",
+      "global": "Global",
+      "camera": "Kamera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profil"
+    },
+    "field": {
+      "label": "Bidang"
+    },
+    "value": {
+      "label": "Nilai baru",
+      "reset": "Atur ulang"
+    }
+  },
+  "enrichments": {
+    "title": "Pengaturan Pengayaan",
+    "unsavedChanges": "Perubahan pengaturan Pengayaan yang belum disimpan",
+    "birdClassification": {
+      "title": "Klasifikasi Burung",
+      "desc": "Klasifikasi burung mengidentifikasi burung yang dikenal menggunakan model Tensorflow terkuantisasi. Saat burung yang dikenal dikenali, nama umumnya akan ditambahkan sebagai sub_label. Informasi ini disertakan dalam UI, filter, serta notifikasi."
+    },
+    "semanticSearch": {
+      "title": "Pencarian Semantik",
+      "desc": "Pencarian Semantik di Frigate memungkinkan Anda menemukan objek yang terlacak dalam item tinjauan menggunakan gambar itu sendiri, deskripsi teks yang ditentukan pengguna, atau deskripsi yang dibuat secara otomatis.",
+      "reindexNow": {
+        "label": "Indeks Ulang Sekarang",
+        "desc": "Pengindeksan ulang akan membuat ulang embedding untuk semua objek yang terlacak. Proses ini berjalan di latar belakang dan dapat memaksimalkan penggunaan CPU Anda serta memerlukan waktu cukup lama tergantung pada jumlah objek yang terlacak yang Anda miliki.",
+        "confirmTitle": "Konfirmasi Pengindeksan Ulang",
+        "confirmDesc": "Apakah Anda yakin ingin mengindeks ulang semua embedding objek yang terlacak? Proses ini akan berjalan di latar belakang, tetapi dapat memaksimalkan penggunaan CPU Anda dan memerlukan waktu cukup lama. Anda dapat memantau progresnya di halaman Jelajahi.",
+        "confirmButton": "Indeks Ulang",
+        "success": "Pengindeksan ulang berhasil dimulai.",
+        "alreadyInProgress": "Pengindeksan ulang sudah sedang berlangsung.",
+        "error": "Gagal memulai pengindeksan ulang: {{errorMessage}}"
+      },
+      "modelSize": {
+        "label": "Ukuran Model",
+        "desc": "Ukuran model yang digunakan untuk embedding pencarian semantik.",
+        "small": {
+          "title": "kecil",
+          "desc": "Menggunakan <em>small</em> akan memakai versi model terkuantisasi yang menggunakan RAM lebih sedikit dan berjalan lebih cepat pada CPU dengan perbedaan kualitas embedding yang sangat kecil."
+        },
+        "large": {
+          "title": "besar",
+          "desc": "Menggunakan <em>large</em> memakai model Jina penuh dan akan otomatis berjalan pada GPU jika memungkinkan."
+        }
+      }
+    },
+    "faceRecognition": {
+      "title": "Pengenalan Wajah",
+      "desc": "Pengenalan wajah memungkinkan orang diberi nama, dan saat wajah mereka dikenali Frigate akan menetapkan nama orang tersebut sebagai sub_label. Informasi ini disertakan dalam UI, filter, serta notifikasi.",
+      "modelSize": {
+        "label": "Ukuran Model",
+        "desc": "Ukuran model yang digunakan untuk pengenalan wajah.",
+        "small": {
+          "title": "kecil",
+          "desc": "Menggunakan <em>small</em> memakai model embedding wajah FaceNet yang berjalan efisien pada sebagian besar CPU."
+        },
+        "large": {
+          "title": "besar",
+          "desc": "Menggunakan <em>large</em> memakai model embedding wajah ArcFace dan akan otomatis berjalan pada GPU jika memungkinkan."
+        }
+      }
+    },
+    "licensePlateRecognition": {
+      "title": "Pengenalan Pelat Nomor",
+      "desc": "Frigate dapat mengenali pelat nomor pada kendaraan dan secara otomatis menambahkan karakter yang terdeteksi ke field recognized_license_plate atau nama yang dikenal sebagai sub_label pada objek bertipe mobil. Kasus penggunaan yang umum adalah membaca pelat nomor mobil yang masuk ke jalan masuk rumah atau mobil yang melintas di jalan."
+    },
+    "restart_required": "Perlu mulai ulang (pengaturan Pengayaan berubah)",
+    "toast": {
+      "success": "Pengaturan Pengayaan telah disimpan. Mulai ulang Frigate untuk menerapkan perubahan Anda.",
+      "error": "Gagal menyimpan perubahan konfigurasi: {{errorMessage}}"
+    }
+  },
+  "cameraWizard": {
+    "title": "Tambah Kamera",
+    "description": "Ikuti langkah-langkah di bawah ini untuk menambahkan kamera baru ke instalasi Frigate Anda.",
+    "steps": {
+      "nameAndConnection": "Nama & Koneksi",
+      "probeOrSnapshot": "Probe atau Cuplikan",
+      "streamConfiguration": "Konfigurasi Stream",
+      "validationAndTesting": "Validasi & Pengujian"
+    },
+    "save": {
+      "success": "Berhasil menyimpan kamera baru {{cameraName}}.",
+      "failure": "Kesalahan saat menyimpan {{cameraName}}."
+    },
+    "testResultLabels": {
+      "resolution": "Resolusi",
+      "video": "Video",
+      "audio": "Audio",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Harap berikan URL stream yang valid",
+      "testFailed": "Pengujian stream gagal: {{error}}"
+    },
+    "step1": {
+      "description": "Masukkan detail kamera Anda dan pilih untuk memeriksa kamera atau memilih merek secara manual.",
+      "cameraName": "Nama Kamera",
+      "cameraNamePlaceholder": "mis., front_door atau Back Yard Overview",
+      "host": "Alamat Host/IP",
+      "port": "Port",
+      "username": "Nama Pengguna",
+      "usernamePlaceholder": "Opsional",
+      "password": "Kata Sandi",
+      "passwordPlaceholder": "Opsional",
+      "selectTransport": "Pilih protokol transport",
+      "cameraBrand": "Merek Kamera",
+      "selectBrand": "Pilih merek kamera untuk template URL",
+      "customUrl": "URL Stream Kustom",
+      "brandInformation": "Informasi merek",
+      "brandUrlFormat": "Untuk kamera dengan format URL RTSP seperti: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "connectionSettings": "Pengaturan Koneksi",
+      "detectionMethod": "Metode Deteksi Stream",
+      "onvifPort": "Port ONVIF",
+      "probeMode": "Periksa kamera",
+      "manualMode": "Pilihan manual",
+      "detectionMethodDescription": "Periksa kamera dengan ONVIF (jika didukung) untuk menemukan URL stream kamera, atau pilih merek kamera secara manual untuk menggunakan URL yang telah ditentukan sebelumnya. Untuk memasukkan URL RTSP kustom, pilih metode manual dan pilih \"Lainnya\".",
+      "onvifPortDescription": "Untuk kamera yang mendukung ONVIF, biasanya ini adalah 80 atau 8080.",
+      "useDigestAuth": "Gunakan autentikasi digest",
+      "useDigestAuthDescription": "Gunakan autentikasi digest HTTP untuk ONVIF. Beberapa kamera mungkin memerlukan nama pengguna/kata sandi ONVIF khusus alih-alih pengguna admin standar.",
+      "errors": {
+        "brandOrCustomUrlRequired": "Pilih merek kamera dengan host/IP atau pilih 'Lainnya' dengan URL kustom",
+        "nameRequired": "Nama kamera wajib diisi",
+        "nameLength": "Nama kamera harus 64 karakter atau kurang",
+        "invalidCharacters": "Nama kamera mengandung karakter yang tidak valid",
+        "nameExists": "Nama kamera sudah ada",
+        "customUrlRtspRequired": "URL kustom harus diawali dengan \"rtsp://\" atau \"rtsps://\". Konfigurasi manual diperlukan untuk stream kamera non-RTSP."
+      }
+    },
+    "step2": {
+      "description": "Periksa kamera untuk stream yang tersedia atau konfigurasi pengaturan manual berdasarkan metode deteksi yang Anda pilih.",
+      "testSuccess": "Pengujian koneksi berhasil!",
+      "testFailed": "Pengujian koneksi gagal. Harap periksa input Anda dan coba lagi.",
+      "testFailedTitle": "Pengujian Gagal",
+      "streamDetails": "Detail Stream",
+      "probing": "Sedang memeriksa kamera...",
+      "retry": "Coba lagi",
+      "testing": {
+        "probingMetadata": "Sedang memeriksa metadata kamera...",
+        "fetchingSnapshot": "Sedang mengambil cuplikan kamera..."
+      },
+      "probeFailed": "Gagal memeriksa kamera: {{error}}",
+      "probingDevice": "Sedang memeriksa perangkat...",
+      "probeSuccessful": "Pemeriksaan berhasil",
+      "probeError": "Kesalahan Pemeriksaan",
+      "probeNoSuccess": "Pemeriksaan tidak berhasil",
+      "deviceInfo": "Informasi Perangkat",
+      "manufacturer": "Produsen",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profil",
+      "ptzSupport": "Dukungan PTZ",
+      "autotrackingSupport": "Dukungan Pelacakan Otomatis",
+      "presets": "Preset",
+      "rtspCandidates": "Kandidat RTSP",
+      "rtspCandidatesDescription": "URL RTSP berikut ditemukan dari pemeriksaan kamera. Uji koneksi untuk melihat metadata stream.",
+      "noRtspCandidates": "Tidak ada URL RTSP yang ditemukan dari kamera. Kredensial Anda mungkin salah, atau kamera mungkin tidak mendukung ONVIF atau metode yang digunakan untuk mengambil URL RTSP. Kembali dan masukkan URL RTSP secara manual.",
+      "candidateStreamTitle": "Kandidat {{number}}",
+      "useCandidate": "Gunakan",
+      "uriCopy": "Salin",
+      "uriCopied": "URI disalin ke clipboard",
+      "testConnection": "Uji Koneksi",
+      "toggleUriView": "Klik untuk mengalihkan tampilan URI penuh",
+      "connected": "Terhubung",
+      "notConnected": "Tidak Terhubung",
+      "errors": {
+        "hostRequired": "Alamat host/IP wajib diisi"
+      }
+    },
+    "step3": {
+      "description": "Konfigurasikan peran stream dan tambahkan stream tambahan untuk kamera Anda.",
+      "streamsTitle": "Stream Kamera",
+      "addStream": "Tambah Stream",
+      "addAnotherStream": "Tambah Stream Lain",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "URL Stream",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "selectStream": "Pilih sebuah stream",
+      "searchCandidates": "Cari kandidat...",
+      "noStreamFound": "Stream tidak ditemukan",
+      "url": "URL",
+      "resolution": "Resolusi",
+      "selectResolution": "Pilih resolusi",
+      "quality": "Kualitas",
+      "selectQuality": "Pilih kualitas",
+      "roles": "Peran",
+      "roleLabels": {
+        "detect": "Deteksi Objek",
+        "record": "Perekaman",
+        "audio": "Audio"
+      },
+      "testStream": "Uji Koneksi",
+      "testSuccess": "Pengujian stream berhasil!",
+      "testFailed": "Pengujian stream gagal",
+      "testFailedTitle": "Pengujian Gagal",
+      "connected": "Terhubung",
+      "notConnected": "Tidak Terhubung",
+      "featuresTitle": "Fitur",
+      "go2rtc": "Kurangi koneksi ke kamera",
+      "detectRoleWarning": "Setidaknya satu stream harus memiliki peran \"detect\" untuk melanjutkan.",
+      "rolesPopover": {
+        "title": "Peran Stream",
+        "detect": "Umpan utama untuk deteksi objek.",
+        "record": "Menyimpan segmen umpan video berdasarkan pengaturan konfigurasi.",
+        "audio": "Umpan untuk deteksi berbasis audio."
+      },
+      "featuresPopover": {
+        "title": "Fitur Stream",
+        "description": "Gunakan restreaming go2rtc untuk mengurangi koneksi ke kamera Anda."
+      }
+    },
+    "step4": {
+      "description": "Validasi dan analisis akhir sebelum menyimpan kamera baru Anda. Hubungkan setiap stream sebelum menyimpan.",
+      "validationTitle": "Validasi Stream",
+      "connectAllStreams": "Hubungkan Semua Stream",
+      "reconnectionSuccess": "Penyambungan ulang berhasil.",
+      "reconnectionPartial": "Beberapa stream gagal disambungkan ulang.",
+      "streamUnavailable": "Pratinjau stream tidak tersedia",
+      "reload": "Muat ulang",
+      "connecting": "Menghubungkan...",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Valid",
+      "failed": "Gagal",
+      "notTested": "Belum diuji",
+      "connectStream": "Hubungkan",
+      "connectingStream": "Sedang menghubungkan",
+      "disconnectStream": "Putuskan",
+      "estimatedBandwidth": "Perkiraan Bandwidth",
+      "roles": "Peran",
+      "ffmpegModule": "Gunakan mode kompatibilitas stream",
+      "ffmpegModuleDescription": "Jika stream tidak dimuat setelah beberapa kali percobaan, coba aktifkan ini. Saat diaktifkan, Frigate akan menggunakan modul ffmpeg dengan go2rtc. Ini dapat memberikan kompatibilitas yang lebih baik dengan beberapa stream kamera.",
+      "none": "Tidak ada",
+      "error": "Kesalahan",
+      "streamValidated": "Stream {{number}} berhasil divalidasi",
+      "streamValidationFailed": "Validasi stream {{number}} gagal",
+      "saveAndApply": "Simpan Kamera Baru",
+      "saveError": "Konfigurasi tidak valid. Harap periksa pengaturan Anda.",
+      "issues": {
+        "title": "Validasi Stream",
+        "videoCodecGood": "Codec video adalah {{codec}}.",
+        "audioCodecGood": "Codec audio adalah {{codec}}.",
+        "resolutionHigh": "Resolusi {{resolution}} dapat menyebabkan peningkatan penggunaan sumber daya.",
+        "resolutionLow": "Resolusi {{resolution}} mungkin terlalu rendah untuk deteksi objek kecil yang andal.",
+        "resolutionUnknown": "Resolusi stream ini tidak dapat diperiksa. Anda harus menetapkan resolusi detect secara manual di Pengaturan atau konfigurasi Anda.",
+        "noAudioWarning": "Tidak ada audio yang terdeteksi untuk stream ini, rekaman tidak akan memiliki audio.",
+        "audioCodecRecordError": "Codec audio AAC diperlukan untuk mendukung audio dalam rekaman.",
+        "audioCodecRequired": "Stream audio diperlukan untuk mendukung deteksi audio.",
+        "restreamingWarning": "Mengurangi koneksi ke kamera untuk stream record dapat sedikit meningkatkan penggunaan CPU.",
+        "brands": {
+          "reolink-rtsp": "RTSP Reolink tidak direkomendasikan. Aktifkan HTTP di pengaturan firmware kamera dan mulai ulang wizard.",
+          "reolink-http": "Stream HTTP Reolink sebaiknya menggunakan FFmpeg untuk kompatibilitas yang lebih baik. Aktifkan 'Gunakan mode kompatibilitas stream' untuk stream ini."
+        },
+        "dahua": {
+          "substreamWarning": "Substream 1 terkunci pada resolusi rendah. Banyak kamera Dahua / Amcrest / EmpireTech mendukung substream tambahan yang perlu diaktifkan di pengaturan kamera. Disarankan untuk memeriksa dan menggunakan stream tersebut jika tersedia."
+        },
+        "hikvision": {
+          "substreamWarning": "Substream 1 terkunci pada resolusi rendah. Banyak kamera Hikvision mendukung substream tambahan yang perlu diaktifkan di pengaturan kamera. Disarankan untuk memeriksa dan menggunakan stream tersebut jika tersedia."
+        }
+      }
+    }
+  },
+  "cameraManagement": {
+    "title": "Kelola Kamera",
+    "description": "Tambahkan, edit, dan hapus kamera, kendalikan status setiap kamera, serta atur penimpaan per profil dan jenis kamera. Untuk mengonfigurasi stream, deteksi, gerakan, dan pengaturan khusus kamera lainnya, pilih bagian terkait di bawah Konfigurasi Kamera.",
+    "addCamera": "Tambah Kamera Baru",
+    "deleteCamera": "Hapus Kamera",
+    "deleteCameraDialog": {
+      "title": "Hapus Kamera",
+      "description": "Menghapus kamera akan menghapus secara permanen semua rekaman, objek terlacak, dan konfigurasi untuk kamera tersebut. Semua stream go2rtc yang terkait dengan kamera ini mungkin masih perlu dihapus secara manual.",
+      "selectPlaceholder": "Pilih kamera...",
+      "confirmTitle": "Apakah Anda yakin?",
+      "confirmWarning": "Menghapus <strong>{{cameraName}}</strong> tidak dapat dibatalkan.",
+      "deleteExports": "Juga hapus ekspor untuk kamera ini",
+      "confirmButton": "Hapus Permanen",
+      "success": "Kamera {{cameraName}} berhasil dihapus",
+      "error": "Gagal menghapus kamera {{cameraName}}"
+    },
+    "editCamera": "Edit Kamera:",
+    "selectCamera": "Pilih Kamera",
+    "backToSettings": "Kembali ke Pengaturan Kamera",
+    "streams": {
+      "title": "Status dan Detail Kamera",
+      "enableLabel": "Kamera yang diaktifkan",
+      "enableDesc": "Nonaktifkan sementara kamera yang aktif hingga Frigate dimulai ulang. Menonaktifkan kamera sepenuhnya akan menghentikan seluruh pemrosesan stream kamera ini oleh Frigate. Deteksi, perekaman, dan debugging tidak akan tersedia.<br /> <em>Catatan: Ini tidak menonaktifkan restream go2rtc.</em><br /><br />Seret pegangan untuk mengubah urutan kamera sebagaimana ditampilkan di UI. Urutan kamera yang aktif akan tercermin di seluruh UI termasuk dasbor Langsung dan dropdown pemilihan kamera.",
+      "disableLabel": "Kamera yang dinonaktifkan",
+      "disableDesc": "Aktifkan kamera yang saat ini tidak terlihat di UI dan dinonaktifkan dalam konfigurasi. Mulai ulang Frigate diperlukan setelah mengaktifkan.",
+      "enableSuccess": "{{cameraName}} diaktifkan. Restart Frigate untuk menerapkan.",
+      "reorderHandle": "Seret untuk mengubah urutan",
+      "saving": "Menyimpan…",
+      "saved": "Tersimpan",
+      "friendlyName": {
+        "edit": "Edit nama tampilan kamera",
+        "title": "Edit Nama Tampilan",
+        "description": "Tetapkan nama ramah yang ditampilkan untuk kamera ini di seluruh UI Frigate. Biarkan kosong untuk menggunakan ID kamera.",
+        "rename": "Ubah Nama"
+      },
+      "label": "Status kamera",
+      "description": "Atur status operasi untuk setiap kamera.<br /><br /><strong>Nyala</strong>: stream diproses secara normal.<br /><strong>Mati</strong>: mem jeda pemrosesan untuk sementara. Tidak tetap setelah Frigate dimulai ulang.<br /><strong>Nonaktif</strong>: menghentikan pemrosesan dan menyimpan perubahan ke konfigurasi Anda. Restart diperlukan untuk mengaktifkan kembali kamera yang dinonaktifkan.<br /><br /><em>Catatan: Menonaktifkan tidak memengaruhi restream go2rtc.</em><br /><br />Seret pegangan untuk mengubah urutan kamera aktif sebagaimana tampil di seluruh UI, termasuk dasbor Live dan menu dropdown pemilihan kamera.",
+      "disabledSubheading": "Dinonaktifkan dalam konfigurasi",
+      "status": {
+        "on": "Nyala",
+        "off": "Mati",
+        "disabled": "Nonaktif"
+      },
+      "disableSuccess": "{{cameraName}} dinonaktifkan dan disimpan ke konfigurasi.",
+      "details": {
+        "edit": "Edit detail kamera",
+        "title": "Edit Detail Kamera",
+        "description": "Perbarui nama tampilan, URL eksternal, dan visibilitas yang digunakan untuk kamera ini di seluruh UI Frigate.",
+        "friendlyNameLabel": "Nama Tampilan",
+        "friendlyNameHelp": "Nama ramah yang ditampilkan untuk kamera ini di seluruh UI Frigate. Biarkan kosong untuk menggunakan ID kamera.",
+        "webuiUrlLabel": "URL Web UI Kamera",
+        "webuiUrlHelp": "URL untuk membuka web UI kamera langsung dari tampilan Debug. Biarkan kosong untuk menonaktifkan tautan.",
+        "webuiUrlInvalid": "Harus berupa URL yang valid (misalnya, https://example.com).",
+        "dashboardLabel": "Tampilkan di dasbor Live",
+        "dashboardHelp": "Tampilkan kamera ini di dasbor Live.",
+        "reviewLabel": "Tampilkan di Review",
+        "reviewHelp": "Tampilkan kamera ini di Review, termasuk filter kamera, review gerakan, dan tampilan riwayat."
+      }
+    },
+    "cameraConfig": {
+      "add": "Tambah Kamera",
+      "edit": "Edit Kamera",
+      "description": "Konfigurasikan pengaturan kamera termasuk input stream dan perannya.",
+      "name": "Nama Kamera",
+      "nameRequired": "Nama kamera wajib diisi",
+      "nameLength": "Nama kamera harus kurang dari 64 karakter.",
+      "namePlaceholder": "mis., front_door atau Back Yard Overview",
+      "enabled": "Diaktifkan",
+      "ffmpeg": {
+        "inputs": "Input Stream",
+        "path": "Path Stream",
+        "pathRequired": "Path stream wajib diisi",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Peran",
+        "rolesRequired": "Setidaknya satu peran wajib diisi",
+        "rolesUnique": "Setiap peran (audio, detect, record) hanya dapat ditetapkan ke satu stream",
+        "addInput": "Tambah Input Stream",
+        "removeInput": "Hapus Input Stream",
+        "inputsRequired": "Setidaknya satu input stream wajib diisi"
+      },
+      "go2rtcStreams": "Stream go2rtc",
+      "streamUrls": "URL Stream",
+      "addUrl": "Tambah URL",
+      "addGo2rtcStream": "Tambah Stream go2rtc",
+      "toast": {
+        "success": "Kamera {{cameraName}} berhasil disimpan"
+      }
+    },
+    "profiles": {
+      "title": "Penimpaan Kamera per Profil",
+      "selectLabel": "Pilih profil",
+      "description": "Atur kamera mana yang dinyalakan atau dimatikan saat suatu profil diaktifkan. Kamera yang disetel ke \"Warisi\" akan mempertahankan status default-nya.",
+      "inherit": "Warisi",
+      "enabled": "Diaktifkan",
+      "disabled": "Dinonaktifkan",
+      "on": "Nyala",
+      "off": "Mati"
+    },
+    "cameraType": {
+      "title": "Tipe Kamera",
+      "label": "Tipe kamera",
+      "description": "Tetapkan tipe untuk setiap kamera. Kamera LPR khusus adalah kamera satu fungsi dengan zoom optik kuat untuk menangkap pelat nomor pada kendaraan yang jauh. Sebagian besar kamera sebaiknya menggunakan tipe kamera normal kecuali kamera tersebut memang khusus untuk LPR dan memiliki tampilan yang sangat terfokus pada pelat nomor.",
+      "normal": "Normal",
+      "dedicatedLpr": "LPR Khusus",
+      "saveSuccess": "Tipe kamera untuk {{cameraName}} telah diperbarui. Mulai ulang Frigate untuk menerapkan perubahan."
+    },
+    "clone": {
+      "sectionTitle": "Kloning pengaturan",
+      "sectionDescription": "Salin konfigurasi dari satu kamera ke kamera lain atau ke kamera baru.",
+      "button": "Kloning pengaturan",
+      "title": "Kloning pengaturan kamera",
+      "description": "Salin konfigurasi sebuah kamera ke satu atau lebih kamera lain atau ke kamera baru. Identitas (nama, nama ramah, URL web UI, urutan tampilan) tidak pernah disalin.",
+      "source": {
+        "label": "Kamera sumber",
+        "placeholder": "Pilih kamera sumber",
+        "required": "Pilih kamera sumber"
+      },
+      "target": {
+        "legend": "Target",
+        "newRadio": "Kamera baru",
+        "newNameLabel": "Nama kamera",
+        "newNamePlaceholder": "misalnya, pintu_belakang atau Pintu Belakang",
+        "newNameRequired": "Nama kamera wajib diisi",
+        "newNameInvalid": "Nama kamera tidak valid",
+        "newNameCollision": "Kamera dengan nama ini sudah ada",
+        "newStreamsForced": "Stream selalu disalin untuk kamera baru.",
+        "existingCamerasRadio": "Kamera yang sudah ada",
+        "allCameras": "Semua kamera",
+        "existingPlaceholder": "Pilih setidaknya satu kamera",
+        "existingDisabled": "Tidak ada kamera lain untuk disalin ke"
+      },
+      "categories": {
+        "legend": "Pengaturan untuk dikloning",
+        "description": "Pilih pengaturan mana yang akan disalin dari kamera sumber.",
+        "selectAll": "Pilih semua",
+        "selectNone": "Jangan pilih apa pun",
+        "resetDefaults": "Reset ke default",
+        "general": "Umum",
+        "spatial": "Pengaturan spasial",
+        "streams": "Stream",
+        "spatialWarningTitle": "Ketidakcocokan resolusi",
+        "spatialWarning": "Resolusi deteksi kamera sumber {{srcCamera}} ({{srcWidth}}×{{srcHeight}}) berbeda dengan: {{cameras}}. Poligon mungkin tidak sejajar pada kamera-kamera tersebut. Default untuk ini adalah nonaktif; aktifkan untuk menyalin apa adanya.",
+        "restartHint": "Perlu restart",
+        "items": {
+          "record": "Perekaman",
+          "snapshots": "Snapshot",
+          "review": "Review",
+          "motion": "Deteksi gerakan",
+          "objects": "Objek",
+          "audio": "Deteksi audio",
+          "audio_transcription": "Transkripsi audio",
+          "notifications": "Notifikasi",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Gaya stempel waktu",
+          "onvif": "ONVIF",
+          "lpr": "Pengenalan pelat nomor",
+          "face_recognition": "Pengenalan wajah",
+          "semantic_search": "Pencarian semantik",
+          "genai": "AI generatif",
+          "type": "Jenis kamera (normal / LPR khusus)",
+          "profiles": "Profil",
+          "detect": "Dimensi deteksi",
+          "zones": "Zona",
+          "motion_mask": "Masker gerakan",
+          "object_masks": "Masker objek",
+          "ffmpeg_live": "URL dan peran stream"
+        }
+      },
+      "footer": {
+        "changeCount_other": "{{count}} perubahan akan diterapkan",
+        "restartNeeded": "Restart akan diperlukan untuk beberapa perubahan.",
+        "liveOnly": "Semua perubahan akan diterapkan langsung tanpa restart.",
+        "submit": "Kloning",
+        "submitting": "Mengkloning…"
+      },
+      "toast": {
+        "success": "Pengaturan disalin ke {{cameraName}}",
+        "successWithRestart": "Pengaturan disalin ke {{cameraName}}. Restart Frigate untuk menerapkan semua perubahan.",
+        "successMulti_other": "Pengaturan disalin ke {{count}} kamera",
+        "successMultiWithRestart_other": "Pengaturan disalin ke {{count}} kamera. Restart Frigate untuk menerapkan semua perubahan.",
+        "partialFailure": "{{successCount}} bagian diterapkan; '{{failedSection}}' gagal: {{errorMessage}}",
+        "partialFailureMulti": "Disalin ke {{successCount}} kamera; gagal untuk {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "Kamera {{cameraName}} berhasil dibuat, tetapi beberapa pengaturan gagal disalin: {{errorMessage}}",
+        "sourceMissing": "Kamera sumber sudah tidak ada",
+        "submitError": "Gagal mengkloning kamera: {{errorMessage}}"
+      }
+    }
+  },
+  "cameraReview": {
+    "title": "Pengaturan Tinjauan Kamera",
+    "object_descriptions": {
+      "title": "Deskripsi Objek AI Generatif",
+      "desc": "Aktifkan/nonaktifkan sementara deskripsi objek AI Generatif untuk kamera ini hingga Frigate dimulai ulang. Saat dinonaktifkan, deskripsi yang dihasilkan AI tidak akan diminta untuk objek terlacak pada kamera ini."
+    },
+    "review_descriptions": {
+      "title": "Deskripsi Tinjauan AI Generatif",
+      "desc": "Aktifkan/nonaktifkan sementara deskripsi tinjauan AI Generatif untuk kamera ini hingga Frigate dimulai ulang. Saat dinonaktifkan, deskripsi yang dihasilkan AI tidak akan diminta untuk item tinjauan pada kamera ini."
+    },
+    "review": {
+      "title": "Tinjauan",
+      "desc": "Aktifkan/nonaktifkan sementara alert dan deteksi untuk kamera ini hingga Frigate dimulai ulang. Saat dinonaktifkan, tidak ada item tinjauan baru yang akan dibuat. ",
+      "alerts": "Alert ",
+      "detections": "Deteksi "
+    },
+    "reviewClassification": {
+      "title": "Klasifikasi Tinjauan",
+      "desc": "Frigate mengategorikan item tinjauan sebagai Alert dan Deteksi. Secara default, semua objek <em>person</em> dan <em>car</em> dianggap sebagai Alert. Anda dapat menyempurnakan kategorisasi item tinjauan Anda dengan mengonfigurasi zona yang diwajibkan untuk item tersebut.",
+      "noDefinedZones": "Tidak ada zona yang didefinisikan untuk kamera ini.",
+      "objectAlertsTips": "Semua objek {{alertsLabels}} pada {{cameraName}} akan ditampilkan sebagai Alert.",
+      "zoneObjectAlertsTips": "Semua objek {{alertsLabels}} yang terdeteksi di {{zone}} pada {{cameraName}} akan ditampilkan sebagai Alert.",
+      "objectDetectionsTips": "Semua objek {{detectionsLabels}} yang tidak dikategorikan pada {{cameraName}} akan ditampilkan sebagai Deteksi, terlepas dari zona mana mereka berada.",
+      "zoneObjectDetectionsTips": {
+        "text": "Semua objek {{detectionsLabels}} yang tidak dikategorikan di {{zone}} pada {{cameraName}} akan ditampilkan sebagai Deteksi.",
+        "notSelectDetections": "Semua objek {{detectionsLabels}} yang terdeteksi di {{zone}} pada {{cameraName}} dan tidak dikategorikan sebagai Alert akan ditampilkan sebagai Deteksi, terlepas dari zona mana mereka berada.",
+        "regardlessOfZoneObjectDetectionsTips": "Semua objek {{detectionsLabels}} yang tidak dikategorikan pada {{cameraName}} akan ditampilkan sebagai Deteksi, terlepas dari zona mana mereka berada."
+      },
+      "unsavedChanges": "Pengaturan Klasifikasi Tinjauan yang belum disimpan untuk {{camera}}",
+      "selectAlertsZones": "Pilih zona untuk Alert",
+      "selectDetectionsZones": "Pilih zona untuk Deteksi",
+      "limitDetections": "Batasi deteksi ke zona tertentu",
+      "toast": {
+        "success": "Konfigurasi Klasifikasi Tinjauan telah disimpan. Mulai ulang Frigate untuk menerapkan perubahan."
+      }
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Semua Masker dan Zona"
+    },
+    "restart_required": "Perlu mulai ulang (masker/zona berubah)",
+    "disabledInConfig": "Item dinonaktifkan dalam file konfigurasi",
+    "addDisabledProfile": "Tambahkan ke konfigurasi dasar terlebih dahulu, lalu timpa di profil",
+    "profileBase": "(dasar)",
+    "profileOverride": "(timpa)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Koordinat untuk {{polyName}} telah disalin ke clipboard."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Tidak dapat menyalin koordinat ke clipboard."
+      }
+    },
+    "motionMaskLabel": "Masker Gerakan {{number}}",
+    "objectMaskLabel": "Masker Objek {{number}}",
+    "form": {
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID tidak boleh kosong.",
+          "alreadyExists": "Masker dengan ID ini sudah ada untuk kamera ini."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Nama tidak boleh kosong."
+        }
+      },
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Nama zona harus minimal 2 karakter.",
+          "mustNotBeSameWithCamera": "Nama zona tidak boleh sama dengan nama kamera.",
+          "alreadyExists": "Zona dengan nama ini sudah ada untuk kamera ini.",
+          "mustNotContainPeriod": "Nama zona tidak boleh mengandung titik.",
+          "hasIllegalCharacter": "Nama zona mengandung karakter yang tidak valid.",
+          "mustHaveAtLeastOneLetter": "Nama zona harus memiliki setidaknya satu huruf."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Jarak harus lebih besar dari atau sama dengan 0.1.",
+          "mustBeFilled": "Semua field jarak harus diisi untuk menggunakan estimasi kecepatan."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Inersia harus lebih besar dari 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Waktu loitering harus lebih besar dari atau sama dengan 0."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Ambang kecepatan harus lebih besar dari atau sama dengan 0.1."
+        }
+      },
+      "polygonDrawing": {
+        "type": {
+          "zone": "zona",
+          "motion_mask": "masker gerakan",
+          "object_mask": "masker objek"
+        },
+        "removeLastPoint": "Hapus titik terakhir",
+        "reset": {
+          "label": "Hapus semua titik"
+        },
+        "snapPoints": {
+          "true": "Kaitkan titik",
+          "false": "Jangan kaitkan titik"
+        },
+        "delete": {
+          "title": "Konfirmasi Hapus",
+          "desc": "Apakah Anda yakin ingin menghapus {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} telah dihapus."
+        },
+        "revertOverride": {
+          "title": "Kembalikan ke Konfigurasi Dasar",
+          "desc": "Ini akan menghapus penimpaan profil untuk {{type}} <em>{{name}}</em> dan mengembalikannya ke konfigurasi dasar."
+        },
+        "error": {
+          "mustBeFinished": "Gambar poligon harus diselesaikan sebelum menyimpan."
+        }
+      }
+    },
+    "zones": {
+      "label": "Zona",
+      "documentTitle": "Edit Zona - Frigate",
+      "desc": {
+        "title": "Zona memungkinkan Anda menentukan area tertentu pada frame sehingga Anda dapat menentukan apakah suatu objek berada di dalam area tertentu atau tidak.",
+        "documentation": "Dokumentasi"
+      },
+      "add": "Tambah Zona",
+      "edit": "Edit Zona",
+      "point_other": "{{count}} titik",
+      "clickDrawPolygon": "Klik untuk menggambar poligon pada gambar.",
+      "name": {
+        "title": "Nama",
+        "inputPlaceHolder": "Masukkan nama…",
+        "tips": "Nama harus minimal 2 karakter, harus memiliki setidaknya satu huruf, dan tidak boleh sama dengan nama kamera atau zona lain pada kamera ini."
+      },
+      "enabled": {
+        "title": "Diaktifkan",
+        "description": "Menentukan apakah zona ini aktif dan diaktifkan dalam file konfigurasi. Jika dinonaktifkan, zona ini tidak dapat diaktifkan melalui MQTT. Zona yang dinonaktifkan diabaikan saat runtime."
+      },
+      "inertia": {
+        "title": "Inersia",
+        "desc": "Menentukan berapa banyak frame suatu objek harus berada di dalam zona sebelum dianggap berada di zona tersebut. <em>Default: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Waktu Loitering",
+        "desc": "Menetapkan jumlah waktu minimum dalam detik yang harus dilalui objek di dalam zona agar zona aktif. <em>Default: 0</em>"
+      },
+      "objects": {
+        "title": "Objek",
+        "desc": "Daftar objek yang berlaku untuk zona ini."
+      },
+      "allObjects": "Semua Objek",
+      "speedEstimation": {
+        "title": "Estimasi Kecepatan",
+        "desc": "Aktifkan estimasi kecepatan untuk objek di zona ini. Zona harus memiliki tepat 4 titik.",
+        "lineADistance": "Jarak garis A ({{unit}})",
+        "lineBDistance": "Jarak garis B ({{unit}})",
+        "lineCDistance": "Jarak garis C ({{unit}})",
+        "lineDDistance": "Jarak garis D ({{unit}})"
+      },
+      "speedThreshold": {
+        "title": "Ambang Kecepatan ({{unit}})",
+        "desc": "Menentukan kecepatan minimum agar objek dianggap berada di zona ini.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Estimasi kecepatan telah dinonaktifkan untuk zona ini. Zona dengan estimasi kecepatan harus memiliki tepat 4 titik.",
+            "loiteringTimeError": "Zona dengan waktu loitering lebih besar dari 0 sebaiknya tidak digunakan dengan estimasi kecepatan."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zona ({{zoneName}}) telah disimpan."
+      }
+    },
+    "motionMasks": {
+      "label": "Masker Gerakan",
+      "documentTitle": "Edit Masker Gerakan - Frigate",
+      "desc": {
+        "title": "Masker gerakan digunakan untuk mencegah jenis gerakan yang tidak diinginkan memicu deteksi. Masking yang berlebihan akan membuat objek lebih sulit dilacak.",
+        "documentation": "Dokumentasi"
+      },
+      "add": "Masker Gerakan Baru",
+      "edit": "Edit Masker Gerakan",
+      "defaultName": "Masker Gerakan {{number}}",
+      "context": {
+        "title": "Masker gerakan digunakan untuk mencegah jenis gerakan yang tidak diinginkan memicu deteksi (contoh: ranting pohon, stempel waktu kamera). Masker gerakan harus digunakan <em>dengan sangat hemat</em>, masking yang berlebihan akan membuat objek lebih sulit dilacak."
+      },
+      "point_other": "{{count}} titik",
+      "clickDrawPolygon": "Klik untuk menggambar poligon pada gambar.",
+      "name": {
+        "title": "Nama",
+        "description": "Nama ramah opsional untuk masker gerakan ini.",
+        "placeholder": "Masukkan nama..."
+      },
+      "polygonAreaTooLarge": {
+        "title": "Masker gerakan menutupi {{polygonArea}}% dari frame kamera. Masker gerakan besar tidak direkomendasikan.",
+        "tips": "Masker gerakan tidak mencegah objek terdeteksi. Anda sebaiknya menggunakan zona wajib sebagai gantinya."
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} telah disimpan.",
+          "noName": "Masker Gerakan telah disimpan."
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "Masker Objek",
+      "documentTitle": "Edit Masker Objek - Frigate",
+      "desc": {
+        "title": "Masker filter objek digunakan untuk menyaring positif palsu untuk tipe objek tertentu berdasarkan lokasi.",
+        "documentation": "Dokumentasi"
+      },
+      "add": "Tambah Masker Objek",
+      "edit": "Edit Masker Objek",
+      "context": "Masker filter objek digunakan untuk menyaring positif palsu untuk tipe objek tertentu berdasarkan lokasi.",
+      "point_other": "{{count}} titik",
+      "clickDrawPolygon": "Klik untuk menggambar poligon pada gambar.",
+      "name": {
+        "title": "Nama",
+        "description": "Nama ramah opsional untuk masker objek ini.",
+        "placeholder": "Masukkan nama..."
+      },
+      "objects": {
+        "title": "Objek",
+        "desc": "Tipe objek yang berlaku untuk masker objek ini.",
+        "allObjectTypes": "Semua tipe objek"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} telah disimpan.",
+          "noName": "Masker Objek telah disimpan."
+        }
+      }
+    },
+    "masks": {
+      "enabled": {
+        "title": "Diaktifkan",
+        "description": "Menentukan apakah masker ini diaktifkan dalam file konfigurasi. Jika dinonaktifkan, masker ini tidak dapat diaktifkan melalui MQTT. Masker yang dinonaktifkan diabaikan saat runtime."
+      }
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Penyetel Deteksi Gerakan",
+    "unsavedChanges": "Perubahan Penyetel Gerakan yang belum disimpan ({{camera}})",
+    "desc": {
+      "title": "Frigate menggunakan deteksi gerakan sebagai pemeriksaan awal untuk melihat apakah ada sesuatu yang terjadi dalam frame yang layak diperiksa dengan deteksi objek.",
+      "documentation": "Baca Panduan Penyetelan Gerakan"
+    },
+    "Threshold": {
+      "title": "Ambang",
+      "desc": "Nilai ambang menentukan seberapa besar perubahan luminansi piksel yang diperlukan agar dianggap sebagai gerakan. <em>Default: 30</em>"
+    },
+    "contourArea": {
+      "title": "Area Kontur",
+      "desc": "Nilai area kontur digunakan untuk menentukan kelompok piksel yang berubah mana yang memenuhi syarat sebagai gerakan. <em>Default: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Tingkatkan Kontras",
+      "desc": "Tingkatkan kontras untuk adegan yang lebih gelap. <em>Default: ON</em>"
+    },
+    "toast": {
+      "success": "Pengaturan gerakan telah disimpan."
+    }
+  },
+  "debug": {
+    "title": "Debug",
+    "detectorDesc": "Frigate menggunakan detektor Anda ({{detectors}}) untuk mendeteksi objek di stream video kamera Anda.",
+    "desc": "Tampilan debug menunjukkan tampilan real-time objek yang dilacak dan statistiknya. Daftar objek menampilkan ringkasan objek yang terdeteksi dengan sedikit jeda waktu.",
+    "openCameraWebUI": "Buka UI Web milik {{camera}}",
+    "debugging": "Debugging",
+    "objectList": "Daftar Objek",
+    "noObjects": "Tidak ada objek",
+    "audio": {
+      "title": "Audio",
+      "noAudioDetections": "Tidak ada deteksi audio",
+      "score": "skor",
+      "currentRMS": "RMS Saat Ini",
+      "currentdbFS": "dbFS Saat Ini"
+    },
+    "boundingBoxes": {
+      "title": "Kotak pembatas",
+      "desc": "Tampilkan kotak pembatas di sekitar objek yang dilacak",
+      "colors": {
+        "label": "Warna Kotak Pembatas Objek",
+        "info": "<li>Saat startup, warna berbeda akan ditetapkan untuk setiap label objek</li><li>Garis tipis biru tua menunjukkan bahwa objek tersebut tidak terdeteksi pada titik waktu saat ini</li><li>Garis tipis abu-abu menunjukkan bahwa objek tersebut terdeteksi sebagai diam</li><li>Garis tebal menunjukkan bahwa objek tersebut menjadi subjek pelacakan otomatis (jika diaktifkan)</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Stempel waktu",
+      "desc": "Hamparkan stempel waktu pada gambar"
+    },
+    "zones": {
+      "title": "Zona",
+      "desc": "Tampilkan garis luar dari zona yang telah didefinisikan"
+    },
+    "mask": {
+      "title": "Masker gerakan",
+      "desc": "Tampilkan poligon masker gerakan"
+    },
+    "motion": {
+      "title": "Kotak gerakan",
+      "desc": "Tampilkan kotak di sekitar area tempat gerakan terdeteksi",
+      "tips": "<p><strong>Kotak Gerakan</strong></p><br><p>Kotak merah akan dihamparkan pada area frame tempat gerakan saat ini terdeteksi</p>"
+    },
+    "regions": {
+      "title": "Wilayah",
+      "desc": "Tampilkan kotak wilayah minat yang dikirim ke detektor objek",
+      "tips": "<p><strong>Kotak Wilayah</strong></p><br><p>Kotak hijau terang akan dihamparkan pada area minat di frame yang sedang dikirim ke detektor objek.</p>"
+    },
+    "paths": {
+      "title": "Jalur",
+      "desc": "Tampilkan titik-titik penting dari jalur objek yang dilacak",
+      "tips": "<p><strong>Jalur</strong></p><br><p>Garis dan lingkaran akan menunjukkan titik-titik penting yang telah dilalui objek yang dilacak selama siklus hidupnya.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Gambar Filter Bentuk Objek",
+      "desc": "Gambar persegi panjang pada gambar untuk melihat detail area dan rasio",
+      "tips": "Aktifkan opsi ini untuk menggambar persegi panjang pada gambar kamera guna menampilkan area dan rasionya. Nilai-nilai ini kemudian dapat digunakan untuk menetapkan parameter filter bentuk objek dalam konfigurasi Anda.",
+      "score": "Skor",
+      "ratio": "Rasio",
+      "area": "Area"
+    }
+  },
+  "timestampPosition": {
+    "tl": "Kiri atas",
+    "tr": "Kanan atas",
+    "bl": "Kiri bawah",
+    "br": "Kanan bawah"
+  },
+  "users": {
+    "title": "Pengguna",
+    "management": {
+      "title": "Manajemen Pengguna",
+      "desc": "Kelola akun pengguna untuk instance Frigate ini."
+    },
+    "addUser": "Tambah Pengguna",
+    "updatePassword": "Atur Ulang Kata Sandi",
+    "toast": {
+      "success": {
+        "createUser": "Pengguna {{user}} berhasil dibuat",
+        "deleteUser": "Pengguna {{user}} berhasil dihapus",
+        "updatePassword": "Kata sandi berhasil diperbarui.",
+        "roleUpdated": "Peran untuk {{user}} diperbarui"
+      },
+      "error": {
+        "setPasswordFailed": "Gagal menyimpan kata sandi: {{errorMessage}}",
+        "createUserFailed": "Gagal membuat pengguna: {{errorMessage}}",
+        "deleteUserFailed": "Gagal menghapus pengguna: {{errorMessage}}",
+        "roleUpdateFailed": "Gagal memperbarui peran: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Nama pengguna",
+      "actions": "Tindakan",
+      "role": "Peran",
+      "noUsers": "Tidak ada pengguna ditemukan.",
+      "changeRole": "Ubah peran pengguna",
+      "password": "Atur Ulang Kata Sandi",
+      "deleteUser": "Hapus pengguna"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Nama pengguna",
+          "desc": "Hanya huruf, angka, titik, dan garis bawah yang diizinkan.",
+          "placeholder": "Masukkan nama pengguna"
+        },
+        "password": {
+          "title": "Kata sandi",
+          "placeholder": "Masukkan kata sandi",
+          "show": "Tampilkan kata sandi",
+          "hide": "Sembunyikan kata sandi",
+          "confirm": {
+            "title": "Konfirmasi Kata Sandi",
+            "placeholder": "Konfirmasi Kata Sandi"
+          },
+          "strength": {
+            "title": "Kekuatan kata sandi: ",
+            "weak": "Lemah",
+            "medium": "Sedang",
+            "strong": "Kuat",
+            "veryStrong": "Sangat Kuat"
+          },
+          "requirements": {
+            "title": "Persyaratan kata sandi:",
+            "length": "Setidaknya 12 karakter"
+          },
+          "match": "Kata sandi cocok",
+          "notMatch": "Kata sandi tidak cocok"
+        },
+        "newPassword": {
+          "title": "Kata Sandi Baru",
+          "placeholder": "Masukkan kata sandi baru",
+          "confirm": {
+            "placeholder": "Masukkan ulang kata sandi baru"
+          }
+        },
+        "currentPassword": {
+          "title": "Kata Sandi Saat Ini",
+          "placeholder": "Masukkan kata sandi Anda saat ini"
+        },
+        "usernameIsRequired": "Nama pengguna wajib diisi",
+        "passwordIsRequired": "Kata sandi wajib diisi"
+      },
+      "createUser": {
+        "title": "Buat Pengguna Baru",
+        "desc": "Tambahkan akun pengguna baru dan tentukan perannya untuk akses ke area UI Frigate.",
+        "usernameOnlyInclude": "Nama pengguna hanya boleh berisi huruf, angka, . atau _",
+        "confirmPassword": "Harap konfirmasi kata sandi Anda"
+      },
+      "deleteUser": {
+        "title": "Hapus Pengguna",
+        "desc": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus akun pengguna secara permanen dan menghapus semua data terkait.",
+        "warn": "Apakah Anda yakin ingin menghapus <strong>{{username}}</strong>?"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Kata sandi tidak boleh kosong",
+        "doNotMatch": "Kata sandi tidak cocok",
+        "currentPasswordRequired": "Kata sandi saat ini wajib diisi",
+        "incorrectCurrentPassword": "Kata sandi saat ini salah",
+        "passwordVerificationFailed": "Gagal memverifikasi kata sandi",
+        "updatePassword": "Perbarui Kata Sandi untuk {{username}}",
+        "setPassword": "Tetapkan Kata Sandi",
+        "desc": "Buat kata sandi yang kuat untuk mengamankan akun ini.",
+        "multiDeviceWarning": "Perangkat lain tempat Anda masuk juga akan diminta login ulang dalam {{refresh_time}}.",
+        "multiDeviceAdmin": "Anda juga dapat memaksa semua pengguna untuk segera mengautentikasi ulang dengan memutar rahasia JWT Anda."
+      },
+      "changeRole": {
+        "title": "Ubah Peran Pengguna",
+        "select": "Pilih peran",
+        "desc": "Perbarui izin untuk <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Pilih peran yang sesuai untuk pengguna ini:",
+          "admin": "Admin",
+          "adminDesc": "Akses penuh ke semua fitur.",
+          "viewer": "Viewer",
+          "viewerDesc": "Terbatas hanya pada dasbor Langsung, Tinjauan, Jelajahi, dan Ekspor.",
+          "customDesc": "Peran kustom dengan akses kamera tertentu."
+        }
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Manajemen Peran Viewer",
+      "desc": "Kelola peran viewer kustom dan izin akses kameranya untuk instance Frigate ini."
+    },
+    "addRole": "Tambah Peran",
+    "table": {
+      "role": "Peran",
+      "cameras": "Kamera",
+      "actions": "Tindakan",
+      "noRoles": "Tidak ada peran kustom ditemukan.",
+      "editCameras": "Edit Kamera",
+      "deleteRole": "Hapus Peran"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Peran {{role}} berhasil dibuat",
+        "updateCameras": "Kamera untuk peran {{role}} telah diperbarui",
+        "deleteRole": "Peran {{role}} berhasil dihapus",
+        "userRolesUpdated_other": "{{count}} pengguna yang ditetapkan ke peran ini telah diperbarui menjadi 'viewer', yang memiliki akses ke semua kamera."
+      },
+      "error": {
+        "createRoleFailed": "Gagal membuat peran: {{errorMessage}}",
+        "updateCamerasFailed": "Gagal memperbarui kamera: {{errorMessage}}",
+        "deleteRoleFailed": "Gagal menghapus peran: {{errorMessage}}",
+        "userUpdateFailed": "Gagal memperbarui peran pengguna: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Buat Peran Baru",
+        "desc": "Tambahkan peran baru dan tentukan izin akses kamera."
+      },
+      "editCameras": {
+        "title": "Edit Kamera Peran",
+        "desc": "Perbarui akses kamera untuk peran <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Hapus Peran",
+        "desc": "Tindakan ini tidak dapat dibatalkan. Ini akan menghapus peran secara permanen dan menetapkan pengguna mana pun dengan peran ini ke peran 'viewer', yang akan memberikan akses viewer ke semua kamera.",
+        "warn": "Apakah Anda yakin ingin menghapus <strong>{{role}}</strong>?",
+        "deleting": "Sedang menghapus..."
+      },
+      "form": {
+        "role": {
+          "title": "Nama Peran",
+          "placeholder": "Masukkan nama peran",
+          "desc": "Hanya huruf, angka, titik, dan garis bawah yang diizinkan.",
+          "roleIsRequired": "Nama peran wajib diisi",
+          "roleOnlyInclude": "Nama peran hanya boleh berisi huruf, angka, . atau _",
+          "roleExists": "Peran dengan nama ini sudah ada."
+        },
+        "cameras": {
+          "title": "Kamera",
+          "desc": "Pilih kamera yang dapat diakses oleh peran ini. Setidaknya satu kamera wajib dipilih.",
+          "required": "Setidaknya satu kamera harus dipilih."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Notifikasi",
+    "notificationSettings": {
+      "title": "Pengaturan Notifikasi",
+      "desc": "Frigate dapat secara native mengirim notifikasi push ke perangkat Anda saat berjalan di browser atau diinstal sebagai PWA."
+    },
+    "notificationUnavailable": {
+      "title": "Notifikasi Tidak Tersedia",
+      "desc": "Notifikasi push web memerlukan konteks aman (<code>https://…</code>). Ini adalah batasan browser. Akses Frigate secara aman untuk menggunakan notifikasi.",
+      "descPwa": "Di iOS, notifikasi push web hanya tersedia jika Frigate dipasang ke Layar Utama Anda. Buka menu <strong>Bagikan</strong>, pilih <strong>Tambahkan ke Layar Utama</strong>, lalu buka Frigate dari ikon baru tersebut untuk mendaftarkan perangkat ini agar menerima notifikasi."
+    },
+    "globalSettings": {
+      "title": "Pengaturan Global",
+      "desc": "Tangguhkan notifikasi sementara untuk kamera tertentu pada semua perangkat yang terdaftar."
+    },
+    "email": {
+      "title": "Email",
+      "placeholder": "mis. contoh@email.com",
+      "desc": "Email yang valid wajib diisi dan akan digunakan untuk memberi tahu Anda jika ada masalah dengan layanan push."
+    },
+    "cameras": {
+      "title": "Kamera",
+      "noCameras": "Tidak ada kamera tersedia",
+      "desc": "Pilih kamera mana yang akan diaktifkan notifikasinya."
+    },
+    "deviceSpecific": "Pengaturan Khusus Perangkat",
+    "registerDevice": "Daftarkan Perangkat Ini",
+    "unregisterDevice": "Batalkan Pendaftaran Perangkat Ini",
+    "sendTestNotification": "Kirim notifikasi uji",
+    "unsavedRegistrations": "Pendaftaran Notifikasi yang belum disimpan",
+    "unsavedChanges": "Perubahan Notifikasi yang belum disimpan",
+    "active": "Notifikasi Aktif",
+    "suspended": "Notifikasi ditangguhkan {{time}}",
+    "suspendTime": {
+      "suspend": "Tangguhkan",
+      "5minutes": "Tangguhkan selama 5 menit",
+      "10minutes": "Tangguhkan selama 10 menit",
+      "30minutes": "Tangguhkan selama 30 menit",
+      "1hour": "Tangguhkan selama 1 jam",
+      "12hours": "Tangguhkan selama 12 jam",
+      "24hours": "Tangguhkan selama 24 jam",
+      "untilRestart": "Tangguhkan hingga dimulai ulang"
+    },
+    "cancelSuspension": "Batalkan Penangguhan",
+    "toast": {
+      "success": {
+        "registered": "Berhasil terdaftar untuk notifikasi. Mulai ulang Frigate diperlukan sebelum notifikasi apa pun (termasuk notifikasi uji) dapat dikirim.",
+        "settingSaved": "Pengaturan notifikasi telah disimpan."
+      },
+      "error": {
+        "registerFailed": "Gagal menyimpan pendaftaran notifikasi."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Pengaturan Frigate+",
+    "description": "Frigate+ adalah layanan berlangganan yang menyediakan akses ke fitur dan kemampuan tambahan untuk instance Frigate Anda, termasuk kemampuan menggunakan model deteksi objek kustom yang dilatih dengan data Anda sendiri. Anda dapat mengelola pengaturan model Frigate+ Anda di sini.",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "Model Saat Ini",
+      "otherModels": "Model Lainnya",
+      "configuration": "Konfigurasi"
+    },
+    "apiKey": {
+      "title": "Kunci API Frigate+",
+      "validated": "Kunci API Frigate+ terdeteksi dan tervalidasi",
+      "notValidated": "Kunci API Frigate+ tidak terdeteksi atau tidak tervalidasi",
+      "desc": "Kunci API Frigate+ memungkinkan integrasi dengan layanan Frigate+.",
+      "plusLink": "Baca lebih lanjut tentang Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Konfigurasi Cuplikan",
+      "desc": "Mengirim ke Frigate+ mengharuskan cuplikan diaktifkan dalam konfigurasi Anda.",
+      "cleanCopyWarning": "Beberapa kamera menonaktifkan cuplikan",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Cuplikan"
+      }
+    },
+    "modelInfo": {
+      "title": "Informasi Model",
+      "modelType": "Tipe Model",
+      "trainDate": "Tanggal Pelatihan",
+      "baseModel": "Model Dasar",
+      "plusModelType": {
+        "baseModel": "Model Dasar",
+        "userModel": "Disetel Halus"
+      },
+      "supportedDetectors": "Detektor yang Didukung",
+      "cameras": "Kamera",
+      "loading": "Memuat informasi model…",
+      "error": "Gagal memuat informasi model",
+      "noModelLoaded": "Saat ini tidak ada model Frigate+ yang dimuat.",
+      "availableModels": "Model Frigate+ yang tersedia",
+      "loadingAvailableModels": "Memuat model yang tersedia…",
+      "selectModel": "Pilih model",
+      "noModelsAvailable": "Tidak ada model tersedia",
+      "filter": {
+        "ariaLabel": "Filter model berdasarkan tipe",
+        "baseModels": "Model Dasar",
+        "fineTunedModels": "Model yang Disetel Halus"
+      },
+      "modelSelect": "Model Frigate+ Anda yang tersedia dapat dipilih di sini. Perlu dicatat bahwa hanya model yang kompatibel dengan konfigurasi detektor Anda saat ini yang dapat dipilih."
+    },
+    "changeInDetectorsAndModel": "Ubah model",
+    "unsavedChanges": "Perubahan pengaturan Frigate+ yang belum disimpan",
+    "restart_required": "Perlu mulai ulang (model Frigate+ berubah)",
+    "toast": {
+      "success": "Pengaturan Frigate+ telah disimpan. Mulai ulang Frigate untuk menerapkan perubahan.",
+      "error": "Gagal menyimpan perubahan konfigurasi: {{errorMessage}}"
+    }
+  },
+  "detectorsAndModel": {
+    "title": "Detektor dan model",
+    "description": "Konfigurasikan backend detektor yang menjalankan deteksi objek dan model yang digunakannya. Perubahan disimpan bersama agar detektor dan model tetap sinkron.",
+    "cardTitles": {
+      "detector": "Perangkat Keras Detektor",
+      "model": "Model Deteksi"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Model Kustom"
+    },
+    "mismatch": {
+      "warning": "Model Frigate+ saat ini \"{{model}}\" memerlukan detektor {{required}}. Pilih model yang kompatibel di bawah atau beralih ke Model Kustom sebelum menyimpan."
+    },
+    "plusModel": {
+      "requiresDetector": "Memerlukan: {{detector}}",
+      "noModelSelected": "Pilih model Frigate+"
+    },
+    "toast": {
+      "saveSuccess": "Pengaturan detektor dan model telah disimpan. Mulai ulang Frigate untuk menerapkan perubahan.",
+      "saveError": "Gagal menyimpan pengaturan detektor dan model"
+    },
+    "unsavedChanges": "Perubahan detektor dan model yang belum disimpan",
+    "restartRequired": "Perlu mulai ulang (detektor atau model berubah)"
+  },
+  "triggers": {
+    "documentTitle": "Pemicu",
+    "semanticSearch": {
+      "title": "Pencarian Semantik dinonaktifkan",
+      "desc": "Pencarian Semantik harus diaktifkan untuk menggunakan Pemicu."
+    },
+    "management": {
+      "title": "Pemicu",
+      "desc": "Kelola pemicu untuk {{camera}}. Gunakan tipe thumbnail untuk memicu pada thumbnail yang mirip dengan objek terlacak yang Anda pilih, dan tipe deskripsi untuk memicu pada deskripsi yang mirip dengan teks yang Anda tentukan."
+    },
+    "addTrigger": "Tambah Pemicu",
+    "table": {
+      "name": "Nama",
+      "type": "Tipe",
+      "content": "Konten",
+      "threshold": "Ambang",
+      "actions": "Tindakan",
+      "noTriggers": "Tidak ada pemicu yang dikonfigurasi untuk kamera ini.",
+      "edit": "Edit",
+      "deleteTrigger": "Hapus Pemicu",
+      "lastTriggered": "Terakhir dipicu"
+    },
+    "type": {
+      "thumbnail": "Thumbnail",
+      "description": "Deskripsi"
+    },
+    "actions": {
+      "notification": "Kirim Notifikasi",
+      "sub_label": "Tambahkan Sub Label",
+      "attribute": "Tambahkan Atribut"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Buat Pemicu",
+        "desc": "Buat pemicu untuk kamera {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Edit Pemicu",
+        "desc": "Edit pengaturan pemicu pada kamera {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Hapus Pemicu",
+        "desc": "Apakah Anda yakin ingin menghapus pemicu <strong>{{triggerName}}</strong>? Tindakan ini tidak dapat dibatalkan."
+      },
+      "form": {
+        "name": {
+          "title": "Nama",
+          "placeholder": "Beri nama pemicu ini",
+          "description": "Masukkan nama atau deskripsi unik untuk mengidentifikasi pemicu ini",
+          "error": {
+            "minLength": "Bidang harus memiliki panjang minimal 2 karakter.",
+            "invalidCharacters": "Bidang hanya boleh berisi huruf, angka, garis bawah, dan tanda hubung.",
+            "alreadyExists": "Pemicu dengan nama ini sudah ada untuk kamera ini."
+          }
+        },
+        "enabled": {
+          "description": "Aktifkan atau nonaktifkan pemicu ini"
+        },
+        "type": {
+          "title": "Tipe",
+          "placeholder": "Pilih tipe pemicu",
+          "description": "Picu saat deskripsi objek terlacak yang serupa terdeteksi",
+          "thumbnail": "Picu saat thumbnail objek terlacak yang serupa terdeteksi"
+        },
+        "content": {
+          "title": "Konten",
+          "imagePlaceholder": "Pilih thumbnail",
+          "textPlaceholder": "Masukkan konten teks",
+          "imageDesc": "Hanya 100 thumbnail terbaru yang ditampilkan. Jika Anda tidak dapat menemukan thumbnail yang diinginkan, silakan tinjau objek sebelumnya di Jelajahi dan atur pemicu dari menu di sana.",
+          "textDesc": "Masukkan teks untuk memicu tindakan ini saat deskripsi objek terlacak yang serupa terdeteksi.",
+          "error": {
+            "required": "Konten wajib diisi."
+          }
+        },
+        "threshold": {
+          "title": "Ambang",
+          "desc": "Tetapkan ambang kemiripan untuk pemicu ini. Ambang yang lebih tinggi berarti kecocokan yang lebih dekat diperlukan agar pemicu dijalankan.",
+          "error": {
+            "min": "Ambang harus minimal 0",
+            "max": "Ambang harus maksimal 1"
+          }
+        },
+        "actions": {
+          "title": "Tindakan",
+          "desc": "Secara default, Frigate mengirim pesan MQTT untuk semua pemicu. Sub label menambahkan nama pemicu ke label objek. Atribut adalah metadata yang dapat dicari dan disimpan secara terpisah dalam metadata objek terlacak.",
+          "error": {
+            "min": "Setidaknya satu tindakan harus dipilih."
+          }
+        }
+      }
+    },
+    "wizard": {
+      "title": "Buat Pemicu",
+      "step1": {
+        "description": "Konfigurasikan pengaturan dasar untuk pemicu Anda."
+      },
+      "step2": {
+        "description": "Atur konten yang akan memicu tindakan ini."
+      },
+      "step3": {
+        "description": "Konfigurasikan ambang dan tindakan untuk pemicu ini."
+      },
+      "steps": {
+        "nameAndType": "Nama dan Tipe",
+        "configureData": "Konfigurasikan Data",
+        "thresholdAndActions": "Ambang dan Tindakan"
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Pemicu {{name}} berhasil dibuat.",
+        "updateTrigger": "Pemicu {{name}} berhasil diperbarui.",
+        "deleteTrigger": "Pemicu {{name}} berhasil dihapus."
+      },
+      "error": {
+        "createTriggerFailed": "Gagal membuat pemicu: {{errorMessage}}",
+        "updateTriggerFailed": "Gagal memperbarui pemicu: {{errorMessage}}",
+        "deleteTriggerFailed": "Gagal menghapus pemicu: {{errorMessage}}"
+      }
+    }
+  },
+  "maintenance": {
+    "title": "Pemeliharaan",
+    "sync": {
+      "title": "Sinkronisasi Media",
+      "desc": "Frigate akan secara berkala membersihkan media sesuai jadwal reguler berdasarkan konfigurasi retensi Anda. Wajar jika ada beberapa file yatim piatu saat Frigate berjalan. Gunakan fitur ini untuk menghapus file media yatim piatu dari disk yang tidak lagi direferensikan dalam basis data.",
+      "started": "Sinkronisasi media dimulai.",
+      "alreadyRunning": "Pekerjaan sinkronisasi sudah sedang berjalan",
+      "error": "Gagal memulai sinkronisasi",
+      "currentStatus": "Status",
+      "jobId": "ID Pekerjaan",
+      "startTime": "Waktu Mulai",
+      "endTime": "Waktu Selesai",
+      "statusLabel": "Status",
+      "results": "Hasil",
+      "errorLabel": "Kesalahan",
+      "mediaTypes": "Tipe Media",
+      "allMedia": "Semua Media",
+      "dryRun": "Dry Run",
+      "dryRunEnabled": "Tidak ada file yang akan dihapus",
+      "dryRunDisabled": "File akan dihapus",
+      "force": "Paksa",
+      "forceDesc": "Lewati ambang keamanan dan selesaikan sinkronisasi meskipun lebih dari 50% file akan dihapus.",
+      "verbose": "Verbose",
+      "verboseDesc": "Tulis daftar lengkap file yatim piatu ke disk untuk ditinjau.",
+      "running": "Sinkronisasi Berjalan...",
+      "start": "Mulai Sinkronisasi",
+      "inProgress": "Sinkronisasi sedang berlangsung. Halaman ini dinonaktifkan.",
+      "status": {
+        "queued": "Dalam antrean",
+        "running": "Berjalan",
+        "completed": "Selesai",
+        "failed": "Gagal",
+        "notRunning": "Tidak Berjalan"
+      },
+      "resultsFields": {
+        "filesChecked": "File Diperiksa",
+        "orphansFound": "File Yatim Piatu Ditemukan",
+        "orphansDeleted": "File Yatim Piatu Dihapus",
+        "aborted": "Dibatalkan. Penghapusan akan melebihi ambang keamanan.",
+        "error": "Kesalahan",
+        "totals": "Total"
+      },
+      "event_snapshots": "Cuplikan Objek Terlacak",
+      "event_thumbnails": "Thumbnail Objek Terlacak",
+      "review_thumbnails": "Thumbnail Tinjauan",
+      "previews": "Pratinjau",
+      "exports": "Ekspor",
+      "recordings": "Rekaman"
+    },
+    "regionGrid": {
+      "title": "Grid Wilayah",
+      "desc": "Grid wilayah adalah optimasi yang mempelajari di mana objek dengan ukuran berbeda biasanya muncul dalam bidang pandang tiap kamera. Frigate menggunakan data ini untuk menentukan ukuran wilayah deteksi secara efisien. Grid ini dibangun secara otomatis seiring waktu dari data objek terlacak.",
+      "clear": "Hapus grid wilayah",
+      "clearConfirmTitle": "Hapus Grid Wilayah",
+      "clearConfirmDesc": "Menghapus grid wilayah tidak direkomendasikan kecuali Anda baru-baru ini mengubah ukuran model detektor atau mengubah posisi fisik kamera dan mengalami masalah pelacakan objek. Grid akan dibangun ulang secara otomatis seiring waktu saat objek dilacak. Frigate perlu dimulai ulang agar perubahan diterapkan.",
+      "clearSuccess": "Grid wilayah berhasil dihapus",
+      "clearError": "Gagal menghapus grid wilayah",
+      "restartRequired": "Perlu mulai ulang agar perubahan grid wilayah diterapkan"
+    }
+  },
+  "configForm": {
+    "global": {
+      "title": "Pengaturan Global",
+      "description": "Pengaturan ini berlaku untuk semua kamera kecuali ditimpa dalam pengaturan khusus kamera."
+    },
+    "camera": {
+      "title": "Pengaturan Kamera",
+      "description": "Pengaturan ini hanya berlaku untuk kamera ini dan menimpa pengaturan global.",
+      "noCameras": "Tidak ada kamera tersedia"
+    },
+    "advancedSettingsCount": "Pengaturan Lanjutan ({{count}})",
+    "advancedCount": "Lanjutan ({{count}})",
+    "showAdvanced": "Tampilkan Pengaturan Lanjutan",
+    "tabs": {
+      "sharedDefaults": "Default Bersama",
+      "system": "Sistem",
+      "integrations": "Integrasi"
+    },
+    "additionalProperties": {
+      "keyLabel": "Kunci",
+      "valueLabel": "Nilai",
+      "keyPlaceholder": "Kunci baru",
+      "remove": "Hapus"
+    },
+    "knownPlates": {
+      "namePlaceholder": "mis., Mobil Istri",
+      "platePlaceholder": "Nomor pelat atau regex"
+    },
+    "timezone": {
+      "defaultOption": "Gunakan zona waktu browser"
+    },
+    "roleMap": {
+      "empty": "Tidak ada pemetaan peran",
+      "roleLabel": "Peran",
+      "groupsLabel": "Grup",
+      "addMapping": "Tambah pemetaan peran",
+      "remove": "Hapus"
+    },
+    "ffmpegArgs": {
+      "preset": "Preset",
+      "manual": "Argumen manual",
+      "inherit": "Warisi dari pengaturan kamera",
+      "none": "Tidak ada",
+      "useGlobalSetting": "Warisi dari pengaturan global",
+      "selectPreset": "Pilih preset",
+      "manualPlaceholder": "Masukkan argumen FFmpeg",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-vaapi": "VAAPI (GPU Intel/AMD)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "GPU NVIDIA",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generik)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generik)",
+        "preset-http-reolink": "HTTP - Kamera Reolink",
+        "preset-rtmp-generic": "RTMP (Generik)",
+        "preset-rtsp-generic": "RTSP (Generik)",
+        "preset-rtsp-restream": "RTSP - Restream dari go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Restream dari go2rtc (Latensi Rendah)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Rekam (Generik, tanpa audio)",
+        "preset-record-generic-audio-copy": "Rekam (Generik + Salin Audio)",
+        "preset-record-generic-audio-aac": "Rekam (Generik + Audio ke AAC)",
+        "preset-record-mjpeg": "Rekam - Kamera MJPEG",
+        "preset-record-jpeg": "Rekam - Kamera JPEG",
+        "preset-record-ubiquiti": "Rekam - Kamera Ubiquiti"
+      }
+    },
+    "cameraInputs": {
+      "itemTitle": "Stream {{index}}"
+    },
+    "restartRequiredField": "Perlu mulai ulang",
+    "restartRequiredFooter": "Konfigurasi berubah - Perlu mulai ulang",
+    "sections": {
+      "detect": "Deteksi",
+      "record": "Perekaman",
+      "snapshots": "Cuplikan",
+      "motion": "Gerakan",
+      "objects": "Objek",
+      "review": "Tinjauan",
+      "audio": "Audio",
+      "notifications": "Notifikasi",
+      "live": "Tampilan Langsung",
+      "timestamp_style": "Stempel waktu",
+      "mqtt": "MQTT",
+      "database": "Basis data",
+      "telemetry": "Telemetri",
+      "auth": "Autentikasi",
+      "tls": "TLS",
+      "proxy": "Proksi",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "Detektor",
+      "model": "Model",
+      "semantic_search": "Pencarian Semantik",
+      "genai": "GenAI",
+      "face_recognition": "Pengenalan Wajah",
+      "lpr": "Pengenalan Pelat Nomor",
+      "birdseye": "Birdseye",
+      "masksAndZones": "Masker / Zona"
+    },
+    "detect": {
+      "title": "Pengaturan Deteksi"
+    },
+    "detectors": {
+      "title": "Pengaturan Detektor",
+      "singleType": "Hanya satu detektor {{type}} yang diizinkan.",
+      "keyRequired": "Nama detektor wajib diisi.",
+      "keyDuplicate": "Nama detektor sudah ada.",
+      "noSchema": "Tidak ada skema detektor yang tersedia.",
+      "none": "Tidak ada instance detektor yang dikonfigurasi.",
+      "add": "Tambah detektor",
+      "addCustomKey": "Tambah kunci kustom"
+    },
+    "record": {
+      "title": "Pengaturan Perekaman"
+    },
+    "snapshots": {
+      "title": "Pengaturan Cuplikan"
+    },
+    "motion": {
+      "title": "Pengaturan Gerakan"
+    },
+    "objects": {
+      "title": "Pengaturan Objek"
+    },
+    "audioLabels": {
+      "summary": "{{count}} label audio dipilih",
+      "empty": "Tidak ada label audio tersedia"
+    },
+    "objectLabels": {
+      "summary": "{{count}} tipe objek dipilih",
+      "empty": "Tidak ada label objek tersedia"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} label dipilih",
+      "empty": "Tidak ada label tersedia"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} untuk {{label}}"
+    },
+    "zoneNames": {
+      "summary": "{{count}} dipilih",
+      "empty": "Tidak ada zona tersedia"
+    },
+    "inputRoles": {
+      "summary": "{{count}} peran dipilih",
+      "empty": "Tidak ada peran tersedia",
+      "options": {
+        "detect": "Deteksi",
+        "record": "Rekam",
+        "audio": "Audio"
+      }
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Embedding",
+        "descriptions": "Deskripsi",
+        "chat": "Chat"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Pilih model…",
+      "builtIn": "Model Bawaan",
+      "genaiProviders": "Penyedia GenAI"
+    },
+    "review": {
+      "title": "Pengaturan Tinjauan"
+    },
+    "audio": {
+      "title": "Pengaturan Audio"
+    },
+    "notifications": {
+      "title": "Pengaturan Notifikasi"
+    },
+    "live": {
+      "title": "Pengaturan Tampilan Langsung"
+    },
+    "timestamp_style": {
+      "title": "Pengaturan Stempel Waktu"
+    },
+    "searchPlaceholder": "Cari...",
+    "addCustomLabel": "Tambahkan label kustom...",
+    "genaiModel": {
+      "placeholder": "Pilih atau masukkan model…",
+      "search": "Cari atau masukkan model…",
+      "noModels": "Tidak ada model tersedia",
+      "available": "Model yang tersedia",
+      "useCustom": "Gunakan \"{{value}}\"",
+      "refresh": "Segarkan model",
+      "probeFailed": "Gagal memeriksa model",
+      "fetchedModels": "Berhasil mengambil daftar model"
+    },
+    "liveStreams": {
+      "streamNameLabel": "Nama stream",
+      "streamNamePlaceholder": "misalnya, Stream HD Utama",
+      "go2rtcStreamLabel": "Stream go2rtc",
+      "go2rtcStreamPlaceholder": "Pilih stream go2rtc",
+      "go2rtcStreamSearch": "Cari atau masukkan nama stream…",
+      "noGo2rtcStreams": "Tidak ada stream go2rtc yang dikonfigurasi",
+      "availableStreams": "Stream yang tersedia",
+      "useCustom": "Gunakan \"{{value}}\"",
+      "addStream": "Tambahkan stream"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "Tidak berlaku untuk penyedia GenAI"
+    },
+    "ptzPresets": {
+      "placeholder": "Pilih atau masukkan preset...",
+      "search": "Cari atau masukkan preset...",
+      "noPresets": "Tidak ada preset yang tersedia",
+      "available": "Preset kamera",
+      "useCustom": "Gunakan \"{{value}}\""
+    },
+    "defaultRole": {
+      "admin": "Admin",
+      "viewer": "Penampil"
+    }
+  },
+  "globalConfig": {
+    "title": "Konfigurasi Global",
+    "description": "Konfigurasikan pengaturan global yang berlaku untuk semua kamera kecuali jika ditimpa.",
+    "toast": {
+      "success": "Pengaturan global berhasil disimpan",
+      "error": "Gagal menyimpan pengaturan global",
+      "validationError": "Validasi gagal"
+    }
+  },
+  "cameraConfig": {
+    "title": "Konfigurasi Kamera",
+    "description": "Konfigurasikan pengaturan untuk masing-masing kamera. Pengaturan menimpa default global.",
+    "overriddenBadge": "Ditimpa",
+    "resetToGlobal": "Atur Ulang ke Global",
+    "toast": {
+      "success": "Pengaturan kamera berhasil disimpan",
+      "error": "Gagal menyimpan pengaturan kamera"
+    }
+  },
+  "toast": {
+    "success": "Pengaturan berhasil disimpan",
+    "applied": "Pengaturan berhasil diterapkan",
+    "successRestartRequired": "Pengaturan berhasil disimpan. Mulai ulang Frigate untuk menerapkan perubahan Anda.",
+    "error": "Gagal menyimpan pengaturan",
+    "validationError": "Validasi gagal: {{message}}",
+    "resetSuccess": "Atur ulang ke default global",
+    "resetError": "Gagal mengatur ulang pengaturan",
+    "saveAllSuccess_other": "Semua {{count}} bagian berhasil disimpan.",
+    "saveAllSuccessRestartRequired_other": "Semua {{count}} bagian berhasil disimpan. Mulai ulang Frigate untuk menerapkan perubahan Anda.",
+    "saveAllPartial_other": "{{successCount}} dari {{totalCount}} bagian berhasil disimpan. {{failCount}} gagal.",
+    "saveAllFailure": "Gagal menyimpan semua bagian."
+  },
+  "profiles": {
+    "title": "Profil",
+    "activeProfile": "Profil Aktif",
+    "noActiveProfile": "Tidak ada profil aktif",
+    "active": "Aktif",
+    "activated": "Profil '{{profile}}' diaktifkan",
+    "activateFailed": "Gagal menetapkan profil",
+    "deactivated": "Profil dinonaktifkan",
+    "noProfiles": "Tidak ada profil yang didefinisikan.",
+    "noOverrides": "Tidak ada penimpaan",
+    "cameraCount_other": "{{count}} kamera",
+    "columnCamera": "Kamera",
+    "columnOverrides": "Penimpaan Profil",
+    "baseConfig": "Konfigurasi Dasar",
+    "addProfile": "Tambah Profil",
+    "newProfile": "Profil Baru",
+    "profileNamePlaceholder": "mis., Armed, Away, Night Mode",
+    "friendlyNameLabel": "Nama Profil",
+    "profileIdLabel": "ID Profil",
+    "profileIdDescription": "Pengidentifikasi internal yang digunakan dalam konfigurasi dan otomatisasi",
+    "nameInvalid": "Hanya huruf kecil, angka, dan garis bawah yang diizinkan",
+    "nameDuplicate": "Profil dengan nama ini sudah ada",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Harus minimal 2 karakter",
+      "mustNotContainPeriod": "Tidak boleh mengandung titik",
+      "alreadyExists": "Profil dengan ID ini sudah ada"
+    },
+    "renameProfile": "Ubah Nama Profil",
+    "renameSuccess": "Profil diubah namanya menjadi '{{profile}}'",
+    "deleteProfile": "Hapus Profil",
+    "deleteProfileConfirm": "Hapus profil \"{{profile}}\" dari semua kamera? Ini tidak dapat dibatalkan.",
+    "deleteSuccess": "Profil '{{profile}}' dihapus",
+    "createSuccess": "Profil '{{profile}}' dibuat",
+    "removeOverride": "Hapus Penimpaan Profil",
+    "deleteSection": "Hapus Penimpaan Bagian",
+    "deleteSectionConfirm": "Hapus penimpaan {{section}} untuk profil {{profile}} pada {{camera}}?",
+    "deleteSectionSuccess": "Penimpaan {{section}} untuk {{profile}} telah dihapus",
+    "enableSwitch": "Aktifkan Profil",
+    "enabledDescription": "Profil diaktifkan. Buat profil baru di bawah, buka bagian konfigurasi kamera untuk membuat perubahan, lalu simpan agar perubahan berlaku.",
+    "disabledDescription": "Profil memungkinkan Anda mendefinisikan kumpulan bernama dari penimpaan konfigurasi kamera (mis., armed, away, night) yang dapat diaktifkan sesuai kebutuhan."
+  },
+  "unsavedChanges": "Anda memiliki perubahan yang belum disimpan",
+  "confirmReset": "Konfirmasi Atur Ulang",
+  "resetToDefaultDescription": "Ini akan mengatur ulang semua pengaturan di bagian ini ke nilai defaultnya. Tindakan ini tidak dapat dibatalkan.",
+  "resetToGlobalDescription": "Ini akan mengatur ulang pengaturan di bagian ini ke default global. Tindakan ini tidak dapat dibatalkan.",
+  "go2rtcStreams": {
+    "title": "Stream go2rtc",
+    "description": "Kelola konfigurasi stream go2rtc untuk restreaming kamera. Setiap stream memiliki nama dan satu atau lebih URL sumber.",
+    "addStream": "Tambah stream",
+    "addStreamDesc": "Masukkan nama untuk stream baru. Nama ini akan digunakan untuk merujuk stream dalam konfigurasi kamera Anda.",
+    "addUrl": "Tambah URL",
+    "streamNumber": "Stream {{index}}",
+    "streamName": "Nama stream",
+    "streamNamePlaceholder": "mis., front_door",
+    "streamUrlPlaceholder": "mis., rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "Hapus stream",
+    "deleteStreamConfirm": "Apakah Anda yakin ingin menghapus stream \"{{streamName}}\"? Kamera yang merujuk stream ini mungkin berhenti berfungsi.",
+    "noStreams": "Tidak ada stream go2rtc yang dikonfigurasi. Tambahkan stream untuk memulai.",
+    "validation": {
+      "nameRequired": "Nama stream wajib diisi",
+      "nameDuplicate": "Stream dengan nama ini sudah ada",
+      "nameInvalid": "Nama stream hanya boleh berisi huruf, angka, garis bawah, dan tanda hubung",
+      "urlRequired": "Setidaknya satu URL wajib diisi"
+    },
+    "renameStream": "Ubah nama stream",
+    "renameStreamDesc": "Masukkan nama baru untuk stream ini. Mengubah nama stream dapat merusak kamera atau stream lain yang merujuknya berdasarkan nama.",
+    "newStreamName": "Nama stream baru",
+    "ffmpeg": {
+      "useFfmpegModule": "Gunakan mode kompatibilitas (ffmpeg)",
+      "video": "Video",
+      "audio": "Audio",
+      "hardware": "Akselerasi perangkat keras",
+      "videoCopy": "Salin",
+      "videoH264": "Transkode ke H.264",
+      "videoH265": "Transkode ke H.265",
+      "videoExclude": "Kecualikan",
+      "audioCopy": "Salin",
+      "audioAac": "Transkode ke AAC",
+      "audioOpus": "Transkode ke Opus",
+      "audioPcmu": "Transkode ke PCM μ-law",
+      "audioPcma": "Transkode ke PCM A-law",
+      "audioPcm": "Transkode ke PCM",
+      "audioMp3": "Transkode ke MP3",
+      "audioExclude": "Kecualikan",
+      "hardwareNone": "Tanpa akselerasi perangkat keras",
+      "hardwareAuto": "Otomatis (direkomendasikan)",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Tambah codec video",
+      "addAudioCodec": "Tambah codec audio",
+      "removeCodec": "Hapus codec"
+    },
+    "sourceNumber": "Sumber {{index}}"
+  },
+  "birdseye": {
+    "trackingMode": {
+      "objects": "Objek",
+      "motion": "Gerakan",
+      "continuous": "Kontinu"
+    },
+    "cameraOrder": {
+      "label": "Urutan kamera",
+      "description": "Seret kamera untuk mengatur urutannya dalam tata letak Birdseye.",
+      "reorderHandle": "Seret untuk mengubah urutan",
+      "saving": "Menyimpan…",
+      "saved": "Tersimpan"
+    }
+  },
+  "retainMode": {
+    "all": "Semua",
+    "motion": "Gerakan",
+    "active_objects": "Objek Aktif"
+  },
+  "previewQuality": {
+    "very_high": "Sangat Tinggi",
+    "high": "Tinggi",
+    "medium": "Sedang",
+    "low": "Rendah",
+    "very_low": "Sangat Rendah"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Browser",
+      "12hour": "12 jam",
+      "24hour": "24 jam"
+    },
+    "TimeOrDateStyle": {
+      "full": "Penuh",
+      "long": "Panjang",
+      "medium": "Sedang",
+      "short": "Pendek"
+    },
+    "unitSystem": {
+      "metric": "Metrik",
+      "imperial": "Imperial"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Rekaman",
+      "previews": "Pratinjau"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Debug",
+      "info": "Info",
+      "warning": "Peringatan",
+      "error": "Kesalahan",
+      "critical": "Kritis"
+    }
+  },
+  "onvif": {
+    "profileAuto": "Otomatis",
+    "profileLoading": "Memuat profil...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Dinonaktifkan",
+        "absolute": "Absolut",
+        "relative": "Relatif"
+      }
+    }
+  },
+  "modelSize": {
+    "small": "Kecil",
+    "large": "Besar"
   }
 }

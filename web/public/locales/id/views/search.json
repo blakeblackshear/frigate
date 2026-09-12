@@ -1,36 +1,73 @@
 {
-  "search": "Cari",
-  "savedSearches": "Simpan Pencarian",
+  "search": "Pencarian",
+  "savedSearches": "Pencarian Tersimpan",
   "searchFor": "Cari untuk {{inputValue}}",
   "button": {
-    "clear": "Bersihkan pencarian",
-    "save": "Simpan Pencarian",
+    "clear": "Hapus pencarian",
+    "save": "Simpan pencarian",
     "delete": "Hapus pencarian yang disimpan",
-    "filterInformation": "Saring Informasi",
+    "filterInformation": "Informasi filter",
     "filterActive": "Filter aktif"
   },
-  "trackedObjectId": "Tracked Object ID",
+  "trackedObjectId": "ID Objek yang Dilacak",
   "filter": {
     "label": {
       "cameras": "Kamera",
       "labels": "Label",
       "zones": "Zona",
-      "sub_labels": "Sublabel",
+      "sub_labels": "Sub Label",
       "attributes": "Atribut",
-      "search_type": "Tipe pencarian",
+      "search_type": "Jenis Pencarian",
       "time_range": "Rentang Waktu",
       "before": "Sebelum",
       "after": "Sesudah",
-      "min_score": "Minimal Skor",
-      "max_score": "Maks Skor",
-      "min_speed": "Kecepatan Min",
-      "max_speed": "Kecepatan Maks",
-      "recognized_license_plate": "Plat Kendaraan Dikenali",
-      "has_clip": "Memiliki Klip",
-      "has_snapshot": "Memiliki tangkapan layar"
+      "min_score": "Skor Minimum",
+      "max_score": "Skor Maksimum",
+      "min_speed": "Kecepatan Minimum",
+      "max_speed": "Kecepatan Maksimum",
+      "recognized_license_plate": "Pelat Nomor yang Diakui",
+      "has_clip": "Memiliki Video Klip",
+      "has_snapshot": "Memiliki Snapshot"
     },
     "searchType": {
-      "thumbnail": "Tumbnail"
+      "thumbnail": "Gambar Mini",
+      "description": "Deskripsi"
+    },
+    "toast": {
+      "error": {
+        "beforeDateBeLaterAfter": "Tanggal 'before' harus lebih akhir daripada tanggal 'after'.",
+        "afterDatebeEarlierBefore": "Tanggal 'after' harus lebih awal daripada tanggal 'before'.",
+        "minScoreMustBeLessOrEqualMaxScore": "'min_score' harus lebih kecil dari atau sama dengan 'max_score'.",
+        "maxScoreMustBeGreaterOrEqualMinScore": "'max_score' harus lebih besar dari atau sama dengan 'min_score'.",
+        "minSpeedMustBeLessOrEqualMaxSpeed": "'min_speed' harus lebih kecil dari atau sama dengan 'max_speed'.",
+        "maxSpeedMustBeGreaterOrEqualMinSpeed": "'max_speed' harus lebih besar dari atau sama dengan 'min_speed'."
+      }
+    },
+    "tips": {
+      "title": "Cara menggunakan filter teks",
+      "desc": {
+        "text": "Filter membantu Anda mempersempit hasil pencarian. Berikut cara menggunakannya di kolom input:",
+        "step1": "Ketik nama kunci filter diikuti tanda titik dua (misalnya, \"cameras:\").",
+        "step2": "Pilih nilai dari saran atau ketik nilai Anda sendiri.",
+        "step3": "Gunakan beberapa filter dengan menambahkannya satu per satu dengan spasi di antaranya.",
+        "step4": "Filter tanggal (before: dan after:) menggunakan format {{DateFormat}}.",
+        "step5": "Filter rentang waktu menggunakan format {{exampleTime}}.",
+        "step6": "Hapus filter dengan mengklik tanda 'x' di sebelahnya.",
+        "exampleLabel": "Contoh:"
+      }
+    },
+    "header": {
+      "currentFilterType": "Nilai Filter",
+      "noFilters": "Filter",
+      "activeFilters": "Filter Aktif"
     }
+  },
+  "similaritySearch": {
+    "title": "Pencarian Kemiripan",
+    "active": "Pencarian kemiripan aktif",
+    "clear": "Hapus pencarian kemiripan"
+  },
+  "placeholder": {
+    "search": "Pencarian…"
   }
 }

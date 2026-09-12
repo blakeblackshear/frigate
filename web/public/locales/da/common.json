@@ -24,7 +24,7 @@
     "am": "am",
     "year_one": "{{time}} år",
     "year_other": "{{time}} år",
-    "mo": "{{time}}må",
+    "mo": "{{time}}md.",
     "month_one": "{{time}} måned",
     "month_other": "{{time}} måneder",
     "d": "{{time}}d",
@@ -121,18 +121,18 @@
     "back": "Tilbage",
     "history": "Historik",
     "fullscreen": "Fuldskærm",
-    "exitFullscreen": "Afslut Fludskærm",
-    "pictureInPicture": "Billede i Billede",
-    "twoWayTalk": "2 vejs samtale",
-    "cameraAudio": "Kamera Lyd",
-    "on": "ON",
-    "off": "OFF",
+    "exitFullscreen": "Afslut Fuldskærm",
+    "pictureInPicture": "Billede i billede",
+    "twoWayTalk": "Samtale",
+    "cameraAudio": "Kameralyd",
+    "on": "Til",
+    "off": "Fra",
     "edit": "Rediger",
     "copyCoordinates": "Kopier koordinater",
     "delete": "Slet",
     "yes": "Ja",
     "no": "Nej",
-    "download": "Download",
+    "download": "Hent",
     "info": "Info",
     "suspended": "Sat på pause",
     "unsuspended": "Genoptag",
@@ -141,7 +141,19 @@
     "export": "Eksporter",
     "deleteNow": "Slet nu",
     "next": "Næste",
-    "continue": "Fortsæt"
+    "continue": "Fortsæt",
+    "add": "Tilføj",
+    "applying": "Anvender…",
+    "undo": "Annuler",
+    "copiedToClipboard": "Kopieret til udklipsholder",
+    "modified": "Ændret",
+    "overridden": "Overskrevet",
+    "resetToGlobal": "Gendan til global",
+    "resetToDefault": "Gendan standard",
+    "saveAll": "Gem alle",
+    "savingAll": "Gemmer alle…",
+    "undoAll": "Fortryd alle",
+    "retry": "Prøv igen"
   },
   "menu": {
     "system": "System",
@@ -194,7 +206,9 @@
       "gl": "Galego (Galisisk)",
       "id": "Bahasa Indonesia (Indonesisk)",
       "ur": "اردو (Urdu)",
-      "hr": "Hrvatski (Kroatisk)"
+      "hr": "Hrvatski (Kroatisk)",
+      "zhHant": "繁體中文 (Traditionel Kinesisk)",
+      "bs": "Bosanski (Bosnisk)"
     },
     "appearance": "Udseende",
     "darkMode": {
@@ -243,7 +257,11 @@
       "logout": "Log ud",
       "setPassword": "Vælg kodeord"
     },
-    "classification": "Kategorisering"
+    "classification": "Kategorisering",
+    "profiles": "Profiler",
+    "actions": "Handlinger",
+    "features": "Funktioner",
+    "chat": "Chat"
   },
   "toast": {
     "copyUrlToClipboard": "Kopieret URL til udklipsholder.",
@@ -252,13 +270,14 @@
       "error": {
         "title": "Ændringer kunne ikke gemmes: {{errorMessage}}",
         "noMessage": "Kunne ikke gemme konfigurationsændringer"
-      }
+      },
+      "success": "Gemte ændringerne i konfigurationen."
     }
   },
   "role": {
     "title": "Rolle",
     "admin": "Admin",
-    "viewer": "Viewer",
+    "viewer": "Seer",
     "desc": "Admins har fuld adgang til Frigate UI. Viewers er begrænset til at se kameraer, gennemse items, og historik i UI."
   },
   "pagination": {
@@ -296,5 +315,10 @@
   },
   "information": {
     "pixels": "{{area}}px"
+  },
+  "no_items": "Intet fundet",
+  "validation_errors": "Valideringsfejl",
+  "credentialField": {
+    "savedPlaceholder": "Gemt - efterlad blank for at bevare nuværende"
   }
 }

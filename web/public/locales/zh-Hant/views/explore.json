@@ -99,7 +99,7 @@
     "regenerateFromSnapshot": "從截圖重新生成",
     "regenerateFromThumbnails": "從縮圖重新生成",
     "tips": {
-      "descriptionSaved": "成功保存說明",
+      "descriptionSaved": "成功儲存說明",
       "saveDescriptionFailed": "更新說明失敗：{{errorMessage}}"
     },
     "editAttributes": {
@@ -112,7 +112,8 @@
     "attributes": "分類屬性",
     "title": {
       "label": "標題"
-    }
+    },
+    "scoreInfo": "分數資訊"
   },
   "trackedObjectDetails": "追蹤物件詳情",
   "type": {
@@ -221,12 +222,22 @@
     "viewTrackingDetails": {
       "label": "檢視追蹤詳細資訊",
       "aria": "顯示追蹤詳細資訊"
+    },
+    "debugReplay": {
+      "label": "除錯重播",
+      "aria": "在除錯重播檢視中檢視此被追蹤物件"
+    },
+    "more": {
+      "aria": "更多"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "確認刪除",
-      "desc": "刪除此追蹤物件將移除截圖、所有已保存的嵌入，以及所有相關的追蹤詳情。歷史記錄中的錄影<em>不會</em>被刪除。<br /><br />你確定要刪除嗎？"
+      "desc": "刪除此追蹤物件將會移除快照、已儲存的嵌入向量資料（embeddings），以及相關的追蹤詳情紀錄。歷史檢視中的錄影檔案 <em>不會</em> 被刪除。<br /><br />確定要刪除嗎？"
+    },
+    "toast": {
+      "error": "刪除該追蹤目標時出錯：{{errorMessage}}"
     }
   },
   "noTrackedObjects": "找不到追蹤物件",
@@ -248,7 +259,7 @@
     "noImageFound": "沒有找到在此時間點的圖片。",
     "createObjectMask": "建立物件遮罩",
     "adjustAnnotationSettings": "調整標記設定",
-    "scrollViewTips": "點擊查看物件周期的關鍵時間。",
+    "scrollViewTips": "點擊查看物件週期的關鍵時間。",
     "autoTrackingTips": "自動追蹤鏡頭的邊框位置可能不準確。",
     "count": "{{second}}之{{first}}",
     "trackedPoint": "追蹤點",
@@ -268,7 +279,10 @@
         "zones": "區域",
         "ratio": "比例",
         "score": "分數",
-        "area": "面積"
+        "area": "面積",
+        "computedScore": "計算得分",
+        "topScore": "最高得分",
+        "toggleAdvancedScores": "切換高階分數"
       }
     },
     "annotationSettings": {
@@ -294,5 +308,8 @@
   },
   "aiAnalysis": {
     "title": "AI 分析"
+  },
+  "concerns": {
+    "label": "風險等級"
   }
 }

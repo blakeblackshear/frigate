@@ -60,7 +60,7 @@ export function getLifecycleItemDescription(
       } else {
         title = t("trackingDetails.lifecycleItemDesc.attribute.other", {
           ns: "views/explore",
-          label: lifecycleItem.data.label,
+          label: getTranslatedLabel(lifecycleItem.data.label),
           attribute: getTranslatedLabel(
             lifecycleItem.data.attribute.replaceAll("_", " "),
           ),

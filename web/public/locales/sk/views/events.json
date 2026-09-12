@@ -40,8 +40,8 @@
   "detail": {
     "noDataFound": "Žiadne podrobné údaje na kontrolu",
     "aria": "Prepnúť zobrazenie detailov",
-    "trackedObject_one": "objekt",
-    "trackedObject_other": "objekty",
+    "trackedObject_one": "{{count}} objekt",
+    "trackedObject_other": "{{count}} objektov",
     "noObjectDetailData": "Nie sú k dispozícii žiadne podrobné údaje o objekte.",
     "label": "Detail",
     "settings": "Nastavenia podrobného zobrazenia",

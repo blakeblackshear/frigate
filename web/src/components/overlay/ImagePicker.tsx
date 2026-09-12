@@ -85,7 +85,7 @@ export default function ImagePicker({
     <Input
       type="text"
       placeholder={t("imagePicker.search.placeholder")}
-      className="text-md mb-3 md:text-sm"
+      className="mb-3 md:text-sm"
       value={searchTerm}
       onChange={(e) => {
         setSearchTerm(e.target.value);

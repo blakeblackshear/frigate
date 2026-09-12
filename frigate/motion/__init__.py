@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
 
 from numpy import ndarray
 
@@ -10,13 +9,13 @@ class MotionDetector(ABC):
     @abstractmethod
     def __init__(
         self,
-        frame_shape: Tuple[int, int, int],
+        frame_shape: tuple[int, int, int],
         config: MotionConfig,
         fps: int,
-        improve_contrast,
-        threshold,
-        contour_area,
-    ):
+        improve_contrast: bool,
+        threshold: int,
+        contour_area: int | None,
+    ) -> None:
         pass
 
     @abstractmethod
@@ -25,7 +24,7 @@ class MotionDetector(ABC):
         pass
 
     @abstractmethod
-    def is_calibrating(self):
+    def is_calibrating(self) -> bool:
         """Return if motion is recalibrating."""
         pass
 
@@ -35,6 +34,6 @@ class MotionDetector(ABC):
         pass
 
     @abstractmethod
-    def stop(self):
+    def stop(self) -> None:
         """Stop any ongoing work and processes."""
         pass

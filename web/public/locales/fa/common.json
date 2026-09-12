@@ -17,13 +17,13 @@
     "5minutes": "۵ دقیقه",
     "10minutes": "۱۰ دقیقه",
     "day_one": "{{time}} روز",
-    "day_other": "{{time}} روز",
+    "day_other": "{{time}} روزها",
     "h": "{{time}}س",
     "hour_one": "{{time}} ساعت",
-    "hour_other": "{{time}} ساعت",
+    "hour_other": "{{time}} ساعتها",
     "m": "{{time}} دقیقه",
     "minute_one": "{{time}} دقیقه",
-    "minute_other": "{{time}} دقیقه",
+    "minute_other": "{{time}} دقایق",
     "s": "{{time}}ث",
     "30minutes": "۳۰ دقیقه",
     "1hour": "۱ ساعت",
@@ -33,10 +33,10 @@
     "am": "ق.ظ.",
     "yr": "{{time}} سال",
     "year_one": "{{time}} سال",
-    "year_other": "{{time}} سال",
+    "year_other": "{{time}} سالها",
     "mo": "{{time}} ماه",
     "month_one": "{{time}} ماه",
-    "month_other": "{{time}} ماه",
+    "month_other": "{{time}} ماه ها",
     "d": "{{time}} روز",
     "second_one": "{{time}} ثانیه",
     "second_other": "‏{{time}} ثانیه",
@@ -75,7 +75,8 @@
     },
     "inProgress": "در حال انجام",
     "invalidStartTime": "زمان شروع نامعتبر است",
-    "invalidEndTime": "زمان پایان نامعتبر است"
+    "invalidEndTime": "زمان پایان نامعتبر است",
+    "never": "هرگز"
   },
   "unit": {
     "length": {
@@ -101,7 +102,8 @@
     "all": "همه",
     "back": "برگشت به قبل",
     "show": "نمایش {{item}}",
-    "none": "هیچ‌کدام"
+    "none": "هیچ‌کدام",
+    "other": "دیگر"
   },
   "list": {
     "many": "{{items}}، و {{last}}",
@@ -132,10 +134,10 @@
     "export": "خروجی گرفتن",
     "next": "بعدی",
     "reset": "بازنشانی",
-    "enabled": "فعال",
+    "enabled": "فعال شده",
     "disable": "غیرفعال کردن",
     "save": "ذخیره",
-    "saving": "در حال ذخیره…",
+    "saving": "در حال ذخیره‌سازی…",
     "copy": "کپی",
     "history": "تاریخچه",
     "pictureInPicture": "تصویر در تصویر",
@@ -148,7 +150,19 @@
     "continue": "ادامه",
     "on": "روشن",
     "edit": "ویرایش",
-    "suspended": "تعلیق‌شده"
+    "suspended": "تعلیق‌شده",
+    "add": "افزودن",
+    "applying": "در حال اعمال…",
+    "undo": "برگرداندن",
+    "copiedToClipboard": "در کلیپ‌بورد کپی شد",
+    "modified": "اصلاح شده",
+    "retry": "تلاش دوباره",
+    "resetToGlobal": "بازنشانی به حالت جهانی",
+    "resetToDefault": "بازنشانی به پیش‌فرض",
+    "saveAll": "ذخیره همه",
+    "savingAll": "ذخیره‌سازی همه…",
+    "undoAll": "بازگردانی همه",
+    "overridden": "نادیده‌گرفته‌شده"
   },
   "menu": {
     "systemMetrics": "شاخص‌های سیستم",
@@ -196,9 +210,12 @@
       "ur": "اردو (زبان اردو)",
       "withSystem": {
         "label": "برای زبان از تنظیمات سامانه استفاده کنید"
-      }
+      },
+      "zhHant": "چینی سنتی",
+      "hr": "کرواسیایی",
+      "bs": "بوسنیایی"
     },
-    "system": "سامانه",
+    "system": "سیستم",
     "systemLogs": "لاگ‌های سامانه",
     "configurationEditor": "ویرایشگر پیکربندی",
     "languages": "زبان‌ها",
@@ -233,7 +250,7 @@
       "cameras": {
         "title": "دوربین‌ها",
         "count_one": "{{count}} دوربین",
-        "count_other": "{{count}} دوربین"
+        "count_other": "{{count}} دوربینها"
       }
     },
     "review": "بازبینی",
@@ -249,7 +266,11 @@
       "anonymous": "ناشناس",
       "logout": "خروج",
       "setPassword": "تنظیم گذرواژه"
-    }
+    },
+    "profiles": "پروفایل‌ها",
+    "actions": "اقدام‌ها",
+    "features": "ویژگی‌ها",
+    "chat": "چت"
   },
   "toast": {
     "copyUrlToClipboard": "نشانی اینترنتی در کلیپ‌بورد کپی شد.",
@@ -258,7 +279,8 @@
       "error": {
         "title": "ذخیرهٔ تغییرات پیکربندی ناموفق بود: {{errorMessage}}",
         "noMessage": "ذخیرهٔ تغییرات پیکربندی ناموفق بود"
-      }
+      },
+      "success": "تغییرات پیکربندی با موفقیت ذخیره شد."
     }
   },
   "role": {
@@ -293,5 +315,10 @@
   "readTheDocumentation": "مستندات را بخوانید",
   "information": {
     "pixels": "{{area}}px"
+  },
+  "no_items": "هیچ چیزی یافت نشد",
+  "validation_errors": "خطاهای اعتبارسنجی",
+  "credentialField": {
+    "savedPlaceholder": "ذخیره شد — برای نگه‌داشت وضعیت کنونی، خالی بگذارید"
   }
 }

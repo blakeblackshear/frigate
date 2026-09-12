@@ -1,6 +1,8 @@
 import ReviewCard from "@/components/card/ReviewCard";
 import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
+import DebugReplayDialog from "@/components/overlay/DebugReplayDialog";
 import ExportDialog from "@/components/overlay/ExportDialog";
+import ActionsDropdown from "@/components/overlay/ActionsDropdown";
 import PreviewPlayer, {
   PreviewController,
 } from "@/components/player/PreviewPlayer";
@@ -24,7 +26,7 @@ import {
   ReviewSummary,
   ZoomLevel,
 } from "@/types/review";
-import { getChunkedTimeDay } from "@/utils/timelineUtil";
+import { findChunkIndex, getChunkedTimeDay } from "@/utils/timelineUtil";
 import {
   MutableRefObject,
   useCallback,
@@ -40,8 +42,9 @@ import {
   isTablet,
 } from "react-device-detect";
 import { IoMdArrowRoundBack } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import useSWR from "swr";
 import { TimeRange, TimelineType } from "@/types/timeline";
 import MobileCameraDrawer from "@/components/overlay/MobileCameraDrawer";
@@ -75,6 +78,9 @@ import {
   GenAISummaryDialog,
   GenAISummaryChip,
 } from "@/components/overlay/chip/GenAISummaryChip";
+import ShareTimestampDialog from "@/components/overlay/ShareTimestampDialog";
+import { shareOrCopy } from "@/utils/browserUtil";
+import { createRecordingReviewUrl } from "@/utils/recordingReviewUrl";
 
 const DATA_REFRESH_TIME = 600000; // 10 minutes
 
@@ -89,6 +95,7 @@ type RecordingViewProps = {
   filter?: ReviewFilter;
   updateFilter: (newFilter: ReviewFilter) => void;
   refreshData?: () => void;
+  onMotionSearch?: (camera: string) => void;
 };
 export function RecordingView({
   startCamera,
@@ -101,10 +108,13 @@ export function RecordingView({
   filter,
   updateFilter,
   refreshData,
+  onMotionSearch,
 }: RecordingViewProps) {
-  const { t } = useTranslation(["views/events"]);
+  const { t } = useTranslation(["views/events", "components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isAdmin = useIsAdmin();
   const navigate = useNavigate();
+  const location = useLocation();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   // recordings summary
@@ -113,8 +123,13 @@ export function RecordingView({
 
   const allowedCameras = useAllowedCameras();
   const effectiveCameras = useMemo(
-    () => allCameras.filter((camera) => allowedCameras.includes(camera)),
-    [allCameras, allowedCameras],
+    () =>
+      allCameras.filter(
+        (camera) =>
+          allowedCameras.includes(camera) &&
+          config?.cameras[camera]?.ui?.review !== false,
+      ),
+    [allCameras, allowedCameras, config?.cameras],
   );
   const [mainCamera, setMainCamera] = useState(startCamera);
 
@@ -163,9 +178,7 @@ export function RecordingView({
     [timeRange],
   );
   const [selectedRangeIdx, setSelectedRangeIdx] = useState(
-    chunkedTimeRange.findIndex((chunk) => {
-      return chunk.after <= startTime && chunk.before >= startTime;
-    }),
+    findChunkIndex(chunkedTimeRange, startTime),
   );
   const currentTimeRange = useMemo<TimeRange>(
     () =>
@@ -198,6 +211,21 @@ export function RecordingView({
   const [exportMode, setExportMode] = useState<ExportMode>("none");
   const [exportRange, setExportRange] = useState<TimeRange>();
   const [showExportPreview, setShowExportPreview] = useState(false);
+
+  // debug replay
+
+  const [debugReplayMode, setDebugReplayMode] = useState<ExportMode>("none");
+  const [debugReplayRange, setDebugReplayRange] = useState<TimeRange>();
+  const [shareTimestampOpen, setShareTimestampOpen] = useState(false);
+  const [shareTimestampAtOpen, setShareTimestampAtOpen] = useState(
+    Math.floor(startTime),
+  );
+  const [shareTimestampOption, setShareTimestampOption] = useState<
+    "current" | "custom"
+  >("current");
+  const [customShareTimestamp, setCustomShareTimestamp] = useState(
+    Math.floor(startTime),
+  );
 
   // move to next clip
 
@@ -253,9 +281,7 @@ export function RecordingView({
 
   const updateSelectedSegment = useCallback(
     (currentTime: number, updateStartTime: boolean) => {
-      const index = chunkedTimeRange.findIndex(
-        (seg) => seg.after <= currentTime && seg.before >= currentTime,
-      );
+      const index = findChunkIndex(chunkedTimeRange, currentTime);
 
       if (index != -1) {
         if (updateStartTime) {
@@ -269,7 +295,7 @@ export function RecordingView({
   );
 
   useEffect(() => {
-    if (scrubbing || exportRange) {
+    if (scrubbing || exportRange || debugReplayRange) {
       if (
         currentTime > currentTimeRange.before + 60 ||
         currentTime < currentTimeRange.after - 60
@@ -309,6 +335,44 @@ export function RecordingView({
     },
     [currentTimeRange, updateSelectedSegment],
   );
+
+  const onClipPrevious = useCallback(
+    (diff: number) => {
+      manuallySetCurrentTime(
+        currentTime + diff,
+        mainControllerRef.current?.isPlaying() ?? false,
+      );
+    },
+    [currentTime, manuallySetCurrentTime],
+  );
+
+  const onShareReviewLink = useCallback(
+    (timestamp: number) => {
+      const reviewUrl = createRecordingReviewUrl(location.pathname, {
+        camera: mainCamera,
+        timestamp: Math.floor(timestamp),
+      });
+
+      shareOrCopy(
+        reviewUrl,
+        t("recording.shareTimestamp.shareTitle", {
+          ns: "components/dialog",
+          camera: mainCamera,
+        }),
+      );
+    },
+    [location.pathname, mainCamera, t],
+  );
+
+  const handleBack = useCallback(() => {
+    // if we came from a direct share link, there is no history to go back to, so navigate to the homepage instead
+    if (recording?.navigationSource === "shared-link") {
+      navigate("/");
+      return;
+    }
+
+    navigate(-1);
+  }, [navigate, recording?.navigationSource]);
 
   useEffect(() => {
     if (!scrubbing) {
@@ -560,7 +624,7 @@ export function RecordingView({
               className="flex items-center gap-2.5 rounded-lg"
               aria-label={t("label.back", { ns: "common" })}
               size="sm"
-              onClick={() => navigate(-1)}
+              onClick={handleBack}
             >
               <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
               {isDesktop && (
@@ -592,10 +656,28 @@ export function RecordingView({
               onSelectCamera={onSelectCamera}
             />
             {isDesktop && (
+              <DebugReplayDialog
+                camera={mainCamera}
+                currentTime={currentTime}
+                latestTime={timeRange.before}
+                mode={debugReplayMode}
+                range={debugReplayRange}
+                setRange={(range: TimeRange | undefined) => {
+                  setDebugReplayRange(range);
+
+                  if (range != undefined) {
+                    mainControllerRef.current?.pause();
+                  }
+                }}
+                setMode={setDebugReplayMode}
+              />
+            )}
+            {isDesktop && (
               <ExportDialog
                 camera={mainCamera}
                 currentTime={currentTime}
                 latestTime={timeRange.before}
+                earliestTime={timeRange.after}
                 mode={exportMode}
                 range={exportRange}
                 showPreview={showExportPreview}
@@ -639,6 +721,53 @@ export function RecordingView({
                 setMotionOnly={() => {}}
               />
             )}
+            {isDesktop && (
+              <ShareTimestampDialog
+                currentTime={shareTimestampAtOpen}
+                open={shareTimestampOpen}
+                onOpenChange={setShareTimestampOpen}
+                selectedOption={shareTimestampOption}
+                setSelectedOption={setShareTimestampOption}
+                customTimestamp={customShareTimestamp}
+                setCustomTimestamp={setCustomShareTimestamp}
+                onShareTimestamp={onShareReviewLink}
+              />
+            )}
+            {isDesktop && (
+              <ActionsDropdown
+                onShareTimestampClick={() => {
+                  const initialTimestamp = Math.floor(currentTime);
+
+                  setShareTimestampAtOpen(initialTimestamp);
+                  setShareTimestampOption("current");
+                  setCustomShareTimestamp(initialTimestamp);
+                  setShareTimestampOpen(true);
+                }}
+                onMotionSearchClick={
+                  onMotionSearch ? () => onMotionSearch(mainCamera) : undefined
+                }
+                onDebugReplayClick={
+                  isAdmin
+                    ? () => {
+                        setDebugReplayRange({
+                          after: timeRange.before - 60,
+                          before: timeRange.before,
+                        });
+                        setDebugReplayMode("select");
+                      }
+                    : undefined
+                }
+                onExportClick={() => {
+                  const now = new Date(timeRange.before * 1000);
+                  now.setHours(now.getHours() - 1);
+                  setExportRange({
+                    before: timeRange.before,
+                    after: now.getTime() / 1000,
+                  });
+                  setExportMode("select");
+                }}
+              />
+            )}
             {isDesktop ? (
               <ToggleGroup
                 className="*:rounded-md *:px-3 *:py-4"
@@ -654,7 +783,7 @@ export function RecordingView({
                   value="timeline"
                   aria-label={t("timeline.aria")}
                 >
-                  <div className="">{t("timeline")}</div>
+                  <div className="">{t("timeline.label")}</div>
                 </ToggleGroupItem>
                 <ToggleGroupItem
                   className={`${timelineType == "events" ? "" : "text-muted-foreground"}`}
@@ -682,12 +811,27 @@ export function RecordingView({
               filter={filter}
               currentTime={currentTime}
               latestTime={timeRange.before}
+              earliestTime={timeRange.after}
               recordingsSummary={recordingsSummary}
               mode={exportMode}
               range={exportRange}
               showExportPreview={showExportPreview}
               allLabels={reviewFilterList.labels}
               allZones={reviewFilterList.zones}
+              debugReplayMode={debugReplayMode}
+              debugReplayRange={debugReplayRange}
+              setDebugReplayMode={setDebugReplayMode}
+              setDebugReplayRange={(range: TimeRange | undefined) => {
+                setDebugReplayRange(range);
+
+                if (range != undefined) {
+                  mainControllerRef.current?.pause();
+                }
+              }}
+              onShareTimestamp={onShareReviewLink}
+              onMotionSearch={
+                onMotionSearch ? () => onMotionSearch(mainCamera) : undefined
+              }
               onUpdateFilter={updateFilter}
               setRange={setExportRange}
               setMode={setExportMode}
@@ -758,7 +902,9 @@ export function RecordingView({
                   timeRange={currentTimeRange}
                   cameraPreviews={allPreviews ?? []}
                   startTimestamp={playbackStart}
-                  hotKeys={exportMode != "select"}
+                  hotKeys={
+                    exportMode != "select" && debugReplayMode != "select"
+                  }
                   fullscreen={fullscreen}
                   onTimestampUpdate={(timestamp) => {
                     setPlayerTime(timestamp);
@@ -768,11 +914,17 @@ export function RecordingView({
                     );
                   }}
                   onClipEnded={onClipEnded}
+                  onClipPrevious={onClipPrevious}
                   onSeekToTime={manuallySetCurrentTime}
                   onControllerReady={(controller) => {
                     mainControllerRef.current = controller;
                   }}
-                  isScrubbing={scrubbing || exportMode == "timeline"}
+                  isScrubbing={
+                    scrubbing ||
+                    exportMode == "timeline" ||
+                    exportMode == "timeline_multi" ||
+                    debugReplayMode == "timeline"
+                  }
                   supportsFullscreen={supportsFullScreen}
                   setFullResolution={setFullResolution}
                   toggleFullscreen={toggleFullscreen}
@@ -840,18 +992,29 @@ export function RecordingView({
             contentRef={contentRef}
             mainCamera={mainCamera}
             timelineType={
-              (exportRange == undefined ? timelineType : "timeline") ??
-              "timeline"
+              (exportRange == undefined && debugReplayRange == undefined
+                ? timelineType
+                : "timeline") ?? "timeline"
             }
             timeRange={timeRange}
             mainCameraReviewItems={mainCameraReviewItems}
             activeReviewItem={activeReviewItem}
             currentTime={currentTime}
-            exportRange={exportMode == "timeline" ? exportRange : undefined}
+            exportRange={
+              exportMode == "timeline" || exportMode == "timeline_multi"
+                ? exportRange
+                : debugReplayMode == "timeline"
+                  ? debugReplayRange
+                  : undefined
+            }
             setCurrentTime={setCurrentTime}
             manuallySetCurrentTime={manuallySetCurrentTime}
             setScrubbing={setScrubbing}
-            setExportRange={setExportRange}
+            setExportRange={
+              debugReplayMode == "timeline"
+                ? setDebugReplayRange
+                : setExportRange
+            }
             onAnalysisOpen={onAnalysisOpen}
             isPlaying={mainControllerRef?.current?.isPlaying() ?? false}
           />
@@ -875,7 +1038,7 @@ type TimelineProps = {
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
   manuallySetCurrentTime: (time: number, force: boolean) => void;
   setScrubbing: React.Dispatch<React.SetStateAction<boolean>>;
-  setExportRange: (range: TimeRange) => void;
+  setExportRange: React.Dispatch<React.SetStateAction<TimeRange | undefined>>;
   onAnalysisOpen: (open: boolean) => void;
 };
 function Timeline({
@@ -968,22 +1131,50 @@ function Timeline({
     },
   ]);
 
-  const [exportStart, setExportStartTime] = useState<number>(0);
-  const [exportEnd, setExportEndTime] = useState<number>(0);
-
-  useEffect(() => {
-    if (exportRange && exportStart != 0 && exportEnd != 0) {
-      if (exportRange.after != exportStart) {
-        setCurrentTime(exportStart);
-      } else if (exportRange?.before != exportEnd) {
-        setCurrentTime(exportEnd);
+  // a local mirror of the range fights a reseed: the position effect
+  // echoes it back and the two rewrite each other forever
+  const setExportStartTime = useCallback(
+    (value: React.SetStateAction<number>) => {
+      if (!exportRange) {
+        return;
       }
 
-      setExportRange({ after: exportStart, before: exportEnd });
-    }
-    // we only want to update when the export parts change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exportStart, exportEnd, setExportRange, setCurrentTime]);
+      const next =
+        typeof value === "function" ? value(exportRange.after) : value;
+
+      // the position effect re-reports the current time on every reposition
+      if (next == exportRange.after) {
+        return;
+      }
+
+      setCurrentTime(next);
+      setExportRange((prev) =>
+        prev ? { after: next, before: prev.before } : prev,
+      );
+    },
+    [exportRange, setExportRange, setCurrentTime],
+  );
+
+  const setExportEndTime = useCallback(
+    (value: React.SetStateAction<number>) => {
+      if (!exportRange) {
+        return;
+      }
+
+      const next =
+        typeof value === "function" ? value(exportRange.before) : value;
+
+      if (next == exportRange.before) {
+        return;
+      }
+
+      setCurrentTime(next);
+      setExportRange((prev) =>
+        prev ? { after: prev.after, before: next } : prev,
+      );
+    },
+    [exportRange, setExportRange, setCurrentTime],
+  );
 
   return (
     <div
@@ -1038,7 +1229,7 @@ function Timeline({
             motion_events={motionData ?? []}
             noRecordingRanges={noRecordings ?? []}
             contentRef={contentRef}
-            onHandlebarDraggingChange={(scrubbing) => setScrubbing(scrubbing)}
+            onHandlebarDraggingChange={setScrubbing}
             isZooming={isZooming}
             zoomDirection={zoomDirection}
             onZoomChange={handleZoomChange}

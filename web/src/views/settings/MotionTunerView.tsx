@@ -4,7 +4,7 @@ import useSWR from "swr";
 import axios from "axios";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import AutoUpdatingCameraImage from "@/components/camera/AutoUpdatingCameraImage";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,7 +15,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
@@ -63,6 +62,8 @@ export default function MotionTunerView({
     improve_contrast: undefined,
   });
 
+  const userInteractedRef = useRef(false);
+
   const cameraConfig = useMemo(() => {
     if (config && selectedCamera) {
       return config.cameras[selectedCamera];
@@ -70,6 +71,7 @@ export default function MotionTunerView({
   }, [config, selectedCamera]);
 
   useEffect(() => {
+    userInteractedRef.current = false;
     if (cameraConfig) {
       setMotionSettings({
         threshold: cameraConfig.motion.threshold,
@@ -87,24 +89,29 @@ export default function MotionTunerView({
   }, [selectedCamera]);
 
   useEffect(() => {
-    if (!motionSettings.threshold) return;
+    if (!motionSettings.threshold || !userInteractedRef.current) return;
 
     sendMotionThreshold(motionSettings.threshold);
   }, [motionSettings.threshold, sendMotionThreshold]);
 
   useEffect(() => {
-    if (!motionSettings.contour_area) return;
+    if (!motionSettings.contour_area || !userInteractedRef.current) return;
 
     sendMotionContourArea(motionSettings.contour_area);
   }, [motionSettings.contour_area, sendMotionContourArea]);
 
   useEffect(() => {
-    if (motionSettings.improve_contrast === undefined) return;
+    if (
+      motionSettings.improve_contrast === undefined ||
+      !userInteractedRef.current
+    )
+      return;
 
     sendImproveContrast(motionSettings.improve_contrast ? "ON" : "OFF");
   }, [motionSettings.improve_contrast, sendImproveContrast]);
 
   const handleMotionConfigChange = (newConfig: Partial<MotionSettings>) => {
+    userInteractedRef.current = true;
     setMotionSettings((prevConfig) => ({ ...prevConfig, ...newConfig }));
     setUnsavedChanges(true);
     setChangedValue(true);
@@ -176,7 +183,6 @@ export default function MotionTunerView({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <Toaster position="top-center" closeButton={true} />
       <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto rounded-lg border-[1px] border-secondary-foreground bg-background_alt p-2 md:order-none md:mr-3 md:mt-0 md:w-3/12">
         <Heading as="h4" className="mb-2">
           {t("motionDetectionTuner.title")}
@@ -200,7 +206,7 @@ export default function MotionTunerView({
         <div className="flex w-full flex-col space-y-6">
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
-              <Label htmlFor="motion-threshold" className="text-md">
+              <Label htmlFor="motion-threshold">
                 {t("motionDetectionTuner.Threshold.title")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
@@ -229,7 +235,7 @@ export default function MotionTunerView({
           </div>
           <div className="mt-2 space-y-6">
             <div className="space-y-0.5">
-              <Label htmlFor="motion-threshold" className="text-md">
+              <Label htmlFor="motion-threshold">
                 {t("motionDetectionTuner.contourArea.title")}
               </Label>
               <div className="my-2 text-sm text-muted-foreground">
@@ -299,7 +305,7 @@ export default function MotionTunerView({
             >
               {isLoading ? (
                 <div className="flex flex-row items-center gap-2">
-                  <ActivityIndicator />
+                  <ActivityIndicator className="size-4" />
                   <span>{t("button.saving", { ns: "common" })}</span>
                 </div>
               ) : (

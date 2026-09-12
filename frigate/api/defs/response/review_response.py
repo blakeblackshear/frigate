@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict
 
 from pydantic import BaseModel, Json
 
@@ -34,7 +33,7 @@ class DayReview(BaseModel):
 
 class ReviewSummaryResponse(BaseModel):
     last24Hours: Last24HoursReview
-    root: Dict[str, DayReview]
+    root: dict[str, DayReview]
 
 
 class ReviewActivityMotionResponse(BaseModel):

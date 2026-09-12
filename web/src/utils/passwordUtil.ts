@@ -1,3 +1,5 @@
+import { TFunction } from "i18next";
+
 export const calculatePasswordStrength = (password: string): number => {
   if (!password) return 0;
 
@@ -16,13 +18,18 @@ export const getPasswordRequirements = (password: string) => ({
 
 export const getPasswordStrengthLabel = (
   password: string,
-  t: (key: string) => string,
+  t: TFunction,
 ): string => {
   const strength = calculatePasswordStrength(password);
 
   if (!password) return "";
-  if (strength < 1) return t("users.dialog.form.password.strength.weak");
-  return t("users.dialog.form.password.strength.veryStrong");
+  if (strength < 1)
+    return t("users.dialog.form.password.strength.weak", {
+      ns: "views/settings",
+    });
+  return t("users.dialog.form.password.strength.veryStrong", {
+    ns: "views/settings",
+  });
 };
 
 export const getPasswordStrengthColor = (password: string): string => {

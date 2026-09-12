@@ -6,13 +6,18 @@ import logging
 import random
 import string
 from collections import Counter
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from frigate.comms.event_metadata_updater import (
     EventMetadataPublisher,
     EventMetadataTypeEnum,
 )
 from frigate.config import CameraConfig, FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +34,11 @@ class CameraActivityManager:
         self.zone_all_object_counts: dict[str, Counter] = {}
         self.zone_active_object_counts: dict[str, Counter] = {}
         self.all_zone_labels: dict[str, set[str]] = {}
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            config,
+            config.cameras,
+            [CameraConfigUpdateEnum.zones, CameraConfigUpdateEnum.objects],
+        )
 
         for camera_config in config.cameras.values():
             if not camera_config.enabled_in_config:
@@ -37,6 +47,9 @@ class CameraActivityManager:
             self.__init_camera(camera_config)
 
     def __init_camera(self, camera_config: CameraConfig) -> None:
+        if camera_config.name is None:
+            return
+
         self.last_camera_activity[camera_config.name] = {}
         self.camera_all_object_counts[camera_config.name] = Counter()
         self.camera_active_object_counts[camera_config.name] = Counter()
@@ -53,10 +66,46 @@ class CameraActivityManager:
                 else camera_config.objects.track
             )
 
+    def __rebuild_zone_labels(self) -> None:
+        """Rebuild zone label tracking after a runtime zones/objects change."""
+        new_zone_labels: dict[str, set[str]] = {}
+
+        for camera_config in self.config.cameras.values():
+            if not camera_config.enabled_in_config or camera_config.name is None:
+                continue
+
+            for zone, zone_config in camera_config.zones.items():
+                new_zone_labels.setdefault(zone, set()).update(
+                    zone_config.objects
+                    if zone_config.objects
+                    else camera_config.objects.track
+                )
+
+        # drop counters for zones that no longer exist
+        for zone in list(self.zone_all_object_counts.keys()):
+            if zone not in new_zone_labels:
+                self.zone_all_object_counts.pop(zone, None)
+                self.zone_active_object_counts.pop(zone, None)
+
+        # ensure counters exist for new zones so the first count is published
+        for zone in new_zone_labels:
+            self.zone_all_object_counts.setdefault(zone, Counter())
+            self.zone_active_object_counts.setdefault(zone, Counter())
+
+        self.all_zone_labels = new_zone_labels
+
     def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
+        updated_topics = self.config_subscriber.check_for_updates()
+
+        if "zones" in updated_topics or "objects" in updated_topics:
+            self.__rebuild_zone_labels()
+
         all_objects: list[dict[str, Any]] = []
 
         for camera in new_activity.keys():
+            if camera not in self.config.cameras:
+                continue
+
             # handle cameras that were added dynamically
             if camera not in self.camera_all_object_counts:
                 self.__init_camera(self.config.cameras[camera])
@@ -111,7 +160,7 @@ class CameraActivityManager:
         self.last_camera_activity = new_activity
 
     def compare_camera_activity(
-        self, camera: str, new_activity: dict[str, Any]
+        self, camera: str, new_activity: list[dict[str, Any]]
     ) -> None:
         all_objects = Counter(
             obj["label"].replace("-verified", "") for obj in new_activity
@@ -124,7 +173,11 @@ class CameraActivityManager:
         any_changed = False
 
         # run through each object and check what topics need to be updated
-        for label in self.config.cameras[camera].objects.track:
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return
+
+        for label in camera_config.objects.track:
             if label in self.config.model.non_logo_attributes:
                 continue
 
@@ -151,6 +204,9 @@ class CameraActivityManager:
             self.publish(f"{camera}/all", sum(list(all_objects.values())))
             self.publish(f"{camera}/all/active", sum(list(active_objects.values())))
 
+    def stop(self) -> None:
+        self.config_subscriber.stop()
+
 
 class AudioActivityManager:
     def __init__(
@@ -168,12 +224,18 @@ class AudioActivityManager:
             self.__init_camera(camera_config)
 
     def __init_camera(self, camera_config: CameraConfig) -> None:
+        if camera_config.name is None:
+            return
+
         self.current_audio_detections[camera_config.name] = {}
 
     def update_activity(self, new_activity: dict[str, dict[str, Any]]) -> None:
         now = datetime.datetime.now().timestamp()
 
         for camera in new_activity.keys():
+            if camera not in self.config.cameras:
+                continue
+
             # handle cameras that were added dynamically
             if camera not in self.current_audio_detections:
                 self.__init_camera(self.config.cameras[camera])
@@ -192,8 +254,12 @@ class AudioActivityManager:
 
     def compare_audio_activity(
         self, camera: str, new_detections: list[tuple[str, float]], now: float
-    ) -> None:
-        max_not_heard = self.config.cameras[camera].audio.max_not_heard
+    ) -> bool:
+        camera_config = self.config.cameras.get(camera)
+        if camera_config is None:
+            return False
+
+        max_not_heard = camera_config.audio.max_not_heard
         current = self.current_audio_detections[camera]
 
         any_changed = False
@@ -222,6 +288,7 @@ class AudioActivityManager:
                         None,
                         "audio",
                         {},
+                        None,
                     ),
                     EventMetadataTypeEnum.manual_event_create.value,
                 )

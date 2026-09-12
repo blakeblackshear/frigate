@@ -21,7 +21,7 @@ class FaceRecognizer(ABC):
 
     def __init__(self, config: FrigateConfig) -> None:
         self.config = config
-        self.landmark_detector: cv2.face.FacemarkLBF = None
+        self.landmark_detector: cv2.face.Facemark | None = None
         self.init_landmark_detector()
 
     @abstractmethod
@@ -38,13 +38,14 @@ class FaceRecognizer(ABC):
     def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         pass
 
-    @redirect_output_to_logger(logger, logging.DEBUG)
+    @redirect_output_to_logger(logger, logging.DEBUG)  # type: ignore[misc]
     def init_landmark_detector(self) -> None:
         landmark_model = os.path.join(MODEL_CACHE_DIR, "facedet/landmarkdet.yaml")
 
         if os.path.exists(landmark_model):
-            self.landmark_detector = cv2.face.createFacemarkLBF()
-            self.landmark_detector.loadModel(landmark_model)
+            landmark_detector = cv2.face.createFacemarkLBF()
+            landmark_detector.loadModel(landmark_model)
+            self.landmark_detector = landmark_detector
 
     def align_face(
         self,
@@ -52,8 +53,10 @@ class FaceRecognizer(ABC):
         output_width: int,
         output_height: int,
     ) -> np.ndarray:
-        # landmark is run on grayscale images
+        if not self.landmark_detector:
+            raise ValueError("Landmark detector not initialized")
 
+        # landmark is run on grayscale images
         if image.ndim == 3:
             land_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         else:
@@ -130,9 +133,67 @@ class FaceRecognizer(ABC):
             return 0.0
 
 
+def build_class_mean(
+    embs: list[np.ndarray],
+    trim: float = 0.15,
+    outlier_threshold: float = 0.30,
+    min_keep_frac: float = 0.7,
+    max_iters: int = 3,
+) -> np.ndarray:
+    """Build a class-mean embedding with two-layer outlier protection.
+
+    Layer 1 (iterative, vector-wise): drop whole embeddings whose cosine
+    similarity to the current class mean is below ``outlier_threshold``.
+    Catches mislabeled or corrupted training samples (wrong face in the
+    folder, full-frame screenshots, extreme crops) that per-dimension
+    trimming cannot detect.
+
+    Layer 2 (per-dimension): ``scipy.stats.trim_mean`` on the retained set
+    to smooth per-component noise (lighting, expression, alignment jitter).
+
+    Collections with fewer than 5 images bypass outlier rejection — too few
+    samples to establish a reliable class center.
+    """
+    arr = np.stack(embs, axis=0)
+
+    if len(arr) < 5:
+        return np.asarray(stats.trim_mean(arr, trim, axis=0))
+
+    keep = np.ones(len(arr), dtype=bool)
+    floor = max(5, int(np.ceil(min_keep_frac * len(arr))))
+
+    for _ in range(max_iters):
+        mean = stats.trim_mean(arr[keep], trim, axis=0)
+        m_norm = mean / (np.linalg.norm(mean) + 1e-9)
+        e_norms = arr / (np.linalg.norm(arr, axis=1, keepdims=True) + 1e-9)
+        cos = e_norms @ m_norm
+        new_keep = cos >= outlier_threshold
+
+        if new_keep.sum() < floor:
+            top = np.argsort(-cos)[:floor]
+            new_keep = np.zeros(len(arr), dtype=bool)
+            new_keep[top] = True
+
+        if np.array_equal(new_keep, keep):
+            break
+        keep = new_keep
+
+    dropped = int((~keep).sum())
+
+    if dropped:
+        logger.debug(
+            f"Vector-wise outlier filter dropped {dropped}/{len(arr)} embeddings"
+        )
+
+    return np.asarray(stats.trim_mean(arr[keep], trim, axis=0))
+
+
 def similarity_to_confidence(
-    cosine_similarity: float, median=0.3, range_width=0.6, slope_factor=12
-):
+    cosine_similarity: float,
+    median: float = 0.3,
+    range_width: float = 0.6,
+    slope_factor: float = 12,
+) -> float:
     """
     Default sigmoid function to map cosine similarity to confidence.
 
@@ -151,14 +212,14 @@ def similarity_to_confidence(
     bias = median
 
     # Calculate confidence
-    confidence = 1 / (1 + np.exp(-slope * (cosine_similarity - bias)))
+    confidence: float = 1 / (1 + np.exp(-slope * (cosine_similarity - bias)))
     return confidence
 
 
 class FaceNetRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
-        self.mean_embs: dict[int, np.ndarray] = {}
+        self.mean_embs: dict[str, np.ndarray] = {}
         self.face_embedder: FaceNetEmbedding = FaceNetEmbedding()
         self.model_builder_queue: queue.Queue | None = None
 
@@ -168,7 +229,7 @@ class FaceNetRecognizer(FaceRecognizer):
     def run_build_task(self) -> None:
         self.model_builder_queue = queue.Queue()
 
-        def build_model():
+        def build_model() -> None:
             face_embeddings_map: dict[str, list[np.ndarray]] = {}
             idx = 0
 
@@ -187,7 +248,7 @@ class FaceNetRecognizer(FaceRecognizer):
                     img = cv2.imread(os.path.join(face_folder, image))
 
                     if img is None:
-                        continue
+                        continue  # type: ignore[unreachable]
 
                     img = self.align_face(img, img.shape[1], img.shape[0])
                     emb = self.face_embedder([img])[0].squeeze()
@@ -195,12 +256,13 @@ class FaceNetRecognizer(FaceRecognizer):
 
                 idx += 1
 
+            assert self.model_builder_queue is not None
             self.model_builder_queue.put(face_embeddings_map)
 
         thread = threading.Thread(target=build_model, daemon=True)
         thread.start()
 
-    def build(self):
+    def build(self) -> None:
         if not self.landmark_detector:
             self.init_landmark_detector()
             return None
@@ -222,11 +284,11 @@ class FaceNetRecognizer(FaceRecognizer):
 
         for name, embs in face_embeddings_map.items():
             if embs:
-                self.mean_embs[name] = stats.trim_mean(embs, 0.15)
+                self.mean_embs[name] = build_class_mean(embs)
 
         logger.debug("Finished building ArcFace model")
 
-    def classify(self, face_image):
+    def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         if not self.landmark_detector:
             return None
 
@@ -245,7 +307,7 @@ class FaceNetRecognizer(FaceRecognizer):
         img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
         embedding = self.face_embedder([img])[0].squeeze()
 
-        score = 0
+        score: float = 0
         label = ""
 
         for name, mean_emb in self.mean_embs.items():
@@ -268,7 +330,7 @@ class FaceNetRecognizer(FaceRecognizer):
 class ArcFaceRecognizer(FaceRecognizer):
     def __init__(self, config: FrigateConfig):
         super().__init__(config)
-        self.mean_embs: dict[int, np.ndarray] = {}
+        self.mean_embs: dict[str, np.ndarray] = {}
         self.face_embedder: ArcfaceEmbedding = ArcfaceEmbedding(config.face_recognition)
         self.model_builder_queue: queue.Queue | None = None
 
@@ -278,7 +340,7 @@ class ArcFaceRecognizer(FaceRecognizer):
     def run_build_task(self) -> None:
         self.model_builder_queue = queue.Queue()
 
-        def build_model():
+        def build_model() -> None:
             face_embeddings_map: dict[str, list[np.ndarray]] = {}
             idx = 0
 
@@ -297,20 +359,21 @@ class ArcFaceRecognizer(FaceRecognizer):
                     img = cv2.imread(os.path.join(face_folder, image))
 
                     if img is None:
-                        continue
+                        continue  # type: ignore[unreachable]
 
                     img = self.align_face(img, img.shape[1], img.shape[0])
-                    emb = self.face_embedder([img])[0].squeeze()
+                    emb = self.face_embedder([img])[0].squeeze()  # type: ignore[arg-type]
                     face_embeddings_map[name].append(emb)
 
                 idx += 1
 
+            assert self.model_builder_queue is not None
             self.model_builder_queue.put(face_embeddings_map)
 
         thread = threading.Thread(target=build_model, daemon=True)
         thread.start()
 
-    def build(self):
+    def build(self) -> None:
         if not self.landmark_detector:
             self.init_landmark_detector()
             return None
@@ -332,11 +395,11 @@ class ArcFaceRecognizer(FaceRecognizer):
 
         for name, embs in face_embeddings_map.items():
             if embs:
-                self.mean_embs[name] = stats.trim_mean(embs, 0.15)
+                self.mean_embs[name] = build_class_mean(embs)
 
         logger.debug("Finished building ArcFace model")
 
-    def classify(self, face_image):
+    def classify(self, face_image: np.ndarray) -> tuple[str, float] | None:
         if not self.landmark_detector:
             return None
 
@@ -353,9 +416,9 @@ class ArcFaceRecognizer(FaceRecognizer):
 
         # align face and run recognition
         img = self.align_face(face_image, face_image.shape[1], face_image.shape[0])
-        embedding = self.face_embedder([img])[0].squeeze()
+        embedding = self.face_embedder([img])[0].squeeze()  # type: ignore[arg-type]
 
-        score = 0
+        score: float = 0
         label = ""
 
         for name, mean_emb in self.mean_embs.items():

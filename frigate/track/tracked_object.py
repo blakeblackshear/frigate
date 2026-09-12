@@ -5,7 +5,7 @@ import math
 import os
 from collections import defaultdict
 from statistics import median
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 import cv2
 import numpy as np
@@ -13,18 +13,15 @@ import numpy as np
 from frigate.config import (
     CameraConfig,
     FilterConfig,
-    SnapshotsConfig,
     UIConfig,
 )
-from frigate.const import CLIPS_DIR, THUMB_DIR
+from frigate.const import CLIPS_DIR, REPLAY_CAMERA_PREFIX, THUMB_DIR
 from frigate.detectors.detector_config import ModelConfig
 from frigate.review.types import SeverityEnum
 from frigate.util.builtin import sanitize_float
 from frigate.util.image import (
     area,
-    calculate_region,
-    draw_box_with_label,
-    draw_timestamp,
+    get_snapshot_bytes,
     is_better_thumbnail,
 )
 from frigate.util.object import box_inside
@@ -57,6 +54,11 @@ class TrackedObject:
         self.obj_data = obj_data
         self.colormap = model_config.colormap
         self.logos = model_config.all_attribute_logos
+        self.thumbnail_attributes = [
+            attr
+            for attr in model_config.attributes_map.get(obj_data["label"], [])
+            if attr in model_config.non_logo_attributes
+        ]
         self.camera_config = camera_config
         self.ui_config = ui_config
         self.frame_cache = frame_cache
@@ -64,14 +66,15 @@ class TrackedObject:
         self.zone_loitering: dict[str, int] = {}
         self.current_zones: list[str] = []
         self.entered_zones: list[str] = []
+        self.new_zone_entered: bool = False
         self.attributes: dict[str, float] = defaultdict(float)
         self.false_positive = True
         self.has_clip = False
         self.has_snapshot = False
         self.top_score = self.computed_score = 0.0
         self.thumbnail_data: dict[str, Any] | None = None
-        self.last_updated = 0
-        self.last_published = 0
+        self.last_updated: float = 0
+        self.last_published: float = 0
         self.frame = None
         self.active = True
         self.pending_loitering = False
@@ -83,7 +86,7 @@ class TrackedObject:
         self.previous = self.to_dict()
 
     @property
-    def max_severity(self) -> Optional[str]:
+    def max_severity(self) -> str | None:
         review_config = self.camera_config.review
 
         if (
@@ -151,7 +154,7 @@ class TrackedObject:
         if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
-                self.obj_data["label"],
+                self.thumbnail_attributes,
                 self.thumbnail_data,
                 obj_data,
                 self.camera_config.frame_shape,
@@ -188,6 +191,10 @@ class TrackedObject:
 
         # check each zone
         for name, zone in self.camera_config.zones.items():
+            # skip disabled zones
+            if not zone.enabled:
+                continue
+
             # if the zone is not for this object type, skip
             if len(zone.objects) > 0 and obj_data["label"] not in zone.objects:
                 continue
@@ -277,6 +284,7 @@ class TrackedObject:
 
                             if name not in self.entered_zones:
                                 self.entered_zones.append(name)
+                                self.new_zone_entered = True
                         else:
                             self.zone_loitering[name] = loitering_score
 
@@ -327,7 +335,12 @@ class TrackedObject:
             if self.obj_data["position_changes"] != obj_data["position_changes"]:
                 significant_change = True
 
-            if self.obj_data["attributes"] != obj_data["attributes"]:
+            # disappearance of a per-frame attribute can be caused by detection
+            # skipping the object on a frame (stationary objects on non-interval
+            # frames), so only flag when a new attribute label appears
+            prev_labels = {a["label"] for a in self.obj_data["attributes"]}
+            curr_labels = {a["label"] for a in obj_data["attributes"]}
+            if curr_labels - prev_labels:
                 significant_change = True
 
             # if the state changed between stationary and active
@@ -389,6 +402,7 @@ class TrackedObject:
             "camera": self.camera_config.name,
             "frame_time": self.obj_data["frame_time"],
             "snapshot": self.thumbnail_data,
+            "snapshot_clean": True,
             "label": self.obj_data["label"],
             "sub_label": self.obj_data.get("sub_label"),
             "top_score": self.top_score,
@@ -396,6 +410,7 @@ class TrackedObject:
             "start_time": self.obj_data["start_time"],
             "end_time": self.obj_data.get("end_time", None),
             "score": self.obj_data["score"],
+            "computed_score": self.computed_score,
             "box": self.obj_data["box"],
             "area": self.obj_data["area"],
             "ratio": self.obj_data["ratio"],
@@ -434,7 +449,7 @@ class TrackedObject:
         return count > (self.camera_config.detect.stationary.threshold or 50)
 
     def get_thumbnail(self, ext: str) -> bytes | None:
-        img_bytes = self.get_img_bytes(
+        img_bytes, _ = self.get_img_bytes(
             ext, timestamp=False, bounding_box=False, crop=True, height=175
         )
 
@@ -445,27 +460,15 @@ class TrackedObject:
             return img.tobytes()
 
     def get_clean_webp(self) -> bytes | None:
-        if self.thumbnail_data is None:
-            return None
-
-        try:
-            best_frame = cv2.cvtColor(
-                self.frame_cache[self.thumbnail_data["frame_time"]]["frame"],
-                cv2.COLOR_YUV2BGR_I420,
-            )
-        except KeyError:
-            logger.warning(
-                f"Unable to create clean webp because frame {self.thumbnail_data['frame_time']} is not in the cache"
-            )
-            return None
-
-        ret, webp = cv2.imencode(
-            ".webp", best_frame, [int(cv2.IMWRITE_WEBP_QUALITY), 60]
+        webp_bytes, _ = self.get_img_bytes(
+            ext="webp",
+            timestamp=False,
+            bounding_box=False,
+            crop=False,
+            height=None,
+            quality=self.camera_config.snapshots.quality,
         )
-        if ret:
-            return webp.tobytes()
-        else:
-            return None
+        return webp_bytes
 
     def get_img_bytes(
         self,
@@ -475,151 +478,65 @@ class TrackedObject:
         crop: bool = False,
         height: int | None = None,
         quality: int | None = None,
-    ) -> bytes | None:
+    ) -> tuple[bytes | None, float | None]:
         if self.thumbnail_data is None:
-            return None
+            return None, None
 
         try:
+            frame_time = self.thumbnail_data["frame_time"]
             best_frame = cv2.cvtColor(
-                self.frame_cache[self.thumbnail_data["frame_time"]]["frame"],
+                self.frame_cache[frame_time]["frame"],
                 cv2.COLOR_YUV2BGR_I420,
             )
         except KeyError:
             logger.warning(
-                f"Unable to create jpg because frame {self.thumbnail_data['frame_time']} is not in the cache"
+                f"Unable to create snapshot because frame {frame_time} is not in the cache"
             )
-            return None
+            return None, None
 
-        if bounding_box:
-            thickness = 2
-            color = self.colormap.get(self.obj_data["label"], (255, 255, 255))
-
-            # draw the bounding boxes on the frame
-            box = self.thumbnail_data["box"]
-            draw_box_with_label(
-                best_frame,
-                box[0],
-                box[1],
-                box[2],
-                box[3],
-                self.obj_data["label"],
-                f"{int(self.thumbnail_data['score'] * 100)}% {int(self.thumbnail_data['area'])}"
-                + (
-                    f" {self.thumbnail_data['current_estimated_speed']:.1f}"
-                    if self.thumbnail_data["current_estimated_speed"] != 0
-                    else ""
-                ),
-                thickness=thickness,
-                color=color,
-            )
-
-            # draw any attributes
-            for attribute in self.thumbnail_data["attributes"]:
-                box = attribute["box"]
-                box_area = int((box[2] - box[0]) * (box[3] - box[1]))
-                draw_box_with_label(
-                    best_frame,
-                    box[0],
-                    box[1],
-                    box[2],
-                    box[3],
-                    attribute["label"],
-                    f"{attribute['score']:.0%} {str(box_area)}",
-                    thickness=thickness,
-                    color=color,
-                )
-
-        if crop:
-            box = self.thumbnail_data["box"]
-            box_size = 300
-            region = calculate_region(
-                best_frame.shape,
-                box[0],
-                box[1],
-                box[2],
-                box[3],
-                box_size,
-                multiplier=1.1,
-            )
-            best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
-
-        if height:
-            width = int(height * best_frame.shape[1] / best_frame.shape[0])
-            best_frame = cv2.resize(
-                best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
-            )
-        if timestamp:
-            colors = self.camera_config.timestamp_style.color
-            draw_timestamp(
-                best_frame,
-                self.thumbnail_data["frame_time"],
-                self.camera_config.timestamp_style.format,
-                font_effect=self.camera_config.timestamp_style.effect,
-                font_thickness=self.camera_config.timestamp_style.thickness,
-                font_color=(colors.blue, colors.green, colors.red),
-                position=self.camera_config.timestamp_style.position,
-            )
-
-        quality_params = []
-
-        if ext == "jpg":
-            quality_params = [int(cv2.IMWRITE_JPEG_QUALITY), quality or 70]
-        elif ext == "webp":
-            quality_params = [int(cv2.IMWRITE_WEBP_QUALITY), quality or 60]
-
-        ret, jpg = cv2.imencode(f".{ext}", best_frame, quality_params)
-
-        if ret:
-            return jpg.tobytes()
-        else:
-            return None
+        return get_snapshot_bytes(
+            best_frame,
+            frame_time,
+            ext=ext,
+            timestamp=timestamp,
+            bounding_box=bounding_box,
+            crop=crop,
+            height=height,
+            quality=quality,
+            label=self.obj_data["label"],
+            box=self.thumbnail_data["box"],
+            score=self.thumbnail_data["score"],
+            area=self.thumbnail_data["area"],
+            attributes=self.thumbnail_data["attributes"],
+            color=self.colormap.get(self.obj_data["label"], (255, 255, 255)),
+            timestamp_style=self.camera_config.timestamp_style,
+            estimated_speed=self.thumbnail_data["current_estimated_speed"],
+        )
 
     def write_snapshot_to_disk(self) -> None:
-        snapshot_config: SnapshotsConfig = self.camera_config.snapshots
-        jpg_bytes = self.get_img_bytes(
-            ext="jpg",
-            timestamp=snapshot_config.timestamp,
-            bounding_box=snapshot_config.bounding_box,
-            crop=snapshot_config.crop,
-            height=snapshot_config.height,
-            quality=snapshot_config.quality,
-        )
-        if jpg_bytes is None:
+        webp_bytes = self.get_clean_webp()
+        if webp_bytes is None:
             logger.warning(f"Unable to save snapshot for {self.obj_data['id']}.")
         else:
             with open(
                 os.path.join(
-                    CLIPS_DIR, f"{self.camera_config.name}-{self.obj_data['id']}.jpg"
+                    CLIPS_DIR,
+                    f"{self.camera_config.name}-{self.obj_data['id']}-clean.webp",
                 ),
                 "wb",
-            ) as j:
-                j.write(jpg_bytes)
-
-        # write clean snapshot if enabled
-        if snapshot_config.clean_copy:
-            webp_bytes = self.get_clean_webp()
-            if webp_bytes is None:
-                logger.warning(
-                    f"Unable to save clean snapshot for {self.obj_data['id']}."
-                )
-            else:
-                with open(
-                    os.path.join(
-                        CLIPS_DIR,
-                        f"{self.camera_config.name}-{self.obj_data['id']}-clean.webp",
-                    ),
-                    "wb",
-                ) as p:
-                    p.write(webp_bytes)
+            ) as p:
+                p.write(webp_bytes)
 
     def write_thumbnail_to_disk(self) -> None:
         if not self.camera_config.name:
             return
 
+        if self.camera_config.name.startswith(REPLAY_CAMERA_PREFIX):
+            return
+
         directory = os.path.join(THUMB_DIR, self.camera_config.name)
 
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+        os.makedirs(directory, exist_ok=True)
 
         thumb_bytes = self.get_thumbnail("webp")
 
@@ -678,7 +595,7 @@ class TrackedObjectAttribute:
             "box": self.box,
         }
 
-    def find_best_object(self, objects: list[dict[str, Any]]) -> Optional[str]:
+    def find_best_object(self, objects: list[dict[str, Any]]) -> str | None:
         """Find the best attribute for each object and return its ID."""
         best_object_area: float | None = None
         best_object_id: str | None = None

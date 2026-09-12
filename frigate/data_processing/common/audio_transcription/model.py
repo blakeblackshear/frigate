@@ -53,7 +53,7 @@ class AudioTranscriptionModelRunner:
                 self.downloader = ModelDownloader(
                     model_name="sherpa-onnx",
                     download_path=download_path,
-                    file_names=self.model_files.keys(),
+                    file_names=list(self.model_files.keys()),
                     download_func=self.__download_models,
                 )
                 self.downloader.ensure_model_files()

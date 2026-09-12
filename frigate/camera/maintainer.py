@@ -14,6 +14,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
+from frigate.const import REPLAY_CAMERA_PREFIX
 from frigate.models import Regions
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
@@ -50,12 +51,25 @@ class CameraMaintainer(threading.Thread):
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.remove,
+                CameraConfigUpdateEnum.refresh,
             ],
         )
         self.shm_count = self.__calculate_shm_frame_count()
         self.camera_processes: dict[str, mp.Process] = {}
         self.capture_processes: dict[str, mp.Process] = {}
+        self.camera_stop_events: dict[str, MpEvent] = {}
         self.metrics_manager = metrics_manager
+
+    def __ensure_camera_stop_event(self, camera: str) -> MpEvent:
+        camera_stop_event = self.camera_stop_events.get(camera)
+
+        if camera_stop_event is None:
+            camera_stop_event = mp.Event()
+            self.camera_stop_events[camera] = camera_stop_event
+        else:
+            camera_stop_event.clear()
+
+        return camera_stop_event
 
     def __init_historical_regions(self) -> None:
         # delete region grids for removed or renamed cameras
@@ -90,7 +104,7 @@ class CameraMaintainer(threading.Thread):
                 f"recommend increasing it to at least {shm_stats['min_shm']}MB."
             )
 
-        return shm_stats["shm_frame_count"]
+        return int(shm_stats["shm_frame_count"])
 
     def __start_camera_processor(
         self, name: str, config: CameraConfig, runtime: bool = False
@@ -99,9 +113,13 @@ class CameraMaintainer(threading.Thread):
             logger.info(f"Camera processor not started for disabled camera {name}")
             return
 
+        camera_stop_event = self.__ensure_camera_stop_event(name)
+
         if runtime:
             self.camera_metrics[name] = CameraMetrics(self.metrics_manager)
-            self.ptz_metrics[name] = PTZMetrics(autotracker_enabled=False)
+            self.ptz_metrics[name] = PTZMetrics(
+                autotracker_enabled=config.onvif.autotracking.enabled
+            )
             self.region_grids[name] = get_camera_regions_grid(
                 name,
                 config.detect,
@@ -135,13 +153,13 @@ class CameraMaintainer(threading.Thread):
             self.camera_metrics[name],
             self.ptz_metrics[name],
             self.region_grids[name],
-            self.stop_event,
+            camera_stop_event,
             self.config.logger,
         )
-        self.camera_processes[config.name] = camera_process
+        self.camera_processes[name] = camera_process
         camera_process.start()
-        self.camera_metrics[config.name].process_pid.value = camera_process.pid
-        logger.info(f"Camera processor started for {config.name}: {camera_process.pid}")
+        self.camera_metrics[name].process_pid.value = camera_process.pid
+        logger.info(f"Camera processor started for {name}: {camera_process.pid}")
 
     def __start_camera_capture(
         self, name: str, config: CameraConfig, runtime: bool = False
@@ -149,6 +167,8 @@ class CameraMaintainer(threading.Thread):
         if not config.enabled_in_config:
             logger.info(f"Capture process not started for disabled camera {name}")
             return
+
+        camera_stop_event = self.__ensure_camera_stop_event(name)
 
         # pre-create shms
         count = 10 if runtime else self.shm_count
@@ -160,7 +180,7 @@ class CameraMaintainer(threading.Thread):
             config,
             count,
             self.camera_metrics[name],
-            self.stop_event,
+            camera_stop_event,
             self.config.logger,
         )
         capture_process.daemon = True
@@ -170,22 +190,59 @@ class CameraMaintainer(threading.Thread):
         logger.info(f"Capture process started for {name}: {capture_process.pid}")
 
     def __stop_camera_capture_process(self, camera: str) -> None:
-        capture_process = self.capture_processes[camera]
+        capture_process = self.capture_processes.get(camera)
         if capture_process is not None:
             logger.info(f"Waiting for capture process for {camera} to stop")
-            capture_process.terminate()
-            capture_process.join()
+            camera_stop_event = self.camera_stop_events.get(camera)
+
+            if camera_stop_event is not None:
+                camera_stop_event.set()
+
+            capture_process.join(timeout=10)
+            if capture_process.is_alive():
+                logger.warning(
+                    f"Capture process for {camera} didn't exit, forcing termination"
+                )
+                capture_process.terminate()
+                capture_process.join()
+
+    def __unlink_camera_frame_slots(self, camera: str) -> None:
+        """Drop the camera's per-frame YUV SHM segments from this
+        process's frame_manager and unlink them at the OS level.
+
+        Safe to call after the camera's capture/processor subprocesses
+        have been joined — they no longer hold mappings, so unlink frees
+        the segments immediately. Other long-lived processes that opened
+        these slots will continue using their existing mappings until
+        they call frame_manager.get with a shape that no longer fits
+        (the get path drops and reopens stale refs).
+        """
+        prefix = f"{camera}_frame"
+        names = [n for n in list(self.frame_manager.shm_store) if n.startswith(prefix)]
+        for name in names:
+            try:
+                self.frame_manager.delete(name)
+            except Exception as exc:
+                logger.debug("Could not unlink SHM %s: %s", name, exc)
 
     def __stop_camera_process(self, camera: str) -> None:
-        camera_process = self.camera_processes[camera]
+        camera_process = self.camera_processes.get(camera)
         if camera_process is not None:
             logger.info(f"Waiting for process for {camera} to stop")
-            camera_process.terminate()
-            camera_process.join()
+            camera_stop_event = self.camera_stop_events.get(camera)
+
+            if camera_stop_event is not None:
+                camera_stop_event.set()
+
+            camera_process.join(timeout=10)
+            if camera_process.is_alive():
+                logger.warning(f"Process for {camera} didn't exit, forcing termination")
+                camera_process.terminate()
+                camera_process.join()
             logger.info(f"Closing frame queue for {camera}")
             empty_and_close_queue(self.camera_metrics[camera].frame_queue)
 
-    def run(self):
+    def run(self) -> None:
         self.__init_historical_regions()
 
         # start camera processes
@@ -199,6 +256,12 @@ class CameraMaintainer(threading.Thread):
             for update_type, updated_cameras in updates.items():
                 if update_type == CameraConfigUpdateEnum.add.name:
                     for camera in updated_cameras:
+                        if (
+                            camera in self.camera_processes
+                            or camera in self.capture_processes
+                        ):
+                            continue
+
                         self.__start_camera_processor(
                             camera,
                             self.update_subscriber.camera_configs[camera],
@@ -210,15 +273,55 @@ class CameraMaintainer(threading.Thread):
                             runtime=True,
                         )
                 elif update_type == CameraConfigUpdateEnum.remove.name:
-                    self.__stop_camera_capture_process(camera)
-                    self.__stop_camera_process(camera)
+                    for camera in updated_cameras:
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
+                        self.__unlink_camera_frame_slots(camera)
+                        self.capture_processes.pop(camera, None)
+                        self.camera_processes.pop(camera, None)
+                        self.camera_stop_events.pop(camera, None)
+                        self.region_grids.pop(camera, None)
+                        self.camera_metrics.pop(camera, None)
+                        self.ptz_metrics.pop(camera, None)
+                elif update_type == CameraConfigUpdateEnum.refresh.name:
+                    # Recycle replay cameras so detect width/height/fps
+                    # propagate through ffmpeg args, SHM sizing, and the
+                    # region grid. Regular cameras detect change still
+                    # requires a full restart.
+                    for camera in updated_cameras:
+                        if not camera.startswith(REPLAY_CAMERA_PREFIX):
+                            continue
+
+                        new_config = self.update_subscriber.camera_configs.get(camera)
+                        if new_config is None:
+                            # remove arrived in the same batch
+                            continue
+
+                        if (
+                            camera not in self.camera_processes
+                            and camera not in self.capture_processes
+                        ):
+                            continue
+
+                        # rebuild ffmpeg cmds on the shared config so the
+                        # new subprocesses spawn with current args
+                        new_config.recreate_ffmpeg_cmds()
+
+                        self.__stop_camera_capture_process(camera)
+                        self.__stop_camera_process(camera)
+                        self.__unlink_camera_frame_slots(camera)
+                        self.capture_processes.pop(camera, None)
+                        self.camera_processes.pop(camera, None)
+
+                        self.__start_camera_processor(camera, new_config, runtime=True)
+                        self.__start_camera_capture(camera, new_config, runtime=True)
 
         # ensure the capture processes are done
-        for camera in self.camera_processes.keys():
+        for camera in self.capture_processes.keys():
             self.__stop_camera_capture_process(camera)
 
         # ensure the camera processors are done
-        for camera in self.capture_processes.keys():
+        for camera in self.camera_processes.keys():
             self.__stop_camera_process(camera)
 
         self.update_subscriber.stop()

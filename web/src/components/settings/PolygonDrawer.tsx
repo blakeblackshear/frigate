@@ -18,12 +18,13 @@ import Konva from "konva";
 import { Vector2d } from "konva/lib/types";
 
 type PolygonDrawerProps = {
-  stageRef: RefObject<Konva.Stage>;
+  stageRef: RefObject<Konva.Stage | null>;
   points: number[][];
   distances: number[];
   isActive: boolean;
   isHovered: boolean;
   isFinished: boolean;
+  enabled?: boolean;
   color: number[];
   handlePointDragMove: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
   handleGroupDragEnd: (e: KonvaEventObject<MouseEvent | TouchEvent>) => void;
@@ -39,6 +40,7 @@ export default function PolygonDrawer({
   isActive,
   isHovered,
   isFinished,
+  enabled = true,
   color,
   handlePointDragMove,
   handleGroupDragEnd,
@@ -108,9 +110,15 @@ export default function PolygonDrawer({
 
   const colorString = useCallback(
     (darkened: boolean) => {
+      if (!enabled) {
+        // Slightly desaturate the color when disabled
+        const avg = (color[0] + color[1] + color[2]) / 3;
+        const desaturated = color.map((c) => Math.round(c * 0.4 + avg * 0.6));
+        return toRGBColorString(desaturated, darkened);
+      }
       return toRGBColorString(color, darkened);
     },
-    [color],
+    [color, enabled],
   );
 
   useEffect(() => {
@@ -162,9 +170,11 @@ export default function PolygonDrawer({
         points={flattenedPoints}
         stroke={colorString(true)}
         strokeWidth={3}
+        dash={enabled ? undefined : [10, 5]}
         hitStrokeWidth={12}
         closed={isFinished}
         fill={colorString(isActive || isHovered ? true : false)}
+        opacity={enabled ? 1 : 0.85}
         onMouseOver={() =>
           isActive
             ? isFinished

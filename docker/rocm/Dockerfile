@@ -13,7 +13,7 @@ ARG ROCM
 
 RUN apt update -qq && \
     apt install -y wget gpg && \
-    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.1.1/ubuntu/jammy/amdgpu-install_7.1.1.70101-1_all.deb && \
+    wget -O rocm.deb https://repo.radeon.com/amdgpu-install/7.2.3/ubuntu/jammy/amdgpu-install_7.2.3.70203-1_all.deb && \
     apt install -y ./rocm.deb && \
     apt update && \
     apt install -qq -y rocm
@@ -32,11 +32,14 @@ RUN echo /opt/rocm/lib|tee /opt/rocm-dist/etc/ld.so.conf.d/rocm.conf
 FROM deps AS deps-prelim
 
 COPY docker/rocm/debian-backports.sources /etc/apt/sources.list.d/debian-backports.sources
-RUN apt-get update && \
+# install_deps.sh upgraded libstdc++6 from trixie for Battlemage; the matching
+# -dev package must also come from trixie or apt refuses to satisfy it.
+RUN echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list && \
+    apt-get update && \
     apt-get install -y libnuma1 && \
     apt-get install -qq -y -t bookworm-backports mesa-va-drivers mesa-vulkan-drivers && \
-    # Install C++ standard library headers for HIPRTC kernel compilation fallback
-    apt-get install -qq -y libstdc++-12-dev && \
+    apt-get install -qq -y -t trixie libstdc++-14-dev && \
+    rm -f /etc/apt/sources.list.d/trixie.list && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /opt/frigate
@@ -56,13 +59,17 @@ FROM scratch AS rocm-dist
 
 ARG ROCM
 
+# Copy HIP headers required for MIOpen JIT (BuildHip) / HIPRTC at runtime
+COPY --from=rocm /opt/rocm-${ROCM}/include/ /opt/rocm-${ROCM}/include/
 COPY --from=rocm /opt/rocm-$ROCM/bin/rocminfo /opt/rocm-$ROCM/bin/migraphx-driver /opt/rocm-$ROCM/bin/
-# Copy MIOpen database files for gfx10xx and gfx11xx only (RDNA2/RDNA3)
+# Copy MIOpen database files for gfx10xx, gfx11xx, and gfx12xx only (RDNA2/RDNA3/RDNA4)
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx10* /opt/rocm-$ROCM/share/miopen/db/
 COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx11* /opt/rocm-$ROCM/share/miopen/db/
-# Copy rocBLAS library files for gfx10xx and gfx11xx only
+COPY --from=rocm /opt/rocm-$ROCM/share/miopen/db/*gfx12* /opt/rocm-$ROCM/share/miopen/db/
+# Copy rocBLAS library files for gfx10xx, gfx11xx, and gfx12xx only
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*gfx10* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*gfx11* /opt/rocm-$ROCM/lib/rocblas/library/
+COPY --from=rocm /opt/rocm-$ROCM/lib/rocblas/library/*gfx12* /opt/rocm-$ROCM/lib/rocblas/library/
 COPY --from=rocm /opt/rocm-dist/ /
 
 #######################################################################
@@ -71,6 +78,10 @@ ENV MIGRAPHX_DISABLE_MIOPEN_FUSION=1
 ENV MIGRAPHX_DISABLE_SCHEDULE_PASS=1
 ENV MIGRAPHX_DISABLE_REDUCE_FUSION=1
 ENV MIGRAPHX_ENABLE_HIPRTC_WORKAROUNDS=1
+ENV MIOPEN_CUSTOM_CACHE_DIR=/config/model_cache/migraphx
+ENV MIOPEN_USER_DB_PATH=/config/model_cache/migraphx
+ENV AMD_COMGR_CACHE=1
+ENV AMD_COMGR_CACHE_DIR=/config/model_cache/migraphx
 
 COPY --from=rocm-dist / /
 

@@ -23,8 +23,12 @@
   },
   "toast": {
     "success": {
-      "deletedImage": "Obrisane slike",
-      "deletedCategory": "Izbrisana Klasa",
+      "deletedImage_one": "Obrisane slike",
+      "deletedImage_few": "",
+      "deletedImage_other": "",
+      "deletedCategory_one": "Izbrisana Klasa",
+      "deletedCategory_few": "",
+      "deletedCategory_other": "",
       "deletedModel_one": "Uspješno izbrisan {{count}} model",
       "deletedModel_few": "Uspješno izbrisana {{count}} modela",
       "deletedModel_other": "Uspješno izbrisano {{count}} modela",

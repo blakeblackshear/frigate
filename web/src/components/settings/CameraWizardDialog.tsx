@@ -338,8 +338,8 @@ export default function CameraWizardDialog({
               }
             } else {
               toast.success(
-                t("camera.cameraConfig.toast.success", {
-                  cameraName: wizardData.cameraName,
+                t("cameraWizard.save.success", {
+                  cameraName: friendlyName || finalCameraName,
                 }),
                 { position: "top-center" },
               );

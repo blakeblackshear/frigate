@@ -68,7 +68,10 @@
         }
       },
       "birdseye": "Vtáčie oko"
-    }
+    },
+    "showAll": "Zobraziť všetky skupiny kamier",
+    "showLess": "Zobraziť menej",
+    "editGroups": "Upraviť skupiny kamier"
   },
   "debug": {
     "options": {

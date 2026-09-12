@@ -4,7 +4,6 @@ import datetime
 import logging
 from functools import reduce
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 from fastapi import APIRouter, Request
@@ -18,6 +17,7 @@ from frigate.api.auth import (
     get_allowed_cameras_for_filter,
     get_current_user,
     require_camera_access,
+    require_full_camera_access,
     require_role,
 )
 from frigate.api.defs.query.review_query_parameters import (
@@ -33,7 +33,6 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
-from frigate.config import FrigateConfig
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
@@ -52,7 +51,7 @@ router = APIRouter(tags=[Tags.review])
 async def review(
     params: ReviewQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -84,7 +83,7 @@ async def review(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((ReviewSegment.camera << camera_list))
+    clauses.append(ReviewSegment.camera << camera_list)
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -107,12 +106,12 @@ async def review(
 
         for zone in filtered_zones:
             zone_clauses.append(
-                (ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*')
+                ReviewSegment.data["zones"].cast("text") % f'*"{zone}"*'
             )
         clauses.append(reduce(operator.or_, zone_clauses))
 
     if severity:
-        clauses.append((ReviewSegment.severity == severity))
+        clauses.append(ReviewSegment.severity == severity)
 
     # Join with UserReviewStatus to get per-user review status
     review_query = (
@@ -205,7 +204,7 @@ async def review_ids(request: Request, ids: str):
 async def review_summary(
     params: ReviewSummaryQueryParams = Depends(),
     current_user: dict = Depends(get_current_user),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     if isinstance(current_user, JSONResponse):
         return current_user
@@ -228,7 +227,7 @@ async def review_summary(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((ReviewSegment.camera << camera_list))
+    clauses.append(ReviewSegment.camera << camera_list)
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -329,7 +328,7 @@ async def review_summary(
         camera_list = list(filtered)
     else:
         camera_list = allowed_cameras
-    clauses.append((ReviewSegment.camera << camera_list))
+    clauses.append(ReviewSegment.camera << camera_list)
 
     if labels != "all":
         # use matching so segments with multiple labels
@@ -585,7 +584,7 @@ def delete_reviews(body: ReviewModifyMultipleBody):
 )
 def motion_activity(
     params: ReviewActivityMotionQueryParams = Depends(),
-    allowed_cameras: List[str] = Depends(get_allowed_cameras_for_filter),
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
     """Get motion and audio activity."""
     cameras = params.cameras
@@ -598,7 +597,7 @@ def motion_activity(
     scale = params.scale
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
-    clauses.append((Recordings.motion > 0))
+    clauses.append(Recordings.motion > 0)
 
     if cameras != "all":
         requested = set(cameras.split(","))
@@ -606,9 +605,10 @@ def motion_activity(
         if not filtered:
             return JSONResponse(content=[])
         camera_list = list(filtered)
-        clauses.append((Recordings.camera << camera_list))
     else:
-        clauses.append((Recordings.camera << allowed_cameras))
+        camera_list = list(allowed_cameras)
+
+    clauses.append(Recordings.camera << camera_list)
 
     data: list[Recordings] = (
         Recordings.select(
@@ -636,14 +636,12 @@ def motion_activity(
     df.set_index(["start_time"], inplace=True)
 
     # normalize data
-    motion = (
-        df["motion"]
-        .resample(f"{scale}s")
-        .apply(lambda x: max(x, key=abs, default=0.0))
-        .fillna(0.0)
-        .to_frame()
-    )
-    cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
+    motion = df["motion"].resample(f"{scale}s").max().fillna(0.0).to_frame()
+
+    if len(camera_list) == 1:
+        cameras = df["camera"].resample(f"{scale}s").first().fillna("")
+    else:
+        cameras = df["camera"].resample(f"{scale}s").agg(lambda x: ",".join(set(x)))
     df = motion.join(cameras)
 
     length = df.shape[0]
@@ -658,6 +656,11 @@ def motion_activity(
             )
         else:
             df.iloc[i : i + chunk, 0] = 0.0
+
+    # Drop resample gap-fill buckets. The resample above emits a row for every
+    # {scale}s bucket spanning the range, and buckets with no recording get a
+    # motion of 0 (from fillna) and an empty camera (from joining an empty set).
+    df = df[df["camera"] != ""]
 
     # change types for output
     df.index = df.index.astype(int) // (10**9)
@@ -707,6 +710,7 @@ async def get_review(request: Request, review_id: str):
     dependencies=[Depends(allow_any_authenticated())],
 )
 async def set_not_reviewed(
+    request: Request,
     review_id: str,
     current_user: dict = Depends(get_current_user),
 ):
@@ -725,6 +729,8 @@ async def set_not_reviewed(
             status_code=404,
         )
 
+    await require_camera_access(review.camera, request=request)
+
     try:
         user_review = UserReviewStatus.get(
             UserReviewStatus.user_id == user_id,
@@ -741,15 +747,16 @@ async def set_not_reviewed(
     )
 
 
+# Intentionally not camera scoped, as the summary correlates each flagged event
+# with overlapping activity on other cameras. Restricted to callers who can
+# already see every camera, so the unscoped query discloses nothing.
 @router.post(
     "/review/summarize/start/{start_ts}/end/{end_ts}",
-    dependencies=[Depends(allow_any_authenticated())],
+    dependencies=[Depends(require_full_camera_access)],
     description="Use GenAI to summarize review items over a period of time.",
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):
-    config: FrigateConfig = request.app.frigate_config
-
-    if not config.genai.provider:
+    if not request.app.genai_manager.description_client:
         return JSONResponse(
             content=(
                 {

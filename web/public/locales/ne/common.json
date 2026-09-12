@@ -1,0 +1,18 @@
+{
+  "time": {
+    "untilForRestart": "फ्रिगेट पुनः सुरु नभएसम्म।",
+    "untilRestart": "पुन: सुरु नभएसम्म",
+    "never": "कहिल्यै होइन",
+    "ago": "{{timeAgo}} अघि",
+    "untilForTime": "{{time}} सम्म",
+    "justNow": "भर्खरै",
+    "today": "आज",
+    "yesterday": "हिजो",
+    "last7": "पछिल्लो ७ दिन",
+    "last14": "पछिल्लो १४ दिन",
+    "last30": "पछिल्लो ३० दिन",
+    "thisWeek": "यो हप्ता",
+    "lastWeek": "गत हप्ता",
+    "thisMonth": "यो महिना"
+  }
+}

@@ -37,8 +37,8 @@ export type EventReviewTimelineProps = {
   events: ReviewSegment[];
   visibleTimestamps?: number[];
   severityType: ReviewSeverity;
-  timelineRef?: RefObject<HTMLDivElement>;
-  contentRef: RefObject<HTMLDivElement>;
+  timelineRef?: RefObject<HTMLDivElement | null>;
+  contentRef: RefObject<HTMLDivElement | null>;
   onHandlebarDraggingChange?: (isDragging: boolean) => void;
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;

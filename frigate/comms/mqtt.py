@@ -1,6 +1,7 @@
 import logging
 import threading
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
@@ -38,7 +39,20 @@ class MqttClient(Communicator):
         )
 
     def stop(self) -> None:
+        self.publish("available", "stopped", retain=True)
         self.client.disconnect()
+
+    def _notifications_enabled_in_config(self) -> bool:
+        """Whether notifications are configured globally or on any camera.
+
+        Notifications can be enabled per camera with the global config left
+        disabled, so the global topics must consider both (matching how
+        app.py decides to create the WebPushClient).
+        """
+        return self.config.notifications.enabled_in_config or any(
+            cam.enabled and cam.notifications.enabled_in_config
+            for cam in self.config.cameras.values()
+        )
 
     def _set_initial_topics(self) -> None:
         """Set initial state topics."""
@@ -61,6 +75,11 @@ class MqttClient(Communicator):
             self.publish(
                 f"{camera_name}/audio/state",
                 "ON" if camera.audio.enabled_in_config else "OFF",
+                retain=True,
+            )
+            self.publish(
+                f"{camera_name}/audio_transcription/state",
+                "ON" if camera.audio_transcription.live_enabled else "OFF",
                 retain=True,
             )
             self.publish(
@@ -133,13 +152,41 @@ class MqttClient(Communicator):
                 retain=True,
             )
 
-        if self.config.notifications.enabled_in_config:
+            for mask_name, motion_mask in camera.motion.mask.items():
+                if motion_mask:
+                    self.publish(
+                        f"{camera_name}/motion_mask/{mask_name}/state",
+                        "ON" if motion_mask.enabled else "OFF",
+                        retain=True,
+                    )
+
+            for mask_name, object_mask in camera.objects.mask.items():
+                if object_mask:
+                    self.publish(
+                        f"{camera_name}/object_mask/{mask_name}/state",
+                        "ON" if object_mask.enabled else "OFF",
+                        retain=True,
+                    )
+
+            for zone_name, zone in camera.zones.items():
+                self.publish(
+                    f"{camera_name}/zone/{zone_name}/state",
+                    "ON" if zone.enabled else "OFF",
+                    retain=True,
+                )
+
+        if self._notifications_enabled_in_config():
             self.publish(
                 "notifications/state",
                 "ON" if self.config.notifications.enabled else "OFF",
                 retain=True,
             )
 
+        self.publish(
+            "profile/state",
+            self.config.active_profile or "none",
+            retain=True,
+        )
         self.publish("available", "online", retain=True)
 
     def on_mqtt_command(
@@ -173,8 +220,8 @@ class MqttClient(Communicator):
                 logger.error("Unable to connect to MQTT server: MQTT Not authorized")
             else:
                 logger.error(
-                    "Unable to connect to MQTT server: Connection refused. Error code: "
-                    + reason_code.getName()
+                    "Unable to connect to MQTT server: Connection refused. Error code: %s",
+                    reason_code.getName(),
                 )
 
         self.connected = True
@@ -216,6 +263,7 @@ class MqttClient(Communicator):
             "snapshots",
             "detect",
             "audio",
+            "audio_transcription",
             "motion",
             "improve_contrast",
             "ptz_autotracker",
@@ -227,6 +275,7 @@ class MqttClient(Communicator):
             "review_detections",
             "object_descriptions",
             "review_descriptions",
+            "notifications",
         ]
 
         for name in self.config.cameras.keys():
@@ -236,17 +285,46 @@ class MqttClient(Communicator):
                     self.on_mqtt_command,
                 )
 
+            # notifications suspend doesn't follow the /set topic pattern
+            self.client.message_callback_add(
+                f"{self.mqtt_config.topic_prefix}/{name}/notifications/suspend",
+                self.on_mqtt_command,
+            )
+
             if self.config.cameras[name].onvif.host:
                 self.client.message_callback_add(
                     f"{self.mqtt_config.topic_prefix}/{name}/ptz",
                     self.on_mqtt_command,
                 )
 
-        if self.config.notifications.enabled_in_config:
+            for mask_name in self.config.cameras[name].motion.mask.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/motion_mask/{mask_name}/set",
+                    self.on_mqtt_command,
+                )
+
+            for mask_name in self.config.cameras[name].objects.mask.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/object_mask/{mask_name}/set",
+                    self.on_mqtt_command,
+                )
+
+            for zone_name in self.config.cameras[name].zones.keys():
+                self.client.message_callback_add(
+                    f"{self.mqtt_config.topic_prefix}/{name}/zone/{zone_name}/set",
+                    self.on_mqtt_command,
+                )
+
+        if self._notifications_enabled_in_config():
             self.client.message_callback_add(
                 f"{self.mqtt_config.topic_prefix}/notifications/set",
                 self.on_mqtt_command,
             )
+
+        self.client.message_callback_add(
+            f"{self.mqtt_config.topic_prefix}/profile/set",
+            self.on_mqtt_command,
+        )
 
         self.client.message_callback_add(
             f"{self.mqtt_config.topic_prefix}/onConnect", self.on_mqtt_command

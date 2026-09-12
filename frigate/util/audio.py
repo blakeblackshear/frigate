@@ -3,7 +3,6 @@
 import logging
 import os
 import subprocess as sp
-from typing import Optional
 
 from pathvalidate import sanitize_filename
 
@@ -19,7 +18,7 @@ def get_audio_from_recording(
     start_ts: float,
     end_ts: float,
     sample_rate: int = 16000,
-) -> Optional[bytes]:
+) -> bytes | None:
     """Extract audio from recording files between start_ts and end_ts in WAV format suitable for sherpa-onnx.
 
     Args:

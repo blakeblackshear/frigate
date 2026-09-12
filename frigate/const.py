@@ -14,11 +14,14 @@ RECORD_DIR = f"{BASE_DIR}/recordings"
 TRIGGER_DIR = f"{CLIPS_DIR}/triggers"
 BIRDSEYE_PIPE = "/tmp/cache/birdseye"
 CACHE_DIR = "/tmp/cache"
-FRIGATE_LOCALHOST = "http://127.0.0.1:5000"
+REPLAY_CAMERA_PREFIX = "_replay_"
+REPLAY_DIR = os.path.join(CLIPS_DIR, "replay")
 PLUS_ENV_VAR = "PLUS_API_KEY"
 PLUS_API_HOST = "https://api.frigate.video"
 
 SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
+
+REDACTED_CREDENTIAL_SENTINEL = "__FRIGATE_SAVED_CREDENTIAL__"
 
 # Attribute & Object constants
 
@@ -41,7 +44,27 @@ DEFAULT_ATTRIBUTE_LABEL_MAP = {
         "ups",
         "usps",
     ],
+    "truck": ["license_plate"],
+    "garbage_truck": ["license_plate"],
     "motorcycle": ["license_plate"],
+    "bus": ["license_plate"],
+    "school_bus": ["license_plate"],
+}
+ATTRIBUTE_LABEL_DISPLAY_MAP = {
+    "amazon": "Amazon",
+    "an_post": "An Post",
+    "canada_post": "Canada Post",
+    "dhl": "DHL",
+    "dpd": "DPD",
+    "fedex": "FedEx",
+    "gls": "GLS",
+    "nzpost": "NZ Post",
+    "postnl": "PostNL",
+    "postnord": "PostNord",
+    "purolator": "Purolator",
+    "royal_mail": "Royal Mail",
+    "ups": "UPS",
+    "usps": "USPS",
 }
 LABEL_CONSOLIDATION_MAP = {
     "car": 0.8,
@@ -122,6 +145,7 @@ UPDATE_REVIEW_DESCRIPTION = "update_review_description"
 UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
 UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
+UPDATE_JOB_STATE = "update_job_state"
 NOTIFICATION_TEST = "notification_test"
 
 # IO Nice Values

@@ -6,7 +6,7 @@ import {
   ClassificationThreshold,
   ClassifiedEvent,
 } from "@/types/classification";
-import { forwardRef, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { isDesktop, isIOS, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -215,6 +215,25 @@ export function GroupedClassificationCard({
   const navigate = useNavigate();
   const { t } = useTranslation(["views/explore", i18nLibrary]);
   const [detailOpen, setDetailOpen] = useState(false);
+
+  // If the component unmounts while the detail overlay is open, we need to
+  // pop the history state that was pushed by useHistoryBack, otherwise it
+  // leaves a stale entry that breaks back navigation.
+  const detailOpenRef = useRef(detailOpen);
+  useEffect(() => {
+    detailOpenRef.current = detailOpen;
+  }, [detailOpen]);
+
+  useEffect(() => {
+    return () => {
+      // Only pop the state if we are still sitting on the overlayOpen history entry.
+      // This prevents the unmount from undoing cross-page routing if the unmount
+      // was caused by navigating away to a different view.
+      if (detailOpenRef.current && window.history.state?.overlayOpen) {
+        window.history.back();
+      }
+    };
+  }, []);
 
   // data
 

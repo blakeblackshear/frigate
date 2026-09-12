@@ -1,0 +1,73 @@
+{
+    "audio": {
+        "global": {
+            "sensitivity": "グローバル感度",
+            "detection": "グローバル検知"
+        },
+        "cameras": {
+            "detection": "検知",
+            "sensitivity": "感度"
+        }
+    },
+    "timestamp_style": {
+        "cameras": {
+            "appearance": "外観"
+        },
+        "global": {
+            "appearance": "全体の外観"
+        }
+    },
+    "motion": {
+        "cameras": {
+            "sensitivity": "感度",
+            "algorithm": "アルゴリズム"
+        },
+        "global": {
+            "sensitivity": "グローバル感度",
+            "algorithm": "グローバルアルゴリズム"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "グローバル解像度",
+            "tracking": "グローバルトラッキング"
+        },
+        "cameras": {
+            "resolution": "解像度",
+            "tracking": "トラッキング"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "グローバルトラッキング",
+            "filtering": "グローバルフィルタ"
+        },
+        "cameras": {
+            "tracking": "トラッキング",
+            "filtering": "フィルタ"
+        }
+    },
+    "record": {
+        "global": {
+            "events": "グローバルイベント",
+            "retention": "グローバルリテンション"
+        },
+        "cameras": {
+            "retention": "リテンション",
+            "events": "イベント"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "グローバル表示"
+        },
+        "cameras": {
+            "display": "表示"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "カメラ固有のFFmpeg引数"
+        }
+    }
+}

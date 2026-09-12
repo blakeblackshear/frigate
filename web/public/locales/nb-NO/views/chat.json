@@ -1,0 +1,72 @@
+{
+    "documentTitle": "Chat - Frigate",
+    "title": "Frigate Chat",
+    "subtitle": "Din AI-assistent for kamerahåndtering og innsikt",
+    "placeholder": "Spør om hva som helst...",
+    "error": "Noe gikk galt. Vennligst prøv igjen.",
+    "processing": "Behandler...",
+    "toolsUsed": "Brukt: {{tools}}",
+    "showTools": "Vis verktøy ({{count}})",
+    "hideTools": "Skjul verktøy",
+    "call": "Kall",
+    "result": "Resultat",
+    "arguments": "Argumenter:",
+    "response": "Svar:",
+    "attachment_chip_label": "{{label}} på {{camera}}",
+    "attachment_chip_remove": "Fjern vedlegg",
+    "open_in_explore": "Åpne i Utforsk",
+    "attach_event_aria": "Legg ved hendelse {{eventId}}",
+    "attachment_picker_paste_label": "Eller lim inn hendelses-ID",
+    "attachment_picker_attach": "Legg ved",
+    "attachment_picker_placeholder": "Legg ved en hendelse",
+    "quick_reply_find_similar": "Finn lignende observasjoner",
+    "quick_reply_tell_me_more": "Fortell meg mer om dette",
+    "quick_reply_when_else": "Når ellers ble det sett?",
+    "quick_reply_find_similar_text": "Finn lignende observasjoner som denne.",
+    "quick_reply_tell_me_more_text": "Fortell meg mer om denne.",
+    "quick_reply_when_else_text": "Når ellers ble denne sett?",
+    "anchor": "Referanse",
+    "similarity_score": "Likhet",
+    "no_similar_objects_found": "Ingen lignende objekter funnet.",
+    "semantic_search_required": "Semantisk søk må være aktivert for å finne lignende objekter.",
+    "send": "Send",
+    "suggested_requests": "Prøv å spørre:",
+    "starting_requests": {
+        "show_recent_events": "Vis nylige hendelser",
+        "show_camera_status": "Vis kamerastatus",
+        "recap": "Hva skjedde mens jeg var borte?",
+        "watch_camera": "Overvåk et kamera for aktivitet"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Vis meg nylige hendelser fra den siste timen",
+        "show_camera_status": "Hva er status for kameraene mine akkurat nå?",
+        "recap": "Hva skjedde mens jeg var borte?",
+        "watch_camera": "Overvåk inngangsdøren og gi meg beskjed hvis noen dukker opp"
+    },
+    "new_chat": "Ny chat",
+    "settings": {
+        "title": "Chat-innstillinger",
+        "show_stats": {
+            "title": "Vis statistikk",
+            "desc": "Vis genereringshastighet og kontekststørrelse for chat-svar.",
+            "while_generating": "Under generering",
+            "always": "Alltid"
+        },
+        "auto_scroll": {
+            "title": "Auto-rulling",
+            "desc": "Følg nye meldinger etter hvert som de ankommer."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} tokens",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Resonnerer…",
+        "show": "Vis resonnering",
+        "hide": "Skjul resonnering"
+    },
+    "thinking": {
+        "toggle": "Aktiver/deaktiver tenking"
+    }
+}

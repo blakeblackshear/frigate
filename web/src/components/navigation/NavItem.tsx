@@ -27,6 +27,7 @@ type NavItemProps = {
   item: NavData;
   Icon: IconType;
   onClick?: () => void;
+  large?: boolean;
 };
 
 export default function NavItem({
@@ -34,6 +35,7 @@ export default function NavItem({
   item,
   Icon,
   onClick,
+  large,
 }: NavItemProps) {
   const { t } = useTranslation(["common"]);
   if (item.enabled == false) {
@@ -48,11 +50,12 @@ export default function NavItem({
         cn(
           "flex flex-col items-center justify-center rounded-lg p-[6px]",
           className,
+          large && "size-12",
           variants[item.variant ?? "primary"][isActive ? "active" : "inactive"],
         )
       }
     >
-      <Icon className="size-5" />
+      <Icon className={large ? "size-6" : "size-5"} />
     </NavLink>
   );
 

@@ -7,12 +7,12 @@ export function resolveZoneName(
   zoneId: string,
   cameraId?: string,
 ) {
-  if (!config) return String(zoneId).replace(/_/g, " ");
+  if (!config) return String(zoneId);
 
   if (cameraId) {
     const camera = config.cameras?.[String(cameraId)];
     const zone = camera?.zones?.[zoneId];
-    return zone?.friendly_name || String(zoneId).replace(/_/g, " ");
+    return zone?.friendly_name || String(zoneId);
   }
 
   for (const camKey in config.cameras) {
@@ -21,12 +21,12 @@ export function resolveZoneName(
     if (!cam?.zones) continue;
     if (Object.prototype.hasOwnProperty.call(cam.zones, zoneId)) {
       const zone = cam.zones[zoneId];
-      return zone?.friendly_name || String(zoneId).replace(/_/g, " ");
+      return zone?.friendly_name || String(zoneId);
     }
   }
 
-  // Fallback: return a cleaned-up zoneId string
-  return String(zoneId).replace(/_/g, " ");
+  // Fallback: display the raw zone id verbatim (no friendly_name available)
+  return String(zoneId);
 }
 
 export function useZoneFriendlyName(zoneId: string, cameraId?: string): string {

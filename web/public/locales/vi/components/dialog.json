@@ -6,7 +6,8 @@
       "title": "Đang khởi động lại Frigate",
       "content": "Trang này sẽ tải lại sau {{countdown}} giây.",
       "button": "Tải lại ngay"
-    }
+    },
+    "description": "Thao tác này sẽ tạm dừng hoạt động của Frigate trong thời gian ngắn để khởi động lại."
   },
   "explore": {
     "plus": {

@@ -15,5 +15,16 @@
   "dhl": "DHL",
   "postnl": "PostNL",
   "dpd": "DPD",
-  "boat": "Laiva"
+  "boat": "Laiva",
+  "dog": "Suns",
+  "bark": "Riešana",
+  "cat": "Kaķis",
+  "horse": "Zirgs",
+  "mouse": "Pele",
+  "animal": "Dzīvnieks",
+  "door": "Durvis",
+  "sink": "Izlietne",
+  "hair_dryer": "Fēns",
+  "toothbrush": "Zobu birste",
+  "clock": "Pulkstens"
 }

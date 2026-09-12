@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -12,12 +19,18 @@ import { TimeRange } from "@/types/timeline";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { VideoResolutionType } from "@/types/live";
 import axios from "axios";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 import {
   calculateInpointOffset,
   calculateSeekPosition,
 } from "@/utils/videoUtil";
+import {
+  downloadSnapshot,
+  generateSnapshotFilename,
+  grabVideoSnapshot,
+} from "@/utils/snapshotUtil";
 import { isFirefox } from "react-device-detect";
 
 /**
@@ -36,10 +49,12 @@ type DynamicVideoPlayerProps = {
   onControllerReady: (controller: DynamicVideoController) => void;
   onTimestampUpdate?: (timestamp: number) => void;
   onClipEnded?: () => void;
+  onClipPrevious?: (diff: number) => void;
   onSeekToTime?: (timestamp: number, play?: boolean) => void;
   setFullResolution: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
+  transformedOverlay?: ReactNode;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -54,12 +69,14 @@ export default function DynamicVideoPlayer({
   onControllerReady,
   onTimestampUpdate,
   onClipEnded,
+  onClipPrevious,
   onSeekToTime,
   setFullResolution,
   toggleFullscreen,
   containerRef,
+  transformedOverlay,
 }: DynamicVideoPlayerProps) {
-  const { t } = useTranslation(["components/player"]);
+  const { t } = useTranslation(["components/player", "views/live"]);
   const apiHost = useApiHost();
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -170,6 +187,49 @@ export default function DynamicVideoPlayer({
       return axios.post(`/${camera}/plus/${time}`);
     },
     [camera, controller],
+  );
+
+  const getSnapshotUrlForPlus = useCallback(
+    (playTime: number) => {
+      if (!controller) {
+        return undefined;
+      }
+
+      const time = controller.getProgress(playTime);
+      if (!time) {
+        return undefined;
+      }
+      return `${apiHost}api/${camera}/recordings/${time}/snapshot.jpg?height=500`;
+    },
+    [apiHost, camera, controller],
+  );
+
+  const onDownloadSnapshot = useCallback(
+    async (playTime: number) => {
+      if (!controller || !playerRef.current) {
+        return;
+      }
+
+      // map the player time back to the timeline timestamp so the filename
+      // reflects the moment being viewed rather than the current time
+      const frameTime = controller.getProgress(playTime);
+      const result = await grabVideoSnapshot(playerRef.current);
+
+      if (result.success) {
+        downloadSnapshot(
+          result.data.dataUrl,
+          generateSnapshotFilename(camera, frameTime),
+        );
+        toast.success(t("snapshot.downloadStarted", { ns: "views/live" }), {
+          position: "top-center",
+        });
+      } else {
+        toast.error(t("snapshot.captureFailed", { ns: "views/live" }), {
+          position: "top-center",
+        });
+      }
+    },
+    [camera, controller, t],
   );
 
   // state of playback player
@@ -285,6 +345,7 @@ export default function DynamicVideoPlayer({
           onTimeUpdate={onTimeUpdate}
           onPlayerLoaded={onPlayerLoaded}
           onClipEnded={onValidateClipEnd}
+          onClipPrevious={onClipPrevious}
           onSeekToTime={(timestamp, play) => {
             if (onSeekToTime) {
               onSeekToTime(timestamp, play);
@@ -303,6 +364,8 @@ export default function DynamicVideoPlayer({
           }}
           setFullResolution={setFullResolution}
           onUploadFrame={onUploadFrameToPlus}
+          getSnapshotUrl={getSnapshotUrlForPlus}
+          onSnapshot={onDownloadSnapshot}
           toggleFullscreen={toggleFullscreen}
           onError={(error) => {
             if (error == "stalled" && !isScrubbing) {
@@ -312,6 +375,7 @@ export default function DynamicVideoPlayer({
           isDetailMode={isDetailMode}
           camera={contextCamera || camera}
           currentTimeOverride={currentTime}
+          transformedOverlay={transformedOverlay}
         />
       )}
       <PreviewPlayer

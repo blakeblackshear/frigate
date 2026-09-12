@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Direkte - Frigate",
+  "documentTitle": {
+    "default": "Direkte - Frigate"
+  },
   "lowBandwidthMode": "Lav båndbreddemodus",
   "documentTitle.withCamera": "{{camera}} - Direkte - Frigate",
   "ptz": {
@@ -7,7 +9,8 @@
       "clickMove": {
         "label": "Klikk i rammen for å sentrere kameraet",
         "enable": "Aktiver klikk for å flytte",
-        "disable": "Deaktiver klikk for å flytte"
+        "disable": "Deaktiver klikk for å flytte",
+        "enableWithZoom": "Aktiver \"klikk for å flytte\" / \"dra for å zoome\""
       },
       "left": {
         "label": "Flytt PTZ-kameraet til venstre"
@@ -47,7 +50,9 @@
   },
   "camera": {
     "enable": "Aktiver kamera",
-    "disable": "Deaktiver kamera"
+    "disable": "Deaktiver kamera",
+    "turnOn": "Slå kamera på",
+    "turnOff": "Skå kamera av"
   },
   "snapshots": {
     "enable": "Aktiver stillbilder",
@@ -149,7 +154,8 @@
   },
   "recording": {
     "enable": "Aktiver opptak",
-    "disable": "Deaktiver opptak"
+    "disable": "Deaktiver opptak",
+    "disabledInConfig": "Opptak må først aktiveres i Innstillinger for dette kameraet."
   },
   "streamStats": {
     "enable": "Vis Strømmestatistikk",
@@ -165,7 +171,8 @@
     "snapshots": "Stillbilder",
     "audioDetection": "Lydregistrering",
     "autotracking": "Automatisk sporing",
-    "transcription": "Lydtranskripsjon"
+    "transcription": "Lydtranskripsjon",
+    "camera": "Kamera"
   },
   "transcription": {
     "enable": "Aktiver direkte lydtranskripsjon",

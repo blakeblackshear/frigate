@@ -8,9 +8,12 @@ body:
 
         Before submitting your support request, please [search the discussions][discussions], read the [official Frigate documentation][docs], and read the [Frigate FAQ][faq] pinned at the Discussion page to see if your question has already been answered by the community.
 
+        By posting here you agree to follow our [AI policy][ai-policy]. Posts that appear to be written by an AI on your behalf may be closed without a response.
+
         [discussions]: https://www.github.com/blakeblackshear/frigate/discussions
         [docs]: https://docs.frigate.video
         [faq]: https://github.com/blakeblackshear/frigate/discussions/12724
+        [ai-policy]: https://github.com/blakeblackshear/frigate/blob/dev/AI_POLICY.md
   - type: textarea
     id: description
     attributes:
@@ -53,11 +56,12 @@ body:
     attributes:
       label: Install method
       options:
-        - Home Assistant Add-on
+        - Home Assistant App
         - Docker Compose
         - Docker CLI
         - Proxmox via Docker
-        - Proxmox via TTeck Script
+        - Proxmox via installation script
+        - Proxomox via VM
         - Windows WSL2
     validations:
       required: true

@@ -1,5 +1,6 @@
 import AddFaceIcon from "@/components/icons/AddFaceIcon";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
+import { EmptyCard } from "@/components/card/EmptyCard";
 import CreateFaceWizardDialog from "@/components/overlay/detail/FaceCreateWizardDialog";
 import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import UploadImageDialog from "@/components/overlay/dialog/UploadImageDialog";
@@ -266,6 +267,34 @@ export default function FaceLibrary() {
     [setPageToggle, refreshFaces, t],
   );
 
+  const onReclassify = useCallback(
+    (image: string, newName: string) => {
+      axios
+        .post(`/faces/${pageToggle}/reclassify`, {
+          id: image,
+          new_name: newName,
+        })
+        .then((resp) => {
+          if (resp.status == 200) {
+            toast.success(t("toast.success.reclassifiedFace"), {
+              position: "top-center",
+            });
+            refreshFaces();
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+          toast.error(t("toast.error.reclassifyFailed", { errorMessage }), {
+            position: "top-center",
+          });
+        });
+    },
+    [pageToggle, refreshFaces, t],
+  );
+
   // keyboard
 
   const contentRef = useRef<HTMLDivElement | null>(null);
@@ -445,17 +474,21 @@ export default function FaceLibrary() {
             attemptImages={trainImages}
             faceNames={faces}
             selectedFaces={selectedFaces}
+            isLoading={faceData === undefined}
             onClickFaces={onClickFaces}
+            onAddFace={() => setAddFace(true)}
             onRefresh={refreshFaces}
           />
         ) : (
           <FaceGrid
             contentRef={contentRef}
             faceImages={faceImages}
+            faceNames={faces}
             pageToggle={pageToggle}
             selectedFaces={selectedFaces}
             onClickFaces={onClickFaces}
             onDelete={onDelete}
+            onReclassify={onReclassify}
           />
         ))
       )}
@@ -534,7 +567,6 @@ function LibrarySelector({
             </Button>
             <Button
               variant="destructive"
-              className="text-white"
               onClick={() => {
                 if (confirmDelete) {
                   handleDeleteFace(confirmDelete);
@@ -564,7 +596,7 @@ function LibrarySelector({
         forbiddenErrorMessage={t("description.nameCannotContainHash")}
       />
 
-      <DropdownMenu modal={false}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="flex justify-between smart-capitalize">
             {pageTitle}
@@ -601,11 +633,11 @@ function LibrarySelector({
               className="group flex items-center justify-between p-0"
             >
               <div
-                className="flex-grow cursor-pointer"
+                className="flex-grow cursor-pointer px-2 py-1.5"
                 onClick={() => setPageToggle(face)}
               >
                 {face}
-                <span className="ml-2 px-2 py-1.5 text-muted-foreground">
+                <span className="ml-2 text-muted-foreground">
                   ({faceData?.[face].length})
                 </span>
               </div>
@@ -661,7 +693,9 @@ type TrainingGridProps = {
   attemptImages: string[];
   faceNames: string[];
   selectedFaces: string[];
+  isLoading: boolean;
   onClickFaces: (images: string[], ctrl: boolean) => void;
+  onAddFace: () => void;
   onRefresh: (
     data?:
       | FaceLibraryData
@@ -678,7 +712,9 @@ function TrainingGrid({
   attemptImages,
   faceNames,
   selectedFaces,
+  isLoading,
   onClickFaces,
+  onAddFace,
   onRefresh,
 }: TrainingGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
@@ -732,6 +768,25 @@ function TrainingGrid({
   ]);
 
   if (attemptImages.length == 0) {
+    if (isLoading) {
+      return (
+        <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center text-center" />
+      );
+    }
+
+    if (faceNames.length == 0) {
+      return (
+        <EmptyCard
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center text-center"
+          icon={<AddFaceIcon className="size-16" />}
+          title={t("train.emptyNoLibrary.title")}
+          description={t("train.emptyNoLibrary.description")}
+          buttonText={t("button.addFace")}
+          onClick={onAddFace}
+        />
+      );
+    }
+
     return (
       <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center text-center">
         <LuFolderCheck className="size-16" />
@@ -983,18 +1038,22 @@ function FaceAttemptGroup({
 type FaceGridProps = {
   contentRef: MutableRefObject<HTMLDivElement | null>;
   faceImages: string[];
+  faceNames: string[];
   pageToggle: string;
   selectedFaces: string[];
   onClickFaces: (images: string[], ctrl: boolean) => void;
   onDelete: (name: string, ids: string[]) => void;
+  onReclassify: (image: string, newName: string) => void;
 };
 function FaceGrid({
   contentRef,
   faceImages,
+  faceNames,
   pageToggle,
   selectedFaces,
   onClickFaces,
   onDelete,
+  onReclassify,
 }: FaceGridProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
 
@@ -1032,6 +1091,17 @@ function FaceGrid({
             i18nLibrary="views/faceLibrary"
             onClick={(data, meta) => onClickFaces([data.filename], meta)}
           >
+            <FaceSelectionDialog
+              faceNames={faceNames}
+              excludeName={pageToggle}
+              dialogLabel={t("reclassifyFaceAs")}
+              tooltipLabel={t("reclassifyFace")}
+              onTrainAttempt={(newName) => onReclassify(image, newName)}
+            >
+              <BlurredIconButton>
+                <AddFaceIcon className="size-5" />
+              </BlurredIconButton>
+            </FaceSelectionDialog>
             <Tooltip>
               <TooltipTrigger>
                 <LuTrash2

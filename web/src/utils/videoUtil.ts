@@ -78,3 +78,20 @@ export function calculateSeekPosition(
 
   return seekSeconds >= 0 ? seekSeconds : undefined;
 }
+
+/**
+ * Attempts to play the video, and if it fails due to a NotAllowedError (often caused by browser autoplay restrictions),
+ * it temporarily mutes the video and tries to play again.
+ * @param video - The HTMLVideoElement to play
+ */
+export function playWithTemporaryMuteFallback(video: HTMLVideoElement) {
+  return video.play().catch((error: { name?: string }) => {
+    if (error.name === "NotAllowedError" && !video.muted) {
+      video.muted = true;
+
+      return video.play().catch(() => undefined);
+    }
+
+    throw error;
+  });
+}

@@ -1,15 +1,15 @@
 {
-  "search": "یافتن",
+  "search": "جستجو",
   "savedSearches": "جستجوهای ذخیره شده",
   "searchFor": "جستجو برای {{inputValue}}",
   "button": {
     "clear": "پاک کردن جستجو",
-    "save": "ذخیره جست‌وجو",
+    "save": "ذخیره جستجو",
     "delete": "حذف جستجوی ذخیره‌شده",
     "filterInformation": "اطلاعات فیلتر",
     "filterActive": "فیلترها فعال‌اند"
   },
-  "trackedObjectId": "شناسهٔ شیء ردیابی‌شده",
+  "trackedObjectId": "شناسه‌ی شی ردیابی‌شده",
   "filter": {
     "label": {
       "cameras": "دوربین‌ها",
@@ -17,15 +17,15 @@
       "sub_labels": "زیر‌برچسب‌ها",
       "attributes": "صفت‌ها",
       "search_type": "نوع جستجو",
-      "time_range": "بازهٔ زمانی",
+      "time_range": "بازه زمانی",
       "zones": "ناحیه‌ها",
       "before": "قبل از",
       "after": "بعد از",
-      "min_score": "حداقل امتیاز",
-      "max_score": "حداکثر امتیاز",
-      "min_speed": "حداقل سرعت",
-      "max_speed": "حداکثر سرعت",
-      "recognized_license_plate": "پلاک شناسایی‌شده",
+      "min_score": "کمینه امتیاز",
+      "max_score": "بیشینه امتیاز",
+      "min_speed": "کمینه سرعت",
+      "max_speed": "بیشینه سرعت",
+      "recognized_license_plate": "پلاک شناسایی شده",
       "has_clip": "دارای کلیپ",
       "has_snapshot": "دارای عکس فوری"
     },
@@ -40,7 +40,7 @@
       }
     },
     "searchType": {
-      "thumbnail": "پیش‌نمایش",
+      "thumbnail": "بندانگشتی",
       "description": "توضیحات"
     },
     "tips": {

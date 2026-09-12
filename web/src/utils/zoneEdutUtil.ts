@@ -1,3 +1,33 @@
+// Build a config/set query fragment that removes `name` from a
+// required_zones list on the given camera section (e.g. "snapshots",
+// "mqtt", "objects.genai", "onvif.autotracking"), rebuilding the
+// remaining entries. When removing the name empties the list, the
+// required_zones key itself is deleted so the field reverts to its
+// default instead of retaining the now-stale zone name. Returns an empty
+// string when `name` is not present so unrelated sections are untouched.
+export const removeRequiredZoneQuery = (
+  name: string,
+  camera: string,
+  section: string,
+  zones: string[],
+) => {
+  const remaining = new Set<string>(zones || []);
+
+  if (!remaining.has(name)) {
+    return "";
+  }
+
+  remaining.delete(name);
+
+  const key = `cameras.${camera}.${section}.required_zones`;
+
+  if (remaining.size === 0) {
+    return `&${key}`;
+  }
+
+  return [...remaining].map((zone) => `&${key}=${zone}`).join("");
+};
+
 export const reviewQueries = (
   name: string,
   review_alerts: boolean,

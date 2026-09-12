@@ -1,0 +1,1163 @@
+import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
+import {
+  expectBodyInteractive,
+  waitForBodyInteractive,
+} from "../helpers/overlay-interaction";
+
+test.describe("Export Page - Delete race @high", () => {
+  // Empirical guard for radix-ui/primitives#3445: when a modal DropdownMenu
+  // opens an AlertDialog and the AlertDialog's confirm action causes the
+  // parent's optimistic cache update to unmount the card, we want to know
+  // whether the deduped react-dismissable-layer (1.1.11) handles the
+  // pointer-events stack cleanup or whether `modal={false}` is still
+  // required on the DropdownMenu. The classic "canonical" pattern, distinct
+  // from the FaceSelectionDialog auto-unmount race already covered by
+  // face-library.spec.ts.
+  test("deleting an export via dropdown→alert→confirm leaves body interactive", async ({
+    frigateApp,
+  }) => {
+    if (frigateApp.isMobile) {
+      test.skip();
+      return;
+    }
+
+    const initialExports = [
+      {
+        id: "export-race-001",
+        camera: "front_door",
+        name: "Race - Test Export",
+        date: 1775490731.3863528,
+        video_path: "/exports/export-race-001.mp4",
+        thumb_path: "/exports/export-race-001-thumb.jpg",
+        in_progress: false,
+        export_case_id: null,
+      },
+    ];
+    let deleted = false;
+
+    await frigateApp.installDefaults({
+      exports: initialExports,
+    });
+
+    // Flip /api/export to empty after the delete POST is observed so the
+    // page's SWR mutate sees the export gone.
+    await frigateApp.page.route("**/api/export**", async (route) => {
+      const payload = deleted ? [] : initialExports;
+      await route.fulfill({ json: payload });
+    });
+    await frigateApp.page.route("**/api/exports/delete", async (route) => {
+      deleted = true;
+      const delayMs = Number(
+        (globalThis as { process?: { env?: Record<string, string> } }).process
+          ?.env?.DELETE_DELAY_MS ?? "100",
+      );
+      if (delayMs > 0) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+      }
+      await route.fulfill({ json: { success: true } });
+    });
+
+    await frigateApp.goto("/export");
+    await expect(frigateApp.page.getByText("Race - Test Export")).toBeVisible({
+      timeout: 5_000,
+    });
+
+    // Open the kebab menu on the export card. The kebab uses the
+    // (misleading) aria-label "Edit name" from ExportCard's source — it
+    // wraps the FiMoreVertical icon. There is exactly one such button on
+    // the page once we have a single export rendered.
+    const kebab = frigateApp.page
+      .getByRole("button", { name: /edit name/i })
+      .first();
+    await expect(kebab).toBeVisible({ timeout: 5_000 });
+    await kebab.click();
+
+    const menu = frigateApp.page
+      .locator('[role="menu"], [data-radix-menu-content]')
+      .first();
+    await expect(menu).toBeVisible({ timeout: 3_000 });
+
+    // Delete Export
+    await menu
+      .getByRole("menuitem", { name: /delete export/i })
+      .first()
+      .click();
+
+    // AlertDialog at page level. The confirm button's accessible name is
+    // "Delete Export" (its aria-label), the visible text is just "Delete".
+    const confirm = frigateApp.page.getByRole("alertdialog");
+    await expect(confirm).toBeVisible({ timeout: 3_000 });
+    await confirm
+      .getByRole("button", { name: /^delete export$/i })
+      .first()
+      .click();
+
+    // The card optimistically disappears, the dialog closes, and body
+    // pointer-events must come unstuck.
+    await expect(
+      frigateApp.page.getByText("Race - Test Export"),
+    ).not.toBeVisible({ timeout: 5_000 });
+    await waitForBodyInteractive(frigateApp.page, 5_000);
+    await expectBodyInteractive(frigateApp.page);
+
+    // Sanity: another page-level button still responds.
+    const newCase = frigateApp.page.getByRole("button", { name: /new case/i });
+    await expect(newCase).toBeVisible({ timeout: 3_000 });
+    await newCase.click();
+    await expect(
+      frigateApp.page.getByRole("dialog").filter({ hasText: /create case/i }),
+    ).toBeVisible({ timeout: 3_000 });
+  });
+});
+
+test.describe("Export Page - Overview @high", () => {
+  test("renders uncategorized exports and case cards from mock data", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/export");
+
+    await expect(
+      frigateApp.page.getByText("Front Door - Person Alert"),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Garage - In Progress"),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Package Theft Investigation"),
+    ).toBeVisible();
+  });
+
+  test("search filters uncategorized exports", async ({ frigateApp }) => {
+    await frigateApp.goto("/export");
+
+    const searchInput = frigateApp.page.getByPlaceholder(/search/i).first();
+    await searchInput.fill("Front Door");
+
+    await expect(
+      frigateApp.page.getByText("Front Door - Person Alert"),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Backyard - Car Detection"),
+    ).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Garage - In Progress"),
+    ).toBeHidden();
+  });
+
+  test("new case button opens the create case dialog", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/export");
+
+    await frigateApp.page.getByRole("button", { name: "New Case" }).click();
+
+    await expect(
+      frigateApp.page.getByRole("dialog").filter({ hasText: "Create Case" }),
+    ).toBeVisible();
+    await expect(frigateApp.page.getByPlaceholder("Case name")).toBeVisible();
+  });
+});
+
+test.describe("Export Page - Case Detail @high", () => {
+  test("opening a case shows its detail view and associated export", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Package Theft Investigation")
+      .first()
+      .click();
+
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Backyard - Car Detection"),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Add Export" }),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Edit Case" }),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Delete Case" }),
+    ).toBeVisible();
+  });
+
+  test("edit case opens a prefilled dialog", async ({ frigateApp }) => {
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Package Theft Investigation")
+      .first()
+      .click();
+    await frigateApp.page.getByRole("button", { name: "Edit Case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: "Edit Case" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator("input")).toHaveValue(
+      "Package Theft Investigation",
+    );
+    await expect(dialog.locator("textarea")).toHaveValue(
+      "Review of suspicious activity near the front porch",
+    );
+  });
+
+  test("add export shows completed uncategorized exports for assignment", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Package Theft Investigation")
+      .first()
+      .click();
+    await frigateApp.page.getByRole("button", { name: "Add Export" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: "Add Export to Package Theft Investigation" });
+    await expect(dialog).toBeVisible();
+    // Completed, uncategorized exports are selectable
+    await expect(dialog.getByText("Front Door - Person Alert")).toBeVisible();
+    // In-progress exports are intentionally hidden by AssignExportDialog
+    // (see Exports.tsx filteredExports) — they can't be assigned until
+    // they finish, so they should not show in the picker.
+    await expect(dialog.getByText("Garage - In Progress")).toBeHidden();
+  });
+
+  test("delete case opens a confirmation dialog", async ({ frigateApp }) => {
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Package Theft Investigation")
+      .first()
+      .click();
+    await frigateApp.page.getByRole("button", { name: "Delete Case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("alertdialog")
+      .filter({ hasText: "Delete Case" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(/Package Theft Investigation/)).toBeVisible();
+  });
+
+  test("delete case can also delete its exports", async ({ frigateApp }) => {
+    let deleteRequestUrl: string | null = null;
+    let deleteCaseCompleted = false;
+
+    const initialCases = [
+      {
+        id: "case-001",
+        name: "Package Theft Investigation",
+        description: "Review of suspicious activity near the front porch",
+        created_at: 1775407931.3863528,
+        updated_at: 1775483531.3863528,
+      },
+    ];
+
+    const initialExports = [
+      {
+        id: "export-001",
+        camera: "front_door",
+        name: "Front Door - Person Alert",
+        date: 1775490731.3863528,
+        video_path: "/exports/export-001.mp4",
+        thumb_path: "/exports/export-001-thumb.jpg",
+        in_progress: false,
+        export_case_id: null,
+      },
+      {
+        id: "export-002",
+        camera: "backyard",
+        name: "Backyard - Car Detection",
+        date: 1775483531.3863528,
+        video_path: "/exports/export-002.mp4",
+        thumb_path: "/exports/export-002-thumb.jpg",
+        in_progress: false,
+        export_case_id: "case-001",
+      },
+      {
+        id: "export-003",
+        camera: "garage",
+        name: "Garage - In Progress",
+        date: 1775492531.3863528,
+        video_path: "/exports/export-003.mp4",
+        thumb_path: "/exports/export-003-thumb.jpg",
+        in_progress: true,
+        export_case_id: null,
+      },
+    ];
+
+    await frigateApp.page.route(/\/api\/cases(?:$|\?|\/)/, async (route) => {
+      const request = route.request();
+
+      if (request.method() === "DELETE") {
+        deleteRequestUrl = request.url();
+        deleteCaseCompleted = true;
+        return route.fulfill({ json: { success: true } });
+      }
+
+      if (request.method() === "GET") {
+        return route.fulfill({
+          json: deleteCaseCompleted ? [] : initialCases,
+        });
+      }
+
+      return route.fallback();
+    });
+
+    await frigateApp.page.route("**/api/exports**", async (route) => {
+      if (route.request().method() !== "GET") {
+        return route.fallback();
+      }
+
+      return route.fulfill({
+        json: deleteCaseCompleted
+          ? initialExports.filter((exp) => exp.export_case_id !== "case-001")
+          : initialExports,
+      });
+    });
+
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Package Theft Investigation")
+      .first()
+      .click();
+    await frigateApp.page.getByRole("button", { name: "Delete Case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("alertdialog")
+      .filter({ hasText: "Delete Case" });
+    await expect(dialog).toBeVisible();
+
+    const deleteExportsSwitch = dialog.getByRole("switch", {
+      name: "Also delete exports",
+    });
+    await expect(deleteExportsSwitch).toHaveAttribute("aria-checked", "false");
+    await expect(
+      dialog.getByText(
+        "Exports will remain available as uncategorized exports.",
+      ),
+    ).toBeVisible();
+
+    await deleteExportsSwitch.click();
+
+    await expect(deleteExportsSwitch).toHaveAttribute("aria-checked", "true");
+    await expect(
+      dialog.getByText("All exports in this case will be permanently deleted."),
+    ).toBeVisible();
+
+    await dialog.getByRole("button", { name: /^delete$/i }).click();
+
+    await expect
+      .poll(() => deleteRequestUrl)
+      .toContain("/api/cases/case-001?delete_exports=true");
+
+    await expect(dialog).toBeHidden();
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Backyard - Car Detection"),
+    ).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Front Door - Person Alert"),
+    ).toBeVisible();
+  });
+});
+
+test.describe("Export Page - Empty State @high", () => {
+  test("renders the empty state when there are no exports or cases", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/export**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await frigateApp.page.route("**/api/exports**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await frigateApp.page.route("**/api/cases", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await frigateApp.page.route("**/api/cases**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("No exports found")).toBeVisible();
+  });
+});
+
+test.describe("Export Page - Mobile @high @mobile", () => {
+  test("mobile can open an export preview dialog", async ({ frigateApp }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only assertion");
+
+    await frigateApp.goto("/export");
+
+    await frigateApp.page
+      .getByText("Front Door - Person Alert")
+      .first()
+      .click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: "Front Door - Person Alert" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator("video")).toBeVisible();
+  });
+});
+
+test.describe("Multi-Review Export @high", () => {
+  // Two alert reviews close enough to "now" to fall within the
+  // default last-24-hours review window. Using numeric timestamps
+  // because the TS ReviewSegment type expects numbers even though
+  // the backend pydantic model serializes datetime as ISO strings —
+  // the app reads these as numbers for display math.
+  const now = Date.now() / 1000;
+  const mockReviews = [
+    {
+      id: "mex-review-001",
+      camera: "front_door",
+      start_time: now - 600,
+      end_time: now - 580,
+      has_been_reviewed: false,
+      severity: "alert",
+      thumb_path: "/clips/front_door/mex-review-001-thumb.jpg",
+      data: {
+        audio: [],
+        detections: ["person-001"],
+        objects: ["person"],
+        sub_labels: [],
+        significant_motion_areas: [],
+        zones: ["front_yard"],
+      },
+    },
+    {
+      id: "mex-review-002",
+      camera: "backyard",
+      start_time: now - 1200,
+      end_time: now - 1170,
+      has_been_reviewed: false,
+      severity: "alert",
+      thumb_path: "/clips/backyard/mex-review-002-thumb.jpg",
+      data: {
+        audio: [],
+        detections: ["car-002"],
+        objects: ["car"],
+        sub_labels: [],
+        significant_motion_areas: [],
+        zones: ["driveway"],
+      },
+    },
+  ];
+
+  // 51 alert reviews, all front_door, spaced 5 minutes apart. Used by the
+  // over-limit test to trigger Ctrl+A select-all and verify the Export
+  // button is hidden at 51 selected.
+  const oversizedReviews = Array.from({ length: 51 }, (_, i) => ({
+    id: `mex-oversized-${i.toString().padStart(3, "0")}`,
+    camera: "front_door",
+    start_time: now - 60 * 60 - i * 300,
+    end_time: now - 60 * 60 - i * 300 + 20,
+    has_been_reviewed: false,
+    severity: "alert",
+    thumb_path: `/clips/front_door/mex-oversized-${i}-thumb.jpg`,
+    data: {
+      audio: [],
+      detections: [`person-${i}`],
+      objects: ["person"],
+      sub_labels: [],
+      significant_motion_areas: [],
+      zones: ["front_yard"],
+    },
+  }));
+
+  const mockSummary = {
+    last24Hours: {
+      reviewed_alert: 0,
+      reviewed_detection: 0,
+      total_alert: 2,
+      total_detection: 0,
+    },
+  };
+
+  async function routeReviews(
+    page: import("@playwright/test").Page,
+    reviews: unknown[],
+  ) {
+    // Intercept the actual `/api/review` endpoint (singular — the
+    // default api-mocker only registers `/api/reviews**` (plural)
+    // which does not match the real request URL).
+    await page.route(/\/api\/review(\?|$)/, (route) =>
+      route.fulfill({ json: reviews }),
+    );
+    await page.route(/\/api\/review\/summary/, (route) =>
+      route.fulfill({ json: mockSummary }),
+    );
+  }
+
+  test.beforeEach(async ({ frigateApp }) => {
+    await routeReviews(frigateApp.page, mockReviews);
+    // Empty cases list by default so the dialog defaults to "new case".
+    // Individual tests override this to populate existing cases.
+    await frigateApp.page.route("**/api/cases", (route) =>
+      route.fulfill({ json: [] }),
+    );
+  });
+
+  async function selectTwoReviews(frigateApp: {
+    page: import("@playwright/test").Page;
+  }) {
+    // Every review card has className `review-item` on its wrapper
+    // (see EventView.tsx). Cards also have data-start attributes that
+    // we can key off if needed.
+    const reviewItems = frigateApp.page.locator(".review-item");
+    await reviewItems.first().waitFor({ state: "visible", timeout: 10_000 });
+
+    // Meta-click the first two items to enter multi-select mode.
+    // PreviewThumbnailPlayer reads e.metaKey to decide multi-select.
+    await reviewItems.nth(0).click({ modifiers: ["Meta"] });
+    await reviewItems.nth(1).click();
+  }
+
+  test("selecting two reviews reveals the export button", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop multi-select flow");
+
+    await frigateApp.goto("/review");
+
+    await selectTwoReviews(frigateApp);
+
+    // Action group replaces the filter bar once items are selected
+    await expect(frigateApp.page.getByText(/2.*selected/i)).toBeVisible({
+      timeout: 5_000,
+    });
+
+    const exportButton = frigateApp.page.getByRole("button", {
+      name: /export/i,
+    });
+    await expect(exportButton).toBeVisible();
+  });
+
+  test("clicking export opens the multi-review dialog with correct title", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop multi-select flow");
+
+    await frigateApp.goto("/review");
+
+    await selectTwoReviews(frigateApp);
+
+    await frigateApp.page
+      .getByRole("button", { name: /export/i })
+      .first()
+      .click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: /Export 2 reviews/i });
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+    // The dialog uses a Select trigger for case selection (admins). The
+    // default "None" value is shown on the trigger.
+    await expect(dialog.locator("button[role='combobox']")).toBeVisible();
+    await expect(dialog.getByText(/None/)).toBeVisible();
+  });
+
+  test("starting an export posts the expected payload and stays on the review page", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop multi-select flow");
+
+    let capturedPayload: unknown = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: {
+          export_case_id: "new-case-xyz",
+          export_ids: ["front_door_a", "backyard_b"],
+          results: [
+            {
+              camera: "front_door",
+              export_id: "front_door_a",
+              success: true,
+              status: "queued",
+              error: null,
+              item_index: 0,
+            },
+            {
+              camera: "backyard",
+              export_id: "backyard_b",
+              success: true,
+              status: "queued",
+              error: null,
+              item_index: 1,
+            },
+          ],
+        },
+      });
+    });
+
+    await frigateApp.goto("/review");
+    await selectTwoReviews(frigateApp);
+    await frigateApp.page
+      .getByRole("button", { name: /export/i })
+      .first()
+      .click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: /Export 2 reviews/i });
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    // Select "Create new case" from the case dropdown (default is "None")
+    await dialog.locator("button[role='combobox']").click();
+    await frigateApp.page
+      .getByRole("option", { name: /Create new case/i })
+      .click();
+
+    const nameInput = dialog.locator("input").first();
+    await nameInput.fill("E2E Incident");
+
+    await dialog.getByRole("button", { name: /export 2 reviews/i }).click();
+
+    // Wait for the POST to fire
+    await expect.poll(() => capturedPayload, { timeout: 5_000 }).not.toBeNull();
+
+    const payload = capturedPayload as {
+      items: Array<{
+        camera: string;
+        start_time: number;
+        end_time: number;
+        image_path?: string;
+        client_item_id?: string;
+      }>;
+      new_case_name?: string;
+      export_case_id?: string;
+    };
+    expect(payload.items).toHaveLength(2);
+    expect(payload.new_case_name).toBe("E2E Incident");
+    // When creating a new case, we must NOT also send export_case_id —
+    // the two fields are mutually exclusive on the backend.
+    expect(payload.export_case_id).toBeUndefined();
+    expect(payload.items.map((i) => i.camera).sort()).toEqual([
+      "backyard",
+      "front_door",
+    ]);
+    // Each item must preserve REVIEW_PADDING (4s) on the edges —
+    // i.e. the padded window is 8s longer than the original review.
+    // The mock reviews above have 20s and 30s raw durations, so the
+    // expected padded durations are 28s and 38s.
+    const paddedDurations = payload.items
+      .map((i) => i.end_time - i.start_time)
+      .sort((a, b) => a - b);
+    expect(paddedDurations).toEqual([28, 38]);
+    // Thumbnails should be passed through per item
+    for (const item of payload.items) {
+      expect(item.image_path).toMatch(/mex-review-\d+-thumb\.jpg$/);
+    }
+    expect(payload.items.map((item) => item.client_item_id)).toEqual([
+      "mex-review-001",
+      "mex-review-002",
+    ]);
+
+    // Creating a case must not pull the user off the review they were
+    // working through — the case is offered as a link on the toast instead.
+    const viewCase = frigateApp.page.getByRole("link", { name: /view/i });
+    await expect(viewCase).toBeVisible({ timeout: 5_000 });
+    await expect(viewCase).toHaveAttribute(
+      "href",
+      /export\?caseId=new-case-xyz$/,
+    );
+    await expect(frigateApp.page).toHaveURL(/\/review(\?|$)/);
+  });
+
+  test("mobile opens a drawer (not a dialog) for the multi-review export flow", async ({
+    frigateApp,
+  }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only Drawer assertion");
+
+    await frigateApp.goto("/review");
+    await selectTwoReviews(frigateApp);
+
+    await frigateApp.page
+      .getByRole("button", { name: /export/i })
+      .first()
+      .click();
+
+    // On mobile the component renders a shadcn Drawer, which uses
+    // role="dialog" but sets data-vaul-drawer. Desktop renders a
+    // shadcn Dialog with role="dialog" but no data-vaul-drawer.
+    // The title and submit button both contain "Export 2 reviews", so
+    // assert each element distinctly: the title is a heading and the
+    // submit button has role="button".
+    const drawer = frigateApp.page.locator("[data-vaul-drawer]");
+    await expect(drawer).toBeVisible({ timeout: 5_000 });
+    await expect(
+      drawer.getByRole("heading", { name: /Export 2 reviews/i }),
+    ).toBeVisible();
+    await expect(
+      drawer.getByRole("button", { name: /export 2 reviews/i }),
+    ).toBeVisible();
+  });
+
+  test("hides export button when more than 50 reviews are selected", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop select-all keyboard flow");
+
+    // Override the default 2-review mock with 51 reviews before
+    // navigation. Playwright matches routes last-registered-first so
+    // this takes precedence over the beforeEach.
+    await routeReviews(frigateApp.page, oversizedReviews);
+
+    await frigateApp.goto("/review");
+
+    // Wait for any review item to render before firing the shortcut
+    await frigateApp.page
+      .locator(".review-item")
+      .first()
+      .waitFor({ state: "visible", timeout: 10_000 });
+
+    // Ctrl+A triggers onSelectAllReviews (see EventView.tsx useKeyboardListener)
+    await frigateApp.page.keyboard.press("Control+a");
+
+    // The action group should show "51 selected" but no Export button.
+    // Mark-as-reviewed is still there so the action bar is rendered.
+    // Scope the "Mark as reviewed" lookup to its exact aria-label because
+    // the page can render other "mark as reviewed" controls elsewhere
+    // (e.g. on individual cards) that would trip strict-mode matching.
+    await expect(frigateApp.page.getByText(/51.*selected/i)).toBeVisible({
+      timeout: 5_000,
+    });
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Mark as reviewed" }),
+    ).toBeVisible();
+    await expect(
+      frigateApp.page.getByRole("button", { name: /^export$/i }),
+    ).toHaveCount(0);
+  });
+
+  test("attaching to an existing case sends export_case_id without new_case_name", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop multi-select flow");
+
+    // Seed one existing case so the dialog can offer the "existing" branch.
+    // The fixture mocks the user as admin (adminProfile()), so useIsAdmin()
+    // is true and the dialog renders the "Existing case" radio.
+    await frigateApp.page.route("**/api/cases", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "existing-case-abc",
+            name: "Incident #42",
+            description: "",
+            created_at: now - 3600,
+            updated_at: now - 3600,
+          },
+        ],
+      }),
+    );
+
+    let capturedPayload: unknown = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: {
+          export_case_id: "existing-case-abc",
+          export_ids: ["front_door_a", "backyard_b"],
+          results: [
+            {
+              camera: "front_door",
+              export_id: "front_door_a",
+              success: true,
+              status: "queued",
+              error: null,
+              item_index: 0,
+            },
+            {
+              camera: "backyard",
+              export_id: "backyard_b",
+              success: true,
+              status: "queued",
+              error: null,
+              item_index: 1,
+            },
+          ],
+        },
+      });
+    });
+
+    await frigateApp.goto("/review");
+    await selectTwoReviews(frigateApp);
+
+    await frigateApp.page
+      .getByRole("button", { name: /export/i })
+      .first()
+      .click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: /Export 2 reviews/i });
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    // Open the Case Select dropdown and pick the seeded case directly.
+    // The dialog now uses a single Select listing existing cases above
+    // the "Create new case" option — no radio toggle needed.
+    const selectTrigger = dialog.locator("button[role='combobox']").first();
+    await selectTrigger.waitFor({ state: "visible", timeout: 5_000 });
+    await selectTrigger.click();
+
+    // The dropdown portal renders outside the dialog
+    await frigateApp.page.getByRole("option", { name: /Incident #42/ }).click();
+
+    await dialog.getByRole("button", { name: /export 2 reviews/i }).click();
+
+    await expect.poll(() => capturedPayload, { timeout: 5_000 }).not.toBeNull();
+
+    const payload = capturedPayload as {
+      items: unknown[];
+      new_case_name?: string;
+      new_case_description?: string;
+      export_case_id?: string;
+    };
+    expect(payload.export_case_id).toBe("existing-case-abc");
+    expect(payload.new_case_name).toBeUndefined();
+    expect(payload.new_case_description).toBeUndefined();
+    expect(payload.items).toHaveLength(2);
+
+    // Attaching to a case leaves the user on the review page; the case is
+    // reachable from the toast action.
+    const viewCase = frigateApp.page.getByRole("link", { name: /view/i });
+    await expect(viewCase).toBeVisible({ timeout: 5_000 });
+    await expect(viewCase).toHaveAttribute(
+      "href",
+      /export\?caseId=existing-case-abc$/,
+    );
+    await expect(frigateApp.page).toHaveURL(/\/review(\?|$)/);
+  });
+});
+
+test.describe("Multi-Camera Export from History @high", () => {
+  // The recording view seeds the multi-camera range around the playback
+  // position, so the deep link has to land close to the live edge for the
+  // seeded end to run past the end of the timeline.
+  const playbackTime = Math.floor(Date.now() / 1000) - 300;
+
+  async function openRecordingView(frigateApp: FrigateApp) {
+    // The recording view pulls these while the timeline renders; the preview
+    // server 500s on them, which the error collector would flag.
+    await frigateApp.page.route("**/api/*/recordings**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+    await frigateApp.page.route("**/api/recordings/unavailable**", (route) =>
+      route.fulfill({ json: [] }),
+    );
+
+    await frigateApp.goto(`/review?timestamp=front_door_${playbackTime}`);
+  }
+
+  // Desktop opens the export form in a dialog from the Actions menu; mobile
+  // opens the same form inside the settings drawer.
+  async function openMultiCameraTab(frigateApp: FrigateApp) {
+    await openRecordingView(frigateApp);
+
+    if (frigateApp.isMobile) {
+      await frigateApp.page
+        .getByRole("button", { name: /filters/i })
+        .first()
+        .click({ timeout: 15_000 });
+      await frigateApp.page.getByRole("button", { name: /^export$/i }).click();
+    } else {
+      await frigateApp.page
+        .getByRole("button", { name: /actions/i })
+        .click({ timeout: 15_000 });
+      await frigateApp.page.getByRole("menuitem", { name: /export/i }).click();
+    }
+
+    const form = frigateApp.page.getByRole("dialog");
+    await expect(form).toBeVisible({ timeout: 5_000 });
+    await form.getByRole("tab", { name: /multi-camera/i }).click();
+
+    return form;
+  }
+
+  test("timeline selection renders both export handles on the timeline", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    await form
+      .getByRole("button", { name: "Select from Timeline" })
+      .click({ timeout: 5_000 });
+    await expect(form).toBeHidden({ timeout: 5_000 });
+
+    // A range seeded past the end of the timeline has no segment to anchor
+    // to, which leaves the handle unpositioned at the top of the timeline
+    // with an empty label until it is dragged.
+    for (const handle of [".export-start", ".export-end"]) {
+      const locator = frigateApp.page.locator(handle);
+      await expect(locator).toHaveText(/\d{1,2}:\d{2}/, { timeout: 5_000 });
+      await expect(locator).not.toHaveAttribute("style", /top:\s*0px/);
+    }
+  });
+
+  test("the time range picker opens without a configured timezone", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    // ui.timezone is null until the user sets one, which used to take the
+    // whole page down when the calendar worked out its disabled days
+    await form
+      .getByRole("button", { name: /^start time$/i })
+      .click({ timeout: 5_000 });
+
+    await expect(
+      frigateApp.page.getByRole("button", { name: /previous month/i }),
+    ).toBeVisible({ timeout: 5_000 });
+  });
+
+  test("canceling timeline selection reopens the form with the case intact", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    await form
+      .getByPlaceholder(/new case name/i)
+      .fill("Incident 7", { timeout: 5_000 });
+    await form
+      .getByPlaceholder(/case description/i)
+      .fill("Front gate follow-up");
+
+    await form.getByRole("button", { name: "Select from Timeline" }).click();
+    await expect(form).toBeHidden({ timeout: 5_000 });
+
+    await frigateApp.page.getByRole("button", { name: /cancel/i }).click();
+
+    await expect(form).toBeVisible({ timeout: 5_000 });
+    await expect(
+      form.getByRole("tab", { name: /multi-camera/i }),
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(form.getByPlaceholder(/new case name/i)).toHaveValue(
+      "Incident 7",
+    );
+    await expect(form.getByPlaceholder(/case description/i)).toHaveValue(
+      "Front gate follow-up",
+    );
+  });
+});
+
+test.describe("Export Page - Active Job Progress @medium", () => {
+  test("encoding job renders percent label and progress bar", async ({
+    frigateApp,
+  }) => {
+    // Override the default empty mock with an encoding job. Per-test
+    // page.route registrations win over those set by the api-mocker.
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-encoding",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Encoding Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding",
+            progress_percent: 42,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Encoding Sample")).toBeVisible();
+    // Step label and percent are rendered together as text near the
+    // progress bar (separated by a middle dot), not in a corner badge.
+    await expect(frigateApp.page.getByText(/Encoding\s*·\s*42%/)).toBeVisible();
+  });
+
+  test("queued job shows queued badge", async ({ frigateApp }) => {
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-queued",
+            job_type: "export",
+            status: "queued",
+            camera: "front_door",
+            name: "Queued Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: null,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "queued",
+            progress_percent: 0,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Queued Sample")).toBeVisible();
+    await expect(
+      frigateApp.page.getByText("Queued", { exact: true }),
+    ).toBeVisible();
+  });
+
+  test("active job hides matching in_progress export row", async ({
+    frigateApp,
+  }) => {
+    // The backend inserts the Export row with in_progress=True before
+    // FFmpeg starts encoding, so the same id appears in BOTH /jobs/export
+    // and /exports during the run. The page must show the rich progress
+    // card from the active jobs feed and suppress the binary-spinner
+    // ExportCard from the exports feed; otherwise the older binary
+    // spinner replaces the percent label as soon as SWR re-polls.
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "shared-id",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Shared Id Encoding",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding",
+            progress_percent: 67,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.page.route("**/api/exports**", (route) => {
+      if (route.request().method() !== "GET") {
+        return route.fallback();
+      }
+      return route.fulfill({
+        json: [
+          {
+            id: "shared-id",
+            camera: "front_door",
+            name: "Shared Id Encoding",
+            date: 1775407931,
+            video_path: "/exports/shared-id.mp4",
+            thumb_path: "/exports/shared-id-thumb.jpg",
+            in_progress: true,
+            export_case_id: null,
+          },
+        ],
+      });
+    });
+
+    await frigateApp.goto("/export");
+
+    // The progress label must be present — proving the rich card won.
+    await expect(frigateApp.page.getByText(/Encoding\s*·\s*67%/)).toBeVisible();
+
+    // And only ONE card should be visible for that id, not two.
+    const titles = frigateApp.page.getByText("Shared Id Encoding");
+    await expect(titles).toHaveCount(1);
+  });
+
+  test("stream copy job shows copying label", async ({ frigateApp }) => {
+    // Default (non-custom) exports use `-c copy`, which is a remux, not
+    // a real encode. The step label should read "Copying" so users
+    // aren't misled into thinking re-encoding is happening.
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-copying",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Copy Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "copying",
+            progress_percent: 80,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Copy Sample")).toBeVisible();
+    await expect(frigateApp.page.getByText(/Copying\s*·\s*80%/)).toBeVisible();
+  });
+
+  test("encoding retry job shows retry label", async ({ frigateApp }) => {
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-retry",
+            job_type: "export",
+            status: "running",
+            camera: "front_door",
+            name: "Retry Sample",
+            export_case_id: null,
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding_retry",
+            progress_percent: 12,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export");
+
+    await expect(frigateApp.page.getByText("Retry Sample")).toBeVisible();
+    await expect(
+      frigateApp.page.getByText(/Encoding \(retry\)\s*·\s*12%/),
+    ).toBeVisible();
+  });
+});

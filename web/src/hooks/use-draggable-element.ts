@@ -1,17 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useDateLocale } from "./use-date-locale";
+import { useTimeFormat } from "./use-date-utils";
 import { useTranslation } from "react-i18next";
 import useUserInteraction from "./use-user-interaction";
 
+const DRAG_STATE_COMMIT_MS = 100;
+
 type DraggableElementProps = {
-  contentRef: React.RefObject<HTMLElement>;
-  timelineRef: React.RefObject<HTMLDivElement>;
-  segmentsRef: React.RefObject<HTMLDivElement>;
-  draggableElementRef: React.RefObject<HTMLDivElement>;
+  contentRef: React.RefObject<HTMLElement | null>;
+  timelineRef: React.RefObject<HTMLDivElement | null>;
+  segmentsRef: React.RefObject<HTMLDivElement | null>;
+  draggableElementRef: React.RefObject<HTMLDivElement | null>;
   segmentDuration: number;
   showDraggableElement: boolean;
   draggableElementTime?: number;
@@ -60,6 +63,8 @@ function useDraggableElement({
 
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
+  const lastDragTimeCommitRef = useRef(0);
+  const pendingDragTimeRef = useRef<number | null>(null);
   const [elementScrollIntoView, setElementScrollIntoView] = useState(true);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
   const [fullTimelineHeight, setFullTimelineHeight] = useState<number>();
@@ -125,6 +130,7 @@ function useDraggableElement({
       }
       e.stopPropagation();
       setIsDragging(true);
+      pendingDragTimeRef.current = null;
 
       let clientY;
       if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
@@ -153,9 +159,14 @@ function useDraggableElement({
       if (isDragging) {
         setIsDragging(false);
         setInitialClickAdjustment(0);
+
+        if (pendingDragTimeRef.current !== null && setDraggableElementTime) {
+          setDraggableElementTime(pendingDragTimeRef.current);
+          pendingDragTimeRef.current = null;
+        }
       }
     },
-    [isDragging, setIsDragging],
+    [isDragging, setIsDragging, setDraggableElementTime],
   );
 
   const timestampToPixels = useCallback(
@@ -168,7 +179,7 @@ function useDraggableElement({
   const { t } = useTranslation(["common"]);
   const locale = useDateLocale();
 
-  const timeFormat = config?.ui.time_format === "24hour" ? "24hour" : "12hour";
+  const timeFormat = useTimeFormat(config);
   const format = useMemo(() => {
     const formatKey = `time.${
       segmentDuration < 60 && !dense
@@ -345,9 +356,21 @@ function useDraggableElement({
         );
 
         if (setDraggableElementTime) {
-          setDraggableElementTime(
-            targetSegmentTime + segmentDuration * (offset / segmentHeight),
-          );
+          const newTime =
+            targetSegmentTime + segmentDuration * (offset / segmentHeight);
+          const now = performance.now();
+
+          // don't commit on every animation frame, only commit it at a
+          // set interval to avoid React's nested update limit
+          if (now - lastDragTimeCommitRef.current >= DRAG_STATE_COMMIT_MS) {
+            lastDragTimeCommitRef.current = now;
+            pendingDragTimeRef.current = null;
+            setDraggableElementTime(newTime);
+          } else {
+            // Hold the newest value; handleMouseUp flushes it so the
+            // release still lands exactly where the handle was dropped.
+            pendingDragTimeRef.current = newTime;
+          }
         }
 
         if (draggingAtTopEdge || draggingAtBottomEdge) {

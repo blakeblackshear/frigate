@@ -1,5 +1,6 @@
 """Camera apis."""
 
+import asyncio
 import json
 import logging
 import re
@@ -11,20 +12,38 @@ import httpx
 import requests
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import JSONResponse
+from filelock import FileLock, Timeout
 from onvif import ONVIFCamera, ONVIFError
+from ruamel.yaml import YAML
 from zeep.exceptions import Fault, TransportError
 from zeep.transports import AsyncTransport
 
 from frigate.api.auth import (
+    _get_stream_owner_cameras,
     allow_any_authenticated,
+    get_current_user,
     require_go2rtc_stream_access,
     require_role,
 )
+from frigate.api.config_util import swap_runtime_config
+from frigate.api.defs.request.app_body import CameraSetBody
 from frigate.api.defs.tags import Tags
-from frigate.config.config import FrigateConfig
-from frigate.util.builtin import clean_camera_user_pass
+from frigate.config import FrigateConfig
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateTopic,
+)
+from frigate.config.env import substitute_frigate_vars
+from frigate.models import User
+from frigate.util.builtin import clean_camera_user_pass, get_record_segment_time
+from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
+from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
-from frigate.util.services import ffprobe_stream, is_restricted_go2rtc_source
+from frigate.util.services import (
+    analyze_record_keyframes,
+    ffprobe_stream,
+    is_restricted_go2rtc_source,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +74,8 @@ def _is_valid_host(host: str) -> bool:
 
 
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
-def go2rtc_streams():
-    r = requests.get("http://127.0.0.1:1984/api/streams")
+async def go2rtc_streams(request: Request):
+    r = await asyncio.to_thread(requests.get, "http://127.0.0.1:1984/api/streams")
     if not r.ok:
         logger.error("Failed to fetch streams from go2rtc")
         return JSONResponse(
@@ -64,6 +83,24 @@ def go2rtc_streams():
             status_code=500,
         )
     stream_data = r.json()
+
+    # Roles with an explicit camera list see only streams owned by an allowed
+    # camera. Admin and full-access roles (no list / empty list) see all streams.
+    current_user = await get_current_user(request)
+    if not isinstance(current_user, JSONResponse):
+        role = current_user["role"]
+        roles_dict = request.app.frigate_config.auth.roles
+        if role != "admin" and roles_dict.get(role):
+            all_camera_names = set(request.app.frigate_config.cameras.keys())
+            allowed_cameras = set(
+                User.get_allowed_cameras(role, roles_dict, all_camera_names)
+            )
+            stream_data = {
+                name: data
+                for name, data in stream_data.items()
+                if _get_stream_owner_cameras(request, name) & allowed_cameras
+            }
+
     for data in stream_data.values():
         for producer in data.get("producers") or []:
             producer["url"] = clean_camera_user_pass(producer.get("url", ""))
@@ -127,7 +164,25 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
     try:
         params = {"name": stream_name}
         if src:
-            params["src"] = src
+            try:
+                resolved_src = substitute_frigate_vars(src)
+            except KeyError:
+                resolved_src = src
+
+            if is_restricted_go2rtc_source(resolved_src):
+                logger.warning(
+                    "Rejected go2rtc stream '%s' with restricted source type (echo/expr/exec)",
+                    stream_name,
+                )
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": "Restricted stream source type",
+                    },
+                    status_code=400,
+                )
+
+            params["src"] = resolved_src
 
         r = requests.put(
             "http://127.0.0.1:1984/api/streams",
@@ -325,6 +380,48 @@ def ffprobe(request: Request, paths: str = "", detailed: bool = False):
     return JSONResponse(content=output)
 
 
+@router.get("/keyframe_analysis", dependencies=[Depends(require_role(["admin"]))])
+async def keyframe_analysis(request: Request, camera: str = ""):
+    """Probe a camera's record stream and classify its keyframe spacing.
+
+    Detects smart/+ codecs and long/variable GOPs that degrade recording.
+    """
+    config: FrigateConfig = request.app.frigate_config
+
+    if camera not in config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": f"{camera} is not a valid camera."},
+            status_code=404,
+        )
+
+    camera_config = config.cameras[camera]
+
+    if not camera_config.enabled:
+        return JSONResponse(
+            content={"success": False, "message": f"{camera} is not enabled."},
+            status_code=404,
+        )
+
+    # keyframe spacing only matters when this camera is recording
+    if not camera_config.record.enabled:
+        return JSONResponse(content={"severity": "record_disabled"})
+
+    # recording guarantees an input carries the record role; its index matches
+    # the "Stream N" numbering the ffprobe endpoint surfaces (same input order)
+    record_index, record_input = next(
+        (idx, i)
+        for idx, i in enumerate(camera_config.ffmpeg.inputs)
+        if "record" in i.roles
+    )
+
+    segment_time = get_record_segment_time(camera_config)
+    result = await analyze_record_keyframes(
+        config.ffmpeg, record_input.path, segment_time
+    )
+    result["stream_index"] = record_index
+    return JSONResponse(content=result)
+
+
 @router.get("/ffprobe/snapshot", dependencies=[Depends(require_role(["admin"]))])
 def ffprobe_snapshot(request: Request, url: str = "", timeout: int = 10):
     """Get a snapshot from a stream URL using ffmpeg."""
@@ -492,6 +589,68 @@ def _extract_fps(r_frame_rate: str) -> float | None:
         return None
 
 
+def _build_digest_transport(username: str, password: str) -> AsyncTransport:
+    """Build a zeep transport backed by an httpx client using HTTP digest auth."""
+    auth = httpx.DigestAuth(username, password)
+    client = httpx.AsyncClient(auth=auth, timeout=10.0)
+    return AsyncTransport(client=client)
+
+
+async def _connect_onvif_camera(
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    wsdl_base: str | None,
+    auth_type: str,
+) -> ONVIFCamera:
+    """Connect to an ONVIF device, trying both WS-Security password encodings.
+
+    Cameras disagree on whether the WS-Security UsernameToken should carry a
+    hashed PasswordDigest or a plaintext PasswordText. The wizard can't know
+    which a given camera expects, so we try PasswordDigest first (the common
+    case) and fall back to PasswordText when the device rejects the token. This
+    is independent of auth_type, which controls HTTP transport-level auth.
+    """
+    first_error: Fault | None = None
+
+    # encrypt=True -> PasswordDigest, encrypt=False -> PasswordText
+    for encrypt in (True, False):
+        onvif_camera = ONVIFCamera(
+            host,
+            port,
+            username or "",
+            password or "",
+            wsdl_dir=wsdl_base,
+            encrypt=encrypt,
+        )
+
+        try:
+            await onvif_camera.update_xaddrs()
+        except Fault as e:
+            # A SOAP fault here is how a camera signals the wrong password
+            # encoding, so retry with the other encoding before giving up.
+            logger.debug(
+                "ONVIF connect with %s rejected, trying alternate encoding",
+                "PasswordDigest" if encrypt else "PasswordText",
+            )
+            if first_error is None:
+                first_error = e
+            continue
+
+        if auth_type == "digest" and username and password:
+            transport = _build_digest_transport(username, password)
+            for service in ("devicemgmt", "media", "ptz"):
+                if hasattr(onvif_camera, service):
+                    getattr(onvif_camera, service).zeep_client.transport = transport
+            logger.debug("Configured digest authentication")
+
+        return onvif_camera
+
+    # Both encodings failed authentication; surface the original fault.
+    raise first_error
+
+
 @router.get(
     "/onvif/probe",
     dependencies=[Depends(require_role(["admin"]))],
@@ -568,33 +727,9 @@ async def onvif_probe(
         except Exception:
             wsdl_base = None
 
-        onvif_camera = ONVIFCamera(
-            host, port, username or "", password or "", wsdl_dir=wsdl_base
+        onvif_camera = await _connect_onvif_camera(
+            host, port, username, password, wsdl_base, auth_type
         )
-
-        # Configure digest authentication if requested
-        if auth_type == "digest" and username and password:
-            # Create httpx client with digest auth
-            auth = httpx.DigestAuth(username, password)
-            client = httpx.AsyncClient(auth=auth, timeout=10.0)
-
-            # Replace the transport in the zeep client
-            transport = AsyncTransport(client=client)
-
-            # Update the xaddr before setting transport
-            await onvif_camera.update_xaddrs()
-
-            # Replace transport in all services
-            if hasattr(onvif_camera, "devicemgmt"):
-                onvif_camera.devicemgmt.zeep_client.transport = transport
-            if hasattr(onvif_camera, "media"):
-                onvif_camera.media.zeep_client.transport = transport
-            if hasattr(onvif_camera, "ptz"):
-                onvif_camera.ptz.zeep_client.transport = transport
-
-            logger.debug("Configured digest authentication")
-        else:
-            await onvif_camera.update_xaddrs()
 
         # Get device information
         device_info = {
@@ -607,10 +742,9 @@ async def onvif_probe(
 
             # Update transport for device service if digest auth
             if auth_type == "digest" and username and password:
-                auth = httpx.DigestAuth(username, password)
-                client = httpx.AsyncClient(auth=auth, timeout=10.0)
-                transport = AsyncTransport(client=client)
-                device_service.zeep_client.transport = transport
+                device_service.zeep_client.transport = _build_digest_transport(
+                    username, password
+                )
 
             device_info_resp = await device_service.GetDeviceInformation()
             manufacturer = getattr(device_info_resp, "Manufacturer", None) or (
@@ -648,10 +782,9 @@ async def onvif_probe(
 
             # Update transport for media service if digest auth
             if auth_type == "digest" and username and password:
-                auth = httpx.DigestAuth(username, password)
-                client = httpx.AsyncClient(auth=auth, timeout=10.0)
-                transport = AsyncTransport(client=client)
-                media_service.zeep_client.transport = transport
+                media_service.zeep_client.transport = _build_digest_transport(
+                    username, password
+                )
 
             profiles = await media_service.GetProfiles()
             profiles_count = len(profiles) if profiles else 0
@@ -683,10 +816,9 @@ async def onvif_probe(
 
             # Update transport for PTZ service if digest auth
             if auth_type == "digest" and username and password:
-                auth = httpx.DigestAuth(username, password)
-                client = httpx.AsyncClient(auth=auth, timeout=10.0)
-                transport = AsyncTransport(client=client)
-                ptz_service.zeep_client.transport = transport
+                ptz_service.zeep_client.transport = _build_digest_transport(
+                    username, password
+                )
 
             # Check if PTZ service is available
             try:
@@ -839,10 +971,9 @@ async def onvif_probe(
 
             # Update transport for media service if digest auth
             if auth_type == "digest" and username and password:
-                auth = httpx.DigestAuth(username, password)
-                client = httpx.AsyncClient(auth=auth, timeout=10.0)
-                transport = AsyncTransport(client=client)
-                media_service.zeep_client.transport = transport
+                media_service.zeep_client.transport = _build_digest_transport(
+                    username, password
+                )
 
             if profiles_count and media_service:
                 for p in profiles or []:
@@ -965,7 +1096,6 @@ async def onvif_probe(
                         probe = ffprobe_stream(
                             request.app.frigate_config.ffmpeg, test_uri, detailed=False
                         )
-                        print(probe)
                         ok = probe is not None and getattr(probe, "returncode", 1) == 0
                         tested_candidates.append(
                             {
@@ -1021,3 +1151,280 @@ async def onvif_probe(
                     await onvif_camera.close()
             except Exception as e:
                 logger.debug(f"Error closing ONVIF camera session: {e}")
+
+
+@router.delete(
+    "/cameras/{camera_name}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+async def delete_camera(
+    request: Request,
+    camera_name: str,
+    delete_exports: bool = Query(default=False),
+):
+    """Delete a camera and all its associated data.
+
+    Removes the camera from config, stops processes, and cleans up
+    all database entries and media files.
+
+    Args:
+        camera_name: Name of the camera to delete
+        delete_exports: Whether to also delete exports for this camera
+    """
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera {camera_name} not found",
+            },
+            status_code=404,
+        )
+
+    old_camera_config = frigate_config.cameras[camera_name]
+    config_file = find_config_file()
+    lock = FileLock(f"{config_file}.lock", timeout=5)
+
+    try:
+        with lock:
+            with open(config_file) as f:
+                old_raw_config = f.read()
+
+            try:
+                yaml = YAML()
+                yaml.indent(mapping=2, sequence=4, offset=2)
+
+                with open(config_file) as f:
+                    data = yaml.load(f)
+
+                # Remove camera from config
+                if "cameras" in data and camera_name in data["cameras"]:
+                    del data["cameras"][camera_name]
+
+                # Remove camera from auth roles
+                auth = data.get("auth", {})
+                if auth and "roles" in auth:
+                    empty_roles = []
+                    for role_name, cameras_list in auth["roles"].items():
+                        if (
+                            isinstance(cameras_list, list)
+                            and camera_name in cameras_list
+                        ):
+                            cameras_list.remove(camera_name)
+                            # Custom roles can't be empty; mark for removal
+                            if not cameras_list and role_name not in (
+                                "admin",
+                                "viewer",
+                            ):
+                                empty_roles.append(role_name)
+                    for role_name in empty_roles:
+                        del auth["roles"][role_name]
+
+                with open(config_file, "w") as f:
+                    yaml.dump(data, f)
+
+                with open(config_file) as f:
+                    new_raw_config = f.read()
+
+                try:
+                    config = FrigateConfig.parse(new_raw_config)
+                except Exception:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                    logger.exception(
+                        "Config error after removing camera %s",
+                        camera_name,
+                    )
+                    return JSONResponse(
+                        content={
+                            "success": False,
+                            "message": "Error parsing config after camera removal",
+                        },
+                        status_code=400,
+                    )
+            except Exception as e:
+                logger.error(
+                    "Error updating config to remove camera %s: %s", camera_name, e
+                )
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": "Error updating config",
+                    },
+                    status_code=500,
+                )
+
+            # rebind every collaborator to the new config and re-layer runtime
+            # toggles for the surviving cameras, same as /api/config/set
+            swap_runtime_config(request.app, config)
+
+            # drop the deleted camera's persisted overrides so a camera later
+            # added under the same name doesn't inherit them
+            if request.app.dispatcher is not None:
+                request.app.dispatcher.clear_runtime_state_for_camera(camera_name)
+
+            # Publish removal to stop ffmpeg processes and clean up runtime state
+            request.app.config_publisher.publish_update(
+                CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, camera_name),
+                old_camera_config,
+            )
+
+    except Timeout:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Another process is currently updating the config",
+            },
+            status_code=409,
+        )
+
+    # Clean up database entries
+    counts, export_paths = await asyncio.to_thread(
+        cleanup_camera_db, camera_name, delete_exports
+    )
+
+    # Clean up media files in background thread
+    await asyncio.to_thread(
+        cleanup_camera_files, camera_name, export_paths if delete_exports else None
+    )
+
+    # Best-effort go2rtc stream removal
+    try:
+        await asyncio.to_thread(
+            requests.delete,
+            "http://127.0.0.1:1984/api/streams",
+            params={"src": camera_name},
+            timeout=5,
+        )
+    except Exception:
+        logger.debug("Failed to remove go2rtc stream for %s", camera_name)
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": f"Camera {camera_name} has been deleted",
+            "cleanup": counts,
+        },
+        status_code=200,
+    )
+
+
+_SUB_COMMAND_FEATURES = {"motion_mask", "object_mask", "zone"}
+
+
+@router.put(
+    "/camera/{camera_name}/set/{feature}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+@router.put(
+    "/camera/{camera_name}/set/{feature}/{sub_command}",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def camera_set(
+    request: Request,
+    camera_name: str,
+    feature: str,
+    body: CameraSetBody,
+    sub_command: str | None = None,
+):
+    """Set a camera feature state. Use camera_name='*' to target all cameras.
+
+    The value to set is sent in the request body as `{"value": "<value>"}`.
+
+    | Feature | Accepted values |
+    | --- | --- |
+    | `enabled` | `ON`, `OFF` |
+    | `detect` | `ON`, `OFF` |
+    | `motion` | `ON`, `OFF` |
+    | `recordings` | `ON`, `OFF` |
+    | `snapshots` | `ON`, `OFF` |
+    | `audio` | `ON`, `OFF` |
+    | `audio_transcription` | `ON`, `OFF` |
+    | `notifications` | `ON`, `OFF` |
+    | `review_alerts` | `ON`, `OFF` |
+    | `review_detections` | `ON`, `OFF` |
+    | `object_descriptions` | `ON`, `OFF` |
+    | `review_descriptions` | `ON`, `OFF` |
+    | `improve_contrast` | `ON`, `OFF` |
+    | `ptz_autotracker` | `ON`, `OFF` |
+    | `birdseye` | `ON`, `OFF` |
+    | `birdseye_mode` | `CONTINUOUS`, `MOTION`, `OBJECTS` |
+    | `motion_contour_area` | integer |
+    | `motion_threshold` | integer |
+    | `motion_mask` | `ON`, `OFF` |
+    | `object_mask` | `ON`, `OFF` |
+    | `zone` | `ON`, `OFF` |
+    | `profile` | a profile name, or `none` to deactivate |
+
+    `motion_mask`, `object_mask`, and `zone` require the `sub_command` path
+    parameter to be set to the name of the mask or zone. All other features
+    reject a sub-command.
+
+    `profile` applies globally rather than per camera, so it requires
+    `camera_name` to be `*`.
+
+    These features map to the equivalent MQTT topics, which document the
+    behavior of each value in more detail.
+    """
+    dispatcher = request.app.dispatcher
+    frigate_config: FrigateConfig = request.app.frigate_config
+
+    if feature == "profile":
+        if camera_name != "*":
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Profile feature requires camera_name='*'",
+                },
+                status_code=400,
+            )
+        dispatcher._receive("profile/set", body.value)
+        return JSONResponse(content={"success": True})
+
+    if feature not in dispatcher._camera_settings_handlers:
+        return JSONResponse(
+            content={"success": False, "message": f"Unknown feature: {feature}"},
+            status_code=400,
+        )
+
+    if sub_command and feature not in _SUB_COMMAND_FEATURES:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Feature '{feature}' does not support sub-commands",
+            },
+            status_code=400,
+        )
+
+    if not sub_command and feature in _SUB_COMMAND_FEATURES:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Feature '{feature}' requires a sub-command (e.g. mask or zone name)",
+            },
+            status_code=400,
+        )
+
+    if camera_name == "*":
+        cameras = list(frigate_config.cameras.keys())
+    elif camera_name not in frigate_config.cameras:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": f"Camera '{camera_name}' not found",
+            },
+            status_code=404,
+        )
+    else:
+        cameras = [camera_name]
+
+    for cam in cameras:
+        topic = (
+            f"{cam}/{feature}/{sub_command}/set"
+            if sub_command
+            else f"{cam}/{feature}/set"
+        )
+        dispatcher._receive(topic, body.value)
+
+    return JSONResponse(content={"success": True})

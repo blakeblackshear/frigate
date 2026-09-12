@@ -1,11 +1,12 @@
-import { useState, ReactNode } from "react";
+import { useState, ReactNode, useCallback } from "react";
 import { SearchResult } from "@/types/search";
+import { REVIEW_PADDING } from "@/types/review";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { baseUrl } from "@/api/baseUrl";
 import { toast } from "sonner";
 import axios from "axios";
 import { FiMoreVertical } from "react-icons/fi";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -32,6 +33,7 @@ import useSWR from "swr";
 import { Trans, useTranslation } from "react-i18next";
 import BlurredIconButton from "../button/BlurredIconButton";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useNavigate } from "react-router-dom";
 
 type SearchResultActionsProps = {
   searchResult: SearchResult;
@@ -52,8 +54,10 @@ export default function SearchResultActions({
   isContextMenu = false,
   children,
 }: SearchResultActionsProps) {
-  const { t } = useTranslation(["views/explore"]);
+  const { t } = useTranslation(["views/explore", "views/replay", "common"]);
   const isAdmin = useIsAdmin();
+  const navigate = useNavigate();
+  const [isStarting, setIsStarting] = useState(false);
 
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -84,6 +88,66 @@ export default function SearchResultActions({
       });
   };
 
+  const handleDebugReplay = useCallback(
+    (event: SearchResult) => {
+      setIsStarting(true);
+
+      axios
+        .post("debug_replay/start", {
+          camera: event.camera,
+          start_time: (event.start_time ?? 0) - REVIEW_PADDING,
+          end_time: (event.end_time ?? Date.now() / 1000) + REVIEW_PADDING,
+        })
+        .then((response) => {
+          if (response.status === 202 || response.status === 200) {
+            navigate("/replay");
+          }
+        })
+        .catch((error) => {
+          const errorMessage =
+            error.response?.data?.message ||
+            error.response?.data?.detail ||
+            "Unknown error";
+
+          if (error.response?.status === 409) {
+            toast.error(
+              t("dialog.toast.alreadyActive", { ns: "views/replay" }),
+              {
+                position: "top-center",
+                closeButton: true,
+                dismissible: false,
+                action: (
+                  <a
+                    href={`${baseUrl}replay`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Button>
+                      {t("dialog.toast.goToReplay", { ns: "views/replay" })}
+                    </Button>
+                  </a>
+                ),
+              },
+            );
+          } else {
+            toast.error(
+              t("dialog.toast.error", {
+                ns: "views/replay",
+                error: errorMessage,
+              }),
+              {
+                position: "top-center",
+              },
+            );
+          }
+        })
+        .finally(() => {
+          setIsStarting(false);
+        });
+    },
+    [navigate, t],
+  );
+
   const MenuItem = isContextMenu ? ContextMenuItem : DropdownMenuItem;
 
   const menuItems = (
@@ -103,25 +167,24 @@ export default function SearchResultActions({
         <MenuItem aria-label={t("itemMenu.downloadSnapshot.aria")}>
           <a
             className="flex items-center"
-            href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg`}
+            href={`${baseUrl}api/events/${searchResult.id}/snapshot.jpg?crop=0&bbox=1&timestamp=0`}
             download={`${searchResult.camera}_${searchResult.label}.jpg`}
           >
             <span>{t("itemMenu.downloadSnapshot.label")}</span>
           </a>
         </MenuItem>
       )}
-      {searchResult.has_snapshot &&
-        config?.cameras[searchResult.camera].snapshots.clean_copy && (
-          <MenuItem aria-label={t("itemMenu.downloadCleanSnapshot.aria")}>
-            <a
-              className="flex items-center"
-              href={`${baseUrl}api/events/${searchResult.id}/snapshot-clean.webp`}
-              download={`${searchResult.camera}_${searchResult.label}-clean.webp`}
-            >
-              <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
-            </a>
-          </MenuItem>
-        )}
+      {searchResult.has_snapshot && (
+        <MenuItem aria-label={t("itemMenu.downloadCleanSnapshot.aria")}>
+          <a
+            className="flex items-center"
+            href={`${baseUrl}api/events/${searchResult.id}/snapshot-clean.webp`}
+            download={`${searchResult.camera}_${searchResult.label}-clean.webp`}
+          >
+            <span>{t("itemMenu.downloadCleanSnapshot.label")}</span>
+          </a>
+        </MenuItem>
+      )}
       {searchResult.data.type == "object" && (
         <MenuItem
           aria-label={t("itemMenu.viewTrackingDetails.aria")}
@@ -149,6 +212,20 @@ export default function SearchResultActions({
             <span>{t("itemMenu.addTrigger.label")}</span>
           </MenuItem>
         )}
+      {isAdmin && searchResult.has_clip && (
+        <MenuItem
+          className="cursor-pointer"
+          aria-label={t("itemMenu.debugReplay.aria")}
+          disabled={isStarting}
+          onSelect={() => {
+            handleDebugReplay(searchResult);
+          }}
+        >
+          {isStarting
+            ? t("dialog.starting", { ns: "views/replay" })
+            : t("itemMenu.debugReplay.label")}
+        </MenuItem>
+      )}
       {isAdmin && (
         <MenuItem
           aria-label={t("itemMenu.deleteTrackedObject.label")}
@@ -189,13 +266,13 @@ export default function SearchResultActions({
         </AlertDialogContent>
       </AlertDialog>
       {isContextMenu ? (
-        <ContextMenu modal={false}>
+        <ContextMenu>
           <ContextMenuTrigger>{children}</ContextMenuTrigger>
           <ContextMenuContent>{menuItems}</ContextMenuContent>
         </ContextMenu>
       ) : (
         <>
-          <DropdownMenu modal={false}>
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <BlurredIconButton aria-label={t("itemMenu.more.aria")}>
                 <FiMoreVertical className="size-5" />

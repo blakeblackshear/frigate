@@ -113,7 +113,8 @@
     "attributes": "Attributs de classification",
     "title": {
       "label": "Titre"
-    }
+    },
+    "scoreInfo": "Information score"
   },
   "type": {
     "details": "détails",
@@ -222,12 +223,22 @@
     "downloadCleanSnapshot": {
       "label": "Télécharger l'instantané vierge",
       "aria": "Télécharger l'instantané vierge"
+    },
+    "debugReplay": {
+      "label": "Relecture de débogage",
+      "aria": "Visualiser cet objet suivi dans la vue de la session de relecture de déboggage"
+    },
+    "more": {
+      "aria": "Plus"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmer la suppression",
       "desc": "La suppression de cet objet suivi supprime l'instantané, les embeddings enregistrés et les entrées du cycle de vie de l'objet associé. Les images enregistrées de cet objet suivi dans la vue Chronologie <em>NE</em> seront <em>PAS</em> supprimées.<br /><br />Êtes-vous sûr de vouloir continuer ?"
+    },
+    "toast": {
+      "error": "Une erreur est survenue lors de la suppression de cet objet suivi : {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Aucun objet suivi trouvé",
@@ -278,7 +289,10 @@
         "zones": "Zones",
         "ratio": "Ratio",
         "area": "Surface",
-        "score": "Score"
+        "score": "Score",
+        "computedScore": "Score calculé",
+        "topScore": "Meilleur score",
+        "toggleAdvancedScores": "Afficher/masquer les scores avancés"
       }
     },
     "annotationSettings": {

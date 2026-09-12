@@ -219,6 +219,25 @@ class TestHttpApp(BaseTestHttp):
             assert len(events) == 1
             assert events[0]["id"] == event_id
 
+    def test_similarity_search_hides_unauthorized_anchor_event(self):
+        mock_embeddings = Mock()
+        self.app.frigate_config.semantic_search.enabled = True
+        self.app.embeddings = mock_embeddings
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event("hidden.anchor", camera="back_door")
+            response = client.get(
+                "/events/search",
+                params={
+                    "search_type": "similarity",
+                    "event_id": "hidden.anchor",
+                },
+            )
+
+        assert response.status_code == 404
+        assert response.json()["message"] == "Event not found"
+        mock_embeddings.search_thumbnail.assert_not_called()
+
     def test_get_good_event(self):
         id = "123456.random"
 

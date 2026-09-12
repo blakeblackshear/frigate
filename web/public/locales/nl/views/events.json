@@ -9,7 +9,9 @@
   "recordings": {
     "documentTitle": "Opnamen - Frigate"
   },
-  "timeline": "Tijdlijn",
+  "timeline": {
+    "label": "Tijdslijn"
+  },
   "empty": {
     "alert": "Er zijn geen meldingen om te beoordelen",
     "detection": "Er zijn geen detecties om te beoordelen",

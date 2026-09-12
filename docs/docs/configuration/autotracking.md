@@ -3,6 +3,11 @@ id: autotracking
 title: Camera Autotracking
 ---
 
+import ConfigTabs from "@site/src/components/ConfigTabs";
+import TabItem from "@theme/TabItem";
+import NavPath from "@site/src/components/NavPath";
+import FaqItem from "@site/src/components/FaqItem";
+
 An ONVIF-capable, PTZ (pan-tilt-zoom) camera that supports relative movement within the field of view (FOV) can be configured to automatically track moving objects and keep them in the center of the frame.
 
 ![Autotracking example with zooming](/img/frigate-autotracking-example.gif)
@@ -29,11 +34,43 @@ A growing list of cameras and brands that have been reported by users to work wi
 
 First, set up a PTZ preset in your camera's firmware and give it a name. If you're unsure how to do this, consult the documentation for your camera manufacturer's firmware. Some tutorials for common brands: [Amcrest](https://www.youtube.com/watch?v=lJlE9-krmrM), [Reolink](https://www.youtube.com/watch?v=VAnxHUY5i5w), [Dahua](https://www.youtube.com/watch?v=7sNbc5U-k54).
 
-Edit your Frigate configuration file and enter the ONVIF parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name you configured in your camera's firmware to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
+Configure the ONVIF connection and autotracking parameters for your camera. Specify the object types to track, a required zone the object must enter to begin autotracking, and the camera preset name you configured in your camera's firmware to return to when tracking has ended. Optionally, specify a delay in seconds before Frigate returns the camera to the preset.
 
 An [ONVIF connection](cameras.md) is required for autotracking to function. Also, a [motion mask](masks.md) over your camera's timestamp and any overlay text is recommended to ensure they are completely excluded from scene change calculations when the camera is moving.
 
 Note that `autotracking` is disabled by default but can be enabled in the configuration or by MQTT.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Camera configuration > ONVIF" /> for the desired camera.
+
+**ONVIF Connection**
+
+| Field                  | Description                                                                                                                                                 |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ONVIF host**         | Host of the camera being connected to. HTTP is assumed by default; prefix with `https://` for HTTPS.                                                        |
+| **ONVIF port**         | ONVIF port for device (default: 8000)                                                                                                                       |
+| **ONVIF username**     | Username for login. Some devices require admin to access ONVIF.                                                                                             |
+| **ONVIF password**     | Password for login                                                                                                                                          |
+| **Disable TLS verify** | Skip TLS verification and disable digest auth for ONVIF (default: false)                                                                                    |
+| **ONVIF profile**      | ONVIF media profile to use for PTZ control, matched by token or name. If not set, the first profile with valid PTZ configuration is selected automatically. |
+
+**Autotracking**
+
+| Field                   | Description                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Enable Autotracking** | Enable or disable object autotracking (default: false)                                                                               |
+| **Calibrate on start**  | Calibrate the camera on startup by measuring PTZ motor speed (default: false)                                                        |
+| **Zoom mode**           | Zoom mode during autotracking: `disabled`, `absolute`, or `relative` (default: disabled)                                             |
+| **Zoom Factor**         | Controls zoom behavior on tracked objects, between 0.1 and 0.75. Lower keeps more scene visible; higher zooms in more (default: 0.3) |
+| **Tracked objects**     | List of object types to track (default: person)                                                                                      |
+| **Required Zones**      | Zones an object must enter to begin autotracking                                                                                     |
+| **Return Preset**       | Name of ONVIF preset in camera firmware to return to when tracking ends (default: home)                                              |
+| **Return timeout**      | Seconds to delay before returning to preset (default: 10)                                                                            |
+
+</TabItem>
+<TabItem value="yaml">
 
 ```yaml
 cameras:
@@ -52,6 +89,10 @@ cameras:
       password: admin
       # Optional: Skip TLS verification from the ONVIF server (default: shown below)
       tls_insecure: False
+      # Optional: ONVIF media profile to use for PTZ control, matched by token or name. (default: shown below)
+      # If not set, the first profile with valid PTZ configuration is selected automatically.
+      # Use this when your camera has multiple ONVIF profiles and you need to select a specific one.
+      profile: None
       # Optional: PTZ camera object autotracking. Keeps a moving object in
       # the center of the frame by automatically moving the PTZ camera.
       autotracking:
@@ -88,13 +129,16 @@ cameras:
         movement_weights: []
 ```
 
+</TabItem>
+</ConfigTabs>
+
 ## Calibration
 
 PTZ motors operate at different speeds. Performing a calibration will direct Frigate to measure this speed over a variety of movements and use those measurements to better predict the amount of movement necessary to keep autotracked objects in the center of the frame.
 
 Calibration is optional, but will greatly assist Frigate in autotracking objects that move across the camera's field of view more quickly.
 
-To begin calibration, set the `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
+To begin calibration, set `calibrate_on_startup` for your camera to `True` and restart Frigate. Frigate will then make a series of small and large movements with your camera. Don't move the PTZ manually while calibration is in progress. Once complete, camera motion will stop and your config file will be automatically updated with a `movement_weights` parameter to be used in movement calculations. You should not modify this parameter manually.
 
 After calibration has ended, your PTZ will be moved to the preset specified by `return_preset`.
 
@@ -118,13 +162,13 @@ Every PTZ camera is different, so autotracking may not perform ideally in every 
 
 The object tracker in Frigate estimates the motion of the PTZ so that tracked objects are preserved when the camera moves. In most cases 5 fps is sufficient, but if you plan to track faster moving objects, you may want to increase this slightly. Higher frame rates (> 10fps) will only slow down Frigate and the motion estimator and may lead to dropped frames, especially if you are using experimental zooming.
 
-A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. You can watch Frigate's debug viewer for your camera to see a thicker colored box around the object currently being autotracked.
+A fast [detector](object_detectors.md) is recommended. CPU detectors will not perform well or won't work at all. You can watch Frigate's [debug viewer](/usage/live#the-single-camera-view) for your camera to see a thicker colored box around the object currently being autotracked.
 
 ![Autotracking Debug View](/img/autotracking-debug.gif)
 
 A full-frame zone in `required_zones` is not recommended, especially if you've calibrated your camera and there are `movement_weights` defined in the configuration file. Frigate will continue to autotrack an object that has entered one of the `required_zones`, even if it moves outside of that zone.
 
-Some users have found it helpful to adjust the zone `inertia` value. See the [configuration reference](index.md).
+Some users have found it helpful to adjust the zone `inertia` value. See the [configuration reference](advanced/reference.md).
 
 ## Zooming
 
@@ -144,30 +188,96 @@ In security and surveillance, it's common to use "spotter" cameras in combinatio
 
 ## Troubleshooting and FAQ
 
-### The autotracker loses track of my object. Why?
+### Camera Compatibility
+
+<FaqItem id="which-ptz-camera-should-i-use-for-autotracking" question="Which PTZ camera should I use for autotracking?">
+
+See the community-maintained list of [ONVIF PTZ camera recommendations](cameras.md#onvif-ptz-camera-recommendations) for cameras and brands reported to work (and not work) with autotracking. This is not an exhaustive list that is frequently updated, so other cameras not listed may also work well. Frigate's autotracking was developed with a Dahua SD1A404XB-GNR (now sold as the EmpireTech PTZ1A4M-4X-S2), and Dahua / EmpireTech PTZs are the most consistently reported as working well.
+
+When comparing models:
+
+- Verify ONVIF support first. See [Checking ONVIF camera support](#checking-onvif-camera-support) above.
+- Favor a camera with a fast PTZ motor. Cameras with slow motors may fail [calibration](#calibration) and will struggle to keep up with objects that move across the field of view quickly.
+
+</FaqItem>
+
+<FaqItem id="does-autotracking-work-with-reolink-ptz-cameras" question="Does autotracking work with Reolink PTZ cameras?">
+
+No. Reolink cameras (including the TrackMix series) lack the ONVIF FOV RelativeMove firmware support that Frigate's autotracker requires, so autotracking will not work with any current Reolink PTZ. Their video streams and basic PTZ controls still work in Frigate. If you want object tracking on a Reolink PTZ, you will need to use the tracking feature built into the camera's firmware, which is proprietary and operates independently of Frigate.
+
+</FaqItem>
+
+<FaqItem id="im-seeing-an-error-in-the-logs-that-my-camera-is-still-in-onvif-moving-status-what-does-this-mean" question={"I'm seeing an error in the logs that my camera \"is still in ONVIF 'MOVING' status.\" What does this mean?"}>
+
+There are two possible known reasons for this (and perhaps others yet unknown): a slow PTZ motor or buggy camera firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config. This may also be the case with other non-Hikvision cameras utilizing Hikvision firmware, such as some Annke models. In rare cases the vendor may provide fixed firmware on request; for example, Annke has supplied firmware that resolves this for the CZ504 (see the [camera recommendations list](cameras.md#onvif-ptz-camera-recommendations)).
+
+</FaqItem>
+
+<FaqItem id="calibration-seems-to-have-completed-but-the-camera-is-not-actually-moving-to-track-my-object-why" question="Calibration seems to have completed, but the camera is not actually moving to track my object. Why?">
+
+Some cameras have firmware that reports that FOV RelativeMove, the ONVIF command that Frigate uses for autotracking, is supported. However, if the camera does not pan or tilt when an object comes into the required zone, your camera's firmware does not actually support FOV RelativeMove. One such camera is the Uniview IPC672LR-AX4DUPK. It actually moves its zoom motor instead of panning and tilting and does not follow the ONVIF standard whatsoever.
+
+</FaqItem>
+
+### Calibration Issues
+
+<FaqItem id="i-tried-calibrating-my-camera-but-the-logs-show-that-it-is-stuck-at-0-and-frigate-is-not-starting-up" question="I tried calibrating my camera, but the logs show that it is stuck at 0% and Frigate is not starting up.">
+
+This is often caused by the same reason as the "MOVING" status error above - the `MoveStatus` ONVIF parameter is not changing due to a bug in your camera's firmware. Also, see the note above: Frigate's web UI and all other cameras will be unresponsive while calibration is in progress. This is expected and normal. But if you don't see log entries every few seconds for calibration progress, your camera is not compatible with autotracking.
+
+</FaqItem>
+
+<FaqItem id="frigate-reports-an-error-saying-that-calibration-has-failed-why" question="Frigate reports an error saying that calibration has failed. Why?">
+
+Calibration measures the amount of time it takes for Frigate to make a series of movements with your PTZ. This error message is recorded in the log if these values are too high for Frigate to support calibrated autotracking. This is often the case when your camera's motor or network connection is too slow or your camera's firmware doesn't report the motor status in a timely manner.
+
+Some things to try:
+
+- If your camera's firmware has a PTZ or motor speed setting, set it to the fastest available speed and calibrate again.
+- Run without calibration: remove the `movement_weights` line from your config, set `calibrate_on_startup` to `False`, and restart.
+
+If calibration consistently fails, this often means your camera's motor is too slow and autotracking will behave unpredictably or won't be able to keep up with moving objects.
+
+</FaqItem>
+
+<FaqItem id="autotracking-is-erratic-or-moves-the-camera-in-the-wrong-direction" question="Autotracking is erratic, moves the camera in the wrong direction, or zooms past my object. Why?">
+
+Frigate uses the `movement_weights` measured during calibration to predict how far the camera needs to move to keep an object centered, so inaccurate values produce movements that don't seem to make sense: overshooting, moving the opposite direction, or zooming in on an object's last known position and losing it entirely. This is almost always a calibration issue.
+
+- Remove the `movement_weights` entry from your config and restart Frigate to run without calibration. If tracking improves, try recalibrating.
+- Recalibrate several times. The `movement_weights` values should be close to each other after each run. If they vary significantly between runs, your camera may not be reporting its motor status reliably, and you may get better results without calibration.
+- If you are using zooming, a high `zoom_factor` can cause the camera to zoom in too far and lose the object. Try a lower value.
+
+Remember to recalibrate whenever you change your `return_preset`, change your camera's detect `fps`, or enable zooming after calibrating with it disabled.
+
+</FaqItem>
+
+### Tracking Behavior
+
+<FaqItem id="the-autotracker-loses-track-of-my-object-why" question="The autotracker loses track of my object. Why?">
 
 There are many reasons this could be the case. If you are using experimental zooming, your `zoom_factor` value might be too high, the object might be traveling too quickly, the scene might be too dark, there are not enough details in the scene (for example, a PTZ looking down on a driveway or other monotone background without a sufficient number of hard edges or corners), or the scene is otherwise less than optimal for Frigate to maintain tracking.
 
 Your camera's shutter speed may also be set too low so that blurring occurs with motion. Check your camera's firmware to see if you can increase the shutter speed.
 
-Watching Frigate's debug view can help to determine a possible cause. The autotracked object will have a thicker colored box around it.
+Watching Frigate's debug view can help to determine a possible cause. The autotracked object will have a thicker colored box around it. If the camera consistently zooms in on the object and then loses it, see [Autotracking is erratic, moves the camera in the wrong direction, or zooms past my object. Why?](#autotracking-is-erratic-or-moves-the-camera-in-the-wrong-direction) above.
 
-### I'm seeing an error in the logs that my camera "is still in ONVIF 'MOVING' status." What does this mean?
+</FaqItem>
 
-There are two possible known reasons for this (and perhaps others yet unknown): a slow PTZ motor or buggy camera firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config. This may also be the case with other non-Hikvision cameras utilizing Hikvision firmware.
-
-### I tried calibrating my camera, but the logs show that it is stuck at 0% and Frigate is not starting up.
-
-This is often caused by the same reason as above - the `MoveStatus` ONVIF parameter is not changing due to a bug in your camera's firmware. Also, see the note above: Frigate's web UI and all other cameras will be unresponsive while calibration is in progress. This is expected and normal. But if you don't see log entries every few seconds for calibration progress, your camera is not compatible with autotracking.
-
-### I'm seeing this error in the logs: "Autotracker: motion estimator couldn't get transformations". What does this mean?
+<FaqItem id="im-seeing-this-error-in-the-logs-autotracker-motion-estimator-couldnt-get-transformations-what-does-this-mean" question={"I'm seeing this error in the logs: \"Autotracker: motion estimator couldn't get transformations\". What does this mean?"}>
 
 To maintain object tracking during PTZ moves, Frigate tracks the motion of your camera based on the details of the frame. If you are seeing this message, it could mean that your `zoom_factor` may be set too high, the scene around your detected object does not have enough details (like hard edges or color variations), or your camera's shutter speed is too slow and motion blur is occurring. Try reducing `zoom_factor`, finding a way to alter the scene around your object, or changing your camera's shutter speed.
 
-### Calibration seems to have completed, but the camera is not actually moving to track my object. Why?
+</FaqItem>
 
-Some cameras have firmware that reports that FOV RelativeMove, the ONVIF command that Frigate uses for autotracking, is supported. However, if the camera does not pan or tilt when an object comes into the required zone, your camera's firmware does not actually support FOV RelativeMove. One such camera is the Uniview IPC672LR-AX4DUPK. It actually moves its zoom motor instead of panning and tilting and does not follow the ONVIF standard whatsoever.
+<FaqItem id="why-does-object-detection-pause-briefly-when-the-camera-moves" question="Why does object detection pause briefly when the camera moves?">
 
-### Frigate reports an error saying that calibration has failed. Why?
+When the PTZ moves, the entire frame changes at once. Frigate's motion detection treats sudden scene-wide changes (like a lightning flash, an infrared mode switch, or a camera move) specially and pauses detection momentarily until the scene stabilizes. This is expected and normal, and detection resumes shortly after the camera stops moving. If detection does not resume once the camera is stationary, use the [debug view](/usage/live#the-single-camera-view) to see what is happening.
 
-Calibration measures the amount of time it takes for Frigate to make a series of movements with your PTZ. This error message is recorded in the log if these values are too high for Frigate to support calibrated autotracking. This is often the case when your camera's motor or network connection is too slow or your camera's firmware doesn't report the motor status in a timely manner. You can try running without calibration (just remove the `movement_weights` line from your config and restart), but if calibration fails, this often means that autotracking will behave unpredictably.
+</FaqItem>
+
+<FaqItem id="can-i-turn-autotracking-on-and-off-automatically" question="Can I turn autotracking on and off automatically?">
+
+Yes. Autotracking can be toggled per camera at runtime over MQTT with the [`frigate/<camera_name>/ptz_autotracker/set`](../integrations/mqtt.md#frigatecamera_nameptz_autotrackerset) topic, and the [Home Assistant integration](../integrations/home-assistant.md) exposes a switch for it. This pairs well with the "spotter" camera automations described in [Usage applications](#usage-applications) above, for example only enabling autotracking at night or when nobody is home.
+
+</FaqItem>

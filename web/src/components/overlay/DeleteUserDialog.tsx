@@ -46,27 +46,21 @@ export default function DeleteUserDialog({
           </p>
         </div>
 
-        <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <div className="flex flex-1 flex-col justify-end">
-            <div className="flex flex-row gap-2 pt-5">
-              <Button
-                className="flex flex-1"
-                aria-label={t("button.cancel", { ns: "common" })}
-                onClick={onCancel}
-                type="button"
-              >
-                {t("button.cancel", { ns: "common" })}
-              </Button>
-              <Button
-                variant="destructive"
-                aria-label={t("button.delete", { ns: "common" })}
-                className="flex flex-1 text-white"
-                onClick={onDelete}
-              >
-                {t("button.delete", { ns: "common" })}
-              </Button>
-            </div>
-          </div>
+        <DialogFooter>
+          <Button
+            aria-label={t("button.cancel", { ns: "common" })}
+            onClick={onCancel}
+            type="button"
+          >
+            {t("button.cancel", { ns: "common" })}
+          </Button>
+          <Button
+            variant="destructive"
+            aria-label={t("button.delete", { ns: "common" })}
+            onClick={onDelete}
+          >
+            {t("button.delete", { ns: "common" })}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

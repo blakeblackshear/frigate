@@ -170,7 +170,8 @@
     "attributes": "Classificatie-kenmerken",
     "title": {
       "label": "Titel"
-    }
+    },
+    "scoreInfo": "Informatie over de score"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -221,6 +222,13 @@
     "downloadCleanSnapshot": {
       "label": "Download schone snapshot",
       "aria": "Download schone snapshot"
+    },
+    "debugReplay": {
+      "label": "Debug-herhaling",
+      "aria": "Bekijk dit gevolgde object in de weergave voor het afspelen van foutopsporing"
+    },
+    "more": {
+      "aria": "Meer"
     }
   },
   "noTrackedObjects": "Geen gevolgde objecten gevonden",
@@ -241,6 +249,9 @@
     "confirmDelete": {
       "title": "Bevestig Verwijderen",
       "desc": "Het verwijderen van dit gevolgde object verwijdert de snapshot, alle opgeslagen embeddings en eventuele bijbehorende trackinggegevens van het object. Opgenomen videobeelden van dit object in de Geschiedenisweergave worden <em>NIET</em> verwijderd.<br /><br />Weet je zeker dat je wilt doorgaan?"
+    },
+    "toast": {
+      "error": "Fout bij het verwijderen van dit bijgehouden object: {{errorMessage}}"
     }
   },
   "fetchingTrackedObjectsFailed": "Fout bij het ophalen van gevolgde objecten: {{errorMessage}}",
@@ -276,7 +287,10 @@
         "zones": "Zones",
         "ratio": "Verhouding",
         "area": "Gebied",
-        "score": "Score"
+        "score": "Score",
+        "computedScore": "Berekende score",
+        "topScore": "Hoogste score",
+        "toggleAdvancedScores": "Geavanceerde scores weergeven"
       }
     },
     "annotationSettings": {

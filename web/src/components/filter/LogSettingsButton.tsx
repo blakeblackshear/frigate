@@ -37,10 +37,10 @@ export function LogSettingsButton({
     </Button>
   );
   const content = (
-    <div className={cn("my-3 space-y-3 py-3 md:mt-0 md:py-0")}>
+    <div className={cn("my-3 space-y-3 px-3 py-3 md:mt-0 md:px-0 md:py-0")}>
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">{t("filter")}</div>
+          <div>{t("filter")}</div>
           <div className="space-y-1 text-xs text-muted-foreground">
             {t("logSettings.filterBySeverity")}
           </div>
@@ -53,7 +53,7 @@ export function LogSettingsButton({
       <DropdownMenuSeparator />
       <div className="space-y-4">
         <div className="space-y-0.5">
-          <div className="text-md">{t("logSettings.loading.title")}</div>
+          <div>{t("logSettings.loading.title")}</div>
           <div className="mt-2.5 flex flex-col gap-2.5">
             <div className="space-y-1 text-xs text-muted-foreground">
               {t("logSettings.loading.desc")}
@@ -77,7 +77,7 @@ export function LogSettingsButton({
     return (
       <Drawer>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden p-3">
+        <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden">
           {content}
         </DrawerContent>
       </Drawer>
@@ -129,7 +129,7 @@ export function GeneralFilterContent({
                 className="mx-2 w-full cursor-pointer text-primary smart-capitalize"
                 htmlFor={item}
               >
-                {item.replaceAll("_", " ")}
+                {t(`logger.logLevel.${item}`, { ns: "views/settings" })}
               </Label>
               <Switch
                 key={item}

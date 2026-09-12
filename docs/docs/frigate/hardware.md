@@ -55,7 +55,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
-  - [Supports many model architectures](../../configuration/object_detectors#configuration)
+  - [Supports many model architectures](../../configuration/object_detectors#configuration-hailo)
   - Runs best with tiny or small size models
 
 - [Google Coral EdgeTPU](#google-coral-tpu): The Google Coral EdgeTPU is available in USB and m.2 format allowing for a wide range of compatibility with devices.
@@ -68,26 +68,26 @@ Frigate supports multiple different detectors that work on different types of ha
 **AMD**
 
 - [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
-  - [Supports limited model architectures](../../configuration/object_detectors#rocm-supported-models)
+  - [Supports limited model architectures](../../configuration/object_detectors#amdrocm-gpu-detector)
   - Runs best on discrete AMD GPUs
 
 **Apple Silicon**
 
 - [Apple Silicon](#apple-silicon): Apple Silicon is usable on all M1 and newer Apple Silicon devices to provide efficient and fast object detection
-  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#apple-silicon-supported-models)
+  - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#apple-silicon-detector)
   - Runs well with any size models including large
   - Runs via ZMQ proxy which adds some latency, only recommended for local connection
 
 **Intel**
 
 - [OpenVino](#openvino---intel): OpenVino can run on Intel Arc GPUs, Intel integrated GPUs, and Intel NPUs to provide efficient object detection.
-  - [Supports majority of model architectures](../../configuration/object_detectors#openvino-supported-models)
+  - [Supports majority of model architectures](../../configuration/object_detectors#openvino-detector)
   - Runs best with tiny, small, or medium models
 
 **Nvidia**
 
 - [Nvidia GPU](#nvidia-gpus): Nvidia GPUs can provide efficient object detection.
-  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx-supported-models)
+  - [Supports majority of model architectures via ONNX](../../configuration/object_detectors#onnx)
   - Runs well with any size models including large
 
 - <CommunityBadge /> [Jetson](#nvidia-jetson): Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6.
@@ -95,7 +95,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Rockchip** <CommunityBadge />
 
 - [RKNN](#rockchip-platform): RKNN models can run on Rockchip devices with included NPUs to provide efficient object detection.
-  - [Supports limited model architectures](../../configuration/object_detectors#choosing-a-model)
+  - [Supports limited model architectures](../../configuration/object_detectors#rockchip-supported-models)
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
@@ -103,18 +103,22 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [Synaptics](#synaptics): synap models can run on Synaptics devices(e.g astra machina) with included NPUs to provide efficient object detection.
 
+**AXERA** <CommunityBadge />
+
+- [AXEngine](#axera): axera models can run on AXERA NPUs via AXEngine, delivering highly efficient object detection.
+
 :::
 
 ### Hailo-8
 
-Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms—including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
+Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms, including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
 
 **Default Model Configuration:**
 
 - **Hailo-8L:** Default model is **YOLOv6n**.
 - **Hailo-8:** Default model is **YOLOv6n**.
 
-In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms—with dual PCIe lanes—yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
+In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms, with dual PCIe lanes, yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
 
 | Name             | Hailo‑8 Inference Time | Hailo‑8L Inference Time |
 | ---------------- | ---------------------- | ----------------------- |
@@ -142,16 +146,10 @@ A single Coral can handle many cameras using the default model and will be suffi
 The OpenVINO detector type is able to run on:
 
 - 6th Gen Intel Platforms and newer that have an iGPU
-- x86 hosts with an Intel Arc GPU
+- x86 hosts with an Intel Arc GPU (including Arc A-series and B-series Battlemage)
 - Intel NPUs
 - Most modern AMD CPUs (though this is officially not supported by Intel)
 - x86 & Arm64 hosts via CPU (generally not recommended)
-
-:::note
-
-Intel B-series (Battlemage) GPUs are not officially supported with Frigate 0.17, though a user has [provided steps to rebuild the Frigate container](https://github.com/blakeblackshear/frigate/discussions/21257) with support for them.
-
-:::
 
 More information is available [in the detector docs](/configuration/object_detectors#openvino-detector)
 
@@ -196,13 +194,14 @@ Inference is done with the `onnx` detector type. Speeds will vary greatly depend
 ✅ - Accelerated with CUDA Graphs
 ❌ - Not accelerated with CUDA Graphs
 
-| Name      | ✅ YOLOv9 Inference Time              | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
-| --------- | ------------------------------------- | ------------------------- | -------------------------- |
-| GTX 1070  | s-320: 16 ms                          |                           | 320: 14 ms                 |
-| RTX 3050  | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
-| RTX 3070  | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
-| RTX A4000 |                                       |                           | 320: ~ 15 ms               |
-| Tesla P40 |                                       |                           | 320: ~ 105 ms              |
+| Name        | ✅ YOLOv9 Inference Time              | ✅ RF-DETR Inference Time | ❌ YOLO-NAS Inference Time |
+| ----------- | ------------------------------------- | ------------------------- | -------------------------- |
+| GTX 1070    | s-320: 16 ms                          |                           | 320: 14 ms                 |
+| RTX 3050    | t-320: 8 ms s-320: 10 ms s-640: 28 ms | Nano-320: ~ 12 ms         | 320: ~ 10 ms 640: ~ 16 ms  |
+| RTX 3070    | t-320: 6 ms s-320: 8 ms s-640: 25 ms  | Nano-320: ~ 9 ms          | 320: ~ 8 ms 640: ~ 14 ms   |
+| RTX 5060 Ti | t-320: 5 ms s-320: 7 ms s-640: 22 ms  | Nano-320: ~ 4 ms          |                            |
+| RTX A4000   |                                       |                           | 320: ~ 15 ms               |
+| Tesla P40   |                                       |                           | 320: ~ 105 ms              |
 
 ### Apple Silicon
 
@@ -224,10 +223,11 @@ Apple Silicon can not run within a container, so a ZMQ proxy is utilized to comm
 
 With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
 
-| Name      | YOLOv9 Inference Time       | YOLO-NAS Inference Time   |
-| --------- | --------------------------- | ------------------------- |
-| AMD 780M  | t-320: ~ 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |
-| AMD 8700G |                             | 320: ~ 20 ms 640: ~ 40 ms |
+| Name           | YOLOv9 Inference Time       | YOLO-NAS Inference Time   | RF-DETR Inference Time |
+| -------------- | --------------------------- | ------------------------- | ---------------------- |
+| AMD 780M       | t-320: ~ 14 ms s-320: 20 ms | 320: ~ 25 ms 640: ~ 50 ms |                        |
+| AMD 8700G      |                             | 320: ~ 20 ms 640: ~ 40 ms |                        |
+| AMD 9060XT 16G | t-320: ~ 4 ms  s-320: 5 ms  | 320: ~ 6 ms               | Nano-320: ~ 90 ms      |
 
 ## Community Supported Detectors
 
@@ -258,7 +258,7 @@ Inference speeds may vary depending on the host platform. The above data was mea
 
 ### Nvidia Jetson
 
-Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson-orin-agx-orin-nx-orin-nano-xavier-agx-xavier-nx-tx2-tx1-nano) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
+Jetson devices are supported via the TensorRT or ONNX detectors when running Jetpack 6. It will [make use of the Jetson's hardware media engine](/configuration/hardware_acceleration_video#nvidia-jetson) when configured with the [appropriate presets](/configuration/ffmpeg_presets#hwaccel-presets), and will make use of the Jetson's GPU and DLA for object detection when configured with the [TensorRT detector](/configuration/object_detectors#nvidia-tensorrt-detector).
 
 Inference speed will vary depending on the YOLO model, jetson platform and jetson nvpmodel (GPU/DLA/EMC clock speed). It is typically 20-40 ms for most models. The DLA is more efficient than the GPU, but not faster, so using the DLA will reduce power consumption but will slightly increase inference time.
 
@@ -287,6 +287,14 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 | ------------- | ------------------------------- |
 | ssd mobilenet | ~ 25 ms                         |
 | yolov5m       | ~ 118 ms                        |
+
+### AXERA
+
+- **AXEngine** Default model is **yolov9**
+
+| Name             | AXERA AX650N/AX8850N Inference Time |
+| ---------------- | ----------------------------------- |
+| yolov9-tiny      | ~ 4 ms                              |
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 

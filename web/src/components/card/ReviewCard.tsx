@@ -1,5 +1,5 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { useFormattedTimestamp, use24HourTime } from "@/hooks/use-date-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { getIconForLabel } from "@/utils/iconUtil";
@@ -55,9 +55,10 @@ export default function ReviewCard({
   const { t } = useTranslation(["components/dialog"]);
   const { data: config } = useSWR<FrigateConfig>("config");
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();
+  const is24Hour = use24HourTime(config);
   const formattedDate = useFormattedTimestamp(
     event.start_time,
-    config?.ui.time_format == "24hour"
+    is24Hour
       ? t("time.formattedTimestampHourMinute.24hour", { ns: "common" })
       : t("time.formattedTimestampHourMinute.12hour", { ns: "common" }),
     config?.ui.timezone,
@@ -78,17 +79,26 @@ export default function ReviewCard({
       ? event.end_time + REVIEW_PADDING
       : Date.now() / 1000;
 
+    const genAiTitle = event.data.metadata?.title?.trim();
+
     axios
       .post(
-        `export/${event.camera}/start/${event.start_time + REVIEW_PADDING}/end/${endTime}`,
-        { playback: "realtime" },
+        `export/${event.camera}/start/${event.start_time - REVIEW_PADDING}/end/${endTime}`,
+        {
+          playback: "realtime",
+          ...(genAiTitle ? { name: genAiTitle } : {}),
+        },
       )
       .then((response) => {
-        if (response.status == 200) {
+        if (response.status < 300) {
           toast.success(t("export.toast.success"), {
             position: "top-center",
             action: (
-              <a href="/export" target="_blank" rel="noopener noreferrer">
+              <a
+                href={`${baseUrl}export`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button>{t("export.toast.view")}</Button>
               </a>
             ),
