@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "Ρυθμίσεις - Frigate",
     "authentication": "Ρυθμίσεις ελέγχου ταυτοποίησης - Frigate",
-    "camera": "Ρυθμίσεις Κάμερας - Frigate",
     "enrichments": "Ρυθμίσεις εμπλουτισμού - Frigate",
     "masksAndZones": "Ρυθμίσεις Μασκών και Ζωνών - Frigate",
     "motionTuner": "Ρύθμιση Κίνησης - Frigate",
@@ -44,15 +43,5 @@
   "cameraSetting": {
     "camera": "Κάμερα",
     "noCamera": "Δεν υπάρχει Κάμερα"
-  },
-  "triggers": {
-    "dialog": {
-      "form": {
-        "friendly_name": {
-          "placeholder": "Ονομάτισε ή περιέγραψε αυτό το εύνασμα",
-          "description": "Ένα προαιρετικό φιλικό όνομα, ή ένα περιγραφικό κείμενο για αυτό το εύνασμα."
-        }
-      }
-    }
   }
 }
