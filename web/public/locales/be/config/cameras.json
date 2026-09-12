@@ -144,10 +144,6 @@
             "label": "Уключыць Birdseye",
             "description": "Уключыць або адключыць функцыю выгляду Birdseye."
         },
-        "mode": {
-            "label": "Рэжым адсочвання",
-            "description": "Рэжым уключэння камер у Birdseye: «objects», «motion» або «continuous»."
-        },
         "order": {
             "label": "Пазіцыя",
             "description": "Лічбавае становішча, якое вызначае парадак камеры ў раскладцы Birdseye."
