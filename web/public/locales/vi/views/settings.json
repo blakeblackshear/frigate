@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "Cài đặt - Frigate",
     "authentication": "Cài đặt Xác thực - Frigate",
-    "camera": "Cài đặt Camera - Frigate",
     "enrichments": "Cài đặt Làm giàu Dữ liệu - Frigate",
     "notifications": "Cài đặt Thông báo - Frigate",
     "masksAndZones": "Trình chỉnh sửa Mặt nạ và Vùng - Frigate",
@@ -54,13 +53,11 @@
     },
     "notificationSettings": {
       "desc": "Frigate có thể gửi thông báo đẩy tự nhiên đến thiết bị của bạn khi nó đang chạy trong trình duyệt hoặc được cài đặt dưới dạng PWA.",
-      "title": "Cài đặt Thông báo",
-      "documentation": "Đọc tài liệu"
+      "title": "Cài đặt Thông báo"
     },
     "notificationUnavailable": {
       "desc": "Thông báo đẩy web yêu cầu một ngữ cảnh an toàn (<code>https://…</code>). Đây là một hạn chế của trình duyệt. Truy cập Frigate một cách an toàn để sử dụng thông báo.",
-      "title": "Thông báo không khả dụng",
-      "documentation": "Đọc tài liệu"
+      "title": "Thông báo không khả dụng"
     },
     "globalSettings": {
       "desc": "Tạm thời đình chỉ thông báo cho các camera cụ thể trên tất cả các thiết bị đã đăng ký.",
@@ -80,13 +77,11 @@
     "snapshotConfig": {
       "table": {
         "camera": "Máy quay",
-        "cleanCopySnapshots": "Ảnh chụp nhanh <code>clean_copy</code>",
         "snapshots": "Ảnh chụp nhanh"
       },
       "desc": "Việc gửi đến Frigate+ yêu cầu cả ảnh chụp nhanh và ảnh chụp nhanh <code>clean_copy</code> phải được bật trong cấu hình của bạn.",
       "cleanCopyWarning": "Một số camera đã bật ảnh chụp nhanh nhưng đã tắt bản sao sạch. Bạn cần bật <code>clean_copy</code> trong cấu hình ảnh chụp nhanh của mình để có thể gửi hình ảnh từ các camera này đến Frigate+.",
-      "title": "Cấu hình Ảnh chụp nhanh",
-      "documentation": "Đọc tài liệu"
+      "title": "Cấu hình Ảnh chụp nhanh"
     },
     "modelInfo": {
       "error": "Không thể tải thông tin mô hình",
@@ -111,78 +106,6 @@
       "error": "Không thể lưu các thay đổi cấu hình: {{errorMessage}}"
     },
     "restart_required": "Yêu cầu khởi động lại (mô hình Frigate+ đã thay đổi)"
-  },
-  "camera": {
-    "title": "Cài đặt Camera",
-    "review": {
-      "alerts": "Cảnh báo ",
-      "detections": "Phát hiện ",
-      "title": "Xem lại",
-      "desc": "Tạm thời bật/tắt cảnh báo và phát hiện cho camera này cho đến khi Frigate khởi động lại. Khi bị vô hiệu hóa, sẽ không có mục xem lại mới nào được tạo ra. "
-    },
-    "reviewClassification": {
-      "title": "Phân loại mục Xem lại",
-      "unsavedChanges": "Các thay đổi cài đặt Phân loại mục Xem lại chưa được lưu cho {{camera}}",
-      "readTheDocumentation": "Đọc tài liệu",
-      "objectDetectionsTips": "Tất cả các đối tượng {{detectionsLabels}} không được phân loại trên {{cameraName}} sẽ được hiển thị dưới dạng Phát hiện bất kể chúng ở trong vùng nào.",
-      "desc": "Frigate phân loại các mục xem lại thành Cảnh báo và Phát hiện. Theo mặc định, tất cả các đối tượng <em>người</em> và <em>ô tô</em> được coi là Cảnh báo. Bạn có thể tinh chỉnh việc phân loại các mục xem lại của mình bằng cách định cấu hình các vùng bắt buộc cho chúng.",
-      "zoneObjectDetectionsTips": {
-        "text": "Tất cả các đối tượng {{detectionsLabels}} không được phân loại trong vùng {{zone}} trên {{cameraName}} sẽ được hiển thị dưới dạng Phát hiện.",
-        "notSelectDetections": "Tất cả các đối tượng {{detectionsLabels}} được phát hiện trong vùng {{zone}} trên {{cameraName}} không được phân loại là Cảnh báo sẽ được hiển thị dưới dạng Phát hiện bất kể chúng ở trong vùng nào.",
-        "regardlessOfZoneObjectDetectionsTips": "Tất cả các đối tượng {{detectionsLabels}} không được phân loại trên {{cameraName}} sẽ được hiển thị dưới dạng Phát hiện bất kể chúng ở trong vùng nào."
-      },
-      "toast": {
-        "success": "Cấu hình Phân loại mục Xem lại đã được lưu. Khởi động lại Frigate để áp dụng các thay đổi."
-      },
-      "limitDetections": "Giới hạn phát hiện trong các vùng cụ thể",
-      "selectDetectionsZones": "Chọn vùng cho Phát hiện",
-      "zoneObjectAlertsTips": "Tất cả các đối tượng {{alertsLabels}} được phát hiện trong vùng {{zone}} trên {{cameraName}} sẽ được hiển thị dưới dạng Cảnh báo.",
-      "noDefinedZones": "Không có vùng nào được xác định cho camera này.",
-      "objectAlertsTips": "Tất cả các đối tượng {{alertsLabels}} trên {{cameraName}} sẽ được hiển thị dưới dạng Cảnh báo.",
-      "selectAlertsZones": "Chọn vùng cho Cảnh báo"
-    },
-    "streams": {
-      "title": "Luồng phát",
-      "desc": "Tạm thời vô hiệu hóa một camera cho đến khi Frigate khởi động lại. Vô hiệu hóa một camera sẽ dừng hoàn toàn quá trình xử lý các luồng của camera này của Frigate. Việc phát hiện, ghi hình và gỡ lỗi sẽ không khả dụng.<br /> <em>Lưu ý: Điều này không vô hiệu hóa các luồng phát lại của go2rtc.</em>"
-    },
-    "object_descriptions": {
-      "title": "Mô tả đối tượng bằng AI tạo sinh",
-      "desc": "Tạm thời bật/tắt mô tả đối tượng bằng AI tạo sinh cho camera này. Khi tắt, mô tả do AI tạo sinh sẽ không được yêu cầu cho các đối tượng được theo dõi trên camera này."
-    },
-    "review_descriptions": {
-      "title": "Mô tả đánh giá bằng AI tạo sinh",
-      "desc": "Tạm thời bật/tắt mô tả xem lại bằng AI tạo sinh cho camera này. Khi tắt, mô tả do AI tạo sinh sẽ không được yêu cầu cho các mục xem lại trên camera này."
-    },
-    "addCamera": "Thêm Camera mới",
-    "editCamera": "Chỉnh sửa Camera:",
-    "selectCamera": "Chọn Camera",
-    "backToSettings": "Quay lại cài đặt Camera",
-    "cameraConfig": {
-      "add": "Thêm Camera",
-      "edit": "Chỉnh sửa Camera",
-      "description": "Cấu hình Camera, bao gồm luồng đầu vào và vai trò.",
-      "name": "Tên Camera",
-      "nameRequired": "Yêu cầu nhập tên Camera",
-      "nameInvalid": "Tên Camera chỉ được chứa chữ cái, số, dấu gạch dưới hoặc dấu gạch ngang",
-      "namePlaceholder": "Ví dụ: front_door",
-      "enabled": "Bật",
-      "ffmpeg": {
-        "inputs": "Luồng đầu vào",
-        "path": "Đường dẫn luồng",
-        "pathRequired": "Yêu cầu nhập đường dẫn luồng",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Vai trò",
-        "rolesRequired": "Cần ít nhất một vai trò",
-        "rolesUnique": "Mỗi vai trò (âm thanh, phát hiện, ghi hình) chỉ có thể được gán cho một luồng duy nhất",
-        "addInput": "Thêm luồng đầu vào",
-        "removeInput": "Xóa luồng đầu vào",
-        "inputsRequired": "Cần ít nhất một luồng đầu vào"
-      },
-      "toast": {
-        "success": "Camera {{cameraName}} đã được lưu thành công"
-      },
-      "nameLength": "Tên của camera phải dưới 24 ký tự."
-    }
   },
   "masksAndZones": {
     "form": {
@@ -261,7 +184,6 @@
     },
     "zones": {
       "speedEstimation": {
-        "docs": "Đọc tài liệu",
         "desc": "Bật ước tính tốc độ cho các đối tượng trong vùng này. Vùng phải có chính xác 4 điểm.",
         "title": "Ước tính Tốc độ",
         "lineADistance": "Khoảng cách đường A ({{unit}})",
@@ -319,14 +241,12 @@
       },
       "point_other": "{{count}} điểm",
       "polygonAreaTooLarge": {
-        "documentation": "Đọc tài liệu",
         "tips": "Mặt nạ chuyển động không ngăn chặn việc phát hiện đối tượng. Bạn nên sử dụng một vùng bắt buộc thay thế.",
         "title": "Mặt nạ chuyển động đang che {{polygonArea}}% khung hình của camera. Không khuyến khích sử dụng mặt nạ chuyển động lớn."
       },
       "add": "Mặt nạ chuyển động mới",
       "edit": "Chỉnh sửa Mặt nạ chuyển động",
       "context": {
-        "documentation": "Đọc tài liệu",
         "title": "Mặt nạ chuyển động được sử dụng để ngăn chặn các loại chuyển động không mong muốn kích hoạt việc phát hiện (ví dụ: cành cây, dấu thời gian của camera). Mặt nạ chuyển động nên được sử dụng <em>rất hạn chế</em>, việc che quá nhiều sẽ làm cho việc theo dõi đối tượng trở nên khó khăn hơn."
       },
       "label": "Mặt nạ chuyển động",
@@ -380,7 +300,6 @@
     "objectShapeFilterDrawing": {
       "title": "Vẽ bộ lọc hình dạng đối tượng",
       "desc": "Vẽ một hình chữ nhật trên hình ảnh để xem chi tiết diện tích và tỷ lệ",
-      "document": "Đọc tài liệu ",
       "score": "Điểm",
       "tips": "Bật tùy chọn này để vẽ một hình chữ nhật trên hình ảnh của camera để hiển thị diện tích và tỷ lệ của nó. Các giá trị này sau đó có thể được sử dụng để đặt các tham số bộ lọc hình dạng đối tượng trong cấu hình của bạn.",
       "ratio": "Tỷ lệ",
@@ -628,13 +547,11 @@
           "title": "lớn",
           "desc": "Sử dụng mô hình <em>lớn</em> sẽ dùng mô hình Jina đầy đủ và sẽ tự động chạy trên GPU nếu có."
         }
-      },
-      "readTheDocumentation": "Đọc tài liệu"
+      }
     },
     "faceRecognition": {
       "title": "Nhận dạng Khuôn mặt",
       "desc": "Nhận dạng khuôn mặt cho phép gán tên cho người và khi khuôn mặt của họ được nhận dạng, Frigate sẽ gán tên của người đó làm nhãn phụ. Thông tin này được bao gồm trong giao diện người dùng, bộ lọc, cũng như trong các thông báo.",
-      "readTheDocumentation": "Đọc tài liệu",
       "modelSize": {
         "label": "Kích thước Mô hình",
         "desc": "Kích thước của mô hình được sử dụng để nhận dạng khuôn mặt.",
@@ -650,8 +567,7 @@
     },
     "licensePlateRecognition": {
       "title": "Nhận dạng Biển số xe",
-      "desc": "Frigate có thể nhận dạng biển số xe trên các phương tiện và tự động thêm các ký tự được phát hiện vào trường recognized_license_plate hoặc một tên đã biết làm nhãn phụ cho các đối tượng thuộc loại ô tô. Một trường hợp sử dụng phổ biến có thể là đọc biển số xe ô tô đi vào đường lái xe hoặc ô tô đi ngang qua trên đường phố.",
-      "readTheDocumentation": "Đọc tài liệu"
+      "desc": "Frigate có thể nhận dạng biển số xe trên các phương tiện và tự động thêm các ký tự được phát hiện vào trường recognized_license_plate hoặc một tên đã biết làm nhãn phụ cho các đối tượng thuộc loại ô tô. Một trường hợp sử dụng phổ biến có thể là đọc biển số xe ô tô đi vào đường lái xe hoặc ô tô đi ngang qua trên đường phố."
     },
     "restart_required": "Yêu cầu khởi động lại (cài đặt Làm giàu Dữ liệu đã thay đổi)",
     "toast": {
@@ -769,7 +685,6 @@
       }
     },
     "actions": {
-      "alert": "Gắn nhãn Cảnh báo",
       "notification": "Gửi thông báo"
     }
   }
