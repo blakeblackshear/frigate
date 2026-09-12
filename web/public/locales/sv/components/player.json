@@ -40,7 +40,6 @@
     "decodedFrames": "Avkodade bildrutor:",
     "droppedFrameRate": "Andel förlorade bildrutor:"
   },
-  "cameraDisabled": "Kameran är inaktiverad",
   "toast": {
     "error": {
       "submitFrigatePlusFailed": "Det gick inte att skicka bildrutan till Frigate+"
