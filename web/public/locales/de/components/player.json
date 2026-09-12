@@ -11,7 +11,6 @@
     "title": "Stream ist offline",
     "desc": "Es wurden keine Bilder vom <code>Erkennungsstream</code> der Kamera {{cameraName}} empfangen, bitte Logs überprüfen"
   },
-  "cameraDisabled": "Kamera ist deaktiviert",
   "stats": {
     "streamType": {
       "title": "Stream Typ:",

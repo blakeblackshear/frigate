@@ -103,14 +103,12 @@
     "audio": {
       "available": "Audio ist für diesen Stream verfügbar",
       "tips": {
-        "title": "Audio muss von deiner Kamera ausgegeben und für diesen Stream in go2rtc konfiguriert werden.",
-        "documentation": "Dokumentation lesen "
+        "title": "Audio muss von deiner Kamera ausgegeben und für diesen Stream in go2rtc konfiguriert werden."
       },
       "unavailable": "Für diesen Stream ist kein Audio verfügbar"
     },
     "twoWayTalk": {
       "tips": "Ihr Gerät muss die Funktion unterstützen und WebRTC muss für die bidirektionale Kommunikation konfiguriert sein.",
-      "tips.documentation": "Dokumentation lesen ",
       "available": "Für diesen Stream ist eine Zwei-Wege-Sprechfunktion verfügbar",
       "unavailable": "Zwei-Wege-Kommunikation für diesen Stream nicht verfügbar"
     },
@@ -132,8 +130,7 @@
       "motion": "Bewegung",
       "active_objects": "Aktive Objekte",
       "all": "Alle"
-    },
-    "notAllTips": "Dein Konfiguration zur Aufzeichnungsaufbewahrung von {{source}} ist eingestellt auf<code> -Modus:{{effectiveRetainMode}}</code> , daher werden in dieser On-Demand Aufzeichnung nur Segmente gespeichert mit{{effectiveRetainModeName}} ."
+    }
   },
   "editLayout": {
     "group": {
@@ -143,8 +140,6 @@
     "label": "Layout bearbeiten"
   },
   "camera": {
-    "enable": "Kamera aktivieren",
-    "disable": "Kamera deaktivieren",
     "turnOn": "Schalte die Kamera ein",
     "turnOff": "Schalte die Kamera aus"
   },
@@ -160,7 +155,6 @@
     "objectDetection": "Objekterkennung",
     "recording": "Aufnahme",
     "snapshots": "Schnappschüsse",
-    "cameraEnabled": "Kamera aktiviert",
     "autotracking": "Autotracking",
     "audioDetection": "Audioerkennung",
     "title": "{{camera}} Einstellungen",

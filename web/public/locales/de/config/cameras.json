@@ -70,10 +70,6 @@
             "label": "Birdseye aktivieren",
             "description": "Aktivieren oder deaktivieren der Birdseye-Funktion."
         },
-        "mode": {
-            "label": "Verfolgungsmodus",
-            "description": "Modus zum Einbeziehen von Kameras in Birdseye: „Objekte“, „Bewegung“ oder „kontinuierlich“."
-        },
         "order": {
             "label": "Position",
             "description": "Numerische Position, die Reihenfolge der Kamera im Birdseye-Layout steuert."
@@ -786,10 +782,6 @@
             "label": "Schnappschüsse aktivieren",
             "description": "Das Speichern von Momentaufnahmen für diese Kamera aktivieren oder deaktivieren."
         },
-        "clean_copy": {
-            "label": "Saubere Kopie speichern",
-            "description": "Save an unannotated clean copy of snapshots in addition to annotated ones."
-        },
         "timestamp": {
             "label": "Zeitstempel-Einblendung",
             "description": "Füge einen Zeitstempel auf die von der API abgerufenen Momentaufnahmen ein."
@@ -816,10 +808,6 @@
             "default": {
                 "label": "Standard-Aufbewahrungsfrist",
                 "description": "Standardmäßige Anzahl von Tagen, für die Snapshots aufbewahrt werden."
-            },
-            "mode": {
-                "label": "Speichermodus",
-                "description": "Speichermodus: „all“ (alle Segmente speichern), „motion“ (Segmente mit Bewegung speichern) oder „active_objects“ (Segmente mit aktiven Objekten speichern)."
             },
             "objects": {
                 "label": "Objektaufbewahrung",
