@@ -76,12 +76,7 @@
         }
       },
       "npuUsage": "Použitie NPU",
-      "npuMemory": "Pamäť NPU",
-      "intelGpuWarning": {
-        "title": "Intel GPU Stats Upozornenie",
-        "message": "Štatistiky GPU nedostupné",
-        "description": "Toto je známa chyba v Štatistike správ Intel (intel_gpu_top) kde sa rozpadne a opakovane vráti používanie GPU 0% aj v prípadoch, keď hardvér detekcie objektov správne beží na (i)GPU. Toto nie je Frigate chyba. Môžete reštartovať a tak dočasne opraviť problém a potvrdiť, že GPU funguje správne. Toto nemá vplyv na výkon."
-      }
+      "npuMemory": "Pamäť NPU"
     },
     "otherProcesses": {
       "title": "Iné procesy",
@@ -175,8 +170,7 @@
     "reindexingEmbeddings": "Preindexovanie vložených prvkov (dokončené na {{processed}} %)",
     "cameraIsOffline": "{{camera}} je offline",
     "detectIsSlow": "{{detect}} je pomalý ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} je veľmi pomalý ({{speed}} ms)",
-    "shmTooLow": "Alokácia /dev/shm ({{total}} MB) by sa mala zvýšiť aspoň na {{min}} MB."
+    "detectIsVerySlow": "{{detect}} je veľmi pomalý ({{speed}} ms)"
   },
   "enrichments": {
     "title": "AI funkcie",

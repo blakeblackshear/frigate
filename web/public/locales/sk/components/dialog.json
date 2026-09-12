@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Predložené"
+        },
+        "toast": {
+          "error": "Odoslanie do Frigate+ zlyhalo. Skontrolujte sieťové pripojenie a skúste znova."
         }
       }
     },
@@ -57,8 +60,7 @@
       "success": "Export bol úspešne spustený. Súbor si pozrite na stránke exportov.",
       "error": {
         "failed": "Chyba spustenia exportu: {{error}}",
-        "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku",
-        "noVaildTimeSelected": "Nie je vybrané žiadne platné časové obdobie"
+        "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku"
       },
       "view": "Zobraziť"
     },
@@ -83,7 +85,24 @@
       "cameraSelection": "Kamery",
       "cameraSelectionHelp": "Kamery so sledovanými objektmi v tomto časovom rozsahu sú vopred vybrané",
       "checkingActivity": "Kontrola aktivity kamery...",
-      "noCameras": "Nie sú k dispozícii žiadne kamery"
+      "noCameras": "Nie sú k dispozícii žiadne kamery",
+      "timeRange": "Časový rámec",
+      "selectFromTimeline": "Vybrať na časovej osi",
+      "searchOrSelectGroup": "Vyhľadať, alebo vybrať skupinu kamier",
+      "selectAll": "Vybrať všetky kamery",
+      "clearSelection": "Zrušiť výber",
+      "selectWithActivity": "Kamery so sledovanými objektami",
+      "selectGroup": "Vybrať skupinu",
+      "noMatchingCameras": "Žiadne kamery nevyhovujú vyhľadávaniu",
+      "selectedCount": "{{selected}} / {{total}} vybraných",
+      "detectionCount_one": "{{count}} sledovaný objekt",
+      "detectionCount_few": "{{count}} sledované objekty",
+      "detectionCount_other": "{{count}} sledovaných objektov",
+      "nameLabel": "Názov exportu",
+      "namePlaceholder": "",
+      "exportButton_one": "",
+      "exportButton_few": "",
+      "exportButton_other": ""
     }
   },
   "streaming": {
@@ -91,8 +110,7 @@
     "restreaming": {
       "disabled": "Opätovné streamovanie nie je pre túto kameru povolené.",
       "desc": {
-        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc.",
-        "readTheDocumentation": "Prečítajte si dokumentáciu"
+        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc."
       }
     },
     "showStats": {

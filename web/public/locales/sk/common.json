@@ -158,7 +158,10 @@
     "saveAll": "Uložiť všetko",
     "savingAll": "Ukladá sa všetko…",
     "undoAll": "Vrátiť späť všetko",
-    "retry": "Skúste to znova"
+    "retry": "Skúste to znova",
+    "add": "Pridať",
+    "applying": "Aplikovanie…",
+    "undo": "Späť"
   },
   "menu": {
     "system": "Systém",

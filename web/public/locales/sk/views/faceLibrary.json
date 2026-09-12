@@ -5,11 +5,7 @@
     "placeholder": "Zadajte názov pre túto kolekciu"
   },
   "details": {
-    "person": "Osoba",
-    "subLabelScore": "Skóre podúrovne",
     "scoreInfo": "Skóre podúrovne je vážené skóre všetkých rozpoznaných dôverností tváre, to ale môže byť odlišné od skóre zobrazeného na snímke.",
-    "face": "Detail tváre",
-    "faceDesc": "Podrobnosti o sledovanom objekte, ktorý vytvoril túto tvár",
     "timestamp": "Časová pečiatka",
     "unknown": "Neznámy"
   },
@@ -20,8 +16,6 @@
   },
   "collections": "Kolekcie",
   "createFaceLibrary": {
-    "title": "Vytvoriť Zbierku",
-    "desc": "Vytvoriť novú zbierku",
     "new": "Vytvoriť novú tvár",
     "nextSteps": "Vybudovanie silného základu:<li>Použite kartu Nedávno rozpoznané tváre na výber a trénovanie obrázkov pre každú rozpoznanú osobu.</li><li>Pre dosiahnutie najlepších výsledkov sa zamerajte na priame obrázky; vyhnite sa trénovaniu obrázkov, ktoré zachytávajú tváre pod uhlom.</li></ul>"
   },
@@ -38,8 +32,6 @@
     "aria": "Vyberte nedávno rozpoznané tváre",
     "empty": "Neexistujú žiadne predchádzajúce pokusy o rozpoznávanie tváre"
   },
-  "selectItem": "Vyberte {{item}}",
-  "selectFace": "Vyberte tvár",
   "deleteFaceLibrary": {
     "title": "Odstrániť Meno",
     "desc": "Ste si istí, že chcete odstrániť kolekciu {{name}}? Tým sa natrvalo odstránia všetky pridružené tváre."
@@ -71,8 +63,6 @@
     "maxSize": "Max velkosť: {{size}} MB"
   },
   "nofaces": "Žiadne tváre",
-  "pixels": "{{area}}px",
-  "readTheDocs": "Prečitajte si návod",
   "trainFaceAs": "Trénovať tvár ako:",
   "trainFace": "Trénovať tvár",
   "toast": {
