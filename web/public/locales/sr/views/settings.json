@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "Podešavanja - Frigate",
     "authentication": "Podešavanja autentifikacije - Frigate",
-    "camera": "Podešavanje kamera - Frigate",
     "enrichments": "Podešavanja obogaćivanja - Frigate",
     "masksAndZones": "Uređivač maski i zona - Frigate",
     "motionTuner": "Tjuner pokreta - Frigate",
@@ -1212,31 +1211,6 @@
       "error": "Неуспешно чување измена конфигурације: {{errorMessage}}"
     }
   },
-  "detectorsAndModel": {
-    "title": "Детектори и модел",
-    "description": "Конфигуришите позадински детектор који покреће детекцију објеката и модел који користи. Измене се чувају заједно тако да детектор и модел остану синхронизовани.",
-    "cardTitles": {
-      "detector": "Хардвер детектора",
-      "model": "Модел детекције"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "Прилагођени модел"
-    },
-    "mismatch": {
-      "warning": "Тренутни Frigate+ модел \"{{model}}\" захтева {{required}} детектор. Изаберите компатибилан модел испод или пређите на Прилагођени модел пре чувања."
-    },
-    "plusModel": {
-      "requiresDetector": "Захтева: {{detector}}",
-      "noModelSelected": "Изаберите Frigate+ модел"
-    },
-    "toast": {
-      "saveSuccess": "Подешавања детектора и модела су сачувана. Рестартујте Frigate за примену измена.",
-      "saveError": "Неуспешно чување подешавања детектора и модела"
-    },
-    "unsavedChanges": "Несачуване измене детектора и модела",
-    "restartRequired": "Потребно је рестартовање (промењен детектор или модел)"
-  },
   "triggers": {
     "documentTitle": "Окидачи",
     "semanticSearch": {
@@ -1547,16 +1521,6 @@
     "detect": {
       "title": "Подешавања детекције"
     },
-    "detectors": {
-      "title": "Подешавања детектора",
-      "singleType": "Дозвољен је само један {{type}} детектор.",
-      "keyRequired": "Назив детектора је обавезан.",
-      "keyDuplicate": "Назив детектора већ постоји.",
-      "noSchema": "Нема доступних шема детектора.",
-      "none": "Нема конфигурисаних инстанци детектора.",
-      "add": "Додај детектор",
-      "addCustomKey": "Додај прилагођени кључ"
-    },
     "record": {
       "title": "Подешавања снимања"
     },
@@ -1776,11 +1740,6 @@
     }
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "Објекти",
-      "motion": "Покрет",
-      "continuous": "Континуирано"
-    },
     "cameraOrder": {
       "label": "Редослед камера",
       "description": "Превуците за промену редоследа камера у Birdseye приказу.",
@@ -1888,15 +1847,8 @@
     "record": {
       "noRecordRole": "Ниједан улазни стрим нема улогу снимања. Додајте улогу снимања да бисте омогућили снимање."
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "Birdseye режим објеката захтева да детекција буде омогућена."
-    },
     "snapshots": {
       "detectDisabled": "Снимци захтевају да детекција буде омогућена."
-    },
-    "detectors": {
-      "mixedTypes": "Мешовити типови детектора су детектовани.",
-      "mixedTypesSuggestion": "Размислите о коришћењу једног типа детектора за конзистентност."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Мали модел величине користи квантизовану верзију Jina модела."
