@@ -1,6 +1,5 @@
 {
   "labels": {
-    "count": "{{count}} Labels",
     "all": {
       "short": "Labels",
       "title": "Alle labels"
