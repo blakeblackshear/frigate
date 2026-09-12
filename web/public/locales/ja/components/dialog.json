@@ -59,7 +59,6 @@
       "error": {
         "failed": "エクスポートキューの開始に失敗しました: {{error}}",
         "endTimeMustAfterStartTime": "終了時間は開始時間より後である必要があります",
-        "noVaildTimeSelected": "有効な時間範囲が選択されていません",
         "noValidTimeSelected": "有効な時間範囲が選択されていません"
       },
       "view": "表示",
@@ -119,7 +118,6 @@
       "exportingButton": "エクスポート中...",
       "toast": {
         "started_other": "{{count}} 件のエクスポートを開始しました。",
-        "startedNoCase_other": "{{count}} 件のエクスポートを開始しました。",
         "partial": "{{total}} 件中 {{successful}} 件のエクスポートを開始しました。失敗: {{failedItems}}",
         "failed": "{{total}} 件のエクスポートを開始できませんでした。失敗: {{failedItems}}"
       }
