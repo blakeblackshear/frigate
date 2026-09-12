@@ -93,8 +93,15 @@ function PagePanel({ failure }: PanelProps) {
   const stale = isStaleAsset(failure);
 
   const onCopy = () => {
-    copy(crashReport(failure, stats?.service.version));
-    toast.success(t("button.copiedToClipboard"), { position: "top-center" });
+    // copy() falls back to a prompt and returns false when the clipboard is
+    // refused, so a success toast has to wait on the result.
+    const copied = copy(crashReport(failure, stats?.service.version));
+
+    if (copied) {
+      toast.success(t("button.copiedToClipboard"), { position: "top-center" });
+    } else {
+      toast.error(t("error.copyFailed"), { position: "top-center" });
+    }
   };
 
   return (
@@ -143,7 +150,7 @@ function PagePanel({ failure }: PanelProps) {
   );
 }
 
-/** Corner strip, so a failed sidebar never sits on top of the page content. */
+/** Corner strip, so failed chrome never sits on top of the page content. */
 function ChromeNotice() {
   const { t } = useTranslation(["common"]);
 
@@ -154,7 +161,7 @@ function ChromeNotice() {
       className="absolute bottom-0 left-0 z-50 flex max-w-full items-center gap-2 rounded-tr-md bg-secondary px-3 py-1.5 text-xs text-primary shadow-md"
     >
       <FaExclamationTriangle className="size-4 shrink-0 text-danger" />
-      <div className="truncate">{t("error.navigation")}</div>
+      <div className="truncate">{t("error.partial")}</div>
       <Button
         variant="link"
         className="h-auto p-0 text-xs"

@@ -108,11 +108,9 @@ function DefaultAppView() {
 
   return (
     <div className="size-full overflow-hidden">
-      <ChromeErrorBoundary>
-        {isDesktop && <Sidebar />}
-        {isDesktop && <Statusbar />}
-        {isMobile && <Bottombar />}
-      </ChromeErrorBoundary>
+      <ChromeErrorBoundary>{isDesktop && <Sidebar />}</ChromeErrorBoundary>
+      <ChromeErrorBoundary>{isDesktop && <Statusbar />}</ChromeErrorBoundary>
+      <ChromeErrorBoundary>{isMobile && <Bottombar />}</ChromeErrorBoundary>
       <div
         id="pageRoot"
         className={cn(

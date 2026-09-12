@@ -118,7 +118,7 @@ test.describe("Error boundaries - chrome failure @high", () => {
     ],
   });
 
-  test("a thrown status bar leaves the page content alone", async ({
+  test("a thrown status bar leaves the sidebar and page content alone", async ({
     frigateApp,
   }) => {
     test.skip(frigateApp.isMobile, "The status bar is desktop chrome");
@@ -127,11 +127,44 @@ test.describe("Error boundaries - chrome failure @high", () => {
     const strip = frigateApp.page.getByTestId("error-strip");
     await expect(strip).toBeVisible({ timeout: 10_000 });
     await expect(strip.getByRole("button", { name: "Reload" })).toBeVisible();
+    await expect(strip).toHaveCount(1);
 
+    // Each chrome component owns its boundary, so the sidebar survives a
+    // status bar failure and the user can still navigate out.
+    await expect(frigateApp.page.locator("aside")).toBeVisible();
+    await expect(frigateApp.page.locator('a[href="/review"]')).toBeVisible();
     await expect(frigateApp.page.getByTestId("error-panel")).toHaveCount(0);
     await expect(
       frigateApp.page.locator("[data-camera='front_door']"),
     ).toBeVisible({ timeout: 10_000 });
+  });
+});
+
+test.describe("Error boundaries - clipboard refused @high", () => {
+  test.use({
+    expectedErrors: [
+      /is not a function|An error occurred in the|The above error occurred/,
+    ],
+  });
+
+  test("a refused clipboard write reports the failure", async ({
+    frigateApp,
+  }) => {
+    // copy-to-clipboard treats a false return from execCommand as a failure
+    // and falls back to a prompt, which Playwright dismisses on its own.
+    await frigateApp.page.addInitScript(() => {
+      document.execCommand = () => false;
+    });
+    await breakExportsPage(frigateApp);
+
+    await frigateApp.page
+      .getByTestId("error-panel")
+      .getByRole("button", { name: "Copy details" })
+      .click();
+
+    await expect(
+      frigateApp.page.getByText("Could not copy details to clipboard"),
+    ).toBeVisible();
   });
 });
 
