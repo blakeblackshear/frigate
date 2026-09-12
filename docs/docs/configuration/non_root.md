@@ -313,7 +313,15 @@ To remove root from the container entirely, add Docker's `user:`:
 
 ```yaml
     user: "1000:1000" # NOT compatible with PUID/PGID, see the run modes table
+    tmpfs:
+      - /tmp:size=256m
+      - /tmp/cache:size=1000000000
+      - /run:exec,nosuid,nodev,mode=0755,uid=1000,gid=1000,size=16m # uid must match user:
 ```
+
+`/run` has to be owned by that uid as well. s6 writes its runtime state there before anything else starts, and with no root in the container a root-owned `/run` stops it during init with `cannot create /run/test of writability`. Keep `uid` and `gid` in the tmpfs options matching `user:`, and don't carry that pair back into the default mode, where a root-owned `/run` is what keeps the unprivileged services out of s6's runtime state.
+
+This only bites once root is genuinely gone. s6's init helper is setuid, so `user:` on its own still lets init regain root and correct `/run` itself. The `no-new-privileges:true` above is what blocks that, which is also what makes the `/run` ownership mandatory. Dropping it would hide the problem by handing init root again.
 
 Two things change, and the first one will break a working install if you skip it. The startup device grants can't run, because there is no root left to run them, so every device you pass stops working until you grant that uid access yourself with `group_add:` or a udev rule; see [Manual setup](#manual-setup). Expect this to surface as a driver error rather than a permission error, like `No VA display found` from VAAPI. And every service then runs as that one uid, so go2rtc no longer gets its own restricted user. `/config` and `/media/frigate` have to be owned by that uid already, since Frigate never adjusts ownership in this mode. Switching an existing install over also leaves `/config/go2rtc_homekit.yml` owned by the go2rtc user, which this mode can't write; `chown` it to your uid or HomeKit pairing changes stop persisting. Frigate warns and starts either way.
 

@@ -303,7 +303,7 @@ jobs:
           # /run must allow exec: S6_READ_ONLY_ROOT has s6 copy its service
           # scripts there and run them, and --tmpfs defaults to noexec
           docker run -d --name frigate-ro --shm-size 256m \
-            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755,uid=1000,gid=1000 \
             --user 1000:1000 \
             --security-opt no-new-privileges:true \
             -v /tmp/frigate-config-ro:/config \
@@ -405,7 +405,7 @@ jobs:
           # the config dir above now holds a go2rtc-owned go2rtc_homekit.yml,
           # which user: keeps readable but not writable (no supplementary groups)
           docker run -d --name frigate-rod-user --shm-size 256m \
-            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755 \
+            --read-only --tmpfs /tmp:rw,size=1g --tmpfs /run:exec,nosuid,nodev,mode=0755,uid=1000,gid=1000 \
             --user 1000:1000 \
             -v /tmp/frigate-config-rod:/config \
             -v /tmp/frigate-media-rod:/media/frigate \
