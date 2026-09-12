@@ -94,10 +94,6 @@
             "label": "Aktiver Fugleperspektiv",
             "description": "Aktiver eller deaktiver funksjonen for Fugleperspektiv."
         },
-        "mode": {
-            "label": "Sporingsmodus",
-            "description": "Modus for å inkludere kameraer i Fugleperspektiv: 'objects', 'motion' eller 'continuous'."
-        },
         "order": {
             "label": "Posisjon",
             "description": "Numerisk posisjon som kontrollerer kameraenes rekkefølge i Fugleperspektiv-oppsettet."
@@ -627,10 +623,6 @@
             "default": {
                 "label": "Standard bevaring",
                 "description": "Standard antall dager stillbilder skal bevares."
-            },
-            "mode": {
-                "label": "Bevaringsmodus",
-                "description": "Modus for bevaring: \"Alle\" (lagre alle segmenter), \"Bevegelse\" (lagre segmenter med bevegelse) eller \"Aktive objekter\" (lagre segmenter med aktive objekter)."
             },
             "objects": {
                 "label": "Objektbevaring",

@@ -103,11 +103,6 @@
       "gpuUsage": "GPU-belastning",
       "npuMemory": "NPU minne",
       "npuUsage": "NPU-belastning",
-      "intelGpuWarning": {
-        "title": "Til info om Intel GPU-statistikk",
-        "message": "GPU statistikk ikke tilgjengelig",
-        "description": "Dette er en kjent feil i Intels verktøy for rapportering av GPU-statistikk (intel_gpu_top), der verktøyet slutter å fungere og gjentatte ganger viser 0 % GPU-bruk, selv om maskinvareakselerasjon og objektdeteksjon kjører korrekt på (i)GPU-en. Dette er ikke en feil i Frigate. Du kan starte verten på nytt for å løse problemet midlertidig, og for å bekrefte at GPU-en fungerer som den skal. Dette påvirker ikke ytelsen."
-      },
       "gpuTemperature": "GPU-temperatur",
       "npuTemperature": "NPU-temperatur",
       "gpuCompute": "GPU prossesering / enkoding"
@@ -172,8 +167,6 @@
       },
       "aspectRatio": "bildeforhold",
       "keyframes": {
-        "error": "Keyframe-intervallet (~{{seconds}}s) overskrider lengden på opptakssegmentet ({{segmentTime}}s). Enkelte segmenter kan mangle en keyframe, noe som ødelegger avspillingen. Deaktiver smart / +kodek'en på kameraet eller forkort keyframe-intervallet.",
-        "warning": "Spredte eller variable ke,yframes (lengste avstand ~{{seconds}}s), sannsynligvis på grunn av en smart-kodek (H.264+/H.265+). Dette er ikke anbefalt.",
         "unknown": "Kunne ikke bestemme keyframe-intervallet.",
         "ok": "Keyframes hvert ~{{seconds}}s, optimalt for opptak og avspilling.",
         "gap": "Keyframe-intervall (min / snitt / maks):",
@@ -268,7 +261,6 @@
     "cameraIsOffline": "{{camera}} er frakoblet",
     "detectIsSlow": "{{detect}} er treg ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} er veldig treg ({{speed}} ms)",
-    "shmTooLow": "/dev/shm-allokeringen ({{total}} MB) bør økes til minst {{min}} MB.",
     "debugReplayActive": "Debug-reprise pågår"
   }
 }
