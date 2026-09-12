@@ -76,11 +76,6 @@
       "gpuEncoder": "GPU 編碼器",
       "gpuDecoder": "GPU 解碼器",
       "npuMemory": "NPU 記憶體",
-      "intelGpuWarning": {
-        "title": "Intel GPU 狀態警告",
-        "message": "GPU 狀態不可用",
-        "description": "這是 Intel GPU 統計工具已知問題，可能顯示 0% 使用率，但不影響效能。可重新啟動主機暫時修復。"
-      },
       "gpuTemperature": "GPU 溫度",
       "npuTemperature": "NPU 溫度"
     },
@@ -188,8 +183,7 @@
     "detectHighCpuUsage": "{{camera}} 的偵測 CPU 使用率過高 ({{detectAvg}}%)",
     "healthy": "系統運作正常",
     "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率過高 ({{ffmpegAvg}}%)",
-    "reindexingEmbeddings": "重新索引嵌入資料 (已完成 {{processed}}%)",
-    "shmTooLow": "/dev/shm 分配（{{total}} MB）太小，請增加至至少 {{min}} MB。"
+    "reindexingEmbeddings": "重新索引嵌入資料 (已完成 {{processed}}%)"
   },
   "enrichments": {
     "title": "進階功能",
