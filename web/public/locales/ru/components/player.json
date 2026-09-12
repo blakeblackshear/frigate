@@ -11,7 +11,6 @@
     "title": "Поток оффлайн",
     "desc": "С потока <code>detect</code> камеры {{cameraName}} не получено кадров, проверьте логи ошибок"
   },
-  "cameraDisabled": "Камера отключена",
   "stats": {
     "streamType": {
       "title": "Тип потока:",
