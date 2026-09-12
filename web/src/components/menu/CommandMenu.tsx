@@ -31,7 +31,8 @@ import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import useNavigation from "@/hooks/use-navigation";
-import { usePersistence } from "@/hooks/use-persistence";
+import { useHasFullCameraAccess } from "@/hooks/use-has-full-camera-access";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { settingsViewGroups, ALLOWED_VIEWS_FOR_VIEWER } from "@/types/settings";
 
@@ -97,6 +98,7 @@ export default function CommandMenu() {
     revalidateOnFocus: false,
   });
   const allowedCameras = useAllowedCameras();
+  const hasFullCameraAccess = useHasFullCameraAccess();
   const navPages = useNavigation();
   const { theme, systemTheme, setTheme } = useTheme();
   const { send: sendRestart } = useRestart();
@@ -104,7 +106,7 @@ export default function CommandMenu() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [confirmRestart, setConfirmRestart] = useState(false);
-  const [recent, setRecent] = usePersistence<string[]>(
+  const [recent, setRecent] = useUserPersistence<string[]>(
     "command-menu-recent",
     NO_RECENT,
   );
@@ -194,12 +196,26 @@ export default function CommandMenu() {
       });
     }
 
-    for (const group of Object.keys(config?.camera_groups ?? {})) {
+    for (const [group, groupConfig] of Object.entries(
+      config?.camera_groups ?? {},
+    )) {
+      // A custom role only gets groups it can actually open, and only the
+      // cameras it may see become search terms.
+      const groupCameras = hasFullCameraAccess
+        ? groupConfig.cameras
+        : groupConfig.cameras.filter((camera) =>
+            allowedCameras.includes(camera),
+          );
+
+      if (groupCameras.length === 0) {
+        continue;
+      }
+
       built.push({
         id: `group-${group}`,
         section: "cameraGroups",
         title: group,
-        terms: config?.camera_groups?.[group]?.cameras ?? [],
+        terms: groupCameras,
         Icon: LuLayers,
         onRun: goTo(`/?group=${encodeURIComponent(group)}`),
       });
@@ -246,7 +262,16 @@ export default function CommandMenu() {
     }
 
     return built;
-  }, [t, navigate, isAdmin, config, allowedCameras, navPages, toggleTheme]);
+  }, [
+    t,
+    navigate,
+    isAdmin,
+    config,
+    allowedCameras,
+    hasFullCameraAccess,
+    navPages,
+    toggleTheme,
+  ]);
 
   const recentCommands = useMemo(
     () =>

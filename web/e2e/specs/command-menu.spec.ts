@@ -10,7 +10,10 @@
 import { test, expect } from "../fixtures/frigate-test";
 import type { FrigateApp } from "../fixtures/frigate-test";
 import { getMonacoVisibleText } from "../helpers/monaco";
-import { viewerProfile } from "../fixtures/mock-data/profile";
+import {
+  restrictedProfile,
+  viewerProfile,
+} from "../fixtures/mock-data/profile";
 
 const SAMPLE_CONFIG = "mqtt:\n  host: mqtt\n";
 
@@ -24,8 +27,8 @@ function commands(app: FrigateApp, text: string | RegExp) {
 
 /**
  * Reads the recent command ids straight out of idb-keyval's store, which is
- * where usePersistence writes. The write is fire and forget, so a test that
- * reloads has to wait for it to land first.
+ * where useUserPersistence writes under a key namespaced by username. The
+ * write is fire and forget, so a test that reloads has to wait for it first.
  */
 function storedRecents(app: FrigateApp) {
   return app.page.evaluate(
@@ -37,7 +40,7 @@ function storedRecents(app: FrigateApp) {
           const read = request.result
             .transaction("keyval", "readonly")
             .objectStore("keyval")
-            .get("command-menu-recent");
+            .get("command-menu-recent:admin");
           read.onerror = () => resolve([]);
           read.onsuccess = () => resolve(read.result ?? []);
         };
@@ -234,6 +237,33 @@ test.describe("Command menu - permissions @high", () => {
     await expect(commands(frigateApp, "Restart Frigate")).toHaveCount(0);
     await expect(commands(frigateApp, "Configuration Editor")).toHaveCount(0);
     await expect(commands(frigateApp, "Motion tuner")).toHaveCount(0);
+  });
+
+  test("a custom role only reaches groups holding its cameras", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({
+      profile: restrictedProfile(["garage"], { role: "restricted" }),
+    });
+    await frigateApp.goto("/");
+    await openMenu(frigateApp);
+
+    const input = frigateApp.page.locator("[cmdk-input]");
+    const group = (name: string) =>
+      frigateApp.page.locator(`[cmdk-item][data-value="group-${name}"]`);
+
+    await input.fill("garage");
+    await expect(commands(frigateApp, "Garage").first()).toBeVisible();
+    await expect(group("default")).toHaveCount(1);
+
+    // "outdoor" holds no camera this role may see
+    await input.fill("outdoor");
+    await expect(group("outdoor")).toHaveCount(0);
+
+    // nor may a hidden camera's name pull a group up through its search terms
+    await input.fill("backyard");
+    await expect(group("default")).toHaveCount(0);
+    await expect(commands(frigateApp, "Backyard")).toHaveCount(0);
   });
 });
 
