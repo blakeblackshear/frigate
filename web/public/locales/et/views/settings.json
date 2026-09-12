@@ -170,10 +170,7 @@
           "hide": "Peida salasõna",
           "requirements": {
             "title": "Salasõna reeglid:",
-            "length": "Vähemalt 12 tähemärki",
-            "uppercase": "Vähemalt üks suurtäht",
-            "digit": "Vähemalt üks number",
-            "special": "Vähemalt üks erimärk (!@#$%^&*(),.?\":{}|<>)"
+            "length": "Vähemalt 12 tähemärki"
           }
         },
         "newPassword": {
@@ -341,7 +338,6 @@
       "title": "Hetkvõtte seadistused",
       "table": {
         "snapshots": "Hetkvõtted",
-        "cleanCopySnapshots": "<code>clean_copy</code> Hetkvõtted",
         "camera": "Kaamera"
       }
     },
