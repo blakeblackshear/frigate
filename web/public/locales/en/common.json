@@ -164,7 +164,8 @@
     "saveAll": "Save All",
     "savingAll": "Saving All…",
     "undoAll": "Undo All",
-    "retry": "Retry"
+    "retry": "Retry",
+    "reload": "Reload"
   },
   "menu": {
     "system": "System",
@@ -313,6 +314,15 @@
     "documentTitle": "Not Found - Frigate",
     "title": "404",
     "desc": "Page not found"
+  },
+  "error": {
+    "title": "This page stopped working",
+    "desc": "The page ran into an unexpected error. Reloading usually clears it. If it keeps happening, copy the details and attach them to a discussion on GitHub.",
+    "staleTitle": "Reload required",
+    "staleDesc": "Part of the interface could not be loaded, which usually means Frigate was updated while this tab was open. Reload to pick up the new version.",
+    "partial": "Part of the interface stopped working.",
+    "copyDetails": "Copy details",
+    "copyFailed": "Could not copy details to clipboard"
   },
   "selectItem": "Select {{item}}",
   "readTheDocumentation": "Read the documentation",

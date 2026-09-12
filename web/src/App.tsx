@@ -6,7 +6,7 @@ import Sidebar from "@/components/navigation/Sidebar";
 import { isDesktop, isMobile } from "react-device-detect";
 import Statusbar from "./components/Statusbar";
 import Bottombar from "./components/navigation/Bottombar";
-import { Suspense, lazy, useContext, useEffect, useState } from "react";
+import { lazy, useContext, useEffect, useState } from "react";
 import { Redirect } from "./components/navigation/Redirect";
 import { cn } from "./lib/utils";
 import { isPWA } from "./utils/isPWA";
@@ -18,6 +18,7 @@ import { isRedirectingToLogin } from "@/api/auth-redirect";
 import { AuthContext } from "@/context/auth-context";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { isSetupDismissed } from "@/utils/setupWizard";
+import { ChromeErrorBoundary, LazyPage } from "@/components/ErrorBoundaries";
 
 const Live = lazy(() => import("@/pages/Live"));
 const Events = lazy(() => import("@/pages/Events"));
@@ -94,22 +95,22 @@ function DefaultAppView() {
   if (showWizard) {
     return (
       <div className="size-full overflow-hidden">
-        <Suspense
+        <LazyPage
           fallback={
             <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
           }
         >
           <SetupWizard />
-        </Suspense>
+        </LazyPage>
       </div>
     );
   }
 
   return (
     <div className="size-full overflow-hidden">
-      {isDesktop && <Sidebar />}
-      {isDesktop && <Statusbar />}
-      {isMobile && <Bottombar />}
+      <ChromeErrorBoundary>{isDesktop && <Sidebar />}</ChromeErrorBoundary>
+      <ChromeErrorBoundary>{isDesktop && <Statusbar />}</ChromeErrorBoundary>
+      <ChromeErrorBoundary>{isMobile && <Bottombar />}</ChromeErrorBoundary>
       <div
         id="pageRoot"
         className={cn(
@@ -121,7 +122,7 @@ function DefaultAppView() {
             : "bottom-8 left-[52px]",
         )}
       >
-        <Suspense
+        <LazyPage
           fallback={
             <ActivityIndicator className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
           }
@@ -147,7 +148,7 @@ function DefaultAppView() {
             <Route path="/unauthorized" element={<AccessDenied />} />
             <Route path="*" element={<Redirect to="/" />} />
           </Routes>
-        </Suspense>
+        </LazyPage>
       </div>
     </div>
   );
@@ -160,9 +161,9 @@ function SafeAppView() {
         id="pageRoot"
         className={cn("absolute bottom-0 left-0 right-0 top-0 overflow-hidden")}
       >
-        <Suspense>
+        <LazyPage>
           <ConfigEditor />
-        </Suspense>
+        </LazyPage>
       </div>
     </div>
   );
