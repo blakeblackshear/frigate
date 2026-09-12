@@ -11,7 +11,6 @@
     "title": "Přenos je offline",
     "desc": "Žádné snímky nebyly zaznamenány na {{cameraName}} <code>detect</code>přenosu, zkontrolujte logy chyb"
   },
-  "cameraDisabled": "Kamera je zakázaná",
   "stats": {
     "streamType": {
       "title": "Typ přenosu:",
