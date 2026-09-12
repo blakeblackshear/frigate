@@ -31,7 +31,6 @@ DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
 DETECTOR_DEVICE_FIELDS = {
     "cpu": "num_threads",
     "rknn": "num_cores",
-    "deepstack": "api_url",
     "degirum": "location",
     "zmq": "endpoint",
 }
@@ -40,7 +39,6 @@ DETECTOR_DEVICE_FIELDS = {
 # detectors that use them are being reworked, so they are dropped rather than
 # carried over.
 DROPPED_DETECTOR_OPTIONS = {
-    "deepstack": ["api_timeout", "api_key"],
     "degirum": ["zoo", "token"],
     "zmq": ["request_timeout_ms", "linger_ms"],
 }

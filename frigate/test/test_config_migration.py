@@ -128,10 +128,10 @@ class TestMigrateModels(unittest.TestCase):
             migrated = migrate_models(
                 {
                     "detectors": {
-                        "ds": {
-                            "type": "deepstack",
-                            "api_url": "http://host:5000/v1/vision/detection",
-                            "api_key": "secret",
+                        "remote": {
+                            "type": "zmq",
+                            "endpoint": "tcp://host:5555",
+                            "request_timeout_ms": 200,
                         }
                     }
                 }
@@ -139,9 +139,9 @@ class TestMigrateModels(unittest.TestCase):
 
         self.assertEqual(
             migrated["models"][0]["devices"],
-            ["deepstack:http://host:5000/v1/vision/detection"],
+            ["zmq:tcp://host:5555"],
         )
-        self.assertTrue(any("api_key" in message for message in logs.output))
+        self.assertTrue(any("request_timeout_ms" in message for message in logs.output))
 
     def test_mixed_detector_types_are_logged(self):
         with self.assertLogs("frigate.util.config", level=logging.ERROR) as logs:
