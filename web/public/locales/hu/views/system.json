@@ -137,10 +137,7 @@
       "gpuEncoder": "GPU Enkóder",
       "gpuDecoder": "GPU Dekóder",
       "npuUsage": "NPU Kihasználtság",
-      "npuMemory": "NPU Memória",
-      "intelGpuWarning": {
-        "message": "GPU statisztika nem érhető el"
-      }
+      "npuMemory": "NPU Memória"
     },
     "otherProcesses": {
       "processMemoryUsage": "Folyamat Memória Kihasználtság",
@@ -206,8 +203,7 @@
     "detectIsSlow": "{{detect}} lassú ({{speed}} ms)",
     "reindexingEmbeddings": "Beágyazások újra indexelése ({{processed}}% kész)",
     "ffmpegHighCpuUsage": "{{camera}}-nak/-nek magas FFmpeg CPU felhasználása ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "A(z) {{camera}} kameránál magas az észlelési CPU-használat ({{detectAvg}}%)",
-    "shmTooLow": "A /dev/shm részére foglalt területet ({{total}} MB) legalább {{min}} MB-ra kell növelni."
+    "detectHighCpuUsage": "A(z) {{camera}} kameránál magas az észlelési CPU-használat ({{detectAvg}}%)"
   },
   "lastRefreshed": "Utoljára frissítve: "
 }
