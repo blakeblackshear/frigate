@@ -6,10 +6,19 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 
-from peewee import SQL, fn
+from peewee import SQL, Case, fn
 
 from frigate.config import FrigateConfig
-from frigate.const import RECORD_DIR, REPLAY_CAMERA_PREFIX
+from frigate.config.camera.updater import (
+    CameraConfigUpdateEnum,
+    CameraConfigUpdateSubscriber,
+)
+from frigate.const import (
+    RECORD_DIR,
+    REPLAY_CAMERA_PREFIX,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.models import Event, Recordings
 from frigate.util.builtin import clear_and_unlink
 
@@ -19,6 +28,7 @@ bandwidth_equation = Recordings.segment_size / (
 )
 
 MAX_CALCULATED_BANDWIDTH = 10000  # 10Gb/hr
+BANDWIDTH_SAMPLE_TARGET = 50
 
 
 class StorageMaintainer(threading.Thread):
@@ -30,6 +40,99 @@ class StorageMaintainer(threading.Thread):
         self.stop_event = stop_event
         self.camera_storage_stats: dict[str, dict] = {}
 
+        # read by stats; true while maintenance has to delete retained recordings
+        self.retention_unmet = False
+        self.config_subscriber = CameraConfigUpdateSubscriber(
+            self.config,
+            self.config.cameras,
+            [CameraConfigUpdateEnum.record],
+        )
+
+    def _recording_stream_types(self, camera: str) -> tuple[str, ...]:
+        """Return the stream types the camera is currently recording."""
+        camera_config = self.config.cameras.get(camera)
+
+        if camera_config is None or not camera_config.record.enabled:
+            return ()
+
+        if camera_config.record.sub.enabled:
+            return (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
+
+        return (STREAM_TYPE_MAIN,)
+
+    def expected_hourly_bandwidth(self) -> float:
+        """Return the MB/hr the cameras are expected to write.
+
+        Only the streams a camera currently records are counted, so toggling
+        recording or sub stream recording is reflected without waiting for the
+        existing segments of a stopped stream to expire.
+        """
+        total = 0.0
+
+        for camera, stats in self.camera_storage_stats.items():
+            stream_bandwidths = stats.get("bandwidth_by_stream", {})
+            total += sum(
+                stream_bandwidths.get(stream_type, 0)
+                for stream_type in self._recording_stream_types(camera)
+            )
+
+        return round(total, 2)
+
+    def _recent_stream_bandwidth(
+        self, camera: str, stream_type: str, window: int
+    ) -> float | None:
+        """Average MB/s over a stream's most recent rows, or None if no sample.
+
+        Zero-size rows are excluded inside the projection, not the WHERE
+        clause: a segment_size predicate baits the planner into the
+        (camera, segment_size) index plus a full sort of the camera's
+        history instead of the time-ordered index.
+        """
+        recent = (
+            Recordings.select(
+                Case(
+                    None,
+                    [(Recordings.segment_size > 0, bandwidth_equation)],
+                    None,
+                ).alias("bw")
+            )
+            .where(
+                Recordings.camera == camera,
+                Recordings.stream_type == stream_type,
+            )
+            .order_by(Recordings.start_time.desc())
+            .limit(window)
+            .alias("recent")
+        )
+        avg: float | None = Recordings.select(fn.AVG(SQL("bw"))).from_(recent).scalar()
+        return avg
+
+    def _stream_sample_count(self, camera: str, stream_type: str) -> int:
+        """Count a stream's non-zero segments, stopping at the sample target."""
+        count: int = (
+            Recordings.select(Recordings.id)
+            .where(
+                Recordings.camera == camera,
+                Recordings.stream_type == stream_type,
+                Recordings.segment_size > 0,
+            )
+            .limit(BANDWIDTH_SAMPLE_TARGET)
+            .count()
+        )
+        return count
+
+    def _needs_refresh(self, camera: str) -> bool:
+        """Return whether a stream the camera records still lacks samples.
+
+        Counted per stream rather than per camera: a stream that starts
+        recording later has no samples of its own yet, and a camera-wide count
+        would report it settled on the strength of another stream's history.
+        """
+        return any(
+            self._stream_sample_count(camera, stream_type) < BANDWIDTH_SAMPLE_TARGET
+            for stream_type in self._recording_stream_types(camera)
+        )
+
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
         for camera in self.config.cameras.keys():
@@ -37,45 +140,45 @@ class StorageMaintainer(threading.Thread):
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
 
-            # cameras with < 50 segments should be refreshed to keep size accurate
-            # when few segments are available
-            if self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
-                self.camera_storage_stats[camera] = {
-                    "needs_refresh": (
-                        Recordings.select(fn.COUNT("*"))
-                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                        .scalar()
-                        < 50
-                    )
+            if not self.camera_storage_stats.get(camera, {}).get("needs_refresh", True):
+                continue
+
+            # calculate MB/hr from the last 100 segments of each stream
+            # type and sum the rates; mixing streams would average small
+            # sub segments against large main segments and underestimate
+            # the true write rate
+            bandwidth_by_stream: dict[str, float] = {}
+            for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
+                avg_bw = self._recent_stream_bandwidth(camera, stream_type, 100)
+                if avg_bw is None:
+                    # the recent window can be all zero-size ingest
+                    # glitches; look further back before concluding
+                    # the stream writes nothing
+                    avg_bw = self._recent_stream_bandwidth(camera, stream_type, 1000)
+                if avg_bw is not None:
+                    bandwidth_by_stream[stream_type] = round(avg_bw * 3600, 2)
+
+            bandwidth = round(sum(bandwidth_by_stream.values()), 2)
+
+            if bandwidth > MAX_CALCULATED_BANDWIDTH:
+                logger.warning(
+                    f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
+                )
+                # scale each stream so the per stream values still sum to
+                # the clamped total the UI displays alongside them
+                scale = MAX_CALCULATED_BANDWIDTH / bandwidth
+                bandwidth_by_stream = {
+                    stream_type: round(value * scale, 2)
+                    for stream_type, value in bandwidth_by_stream.items()
                 }
+                bandwidth = MAX_CALCULATED_BANDWIDTH
 
-                # calculate MB/hr from last 100 segments
-                try:
-                    # Subquery to get last 100 segments, then average their bandwidth
-                    last_100 = (
-                        Recordings.select(bandwidth_equation.alias("bw"))
-                        .where(Recordings.camera == camera, Recordings.segment_size > 0)
-                        .order_by(Recordings.start_time.desc())
-                        .limit(100)
-                        .alias("recent")
-                    )
-
-                    bandwidth = round(
-                        Recordings.select(fn.AVG(SQL("bw"))).from_(last_100).scalar()
-                        * 3600,
-                        2,
-                    )
-
-                    if bandwidth > MAX_CALCULATED_BANDWIDTH:
-                        logger.warning(
-                            f"{camera} has a bandwidth of {bandwidth} MB/hr which exceeds the expected maximum. This typically indicates an issue with the cameras recordings."
-                        )
-                        bandwidth = MAX_CALCULATED_BANDWIDTH
-                except TypeError:
-                    bandwidth = 0
-
-                self.camera_storage_stats[camera]["bandwidth"] = bandwidth
-                logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
+            self.camera_storage_stats[camera] = {
+                "needs_refresh": self._needs_refresh(camera),
+                "bandwidth": bandwidth,
+                "bandwidth_by_stream": bandwidth_by_stream,
+            }
+            logger.debug(f"{camera} has a bandwidth of {bandwidth} MiB/hr.")
 
     def calculate_camera_usages(self) -> dict[str, dict]:
         """Calculate the storage usage of each camera."""
@@ -86,20 +189,42 @@ class StorageMaintainer(threading.Thread):
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
 
-            camera_storage = (
-                Recordings.select(fn.SUM(Recordings.segment_size))
-                .where(Recordings.camera == camera, Recordings.segment_size != 0)
-                .scalar()
+            stream_usages = {
+                row["stream_type"]: row["usage"] or 0
+                for row in (
+                    Recordings.select(
+                        Recordings.stream_type,
+                        fn.SUM(Recordings.segment_size).alias("usage"),
+                    )
+                    .where(Recordings.camera == camera, Recordings.segment_size != 0)
+                    .group_by(Recordings.stream_type)
+                    .dicts()
+                )
+            }
+            stream_bandwidths = self.camera_storage_stats.get(camera, {}).get(
+                "bandwidth_by_stream", {}
             )
 
             camera_key = (
                 getattr(self.config.cameras[camera], "friendly_name", None) or camera
             )
             usages[camera_key] = {
-                "usage": camera_storage,
+                "usage": sum(stream_usages.values()),
                 "bandwidth": self.camera_storage_stats.get(camera, {}).get(
                     "bandwidth", 0
                 ),
+                # only streams with segments on disk are reported, so a camera
+                # keeps its sub entry until sub retention expires those segments.
+                # bandwidth is null rather than 0 when the cache holds no sample
+                # for the stream, since 0 would claim it writes nothing
+                "streams": {
+                    stream_type: {
+                        "usage": stream_usages[stream_type],
+                        "bandwidth": stream_bandwidths.get(stream_type),
+                    }
+                    for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
+                    if stream_usages.get(stream_type)
+                },
             }
 
         return usages
@@ -108,9 +233,7 @@ class StorageMaintainer(threading.Thread):
         """Return if storage needs cleanup."""
         # currently runs cleanup if less than 1 hour of space is left
         # disk_usage should not spin up disks
-        hourly_bandwidth = sum(
-            [b["bandwidth"] for b in self.camera_storage_stats.values()]
-        )
+        hourly_bandwidth = self.expected_hourly_bandwidth()
         remaining_storage = round(shutil.disk_usage(RECORD_DIR).free / pow(2, 20), 1)
         logger.debug(
             f"Storage cleanup check: {hourly_bandwidth} hourly with remaining storage: {remaining_storage}."
@@ -121,9 +244,7 @@ class StorageMaintainer(threading.Thread):
         """Remove oldest hour of recordings."""
         logger.debug("Starting storage cleanup.")
         deleted_segments_size = 0
-        hourly_bandwidth = sum(
-            [b["bandwidth"] for b in self.camera_storage_stats.values()]
-        )
+        hourly_bandwidth = self.expected_hourly_bandwidth()
 
         recordings = (
             Recordings.select(
@@ -224,8 +345,11 @@ class StorageMaintainer(threading.Thread):
                 except FileNotFoundError:
                     # this file was not found so we must assume no space was cleaned up
                     pass
+
+            self.retention_unmet = True
         else:
             logger.info(f"Cleaned up {deleted_segments_size:.2f} MB of recordings")
+            self.retention_unmet = False
 
         logger.debug(f"Expiring {len(deleted_recordings)} recordings")
         # delete up to 100,000 at a time
@@ -283,20 +407,33 @@ class StorageMaintainer(threading.Thread):
         """Check every 5 minutes if storage needs to be cleaned up."""
         if self.config.safe_mode:
             logger.info("Safe mode enabled, skipping storage maintenance")
+            self.config_subscriber.stop()
             return
 
         self.calculate_camera_bandwidth()
         while not self.stop_event.wait(300):
-            if not self.camera_storage_stats or True in [
-                r["needs_refresh"] for r in self.camera_storage_stats.values()
-            ]:
-                self.calculate_camera_bandwidth()
-                logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
+            self._maintain_once()
 
-            if self.check_storage_needs_cleanup():
-                logger.info(
-                    "Less than 1 hour of recording space left, running storage maintenance..."
-                )
-                self.reduce_storage_consumption()
-
+        self.config_subscriber.stop()
         logger.info("Exiting storage maintainer...")
+
+    def _maintain_once(self) -> None:
+        updated_topics = self.config_subscriber.check_for_updates()
+
+        for camera in updated_topics.get(CameraConfigUpdateEnum.record.name, []):
+            if camera in self.camera_storage_stats:
+                self.camera_storage_stats[camera]["needs_refresh"] = True
+
+        if not self.camera_storage_stats or True in [
+            r["needs_refresh"] for r in self.camera_storage_stats.values()
+        ]:
+            self.calculate_camera_bandwidth()
+            logger.debug(f"Default camera bandwidths: {self.camera_storage_stats}.")
+
+        if self.check_storage_needs_cleanup():
+            logger.info(
+                "Less than 1 hour of recording space left, running storage maintenance..."
+            )
+            self.reduce_storage_consumption()
+        else:
+            self.retention_unmet = False

@@ -12,6 +12,7 @@ from typing import Any
 
 import cv2
 from peewee import DoesNotExist
+from playhouse.shortcuts import model_to_dict
 from titlecase import titlecase
 
 from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
@@ -23,6 +24,7 @@ from frigate.const import (
     ATTRIBUTE_LABEL_DISPLAY_MAP,
     CACHE_DIR,
     CLIPS_DIR,
+    STREAM_TYPE_MAIN,
     UPDATE_REVIEW_DESCRIPTION,
 )
 from frigate.data_processing.types import PostProcessDataEnum
@@ -137,7 +139,10 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             return
 
         camera = data["after"]["camera"]
-        camera_config = self.config.cameras[camera]
+        camera_config = self.config.cameras.get(camera)
+
+        if camera_config is None:
+            return
 
         if not camera_config.review.genai.enabled:
             return
@@ -163,17 +168,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             image_source = camera_config.review.genai.image_source
 
             if image_source == ImageSourceEnum.recordings:
-                duration = final_data["end_time"] - final_data["start_time"]
-                buffer_extension = min(5, duration * RECORDING_BUFFER_EXTENSION_PERCENT)
-
-                # Ensure minimum total duration for short review items
-                # This provides better context for brief events
-                total_duration = duration + (2 * buffer_extension)
-                if total_duration < MIN_RECORDING_DURATION:
-                    # Expand buffer to reach minimum duration, still respecting max of 5s per side
-                    additional_buffer_per_side = (MIN_RECORDING_DURATION - duration) / 2
-                    buffer_extension = min(5, additional_buffer_per_side)
-
+                buffer_extension = get_recording_buffer_extension(
+                    final_data["end_time"] - final_data["start_time"]
+                )
                 final_data["start_time"] -= buffer_extension
                 final_data["end_time"] += buffer_extension
 
@@ -198,16 +195,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                         camera_config.review.genai.debug_save_thumbnails,
                     )
                 elif camera_config.review.genai.debug_save_thumbnails:
-                    # Save debug thumbnails for recordings
-                    Path(os.path.join(CLIPS_DIR, "genai-requests", id)).mkdir(
-                        parents=True, exist_ok=True
-                    )
-                    for idx, frame_bytes in enumerate(thumbs):
-                        with open(
-                            os.path.join(CLIPS_DIR, f"genai-requests/{id}/{idx}.jpg"),
-                            "wb",
-                        ) as f:
-                            f.write(frame_bytes)
+                    self.save_debug_recording_frames(id, thumbs)
             else:
                 # Use preview frames
                 thumbs = self.get_preview_frames_as_bytes(
@@ -219,25 +207,23 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     camera_config.review.genai.debug_save_thumbnails,
                 )
 
-            # kickoff analysis
-            self.review_desc_dps.update()
-            threading.Thread(
-                target=run_analysis,
-                args=(
-                    self.requestor,
-                    self.genai_manager.description_client,
-                    self.review_desc_speed,
-                    camera_config,
-                    final_data,
-                    thumbs,
-                    camera_config.review.genai,
-                    list(self.config.model.merged_labelmap.values()),
-                    self.config.model.all_attributes,
-                ),
-            ).start()
+            self.start_analysis(camera_config, final_data, thumbs)
 
     def handle_request(self, topic: str, request_data: dict[str, Any]) -> str | None:
-        if topic == EmbeddingsRequestEnum.summarize_review.value:
+        if topic == EmbeddingsRequestEnum.regenerate_review_description.value:
+            review_id = request_data["review_id"]
+            logger.debug("Found GenAI Review description request for %s", review_id)
+
+            # frame extraction shells out to ffmpeg once per frame, so run the
+            # whole thing off the maintainer loop and answer the caller now
+            threading.Thread(
+                target=self.regenerate_description,
+                name=f"regenerate_review_description_{review_id}",
+                daemon=True,
+                args=(review_id,),
+            ).start()
+            return "started"
+        elif topic == EmbeddingsRequestEnum.summarize_review.value:
             start_ts = request_data["start_ts"]
             end_ts = request_data["end_ts"]
             logger.debug(
@@ -356,6 +342,104 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         else:
             return None
 
+    def regenerate_description(self, review_id: str) -> None:
+        """Re-run a finished review item through the description process.
+
+        Frames always come from recordings: preview frames only live in the
+        cache briefly and are much harder to sample from once they have been
+        compressed into a preview clip. Alerts and detections are both accepted
+        regardless of the per-camera alerts/detections toggles, since the run
+        was asked for explicitly.
+        """
+        client = self.genai_manager.description_client
+
+        if client is None:
+            logger.error("No GenAI provider is assigned the descriptions role")
+            return
+
+        try:
+            review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
+        except DoesNotExist:
+            logger.error(
+                "Review item %s not found for description generation", review_id
+            )
+            return
+
+        camera_config = self.config.cameras.get(str(review.camera))
+
+        if camera_config is None:
+            logger.error("Camera %s no longer exists", review.camera)
+            return
+
+        if not camera_config.review.genai.enabled:
+            logger.error(
+                "GenAI review descriptions are not enabled for %s", review.camera
+            )
+            return
+
+        final_data = model_to_dict(review)
+
+        if final_data["end_time"] is None:
+            logger.error("Review item %s has not ended yet", review_id)
+            return
+
+        buffer_extension = get_recording_buffer_extension(
+            final_data["end_time"] - final_data["start_time"]
+        )
+        thumbs = self.get_recording_frames(
+            str(review.camera),
+            final_data["start_time"] - buffer_extension,
+            final_data["end_time"] + buffer_extension,
+            height=480,
+        )
+
+        if not thumbs:
+            logger.error(
+                "No recording frames are available for review item %s", review_id
+            )
+            return
+
+        if camera_config.review.genai.debug_save_thumbnails:
+            self.save_debug_recording_frames(review_id, thumbs)
+
+        self.start_analysis(camera_config, final_data, thumbs)
+
+    def start_analysis(
+        self,
+        camera_config: CameraConfig,
+        final_data: dict[str, Any],
+        thumbs: list[bytes],
+    ) -> None:
+        """Kick off description generation for a review item in the background."""
+        self.review_desc_dps.update()
+        threading.Thread(
+            target=run_analysis,
+            args=(
+                self.requestor,
+                self.genai_manager.description_client,
+                self.review_desc_speed,
+                camera_config,
+                final_data,
+                thumbs,
+                camera_config.review.genai,
+                sorted(self.config.all_labels),
+                self.config.all_attributes,
+            ),
+        ).start()
+
+    def save_debug_recording_frames(self, review_id: str, thumbs: list[bytes]) -> None:
+        """Write the recording frames sent to the provider out for debugging."""
+        Path(os.path.join(CLIPS_DIR, "genai-requests", review_id)).mkdir(
+            parents=True, exist_ok=True
+        )
+
+        for idx, frame_bytes in enumerate(thumbs):
+            with open(
+                os.path.join(CLIPS_DIR, f"genai-requests/{review_id}/{idx}.jpg"),
+                "wb",
+            ) as f:
+                f.write(frame_bytes)
+
     def get_cache_frames(
         self,
         camera: str,
@@ -438,6 +522,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     )
                     .where((ts >= Recordings.start_time) & (ts <= Recordings.end_time))
                     .where(Recordings.camera == camera)
+                    .where(Recordings.stream_type == STREAM_TYPE_MAIN)
                     .order_by(Recordings.start_time.desc())
                     .limit(1)
                     .get()
@@ -534,6 +619,20 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         return thumbs
 
 
+def get_recording_buffer_extension(duration: float) -> float:
+    """Seconds of padding to add to each side of a review item when pulling
+    recording frames, so brief items still carry enough context."""
+    buffer_extension = min(5, duration * RECORDING_BUFFER_EXTENSION_PERCENT)
+
+    # Ensure minimum total duration for short review items
+    # This provides better context for brief events
+    if duration + (2 * buffer_extension) < MIN_RECORDING_DURATION:
+        # Expand buffer to reach minimum duration, still respecting max of 5s per side
+        buffer_extension = min(5, (MIN_RECORDING_DURATION - duration) / 2)
+
+    return buffer_extension
+
+
 def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
@@ -596,6 +695,7 @@ def run_analysis(
         genai_config.preferred_language,
         genai_config.debug_save_thumbnails,
         genai_config.activity_context_prompt,
+        genai_config.response_style,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 

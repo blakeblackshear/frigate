@@ -2,8 +2,6 @@
   "documentTitle": {
     "default": "設定 - Frigate",
     "authentication": "認證設定 - Frigate",
-    "camera": "鏡頭設定 - Frigate",
-    "classification": "進階功能設定 - Frigate",
     "masksAndZones": "遮罩與區域編輯器 - Frigate",
     "motionTuner": "移動調校器 - Frigate",
     "object": "除錯 - Frigate",
@@ -16,7 +14,6 @@
   },
   "menu": {
     "ui": "介面",
-    "classification": "進階功能",
     "cameras": "鏡頭設定",
     "masksAndZones": "遮罩／區域",
     "motionTuner": "移動調校器",
@@ -95,139 +92,6 @@
       "error": {
         "clearStoredLayoutFailed": "清除儲存版面配置失敗：{{errorMessage}}",
         "clearStreamingSettingsFailed": "清除串流設定失敗：{{errorMessage}}"
-      }
-    }
-  },
-  "classification": {
-    "birdClassification": {
-      "desc": "鳥類分類會使用量化 Tensorflow 模型識別已知鳥類。當辨識到已知鳥類時，牠的常見名稱會加到子標籤上。此資訊會顯示在介面、篩選器及通知中。",
-      "title": "鳥類分類"
-    },
-    "semanticSearch": {
-      "title": "語意搜尋",
-      "desc": "Frigate 的語意搜尋功能讓你可以利用影像本身、自訂文字描述，或自動產生的描述，在審查項目中尋找已追蹤的物件。",
-      "readTheDocumentation": "閱讀文件",
-      "reindexNow": {
-        "label": "立即重建索引",
-        "confirmTitle": "確認重建索引",
-        "confirmButton": "重建索引",
-        "success": "重建索引已成功開始。",
-        "alreadyInProgress": "重建索引已在進行中。",
-        "error": "啟動重建索引失敗：{{errorMessage}}",
-        "confirmDesc": "你確定要重建索引所有已追蹤物件的嵌入向量嗎？這個過程會在背景運行，但可能會用盡你的 CPU，而且需要一定時間。你可以在「瀏覽」頁面查看進度。",
-        "desc": "重建索引會為所有已追蹤物件重新生成嵌入向量。這個過程會在背景運行，可能會用盡你的 CPU，所需時間取決於已追蹤物件的數量。"
-      },
-      "modelSize": {
-        "label": "模型大小",
-        "desc": "用於語意搜尋的模型大小。",
-        "small": {
-          "title": "小型",
-          "desc": "使用<em>小型</em>模型會採用量化版本，較少佔用 RAM，在 CPU 上運行更快，而嵌入品質的差異非常細微。"
-        },
-        "large": {
-          "title": "大型",
-          "desc": "使用<em>大型</em>模型會採用完整的 Jina 模型，並在適用情況下自動於 GPU 上運行。"
-        }
-      }
-    },
-    "faceRecognition": {
-      "modelSize": {
-        "small": {
-          "title": "小型",
-          "desc": "使用<em>小型</em>模型會採用 FaceNet 臉部嵌入模型，在大多數 CPU 上能有效運行。"
-        },
-        "large": {
-          "title": "大型",
-          "desc": "使用<em>大型</em>模型會採用 ArcFace 臉部嵌入模型，並在適用情況下自動於 GPU 上運行。"
-        },
-        "label": "模型大小",
-        "desc": "用於人臉識別的模型大小。"
-      },
-      "readTheDocumentation": "閱讀文件",
-      "title": "人臉識別",
-      "desc": "人臉識別功能允許為人物分配名字，當辨識到他們的臉孔時，Frigate 會將名字加到子標籤上。此資訊會顯示於介面、篩選器及通知中。"
-    },
-    "licensePlateRecognition": {
-      "title": "車牌識別",
-      "readTheDocumentation": "閱讀文件",
-      "desc": "Frigate 可以識別車輛上的車牌，自動將偵測到的字元加到已辨識車牌欄位，或將已知名稱加到屬於車輛類型的物件的子標籤上。常見用途包括讀取駛入車道或在街道上駛過的車輛的車牌。"
-    },
-    "restart_required": "需要重新啟動（分類設定已變更）",
-    "toast": {
-      "error": "儲存設定變更失敗：{{errorMessage}}",
-      "success": "分類設定已儲存。請重新啟動 Frigate 以套用你的更改。"
-    },
-    "title": "進階功能設定",
-    "unsavedChanges": "進階功能設定更改尚未儲存"
-  },
-  "camera": {
-    "title": "鏡頭設定",
-    "streams": {
-      "title": "串流",
-      "desc": "暫時停用鏡頭直到Frigate重新啟動。停用鏡頭會完全停止 Frigate 處理此鏡頭的串流。將會無法使用偵測、錄影和除錯功能。<br /><em>注意：這不會停用 go2rtc 的轉播功能。</em>"
-    },
-    "review": {
-      "title": "審查",
-      "desc": "暫時啟用或停用此鏡頭的警報和偵測直到Frigate重新啟動。停用後，將不會產生新的審查項目。 ",
-      "alerts": "警報 ",
-      "detections": "偵測 "
-    },
-    "reviewClassification": {
-      "readTheDocumentation": "閱讀文件",
-      "noDefinedZones": "此鏡頭未定義任何區域。",
-      "zoneObjectAlertsTips": "在{{cameraName}}的{{zone}}區域偵測到的所有{{alertsLabels}}物件將會顯示為警報。",
-      "objectDetectionsTips": "無論位於哪個區域，在{{cameraName}}上所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
-      "objectAlertsTips": "在{{cameraName}}上所有{{alertsLabels}}物件將會顯示為警報。",
-      "zoneObjectDetectionsTips": {
-        "text": "在{{cameraName}}的{{zone}}區域內所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
-        "regardlessOfZoneObjectDetectionsTips": "無論位於哪個區域，在{{cameraName}}上所有未分類的{{detectionsLabels}}物件將會顯示為偵測結果。",
-        "notSelectDetections": "無論位於哪個區域，在{{cameraName}}的{{zone}}區域偵測到、但未分類為警報的{{detectionsLabels}}物件將會顯示為偵測結果。"
-      },
-      "selectDetectionsZones": "選擇偵測的區域",
-      "limitDetections": "限制偵測至特定區域",
-      "title": "審查分類",
-      "desc": "Frigate會將審查項目分類為「警報」同「偵測」。預設情況下，所有<em>人</em>同<em>車</em> 的物件都會被視為警報。你可以透過設定所需區域，細分審查項目分類。",
-      "selectAlertsZones": "選擇警報的區域",
-      "toast": {
-        "success": "審查分類設定已儲存。請重新啟動Frigate以套用更改。"
-      },
-      "unsavedChanges": "{{camera}}的審查分類設定尚未儲存"
-    },
-    "object_descriptions": {
-      "title": "生成式 AI 物件描述",
-      "desc": "暫時啟用或停用此鏡頭生成式 AI 物件描述。停用時，不會為此鏡頭的追蹤物件請求 AI 描述。"
-    },
-    "review_descriptions": {
-      "title": "生成式 AI 審查描述",
-      "desc": "暫時啟用或停用此鏡頭生成式 AI 審查描述。停用時，不會為此鏡頭的審查項目請求 AI 描述。"
-    },
-    "addCamera": "新增鏡頭",
-    "editCamera": "編輯鏡頭：",
-    "selectCamera": "選擇鏡頭",
-    "backToSettings": "返回鏡頭設定",
-    "cameraConfig": {
-      "add": "新增鏡頭",
-      "edit": "編輯鏡頭",
-      "description": "設定鏡頭，包括串流輸入同角色分配。",
-      "name": "鏡頭名稱",
-      "nameRequired": "必須填寫鏡頭名稱",
-      "nameLength": "鏡頭名稱不得多於 24 個字元。",
-      "namePlaceholder": "例如：front_door",
-      "enabled": "已啟用",
-      "ffmpeg": {
-        "inputs": "輸入串流",
-        "path": "串流路徑",
-        "pathRequired": "必須填寫串流路徑",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "角色",
-        "rolesRequired": "至少需要分配一個角色",
-        "rolesUnique": "每個角色（音訊、偵測、錄影）只可分配到一個串流",
-        "addInput": "新增輸入串流",
-        "removeInput": "移除輸入串流",
-        "inputsRequired": "至少需要一個輸入串流"
-      },
-      "toast": {
-        "success": "鏡頭 {{cameraName}} 已成功儲存"
       }
     }
   },
@@ -323,7 +187,6 @@
       "speedEstimation": {
         "title": "速度估算",
         "desc": "啟用此區域內物件的速度估算。區域必須正好有4個點。",
-        "docs": "閱讀文件",
         "lineCDistance": "C 線距離 ({{unit}})",
         "lineBDistance": "B 線距離 ({{unit}})",
         "lineADistance": "A 線距離 ({{unit}})",
@@ -360,12 +223,10 @@
       "clickDrawPolygon": "在圖片上點擊以繪製多邊形。",
       "polygonAreaTooLarge": {
         "title": "移動遮罩覆蓋了鏡頭畫面{{polygonArea}}%。建議不要使用過大的遮罩。",
-        "tips": "移動遮罩無法阻止物件被偵測，應使用必要區域來限制範圍。",
-        "documentation": "閱讀文件"
+        "tips": "移動遮罩無法阻止物件被偵測，應使用必要區域來限制範圍。"
       },
       "context": {
-        "title": "移動遮罩用於防止某些不需要的移動（如樹枝晃動、鏡頭時間戳記）觸發偵測。移動遮罩應該<em>非常謹慎</em>使用，過度遮罩會令物件追蹤更加困難。",
-        "documentation": "閱讀文件"
+        "title": "移動遮罩用於防止某些不需要的移動（如樹枝晃動、鏡頭時間戳記）觸發偵測。移動遮罩應該<em>非常謹慎</em>使用，過度遮罩會令物件追蹤更加困難。"
       },
       "add": "新增移動遮罩",
       "toast": {
@@ -468,7 +329,6 @@
     },
     "objectShapeFilterDrawing": {
       "title": "物件形狀篩選繪圖",
-      "document": "閱讀文件 ",
       "score": "分數",
       "area": "面積",
       "ratio": "比例",
@@ -606,13 +466,11 @@
     "title": "通知",
     "notificationSettings": {
       "title": "通知設定",
-      "desc": "Frigate可原生向你的裝置推送通知，無論在瀏覽器中運行或安裝為PWA。",
-      "documentation": "閱讀文件"
+      "desc": "Frigate可原生向你的裝置推送通知，無論在瀏覽器中運行或安裝為PWA。"
     },
     "notificationUnavailable": {
       "title": "無法使用通知功能",
-      "desc": "網頁推送通知需在安全環境下運作（<code>https://…</code>），這是瀏覽器的限制。請透過安全連線存取Frigate以使用通知功能。",
-      "documentation": "閱讀文件"
+      "desc": "網頁推送通知需在安全環境下運作（<code>https://…</code>），這是瀏覽器的限制。請透過安全連線存取Frigate以使用通知功能。"
     },
     "globalSettings": {
       "title": "全域設定",
@@ -668,11 +526,9 @@
     },
     "snapshotConfig": {
       "title": "快照設定",
-      "documentation": "閱讀文件",
       "table": {
         "camera": "鏡頭",
-        "snapshots": "快照",
-        "cleanCopySnapshots": "<code>clean_copy</code> 快照"
+        "snapshots": "快照"
       },
       "cleanCopyWarning": "部分鏡頭已啟用快照，但未啟用乾淨副本。你必須於快照設定中啟用<code>clean_copy</code>，才能從這些鏡頭提交影像至Frigate+。",
       "desc": "提交至Frigate+需要在設定中同時啟用快照及<code>clean_copy</code>快照功能。"
@@ -716,8 +572,7 @@
         }
       },
       "desc": "人臉識別功能允許為人物分配名字，當辨識到他們的臉孔時，Frigate 會將名字加到子標籤上。此資訊會顯示於介面、篩選器及通知中。",
-      "title": "人臉識別",
-      "readTheDocumentation": "閱讀文件"
+      "title": "人臉識別"
     },
     "birdClassification": {
       "title": "鳥類分類",
@@ -736,7 +591,6 @@
         "error": "啟動重建索引失敗：{{errorMessage}}"
       },
       "title": "語意搜尋",
-      "readTheDocumentation": "閱讀文件",
       "modelSize": {
         "label": "模型大小",
         "desc": "用於語意搜尋的模型大小。",
@@ -752,8 +606,7 @@
     },
     "licensePlateRecognition": {
       "title": "車牌識別",
-      "desc": "Frigate 可以識別車輛上的車牌，自動將偵測到的字元加到已辨識車牌欄位，或將已知名稱加到屬於車輛類型的物件的子標籤上。常見用途包括讀取駛入車道或在街道上駛過的車輛的車牌。",
-      "readTheDocumentation": "閱讀文件"
+      "desc": "Frigate 可以識別車輛上的車牌，自動將偵測到的字元加到已辨識車牌欄位，或將已知名稱加到屬於車輛類型的物件的子標籤上。常見用途包括讀取駛入車道或在街道上駛過的車輛的車牌。"
     },
     "title": "進階功能設定",
     "unsavedChanges": "未儲存進階功能設定變更",
@@ -850,7 +703,6 @@
       "description": "描述"
     },
     "actions": {
-      "alert": "標記為警報",
       "notification": "發送通知",
       "sub_label": "新增子標籤",
       "attribute": "新增屬性"
@@ -887,11 +739,6 @@
           "placeholder": "選擇觸發器類型",
           "description": "偵測到相似物件描述時觸發",
           "thumbnail": "偵測到相似縮圖時觸發"
-        },
-        "friendly_name": {
-          "title": "顯示名稱",
-          "placeholder": "為此觸發器命名或描述",
-          "description": "此觸發器的可選顯示名稱或描述文字。"
         },
         "content": {
           "title": "內容",
@@ -990,26 +837,13 @@
       "brandInformation": "品牌資訊",
       "brandUrlFormat": "適用於 RTSP 網址格式如下的鏡頭：{{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
-      "testConnection": "測試連線",
-      "testSuccess": "連線測試成功！",
-      "testFailed": "連線測試失敗，請檢查輸入內容後再試一次。",
-      "streamDetails": "串流詳情",
-      "warnings": {
-        "noSnapshot": "無法從設定的串流中擷取快照。"
-      },
       "errors": {
         "brandOrCustomUrlRequired": "請選擇包含主機/IP 的鏡頭品牌，或選擇「其他」並輸入自訂網址",
         "nameRequired": "必須輸入鏡頭名稱",
         "nameLength": "鏡頭名稱長度不得超過 64 個字元",
         "invalidCharacters": "鏡頭名稱包含無效字元",
         "nameExists": "鏡頭名稱已存在",
-        "brands": {
-          "reolink-rtsp": "不建議使用 Reolink RTSP。建議在鏡頭設定中啟用 HTTP，並重新啟動鏡頭設定精靈。"
-        },
         "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」開頭。非 RTSP 串流需手動設定。"
-      },
-      "docs": {
-        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
       },
       "connectionSettings": "連線設定",
       "detectionMethod": "串流偵測方式",
@@ -1023,42 +857,11 @@
     },
     "step2": {
       "description": "根據你所選擇的偵測方法，探測鏡頭是否有用串流，或者設定手動設定。",
-      "streamsTitle": "鏡頭串流",
-      "addStream": "新增串流",
-      "addAnotherStream": "新增另一個串流",
-      "streamTitle": "串流 {{number}}",
-      "streamUrl": "串流網址",
-      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
-      "url": "網址",
-      "resolution": "解析度",
-      "selectResolution": "選擇解析度",
-      "quality": "畫質",
-      "selectQuality": "選擇畫質",
-      "roles": "角色",
-      "roleLabels": {
-        "detect": "物件偵測",
-        "record": "錄影",
-        "audio": "音訊"
-      },
-      "testStream": "測試連線",
       "testSuccess": "連線測試成功！",
       "testFailed": "連線測試失敗。請檢查你的輸入並重試。",
       "testFailedTitle": "測試失敗",
       "connected": "已連線",
       "notConnected": "未連線",
-      "featuresTitle": "功能",
-      "go2rtc": "減少與鏡頭的連線數",
-      "detectRoleWarning": "至少需有一個串流設定為「偵測」角色才能繼續。",
-      "rolesPopover": {
-        "title": "串流角色",
-        "detect": "用於物件偵測的主要影像來源。",
-        "record": "根據設定儲存影片片段。",
-        "audio": "用於音訊偵測的來源。"
-      },
-      "featuresPopover": {
-        "title": "串流功能",
-        "description": "使用 go2rtc 轉串流以減少與鏡頭的直接連線。"
-      },
       "streamDetails": "串流詳情",
       "probing": "正在探測鏡頭…",
       "retry": "重試",
@@ -1094,43 +897,8 @@
     },
     "step3": {
       "description": "設定串流角色，並為鏡頭新增其他串流。",
-      "validationTitle": "串流驗證",
-      "connectAllStreams": "連線所有串流",
-      "reconnectionSuccess": "重新連線成功。",
-      "reconnectionPartial": "部分串流重新連線失敗。",
-      "streamUnavailable": "無法預覽串流",
-      "reload": "重新載入",
-      "connecting": "正在連線...",
       "streamTitle": "串流 {{number}}",
-      "valid": "有效",
-      "failed": "失敗",
-      "notTested": "未測試",
-      "connectStream": "連線",
-      "connectingStream": "連線中",
-      "disconnectStream": "中斷連線",
-      "estimatedBandwidth": "預計頻寬",
       "roles": "角色",
-      "none": "無",
-      "error": "錯誤",
-      "streamValidated": "串流 {{number}} 驗證成功",
-      "streamValidationFailed": "串流 {{number}} 驗證失敗",
-      "saveAndApply": "儲存新鏡頭",
-      "saveError": "設定無效，請檢查你的設定。",
-      "issues": {
-        "title": "串流驗證",
-        "videoCodecGood": "影片編碼格式為 {{codec}}。",
-        "audioCodecGood": "音訊編碼格式為 {{codec}}。",
-        "noAudioWarning": "此串流未偵測到音訊，錄影將不會有聲音。",
-        "audioCodecRecordError": "錄影要支援音訊，必須使用 AAC 編碼。",
-        "audioCodecRequired": "要支援音訊偵測，必須有音訊串流。",
-        "restreamingWarning": "若減少錄影串流與鏡頭的連線，CPU 使用率可能會略微增加。",
-        "dahua": {
-          "substreamWarning": "子串流 1 被鎖定為低解析度。許多 Dahua / Amcrest / EmpireTech 鏡頭支援額外子串流，需要在鏡頭設定中啟用。建議如有可用，檢查並使用這些子串流。"
-        },
-        "hikvision": {
-          "substreamWarning": "子串流 1 被鎖定為低解析度。許多 Hikvision 鏡頭支援額外子串流，需要在鏡頭設定中啟用。建議如有可用，檢查並使用這些子串流。"
-        }
-      },
       "streamsTitle": "鏡頭串流",
       "addStream": "新增串流",
       "addAnotherStream": "新增另一個串流",
@@ -1225,8 +993,7 @@
     "selectCamera": "選擇鏡頭",
     "backToSettings": "返回鏡頭設定",
     "streams": {
-      "title": "啟用／停用鏡頭",
-      "desc": "暫時停用鏡頭，直到 Frigate 重新啟動。停用鏡頭會完全停止 Frigate 對該鏡頭串流的處理。偵測、錄影及除錯功能將無法使用。<br /><em>注意：這不會停用 go2rtc 轉串流。</em>"
+      "title": "啟用／停用鏡頭"
     },
     "cameraConfig": {
       "add": "新增鏡頭",

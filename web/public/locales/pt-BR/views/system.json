@@ -184,8 +184,7 @@
     "healthy": "O sistema está saudável",
     "cameraIsOffline": "{{camera}} está offline",
     "reindexingEmbeddings": "Reindexando os embeddings ({{processed}}% completado)",
-    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)",
-    "shmTooLow": "A alocação ({{total}} MB) para a pasta /dev/shm deve ser aumentada para ao menos {{min}} MB."
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Enriquecimentos",

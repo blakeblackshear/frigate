@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "Nustatymai - Frigate",
     "authentication": "Autentifikavimo Nustatymai - Frigate",
-    "camera": "Kameros Nustatymai - Frigate",
     "object": "Debug - Frigate",
     "general": "Išvaizdos Parametrai - Frigate",
     "frigatePlus": "Frigate+ Nustatymai - Frigate",
@@ -159,76 +158,6 @@
       "success": "Patobulinimų nustaty buvo pakeisti. Kad pkyčiai būtų pritaikyti perkraukite Frigate.",
       "error": "Nepavyko išsaugoti konfiguracijos pakeitimų: {{errorMessage}}"
     }
-  },
-  "camera": {
-    "title": "Kamerų Nustatymai",
-    "streams": {
-      "title": "Transliacijos",
-      "desc": "Laikinai išjunkite kamerą kol Frigate bus perkrautas. Išjungiant kamerą visiškai sustabdo Frigate veiklą šiai kamerai. Nebus aptikimų, įrašų ar debug informacijos.<br /><em>Pastaba: Tai neišjungs go2rtc sratų.</em>"
-    },
-    "review": {
-      "desc": "Trumpam įjungti/išjungti įspėjimus ir aptikimus šiai kamerai iki kol Frigate bus perkrautas. Kai išjungta, naujos peržiūros nebus kuriamos. ",
-      "detections": "Aptikimai ",
-      "title": "Peržiūra",
-      "alerts": "Įspėjimai "
-    },
-    "reviewClassification": {
-      "desc": "Frigate kategorizuoja peržiūras į Įspėjimus ir Aptikimus. Pagal nutylėjimą, visi <em>žmonių</em> ir <em>mašinų</em> objektai yra vertinami kaip įspėjimai. Jūs galite detalizuoti peržiūrų kategorizavimą priskiriant objektas privalomas zonas.",
-      "zoneObjectAlertsTips": "Visi {{alertsLabels}} objektai aptikti {{zone}} ir {{cameraName}} bus rodomi kaip Įspėjimai.",
-      "objectDetectionsTips": "Visi {{detectionsLabels}} objektai nekategorizuoti {{cameraName}} bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra.",
-      "zoneObjectDetectionsTips": {
-        "text": "Visi {{detectionsLabels}} objektai nekategorizuoti {{zone}} ir {{cameraName}} bus rodomi kaip Aptikimai.",
-        "notSelectDetections": "Visi {{detectionsLabels}} objektai aptikti {{zone}} ir {{cameraName}} nekategorizuojami kaip Įspėjimai bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra.",
-        "regardlessOfZoneObjectDetectionsTips": "Visi {{detectionsLabels}} objektai nekategorizuoti {{cameraName}} bus rodomi kaip Aptikimai nepriklausomai kurioje zonoje ji yra."
-      },
-      "selectDetectionsZones": "Pasirinkti zonas Aptikimams",
-      "limitDetections": "Apriboti aptikimus specifinėms zonoms",
-      "title": "Apžvalgų Kalsifikavimas",
-      "noDefinedZones": "Šiai kamerai sukurtų zonų nėra.",
-      "objectAlertsTips": "Visi {{alertsLabels}} objektai kemeroje {{cameraName}} bus rodomi kaip Įspėjimai.",
-      "unsavedChanges": "Neišsaugoti Apžvalgos Klasifikavimo nustatymai kamerai {{camera}}",
-      "selectAlertsZones": "Pasirinkti zonas Įspėjimams",
-      "toast": {
-        "success": "Apžvalgų Klasifikavimo konfiguracija buvo išsaugota. Restartuoti Frigate kad pokyčiai būtų pritaikyti."
-      }
-    },
-    "cameraConfig": {
-      "ffmpeg": {
-        "rolesUnique": "Kiekviena role (garso, aptikimo, įrašymo) gali buti priskirta tik vienam srautui",
-        "inputs": "Įvesties Srautas",
-        "path": "Srauto Kelias",
-        "pathRequired": "Srauto Kelias yra privalomas",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Rolės",
-        "rolesRequired": "Privaloma bent viena rolė",
-        "addInput": "Pridėti Įvesties Srautą",
-        "removeInput": "Pašalinti Įvesties Srautą",
-        "inputsRequired": "Privalomas bent vienas įvesties srautas"
-      },
-      "add": "Pridėti Kamerą",
-      "edit": "Koreguoti Kamerą",
-      "description": "Konfiguruoti kameros nustatymus įskaitant įvesties srautus ir roles.",
-      "name": "Kamera Pavadinimas",
-      "nameRequired": "Kamera pavadinimas yra privalomas",
-      "nameLength": "Kamera pavadininas privalo būti trumpesnis nei 24 simboliai.",
-      "namePlaceholder": "pvz., priekinės_durys",
-      "enabled": "Šjungti",
-      "toast": {
-        "success": "Kamera {{cameraName}} sėkmingai išsaugota"
-      }
-    },
-    "object_descriptions": {
-      "title": "Generatyvinio DI Objektų Aprašymai",
-      "desc": "Laikinai įjungti/ išjungti Ganaratyvinio DI objektų aprašymus šiai kamerai. Kai išjungta, šios kameros sekamiems objektams nebus generuojami aprašymai."
-    },
-    "review_descriptions": {
-      "title": "Generatyvinio DI Apžvalgų Aprašymai",
-      "desc": "Laikinai įjungti/ išjungti Ganaratyvinio DI apžvalgų aprašymus šiai kamerai. Kai išjungta, šios kameros apžvalgoms nebus generuojami aprašymai."
-    },
-    "addCamera": "Pridėti Naują Kamerą",
-    "editCamera": "Koreguoti Kamerą:",
-    "selectCamera": "Pasirinkti Kamera",
-    "backToSettings": "Atgal į Kameros Nustatymus"
   },
   "masksAndZones": {
     "zones": {
@@ -636,11 +565,6 @@
           "error": {
             "min": "Bent vienas veiksmas privalo būti parinktas."
           }
-        },
-        "friendly_name": {
-          "title": "Draugiškas Pavadinimas",
-          "placeholder": "Pavadinikite ar apibūdinkite trigerį",
-          "description": "Draugiškas pavadinimas ar apibūdinimas šiam trigeriui nėra būtinas."
         }
       }
     },
@@ -666,7 +590,6 @@
       "description": "Aprašymas"
     },
     "actions": {
-      "alert": "Pažymėti kaip įspėjimą",
       "notification": "Siųsti Pranešimą"
     },
     "toast": {
@@ -754,8 +677,7 @@
       "cleanCopyWarning": "Kai kurios kameros turi momentinius kadrus išjungtus",
       "table": {
         "camera": "Kamera",
-        "snapshots": "Momentiniai Kadrai",
-        "cleanCopySnapshots": "Momentiniai kadrai <code>švari_kopija</code>"
+        "snapshots": "Momentiniai Kadrai"
       }
     },
     "modelInfo": {
@@ -884,8 +806,6 @@
       "brandInformation": "Gamintojo informacija",
       "brandUrlFormat": "Kamerai su RTSP URL formatas kaip: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://vartotojas:slaptažodis@host:port/path",
-      "testConnection": "Testuoti Susijungimą",
-      "testSuccess": "Susijungimo testas sėkmingas!",
       "connectionSettings": "Prisijungimo Nustatymai",
       "detectionMethod": "Transliacijos Aptikimo Metodas",
       "onvifPort": "ONVIF Portas",

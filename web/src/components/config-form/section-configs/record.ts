@@ -6,12 +6,27 @@ const record: SectionConfigOverrides = {
     messages: [
       {
         key: "no-record-role",
+        health: (ctx) => ctx.fullCameraConfig?.record?.enabled === true,
         messageKey: "configMessages.record.noRecordRole",
         severity: "warning",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
           return !ctx.fullCameraConfig.ffmpeg?.inputs?.some((i) =>
             i.roles?.includes("record"),
+          );
+        },
+      },
+      {
+        key: "no-record-sub-role",
+        health: (ctx) => ctx.fullCameraConfig?.record?.sub?.enabled === true,
+        messageKey: "configMessages.record.noRecordSubRole",
+        severity: "warning",
+        condition: (ctx) => {
+          if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
+          const sub = ctx.formData?.sub as Record<string, unknown> | undefined;
+          if (!sub?.enabled) return false;
+          return !ctx.fullCameraConfig.ffmpeg?.inputs?.some((i) =>
+            i.roles?.includes("record_sub"),
           );
         },
       },
@@ -34,6 +49,7 @@ const record: SectionConfigOverrides = {
       "motion",
       "alerts",
       "detections",
+      "sub",
       "preview",
       "export",
     ],
@@ -65,6 +81,12 @@ const record: SectionConfigOverrides = {
         "ui:options": { enumI18nPrefix: "retainMode" },
       },
       "detections.retain.mode": {
+        "ui:options": { enumI18nPrefix: "retainMode" },
+      },
+      "sub.alerts.mode": {
+        "ui:options": { enumI18nPrefix: "retainMode" },
+      },
+      "sub.detections.mode": {
         "ui:options": { enumI18nPrefix: "retainMode" },
       },
       preview: {

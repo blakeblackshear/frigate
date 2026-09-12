@@ -10,7 +10,6 @@
       "description": "只有在該鏡頭啟用錄影時，才可為該鏡頭建立審查項目。"
     }
   },
-  "timeline": "時間線",
   "events": {
     "label": "事件",
     "noFoundForTimePeriod": "此時段內沒有找到事件。",
@@ -39,8 +38,6 @@
   "detections": "偵測",
   "timeline.aria": "選擇時間線",
   "detected": "已偵測",
-  "suspiciousActivity": "可疑行為",
-  "threateningActivity": "威脅行為",
   "zoomIn": "放大",
   "zoomOut": "縮小",
   "detail": {

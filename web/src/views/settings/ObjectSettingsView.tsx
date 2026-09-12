@@ -34,6 +34,7 @@ import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { AudioLevelGraph } from "@/components/audio/AudioLevelGraph";
 import { useWs } from "@/api/ws";
 import { cn } from "@/lib/utils";
+import { getPrimaryModel } from "@/utils/modelUtil";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -172,11 +173,10 @@ export default function ObjectSettingsView({
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
           <p>
             {t("debug.detectorDesc", {
-              detectors: config
-                ? Object.keys(config?.detectors)
-                    .map((detector) => capitalizeFirstLetter(detector))
-                    .join(",")
-                : "",
+              detectors: (config?.models ?? [])
+                .flatMap((model) => model.devices ?? [])
+                .map((device) => capitalizeFirstLetter(device))
+                .join(","),
             })}
           </p>
           <p>{t("debug.desc")}</p>
@@ -380,7 +380,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
       return;
     }
 
-    return config.model?.colormap;
+    return getPrimaryModel(config)?.colormap;
   }, [config]);
 
   const getColorForObjectName = useCallback(

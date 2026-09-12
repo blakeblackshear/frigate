@@ -66,10 +66,6 @@
             "label": "Omogoči Birdseye",
             "description": "Vklopi ali izklopi funkcijo Birdseye."
         },
-        "mode": {
-            "label": "Način sledenja",
-            "description": "Način vključitve kamer v Birdseye: 'objects' (objekti), 'motion' (gibanje) ali 'continuous' (neprekinjeno)."
-        },
         "order": {
             "label": "Položaj",
             "description": "Številčna vrednost, ki določa vrstni red kamere v postavitvi Birdseye."
@@ -631,10 +627,6 @@
             "label": "Posnetki omogočeni",
             "description": "Omogoči ali onemogoči shranjevanje posnetkov za to kamero."
         },
-        "clean_copy": {
-            "label": "Shrani čisto kopijo",
-            "description": "Poleg označenih shrani tudi čisto kopijo posnetkov brez anotacij."
-        },
         "timestamp": {
             "label": "Prekrivna časovna značka",
             "description": "Na shranjene posnetke dodaj časovno značko."
@@ -661,10 +653,6 @@
             "default": {
                 "label": "Privzeta hramba",
                 "description": "Privzeto število dni za hrambo posnetkov."
-            },
-            "mode": {
-                "label": "Način hrambe",
-                "description": "Način hrambe posnetkov."
             },
             "objects": {
                 "label": "Hramba po objektih",

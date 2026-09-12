@@ -1,0 +1,114 @@
+{
+  "setupWizard": {
+    "steps": {
+      "welcome": "Welcome",
+      "account": "Account",
+      "camera": "Add Camera",
+      "hwaccel": "Acceleration",
+      "detector": "Detection",
+      "recording": "Recording",
+      "complete": "Done"
+    },
+    "welcome": {
+      "title": "Welcome to Frigate",
+      "description": "Let's get your security cameras set up. We'll walk through camera connection, hardware settings, and recording.",
+      "getStarted": "Get Started",
+      "skipSetup": "Skip setup and configure manually"
+    },
+    "account": {
+      "title": "Secure your account",
+      "descriptionSignedIn": "You're signed in as {{username}} using the temporary password from the Frigate logs. Set one you'll remember.",
+      "descriptionAnonymous": "You're accessing Frigate on a port that doesn't require a login. Set a password for the admin account so you can sign in on the secured port.",
+      "passwordSet": "Password set",
+      "changePassword": "Change password",
+      "addUser": "Add user",
+      "usersFailed": "Could not load the user list. You can still set the admin password.",
+      "userFailed": "Failed to add the user. Please try again."
+    },
+    "camera": {
+      "title": "Add Your First Camera",
+      "description": "Connect a camera to start monitoring. You can also add more cameras later in Settings.",
+      "addCamera": "Add Camera",
+      "addAnother": "Add Another Camera",
+      "cameraAdded": "Camera added successfully",
+      "retry": "Try Again"
+    },
+    "hwaccel": {
+      "title": "Hardware Acceleration",
+      "description": "Speed up video decoding with your GPU.",
+      "detecting": "Checking your hardware...",
+      "auto": "Auto",
+      "autoResolved": "Will use {{family}} for your cameras.",
+      "autoNone": "No supported video card found. Frigate will decide at startup.",
+      "recommendFailed": "Hardware detection is unavailable. Frigate will decide at startup.",
+      "families": {
+        "nvidia": "CUDA (NVIDIA)",
+        "vaapi": "VAAPI (Intel/AMD)",
+        "intel-qsv": "QuickSync (Intel)",
+        "rkmpp": "RKMPP (Rockchip)",
+        "jetson": "NVIDIA Jetson",
+        "rpi": "V4L2 (Raspberry Pi)",
+        "none": "None (software decoding)"
+      }
+    },
+    "detector": {
+      "title": "Object Detection",
+      "description": "Choose the hardware Frigate uses to detect people and objects.",
+      "detecting": "Checking for detection hardware...",
+      "probeFailed": "Hardware detection is unavailable. You can configure detection later in Settings.",
+      "recommended": "Recommended",
+      "modelRequired": "{{name}} needs a detection model before it can run. Pick a Frigate+ model, or finish setup and add one under Settings > Detection models.",
+      "plusModelPlaceholder": "Select a Frigate+ model",
+      "continueWithout": "Continue without detection"
+    },
+    "recording": {
+      "title": "Recordings",
+      "description": "Save video from your cameras so you can watch it later.",
+      "enableRecording": "Enable recordings",
+      "retentionDays": "Keep recordings for (days)",
+      "storageEstimate": "With {{free}} GB free, {{cameras}} camera(s) recording around the clock fills the disk in roughly {{days}} days.",
+      "noCameras": "You haven't added cameras yet. Recording will apply when you add cameras in Settings.",
+      "modeLabel": "What to record",
+      "modes": {
+        "events": {
+          "label": "Only when something is detected",
+          "description": "Saves video around people, cars, and other objects Frigate detects. Uses far less disk space."
+        },
+        "continuous": {
+          "label": "All the time",
+          "description": "Saves video around the clock, so you can go back to any moment. Uses much more disk space."
+        }
+      },
+      "retentionHint": {
+        "events": "Video of anything Frigate detects is kept this long, then deleted automatically.",
+        "continuous": "All video is kept this long, then deleted automatically."
+      }
+    },
+    "complete": {
+      "title": "You're done!",
+      "description": "Your Frigate system is configured. Here's what we set up:",
+      "configured": "Configured",
+      "notConfigured": "Not configured",
+      "configureInSettings": "Configure in Settings",
+      "camera": "Camera",
+      "hwaccel": "Hardware Acceleration",
+      "detector": "Object Detection",
+      "recording": "Recording",
+      "goToLiveView": "Go to Live View",
+      "applyAndRestart": "Apply & Restart",
+      "restartNotice": "Frigate needs to restart to apply your settings. This takes about 30 seconds.",
+      "nextSteps": "Next steps: Set up motion masks, zones, and notifications in Settings.",
+      "restarting": "Starting Frigate...",
+      "restartingDescription": "This takes about 30 seconds."
+    },
+    "actions": {
+      "next": "Next",
+      "back": "Back",
+      "skip": "Skip",
+      "saving": "Saving..."
+    },
+    "errors": {
+      "saveFailed": "Failed to save configuration. Please try again."
+    }
+  }
+}

@@ -15,16 +15,6 @@
         "state": {
           "submitted": "Gönderildi"
         },
-        "true": {
-          "true_one": "Bu bir {{label}}",
-          "true_other": "Bu bir {{label}}",
-          "label": "Frigate+ için bu etiketi onaylayın"
-        },
-        "false": {
-          "label": "Bu etiketi Frigate+ için onaylamaktan vazgeç",
-          "false_one": "Bu bir {{label}} değil",
-          "false_other": "Bu bir {{label}} değil"
-        },
         "question": {
           "ask_an": "Bu nesne bir <code>{{label}}</code> nesnesi mi?",
           "label": "Bu etiketi Frigate+ için onaylayın",
@@ -67,7 +57,6 @@
       "error": {
         "failed": "Dışa aktarım sıraya alınamadı: {{error}}",
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
-        "noVaildTimeSelected": "Geçerli bir zaman aralığı seçilmedi",
         "noValidTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
       },
       "view": "Görüntüle",
@@ -137,8 +126,6 @@
       "toast": {
         "started_one": "1 Adet dışa aktarın başladı. Durum açılıyor.",
         "started_other": "{{count}} Adet dışa aktarın başladı. Durum açılıyor.",
-        "startedNoCase_one": "1 Adet dışa aktarım başladı.",
-        "startedNoCase_other": "{{count}} Adet dışa aktarım başladı.",
         "partial": "{{total}} üzerinden {{successful}} dışa aktarıldı. Başarısız: {{failedItems}}",
         "failed": "{{total}} Adet dışa aktarım başarısız oldu. Başarısız: {{failedItems}}"
       }
@@ -149,7 +136,6 @@
     "restreaming": {
       "disabled": "Bu kamera için Yeniden Akış devre dışı.",
       "desc": {
-        "readTheDocumentation": "Dökümantasyonu oku",
         "title": "Bu kameradan ek canlı gösterim seçenekleri ve sesli yayın almak için go2rtc'yi yapılandırın."
       }
     },

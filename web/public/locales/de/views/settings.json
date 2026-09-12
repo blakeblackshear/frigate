@@ -2,12 +2,10 @@
   "documentTitle": {
     "default": "Einstellungen - Frigate",
     "authentication": "Authentifizierungseinstellungen – Frigate",
-    "camera": "Kameraeinstellungen - Frigate",
     "masksAndZones": "Masken- und Zoneneditor – Frigate",
     "object": "Debug - Frigate",
     "general": "Benutzeroberflächen-Einstellungen - Frigate",
     "frigatePlus": "Frigate+ Einstellungen – Frigate",
-    "classification": "Klassifizierungseinstellungen – Frigate",
     "motionTuner": "Bewegungserkennungs-Optimierer – Frigate",
     "notifications": "Benachrichtigungseinstellungen",
     "enrichments": "Erweiterte Statistiken - Frigate",
@@ -22,7 +20,6 @@
   "menu": {
     "ui": "Benutzeroberfläche",
     "cameras": "Kameraeinstellungen",
-    "classification": "Klassifizierung",
     "masksAndZones": "Maskierungen / Zonen",
     "motionTuner": "Bewegungserkennungs-Optimierer",
     "debug": "Debug",
@@ -38,7 +35,6 @@
     "general": "allgemein",
     "globalConfig": "Grundeinstellungen",
     "integrations": "Integrationen",
-    "profileSettings": "Profileinstellungen",
     "globalDetect": "Objekterkennung",
     "globalRecording": "Aufnahme",
     "globalSnapshots": "Schnappschüsse",
@@ -60,8 +56,6 @@
     "systemTelemetry": "Telemetrie",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "Erkannte Hardware",
-    "systemDetectionModel": "Erkennungsmodell",
     "systemMqtt": "mqtt",
     "integrationSemanticSearch": "Semantische Suche",
     "integrationGenerativeAi": "Generative KI",
@@ -164,140 +158,6 @@
       }
     }
   },
-  "classification": {
-    "title": "Klassifizierungseinstellungen",
-    "semanticSearch": {
-      "title": "Semantische Suche",
-      "desc": "Die semantische Suche in Frigate ermöglicht es, verfolgte Objekte innerhalb der Überprüfungselemente zu finden, indem entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwendet wird.",
-      "readTheDocumentation": "Lesen Sie die Dokumentation",
-      "reindexNow": {
-        "alreadyInProgress": "Neu-Indizierung läufts bereits.",
-        "label": "Neuindizieren",
-        "confirmTitle": "Bestätige Neu-Indizierung",
-        "confirmButton": "Neu-Indizieren",
-        "success": "Neuindizierung erfolgreich gestartet.",
-        "error": "Starten der Neuindizierung fehlgeschlagen: {{errorMessage}}",
-        "desc": "Durch die Neuindizierung werden die Einbettungen für alle verfolgten Objekte neu generiert. Dieser Prozess läuft im Hintergrund und kann Ihre CPU überlasten. Je nach Anzahl der verfolgten Objekte kann er einige Zeit in Anspruch nehmen.",
-        "confirmDesc": "Möchten Sie alle verfolgten Objekteinbettungen wirklich neu indizieren? Dieser Vorgang läuft im Hintergrund, kann aber Ihre CPU überlasten und einige Zeit in Anspruch nehmen. Sie können den Fortschritt auf der Explore-Seite verfolgen."
-      },
-      "modelSize": {
-        "large": {
-          "title": "groß",
-          "desc": "Bei Verwendung von <em> large </em> wird das vollständige Jina-Modell verwendet und ggf. automatisch auf der GPU ausgeführt."
-        },
-        "label": "Model Größe",
-        "small": {
-          "title": "klein",
-          "desc": "Durch die Verwendung von <em> small </em> wird eine quantisierte Version des Modells eingesetzt, die weniger RAM verwendet und schneller auf der CPU läuft, wobei der Unterschied in der Einbettungsqualität sehr gering ist."
-        },
-        "desc": "Die Größe des Modells, das für semantische Sucheinbettungen verwendet wird."
-      }
-    },
-    "birdClassification": {
-      "desc": "Die Vogelklassifizierung identifiziert bekannte Vögel mithilfe eines quantisierten Tensorflow-Modells. Wenn ein bekannter Vogel erkannt wird, wird sein allgemeiner Name als sub_label hinzugefügt. Diese Informationen sind in der Benutzeroberfläche, in Filtern und in Benachrichtigungen enthalten.",
-      "title": "Vogel-Klassifizierung"
-    },
-    "licensePlateRecognition": {
-      "readTheDocumentation": "Lies die Dokumentation",
-      "title": "Nummernschilderkennung",
-      "desc": "Frigate kann Nummernschilder an Fahrzeugen erkennen und die erkannten Zeichen automatisch dem Feld „recognized_license_plate“ oder einem bekannten Namen als Unterbezeichnung für Objekte vom Typ „Auto“ hinzufügen. Ein häufiger Anwendungsfall ist das Lesen der Nummernschilder von Autos, die in eine Einfahrt einfahren oder auf einer Straße vorbeifahren."
-    },
-    "faceRecognition": {
-      "readTheDocumentation": "Lies die Dokumentation",
-      "modelSize": {
-        "small": {
-          "title": "klein",
-          "desc": "ei der Verwendung von <em> small </em> wird ein FaceNet-Gesichtseinbettungsmodell eingesetzt, das auf den meisten CPUs effizient läuft."
-        },
-        "label": "Model Größe",
-        "large": {
-          "title": "groß",
-          "desc": "Bei der Verwendung von <em> large </em> wird ein ArcFace-Gesichtseinbettungsmodell verwendet und ggf. automatisch auf der GPU ausgeführt."
-        },
-        "desc": "Die Größe des für die Gesichtserkennung verwendeten Modells."
-      },
-      "title": "Gesichtserkennung",
-      "desc": "Mithilfe der Gesichtserkennung können Personen Namen zugewiesen werden. Sobald das Gesicht erkannt wird, weist Frigate den Namen der Person als Unterbezeichnung zu. Diese Informationen werden in die Benutzeroberfläche, Filter und Benachrichtigungen integriert."
-    },
-    "toast": {
-      "error": "Sichern der Konfigurationsänderungen fehlgeschlagen: {{errorMessage}}",
-      "success": "Die Klassifizierungseinstellungen wurden gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen."
-    },
-    "restart_required": "Neustart erforderlich (Klassifizierungseinstellungen geändert)",
-    "unsavedChanges": "Nicht gespeicherte Änderungen der Klassifizierungseinstellungen"
-  },
-  "camera": {
-    "reviewClassification": {
-      "toast": {
-        "success": "Die Konfiguration der Klassifizierung wurde gespeichert. Starte Frigate neu, um die Änderungen zu übernehmen."
-      },
-      "title": "Überprüfung der Klassifikation",
-      "selectAlertsZones": "Zonen für Warnungen auswählen",
-      "limitDetections": "Begrenzung der Erkennungen auf bestimmte Zonen",
-      "readTheDocumentation": "Lies die Dokumentation",
-      "noDefinedZones": "Für diese Kamera sind keine Zonen definiert.",
-      "selectDetectionsZones": "Zonen für Erkennungen auswählen",
-      "objectAlertsTips": "Alle {{alertsLabels}} -Objekte auf {{cameraName}} werden als Warnungen angezeigt.",
-      "desc": "Frigate kategorisiert Überprüfungselemente als Warnungen und Erkennungen. Standardmäßig werden alle Objekte vom Typ <em> Person </em> und <em> Auto </em> als Warnungen betrachtet. Sie können die Kategorisierung Ihrer Überprüfungselemente verfeinern, indem Sie die erforderlichen Zonen dafür konfigurieren.",
-      "zoneObjectAlertsTips": "Alle {{alertsLabels}} Objekte, die in {{zone}} auf {{cameraName}} erkannt werden , werden als Warnungen angezeigt.",
-      "objectDetectionsTips": "Alle {{detectionsLabels}} Objekte, die auf {{cameraName}} nicht kategorisiert sind, werden unabhängig von der Zone, in der sie sich befinden, als Erkennungen angezeigt.",
-      "zoneObjectDetectionsTips": {
-        "text": "Alle {{detectionsLabels}} Objekte, die in {{zone}} auf {{cameraName}} nicht kategorisiert sind, werden als Erkennungen angezeigt.",
-        "regardlessOfZoneObjectDetectionsTips": "Alle {{detectionsLabels}} Objekte, die auf {{cameraName}} nicht kategorisiert sind, werden unabhängig von der Zone, in der sie sich befinden, als Erkennungen angezeigt.",
-        "notSelectDetections": "Alle {{detectionsLabels}} Objekte, die in {{zone}} auf {{cameraName}} erkannt wurden und nicht als Warnungen kategorisiert sind, werden unabhängig von der Zone, in der sie sich befinden, als Erkennungen angezeigt."
-      },
-      "unsavedChanges": "Nicht gespeicherte Überprüfung der Klassifizierungseinstellungen für {{camera}}"
-    },
-    "streams": {
-      "title": "Streams",
-      "desc": "Deaktiviere eine Kamera vorübergehend, bis Frigate neu gestartet wird. Das Deaktivieren einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr möglich.<br /> <em>Hinweis: Go2RTC-Restreams werden dadurch nicht deaktiviert.</em>"
-    },
-    "review": {
-      "title": "Überprüfung",
-      "alerts": "Warnungen ",
-      "detections": "Erkennungen ",
-      "desc": "Aktiviere/deaktiviere Benachrichtigungen und Erkennungen für diese Kamera vorübergehend, bis Frigate neu gestartet wird. Wenn deaktiviert, werden keine neuen Überprüfungseinträge erstellt. "
-    },
-    "title": "Kameraeinstellungen",
-    "object_descriptions": {
-      "title": "Generative KI-Objektbeschreibungen",
-      "desc": "Generativen KI-Objektbeschreibungen für diese Kamera vorübergehend aktivieren/deaktivieren. Wenn diese Funktion deaktiviert ist, werden keine KI-generierten Beschreibungen für verfolgte Objekte auf dieser Kamera angefordert."
-    },
-    "cameraConfig": {
-      "ffmpeg": {
-        "roles": "Rollen",
-        "pathRequired": "Stream-Pfad ist erforderlich",
-        "path": "Stream-Pfad",
-        "inputs": "Eingabe Streams",
-        "pathPlaceholder": "rtsp://...",
-        "rolesRequired": "Mindestens eine Rolle ist erforderlich",
-        "rolesUnique": "Jede Rolle (Audio, Erkennung, Aufzeichnung) kann nur einem Stream zugewiesen werden",
-        "addInput": "Eingabe-Stream hinzufügen",
-        "removeInput": "Eingabe-Stream entfernen",
-        "inputsRequired": "Mindestens ein Eingabe-Stream ist erforderlich"
-      },
-      "enabled": "Aktiviert",
-      "namePlaceholder": "z. B., Vorder_Türe",
-      "nameInvalid": "Der Name der Kamera darf nur Buchstaben, Zahlen, Unterstriche oder Bindestriche enthalten",
-      "name": "Kamera Name",
-      "edit": "Kamera bearbeiten",
-      "add": "Kamera hinzufügen",
-      "description": "Kameraeinstellungen einschließlich Stream-Eingänge und Rollen konfigurieren.",
-      "nameRequired": "Kameraname ist erforderlich",
-      "toast": {
-        "success": "Kamera {{cameraName}} erfolgreich gespeichert"
-      },
-      "nameLength": "Der Name der Kamera darf maximal 24 Zeichen lang sein."
-    },
-    "backToSettings": "Zurück zu den Kamera Einstellungen",
-    "selectCamera": "Kamera wählen",
-    "editCamera": "Kamera bearbeiten:",
-    "addCamera": "Neue Kamera hinzufügen",
-    "review_descriptions": {
-      "desc": "Generativen KI-Objektbeschreibungen für diese Kamera vorübergehend aktivieren/deaktivieren. Wenn diese Funktion deaktiviert ist, werden keine KI-generierten Beschreibungen für Überprüfungselemente auf dieser Kamera angefordert.",
-      "title": "Beschreibungen zur generativen KI-Überprüfung"
-    }
-  },
   "masksAndZones": {
     "form": {
       "zoneName": {
@@ -394,7 +254,6 @@
       "speedEstimation": {
         "title": "Geschwindigkeitsschätzung",
         "desc": "Aktiviere die Geschwindigkeitsabschätzung für Objekte in diesem Bereich. Der Bereich muss genau 4 Punkte haben.",
-        "docs": "Bitte lies die Dokumentation",
         "lineADistance": "Spur A Distanz ({{unit}})",
         "lineDDistance": "Spur D Distanz ({{unit}})",
         "lineBDistance": "Spur B Distanz ({{unit}})",
@@ -445,7 +304,6 @@
       },
       "documentTitle": "Bewegungsmaske bearbeiten – Frigate",
       "context": {
-        "documentation": "Lies die Dokumentation",
         "title": "Bewegungsmasken werden verwendet, um unerwünschte Bewegungen (z. B. Baumäste, Kamerazeitstempel) daran zu hindern, eine Erkennung auszulösen. Bewegungsmasken sollten <em>sehr sparsam</em> eingesetzt werden – zu starkes Maskieren erschwert das Nachverfolgen von Objekten."
       },
       "clickDrawPolygon": "Klicke, um ein Polygon auf dem Bild zu zeichnen.",
@@ -459,8 +317,7 @@
       "edit": "Bewegungsmaske bearbeiten",
       "polygonAreaTooLarge": {
         "title": "Die Bewegungsmaske deckt {{polygonArea}} % des Kamerabildes ab. Große Bewegungsmasken werden nicht empfohlen.",
-        "tips": "Bewegungsmasken verhindern nicht, dass Objekte erkannt werden. Du solltest stattdessen eine erforderliche Zone verwenden.",
-        "documentation": "Lies die Dokumentation"
+        "tips": "Bewegungsmasken verhindern nicht, dass Objekte erkannt werden. Du solltest stattdessen eine erforderliche Zone verwenden."
       },
       "point_one": "{{count}} Punkt",
       "point_other": "{{count}} Punkte",
@@ -519,7 +376,6 @@
   "debug": {
     "objectShapeFilterDrawing": {
       "score": "Bewertung",
-      "document": "Lies die Dokumentation. ",
       "tips": "Aktiviere diese Option, um ein Rechteck auf dem Kamerabild zu zeichnen, das dessen Bereich und Seitenverhältnis anzeigt. Diese Werte können anschließend verwendet werden, um Parameter für den Objektform-Filter in deiner Konfiguration festzulegen.",
       "area": "Bereich",
       "ratio": "Verhältnis",
@@ -655,10 +511,7 @@
           "placeholder": "Passwort eingeben",
           "requirements": {
             "title": "Passwort Anforderungen:",
-            "length": "Mindestens 12 Zeichen",
-            "uppercase": "Mindestens ein Großbuchstabe",
-            "digit": "Mindestens eine Ziffer",
-            "special": "Mindestens ein Sonderzeichen (!@#$%^&*(),.?\":{}|<>)"
+            "length": "Mindestens 12 Zeichen"
           },
           "show": "Passwort anzeigen",
           "hide": "Verstecke Passwort"
@@ -723,14 +576,12 @@
     },
     "notificationSettings": {
       "title": "Einstellungen für Benachrichtigungen",
-      "desc": "Frigate kann von Haus aus Push-Benachrichtigungen an ein Gerät senden, wenn es im Browser läuft oder als PWA installiert ist.",
-      "documentation": "Lese die Dokumentation"
+      "desc": "Frigate kann von Haus aus Push-Benachrichtigungen an ein Gerät senden, wenn es im Browser läuft oder als PWA installiert ist."
     },
     "title": "Benachrichtigungen",
     "notificationUnavailable": {
       "title": "Benachrichtigungen nicht verfügbar",
       "desc": "Web Push Benachrichtigungen erfordern einen sicheren Kontext (<code>https://…</code>). Das ist eine Vorgabe des Browsers. Greife auf Frigate gesichert zu um Benachrichtigungen zu nutzen.",
-      "documentation": "Dokumentation lesen",
       "descPwa": "Unter iOS sind Web-Push-Benachrichtigungen nur verfügbar, wenn Frigate auf Ihrem Startbildschirm installiert ist. Öffnen Sie das Menü <strong>Teilen</strong>, wählen Sie <strong>Zum Startbildschirm hinzufügen</strong> und öffnen Sie Frigate über das neue Symbol, um dieses Gerät für Benachrichtigungen zu registrieren."
     },
     "cameras": {
@@ -783,11 +634,9 @@
     "snapshotConfig": {
       "desc": "Für die Übermittlung an Frigate+ müssen Snapshots in Ihrer Konfiguration aktiviert sein.",
       "cleanCopyWarning": "Bei einigen Kameras ist die Schnappschussfunktion deaktiviert",
-      "documentation": "die Dokumentation lesen",
       "table": {
         "camera": "Kamera",
-        "snapshots": "Snapshots",
-        "cleanCopySnapshots": "<code>clean_copy</code> Snapshots"
+        "snapshots": "Snapshots"
       },
       "title": "Snapshot Einstellungen"
     },
@@ -862,13 +711,11 @@
         }
       },
       "title": "Semantische Suche",
-      "desc": "Die semantische Suche in Frigate ermöglicht es Ihnen, verfolgte Objekte innerhalb Ihrer Überprüfungselemente zu finden, indem Sie entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwenden.",
-      "readTheDocumentation": "Lies die Dokumentation"
+      "desc": "Die semantische Suche in Frigate ermöglicht es Ihnen, verfolgte Objekte innerhalb Ihrer Überprüfungselemente zu finden, indem Sie entweder das Bild selbst, eine benutzerdefinierte Textbeschreibung oder eine automatisch generierte Beschreibung verwenden."
     },
     "faceRecognition": {
       "title": "Gesichtserkennung",
       "desc": "Die Gesichtserkennung ermöglicht es, Personen Namen zuzuweisen. Wenn ein Gesicht erkannt wird, ordnet Frigate den Namen der Person als Untertitel zu. Diese Informationen sind in der Benutzeroberfläche, den Filtern und in den Benachrichtigungen enthalten.",
-      "readTheDocumentation": "Lies die Dokumentation",
       "modelSize": {
         "label": "Modellgröße",
         "desc": "Die Größe des für die Gesichtserkennung verwendeten Modells.",
@@ -884,8 +731,7 @@
     },
     "licensePlateRecognition": {
       "title": "Kennzeichenerkennung",
-      "desc": "Frigate kann Kennzeichen an Fahrzeugen erkennen und die erkannten Zeichen automatisch in das Feld recognized_license_plate oder einen bekannten Namen als sub_label zu Objekten vom Typ car hinzufügen. Ein häufiger Anwendungsfall ist das Lesen der Kennzeichen von Autos, die in eine Einfahrt einfahren oder auf einer Straße vorbeifahren.",
-      "readTheDocumentation": "Lies die Dokumentation"
+      "desc": "Frigate kann Kennzeichen an Fahrzeugen erkennen und die erkannten Zeichen automatisch in das Feld recognized_license_plate oder einen bekannten Namen als sub_label zu Objekten vom Typ car hinzufügen. Ein häufiger Anwendungsfall ist das Lesen der Kennzeichen von Autos, die in eine Einfahrt einfahren oder auf einer Straße vorbeifahren."
     },
     "restart_required": "Neustart erforderlich (Verbesserungseinstellungen geändert)",
     "toast": {
@@ -916,7 +762,6 @@
       "description": "Beschreibung"
     },
     "actions": {
-      "alert": "Als Alarm markieren",
       "notification": "Benachrichtigung senden",
       "sub_label": "Unterlabel hinzufügen",
       "attribute": "Attribut hinzufügen"
@@ -978,11 +823,6 @@
           "error": {
             "min": "Mindesten eine Aktion muss ausgewählt sein."
           }
-        },
-        "friendly_name": {
-          "title": "Nutzerfreundlicher Name",
-          "placeholder": "Benenne oder beschreibe diesen Auslöser",
-          "description": "Ein optionaler nutzerfreundlicher Name oder eine Beschreibung für diesen Auslöser."
         }
       }
     },
@@ -1121,26 +961,13 @@
       "brandInformation": "Hersteller Information",
       "brandUrlFormat": "Für Kameras mit RTSP URL nutze folgendes Format: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://nutzername:passwort@host:port/pfad",
-      "testConnection": "Teste Verbindung",
-      "testSuccess": "Verbindungstest erfolgreich!",
-      "testFailed": "Verbindungstest fehlgeschlagen. Bitte prüfe deine Eingaben und versuche es erneut.",
-      "streamDetails": "Stream Details",
-      "warnings": {
-        "noSnapshot": "Es kann kein Snapshot aus dem konfigurierten Stream abgerufen werden."
-      },
       "errors": {
         "brandOrCustomUrlRequired": "Wählen Sie entweder einen Kamerahersteller mit Host/IP aus oder wählen Sie „Andere“ mit einer benutzerdefinierten URL",
         "nameRequired": "Der Kameraname wird benötigt",
         "nameLength": "Der Kameraname darf höchsten 64 Zeichen lang sein",
         "invalidCharacters": "Der Kameraname enthält ungültige Zeichen",
         "nameExists": "Der Kameraname existiert bereits",
-        "brands": {
-          "reolink-rtsp": "Reolink RTSP wird nicht empfohlen. Es wird empfohlen, http in den Kameraeinstellungen zu aktivieren und den Kamera-Assistenten neu zu starten."
-        },
         "customUrlRtspRequired": "Benutzerdefinierte URLs müssen mit „rtsp://“ oder \"rtsps://\" beginnen. Für Nicht-RTSP-Kamerastreams ist eine manuelle Konfiguration erforderlich."
-      },
-      "docs": {
-        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
       },
       "connectionSettings": "Verbindungseinstellungen",
       "detectionMethod": "Stream Erkennungsmethode",
@@ -1154,42 +981,11 @@
     },
     "step2": {
       "description": "Suchen Sie in der Kamera nach verfügbaren Streams oder konfigurieren Sie manuelle Einstellungen basierend auf der von Ihnen ausgewählten Erkennungsmethode.",
-      "streamsTitle": "Kamera Streams",
-      "addStream": "Stream hinzufügen",
-      "addAnotherStream": "Weiteren Stream hinzufügen",
-      "streamTitle": "Stream {{nummer}}",
-      "streamUrl": "Stream URL",
-      "streamUrlPlaceholder": "rtsp://nutzername:passwort@host:port/pfad",
-      "url": "URL",
-      "resolution": "Auflösung",
-      "selectResolution": "Auflösung auswählen",
-      "quality": "Qualität",
-      "selectQuality": "Qualität auswählen",
-      "roles": "Rollen",
-      "roleLabels": {
-        "detect": "Objekt-Erkennung",
-        "record": "Aufzeichnung",
-        "audio": "Audio"
-      },
-      "testStream": "Verbindung testen",
       "testSuccess": "Verbindung erfolgreich getestet!",
       "testFailed": "Verbindungstest fehlgeschlagen. Bitte überprüfen Sie ihre Eingaben und versuchen Sie es erneut.",
       "testFailedTitle": "Test fehlgeschlagen",
       "connected": "Verbunden",
       "notConnected": "Nicht verbunden",
-      "featuresTitle": "Funktionen",
-      "go2rtc": "Verbindungen zur Kamera reduzieren",
-      "detectRoleWarning": "Mindestens ein Stream muss die Rolle „detect“ haben, um fortfahren zu können.",
-      "rolesPopover": {
-        "title": "Stream Rollen",
-        "detect": "Haupt-Feed für Objekt-Erkennung.",
-        "record": "Speichert Segmente des Video-Feeds basierend auf den Konfigurationseinstellungen.",
-        "audio": "Feed für audiobasierte Erkennung."
-      },
-      "featuresPopover": {
-        "title": "Stream Funktionen",
-        "description": "Verwende go2rtc Restreaming, um die Verbindungen zu deiner Kamera zu reduzieren."
-      },
       "streamDetails": "Verbindungsdetails",
       "probing": "Kamera wird geprüft...",
       "retry": "Wiederholen",
@@ -1225,43 +1021,8 @@
     },
     "step3": {
       "description": "Konfigurieren Sie Stream-Rollen und fügen Sie zusätzliche Streams für Ihre Kamera hinzu.",
-      "validationTitle": "Stream Validierung",
-      "connectAllStreams": "Verbinde alle Streams",
-      "reconnectionSuccess": "Wiederverbindung erfolgreich.",
-      "reconnectionPartial": "Einige Streams konnten nicht wieder verbunden werden.",
-      "streamUnavailable": "Stream-Vorschau nicht verfügbar",
-      "reload": "Neu laden",
-      "connecting": "Verbinde...",
       "streamTitle": "Stream {{number}}",
-      "valid": "Gültig",
-      "failed": "Fehlgeschlagen",
-      "notTested": "Nicht getestet",
-      "connectStream": "Verbinden",
-      "connectingStream": "Verbinde",
-      "disconnectStream": "Trennen",
-      "estimatedBandwidth": "Geschätzte Bandbreite",
       "roles": "Rollen",
-      "none": "Keine",
-      "error": "Fehler",
-      "streamValidated": "Stream {{number}} wurde erfolgreich validiert",
-      "streamValidationFailed": "Stream {{number}} Validierung fehlgeschlagen",
-      "saveAndApply": "Neue Kamera speichern",
-      "saveError": "Ungültige Konfiguration. Bitte prüfe die Einstellungen.",
-      "issues": {
-        "title": "Stream Validierung",
-        "videoCodecGood": "Video-Codec ist {{codec}}.",
-        "audioCodecGood": "Audio-Codec ist {{codec}}.",
-        "noAudioWarning": "Für diesen Stream wurde kein Ton erkannt, die Aufzeichnungen enthalten keinen Ton.",
-        "audioCodecRecordError": "Der AAC-Audio-Codec ist erforderlich, um Audio in Aufnahmen zu unterstützen.",
-        "audioCodecRequired": "Ein Audiostream ist erforderlich, um Audioerkennung zu unterstützen.",
-        "restreamingWarning": "Eine Reduzierung der Verbindungen zur Kamera für den Aufzeichnungsstream kann zu einer etwas höheren CPU-Auslastung führen.",
-        "dahua": {
-          "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Kameras von Dahua / Amcrest / EmpireTech unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu nutzen, sofern sie verfügbar sind."
-        },
-        "hikvision": {
-          "substreamWarning": "Substream 1 ist auf eine niedrige Auflösung festgelegt. Viele Hikvision-Kameras unterstützen zusätzliche Substreams, die in den Kameraeinstellungen aktiviert werden müssen. Es wird empfohlen, diese Streams zu nutzen, sofern sie verfügbar sind."
-        }
-      },
       "streamsTitle": "Kamera Stream",
       "addStream": "Stream hinzufügen",
       "addAnotherStream": "weiteren Stream hinzufügen",
@@ -1358,18 +1119,7 @@
     "backToSettings": "Zurück zu Kameraeinstellungen",
     "streams": {
       "title": "Kamerastatus und Details",
-      "desc": "Deaktiviere eine Kamera vorübergehend, bis Frigate neu gestartet wird. Deaktivierung einer Kamera stoppt die Verarbeitung der Streams dieser Kamera durch Frigate vollständig. Erkennung, Aufzeichnung und Debugging sind dann nicht mehr verfügbar. <br /> <em>Hinweis: Dies deaktiviert nicht die go2rtc restreams.</em>",
-      "enableLabel": "Aktivierte Kameras",
-      "enableDesc": "</em>Eine aktivierte Kamera vorübergehend deaktivieren, bis Frigate neu gestartet wird. Durch das Deaktivieren einer Kamera wird die Verarbeitung der Streams dieser Kamera durch Frigate vollständig unterbrochen. Erkennung, Aufzeichnung und Fehlerbehebung stehen dann nicht mehr zur Verfügung.<br /><em> Hinweis: go2rtc-Restreams werden dadurch nicht deaktiviert.</em>",
-      "disableLabel": "Deaktivierte Kameras",
-      "disableDesc": "Aktivieren Sie eine Kamera, die derzeit in der Benutzeroberfläche nicht sichtbar und in der Konfiguration deaktiviert ist. Nach der Aktivierung ist ein Neustart von Frigate erforderlich.",
       "enableSuccess": "{{cameraName}} wurde aktiviert. Starte Frigate neu, um die Änderung zu übernehmen.",
-      "friendlyName": {
-        "edit": "Anzeigenamen der Kamera bearbeiten",
-        "title": "Anzeigenamen bearbeiten",
-        "description": "Legen Sie den Anzeigenamen fest, der für diese Kamera in der gesamten Benutzeroberfläche von „Frigate“ angezeigt wird. Lassen Sie das Feld leer, um die Kamera-ID zu verwenden.",
-        "rename": "Umbenennen"
-      },
       "reorderHandle": "Zum Neuanordnen ziehen",
       "saving": "Speichern…",
       "saved": "gespeichert",
@@ -1443,8 +1193,6 @@
       "selectLabel": "Profil auswählen",
       "description": "Legen Sie fest, welche Kameras bei der Aktivierung eines Profils ein- oder ausgeschaltet werden. Kameras, die auf „Übernehmen“ eingestellt sind, behalten ihren Standardzustand bei.",
       "inherit": "Erben",
-      "enabled": "Aktiviert",
-      "disabled": "Deaktiviert",
       "on": "Eingeschaltet",
       "off": "Ausgeschaltet"
     },
@@ -1629,15 +1377,6 @@
     "bl": "Unten links",
     "br": "Unten rechts"
   },
-  "detectionModel": {
-    "plusActive": {
-      "title": "Verwaltung von Frigate+-Modellen",
-      "label": "Aktuelle Modellquelle",
-      "description": "Auf diesem Rechner läuft ein Frigate+-Modell. Wählen Sie Ihr Modell in den Frigate+-Einstellungen aus oder ändern Sie es.",
-      "goToFrigatePlus": "Zu den Frigate+-Einstellungen gehen",
-      "showModelForm": "Ein Modell manuell konfigurieren"
-    }
-  },
   "maintenance": {
     "title": "Wartung",
     "sync": {
@@ -1820,16 +1559,6 @@
     "detect": {
       "title": "Erkennungseinstellungen"
     },
-    "detectors": {
-      "title": "Erkennungseinstellungen",
-      "singleType": "Es ist nur ein {{type}}-Detektor zulässig.",
-      "keyRequired": "Der Name des Detektors ist erforderlich.",
-      "keyDuplicate": "Der Name des Detektors ist bereits vorhanden.",
-      "noSchema": "Es sind keine Detektorschemata verfügbar.",
-      "none": "Es sind keine Detektorinstanzen konfiguriert.",
-      "add": "Detektor hinzufügen",
-      "addCustomKey": "Benutzter Schlüssel hinzufügen"
-    },
     "record": {
       "title": "Aufnahmeeinstellungen"
     },
@@ -1852,8 +1581,7 @@
     },
     "reviewLabels": {
       "summary": "{{count}} Etiketten ausgewählt",
-      "empty": "Keine Beschriftungen verfügbar",
-      "allNonAlertDetections": "Alle Aktivitäten, die keine Warnmeldungen auslösen, werden als Erkennungen erfasst."
+      "empty": "Keine Beschriftungen verfügbar"
     },
     "filters": {
       "objectFieldLabel": "{{field}} für {{label}}"
@@ -1874,8 +1602,6 @@
     "genaiRoles": {
       "options": {
         "embeddings": "Einbetten",
-        "vision": "Vision",
-        "tools": "Werkzeuge",
         "descriptions": "Beschreibung",
         "chat": "Chat"
       }
@@ -2072,7 +1798,6 @@
       "addAudioCodec": "Audio-Codec hinzufügen",
       "removeCodec": "Codec entfernen"
     },
-    "streamNumber": "Stream {{index}}",
     "sourceNumber": "Quelle {{index}}"
   },
   "onvif": {
@@ -2122,15 +1847,8 @@
     "record": {
       "noRecordRole": "Für keinen Stream ist die Rolle „Record“ definiert. Die Aufzeichnung funktioniert nicht."
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "Birdseye ist auf den Modus „Objekte“ eingestellt, doch die Objekterkennung ist für diese Kamera deaktiviert. Die Kamera wird in Birdseye nicht angezeigt."
-    },
     "snapshots": {
       "detectDisabled": "Die Objekterkennung ist deaktiviert. Es werden keine Momentaufnahmen von verfolgten Objekten erstellt."
-    },
-    "detectors": {
-      "mixedTypes": "Alle Detektoren müssen von gleichem Typ sein, Entferne bestehende Detektoren um einen anderen Typ zu benutzen.",
-      "mixedTypesSuggestion": "Alle Detektoren müssen vom gleichem Typ sein. Entferne bestehende oder wähle {{type}}."
     },
     "objects": {
       "genaiNoDescriptionsProvider": "Sie müssen einen GenAI-Anbieter mit der Rolle „Beschreibung“ konfigurieren, damit Beschreibungen generiert werden können."
@@ -2151,11 +1869,6 @@
     }
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "Objekte",
-      "motion": "Bewegung",
-      "continuous": "Fortlaufend"
-    },
     "cameraOrder": {
       "label": "Kamerabestellung",
       "description": "Ziehe die Kameras per Drag & Drop, um ihre Reihenfolge im Birdseye-Layout festzulegen.",
@@ -2181,12 +1894,6 @@
       "browser": "Browser",
       "12hour": "12 Stunden",
       "24hour": "24 Stunden"
-    },
-    "TimeOrDateStyle": {
-      "full": "vollständig",
-      "long": "lang",
-      "medium": "mittel",
-      "short": "kurz"
     },
     "unitSystem": {
       "metric": "Metrik",
@@ -2216,30 +1923,5 @@
     "overrideGlobal": "Dieser Abschnitt überschreibt die globale Konfiguration",
     "overrideProfile": "Dieser Abschnitt wird durch das Profil {{profile}} überschrieben",
     "unsaved": "Dieser Abschnitt enthält ungespeicherte Änderungen"
-  },
-  "detectorsAndModel": {
-    "title": "Detektoren und Modell",
-    "description": "Konfigurieren Sie das Detektor-Backend, das die Objekterkennung ausführt, sowie das dafür verwendete Modell. Änderungen werden gemeinsam gespeichert, sodass Detektor und Modell synchron bleiben.",
-    "cardTitles": {
-      "detector": "Detektor-Hardware",
-      "model": "Erkennungsmodell"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "Benutzerdefiniertes Modell"
-    },
-    "mismatch": {
-      "warning": "Das aktuelle Frigate+-Modell „{{model}}“ erfordert den {{required}}-Detektor. Wählen Sie unten ein kompatibles Modell aus oder wechseln Sie vor dem Speichern zu „Benutzerdefiniertes Modell“."
-    },
-    "plusModel": {
-      "requiresDetector": "Voraussetzung: {{detector}}",
-      "noModelSelected": "Wählen Sie ein Modell der Frigate+ aus"
-    },
-    "toast": {
-      "saveSuccess": "Detektoren und Modelleinstellungen wurden gespeichert. Starten Sie Frigate neu, um die Änderungen zu übernehmen.",
-      "saveError": "Das Speichern der Detektor- und Modelleinstellungen ist fehlgeschlagen"
-    },
-    "unsavedChanges": "Nicht gespeicherte Änderungen an Detektor und Modell",
-    "restartRequired": "Neustart erforderlich (Detektor oder Modell geändert)"
   }
 }

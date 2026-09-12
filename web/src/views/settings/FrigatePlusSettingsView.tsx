@@ -17,6 +17,7 @@ import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
+import { getPrimaryModel } from "@/utils/modelUtil";
 
 export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
   const { t } = useTranslation("views/settings");
@@ -51,7 +52,7 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
               description={
                 <>
                   <p>{t("frigatePlus.apiKey.desc")}</p>
-                  {!config?.model.plus && (
+                  {!getPrimaryModel(config)?.plus && (
                     <div className="mt-2 flex items-center text-primary-variant">
                       <Link
                         to="https://frigate.video/plus"
@@ -85,7 +86,7 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
 
           {config?.plus?.enabled && (
             <FrigatePlusCurrentModelSummary
-              plusModel={config.model.plus}
+              plusModel={getPrimaryModel(config)?.plus}
               action={
                 <Button
                   size="sm"

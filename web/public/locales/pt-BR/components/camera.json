@@ -35,8 +35,7 @@
         "desc": "Alterar as opções de transmissão ao vivo para o painel desse grupo de câmera. <em>Esses ajustes são específicos para esse dispositivo/navegador.</em>",
         "audio": {
           "tips": {
-            "title": "O audio deve ter a sua saída da câmera e configurado em go2rtc para essa transmissão.",
-            "document": "Leia a documentação "
+            "title": "O audio deve ter a sua saída da câmera e configurado em go2rtc para essa transmissão."
           }
         },
         "stream": "Transmissão",

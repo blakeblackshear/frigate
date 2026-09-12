@@ -44,11 +44,6 @@
           "label": "Închide info GPU"
         }
       },
-      "intelGpuWarning": {
-        "title": "Avertisment statistici GPU Intel",
-        "message": "Statisticile GPU sunt indisponibile",
-        "description": "Acesta este un bug cunoscut în instrumentele de raportare GPU Intel (intel_gpu_top), unde acestea se blochează și returnează repetat o utilizare GPU de 0% chiar și atunci când accelerarea hardware și detecția obiectelor rulează corect pe (i)GPU. Aceasta nu este o problemă Frigate. Poți reporni host-ul pentru a remedia temporar problema și a confirma că GPU-ul funcționează corect. Performanța nu este afectată."
-      },
       "gpuTemperature": "Temperatură GPU",
       "npuTemperature": "Temperatură NPU",
       "gpuCompute": "Calcul / Codare GPU"
@@ -98,7 +93,6 @@
     "shm": {
       "title": "Alocare SHM (shared memory)",
       "warning": "Dimensiunea actuală SHM de {{total}}MB este prea mică. Crește-o la cel puțin {{min_shm}}MB.",
-      "readTheDocumentation": "Citește documentația",
       "frameLifetime": {
         "title": "Durata de viață a cadrului",
         "description": "Fiecare cameră are {{frames}} sloturi de cadre în memoria partajată. La rata de cadre a celei mai rapide camere, fiecare cadru este disponibil pentru aproximativ {{lifetime}}s înainte de a fi suprascris."
@@ -149,7 +143,6 @@
         "cameras_count_other": "{{count}} Camere"
       },
       "empty": "Niciun mesaj capturat încă",
-      "count": "{{count}} mesaje",
       "expanded": {
         "payload": "Conținut"
       },
@@ -212,8 +205,6 @@
         "gap": "Interval keyframe (min / med / max):",
         "ok": "Keyframe-uri la fiecare ~{{seconds}}s, bune pentru înregistrare și redare.",
         "segmentLength": "Lungime segment de înregistrare:",
-        "warning": "Keyframe-uri rare sau variabile (cel mai lung interval ~{{seconds}}s), probabil un codec smart (H.264+/H.265+), acest lucru nu este recomandat.",
-        "error": "Intervalul keyframe (~{{seconds}}s) depășește lungimea segmentului de înregistrare ({{segmentTime}}s). Unele segmente pot să nu aibă niciun keyframe, ceea ce întrerupe redarea. Dezactivează codecul smart/+ de pe cameră sau scurtează intervalul keyframe.",
         "unknown": "Nu s-a putut determina distanțarea keyframe-urilor.",
         "recordDisabled": "Înregistrarea este dezactivată pentru această cameră."
       }
@@ -269,7 +260,6 @@
     "ffmpegHighCpuUsage": "{{camera}} are o utilizare ridicată CPU FFmpeg ({{ffmpegAvg}}%)",
     "cameraIsOffline": "{{camera}} este offline",
     "healthy": "Sistemul este sănătos",
-    "shmTooLow": "Alocarea /dev/shm ({{total}} MB) ar trebui mărită la cel puțin {{min}} MB.",
     "debugReplayActive": "Sesiunea de reluare de depanare este activă"
   },
   "lastRefreshed": "Ultima actualizare: "

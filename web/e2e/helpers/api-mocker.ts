@@ -14,6 +14,7 @@ import {
   type DeepPartial,
   configFactory,
 } from "../fixtures/mock-data/config";
+import { DETECTION_HARDWARE } from "../fixtures/mock-data/hardware";
 import { adminProfile, type UserProfile } from "../fixtures/mock-data/profile";
 import { BASE_STATS, statsFactory } from "../fixtures/mock-data/stats";
 
@@ -25,7 +26,7 @@ function loadMockJson(filename: string): unknown {
 }
 
 // 1x1 transparent PNG
-const PLACEHOLDER_PNG = Buffer.from(
+export const PLACEHOLDER_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
   "base64",
 );
@@ -41,7 +42,36 @@ export interface ApiMockOverrides {
   faces?: Record<string, unknown>;
   configRaw?: string;
   configSchema?: Record<string, unknown>;
+  hardware?: unknown[];
+  hwaccel?: {
+    recommended: string;
+    available?: { key: string; presets: Record<string, string> }[];
+  };
+  users?: { username: string; role: string }[];
+  notices?: unknown[];
+  dismissedChecks?: unknown[];
+  /** camera name to the ffprobe entries returned for `paths=camera:<name>` */
+  ffprobe?: Record<string, unknown[]>;
 }
+
+export const FFPROBE_OK = [
+  {
+    return_code: 0,
+    stderr: "",
+    stdout: {
+      streams: [
+        {
+          codec_type: "video",
+          codec_name: "h264",
+          width: 1920,
+          height: 1080,
+          avg_frame_rate: "15/1",
+        },
+        { codec_type: "audio", codec_name: "aac" },
+      ],
+    },
+  },
+];
 
 export class ApiMocker {
   private page: Page;
@@ -176,6 +206,50 @@ export class ApiMocker {
     // Config set (mutation)
     await this.page.route("**/api/config/set", (route) =>
       route.fulfill({ json: { success: true, require_restart: false } }),
+    );
+
+    // Detection hardware discovery
+    await this.page.route("**/api/hardware/probe**", (route) =>
+      route.fulfill({ json: overrides?.hardware ?? DETECTION_HARDWARE }),
+    );
+
+    // Hwaccel preset recommendation
+    await this.page.route("**/api/hardware/hwaccel**", (route) =>
+      route.fulfill({
+        json: {
+          recommended: "",
+          available: [],
+          ...(overrides?.hwaccel ?? {}),
+        },
+      }),
+    );
+
+    // ffprobe. The Health tab's stream checks probe `camera:<name>`; the
+    // wizard probes raw URLs. Both get a healthy h264 + aac answer by default.
+    await this.page.route("**/api/ffprobe**", (route) => {
+      const url = new URL(route.request().url());
+      const paths = url.searchParams.get("paths") ?? "";
+      const camera = paths.startsWith("camera:") ? paths.slice(7) : undefined;
+      const entries = (camera && overrides?.ffprobe?.[camera]) || FFPROBE_OK;
+      return route.fulfill({ json: entries });
+    });
+
+    // Notices
+    await this.page.route("**/api/notices", (route) =>
+      route.fulfill({ json: overrides?.notices ?? [] }),
+    );
+    await this.page.route("**/api/notices/dismissed_checks", (route) =>
+      route.fulfill({ json: overrides?.dismissedChecks ?? [] }),
+    );
+
+    // Users. GET lists them; POST/PUT (create, password) just succeed, so
+    // tests assert on the intercepted request body instead of a response.
+    await this.page.route("**/api/users**", (route) =>
+      route.request().method() === "GET"
+        ? route.fulfill({
+            json: overrides?.users ?? [{ username: "admin", role: "admin" }],
+          })
+        : route.fulfill({ json: { message: "ok" } }),
     );
 
     // Go2RTC streams

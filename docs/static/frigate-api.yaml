@@ -62,6 +62,9 @@ paths:
                 type: string
         '401':
           description: Authentication Failed
+        '403':
+          description: Access Denied (proxy user resolved to a default role of 
+            'none')
       security: []
       x-required-role: public
   /profile:
@@ -713,7 +716,7 @@ paths:
         | `improve_contrast` | `ON`, `OFF` |
         | `ptz_autotracker` | `ON`, `OFF` |
         | `birdseye` | `ON`, `OFF` |
-        | `birdseye_mode` | `CONTINUOUS`, `MOTION`, `OBJECTS` |
+        | `birdseye_modes` | `CONTINUOUS`, `MOTION`, `ALL_OBJECTS`, `ALERTS`, `DETECTIONS`, `NONE`, or a comma-separated combination |
         | `motion_contour_area` | integer |
         | `motion_threshold` | integer |
         | `motion_mask` | `ON`, `OFF` |
@@ -803,7 +806,7 @@ paths:
         | `improve_contrast` | `ON`, `OFF` |
         | `ptz_autotracker` | `ON`, `OFF` |
         | `birdseye` | `ON`, `OFF` |
-        | `birdseye_mode` | `CONTINUOUS`, `MOTION`, `OBJECTS` |
+        | `birdseye_modes` | `CONTINUOUS`, `MOTION`, `ALL_OBJECTS`, `ALERTS`, `DETECTIONS`, `NONE`, or a comma-separated combination |
         | `motion_contour_area` | integer |
         | `motion_threshold` | integer |
         | `motion_mask` | `ON`, `OFF` |
@@ -2280,6 +2283,42 @@ paths:
         - frigateUserAuth: []
       x-required-role: camera
       description: '**Access:** Authenticated user with access to the referenced camera.'
+  /review/{review_id}/regenerate_description:
+    put:
+      tags:
+        - Review
+      summary: Generate a review item description
+      description: |-
+        **Access:** Admin role required.
+
+        Re-runs a review item through the GenAI descriptions process.
+            Frames are always taken from recordings, and both alerts and detections are
+            accepted regardless of the camera's GenAI alerts/detections toggles.
+      operationId: 
+        regenerate_review_description_review__review_id__regenerate_description_put
+      parameters:
+        - name: review_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Review Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /review/{review_id}/viewed:
     delete:
       tags:
@@ -2470,6 +2509,25 @@ paths:
 
         Returns available models for each configured GenAI provider.
       operationId: genai_models_genai_models_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /genai/roles:
+    get:
+      tags:
+        - App
+      summary: Get the model assigned to each GenAI role
+      description: |-
+        **Access:** Admin role required.
+
+        Returns the selected model and its context size for each configured GenAI role. Reads only what the client saved when it initialized, so the provider is not queried for its model list.
+      operationId: genai_roles_genai_roles_get
       responses:
         '200':
           description: Successful Response
@@ -2946,6 +3004,44 @@ paths:
         - frigateUserAuth: []
       x-required-role: any
       description: '**Access:** Any authenticated user.'
+  /categorized_object_names:
+    get:
+      tags:
+        - App
+      summary: Get known object names by object type
+      description: |-
+        **Access:** Any authenticated user.
+
+        Returns the sub labels and attributes this install can attach,
+            grouped by object type. Unlike /sub_labels, which reflects what has already been
+            detected, this reads the config and model files, so it covers recognized face
+            names, named license plates, custom object classification categories, and the
+            detector attributes of tracked objects.
+      operationId: categorized_object_names_categorized_object_names_get
+      parameters:
+        - name: object_type
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Object Type
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateUserAuth: []
+      x-required-role: any
   /audio_labels:
     get:
       tags:
@@ -3963,6 +4059,231 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GenericResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /hardware/probe:
+    get:
+      tags:
+        - Hardware
+      summary: Probe Hardware
+      description: |-
+        **Access:** Admin role required.
+
+        Get the object detection hardware attached to this system.
+
+        Args:
+            refresh: Probe again instead of returning the cached result
+
+        Returns:
+            Every kind of detection hardware that was found
+      operationId: probe_hardware_hardware_probe_get
+      parameters:
+        - name: refresh
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Refresh
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DetectionHardware'
+                title: Response Probe Hardware Hardware Probe Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /hardware/hwaccel:
+    get:
+      tags:
+        - Hardware
+      summary: Hwaccel Recommendation
+      description: |-
+        **Access:** Admin role required.
+
+        Get the hardware decoding this system can do.
+
+        Args:
+            detector: Hardware key of the detection hardware in use, which biases
+                the recommendation toward that hardware's GPU
+            codecs: Comma separated codecs of the streams that will be decoded,
+                used to drop families that cannot decode one of them
+
+        Returns:
+            The recommended family (empty when none fits) and every usable family
+      operationId: hwaccel_recommendation_hardware_hwaccel_get
+      parameters:
+        - name: detector
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Detector
+        - name: codecs
+          in: query
+          required: false
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Codecs
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HwaccelRecommendation'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices:
+    get:
+      tags:
+        - Notices
+      summary: Get Notices
+      description: |-
+        **Access:** Admin role required.
+
+        Get notices, most severe first.
+
+        Args:
+            include_dismissed: Also return dismissed notices, for the history view
+
+        Returns:
+            The notices
+      operationId: get_notices_notices_get
+      parameters:
+        - name: include_dismissed
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Include Dismissed
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/stats:
+    get:
+      tags:
+        - Notices
+      summary: Get Notice Stats
+      description: |-
+        **Access:** Admin role required.
+
+        Get lifetime occurrence counts per notice kind.
+      operationId: get_notice_stats_notices_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/dismissed_checks:
+    get:
+      tags:
+        - Notices
+      summary: Get Dismissed Checks
+      description: |-
+        **Access:** Admin role required.
+
+        Get the dismissed config and stream check rows, newest first.
+      operationId: get_dismissed_checks_notices_dismissed_checks_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/dismissed:
+    delete:
+      tags:
+        - Notices
+      summary: Purge Dismissed
+      description: |-
+        **Access:** Admin role required.
+
+        Delete every dismissed notice and check row so each can show again.
+      operationId: purge_dismissed_notices_dismissed_delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/{notice_id}/dismiss:
+    post:
+      tags:
+        - Notices
+      summary: Dismiss Notice
+      description: |-
+        **Access:** Admin role required.
+
+        Hide a notice or a config or stream check row.
+
+        It stays hidden if the same problem happens again.
+      operationId: dismiss_notice_notices__notice_id__dismiss_post
+      parameters:
+        - name: notice_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Notice Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
         '422':
           description: Validation Error
           content:
@@ -5984,6 +6305,65 @@ paths:
       security:
         - frigateUserAuth: []
       x-required-role: camera
+  /vod/{camera_name}/{stream}/start/{start_ts}/end/{end_ts}:
+    get:
+      tags:
+        - Media
+      summary: Vod Ts Stream
+      description: |-
+        **Access:** Authenticated user with access to the referenced camera.
+
+        Returns an HLS playlist pinned to one stream type (main or sub) for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.
+      operationId: 
+        vod_ts_stream_vod__camera_name___stream__start__start_ts__end__end_ts__get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+        - name: stream
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/VodStreamPreference'
+        - name: start_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: Start Ts
+        - name: end_ts
+          in: path
+          required: true
+          schema:
+            type: number
+            title: End Ts
+        - name: force_discontinuity
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Force Discontinuity
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateUserAuth: []
+      x-required-role: camera
   /events/{event_id}/snapshot.jpg:
     get:
       tags:
@@ -6922,6 +7302,63 @@ paths:
       security:
         - frigateUserAuth: []
       x-required-role: camera
+  /{camera_name}/recordings/coverage:
+    get:
+      tags:
+        - Recordings
+      summary: Recordings Coverage
+      description: |-
+        **Access:** Authenticated user with access to the referenced camera.
+
+        Returns merged recording coverage spans plus codec compatibility.
+
+        codecs_compatible is false only when more than one known video codec
+        appears across the range's rows, the case where the merged vod route
+        degrades to a single-stream manifest.
+      operationId: recordings_coverage__camera_name__recordings_coverage_get
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+        - name: after
+          in: query
+          required: true
+          schema:
+            type: number
+            title: After
+        - name: before
+          in: query
+          required: true
+          schema:
+            type: number
+            title: Before
+        - name: timelines
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+            title: Timelines
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateUserAuth: []
+      x-required-role: camera
   /{camera_name}/recordings:
     get:
       tags:
@@ -6945,13 +7382,17 @@ paths:
           in: query
           required: false
           schema:
-            type: number
+            anyOf:
+              - type: number
+              - type: 'null'
             title: After
         - name: before
           in: query
           required: false
           schema:
-            type: number
+            anyOf:
+              - type: number
+              - type: 'null'
             title: Before
       responses:
         '200':
@@ -7325,6 +7766,14 @@ components:
             - type: 'null'
           title: New case description
           description: Optional description for a newly created export case
+        stream:
+          $ref: '#/components/schemas/ExportStreamEnum'
+          title: Recorded stream to export
+          description: Which recorded stream every item in the batch is exported
+            from. 'auto' uses the merged timeline, preferring the main stream 
+            and falling back to the sub stream where main has aged out. 'main' 
+            or 'sub' pins the exports to that stream.
+          default: auto
       type: object
       required:
         - items
@@ -7506,6 +7955,18 @@ components:
           description: Per-request thinking toggle. None means use the provider 
             default. Ignored by providers that do not expose a per-request 
             thinking switch.
+        tool_decisions:
+          additionalProperties:
+            type: string
+            enum:
+              - approve
+              - reject
+          type: object
+          title: Tool Decisions
+          description: Decisions for tool calls that paused for approval, keyed 
+            by tool call ID. Send these with the conversation chain returned 
+            alongside an approval request; rejected calls are reported to the 
+            model as declined instead of being executed.
       type: object
       required:
         - messages
@@ -7688,6 +8149,46 @@ components:
       required:
         - ids
       title: DeleteFaceImagesBody
+    DetectionHardware:
+      properties:
+        key:
+          type: string
+          title: Hardware key
+          description: Stable identifier for this kind of hardware.
+        detector:
+          type: string
+          title: Detector type
+          description: The detector that drives this hardware.
+        name:
+          type: string
+          title: Hardware name
+          description: Human readable name for this kind of hardware.
+        units:
+          items:
+            $ref: '#/components/schemas/HardwareUnit'
+          type: array
+          title: Units
+          description: Each physical piece of this hardware that was found.
+        count:
+          type: integer
+          title: Unit count
+          description: How many units were found.
+        unlimited:
+          type: boolean
+          title: Unlimited detectors
+          description: Whether this hardware can run more inference processes 
+            than there are units.
+      type: object
+      required:
+        - key
+        - detector
+        - name
+        - units
+        - count
+        - unlimited
+      title: DetectionHardware
+      description: A kind of detection hardware, and every unit of it that was 
+        found.
     EventCreateResponse:
       properties:
         success:
@@ -8210,6 +8711,14 @@ components:
           title: Chapter mode
           description: Optional chapter metadata to embed in the export. When 
             omitted, the camera's configured export chapter mode is used.
+        stream:
+          $ref: '#/components/schemas/ExportStreamEnum'
+          title: Recorded stream to export
+          description: Which recorded stream to export. 'auto' uses the merged 
+            timeline, preferring the main stream and falling back to the sub 
+            stream where main has aged out. 'main' or 'sub' pins the export to 
+            that stream alone.
+          default: auto
       type: object
       title: ExportRecordingsBody
     ExportRecordingsCustomBody:
@@ -8264,6 +8773,20 @@ components:
       required:
         - name
       title: ExportRenameBody
+    ExportStreamEnum:
+      type: string
+      enum:
+        - auto
+        - main
+        - sub
+      title: ExportStreamEnum
+      description: |-
+        Which recorded stream an export should be built from.
+
+        ``auto`` keeps the merged timeline: main where it exists, sub filling
+        the gaps main has already aged out of. Pinning to one stream trades
+        that coverage for a uniform source, which is always a plain stream
+        copy since nothing hands off mid-export.
     Extension:
       type: string
       enum:
@@ -8415,6 +8938,61 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    HardwareUnit:
+      properties:
+        device:
+          type: string
+          title: Device string
+          description: The value to put in a model's devices list, for example 
+            'edgetpu:pci:1'.
+        label:
+          type: string
+          title: Unit label
+          description: How to identify this unit among others of the same kind, 
+            for example 'PCIe 1'.
+      type: object
+      required:
+        - device
+        - label
+      title: HardwareUnit
+      description: One physical piece of hardware.
+    HwaccelFamily:
+      properties:
+        key:
+          type: string
+          title: Family key
+          description: Stable identifier for this kind of hardware decoding.
+        presets:
+          additionalProperties:
+            type: string
+          type: object
+          title: Presets
+          description: The ffmpeg preset for each codec this family decodes, or 
+            a single 'any' preset when it decodes every codec.
+      type: object
+      required:
+        - key
+        - presets
+      title: HwaccelFamily
+      description: A kind of hardware decoding, and the presets that drive it.
+    HwaccelRecommendation:
+      properties:
+        recommended:
+          type: string
+          title: Recommended family
+          description: Key of the family that fits this system best, or an empty
+            string when none does.
+        available:
+          items:
+            $ref: '#/components/schemas/HwaccelFamily'
+          type: array
+          title: Available families
+          description: Every family this system's hardware can use, best first.
+      type: object
+      required:
+        - recommended
+      title: HwaccelRecommendation
+      description: The hardware decoding this system can do.
     Last24HoursReview:
       properties:
         reviewed_alert:
@@ -8905,6 +9483,17 @@ components:
         - msg
         - type
       title: ValidationError
+    VodStreamPreference:
+      type: string
+      enum:
+        - main
+        - sub
+      title: VodStreamPreference
+      description: |-
+        Stream pin for the path-segment VOD route.
+
+        nginx-vod derives its mapping fetch URI from the playlist URL path
+        (query params are dropped), so the preference must be a path segment.
   securitySchemes:
     frigateAdminAuth:
       type: apiKey

@@ -56,10 +56,6 @@
       }
     }
   },
-  "camera": {
-    "enable": "Activer la caméra",
-    "disable": "Désactiver la caméra"
-  },
   "detect": {
     "enable": "Activer la détection",
     "disable": "Désactiver la détection"
@@ -109,14 +105,12 @@
     "audio": {
       "available": "L'audio est disponible pour ce flux",
       "tips": {
-        "documentation": "Lire la documentation ",
         "title": "L'audio doit provenir de votre caméra et être configuré dans go2rtc pour ce flux."
       },
       "unavailable": "L'audio n'est pas disponible pour ce flux"
     },
     "twoWayTalk": {
       "tips": "Votre appareil doit prendre en charge cette fonctionnalité et WebRTC doit être configuré pour la conversation bidirectionnelle.",
-      "tips.documentation": "Lire la documention ",
       "available": "Conversation bidirectionnelle disponible pour ce flux",
       "unavailable": "Conversation bidirectionnelle non disponible pour ce flux"
     },
@@ -139,7 +133,6 @@
     "snapshots": "Instantanés",
     "audioDetection": "Détection audio",
     "autotracking": "Suivi automatique",
-    "cameraEnabled": "Caméra activée",
     "title": "Paramètres de {{camera}}",
     "transcription": "Transcription audio"
   },
@@ -151,8 +144,7 @@
       "all": "Tous",
       "motion": "Mouvement",
       "active_objects": "Objets actifs"
-    },
-    "notAllTips": "Votre configuration de conservation d'enregistrement {{source}} est définie sur <code>mode : {{effectiveRetainMode}}</code>, donc cet enregistrement à la demande ne conservera que les segments avec {{effectiveRetainModeName}}."
+    }
   },
   "audio": "Audio",
   "autotracking": {

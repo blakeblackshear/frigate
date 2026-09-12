@@ -1,5 +1,4 @@
 {
-  "selectItem": "{{item}} seçin",
   "description": {
     "placeholder": "Bu koleksiyona bir isim verin",
     "addFace": "İlk görselinizi yükleyerek Yüz Kütüphanesi’ne yeni bir koleksiyon ekleyin.",
@@ -7,13 +6,8 @@
     "nameCannotContainHash": "İsim, # içeremez."
   },
   "details": {
-    "person": "İnsan",
-    "faceDesc": "Yüz ve ilişkili nesneye ait detaylar",
-    "confidence": "Kesinlik",
     "timestamp": "Zaman Damgası",
-    "face": "Yüz Detayları",
     "scoreInfo": "Alt etiket skoru, tanınan tüm yüzlerin güvenilirlik değerlerinin ağırlıklı ortalamasından elde edilir, dolayısıyla fotoğraf üzerinde gösterilen skordan farklı olabilir.",
-    "subLabelScore": "Alt Etiket Puanı",
     "unknown": "Bilinmiyor"
   },
   "documentTitle": "Yüz Kütüphanesi - Frigate",
@@ -22,9 +16,7 @@
     "desc": "Yüzleri taramak ve {{pageToggle}} için dahil etmek üzere bir resim yükleyin"
   },
   "createFaceLibrary": {
-    "desc": "Yeni bir yüz koleksiyonu oluşturun",
     "new": "Yeni Yüz Oluştur",
-    "title": "Koleksiyon Oluştur",
     "nextSteps": "Sağlam bir temel oluşturmak için:<li>Her tespit edilen kişi için **Recent Recognitions (Son Tanımalar)** sekmesini kullanarak görüntüleri seçin ve eğitim gerçekleştirin.</li> <li>En iyi sonuçlar için doğrudan önden çekilmiş yüz görüntülerine odaklanın; yüzlerin açılı göründüğü fotoğrafları eğitimde kullanmaktan kaçının.</li>"
   },
   "train": {
@@ -76,8 +68,6 @@
       "renameFaceFailed": "Yüz yeniden adlandırılamadı: {{errorMessage}}"
     }
   },
-  "readTheDocs": "Dokümantasyonu oku",
-  "selectFace": "Yüz Seçin",
   "trainFace": "Yüzü Eğit",
   "steps": {
     "faceName": "Yüze İsim Verin",
@@ -97,6 +87,5 @@
     "desc_one": "Bir adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
     "desc_other": "{{count}} adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
   },
-  "nofaces": "Yüz bulunamadı",
-  "pixels": "{{area}}px"
+  "nofaces": "Yüz bulunamadı"
 }

@@ -57,8 +57,7 @@
       "view": "Преглед",
       "error": {
         "failed": "Неуспешан почетак извоза: {{error}}",
-        "endTimeMustAfterStartTime": "Завршно време мора бити након почетног времена",
-        "noVaildTimeSelected": "Није изабран валидан временски распон"
+        "endTimeMustAfterStartTime": "Завршно време мора бити након почетног времена"
       }
     },
     "fromTimeline": {

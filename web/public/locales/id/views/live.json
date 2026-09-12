@@ -56,10 +56,6 @@
     },
     "presets": "Preset kamera PTZ"
   },
-  "camera": {
-    "enable": "Aktifkan Kamera",
-    "disable": "Nonaktifkan Kamera"
-  },
   "muteCameras": {
     "enable": "Bisukan Semua Kamera",
     "disable": "Suarakan Semua Kamera"
@@ -153,7 +149,6 @@
   },
   "cameraSettings": {
     "title": "Pengaturan {{camera}}",
-    "cameraEnabled": "Kamera Diaktifkan",
     "objectDetection": "Deteksi Objek",
     "recording": "Perekaman",
     "snapshots": "Snapshot",

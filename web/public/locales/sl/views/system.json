@@ -56,8 +56,7 @@
       "empty": "Ni še ujetih sporočil",
       "expanded": {
         "payload": "Tovor (payload)"
-      },
-      "count": "{{count}} sporočil"
+      }
     }
   },
   "storage": {
@@ -122,11 +121,6 @@
         }
       },
       "npuUsage": "Uporaba NPU",
-      "intelGpuWarning": {
-        "message": "Statistika GPU ni na voljo",
-        "description": "To je znana napaka v Intelovih orodjih za poročanje (intel_gpu_top), kjer orodje neha delovati in nenehno vrača 0 % porabo GPU, čeprav strojno pospeševanje in zaznavanje objektov pravilno delujeta na (i)GPU. To ni napaka programa Frigate. Za začasno rešitev in potrditev delovanja lahko ponovno zaženeš gostiteljski sistem. To ne vpliva na zmogljivost.",
-        "title": "Opozorilo za Intel GPU"
-      },
       "gpuTemperature": "Temperatura GPU",
       "npuTemperature": "Temperatura NPU"
     },
@@ -220,7 +214,6 @@
     "cameraIsOffline": "Kamera {{camera}} je brez povezave",
     "detectIsSlow": "Zaznavanje ({{detect}}) je počasno ({{speed}} ms)",
     "detectIsVerySlow": "Zaznavanje ({{detect}}) je zelo počasno ({{speed}} ms)",
-    "shmTooLow": "Dodelitev /dev/shm ({{total}} MB) bi morala biti povečana na vsaj {{min}} MB.",
     "debugReplayActive": "Seja ponovnega predvajanja za razhroščevanje je aktivna"
   },
   "enrichments": {

@@ -40,7 +40,6 @@
     "title": "Струм офлайн",
     "desc": "Потік <code>detect</code > камери {{cameraName}} не отримував ніяких кадрів, перевірте журнал помилок"
   },
-  "cameraDisabled": "Камера вимкнена",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Зображення успішно завантажено до Frigate+"

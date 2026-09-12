@@ -9,21 +9,57 @@ __all__ = [
     "BirdseyeConfig",
     "BirdseyeLayoutConfig",
     "BirdseyeModeEnum",
+    "birdseye_modes_from_mqtt_payload",
+    "birdseye_modes_to_mqtt_payload",
 ]
+
+# canonical MQTT payload for an empty mode list
+MQTT_NO_MODES = "NONE"
 
 
 class BirdseyeModeEnum(str, Enum):
-    objects = "objects"
-    motion = "motion"
     continuous = "continuous"
+    motion = "motion"
+    all_objects = "all_objects"
+    alerts = "alerts"
+    detections = "detections"
 
-    @classmethod
-    def get_index(cls, type):
-        return list(cls).index(type)
 
-    @classmethod
-    def get(cls, index):
-        return list(cls)[index]
+def birdseye_modes_from_mqtt_payload(payload: str) -> list[BirdseyeModeEnum] | None:
+    """Parse an uppercase MQTT payload into activity modes, or None when invalid."""
+    raw_modes = payload.split(",")
+
+    if any(not raw_mode or raw_mode != raw_mode.upper() for raw_mode in raw_modes):
+        return None
+
+    if raw_modes == [MQTT_NO_MODES]:
+        return []
+
+    modes: list[BirdseyeModeEnum] = []
+
+    for raw_mode in raw_modes:
+        try:
+            mode = BirdseyeModeEnum(raw_mode.lower())
+        except ValueError:
+            return None
+
+        if mode in modes:
+            return None
+
+        modes.append(mode)
+
+    return modes
+
+
+def birdseye_modes_to_mqtt_payload(modes: list[BirdseyeModeEnum]) -> str:
+    """Serialize activity modes for MQTT state topics."""
+    payload = ",".join(mode.value.upper() for mode in BirdseyeModeEnum if mode in modes)
+    return payload or MQTT_NO_MODES
+
+
+def default_birdseye_modes() -> list[BirdseyeModeEnum]:
+    """Return the default Birdseye activity modes."""
+    return [BirdseyeModeEnum.all_objects]
 
 
 class BirdseyeLayoutConfig(FrigateBaseModel):
@@ -47,10 +83,10 @@ class BirdseyeConfig(FrigateBaseModel):
         title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
-    mode: BirdseyeModeEnum = Field(
-        default=BirdseyeModeEnum.objects,
-        title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+    modes: list[BirdseyeModeEnum] = Field(
+        default_factory=default_birdseye_modes,
+        title="Activity types",
+        description="Activity types that include cameras in Birdseye.",
     )
 
     restream: bool = Field(
@@ -102,10 +138,10 @@ class BirdseyeCameraConfig(BaseModel):
         title="Enable Birdseye",
         description="Enable or disable the Birdseye view feature.",
     )
-    mode: BirdseyeModeEnum = Field(
-        default=BirdseyeModeEnum.objects,
-        title="Tracking mode",
-        description="Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'.",
+    modes: list[BirdseyeModeEnum] = Field(
+        default_factory=default_birdseye_modes,
+        title="Activity types",
+        description="Activity types that include cameras in Birdseye.",
     )
 
     order: int = Field(

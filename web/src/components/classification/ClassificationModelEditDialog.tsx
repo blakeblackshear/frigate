@@ -32,6 +32,7 @@ import {
 } from "@/types/frigateConfig";
 import { ClassificationDatasetResponse } from "@/types/classification";
 import { getTranslatedLabel } from "@/utils/i18n";
+import { isAttributeLabel } from "@/utils/modelUtil";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -99,7 +100,7 @@ export default function ClassificationModelEditDialog({
       }
 
       cameraConfig.objects.track.forEach((label) => {
-        if (!config.model.all_attributes.includes(label)) {
+        if (!isAttributeLabel(config, label)) {
           labels.add(label);
         }
       });

@@ -16,6 +16,48 @@ from frigate.config.ui import UnitSystemEnum
 from frigate.data_processing.post.types import ReviewMetadata
 from frigate.models import Event
 
+# Base guidance per response field. `observations` is a reasoning scaffold,
+# not user-facing, so style presets never override it.
+REVIEW_DESCRIPTION_FIELD_GUIDELINES: dict[str, str] = {
+    "observations": "Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.",
+    "scene": 'Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.',
+    "title": "Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.",
+    "shortSummary": "Briefly summarize the primary activity across the observations.",
+    "potential_threat_level": "Must be consistent with your scene description and the activity patterns above.",
+}
+
+# Style presets keyed by ReviewResponseStyleEnum value. Presets replace the
+# base guidance rather than append to it, so the prompt never carries
+# competing style instructions.
+REVIEW_RESPONSE_STYLES: dict[str, dict[str, str]] = {
+    "natural": {
+        "scene": 'Recount what happened the way a person would describe it to a neighbor, in plain everyday language: how the sequence begins, then each significant movement and action in the order it happens. Use flowing sentences that connect related actions, written the way people actually talk rather than like a surveillance report. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name rather than a generic term. Refer to unnamed objects naturally with articles. Stay factual, and keep the description consistent with the threat level you assign.',
+        "title": 'Write the title as a short, sentence-case headline in present tense: the subject, then what they do, phrased the way you would text it to the homeowner. Describe only the action you see; do not assign the person a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens. For named subjects, always use their name.',
+        "shortSummary": "Sum up the primary activity in one short, natural sentence, as if mentioning it to someone in passing.",
+    },
+    "concise": {
+        "scene": 'Cover each significant movement and action in order using as few short, direct sentences as possible, omitting environmental and cosmetic detail unless it affects the assessment. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
+        "title": 'Write the title as a terse label of two to four words naming the specific activity observed and where it happened. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. For named subjects, always use their name.',
+        "shortSummary": "Summarize the primary activity in one short sentence.",
+    },
+    "detailed": {
+        "scene": 'Describe how the sequence begins, then the progression of events — all significant movements and actions in order, including the specifics that best identify the subjects: colors, clothing, carried items, positions, and paths of movement, plus environmental details like lighting changes when they stand out. Favor the most identifying details over exhaustive coverage, and keep every added detail observational rather than speculative. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name rather than a generic term. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
+        "title": 'Write the title as a specific description of who did what and where, in under roughly twelve words, including the most distinguishing visible detail of the subject, such as clothing or vehicle color. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens. For named subjects, always use their name.',
+        "shortSummary": "Briefly summarize the primary activity across the observations, including the most identifying visible detail, such as vehicle color or clothing.",
+    },
+}
+
+
+def get_review_field_guidelines(response_style: str = "default") -> dict[str, str]:
+    """Return per-field response guidance with the style preset applied.
+
+    "default" (or an unknown value) applies no overrides.
+    """
+    return {
+        **REVIEW_DESCRIPTION_FIELD_GUIDELINES,
+        **REVIEW_RESPONSE_STYLES.get(response_style, {}),
+    }
+
 
 def build_review_description_prompt(
     review_data: dict[str, Any],
@@ -23,6 +65,7 @@ def build_review_description_prompt(
     concerns: list[str],
     preferred_language: str | None,
     activity_context_prompt: str,
+    response_style: str = "default",
 ) -> str:
     """Build the prompt for review activity description generation."""
 
@@ -48,6 +91,8 @@ def build_review_description_prompt(
             return "\n- " + "\n- ".join(review_data["unified_objects"])
         else:
             return "\n- (No objects detected)"
+
+    fields = get_review_field_guidelines(response_style)
 
     return f"""
 Your task is to analyze a sequence of images taken in chronological order from a security camera.
@@ -75,11 +120,11 @@ When forming your description:
 ## Response Field Guidelines
 
 Respond with a JSON object matching the provided schema. Field-specific guidance:
-- `observations`: Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.
-- `scene`: Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.
-- `title`: Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.
-- `shortSummary`: Briefly summarize the primary activity across the observations.
-- `potential_threat_level`: Must be consistent with your scene description and the activity patterns above.
+- `observations`: {fields["observations"]}
+- `scene`: {fields["scene"]}
+- `title`: {fields["title"]}
+- `shortSummary`: {fields["shortSummary"]}
+- `potential_threat_level`: {fields["potential_threat_level"]}
 {get_concern_prompt()}
 
 ## Sequence Details
@@ -262,6 +307,14 @@ def get_tool_definitions(
     `attribute` parameter is exposed for filtering by their labels. When the
     embeddings model only understands English (JinaV1), the `semantic_query`
     description instructs the model to write the query in English.
+
+    Descriptions here stay mechanical: which tool to reach for, and how the
+    filters relate to each other, is stated once in the system prompt so the
+    guidance is not paid for twice on every request.
+
+    Each definition carries a Frigate-only `access` field ("read" or "write");
+    write tools pause for user approval in the chat loop. Strip it with
+    `strip_tool_access` before sending the list to a provider.
     """
     search_objects_properties: dict[str, Any] = {
         "camera": {
@@ -270,26 +323,13 @@ def get_tool_definitions(
         },
         "label": {
             "type": "string",
-            "description": (
-                "Generic object class to filter by — one of the tracked detector "
-                "labels such as 'person', 'package', 'car', 'dog', 'bird'. Use "
-                "this for broad queries like 'show me all cars today'. Combine "
-                "with semantic_query when the user also describes appearance or "
-                "behavior (e.g. label='person', semantic_query='riding a lawn "
-                "mower')."
-            ),
+            "description": "Tracked object class to filter by.",
         },
         "sub_label": {
             "type": "string",
             "description": (
-                "Filter by a DISCRETE NAMED entity recognized in the detection. "
-                "Use this for: a known person's name ('John'), a delivery "
-                "company ('Amazon', 'UPS'), a recognized animal species or "
-                "breed ('blue jay', 'cardinal', 'golden retriever'), or a "
-                "license plate string. When filtering by a specific name, set "
-                "only sub_label and leave label unset. Do NOT use sub_label "
-                "for descriptions of appearance, clothing, or actions — those "
-                "belong in semantic_query."
+                "Name recognized in the detection: a person, delivery company, "
+                "animal species or breed, or license plate."
             ),
         },
         "after": {
@@ -313,20 +353,11 @@ def get_tool_definitions(
     }
 
     if attribute_classifications:
-        model_outline = "; ".join(
-            f"{m['name']} (applies to {', '.join(m['objects']) or 'any object'})"
-            for m in attribute_classifications
-        )
         search_objects_properties["attribute"] = {
             "type": "string",
             "description": (
-                "Filter by a classification attribute label produced by a "
-                "configured attribute classification model. Use this INSTEAD "
-                "of semantic_query when the user's request matches one of "
-                "these classifications. Configured models: "
-                f"{model_outline}. "
-                "Set the value to the attribute label that matches the user's "
-                "phrasing (case-sensitive)."
+                "Attribute label produced by a configured classification model "
+                "(case-sensitive)."
             ),
         }
 
@@ -334,29 +365,12 @@ def get_tool_definitions(
         search_objects_properties["semantic_query"] = {
             "type": "string",
             "description": (
-                "Optional natural-language description of a PHYSICAL "
-                "CHARACTERISTIC, APPEARANCE, or ACTIVITY the user mentioned, "
-                "used to semantically narrow results. Only set this when the "
-                "user describes something beyond what label and sub_label can "
-                "express on their own.\n"
-                "USE for descriptive phrases like: 'riding a lawn mower', "
-                "'wearing a red jacket', 'carrying a package', 'walking a "
-                "dog', 'on a bicycle', 'holding an umbrella'.\n"
-                "DO NOT USE for:\n"
-                "- specific named people, pets, or delivery companies → use sub_label\n"
-                "- animal species or breed names like 'blue jay', 'cardinal', "
-                "'golden retriever' → use sub_label\n"
-                "- license plate strings → use sub_label\n"
-                "- generic object queries like 'all cars today' or 'every "
-                "person' → use label alone with no semantic_query\n"
-                "When set, combine with label/time/camera/zone filters as "
-                "usual (e.g. label='person', semantic_query='riding a lawn "
-                "mower', after='2024-05-01T00:00:00Z')."
+                "Description of an appearance or activity, used to semantically "
+                "narrow results."
                 + (
-                    " The configured embeddings model only understands "
-                    "English, so always write semantic_query in English, "
-                    "translating the user's description if they phrased it "
-                    "in another language."
+                    " The configured embeddings model only understands English, so "
+                    "always write this in English, translating the user's "
+                    "description if they phrased it in another language."
                     if embeddings_language == "english"
                     else ""
                 )
@@ -364,30 +378,15 @@ def get_tool_definitions(
         }
 
     search_objects_description = (
-        "Search the historical record of detected objects in Frigate. "
-        "Use this ONLY for questions about the PAST — e.g. 'did anyone come by today?', "
-        "'when was the last car?', 'show me detections from yesterday'. "
-        "Do NOT use this for monitoring or alerting requests about future events — "
-        "use start_camera_watch instead for those. "
-        "An 'object' in Frigate represents a tracked detection (e.g., a person, package, car).\n\n"
-        "Choose filters based on what the user is asking for:\n"
-        "- Generic class query ('show me all cars today'): set `label` only.\n"
-        "- Specific NAMED entity (known person, delivery company, animal "
-        "species/breed like 'blue jay' or 'golden retriever', license "
-        "plate): set `sub_label` only and leave `label` unset.\n"
+        "Search the historical record of tracked detections. Use this ONLY for "
+        "questions about the PAST, e.g. 'did anyone come by today?', 'when was the "
+        "last car?'. For alerting on future events use start_camera_watch instead."
     )
-    if semantic_search_enabled:
-        search_objects_description += (
-            "- Physical CHARACTERISTIC, APPEARANCE, or ACTIVITY that is not a "
-            "discrete name ('person riding a lawn mower', 'someone in a red "
-            "jacket', 'person carrying a package'): set `semantic_query` with "
-            "the descriptive phrase, optionally alongside `label` for the "
-            "object class. Do NOT put descriptive phrases in sub_label."
-        )
 
     return [
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "search_objects",
                 "description": search_objects_description,
@@ -400,18 +399,30 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
+            "function": {
+                "name": "get_categorized_object_names",
+                "description": (
+                    "Every name that can be attached as a sub_label, grouped by object "
+                    "type: recognized faces, named license plates, classification "
+                    "categories, and delivery logos. Takes no arguments and always "
+                    "returns the complete map."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "access": "read",
             "function": {
                 "name": "find_similar_objects",
                 "description": (
-                    "Find tracked objects that are visually and semantically similar "
-                    "to a specific past event. Use this when the user references a "
-                    "particular object they have seen and wants to find other "
-                    "sightings of the same or similar one ('that green car', 'the "
-                    "person in the red jacket', 'the package that was delivered'). "
-                    "Prefer this over search_objects whenever the user's intent is "
-                    "'find more like this specific one.' Use search_objects first "
-                    "only if you need to locate the anchor event. Requires semantic "
-                    "search to be enabled."
+                    "Find tracked objects visually and semantically similar to a "
+                    "specific past event. Requires semantic search to be enabled."
                 ),
                 "parameters": {
                     "type": "object",
@@ -470,12 +481,12 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "write",
             "function": {
                 "name": "set_camera_state",
                 "description": (
-                    "Change a camera's feature state (e.g., turn detection on/off, enable/disable recordings). "
-                    "Use camera='*' to apply to all cameras at once. "
-                    "Only call this tool when the user explicitly asks to change a camera setting. "
+                    "Change a camera's feature state, e.g. turn detection on or off. "
+                    "Only call this when the user explicitly asks to change a setting. "
                     "Requires admin privileges."
                 ),
                 "parameters": {
@@ -495,7 +506,7 @@ def get_tool_definitions(
                                 "motion",
                                 "enabled",
                                 "birdseye",
-                                "birdseye_mode",
+                                "birdseye_modes",
                                 "improve_contrast",
                                 "ptz_autotracker",
                                 "motion_contour_area",
@@ -510,14 +521,14 @@ def get_tool_definitions(
                             ],
                             "description": (
                                 "The feature to change. Most features accept ON or OFF. "
-                                "birdseye_mode accepts CONTINUOUS, MOTION, or OBJECTS. "
+                                "birdseye_modes accepts CONTINUOUS, MOTION, ALL_OBJECTS, ALERTS, DETECTIONS, NONE, or a comma-separated combination. "
                                 "motion_contour_area and motion_threshold accept a number. "
                                 "profile accepts a profile name or 'none' to deactivate (requires camera='*')."
                             ),
                         },
                         "value": {
                             "type": "string",
-                            "description": "The value to set. ON or OFF for toggles, a number for thresholds, a profile name or 'none' for profile.",
+                            "description": "The value to set, as accepted by the chosen feature.",
                         },
                     },
                     "required": ["camera", "feature", "value"],
@@ -526,14 +537,13 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_live_context",
                 "description": (
-                    "Get the current live image and detection information for a single camera: objects being tracked, "
-                    "zones, timestamps. Use this to understand what is visible in the live view. "
-                    "Call this when answering questions about what is happening right now on a specific camera. "
-                    "Operates on one camera at a time; call the tool again for each additional camera. "
-                    "Wildcards and empty values are not accepted."
+                    "Current live image and detections (tracked objects, zones, "
+                    "timestamps) for one camera. Use this for questions about what is "
+                    "happening right now. Call it again for each additional camera."
                 ),
                 "parameters": {
                     "type": "object",
@@ -541,8 +551,8 @@ def get_tool_definitions(
                         "camera": {
                             "type": "string",
                             "description": (
-                                "Exact name of a single camera to get live context for. "
-                                "Wildcards (e.g. '*', 'all') and empty strings are not accepted."
+                                "Exact name of a single camera. Wildcards (e.g. '*', "
+                                "'all') and empty strings are not accepted."
                             ),
                         },
                     },
@@ -552,13 +562,13 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "write",
             "function": {
                 "name": "start_camera_watch",
                 "description": (
-                    "Start a continuous VLM watch job that monitors a camera and sends a notification "
-                    "when a specified condition is met. Use this when the user wants to be alerted about "
-                    "a future event, e.g. 'tell me when guests arrive' or 'notify me when the package is picked up'. "
-                    "Only one watch job can run at a time. Returns a job ID."
+                    "Start a continuous watch job that monitors a camera and notifies "
+                    "the user when a condition is met, e.g. 'tell me when guests "
+                    "arrive'. Only one watch job can run at a time. Returns a job ID."
                 ),
                 "parameters": {
                     "type": "object",
@@ -596,12 +606,10 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "write",
             "function": {
                 "name": "stop_camera_watch",
-                "description": (
-                    "Cancel the currently running VLM watch job. Use this when the user wants to "
-                    "stop a previously started watch, e.g. 'stop watching the front door'."
-                ),
+                "description": "Cancel the currently running watch job.",
                 "parameters": {
                     "type": "object",
                     "properties": {},
@@ -611,14 +619,13 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_profile_status",
                 "description": (
-                    "Get the current profile status including the active profile and "
-                    "timestamps of when each profile was last activated. Use this to "
-                    "determine time periods for recap requests — e.g. when the user asks "
-                    "'what happened while I was away?', call this first to find the relevant "
-                    "time window based on profile activation history."
+                    "Get the active profile and when each profile was last activated. "
+                    "Call this before get_recap to derive the time window for requests "
+                    "like 'what happened while I was away?'."
                 ),
                 "parameters": {
                     "type": "object",
@@ -629,14 +636,13 @@ def get_tool_definitions(
         },
         {
             "type": "function",
+            "access": "read",
             "function": {
                 "name": "get_recap",
                 "description": (
-                    "Get a recap of all activity (alerts and detections) for a given time period. "
-                    "Use this after calling get_profile_status to retrieve what happened during "
-                    "a specific window — e.g. 'what happened while I was away?'. Returns a "
-                    "chronological list of activity with camera, objects, zones, and GenAI-generated "
-                    "descriptions when available. Summarize the results for the user."
+                    "Get all activity (alerts and detections) for a time period, as a "
+                    "chronological list with camera, objects, zones, and descriptions "
+                    "when available. Summarize the results for the user."
                 ),
                 "parameters": {
                     "type": "object",
@@ -663,7 +669,118 @@ def get_tool_definitions(
                 },
             },
         },
+        {
+            "type": "function",
+            "access": "read",
+            "function": {
+                "name": "get_export_cases",
+                "description": (
+                    "List the export cases (named groups of exported clips) with "
+                    "their IDs, descriptions, and how many exports each holds. "
+                    "Call this before create_export when the user wants a clip "
+                    "added to an existing case."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "access": "write",
+            "function": {
+                "name": "create_export",
+                "description": (
+                    "Export a camera's recording for a time range to a "
+                    "downloadable file, optionally attached to an existing export "
+                    "case. Only call this when the user explicitly asks to export "
+                    "or save a clip."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "camera": {
+                            "type": "string",
+                            "description": "Camera ID to export from.",
+                        },
+                        "start_time": {
+                            "type": "string",
+                            "description": "Start of the clip in ISO 8601 format (e.g. '2025-03-15T08:00:00').",
+                        },
+                        "end_time": {
+                            "type": "string",
+                            "description": "End of the clip in ISO 8601 format (e.g. '2025-03-15T08:05:00').",
+                        },
+                        "name": {
+                            "type": "string",
+                            "description": "Friendly name for the export (optional).",
+                        },
+                        "source": {
+                            "type": "string",
+                            "enum": ["recordings", "preview"],
+                            "description": (
+                                "'recordings' (default) exports full-quality footage; "
+                                "'preview' builds a low-resolution timelapse."
+                            ),
+                            "default": "recordings",
+                        },
+                        "export_case_id": {
+                            "type": "string",
+                            "description": (
+                                "ID of an existing export case to attach the export "
+                                "to. Use get_export_cases to find it."
+                            ),
+                        },
+                    },
+                    "required": ["camera", "start_time", "end_time"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "access": "read",
+            "function": {
+                "name": "get_event_image",
+                "description": (
+                    "View the thumbnail or snapshot image of a specific tracked "
+                    "object so you can describe what it shows. Use the event id "
+                    "from search_objects, find_similar_objects, or an attached "
+                    "event."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "event_id": {
+                            "type": "string",
+                            "description": "ID of the tracked object to view.",
+                        },
+                        "image": {
+                            "type": "string",
+                            "enum": ["thumbnail", "snapshot"],
+                            "description": (
+                                "'thumbnail' (default) is a small crop of the object; "
+                                "'snapshot' is the full camera frame."
+                            ),
+                            "default": "thumbnail",
+                        },
+                    },
+                    "required": ["event_id"],
+                },
+            },
+        },
     ]
+
+
+def get_write_tool_names(tools: list[dict[str, Any]]) -> set[str]:
+    """Names of the tools whose `access` is "write" (they change state)."""
+    return {tool["function"]["name"] for tool in tools if tool.get("access") == "write"}
+
+
+def strip_tool_access(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Drop the Frigate-only `access` field before handing tools to a provider."""
+    return [{k: v for k, v in tool.items() if k != "access"} for tool in tools]
 
 
 def build_chat_system_prompt(
@@ -723,14 +840,13 @@ def build_chat_system_prompt(
         )
         speed_units_section = f"\n\nReport object speeds to the user in {speed_unit}."
 
-    semantic_search_section = ""
+    filter_routing_section = (
+        "\n\nWhen routing a search_objects call, pick filters by the shape of the user's request:\n"
+        "- Generic class ('show me all cars today'): set `label` only.\n"
+        "- Specific named entity — a known person ('John'), delivery company ('Amazon'), animal species/breed ('blue jay', 'golden retriever'), or license plate: set `sub_label` only and leave `label` unset. Call get_categorized_object_names first and use the exact spelling it returns; a guessed spelling matches nothing. If the name is absent, say it is not configured rather than searching for it."
+    )
     if semantic_search_enabled:
-        semantic_search_section = (
-            "\n\nWhen routing a search_objects call, pick filters by the shape of the user's request:\n"
-            "- Generic class ('show me all cars today'): set `label` only.\n"
-            "- Specific named entity — a known person ('John'), delivery company ('Amazon'), animal species/breed ('blue jay', 'cardinal', 'golden retriever'), or license plate: set `sub_label` only and leave `label` unset.\n"
-            "- Physical characteristic, appearance, or activity that is NOT a discrete name ('find me people riding a lawn mower', 'someone in a red jacket', 'a person carrying a package'): set `semantic_query` with the descriptive phrase, optionally combined with `label` for the object class. Never put descriptive phrases in `sub_label`."
-        )
+        filter_routing_section += "\n- Physical characteristic, appearance, or activity that is NOT a discrete name ('riding a lawn mower', 'someone in a red jacket'): set `semantic_query` with the descriptive phrase, optionally combined with `label`. Never put descriptive phrases in `sub_label`."
 
     attribute_classification_section = ""
     if attribute_classifications:
@@ -739,9 +855,9 @@ def build_chat_system_prompt(
             for m in attribute_classifications
         )
         attribute_classification_section = (
-            "\n\nAttribute classification models are configured for the following object types:\n"
+            "\n\nConfigured attribute classification models:\n"
             f"{model_lines}\n"
-            "When the user's request matches one of these classifications, set the search_objects `attribute` field to the matching label rather than using `semantic_query`. Reserve `semantic_query` for descriptive phrases that fall outside the configured attribute labels."
+            "When the user's request matches one of these classifications, set the search_objects `attribute` field to the matching label (case-sensitive) rather than using `semantic_query`. Reserve `semantic_query` for descriptive phrases outside the configured attribute labels."
         )
 
     return f"""You are a helpful assistant for Frigate, a security camera NVR system. You help users answer questions about their cameras, detected objects, and events.
@@ -750,9 +866,6 @@ Current server local date and time: {current_date_str} at {current_time_str}
 
 Do not start your response with phrases like "I will check...", "Let me see...", or "Let me look...". Answer directly.
 
-Always present times to the user in the server's local timezone. When tool results include start_time_local and end_time_local, use those exact strings when listing or describing detection times—do not convert or invent timestamps. Do not use UTC or ISO format with Z for the user-facing answer unless the tool result only provides Unix timestamps without local time fields.
-When users ask about "today", "yesterday", "this week", etc., use the current date above as reference.
-When searching for objects or events, use ISO 8601 format for dates (e.g., {current_date_str}T00:00:00Z for the start of today).
-Always be accurate with time calculations based on the current date provided.
+Always present times in the server's local timezone. When tool results include start_time_local and end_time_local, quote those strings exactly; never convert or invent timestamps, and fall back to UTC or ISO format only when a result has no local time fields. Resolve relative dates like "today" or "this week" against the current date above, and pass dates to tools in ISO 8601 (e.g. {current_date_str}T00:00:00Z for the start of today).
 
-When a user refers to a specific object they have seen or describe with identifying details ("that green car", "the person in the red jacket", "a package left today"), prefer the find_similar_objects tool over search_objects. Use search_objects first only to locate the anchor event, then pass its id to find_similar_objects. For generic queries like "show me all cars today", keep using search_objects. If a user message begins with [attached_event:<id>], treat that event id as the anchor for any similarity or "tell me more" request in the same message and call find_similar_objects with that id.{semantic_search_section}{attribute_classification_section}{cameras_section}{speed_units_section}"""
+When the user refers to a specific object they have seen ("that green car", "the person in the red jacket", "a package left today"), prefer find_similar_objects over search_objects, using search_objects only to locate the anchor event and passing its id along. Keep search_objects for generic queries like "show me all cars today". If a user message begins with [attached_event:<id>], treat that id as the anchor for any similarity or "tell me more" request in the same message.{filter_routing_section}{attribute_classification_section}{cameras_section}{speed_units_section}"""

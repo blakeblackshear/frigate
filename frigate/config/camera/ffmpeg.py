@@ -42,6 +42,20 @@ class FfmpegOutputArgsConfig(FrigateBaseModel):
         title="Record output arguments",
         description="Default output arguments for record role streams.",
     )
+    record_sub: str | list[str] = Field(
+        default_factory=list,
+        title="Sub stream record output arguments",
+        description="Output arguments for record_sub role streams. The record output arguments are used when this is not set.",
+    )
+
+    @property
+    def effective_record_sub(self) -> str | list[str]:
+        """Output arguments used for the record_sub role.
+
+        Falls back to the record arguments rather than to the stock preset so
+        that a customized record value keeps applying to both recorded streams.
+        """
+        return self.record_sub or self.record
 
 
 class FfmpegConfig(FrigateBaseModel):
@@ -99,6 +113,7 @@ class FfmpegConfig(FrigateBaseModel):
 class CameraRoleEnum(str, Enum):
     audio = "audio"
     record = "record"
+    record_sub = "record_sub"
     detect = "detect"
 
 

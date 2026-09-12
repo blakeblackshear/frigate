@@ -105,11 +105,6 @@
       },
       "npuUsage": "Utilisation NPU",
       "npuMemory": "Mémoire NPU",
-      "intelGpuWarning": {
-        "title": "Avertissement relatif aux statistiques du GPU Intel",
-        "message": "Statistiques du GPU non disponibles",
-        "description": "Il s'agit d'un bug connu de l'outil de statistiques GPU d'Intel (intel_gpu_top) : il peut afficher à tort une utilisation de 0 %, même lorsque l'accélération matérielle et la détection d'objets fonctionnent correctement sur l'iGPU. Ce problème ne vient pas de Frigate. Vous pouvez redémarrer l'hôte pour rétablir temporairement l'affichage et confirmer le fonctionnement du GPU. Les performances ne sont pas affectées."
-      },
       "gpuTemperature": "Température du GPU",
       "npuTemperature": "Température du NPU",
       "gpuCompute": "Calcul GPU / Encodage"
@@ -184,8 +179,6 @@
         "gap": "Écart en images clefs (min / moy / max) :",
         "segmentLength": "Durée du segment d'enregistrement :",
         "ok": "Images clefs chaque ~{{seconds}}s, convient à l'enregistrement et au visionnement.",
-        "warning": "Images clefs fragmentées ou variables (plus grand écart d'environ {{seconds}}s), vraisemblablement un codec intelligent (H.264+/H.265+), non-recommendé.",
-        "error": "L'écart en images clefs (~{{seconds}}) dépasse la longueur du segment d'enregistrement ({{segmentTime}}). Certains segments n'ont peut-être pas de clef, ce qui corrompt la lecture. Désactiver le codec intelligent/+ sur la caméra ou raccourcir son intervalle en images clefs.",
         "unknown": "Impossible de déterminer l'espacement en images clefs.",
         "recordDisabled": "L'enregistrement est désactivé pour cette caméra."
       }
@@ -241,7 +234,6 @@
     "cameraIsOffline": "{{camera}} est hors ligne",
     "detectIsSlow": "{{detect}} est lent ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} est très lent ({{speed}} ms)",
-    "shmTooLow": "L'allocation /dev/shm ({{total}} Mo) devrait être augmentée à au moins {{min}} Mo.",
     "debugReplayActive": "Session de relecture de débogage active"
   },
   "enrichments": {

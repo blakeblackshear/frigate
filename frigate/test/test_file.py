@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 from types import SimpleNamespace
 from unittest import TestCase
 from unittest.mock import patch
@@ -70,3 +71,68 @@ class TestFileUtils(TestCase):
             assert rendered_image is not None
             assert rendered_image.shape[0] == 40
             assert rendered_image.max() > 0
+
+    def test_get_event_thumbnail_bytes_ignores_empty_file(self):
+        """Verify empty thumbnail files are treated as missing."""
+        event = SimpleNamespace(id="empty-thumb", camera="front_door", thumbnail=None)
+
+        with (
+            tempfile.TemporaryDirectory() as thumb_dir,
+            patch.object(file_util, "THUMB_DIR", thumb_dir),
+        ):
+            camera_dir = os.path.join(thumb_dir, event.camera)
+            os.makedirs(camera_dir)
+
+            with open(os.path.join(camera_dir, f"{event.id}.webp"), "wb"):
+                pass
+
+            assert file_util.get_event_thumbnail_bytes(event) is None
+
+
+class TestTrimOldestFiles(TestCase):
+    def _fill(self, folder: str, names: list[str]) -> None:
+        # a short gap keeps the ctime order deterministic
+        for name in names:
+            with open(os.path.join(folder, name), "wb"):
+                pass
+
+            time.sleep(0.01)
+
+    def test_trims_folder_already_over_limit(self):
+        """Verify one call trims a folder that is far over the limit."""
+        with tempfile.TemporaryDirectory() as folder:
+            self._fill(folder, [f"{i:03d}.webp" for i in range(10)])
+
+            file_util.trim_oldest_files(folder, 4)
+
+            assert sorted(os.listdir(folder)) == [
+                "006.webp",
+                "007.webp",
+                "008.webp",
+                "009.webp",
+            ]
+
+    def test_counts_every_listed_image_extension(self):
+        """Verify the trim counts the same images the train listing shows."""
+        with tempfile.TemporaryDirectory() as folder:
+            self._fill(
+                folder, ["notes.txt", "a.jpg", "b.jpeg", "c.png", "d.webp", "e.webp"]
+            )
+
+            file_util.trim_oldest_files(folder, 2)
+
+            assert sorted(os.listdir(folder)) == ["d.webp", "e.webp", "notes.txt"]
+
+    def test_file_removed_during_scan_does_not_skip_trim(self):
+        """Verify a file deleted between listing and stat still trims the rest."""
+        real_listdir = os.listdir
+
+        with tempfile.TemporaryDirectory() as folder:
+            self._fill(folder, [f"{i:03d}.webp" for i in range(10)])
+
+            with patch(
+                "os.listdir", side_effect=lambda p: real_listdir(p) + ["gone.webp"]
+            ):
+                file_util.trim_oldest_files(folder, 4)
+
+            assert len(os.listdir(folder)) == 4

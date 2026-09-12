@@ -15,7 +15,6 @@
       "description": "Položky revize lze pro kameru vytvořit pouze tehdy, je-li pro ni povoleno nahrávání."
     }
   },
-  "timeline": "Časová osa",
   "timeline.aria": "Zvolit časovou osu",
   "events": {
     "label": "Události",
@@ -39,8 +38,6 @@
   "detected": "Detekováno",
   "selected_one": "{{count}} vybráno",
   "selected_other": "{{count}} vybráno",
-  "suspiciousActivity": "Podezřelá aktivita",
-  "threateningActivity": "Ohrožující činnost",
   "zoomIn": "Přiblížit",
   "zoomOut": "Oddálit",
   "detail": {

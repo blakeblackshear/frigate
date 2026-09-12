@@ -45,15 +45,6 @@
     "m": "{{time}}d",
     "minute_one": "{{time}} dakika",
     "minute_other": "{{time}} dakika",
-    "formattedTimestampWithYear": {
-      "12hour": "%-d %b %Y, %I:%M %p",
-      "24hour": "%-d %b %Y, %H:%M"
-    },
-    "formattedTimestampOnlyMonthAndDay": "%-d %b",
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "%-d %b, %I:%M %p",
-      "24hour": "%-d %b, %H:%M"
-    },
     "s": "{{time}}sn",
     "month_one": "{{time}} ay",
     "month_other": "{{time}} ay",
@@ -200,7 +191,6 @@
     "theme": {
       "label": "Tema",
       "blue": "Mavi",
-      "contrast": "Yüksek Karşıtlık",
       "green": "Yeşil",
       "red": "Kırmızı",
       "default": "Varsayılan",

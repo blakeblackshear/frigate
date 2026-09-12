@@ -43,8 +43,6 @@
   "selected_one": "Wybrano {{count}}",
   "selected_other": "Wybrano {{count}}",
   "detected": "wykryto",
-  "suspiciousActivity": "Podejrzana aktywność",
-  "threateningActivity": "Niebezpieczne działania",
   "zoomIn": "Przybliż",
   "zoomOut": "Oddal",
   "detail": {

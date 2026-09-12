@@ -9,10 +9,99 @@
       "go2rtc": "Go2RTC Logs - Frigate",
       "nginx": "Nginx Logs - Frigate",
       "websocket": "Messages Logs - Frigate"
-    }
+    },
+    "health": "Health - Frigate"
   },
   "title": "System",
   "metrics": "System metrics",
+  "health": {
+    "title": "Health",
+    "notices": {
+      "title": "Notices",
+      "empty": "Your Frigate installation is healthy",
+      "dismiss": "Dismiss",
+      "openSettings": "Open settings",
+      "openLink": "Open link",
+      "noMatches": "No notices match the filter",
+      "dismissedTitle": "Dismissed",
+      "noneDismissed": "No dismissed notices",
+      "clearDismissed": "Clear dismissed",
+      "clearDismissedTitle": "Clear dismissed notices?",
+      "clearDismissedDesc": "Every dismissed notice is deleted. Config and stream checks show again right away, and other notices return the next time they happen.",
+      "firstSeen_one": "First seen {{time}}",
+      "firstSeen_other": "First seen {{time}} · {{count}} times",
+      "dismissedAt": "Dismissed {{time}}",
+      "filter": {
+        "showDismissed": "Show dismissed",
+        "severity": "Severity",
+        "error": "Error",
+        "warning": "Warning",
+        "info": "Info"
+      },
+      "kinds": {
+        "detector_stuck": "Detector {{detector}} was restarted after it stopped responding",
+        "model_download_failed": "Downloading {{file}} for {{model}} failed: {{error}}",
+        "skipped_detections": "Detection could not keep up and skipped {{pct}}% of frames for over a minute",
+        "shm_too_low": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB",
+        "failed_login_one": "Failed login attempt for {{user}}",
+        "failed_login_other": "Failed login attempts for {{user}}",
+        "update_available": "Frigate {{version}} is available"
+      },
+      "streamPrefix": "Stream {{index}}: {{message}}",
+      "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
+      "streamProbeFailed": "Stream {{index}} could not be probed: {{error}}",
+      "cameraProbeFailed": "Streams could not be probed: {{error}}"
+    },
+    "hardware": {
+      "title": "Hardware",
+      "objectDetection": "Object detection",
+      "hardwareAcceleration": "Hardware acceleration",
+      "enrichments": {
+        "title": "Enrichments",
+        "semantic_search": "Semantic search",
+        "face_recognition": "Face recognition",
+        "lpr": "License plate recognition",
+        "audio_transcription": "Audio transcription"
+      },
+      "cameraConnections": "Camera connections",
+      "allCamerasExcellent": "All cameras have an excellent connection.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "Nothing configured",
+      "allCameras": "All cameras",
+      "probeUnavailable": "Hardware detection is unavailable",
+      "justStarted": "Frigate just started",
+      "deviceNotFound": "{{devices}} was not found on this system",
+      "detectorNotRunning": "Detector process is not running",
+      "inferenceVerySlow": "Inference is very slow ({{speed}} ms)",
+      "inferenceSlow": "Inference is slow ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Custom ffmpeg arguments",
+      "customArgsNotVerified": "Custom ffmpeg arguments, not verified",
+      "hwaccelNotConfigured": "No hardware decoding is in use, but {{family}} is available. Select it in the ffmpeg settings",
+      "hwaccelHardwareMissing": "{{family}} is configured, but the hardware probe did not report it",
+      "unrecognizedDevice": "Unrecognized device override, not verified",
+      "decoderUsage": "decoder {{usage}}",
+      "remoteProvider": "Remote provider",
+      "acceleratorMissing": "Configured for {{device}} but no compatible accelerator was found",
+      "modelNotRunYet": "Model has not run yet, the device is verified after first use",
+      "fellBackToCpu": "Configured for {{device}} but running on the CPU",
+      "cpuDespiteAccelerator": "Running on the CPU although an accelerator is available",
+      "probed": "Probed",
+      "probing": "Probing...",
+      "recheck": "Re-check hardware",
+      "cameraStreams": "Camera streams",
+      "streamsNotChecked": "Not checked yet",
+      "streamsChecking": "Checking {{done}} of {{total}}",
+      "streamsClean": "No stream problems",
+      "checked": "Checked",
+      "runAgain": "Run again",
+      "runStreamChecks": "Run stream checks",
+      "streamsChecked_one": "{{count}} camera checked",
+      "streamsChecked_other": "{{count}} cameras checked",
+      "streamsFlagged_one": "{{count}} with problems, listed under Notices",
+      "streamsFlagged_other": "{{count}} with problems, listed under Notices"
+    }
+  },
   "logs": {
     "websocket": {
       "label": "Messages",
@@ -148,6 +237,10 @@
       "unused": {
         "title": "Unused",
         "tips": "This value may not accurately represent the free space available to Frigate if you have other files stored on your drive beyond Frigate's recordings. Frigate does not track storage usage outside of its recordings."
+      },
+      "subStream": {
+        "information": "Sub Stream Storage Information",
+        "tips": "Cameras that record a sub stream show their Original and Low quality usage separately, using the same names as the quality options in recording playback. Low quality recordings stay on disk until their retention period expires, so this breakdown can still appear for a camera after sub stream recording has been turned off."
       }
     }
   },
@@ -180,8 +273,10 @@
         "gap": "Keyframe gap (min / avg / max):",
         "segmentLength": "Recording segment length:",
         "ok": "Keyframes every ~{{seconds}}s, good for recording and playback.",
-        "warning": "Sparse or variable keyframes (longest gap ~{{seconds}}s), likely a smart codec (H.264+/H.265+), this is not recommended.",
-        "error": "Keyframe gap (~{{seconds}}s) exceeds the recording segment length ({{segmentTime}}s). Some segments may have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
+        "warningFixed": "Keyframes are evenly spaced but sparse (every ~{{seconds}}s). Recording still works, but live playback and seeking start more slowly. Set the camera's I-frame (keyframe) interval to match its frame rate.",
+        "warningVariable": "Keyframe spacing is inconsistent ({{minSeconds}}s to {{maxSeconds}}s), which usually means a smart codec (H.264+/H.265+) is enabled. This is not recommended.",
+        "errorFixed": "Keyframes every ~{{seconds}}s is longer than the recording segment length ({{segmentTime}}s), so some segments have no keyframe and will not play back. Shorten the camera's I-frame (keyframe) interval to match its frame rate.",
+        "errorVariable": "Keyframe gaps reach ~{{seconds}}s, longer than the recording segment length ({{segmentTime}}s). Some segments will have no keyframe, which breaks playback. Disable the smart/+ codec on the camera or shorten its keyframe interval.",
         "unknown": "Couldn't determine keyframe spacing.",
         "recordDisabled": "Recording is disabled for this camera."
       }
@@ -230,13 +325,16 @@
   "lastRefreshed": "Last refreshed: ",
   "stats": {
     "ffmpegHighCpuUsage": "{{camera}} has high FFmpeg CPU usage ({{ffmpegAvg}}%)",
+    "cameraSkippedDetections": "{{camera}} is skipping detection on {{pct}}% of frames",
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
+    "systemNotices_one": "{{count}} system notice",
+    "systemNotices_other": "{{count}} system notices",
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
-    "shmTooLow": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB.",
+    "retentionUnmet": "Recordings are being deleted before their retention period ends to free space",
     "debugReplayActive": "Debug replay session is active"
   },
   "enrichments": {

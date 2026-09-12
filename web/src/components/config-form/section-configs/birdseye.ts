@@ -5,29 +5,31 @@ const birdseye: SectionConfigOverrides = {
     sectionDocs: "/configuration/birdseye",
     messages: [
       {
-        key: "objects-mode-detect-disabled",
-        messageKey: "configMessages.birdseye.objectsModeDetectDisabled",
+        key: "object-tracking-detect-disabled",
+        messageKey: "configMessages.birdseye.objectTrackingDetectDisabled",
         severity: "info",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;
+          const modes = ctx.formData?.modes;
+          if (!Array.isArray(modes)) {
+            return false;
+          }
+
           return (
-            ctx.formData?.mode === "objects" &&
+            modes.includes("all_objects") &&
             ctx.fullCameraConfig.detect?.enabled === false
           );
         },
       },
     ],
     restartRequired: [],
-    fieldOrder: ["enabled", "mode", "order"],
+    fieldOrder: ["enabled", "modes", "order"],
     hiddenFields: ["order"],
     advancedFields: [],
-    overrideFields: ["enabled", "mode"],
+    overrideFields: ["enabled", "modes"],
     uiSchema: {
-      mode: {
-        "ui:size": "xs",
-        "ui:options": {
-          enumI18nPrefix: "birdseye.trackingMode",
-        },
+      modes: {
+        "ui:widget": "birdseyeModes",
       },
     },
   },
@@ -38,7 +40,7 @@ const birdseye: SectionConfigOverrides = {
       "width",
       "height",
       "quality",
-      "mode",
+      "modes",
       "layout",
       "inactivity_threshold",
       "idle_heartbeat_fps",
@@ -54,8 +56,7 @@ const birdseye: SectionConfigOverrides = {
       "idle_heartbeat_fps",
     ],
     uiSchema: {
-      mode: {
-        "ui:size": "xs",
+      modes: {
         "ui:after": { render: "BirdseyeCameraReorder" },
       },
     },

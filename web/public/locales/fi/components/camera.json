@@ -35,8 +35,7 @@
         "audioIsUnavailable": "Ääni ei ole saatavilla tähän suoratoistoon",
         "audio": {
           "tips": {
-            "title": "Äänen on oltava kytkettynä kameraan ja määritettynä go2rtc:ssä tätä suoratoistoa varten.",
-            "document": "Lue dokumentaatio "
+            "title": "Äänen on oltava kytkettynä kameraan ja määritettynä go2rtc:ssä tätä suoratoistoa varten."
           }
         },
         "streamMethod": {

@@ -71,6 +71,7 @@ from frigate.util.config import (
     find_config_file,
     redact_credential,
 )
+from frigate.util.object_names import get_categorized_object_names
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -189,6 +190,20 @@ def genai_models(request: Request):
     return JSONResponse(content=request.app.genai_manager.list_models())
 
 
+@router.get(
+    "/genai/roles",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get the model assigned to each GenAI role",
+    description=(
+        "Returns the selected model and its context size for each configured "
+        "GenAI role. Reads only what the client saved when it initialized, so "
+        "the provider is not queried for its model list."
+    ),
+)
+def genai_roles(request: Request):
+    return JSONResponse(content=request.app.genai_manager.role_info())
+
+
 @router.post(
     "/genai/probe",
     dependencies=[Depends(require_role(["admin"]))],
@@ -291,10 +306,6 @@ def config(request: Request):
     config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
-    config["detectors"] = {
-        name: detector.model_dump(mode="json", warnings="none", exclude_none=True)
-        for name, detector in config_obj.detectors.items()
-    }
 
     # remove environment_vars for non-admin users
     if request.headers.get("remote-role") != "admin":
@@ -375,31 +386,28 @@ def config(request: Request):
         config["go2rtc"]["streams"][stream_name] = cleaned
 
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
-    config["model"]["colormap"] = config_obj.model.colormap
-    config["model"]["all_attributes"] = config_obj.model.all_attributes
-    config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
 
-    # Add model plus data if plus is enabled
-    if config["plus"]["enabled"]:
-        model_path = config.get("model", {}).get("path")
-        if model_path:
-            model_json_path = FilePath(model_path).with_suffix(".json")
+    for index, model in enumerate(config_obj.models):
+        model_dict = config["models"][index]
+        model_dict["colormap"] = model.colormap
+        model_dict["all_attributes"] = model.all_attributes
+        model_dict["non_logo_attributes"] = model.non_logo_attributes
+        model_dict["labelmap"] = model.merged_labelmap
+
+        if not config["plus"]["enabled"]:
+            continue
+
+        # Add model plus data if plus is enabled
+        model_dict["plus"] = None
+
+        if model.path:
+            model_json_path = FilePath(model.path).with_suffix(".json")
+
             try:
                 with open(model_json_path) as f:
-                    model_plus_data = json.load(f)
-                config["model"]["plus"] = model_plus_data
-            except FileNotFoundError:
-                config["model"]["plus"] = None
-            except json.JSONDecodeError:
-                config["model"]["plus"] = None
-        else:
-            config["model"]["plus"] = None
-
-    # use merged labelamp
-    for detector_config in config["detectors"].values():
-        detector_config["model"]["labelmap"] = (
-            request.app.frigate_config.model.merged_labelmap
-        )
+                    model_dict["plus"] = json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                pass
 
     return JSONResponse(content=config)
 
@@ -1313,9 +1321,41 @@ def get_sub_labels(
     return JSONResponse(content=sub_labels)
 
 
+@router.get(
+    "/categorized_object_names",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get known object names by object type",
+    description="""Returns the sub labels and attributes this install can attach,
+    grouped by object type. Unlike /sub_labels, which reflects what has already been
+    detected, this reads the config and model files, so it covers recognized face
+    names, named license plates, custom object classification categories, and the
+    detector attributes of tracked objects.""",
+)
+def categorized_object_names(
+    request: Request,
+    object_type: str | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    return JSONResponse(
+        content=get_categorized_object_names(
+            request.app.frigate_config, allowed_cameras, object_type
+        )
+    )
+
+
 @router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_audio_labels():
+def get_audio_labels(request: Request):
     labels = load_labels("/audio-labelmap.txt", prefill=521)
+
+    # configured overrides group several audio classes under one label, and the
+    # detector merges them over the defaults at runtime. Offer them here too, or
+    # a grouped label could never be picked in the UI.
+    config: FrigateConfig = request.app.frigate_config
+    labels.update(config.audio.labelmap)
+
+    for camera in config.cameras.values():
+        labels.update(camera.audio.labelmap)
+
     return JSONResponse(content=labels)
 
 
@@ -1337,11 +1377,14 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 
     modelList = models["list"]
 
+    config: FrigateConfig = request.app.frigate_config
+    primary_model = config.primary_model
+
     # current model type
-    modelType = request.app.frigate_config.model.model_type
+    modelType = primary_model.model_type
 
     # current detectorType for comparing to supportedDetectors
-    detectorType = list(request.app.frigate_config.detectors.values())[0].type
+    detectorType = config.devices_for_model(primary_model)[0].detector
 
     validModels = []
 

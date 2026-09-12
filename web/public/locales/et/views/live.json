@@ -6,7 +6,6 @@
   "streamingSettings": "Voogedastuse seadistused",
   "cameraSettings": {
     "title": "Seadistused: {{camera}}",
-    "cameraEnabled": "Kaamera on kasutusel",
     "objectDetection": "Objektide tuvastamine",
     "audioDetection": "Heli tuvastus",
     "transcription": "Heli üleskirjutus",
@@ -73,8 +72,6 @@
     }
   },
   "camera": {
-    "enable": "Lülita kaamera sisse",
-    "disable": "Lülita kaamera välja",
     "turnOn": "Lülita kaamera sisse",
     "turnOff": "Lülita kaamera välja"
   },

@@ -60,6 +60,8 @@ from frigate.data_processing.real_time.license_plate import (
 )
 from frigate.data_processing.types import DataProcessorMetrics, PostProcessDataEnum
 from frigate.db.sqlitevecq import SqliteVecQueueDatabase
+from frigate.detectors.detection_runners import snapshot_loaded_devices
+from frigate.embeddings.types import fold_runtime_devices
 from frigate.events.types import (
     EventStateEnum,
     EventTypeEnum,
@@ -101,6 +103,7 @@ class EmbeddingMaintainer(threading.Thread):
         super().__init__(name="embeddings_maintainer")
         self.config = config
         self.metrics = metrics
+        self._published_devices: dict[str, str] = {}
         self.embeddings = None
         self.config_updater = CameraConfigUpdateSubscriber(
             self.config,
@@ -337,6 +340,7 @@ class EmbeddingMaintainer(threading.Thread):
             self._expire_dedicated_lpr()
             self._process_finalized()
             self._process_event_metadata()
+            self._publish_runtime_devices()
 
         # Shutdown deferred processors
         for processor in self.realtime_processors:
@@ -609,6 +613,18 @@ class EmbeddingMaintainer(threading.Thread):
                 # Embed the thumbnail
                 self._embed_thumbnail(event_id, thumbnail)
 
+            # every post processor below reads config.cameras[camera], but
+            # tracked_events still has to be released or the thumbnails held
+            # for this event leak, same as the two exits above
+            if camera not in self.config.cameras:
+                logger.debug("Skipping post processing for removed camera %s", camera)
+
+                for processor in self.post_processors:
+                    if isinstance(processor, ObjectDescriptionProcessor):
+                        processor.cleanup_event(event_id)
+
+                continue
+
             # call any defined post processors
             for processor in self.post_processors:
                 if isinstance(processor, LicensePlatePostProcessor):
@@ -666,11 +682,18 @@ class EmbeddingMaintainer(threading.Thread):
         to_remove = []
 
         for id, data in self.detected_license_plates.items():
+            camera_config = self.config.cameras.get(data["camera"])
+
+            if camera_config is None:
+                # camera was removed, drop the entry rather than expiring it
+                to_remove.append(id)
+                continue
+
             last_seen = data.get("last_seen", 0)
             if not last_seen:
                 continue
 
-            if now - last_seen > self.config.cameras[data["camera"]].lpr.expire_time:
+            if now - last_seen > camera_config.lpr.expire_time:
                 to_remove.append(id)
         for id in to_remove:
             self.event_metadata_publisher.publish(
@@ -695,7 +718,9 @@ class EmbeddingMaintainer(threading.Thread):
             topic = str(raw_topic)
 
             if topic.endswith(RecordingsDataTypeEnum.saved.value):
-                camera, recordings_available_through_timestamp, _ = payload
+                camera, _stream_type, recordings_available_through_timestamp, _ = (
+                    payload
+                )
 
                 self.recordings_available_through[camera] = (
                     recordings_available_through_timestamp
@@ -716,6 +741,19 @@ class EmbeddingMaintainer(threading.Thread):
             for processor in self.post_processors:
                 if isinstance(processor, ReviewDescriptionProcessor):
                     processor.process_data(review_updates, PostProcessDataEnum.review)
+
+    def _publish_runtime_devices(self) -> None:
+        """Push each enrichment's loaded device to the shared metrics dict.
+
+        Runs every loop iteration, so only changed entries cross the manager
+        boundary.
+        """
+        for enrichment, device in fold_runtime_devices(
+            snapshot_loaded_devices()
+        ).items():
+            if self._published_devices.get(enrichment) != device:
+                self.metrics.runtime_devices[enrichment] = device
+                self._published_devices[enrichment] = device
 
     def _process_event_metadata(self):
         # Check for regenerate description requests

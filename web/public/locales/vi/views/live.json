@@ -1,5 +1,4 @@
 {
-  "documentTitle": "Trực tiếp - Frigate",
   "documentTitle.withCamera": "{{camera}} - Trực tiếp - Frigate",
   "lowBandwidthMode": "Chế độ băng thông thấp",
   "twoWayTalk": {
@@ -18,15 +17,13 @@
     "title": "Luồng",
     "audio": {
       "tips": {
-        "title": "Âm thanh phải được phát ra từ camera của bạn và cấu hình trong go2rtc cho luồng này.",
-        "documentation": "Đọc tài liệu "
+        "title": "Âm thanh phải được phát ra từ camera của bạn và cấu hình trong go2rtc cho luồng này."
       },
       "available": "Âm thanh khả dụng cho luồng này",
       "unavailable": "Âm thanh không khả dụng cho luồng này"
     },
     "twoWayTalk": {
       "tips": "hiết bị của bạn phải hỗ trợ tính năng này và WebRTC phải được cấu hình để đàm thoại hai chiều.",
-      "tips.documentation": "Đọc tài liệu ",
       "available": "Đàm thoại hai chiều khả dụng cho luồng này",
       "unavailable": "Đàm thoại hai chiều không khả dụng cho luồng này"
     },
@@ -108,10 +105,6 @@
     "enable": "Bật âm thanh Camera",
     "disable": "Tắt âm thanh Camera"
   },
-  "camera": {
-    "enable": "Bật camera",
-    "disable": "Tắt camera"
-  },
   "muteCameras": {
     "enable": "Tắt tiếng tất cả Camera",
     "disable": "Bật tiếng tất cả Camera"
@@ -148,7 +141,6 @@
   },
   "cameraSettings": {
     "title": "Cài đặt {{camera}}",
-    "cameraEnabled": "Camera đã bật",
     "objectDetection": "Phát hiện đối tượng",
     "recording": "Ghi hình",
     "snapshots": "Ảnh chụp",
@@ -164,8 +156,7 @@
       "all": "Tất cả",
       "motion": "Chuyển động",
       "active_objects": "Đối tượng hoạt động"
-    },
-    "notAllTips": "Cấu hình giữ lại ghi hình {{source}} của bạn được đặt là <code>mode: {{effectiveRetainMode}}</code>, vì vậy lần ghi hình theo yêu cầu này chỉ giữ lại các đoạn có {{effectiveRetainModeName}}."
+    }
   },
   "transcription": {
     "enable": "Bật phiên âm trực tiếp",

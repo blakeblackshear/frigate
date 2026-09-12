@@ -2,8 +2,6 @@
   "documentTitle": {
     "authentication": "Impostazioni di autenticazione - Frigate",
     "default": "Impostazioni - Frigate",
-    "classification": "Impostazioni di classificazione - Frigate",
-    "camera": "Impostazioni telecamera - Frigate",
     "masksAndZones": "Editor di maschere e zone - Frigate",
     "motionTuner": "Regolatore di movimento - Frigate",
     "object": "Correzioni - Frigate",
@@ -24,11 +22,9 @@
       "cleanCopyWarning": "Alcune telecamere hanno la funzione di istantanea disabilitata",
       "table": {
         "snapshots": "Istantanee",
-        "camera": "Telecamera",
-        "cleanCopySnapshots": "Istantanee <code>clean_copy</code>"
+        "camera": "Telecamera"
       },
       "desc": "Per inviare i dati a Frigate+ è necessario abilitare le istantanee nella configurazione.",
-      "documentation": "Leggi la documentazione",
       "title": "Configurazione istantanee"
     },
     "apiKey": {
@@ -89,7 +85,6 @@
       "area": "Area",
       "title": "Disegno del filtro della forma dell'oggetto",
       "desc": "Disegna un rettangolo sull'immagine per visualizzare i dettagli dell'area e del rapporto",
-      "document": "Leggi la documentazione ",
       "score": "Punteggio",
       "ratio": "Rapporto"
     },
@@ -142,8 +137,7 @@
   "masksAndZones": {
     "motionMasks": {
       "context": {
-        "title": "Le maschere di movimento vengono utilizzate per impedire che tipi di movimento indesiderati attivino il rilevamento (ad esempio: rami di alberi, orari di telecamere). Le maschere di movimento dovrebbero essere utilizzate con <em>molta parsimonia</em>: un uso eccessivo renderebbe più difficile il tracciamento degli oggetti.",
-        "documentation": "Leggi la documentazione"
+        "title": "Le maschere di movimento vengono utilizzate per impedire che tipi di movimento indesiderati attivino il rilevamento (ad esempio: rami di alberi, orari di telecamere). Le maschere di movimento dovrebbero essere utilizzate con <em>molta parsimonia</em>: un uso eccessivo renderebbe più difficile il tracciamento degli oggetti."
       },
       "desc": {
         "title": "Le maschere di movimento vengono utilizzate per impedire che movimenti indesiderati attivino il rilevamento. Un mascheramento eccessivo renderà più difficile il tracciamento degli oggetti.",
@@ -154,7 +148,6 @@
       "clickDrawPolygon": "Fai clic per disegnare un poligono sull'immagine.",
       "polygonAreaTooLarge": {
         "title": "La maschera di movimento copre il {{polygonArea}}% dell'inquadratura. Si sconsiglia di utilizzare maschere di movimento di grandi dimensioni.",
-        "documentation": "Leggi la documentazione",
         "tips": "Le maschere di movimento non impediscono il rilevamento degli oggetti. È consigliabile utilizzare una zona specifica."
       },
       "point_one": "{{count}} punto",
@@ -261,7 +254,6 @@
       "speedEstimation": {
         "desc": "Abilita la stima della velocità per gli oggetti in questa zona. La zona deve avere esattamente 4 punti.",
         "title": "Stima della velocità",
-        "docs": "Leggi la documentazione",
         "lineCDistance": "Distanza della linea C ({{unit}})",
         "lineDDistance": "Distanza della linea D ({{unit}})",
         "lineADistance": "Distanza della linea A ({{unit}})",
@@ -364,83 +356,10 @@
     "camera": "Telecamera",
     "noCamera": "Nessuna telecamera"
   },
-  "camera": {
-    "reviewClassification": {
-      "limitDetections": "Limita i rilevamenti a zone specifiche",
-      "objectDetectionsTips": "Tutti gli oggetti {{detectionsLabels}} non categorizzati su {{cameraName}} verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano.",
-      "zoneObjectDetectionsTips": {
-        "text": "Tutti gli oggetti {{detectionsLabels}} non categorizzati in {{zone}} su {{cameraName}} verranno mostrati come Rilevamenti.",
-        "notSelectDetections": "Tutti gli oggetti {{detectionsLabels}} rilevati in {{zone}} su {{cameraName}} non classificati come Avvisi verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano.",
-        "regardlessOfZoneObjectDetectionsTips": "Tutti gli oggetti {{detectionsLabels}} non categorizzati su {{cameraName}} verranno mostrati come Rilevamenti, indipendentemente dalla zona in cui si trovano."
-      },
-      "title": "Classificazione della revisione",
-      "desc": "Frigate categorizza gli elementi di revisione come Avvisi e Rilevamenti. Per impostazione predefinita, tutti gli oggetti <em>persona</em> e <em>automobile</em> sono considerati Avvisi. Puoi perfezionare la categorizzazione degli elementi di revisione configurando le zone desiderate.",
-      "objectAlertsTips": "Tutti gli oggetti {{alertsLabels}} su {{cameraName}} verranno mostrati come Avvisi.",
-      "toast": {
-        "success": "La configurazione della classificazione di revisione è stata salvata. Riavvia Frigate per applicare le modifiche."
-      },
-      "readTheDocumentation": "Leggi la documentazione",
-      "noDefinedZones": "Per questa telecamera non sono definite zone.",
-      "zoneObjectAlertsTips": "Tutti gli oggetti {{alertsLabels}} rilevati in {{zone}} su {{cameraName}} verranno visualizzati come Avvisi.",
-      "selectAlertsZones": "Seleziona le zone per gli Avvisi",
-      "selectDetectionsZones": "Seleziona le zone per i Rilevamenti",
-      "unsavedChanges": "Impostazioni di classificazione delle revisioni non salvate per {{camera}}"
-    },
-    "streams": {
-      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi da parte di Frigate. Rilevamenti, registrazioni e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni di go2rtc.</em>",
-      "title": "Flussi"
-    },
-    "title": "Impostazioni telecamera",
-    "review": {
-      "title": "Rivedi",
-      "desc": "Abilita/disabilita temporaneamente avvisi e rilevamenti per questa telecamera fino al riavvio di Frigate. Se disabilitati, non verranno generati nuovi elementi di revisione. ",
-      "alerts": "Avvisi ",
-      "detections": "Rilevamenti "
-    },
-    "object_descriptions": {
-      "title": "Descrizioni di oggetti di IA generativa",
-      "desc": "Abilita/disabilita temporaneamente le descrizioni degli oggetti generate dall'IA per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli oggetti tracciati su questa telecamera."
-    },
-    "review_descriptions": {
-      "title": "Descrizioni delle revisioni dell'IA generativa",
-      "desc": "Abilita/disabilita temporaneamente le descrizioni delle revisioni dell'IA generativa per questa telecamera. Se disabilitate, le descrizioni generate dall'IA non verranno richieste per gli elementi da recensire su questa telecamera."
-    },
-    "addCamera": "Aggiungi nuova telecamera",
-    "editCamera": "Modifica telecamera:",
-    "selectCamera": "Seleziona una telecamera",
-    "backToSettings": "Torna alle impostazioni della telecamera",
-    "cameraConfig": {
-      "add": "Aggiungi telecamera",
-      "edit": "Modifica telecamera",
-      "description": "Configura le impostazioni della telecamera, inclusi gli ingressi ed i ruoli della trasmissione.",
-      "name": "Nome della telecamera",
-      "nameRequired": "Il nome della telecamera è obbligatorio",
-      "nameInvalid": "Il nome della telecamera deve contenere solo lettere, numeri, caratteri di sottolineatura o trattini",
-      "namePlaceholder": "ad esempio: porta_principale",
-      "enabled": "Abilitata",
-      "ffmpeg": {
-        "inputs": "Flussi di ingresso",
-        "path": "Percorso del flusso",
-        "pathRequired": "Il percorso del flusso è obbligatorio",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Ruoli",
-        "rolesRequired": "È richiesto almeno un ruolo",
-        "rolesUnique": "Ogni ruolo (audio, rilevamento, registrazione) può essere assegnato solo ad un flusso",
-        "addInput": "Aggiungi flusso di ingresso",
-        "removeInput": "Rimuovi flusso di ingresso",
-        "inputsRequired": "È richiesto almeno un flusso di ingresso"
-      },
-      "toast": {
-        "success": "La telecamera {{cameraName}} è stata salvata correttamente"
-      },
-      "nameLength": "Il nome della telecamera deve contenere meno di 24 caratteri."
-    }
-  },
   "menu": {
     "motionTuner": "Regolatore di movimento",
     "notifications": "Notifiche",
     "ui": "Interfaccia utente",
-    "classification": "Classificazione",
     "cameras": "Configurazione telecamera",
     "masksAndZones": "Maschere / Zone",
     "debug": "Correzioni",
@@ -478,8 +397,6 @@
     "systemTelemetry": "Telemetria",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "Dispositivo di rilevamento",
-    "systemDetectionModel": "Modello di rilevamento",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "Flussi go2rtc",
     "integrationSemanticSearch": "Ricerca semantica",
@@ -558,10 +475,7 @@
           "hide": "Nascondi password",
           "requirements": {
             "title": "Requisiti password:",
-            "length": "Almeno 12 caratteri",
-            "uppercase": "Almeno una lettera maiuscola",
-            "digit": "Almeno una cifra",
-            "special": "Almeno un carattere speciale (!@#$%^&*(),.?\":{}|<>)"
+            "length": "Almeno 12 caratteri"
           }
         },
         "newPassword": {
@@ -686,68 +600,6 @@
       }
     }
   },
-  "classification": {
-    "licensePlateRecognition": {
-      "desc": "Frigate può riconoscere le targhe dei veicoli e aggiungere automaticamente i caratteri rilevati al campo recognized_license_plate o un nome noto come sub_label agli oggetti di tipo \"automobile\". Un caso d'uso comune potrebbe essere la lettura delle targhe delle auto che entrano in un vialetto o che transitano lungo una strada.",
-      "title": "Riconoscimento della targa",
-      "readTheDocumentation": "Leggi la documentazione"
-    },
-    "title": "Impostazioni di classificazione",
-    "semanticSearch": {
-      "title": "Ricerca semantica",
-      "desc": "La ricerca semantica in Frigate consente di trovare gli oggetti tracciati all'interno degli elementi della recensione utilizzando l'immagine stessa, una descrizione testuale definita dall'utente o una generata automaticamente.",
-      "readTheDocumentation": "Leggi la documentazione",
-      "modelSize": {
-        "large": {
-          "title": "grande",
-          "desc": "L'utilizzo di <em>large</em> sfrutta il modello Jina completo e, se applicabile, verrà eseguito automaticamente sulla GPU."
-        },
-        "small": {
-          "desc": "L'utilizzo di <em>small</em> sfrutta una versione quantizzata del modello che utilizza meno RAM ed è più veloce sulla CPU con una differenza davvero trascurabile nella qualità di incorporamento.",
-          "title": "piccolo"
-        },
-        "label": "Dimensioni del modello",
-        "desc": "Dimensioni del modello utilizzato per gli incorporamenti della ricerca semantica."
-      },
-      "reindexNow": {
-        "label": "Reindicizza ora",
-        "desc": "La reindicizzazione rigenererà gli incorporamenti per tutti gli oggetti tracciati. Questo processo viene eseguito in sottofondo e potrebbe impegnare al massimo la CPU e richiedere un tempo considerevole, a seconda del numero di oggetti tracciati.",
-        "confirmTitle": "Conferma reindicizzazione",
-        "confirmDesc": "Vuoi davvero reindicizzare tutti gli incorporamenti di oggetti tracciati? Questo processo verrà eseguito in sottofondo, ma potrebbe impegnare al massimo la CPU e richiedere molto tempo. Puoi monitorare l'avanzamento nella pagina Esplora.",
-        "confirmButton": "Reindicizza",
-        "success": "Reindicizzazione avviata con successo.",
-        "alreadyInProgress": "La reindicizzazione è già in corso.",
-        "error": "Impossibile avviare la reindicizzazione: {{errorMessage}}"
-      }
-    },
-    "faceRecognition": {
-      "title": "Riconoscimento facciale",
-      "desc": "Il riconoscimento facciale consente di assegnare un nome alle persone e, quando il volto viene riconosciuto, Frigate assegnerà il nome della persona come sottoetichetta. Queste informazioni sono incluse nell'interfaccia utente, nei filtri e nelle notifiche.",
-      "modelSize": {
-        "desc": "Dimensioni del modello utilizzato per il riconoscimento facciale.",
-        "small": {
-          "title": "piccolo",
-          "desc": "L'utilizzo di <em>small</em> sfrutta un modello di incorporamento di volti FaceNet che funziona in modo efficiente sulla maggior parte delle CPU."
-        },
-        "large": {
-          "title": "grande",
-          "desc": "L'utilizzo di <em>large</em> sfrutta un modello di incorporamento di volti ArcFace e verrà eseguito automaticamente sulla GPU, se applicabile."
-        },
-        "label": "Dimensioni del modello"
-      },
-      "readTheDocumentation": "Leggi la documentazione"
-    },
-    "toast": {
-      "error": "Impossibile salvare le modifiche alla configurazione: {{errorMessage}}",
-      "success": "Le impostazioni di classificazione sono state salvate. Riavvia Frigate per applicare le modifiche."
-    },
-    "birdClassification": {
-      "desc": "La classificazione degli uccelli identifica gli uccelli noti utilizzando un modello Tensorflow quantizzato. Quando un uccello noto viene riconosciuto, il suo nome comune viene aggiunto come sub_label. Queste informazioni sono incluse nell'interfaccia utente, nei filtri e nelle notifiche.",
-      "title": "Classificazione degli uccelli"
-    },
-    "restart_required": "Riavvio richiesto (impostazioni di classificazione modificate)",
-    "unsavedChanges": "Modifiche alle impostazioni di classificazione non salvate"
-  },
   "dialog": {
     "unsavedChanges": {
       "title": "Sono presenti modifiche non salvate.",
@@ -809,7 +661,6 @@
     "registerDevice": "Registra questo dispositivo",
     "notificationUnavailable": {
       "desc": "Le notifiche push web richiedono un contesto sicuro (<code>https://...</code>). Questa è una limitazione del browser. Accedi a Frigate in modo sicuro per utilizzare le notifiche.",
-      "documentation": "Leggi la documentazione",
       "title": "Notifiche non disponibili",
       "descPwa": "Su iOS, le notifiche push web sono disponibili solo se Frigate è installato sulla schermata Home. Apri il menu <strong>Condividi</strong>, scegli <strong>Aggiungi alla schermata Home</strong>, quindi apri Frigate dalla nuova icona per registrare questo dispositivo per le notifiche."
     },
@@ -826,8 +677,7 @@
     "title": "Notifiche",
     "notificationSettings": {
       "title": "Impostazioni di notifica",
-      "desc": "Frigate può inviare notifiche push in modo nativo al tuo dispositivo quando è in esecuzione nel browser o installato come PWA.",
-      "documentation": "Leggi la documentazione"
+      "desc": "Frigate può inviare notifiche push in modo nativo al tuo dispositivo quando è in esecuzione nel browser o installato come PWA."
     },
     "cancelSuspension": "Annulla sospensione",
     "unsavedRegistrations": "Registrazioni di notifiche non salvate",
@@ -863,13 +713,11 @@
         }
       },
       "title": "Ricerca semantica",
-      "desc": "La ricerca semantica in Frigate consente di trovare gli oggetti tracciati all'interno degli elementi della recensione utilizzando l'immagine stessa, una descrizione testuale definita dall'utente o una generata automaticamente.",
-      "readTheDocumentation": "Leggi la documentazione"
+      "desc": "La ricerca semantica in Frigate consente di trovare gli oggetti tracciati all'interno degli elementi della recensione utilizzando l'immagine stessa, una descrizione testuale definita dall'utente o una generata automaticamente."
     },
     "faceRecognition": {
       "desc": "Il riconoscimento facciale consente di assegnare un nome alle persone e, quando il volto viene riconosciuto, Frigate assegnerà il nome della persona come sottoetichetta. Queste informazioni sono incluse nell'interfaccia utente, nei filtri e nelle notifiche.",
       "title": "Riconoscimento facciale",
-      "readTheDocumentation": "Leggi la documentazione",
       "modelSize": {
         "label": "Dimensioni del modello",
         "desc": "Dimensioni del modello utilizzato per il riconoscimento facciale.",
@@ -889,8 +737,7 @@
     },
     "licensePlateRecognition": {
       "desc": "Frigate può riconoscere le targhe dei veicoli e aggiungere automaticamente i caratteri rilevati al campo recognized_license_plate o un nome noto come sub_label agli oggetti di tipo automobile (car). Un caso d'uso comune potrebbe essere la lettura delle targhe delle auto che entrano in un vialetto o che transitano lungo una strada.",
-      "title": "Riconoscimento targhe",
-      "readTheDocumentation": "Leggi la documentazione"
+      "title": "Riconoscimento targhe"
     },
     "unsavedChanges": "Modifiche alle impostazioni di miglioramento non salvate",
     "restart_required": "Riavvio richiesto (impostazioni di miglioramento modificate)"
@@ -918,7 +765,6 @@
       "description": "Descrizione"
     },
     "actions": {
-      "alert": "Contrassegna come avviso",
       "notification": "Invia notifica",
       "sub_label": "Aggiungi sottoetichetta",
       "attribute": "Aggiungi attributo"
@@ -980,11 +826,6 @@
           "error": {
             "min": "È necessario selezionare almeno un'azione."
           }
-        },
-        "friendly_name": {
-          "title": "Nome semplice",
-          "placeholder": "Assegna un nome o descrivi questo innesco",
-          "description": "Un nome semplice o un testo descrittivo facoltativo per questo innesco."
         }
       }
     },
@@ -1123,48 +964,9 @@
   },
   "cameraWizard": {
     "step3": {
-      "streamUnavailable": "Anteprima trasmissione non disponibile",
       "description": "Configura i ruoli del flusso e aggiungi altri flussi alla tua telecamera.",
-      "validationTitle": "Convalida del flusso",
-      "connectAllStreams": "Connetti tutti i flussi",
-      "reconnectionSuccess": "Riconnessione riuscita.",
-      "reconnectionPartial": "Alcuni flussi non sono riusciti a riconnettersi.",
-      "reload": "Ricarica",
-      "connecting": "Connessione...",
       "streamTitle": "Flusso {{number}}",
-      "valid": "Convalida",
-      "failed": "Fallito",
-      "notTested": "Non verificata",
-      "connectStream": "Connetti",
-      "connectingStream": "Connessione",
-      "disconnectStream": "Disconnetti",
-      "estimatedBandwidth": "Larghezza di banda stimata",
       "roles": "Ruoli",
-      "none": "Nessuno",
-      "error": "Errore",
-      "streamValidated": "Flusso {{number}} convalidato con successo",
-      "streamValidationFailed": "Convalida del flusso {{number}} non riuscita",
-      "saveAndApply": "Salva nuova telecamera",
-      "saveError": "Configurazione non valida. Controlla le impostazioni.",
-      "issues": {
-        "title": "Convalida del flusso",
-        "videoCodecGood": "Il codec video è {{codec}}.",
-        "audioCodecGood": "Il codec audio è {{codec}}.",
-        "noAudioWarning": "Nessun audio rilevato per questo flusso, le registrazioni non avranno audio.",
-        "audioCodecRecordError": "Per supportare l'audio nelle registrazioni è necessario il codec audio AAC.",
-        "audioCodecRequired": "Per supportare il rilevamento audio è necessario un flusso audio.",
-        "restreamingWarning": "Riducendo le connessioni alla telecamera per il flusso di registrazione l'utilizzo della CPU potrebbe aumentare leggermente.",
-        "dahua": {
-          "substreamWarning": "Il flusso 1 è bloccato a bassa risoluzione. Molte telecamere Dahua/Amcrest/EmpireTech supportano flussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
-        },
-        "hikvision": {
-          "substreamWarning": "Il flusso 1 è bloccato a bassa risoluzione. Molte telecamere Hikvision supportano flussi aggiuntivi che devono essere abilitati nelle impostazioni della telecamera. Si consiglia di controllare e utilizzare tali flussi, se disponibili."
-        },
-        "resolutionHigh": "Una risoluzione di {{resolution}} potrebbe causare un aumento dell'utilizzo delle risorse.",
-        "resolutionLow": "Una risoluzione di {{resolution}} potrebbe essere troppo bassa per un rilevamento affidabile di oggetti di piccole dimensioni."
-      },
-      "ffmpegModule": "Utilizza la modalità di compatibilità della trasmissione",
-      "ffmpegModuleDescription": "Se il flusso non si carica dopo diversi tentativi, prova ad abilitare questa opzione. Se abilitata, Frigate utilizzerà il modulo ffmpeg con go2rtc. Questo potrebbe garantire una migliore compatibilità con alcuni flussi di telecamere.",
       "streamsTitle": "Flussi della telecamera",
       "addStream": "Aggiungi flusso",
       "addAnotherStream": "Aggiungi un altro flusso",
@@ -1242,30 +1044,13 @@
       "brandInformation": "Informazioni sul marchio",
       "brandUrlFormat": "Per le telecamere con formato URL RTSP come: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://nomeutente:password@sistema:porta/percorso",
-      "testConnection": "Prova connessione",
-      "testSuccess": "Prova di connessione riuscita!",
-      "testFailed": "Prova di connessione fallita. Controlla i dati immessi e riprova.",
-      "streamDetails": "Dettagli del flusso",
-      "warnings": {
-        "noSnapshot": "Impossibile recuperare un'immagine dal flusso configurato."
-      },
       "errors": {
         "brandOrCustomUrlRequired": "Seleziona una marca di telecamera con sistema/IP oppure scegli \"Altro\" con un URL personalizzato",
         "nameRequired": "Il nome della telecamera è obbligatorio",
         "nameLength": "Il nome della telecamera deve contenere al massimo 64 caratteri",
         "invalidCharacters": "Il nome della telecamera contiene caratteri non validi",
         "nameExists": "Il nome della telecamera esiste già",
-        "brands": {
-          "reolink-rtsp": "Reolink RTSP non è consigliato. Abilita HTTP nelle impostazioni del firmware della telecamera e riavvia la procedura guidata."
-        },
         "customUrlRtspRequired": "Gli URL personalizzati devono iniziare con \"rtsp://\" o \"rtsps://\". La configurazione manuale è necessaria per i flussi video non RTSP."
-      },
-      "docs": {
-        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
-      },
-      "testing": {
-        "probingMetadata": "Analisi dei metadati della telecamera in corso...",
-        "fetchingSnapshot": "Recupero istantanea della telecamera in corso..."
       },
       "probeMode": "Analisi telecamera",
       "detectionMethodDescription": "Analizza la telecamera con ONVIF (se supportato) per trovare gli URL dei flussi video della telecamera oppure seleziona manualmente la marca della telecamera per utilizzare URL predefiniti. Per inserire un URL RTSP personalizzato, scegli il metodo manuale e seleziona \"Altro\".",
@@ -1279,42 +1064,11 @@
     },
     "step2": {
       "description": "Analizza la telecamera per individuare i flussi disponibili oppure configura le impostazioni manuali in base al metodo di rilevamento selezionato.",
-      "streamsTitle": "Flussi della telecamera",
-      "addStream": "Aggiungi flusso",
-      "addAnotherStream": "Aggiungi un altro flusso",
-      "streamTitle": "Flusso {{number}}",
-      "streamUrl": "URL del flusso",
-      "streamUrlPlaceholder": "rtsp://nomeutente:password@sistema:porta/percorso",
-      "url": "URL",
-      "resolution": "Risoluzione",
-      "selectResolution": "Seleziona la risoluzione",
-      "quality": "Qualità",
-      "selectQuality": "Seleziona la qualità",
-      "roles": "Ruoli",
-      "roleLabels": {
-        "detect": "Rilevamento oggetti",
-        "record": "Registrazione",
-        "audio": "Audio"
-      },
-      "testStream": "Prova connessione",
       "testSuccess": "Prova di connessione riuscita!",
       "testFailed": "Prova di connessione fallita. Controlla i dati inseriti e riprova.",
       "testFailedTitle": "Prova fallita",
       "connected": "Connessa",
       "notConnected": "Non connessa",
-      "featuresTitle": "Caratteristiche",
-      "go2rtc": "Riduci le connessioni alla telecamera",
-      "detectRoleWarning": "Per procedere, almeno un flusso deve avere il ruolo \"rileva\".",
-      "rolesPopover": {
-        "title": "Ruoli del flusso",
-        "detect": "Flusso principale per il rilevamento degli oggetti.",
-        "record": "Salva segmenti del flusso video in base alle impostazioni di configurazione.",
-        "audio": "Flusso per il rilevamento basato sull'audio."
-      },
-      "featuresPopover": {
-        "title": "Caratteristiche del flusso",
-        "description": "Utilizza la ritrasmissione go2rtc per ridurre le connessioni alla tua telecamera."
-      },
       "probeFailed": "Impossibile analizzare la telecamera: {{error}}",
       "probeSuccessful": "Analisi riuscita",
       "probeError": "Errore analisi",
@@ -1406,18 +1160,7 @@
     "backToSettings": "Torna alle impostazioni della telecamera",
     "streams": {
       "title": "Stato e dettagli della telecamera",
-      "desc": "Disattiva temporaneamente una telecamera fino al riavvio di Frigate. La disattivazione completa di una telecamera interrompe l'elaborazione dei flussi di questa telecamera da parte di Frigate. Rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disattiva le ritrasmissioni di go2rtc.</em>",
-      "enableLabel": "Telecamere abilitate",
-      "enableDesc": "Disabilita temporaneamente una telecamera abilitata fino al riavvio di Frigate. La disabilitazione completa di una telecamera interrompe l'elaborazione dei flussi video di tale telecamera da parte di Frigate. Le funzioni di rilevamento, registrazione e correzioni non saranno disponibili.<br /> <em>Nota: questa operazione non disabilita le ritrasmissioni go2rtc.</em><br /><br />Trascina le schede per riordinare le telecamere nell'interfaccia utente. L'ordine delle telecamere abilitate verrà visualizzato in tutta l'interfaccia utente inclusa la schermata Dal vivo e i menu a tendina di selezione delle telecamere.",
-      "disableLabel": "Telecamere disabilitate",
-      "disableDesc": "Abilita una telecamera attualmente non visibile nell'interfaccia utente e disabilitata nella configurazione. Dopo l'abilitazione è necessario riavviare Frigate.",
       "enableSuccess": "{{cameraName}} abilitata. Riavvia Frigate per applicare le modifiche.",
-      "friendlyName": {
-        "edit": "Modifica il nome visualizzato della telecamera",
-        "title": "Modifica il nome visualizzato",
-        "description": "Imposta il nome amichevole visualizzato per questa telecamera nell'interfaccia utente di Frigate. Lascia vuoto per utilizzare l'ID della telecamera.",
-        "rename": "Rinomina"
-      },
       "reorderHandle": "Trascina per riordinare",
       "saving": "Salvataggio…",
       "saved": "Salvato",
@@ -1475,12 +1218,10 @@
       "addGo2rtcStream": "Aggiungi flusso go2rtc"
     },
     "profiles": {
-      "enabled": "Abilitato",
       "title": "Sovrascritture della telecamera del profilo",
       "selectLabel": "Seleziona il profilo",
       "description": "Configura quali telecamere vengono accese o spente all'attivazione di un profilo. Le telecamere impostate su \"Eredita\" mantengono il loro stato predefinito.",
       "inherit": "Eredita",
-      "disabled": "Disabilitato",
       "on": "Attivato",
       "off": "Disattivato"
     },
@@ -1672,7 +1413,6 @@
     "renameStream": "Rinomina flusso",
     "renameStreamDesc": "Inserisci un nuovo nome per questo flusso. Rinominare un flusso potrebbe causare problemi alle telecamere o ad altri flussi che lo referenziano tramite il suo nome.",
     "newStreamName": "Nuovo nome del flusso",
-    "streamNumber": "Flusso {{index}}",
     "sourceNumber": "Sorgente {{index}}"
   },
   "configForm": {
@@ -1805,16 +1545,6 @@
     "restartRequiredFooter": "Configurazione modificata - Riavvio necessario",
     "detect": {
       "title": "Impostazioni di rilevamento"
-    },
-    "detectors": {
-      "title": "Impostazioni del rilevatore",
-      "singleType": "È consentito un solo rilevatore di tipo {{type}}.",
-      "keyRequired": "Il nome del rilevatore è obbligatorio.",
-      "keyDuplicate": "Il nome del rilevatore esiste già.",
-      "noSchema": "Non sono disponibili schemi di rilevamento.",
-      "none": "Nessuna istanza del rilevatore configurata.",
-      "add": "Aggiungi rilevatore",
-      "addCustomKey": "Aggiungi chiave personalizzata"
     },
     "record": {
       "title": "Impostazioni di registrazione"
@@ -1984,15 +1714,6 @@
     "bl": "In basso a sinistra",
     "br": "In basso a destra"
   },
-  "detectionModel": {
-    "plusActive": {
-      "title": "Gestione del modello Frigate+",
-      "label": "Fonte del modello attuale",
-      "description": "Questa istanza utilizza un modello Frigate+. Seleziona o modifica il tuo modello nelle impostazioni di Frigate+.",
-      "goToFrigatePlus": "Vai alle impostazioni di Frigate+",
-      "showModelForm": "Configura manualmente un modello"
-    }
-  },
   "maintenance": {
     "title": "Manutenzione",
     "sync": {
@@ -2059,11 +1780,6 @@
     "active_objects": "Oggetti attivi"
   },
   "birdseye": {
-    "trackingMode": {
-      "motion": "Movimento",
-      "objects": "Oggetti",
-      "continuous": "Continuo"
-    },
     "cameraOrder": {
       "reorderHandle": "Trascina per riordinare",
       "saving": "Salvataggio…",
@@ -2103,12 +1819,6 @@
     "very_low": "Molto bassa"
   },
   "ui": {
-    "TimeOrDateStyle": {
-      "medium": "Medio",
-      "full": "Completo",
-      "long": "Lungo",
-      "short": "Corto"
-    },
     "timeFormat": {
       "browser": "Navigatore",
       "12hour": "12 ore",
@@ -2188,15 +1898,8 @@
     "record": {
       "noRecordRole": "Nessun flusso ha il ruolo di registrazione definito. La registrazione non funzionerà."
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "Birdseye è impostato sulla modalità 'oggetti', ma il rilevamento degli oggetti è disabilitato per questa telecamera. La telecamera non verrà visualizzata in Birdseye."
-    },
     "snapshots": {
       "detectDisabled": "Il rilevamento degli oggetti è disabilitato. Le istantanee vengono generate dagli oggetti tracciati e non verranno create."
-    },
-    "detectors": {
-      "mixedTypes": "Tutti i rilevatori devono essere dello stesso tipo. Rimuovi i rilevatori esistenti per poter utilizzare un tipo diverso.",
-      "mixedTypesSuggestion": "Tutti i rilevatori devono essere dello stesso tipo. Rimuovi i rilevatori esistenti oppure seleziona {{type}}."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Il modello 'piccolo' Jina V2 presenta elevati consumi di RAM e di inferenza. Si consiglia il modello 'grande' con GPU dedicata."
@@ -2237,30 +1940,5 @@
     "overrideGlobal": "Questa sezione sovrascrive la configurazione globale",
     "overrideProfile": "Questa sezione viene sovrascritta dal profilo {{profile}}",
     "unsaved": "Questa sezione contiene modifiche non salvate"
-  },
-  "detectorsAndModel": {
-    "title": "Rilevatori e modelli",
-    "description": "Configura il backend del rilevatore che esegue il rilevamento degli oggetti e il modello che utilizza. Le modifiche vengono salvate insieme in modo che il rilevatore e il modello rimangano sincronizzati.",
-    "cardTitles": {
-      "detector": "Dispositivo di rilevamento",
-      "model": "Modello di rilevamento"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "Modello personalizzato"
-    },
-    "mismatch": {
-      "warning": "Il modello Frigate+ attuale \"{{model}}\" richiede il rilevatore {{required}}. Seleziona un modello compatibile qui sotto oppure passa a Modello personalizzato prima di salvare."
-    },
-    "plusModel": {
-      "requiresDetector": "Richiede: {{detector}}",
-      "noModelSelected": "Seleziona un modello Frigate+"
-    },
-    "toast": {
-      "saveSuccess": "Rilevatori e impostazioni del modello salvati. Riavviare Frigate per applicare le modifiche.",
-      "saveError": "Impossibile salvare le impostazioni del rilevatore e del modello"
-    },
-    "unsavedChanges": "Modifiche al rilevatore e al modello non salvate",
-    "restartRequired": "Riavvio richiesto (rilevatore o modello modificato)"
   }
 }

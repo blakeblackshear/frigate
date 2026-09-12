@@ -44,6 +44,11 @@ def chunk_content(content: str, chunk_size: int = 80) -> Generator[str, None, No
         yield " ".join(current)
 
 
+def format_local_time(timestamp: float) -> str:
+    """Format a unix timestamp as the server-local string quoted to users."""
+    return datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %I:%M:%S %p")
+
+
 def format_events_with_local_time(
     events_list: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
@@ -58,11 +63,9 @@ def format_events_with_local_time(
             start_ts = evt.get("start_time")
             end_ts = evt.get("end_time")
             if start_ts is not None:
-                dt_start = datetime.fromtimestamp(start_ts)
-                copy_evt["start_time_local"] = dt_start.strftime("%Y-%m-%d %I:%M:%S %p")
+                copy_evt["start_time_local"] = format_local_time(start_ts)
             if end_ts is not None:
-                dt_end = datetime.fromtimestamp(end_ts)
-                copy_evt["end_time_local"] = dt_end.strftime("%Y-%m-%d %I:%M:%S %p")
+                copy_evt["end_time_local"] = format_local_time(end_ts)
         except (TypeError, ValueError, OSError):
             pass
         result.append(copy_evt)

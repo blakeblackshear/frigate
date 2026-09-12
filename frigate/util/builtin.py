@@ -20,7 +20,12 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from ruamel.yaml import YAML
 
-from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+from frigate.const import (
+    REGEX_HTTP_CAMERA_USER_PASS,
+    REGEX_RTSP_CAMERA_USER_PASS,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 
 if TYPE_CHECKING:
     from frigate.config import CameraConfig
@@ -137,9 +142,16 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
 DEFAULT_RECORD_SEGMENT_TIME = 10
 
 
-def get_record_segment_time(config: "CameraConfig") -> int:
-    """Extract -segment_time from the camera's record output args."""
-    record_args = get_ffmpeg_arg_list(config.ffmpeg.output_args.record)
+def get_record_segment_time(
+    config: "CameraConfig", stream_type: str = STREAM_TYPE_MAIN
+) -> int:
+    """Extract -segment_time from the camera's record output args for a stream."""
+    output_args = (
+        config.ffmpeg.output_args.effective_record_sub
+        if stream_type == STREAM_TYPE_SUB
+        else config.ffmpeg.output_args.record
+    )
+    record_args = get_ffmpeg_arg_list(output_args)
 
     if record_args and record_args[0].startswith("preset"):
         return DEFAULT_RECORD_SEGMENT_TIME
@@ -152,12 +164,19 @@ def get_record_segment_time(config: "CameraConfig") -> int:
 
 
 def load_labels(
-    path: str | None, encoding="utf-8", prefill=91, indexed: bool | None = None
+    path: str | None, encoding="utf-8", prefill=0, indexed: bool | None = None
 ):
     """Loads labels from file (with or without index numbers).
+
+    Only the indices the file defines are returned, so the result describes
+    exactly the classes a model can name. Callers must treat a missing index
+    as an unnamed class rather than assuming a contiguous range.
+
     Args:
       path: path to label file.
       encoding: label file encoding.
+      prefill: pad indices below this with "unknown" before reading the file.
+      indexed: whether lines start with an index; auto-detected when None.
     Returns:
       Dictionary mapping indices to labels.
     """

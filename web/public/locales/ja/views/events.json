@@ -43,8 +43,6 @@
   "selected_one": "{{count}} 選択済み",
   "selected_other": "{{count}} 選択済み",
   "detected": "検知",
-  "suspiciousActivity": "不審なアクティビティ",
-  "threateningActivity": "脅威となるアクティビティ",
   "zoomIn": "ズームイン",
   "zoomOut": "ズームアウト",
   "detail": {

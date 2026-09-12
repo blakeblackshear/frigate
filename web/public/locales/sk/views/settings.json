@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "Nastavenia - Frigate",
     "authentication": "Nastavenie autentifikácie- Frigate",
-    "camera": "Nastavenia Kamier– Frigate",
     "enrichments": "Nastavenia obohatenia – Frigate",
     "masksAndZones": "Editor masky a zón - Frigate",
     "motionTuner": "Ladič detekcie pohybu - Frigate",
@@ -154,76 +153,6 @@
     "toast": {
       "success": "Nastavenia obohatenia boli uložené. Reštartujte Frigate, aby sa zmeny prejavili.",
       "error": "Nepodarilo sa uložiť zmeny konfigurácie: {{errorMessage}}"
-    }
-  },
-  "camera": {
-    "title": "Nastavenie kamier",
-    "streams": {
-      "title": "Streamy",
-      "desc": "Dočasne deaktivujte kameru, kým sa Frigate nereštartuje. Deaktivácia kamery úplne zastaví spracovanie streamov z tejto kamery aplikáciou Frigate. Detekcia, nahrávanie a ladenie nebudú k dispozícii.<br /> <em>Poznámka: Toto nezakáže restreamy go2rtc.</em>"
-    },
-    "review": {
-      "title": "Recenzia",
-      "desc": "Dočasne povoliť/zakázať upozornenia a detekcie pre túto kameru, kým sa Frigate nereštartuje. Po zakázaní sa nebudú generovať žiadne nové položky kontroly. ",
-      "alerts": "Upozornenia ",
-      "detections": "Detekcie "
-    },
-    "object_descriptions": {
-      "title": "Generatívne popisy objektov umelej inteligencie",
-      "desc": "Dočasne povoliť/zakázať generatívne popisy objektov AI pre túto kameru. Ak je táto funkcia zakázaná, pre sledované objekty na tejto kamere sa nebudú vyžadovať popisy generované AI."
-    },
-    "review_descriptions": {
-      "title": "Popisy generatívnej umelej inteligencie",
-      "desc": "Dočasne povoliť/zakázať generatívne popisy kontroly pomocou umelej inteligencie pre túto kameru. Ak je táto funkcia zakázaná, popisy generované umelou inteligenciou sa nebudú vyžadovať pre položky kontroly v tejto kamere."
-    },
-    "reviewClassification": {
-      "title": "Preskúmať klasifikáciu",
-      "desc": "Frigate kategorizuje položky recenzií ako Upozornenia a Detekcie. Predvolene sa všetky objekty typu <em>osoba</em> a <em>auto</em> považujú za Upozornenia. Kategorizáciu položiek recenzií môžete spresniť konfiguráciou požadovaných zón pre ne.",
-      "noDefinedZones": "Pre túto kameru nie sú definované žiadne zóny.",
-      "objectAlertsTips": "Všetky objekty {{alertsLabels}} na {{cameraName}} sa zobrazia ako Upozornenia.",
-      "zoneObjectAlertsTips": "Všetky objekty {{alertsLabels}} detekované v {{zone}} na {{cameraName}} budú zobrazené ako Upozornenia.",
-      "objectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
-      "zoneObjectDetectionsTips": {
-        "text": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{zone}} na kamere {{cameraName}}, budú zobrazené ako detekcie.",
-        "notSelectDetections": "Všetky objekty typu {{detectionsLabels}} detekované v zóne {{zone}} na kamere {{cameraName}}, ktoré nie sú zaradené do kategórie Upozornenia, sa zobrazia ako Detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú.",
-        "regardlessOfZoneObjectDetectionsTips": "Všetky objekty {{detectionsLabels}}, ktoré nie sú zaradené do kategórie {{cameraName}}, sa zobrazia ako detekcie bez ohľadu na to, v ktorej zóne sa nachádzajú."
-      },
-      "unsavedChanges": "Neuložené nastavenia klasifikácie recenzií pre {{camera}}",
-      "selectAlertsZones": "Vyberte podobné sledované objekty",
-      "selectDetectionsZones": "Vyberte zóny pre detekcie",
-      "limitDetections": "Obmedziť detekciu na konkrétne zóny",
-      "toast": {
-        "success": "Konfigurácia klasifikácie bola uložená. Reštartujte Frigate, aby sa zmeny prejavili."
-      }
-    },
-    "addCamera": "Pridať novu kameru",
-    "editCamera": "Upraviť kameru:",
-    "selectCamera": "Vyberte kameru",
-    "backToSettings": "Späť na nastavenia kamery",
-    "cameraConfig": {
-      "add": "Pridať kameru",
-      "edit": "Upraviť kameru",
-      "description": "Konfigurovať nastavenia kamery, vrátane vstupov streamu a rolí.",
-      "name": "Názov kamery",
-      "nameRequired": "Názov kamery je povinný",
-      "nameLength": "Názov kamery musí mať menej ako 24 znakov.",
-      "namePlaceholder": "napr. predné dvere",
-      "enabled": "Povoliť",
-      "ffmpeg": {
-        "inputs": "Vstupné streamy",
-        "path": "Cesta streamu",
-        "pathRequired": "Cesta k streamu je povinná",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Roly",
-        "rolesRequired": "Je vyžadovaná aspoň jedna rola",
-        "rolesUnique": "Každá rola (audio, detekcia, záznam) môže byť priradená iba k jednému streamu",
-        "addInput": "Pridať vstupný stream",
-        "removeInput": "Odobrať vstupný stream",
-        "inputsRequired": "Je vyžadovaný aspoň jeden vstupný stream"
-      },
-      "toast": {
-        "success": "Kamera {{cameraName}} bola úspešne uložená"
-      }
     }
   },
   "masksAndZones": {
@@ -521,30 +450,13 @@
       "brandInformation": "Informácie o značke",
       "brandUrlFormat": "Pre kamery s formátom RTSP URL ako: {{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://username:password@host:port/path",
-      "testConnection": "Testovacie pripojenie",
-      "testSuccess": "Test pripojenia úspešný!",
-      "testFailed": "Test pripojenia zlyhal. Skontrolujte svoj vstup a skúste to znova.",
-      "streamDetails": "Detaily vysielania",
-      "warnings": {
-        "noSnapshot": "Nemožno načítať snímku z konfigurovaného vysielania."
-      },
       "errors": {
         "brandOrCustomUrlRequired": "Buď vyberte značku kamery s hostiteľom / IP alebo si vyberte \"Iný\" s vlastnou URL",
         "nameRequired": "Názov kamery je povinný",
         "nameLength": "Názov kamery musí byť 64 znakov alebo menej",
         "invalidCharacters": "Názov kamery obsahuje neplatné znaky",
         "nameExists": "Názov kamery už existuje",
-        "brands": {
-          "reolink-rtsp": "Reolink RTSP sa neodporúča. Odporúča sa povoliť HTTP v nastavení kamery a reštartovať sprievodca kamery."
-        },
         "customUrlRtspRequired": "Vlastné URL musia začať s \"rtsp / \"\". Manuálna konfigurácia je potrebná pre non-RTSP kamerové prúdy."
-      },
-      "docs": {
-        "reolink": "https://docs.frigate.video/configuration/camera_specific.html#reolink-cameras"
-      },
-      "testing": {
-        "probingMetadata": "Skúmanie metadát kamery...",
-        "fetchingSnapshot": "Načítava sa snímka z kamery..."
       },
       "connectionSettings": "Nastavenie pripojenia",
       "detectionMethod": "Stream Detekcia Metóda",
@@ -558,42 +470,11 @@
     },
     "step2": {
       "description": "Vyhľadajte dostupné streamy z kamery alebo nakonfigurujte manuálne nastavenia na základe zvolenej metódy detekcie.",
-      "streamsTitle": "Kamerové prúdy",
-      "addStream": "Pridať Stream",
-      "addAnotherStream": "Pridať ďalší Stream",
-      "streamTitle": "Stream {{number}}",
-      "streamUrl": "Stream URL",
-      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
-      "url": "URL",
-      "resolution": "Rozlíšenie",
-      "selectResolution": "Vyberte rozlíšenie",
-      "quality": "Kvalita",
-      "selectQuality": "Vyberte kvalitu",
-      "roles": "Roly",
-      "roleLabels": {
-        "detect": "Detekcia objektov",
-        "record": "Nahrávanie",
-        "audio": "Zvuk"
-      },
-      "testStream": "Testovacie pripojenie",
       "testSuccess": "Test pripojenia bol úspešný!",
       "testFailed": "Test pripojenia zlyhal. Skontrolujte zadané údaje a skúste to znova.",
       "testFailedTitle": "Test Zlyhal",
       "connected": "Pripojené",
       "notConnected": "Nie je pripojený",
-      "featuresTitle": "Vlastnosti",
-      "go2rtc": "Znížte počet pripojení ku kamere",
-      "detectRoleWarning": "Aspoň jeden prúd musí mať \"detekt\" úlohu pokračovať.",
-      "rolesPopover": {
-        "title": "Roly streamu",
-        "detect": "Hlavné krmivo pre detekciu objektu.",
-        "record": "Ukladá segmenty video kanála na základe nastavení konfigurácie.",
-        "audio": "Kŕmenie pre detekciu zvuku."
-      },
-      "featuresPopover": {
-        "title": "Funkcie streamu",
-        "description": "Použite prekrytie go2rtc na zníženie pripojenia k fotoaparátu."
-      },
       "streamDetails": "Detaily vysielania",
       "probing": "Skúmajúca kamera...",
       "retry": "Skúste to znova",
@@ -628,46 +509,9 @@
       }
     },
     "step3": {
-      "connectStream": "Pripojiť",
-      "connectingStream": "Pripája",
-      "disconnectStream": "Odpojiť",
-      "estimatedBandwidth": "Odhadovaná šírka pásma",
       "roles": "Roly",
-      "none": "Žiadny",
-      "error": "Chyba",
-      "streamValidated": "Stream {{number}} úspešne overený",
-      "streamValidationFailed": "Stream {{number}} validácia zlyhala",
-      "saveAndApply": "Uložiť novú kameru",
-      "saveError": "Neplatná konfigurácia. Skontrolujte nastavenia.",
-      "issues": {
-        "title": "Stream Platnosť",
-        "videoCodecGood": "Kód videa {{codec}}.",
-        "audioCodecGood": "Audio kódc je {{codec}}.",
-        "noAudioWarning": "Žiadne audio zistené pre tento prúd, nahrávanie nebude mať audio.",
-        "audioCodecRecordError": "AAC audio kodek je potrebný na podporu audio v záznamoch.",
-        "audioCodecRequired": "Zvukový prúd je povinný podporovať detekciu zvuku.",
-        "restreamingWarning": "Zníženie pripojenia ku kamery pre rekordný prúd môže mierne zvýšiť využitie CPU.",
-        "dahua": {
-          "substreamWarning": "Substream 1 je uzamknutý na nízke rozlíšenie. Mnoho Dahua / Amcrest / EmpireTech kamery podporujú ďalšie podstreamy, ktoré musia byť povolené v nastavení kamery. Odporúča sa skontrolovať a využiť tie prúdy, ak je k dispozícii."
-        },
-        "hikvision": {
-          "substreamWarning": "Substream 1 je uzamknutý na nízke rozlíšenie. Mnoho Hikvision kamery podporujú ďalšie podstreamy, ktoré musia byť povolené v nastavení kamery. Odporúča sa skontrolovať a využiť tie prúdy, ak je k dispozícii."
-        },
-        "resolutionHigh": "Rozlíšenie {{resolution}} môže spôsobiť zvýšenú spotrebu zdrojov.",
-        "resolutionLow": "Rozlíšenie {{resolution}} môže byť príliš nízka pre spoľahlivú detekciu malých objektov."
-      },
       "description": "Nakonfigurujte role streamov a pridajte ďalšie streamy pre vašu kameru.",
-      "validationTitle": "Stream Platnosť",
-      "connectAllStreams": "Pripojte všetky prúdy",
-      "reconnectionSuccess": "Opätovné pripojenie bolo úspešné.",
-      "reconnectionPartial": "Niektoré prúdy sa nepodarilo prepojiť.",
-      "streamUnavailable": "Ukážka streamu nie je k dispozícii",
-      "reload": "Znovu načítať",
-      "connecting": "Pripája...",
       "streamTitle": "Stream {{number}}",
-      "valid": "Platné",
-      "failed": "Zlyhanie",
-      "notTested": "Netestované",
       "streamsTitle": "Kamerové prúdy",
       "addStream": "Pridať Stream",
       "addAnotherStream": "Pridať ďalší Stream",
@@ -761,8 +605,7 @@
     "selectCamera": "Vyberte kameru",
     "backToSettings": "Späť na nastavenia kamery",
     "streams": {
-      "title": "Enable / Disable kamery",
-      "desc": "Dočasne deaktivujte kameru, kým sa Frigate nereštartuje. Deaktivácia kamery úplne zastaví spracovanie streamov z tejto kamery aplikáciou Frigate. Detekcia, nahrávanie a ladenie nebudú k dispozícii.<br /> <em>Poznámka: Toto nezakáže restreamy go2rtc.</em>"
+      "title": "Enable / Disable kamery"
     },
     "cameraConfig": {
       "add": "Pridať kameru",
@@ -1059,8 +902,7 @@
       "cleanCopyWarning": "Niektoré kamery majú povolené snímky, ale voľba <code>clean_copy</code> je zakázaná. Pre možnosť odosielania snímok z týchto kamier do služby Frigate+ je nutné túto voľbu povoliť v konfigurácii snímok.",
       "table": {
         "camera": "Kamera",
-        "snapshots": "Snímky",
-        "cleanCopySnapshots": "<code>clean_copy</code> Snímky"
+        "snapshots": "Snímky"
       }
     },
     "modelInfo": {

@@ -31,6 +31,10 @@
       "label": "Listen types",
       "description": "List of audio event types to detect (for example: bark, fire_alarm, speech, yell)."
     },
+    "labelmap": {
+      "label": "Audio labelmap customization",
+      "description": "Overrides or remapping entries to merge into the standard audio labelmap."
+    },
     "filters": {
       "label": "Audio filters",
       "description": "Per-audio-type filter settings such as confidence thresholds used to reduce false positives.",
@@ -70,9 +74,9 @@
       "label": "Enable Birdseye",
       "description": "Enable or disable the Birdseye view feature."
     },
-    "mode": {
-      "label": "Tracking mode",
-      "description": "Mode for including cameras in Birdseye: 'objects', 'motion', or 'continuous'."
+    "modes": {
+      "label": "Activity types",
+      "description": "Activity types that include cameras in Birdseye."
     },
     "order": {
       "label": "Position",
@@ -93,6 +97,10 @@
     "width": {
       "label": "Detect width",
       "description": "Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution."
+    },
+    "scene": {
+      "label": "Detect scene",
+      "description": "The environment this camera looks at, used to pick which of the configured models runs on it. Cameras left on 'all' run the model configured with a scene of 'all'."
     },
     "fps": {
       "label": "Detect FPS",
@@ -180,6 +188,10 @@
       "record": {
         "label": "Record output arguments",
         "description": "Default output arguments for record role streams."
+      },
+      "record_sub": {
+        "label": "Sub stream record output arguments",
+        "description": "Output arguments for record_sub role streams. The record output arguments are used when this is not set."
       }
     },
     "retry_interval": {
@@ -506,6 +518,54 @@
         "description": "Preview quality level (very_low, low, medium, high, very_high)."
       }
     },
+    "sub": {
+      "label": "Sub stream recording",
+      "description": "Settings for recording a second, lower quality stream.",
+      "enabled": {
+        "label": "Enable sub stream recording",
+        "description": "Enable recording of a second, lower quality stream for adaptive quality playback and extended retention."
+      },
+      "continuous": {
+        "label": "Sub stream continuous retention",
+        "description": "Number of days to retain sub stream recordings regardless of tracked objects or motion.",
+        "days": {
+          "label": "Retention days",
+          "description": "Days to retain recordings."
+        }
+      },
+      "motion": {
+        "label": "Sub stream motion retention",
+        "description": "Number of days to retain sub stream recordings triggered by motion.",
+        "days": {
+          "label": "Retention days",
+          "description": "Days to retain recordings."
+        }
+      },
+      "alerts": {
+        "label": "Sub stream alert retention",
+        "description": "Retention settings for sub stream recordings of alerts.",
+        "days": {
+          "label": "Retention days",
+          "description": "Number of days to retain recordings of detection events."
+        },
+        "mode": {
+          "label": "Retention mode",
+          "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+        }
+      },
+      "detections": {
+        "label": "Sub stream detection retention",
+        "description": "Retention settings for sub stream recordings of detections.",
+        "days": {
+          "label": "Retention days",
+          "description": "Number of days to retain recordings of detection events."
+        },
+        "mode": {
+          "label": "Retention mode",
+          "description": "Mode for retention: all (save all segments), motion (save segments with motion), or active_objects (save segments with active objects)."
+        }
+      }
+    },
     "enabled_in_config": {
       "label": "Original recording state",
       "description": "Indicates whether recording was enabled in the original static configuration."
@@ -596,6 +656,10 @@
       "preferred_language": {
         "label": "Preferred language",
         "description": "Preferred language to request from the GenAI provider for generated responses."
+      },
+      "response_style": {
+        "label": "Response style",
+        "description": "Writing style preset for generated review descriptions. Presets adjust the tone and level of detail of the user-facing title, summary, and scene description; 'default' leaves the built-in prompt unchanged."
       },
       "activity_context_prompt": {
         "label": "Activity context prompt",

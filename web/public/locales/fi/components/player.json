@@ -12,7 +12,6 @@
     "title": "Kamera poissa verkosta",
     "desc": "Kuvaruutuja ei vastaanotettu kameran {{cameraName}} <code>detect</code>-kuvavirrasta, tarkista virhelogit"
   },
-  "cameraDisabled": "Kamera on poistettu käytöstä",
   "stats": {
     "streamType": {
       "title": "Kuvavirran tyyppi:",

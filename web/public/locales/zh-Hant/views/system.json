@@ -105,11 +105,6 @@
       },
       "npuUsage": "NPU 使用率",
       "npuMemory": "NPU 記憶體",
-      "intelGpuWarning": {
-        "title": "Intel GPU 狀態警告",
-        "message": "GPU 狀態資訊不可用",
-        "description": "這是一個在Intel GPU 狀態回報工具 (intel_gpu_top) 中已知的 Bug，該工具會故障並重複的回報 GPU占用率為 0%，甚至在硬體加速與物件偵測在 (i)GPU上正確運作時也是如此。這不是 Frigate 的 Bug。您可以透過重新啟動主機來暫時修復此問題以確認 GPU 運作正常。這不會影響效能。"
-      },
       "gpuCompute": "GPU 計算 / 編碼",
       "gpuTemperature": "GPU 溫度",
       "npuTemperature": "NPU 溫度"
@@ -185,8 +180,6 @@
         "gap": "關鍵幀間隔 (最小 / 平均 / 最大)：",
         "segmentLength": "錄影片段長度：",
         "ok": "每約 {{seconds}} 秒一個關鍵幀，適合錄影與重播。",
-        "warning": "關鍵幀稀疏或不固定（最長間隔約 {{seconds}} 秒），可能使用了智慧編碼（H.264+/H.265+），不建議這樣設定。",
-        "error": "關鍵幀間隔（~{{seconds}} 秒）超過了錄影片段長度（{{segmentTime}} 秒）。某些片段可能沒有關鍵幀，這會導致重播中斷。請停用攝影機上的智慧/+編碼，或縮短其關鍵幀間隔。",
         "unknown": "無法確定關鍵幀間隔。",
         "recordDisabled": "此攝影機已停用錄影功能。"
       }
@@ -241,7 +234,6 @@
     "cameraIsOffline": "{{camera}} 已離線",
     "detectIsSlow": "{{detect}} 偵測速度較慢（{{speed}} 毫秒）",
     "detectIsVerySlow": "{{detect}} 偵測速度緩慢（{{speed}} 毫秒）",
-    "shmTooLow": "/dev/shm 配置（{{total}} MB）應增加至至少{{min}} MB。",
     "debugReplayActive": "除錯重播工作階段正在進行"
   },
   "enrichments": {

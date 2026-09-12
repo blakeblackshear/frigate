@@ -16,18 +16,8 @@
         "desc": "Objekter på steder du vil unngå er ikke falske positiver. Å sende dem som falske positiver vil forvirre modellen."
       },
       "review": {
-        "true": {
-          "label": "Bekreft denne merkelappen for Frigate Plus",
-          "true_one": "Dette er en {{label}}",
-          "true_other": "Dette er en {{label}}"
-        },
         "state": {
           "submitted": "Sendt inn"
-        },
-        "false": {
-          "label": "Ikke bekreft denne merkelappen for Frigate Plus",
-          "false_one": "Dette er ikke en {{label}}",
-          "false_other": "Dette er ikke en {{label}}"
         },
         "question": {
           "label": "Bekreft denne etiketten for Frigate Plus",
@@ -63,7 +53,6 @@
       "success": "Eksport startet. Se filen på eksportsiden.",
       "error": {
         "failed": "Kunne ikke legge eksport i kø: {{error}}",
-        "noVaildTimeSelected": "Ingen gyldig tidsperiode valgt",
         "endTimeMustAfterStartTime": "Sluttid må være etter starttid",
         "noValidTimeSelected": "Ingen gyldig tidsrom valgt"
       },
@@ -134,9 +123,7 @@
         "partial": "Startet {{successful}} av {{total}} eksporter. Feilet: {{failedItems}}",
         "failed": "Kunne ikke starte {{total}} eksporter. Feilet: {{failedItems}}",
         "started_one": "Startet 1 eksport.",
-        "started_other": "Startet {{count}} eksporter.",
-        "startedNoCase_one": "Startet 1 eksport.",
-        "startedNoCase_other": "Startet {{count}} eksporter."
+        "started_other": "Startet {{count}} eksporter."
       },
       "title_one": "Eksporter 1 inspeksjon",
       "title_other": "Eksporter {{count}} inspeksjon",
@@ -149,7 +136,6 @@
     "restreaming": {
       "disabled": "Viderestrømming er ikke aktivert for dette kameraet.",
       "desc": {
-        "readTheDocumentation": "Se dokumentasjonen",
         "title": "Konfigurer go2rtc for flere direktestrømmingsalternativer og lyd for dette kameraet."
       }
     },

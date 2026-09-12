@@ -9,7 +9,7 @@ import NavPath from "@site/src/components/NavPath";
 
 ## Adding a camera with the Add Camera Wizard
 
-The Add Camera Wizard is the recommended way to add a camera. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />. The wizard connects to your camera, tests each stream, and writes the camera's configuration for you, including the [go2rtc](go2rtc.md) restream and the live view stream mapping, so a standard setup needs no hand-written YAML.
+The Add Camera Wizard is the recommended way to add a camera. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, or use it from the [setup wizard](../guides/getting_started.md#configuring-frigate) on a new install. The wizard connects to your camera, tests each stream, and writes the camera's configuration for you, including the [go2rtc](go2rtc.md) restream and the live view stream mapping, so a standard setup needs no hand-written YAML.
 
 ### Step 1: Name and connection
 
@@ -83,11 +83,12 @@ A camera is enabled by default but can be disabled by using `enabled: False`. Ca
 
 Each role can only be assigned to one input per camera. The options for roles are as follows:
 
-| Role     | Description                                                                         |
-| -------- | ----------------------------------------------------------------------------------- |
-| `detect` | Main feed for object detection. [docs](object_detectors.md)                         |
-| `record` | Saves segments of the video feed based on configuration settings. [docs](record.md) |
-| `audio`  | Feed for audio based detection. [docs](audio_detectors.md)                          |
+| Role         | Description                                                                                                  |
+| ------------ | ------------------------------------------------------------------------------------------------------------ |
+| `detect`     | Main feed for object detection. [docs](object_detectors.md)                                                  |
+| `record`     | Saves segments of the video feed based on configuration settings. [docs](record.md)                          |
+| `record_sub` | Saves segments of a second, lower quality stream with its own retention. [docs](record.md#sub-stream-recording) |
+| `audio`      | Feed for audio based detection. [docs](audio_detectors.md)                                                   |
 
 <ConfigTabs>
 <TabItem value="ui">

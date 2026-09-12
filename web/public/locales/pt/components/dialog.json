@@ -16,20 +16,8 @@
         "desc": "Os objetos nas localizações que quer evitar não são falsos positivos. Submete-los como falsos positivos confundirá o modelo."
       },
       "review": {
-        "true": {
-          "label": "Confirme esta etiqueta para Frigate Plus",
-          "true_one": "Este é um {{label}}",
-          "true_many": "Estes são muitos {{label}}",
-          "true_other": "Estão são {{label}}"
-        },
         "state": {
           "submitted": "Submetido"
-        },
-        "false": {
-          "label": "Não confirmar esta etiqueta para Frigate Plus",
-          "false_one": "Este não é um {{label}}",
-          "false_many": "Estes não são muitos {{label}}",
-          "false_other": "Estes não são {{label}}"
         },
         "question": {
           "label": "Confirme esta etiqueta para Frigate Plus",
@@ -67,8 +55,7 @@
       "success": "Exportação iniciada com sucesso. Veja o ficheiro na pasta de exportações.",
       "error": {
         "failed": "Não foi possível iniciar a exportação: {{error}}",
-        "endTimeMustAfterStartTime": "O horário de término deve ser posterior ao horário de início",
-        "noVaildTimeSelected": "Nenhum intervalo de tempo válido selecionado"
+        "endTimeMustAfterStartTime": "O horário de término deve ser posterior ao horário de início"
       }
     },
     "selectOrExport": "Selecionar ou Exportar",
@@ -105,8 +92,7 @@
     },
     "restreaming": {
       "desc": {
-        "title": "Configure go2rtc para obter opções adicionais da visualização ao vivo e o áudio para esta câmara.",
-        "readTheDocumentation": "Leia a documentação"
+        "title": "Configure go2rtc para obter opções adicionais da visualização ao vivo e o áudio para esta câmara."
       },
       "disabled": "A retransmissão não está ativada para esta câmara."
     },

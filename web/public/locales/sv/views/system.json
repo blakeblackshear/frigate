@@ -76,12 +76,7 @@
         }
       },
       "npuUsage": "NPU-användning",
-      "npuMemory": "NPU-minne",
-      "intelGpuWarning": {
-        "title": "Intel GPU statistik varning",
-        "message": "GPU statistik otillgänglig",
-        "description": "Detta är en känd bugg i Intels GPU-statistikrapporteringsverktyg (intel_gpu_top) där den slutar fungera och upprepade gånger returnerar en GPU-användning på 0 %, även i fall där hårdvaruacceleration och objektdetektering körs korrekt på (i)GPU:n. Detta är inte en Frigate-bugg. Du kan starta om värden för att tillfälligt åtgärda problemet och bekräfta att GPU:n fungerar korrekt. Detta påverkar inte prestandan."
-      }
+      "npuMemory": "NPU-minne"
     },
     "otherProcesses": {
       "title": "Övriga processer",
@@ -175,8 +170,7 @@
     "reindexingEmbeddings": "Omindexering av inbäddningar ({{processed}} % klart)",
     "cameraIsOffline": "{{camera}} är frånkopplad",
     "detectIsSlow": "{{detect}} är långsam ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} är mycket långsam ({{speed}} ms)",
-    "shmTooLow": "/dev/shm-allokeringen ({{total}} MB) bör ökas till minst {{min}} MB."
+    "detectIsVerySlow": "{{detect}} är mycket långsam ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Berikningar",

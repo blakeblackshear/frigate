@@ -16,18 +16,6 @@
         "desc": "Los objetos en ubicaciones que deseas evitar no son falsos positivos. Enviarlos como falsos positivos confundirá al modelo."
       },
       "review": {
-        "false": {
-          "label": "No confirmar esta etiqueta para Frigate Plus",
-          "false_one": "Esto no es un {{label}}",
-          "false_many": "Esto no es un {{label}}",
-          "false_other": "Esto no es un {{label}}"
-        },
-        "true": {
-          "true_one": "Esto es un {{label}}",
-          "true_many": "Esto es un {{label}}",
-          "true_other": "Esto es un {{label}}",
-          "label": "Confirmar esta etiqueta para Frigate+"
-        },
         "state": {
           "submitted": "Enviado"
         },
@@ -70,7 +58,6 @@
     "toast": {
       "error": {
         "failed": "No se pudo iniciar la exportación: {{error}}",
-        "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido",
         "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio",
         "noValidTimeSelected": "Rango de tiempo seleccionado no valido"
       },
@@ -147,9 +134,6 @@
         "started_one": "Se inició 1 exportación. Abriendo el caso ahora.",
         "started_many": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
         "started_other": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
-        "startedNoCase_one": "Se inició 1 exportación.",
-        "startedNoCase_many": "Se iniciaron {{count}} exportaciones.",
-        "startedNoCase_other": "Se iniciaron {{count}} exportaciones.",
         "partial": "Se iniciaron {{successful}} de {{total}} exportaciones. Fallidas: {{failedItems}}",
         "failed": "No se pudieron iniciar {{total}} exportaciones. Fallidas: {{failedItems}}"
       }
@@ -159,8 +143,7 @@
     "restreaming": {
       "disabled": "La retransmisión no está habilitada para esta cámara.",
       "desc": {
-        "title": "Configura go2rtc para opciones adicionales de vista en vivo y audio para esta cámara.",
-        "readTheDocumentation": "Leer la documentación"
+        "title": "Configura go2rtc para opciones adicionales de vista en vivo y audio para esta cámara."
       }
     },
     "debugView": "Vista de depuración",
