@@ -60,8 +60,6 @@
   "selected_other": "{{count}}개 선택됨",
   "camera": "카메라",
   "detected": "감지됨",
-  "suspiciousActivity": "수상한 행동",
-  "threateningActivity": "위협적인 행동",
   "zoomIn": "확대",
   "zoomOut": "축소",
   "select_all": "전체",

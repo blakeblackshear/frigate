@@ -123,7 +123,6 @@
   "documentTitle": {
     "default": "설정 - Frigate",
     "authentication": "인증 설정 - Frigate",
-    "camera": "카메라 설정 - Frigate",
     "enrichments": "확장 기능 설정 - Frigate",
     "masksAndZones": "마스크 및 구역 편집기 - Frigate",
     "motionTuner": "움직임 튜너 - Frigate",
@@ -270,7 +269,6 @@
     "globalConfig": "전역 설정",
     "system": "시스템",
     "integrations": "연동 기능",
-    "profileSettings": "프로필 설정",
     "globalDetect": "객체 감지",
     "globalRecording": "녹화",
     "globalSnapshots": "스냅샷",
@@ -292,8 +290,6 @@
     "systemTelemetry": "원격 측정",
     "systemBirdseye": "버드아이",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "감지기 하드웨어",
-    "systemDetectionModel": "감지 모델",
     "systemMqtt": "MQTT",
     "integrationSemanticSearch": "시맨틱 검색",
     "integrationGenerativeAi": "생성형 AI",
@@ -1373,31 +1369,6 @@
       "error": "설정 변경 사항 저장 실패: {{errorMessage}}"
     }
   },
-  "detectorsAndModel": {
-    "title": "감지기 및 모델",
-    "description": "객체 감지를 실행하는 감지기 백엔드와 감지기가 사용하는 모델을 구성합니다. 감지기와 모델이 항상 일치하도록 변경 사항은 함께 저장됩니다.",
-    "cardTitles": {
-      "detector": "감지기 하드웨어",
-      "model": "감지 모델"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "커스텀 모델"
-    },
-    "mismatch": {
-      "warning": "현재 Frigate+ 모델 \"{{model}}\"은(는) {{required}} 감지기가 필요합니다. 저장하기 전에 아래에서 호환되는 모델을 선택하거나 커스텀 모델로 전환하세요."
-    },
-    "plusModel": {
-      "requiresDetector": "필요 감지기: {{detector}}",
-      "noModelSelected": "Frigate+ 모델 선택"
-    },
-    "toast": {
-      "saveSuccess": "감지기 및 모델 설정이 저장되었습니다. 변경 사항을 적용하려면 Frigate를 재시작하세요.",
-      "saveError": "감지기 및 모델 설정 저장 실패"
-    },
-    "unsavedChanges": "저장되지 않은 감지기 및 모델 변경 사항",
-    "restartRequired": "재시작 필요 (감지기 또는 모델 변경됨)"
-  },
   "maintenance": {
     "title": "유지 관리",
     "sync": {
@@ -1594,16 +1565,6 @@
     },
     "detect": {
       "title": "감지 설정"
-    },
-    "detectors": {
-      "title": "감지기 설정",
-      "singleType": "{{type}} 유형의 감지기는 하나만 허용됩니다.",
-      "keyRequired": "감지기 이름은 필수입니다.",
-      "keyDuplicate": "감지기 이름이 이미 존재합니다.",
-      "noSchema": "사용 가능한 감지기 스키마가 없습니다.",
-      "none": "구성된 감지기 인스턴스가 없습니다.",
-      "add": "감지기 추가",
-      "addCustomKey": "커스텀 키 추가"
     },
     "record": {
       "title": "녹화 설정"
@@ -1828,11 +1789,6 @@
     }
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "객체",
-      "motion": "움직임",
-      "continuous": "상시"
-    },
     "cameraOrder": {
       "label": "카메라 순서",
       "description": "카메라를 드래그하여 버드아이 레이아웃 내 표시 순서를 설정하세요.",
@@ -1941,15 +1897,8 @@
     "record": {
       "noRecordRole": "record 역할이 지정된 스트림이 없습니다. 녹화 기능이 작동하지 않습니다."
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "버드아이가 '객체(objects)' 모드로 설정되어 있지만 이 카메라에서 객체 감지가 비활성화되어 있습니다. 해당 카메라는 버드아이에 표시되지 않습니다."
-    },
     "snapshots": {
       "detectDisabled": "객체 감지가 비활성화되어 있습니다. 스냅샷은 추적된 객체로부터 생성되므로 스냅샷이 생성되지 않습니다."
-    },
-    "detectors": {
-      "mixedTypes": "모든 감지기는 동일한 유형이어야 합니다. 다른 유형을 사용하려면 기존 감지기를 삭제하세요.",
-      "mixedTypesSuggestion": "모든 감지기는 동일한 유형이어야 합니다. 기존 감지기를 제거하거나 {{type}}을(를) 선택하세요."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Jina V2 모델의 'small' 크기는 RAM 소모량과 추론 비용이 높습니다. 외장 GPU 환경에서 'large' 모델을 사용하는 것을 권장합니다."

@@ -196,10 +196,6 @@
             "label": "버드아이 활성화",
             "description": "버드아이 뷰 기능을 활성화하거나 비활성화합니다."
         },
-        "mode": {
-            "label": "추적 모드",
-            "description": "카메라를 버드아이에 포함하는 기준 모드: 'objects', 'motion', 또는 'continuous'."
-        },
         "order": {
             "label": "표시 순서",
             "description": "버드아이 레이아웃 내에서 카메라 배치 순서를 제어하는 숫자입니다."
