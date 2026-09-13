@@ -1952,7 +1952,11 @@
       "modelSizeLarge": "The 'large' model is optimized for multi-line license plates. The 'small' model provides better performance over 'large' and should be used unless your region uses multi-line plate formats."
     },
     "record": {
-      "noRecordRole": "No streams have the record role defined. Recording will not function."
+      "noRecordRole": "No streams have the record role defined. Recording will not function.",
+      "profileBaseDisabled": "Recording is disabled in this camera's base config, so enabling it in a profile has no effect. Enable recording in the base config and use a profile to disable it instead."
+    },
+    "notifications": {
+      "profileBaseDisabled": "No cameras have notifications enabled in their base config, so enabling them in a profile has no effect. Enable notifications in the base config of at least one camera."
     },
     "birdseye": {
       "objectsModeDetectDisabled": "Birdseye is set to 'objects' mode, but object detection is disabled for this camera. The camera will not appear in Birdseye."
