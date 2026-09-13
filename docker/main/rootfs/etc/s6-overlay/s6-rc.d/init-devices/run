@@ -98,19 +98,39 @@ if [[ -d /dev/bus/usb ]]; then
     done < <(find /dev/bus/usb -type d -print0)
 fi
 
-# The Axelera runtime enumerates Metis cards by the colon-separated node name
-# that the vendor's udev rules create on a host (e.g. /dev/metis-0:1:0, a
-# symlink to the raw /dev/metis-0-1-0). Containers get the raw node only,
-# because docker never copies symlinks and there is no udev here, so recreate
-# the alias the runtime looks for.
-if compgen -G "/dev/metis-*-*-*" > /dev/null; then
-    for node in /dev/metis-*-*-*; do
-        [[ -c "$node" ]] || continue
-        base=${node##*/}
-        suffix=${base#metis-}
-        alias="/dev/metis-${suffix//-/:}"
-        if [[ ! -e "$alias" ]]; then
-            ln -s "$base" "$alias" && echo "[INFO] device access: created Metis alias ${alias}"
+# Generic device node aliases: some vendor runtimes look for a node under a
+# colon-separated name that host udev rules create as a symlink (the Axelera
+# Metis runtime enumerates /dev/metis-0:1:0). Containers get the raw node
+# only, because docker never copies symlinks and there is no udev here. Set
+# DEVICE_ALIASES to comma separated alias=target pairs to recreate them:
+#   -e DEVICE_ALIASES="/dev/metis-0:1:0=/dev/metis-0-1-0"
+if [[ -n "${DEVICE_ALIASES:-}" ]]; then
+    IFS=',' read -ra alias_pairs <<< "${DEVICE_ALIASES}"
+    for pair in "${alias_pairs[@]}"; do
+        pair="${pair//[[:space:]]/}"
+        if [[ -z "$pair" ]]; then
+            continue
+        fi
+        if [[ "$pair" != *=* ]]; then
+            echo "[ERROR] DEVICE_ALIASES entries must be alias=target pairs, got '${pair}'" >&2
+            exit 1
+        fi
+        alias_node="${pair%%=*}"
+        target_node="${pair#*=}"
+        if [[ "$alias_node" != /dev/* || "$target_node" != /dev/* || "$pair" == *..* ]]; then
+            echo "[ERROR] DEVICE_ALIASES nodes must be under /dev, got '${pair}'" >&2
+            exit 1
+        fi
+        if [[ ! -e "$target_node" ]]; then
+            echo "[WARN] device access: DEVICE_ALIASES target ${target_node} is not present; skipping ${alias_node}"
+            continue
+        fi
+        if [[ ! -e "$alias_node" ]]; then
+            if ln -s "$target_node" "$alias_node"; then
+                echo "[INFO] device access: created alias ${alias_node} -> ${target_node}"
+            else
+                echo "[WARN] device access: could not create alias ${alias_node}" >&2
+            fi
         fi
     done
 fi

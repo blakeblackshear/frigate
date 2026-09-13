@@ -524,9 +524,14 @@ devices:
   - /dev/dma_heap/system
   # the exact node is printed by `ls /dev/metis*`, e.g. /dev/metis-0-1-0
   - /dev/metis-0-1-0
+environment:
+  # the runtime enumerates the card by the colon-separated name the host
+  # udev rules use (e.g. /dev/metis-0:1:0); docker cannot map colon-named
+  # nodes, so Frigate creates the symlink at startup instead
+  - DEVICE_ALIASES=/dev/metis-0:1:0=/dev/metis-0-1-0
 ```
 
-If you are using `docker run`, add `--device /dev/dma_heap/system --device /dev/metis-0-1-0` to your command.
+If you are using `docker run`, add `--device /dev/dma_heap/system --device /dev/metis-0-1-0 -e DEVICE_ALIASES=/dev/metis-0:1:0=/dev/metis-0-1-0` to your command. Match the pair to your node: replace the dashes in the `metis-<bus>-<dev>-<fn>` suffix with colons for the alias side.
 
 :::warning
 
