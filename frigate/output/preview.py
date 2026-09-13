@@ -23,6 +23,7 @@ from frigate.ffmpeg_presets import (
 )
 from frigate.models import Previews
 from frigate.util.image import copy_yuv_to_position, get_blank_yuv_frame, get_yuv_crop
+from frigate.util.ownership import chown_to_runtime
 
 logger = logging.getLogger(__name__)
 
@@ -185,6 +186,7 @@ class FFMpegConverter(threading.Thread):
 
         if p.returncode == 0:
             logger.debug("successfully saved preview")
+            chown_to_runtime(self.path)
             self.requestor.send_data(
                 INSERT_PREVIEW,
                 {

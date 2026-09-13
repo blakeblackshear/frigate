@@ -12,7 +12,6 @@
     "title": "جریان آفلاین",
     "desc": "هیچ فریمی از جریان <code>detect</code> دوربین {{cameraName}} دریافت نشده است، گزارش‌های خطا را بررسی کنید"
   },
-  "cameraDisabled": "دوربین غیرفعال است",
   "stats": {
     "streamType": {
       "title": "نوع جریان:",

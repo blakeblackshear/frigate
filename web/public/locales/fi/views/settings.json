@@ -1,7 +1,5 @@
 {
   "documentTitle": {
-    "camera": "Kamera-asetukset - Frigate",
-    "classification": "Klassifiointiasetukset - Frigate",
     "masksAndZones": "Peite ja vyöhykemuokkain - Frigate",
     "motionTuner": "Liikesäädin - Frigate",
     "default": "Asetukset - Frigate",
@@ -19,7 +17,6 @@
     "ui": "Käyttöliittymä",
     "cameras": "Kameroiden asetukset",
     "users": "Käyttäjät",
-    "classification": "Klassifiointi",
     "frigateplus": "Frigate+",
     "masksAndZones": "Maskit / alueet",
     "debug": "Debuggaus",
@@ -87,107 +84,6 @@
         "clearStreamingSettingsFailed": "Striimausasetusten tyhjentäminen ei onnistunut: {{errorMessage}}"
       }
     }
-  },
-  "classification": {
-    "title": "Klassifiointiasetukset",
-    "semanticSearch": {
-      "reindexNow": {
-        "label": "Uudelleen indeksoi nyt",
-        "confirmDesc": "Oletko varma että haluat indeksoida uudelleen kaikki seurattujen kohteiden upotukset? Tämä prosessi toimii taustalla ja saattaa maksimoida prosessorin käytön sekä viedä runsaasti aikaa. Voit seurata prosessin etenemistä tarkastelu -sivulta.",
-        "desc": "Indeksoinnin luominen uudelleen jälleenrakentaa upotukset kaikkiin seurattuihin kohteisiin. Tämä prosessi toimii taustalla ja saattaa maksimoida prosessorin käytön sekä viedä reilusti aikaa riippuen paljonko seurattavia kohteita sinulla on.",
-        "confirmButton": "Indeksoi uudelleen",
-        "success": "Uudelleen indeksointi aloitettiin onnistuneesti.",
-        "alreadyInProgress": "Uudelleen indeksointi on jo käynnissä.",
-        "error": "Uudelleen indeksointia ei voitu aloittaa: {{errorMessage}}",
-        "confirmTitle": "Vahvista uudelleen indeksointi"
-      },
-      "modelSize": {
-        "label": "Mallin koko",
-        "small": {
-          "desc": "Valitessa <em>pieni</em> käytetään kvantisoitunutta versiota mallista joka käyttää vähemmän muistia sekä prosesoria upotuksen laatueron ollessa lähes olematon.",
-          "title": "pieni"
-        },
-        "large": {
-          "desc": "Valittaessa <em>suuri</em> käytettään täyttä Jina-mallia joka ajetaan automaattisesti grafiikkaytimellä mikäli mahdollista.",
-          "title": "suuri"
-        },
-        "desc": "Semanttisen haun upotuksiin käytetyn mallin koko."
-      },
-      "title": "Semanttinen haku",
-      "readTheDocumentation": "Lue dokumentaatio",
-      "desc": "Frigaten semanttisen haun kanssa voit hakea seurattuja kohteita esikatseluista joko kuvasta itsestään, käyttäjän määrittelemän teksti-kuvauksen perusteella tai automaattisesti generoidun kuvauksen kanssa."
-    },
-    "faceRecognition": {
-      "title": "Kasvojentunnistus",
-      "readTheDocumentation": "Lue dokumentaatio",
-      "modelSize": {
-        "label": "Mallin koko",
-        "desc": "Kasvojentunnistukseen käytetyn mallin koko.",
-        "small": {
-          "title": "pieni",
-          "desc": "Valitessa <em>pieni</em> FaceNet käyttää kasvojen upotukseen mallia joka toimii tehokkaasti suurimmalla osalla prosessoreista."
-        },
-        "large": {
-          "title": "suuri",
-          "desc": "Valitessa <em>suuri</em> käytetään ArcFace mallia kasvojen upotukseen joka ajetaan automaattisesti grafiikkaprosessorilla mikäli mahdollista."
-        }
-      },
-      "desc": "Kasvojentunnistus sallii nimien antamisen ihmisille ja kun heidän kasvonsa tunnistetaan Frigate antaa henkilölle nimen ala-viittenä. Tämä tieto sisällytetään käyttöliittymään, filttereihin sekä ilmoituksiin."
-    },
-    "licensePlateRecognition": {
-      "title": "Rekisterikilven tunnistus",
-      "desc": "Frigate voi tunnistaa ajoneuvojen rekisterikilpiä ja lisätä tunnistetut kirjaimet automaattisesti recognized_license_plate -kenttään tai tunnettu nimi sub_label kohteisiin joiden tyyppi on ajoneuvo. Yleinen käyttökohde on lukea pihatielle ajavien tai kadulla ohiajavien ajoneuvojen rekisterikilvet.",
-      "readTheDocumentation": "Lue dokumentaatio"
-    },
-    "toast": {
-      "success": "Klassifiointiasetukset on tallennettu. Käynnistä Frigate uudelleen saadaksesi ne käyttöön.",
-      "error": "Konfiguraatio muutoksia ei voitu tallentaa: {{errorMessage}}"
-    },
-    "restart_required": "Tarvitaan uudelleenkäynnistys (luokitusasetuksia muutettu)",
-    "birdClassification": {
-      "title": "Lintujen luokittelu",
-      "desc": "Lintujen luokittelu tunnistaa tunnetut linnut kvantisoidun Tensorflow-mallin avulla. Kun tunnettu lintu tunnistetaan, sen yleinen nimi lisätään alitunnisteena. Tämä tieto sisältyy käyttöliittymään, suodattimiin ja ilmoituksiin."
-    }
-  },
-  "camera": {
-    "title": "Kamera-asetukset",
-    "streams": {
-      "title": "Striimit",
-      "desc": "Poista kamera käytöstä väliaikaisesti, kunnes Frigate uudelleenkäynnistetään. Kameran poiskytkeminen lopettaa kameran videostriimien käsittelyn. Havainnot, tallennus ja debuggaus ovat pois käytöstä.<br /><em>Huom: tämä ei poista käytöstä go2rtc uusinta striimejä.</em>"
-    },
-    "review": {
-      "title": "Katselu",
-      "desc": "Kytke väliaikaisesti päälle/pois hälytykset ja tunnistus tälle kameralle, kunnes Frigate käynnistetään uudelleen. Kun ne ovat pois päältä, uusia katseltavia tapahtumia ei luoda. ",
-      "alerts": "Hälytykset ",
-      "detections": "Tunnistukset "
-    },
-    "reviewClassification": {
-      "title": "Katseluiden klassifiointi",
-      "readTheDocumentation": "Lue dokumentaatio",
-      "noDefinedZones": "Tälle kameralle ei ole määritelty vyöhykkeitä.",
-      "objectAlertsTips": "Kaikki {{alertsLabels}} objektit lähteelle {{cameraName}} näytetään hälytyksinä.",
-      "zoneObjectAlertsTips": "Kaikki {{alertsLabels}} objektit jotka tunnistetaan alueella {{zone}} lähteessä {{cameraName}} näytetään Hälytyksinä.",
-      "objectDetectionsTips": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu lähteessä {{cameraName}} näytetään Tunnistuksina niiden vyöhykkeestä huolimatta.",
-      "zoneObjectDetectionsTips": {
-        "text": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu vyöhykkeellä {{zone}} lähteessä {{cameraName}} näytetään Tunnistuksina.",
-        "notSelectDetections": "Kaikki {{detectionsLabels}} objektit jotka tunnistetaan vyöhykkeellä {{zone}} lähteessä {{cameraName}}, joita ei ole kategorisoitu Hälytyksiksi näytetään Tunnistuksina niiden vyöhykkeestä huolimatta.",
-        "regardlessOfZoneObjectDetectionsTips": "Kaikki {{detectionsLabels}} objektit joita ei ole kategorisoitu lähteessä {{cameraName}} näytetään Tunnistuksina niiden vyöhykkeestä huolimatta."
-      },
-      "selectAlertsZones": "Valitse vyöhykkeet Hälytystä varten",
-      "desc": "Frigate kategorisoi tahtumia Hälytyksiksi ja Tunnistuksiksi. Vakiona kaikki <em>henkilö</em> sekä <em>ajoneuvo</em> objektit käsitellään Hälytyksinä. Voit kategorisoida uudelleen katseltavat tapahtumat antamalla niille vaaditut alueet.",
-      "limitDetections": "Rajoita tunnistukset tiettyihin vyöhykkeisiin",
-      "selectDetectionsZones": "Valitse vyöhykkeet tunnistusta varten",
-      "toast": {
-        "success": "Luokittelumäärityksen tarkistus on tallennettu. Käynnistä Frigate uudelleen muutosten käyttöönottamiseksi."
-      }
-    },
-    "cameraConfig": {
-      "add": "Lisää kamera",
-      "ffmpeg": {
-        "addInput": "Lisää tulovirta"
-      }
-    },
-    "addCamera": "Lisää uusi kamera"
   },
   "masksAndZones": {
     "filter": {
@@ -301,7 +197,6 @@
       "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan.",
       "label": "Liikepeitto",
       "context": {
-        "documentation": "Lue dokumentaatio",
         "title": "Liikepeittoja käytetään estämään ei-toivottujen liiketyyppien (esimerkiksi puiden oksat, kameroiden aikaleimat) aiheuttamat tunnistukset. Liikepeittoja tulisi käyttää <em>hyvin säästeliäästi</em>, sillä liiallinen maskaus vaikeuttaa kohteiden seurantaa."
       },
       "documentTitle": "Muokkaa liikepeittoa - Frigate",
@@ -313,8 +208,7 @@
       "edit": "Muokkaa liikepeittoa",
       "polygonAreaTooLarge": {
         "title": "Liikepeitto peittää {{polygonArea}}% kameran kuvasta. Suuria liikemaskeja ei suositella.",
-        "tips": "Liikepeitto eivät estä kohteiden havaitsemista. Sinun tulisi sen sijaan käyttää vaadittua vyöhykettä.",
-        "documentation": "Lue dokumentaatio"
+        "tips": "Liikepeitto eivät estä kohteiden havaitsemista. Sinun tulisi sen sijaan käyttää vaadittua vyöhykettä."
       },
       "toast": {
         "success": {
@@ -358,7 +252,6 @@
     "objectShapeFilterDrawing": {
       "title": "Objektin muodon suodattimen piirtäminen",
       "desc": "Piirrä kuvaan suorakulmio nähdäksesi pinta-alan ja kuvasuhteen tiedot",
-      "document": "Lue dokumentaatio ",
       "score": "Pisteet",
       "ratio": "Suhde",
       "area": "Alue",
@@ -466,8 +359,7 @@
       "description": "Kuvaus"
     },
     "actions": {
-      "notification": "Lähetä ilmoitus",
-      "alert": "Merkitse hälytykseksi"
+      "notification": "Lähetä ilmoitus"
     },
     "dialog": {
       "createTrigger": {

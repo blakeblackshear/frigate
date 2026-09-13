@@ -3,18 +3,9 @@
     "yesterday": "Ayer",
     "thisMonth": "Este mes",
     "yr": "{{time}}año",
-    "formattedTimestampWithYear": {
-      "12hour": "%b %-d %Y, %I:%M %p",
-      "24hour": "%b %-d %Y, %H:%M"
-    },
     "second_one": "{{time}} segundo",
     "second_many": "{{time}} segundos",
     "second_other": "{{time}} segundos",
-    "formattedTimestampOnlyMonthAndDay": "%b %-d",
-    "formattedTimestampExcludeSeconds": {
-      "24hour": "%b %-d, %H:%M",
-      "12hour": "%b %-d, %I:%M %p"
-    },
     "formattedTimestamp": {
       "24hour": "MMM d, HH:mm:ss",
       "12hour": "MMM d, h:mm:ss aaa"
@@ -174,7 +165,6 @@
       "green": "Verde",
       "nord": "Nord",
       "red": "Rojo",
-      "contrast": "Alto contraste",
       "default": "Predeterminado",
       "highcontrast": "Alto Contraste"
     },

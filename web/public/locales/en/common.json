@@ -129,6 +129,8 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "close": "Close",
+    "expand": "Expand",
+    "collapse": "Collapse",
     "copy": "Copy",
     "copiedToClipboard": "Copied to clipboard",
     "back": "Back",
@@ -162,13 +164,14 @@
     "saveAll": "Save All",
     "savingAll": "Saving All…",
     "undoAll": "Undo All",
-    "retry": "Retry"
+    "retry": "Retry",
+    "reload": "Reload"
   },
   "menu": {
     "system": "System",
-    "systemMetrics": "System metrics",
+    "systemMetrics": "Health and Metrics",
     "configuration": "Configuration",
-    "systemLogs": "System logs",
+    "systemLogs": "Logs",
     "profiles": "Profiles",
     "settings": "Settings",
     "configurationEditor": "Configuration Editor",
@@ -312,6 +315,15 @@
     "title": "404",
     "desc": "Page not found"
   },
+  "error": {
+    "title": "This page stopped working",
+    "desc": "The page ran into an unexpected error. Reloading usually clears it. If it keeps happening, copy the details and attach them to a discussion on GitHub.",
+    "staleTitle": "Reload required",
+    "staleDesc": "Part of the interface could not be loaded, which usually means Frigate was updated while this tab was open. Reload to pick up the new version.",
+    "partial": "Part of the interface stopped working.",
+    "copyDetails": "Copy details",
+    "copyFailed": "Could not copy details to clipboard"
+  },
   "selectItem": "Select {{item}}",
   "readTheDocumentation": "Read the documentation",
   "information": {
@@ -321,5 +333,27 @@
   "validation_errors": "Validation Errors",
   "credentialField": {
     "savedPlaceholder": "Saved — leave blank to keep current"
+  },
+  "commandMenu": {
+    "title": "Command menu",
+    "description": "Search pages, cameras, settings, and actions",
+    "placeholder": "Search pages, cameras, settings, and actions",
+    "empty": "No matches",
+    "hint": "{{key}} or / to open, Enter to run",
+    "section": {
+      "recent": "Recent",
+      "pages": "Pages",
+      "cameras": "Cameras",
+      "cameraGroups": "Camera groups",
+      "settings": "Settings",
+      "actions": "Actions"
+    },
+    "camera": {
+      "live": "Live",
+      "review": "Review"
+    },
+    "action": {
+      "toggleTheme": "Toggle light and dark mode"
+    }
   }
 }

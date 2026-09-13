@@ -23,6 +23,7 @@ import type {
 import {
   processCameraName,
   calculateDetectDimensions,
+  hevcRecordingStreamId,
 } from "@/utils/cameraUtil";
 import { cn } from "@/lib/utils";
 
@@ -74,11 +75,14 @@ const STEPS = [
 type CameraWizardDialogProps = {
   open: boolean;
   onClose: () => void;
+  // lets callers reuse what was probed here instead of probing again
+  onCameraAdded?: (camera: { name: string; detectCodec?: string }) => void;
 };
 
 export default function CameraWizardDialog({
   open,
   onClose,
+  onCameraAdded,
 }: CameraWizardDialogProps) {
   const { t } = useTranslation(["views/settings"]);
   const { mutate: updateConfig } = useSWR("config");
@@ -115,13 +119,19 @@ export default function CameraWizardDialog({
       case 1:
         // Step 2: Can proceed if at least one stream exists (from probe or manual test)
         return (state.wizardData.streams?.length ?? 0) > 0;
-      case 2:
-        // Step 3: Can proceed if at least one stream has 'detect' role
-        return !!(
+      case 2: {
+        // Step 3: requires a detect stream; if PTZ is enabled, also require
+        // ONVIF host + port (fields are pre-filled but the user may clear them)
+        const hasDetect = !!(
           state.wizardData.streams?.some((stream) =>
             stream.roles.includes("detect"),
           ) ?? false
         );
+        const onvif = state.wizardData.onvif;
+        const onvifOk =
+          !onvif?.enabled || (!!onvif.host?.trim() && !!onvif.port);
+        return hasDetect && onvifOk;
+      }
       case 3:
         // Step 4: Always can proceed from final step (save will be handled there)
         return true;
@@ -176,6 +186,11 @@ export default function CameraWizardDialog({
         wizardData.cameraName,
       );
 
+      // re-checked here: roles and codecs may have changed since it was set
+      const appleCompatibility =
+        !!wizardData.appleCompatibility &&
+        !!hevcRecordingStreamId(wizardData.streams);
+
       // Convert wizard data to Frigate config format
       const configData: CameraConfigData = {
         cameras: {
@@ -183,6 +198,7 @@ export default function CameraWizardDialog({
             enabled: true,
             ...(friendlyName && { friendly_name: friendlyName }),
             ffmpeg: {
+              ...(appleCompatibility && { apple_compatibility: true }),
               inputs: wizardData.streams.map((stream, index) => {
                 if (stream.restream) {
                   const go2rtcStreamName =
@@ -241,6 +257,20 @@ export default function CameraWizardDialog({
         });
       }
 
+      // Write the ONVIF section when PTZ controls are enabled
+      if (wizardData.onvif?.enabled && wizardData.onvif.host.trim()) {
+        configData.cameras[finalCameraName].onvif = {
+          host: wizardData.onvif.host.trim(),
+          port: wizardData.onvif.port,
+          ...(wizardData.onvif.user?.trim() && {
+            user: wizardData.onvif.user.trim(),
+          }),
+          ...(wizardData.onvif.password && {
+            password: wizardData.onvif.password,
+          }),
+        };
+      }
+
       const requestBody: ConfigSetBody = {
         requires_restart: 1,
         config_data: configData,
@@ -251,6 +281,13 @@ export default function CameraWizardDialog({
         .put("config/set", requestBody)
         .then((response) => {
           if (response.status === 200) {
+            onCameraAdded?.({
+              name: finalCameraName,
+              detectCodec: wizardData.streams?.find((stream) =>
+                stream.roles.includes("detect"),
+              )?.testResult?.videoCodec,
+            });
+
             // Configure go2rtc streams for all streams
             if (wizardData.streams && wizardData.streams.length > 0) {
               const go2rtcStreams: Record<string, string[]> = {};
@@ -373,7 +410,7 @@ export default function CameraWizardDialog({
           setIsLoading(false);
         });
     },
-    [updateConfig, t, onClose],
+    [updateConfig, t, onClose, onCameraAdded],
   );
 
   return (

@@ -52,8 +52,7 @@
     "detectIsSlow": "{{detect}} je pomalé ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} je velmi pomalé ({{speed}} ms)",
     "detectHighCpuUsage": "{{camera}} má vysoké využití CPU detekcemi ({{detectAvg}} %)",
-    "ffmpegHighCpuUsage": "{{camera}} má vyské využití CPU FFmpegem ({{ffmpegAvg}}%)",
-    "shmTooLow": "Alokace /dev/shm ({{total}} MB) by měla být zvýšena alespoň na {{min}} MB."
+    "ffmpegHighCpuUsage": "{{camera}} má vyské využití CPU FFmpegem ({{ffmpegAvg}}%)"
   },
   "enrichments": {
     "embeddings": {
@@ -112,12 +111,7 @@
       "gpuUsage": "Využití CPU",
       "gpuMemory": "Paměť GPU",
       "gpuEncoder": "GPU kodér",
-      "gpuDecoder": "GPU Dekodér",
-      "intelGpuWarning": {
-        "title": "Upozornění Intel GPU Stats",
-        "message": "Statistiky GPU nedostupné",
-        "description": "Toto je známá chyba v nástrojích Intel pro hlášení statistik GPU (intel_gpu_top), která selhává a opakovaně vrací využití GPU 0 %, a to i v případech, kdy na (i)GPU správně běží hardwarová akcelerace a detekce objektů. Nejedná se o chybu Frigate. Můžete restartovat hostitele, abyste problém dočasně vyřešili a potvrdili, že GPU funguje správně. Toto neovlivňuje výkon."
-      }
+      "gpuDecoder": "GPU Dekodér"
     },
     "otherProcesses": {
       "title": "Ostatní procesy",

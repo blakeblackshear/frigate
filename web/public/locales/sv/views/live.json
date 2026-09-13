@@ -1,5 +1,4 @@
 {
-  "documentTitle": "Live - Frigate",
   "documentTitle.withCamera": "{{camera}} – livevy - Frigate",
   "twoWayTalk": {
     "enable": "Aktivera tvåvägssamtal",
@@ -102,7 +101,6 @@
   "cameraSettings": {
     "audioDetection": "Ljuddetektering",
     "title": "Inställningar för {{camera}}",
-    "cameraEnabled": "Kamera Aktiverad",
     "objectDetection": "Objektdetektering",
     "recording": "Inspelning",
     "snapshots": "Ögonblicksbilder",
@@ -114,8 +112,7 @@
       "active_objects": "Aktiva objekt",
       "all": "Allt",
       "motion": "Rörelse"
-    },
-    "notAllTips": "Din lagringskonfiguration för {{source}}-inspelning är inställd på <code>läge: {{effectiveRetainMode}}</code>, så den här inspelningen vid behov kommer endast att behålla segment av {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Redigera layout",
@@ -123,10 +120,6 @@
       "label": "Redigera kameragrupp"
     },
     "exitEdit": "Avsluta redigering"
-  },
-  "camera": {
-    "enable": "Aktivera Kamera",
-    "disable": "Inaktivera Kamera"
   },
   "muteCameras": {
     "enable": "Slå av ljudet på alla kameror",
@@ -140,15 +133,13 @@
     "title": "Ström",
     "audio": {
       "tips": {
-        "title": "Ljud måste skickas ut från din kamera och konfigureras i go2rtc för den här strömmen.",
-        "documentation": "Läs dokumentationen: "
+        "title": "Ljud måste skickas ut från din kamera och konfigureras i go2rtc för den här strömmen."
       },
       "available": "Ljud är tillgängligt för den här strömmen",
       "unavailable": "Ljud är inte tillgängligt för den här strömmen"
     },
     "twoWayTalk": {
       "tips": "Din enhet måste stödja funktionen och WebRTC måste vara konfigurerat för tvåvägskommunikation.",
-      "tips.documentation": "Läs dokumentationen: ",
       "available": "Tvåvägskommunikation är tillgänglig för den här strömmen",
       "unavailable": "Tvåvägskommunikation är inte tillgänglig för den här strömmen"
     },

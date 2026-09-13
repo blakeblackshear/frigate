@@ -1,6 +1,7 @@
 import type { FieldPathList, FieldProps, RJSFSchema } from "@rjsf/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import useSWR from "swr";
 import {
   Collapsible,
   CollapsibleContent,
@@ -8,11 +9,24 @@ import {
 } from "@/components/ui/collapsible";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Command,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
+  LuCheck,
   LuChevronDown,
   LuChevronRight,
+  LuChevronsUpDown,
   LuPlus,
   LuTrash2,
 } from "react-icons/lu";
@@ -22,6 +36,183 @@ import { isSubtreeModified } from "../utils";
 import { MapKeyInput } from "../components";
 
 type KnownPlatesData = Record<string, string[]>;
+
+type PlateComboboxProps = {
+  id: string;
+  value: string;
+  entryName: string;
+  disabled?: boolean;
+  detectedPlates: string[];
+  plateAssignments: Map<string, string>;
+  autoOpen: boolean;
+  onAutoOpened: () => void;
+  onCommit: (next: string) => void;
+};
+
+/**
+ * Plate entry that doubles as a picker for plates Frigate has already
+ * recognized. Free text is still accepted so regexes remain typeable.
+ */
+function PlateCombobox({
+  id,
+  value,
+  entryName,
+  disabled,
+  detectedPlates,
+  plateAssignments,
+  autoOpen,
+  onAutoOpened,
+  onCommit,
+}: PlateComboboxProps) {
+  const { t } = useTranslation(["views/settings"]);
+  const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!autoOpen) return;
+    setOpen(true);
+    onAutoOpened();
+  }, [autoOpen, onAutoOpened]);
+
+  // Seed the search box with the current plate and select it, so the first
+  // keystroke replaces the plate instead of appending to it.
+  useEffect(() => {
+    if (!open) {
+      setSearchValue("");
+      return;
+    }
+
+    setSearchValue(value);
+    const frame = requestAnimationFrame(() => inputRef.current?.select());
+    return () => cancelAnimationFrame(frame);
+  }, [open, value]);
+
+  const trimmedSearch = searchValue.trim();
+
+  const matchesDetected = useMemo(
+    () =>
+      detectedPlates.some(
+        (plate) => plate.toLowerCase() === trimmedSearch.toLowerCase(),
+      ),
+    [detectedPlates, trimmedSearch],
+  );
+
+  const showCustomOption = trimmedSearch.length > 0 && !matchesDetected;
+
+  const commit = useCallback(
+    (next: string) => {
+      onCommit(next);
+      setOpen(false);
+    },
+    [onCommit],
+  );
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          id={id}
+          type="button"
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          disabled={disabled}
+          className={cn(
+            "min-w-0 flex-1 justify-between font-normal",
+            !value && "text-muted-foreground",
+          )}
+        >
+          <span className="truncate">
+            {value ||
+              t("configForm.knownPlates.platePlaceholder", {
+                ns: "views/settings",
+              })}
+          </span>
+          <LuChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        className="w-[--radix-popover-trigger-width] p-0"
+      >
+        <Command>
+          <CommandInput
+            ref={inputRef}
+            placeholder={t("configForm.knownPlates.search", {
+              ns: "views/settings",
+            })}
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
+          <CommandList>
+            {showCustomOption && (
+              <CommandGroup>
+                <CommandItem
+                  value={trimmedSearch}
+                  onSelect={() => commit(trimmedSearch)}
+                >
+                  <LuPlus className="mr-2 h-4 w-4 shrink-0" />
+                  <span className="truncate">
+                    {t("configForm.knownPlates.useCustom", {
+                      ns: "views/settings",
+                      value: trimmedSearch,
+                    })}
+                  </span>
+                </CommandItem>
+              </CommandGroup>
+            )}
+            {detectedPlates.length > 0 ? (
+              <CommandGroup
+                heading={t("configForm.knownPlates.detected", {
+                  ns: "views/settings",
+                })}
+              >
+                {detectedPlates.map((plate) => {
+                  const assignedTo = plateAssignments.get(plate);
+                  const showAssignedTo =
+                    !!assignedTo && assignedTo !== entryName;
+
+                  return (
+                    <CommandItem
+                      key={plate}
+                      value={plate}
+                      onSelect={() => commit(plate)}
+                    >
+                      <LuCheck
+                        className={cn(
+                          "mr-2 h-4 w-4 shrink-0",
+                          value === plate ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+                      <span className="truncate">{plate}</span>
+                      {showAssignedTo && (
+                        <span className="ml-auto shrink-0 pl-2 text-xs text-muted-foreground">
+                          {t("configForm.knownPlates.assignedTo", {
+                            ns: "views/settings",
+                            name: assignedTo,
+                          })}
+                        </span>
+                      )}
+                    </CommandItem>
+                  );
+                })}
+              </CommandGroup>
+            ) : (
+              !showCustomOption && (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  {t("configForm.knownPlates.noneDetected", {
+                    ns: "views/settings",
+                  })}
+                </div>
+              )
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 export function KnownPlatesField(props: FieldProps) {
   const { schema, formData, onChange, idSchema, disabled, readonly } = props;
@@ -87,6 +278,35 @@ export function KnownPlatesField(props: FieldProps) {
     }
   }, [hasItems]);
 
+  const { data: recognizedPlates } = useSWR<string[]>(
+    open ? ["recognized_license_plates", { split_joined: 1 }] : null,
+    { revalidateOnFocus: false },
+  );
+
+  const detectedPlates = useMemo(
+    () => recognizedPlates ?? [],
+    [recognizedPlates],
+  );
+
+  const plateAssignments = useMemo(() => {
+    const assignments = new Map<string, string>();
+    for (const [name, plates] of entries) {
+      for (const plate of plates) {
+        const trimmed = plate.trim();
+        if (trimmed && !assignments.has(trimmed)) {
+          assignments.set(trimmed, name);
+        }
+      }
+    }
+    return assignments;
+  }, [entries]);
+
+  const [pendingOpenPlate, setPendingOpenPlate] = useState<string | null>(null);
+  const clearPendingOpenPlate = useCallback(
+    () => setPendingOpenPlate(null),
+    [],
+  );
+
   const handleAddEntry = useCallback(() => {
     const next = { ...data, "": [""] };
     onChange(next, fieldPath);
@@ -120,8 +340,9 @@ export function KnownPlatesField(props: FieldProps) {
 
   const handleAddPlate = useCallback(
     (key: string) => {
-      const next = { ...data, [key]: [...(data[key] || []), ""] };
-      onChange(next, fieldPath);
+      const plates = [...(data[key] || []), ""];
+      onChange({ ...data, [key]: plates }, fieldPath);
+      setPendingOpenPlate(`${key}::${plates.length - 1}`);
     },
     [data, fieldPath, onChange],
   );
@@ -152,9 +373,6 @@ export function KnownPlatesField(props: FieldProps) {
     defaultValue: "Delete",
   });
   const namePlaceholder = t("configForm.knownPlates.namePlaceholder", {
-    ns: "views/settings",
-  });
-  const platePlaceholder = t("configForm.knownPlates.platePlaceholder", {
     ns: "views/settings",
   });
   return (
@@ -224,15 +442,20 @@ export function KnownPlatesField(props: FieldProps) {
                   <div className="ml-1 space-y-2 border-l-2 border-muted-foreground/20 pl-3">
                     {plates.map((plate, plateIndex) => (
                       <div key={plateIndex} className="flex items-center gap-2">
-                        <Input
+                        <PlateCombobox
                           id={`${entryId}-plate-${plateIndex}`}
                           value={plate}
-                          placeholder={platePlaceholder}
+                          entryName={key}
                           disabled={disabled || readonly}
-                          onChange={(e) =>
-                            handleUpdatePlate(key, plateIndex, e.target.value)
+                          detectedPlates={detectedPlates}
+                          plateAssignments={plateAssignments}
+                          autoOpen={
+                            pendingOpenPlate === `${key}::${plateIndex}`
                           }
-                          className="flex-1"
+                          onAutoOpened={clearPendingOpenPlate}
+                          onCommit={(next) =>
+                            handleUpdatePlate(key, plateIndex, next)
+                          }
                         />
                         {plates.length > 1 && (
                           <Button

@@ -76,12 +76,7 @@
         }
       },
       "npuUsage": "Upotreba NPU-a",
-      "npuMemory": "Memorija NPU-a",
-      "intelGpuWarning": {
-        "title": "Upozorenje Intel GPU Statistika",
-        "message": "Statistika GPU-a nije dostupna",
-        "description": "Ovo je poznata greška u Intelovim alatima za izvještavanje GPU statistike (intel_gpu_top) gdje će se podaci prekinuti i stalno prikazivati 0% korištenja GPU-a, čak i kada hardversko ubrzanje i detekcija objekata pravilno rade na (i)GPU-u. Ovo nije greška Frigate-a. Možete ponovno pokrenuti host da privremeno riješite problem i potvrdite da GPU radi ispravno. Ovo ne utječe na performanse."
-      }
+      "npuMemory": "Memorija NPU-a"
     },
     "otherProcesses": {
       "title": "Ostali Procesi",
@@ -175,8 +170,7 @@
     "reindexingEmbeddings": "Reindeksiranje embeddings ({{processed}}% završeno)",
     "cameraIsOffline": "{{camera}} je offline",
     "detectIsSlow": "{{detect}} je sporo ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} je vrlo sporo ({{speed}} ms)",
-    "shmTooLow": "/dev/shm alokacija ({{total}} MB) treba biti povećana na najmanje {{min}} MB."
+    "detectIsVerySlow": "{{detect}} je vrlo sporo ({{speed}} ms)"
   },
   "enrichments": {
     "title": "Obogaćenja",

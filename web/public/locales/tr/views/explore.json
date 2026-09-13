@@ -108,7 +108,6 @@
       },
       "error": "Bir hata oluştu. Frigate günlüklerini kontrol edin.",
       "tips": {
-        "documentation": "Dökümantasyonu oku",
         "context": "Model indirildikten sonra takip edilmiş nesnelerinizin gömüleri tekrar dizinlemeyi tercih edebilirsiniz."
       },
       "context": "Frigate, Anlamsal Arama özelliği için gerekli olan gömü modellerini indiriyor. Ağ bağlantınızın hızına göre bu işlem bir kaç dakika sürebilir."
@@ -117,60 +116,13 @@
   "trackedObjectDetails": "Takip Edilen Nesne Detayları",
   "type": {
     "details": "detaylar",
-    "object_lifecycle": "nesne yaşam döngüsü",
     "snapshot": "fotoğraf",
     "video": "video",
     "thumbnail": "küçük resim",
     "tracking_details": "izleme ayrıntıları"
   },
   "objectLifecycle": {
-    "title": "Nesne Yaşam Döngüsü",
-    "noImageFound": "Bu zaman damgası için bir resim bulunamadı.",
-    "createObjectMask": "Nesne Maskesi Oluştur",
-    "adjustAnnotationSettings": "Belirteç ayarları",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} tespit edildi",
-      "entered_zone": "{{label}} {{zones}} alanına girdi",
-      "active": "{{label}} inaktif oldu",
-      "heard": "{{label}} duyuldu",
-      "external": "{{label}} tespit edildi",
-      "stationary": "{{label}} sabit durdu",
-      "attribute": {
-        "other": "{{label}} {{attribute}} olarak tespit edildi",
-        "faceOrLicense_plate": "{{label}} için {{attribute}} tespit edildi"
-      },
-      "gone": "{{label}} ayrıldı",
-      "header": {
-        "zones": "Alanlar",
-        "ratio": "Oran",
-        "area": "Alan"
-      }
-    },
-    "annotationSettings": {
-      "offset": {
-        "label": "Belirteç telafisi",
-        "documentation": "Dökümantasyonu oku ",
-        "millisecondsToOffset": "Belirteç gecikmesi. <em>Varsayılan: 0</em>",
-        "desc": "Tespit belirteç verisi kameranızın tespit yayınından gelir fakat kameranızın kayıt yayını üzerine çizilir. Bu iki yayın zaman zaman senkrondan kayar. Bunun sonucu olarak görüntü ve belirteç karelerinin zaman uyumu kayabilir. Bunu telafi etmek için <code>annotation_offset</code> alanı kullanılarak gecikmeyi ayarlanabilir.",
-        "tips": "İPUCU: Videoda bir kişinin soldan sağa doğru yürüdüğünü hayal edin. Eğer belirteç sürekli olarak kişinin solunda/arkasında ise bu değer daha küçük veya negatif olarak ayarlanmalıdır. Benzer şekilde, eğer kişi sağdan sola doğru yürürken belirteç karesi sürekli olarak kişinin önünde/sağında kalıyorsa bu değer daha büyük veya pozitif olarak ayarlanmalıdır.",
-        "toast": {
-          "success": "{{camera}} kamerası için belirteç telafi değeri yapılandırma dosyasına kaydedildi. Değişikliklerin uygulamak için Frigate'i yeniden başlatın."
-        }
-      },
-      "title": "Belirteç Ayarları",
-      "showAllZones": {
-        "title": "Tüm Alanları Göster",
-        "desc": "Nesnelerin bir alana girdiği karelerde her zaman alanları göster."
-      }
-    },
-    "carousel": {
-      "next": "Sonraki sayfa",
-      "previous": "Önceki sayfa"
-    },
-    "scrollViewTips": "Bu nesnenin yaşam döngüsündeki önemli noktaları görmek için kaydırın.",
-    "autoTrackingTips": "Otomatik takip yapılan kameralarda gösterilen çerçeveler hatalı olacaktır.",
-    "count": "Toplam {{second}} kerede {{first}} kez",
-    "trackedPoint": "Takip Edilen Nokta"
+    "noImageFound": "Bu zaman damgası için bir resim bulunamadı."
   },
   "itemMenu": {
     "downloadVideo": {
@@ -191,10 +143,6 @@
     },
     "deleteTrackedObject": {
       "label": "Bu takip edilen nesneyi sil"
-    },
-    "viewObjectLifecycle": {
-      "aria": "Nesne yaşam döngüsünü göster",
-      "label": "Nesne yaşam döngüsünü göster"
     },
     "downloadSnapshot": {
       "aria": "Fotoğrafı indir",

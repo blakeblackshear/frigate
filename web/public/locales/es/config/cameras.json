@@ -732,10 +732,6 @@
             "label": "Habilitar Birdseye",
             "description": "Habilita o deshabilita la función de vista Birdseye."
         },
-        "mode": {
-            "label": "Modo de seguimiento",
-            "description": "Modo para incluir cámaras en Birdseye: 'objects', 'motion' o 'continuous'."
-        },
         "order": {
             "label": "Posición",
             "description": "Posición numérica que controla el orden de la cámara en el diseño de Birdseye."
@@ -886,10 +882,6 @@
             "default": {
                 "label": "Retención predeterminada",
                 "description": "Número predeterminado de días durante los que conservar instantáneas."
-            },
-            "mode": {
-                "label": "Modo de retención",
-                "description": "Modo de retención: all (guarda todos los segmentos), motion (guarda segmentos con movimiento) o active_objects (guarda segmentos con objetos activos)."
             },
             "objects": {
                 "label": "Retención por objeto",

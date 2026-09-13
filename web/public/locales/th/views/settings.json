@@ -89,19 +89,11 @@
     },
     "email": {
       "title": "อีเมล"
-    },
-    "notificationSettings": {
-      "documentation": "อ่านเอกสาร"
-    },
-    "notificationUnavailable": {
-      "documentation": "อ่านเอกสาร"
     }
   },
   "documentTitle": {
     "default": "ตั้งค่า - Frigate",
     "authentication": "การตั้งค่าการตรวจสอบสิทธิ์ - Frigate",
-    "camera": "การตั้งค่ากล้อง - Frigate",
-    "classification": "การตั้งค่าการจำแนกประเภท - Frigate",
     "masksAndZones": "ตัวแก้ไขแมสและโซน - Frigate",
     "general": "การตั้งค่าทั่วไป - Frigate",
     "frigatePlus": "การตั้งค่า Frigate+ - Frigate",
@@ -117,7 +109,6 @@
     "frigateplus": "Frigate+",
     "cameras": "ตั้งค่ากล้อง",
     "users": "ผู้ใช้",
-    "classification": "การจําแนกประเภท",
     "masksAndZones": "แมส / โซน",
     "ui": "UI"
   },
@@ -158,43 +149,6 @@
       "clearAll": "ล้างการตั้งค่าสตรีมทั้งหมด"
     }
   },
-  "classification": {
-    "faceRecognition": {
-      "title": "การจดจำใบหน้า",
-      "modelSize": {
-        "small": {
-          "title": "เล็ก"
-        },
-        "large": {
-          "title": "ใหญ่"
-        }
-      }
-    },
-    "toast": {
-      "error": "ผิดพลาดในการบันทึกการกำหนดค่า: {{errorMessage}}"
-    },
-    "semanticSearch": {
-      "modelSize": {
-        "small": {
-          "title": "เล็ก"
-        },
-        "large": {
-          "title": "ใหญ่"
-        }
-      }
-    },
-    "restart_required": "จำเป็นต้องรีสตาร์ท (การตั้งค่าการจำแนกมีการเปลี่ยนแปลง)"
-  },
-  "camera": {
-    "review": {
-      "title": "รีวิว",
-      "alerts": "การแจ้งเตือน ",
-      "detections": "การเคลื่อนไหว "
-    },
-    "reviewClassification": {
-      "readTheDocumentation": "อ่านเอกสาร"
-    }
-  },
   "masksAndZones": {
     "zones": {
       "name": {
@@ -204,19 +158,10 @@
       },
       "add": "เพิ่มโซน",
       "edit": "แก้โซน",
-      "point_other": "{{count}} จุด",
-      "speedEstimation": {
-        "docs": "อ่านเอกสาร"
-      }
+      "point_other": "{{count}} จุด"
     },
     "motionMasks": {
-      "point_other": "{{count}} จุด",
-      "context": {
-        "documentation": "อ่านเอกสาร"
-      },
-      "polygonAreaTooLarge": {
-        "documentation": "อ่านเอกสาร"
-      }
+      "point_other": "{{count}} จุด"
     },
     "objectMasks": {
       "point_other": "{{count}} จุด"
@@ -229,25 +174,6 @@
     },
     "toast": {
       "error": "ผิดพลาดในการบันทึกการกำหนดค่า: {{errorMessage}}"
-    },
-    "snapshotConfig": {
-      "documentation": "อ่านเอกสาร"
-    }
-  },
-  "debug": {
-    "objectShapeFilterDrawing": {
-      "document": "อ่านเอกสาร "
-    }
-  },
-  "enrichments": {
-    "semanticSearch": {
-      "readTheDocumentation": "อ่านเอกสาร"
-    },
-    "faceRecognition": {
-      "readTheDocumentation": "อ่านเอกสาร"
-    },
-    "licensePlateRecognition": {
-      "readTheDocumentation": "อ่านเอกสาร"
     }
   }
 }

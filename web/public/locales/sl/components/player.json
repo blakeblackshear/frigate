@@ -39,7 +39,6 @@
     "title": "Tok ni povezan",
     "desc": "Pretok <code>detect</code> za kamero {{cameraName}} ne prejema slik, preveri dnevnike napak."
   },
-  "cameraDisabled": "Kamera je onemogočena",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Okvir je bil uspešno poslan v Frigate+"

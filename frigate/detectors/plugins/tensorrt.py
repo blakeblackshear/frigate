@@ -14,7 +14,7 @@ try:
 except ModuleNotFoundError:
     TRT_SUPPORT = False
 
-from typing import Literal
+from typing import ClassVar, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -52,6 +52,8 @@ class TensorRTDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="TensorRT",
     )
+
+    device_spec_type: ClassVar[type] = int
 
     type: Literal[DETECTOR_KEY]
     device: int = Field(

@@ -111,11 +111,7 @@ const resolveErrorFieldLabel = ({
       ? "config/cameras"
       : formContext?.i18nNamespace;
 
-  const translationPath = buildTranslationPath(
-    stringSegments,
-    sectionI18nPrefix,
-    formContext,
-  );
+  const translationPath = buildTranslationPath(stringSegments, formContext);
 
   if (effectiveNamespace && translationPath) {
     const translated = resolveConfigTranslation(

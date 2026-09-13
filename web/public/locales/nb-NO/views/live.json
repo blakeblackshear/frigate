@@ -49,8 +49,6 @@
     }
   },
   "camera": {
-    "enable": "Aktiver kamera",
-    "disable": "Deaktiver kamera",
     "turnOn": "Slå kamera på",
     "turnOff": "Skå kamera av"
   },
@@ -93,15 +91,13 @@
   "stream": {
     "audio": {
       "tips": {
-        "title": "Lyd må være aktivert på kameraet ditt og konfigurert i go2rtc for denne strømmen.",
-        "documentation": "Se dokumentasjonen "
+        "title": "Lyd må være aktivert på kameraet ditt og konfigurert i go2rtc for denne strømmen."
       },
       "available": "Lyd er tilgjengelig for denne strømmen",
       "unavailable": "Lyd er ikke tilgjengelig for denne strømmen"
     },
     "twoWayTalk": {
       "tips": "Enheten din må støtte funksjonen og WebRTC må være konfigurert for toveis tale.",
-      "tips.documentation": "Se dokumentasjonen ",
       "available": "Toveis tale er tilgjengelig for denne strømmen",
       "unavailable": "Toveis tale er ikke tilgjengelig for denne strømmen"
     },
@@ -126,8 +122,7 @@
       "all": "Alle",
       "motion": "Bevegelse",
       "active_objects": "Aktive objekter"
-    },
-    "notAllTips": "Konfigurasjonen for opptaksbevaring for {{source}} er satt til <code>mode: {{effectiveRetainMode}}</code>, så dette manuelle opptaket vil kun beholde segmenter med {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Rediger oppsett",
@@ -165,7 +160,6 @@
   "notifications": "Meldingsvarsler",
   "cameraSettings": {
     "title": "{{camera}}-innstillinger",
-    "cameraEnabled": "Kamera aktivert",
     "objectDetection": "Objektdeteksjon",
     "recording": "Opptak",
     "snapshots": "Stillbilder",

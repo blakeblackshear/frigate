@@ -185,6 +185,5 @@
         "description": "En iyi sonuçlar için her bir durum için örnek görseller seçmeniz tavsiye edilir. Tüm durumlar için görsel seçmeden devam edebilirsiniz fakat tüm durumlar için görseller seçilmedikçe model eğitilemeyecektir. Son Sınıflandırmalar arayüzünü kullanarak görselleri sınıflandırmak üzere görüntüleyebilir, yeterince görsel seçildikten sonra da modeli eğitebilirsiniz."
       }
     }
-  },
-  "none": "Yok"
+  }
 }

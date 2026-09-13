@@ -57,8 +57,6 @@
     "disable": "Deshabilita l'àudio de la càmera"
   },
   "camera": {
-    "enable": "Habilitar la càmera",
-    "disable": "Deshabilita la càmera",
     "turnOn": "Activa la càmera",
     "turnOff": "Apaga la càmera"
   },
@@ -117,14 +115,12 @@
     "title": "Transmissió",
     "audio": {
       "tips": {
-        "documentation": "Llegir la documentació ",
         "title": "L'àudio ha de provenir de la càmera i estar configurat amb go2rtc per a aquesta transmissió."
       },
       "available": "L'àudio està disponible per a aquesta transmissió",
       "unavailable": "L'audio no està disponible per a aquesta transmissió"
     },
     "twoWayTalk": {
-      "tips.documentation": "Llegir la documentació ",
       "tips": "El teu dispositiu ha de suportar la funció i WebRTC ha d'estar configurat per a conversa bidireccional.",
       "available": "La conversa bidireccional està disponible per a aquesta transmissió",
       "unavailable": "La conversa bidireccional no està disponible per a aquesta transmissió"
@@ -147,7 +143,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Paràmetres",
-    "cameraEnabled": "Càmera habilitada",
     "recording": "Gravació",
     "snapshots": "Instantànies",
     "autotracking": "Seguiment automàtic",
@@ -164,8 +159,7 @@
       "all": "Tot",
       "motion": "Moviment",
       "active_objects": "Objectes actius"
-    },
-    "notAllTips": "El vostre {{source}} registre de configuració de retenció s'ha posat en el mode <code>: {{effectiveRetainMode}}</code>, així que la gravaciò a demanda només seguirà segments amb {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Editar el disseny",

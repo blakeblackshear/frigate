@@ -12,7 +12,6 @@
     "title": "Adás Nem Elérhető",
     "desc": "Nem érkezett kép a {{cameraName}}-n, <code>észlelés</code> adásban. Ellenőrizze a hibanaplót"
   },
-  "cameraDisabled": "Kamera kikapcsolva",
   "stats": {
     "streamType": {
       "title": "Adás Típus:",

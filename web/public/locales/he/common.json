@@ -97,9 +97,9 @@
       "kbps": "kB/s",
       "mbps": "MB/s",
       "gbps": "GB/s",
-      "kbph": "kB/hour",
-      "mbph": "MB/hour",
-      "gbph": "GB/hour"
+      "kbph": "kB/שעה",
+      "mbph": "MB/שעה",
+      "gbph": "GB/שעה"
     }
   },
   "label": {
@@ -119,7 +119,7 @@
     "enable": "אפשר",
     "disabled": "מבוטל",
     "disable": "בטל",
-    "save": "שמירה",
+    "save": "שמור",
     "saving": "שומר…",
     "back": "חזרה",
     "close": "סגירה",
@@ -148,59 +148,74 @@
     "info": "מידע",
     "next": "הבא",
     "continue": "המשך",
-    "add": "להוסיף"
+    "add": "להוסיף",
+    "applying": "מחיל…",
+    "undo": "בטל",
+    "copiedToClipboard": "הועתק ללוח הכתיבה",
+    "modified": "שונה",
+    "overridden": "בוטל",
+    "resetToGlobal": "אפס להגדרה הגלובלית",
+    "resetToDefault": "אפס לברירת מחדל",
+    "saveAll": "שמור הכל",
+    "savingAll": "שומר הכל…",
+    "undoAll": "בטל הכל",
+    "retry": "נסה שוב"
   },
   "menu": {
     "system": "מערכת",
     "systemMetrics": "מדדי מערכת",
     "configuration": "תצורת מערכת",
-    "systemLogs": "לוגים מערכת",
+    "systemLogs": "יומני מערכת",
     "settings": "הגדרות",
     "configurationEditor": "עריכת תצורה",
     "languages": "שפות",
     "language": {
-      "en": "English (English)",
-      "es": "ספרדית",
-      "fr": "צרפתית",
-      "ar": "ערבית",
-      "pt": "פורטוגזית",
-      "it": "איטלקית",
-      "nl": "הולנדית",
-      "sv": "שוודית",
-      "cs": "צ'כית",
-      "nb": "נורווגית",
-      "ko": "קוריאנית",
-      "vi": "ויטנאמית",
-      "fa": "פרסית",
-      "pl": "פולנית",
-      "uk": "אוקראינית",
+      "en": "English (אנגלית)",
+      "es": "Español (ספרדית)",
+      "fr": "Français (צרפתית)",
+      "ar": "العربية (ערבית)",
+      "pt": "Português (פורטוגזית)",
+      "it": "Italiano (איטלקית)",
+      "nl": "Nederlands (הולנדית)",
+      "sv": "Svenska (שוודית)",
+      "cs": "Čeština (צ'כית)",
+      "nb": "Norsk Bokmål (נורווגית ספרותית)",
+      "ko": "한국어 (קוריאנית)",
+      "vi": "Tiếng Việt (וייטנאמית)",
+      "fa": "فارسی (פרסית)",
+      "pl": "Polski (פולנית)",
+      "uk": "Українська (אוקראינית)",
       "he": "עברית",
-      "el": "יוונית",
-      "ro": "רומנית",
-      "hu": "הונגרית",
-      "fi": "פינית",
-      "da": "דנית",
+      "el": "Ελληνικά (יוונית)",
+      "ro": "Română (רומנית)",
+      "hu": "⁨Magyar (הונגרית)",
+      "fi": "Suomi (פינית)",
+      "da": "Dansk (דנית)",
       "withSystem": {
         "label": "השתמש בהגדרות המערכת עבור השפה"
       },
-      "sk": "סלובקית",
-      "th": "תאילנדית",
-      "zhCN": "סינית פשוטה",
-      "tr": "טורקית",
-      "hi": "הודית",
-      "ru": "רוסית",
-      "ja": "יפנית",
-      "de": "גרמנית",
-      "yue": "קנטונזית",
-      "ca": "קטלה (קטלאנית)",
-      "ptBR": "פורטוגזית - ברזיל",
-      "sr": "סרבית",
-      "sl": "סלובנית",
-      "lt": "ליטאית",
-      "bg": "בולגרית",
-      "gl": "Galego",
-      "id": "אינדונזית",
-      "ur": "اردو"
+      "sk": "Slovenčina (סלובקית)",
+      "th": "ไทย (תאילנדית)",
+      "zhCN": "简体中文 (סינית מפושטת)",
+      "tr": "Türkçe (טורקית)",
+      "hi": "हिन्दी (הינדי)",
+      "ru": "Русский (רוסית)",
+      "ja": "日本語 (יפנית)",
+      "de": "Deutsch (גרמנית)",
+      "yue": "粵語 (קנטונזית)",
+      "ca": "Català (קטלאנית)",
+      "ptBR": "Português brasileiro (פורטוגזית ברזילאית)",
+      "sr": "Српски (סרבית)",
+      "sl": "Slovenščina (סלובנית)",
+      "lt": "Lietuvių (ליטאית)",
+      "bg": "Български (בולגרית)",
+      "gl": "Galego (גאליסית)",
+      "id": "Bahasa Indonesia (אינדונזית)",
+      "ur": "اردو (אורדו)",
+      "zhHant": "繁體中文 (סינית מסורתית)",
+      "be": "Беларуская (בלארוסית)",
+      "hr": "Hrvatski (קרואטית)",
+      "bs": "Bosanski (בוסנית)"
     },
     "appearance": "מראה",
     "darkMode": {
@@ -226,9 +241,9 @@
     "help": "עזרה",
     "documentation": {
       "title": "תיעוד",
-      "label": "תיעוד Frigate"
+      "label": "תיעודי Frigate"
     },
-    "restart": "הפעלה מחדש",
+    "restart": "הפעל מחדש",
     "live": {
       "title": "שידור חי",
       "cameras": {
@@ -240,45 +255,50 @@
       "allCameras": "כל המצלמות"
     },
     "export": "ייצוא",
-    "uiPlayground": "ממשק משתמש",
-    "faceLibrary": "ספריית זיהוי פנים",
+    "uiPlayground": "סביבת ניסויים",
+    "faceLibrary": "ספריית פנים",
     "user": {
       "account": "חשבון",
       "anonymous": "אנונימי",
-      "logout": "ניתוק",
+      "logout": "התנתק",
       "current": "משתמש מחובר: {{user}}",
-      "setPassword": "קביעת סיסמה",
+      "setPassword": "עריכת סיסמה",
       "title": "משתמש"
     },
-    "classification": "סיווג"
+    "classification": "סיווג",
+    "profiles": "פרופילים",
+    "actions": "פעולות",
+    "features": "יכולות",
+    "chat": "צ'אט"
   },
   "toast": {
-    "copyUrlToClipboard": "כתובת האתר המועתקת.",
+    "copyUrlToClipboard": "כתובת הURL הועתקה.",
     "save": {
-      "title": "שמירה",
+      "title": "שמור",
       "error": {
         "noMessage": "שמירת שינויי התצורה נכשלה",
-        "title": "נכשל בניסיון לשמור את ההגדרות: {{errorMessage}}"
-      }
+        "title": "נכשל בניסיון לשמור את השינויים: {{errorMessage}}"
+      },
+      "success": "שינויי התצורה נשמרו בהצלחה."
     }
   },
   "role": {
-    "title": "הרשאה",
-    "admin": "מנהל",
+    "title": "תפקיד",
+    "admin": "מנהל מערכת",
     "viewer": "צופה",
-    "desc": "למנהלי מערכת יש גישה מלאה לכל התכונות בממשק המשתמש של Frigate. הצופים מוגבלים לצפייה במצלמות, סקירת פריטים וצילומים היסטוריים בממשק המשתמש."
+    "desc": "למנהלי מערכת יש גישה מלאה לכל התכונות בממשק המשתמש של Frigate. צופים מוגבלים לצפייה במצלמות, סקירת פריטים וצילומים היסטוריים בממשק המשתמש."
   },
   "pagination": {
     "next": {
       "title": "הבא",
-      "label": "עבור לדף הבא"
+      "label": "עבור לעמוד הבא"
     },
     "label": "דפדוף",
     "previous": {
-      "title": "הקודם",
-      "label": "עבור לדף הקודם"
+      "title": "קודם",
+      "label": "עבור לעמוד הקודם"
     },
-    "more": "דפים נוספים"
+    "more": "עמודים נוספים"
   },
   "accessDenied": {
     "title": "הגישה נדחתה",
@@ -288,7 +308,7 @@
   "notFound": {
     "documentTitle": "לא נמצא - Frigate",
     "title": "404",
-    "desc": "דף לא נמצא"
+    "desc": "עמוד לא נמצא"
   },
   "selectItem": "בחירה:{{item}}",
   "readTheDocumentation": "קרא את התיעוד",
@@ -303,5 +323,10 @@
   },
   "information": {
     "pixels": "{{area}}px"
+  },
+  "no_items": "אין רכיבים",
+  "validation_errors": "שגיאות אימות",
+  "credentialField": {
+    "savedPlaceholder": "נשמר - השאר ריק בכדי לשמור על הנוכחי"
   }
 }

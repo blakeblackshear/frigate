@@ -2,7 +2,7 @@ import logging
 import os.path
 import re
 import urllib.request
-from typing import Literal
+from typing import ClassVar, Literal
 
 import cv2
 import numpy as np
@@ -34,6 +34,9 @@ class RknnDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="RKNN",
     )
+
+    device_spec_field: ClassVar[str] = "num_cores"
+    device_spec_type: ClassVar[type] = int
 
     type: Literal[DETECTOR_KEY]
     num_cores: int = Field(

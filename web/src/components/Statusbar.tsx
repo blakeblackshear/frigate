@@ -4,6 +4,7 @@ import {
   StatusMessage,
 } from "@/context/statusbar-provider";
 import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
+import StatusBarNotices from "@/components/health/StatusBarNotices";
 import { cn } from "@/lib/utils";
 import type { ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
@@ -186,11 +187,11 @@ export default function Statusbar() {
           ))}
       </div>
       <div className="no-scrollbar flex h-full max-w-[50%] items-center gap-2 overflow-x-auto">
-        {Object.entries(messages).length === 0 ? (
-          <div className="flex items-center gap-2 text-sm">
+        {!isAdmin ? null : Object.entries(messages).length === 0 ? (
+          <Link to="/system#health" className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
             {t("stats.healthy")}
-          </div>
+          </Link>
         ) : (
           Object.entries(messages).map(([key, messageArray]) => (
             <div key={key} className="flex h-full items-center gap-2">
@@ -220,6 +221,7 @@ export default function Statusbar() {
             </div>
           ))
         )}
+        {isAdmin && <StatusBarNotices />}
       </div>
     </div>
   );

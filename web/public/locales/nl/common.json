@@ -37,7 +37,6 @@
       "12hour": "d MMM, HH:mm:ss",
       "24hour": "d MMM, HH:mm:ss"
     },
-    "formattedTimestampOnlyMonthAndDay": "%-d %b",
     "d": "{{time}}d",
     "day_one": "{{time}} dag",
     "day_other": "{{time}} dagen",
@@ -45,14 +44,6 @@
     "hour_one": "{{time}} uur",
     "hour_other": "{{time}} uren",
     "m": "{{time}}min",
-    "formattedTimestampWithYear": {
-      "12hour": "%-d %b %Y, %H:%M",
-      "24hour": "%-d %b %Y, %H:%M"
-    },
-    "formattedTimestampExcludeSeconds": {
-      "24hour": "%-d %b, %H:%M",
-      "12hour": "%-d %b, %H:%M"
-    },
     "minute_one": "{{time}} minuut",
     "minute_other": "{{time}} minuten",
     "second_one": "{{time}} seconde",
@@ -230,7 +221,6 @@
     "appearance": "Opmaak",
     "theme": {
       "blue": "Blauw",
-      "contrast": "Hoog contrast",
       "label": "Thema",
       "green": "Groen",
       "nord": "Nord",

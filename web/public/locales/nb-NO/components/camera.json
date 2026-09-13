@@ -45,8 +45,7 @@
         "audioIsUnavailable": "Lyd er ikke tilgjengelig for denne strømmen",
         "audio": {
           "tips": {
-            "title": "Lyd må komme fra kameraet ditt og konfigureres i go2rtc for denne strømmen.",
-            "document": "Se dokumentasjonen "
+            "title": "Lyd må komme fra kameraet ditt og konfigureres i go2rtc for denne strømmen."
           }
         },
         "stream": "Strøm",

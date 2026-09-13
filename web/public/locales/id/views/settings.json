@@ -1,8 +1,6 @@
 {
   "documentTitle": {
     "default": "Pengaturan - Frigate",
-    "camera": "Pengaturan Kamera - Frigate",
-    "classification": "Pengaturan Klasifikasi - Frigate",
     "authentication": "Pengaturan Autentikasi - Frigate",
     "masksAndZones": "Editor Masker dan Zona - Frigate",
     "motionTuner": "Penyetel Gerakan - Frigate",
@@ -199,15 +197,8 @@
     "record": {
       "noRecordRole": "Tidak ada stream yang memiliki peran record yang didefinisikan. Perekaman tidak akan berfungsi."
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "Birdseye disetel ke mode 'objects', tetapi deteksi objek dinonaktifkan untuk kamera ini. Kamera tidak akan muncul di Birdseye."
-    },
     "snapshots": {
       "detectDisabled": "Deteksi objek dinonaktifkan. Cuplikan dihasilkan dari objek yang terlacak dan tidak akan dibuat."
-    },
-    "detectors": {
-      "mixedTypes": "Semua detektor harus menggunakan tipe yang sama. Hapus detektor yang ada untuk menggunakan tipe yang berbeda.",
-      "mixedTypesSuggestion": "Semua detektor harus menggunakan tipe yang sama. Hapus detektor yang ada atau pilih {{type}}."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Ukuran 'small' dengan model Jina V2 memiliki RAM tinggi dan biaya inferensi. Model 'large' dengan GPU diskrit direkomendasikan."
@@ -528,20 +519,10 @@
     "backToSettings": "Kembali ke Pengaturan Kamera",
     "streams": {
       "title": "Status dan Detail Kamera",
-      "enableLabel": "Kamera yang diaktifkan",
-      "enableDesc": "Nonaktifkan sementara kamera yang aktif hingga Frigate dimulai ulang. Menonaktifkan kamera sepenuhnya akan menghentikan seluruh pemrosesan stream kamera ini oleh Frigate. Deteksi, perekaman, dan debugging tidak akan tersedia.<br /> <em>Catatan: Ini tidak menonaktifkan restream go2rtc.</em><br /><br />Seret pegangan untuk mengubah urutan kamera sebagaimana ditampilkan di UI. Urutan kamera yang aktif akan tercermin di seluruh UI termasuk dasbor Langsung dan dropdown pemilihan kamera.",
-      "disableLabel": "Kamera yang dinonaktifkan",
-      "disableDesc": "Aktifkan kamera yang saat ini tidak terlihat di UI dan dinonaktifkan dalam konfigurasi. Mulai ulang Frigate diperlukan setelah mengaktifkan.",
       "enableSuccess": "{{cameraName}} diaktifkan. Restart Frigate untuk menerapkan.",
       "reorderHandle": "Seret untuk mengubah urutan",
       "saving": "Menyimpan…",
       "saved": "Tersimpan",
-      "friendlyName": {
-        "edit": "Edit nama tampilan kamera",
-        "title": "Edit Nama Tampilan",
-        "description": "Tetapkan nama ramah yang ditampilkan untuk kamera ini di seluruh UI Frigate. Biarkan kosong untuk menggunakan ID kamera.",
-        "rename": "Ubah Nama"
-      },
       "label": "Status kamera",
       "description": "Atur status operasi untuk setiap kamera.<br /><br /><strong>Nyala</strong>: stream diproses secara normal.<br /><strong>Mati</strong>: mem jeda pemrosesan untuk sementara. Tidak tetap setelah Frigate dimulai ulang.<br /><strong>Nonaktif</strong>: menghentikan pemrosesan dan menyimpan perubahan ke konfigurasi Anda. Restart diperlukan untuk mengaktifkan kembali kamera yang dinonaktifkan.<br /><br /><em>Catatan: Menonaktifkan tidak memengaruhi restream go2rtc.</em><br /><br />Seret pegangan untuk mengubah urutan kamera aktif sebagaimana tampil di seluruh UI, termasuk dasbor Live dan menu dropdown pemilihan kamera.",
       "disabledSubheading": "Dinonaktifkan dalam konfigurasi",
@@ -600,8 +581,6 @@
       "selectLabel": "Pilih profil",
       "description": "Atur kamera mana yang dinyalakan atau dimatikan saat suatu profil diaktifkan. Kamera yang disetel ke \"Warisi\" akan mempertahankan status default-nya.",
       "inherit": "Warisi",
-      "enabled": "Diaktifkan",
-      "disabled": "Dinonaktifkan",
       "on": "Nyala",
       "off": "Mati"
     },
@@ -1318,31 +1297,6 @@
       "error": "Gagal menyimpan perubahan konfigurasi: {{errorMessage}}"
     }
   },
-  "detectorsAndModel": {
-    "title": "Detektor dan model",
-    "description": "Konfigurasikan backend detektor yang menjalankan deteksi objek dan model yang digunakannya. Perubahan disimpan bersama agar detektor dan model tetap sinkron.",
-    "cardTitles": {
-      "detector": "Perangkat Keras Detektor",
-      "model": "Model Deteksi"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "Model Kustom"
-    },
-    "mismatch": {
-      "warning": "Model Frigate+ saat ini \"{{model}}\" memerlukan detektor {{required}}. Pilih model yang kompatibel di bawah atau beralih ke Model Kustom sebelum menyimpan."
-    },
-    "plusModel": {
-      "requiresDetector": "Memerlukan: {{detector}}",
-      "noModelSelected": "Pilih model Frigate+"
-    },
-    "toast": {
-      "saveSuccess": "Pengaturan detektor dan model telah disimpan. Mulai ulang Frigate untuk menerapkan perubahan.",
-      "saveError": "Gagal menyimpan pengaturan detektor dan model"
-    },
-    "unsavedChanges": "Perubahan detektor dan model yang belum disimpan",
-    "restartRequired": "Perlu mulai ulang (detektor atau model berubah)"
-  },
   "triggers": {
     "documentTitle": "Pemicu",
     "semanticSearch": {
@@ -1633,16 +1587,6 @@
     "detect": {
       "title": "Pengaturan Deteksi"
     },
-    "detectors": {
-      "title": "Pengaturan Detektor",
-      "singleType": "Hanya satu detektor {{type}} yang diizinkan.",
-      "keyRequired": "Nama detektor wajib diisi.",
-      "keyDuplicate": "Nama detektor sudah ada.",
-      "noSchema": "Tidak ada skema detektor yang tersedia.",
-      "none": "Tidak ada instance detektor yang dikonfigurasi.",
-      "add": "Tambah detektor",
-      "addCustomKey": "Tambah kunci kustom"
-    },
     "record": {
       "title": "Pengaturan Perekaman"
     },
@@ -1831,7 +1775,6 @@
     "addStream": "Tambah stream",
     "addStreamDesc": "Masukkan nama untuk stream baru. Nama ini akan digunakan untuk merujuk stream dalam konfigurasi kamera Anda.",
     "addUrl": "Tambah URL",
-    "streamNumber": "Stream {{index}}",
     "streamName": "Nama stream",
     "streamNamePlaceholder": "mis., front_door",
     "streamUrlPlaceholder": "mis., rtsp://user:pass@192.168.1.100/stream",
@@ -1878,11 +1821,6 @@
     "sourceNumber": "Sumber {{index}}"
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "Objek",
-      "motion": "Gerakan",
-      "continuous": "Kontinu"
-    },
     "cameraOrder": {
       "label": "Urutan kamera",
       "description": "Seret kamera untuk mengatur urutannya dalam tata letak Birdseye.",
@@ -1908,12 +1846,6 @@
       "browser": "Browser",
       "12hour": "12 jam",
       "24hour": "24 jam"
-    },
-    "TimeOrDateStyle": {
-      "full": "Penuh",
-      "long": "Panjang",
-      "medium": "Sedang",
-      "short": "Pendek"
     },
     "unitSystem": {
       "metric": "Metrik",

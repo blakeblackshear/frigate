@@ -6,12 +6,19 @@ import logging
 from collections.abc import Callable, Iterable
 from typing import Any, cast
 
+from peewee import IntegrityError
+
 from frigate.camera import PTZMetrics
 from frigate.camera.activity_manager import AudioActivityManager, CameraActivityManager
 from frigate.comms.base_communicator import Communicator
+from frigate.comms.mqtt import MqttClient
 from frigate.comms.runtime_state import RuntimeStatePersistence
 from frigate.comms.webpush import WebPushClient
-from frigate.config import BirdseyeModeEnum, FrigateConfig
+from frigate.config import (
+    FrigateConfig,
+    birdseye_modes_from_mqtt_payload,
+    birdseye_modes_to_mqtt_payload,
+)
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdatePublisher,
@@ -34,16 +41,23 @@ from frigate.const import (
     UPDATE_EVENT_DESCRIPTION,
     UPDATE_JOB_STATE,
     UPDATE_MODEL_STATE,
+    UPDATE_NOTICE,
     UPDATE_REVIEW_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import Event, Previews, Recordings, ReviewSegment
+from frigate.notices.registry import NoticeRegistry
 from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 from frigate.types import ModelStatusTypesEnum, TrackedObjectUpdateTypesEnum
 from frigate.util.object import get_camera_regions_grid
 from frigate.util.services import restart_frigate
 
 logger = logging.getLogger(__name__)
+
+# <camera>/<command>/<sub_command>/set, one segment longer than the rest
+SUB_COMMAND_TOPICS = frozenset({"motion_mask", "object_mask", "zone"})
+
+BARE_COMMAND_TOPICS = frozenset({"onConnect", "restart"})
 
 
 class Dispatcher:
@@ -56,12 +70,18 @@ class Dispatcher:
         onvif: OnvifController,
         ptz_metrics: dict[str, PTZMetrics],
         communicators: list[Communicator],
+        notice_registry: NoticeRegistry | None = None,
     ) -> None:
         self.config = config
         self.config_updater = config_updater
         self.onvif = onvif
         self.ptz_metrics = ptz_metrics
         self.comms = communicators
+        self.notice_registry = notice_registry
+
+        if notice_registry is not None:
+            notice_registry.subscribe(self._publish_notices)
+
         self.camera_activity = CameraActivityManager(config, self.publish)
         self.audio_activity = AudioActivityManager(config, self.publish)
         self.model_state: dict[str, ModelStatusTypesEnum] = {}
@@ -84,7 +104,7 @@ class Dispatcher:
             "recordings": self._on_recordings_command,
             "snapshots": self._on_snapshots_command,
             "birdseye": self._on_birdseye_command,
-            "birdseye_mode": self._on_birdseye_mode_command,
+            "birdseye_modes": self._on_birdseye_modes_command,
             "review_alerts": self._on_alerts_command,
             "review_detections": self._on_detections_command,
             "object_descriptions": self._on_object_description_command,
@@ -99,11 +119,117 @@ class Dispatcher:
         }
         self.profile_manager: ProfileManager | None = None
 
-        for comm in self.comms:
-            comm.subscribe(self._receive)
-
         self.web_push_client = next(
             (comm for comm in communicators if isinstance(comm, WebPushClient)), None
+        )
+
+        for comm in self.comms:
+            comm.subscribe(self._receive)
+            comm.attach_dispatcher(self)
+
+    def start_communicators(self) -> None:
+        """Start communicators after dispatcher wiring is fully initialized."""
+        for comm in self.comms:
+            comm.start()
+
+    def is_command_topic(self, topic: str) -> bool:
+        """Whether a prefix-stripped topic maps to a command handler.
+
+        Transports that fan a whole topic tree in must filter on this:
+        _receive() republishes anything it does not recognize, so forwarding
+        unfiltered would echo Frigate's own publishes back.
+        """
+        parts = topic.split("/")
+
+        if topic in BARE_COMMAND_TOPICS:
+            return True
+
+        if len(parts) == 2 and parts[1] == "ptz":
+            return True
+
+        if len(parts) == 2 and parts[1] == "set":
+            return parts[0] in self._global_settings_handlers
+
+        if len(parts) == 3 and parts[2] == "set":
+            return (
+                parts[1] in self._camera_settings_handlers
+                and parts[1] not in SUB_COMMAND_TOPICS
+            )
+
+        if len(parts) == 3 and parts[2] == "suspend":
+            return parts[1] == "notifications"
+
+        if len(parts) == 4 and parts[3] == "set":
+            return parts[1] in SUB_COMMAND_TOPICS
+
+        return False
+
+    def _build_camera_activity_snapshot(self) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Build the current runtime activity snapshot for reconnect consumers."""
+        camera_status = {
+            camera: status
+            for camera, status in self.camera_activity.last_camera_activity.copy().items()
+            if camera in self.config.cameras
+        }
+        audio_detections = self.audio_activity.current_audio_detections.copy()
+        cameras_with_status = camera_status.keys()
+
+        for camera in self.config.cameras.keys():
+            if camera not in cameras_with_status:
+                camera_status[camera] = {}
+
+            camera_status[camera]["config"] = {
+                "detect": self.config.cameras[camera].detect.enabled,
+                "enabled": self.config.cameras[camera].enabled,
+                "snapshots": self.config.cameras[camera].snapshots.enabled,
+                "record": self.config.cameras[camera].record.enabled,
+                "audio": self.config.cameras[camera].audio.enabled,
+                "audio_transcription": self.config.cameras[
+                    camera
+                ].audio_transcription.live_enabled,
+                "notifications": self.config.cameras[camera].notifications.enabled,
+                "notifications_suspended": int(
+                    self.web_push_client.suspended_cameras.get(camera, 0)
+                )
+                if self.web_push_client
+                and camera in self.web_push_client.suspended_cameras
+                else 0,
+                "autotracking": self.config.cameras[camera].onvif.autotracking.enabled,
+                "alerts": self.config.cameras[camera].review.alerts.enabled,
+                "detections": self.config.cameras[camera].review.detections.enabled,
+                "object_descriptions": self.config.cameras[
+                    camera
+                ].objects.genai.enabled,
+                "review_descriptions": self.config.cameras[camera].review.genai.enabled,
+            }
+
+        return camera_status, audio_detections
+
+    def publish_runtime_snapshot(
+        self,
+        publisher: Callable[[str, Any, bool], None] | None = None,
+    ) -> None:
+        """Publish the runtime snapshot for newly connected listeners."""
+        publish = publisher or self.publish
+        camera_status, audio_detections = self._build_camera_activity_snapshot()
+
+        publish("camera_activity", json.dumps(camera_status), False)
+        publish("model_state", json.dumps(self.model_state.copy()), False)
+        publish(
+            "embeddings_reindex_progress",
+            json.dumps(self.embeddings_reindex.copy()),
+            False,
+        )
+        publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()), False)
+
+        if self.notice_registry is not None:
+            publish("notices", json.dumps(self.notice_registry.active()), False)
+
+        publish("audio_detections", json.dumps(audio_detections), False)
+        publish(
+            "profile/state",
+            self.config.active_profile or "none",
+            True,
         )
         if self.web_push_client is not None:
             self.web_push_client.set_suspension_broadcaster(self.publish)
@@ -123,17 +249,11 @@ class Dispatcher:
 
             try:
                 if command_type == "set":
-                    # Commands that require a sub-command (mask/zone name)
-                    sub_command_required = {
-                        "motion_mask",
-                        "object_mask",
-                        "zone",
-                    }
                     if sub_command:
                         self._camera_settings_handlers[command](
                             camera_name, sub_command, payload
                         )
-                    elif command in sub_command_required:
+                    elif command in SUB_COMMAND_TOPICS:
                         logger.error(
                             "Command %s requires a sub-command (mask/zone name)",
                             command,
@@ -149,17 +269,32 @@ class Dispatcher:
             restart_frigate()
 
         def handle_insert_many_recordings() -> None:
-            Recordings.insert_many(payload).execute()
+            try:
+                Recordings.insert_many(payload).execute()
+            except IntegrityError:
+                logger.warning(
+                    "Batch recording insert failed, inserting rows individually"
+                )
+
+                for recording in payload:
+                    try:
+                        Recordings.insert(recording).execute()
+                    except IntegrityError:
+                        logger.warning(
+                            "Skipping recording that is already stored: %s",
+                            recording.get(Recordings.path.name),
+                        )
 
         def handle_request_region_grid() -> Any:
             camera = payload
             if camera not in self.config.cameras:
                 return None
 
+            model = self.config.model_for_camera(camera)
             grid = get_camera_regions_grid(
                 camera,
                 self.config.cameras[camera].detect,
-                max(self.config.model.width, self.config.model.height),
+                max(model.width, model.height),
             )
             return grid
 
@@ -217,6 +352,16 @@ class Dispatcher:
                 self.model_state[model] = ModelStatusTypesEnum[state]
                 self.publish("model_state", json.dumps(self.model_state))
 
+        def handle_update_notice() -> None:
+            if self.notice_registry is None or not isinstance(payload, dict):
+                return
+
+            try:
+                self.notice_registry.apply(payload)
+            except Exception:
+                # a raise here would kill the REP thread for every process
+                logger.exception("Failed to apply notice update")
+
         def handle_model_state() -> None:
             self.publish("model_state", json.dumps(self.model_state.copy()))
 
@@ -267,67 +412,11 @@ class Dispatcher:
         def handle_birdseye_layout() -> None:
             self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
 
-        def handle_on_connect() -> None:
-            camera_status = {
-                camera: status
-                for camera, status in self.camera_activity.last_camera_activity.copy().items()
-                if camera in self.config.cameras
-            }
-            audio_detections = self.audio_activity.current_audio_detections.copy()
-            cameras_with_status = camera_status.keys()
-
-            for camera in self.config.cameras.keys():
-                if camera not in cameras_with_status:
-                    camera_status[camera] = {}
-
-                camera_status[camera]["config"] = {
-                    "detect": self.config.cameras[camera].detect.enabled,
-                    "enabled": self.config.cameras[camera].enabled,
-                    "snapshots": self.config.cameras[camera].snapshots.enabled,
-                    "record": self.config.cameras[camera].record.enabled,
-                    "audio": self.config.cameras[camera].audio.enabled,
-                    "audio_transcription": self.config.cameras[
-                        camera
-                    ].audio_transcription.live_enabled,
-                    "notifications": self.config.cameras[camera].notifications.enabled,
-                    "notifications_suspended": int(
-                        self.web_push_client.suspended_cameras.get(camera, 0)
-                    )
-                    if self.web_push_client
-                    and camera in self.web_push_client.suspended_cameras
-                    else 0,
-                    "autotracking": self.config.cameras[
-                        camera
-                    ].onvif.autotracking.enabled,
-                    "alerts": self.config.cameras[camera].review.alerts.enabled,
-                    "detections": self.config.cameras[camera].review.detections.enabled,
-                    "object_descriptions": self.config.cameras[
-                        camera
-                    ].objects.genai.enabled,
-                    "review_descriptions": self.config.cameras[
-                        camera
-                    ].review.genai.enabled,
-                }
-
-            self.publish("camera_activity", json.dumps(camera_status))
-            self.publish("model_state", json.dumps(self.model_state.copy()))
-            self.publish(
-                "embeddings_reindex_progress",
-                json.dumps(self.embeddings_reindex.copy()),
-            )
-            self.publish("birdseye_layout", json.dumps(self.birdseye_layout.copy()))
-            self.publish("audio_detections", json.dumps(audio_detections))
-            self.publish(
-                "profile/state",
-                self.config.active_profile or "none",
-                retain=True,
-            )
-
         def handle_notification_test() -> None:
             self.publish("notification_test", "Test notification")
 
         # Dictionary mapping topic to handlers
-        topic_handlers = {
+        topic_handlers: dict[str, Callable[[], Any]] = {
             INSERT_MANY_RECORDINGS: handle_insert_many_recordings,
             REQUEST_REGION_GRID: handle_request_region_grid,
             INSERT_PREVIEW: handle_insert_preview,
@@ -340,6 +429,7 @@ class Dispatcher:
             UPDATE_REVIEW_DESCRIPTION: handle_update_review_description,
             UPDATE_MODEL_STATE: handle_update_model_state,
             UPDATE_JOB_STATE: handle_update_job_state,
+            UPDATE_NOTICE: handle_update_notice,
             UPDATE_EMBEDDINGS_REINDEX_PROGRESS: handle_update_embeddings_reindex_progress,
             UPDATE_BIRDSEYE_LAYOUT: handle_update_birdseye_layout,
             UPDATE_AUDIO_TRANSCRIPTION_STATE: handle_update_audio_transcription_state,
@@ -350,7 +440,7 @@ class Dispatcher:
             "jobState": handle_job_state,
             "audioTranscriptionState": handle_audio_transcription_state,
             "birdseyeLayout": handle_birdseye_layout,
-            "onConnect": handle_on_connect,
+            "onConnect": self.publish_runtime_snapshot,
         }
 
         if topic.endswith("set") or topic.endswith("ptz") or topic.endswith("suspend"):
@@ -397,6 +487,23 @@ class Dispatcher:
         """Handle publishing to communicators."""
         for comm in self.comms:
             comm.publish(topic, payload, retain)
+
+    def publish_local(self, topic: str, payload: Any) -> None:
+        """Publish to every communicator except MQTT.
+
+        Used for topics whose external schema is not settled yet.
+        """
+        for comm in self.comms:
+            if isinstance(comm, MqttClient):
+                continue
+
+            comm.publish(topic, payload, False)
+
+    def _publish_notices(self) -> None:
+        if self.notice_registry is None:
+            return
+
+        self.publish_local("notices", json.dumps(self.notice_registry.active()))
 
     def stop(self) -> None:
         self.camera_activity.stop()
@@ -879,11 +986,12 @@ class Dispatcher:
         )
         self.publish(f"{camera_name}/birdseye/state", payload, retain=True)
 
-    def _on_birdseye_mode_command(self, camera_name: str, payload: str) -> None:
+    def _on_birdseye_modes_command(self, camera_name: str, payload: str) -> None:
         """Callback for birdseye mode topic."""
 
-        if payload not in ["CONTINUOUS", "MOTION", "OBJECTS"]:
-            logger.info(f"Invalid birdseye_mode command: {payload}")
+        modes = birdseye_modes_from_mqtt_payload(payload)
+        if modes is None:
+            logger.info("Invalid birdseye_modes command: %s", payload)
             return
 
         birdseye_settings = self.config.cameras[camera_name].birdseye
@@ -892,16 +1000,20 @@ class Dispatcher:
             logger.info(f"Birdseye mode not enabled for {camera_name}")
             return
 
-        birdseye_settings.mode = BirdseyeModeEnum(payload.lower())
+        birdseye_settings.modes = modes
         logger.info(
-            f"Setting birdseye mode for {camera_name} to {birdseye_settings.mode}"
+            f"Setting birdseye mode for {camera_name} to {birdseye_settings.modes}"
         )
 
         self.config_updater.publish_update(
             CameraConfigUpdateTopic(CameraConfigUpdateEnum.birdseye, camera_name),
             birdseye_settings,
         )
-        self.publish(f"{camera_name}/birdseye_mode/state", payload, retain=True)
+        self.publish(
+            f"{camera_name}/birdseye_modes/state",
+            birdseye_modes_to_mqtt_payload(modes),
+            retain=True,
+        )
 
     def _on_camera_notification_command(self, camera_name: str, payload: str) -> None:
         """Callback for camera level notifications topic."""

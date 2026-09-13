@@ -13,6 +13,7 @@ import {
   useState,
 } from "react";
 import useStats from "@/hooks/use-stats";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import GeneralSettings from "../menu/GeneralSettings";
 import useNavigation from "@/hooks/use-navigation";
 import {
@@ -151,7 +152,10 @@ function StatusAlertNav({ className, large }: StatusAlertNavProps) {
     }
   }, [reindexState, addMessage, clearMessages, t]);
 
-  if (!messages || Object.keys(messages).length === 0) {
+  const isAdmin = useIsAdmin();
+
+  // problems link to admin-only pages
+  if (!isAdmin || !messages || Object.keys(messages).length === 0) {
     return;
   }
 

@@ -65,10 +65,6 @@
             "label": "Увімкнути Birdseye",
             "description": "Увімкнути або вимкнути функцію перегляду у режимі Birdseye."
         },
-        "mode": {
-            "label": "Режим відстежування",
-            "description": "Режими для додавання камер в Birdseye: 'objects' (об'єкти), 'motion' (рух) або 'continuous' (безперервний)."
-        },
         "order": {
             "label": "Розміщення",
             "description": "Номер позиції, що визначає розміщення камери на макеті Birdseye."

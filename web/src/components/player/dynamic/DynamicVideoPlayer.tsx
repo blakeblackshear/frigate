@@ -9,7 +9,12 @@ import {
 import { useApiHost } from "@/api";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Recording } from "@/types/record";
+import {
+  AutoQualityReason,
+  PlaybackQuality,
+  Recording,
+  RecordingCoverage,
+} from "@/types/record";
 import { Preview } from "@/types/preview";
 import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
 import { DynamicVideoController } from "./DynamicVideoController";
@@ -32,6 +37,23 @@ import {
   grabVideoSnapshot,
 } from "@/utils/snapshotUtil";
 import { isFirefox } from "react-device-detect";
+import { AutoQualityGovernor } from "./AutoQualityGovernor";
+import { isCodecFamilySupported } from "@/utils/codecSupport";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
+
+// forward buffer while playing the low quality stream; low bitrate makes
+// a longer buffer cheap and it rides out connection variance better
+const SUB_STREAM_BUFFER_LENGTH_S = 30;
+
+// seeks rebuild the source starting at the seek target so the vod
+// bootstrap segment ladder applies to every seek; quantizing keeps
+// seek URLs repeatable for nginx's mapping/response caches
+const SOURCE_START_GRID_S = 10;
+
+// seeks beyond this bridge the source load with the preview player (the
+// held video frame is pre-seek content); continuations (quality switch,
+// natural chunk advance) keep the held frame
+const REPOSITION_PREVIEW_THRESHOLD_S = 2;
 
 /**
  * Dynamically switches between video playback and scrubbing preview player.
@@ -55,6 +77,11 @@ type DynamicVideoPlayerProps = {
   toggleFullscreen: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
   transformedOverlay?: ReactNode;
+  quality?: PlaybackQuality;
+  onAutoQualityChange?: (
+    lowQuality: boolean,
+    reason: AutoQualityReason | undefined,
+  ) => void;
 };
 export default function DynamicVideoPlayer({
   className,
@@ -75,6 +102,8 @@ export default function DynamicVideoPlayer({
   toggleFullscreen,
   containerRef,
   transformedOverlay,
+  quality,
+  onAutoQualityChange,
 }: DynamicVideoPlayerProps) {
   const { t } = useTranslation(["components/player", "views/live"]);
   const apiHost = useApiHost();
@@ -128,7 +157,8 @@ export default function DynamicVideoPlayer({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout>();
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const prevCameraRef = useRef(camera);
 
   // Don't set source until recordings load - we need accurate startPosition
   // to avoid hls.js clamping to video end when startPosition exceeds duration
@@ -137,30 +167,179 @@ export default function DynamicVideoPlayer({
   // start at correct time
 
   useEffect(() => {
+    // isLoading/isBuffering only clear on playback progress, which a
+    // paused scrub never reaches. A camera switch is excluded: its old
+    // source still reads as settled while the new one is fetched
+    const scrubExit = prevCameraRef.current === camera;
+    prevCameraRef.current = camera;
+    const settled = () =>
+      sourceLoadedRef.current &&
+      (playerRef.current?.readyState ?? 0) >=
+        HTMLMediaElement.HAVE_CURRENT_DATA;
+
+    if (!isScrubbing && scrubExit && settled()) {
+      setIsLoading(false);
+      setIsBuffering(false);
+    }
+
     if (!isScrubbing) {
-      setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
+      // never overwrite a pending timer: an orphaned one escapes
+      // onPlaying's clearTimeout and flashes loading mid-playback
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      loadingTimeoutRef.current = setTimeout(() => {
+        // re-checked here: readyState drops while a seek loads
+        if (scrubExit && settled()) {
+          return;
+        }
+        setIsLoading(true);
+      }, 1000);
     }
 
     return () => {
-      if (loadingTimeout) {
-        clearTimeout(loadingTimeout);
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
     };
-    // we only want trigger when scrubbing state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera, isScrubbing]);
 
+  // wall-clock position to resume from once the current source finishes
+  // loading. A seek landing mid-load must win over the position the
+  // source was built around, or the post-load seek drags playback back
+  const sourceAnchorRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    sourceAnchorRef.current = startTimestamp;
+  }, [startTimestamp]);
+  // a recordings change refined the seek model without changing the
+  // playlist, so the playback effect skips its loading indicator
+  const modelOnlyUpdateRef = useRef(false);
+
+  // re-anchors quality-switch rebuilds and classifies rebuilds as
+  // repositioning vs continuation
+  const lastPlayedTimestampRef = useRef<number | undefined>(undefined);
+
+  // start of the current source window within the chunk; undefined plays
+  // from the chunk start. Follows explicit seeks (startTimestamp),
+  // cleared when a chunk change leaves the seek target behind
+  const [sourceAfter, setSourceAfter] = useState<number | undefined>(undefined);
+
+  // adjusted during render: an effect lands one commit late, briefly
+  // painting the stale video frame between drag preview and load bridge
+  const nextSourceAfter =
+    startTimestamp !== undefined &&
+    startTimestamp > timeRange.after &&
+    startTimestamp < timeRange.before
+      ? Math.max(
+          timeRange.after,
+          Math.floor(startTimestamp / SOURCE_START_GRID_S) *
+            SOURCE_START_GRID_S,
+        )
+      : undefined;
+
+  if (nextSourceAfter !== sourceAfter) {
+    setSourceAfter(nextSourceAfter);
+
+    const lastPlayed = lastPlayedTimestampRef.current;
+    if (
+      !isLoading &&
+      startTimestamp !== undefined &&
+      lastPlayed !== undefined &&
+      Math.abs(startTimestamp - lastPlayed) > REPOSITION_PREVIEW_THRESHOLD_S
+    ) {
+      setIsLoading(true);
+    }
+  }
+
+  // the release anchor lands one commit after isScrubbing flips false
+  // (the view writes playbackStart from an effect), which would flash
+  // the stale frame; hold one commit. The clearing effect runs before
+  // the parent's release effect, so clear and anchor batch into one render
+  const [releaseHold, setReleaseHold] = useState(false);
+  const [wasScrubbing, setWasScrubbing] = useState(isScrubbing);
+
+  if (isScrubbing !== wasScrubbing) {
+    setWasScrubbing(isScrubbing);
+    if (!isScrubbing) {
+      setReleaseHold(true);
+    }
+  }
+
+  useEffect(() => {
+    if (releaseHold) {
+      setReleaseHold(false);
+    }
+  }, [releaseHold]);
+
+  const recordingParams = useMemo(
+    () => ({
+      before: timeRange.before,
+      // clamp: during the adjust-render pass this memo can evaluate with
+      // the previous sourceAfter against a new timeRange
+      after:
+        sourceAfter !== undefined &&
+        sourceAfter > timeRange.after &&
+        sourceAfter < timeRange.before
+          ? sourceAfter
+          : timeRange.after,
+      timelines: true,
+    }),
+    [timeRange, sourceAfter],
+  );
+
+  // the window the current source covers; the seek model, in-range
+  // checks, and stale-report guard use this, not the chunk timeRange
+  const sourceTimeRange = useMemo<TimeRange>(
+    () => ({ after: recordingParams.after, before: recordingParams.before }),
+    [recordingParams],
+  );
+
   const onPlayerLoaded = useCallback(() => {
-    if (!controller || !startTimestamp) {
+    sourceLoadedRef.current = true;
+    governorRef.current?.sourceLoadEnded();
+
+    const anchor = sourceAnchorRef.current;
+
+    if (!controller || !anchor) {
       return;
     }
 
-    controller.seekToTimestamp(startTimestamp, true);
-  }, [startTimestamp, controller]);
+    // an anchor outside this source window is stale (e.g. a natural clip
+    // advance); the playlist already starts where playback should
+    if (anchor < sourceTimeRange.after || anchor > sourceTimeRange.before) {
+      return;
+    }
+
+    // while the handlebar is down only position the hidden player, never
+    // start it: a mid-drag chunk prefetch can audibly blip before
+    // onPlaying pauses it. The release seek starts playback
+    controller.seekToTimestamp(anchor, !isScrubbing);
+  }, [controller, sourceTimeRange, isScrubbing]);
+
+  // the range the controller's playback model was last built for; while
+  // a chunk change awaits its coverage, the outgoing source reports
+  // times that would map through the stale model
+  const modelTimeRangeRef = useRef<TimeRange | undefined>(undefined);
 
   const onTimeUpdate = useCallback(
     (time: number) => {
+      // safety net for stall or startup signals the player missed
+      governorRef.current?.stallEnded();
+      if (!sourceLoadedRef.current) {
+        sourceLoadedRef.current = true;
+        governorRef.current?.sourceLoadEnded();
+      }
+
       if (isScrubbing || !controller || !onTimestampUpdate || time == 0) {
+        return;
+      }
+
+      // drop reports until the controller's model matches this source
+      if (
+        modelTimeRangeRef.current?.after !== sourceTimeRange.after ||
+        modelTimeRangeRef.current?.before !== sourceTimeRange.before
+      ) {
         return;
       }
 
@@ -172,9 +351,18 @@ export default function DynamicVideoPlayer({
         setIsBuffering(false);
       }
 
-      onTimestampUpdate(controller.getProgress(time));
+      const progress = controller.getProgress(time);
+      lastPlayedTimestampRef.current = progress;
+      onTimestampUpdate(progress);
     },
-    [controller, onTimestampUpdate, isBuffering, isLoading, isScrubbing],
+    [
+      controller,
+      onTimestampUpdate,
+      isBuffering,
+      isLoading,
+      isScrubbing,
+      sourceTimeRange,
+    ],
   );
 
   const onUploadFrameToPlus = useCallback(
@@ -234,49 +422,346 @@ export default function DynamicVideoPlayer({
 
   // state of playback player
 
-  const recordingParams = useMemo(
-    () => ({
-      before: timeRange.before,
-      after: timeRange.after,
-    }),
-    [timeRange],
-  );
-  const { data: recordings } = useSWR<Recording[]>(
-    [`${camera}/recordings`, recordingParams],
+  const { data: coverage } = useSWR<RecordingCoverage>(
+    [`${camera}/recordings/coverage`, recordingParams],
     { revalidateOnFocus: false },
   );
 
+  // auto quality plays the default route until the governor downswitches
+  // to the pinned sub route; manual pins bypass this entirely
+  const [autoLowQuality, setAutoLowQuality] = useState(false);
+  const [autoLowReason, setAutoLowReason] = useState<
+    AutoQualityReason | undefined
+  >(undefined);
+  const autoLowQualityRef = useRef(false);
+
+  const subAvailable = useMemo(
+    () =>
+      coverage?.spans?.some((span) => span.streams.includes("sub")) ?? false,
+    [coverage],
+  );
+
+  const resolvedQuality = quality ?? "auto";
+
+  // the ref indirection keeps these reading fresh state while the
+  // governor stays a single instance for the component's lifetime
+  const tryDownswitchRef = useRef<(reason: string) => boolean>(() => false);
+  const tryUpswitchRef = useRef<() => void>(() => {});
+  const governorRef = useRef<AutoQualityGovernor | null>(null);
+  if (governorRef.current === null) {
+    governorRef.current = new AutoQualityGovernor(
+      (reason) => tryDownswitchRef.current(reason),
+      () => tryUpswitchRef.current(),
+    );
+  }
+  const governor = governorRef.current;
+
+  // callers pass an inline callback, so keeping it out of the notify
+  // effect's deps stops the notification's re-render from re-firing it
+  const onAutoQualityChangeRef = useRef(onAutoQualityChange);
+
   useEffect(() => {
+    onAutoQualityChangeRef.current = onAutoQualityChange;
+  }, [onAutoQualityChange]);
+
+  useEffect(() => {
+    autoLowQualityRef.current = autoLowQuality;
+    onAutoQualityChangeRef.current?.(
+      autoLowQuality,
+      autoLowQuality ? autoLowReason : undefined,
+    );
+  }, [autoLowQuality, autoLowReason]);
+
+  useEffect(() => {
+    tryDownswitchRef.current = (reason: string) => {
+      if (
+        resolvedQuality !== "auto" ||
+        !subAvailable ||
+        autoLowQualityRef.current
+      ) {
+        return false;
+      }
+      setAutoLowQuality(true);
+      setAutoLowReason(reason === "codec" ? "codec" : "bandwidth");
+      // so a recovered connection (or a wrong downswitch) returns to
+      // full quality mid-chunk rather than at the next boundary
+      governor.armUpswitchProbe();
+      return true;
+    };
+    tryUpswitchRef.current = () => {
+      if (resolvedQuality === "auto" && autoLowQualityRef.current) {
+        setAutoLowQuality(false);
+        setAutoLowReason(undefined);
+      }
+    };
+  }, [resolvedQuality, subAvailable, governor]);
+
+  // persisted across sessions so a device on a known-slow connection
+  // starts low instead of paying the first stall to find out
+  const [persistedEstimate, setPersistedEstimate, estimateLoaded] =
+    useUserPersistence<number>("playbackBandwidthEstimate");
+
+  const persistGovernor = useCallback(() => {
+    const estimate = governor.bandwidthEstimate;
+    if (estimate !== undefined) {
+      setPersistedEstimate(Math.round(estimate));
+    }
+  }, [governor, setPersistedEstimate]);
+  const persistGovernorRef = useRef(persistGovernor);
+
+  useEffect(() => {
+    persistGovernorRef.current = persistGovernor;
+  }, [persistGovernor]);
+
+  useEffect(() => {
+    // returning to auto starts fresh on the default route, except when
+    // this browser already proved it cannot decode the original stream
+    governor.resetStallHistory();
+    setAutoLowQuality(governor.isMainUnplayable);
+    setAutoLowReason(governor.isMainUnplayable ? "codec" : undefined);
+    // we only want to reset when the pinned quality changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quality]);
+
+  useEffect(() => {
+    // measured connection throughput carries over across cameras
+    governor.resetForCamera();
+    setAutoLowQuality(false);
+    setAutoLowReason(undefined);
+    // we only want to reset when the camera changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [camera]);
+
+  // seed the governor once per camera, then decide the starting quality
+  const seededCameraRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (seededCameraRef.current === camera || !estimateLoaded || !coverage) {
+      return;
+    }
+    seededCameraRef.current = camera;
+
+    const mainSummary = coverage.streams?.main;
+    if (mainSummary?.bitrate) {
+      governor.learnMainBitrate(mainSummary.bitrate);
+    }
+    governor.seed(persistedEstimate);
+
+    if (resolvedQuality !== "auto" || !subAvailable) {
+      return;
+    }
+
+    // data saver is a user preference, not a bandwidth fact: hold the
+    // low stream and never auto-upswitch against it (a manual pin to
+    // Original still wins as an explicit action)
+    const saveData =
+      (navigator as Navigator & { connection?: { saveData?: boolean } })
+        .connection?.saveData === true;
+    if (saveData) {
+      governor.setHoldLow(true);
+    }
+
+    // a browser that cannot decode the original codec can never play
+    // the merged route. This probe fails open (unknown codecs count as
+    // supported); the reactive fatal-codec path is the real authority
+    const mainSupported = isCodecFamilySupported(mainSummary?.video_codec);
+    const subSupported = isCodecFamilySupported(
+      coverage.streams?.sub?.video_codec,
+    );
+    if (!mainSupported && subSupported) {
+      governor.markMainUnplayable();
+      setAutoLowQuality(true);
+      setAutoLowReason("codec");
+      return;
+    }
+
+    if (saveData) {
+      setAutoLowQuality(true);
+      setAutoLowReason("saveData");
+      return;
+    }
+
+    // a fully cold device also starts low: the conservative start shows
+    // a first frame in seconds and the armed probe recovers full
+    // quality within a few segment loads on connections that allow it
+    const coldStart = governor.bandwidthEstimate === undefined;
+    if (!coldStart && !governor.shouldStartLow()) {
+      return;
+    }
+
+    setAutoLowQuality(true);
+    setAutoLowReason("bandwidth");
+    governor.armUpswitchProbe();
+  }, [
+    camera,
+    coverage,
+    estimateLoaded,
+    persistedEstimate,
+    resolvedQuality,
+    subAvailable,
+    governor,
+  ]);
+
+  // time-to-first-frame budget; the stall clock is blind before
+  // playback starts, so an oversized first segment would spin forever
+  const sourceLoadedRef = useRef(false);
+  useEffect(() => {
+    sourceLoadedRef.current = false;
+  }, [source]);
+  useEffect(() => {
+    if (!source || isScrubbing || sourceLoadedRef.current) {
+      governor.sourceLoadEnded();
+      return;
+    }
+    governor.sourceLoadStarted();
+  }, [source, isScrubbing, governor]);
+
+  useEffect(() => {
+    // a chunk boundary is where full quality may be retried, and a
+    // natural point to persist what the governor has learned
+    setAutoLowQuality((prev) => prev && !governor.shouldRetryMain());
+    persistGovernorRef.current();
+    // we only want to re-evaluate when the playback chunk changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeRange]);
+
+  useEffect(() => {
+    return () => {
+      persistGovernorRef.current();
+      governor.destroy();
+    };
+    // governor is a stable per-mount instance
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const effectiveQuality: PlaybackQuality =
+    resolvedQuality === "auto" && autoLowQuality ? "sub" : resolvedQuality;
+
+  const onStallStart = useCallback(() => governor.stallStarted(), [governor]);
+  const onStallEnd = useCallback(() => governor.stallEnded(), [governor]);
+  const onSeekStart = useCallback(() => governor.noteSeek(), [governor]);
+  const onFatalNetworkError = useCallback(
+    () => governor.fatalNetworkError(),
+    [governor],
+  );
+  const onFatalCodecError = useCallback(
+    () => governor.fatalCodecError(),
+    [governor],
+  );
+  const onBandwidthSample = useCallback(
+    (estimateBps: number, levelBitrateBps?: number) =>
+      governor.bandwidthSample(
+        estimateBps,
+        levelBitrateBps,
+        // the merged default route leads with the original stream, so
+        // its samples measure original-quality sustainability
+        effectiveQuality !== "sub",
+      ),
+    [governor, effectiveQuality],
+  );
+
+  // the realized timelines mirror the vod manifests exactly, including
+  // keyframe back-snap lead-in at cross-stream hand-offs. Walking wall
+  // lengths instead drifts ~0.5s per hand-off, since the playlist
+  // contains lead-in media the model never knew about
+  const recordings = useMemo<Recording[] | undefined>(() => {
+    const timeline =
+      coverage?.timelines?.[
+        effectiveQuality === "main" || effectiveQuality === "sub"
+          ? effectiveQuality
+          : "auto"
+      ];
+
+    if (!timeline) {
+      return undefined;
+    }
+
+    return timeline.map((span) => ({
+      start_time: span.start_time,
+      end_time: span.end_time,
+      duration: span.duration / 1000,
+    })) as Recording[];
+  }, [coverage, effectiveQuality]);
+
+  // lets the effect below tell quality rebuilds apart from chunk changes
+  const prevEffectiveQualityRef = useRef(effectiveQuality);
+
+  useEffect(() => {
+    const qualityChanged = prevEffectiveQualityRef.current !== effectiveQuality;
+    prevEffectiveQualityRef.current = effectiveQuality;
+
     if (!recordings?.length) {
       if (recordings?.length == 0) {
+        // drop any stale source so the previous playlist unmounts
+        // instead of playing under the no-recording state
+        setSource(undefined);
         setNoRecording(true);
+        // with no source nothing will play to clear a pending
+        // camera-switch load, hiding the message behind a preview frame
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+        }
+        setIsLoading(false);
       }
 
       return;
     }
 
+    // an identical playlist means coverage only refined the seek model;
+    // skip the rebuild so the player is not torn down
+    const streamPath =
+      effectiveQuality === "main" || effectiveQuality === "sub"
+        ? `/${effectiveQuality}`
+        : "";
+    const playlist = `${apiHost}vod/${camera}${streamPath}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`;
+    if (!qualityChanged && source?.playlist === playlist) {
+      modelOnlyUpdateRef.current = true;
+      return;
+    }
+
+    // a quality switch rebuilds mid-playback, so anchor to the live
+    // playhead rather than the chunk-stale startTimestamp prop. The
+    // controller still holds the OUTGOING timeline here (newPlayback
+    // runs in a later effect), and the timeupdate-throttled lastPlayed
+    // ref lags the frame on screen by up to ~250ms
+    const liveTime = playerRef.current?.currentTime;
+    const livePlayed =
+      qualityChanged && controller && liveTime !== undefined && liveTime > 0
+        ? controller.getProgress(liveTime)
+        : undefined;
+    const lastPlayed = livePlayed ?? lastPlayedTimestampRef.current;
+    const anchorTimestamp =
+      qualityChanged &&
+      lastPlayed !== undefined &&
+      lastPlayed >= recordingParams.after &&
+      lastPlayed <= recordingParams.before
+        ? lastPlayed
+        : startTimestamp;
+    sourceAnchorRef.current = anchorTimestamp;
+
     let startPosition = undefined;
 
-    if (startTimestamp) {
+    if (anchorTimestamp) {
       const inpointOffset = calculateInpointOffset(
         recordingParams.after,
         (recordings || [])[0],
       );
 
       startPosition = calculateSeekPosition(
-        startTimestamp,
+        anchorTimestamp,
         recordings,
         inpointOffset,
       );
     }
 
     setSource({
-      playlist: `${apiHost}vod/${camera}/start/${recordingParams.after}/end/${recordingParams.before}/master.m3u8`,
+      playlist,
       startPosition,
     });
 
+    // we only want to rebuild the source when the playlist itself changes;
+    // startTimestamp, timeRange, and the anchor refs are read as-of-rebuild
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recordings]);
+  }, [recordings, effectiveQuality]);
 
   useEffect(() => {
     if (!controller || !recordings?.length) {
@@ -287,12 +772,32 @@ export default function DynamicVideoPlayer({
       playerRef.current.autoplay = !isScrubbing;
     }
 
-    setLoadingTimeout(setTimeout(() => setIsLoading(true), 1000));
+    const modelOnlyUpdate = modelOnlyUpdateRef.current;
+    modelOnlyUpdateRef.current = false;
+
+    // on a source swap the element already has a decoded frame; keep it
+    // visible under the buffering indicator rather than hiding it
+    // behind the preview player like the initial load does
+    const hasDecodedFrame =
+      (playerRef.current?.readyState ?? 0) >=
+      HTMLMediaElement.HAVE_CURRENT_DATA;
+
+    if (!modelOnlyUpdate) {
+      // an overwritten pending timer would escape onPlaying's clearTimeout
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+      loadingTimeoutRef.current = setTimeout(
+        () => (hasDecodedFrame ? setIsBuffering(true) : setIsLoading(true)),
+        1000,
+      );
+    }
 
     controller.newPlayback({
       recordings: recordings ?? [],
-      timeRange,
+      timeRange: sourceTimeRange,
     });
+    modelTimeRangeRef.current = sourceTimeRange;
 
     // we only want this to change when controller or recordings update
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -336,7 +841,7 @@ export default function DynamicVideoPlayer({
         <HlsVideoPlayer
           videoRef={playerRef}
           containerRef={containerRef}
-          visible={!(isScrubbing || isLoading)}
+          visible={!(isScrubbing || isLoading || releaseHold)}
           currentSource={source}
           hotKeys={hotKeys}
           supportsFullscreen={supportsFullscreen}
@@ -356,8 +861,8 @@ export default function DynamicVideoPlayer({
               playerRef.current?.pause();
             }
 
-            if (loadingTimeout) {
-              clearTimeout(loadingTimeout);
+            if (loadingTimeoutRef.current) {
+              clearTimeout(loadingTimeoutRef.current);
             }
 
             setNoRecording(false);
@@ -372,6 +877,16 @@ export default function DynamicVideoPlayer({
               setIsBuffering(true);
             }
           }}
+          onStallStart={onStallStart}
+          onStallEnd={onStallEnd}
+          onSeekStart={onSeekStart}
+          onBandwidthSample={onBandwidthSample}
+          onFatalNetworkError={onFatalNetworkError}
+          onFatalCodecError={onFatalCodecError}
+          initialBandwidthEstimate={governor.bandwidthEstimate}
+          bufferLength={
+            effectiveQuality === "sub" ? SUB_STREAM_BUFFER_LENGTH_S : undefined
+          }
           isDetailMode={isDetailMode}
           camera={contextCamera || camera}
           currentTimeOverride={currentTime}
@@ -381,7 +896,7 @@ export default function DynamicVideoPlayer({
       <PreviewPlayer
         className={cn(
           className,
-          isScrubbing || isLoading ? "visible" : "hidden",
+          isScrubbing || isLoading || releaseHold ? "visible" : "hidden",
         )}
         camera={camera}
         timeRange={timeRange}

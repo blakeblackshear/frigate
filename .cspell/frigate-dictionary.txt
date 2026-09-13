@@ -55,7 +55,6 @@ Dahua
 datasheet
 debconf
 deci
-deepstack
 defragment
 devcontainer
 DEVICEMAP

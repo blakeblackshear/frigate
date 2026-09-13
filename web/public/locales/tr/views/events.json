@@ -11,7 +11,6 @@
       "description": "İnceleme öğeleri yalnızca bir kamera için kayıt özelliği etkinleştirildiğinde oluşturulabilir."
     }
   },
-  "timeline": "Zaman şeridi",
   "events": {
     "aria": "Olayları seçin",
     "noFoundForTimePeriod": "Seçili zaman aralığında olay bulunamadı.",
@@ -39,8 +38,6 @@
   "selected_one": "{{count}} seçildi",
   "selected_other": "{{count}} seçildi",
   "detected": "algılandı",
-  "suspiciousActivity": "Şüpheli Etkinlik",
-  "threateningActivity": "Tehlikeli Etkinlik",
   "zoomIn": "Büyüt",
   "zoomOut": "Küçült",
   "detail": {

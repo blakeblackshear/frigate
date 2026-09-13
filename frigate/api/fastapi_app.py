@@ -21,8 +21,10 @@ from frigate.api import (
     debug_replay,
     event,
     export,
+    hardware,
     media,
     motion_search,
+    notices,
     notification,
     preview,
     record,
@@ -40,6 +42,7 @@ from frigate.config.profile_manager import ProfileManager
 from frigate.debug_replay import DebugReplayManager, debug_replay_auto_stop_watchdog
 from frigate.embeddings import EmbeddingsContext
 from frigate.genai import GenAIClientManager
+from frigate.notices.registry import NoticeRegistry
 from frigate.ptz.onvif import OnvifController
 from frigate.stats.emitter import StatsEmitter
 from frigate.storage import StorageMaintainer
@@ -76,6 +79,7 @@ def create_fastapi_app(
     profile_manager: ProfileManager | None = None,
     enforce_default_admin: bool = True,
     config_holder: ConfigHolder | None = None,
+    notice_registry: NoticeRegistry | None = None,
 ):
     logger.info("Starting FastAPI app")
     app = FastAPI(
@@ -145,6 +149,8 @@ def create_fastapi_app(
     app.include_router(preview.router)
     app.include_router(notification.router)
     app.include_router(export.router)
+    app.include_router(hardware.router)
+    app.include_router(notices.router)
     app.include_router(event.router)
     app.include_router(media.router)
     app.include_router(motion_search.router)
@@ -161,6 +167,7 @@ def create_fastapi_app(
     app.camera_error_image = None
     app.onvif = onvif
     app.stats_emitter = stats_emitter
+    app.notice_registry = notice_registry
     app.event_metadata_updater = event_metadata_updater
     app.config_publisher = config_publisher
     app.replay_manager = replay_manager

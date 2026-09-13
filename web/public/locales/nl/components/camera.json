@@ -31,7 +31,6 @@
         "audioIsUnavailable": "Audio is niet beschikbaar voor deze stream",
         "audio": {
           "tips": {
-            "document": "Lees de documentatie ",
             "title": "Audio moet worden uitgevoerd vanaf je camera en geconfigureerd in go2rtc voor deze stream."
           }
         },

@@ -584,8 +584,7 @@
     "selectCamera": "Odaberite kameru",
     "backToSettings": "Povratak na postavke kamere",
     "streams": {
-      "title": "Omogući / Onemogući kamere",
-      "desc": "Privremeno onemogući kameru dok se frigate ponovno ne pokrene. Onemogućavanje kamere potpuno zaustavlja Frigateovu obradu streamova te kamere. Detekcija, snimanje i otklanjanje grešaka neće biti dostupni.<br /> <em>Napomena: Ovo ne onemogućuje go2rtc reemitiranja.</em>"
+      "title": "Omogući / Onemogući kamere"
     },
     "cameraConfig": {
       "add": "Dodaj kameru",
@@ -792,10 +791,7 @@
           },
           "requirements": {
             "title": "Zahtjevi za lozinku:",
-            "length": "Najmanje 8 znakova",
-            "uppercase": "Barem jedno veliko slovo",
-            "digit": "Barem jedna znamenka",
-            "special": "Barem jedan poseban znak (!@#$%^&*(),.?\":{}|<>)"
+            "length": "Najmanje 8 znakova"
           },
           "match": "Lozinke se podudaraju",
           "notMatch": "Lozinke se ne podudaraju"
@@ -920,8 +916,7 @@
       "cleanCopyWarning": "Neke kamere imaju omogućene snimke, ali je čista kopija onemogućena. Morate omogućiti <code>clean_copy</code> u konfiguraciji za snimke da biste mogli slati slike s tih kamera na Frigate+.",
       "table": {
         "camera": "Kamera",
-        "snapshots": "Snimke",
-        "cleanCopySnapshots": "<code>clean_copy</code> Snimke"
+        "snapshots": "Snimke"
       }
     },
     "modelInfo": {

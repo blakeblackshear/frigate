@@ -26,7 +26,6 @@
     "label": "Gibanje",
     "only": "Samo gibanje"
   },
-  "timeline": "Časovnica",
   "timeline.aria": "Izberi časovnico",
   "calendarFilter": {
     "last24Hours": "Zadnjih 24 ur"

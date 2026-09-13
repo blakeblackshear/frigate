@@ -1,12 +1,7 @@
 {
   "details": {
-    "person": "Person",
-    "confidence": "Säkerhet",
-    "face": "Ansiktsdetaljer",
     "timestamp": "Tidsstämpel",
-    "faceDesc": "Detaljer om det spårade objektet som genererade detta ansikte",
     "unknown": "Okänd",
-    "subLabelScore": "Underetikettpoäng",
     "scoreInfo": "Poängen är ett viktat genomsnitt av alla ansiktspoäng, viktat efter ansiktets storlek i varje bild."
   },
   "description": {
@@ -25,8 +20,6 @@
     }
   },
   "createFaceLibrary": {
-    "title": "Skapa samling",
-    "desc": "Skapa ny samling",
     "nextSteps": "För att skapa en bra grund:<ul><li>Använd fliken Senaste igenkänningar för att välja och träna bilder för varje detekterad person.</li><li>Använd främst bilder tagna rakt framifrån för bästa resultat och undvik att träna med bilder där ansiktet visas i vinkel.</li></ul>",
     "new": "Skapa nytt ansikte"
   },
@@ -40,9 +33,7 @@
     "title": "Ladda upp ansiktsbild",
     "desc": "Ladda upp en bild som ska genomsökas efter ansikten och läggas till i {{pageToggle}}"
   },
-  "selectItem": "Välj {{item}}",
   "collections": "Samlingar",
-  "selectFace": "Välj ansikte",
   "deleteFaceLibrary": {
     "title": "Ta bort samling",
     "desc": "Är du säker på att du vill ta bort samlingen {{name}}? Detta kommer att ta bort alla associerade ansikten permanent."
@@ -61,8 +52,6 @@
     }
   },
   "nofaces": "Inga ansikten tillgängliga",
-  "pixels": "{{area}}px",
-  "readTheDocs": "Läs dokumentationen",
   "trainFaceAs": "Träna ansiktet som:",
   "trainFace": "Träna ansiktet",
   "toast": {

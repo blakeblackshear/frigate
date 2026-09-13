@@ -34,7 +34,6 @@
   "stream": {
     "audio": {
       "tips": {
-        "documentation": "Dökümantasyonu oku ",
         "title": "Bu yayın için kameranızın yayın çıkışında ses olması ve go2rtc'de ayarlanmış olması gerekmektedir."
       },
       "unavailable": "Bu yayında ses yok",
@@ -42,7 +41,6 @@
     },
     "twoWayTalk": {
       "tips": "Çift yönlü ses için cihazınızın ve kameranızın bu özelliği desteklemesi ve WebRTC'nin ayarlanmış olması gereklidir.",
-      "tips.documentation": "Dökümantasyonu oku ",
       "available": "Bu yayında çift yönlü ses var",
       "unavailable": "Bu yayında çift yönlü ses yok"
     },
@@ -64,7 +62,6 @@
     "snapshots": "Fotoğraflar",
     "title": "{{camera}} Ayarları",
     "autotracking": "Otomatik Takip",
-    "cameraEnabled": "Kamera Açık",
     "objectDetection": "Nesne Tespiti",
     "audioDetection": "Ses Algılama",
     "transcription": "Ses Çözümlemesi"
@@ -74,8 +71,7 @@
       "active_objects": "Aktif nesneler",
       "all": "Tümü",
       "motion": "Hareket"
-    },
-    "notAllTips": "İlgili {{source}} kaynağındaki kayıt saklama politikanız <code> şu moda ayarlı: {{effectiveRetainMode}}</code>. Dolayısıyla şu anda gerçekleştirdiğiniz manuel talep üzerine kayıtta yalnızca {{effectiveRetainModeName}} içeren bölümler yer alacaktır."
+    }
   },
   "editLayout": {
     "label": "Düzeni düzenle",
@@ -133,10 +129,6 @@
   },
   "history": {
     "label": "Geçmiş görüntüleri göster"
-  },
-  "camera": {
-    "enable": "Kamerayı Aç",
-    "disable": "Kamerayı Kapat"
   },
   "suspend": {
     "forTime": "Askıya alınma süresi: "

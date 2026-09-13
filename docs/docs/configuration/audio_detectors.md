@@ -114,6 +114,30 @@ audio:
 </TabItem>
 </ConfigTabs>
 
+#### Grouping Audio Labels
+
+Related audio classes can be grouped under one label by mapping their numeric
+class IDs to the same name. Add the grouped name to `listen` and use it for any
+corresponding filter:
+
+```yaml
+audio:
+  listen:
+    - dogs
+  labelmap:
+    69: dogs # dog
+    70: dogs # bark
+    75: dogs # whimper_dog
+  filters:
+    dogs:
+      threshold: 0.8
+```
+
+Class IDs are zero-based indices in
+[`audio-labelmap.txt`](https://github.com/blakeblackshear/frigate/blob/dev/audio-labelmap.txt),
+so each ID is one less than the displayed file line number.
+Audio label mappings are separate from the object detector's `model.labelmap`.
+
 ### Common Audio Labels
 
 The labelmap includes hundreds of sound types. The labels below are the ones most users may find practical, grouped by what they're typically used for. Use the exact label string from the left column in your `listen` config, or search for the label in the Frigate UI directly.

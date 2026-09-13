@@ -56,10 +56,6 @@
     },
     "presets": "Preseti PTZ kamere"
   },
-  "camera": {
-    "enable": "Omogući kameru",
-    "disable": "Onemogući kameru"
-  },
   "muteCameras": {
     "enable": "Utišajte sve kamere",
     "disable": "Ponovo uključite zvuk za sve kamere"
@@ -152,7 +148,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Postavke",
-    "cameraEnabled": "Kamera omogućena",
     "objectDetection": "Detekcija objekata",
     "recording": "Snimanje",
     "snapshots": "Snimci",

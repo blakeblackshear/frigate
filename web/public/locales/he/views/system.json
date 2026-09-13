@@ -7,8 +7,7 @@
     "reindexingEmbeddings": "אינדקס מחדש של ההטמעות ({{processed}}% הושלם)",
     "cameraIsOffline": "{{camera}} לא זמינה",
     "detectIsSlow": "{{detect}} איטי ({{speed}} אלפיות שנייה)",
-    "detectIsVerySlow": "{{detect}} איטי מאוד ({{speed}} אלפיות שנייה)",
-    "shmTooLow": "יש להגדיל את הקצאת ‎/dev/shm‏ ({{total}} MB) לפחות ל־{{min}} MB."
+    "detectIsVerySlow": "{{detect}} איטי מאוד ({{speed}} אלפיות שנייה)"
   },
   "documentTitle": {
     "cameras": "מצב מצלמות - Frigate",
@@ -87,12 +86,7 @@
         }
       },
       "npuUsage": "שימוש ב-NPU",
-      "npuMemory": "NPU זיכרון",
-      "intelGpuWarning": {
-        "title": "אזהרת סטטיסטיקות GPU של Intel",
-        "message": "נתוני ה־GPU אינם זמינים",
-        "description": "זהו באג ידוע בכלי הדיווח של Intel לסטטיסטיקות GPU ‏(intel_gpu_top): לפעמים הוא “נשבר” ומתחיל להחזיר שוב ושוב שימוש GPU של 0%, גם במקרים שבהם ההאצה החומרתית וזיהוי האובייקטים כן עובדים תקין על ה־(i)GPU.\nזה לא באג של Frigate. אפשר לאתחל את ה־Host כדי לתקן את זה זמנית, וככה גם לוודא שה־GPU באמת עובד כמו שצריך.\nהתקלה הזו לא משפיעה על הביצועים."
-      }
+      "npuMemory": "NPU זיכרון"
     },
     "otherProcesses": {
       "title": "תהליכים אחרים",

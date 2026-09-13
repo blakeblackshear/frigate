@@ -10,7 +10,6 @@
     "desc": "No se han recibido fotogramas en la transmisión <code>detect</code> de {{cameraName}}, revisa los registros de errores",
     "title": "Transmisión desconectada"
   },
-  "cameraDisabled": "La cámara está deshabilitada",
   "stats": {
     "streamType": {
       "title": "Tipo de transmisión:",

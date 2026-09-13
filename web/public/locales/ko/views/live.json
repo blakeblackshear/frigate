@@ -57,8 +57,6 @@
     "presets": "PTZ 카메라 프리셋"
   },
   "camera": {
-    "enable": "카메라 활성화",
-    "disable": "카메라 비활성화",
     "turnOn": "카메라 켜기",
     "turnOff": "카메라 끄기"
   },
@@ -149,7 +147,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} 설정",
-    "cameraEnabled": "카메라 활성화",
     "objectDetection": "객체 감지",
     "recording": "녹화",
     "snapshots": "스냅샷",
@@ -166,8 +163,7 @@
       "all": "전체",
       "motion": "움직임",
       "active_objects": "활동 중인 객체"
-    },
-    "notAllTips": "{{source}} 녹화 보관 설정이 <code>mode: {{effectiveRetainMode}}</code>로 되어 있어, 이 수동 녹화는 {{effectiveRetainModeName}}이(가) 있는 구간만 저장됩니다."
+    }
   },
   "editLayout": {
     "label": "레이아웃 편집",

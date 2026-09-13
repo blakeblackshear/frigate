@@ -6,10 +6,13 @@ import logging
 import math
 import os
 import subprocess as sp
+import tempfile
 import time
+from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
+from enum import Enum
 from pathlib import Path as FilePath
-from typing import Any
+from typing import IO, Any
 from urllib.parse import unquote
 
 import cv2
@@ -39,12 +42,14 @@ from frigate.config.camera.snapshots import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
     INSTALL_DIR,
-    MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
 from frigate.track.object_processing import TrackedObjectProcessor
+from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.file import (
     get_event_snapshot_bytes,
     get_event_snapshot_path,
@@ -52,10 +57,38 @@ from frigate.util.file import (
     load_event_snapshot_image,
 )
 from frigate.util.image import get_image_from_recording, get_image_quality_params
-from frigate.util.media import get_keyframe_before
 from frigate.util.object import create_empty_regions_grid
+from frigate.util.recording_coverage import (
+    build_spans,
+    null_audio_glitches,
+    plan_clip,
+    resolve_coverage,
+    stream_has_audio,
+)
 
 logger = logging.getLogger(__name__)
+
+
+# must match the patched MAX_CLIPS in docker/main/build_nginx.sh; a
+# normal hour needs ~360, one clip per recording file
+NGINX_VOD_MAX_CLIPS = 1080
+
+# tail of ffmpeg's stderr kept for the clip download failure log
+CLIP_STDERR_LOG_BYTES = 8192
+
+# how long a drained clip download waits for ffmpeg to exit on its own
+CLIP_FFMPEG_EXIT_TIMEOUT = 10
+
+
+class VodStreamPreference(str, Enum):
+    """Stream pin for the path-segment VOD route.
+
+    nginx-vod derives its mapping fetch URI from the playlist URL path
+    (query params are dropped), so the preference must be a path segment.
+    """
+
+    main = STREAM_TYPE_MAIN
+    sub = STREAM_TYPE_SUB
 
 
 router = APIRouter(tags=[Tags.media])
@@ -319,7 +352,7 @@ async def get_snapshot_from_recording(
                 & (frame_time <= Recordings.end_time)
             )
             .where(Recordings.camera == camera_name)
-            .order_by(Recordings.start_time.desc())
+            .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
             .limit(1)
             .get()
         )
@@ -338,7 +371,7 @@ async def get_snapshot_from_recording(
                     & (frame_time <= Recordings.end_time)
                 )
                 .where(Recordings.camera == camera_name)
-                .order_by(Recordings.start_time.desc())
+                .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
                 .limit(1)
                 .get()
             )
@@ -398,7 +431,7 @@ async def submit_recording_snapshot_to_plus(
             (frame_time >= Recordings.start_time) & (frame_time <= Recordings.end_time)
         )
         .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.desc())
+        .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
         .limit(1)
     )
 
@@ -441,6 +474,53 @@ async def submit_recording_snapshot_to_plus(
         )
 
 
+def _read_stderr_tail(stderr_file: IO[bytes]) -> str:
+    """Read back the last CLIP_STDERR_LOG_BYTES of a captured stderr file."""
+    stderr_file.seek(0, os.SEEK_END)
+    stderr_file.seek(max(0, stderr_file.tell() - CLIP_STDERR_LOG_BYTES))
+    return stderr_file.read().decode("utf-8", "replace")
+
+
+def _run_clip_download(ffmpeg_cmd: list[str], file_path: str) -> Iterator[bytes]:
+    """Stream an ffmpeg concat remux to the client, always cleaning up after it."""
+    stderr_file = None
+    ffmpeg = None
+
+    try:
+        stderr_file = tempfile.TemporaryFile()
+        ffmpeg = sp.Popen(ffmpeg_cmd, stdout=sp.PIPE, stderr=stderr_file)
+
+        while True:
+            data = ffmpeg.stdout.read(8192)
+
+            if not data:
+                break
+
+            yield data
+
+        try:
+            # wait rather than signal, so the real exit code survives
+            ffmpeg.wait(timeout=CLIP_FFMPEG_EXIT_TIMEOUT)
+        except sp.TimeoutExpired:
+            pass
+    finally:
+        if ffmpeg is not None:
+            # read before terminating: a None here is our teardown, not a failure
+            exit_code = ffmpeg.poll()
+            terminate_ffmpeg_stream(ffmpeg)
+
+            if exit_code:
+                logger.error(
+                    "Failed to generate clip, ffmpeg logs: %s",
+                    _read_stderr_tail(stderr_file),
+                )
+
+        if stderr_file is not None:
+            stderr_file.close()
+
+        FilePath(file_path).unlink(missing_ok=True)
+
+
 @router.get(
     "/{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4",
     dependencies=[Depends(require_camera_access)],
@@ -452,40 +532,29 @@ async def recording_clip(
     start_ts: float,
     end_ts: float,
 ):
-    def run_download(ffmpeg_cmd: list[str], file_path: str):
-        with sp.Popen(
-            ffmpeg_cmd,
-            stderr=sp.PIPE,
-            stdout=sp.PIPE,
-            text=False,
-        ) as ffmpeg:
-            while True:
-                data = ffmpeg.stdout.read(8192)
-                if data is not None and len(data) > 0:
-                    yield data
-                else:
-                    if ffmpeg.returncode and ffmpeg.returncode != 0:
-                        logger.error(
-                            f"Failed to generate clip, ffmpeg logs: {ffmpeg.stderr.read()}"
-                        )
-                    else:
-                        FilePath(file_path).unlink(missing_ok=True)
-                    break
+    def get_clip_query(stream_type: str):
+        return (
+            Recordings.select(
+                Recordings.path,
+                Recordings.start_time,
+                Recordings.end_time,
+            )
+            .where(
+                (Recordings.start_time.between(start_ts, end_ts))
+                | (Recordings.end_time.between(start_ts, end_ts))
+                | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
+            )
+            .where(Recordings.camera == camera_name)
+            .where(Recordings.stream_type == stream_type)
+            .order_by(Recordings.start_time.asc())
+        )
 
-    recordings = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-            Recordings.end_time,
-        )
-        .where(
-            (Recordings.start_time.between(start_ts, end_ts))
-            | (Recordings.end_time.between(start_ts, end_ts))
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.asc())
-    )
+    # never mix streams in one concat; use main when available and
+    # fall back to sub for expired-main history
+    recordings = get_clip_query(STREAM_TYPE_MAIN)
+
+    if recordings.count() == 0:
+        recordings = get_clip_query(STREAM_TYPE_SUB)
 
     if recordings.count() == 0:
         return JSONResponse(
@@ -496,7 +565,9 @@ async def recording_clip(
             status_code=400,
         )
 
-    file_name = sanitize_filename(f"playlist_{camera_name}_{start_ts}-{end_ts}.txt")
+    file_name = sanitize_filename(
+        f"playlist_{camera_name}_{start_ts}-{end_ts}_{os.urandom(4).hex()}.txt"
+    )
     file_path = os.path.join(CACHE_DIR, file_name)
     with open(file_path, "w") as file:
         clip: Recordings
@@ -544,22 +615,65 @@ async def recording_clip(
     ]
 
     return StreamingResponse(
-        run_download(ffmpeg_cmd, file_path),
+        _run_clip_download(ffmpeg_cmd, file_path),
         media_type="video/mp4",
     )
 
 
-@router.get(
-    "/vod/{camera_name}/start/{start_ts}/end/{end_ts}",
-    dependencies=[Depends(require_camera_access)],
-    description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
-)
-async def vod_ts(
+def _build_vod_clip(
+    row: Any, start: float, end: float
+) -> tuple[dict[str, Any], int] | None:
+    """Build one nginx-vod clip dict + duration (ms) for a recording row trimmed to [start, end).
+
+    Realization comes entirely from the shared plan_clip, so the coverage
+    endpoint's realized timelines match this manifest by construction.
+    """
+    plan = plan_clip(row, start, end)
+
+    if plan.skipped:
+        return None
+
+    clip: dict[str, Any] = {"type": "source", "path": row.path}
+    if plan.clip_from_ms is not None:
+        clip["clipFrom"] = plan.clip_from_ms
+    if plan.key_frame_durations is not None:
+        # real gaps enable keyframe-aligned sub-file segments (bootstrap
+        # ladder); the whole-clip fallback keeps one segment per file,
+        # the only safe cut without an index
+        if plan.first_key_frame_offset_ms > 0:
+            clip["firstKeyFrameOffset"] = plan.first_key_frame_offset_ms
+        clip["keyFrameDurations"] = plan.key_frame_durations
+    else:
+        clip["keyFrameDurations"] = [plan.duration_ms]
+    logger.debug(
+        "VOD: added clip %s duration_ms=%s clipFrom=%s",
+        row.path,
+        plan.duration_ms,
+        clip.get("clipFrom"),
+    )
+    return clip, plan.duration_ms
+
+
+async def _vod_response(
     camera_name: str,
     start_ts: float,
     end_ts: float,
     force_discontinuity: bool = False,
-):
+    stream_preference: str | None = None,
+) -> JSONResponse:
+    """Build an nginx-vod mapping JSON for a camera over a timestamp range.
+
+    Always a single-sequence mapping; quality selection happens in the
+    frontend by choosing between this route and the stream-pinned routes.
+
+    Args:
+        camera_name: The camera to build the mapping for
+        start_ts: Range start as a unix timestamp
+        end_ts: Range end as a unix timestamp
+        force_discontinuity: Emit HLS discontinuity markers between clips
+        stream_preference: Pin the manifest to one stream type ("main" or
+            "sub"), serving only that stream's recordings
+    """
     logger.debug(
         "VOD: Generating VOD for %s from %s to %s with force_discontinuity=%s",
         camera_name,
@@ -567,104 +681,85 @@ async def vod_ts(
         end_ts,
         force_discontinuity,
     )
-    recordings = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.duration,
-            Recordings.end_time,
-            Recordings.start_time,
-        )
-        .where(
-            Recordings.start_time.between(start_ts, end_ts)
-            | Recordings.end_time.between(start_ts, end_ts)
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
-        .where(Recordings.camera == camera_name)
-        .order_by(Recordings.start_time.asc())
-        .iterator()
+    intervals = resolve_coverage(camera_name, start_ts, end_ts)
+
+    # rows contradicting their stream's audio composition are
+    # truncated-shutdown glitches
+    main_audio = stream_has_audio(intervals, main=True)
+    sub_audio = stream_has_audio(intervals, main=False)
+
+    spans = build_spans(
+        null_audio_glitches(intervals, main_audio, sub_audio),
+        stream_preference,
     )
 
-    clips = []
-    durations = []
-    min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
-    max_duration_ms = MAX_SEGMENT_DURATION * 1000
-
-    recording: Recordings
-    for recording in recordings:
+    durations: list[int] = []
+    clips: list[dict[str, Any]] = []
+    # gathered after glitch-nulling and span building, so the policy
+    # decisions below reflect the manifest's real contents
+    video_codecs: set[str] = set()
+    audio_presence: set[bool] = set()
+    audio_params: set[tuple[str | None, int | None]] = set()
+    span_streams: set[bool] = set()
+    for row, span_start, span_end, span_is_main in spans:
         logger.debug(
             "VOD: processing recording: %s start=%s end=%s duration=%s",
-            recording.path,
-            recording.start_time,
-            recording.end_time,
-            recording.duration,
+            row.path,
+            row.start_time,
+            row.end_time,
+            row.duration,
         )
+        built = _build_vod_clip(row, span_start, span_end)
 
-        clip = {"type": "source", "path": recording.path}
-        duration = int(recording.duration * 1000)
-
-        # adjust start offset if start_ts is after recording.start_time
-        if start_ts > recording.start_time:
-            inpoint = int((start_ts - recording.start_time) * 1000)
-            clip["clipFrom"] = inpoint
-            duration -= inpoint
-            logger.debug(
-                "VOD: applied clipFrom %sms to %s",
-                inpoint,
-                recording.path,
-            )
-
-        # adjust end if recording.end_time is after end_ts
-        if recording.end_time > end_ts:
-            duration -= int((recording.end_time - end_ts) * 1000)
-
-        # nginx-vod-module pushes clipFrom forward to the next keyframe,
-        # which can leave too few frames and produce an empty/unplayable
-        # segment. Snap clipFrom back to the preceding keyframe so the
-        # segment always starts with a decodable frame.
-        if "clipFrom" in clip:
-            keyframe_ms = get_keyframe_before(recording.path, clip["clipFrom"])
-            if keyframe_ms is not None:
-                gained = clip["clipFrom"] - keyframe_ms
-                clip["clipFrom"] = keyframe_ms
-                duration += gained
-                logger.debug(
-                    "VOD: snapped clipFrom to keyframe at %sms for %s, duration now %sms",
-                    keyframe_ms,
-                    recording.path,
-                    duration,
-                )
-            else:
-                # could not read keyframes, remove clipFrom to use full recording
-                logger.debug(
-                    "VOD: no keyframe info for %s, removing clipFrom to use full recording",
-                    recording.path,
-                )
-                del clip["clipFrom"]
-                duration = int(recording.duration * 1000)
-                if recording.end_time > end_ts:
-                    duration -= int((recording.end_time - end_ts) * 1000)
-
-        if duration < min_duration_ms:
-            # skip if the clip has no valid duration (too short to contain frames)
-            logger.debug(
-                "VOD: skipping recording %s - resulting duration %sms too short",
-                recording.path,
-                duration,
-            )
+        if built is None:
             continue
 
-        if min_duration_ms <= duration < max_duration_ms:
-            clip["keyFrameDurations"] = [duration]
-            clips.append(clip)
-            durations.append(duration)
-            logger.debug(
-                "VOD: added clip %s duration_ms=%s clipFrom=%s",
-                recording.path,
-                duration,
-                clip.get("clipFrom"),
-            )
-        else:
-            logger.warning(f"Recording clip is missing or empty: {recording.path}")
+        clips.append(built[0])
+        durations.append(built[1])
+        span_streams.add(span_is_main)
+        if row.video_codec is not None:
+            video_codecs.add(row.video_codec)
+        audio_presence.add(row.has_audio is not False)
+        # legacy rows contribute no signature, so uniformly-unknown
+        # history keeps the legacy shape
+        if row.has_audio is not False and (
+            row.audio_codec is not None or row.audio_rate is not None
+        ):
+            audio_params.add((row.audio_codec, row.audio_rate))
+
+    # nginx-vod requires a uniform track count per sequence, and adding or
+    # removing an audio track across an MSE discontinuity is unproven
+    if len(audio_presence) > 1:
+        logger.debug(
+            "VOD: %s mixes audio-bearing and audio-less recordings between "
+            "%s and %s; serving the range without audio",
+            camera_name,
+            start_ts,
+            end_ts,
+        )
+        for clip in clips:
+            clip["tracks"] = "v"
+
+    # discontinuity mode emits per-clip init segments, letting the decoder
+    # reconfigure at each boundary. Stream type counts as a signature of
+    # its own: the two encoders differ in SPS/PPS even when codec name and
+    # audio params match, and a single-init manifest then decode-fails on
+    # players that only configure from the init segment (iOS)
+    use_discontinuity = (
+        len(video_codecs) > 1 or len(audio_params) > 1 or len(span_streams) > 1
+    )
+    if use_discontinuity:
+        logger.debug(
+            "VOD: %s mixes media signatures between %s and %s (video codecs "
+            "%s, audio params %s, streams %s); serving a discontinuity "
+            "manifest with per-clip init segments",
+            camera_name,
+            start_ts,
+            end_ts,
+            sorted(video_codecs),
+            sorted(audio_params, key=str),
+            sorted(span_streams),
+        )
 
     if not clips:
         logger.error(
@@ -678,16 +773,50 @@ async def vod_ts(
             status_code=404,
         )
 
+    if len(clips) > NGINX_VOD_MAX_CLIPS:
+        logger.warning(
+            "VOD: %s needs %d clips between %s and %s, exceeding nginx's "
+            "limit of %d; playback of this range will fail. This usually "
+            "means the camera produced abnormally short recording segments "
+            "(check the stream's timestamps)",
+            camera_name,
+            len(clips),
+            start_ts,
+            end_ts,
+            NGINX_VOD_MAX_CLIPS,
+        )
+
+    # segmentation comes from the vod_* nginx directives plus per-clip
+    # keyFrameDurations; a segment_duration field here was always ignored
+    # (nginx-vod parses only camelCase segmentDuration)
     hour_ago = datetime.now() - timedelta(hours=1)
-    return JSONResponse(
-        content={
-            "cache": hour_ago.timestamp() > start_ts,
-            "discontinuity": force_discontinuity,
-            "consistentSequenceMediaInfo": True,
-            "durations": durations,
-            "segment_duration": max(durations),
-            "sequences": [{"clips": clips}],
-        }
+    content = {
+        "cache": hour_ago.timestamp() > start_ts,
+        "discontinuity": force_discontinuity or use_discontinuity,
+        "consistentSequenceMediaInfo": True,
+        "durations": durations,
+        "sequences": [{"clips": clips}],
+    }
+    if use_discontinuity:
+        # clip-indexed naming is what makes nginx-vod emit per-clip
+        # EXT-X-MAP outside of its live mode
+        content["initialClipIndex"] = 1
+    return JSONResponse(content=content)
+
+
+@router.get(
+    "/vod/{camera_name}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+async def vod_ts(
+    camera_name: str,
+    start_ts: float,
+    end_ts: float,
+    force_discontinuity: bool = False,
+):
+    return await _vod_response(
+        camera_name, start_ts, end_ts, force_discontinuity=force_discontinuity
     )
 
 
@@ -776,7 +905,43 @@ async def vod_clip(
     start_ts: float,
     end_ts: float,
 ):
-    return await vod_ts(camera_name, start_ts, end_ts, force_discontinuity=True)
+    # the tracking-details player corrects its timeline from
+    # sequences[0].clips[0].clipFrom
+    return await _vod_response(
+        camera_name,
+        start_ts,
+        end_ts,
+        force_discontinuity=True,
+    )
+
+
+# registered after /vod/clip/... on purpose: both routes are six path
+# segments, Starlette matches structurally in registration order, and the
+# enum validation on {stream} would otherwise 422 every /vod/clip request
+@router.get(
+    "/vod/{camera_name}/{stream}/start/{start_ts}/end/{end_ts}",
+    dependencies=[Depends(require_camera_access)],
+    description="Returns an HLS playlist pinned to one stream type (main or sub) for the specified timestamp-range on the specified camera. Append /master.m3u8 or /index.m3u8 for HLS playback.",
+)
+async def vod_ts_stream(
+    camera_name: str,
+    stream: VodStreamPreference,
+    start_ts: float,
+    end_ts: float,
+    force_discontinuity: bool = False,
+):
+    """VOD for a timestamp range pinned to one stream type.
+
+    How the frontend selects quality, now that mappings are always
+    single-sequence.
+    """
+    return await _vod_response(
+        camera_name,
+        start_ts,
+        end_ts,
+        force_discontinuity=force_discontinuity,
+        stream_preference=stream.value,
+    )
 
 
 @router.get(
@@ -814,13 +979,13 @@ async def event_snapshot(
             timestamp_style=request.app.frigate_config.cameras[
                 event.camera
             ].timestamp_style,
-            colormap=request.app.frigate_config.model.colormap,
+            colormap=request.app.frigate_config.model_for_camera(event.camera).colormap,
         )
     except DoesNotExist:
         # see if the object is currently being tracked
         try:
             camera_states: list[CameraState] = (
-                request.app.detected_frames_processor.camera_states.values()
+                request.app.detected_frames_processor.get_camera_states()
             )
             for camera_state in camera_states:
                 if event_id in camera_state.tracked_objects:
@@ -895,10 +1060,10 @@ async def event_thumbnail(
     except DoesNotExist:
         thumbnail_bytes = None
 
-    if thumbnail_bytes is None:
+    if not thumbnail_bytes:
         # see if the object is currently being tracked
         try:
-            camera_states = request.app.detected_frames_processor.camera_states.values()
+            camera_states = request.app.detected_frames_processor.get_camera_states()
             for camera_state in camera_states:
                 if event_id in camera_state.tracked_objects:
                     tracked_obj = camera_state.tracked_objects.get(event_id)
@@ -911,7 +1076,7 @@ async def event_thumbnail(
                 status_code=404,
             )
 
-    if thumbnail_bytes is None:
+    if not thumbnail_bytes:
         return JSONResponse(
             content={"success": False, "message": "Event not found"},
             status_code=404,
@@ -919,6 +1084,13 @@ async def event_thumbnail(
 
     img_as_np = np.frombuffer(thumbnail_bytes, dtype=np.uint8)
     img = cv2.imdecode(img_as_np, flags=1)
+
+    if img is None:
+        # thumbnail on disk is truncated or corrupt
+        return JSONResponse(
+            content={"success": False, "message": "Event not found"},
+            status_code=404,
+        )
 
     # android notifications prefer a 2:1 ratio
     if format == "android":
@@ -1127,7 +1299,7 @@ async def event_snapshot_clean(request: Request, event_id: str, download: bool =
             # see if the object is currently being tracked
             try:
                 camera_states = (
-                    request.app.detected_frames_processor.camera_states.values()
+                    request.app.detected_frames_processor.get_camera_states()
                 )
                 for camera_state in camera_states:
                     if event_id in camera_state.tracked_objects:

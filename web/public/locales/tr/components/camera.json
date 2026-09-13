@@ -16,7 +16,6 @@
         "title": "{{cameraName}} Yayın Ayarları",
         "audio": {
           "tips": {
-            "document": "Dökümantasyonu oku ",
             "title": "Bu yayın için kameranızın yayın çıkışında ses olması ve go2rtc'de ayarlanmış olması gerekmektedir."
           }
         },

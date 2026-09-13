@@ -122,7 +122,7 @@ class ProcessClip:
             self.camera_name,
             self.frame_queue,
             self.frame_shape,
-            self.config.model,
+            self.config.model_for_camera(self.camera_name),
             self.camera_config.detect,
             self.frame_manager,
             motion_detector,
@@ -248,7 +248,7 @@ def process(path, label, output, debug_path):
 
     json_config = {
         "mqtt": {"enabled": False},
-        "detectors": {"coral": {"type": "edgetpu", "device": "usb"}},
+        "models": [{"devices": ["edgetpu:usb"]}],
         "cameras": {
             "camera": {
                 "ffmpeg": {

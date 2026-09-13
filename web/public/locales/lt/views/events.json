@@ -43,8 +43,6 @@
     "button": "Nauji Įrašai Peržiūrėjimui"
   },
   "detected": "aptikta",
-  "suspiciousActivity": "Įtartina Veikla",
-  "threateningActivity": "Grėsminga Veikla",
   "detail": {
     "noDataFound": "Peržiūrai informacijos nėra",
     "aria": "Perjungti į detalų vaizdą",

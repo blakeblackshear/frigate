@@ -57,8 +57,6 @@
     }
   },
   "camera": {
-    "enable": "Ativar Câmera",
-    "disable": "Desabilitar Câmera",
     "turnOn": "Ligar a câmera",
     "turnOff": "Desligar a câmera"
   },
@@ -121,15 +119,13 @@
     "title": "Transmissão",
     "audio": {
       "tips": {
-        "title": "O áudio deve sair da sua câmera e configurado no go2rtc para essa transmissão.",
-        "documentation": "Leia da documentação. "
+        "title": "O áudio deve sair da sua câmera e configurado no go2rtc para essa transmissão."
       },
       "available": "Áudio disponível para essa transmissão",
       "unavailable": "O áudio não está disponível para essa transmissão"
     },
     "twoWayTalk": {
       "tips": "O seu dispostivio precisa suportar esse recurso e o WebRTC precisa estar configurado para áudio bidirecional.",
-      "tips.documentation": "Leia a documentação. ",
       "available": "Áudio bidirecional está disponível para essa transmissão",
       "unavailable": "Áudio bidirecional está indisponível para essa transmissão"
     },
@@ -147,7 +143,6 @@
   },
   "cameraSettings": {
     "title": "Configurações de {{camera}}",
-    "cameraEnabled": "Câmera Habilitada",
     "objectDetection": "Detecção de Objeto",
     "recording": "Gravação",
     "snapshots": "Capturas de Imagem",
@@ -164,8 +159,7 @@
       "all": "Todos",
       "motion": "Movimento",
       "active_objects": "Objetos Ativos"
-    },
-    "notAllTips": "A configuração de retenção da sua gravação do(a) {{source}} está definida para o <code>modo: {{effectiveRetainMode}}</code>, então essa gravação sob demanda irá manter somente os segmentos com o {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Editar Layout",

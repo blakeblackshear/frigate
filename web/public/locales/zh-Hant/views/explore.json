@@ -24,8 +24,7 @@
         "textTokenizer": "文字分詞器"
       },
       "tips": {
-        "context": "在模型下載完成後，你可能會需要重新建立追蹤物件的特徵索引。",
-        "documentation": "閱讀文件"
+        "context": "在模型下載完成後，你可能會需要重新建立追蹤物件的特徵索引。"
       },
       "error": "發生錯誤。請檢查 Frigate 日誌。"
     }
@@ -120,58 +119,11 @@
     "details": "詳情",
     "snapshot": "截圖",
     "video": "影片",
-    "object_lifecycle": "物件生命週期",
     "thumbnail": "預覽圖",
     "tracking_details": "追蹤詳情"
   },
   "objectLifecycle": {
-    "title": "物件生命週期",
-    "noImageFound": "此時間點找不到圖片。",
-    "createObjectMask": "建立物件遮罩",
-    "adjustAnnotationSettings": "調整標注設定",
-    "scrollViewTips": "滾動以查看此物件生命週期中的重要時刻。",
-    "autoTrackingTips": "自動追蹤鏡頭的定界框位置可能不準確。",
-    "count": "第 {{first}} 個，共 {{second}} 個",
-    "trackedPoint": "追蹤點",
-    "lifecycleItemDesc": {
-      "visible": "偵測到 {{label}}",
-      "entered_zone": "{{label}} 進入了 {{zones}}",
-      "active": "{{label}} 開始活動",
-      "stationary": "{{label}} 停止活動",
-      "attribute": {
-        "faceOrLicense_plate": "偵測到 {{label}} 的 {{attribute}}",
-        "other": "{{label}} 被辨識為 {{attribute}}"
-      },
-      "gone": "{{label}} 離開了",
-      "heard": "聽到 {{label}}",
-      "external": "偵測到 {{label}}",
-      "header": {
-        "zones": "區域",
-        "ratio": "比例",
-        "area": "範圍"
-      }
-    },
-    "annotationSettings": {
-      "title": "標注設定",
-      "showAllZones": {
-        "title": "顯示所有區域",
-        "desc": "總是在畫面上顯示有物件進入的區域。"
-      },
-      "offset": {
-        "label": "標注偏移量",
-        "desc": "此資料是來自鏡頭的偵測串流，但被覆蓋在錄影串流上。通常兩個串流沒辦法完美的同步，因此，影片片段中的定界框可能無法完全對齊。不過，這可以透過 <code>annotation_offset</code> 進行調整。",
-        "documentation": "閱讀文件 ",
-        "millisecondsToOffset": "偵測註解偏移的毫秒數。<em>預設：0</em>",
-        "tips": "提示：試想在一個片段中有個人從畫面左邊走到右邊。如果事件時間線上的定界框一直出現在人物的左邊，則應該減少數值。在同樣的畫面中，如果定界框持續出現在人的前方，則應該增加數值。",
-        "toast": {
-          "success": "{{camera}} 的標注偏移量已保存到設定檔。重新啟動 Frigate 以套用更改。"
-        }
-      }
-    },
-    "carousel": {
-      "previous": "上一張",
-      "next": "下一張"
-    }
+    "noImageFound": "此時間點找不到圖片。"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -181,10 +133,6 @@
     "downloadSnapshot": {
       "label": "下載截圖",
       "aria": "下載截圖"
-    },
-    "viewObjectLifecycle": {
-      "label": "查看物件生命週期",
-      "aria": "顯示物件生命週期"
     },
     "findSimilar": {
       "label": "尋找相似項目",

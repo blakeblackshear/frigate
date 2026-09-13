@@ -56,7 +56,6 @@
         "cameras_count_other": "{{count}} Càmeres"
       },
       "empty": "Encara no s'ha capturat cap missatge",
-      "count": "{{count}} missatges",
       "expanded": {
         "payload": "Payload"
       },
@@ -106,11 +105,6 @@
       },
       "npuUsage": "Ús de NPU",
       "npuMemory": "Memòria de NPU",
-      "intelGpuWarning": {
-        "title": "Avís d'estadístiques de la GPU d'Intel",
-        "message": "Estadístiques de GPU no disponibles",
-        "description": "Aquest és un error conegut en les eines d'informació de les estadístiques de GPU d'Intel (intel.gpu.top) on es trencarà i retornarà repetidament un ús de GPU del 0% fins i tot en els casos en què l'acceleració del maquinari i la detecció d'objectes s'executen correctament a la (i)GPU. Això no és un error de Frigate. Podeu reiniciar l'amfitrió per a corregir temporalment el problema i confirmar que la GPU funciona correctament. Això no afecta el rendiment."
-      },
       "gpuTemperature": "Temperatura de la GPU",
       "npuTemperature": "Temperatura NPU",
       "gpuCompute": "Càlcul / Codificació per GPU"
@@ -202,8 +196,6 @@
         "gap": "Espai de fotogrames clau (mín / avg / max):",
         "segmentLength": "Longitud del segment d'enregistrament:",
         "ok": "Fotogrames clau cada ,{{seconds}}s, bons per enregistrar i reproduir.",
-        "warning": "Els fotogrames clau dispersos o variables (espai més llarg .{{seconds}}s), probablement un còdec intel·ligent (H.264+/H.265+), això no és recomanable.",
-        "error": "El buit dels fotogrames clau ( the{{seconds}}s) excedeix la longitud del segment d'enregistrament ({{segmentTime}}s). Alguns segments poden no tenir un fotograma clau, el qual trenca la reproducció. Desactiva el còdec intel·ligent/+ a la càmera o escurça el seu interval de fotogrames clau.",
         "unknown": "No s'ha pogut determinar l'espaiat dels fotogrames clau.",
         "recordDisabled": "L'enregistrament està desactivat per a aquesta càmera."
       }
@@ -242,7 +234,6 @@
     "detectHighCpuUsage": "{{camera}} te un ús elevat de CPU per la detecció ({{detectAvg}}%)",
     "detectIsVerySlow": "{{detect}} és molt lent ({{speed}} ms)",
     "detectIsSlow": "{{detect}} és lent ({{speed}} ms)",
-    "shmTooLow": "/dev/shm directori ({{total}} MB) hauria de ser incrementat com a mínim {{min}} MB.",
     "debugReplayActive": "La sessió de repetició de depuració està activa"
   },
   "enrichments": {

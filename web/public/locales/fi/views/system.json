@@ -23,7 +23,16 @@
     },
     "websocket": {
       "label": "Viestit",
-      "pause": "Pysäytä"
+      "pause": "Pysäytä",
+      "resume": "Jatka",
+      "filter": {
+        "face_recognition": "Kasvojen tunnistus",
+        "cameras_count_one": "{{count}} Kamera",
+        "cameras_count_other": "{{count}} Kameraa",
+        "camera": "Kamera"
+      },
+      "count_one": "{{count}} viesti",
+      "count_other": "{{count}} viestiä"
     }
   },
   "documentTitle": {

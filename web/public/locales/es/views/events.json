@@ -40,12 +40,9 @@
     "last24Hours": "Últimas 24 horas"
   },
   "markTheseItemsAsReviewed": "Marcar estos elementos como revisados",
-  "selected": "{{count}} seleccionados",
   "selected_one": "{{count}} seleccionados",
   "selected_other": "{{count}} seleccionados",
   "detected": "detectado",
-  "suspiciousActivity": "Actividad Sospechosa",
-  "threateningActivity": "Actividad Amenzadora",
   "zoomIn": "Agrandar",
   "zoomOut": "Alejar",
   "detail": {

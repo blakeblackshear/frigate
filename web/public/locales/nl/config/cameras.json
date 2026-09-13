@@ -70,10 +70,6 @@
             "label": "Birdseye-overzicht inschakelen",
             "description": "De overzichtsweergavefunctie in- of uitschakelen."
         },
-        "mode": {
-            "label": "Weergavemodus",
-            "description": "Modus voor het opnemen van camera’s in overzichtsweergave: ‘objecten’, ‘beweging’ of ‘continu’."
-        },
         "order": {
             "label": "Positie",
             "description": "Numerieke positie die de volgorde van de camera in de overzichtsweergave lay-out bepaalt."
@@ -657,10 +653,6 @@
             "default": {
                 "label": "Standaard retentie",
                 "description": "Standaard aantal dagen om snapshots te bewaren."
-            },
-            "mode": {
-                "label": "Bewaarmodus",
-                "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
             },
             "objects": {
                 "label": "Objectbewaring",

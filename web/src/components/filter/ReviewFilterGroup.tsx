@@ -14,12 +14,10 @@ import { FaCheckCircle, FaFilter, FaRunning } from "react-icons/fa";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import MobileReviewSettingsDrawer, {
-  DrawerFeatures,
-} from "../overlay/MobileReviewSettingsDrawer";
+import MobileReviewSettingsDrawer from "../overlay/MobileReviewSettingsDrawer";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import FilterSwitch from "./FilterSwitch";
-import { FilterList, GeneralFilter } from "@/types/filter";
+import { DrawerFeatures, FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";

@@ -11,7 +11,6 @@
     "title": "Stream Tidak Aktif",
     "desc": "Tidak ada gambar yang diterima dari strim <code>detect</code> {{cameraName}}, mohon lihat log error"
   },
-  "cameraDisabled": "Kamera dinonaktifkan",
   "stats": {
     "streamType": {
       "title": "Tipe stream:",

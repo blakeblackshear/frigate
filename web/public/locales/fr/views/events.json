@@ -38,12 +38,9 @@
   },
   "camera": "Caméra",
   "markTheseItemsAsReviewed": "Marquer ces activités comme traitées",
-  "selected": "{{count}} sélectionné(s)",
   "selected_other": "{{count}} sélectionné(s)",
   "selected_one": "{{count}} sélectionné(s)",
   "detected": "détecté",
-  "suspiciousActivity": "Activité suspecte",
-  "threateningActivity": "Activité menaçante",
   "detail": {
     "noDataFound": "Aucun détail à traiter",
     "aria": "Activer/désactiver la vue détaillée",

@@ -1,3 +1,4 @@
+import { GenAIRole } from "@/types/frigateConfig";
 export type ToolCallFunction = {
   name: string;
   arguments: string;
@@ -20,9 +21,19 @@ export type ChatMessage = {
 };
 
 export type ToolCall = {
+  id?: string;
   name: string;
   arguments?: Record<string, unknown>;
   response?: string;
+};
+
+export type ToolDecision = "approve" | "reject";
+
+/** A state-changing tool call the backend paused on, awaiting the user. */
+export type PendingToolCall = {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
 };
 
 export type StartingRequest = {
@@ -47,3 +58,11 @@ export type GenAIProviderInfo = {
 };
 
 export type GenAIModelsResponse = Record<string, GenAIProviderInfo>;
+
+export type GenAIRoleInfo = {
+  name: string;
+  model: string;
+  context_size: number;
+};
+
+export type GenAIRolesResponse = Partial<Record<GenAIRole, GenAIRoleInfo>>;

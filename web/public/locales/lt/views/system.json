@@ -105,11 +105,6 @@
       },
       "npuUsage": "NPU Naudojimas",
       "npuMemory": "NPU Atmintis",
-      "intelGpuWarning": {
-        "title": "Intel GPU statistikų įspėjimas",
-        "message": "GPU statistika negalima",
-        "description": "Tai žinoma problema su Intel GPU statistikos raportavimo įrankiu (intel_gpu_top), kai jis stringa ir pakartotinai grąžina GPU vartojimas 0% net tais atvejais kai hardware acceleration ir objektų aptikimas taisiklingai veikia naudojant (i)GPU. Tai nėra Frigate klaida. Laikinai padeda įrenginio perkrovimas, kad įsitikinti teisingu GPU funkcionavimu. Tai neįtakoja spartos."
-      },
       "gpuCompute": "GPU Skaičiavimai / Transformavimas",
       "gpuTemperature": "GPU Temperatūra",
       "npuTemperature": "NPU Temperatūra"
@@ -185,8 +180,6 @@
         "gap": "Raktinių Kadrų tarpsnis (min / avg / max):",
         "segmentLength": "Įrašo segmento trukmė:",
         "ok": "Raktiniai Kadrai kas ~{{seconds}} sek., tinkama įrašinėjimui ar peržiūrėjimui.",
-        "warning": "Išsibarstę ar kintami Raktiniai Kadrai (ilgiausias tarpsnis ~{{seconds}} sek.), greičiausiai išmanus kodekas (H.264+/H.265+), tai yra nerekomenduojama.",
-        "error": "Raktinių Kadrų tarpsnis (~{{seconds}} sek.) viršyja įrašo segmento trukmę ({{segmentTime}} sek.). Kaikurie segmentai gali neturėti Raktinio Kadro, tai sugadina vaizdo leidimą. Nenaudokite išmanaus/+ kodeko kameroje arba sutrumpinkite Raktinio Kadro intervalą.",
         "unknown": "Nepavyko nustatyti Raktinio Kadro išsidėstymo.",
         "recordDisabled": "Įrašinėjimas šiai kamerai yra išjungtas."
       }
@@ -241,7 +234,6 @@
     "cameraIsOffline": "{{camera}} yra nepasiekiama",
     "detectIsSlow": "{{detect}} yra lėtas ({{speed}}ms)",
     "detectIsVerySlow": "{{detect}} yra labai lėtas ({{speed}}ms)",
-    "shmTooLow": "/dev/shm priskirta ({{total}} MB) turi būti padidinta bent jau iki {{min}} MB.",
     "debugReplayActive": "Pakartojimo Tyrimo sesija aktyvi"
   },
   "enrichments": {

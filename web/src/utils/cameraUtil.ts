@@ -1,6 +1,7 @@
 import { baseUrl } from "@/api/baseUrl";
 import { generateFixedHash, isValidId } from "./stringUtil";
 import type { LiveStreamMetadata } from "@/types/live";
+import type { StreamConfig } from "@/types/cameraWizard";
 
 /**
  * Processes a user-entered camera name and returns both the final camera name
@@ -204,4 +205,26 @@ const REPLAY_CAMERA_PREFIX = "_replay_";
  */
 export function isReplayCamera(name: string): boolean {
   return name.startsWith(REPLAY_CAMERA_PREFIX);
+}
+
+const HEVC_CODEC_NAMES = ["hevc", "h265"];
+
+function isHevcCodec(codec?: string): boolean {
+  return HEVC_CODEC_NAMES.includes((codec ?? "").trim().toLowerCase());
+}
+
+function isRecordingStream(stream: StreamConfig): boolean {
+  return stream.roles.includes("record") || stream.roles.includes("record_sub");
+}
+
+/**
+ * First recording stream probed as H.265. The other record output's codec
+ * doesn't matter: ffmpeg drops `-tag:v hvc1` on anything that isn't HEVC.
+ */
+export function hevcRecordingStreamId(
+  streams: StreamConfig[],
+): string | undefined {
+  return streams.find(
+    (s) => isRecordingStream(s) && isHevcCodec(s.testResult?.videoCodec),
+  )?.id;
 }

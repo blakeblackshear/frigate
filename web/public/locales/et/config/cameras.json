@@ -21,9 +21,6 @@
         }
     },
     "birdseye": {
-        "mode": {
-            "label": "Jälgimisrežiim"
-        },
         "order": {
             "label": "Positsioon"
         }

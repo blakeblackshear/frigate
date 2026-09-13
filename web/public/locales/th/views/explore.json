@@ -12,11 +12,6 @@
       "step": {
         "thumbnailsEmbedded": "รูปภาพย่อที่ฝังไว้: "
       }
-    },
-    "downloadingModels": {
-      "tips": {
-        "documentation": "อ่านเอกสาร"
-      }
     }
   },
   "type": {
@@ -24,12 +19,7 @@
     "video": "วิดีโอ"
   },
   "objectLifecycle": {
-    "noImageFound": "ไม่มีภาพสําหรับช่วงเวลานี้.",
-    "annotationSettings": {
-      "offset": {
-        "documentation": "อ่านเอกสาร "
-      }
-    }
+    "noImageFound": "ไม่มีภาพสําหรับช่วงเวลานี้."
   },
   "trackedObjectsCount_other": "{{count}} วัตถุที่เจอ ",
   "details": {

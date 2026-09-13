@@ -40,7 +40,6 @@
   "noPreviewFound": "Geen voorbeeld gevonden",
   "noPreviewFoundFor": "Geen voorbeeld gevonden voor {{cameraName}}",
   "livePlayerRequiredIOSVersion": "Voor dit type livestream is iOS 17.1 of hoger vereist.",
-  "cameraDisabled": "Camera is uitgeschakeld",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Frame succesvol ingediend bij Frigate+"

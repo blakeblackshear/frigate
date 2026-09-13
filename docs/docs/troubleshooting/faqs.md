@@ -135,7 +135,7 @@ You can still configure Frigate to use UDP by using ffmpeg input args or the pre
 
 ### Frigate is slow to start up with a "probing detect stream" message in the logs
 
-When `detect.width` and `detect.height` are not set, Frigate probes each camera's detect stream on startup (and when saving the config) to auto-detect its resolution. For RTSP streams Frigate probes with ffprobe and automatically retries over TCP if UDP doesn't respond, with a 5 second timeout per attempt. A camera that cannot be reached over either transport will add up to ~10 seconds to startup before Frigate falls through with default dimensions, which may show up as width `0` and height `0` in Camera Probe Info under System Metrics.
+When `detect.width` and `detect.height` are not set, Frigate probes each camera's detect stream on startup (and when saving the config) to auto-detect its resolution. For RTSP streams Frigate probes with ffprobe and automatically retries over TCP if UDP doesn't respond, with a 5 second timeout per attempt. A camera that cannot be reached over either transport will add up to ~10 seconds to startup before Frigate falls through with default dimensions, which may show up as width `0` and height `0` in Camera Probe Info under Health and Metrics.
 
 To skip the probe entirely and make startup instant, set `detect.width` and `detect.height` explicitly in your camera config:
 
@@ -181,3 +181,9 @@ Frigate's object detection relies on a machine learning [model](../frigate/gloss
 - If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
 
 Filters and masks only hide the incorrect result - they don't teach Frigate what the object actually is. For that, fine-tune your own model or use Frigate+.
+
+### Where do I see problems Frigate has detected?
+
+Open System > Health. The Notices list keeps a record of problems Frigate has found, and you can dismiss any entry to acknowledge it. Ongoing conditions, such as an offline camera or recordings deleted before their retention period, appear in the status bar for admins until they clear, and the status bar links to the Notices list while it has undismissed entries. On mobile, tap the warning icon in the bottom navigation bar to see them.
+
+The Hardware section below the notices shows whether the detection hardware, hardware acceleration, and enrichment devices in your config were found and are being used, so a GPU that silently fell back to the CPU shows up as a warning. Run stream checks to probe every camera's streams for the same problems the camera wizard reports.

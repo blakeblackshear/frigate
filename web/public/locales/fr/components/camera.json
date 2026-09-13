@@ -35,7 +35,6 @@
         "desc": "Modifier les options du flux temps réel pour le tableau de bord de ce groupe de caméras. <em>Ces paramètres sont spécifiques à l'appareil ou au navigateur.</em>",
         "audio": {
           "tips": {
-            "document": "Lire la documentation ",
             "title": "L'audio doit provenir de la caméra et être configuré dans go2rtc pour ce flux."
           }
         },

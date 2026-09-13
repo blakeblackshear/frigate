@@ -54,15 +54,6 @@
       "12hour": "MM/dd h:mm:ssa",
       "24hour": "d MMM HH:mm:ss"
     },
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "%b %-d, %I:%M %p",
-      "24hour": "%b %-d, %H:%M"
-    },
-    "formattedTimestampWithYear": {
-      "12hour": "%b %-d %Y, %I:%M %p",
-      "24hour": "%b %-d %Y, %H:%M"
-    },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
       "24hour": "HH:mm"
@@ -238,7 +229,6 @@
     "theme": {
       "label": "Tema",
       "blue": "Blu",
-      "contrast": "Alto contrasto",
       "green": "Verde",
       "default": "Predefinito",
       "red": "Rosso",

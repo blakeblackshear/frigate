@@ -175,181 +175,6 @@
             "description": "Attiva l'aggiunta di tag HEVC per una migliore compatibilità con i lettori Apple durante la registrazione in formato H.265."
         }
     },
-    "detectors": {
-        "cpu": {
-            "num_threads": {
-                "label": "Numero di processi di rilevamento",
-                "description": "Il numero di processi utilizzati per l'inferenza basata sulla CPU."
-            },
-            "description": "Rilevatore CPU TFLite che esegue modelli TensorFlow Lite sulla CPU di sistema senza accelerazione hardware. Sconsigliato.",
-            "label": "CPU"
-        },
-        "label": "Dispositivo di rilevamento",
-        "hailo8l": {
-            "description": "Rilevatore Hailo-8/Hailo-8L che utilizza modelli HEF e l'SDK HailoRT per l'inferenza sul dispositivo Hailo.",
-            "label": "Hailo-8/Hailo-8L",
-            "device": {
-                "label": "Tipo di dispositivo",
-                "description": "Il dispositivo da utilizzare per l'inferenza Hailo (ad es. 'PCIe', 'M.2')."
-            }
-        },
-        "openvino": {
-            "description": "Rilevatore OpenVINO per CPU AMD e Intel, GPU Intel e dispositivo Intel VPU.",
-            "label": "OpenVino",
-            "device": {
-                "label": "Tipo di Dispositivo",
-                "description": "Il dispositivo da utilizzare per l'inferenza OpenVINO (ad es. 'CPU', 'GPU', 'NPU')."
-            }
-        },
-        "rknn": {
-            "description": "Rilevatore RKNN per NPU Rockchip; esegue modelli RKNN compilati su dispositivo Rockchip.",
-            "label": "RKNN",
-            "num_cores": {
-                "label": "Numero core NPU da utilizzare.",
-                "description": "Il numero di core NPU da utilizzare (0 per automatico)."
-            }
-        },
-        "synaptics": {
-            "description": "Rilevatore NPU Synaptics per modelli in formato .synap utilizzando l'SDK Synap su dispositivo Synaptics.",
-            "label": "Synaptics"
-        },
-        "type": {
-            "label": "Tipo"
-        },
-        "description": "Configurazione per i rilevatori di oggetti (backend CPU, GPU, ONNX) e impostazioni del modello specifiche per il rilevatore.",
-        "model": {
-            "label": "Configurazione del modello specifica del rilevatore",
-            "description": "Opzioni di configurazione del modello specifiche del rilevatore (percorso, dimensioni di ingresso, ecc.).",
-            "path": {
-                "label": "Percorso del modello di rilevamento oggetti personalizzato",
-                "description": "Percorso di un file del modello di rilevamento personalizzato (o plus://<model_id> per i modelli Frigate+)."
-            },
-            "labelmap_path": {
-                "label": "Mappa delle etichette (label map) per il rilevatore di oggetti personalizzato",
-                "description": "Percorso di un file labelmap che mappa le classi numeriche in etichette testuali per il rilevatore."
-            },
-            "width": {
-                "label": "Larghezza di ingresso del modello di rilevamento oggetti",
-                "description": "Larghezza del tensore di ingresso del modello in pixel."
-            },
-            "height": {
-                "label": "Altezza di ingresso del modello di rilevamento oggetti",
-                "description": "Altezza del tensore di ingresso del modello in pixel."
-            },
-            "labelmap": {
-                "label": "Personalizzazione labelmap",
-                "description": "Sostituzioni o voci di rimappatura da unire alla labelmap standard."
-            },
-            "attributes_map": {
-                "label": "Mappa delle etichette oggetto con le relative etichette di attributo",
-                "description": "Mappatura dalle etichette oggetto alle etichette di attributo utilizzata per allegare metadati (ad esempio 'car' -> ['license_plate'])."
-            },
-            "input_tensor": {
-                "label": "Forma del tensore di ingresso del modello",
-                "description": "Formato del tensore richiesto dal modello: 'nhwc' o 'nchw'."
-            },
-            "input_pixel_format": {
-                "label": "Formato colore dei pixel di ingresso del modello",
-                "description": "Spazio colore dei pixel richiesto dal modello: 'rgb', 'bgr' o 'yuv'."
-            },
-            "input_dtype": {
-                "label": "Tipo di dati di ingresso del modello (Dtype)",
-                "description": "Tipo di dati del tensore di ingresso del modello (ad esempio 'float32')."
-            },
-            "model_type": {
-                "label": "Tipo di modello di rilevamento oggetti",
-                "description": "Tipo di architettura del modello del rilevatore (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilizzato da alcuni rilevatori per l'ottimizzazione."
-            }
-        },
-        "model_path": {
-            "label": "Percorso del modello specifico del rilevatore",
-            "description": "Percorso del file binario del modello del rilevatore, se richiesto dal rilevatore scelto."
-        },
-        "axengine": {
-            "label": "NPU AXEngine",
-            "description": "Rilevatore NPU AXERA AX650N/AX8850N che esegue file .axmodel compilati tramite il runtime AXEngine."
-        },
-        "deepstack": {
-            "label": "DeepStack",
-            "description": "Rilevatore DeepStack/CodeProject.AI che invia immagini a una API HTTP DeepStack remota per l'inferenza. Non consigliato.",
-            "api_url": {
-                "label": "URL API DeepStack",
-                "description": "L'URL delle API DeepStack."
-            },
-            "api_timeout": {
-                "label": "Timeout API DeepStack (in secondi)",
-                "description": "Tempo massimo consentito per una richiesta alle API DeepStack."
-            },
-            "api_key": {
-                "label": "Chiave API DeepStack (se richiesta)",
-                "description": "Chiave API opzionale per i servizi DeepStack autenticati."
-            }
-        },
-        "degirum": {
-            "label": "DeGirum",
-            "description": "Rilevatore DeGirum per l'esecuzione di modelli tramite il cloud DeGirum o servizi di inferenza locali.",
-            "zoo": {
-                "label": "Model Zoo",
-                "description": "Percorso o URL del model zoo di DeGirum."
-            },
-            "token": {
-                "label": "Token Cloud DeGirum",
-                "description": "Token per l'accesso al Cloud DeGirum."
-            }
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "Rilevatore EdgeTPU che esegue modelli TensorFlow Lite compilati per Coral EdgeTPU utilizzando il delegate EdgeTPU.",
-            "device": {
-                "label": "Tipo di dispositivo",
-                "description": "Il dispositivo da utilizzare per l'inferenza EdgeTPU (ad es. 'usb', 'pci')."
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "Rilevatore MemryX MX3 che esegue modelli DFP compilati su acceleratori MemryX.",
-            "device": {
-                "label": "Percorso del dispositivo",
-                "description": "Il dispositivo da utilizzare per l'inferenza MemryX (ad es. 'PCIe')."
-            }
-        },
-        "onnx": {
-            "label": "ONNX",
-            "description": "Rilevatore ONNX per l'esecuzione di modelli ONNX; utilizzerà i backend di accelerazione disponibili (CUDA/ROCm/OpenVINO) quando presenti.",
-            "device": {
-                "label": "Tipo di dispositivo",
-                "description": "Il dispositivo da utilizzare per l'inferenza ONNX (ad es. 'AUTO', 'CPU', 'GPU')."
-            }
-        },
-        "teflon_tfl": {
-            "label": "Teflon",
-            "description": "Rilevatore delegate Teflon per TFLite che utilizza la libreria delegate Mesa Teflon per accelerare l'inferenza sulle GPU supportate."
-        },
-        "tensorrt": {
-            "label": "TensorRT",
-            "description": "Rilevatore TensorRT per dispositivi Nvidia Jetson che utilizza engine TensorRT serializzati per l'inferenza accelerata.",
-            "device": {
-                "label": "L'indice dispositivo GPU",
-                "description": "L'indice del dispositivo GPU da utilizzare."
-            }
-        },
-        "zmq": {
-            "label": "ZMQ IPC",
-            "description": "Rilevatore ZMQ IPC che delega l'inferenza a un processo esterno tramite un endpoint ZeroMQ IPC.",
-            "endpoint": {
-                "label": "Endpoint ZMQ IPC",
-                "description": "L'endpoint ZMQ a cui connettersi."
-            },
-            "request_timeout_ms": {
-                "label": "Timeout richiesta ZMQ in millisecondi",
-                "description": "Timeout per le richieste ZMQ in millisecondi."
-            },
-            "linger_ms": {
-                "label": "Tempo di attesa (linger) socket ZMQ in millisecondi",
-                "description": "Periodo di attesa (linger) del socket in millisecondi."
-            }
-        }
-    },
     "audio_transcription": {
         "label": "Trascrizione audio",
         "description": "Impostazioni per la trascrizione audio in tempo reale e del parlato utilizzata per eventi e sottotitoli in tempo reale.",
@@ -898,10 +723,6 @@
                 "label": "Conservazione predefinita",
                 "description": "Numero predefinito di giorni per cui conservare le istantanee."
             },
-            "mode": {
-                "label": "Modalità di conservazione",
-                "description": "Modalità di conservazione: tutti (salva tutti i segmenti), movimento (salva i segmenti con movimento) o oggetti_attivi (salva i segmenti con oggetti attivi)."
-            },
             "objects": {
                 "label": "Conservazione oggetti",
                 "description": "Eccezioni per singolo oggetto relativi ai giorni di conservazione delle istantanee."
@@ -1288,10 +1109,6 @@
             "label": "Abilita Birdseye",
             "description": "Abilita o disabilita la funzione di visualizzazione Birdseye."
         },
-        "mode": {
-            "label": "Modalità di tracciamento",
-            "description": "Modalità per includere le telecamere in Birdseye: 'oggetti', 'movimento' o 'continuo'."
-        },
         "order": {
             "label": "Posizione",
             "description": "Posizione numerica che controlla l'ordine delle telecamere nella disposizione Birdseye."
@@ -1331,50 +1148,6 @@
         "idle_heartbeat_fps": {
             "label": "FPS heartbeat in inattività",
             "description": "Fotogrammi al secondo (FPS) con cui reinviare l'ultimo fotogramma composto di Birdseye durante l'inattività; imposta a 0 per disabilitare."
-        }
-    },
-    "model": {
-        "label": "Modello di rilevamento",
-        "description": "Impostazioni per configurare un modello di rilevamento oggetti personalizzato e la forma del suo tensore di ingresso.",
-        "path": {
-            "label": "Percorso del modello di rilevamento oggetti personalizzato",
-            "description": "Percorso al file del modello di rilevamento personalizzato (o plus://<model_id> per i modelli Frigate+)."
-        },
-        "labelmap_path": {
-            "label": "Mappa delle etichette (label map) per il rilevatore di oggetti personalizzato",
-            "description": "Percorso al file labelmap che mappa le classi numeriche in etichette testuali per il rilevatore."
-        },
-        "width": {
-            "label": "Larghezza di ingresso del modello di rilevamento oggetti",
-            "description": "Larghezza del tensore di ingresso del modello in pixel."
-        },
-        "height": {
-            "label": "Altezza di ingresso del modello di rilevamento oggetti",
-            "description": "Altezza del tensore di ingresso del modello in pixel."
-        },
-        "labelmap": {
-            "label": "Personalizzazione labelmap",
-            "description": "Sostituzioni o voci di rimappatura da unire alla labelmap standard."
-        },
-        "attributes_map": {
-            "label": "Mappa delle etichette oggetto con le relative etichette di attributo",
-            "description": "Mappatura dalle etichette oggetto alle etichette di attributo utilizzata per allegare metadati (ad esempio 'macchina' -> ['targa'])."
-        },
-        "input_tensor": {
-            "label": "Forma del tensore di ingresso del modello",
-            "description": "Formato del tensore richiesto dal modello: 'nhwc' o 'nchw'."
-        },
-        "input_pixel_format": {
-            "label": "Formato colore dei pixel di ingresso del modello",
-            "description": "Spazio colore dei pixel richiesto dal modello: 'rgb', 'bgr' o 'yuv'."
-        },
-        "input_dtype": {
-            "label": "Tipo di dati di ingresso del modello (Dtype)",
-            "description": "Tipo di dati del tensore di ingresso del modello (ad esempio 'float32')."
-        },
-        "model_type": {
-            "label": "Tipo di modello di rilevamento oggetti",
-            "description": "Tipo di architettura del modello del rilevatore (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilizzato da alcuni rilevatori per l'ottimizzazione."
         }
     },
     "semantic_search": {

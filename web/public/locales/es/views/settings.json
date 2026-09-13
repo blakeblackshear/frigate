@@ -4,9 +4,7 @@
     "object": "Depurar - Frigate",
     "default": "Configuración - Frigate",
     "authentication": "Configuración de autenticación - Frigate",
-    "camera": "Configuración de cámara - Frigate",
     "motionTuner": "Ajuste de movimiento - Frigate",
-    "classification": "Configuración de clasificación - Frigate",
     "general": "Configuración de la interfaz - Frigate",
     "frigatePlus": "Configuración de Frigate+ - Frigate",
     "notifications": "Configuración de Notificaciones - Frigate",
@@ -23,7 +21,6 @@
     "cameras": "Configuración de Cámara",
     "debug": "Depuración",
     "ui": "Interfaz de Usuario",
-    "classification": "Clasificación",
     "motionTuner": "Ajuste de movimiento",
     "masksAndZones": "Máscaras / Zonas",
     "frigateplus": "Frigate+",
@@ -61,8 +58,6 @@
     "systemTelemetry": "Telemetría",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "Hardware del detector",
-    "systemDetectionModel": "Modelo de detección",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "Flujos go2rtc",
     "integrationSemanticSearch": "Búsqueda semántica",
@@ -161,140 +156,6 @@
         "clearStreamingSettingsFailed": "Error al borrar la configuración de transmisión: {{errorMessage}}",
         "clearStoredLayoutFailed": "Error al borrar el diseño guardado: {{errorMessage}}"
       }
-    }
-  },
-  "classification": {
-    "semanticSearch": {
-      "title": "Búsqueda semántica",
-      "desc": "La búsqueda semántica en Frigate te permite encontrar objetos rastreados dentro de tus elementos de revisión utilizando la propia imagen, una descripción escrita por el usuario o una generada automáticamente.",
-      "readTheDocumentation": "Leer la documentación",
-      "reindexNow": {
-        "confirmTitle": "Confirmar reindexación",
-        "confirmButton": "Reindexar",
-        "success": "La reindexación comenzó con éxito.",
-        "label": "Reindexar ahora",
-        "desc": "La reindexación regenerará las incrustaciones para todos los objetos rastreados. Este proceso se ejecuta en segundo plano y puede maximizar el uso de tu CPU y tomar una cantidad considerable de tiempo dependiendo del número de objetos rastreados que tengas.",
-        "confirmDesc": "¿Estás seguro de que quieres reindexar todas las incrustaciones de objetos rastreados? Este proceso se ejecutará en segundo plano, pero puede maximizar el uso de tu CPU y tomar una cantidad considerable de tiempo. Puedes ver el progreso en la página de Explorar.",
-        "alreadyInProgress": "La reindexación ya está en curso.",
-        "error": "No se pudo iniciar la reindexación: {{errorMessage}}"
-      },
-      "modelSize": {
-        "small": {
-          "desc": "Usar <em>pequeño</em> emplea una versión cuantizada del modelo que utiliza menos RAM y se ejecuta más rápido en la CPU con una diferencia muy insignificante en la calidad de las incrustaciones.",
-          "title": "pequeño"
-        },
-        "large": {
-          "title": "grande",
-          "desc": "Usar <em>grande</em> emplea el modelo completo de Jina y se ejecutará automáticamente en la GPU si es aplicable."
-        },
-        "label": "Tamaño del modelo",
-        "desc": "El tamaño del modelo utilizado para las incrustaciones de búsqueda semántica."
-      }
-    },
-    "title": "Configuración de clasificación",
-    "faceRecognition": {
-      "title": "Reconocimiento facial",
-      "modelSize": {
-        "large": {
-          "title": "grande",
-          "desc": "Usar <em>grande</em> emplea un modelo de incrustación facial ArcFace y se ejecutará automáticamente en la GPU si es aplicable."
-        },
-        "small": {
-          "desc": "Usar <em>pequeño</em> emplea un modelo de incrustación facial FaceNet que se ejecuta de manera eficiente en la mayoría de las CPUs.",
-          "title": "pequeño"
-        },
-        "label": "Tamaño del modelo",
-        "desc": "El tamaño del modelo utilizado para el reconocimiento facial."
-      },
-      "readTheDocumentation": "Leer la documentación",
-      "desc": "El reconocimiento facial permite asignar nombres a las personas y, cuando se reconoce su rostro, Frigate asignará el nombre de la persona como una subetiqueta. Esta información se incluye en la interfaz de usuario, los filtros y también en las notificaciones."
-    },
-    "licensePlateRecognition": {
-      "title": "Reconocimiento de matrículas",
-      "desc": "Frigate puede reconocer matrículas en vehículos y agregar automáticamente los caracteres detectados al campo recognized_license_plate o un nombre conocido como subetiqueta a objetos que sean del tipo coche. Un caso de uso común puede ser leer las matrículas de los coches que entran en un camino de entrada o de los coches que pasan por una calle.",
-      "readTheDocumentation": "Leer la documentación"
-    },
-    "toast": {
-      "success": "Los ajustes de clasificación han sido guardados. Reinicia Frigate para aplicar tus cambios.",
-      "error": "No se pudieron guardar los cambios de configuración: {{errorMessage}}"
-    },
-    "birdClassification": {
-      "title": "Clasificación de Aves",
-      "desc": "La clasificación de aves identifica aves conocidas utilizando un modelo de TensorFlow cuantizado. Cuando se reconoce una ave conocida, su nombre común se añadirá como una subetiqueta. Esta información se incluye en la interfaz de usuario, en los filtros y en las notificaciones."
-    },
-    "restart_required": "Es necesario reiniciar (se han cambiado las configuraciones de clasificación)",
-    "unsavedChanges": "Cambios en la configuración de clasificación no guardados"
-  },
-  "camera": {
-    "review": {
-      "alerts": "Alertas ",
-      "desc": "Activar/desactivar temporalmente las alertas y detecciones para esta cámara hasta que Frigate se reinicie. Cuando está desactivado, no se generarán nuevos elementos de revisión. ",
-      "detections": "Detecciones ",
-      "title": "Revisar"
-    },
-    "reviewClassification": {
-      "readTheDocumentation": "Leer la documentación",
-      "noDefinedZones": "No se han definido zonas para esta cámara.",
-      "selectAlertsZones": "Seleccionar zonas para Alertas",
-      "zoneObjectDetectionsTips": {
-        "regardlessOfZoneObjectDetectionsTips": "Todos los objetos {{detectionsLabels}} no categorizados en {{cameraName}} se mostrarán como Detecciones, independientemente de en qué zona se encuentren.",
-        "text": "Todos los objetos {{detectionsLabels}} no categorizados en {{zone}} en {{cameraName}} se mostrarán como Detecciones.",
-        "notSelectDetections": "Todos los objetos {{detectionsLabels}} detectados en {{zone}} en {{cameraName}} que no estén categorizados como Alertas se mostrarán como Detecciones, independientemente de en qué zona se encuentren."
-      },
-      "desc": "Frigate clasifica los elementos de revisión como Alertas y Detecciones. Por defecto, todos los objetos <em>persona</em> y <em>coche</em> se consideran Alertas. Puedes refinar la categorización de tus elementos de revisión configurando zonas requeridas para ellos.",
-      "objectDetectionsTips": "Todos los objetos {{detectionsLabels}} no categorizados en {{cameraName}} se mostrarán como Detecciones, independientemente de en qué zona se encuentren.",
-      "zoneObjectAlertsTips": "Todos los objetos {{alertsLabels}} detectados en {{zone}} en {{cameraName}} se mostrarán como Alertas.",
-      "title": "Clasificación de revisión",
-      "objectAlertsTips": "Todos los objetos {{alertsLabels}} en {{cameraName}} se mostrarán como Alertas.",
-      "selectDetectionsZones": "Seleccionar zonas para Detecciones",
-      "limitDetections": "Limitar detecciones a zonas específicas",
-      "toast": {
-        "success": "La configuración de clasificación de revisión ha sido guardada. Reinicia Frigate para aplicar los cambios."
-      },
-      "unsavedChanges": "Configuración de clasificación de revisión no guardada para {{camera}}"
-    },
-    "title": "Ajustes de la cámara",
-    "streams": {
-      "title": "Transmisiones",
-      "desc": "Desactivar temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de esta cámara por parte de Frigate. La detección, grabación y depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>"
-    },
-    "object_descriptions": {
-      "title": "Descripciones de objetos de IA generativa",
-      "desc": "Habilitar/deshabilitar temporalmente las descripciones de objetos de IA generativa para esta cámara. Cuando está deshabilitado, no se solicitarán descripciones generadas por IA para los objetos rastreados en esta cámara."
-    },
-    "review_descriptions": {
-      "title": "Descripciones de revisión de IA generativa",
-      "desc": "Habilitar/deshabilitar temporalmente las descripciones de revisión de IA generativa para esta cámara. Cuando está deshabilitado, no se solicitarán descripciones generadas por IA para los elementos de revisión en esta cámara."
-    },
-    "addCamera": "Añadir nueva cámara",
-    "editCamera": "Editar cámara:",
-    "selectCamera": "Seleccionar una cámara",
-    "backToSettings": "Volver a la configuración de la cámara",
-    "cameraConfig": {
-      "add": "Añadir cámara",
-      "edit": "Editar cámara",
-      "description": "Configurar los ajustes de la cámara, incluyendo las entradas de flujo y los roles.",
-      "name": "Nombre de la cámara",
-      "nameRequired": "El nombre de la cámara es obligatorio",
-      "nameInvalid": "El nombre de la cámara debe contener solo letras, números, guiones bajos o guiones",
-      "namePlaceholder": "p. ej., puerta_principal",
-      "enabled": "Habilitado",
-      "ffmpeg": {
-        "inputs": "Flujos de entrada",
-        "path": "Ruta del flujo",
-        "pathRequired": "La ruta del flujo es obligatoria",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Roles",
-        "rolesRequired": "Se requiere al menos un rol",
-        "rolesUnique": "Cada rol (audio, detección, grabación) solo puede asignarse a un flujo",
-        "addInput": "Añadir flujo de entrada",
-        "removeInput": "Eliminar flujo de entrada",
-        "inputsRequired": "Se requiere al menos un flujo de entrada"
-      },
-      "toast": {
-        "success": "Cámara {{cameraName}} guardada con éxito"
-      },
-      "nameLength": "Nombre de cámara debe ser de mínimo 24 caracteres."
     }
   },
   "masksAndZones": {
@@ -399,7 +260,6 @@
       "speedEstimation": {
         "desc": "Habilitar la estimación de velocidad para objetos en esta zona. La zona debe tener exactamente 4 puntos.",
         "title": "Estimación de velocidad",
-        "docs": "Leer la documentación",
         "lineBDistance": "Distancia de la línea B ({{unit}})",
         "lineCDistance": "Distancia de la línea C ({{unit}})",
         "lineDDistance": "Distancia de la línea D ({{unit}})",
@@ -447,12 +307,10 @@
       "add": "Nueva Máscara de Movimiento",
       "edit": "Editar Máscara de Movimiento",
       "context": {
-        "documentation": "Leer la documentación",
         "title": "Las máscaras de movimiento se utilizan para evitar que tipos de movimiento no deseados activen la detección (por ejemplo: ramas de árboles, marcas de tiempo de la cámara). Las máscaras de movimiento deben usarse <em>con moderación</em>, un exceso de enmascaramiento dificultará el seguimiento de objetos."
       },
       "clickDrawPolygon": "Haz clic para dibujar un polígono en la imagen.",
       "polygonAreaTooLarge": {
-        "documentation": "Leer la documentación",
         "title": "La máscara de movimiento está cubriendo el {{polygonArea}}% del marco de la cámara. No se recomiendan máscaras de movimiento grandes.",
         "tips": "Las máscaras de movimiento no impiden que se detecten objetos. Deberías usar una zona requerida en su lugar."
       },
@@ -582,7 +440,6 @@
       "title": "Dibujo de Filtro de Forma de Objetos",
       "desc": "Dibuja un rectángulo en la imagen para ver los detalles de área y proporción",
       "tips": "Habilita esta opción para dibujar un rectángulo en la imagen de la cámara y mostrar su área y proporción. Estos valores pueden usarse luego para establecer parámetros de filtro de forma de objetos en tu configuración.",
-      "document": "Lee la documentación ",
       "score": "Puntuación",
       "ratio": "Proporción",
       "area": "Área"
@@ -658,10 +515,7 @@
           "hide": "Ocultar contraseña",
           "requirements": {
             "title": "Requisitos de contraseña:",
-            "length": "Al menos 12 caracteres",
-            "uppercase": "Al menos una mayúscula",
-            "digit": "Al menos un número",
-            "special": "Al menos un caracter especial (!@#$%^&*(),.?\":{}|<>)"
+            "length": "Al menos 12 caracteres"
           }
         },
         "newPassword": {
@@ -721,12 +575,10 @@
     "title": "Notificaciones",
     "notificationSettings": {
       "title": "Configuración de notificaciones",
-      "desc": "Frigate puede enviar notificaciones push a tu dispositivo de forma nativa cuando se ejecuta en el navegador o está instalado como una PWA.",
-      "documentation": "Leer la documentación"
+      "desc": "Frigate puede enviar notificaciones push a tu dispositivo de forma nativa cuando se ejecuta en el navegador o está instalado como una PWA."
     },
     "notificationUnavailable": {
       "title": "Notificaciones no disponibles",
-      "documentation": "Leer la documentación",
       "desc": "Las notificaciones push web requieren un contexto seguro (<code>https://…</code>). Esto es una limitación del navegador. Accede a Frigate de forma segura para usar las notificaciones.",
       "descPwa": "En iOS, las notificaciones push web solo están disponibles cuando Frigate está instalado en la pantalla de inicio. Abre el menú <strong>Compartir</strong>, selecciona <strong>Añadir a la pantalla de inicio</strong> y, a continuación, abre Frigate desde el nuevo icono para registrar este dispositivo para las notificaciones."
     },
@@ -784,11 +636,9 @@
     },
     "snapshotConfig": {
       "title": "Configuración de instantáneas",
-      "documentation": "Leer la documentación",
       "table": {
         "camera": "Cámara",
-        "snapshots": "Instantáneas",
-        "cleanCopySnapshots": "<code>clean_copy</code> Instantáneas"
+        "snapshots": "Instantáneas"
       },
       "desc": "Enviar a Frigate+ requiere que las instantáneas estén habilitadas en tu configuración.",
       "cleanCopyWarning": "Algunas cámaras tienen las instantáneas deshabilitadas"
@@ -798,7 +648,6 @@
       "modelType": "Tipo de modelo",
       "baseModel": "Modelo base",
       "supportedDetectors": "Detectores compatibles",
-      "dimensions": "Dimensiones",
       "cameras": "Cámaras",
       "loading": "Cargando información del modelo…",
       "error": "No se pudo cargar la información del modelo",
@@ -844,7 +693,6 @@
     "semanticSearch": {
       "title": "Búsqueda Semántica",
       "desc": "La búsqueda semántica en Frigate te permite encontrar objetos rastreados dentro de tus elementos de revisión utilizando ya sea la imagen en sí, una descripción de texto definida por el usuario o una generada automáticamente.",
-      "readTheDocumentation": "Leer la Documentación",
       "reindexNow": {
         "confirmTitle": "Confirmar Re-Indexado",
         "confirmDesc": "¿Estás seguro de que quieres re-indexar todas las representaciones (embeddings) de objetos rastreados? Este proceso se ejecutará en segundo plano, pero puede usar al máximo tu CPU y tardar una cantidad considerable de tiempo, dependiendo de la cantidad de objetos registrados. Puedes seguir el progreso en la página Explorar (Explore).",
@@ -870,7 +718,6 @@
     },
     "faceRecognition": {
       "title": "Reconocimiento Facial",
-      "readTheDocumentation": "Leer la Documentación",
       "modelSize": {
         "label": "Tamaño del Modelo",
         "desc": "Tamaño del modelo a ser utilizado para el reconocimiento facial.",
@@ -887,7 +734,6 @@
     },
     "licensePlateRecognition": {
       "title": "Reconocimiento de Matrículas (LPR)",
-      "readTheDocumentation": "Leer la Documentación",
       "desc": "Frigate puede reconocer matrículas de vehículos y agregar automáticamente los caracteres detectados al campo recognized_license_plate, o bien asignar un nombre conocido como sub-etiqueta (sub_label) a los objetos de tipo coche (car). Un caso de uso común es leer las matrículas de los autos que ingresan a una cochera o que pasan por una calle."
     },
     "restart_required": "Es necesario reiniciar Frigate (La configuración de Enrichments han cambiado)",
@@ -919,7 +765,6 @@
       "thumbnail": "Miniatura"
     },
     "actions": {
-      "alert": "Marcar como Alerta",
       "notification": "Enviar Notificación",
       "sub_label": "Añadir una subetiqueta",
       "attribute": "Añadir atributo"
@@ -956,11 +801,6 @@
           "placeholder": "Seleccione tipo de disparador",
           "description": "Se dispara cuando se detecta una descripción de objeto rastreado similar",
           "thumbnail": "Se dispara cuando se detecta una miniatura de un objeto rastreado similar"
-        },
-        "friendly_name": {
-          "title": "Nombre amigable",
-          "placeholder": "Nombre o describa este disparador",
-          "description": "Un nombre o texto descriptivo amigable (opcional) para este disparador."
         },
         "content": {
           "title": "Contenido",
@@ -1283,18 +1123,7 @@
     "backToSettings": "Volver a configuración de la cámara",
     "streams": {
       "title": "Estado y detalles de la cámara",
-      "desc": "Desactiva temporalmente una cámara hasta que Frigate se reinicie. Desactivar una cámara detiene por completo el procesamiento de las transmisiones de Frigate. La detección, la grabación y la depuración no estarán disponibles.<br /> <em>Nota: Esto no desactiva las retransmisiones de go2rtc.</em>",
-      "enableDesc": "Deshabilita temporalmente una cámara habilitada hasta que Frigate se reinicie. Deshabilitar una cámara detiene completamente el procesamiento de los flujos de esa cámara por parte de Frigate. La detección, la grabación y la depuración no estarán disponibles. Nota: Esto no deshabilita las retransmisiones de go2rtc.Arrastra el controlador para reordenar las cámaras tal y como aparecen en la interfaz. El orden de las cámaras habilitadas se reflejará en toda la interfaz, incluido el panel en directo y los menús desplegables de selección de cámaras.",
-      "enableLabel": "Cámaras habilitadas",
-      "disableLabel": "Cámaras deshabilitadas",
-      "disableDesc": "Habilita una cámara que actualmente no está visible en la interfaz y está deshabilitada en la configuración. Es necesario reiniciar Frigate después de habilitarla.",
       "enableSuccess": "{{cameraName}} habilitada. Reinicia Frigate para aplicar los cambios.",
-      "friendlyName": {
-        "edit": "Editar nombre visible de la cámara",
-        "title": "Editar nombre visible",
-        "description": "Establece el nombre descriptivo que se mostrará para esta cámara en toda la interfaz de Frigate. Déjalo en blanco para usar el ID de la cámara.",
-        "rename": "Renombrar"
-      },
       "reorderHandle": "Arrastrar para reordenar",
       "saving": "Guardando…",
       "saved": "Guardado",
@@ -1368,8 +1197,6 @@
       "selectLabel": "Seleccionar perfil",
       "description": "Configura qué cámaras se activan o desactivan cuando se activa un perfil. Las cámaras configuradas como “Heredar” conservan su estado predeterminado.",
       "inherit": "Heredar",
-      "enabled": "Habilitado",
-      "disabled": "Deshabilitado",
       "on": "Encendido",
       "off": "Apagado"
     },
@@ -1744,16 +1571,6 @@
     "detect": {
       "title": "Ajustes de detección"
     },
-    "detectors": {
-      "title": "Ajustes de detector",
-      "singleType": "Solo se permite un detector {{type}}.",
-      "keyRequired": "El nombre del detector es obligatorio.",
-      "keyDuplicate": "El nombre del detector ya existe.",
-      "noSchema": "No hay esquemas de detector disponibles.",
-      "none": "No hay instancias de detector configuradas.",
-      "add": "Añadir detector",
-      "addCustomKey": "Añadir clave personalizada"
-    },
     "record": {
       "title": "Ajustes de grabación"
     },
@@ -1979,13 +1796,9 @@
       "addAudioCodec": "Añadir códec de audio",
       "removeCodec": "Eliminar códec"
     },
-    "streamNumber": "Flujo {{index}}",
     "sourceNumber": "Origen {{index}}"
   },
   "configMessages": {
-    "birdseye": {
-      "objectsModeDetectDisabled": "Birdseye está configurado en modo 'objects', pero la detección de objetos está desactivada para esta cámara. La cámara no aparecerá en Birdseye."
-    },
     "lpr": {
       "globalDisabled": "El reconocimiento de matrículas no está habilitado a nivel global. Habilítelo en la configuración global para que funcione el reconocimiento de matrículas a nivel de cámara.",
       "vehicleNotTracked": "El reconocimiento de matrículas requiere rastrear 'car' o 'motorcycle'. Habilita 'car' o 'motorcycle' en Objetos para esta cámara.",
@@ -2004,10 +1817,6 @@
     },
     "snapshots": {
       "detectDisabled": "La detección de objetos está desactivada. Las instantáneas se generan a partir de los objetos rastreados y no se crearán."
-    },
-    "detectors": {
-      "mixedTypes": "Todos los detectores deben ser del mismo tipo. Retire los detectores existentes para utilizar un tipo diferente.",
-      "mixedTypesSuggestion": "Todos los detectores deben usar el mismo tipo. Elimina los detectores existentes o selecciona {{type}}."
     },
     "review": {
       "detectDisabled": "La detección de objetos está desactivada. Los elementos de revisión requieren objetos detectados para categorizar las alertas y detecciones.",
@@ -2032,8 +1841,7 @@
       "noRecordRole": "Ningún flujo tiene definido el rol de grabación. La grabación no funcionará."
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "El tamaño 'small' con el modelo Jina V2 tiene un alto consumo de RAM y coste de inferencia. Se recomienda el modelo 'large' con una GPU dedicada.",
-      "modelSizeIgnoredForProvider": "El tamaño del modelo solo se aplica a los modelos Jina integrados. Este valor se ignorará al usar un proveedor de embeddings GenAI."
+      "jinav2SmallModelSize": "El tamaño 'small' con el modelo Jina V2 tiene un alto consumo de RAM y coste de inferencia. Se recomienda el modelo 'large' con una GPU dedicada."
     },
     "onvif": {
       "autotrackingNoZones": "El seguimiento automático requiere al menos una zona. Define una zona para esta cámara en Máscaras / Zonas y, a continuación, establécela como zona obligatoria a continuación."
@@ -2049,15 +1857,6 @@
   },
   "resetToDefaultDescription": "Esto restablecerá todos los ajustes de esta sección a sus valores predeterminados. Esta acción no se puede deshacer.",
   "resetToGlobalDescription": "Esto restablecerá la configuración de esta sección a los valores predeterminados globales. Esta acción no se puede deshacer.",
-  "detectionModel": {
-    "plusActive": {
-      "description": "Esta instancia está ejecutando un modelo de Frigate+. Seleccione o cambie su modelo en la configuración de Frigate+.",
-      "title": "Gestión de modelos de Frigate+",
-      "label": "Origen del modelo actual",
-      "goToFrigatePlus": "Ir a los ajustes de Frigate+",
-      "showModelForm": "Configurar un modelo manualmente"
-    }
-  },
   "saveAllPreview": {
     "profile": {
       "label": "Override,Eliminar"
@@ -2087,11 +1886,6 @@
   "unsavedChanges": "Tienes cambios sin guardar",
   "confirmReset": "Confirmar restablecimiento",
   "birdseye": {
-    "trackingMode": {
-      "objects": "Objetos",
-      "motion": "Movimiento",
-      "continuous": "Continuo"
-    },
     "cameraOrder": {
       "label": "Orden de cámaras",
       "description": "Arrastra las cámaras para establecer su orden en el diseño de Birdseye.",
@@ -2100,24 +1894,11 @@
       "saved": "Guardado"
     }
   },
-  "snapshot": {
-    "retainMode": {
-      "all": "Todo",
-      "motion": "Movimiento",
-      "active_objects": "Objetos activos"
-    }
-  },
   "ui": {
     "timeFormat": {
       "browser": "Navegador",
       "12hour": "12 horas",
       "24hour": "24 horas"
-    },
-    "TimeOrDateStyle": {
-      "full": "Completo",
-      "long": "Largo",
-      "medium": "Medio",
-      "short": "Corto"
     },
     "unitSystem": {
       "metric": "Métrico",
@@ -2154,31 +1935,6 @@
     "medium": "Medio",
     "low": "Bajo",
     "very_low": "Muy bajo"
-  },
-  "detectorsAndModel": {
-    "title": "Detectores y modelo",
-    "description": "Configura el backend del detector que ejecuta la detección de objetos y el modelo que utiliza. Los cambios se guardan juntos para que el detector y el modelo permanezcan sincronizados.",
-    "cardTitles": {
-      "detector": "Hardware del detector",
-      "model": "Modelo de detección"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "Modelo personalizado"
-    },
-    "mismatch": {
-      "warning": "El modelo actual de Frigate+ “{{model}}” requiere el detector {{required}}. Selecciona un modelo compatible a continuación o cambia a Modelo personalizado antes de guardar."
-    },
-    "plusModel": {
-      "requiresDetector": "Requiere: {{detector}}",
-      "noModelSelected": "Selecciona un modelo de Frigate+"
-    },
-    "toast": {
-      "saveSuccess": "Los ajustes de detectores y modelo se han guardado. Reinicia Frigate para aplicar los cambios.",
-      "saveError": "No se pudieron guardar los ajustes del detector y del modelo"
-    },
-    "unsavedChanges": "Cambios sin guardar en el detector y el modelo",
-    "restartRequired": "Reinicio necesario (se ha cambiado el detector o el modelo)"
   },
   "menuDot": {
     "overrideGlobal": "Esta sección sobrescribe la configuración global",

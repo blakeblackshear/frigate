@@ -9,9 +9,6 @@
         }
     },
     "birdseye": {
-        "mode": {
-            "label": "Jälgimisrežiim"
-        },
         "order": {
             "label": "Positsioon"
         },
@@ -351,62 +348,8 @@
             "label": "Ühikute süsteem"
         }
     },
-    "detectors": {
-        "label": "Detektori riistvara",
-        "cpu": {
-            "label": "CPU"
-        },
-        "deepstack": {
-            "label": "DeepStack"
-        },
-        "edgetpu": {
-            "label": "EdgeTPU"
-        },
-        "onnx": {
-            "label": "ONNX",
-            "device": {
-                "label": "Seadme tüüp"
-            }
-        },
-        "rknn": {
-            "label": "RKNN"
-        },
-        "openvino": {
-            "label": "OpenVINO"
-        },
-        "tensorrt": {
-            "label": "TensorRT"
-        },
-        "teflon_tfl": {
-            "label": "Teflon"
-        },
-        "synaptics": {
-            "label": "Synaptics"
-        },
-        "memryx": {
-            "device": {
-                "label": "Seadme asukoht"
-            },
-            "label": "MemryX"
-        },
-        "hailo8l": {
-            "label": "Hailo-8/Hailo-8L"
-        },
-        "zmq": {
-            "label": "ZMQ IPC"
-        },
-        "axengine": {
-            "label": "AXEngine NPU"
-        },
-        "degirum": {
-            "label": "DeGirum"
-        }
-    },
     "logger": {
         "label": "Logimine"
-    },
-    "model": {
-        "label": "Tuvastusmudel"
     },
     "record": {
         "label": "Salvestus",

@@ -43,6 +43,9 @@ const review: SectionConfigOverrides = {
       },
       {
         key: "genai-no-descriptions-provider",
+        health: (ctx) =>
+          (ctx.formData as { genai?: { enabled?: boolean } })?.genai
+            ?.enabled === true,
         field: "genai.enabled",
         messageKey: "configMessages.objects.genaiNoDescriptionsProvider",
         severity: "warning",
@@ -57,6 +60,7 @@ const review: SectionConfigOverrides = {
       },
       {
         key: "genai-image-source-recordings-record-disabled",
+        health: true,
         field: "genai.image_source",
         messageKey:
           "configMessages.review.genaiImageSourceRecordingsRecordDisabled",

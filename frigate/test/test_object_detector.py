@@ -1,7 +1,8 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import numpy as np
+import zmq
 from pydantic import parse_obj_as
 
 import frigate.detectors as detectors
@@ -108,13 +109,13 @@ class TestLocalObjectDetector(unittest.TestCase):
             ("label-2", 0.5, (8, 7, 6, 5)),
         ]
         TEST_LABEL_FILE = "/test_labels.txt"
-        mock_load_labels.return_value = [
-            "label-1",
-            "label-2",
-            "label-3",
-            "label-4",
-            "label-5",
-        ]
+        mock_load_labels.return_value = {
+            0: "label-1",
+            1: "label-2",
+            2: "label-3",
+            3: "label-4",
+            4: "label-5",
+        }
 
         test_cfg = parse_obj_as(DetectorConfig, {"type": "cpu", "model": {}})
         test_cfg.model = ModelConfig()
@@ -136,3 +137,69 @@ class TestLocalObjectDetector(unittest.TestCase):
             == np.zeros((1, 32, 32, 3)).shape
         )
         assert test_result == TEST_DETECT_RESULT
+
+
+class TestRemoteObjectDetector(unittest.TestCase):
+    """Cover the label lookup that turns raw class ids into detections."""
+
+    def _build_detector(self, labels, rows):
+        detector = frigate.object_detection.base.RemoteObjectDetector.__new__(
+            frigate.object_detection.base.RemoteObjectDetector
+        )
+        detector.labels = labels
+        detector.name = "front_door"
+        detector.fps = MagicMock()
+        detector.stop_event = MagicMock()
+        detector.stop_event.is_set.return_value = False
+        detector.unnamed_class_ids = set()
+        detector.np_shm = np.zeros((1, 320, 320, 3), np.uint8)
+        detector.out_np_shm = np.array(rows, np.float32)
+        detector.detection_queue = MagicMock()
+        detector.detector_subscriber = MagicMock()
+        detector.detector_subscriber.socket.recv_string.side_effect = zmq.Again()
+        detector.detector_subscriber.check_for_update.return_value = "front_door"
+        return detector
+
+    def test_maps_class_ids_to_labels(self):
+        rows = [[2, 0.9, 0.1, 0.2, 0.3, 0.4], [0, 0.8, 0.5, 0.6, 0.7, 0.8]] + [
+            [0, 0, 0, 0, 0, 0]
+        ] * 18
+        detector = self._build_detector({0: "person", 2: "car"}, rows)
+
+        results = detector.detect(np.zeros((1, 320, 320, 3), np.uint8))
+
+        self.assertEqual([r[0] for r in results], ["car", "person"])
+
+    def test_skips_class_ids_the_labelmap_does_not_name(self):
+        # a labelmap that names fewer classes than the model emits
+        rows = [[7, 0.9, 0.1, 0.2, 0.3, 0.4], [0, 0.8, 0.5, 0.6, 0.7, 0.8]] + [
+            [0, 0, 0, 0, 0, 0]
+        ] * 18
+        detector = self._build_detector({0: "person"}, rows)
+
+        results = detector.detect(np.zeros((1, 320, 320, 3), np.uint8))
+
+        self.assertEqual([r[0] for r in results], ["person"])
+        self.assertEqual(detector.unnamed_class_ids, {7})
+
+    def test_warns_once_per_unnamed_class_id(self):
+        rows = [
+            [7, 0.9, 0.1, 0.2, 0.3, 0.4],
+            [7, 0.8, 0.1, 0.2, 0.3, 0.4],
+            [9, 0.7, 0.1, 0.2, 0.3, 0.4],
+        ] + [[0, 0, 0, 0, 0, 0]] * 17
+        detector = self._build_detector({0: "person"}, rows)
+
+        with self.assertLogs("frigate.object_detection.base", level="WARNING") as logs:
+            detector.detect(np.zeros((1, 320, 320, 3), np.uint8))
+
+        self.assertEqual(len(logs.output), 2)
+        self.assertEqual(detector.unnamed_class_ids, {7, 9})
+
+    def test_empty_labelmap_drops_detections_instead_of_raising(self):
+        rows = [[0, 0.9, 0.1, 0.2, 0.3, 0.4]] + [[0, 0, 0, 0, 0, 0]] * 19
+        detector = self._build_detector({}, rows)
+
+        results = detector.detect(np.zeros((1, 320, 320, 3), np.uint8))
+
+        self.assertEqual(results, [])

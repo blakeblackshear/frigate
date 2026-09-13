@@ -736,6 +736,13 @@ export function applySchemaDefaults(
   schema: RJSFSchema,
   formData: Record<string, unknown> = {},
 ): Record<string, unknown> {
+  // An array section (models) carries its defaults on the item schema, not
+  // here. Spreading an array below would turn it into an object keyed by
+  // index, so hand it back untouched.
+  if (Array.isArray(formData)) {
+    return formData as unknown as Record<string, unknown>;
+  }
+
   const result = { ...formData };
   const schemaObj = schema as Record<string, unknown>;
 

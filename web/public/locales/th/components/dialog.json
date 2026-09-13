@@ -21,7 +21,6 @@
     "toast": {
       "error": {
         "endTimeMustAfterStartTime": "เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่มต้น",
-        "noVaildTimeSelected": "ไม่ได้เลือกช่วงเวลาที่ถูกต้อง",
         "failed": "เริ่มต้นการส่งออกผิดพลาด: {{error}}"
       },
       "success": "เริ่มต้นการส่งออก ดูไฟล์ในโฟลเดอร์ /exports."
@@ -93,10 +92,7 @@
   "streaming": {
     "label": "สตรีม",
     "restreaming": {
-      "disabled": "รีสตรีมไม่ได้เปิดใช้งานสําหรับกล้องนี้.",
-      "desc": {
-        "readTheDocumentation": "อ่านเอกสาร"
-      }
+      "disabled": "รีสตรีมไม่ได้เปิดใช้งานสําหรับกล้องนี้."
     },
     "showStats": {
       "label": "แสดงสถานะสตรีม",

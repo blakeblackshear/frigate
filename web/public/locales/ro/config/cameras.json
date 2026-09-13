@@ -70,10 +70,6 @@
             "label": "Activare Birdseye",
             "description": "Activează sau dezactivează funcția Birdseye."
         },
-        "mode": {
-            "label": "Mod urmărire",
-            "description": "Modul de includere a camerelor în Birdseye: 'objects', 'motion' sau 'continuous'."
-        },
         "order": {
             "label": "Poziție",
             "description": "Poziția numerică ce controlează ordinea camerei în layout-ul Birdseye."
@@ -642,10 +638,6 @@
             "label": "Activează snapshot-urile",
             "description": "Activează sau dezactivează salvarea de snapshots pentru această cameră."
         },
-        "clean_copy": {
-            "label": "Salvează copie curată",
-            "description": "Salvează și o copie fără adnotări a snapshot-ului."
-        },
         "timestamp": {
             "label": "Overlay timestamp",
             "description": "Suprapune data și ora pe snapshot-urile din API."
@@ -672,10 +664,6 @@
             "default": {
                 "label": "Retenție implicită",
                 "description": "Numărul implicit de zile pentru păstrare."
-            },
-            "mode": {
-                "label": "Mod retenție",
-                "description": "Mod retenție: 'all', 'motion' sau 'active_objects'."
             },
             "objects": {
                 "label": "Retenție per obiect",

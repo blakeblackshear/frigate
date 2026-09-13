@@ -316,185 +316,6 @@
             }
         }
     },
-    "detectors": {
-        "deepstack": {
-            "description": "Detector DeepStack/CodeProject.AI que envía imágenes a una API HTTP remota de DeepStack para la inferencia. No recomendado.",
-            "api_url": {
-                "description": "La URL de la API de DeepStack.",
-                "label": "URL de la API de DeepStack"
-            },
-            "api_timeout": {
-                "label": "Tiempo de espera de la API de DeepStack (en segundos)",
-                "description": "Tiempo máximo permitido para una solicitud a la API de DeepStack."
-            },
-            "api_key": {
-                "label": "Clave de API de DeepStack (si es necesaria)",
-                "description": "Clave API opcional para servicios autenticados de DeepStack."
-            },
-            "label": "DeepStack"
-        },
-        "type": {
-            "label": "Tipo"
-        },
-        "label": "Detector de hardware",
-        "cpu": {
-            "label": "CPU",
-            "num_threads": {
-                "label": "Número de hilos para detección",
-                "description": "Número de hilos usados para inferencia basada en CPU."
-            },
-            "description": "Detector TFLite de CPU que ejecuta modelos de TensorFlow Lite en la CPU del host sin aceleración por hardware. No recomendado."
-        },
-        "axengine": {
-            "label": "Motor AX NPU",
-            "description": "Detector NPU AXERA AX650N/AX8850N que ejecuta archivos .axmodel compilados mediante el runtime AXEngine."
-        },
-        "teflon_tfl": {
-            "description": "Detector de delegados Teflon para TFLite, que utiliza la biblioteca de delegados Mesa Teflon para acelerar la inferencia en las GPU compatibles.",
-            "label": "Teflon"
-        },
-        "synaptics": {
-            "description": "Detector NPU de Synaptics para modelos en formato .synap, utilizando el Synap SDK en hardware de Synaptics.",
-            "label": "Synaptics"
-        },
-        "zmq": {
-            "description": "Detector ZMQ IPC que descarga la inferencia a un proceso externo a través de un punto de conexión IPC de ZeroMQ.",
-            "label": "IPC de ZMQ",
-            "endpoint": {
-                "label": "Endpoint IPC de ZMQ",
-                "description": "Endpoint ZMQ al que conectarse."
-            },
-            "request_timeout_ms": {
-                "label": "Tiempo de espera de solicitud ZMQ en milisegundos",
-                "description": "Tiempo de espera para solicitudes ZMQ en milisegundos."
-            },
-            "linger_ms": {
-                "label": "Persistencia del socket ZMQ en milisegundos",
-                "description": "Periodo de persistencia del socket en milisegundos."
-            }
-        },
-        "hailo8l": {
-            "description": "Detector Hailo-8/Hailo-8L que utiliza modelos HEF y el SDK HailoRT para la inferencia en hardware Hailo.",
-            "label": "Hailo-8/Hailo-8L",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia Hailo (p. ej., 'PCIe', 'M.2')."
-            }
-        },
-        "onnx": {
-            "description": "Detector ONNX para ejecutar modelos ONNX; utilizará los backends de aceleración disponibles (CUDA/ROCm/OpenVINO) cuando estén disponibles.",
-            "label": "ONNX",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia ONNX (p. ej., 'AUTO', 'CPU', 'GPU')."
-            }
-        },
-        "description": "Configuración para detectores de objetos (backends de CPU, GPU y ONNX) y cualquier ajuste del modelo específico del detector.",
-        "openvino": {
-            "description": "Detector OpenVINO para CPU AMD e Intel, GPU Intel y hardware VPU Intel.",
-            "label": "OpenVINO",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia OpenVINO (p. ej., 'CPU', 'GPU', 'NPU')."
-            }
-        },
-        "tensorrt": {
-            "description": "Detector TensorRT para dispositivos Nvidia Jetson que utiliza motores TensorRT serializados para una inferencia acelerada.",
-            "label": "TensorRT",
-            "device": {
-                "label": "Índice de dispositivo GPU",
-                "description": "Índice del dispositivo GPU que se usará."
-            }
-        },
-        "degirum": {
-            "description": "Detector DeGirum para ejecutar modelos a través de la nube de DeGirum o servicios de inferencia local.",
-            "label": "DeGirum",
-            "location": {
-                "label": "Ubicación de inferencia",
-                "description": "Ubicación del motor de inferencia DeGirum (p. ej., '@cloud', '127.0.0.1')."
-            },
-            "zoo": {
-                "label": "Repositorio de modelos",
-                "description": "Ruta o URL al repositorio de modelos de DeGirum."
-            },
-            "token": {
-                "label": "Token de DeGirum Cloud",
-                "description": "Token para acceder a DeGirum Cloud."
-            }
-        },
-        "rknn": {
-            "description": "Detector RKNN para NPUs de Rockchip; ejecuta modelos compilados para RKNN en hardware de Rockchip.",
-            "label": "RKNN",
-            "num_cores": {
-                "label": "Número de núcleos NPU que se usarán.",
-                "description": "Número de núcleos NPU que se usarán (0 para automático)."
-            }
-        },
-        "model": {
-            "label": "Configuración de modelo específica del detector",
-            "description": "Opciones de configuración de modelo específicas del detector (ruta, tamaño de entrada, etc.).",
-            "path": {
-                "label": "Ruta del modelo de detector de objetos personalizado",
-                "description": "Ruta a un archivo de modelo de detección personalizado (o plus://<model_id> para modelos de Frigate+)."
-            },
-            "labelmap_path": {
-                "label": "Mapa de etiquetas para detector de objetos personalizado",
-                "description": "Ruta a un archivo labelmap que asigna clases numéricas a etiquetas de texto para el detector."
-            },
-            "width": {
-                "label": "Anchura de entrada del modelo de detección de objetos",
-                "description": "Anchura del tensor de entrada del modelo en píxeles."
-            },
-            "height": {
-                "label": "Altura de entrada del modelo de detección de objetos",
-                "description": "Altura del tensor de entrada del modelo en píxeles."
-            },
-            "labelmap": {
-                "label": "Personalización del mapa de etiquetas",
-                "description": "Sobrescrituras o entradas de reasignación que se fusionarán con el mapa de etiquetas estándar."
-            },
-            "attributes_map": {
-                "label": "Mapa de etiquetas de objetos a sus etiquetas de atributos",
-                "description": "Asignación de etiquetas de objetos a etiquetas de atributos usada para adjuntar metadatos (por ejemplo, 'car' -> ['license_plate'])."
-            },
-            "input_tensor": {
-                "label": "Forma del tensor de entrada del modelo",
-                "description": "Formato de tensor esperado por el modelo: 'nhwc' o 'nchw'."
-            },
-            "input_pixel_format": {
-                "label": "Formato de color de píxeles de entrada del modelo",
-                "description": "Espacio de color de píxeles esperado por el modelo: 'rgb', 'bgr' o 'yuv'."
-            },
-            "input_dtype": {
-                "label": "Tipo D de entrada del modelo",
-                "description": "Tipo de datos del tensor de entrada del modelo (por ejemplo, 'float32')."
-            },
-            "model_type": {
-                "label": "Tipo de modelo de detección de objetos",
-                "description": "Tipo de arquitectura del modelo del detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilizado por algunos detectores para su optimización."
-            }
-        },
-        "model_path": {
-            "label": "Ruta de modelo específica del detector",
-            "description": "Ruta del archivo binario del modelo detector si lo requiere el detector elegido."
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "Detector EdgeTPU que ejecuta modelos TensorFlow Lite compilados para Coral EdgeTPU mediante el delegado EdgeTPU.",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia EdgeTPU (p. ej., 'usb', 'pci')."
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "Detector MemryX MX3 que ejecuta modelos DFP compilados en aceleradores MemryX.",
-            "device": {
-                "label": "Ruta del dispositivo",
-                "description": "Dispositivo que se usará para la inferencia MemryX (p. ej., 'PCIe')."
-            }
-        }
-    },
     "database": {
         "label": "Base de datos",
         "description": "Configuración de la base de datos SQLite utilizada por Frigate para almacenar los metadatos de los objetos rastreados y las grabaciones.",
@@ -685,14 +506,6 @@
         "time_format": {
             "label": "Formato de hora",
             "description": "Formato de hora que se usará en la interfaz (browser, 12hour o 24hour)."
-        },
-        "date_style": {
-            "label": "Estilo de fecha",
-            "description": "Estilo de fecha que se usará en la interfaz (full, long, medium, short)."
-        },
-        "time_style": {
-            "label": "Estilo de hora",
-            "description": "Estilo de hora que se usará en la interfaz (full, long, medium, short)."
         }
     },
     "audio_transcription": {
@@ -1202,10 +1015,6 @@
             "label": "Habilitar Birdseye",
             "description": "Habilita o deshabilita la función de vista Birdseye."
         },
-        "mode": {
-            "label": "Modo de seguimiento",
-            "description": "Modo para incluir cámaras en Birdseye: 'objects', 'motion' o 'continuous'."
-        },
         "order": {
             "label": "Posición",
             "description": "Posición numérica que controla el orden de la cámara en el diseño de Birdseye."
@@ -1444,10 +1253,6 @@
                 "label": "Retención predeterminada",
                 "description": "Número predeterminado de días durante los que conservar instantáneas."
             },
-            "mode": {
-                "label": "Modo de retención",
-                "description": "Modo de retención: all (guarda todos los segmentos), motion (guarda segmentos con movimiento) o active_objects (guarda segmentos con objetos activos)."
-            },
             "objects": {
                 "label": "Retención por objeto",
                 "description": "Sobrescrituras por objeto para los días de retención de instantáneas."
@@ -1509,50 +1314,6 @@
         "enabled": {
             "label": "Habilitar TLS",
             "description": "Habilita TLS para la interfaz web y la API de Frigate en el puerto TLS configurado."
-        }
-    },
-    "model": {
-        "label": "Modelo de detección",
-        "description": "Ajustes para configurar un modelo de detección de objetos personalizado y su forma de entrada.",
-        "path": {
-            "label": "Ruta del modelo de detector de objetos personalizado",
-            "description": "Ruta a un archivo de modelo de detección personalizado (o plus://<model_id> para modelos de Frigate+)."
-        },
-        "labelmap_path": {
-            "label": "Mapa de etiquetas para detector de objetos personalizado",
-            "description": "Ruta a un archivo labelmap que asigna clases numéricas a etiquetas de texto para el detector."
-        },
-        "width": {
-            "label": "Anchura de entrada del modelo de detección de objetos",
-            "description": "Anchura del tensor de entrada del modelo en píxeles."
-        },
-        "height": {
-            "label": "Altura de entrada del modelo de detección de objetos",
-            "description": "Altura del tensor de entrada del modelo en píxeles."
-        },
-        "labelmap": {
-            "label": "Personalización del mapa de etiquetas",
-            "description": "Sobrescrituras o entradas de reasignación que se fusionarán con el mapa de etiquetas estándar."
-        },
-        "attributes_map": {
-            "label": "Mapa de etiquetas de objetos a sus etiquetas de atributos",
-            "description": "Asignación de etiquetas de objetos a etiquetas de atributos usada para adjuntar metadatos (por ejemplo, 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-            "label": "Forma del tensor de entrada del modelo",
-            "description": "Formato de tensor esperado por el modelo: 'nhwc' o 'nchw'."
-        },
-        "input_pixel_format": {
-            "label": "Formato de color de píxeles de entrada del modelo",
-            "description": "Espacio de color de píxeles esperado por el modelo: 'rgb', 'bgr' o 'yuv'."
-        },
-        "input_dtype": {
-            "label": "Tipo D de entrada del modelo",
-            "description": "Tipo de datos del tensor de entrada del modelo (por ejemplo, 'float32')."
-        },
-        "model_type": {
-            "label": "Tipo de modelo de detección de objetos",
-            "description": "Tipo de arquitectura del modelo del detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilizada por algunos detectores para su optimización."
         }
     },
     "classification": {

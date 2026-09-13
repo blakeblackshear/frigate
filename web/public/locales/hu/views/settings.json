@@ -2,8 +2,6 @@
   "documentTitle": {
     "default": "Beállítások - Frigate",
     "authentication": "Hitelesítési beállítások - Frigate",
-    "camera": "Kamera beállítások - Frigate",
-    "classification": "Osztályozási beállítások - Frigate",
     "masksAndZones": "Maszk és zónaszerkesztő - Frigate",
     "object": "Hibakeresés - Frigate",
     "general": "Felhasználói felület beállításai - Frigate",
@@ -20,7 +18,6 @@
   },
   "menu": {
     "ui": "UI",
-    "classification": "Osztályozás",
     "cameras": "Kamera beállítások",
     "masksAndZones": "Maszkok / Zónák",
     "motionTuner": "Mozgás finomhangolása",
@@ -119,7 +116,6 @@
   },
   "enrichments": {
     "semanticSearch": {
-      "readTheDocumentation": "Olvassa el a Dokumentációt",
       "reindexNow": {
         "error": "Újraindexálás megkezdése sikertelen: {{errorMessage}}",
         "label": "Újraindexálás Most",
@@ -151,7 +147,6 @@
     },
     "faceRecognition": {
       "title": "Arcfelismerés",
-      "readTheDocumentation": "Olvassa el a Dokumentációt",
       "modelSize": {
         "label": "Modell Mérete",
         "desc": "Az arcfelismeréshez használt modell mérete.",
@@ -168,7 +163,6 @@
     },
     "licensePlateRecognition": {
       "title": "Rendszámtábla Felismerés",
-      "readTheDocumentation": "Olvassa el a Dokumentációt",
       "desc": "A Frigate képes felismerni a járművek rendszámtábláit, és automatikusan hozzáadja a felismert karaktereket a recognized_license_plate mezőhöz, vagy egy ismert nevet al_címkeként rendel az autótípusú objektumokhoz. Egy gyakori felhasználási eset lehet a bejáróra behajtó vagy az utcán elhaladó autók rendszámtáblájának olvasása."
     },
     "toast": {
@@ -182,7 +176,6 @@
   "notification": {
     "title": "Értesítések",
     "notificationSettings": {
-      "documentation": "Olvassa el a Dokumentációt",
       "title": "Értesítési Beállítások",
       "desc": "A Frigate natívan képes push értesítéseket küldeni az eszközére, ha böngészőben fut vagy PWA-ként van telepítve."
     },
@@ -218,7 +211,6 @@
     },
     "notificationUnavailable": {
       "title": "Értesítés elérhetetlen",
-      "documentation": "Olvassa el a Dokumentációt",
       "desc": "A webes push értesítésekhez biztonságos környezet (<code>https://…</code>) szükséges. Ez egy böngészői korlátozás. A értesítések használatához férjen hozzá biztonságosan a Frigate-hez."
     },
     "sendTestNotification": "Teszt értesítés küldése",
@@ -263,10 +255,8 @@
       "title": "Pillanatkép Konfiguráció",
       "table": {
         "snapshots": "Pillanatképek",
-        "camera": "Kamera",
-        "cleanCopySnapshots": "<code>clean_copy</code> pillanatképek"
+        "camera": "Kamera"
       },
-      "documentation": "Olvassa el a dokumentációt",
       "desc": "A Frigate+ szolgáltatásba történő beküldéshez a konfigurációban engedélyezni kell a pillanatképeket és a <code>clean_copy</code> pillanatképeket is.",
       "cleanCopyWarning": "Néhány kamerán engedélyezve vannak a pillanatképek, de a tiszta másolat ki van kapcsolva. Ahhoz, hogy ezekről a kamerákról képeket tudjon beküldeni a Frigate+ szolgáltatásba, engedélyeznie kell a <code>clean_copy</code> beállítást a pillanatkép konfigurációban."
     },
@@ -398,7 +388,6 @@
       "allObjects": "Minden Tárgy",
       "speedEstimation": {
         "title": "Sebesség Becslés",
-        "docs": "Olvassa el a dokumentációt",
         "lineADistance": "A vonal távsolság {{unit}}",
         "lineBDistance": "B vonal távolsága {{unit}}",
         "lineCDistance": "C vonal távolsága {{unit}}",
@@ -511,12 +500,10 @@
         "title": "A mozgásmaszkokat arra használják, hogy megakadályozzák a nem kívánt mozgástípusok észlelését. A túlzott maszkolás megnehezíti az objektumok követését."
       },
       "context": {
-        "documentation": "Olvassa el a dokumentációt",
         "title": "A mozgásmaszkokat arra használják, hogy megakadályozzák a nem kívánt mozgástípusok észlelését (például faágak, kamera időbélyegek). A mozgásmaszkokat <em>nagyon megfontoltan</em> kell alkalmazni, mert a túlzott maszkolás megnehezíti az objektumok követését."
       },
       "edit": "Mozgási Maszk Módosítása",
       "polygonAreaTooLarge": {
-        "documentation": "Olvassa el a dokumentációt",
         "title": "A mozgásmaszk a kamera képkockájának {{polygonArea}}%-át fedi le. Nagy mozgásmaszkok használata nem ajánlott.",
         "tips": "A mozgásmaszkok nem akadályozzák meg az objektumok észlelését. Ehelyett ajánlott kötelező zónát használni."
       },
@@ -562,7 +549,6 @@
     },
     "objectShapeFilterDrawing": {
       "score": "Pontszám",
-      "document": "Olvassa el a dokumentációt ",
       "area": "Terület",
       "title": "Objektum alak szűrő rajzolás",
       "desc": "Rajzoljon egy téglalapot a képre a terület- és arányadatok megtekintéséhez",
@@ -631,78 +617,6 @@
       "desc": "A kontúrterület értékét arra használják, hogy eldöntsék, melyik megváltozott pixelekből álló csoport minősül mozgásnak. <em>Alapértelmezett: 10</em>"
     }
   },
-  "camera": {
-    "streams": {
-      "title": "Adások",
-      "desc": "Ideiglenesen tiltsa le a kamerát a Frigate újraindításáig. A kamera teljes letiltása megállítja a Frigate feldolgozását az adott kamera közvetítésénél. Az észlelés, rögzítés és hibakeresés nem lesz elérhető.<br /> <em>Megjegyzés: Ez nem tiltja le a go2rtc újraközvetítéseket.</em>"
-    },
-    "review": {
-      "title": "Áttekintés",
-      "alerts": "Riasztások ",
-      "detections": "Érzékelések ",
-      "desc": "Ideiglenesen engedélyezze/tiltsa le a riasztásokat és észleléseket ennél a kameránál a Frigate újraindításáig. Letiltás esetén nem keletkeznek új ellenőrzési elemek. "
-    },
-    "reviewClassification": {
-      "readTheDocumentation": "Olvassa el a Dokumentációt",
-      "title": "Attekintés Osztályozás",
-      "noDefinedZones": "Nincs zóna meghatározva ehhez a kamerához.",
-      "objectAlertsTips": "Minden {{alertsLabels}} tárgy a {{cameraName}} -n Riasztásként fog megjelenni.",
-      "selectDetectionsZones": "Válassza ki a zónákat az Észleléshez",
-      "limitDetections": "Korlátozza az észleléseket adott zónákra",
-      "selectAlertsZones": "Válassza ki a zónákat a Riasztásokhoz",
-      "zoneObjectAlertsTips": "Minden {{alertsLabels}}tárgy észlelés {{zone}}-ban/-ben a {{cameraName}}-n Riasztásként lesz megjelenítve.",
-      "objectDetectionsTips": "Minden {{detectionsLabels}} tárgy, ami nincs bekategorizálva a {{cameraName}}-n Észleléskén lesz megjelenítve függetlenül attól, hogy melyik zónában vannak.",
-      "desc": "A Frigate az ellenőrzési elemeket Riasztásokra és Észlelésekre osztja. Alapértelmezés szerint az összes <em>személy</em> és <em>autó</em> objektum Riasztásnak számít. Az ellenőrzési elemek kategorizálását finomíthatja azzal, hogy megadja az észleléshez szükséges zónákat.",
-      "zoneObjectDetectionsTips": {
-        "text": "Az összes {{detectionsLabels}} objektum, amely nincs kategorizálva a(z) {{zone}} zónában a(z) {{cameraName}} kamerán, Észlelésként lesz megjelenítve.",
-        "notSelectDetections": "Az összes {{detectionsLabels}} objektum, amelyet a(z) {{zone}} zónában észleltek a(z) {{cameraName}} kamerán, és amely nem lett Riasztásként kategorizálva, Észlelésként lesz megjelenítve, függetlenül attól, hogy melyik zónában vannak.",
-        "regardlessOfZoneObjectDetectionsTips": "Az összes {{detectionsLabels}} objektum, amely nincs kategorizálva a(z) {{cameraName}} kamerán, Észlelésként lesz megjelenítve zónától függetlenül."
-      },
-      "unsavedChanges": "Nem mentett Ellenőrzési Kategorizálási beállítások a(z) {{camera}} kamerához",
-      "toast": {
-        "success": "Az Ellenőrzési Kategorizálás beállításai elmentésre kerültek. A módosítások alkalmazásához indítsa újra a Frigate-et."
-      }
-    },
-    "title": "Kamera Beállítások",
-    "object_descriptions": {
-      "title": "Generatív AI Tárgy Leírások",
-      "desc": "Ideiglenesen engedélyezze/tiltsa le a generatív AI objektumleírásokat ehhez a kamerához. Letiltás esetén a rendszer nem kéri le a mesterséges intelligencia által generált leírásokat a kamerán követett objektumokhoz."
-    },
-    "addCamera": "Új Kamera Hozzáadása",
-    "editCamera": "Kamera Szerkesztése:",
-    "selectCamera": "Válasszon ki egy Kamerát",
-    "backToSettings": "Vissza a Kamera Beállításokhoz",
-    "cameraConfig": {
-      "add": "Kamera Hozzáadása",
-      "edit": "Kamera Szerkesztése",
-      "name": "Kamera Neve",
-      "nameRequired": "Kamera nevének megadása szükséges",
-      "description": "Konfigurálja a kamera beállításait, beleértve a stream bemeneteket és szerepeket.",
-      "nameInvalid": "A kamera neve csak betűket, számokat, aláhúzásjeleket vagy kötőjeleket tartalmazhat",
-      "namePlaceholder": "pl: bejarati_ajto",
-      "enabled": "Engedélyezve",
-      "ffmpeg": {
-        "inputs": "Bemeneti Adatfolyamok",
-        "path": "Adatfolyam útvonal",
-        "pathRequired": "Adatfolyam útvonal szükséges",
-        "pathPlaceholder": "rtsp://...",
-        "roles": "Szerepkörök",
-        "rolesRequired": "Legalább egy szerepkör megadása kötelező",
-        "rolesUnique": "Minden szerepkör (hang, érzékelés, rögzítés) csak egy adatfolyamhoz rendelhető hozzá",
-        "addInput": "Bejövő Adatfolyam Hozzáadása",
-        "removeInput": "Bejövő Adatfolyam Eltávolítása",
-        "inputsRequired": "Legalább egy bemeneti adatfolyam szükséges"
-      },
-      "toast": {
-        "success": "A következő kamera sikeresen mentve: {{cameraName}}"
-      },
-      "nameLength": "A kamera nevének kevesebbnek kell lennie 24 karakternél."
-    },
-    "review_descriptions": {
-      "title": "Generatív MI Áttekintési Leírások",
-      "desc": "Ideiglenesen engedélyezze/tiltsa le a generatív mesterséges intelligencia által generált leírásokat ehhez a kamerához. Letiltás esetén a mesterséges intelligencia által generált leírások nem lesznek lekérve a kamerán található elemhez."
-    }
-  },
   "triggers": {
     "documentTitle": "Trigger-ek",
     "management": {
@@ -726,7 +640,6 @@
       "description": "Leírás"
     },
     "actions": {
-      "alert": "Megjelölés Riasztásként",
       "notification": "Értesítés küldése"
     },
     "dialog": {
@@ -782,11 +695,6 @@
           "error": {
             "min": "Legalább egy műveletet ki kell választani."
           }
-        },
-        "friendly_name": {
-          "title": "Barátságos név",
-          "placeholder": "Nevezd meg vagy írd le ezt a triggert",
-          "description": "Egy opcionális felhasználóbarát név vagy leíró szöveg ehhez az eseményindítóhoz."
         }
       }
     },
@@ -888,10 +796,5 @@
     "overriddenGlobalTooltip": "Ez a kamera felülírja a globális konfigurációs beállításokat ebben a részben",
     "overriddenBaseConfig": "Felülírt (Alapbeállítás)",
     "overriddenBaseConfigTooltip": "A {{profile}} profil felülírja a konfigurációs beállításokat ebben a részben"
-  },
-  "detectionModel": {
-    "plusActive": {
-      "label": "A jelenlegi modell forrása"
-    }
   }
 }

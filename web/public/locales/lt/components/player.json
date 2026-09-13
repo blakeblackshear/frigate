@@ -12,7 +12,6 @@
     "title": "Transliacija nepasiekiama",
     "desc": "Jokių transliacijos kadrų negauta iš {{cameraName}}<code>detect</code>, patikrinkite klaidų sąrašus"
   },
-  "cameraDisabled": "Kamera yra išjungta",
   "stats": {
     "streamType": {
       "title": "Transliacijos Tipas:",

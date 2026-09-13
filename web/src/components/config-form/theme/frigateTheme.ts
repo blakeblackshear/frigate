@@ -22,6 +22,7 @@ import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
 import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
 import { ReviewLabelSwitchesWidget } from "./widgets/ReviewLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
+import { BirdseyeModesWidget } from "./widgets/BirdseyeModesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
 import { GenAIModelWidget } from "./widgets/GenAIModelWidget";
@@ -48,7 +49,7 @@ import { MultiSchemaFieldTemplate } from "./templates/MultiSchemaFieldTemplate";
 import { WrapIfAdditionalTemplate } from "./templates/WrapIfAdditionalTemplate";
 
 import { LayoutGridField } from "./fields/LayoutGridField";
-import { DetectorHardwareField } from "./fields/DetectorHardwareField";
+import { ModelsField } from "./fields/ModelsField";
 import { ReplaceRulesField } from "./fields/ReplaceRulesField";
 import { CameraInputsField } from "./fields/CameraInputsField";
 import { DictAsYamlField } from "./fields/DictAsYamlField";
@@ -87,6 +88,7 @@ export const frigateTheme: FrigateTheme = {
     audioLabels: AudioLabelSwitchesWidget,
     reviewLabels: ReviewLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
+    birdseyeModes: BirdseyeModesWidget,
     timezoneSelect: TimezoneSelectWidget,
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
@@ -109,7 +111,7 @@ export const frigateTheme: FrigateTheme = {
   },
   fields: {
     LayoutGridField: LayoutGridField,
-    DetectorHardwareField: DetectorHardwareField,
+    ModelsField: ModelsField,
     ReplaceRulesField: ReplaceRulesField,
     CameraInputsField: CameraInputsField,
     DictAsYamlField: DictAsYamlField,

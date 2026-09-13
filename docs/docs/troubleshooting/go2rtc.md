@@ -15,7 +15,7 @@ When a stream won't play or behaves oddly, the most important first step is to f
 
 ### 1. Read the go2rtc logs
 
-Access the go2rtc logs in the Frigate UI under <NavPath path="System Logs" /> in the sidebar (select the **go2rtc** tab). If go2rtc cannot connect to your camera you will usually see a clear error here: `401 Unauthorized` (bad or incorrectly encoded credentials), `Connection refused` / `timeout` (wrong IP, port, or the camera is at its connection limit), or `404 Not Found` (wrong RTSP path, or the referenced stream name does not exist).
+Access the go2rtc logs in the Frigate UI under <NavPath path="Logs" /> in the sidebar (select the **go2rtc** tab). If go2rtc cannot connect to your camera you will usually see a clear error here: `401 Unauthorized` (bad or incorrectly encoded credentials), `Connection refused` / `timeout` (wrong IP, port, or the camera is at its connection limit), or `404 Not Found` (wrong RTSP path, or the referenced stream name does not exist).
 
 ### 2. Test the stream in the go2rtc web interface
 

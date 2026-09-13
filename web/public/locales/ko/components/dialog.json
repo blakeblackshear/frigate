@@ -59,7 +59,6 @@
       "error": {
         "failed": "내보내기 대기열 등록 실패: {{error}}",
         "endTimeMustAfterStartTime": "종료 시간은 시작 시간 이후여야 합니다",
-        "noVaildTimeSelected": "유효한 시간 범위가 선택되지 않았습니다",
         "noValidTimeSelected": "유효한 시간 범위가 선택되지 않았습니다"
       },
       "view": "보기",

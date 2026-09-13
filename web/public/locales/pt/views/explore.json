@@ -21,8 +21,7 @@
       },
       "context": "O Frigate está a transferir os modelos de incorporação necessários para suportar a funcionalidade de \"Procura Semântica\". Isto pode levar vários minutos, dependendo da velocidade da sua ligação de rede.",
       "tips": {
-        "context": "Talvez queira reindexar as incorporações dos seus objetos rastreados depois de os modelos serem transferidos.",
-        "documentation": "Leia a documentação"
+        "context": "Talvez queira reindexar as incorporações dos seus objetos rastreados depois de os modelos serem transferidos."
       },
       "error": "Ocorreu um erro. Verifique os registos do Frigate."
     },
@@ -109,66 +108,15 @@
   "type": {
     "details": "detalhes",
     "video": "vídeo",
-    "object_lifecycle": "ciclo de vida do objeto",
     "snapshot": "captura de ecrã"
   },
   "objectLifecycle": {
-    "title": "Ciclo de vida do objeto",
-    "lifecycleItemDesc": {
-      "attribute": {
-        "other": "{{label}} reconhecido como {{attribute}}",
-        "faceOrLicense_plate": "{{attribute}} detetado por {{label}}"
-      },
-      "gone": "{{label}} saiu",
-      "heard": "{{label}} ouvido",
-      "visible": "{{label}} detectado",
-      "external": "{{label}} detetado",
-      "entered_zone": "{{label}} entrou em {{zones}}",
-      "active": "{{label}} se tornou ativo",
-      "stationary": "{{label}} se tornou estacionário",
-      "header": {
-        "zones": "Zonas",
-        "ratio": "Proporção",
-        "area": "Área"
-      }
-    },
-    "annotationSettings": {
-      "title": "Definições de Anotação",
-      "offset": {
-        "documentation": "Leia a documentação ",
-        "desc": "Esses dados vêm do feed de detecção da sua câmara, mas são sobrepostos nas imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e o vídeo não se alinharão perfeitamente. No entanto, o campo <code>annotation_offset</code> pode ser usado para ajustar isso.",
-        "tips": "DICA: Imagine que há um clipe de evento com uma pessoa a andar da esquerda para a direita. Se a caixa delimitadora da linha do tempo do evento estiver consistentemente à esquerda da pessoa, o valor deve ser diminuído. Da mesma forma, se uma pessoa estiver andando da esquerda para a direita e a caixa delimitadora estiver consistentemente à frente da pessoa, o valor deve ser aumentado.",
-        "label": "Deslocamento de Anotação",
-        "millisecondsToOffset": "Milissegundos para deslocar as anotações de detecção. <em>Padrão: 0</em>",
-        "toast": {
-          "success": "O deslocamento de anotação para {{camera}} foi salvo no arquivo de configuração. Reinicie o Frigate para aplicar as alterações."
-        }
-      },
-      "showAllZones": {
-        "title": "Mostrar Todas as Zonas",
-        "desc": "Mostrar sempre as zonas nas imagens onde os objetos entraram numa zona."
-      }
-    },
-    "carousel": {
-      "previous": "Slide anterior",
-      "next": "Próximo slide"
-    },
-    "noImageFound": "Nenhuma imagem encontrada para este carimbo de data/hora.",
-    "createObjectMask": "Criar Máscara de Objeto",
-    "adjustAnnotationSettings": "Ajustar definições de anotação",
-    "autoTrackingTips": "As posições da caixa delimitadora serão imprecisas para as câmaras com rastreamento automático.",
-    "scrollViewTips": "Deslize para ver os momentos significativos do ciclo de vida deste objeto.",
-    "count": "{{first}} de {{second}}",
-    "trackedPoint": "Ponto Rastreado"
+    "noImageFound": "Nenhuma imagem encontrada para este carimbo de data/hora."
   },
   "itemMenu": {
     "downloadSnapshot": {
       "aria": "Descarregar captura",
       "label": "Descarregar captura"
-    },
-    "viewObjectLifecycle": {
-      "label": "Ver ciclo de vida do objeto",
-      "aria": "Mostrar o ciclo de vida do objeto"
     },
     "viewInHistory": {
       "label": "Ver no Histórico",

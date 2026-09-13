@@ -40,7 +40,6 @@
     "title": "스트림 오프라인",
     "desc": "{{cameraName}} 카메라의 <code>detect</code> 스트림에서 수신된 프레임이 없습니다. 오류 로그를 확인하세요"
   },
-  "cameraDisabled": "카메라를 이용할 수 없습니다",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Frigate+에 프레임을 성공적으로 제출했습니다"

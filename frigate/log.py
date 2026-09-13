@@ -13,9 +13,12 @@ from functools import wraps
 from logging.handlers import QueueHandler, QueueListener
 from multiprocessing.managers import SyncManager
 from queue import Empty, Queue
-from typing import Any
+from typing import Any, TypeVar, cast
 
 from frigate.util.builtin import clean_camera_user_pass
+
+# lets a decorator keep the signature of the function it wraps
+_F = TypeVar("_F", bound=Callable[..., Any])
 
 LOG_HANDLER = logging.StreamHandler()
 LOG_HANDLER.setFormatter(
@@ -242,10 +245,10 @@ def __redirect_fd_to_queue(queue: Queue[str]) -> Generator[None, None, None]:
             pass
 
 
-def redirect_output_to_logger(logger: logging.Logger, level: int) -> Any:
+def redirect_output_to_logger(logger: logging.Logger, level: int) -> Callable[[_F], _F]:
     """Decorator to redirect both Python sys.stdout/stderr and C-level stdout to logger."""
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: _F) -> _F:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             queue: Queue[str] = Queue()
@@ -275,7 +278,7 @@ def redirect_output_to_logger(logger: logging.Logger, level: int) -> Any:
 
             return result
 
-        return wrapper
+        return cast(_F, wrapper)
 
     return decorator
 

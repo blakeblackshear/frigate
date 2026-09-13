@@ -304,7 +304,7 @@ Topic with current state of notifications. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/status/<role>`
 
-Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`). Possible values are:
+Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`, `record_sub`). `record_sub` is only published for cameras with [sub stream recording](/configuration/record#sub-stream-recording) enabled, and is tracked separately from `record` so a healthy main stream can't hide a stalled sub stream. Possible values are:
 
 - `online`: Stream is running and being processed
 - `offline`: Stream is offline and is being restarted
@@ -553,22 +553,25 @@ must be enabled in the configuration.
 
 Topic with current state of Birdseye for a camera. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/birdseye_mode/set`
+### `frigate/<camera_name>/birdseye_modes/set`
 
-Topic to set Birdseye mode for a camera. Birdseye offers different modes to customize under which circumstances the camera is shown.
+Topic to set the Birdseye activity types for a camera. Send one uppercase activity type or combine multiple types with commas, for example `MOTION,ALERTS`.
 
-_Note: Changing the value from `CONTINUOUS` -> `MOTION | OBJECTS` will take up to 30 seconds for
+_Note: Changing the value from `CONTINUOUS` to non-continuous activity types will take up to 30 seconds for
 the camera to be removed from the view._
 
-| Command      | Description                                                       |
-| ------------ | ----------------------------------------------------------------- |
-| `CONTINUOUS` | Always included                                                   |
-| `MOTION`     | Show when detected motion within the last 30 seconds are included |
-| `OBJECTS`    | Shown if an active object tracked within the last 30 seconds      |
+| Command       | Description                                                      |
+| ------------- | ---------------------------------------------------------------- |
+| `CONTINUOUS`  | Always included                                                  |
+| `MOTION`      | Shown if motion was detected within the last 30 seconds          |
+| `ALL_OBJECTS` | Shown if a tracked object was present within the last 30 seconds |
+| `ALERTS`      | Shown while an alert review item is in progress                  |
+| `DETECTIONS`  | Shown while a detection review item is in progress               |
+| `NONE`        | Never included                                                   |
 
-### `frigate/<camera_name>/birdseye_mode/state`
+### `frigate/<camera_name>/birdseye_modes/state`
 
-Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+Topic with the current Birdseye activity types for a camera. Multiple enabled types are published as a comma-separated value in the order `CONTINUOUS`, `MOTION`, `ALL_OBJECTS`, `ALERTS`, `DETECTIONS`. `NONE` is published when no activity types are enabled.
 
 ### `frigate/<camera_name>/notifications/set`
 

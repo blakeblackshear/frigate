@@ -18,7 +18,10 @@ class RecordingsDataTypeEnum(str, Enum):
 
 
 class RecordingsDataPublisher(Publisher[Any]):
-    """Publishes latest recording data."""
+    """Publishes latest recording data.
+
+    Payloads are (camera, stream_type, timestamp, cache_path) on every topic.
+    """
 
     topic_base = "recordings/"
 

@@ -4,8 +4,7 @@
       "setting": {
         "audio": {
           "tips": {
-            "title": "此串流必須從你的鏡頭輸出音訊並在 go2rtc 中設定。",
-            "document": "閱讀文件 "
+            "title": "此串流必須從你的鏡頭輸出音訊並在 go2rtc 中設定。"
           }
         },
         "streamMethod": {

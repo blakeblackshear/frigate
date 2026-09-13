@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Read or write the ownership sweep sentinel without following symlinks.
+
+The sentinel lives in /config, which the unprivileged runtime user owns, so it
+can be swapped for a symlink. read trusts only a root-owned regular file; write
+never follows a symlink or fifo onto another file.
+
+Usage:
+  safe-sentinel read PATH            print content, exit 0 only if root-owned regular file
+  safe-sentinel write PATH CONTENT   write CONTENT to a regular file at PATH
+"""
+
+import errno
+import os
+import stat
+import sys
+
+MODE = 0o644
+
+
+def do_read(path: str) -> int:
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+    except OSError:
+        return 1
+    try:
+        st = os.fstat(fd)
+        if not stat.S_ISREG(st.st_mode) or st.st_uid != 0:
+            return 1
+        sys.stdout.buffer.write(os.read(fd, 4096))
+    finally:
+        os.close(fd)
+    return 0
+
+
+def do_write(path: str, content: str) -> int:
+    # O_NONBLOCK so a fifo fails fast (ENXIO) instead of blocking the open.
+    flags = os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK
+    replace = (errno.ELOOP, errno.ENXIO)
+    try:
+        fd = os.open(path, flags, MODE)
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            os.close(fd)
+            raise OSError(errno.ELOOP, "not a regular file")
+    except OSError as err:
+        if err.errno not in replace:
+            raise
+        os.unlink(path)
+        fd = os.open(path, flags | os.O_EXCL, MODE)
+    try:
+        os.ftruncate(fd, 0)
+        os.write(fd, content.encode())
+        # keep it root-owned so a later sweep that chowned the old sentinel to
+        # the runtime user can't make the next read reject and re-sweep
+        os.fchown(fd, 0, 0)
+    finally:
+        os.close(fd)
+    return 0
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) == 3 and argv[1] == "read":
+        return do_read(argv[2])
+    if len(argv) == 4 and argv[1] == "write":
+        try:
+            return do_write(argv[2], argv[3])
+        except OSError:
+            return 1
+    print("usage: safe-sentinel read PATH | write PATH CONTENT", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

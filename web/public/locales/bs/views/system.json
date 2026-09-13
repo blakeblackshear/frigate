@@ -107,12 +107,7 @@
       },
       "npuUsage": "Korišćenje NPU",
       "npuMemory": "Memorija NPU",
-      "npuTemperature": "Temperatura NPU",
-      "intelGpuWarning": {
-        "title": "Upozorenje o statistikama Intel GPU",
-        "message": "Statistike GPU nedostupne",
-        "description": "Ovo je poznati bug u alatima za prikaz statistika Intel GPU (intel_gpu_top) gdje će se prekiniti i ponovo vratiti GPU korišćenje od 0% čak i u slučajevima kada se hardverska akceleracija i detekcija objekata ispravno izvršavaju na (i)GPU. Ovo nije bug Frigate. Možete ponovo pokrenuti host kako biste privremeno popravili problem i potvrdili da GPU radi ispravno. Ovo ne utiče na performanse."
-      }
+      "npuTemperature": "Temperatura NPU"
     },
     "otherProcesses": {
       "title": "Drugi procesi",
@@ -223,7 +218,6 @@
     "cameraIsOffline": "{{camera}} je offline",
     "detectIsSlow": "{{detect}} je spor ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} je vrlo spor ({{speed}} ms)",
-    "shmTooLow": "/dev/shm alokacija ({{total}} MB) treba povećati na najmanje {{min}} MB.",
     "debugReplayActive": "Debug ponavljanje sesije je aktivno"
   },
   "enrichments": {

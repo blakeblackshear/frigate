@@ -202,11 +202,7 @@
       "title": "Riistvara info",
       "npuUsage": "NPU kasutus",
       "npuMemory": "NPU mälu",
-      "npuTemperature": "NPU temperatuur",
-      "intelGpuWarning": {
-        "title": "Inteli GPU statistika hoiatus",
-        "message": "GPU statistika pole saadaval"
-      }
+      "npuTemperature": "NPU temperatuur"
     },
     "otherProcesses": {
       "series": {

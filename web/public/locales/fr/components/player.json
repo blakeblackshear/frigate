@@ -12,7 +12,6 @@
     "desc": "Aucune image n'a été reçue sur le flux de <code>détection</code> de la caméra {{cameraName}}. Vérifiez le journal d'erreurs."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 ou une version supérieure est requise pour ce type de flux en direct.",
-  "cameraDisabled": "La caméra est désactivée.",
   "stats": {
     "streamType": {
       "title": "Type de flux :",

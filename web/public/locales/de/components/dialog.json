@@ -12,18 +12,8 @@
   "explore": {
     "plus": {
       "review": {
-        "true": {
-          "label": "Bestätigen Sie das Label für Frigate Plus",
-          "true_one": "Das ist ein/eine {{label}}",
-          "true_other": "Dies sind {{label}}"
-        },
         "state": {
           "submitted": "Übermittelt"
-        },
-        "false": {
-          "false_one": "Das ist kein(e) {{label}}",
-          "false_other": "Das sind kein(e) {{label}}",
-          "label": "Bestätige dieses Label nicht für Frigate Plus"
         },
         "question": {
           "label": "Bestätige diese Beschriftung für Frigate Plus",
@@ -68,7 +58,6 @@
       "error": {
         "endTimeMustAfterStartTime": "Die Endzeit darf nicht vor der Startzeit liegen",
         "failed": "Fehler beim Export in die Warteschlange: {{error}}",
-        "noVaildTimeSelected": "Kein gültiger Zeitraum ausgewählt",
         "noValidTimeSelected": "Kein gültiger Zeitraum ausgewählt"
       },
       "success": "Export erfolgreich gestartet. Die Datei befindet sich auf der Exportseite.",
@@ -137,8 +126,6 @@
       "toast": {
         "started_one": "1 Export gestartet.",
         "started_other": "{{count}} Exporte gestartet.",
-        "startedNoCase_one": "1 Export gestartet.",
-        "startedNoCase_other": "{{count}} Exports gestartet.",
         "partial": "{{successful}} von {{total}} Exporten gestartet. Fehlgeschlagen: {{failedItems}}",
         "failed": "Fehler beim Starten der {{total}} Exporte. Fehler: {{failedItems}}"
       }
@@ -148,7 +135,6 @@
     "restreaming": {
       "disabled": "Für diese Kamera ist das Restreaming nicht aktiviert.",
       "desc": {
-        "readTheDocumentation": "Weitere Informationen in der Dokumentation",
         "title": "Konfiguriere go2rtc, um erweiterte Live-Ansichtsoptionen und Audio für diese Kamera zu nutzen."
       }
     },

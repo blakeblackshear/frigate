@@ -40,15 +40,6 @@
       "12hour": "dd/MM h:mm:ssa",
       "24hour": "d MMM HH:mm:ss"
     },
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "thời gian 12 giờ (không giây)",
-      "24hour": "thời gian 24 giờ (không giây)"
-    },
-    "formattedTimestampWithYear": {
-      "12hour": "thời gian 12 giờ kèm năm",
-      "24hour": "thời gian 24 giờ kèm năm"
-    },
-    "formattedTimestampOnlyMonthAndDay": "chỉ tháng và ngày",
     "yr": "{{time}} năm",
     "h": "{{time}} giờ",
     "formattedTimestampMonthDayYear": {
@@ -154,7 +145,6 @@
     "theme": {
       "label": "Giao diện",
       "red": "Đỏ",
-      "contrast": "tương phản",
       "blue": "Xanh dương",
       "green": "Xanh lá",
       "nord": "Nord",

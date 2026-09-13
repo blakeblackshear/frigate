@@ -23,6 +23,7 @@ export type BatchExportBody = {
   export_case_id?: string;
   new_case_name?: string;
   new_case_description?: string;
+  stream?: ExportStreamSelection;
 };
 
 export const MAX_BATCH_EXPORT_ITEMS = 50;
@@ -59,12 +60,15 @@ export type StartExportResponse = {
   status?: string | null;
 };
 
+export type ExportStreamSelection = "auto" | "main" | "sub";
+
 export type ExportJobStep =
   | "queued"
   | "preparing"
   | "copying"
   | "encoding"
   | "encoding_retry"
+  | "merging"
   | "finalizing";
 
 export type ExportJob = {

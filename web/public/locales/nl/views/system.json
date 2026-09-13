@@ -100,11 +100,6 @@
       "gpuMemory": "GPU-geheugen",
       "npuUsage": "NPU-gebruik",
       "npuMemory": "NPU-geheugen",
-      "intelGpuWarning": {
-        "title": "Waarschuwing Intel GPU-statistieken",
-        "message": "GPU-statistieken niet beschikbaar",
-        "description": "Dit is een bekend probleem in de GPU-statistiekentools van Intel (intel_gpu_top). Deze raken defect en geven herhaaldelijk een GPU-gebruik van 0% weer, zelfs wanneer hardware-acceleratie en objectdetectie correct draaien op de (i)GPU. Dit is geen bug in Frigate. Je kunt de host opnieuw opstarten om het tijdelijk op te lossen en te controleren dat de GPU goed werkt. Dit heeft geen invloed op de prestaties."
-      },
       "gpuTemperature": "GPU Temperatuur"
     },
     "otherProcesses": {
@@ -143,8 +138,7 @@
     "title": "Opslag",
     "shm": {
       "title": "SHM (gedeeld geheugen) toewijzing",
-      "warning": "De huidige SHM-grootte van {{total}} MB is te klein. Vergroot deze tot minimaal {{min_shm}} MB.",
-      "readTheDocumentation": "Lees de documentatie"
+      "warning": "De huidige SHM-grootte van {{total}} MB is te klein. Vergroot deze tot minimaal {{min_shm}} MB."
     }
   },
   "cameras": {
@@ -201,8 +195,7 @@
     "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
     "detectIsSlow": "{{detect}} is traag ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is erg traag ({{speed}} ms)",
-    "cameraIsOffline": "{{camera}} is offline",
-    "shmTooLow": "Vergroot de /dev/shm toewijzing van {{total}} MB naar minimaal {{min}} MB."
+    "cameraIsOffline": "{{camera}} is offline"
   },
   "enrichments": {
     "title": "Verrijkingen",

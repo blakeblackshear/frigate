@@ -9,20 +9,13 @@
   },
   "createFaceLibrary": {
     "new": "Vytvořit nový obličej",
-    "desc": "Vytvořit novou kolekci",
-    "nextSteps": "Chcete-li vybudovat pevný základ:<li>Použijte kartu Nedávná Rozpoznání k výběru a trénování na snímcích pro každou detekovanou osobu.</li><li>Pro nejlepší výsledky se zaměřte na přímé snímky; vyhněte se trénování snímků, které zachycují obličeje pod úhlem.</li></ul>",
-    "title": "Vytvořit kolekci"
+    "nextSteps": "Chcete-li vybudovat pevný základ:<li>Použijte kartu Nedávná Rozpoznání k výběru a trénování na snímcích pro každou detekovanou osobu.</li><li>Pro nejlepší výsledky se zaměřte na přímé snímky; vyhněte se trénování snímků, které zachycují obličeje pod úhlem.</li></ul>"
   },
   "details": {
     "unknown": "Neznámý",
-    "person": "Osoba",
-    "face": "Detaily tváře",
-    "subLabelScore": "Skóre dílčího popisku",
     "scoreInfo": "Skóre dílčího popisku je vážené skóre všech jistot rozpoznání obličejů, ale to může být odlišné od skóre zobrazeného na snímku.",
-    "faceDesc": "Podrobnosti o sledovaném objektu, který vygeneroval tuto tvář",
     "timestamp": "Časové razítko"
   },
-  "selectFace": "Vyberte tvář",
   "deleteFaceAttempts": {
     "title": "Odstranit obličeje",
     "desc_one": "Skutečně chcete vymazat {{count}} obličej? Tato akce je nevratná.",
@@ -30,7 +23,6 @@
     "desc_other": "Skutečně chcete vymazat {{count}} obličejů? Tato akce je nevratná."
   },
   "nofaces": "Žádné tváře",
-  "pixels": "{{area}}px",
   "deleteFaceLibrary": {
     "title": "Odstranit jméno",
     "desc": "Skutečně chcete vymazat kolekci {{name}}? Toto trvale vymaže všechny přiřazené obličeje."
@@ -60,12 +52,10 @@
     "reprocessFace": "Přepracovat Obličej"
   },
   "trainFace": "Trénovat obličej",
-  "selectItem": "Vyberte {{item}}",
   "renameFace": {
     "title": "Přejmenovat obličej",
     "desc": "Zadejte nový název pro {{name}}"
   },
-  "readTheDocs": "Přečtěte si dokumentaci",
   "toast": {
     "success": {
       "renamedFace": "Úspěšně přejmenovaný obličej na {{name}}",

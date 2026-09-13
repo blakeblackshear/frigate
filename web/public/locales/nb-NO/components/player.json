@@ -40,7 +40,6 @@
     "title": "Strømmen er frakoblet",
     "desc": "Ingen bilder er mottatt på {{cameraName}} <code>detekt</code>-strømmen, sjekk feilloggene"
   },
-  "cameraDisabled": "Kameraet er deaktivert",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Bildet ble sendt til Frigate+"

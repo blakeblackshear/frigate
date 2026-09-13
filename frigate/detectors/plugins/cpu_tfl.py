@@ -1,5 +1,5 @@
 import logging
-from typing import Literal
+from typing import ClassVar, Literal
 
 from pydantic import ConfigDict, Field
 
@@ -26,6 +26,9 @@ class CpuDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="CPU",
     )
+
+    device_spec_field: ClassVar[str] = "num_threads"
+    device_spec_type: ClassVar[type] = int
 
     type: Literal[DETECTOR_KEY]
     num_threads: int = Field(

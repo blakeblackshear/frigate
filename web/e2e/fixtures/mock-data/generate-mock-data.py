@@ -102,11 +102,12 @@ def generate_config():
         snapshot = config.model_dump()
 
     # Runtime-computed fields not in the Pydantic dump
-    all_attrs = set()
-    for attrs in snapshot.get("model", {}).get("attributes_map", {}).values():
-        all_attrs.update(attrs)
-    snapshot["model"]["all_attributes"] = sorted(all_attrs)
-    snapshot["model"]["colormap"] = {}
+    for model in snapshot.get("models", []):
+        all_attrs = set()
+        for attrs in model.get("attributes_map", {}).values():
+            all_attrs.update(attrs)
+        model["all_attributes"] = sorted(all_attrs)
+        model["colormap"] = {}
 
     return snapshot
 

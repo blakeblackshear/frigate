@@ -41,8 +41,6 @@
   "selected_other": "{{count}} geselecteerd",
   "selected_one": "{{count}} geselecteerd",
   "detected": "gedetecteerd",
-  "suspiciousActivity": "Verdachte activiteit",
-  "threateningActivity": "Bedreigende activiteit",
   "detail": {
     "noDataFound": "Geen gedetailleerde gegevens om te beoordelen",
     "aria": "Detailweergave in- of uitschakelen",

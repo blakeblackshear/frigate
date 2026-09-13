@@ -9,7 +9,6 @@
     "submit": "ส่ง"
   },
   "livePlayerRequiredIOSVersion": "ต้องใช้ iOS 17.1 ขึ้นไปสำหรับประเภทสตรีมสดนี้",
-  "cameraDisabled": "กล้องถูกปิดใช้งาน",
   "stats": {
     "streamType": {
       "title": "ประเภทสตรีม:",

@@ -16,14 +16,6 @@
         "desc": "你不希望检测指定地点中的目标或物体不应被视为误报。若将其作为误报提交，可能会导致 AI 模型容易混淆相关目标或物体的识别。"
       },
       "review": {
-        "true": {
-          "label": "为 Frigate Plus 确认此标签",
-          "true_other": "这是 {{label}}"
-        },
-        "false": {
-          "label": "不为 Frigate Plus 确认此标签",
-          "false_other": "这不是 {{label}}"
-        },
         "state": {
           "submitted": "已提交"
         },
@@ -67,7 +59,6 @@
       "error": {
         "failed": "未能加入导出队列：{{error}}",
         "endTimeMustAfterStartTime": "结束时间必须在开始时间之后",
-        "noVaildTimeSelected": "未选择有效的时间范围",
         "noValidTimeSelected": "未选择有效的时间范围"
       },
       "view": "查看",
@@ -127,7 +118,6 @@
       "exportingButton": "导出中…",
       "toast": {
         "started_other": "已开始 {{count}} 个导出。",
-        "startedNoCase_other": "已开始 {{count}} 个导出。",
         "partial": "已启动 {{total}} 个导出，其中 {{successful}} 个成功。失败项：{{failedItems}}",
         "failed": "启动导出失败（共 {{total}} 个）。失败项：{{failedItems}}"
       }
@@ -138,8 +128,7 @@
     "restreaming": {
       "disabled": "此摄像头未启用视频流转发功能。",
       "desc": {
-        "title": "为此摄像头设置 go2rtc，以获取额外的实时预览选项和音频支持。",
-        "readTheDocumentation": "阅读文档"
+        "title": "为此摄像头设置 go2rtc，以获取额外的实时预览选项和音频支持。"
       }
     },
     "showStats": {

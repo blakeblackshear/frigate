@@ -46,14 +46,6 @@
     "second_one": "{{time}} секунда",
     "second_few": "{{time}} секунды",
     "second_many": "{{time}} секунд",
-    "formattedTimestampExcludeSeconds": {
-      "24hour": "%b %-d, %H:%M",
-      "12hour": "%b %-d, %I:%M %p"
-    },
-    "formattedTimestampWithYear": {
-      "24hour": "%b %-d %Y, %H:%M",
-      "12hour": "%b %-d %Y, %I:%M %p"
-    },
     "formattedTimestamp2": {
       "24hour": "d MMM HH:mm:ss",
       "12hour": "dd/MM h:mm:ssa"
@@ -62,7 +54,6 @@
       "12hour": "d MMM, h:mm:ss aaa",
       "24hour": "d MMM, HH:mm:ss"
     },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "formattedTimestampHourMinuteSecond": {
       "12hour": "h:mm:ss aaa",
       "24hour": "HH:mm:ss"
@@ -242,7 +233,6 @@
       "green": "Зелёная",
       "nord": "Северная",
       "red": "Красная",
-      "contrast": "Высокий контраст",
       "highcontrast": "Контрастная"
     },
     "help": "Помощь",

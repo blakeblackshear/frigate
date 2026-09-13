@@ -46,6 +46,5 @@
   "streamOffline": {
     "title": "זרם מצלמה לא זמין",
     "desc": "לא התקבלו פריימים בזרם <code>detect</code> של {{cameraName}}, בדקו את יומני השגיאות"
-  },
-  "cameraDisabled": "המצלמה מושבתת"
+  }
 }

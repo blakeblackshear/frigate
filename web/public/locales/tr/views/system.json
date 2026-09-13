@@ -43,12 +43,7 @@
       "gpuEncoder": "GPU Kodlayıcı",
       "title": "Donanım Bilgisi",
       "npuUsage": "NPU Kullanımı",
-      "npuMemory": "NPU Bellek Kullanımı",
-      "intelGpuWarning": {
-        "title": "Intel GPU İstatistik Uyarısı",
-        "message": "GPU istatistikleri kullanılamıyor",
-        "description": "Bu durum, donanımsal hızlandırma ve nesne tespiti (i)GPU üzerinde sorunsuz çalışıyor olsa bile, Intel’in GPU istatistik raporlama aracındaki (intel_gpu_top) bilinen bir hatadan ötürü GPU kullanımının %0 olarak bildirilmesinden kaynaklanmakta olup, Frigate hatası değildir. Sorunu geçici olarak düzeltmek ve (i)GPU’nun doğru çalıştığını doğrulamak için ana makineyi yeniden başlatabilirsiniz. Bu durum performansı etkilememektedir."
-      }
+      "npuMemory": "NPU Bellek Kullanımı"
     },
     "otherProcesses": {
       "title": "Diğer İşlemler",
@@ -155,8 +150,7 @@
     "healthy": "Sistem sağlıklı",
     "detectIsVerySlow": "{{detect}} çok yavaş çalışıyor ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} çevrimdışı",
-    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)",
-    "shmTooLow": "Ayrılan /dev/shm belleği (şu anda {{total}} MB), en az {{min}} MB'a çıkartılmalıdır."
+    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)"
   },
   "enrichments": {
     "embeddings": {

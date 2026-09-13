@@ -42,12 +42,7 @@
       "gpuUsage": "Mức sử dụng GPU",
       "gpuMemory": "Bộ nhớ GPU",
       "gpuEncoder": "Bộ mã hóa GPU",
-      "gpuDecoder": "Bộ giải mã GPU",
-      "intelGpuWarning": {
-        "title": "Cảnh báo thống kê GPU Intel",
-        "message": "Không có số liệu thống kê GPU",
-        "description": "Đây là lỗi đã biết trong công cụ báo cáo thống kê GPU của Intel (intel_gpu_top), khi nó bị trục trặc và liên tục trả về mức sử dụng GPU là 0%, dù thực tế phần cứng tăng tốc và nhận diện đối tượng đang hoạt động đúng trên (i)GPU. Đây không phải lỗi của Frigate. Bạn có thể khởi động lại máy chủ để tạm thời khắc phục và xác nhận GPU vẫn hoạt động bình thường. Điều này không ảnh hưởng đến hiệu suất."
-      }
+      "gpuDecoder": "Bộ giải mã GPU"
     },
     "otherProcesses": {
       "processCpuUsage": "Mức sử dụng CPU của Tiến trình",
@@ -143,8 +138,7 @@
     "ffmpegHighCpuUsage": "{{camera}} có mức sử dụng CPU FFmpeg cao ({{ffmpegAvg}}%)",
     "detectHighCpuUsage": "{{camera}} có mức sử dụng CPU phát hiện cao ({{detectAvg}}%)",
     "healthy": "Hệ thống đang hoạt động tốt",
-    "reindexingEmbeddings": "Đang lập chỉ mục lại các embedding (hoàn thành {{processed}}%)",
-    "shmTooLow": "/dev/shm ({{total}} MB) cần được tăng lên tối thiểu {{min}} MB."
+    "reindexingEmbeddings": "Đang lập chỉ mục lại các embedding (hoàn thành {{processed}}%)"
   },
   "enrichments": {
     "embeddings": {

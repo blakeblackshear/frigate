@@ -17,6 +17,7 @@ import numpy as np
 
 from frigate.config import CameraConfig
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_decode
+from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.services import auto_detect_hwaccel
 
 logger = logging.getLogger(__name__)
@@ -86,25 +87,6 @@ def _read_exact(stream: IO[bytes], size: int) -> bytes | None:
             return None
         buf.extend(chunk)
     return bytes(buf)
-
-
-def _terminate(proc: sp.Popen[bytes]) -> None:
-    """Stop an ffmpeg decode process promptly."""
-    # Close the read end first so a blocked ffmpeg write unblocks (ffmpeg then
-    # sees a broken pipe), then signal it. The resulting ffmpeg write error is
-    # harmless and goes to the captured stderr.
-    if proc.stdout is not None:
-        try:
-            proc.stdout.close()
-        except OSError:
-            pass
-    if proc.poll() is None:
-        proc.terminate()
-        try:
-            proc.wait(timeout=5)
-        except sp.TimeoutExpired:
-            proc.kill()
-            proc.wait()
 
 
 KEYFRAME_MAX_GAP_SECONDS = 2.0
@@ -222,7 +204,7 @@ def _run_vod_decode(
             count += 1
             yield frame
     finally:
-        _terminate(proc)
+        terminate_ffmpeg_stream(proc)
         stderr_file.close()
 
     if count == 0 and software_retry and not should_stop():

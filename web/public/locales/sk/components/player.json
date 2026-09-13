@@ -11,7 +11,6 @@
     "title": "Streamujte Offline",
     "desc": "V streame <code>detect</code> {{cameraName}} neboli prijaté žiadne snímky, skontrolujte protokoly chýb"
   },
-  "cameraDisabled": "Kamera je zakázaná",
   "stats": {
     "streamType": {
       "title": "Typ streamu:",

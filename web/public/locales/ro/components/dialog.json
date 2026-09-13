@@ -12,18 +12,6 @@
   "explore": {
     "plus": {
       "review": {
-        "true": {
-          "label": "Confirma aceasta eticheta pentru Frigate Plus",
-          "true_one": "Asta e o {{label}}",
-          "true_few": "Astea sunt {{label}}",
-          "true_other": "Astea sunt {{label}}"
-        },
-        "false": {
-          "label": "Nu confirma aceasta eticheta pentru Frigate Plus",
-          "false_one": "Asta nu este  {{label}}",
-          "false_few": "Astea nu sunt {{label}}",
-          "false_other": "Astea nu sunt {{label}}"
-        },
         "state": {
           "submitted": "Trimis"
         },
@@ -99,7 +87,6 @@
       "error": {
         "failed": "Nu s-a putut adăuga exportul în coadă: {{error}}",
         "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
-        "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid",
         "noValidTimeSelected": "Niciun interval de timp valid selectat"
       },
       "view": "Vizualizează",
@@ -173,9 +160,6 @@
         "started_one": "A început 1 export.",
         "started_few": "Au început {{count}} exporturi.",
         "started_other": "Au început {{count}} de exporturi.",
-        "startedNoCase_one": "A început 1 export.",
-        "startedNoCase_few": "Au început {{count}} exporturi.",
-        "startedNoCase_other": "Au început {{count}} de exporturi.",
         "partial": "Au început {{successful}} din {{total}} exporturi. Au eșuat: {{failedItems}}",
         "failed": "Eșec la pornirea a {{total}} exporturi. Au eșuat: {{failedItems}}"
       }
@@ -186,8 +170,7 @@
     "restreaming": {
       "disabled": "Restreaming-ul nu este activat pentru această cameră.",
       "desc": {
-        "title": "Configurează go2rtc pentru opțiuni suplimentare de vizualizare live și audio pentru această cameră.",
-        "readTheDocumentation": "Citește documentația"
+        "title": "Configurează go2rtc pentru opțiuni suplimentare de vizualizare live și audio pentru această cameră."
       }
     },
     "showStats": {

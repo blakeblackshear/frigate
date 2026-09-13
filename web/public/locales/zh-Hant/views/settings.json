@@ -2,7 +2,6 @@
   "documentTitle": {
     "default": "設定 - Frigate",
     "authentication": "認證設定 - Frigate",
-    "camera": "鏡頭設定 - Frigate",
     "enrichments": "進階功能設定 - Frigate",
     "general": "使用者介面設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
@@ -587,17 +586,7 @@
     "backToSettings": "返回攝影機設定",
     "streams": {
       "title": "開啟或關閉攝影機",
-      "enableLabel": "開啟攝影機",
-      "enableDesc": "暫時停用已開啟的攝影機，直到 Frigate 重啟。停用攝影機會完全停止 Frigate 對該攝影機影片流的處理。偵測、錄影和除錯功能將不可用。<br /> <em>注意：這不會停用 go2rtc 的轉推流。</em>",
-      "disableLabel": "關閉攝影機",
-      "disableDesc": "開啟在當前在介面中不可見且在配置中被停用的攝影機。啟用後需要重啟 Frigate 才能生效。",
       "enableSuccess": "已在配置中啟用 {{cameraName}}。請重啟 Frigate 以應用更改。",
-      "friendlyName": {
-        "edit": "修改攝影機顯示名稱",
-        "title": "修改顯示名稱",
-        "description": "設定該攝像機在 Frigate 使用者介面中顯示的名稱。若留空，則使用攝像機 ID。",
-        "rename": "重新命名"
-      },
       "label": "攝影機狀態",
       "description": "設定各攝影機的運作狀態。<br /><br /><strong>開啟</strong>：正常處理串流。<br /><strong>關閉</strong>：暫時暫停處理。重啟 Frigate 後不會保留此狀態。<br /><strong>停用</strong>：停止處理並將變更儲存至您的設定中。需要重新啟動才能重新啟用已停用的攝影機。<br /><br /><em>備註：停用不會影響 go2rtc 的轉流功能。</em><br /><br />拖曳控制鍵可調整現用攝影機在整個 UI 中顯示的順序，包括即時儀表板和攝影機選擇下拉選單。",
       "disabledSubheading": "在設定中禁用",
@@ -659,8 +648,6 @@
       "selectLabel": "選擇設定檔",
       "description": "配置在啟用某個設定檔時，哪些攝影機應被開啟或關閉。設定為「繼承」的攝影機會沿用它原本的啟用/停用狀態。",
       "inherit": "繼承",
-      "enabled": "開啟",
-      "disabled": "關閉",
       "on": "開啟",
       "off": "關閉"
     },
@@ -1377,31 +1364,6 @@
       "error": "配置更改儲存失敗：{{errorMessage}}"
     }
   },
-  "detectorsAndModel": {
-    "title": "偵測器與模型",
-    "description": "設定執行物件偵測的偵測器後端及其使用的模型。變更會一起儲存以確保偵測器與模型保持同步。",
-    "cardTitles": {
-      "detector": "偵測器硬體",
-      "model": "偵測模型"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "自訂模型"
-    },
-    "mismatch": {
-      "warning": "目前的 Frigate+ 模型「{{model}}」需要 {{required}} 偵測器。請在下方選擇相容的模型，或在儲存前切換到「自訂模型」。"
-    },
-    "plusModel": {
-      "requiresDetector": "需要：{{detector}}",
-      "noModelSelected": "選擇 Frigate+ 模型"
-    },
-    "toast": {
-      "saveSuccess": "偵測器與模型設定已儲存。請重新啟動 Frigate 以套用變更。",
-      "saveError": "儲存偵測器與模型設定失敗"
-    },
-    "unsavedChanges": "偵測器與模型有未儲存的變更",
-    "restartRequired": "需要重新啟動（偵測器或模型已變更）"
-  },
   "maintenance": {
     "title": "維護",
     "sync": {
@@ -1587,16 +1549,6 @@
     },
     "detect": {
       "title": "偵測設定"
-    },
-    "detectors": {
-      "title": "偵測器設定",
-      "singleType": "只允許一個 {{type}} 偵測器。",
-      "keyRequired": "偵測器名稱為必填項。",
-      "keyDuplicate": "偵測器名稱已存在。",
-      "noSchema": "沒有可用的偵測器架構。",
-      "none": "未配置偵測器例項。",
-      "add": "新增偵測器",
-      "addCustomKey": "新增自訂鍵（Key）"
     },
     "record": {
       "title": "錄製設定"
@@ -1832,11 +1784,6 @@
     "sourceNumber": "來源 {{index}}"
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "目標",
-      "motion": "動作",
-      "continuous": "持續"
-    },
     "cameraOrder": {
       "label": "攝影機排序",
       "description": "拖曳攝影機以設定它們在鳥瞰佈局中的順序。",
@@ -1862,12 +1809,6 @@
       "browser": "瀏覽器",
       "12hour": "12 小時",
       "24hour": "24 小時"
-    },
-    "TimeOrDateStyle": {
-      "full": "完整",
-      "long": "長",
-      "medium": "中",
-      "short": "短"
     },
     "unitSystem": {
       "metric": "公制",
@@ -1943,15 +1884,8 @@
     "record": {
       "noRecordRole": "暫無任何影片串流已定義錄製功能，錄製功能將無法正常運作。"
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "鳥瞰圖已設定為「目標」模式，但此攝影機未開啟目標偵測。攝影機將不會顯示在鳥瞰畫面中。"
-    },
     "snapshots": {
       "detectDisabled": "目標偵測已停用。快照是根據追蹤到的目標生成的，因此將不會建立快照。"
-    },
-    "detectors": {
-      "mixedTypes": "所有偵測器必須為同一型別。若要更換為其他型別，請先移除現有的偵測器。",
-      "mixedTypesSuggestion": "所有偵測器必須使用相同型別。請移除現有偵測器，或選擇 {{type}}。"
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Jina V2 的大型模型版本記憶體佔用與推理開銷較高，建議搭配獨立顯示卡使用大型模型。"

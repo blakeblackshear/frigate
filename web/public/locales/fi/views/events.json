@@ -40,6 +40,6 @@
     "button": "Uudet katselmoitavat kohteet"
   },
   "camera": "Kamera",
-  "suspiciousActivity": "Epäilyttävä toiminta",
-  "threateningActivity": "Uhkaava toiminta"
+  "zoomIn": "Lähennä",
+  "zoomOut": "Loitonna"
 }

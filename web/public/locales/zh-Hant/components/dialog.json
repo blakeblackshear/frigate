@@ -59,7 +59,6 @@
       "error": {
         "failed": "匯出失敗：{{error}}",
         "endTimeMustAfterStartTime": "結束時間必須要在開始時間之後",
-        "noVaildTimeSelected": "沒有選取有效的時間範圍",
         "noValidTimeSelected": "未選擇有效的時間範圍"
       },
       "view": "查看",
@@ -119,7 +118,6 @@
       "exportingButton": "匯出中…",
       "toast": {
         "started_other": "已開始 {{count}} 個匯出。正在開啟案件。",
-        "startedNoCase_other": "已開始 {{count}} 個匯出。",
         "partial": "已啟動 {{total}} 個匯出，其中 {{successful}} 個成功。失敗項：{{failedItems}}",
         "failed": "啟動匯出失敗（共 {{total}} 個）。失敗項：{{failedItems}}"
       }
@@ -130,8 +128,7 @@
     "restreaming": {
       "disabled": "此鏡頭並未啟用串流重導向。",
       "desc": {
-        "title": "設定 go2rtc 以啟用更多此鏡頭的預覽選項及音訊。",
-        "readTheDocumentation": "閱讀文件"
+        "title": "設定 go2rtc 以啟用更多此鏡頭的預覽選項及音訊。"
       }
     },
     "showStats": {

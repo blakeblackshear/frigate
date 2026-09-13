@@ -79,6 +79,12 @@ class Recordings(Model):
     segment_size = FloatField(default=0)  # this should be stored as MB
     regions = IntegerField(null=True)
     motion_heatmap = JSONField(null=True)  # 16x16 grid, 256 values (0-255)
+    keyframes = JSONField(null=True)  # ms offsets; NULL = unprobed (legacy rows)
+    stream_type = CharField(default="main", max_length=8)
+    has_audio = BooleanField(null=True)  # NULL = unknown (legacy rows)
+    audio_rate = IntegerField(null=True)  # Hz; NULL = unknown (legacy rows)
+    audio_codec = CharField(null=True, max_length=20)  # NULL = unknown (legacy rows)
+    video_codec = CharField(null=True, max_length=20)  # NULL = unknown (legacy rows)
 
 
 class ExportCase(Model):
@@ -177,3 +183,25 @@ class Trigger(Model):
 
     class Meta:
         primary_key = CompositeKey("camera", "name")
+
+
+class Notice(Model):
+    id = CharField(null=False, primary_key=True, max_length=150)
+    kind = CharField(index=True, max_length=50)
+    scope = CharField(max_length=100, null=True)
+    params = JSONField()
+    first_seen = DateTimeField()
+    last_seen = DateTimeField()
+    count = IntegerField(default=1)
+    dismissed_at = DateTimeField(null=True)
+
+
+class NoticeStats(Model):
+    kind = CharField(null=False, primary_key=True, max_length=50)
+    occurrences = IntegerField(default=0)
+    dismissals = IntegerField(default=0)
+    first_seen = DateTimeField()
+    last_seen = DateTimeField()
+    # watermarks for a future analytics reporter; unused until then
+    reported_occurrences = IntegerField(default=0)
+    reported_dismissals = IntegerField(default=0)

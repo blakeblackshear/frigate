@@ -1,13 +1,7 @@
 {
-  "selectItem": "Selecteer {{item}}",
   "details": {
     "timestamp": "Tijdstempel",
-    "person": "Persoon",
-    "confidence": "Vertrouwen",
-    "face": "Gezicht Details",
-    "faceDesc": "Details van het gevolgde object dat dit gezicht heeft gegenereerd",
     "scoreInfo": "De sublabelscore is het gewogen gemiddelde van hoe zeker de gezichtsherkenningen zijn. Deze score kan anders zijn dan die op de snapshot.",
-    "subLabelScore": "Score voor sublabel",
     "unknown": "Onbekend"
   },
   "documentTitle": "Gezichtsbibliotheek - Frigate",
@@ -27,7 +21,6 @@
       "description": "U moet ten minste één gezicht aan de bibliotheek toevoegen om gezichtsherkenning te laten werken."
     }
   },
-  "selectFace": "Selecteer gezicht",
   "toast": {
     "error": {
       "addFaceLibraryFailed": "Het is niet gelukt om de gezichtsnaam in te stellen: {{errorMessage}}",
@@ -61,8 +54,6 @@
     }
   },
   "createFaceLibrary": {
-    "title": "Collectie maken",
-    "desc": "Een nieuwe collectie maken",
     "new": "Creëer een nieuw gezicht",
     "nextSteps": "Om een sterke basis op te bouwen:<li>Gebruik het tabblad ‘Recente herkenningen’ om afbeeldingen te selecteren en te trainen voor elke gedetecteerde persoon.</li> <li>Richt je op afbeeldingen die recht van voren genomen zijn voor de beste resultaten, vermijd trainingsafbeeldingen waarop gezichten onder een hoek te zien zijn.</li>"
   },
@@ -84,7 +75,6 @@
   },
   "trainFaceAs": "Gezicht trainen als:",
   "trainFace": "Gezicht trainen",
-  "readTheDocs": "Lees de documentatie",
   "steps": {
     "nextSteps": "Volgende stappen",
     "faceName": "Voer een naam in",
@@ -104,7 +94,6 @@
   },
   "collections": "Collecties",
   "nofaces": "Geen gezichten beschikbaar",
-  "pixels": "{{area}}px",
   "reclassifyFaceAs": "Herclassificeer ‘Face’ als:",
   "reclassifyFace": "Gezicht opnieuw classificeren"
 }

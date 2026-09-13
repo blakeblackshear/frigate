@@ -46,6 +46,5 @@
   "streamOffline": {
     "title": "Luồng ngoại tuyến",
     "desc": "Không nhận được khung hình nào trên luồng <code>detect</code> của {{cameraName}}, hãy kiểm tra nhật ký lỗi"
-  },
-  "cameraDisabled": "Camera đã bị tắt"
+  }
 }
