@@ -249,6 +249,12 @@ Leaving the `objects` section empty (or omitting `track`) does not clear the lis
 
 Fields that require a Frigate restart to take effect cannot be overridden by profiles, since profiles are applied at runtime without restarting. Those fields are hidden when editing a profile override and can only be changed on the base configuration.
 
+### Why can't a profile enable recording when it's disabled in the base config?
+
+Frigate only sets up a camera's recording stream at startup when recording is enabled in the base config, so enabling it later from a profile has no effect. The same applies to turning recording on from the UI or MQTT.
+
+To keep recording off by default, leave `record.enabled: true` in the base config and create a profile that sets `record.enabled: false`. Activate that profile and it will be restored automatically when Frigate starts.
+
 ### Can I schedule profiles to be enabled or disabled at certain times?
 
 Not within Frigate itself. Frigate is an NVR, not an automation platform, so it intentionally does not include a scheduler for activating profiles. Instead, activate profiles from an automation platform that already handles time- and event-based triggers well, such as [Home Assistant](https://www.home-assistant.io/) or [Node-RED](https://nodered.org/). These integrate with Frigate and give you far more robust and flexible scheduling than a built-in scheduler could.
