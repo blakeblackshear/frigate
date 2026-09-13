@@ -16,6 +16,21 @@ const record: SectionConfigOverrides = {
         },
       },
     ],
+    fieldMessages: [
+      {
+        key: "profile-base-record-disabled",
+        field: "enabled",
+        messageKey: "configMessages.record.profileBaseDisabled",
+        severity: "warning",
+        position: "after",
+        docLink:
+          "/configuration/profiles#why-cant-a-profile-enable-recording-when-its-disabled-in-the-base-config",
+        condition: (ctx) =>
+          !!ctx.profileName &&
+          ctx.formData?.enabled === true &&
+          ctx.fullCameraConfig?.record.enabled_in_config === false,
+      },
+    ],
     fieldDocs: {
       "alerts.pre_capture":
         "/configuration/record#pre-capture-and-post-capture",

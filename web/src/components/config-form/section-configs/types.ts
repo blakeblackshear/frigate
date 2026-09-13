@@ -8,6 +8,7 @@ export type MessageConditionContext = {
   fullCameraConfig?: CameraConfig;
   level: "global" | "camera";
   cameraName?: string;
+  profileName?: string;
   formData: ConfigSectionData;
 };
 
