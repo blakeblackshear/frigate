@@ -6,27 +6,6 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Globally set pip break-system-packages option to avoid having to specify it every time
 ARG PIP_BREAK_SYSTEM_PACKAGES=1
 
-FROM debian:12-slim AS rk-ffmpeg
-ARG DEBIAN_FRONTEND
-ARG ROCKCHIP_FFMPEG_RELEASE=rockchip-20260913-34752088530-1
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends xz-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-ADD --checksum=sha256:825830538f1fa42b703cb5191b37f5b68dcea7ff6a3330285226fa48e8b8b9eb https://github.com/oDestroyeRo/ffmpeg-rockchip/releases/download/${ROCKCHIP_FFMPEG_RELEASE}/ffmpeg-6.1.6-rockchip-linux-arm64-debian12.tar.xz /tmp/ffmpeg-6.0.tar.xz
-ADD --checksum=sha256:bd9c4d9dbde9d7083e902f59995654a85112829a84ad2e95dc8c461077ea9884 https://github.com/oDestroyeRo/ffmpeg-rockchip/releases/download/${ROCKCHIP_FFMPEG_RELEASE}/ffmpeg-7.1.5-rockchip-linux-arm64-debian12.tar.xz /tmp/ffmpeg-7.0.tar.xz
-ADD --checksum=sha256:25a63fba1038948ad62e76be557153bfea086547ddbc1fdbf90b0a2f683010c3 https://github.com/oDestroyeRo/ffmpeg-rockchip/releases/download/${ROCKCHIP_FFMPEG_RELEASE}/ffmpeg-8.1.2-rockchip-linux-arm64-debian12.tar.xz /tmp/ffmpeg-8.0.tar.xz
-
-# Preserve the version aliases and the bin/lib layout used by the relative RUNPATH.
-RUN set -eux; \
-    for version in 6.0 7.0 8.0; do \
-        mkdir -p "/rootfs/usr/lib/ffmpeg/${version}"; \
-        tar -xf "/tmp/ffmpeg-${version}.tar.xz" -C "/rootfs/usr/lib/ffmpeg/${version}" --strip-components=1; \
-        "/rootfs/usr/lib/ffmpeg/${version}/bin/ffmpeg" -hide_banner -version; \
-        "/rootfs/usr/lib/ffmpeg/${version}/bin/ffprobe" -hide_banner -version; \
-        rm "/tmp/ffmpeg-${version}.tar.xz"; \
-    done
-
 FROM wheels as rk-wheels
 COPY docker/main/requirements-wheels.txt /requirements-wheels.txt
 COPY docker/rockchip/requirements-wheels-rk.txt /requirements-wheels-rk.txt
@@ -51,6 +30,16 @@ COPY docker/rockchip/conv2rknn.py /opt/conv2rknn.py
 
 ADD https://github.com/MarcA711/rknn-toolkit2/releases/download/v2.3.2/librknnrt.so /usr/lib/
 
-COPY --from=rk-ffmpeg /rootfs/usr/lib/ffmpeg/ /usr/lib/ffmpeg/
+ARG ROCKCHIP_FFMPEG_RELEASE=rockchip-20260913-34752088530-1
+ADD --checksum=sha256:825830538f1fa42b703cb5191b37f5b68dcea7ff6a3330285226fa48e8b8b9eb https://github.com/oDestroyeRo/ffmpeg-rockchip/releases/download/${ROCKCHIP_FFMPEG_RELEASE}/ffmpeg-6.1.6-rockchip-linux-arm64-debian12.tar.xz /tmp/ffmpeg-6.1.6.tar.xz
+ADD --checksum=sha256:bd9c4d9dbde9d7083e902f59995654a85112829a84ad2e95dc8c461077ea9884 https://github.com/oDestroyeRo/ffmpeg-rockchip/releases/download/${ROCKCHIP_FFMPEG_RELEASE}/ffmpeg-7.1.5-rockchip-linux-arm64-debian12.tar.xz /tmp/ffmpeg-7.1.5.tar.xz
+ADD --checksum=sha256:25a63fba1038948ad62e76be557153bfea086547ddbc1fdbf90b0a2f683010c3 https://github.com/oDestroyeRo/ffmpeg-rockchip/releases/download/${ROCKCHIP_FFMPEG_RELEASE}/ffmpeg-8.1.2-rockchip-linux-arm64-debian12.tar.xz /tmp/ffmpeg-8.1.2.tar.xz
+# Python can unpack xz archives without adding extraction tools to the image.
+RUN set -eux; \
+    for version in 6.1.6 7.1.5 8.1.2; do \
+        python3 -m tarfile -e "/tmp/ffmpeg-${version}.tar.xz" /tmp; \
+        cp -a "/tmp/ffmpeg-${version}-rockchip-linux-arm64-debian12/." "/usr/lib/ffmpeg/${version%%.*}.0"; \
+        rm -rf "/tmp/ffmpeg-${version}-rockchip-linux-arm64-debian12" "/tmp/ffmpeg-${version}.tar.xz"; \
+    done
 ENV DEFAULT_FFMPEG_VERSION="6.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:${INCLUDED_FFMPEG_VERSIONS}"
