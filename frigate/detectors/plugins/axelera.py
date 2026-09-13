@@ -645,10 +645,31 @@ class _AxeleraRuntimeInference:
     # -- internals ---------------------------------------------------------
 
     def _push_result(self, connection_id: str, rows: np.ndarray) -> None:
-        try:
-            self._result_q.put_nowait((connection_id, rows))
-        except queue.Full:
-            logger.error("axelera: result queue full; dropping %s", connection_id)
+        """Deliver one completion, applying backpressure instead of dropping.
+
+        The async runner contract is strictly 1 submission : 1 delivered
+        result (SHM cleanup + timing pairing), so an accepted submission must
+        never lose its completion: if the result worker is behind, the
+        producing thread blocks until the queue drains. The only consumer is
+        the runner's result worker (which drains until stop), so the block
+        self-throttles rather than deadlocking; it is stop-aware so shutdown
+        stays responsive while the runner is unwinding.
+        """
+        warned = False
+        while not self._stop.is_set():
+            try:
+                self._result_q.put((connection_id, rows), timeout=0.25)
+                return
+            except queue.Full:
+                if not warned:
+                    logger.warning(
+                        "axelera: result queue full, applying backpressure for %s",
+                        connection_id,
+                    )
+                    warned = True
+        logger.warning(
+            "axelera: stopping, dropping undelivered result for %s", connection_id
+        )
 
     def _producer(self) -> None:
         """Letterbox + quantize + run(); hand raw outputs to the decoder.
