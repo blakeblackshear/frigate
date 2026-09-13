@@ -191,13 +191,11 @@ cameras:
     detect:
       enabled: false
     record:
-      enabled: false
+      enabled: true
     profiles:
       away:
         enabled: true
         detect:
-          enabled: true
-        record:
           enabled: true
       home:
         enabled: false
@@ -250,6 +248,12 @@ Leaving the `objects` section empty (or omitting `track`) does not clear the lis
 ### Why are some settings missing when I configure a profile override?
 
 Fields that require a Frigate restart to take effect cannot be overridden by profiles, since profiles are applied at runtime without restarting. Those fields are hidden when editing a profile override and can only be changed on the base configuration.
+
+### Why can't a profile enable recording when it's disabled in the base config?
+
+Frigate only sets up a camera's recording stream at startup when recording is enabled in the base config, so enabling it later from a profile has no effect. The same applies to turning recording on from the UI or MQTT.
+
+To keep recording off by default, leave `record.enabled: true` in the base config and create a profile that sets `record.enabled: false`. Activate that profile and it will be restored automatically when Frigate starts.
 
 ### Can I schedule profiles to be enabled or disabled at certain times?
 
