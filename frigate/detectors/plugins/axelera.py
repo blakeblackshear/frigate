@@ -36,6 +36,7 @@ import logging
 import os
 import queue
 import re
+import shutil
 import threading
 import time
 import zipfile
@@ -443,8 +444,10 @@ class _AxeleraRuntimeInference:
         if not devices:
             raise RuntimeError(
                 "axelera: no Metis device enumerated; check that the "
-                "/dev/metis-<bus>:<dev>:<fn> node (colon form) is passed "
-                "into the container and the metis driver is loaded"
+                "/dev/metis-<bus>-<dev>-<fn> node is passed into the "
+                "container (see the install docs for the DEVICE_ALIASES "
+                "variable the runtime's colon-form node name needs) and "
+                "that the metis driver is loaded on the host"
             )
         # hold the device connection on self: the runtime releases the device
         # when the connection object is garbage collected, so it must outlive
@@ -901,6 +904,7 @@ class AxeleraDetector(DetectionApi):
             )
         # the runtime wheels install into the user site at first start
         self.activate_dependencies()
+        _ensure_runtime_enumeration_tools()
         _point_runtime_at_installed_firmware()
         super().__init__(detector_config)
 
@@ -1002,6 +1006,60 @@ class AxeleraDetector(DetectionApi):
             self.close()
         except Exception:  # noqa: S110, BLE001
             pass
+
+
+def _ensure_runtime_enumeration_tools() -> None:
+    """Provide minimal lspci/lsmod stand-ins when the image lacks them.
+
+    The runtime's list_devices() shells out to ``lspci`` (PCI count, matched
+    against the driver count) and ``lsmod`` (AIPU driver presence) through
+    popen and greps their output. Both only read /sys and /proc, which are
+    readable in the container, so when the real tools are absent (slim image)
+    the plugin supplies shell stand-ins in a directory it owns and prepends
+    that to PATH. The real tools always win when installed.
+    """
+    if shutil.which("lspci") is not None and shutil.which("lsmod") is not None:
+        return
+    bin_dir = os.path.join(MODEL_CACHE_DIR, DETECTOR_KEY, "bin")
+    try:
+        os.makedirs(bin_dir, exist_ok=True)
+        scripts = {
+            # lsmod(8)-shaped output built from /proc/modules
+            "lsmod": (
+                "#!/bin/sh\n"
+                'echo "Module                  Size  Used by"\n'
+                "while read -r name size used _; do\n"
+                '    printf \'%-19s %8s  %s\\n\' "$name" "$size" "$used"\n'
+                "done < /proc/modules\n"
+            ),
+            # lspci(8)-shaped Device lines from sysfs; the runtime matches the
+            # vendor:device hex pair (1f9d for Metis)
+            "lspci": (
+                "#!/bin/sh\n"
+                "for dev in /sys/bus/pci/devices/*; do\n"
+                '    [ -r "$dev/vendor" ] || continue\n'
+                '    read -r vendor < "$dev/vendor"\n'
+                '    read -r device < "$dev/device"\n'
+                "    printf '%s Device %s:%s\\n' \"${dev##*/}\" "
+                '"${vendor#0x}" "${device#0x}"\n'
+                "done\n"
+            ),
+        }
+        for name, body in scripts.items():
+            if shutil.which(name) is not None:
+                continue
+            path = os.path.join(bin_dir, name)
+            with open(path, "w") as f:
+                f.write(body)
+            os.chmod(path, 0o755)
+        os.environ["PATH"] = bin_dir + os.pathsep + os.environ.get("PATH", "")
+        logger.debug("axelera: prepended runtime tools dir %s to PATH", bin_dir)
+    except OSError as exc:
+        logger.warning(
+            "axelera: could not install runtime enumeration helpers in %s: %s",
+            bin_dir,
+            exc,
+        )
 
 
 def _point_runtime_at_installed_firmware() -> None:
