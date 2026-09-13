@@ -1,5 +1,5 @@
 aiofiles == 25.1.*
-click == 8.1.*
+click == 8.5.*
 # FastAPI
 aiohttp == 3.12.*
 starlette == 0.47.*
