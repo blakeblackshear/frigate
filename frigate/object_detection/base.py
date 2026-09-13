@@ -385,6 +385,10 @@ class ObjectDetectProcess:
 
         # Async path for MemryX and Axelera (send/receive contract)
         if self.detector_config.type in ("memryx", "axelera"):
+            # a replacement process publishes its own window; clear the previous
+            # process's duty cycle so stats never show stale utilization while the
+            # new detector is still initializing
+            self.run_duty_cycle.value = -1.0
             self.detect_process = AsyncDetectorRunner(
                 f"frigate.detector:{self.name}",
                 self.detection_queue,

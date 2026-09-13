@@ -70,7 +70,7 @@ The SDKs for a few hardware detectors are not shipped in the Frigate image. They
 If the container cannot reach GitHub, provide the files yourself:
 
 1. Download the files for your architecture on a machine with internet access.
-2. Place them, with exactly the file names listed above, in `/config/model_cache/runtimes/<detector>/`, where `<detector>` is the detector `type` from your config (`hailo8l`, `memryx`, or `axengine`).
+2. Place them, with exactly the file names listed above, in `/config/model_cache/runtimes/<detector>/`, where `<detector>` is the detector `type` from your config (`hailo8l`, `memryx`, `axengine`, or `axelera`).
 3. Start Frigate. Files whose checksum matches are installed without any download; a file with the wrong checksum is discarded and downloaded again, so a failed startup log names the file to replace.
 
 The `GITHUB_ENDPOINT` mirror variable below applies to these downloads as well.
