@@ -106,30 +106,6 @@ def stats_init(
     return stats_tracking
 
 
-def _axelera_run_duty_cycle(
-    detectors: dict[str, ObjectDetectProcess],
-) -> float | None:
-    """Highest run duty cycle published by the configured axelera detectors.
-
-    The detector process times each blocking ModelInstance.run and publishes
-    busy/wall for the last window through a shared Value (a negative value
-    means the detector has not produced a window yet and nothing is shown).
-    This is host-side occupancy of the run call, including DMA and driver
-    time, not an AIPU core counter: the runtime exposes no device-side one.
-    """
-    cycles = [
-        detector.run_duty_cycle.value
-        for detector in detectors.values()
-        if detector.detector_config.type == "axelera"
-        and detector.run_duty_cycle.value >= 0.0
-    ]
-
-    if not cycles:
-        return None
-
-    return round(max(cycles), 1)
-
-
 def get_detector_stats(
     stats_tracking: StatsTrackingTypes,
 ) -> dict[str, dict[str, Any]]:
@@ -341,13 +317,15 @@ def stats_snapshot(
 
     hardware_stats.update_stats(stats)
 
-    # the axelera run duty cycle is a detector-process stat (a shared Value,
-    # not a device counter); fold it into the polled NPU entry if one exists
-    axelera_npu = stats.get("npu_usages", {}).get("axelera")
-    if axelera_npu is not None:
-        duty = _axelera_run_duty_cycle(stats_tracking["detectors"])
-        if duty is not None:
-            axelera_npu["npu"] = duty
+    # fold run duty cycles published by async detector processes (shared
+    # Values, not device counters) into the matching polled NPU entries; a
+    # negative value means the detector has not produced a window yet
+    npu_usages = stats.get("npu_usages", {})
+    for detector in stats_tracking["detectors"].values():
+        duty = detector.run_duty_cycle.value
+        detector_type = detector.detector_config.type
+        if duty >= 0.0 and detector_type in npu_usages:
+            npu_usages[detector_type]["npu"] = round(duty, 1)
 
     if config.telemetry.stats.network_bandwidth:
         bandwidth_stats = get_bandwidth_stats(config)
