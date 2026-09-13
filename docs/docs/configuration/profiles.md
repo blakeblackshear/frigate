@@ -191,13 +191,11 @@ cameras:
     detect:
       enabled: false
     record:
-      enabled: false
+      enabled: true
     profiles:
       away:
         enabled: true
         detect:
-          enabled: true
-        record:
           enabled: true
       home:
         enabled: false
