@@ -8,7 +8,7 @@ fastapi[standard-no-fastapi-cloud-cli] == 0.116.*
 uvicorn == 0.46.*
 slowapi == 0.1.*
 joserfc == 1.6.*
-cryptography == 44.0.*
+cryptography == 46.0.*
 pathvalidate == 3.3.*
 markupsafe == 3.0.*
 python-multipart == 0.0.31
@@ -51,7 +51,7 @@ google-genai == 1.58.*
 ollama == 0.6.*
 openai == 1.65.*
 # push notifications
-py-vapid == 1.9.*
+py-vapid == 1.9.4
 pywebpush == 2.0.*
 # alpr
 pyclipper == 1.4.*
