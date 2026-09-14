@@ -49,8 +49,8 @@ const PLUS_MODEL = {
   height: 320,
 };
 
-// Frigate+ builds a Hailo model per device, and reports the detector by both
-// the legacy hailo8l key and the current one
+// Frigate+ builds a Hailo model per device and names the detector by its
+// pre-rename key; /api/plus/models adds the current one before serving it
 const HAILO_PLUS_MODELS = [
   {
     ...PLUS_MODEL,
