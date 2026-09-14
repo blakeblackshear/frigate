@@ -133,25 +133,54 @@ def escape_special_characters(path: str) -> str:
         return path
 
 
+_URL_HOST = r"(?:[A-Za-z0-9._-]+|\[[0-9A-Fa-f:.]+\])(?::\d+)?"
+
+
 def encode_go2rtc_source_password(source: str) -> str:
     """Percent-encode reserved characters in a go2rtc stream source password.
 
     go2rtc parses sources as strict URLs, so raw characters like # ? / % break
-    them. Existing %XX escapes are kept, so already encoded sources are
-    unchanged. A raw password containing % followed by two hex digits is
-    indistinguishable from an escape and must still be encoded by the user.
+    them. Sources that are already valid URLs are returned unchanged, and
+    existing %XX escapes are kept. A raw password containing % followed by two
+    hex digits is indistinguishable from an escape and must still be encoded
+    by the user.
     """
     if len(source) > 1000 or source.strip().startswith(("echo:", "expr:", "exec:")):
         return source
 
-    match = re.search(REGEX_RTSP_CAMERA_USER_PASS, source)
+    scheme_end = source.find("://")
 
-    if match is None:
+    if scheme_end == -1:
         return source
 
-    # the username pattern excludes ":", so the first one ends it
-    password_start = source.index(":", match.start() + 3) + 1
-    password_end = match.end() - 1
+    # go2rtc already parses a valid URL correctly, so don't guess where its
+    # password ends (an @ in the path or query would be mistaken for it)
+    authority_start = scheme_end + 3
+    authority = re.split(r"[/?#]", source[authority_start:], maxsplit=1)[0]
+    userinfo, _, host = authority.rpartition("@")
+
+    if re.fullmatch(_URL_HOST, host) and re.fullmatch(
+        r"(?:[A-Za-z0-9\-._~!$&'()*+,;=:@]|%[0-9A-Fa-f]{2})*", userinfo
+    ):
+        return source
+
+    user = re.compile(r"[a-zA-Z0-9_-]+:").match(source, authority_start)
+
+    if user is None:
+        return source
+
+    # the password ends at the first @ followed by a host and the end of the
+    # authority, so raw / ? # in the password don't end it early
+    host_after = re.compile(_URL_HOST + r"(?=[/?#]|$)")
+    password_start = user.end()
+    password_end = source.find("@", password_start)
+
+    while password_end != -1 and not host_after.match(source, password_end + 1):
+        password_end = source.find("@", password_end + 1)
+
+    if password_end == -1:
+        return source
+
     password = re.sub(
         r"%[0-9A-Fa-f]{2}|[^A-Za-z0-9\-._~!$&'()*+,;=]",
         lambda m: (

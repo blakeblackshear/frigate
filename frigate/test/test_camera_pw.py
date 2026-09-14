@@ -58,9 +58,30 @@ class TestGo2rtcSourcePasswordEncoding(unittest.TestCase):
             "rtsp://admin:ab%23c%3Fd%2Fe@10.0.0.2:554/live",
         )
 
-    def test_password_with_space_is_not_matched(self):
-        # shares REGEX_RTSP_CAMERA_USER_PASS, which stops at whitespace
-        source = "rtsp://admin:ab cd@10.0.0.2:554/live"
+    def test_password_with_space_is_encoded(self):
+        self.assertEqual(
+            encode_go2rtc_source_password("rtsp://admin:ab cd@10.0.0.2:554/live"),
+            "rtsp://admin:ab%20cd@10.0.0.2:554/live",
+        )
+
+    def test_at_after_host_is_not_part_of_password(self):
+        for source in (
+            "rtsp://admin:pass@10.0.0.2/cam?email=a@b.com",
+            "rtsp://camera:554/live@x",
+        ):
+            self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_at_after_host_with_raw_password_is_not_consumed(self):
+        self.assertEqual(
+            encode_go2rtc_source_password(
+                "rtsp://admin:ab#cd@10.0.0.2/cam?email=a@b.com"
+            ),
+            "rtsp://admin:ab%23cd@10.0.0.2/cam?email=a@b.com",
+        )
+
+    def test_password_that_forms_a_valid_url_is_unchanged(self):
+        # ambiguous: go2rtc reads host "ss", so it is left for the user to encode
+        source = "rtsp://admin:P@ss#1@10.0.0.2/live"
         self.assertEqual(encode_go2rtc_source_password(source), source)
 
     def test_at_and_percent_in_password_are_encoded(self):
