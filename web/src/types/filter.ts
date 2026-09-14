@@ -11,7 +11,7 @@ export type FilterList = {
 
 export const LAST_24_HOURS_KEY = "last24Hours";
 
-const DRAWER_FEATURES = [
+export const DRAWER_FEATURES = [
   "export",
   "calendar",
   "filter",

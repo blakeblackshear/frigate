@@ -114,7 +114,7 @@ export type DeleteClipType = {
 
 // filtering
 
-const EXPORT_FILTERS = ["cameras"] as const;
+export const EXPORT_FILTERS = ["cameras"] as const;
 export type ExportFilters = (typeof EXPORT_FILTERS)[number];
 export const DEFAULT_EXPORT_FILTERS: ExportFilters[] = ["cameras"];
 

@@ -1,4 +1,4 @@
-const SEARCH_FILTERS = [
+export const SEARCH_FILTERS = [
   "cameras",
   "date",
   "time",
