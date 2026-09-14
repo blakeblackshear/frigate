@@ -109,6 +109,8 @@ class Export(Model):
         backref="exports",
         column_name="export_case_id",
     )
+    # peewee adds this accessor for the export_case column at runtime
+    export_case_id: str | None
 
 
 class ReviewSegment(Model):

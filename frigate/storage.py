@@ -3,8 +3,10 @@
 import logging
 import shutil
 import threading
+from collections.abc import Iterable
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
+from typing import Any, cast
 
 from peewee import SQL, Case, fn
 
@@ -191,14 +193,15 @@ class StorageMaintainer(threading.Thread):
 
             stream_usages = {
                 row["stream_type"]: row["usage"] or 0
-                for row in (
+                for row in cast(
+                    Iterable[dict[str, Any]],
                     Recordings.select(
                         Recordings.stream_type,
                         fn.SUM(Recordings.segment_size).alias("usage"),
                     )
                     .where(Recordings.camera == camera, Recordings.segment_size != 0)
                     .group_by(Recordings.stream_type)
-                    .dicts()
+                    .dicts(),
                 )
             }
             stream_bandwidths = self.camera_storage_stats.get(camera, {}).get(

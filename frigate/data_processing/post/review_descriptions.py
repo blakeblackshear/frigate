@@ -8,7 +8,7 @@ import os
 import shutil
 import threading
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import cv2
 from peewee import DoesNotExist
@@ -528,7 +528,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     .get()
                 )
 
-                time_in_segment = ts - recording.start_time
+                # start_time is a DateTimeField holding a unix timestamp
+                time_in_segment = ts - cast(float, recording.start_time)
                 return get_image_from_recording(
                     self.config.ffmpeg,
                     recording.path,
