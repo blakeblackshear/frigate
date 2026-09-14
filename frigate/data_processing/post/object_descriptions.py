@@ -9,9 +9,10 @@ from typing import TYPE_CHECKING, Any
 
 import cv2
 import numpy as np
+import zmq
 from peewee import DoesNotExist
 
-from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.inter_process import SOCKET_REP_REQ, InterProcessRequestor
 from frigate.config import CameraConfig, FrigateConfig
 from frigate.const import CLIPS_DIR, UPDATE_EVENT_DESCRIPTION
 from frigate.data_processing.post.semantic_trigger import SemanticTriggerProcessor
@@ -32,6 +33,47 @@ from ..types import DataProcessorMetrics
 logger = logging.getLogger(__name__)
 
 MAX_THUMBNAILS = 10
+
+# Each blocking phase is bounded; this does not bound model generation time.
+DESCRIPTION_IPC_TIMEOUT_MS = 5000
+
+
+class DescriptionUpdateError(RuntimeError):
+    """Safe transport failure category; description persistence is unconfirmed."""
+
+
+def _send_description_update(payload: dict[str, Any]) -> None:
+    """Own the complete REQ transaction on this caller's thread.
+
+    A reply confirms dispatcher handling, not durable database persistence.
+    Never retry an ambiguous timeout: the dispatcher may already have saved it.
+    """
+    try:
+        with zmq.Context() as context:
+            with context.socket(zmq.REQ) as socket:
+                socket.setsockopt(zmq.LINGER, 0)
+                socket.setsockopt(zmq.SNDTIMEO, DESCRIPTION_IPC_TIMEOUT_MS)
+                socket.setsockopt(zmq.RCVTIMEO, DESCRIPTION_IPC_TIMEOUT_MS)
+                socket.setsockopt(zmq.IMMEDIATE, 1)
+                socket.connect(SOCKET_REP_REQ)
+                try:
+                    socket.send_json((UPDATE_EVENT_DESCRIPTION, payload))
+                except (TypeError, ValueError):
+                    raise DescriptionUpdateError(
+                        "description_ipc_invalid_payload"
+                    ) from None
+                try:
+                    reply = socket.recv_json()
+                except ValueError:
+                    raise DescriptionUpdateError(
+                        "description_ipc_invalid_reply"
+                    ) from None
+                if reply != []:
+                    raise DescriptionUpdateError("description_ipc_invalid_reply")
+    except zmq.Again:
+        raise DescriptionUpdateError("description_ipc_timeout") from None
+    except zmq.ZMQError:
+        raise DescriptionUpdateError("description_ipc_transport_error") from None
 
 
 class ObjectDescriptionProcessor(PostProcessorApi):
@@ -354,16 +396,18 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             logger.debug("Failed to generate description for %s", event.id)
             return
 
-        # fire and forget description update
-        self.requestor.send_data(
-            UPDATE_EVENT_DESCRIPTION,
-            {
-                "type": TrackedObjectUpdateTypesEnum.description,
-                "id": event.id,
-                "description": description,
-                "camera": event.camera,
-            },
-        )
+        try:
+            _send_description_update(
+                {
+                    "type": TrackedObjectUpdateTypesEnum.description,
+                    "id": event.id,
+                    "description": description,
+                    "camera": event.camera,
+                }
+            )
+        except DescriptionUpdateError as error:
+            logger.warning("Description update unconfirmed: %s", error)
+            return
 
         # Embed the description
         if self.config.semantic_search.enabled:
