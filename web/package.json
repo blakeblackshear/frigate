@@ -60,7 +60,7 @@
     "copy-to-clipboard": "^3.3.3",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
-    "framer-motion": "^12.38.0",
+    "framer-motion": "^13.2.0",
     "hls.js": "^1.6.15",
     "i18next": "^24.2.0",
     "i18next-http-backend": "^4.0.2",
