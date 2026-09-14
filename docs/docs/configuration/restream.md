@@ -177,10 +177,7 @@ go2rtc:
     my_camera_encoded: rtsp://username:$%40foo%23bar@192.168.1.100
 ```
 
-Existing `%XX` escapes are kept as-is, so passwords that are already encoded are not changed. Encode the password yourself, for example with [urlencoder.org](https://urlencoder.org), when it:
-
-- contains a `%` followed by two hexadecimal digits (such as `ab%41`), which is indistinguishable from an escape. Write the `%` as `%25`.
-- contains a space.
+See [this comment](https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
 
 ## Preventing go2rtc from blocking two-way audio {#two-way-talk-restream}
 
