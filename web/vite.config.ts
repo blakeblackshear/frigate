@@ -1,7 +1,7 @@
-/// <reference types="vitest" />
+/// <reference types="vitest/config" />
 import path, { resolve } from "path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 const proxyHost = process.env.PROXY_HOST || "localhost:5000";
@@ -37,14 +37,14 @@ export default defineConfig({
       },
     },
   },
-  esbuild: {
-    keepNames: true,
-  },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        login: resolve(__dirname, "login.html"),
+        main: resolve(import.meta.dirname, "index.html"),
+        login: resolve(import.meta.dirname, "login.html"),
+      },
+      output: {
+        keepNames: true,
       },
     },
   },
@@ -57,14 +57,14 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   test: {
     environment: "jsdom",
     alias: {
       "testing-library": path.resolve(
-        __dirname,
+        import.meta.dirname,
         "./__test__/testing-library.js",
       ),
     },

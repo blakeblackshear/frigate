@@ -114,9 +114,10 @@
     "@types/strftime": "^0.9.8",
     "@typescript-eslint/eslint-plugin": "^7.5.0",
     "@typescript-eslint/parser": "^7.5.0",
-    "@vitejs/plugin-react-swc": "^3.8.0",
-    "@vitest/coverage-v8": "^3.0.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^4.1.11",
     "autoprefixer": "^10.4.20",
+    "esbuild": "^0.28.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jest": "^28.2.0",
@@ -136,8 +137,8 @@
     "prettier-plugin-tailwindcss": "^0.6.5",
     "tailwindcss": "^3.4.9",
     "typescript": "^5.9.3",
-    "vite": "^6.4.2",
-    "vitest": "^3.0.7"
+    "vite": "^8.3.0",
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "@radix-ui/react-compose-refs": "1.1.2",
