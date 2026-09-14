@@ -237,7 +237,7 @@ class SemanticTriggerProcessor(PostProcessorApi):
                     return
 
                 # Skip the event if not an object
-                if event.data.get("type") != "object":  # type: ignore[attr-defined]
+                if event.data.get("type") != "object":
                     return
 
                 thumbnail_bytes = get_event_thumbnail_bytes(event)

@@ -253,7 +253,7 @@ class ObjectDescriptionProcessor(PostProcessorApi):
             # Crop snapshot based on region
             # provide full image if region doesn't exist (manual events)
             height, width = img.shape[:2]
-            x1_rel, y1_rel, width_rel, height_rel = event.data.get(  # type: ignore[attr-defined]
+            x1_rel, y1_rel, width_rel, height_rel = event.data.get(
                 "region", [0, 0, 1, 1]
             )
             x1, y1 = int(x1_rel * width), int(y1_rel * height)

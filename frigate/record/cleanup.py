@@ -5,6 +5,7 @@ import itertools
 import logging
 import os
 import threading
+from collections.abc import Iterable
 from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Any
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def _filter_reviews_for_pass(
-    reviews: list[Any],
+    reviews: Iterable[Any],
     now: datetime.datetime,
     alerts_days: float,
     detections_days: float,
@@ -121,14 +122,14 @@ class RecordingCleanup(threading.Thread):
         )
 
         maybe_empty_dirs = set()
-        thumbs_to_delete = list(map(lambda x: x[1], expired_reviews))
-        for thumb_path in thumbs_to_delete:
-            thumb_path = Path(thumb_path)
+        thumbs_to_delete = list(map(lambda x: x.thumb_path, expired_reviews))
+        for thumb in thumbs_to_delete:
+            thumb_path = Path(thumb)
             thumb_path.unlink(missing_ok=True)
             maybe_empty_dirs.add(thumb_path.parent)
 
         max_deletes = 100000
-        deleted_reviews_list = list(map(lambda x: x[0], expired_reviews))
+        deleted_reviews_list = list(map(lambda x: x.id, expired_reviews))
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]

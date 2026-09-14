@@ -37,7 +37,7 @@ class EventCleanup(threading.Thread):
         if self.removed_camera_labels is None:
             self.removed_camera_labels = list(
                 Event.select(Event.label)
-                .where(Event.camera.not_in(self.camera_keys))  # type: ignore[arg-type,call-arg,misc]
+                .where(Event.camera.not_in(self.camera_keys))
                 .distinct()
                 .execute()
             )
@@ -89,7 +89,7 @@ class EventCleanup(threading.Thread):
                     Event.thumbnail,
                 )
                 .where(
-                    Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
+                    Event.camera.not_in(self.camera_keys),
                     Event.start_time < expire_after,
                     Event.label == event.label,
                     Event.retain_indefinitely == False,
@@ -111,7 +111,7 @@ class EventCleanup(threading.Thread):
 
             # update the clips attribute for the db entry
             query = Event.select(Event.id).where(
-                Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
+                Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == event.label,
                 Event.retain_indefinitely == False,
@@ -218,7 +218,7 @@ class EventCleanup(threading.Thread):
                 Event.camera,
             )
             .where(
-                Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
+                Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.retain_indefinitely == False,
             )
@@ -249,7 +249,7 @@ class EventCleanup(threading.Thread):
 
         # update the clips attribute for the db entry
         query = Event.select(Event.id).where(
-            Event.camera.not_in(self.camera_keys),  # type: ignore[arg-type,call-arg,misc]
+            Event.camera.not_in(self.camera_keys),
             Event.start_time < expire_after,
             Event.retain_indefinitely == False,
         )
