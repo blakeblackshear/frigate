@@ -926,7 +926,7 @@ function FrigateCameraFeatures({
         );
         setActiveToastId(toastId);
       }
-    } catch (error) {
+    } catch {
       toast.error(t("manualRecording.failedToStart"), {
         position: "top-center",
       });
@@ -948,7 +948,7 @@ function FrigateCameraFeatures({
           position: "top-center",
         });
       }
-    } catch (error) {
+    } catch {
       toast.error(t("manualRecording.failedToEnd"), {
         position: "top-center",
       });
@@ -973,7 +973,7 @@ function FrigateCameraFeatures({
       xhr.setRequestHeader("X-CACHE-BYPASS", "1");
       xhr.withCredentials = true;
       xhr.send(payload);
-    } catch (e) {
+    } catch {
       // Silently ignore errors during unload
     }
   }, []);

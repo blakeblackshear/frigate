@@ -14,9 +14,6 @@ export default defineConfig([
   tseslint.configs.recommended,
   prettierRecommended,
   {
-    linterOptions: {
-      reportUnusedDisableDirectives: "off",
-    },
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
@@ -37,18 +34,11 @@ export default defineConfig([
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
-          caughtErrors: "none",
+          caughtErrorsIgnorePattern: "^_",
         },
       ],
       "no-console": "error",
       "prettier/prettier": "warn",
-
-      // newer recommended rules the codebase doesn't pass yet
-      "no-useless-assignment": "off",
-      "preserve-caught-error": "off",
-      "no-constant-binary-expression": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
-      "@typescript-eslint/no-empty-object-type": "off",
     },
   },
 ]);

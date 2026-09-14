@@ -92,7 +92,7 @@ export default function CreateRoleDialog({
     try {
       await onCreate(values.role, values.cameras);
       form.reset();
-    } catch (error) {
+    } catch {
       // Error handled in parent
     } finally {
       setIsLoading(false);

@@ -599,7 +599,6 @@ export function TrackingDetails({
       playlist,
       startPosition: 0,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event]);
 
   // Determine camera aspect ratio category

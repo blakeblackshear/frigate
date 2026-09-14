@@ -672,7 +672,7 @@ export function RecordingView({
 
       try {
         if (node) visiblePreviewObserver.current.observe(node);
-      } catch (e) {
+      } catch {
         // no op
       }
     },

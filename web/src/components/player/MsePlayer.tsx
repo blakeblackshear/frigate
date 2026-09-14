@@ -357,7 +357,7 @@ function MSEPlayer({
           if (originalHandler) {
             try {
               originalHandler(msg);
-            } catch (e) {
+            } catch {
               // Don't reject - we got the response, just let the error bubble
             }
           }
@@ -478,7 +478,7 @@ function MSEPlayer({
               msRef.current?.setLiveSeekableRange(end, end + 15);
             }
           }
-        } catch (e) {
+        } catch {
           // no-op
         }
       });
@@ -497,7 +497,7 @@ function MSEPlayer({
         } else {
           try {
             sb?.appendBuffer(data as ArrayBuffer);
-          } catch (e) {
+          } catch {
             // no-op
           }
         }

@@ -778,7 +778,7 @@ export default function AuthenticationView({
           if (selectedRoleForDelete) {
             try {
               await onDeleteRole(selectedRoleForDelete);
-            } catch (error) {
+            } catch {
               // Error handling is already done in onDeleteRole
             }
           }

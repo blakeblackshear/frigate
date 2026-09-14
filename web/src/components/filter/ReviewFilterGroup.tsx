@@ -346,8 +346,6 @@ function GeneralFilterButton({
       showAll: showAll,
       ...filter,
     });
-    // only refresh when state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLabels, selectedZones, showAll, filter]);
 
   const trigger = (

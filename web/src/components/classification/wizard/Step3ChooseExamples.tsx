@@ -189,7 +189,7 @@ export default function Step3ChooseExamples({
               },
             );
           }
-        } catch (error) {
+        } catch {
           // Silently fail - unselected images will remain but won't cause issues
           // since the frontend filters out images that don't match expected format
         }

@@ -386,6 +386,7 @@ export default function ClassificationModelEditDialog({
                   "Unknown error";
                 throw new Error(
                   `Failed to rename ${oldName} to ${newName}: ${errorMessage}`,
+                  { cause: err },
                 );
               }
             },
