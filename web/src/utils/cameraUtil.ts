@@ -71,7 +71,7 @@ export async function detectReolinkCamera(
     }
 
     return null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -94,7 +94,7 @@ export function maskUri(uri: string): string {
       urlObj.searchParams.set("password", "*".repeat(4));
       return urlObj.toString();
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
   return uri;

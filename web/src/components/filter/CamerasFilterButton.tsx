@@ -81,8 +81,6 @@ export function CamerasFilterButton({
 
   useEffect(() => {
     setCurrentCameras(selectedCameras);
-    // only refresh when state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCameras]);
 
   const trigger = (

@@ -26,14 +26,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { cn } from "@/lib/utils";
 
-const REVIEW_FILTERS = [
-  "cameras",
-  "reviewed",
-  "date",
-  "general",
-  "motionOnly",
-] as const;
-type ReviewFilters = (typeof REVIEW_FILTERS)[number];
+type ReviewFilters = "cameras" | "reviewed" | "date" | "general" | "motionOnly";
 const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
   "cameras",
   "reviewed",
@@ -353,8 +346,6 @@ function GeneralFilterButton({
       showAll: showAll,
       ...filter,
     });
-    // only refresh when state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLabels, selectedZones, showAll, filter]);
 
   const trigger = (

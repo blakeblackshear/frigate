@@ -36,8 +36,6 @@ export const reviewQueries = (
   alertsZones: string[],
   detectionsZones: string[],
 ) => {
-  let alertQueries = "";
-  let detectionQueries = "";
   let same_alerts = false;
   let same_detections = false;
 
@@ -50,7 +48,7 @@ export const reviewQueries = (
     alerts.delete(name);
   }
 
-  alertQueries = [...alerts]
+  let alertQueries = [...alerts]
     .map((zone) => `&cameras.${camera}.review.alerts.required_zones=${zone}`)
     .join("");
 
@@ -63,7 +61,7 @@ export const reviewQueries = (
     detections.delete(name);
   }
 
-  detectionQueries = [...detections]
+  let detectionQueries = [...detections]
     .map(
       (zone) => `&cameras.${camera}.review.detections.required_zones=${zone}`,
     )

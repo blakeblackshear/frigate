@@ -722,7 +722,7 @@ function DetectionReview({
 
       try {
         if (node) minimapObserver.current.observe(node);
-      } catch (e) {
+      } catch {
         // no op
       }
     },

@@ -142,7 +142,7 @@ export default function Step2ProbeOrSnapshot({
               reader.onload = () => resolve(reader.result as string);
               reader.readAsDataURL(snapshotBlob);
             });
-          } catch (snapshotError) {
+          } catch {
             snapshotBase64 = undefined;
           }
         }
@@ -307,7 +307,7 @@ export default function Step2ProbeOrSnapshot({
             data.username,
             data.password,
           );
-        } catch (error) {
+        } catch {
           return null;
         }
       }

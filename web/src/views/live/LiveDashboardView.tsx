@@ -243,7 +243,7 @@ export default function LiveDashboardView({
 
       try {
         if (node) visibleCameraObserver.current.observe(node);
-      } catch (e) {
+      } catch {
         // no op
       }
     },

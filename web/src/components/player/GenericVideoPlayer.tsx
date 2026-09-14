@@ -35,7 +35,7 @@ export function GenericVideoPlayer({
         // missing media is a 404; 502 still covers a failed or
         // unreachable mapping request, which is equally unplayable
         setSourceExists(response.status !== 502 && response.status !== 404);
-      } catch (error) {
+      } catch {
         setSourceExists(false);
       }
     };

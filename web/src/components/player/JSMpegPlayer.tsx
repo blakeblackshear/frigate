@@ -203,7 +203,7 @@ export default function JSMpegPlayer({
           try {
             videoElement.player?.destroy();
             // eslint-disable-next-line no-empty
-          } catch (e) {}
+          } catch {}
 
           if (videoWrapper) {
             videoWrapper.innerHTML = "";

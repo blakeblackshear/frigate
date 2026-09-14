@@ -1101,8 +1101,8 @@ function ObjectTrainGrid({
         return undefined;
       }
 
-      let label: string | undefined = undefined;
-      let score: number | undefined = undefined;
+      let label: string | undefined;
+      let score: number | undefined;
 
       if (model.object_config.classification_type === "attribute") {
         label = event.data[model.name] as string | undefined;

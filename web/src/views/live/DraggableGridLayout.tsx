@@ -668,7 +668,9 @@ export default function DraggableGridLayout({
                     playInBackground={false}
                     showStats={statsStates[camera.name]}
                     onClick={() => {
-                      !isEditMode && onSelectCamera(camera.name);
+                      if (!isEditMode) {
+                        onSelectCamera(camera.name);
+                      }
                     }}
                     onError={(e) => {
                       setPreferredLiveModes((prevModes) => {

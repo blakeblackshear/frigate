@@ -296,7 +296,6 @@ export default function SearchView({
   useEffect(() => {
     setSelectedObjects([]);
     // unselect items when search term or filter changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchTerm, searchFilter]);
 
   // confidence score

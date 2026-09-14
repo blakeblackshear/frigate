@@ -97,7 +97,7 @@ const formatMap: {
 const getResolvedTimeZone = () => {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch (error) {
+  } catch {
     const offsetMinutes = new Date().getTimezoneOffset();
     return `UTC${offsetMinutes < 0 ? "+" : "-"}${Math.abs(offsetMinutes / 60)
       .toString()
@@ -224,7 +224,7 @@ export const formatUnixTimestampToDateTime = (
     }
 
     return formattedDateTime;
-  } catch (error) {
+  } catch {
     return "Invalid time";
   }
 };

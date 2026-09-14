@@ -118,7 +118,7 @@ export default function WebRtcPlayer({
           ? await navigator.mediaDevices.getUserMedia(constraints)
           : await navigator.mediaDevices.getDisplayMedia(constraints);
       return stream.getTracks();
-    } catch (e) {
+    } catch {
       return [];
     }
   }

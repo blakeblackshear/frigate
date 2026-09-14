@@ -236,7 +236,6 @@ export function MotionReviewTimeline({
       scrollToSegment={scrollToSegment}
       isZooming={isZooming}
       zoomDirection={zoomDirection}
-      getRecordingAvailability={getRecordingAvailability}
       onZoomChange={onZoomChange}
       possibleZoomLevels={possibleZoomLevels}
       currentZoomLevel={currentZoomLevel}

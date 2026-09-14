@@ -39,8 +39,6 @@ export default function AutoUpdatingCameraImage({
         timeoutRef.current = null;
       }
     };
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadInterval]);
 
   const handleLoad = useCallback(() => {
@@ -75,7 +73,7 @@ export default function AutoUpdatingCameraImage({
   const [isCached, setIsCached] = useState(false);
 
   const cacheKey = useMemo(() => {
-    let baseParam = "";
+    let baseParam: string;
 
     if (periodicCache && !isCached) {
       const date = new Date(key);

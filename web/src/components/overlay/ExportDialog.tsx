@@ -675,7 +675,7 @@ export function ExportContent({
       setSelectedOption(option);
 
       const now = new Date(latestTime * 1000);
-      let start = 0;
+      let start: number;
 
       switch (option) {
         case "1":
