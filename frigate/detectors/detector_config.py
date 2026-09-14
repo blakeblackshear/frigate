@@ -3,14 +3,14 @@ import json
 import logging
 import os
 from enum import Enum
-from typing import Any, ClassVar
+from typing import ClassVar
 
 import requests
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
 from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP, MODEL_CACHE_DIR
-from frigate.plus import PlusApi
+from frigate.plus import PlusApi, load_plus_model_info
 from frigate.util.builtin import generate_color_palette, load_labels
 
 logger = logging.getLogger(__name__)
@@ -190,12 +190,13 @@ class ModelConfig(BaseModel):
 
         # download the model info if it doesn't exist
         if not os.path.isfile(model_info_path):
-            model_info = plus_api.get_model_info(model_id)
             with open(model_info_path, "w") as f:
-                json.dump(model_info, f)
-        else:
-            with open(model_info_path) as f:
-                model_info: dict[str, Any] = json.load(f)
+                json.dump(plus_api.get_model_info(model_id), f)
+
+        model_info = load_plus_model_info(model_id)
+
+        if model_info is None:
+            raise ValueError(f"Unable to read the model info for {model_id}")
 
         if detector and detector not in model_info["supportedDetectors"]:
             raise ValueError(f"Model does not support detector type of {detector}")

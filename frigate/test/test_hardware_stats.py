@@ -200,7 +200,7 @@ class TestScanDetectors(HardwareStatsTestCase):
             self.scan([DeviceSpec("openvino:CPU", "openvino", "CPU")]), set()
         )
         self.assertEqual(self.scan([DeviceSpec("cpu", "cpu", None)]), set())
-        self.assertEqual(self.scan([DeviceSpec("hailo8l", "hailo8l", None)]), set())
+        self.assertEqual(self.scan([DeviceSpec("hailo", "hailo", None)]), set())
 
     def test_onnx_resolves_to_present_gpu(self):
         spec = DeviceSpec("onnx", "onnx", None)
@@ -412,7 +412,7 @@ class TestHardwareTemperatures(unittest.TestCase):
         return_value={"hailo8l-1": 52.0, "hailo8l-0": 51.0},
     )
     def test_hailo_sorted_by_name(self, temps):
-        self.assertEqual(get_hardware_temperatures("hailo8l"), [51.0, 52.0])
+        self.assertEqual(get_hardware_temperatures("hailo"), [51.0, 52.0])
 
     def test_unsupported_type(self):
         self.assertEqual(get_hardware_temperatures("rknn"), [])

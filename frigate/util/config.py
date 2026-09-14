@@ -170,7 +170,20 @@ def migrate_frigate_config(config_file: str):
     # version and still use the pre-models detectors and model keys
     needs_models = "detectors" in config or "model" in config
 
-    if previous_version == CURRENT_CONFIG_VERSION and not needs_models:
+    # likewise, it may already be on the models list and still name the hailo
+    # detector by its old key
+    needs_detector_rename = any(
+        isinstance(device, str) and device.partition(":")[0] == "hailo8l"
+        for model in (config.get("models") or [])
+        if isinstance(model, dict)
+        for device in (model.get("devices") or [])
+    )
+
+    if (
+        previous_version == CURRENT_CONFIG_VERSION
+        and not needs_models
+        and not needs_detector_rename
+    ):
         logger.info("frigate config does not need migration...")
         return
 
@@ -241,6 +254,12 @@ def migrate_frigate_config(config_file: str):
     if needs_models:
         logger.info("Migrating frigate detectors and model to models...")
         new_config = migrate_models(new_config)
+        with open(config_file, "w") as f:
+            yaml.dump(new_config, f)
+
+    if needs_detector_rename:
+        logger.info("Migrating renamed frigate detectors...")
+        new_config = rename_hailo_detector(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
 
@@ -777,9 +796,44 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     return new_config
 
 
+def rename_hailo_detector(
+    config: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Rename the hailo8l detector, which drives every Hailo device.
+
+    Args:
+        config: The loaded config
+
+    Returns:
+        The config with every models entry naming the detector 'hailo'
+    """
+    new_config = config.copy()
+
+    for model in new_config.get("models") or []:
+        if not isinstance(model, dict):
+            continue
+
+        devices = model.get("devices")
+
+        if not isinstance(devices, list):
+            continue
+
+        # assigned per index so ruamel keeps the comments on the list
+        for index, device in enumerate(devices):
+            if not isinstance(device, str):
+                continue
+
+            detector, separator, rest = device.partition(":")
+
+            if detector == "hailo8l":
+                devices[index] = f"hailo{separator}{rest}"
+
+    return new_config
+
+
 def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating Frigate config to 0.19-0."""
-    new_config = config.copy()
+    new_config = rename_hailo_detector(config)
 
     _migrate_birdseye_mode(new_config.get("birdseye"))
 
@@ -824,6 +878,11 @@ def migrate_models(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any
         detector = detector or {}
         detector_type = detector.get("type", "cpu")
         device = detector.get(DETECTOR_DEVICE_FIELDS.get(detector_type, "device"))
+
+        # hailo8l named one device, but the detector drives every Hailo device
+        if detector_type == "hailo8l":
+            detector_type = "hailo"
+
         device_string = detector_type if device is None else f"{detector_type}:{device}"
 
         # repeating a device now means running an extra inference process on it,

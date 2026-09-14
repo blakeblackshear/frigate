@@ -170,7 +170,7 @@ class TestAccelerators(HardwareProbeTestCase):
     def test_hailo_is_found_by_its_device_node(self):
         write(os.path.join(self.dev_root, "hailo0"))
 
-        self.assertEqual(self.probe()["hailo8l"].units[0].device, "hailo8l:PCIe")
+        self.assertEqual(self.probe()["hailo"].units[0].device, "hailo:PCIe")
 
     def test_each_memryx_node_is_a_unit(self):
         write(os.path.join(self.dev_root, "memx0"))

@@ -2,7 +2,6 @@
 
 import asyncio
 import copy
-import json
 import logging
 import os
 import platform
@@ -11,7 +10,6 @@ import urllib
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
-from pathlib import Path as FilePath
 from typing import Any
 
 import aiofiles
@@ -56,6 +54,7 @@ from frigate.jobs.media_sync import (
     start_media_sync_job,
 )
 from frigate.models import Event, Timeline
+from frigate.plus import load_plus_model_info
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
@@ -401,13 +400,7 @@ def config(request: Request):
         model_dict["plus"] = None
 
         if model.path:
-            model_json_path = FilePath(model.path).with_suffix(".json")
-
-            try:
-                with open(model_json_path) as f:
-                    model_dict["plus"] = json.load(f)
-            except (FileNotFoundError, json.JSONDecodeError):
-                pass
+            model_dict["plus"] = load_plus_model_info(os.path.basename(model.path))
 
     return JSONResponse(content=config)
 

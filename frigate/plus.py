@@ -11,9 +11,34 @@ import requests
 from numpy import ndarray
 from requests.models import Response
 
-from frigate.const import PLUS_API_HOST, PLUS_ENV_VAR
+from frigate.const import MODEL_CACHE_DIR, PLUS_API_HOST, PLUS_ENV_VAR
 
 logger = logging.getLogger(__name__)
+
+
+def load_plus_model_info(model_id: str) -> dict[str, Any] | None:
+    """Read a Frigate+ model's cached info file.
+
+    Args:
+        model_id: The Frigate+ model id
+
+    Returns:
+        The model info, or None when it has not been cached or cannot be read
+    """
+    try:
+        with open(os.path.join(MODEL_CACHE_DIR, f"{model_id}.json")) as f:
+            model_info: dict[str, Any] = json.load(f)
+    except (OSError, ValueError):
+        return None
+
+    supported = model_info.get("supportedDetectors")
+
+    # Frigate+ names the Hailo detector by the key it had before the rename, so
+    # add the current key alongside it rather than replacing it
+    if supported and "hailo8l" in supported and "hailo" not in supported:
+        supported.append("hailo")
+
+    return model_info
 
 
 def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:

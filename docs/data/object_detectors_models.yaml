@@ -36,13 +36,13 @@ edgeTPU:
             height: 320 # <--- should match the imgsize of the model, typically 320
             path: /config/model_cache/yolov9-s-relu6-best_320_int8_edgetpu.tflite
             labelmap_path: /config/labels-coco17.txt
-hailo8l:
-  title: Hailo-8/Hailo-8L
+hailo:
+  title: Hailo
   models:
     - key: yolo
       label: YOLO
       recommended: true
-      download: If no custom model path or URL is provided, the Hailo detector automatically downloads the default model (YOLOv6n) from the Hailo Model Zoo on first startup based on the detected hardware. Once cached under `/config/model_cache/hailo`, the model works fully offline.
+      download: If no custom model path or URL is provided, the Hailo detector automatically downloads the default model (YOLOv6n) from the Hailo Model Zoo on first startup, choosing the build that matches the attached device. Once cached under `/config/model_cache`, the model works fully offline.
       ui: |-
         Navigate to **Settings > System > Detection models** and select **Hailo** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure the model settings:
 
@@ -60,7 +60,7 @@ hailo8l:
       yaml: |-
         models:
           - devices:
-              - hailo8l:PCIe
+              - hailo:PCIe
             width: 320
             height: 320
             input_tensor: nhwc
@@ -101,7 +101,7 @@ hailo8l:
       yaml: |-
         models:
           - devices:
-              - hailo8l:PCIe
+              - hailo:PCIe
             width: 300
             height: 300
             input_tensor: nhwc

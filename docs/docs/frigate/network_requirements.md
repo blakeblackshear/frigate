@@ -47,7 +47,7 @@ If you are using one of the following hardware detectors and have not provided y
 | Detector                                                           | Model Downloaded     | Source                   |
 | ------------------------------------------------------------------ | -------------------- | ------------------------ |
 | [Rockchip RKNN](/configuration/object_detectors#rockchip-platform) | RKNN detection model | GitHub                   |
-| [Hailo 8 / 8L](/configuration/object_detectors#hailo-8)            | YOLOv6n (.hef)       | Hailo Model Zoo (AWS S3) |
+| [Hailo 8 / 8L / 8R](/configuration/object_detectors#hailo)         | YOLOv6n (.hef)       | Hailo Model Zoo (AWS S3) |
 | [AXERA AXEngine](/configuration/object_detectors)                  | Detection model      | HuggingFace              |
 
 :::note
@@ -60,16 +60,16 @@ The default CPU, EdgeTPU, and OpenVINO object detection models are bundled into 
 
 The SDKs for a few hardware detectors are not shipped in the Frigate image. They are downloaded the first time that detector is configured, verified against checksums pinned in the Frigate release, and installed into the Frigate user's home directory (`/config/.local` by default). Once installed they are not downloaded again until a Frigate release pins a new version.
 
-| Detector                                                       | Version | Files                                                                                                                                                                                                 | Source                                                                                     |
-| -------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| [Hailo 8 / 8L](/configuration/object_detectors#hailo-8)        | 4.21.0  | `hailort-debian12-amd64.tar.gz` and `hailort-4.21.0-cp311-cp311-linux_x86_64.whl` on x86, `hailort-debian12-arm64.tar.gz` and `hailort-4.21.0-cp311-cp311-linux_aarch64.whl` on arm64 | [GitHub release](https://github.com/frigate-nvr/hailort/releases/tag/v4.21.0)              |
-| [MemryX MX3](/configuration/object_detectors#memryx-mx3)       | 2.1.0   | `mx_accl_frigate-2.1.0.zip` (the release source archive, renamed)                                                                                                                                     | [GitHub archive](https://github.com/memryx/mx_accl_frigate/archive/refs/tags/v2.1.0.zip)   |
-| [AXERA AXEngine](/configuration/object_detectors#axera)        | 0.1.3   | `axengine-0.1.3-py3-none-any.whl`                                                                                                                                                                     | [GitHub release](https://github.com/AXERA-TECH/pyaxengine/releases/tag/0.1.3-frigate)      |
+| Detector                                                   | Version | Files                                                                                                                                                                                 | Source                                                                                   |
+| ---------------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [Hailo 8 / 8L / 8R](/configuration/object_detectors#hailo) | 4.21.0  | `hailort-debian12-amd64.tar.gz` and `hailort-4.21.0-cp311-cp311-linux_x86_64.whl` on x86, `hailort-debian12-arm64.tar.gz` and `hailort-4.21.0-cp311-cp311-linux_aarch64.whl` on arm64 | [GitHub release](https://github.com/frigate-nvr/hailort/releases/tag/v4.21.0)            |
+| [MemryX MX3](/configuration/object_detectors#memryx-mx3)   | 2.1.0   | `mx_accl_frigate-2.1.0.zip` (the release source archive, renamed)                                                                                                                     | [GitHub archive](https://github.com/memryx/mx_accl_frigate/archive/refs/tags/v2.1.0.zip) |
+| [AXERA AXEngine](/configuration/object_detectors#axera)    | 0.1.3   | `axengine-0.1.3-py3-none-any.whl`                                                                                                                                                     | [GitHub release](https://github.com/AXERA-TECH/pyaxengine/releases/tag/0.1.3-frigate)    |
 
 If the container cannot reach GitHub, provide the files yourself:
 
 1. Download the files for your architecture on a machine with internet access.
-2. Place them, with exactly the file names listed above, in `/config/model_cache/runtimes/<detector>/`, where `<detector>` is the detector `type` from your config (`hailo8l`, `memryx`, or `axengine`).
+2. Place them, with exactly the file names listed above, in `/config/model_cache/runtimes/<detector>/`, where `<detector>` is the detector named in your config's `devices` (`hailo`, `memryx`, or `axengine`).
 3. Start Frigate. Files whose checksum matches are installed without any download; a file with the wrong checksum is discarded and downloaded again, so a failed startup log names the file to replace.
 
 The `GITHUB_ENDPOINT` mirror variable below applies to these downloads as well.
