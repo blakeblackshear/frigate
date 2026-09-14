@@ -79,16 +79,47 @@ class TestGo2rtcSourcePasswordEncoding(unittest.TestCase):
             "rtsp://admin:ab%23cd@10.0.0.2/cam?email=a@b.com",
         )
 
+    def test_numeric_password_before_hash_or_question_is_encoded(self):
+        self.assertEqual(
+            encode_go2rtc_source_password("rtsp://admin:1234#abcd@10.0.0.2/live"),
+            "rtsp://admin:1234%23abcd@10.0.0.2/live",
+        )
+        self.assertEqual(
+            encode_go2rtc_source_password("rtsp://admin:12345?@10.0.0.2/live"),
+            "rtsp://admin:12345%3F@10.0.0.2/live",
+        )
+
+    def test_host_port_with_params_is_unchanged(self):
+        for source in (
+            "rtsp://camera:554#backchannel=0",
+            "rtsp://10.0.0.2:554?channel=1",
+            "rtsp://[fe80::1]:554#backchannel=0",
+        ):
+            self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_ipv6_zone_host_is_valid(self):
+        source = "rtsp://admin:pass@[fe80::1%25eth0]/cam?e=a@b.com"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_numeric_password_before_slash_is_unchanged(self):
+        # ambiguous: indistinguishable from host:port/path
+        source = "rtsp://admin:2024/pass@10.0.0.2/live"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
+
     def test_password_that_forms_a_valid_url_is_unchanged(self):
         # ambiguous: go2rtc reads host "ss", so it is left for the user to encode
         source = "rtsp://admin:P@ss#1@10.0.0.2/live"
         self.assertEqual(encode_go2rtc_source_password(source), source)
 
-    def test_at_and_percent_in_password_are_encoded(self):
+    def test_invalid_percent_in_password_is_encoded(self):
         self.assertEqual(
             encode_go2rtc_source_password("rtsp://username:$@foo%@192.168.1.100"),
-            "rtsp://username:$%40foo%25@192.168.1.100",
+            "rtsp://username:$@foo%25@192.168.1.100",
         )
+
+    def test_at_and_colon_in_password_are_kept(self):
+        source = "rtsp://admin:p@ss:w@rd@10.0.0.2/live"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
 
     def test_encoded_password_is_unchanged(self):
         source = "rtsp://username:$%40foo%25%23@192.168.1.100/live"
@@ -103,7 +134,7 @@ class TestGo2rtcSourcePasswordEncoding(unittest.TestCase):
     def test_encoding_is_idempotent(self):
         source = "rtsp://admin:p@ss:w#rd{é}@10.0.0.2/live"
         once = encode_go2rtc_source_password(source)
-        self.assertEqual(once, "rtsp://admin:p%40ss%3Aw%23rd%7B%C3%A9%7D@10.0.0.2/live")
+        self.assertEqual(once, "rtsp://admin:p@ss:w%23rd%7B%C3%A9%7D@10.0.0.2/live")
         self.assertEqual(encode_go2rtc_source_password(once), once)
 
     def test_ffmpeg_source_params_are_preserved(self):

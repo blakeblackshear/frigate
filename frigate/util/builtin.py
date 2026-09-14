@@ -133,64 +133,49 @@ def escape_special_characters(path: str) -> str:
         return path
 
 
-_URL_HOST = r"(?:[A-Za-z0-9._-]+|\[[0-9A-Fa-f:.]+\])(?::\d+)?"
+_URL_HOST = r"(?:[A-Za-z0-9._-]+|\[[0-9A-Fa-f:.]+(?:%25[A-Za-z0-9._~-]+)?\])(?::\d+)?"
 
 
 def encode_go2rtc_source_password(source: str) -> str:
-    """Percent-encode reserved characters in a go2rtc stream source password.
+    """Percent-encode characters go2rtc can't parse in a stream source password.
 
     go2rtc parses sources as strict URLs, so raw characters like # ? / % break
-    them. Sources that are already valid URLs are returned unchanged, and
-    existing %XX escapes are kept. A raw password containing % followed by two
-    hex digits is indistinguishable from an escape and must still be encoded
-    by the user.
+    them. Characters valid in a URL password, including @ : and existing %XX
+    escapes, are kept, so sources that already parse are returned unchanged.
     """
     if len(source) > 1000 or source.strip().startswith(("echo:", "expr:", "exec:")):
         return source
 
     scheme_end = source.find("://")
-
-    if scheme_end == -1:
-        return source
-
-    # go2rtc already parses a valid URL correctly, so don't guess where its
-    # password ends (an @ in the path or query would be mistaken for it)
-    authority_start = scheme_end + 3
-    authority = re.split(r"[/?#]", source[authority_start:], maxsplit=1)[0]
-    userinfo, _, host = authority.rpartition("@")
-
-    if re.fullmatch(_URL_HOST, host) and re.fullmatch(
-        r"(?:[A-Za-z0-9\-._~!$&'()*+,;=:@]|%[0-9A-Fa-f]{2})*", userinfo
-    ):
-        return source
-
-    user = re.compile(r"[a-zA-Z0-9_-]+:").match(source, authority_start)
+    user = (
+        re.compile(r"[a-zA-Z0-9_-]+:").match(source, scheme_end + 3)
+        if scheme_end != -1
+        else None
+    )
 
     if user is None:
         return source
 
-    # the password ends at the first @ followed by a host and the end of the
-    # authority, so raw / ? # in the password don't end it early
+    # the password ends at the first @ followed by a host, so raw / ? # in the
+    # password don't end it early and an @ in the path or query isn't used
     host_after = re.compile(_URL_HOST + r"(?=[/?#]|$)")
-    password_start = user.end()
-    password_end = source.find("@", password_start)
+    password_end = source.find("@", user.end())
 
     while password_end != -1 and not host_after.match(source, password_end + 1):
         password_end = source.find("@", password_end + 1)
 
-    if password_end == -1:
+    password = source[user.end() : password_end]
+
+    # host:port/path with an @ later in the path has no credentials at all
+    if password_end == -1 or re.match(r"\d*/", password):
         return source
 
     password = re.sub(
-        r"%[0-9A-Fa-f]{2}|[^A-Za-z0-9\-._~!$&'()*+,;=]",
-        lambda m: (
-            m.group(0)
-            if len(m.group(0)) == 3
-            else urllib.parse.quote(m.group(0), safe="")
-        ),
-        source[password_start:password_end],
+        r"%(?![0-9A-Fa-f]{2})|[^A-Za-z0-9\-._~!$&'()*+,;=:@%]",
+        lambda m: urllib.parse.quote(m.group(0), safe=""),
+        password,
     )
-    return source[:password_start] + password + source[password_end:]
+    return source[: user.end()] + password + source[password_end:]
 
 
 def get_ffmpeg_arg_list(arg: Any) -> list:
