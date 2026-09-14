@@ -118,7 +118,7 @@
     "autoprefixer": "^10.4.20",
     "esbuild": "^0.28.2",
     "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jest": "^28.2.0",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react-hooks": "^5.2.0",
