@@ -50,7 +50,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@rjsf/core": "^6.4.1",
     "@rjsf/shadcn": "^6.5.2",
-    "@rjsf/utils": "^6.4.1",
+    "@rjsf/utils": "^6.10.0",
     "@rjsf/validator-ajv8": "^6.4.1",
     "apexcharts": "^7.3.0",
     "axios": "^1.18.0",
