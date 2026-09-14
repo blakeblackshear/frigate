@@ -1,6 +1,7 @@
 import { useTheme } from "@/context/theme-provider";
 import { generateColors } from "@/utils/colorUtil";
 import { useCallback, useEffect, useMemo } from "react";
+import ApexCharts from "apexcharts";
 import Chart from "react-apexcharts";
 import {
   Table,
@@ -151,10 +152,10 @@ export function CombinedStorageGraph({
           show: false,
         },
         y: {
-          formatter: function (val, { seriesIndex }) {
-            if (series[seriesIndex]) {
-              const usage = series[seriesIndex].usage;
-              return `${getUnitSize(usage)} (${val.toFixed(2)}%)`;
+          formatter: function (val, opts) {
+            const entry = opts ? series[opts.seriesIndex] : undefined;
+            if (entry) {
+              return `${getUnitSize(entry.usage)} (${val.toFixed(2)}%)`;
             }
           },
         },
