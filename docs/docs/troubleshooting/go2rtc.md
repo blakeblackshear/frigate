@@ -169,7 +169,7 @@ To keep CPU usage down:
 
 ## Connection, authentication, and complex passwords
 
-If go2rtc logs `401 Unauthorized`, `invalid port ... after host`, `invalid URL escape`, or `invalid userinfo` for a URL that works in VLC, the password likely contains reserved URL characters. Frigate encodes reserved characters in `go2rtc.streams` passwords automatically and keeps existing `%XX` escapes, but two cases still need manual encoding: an `@` followed later by `/`, `?`, or `#` (such as `P@ss#1`), and a literal `%` followed by two hexadecimal digits (write the `%` as `%25`).
+If go2rtc logs `401 Unauthorized`, `invalid port ... after host`, `invalid URL escape`, or `invalid userinfo` for a URL that works in VLC, the password likely contains reserved URL characters. Frigate encodes reserved characters in `go2rtc.streams` passwords automatically and keeps existing `%XX` escapes, but three cases still need manual encoding: an `@` followed later by `/`, `?`, or `#` (such as `P@ss#1`), a password starting with digits followed by `/` (such as `2024/pass`), and a literal `%` followed by two hexadecimal digits (write the `%` as `%25`).
 
 Under `cameras.ffmpeg.inputs`, always use the **raw** password (Frigate encodes it for you). Pre-encoding it there causes a double-encode and fails. See [Handling Complex Passwords](/configuration/restream#handling-complex-passwords).
 

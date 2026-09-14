@@ -177,7 +177,7 @@ go2rtc:
     my_camera_encoded: rtsp://username:$foo%23bar%3F1@192.168.1.100
 ```
 
-Encode the password yourself when it contains an `@` followed later by `/`, `?`, or `#` (such as `P@ss#1`), or a `%` followed by two hexadecimal digits (such as `ab%41`). Frigate leaves these unchanged because they can't be told apart from a valid URL.
+Encode the password yourself when it contains an `@` followed later by `/`, `?`, or `#` (such as `P@ss#1`), starts with digits followed by `/` (such as `2024/pass`), or contains a `%` followed by two hexadecimal digits (such as `ab%41`). Frigate leaves these unchanged because they can't be told apart from a valid URL.
 
 See [this comment](https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
 
