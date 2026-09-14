@@ -261,12 +261,11 @@ function Logs() {
   const handleScroll = useMemo(
     () =>
       debounce(() => {
-        const scrollThreshold =
-          lazyLogRef.current?.listRef.current?.findEndIndex() ?? 10;
-        const startIndex =
-          lazyLogRef.current?.listRef.current?.findStartIndex() ?? 0;
+        const list = lazyLogRef.current?.listRef.current;
+        const startIndex = list?.findItemIndex(list.scrollOffset) ?? 0;
         const endIndex =
-          lazyLogRef.current?.listRef.current?.findEndIndex() ?? 0;
+          list?.findItemIndex(list.scrollOffset + list.viewportSize) ?? 0;
+        const scrollThreshold = list ? endIndex : 10;
         const pageSize = endIndex - startIndex;
         if (
           scrollThreshold < pageSize + pageSize / 2 &&
