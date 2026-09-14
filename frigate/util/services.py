@@ -831,6 +831,70 @@ def get_axcl_npu_stats() -> dict[str, str | float] | None:
     return None
 
 
+_axelera_board_temp_cache: tuple[float, float] | None = None
+_AXELERA_BOARD_TEMP_TTL = 5.0
+
+
+def get_axelera_board_temp() -> float | None:
+    """Get the Axelera Metis board temperature through the SDK's axcmd tool.
+
+    The read goes through the board controller and does not open an inference
+    stream, so it is safe to call while a detector is running. ``axcmd`` ships
+    with the runtime wheel; ``find_tool`` prefers the runtime-installed copy
+    under the user base. Results are cached for a few seconds so one stats tick
+    spawns axcmd at most once.
+
+    NOTE: this function is blocking (up to ~5s on a hung board).
+    """
+    global _axelera_board_temp_cache
+
+    now = time.monotonic()
+    if (
+        _axelera_board_temp_cache is not None
+        and now - _axelera_board_temp_cache[0] < _AXELERA_BOARD_TEMP_TTL
+    ):
+        return _axelera_board_temp_cache[1]
+
+    try:
+        from frigate.util.runtime_deps import find_tool
+
+        axcmd_path = find_tool("axcmd")
+    except Exception:  # noqa: BLE001
+        axcmd_path = shutil.which("axcmd")
+
+    if axcmd_path is None or not os.path.exists(axcmd_path):
+        return None
+
+    try:
+        result = sp.run(
+            [axcmd_path, "--board-temp"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, sp.TimeoutExpired):
+        return None
+
+    if result.returncode != 0:
+        return None
+
+    # anchor on the board-controller line ("N: temp_sensorX@YY = <value>") so
+    # unrelated "= <number>" output (firmware/version preambles) is not picked up
+    match = re.search(r"temp_sensor[^=\n]*=\s*([\d.]+)", result.stdout)
+
+    if match is None:
+        return None
+
+    try:
+        temp = round(float(match.group(1)), 1)
+    except ValueError:
+        return None
+
+    _axelera_board_temp_cache = (now, temp)
+    return temp
+
+
 def try_get_info(f, h, default="N/A", sensor=None):
     try:
         if h:
