@@ -53,7 +53,7 @@ def preprocess_tensor(image: np.ndarray, model_w: int, model_h: int) -> np.ndarr
 
 
 # ----------------- Global Constants ----------------- #
-DETECTOR_KEY = "hailo8l"
+DETECTOR_KEY = "hailo"
 ARCH = None
 H8_DEFAULT_MODEL = "yolov6n.hef"
 H8L_DEFAULT_MODEL = "yolov6n.hef"
@@ -469,10 +469,10 @@ class HailoDetector(DetectionApi):
 
 # ----------------- HailoDetectorConfig Class ----------------- #
 class HailoDetectorConfig(BaseDetectorConfig):
-    """Hailo-8/Hailo-8L detector using HEF models and the HailoRT SDK for inference on Hailo hardware."""
+    """Hailo detector using HEF models and the HailoRT SDK for inference on Hailo hardware."""
 
     model_config = ConfigDict(
-        title="Hailo-8/Hailo-8L",
+        title="Hailo",
     )
 
     type: Literal[DETECTOR_KEY]

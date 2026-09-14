@@ -467,7 +467,7 @@ def get_hardware_temperatures(detector_type: str) -> list[float | None]:
                 read_temperature(os.path.join(base, apex, "temp"))
                 for apex in sorted(os.listdir(base))
             ]
-    elif detector_type == "hailo8l":
+    elif detector_type == "hailo":
         hailo_temps = get_hailo_temps()
         return [hailo_temps[name] for name in sorted(hailo_temps.keys())]
 

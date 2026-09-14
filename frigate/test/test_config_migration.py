@@ -12,6 +12,7 @@ from frigate.util.config import (
     CURRENT_CONFIG_VERSION,
     migrate_frigate_config,
     migrate_models,
+    rename_hailo_detector,
 )
 
 
@@ -164,6 +165,61 @@ class TestMigrateModels(unittest.TestCase):
         self.assertEqual(migrated["mqtt"], {"host": "mqtt"})
 
 
+class TestMigrateRenamedDetectors(unittest.TestCase):
+    def test_a_hailo_detector_is_renamed(self):
+        migrated = migrate_models(
+            {"detectors": {"hailo": {"type": "hailo8l", "device": "PCIe"}}}
+        )
+
+        self.assertEqual(migrated["models"][0]["devices"], ["hailo:PCIe"])
+
+    def test_a_hailo_detector_without_a_device(self):
+        migrated = migrate_models({"detectors": {"hailo": {"type": "hailo8l"}}})
+
+        self.assertEqual(migrated["models"][0]["devices"], ["hailo"])
+
+    def test_two_hailo_detectors_stay_separate(self):
+        # the shareable lookup has to resolve through the renamed key
+        migrated = migrate_models(
+            {
+                "detectors": {
+                    "hailo1": {"type": "hailo8l", "device": "PCIe"},
+                    "hailo2": {"type": "hailo8l", "device": "PCIe"},
+                }
+            }
+        )
+
+        self.assertEqual(migrated["models"][0]["devices"], ["hailo:PCIe", "hailo:PCIe"])
+
+
+class TestRenameHailoDetector(unittest.TestCase):
+    def test_a_renamed_detector_is_updated(self):
+        migrated = rename_hailo_detector(
+            {"models": [{"devices": ["hailo8l:PCIe", "hailo8l"]}]}
+        )
+
+        self.assertEqual(migrated["models"][0]["devices"], ["hailo:PCIe", "hailo"])
+
+    def test_other_detectors_are_untouched(self):
+        migrated = rename_hailo_detector(
+            {"models": [{"devices": ["openvino:GPU", "cpu"]}]}
+        )
+
+        self.assertEqual(migrated["models"][0]["devices"], ["openvino:GPU", "cpu"])
+
+    def test_renaming_is_idempotent(self):
+        once = rename_hailo_detector({"models": [{"devices": ["hailo8l:PCIe"]}]})
+        twice = rename_hailo_detector(once)
+
+        self.assertEqual(twice["models"][0]["devices"], ["hailo:PCIe"])
+
+    def test_a_config_without_models_is_left_alone(self):
+        self.assertEqual(
+            rename_hailo_detector({"mqtt": {"enabled": False}}),
+            {"mqtt": {"enabled": False}},
+        )
+
+
 class TestMigrateConfigFile(unittest.TestCase):
     """The full file migration, which is gated on shape as well as version."""
 
@@ -219,6 +275,37 @@ class TestMigrateConfigFile(unittest.TestCase):
         self.assertFalse(
             os.path.exists(os.path.join(self.temp_dir.name, "backup_config.yaml"))
         )
+
+    def test_a_legacy_hailo_detector_lands_on_the_hailo_key(self):
+        # the detectors key is folded into models after the version chain has
+        # run, so the rename has to happen there too
+        migrated = self._migrate(
+            "mqtt:\n"
+            "  enabled: false\n"
+            "detectors:\n"
+            "  hailo:\n"
+            "    type: hailo8l\n"
+            "    device: PCIe\n"
+            "cameras: {}\n"
+            "version: 0.18-0\n"
+        )
+
+        self.assertEqual(migrated["models"][0]["devices"], ["hailo:PCIe"])
+        self.assertNotIn("detectors", migrated)
+
+    def test_a_hailo8l_device_is_renamed_at_the_current_version(self):
+        migrated = self._migrate(
+            "mqtt:\n"
+            "  enabled: false\n"
+            "models:\n"
+            "  - scene: all\n"
+            "    devices:\n"
+            "      - hailo8l:PCIe\n"
+            "cameras: {}\n"
+            f"version: {CURRENT_CONFIG_VERSION}\n"
+        )
+
+        self.assertEqual(migrated["models"][0]["devices"], ["hailo:PCIe"])
 
 
 if __name__ == "__main__":

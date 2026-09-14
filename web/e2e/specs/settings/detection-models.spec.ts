@@ -49,9 +49,43 @@ const PLUS_MODEL = {
   height: 320,
 };
 
+// Frigate+ builds a Hailo model per device and names the detector by its
+// pre-rename key; /api/plus/models adds the current one before serving it
+const HAILO_PLUS_MODELS = [
+  {
+    ...PLUS_MODEL,
+    id: "hailo8l1",
+    supportedDetectors: ["hailo8l", "hailo"],
+    hailoDevice: "hailo8l",
+  },
+  {
+    ...PLUS_MODEL,
+    id: "hailo8r1",
+    supportedDetectors: ["hailo8l", "hailo"],
+    hailoDevice: "hailo8r",
+  },
+];
+
+const HAILO_HARDWARE = [
+  {
+    key: "hailo",
+    detector: "hailo",
+    name: "Hailo",
+    units: [{ device: "hailo:PCIe", label: "hailo0" }],
+    count: 1,
+    unlimited: true,
+  },
+];
+
 type SavedConfig = { config_data?: { models?: Model[] } };
 
-async function installRoutes(page: Page, models: Model[], plusEnabled = false) {
+async function installRoutes(
+  page: Page,
+  models: Model[],
+  plusEnabled = false,
+  plusModels: unknown[] = [PLUS_MODEL],
+  hailoHardware = false,
+) {
   const config = configFactory({
     models,
     plus: { enabled: plusEnabled },
@@ -70,8 +104,14 @@ async function installRoutes(page: Page, models: Model[], plusEnabled = false) {
     route.fulfill({ json: { models } }),
   );
   await page.route("**/api/plus/models", (route) =>
-    route.fulfill({ json: [PLUS_MODEL] }),
+    route.fulfill({ json: plusModels }),
   );
+
+  if (hailoHardware) {
+    await page.route("**/api/hardware/probe**", (route) =>
+      route.fulfill({ json: HAILO_HARDWARE }),
+    );
+  }
   await page.route("**/api/config/set", async (route) => {
     saves.push(route.request().postDataJSON() as SavedConfig);
     await route.fulfill({ json: { success: true, require_restart: false } });
@@ -260,6 +300,35 @@ test.describe("Detection models settings @high", () => {
     await expect.poll(() => saves.length).toBeGreaterThan(0);
 
     expect(saves.at(-1)?.config_data?.models?.[0].path).toBe("plus://abc123");
+  });
+
+  test("a Frigate+ Hailo model is listed by the device it was built for", async ({
+    frigateApp,
+  }) => {
+    // every Hailo model supports the one hailo detector, so the detector name
+    // says nothing; which device it was built for is what the user picks on
+    await installRoutes(
+      frigateApp.page,
+      [{ scene: "all", devices: ["hailo:PCIe"], path: "/config/custom.hef" }],
+      true,
+      HAILO_PLUS_MODELS,
+      true,
+    );
+    await openPage(frigateApp);
+
+    await frigateApp.page.getByRole("tab", { name: "Frigate+" }).click();
+    await frigateApp.page.getByRole("combobox").last().click();
+
+    const options = frigateApp.page.getByRole("option");
+
+    await expect(options).toHaveCount(2);
+    await expect(options.first()).toContainText("hailo8l");
+    await expect(options.last()).toContainText("hailo8r");
+
+    // knowing which device is attached is left to the user, so neither is
+    // ruled out here
+    await expect(options.first()).not.toHaveAttribute("aria-disabled", "true");
+    await expect(options.last()).not.toHaveAttribute("aria-disabled", "true");
   });
 
   test("a freshly opened page is not reported as modified", async ({

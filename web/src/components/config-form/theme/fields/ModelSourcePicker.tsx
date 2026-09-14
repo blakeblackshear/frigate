@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { FrigateConfig } from "@/types/frigateConfig";
+import { describeSupportedDetectors } from "@/utils/plusModels";
 
 export type FrigatePlusModel = {
   id: string;
@@ -20,6 +21,8 @@ export type FrigatePlusModel = {
   trainDate: string;
   isBaseModel: boolean;
   supportedDetectors: string[];
+  // which Hailo device a Hailo model was built for, absent on every other model
+  hailoDevice?: string;
   width: number;
   height: number;
 };
@@ -152,7 +155,7 @@ export function ModelSourcePicker({
                     <div>{describe(model)}</div>
                     <div className="text-xs text-muted-foreground">
                       {t("frigatePlus.modelInfo.supportedDetectors")}:{" "}
-                      {model.supportedDetectors.join(", ")}
+                      {describeSupportedDetectors(model)}
                     </div>
                   </SelectItem>
                 ))

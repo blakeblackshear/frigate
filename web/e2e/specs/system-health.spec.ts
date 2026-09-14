@@ -422,7 +422,7 @@ test.describe("System — Health hardware pane @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
-      config: { models: [{ scene: "all", devices: ["hailo8l"] }] },
+      config: { models: [{ scene: "all", devices: ["hailo"] }] },
       stats: QUIET_STATS,
     });
     await frigateApp.goto("/system#health");
@@ -431,7 +431,7 @@ test.describe("System — Health hardware pane @medium", () => {
     await expect(row).toHaveAttribute("data-state", "error", {
       timeout: 15_000,
     });
-    await expect(row).toContainText("hailo8l was not found on this system");
+    await expect(row).toContainText("hailo was not found on this system");
   });
 
   test("a generic device the probe cannot enumerate is judged by its runtime", async ({

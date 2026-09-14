@@ -5,6 +5,7 @@ import {
 } from "@/components/card/SettingsGroupCard";
 import type { DetectionModelConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
+import { describeSupportedDetectors } from "@/utils/plusModels";
 
 type FrigatePlusCurrentModelSummaryProps = {
   plusModel: DetectionModelConfig["plus"];
@@ -61,7 +62,7 @@ export default function FrigatePlusCurrentModelSummary({
           />
           <SplitCardRow
             label={t("frigatePlus.modelInfo.supportedDetectors")}
-            content={<p>{plusModel.supportedDetectors.join(", ")}</p>}
+            content={<p>{describeSupportedDetectors(plusModel)}</p>}
           />
         </div>
       )}

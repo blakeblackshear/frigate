@@ -429,6 +429,8 @@ export type DetectionModelConfig = {
     baseModel: string;
     isBaseModel: boolean;
     supportedDetectors: string[];
+    // which Hailo device a Hailo model was built for, absent on every other model
+    hailoDevice?: string;
     width: number;
     height: number;
   } | null;

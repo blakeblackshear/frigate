@@ -259,8 +259,8 @@ def detect_hailo() -> DetectionHardware | None:
 
     # the hailo runtime schedules across every attached device itself, so there
     # is nothing to address individually
-    units = [HardwareUnit(device="hailo8l:PCIe", label=os.path.basename(nodes[0]))]
-    return _hardware("hailo8l", "hailo8l", "Hailo", units)
+    units = [HardwareUnit(device="hailo:PCIe", label=os.path.basename(nodes[0]))]
+    return _hardware("hailo", "hailo", "Hailo", units)
 
 
 def detect_memryx() -> DetectionHardware | None:

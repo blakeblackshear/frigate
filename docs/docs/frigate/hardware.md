@@ -54,7 +54,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Most Hardware**
 
-- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
+- [Hailo](#hailo-8): The Hailo-8, Hailo-8L and Hailo-8R AI Acceleration modules are available in m.2 format with a HAT for RPi devices offering a wide range of compatibility with devices.
   - [Supports many model architectures](../../configuration/object_detectors#configuration-hailo)
   - Runs best with tiny or small size models
 
@@ -111,12 +111,13 @@ Frigate supports multiple different detectors that work on different types of ha
 
 ### Hailo-8
 
-Frigate supports both the Hailo-8 and Hailo-8L AI Acceleration Modules on compatible hardware platforms, including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate automatically identifies your hardware type and selects the appropriate default model when a custom model isn’t provided.
+Frigate supports the Hailo-8, Hailo-8L and Hailo-8R AI Acceleration Modules on compatible hardware platforms, including the Raspberry Pi 5 with the PCIe hat from the AI kit. The Hailo detector integration in Frigate identifies which of them is attached and selects the matching default model when a custom model isn’t provided.
 
 **Default Model Configuration:**
 
-- **Hailo-8L:** Default model is **YOLOv6n**.
-- **Hailo-8:** Default model is **YOLOv6n**.
+- **Hailo-8L:** Default model is **YOLOv6n**, compiled for the Hailo-8L.
+- **Hailo-8:** Default model is **YOLOv6n**, compiled for the Hailo-8.
+- **Hailo-8R:** Default model is the **Hailo-8** build of **YOLOv6n**, since the Hailo Model Zoo publishes no Hailo-8R build.
 
 In real-world deployments, even with multiple cameras running concurrently, Frigate has demonstrated consistent performance. Testing on x86 platforms, with dual PCIe lanes, yields further improvements in FPS, throughput, and latency compared to the Raspberry Pi setup.
 

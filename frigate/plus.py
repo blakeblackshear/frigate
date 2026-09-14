@@ -11,9 +11,48 @@ import requests
 from numpy import ndarray
 from requests.models import Response
 
-from frigate.const import PLUS_API_HOST, PLUS_ENV_VAR
+from frigate.const import MODEL_CACHE_DIR, PLUS_API_HOST, PLUS_ENV_VAR
 
 logger = logging.getLogger(__name__)
+
+
+def add_hailo_alias(model_info: dict[str, Any]) -> dict[str, Any]:
+    """Name the hailo detector by its current key as well as its old one.
+
+    Frigate+ reports every Hailo model as supporting hailo8l, which this
+    detector was called before it was renamed to cover every Hailo device.
+    The old key is kept so an older Frigate still matches the model.
+
+    Args:
+        model_info: A Frigate+ model's metadata, edited in place
+
+    Returns:
+        The same metadata
+    """
+    supported = model_info.get("supportedDetectors")
+
+    if supported and "hailo8l" in supported and "hailo" not in supported:
+        supported.append("hailo")
+
+    return model_info
+
+
+def load_plus_model_info(model_id: str) -> dict[str, Any] | None:
+    """Read a Frigate+ model's cached info file.
+
+    Args:
+        model_id: The Frigate+ model id
+
+    Returns:
+        The model info, or None when it has not been cached or cannot be read
+    """
+    try:
+        with open(os.path.join(MODEL_CACHE_DIR, f"{model_id}.json")) as f:
+            model_info: dict[str, Any] = json.load(f)
+    except (OSError, ValueError):
+        return None
+
+    return add_hailo_alias(model_info)
 
 
 def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
@@ -241,4 +280,9 @@ class PlusApi:
         if not r.ok:
             raise Exception(r.text)
 
-        return r.json()
+        models = r.json()
+
+        for model in models.get("list") or []:
+            add_hailo_alias(model)
+
+        return models
