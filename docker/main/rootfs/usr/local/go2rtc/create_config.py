@@ -14,6 +14,7 @@ from frigate.const import (
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
+from frigate.util.builtin import encode_go2rtc_source_password
 from frigate.util.config import find_config_file, resolve_ffmpeg_path
 from frigate.util.services import (
     is_go2rtc_arbitrary_exec_allowed,
@@ -125,7 +126,9 @@ for name in list(go2rtc_config.get("streams", {})):
                 )
                 del go2rtc_config["streams"][name]
                 continue
-            go2rtc_config["streams"][name] = formatted_stream
+            go2rtc_config["streams"][name] = encode_go2rtc_source_password(
+                formatted_stream
+            )
         except ValueError as e:
             print(
                 "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
@@ -144,7 +147,7 @@ for name in list(go2rtc_config.get("streams", {})):
                     )
                     continue
 
-                filtered_streams.append(formatted_stream)
+                filtered_streams.append(encode_go2rtc_source_password(formatted_stream))
             except ValueError as e:
                 print(
                     "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."

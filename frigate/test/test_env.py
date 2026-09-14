@@ -68,6 +68,15 @@ class TestGo2RtcAddStreamSubstitution(unittest.TestCase):
         src = "rtsp://host/{FRIGATE_NONEXISTENT}/stream"
         self.assertEqual(self._call_route(src), src)
 
+    def test_substituted_password_is_url_encoded(self):
+        FRIGATE_ENV_VARS["FRIGATE_RTSP_PASSWORD"] = "ab#nQK4"
+        self.assertEqual(
+            self._call_route(
+                "rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.0.0.2:554/live#backchannel=0"
+            ),
+            "rtsp://admin:ab%23nQK4@10.0.0.2:554/live#backchannel=0",
+        )
+
     def test_malformed_placeholder_rejected_via_api(self):
         """Malformed FRIGATE placeholders raise (not silently passed through).
 

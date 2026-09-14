@@ -35,7 +35,11 @@ from frigate.config.camera.updater import (
 )
 from frigate.config.env import UnknownVariableError, substitute_frigate_vars
 from frigate.models import User
-from frigate.util.builtin import clean_camera_user_pass, get_record_segment_time
+from frigate.util.builtin import (
+    clean_camera_user_pass,
+    encode_go2rtc_source_password,
+    get_record_segment_time,
+)
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
@@ -182,7 +186,7 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
                     status_code=400,
                 )
 
-            params["src"] = resolved_src
+            params["src"] = encode_go2rtc_source_password(resolved_src)
 
         r = requests.put(
             "http://127.0.0.1:1984/api/streams",

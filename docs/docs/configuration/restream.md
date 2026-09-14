@@ -168,27 +168,19 @@ cameras:
 
 ## Handling Complex Passwords
 
-go2rtc expects URL-encoded passwords in the config, [urlencoder.org](https://urlencoder.org) can be used for this purpose.
-
-For example:
+go2rtc requires URL-encoded passwords. Frigate encodes reserved characters in `go2rtc.streams` passwords automatically, so both of these work:
 
 ```yaml
 go2rtc:
   streams:
-    # highlight-error-line
-    my_camera: rtsp://username:$@foo%@192.168.1.100
+    my_camera: rtsp://username:$@foo#bar@192.168.1.100
+    my_camera_encoded: rtsp://username:$%40foo%23bar@192.168.1.100
 ```
 
-becomes
+Existing `%XX` escapes are kept as-is, so passwords that are already encoded are not changed. Encode the password yourself, for example with [urlencoder.org](https://urlencoder.org), when it:
 
-```yaml
-go2rtc:
-  streams:
-    # highlight-next-line
-    my_camera: rtsp://username:$%40foo%25@192.168.1.100
-```
-
-See [this comment](https://github.com/AlexxIT/go2rtc/issues/1217#issuecomment-2242296489) for more information.
+- contains a `%` followed by two hexadecimal digits (such as `ab%41`), which is indistinguishable from an escape. Write the `%` as `%25`.
+- contains a space.
 
 ## Preventing go2rtc from blocking two-way audio {#two-way-talk-restream}
 

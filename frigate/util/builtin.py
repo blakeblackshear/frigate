@@ -133,6 +133,37 @@ def escape_special_characters(path: str) -> str:
         return path
 
 
+def encode_go2rtc_source_password(source: str) -> str:
+    """Percent-encode reserved characters in a go2rtc stream source password.
+
+    go2rtc parses sources as strict URLs, so raw characters like # ? / % break
+    them. Existing %XX escapes are kept, so already encoded sources are
+    unchanged. A raw password containing % followed by two hex digits is
+    indistinguishable from an escape and must still be encoded by the user.
+    """
+    if len(source) > 1000 or source.strip().startswith(("echo:", "expr:", "exec:")):
+        return source
+
+    match = re.search(REGEX_RTSP_CAMERA_USER_PASS, source)
+
+    if match is None:
+        return source
+
+    # the username pattern excludes ":", so the first one ends it
+    password_start = source.index(":", match.start() + 3) + 1
+    password_end = match.end() - 1
+    password = re.sub(
+        r"%[0-9A-Fa-f]{2}|[^A-Za-z0-9\-._~!$&'()*+,;=]",
+        lambda m: (
+            m.group(0)
+            if len(m.group(0)) == 3
+            else urllib.parse.quote(m.group(0), safe="")
+        ),
+        source[password_start:password_end],
+    )
+    return source[:password_start] + password + source[password_end:]
+
+
 def get_ffmpeg_arg_list(arg: Any) -> list:
     """Use arg if list or convert to list format."""
     return arg if isinstance(arg, list) else shlex.split(arg)

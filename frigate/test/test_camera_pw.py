@@ -2,7 +2,11 @@
 
 import unittest
 
-from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
+from frigate.util.builtin import (
+    clean_camera_user_pass,
+    encode_go2rtc_source_password,
+    escape_special_characters,
+)
 
 
 class TestUserPassCleanup(unittest.TestCase):
@@ -45,3 +49,64 @@ class TestUserPassMasking(unittest.TestCase):
         escaped = clean_camera_user_pass(self.rtsp_log_message)
         print(f"The escaped is {escaped}")
         assert escaped == "Did you mean file:rtsp://*:*@192.168.1.3:554"
+
+
+class TestGo2rtcSourcePasswordEncoding(unittest.TestCase):
+    def test_raw_reserved_characters_are_encoded(self):
+        self.assertEqual(
+            encode_go2rtc_source_password("rtsp://admin:ab#c?d/e@10.0.0.2:554/live"),
+            "rtsp://admin:ab%23c%3Fd%2Fe@10.0.0.2:554/live",
+        )
+
+    def test_password_with_space_is_not_matched(self):
+        # shares REGEX_RTSP_CAMERA_USER_PASS, which stops at whitespace
+        source = "rtsp://admin:ab cd@10.0.0.2:554/live"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_at_and_percent_in_password_are_encoded(self):
+        self.assertEqual(
+            encode_go2rtc_source_password("rtsp://username:$@foo%@192.168.1.100"),
+            "rtsp://username:$%40foo%25@192.168.1.100",
+        )
+
+    def test_encoded_password_is_unchanged(self):
+        source = "rtsp://username:$%40foo%25%23@192.168.1.100/live"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_partially_encoded_password_is_completed(self):
+        self.assertEqual(
+            encode_go2rtc_source_password("rtsp://admin:%40ab#cd@10.0.0.2/live"),
+            "rtsp://admin:%40ab%23cd@10.0.0.2/live",
+        )
+
+    def test_encoding_is_idempotent(self):
+        source = "rtsp://admin:p@ss:w#rd{é}@10.0.0.2/live"
+        once = encode_go2rtc_source_password(source)
+        self.assertEqual(once, "rtsp://admin:p%40ss%3Aw%23rd%7B%C3%A9%7D@10.0.0.2/live")
+        self.assertEqual(encode_go2rtc_source_password(once), once)
+
+    def test_ffmpeg_source_params_are_preserved(self):
+        self.assertEqual(
+            encode_go2rtc_source_password(
+                "ffmpeg:rtsp://admin:ab#nQK4@10.0.0.2:554/cam?channel=1&subtype=0"
+                "#video=copy#backchannel=0"
+            ),
+            "ffmpeg:rtsp://admin:ab%23nQK4@10.0.0.2:554/cam?channel=1&subtype=0"
+            "#video=copy#backchannel=0",
+        )
+
+    def test_safe_password_is_unchanged(self):
+        source = "rtsp://admin:Pass!word$1&2@10.0.0.2/live#backchannel=0"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_source_without_credentials_is_unchanged(self):
+        for source in (
+            "rtsp://10.0.0.2:554/live",
+            "rtsp://127.0.0.1:8554/front_door",
+            "ffmpeg:front_door#audio=opus",
+        ):
+            self.assertEqual(encode_go2rtc_source_password(source), source)
+
+    def test_exec_sources_are_unchanged(self):
+        source = "exec:ffmpeg -i rtsp://admin:ab#cd@10.0.0.2/live -f rtsp {output}"
+        self.assertEqual(encode_go2rtc_source_password(source), source)
