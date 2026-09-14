@@ -65,7 +65,7 @@
     "i18next": "^24.2.0",
     "i18next-http-backend": "^4.0.2",
     "idb-keyval": "^6.2.1",
-    "immer": "^10.1.1",
+    "immer": "^11.1.18",
     "js-yaml": "^4.3.2",
     "konva": "^10.2.3",
     "lodash": "^4.18.1",
