@@ -1,2 +1,2 @@
 numpy
-openvino >= 2026.2.0
+openvino >= 2026.3.1
