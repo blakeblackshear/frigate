@@ -464,7 +464,7 @@
         },
         "default_role": {
             "label": "Ruolo predefinito",
-            "description": "Ruolo predefinito assegnato agli utenti autenticati tramite proxy quando non si applica nessuna mappatura dei ruoli."
+            "description": "Ruolo predefinito assegnato agli utenti autenticati tramite proxy quando non è applicabile alcuna mappatura dei ruoli. Imposta su 'nessuno' per negare l'accesso agli utenti non mappati."
         },
         "separator": {
             "label": "Carattere separatore",
@@ -1399,5 +1399,8 @@
             "label": "Ordine di ordinamento",
             "description": "Ordine numerico utilizzato per ordinare i gruppi di telecamere nell'interfaccia utente; i numeri più alti appaiono dopo."
         }
+    },
+    "models": {
+        "label": "Modelli di rilevamento"
     }
 }

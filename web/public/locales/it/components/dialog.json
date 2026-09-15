@@ -66,9 +66,9 @@
       "batchSuccess_other": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
       "batchPartial": "Avviate {{successful}} esportazioni su un totale di {{total}}. Telecamere non riuscite: {{failedCameras}}",
       "batchFailed": "Impossibile avviare {{total}} esportazioni. Telecamere non riuscite: {{failedCameras}}",
-      "batchQueuedSuccess_one": "1 esportazione in coda. Apertura del caso in corso.",
-      "batchQueuedSuccess_many": "Sono in coda {{count}} esportazioni. Apertura del caso in corso.",
-      "batchQueuedSuccess_other": "Sono in coda {{count}} esportazioni. Apertura del caso in corso.",
+      "batchQueuedSuccess_one": "1 esportazione in coda.",
+      "batchQueuedSuccess_many": "{{count}} esportazioni in coda.",
+      "batchQueuedSuccess_other": "{{count}} esportazioni in coda.",
       "batchQueuedPartial": "In coda {{successful}} di {{total}} esportazioni. Telecamere non riuscite: {{failedCameras}}",
       "batchQueueFailed": "Impossibile mettere in coda {{total}} esportazioni. Telecamere non riuscite: {{failedCameras}}"
     },
@@ -131,9 +131,9 @@
       "exportButton_other": "Esporta {{count}} revisioni",
       "exportingButton": "Esportazione...",
       "toast": {
-        "started_one": "Avviata 1 esportazione. Apertura del caso in corso.",
-        "started_many": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
-        "started_other": "Avviate {{count}} esportazioni. Apertura del caso in corso.",
+        "started_one": "Avviata 1 esportazione.",
+        "started_many": "Avviate {{count}} esportazioni.",
+        "started_other": "Avviate {{count}} esportazioni.",
         "partial": "Avviate {{successful}} esportazioni su un totale di {{total}}. Fallite: {{failedItems}}",
         "failed": "Impossibile avviare {{total}} esportazioni. Errori: {{failedItems}}"
       }
