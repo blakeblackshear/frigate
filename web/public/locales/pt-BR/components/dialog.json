@@ -137,6 +137,15 @@
         "failed": "Falha ao iniciar {{total}} exportações. Falhas: {{failedItems}}",
         "partial": "Iniciadas {{successful}} de {{total}} exportações. Falhas: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualidade",
+      "auto": "Automático",
+      "main": "Original",
+      "sub": "Baixo",
+      "autoDesc": "Usa o fluxo principal e alterna para o fluxo de qualidade inferior quando o principal falhar.",
+      "mainDesc": "Exporta apenas o fluxo principal de qualidade original. Intervalos onde o fluxo principal não está disponível ficarão de fora.",
+      "subDesc": "Exporta somente o fluxo de qualidade inferior. Intervalos onde o fluxo não estiver disponível ficarão de fora."
     }
   },
   "streaming": {
@@ -182,7 +191,8 @@
       "markAsReviewed": "Marcar como revisado",
       "export": "Exportar",
       "deleteNow": "Deletar Agora",
-      "markAsUnreviewed": "Marcar como não revisado"
+      "markAsUnreviewed": "Marcar como não revisado",
+      "generateDescription": "Gerar descrição"
     },
     "shareTimestamp": {
       "label": "Compartilhar marca de tempo",
@@ -191,6 +201,12 @@
       "custom": "Marcação de data/hora personalizado",
       "button": "Compartilhar URL com marcação de tempo",
       "shareTitle": "Marcação de data/hora da análise do Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Uma descrição gerada pela GenAI foi solicitada para esse item de revisão.",
+        "error": "Falha ao requisitar a descrição: {{error}}"
+      }
     }
   },
   "imagePicker": {

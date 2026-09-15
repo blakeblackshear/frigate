@@ -105,12 +105,29 @@
     }
   },
   "deleteDatasetImages": {
-    "title": "Deletar Imagens do Dataset"
+    "title": "Deletar Imagens do Dataset",
+    "desc_one": "Tem certeza que quer apagar {{count}} imagem do {{dataset}}? Esta ação não poderá ser desfeita e será preciso treinar novamente o modelo.",
+    "desc_many": "Tem certeza que quer apagar {{count}} imagens do {{dataset}}? Esta ação não poderá ser desfeita e será preciso treinar novamente o modelo.",
+    "desc_other": "Tem certeza que quer apagar {{count}} imagens do {{dataset}}? Esta ação não poderá ser desfeita e será preciso treinar novamente o modelo."
   },
   "edit": {
     "title": "Editar Modelo de Classificação",
     "descriptionState": "Edite as classes deste modelo de classificação de estado. As alterações exigirão treinar novamente o modelo.",
-    "descriptionObject": "Edite o tipo de objeto e tipo de classificação para este modelo de classificação de objeto."
+    "descriptionObject": "Edite o tipo de objeto e tipo de classificação para este modelo de classificação de objeto.",
+    "enabled": "Ativado",
+    "enabledDesc": "Executa este modelo. Quando desativado, ele para de executar e não mais classifica.",
+    "saveAttempts": "Salvar tentativas",
+    "saveAttemptsDesc": "Número de imagens de tentativas de classificação que devem ser mantidas para as classificações recentes UI.",
+    "motion": "Executar com Movimento",
+    "motionDesc": "Executar classificação quando movimento for detectado dentro do recorte configurado.",
+    "interval": "Intervalo",
+    "intervalDesc": "Segundos entre execuções periódicas de classificação. Deixar vazio para executar somente em movimento.",
+    "intervalPlaceholder": "Sem intervalo",
+    "stateClassesInfo": "Modelo atualizado. Retem o modelo para as mudanças de classe surtirem efeito.",
+    "errors": {
+      "saveAttemptsInvalid": "Tentativas de gravação devem ter um número inteiro de 0 ou maior",
+      "intervalInvalid": "Intervalo deve ser um número inteiro maior que 0"
+    }
   },
   "reclassifyImageAs": "Reclassificar imagem como:",
   "reclassifyImage": "Reclassificar imagem",
@@ -119,5 +136,6 @@
     "steps": {
       "nameAndDefine": "Nomear e definir"
     }
-  }
+  },
+  "disabled": "Desativado"
 }
