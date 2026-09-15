@@ -786,6 +786,13 @@ def auth(request: Request):
 
         user = token.claims.get("sub")
         role = token.claims.get("role")
+
+        # the token keeps the role it was issued with, so a role removed from
+        # the config since then must send the user back through login
+        if role not in auth_config.roles:
+            logger.debug("jwt role %s is not in the config", role)
+            return fail_response
+
         current_time = int(time.time())
 
         # if the jwt is expired
