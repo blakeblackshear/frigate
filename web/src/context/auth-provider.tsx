@@ -1,30 +1,7 @@
 import axios from "axios";
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import useSWR from "swr";
-
-interface AuthState {
-  user: { username: string; role: string | null } | null;
-  allowedCameras: string[];
-  isLoading: boolean;
-  isAuthenticated: boolean; // true if auth is required
-}
-
-interface AuthContextType {
-  auth: AuthState;
-  login: (user: AuthState["user"]) => void;
-  logout: () => void;
-}
-
-export const AuthContext = createContext<AuthContextType>({
-  auth: {
-    user: null,
-    allowedCameras: [],
-    isLoading: true,
-    isAuthenticated: false,
-  },
-  login: () => {},
-  logout: () => {},
-});
+import { AuthContext, AuthState } from "./auth-context";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [auth, setAuth] = useState<AuthState>({

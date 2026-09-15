@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";

@@ -61,7 +61,7 @@ import {
   JsonValue,
 } from "@/types/configForm";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 import {
   cameraUpdateTopicMap,
   globalCameraDefaultSections,

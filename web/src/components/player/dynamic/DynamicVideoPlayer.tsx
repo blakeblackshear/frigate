@@ -16,7 +16,8 @@ import {
   RecordingCoverage,
 } from "@/types/record";
 import { Preview } from "@/types/preview";
-import PreviewPlayer, { PreviewController } from "../PreviewPlayer";
+import PreviewPlayer from "../PreviewPlayer";
+import { PreviewController } from "../PreviewController";
 import { DynamicVideoController } from "./DynamicVideoController";
 import HlsVideoPlayer, { HlsSource } from "../HlsVideoPlayer";
 import { useDetailStream } from "@/context/detail-stream-context";
