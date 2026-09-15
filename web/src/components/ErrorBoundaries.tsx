@@ -92,10 +92,12 @@ function PagePanel({ failure }: PanelProps) {
 
   const stale = isStaleAsset(failure);
 
-  const onCopy = () => {
-    // copy() falls back to a prompt and returns false when the clipboard is
+  const onCopy = async () => {
+    // copy() falls back to a prompt and resolves false when the clipboard is
     // refused, so a success toast has to wait on the result.
-    const copied = copy(crashReport(failure, stats?.service.version));
+    const copied = await copy(crashReport(failure, stats?.service.version), {
+      fallbackToPrompt: true,
+    });
 
     if (copied) {
       toast.success(t("button.copiedToClipboard"), { position: "top-center" });

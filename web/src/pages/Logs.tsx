@@ -362,10 +362,10 @@ function Logs() {
     });
   }, [isLoading, logState]);
 
-  const handleCopyLogs = useCallback(() => {
+  const handleCopyLogs = useCallback(async () => {
     if (!logState.entries.length) return;
 
-    if (copy(logState.entries.map((entry) => entry.text).join("\n"))) {
+    if (await copy(logState.entries.map((entry) => entry.text).join("\n"))) {
       toast.success(t("logs.copy.success"));
     } else {
       toast.error(t("logs.copy.error"));

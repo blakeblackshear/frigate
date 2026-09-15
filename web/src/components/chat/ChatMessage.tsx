@@ -71,10 +71,10 @@ export function MessageBubble({
 
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     const text = content?.trim() || "";
     if (!text) return;
-    if (copy(text)) {
+    if (await copy(text)) {
       setCopied(true);
       toast.success(t("button.copiedToClipboard", { ns: "common" }));
       setTimeout(() => setCopied(false), 2000);
