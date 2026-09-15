@@ -123,7 +123,7 @@ function ConfigEditor() {
         hover: true,
         completion: true,
         validate: true,
-        format: true,
+        format: { enable: true },
         schemas: [
           {
             uri: `${apiHost}api/config/schema.json`,
