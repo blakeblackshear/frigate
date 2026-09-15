@@ -68,7 +68,7 @@
     "js-yaml": "^4.3.2",
     "konva": "^10.2.3",
     "lodash": "^4.18.1",
-    "lucide-react": "^0.577.0",
+    "lucide-react": "^1.45.0",
     "monaco-yaml": "^5.4.1",
     "next-themes": "^0.4.6",
     "nosleep.js": "^0.12.0",
