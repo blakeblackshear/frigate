@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 import path, { resolve } from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
@@ -8,9 +7,6 @@ const proxyHost = process.env.PROXY_HOST || "localhost:5000";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    "import.meta.vitest": "undefined",
-  },
   server: {
     proxy: {
       "/api": {
@@ -59,22 +55,5 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "./src"),
     },
-  },
-  test: {
-    environment: "jsdom",
-    alias: {
-      "testing-library": path.resolve(
-        import.meta.dirname,
-        "./__test__/testing-library.js",
-      ),
-    },
-    setupFiles: ["./__test__/test-setup.ts"],
-    includeSource: ["src/**/*.{js,jsx,ts,tsx}"],
-    coverage: {
-      reporter: ["text-summary", "text"],
-    },
-    mockReset: true,
-    restoreMocks: true,
-    globals: true,
   },
 });
