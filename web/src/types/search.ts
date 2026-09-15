@@ -25,11 +25,7 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters[] = [
 export type SearchSource = "similarity" | "thumbnail" | "description";
 
 export type SearchSortType =
-  | "date_asc"
-  | "date_desc"
-  | "score_asc"
-  | "score_desc"
-  | "relevance";
+  "date_asc" | "date_desc" | "score_asc" | "score_desc" | "relevance";
 
 export type EventType = "object" | "audio" | "manual";
 

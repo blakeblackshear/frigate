@@ -748,14 +748,12 @@ export default function Settings() {
 
       if (level === "camera") {
         return CAMERA_SECTION_MAPPING[actualSection] as
-          | SettingsType
-          | undefined;
+          SettingsType | undefined;
       }
       return (
         (GLOBAL_SECTION_MAPPING[actualSection] as SettingsType | undefined) ??
         (ENRICHMENTS_SECTION_MAPPING[actualSection] as
-          | SettingsType
-          | undefined) ??
+          SettingsType | undefined) ??
         (SYSTEM_SECTION_MAPPING[actualSection] as SettingsType | undefined)
       );
     },

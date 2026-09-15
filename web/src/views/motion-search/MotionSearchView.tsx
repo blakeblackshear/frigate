@@ -720,10 +720,10 @@ export default function MotionSearchView({
 
   const canStartSearch = Boolean(
     selectedCamera &&
-      searchRange &&
-      searchRange.before >= searchRange.after &&
-      polygonPoints.length >= 3 &&
-      !isDrawingROI,
+    searchRange &&
+    searchRange.before >= searchRange.after &&
+    polygonPoints.length >= 3 &&
+    !isDrawingROI,
   );
 
   const cancelMotionSearchJob = useCallback(

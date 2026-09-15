@@ -276,14 +276,10 @@ export function downloadJson(payload: unknown, fileName: string): void {
 }
 
 export type ParseError =
-  | "invalid_json"
-  | "wrong_type"
-  | "unsupported_version"
-  | "invalid_schema";
+  "invalid_json" | "wrong_type" | "unsupported_version" | "invalid_schema";
 
 export type ParseResult =
-  | { ok: true; file: UiSettingsFile }
-  | { ok: false; error: ParseError };
+  { ok: true; file: UiSettingsFile } | { ok: false; error: ParseError };
 
 export function parseUiSettingsFile(text: string): ParseResult {
   let raw: unknown;

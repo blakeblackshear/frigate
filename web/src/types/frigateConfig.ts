@@ -20,11 +20,7 @@ export interface BirdseyeConfig {
 }
 
 export type BirdseyeMode =
-  | "continuous"
-  | "motion"
-  | "all_objects"
-  | "alerts"
-  | "detections";
+  "continuous" | "motion" | "all_objects" | "alerts" | "detections";
 
 export interface FaceRecognitionConfig {
   enabled: boolean;

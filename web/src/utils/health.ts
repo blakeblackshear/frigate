@@ -256,12 +256,7 @@ export function detectionRows({
 // ------------------------------------------------------------------ hwaccel
 
 export type HwaccelFamilyKey =
-  | "nvidia"
-  | "vaapi"
-  | "intel-qsv"
-  | "rkmpp"
-  | "jetson"
-  | "rpi";
+  "nvidia" | "vaapi" | "intel-qsv" | "rkmpp" | "jetson" | "rpi";
 
 export type HwaccelClass =
   | { kind: "none" }

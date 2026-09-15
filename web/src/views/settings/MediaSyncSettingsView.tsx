@@ -43,7 +43,7 @@ export default function MediaSyncSettingsView() {
 
   const isJobRunning = Boolean(
     currentJob &&
-      (currentJob.status === "queued" || currentJob.status === "running"),
+    (currentJob.status === "queued" || currentJob.status === "running"),
   );
 
   const handleMediaTypeChange = useCallback((id: string, checked: boolean) => {

@@ -316,7 +316,11 @@ export default function ZoneEditPane({
     return profileZone ?? cam.zones[polygon.name];
   }, [polygon, config, editingProfile]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<
+    z.input<typeof formSchema>,
+    unknown,
+    z.output<typeof formSchema>
+  >({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
@@ -601,7 +605,7 @@ export default function ZoneEditPane({
     ],
   );
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.output<typeof formSchema>) {
     if (activePolygonIndex === undefined || !values || !polygons) {
       return;
     }
