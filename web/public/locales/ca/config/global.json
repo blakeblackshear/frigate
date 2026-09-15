@@ -31,6 +31,10 @@
             "record": {
                 "label": "Registra els arguments de sortida",
                 "description": "Arguments de sortida predeterminats per a enregistrar fluxos de rols."
+            },
+            "record_sub": {
+                "label": "Arguments de sortida del registre de subflux",
+                "description": "Arguments de sortida per als fluxos de rols record.sub. Els arguments de sortida del registre s'utilitzen quan no s'estableix."
             }
         },
         "retry_interval": {
@@ -388,6 +392,54 @@
         "enabled_in_config": {
             "label": "Estat de l'enregistrament original",
             "description": "Indica si l'enregistrament s'ha activat en la configuració estàtica original."
+        },
+        "sub": {
+            "label": "Enregistrament de subflux",
+            "description": "Paràmetres per a enregistrar un segon flux de menor qualitat.",
+            "enabled": {
+                "label": "Habilita l'enregistrament de subflux",
+                "description": "Permet l'enregistrament d'un segon flux de menor qualitat per a la reproducció de qualitat adaptativa i la retenció estesa."
+            },
+            "continuous": {
+                "label": "Retenció contínua del subflux",
+                "description": "Nombre de dies per a retenir els enregistraments de sub flux independentment dels objectes o el moviment seguits.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Dies per retenir enregistraments."
+                }
+            },
+            "motion": {
+                "label": "Retenció del moviment del subflux",
+                "description": "Nombre de dies per a retenir els enregistraments de substream activats pel moviment.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Dies per retenir enregistraments."
+                }
+            },
+            "alerts": {
+                "label": "Retenció d'alertes del subflux",
+                "description": "Paràmetres de retenció per als enregistraments de substream d'alertes.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            },
+            "detections": {
+                "label": "Retenció de la detecció de subflux",
+                "description": "Paràmetres de retenció per als enregistraments de substream de les deteccions.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            }
         }
     },
     "review": {
@@ -453,6 +505,10 @@
             "activity_context_prompt": {
                 "label": "Indicador de context de l'activitat",
                 "description": "Pregunta personalitzada que descriu el que és i no és una activitat sospitosa per proporcionar context per als resums de GenAI."
+            },
+            "response_style": {
+                "label": "Estil de resposta",
+                "description": "Escriviu un predefinit d'estil per a les descripcions generades de les revisions. Els valors predefinits ajusten el to i el nivell de detall del títol orientat a l'usuari, el resum i la descripció de l'escena; «predeterminat» deixa l'indicatiu incorporat sense canvis."
             }
         },
         "label": "Revisió",
@@ -971,7 +1027,7 @@
         },
         "default_role": {
             "label": "Rol predeterminat",
-            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols."
+            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols. Establiu-ho a «none» per a denegar l'accés als usuaris sense mapar."
         },
         "separator": {
             "label": "Caràcter separador",
@@ -1084,6 +1140,10 @@
         "num_threads": {
             "label": "Fils de detecció",
             "description": "Nombre de fils a utilitzar per al processament de detecció d'àudio."
+        },
+        "labelmap": {
+            "label": "Personalització del mapa d'etiquetes d'àudio",
+            "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes d'àudio estàndard."
         }
     },
     "birdseye": {
@@ -1132,7 +1192,11 @@
             "label": "Posició",
             "description": "Posició numèrica que controla l'ordenació de la càmera en la disposició Birdseye."
         },
-        "label": "Birdseye"
+        "label": "Birdseye",
+        "modes": {
+            "label": "Tipus d'activitat",
+            "description": "Tipus d'activitat que inclouen càmeres a Birdseye."
+        }
     },
     "detect": {
         "label": "Detecció d'objectes",
@@ -1192,6 +1256,10 @@
         "annotation_offset": {
             "label": "Desplaçament de l'anotació",
             "description": "Mil·lisegons per a desplaçar detecta anotacions per a alinear millor els límits de la línia de temps amb els enregistraments; pot ser positiu o negatiu."
+        },
+        "scene": {
+            "label": "Detecta l'escena",
+            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'totes' executen el model configurat amb una escena de 'totes'."
         }
     },
     "classification": {
@@ -1399,5 +1467,57 @@
     "active_profile": {
         "label": "Perfil actiu",
         "description": "Nom de perfil actualment actiu. Només en temps d'execució, no ha persistit en YAML."
+    },
+    "models": {
+        "label": "Models de detecció",
+        "description": "Models de detecció d'objectes i el maquinari en què s'executa. Les càmeres trien un model fent coincidir el seu detect.scene amb l'escena d'un model.",
+        "scene": {
+            "label": "Escena del model",
+            "description": "L'entorn de la càmera per al qual s'utilitza aquest model. Les càmeres seleccionen un model establint detect.scene a un valor coincident, i «all» és utilitzat per qualsevol càmera que no n'estableixi un."
+        },
+        "devices": {
+            "label": "hardware de detecció",
+            "description": "Aquest model funciona com a '<detector>' o '<detector>:<device>' (per exemple 'edgetpu:pci:0' o 'openvino:GPU'). La llista del mateix dispositiu més d'una vegada executa processos d'inferència addicionals."
+        },
+        "path": {
+            "label": "Ruta del model de detector d'objectes personalitzat",
+            "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+            "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+        },
+        "width": {
+            "label": "Amplada d'entrada del model de detecció d'objectes",
+            "description": "Amplada del tensor d'entrada del model en píxels."
+        },
+        "height": {
+            "label": "Alçada d'entrada del model de detecció d'objectes",
+            "description": "Alçada del tensor d'entrada del model en píxels."
+        },
+        "labelmap": {
+            "label": "Personalització del mapa d'etiquetes",
+            "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+        },
+        "attributes_map": {
+            "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+            "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'cotxe' -). ['matricula'])."
+        },
+        "input_tensor": {
+            "label": "Forma del sensor d'entrada del model",
+            "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Format de color del píxel d'entrada del model",
+            "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Tipus D d'entrada del model",
+            "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+        },
+        "model_type": {
+            "label": "Tipus de model de detecció d'objectes",
+            "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilitzat per alguns detectors per a l'optimització."
+        }
     }
 }

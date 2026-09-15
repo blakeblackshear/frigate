@@ -9,7 +9,8 @@
       "nginx": "Registres de Nginix - Frigate",
       "websocket": "Registres de missatges - Frigate"
     },
-    "enrichments": "Estadístiques complementàries - Frigate"
+    "enrichments": "Estadístiques complementàries - Frigate",
+    "health": "Salut - Frigate"
   },
   "title": "Sistema",
   "metrics": "Mètriques del sistema",
@@ -139,7 +140,11 @@
         "title": "Sense utilitzar",
         "tips": "Aquest valor pot no de forma exacta representar l'espai lliure disponible a Frigate si tens altres fitxers emmagatzemats en la vostra unitat més enllà dels registres de Frigate. Frigate no rastreja l'ús d'emmagatzematge extern als seus registres."
       },
-      "percentageOfTotalUsed": "Percentatge del total"
+      "percentageOfTotalUsed": "Percentatge del total",
+      "subStream": {
+        "information": "Informació de l'emmagatzematge del subflux",
+        "tips": "Les càmeres que enregistren un subflux mostren el seu ús original i de baixa qualitat per separat, utilitzant els mateixos noms que les opcions de qualitat en la reproducció de l'enregistrament. Els enregistraments de baixa qualitat es mantenen en disc fins que el seu període de retenció expira, de manera que aquesta avaria encara pot aparèixer per a una càmera després que s'hagi desactivat l'enregistrament de substream."
+      }
     },
     "overview": "Visió general",
     "shm": {
@@ -197,7 +202,11 @@
         "segmentLength": "Longitud del segment d'enregistrament:",
         "ok": "Fotogrames clau cada ,{{seconds}}s, bons per enregistrar i reproduir.",
         "unknown": "No s'ha pogut determinar l'espaiat dels fotogrames clau.",
-        "recordDisabled": "L'enregistrament està desactivat per a aquesta càmera."
+        "recordDisabled": "L'enregistrament està desactivat per a aquesta càmera.",
+        "warningFixed": "Els fotogrames clau estan uniformement espaiats però dispersos (cada ).{{seconds}}s). L'enregistrament encara funciona, però la reproducció en directe i la recerca comencen més lentament. Estableix l'interval I-frame (keyframe) de la càmera perquè coincideixi amb la seva velocitat de fotogrames.",
+        "warningVariable": "L'espaiat dels fotogrames clau és inconsistent ({{minSeconds}}s a {{maxSeconds}}s), el qual normalment significa que un còdec intel·ligent (H.264+/H.265+) està habilitat. Això no és recomanable.",
+        "errorFixed": "Els fotogrames clau cada the{{seconds}}s és més llarg que la longitud del segment d'enregistrament ({{segmentTime}}s), de manera que alguns segments no tenen fotogrames clau i no es reproduiran. Escurça l'interval I-frame (keyframe) de la càmera perquè coincideixi amb la seva velocitat de fotogrames.",
+        "errorVariable": "Els buits dels fotogrames clau arriben a the{{seconds}}s, més llargs que la longitud del segment d'enregistrament ({{segmentTime}}s). Alguns segments no tindran un fotograma clau, el qual trenca la reproducció. Desactiva el còdec intel·ligent/+ a la càmera o escurça el seu interval de fotogrames clau."
       }
     },
     "title": "Càmeres",
@@ -234,7 +243,11 @@
     "detectHighCpuUsage": "{{camera}} te un ús elevat de CPU per la detecció ({{detectAvg}}%)",
     "detectIsVerySlow": "{{detect}} és molt lent ({{speed}} ms)",
     "detectIsSlow": "{{detect}} és lent ({{speed}} ms)",
-    "debugReplayActive": "La sessió de repetició de depuració està activa"
+    "debugReplayActive": "La sessió de repetició de depuració està activa",
+    "cameraSkippedDetections": "{{camera}} està ometent la detecció en {{pct}}% de fotogrames",
+    "systemNotices_one": "{{count}} avís del sistema",
+    "systemNotices_other": "{{count}} avisos del sistema",
+    "retentionUnmet": "Els enregistraments s'estan suprimint abans que acabi el seu període de retenció a l'espai lliure"
   },
   "enrichments": {
     "title": "Anàlisi avançada",
@@ -262,5 +275,93 @@
     },
     "infPerSecond": "Inferències per segon",
     "averageInf": "Temps mitjà d'inferència"
+  },
+  "health": {
+    "title": "Salut",
+    "notices": {
+      "title": "Avís",
+      "empty": "La instal·lació de Frigate és saludable",
+      "dismiss": "Descarta",
+      "openSettings": "Obre la configuració",
+      "openLink": "Obre l'enllaç",
+      "noMatches": "No hi ha avisos que coincideixin amb el filtre",
+      "dismissedTitle": "Descartat",
+      "noneDismissed": "No hi ha avisos descartats",
+      "clearDismissed": "Neteja descartada",
+      "clearDismissedTitle": "Voleu netejar els avisos descartats?",
+      "clearDismissedDesc": "S'elimina cada avís acomiadat. Les comprovacions de configuració i flux es mostren de nou immediatament, i altres avisos tornen la propera vegada que succeeixin.",
+      "firstSeen_one": "{{time}} vist per primera vegada",
+      "firstSeen_other": "{{time}} · {{count}} vegades",
+      "dismissedAt": "S'ha suprimit {{time}}",
+      "filter": {
+        "showDismissed": "Mostra descartat",
+        "severity": "Severitat",
+        "warning": "Avís",
+        "error": "Error",
+        "info": "Info"
+      },
+      "kinds": {
+        "detector_stuck": "S'ha reiniciat el detector {{detector}} després que deixés de respondre",
+        "model_download_failed": "Ha fallat la baixada de {{file}} per {{model}}: {{error}}",
+        "skipped_detections": "La detecció no ha pogut mantenir el {{pct}}% de fotogrames durant més d'un minut",
+        "shm_too_low": "L'assignació /dev/shm ({{total}} MB) s'hauria d'augmentar a com a mínim {{min}} MB",
+        "failed_login_one": "Error en l'intent d'inici de sessió de {{user}}",
+        "failed_login_other": "Intents d'inici de sessió fallits per {{user}}",
+        "update_available": "Frigate {{version}} està disponible"
+      },
+      "streamPrefix": "Flux {{index}}: {{message}}",
+      "streamPrefixRestream": "Flux {{index}} (via go2rtc): {{message}}",
+      "streamProbeFailed": "No s'ha pogut provar el flux {{index}}: {{error}}",
+      "cameraProbeFailed": "No s'han pogut explorar els fluxos: {{error}}"
+    },
+    "hardware": {
+      "title": "Maquinari",
+      "objectDetection": "Detecció d'objectes",
+      "hardwareAcceleration": "Acceleració del maquinari",
+      "enrichments": {
+        "title": "Enriquiments",
+        "semantic_search": "Cerca semàntica",
+        "face_recognition": "Reconeixement facial",
+        "lpr": "Reconeixement de matricules",
+        "audio_transcription": "Transcripció d'àudio"
+      },
+      "cameraConnections": "Connexions de la càmera",
+      "allCamerasExcellent": "Totes les càmeres tenen una excel·lent connexió.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "Res configurat",
+      "allCameras": "Totes les càmeres",
+      "probeUnavailable": "La detecció de maquinari no està disponible",
+      "justStarted": "Frigate acaba de començar",
+      "deviceNotFound": "{{devices}} no s'ha trobat en aquest sistema",
+      "detectorNotRunning": "El procés del detector no s'està executant",
+      "inferenceVerySlow": "La inferència és molt lenta ({{speed}} ms)",
+      "inferenceSlow": "La inferència és lenta ({{speed}} ms)",
+      "customArgs": "Arguments personalitzats del ffmpeg",
+      "customArgsNotVerified": "Arguments personalitzats del ffmpeg, no verificats",
+      "hwaccelNotConfigured": "No s'utilitza cap descodificació de maquinari, però {{family}} està disponible. Seleccioneu-lo a la configuració del ffmpeg",
+      "hwaccelHardwareMissing": "{{family}} està configurat, però la sonda de maquinari no ho ha informat",
+      "unrecognizedDevice": "Sobreescriu el dispositiu no reconegut, no verificat",
+      "decoderUsage": "descodificador {{usage}}",
+      "remoteProvider": "Proveïdor remot",
+      "acceleratorMissing": "Configurat per {{device}} però no s'ha trobat cap accelerador compatible",
+      "modelNotRunYet": "El model encara no s'ha executat, el dispositiu es verifica després del primer ús",
+      "fellBackToCpu": "Configurat per {{device}} però executant-se a la CPU",
+      "cpuDespiteAccelerator": "S'està executant a la CPU encara que hi ha disponible un accelerador",
+      "probed": "Profund",
+      "probing": "S'està sondejant...",
+      "recheck": "Torna a comprovar el maquinari",
+      "cameraStreams": "Fluxos de la càmera",
+      "streamsNotChecked": "Encara no s'ha comprovat",
+      "streamsChecking": "S'està comprovant {{done}} de {{total}}",
+      "streamsClean": "No hi ha problemes de flux",
+      "checked": "Comprovat",
+      "runAgain": "Torna a executar",
+      "runStreamChecks": "Executa les comprovacions de flux",
+      "streamsChecked_one": "S'ha comprovat la càmera {{count}}",
+      "streamsChecked_other": "{{count}} càmeres comprovades",
+      "streamsFlagged_one": "{{count}} amb problemes, llistat a Avisos",
+      "streamsFlagged_other": "{{count}} amb problemes, llistat a Avisos",
+      "inferenceMs": "{{speed}} ms"
+    }
   }
 }
