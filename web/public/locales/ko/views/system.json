@@ -9,7 +9,8 @@
       "go2rtc": "Go2RTC 로그 - Frigate",
       "nginx": "Nginx 로그 - Frigate",
       "websocket": "메시지 로그 - Frigate"
-    }
+    },
+    "health": "시스템지표 - Frigate"
   },
   "title": "시스템",
   "metrics": "시스템 지표",
@@ -140,6 +141,10 @@
       "unused": {
         "title": "여유 공간",
         "tips": "드라이브에 Frigate 녹화본 외에 다른 파일이 저장되어 있는 경우 이 수치가 Frigate에서 사용 가능한 실제 여유 공간과 정확히 일치하지 않을 수 있습니다. Frigate은 자체 녹화본 외부의 저장 공간 사용량을 추적하지 않습니다."
+      },
+      "subStream": {
+        "information": "서브 스트림 저장 공간 정보",
+        "tips": "서브 스트림을 녹화하는 카메라는 녹화 재생 시의 화질 옵션과 동일한 명칭을 사용하여 원본 및 저화질 사용량을 별도로 표시합니다. 저화질 녹화본은 보관 기간이 만료될 때까지 디스크에 유지되므로, 서브 스트림 녹화를 끈 후에도 이 내역이 계속 표시될 수 있습니다."
       }
     },
     "shm": {
@@ -181,7 +186,11 @@
         "segmentLength": "녹화 세그먼트 길이:",
         "ok": "키프레임이 약 {{seconds}}초마다 배치되어 녹화 및 재생에 적합합니다.",
         "unknown": "키프레임 간격을 확인할 수 없습니다.",
-        "recordDisabled": "이 카메라의 녹화 기능이 비활성화되어 있습니다."
+        "recordDisabled": "이 카메라의 녹화 기능이 비활성화되어 있습니다.",
+        "warningFixed": "키프레임 간격이 일정하지만 너무 멉니다 (~{{seconds}}초 간격). 녹화는 정상 작동하지만 라이브 재생 및 탐색 시작이 느려집니다. 카메라의 I-프레임(키프레임) 주기를 프레임 레이트와 동일하게 설정하세요.",
+        "warningVariable": "키프레임 간격이 불규칙합니다 ({{minSeconds}}초 ~ {{maxSeconds}}초). 일반적으로 스마트 코덱(H.264+/H.265+)이 활성화되었음을 의미하며, 사용을 권장하지 않습니다.",
+        "errorFixed": "키프레임 간격(~{{seconds}}초)이 녹화 세그먼트 길이({{segmentTime}}초)보다 깁니다. 일부 세그먼트에 키프레임이 누락되어 정상 재생되지 않습니다. 카메라의 I-프레임(키프레임) 주기를 단축하여 프레임 레이트에 맞추세요.",
+        "errorVariable": "키프레임 간격이 최대 ~{{seconds}}초에 달해 녹화 세그먼트 길이({{segmentTime}}초)를 초과합니다. 일부 세그먼트에 키프레임이 없어 재생에 실패합니다. 카메라에서 스마트/+ 코덱을 비활성화하거나 키프레임 간격을 줄이세요."
       }
     },
     "framesAndDetections": "프레임 / 감지",
@@ -234,7 +243,11 @@
     "cameraIsOffline": "{{camera}} 카메라가 오프라인 상태입니다",
     "detectIsSlow": "{{detect}} 처리가 느립니다 ({{speed}}ms)",
     "detectIsVerySlow": "{{detect}} 처리가 매우 느립니다 ({{speed}}ms)",
-    "debugReplayActive": "디버그 리플레이 세션이 실행 중입니다"
+    "debugReplayActive": "디버그 리플레이 세션이 실행 중입니다",
+    "cameraSkippedDetections": "{{camera}} 카메라가 프레임의 {{pct}}%에서 감지를 건너뛰고 있습니다",
+    "systemNotices_one": "{{count}}개의 시스템 알림",
+    "systemNotices_other": "{{count}}개의 시스템 알림",
+    "retentionUnmet": "디스크 공간 확보를 위해 보관 기간이 만료되기 전에 녹화본이 삭제되고 있습니다"
   },
   "enrichments": {
     "title": "확장 기능",
@@ -262,5 +275,93 @@
       "classification_events_per_second": "{{name}} 초당 분류 이벤트 수"
     },
     "averageInf": "평균 추론 시간"
+  },
+  "health": {
+    "title": "시스템 지표",
+    "notices": {
+      "title": "알림",
+      "empty": "Frigate 이 잘 설치되어있습니다",
+      "dismiss": "무시",
+      "openSettings": "설정 열기",
+      "openLink": "링크 열기",
+      "noMatches": "필터에 맞는 알림이 없습니다",
+      "dismissedTitle": "무시됨",
+      "noneDismissed": "무시된 알림 없음",
+      "clearDismissed": "무시됨 지우기",
+      "clearDismissedTitle": "무시된 알림을 지울까요?",
+      "clearDismissedDesc": "무시된 모든 알림이 삭제됩니다. 설정 및 스트림 점검 항목은 즉시 다시 표시되며, 기타 알림은 다음에 다시 발생할 때 표시됩니다.",
+      "firstSeen_one": "최초 감지: {{time}}",
+      "firstSeen_other": "최초 감지: {{time}} · {{count}}회",
+      "dismissedAt": "무시됨: {{time}}",
+      "filter": {
+        "showDismissed": "무시된 항목 표시",
+        "severity": "심각도",
+        "error": "오류",
+        "warning": "경고",
+        "info": "정보"
+      },
+      "kinds": {
+        "detector_stuck": "감지기 {{detector}}의 응답이 없어 재시작되었습니다",
+        "model_download_failed": "{{model}}의 {{file}} 다운로드 실패: {{error}}",
+        "skipped_detections": "감지 처리가 지연되어 1분 이상 프레임의 {{pct}}%를 건너뛰었습니다",
+        "shm_too_low": "/dev/shm 할당량({{total}} MB)을 최소 {{min}} MB 이상으로 늘려야 합니다",
+        "failed_login_one": "{{user}} 계정 로그인 시도 실패",
+        "failed_login_other": "{{user}} 계정 로그인 시도 실패",
+        "update_available": "Frigate {{version}} 버전을 사용할 수 있습니다"
+      },
+      "streamPrefix": "스트림 {{index}}: {{message}}",
+      "streamPrefixRestream": "스트림 {{index}} (go2rtc 경유): {{message}}",
+      "streamProbeFailed": "스트림 {{index}} 정보를 감지할 수 없음: {{error}}",
+      "cameraProbeFailed": "스트림 정보를 감지할 수 없음: {{error}}"
+    },
+    "hardware": {
+      "title": "하드웨어",
+      "objectDetection": "객체 감지",
+      "hardwareAcceleration": "하드웨어 가속",
+      "enrichments": {
+        "title": "추가 기능",
+        "semantic_search": "시맨틱 검색",
+        "face_recognition": "얼굴 인식",
+        "lpr": "차량 번호판 인식",
+        "audio_transcription": "오디오 텍스트 변환"
+      },
+      "cameraConnections": "카메라 연결 상태",
+      "allCamerasExcellent": "모든 카메라의 연결 상태가 매우 양호합니다.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "구성된 항목 없음",
+      "allCameras": "모든 카메라",
+      "probeUnavailable": "하드웨어 감지 기능을 사용할 수 없음",
+      "justStarted": "Frigate이 방금 시작됨",
+      "deviceNotFound": "이 시스템에서 {{devices}} 장치를 찾을 수 없음",
+      "detectorNotRunning": "감지기 프로세스가 실행되고 있지 않음",
+      "inferenceVerySlow": "추론 속도가 매우 느림 ({{speed}} ms)",
+      "inferenceSlow": "추론 속도가 느림 ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "사용자 지정 ffmpeg 인수",
+      "customArgsNotVerified": "사용자 지정 ffmpeg 인수 (검증되지 않음)",
+      "hwaccelNotConfigured": "하드웨어 디코딩을 사용하고 있지 않지만 {{family}} 가속을 사용할 수 있습니다. ffmpeg 설정에서 선택하세요",
+      "hwaccelHardwareMissing": "{{family}} 가속이 설정되었지만 하드웨어 감지에서 확인되지 않음",
+      "unrecognizedDevice": "인식할 수 없는 장치 재지정 (검증되지 않음)",
+      "decoderUsage": "디코더 {{usage}}",
+      "remoteProvider": "원격 공급자",
+      "acceleratorMissing": "{{device}} 사용으로 설정되었으나 호환되는 가속기를 찾을 수 없음",
+      "modelNotRunYet": "모델이 아직 실행되지 않았습니다. 장치는 처음 사용된 후에 검증됩니다",
+      "fellBackToCpu": "{{device}} 사용으로 설정되었으나 CPU에서 실행 중",
+      "cpuDespiteAccelerator": "가속기를 사용할 수 있지만 CPU에서 실행 중",
+      "probed": "감지 완료",
+      "probing": "감지 중...",
+      "recheck": "하드웨어 다시 확인",
+      "cameraStreams": "카메라 스트림",
+      "streamsNotChecked": "아직 확인되지 않음",
+      "streamsChecking": "확인 중 ({{done}} / {{total}})",
+      "streamsClean": "스트림 문제 없음",
+      "checked": "확인 완료",
+      "runAgain": "다시 실행",
+      "runStreamChecks": "스트림 점검 실행",
+      "streamsChecked_one": "{{count}}개 카메라 확인 완료",
+      "streamsChecked_other": "{{count}}개 카메라 확인 완료",
+      "streamsFlagged_one": "{{count}}개에 문제 있음 (알림에 나열됨)",
+      "streamsFlagged_other": "{{count}}개에 문제 있음 (알림에 나열됨)"
+    }
   }
 }

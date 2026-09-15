@@ -25,7 +25,8 @@
     "triggers": "觸發器",
     "roles": "角色",
     "cameraManagement": "管理",
-    "cameraReview": "審查"
+    "cameraReview": "審查",
+    "profiles": "設定檔"
   },
   "dialog": {
     "unsavedChanges": {

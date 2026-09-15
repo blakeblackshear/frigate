@@ -46,6 +46,10 @@
         "num_threads": {
             "label": "Fils de detecció",
             "description": "Nombre de fils a utilitzar per al processament de detecció d'àudio."
+        },
+        "labelmap": {
+            "label": "Personalització del mapa d'etiquetes d'àudio",
+            "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes d'àudio estàndard."
         }
     },
     "audio_transcription": {
@@ -73,6 +77,10 @@
         "order": {
             "label": "Posició",
             "description": "Posició numèrica que controla l'ordenació de la càmera en la disposició Birdseye."
+        },
+        "modes": {
+            "label": "Tipus d'activitat",
+            "description": "Tipus d'activitat que inclouen càmeres a Birdseye."
         }
     },
     "detect": {
@@ -133,6 +141,10 @@
         "annotation_offset": {
             "label": "Desplaçament de l'anotació",
             "description": "Mil·lisegons per a desplaçar detecta anotacions per a alinear millor els límits de la línia de temps amb els enregistraments; pot ser positiu o negatiu."
+        },
+        "scene": {
+            "label": "Detecta l'escena",
+            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'totes' executen el model configurat amb una escena de 'totes'."
         }
     },
     "face_recognition": {
@@ -176,6 +188,10 @@
             "record": {
                 "label": "Registra els arguments de sortida",
                 "description": "Arguments de sortida predeterminats per a enregistrar fluxos de rols."
+            },
+            "record_sub": {
+                "label": "Arguments de sortida del registre de subflux",
+                "description": "Arguments de sortida per als fluxos de rols record.sub. Els arguments de sortida del registre s'utilitzen quan no s'estableix."
             }
         },
         "retry_interval": {
@@ -505,6 +521,54 @@
         "enabled_in_config": {
             "label": "Estat de l'enregistrament original",
             "description": "Indica si l'enregistrament s'ha activat en la configuració estàtica original."
+        },
+        "sub": {
+            "label": "Enregistrament de subflux",
+            "description": "Paràmetres per a enregistrar un segon flux de menor qualitat.",
+            "enabled": {
+                "label": "Habilita l'enregistrament de subflux",
+                "description": "Permet l'enregistrament d'un segon flux de menor qualitat per a la reproducció de qualitat adaptativa i la retenció estesa."
+            },
+            "continuous": {
+                "label": "Retenció contínua del subflux",
+                "description": "Nombre de dies per a retenir els enregistraments de sub flux independentment dels objectes o el moviment seguits.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Dies per retenir enregistraments."
+                }
+            },
+            "motion": {
+                "label": "Retenció del moviment del subflux",
+                "description": "Nombre de dies per a retenir els enregistraments de substream activats pel moviment.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Dies per retenir enregistraments."
+                }
+            },
+            "alerts": {
+                "label": "Retenció d'alertes del subflux",
+                "description": "Paràmetres de retenció per als enregistraments de substream d'alertes.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            },
+            "detections": {
+                "label": "Retenció de la detecció de subflux",
+                "description": "Paràmetres de retenció per als enregistraments de substream de les deteccions.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            }
         }
     },
     "review": {
@@ -596,6 +660,10 @@
             "activity_context_prompt": {
                 "label": "Indicador de context de l'activitat",
                 "description": "Pregunta personalitzada que descriu el que és i no és una activitat sospitosa per proporcionar context per als resums de GenAI."
+            },
+            "response_style": {
+                "label": "Estil de resposta",
+                "description": "Escriviu un predefinit d'estil per a les descripcions generades de les revisions. Els valors predefinits ajusten el to i el nivell de detall del títol orientat a l'usuari, el resum i la descripció de l'escena; «predeterminat» deixa l'indicatiu incorporat sense canvis."
             }
         }
     },

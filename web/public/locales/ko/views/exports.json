@@ -65,7 +65,8 @@
     "copying": "복사 중",
     "encoding": "인코딩 중",
     "encodingRetry": "인코딩 재시도 중",
-    "finalizing": "마무리 중"
+    "finalizing": "마무리 중",
+    "merging": "병합 중"
   },
   "caseView": {
     "noDescription": "설명 없음",

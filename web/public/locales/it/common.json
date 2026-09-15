@@ -165,8 +165,8 @@
     "configuration": "Configurazione",
     "languages": "Lingue",
     "appearance": "Aspetto",
-    "systemMetrics": "Metriche di sistema",
-    "systemLogs": "Registri di sistema",
+    "systemMetrics": "Salute e metriche",
+    "systemLogs": "Registri",
     "settings": "Impostazioni",
     "configurationEditor": "Editor di configurazione",
     "language": {

@@ -24,12 +24,12 @@
     "users": "Usuários",
     "notifications": "Notificações",
     "frigateplus": "Frigate+",
-    "motionTuner": "Ajuste de Movimento",
+    "motionTuner": "Ajuste de movimento",
     "debug": "Depurar",
     "enrichments": "Enriquecimentos",
     "triggers": "Gatilhos",
     "roles": "Papéis",
-    "cameraManagement": "Gerenciamento",
+    "cameraManagement": "Gerenciamento de câmeras",
     "cameraReview": "Revisar",
     "general": "Geral",
     "globalConfig": "Configuração global",
@@ -56,9 +56,9 @@
     "systemLogging": "Registro",
     "systemEnvironmentVariables": "Variáveis de ambiente",
     "systemTelemetry": "Telemetria",
-    "systemBirdseye": "Birdseye",
+    "systemBirdseye": "Visão panorâmica",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorsAndModel": "Detectores e modelo",
+    "systemDetectorsAndModel": "Modelos de detecção",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "Fluxo de go2rtc",
     "integrationSemanticSearch": "Busca semântica",
@@ -77,7 +77,8 @@
     "cameraAudioEvents": "Detecção de áudio",
     "cameraAudioTranscription": "Transcrição de áudio",
     "cameraNotifications": "Notificações",
-    "cameraLivePlayback": "Reprodução ao vivo"
+    "cameraLivePlayback": "Reprodução ao vivo",
+    "cameraUi": "Interface da Câmera"
   },
   "dialog": {
     "unsavedChanges": {
@@ -629,7 +630,7 @@
       "cameras": "Câmeras",
       "loading": "Carregando informações do modelo…",
       "error": "Falha ao carregar as informações do modelo",
-      "availableModels": "Modelos Disponíveis",
+      "availableModels": "Modelos do Frigate+ disponíveis",
       "loadingAvailableModels": "Carregando modelos disponíveis…",
       "title": "Informação do Modelo",
       "modelType": "Tipo de Modelo",
@@ -639,7 +640,7 @@
     },
     "snapshotConfig": {
       "title": "Configuração de Captura de Imagem",
-      "desc": "Envios ao Frigate+ requerem tanto a captura de imagem normais quanto a captura de imagem <code>clean_copy</code> estarem habilitadas na sua configuração.",
+      "desc": "Envios para o Frigate+ exigem que a captura de imagem (snapshot) esteja habilitada na sua configuração.",
       "cleanCopyWarning": "Algumas câmeras estão com os snapshots desativados",
       "table": {
         "camera": "Câmera",
@@ -712,7 +713,7 @@
           "title": "Conteúdo",
           "imagePlaceholder": "Selecionar um thumbnail",
           "textPlaceholder": "Digitar conteúdo do texto",
-          "imageDesc": "Selecionar uma imagem para acionar essa ação quando uma imagem semelhante for detectada.",
+          "imageDesc": "Apenas as 100 miniaturas mais recentes são exibidas. Se você não encontrar a miniatura desejada, revise os objetos anteriores em Explorar e configure um gatilho no menu lá.",
           "textDesc": "Digite o texto para ativar essa ação quando uma descrição semelhante de objeto rastreado for detectada.",
           "error": {
             "required": "Um conteúdo é requerido."
@@ -727,7 +728,7 @@
         },
         "actions": {
           "title": "Ações",
-          "desc": "Por padrão, o Frigate dispara uma mensagem MQTT para todos os gatilhos. Escolha uma ação adicional para realizar quando uma ação for disparada.",
+          "desc": "Por padrão, o Frigate dispara uma mensagem MQTT para todos os gatilhos. Sub-etiquetas adicionam o nome do gatilho à etiqueta do objeto. Atributos são metadados pesquisáveis armazenados separadamente nos metadados de objetos rastreados.",
           "error": {
             "min": "Ao menos uma ação deve ser selecionada."
           }

@@ -143,6 +143,15 @@
         "partial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestusid: {{failedItems}}",
         "failed": "{{total}} ekspordi algatamine ebaõnnestus. Ebaõnnestunud: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Kvaliteet",
+      "auto": "Automaatne",
+      "main": "Algne",
+      "sub": "Madal",
+      "autoDesc": "Kasutab põhilist voogedastust ja lülitub madalama kvaliteediga alamvoogedastusele, kui põhiline pole kättesaadav.",
+      "subDesc": "Eksporditakse ainult madalama kvaliteediga alamvoogedastus. Ajavahemikud, mil see pole kättesaadav, jäävad välja.",
+      "mainDesc": "Eksporditakse ainult algse kvaliteediga põhiline voogedastus. Ajavahemikud, mil see pole kättesaadav, jäävad välja."
     }
   },
   "streaming": {
@@ -164,7 +173,8 @@
       "export": "Ekspordi",
       "markAsReviewed": "Märgi ülevaadatuks",
       "markAsUnreviewed": "Märgi mitteülevaadatuks",
-      "deleteNow": "Kustuta kohe"
+      "deleteNow": "Kustuta kohe",
+      "generateDescription": "Koosta kirjeldus"
     },
     "confirmDelete": {
       "title": "Kinnita kustutamine",
@@ -183,6 +193,12 @@
       "custom": "Kohandatud ajatempel",
       "button": "Jaga ajatempliga linki",
       "shareTitle": "Frigate ülevaate ajatempel: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "error": "Kirjelduse pärimine ei õnnestunud: {{error}}",
+        "success": "Selle ülevaatamisele kuuluva objekti jaoks oled palunud „GenAI“ põhise kirjelduse koostamist."
+      }
     }
   },
   "imagePicker": {
