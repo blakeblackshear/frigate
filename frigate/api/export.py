@@ -1038,6 +1038,10 @@ def export_recording_custom(
     if camera_validation_error is not None:
         return camera_validation_error
 
+    # Validate user-provided ffmpeg args to prevent injection and add to cases.
+    # Admin users are trusted and skip validation.
+    is_admin = request.headers.get("remote-role", "") == "admin"
+
     playback_source = body.source
     friendly_name = body.name
     existing_image, image_validation_error = _sanitize_existing_image(body.image_path)
@@ -1048,6 +1052,16 @@ def export_recording_custom(
     cpu_fallback = body.cpu_fallback
 
     export_case_id = body.export_case_id
+
+    if export_case_id is not None and not is_admin:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Only admins can attach exports to an existing case.",
+            },
+            status_code=403,
+        )
+
     case_validation_error = _validate_export_case(export_case_id)
     if case_validation_error is not None:
         return case_validation_error
@@ -1063,10 +1077,6 @@ def export_recording_custom(
             content={"success": False, "message": source_error},
             status_code=400,
         )
-
-    # Validate user-provided ffmpeg args to prevent injection.
-    # Admin users are trusted and skip validation.
-    is_admin = request.headers.get("remote-role", "") == "admin"
 
     if not is_admin:
         for args_label, args_value in [
