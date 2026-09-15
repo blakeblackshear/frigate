@@ -121,6 +121,15 @@
         "partial": "{{total}}건 중 {{successful}}건의 내보내기를 시작했습니다. 실패 항목: {{failedItems}}",
         "failed": "{{total}}건의 내보내기 시작에 실패했습니다. 실패 항목: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "품질",
+      "auto": "자동",
+      "main": "원본",
+      "sub": "낮음",
+      "autoDesc": "메인 스트림을 사용합니다. 메인 스트림이 사용불가능할 경우 저품질 서브스트림으로 돌아옵니다.",
+      "mainDesc": "원본 품질의 메인스트림만 내보내기합니다. 메인스트림이 누락된 시간대는 제외됩니다.",
+      "subDesc": "저품질의 서브스트림만 내보내기합니다. 서브스트림이 누락된 시간대는 제외됩니다."
     }
   },
   "streaming": {
@@ -166,7 +175,8 @@
       "export": "내보내기",
       "markAsReviewed": "검토 완료로 표시",
       "markAsUnreviewed": "미검토 상태로 표시",
-      "deleteNow": "지금 삭제"
+      "deleteNow": "지금 삭제",
+      "generateDescription": "설명 생성"
     },
     "shareTimestamp": {
       "label": "타임스탬프 공유",
@@ -175,6 +185,12 @@
       "custom": "사용자 지정 타임스탬프",
       "button": "타임스탬프 URL 공유",
       "shareTitle": "Frigate 다시보기 타임스탬프: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "이 검토 항목에 대한 생성형 AI 설명 생성을 요청했습니다.",
+        "error": "설명 생성 요청 실패: {{error}}"
+      }
     }
   },
   "imagePicker": {

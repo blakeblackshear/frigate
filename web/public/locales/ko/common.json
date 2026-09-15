@@ -93,9 +93,9 @@
       "setPassword": "비밀번호 설정"
     },
     "system": "시스템",
-    "systemMetrics": "시스템 지표",
+    "systemMetrics": "시스템 상태와 지표",
     "configuration": "설정 구성",
-    "systemLogs": "시스템 로그",
+    "systemLogs": "로그",
     "settings": "설정",
     "configurationEditor": "설정 편집기",
     "languages": "언어",
@@ -266,7 +266,10 @@
     "savingAll": "모두 저장 중…",
     "undoAll": "모두 실행 취소",
     "applying": "적용 중…",
-    "retry": "재시도"
+    "retry": "재시도",
+    "expand": "펼치기",
+    "collapse": "접기",
+    "reload": "새로고침"
   },
   "toast": {
     "copyUrlToClipboard": "클립보드에 URL이 복사되었습니다.",
@@ -314,5 +317,36 @@
   "validation_errors": "유효성 검사 오류",
   "credentialField": {
     "savedPlaceholder": "저장됨 — 현재 값을 유지하려면 비워 두세요"
+  },
+  "error": {
+    "title": "이 페이지가 작동을 멈췄습니다",
+    "desc": "페이지에 예기치 않은 오류가 발생했습니다. 일반적으로 새로고침하면 해결됩니다. 문제가 계속되면 세부 정보를 복사하여 GitHub Discussion에 첨부해 주세요.",
+    "staleTitle": "새로고침 필요",
+    "staleDesc": "인터페이스의 일부를 불러오지 못했습니다. 이 탭이 열려 있는 동안 Frigate이 업데이트되었을 수 있습니다. 최신 버전을 반영하려면 새로고침하세요.",
+    "partial": "인터페이스의 일부가 작동을 멈췄습니다.",
+    "copyDetails": "세부 정보 복사",
+    "copyFailed": "세부 정보를 클립보드에 복사하지 못했습니다"
+  },
+  "commandMenu": {
+    "title": "명령 메뉴",
+    "description": "페이지, 카메라, 설정 및 작업 검색",
+    "placeholder": "페이지, 카메라, 설정 및 작업 검색",
+    "empty": "일치하는 항목 없음",
+    "hint": "{{key}}로 열거나, 엔터키로 실행",
+    "section": {
+      "recent": "최근",
+      "pages": "페이지",
+      "cameras": "카메라",
+      "cameraGroups": "카메라 그룹",
+      "settings": "설정",
+      "actions": "작업"
+    },
+    "camera": {
+      "live": "라이브",
+      "review": "리뷰"
+    },
+    "action": {
+      "toggleTheme": "라이트 모드와 다크 모드를 전환합니다"
+    }
   }
 }
