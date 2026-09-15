@@ -27,8 +27,7 @@ import type { GenAIModelsResponse } from "@/types/chat";
 import { getSizedFieldClassName } from "../utils";
 
 type ProbeResponse =
-  | { success: true; models: string[] }
-  | { success: false; message: string };
+  { success: true; models: string[] } | { success: false; message: string };
 
 type ProbeStatus = "idle" | "probing" | "success" | "error";
 

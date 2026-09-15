@@ -123,8 +123,7 @@ function getDefaultFilter(
   if (!schema) return undefined;
   const sectionSchema = extractSectionSchema(schema, sectionPath, "camera");
   const filtersSchema = sectionSchema?.properties?.filters as
-    | RJSFSchema
-    | undefined;
+    RJSFSchema | undefined;
   if (!filtersSchema) return undefined;
 
   // An optional map (`dict[str, X] | None`, as `audio.filters` is declared)
@@ -965,8 +964,7 @@ export function useProfileSectionDeltas(
 
     const profileSection = (
       cameraConfig.profiles?.[profileName] as
-        | Record<string, unknown>
-        | undefined
+        Record<string, unknown> | undefined
     )?.[sectionPath];
     if (profileSection == null) return [];
 

@@ -8,11 +8,7 @@
  */
 
 export type DownswitchReason =
-  | "stall"
-  | "bandwidth"
-  | "fatal-error"
-  | "startup"
-  | "codec";
+  "stall" | "bandwidth" | "fatal-error" | "startup" | "codec";
 
 // stalls just after a seek are expected on any network (the target
 // position is rarely buffered), so they get a longer budget and are

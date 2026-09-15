@@ -96,8 +96,7 @@ const getItemProperties = (
 
 const getSceneOptions = (itemSchema: RJSFSchema | undefined): string[] => {
   const scene = getItemProperties(itemSchema).scene as
-    | Record<string, unknown>
-    | undefined;
+    Record<string, unknown> | undefined;
   const values = scene?.enum;
 
   return Array.isArray(values)

@@ -98,8 +98,7 @@ export function SwitchesWidget(props: WidgetProps) {
   const availableEntities = useMemo(() => {
     const getEntities =
       (props.options?.getEntities as
-        | ((context: FormContext) => string[])
-        | undefined) || (() => []);
+        ((context: FormContext) => string[]) | undefined) || (() => []);
     if (context) {
       return getEntities(context);
     }
@@ -109,8 +108,8 @@ export function SwitchesWidget(props: WidgetProps) {
   const getDisplayLabel = useMemo(
     () =>
       (props.options?.getDisplayLabel as
-        | ((entity: string, context?: FormContext) => string)
-        | undefined) || ((entity: string) => entity),
+        ((entity: string, context?: FormContext) => string) | undefined) ||
+      ((entity: string) => entity),
     [props.options],
   );
 

@@ -102,10 +102,7 @@ export type EmbeddingsReindexProgressType = {
 export type ToggleableSetting = "ON" | "OFF";
 
 export type TrackedObjectUpdateType =
-  | "description"
-  | "lpr"
-  | "transcription"
-  | "face";
+  "description" | "lpr" | "transcription" | "face";
 
 export type TrackedObjectUpdateReturnType = {
   type: TrackedObjectUpdateType;

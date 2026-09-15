@@ -86,8 +86,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const formContext = registry?.formContext as ConfigFormContext | undefined;
   const i18nNamespace = formContext?.i18nNamespace as string | undefined;
   const sectionI18nPrefix = formContext?.sectionI18nPrefix as
-    | string
-    | undefined;
+    string | undefined;
   const isCameraLevel = formContext?.level === "camera";
   const effectiveNamespace = isCameraLevel ? "config/cameras" : i18nNamespace;
   const { t, i18n } = useTranslation([

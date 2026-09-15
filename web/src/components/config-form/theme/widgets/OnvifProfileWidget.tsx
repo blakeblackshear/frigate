@@ -21,8 +21,7 @@ export function OnvifProfileWidget(props: WidgetProps) {
   const { t } = useTranslation(["views/settings"]);
 
   const formContext = props.registry?.formContext as
-    | ConfigFormContext
-    | undefined;
+    ConfigFormContext | undefined;
   const cameraName = formContext?.cameraName;
   const isCameraLevel = formContext?.level === "camera";
   const hasOnvifHost = !!formContext?.fullCameraConfig?.onvif?.host;

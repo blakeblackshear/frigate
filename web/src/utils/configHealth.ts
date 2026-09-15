@@ -192,9 +192,9 @@ export function evaluateConfigHealth(
               t,
             );
 
-            if (
-              !(inherited && firedGlobally.has(`${section}:${message.key}`))
-            ) {
+            if (!(
+              inherited && firedGlobally.has(`${section}:${message.key}`)
+            )) {
               problems.push(problem);
             }
           });

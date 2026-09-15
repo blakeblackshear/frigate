@@ -163,11 +163,7 @@ export type Ffprobe = {
 };
 
 export type KeyframeSeverity =
-  | "ok"
-  | "warning"
-  | "error"
-  | "unknown"
-  | "record_disabled";
+  "ok" | "warning" | "error" | "unknown" | "record_disabled";
 
 export type KeyframeGapPattern = "fixed" | "variable";
 

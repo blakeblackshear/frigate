@@ -44,8 +44,7 @@ function getPropertyTitle(itemSchema: RJSFSchema | undefined, key: string) {
 export function ReplaceRulesField(props: FieldProps) {
   const { schema, formData, onChange, idSchema, disabled, readonly } = props;
   const formContext = props.registry?.formContext as
-    | ConfigFormContext
-    | undefined;
+    ConfigFormContext | undefined;
 
   const configNamespace =
     formContext?.i18nNamespace ??

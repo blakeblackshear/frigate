@@ -131,8 +131,7 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
       anyOf.length === stringBranches.length + (hasNull ? 1 : 0)
     ) {
       const enumValues = (enumBranch as Record<string, unknown>).enum as
-        | unknown[]
-        | undefined;
+        unknown[] | undefined;
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
       return {
         ...rest,
@@ -751,8 +750,7 @@ export function applySchemaDefaults(
   let properties = schemaObj.properties;
   if (!isSchemaObject(properties)) {
     const branches = (schemaObj.anyOf ?? schemaObj.oneOf) as
-      | unknown[]
-      | undefined;
+      unknown[] | undefined;
     if (Array.isArray(branches)) {
       const objectBranch = branches.find(
         (s) =>

@@ -43,10 +43,10 @@ export default function useStats(stats: FrigateStats | undefined) {
   const { payload: replayJob } = useJobStatus("debug_replay", isAdmin);
   const replayActive = Boolean(
     isAdmin &&
-      replayJob &&
-      (replayJob.status === "queued" ||
-        replayJob.status === "running" ||
-        replayJob.status === "success"),
+    replayJob &&
+    (replayJob.status === "queued" ||
+      replayJob.status === "running" ||
+      replayJob.status === "success"),
   );
 
   const memoizedStats = useDeepMemo(stats);

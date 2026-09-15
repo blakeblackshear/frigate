@@ -159,8 +159,7 @@ function StreamValueCombobox({
 export function LiveStreamsField(props: FieldProps) {
   const { schema, formData, onChange, idSchema, disabled, readonly } = props;
   const formContext = props.registry?.formContext as
-    | ConfigFormContext
-    | undefined;
+    ConfigFormContext | undefined;
 
   const configNamespace =
     formContext?.i18nNamespace ??
