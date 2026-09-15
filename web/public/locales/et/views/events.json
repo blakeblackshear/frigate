@@ -91,5 +91,6 @@
     "crop": "Kadreeri filtreerimiseks",
     "cropAria": "Lülita filtreeritud alade kadreeritud eelvaated sisse/välja",
     "cropDesc": "Täiskaadri kuvamise asemel suumi eelvaated valitud filtritega märgitud alani."
-  }
+  },
+  "subOnlyQuality": "Sellest ajavahemikust on saadaval vaid madala kvaliteediga salvestised"
 }

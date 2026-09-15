@@ -56,7 +56,7 @@
       "streamTitle": "Voog {{number}}",
       "streamUrl": "Voo URL",
       "addStream": "Lisa voog",
-      "description": "Seadista voogedastusrolle ja lisa oma kaamerale täiendavaid vooge.",
+      "description": "Seadista omadusi, voogedastusrolle ja lisa oma kaamerale täiendavaid vooge.",
       "streamsTitle": "Kaamera vood"
     },
     "steps": {
@@ -447,7 +447,7 @@
     "systemTelemetry": "Telemeetria",
     "systemBirdseye": "Vaade linnulennult",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorsAndModel": "Tuvastamine ja mudelid",
+    "systemDetectorsAndModel": "Tuvastusmudelid",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "go2rtc voogedastus",
     "integrationSemanticSearch": "Semantiline otsing",
