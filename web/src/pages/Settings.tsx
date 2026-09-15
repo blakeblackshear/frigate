@@ -540,6 +540,35 @@ export default function Settings() {
   const [editingProfile, setEditingProfile] = useState<
     Record<string, string | null>
   >({});
+
+  // drop pending edits for a camera or profile that no longer exists
+  useEffect(() => {
+    if (!config) return;
+    const isStale = (camera: string, profile?: string | null) =>
+      !config.cameras[camera] || (!!profile && !config.profiles?.[profile]);
+    const prune = <T,>(
+      prev: Record<string, T>,
+      stale: (key: string, value: T) => boolean,
+    ) => {
+      const next = Object.fromEntries(
+        Object.entries(prev).filter(([key, value]) => !stale(key, value)),
+      );
+      return Object.keys(next).length === Object.keys(prev).length
+        ? prev
+        : next;
+    };
+    setEditingProfile((prev) => prune(prev, isStale));
+    setPendingDataBySection((prev) =>
+      prune(prev, (key) => {
+        const [camera, section] = key.split("::");
+        return (
+          section !== undefined &&
+          isStale(camera, parseProfileFromSectionPath(section).profileName)
+        );
+      }),
+    );
+  }, [config]);
+
   const [profilesUIEnabled, setProfilesUIEnabled] = useState(false);
 
   const allProfileNames = useMemo(() => {
