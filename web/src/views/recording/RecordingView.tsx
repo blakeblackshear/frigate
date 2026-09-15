@@ -3,9 +3,8 @@ import ReviewFilterGroup from "@/components/filter/ReviewFilterGroup";
 import DebugReplayDialog from "@/components/overlay/DebugReplayDialog";
 import ExportDialog from "@/components/overlay/ExportDialog";
 import ActionsDropdown from "@/components/overlay/ActionsDropdown";
-import PreviewPlayer, {
-  PreviewController,
-} from "@/components/player/PreviewPlayer";
+import PreviewPlayer from "@/components/player/PreviewPlayer";
+import { PreviewController } from "@/components/player/PreviewController";
 import { DynamicVideoController } from "@/components/player/dynamic/DynamicVideoController";
 import DynamicVideoPlayer from "@/components/player/dynamic/DynamicVideoPlayer";
 import QualitySelector from "@/components/player/QualitySelector";

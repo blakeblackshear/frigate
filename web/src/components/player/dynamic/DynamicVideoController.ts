@@ -1,6 +1,6 @@
 import { Recording } from "@/types/record";
 import { DynamicPlayback } from "@/types/playback";
-import { PreviewController } from "../PreviewPlayer";
+import { PreviewController } from "../PreviewController";
 import { TimeRange, TrackingDetailsSequence } from "@/types/timeline";
 import {
   calculateInpointOffset,

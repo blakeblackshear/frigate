@@ -19,7 +19,7 @@ import useNavigation from "@/hooks/use-navigation";
 import {
   StatusBarMessagesContext,
   StatusMessage,
-} from "@/context/statusbar-provider";
+} from "@/context/statusbar-context";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
