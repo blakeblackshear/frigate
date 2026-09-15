@@ -163,8 +163,18 @@ export default function ClassificationModelEditDialog({
     }
   }, [isObjectModel, t]);
 
-  const form = useForm<ObjectFormData | StateFormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<
+    ObjectFormData | StateFormData,
+    unknown,
+    ObjectFormData | StateFormData
+  >({
+    resolver: zodResolver(
+      formSchema as z.ZodType<
+        ObjectFormData | StateFormData,
+        z.ZodTypeDef,
+        ObjectFormData | StateFormData
+      >,
+    ),
     defaultValues: isObjectModel
       ? ({
           enabled: model.enabled,
