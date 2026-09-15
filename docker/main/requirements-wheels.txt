@@ -73,4 +73,4 @@ faster-whisper==1.2.*
 librosa==0.11.*
 soundfile==0.13.*
 # Memory profiling
-memray == 1.15.*
+memray == 1.20.*
