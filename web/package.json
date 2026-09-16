@@ -95,7 +95,7 @@
     "vaul": "^1.1.2",
     "virtua": "^0.51.3",
     "vite-plugin-monaco-editor": "^1.1.0",
-    "zod": "^3.25.76"
+    "zod": "^4.6.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
