@@ -48,13 +48,7 @@ RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 MIN_RECORDING_DURATION = 10
 MAX_IMAGE_TOKENS = 24000
 MAX_FRAMES_PER_SECOND = 1
-
-# Ceiling on frames in annotated mode. Interleaved notes give the model the
-# sequence explicitly, so extra near-duplicate frames stop paying for
-# themselves and start crowding out the middle of the clip. Acts as a minimum
-# spacing of duration / MAX_ANNOTATED_FRAMES, which leaves short items dense
-# (the per-second cap still wins there) and spreads long ones out.
-MAX_ANNOTATED_FRAMES = 20
+MAX_ANNOTATED_FRAMES = 28
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):

@@ -146,19 +146,22 @@ class GenAIClient:
             ) as f:
                 f.write(context_prompt)
 
-            if frame_captions:
-                # Saved separately so the debug folder can be replayed: the
-                # captions travel beside the images, not inside the prompt.
-                with open(
-                    os.path.join(
-                        CLIPS_DIR,
-                        "genai-requests",
-                        review_data["id"],
-                        "frame_captions.txt",
-                    ),
-                    "w",
-                ) as f:
-                    f.write("\n\n".join(frame_captions))
+            if frame_captions and interleaved:
+                # One file per frame, numbered to match the image it precedes
+                # (0.txt goes with 0.jpg), so the debug folder replays without
+                # having to re-derive the mapping. Non-interleaved providers
+                # already carry these notes inside prompt.txt.
+                for index, caption in enumerate(frame_captions):
+                    with open(
+                        os.path.join(
+                            CLIPS_DIR,
+                            "genai-requests",
+                            review_data["id"],
+                            f"{index}.txt",
+                        ),
+                        "w",
+                    ) as f:
+                        f.write(caption)
 
         response_format = build_review_description_response_format(concerns)
 
