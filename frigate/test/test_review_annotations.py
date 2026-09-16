@@ -123,11 +123,16 @@ class TestTimeline(unittest.TestCase):
         self.assertNotIn("track", joined.lower())
         self.assertNotIn(self.event["id"], joined)
 
-    def test_object_still_tracked_at_end_is_reported_present(self):
+    def test_object_still_tracked_at_end_gets_no_closing_note(self):
+        # Its state at the end is visible in the last frame, so nothing is said.
         timeline = build_timeline([self.event], span_end=15.0)
-        phrases = [p for _, p in timeline]
-        self.assertTrue(any("still being tracked" in p for p in phrases))
-        self.assertFalse(any("no longer detected" in p for p in phrases))
+        self.assertEqual(
+            [p for _, p in timeline],
+            [
+                "a person first detected at the right of the frame",
+                "a person starts moving up and left from the right of the frame",
+            ],
+        )
 
     def test_object_ending_inside_the_clip_is_no_longer_detected(self):
         timeline = build_timeline([self.event], span_end=40.0)
@@ -138,13 +143,25 @@ class TestTimeline(unittest.TestCase):
         # The subject keeps moving after the final sampled frame; those notes
         # describe nothing the model can see.
         late = dict(self.event)
-        late["path_data"] = straight_path((0.9, 0.6), (0.4, 0.3), 10, 100.0)
+        out = straight_path((0.9, 0.6), (0.4, 0.6), 8, 100.0)
+        back = straight_path((0.4, 0.6), (0.9, 0.6), 8, 108.0)
+        late["path_data"] = out + back
         late["start_time"] = 100.0
         timeline = build_timeline([late], span_end=105.0)
-        self.assertFalse(any("reaches" in p for _, p in timeline))
+        self.assertTrue(any("starts moving" in p for _, p in timeline))
+        self.assertFalse(any("turns around" in p for _, p in timeline))
 
 
 class TestNoAssumedState(unittest.TestCase):
+    def test_no_note_for_where_movement_ends(self):
+        # Ending a leftward walk still in the right third was read as a turn
+        # back to the right, and "stops moving" was read as standing still.
+        moments = path_moments(straight_path((0.95, 0.6), (0.7, 0.4), 6, 0.0))
+        self.assertEqual(
+            [p for _, p in moments],
+            ["starts moving up and left from the right of the frame"],
+        )
+
     def test_notes_never_claim_an_object_is_stationary(self):
         # A track still open at the last frame says nothing about motion.
         event = {
@@ -160,6 +177,7 @@ class TestNoAssumedState(unittest.TestCase):
         self.assertNotIn("stationary", joined)
         self.assertNotIn("stops", joined)
         self.assertNotIn("leaves", joined)
+        self.assertNotIn("still", joined)
 
 
 class TestFrameBucketing(unittest.TestCase):

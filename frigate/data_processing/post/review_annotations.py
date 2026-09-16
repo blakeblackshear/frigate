@@ -128,7 +128,9 @@ def path_legs(points: list[tuple[float, float, float]]) -> list[tuple[int, int]]
 def path_moments(path_data: list[Any]) -> list[tuple[float, str]]:
     """Key moments in one trajectory as (timestamp, phrase).
 
-    Emits one note per leg of travel plus where the last leg ends.
+    Emits one note per leg of travel. Where the last leg ends is left out:
+    path_data only records significant movement, so its final point cannot
+    distinguish an object coming to rest from one leaving the frame.
     """
     if not path_data or len(path_data) < 2:
         return []
@@ -156,12 +158,6 @@ def path_moments(path_data: list[Any]) -> list[tuple[float, str]]:
                 (t0, f"turns around at {describe_position(x0, y0)} and heads {heading}")
             )
 
-    if legs:
-        # path_data only records significant movement, so its last point marks
-        # where travel was last seen, not that the object came to rest there.
-        x, y, t = points[legs[-1][1]]
-        moments.append((t, f"reaches {describe_position(x, y)}"))
-
     return moments
 
 
@@ -170,10 +166,11 @@ def build_timeline(
 ) -> list[tuple[float, str]]:
     """All annotated moments across every event, in time order.
 
-    `span_end` is the timestamp of the last sampled frame. Moments past it
-    describe nothing the model can see. Notes only state what the tracker
-    knows: a track ending means the object stopped being detected, which may
-    or may not mean it left the frame.
+    Only changes are noted, since those are what sparse frames miss; an
+    object's state at the end of the clip is visible in the last frame.
+    `span_end` is the timestamp of the last sampled frame, and moments past it
+    describe nothing the model can see. A track ending means the object
+    stopped being detected, which may or may not mean it left the frame.
     """
     ordered = sorted(events, key=lambda e: e["start_time"])
     timeline: list[tuple[float, str]] = []
@@ -192,10 +189,6 @@ def build_timeline(
 
         if event["end_time"] and event["end_time"] <= span_end:
             timeline.append((event["end_time"], f"{name} is no longer detected"))
-        else:
-            timeline.append(
-                (span_end, f"{name} is still being tracked at the end of the clip")
-            )
 
     return sorted(timeline, key=lambda m: m[0])
 
