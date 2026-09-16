@@ -110,8 +110,7 @@ class GenAIClient:
         """Generate a description for the review item activity.
 
         `frame_captions` holds one caption per thumbnail for the annotated
-        frame mode; providers that can interleave text and images emit each
-        caption directly before its frame.
+        frame mode; each is sent directly before its frame.
         """
         if frame_captions and len(frame_captions) != len(thumbnails):
             logger.warning(
@@ -121,7 +120,6 @@ class GenAIClient:
             )
             frame_captions = None
 
-        interleaved = self.supports_interleaved_images
         context_prompt = build_review_description_prompt(
             review_data,
             thumbnails,
@@ -130,7 +128,6 @@ class GenAIClient:
             activity_context_prompt,
             response_style,
             frame_captions,
-            interleaved,
         )
 
         logger.debug(
@@ -146,11 +143,10 @@ class GenAIClient:
             ) as f:
                 f.write(context_prompt)
 
-            if frame_captions and interleaved:
+            if frame_captions:
                 # One file per frame, numbered to match the image it precedes
                 # (0.txt goes with 0.jpg), so the debug folder replays without
-                # having to re-derive the mapping. Non-interleaved providers
-                # already carry these notes inside prompt.txt.
+                # having to re-derive the mapping.
                 for index, caption in enumerate(frame_captions):
                     with open(
                         os.path.join(
@@ -169,7 +165,7 @@ class GenAIClient:
             context_prompt,
             thumbnails,
             response_format,
-            image_captions=frame_captions if interleaved else None,
+            image_captions=frame_captions,
         )
 
         if debug_save and response:
@@ -319,19 +315,9 @@ class GenAIClient:
 
         ``image_captions`` carries one caption per image, to be placed
         immediately before its image so the model can tell the frames apart.
-        Providers whose transport cannot interleave text and images append
-        them to the prompt instead.
+        Providers build their request order with ``interleave_images``.
         """
         return None
-
-    @property
-    def supports_interleaved_images(self) -> bool:
-        """Whether text and images can be mixed in a single request.
-
-        Providers that take a flat image list alongside one prompt string
-        cannot, and receive per-frame notes folded into the prompt instead.
-        """
-        return True
 
     @property
     def supports_vision(self) -> bool:

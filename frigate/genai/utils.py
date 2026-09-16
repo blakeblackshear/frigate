@@ -7,6 +7,25 @@ from typing import Any
 logger = logging.getLogger(__name__)
 
 
+def interleave_images(
+    prompt: str, images: list[bytes], captions: list[str] | None = None
+) -> list[str | bytes]:
+    """The prompt, then each image preceded by its caption when one is given.
+
+    Providers map the text and image parts onto their own request format, so
+    every provider sends the same order.
+    """
+    parts: list[str | bytes] = [prompt]
+
+    for index, image in enumerate(images):
+        if captions and index < len(captions):
+            parts.append(captions[index])
+
+        parts.append(image)
+
+    return parts
+
+
 def parse_tool_calls_from_message(
     message: dict[str, Any],
 ) -> list[dict[str, Any]] | None:

@@ -66,11 +66,6 @@ FRAME_ANNOTATION_GUIDANCE = """- Each image below is immediately preceded by a t
 - Some images below are preceded by notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, stopping, or no longer being detected. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
 
 
-# Used when the provider's transport cannot interleave text and images, so
-# the same notes are listed up front instead of sitting against their frames.
-FRAME_TIMELINE_GUIDANCE = """- The "Frame Notes" section at the end of this prompt lists, by frame number, notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, stopping, or no longer being detected. The images follow in frame order, so note 1 describes the first image. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
-
-
 def build_review_description_prompt(
     review_data: dict[str, Any],
     thumbnails: list[bytes],
@@ -79,14 +74,11 @@ def build_review_description_prompt(
     activity_context_prompt: str,
     response_style: str = "default",
     frame_captions: list[str] | None = None,
-    interleaved: bool = True,
 ) -> str:
     """Build the prompt for review activity description generation.
 
-    When `frame_captions` is set, the caller has per-frame tracker notes. With
-    `interleaved`, each caption is placed directly before its image and the
-    prompt says so; otherwise the notes are appended to the prompt as a
-    timeline, since some providers cannot mix text and images in one request.
+    When `frame_captions` is set, each caption is sent directly before its
+    image, so the prompt explains that layout.
     """
 
     def get_concern_prompt() -> str:
@@ -113,16 +105,7 @@ def build_review_description_prompt(
             return "\n- (No objects detected)"
 
     fields = get_review_field_guidelines(response_style)
-    if not frame_captions:
-        frame_guidance = ""
-        frame_notes = ""
-    elif interleaved:
-        frame_guidance = f"\n{FRAME_ANNOTATION_GUIDANCE}"
-        frame_notes = ""
-    else:
-        frame_guidance = f"\n{FRAME_TIMELINE_GUIDANCE}"
-        notes = "\n\n".join(frame_captions)
-        frame_notes = f"\n## Frame Notes\n\n{notes}\n"
+    frame_guidance = f"\n{FRAME_ANNOTATION_GUIDANCE}" if frame_captions else ""
 
     return f"""
 Your task is to analyze a sequence of images taken in chronological order from a security camera.
@@ -170,7 +153,7 @@ Each line represents a detection state, not necessarily unique individuals. The 
 
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
-{frame_notes}
+
 {get_language_prompt()}
 """
 

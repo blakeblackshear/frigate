@@ -11,6 +11,7 @@ from openai import OpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
 
@@ -66,22 +67,18 @@ class OpenAIClient(GenAIClient):
         image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to OpenAI."""
-        encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
-        messages_content: list[dict] = [
-            {
-                "type": "text",
-                "text": prompt,
-            }
-        ]
-        for index, image in enumerate(encoded_images):
-            if image_captions and index < len(image_captions):
-                messages_content.append({"type": "text", "text": image_captions[index]})
+        messages_content: list[dict] = []
+        for part in interleave_images(prompt, images, image_captions):
+            if isinstance(part, str):
+                messages_content.append({"type": "text", "text": part})
+                continue
 
+            encoded = base64.b64encode(part).decode("utf-8")
             messages_content.append(
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{image}",
+                        "url": f"data:image/jpeg;base64,{encoded}",
                         "detail": "low",
                     },
                 }

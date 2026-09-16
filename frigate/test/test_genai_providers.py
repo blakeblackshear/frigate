@@ -360,9 +360,70 @@ class TestOllamaProvider(unittest.TestCase):
         from frigate.genai.plugins.ollama import _normalize_multimodal_content
 
         text, images = _normalize_multimodal_content(MULTIMODAL_MESSAGES[-1]["content"])
-        self.assertIn("live image", text)
-        self.assertEqual(len(images), 1)
-        self.assertEqual(images[0], b"\xff\xd8\xff\xd9")
+        self.assertEqual(
+            text, "Here is the current live image from camera 'front'.\n[img]"
+        )
+        self.assertEqual(images, [b"\xff\xd8\xff\xd9"])
+
+    def test_normalize_keeps_text_and_image_order(self):
+        from frigate.genai.plugins.ollama import _normalize_multimodal_content
+
+        text, images = _normalize_multimodal_content(
+            [
+                {"type": "text", "text": "intro"},
+                {"type": "text", "text": "Frame 1"},
+                {"type": "image_url", "image_url": {"url": _IMAGE_DATA_URI}},
+                {"type": "text", "text": "Frame 2"},
+                {"type": "image_url", "image_url": {"url": _IMAGE_DATA_URI}},
+            ]
+        )
+        self.assertEqual(text, "intro\nFrame 1\n[img]\nFrame 2\n[img]")
+        self.assertEqual(len(images), 2)
+
+    def test_send_uses_chat_with_captions_before_each_image(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.return_value = {
+            "message": {"content": '{"ok": true}'},
+            "done": True,
+            "done_reason": "stop",
+        }
+        client._supports_thinking_cache = False
+
+        result = client._send(
+            "prompt",
+            [b"a", b"b"],
+            {"type": "json_schema", "json_schema": {"schema": {"type": "object"}}},
+            image_captions=["Frame 1 of 2", "Frame 2 of 2"],
+        )
+
+        self.assertEqual(result, '{"ok": true}')
+        client.provider.generate.assert_not_called()
+        params = client.provider.chat.call_args.kwargs
+        self.assertEqual(
+            params["messages"],
+            [
+                {
+                    "role": "user",
+                    "content": "prompt\nFrame 1 of 2\n[img]\nFrame 2 of 2\n[img]",
+                    "images": [b"a", b"b"],
+                }
+            ],
+        )
+        self.assertEqual(params["format"], {"type": "object"})
+        self.assertNotIn("think", params)
+
+    def test_send_without_captions_puts_images_after_prompt(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.return_value = {"message": {"content": "ok"}, "done": True}
+        client._supports_thinking_cache = False
+
+        client._send("prompt", [b"a"])
+
+        message = client.provider.chat.call_args.kwargs["messages"][0]
+        self.assertEqual(message["content"], "prompt\n[img]")
+        self.assertEqual(message["images"], [b"a"])
 
 
 # ---------------------------------------------------------------------------

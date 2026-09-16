@@ -13,6 +13,7 @@ from google.genai.types import FunctionCallingConfigMode
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
 
@@ -121,13 +122,12 @@ class GeminiClient(GenAIClient):
         image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
-        contents: list[Any] = [prompt]
-
-        for index, img in enumerate(images):
-            if image_captions and index < len(image_captions):
-                contents.append(image_captions[index])
-
-            contents.append(types.Part.from_bytes(data=img, mime_type="image/jpeg"))
+        contents: list[Any] = [
+            part
+            if isinstance(part, str)
+            else types.Part.from_bytes(data=part, mime_type="image/jpeg")
+            for part in interleave_images(prompt, images, image_captions)
+        ]
 
         try:
             # Merge runtime_options into generation_config if provided

@@ -207,8 +207,6 @@ Annotated mode also caps the number of frames, since the notes already establish
 
 Annotated mode needs tracking data for the review item. If none is available, Frigate falls back to sending plain frames for that item.
 
-Ollama's API accepts a single prompt alongside a flat list of images and cannot place text between them, so with Ollama the notes are added to the end of the prompt as a numbered list rather than interleaved. Other providers interleave them.
-
 :::
 
 <ConfigTabs>
