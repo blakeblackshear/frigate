@@ -1,6 +1,9 @@
 import { baseUrl } from "@/api/baseUrl";
 import { LivePlayerError, PlayerStatsType } from "@/types/live";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { webRTCIceServers } from "@/utils/webrtcUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useSWR from "swr";
 
 type WebRtcPlayerProps = {
   className?: string;
@@ -32,6 +35,18 @@ export default function WebRtcPlayer({
   onError,
 }: WebRtcPlayerProps) {
   // metadata
+
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  // Keyed on the serialized list so an unrelated config update doesn't
+  // reconnect every WebRTC player.
+  const iceServersKey = JSON.stringify(
+    config?.go2rtc?.webrtc?.ice_servers ?? [],
+  );
+  const iceServers = useMemo(
+    () => webRTCIceServers(JSON.parse(iceServersKey)),
+    [iceServersKey],
+  );
 
   const wsURL = useMemo(() => {
     return `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${camera}`;
@@ -69,7 +84,7 @@ export default function WebRtcPlayer({
 
       const pc = new RTCPeerConnection({
         bundlePolicy: "max-bundle",
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers,
       });
 
       const localTracks = [];
@@ -109,7 +124,7 @@ export default function WebRtcPlayer({
       videoRef.current.srcObject = new MediaStream(localTracks);
       return pc;
     },
-    [videoRef],
+    [videoRef, iceServers],
   );
 
   async function getMediaTracks(
@@ -226,7 +241,7 @@ export default function WebRtcPlayer({
 
       const pc = new RTCPeerConnection({
         bundlePolicy: "max-bundle",
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers,
       });
       tracks.forEach((track) =>
         pc.addTransceiver(track, { direction: "sendonly" }),
@@ -249,7 +264,7 @@ export default function WebRtcPlayer({
         micPcRef.current = undefined;
       }
     };
-  }, [microphoneEnabled, playbackEnabled, wsURL, startSignaling]);
+  }, [microphoneEnabled, playbackEnabled, wsURL, startSignaling, iceServers]);
 
   // ios compat
 

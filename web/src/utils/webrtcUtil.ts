@@ -1,3 +1,4 @@
+import { FrigateConfig } from "@/types/frigateConfig";
 import { WebRTCUnavailableReason } from "@/types/live";
 
 /**
@@ -5,6 +6,27 @@ import { WebRTCUnavailableReason } from "@/types/live";
  * Used to gate the WebRTC live streaming option (e.g. H.265 is only
  * decodable over WebRTC on Chrome 136+ / Safari 18+ with HEVC hardware).
  */
+
+const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+];
+
+type ConfiguredIceServers = FrigateConfig["go2rtc"]["webrtc"]["ice_servers"];
+
+/** ICE servers for browser peer connections, falling back to public STUN. */
+export function webRTCIceServers(
+  configured: ConfiguredIceServers,
+): RTCIceServer[] {
+  if (!configured?.length) {
+    return DEFAULT_ICE_SERVERS;
+  }
+
+  return configured.map((server) => ({
+    urls: server.urls,
+    username: server.username,
+    credential: server.credential,
+  }));
+}
 
 export function browserSupportsWebRTC(): boolean {
   return typeof window !== "undefined" && "RTCPeerConnection" in window;

@@ -14,10 +14,6 @@ export type WebRTCProbeResult = {
 
 let probePromise: Promise<WebRTCProbeResult> | null = null;
 
-const DEFAULT_ICE_SERVERS: RTCIceServer[] = [
-  { urls: "stun:stun.l.google.com:19302" },
-];
-
 function describeError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
@@ -33,7 +29,7 @@ function runProbe(
 
     const pc = new RTCPeerConnection({
       bundlePolicy: "max-bundle",
-      iceServers: iceServers.length ? iceServers : DEFAULT_ICE_SERVERS,
+      iceServers,
     });
     let ws: WebSocket | null = null;
 

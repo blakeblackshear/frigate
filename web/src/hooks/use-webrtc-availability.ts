@@ -8,6 +8,7 @@ import {
   browserWebRTCVideoCodecs,
   logWebRTCUnavailable,
   resetWebRTCUnavailableLog,
+  webRTCIceServers,
 } from "@/utils/webrtcUtil";
 import {
   getPlaybackAudioCodecs,
@@ -96,15 +97,6 @@ function describeGlobalReason(
 /** go2rtc config the cached probe result and log messages belong to. */
 let lastProbeSignature: string | null = null;
 
-function iceServersFromConfig(config?: FrigateConfig): RTCIceServer[] {
-  const servers = config?.go2rtc?.webrtc?.ice_servers ?? [];
-  return servers.map((s) => ({
-    urls: s.urls,
-    username: s.username,
-    credential: s.credential,
-  }));
-}
-
 /**
  * Once-per-session: browser support, go2rtc config, and a live handshake probe.
  */
@@ -132,7 +124,10 @@ export function useWebRTCGloballyAvailable(): GlobalAvailability {
     return Object.keys(streams)[0];
   }, [config]);
 
-  const iceServers = useMemo(() => iceServersFromConfig(config), [config]);
+  const iceServers = useMemo(
+    () => webRTCIceServers(config?.go2rtc?.webrtc?.ice_servers),
+    [config],
+  );
 
   // Identity of the cached page-session probe: a config change here must
   // re-probe rather than return a stale result.
