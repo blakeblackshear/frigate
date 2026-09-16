@@ -112,26 +112,39 @@ def onnx_box_graph(box_format: str) -> bytes:
         # a record whose wire type means nothing, as a damaged section reads
         return proto_varint(1 << 3 | 3)
 
+    unnamed = box_format == "unnamed"
+
+    def graph_node(op_type: str, name: str, inputs: list, outputs: list) -> bytes:
+        return onnx_node(op_type, "" if unnamed else name, inputs, outputs)
+
     nodes = [
-        onnx_node("Split", "dfl_split", ["dfl", "sizes"], ["lt", "rb"]),
-        onnx_node("Sub", "corner_min", ["anchors", "lt"], ["x1y1"]),
-        onnx_node("Add", "corner_max", ["rb", "anchors"], ["x2y2"]),
+        graph_node("Split", "dfl_split", ["dfl", "sizes"], ["lt", "rb"]),
+        graph_node("Sub", "corner_min", ["anchors", "lt"], ["x1y1"]),
+        graph_node("Add", "corner_max", ["rb", "anchors"], ["x2y2"]),
     ]
-    if box_format == "centre":
+    if box_format in ("centre", "unnamed"):
         nodes += [
-            onnx_node("Add", "corner_sum", ["x1y1", "x2y2"], ["sum"]),
-            onnx_node("Mul", "corner_mean", ["sum", "half"], ["cxy"]),
-            onnx_node("Sub", "corner_span", ["x2y2", "x1y1"], ["wh"]),
-            onnx_node("Concat", "box_concat", ["cxy", "wh"], ["box"]),
+            graph_node("Add", "corner_sum", ["x1y1", "x2y2"], ["sum"]),
+            graph_node("Mul", "corner_mean", ["sum", "half"], ["cxy"]),
+            graph_node("Sub", "corner_span", ["x2y2", "x1y1"], ["wh"]),
+            graph_node("Concat", "box_concat", ["cxy", "wh"], ["box"]),
         ]
     elif box_format == "corner":
-        nodes.append(onnx_node("Concat", "box_concat", ["x1y1", "x2y2"], ["box"]))
+        nodes.append(graph_node("Concat", "box_concat", ["x1y1", "x2y2"], ["box"]))
     else:
         # a head that builds its boxes from one distance alone, which is
         # neither shape and must not be read as either
-        nodes.append(onnx_node("Concat", "box_concat", ["x1y1", "x1y1"], ["box"]))
+        nodes.append(graph_node("Concat", "box_concat", ["x1y1", "x1y1"], ["box"]))
 
-    nodes.append(onnx_node("Mul", PPU_BBOX_NODE, ["box", "strides"], ["bbox_out"]))
+    box = "box"
+    if unnamed:
+        # a reshape between the concat and the node the PPU reads, so the
+        # walk has to step past one unnamed node to reach another
+        box = "box_flat"
+        nodes.append(graph_node("Reshape", "box_reshape", ["shape", "box"], [box]))
+
+    # compile_config names this one, so it carries a name either way
+    nodes.append(onnx_node("Mul", PPU_BBOX_NODE, [box, "strides"], ["bbox_out"]))
     # graph inputs and initializers sit beside the nodes and are not read
     graph = b"".join(proto_bytes(1, node) for node in nodes)
     graph += proto_bytes(5, b"weights")
@@ -326,6 +339,19 @@ class TestDeepxPpuLayoutFile(unittest.TestCase):
                         centre_boxes=centre,
                     ),
                 )
+
+    def test_a_graph_whose_nodes_are_unnamed_still_gives_its_box_format(self):
+        """A node's name is optional in ONNX, so an exporter can leave every
+        one of them empty and the model still runs. The walk back to the
+        concat has to tell those nodes apart by the tensors they write, or a
+        head Frigate can decode would be refused at load."""
+        path = write_dxnn(
+            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="unnamed"
+        )
+        self.assertEqual(
+            read_ppu_layout(path),
+            PpuLayout(anchor_based=False, grids=((100, 84),), centre_boxes=True),
+        )
 
     def test_a_box_format_the_graph_does_not_answer_is_left_open(self):
         """Nothing is guessed from the head: a file with no compiled graph,

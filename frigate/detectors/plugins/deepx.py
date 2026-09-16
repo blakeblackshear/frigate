@@ -696,9 +696,12 @@ def _upstream_concat(node: dict | None, producers: dict) -> dict | None:
             return current
 
         for name in current["input"]:
+            if name in seen:
+                continue
+
+            seen.add(name)
             producer = producers.get(name)
-            if producer is not None and producer["name"] not in seen:
-                seen.add(producer["name"])
+            if producer is not None:
                 queue.append(producer)
 
     return None
