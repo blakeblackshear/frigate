@@ -412,10 +412,8 @@ export default function LivePlayer({
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
         !liveReady && (
-          (
           <div className="absolute inset-0 flex items-center justify-center">
             <ActivityIndicator className={"w-full [.bg-black_&]:text-white"} />
-        )
           </div>
         )}
 
