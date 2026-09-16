@@ -80,6 +80,21 @@ PPU_ANCHORS_BY_SCALES = {
 # DXNN_HEADER_SIZE; every offset in the index counts from there.
 DXNN_MAGIC = b"DXNN"
 DXNN_HEADER_SIZE = 8192
+# The compiled graph DX-COM keeps for visualisation, an ONNX ModelProto in
+# plain protobuf beside the encrypted NPU model. Only its node list is read,
+# to see how the tensor the PPU takes as boxes was built.
+DXNN_GRAPH_SECTION = "vis_npu_models"
+# ModelProto.graph, GraphProto.node, then NodeProto's input, output, name
+# and op_type, as onnx.proto numbers them.
+ONNX_GRAPH_FIELD = 7
+ONNX_NODE_FIELD = 1
+ONNX_NODE_FIELDS = {1: "input", 2: "output", 3: "name", 4: "op_type"}
+# A YOLO head splits the DFL output into the two distances a box is built
+# from, so a walk back from the box tensor stops at the split.
+PPU_DISTANCE_OPS = ("Split", "Slice")
+# Depth and breadth caps, so a graph that is not the expected shape is
+# answered with None rather than walked forever.
+ONNX_WALK_LIMIT = 16
 # compile_config's ppu.type for the heads decoded as bounding boxes
 PPU_TYPE_ANCHOR_BASED = 0
 PPU_TYPE_ANCHOR_FREE = 1
@@ -438,20 +453,16 @@ def ppu_records(outputs: list[np.ndarray]) -> np.ndarray | None:
     return records
 
 
-def ppu_boxes_are_centres(boxes: np.ndarray) -> bool:
-    """Whether these pixel boxes hold a centre and size rather than two
-    corners: a corner box always runs x1<=x2, y1<=y2, so only a centre box
-    can show a width below its x or a height below its y."""
-    return bool(np.any(boxes[:, 2] < boxes[:, 0]) or np.any(boxes[:, 3] < boxes[:, 1]))
-
-
 @dataclass(frozen=True)
 class PpuLayout:
-    """The PPU head's kind (None if unnamed) and each scale's grid, finest
-    first, as the compiled model states them."""
+    """The PPU head's kind (None if unnamed), each scale's grid, finest
+    first, and whether its boxes are a centre and size, as the compiled
+    model states them. `centre_boxes` is None wherever the question does
+    not arise, which is every head but a single-scale anchor-free one."""
 
     anchor_based: bool | None
     grids: tuple[tuple[int, int], ...]
+    centre_boxes: bool | None = None
 
     @property
     def scale_count(self) -> int:
@@ -507,13 +518,36 @@ def read_ppu_layout(path: str) -> PpuLayout | None:
                     else:
                         continue
 
-                    if grids:
-                        return PpuLayout(
-                            anchor_based, tuple(grids[k] for k in sorted(grids))
-                        )
+                    if not grids:
+                        continue
+
+                    scales = tuple(grids[k] for k in sorted(grids))
+                    centre_boxes = None
+                    bbox_node = _ppu_bbox_node(ppu)
+                    if anchor_based is False and len(scales) == 1 and bbox_node:
+                        nodes = []
+                        try:
+                            for entry in (data.get(DXNN_GRAPH_SECTION) or {}).values():
+                                nodes += _onnx_nodes(section(entry))
+                        except (OSError, ValueError, IndexError, KeyError, TypeError):
+                            # an unreadable graph leaves the format unsettled,
+                            # which the loader refuses with its own reason
+                            nodes = []
+
+                        centre_boxes = ppu_boxes_are_centres(nodes, bbox_node)
+
+                    return PpuLayout(anchor_based, scales, centre_boxes)
 
             return None
-    except (OSError, ValueError, KeyError, TypeError, AttributeError, struct.error):
+    except (
+        OSError,
+        ValueError,
+        KeyError,
+        IndexError,
+        TypeError,
+        AttributeError,
+        struct.error,
+    ):
         return None
 
 
@@ -573,6 +607,160 @@ def _ppu_outputs_are_anchor_based(outputs: list[dict], ppu: dict | None) -> bool
 
     if any("_anchor_" in str(output.get("name", "")) for output in outputs):
         return True
+
+    return None
+
+
+def _ppu_bbox_node(ppu: dict | None) -> str | None:
+    """The graph node whose output the PPU reads as boxes, which
+    compile_config names per scale for an anchor-free head."""
+    layers = (ppu or {}).get("layer")
+    if not isinstance(layers, list) or len(layers) != 1:
+        return None
+
+    layer = layers[0]
+    return layer.get("bbox") if isinstance(layer, dict) else None
+
+
+def _proto_varint(blob: bytes, at: int) -> tuple[int, int]:
+    """One protobuf varint and the offset just past it."""
+    value = shift = 0
+    while True:
+        byte = blob[at]
+        at += 1
+        value |= (byte & 0x7F) << shift
+        if not byte & 0x80:
+            return value, at
+
+        shift += 7
+
+
+def _proto_fields(blob: bytes):
+    """Field number and payload of every length-delimited protobuf record
+    in `blob`; records of the other wire types are skipped over."""
+    at = 0
+    while at < len(blob):
+        key, at = _proto_varint(blob, at)
+        field, wire = key >> 3, key & 7
+        if wire == 0:
+            _, at = _proto_varint(blob, at)
+        elif wire == 2:
+            size, at = _proto_varint(blob, at)
+            yield field, blob[at : at + size]
+            at += size
+        elif wire == 5:
+            at += 4
+        elif wire == 1:
+            at += 8
+        else:
+            raise ValueError(f"unknown protobuf wire type {wire}")
+
+
+def _onnx_nodes(blob: bytes) -> list[dict]:
+    """Every node of an ONNX ModelProto's graph, as its op_type, name and
+    the tensor names it reads and writes. Weights are not read."""
+    nodes = []
+    for field, graph in _proto_fields(blob):
+        if field != ONNX_GRAPH_FIELD:
+            continue
+
+        for graph_field, node in _proto_fields(graph):
+            if graph_field != ONNX_NODE_FIELD:
+                continue
+
+            entry = {"input": [], "output": [], "name": "", "op_type": ""}
+            for node_field, value in _proto_fields(node):
+                key = ONNX_NODE_FIELDS.get(node_field)
+                if key is None:
+                    continue
+
+                text = value.decode("utf-8", "replace")
+                if key in ("input", "output"):
+                    entry[key].append(text)
+                else:
+                    entry[key] = text
+
+            nodes.append(entry)
+
+    return nodes
+
+
+def _upstream_concat(node: dict | None, producers: dict) -> dict | None:
+    """The concatenation that assembles the tensor `node` writes, nearest
+    first; None when the box tensor was not built by one."""
+    seen: set[str] = set()
+    queue = [node] if node else []
+    while queue and len(seen) <= ONNX_WALK_LIMIT:
+        current = queue.pop(0)
+        if current["op_type"] == "Concat":
+            return current
+
+        for name in current["input"]:
+            producer = producers.get(name)
+            if producer is not None and producer["name"] not in seen:
+                seen.add(producer["name"])
+                queue.append(producer)
+
+    return None
+
+
+def _box_tensor_sources(producers: dict, tensor: str) -> set[str]:
+    """The tensors this one was built from, stopping at the DFL distances
+    and at anything the graph does not produce, such as a constant."""
+    sources: set[str] = set()
+    seen: set[str] = set()
+    pending = [(tensor, 0)]
+    while pending:
+        name, depth = pending.pop()
+        if name in seen:
+            continue
+
+        seen.add(name)
+        node = producers.get(name)
+        if (
+            node is None
+            or depth >= ONNX_WALK_LIMIT
+            or node["op_type"] in PPU_DISTANCE_OPS
+        ):
+            sources.add(name)
+            continue
+
+        pending += [(read, depth + 1) for read in node["input"]]
+
+    return sources
+
+
+def ppu_boxes_are_centres(nodes: list[dict], bbox_node: str) -> bool | None:
+    """Whether the PPU's box tensor holds a centre and size rather than two
+    corners, read from how the compiled graph built it. A YOLO head turns
+    the two DFL distances into corners as (anchor - left, anchor + right),
+    one distance per half, or into a centre and size as their mean and
+    their difference, both halves drawing on both distances. None when the
+    graph is not there or built the boxes some other way; nothing here
+    reads a node's name, only the shape of the graph around it."""
+    producers = {out: node for node in nodes for out in node["output"]}
+    by_name = {node["name"]: node for node in nodes}
+
+    concat = _upstream_concat(by_name.get(bbox_node), producers)
+    if concat is None or len(concat["input"]) != 2:
+        return None
+
+    first, second = (_box_tensor_sources(producers, t) for t in concat["input"])
+    distances = {
+        tensor
+        for tensor in first | second
+        if producers.get(tensor, {}).get("op_type") in PPU_DISTANCE_OPS
+    }
+    if len(distances) != 2:
+        return None
+
+    first &= distances
+    second &= distances
+    if first == second == distances:
+        return True
+
+    if first != second and len(first) == len(second) == 1:
+        return False
 
     return None
 
@@ -643,23 +831,21 @@ def decode_ppu(
     *,
     strides: tuple[int, ...] | np.ndarray,
     anchor_based: bool,
+    centre_boxes: bool = False,
     records: np.ndarray | None = None,
-    centre_boxes: bool | None = None,
-    boxes: np.ndarray | None = None,
 ) -> np.ndarray:
     """Decode PPU records, leaving only NMS. `strides` is one per scale,
-    finest first, as the model file's grids give them; `centre_boxes`
-    skips its heuristic once a caller settles it; `records` and `boxes`
-    reuse an already-parsed buffer instead of re-parsing `outputs`."""
+    finest first, as the model file's grids give them; `centre_boxes` says
+    how a single-scale anchor-free head writes its boxes, which the model
+    file settles at load; `records` reuses an already-parsed buffer
+    instead of re-parsing `outputs`."""
     if records is None:
         records = ppu_records(outputs)
 
     if records is None:
         return np.zeros((20, 6), np.float32)
 
-    if boxes is None:
-        boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
-
+    boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
     scores = reinterpret(records, PPU_SCORE_BYTES, np.float32).flatten()
     labels = reinterpret(records, PPU_LABEL_BYTES, np.uint32).flatten()
     strides = np.asarray(strides, np.float32)
@@ -677,9 +863,6 @@ def decode_ppu(
         )
         scores = np.where(known, scores, 0.0)
     else:
-        if centre_boxes is None:
-            centre_boxes = ppu_boxes_are_centres(boxes)
-
         if centre_boxes:
             centre_x, centre_y = boxes[:, 0], boxes[:, 1]
             box_w, box_h = boxes[:, 2], boxes[:, 3]
@@ -947,8 +1130,6 @@ class DeepxDetector(DetectionApi):
             # the shared YOLOX decoder's cell grids and strides for this input
             self.calculate_grids_strides()
         self.logged_layout = False
-        # set once proven; a corner-format head never produces such a record
-        self.ppu_centre_boxes = False
         self.ppu_unsupported_scale_reported = False
         self.damoyolo_outputs_reported = False
 
@@ -976,11 +1157,33 @@ class DeepxDetector(DetectionApi):
                 "or later."
             )
 
+        if (
+            layout.anchor_based is False
+            and layout.scale_count == 1
+            and layout.centre_boxes is None
+        ):
+            # the two readings of a box field are both plausible geometry, so
+            # a frame cannot settle this; only the compiled graph can
+            raise ValueError(
+                f"Could not tell from {model_path} whether its PPU head writes "
+                "boxes as a centre and size or as two corners. The compiled "
+                "graph that says so is missing from the file or builds its "
+                "boxes in a way Frigate does not recognise. Compile PPU models "
+                "with DX-COM 2.4.0 or later."
+            )
+
         logger.info(
-            "DEEPX PPU head from the model: %s, %d scale(s), grids %s",
+            "DEEPX PPU head from the model: %s, %d scale(s), grids %s%s",
             "anchor-based" if layout.anchor_based else "anchor-free",
             layout.scale_count,
             layout.grids,
+            ""
+            if layout.centre_boxes is None
+            else (
+                ", boxes as a centre and size"
+                if layout.centre_boxes
+                else ", boxes as two corners"
+            ),
         )
         return layout
 
@@ -1077,17 +1280,6 @@ class DeepxDetector(DetectionApi):
         assert layout is not None
 
         records = ppu_records(outputs)
-        boxes = None
-        if records is not None and len(records):
-            boxes = reinterpret(records, PPU_BOX_BYTES, np.float32).reshape(-1, 4)
-
-        if (
-            boxes is not None
-            and not layout.anchor_based
-            and layout.scale_count == 1
-            and not self.ppu_centre_boxes
-        ):
-            self.ppu_centre_boxes = ppu_boxes_are_centres(boxes)
 
         if (
             layout.anchor_based
@@ -1111,10 +1303,8 @@ class DeepxDetector(DetectionApi):
             NMS_THRESHOLD,
             strides=layout.strides(self.width),
             anchor_based=bool(layout.anchor_based),
+            centre_boxes=bool(layout.centre_boxes),
             records=records,
-            # None leaves it to the frame; only a proven True is kept
-            centre_boxes=True if self.ppu_centre_boxes else None,
-            boxes=boxes,
         )
 
     def decode_damoyolo(self, outputs: list[np.ndarray]) -> np.ndarray:

@@ -264,49 +264,28 @@ Inference speeds may vary depending on the host platform. The above data was mea
 
 ### DEEPX NPU
 
-Frigate supports the DEEPX NPU in both of its form factors: the **DX-M1** M.2 module, which works on x86 (Intel/AMD) and ARM-based SBCs such as the Raspberry Pi 5, and the **DX-M1M** on the [Sixfab AI HAT+](https://docs.sixfab.com/docs/ai-hat-plus-raspberry-pi-5-quickstart) for the Raspberry Pi 5. Both use the same driver and runtime, so the configuration is identical for either one.
+Frigate supports the DEEPX NPU in both of its form factors: the **DX-M1** M.2 module, which works on x86 (Intel/AMD) and ARM-based SBCs such as the Raspberry Pi 5, and the **DX-M1M** on the [Sixfab AI HAT+](https://docs.sixfab.com/docs/ai-hat-plus-raspberry-pi-5-quickstart) for the Raspberry Pi 5. Both use the same driver and runtime, so the configuration is identical for either one. DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
 
-DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
+The DEEPX driver and runtime run on the Docker host rather than inside the Frigate container and must be installed before the NPU can be used. See the [installation docs](installation.md#deepx-npu) for the setup steps and [the detector docs](/configuration/object_detectors#deepx-npu) for the configuration.
 
-The NPU runs models compiled to the `.dxnn` format with DEEPX's DX-COM compiler. Pre-compiled YOLO and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo). Models compiled with Post-Processing Unit (PPU) support move candidate selection onto the NPU, which reduces host CPU usage; both anchor-based and anchor-free PPU heads are supported. Frigate reads the PPU head's kind and number of detection scales from the `.dxnn` file when the model loads, so no configuration is needed for either. PPU models must be compiled with DX-COM 2.4.0 or later; a `.dxnn` without that layout is refused at load.
+Frigate does not bundle a model for this detector. Models use DEEPX's `.dxnn` format, and pre-compiled YOLO and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo). Prefer a model with a `_ppu` suffix whenever one is available for the architecture you want: these run part of the post-processing on the NPU itself and are considerably faster, roughly 2.5x for the same architecture and input size. **YOLOX-S with PPU is the recommended starting point.**
 
-Exception: **YOLOv7 and YOLOv7-x PPU models are not supported**. A PPU record has no anchor sizes, only a grid position, and the `.dxnn` does not carry them either, so Frigate decodes anchor-based PPU heads against a fixed anchor table per scale count: the usual COCO anchor set for three-scale heads (the one DEEPX's own reference decoder uses for every other three-scale model it ships) and the usual tiny set for two-scale heads. YOLOv7's anchors differ and nothing in the model tells them apart, so it decodes to wrong box sizes. Non-PPU YOLOv7 is unaffected (its raw head already outputs pixel-space boxes). An end-to-end PPU head that emits corner boxes rather than a centre and size is told apart from the records themselves. **Face and pose PPU models (SCRFD and the pose export) are not supported**: their records carry landmarks or keypoints in a different layout, and Frigate only decodes object detection records.
+Inference times for a few recommended models, measured through Frigate's own stats on a DX-M1:
 
-The DEEPX kernel driver, the DX-RT runtime, and the `dxrtd` daemon all run on the Docker host rather than inside the Frigate container, and have to be installed there before the NPU can be used. Frigate connects to the daemon over its socket, so the NPU stays available to other programs on the host at the same time. See the [installation docs](installation.md#deepx-npu) for the setup steps.
+| Model             | Input Size | DX-M1 Inference Time |
+| ----------------- | ---------- | -------------------- |
+| YOLOX-S (PPU)     | 640        | ~ 13 ms              |
+| YOLOv9-t (PPU)    | 640        | ~ 18 ms              |
+| YOLOv4 (PPU)      | 512        | ~ 20 ms              |
+| YOLOX-S           | 640        | ~ 34 ms              |
+| YOLOv9-s          | 640        | ~ 39 ms              |
+| DAMO-YOLO-T       | 640        | ~ 47 ms              |
 
-The DEEPX ModelZoo publishes pre-compiled `.dxnn` files for many YOLO variants as well as the models below:
-| Model                  | Input Size | DX-M1 Inference Time |
-| ---------------------- | ---------- | -------------------- |
-| DAMO-YOLO-T            | 640        | ~ 47 ms             |
-| DAMO-YOLO TinyNAS-L20T | 640        | ~ 48 ms             |
-| DAMO-YOLO-S            | 640        | ~ 48 ms             |
-| DAMO-YOLO TinyNAS-L25S | 640        | ~ 48 ms             |
-| DAMO-YOLO-M            | 640        | ~ 56 ms             |
-| DAMO-YOLO TinyNAS-L20M | 640        | ~ 55 ms             |
-| DAMO-YOLO-L            | 640        | ~ 57 ms             |
-| YOLOv9s                | 640        | ~ 51 ms              |
-
-These are DEEPX's own figures for the DX-M1, derived from the frames per second published in the ModelZoo. They cover the NPU alone and exclude the pre- and post-processing Frigate does on the host, so the inference speed Frigate reports will be higher, and noticeably so on a slower host such as a Raspberry Pi 5.
-
-Besides the DAMO-YOLO family shown above, other models from the wider YOLO family published in the ModelZoo are also supported by the `deepx` detector by setting `model_type: yolo-generic`. A YOLOX model compiled without PPU support is the one exception: its raw head needs `model_type: yolox` (the PPU variant works with either). Inference times for these, measured through Frigate's own stats API on a DX-M1 rather than taken from DEEPX's published figures, are below:
-
-| Model             | Input Size | DX-M1 Inference Time (via Frigate) |
-| ------------------ | ---------- | ----------------------------------- |
-| YOLOv3-tiny (PPU)  | 416        | ~ 6 ms                              |
-| YOLOX-S (PPU)      | 640        | ~ 13 ms                             |
-| YOLOv3 (PPU)       | 416        | ~ 16 ms                             |
-| YOLOv9-t (PPU)     | 640        | ~ 18 ms                             |
-| YOLOv4 (PPU)       | 512        | ~ 20 ms                             |
-| YOLOv3 (PPU)       | 608        | ~ 28 ms                             |
-| YOLOX-S            | 640        | ~ 34 ms                             |
-| YOLOv9-s           | 640        | ~ 39 ms                             |
-
-Unlike the DAMO-YOLO table above, these figures include Frigate's own pipeline overhead (host-side pre/post-processing and the PCIe/IPC round trip), not just raw NPU compute time, so they are not directly comparable to DEEPX's published numbers. Other variants from the ModelZoo not listed here are also supported but have not been measured.
-
-**PPU support is strongly recommended whenever a model offers it.** Moving candidate/box selection onto the NPU's Post-Processing Unit substantially cuts host-side CPU work and inference time for the same architecture and input size: YOLOX-S measured ~34 ms without PPU versus ~13 ms with PPU above, roughly a 2.5x difference from PPU alone. Prefer a `_ppu`-suffixed model whenever one is available for the architecture you want.
+Other ModelZoo variants, including the rest of the DAMO-YOLO family, are also supported but have not been measured. Inference speeds vary with the host platform, so a slower host such as a Raspberry Pi 5 will report higher times than those above.
 
 :::note
-SSD models in the ModelZoo, trained on Pascal VOC rather than COCO, so their labels do not match the object vocabulary used by `objects.track` and the rest of Frigate. The `deepx` detector has no SSD decoder and rejects `model_type: ssd` at startup. Use a DAMO-YOLO or YOLO model instead.
+
+A few ModelZoo models can not be used with Frigate: SSD models (they are trained on Pascal VOC, so their labels do not match Frigate's), face and pose models, and the PPU builds of YOLOv7.
 
 :::
 

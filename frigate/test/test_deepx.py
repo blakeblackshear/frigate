@@ -71,16 +71,94 @@ def strides_for(scales: int) -> tuple[int, ...]:
 ANCHOR_BASED_PPU = {"type": 0, "num_classes": 80, "activation": "Sigmoid"}
 ANCHOR_FREE_PPU = {"type": 1, "num_classes": 80}
 
+# the node compile_config names as the tensor the PPU reads as boxes
+PPU_BBOX_NODE = "/head/Mul_2"
 
-def write_dxnn(directory, ppu, layers, name="model.dxnn", table=True) -> str:
+
+def proto_varint(value: int) -> bytes:
+    out = bytearray()
+    while True:
+        byte = value & 0x7F
+        value >>= 7
+        out.append(byte | (0x80 if value else 0))
+        if not value:
+            return bytes(out)
+
+
+def proto_bytes(field: int, payload: bytes) -> bytes:
+    """One length-delimited protobuf record."""
+    return proto_varint(field << 3 | 2) + proto_varint(len(payload)) + payload
+
+
+def proto_number(field: int, value: int) -> bytes:
+    """One varint record, the wire type the reader has to step over."""
+    return proto_varint(field << 3) + proto_varint(value)
+
+
+def onnx_node(op_type: str, name: str, inputs: list, outputs: list) -> bytes:
+    """A NodeProto: input, output, name and op_type, fields 1 to 4."""
+    body = b"".join(proto_bytes(1, tensor.encode()) for tensor in inputs)
+    body += b"".join(proto_bytes(2, tensor.encode()) for tensor in outputs)
+    return body + proto_bytes(3, name.encode()) + proto_bytes(4, op_type.encode())
+
+
+def onnx_box_graph(box_format: str) -> bytes:
+    """The compiled graph DX-COM leaves in the file, cut down to the nodes
+    that build the box tensor: the DFL split, its two distances turned into
+    corners, and for a centre-and-size head their mean and difference. The
+    ModelProto is wrapped in the fields a real one carries around its
+    graph, which the reader has to step over."""
+    if box_format == "broken":
+        # a record whose wire type means nothing, as a damaged section reads
+        return proto_varint(1 << 3 | 3)
+
+    nodes = [
+        onnx_node("Split", "dfl_split", ["dfl", "sizes"], ["lt", "rb"]),
+        onnx_node("Sub", "corner_min", ["anchors", "lt"], ["x1y1"]),
+        onnx_node("Add", "corner_max", ["rb", "anchors"], ["x2y2"]),
+    ]
+    if box_format == "centre":
+        nodes += [
+            onnx_node("Add", "corner_sum", ["x1y1", "x2y2"], ["sum"]),
+            onnx_node("Mul", "corner_mean", ["sum", "half"], ["cxy"]),
+            onnx_node("Sub", "corner_span", ["x2y2", "x1y1"], ["wh"]),
+            onnx_node("Concat", "box_concat", ["cxy", "wh"], ["box"]),
+        ]
+    elif box_format == "corner":
+        nodes.append(onnx_node("Concat", "box_concat", ["x1y1", "x2y2"], ["box"]))
+    else:
+        # a head that builds its boxes from one distance alone, which is
+        # neither shape and must not be read as either
+        nodes.append(onnx_node("Concat", "box_concat", ["x1y1", "x1y1"], ["box"]))
+
+    nodes.append(onnx_node("Mul", PPU_BBOX_NODE, ["box", "strides"], ["bbox_out"]))
+    # graph inputs and initializers sit beside the nodes and are not read
+    graph = b"".join(proto_bytes(1, node) for node in nodes)
+    graph += proto_bytes(5, b"weights")
+    return (
+        proto_number(1, 10)  # ir_version
+        + proto_bytes(2, b"onnx_frontend_compiler")  # producer_name
+        + proto_bytes(7, graph)
+    )
+
+
+def write_dxnn(
+    directory, ppu, layers, name="model.dxnn", table=True, box_format=None
+) -> str:
     """A minimal .dxnn as DX-RT's parsers read it: the container header, a
     compile_config carrying `ppu`, and either the PPU tensor table with one
     entry per (layer, anchor) as a v8 file has, or with `table` False only
     the rmap_info listing of the PPU output tensors, as a v7 file has.
     `layers` is (grid_w, grid_h, entries) per scale, finest first; an
     anchor-free scale has one entry, and grid_h 1 means a flattened
-    (1, cells, channels) tensor."""
+    (1, cells, channels) tensor. `box_format`, "centre" or "corner", adds
+    the compiled graph that says how the head writes its boxes, along with
+    the compile_config layer naming the node the PPU reads them from."""
+    if box_format is not None and "layer" not in ppu:
+        ppu = dict(ppu, layer=[{"bbox": PPU_BBOX_NODE, "cls_conf": "/head/Sigmoid"}])
+
     compile_config = json.dumps({"compile_version": "2.4.0", "ppu": ppu}).encode()
+    graph = onnx_box_graph(box_format) if box_format is not None else b""
 
     if table:
         part = bytearray(struct.pack("<BBBB", 1, sum(n for _, _, n in layers), 0, 0))
@@ -111,30 +189,40 @@ def write_dxnn(directory, ppu, layers, name="model.dxnn", table=True) -> str:
                 outputs.append({"name": name_, "shape": shape, "layout": "PPU_YOLO"})
         part = json.dumps({"inputs": [], "outputs": outputs}).encode()
 
+    data = {
+        "compile_config": {
+            "type": "str",
+            "offset": 0,
+            "size": len(compile_config),
+        },
+        "compiled_data": {
+            "M1A_4K": {
+                "npu_0": {
+                    "rmap": {"type": "bytes", "offset": 0, "size": 0},
+                    "ppu" if table else "rmap_info": {
+                        "type": "bytes" if table else "str",
+                        "offset": len(compile_config),
+                        "size": len(part),
+                    },
+                }
+            }
+        },
+    }
+    if graph:
+        data["vis_npu_models"] = {
+            "npu_0": {
+                "type": "bytes",
+                "offset": len(compile_config) + len(part),
+                "size": len(graph),
+            }
+        }
+
     index = json.dumps(
         {
             "version": 8 if table else 7,
             "signature": "DXNN",
             "size": 8192,
-            "data": {
-                "compile_config": {
-                    "type": "str",
-                    "offset": 0,
-                    "size": len(compile_config),
-                },
-                "compiled_data": {
-                    "M1A_4K": {
-                        "npu_0": {
-                            "rmap": {"type": "bytes", "offset": 0, "size": 0},
-                            "ppu" if table else "rmap_info": {
-                                "type": "bytes" if table else "str",
-                                "offset": len(compile_config),
-                                "size": len(part),
-                            },
-                        }
-                    }
-                },
-            },
+            "data": data,
         }
     ).encode()
 
@@ -142,7 +230,7 @@ def write_dxnn(directory, ppu, layers, name="model.dxnn", table=True) -> str:
     with open(path, "wb") as model:
         model.write(b"DXNN" + struct.pack("<I", 8))
         model.write(index.ljust(8192 - 8, b"\0"))
-        model.write(compile_config + part)
+        model.write(compile_config + part + graph)
 
     return path
 
@@ -166,9 +254,12 @@ class TestDeepxPpuLayoutFile(unittest.TestCase):
         )
 
         # anchor-free with every scale flattened into one tensor
-        path = write_dxnn(self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)])
+        path = write_dxnn(
+            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
+        )
         self.assertEqual(
-            read_ppu_layout(path), PpuLayout(anchor_based=False, grids=((100, 84),))
+            read_ppu_layout(path),
+            PpuLayout(anchor_based=False, grids=((100, 84),), centre_boxes=True),
         )
 
         # a head kind the compiler does not name leaves the kind open but
@@ -214,6 +305,65 @@ class TestDeepxPpuLayoutFile(unittest.TestCase):
             read_ppu_layout(path), PpuLayout(anchor_based=False, grids=((8400, 1),))
         )
 
+    def test_a_single_scale_head_reads_its_box_format_from_the_graph(self):
+        """Two heads can leave the same metadata and still write their boxes
+        differently, so the format comes from how the compiled graph built
+        the box tensor: one distance per half is corners, both distances in
+        both halves is a centre and size."""
+        for box_format, centre in (("centre", True), ("corner", False)):
+            with self.subTest(box_format=box_format):
+                path = write_dxnn(
+                    self.tmp.name,
+                    ANCHOR_FREE_PPU,
+                    [(100, 84, 1)],
+                    box_format=box_format,
+                )
+                self.assertEqual(
+                    read_ppu_layout(path),
+                    PpuLayout(
+                        anchor_based=False,
+                        grids=((100, 84),),
+                        centre_boxes=centre,
+                    ),
+                )
+
+    def test_a_box_format_the_graph_does_not_answer_is_left_open(self):
+        """Nothing is guessed from the head: a file with no compiled graph,
+        and one whose graph does not build its boxes the way a YOLO head
+        does, both leave the format unsettled for the loader to refuse."""
+        path = write_dxnn(self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)])
+        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+
+        # a graph that does not hold the node compile_config names
+        path = write_dxnn(
+            self.tmp.name,
+            dict(ANCHOR_FREE_PPU, layer=[{"bbox": "/head/Missing"}]),
+            [(100, 84, 1)],
+            box_format="centre",
+        )
+        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+
+        # a graph that builds its boxes from neither shape
+        path = write_dxnn(
+            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="neither"
+        )
+        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+
+        # a graph section the reader cannot make sense of
+        path = write_dxnn(
+            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="broken"
+        )
+        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+
+        # the question does not arise for the heads that are grid-decoded
+        path = write_dxnn(
+            self.tmp.name,
+            ANCHOR_FREE_PPU,
+            [(80, 80, 1), (40, 40, 1), (20, 20, 1)],
+            box_format="centre",
+        )
+        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+
     def test_nothing_is_read_from_a_model_without_ppu_metadata(self):
         self.assertIsNone(read_ppu_layout(os.path.join(self.tmp.name, "missing")))
 
@@ -244,6 +394,7 @@ class TestDeepxPpuDecode(unittest.TestCase):
             0.45,
             strides=strides_for(1),
             anchor_based=False,
+            centre_boxes=True,
         )
 
         self.assertEqual(detections[0][0], 3)
@@ -312,6 +463,7 @@ class TestDeepxPpuDecode(unittest.TestCase):
             0.45,
             strides=strides_for(1),
             anchor_based=False,
+            centre_boxes=True,
         )
 
         self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
@@ -368,52 +520,24 @@ class TestDeepxPpuDecode(unittest.TestCase):
 
         self.assertTrue(np.all(detections == 0))
 
-    def test_corner_boxes_are_read_as_corners_until_a_record_rules_them_out(self):
+    def test_the_same_record_decodes_by_the_box_format_it_is_told(self):
         """A decode-in-head PPU record holds either a centre and size or,
         for a corner-format head, the two corners in the same four fields.
-        Corners always run x1 <= x2 and y1 <= y2, so a frame is read as
-        corners unless one of its records has a width below its x or a
-        height below its y, which only a centre box can."""
-        detections = decode_ppu(
-            [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(1),
-            anchor_based=False,
-        )
-        self.assertEqual(detections[0][0], 2)
-        self.assertAlmostEqual(detections[0][2], 50 / 640, places=5)
-        self.assertAlmostEqual(detections[0][3], 100 / 640, places=5)
-        self.assertAlmostEqual(detections[0][4], 250 / 640, places=5)
-        self.assertAlmostEqual(detections[0][5], 300 / 640, places=5)
+        The same four floats are valid geometry read either way, so only
+        the format the model file settled decides between them."""
+        record = [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)]
 
-        # the same record beside one only a centre box could be
-        detections = decode_ppu(
-            [
-                build_ppu_records(
-                    build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2),
-                    build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3, score=0.5),
-                )
-            ],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(1),
-            anchor_based=False,
+        corners = decode_ppu(
+            record, 640, 640, 0.25, 0.45, strides=strides_for(1), anchor_based=False
         )
-        self.assertEqual(detections[0][0], 2)
-        # centre (100, 50), size 300 x 250, clipped at the frame edge
-        self.assertAlmostEqual(detections[0][2], 0.0, places=5)
-        self.assertAlmostEqual(detections[0][3], 0.0, places=5)
-        self.assertAlmostEqual(detections[0][4], 175 / 640, places=5)
-        self.assertAlmostEqual(detections[0][5], 250 / 640, places=5)
+        self.assertEqual(corners[0][0], 2)
+        self.assertAlmostEqual(corners[0][2], 50 / 640, places=5)
+        self.assertAlmostEqual(corners[0][3], 100 / 640, places=5)
+        self.assertAlmostEqual(corners[0][4], 250 / 640, places=5)
+        self.assertAlmostEqual(corners[0][5], 300 / 640, places=5)
 
-        # and told centres outright, no record is read as corners
-        detections = decode_ppu(
-            [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)],
+        centres = decode_ppu(
+            record,
             640,
             640,
             0.25,
@@ -422,7 +546,12 @@ class TestDeepxPpuDecode(unittest.TestCase):
             anchor_based=False,
             centre_boxes=True,
         )
-        self.assertAlmostEqual(detections[0][5], 250 / 640, places=5)
+        # centre (100, 50), size 300 x 250, clipped at the frame edge
+        self.assertEqual(centres[0][0], 2)
+        self.assertAlmostEqual(centres[0][2], 0.0, places=5)
+        self.assertAlmostEqual(centres[0][3], 0.0, places=5)
+        self.assertAlmostEqual(centres[0][4], 175 / 640, places=5)
+        self.assertAlmostEqual(centres[0][5], 250 / 640, places=5)
 
     def test_drops_records_below_the_score_threshold(self):
         detections = decode_ppu(
@@ -1099,7 +1228,9 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         self.assertEqual(detector.output.columns, 84)
 
     def test_a_ppu_model_is_recognized_by_the_runtime_flag(self):
-        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
+        detector = self._ppu_detector_for(
+            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
+        )
 
         self.assertIs(detector.output.layout, YoloLayout.ppu)
 
@@ -1117,11 +1248,13 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         self.assertAlmostEqual(detections[0][3], 0.380094, places=5)
         self.assertAlmostEqual(detections[0][5], 0.589906, places=5)
 
-    def _ppu_detector_for(self, ppu, layers, model_type=ModelTypeEnum.yologeneric):
+    def _ppu_detector_for(
+        self, ppu, layers, model_type=ModelTypeEnum.yologeneric, box_format=None
+    ):
         """A PPU detector loaded from a model file that describes its head."""
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        path = write_dxnn(tmp.name, ppu, layers)
+        path = write_dxnn(tmp.name, ppu, layers, box_format=box_format)
 
         detector, _ = self._detector(
             model_type, [{"shape": [8400]}], ppu=True, model_path=path
@@ -1155,7 +1288,9 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         """An anchor-free head reads a sub-pixel box in the corner as the
         pixels it is, and a YOLOX-style head is grid-decoded from a first
         frame holding one record at one layer."""
-        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
+        detector = self._ppu_detector_for(
+            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
+        )
 
         detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
         detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
@@ -1204,33 +1339,39 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         self.assertAlmostEqual(detections[0][2], (152 - np.exp(0.5) * 8) / 640, 5)
         self.assertAlmostEqual(detections[0][3], (179.2 - np.exp(1.0) * 8) / 640, 5)
 
-    def test_centre_boxes_are_kept_once_a_record_proves_them(self):
-        """A centre-format head is settled by its first record with a width
-        below its x, and a later frame whose boxes all happen to sit far
-        enough left and down to pass for corners is still read as centres.
-        A corner-format head never produces such a record and stays corners."""
-        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
+    def test_the_box_format_is_read_from_the_model_at_load(self):
+        """Two heads whose records are indistinguishable decode by what
+        their own file said, from the first frame and on every frame; a
+        centre-format head is never read as corners while it waits for a
+        record to give itself away."""
+        record = [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)]
 
-        detector.session.run.return_value = [
-            build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3)
-        ]
-        detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertTrue(detector.ppu_centre_boxes)
+        detector = self._ppu_detector_for(
+            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
+        )
+        self.assertTrue(detector.ppu_layout.centre_boxes)
 
-        detector.session.run.return_value = [
-            build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)
-        ]
-        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        detector.session.run.return_value = record
         # centre (100, 50), size 300 x 250: the right edge lands at 250
-        self.assertAlmostEqual(second[0][5], 250 / 640, places=5)
+        for frame in range(2):
+            with self.subTest(frame=frame):
+                detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+                self.assertAlmostEqual(detections[0][5], 250 / 640, places=5)
 
-        detector = self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
-        detector.session.run.return_value = [
-            build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)
-        ]
-        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertFalse(detector.ppu_centre_boxes)
-        self.assertAlmostEqual(first[0][5], 300 / 640, places=5)
+        detector = self._ppu_detector_for(
+            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="corner"
+        )
+        self.assertFalse(detector.ppu_layout.centre_boxes)
+
+        detector.session.run.return_value = record
+        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        self.assertAlmostEqual(detections[0][5], 300 / 640, places=5)
+
+    def test_a_single_scale_head_without_a_box_format_is_refused(self):
+        """Nothing in a frame can settle the format, so a file that does not
+        carry the graph fails at load rather than guessing every frame."""
+        with self.assertRaisesRegex(ValueError, "centre and size or as two corners"):
+            self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
 
     def test_an_unsupported_ppu_scale_count_is_reported_once(self):
         """An anchor-based head with a scale count Frigate has no anchor

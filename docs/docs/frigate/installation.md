@@ -456,7 +456,7 @@ Add one `--device` per NPU, contiguously from `/dev/dxrt0`, since the client sto
 
 The installation script configures `dxrt.service` to place its socket in `/run/dxrt` through a systemd drop-in. Mounting the directory rather than the socket file means the container sees the new socket after `dxrt.service` is restarted, rather than holding on to a deleted one.
 
-`dxrtd` listens on an abstract socket as well, but that one does not cross into a container, so Frigate names the filesystem socket through `DXRT_DYNAMIC_IPC_ENDPOINT` on your behalf. Set that variable on the container yourself only if the daemon listens somewhere else, which means you also set it for `dxrtd` through its own systemd drop-in. The script writes `/etc/systemd/system/dxrt.service.d/frigate.conf` and `/etc/profile.d/dxrt.sh` for exactly that, the second so the host's own `dxrt-cli` and `dxtop` look in the same place.
+`dxrtd` listens on an abstract socket as well, but that one does not cross into a container, so Frigate names the filesystem socket through `DXRT_DYNAMIC_IPC_ENDPOINT` on your behalf. Set that variable on the container yourself only if the daemon listens somewhere else, which means you also set it for `dxrtd` through its own systemd drop-in. The script writes `/etc/systemd/system/dxrt.service.d/frigate.conf` for exactly that, and has `dxrt.service` link the socket to `/tmp/dxrt_dynamic_ipc.sock` when it starts, so the host's own `dxrt-cli` and `dxtop` keep finding it at the default path they fall back to.
 
 :::note
 
