@@ -210,7 +210,7 @@ export default function WebRtcPlayer({
       return;
     }
 
-    // No mic here — it's a separate connection, so toggling talk never reloads.
+    // No mic here. It's a separate connection, so toggling talk never reloads.
     const aPc = PeerConnection("video+audio");
     connect(aPc);
 
@@ -271,7 +271,9 @@ export default function WebRtcPlayer({
           return;
         }
         // eslint-disable-next-line no-console
-        console.error(`${camera} - two-way talk error: ${msg.value}`);
+        console.error(
+          `${camera} - Two-way talk error: ${msg.value} See the documentation: https://docs.frigate.video/configuration/live/#two-way-talk`,
+        );
         onMicrophoneError?.("refused");
       });
     })();
