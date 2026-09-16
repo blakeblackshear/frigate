@@ -2,14 +2,17 @@
 
 Builds short notes describing what changed during a review item, keyed to the
 frames sampled from it. Everything here comes from tracked object data already
-in the database, chiefly each event's `path_data` trajectory, so the notes can
-be stated to the model as fact rather than as something it must perceive.
+in the database (each event's `path_data` trajectory and the timeline's
+stationary/active changes), so the notes can be stated to the model as fact
+rather than as something it must perceive.
 """
 
 import logging
+import math
+from collections.abc import Sequence
 from typing import Any
 
-from frigate.models import Event
+from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +29,18 @@ REVERSAL_DOT = -0.3
 # one spot produces a burst of contradictory "turns around" notes on a single
 # frame.
 MIN_LEG_DISTANCE = 0.08
+
+# Movement that begins within this many seconds of detection is folded into
+# the detection note, so each arrival reads as one event instead of several.
+DETECT_MOVE_MERGE_SECONDS = 2.0
+
+STATE_CHANGE_PHRASES = {
+    "stationary": "has stopped moving",
+    "active": "starts moving again",
+}
+
+Point = tuple[float, float, float]
+Leg = tuple[int, int]
 
 
 def describe_position(x: float, y: float) -> str:
@@ -80,7 +95,7 @@ def event_name(event: dict[str, Any]) -> str:
     return f"{article} {label}"
 
 
-def path_legs(points: list[tuple[float, float, float]]) -> list[tuple[int, int]]:
+def path_legs(points: list[Point]) -> list[Leg]:
     """Split a trajectory into runs of travel in a consistent direction.
 
     A leg ends when the subject starts moving back against the direction that
@@ -89,7 +104,7 @@ def path_legs(points: list[tuple[float, float, float]]) -> list[tuple[int, int]]
 
     Returns (start, end) index pairs into `points`.
     """
-    legs: list[tuple[int, int]] = []
+    legs: list[Leg] = []
     start = 0
 
     for i in range(1, len(points)):
@@ -125,6 +140,48 @@ def path_legs(points: list[tuple[float, float, float]]) -> list[tuple[int, int]]
     ]
 
 
+def path_points(path_data: list[Any]) -> list[Point]:
+    """Flatten path_data into (x, y, timestamp) tuples, or [] if malformed."""
+    try:
+        return [(p[0][0], p[0][1], p[1]) for p in path_data or []]
+    except (IndexError, TypeError):
+        logger.debug("Malformed path_data, skipping trajectory notes")
+        return []
+
+
+def leg_start_time(points: list[Point], leg: Leg) -> float:
+    """When a leg's movement actually began.
+
+    path_data always keeps an object's first two samples, so a leg can open
+    with points recorded long before the object moved. The first sample that
+    has left the leg's origin is the earliest evidence of movement.
+    """
+    a, b = leg
+    x0, y0, t0 = points[a]
+
+    for x, y, t in points[a + 1 : b + 1]:
+        if math.hypot(x - x0, y - y0) >= STILL_THRESHOLD:
+            return t
+
+    return t0
+
+
+def leg_heading(points: list[Point], leg: Leg) -> str:
+    a, b = leg
+    return describe_heading(points[b][0] - points[a][0], points[b][1] - points[a][1])
+
+
+def leg_phrase(points: list[Point], leg: Leg, first: bool) -> str:
+    """Describe the start of a leg, e.g. 'turns around at ... and heads left'."""
+    heading = leg_heading(points, leg)
+    place = describe_position(points[leg[0]][0], points[leg[0]][1])
+
+    if first:
+        return f"starts moving {heading} from {place}"
+
+    return f"turns around at {place} and heads {heading}"
+
+
 def path_moments(path_data: list[Any]) -> list[tuple[float, str]]:
     """Key moments in one trajectory as (timestamp, phrase).
 
@@ -132,37 +189,21 @@ def path_moments(path_data: list[Any]) -> list[tuple[float, str]]:
     path_data only records significant movement, so its final point cannot
     distinguish an object coming to rest from one leaving the frame.
     """
-    if not path_data or len(path_data) < 2:
+    points = path_points(path_data)
+
+    if len(points) < 2:
         return []
 
-    try:
-        points = [(p[0][0], p[0][1], p[1]) for p in path_data]
-    except (IndexError, TypeError):
-        logger.debug("Malformed path_data, skipping trajectory notes")
-        return []
-
-    legs = path_legs(points)
-    moments: list[tuple[float, str]] = []
-
-    for index, (a, b) in enumerate(legs):
-        x0, y0, t0 = points[a]
-        x1, y1, _ = points[b]
-        heading = describe_heading(x1 - x0, y1 - y0)
-
-        if index == 0:
-            moments.append(
-                (t0, f"starts moving {heading} from {describe_position(x0, y0)}")
-            )
-        else:
-            moments.append(
-                (t0, f"turns around at {describe_position(x0, y0)} and heads {heading}")
-            )
-
-    return moments
+    return [
+        (leg_start_time(points, leg), leg_phrase(points, leg, index == 0))
+        for index, leg in enumerate(path_legs(points))
+    ]
 
 
 def build_timeline(
-    events: list[dict[str, Any]], span_end: float
+    events: list[dict[str, Any]],
+    span_end: float,
+    state_changes: Sequence[dict[str, Any]] = (),
 ) -> list[tuple[float, str]]:
     """All annotated moments across every event, in time order.
 
@@ -171,21 +212,66 @@ def build_timeline(
     `span_end` is the timestamp of the last sampled frame, and moments past it
     describe nothing the model can see. A track ending means the object
     stopped being detected, which may or may not mean it left the frame.
+
+    `state_changes` are timeline rows (timestamp, source_id, class_type); the
+    stationary and active ones become "has stopped moving" / "starts moving
+    again". Frigate only marks an object stationary after it has been still
+    for a while, which the past-tense wording reflects.
+
+    Each object keeps its own notes. Folding an object into the note of the
+    person moving it ("alongside ...") was tried and made models lose track of
+    where the object went.
     """
-    ordered = sorted(events, key=lambda e: e["start_time"])
+    changes_by_event: dict[str, list[tuple[float, str]]] = {}
+
+    for change in state_changes:
+        phrase = STATE_CHANGE_PHRASES.get(change["class_type"])
+
+        if phrase:
+            changes_by_event.setdefault(change["source_id"], []).append(
+                (change["timestamp"], phrase)
+            )
+
     timeline: list[tuple[float, str]] = []
 
-    for event in ordered:
+    for event in sorted(events, key=lambda e: e["start_time"]):
+        points = path_points(event.get("path_data") or [])
+        legs = path_legs(points) if len(points) >= 2 else []
         name = event_name(event)
-        path = event.get("path_data") or []
-        where = describe_position(path[0][0][0], path[0][0][1]) if path else "the frame"
-        timeline.append((event["start_time"], f"{name} first detected at {where}"))
+        detected_at = event["start_time"]
+        where = describe_position(points[0][0], points[0][1]) if points else "the frame"
+        merges = bool(legs) and leg_start_time(points, legs[0]) - detected_at <= (
+            DETECT_MOVE_MERGE_SECONDS
+        )
+        remaining = list(enumerate(legs))
+        moments: list[tuple[float, str]] = []
 
-        for timestamp, phrase in path_moments(path):
-            if timestamp > span_end:
-                continue
+        if merges:
+            heading = leg_heading(points, legs[0])
+            timeline.append(
+                (detected_at, f"{name} first detected at {where}, moving {heading}")
+            )
+            remaining = remaining[1:]
+        else:
+            timeline.append((detected_at, f"{name} first detected at {where}"))
 
-            timeline.append((timestamp, f"{name} {phrase}"))
+        for index, leg in remaining:
+            moments.append(
+                (
+                    leg_start_time(points, leg),
+                    leg_phrase(points, leg, index == 0),
+                )
+            )
+
+        moments.extend(
+            (timestamp, phrase)
+            for timestamp, phrase in changes_by_event.get(event["id"], [])
+            if timestamp >= detected_at
+        )
+
+        for timestamp, phrase in moments:
+            if timestamp <= span_end:
+                timeline.append((timestamp, f"{name} {phrase}"))
 
         if event["end_time"] and event["end_time"] <= span_end:
             timeline.append((event["end_time"], f"{name} is no longer detected"))
@@ -228,7 +314,6 @@ def get_tracked_events(detection_ids: list[str]) -> list[dict[str, Any]]:
             Event.sub_label,
             Event.start_time,
             Event.end_time,
-            Event.zones,
             Event.data,
         )
         .where(Event.id << detection_ids)
@@ -243,7 +328,6 @@ def get_tracked_events(detection_ids: list[str]) -> list[dict[str, Any]]:
             "sub_label": row["sub_label"],
             "start_time": row["start_time"],
             "end_time": row["end_time"],
-            "zones": row["zones"] or [],
             "path_data": (row["data"] or {}).get("path_data") or [],
         }
         for row in rows
@@ -251,8 +335,25 @@ def get_tracked_events(detection_ids: list[str]) -> list[dict[str, Any]]:
     ]
 
 
+def get_state_changes(detection_ids: list[str]) -> list[dict[str, Any]]:
+    """Stationary/active changes the timeline recorded for these objects."""
+    if not detection_ids:
+        return []
+
+    return list(
+        Timeline.select(Timeline.timestamp, Timeline.source_id, Timeline.class_type)
+        .where(
+            (Timeline.source_id << detection_ids)
+            & (Timeline.class_type << list(STATE_CHANGE_PHRASES))
+        )
+        .dicts()
+        .iterator()
+    )
+
+
 def build_frame_captions(
-    detection_ids: list[str], frame_times: list[float]
+    detection_ids: list[str],
+    frame_times: list[float],
 ) -> list[str]:
     """A caption for each sampled frame, in frame order.
 
@@ -270,7 +371,8 @@ def build_frame_captions(
         logger.debug("No tracked events found for review item, skipping annotations")
         return []
 
-    buckets = annotations_by_frame(build_timeline(events, frame_times[-1]), frame_times)
+    timeline = build_timeline(events, frame_times[-1], get_state_changes(detection_ids))
+    buckets = annotations_by_frame(timeline, frame_times)
 
     if not buckets:
         return []

@@ -63,12 +63,12 @@ def get_review_field_guidelines(response_style: str = "default") -> dict[str, st
 # mode. Neither the notes nor this guidance say whether repeated detections are
 # the same subject, since the tracking data cannot tell.
 FRAME_ANNOTATION_GUIDANCE = """- Each image below is immediately preceded by a text label giving its frame number and how many seconds into the sequence it was captured. Use these labels to track the order of events and the time between them.
-- Some images below are preceded by notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, or no longer being detected. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
+- Some images below are preceded by notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, stopping, or no longer being detected. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
 
 
 # Used when the provider's transport cannot interleave text and images, so
 # the same notes are listed up front instead of sitting against their frames.
-FRAME_TIMELINE_GUIDANCE = """- The "Frame Notes" section at the end of this prompt lists, by frame number, notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, or no longer being detected. The images follow in frame order, so note 1 describes the first image. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
+FRAME_TIMELINE_GUIDANCE = """- The "Frame Notes" section at the end of this prompt lists, by frame number, notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, stopping, or no longer being detected. The images follow in frame order, so note 1 describes the first image. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
 
 
 def build_review_description_prompt(

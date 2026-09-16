@@ -128,10 +128,7 @@ class TestTimeline(unittest.TestCase):
         timeline = build_timeline([self.event], span_end=15.0)
         self.assertEqual(
             [p for _, p in timeline],
-            [
-                "a person first detected at the right of the frame",
-                "a person starts moving up and left from the right of the frame",
-            ],
+            ["a person first detected at the right of the frame, moving up and left"],
         )
 
     def test_object_ending_inside_the_clip_is_no_longer_detected(self):
@@ -148,8 +145,109 @@ class TestTimeline(unittest.TestCase):
         late["path_data"] = out + back
         late["start_time"] = 100.0
         timeline = build_timeline([late], span_end=105.0)
-        self.assertTrue(any("starts moving" in p for _, p in timeline))
+        self.assertTrue(any("moving left" in p for _, p in timeline))
         self.assertFalse(any("turns around" in p for _, p in timeline))
+
+
+def track(event_id, label, start, path, sub_label=None, end=None):
+    return {
+        "id": event_id,
+        "label": label,
+        "sub_label": sub_label,
+        "start_time": start,
+        "end_time": end if end is not None else start + 500.0,
+        "zones": [],
+        "path_data": path,
+    }
+
+
+class TestArrival(unittest.TestCase):
+    def test_objects_arriving_together_keep_separate_notes(self):
+        person = track(
+            "1789481994.684479-lpyc2z",
+            "person",
+            0.0,
+            straight_path((0.9, 0.63), (0.58, 0.34), 10, 0.1),
+        )
+        bin_ = track(
+            "1789481995.063395-vlzd7q",
+            "waste_bin",
+            0.3,
+            straight_path((0.91, 0.64), (0.6, 0.33), 10, 0.4),
+            sub_label="Compost",
+        )
+        phrases = [p for _, p in build_timeline([person, bin_], 100.0)]
+        self.assertEqual(
+            phrases,
+            [
+                "a person first detected at the right of the frame, moving up and left",
+                'waste bin "Compost" first detected at the right of the frame, '
+                "moving up and left",
+            ],
+        )
+
+    def test_object_detected_well_before_it_moves_gets_separate_notes(self):
+        # path_data always keeps the first two samples, so a bin sitting in
+        # the yard opens its leg long before it is picked up.
+        path = [[[0.91, 0.64], 0.4]] + straight_path(
+            (0.91, 0.64), (0.6, 0.33), 10, 20.4
+        )
+        bin_ = track(
+            "1789481995.063395-vlzd7q", "waste_bin", 0.3, path, sub_label="Compost"
+        )
+        timeline = build_timeline([bin_], 100.0)
+        self.assertEqual(
+            timeline[0],
+            (0.3, 'waste bin "Compost" first detected at the right of the frame'),
+        )
+        self.assertAlmostEqual(timeline[1][0], 21.4)
+        self.assertEqual(
+            timeline[1][1],
+            'waste bin "Compost" starts moving up and left from the right of the frame',
+        )
+
+
+class TestStateChanges(unittest.TestCase):
+    def test_stationary_and_active_rows_become_notes(self):
+        bin_ = track(
+            "1789481995.063395-vlzd7q",
+            "waste_bin",
+            0.3,
+            straight_path((0.91, 0.64), (0.6, 0.33), 10, 0.4),
+            sub_label="Compost",
+        )
+        changes = [
+            {"timestamp": 20.0, "source_id": bin_["id"], "class_type": "stationary"},
+            {"timestamp": 30.0, "source_id": bin_["id"], "class_type": "active"},
+            {"timestamp": 35.0, "source_id": bin_["id"], "class_type": "entered_zone"},
+            {
+                "timestamp": 40.0,
+                "source_id": "someone-else",
+                "class_type": "stationary",
+            },
+        ]
+        timeline = build_timeline([bin_], 100.0, state_changes=changes)
+        self.assertEqual(
+            timeline[1:],
+            [
+                (20.0, 'waste bin "Compost" has stopped moving'),
+                (30.0, 'waste bin "Compost" starts moving again'),
+            ],
+        )
+
+    def test_state_changes_after_the_last_frame_are_dropped(self):
+        bin_ = track(
+            "1789481995.063395-vlzd7q",
+            "waste_bin",
+            0.3,
+            straight_path((0.91, 0.64), (0.6, 0.33), 10, 0.4),
+            sub_label="Compost",
+        )
+        changes = [
+            {"timestamp": 200.0, "source_id": bin_["id"], "class_type": "stationary"}
+        ]
+        timeline = build_timeline([bin_], 100.0, state_changes=changes)
+        self.assertFalse(any("stopped" in p for _, p in timeline))
 
 
 class TestNoAssumedState(unittest.TestCase):
