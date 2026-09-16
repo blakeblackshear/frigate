@@ -62,53 +62,22 @@ def describe_heading(dx: float, dy: float) -> str:
     return " and ".join(parts) if parts else "in place"
 
 
-def event_name(event: dict[str, Any], ordinal: str | None) -> str:
-    """Name an object for the notes, e.g. 'waste bin "Compost" #2'.
+def event_name(event: dict[str, Any]) -> str:
+    """Name an object for the notes, e.g. 'a person' or 'waste bin "Compost"'.
 
-    Track identifiers are deliberately never used. Frigate opens a new tracked
-    object every time a subject is re-detected, and exposing that to the model
-    makes it report one person as several.
+    Objects are never numbered or given track identifiers. Frigate opens a new
+    tracked object whenever a subject is re-detected, so the tracking data
+    cannot say whether two entries are the same subject, and the notes stay
+    ambiguous rather than implying either answer.
     """
     label = str(event["label"]).replace("_", " ").replace("-verified", "")
     sub_label = event.get("sub_label")
-    name = f'{label} "{sub_label}"' if sub_label else f"the {label}"
 
-    return f"{name} {ordinal}" if ordinal else name
+    if sub_label:
+        return f'{label} "{sub_label}"'
 
-
-def overlapping_ordinals(events: list[dict[str, Any]]) -> dict[str, str]:
-    """Number same-named objects only when their tracks coexist in time.
-
-    Two tracks sharing a label and sub_label that are alive at the same moment
-    are provably different physical objects, so numbering them states a fact.
-    Tracks that never overlap are usually one subject re-detected after a
-    tracking gap, and numbering those is what makes a model report one person
-    as several.
-    """
-    ordinals: dict[str, str] = {}
-    groups: dict[tuple[str, str | None], list[dict[str, Any]]] = {}
-
-    for event in events:
-        groups.setdefault((event["label"], event.get("sub_label")), []).append(event)
-
-    for members in groups.values():
-        if len(members) < 2:
-            continue
-
-        members = sorted(members, key=lambda e: e["start_time"])
-        overlaps = any(
-            a["end_time"] > b["start_time"]
-            for i, a in enumerate(members)
-            for b in members[i + 1 :]
-        )
-
-        if not overlaps:
-            continue
-
-        for index, event in enumerate(members):
-            ordinals[event["id"]] = f"#{index + 1}"
-
-    return ordinals
+    article = "an" if label[:1].lower() in "aeiou" else "a"
+    return f"{article} {label}"
 
 
 def path_legs(points: list[tuple[float, float, float]]) -> list[tuple[int, int]]:
@@ -204,11 +173,10 @@ def build_timeline(
     reported as present rather than as having left.
     """
     ordered = sorted(events, key=lambda e: e["start_time"])
-    ordinals = overlapping_ordinals(ordered)
     timeline: list[tuple[float, str]] = []
 
     for event in ordered:
-        name = event_name(event, ordinals.get(event["id"]))
+        name = event_name(event)
         path = event.get("path_data") or []
         zones = ", ".join(event.get("zones") or [])
         where = describe_position(path[0][0][0], path[0][0][1]) if path else "the frame"

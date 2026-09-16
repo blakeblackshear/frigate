@@ -7,7 +7,7 @@ from frigate.data_processing.post.review_annotations import (
     build_timeline,
     describe_heading,
     describe_position,
-    overlapping_ordinals,
+    event_name,
     path_legs,
     path_moments,
 )
@@ -70,53 +70,33 @@ class TestPathLegs(unittest.TestCase):
         self.assertEqual(path_moments([[0.5, 1.0], [0.6, 2.0]]), [])
 
 
-class TestOrdinals(unittest.TestCase):
-    def test_overlapping_tracks_are_numbered(self):
-        events = [
-            {
-                "id": "a",
-                "label": "waste_bin",
-                "sub_label": "Compost",
-                "start_time": 0,
-                "end_time": 100,
-            },
-            {
-                "id": "b",
-                "label": "waste_bin",
-                "sub_label": "Compost",
-                "start_time": 10,
-                "end_time": 100,
-            },
-        ]
-        self.assertEqual(overlapping_ordinals(events), {"a": "#1", "b": "#2"})
+class TestEventNames(unittest.TestCase):
+    def test_unnamed_objects_use_an_indefinite_article(self):
+        self.assertEqual(event_name({"label": "person"}), "a person")
+        self.assertEqual(event_name({"label": "animal"}), "an animal")
 
-    def test_sequential_tracks_are_not_numbered(self):
-        # The same person re-detected after a gap; numbering these is what
-        # makes a model report one person as several.
+    def test_sub_labeled_objects_use_their_name(self):
+        event = {"label": "waste_bin", "sub_label": "Compost"}
+        self.assertEqual(event_name(event), 'waste bin "Compost"')
+
+    def test_repeated_objects_are_never_numbered(self):
+        # Whether these are the same subject is unknown, so the notes must not
+        # imply either answer.
         events = [
             {
-                "id": "a",
+                "id": f"1789481994.68448{i}-abcdef",
                 "label": "person",
                 "sub_label": None,
-                "start_time": 0,
-                "end_time": 10,
-            },
-            {
-                "id": "b",
-                "label": "person",
-                "sub_label": None,
-                "start_time": 20,
-                "end_time": 30,
-            },
-            {
-                "id": "c",
-                "label": "person",
-                "sub_label": None,
-                "start_time": 40,
-                "end_time": 50,
-            },
+                "start_time": float(i * 10),
+                "end_time": float(i * 10 + 50),
+                "zones": [],
+                "path_data": straight_path((0.9, 0.6), (0.4, 0.3), 10, i * 10.0),
+            }
+            for i in range(3)
         ]
-        self.assertEqual(overlapping_ordinals(events), {})
+        phrases = [p for _, p in build_timeline(events, span_end=100.0)]
+        self.assertTrue(all(p.startswith("a person ") for p in phrases))
+        self.assertFalse(any("#" in p for p in phrases))
 
 
 class TestTimeline(unittest.TestCase):
