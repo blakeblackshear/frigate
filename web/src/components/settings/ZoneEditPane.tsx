@@ -398,6 +398,18 @@ export default function ZoneEditPane({
         enabled,
       };
 
+      if (renamingZone) {
+        // The form has no filters field, so carry the old zone's over
+        const baseZones = (cameraConfig?.base_config?.zones ??
+          cameraConfig?.zones) as
+          Record<string, { filters?: Record<string, unknown> }> | undefined;
+        const filters = baseZones?.[polygon.name]?.filters;
+
+        if (filters && Object.keys(filters).length > 0) {
+          zoneData.filters = filters;
+        }
+      }
+
       const same_objects =
         form_objects.length == objects.length &&
         form_objects.every(function (element, index) {

@@ -31,7 +31,11 @@ class TestConfigSetZones(BaseTestHttp):
                     },
                     "detect": {"height": 1080, "width": 1920, "fps": 5},
                     "zones": {
-                        "driveway": {"coordinates": "0,0,1,0,1,1", "inertia": 5},
+                        "driveway": {
+                            "coordinates": "0,0,1,0,1,1",
+                            "inertia": 5,
+                            "filters": {"person": {"min_area": 5000}},
+                        },
                         "porch": {"coordinates": "0,0,0.5,0,0.5,0.5"},
                     },
                     "review": {
@@ -120,6 +124,18 @@ class TestConfigSetZones(BaseTestHttp):
                     "front_drive": {
                         "coordinates": "0,0,1,0,1,1",
                         "enabled": True,
+                        # as /api/config returns them, with defaults filled in
+                        "filters": {
+                            "person": {
+                                "min_area": 5000,
+                                "max_area": 24000000,
+                                "min_ratio": 0.0,
+                                "max_ratio": 24000000.0,
+                                "threshold": 0.7,
+                                "min_score": 0.5,
+                                "mask": {},
+                            }
+                        },
                         "inertia": 5,
                     },
                 },
@@ -145,6 +161,9 @@ class TestConfigSetZones(BaseTestHttp):
         front = self._front()
         self.assertEqual(list(front["zones"]), ["porch", "front_drive"])
         self.assertEqual(front["zones"]["front_drive"]["inertia"], 5)
+        self.assertEqual(
+            front["zones"]["front_drive"]["filters"]["person"]["min_area"], 5000
+        )
         self.assertEqual(front["review"]["alerts"]["labels"], ["person"])
         self.assertEqual(front["review"]["alerts"]["required_zones"], ["front_drive"])
         self.assertEqual(front["snapshots"]["required_zones"], ["front_drive"])

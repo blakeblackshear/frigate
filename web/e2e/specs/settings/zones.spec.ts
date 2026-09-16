@@ -14,6 +14,19 @@ import { configFactory } from "../../fixtures/mock-data/config";
 const SETTINGS_URL = "/settings?page=masksAndZones&camera=front_door";
 const COORDINATES = "0.1,0.1,0.5,0.1,0.5,0.5,0.1,0.5";
 
+// /api/config returns zone filters with defaults filled in
+const FILTERS = {
+  person: {
+    min_area: 5000,
+    max_area: 24000000,
+    min_ratio: 0,
+    max_ratio: 24000000,
+    threshold: 0.7,
+    min_score: 0.5,
+    mask: {},
+  },
+};
+
 type ConfigSetRequest = { url: string; body: Record<string, unknown> };
 
 async function installRoutes(page: Page) {
@@ -28,7 +41,7 @@ async function installRoutes(page: Page) {
             inertia: 3,
             loitering_time: 0,
             objects: [],
-            filters: {},
+            filters: FILTERS,
             color: [128, 128, 0],
           },
         },
@@ -74,7 +87,7 @@ async function openZoneAction(
 
   // Desktop shows the actions on hover
   await row.hover();
-  await row.getByRole("button", { name: action, exact: true }).click();
+  await row.getByLabel(action, { exact: true }).click();
 }
 
 test.describe("zone rename and delete @medium @mobile", () => {
@@ -177,6 +190,7 @@ test.describe("zone rename and delete @medium @mobile", () => {
               front_drive: {
                 coordinates: COORDINATES,
                 enabled: true,
+                filters: FILTERS,
                 inertia: 3,
                 loitering_time: 0,
               },

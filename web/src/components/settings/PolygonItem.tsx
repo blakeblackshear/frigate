@@ -526,7 +526,6 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={LuPencil}
-                  role="button"
                   aria-label={t("button.edit", { ns: "common" })}
                   disabled={isLoading}
                   className={cn(
@@ -572,7 +571,6 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={HiTrash}
-                  role="button"
                   aria-label={t("button.delete", { ns: "common" })}
                   disabled={isLoading}
                   className={cn(
