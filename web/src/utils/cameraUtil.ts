@@ -174,7 +174,7 @@ export function detectCameraAudioFeatures(
 
   const twoWayAudio =
     (!requireSecureContext || window.isSecureContext) &&
-    metadata.producers.find(
+    (metadata.producers ?? []).find(
       (prod) =>
         prod.medias &&
         prod.medias.find((media) => media.includes("audio, sendonly")) !=
@@ -182,7 +182,7 @@ export function detectCameraAudioFeatures(
     ) != undefined;
 
   const audioOutput =
-    metadata.producers.find(
+    (metadata.producers ?? []).find(
       (prod) =>
         prod.medias &&
         prod.medias.find((media) => media.includes("audio, recvonly")) !=
@@ -193,6 +193,62 @@ export function detectCameraAudioFeatures(
     twoWayAudio: !!twoWayAudio,
     audioOutput: !!audioOutput,
   };
+}
+
+const MEDIA_DIRECTIONS = new Set(["sendonly", "recvonly", "sendrecv"]);
+
+// "sendonly" is the two-way-talk backchannel, not playback audio.
+const PLAYBACK_DIRECTIONS = new Set(["recvonly", "sendrecv"]);
+
+// Parses a go2rtc media line: "audio, recvonly, OPUS/48000/2" -> ["OPUS"],
+// stripping the "/clockrate[/channels]" suffix.
+function codecsFromMedia(media: string): string[] {
+  const parts = media.split(",").map((p) => p.trim());
+  return parts
+    .slice(1)
+    .filter((p) => !MEDIA_DIRECTIONS.has(p.toLowerCase()))
+    .map((p) => p.split("/")[0].toUpperCase());
+}
+
+function mediaDirection(media: string): string | undefined {
+  return media
+    .split(",")
+    .map((p) => p.trim().toLowerCase())
+    .find((p) => MEDIA_DIRECTIONS.has(p));
+}
+
+function codecsForKind(
+  metadata: LiveStreamMetadata | null | undefined,
+  kind: "video" | "audio",
+  directions?: Set<string>,
+): string[] {
+  if (!metadata) return [];
+  const codecs = new Set<string>();
+  for (const producer of metadata.producers ?? []) {
+    for (const media of producer.medias ?? []) {
+      if (!media.trim().toLowerCase().startsWith(kind)) continue;
+      if (directions) {
+        const direction = mediaDirection(media);
+        if (!direction || !directions.has(direction)) continue;
+      }
+      codecsFromMedia(media).forEach((c) => codecs.add(c));
+    }
+  }
+  return Array.from(codecs);
+}
+
+export function getStreamVideoCodecs(
+  metadata: LiveStreamMetadata | null | undefined,
+): string[] {
+  return codecsForKind(metadata, "video");
+}
+
+// go2rtc exposes a WebRTC-capable playback codec only when one is configured
+// (e.g. an opus transcode) or the camera streams G.711 natively.
+export function getPlaybackAudioCodecs(
+  metadata: LiveStreamMetadata | null | undefined,
+): string[] {
+  return codecsForKind(metadata, "audio", PLAYBACK_DIRECTIONS);
 }
 
 const REPLAY_CAMERA_PREFIX = "_replay_";

@@ -30,11 +30,14 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import useSWR from "swr";
 import { LuCheck, LuExternalLink, LuInfo, LuX } from "react-icons/lu";
 import { Link } from "react-router-dom";
-import { LiveStreamMetadata } from "@/types/live";
+import { LivePlayerMode, LiveStreamMetadata } from "@/types/live";
 import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
+import { Switch } from "@/components/ui/switch";
+import { useWebRTCAvailableForStream } from "@/hooks/use-webrtc-availability";
+import StreamTechnologySelect from "@/components/player/StreamTechnologySelect";
 
 type CameraStreamingDialogProps = {
   camera: string;
@@ -55,7 +58,11 @@ export function CameraStreamingDialog({
   setIsDialogOpen,
   onSave,
 }: CameraStreamingDialogProps) {
-  const { t } = useTranslation(["components/camera", "components/dialog"]);
+  const { t } = useTranslation([
+    "components/camera",
+    "components/dialog",
+    "views/live",
+  ]);
 
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -68,6 +75,8 @@ export function CameraStreamingDialog({
     Object.entries(config?.cameras[camera]?.live?.streams || {})[0]?.[1] || "",
   );
   const [streamType, setStreamType] = useState<StreamType>("smart");
+  const [playerMode, setPlayerMode] = useState<LivePlayerMode>("mse");
+  const [forceLowBandwidth, setForceLowBandwidth] = useState(false);
   const [compatibilityMode, setCompatibilityMode] = useState(false);
 
   // metadata
@@ -79,11 +88,37 @@ export function CameraStreamingDialog({
     [config, streamName],
   );
 
-  const cameraMetadata = streamName ? streamMetadata?.[streamName] : undefined;
+  // Fetch the go2rtc stream metadata directly when the parent didn't provide it
+  // so codec/availability detection works regardless of caller
+  const { data: fetchedMetadata } = useSWR<LiveStreamMetadata>(
+    isRestreamed && streamName && !streamMetadata?.[streamName]
+      ? `go2rtc/streams/${streamName}`
+      : null,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      revalidateIfStale: false,
+      dedupingInterval: 60000,
+    },
+  );
+
+  const cameraMetadata = streamName
+    ? (streamMetadata?.[streamName] ?? fetchedMetadata)
+    : undefined;
 
   const { audioOutput: supportsAudioOutput } = useMemo(
     () => detectCameraAudioFeatures(cameraMetadata),
     [cameraMetadata],
+  );
+
+  const { available: isWebRTCAvailable, reason: webRTCUnavailableReason } =
+    useWebRTCAvailableForStream(cameraMetadata, streamName);
+
+  // The chosen technology resolved for the currently selected stream, WITHOUT
+  // rewriting the saved choice
+  const resolvedPlayerMode = useMemo<LivePlayerMode>(
+    () => (playerMode === "webrtc" && !isWebRTCAvailable ? "mse" : playerMode),
+    [playerMode, isWebRTCAvailable],
   );
 
   // handlers
@@ -107,10 +142,15 @@ export function CameraStreamingDialog({
 
       setStreamName(streamExists ? streamNameFromSettings : firstStreamEntry);
       setStreamType(cameraSettings.streamType || "smart");
+      const savedPlayerMode = cameraSettings.playerMode || "mse";
+      setPlayerMode(savedPlayerMode === "jsmpeg" ? "mse" : savedPlayerMode);
+      setForceLowBandwidth(savedPlayerMode === "jsmpeg");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
       setStreamName(firstStreamEntry);
       setStreamType("smart");
+      setPlayerMode("mse");
+      setForceLowBandwidth(false);
       setCompatibilityMode(false);
     }
   }, [groupStreamingSettings, camera, config]);
@@ -122,6 +162,7 @@ export function CameraStreamingDialog({
       [camera]: {
         streamName,
         streamType,
+        playerMode: forceLowBandwidth ? "jsmpeg" : playerMode,
         compatibilityMode,
         playAudio: groupStreamingSettings?.[camera]?.playAudio ?? false,
         volume: groupStreamingSettings?.[camera]?.volume ?? 1,
@@ -138,6 +179,8 @@ export function CameraStreamingDialog({
     camera,
     streamName,
     streamType,
+    playerMode,
+    forceLowBandwidth,
     compatibilityMode,
     setIsDialogOpen,
     onSave,
@@ -162,10 +205,15 @@ export function CameraStreamingDialog({
 
       setStreamName(streamExists ? streamNameFromSettings : firstStreamEntry);
       setStreamType(cameraSettings.streamType || "smart");
+      const savedPlayerMode = cameraSettings.playerMode || "mse";
+      setPlayerMode(savedPlayerMode === "jsmpeg" ? "mse" : savedPlayerMode);
+      setForceLowBandwidth(savedPlayerMode === "jsmpeg");
       setCompatibilityMode(cameraSettings.compatibilityMode || false);
     } else {
       setStreamName(firstStreamEntry);
       setStreamType("smart");
+      setPlayerMode("mse");
+      setForceLowBandwidth(false);
       setCompatibilityMode(false);
     }
 
@@ -234,7 +282,11 @@ export function CameraStreamingDialog({
               <Label htmlFor="stream" className="text-right">
                 {t("group.camera.setting.stream")}
               </Label>
-              <Select value={streamName} onValueChange={setStreamName}>
+              <Select
+                value={streamName}
+                onValueChange={setStreamName}
+                disabled={forceLowBandwidth}
+              >
                 <SelectTrigger className="">
                   <SelectValue
                     placeholder={t("group.camera.setting.placeholder")}
@@ -250,44 +302,84 @@ export function CameraStreamingDialog({
                       ),
                     )}
                 </SelectContent>
-                <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
-                  {supportsAudioOutput ? (
-                    <>
-                      <LuCheck className="size-4 text-success" />
-                      <div>{t("group.camera.setting.audioIsAvailable")}</div>
-                    </>
-                  ) : (
-                    <>
-                      <LuX className="size-4 text-danger" />
-                      <div>{t("group.camera.setting.audioIsUnavailable")}</div>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <div className="cursor-pointer p-0">
-                            <LuInfo className="size-4" />
-                            <span className="sr-only">
-                              {t("button.info", { ns: "common" })}
-                            </span>
-                          </div>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-80 text-xs">
-                          {t("group.camera.setting.audio.tips.title")}
-                          <div className="mt-2 flex items-center text-primary">
-                            <Link
-                              to={getLocaleDocUrl("configuration/live")}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline"
-                            >
-                              {t("readTheDocumentation", { ns: "common" })}
-                              <LuExternalLink className="ml-2 inline-flex size-3" />
-                            </Link>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </>
-                  )}
-                </div>
+                {!forceLowBandwidth && (
+                  <div className="flex flex-row items-center gap-1 text-sm text-muted-foreground">
+                    {supportsAudioOutput ? (
+                      <>
+                        <LuCheck className="size-4 text-success" />
+                        <div>{t("group.camera.setting.audioIsAvailable")}</div>
+                      </>
+                    ) : (
+                      <>
+                        <LuX className="size-4 text-danger" />
+                        <div>
+                          {t("group.camera.setting.audioIsUnavailable")}
+                        </div>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <div className="cursor-pointer p-0">
+                              <LuInfo className="size-4" />
+                              <span className="sr-only">
+                                {t("button.info", { ns: "common" })}
+                              </span>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80 text-xs">
+                            {t("group.camera.setting.audio.tips.title")}
+                            <div className="mt-2 flex items-center text-primary">
+                              <Link
+                                to={getLocaleDocUrl("configuration/live")}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline"
+                              >
+                                {t("readTheDocumentation", { ns: "common" })}
+                                <LuExternalLink className="ml-2 inline-flex size-3" />
+                              </Link>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </>
+                    )}
+                  </div>
+                )}
               </Select>
+            </div>
+          )}
+        {isRestreamed &&
+          Object.entries(config?.cameras[camera].live.streams).length > 0 && (
+            <div className="flex flex-col items-start gap-2">
+              <Label htmlFor="streaming-technology" className="text-right">
+                {t("stream.mode", { ns: "views/live" })}
+              </Label>
+              <StreamTechnologySelect
+                value={resolvedPlayerMode}
+                onValueChange={setPlayerMode}
+                isWebRTCAvailable={isWebRTCAvailable}
+                webRTCUnavailableReason={webRTCUnavailableReason}
+                disabled={forceLowBandwidth}
+              />
+              <p className="text-sm text-muted-foreground">
+                {t("stream.technology.description", { ns: "views/live" })}
+              </p>
+            </div>
+          )}
+        {isRestreamed &&
+          Object.entries(config?.cameras[camera].live.streams).length > 0 && (
+            <div className="flex flex-col items-start gap-2">
+              <div className="flex w-full items-center justify-between">
+                <Label htmlFor="force-low-bandwidth" className="cursor-pointer">
+                  {t("stream.lowBandwidth.force.label", { ns: "views/live" })}
+                </Label>
+                <Switch
+                  id="force-low-bandwidth"
+                  checked={forceLowBandwidth}
+                  onCheckedChange={setForceLowBandwidth}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t("stream.lowBandwidth.force.desc", { ns: "views/live" })}
+              </p>
             </div>
           )}
         <div className="flex flex-col items-start gap-2">

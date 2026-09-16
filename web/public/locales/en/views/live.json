@@ -6,7 +6,12 @@
   "lowBandwidthMode": "Low-bandwidth Mode",
   "twoWayTalk": {
     "enable": "Enable Two Way Talk",
-    "disable": "Disable Two Way Talk"
+    "disable": "Disable Two Way Talk",
+    "requiresWebRTC": "Two-way talk requires WebRTC, which is unavailable",
+    "error": {
+      "microphone": "Two-way talk could not access your microphone",
+      "refused": "Two-way talk failed to start. See the browser console for details."
+    }
   },
   "cameraAudio": {
     "enable": "Enable Camera Audio",
@@ -135,7 +140,8 @@
       "unavailable": "Audio is not available for this stream"
     },
     "debug": {
-      "picker": "Stream selection unavailable in debug mode. Debug view always uses the stream assigned the detect role."
+      "picker": "Stream selection unavailable in debug mode. Debug view always uses the stream assigned the detect role.",
+      "technology": "Stream technology selection is unavailable in debug mode."
     },
     "twoWayTalk": {
       "tips": "Your device must support the feature and WebRTC must be configured for two-way talk.",
@@ -144,11 +150,36 @@
     },
     "lowBandwidth": {
       "tips": "Live view is in low-bandwidth mode due to buffering or stream errors.",
-      "resetStream": "Reset stream"
+      "resetStream": "Reset stream",
+      "force": {
+        "label": "Force low-bandwidth mode",
+        "desc": "Always play Frigate's built-in low-bandwidth feed instead of the selected stream. Works on any connection, but has lower quality and no audio."
+      }
     },
     "playInBackground": {
       "label": "Play in background",
       "tips": "Enable this option to continue streaming when the player is hidden."
+    },
+    "mode": "Streaming Technology",
+    "technology": {
+      "description": "Choose your preferred streaming technology. Frigate may still fall back to low bandwidth mode on playback or network errors.",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "Recommended default, broad compatibility and smooth playback",
+        "webrtc": "Needs extra setup and isn't supported on every device"
+      },
+      "unavailable": {
+        "browser": "Your browser does not support WebRTC.",
+        "not-configured": "WebRTC is not configured. Set go2rtc webrtc candidates or ice_servers.",
+        "unreachable": "WebRTC could not connect. Check that port 8555 is reachable and any STUN/TURN server is correct.",
+        "video-codec": "This stream's video codec is not supported by WebRTC in this browser.",
+        "audio-codec": "This stream's audio codec is not supported by WebRTC. Transcode to opus or G.711 with go2rtc.",
+        "checking": "Checking WebRTC availability…"
+      }
     }
   },
   "cameraSettings": {

@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import {
   LivePlayerError,
+  TwoWayTalkError,
   LivePlayerMode,
   PlayerStatsType,
   VideoResolutionType,
@@ -51,6 +52,7 @@ type LivePlayerProps = {
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
+  onMicrophoneError?: (error: TwoWayTalkError) => void;
   onResetLiveMode?: () => void;
 };
 
@@ -76,6 +78,7 @@ export default function LivePlayer({
   onClick,
   setFullResolution,
   onError,
+  onMicrophoneError,
   onResetLiveMode,
 }: LivePlayerProps) {
   const { t } = useTranslation(["components/player"]);
@@ -98,7 +101,6 @@ export default function LivePlayer({
   const [stats, setStats] = useState<PlayerStatsType>({
     streamType: "-",
     bandwidth: 0, // in kBps
-    latency: undefined, // in seconds
     totalFrames: 0,
     droppedFrames: undefined,
     decodedFrames: 0,
@@ -272,6 +274,7 @@ export default function LivePlayer({
         onPlaying={playerIsPlaying}
         pip={pip}
         onError={onError}
+        onMicrophoneError={onMicrophoneError}
       />
     );
   } else if (preferredLiveMode == "mse") {
@@ -363,7 +366,11 @@ export default function LivePlayer({
       {cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
-        !liveReady && <ActivityIndicator />}
+        !liveReady && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ActivityIndicator />
+          </div>
+        )}
 
       {((showStillWithoutActivity && !liveReady) || liveReady) &&
         objects.length > 0 && (

@@ -43,6 +43,7 @@ import { cn } from "@/lib/utils";
 import {
   AudioState,
   LivePlayerError,
+  LivePlayerMode,
   StatsState,
   VolumeState,
 } from "@/types/live";
@@ -271,6 +272,16 @@ export default function LiveDashboardView({
     return streams;
   }, [cameras, currentGroupStreamingSettings]);
 
+  // Per-camera streaming-technology choice from the camera group settings.
+  const preferredModes = useMemo(() => {
+    const modes: { [cameraName: string]: LivePlayerMode | undefined } = {};
+    cameras.forEach((camera) => {
+      modes[camera.name] =
+        currentGroupStreamingSettings?.[camera.name]?.playerMode;
+    });
+    return modes;
+  }, [cameras, currentGroupStreamingSettings]);
+
   const {
     preferredLiveModes,
     setPreferredLiveModes,
@@ -278,7 +289,8 @@ export default function LiveDashboardView({
     isRestreamedStates,
     supportsAudioOutputStates,
     streamMetadata,
-  } = useCameraLiveMode(cameras, windowVisible, activeStreams);
+    webRTCUsableStates,
+  } = useCameraLiveMode(cameras, windowVisible, activeStreams, preferredModes);
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -286,7 +298,7 @@ export default function LiveDashboardView({
     (cameraName: string, error: LivePlayerError) => {
       setPreferredLiveModes((prevModes) => {
         const newModes = { ...prevModes };
-        if (error === "mse-decode") {
+        if (error === "mse-decode" && webRTCUsableStates[cameraName]) {
           newModes[cameraName] = "webrtc";
         } else {
           newModes[cameraName] = "jsmpeg";
@@ -294,7 +306,7 @@ export default function LiveDashboardView({
         return newModes;
       });
     },
-    [setPreferredLiveModes],
+    [setPreferredLiveModes, webRTCUsableStates],
   );
 
   // audio states
@@ -673,7 +685,7 @@ export default function LiveDashboardView({
               fullscreen={fullscreen}
               toggleFullscreen={toggleFullscreen}
               preferredLiveModes={preferredLiveModes}
-              setPreferredLiveModes={setPreferredLiveModes}
+              handleError={handleError}
               resetPreferredLiveMode={resetPreferredLiveMode}
               isRestreamedStates={isRestreamedStates}
               supportsAudioOutputStates={supportsAudioOutputStates}

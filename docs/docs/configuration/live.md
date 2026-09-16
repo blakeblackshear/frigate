@@ -28,6 +28,24 @@ WebRTC may use an external STUN server for NAT traversal. MSE and HLS streaming 
 
 :::
 
+### Selecting a streaming technology
+
+Frigate [defaults to MSE](#why-does-frigate-prefer-mse-over-webrtc-for-live-view) for restreamed cameras by design. To use WebRTC, select it explicitly from a camera's single-camera Live view settings (the settings menu in the camera's Live view header on desktop, or the settings drawer on mobile). Three related controls work together:
+
+- **Stream**: _what_ to play. This lists the [streams you've configured](#setting-streams-for-live-ui) (for example `Main Stream` and `Sub Stream`).
+- **Force low-bandwidth mode**: a switch that always plays Frigate's built-in low-bandwidth feed (the stream assigned the `detect` role, using JSMpeg) instead of the selected stream. It works anywhere without go2rtc and is useful on slow or metered connections. While it is enabled, the stream and streaming technology selectors are disabled; your stream and technology choices are restored when you turn it off.
+- **Streaming Technology**: _how_ to play the selected stream, listing **MSE** and **WebRTC**. It is only shown for a restreamed stream.
+
+- The choices are saved **per device, per camera** in your browser's local storage.
+- **WebRTC is only selectable when it can actually work for that stream.** When it can't, the option is shown disabled with the reason inline, and a more detailed reason (the failing codecs, or why the connectivity check failed) is logged to your browser's console. Common reasons:
+  - **Not configured**: no `candidates` or `ice_servers` are set under `go2rtc.webrtc` (see [WebRTC extra configuration](#webrtc-extra-configuration)).
+  - **Could not connect**: e.g. port `8555` isn't reachable, or a STUN/TURN server is misconfigured. Frigate runs a one-time WebRTC connectivity check when the Live view opens; the option may briefly show as "checking" while it runs.
+  - **Unsupported video codec**: the stream's video codec can't be played over WebRTC in your browser, most commonly H.265/HEVC in Firefox or Edge.
+  - **Unsupported audio codec**: WebRTC needs opus or G.711 audio, so a stream whose playback audio is only AAC (without an added opus/G.711 track) can't carry audio over WebRTC. See [Audio Support](#audio-support) for how to add one.
+  - **Unsupported browser**: the browser doesn't support WebRTC.
+
+When WebRTC isn't available, Frigate automatically uses MSE (or falls back to JSMpeg), so live view keeps working regardless of the selection.
+
 ### Camera Settings Recommendations
 
 If you are using go2rtc, you should adjust the following settings in your camera's firmware for the best experience with Live view:
@@ -157,6 +175,17 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
         - stun:8555
   ```
 
+- The web UI uses the STUN and TURN servers in `ice_servers` and falls back to Google's public STUN server when none are set:
+
+  ```yaml title="config.yml"
+  go2rtc:
+    webrtc:
+      ice_servers:
+        - urls: [turn:turn.example.com:3478]
+          username: frigate
+          credential: password
+  ```
+
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
 
 - Note that some browsers may not support H.265 (HEVC). You can check your browser's current version for H.265 compatibility [here](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness).
@@ -205,6 +234,8 @@ For devices that support two way talk, Frigate can be configured to use the feat
 - Set up go2rtc with [WebRTC](#webrtc-extra-configuration).
 - Ensure you access Frigate via https (may require [opening port 8971](/frigate/installation/#ports)).
 - For the Home Assistant Frigate card, [follow the docs](http://card.camera/#/usage/2-way-audio) for the correct source.
+
+The two-way talk control in the single-camera Live view is only enabled when WebRTC is available; if WebRTC isn't configured or can't connect, the control is shown disabled.
 
 To use the Reolink Doorbell with two way talk, you should use the [recommended Reolink configuration](/configuration/camera_specific#reolink-cameras)
 

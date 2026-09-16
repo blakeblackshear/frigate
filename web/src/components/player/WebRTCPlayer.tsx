@@ -1,6 +1,13 @@
 import { baseUrl } from "@/api/baseUrl";
-import { LivePlayerError, PlayerStatsType } from "@/types/live";
+import {
+  LivePlayerError,
+  PlayerStatsType,
+  TwoWayTalkError,
+} from "@/types/live";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { webRTCIceServers } from "@/utils/webrtcUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useSWR from "swr";
 
 type WebRtcPlayerProps = {
   className?: string;
@@ -15,6 +22,7 @@ type WebRtcPlayerProps = {
   setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
   onError?: (error: LivePlayerError) => void;
+  onMicrophoneError?: (error: TwoWayTalkError) => void;
 };
 
 export default function WebRtcPlayer({
@@ -30,8 +38,21 @@ export default function WebRtcPlayer({
   setStats,
   onPlaying,
   onError,
+  onMicrophoneError,
 }: WebRtcPlayerProps) {
   // metadata
+
+  const { data: config } = useSWR<FrigateConfig>("config");
+
+  // Keyed on the serialized list so an unrelated config update doesn't
+  // reconnect every WebRTC player.
+  const iceServersKey = JSON.stringify(
+    config?.go2rtc?.webrtc?.ice_servers ?? [],
+  );
+  const iceServers = useMemo(
+    () => webRTCIceServers(JSON.parse(iceServersKey)),
+    [iceServersKey],
+  );
 
   const wsURL = useMemo(() => {
     return `${baseUrl.replace(/^http/, "ws")}live/webrtc/api/ws?src=${camera}`;
@@ -54,6 +75,10 @@ export default function WebRtcPlayer({
   const pcRef = useRef<RTCPeerConnection | undefined>(undefined);
   const wsRef = useRef<WebSocket | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  // Separate sendonly-audio connection for two-way talk: go2rtc only wires the
+  // backchannel from a connection's initial offer.
+  const micPcRef = useRef<RTCPeerConnection | undefined>(undefined);
+  const micWsRef = useRef<WebSocket | null>(null);
   const [bufferTimeout, setBufferTimeout] = useState<NodeJS.Timeout>();
   const videoLoadTimeoutRef = useRef<NodeJS.Timeout>(undefined);
 
@@ -65,7 +90,7 @@ export default function WebRtcPlayer({
 
       const pc = new RTCPeerConnection({
         bundlePolicy: "max-bundle",
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        iceServers,
       });
 
       const localTracks = [];
@@ -105,7 +130,7 @@ export default function WebRtcPlayer({
       videoRef.current.srcObject = new MediaStream(localTracks);
       return pc;
     },
-    [videoRef],
+    [videoRef, iceServers],
   );
 
   async function getMediaTracks(
@@ -123,51 +148,57 @@ export default function WebRtcPlayer({
     }
   }
 
+  // Offer/answer/ICE exchange over the WebSocket; shared by both connections.
+  const startSignaling = useCallback((pc: RTCPeerConnection, ws: WebSocket) => {
+    ws.addEventListener("open", () => {
+      pc.addEventListener("icecandidate", (ev) => {
+        if (!ev.candidate) return;
+        ws.send(
+          JSON.stringify({
+            type: "webrtc/candidate",
+            value: ev.candidate.candidate,
+          }),
+        );
+      });
+
+      pc.createOffer()
+        .then((offer) => pc.setLocalDescription(offer))
+        .then(() => {
+          ws.send(
+            JSON.stringify({
+              type: "webrtc/offer",
+              value: pc.localDescription?.sdp,
+            }),
+          );
+        });
+    });
+
+    ws.addEventListener("message", (ev) => {
+      const msg = JSON.parse(ev.data);
+      if (msg.type === "webrtc/candidate") {
+        pc.addIceCandidate({ candidate: msg.value, sdpMid: "0" });
+      } else if (msg.type === "webrtc/answer") {
+        pc.setRemoteDescription({ type: "answer", sdp: msg.value });
+      }
+    });
+  }, []);
+
   const connect = useCallback(
     async (aPc: Promise<RTCPeerConnection | undefined>) => {
       if (!aPc) {
         return;
       }
 
-      pcRef.current = await aPc;
+      const pc = await aPc;
+      if (!pc) {
+        return;
+      }
+
+      pcRef.current = pc;
       wsRef.current = new WebSocket(wsURL);
-      const ws = wsRef.current;
-
-      ws.addEventListener("open", () => {
-        pcRef.current?.addEventListener("icecandidate", (ev) => {
-          if (!ev.candidate) return;
-          const msg = {
-            type: "webrtc/candidate",
-            value: ev.candidate.candidate,
-          };
-          ws.send(JSON.stringify(msg));
-        });
-
-        pcRef.current
-          ?.createOffer()
-          .then((offer) => pcRef.current?.setLocalDescription(offer))
-          .then(() => {
-            const msg = {
-              type: "webrtc/offer",
-              value: pcRef.current?.localDescription?.sdp,
-            };
-            ws.send(JSON.stringify(msg));
-          });
-      });
-
-      ws.addEventListener("message", (ev) => {
-        const msg = JSON.parse(ev.data);
-        if (msg.type === "webrtc/candidate") {
-          pcRef.current?.addIceCandidate({ candidate: msg.value, sdpMid: "0" });
-        } else if (msg.type === "webrtc/answer") {
-          pcRef.current?.setRemoteDescription({
-            type: "answer",
-            sdp: msg.value,
-          });
-        }
-      });
+      startSignaling(pc, wsRef.current);
     },
-    [wsURL],
+    [wsURL, startSignaling],
   );
 
   useEffect(() => {
@@ -179,9 +210,8 @@ export default function WebRtcPlayer({
       return;
     }
 
-    const aPc = PeerConnection(
-      microphoneEnabled ? "video+audio+microphone" : "video+audio",
-    );
+    // No mic here. It's a separate connection, so toggling talk never reloads.
+    const aPc = PeerConnection("video+audio");
     connect(aPc);
 
     return () => {
@@ -194,14 +224,80 @@ export default function WebRtcPlayer({
         pcRef.current = undefined;
       }
     };
+  }, [camera, connect, PeerConnection, pcRef, videoRef, playbackEnabled]);
+
+  // Backchannel connection, alive only while the mic is on.
+  useEffect(() => {
+    if (!microphoneEnabled || !playbackEnabled) {
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const tracks = await getMediaTracks("user", {
+        video: false,
+        audio: true,
+      });
+
+      if (cancelled) {
+        tracks.forEach((track) => track.stop());
+        return;
+      }
+
+      if (tracks.length === 0) {
+        onMicrophoneError?.("microphone");
+        return;
+      }
+
+      const pc = new RTCPeerConnection({
+        bundlePolicy: "max-bundle",
+        iceServers,
+      });
+      tracks.forEach((track) =>
+        pc.addTransceiver(track, { direction: "sendonly" }),
+      );
+
+      micPcRef.current = pc;
+      const ws = new WebSocket(wsURL);
+      micWsRef.current = ws;
+      startSignaling(pc, ws);
+
+      // go2rtc sends an error instead of an answer when it can't attach the
+      // microphone to the camera's backchannel.
+      ws.addEventListener("message", (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type !== "error" || cancelled) {
+          return;
+        }
+        // eslint-disable-next-line no-console
+        console.error(
+          `${camera} - Two-way talk error: ${msg.value} See the documentation: https://docs.frigate.video/configuration/live/#two-way-talk`,
+        );
+        onMicrophoneError?.("refused");
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+      micPcRef.current?.getSenders().forEach((sender) => sender.track?.stop());
+      if (micWsRef.current) {
+        micWsRef.current.close();
+        micWsRef.current = null;
+      }
+      if (micPcRef.current) {
+        micPcRef.current.close();
+        micPcRef.current = undefined;
+      }
+    };
   }, [
-    camera,
-    connect,
-    PeerConnection,
-    pcRef,
-    videoRef,
-    playbackEnabled,
     microphoneEnabled,
+    playbackEnabled,
+    wsURL,
+    startSignaling,
+    iceServers,
+    camera,
+    onMicrophoneError,
   ]);
 
   // ios compat
@@ -262,9 +358,7 @@ export default function WebRtcPlayer({
         const report = await pcRef.current.getStats();
         let bytesReceived = 0;
         let timestamp = 0;
-        let roundTripTime = 0;
         let framesReceived = 0;
-        let framesDropped = 0;
         let framesDecoded = 0;
 
         report.forEach((stat) => {
@@ -272,11 +366,7 @@ export default function WebRtcPlayer({
             bytesReceived = stat.bytesReceived;
             timestamp = stat.timestamp;
             framesReceived = stat.framesReceived;
-            framesDropped = stat.framesDropped;
             framesDecoded = stat.framesDecoded;
-          }
-          if (stat.type === "candidate-pair" && stat.state === "succeeded") {
-            roundTripTime = stat.currentRoundTripTime;
           }
         });
 
@@ -289,12 +379,10 @@ export default function WebRtcPlayer({
         setStats?.({
           streamType: "WebRTC",
           bandwidth: Math.round(bitrate),
-          latency: roundTripTime,
           totalFrames: framesReceived,
-          droppedFrames: framesDropped,
+          droppedFrames: undefined,
           decodedFrames: framesDecoded,
-          droppedFrameRate:
-            framesReceived > 0 ? (framesDropped / framesReceived) * 100 : 0,
+          droppedFrameRate: undefined,
         });
 
         lastBytesReceived = bytesReceived;
@@ -307,7 +395,6 @@ export default function WebRtcPlayer({
       setStats?.({
         streamType: "-",
         bandwidth: 0,
-        latency: undefined,
         totalFrames: 0,
         droppedFrames: undefined,
         decodedFrames: 0,

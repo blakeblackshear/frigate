@@ -4,11 +4,42 @@ import useSWR from "swr";
 import { LivePlayerMode } from "@/types/live";
 import useDeferredStreamMetadata from "./use-deferred-stream-metadata";
 import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
+import {
+  evaluateStreamWebRTCAvailability,
+  useWebRTCGloballyAvailable,
+} from "./use-webrtc-availability";
+
+// Shared by the initial computation and the context-menu "Reset" so the two
+// can't diverge.
+function resolveLiveMode(
+  isRestreamed: boolean,
+  mseSupported: boolean,
+  webRTCAvailable: boolean,
+  requested: LivePlayerMode | undefined,
+): LivePlayerMode {
+  let mode: LivePlayerMode;
+  if (!mseSupported) {
+    mode = isRestreamed && webRTCAvailable ? "webrtc" : "jsmpeg";
+  } else {
+    mode = isRestreamed ? "mse" : "jsmpeg";
+  }
+
+  if (requested === "jsmpeg") {
+    mode = "jsmpeg";
+  } else if (requested === "webrtc" && isRestreamed && webRTCAvailable) {
+    mode = "webrtc";
+  } else if (requested === "mse" && mseSupported && isRestreamed) {
+    mode = "mse";
+  }
+
+  return mode;
+}
 
 export default function useCameraLiveMode(
   cameras: CameraConfig[],
   windowVisible: boolean,
   activeStreams?: { [cameraName: string]: string },
+  preferredModes?: { [cameraName: string]: LivePlayerMode | undefined },
 ) {
   const { data: config } = useSWR<FrigateConfig>("config");
 
@@ -46,6 +77,25 @@ export default function useCameraLiveMode(
   // Fetch stream metadata with deferred loading (doesn't block initial render)
   const streamMetadata = useDeferredStreamMetadata(restreamedStreamNames);
 
+  const { globallyAvailable, globalReason } = useWebRTCGloballyAvailable();
+
+  // "checking" counts as usable because the probe re-enters it on every mount,
+  // and treating it as unavailable would downgrade a saved WebRTC choice.
+  const webRTCUsableStates = useMemo(() => {
+    const states: { [cameraName: string]: boolean } = {};
+    cameras.forEach((camera) => {
+      const streamName =
+        activeStreams?.[camera.name] ?? Object.values(camera.live.streams)[0];
+      const { available, reason } = evaluateStreamWebRTCAvailability({
+        globallyAvailable,
+        globalReason,
+        metadata: streamMetadata[streamName],
+      });
+      states[camera.name] = available || reason === "checking";
+    });
+    return states;
+  }, [cameras, activeStreams, globallyAvailable, globalReason, streamMetadata]);
+
   // Compute live mode states
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
     [key: string]: LivePlayerMode;
@@ -81,11 +131,14 @@ export default function useCameraLiveMode(
 
       newIsRestreamedStates[camera.name] = isRestreamed ?? false;
 
-      if (!mseSupported) {
-        newPreferredLiveModes[camera.name] = isRestreamed ? "webrtc" : "jsmpeg";
-      } else {
-        newPreferredLiveModes[camera.name] = isRestreamed ? "mse" : "jsmpeg";
-      }
+      // Auto-selected default, overridden by the user's per-camera choice when viable
+      // Runtime fallback (player errors) still adjusts the mode on top of this base
+      newPreferredLiveModes[camera.name] = resolveLiveMode(
+        !!isRestreamed,
+        mseSupported,
+        webRTCUsableStates[camera.name] ?? false,
+        preferredModes?.[camera.name],
+      );
 
       // Check each stream for audio support
       if (isRestreamed) {
@@ -108,7 +161,15 @@ export default function useCameraLiveMode(
     setPreferredLiveModes(newPreferredLiveModes);
     setIsRestreamedStates(newIsRestreamedStates);
     setSupportsAudioOutputStates(newSupportsAudioOutputStates);
-  }, [activeStreams, cameras, config, windowVisible, streamMetadata]);
+  }, [
+    activeStreams,
+    cameras,
+    config,
+    windowVisible,
+    streamMetadata,
+    webRTCUsableStates,
+    preferredModes,
+  ]);
 
   const resetPreferredLiveMode = useCallback(
     (cameraName: string) => {
@@ -124,19 +185,17 @@ export default function useCameraLiveMode(
         config &&
         Object.keys(config.go2rtc.streams || {}).includes(selectedStreamName);
 
-      setPreferredLiveModes((prevModes) => {
-        const newModes = { ...prevModes };
-
-        if (!mseSupported) {
-          newModes[cameraName] = isRestreamed ? "webrtc" : "jsmpeg";
-        } else {
-          newModes[cameraName] = isRestreamed ? "mse" : "jsmpeg";
-        }
-
-        return newModes;
-      });
+      setPreferredLiveModes((prevModes) => ({
+        ...prevModes,
+        [cameraName]: resolveLiveMode(
+          !!isRestreamed,
+          mseSupported,
+          webRTCUsableStates[cameraName] ?? false,
+          preferredModes?.[cameraName],
+        ),
+      }));
     },
-    [activeStreams, cameras, config],
+    [activeStreams, cameras, config, webRTCUsableStates, preferredModes],
   );
 
   return {
@@ -146,5 +205,6 @@ export default function useCameraLiveMode(
     isRestreamedStates,
     supportsAudioOutputStates,
     streamMetadata,
+    webRTCUsableStates,
   };
 }

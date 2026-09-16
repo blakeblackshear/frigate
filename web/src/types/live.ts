@@ -33,6 +33,16 @@ export type LiveStreamMetadata = {
 
 export type LivePlayerError = "stalled" | "startup" | "mse-decode";
 
+export type TwoWayTalkError = "microphone" | "refused";
+
+export type WebRTCUnavailableReason =
+  | "browser"
+  | "not-configured"
+  | "unreachable"
+  | "video-codec"
+  | "audio-codec"
+  | "checking";
+
 export type AudioState = Record<string, boolean>;
 export type StatsState = Record<string, boolean>;
 export type VolumeState = Record<string, number>;
@@ -40,7 +50,6 @@ export type VolumeState = Record<string, number>;
 export type PlayerStatsType = {
   streamType: string;
   bandwidth: number;
-  latency: number | undefined;
   totalFrames: number;
   droppedFrames: number | undefined;
   decodedFrames: number | undefined;
