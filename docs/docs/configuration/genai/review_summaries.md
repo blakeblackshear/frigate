@@ -197,7 +197,7 @@ review:
 Review items are sent to the model as a sequence of still frames. Some models follow that sequence well on their own; others lose track of activity that repeats or reverses, and describe a single trip when the subject actually made several. The `frame_mode` option controls how those frames are presented.
 
 - `frames` (default): the prompt followed by the frames, exactly as earlier versions of Frigate sent them.
-- `annotated_frames`: each frame is preceded by its frame number and elapsed time, along with notes describing what the object tracker recorded at that moment, such as an object being first detected, starting or stopping movement, turning around, or leaving the frame.
+- `annotated_frames`: each frame is preceded by its frame number and elapsed time, along with notes describing what the object tracker recorded at that moment, such as an object being first detected, starting to move, turning around, or no longer being detected.
 
 The notes come from tracking data rather than from the images, so they describe activity the model may not have picked up on its own. In testing with a person carrying three waste bins to the curb one at a time, `gemma4` described a single trip on every attempt with `frames`, and consistently described multiple trips with `annotated_frames`. Models that already handle these sequences well, such as the `qwen3-vl` family, gain little and should stay on `frames`.
 

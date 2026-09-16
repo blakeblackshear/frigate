@@ -126,13 +126,13 @@ class TestTimeline(unittest.TestCase):
     def test_object_still_tracked_at_end_is_reported_present(self):
         timeline = build_timeline([self.event], span_end=15.0)
         phrases = [p for _, p in timeline]
-        self.assertTrue(any("still present" in p for p in phrases))
-        self.assertFalse(any("leaves the frame" in p for p in phrases))
+        self.assertTrue(any("still being tracked" in p for p in phrases))
+        self.assertFalse(any("no longer detected" in p for p in phrases))
 
-    def test_object_ending_inside_the_clip_leaves_the_frame(self):
+    def test_object_ending_inside_the_clip_is_no_longer_detected(self):
         timeline = build_timeline([self.event], span_end=40.0)
         phrases = [p for _, p in timeline]
-        self.assertTrue(any("leaves the frame" in p for p in phrases))
+        self.assertTrue(any("no longer detected" in p for p in phrases))
 
     def test_moments_past_the_last_frame_are_dropped(self):
         # The subject keeps moving after the final sampled frame; those notes
@@ -141,7 +141,25 @@ class TestTimeline(unittest.TestCase):
         late["path_data"] = straight_path((0.9, 0.6), (0.4, 0.3), 10, 100.0)
         late["start_time"] = 100.0
         timeline = build_timeline([late], span_end=105.0)
-        self.assertFalse(any("stops moving" in p for _, p in timeline))
+        self.assertFalse(any("reaches" in p for _, p in timeline))
+
+
+class TestNoAssumedState(unittest.TestCase):
+    def test_notes_never_claim_an_object_is_stationary(self):
+        # A track still open at the last frame says nothing about motion.
+        event = {
+            "id": "1789482056.695307-3uhf47",
+            "label": "person",
+            "sub_label": None,
+            "start_time": 0.0,
+            "end_time": 500.0,
+            "zones": ["front_yard"],
+            "path_data": straight_path((0.9, 0.6), (0.4, 0.3), 10, 1.0),
+        }
+        joined = " ".join(p for _, p in build_timeline([event], span_end=20.0))
+        self.assertNotIn("stationary", joined)
+        self.assertNotIn("stops", joined)
+        self.assertNotIn("leaves", joined)
 
 
 class TestFrameBucketing(unittest.TestCase):

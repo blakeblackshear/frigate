@@ -128,7 +128,7 @@ def path_legs(points: list[tuple[float, float, float]]) -> list[tuple[int, int]]
 def path_moments(path_data: list[Any]) -> list[tuple[float, str]]:
     """Key moments in one trajectory as (timestamp, phrase).
 
-    Emits one note per leg of travel plus a final resting position.
+    Emits one note per leg of travel plus where the last leg ends.
     """
     if not path_data or len(path_data) < 2:
         return []
@@ -157,8 +157,10 @@ def path_moments(path_data: list[Any]) -> list[tuple[float, str]]:
             )
 
     if legs:
+        # path_data only records significant movement, so its last point marks
+        # where travel was last seen, not that the object came to rest there.
         x, y, t = points[legs[-1][1]]
-        moments.append((t, f"stops moving at {describe_position(x, y)}"))
+        moments.append((t, f"reaches {describe_position(x, y)}"))
 
     return moments
 
@@ -169,8 +171,9 @@ def build_timeline(
     """All annotated moments across every event, in time order.
 
     `span_end` is the timestamp of the last sampled frame. Moments past it
-    describe nothing the model can see, and objects still tracked then are
-    reported as present rather than as having left.
+    describe nothing the model can see. Notes only state what the tracker
+    knows: a track ending means the object stopped being detected, which may
+    or may not mean it left the frame.
     """
     ordered = sorted(events, key=lambda e: e["start_time"])
     timeline: list[tuple[float, str]] = []
@@ -178,7 +181,6 @@ def build_timeline(
     for event in ordered:
         name = event_name(event)
         path = event.get("path_data") or []
-        zones = ", ".join(event.get("zones") or [])
         where = describe_position(path[0][0][0], path[0][0][1]) if path else "the frame"
         timeline.append((event["start_time"], f"{name} first detected at {where}"))
 
@@ -189,14 +191,10 @@ def build_timeline(
             timeline.append((timestamp, f"{name} {phrase}"))
 
         if event["end_time"] and event["end_time"] <= span_end:
-            timeline.append((event["end_time"], f"{name} leaves the frame"))
+            timeline.append((event["end_time"], f"{name} is no longer detected"))
         else:
             timeline.append(
-                (
-                    span_end,
-                    f"{name} is still present at the end of the clip, "
-                    f"stationary in zone: {zones or 'none'}",
-                )
+                (span_end, f"{name} is still being tracked at the end of the clip")
             )
 
     return sorted(timeline, key=lambda m: m[0])
