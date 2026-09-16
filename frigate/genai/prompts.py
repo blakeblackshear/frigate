@@ -59,6 +59,20 @@ def get_review_field_guidelines(response_style: str = "default") -> dict[str, st
     }
 
 
+# Explains the per-frame labels and tracker notes used by the annotated frame
+# mode. Track identifiers are deliberately absent from the notes themselves:
+# Frigate opens a new tracked object each time a subject is re-detected, and
+# naming those makes models report one person as several. The closing sentence
+# covers the same ground without giving them something to latch onto.
+FRAME_ANNOTATION_GUIDANCE = """- Each image below is immediately preceded by a text label giving its frame number and how many seconds into the sequence it was captured. Use these labels to track the order of events and the time between them.
+- Some images below are preceded by notes from the camera's object tracker recording what changed at that point: an object being first detected, starting or stopping movement, reversing direction, or leaving the frame. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them. The tracker opens a new entry each time a subject is re-detected, so unless two subjects of the same type are present at the same time, treat repeated entries as the same subject returning."""
+
+
+# Used when the provider's transport cannot interleave text and images, so
+# the same notes are listed up front instead of sitting against their frames.
+FRAME_TIMELINE_GUIDANCE = """- The "Frame Notes" section at the end of this prompt lists, by frame number, notes from the camera's object tracker recording what changed at that point: an object being first detected, starting or stopping movement, reversing direction, or leaving the frame. The images follow in frame order, so note 1 describes the first image. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them. The tracker opens a new entry each time a subject is re-detected, so unless two subjects of the same type are present at the same time, treat repeated entries as the same subject returning."""
+
+
 def build_review_description_prompt(
     review_data: dict[str, Any],
     thumbnails: list[bytes],
@@ -66,8 +80,16 @@ def build_review_description_prompt(
     preferred_language: str | None,
     activity_context_prompt: str,
     response_style: str = "default",
+    frame_captions: list[str] | None = None,
+    interleaved: bool = True,
 ) -> str:
-    """Build the prompt for review activity description generation."""
+    """Build the prompt for review activity description generation.
+
+    When `frame_captions` is set, the caller has per-frame tracker notes. With
+    `interleaved`, each caption is placed directly before its image and the
+    prompt says so; otherwise the notes are appended to the prompt as a
+    timeline, since some providers cannot mix text and images in one request.
+    """
 
     def get_concern_prompt() -> str:
         if concerns:
@@ -93,6 +115,16 @@ def build_review_description_prompt(
             return "\n- (No objects detected)"
 
     fields = get_review_field_guidelines(response_style)
+    if not frame_captions:
+        frame_guidance = ""
+        frame_notes = ""
+    elif interleaved:
+        frame_guidance = f"\n{FRAME_ANNOTATION_GUIDANCE}"
+        frame_notes = ""
+    else:
+        frame_guidance = f"\n{FRAME_TIMELINE_GUIDANCE}"
+        notes = "\n\n".join(frame_captions)
+        frame_notes = f"\n## Frame Notes\n\n{notes}\n"
 
     return f"""
 Your task is to analyze a sequence of images taken in chronological order from a security camera.
@@ -130,7 +162,7 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 ## Sequence Details
 
 - Camera: {review_data["camera"]}
-- Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest)
+- Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest){frame_guidance}
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
 - Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}
 
@@ -140,7 +172,7 @@ Each line represents a detection state, not necessarily unique individuals. The 
 
 **Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
 {get_objects_list()}
-
+{frame_notes}
 {get_language_prompt()}
 """
 

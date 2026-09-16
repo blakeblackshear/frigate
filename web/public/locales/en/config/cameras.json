@@ -657,6 +657,10 @@
         "label": "Preferred language",
         "description": "Preferred language to request from the GenAI provider for generated responses."
       },
+      "frame_mode": {
+        "label": "Frame mode",
+        "description": "How frames are presented to the model. 'frames' sends the prompt followed by the frames, which suits models that track a sequence well on their own. 'annotated_frames' labels each frame and interleaves notes derived from object tracking, which helps models that lose track of activity that repeats or reverses."
+      },
       "response_style": {
         "label": "Response style",
         "description": "Writing style preset for generated review descriptions. Presets adjust the tone and level of detail of the user-facing title, summary, and scene description; 'default' leaves the built-in prompt unchanged."

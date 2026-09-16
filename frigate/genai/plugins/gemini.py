@@ -118,11 +118,17 @@ class GeminiClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
-        contents = [prompt] + [
-            types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
-        ]
+        contents: list[Any] = [prompt]
+
+        for index, img in enumerate(images):
+            if image_captions and index < len(image_captions):
+                contents.append(image_captions[index])
+
+            contents.append(types.Part.from_bytes(data=img, mime_type="image/jpeg"))
+
         try:
             # Merge runtime_options into generation_config if provided
             generation_config_dict: dict[str, Any] = {"candidate_count": 1}
@@ -136,7 +142,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=contents,  # type: ignore[arg-type]
+                contents=contents,
                 config=types.GenerateContentConfig(
                     **generation_config_dict,
                 ),

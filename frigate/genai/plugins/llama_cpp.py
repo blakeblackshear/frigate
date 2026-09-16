@@ -333,6 +333,7 @@ class LlamaCppClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
@@ -348,7 +349,10 @@ class LlamaCppClient(GenAIClient):
                     "text": prompt,
                 }
             ]
-            for image in images:
+            for index, image in enumerate(images):
+                if image_captions and index < len(image_captions):
+                    content.append({"type": "text", "text": image_captions[index]})
+
                 encoded_image = base64.b64encode(image).decode("utf-8")
                 content.append(
                     {

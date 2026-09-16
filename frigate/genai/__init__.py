@@ -105,8 +105,23 @@ class GenAIClient:
         debug_save: bool,
         activity_context_prompt: str,
         response_style: str = "default",
+        frame_captions: list[str] | None = None,
     ) -> ReviewMetadata | None:
-        """Generate a description for the review item activity."""
+        """Generate a description for the review item activity.
+
+        `frame_captions` holds one caption per thumbnail for the annotated
+        frame mode; providers that can interleave text and images emit each
+        caption directly before its frame.
+        """
+        if frame_captions and len(frame_captions) != len(thumbnails):
+            logger.warning(
+                "Got %d frame captions for %d thumbnails, sending plain frames",
+                len(frame_captions),
+                len(thumbnails),
+            )
+            frame_captions = None
+
+        interleaved = self.supports_interleaved_images
         context_prompt = build_review_description_prompt(
             review_data,
             thumbnails,
@@ -114,6 +129,8 @@ class GenAIClient:
             preferred_language,
             activity_context_prompt,
             response_style,
+            frame_captions,
+            interleaved,
         )
 
         logger.debug(
@@ -129,9 +146,28 @@ class GenAIClient:
             ) as f:
                 f.write(context_prompt)
 
+            if frame_captions:
+                # Saved separately so the debug folder can be replayed: the
+                # captions travel beside the images, not inside the prompt.
+                with open(
+                    os.path.join(
+                        CLIPS_DIR,
+                        "genai-requests",
+                        review_data["id"],
+                        "frame_captions.txt",
+                    ),
+                    "w",
+                ) as f:
+                    f.write("\n\n".join(frame_captions))
+
         response_format = build_review_description_response_format(concerns)
 
-        response = self._send(context_prompt, thumbnails, response_format)
+        response = self._send(
+            context_prompt,
+            thumbnails,
+            response_format,
+            image_captions=frame_captions if interleaved else None,
+        )
 
         if debug_save and response:
             with open(
@@ -269,6 +305,7 @@ class GenAIClient:
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to the provider.
 
@@ -276,8 +313,22 @@ class GenAIClient:
         ``supports_toggleable_thinking``. Description-style callers leave it
         at the default (off) since synthesis tasks don't benefit from
         reasoning traces.
+
+        ``image_captions`` carries one caption per image, to be placed
+        immediately before its image so the model can tell the frames apart.
+        Providers whose transport cannot interleave text and images append
+        them to the prompt instead.
         """
         return None
+
+    @property
+    def supports_interleaved_images(self) -> bool:
+        """Whether text and images can be mixed in a single request.
+
+        Providers that take a flat image list alongside one prompt string
+        cannot, and receive per-frame notes folded into the prompt instead.
+        """
+        return True
 
     @property
     def supports_vision(self) -> bool:

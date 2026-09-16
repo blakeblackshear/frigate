@@ -63,11 +63,11 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 You must use a vision-capable model with Frigate. The following models are recommended for local deployment of the `descriptions` and `chat` roles:
 
-| Model               | Notes                                                                                                                                                                |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl`          | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
-| `qwen3.6`/`qwen3.8` | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
-| `gemma4`            | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
+| Model               | Review [frame mode](/configuration/genai/review_summaries#frame-mode) | Notes                                                                                                                                                                |
+| ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qwen3-vl`          | `frames`                                                              | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object. Follows a sequence of frames on its own.     |
+| `qwen3.6`/`qwen3.8` | `frames`                                                              | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
+| `gemma4`            | `annotated_frames`                                                    | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action. Loses track of activity that repeats or reverses, so it benefits from annotated frames. |
 
 #### Embedding models
 

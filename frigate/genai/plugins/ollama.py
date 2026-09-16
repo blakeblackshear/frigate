@@ -102,6 +102,12 @@ class OllamaClient(GenAIClient):
     _supports_thinking_cache: bool | None = None
 
     @property
+    def supports_interleaved_images(self) -> bool:
+        """Ollama's generate API takes one prompt plus a flat image list, so
+        text cannot be positioned between individual images."""
+        return False
+
+    @property
     def supports_toggleable_thinking(self) -> bool:
         if self._supports_thinking_cache is not None:
             return self._supports_thinking_cache
@@ -196,6 +202,7 @@ class OllamaClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to Ollama"""
         if self.provider is None:

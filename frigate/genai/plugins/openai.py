@@ -63,6 +63,7 @@ class OpenAIClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to OpenAI."""
         encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
@@ -72,7 +73,10 @@ class OpenAIClient(GenAIClient):
                 "text": prompt,
             }
         ]
-        for image in encoded_images:
+        for index, image in enumerate(encoded_images):
+            if image_captions and index < len(image_captions):
+                messages_content.append({"type": "text", "text": image_captions[index]})
+
             messages_content.append(
                 {
                     "type": "image_url",
