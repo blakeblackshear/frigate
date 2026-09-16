@@ -7,7 +7,11 @@
   "twoWayTalk": {
     "enable": "Enable Two Way Talk",
     "disable": "Disable Two Way Talk",
-    "requiresWebRTC": "Two-way talk requires WebRTC, which is unavailable"
+    "requiresWebRTC": "Two-way talk requires WebRTC, which is unavailable",
+    "error": {
+      "microphone": "Two-way talk could not access your microphone",
+      "refused": "Two-way talk failed to start. See the browser console for details."
+    }
   },
   "cameraAudio": {
     "enable": "Enable Camera Audio",

@@ -1,5 +1,9 @@
 import { baseUrl } from "@/api/baseUrl";
-import { LivePlayerError, PlayerStatsType } from "@/types/live";
+import {
+  LivePlayerError,
+  PlayerStatsType,
+  TwoWayTalkError,
+} from "@/types/live";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { webRTCIceServers } from "@/utils/webrtcUtil";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -18,6 +22,7 @@ type WebRtcPlayerProps = {
   setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
   onError?: (error: LivePlayerError) => void;
+  onMicrophoneError?: (error: TwoWayTalkError) => void;
 };
 
 export default function WebRtcPlayer({
@@ -33,6 +38,7 @@ export default function WebRtcPlayer({
   setStats,
   onPlaying,
   onError,
+  onMicrophoneError,
 }: WebRtcPlayerProps) {
   // metadata
 
@@ -234,8 +240,13 @@ export default function WebRtcPlayer({
         audio: true,
       });
 
-      if (cancelled || tracks.length === 0) {
+      if (cancelled) {
         tracks.forEach((track) => track.stop());
+        return;
+      }
+
+      if (tracks.length === 0) {
+        onMicrophoneError?.("microphone");
         return;
       }
 
@@ -248,8 +259,21 @@ export default function WebRtcPlayer({
       );
 
       micPcRef.current = pc;
-      micWsRef.current = new WebSocket(wsURL);
-      startSignaling(pc, micWsRef.current);
+      const ws = new WebSocket(wsURL);
+      micWsRef.current = ws;
+      startSignaling(pc, ws);
+
+      // go2rtc sends an error instead of an answer when it can't attach the
+      // microphone to the camera's backchannel.
+      ws.addEventListener("message", (ev) => {
+        const msg = JSON.parse(ev.data);
+        if (msg.type !== "error" || cancelled) {
+          return;
+        }
+        // eslint-disable-next-line no-console
+        console.error(`${camera} - two-way talk error: ${msg.value}`);
+        onMicrophoneError?.("refused");
+      });
     })();
 
     return () => {
@@ -264,7 +288,15 @@ export default function WebRtcPlayer({
         micPcRef.current = undefined;
       }
     };
-  }, [microphoneEnabled, playbackEnabled, wsURL, startSignaling, iceServers]);
+  }, [
+    microphoneEnabled,
+    playbackEnabled,
+    wsURL,
+    startSignaling,
+    iceServers,
+    camera,
+    onMicrophoneError,
+  ]);
 
   // ios compat
 

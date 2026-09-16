@@ -6,8 +6,47 @@
  * configured, the WebRTC option must be disabled in the stream-technology
  * selector (label "Streaming Technology").
  */
+import type { Page } from "@playwright/test";
 import { test, expect } from "../fixtures/frigate-test";
 import { LivePage } from "../pages/live.page";
+
+// the mocked profile is admin, so useUserPersistence keys are namespaced
+const STREAMING_KEY = "streaming-settings:admin";
+
+async function writeIdb(page: Page, entries: Record<string, unknown>) {
+  await page.evaluate(async (data) => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("keyval-store", 1);
+      request.onupgradeneeded = () =>
+        request.result.createObjectStore("keyval");
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const tx = request.result.transaction("keyval", "readwrite");
+        const store = tx.objectStore("keyval");
+        Object.entries(data).forEach(([key, value]) => store.put(value, key));
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+      };
+    });
+  }, entries);
+}
+
+async function readIdb(page: Page, key: string) {
+  return page.evaluate(async (target) => {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("keyval-store", 1);
+      request.onupgradeneeded = () =>
+        request.result.createObjectStore("keyval");
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const tx = request.result.transaction("keyval", "readonly");
+        const get = tx.objectStore("keyval").get(target);
+        get.onsuccess = () => resolve(get.result ?? null);
+        get.onerror = () => reject(get.error);
+      };
+    });
+  }, key);
+}
 
 test.describe("WebRTC availability gating @critical", () => {
   test("desktop: WebRTC option is disabled when no candidates or ice_servers", async ({
@@ -291,6 +330,61 @@ test.describe("WebRTC availability gating @critical", () => {
     await lowBandwidthSwitch.click();
     await expect(technologyTrigger).toBeEnabled();
     await expect(streamTrigger).toBeEnabled();
+  });
+
+  test("desktop: saving group streaming settings keeps an unavailable WebRTC choice", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop context menu only");
+
+    await frigateApp.installDefaults({
+      config: {
+        go2rtc: {
+          streams: { front_door: ["rtsp://127.0.0.1:8554/front_door"] },
+          webrtc: { candidates: [], ice_servers: [] },
+        },
+      },
+    });
+
+    await frigateApp.page.route("**/api/go2rtc/streams/front_door**", (route) =>
+      route.fulfill({
+        json: {
+          producers: [{ medias: ["video, recvonly, H264"] }],
+          consumers: [],
+        },
+      }),
+    );
+
+    const saved = {
+      streamName: "front_door",
+      streamType: "smart",
+      playerMode: "webrtc",
+      compatibilityMode: false,
+      playAudio: false,
+      volume: 1,
+    };
+
+    await frigateApp.goto("/");
+    await writeIdb(frigateApp.page, {
+      [STREAMING_KEY]: { outdoor: { front_door: saved } },
+    });
+    await frigateApp.goto("/?group=outdoor");
+
+    // With no candidates the dialog resolves WebRTC to MSE for display, but
+    // saving must not persist that fallback over the user's choice.
+    const live = new LivePage(frigateApp.page, true);
+    const menu = await live.openContextMenuOn("front_door");
+    await expect(menu).toBeVisible({ timeout: 5_000 });
+    await menu.getByText("Streaming Settings").click();
+
+    const dialog = frigateApp.page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Save" }).click();
+    await expect(dialog).toBeHidden();
+
+    await expect
+      .poll(() => readIdb(frigateApp.page, STREAMING_KEY))
+      .toMatchObject({ outdoor: { front_door: { playerMode: "webrtc" } } });
   });
 });
 

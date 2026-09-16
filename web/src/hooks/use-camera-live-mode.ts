@@ -4,7 +4,10 @@ import useSWR from "swr";
 import { LivePlayerMode } from "@/types/live";
 import useDeferredStreamMetadata from "./use-deferred-stream-metadata";
 import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
-import { useWebRTCGloballyAvailable } from "./use-webrtc-availability";
+import {
+  evaluateStreamWebRTCAvailability,
+  useWebRTCGloballyAvailable,
+} from "./use-webrtc-availability";
 
 // Shared by the initial computation and the context-menu "Reset" so the two
 // can't diverge.
@@ -74,8 +77,24 @@ export default function useCameraLiveMode(
   // Fetch stream metadata with deferred loading (doesn't block initial render)
   const streamMetadata = useDeferredStreamMetadata(restreamedStreamNames);
 
-  const { globallyAvailable: webRTCGloballyAvailable } =
-    useWebRTCGloballyAvailable();
+  const { globallyAvailable, globalReason } = useWebRTCGloballyAvailable();
+
+  // "checking" counts as usable because the probe re-enters it on every mount,
+  // and treating it as unavailable would downgrade a saved WebRTC choice.
+  const webRTCUsableStates = useMemo(() => {
+    const states: { [cameraName: string]: boolean } = {};
+    cameras.forEach((camera) => {
+      const streamName =
+        activeStreams?.[camera.name] ?? Object.values(camera.live.streams)[0];
+      const { available, reason } = evaluateStreamWebRTCAvailability({
+        globallyAvailable,
+        globalReason,
+        metadata: streamMetadata[streamName],
+      });
+      states[camera.name] = available || reason === "checking";
+    });
+    return states;
+  }, [cameras, activeStreams, globallyAvailable, globalReason, streamMetadata]);
 
   // Compute live mode states
   const [preferredLiveModes, setPreferredLiveModes] = useState<{
@@ -117,7 +136,7 @@ export default function useCameraLiveMode(
       newPreferredLiveModes[camera.name] = resolveLiveMode(
         !!isRestreamed,
         mseSupported,
-        webRTCGloballyAvailable,
+        webRTCUsableStates[camera.name] ?? false,
         preferredModes?.[camera.name],
       );
 
@@ -148,7 +167,7 @@ export default function useCameraLiveMode(
     config,
     windowVisible,
     streamMetadata,
-    webRTCGloballyAvailable,
+    webRTCUsableStates,
     preferredModes,
   ]);
 
@@ -171,12 +190,12 @@ export default function useCameraLiveMode(
         [cameraName]: resolveLiveMode(
           !!isRestreamed,
           mseSupported,
-          webRTCGloballyAvailable,
+          webRTCUsableStates[cameraName] ?? false,
           preferredModes?.[cameraName],
         ),
       }));
     },
-    [activeStreams, cameras, config, webRTCGloballyAvailable, preferredModes],
+    [activeStreams, cameras, config, webRTCUsableStates, preferredModes],
   );
 
   return {
@@ -186,5 +205,6 @@ export default function useCameraLiveMode(
     isRestreamedStates,
     supportsAudioOutputStates,
     streamMetadata,
+    webRTCUsableStates,
   };
 }

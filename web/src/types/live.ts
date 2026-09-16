@@ -33,6 +33,8 @@ export type LiveStreamMetadata = {
 
 export type LivePlayerError = "stalled" | "startup" | "mse-decode";
 
+export type TwoWayTalkError = "microphone" | "refused";
+
 export type WebRTCUnavailableReason =
   | "browser"
   | "not-configured"

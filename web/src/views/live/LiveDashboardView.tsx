@@ -57,7 +57,6 @@ import { EmptyCard } from "@/components/card/EmptyCard";
 import { BsFillCameraVideoOffFill } from "react-icons/bs";
 import { AuthContext } from "@/context/auth-context";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { useWebRTCGloballyAvailable } from "@/hooks/use-webrtc-availability";
 
 type LiveDashboardViewProps = {
   cameras: CameraConfig[];
@@ -290,10 +289,8 @@ export default function LiveDashboardView({
     isRestreamedStates,
     supportsAudioOutputStates,
     streamMetadata,
+    webRTCUsableStates,
   } = useCameraLiveMode(cameras, windowVisible, activeStreams, preferredModes);
-
-  const { globallyAvailable: webRTCGloballyAvailable } =
-    useWebRTCGloballyAvailable();
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -301,7 +298,7 @@ export default function LiveDashboardView({
     (cameraName: string, error: LivePlayerError) => {
       setPreferredLiveModes((prevModes) => {
         const newModes = { ...prevModes };
-        if (error === "mse-decode" && webRTCGloballyAvailable) {
+        if (error === "mse-decode" && webRTCUsableStates[cameraName]) {
           newModes[cameraName] = "webrtc";
         } else {
           newModes[cameraName] = "jsmpeg";
@@ -309,7 +306,7 @@ export default function LiveDashboardView({
         return newModes;
       });
     },
-    [setPreferredLiveModes, webRTCGloballyAvailable],
+    [setPreferredLiveModes, webRTCUsableStates],
   );
 
   // audio states

@@ -162,7 +162,7 @@ export function CameraStreamingDialog({
       [camera]: {
         streamName,
         streamType,
-        playerMode: forceLowBandwidth ? "jsmpeg" : resolvedPlayerMode,
+        playerMode: forceLowBandwidth ? "jsmpeg" : playerMode,
         compatibilityMode,
         playAudio: groupStreamingSettings?.[camera]?.playAudio ?? false,
         volume: groupStreamingSettings?.[camera]?.volume ?? 1,
@@ -179,7 +179,7 @@ export function CameraStreamingDialog({
     camera,
     streamName,
     streamType,
-    resolvedPlayerMode,
+    playerMode,
     forceLowBandwidth,
     compatibilityMode,
     setIsDialogOpen,

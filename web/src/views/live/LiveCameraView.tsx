@@ -34,6 +34,7 @@ import {
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import {
   LivePlayerError,
+  TwoWayTalkError,
   LivePlayerMode,
   LiveStreamMetadata,
   VideoResolutionType,
@@ -598,6 +599,14 @@ export default function LiveCameraView({
     [preferredLiveMode, webRTCUsable],
   );
 
+  const handleMicrophoneError = useCallback(
+    (error: TwoWayTalkError) => {
+      setMic(false);
+      toast.error(t(`twoWayTalk.error.${error}`), { position: "top-center" });
+    },
+    [t],
+  );
+
   return (
     <TransformWrapper
       minScale={1.0}
@@ -869,6 +878,7 @@ export default function LiveCameraView({
                   containerRef={containerRef}
                   setFullResolution={setFullResolution}
                   onError={handleError}
+                  onMicrophoneError={handleMicrophoneError}
                 />
               </div>
             </TransformComponent>
