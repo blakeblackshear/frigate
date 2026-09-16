@@ -58,7 +58,7 @@ pyclipper == 1.4.*
 shapely == 2.0.*
 rapidfuzz==3.12.*
 # HailoRT
-argcomplete==2.0.*
+argcomplete==3.7.*
 contextlib2==0.6.*
 future==0.18.*
 netaddr==1.3.*
