@@ -899,6 +899,14 @@ type TrainGridProps = {
   onRefresh: () => void;
   onDelete: (ids: string[]) => void;
 };
+
+// the backend writes a class with a "-" as "_" in train file names, since it
+// splits those names on "-", so a dataset class may still carry the dash
+function matchesTrainClass(classes: string[], name: string): boolean {
+  const target = name.replaceAll("-", "_");
+  return classes.some((item) => item.replaceAll("-", "_") === target);
+}
+
 function TrainGrid({
   model,
   contentRef,
@@ -936,7 +944,10 @@ function TrainGrid({
             return true;
           }
 
-          if (trainFilter.classes && !trainFilter.classes.includes(data.name)) {
+          if (
+            trainFilter.classes &&
+            !matchesTrainClass(trainFilter.classes, data.name)
+          ) {
             return false;
           }
 
