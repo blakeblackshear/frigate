@@ -77,6 +77,20 @@ class TestAudioTranscriptionGenAIConfig(unittest.TestCase):
         )
         self.assertEqual(config.audio_transcription.model, "whisper_cloud")
 
+    def test_unspecified_model_falls_back_to_whisper(self):
+        """An empty value must not read as a GenAI provider that resolves to no client."""
+        for value in (None, "", "   "):
+            with self.subTest(repr(value)):
+                config = FrigateConfig(
+                    **self._config(
+                        audio_transcription={"enabled": True, "model": value}
+                    )
+                )
+                self.assertIs(
+                    config.audio_transcription.model,
+                    AudioTranscriptionModelEnum.whisper,
+                )
+
     def test_missing_genai_key_raises(self):
         with self.assertRaises(ValidationError) as ctx:
             FrigateConfig(

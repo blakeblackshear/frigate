@@ -71,11 +71,20 @@ class AudioTranscriptionConfig(FrigateBaseModel):
     @field_validator("model", mode="before")
     @classmethod
     def coerce_model_enum(cls, v):
+        # An absent value ("model:" with nothing after it, or an explicit null)
+        # means unspecified, so fall back to the built-in backend. Left as None
+        # it would pass the GenAI-provider validation, which only inspects
+        # strings, and then be treated as a provider name that resolves to no
+        # client, turning transcription into a silent no-op.
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return AudioTranscriptionModelEnum.whisper
+
         if isinstance(v, str):
             try:
                 return AudioTranscriptionModelEnum(v)
             except ValueError:
                 return v
+
         return v
 
     device: EnrichmentsDeviceEnum = Field(

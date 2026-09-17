@@ -118,18 +118,58 @@ class TestStitchTranscripts(unittest.TestCase):
             with self.subTest(description):
                 self.assertEqual(stitch_transcripts(committed, incoming), expected)
 
-    def test_repeat_beyond_the_cap_is_not_collapsed(self):
-        """The <=5-word cap is what stops a genuinely repeated phrase disappearing."""
-        phrase = "one two three four five six"
+    def test_overlap_found_mid_window(self):
+        """The shared run is rarely at the start of the new window.
 
+        The provider re-transcribes the overlapping audio independently and
+        often renders its first word differently, so anchoring the match to the
+        start of the incoming window duplicates the whole phrase.
+        """
         self.assertEqual(
-            stitch_transcripts(phrase, phrase),
-            "one two three four five six one two three four five six",
+            stitch_transcripts(
+                "this is just gonna be a fun time", "It's gonna be a fun time."
+            ),
+            "this is just gonna be a fun time",
         )
 
-    def test_repeat_within_the_cap_is_collapsed(self):
-        """Inside the cap the dedup wins; this is the documented trade-off."""
+    def test_overlap_longer_than_five_words(self):
+        """The cap is bounded by window duration, not by the old 5-word n-gram."""
+        self.assertEqual(
+            stitch_transcripts(
+                "well anyway one two three four five six",
+                "one two three four five six seven",
+            ),
+            "well anyway one two three four five six seven",
+        )
+
+    def test_repeated_phrase_keeps_its_second_utterance(self):
+        """Preferring the earliest match is what protects a real repeat."""
+        self.assertEqual(
+            stitch_transcripts("a b c fun time", "fun time fun time"),
+            "a b c fun time fun time",
+        )
+
+    def test_window_wholly_repeating_the_tail_is_dropped(self):
+        """The accepted trade-off: an entirely redundant window adds nothing."""
         self.assertEqual(stitch_transcripts("go go go", "go go go"), "go go go")
+
+    def test_revises_a_mistranscribed_tail(self):
+        """A wrong last word would otherwise block every alignment.
+
+        Those words came from the newest audio, which the next window re-covers,
+        so replacing them is better than duplicating the phrase behind them.
+        """
+        self.assertEqual(
+            stitch_transcripts("Yeah. this is Jessica.", "This is just gonna be fun."),
+            "Yeah. this is just gonna be fun.",
+        )
+
+    def test_revision_needs_more_than_one_shared_word(self):
+        """A revision deletes published text, so it takes real evidence."""
+        self.assertEqual(
+            stitch_transcripts("the cat sat on a mat", "a dog barked"),
+            "the cat sat on a mat a dog barked",
+        )
 
 
 if __name__ == "__main__":
