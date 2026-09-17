@@ -55,6 +55,7 @@ export type GenAIProviderInfo = {
   roles: string[];
   supports_toggleable_thinking: boolean;
   supports_embeddings: boolean;
+  supports_transcription: boolean;
 };
 
 export type GenAIModelsResponse = Record<string, GenAIProviderInfo>;

@@ -134,6 +134,42 @@ class OpenAIClient(GenAIClient):
             logger.warning("OpenAI returned an error: %s", str(e))
             return None
 
+    @property
+    def supports_transcription(self) -> bool:
+        """OpenAI exposes /v1/audio/transcriptions for its speech models."""
+        return True
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio via the OpenAI audio transcriptions endpoint."""
+        try:
+            # runtime_options are chat-completion parameters; the transcriptions
+            # endpoint rejects unknown fields, so they are deliberately not splatted
+            # in here the way _send() does.
+            request_params: dict[str, Any] = {
+                "model": self.genai_config.model,
+                "file": ("audio.wav", audio, mime_type),
+                "response_format": "text",
+                "timeout": self.timeout,
+            }
+
+            if language:
+                request_params["language"] = language
+
+            result = self.provider.audio.transcriptions.create(**request_params)
+        except (TimeoutException, Exception) as e:
+            logger.warning("OpenAI returned an error: %s", str(e))
+            return None
+
+        # response_format="text" yields a bare string, but some compatible
+        # servers still return the object form
+        text = result if isinstance(result, str) else getattr(result, "text", None)
+        return text.strip() if text else None
+
     def list_models(self) -> list[str]:
         """Return available model IDs from the OpenAI-compatible API."""
         try:

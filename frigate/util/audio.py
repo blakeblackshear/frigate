@@ -1,15 +1,30 @@
 """Utilities for creating and manipulating audio."""
 
+import io
 import logging
 import os
+import struct
 import subprocess as sp
+import wave
 
+import numpy as np
 from pathvalidate import sanitize_filename
 
-from frigate.const import CACHE_DIR, STREAM_TYPE_MAIN, STREAM_TYPE_SUB
+from frigate.const import (
+    AUDIO_SAMPLE_RATE,
+    CACHE_DIR,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.models import Recordings
 
 logger = logging.getLogger(__name__)
+
+# Longest run of words the stitcher will treat as an overlap between two
+# consecutive windows. Matches the n-gram cap the vendored whisper_streaming
+# HypothesisBuffer uses, and bounds how much a genuinely repeated phrase can
+# be collapsed.
+MAX_STITCH_NGRAM = 5
 
 
 def _get_recordings_for_range(
@@ -117,7 +132,9 @@ def get_audio_from_recording(
             logger.debug(
                 f"Successfully extracted audio for {camera_name} from {start_ts} to {end_ts}"
             )
-            return process.stdout
+            # ffmpeg writes to a pipe, so it cannot seek back to patch the chunk
+            # sizes it reserved; repair them before any strict consumer sees them
+            return fix_wav_header(process.stdout)
         else:
             logger.error(f"Failed to extract audio: {process.stderr.decode()}")
             return None
@@ -129,3 +146,116 @@ def get_audio_from_recording(
             os.unlink(file_path)
         except OSError:
             pass
+
+
+def fix_wav_header(data: bytes) -> bytes:
+    """Recompute the RIFF and data chunk sizes in a WAV header.
+
+    ffmpeg writing to a non-seekable pipe cannot go back and patch the sizes it
+    reserved, so it leaves 0xFFFFFFFF placeholders. PyAV-based demuxers ignore
+    them, but strict validators may reject the file or read zero frames.
+
+    Args:
+        data: The complete WAV payload
+
+    Returns:
+        The payload with both sizes corrected, or unchanged if it is not a
+        parseable RIFF/WAVE stream
+    """
+    if len(data) < 12 or data[0:4] != b"RIFF" or data[8:12] != b"WAVE":
+        return data
+
+    out = bytearray(data)
+
+    # RIFF size covers everything after the 8-byte RIFF header
+    struct.pack_into("<I", out, 4, len(out) - 8)
+
+    # walk the chunk list to find "data"; every chunk is padded to even length
+    pos = 12
+
+    while pos + 8 <= len(out):
+        chunk_id = bytes(out[pos : pos + 4])
+        (chunk_size,) = struct.unpack_from("<I", out, pos + 4)
+
+        if chunk_id == b"data":
+            struct.pack_into("<I", out, pos + 4, len(out) - (pos + 8))
+            return bytes(out)
+
+        if chunk_size == 0xFFFFFFFF:
+            # an unpatched size before the data chunk leaves nothing to walk
+            break
+
+        pos += 8 + chunk_size + (chunk_size % 2)
+
+    return bytes(out)
+
+
+def pcm16_to_wav(samples: np.ndarray, sample_rate: int = AUDIO_SAMPLE_RATE) -> bytes:
+    """Wrap mono int16 PCM samples in a WAV container.
+
+    Args:
+        samples: The audio samples; converted to int16 if they are not already
+        sample_rate: Sample rate to declare in the header
+
+    Returns:
+        WAV bytes suitable for upload to a GenAI provider
+    """
+    if samples.dtype != np.int16:
+        samples = samples.astype(np.int16)
+
+    buffer = io.BytesIO()
+
+    with wave.open(buffer, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(sample_rate)
+        wav.writeframes(samples.tobytes())
+
+    return buffer.getvalue()
+
+
+def stitch_transcripts(committed: str, incoming: str) -> str:
+    """Append *incoming* to *committed*, dropping the phrase they share.
+
+    Consecutive overlapped transcription windows re-transcribe the same audio at
+    their seam, so the tail of one and the head of the next name the same words.
+    Find the longest run of up to MAX_STITCH_NGRAM words that is both a suffix of
+    *committed* and a prefix of *incoming*, and drop it from *incoming*.
+
+    Text-level rather than timestamp-level because only some providers return
+    word timings, and this has to work across all of them.
+
+    Args:
+        committed: The transcript accumulated so far
+        incoming: The newest window's transcript
+
+    Returns:
+        The combined transcript
+    """
+    incoming_words = incoming.split()
+
+    if not incoming_words:
+        return committed
+
+    committed_words = committed.split()
+
+    if not committed_words:
+        return " ".join(incoming_words)
+
+    # prefer the longest match so a multi-word overlap is not cut short by a
+    # shorter one that also matches
+    overlap = 0
+
+    for length in range(
+        min(MAX_STITCH_NGRAM, len(committed_words), len(incoming_words)), 0, -1
+    ):
+        if committed_words[-length:] == incoming_words[:length]:
+            overlap = length
+            break
+
+    remainder = incoming_words[overlap:]
+
+    if not remainder:
+        return " ".join(committed_words)
+
+    return " ".join(committed_words + remainder)

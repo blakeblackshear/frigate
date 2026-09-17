@@ -33,6 +33,8 @@ import { CameraPathWidget } from "./widgets/CameraPathWidget";
 import { OptionalFieldWidget } from "./widgets/OptionalFieldWidget";
 import { SemanticSearchModelWidget } from "./widgets/SemanticSearchModelWidget";
 import { SemanticSearchModelSizeWidget } from "./widgets/SemanticSearchModelSizeWidget";
+import { AudioTranscriptionModelWidget } from "./widgets/AudioTranscriptionModelWidget";
+import { AudioTranscriptionModelSizeWidget } from "./widgets/AudioTranscriptionModelSizeWidget";
 import { OnvifProfileWidget } from "./widgets/OnvifProfileWidget";
 import { PTZPresetsWidget } from "./widgets/PTZPresetsWidget";
 import { DefaultRoleWidget } from "./widgets/DefaultRoleWidget";
@@ -93,6 +95,8 @@ export const frigateTheme: FrigateTheme = {
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
     semanticSearchModelSize: SemanticSearchModelSizeWidget,
+    audioTranscriptionModel: AudioTranscriptionModelWidget,
+    audioTranscriptionModelSize: AudioTranscriptionModelSizeWidget,
     onvifProfile: OnvifProfileWidget,
     ptzPresets: PTZPresetsWidget,
     defaultRole: DefaultRoleWidget,

@@ -409,6 +409,89 @@ class LlamaCppClient(GenAIClient):
         return self._supports_audio
 
     @property
+    def supports_transcription(self) -> bool:
+        """Audio-capable models can transcribe through chat completions."""
+        return self._supports_audio
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio through /v1/chat/completions with an input_audio part.
+
+        Deliberately not /v1/audio/transcriptions: that route needs a separately
+        loaded whisper model which the /props and /v1/models probe cannot see, so
+        supports_transcription would disagree with what the endpoint can serve.
+
+        The _media_marker / multimodal_data convention is an /embeddings-only
+        protocol, so no marker-refresh retry is needed here.
+        """
+        if self.provider is None:
+            logger.warning(
+                "llama.cpp provider has not been initialized, audio will not be transcribed. Check your llama.cpp configuration."
+            )
+            return None
+
+        if not self._supports_audio:
+            logger.warning(
+                "llama.cpp model '%s' does not accept audio input",
+                self.genai_config.model,
+            )
+            return None
+
+        prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
+
+        if language:
+            prompt += f" The speech is in language '{language}'."
+
+        try:
+            encoded_audio = base64.b64encode(audio).decode("utf-8")
+            payload: dict[str, Any] = {
+                "model": self.genai_config.model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "input_audio",
+                                "input_audio": {
+                                    "data": encoded_audio,
+                                    "format": "wav",
+                                },
+                            },
+                        ],
+                    },
+                ],
+                **self.provider_options,
+            }
+
+            response = self._post(
+                f"{self.provider}/v1/chat/completions",
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            if (
+                result is not None
+                and "choices" in result
+                and len(result["choices"]) > 0
+            ):
+                choice = result["choices"][0]
+
+                if "message" in choice and choice["message"].get("content"):
+                    return str(choice["message"]["content"].strip()) or None
+
+            return None
+        except Exception as e:
+            logger.warning("llama.cpp returned an error: %s", str(e))
+            return None
+
+    @property
     def supports_tools(self) -> bool:
         """Whether the loaded model supports tool/function calling."""
         return self._supports_tools

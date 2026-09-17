@@ -110,6 +110,12 @@ class GenAIClientManager:
         name = self._role_map.get(GenAIRoleEnum.embeddings)
         return self._get_client(name) if name else None
 
+    @property
+    def transcribe_client(self) -> "GenAIClient | None":
+        """Client configured for the transcribe role."""
+        name = self._role_map.get(GenAIRoleEnum.transcribe)
+        return self._get_client(name) if name else None
+
     def role_info(self) -> dict[str, dict[str, Any]]:
         """Return the model selected for each configured role and its context size.
 
@@ -144,5 +150,6 @@ class GenAIClientManager:
                 "roles": [r.value for r in genai_cfg.roles],
                 "supports_toggleable_thinking": client.supports_toggleable_thinking,
                 "supports_embeddings": client.supports_embeddings,
+                "supports_transcription": client.supports_transcription,
             }
         return result

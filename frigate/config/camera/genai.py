@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import Any
+from typing import Any, Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from ..base import FrigateBaseModel
 from ..env import EnvString
@@ -21,6 +21,17 @@ class GenAIRoleEnum(str, Enum):
     chat = "chat"
     descriptions = "descriptions"
     embeddings = "embeddings"
+    transcribe = "transcribe"
+
+
+# Providers that can accept audio input for the transcribe role. Ollama has no
+# audio input support, so claiming the role there would fail at request time.
+TRANSCRIBE_CAPABLE_PROVIDERS = {
+    GenAIProviderEnum.openai,
+    GenAIProviderEnum.azure_openai,
+    GenAIProviderEnum.gemini,
+    GenAIProviderEnum.llamacpp,
+}
 
 
 class GenAIConfig(FrigateBaseModel):
@@ -52,7 +63,7 @@ class GenAIConfig(FrigateBaseModel):
             GenAIRoleEnum.chat,
         ],
         title="Roles",
-        description="GenAI roles (chat, descriptions, embeddings); one provider per role.",
+        description="GenAI roles (chat, descriptions, embeddings, transcribe); one provider per role. Only chat, descriptions, and embeddings are granted by default; transcribe must be listed explicitly.",
     )
     provider_options: dict[str, Any] = Field(
         default={},
@@ -66,3 +77,17 @@ class GenAIConfig(FrigateBaseModel):
         description="Runtime options passed to the provider for each inference call.",
         json_schema_extra={"additionalProperties": {}},
     )
+
+    @model_validator(mode="after")
+    def validate_transcribe_provider(self) -> Self:
+        """Reject the transcribe role on providers that cannot accept audio input."""
+        if (
+            GenAIRoleEnum.transcribe in self.roles
+            and self.provider not in TRANSCRIBE_CAPABLE_PROVIDERS
+        ):
+            raise ValueError(
+                f"GenAI provider '{self.provider.value}' does not support audio input "
+                "and cannot be given the 'transcribe' role."
+            )
+
+        return self

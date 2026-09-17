@@ -1693,7 +1693,8 @@
       "options": {
         "embeddings": "Embedding",
         "descriptions": "Descriptions",
-        "chat": "Chat"
+        "chat": "Chat",
+        "transcribe": "Transcription"
       }
     },
     "semanticSearchModel": {
@@ -1742,6 +1743,14 @@
       "admin": "Admin",
       "viewer": "Viewer",
       "none": "None (deny access)"
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Select model…",
+      "builtIn": "Built-in Models",
+      "genaiProviders": "GenAI Providers"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "Not applicable for GenAI providers"
     }
   },
   "globalConfig": {
@@ -1953,7 +1962,8 @@
       "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
     },
     "audioTranscription": {
-      "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active."
+      "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active.",
+      "genaiProviderSelected": "A GenAI provider is selected, so the device and model size settings are ignored."
     },
     "detect": {
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",

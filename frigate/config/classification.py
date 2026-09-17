@@ -5,6 +5,7 @@ from pydantic import ConfigDict, Field, field_validator
 from .base import FrigateBaseModel
 
 __all__ = [
+    "AudioTranscriptionModelEnum",
     "CameraFaceRecognitionConfig",
     "CameraLicensePlateRecognitionConfig",
     "CameraAudioTranscriptionConfig",
@@ -18,6 +19,10 @@ __all__ = [
 class SemanticSearchModelEnum(str, Enum):
     jinav1 = "jinav1"
     jinav2 = "jinav2"
+
+
+class AudioTranscriptionModelEnum(str, Enum):
+    whisper = "whisper"
 
 
 class EnrichmentsDeviceEnum(str, Enum):
@@ -57,6 +62,22 @@ class AudioTranscriptionConfig(FrigateBaseModel):
         title="Transcription language",
         description="Language code used for transcription/translation (for example 'en' for English). See https://whisper-api.com/docs/languages/ for supported language codes.",
     )
+    model: AudioTranscriptionModelEnum | str | None = Field(
+        default=AudioTranscriptionModelEnum.whisper,
+        title="Audio transcription model or GenAI provider name",
+        description="The transcription backend: 'whisper' for Frigate's built-in local models, or the name of a GenAI provider with the transcribe role.",
+    )
+
+    @field_validator("model", mode="before")
+    @classmethod
+    def coerce_model_enum(cls, v):
+        if isinstance(v, str):
+            try:
+                return AudioTranscriptionModelEnum(v)
+            except ValueError:
+                return v
+        return v
+
     device: EnrichmentsDeviceEnum = Field(
         default=EnrichmentsDeviceEnum.CPU,
         title="Transcription device",

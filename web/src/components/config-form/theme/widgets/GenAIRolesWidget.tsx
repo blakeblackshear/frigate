@@ -6,7 +6,12 @@ import { Switch } from "@/components/ui/switch";
 import type { ConfigFormContext } from "@/types/configForm";
 import type { GenAIModelsResponse } from "@/types/chat";
 
-const GENAI_ROLES = ["embeddings", "descriptions", "chat"] as const;
+const GENAI_ROLES = [
+  "embeddings",
+  "descriptions",
+  "chat",
+  "transcribe",
+] as const;
 
 function normalizeValue(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -49,12 +54,24 @@ export function GenAIRolesWidget(props: WidgetProps) {
     return info ? info.supports_embeddings : true;
   }, [genaiInfo, providerKey]);
 
+  const transcriptionSupported = useMemo(() => {
+    if (!providerKey) return true;
+    const info = genaiInfo?.[providerKey];
+    return info ? info.supports_transcription : true;
+  }, [genaiInfo, providerKey]);
+
+  const unsupportedRoles = useMemo(() => {
+    const unsupported = new Set<string>();
+
+    if (!embeddingsSupported) unsupported.add("embeddings");
+    if (!transcriptionSupported) unsupported.add("transcribe");
+
+    return unsupported;
+  }, [embeddingsSupported, transcriptionSupported]);
+
   const availableRoles = useMemo(
-    () =>
-      embeddingsSupported
-        ? GENAI_ROLES
-        : GENAI_ROLES.filter((role) => role !== "embeddings"),
-    [embeddingsSupported],
+    () => GENAI_ROLES.filter((role) => !unsupportedRoles.has(role)),
+    [unsupportedRoles],
   );
 
   const occupiedRoles = useMemo(() => {
@@ -80,11 +97,13 @@ export function GenAIRolesWidget(props: WidgetProps) {
     return occupied;
   }, [formContext?.formData, providerKey]);
 
+  // strip every unsupported role in a single onChange; two effects each
+  // rewriting the same value would race and lose one of the edits
   useEffect(() => {
-    if (!embeddingsSupported && selectedRoles.includes("embeddings")) {
-      onChange(selectedRoles.filter((role) => role !== "embeddings"));
-    }
-  }, [embeddingsSupported, selectedRoles, onChange]);
+    if (!selectedRoles.some((role) => unsupportedRoles.has(role))) return;
+
+    onChange(selectedRoles.filter((role) => !unsupportedRoles.has(role)));
+  }, [unsupportedRoles, selectedRoles, onChange]);
 
   const toggleRole = (role: string, enabled: boolean) => {
     if (enabled) {

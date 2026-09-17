@@ -251,7 +251,11 @@ class EmbeddingMaintainer(threading.Thread):
         ):
             self.post_processors.append(
                 AudioTranscriptionPostProcessor(
-                    self.config, self.requestor, self.embeddings, metrics
+                    self.config,
+                    self.requestor,
+                    self.embeddings,
+                    metrics,
+                    self.genai_manager,
                 )
             )
 

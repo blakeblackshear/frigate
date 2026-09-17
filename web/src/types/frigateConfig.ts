@@ -394,7 +394,7 @@ export type AllGroupsStreamingSettings = {
   [groupName: string]: GroupStreamingSettings;
 };
 
-export type GenAIRole = "chat" | "descriptions" | "embeddings";
+export type GenAIRole = "chat" | "descriptions" | "embeddings" | "transcribe";
 
 export type GenAIAgentConfig = {
   api_key?: string;

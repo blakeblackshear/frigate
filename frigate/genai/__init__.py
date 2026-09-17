@@ -338,6 +338,11 @@ class GenAIClient:
         """Whether the configured model can generate embeddings via embed()."""
         return False
 
+    @property
+    def supports_transcription(self) -> bool:
+        """Whether the configured model can transcribe audio via transcribe()."""
+        return False
+
     def list_models(self) -> list[str]:
         """Return the list of model names available from this provider.
 
@@ -375,6 +380,33 @@ class GenAIClient:
             self.__class__.__name__,
         )
         return []
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe speech audio to text.
+
+        Audio is passed as a self-describing blob rather than raw samples so
+        every provider receives a container it can declare, and WAV framing
+        lives in one place instead of in each plugin.
+
+        Args:
+            audio: The encoded audio payload (WAV bytes by default)
+            language: Optional ISO language hint for the provider
+            mime_type: Media type of ``audio``
+
+        Returns:
+            The transcript, or None when the provider cannot produce one
+        """
+        logger.warning(
+            "%s does not support transcription. "
+            "This method should be overridden by the provider implementation.",
+            self.__class__.__name__,
+        )
+        return None
 
     def chat_with_tools(
         self,
