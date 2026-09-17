@@ -129,6 +129,7 @@ def events(
         zones = zone
 
     limit = params.limit
+    offset = params.offset
     after = params.after
     before = params.before
     time_range = params.time_range
@@ -361,11 +362,15 @@ def events(
     else:
         order_by = Event.start_time.desc()
 
+    # offset paging needs a stable order when scores or speeds tie
+    tiebreaker = [Event.id] if sort and sort.startswith(("score", "speed")) else []
+
     events = (
         Event.select(*selected_columns)
         .where(reduce(operator.and_, clauses))
-        .order_by(order_by)
+        .order_by(order_by, *tiebreaker)
         .limit(limit)
+        .offset(offset)
         .dicts()
         .iterator()
     )
@@ -518,6 +523,7 @@ def events_search(
     search_type = params.search_type
     include_thumbnails = params.include_thumbnails
     limit = params.limit
+    offset = params.offset
     sort = params.sort
 
     # Filters
@@ -824,6 +830,9 @@ def events_search(
     if search_results:
         events_query = events_query.where(Event.id << list(search_results.keys()))
 
+    # sorts below are stable, so this orders ties for offset paging
+    events_query = events_query.order_by(Event.id)
+
     # Fetch events and process them in a single pass
     processed_events = []
     for event in events_query.dicts():
@@ -881,7 +890,7 @@ def events_search(
         processed_events.sort(key=lambda x: x["start_time"], reverse=True)
 
     # Limit the number of events returned
-    processed_events = processed_events[:limit]
+    processed_events = processed_events[offset:][:limit]
 
     return JSONResponse(content=processed_events)
 
