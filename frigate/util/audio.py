@@ -29,6 +29,11 @@ logger = logging.getLogger(__name__)
 # legitimately be redundant. The vendored whisper_streaming HypothesisBuffer
 # caps at 5, but there the n-gram is only a tie-break on top of word-level
 # timestamps; here it is the entire alignment, so 5 truncates real overlaps.
+# Sentinel meaning "let the model work out the language". The vendored
+# whisper_streaming code already uses this spelling, so it is the established
+# convention for the audio_transcription.language field.
+AUTO_LANGUAGE = "auto"
+
 MAX_STITCH_NGRAM = 16
 
 # How many trailing committed words the stitcher may discard to find an
@@ -370,3 +375,18 @@ def _overlap_key(word: str) -> str:
 
     # a token that is nothing but punctuation would otherwise match any other
     return key or word
+
+
+def resolve_language(language: str | None) -> str | None:
+    """Turn a configured language into an explicit code, or None for auto-detect.
+
+    Args:
+        language: The configured value, possibly AUTO_LANGUAGE
+
+    Returns:
+        An ISO language code, or None when the backend should detect it
+    """
+    if not language or language == AUTO_LANGUAGE:
+        return None
+
+    return language

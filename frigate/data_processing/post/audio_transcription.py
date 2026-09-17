@@ -21,7 +21,11 @@ from frigate.data_processing.types import PostProcessDataEnum
 from frigate.embeddings.embeddings import Embeddings
 from frigate.genai.manager import GenAIClientManager
 from frigate.types import TrackedObjectUpdateTypesEnum
-from frigate.util.audio import clean_transcript, get_audio_from_recording
+from frigate.util.audio import (
+    clean_transcript,
+    get_audio_from_recording,
+    resolve_language,
+)
 
 from ..types import DataProcessorMetrics
 from .api import PostProcessorApi
@@ -179,7 +183,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
 
         text = client.transcribe(
             audio_data,
-            language=self.config.audio_transcription.language,
+            language=resolve_language(self.config.audio_transcription.language),
         )
         return clean_transcript(text) or None
 
@@ -197,7 +201,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
 
             segments, info = self.recognizer.transcribe(
                 temp_wav,
-                language=self.config.audio_transcription.language,
+                language=resolve_language(self.config.audio_transcription.language),
                 beam_size=5,
             )
 

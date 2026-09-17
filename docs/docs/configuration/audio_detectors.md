@@ -278,9 +278,10 @@ The optional config parameters that can be set at the global level include:
   - This can be `small` or `large`. The `small` setting uses `sherpa-onnx` models that are fast, lightweight, and always run on the CPU but are not as accurate as the `whisper` model.
   - This config option applies to **live transcription only**. With `model: whisper`, recorded `speech` events always use a different `whisper` model (and can be accelerated for CUDA hardware if available with `device: GPU`).
   - Ignored when `model` names a GenAI provider.
-- **`language`**: Defines the language used by `whisper` to translate `speech` audio events (and live audio only if using the `large` model).
-  - Default: `en`
-  - You must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+- **`language`**: Defines the language used to transcribe and translate `speech` audio events (and live audio only if using the `large` model or a GenAI provider).
+  - Default: `auto`
+  - `auto` lets the model detect the language itself, which most models do well. Set an explicit language only if detection is picking the wrong one.
+  - Otherwise you must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
   - Transcriptions for `speech` events are translated.
   - Live audio is translated only if you are using the `large` model. The `small` `sherpa-onnx` model is English-only.
 
@@ -288,7 +289,7 @@ The only field that is valid at the camera level is `enabled`. In particular `mo
 
 #### GenAI Provider
 
-Frigate can send audio to a GenAI provider for transcription when that provider has the `transcribe` role. This is useful if you already run a GenAI provider, or if you do not have the CPU/GPU headroom for a local whisper model. Supported providers are **OpenAI**, **Azure OpenAI**, **Gemini**, and **llama.cpp** with an audio-capable model. Ollama is not supported as it has no audio input.
+Frigate can send audio to a GenAI provider for transcription when that provider has the `transcribe` role. This is useful if you already run a GenAI provider, or if you do not have the CPU/GPU headroom for a local whisper model. Supported providers are **OpenAI**, **Azure OpenAI**, **Gemini**, and **llama.cpp** with an audio-capable model (a dedicated ASR model such as Qwen3-ASR, or a general multimodal model that accepts audio). Ollama is not supported as it has no audio input.
 
 To use a GenAI provider for audio transcription:
 
@@ -341,7 +342,11 @@ Three things keep this opt-in: `transcribe` is not one of the default roles, liv
 
 :::
 
-The `language` config option is forwarded to the provider as a hint. `device` and `model_size` have no effect on this path and no local model is ever downloaded.
+`device` and `model_size` have no effect on this path and no local model is ever downloaded.
+
+`language` defaults to `auto`, which sends no language hint and lets the model detect it. Most audio models detect language well, so leave it on `auto` unless detection is picking the wrong one.
+
+When set explicitly, it is sent as the transcription endpoint's native `language` parameter for OpenAI, Azure, and llama.cpp, and as part of the prompt for Gemini. This matters for dedicated ASR models such as Qwen3-ASR: they read the prompt as contextual biasing rather than as an instruction, so a language named in the prompt is ignored, while the endpoint parameter is honored.
 
 #### Live transcription
 

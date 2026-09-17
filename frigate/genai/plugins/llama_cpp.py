@@ -419,14 +419,16 @@ class LlamaCppClient(GenAIClient):
         language: str | None = None,
         mime_type: str = "audio/wav",
     ) -> str | None:
-        """Transcribe audio through /v1/chat/completions with an input_audio part.
+        """Transcribe audio through the OpenAI-compatible transcriptions route.
 
-        Deliberately not /v1/audio/transcriptions: that route needs a separately
-        loaded whisper model which the /props and /v1/models probe cannot see, so
-        supports_transcription would disagree with what the endpoint can serve.
+        llama.cpp serves /v1/audio/transcriptions for any audio-capable model,
+        not only a separately loaded whisper (ggml-org/llama.cpp#21863), so it
+        covers exactly the models supports_transcription detects. It takes the
+        language as a native multipart field, which is the only thing dedicated
+        ASR models honor: they read the chat prompt as contextual biasing, so
+        asking one there to use a language does nothing.
 
-        The _media_marker / multimodal_data convention is an /embeddings-only
-        protocol, so no marker-refresh retry is needed here.
+        Falls back to chat completions when the server predates that route.
         """
         if self.provider is None:
             logger.warning(
@@ -441,6 +443,41 @@ class LlamaCppClient(GenAIClient):
             )
             return None
 
+        try:
+            data = {"model": self.genai_config.model, "response_format": "json"}
+
+            if language:
+                data["language"] = language
+
+            response = self._post(
+                f"{self.provider}/v1/audio/transcriptions",
+                files={"file": ("audio.wav", audio, mime_type)},
+                data=data,
+                timeout=self.timeout,
+            )
+
+            if response.status_code == 404:
+                logger.debug(
+                    "llama.cpp server has no /v1/audio/transcriptions route, using chat completions"
+                )
+                return self._transcribe_via_chat(audio, language)
+
+            response.raise_for_status()
+            result = response.json()
+            text = result.get("text") if isinstance(result, dict) else None
+
+            return str(text).strip() or None if text else None
+        except Exception as e:
+            logger.warning("llama.cpp returned an error: %s", str(e))
+            return None
+
+    def _transcribe_via_chat(self, audio: bytes, language: str | None) -> str | None:
+        """Transcribe through /v1/chat/completions, for servers without the
+        transcriptions route.
+
+        The _media_marker / multimodal_data convention is an /embeddings-only
+        protocol, so no marker-refresh retry is needed here.
+        """
         prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
 
         if language:

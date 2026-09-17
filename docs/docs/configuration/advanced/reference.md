@@ -814,13 +814,12 @@ genai:
     model: gemini-1.5-flash
     # Optional: Roles this provider handles (default: shown below)
     # Each role (chat, descriptions, embeddings, transcribe) must be assigned to exactly
-    # one provider. transcribe is not granted by default and must be listed explicitly;
-    # it is not available on ollama, which has no audio input.
+    # one provider.
     roles:
       - chat
       - descriptions
       - embeddings
-      # - transcribe
+      - transcribe
     # Optional additional args to pass to the GenAI Provider (default: None)
     provider_options:
       keep_alive: -1
@@ -843,8 +842,9 @@ audio_transcription:
   # Optional: Set the model size used for live transcription. (default: shown below)
   model_size: small
   # Optional: Set the language used for transcription translation. (default: shown below)
-  # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
-  language: en
+  # Use 'auto' to let the model detect the language, or a language code from
+  # https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
+  language: auto
 
 # Optional: Configuration for classification models
 classification:

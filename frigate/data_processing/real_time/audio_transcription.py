@@ -20,7 +20,12 @@ from frigate.data_processing.real_time.whisper_online import (
     FasterWhisperASR,
     OnlineASRProcessor,
 )
-from frigate.util.audio import clean_transcript, pcm16_to_wav, stitch_transcripts
+from frigate.util.audio import (
+    clean_transcript,
+    pcm16_to_wav,
+    resolve_language,
+    stitch_transcripts,
+)
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -219,7 +224,7 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
 
         text = client.transcribe(
             pcm16_to_wav(window),
-            language=self.config.audio_transcription.language,
+            language=resolve_language(self.config.audio_transcription.language),
         )
 
         # cleaning has to come first: a silent window often comes back as the

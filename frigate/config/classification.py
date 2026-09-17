@@ -58,9 +58,9 @@ class AudioTranscriptionConfig(FrigateBaseModel):
         description="Enable or disable automatic audio transcription for all cameras; can be overridden per-camera.",
     )
     language: str = Field(
-        default="en",
+        default="auto",
         title="Transcription language",
-        description="Language code used for transcription/translation (for example 'en' for English). See https://whisper-api.com/docs/languages/ for supported language codes.",
+        description="Language code used for transcription/translation (for example 'en' for English), or 'auto' to let the model detect it. See https://whisper-api.com/docs/languages/ for supported language codes.",
     )
     model: AudioTranscriptionModelEnum | str | None = Field(
         default=AudioTranscriptionModelEnum.whisper,

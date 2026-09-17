@@ -86,7 +86,7 @@ The `transcribe` role needs a model that accepts audio input. Frigate sends shor
 | `qwen3-omni`   | Audio-capable multimodal model for [Audio Transcription](/configuration/audio_detectors#genai-provider). Must be served by llama.cpp started with the matching `--mmproj`. |
 | `voxtral-mini` | Smaller audio-capable option, lower resource use with weaker transcript quality on noisy audio.                                                                             |
 
-llama.cpp only reports audio support when the server was started with an audio projector (`--mmproj`). Without it Frigate sees the model as text-only and the `transcribe` role is unavailable in the UI.
+llama.cpp only reports audio support when the server was started with an audio projector (`--mmproj`). Without it Frigate sees the model as text-only and the `transcribe` role is unavailable in the UI. Frigate transcribes through the server's `/v1/audio/transcriptions` route, which llama.cpp serves for any audio-capable model.
 
 :::info
 
