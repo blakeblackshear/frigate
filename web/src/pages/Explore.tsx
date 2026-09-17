@@ -198,7 +198,19 @@ export default function Explore() {
 
     const [url, params] = searchQuery;
 
-    const isAscending = params.sort?.includes("date_asc");
+    // a start_time cursor only works when rows are ordered by start_time,
+    // so every other sort pages by offset
+    const isDateSort =
+      params.sort === "date_asc" ||
+      params.sort === "date_desc" ||
+      (!params.sort && url === "events");
+
+    if (pageIndex > 0 && !isDateSort) {
+      return [
+        url,
+        { ...params, offset: pageIndex * API_LIMIT, limit: API_LIMIT },
+      ];
+    }
 
     if (pageIndex > 0 && previousPageData) {
       const lastDate = previousPageData[previousPageData.length - 1].start_time;
@@ -206,7 +218,8 @@ export default function Explore() {
         url,
         {
           ...params,
-          [isAscending ? "after" : "before"]: lastDate.toString(),
+          [params.sort === "date_asc" ? "after" : "before"]:
+            lastDate.toString(),
           limit: API_LIMIT,
         },
       ];
@@ -238,10 +251,17 @@ export default function Explore() {
     },
   });
 
-  const searchResults = useMemo(
-    () => (data ? ([] as SearchResult[]).concat(...data) : []),
-    [data],
-  );
+  // offset pages can overlap when results shift between page fetches
+  const searchResults = useMemo(() => {
+    if (!data) return [];
+
+    const seen = new Set<string>();
+    return data.flat().filter((result) => {
+      if (seen.has(result.id)) return false;
+      seen.add(result.id);
+      return true;
+    });
+  }, [data]);
   const isLoadingInitialData = !data && !isValidating;
   const isLoadingMore =
     isLoadingInitialData ||

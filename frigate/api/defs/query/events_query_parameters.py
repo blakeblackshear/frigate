@@ -14,6 +14,7 @@ class EventsQueryParams(BaseModel):
     zone: str | None = "all"
     zones: str | None = "all"
     limit: int | None = 100
+    offset: int | None = 0
     after: float | None = None
     before: float | None = None
     time_range: str | None = DEFAULT_TIME_RANGE
@@ -55,6 +56,7 @@ class EventsSearchQueryParams(BaseModel):
         deprecated=True,
     )
     limit: int | None = 50
+    offset: int | None = 0
     cameras: str | None = "all"
     labels: str | None = "all"
     sub_labels: str | None = "all"

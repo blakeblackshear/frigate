@@ -109,6 +109,7 @@ export type SearchQueryParams = {
   max_speed?: number;
   search_type?: string;
   limit?: number;
+  offset?: number;
   in_progress?: number;
   include_thumbnails?: number;
   query?: string;
