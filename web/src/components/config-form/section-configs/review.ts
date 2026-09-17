@@ -68,8 +68,7 @@ const review: SectionConfigOverrides = {
         position: "after",
         condition: (ctx) => {
           const genai = ctx.formData?.genai as
-            | Record<string, unknown>
-            | undefined;
+            Record<string, unknown> | undefined;
           if (genai?.image_source !== "recordings") return false;
           if (ctx.level === "camera" && ctx.fullCameraConfig) {
             return ctx.fullCameraConfig.record?.enabled === false;
