@@ -829,6 +829,57 @@ def rename_hailo_detector(
     return new_config
 
 
+def _camera_enables_transcription(camera: dict[str, Any]) -> bool:
+    """Whether a camera or one of its profiles turns audio transcription on."""
+    sections = [camera.get("audio_transcription")]
+    profiles = camera.get("profiles")
+
+    if isinstance(profiles, dict):
+        for profile in profiles.values():
+            if isinstance(profile, dict):
+                sections.append(profile.get("audio_transcription"))
+
+    return any(
+        isinstance(section, dict) and section.get("enabled") for section in sections
+    )
+
+
+def _migrate_transcription_language(config: dict[str, Any]) -> None:
+    """Pin English for configs written before the language default became auto.
+
+    audio_transcription.language used to default to "en", so a config that
+    turned transcription on without naming a language was transcribing English.
+    The default is now "auto" (let the model detect), which is better for new
+    users but would silently change behavior for existing ones, so write the old
+    value explicitly for anyone actually using the feature.
+    """
+    transcription = config.get("audio_transcription")
+
+    if isinstance(transcription, dict) and "language" in transcription:
+        # named a language already, so nothing was relying on the default
+        return
+
+    enabled = isinstance(transcription, dict) and bool(transcription.get("enabled"))
+
+    if not enabled:
+        enabled = any(
+            _camera_enables_transcription(camera)
+            for camera in config.get("cameras", {}).values()
+            if isinstance(camera, dict)
+        )
+
+    if not enabled:
+        return
+
+    if not isinstance(transcription, dict):
+        # a camera enabled it without a global section, which still picked up
+        # the global default
+        transcription = {}
+        config["audio_transcription"] = transcription
+
+    transcription["language"] = "en"
+
+
 def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating Frigate config to 0.19-0."""
     new_config = rename_hailo_detector(config)
@@ -844,6 +895,8 @@ def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
                 _migrate_birdseye_mode(profile.get("birdseye"))
 
         new_config["cameras"][name] = camera_config
+
+    _migrate_transcription_language(new_config)
 
     new_config["version"] = "0.19-0"
     return new_config
