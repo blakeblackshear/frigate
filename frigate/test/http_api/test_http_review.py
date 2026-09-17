@@ -240,9 +240,101 @@ class TestHttpReview(BaseTestHttp):
             assert len(response_json) == 1
             assert response_json[0]["id"] == id_reviewed
 
+    def test_get_review_with_label_filter_matches_verified(self):
+        """Test that a label filter also matches the `-verified` variant."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.person", now, now + 2, data={"objects": ["person"]}
+            )
+            super().insert_mock_review_segment(
+                "123456.verified", now, now + 2, data={"objects": ["person-verified"]}
+            )
+            super().insert_mock_review_segment(
+                "123456.car", now, now + 2, data={"objects": ["car"]}
+            )
+
+            params = {
+                "labels": "person",
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert {r["id"] for r in response_json} == {
+                "123456.person",
+                "123456.verified",
+            }
+
+    def test_get_review_with_label_filter_does_not_match_prefix(self):
+        """Test that a label filter does not match labels that only share a prefix."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.carrot", now, now + 2, data={"objects": ["carrot"]}
+            )
+
+            params = {
+                "labels": "car",
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            assert len(response.json()) == 0
+
+    def test_get_review_with_audio_label_filter(self):
+        """Test that a label filter still matches audio labels."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.audio", now, now + 2, data={"audio": ["speech"]}
+            )
+
+            params = {
+                "labels": "speech",
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 1
+            assert response_json[0]["id"] == "123456.audio"
+
     ####################################################################################################################
     ###################################  GET /review/summary Endpoint   #################################################
     ####################################################################################################################
+    def test_get_review_summary_label_filter_matches_verified(self):
+        """Test that the summary label filter also matches the `-verified` variant."""
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.verified", data={"objects": ["person-verified"]}
+            )
+            super().insert_mock_review_segment(
+                "123456.car", data={"objects": ["car"]}, severity=SeverityEnum.detection
+            )
+
+            params = {
+                "cameras": "front_door",
+                "labels": "person",
+                "zones": "all",
+                "timezone": "utc",
+            }
+            response = client.get("/review/summary", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert response_json["last24Hours"]["total_alert"] == 1
+            assert response_json["last24Hours"]["total_detection"] == 0
+
+            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            assert response_json[today_formatted]["total_alert"] == 1
+            assert response_json[today_formatted]["total_detection"] == 0
+
     def test_get_review_summary_all_filters(self):
         with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
