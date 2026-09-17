@@ -627,6 +627,36 @@ class TestOpenAITranscribe(unittest.TestCase):
 
         self.assertNotIn("temperature", create.call_args.kwargs)
 
+    def test_gpt_transcribe_uses_languages_array(self):
+        """gpt-transcribe replaced `language` with a `languages` array."""
+        client = _make_client("openai", model="gpt-transcribe", api_key="k")
+        create = MagicMock(return_value="hi")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        client.transcribe(WAV_BYTES, language="en")
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs["extra_body"], {"languages": ["en"]})
+        # sending both fields is rejected by the API
+        self.assertNotIn("language", kwargs)
+
+    def test_older_models_use_singular_language(self):
+        for model in ("gpt-4o-transcribe", "whisper-1"):
+            with self.subTest(model):
+                client = _make_client("openai", model=model, api_key="k")
+                create = MagicMock(return_value="hi")
+                client.provider = SimpleNamespace(
+                    audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+                )
+
+                client.transcribe(WAV_BYTES, language="en")
+
+                kwargs = create.call_args.kwargs
+                self.assertEqual(kwargs["language"], "en")
+                self.assertNotIn("extra_body", kwargs)
+
     def test_object_response_form(self):
         client = self._client()
         create = MagicMock(return_value=SimpleNamespace(text="hi"))
@@ -733,17 +763,64 @@ class TestLlamaCppTranscribe(unittest.TestCase):
         self.assertTrue(self._client(True).supports_transcription)
         self.assertFalse(self._client(False).supports_transcription)
 
-    def test_emits_input_audio_part(self):
-        client = self._client(True)
+    @staticmethod
+    def _transcriptions_response(text: str = " transcript "):
         response = MagicMock()
-        response.json.return_value = {
-            "choices": [{"message": {"content": " transcript "}}]
-        }
+        response.status_code = 200
+        response.json.return_value = {"text": text}
+        return response
 
-        with patch.object(client, "_post", return_value=response) as post:
+    @staticmethod
+    def _chat_response(content: str = " fallback transcript "):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {"choices": [{"message": {"content": content}}]}
+        return response
+
+    def test_posts_multipart_to_transcriptions(self):
+        client = self._client(True)
+
+        with patch.object(
+            client, "_post", return_value=self._transcriptions_response()
+        ) as post:
             self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "transcript")
 
-        payload = post.call_args.kwargs["json"]
+        self.assertTrue(post.call_args.args[0].endswith("/v1/audio/transcriptions"))
+        self.assertEqual(
+            post.call_args.kwargs["files"]["file"],
+            ("audio.wav", WAV_BYTES, "audio/wav"),
+        )
+        self.assertEqual(post.call_args.kwargs["data"]["language"], "en")
+
+    def test_omits_language_when_not_set(self):
+        """An unset language is what lets the model detect one itself."""
+        client = self._client(True)
+
+        with patch.object(
+            client, "_post", return_value=self._transcriptions_response()
+        ) as post:
+            client.transcribe(WAV_BYTES)
+
+        self.assertNotIn("language", post.call_args.kwargs["data"])
+
+    def test_falls_back_to_chat_completions_on_404(self):
+        """Servers predating llama.cpp#21863 have no transcriptions route."""
+        client = self._client(True)
+        missing = MagicMock()
+        missing.status_code = 404
+
+        with patch.object(
+            client, "_post", side_effect=[missing, self._chat_response()]
+        ) as post:
+            self.assertEqual(
+                client.transcribe(WAV_BYTES, language="en"), "fallback transcript"
+            )
+
+        urls = [call.args[0] for call in post.call_args_list]
+        self.assertTrue(urls[0].endswith("/v1/audio/transcriptions"))
+        self.assertTrue(urls[1].endswith("/v1/chat/completions"))
+
+        payload = post.call_args_list[1].kwargs["json"]
         content = payload["messages"][0]["content"]
         audio_parts = [p for p in content if p["type"] == "input_audio"]
         self.assertEqual(len(audio_parts), 1)
@@ -751,7 +828,6 @@ class TestLlamaCppTranscribe(unittest.TestCase):
         self.assertEqual(
             base64.b64decode(audio_parts[0]["input_audio"]["data"]), WAV_BYTES
         )
-        self.assertTrue(post.call_args.args[0].endswith("/v1/chat/completions"))
 
     def test_audio_unsupported_returns_none(self):
         client = self._client(False)
