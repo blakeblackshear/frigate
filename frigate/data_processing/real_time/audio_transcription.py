@@ -20,7 +20,7 @@ from frigate.data_processing.real_time.whisper_online import (
     FasterWhisperASR,
     OnlineASRProcessor,
 )
-from frigate.util.audio import pcm16_to_wav, stitch_transcripts
+from frigate.util.audio import clean_transcript, pcm16_to_wav, stitch_transcripts
 
 from ..types import DataProcessorMetrics
 from .api import RealTimeProcessorApi
@@ -222,10 +222,14 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             language=self.config.audio_transcription.language,
         )
 
-        if not text:
+        # cleaning has to come first: a silent window often comes back as the
+        # model's preamble alone, which is silence, not a word to commit
+        cleaned = clean_transcript(text)
+
+        if not cleaned:
             return self.__end_genai_utterance()
 
-        self._genai_committed = stitch_transcripts(self._genai_committed, text.strip())
+        self._genai_committed = stitch_transcripts(self._genai_committed, cleaned)
 
         # no VAD on this path, so mirror the whisper branch's heuristic endpoint
         is_endpoint = (

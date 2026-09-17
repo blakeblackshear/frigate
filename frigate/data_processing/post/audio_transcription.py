@@ -21,7 +21,7 @@ from frigate.data_processing.types import PostProcessDataEnum
 from frigate.embeddings.embeddings import Embeddings
 from frigate.genai.manager import GenAIClientManager
 from frigate.types import TrackedObjectUpdateTypesEnum
-from frigate.util.audio import get_audio_from_recording
+from frigate.util.audio import clean_transcript, get_audio_from_recording
 
 from ..types import DataProcessorMetrics
 from .api import PostProcessorApi
@@ -181,7 +181,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             audio_data,
             language=self.config.audio_transcription.language,
         )
-        return text.strip() if text else None
+        return clean_transcript(text) or None
 
     def __transcribe_audio_whisper(self, audio_data: bytes) -> str | None:
         """Transcribe WAV audio data using faster-whisper."""
