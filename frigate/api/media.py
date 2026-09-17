@@ -886,9 +886,8 @@ async def vod_event(
     # If the recordings are not found and the event started more than 5 minutes ago, set has_clip to false
     if (
         event.start_time < datetime.now().timestamp() - 300
-        and type(vod_response) is tuple
-        and len(vod_response) == 2
-        and vod_response[1] == 404
+        and isinstance(vod_response, JSONResponse)
+        and vod_response.status_code == 404
     ):
         Event.update(has_clip=False).where(Event.id == event_id).execute()
 
