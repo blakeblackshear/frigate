@@ -278,6 +278,22 @@ class TestNoAssumedState(unittest.TestCase):
         self.assertNotIn("still", joined)
 
 
+class TestLateEvents(unittest.TestCase):
+    def test_objects_first_detected_after_the_last_frame_are_skipped(self):
+        # Without this the arrival lands on the final frame, which was
+        # captured before the object appeared.
+        late = track(
+            "1789481999.000000-latear",
+            "person",
+            50.0,
+            straight_path((0.9, 0.6), (0.4, 0.3), 10, 50.1),
+        )
+        self.assertEqual(build_timeline([late], span_end=40.0), [])
+        self.assertEqual(
+            annotations_by_frame(build_timeline([late], 40.0), [0.0, 40.0]), {}
+        )
+
+
 class TestFrameBucketing(unittest.TestCase):
     def test_moment_attaches_to_the_following_frame(self):
         frame_times = [0.0, 10.0, 20.0, 30.0]

@@ -63,7 +63,7 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 You must use a vision-capable model with Frigate. The following models are recommended for local deployment of the `descriptions` and `chat` roles:
 
-| Model               | Review [frame mode](/configuration/genai/review_summaries#frame-mode) | Notes                                                                                                                                                                |
+| Model               | Review [frame mode](/configuration/genai/genai_review#frame-mode) | Notes                                                                                                                                                                |
 | ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `qwen3-vl`          | `frames`                                                              | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object. Follows a sequence of frames on its own.     |
 | `qwen3.6`/`qwen3.8` | `frames`                                                              | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |

@@ -235,6 +235,11 @@ def build_timeline(
     timeline: list[tuple[float, str]] = []
 
     for event in sorted(events, key=lambda e: e["start_time"]):
+        # Frame extraction can come up short at the end of a clip, leaving
+        # objects that only appear after the last frame we actually have.
+        if event["start_time"] > span_end:
+            continue
+
         points = path_points(event.get("path_data") or [])
         legs = path_legs(points) if len(points) >= 2 else []
         name = event_name(event)
