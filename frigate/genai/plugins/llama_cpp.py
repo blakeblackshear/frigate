@@ -409,6 +409,126 @@ class LlamaCppClient(GenAIClient):
         return self._supports_audio
 
     @property
+    def supports_transcription(self) -> bool:
+        """Audio-capable models can transcribe through chat completions."""
+        return self._supports_audio
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio through the OpenAI-compatible transcriptions route.
+
+        llama.cpp serves /v1/audio/transcriptions for any audio-capable model,
+        not only a separately loaded whisper (ggml-org/llama.cpp#21863), so it
+        covers exactly the models supports_transcription detects. It takes the
+        language as a native multipart field, which is the only thing dedicated
+        ASR models honor: they read the chat prompt as contextual biasing, so
+        asking one there to use a language does nothing.
+
+        Falls back to chat completions when the server predates that route.
+        """
+        if self.provider is None:
+            logger.warning(
+                "llama.cpp provider has not been initialized, audio will not be transcribed. Check your llama.cpp configuration."
+            )
+            return None
+
+        if not self._supports_audio:
+            logger.warning(
+                "llama.cpp model '%s' does not accept audio input",
+                self.genai_config.model,
+            )
+            return None
+
+        try:
+            data = {"model": self.genai_config.model, "response_format": "json"}
+
+            if language:
+                data["language"] = language
+
+            response = self._post(
+                f"{self.provider}/v1/audio/transcriptions",
+                files={"file": ("audio.wav", audio, mime_type)},
+                data=data,
+                timeout=self.timeout,
+            )
+
+            if response.status_code == 404:
+                logger.debug(
+                    "llama.cpp server has no /v1/audio/transcriptions route, using chat completions"
+                )
+                return self._transcribe_via_chat(audio, language)
+
+            response.raise_for_status()
+            result = response.json()
+            text = result.get("text") if isinstance(result, dict) else None
+
+            return str(text).strip() or None if text else None
+        except Exception as e:
+            logger.warning("llama.cpp returned an error: %s", str(e))
+            return None
+
+    def _transcribe_via_chat(self, audio: bytes, language: str | None) -> str | None:
+        """Transcribe through /v1/chat/completions, for servers without the
+        transcriptions route.
+
+        The _media_marker / multimodal_data convention is an /embeddings-only
+        protocol, so no marker-refresh retry is needed here.
+        """
+        prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
+
+        if language:
+            prompt += f" The speech is in language '{language}'."
+
+        try:
+            encoded_audio = base64.b64encode(audio).decode("utf-8")
+            payload: dict[str, Any] = {
+                "model": self.genai_config.model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "input_audio",
+                                "input_audio": {
+                                    "data": encoded_audio,
+                                    "format": "wav",
+                                },
+                            },
+                        ],
+                    },
+                ],
+                **self.provider_options,
+            }
+
+            response = self._post(
+                f"{self.provider}/v1/chat/completions",
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            if (
+                result is not None
+                and "choices" in result
+                and len(result["choices"]) > 0
+            ):
+                choice = result["choices"][0]
+
+                if "message" in choice and choice["message"].get("content"):
+                    return str(choice["message"]["content"].strip()) or None
+
+            return None
+        except Exception as e:
+            logger.warning("llama.cpp returned an error: %s", str(e))
+            return None
+
+    @property
     def supports_tools(self) -> bool:
         """Whether the loaded model supports tool/function calling."""
         return self._supports_tools
@@ -417,27 +537,73 @@ class LlamaCppClient(GenAIClient):
     def supports_toggleable_thinking(self) -> bool:
         return self._supports_reasoning
 
-    def list_models(self) -> list[str]:
-        """Return available model IDs from the llama.cpp server."""
+    def _fetch_models_data(self) -> list[dict[str, Any]]:
+        """Return the raw /v1/models entries, or an empty list if unreachable."""
         base_url = self.provider or (
             self.genai_config.base_url.rstrip("/")
             if self.genai_config.base_url
             else None
         )
+
         if base_url is None:
             return []
+
         try:
             response = self._get(f"{base_url}/v1/models", timeout=10)
             response.raise_for_status()
-            models = []
-            for m in response.json().get("data", []):
-                models.append(m.get("id", "unknown"))
-                for alias in m.get("aliases", []):
-                    models.append(alias)
-            return sorted(models)
+            data = response.json().get("data", [])
         except Exception as e:
             logger.warning("Failed to list llama.cpp models: %s", e)
             return []
+
+        return data if isinstance(data, list) else []
+
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the llama.cpp server."""
+        models = []
+
+        for m in self._fetch_models_data():
+            models.append(m.get("id", "unknown"))
+
+            for alias in m.get("aliases", []):
+                models.append(alias)
+
+        return sorted(models)
+
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Report input modalities for every model the server serves.
+
+        Since ggml-org/llama.cpp#22952 each /v1/models entry carries
+        architecture.input_modalities, so a single request describes every
+        model rather than just the configured one. That is what lets the UI
+        answer "can the model I just picked transcribe" before the config is
+        saved and a client for it exists.
+
+        Models whose entry predates that field are omitted rather than reported
+        as incapable, so an older server falls back to the /props probe instead
+        of silently losing capabilities it actually has.
+        """
+        capabilities: dict[str, dict[str, bool]] = {}
+
+        for model in self._fetch_models_data():
+            architecture = model.get("architecture") or {}
+            modalities = architecture.get("input_modalities")
+
+            if not isinstance(modalities, list) or not modalities:
+                continue
+
+            flags = {
+                "supports_vision": "image" in modalities,
+                "supports_transcription": "audio" in modalities,
+            }
+
+            names = [model.get("id"), *(model.get("aliases") or [])]
+
+            for name in names:
+                if isinstance(name, str) and name:
+                    capabilities[name] = flags
+
+        return capabilities
 
     def get_context_size(self) -> int:
         """Get the context window size for llama.cpp.

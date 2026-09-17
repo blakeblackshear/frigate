@@ -50,11 +50,23 @@ export type ChatStats = {
 
 export type ShowStatsMode = "while_generating" | "always";
 
+// Capability flags a provider can report for a model it has not loaded.
+// Keyed by model name (and alias) in GenAIProviderInfo.model_capabilities.
+export type GenAIModelCapabilities = {
+  supports_vision?: boolean;
+  supports_embeddings?: boolean;
+  supports_transcription?: boolean;
+};
+
 export type GenAIProviderInfo = {
   models: string[];
   roles: string[];
   supports_toggleable_thinking: boolean;
   supports_embeddings: boolean;
+  supports_transcription: boolean;
+  // Per-model capabilities, when the provider can report them without loading
+  // the model. The top-level flags above describe the configured model only.
+  model_capabilities?: Record<string, GenAIModelCapabilities>;
 };
 
 export type GenAIModelsResponse = Record<string, GenAIProviderInfo>;

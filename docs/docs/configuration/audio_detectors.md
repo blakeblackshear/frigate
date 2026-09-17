@@ -204,7 +204,7 @@ Frequently-heard labels like `speech` can generate a lot of events, and each eve
 
 ### Audio Transcription
 
-Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI's open-source Whisper models via `faster-whisper`. The goal of this feature is to support Semantic Search for `speech` audio events. Frigate is not intended to act as a continuous, fully-automatic speech transcription service. Automatically transcribing all speech (or queuing many audio events for transcription) requires substantial CPU (or GPU) resources and is impractical on most systems. For this reason, transcriptions for events are initiated manually from the UI or the API rather than being run continuously in the background.
+Frigate supports fully local audio transcription using either `sherpa-onnx` or OpenAI's open-source Whisper models via `faster-whisper`, and can alternatively offload transcription to a [GenAI provider](#genai-provider). The goal of this feature is to support Semantic Search for `speech` audio events. Frigate is not intended to act as a continuous, fully-automatic speech transcription service. Automatically transcribing all speech (or queuing many audio events for transcription) requires substantial CPU (or GPU) resources and is impractical on most systems. For this reason, transcriptions for events are initiated manually from the UI or the API rather than being run continuously in the background.
 
 :::info
 
@@ -224,6 +224,7 @@ To enable transcription, configure it globally and optionally disable for specif
 **Global:** Navigate to <NavPath path="Settings > Enrichments > Audio transcription" />.
 
 - Set **Enable audio transcription** to on
+- Set **Audio transcription model or GenAI provider name** to `whisper` for Frigate's built-in local models, or to the name of a GenAI provider
 - Set **Transcription device** to the desired device
 - Set **Model size** to the desired size
 
@@ -235,6 +236,7 @@ To enable transcription, configure it globally and optionally disable for specif
 ```yaml
 audio_transcription:
   enabled: True
+  model: whisper
   device: ...
   model_size: ...
 ```
@@ -263,20 +265,88 @@ The optional config parameters that can be set at the global level include:
 - **`enabled`**: Enable or disable the audio transcription feature.
   - Default: `False`
   - It is recommended to only configure the features at the global level, and enable it at the individual camera level.
+- **`model`**: The transcription backend.
+  - Default: `whisper`
+  - `whisper` uses Frigate's built-in local models, described by `device` and `model_size` below.
+  - Any other value must name a key in your `genai` config whose entry has `transcribe` in its `roles`. See [GenAI Provider](#genai-provider).
 - **`device`**: Device to use to run transcription and translation models.
   - Default: `CPU`
   - This can be `CPU` or `GPU`. The `sherpa-onnx` models are lightweight and run on the CPU only. The `whisper` models can run on GPU but are only supported on CUDA hardware.
+  - Ignored when `model` names a GenAI provider.
 - **`model_size`**: The size of the model used for live transcription.
   - Default: `small`
   - This can be `small` or `large`. The `small` setting uses `sherpa-onnx` models that are fast, lightweight, and always run on the CPU but are not as accurate as the `whisper` model.
-  - This config option applies to **live transcription only**. Recorded `speech` events will always use a different `whisper` model (and can be accelerated for CUDA hardware if available with `device: GPU`).
-- **`language`**: Defines the language used by `whisper` to translate `speech` audio events (and live audio only if using the `large` model).
-  - Default: `en`
-  - You must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
+  - This config option applies to **live transcription only**. With `model: whisper`, recorded `speech` events always use a different `whisper` model (and can be accelerated for CUDA hardware if available with `device: GPU`).
+  - Ignored when `model` names a GenAI provider.
+- **`language`**: Defines the language used to transcribe and translate `speech` audio events (and live audio only if using the `large` model or a GenAI provider).
+  - Default: `auto`
+  - `auto` lets the model detect the language itself, which most models do well. Set an explicit language only if detection is picking the wrong one.
+  - Otherwise you must use a valid [language code](https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10).
   - Transcriptions for `speech` events are translated.
   - Live audio is translated only if you are using the `large` model. The `small` `sherpa-onnx` model is English-only.
 
-The only field that is valid at the camera level is `enabled`.
+The only field that is valid at the camera level is `enabled`. In particular `model` is global only: the transcription backend is a process-wide resource shared by every camera.
+
+#### GenAI Provider
+
+Frigate can send audio to a GenAI provider for transcription when that provider has the `transcribe` role. This is useful if you already run a GenAI provider, or if you do not have the CPU/GPU headroom for a local whisper model. Supported providers are **OpenAI**, **Azure OpenAI**, **Gemini**, and **llama.cpp** with an audio-capable model (a dedicated ASR model such as Qwen3-ASR, or a general multimodal model that accepts audio). Ollama is not supported as it has no audio input.
+
+To use a GenAI provider for audio transcription:
+
+1. Configure a GenAI provider with `transcribe` in its `roles`.
+2. Set the audio transcription model to that GenAI config key (e.g. `whisper_cloud`).
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Enrichments > Audio transcription" />.
+
+| Field                                                | Description                                                                                              |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Audio transcription model or GenAI provider name** | Set to the GenAI config key (e.g. `whisper_cloud`) to use a configured GenAI provider for transcription |
+
+The GenAI provider must also be configured with the `transcribe` role under <NavPath path="Settings > Enrichments > Generative AI" />.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+genai:
+  whisper_cloud:
+    provider: openai
+    api_key: your-api-key
+    model: gpt-transcribe
+    roles:
+      - transcribe
+
+audio_transcription:
+  enabled: True
+  model: whisper_cloud
+  language: en
+```
+
+</TabItem>
+</ConfigTabs>
+
+:::warning
+
+**Give `transcribe` its own `genai` entry.** A `genai` entry has a single `model` string that is shared by every role it holds, so `roles: [descriptions, transcribe]` would send the same model name to both the chat endpoint and the transcription endpoint. Transcription models and chat models are almost never the same model, so define a dedicated entry as shown above.
+
+:::
+
+:::warning
+
+**Live transcription against a metered provider is billed continuously.** In live mode Frigate uploads an overlapping ~2 second window of audio roughly once per second, per camera, for as long as audio stays above that camera's `audio.min_volume`. Windows below that threshold are never uploaded, which is what keeps a quiet camera near zero requests, but a camera pointed at a busy street will keep sending.
+
+Three things keep this opt-in: `transcribe` is not one of the default roles, live transcription is off by default, and the volume gate suppresses silence. Transcription of recorded `speech` events is unaffected - it remains a manual, one-request-per-event action.
+
+:::
+
+`device` and `model_size` have no effect on this path and no local model is ever downloaded.
+
+`language` defaults to `auto`, which sends no language hint and lets the model detect it. Most audio models detect language well, so leave it on `auto` unless detection is picking the wrong one.
+
+When set explicitly, it is sent as the transcription endpoint's native `language` parameter for OpenAI, Azure, and llama.cpp, and as part of the prompt for Gemini. This matters for dedicated ASR models such as Qwen3-ASR: they read the prompt as contextual biasing rather than as an instruction, so a language named in the prompt is ignored, while the endpoint parameter is honored.
 
 #### Live transcription
 
@@ -291,6 +361,8 @@ Results can be error-prone due to a number of factors, including:
 - Using the `small` model - it's fast, but not accurate for poor quality audio
 
 For speech sources close to the camera with minimal background noise, use the `small` model.
+
+A [GenAI provider](#genai-provider) is generally the most accurate option for live transcription, at the cost of a network round trip per window. That round trip has to stay under about a second to keep up with the audio; if it does not, Frigate drops the oldest buffered audio rather than letting the backlog grow.
 
 If you have CUDA hardware, you can experiment with the `large` `whisper` model on GPU. Performance is not quite as fast as the `sherpa-onnx` `small` model, but live transcription is far more accurate. Using the `large` model with CPU will likely be too slow for real-time transcription.
 
@@ -308,7 +380,7 @@ Only one `speech` event may be transcribed at a time. Frigate does not automatic
 
 :::
 
-Recorded `speech` events will always use a `whisper` model, regardless of the `model_size` config setting. Without a supported Nvidia GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient.
+With `model: whisper`, recorded `speech` events always use a `whisper` model, regardless of the `model_size` config setting. Without a supported Nvidia GPU, generating transcriptions for longer `speech` events may take a fair amount of time, so be patient. With a [GenAI provider](#genai-provider), the recorded clip is sent to the provider instead and no local model is used.
 
 #### FAQ
 

@@ -581,5 +581,271 @@ class TestLlamaCppProvider(unittest.TestCase):
         self.assertEqual(client.get_context_size(), 32768)
 
 
+# ---------------------------------------------------------------------------
+# transcribe role
+# ---------------------------------------------------------------------------
+WAV_BYTES = b"RIFF$\x00\x00\x00WAVEfmt "
+
+
+class TestOpenAITranscribe(unittest.TestCase):
+    def _client(self):
+        return _make_client(
+            "openai",
+            model="gpt-4o-transcribe",
+            api_key="k",
+            base_url="http://localhost:9999/v1",
+            runtime_options={"temperature": 0.7},
+        )
+
+    def test_supports_transcription(self):
+        self.assertTrue(self._client().supports_transcription)
+
+    def test_passes_file_tuple_and_language(self):
+        client = self._client()
+        create = MagicMock(return_value="  hello there  ")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "hello there")
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs["model"], "gpt-4o-transcribe")
+        self.assertEqual(kwargs["file"], ("audio.wav", WAV_BYTES, "audio/wav"))
+        self.assertEqual(kwargs["language"], "en")
+        self.assertEqual(kwargs["response_format"], "text")
+
+    def test_does_not_forward_runtime_options(self):
+        """runtime_options are chat parameters; /audio/transcriptions rejects them."""
+        client = self._client()
+        create = MagicMock(return_value="hi")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        client.transcribe(WAV_BYTES)
+
+        self.assertNotIn("temperature", create.call_args.kwargs)
+
+    def test_gpt_transcribe_uses_languages_array(self):
+        """gpt-transcribe replaced `language` with a `languages` array."""
+        client = _make_client("openai", model="gpt-transcribe", api_key="k")
+        create = MagicMock(return_value="hi")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        client.transcribe(WAV_BYTES, language="en")
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs["extra_body"], {"languages": ["en"]})
+        # sending both fields is rejected by the API
+        self.assertNotIn("language", kwargs)
+
+    def test_older_models_use_singular_language(self):
+        for model in ("gpt-4o-transcribe", "whisper-1"):
+            with self.subTest(model):
+                client = _make_client("openai", model=model, api_key="k")
+                create = MagicMock(return_value="hi")
+                client.provider = SimpleNamespace(
+                    audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+                )
+
+                client.transcribe(WAV_BYTES, language="en")
+
+                kwargs = create.call_args.kwargs
+                self.assertEqual(kwargs["language"], "en")
+                self.assertNotIn("extra_body", kwargs)
+
+    def test_object_response_form(self):
+        client = self._client()
+        create = MagicMock(return_value=SimpleNamespace(text="hi"))
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES), "hi")
+
+    def test_error_returns_none(self):
+        client = self._client()
+        create = MagicMock(side_effect=RuntimeError("boom"))
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertIsNone(client.transcribe(WAV_BYTES))
+
+
+class TestAzureOpenAITranscribe(unittest.TestCase):
+    def _client(self):
+        return _make_client(
+            "azure_openai",
+            model="my-deployment",
+            api_key="k",
+            base_url="https://example.openai.azure.com/?api-version=2024-06-01",
+        )
+
+    def test_routes_through_azure_client(self):
+        from openai import AzureOpenAI
+
+        client = self._client()
+        self.assertIsInstance(client.provider, AzureOpenAI)
+        self.assertTrue(client.supports_transcription)
+
+    def test_transcribe_inherited(self):
+        client = self._client()
+        create = MagicMock(return_value="azure text")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES, language="fr"), "azure text")
+        self.assertEqual(create.call_args.kwargs["model"], "my-deployment")
+
+
+class TestGeminiTranscribe(unittest.TestCase):
+    def _client(self):
+        return _make_client("gemini", model="gemini-2.0-flash", api_key="k")
+
+    def test_supports_transcription(self):
+        self.assertTrue(self._client().supports_transcription)
+
+    def test_sends_audio_part(self):
+        client = self._client()
+        generate = MagicMock(return_value=SimpleNamespace(text=" spoken words "))
+        client.provider = SimpleNamespace(
+            models=SimpleNamespace(generate_content=generate)
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "spoken words")
+
+        contents = generate.call_args.kwargs["contents"]
+        audio_parts = [
+            p for p in contents if getattr(p, "inline_data", None) is not None
+        ]
+        self.assertEqual(len(audio_parts), 1)
+        self.assertEqual(audio_parts[0].inline_data.mime_type, "audio/wav")
+        self.assertEqual(audio_parts[0].inline_data.data, WAV_BYTES)
+
+    def test_oversized_payload_is_skipped(self):
+        from frigate.genai.plugins.gemini import GEMINI_MAX_INLINE_BYTES
+
+        client = self._client()
+        generate = MagicMock()
+        client.provider = SimpleNamespace(
+            models=SimpleNamespace(generate_content=generate)
+        )
+
+        self.assertIsNone(client.transcribe(b"\x00" * (GEMINI_MAX_INLINE_BYTES + 1)))
+        generate.assert_not_called()
+
+
+class TestLlamaCppTranscribe(unittest.TestCase):
+    def _client(self, supports_audio: bool):
+        cfg = GenAIConfig(
+            provider="llamacpp",
+            model="m",
+            base_url="http://localhost:9999",
+        )
+        info = {
+            "context_size": 4096,
+            "supports_vision": False,
+            "supports_audio": supports_audio,
+            "supports_tools": False,
+            "supports_reasoning": False,
+            "media_marker": "<__media__>",
+        }
+        cls = PROVIDERS[GenAIProviderEnum.llamacpp]
+        with patch.object(cls, "_get_model_info", return_value=info):
+            return cls(cfg, timeout=5)
+
+    def test_supports_transcription_tracks_supports_audio(self):
+        self.assertTrue(self._client(True).supports_transcription)
+        self.assertFalse(self._client(False).supports_transcription)
+
+    @staticmethod
+    def _transcriptions_response(text: str = " transcript "):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {"text": text}
+        return response
+
+    @staticmethod
+    def _chat_response(content: str = " fallback transcript "):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {"choices": [{"message": {"content": content}}]}
+        return response
+
+    def test_posts_multipart_to_transcriptions(self):
+        client = self._client(True)
+
+        with patch.object(
+            client, "_post", return_value=self._transcriptions_response()
+        ) as post:
+            self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "transcript")
+
+        self.assertTrue(post.call_args.args[0].endswith("/v1/audio/transcriptions"))
+        self.assertEqual(
+            post.call_args.kwargs["files"]["file"],
+            ("audio.wav", WAV_BYTES, "audio/wav"),
+        )
+        self.assertEqual(post.call_args.kwargs["data"]["language"], "en")
+
+    def test_omits_language_when_not_set(self):
+        """An unset language is what lets the model detect one itself."""
+        client = self._client(True)
+
+        with patch.object(
+            client, "_post", return_value=self._transcriptions_response()
+        ) as post:
+            client.transcribe(WAV_BYTES)
+
+        self.assertNotIn("language", post.call_args.kwargs["data"])
+
+    def test_falls_back_to_chat_completions_on_404(self):
+        """Servers predating llama.cpp#21863 have no transcriptions route."""
+        client = self._client(True)
+        missing = MagicMock()
+        missing.status_code = 404
+
+        with patch.object(
+            client, "_post", side_effect=[missing, self._chat_response()]
+        ) as post:
+            self.assertEqual(
+                client.transcribe(WAV_BYTES, language="en"), "fallback transcript"
+            )
+
+        urls = [call.args[0] for call in post.call_args_list]
+        self.assertTrue(urls[0].endswith("/v1/audio/transcriptions"))
+        self.assertTrue(urls[1].endswith("/v1/chat/completions"))
+
+        payload = post.call_args_list[1].kwargs["json"]
+        content = payload["messages"][0]["content"]
+        audio_parts = [p for p in content if p["type"] == "input_audio"]
+        self.assertEqual(len(audio_parts), 1)
+        self.assertEqual(audio_parts[0]["input_audio"]["format"], "wav")
+        self.assertEqual(
+            base64.b64decode(audio_parts[0]["input_audio"]["data"]), WAV_BYTES
+        )
+
+    def test_audio_unsupported_returns_none(self):
+        client = self._client(False)
+
+        with patch.object(client, "_post") as post:
+            self.assertIsNone(client.transcribe(WAV_BYTES))
+
+        post.assert_not_called()
+
+
+class TestBaseClientTranscribe(unittest.TestCase):
+    """Providers that don't implement the role must be inert, not broken."""
+
+    def test_ollama_reports_and_returns_nothing(self):
+        client = _make_client("ollama", model="llava", base_url="http://localhost:9999")
+        self.assertFalse(client.supports_transcription)
+        self.assertIsNone(client.transcribe(WAV_BYTES, language="en"))
+
+
 if __name__ == "__main__":
     unittest.main()

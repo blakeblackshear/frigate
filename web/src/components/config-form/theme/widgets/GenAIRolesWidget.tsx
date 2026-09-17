@@ -4,9 +4,14 @@ import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 import { Switch } from "@/components/ui/switch";
 import type { ConfigFormContext } from "@/types/configForm";
-import type { GenAIModelsResponse } from "@/types/chat";
+import type { GenAIModelCapabilities, GenAIModelsResponse } from "@/types/chat";
 
-const GENAI_ROLES = ["embeddings", "descriptions", "chat"] as const;
+const GENAI_ROLES = [
+  "embeddings",
+  "descriptions",
+  "chat",
+  "transcribe",
+] as const;
 
 function normalizeValue(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -43,18 +48,56 @@ export function GenAIRolesWidget(props: WidgetProps) {
     revalidateOnFocus: false,
   });
 
-  const embeddingsSupported = useMemo(() => {
+  // The model currently chosen in the form, which is what the roles have to
+  // reflect. Reading the saved config instead would keep reporting the previous
+  // model's capabilities until a save and a refetch.
+  const selectedModel = useMemo(() => {
+    if (!providerKey) return undefined;
+    const formData = formContext?.formData as
+      Record<string, unknown> | undefined;
+    const entry = formData?.[providerKey];
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return undefined;
+    }
+    const model = (entry as Record<string, unknown>).model;
+    return typeof model === "string" && model ? model : undefined;
+  }, [formContext?.formData, providerKey]);
+
+  // Capabilities the provider reported for that specific model. Absent when the
+  // provider cannot describe a model it has not loaded, in which case the
+  // entry-level flags (which describe the saved model) are the best available.
+  const modelCapabilities: GenAIModelCapabilities | undefined = useMemo(() => {
+    if (!providerKey || !selectedModel) return undefined;
+    return genaiInfo?.[providerKey]?.model_capabilities?.[selectedModel];
+  }, [genaiInfo, providerKey, selectedModel]);
+
+  const capabilityOf = (
+    key: "supports_embeddings" | "supports_transcription",
+  ): boolean => {
+    const perModel = modelCapabilities?.[key];
+    if (perModel !== undefined) return perModel;
     if (!providerKey) return true;
     const info = genaiInfo?.[providerKey];
-    return info ? info.supports_embeddings : true;
-  }, [genaiInfo, providerKey]);
+    // assume supported when nothing is known, so a role is never hidden on
+    // missing information alone
+    return info ? info[key] : true;
+  };
+
+  const embeddingsSupported = capabilityOf("supports_embeddings");
+  const transcriptionSupported = capabilityOf("supports_transcription");
+
+  const unsupportedRoles = useMemo(() => {
+    const unsupported = new Set<string>();
+
+    if (!embeddingsSupported) unsupported.add("embeddings");
+    if (!transcriptionSupported) unsupported.add("transcribe");
+
+    return unsupported;
+  }, [embeddingsSupported, transcriptionSupported]);
 
   const availableRoles = useMemo(
-    () =>
-      embeddingsSupported
-        ? GENAI_ROLES
-        : GENAI_ROLES.filter((role) => role !== "embeddings"),
-    [embeddingsSupported],
+    () => GENAI_ROLES.filter((role) => !unsupportedRoles.has(role)),
+    [unsupportedRoles],
   );
 
   const occupiedRoles = useMemo(() => {
@@ -80,11 +123,13 @@ export function GenAIRolesWidget(props: WidgetProps) {
     return occupied;
   }, [formContext?.formData, providerKey]);
 
+  // strip every unsupported role in a single onChange; two effects each
+  // rewriting the same value would race and lose one of the edits
   useEffect(() => {
-    if (!embeddingsSupported && selectedRoles.includes("embeddings")) {
-      onChange(selectedRoles.filter((role) => role !== "embeddings"));
-    }
-  }, [embeddingsSupported, selectedRoles, onChange]);
+    if (!selectedRoles.some((role) => unsupportedRoles.has(role))) return;
+
+    onChange(selectedRoles.filter((role) => !unsupportedRoles.has(role)));
+  }, [unsupportedRoles, selectedRoles, onChange]);
 
   const toggleRole = (role: string, enabled: boolean) => {
     if (enabled) {

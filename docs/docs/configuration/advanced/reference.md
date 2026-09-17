@@ -800,7 +800,7 @@ lpr:
 # to Google or OpenAI's LLMs to generate descriptions. GenAI features can be configured at
 # the camera level to enhance privacy for indoor cameras.
 # NOTE: genai is a map of named providers. Each key is a name you choose for the provider,
-#       and each role (chat, descriptions, embeddings) may be assigned to exactly one provider.
+#       and each role (chat, descriptions, embeddings, transcribe) may be assigned to exactly one provider.
 genai:
   # Required: name of the provider (chosen by you, used to reference it elsewhere)
   my_provider:
@@ -813,11 +813,13 @@ genai:
     # Required: The model to use with the provider.
     model: gemini-1.5-flash
     # Optional: Roles this provider handles (default: shown below)
-    # Each role (chat, descriptions, embeddings) must be assigned to exactly one provider.
+    # Each role (chat, descriptions, embeddings, transcribe) must be assigned to exactly
+    # one provider.
     roles:
       - chat
       - descriptions
       - embeddings
+      - transcribe
     # Optional additional args to pass to the GenAI Provider (default: None)
     provider_options:
       keep_alive: -1
@@ -830,13 +832,19 @@ genai:
 audio_transcription:
   # Optional: Enable live and speech event audio transcription (default: shown below)
   enabled: False
+  # Optional: The transcription backend (default: shown below)
+  # Either 'whisper' for Frigate's built-in local models, or the name of a genai
+  # provider that has 'transcribe' in its roles. device and model_size are ignored
+  # when a genai provider is named.
+  model: whisper
   # Optional: The device to run the models on for live transcription. (default: shown below)
   device: CPU
   # Optional: Set the model size used for live transcription. (default: shown below)
   model_size: small
   # Optional: Set the language used for transcription translation. (default: shown below)
-  # List of language codes: https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
-  language: en
+  # Use 'auto' to let the model detect the language, or a language code from
+  # https://github.com/openai/whisper/blob/main/whisper/tokenizer.py#L10
+  language: auto
 
 # Optional: Configuration for classification models
 classification:
