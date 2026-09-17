@@ -830,6 +830,9 @@ def events_search(
     if search_results:
         events_query = events_query.where(Event.id << list(search_results.keys()))
 
+    # sorts below are stable, so this orders ties for offset paging
+    events_query = events_query.order_by(Event.id)
+
     # Fetch events and process them in a single pass
     processed_events = []
     for event in events_query.dicts():

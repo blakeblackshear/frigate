@@ -4079,6 +4079,7 @@ paths:
           schema:
             anyOf:
               - type: integer
+                minimum: 0
               - type: 'null'
             default: 0
             title: Offset
@@ -4393,6 +4394,7 @@ paths:
           schema:
             anyOf:
               - type: integer
+                minimum: 0
               - type: 'null'
             default: 0
             title: Offset
