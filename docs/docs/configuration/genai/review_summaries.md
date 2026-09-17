@@ -192,6 +192,43 @@ review:
 </TabItem>
 </ConfigTabs>
 
+### Frame Mode
+
+Review items are sent to the model as a sequence of still frames. Some models follow that sequence well on their own; others lose track of activity that repeats or reverses, and describe a single trip when the subject actually made several. The `frame_mode` option controls how those frames are presented.
+
+- `frames` (default): the prompt followed by the frames, exactly as earlier versions of Frigate sent them.
+- `annotated_frames`: each frame is preceded by its frame number and elapsed time, along with notes describing what the object tracker recorded at that moment, such as an object being first detected, starting to move, turning around, stopping, or no longer being detected.
+
+The notes come from tracking data rather than from the images, so they describe activity the model may not have picked up on its own. In testing with a person carrying three waste bins to the curb one at a time, `gemma4` described a single trip on every attempt with `frames`, and consistently described multiple trips with `annotated_frames`. Models that already handle these sequences well, such as the `qwen3-vl` family, gain little and should stay on `frames`.
+
+Annotated mode also caps the number of frames, since the notes already establish the order of events and extra near-duplicate frames tend to crowd out the middle of a clip. Longer review items are sampled more sparsely as a result, and typically use fewer tokens than `frames` mode for the same item.
+
+:::note
+
+Annotated mode needs tracking data for the review item. If none is available, Frigate falls back to sending plain frames for that item.
+
+:::
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Set **GenAI config > Frame mode** to the desired mode (e.g., `annotated_frames`)
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml {4}
+review:
+  genai:
+    enabled: true
+    frame_mode: annotated_frames
+```
+
+</TabItem>
+</ConfigTabs>
+
 ### Response Style
 
 Different models respond to the built-in prompt with very different writing styles: some produce natural narration while others sound short and mechanical. The `response_style` option selects a writing style preset that rewords the prompt's instructions for the user-facing fields (the title, short summary, and scene description). Presets replace those instructions rather than adding extra ones, so the model never receives competing style directions.

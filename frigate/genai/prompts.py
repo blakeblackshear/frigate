@@ -59,6 +59,13 @@ def get_review_field_guidelines(response_style: str = "default") -> dict[str, st
     }
 
 
+# Explains the per-frame labels and tracker notes used by the annotated frame
+# mode. Neither the notes nor this guidance say whether repeated detections are
+# the same subject, since the tracking data cannot tell.
+FRAME_ANNOTATION_GUIDANCE = """- Each image below is immediately preceded by a text label giving its frame number and how many seconds into the sequence it was captured. Use these labels to track the order of events and the time between them.
+- Some images below are preceded by notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, stopping, or no longer being detected. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
+
+
 def build_review_description_prompt(
     review_data: dict[str, Any],
     thumbnails: list[bytes],
@@ -66,8 +73,13 @@ def build_review_description_prompt(
     preferred_language: str | None,
     activity_context_prompt: str,
     response_style: str = "default",
+    frame_captions: list[str] | None = None,
 ) -> str:
-    """Build the prompt for review activity description generation."""
+    """Build the prompt for review activity description generation.
+
+    When `frame_captions` is set, each caption is sent directly before its
+    image, so the prompt explains that layout.
+    """
 
     def get_concern_prompt() -> str:
         if concerns:
@@ -93,6 +105,7 @@ def build_review_description_prompt(
             return "\n- (No objects detected)"
 
     fields = get_review_field_guidelines(response_style)
+    frame_guidance = f"\n{FRAME_ANNOTATION_GUIDANCE}" if frame_captions else ""
 
     return f"""
 Your task is to analyze a sequence of images taken in chronological order from a security camera.
@@ -130,7 +143,7 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 ## Sequence Details
 
 - Camera: {review_data["camera"]}
-- Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest)
+- Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest){frame_guidance}
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
 - Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}
 

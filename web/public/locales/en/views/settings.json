@@ -1912,6 +1912,10 @@
     "imageSource": {
       "recordings": "Recordings",
       "previews": "Previews"
+    },
+    "frameMode": {
+      "frames": "Frames",
+      "annotated_frames": "Annotated frames"
     }
   },
   "logger": {

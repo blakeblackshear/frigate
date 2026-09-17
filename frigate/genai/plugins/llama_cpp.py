@@ -14,7 +14,7 @@ from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import parse_tool_calls_from_message
+from frigate.genai.utils import interleave_images, parse_tool_calls_from_message
 
 logger = logging.getLogger(__name__)
 
@@ -333,6 +333,7 @@ class LlamaCppClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
@@ -342,18 +343,17 @@ class LlamaCppClient(GenAIClient):
             return None
 
         try:
-            content = [
-                {
-                    "type": "text",
-                    "text": prompt,
-                }
-            ]
-            for image in images:
-                encoded_image = base64.b64encode(image).decode("utf-8")
+            content: list[dict[str, Any]] = []
+            for part in interleave_images(prompt, images, image_captions):
+                if isinstance(part, str):
+                    content.append({"type": "text", "text": part})
+                    continue
+
+                encoded_image = base64.b64encode(part).decode("utf-8")
                 content.append(
                     {
                         "type": "image_url",
-                        "image_url": {  # type: ignore[dict-item]
+                        "image_url": {
                             "url": f"data:image/jpeg;base64,{encoded_image}",
                         },
                     }

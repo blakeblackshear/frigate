@@ -19,7 +19,11 @@ from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.camera import CameraConfig
-from frigate.config.camera.review import GenAIReviewConfig, ImageSourceEnum
+from frigate.config.camera.review import (
+    GenAIReviewConfig,
+    ImageSourceEnum,
+    ReviewFrameModeEnum,
+)
 from frigate.const import (
     ATTRIBUTE_LABEL_DISPLAY_MAP,
     CACHE_DIR,
@@ -36,6 +40,7 @@ from frigate.util.image import get_image_from_recording
 
 from ..post.api import PostProcessorApi
 from ..types import DataProcessorMetrics
+from .review_annotations import build_frame_captions
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +48,7 @@ RECORDING_BUFFER_EXTENSION_PERCENT = 0.10
 MIN_RECORDING_DURATION = 10
 MAX_IMAGE_TOKENS = 24000
 MAX_FRAMES_PER_SECOND = 1
+MAX_ANNOTATED_FRAMES = 28
 
 
 class ReviewDescriptionProcessor(PostProcessorApi):
@@ -67,6 +73,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         duration: float,
         image_source: ImageSourceEnum = ImageSourceEnum.preview,
         height: int = 480,
+        frame_mode: ReviewFrameModeEnum = ReviewFrameModeEnum.frames,
     ) -> int:
         """Calculate optimal number of frames based on event duration, context size,
         image source, and resolution.
@@ -80,6 +87,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
           - MAX_FRAMES_PER_SECOND x duration, to avoid drowning short events in
             near-duplicate frames where the model latches onto the redundant middle
             and skips the start/end action
+          - MAX_ANNOTATED_FRAMES in annotated mode, where the tracking notes
+            already carry the sequence
         """
         client = self.genai_manager.description_client
 
@@ -125,6 +134,10 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         max_frames_by_tokens = int(image_token_budget / tokens_per_image)
         max_frames_by_duration = int(duration * MAX_FRAMES_PER_SECOND)
         max_frames = min(max_frames_by_tokens, max_frames_by_duration)
+
+        if frame_mode == ReviewFrameModeEnum.annotated_frames:
+            max_frames = min(max_frames, MAX_ANNOTATED_FRAMES)
+
         return max(max_frames, 3)
 
     def process_data(
@@ -166,6 +179,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 return
 
             image_source = camera_config.review.genai.image_source
+            frame_mode = camera_config.review.genai.frame_mode
 
             if image_source == ImageSourceEnum.recordings:
                 buffer_extension = get_recording_buffer_extension(
@@ -174,40 +188,43 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 final_data["start_time"] -= buffer_extension
                 final_data["end_time"] += buffer_extension
 
-                thumbs = self.get_recording_frames(
+                frames = self.get_recording_frames(
                     camera,
                     final_data["start_time"],
                     final_data["end_time"],
                     height=480,  # Use 480p for good balance between quality and token usage
+                    frame_mode=frame_mode,
                 )
 
-                if not thumbs:
+                if not frames:
                     # Fallback to preview frames if no recordings available
                     logger.warning(
                         f"No recording frames found for {camera}, falling back to preview frames"
                     )
-                    thumbs = self.get_preview_frames_as_bytes(
+                    frames = self.get_preview_frames_as_bytes(
                         camera,
                         final_data["start_time"],
                         final_data["end_time"],
                         final_data["thumb_path"],
                         id,
                         camera_config.review.genai.debug_save_thumbnails,
+                        frame_mode,
                     )
                 elif camera_config.review.genai.debug_save_thumbnails:
-                    self.save_debug_recording_frames(id, thumbs)
+                    self.save_debug_recording_frames(id, frames)
             else:
                 # Use preview frames
-                thumbs = self.get_preview_frames_as_bytes(
+                frames = self.get_preview_frames_as_bytes(
                     camera,
                     final_data["start_time"],
                     final_data["end_time"],
                     final_data["thumb_path"],
                     id,
                     camera_config.review.genai.debug_save_thumbnails,
+                    frame_mode,
                 )
 
-            self.start_analysis(camera_config, final_data, thumbs)
+            self.start_analysis(camera_config, final_data, frames)
 
     def handle_request(self, topic: str, request_data: dict[str, Any]) -> str | None:
         if topic == EmbeddingsRequestEnum.regenerate_review_description.value:
@@ -386,31 +403,50 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         buffer_extension = get_recording_buffer_extension(
             final_data["end_time"] - final_data["start_time"]
         )
-        thumbs = self.get_recording_frames(
+        frames = self.get_recording_frames(
             str(review.camera),
             final_data["start_time"] - buffer_extension,
             final_data["end_time"] + buffer_extension,
             height=480,
+            frame_mode=camera_config.review.genai.frame_mode,
         )
 
-        if not thumbs:
+        if not frames:
             logger.error(
                 "No recording frames are available for review item %s", review_id
             )
             return
 
         if camera_config.review.genai.debug_save_thumbnails:
-            self.save_debug_recording_frames(review_id, thumbs)
+            self.save_debug_recording_frames(review_id, frames)
 
-        self.start_analysis(camera_config, final_data, thumbs)
+        self.start_analysis(camera_config, final_data, frames)
 
     def start_analysis(
         self,
         camera_config: CameraConfig,
         final_data: dict[str, Any],
-        thumbs: list[bytes],
+        frames: list[tuple[bytes, float]],
     ) -> None:
         """Kick off description generation for a review item in the background."""
+        thumbs = [frame for frame, _ in frames]
+        captions: list[str] = []
+
+        if (
+            camera_config.review.genai.frame_mode
+            == ReviewFrameModeEnum.annotated_frames
+        ):
+            captions = build_frame_captions(
+                final_data["data"].get("detections") or [],
+                [timestamp for _, timestamp in frames],
+            )
+
+            if not captions:
+                logger.debug(
+                    "No tracking annotations for review item %s, sending plain frames",
+                    final_data["id"],
+                )
+
         self.review_desc_dps.update()
         threading.Thread(
             target=run_analysis,
@@ -421,19 +457,22 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 camera_config,
                 final_data,
                 thumbs,
+                captions,
                 camera_config.review.genai,
                 sorted(self.config.all_labels),
                 self.config.all_attributes,
             ),
         ).start()
 
-    def save_debug_recording_frames(self, review_id: str, thumbs: list[bytes]) -> None:
+    def save_debug_recording_frames(
+        self, review_id: str, frames: list[tuple[bytes, float]]
+    ) -> None:
         """Write the recording frames sent to the provider out for debugging."""
         Path(os.path.join(CLIPS_DIR, "genai-requests", review_id)).mkdir(
             parents=True, exist_ok=True
         )
 
-        for idx, frame_bytes in enumerate(thumbs):
+        for idx, (frame_bytes, _) in enumerate(frames):
             with open(
                 os.path.join(CLIPS_DIR, f"genai-requests/{review_id}/{idx}.jpg"),
                 "wb",
@@ -445,7 +484,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         camera: str,
         start_time: float,
         end_time: float,
-    ) -> list[str]:
+        frame_mode: ReviewFrameModeEnum = ReviewFrameModeEnum.frames,
+    ) -> list[tuple[str, float]]:
+        """Preview frame paths paired with the time each one was captured."""
         preview_dir = os.path.join(CACHE_DIR, "preview_frames")
         file_start = f"preview_{camera}-"
         start_file = f"{file_start}{start_time}.webp"
@@ -477,18 +518,29 @@ class ReviewDescriptionProcessor(PostProcessorApi):
 
         frame_count = len(all_frames)
         desired_frame_count = self.calculate_frame_count(
-            camera, duration=end_time - start_time
+            camera,
+            duration=end_time - start_time,
+            frame_mode=frame_mode,
         )
 
+        def with_timestamp(path: str) -> tuple[str, float]:
+            # Preview frames are named preview_<camera>-<timestamp>.webp
+            stem = os.path.basename(path).removesuffix(".webp")
+
+            try:
+                return (path, float(stem.removeprefix(file_start)))
+            except ValueError:
+                return (path, start_time)
+
         if frame_count <= desired_frame_count:
-            return all_frames
+            return [with_timestamp(f) for f in all_frames]
 
         selected_frames = []
         step_size = (frame_count - 1) / (desired_frame_count - 1)
 
         for i in range(desired_frame_count):
             index = round(i * step_size)
-            selected_frames.append(all_frames[index])
+            selected_frames.append(with_timestamp(all_frames[index]))
 
         return selected_frames
 
@@ -498,11 +550,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         start_time: float,
         end_time: float,
         height: int = 480,
-    ) -> list[bytes]:
-        """Get frames from recordings at specified timestamps."""
+        frame_mode: ReviewFrameModeEnum = ReviewFrameModeEnum.frames,
+    ) -> list[tuple[bytes, float]]:
+        """Get frames from recordings paired with the time each was captured."""
         duration = end_time - start_time
         desired_frame_count = self.calculate_frame_count(
-            camera, duration, ImageSourceEnum.recordings, height
+            camera, duration, ImageSourceEnum.recordings, height, frame_mode
         )
 
         # Calculate evenly spaced timestamps throughout the duration
@@ -540,7 +593,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             except DoesNotExist:
                 return None
 
-        frames = []
+        frames: list[tuple[bytes, float]] = []
 
         for timestamp in timestamps:
             try:
@@ -553,7 +606,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     image_data = extract_frame_from_recording(rounded_timestamp)
 
                 if image_data:
-                    frames.append(image_data)
+                    frames.append((image_data, timestamp))
                 else:
                     logger.warning(
                         f"No recording found for {camera} at timestamp {timestamp}"
@@ -574,7 +627,8 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         thumb_path_fallback: str,
         review_id: str,
         save_debug: bool,
-    ) -> list[bytes]:
+        frame_mode: ReviewFrameModeEnum = ReviewFrameModeEnum.frames,
+    ) -> list[tuple[bytes, float]]:
         """Get preview frames and convert them to JPEG bytes.
 
         Args:
@@ -586,14 +640,14 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             save_debug: Whether to save debug thumbnails
 
         Returns:
-            List of JPEG image bytes
+            List of (JPEG image bytes, capture timestamp) pairs
         """
-        frame_paths = self.get_cache_frames(camera, start_time, end_time)
+        frame_paths = self.get_cache_frames(camera, start_time, end_time, frame_mode)
         if not frame_paths:
-            frame_paths = [thumb_path_fallback]
+            frame_paths = [(thumb_path_fallback, start_time)]
 
-        thumbs = []
-        for idx, thumb_path in enumerate(frame_paths):
+        thumbs: list[tuple[bytes, float]] = []
+        for idx, (thumb_path, timestamp) in enumerate(frame_paths):
             thumb_data = cv2.imread(thumb_path)
 
             if thumb_data is None:
@@ -606,7 +660,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 ".jpg", thumb_data, [int(cv2.IMWRITE_JPEG_QUALITY), 100]
             )
             if ret:
-                thumbs.append(jpg.tobytes())
+                thumbs.append((jpg.tobytes(), timestamp))
 
             if save_debug:
                 Path(os.path.join(CLIPS_DIR, "genai-requests", review_id)).mkdir(
@@ -641,6 +695,7 @@ def run_analysis(
     camera_config: CameraConfig,
     final_data: dict[str, Any],
     thumbs: list[bytes],
+    frame_captions: list[str],
     genai_config: GenAIReviewConfig,
     labelmap_objects: list[str],
     attribute_labels: list[str],
@@ -697,6 +752,7 @@ def run_analysis(
         genai_config.debug_save_thumbnails,
         genai_config.activity_context_prompt,
         genai_config.response_style,
+        frame_captions,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 

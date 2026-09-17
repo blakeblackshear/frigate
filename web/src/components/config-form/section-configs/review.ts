@@ -82,6 +82,7 @@ const review: SectionConfigOverrides = {
       "detections.labels": "/configuration/review/#alerts-and-detections",
       genai: "/configuration/genai/genai_review",
       "genai.image_source": "/configuration/genai/genai_review#image-source",
+      "genai.frame_mode": "/configuration/genai/genai_review#frame-mode",
       "genai.additional_concerns":
         "/configuration/genai/genai_review#additional-concerns",
     },
@@ -136,6 +137,11 @@ const review: SectionConfigOverrides = {
         image_source: {
           "ui:options": {
             enumI18nPrefix: "review.imageSource",
+          },
+        },
+        frame_mode: {
+          "ui:options": {
+            enumI18nPrefix: "review.frameMode",
           },
         },
       },
