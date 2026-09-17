@@ -43,6 +43,22 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=[Tags.review])
 
 
+def get_label_clause(label: str, include_audio: bool = True):
+    """Build a clause matching a label within a review segment's data.
+
+    Verified objects are stored with a `-verified` suffix (eg. `person-verified`)
+    so that variant is matched as well.
+    """
+    clause = (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*') | (
+        ReviewSegment.data["objects"].cast("text") % f'*"{label}-verified"*'
+    )
+
+    if include_audio:
+        clause |= ReviewSegment.data["audio"].cast("text") % f'*"{label}"*'
+
+    return clause
+
+
 @router.get(
     "/review",
     response_model=list[ReviewSegmentResponse],
@@ -92,10 +108,7 @@ async def review(
         filtered_labels = labels.split(",")
 
         for label in filtered_labels:
-            label_clauses.append(
-                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
-                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
-            )
+            label_clauses.append(get_label_clause(label))
         clauses.append(reduce(operator.or_, label_clauses))
 
     if zones != "all":
@@ -236,10 +249,7 @@ async def review_summary(
         filtered_labels = labels.split(",")
 
         for label in filtered_labels:
-            label_clauses.append(
-                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
-                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
-            )
+            label_clauses.append(get_label_clause(label))
         clauses.append(reduce(operator.or_, label_clauses))
     if zones != "all":
         # use matching so segments with multiple zones
@@ -337,9 +347,8 @@ async def review_summary(
         filtered_labels = labels.split(",")
 
         for label in filtered_labels:
-            label_clauses.append(
-                ReviewSegment.data["objects"].cast("text") % f'*"{label}"*'
-            )
+            label_clauses.append(get_label_clause(label, include_audio=False))
+
         clauses.append(reduce(operator.or_, label_clauses))
 
     # Find the time range of available data
