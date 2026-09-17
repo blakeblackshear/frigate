@@ -955,63 +955,79 @@ async def event_snapshot(
     event_complete = False
     jpg_bytes = None
     frame_time = 0
+
     try:
         event = Event.get(Event.id == event_id, Event.end_time != None)
-        event_complete = True
         await require_camera_access(event.camera, request=request)
+    except DoesNotExist:
+        event = None
+
+    if event is not None:
+        event_complete = True
+
         if not event.has_snapshot:
             return JSONResponse(
                 content={"success": False, "message": "Snapshot not available"},
                 status_code=404,
             )
-        snapshot_settings = _resolve_snapshot_settings(
-            request.app.frigate_config.cameras[event.camera].snapshots, params
-        )
-        jpg_bytes, frame_time = get_event_snapshot_bytes(
-            event,
-            ext="jpg",
-            timestamp=snapshot_settings["timestamp"],
-            bounding_box=snapshot_settings["bounding_box"],
-            crop=snapshot_settings["crop"],
-            height=snapshot_settings["height"],
-            quality=snapshot_settings["quality"],
-            timestamp_style=request.app.frigate_config.cameras[
-                event.camera
-            ].timestamp_style,
-            colormap=request.app.frigate_config.model_for_camera(event.camera).colormap,
-        )
-    except DoesNotExist:
-        # see if the object is currently being tracked
+
         try:
-            camera_states: list[CameraState] = (
-                request.app.detected_frames_processor.get_camera_states()
+            snapshot_settings = _resolve_snapshot_settings(
+                request.app.frigate_config.cameras[event.camera].snapshots, params
             )
-            for camera_state in camera_states:
-                if event_id in camera_state.tracked_objects:
-                    tracked_obj = camera_state.tracked_objects.get(event_id)
-                    if tracked_obj is not None:
-                        snapshot_settings = _resolve_snapshot_settings(
-                            camera_state.camera_config.snapshots, params
-                        )
-                        jpg_bytes, frame_time = tracked_obj.get_img_bytes(
-                            ext="jpg",
-                            timestamp=snapshot_settings["timestamp"],
-                            bounding_box=snapshot_settings["bounding_box"],
-                            crop=snapshot_settings["crop"],
-                            height=snapshot_settings["height"],
-                            quality=snapshot_settings["quality"],
-                        )
-                        await require_camera_access(camera_state.name, request=request)
+            jpg_bytes, frame_time = get_event_snapshot_bytes(
+                event,
+                ext="jpg",
+                timestamp=snapshot_settings["timestamp"],
+                bounding_box=snapshot_settings["bounding_box"],
+                crop=snapshot_settings["crop"],
+                height=snapshot_settings["height"],
+                quality=snapshot_settings["quality"],
+                timestamp_style=request.app.frigate_config.cameras[
+                    event.camera
+                ].timestamp_style,
+                colormap=request.app.frigate_config.model_for_camera(
+                    event.camera
+                ).colormap,
+            )
         except Exception:
             return JSONResponse(
-                content={"success": False, "message": "Ongoing event not found"},
+                content={"success": False, "message": "Unknown error occurred"},
                 status_code=404,
             )
-    except Exception:
-        return JSONResponse(
-            content={"success": False, "message": "Unknown error occurred"},
-            status_code=404,
+    else:
+        # see if the object is currently being tracked
+        camera_states: list[CameraState] = (
+            request.app.detected_frames_processor.get_camera_states()
         )
+
+        for camera_state in camera_states:
+            tracked_obj = camera_state.tracked_objects.get(event_id)
+
+            if tracked_obj is None:
+                continue
+
+            await require_camera_access(camera_state.name, request=request)
+
+            try:
+                snapshot_settings = _resolve_snapshot_settings(
+                    camera_state.camera_config.snapshots, params
+                )
+                jpg_bytes, frame_time = tracked_obj.get_img_bytes(
+                    ext="jpg",
+                    timestamp=snapshot_settings["timestamp"],
+                    bounding_box=snapshot_settings["bounding_box"],
+                    crop=snapshot_settings["crop"],
+                    height=snapshot_settings["height"],
+                    quality=snapshot_settings["quality"],
+                )
+            except Exception:
+                return JSONResponse(
+                    content={"success": False, "message": "Ongoing event not found"},
+                    status_code=404,
+                )
+
+            break
 
     if jpg_bytes is None:
         return JSONResponse(
@@ -1061,19 +1077,25 @@ async def event_thumbnail(
 
     if not thumbnail_bytes:
         # see if the object is currently being tracked
-        try:
-            camera_states = request.app.detected_frames_processor.get_camera_states()
-            for camera_state in camera_states:
-                if event_id in camera_state.tracked_objects:
-                    tracked_obj = camera_state.tracked_objects.get(event_id)
-                    if tracked_obj is not None:
-                        await require_camera_access(camera_state.name, request=request)
-                        thumbnail_bytes = tracked_obj.get_thumbnail(extension.value)
-        except Exception:
-            return JSONResponse(
-                content={"success": False, "message": "Event not found"},
-                status_code=404,
-            )
+        camera_states = request.app.detected_frames_processor.get_camera_states()
+
+        for camera_state in camera_states:
+            tracked_obj = camera_state.tracked_objects.get(event_id)
+
+            if tracked_obj is None:
+                continue
+
+            await require_camera_access(camera_state.name, request=request)
+
+            try:
+                thumbnail_bytes = tracked_obj.get_thumbnail(extension.value)
+            except Exception:
+                return JSONResponse(
+                    content={"success": False, "message": "Event not found"},
+                    status_code=404,
+                )
+
+            break
 
     if not thumbnail_bytes:
         return JSONResponse(
