@@ -315,7 +315,7 @@ genai:
   whisper_cloud:
     provider: openai
     api_key: your-api-key
-    model: gpt-4o-transcribe
+    model: gpt-transcribe
     roles:
       - transcribe
 

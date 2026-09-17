@@ -22,6 +22,10 @@ the ``transcribe`` role:
 - The ``api-version`` parsed from ``base_url`` must be 2024-06-01 or later;
   earlier versions have no transcriptions route and the 404 surfaces only as a
   generic provider error.
+- Because ``model`` is a deployment name, the inherited check that picks
+  ``languages`` over ``language`` for gpt-transcribe cannot fire unless the
+  deployment happens to be named after the model. Name the deployment
+  ``gpt-transcribe`` to get the right field, or leave the language on ``auto``.
 """
 
 import logging

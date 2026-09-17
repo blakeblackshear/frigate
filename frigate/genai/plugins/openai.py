@@ -15,6 +15,12 @@ from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
 
+# gpt-transcribe replaced the singular `language` field with a `languages` array
+# and rejects a request that sends both. Older transcription models
+# (gpt-4o-transcribe, gpt-4o-mini-transcribe, whisper-1) still take the singular
+# form. https://developers.openai.com/api/docs/guides/speech-to-text
+_LANGUAGES_ARRAY_MODEL_PREFIX = "gpt-transcribe"
+
 
 def _stats_from_openai_usage(usage: Any) -> dict[str, Any] | None:
     """Build a stats dict from an OpenAI-compatible usage object."""
@@ -158,7 +164,16 @@ class OpenAIClient(GenAIClient):
             }
 
             if language:
-                request_params["language"] = language
+                if (
+                    self.genai_config.model.strip()
+                    .lower()
+                    .startswith(_LANGUAGES_ARRAY_MODEL_PREFIX)
+                ):
+                    # not a typed parameter on the SDK method, so it has to ride
+                    # along in extra_body
+                    request_params["extra_body"] = {"languages": [language]}
+                else:
+                    request_params["language"] = language
 
             result = self.provider.audio.transcriptions.create(**request_params)
         except (TimeoutException, Exception) as e:

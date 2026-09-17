@@ -79,14 +79,14 @@ The `embeddings` role needs a different kind of model. Text queries are matched 
 
 #### Transcription models
 
-The `transcribe` role needs a model that accepts audio input. Frigate sends short WAV clips and asks for a verbatim transcript, so an audio-capable multimodal model is required; a text-only or vision-only model cannot serve this role.
+The `transcribe` role needs a model that accepts audio input. A text-only or vision-only model cannot serve this role. The following are recommended for local deployment of the `transcribe` role:
 
-| Model          | Notes                                                                                                                                                                       |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-omni`   | Audio-capable multimodal model for [Audio Transcription](/configuration/audio_detectors#genai-provider). Must be served by llama.cpp started with the matching `--mmproj`. |
-| `voxtral-mini` | Smaller audio-capable option, lower resource use with weaker transcript quality on noisy audio.                                                                             |
+| Model       | Notes                                                                                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `qwen3-asr` | Dedicated speech recognition model covering 30 languages, and the better choice for transcription quality. It only transcribes, so it cannot be shared with the `descriptions` or `chat` roles.            |
+| `gemma4`    | General multimodal model that accepts audio as well as images, so one served model can cover `transcribe` alongside the other roles. Transcript quality is below `qwen3-asr`, particularly on noisy audio. |
 
-llama.cpp only reports audio support when the server was started with an audio projector (`--mmproj`). Without it Frigate sees the model as text-only and the `transcribe` role is unavailable in the UI. Frigate transcribes through the server's `/v1/audio/transcriptions` route, which llama.cpp serves for any audio-capable model.
+Both must be served by llama.cpp started with the matching audio `--mmproj`. llama.cpp only reports audio support when an audio projector is loaded. Without it Frigate sees the model as text-only and the `transcribe` role is unavailable in the UI. Frigate transcribes through the server's `/v1/audio/transcriptions` route, which llama.cpp serves for any audio-capable model.
 
 :::info
 
