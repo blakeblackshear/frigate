@@ -500,27 +500,73 @@ class LlamaCppClient(GenAIClient):
     def supports_toggleable_thinking(self) -> bool:
         return self._supports_reasoning
 
-    def list_models(self) -> list[str]:
-        """Return available model IDs from the llama.cpp server."""
+    def _fetch_models_data(self) -> list[dict[str, Any]]:
+        """Return the raw /v1/models entries, or an empty list if unreachable."""
         base_url = self.provider or (
             self.genai_config.base_url.rstrip("/")
             if self.genai_config.base_url
             else None
         )
+
         if base_url is None:
             return []
+
         try:
             response = self._get(f"{base_url}/v1/models", timeout=10)
             response.raise_for_status()
-            models = []
-            for m in response.json().get("data", []):
-                models.append(m.get("id", "unknown"))
-                for alias in m.get("aliases", []):
-                    models.append(alias)
-            return sorted(models)
+            data = response.json().get("data", [])
         except Exception as e:
             logger.warning("Failed to list llama.cpp models: %s", e)
             return []
+
+        return data if isinstance(data, list) else []
+
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the llama.cpp server."""
+        models = []
+
+        for m in self._fetch_models_data():
+            models.append(m.get("id", "unknown"))
+
+            for alias in m.get("aliases", []):
+                models.append(alias)
+
+        return sorted(models)
+
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Report input modalities for every model the server serves.
+
+        Since ggml-org/llama.cpp#22952 each /v1/models entry carries
+        architecture.input_modalities, so a single request describes every
+        model rather than just the configured one. That is what lets the UI
+        answer "can the model I just picked transcribe" before the config is
+        saved and a client for it exists.
+
+        Models whose entry predates that field are omitted rather than reported
+        as incapable, so an older server falls back to the /props probe instead
+        of silently losing capabilities it actually has.
+        """
+        capabilities: dict[str, dict[str, bool]] = {}
+
+        for model in self._fetch_models_data():
+            architecture = model.get("architecture") or {}
+            modalities = architecture.get("input_modalities")
+
+            if not isinstance(modalities, list) or not modalities:
+                continue
+
+            flags = {
+                "supports_vision": "image" in modalities,
+                "supports_transcription": "audio" in modalities,
+            }
+
+            names = [model.get("id"), *(model.get("aliases") or [])]
+
+            for name in names:
+                if isinstance(name, str) and name:
+                    capabilities[name] = flags
+
+        return capabilities
 
     def get_context_size(self) -> int:
         """Get the context window size for llama.cpp.

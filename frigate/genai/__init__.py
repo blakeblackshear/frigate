@@ -350,6 +350,21 @@ class GenAIClient:
         """
         return []
 
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Return capability flags for each model the provider serves.
+
+        Only providers whose backend advertises capabilities per model can
+        populate this; llama.cpp reports input modalities for every model it
+        serves, so one request describes them all. An empty mapping means "no
+        per-model information available", and callers fall back to this
+        client's own capability properties, which describe only the configured
+        model. A model absent from a non-empty mapping means the same thing.
+
+        Returns:
+            Model name (including aliases) to its capability flags
+        """
+        return {}
+
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
         return 4096

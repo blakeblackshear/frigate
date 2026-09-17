@@ -151,5 +151,10 @@ class GenAIClientManager:
                 "supports_toggleable_thinking": client.supports_toggleable_thinking,
                 "supports_embeddings": client.supports_embeddings,
                 "supports_transcription": client.supports_transcription,
+                # Capabilities of the configured model are above; this maps every
+                # model the provider serves to its own, so the UI can react to a
+                # model selected but not yet saved. Empty when the provider
+                # cannot report capabilities without loading a model.
+                "model_capabilities": client.list_model_capabilities(),
             }
         return result
