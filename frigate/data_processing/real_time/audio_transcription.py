@@ -5,6 +5,7 @@ import logging
 import os
 import queue
 import threading
+import time
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -48,6 +49,10 @@ GENAI_WINDOW_CHUNKS = 2
 # without limit. The producer is the ffmpeg read thread and must never block.
 AUDIO_QUEUE_MAXSIZE = int(30 / AUDIO_DURATION)
 
+# A backed-up queue drops a chunk per cycle, so warning on each one would spam
+# the log once a second per camera for as long as the provider stays slow.
+AUDIO_DROP_WARN_INTERVAL = 10.0
+
 
 class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
     def __init__(
@@ -82,6 +87,10 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             maxlen=GENAI_WINDOW_CHUNKS
         )
         self._genai_committed = ""
+        # set by the producer when it discards a chunk, so the consumer knows the
+        # audio it is about to receive is not contiguous with what it buffered
+        self._audio_dropped = threading.Event()
+        self._last_drop_warning = 0.0
 
     def __build_recognizer(self) -> None:
         if self._use_genai:
@@ -202,6 +211,19 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             )
             return None
 
+        if self._audio_dropped.is_set():
+            self._audio_dropped.clear()
+
+            # Chunks were discarded between what is buffered and this one, so
+            # concatenating them would splice non-adjacent audio into one window
+            # and destroy the overlap the stitcher depends on.
+            self._genai_window.clear()
+
+            if self._genai_committed:
+                # the transcript has a gap in it; close the utterance out rather
+                # than stitching across missing speech
+                return self.__end_genai_utterance()
+
         self._genai_window.append(audio_data)
 
         if len(self._genai_window) < GENAI_WINDOW_CHUNKS:
@@ -273,10 +295,20 @@ class AudioTranscriptionRealTimeProcessor(RealTimeProcessorApi):
             except queue.Empty:
                 pass
 
-            logger.warning(
-                "Audio transcription queue for %s is full, dropping the oldest audio",
-                self.camera_config.name,
-            )
+            # the stream now has a hole in it, which the consumer has to know
+            # about before it splices the next chunk onto what it already holds
+            self._audio_dropped.set()
+
+            now = time.monotonic()
+
+            if now - self._last_drop_warning >= AUDIO_DROP_WARN_INTERVAL:
+                self._last_drop_warning = now
+                logger.warning(
+                    "Audio transcription queue for %s is full, dropping audio. The "
+                    "provider is not keeping up with the %.2fs chunk rate",
+                    self.camera_config.name,
+                    AUDIO_DURATION,
+                )
 
             try:
                 self.audio_queue.put_nowait((obj_data, audio))

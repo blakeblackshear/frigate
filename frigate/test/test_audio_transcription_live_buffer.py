@@ -214,6 +214,58 @@ class TestLiveGenAITranscription(unittest.TestCase):
         self.assertIsNone(self._feed(_chunk(4000)))
         self.assertIsNone(self._feed(_chunk(4000)))
 
+    def test_dropped_audio_discards_the_buffered_window(self):
+        """A gap in the stream must not be spliced into a single window.
+
+        Dropping a queued chunk leaves the next one non-adjacent to what is
+        buffered, so concatenating them would hand the provider audio with a
+        hole in it and break the 50% overlap the stitcher relies on.
+        """
+        self._feed(_chunk(4000))
+        self.assertEqual(len(self.processor._genai_window), 1)
+
+        # the producer discards a chunk while the consumer is blocked
+        self.processor._audio_dropped.set()
+
+        self._feed(_chunk(5000))
+
+        # the buffered chunk was discarded, so this one starts a fresh window
+        self.assertEqual(len(self.processor._genai_window), 1)
+        self.client.transcribe.assert_not_called()
+
+        # and the window that does go out holds only contiguous audio
+        self._feed(_chunk(5000))
+        self.client.transcribe.assert_called_once()
+
+        with self._sent_wav(0) as wav:
+            samples = np.frombuffer(wav.readframes(wav.getnframes()), dtype=np.int16)
+
+        self.assertEqual(wav.getnframes(), CHUNK_SAMPLES * GENAI_WINDOW_CHUNKS)
+        self.assertTrue((samples == 5000).all(), "window spliced across the gap")
+
+    def test_dropped_audio_ends_a_pending_utterance(self):
+        """Committed text cannot be stitched across missing speech."""
+        self._feed(_chunk(4000))
+        self._feed(_chunk(4000))
+        self.assertEqual(self.processor._genai_committed, "hello")
+
+        self.processor._audio_dropped.set()
+
+        self.assertEqual(self._feed(_chunk(4000)), ("hello", True))
+        self.assertEqual(len(self.processor._genai_window), 0)
+
+    def test_drop_flag_is_consumed_once(self):
+        self.processor._audio_dropped.set()
+        self._feed(_chunk(4000))
+
+        self.assertFalse(self.processor._audio_dropped.is_set())
+
+    def test_full_queue_flags_a_drop(self):
+        for i in range(self.processor.audio_queue.maxsize + 1):
+            self.processor.process_audio({"id": "back_audio"}, _chunk(i + 1))
+
+        self.assertTrue(self.processor._audio_dropped.is_set())
+
     def test_queue_is_bounded_and_drops_oldest(self):
         maxsize = self.processor.audio_queue.maxsize
         self.assertGreater(maxsize, 0)
