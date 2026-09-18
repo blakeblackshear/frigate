@@ -124,6 +124,39 @@ test.describe("genai provider settings @medium", () => {
     await expect(frigateApp.page.getByText(UNSAVED)).toBeVisible();
   });
 
+  test("switching back to the saved provider restores its model", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(
+      frigateApp.page,
+      {
+        provider: "openai",
+        model: "gpt-4o",
+        roles: ["descriptions"],
+      },
+      { models: ["gpt-4o", "qwen3"], supports_transcription: true },
+    );
+    await frigateApp.goto(SETTINGS_URL);
+
+    const model = frigateApp.page.locator(`#root_${ENTRY}_model`);
+    const provider = frigateApp.page.locator(`#root_${ENTRY}_provider`);
+    await expect(model).toHaveText("gpt-4o");
+
+    await provider.click();
+    await frigateApp.page.getByRole("option", { name: "llamacpp" }).click();
+    await model.click();
+    await frigateApp.page.getByRole("option", { name: "qwen3" }).click();
+    await expect(model).toHaveText("qwen3");
+
+    // the model picked for llamacpp must not carry over to openai
+    await provider.click();
+    await frigateApp.page
+      .getByRole("option", { name: "openai", exact: true })
+      .click();
+
+    await expect(model).toHaveText("gpt-4o");
+  });
+
   test("picking a model that cannot transcribe strips the role", async ({
     frigateApp,
   }) => {

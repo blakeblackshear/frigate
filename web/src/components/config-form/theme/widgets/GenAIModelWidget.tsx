@@ -76,6 +76,8 @@ export function GenAIModelWidget(props: WidgetProps) {
 
   const savedProvider =
     typeof savedEntry?.provider === "string" ? savedEntry.provider : null;
+  const savedModel =
+    typeof savedEntry?.model === "string" ? savedEntry.model : "";
 
   // Build a fingerprint from the saved config's provider + base_url so the
   // SWR key changes (and models are refetched) whenever those fields are saved.
@@ -159,15 +161,18 @@ export function GenAIModelWidget(props: WidgetProps) {
   const canProbe = Boolean(formProvider) && !probing;
 
   // A model name belongs to its provider, so switching provider clears it.
-  // Returning to the saved provider (including a form reset) leaves it alone.
+  // Returning to the saved provider restores its saved model, which leaves a
+  // form reset untouched.
   const prevFormProvider = useRef(formProvider);
   useEffect(() => {
     const previous = prevFormProvider.current;
     prevFormProvider.current = formProvider;
 
-    if (previous === formProvider || formProvider === savedProvider) return;
-    if (typeof value === "string" && value) onChange("");
-  }, [formProvider, savedProvider, value, onChange]);
+    if (previous === formProvider) return;
+
+    const next = formProvider === savedProvider ? savedModel : "";
+    if ((typeof value === "string" ? value : "") !== next) onChange(next);
+  }, [formProvider, savedProvider, savedModel, value, onChange]);
 
   const probe = async () => {
     if (!formEntry || !formProvider) return;
