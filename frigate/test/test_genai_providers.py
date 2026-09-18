@@ -580,6 +580,15 @@ class TestLlamaCppProvider(unittest.TestCase):
         client = self._validated_client(4096, {"context_size": 32768})
         self.assertEqual(client.get_context_size(), 32768)
 
+    def test_list_models_dedupes_alias_matching_id(self):
+        client = self._client()
+        models_data = [
+            {"id": "qwen3-asr", "aliases": ["qwen3-asr"]},
+            {"id": "gemma", "aliases": ["gemma", "g4"]},
+        ]
+        with patch.object(client, "_fetch_models_data", return_value=models_data):
+            self.assertEqual(client.list_models(), ["g4", "gemma", "qwen3-asr"])
+
 
 # ---------------------------------------------------------------------------
 # transcribe role

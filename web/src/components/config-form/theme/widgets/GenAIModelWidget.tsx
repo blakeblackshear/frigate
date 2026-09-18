@@ -59,19 +59,29 @@ export function GenAIModelWidget(props: WidgetProps) {
 
   const formContext = registry?.formContext as ConfigFormContext | undefined;
 
-  // Build a fingerprint from the saved config's provider + base_url so the
-  // SWR key changes (and models are refetched) whenever those fields are saved.
-  const configFingerprint = useMemo(() => {
-    if (!providerKey) return "";
+  const savedEntry = useMemo<Record<string, unknown> | null>(() => {
+    if (!providerKey) return null;
     const genai = (
       formContext?.fullConfig as Record<string, unknown> | undefined
     )?.genai;
-    if (!genai || typeof genai !== "object" || Array.isArray(genai)) return "";
+    if (!genai || typeof genai !== "object" || Array.isArray(genai)) {
+      return null;
+    }
     const entry = (genai as Record<string, unknown>)[providerKey];
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return "";
-    const e = entry as Record<string, unknown>;
-    return `${e.provider ?? ""}|${e.base_url ?? ""}`;
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return null;
+    }
+    return entry as Record<string, unknown>;
   }, [providerKey, formContext?.fullConfig]);
+
+  const savedProvider =
+    typeof savedEntry?.provider === "string" ? savedEntry.provider : null;
+
+  // Build a fingerprint from the saved config's provider + base_url so the
+  // SWR key changes (and models are refetched) whenever those fields are saved.
+  const configFingerprint = savedEntry
+    ? `${savedEntry.provider ?? ""}|${savedEntry.base_url ?? ""}`
+    : "";
 
   const { data: allModels, mutate: mutateModels } = useSWR<GenAIModelsResponse>(
     "genai/models",
@@ -147,6 +157,17 @@ export function GenAIModelWidget(props: WidgetProps) {
   const formProvider =
     typeof formEntry?.provider === "string" ? formEntry.provider : null;
   const canProbe = Boolean(formProvider) && !probing;
+
+  // A model name belongs to its provider, so switching provider clears it.
+  // Returning to the saved provider (including a form reset) leaves it alone.
+  const prevFormProvider = useRef(formProvider);
+  useEffect(() => {
+    const previous = prevFormProvider.current;
+    prevFormProvider.current = formProvider;
+
+    if (previous === formProvider || formProvider === savedProvider) return;
+    if (typeof value === "string" && value) onChange("");
+  }, [formProvider, savedProvider, value, onChange]);
 
   const probe = async () => {
     if (!formEntry || !formProvider) return;
