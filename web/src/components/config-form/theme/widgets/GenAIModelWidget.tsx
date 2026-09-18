@@ -160,18 +160,16 @@ export function GenAIModelWidget(props: WidgetProps) {
     typeof formEntry?.provider === "string" ? formEntry.provider : null;
   const canProbe = Boolean(formProvider) && !probing;
 
-  // A model name belongs to its provider, so switching provider clears it.
-  // Returning to the saved provider restores its saved model, which leaves a
-  // form reset untouched.
+  // A model name belongs to its provider, so switching provider clears it,
+  // unless the form holds the saved provider and model together
   const prevFormProvider = useRef(formProvider);
   useEffect(() => {
     const previous = prevFormProvider.current;
     prevFormProvider.current = formProvider;
 
     if (previous === formProvider) return;
-
-    const next = formProvider === savedProvider ? savedModel : "";
-    if ((typeof value === "string" ? value : "") !== next) onChange(next);
+    if (formProvider === savedProvider && value === savedModel) return;
+    if (typeof value === "string" && value) onChange("");
   }, [formProvider, savedProvider, savedModel, value, onChange]);
 
   const probe = async () => {

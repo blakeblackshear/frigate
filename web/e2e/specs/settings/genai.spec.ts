@@ -124,7 +124,7 @@ test.describe("genai provider settings @medium", () => {
     await expect(frigateApp.page.getByText(UNSAVED)).toBeVisible();
   });
 
-  test("switching back to the saved provider restores its model", async ({
+  test("switching back to the saved provider drops the other provider's model", async ({
     frigateApp,
   }) => {
     await installRoutes(
@@ -148,13 +148,39 @@ test.describe("genai provider settings @medium", () => {
     await frigateApp.page.getByRole("option", { name: "qwen3" }).click();
     await expect(model).toHaveText("qwen3");
 
-    // the model picked for llamacpp must not carry over to openai
+    // the model picked for llamacpp must not carry over to openai, and the
+    // saved one isn't filled back in since the endpoint may have changed
     await provider.click();
     await frigateApp.page
       .getByRole("option", { name: "openai", exact: true })
       .click();
 
+    await expect(model).toHaveText(MODEL_PLACEHOLDER);
+  });
+
+  test("undo after switching provider brings back the saved model", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(
+      frigateApp.page,
+      {
+        provider: "openai",
+        model: "gpt-4o",
+        roles: ["descriptions"],
+      },
+      { models: ["gpt-4o"], supports_transcription: true },
+    );
+    await frigateApp.goto(SETTINGS_URL);
+
+    const model = frigateApp.page.locator(`#root_${ENTRY}_model`);
+    await frigateApp.page.locator(`#root_${ENTRY}_provider`).click();
+    await frigateApp.page.getByRole("option", { name: "llamacpp" }).click();
+    await expect(model).toHaveText(MODEL_PLACEHOLDER);
+
+    await frigateApp.page.getByRole("button", { name: "Undo" }).click();
+
     await expect(model).toHaveText("gpt-4o");
+    await expect(frigateApp.page.getByText(UNSAVED)).toBeHidden();
   });
 
   test("picking a model that cannot transcribe strips the role", async ({

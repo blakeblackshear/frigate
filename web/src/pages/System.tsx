@@ -116,7 +116,10 @@ function System() {
                   key={item}
                   className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
                   value={item}
-                  aria-label={`Select ${item}`}
+                  aria-label={t("selectItem", {
+                    ns: "common",
+                    item: t(item + ".title"),
+                  })}
                 >
                   {item == "health" && <LuHeartPulse className="size-4" />}
                   {item == "general" && <LuActivity className="size-4" />}
