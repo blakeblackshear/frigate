@@ -20,7 +20,7 @@ mypy == 1.6.1
 onvif-zeep-async == 4.0.*
 paho-mqtt == 2.1.*
 pandas == 2.2.*
-peewee == 3.17.*
+peewee == 4.5.*
 peewee_migrate == 1.14.*
 psutil == 7.1.*
 pydantic == 2.10.*
