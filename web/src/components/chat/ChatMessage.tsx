@@ -133,7 +133,7 @@ export function MessageBubble({
             variant="select"
             size="icon"
             className="size-9 rounded-full"
-            disabled={!draftContent.trim()}
+            disabled={!draftContent.trim() || onEditSubmit == null}
             onClick={handleEditSubmit}
             aria-label={t("send")}
           >

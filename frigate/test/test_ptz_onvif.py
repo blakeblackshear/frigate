@@ -15,6 +15,8 @@ Also covers the inverse direction: the ptz movement timestamps must not be writt
 for a camera that has autotracking off, because nothing clears them back out.
 """
 
+import asyncio
+import threading
 import unittest
 from unittest.mock import AsyncMock, MagicMock
 
@@ -232,6 +234,41 @@ class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
                 1001.0, metrics.start_time.value, metrics.stop_time.value
             )
         )
+
+
+class TestOnvifClose(unittest.TestCase):
+    """close() must release everything on the loop, since whatever it leaves is
+    garbage collected during interpreter shutdown, where the resulting warnings
+    fail to log and fill the shutdown output with logging errors."""
+
+    def setUp(self) -> None:
+        self.controller = _make_controller(autotracking_enabled=False)
+        self.onvif = self.controller.cams[CAMERA]["onvif"]
+        self.onvif.close = AsyncMock()
+        self.controller.config_subscriber = MagicMock()
+        self.controller.loop = asyncio.new_event_loop()
+        self.controller.loop_thread = threading.Thread(
+            target=self.controller._run_event_loop, daemon=True
+        )
+        self.controller.loop_thread.start()
+        self.addCleanup(self.controller.loop.close)
+
+    def test_close_closes_camera_sessions(self) -> None:
+        self.controller.close()
+
+        self.onvif.close.assert_awaited_once()
+
+    def test_close_cancels_tasks_left_on_the_loop(self) -> None:
+        async def forever() -> None:
+            while True:
+                await asyncio.sleep(1)
+
+        poll = asyncio.run_coroutine_threadsafe(forever(), self.controller.loop)
+
+        self.controller.close()
+
+        self.assertTrue(poll.cancelled())
+        self.assertFalse(self.controller.loop_thread.is_alive())
 
 
 if __name__ == "__main__":

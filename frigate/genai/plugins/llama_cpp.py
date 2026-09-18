@@ -560,13 +560,12 @@ class LlamaCppClient(GenAIClient):
 
     def list_models(self) -> list[str]:
         """Return available model IDs from the llama.cpp server."""
-        models = []
+        models: set[str] = set()
 
+        # llama-server lists the id among the aliases when --alias is set
         for m in self._fetch_models_data():
-            models.append(m.get("id", "unknown"))
-
-            for alias in m.get("aliases", []):
-                models.append(alias)
+            models.add(m.get("id", "unknown"))
+            models.update(m.get("aliases", []))
 
         return sorted(models)
 

@@ -25,6 +25,22 @@ function normalizeValue(value: unknown): string[] {
   return [];
 }
 
+function getString(value: unknown): string | undefined {
+  return typeof value === "string" && value ? value : undefined;
+}
+
+function getEntry(
+  entries: unknown,
+  providerKey: string | undefined,
+): Record<string, unknown> | undefined {
+  if (!providerKey || !entries || typeof entries !== "object") return undefined;
+  const entry = (entries as Record<string, unknown>)[providerKey];
+  if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+    return undefined;
+  }
+  return entry as Record<string, unknown>;
+}
+
 function getProviderKey(widgetId: string): string | undefined {
   const prefix = "root_";
   const suffix = "_roles";
@@ -51,21 +67,26 @@ export function GenAIRolesWidget(props: WidgetProps) {
   // The model currently chosen in the form, which is what the roles have to
   // reflect. Reading the saved config instead would keep reporting the previous
   // model's capabilities until a save and a refetch.
-  const selectedModel = useMemo(() => {
-    if (!providerKey) return undefined;
-    const formData = formContext?.formData as
-      Record<string, unknown> | undefined;
-    const entry = formData?.[providerKey];
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
-      return undefined;
-    }
-    const model = (entry as Record<string, unknown>).model;
-    return typeof model === "string" && model ? model : undefined;
-  }, [formContext?.formData, providerKey]);
+  const formEntry = useMemo(
+    () => getEntry(formContext?.formData, providerKey),
+    [formContext?.formData, providerKey],
+  );
+  const savedEntry = useMemo(
+    () => getEntry(formContext?.fullConfig?.genai, providerKey),
+    [formContext?.fullConfig?.genai, providerKey],
+  );
+
+  const selectedModel = getString(formEntry?.model);
+
+  // The entry-level capability flags describe the saved provider and model
+  // only, so they apply while the form still matches the saved entry.
+  const matchesSaved =
+    savedEntry !== undefined &&
+    getString(formEntry?.provider) === getString(savedEntry.provider) &&
+    selectedModel === getString(savedEntry.model);
 
   // Capabilities the provider reported for that specific model. Absent when the
-  // provider cannot describe a model it has not loaded, in which case the
-  // entry-level flags (which describe the saved model) are the best available.
+  // provider cannot describe a model it has not loaded.
   const modelCapabilities: GenAIModelCapabilities | undefined = useMemo(() => {
     if (!providerKey || !selectedModel) return undefined;
     return genaiInfo?.[providerKey]?.model_capabilities?.[selectedModel];
@@ -76,7 +97,7 @@ export function GenAIRolesWidget(props: WidgetProps) {
   ): boolean => {
     const perModel = modelCapabilities?.[key];
     if (perModel !== undefined) return perModel;
-    if (!providerKey) return true;
+    if (!providerKey || !matchesSaved) return true;
     const info = genaiInfo?.[providerKey];
     // assume supported when nothing is known, so a role is never hidden on
     // missing information alone
@@ -95,9 +116,13 @@ export function GenAIRolesWidget(props: WidgetProps) {
     return unsupported;
   }, [embeddingsSupported, transcriptionSupported]);
 
+  // a selected role stays visible so it can still be switched off
   const availableRoles = useMemo(
-    () => GENAI_ROLES.filter((role) => !unsupportedRoles.has(role)),
-    [unsupportedRoles],
+    () =>
+      GENAI_ROLES.filter(
+        (role) => !unsupportedRoles.has(role) || selectedRoles.includes(role),
+      ),
+    [unsupportedRoles, selectedRoles],
   );
 
   const occupiedRoles = useMemo(() => {
@@ -123,13 +148,16 @@ export function GenAIRolesWidget(props: WidgetProps) {
     return occupied;
   }, [formContext?.formData, providerKey]);
 
-  // strip every unsupported role in a single onChange; two effects each
-  // rewriting the same value would race and lose one of the edits
+  // Strip every unsupported role in a single onChange; two effects each
+  // rewriting the same value would race and lose one of the edits. Only a
+  // model or provider picked in the form can rule a role out, so capability
+  // data arriving for the saved entry never edits the form on its own.
   useEffect(() => {
+    if (matchesSaved) return;
     if (!selectedRoles.some((role) => unsupportedRoles.has(role))) return;
 
     onChange(selectedRoles.filter((role) => !unsupportedRoles.has(role)));
-  }, [unsupportedRoles, selectedRoles, onChange]);
+  }, [matchesSaved, unsupportedRoles, selectedRoles, onChange]);
 
   const toggleRole = (role: string, enabled: boolean) => {
     if (enabled) {

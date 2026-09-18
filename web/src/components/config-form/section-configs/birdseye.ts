@@ -7,6 +7,11 @@ const birdseye: SectionConfigOverrides = {
       {
         key: "object-tracking-detect-disabled",
         messageKey: "configMessages.birdseye.objectTrackingDetectDisabled",
+        runtimeOverride: {
+          section: "detect",
+          messageKey:
+            "configMessages.birdseye.objectTrackingDetectRuntimeDisabled",
+        },
         severity: "info",
         condition: (ctx) => {
           if (ctx.level !== "camera" || !ctx.fullCameraConfig) return false;

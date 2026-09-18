@@ -63,6 +63,10 @@ const objects: SectionConfigOverrides = {
       {
         key: "detect-disabled",
         messageKey: "configMessages.detect.disabled",
+        runtimeOverride: {
+          section: "detect",
+          messageKey: "configMessages.detect.runtimeDisabled",
+        },
         severity: "info",
         condition: (ctx) =>
           ctx.level === "camera" &&

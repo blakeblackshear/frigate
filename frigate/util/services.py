@@ -35,12 +35,19 @@ logger = logging.getLogger(__name__)
 
 def restart_frigate():
     proc = psutil.Process(1)
+
     # if this is running via s6, sigterm pid 1
     if proc.name() == "s6-svscan":
-        proc.terminate()
+        try:
+            proc.terminate()
+            return
+        except psutil.AccessDenied:
+            # frigate runs unprivileged, so it cannot signal root's s6-svscan.
+            # exiting this process instead runs frigate/finish, which halts s6
+            logger.debug("Not permitted to signal s6-svscan, exiting instead")
+
     # otherwise, just try and exit frigate
-    else:
-        os.kill(os.getpid(), signal.SIGINT)
+    os.kill(os.getpid(), signal.SIGINT)
 
 
 def print_stack(sig, frame):

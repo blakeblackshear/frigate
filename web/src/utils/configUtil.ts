@@ -13,6 +13,7 @@ import set from "lodash/set";
 import { isJsonObject } from "@/lib/utils";
 import { REDACTED_CREDENTIAL_SENTINEL } from "@/lib/const";
 import { applySchemaDefaults } from "@/lib/config-schema";
+import { applyConfiguredToggles } from "@/utils/runtimeOverrides";
 import { normalizeConfigValue } from "@/hooks/use-config-override";
 import {
   modifySchemaForSection,
@@ -103,11 +104,13 @@ export const globalCameraDefaultSections = new Set([
 // ---------------------------------------------------------------------------
 
 /**
- * Get the base (pre-profile) value for a camera section.
+ * Get the saved-config value for a camera section, which is what the settings
+ * form edits.
  *
- * When a profile is active the API populates `base_config` with original
- * section values.  This helper returns that value when available, falling
- * back to the top-level (effective) value otherwise.
+ * Two things move the top-level (effective) value away from yaml. A profile
+ * merges its overrides into it, and the API then populates `base_config` with
+ * the originals. Runtime toggles from the live view, MQTT, or Home Assistant
+ * change it in place, and `applyConfiguredToggles` puts those fields back.
  */
 export function getBaseCameraSectionValue(
   config: FrigateConfig | undefined,
@@ -118,7 +121,11 @@ export function getBaseCameraSectionValue(
   const cam = config.cameras?.[cameraName];
   if (!cam) return undefined;
   const base = cam.base_config?.[sectionPath];
-  return base !== undefined ? base : get(cam, sectionPath);
+  return applyConfiguredToggles(
+    cam,
+    sectionPath,
+    base !== undefined ? base : get(cam, sectionPath),
+  );
 }
 
 // mergeWith customizer that replaces arrays wholesale instead of merging them
