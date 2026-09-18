@@ -19,6 +19,8 @@ import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { requiresRestartForFieldPath } from "@/utils/configUtil";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
+import RuntimeOverrideIndicator from "@/components/indicators/RuntimeOverrideIndicator";
+import { getRuntimeOverride } from "@/utils/runtimeOverrides";
 import {
   buildTranslationPath,
   resolveConfigTranslation,
@@ -210,6 +212,18 @@ export function FieldTemplate(props: FieldTemplateProps) {
     restartRequired,
     defaultRequiresRestart,
   );
+
+  // The form shows saved config values, so flag any field the running camera
+  // currently disagrees with. Profile editing shows that profile's overrides
+  // instead, where the comparison does not apply.
+  const runtimeOverride =
+    isCameraLevel && !formContext?.isProfile
+      ? getRuntimeOverride(
+          formContext?.fullCameraConfig,
+          formContext?.sectionPath,
+          pathSegments.join("."),
+        )
+      : undefined;
 
   // Use schema title/description as primary source (from JSON Schema)
   const schemaTitle = schema.title;
@@ -502,6 +516,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
         {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+        {runtimeOverride && (
+          <RuntimeOverrideIndicator
+            runtimeValue={runtimeOverride.runtime}
+            className="ml-2"
+          />
+        )}
       </Label>
     );
   };
@@ -519,6 +539,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
         {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+        {runtimeOverride && (
+          <RuntimeOverrideIndicator
+            runtimeValue={runtimeOverride.runtime}
+            className="ml-2"
+          />
+        )}
       </Label>
     );
   };
@@ -540,6 +566,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
         {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+        {runtimeOverride && (
+          <RuntimeOverrideIndicator
+            runtimeValue={runtimeOverride.runtime}
+            className="ml-2"
+          />
+        )}
       </Label>
     );
   };

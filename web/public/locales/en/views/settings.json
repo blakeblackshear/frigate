@@ -23,6 +23,9 @@
     "overriddenGlobalHeading_one": "This camera overrides {{count}} field from the global config:",
     "overriddenGlobalHeading_other": "This camera overrides {{count}} fields from the global config:",
     "overriddenGlobalNoDeltas": "This camera overrides the global config, but no field values differ.",
+    "overriddenLive": "Overridden (Live)",
+    "overriddenLiveTooltip": "This camera is running with a different value than the one saved in your config, which is shown here. The live view, MQTT, or an active profile can change it while Frigate is running.",
+    "overriddenLiveValue": "Running value: {{value}}",
     "overriddenBaseConfig": "Overridden (Base Config)",
     "overriddenBaseConfigTooltip": "The {{profile}} profile overrides configuration settings in this section",
     "overriddenBaseConfigHeading_one": "The {{profile}} profile overrides {{count}} field from the base config:",
@@ -1954,20 +1957,25 @@
   "configMessages": {
     "review": {
       "recordDisabled": "Recording is disabled, review items will not be generated.",
+      "recordRuntimeDisabled": "Recording is enabled in your config, but it is currently turned off for this camera, so review items will not be generated. Turn it back on from the camera's live view, or check whether an active profile is disabling it.",
       "detectDisabled": "Object detection is disabled. Review items require detected objects to categorize alerts and detections.",
+      "detectRuntimeDisabled": "Object detection is enabled in your config, but it is currently turned off for this camera. Review items require detected objects to categorize alerts and detections. Turn it back on from the camera's live view, or check whether an active profile is disabling it.",
       "allNonAlertDetections": "All non-alert activity will be included as detections.",
-      "genaiImageSourceRecordingsRecordDisabled": "Image source is set to 'recordings', but recording is disabled. Frigate will fall back to preview images."
+      "genaiImageSourceRecordingsRecordDisabled": "Image source is set to 'recordings', but recording is disabled. Frigate will fall back to preview images.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "Image source is set to 'recordings', but recording is currently turned off for this camera even though your config enables it. Frigate will fall back to preview images."
     },
     "audio": {
       "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
     },
     "audioTranscription": {
       "audioDetectionDisabled": "Audio detection is not enabled for this camera. Audio transcription requires audio detection to be active.",
+      "audioDetectionRuntimeDisabled": "Audio detection is enabled in your config, but it is currently turned off for this camera, so audio transcription will not run. Turn it back on from the camera's live view, or check whether an active profile is disabling it.",
       "genaiProviderSelected": "A GenAI provider is selected, so the device and model size settings are ignored."
     },
     "detect": {
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",
       "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function.",
+      "runtimeDisabled": "Object detection is enabled in your config, but it is currently turned off for this camera. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function until it is turned back on from the camera's live view, or until the active profile stops disabling it.",
       "sceneWithoutModel": "No detection model is configured for this scene, so this camera falls back to the model with a scene of 'All cameras'. Add a model for this scene to give the camera its own.",
       "resolutionShouldBeMultipleOfFour": "For best results, detect width and height should be multiples of 4. Other even values may produce visual artifacts or slight distortion in the detect stream.",
       "aspectRatioMismatch": "The width and height you've entered don't match the aspect ratio of your current detect resolution. This may produce a stretched or distorted image.",
@@ -2002,10 +2010,12 @@
       "noRecordSubRole": "No streams have the record_sub role defined. Sub stream recording will not function."
     },
     "birdseye": {
-      "objectTrackingDetectDisabled": "Birdseye includes tracked objects, but object detection is disabled for this camera. The camera will not appear in Birdseye."
+      "objectTrackingDetectDisabled": "Birdseye includes tracked objects, but object detection is disabled for this camera. The camera will not appear in Birdseye.",
+      "objectTrackingDetectRuntimeDisabled": "Birdseye includes tracked objects, but object detection is currently turned off for this camera even though your config enables it. The camera will not appear in Birdseye until it is turned back on from the camera's live view, or until the active profile stops disabling it."
     },
     "snapshots": {
-      "detectDisabled": "Object detection is disabled. Snapshots are generated from tracked objects and will not be created."
+      "detectDisabled": "Object detection is disabled. Snapshots are generated from tracked objects and will not be created.",
+      "detectRuntimeDisabled": "Object detection is enabled in your config, but it is currently turned off for this camera, so snapshots will not be created. Turn it back on from the camera's live view, or check whether an active profile is disabling it."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "The 'small' size with the Jina V2 model has high RAM and inference cost. The 'large' model with a discrete GPU is recommended."

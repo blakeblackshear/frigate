@@ -9,6 +9,11 @@ const audioTranscription: SectionConfigOverrides = {
         health: (ctx) =>
           ctx.fullCameraConfig?.audio_transcription?.enabled === true,
         messageKey: "configMessages.audioTranscription.audioDetectionDisabled",
+        runtimeOverride: {
+          section: "audio",
+          messageKey:
+            "configMessages.audioTranscription.audioDetectionRuntimeDisabled",
+        },
         severity: "warning",
         condition: (ctx) => {
           if (ctx.level === "camera" && ctx.fullCameraConfig) {

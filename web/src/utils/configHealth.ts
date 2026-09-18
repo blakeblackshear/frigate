@@ -10,6 +10,7 @@ import type { FrigateConfig } from "@/types/frigateConfig";
 import type { HealthProblem } from "@/types/health";
 import { getSectionConfig } from "@/utils/configUtil";
 import { activeCameras } from "@/utils/health";
+import { resolveMessageKey } from "@/utils/runtimeOverrides";
 
 function healthMessages(
   section: string,
@@ -47,7 +48,7 @@ function toProblem(
     severity: message.severity,
     scope,
     scopeIsCamera,
-    text: t(message.messageKey, {
+    text: t(resolveMessageKey(message, ctx), {
       ns: "views/settings",
       ...(message.values ?? {}),
     }),
