@@ -1120,6 +1120,18 @@ class OnvifController:
                     f"Camera {camera_name} is still in ONVIF 'MOVING' status."
                 )
 
+    async def _shutdown(self) -> None:
+        """Close the camera sessions and cancel the tasks running on the loop."""
+        for cam_name in list(self.cams):
+            await self._close_camera(cam_name)
+
+        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+
+        for task in tasks:
+            task.cancel()
+
+        await asyncio.gather(*tasks, return_exceptions=True)
+
     def close(self) -> None:
         """Gracefully shut down the ONVIF controller."""
         if not hasattr(self, "loop") or self.loop.is_closed():
@@ -1127,6 +1139,16 @@ class OnvifController:
             return
 
         logger.info("Exiting ONVIF controller...")
+
+        # anything left open here is garbage collected during interpreter
+        # shutdown, where its warnings can no longer be logged cleanly
+        try:
+            asyncio.run_coroutine_threadsafe(self._shutdown(), self.loop).result(
+                timeout=5
+            )
+        except TimeoutError:
+            logger.debug("Timed out closing ONVIF sessions")
+
         self.config_subscriber.stop()
 
         def stop_and_cleanup():
