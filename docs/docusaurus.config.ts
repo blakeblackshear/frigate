@@ -3,6 +3,9 @@ import * as path from "node:path";
 import type { Config, PluginConfig } from "@docusaurus/types";
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 
+// Bump when a new stable release ships
+const STABLE_VERSION = "0.18";
+
 const config: Config = {
   title: "Frigate",
   tagline: "NVR With Realtime Object Detection for IP Cameras",
@@ -23,17 +26,17 @@ const config: Config = {
     mermaid: true,
   },
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
     localeConfigs: {
       en: {
-        label: 'English',
-      }
+        label: "English",
+      },
     },
   },
   themeConfig: {
     announcementBar: {
-      id: 'frigate_plus',
+      id: "frigate_plus",
       content: `
         <span style="margin-right: 8px; display: inline-block; animation: pulse 2s infinite;">🚀</span>
         Get more relevant and accurate detections with Frigate+ models.
@@ -45,8 +48,8 @@ const config: Config = {
             50%       { transform: scale(1.1); }
           }
         </style>`,
-      backgroundColor: '#005f73',
-      textColor: '#e0fbfc',
+      backgroundColor: "#005f73",
+      textColor: "#e0fbfc",
       isCloseable: false,
     },
     docs: {
@@ -83,15 +86,15 @@ const config: Config = {
       },
     },
     prism: {
-      magicComments:[
+      magicComments: [
         {
-          className: 'theme-code-block-highlighted-line',
-          line: 'highlight-next-line',
-          block: {start: 'highlight-start', end: 'highlight-end'},
+          className: "theme-code-block-highlighted-line",
+          line: "highlight-next-line",
+          block: { start: "highlight-start", end: "highlight-end" },
         },
         {
-          className: 'code-block-error-line',
-          line: 'highlight-error-line',
+          className: "code-block-error-line",
+          line: "highlight-error-line",
         },
       ],
       additionalLanguages: ["bash", "json"],
@@ -132,6 +135,11 @@ const config: Config = {
       },
       items: [
         {
+          href: "https://github.com/blakeblackshear/frigate/releases/latest",
+          label: `${STABLE_VERSION}`,
+          position: "left",
+        },
+        {
           to: "/",
           activeBasePath: "docs",
           label: "Docs",
@@ -148,19 +156,19 @@ const config: Config = {
           position: "right",
         },
         {
-          type: 'localeDropdown',
-          position: 'right',
+          type: "localeDropdown",
+          position: "right",
           dropdownItemsAfter: [
             {
-              label: '简体中文（社区翻译）',
-              href: 'https://docs.frigate-cn.video',
-            }
-          ]
+              label: "简体中文（社区翻译）",
+              href: "https://docs.frigate-cn.video",
+            },
+          ],
         },
         {
-          href: 'https://github.com/blakeblackshear/frigate',
-          label: 'GitHub',
-          position: 'right',
+          href: "https://github.com/blakeblackshear/frigate",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
