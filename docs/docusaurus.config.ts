@@ -135,7 +135,7 @@ const config: Config = {
       },
       items: [
         {
-          href: "https://github.com/blakeblackshear/frigate/releases/latest",
+          href: "https://github.com/blakeblackshear/frigate/releases",
           label: `${STABLE_VERSION}`,
           position: "left",
         },
