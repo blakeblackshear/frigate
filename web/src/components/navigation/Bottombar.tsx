@@ -133,8 +133,9 @@ function StatusAlertNav({ className, large }: StatusAlertNavProps) {
 
   useEffect(() => {
     if (reindexState) {
-      if (reindexState.status == "indexing") {
-        clearMessages("embeddings-reindex");
+      clearMessages("embeddings-reindex");
+
+      if (reindexState.status === "indexing") {
         addMessage(
           "embeddings-reindex",
           t("stats.reindexingEmbeddings", {
@@ -144,9 +145,8 @@ function StatusAlertNav({ className, large }: StatusAlertNavProps) {
             ),
           }),
         );
-      }
-      if (reindexState.status === "completed") {
-        clearMessages("embeddings-reindex");
+      } else if (reindexState.status === "failed") {
+        addMessage("embeddings-reindex", t("stats.reindexEmbeddingsFailed"));
       }
     }
   }, [reindexState, addMessage, clearMessages, t]);
