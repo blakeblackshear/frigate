@@ -21,14 +21,6 @@
       "title": "帯域:",
       "short": "帯域幅"
     },
-    "latency": {
-      "title": "遅延:",
-      "value": "{{seconds}} 秒",
-      "short": {
-        "title": "遅延",
-        "value": "{{seconds}} 秒"
-      }
-    },
     "totalFrames": "総フレーム:",
     "droppedFrames": {
       "title": "ドロップしたフレーム:",
