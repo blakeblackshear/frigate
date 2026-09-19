@@ -19,14 +19,6 @@
       "title": "Ancho de banda:",
       "short": "Ancho de banda"
     },
-    "latency": {
-      "title": "Latencia:",
-      "short": {
-        "title": "Latencia",
-        "value": "{{seconds}} seg"
-      },
-      "value": "{{seconds}} segundos"
-    },
     "totalFrames": "Fotogramas totales:",
     "droppedFrames": {
       "title": "Fotogramas perdidos:",

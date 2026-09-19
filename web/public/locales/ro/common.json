@@ -170,7 +170,7 @@
     },
     "help": "Ajutor",
     "system": "Sistem",
-    "systemMetrics": "Metrici de sistem",
+    "systemMetrics": "Stare sistem și metrici",
     "configuration": "Configurație",
     "systemLogs": "Jurnale de sistem",
     "settings": "Setări",
@@ -242,7 +242,10 @@
     "savingAll": "Se salvează toate…",
     "undoAll": "Anulează toate",
     "applying": "Se aplică…",
-    "retry": "Reîncearcă"
+    "retry": "Reîncearcă",
+    "expand": "Extinde",
+    "collapse": "Restrânge",
+    "reload": "Reîncarcă"
   },
   "unit": {
     "speed": {
@@ -328,5 +331,36 @@
   "validation_errors": "Erori de validare",
   "credentialField": {
     "savedPlaceholder": "Salvat — lasă necompletat pentru a păstra valoarea curentă"
+  },
+  "error": {
+    "title": "Această pagină a încetat să mai funcționeze",
+    "desc": "Pagina a întâmpinat o eroare neașteptată. Reîncărcarea rezolvă de obicei problema. Dacă problema persistă, copiază detaliile și atașează-le într-o discuție pe GitHub.",
+    "staleTitle": "Reîncărcare necesară",
+    "staleDesc": "O parte din interfață nu a putut fi încărcată, ceea ce înseamnă de obicei că Frigate a fost actualizat în timp ce această filă era deschisă. Reîncarcă pentru a prelua nouă versiune.",
+    "partial": "O parte din interfață a încetat să mai funcționeze.",
+    "copyDetails": "Copiază detaliile",
+    "copyFailed": "Nu s-au putut copia detaliile în clipboard"
+  },
+  "commandMenu": {
+    "title": "Meniu de comenzi",
+    "description": "Caută pagini, camere, setări și acțiuni",
+    "placeholder": "Caută pagini, camere, setări și acțiuni",
+    "empty": "Nicio potrivire",
+    "hint": "{{key}} sau / pentru deschidere, Enter pentru rulare",
+    "section": {
+      "recent": "Recente",
+      "pages": "Pagini",
+      "cameras": "Camere",
+      "cameraGroups": "Grupuri de camere",
+      "settings": "Setări",
+      "actions": "Acțiuni"
+    },
+    "camera": {
+      "live": "Live",
+      "review": "Recenzie"
+    },
+    "action": {
+      "toggleTheme": "Comută între modul luminos și întunecat"
+    }
   }
 }

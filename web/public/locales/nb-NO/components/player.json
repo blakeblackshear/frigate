@@ -16,14 +16,6 @@
       "title": "Båndbredde:",
       "short": "Båndbredde"
     },
-    "latency": {
-      "title": "Forsinkelse:",
-      "value": "{{seconds}} sekunder",
-      "short": {
-        "title": "Forsinkelse",
-        "value": "{{seconds}} sek"
-      }
-    },
     "totalFrames": "Totalt antall bilder:",
     "decodedFrames": "Dekodede bilder:",
     "droppedFrameRate": "Tapte bilder per sekund:"

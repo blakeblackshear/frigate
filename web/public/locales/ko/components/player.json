@@ -9,14 +9,6 @@
       "short": "대역폭",
       "title": "대역폭:"
     },
-    "latency": {
-      "short": {
-        "title": "지연",
-        "value": "{{seconds}}초"
-      },
-      "title": "지연 시간:",
-      "value": "{{seconds}}초"
-    },
     "streamType": {
       "short": "종류",
       "title": "스트림 종류:"
@@ -45,8 +37,23 @@
       "submittedFrigatePlus": "Frigate+에 프레임을 성공적으로 제출했습니다"
     },
     "error": {
-      "submitFrigatePlusFailed": "Frigate+에 프레임을 제출하지 못했습니다"
+      "submitFrigatePlusFailed": "Frigate+에 프레임을 제출하지 못했습니다",
+      "playRecordingsFailed": "녹화본 재생실패 (에러 {{code}}): {{message}}"
     }
   },
-  "cameraOff": "카메라가 꺼져 있습니다"
+  "cameraOff": "카메라가 꺼져 있습니다",
+  "quality": {
+    "auto": "자동",
+    "autoLow": "저화질 재생 (대역폭 제한)",
+    "autoLowCodec": "저화질 재생 (브라우저에서 원본 형식을 지원하지 않음)",
+    "autoLowSaveData": "저화질 재생 (데이터 절약)",
+    "main": "원본",
+    "sub": "저화질",
+    "notSupportedBrowser": "이 브라우저에서는 지원되지 않음",
+    "label": "화질",
+    "noAudio": "오디오 없음",
+    "audioRate": "{{rate}} kHz 오디오",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "이 시간 범위에 녹화본이 없습니다"
+  }
 }

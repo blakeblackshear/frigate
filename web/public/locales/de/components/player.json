@@ -20,14 +20,6 @@
       "title": "Bandbreite:",
       "short": "Bandbreite"
     },
-    "latency": {
-      "title": "Latenz:",
-      "value": "{{seconds}} Sekunden",
-      "short": {
-        "title": "Latenz",
-        "value": "{{seconds}} s"
-      }
-    },
     "droppedFrames": {
       "short": {
         "title": "Ausgelassen",

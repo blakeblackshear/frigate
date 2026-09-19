@@ -116,5 +116,16 @@
   "nzpost": "NZPost",
   "postnord": "PostNord",
   "gls": "GLS",
-  "dpd": "DPD"
+  "dpd": "DPD",
+  "canada_post": "Correio Canadense",
+  "royal_mail": "Correio Real",
+  "school_bus": "Ônibus Escolar",
+  "skunk": "Gambá",
+  "kangaroo": "Canguru",
+  "baby": "Bebê",
+  "baby_stroller": "Carrinho de bebê",
+  "rickshaw": "Tuk-Tuk",
+  "rodent": "Roedor",
+  "possum": "Marsupial",
+  "garbage_truck": "Caminhão de Lixo"
 }

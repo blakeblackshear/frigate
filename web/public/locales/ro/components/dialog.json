@@ -39,7 +39,8 @@
       "deleteNow": "Șterge acum",
       "export": "Exportă",
       "markAsReviewed": "Marchează ca revizuit",
-      "markAsUnreviewed": "Marchează ca nerevizuit"
+      "markAsUnreviewed": "Marchează ca nerevizuit",
+      "generateDescription": "Generează descriere"
     },
     "confirmDelete": {
       "toast": {
@@ -58,6 +59,12 @@
       "custom": "Timestamp personalizat",
       "button": "Partajează URL-ul cu timestamp",
       "shareTitle": "Timestamp review Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "A fost solicitată o descriere GenAI pentru acest element de revizuire.",
+        "error": "Nu s-a putut solicita descrierea: {{error}}"
+      }
     }
   },
   "export": {
@@ -163,6 +170,15 @@
         "partial": "Au început {{successful}} din {{total}} exporturi. Au eșuat: {{failedItems}}",
         "failed": "Eșec la pornirea a {{total}} exporturi. Au eșuat: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Calitate",
+      "auto": "Auto",
+      "main": "Originală",
+      "sub": "Scăzută",
+      "autoDesc": "Folosește stream-ul principal și trece la sub-stream-ul de calitate mai scăzută acolo unde cel principal nu este disponibil.",
+      "mainDesc": "Exportă doar stream-ul principal de calitate originală. Intervalele de timp în care stream-ul principal nu este disponibil vor lipsi.",
+      "subDesc": "Exportă doar sub-stream-ul de calitate mai scăzută. Intervalele de timp în care sub-stream-ul nu este disponibil vor lipsi."
     }
   },
   "streaming": {

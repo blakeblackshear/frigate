@@ -146,9 +146,9 @@
       "be": "Беларуская (valgevene keel)"
     },
     "system": "Süsteem",
-    "systemMetrics": "Süsteemi meetrika",
+    "systemMetrics": "Süsteemi korrasolek ja meetrika",
     "configuration": "Seadistused",
-    "systemLogs": "Süsteemi logid",
+    "systemLogs": "Logid",
     "configurationEditor": "Seadistuste haldur",
     "languages": "Keeled",
     "appearance": "Välimus",
@@ -253,7 +253,10 @@
     "savingAll": "Salvestan kõiki…",
     "undoAll": "Pööra kõik tegevused tagasi",
     "applying": "Võtan kasutusele…",
-    "retry": "Proovi uuesti"
+    "retry": "Proovi uuesti",
+    "expand": "Laienda",
+    "collapse": "Ahenda",
+    "reload": "Laadi uuesti"
   },
   "label": {
     "back": "Mine tagasi",
@@ -321,5 +324,36 @@
   "validation_errors": "Valideerimise vead",
   "credentialField": {
     "savedPlaceholder": "Salvestatud - senise kasutamiseks jäta tühjaks"
+  },
+  "error": {
+    "title": "Leht lõpetas toimimise",
+    "desc": "Lehel tekkis ootamatu viga. Tavaliselt aitab lehe uuesti laadimine seda kõrvaldada. Kui viga kordub, kopeeri üksikasjad ja lisa need GitHubi arutelusse või veakirjeldusse.",
+    "staleTitle": "Uuesti laadimine on vajalik",
+    "staleDesc": "Osa kasutajaliidesest ei õnnestunud laadida, mis tähendab tavaliselt, et Frigate'i sai uuendatud, kui see vahekaart oli avatud. Uue versiooni kuvamiseks laadi leht uuesti.",
+    "partial": "Osa kasutajaliidestest lõpetas toimimise.",
+    "copyDetails": "Kopeeri üksikasjad",
+    "copyFailed": "Üksikasjade kopeerimine lõikelauale ei õnnestunud"
+  },
+  "commandMenu": {
+    "title": "Käsumenüü",
+    "description": "Otsi lehti, kaameraid, seadistusi ja tegevusi",
+    "placeholder": "Otsi lehti, kaameraid, seadistusi ja tegevusi",
+    "empty": "Vasteid ei leidu",
+    "hint": "Vajuta avamiseks {{key}} või käivitamiseks sisestusklahvi",
+    "section": {
+      "recent": "Hiljutine",
+      "pages": "Lehti",
+      "cameras": "Kaamerad",
+      "cameraGroups": "Kaameragrupid",
+      "settings": "Seadistused",
+      "actions": "Tegevused"
+    },
+    "camera": {
+      "live": "Vaade reaalajas",
+      "review": "Ülevaade"
+    },
+    "action": {
+      "toggleTheme": "Lülita hele ja tume vaade sisse/välja"
+    }
   }
 }

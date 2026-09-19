@@ -14,14 +14,6 @@
       "title": "ประเภทสตรีม:",
       "short": "ประเภท"
     },
-    "latency": {
-      "title": "ความหน่วง:",
-      "value": "{{seconds}} วินาที",
-      "short": {
-        "title": "ความหน่วง",
-        "value": "{{seconds}} วิ"
-      }
-    },
     "totalFrames": "จำนวนเฟรมทั้งหมด:",
     "droppedFrames": {
       "short": {

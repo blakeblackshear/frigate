@@ -21,14 +21,6 @@
       "title": "Pralaidumas:",
       "short": "Pralaidumas"
     },
-    "latency": {
-      "title": "Vėlavimas:",
-      "value": "{{seconds}} sekundžių",
-      "short": {
-        "title": "Vėlavimas",
-        "value": "{{seconds}} sek"
-      }
-    },
     "totalFrames": "Iš viso Kadrų:",
     "droppedFrames": {
       "title": "Pamestų Kadrų:",

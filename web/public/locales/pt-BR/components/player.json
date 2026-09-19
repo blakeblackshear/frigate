@@ -21,14 +21,6 @@
       "title": "Largura de banda:",
       "short": "Largura de banda"
     },
-    "latency": {
-      "title": "Latência:",
-      "value": "{{seconds}} segundos",
-      "short": {
-        "title": "Latência",
-        "value": "{{seconds}} s"
-      }
-    },
     "totalFrames": "Total de Quadros:",
     "droppedFrames": {
       "title": "Quadros perdidos:",
@@ -45,8 +37,23 @@
       "submittedFrigatePlus": "Quadro enviado ao Frigate+ com sucesso"
     },
     "error": {
-      "submitFrigatePlusFailed": "Falha em submeter quadro ao Frigate+"
+      "submitFrigatePlusFailed": "Falha em submeter quadro ao Frigate+",
+      "playRecordingsFailed": "Falha ao reproduzir gravações (erro {{code}}): {{message}}"
     }
   },
-  "cameraOff": "A câmera está desligada"
+  "cameraOff": "A câmera está desligada",
+  "quality": {
+    "auto": "Automático",
+    "autoLow": "Reproduzindo em baixa qualidade (banda limitada)",
+    "autoLowCodec": "Reproduzindo em baixa qualidade (Original não suportada por este browser)",
+    "autoLowSaveData": "Reproduzindo em baixa qualidade (economia de dados)",
+    "main": "Original",
+    "sub": "Baixa",
+    "notSupportedBrowser": "Não suportada por este browser",
+    "label": "Qualidade",
+    "noAudio": "Sem áudio",
+    "audioRate": "Áudio de {{rate}} kHz",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Sem gravações nesse período"
+  }
 }

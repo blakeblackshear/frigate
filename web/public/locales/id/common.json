@@ -76,9 +76,9 @@
   "menu": {
     "system": "Sistem",
     "profiles": "Profil",
-    "systemMetrics": "Metrik sistem",
+    "systemMetrics": "Metrik sistemKesehatan dan Metrik",
     "configuration": "Konfigurasi",
-    "systemLogs": "Log sistem",
+    "systemLogs": "Log",
     "settings": "Pengaturan",
     "configurationEditor": "Editor Konfigurasi",
     "languages": "Bahasa",
@@ -127,7 +127,8 @@
       "withSystem": {
         "label": "Gunakan pengaturan sistem untuk bahasa"
       },
-      "zhHant": "繁體中文 (Tionghoa Tradisional)"
+      "zhHant": "繁體中文 (Tionghoa Tradisional)",
+      "be": "Bahasa Belarusia"
     },
     "appearance": "Tampilan",
     "darkMode": {
@@ -264,7 +265,10 @@
     "saveAll": "Simpan Semua",
     "savingAll": "Menyimpan Semua…",
     "undoAll": "Urungkan Semua",
-    "retry": "Coba Lagi"
+    "retry": "Coba Lagi",
+    "expand": "Perluas",
+    "collapse": "Ciutkan",
+    "reload": "Muat ulang"
   },
   "toast": {
     "copyUrlToClipboard": "URL disalin ke papan klip.",
@@ -313,5 +317,36 @@
   "validation_errors": "Kesalahan Validasi",
   "credentialField": {
     "savedPlaceholder": "Tersimpan — biarkan kosong untuk mempertahankan yang saat ini"
+  },
+  "error": {
+    "title": "Halaman ini berhenti bekerja",
+    "desc": "Halaman mengalami kesalahan yang tidak terduga. Memuat ulang biasanya akan mengatasinya. Jika masih terus terjadi, salin detailnya dan lampirkan ke diskusi di GitHub.",
+    "staleTitle": "Muat ulang diperlukan",
+    "staleDesc": "Sebagian antarmuka tidak dapat dimuat, yang biasanya berarti Frigate telah diperbarui saat tab ini terbuka. Muat ulang untuk mengambil versi baru.",
+    "partial": "Sebagian antarmuka berhenti bekerja.",
+    "copyDetails": "Salin detail",
+    "copyFailed": "Gagal menyalin detail ke papan klip"
+  },
+  "commandMenu": {
+    "title": "Menu perintah",
+    "description": "Cari halaman, kamera, pengaturan, dan tindakan",
+    "placeholder": "Cari halaman, kamera, pengaturan, dan tindakan",
+    "empty": "Tidak ada kecocokan",
+    "hint": "{{key}} atau / untuk membuka, Enter untuk menjalankan",
+    "section": {
+      "recent": "Terkini",
+      "pages": "Halaman",
+      "cameras": "Kamera",
+      "cameraGroups": "Grup kamera",
+      "settings": "Pengaturan",
+      "actions": "Tindakan"
+    },
+    "camera": {
+      "live": "Langsung",
+      "review": "Tinjauan"
+    },
+    "action": {
+      "toggleTheme": "Beralih antara mode terang dan gelap"
+    }
   }
 }

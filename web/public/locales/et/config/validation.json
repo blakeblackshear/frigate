@@ -31,5 +31,8 @@
     },
     "detect": {
         "dimensionMustBeEven": "Peab olema paarisarv."
+    },
+    "models": {
+        "defaultRequired": "Üks mudel peab kasutama stseeni „Kõik kaamerad“. Ilma selleta ei ole ühelgi kaameral, millel stseen on valimata,pole tagavaravariandina kasutatavat mudelit."
     }
 }

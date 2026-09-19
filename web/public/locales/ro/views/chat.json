@@ -55,6 +55,12 @@
         "auto_scroll": {
             "title": "Derulare automată",
             "desc": "Urmărește mesajele noi pe măsură ce sosesc."
+        },
+        "always_allow": {
+            "title": "Acțiuni mereu permise",
+            "desc": "Acțiuni pe care asistentul le poate rula fără să întrebe mai întâi.",
+            "none": "Niciuna",
+            "reset": "Resetează"
         }
     },
     "stats": {
@@ -68,5 +74,15 @@
     },
     "thinking": {
         "toggle": "Comută gândirea"
+    },
+    "approval": {
+        "title": "Aprobă {{tool}}?",
+        "desc": "Această acțiune modifică ceva în Frigate. Verifică detaliile înainte de a aproba.",
+        "approve": "Aprobă",
+        "always_allow": "Permite mereu",
+        "reject": "Respinge",
+        "approved": "Aprobat",
+        "rejected": "Respins",
+        "placeholder": "Aprobă sau respinge acțiunea în așteptare pentru a continua"
     }
 }

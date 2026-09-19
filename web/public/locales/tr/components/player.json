@@ -8,14 +8,6 @@
       "title": "Yayın Türü:",
       "short": "Tür"
     },
-    "latency": {
-      "value": "{{seconds}} saniye",
-      "short": {
-        "title": "Gecikme",
-        "value": "{{seconds}} sn"
-      },
-      "title": "Gecikme:"
-    },
     "bandwidth": {
       "title": "Bant genişliği:",
       "short": "Bant genişliği"

@@ -21,14 +21,6 @@
       "title": "Sávszélesség:",
       "short": "Sávszélesség"
     },
-    "latency": {
-      "title": "Késleltetés:",
-      "value": "{{seconds}} másodperc",
-      "short": {
-        "title": "Késleltetés",
-        "value": "{{seconds}} másodperc"
-      }
-    },
     "droppedFrames": {
       "title": "Hibás Képek:",
       "short": {

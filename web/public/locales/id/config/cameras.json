@@ -17,36 +17,114 @@
         },
         "filters": {
             "threshold": {
-                "label": "Keyakinan-Suara Minimum"
-            }
+                "label": "Keyakinan-Suara Minimum",
+                "description": "Ambang batas keyakinan minimum agar peristiwa audio dapat dihitung."
+            },
+            "label": "Filter audio",
+            "description": "Pengaturan filter per-tipe-audio seperti ambang batas keyakinan yang digunakan untuk mengurangi hasil positif palsu."
         },
         "min_volume": {
-            "label": "Volume-Suara Minimum"
+            "label": "Volume-Suara Minimum",
+            "description": "Ambang batas volume RMS minimum yang diperlukan untuk menjalankan deteksi audio; nilai yang lebih rendah meningkatkan sensitivitas (misalnya, 200 tinggi, 500 sedang, 1000 rendah)."
+        },
+        "max_not_heard": {
+            "label": "Waktu habis berakhir",
+            "description": "Jumlah detik tanpa tipe audio yang dikonfigurasi sebelum peristiwa audio diakhiri."
+        },
+        "listen": {
+            "label": "Tipe pendengaran",
+            "description": "Daftar tipe peristiwa audio yang akan dideteksi (sebagai contoh: gonggongan, alarm_kebakaran, ucapan, teriakan)."
+        },
+        "labelmap": {
+            "label": "Kustomisasi peta label audio",
+            "description": "Entri penimpaan atau pemetaan ulang untuk digabungkan ke dalam peta label audio standar."
+        },
+        "enabled_in_config": {
+            "label": "Status audio asli",
+            "description": "Menunjukkan apakah deteksi audio pada awalnya diaktifkan dalam berkas konfigurasi statis."
+        },
+        "num_threads": {
+            "label": "Utas deteksi",
+            "description": "Jumlah utas yang digunakan untuk pemrosesan deteksi audio."
         }
     },
     "audio_transcription": {
         "label": "Transkripsi Suara",
         "enabled": {
-            "label": "Nyalakan Transkripsi"
+            "label": "Nyalakan Transkripsi",
+            "description": "Aktifkan atau nonaktifkan transkripsi peristiwa audio yang dipicu secara manual."
         },
         "live_enabled": {
-            "label": "Transkripsi Langsung (Live)"
+            "label": "Transkripsi Langsung (Live)",
+            "description": "Aktifkan streaming transkripsi langsung untuk audio saat diterima."
+        },
+        "description": "Pengaturan untuk transkripsi audio langsung dan ucapan yang digunakan untuk peristiwa dan teks langsung.",
+        "enabled_in_config": {
+            "label": "Status transkripsi asli"
         }
     },
     "detect": {
         "label": "Deteksi Objek",
         "enabled": {
-            "label": "Nyalakan Deteksi Objek"
+            "label": "Nyalakan Deteksi Objek",
+            "description": "Aktifkan atau nonaktifkan deteksi objek untuk kamera ini."
         },
         "stationary": {
             "classifier": {
                 "label": "Nyalakan Klasifikasi-Visual",
                 "description": "Menggunakan pengklasifikasi visual untuk membedakan objek-objek diam (benar-benar tidak bergerak), meskipun bounding-box kurang stabil atau bergetar (jitter)."
+            },
+            "label": "Konfigurasi objek diam",
+            "description": "Pengaturan untuk mendeteksi dan mengelola objek yang tetap diam selama jangka waktu tertentu.",
+            "interval": {
+                "label": "Interval objek diam",
+                "description": "Seberapa sering (dalam bingkai) untuk menjalankan pemeriksaan deteksi guna mengonfirmasi objek yang diam."
+            },
+            "threshold": {
+                "label": "Ambang batas objek diam",
+                "description": "Jumlah bingkai tanpa perubahan posisi yang diperlukan untuk menandai suatu objek sebagai objek diam."
+            },
+            "max_frames": {
+                "label": "Maksimum bingkai",
+                "description": "Membatasi berapa lama objek diam dilacak sebelum dibuang.",
+                "default": {
+                    "label": "Maksimum bingkai bawaan (*default*)",
+                    "description": "Jumlah maksimum bingkai bawaan (*default*) untuk melacak objek diam sebelum dihentikan."
+                },
+                "objects": {
+                    "label": "Maksimum bingkai objek",
+                    "description": "Pengecualian (*override*) per-objek untuk maksimum bingkai guna melacak objek diam."
+                }
             }
         },
         "fps": {
             "label": "Kecepatan (FPS) Deteksi",
             "description": "Kecepatan yang ditargetkan untuk menjalankan Deteksi Objek, dalam satuan frame per second (FPS); nilai lebih rendah mengurangi intensitas proses dan dapat meringangkan beban kerja CPU. Nilai 5 direkomendasikan, sedangakan nilai 10 dianggap sangat tinggi dan hanya digunakan untuk pelacakan (tracking) benda yang bergerak dengan benar-benar cepat."
+        },
+        "description": "Pengaturan untuk peran deteksi/detect yang digunakan untuk menjalankan deteksi objek dan menginisialisasi pelacak.",
+        "height": {
+            "label": "Tinggi deteksi",
+            "description": "Tinggi (piksel) bingkai yang digunakan untuk alur deteksi; biarkan kosong untuk menggunakan resolusi alur asli."
+        },
+        "width": {
+            "label": "Lebar deteksi",
+            "description": "Lebar (piksel) bingkai yang digunakan untuk alur deteksi; biarkan kosong untuk menggunakan resolusi alur asli."
+        },
+        "scene": {
+            "label": "Deteksi adegan",
+            "description": "Lingkungan yang dilihat oleh kamera ini, digunakan untuk memilih mana dari model terkonfigurasi yang berjalan padanya. Kamera yang dibiarkan pada 'semua' akan menjalankan model yang dikonfigurasi dengan adegan 'semua'."
+        },
+        "min_initialized": {
+            "label": "Jumlah minimum bingkai inisialisasi",
+            "description": "Jumlah *detection hit* berturut-turut yang diperlukan sebelum membuat objek yang dilacak. Tingkatkan untuk mengurangi inisialisasi palsu. Nilai bawaan (*default*) adalah fps dibagi 2."
+        },
+        "max_disappeared": {
+            "label": "Jumlah maksimum bingkai yang hilang",
+            "description": "Jumlah bingkai tanpa deteksi sebelum objek yang dilacak dianggap hilang."
+        },
+        "annotation_offset": {
+            "label": "Persetan anotasi (*annotation offset*)",
+            "description": "Milisikron (milidetik) untuk menggeser anotasi deteksi agar kotak pembatas (*bounding box*) pada garis waktu lebih sejajar dengan rekaman; dapat bernilai positif atau negatif."
         }
     },
     "enabled": {
@@ -57,6 +135,176 @@
         "enabled": {
             "description": "Nyalakan atau matikan fitur Penglihatan Atas (Birdseye View).",
             "label": "Nyalakan Birdseye"
+        },
+        "label": "Pandangan mata burung",
+        "description": "Pengaturan untuk tampilan komposit Birdseye yang menggabungkan beberapa umpan kamera ke dalam satu tata letak.",
+        "modes": {
+            "label": "Tipe aktivitas",
+            "description": "Tipe aktivitas yang mencakup kamera dalam pandangan Birdseye."
+        },
+        "order": {
+            "label": "Posisi",
+            "description": "Posisi numerik yang mengatur urutan kamera dalam tata letak Birdseye."
+        }
+    },
+    "face_recognition": {
+        "label": "Pengenalan wajah (*face recognition*)",
+        "description": "Pengaturan untuk deteksi dan pengenalan wajah pada kamera ini.",
+        "enabled": {
+            "label": "Aktifkan pengenalan wajah (*enable face recognition*)",
+            "description": "Mengaktifkan atau mematikan pengenalan wajah."
+        },
+        "min_area": {
+            "label": "Area wajah minimum",
+            "description": "Luas minimum (dalam piksel) dari kotak wajah yang terdeteksi yang diperlukan untuk mencoba pengenalan."
+        }
+    },
+    "ffmpeg": {
+        "label": "Stream (FFmpeg)",
+        "description": "Input stream kamera dan opsi FFmpeg, termasuk path binary, parameter, hwaccel, dan parameter output per-role.",
+        "path": {
+            "label": "Path FFmpeg",
+            "description": "Path ke binary FFmpeg yang digunakan atau alias versi (\"7.0\" or \"8.0\")."
+        },
+        "global_args": {
+            "label": "Parameter global FFmpeg",
+            "description": "Parameter global yang dikirim ke proses FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Parameter akselerasi hardware",
+            "description": "Parameter akselerasi hardware untuk FFmpeg. Preset khusus provider direkomendasikan."
+        },
+        "input_args": {
+            "label": "Parameter input",
+            "description": "Parameter input yang diterapkan ke stream input FFmpeg."
+        },
+        "output_args": {
+            "label": "Parameter output",
+            "description": "Parameter output default yang digunakan untuk berbagai role FFmpeg seperti detect dan record.",
+            "detect": {
+                "label": "Parameter output detect",
+                "description": "Parameter output default untuk stream role detect."
+            },
+            "record": {
+                "label": "Parameter output record",
+                "description": "Parameter output default untuk stream role record."
+            },
+            "record_sub": {
+                "label": "Parameter output record sub stream",
+                "description": "Parameter output untuk stream peran record_sub. Parameter output record akan digunakan jika opsi ini tidak diatur."
+            }
+        },
+        "retry_interval": {
+            "label": "Waktu coba ulang FFmpeg",
+            "description": "Jumlah detik untuk menunggu sebelum mencoba menghubungkan ulang stream kamera setelah gagal. Default adalah 10."
+        },
+        "apple_compatibility": {
+            "label": "Kompatibilitas Apple",
+            "description": "Aktifkan penandaan HEVC untuk kompatibilitas player Apple yang lebih baik saat merekam H.265."
+        },
+        "gpu": {
+            "label": "Index GPU",
+            "description": "Index GPU default yang digunakan untuk akselerasi hardware jika tersedia."
+        },
+        "inputs": {
+            "label": "Input kamera",
+            "description": "Daftar definisi stream input (path dan peran) untuk kamera ini.",
+            "path": {
+                "label": "Path input",
+                "description": "URL atau path stream input kamera."
+            },
+            "roles": {
+                "label": "Peran input",
+                "description": "Peran untuk stream input ini."
+            },
+            "global_args": {
+                "label": "Parameter global FFmpeg",
+                "description": "Parameter global FFmpeg untuk stream input ini."
+            },
+            "hwaccel_args": {
+                "label": "Argument akselerasi hardware",
+                "description": "Parameter akselerasi hardware untuk stream input ini."
+            },
+            "input_args": {
+                "label": "Parameter input",
+                "description": "Parameter input khusus untuk stream ini."
+            }
+        }
+    },
+    "live": {
+        "label": "Pemutaran langsung",
+        "description": "Pengaturan yang digunakan oleh Web UI untuk mengontrol pemilihan, resolusi, dan kualitas live stream.",
+        "streams": {
+            "label": "Nama stream langsung",
+            "description": "Pemetaan nama stream terkonfigurasi ke nama restream/go2rtc yang digunakan untuk pemutaran langsung."
+        },
+        "height": {
+            "label": "Tinggi pemutaran langsung",
+            "description": "Tinggi (piksel) untuk merender live stream jsmpeg di Web UI; harus <= tinggi stream detect."
+        },
+        "quality": {
+            "label": "Kualitas pemutaran langsung",
+            "description": "Kualitas encoding untuk stream jsmpeg (1 tertinggi, 31 terendah)."
+        }
+    },
+    "lpr": {
+        "label": "Pengenalan Plat Nomor",
+        "description": "Pengaturan pengenalan plat nomor termasuk ambang batas deteksi, format, dan plat yang dikenal.",
+        "enabled": {
+            "label": "Aktifkan LPR",
+            "description": "Aktifkan atau nonaktifkan LPR pada kamera ini."
+        },
+        "expire_time": {
+            "label": "Waktu kadaluarsa dalam detik",
+            "description": "Waktu dalam detik setelah plat yang tidak terlihat kadaluarsa dari pelacak (hanya untuk kamera LPR khusus)."
+        },
+        "min_area": {
+            "label": "Luas area plat minimum",
+            "description": "Luas area plat minimum (piksel) yang diperlukan untuk mencoba pengenalan."
+        },
+        "enhancement": {
+            "label": "Level peningkatan",
+            "description": "Tingkat peningkatan (0–10) yang diterapkan pada potongan gambar plat sebelum OCR. Nilai yang lebih tinggi tidak selalu memberikan hasil yang lebih baik; level di atas 5 umumnya hanya efektif untuk plat di malam hari dan sebaiknya digunakan secara hati-hati."
+        }
+    },
+    "motion": {
+        "label": "Deteksi gerakan",
+        "description": "Pengaturan deteksi gerakan bawaan untuk kamera ini.",
+        "enabled": {
+            "label": "Aktifkan deteksi gerakan",
+            "description": "Aktifkan atau nonaktifkan deteksi gerakan untuk kamera ini."
+        },
+        "threshold": {
+            "label": "Ambang batas gerakan",
+            "description": "Ambang batas perbedaan piksel yang digunakan oleh detektor gerakan; nilai yang lebih tinggi akan mengurangi sensitivitas (rentang 1–255)."
+        },
+        "lightning_threshold": {
+            "label": "Ambang batas pencahayaan",
+            "description": "Ambang batas untuk mendeteksi dan mengabaikan lonjakan pencahayaan singkat (nilai lebih rendah berarti lebih sensitif, rentang antara 0,3 hingga 1,0). Hal ini tidak menghentikan deteksi gerakan secara total, melainkan hanya membuat detektor berhenti menganalisis bingkai (frame) tambahan setelah ambang batas terlampaui. Rekaman berbasis gerakan akan tetap dibuat selama peristiwa ini terjadi."
+        },
+        "skip_motion_threshold": {
+            "label": "Lewati ambang batas gerakan",
+            "description": "Jika diatur ke nilai antara 0.0 dan 1.0, dan perubahan dalam satu bingkai (frame) melebihi fraksi ini, detektor tidak akan menampilkan kotak gerakan dan langsung melakukan kalibrasi ulang. Hal ini dapat menghemat CPU serta mengurangi hasil positif palsu saat terjadi petir, badai, dll., namun berisiko melewatkan kejadian nyata seperti kamera PTZ yang memantau objek secara otomatis. Pilihan ini adalah kompromi antara kehilangan beberapa megabita rekaman versus memeriksa beberapa klip pendek. Biarkan kosong (None) untuk menonaktifkan fitur ini."
+        },
+        "improve_contrast": {
+            "label": "Tingkatkan kontras",
+            "description": "Terapkan peningkatan kontras pada bingkai (frame) sebelum analisis gerakan untuk membantu proses deteksi."
+        },
+        "contour_area": {
+            "label": "Area kontur",
+            "description": "Area kontur minimum dalam piksel yang diperlukan agar kontur gerakan dapat terhitung."
+        },
+        "delta_alpha": {
+            "label": "motion.delta_alpha.label",
+            "description": "Faktor pembauran alfa (*alpha blending*) yang digunakan dalam komparasi bingkai (*frame differencing*) untuk kalkulasi gerakan."
+        },
+        "frame_alpha": {
+            "label": "Frame alfa",
+            "description": "Nilai alfa yang digunakan saat membaurkan bingkai (*frame blending*) untuk pra-pemrosesan gerakan."
+        },
+        "frame_height": {
+            "label": "Tinggi bingkai",
+            "description": "Tinggi dalam piksel untuk mengubah skala bingkai (*frame*) saat menghitung gerakan."
         }
     }
 }

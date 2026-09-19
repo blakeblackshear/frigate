@@ -21,14 +21,6 @@
       "title": "پهنای باند:",
       "short": "پهنای باند"
     },
-    "latency": {
-      "title": "تأخیر:",
-      "value": "{{seconds}} ثانیه‌ها",
-      "short": {
-        "title": "تأخیر",
-        "value": "{{seconds}} ثانیه"
-      }
-    },
     "totalFrames": "مجموع فریم‌ها:",
     "droppedFrames": {
       "title": "فریم‌های از دست‌رفته:",

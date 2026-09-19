@@ -21,14 +21,6 @@
       "title": "Bandbredd:",
       "short": "Bandbredd"
     },
-    "latency": {
-      "title": "Latens:",
-      "short": {
-        "title": "Latens",
-        "value": "{{seconds}} s"
-      },
-      "value": "{{seconds}} sekunder"
-    },
     "totalFrames": "Totalt antal bildrutor:",
     "droppedFrames": {
       "title": "Förlorade bildrutor:",

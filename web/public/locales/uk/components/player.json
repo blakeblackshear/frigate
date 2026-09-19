@@ -19,14 +19,6 @@
       "title": "Пропускна здатність:",
       "short": "Пропускна здатність"
     },
-    "latency": {
-      "title": "Затримка:",
-      "short": {
-        "title": "Затримка",
-        "value": "{{seconds}} сек"
-      },
-      "value": "{{seconds}} секунд"
-    },
     "totalFrames": "Всього кадрiв:",
     "decodedFrames": "Декодовані кадри:"
   },

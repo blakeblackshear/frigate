@@ -88,7 +88,7 @@
     "uiSettings": "Paràmetres de la IU",
     "profiles": "Perfils",
     "systemGo2rtcStreams": "go2rtc streams",
-    "systemDetectorsAndModel": "Detectors i model"
+    "systemDetectorsAndModel": "Models de detecció"
   },
   "dialog": {
     "unsavedChanges": {
@@ -150,11 +150,50 @@
     "toast": {
       "success": {
         "clearStoredLayout": "Disposició emmagatzemada esborrada per {{cameraName}}",
-        "clearStreamingSettings": "S'han suprimit els paràmetres de la transmissió per tots els grups de càmeres."
+        "clearStreamingSettings": "S'han suprimit els paràmetres de la transmissió per tots els grups de càmeres.",
+        "exportUiSettings": "Configuració exportada",
+        "importUiSettings": "Configuració importada"
       },
       "error": {
         "clearStoredLayoutFailed": "Error en suprimir la disposició desada: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Error en esborrar els paràmetres de la transmissió: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Error en esborrar els paràmetres de la transmissió: {{errorMessage}}",
+        "exportUiSettingsFailed": "No s'han pogut exportar els paràmetres",
+        "importNothingToApply": "No s'ha pogut importar la configuració: el fitxer no conté cap configuració",
+        "importInvalidJson": "No s'ha pogut importar la configuració: el fitxer no és un JSON vàlid",
+        "importWrongType": "Ha fallat la importació de la configuració: el fitxer no és una exportació de la configuració de Frigate",
+        "importUnsupportedVersion": "No s'ha pogut importar la configuració: el fitxer requereix una versió més nova de Frigate",
+        "importInvalidSchema": "No s'ha pogut importar la configuració: el fitxer està mal format",
+        "importUiSettingsFailed": "No s'han pogut importar els paràmetres"
+      }
+    },
+    "backupRestore": {
+      "title": "Còpia de seguretat i restauració",
+      "transfer": {
+        "label": "Fitxer de configuració del dispositiu",
+        "desc": "Les disposicions del grup de càmeres, la configuració de la transmissió i les preferències de la interfície d'usuari s'emmagatzemen al vostre navegador. Exporta-les a un fitxer per fer-ne una còpia de seguretat o per moure-les a un altre dispositiu.",
+        "export": "Exporta la configuració",
+        "import": "Importa els paràmetres"
+      },
+      "importDialog": {
+        "title": "Importa els paràmetres",
+        "desc": "Trieu què aplicar d'aquest fitxer. Frigate es tornarà a carregar quan acabi la importació.",
+        "exportedFrom": "S'ha exportat {{date}} de la versió de configuració de Frigate {{version}}",
+        "layouts_one": "Distribucions de grup de càmeres (grup{{count}})",
+        "layouts_many": "Distribucions de grup de càmera ({{count}} grups)",
+        "layouts_other": "Distribucions de grup de càmera ({{count}} grups)",
+        "streaming_one": "Configuració de l'Streaming (càmera {{count}})",
+        "streaming_many": "Configuració de l'Streaming (càmeres {{count}})",
+        "streaming_other": "Configuració de l'Streaming (càmeres {{count}})",
+        "preferences_one": "Preferències de la interfície d'usuari (ajust {{count}})",
+        "preferences_many": "Preferències de la interfície d'usuari ( {{count}} paràmetres)",
+        "preferences_other": "Preferències de la interfície d'usuari ( {{count}} paràmetres)",
+        "unknownGroups_one": "El grup de càmeres {{groups}} no és en aquest servidor. La seva configuració es desarà però no s'utilitzarà.",
+        "unknownGroups_many": "Els grups de càmeres {{groups}} no són en aquest servidor. La seva configuració es desarà però no s'utilitzarà.",
+        "unknownGroups_other": "Els grups de càmeres {{groups}} no són en aquest servidor. La seva configuració es desarà però no s'utilitzarà.",
+        "unknownCameras_one": "La càmera {{cameras}} no és en aquest servidor. S'ignorarà la seva configuració de transmissió.",
+        "unknownCameras_many": "Les càmeres {{cameras}} no són en aquest servidor. S'ignoraran els seus paràmetres de transmissió.",
+        "unknownCameras_other": "Les càmeres {{cameras}} no són en aquest servidor. S'ignoraran els seus paràmetres de transmissió.",
+        "confirm": "Importa"
       }
     }
   },
@@ -1024,7 +1063,7 @@
       }
     },
     "step3": {
-      "description": "Configura els rols de flux i afegeix fluxos addicionals per a la càmera.",
+      "description": "Configura característiques, rols de flux i afegeix fluxos addicionals per a la càmera.",
       "streamTitle": "Flux {{number}}",
       "roles": "Rols",
       "streamsTitle": "Fluxos de la càmera",
@@ -1058,11 +1097,26 @@
         "title": "Roles de flux",
         "detect": "Canal principal per a la detecció d'objectes.",
         "record": "Desa els segments del canal de vídeo basats en la configuració.",
-        "audio": "Canal per a la detecció basada en àudio."
+        "audio": "Canal per a la detecció basada en àudio.",
+        "record_sub": "Enregistraments de menor qualitat per a la reproducció adaptativa i la retenció estesa (típicament el substream de la càmera)."
       },
       "featuresPopover": {
         "title": "Característiques del flux",
         "description": "Utilitzeu el restreaming go2rtc per reduir les connexions a la càmera."
+      },
+      "appleCompatibility": {
+        "title": "Millora la reproducció en dispositius Apple",
+        "description": "Activeu això si mireu enregistraments al Safari o a un iPhone, iPad o Mac."
+      },
+      "ptz": {
+        "title": "Habilita els controls PTZ",
+        "detectedNote": "S'ha detectat suport PTZ a través de l'ONVIF. Si es tracta d'una càmera PTZ, habilitar aquesta opció us permetrà controlar les funcions pan/tilt/zoom de la càmera des de la interfície d'usuari.",
+        "connectionDetails": "Detalls de la connexió ONVIF",
+        "host": "Amfitrió ONVIF",
+        "port": "Port ONVIF",
+        "username": "Nom d'usuari ONVIF",
+        "password": "Contrasenya ONVIF",
+        "hostRequiredWarning": "Es requereix un amfitrió i un port ONVIF quan s'habiliten els controls PTZ."
       }
     },
     "step4": {
@@ -1393,7 +1447,9 @@
         "orphansDeleted": "Orfes eliminats",
         "aborted": "Avortat. La supressió superaria el llindar de seguretat.",
         "error": "Error",
-        "totals": "Totals"
+        "totals": "Totals",
+        "spaceToReclaim": "Espai a reclamar",
+        "spaceReclaimed": "Espai reclamat"
       },
       "event_snapshots": "Instantànies de l'objecte rastrejat",
       "event_thumbnails": "Miniatures d'objecte rastrejat",
@@ -1489,7 +1545,8 @@
         "preset-record-mjpeg": "Registre - Càmeres MJPEG",
         "preset-record-jpeg": "Registre - Càmeres JPEG",
         "preset-record-ubiquiti": "Registre - Càmeres Ubiquiti"
-      }
+      },
+      "sameAsRecord": "Igual que els arguments de sortida del registre"
     },
     "cameraInputs": {
       "itemTitle": "Flux {{index}}",
@@ -1570,8 +1627,11 @@
       "options": {
         "detect": "Detecta",
         "record": "Enregistrament",
-        "audio": "Àudio"
-      }
+        "audio": "Àudio",
+        "record_sub": "Registre (Sub Flux)"
+      },
+      "roleInUse": "Ja assignat a un altre flux",
+      "recordSubConflict": "Un flux no pot tenir els rols record andsub"
     },
     "review": {
       "title": "Configuració de la revisió"
@@ -1593,7 +1653,8 @@
       "options": {
         "embeddings": "Vectors",
         "descriptions": "Descripcions",
-        "chat": "Xat"
+        "chat": "Xat",
+        "transcribe": "Transcripció"
       }
     },
     "semanticSearchModel": {
@@ -1618,7 +1679,12 @@
     },
     "knownPlates": {
       "namePlaceholder": "per exemple. Cotxe de la parella",
-      "platePlaceholder": "Matricula o regex"
+      "platePlaceholder": "Matricula o regex",
+      "assignedTo": "Assignat a {{name}}",
+      "detected": "Plaques detectades",
+      "noneDetected": "Encara no s'ha detectat cap matrícula",
+      "search": "Cerca o introdueix una matrícula",
+      "useCustom": "Utilitza \"{{value}}\""
     },
     "semanticSearchModelSize": {
       "notApplicable": "No aplicable als proveïdors de GenAI"
@@ -1643,7 +1709,26 @@
     },
     "defaultRole": {
       "admin": "Administrar",
-      "viewer": "Visor"
+      "viewer": "Visor",
+      "none": "Cap (denega l'accés)"
+    },
+    "birdseyeModes": {
+      "summary": "{{count}} seleccionats",
+      "options": {
+        "continuous": "Continu",
+        "motion": "Moviment",
+        "all_objects": "Tots els objectes",
+        "alerts": "Alertes",
+        "detections": "Deteccions"
+      }
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Selecciona el model…",
+      "builtIn": "Models integrats",
+      "genaiProviders": "Proveïdors de GenAI"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "No aplicable als proveïdors de GenAI"
     }
   },
   "globalConfig": {
@@ -1715,7 +1800,10 @@
     "overriddenBaseConfigHeading_one": "El perfil {{profile}} substitueix el camp {{count}} de la configuració base:",
     "overriddenBaseConfigHeading_many": "El perfil {{profile}} substitueix {{count}} camps de la configuració base:",
     "overriddenBaseConfigHeading_other": "El perfil {{profile}} substitueix {{count}} camps de la configuració base:",
-    "overriddenBaseConfigNoDeltas": "El perfil {{profile}} substitueix aquesta secció, però no hi ha valors de camp diferents de la configuració base."
+    "overriddenBaseConfigNoDeltas": "El perfil {{profile}} substitueix aquesta secció, però no hi ha valors de camp diferents de la configuració base.",
+    "overriddenLive": "Sobreescrit (Viure)",
+    "overriddenLiveTooltip": "Aquesta càmera s'està executant amb un valor diferent del desat a la configuració, que es mostra aquí. La vista en viu, MQTT, o un perfil actiu pot canviar-la mentre s'està executant Frigate.",
+    "overriddenLiveValue": "Valor en execució: {{value}}"
   },
   "profiles": {
     "title": "Perfils",
@@ -1833,13 +1921,18 @@
       "recordDisabled": "L'enregistrament està desactivat, els elements de revisió no es generaran.",
       "detectDisabled": "La detecció d'objectes està desactivada. Els elements de revisió requereixen objectes detectats per categoritzar alertes i deteccions.",
       "allNonAlertDetections": "Totes les activitats que no siguin alertes s'inclouran com a deteccions.",
-      "genaiImageSourceRecordingsRecordDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat. Frigate tornarà a la vista prèvia de les imatges."
+      "genaiImageSourceRecordingsRecordDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat. Frigate tornarà a la vista prèvia de les imatges.",
+      "recordRuntimeDisabled": "L'enregistrament està activat a la configuració, però actualment està desactivat per a aquesta càmera, de manera que els elements de revisió no es generaran. Torneu-lo a activar des de la vista en viu de la càmera, o comproveu si un perfil actiu l'està desactivant.",
+      "detectRuntimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera. Els elements de revisió requereixen objectes detectats per categoritzar alertes i deteccions. Torneu-lo a activar des de la vista en viu de la càmera, o comproveu si un perfil actiu l'està desactivant.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "La font d'imatges està configurada com a 'enregistraments', però l'enregistrament està desactivat per a aquesta càmera tot i que la configuració l'habilita. Frigate tornarà a la vista prèvia de les imatges."
     },
     "audio": {
       "noAudioRole": "Cap flux té definit el rol d'àudio. Heu d'habilitar el rol d'àudio per a la detecció d'àudio perquè funcioni."
     },
     "audioTranscription": {
-      "audioDetectionDisabled": "La detecció d'àudio no està activada per a aquesta càmera. La transcripció d'àudio requereix que la detecció d'àudio estigui activa."
+      "audioDetectionDisabled": "La detecció d'àudio no està activada per a aquesta càmera. La transcripció d'àudio requereix que la detecció d'àudio estigui activa.",
+      "genaiProviderSelected": "La detecció d'àudio està activada a la configuració, però actualment està desactivada per a aquesta càmera, de manera que la transcripció d'àudio no s'executarà. Torneu-lo a activar des de la vista en viu de la càmera, o comproveu si un perfil actiu l'està desactivant.",
+      "audioDetectionRuntimeDisabled": "La detecció d'àudio està activada a la configuració, però actualment està desactivada per a aquesta càmera, de manera que la transcripció d'àudio no s'executarà. Torneu-lo a activar des de la vista en viu de la càmera, o comproveu si un perfil actiu l'està desactivant."
     },
     "detect": {
       "fpsGreaterThanFive": "No es recomana establir el detect FPS superior a 5. Els valors més alts poden causar problemes de rendiment i no proporcionaran cap benefici.",
@@ -1849,7 +1942,9 @@
       "maxFramesSet": "La configuració dels fotogrames màxims anul·la el comportament predeterminat i desactiva el seguiment d'objectes estacionaris. Hi ha molt poques situacions en què això sigui necessari, utilitzeu-lo amb precaució.",
       "squareResolution": "Una resolució de detecció quadrada és inusual. L'amplada i l'alçada de la detecció han de coincidir amb la relació d'aspecte de la càmera (per exemple, 16:9), no amb les dimensions del model de detecció d'objectes. Una relació d'aspecte no coincident pot estirar la imatge i reduir la precisió de detecció.",
       "resolutionHigh": "Aquesta resolució de detecció és més alta del recomanat i pot causar un ús més elevat dels recursos sense millorar la precisió de detecció. Es recomana una resolució de detecció a o per sota de 1080p per a la majoria de les càmeres.",
-      "globalResolutionMultipleCameras": "S'estableix una resolució de detecció global mentre es configuren diverses càmeres. Tret que totes les càmeres comparteixin la mateixa resolució i relació d'aspecte, l'amplada i l'alçada de la detecció s'haurien de definir per càmera perquè coincideixi amb la relació d'aspecte nativa de cada càmera."
+      "globalResolutionMultipleCameras": "S'estableix una resolució de detecció global mentre es configuren diverses càmeres. Tret que totes les càmeres comparteixin la mateixa resolució i relació d'aspecte, l'amplada i l'alçada de la detecció s'haurien de definir per càmera perquè coincideixi amb la relació d'aspecte nativa de cada càmera.",
+      "sceneWithoutModel": "No s'ha configurat cap model de detecció per a aquesta escena, de manera que aquesta càmera torna al model amb una escena de 'Totes les càmeres'. Afegiu un model per a aquesta escena per donar la càmera pròpia.",
+      "runtimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera. Instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran fins que no s'encengui des de la vista en viu de la càmera, o fins que el perfil actiu deixi d'inhabilitar-lo."
     },
     "faceRecognition": {
       "globalDisabled": "L'enriquiment del reconeixement facial s'ha d'habilitar perquè les funcions de reconeixement facial funcionin en aquesta càmera.",
@@ -1862,10 +1957,12 @@
       "modelSizeLarge": "El model 'gran' està optimitzat per a matrícules multilínies. El model 'petit' proporciona un millor rendiment sobre 'gran' i s'ha d'utilitzar tret que la vostra regió utilitzi formats de placa multilínia."
     },
     "record": {
-      "noRecordRole": "Cap flux té el rol de registre definit. L'enregistrament no funcionarà."
+      "noRecordRole": "Cap flux té el rol de registre definit. L'enregistrament no funcionarà.",
+      "noRecordSubRole": "Cap flux té definit el rol recordsubsub. L'enregistrament del substream no funcionarà."
     },
     "snapshots": {
-      "detectDisabled": "La detecció d'objectes està desactivada. Les instantànies es generen a partir d'objectes rastrejats i no es crearan."
+      "detectDisabled": "La detecció d'objectes està desactivada. Les instantànies es generen a partir d'objectes rastrejats i no es crearan.",
+      "detectRuntimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera, de manera que no es crearan instantànies. Torneu-lo a activar des de la vista en viu de la càmera, o comproveu si un perfil actiu l'està desactivant."
     },
     "objects": {
       "genaiNoDescriptionsProvider": "Heu de configurar un proveïdor de GenAI amb el rol 'descripcions' per a les descripcions que es generaran."
@@ -1883,6 +1980,10 @@
     "model": {
       "optimizedFor320": "Frigate està optimitzada per a un model 320x320, que és la millor opció per a la majoria de configuracions. Un model 640x640 és més lent i només ajuda en escenaris específics.",
       "inputDimensionsNotDetectResolution": "L'amplada i l'alçada del model d'entrada són les dimensions d'entrada del model de detecció d'objectes, no la resolució de detecció de la càmera. Haurien de coincidir amb les dimensions del model que esteu utilitzant - típicament una mida quadrada com 320x320 o 640x640."
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "Birdseye inclou objectes rastrejats, però la detecció d'objectes està desactivada per a aquesta càmera. La càmera no apareixerà a Birdseye.",
+      "objectTrackingDetectRuntimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera. Instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran fins que no s'encengui des de la vista en viu de la càmera, o fins que el perfil actiu deixi d'inhabilitar-lo."
     }
   },
   "modelSize": {
@@ -1913,6 +2014,10 @@
     "imageSource": {
       "recordings": "Gravacions",
       "previews": "Previsualitzacions"
+    },
+    "frameMode": {
+      "frames": "Fotogrames",
+      "annotated_frames": "Fotogrames anotats"
     }
   },
   "logger": {
@@ -1940,5 +2045,46 @@
     "overrideGlobal": "Aquesta secció substitueix la configuració global",
     "overrideProfile": "Aquesta secció està substituïda pel perfil {{profile}}",
     "unsaved": "Aquesta secció té canvis sense desar"
+  },
+  "detectionModels": {
+    "title": "Models de detecció",
+    "description": "Configura els models de detecció d'objectes i el maquinari que s'executa. Les càmeres trien un model segons la seva escena a la configuració de detecció de la càmera.",
+    "addModel": "Afegeix un model",
+    "cameras_one": "{{count}} càmera",
+    "cameras_many": "{{count}} càmeres",
+    "cameras_other": "{{count}} càmeres",
+    "scene": {
+      "label": "Escena",
+      "description": "L'entorn per al qual serveix aquest model. Les càmeres trien un model establint la mateixa escena a la seva configuració de detecció, i el model amb una escena de tots és utilitzat per qualsevol càmera que no en estableixi una."
+    },
+    "scenes": {
+      "all": "Totes les càmeres",
+      "indoor": "Interior",
+      "outdoor": "Exterior",
+      "indoor_thermal": "Tèrmiques interiors",
+      "outdoor_thermal": "Tèrmiques exterior"
+    },
+    "hardware": {
+      "label": "Maquinari",
+      "placeholder": "Selecciona el maquinari",
+      "loading": "S'està cercant el maquinari de detecció...",
+      "none": "Cap maquinari seleccionat",
+      "claimedBy": "utilitzat per {{scene}}",
+      "detectorCount": "Detectors",
+      "countRecommended_one": "Recomanat per a la càmera {{count}}",
+      "countRecommended_many": "Recomanat per {{count}} càmeres",
+      "countRecommended_other": "Recomanat per {{count}} càmeres",
+      "unrecognized": "Aquest model està configurat per al maquinari que no s'ha trobat en aquest sistema: {{devices}}",
+      "description": "El maquinari en el qual aquest model executa la seva detecció.",
+      "detectorCountDescription": "Quants processos de detecció s'han d'executar en aquest maquinari. Més detectors es mantenen al dia amb més càmeres, a costa de la memòria extra del dispositiu.",
+      "unitsDescription": "Cada unitat executa el seu propi procés de detecció. No es pot seleccionar una unitat ja utilitzada per un altre model."
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Model personalitzat"
+    },
+    "plusModel": {
+      "noModelSelected": "Selecciona un model Frigate+"
+    }
   }
 }

@@ -91,5 +91,6 @@
     "crop": "Decupează după filtru",
     "cropDesc": "Mărește previzualizările pe zonele de filtrare selectate în loc să afișeze cadrul complet.",
     "cropAria": "Comută decuparea previzualizărilor pe zonele filtrate"
-  }
+  },
+  "subOnlyQuality": "Doar înregistrări de calitate scăzută sunt disponibile în acest interval de timp"
 }

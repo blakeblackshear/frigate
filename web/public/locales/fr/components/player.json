@@ -21,14 +21,6 @@
       "title": "Bande passante :",
       "short": "Bande passante"
     },
-    "latency": {
-      "title": "Latence :",
-      "value": "{{seconds}} secondes",
-      "short": {
-        "title": "Latence",
-        "value": "{{seconds}} s"
-      }
-    },
     "droppedFrames": {
       "short": {
         "value": "{{droppedFrames}} images",

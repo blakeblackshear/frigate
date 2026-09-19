@@ -20,14 +20,6 @@
       "title": "Šírka pásma:",
       "short": "Šírka pásma"
     },
-    "latency": {
-      "title": "Latencia:",
-      "value": "{{seconds}} sekund",
-      "short": {
-        "title": "Latencia",
-        "value": "{{seconds}} sek"
-      }
-    },
     "totalFrames": "Celkový počet snímok:",
     "droppedFrames": {
       "title": "Znížené snímky:",

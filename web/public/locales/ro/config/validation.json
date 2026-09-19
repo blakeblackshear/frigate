@@ -31,5 +31,8 @@
     },
     "detect": {
         "dimensionMustBeEven": "Trebuie să fie un număr par."
+    },
+    "models": {
+        "defaultRequired": "Un model trebuie să utilizeze o scenă „Toate camerele”. Fără aceasta, orice cameră care nu alege o scenă nu va avea niciun model la care să revină."
     }
 }

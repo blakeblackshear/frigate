@@ -9,7 +9,8 @@
       "frigate": "Jurnale Frigate - Frigate",
       "websocket": "Jurnale de mesaje - Frigate"
     },
-    "enrichments": "Statistici Procesări Avansate - Frigate"
+    "enrichments": "Statistici Procesări Avansate - Frigate",
+    "health": "Stare sistem - Frigate"
   },
   "general": {
     "hardwareInfo": {
@@ -87,7 +88,11 @@
         "title": "Neutilizat",
         "tips": "Este posibil ca această valoare să nu reprezinte cu precizie spațiul liber disponibil pentru Frigate dacă ai și alte fișiere pe disc în afara înregistrărilor Frigate. Frigate nu urmărește utilizarea stocării în afara propriilor înregistrări."
       },
-      "bandwidth": "Lățime de bandă"
+      "bandwidth": "Lățime de bandă",
+      "subStream": {
+        "information": "Informații stocare sub-stream",
+        "tips": "Camerele care înregistrează un sub-stream afișează separat utilizarea pentru calitatea originală și cea scăzută, folosind aceleași nume ca opțiunile de calitate din redarea înregistrărilor. Înregistrările de calitate scăzută rămân pe disc până la expirarea perioadei de retenție, astfel încât această defalcare poate apărea în continuare pentru o cameră chiar și după ce înregistrarea sub-stream-ului a fost dezactivată."
+      }
     },
     "overview": "Prezentare generală",
     "shm": {
@@ -206,7 +211,11 @@
         "ok": "Keyframe-uri la fiecare ~{{seconds}}s, bune pentru înregistrare și redare.",
         "segmentLength": "Lungime segment de înregistrare:",
         "unknown": "Nu s-a putut determina distanțarea keyframe-urilor.",
-        "recordDisabled": "Înregistrarea este dezactivată pentru această cameră."
+        "recordDisabled": "Înregistrarea este dezactivată pentru această cameră.",
+        "warningFixed": "Cadrele cheie (keyframes) sunt spațiate uniform, dar rare (la fiecare ~{{seconds}}s). Înregistrarea funcționează în continuare, dar redarea live și derularea pornesc mai greu. Setează intervalul I-frame (keyframe) al camerei pentru a se potrivi cu frecvența cadrelor (frame rate).",
+        "warningVariable": "Spațierea cadrelor cheie (keyframes) este inconsecventă ({{minSeconds}}s până la {{maxSeconds}}s), ceea ce înseamnă de obicei că este activat un codec inteligent (H.264+/H.265+). Acest lucru nu este recomandat.",
+        "errorFixed": "Cadrele cheie la fiecare ~{{seconds}}s depășesc durata segmentului de înregistrare ({{segmentTime}}s), astfel încât unele segmente nu au niciun cadru cheie și nu vor putea fi redate. Scurtează intervalul I-frame (keyframe) al camerei pentru a se potrivi cu frecvența cadrelor.",
+        "errorVariable": "Distanța dintre cadrele cheie ajunge la ~{{seconds}}s, fiind mai mare decât durata segmentului de înregistrare ({{segmentTime}}s). Unele segmente nu vor avea niciun cadru cheie, ceea ce afectează redarea. Dezactivează codecul inteligent/smart+ pe cameră sau scurtează intervalul de cadre cheie."
       }
     },
     "label": {
@@ -260,7 +269,99 @@
     "ffmpegHighCpuUsage": "{{camera}} are o utilizare ridicată CPU FFmpeg ({{ffmpegAvg}}%)",
     "cameraIsOffline": "{{camera}} este offline",
     "healthy": "Sistemul este sănătos",
-    "debugReplayActive": "Sesiunea de reluare de depanare este activă"
+    "debugReplayActive": "Sesiunea de reluare de depanare este activă",
+    "cameraSkippedDetections": "{{camera}} omite detecția pe {{pct}}% din cadre",
+    "systemNotices_one": "{{count}} notificare de sistem",
+    "systemNotices_other": "{{count}} notificări de sistem",
+    "retentionUnmet": "Înregistrările sunt șterse înainte de încheierea perioadei de retenție pentru a elibera spațiu"
   },
-  "lastRefreshed": "Ultima actualizare: "
+  "lastRefreshed": "Ultima actualizare: ",
+  "health": {
+    "title": "Stare sistem",
+    "notices": {
+      "title": "Notificări",
+      "empty": "Instalația ta Frigate este în stare bună",
+      "dismiss": "Respinge",
+      "openSettings": "Deschide setările",
+      "openLink": "Deschide linkul",
+      "noMatches": "Nicio notificare nu se potrivește cu filtrul",
+      "dismissedTitle": "Respinse",
+      "noneDismissed": "Nicio notificare respinsă",
+      "clearDismissed": "Șterge respinse",
+      "clearDismissedTitle": "Ștergi notificările respinse?",
+      "clearDismissedDesc": "Fiecare notificare respinsă este ștearsă. Verificările de configurare și de stream-uri reapar imediat, iar celelalte notificări vor reveni data viitoare când apar.",
+      "firstSeen_one": "Văzută prima dată {{time}}",
+      "firstSeen_other": "Văzută prima dată {{time}} · de {{count}} ori",
+      "dismissedAt": "Respinsă {{time}}",
+      "filter": {
+        "showDismissed": "Arată cele respinse",
+        "severity": "Severitate",
+        "error": "Eroare",
+        "warning": "Avertisment",
+        "info": "Info"
+      },
+      "kinds": {
+        "detector_stuck": "Detectorul {{detector}} a fost repornit după ce a încetat să mai răspundă",
+        "model_download_failed": "Descărcarea {{file}} pentru {{model}} a eșuat: {{error}}",
+        "skipped_detections": "Detecția nu a putut ține pasul și a omis {{pct}}% din cadre timp de mai mult de un minut",
+        "shm_too_low": "Alocarea /dev/shm ({{total}} MB) ar trebui mărită la cel puțin {{min}} MB",
+        "failed_login_one": "Încercare eșuată de autentificare pentru {{user}}",
+        "failed_login_other": "Încercări eșuate de autentificare pentru {{user}}",
+        "update_available": "Frigate {{version}} este disponibil"
+      },
+      "streamPrefix": "Stream {{index}}: {{message}}",
+      "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
+      "streamProbeFailed": "Stream-ul {{index}} nu a putut fi sondat: {{error}}",
+      "cameraProbeFailed": "Stream-urile nu au putut fi sondate: {{error}}"
+    },
+    "hardware": {
+      "title": "Hardware",
+      "objectDetection": "Detecția obiectelor",
+      "hardwareAcceleration": "Accelerare hardware",
+      "enrichments": {
+        "title": "Îmbunătățiri",
+        "semantic_search": "Căutare semantică",
+        "face_recognition": "Recunoaștere facială",
+        "lpr": "Recunoașterea numerelor de înmatriculare",
+        "audio_transcription": "Transcriere audio"
+      },
+      "cameraConnections": "Conexiuni camere",
+      "allCamerasExcellent": "Toate camerele au o conexiune excelentă.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "Nimic configurat",
+      "allCameras": "Toate camerele",
+      "probeUnavailable": "Detecția hardware este indisponibilă",
+      "justStarted": "Frigate tocmai a pornit",
+      "deviceNotFound": "{{devices}} nu a fost găsit pe acest sistem",
+      "detectorNotRunning": "Procesul detectorului nu rulează",
+      "inferenceVerySlow": "Inferența este foarte lentă ({{speed}} ms)",
+      "inferenceSlow": "Inferența este lentă ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Argumente ffmpeg personalizate",
+      "customArgsNotVerified": "Argumente ffmpeg personalizate, neverificate",
+      "hwaccelNotConfigured": "Nu este utilizată decodarea hardware, dar {{family}} este disponibil. Selectează-l în setările ffmpeg",
+      "hwaccelHardwareMissing": "{{family}} este configurat, dar sondarea hardware nu l-a raportat",
+      "unrecognizedDevice": "Suprascriere dispozitiv nerecunoscută, neverificată",
+      "decoderUsage": "decodizor {{usage}}",
+      "remoteProvider": "Furnizor la distanță",
+      "acceleratorMissing": "Configurat pentru {{device}}, dar nu a fost găsit niciun accelerator compatibil",
+      "modelNotRunYet": "Modelul nu a rulat încă, dispozitivul este verificat după prima utilizare",
+      "fellBackToCpu": "Configurat pentru {{device}}, dar rulează pe CPU",
+      "cpuDespiteAccelerator": "Rulează pe CPU deși este disponibil un accelerator",
+      "probed": "Sondat",
+      "probing": "Se sondează...",
+      "recheck": "Reverifică hardware-ul",
+      "cameraStreams": "Stream-uri cameră",
+      "streamsNotChecked": "Neverificate încă",
+      "streamsChecking": "Se verifică {{done}} din {{total}}",
+      "streamsClean": "Fără probleme la stream-uri",
+      "checked": "Verificat",
+      "runAgain": "Rulează din nou",
+      "runStreamChecks": "Rulează verificările de stream-uri",
+      "streamsChecked_one": "{{count}} cameră verificată",
+      "streamsChecked_other": "{{count}} camere verificate",
+      "streamsFlagged_one": "{{count}} cu probleme, listate la Notificări",
+      "streamsFlagged_other": "{{count}} cu probleme, listate la Notificări"
+    }
+  }
 }

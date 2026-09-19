@@ -22,14 +22,6 @@
       "title": "Паласа прапускання:",
       "short": "Паласа"
     },
-    "latency": {
-      "title": "Затрымка:",
-      "value": "{{seconds}} сек",
-      "short": {
-        "title": "Затрымка",
-        "value": "{{seconds}} с"
-      }
-    },
     "totalFrames": "Усяго кадраў:",
     "droppedFrames": {
       "title": "Страчаныя кадры:",
@@ -46,7 +38,22 @@
       "submittedFrigatePlus": "Кадр паспяхова адпраўлены ў Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Не ўдалося адправіць кадр у Frigate+"
+      "submitFrigatePlusFailed": "Не ўдалося адправіць кадр у Frigate+",
+      "playRecordingsFailed": "Не ўдалося прайграць запісы (памылка {{code}}): {{message}}"
     }
+  },
+  "quality": {
+    "auto": "Аўта",
+    "autoLow": "Прайграецца нізкая якасць (абмежаваная паласа прапускання)",
+    "autoLowCodec": "Прайграецца нізкая якасць (зыходная не падтрымліваецца гэтым браўзерам)",
+    "autoLowSaveData": "Прайграецца нізкая якасць (эканомія трафіку)",
+    "main": "Зыходная",
+    "sub": "Нізкая",
+    "notSupportedBrowser": "Не падтрымліваецца гэтым браўзерам",
+    "label": "Якасць",
+    "noAudio": "Без гуку",
+    "audioRate": "Гук {{rate}} кГц",
+    "audioCodecRate": "{{codec}} {{rate}} кГц",
+    "noRecordings": "Няма запісаў у гэтым прамежку часу"
   }
 }

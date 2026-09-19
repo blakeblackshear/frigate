@@ -137,6 +137,15 @@
         "partial": "S'han iniciat {{successful}} de {{total}} exportacions. Ha fallat: {{failedItems}}",
         "failed": "No s'han pogut iniciar {{total}} exportacions. Ha fallat: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualitat",
+      "auto": "Automàtic",
+      "main": "Original",
+      "sub": "Baix",
+      "autoDesc": "Utilitza el flux principal i torna al flux de menor qualitat quan el principal no està disponible.",
+      "mainDesc": "Exporta només el flux principal de qualitat original. Faltaran els intervals de temps on el flux principal no està disponible.",
+      "subDesc": "Exporta només el subflux de menor qualitat. Faltaran els intervals de temps on el subflux no està disponible."
     }
   },
   "streaming": {
@@ -172,7 +181,8 @@
       "deleteNow": "Suprimir ara",
       "export": "Exportar",
       "markAsReviewed": "Marcar com a revisat",
-      "markAsUnreviewed": "Marcar com no revisat"
+      "markAsUnreviewed": "Marcar com no revisat",
+      "generateDescription": "Genera la descripció"
     },
     "confirmDelete": {
       "title": "Confirmar la supressió",
@@ -191,6 +201,12 @@
       "custom": "Marca horària personalitzada",
       "button": "Comparteix l'URL de la marca horària",
       "shareTitle": "Marca de temps de revisió de Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "S'ha sol·licitat una descripció de IA Generativa per a aquest element de revisió.",
+        "error": "No s'ha pogut sol·licitar la descripció: {{error}}"
+      }
     }
   },
   "imagePicker": {

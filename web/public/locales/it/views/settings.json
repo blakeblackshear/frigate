@@ -427,7 +427,7 @@
     "cameraMqtt": "MQTT telecamera",
     "maintenance": "Manutenzione",
     "regionGrid": "Griglia di regioni",
-    "systemDetectorsAndModel": "Rilevatori e modelli"
+    "systemDetectorsAndModel": "Modelli di rilevamento"
   },
   "users": {
     "dialog": {
@@ -964,7 +964,7 @@
   },
   "cameraWizard": {
     "step3": {
-      "description": "Configura i ruoli del flusso e aggiungi altri flussi alla tua telecamera.",
+      "description": "Configura le funzionalità, i ruoli dei flussi e aggiungi flussi supplementari per la tua telecamera.",
       "streamTitle": "Flusso {{number}}",
       "roles": "Ruoli",
       "streamsTitle": "Flussi della telecamera",
@@ -1940,5 +1940,8 @@
     "overrideGlobal": "Questa sezione sovrascrive la configurazione globale",
     "overrideProfile": "Questa sezione viene sovrascritta dal profilo {{profile}}",
     "unsaved": "Questa sezione contiene modifiche non salvate"
+  },
+  "detectionModels": {
+    "title": "Modelli di rilevamento"
   }
 }

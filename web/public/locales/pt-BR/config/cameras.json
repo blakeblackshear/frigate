@@ -45,13 +45,17 @@
         "num_threads": {
             "label": "Threads de detecção",
             "description": "Número de threads a serem usadas para o processamento de detecção de áudio."
+        },
+        "labelmap": {
+            "label": "Personalização de etiquetas de áudio",
+            "description": "Sobrepõe ou re-mapeia entradas para mesclar ao lablemap de áudio padrão."
         }
     },
     "label": "Configuração da Câmera",
     "audio_transcription": {
         "label": "Transcrição de áudio",
         "enabled": {
-            "label": "Habilitar transcrição",
+            "label": "Habilitar a transcrição de áudio",
             "description": "Ative ou desative a transcrição de eventos de áudio acionada manualmente."
         },
         "live_enabled": {
@@ -121,7 +125,11 @@
             "description": "Milissegundos para deslocar as anotações de detecção, a fim de alinhar melhor as caixas delimitadoras da linha do tempo com as gravações; pode ser um valor positivo ou negativo."
         },
         "label": "Detecção de Objetos",
-        "description": "Configurações para a função de detecção (*detect*) usada para executar a detecção de objetos e inicializar rastreadores."
+        "description": "Configurações para a função de detecção (*detect*) usada para executar a detecção de objetos e inicializar rastreadores.",
+        "scene": {
+            "label": "Detectar cena",
+            "description": "O ambiente que essa câmera vê, usado para escolher qual dos modelos de configuração rodam nele. Câmeras deixadas em 'tudo' rodam o modelo configurado para cena 'tudo'."
+        }
     },
     "face_recognition": {
         "label": "Reconhecimento facial",
@@ -164,6 +172,10 @@
             "record": {
                 "label": "Registrar argumentos de saída",
                 "description": "Argumentos de saída padrão para fluxos de função de registro."
+            },
+            "record_sub": {
+                "label": "Argumentos de saída do registro do fluxo secundário",
+                "description": "Argumentos de saída para função de registro de fluxos secundários. Os argumentos de saída do registro são usados quando este valor estiver ausente."
             }
         },
         "retry_interval": {
@@ -213,6 +225,10 @@
         "enabled": {
             "label": "Ativar Visão Panorâmica",
             "description": "Habilita ou desabilita a função Panorâmica."
+        },
+        "modes": {
+            "label": "Tipos de Atividade",
+            "description": "Tipos de atividade que incluem câmeras em modo panorâmico."
         }
     },
     "live": {
@@ -505,6 +521,54 @@
         "enabled_in_config": {
             "label": "Estado original da gravação",
             "description": "Indica se a gravação foi habilitada na configuração estática original."
+        },
+        "sub": {
+            "label": "Gravação de fluxo secundário",
+            "description": "Configurações para gravação de um fluxo secundário de qualidade inferior.",
+            "enabled": {
+                "label": "Habilitar gravação de fluxo secundário",
+                "description": "Habilitar a gravação de um fluxo secundário com qualidade inferior para reprodução adaptativa e retenção estendida."
+            },
+            "continuous": {
+                "label": "Retenção contínua do fluxo secundário",
+                "description": "Número de dias para reter gravações do fluxo secundário independentemente de objetos rastreados ou movimento.",
+                "days": {
+                    "label": "Dias de retenção",
+                    "description": "Dias para reter gravações."
+                }
+            },
+            "motion": {
+                "label": "Retenção de movimento no fluxo secundário",
+                "description": "Número de dias para reter gravações do fluxo secundário disparadas por movimento.",
+                "days": {
+                    "label": "Dias de retenção",
+                    "description": "Dias para reter as gravações."
+                }
+            },
+            "alerts": {
+                "label": "Retenção de alertas do fluxo secundário",
+                "description": "Configurações de retenção para gravações de alertas de fluxo secundário.",
+                "days": {
+                    "label": "Dias de retenção",
+                    "description": "Número de dias para reter gravações de eventos de detecção."
+                },
+                "mode": {
+                    "label": "Modo de retenção",
+                    "description": "Modo de retenção: all (salvar todos segmentos), motion (salvar segmentos com movimento), ou active_objects (salvar segmentos com objetos ativos)."
+                }
+            },
+            "detections": {
+                "label": "Retenção de detecção do fluxo secundário",
+                "description": "Configurações de retenção das detecções em fluxos secundários.",
+                "days": {
+                    "label": "Dias de retenção",
+                    "description": "Número de dias para reter gravações dos eventos de detecção."
+                },
+                "mode": {
+                    "label": "Modo de retenção",
+                    "description": "Modo de retenção: all (salvar todos os segmentos), motion (salvar segmentos com movimento), ou active_objects (salvar segmentos com objetos ativos)."
+                }
+            }
         }
     },
     "review": {
@@ -596,6 +660,10 @@
             "alerts": {
                 "label": "Habilitar IA generativa para alertas",
                 "description": "Use IA generativa para gerar descrições para itens de alerta."
+            },
+            "response_style": {
+                "label": "Estilo de resposta",
+                "description": "Estilo de escrita pré-definido para revisão de descrições geradas. A predefinição ajusta o tom e nível de detalhes do título, resumo e descrição das cenas; 'default' deixa o prompt interno sem alterações."
             }
         }
     },

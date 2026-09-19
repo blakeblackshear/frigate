@@ -1,13 +1,5 @@
 {
   "stats": {
-    "latency": {
-      "short": {
-        "title": "Latència",
-        "value": "{{seconds}} s"
-      },
-      "title": "Latència:",
-      "value": "{{seconds}} segons"
-    },
     "streamType": {
       "title": "Tipus de transmissió:",
       "short": "Tipus"
@@ -45,8 +37,23 @@
       "submittedFrigatePlus": "Fotograma enviat correctament a Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Error al enviar fotograma a Frigate+"
+      "submitFrigatePlusFailed": "Error al enviar fotograma a Frigate+",
+      "playRecordingsFailed": "No s'han pogut reproduir els enregistraments (error {{code}}): {{message}}"
     }
   },
-  "cameraOff": "La càmera està apagada"
+  "cameraOff": "La càmera està apagada",
+  "quality": {
+    "auto": "Automàtic",
+    "autoLow": "Reproduint de baixa qualitat (ample de banda limitat)",
+    "autoLowCodec": "Reproducció de baixa qualitat (Original no suportat per aquest navegador)",
+    "autoLowSaveData": "Reproducció de baixa qualitat (desador de dades)",
+    "main": "Original",
+    "sub": "Baixa",
+    "notSupportedBrowser": "No és compatible amb aquest navegador",
+    "label": "Qualitat",
+    "noAudio": "Sense àudio",
+    "audioRate": "{{rate}} àudio kHz",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "No hi ha enregistraments en aquest interval de temps"
+  }
 }

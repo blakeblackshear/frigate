@@ -95,7 +95,7 @@
       "setPassword": "Establecer contraseña",
       "current": "Usuario actual: {{user}}"
     },
-    "systemMetrics": "Métricas del sistema",
+    "systemMetrics": "Salud y Métricas del sistema",
     "help": "Ayuda",
     "system": "Sistema",
     "configuration": "Configuración",
@@ -147,7 +147,8 @@
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Croata)",
       "bs": "Bosanski (Bosnio)",
-      "zhHant": "繁體中文 (Chino Tradicional)"
+      "zhHant": "繁體中文 (Chino Tradicional)",
+      "be": "Bielorruso"
     },
     "appearance": "Apariencia",
     "darkMode": {
@@ -259,7 +260,10 @@
     "saveAll": "Guardar todo",
     "savingAll": "Guardando todo…",
     "undoAll": "Deshacer todo",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "expand": "Expandir",
+    "collapse": "Colapsar",
+    "reload": "Recargar"
   },
   "toast": {
     "save": {
@@ -327,5 +331,36 @@
   "validation_errors": "Errores de validación",
   "credentialField": {
     "savedPlaceholder": "Guardado — déjalo en blanco para mantener el actual"
+  },
+  "commandMenu": {
+    "action": {
+      "toggleTheme": "Cambiar de modo claro a modo oscuro"
+    },
+    "title": "Menú de Comandos",
+    "description": "Buscar páginas, cámaras, configuraciones y acciones",
+    "placeholder": "Buscar páginas, cámaras, configuraciones y acciones",
+    "empty": "No se han encontrado coincidencias",
+    "hint": "{{key}} o / para abrir, Enter para ejecutar",
+    "section": {
+      "recent": "Recientes",
+      "pages": "Páginas",
+      "cameras": "Cámaras",
+      "cameraGroups": "Grupos de cámaras",
+      "settings": "Configuración",
+      "actions": "Acciones"
+    },
+    "camera": {
+      "live": "En vivo",
+      "review": "Revisión"
+    }
+  },
+  "error": {
+    "title": "Esta página ha dejado de funcionar",
+    "desc": "Ha ocurrido un error inesperado en esta página. Recargarla generalmente resuelve el problema. Si sigue sucediendo, copia los detalles y adjuntalos en una nueva discusión en GitHub.",
+    "staleTitle": "Recarga requerida",
+    "staleDesc": "Una parte de esta interfaz no pudo ser cargada, lo que usualmente significa que Frigate fue actualizado mientras esta pestaña estaba abierta. Recarga la página para ver la nueva versión.",
+    "partial": "Una parte de la interfaz ha dejado de funcionar.",
+    "copyDetails": "Copiar detalles",
+    "copyFailed": "Los detalles no pudieron ser copiados al portapapeles"
   }
 }

@@ -21,14 +21,6 @@
       "title": "Širina pojasa:",
       "short": "Širina pojasa"
     },
-    "latency": {
-      "title": "Kasnjenje:",
-      "value": "{{seconds}} sekundi",
-      "short": {
-        "title": "Kasnjenje",
-        "value": "{{seconds}} sek"
-      }
-    },
     "totalFrames": "Ukupno okvira:",
     "droppedFrames": {
       "title": "Izgubljeni okviri:",

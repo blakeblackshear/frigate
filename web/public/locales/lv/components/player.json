@@ -21,14 +21,6 @@
       "title": "Joslas platums:",
       "short": "Joslas platums"
     },
-    "latency": {
-      "title": "Latentums:",
-      "value": "{{seconds}} sekundes",
-      "short": {
-        "title": "Latentums",
-        "value": "{{seconds}} sek"
-      }
-    },
     "totalFrames": "Kopējais kadru skaits:",
     "droppedFrames": {
       "title": "Izlaisti kadri:",

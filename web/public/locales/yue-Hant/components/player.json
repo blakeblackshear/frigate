@@ -14,14 +14,6 @@
       "short": "頻寬",
       "title": "頻寬："
     },
-    "latency": {
-      "value": "{{seconds}} 秒",
-      "short": {
-        "value": "{{seconds}} 秒",
-        "title": "延遲"
-      },
-      "title": "延遲："
-    },
     "totalFrames": "總畫面數：",
     "droppedFrames": {
       "short": {
