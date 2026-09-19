@@ -1,7 +1,7 @@
 {
   "time": {
-    "untilForTime": "Totdat {{time}}",
-    "untilForRestart": "Totdat Frigate herstart.",
+    "untilForTime": "Tot {{time}}",
+    "untilForRestart": "Totdat Frigate opnieuw opstart.",
     "untilRestart": "Tot herstart",
     "12hours": "12 uur",
     "lastWeek": "Vorige week",
@@ -23,8 +23,8 @@
     "1hour": "1 uur",
     "pm": "pm",
     "am": "am",
-    "year_one": "{{time}} Jaar",
-    "year_other": "{{time}} Jaren",
+    "year_one": "{{time}} jaar",
+    "year_other": "{{time}} jaren",
     "mo": "{{time}} maand",
     "month_one": "{{time}} maand",
     "month_other": "{{time}} maanden",
@@ -96,18 +96,18 @@
     "fullscreen": "Volledig scherm",
     "pictureInPicture": "Pop-up venster",
     "twoWayTalk": "Tweerichtingsgesprek",
-    "cameraAudio": "Camera geluid",
-    "on": "aan",
+    "cameraAudio": "Camerageluid",
+    "on": "AAN",
     "copyCoordinates": "Coördinaten kopiëren",
-    "delete": "Verwijder",
+    "delete": "Verwijderen",
     "yes": "Ja",
     "no": "Nee",
     "suspended": "Opgeschort",
     "unsuspended": "Heractiveren",
     "export": "Exporteren",
     "exitFullscreen": "Verlaat volledig scherm",
-    "play": "Speel",
-    "off": "uit",
+    "play": "Afspelen",
+    "off": "UIT",
     "info": "Info",
     "edit": "Bewerken",
     "download": "Download",
@@ -126,7 +126,10 @@
     "saveAll": "Alles Opslaan",
     "savingAll": "Alles aan het opslaan…",
     "undoAll": "Alles ongedaan maken",
-    "retry": "Opnieuw proberen"
+    "retry": "Opnieuw proberen",
+    "expand": "Uitklappen",
+    "collapse": "Inklappen",
+    "reload": "Herladen"
   },
   "unit": {
     "speed": {
@@ -208,7 +211,8 @@
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Kroatisch)",
       "zhHant": "繁體中文 (Traditioneel Chinees)",
-      "bs": "Bosanksi (Bosnisch)"
+      "bs": "Bosanksi (Bosnisch)",
+      "be": "Wit-Russisch (Wit-Russisch)"
     },
     "darkMode": {
       "label": "Donkere modus",
@@ -320,5 +324,36 @@
     "savedPlaceholder": "Opgeslagen - leeg laten om huidige te behouden"
   },
   "no_items": "Geen items",
-  "validation_errors": "Validatie fouten"
+  "validation_errors": "Validatie fouten",
+  "error": {
+    "desc": "Er is een onverwachte fout opgetreden op deze pagina. Meestal helpt het om de pagina opnieuw te laden. Blijft het probleem zich voordoen? Kopieer dan de foutdetails en voeg deze toe aan een discussie op GitHub.",
+    "staleTitle": "Opnieuw laden vereist",
+    "staleDesc": "Een deel van de interface kon niet worden geladen. Waarschijnlijk is Frigate bijgewerkt terwijl dit tabblad nog openstond. Vernieuw de pagina om de bijgewerkte versie te laden.",
+    "partial": "Een deel van de interface werkt niet meer.",
+    "copyDetails": "Details kopiëren",
+    "copyFailed": "Details konden niet worden gekopieerd.",
+    "title": "Deze pagina werkt niet meer"
+  },
+  "commandMenu": {
+    "title": "Opdrachtmenu",
+    "description": "Zoek in pagina's, camera's, instellingen en acties",
+    "placeholder": "Zoek in pagina's, camera's, instellingen en acties",
+    "empty": "Geen resultaten",
+    "hint": "{{key}} of / om te openen, Enter om uit te voeren",
+    "section": {
+      "recent": "Recent",
+      "pages": "Pagina's",
+      "cameras": "Camera's",
+      "cameraGroups": "Camera groepen",
+      "settings": "Instellingen",
+      "actions": "Acties"
+    },
+    "camera": {
+      "live": "Liveweergave",
+      "review": "Beoordelen"
+    },
+    "action": {
+      "toggleTheme": "Wisselen tussen lichte en donkere modus"
+    }
+  }
 }

@@ -1,14 +1,6 @@
 {
   "noRecordingsFoundForThisTime": "Geen opnames gevonden voor deze tijd",
   "stats": {
-    "latency": {
-      "value": "{{seconds}} seconden",
-      "short": {
-        "title": "Latentie",
-        "value": "{{seconds}} s"
-      },
-      "title": "Latentie:"
-    },
     "totalFrames": "Totaal aantal frames:",
     "droppedFrames": {
       "title": "Overgeslagen frames:",

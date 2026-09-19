@@ -129,6 +129,15 @@
       "exportButton_one": "Exporteer 1 revisie",
       "exportButton_other": "Exporteer {{count}} revisies",
       "caseNamePlaceholder": "Inspecteer export - {{date}}"
+    },
+    "stream": {
+      "autoDesc": "Gebruikt de hoofdstream en schakelt over naar de substream met lagere kwaliteit als de hoofdstream niet beschikbaar is.",
+      "mainDesc": "Exporteert alleen de hoofdstream in de oorspronkelijke kwaliteit. Periodes waarin de hoofdstream niet beschikbaar is ontbreken in de export.",
+      "subDesc": "Exporteert alleen de substream met lagere kwaliteit. Periodes waarin de substream niet beschikbaar is ontbreken in de export.",
+      "label": "Kwaliteit",
+      "auto": "Auto",
+      "main": "Orgineel",
+      "sub": "Laag"
     }
   },
   "streaming": {
@@ -164,7 +173,8 @@
       "deleteNow": "Verwijder nu",
       "export": "Exporteren",
       "markAsReviewed": "Markeren als beoordeeld",
-      "markAsUnreviewed": "Markeren als niet beoordeeld"
+      "markAsUnreviewed": "Markeren als niet beoordeeld",
+      "generateDescription": "Beschrijving genereren"
     },
     "confirmDelete": {
       "desc": {
@@ -183,6 +193,12 @@
       "custom": "Aangepaste tijdstempel",
       "button": "Deel tijdstempel URL",
       "shareTitle": "Frigate Beoordelingstijdstempel: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Er is een AI-beschrijving aangevraagd voor dit item.",
+        "error": "Aanvragen van beschrijving mislukt: {{error}}"
+      }
     }
   },
   "imagePicker": {
