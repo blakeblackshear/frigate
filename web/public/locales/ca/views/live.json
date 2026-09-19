@@ -50,7 +50,12 @@
   "lowBandwidthMode": "Mode de baix ample de banda",
   "twoWayTalk": {
     "enable": "Activa la comunicació bidireccional",
-    "disable": "Desactiva la comunicació bidireccional"
+    "disable": "Desactiva la comunicació bidireccional",
+    "requiresWebRTC": "La conversa en dues direccions requereix WebRTC, que no està disponible",
+    "error": {
+      "microphone": "La conversa en dues direccions no ha pogut accedir al micròfon",
+      "refused": "No s'ha pogut iniciar la conversa en dues direccions. Consulteu la consola del navegador per a més detalls."
+    }
   },
   "cameraAudio": {
     "enable": "Habilitar l'àudio de la càmera",
@@ -127,14 +132,40 @@
     },
     "lowBandwidth": {
       "resetStream": "Restablir transmissió",
-      "tips": "La vista en directe està en mode de baix ample de banda a causa d'errors de transmissió o de buffering."
+      "tips": "La vista en directe està en mode de baix ample de banda a causa d'errors de transmissió o de buffering.",
+      "force": {
+        "label": "Força el mode d'amplada de banda baixa",
+        "desc": "Reprodueix sempre el canal d'amplada de banda baixa integrat per Frigate en lloc del flux seleccionat. Funciona en qualsevol connexió, però té menor qualitat i sense àudio."
+      }
     },
     "playInBackground": {
       "label": "Reproduir en segon pla",
       "tips": "Habilita aquesta opció per a contiuar la transmissió tot i que el reproductor estigui ocult."
     },
     "debug": {
-      "picker": "Selecció de stream no disponible en mode debug. La vista debug sempre fa servir el stream assignat pel rol de detecció."
+      "picker": "Selecció de stream no disponible en mode debug. La vista debug sempre fa servir el stream assignat pel rol de detecció.",
+      "technology": "La selecció de la tecnologia de flux no està disponible en el mode de depuració."
+    },
+    "mode": "Tecnologia Streaming",
+    "technology": {
+      "description": "Tria la teva tecnologia de streaming preferida. Frigate encara pot tornar al mode d'amplada de banda baixa en la reproducció o els errors de xarxa.",
+      "tips": {
+        "mse": "Predeterminada recomanada, compatibilitat àmplia i reproducció suau",
+        "webrtc": "Necessita configuració addicional i no està suportat en tots els dispositius"
+      },
+      "unavailable": {
+        "browser": "El teu navegador no suporta WebRTC.",
+        "not-configured": "WebRTC no està configurat. Estableix candidats go2rtc webrtc o ice_servers.",
+        "unreachable": "WebRTC no s'ha pogut connectar. Comproveu que el port 8555 és accessible i qualsevol servidor STUN/TURN és correcte.",
+        "video-codec": "El còdec de vídeo d'aquest flux no és compatible amb WebRTC en aquest navegador.",
+        "audio-codec": "El còdec d'àudio d'aquest flux no és compatible amb WebRTC. Transcodifica a opus o G.711 amb go2rtc.",
+        "checking": "S'està comprovant la disponibilitat de WebRTC…"
+      },
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      }
     }
   },
   "streamingSettings": "Paràmetres de transmissió",

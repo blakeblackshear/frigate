@@ -31,6 +31,10 @@
             "record": {
                 "label": "Registra els arguments de sortida",
                 "description": "Arguments de sortida predeterminats per a enregistrar fluxos de rols."
+            },
+            "record_sub": {
+                "label": "Arguments de sortida del registre de subflux",
+                "description": "Arguments de sortida per als fluxos de rols record.sub. Els arguments de sortida del registre s'utilitzen quan no s'estableix."
             }
         },
         "retry_interval": {
@@ -193,49 +197,49 @@
         "genai": {
             "required_zones": {
                 "label": "Zones requerides",
-                "description": "Zones que s'han d'introduir perquè els objectes es puguin classificar per a la generació de descripcions de GenAI."
+                "description": "Zones que s'han d'introduir perquè els objectes es puguin classificar per a la generació de descripcions d'IA Generativa."
             },
-            "label": "Configuració de l'objecte GenAI",
-            "description": "Opcions de GenAI per descriure objectes rastrejats i enviar fotogrames per a la generació.",
+            "label": "Configuració de l'objecte IA Generativa",
+            "description": "Opcions d'IA Generativa per descriure objectes rastrejats i enviar fotogrames per a la generació.",
             "enabled": {
-                "label": "Habilita el GenAI",
-                "description": "Habilita la generació de descripcions de GenAI per als objectes rastrejats de manera predeterminada."
+                "label": "Habilita l'IA Generativa",
+                "description": "Habilita la generació de descripcions d'IA Generativa per als objectes rastrejats de manera predeterminada."
             },
             "use_snapshot": {
                 "label": "Utilitza instantànies",
-                "description": "Usa instantànies d'objecte en lloc de miniatures per a la generació de descripcions de GenAI."
+                "description": "Usa instantànies d'objecte en lloc de miniatures per a la generació de descripcions d'IA Generativa."
             },
             "prompt": {
                 "label": "Indicació de la llegenda",
-                "description": "Plantilla de pregunta predeterminada utilitzada en generar descripcions amb GenAI."
+                "description": "Plantilla de pregunta predeterminada utilitzada en generar descripcions amb IA Generativa."
             },
             "object_prompts": {
                 "label": "Peticions d'objecte",
-                "description": "Per objecte demana personalitzar les sortides de GenAI per a etiquetes específiques."
+                "description": "Per objecte demana personalitzar les sortides d'IA Generativa per a etiquetes específiques."
             },
             "objects": {
-                "label": "Objectes GenAI",
-                "description": "Llista d'etiquetes d'objectes a enviar a GenAI per defecte."
+                "label": "Objectes d'IA Generativa",
+                "description": "Llista d'etiquetes d'objectes a enviar a IA Generativa per defecte."
             },
             "debug_save_thumbnails": {
                 "label": "Desa les miniatures",
-                "description": "Desa les miniatures enviades a GenAI per a la depuració i la revisió."
+                "description": "Desa les miniatures enviades a IA Generativa per a la depuració i la revisió."
             },
             "send_triggers": {
-                "label": "Activadors de GenAI",
-                "description": "Defineix quan s'han d'enviar fotogrames a GenAI (al final, després de les actualitzacions, etc.).",
+                "label": "Activadors d'IA Generativa",
+                "description": "Defineix quan s'han d'enviar fotogrames a IA Generativa (al final, després de les actualitzacions, etc.).",
                 "tracked_object_end": {
                     "label": "Envia al final",
-                    "description": "Envia una sol·licitud a GenAI quan acabi l'objecte rastrejat."
+                    "description": "Envia una sol·licitud a IA Generativa quan acabi l'objecte rastrejat."
                 },
                 "after_significant_updates": {
-                    "label": "Activador de GenAI primerenc",
-                    "description": "Envia una sol·licitud a GenAI després d'un nombre especificat d'actualitzacions significatives per a l'objecte rastrejat."
+                    "label": "Activador d'IA Generativa primerenc",
+                    "description": "Envia una sol·licitud a IA Generativa després d'un nombre especificat d'actualitzacions significatives per a l'objecte rastrejat."
                 }
             },
             "enabled_in_config": {
-                "label": "Estat original de GenAI",
-                "description": "Indica si el GenAI s'ha activat a la configuració estàtica original."
+                "label": "Estat original d'IA Generativa",
+                "description": "Indica si l'IA Generativa s'ha activat a la configuració estàtica original."
             }
         },
         "label": "Objectes",
@@ -388,6 +392,54 @@
         "enabled_in_config": {
             "label": "Estat de l'enregistrament original",
             "description": "Indica si l'enregistrament s'ha activat en la configuració estàtica original."
+        },
+        "sub": {
+            "label": "Enregistrament de subflux",
+            "description": "Paràmetres per a enregistrar un segon flux de menor qualitat.",
+            "enabled": {
+                "label": "Habilita l'enregistrament de subflux",
+                "description": "Permet l'enregistrament d'un segon flux de menor qualitat per a la reproducció de qualitat adaptativa i la retenció estesa."
+            },
+            "continuous": {
+                "label": "Retenció contínua del subflux",
+                "description": "Nombre de dies per a retenir els enregistraments de sub flux independentment dels objectes o el moviment seguits.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Dies per retenir enregistraments."
+                }
+            },
+            "motion": {
+                "label": "Retenció del moviment del subflux",
+                "description": "Nombre de dies per a retenir els enregistraments de substream activats pel moviment.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Dies per retenir enregistraments."
+                }
+            },
+            "alerts": {
+                "label": "Retenció d'alertes del subflux",
+                "description": "Paràmetres de retenció per als enregistraments de substream d'alertes.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            },
+            "detections": {
+                "label": "Retenció de la detecció de subflux",
+                "description": "Paràmetres de retenció per als enregistraments de substream de les deteccions.",
+                "days": {
+                    "label": "Dies de retenció",
+                    "description": "Nombre de dies per a retenir enregistraments d'esdeveniments de detecció."
+                },
+                "mode": {
+                    "label": "Mode de retenció",
+                    "description": "Mode de retenció: tot (desa tots els segments), moviment (desa els segments amb moviment), o actiuobobjectes (desa els segments amb objectes actius)."
+                }
+            }
         }
     },
     "review": {
@@ -417,42 +469,50 @@
         },
         "genai": {
             "image_source": {
-                "description": "Font d'imatges enviades a GenAI ('previsualització' o 'enregistraments'); 'enregistraments' utilitza Fotogrames de més qualitat però més tokens.",
+                "description": "Font d'imatges enviades a IA Generativa ('previsualització' o 'enregistraments'); 'enregistraments' utilitza Fotogrames de més qualitat però més tokens.",
                 "label": "Revisa l'origen de la imatge"
             },
             "enabled_in_config": {
-                "description": "Fa un seguiment de si la revisió de GenAI es va habilitar originalment a la configuració estàtica.",
-                "label": "Estat original de GenAI"
+                "description": "Fa un seguiment de si la revisió d'IA Generativa es va habilitar originalment a la configuració estàtica.",
+                "label": "Estat original d'IA Generativa"
             },
-            "label": "Configuració del GenAI",
-            "description": "Controla l'ús de la IA generativa per a la producció de descripcions i resums d'elements de revisió.",
+            "label": "Configuració de l'IA Generativa",
+            "description": "Controla l'ús de l'IA generativa per a la producció de descripcions i resums d'elements de revisió.",
             "enabled": {
-                "label": "Habilita les descripcions del GenAI",
-                "description": "Activa o desactiva les descripcions i resums generats per GenAI per als elements de revisió."
+                "label": "Habilita les descripcions de l'IA Generativa",
+                "description": "Activa o desactiva les descripcions i resums generats per IA Generativa per als elements de revisió."
             },
             "alerts": {
-                "label": "Habilita el GenAI per a alertes",
-                "description": "Utilitzeu GenAI per a generar descripcions per als elements d'alerta."
+                "label": "Habilita l'IA Generativa per a alertes",
+                "description": "Utilitzeu IA Generativa per a generar descripcions per als elements d'alerta."
             },
             "detections": {
-                "label": "Habilita el GenAI per a les deteccions",
-                "description": "Utilitzeu GenAI per generar descripcions per als elements de detecció."
+                "label": "Habilita l'IA Generativa per a les deteccions",
+                "description": "Utilitzeu IA Generativa per generar descripcions per als elements de detecció."
             },
             "additional_concerns": {
                 "label": "Altres preocupacions",
-                "description": "Una llista de preocupacions o notes addicionals que el GenAI ha de tenir en compte a l'hora d'avaluar l'activitat en aquesta càmera."
+                "description": "Una llista de preocupacions o notes addicionals que l¡IA Generativa ha de tenir en compte a l'hora d'avaluar l'activitat en aquesta càmera."
             },
             "debug_save_thumbnails": {
                 "label": "Desa les miniatures",
-                "description": "Desa les miniatures que s'envien al proveïdor GenAI per a la depuració i la revisió."
+                "description": "Desa les miniatures que s'envien al proveïdor IA Generativa per a la depuració i la revisió."
             },
             "preferred_language": {
                 "label": "Idioma preferit",
-                "description": "Idioma preferit per sol·licitar al proveïdor GenAI respostes generades."
+                "description": "Idioma preferit per sol·licitar al proveïdor d'IA Generativa respostes generades."
             },
             "activity_context_prompt": {
                 "label": "Indicador de context de l'activitat",
                 "description": "Pregunta personalitzada que descriu el que és i no és una activitat sospitosa per proporcionar context per als resums de GenAI."
+            },
+            "response_style": {
+                "label": "Estil de resposta",
+                "description": "Escriviu un predefinit d'estil per a les descripcions generades de les revisions. Els valors predefinits ajusten el to i el nivell de detall del títol orientat a l'usuari, el resum i la descripció de l'escena; «predeterminat» deixa l'indicatiu incorporat sense canvis."
+            },
+            "frame_mode": {
+                "label": "Mode de fotograma",
+                "description": "Com es presenten els marcs al model. Els 'frames' envien l'indicatiu seguit pels fotogrames, que s'adapta als models que segueixen una seqüència per si sols. 'annotated.frames' etiqueta cada marc i entrellaça notes derivades del seguiment d'objectes, el que ajuda als models que perden el rastre de l'activitat que es repeteix o reverteix."
             }
         },
         "label": "Revisió",
@@ -699,7 +759,7 @@
         "description": "Configuració per a la transcripció d'àudio en viu i de veu utilitzada per a esdeveniments i llegendes en directe.",
         "language": {
             "label": "Idioma de transcripció",
-            "description": "Codi d'idioma utilitzat per a la transcripció/traducció (per exemple 'en' per a l'anglès). Vegeu https://whisper-api.com/docs/languages/ per als codis de llengua compatibles."
+            "description": "Codi d'idioma utilitzat per a la transcripció/traducció (per exemple 'en' per a l'anglès), o 'auto' per permetre que el model el detecti. Vegeu https://whisper-api.com/docs/languages/ per als codis de llengua compatibles."
         },
         "device": {
             "label": "Dispositiu de transcripció",
@@ -712,6 +772,10 @@
         "live_enabled": {
             "label": "Transcripció en viu",
             "description": "Habilita la transcripció en directe per a l'àudio a mesura que es rep."
+        },
+        "model": {
+            "label": "Model de transcripció d'àudio o nom del proveïdor GenAI",
+            "description": "El dorsal de transcripció: 'whisper' per als models locals integrats de Frigate, o el nom d'un proveïdor de GenAI amb el rol de transcriure."
         }
     },
     "version": {
@@ -971,7 +1035,7 @@
         },
         "default_role": {
             "label": "Rol predeterminat",
-            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols."
+            "description": "Rol predeterminat assignat als usuaris intermediaris autenticats quan no s'aplica cap mapatge de rols. Establiu-ho a «none» per a denegar l'accés als usuaris sense mapar."
         },
         "separator": {
             "label": "Caràcter separador",
@@ -1019,7 +1083,7 @@
         }
     },
     "genai": {
-        "label": "Configuració de la IA generada",
+        "label": "Configuració de l'IA Generativa",
         "description": "Paràmetres per als proveïdors integrats generatius d'IA utilitzats per generar descripcions d'objectes i resums de revisions.",
         "api_key": {
             "label": "Clau API",
@@ -1035,15 +1099,15 @@
         },
         "provider": {
             "label": "Proveïdor",
-            "description": "El proveïdor GenAI a utilitzar (per exemple: ollama, gemini, openai)."
+            "description": "El proveïdor IA Generativa a utilitzar (per exemple: ollama, gemini, openai)."
         },
         "roles": {
             "label": "Rols",
-            "description": "Rols de GenAI (xat, descripcions, incrustacions); un proveïdor per rol."
+            "description": "Rols d'IA Generativa (xat, descripcions, incrustacions, transcriure); un proveïdor per rol. Per defecte només es concedeixen xats, descripcions i incrustacions; la transcripció s'ha de llistar explícitament."
         },
         "provider_options": {
             "label": "Opcions del proveïdor",
-            "description": "Opcions addicionals específiques del proveïdor per passar al client GenAI."
+            "description": "Opcions addicionals específiques del proveïdor per passar al client d'IA Generativa."
         },
         "runtime_options": {
             "label": "Opcions de temps d'execució",
@@ -1084,6 +1148,10 @@
         "num_threads": {
             "label": "Fils de detecció",
             "description": "Nombre de fils a utilitzar per al processament de detecció d'àudio."
+        },
+        "labelmap": {
+            "label": "Personalització del mapa d'etiquetes d'àudio",
+            "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes d'àudio estàndard."
         }
     },
     "birdseye": {
@@ -1132,7 +1200,11 @@
             "label": "Posició",
             "description": "Posició numèrica que controla l'ordenació de la càmera en la disposició Birdseye."
         },
-        "label": "Birdseye"
+        "label": "Birdseye",
+        "modes": {
+            "label": "Tipus d'activitat",
+            "description": "Tipus d'activitat que inclouen càmeres a Birdseye."
+        }
     },
     "detect": {
         "label": "Detecció d'objectes",
@@ -1192,6 +1264,10 @@
         "annotation_offset": {
             "label": "Desplaçament de l'anotació",
             "description": "Mil·lisegons per a desplaçar detecta anotacions per a alinear millor els límits de la línia de temps amb els enregistraments; pot ser positiu o negatiu."
+        },
+        "scene": {
+            "label": "Detecta l'escena",
+            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'totes' executen el model configurat amb una escena de 'totes'."
         }
     },
     "classification": {
@@ -1399,5 +1475,57 @@
     "active_profile": {
         "label": "Perfil actiu",
         "description": "Nom de perfil actualment actiu. Només en temps d'execució, no ha persistit en YAML."
+    },
+    "models": {
+        "label": "Models de detecció",
+        "description": "Models de detecció d'objectes i el maquinari en què s'executa. Les càmeres trien un model fent coincidir el seu detect.scene amb l'escena d'un model.",
+        "scene": {
+            "label": "Escena del model",
+            "description": "L'entorn de la càmera per al qual s'utilitza aquest model. Les càmeres seleccionen un model establint detect.scene a un valor coincident, i «all» és utilitzat per qualsevol càmera que no n'estableixi un."
+        },
+        "devices": {
+            "label": "hardware de detecció",
+            "description": "Aquest model funciona com a '<detector>' o '<detector>:<device>' (per exemple 'edgetpu:pci:0' o 'openvino:GPU'). La llista del mateix dispositiu més d'una vegada executa processos d'inferència addicionals."
+        },
+        "path": {
+            "label": "Ruta del model de detector d'objectes personalitzat",
+            "description": "Ruta a un fitxer de model de detecció personalitzat (o plus://<model_id> per a models Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Mapa d'etiquetes per al detector d'objectes personalitzat",
+            "description": "Ruta a un fitxer de mapa d'etiquetes que assigna classes numèriques a etiquetes de cadena per al detector."
+        },
+        "width": {
+            "label": "Amplada d'entrada del model de detecció d'objectes",
+            "description": "Amplada del tensor d'entrada del model en píxels."
+        },
+        "height": {
+            "label": "Alçada d'entrada del model de detecció d'objectes",
+            "description": "Alçada del tensor d'entrada del model en píxels."
+        },
+        "labelmap": {
+            "label": "Personalització del mapa d'etiquetes",
+            "description": "Sobreescriu o reassigna les entrades per a fusionar-se en el mapa d'etiquetes estàndard."
+        },
+        "attributes_map": {
+            "label": "Mapa d'etiquetes d'objectes a les seves etiquetes d'atribut",
+            "description": "Assignació des d'etiquetes d'objectes a etiquetes d'atribut utilitzades per adjuntar metadades (per exemple 'cotxe' -). ['matricula'])."
+        },
+        "input_tensor": {
+            "label": "Forma del sensor d'entrada del model",
+            "description": "Format del sensor esperat pel model: 'nhwc' o 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Format de color del píxel d'entrada del model",
+            "description": "Espai de color del píxel esperat pel model: 'rgb', 'bgr' o 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Tipus D d'entrada del model",
+            "description": "Tipus de dades del tensor d'entrada del model (per exemple «float32»)."
+        },
+        "model_type": {
+            "label": "Tipus de model de detecció d'objectes",
+            "description": "Tipus d'arquitectura del model de detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilitzat per alguns detectors per a l'optimització."
+        }
     }
 }
