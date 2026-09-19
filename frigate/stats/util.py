@@ -319,13 +319,18 @@ def stats_snapshot(
 
     # fold run duty cycles published by async detector processes (shared
     # Values, not device counters) into the matching polled NPU entries; a
-    # negative value means the detector has not produced a window yet
+    # negative value means the detector has not produced a window yet.
+    # Several processes can share one hardware type, so take the busiest
+    # published window as the representative device load.
     npu_usages = stats.get("npu_usages", {})
+    duty_cycles: dict[str, list[float]] = {}
     for detector in stats_tracking["detectors"].values():
         duty = detector.run_duty_cycle.value
         detector_type = detector.detector_config.type
         if duty >= 0.0 and detector_type in npu_usages:
-            npu_usages[detector_type]["npu"] = round(duty, 1)
+            duty_cycles.setdefault(detector_type, []).append(duty)
+    for detector_type, cycles in duty_cycles.items():
+        npu_usages[detector_type]["npu"] = round(max(cycles), 1)
 
     if config.telemetry.stats.network_bandwidth:
         bandwidth_stats = get_bandwidth_stats(config)

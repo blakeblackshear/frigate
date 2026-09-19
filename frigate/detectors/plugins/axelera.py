@@ -28,7 +28,7 @@ Model configuration:
 
 The SDK's own baked postprocess graph (``1/postprocess_graph.onnx``) converts
 the raw int8 AIPU tensors into boxes + class scores, so the plugin only
-dequantises the heads and runs a thin class-max + NMS.
+dequantizes the heads and runs a thin class-max + NMS.
 """
 
 import json
@@ -39,6 +39,7 @@ import re
 import shutil
 import threading
 import time
+import urllib.request
 import zipfile
 from typing import ClassVar, Literal
 
@@ -50,7 +51,12 @@ from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import xyxy_to_xywh_for_nms
-from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
+from frigate.util.runtime_deps import (
+    Artifact,
+    ArtifactKind,
+    RuntimeManifest,
+    user_site,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -202,17 +208,19 @@ def _extract_model_zip(zip_path: str, dest_dir: str) -> None:
         f.write(zip_path)
 
 
-def _resolve_model_json(model_path, model_url, build_root) -> str:
+def _resolve_model_json(path, build_root) -> str:
     """Resolve ``path`` to the compiled ``model.json`` for axelera.runtime.
 
-    Returns the path to ``1/model.json`` (or ``model.json``) for a directory,
-    the model.json itself when given, a compiled-model dir found under
-    ``build_root`` for a bare preset name, or the unpacked contents of a
-    compiled-model zip (downloaded first when the path is a URL). Raises
-    FileNotFoundError otherwise.
+    One string decides everything (hailo8l's set_path_and_url pattern): a URL
+    (with or without scheme) downloads to the cache and unpacks; anything else
+    is a local path or a bare SDK model-zoo preset name. Returns the path to
+    ``1/model.json`` (or ``model.json``) for a directory, the model.json
+    itself when given, a compiled-model dir found under ``build_root`` for a
+    bare preset name, or the unpacked contents of a compiled-model zip.
+    Raises FileNotFoundError otherwise.
     """
-    if model_url and model_path:
-        raise ValueError("`path` cannot be both a URL and a local path.")
+    model_url = path if (path and is_url(path)) else None
+    model_path = None if model_url else path
 
     if model_url:
         name = os.path.splitext(os.path.basename(model_url.split("?")[0]))[0]
@@ -224,10 +232,8 @@ def _resolve_model_json(model_path, model_url, build_root) -> str:
             os.makedirs(cache, exist_ok=True)
             logger.info("axelera: downloading model from %s", model_url)
             try:
-                from frigate.util.downloader import ModelDownloader
-
-                ModelDownloader.download_from_url(_url_with_scheme(model_url), zip_path)
-            except Exception as exc:
+                urllib.request.urlretrieve(_url_with_scheme(model_url), zip_path)
+            except OSError as exc:
                 raise RuntimeError(
                     f"Failed to download model from {model_url}: {exc}"
                 ) from exc
@@ -266,26 +272,48 @@ def _resolve_model_json(model_path, model_url, build_root) -> str:
 
 
 def _find_model_json(where: str) -> str:
-    """Locate the runtime's model.json under a dir or return the path itself."""
+    """Locate the runtime's model.json under a dir or return the path itself.
+
+    A zip may have unpacked with a single top-level directory wrapper, so a
+    directory without a direct model.json is searched one level down. Only an
+    unambiguous single match is accepted: several candidate subdirectories
+    raise instead of returning whichever sorts first, because silently picking
+    one would run a model the user never selected.
+    """
     if os.path.isfile(where) and os.path.basename(where) == "model.json":
         return where
+    if not os.path.isdir(where):
+        raise FileNotFoundError(
+            f"model.json not found for {where}. Point path at the compiled "
+            "model directory (containing 1/model.json) or the model.json itself."
+        )
     for candidate in (
         os.path.join(where, "1", "model.json"),
         os.path.join(where, "model.json"),
     ):
         if os.path.isfile(candidate):
             return candidate
-    # a zip may have unpacked with a single top-level directory wrapper
-    if os.path.isdir(where):
-        for entry in sorted(os.listdir(where)):
-            sub = os.path.join(where, entry)
-            if os.path.isdir(sub):
-                for candidate in (
-                    os.path.join(sub, "1", "model.json"),
-                    os.path.join(sub, "model.json"),
-                ):
-                    if os.path.isfile(candidate):
-                        return candidate
+    matches: list[str] = []
+    for entry in sorted(os.listdir(where)):
+        sub = os.path.join(where, entry)
+        if not os.path.isdir(sub):
+            continue
+        for candidate in (
+            os.path.join(sub, "1", "model.json"),
+            os.path.join(sub, "model.json"),
+        ):
+            if os.path.isfile(candidate):
+                matches.append(candidate)
+                break
+    if len(matches) == 1:
+        return matches[0]
+    if len(matches) > 1:
+        listed = ", ".join(os.path.relpath(m, where) for m in matches)
+        raise ValueError(
+            f"multiple compiled models found under {where}: {listed}. Point "
+            "path at the specific model directory (containing 1/model.json) "
+            "or the model.json itself."
+        )
     raise FileNotFoundError(
         f"model.json not found for {where}. Point path at the compiled "
         "model directory (containing 1/model.json) or the model.json itself."
@@ -521,7 +549,7 @@ class _AxeleraRuntimeInference:
                 f"{len(pp_inputs)} graph inputs vs "
                 f"{len(self._head_real)} model outputs"
             )
-        # Map each postprocess input to the model output whose dequantised NCHW
+        # Map each postprocess input to the model output whose dequantized NCHW
         # crop has exactly that (1, C, H, W) shape: the compile order of the
         # raw heads is not guaranteed to match the postprocess graph's input
         # order (they differ for YOLOX vs YOLO-NAS), shapes are unique per head.
@@ -560,7 +588,7 @@ class _AxeleraRuntimeInference:
             self._pool.put((in_buf, out_bufs))
         self._decode_q: queue.Queue = queue.Queue(maxsize=BUFFER_SETS)
         # fp32 postprocess feeds, sized to each graph input and reused: the
-        # dequantising copy writes straight into them (copyto fuses the
+        # dequantizing copy writes straight into them (copyto fuses the
         # NHWC->NCHW transpose with the int8->fp32 cast, and the dequant math
         # then runs in place) so the hot path never allocates
         self._pp_scratch = {
@@ -797,7 +825,7 @@ class _AxeleraRuntimeInference:
         dst[..., 3] = 127
 
     def _decode(self, out_bufs) -> np.ndarray:
-        """Dequantise heads + postprocess graph + conf threshold + NMS -> rows."""
+        """Dequantize heads + postprocess graph + conf threshold + NMS -> rows."""
         # dequantize + crop to the real channel count + transpose NHWC -> NCHW
         # without temporaries: copyto casts int8 -> fp32 (lossless) while it
         # does the strided transpose copy into the reused scratch feed, then
@@ -910,14 +938,9 @@ class AxeleraDetector(DetectionApi):
 
         self.width = model.width
         self.height = model.height
-        model_path = model.path
-        self.model_url = model_path if (model_path and is_url(model_path)) else None
-        self.model_path = None if self.model_url else model_path
 
         build_root = os.environ.get("AXELERA_BUILD_ROOT", AX_DEFAULT_BUILD_ROOT)
-        self.working_model = _resolve_model_json(
-            self.model_path, self.model_url, build_root
-        )
+        self.working_model = _resolve_model_json(model.path, build_root)
 
         # label name -> Frigate class id by NAME (independent of ordering)
         self._labelmap = {}
@@ -996,14 +1019,11 @@ class AxeleraDetector(DetectionApi):
         """Synchronous path unused: axelera uses the async detector contract."""
         return 0  # type: ignore[override]
 
-    def close(self):
-        """Stop the inference runtime and release the Metis device."""
-        self._inference.stop()
-
     def __del__(self):
         # destructor must not raise
         try:
-            self.close()
+            if getattr(self, "_inference", None) is not None:
+                self.shutdown()
         except Exception:  # noqa: S110, BLE001
             pass
 
@@ -1073,12 +1093,7 @@ def _point_runtime_at_installed_firmware() -> None:
     """
     if os.environ.get("AXELERA_DEVICE_DIR"):
         return
-    try:
-        from frigate.util.runtime_deps import user_site
-
-        omega = os.path.join(str(user_site()), "axelera", "omega")
-    except Exception:  # noqa: BLE001
-        return
+    omega = os.path.join(str(user_site()), "axelera", "omega")
     if not os.path.isdir(omega):
         return
     os.environ["AXELERA_DEVICE_DIR"] = omega
