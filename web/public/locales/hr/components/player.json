@@ -9,14 +9,6 @@
       "short": "Vrsta",
       "title": "Tip Streama:"
     },
-    "latency": {
-      "value": "{{seconds}} sekundi",
-      "short": {
-        "value": "{{seconds}} sekundi",
-        "title": "Kašnjenje"
-      },
-      "title": "Kašnjenje:"
-    },
     "bandwidth": {
       "title": "Mrežna propusnost:",
       "short": "Mrežna propusnost"
