@@ -233,6 +233,7 @@
     "detectHighCpuUsage": "{{camera}} has high detect CPU usage ({{detectAvg}}%)",
     "healthy": "System is healthy",
     "reindexingEmbeddings": "Reindexing embeddings ({{processed}}% complete)",
+    "reindexEmbeddingsFailed": "Reindexing embeddings failed, check the logs",
     "cameraIsOffline": "{{camera}} is offline",
     "detectIsSlow": "{{detect}} is slow ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} is very slow ({{speed}} ms)",
