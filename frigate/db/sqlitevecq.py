@@ -1,5 +1,6 @@
 import logging
 import sqlite3
+import threading
 from typing import Any
 
 import regex
@@ -18,6 +19,7 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
         self.load_vec_extension: bool = load_vec_extension
         # no extension necessary, sqlite will load correctly for each platform
         self.sqlite_vec_path = "/usr/local/lib/vec0"
+        self.upsert_lock = threading.Lock()
         super().__init__(*args, **kwargs)
 
     def _connect(self, *args: Any, **kwargs: Any) -> sqlite3.Connection:
@@ -147,12 +149,18 @@ class SqliteVecQueueDatabase(SqliteQueueDatabase):
 
         event_ids = list(embeddings.keys())
         ids = ",".join(["?" for _ in event_ids])
-        self.execute_write(f"DELETE FROM {table} WHERE id IN ({ids})", event_ids)
-
         params: list[Any] = []
 
         for event_id in event_ids:
             params.extend((event_id, embeddings[event_id]))
 
         values = ", ".join(["(?, ?)"] * len(event_ids))
-        self.execute_write(f"INSERT INTO {table}(id, {column}) VALUES {values}", params)
+
+        # reindexing and live embedding run on separate threads, and each write
+        # is queued separately, so the delete and the insert have to be held
+        # together or an interleaved pair fails on the vec0 primary key
+        with self.upsert_lock:
+            self.execute_write(f"DELETE FROM {table} WHERE id IN ({ids})", event_ids)
+            self.execute_write(
+                f"INSERT INTO {table}(id, {column}) VALUES {values}", params
+            )
