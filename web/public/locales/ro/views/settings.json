@@ -88,7 +88,7 @@
     "uiSettings": "Setări UI",
     "profiles": "Profile",
     "systemGo2rtcStreams": "stream-uri go2rtc",
-    "systemDetectorsAndModel": "Detectori și model"
+    "systemDetectorsAndModel": "Modele de detecție"
   },
   "dialog": {
     "unsavedChanges": {
@@ -150,11 +150,50 @@
     "toast": {
       "success": {
         "clearStoredLayout": "S-a șters layout-ul salvat pentru {{cameraName}}",
-        "clearStreamingSettings": "S-au șters setările de streaming pentru toate grupurile de camere."
+        "clearStreamingSettings": "S-au șters setările de streaming pentru toate grupurile de camere.",
+        "exportUiSettings": "Setările au fost exportate",
+        "importUiSettings": "Setările au fost importate"
       },
       "error": {
         "clearStoredLayoutFailed": "Eșec la ștergerea layout-ului salvat: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Eșec la ștergerea setărilor de streaming: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Eșec la ștergerea setărilor de streaming: {{errorMessage}}",
+        "exportUiSettingsFailed": "Exportarea setărilor a eșuat",
+        "importNothingToApply": "Importarea setărilor a eșuat: fișierul nu conține setări",
+        "importInvalidJson": "Importarea setărilor a eșuat: fișierul nu este un JSON valid",
+        "importWrongType": "Importarea setărilor a eșuat: fișierul nu este un export de setări Frigate",
+        "importUnsupportedVersion": "Importarea setărilor a eșuat: fișierul necesită o versiune mai nouă de Frigate",
+        "importInvalidSchema": "Importarea setărilor a eșuat: fișierul este incorect formatat",
+        "importUiSettingsFailed": "Importarea setărilor a eșuat"
+      }
+    },
+    "backupRestore": {
+      "title": "Backup și restaurare",
+      "transfer": {
+        "label": "Fișier setări dispozitiv",
+        "desc": "Aranjamentele grupurilor de camere, setările de streaming și preferințele interfeței sunt stocate în browserul tău. Exportă-le într-un fișier pentru a le salva sau pentru a le muta pe un alt dispozitiv.",
+        "export": "Exportă setările",
+        "import": "Importă setările"
+      },
+      "importDialog": {
+        "title": "Importă setările",
+        "desc": "Alege ce dorești să aplici din acest fișier. Frigate se va reîncărca la finalizarea importului.",
+        "exportedFrom": "Exportat pe {{date}} din versiunea de configurare Frigate {{version}}",
+        "layouts_one": "Aranjamente grupuri de camere (1 grup)",
+        "layouts_few": "Aranjamente grupuri de camere ({{count}} grupuri)",
+        "layouts_other": "Aranjamente grupuri de camere ({{count}} de grupuri)",
+        "streaming_one": "Setări de streaming (1 cameră)",
+        "streaming_few": "Setări de streaming ({{count}} camere)",
+        "streaming_other": "Setări de streaming ({{count}} de camere)",
+        "preferences_one": "Preferințe interfață (1 setare)",
+        "preferences_few": "Preferințe interfață ({{count}} setări)",
+        "preferences_other": "Preferințe interfață ({{count}} de setări)",
+        "unknownGroups_one": "Grupul de camere {{groups}} nu se află pe acest server. Setările sale vor fi salvate, dar nu vor fi utilizate.",
+        "unknownGroups_few": "Grupurile de camere {{groups}} nu se află pe acest server. Setările lor vor fi salvate, dar nu vor fi utilizate.",
+        "unknownGroups_other": "Grupurile de camere {{groups}} nu se află pe acest server. Setările lor vor fi salvate, dar nu vor fi utilizate.",
+        "unknownCameras_one": "Camera {{cameras}} nu se află pe acest server. Setările sale de streaming vor fi ignorate.",
+        "unknownCameras_few": "Camerele {{cameras}} nu se află pe acest server. Setările lor de streaming vor fi ignorate.",
+        "unknownCameras_other": "Camerele {{cameras}} nu se află pe acest server. Setările lor de streaming vor fi ignorate.",
+        "confirm": "Importă"
       }
     }
   },
@@ -1024,7 +1063,7 @@
       }
     },
     "step3": {
-      "description": "Configurează rolurile stream-urilor și adaugă stream-uri suplimentare pentru camera ta.",
+      "description": "Configurează funcționalitățile, rolurile stream-urilor și adaugă stream-uri suplimentare pentru camera ta.",
       "streamTitle": "Stream-ul {{number}}",
       "roles": "Roluri",
       "streamsTitle": "Stream-uri cameră",
@@ -1058,11 +1097,26 @@
         "title": "Roluri de stream",
         "detect": "Fluxul principal pentru detecția obiectelor.",
         "record": "Salvează segmente video conform setărilor de configurare.",
-        "audio": "Flux pentru detecția bazată pe sunet."
+        "audio": "Flux pentru detecția bazată pe sunet.",
+        "record_sub": "Înregistrări la calitate mai scăzută pentru redare adaptivă și retenție extinsă (de obicei, sub-stream-ul camerei)."
       },
       "featuresPopover": {
         "title": "Caracteristici stream",
         "description": "Folosește restreaming prin go2rtc pentru a reduce numărul de conexiuni directe către cameră."
+      },
+      "appleCompatibility": {
+        "title": "Îmbunătățește redarea pe dispozitivele Apple",
+        "description": "Activează această opțiune dacă vizionezi înregistrările în Safari sau pe un iPhone, iPad sau Mac."
+      },
+      "ptz": {
+        "title": "Activează controalele PTZ",
+        "detectedNote": "Suportul PTZ a fost detectat prin ONVIF. Dacă aceasta este o cameră PTZ, activarea acestei opțiuni îți va permite să controlezi funcțiile de rotire/înclinare/zoom ale camerei din interfață.",
+        "connectionDetails": "Detalii conexiune ONVIF",
+        "host": "Gazdă ONVIF",
+        "port": "Port ONVIF",
+        "username": "Nume utilizator ONVIF",
+        "password": "Parolă ONVIF",
+        "hostRequiredWarning": "Sunt necesare o gazdă și un port ONVIF atunci când controalele PTZ sunt activate."
       }
     },
     "step4": {
@@ -1393,7 +1447,9 @@
         "orphansDeleted": "Fișiere Orfane Șterse",
         "aborted": "Abandonat. Ștergerea ar depăși pragul de siguranță.",
         "error": "Eroare",
-        "totals": "Totaluri"
+        "totals": "Totaluri",
+        "spaceToReclaim": "Spațiu de eliberat",
+        "spaceReclaimed": "Spațiu eliberat"
       },
       "event_snapshots": "Snapshot-uri Obiecte Urmărite",
       "event_thumbnails": "Miniaturi Obiecte Urmărite",
@@ -1489,7 +1545,8 @@
         "preset-record-mjpeg": "Înregistrare - Camere MJPEG",
         "preset-record-jpeg": "Înregistrare - Camere JPEG",
         "preset-record-ubiquiti": "Înregistrare - Camere Ubiquiti"
-      }
+      },
+      "sameAsRecord": "La fel ca argumentele de ieșire pentru înregistrare"
     },
     "cameraInputs": {
       "itemTitle": "Stream-ul {{index}}",
@@ -1570,8 +1627,11 @@
       "options": {
         "detect": "Detecție",
         "record": "Înregistrare",
-        "audio": "Audio"
-      }
+        "audio": "Audio",
+        "record_sub": "Înregistrare (sub-stream)"
+      },
+      "roleInUse": "Atribuit deja altui stream",
+      "recordSubConflict": "Un stream nu poate avea simultan rolurile record și record_sub"
     },
     "review": {
       "title": "Setări Revizuire"
@@ -1593,7 +1653,8 @@
       "options": {
         "embeddings": "Înglobare",
         "descriptions": "Descrieri",
-        "chat": "Chat"
+        "chat": "Chat",
+        "transcribe": "Transcriere"
       }
     },
     "semanticSearchModel": {
@@ -1618,7 +1679,12 @@
     },
     "knownPlates": {
       "namePlaceholder": "ex. Mașina soției",
-      "platePlaceholder": "Număr plăcuță sau regex"
+      "platePlaceholder": "Număr plăcuță sau regex",
+      "assignedTo": "Atribuit lui {{name}}",
+      "detected": "Numere de înmatriculare detectate",
+      "noneDetected": "Niciun număr de înmatriculare detectat încă",
+      "search": "Caută sau introdu un număr de înmatriculare",
+      "useCustom": "Folosește \"{{value}}\""
     },
     "semanticSearchModelSize": {
       "notApplicable": "Nu se aplică pentru furnizorii de GenAI"
@@ -1643,7 +1709,26 @@
     },
     "defaultRole": {
       "admin": "Administrator",
-      "viewer": "Vizualizator"
+      "viewer": "Vizualizator",
+      "none": "Niciunul (refuză accesul)"
+    },
+    "birdseyeModes": {
+      "summary": "{{count}} selectate",
+      "options": {
+        "continuous": "Continuu",
+        "motion": "Mișcare",
+        "all_objects": "Toate obiectele",
+        "alerts": "Alerte",
+        "detections": "Detecții"
+      }
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Selectează modelul…",
+      "builtIn": "Modele integrate",
+      "genaiProviders": "Furnizori GenAI"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "Nu se aplică pentru furnizorii GenAI"
     }
   },
   "globalConfig": {
@@ -1715,7 +1800,10 @@
     "overriddenBaseConfigHeading_one": "Profilul {{profile}} suprascrie {{count}} câmp din configurația de bază:",
     "overriddenBaseConfigHeading_few": "Profilul {{profile}} suprascrie {{count}} câmpuri din configurația de bază:",
     "overriddenBaseConfigHeading_other": "Profilul {{profile}} suprascrie {{count}} de câmpuri din configurația de bază:",
-    "overriddenBaseConfigNoDeltas": "Profilul {{profile}} suprascrie această secțiune, dar nicio valoare a câmpurilor nu diferă de configurația de bază."
+    "overriddenBaseConfigNoDeltas": "Profilul {{profile}} suprascrie această secțiune, dar nicio valoare a câmpurilor nu diferă de configurația de bază.",
+    "overriddenLive": "Suprascris (Live)",
+    "overriddenLiveTooltip": "Această cameră rulează cu o valoare diferită de cea salvată în configurația ta, care este afișată aici. Vizualizarea live, MQTT sau un profil activ pot modifica această valoare în timp ce Frigate rulează.",
+    "overriddenLiveValue": "Valoare în rulare: {{value}}"
   },
   "profiles": {
     "title": "Profile",
@@ -1833,13 +1921,18 @@
       "recordDisabled": "Înregistrarea este dezactivată, elementele de revizuire nu vor fi generate.",
       "detectDisabled": "Detecția obiectelor este dezactivată. Elementele de revizuire necesită obiecte detectate pentru a categorisi alertele și detecțiile.",
       "allNonAlertDetections": "Toată activitatea fără alertă va fi inclusă ca detecții.",
-      "genaiImageSourceRecordingsRecordDisabled": "Sursa imaginii este setată pe 'recordings', dar înregistrarea este dezactivată. Frigate va reveni la imaginile de previzualizare."
+      "genaiImageSourceRecordingsRecordDisabled": "Sursa imaginii este setată pe 'recordings', dar înregistrarea este dezactivată. Frigate va reveni la imaginile de previzualizare.",
+      "recordRuntimeDisabled": "Înregistrarea este activată în configurația ta, dar este dezactivată în prezent pentru această cameră, așa că elementele de recenzie nu vor fi generate. Pornește-o din nou din vizualizarea live a camerei sau verifică dacă un profil activ o dezactivează.",
+      "detectRuntimeDisabled": "Detecția obiectelor este activată în configurația ta, dar este dezactivată în prezent pentru această cameră. Elementele de recenzie necesită obiecte detectate pentru a categorisi alertele și detecțiile. Pornește-o din nou din vizualizarea live a camerei sau verifică dacă un profil activ o dezactivează.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "Sursa de imagini este setată la 'recordings', dar înregistrarea este dezactivată în prezent pentru această cameră, deși este activată în configurația ta. Frigate va folosi ca rezervă imaginile de previzualizare."
     },
     "audio": {
       "noAudioRole": "Niciun flux nu are rolul audio definit. Trebuie să activați rolul audio pentru ca detecția audio să funcționeze."
     },
     "audioTranscription": {
-      "audioDetectionDisabled": "Detecția audio nu este activată pentru această cameră. Transcrierea audio necesită ca detecția audio să fie activă."
+      "audioDetectionDisabled": "Detecția audio nu este activată pentru această cameră. Transcrierea audio necesită ca detecția audio să fie activă.",
+      "audioDetectionRuntimeDisabled": "Detecția audio este activată în configurația ta, dar este dezactivată în prezent pentru această cameră, așa că transcrierea audio nu va rula. Pornește-o din nou din vizualizarea live a camerei sau verifică dacă un profil activ o dezactivează.",
+      "genaiProviderSelected": "Este selectat un furnizor GenAI, astfel încât setările pentru dispozitiv și dimensiunea modelului sunt ignorate."
     },
     "detect": {
       "fpsGreaterThanFive": "Setarea FPS-ului de detecție mai mare de 5 nu este recomandată. Valorile mai mari pot cauza probleme de performanță și nu vor oferi niciun beneficiu.",
@@ -1849,7 +1942,9 @@
       "maxFramesSet": "Setarea numărului maxim de cadre suprascrie comportamentul implicit și dezactivează urmărirea obiectelor staționare. Există foarte puține situații în care acest lucru este necesar, folosește cu precauție.",
       "squareResolution": "O rezoluție de detecție pătrată este neobișnuită. Lățimea și înălțimea de detecție ar trebui să se potrivească cu raportul de aspect al camerei tale (de exemplu, 16:9), nu cu dimensiunile modelului de detecție a obiectelor. Un raport de aspect nepotrivit poate întinde imaginea și reduce acuratețea detecției.",
       "resolutionHigh": "Această rezoluție de detecție este mai mare decât cea recomandată și poate cauza un consum crescut de resurse fără a îmbunătăți acuratețea detecției. O rezoluție de detecție de 1080p sau mai mică este recomandată pentru majoritatea camerelor.",
-      "globalResolutionMultipleCameras": "O rezoluție de detecție globală este setată în timp ce sunt configurate mai multe camere. Dacă nu cumva toate camerele împart aceeași rezoluție și același raport de aspect, lățimea și înălțimea de detecție ar trebui definite per cameră pentru a se potrivi cu raportul de aspect nativ al fiecărei camere."
+      "globalResolutionMultipleCameras": "O rezoluție de detecție globală este setată în timp ce sunt configurate mai multe camere. Dacă nu cumva toate camerele împart aceeași rezoluție și același raport de aspect, lățimea și înălțimea de detecție ar trebui definite per cameră pentru a se potrivi cu raportul de aspect nativ al fiecărei camere.",
+      "runtimeDisabled": "Detecția obiectelor este activată în configurația ta, dar este dezactivată în prezent pentru această cameră. Snapshot-urile, elementele de recenzie și funcțiile suplimentare precum recunoașterea facială, recunoașterea numerelor de înmatriculare și Inteligența Artificială Generativă nu vor funcționa până nu o pornești din nou din vizualizarea live a camerei sau până când profilul activ nu o mai dezactivază.",
+      "sceneWithoutModel": "Nu este configurat niciun model de detecție pentru această scenă, așa că această cameră revine la modelul cu scena 'All cameras'. Adaugă un model pentru această scenă pentru a-i oferi camerei propriul model."
     },
     "faceRecognition": {
       "globalDisabled": "Îmbogățirea pentru recunoaștere facială trebuie activată pentru ca funcțiile de recunoaștere facială să funcționeze pe această cameră.",
@@ -1862,10 +1957,12 @@
       "modelSizeLarge": "Modelul 'large' este optimizat pentru plăcuțele de înmatriculare pe mai multe rânduri. Modelul 'small' oferă o performanță mai bună decât 'large' și ar trebui folosit cu excepția cazului în care regiunea ta folosește formate de plăcuțe pe mai multe rânduri."
     },
     "record": {
-      "noRecordRole": "Niciun flux nu are rolul de înregistrare definit. Înregistrarea nu va funcționa."
+      "noRecordRole": "Niciun flux nu are rolul de înregistrare definit. Înregistrarea nu va funcționa.",
+      "noRecordSubRole": "Niciun stream nu are definit rolul record_sub. Înregistrarea sub-stream-ului nu va funcționa."
     },
     "snapshots": {
-      "detectDisabled": "Detecția obiectelor este dezactivată. Snapshot-urile sunt generate din obiectele urmărite și nu vor fi create."
+      "detectDisabled": "Detecția obiectelor este dezactivată. Snapshot-urile sunt generate din obiectele urmărite și nu vor fi create.",
+      "detectRuntimeDisabled": "Detecția obiectelor este activată în configurația ta, dar este dezactivată în prezent pentru această cameră, așa că nu vor fi create snapshot-uri. Pornește-o din nou din vizualizarea live a camerei sau verifică dacă un profil activ o dezactivează."
     },
     "objects": {
       "genaiNoDescriptionsProvider": "Trebuie să configurezi un furnizor GenAI cu rolul 'descriptions' pentru ca descrierile să fie generate."
@@ -1883,6 +1980,10 @@
     "model": {
       "optimizedFor320": "Frigate este optimizat pentru un model de 320x320, care este cea mai bună alegere pentru majoritatea configurațiilor. Un model de 640x640 este mai lent și ajută doar în scenarii specifice.",
       "inputDimensionsNotDetectResolution": "Lățimea și înălțimea de intrare ale modelului reprezintă dimensiunile de intrare ale modelului de detectare a obiectelor, nu rezoluția de detecție a camerei tale. Acestea ar trebui să se potrivească cu dimensiunile modelului pe care îl folosești — de obicei o dimensiune pătrată, cum ar fi 320x320 sau 640x640."
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "Birdseye include obiecte urmărite, dar detecția obiectelor este dezactivată pentru această cameră. Camera nu va apărea în Birdseye.",
+      "objectTrackingDetectRuntimeDisabled": "Birdseye include obiecte urmărite, dar detecția obiectelor este dezactivată în prezent pentru această cameră, deși este activată în configurația ta. Camera nu va apărea în Birdseye până când nu este pornită din nou din vizualizarea live a camerei sau până când profilul activ nu o mai dezactivează."
     }
   },
   "birdseye": {
@@ -1909,6 +2010,10 @@
     "imageSource": {
       "recordings": "Înregistrări",
       "previews": "Previzualizări"
+    },
+    "frameMode": {
+      "frames": "Cadre",
+      "annotated_frames": "Cadre adnotate"
     }
   },
   "logger": {
@@ -1940,5 +2045,46 @@
     "overrideGlobal": "Această secțiune suprascrie configurația globală",
     "overrideProfile": "Această secțiune este suprascrisă de profilul {{profile}}",
     "unsaved": "Această secțiune are modificări nesalvate"
+  },
+  "detectionModels": {
+    "title": "Modele de detecție",
+    "description": "Configurează modelele de detecție a obiectelor și componentele hardware pe care rulează fiecare. Camerele aleg un model după scenă în setările lor de detecție.",
+    "addModel": "Adaugă model",
+    "cameras_one": "1 cameră",
+    "cameras_few": "{{count}} camere",
+    "cameras_other": "{{count}} de camere",
+    "scene": {
+      "label": "Scenă",
+      "description": "Mediul pentru care este conceput acest model. Camerele aleg un model setând aceeași scenă în setările lor de detecție, iar modelul cu scena 'all' este utilizat de orice cameră care nu își setează una."
+    },
+    "scenes": {
+      "all": "Toate camerele",
+      "indoor": "Interior",
+      "outdoor": "Exterior",
+      "indoor_thermal": "Interior termic",
+      "outdoor_thermal": "Exterior termic"
+    },
+    "hardware": {
+      "label": "Hardware",
+      "placeholder": "Selectează hardware-ul",
+      "loading": "Se caută hardware de detecție...",
+      "none": "Niciun hardware selectat",
+      "claimedBy": "utilizat de {{scene}}",
+      "detectorCount": "Detectori",
+      "countRecommended_one": "Recomandat pentru 1 cameră",
+      "countRecommended_few": "Recomandat pentru {{count}} camere",
+      "countRecommended_other": "Recomandat pentru {{count}} de camere",
+      "unrecognized": "Acest model este configurat pentru hardware care nu a fost găsit pe acest sistem: {{devices}}",
+      "description": "Hardware-ul pe care acest model își rulează detecția.",
+      "detectorCountDescription": "Câte procese de detecție să ruleze pe acest hardware. Mai mulți detectori fac față mai multor camere, cu consum suplimentar de memorie.",
+      "unitsDescription": "Fiecare unitate își rulează propriul proces de detecție. O unitate deja utilizată de un alt model nu poate fi selectată."
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Model personalizat"
+    },
+    "plusModel": {
+      "noModelSelected": "Selectează un model Frigate+"
+    }
   }
 }
