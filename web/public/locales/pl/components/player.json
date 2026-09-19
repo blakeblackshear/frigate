@@ -1,14 +1,6 @@
 {
   "noRecordingsFoundForThisTime": "Nie znaleziono żadnych nagrań w tym czasie",
   "stats": {
-    "latency": {
-      "title": "Opóźnienie:",
-      "value": "{{seconds}} sekund",
-      "short": {
-        "title": "Opóźnienie",
-        "value": "{{seconds}} s"
-      }
-    },
     "totalFrames": "Całkowita liczba klatek:",
     "streamType": {
       "title": "Typ transmisji:",
