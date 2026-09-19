@@ -1,14 +1,6 @@
 {
   "noPreviewFoundFor": "Не е намерен предварителен преглед за {{cameraName}}",
   "stats": {
-    "latency": {
-      "short": {
-        "value": "{{seconds}} сек",
-        "title": "Закъснение"
-      },
-      "title": "Закъснение:",
-      "value": "{{seconds}} секунди"
-    },
     "streamType": {
       "title": "Тип поток:",
       "short": "Тип"
