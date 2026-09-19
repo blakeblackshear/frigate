@@ -83,7 +83,10 @@ export default function Statusbar() {
           }),
         );
       }
-      if (reindexState.status === "completed") {
+      if (
+        reindexState.status === "completed" ||
+        reindexState.status === "failed"
+      ) {
         clearMessages("embeddings-reindex");
       }
     }

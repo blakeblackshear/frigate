@@ -6,9 +6,10 @@ import logging
 import os
 import threading
 import time
+from typing import Any
 
 import numpy as np
-from peewee import DoesNotExist, IntegrityError
+from peewee import DatabaseError, DoesNotExist, IntegrityError
 from PIL import Image
 from playhouse.shortcuts import model_to_dict
 
@@ -207,12 +208,10 @@ class Embeddings:
         embedding = self.vision_embedding([thumbnail])[0]
 
         if upsert:
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
-                VALUES(?, ?)
-                """,
-                (event_id, serialize(embedding)),
+            self.db.upsert_embeddings(
+                "vec_thumbnails",
+                "thumbnail_embedding",
+                {event_id: serialize(embedding)},
             )
 
         self.image_inference_speed.update(datetime.datetime.now().timestamp() - start)
@@ -251,19 +250,12 @@ class Embeddings:
         embeddings = self.vision_embedding(valid_thumbs)
 
         if upsert:
-            items = []
+            items = {}
             for i in range(len(valid_ids)):
-                items.append(valid_ids[i])
-                items.append(serialize(embeddings[i]))
+                items[valid_ids[i]] = serialize(embeddings[i])
                 self.image_eps.update()
 
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_thumbnails(id, thumbnail_embedding)
-                VALUES {}
-                """.format(", ".join(["(?, ?)"] * len(valid_ids))),
-                items,
-            )
+            self.db.upsert_embeddings("vec_thumbnails", "thumbnail_embedding", items)
 
         duration = datetime.datetime.now().timestamp() - start
         self.image_inference_speed.update(duration / len(valid_ids))
@@ -277,12 +269,10 @@ class Embeddings:
         embedding = self.text_embedding([description])[0]
 
         if upsert:
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
-                VALUES(?, ?)
-                """,
-                (event_id, serialize(embedding)),
+            self.db.upsert_embeddings(
+                "vec_descriptions",
+                "description_embedding",
+                {event_id: serialize(embedding)},
             )
 
         self.text_inference_speed.update(datetime.datetime.now().timestamp() - start)
@@ -302,19 +292,14 @@ class Embeddings:
 
         if upsert:
             ids = list(event_descriptions.keys())
-            items = []
+            items = {}
 
             for i in range(len(ids)):
-                items.append(ids[i])
-                items.append(serialize(embeddings[i]))
+                items[ids[i]] = serialize(embeddings[i])
                 self.text_eps.update()
 
-            self.db.execute_sql(
-                """
-                INSERT OR REPLACE INTO vec_descriptions(id, description_embedding)
-                VALUES {}
-                """.format(", ".join(["(?, ?)"] * len(ids))),
-                items,
+            self.db.upsert_embeddings(
+                "vec_descriptions", "description_embedding", items
             )
 
         self.text_inference_speed.update(datetime.datetime.now().timestamp() - start)
@@ -322,6 +307,17 @@ class Embeddings:
         return embeddings
 
     def reindex(self) -> None:
+        """Rebuild every tracked object embedding from scratch."""
+        totals: dict[str, Any] = {"status": "indexing"}
+
+        try:
+            self._reindex(totals)
+        except DatabaseError:
+            logger.exception("Unable to reindex tracked object embeddings")
+            totals["status"] = "failed"
+            self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
+
+    def _reindex(self, totals: dict[str, Any]) -> None:
         logger.info("Indexing tracked object embeddings...")
 
         self.db.drop_embeddings_tables()
@@ -346,14 +342,18 @@ class Embeddings:
             batch_size = 32
         current_page = 1
 
-        totals = {
-            "thumbnails": 0,
-            "descriptions": 0,
-            "processed_objects": total_events - 1 if total_events < batch_size else 0,
-            "total_objects": total_events,
-            "time_remaining": 0 if total_events < batch_size else -1,
-            "status": "indexing",
-        }
+        totals.update(
+            {
+                "thumbnails": 0,
+                "descriptions": 0,
+                "processed_objects": total_events - 1
+                if total_events < batch_size
+                else 0,
+                "total_objects": total_events,
+                "time_remaining": 0 if total_events < batch_size else -1,
+                "status": "indexing",
+            }
+        )
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
