@@ -20,14 +20,6 @@
       "title": "Пропусни опсег:",
       "short": "Ширина опсега"
     },
-    "latency": {
-      "title": "Кашњење:",
-      "value": "{{seconds}} секунди",
-      "short": {
-        "title": "Кашњење",
-        "value": "{{seconds}}s"
-      }
-    },
     "totalFrames": "Укупно фрејмова:",
     "droppedFrames": {
       "title": "Изгубљени фрејмови:",
