@@ -20,14 +20,6 @@
       "title": "Båndbredde:",
       "short": "Båndbredde"
     },
-    "latency": {
-      "title": "Latenstid:",
-      "value": "{{seconds}} sekunder",
-      "short": {
-        "title": "Latenstid",
-        "value": "{{seconds}} sek"
-      }
-    },
     "droppedFrames": {
       "short": {
         "title": "Tabt",
