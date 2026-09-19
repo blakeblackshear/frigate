@@ -18,14 +18,6 @@
       "title": "Largura de banda:",
       "short": "Largura de banda"
     },
-    "latency": {
-      "value": "{{seconds}} segundos",
-      "short": {
-        "title": "Latência",
-        "value": "{{seconds}} seg"
-      },
-      "title": "Latência:"
-    },
     "totalFrames": "Total de quadros:",
     "droppedFrames": {
       "title": "Imagens perdidas:",
