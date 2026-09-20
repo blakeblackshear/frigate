@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
 from frigate.log import setup_logging
-from frigate.util.config import find_config_file
+from frigate.util.config import config_is_read_only, find_config_file
 
 
 def main() -> None:
@@ -101,6 +101,12 @@ def main() -> None:
 
         # force a non-zero exit code for config failures
         if args.validate_config:
+            sys.exit(1)
+
+        # safe mode is repaired from the config editor, which a read-only config
+        # cannot save, so there is nothing to recover to
+        if config_is_read_only():
+            print("Config is read-only, not starting in safe mode.")
             sys.exit(1)
 
         # attempt to start Frigate in recovery mode

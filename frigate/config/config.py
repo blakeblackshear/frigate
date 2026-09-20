@@ -29,6 +29,7 @@ from frigate.util.builtin import (
 from frigate.util.config import (
     CURRENT_CONFIG_VERSION,
     StreamInfoRetriever,
+    config_is_read_only,
     convert_area_to_pixels,
     find_config_file,
     get_relative_coordinates,
@@ -1321,6 +1322,11 @@ class FrigateConfig(FrigateBaseModel):
         # No configuration file found, create one.
         new_config = False
         if not os.path.isfile(config_path):
+            if config_is_read_only():
+                raise FileNotFoundError(
+                    f"No config file found at {config_path} and the config is read-only"
+                )
+
             logger.info("No config file found, saving default config")
             config_path = config_path
             new_config = True

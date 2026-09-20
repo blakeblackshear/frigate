@@ -437,6 +437,7 @@ export type DetectionModelConfig = {
 export interface FrigateConfig {
   version: string;
   safe_mode: boolean;
+  config_read_only: boolean;
 
   audio: {
     enabled: boolean;

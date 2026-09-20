@@ -414,6 +414,19 @@ To do this:
 
 The same exception applies, and again only to [`FRIGATE_ROOT_SERVICES`](/configuration/non_root#keeping-individual-services-root) listing `go2rtc`: the binary is ignored there and the embedded one is used, with a warning in the log. Unlike `ffmpeg.path`, the go2rtc binary location is not configurable, so there is no outside-`/config` alternative. Use `FRIGATE_RUN_AS_ROOT=true` instead if you need both a custom go2rtc build and root. The default mode and the escape hatch both honor `/config/go2rtc` exactly as they always have.
 
+## Externally managed config
+
+When `config.yml` is produced by something other than Frigate, such as a Kubernetes ConfigMap, Ansible, or a git repository, set `FRIGATE_CONFIG_READ_ONLY=true` in the container environment. Like the other `FRIGATE_` switches it is matched against the exact lowercase string `true`, so `True`, `TRUE`, and `1` are all ignored.
+
+Frigate then never writes to the config file:
+
+- Migrations are skipped and no `backup_config.yaml` is written, so an upgrade that changes the config format fails validation rather than rewriting a file that your tooling owns. Migrate the config wherever it is generated.
+- Safe mode is not used. An invalid config prints the validation errors and exits non-zero, because the Config Editor has nowhere to save a fix and a running Frigate with no cameras is harder to notice than a container that will not start.
+- The Config Editor and the settings pages are read-only, and `/api/config/save` and `/api/config/set` return `409`. Temporary in-memory changes, such as debug replay tuning, still work.
+- A missing config file is an error instead of a reason to write out the default config.
+
+Because an incompatible config now stops the container, validate it against the image you are about to deploy. See [Validating your config.yml file updates](#validating-your-configyml-file-updates) below.
+
 ## Validating your config.yml file updates
 
 When frigate starts up, it checks whether your config file is valid, and if it is not, the process exits. To minimize interruptions when updating your config, you have three options -- you can edit the config via the WebUI which has built in validation, use the config API, or you can validate on the command line using the frigate docker container.

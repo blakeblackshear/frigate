@@ -38,6 +38,7 @@ function ConfigEditor() {
     revalidateOnFocus: false,
   });
   const { data: rawConfig } = useSWR<string>("config/raw");
+  const readOnly = config?.config_read_only ?? false;
 
   const { theme, systemTheme } = useTheme();
   const [error, setError] = useState<string | undefined>();
@@ -53,7 +54,7 @@ function ConfigEditor() {
 
   const onHandleSaveConfig = useCallback(
     async (save_option: SaveOptions): Promise<void> => {
-      if (!editorRef.current) {
+      if (readOnly || !editorRef.current) {
         return;
       }
 
@@ -84,7 +85,7 @@ function ConfigEditor() {
         throw new Error(errorMessage, { cause: error });
       }
     },
-    [editorRef, t],
+    [editorRef, readOnly, t],
   );
 
   const handleCopyConfig = useCallback(async () => {
@@ -171,6 +172,10 @@ function ConfigEditor() {
       schemaConfiguredRef.current = false;
     };
   }, [rawConfig, apiHost, systemTheme, theme, onHandleSaveConfig]);
+
+  useEffect(() => {
+    editorRef.current?.updateOptions({ readOnly });
+  }, [readOnly, rawConfig]);
 
   // when in safe mode, attempt to validate the existing (invalid) config immediately
   // so that the user sees the validation errors without needing to press save
@@ -274,6 +279,11 @@ function ConfigEditor() {
                 {t("safeModeDescription")}
               </div>
             )}
+            {readOnly && (
+              <div className="text-sm text-secondary-foreground">
+                {t("readOnlyDescription")}
+              </div>
+            )}
           </div>
           <div className="flex flex-row gap-1">
             <Button
@@ -285,27 +295,31 @@ function ConfigEditor() {
               <LuCopy className="text-secondary-foreground" />
               <span className="hidden md:block">{t("copyConfig")}</span>
             </Button>
-            <Button
-              size="sm"
-              className="flex items-center gap-2"
-              aria-label={t("saveAndRestart")}
-              onClick={handleSaveAndRestart}
-            >
-              <div className="relative size-5">
-                <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
-                <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
-              </div>
-              <span className="hidden md:block">{t("saveAndRestart")}</span>
-            </Button>
-            <Button
-              size="sm"
-              className="flex items-center gap-2"
-              aria-label={t("saveOnly")}
-              onClick={() => onHandleSaveConfig("saveonly")}
-            >
-              <LuSave className="text-secondary-foreground" />
-              <span className="hidden md:block">{t("saveOnly")}</span>
-            </Button>
+            {!readOnly && (
+              <>
+                <Button
+                  size="sm"
+                  className="flex items-center gap-2"
+                  aria-label={t("saveAndRestart")}
+                  onClick={handleSaveAndRestart}
+                >
+                  <div className="relative size-5">
+                    <LuSave className="absolute left-0 top-0 size-3 text-secondary-foreground" />
+                    <MdOutlineRestartAlt className="absolute size-4 translate-x-1 translate-y-1/2 text-secondary-foreground" />
+                  </div>
+                  <span className="hidden md:block">{t("saveAndRestart")}</span>
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex items-center gap-2"
+                  aria-label={t("saveOnly")}
+                  onClick={() => onHandleSaveConfig("saveonly")}
+                >
+                  <LuSave className="text-secondary-foreground" />
+                  <span className="hidden md:block">{t("saveOnly")}</span>
+                </Button>
+              </>
+            )}
           </div>
         </div>
 

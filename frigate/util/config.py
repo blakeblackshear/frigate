@@ -145,9 +145,18 @@ def find_config_file() -> str:
     return config_path
 
 
+def config_is_read_only() -> bool:
+    """Whether the config file is managed outside of Frigate and must not be written."""
+    return os.environ.get("FRIGATE_CONFIG_READ_ONLY", "false") == "true"
+
+
 def migrate_frigate_config(config_file: str):
     """handle migrating the frigate config."""
     logger.info("Checking if frigate config needs migration...")
+
+    if config_is_read_only():
+        logger.info("Config is read-only, skipping migration")
+        return
 
     if not os.access(config_file, mode=os.W_OK):
         logger.error("Config file is read-only, unable to migrate config file.")

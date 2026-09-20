@@ -307,6 +307,13 @@ export function ConfigSection({
   const { data: config, mutate: refreshConfig } =
     useSWR<FrigateConfig>("config");
 
+  // a read-only config can't be written back, but skipSave sections only ever
+  // apply in memory so they stay editable
+  const blockedByReadOnlyConfig =
+    (config?.config_read_only ?? false) && !skipSave;
+  const isDisabled = disabled || blockedByReadOnlyConfig;
+  const isReadonly = readonly || blockedByReadOnlyConfig;
+
   // Get section schema using cached hook
   const sectionSchema = useSectionSchema(sectionPath, effectiveLevel);
 
@@ -1015,7 +1022,7 @@ export function ConfigSection({
             liveValidate={sectionConfig.liveValidate}
             uiSchema={sectionConfig.uiSchema}
             disabled={disabled || isSaving}
-            readonly={readonly}
+            readonly={isReadonly}
             showSubmit={false}
             i18nNamespace={configNamespace}
             customValidate={customValidate}
@@ -1097,7 +1104,7 @@ export function ConfigSection({
                   <Button
                     onClick={() => setIsResetDialogOpen(true)}
                     variant="outline"
-                    disabled={isSaving || isResettingToDefault || disabled}
+                    disabled={isSaving || isResettingToDefault || isDisabled}
                     className="flex flex-1 gap-2"
                   >
                     {isResettingToDefault && (
@@ -1122,7 +1129,7 @@ export function ConfigSection({
                   <Button
                     onClick={() => setIsDeleteProfileDialogOpen(true)}
                     variant="outline"
-                    disabled={isSaving || disabled}
+                    disabled={isSaving || isDisabled}
                     className="flex flex-1 gap-2"
                   >
                     {t("profiles.removeOverride", {
@@ -1135,7 +1142,7 @@ export function ConfigSection({
                 <Button
                   onClick={handleReset}
                   variant="outline"
-                  disabled={isSaving || isSavingAll || disabled}
+                  disabled={isSaving || isSavingAll || isDisabled}
                   className="flex min-w-36 flex-1 gap-2"
                 >
                   {t("button.undo", { ns: "common", defaultValue: "Undo" })}
@@ -1149,7 +1156,7 @@ export function ConfigSection({
                   hasValidationErrors ||
                   isSaving ||
                   isSavingAll ||
-                  disabled
+                  isDisabled
                 }
                 className="flex min-w-36 flex-1 gap-2"
               >

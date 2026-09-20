@@ -67,6 +67,7 @@ from frigate.util.builtin import (
 )
 from frigate.util.config import (
     apply_section_update,
+    config_is_read_only,
     find_config_file,
     redact_credential,
 )
@@ -402,6 +403,8 @@ def config(request: Request):
         if model.path:
             model_dict["plus"] = load_plus_model_info(os.path.basename(model.path))
 
+    config["config_read_only"] = config_is_read_only()
+
     return JSONResponse(content=config)
 
 
@@ -523,8 +526,23 @@ def config_raw():
         )
 
 
+def _config_read_only_response() -> JSONResponse:
+    return JSONResponse(
+        content=(
+            {
+                "success": False,
+                "message": "Config is read-only and is managed outside of Frigate.",
+            }
+        ),
+        status_code=409,
+    )
+
+
 @router.post("/config/save", dependencies=[Depends(require_role(["admin"]))])
 def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
+    if config_is_read_only():
+        return _config_read_only_response()
+
     new_config = body.decode()
     if not new_config:
         return JSONResponse(
@@ -814,6 +832,9 @@ def config_set(request: Request, body: AppConfigSetBody):
 
     if body.skip_save:
         return _config_set_in_memory(request, body)
+
+    if config_is_read_only():
+        return _config_read_only_response()
 
     lock = FileLock(f"{config_file}.lock", timeout=5)
 
