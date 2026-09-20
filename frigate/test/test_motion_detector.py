@@ -73,6 +73,35 @@ class TestImprovedMotionDetector(unittest.TestCase):
             "Motion boxes should be empty when scene change exceeds skip threshold",
         )
 
+    def _bright_frame(self, offset: int) -> np.ndarray:
+        """Produce a bright frame with a small dark object that moves."""
+        frame = np.full((self.frame_shape[0], self.frame_shape[1]), 200, dtype=np.uint8)
+        x = 10 + (offset * 5) % 60
+        frame[40:60, x : x + 15] = 20
+        return frame
+
+    def test_skip_motion_threshold_recovers_after_skip(self):
+        """Skipped frames must still be blended into the background.
+
+        A bright scene differs from the zeroed background across the whole
+        frame, so the first frames are skipped. The background has to catch up
+        anyway, otherwise motion detection never returns.
+        """
+        self.config.skip_motion_threshold = 0.5
+        self.config.improve_contrast = False
+        self.detector.config = self.config
+        self.detector.update_mask()
+
+        boxes = [len(self.detector.detect(self._bright_frame(i))) for i in range(40)]
+
+        self.assertEqual(boxes[0], 0, "First frame should exceed the skip threshold")
+        self.assertGreater(
+            self.detector.avg_frame.max(),
+            0,
+            "Background was never updated while frames were skipped",
+        )
+        self.assertTrue(any(boxes), "Motion detection never recovered after a skip")
+
     def test_skip_motion_threshold_does_not_affect_calibration(self):
         """Even when skipping, the detector should go into calibrating state."""
         self.config.skip_motion_threshold = 0.4
