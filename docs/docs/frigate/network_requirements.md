@@ -65,11 +65,12 @@ The SDKs for a few hardware detectors are not shipped in the Frigate image. They
 | [Hailo 8 / 8L / 8R](/configuration/object_detectors#hailo) | 4.21.0  | `hailort-debian12-amd64.tar.gz` and `hailort-4.21.0-cp311-cp311-linux_x86_64.whl` on x86, `hailort-debian12-arm64.tar.gz` and `hailort-4.21.0-cp311-cp311-linux_aarch64.whl` on arm64 | [GitHub release](https://github.com/frigate-nvr/hailort/releases/tag/v4.21.0)            |
 | [MemryX MX3](/configuration/object_detectors#memryx-mx3)   | 2.1.0   | `mx_accl_frigate-2.1.0.zip` (the release source archive, renamed)                                                                                                                     | [GitHub archive](https://github.com/memryx/mx_accl_frigate/archive/refs/tags/v2.1.0.zip) |
 | [AXERA AXEngine](/configuration/object_detectors#axera)    | 0.1.3   | `axengine-0.1.3-py3-none-any.whl`                                                                                                                                                     | [GitHub release](https://github.com/AXERA-TECH/pyaxengine/releases/tag/0.1.3-frigate)    |
+| [Axelera Metis](/configuration/object_detectors#axelera-metis) | 1.8.0   | `axelera_runtime-1.8.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl` and `axelera_runtime2-0.2.0-cp311-cp311-manylinux_2_28_x86_64.whl` on x86, `axelera_runtime-1.8.0-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl` and `axelera_runtime2-0.2.0-cp311-cp311-manylinux_2_28_aarch64.whl` on arm64, plus `axelera_firmware-1.8.0-py3-none-any.whl` on both | [Axelera Artifactory PyPI](https://software.axelera.ai/artifactory/#web/ui/redirect/pypi/axelera-pypi/simple) |
 
 If the container cannot reach GitHub, provide the files yourself:
 
 1. Download the files for your architecture on a machine with internet access.
-2. Place them, with exactly the file names listed above, in `/config/model_cache/runtimes/<detector>/`, where `<detector>` is the detector named in your config's `devices` (`hailo`, `memryx`, or `axengine`).
+2. Place them, with exactly the file names listed above, in `/config/model_cache/runtimes/<detector>/`, where `<detector>` is the detector named in your config's `devices` (`hailo`, `memryx`, `axengine`, or `axelera`).
 3. Start Frigate. Files whose checksum matches are installed without any download; a file with the wrong checksum is discarded and downloaded again, so a failed startup log names the file to replace.
 
 The `GITHUB_ENDPOINT` mirror variable below applies to these downloads as well.

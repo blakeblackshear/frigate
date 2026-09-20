@@ -37,6 +37,7 @@ device_globs=(
     "/dev/nvmap"
     "/dev/nvidia*"
     "/dev/memx*"
+    "/dev/metis*"
 )
 
 IFS=',' read -ra extra_globs <<< "${DEVICE_ACL_PATHS:-}"
@@ -95,6 +96,43 @@ if [[ -d /dev/bus/usb ]]; then
         setfacl -d -m "u:frigate:rw,u:go2rtc:rw" "$dir" 2>/dev/null || \
             echo "[WARN] could not set a default ACL on ${dir}; a re-enumerating USB device may lose access"
     done < <(find /dev/bus/usb -type d -print0)
+fi
+
+# Generic device node aliases: some vendor runtimes look for a node under a
+# colon-separated name that host udev rules create as a symlink (the Axelera
+# Metis runtime enumerates /dev/metis-0:1:0). Containers get the raw node
+# only, because docker never copies symlinks and there is no udev here. Set
+# DEVICE_ALIASES to comma separated alias=target pairs to recreate them:
+#   -e DEVICE_ALIASES="/dev/metis-0:1:0=/dev/metis-0-1-0"
+if [[ -n "${DEVICE_ALIASES:-}" ]]; then
+    IFS=',' read -ra alias_pairs <<< "${DEVICE_ALIASES}"
+    for pair in "${alias_pairs[@]}"; do
+        pair="${pair//[[:space:]]/}"
+        if [[ -z "$pair" ]]; then
+            continue
+        fi
+        if [[ "$pair" != *=* ]]; then
+            echo "[ERROR] DEVICE_ALIASES entries must be alias=target pairs, got '${pair}'" >&2
+            exit 1
+        fi
+        alias_node="${pair%%=*}"
+        target_node="${pair#*=}"
+        if [[ "$alias_node" != /dev/* || "$target_node" != /dev/* || "$pair" == *..* ]]; then
+            echo "[ERROR] DEVICE_ALIASES nodes must be under /dev, got '${pair}'" >&2
+            exit 1
+        fi
+        if [[ ! -e "$target_node" ]]; then
+            echo "[WARN] device access: DEVICE_ALIASES target ${target_node} is not present; skipping ${alias_node}"
+            continue
+        fi
+        if [[ ! -e "$alias_node" ]]; then
+            if ln -s "$target_node" "$alias_node"; then
+                echo "[INFO] device access: created alias ${alias_node} -> ${target_node}"
+            else
+                echo "[WARN] device access: could not create alias ${alias_node}" >&2
+            fi
+        fi
+    done
 fi
 
 if [[ "$failed" -gt 0 ]]; then
