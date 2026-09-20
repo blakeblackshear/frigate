@@ -34,6 +34,8 @@ from frigate.util.process import FrigateProcess
 
 logger = logging.getLogger(__name__)
 
+RECORD_GRACE_SECONDS = 90
+
 
 def capture_frames(
     ffmpeg_process: sp.Popen[Any],
@@ -164,6 +166,7 @@ class CameraWatchdog(threading.Thread):
         self.latest_invalid_segment_time: float = 0
         self.latest_cache_segment_time: float = 0
         self.record_enable_time: datetime | None = None
+        self.record_grace_until: datetime | None = None
 
         # `valid` segments are published with the segment's start time, so the
         # gap between consecutive publishes can reach 2 * segment_time. Pad the
@@ -280,6 +283,7 @@ class CameraWatchdog(threading.Thread):
                 self.latest_valid_segment_time = 0
                 self.latest_invalid_segment_time = 0
                 self.latest_cache_segment_time = 0
+                self.record_grace_until = None
                 self.record_enable_time = datetime.now().astimezone(UTC)
                 last_restart_time = datetime.now().timestamp()
                 continue
@@ -294,6 +298,7 @@ class CameraWatchdog(threading.Thread):
                     self.latest_valid_segment_time = 0
                     self.latest_invalid_segment_time = 0
                     self.latest_cache_segment_time = 0
+                    self.record_grace_until = None
                     self.record_enable_time = datetime.now().astimezone(UTC)
                 else:
                     self.logger.debug(f"Disabling camera {self.config.name}")
@@ -318,6 +323,7 @@ class CameraWatchdog(threading.Thread):
                     self.latest_valid_segment_time = 0
                     self.latest_invalid_segment_time = 0
                     self.latest_cache_segment_time = 0
+                    self.record_grace_until = None
                     self.record_enable_time = datetime.now().astimezone(UTC)
                     last_restart_time = datetime.now().timestamp()
                 self.was_record_enabled_in_config = record_enabled_in_config
@@ -404,11 +410,16 @@ class CameraWatchdog(threading.Thread):
                 if self.config.record.enabled and "record" in p["roles"]:
                     now_utc = datetime.now().astimezone(UTC)
 
-                    # Check if we're within the grace period after enabling recording
-                    # Grace period: 90 seconds allows time for ffmpeg to start and create first segment
-                    in_grace_period = self.record_enable_time is not None and (
-                        now_utc - self.record_enable_time
-                    ) < timedelta(seconds=90)
+                    # ffmpeg needs time to create a first segment after
+                    # recording is enabled and after a restart
+                    in_grace_period = (
+                        self.record_enable_time is not None
+                        and (now_utc - self.record_enable_time)
+                        < timedelta(seconds=RECORD_GRACE_SECONDS)
+                    ) or (
+                        self.record_grace_until is not None
+                        and now_utc < self.record_grace_until
+                    )
 
                     latest_cache_dt = (
                         datetime.fromtimestamp(self.latest_cache_segment_time, tz=UTC)
@@ -445,8 +456,9 @@ class CameraWatchdog(threading.Thread):
                         <= self.latest_invalid_segment_time
                     )
                     invalid_stale = invalid_stale_condition
+                    stale = cache_stale or valid_stale or invalid_stale
 
-                    if cache_stale or valid_stale or invalid_stale:
+                    if stale and can_restart:
                         if cache_stale:
                             reason = "No new recording segments were created"
                         elif valid_stale:
@@ -471,8 +483,13 @@ class CameraWatchdog(threading.Thread):
                                 f"{self.config.name}/status/{role.value}", "offline"
                             )
 
+                        self.record_grace_until = now_utc + timedelta(
+                            seconds=RECORD_GRACE_SECONDS
+                        )
+                        last_restart_time = now
+
                         continue
-                    else:
+                    elif not stale:
                         self._send_record_status("online", now)
                         p["latest_segment_time"] = self.latest_cache_segment_time
 
