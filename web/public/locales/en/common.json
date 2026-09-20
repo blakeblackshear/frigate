@@ -131,6 +131,7 @@
     "close": "Close",
     "expand": "Expand",
     "collapse": "Collapse",
+    "clear": "Clear",
     "copy": "Copy",
     "copiedToClipboard": "Copied to clipboard",
     "back": "Back",

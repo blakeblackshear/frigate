@@ -180,12 +180,14 @@
     "storedLayouts": {
       "title": "Stored Layouts",
       "desc": "The layout of cameras in a camera group can be dragged/resized. The positions are stored in your browser's local storage.",
-      "clearAll": "Clear All Layouts"
+      "clearAll": "Clear All Layouts",
+      "clearConfirm": "This will clear the stored layout for every camera group in this browser. This cannot be undone."
     },
     "cameraGroupStreaming": {
       "title": "Camera Group Streaming Settings",
       "desc": "Streaming settings for each camera group are stored in your browser's local storage.",
-      "clearAll": "Clear All Streaming Settings"
+      "clearAll": "Clear All Streaming Settings",
+      "clearConfirm": "This will clear the streaming settings for every camera group in this browser. This cannot be undone."
     },
     "backupRestore": {
       "title": "Backup & Restore",

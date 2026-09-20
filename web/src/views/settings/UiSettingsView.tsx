@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
-import { Button } from "../../components/ui/button";
+import { Button, buttonVariants } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import {
@@ -36,6 +36,17 @@ import {
   CONTROL_COLUMN_CLASS_NAME,
 } from "@/components/card/SettingsGroupCard";
 import Heading from "@/components/ui/heading";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 import ImportUiSettingsDialog from "@/components/overlay/dialog/ImportUiSettingsDialog";
 import {
   applyImportPayload,
@@ -53,6 +64,8 @@ import {
 
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
 const IMPORT_FAILED_FLAG = "frigate-ui-settings-import-failed";
+
+type ClearTarget = "layouts" | "streaming";
 
 type SwitchSettingRowProps = {
   id: string;
@@ -203,6 +216,24 @@ export default function UiSettingsView() {
         );
       });
   }, [config, t, username]);
+
+  const [pendingClear, setPendingClear] = useState<ClearTarget | null>(null);
+
+  const clearConfirmCopy = useCallback(
+    (target: ClearTarget) =>
+      // literal keys per branch: a template key would be invisible to
+      // npm run i18n:extract, which CI verifies
+      target === "layouts"
+        ? {
+            title: t("general.storedLayouts.clearAll"),
+            description: t("general.storedLayouts.clearConfirm"),
+          }
+        : {
+            title: t("general.cameraGroupStreaming.clearAll"),
+            description: t("general.cameraGroupStreaming.clearConfirm"),
+          },
+    [t],
+  );
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImport, setPendingImport] = useState<{
@@ -450,7 +481,7 @@ export default function UiSettingsView() {
                     id="stored-layouts-clear"
                     aria-label={t("general.storedLayouts.clearAll")}
                     className="w-full md:w-auto"
-                    onClick={clearStoredLayouts}
+                    onClick={() => setPendingClear("layouts")}
                   >
                     {t("general.storedLayouts.clearAll")}
                   </Button>
@@ -466,7 +497,7 @@ export default function UiSettingsView() {
                     id="camera-group-streaming-clear"
                     aria-label={t("general.cameraGroupStreaming.clearAll")}
                     className="w-full md:w-auto"
-                    onClick={clearStreamingSettings}
+                    onClick={() => setPendingClear("streaming")}
                   >
                     {t("general.cameraGroupStreaming.clearAll")}
                   </Button>
@@ -604,6 +635,45 @@ export default function UiSettingsView() {
           onConfirm={handleImportConfirm}
         />
       )}
+
+      <AlertDialog
+        open={pendingClear != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingClear(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingClear && clearConfirmCopy(pendingClear).title}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingClear && clearConfirmCopy(pendingClear).description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: "destructive" }))}
+              onClick={() => {
+                if (pendingClear === "layouts") {
+                  clearStoredLayouts();
+                } else {
+                  clearStreamingSettings();
+                }
+
+                setPendingClear(null);
+              }}
+            >
+              {t("button.clear", { ns: "common" })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
