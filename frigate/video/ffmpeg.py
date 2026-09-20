@@ -319,9 +319,6 @@ class CameraWatchdog(threading.Thread):
                     f"Capture thread for {self.config.name} did not exit in time"
                 )
 
-        self.logger.error(
-            "The following ffmpeg logs include the last 100 lines prior to exit."
-        )
         self.logpipe.dump()
         self.logger.info("Restarting ffmpeg...")
         self.start_ffmpeg_detect()
