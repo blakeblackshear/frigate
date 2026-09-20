@@ -543,7 +543,6 @@ class CameraWatchdog(threading.Thread):
                         f"{self.config.name}/status/{role.value}", "offline"
                     )
 
-                p["logpipe"].dump()
                 p["process"] = start_or_restart_ffmpeg(
                     p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
                 )

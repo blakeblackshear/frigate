@@ -49,6 +49,12 @@ def start_or_restart_ffmpeg(
     if ffmpeg_process is not None:
         stop_ffmpeg(ffmpeg_process, logger)
 
+        # flush after the stop so the logs cover ffmpeg's output up to exit
+        logger.error(
+            "The following ffmpeg logs include the last 100 lines prior to exit."
+        )
+        logpipe.dump()
+
     if frame_size is None:
         process = sp.Popen(
             ffmpeg_cmd,
