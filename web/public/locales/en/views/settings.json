@@ -1208,9 +1208,8 @@
       "desc": "Frigate can natively send push notifications to your device when it is running in the browser or installed as a PWA."
     },
     "notificationUnavailable": {
-      "title": "Notifications Unavailable",
-      "desc": "Web push notifications require a secure context (<code>https://…</code>). This is a browser limitation. Access Frigate securely to use notifications.",
-      "descPwa": "On iOS, web push notifications are only available when Frigate is installed to your Home Screen. Open the <strong>Share</strong> menu, choose <strong>Add to Home Screen</strong>, then open Frigate from the new icon to register this device for notifications."
+      "desc": "Web push notifications require a secure context (https://…). This is a browser limitation. Access Frigate securely to use notifications.",
+      "descPwa": "On iOS, web push notifications are only available when Frigate is installed to your Home Screen. Open the Share menu, choose Add to Home Screen, then open Frigate from the new icon to register this device for notifications."
     },
     "globalSettings": {
       "title": "Global Settings",
@@ -1316,7 +1315,6 @@
   "triggers": {
     "documentTitle": "Triggers",
     "semanticSearch": {
-      "title": "Semantic Search is disabled",
       "desc": "Semantic Search must be enabled to use Triggers."
     },
     "management": {

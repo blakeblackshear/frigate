@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 
+from frigate.camera import CameraMetrics
 from frigate.comms.detections_updater import DetectionPublisher, DetectionTypeEnum
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import CameraConfig, CameraInput, FrigateConfig
@@ -36,6 +37,7 @@ from frigate.data_processing.common.audio_transcription.model import (
 from frigate.data_processing.real_time.audio_transcription import (
     AudioTranscriptionRealTimeProcessor,
 )
+from frigate.data_processing.types import DataProcessorMetrics
 from frigate.ffmpeg_presets import parse_preset_input
 from frigate.log import LogPipe, suppress_stderr_during
 from frigate.util.builtin import get_ffmpeg_arg_list, load_labels
@@ -86,6 +88,7 @@ class AudioProcessor(FrigateProcess):
         self,
         config: FrigateConfig,
         camera_metrics: DictProxy,
+        embeddings_metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ):
         super().__init__(
@@ -93,7 +96,37 @@ class AudioProcessor(FrigateProcess):
         )
 
         self.camera_metrics = camera_metrics
+        self.embeddings_metrics = embeddings_metrics
         self.config = config
+
+    def spawn_if_needed(self, camera: CameraConfig) -> None:
+        """Start an audio maintainer for the camera once everything it needs
+        has arrived. Returning early leaves the camera for the next poll."""
+        name = camera.name
+        if name is None or name in self.audio_threads:
+            return
+        if not camera.enabled or not camera.audio.enabled:
+            return
+        # ffmpeg update may not have arrived yet
+        if not any("audio" in i.roles for i in camera.ffmpeg.inputs):
+            return
+        # the camera maintainer creates metrics on its own poll of the same
+        # add update and may not have gotten there yet
+        metrics = self.camera_metrics.get(name)
+        if metrics is None:
+            return
+        thread = AudioEventMaintainer(
+            camera,
+            self.config,
+            metrics,
+            self.embeddings_metrics,
+            self.transcription_model_runner,
+            self.stop_event,  # type: ignore[arg-type]
+            self.genai_manager,
+        )
+        self.audio_threads[name] = thread
+        thread.start()
+        self.logger.info(f"Audio maintainer started for {name}")
 
     def __stop_audio_thread(self, camera: str) -> None:
         thread = self.audio_threads.pop(camera, None)
@@ -150,29 +183,8 @@ class AudioProcessor(FrigateProcess):
             ],
         )
 
-        def spawn_if_needed(camera: CameraConfig) -> None:
-            name = camera.name
-            if name is None or name in self.audio_threads:
-                return
-            if not camera.enabled or not camera.audio.enabled:
-                return
-            # ffmpeg update may not have arrived yet; wait for next poll
-            if not any("audio" in i.roles for i in camera.ffmpeg.inputs):
-                return
-            thread = AudioEventMaintainer(
-                camera,
-                self.config,
-                self.camera_metrics,
-                self.transcription_model_runner,
-                self.stop_event,  # type: ignore[arg-type]
-                self.genai_manager,
-            )
-            self.audio_threads[name] = thread
-            thread.start()
-            self.logger.info(f"Audio maintainer started for {name}")
-
         for camera in self.config.cameras.values():
-            spawn_if_needed(camera)
+            self.spawn_if_needed(camera)
 
         self.logger.info(f"Audio processor started (pid: {self.pid})")
 
@@ -182,15 +194,14 @@ class AudioProcessor(FrigateProcess):
             updated_topics = config_subscriber.check_for_updates()
 
             # stop maintainers for removed cameras so their ffmpeg process is
-            # torn down and they stop touching camera_metrics (which the camera
-            # maintainer has already popped for the removed camera)
+            # torn down
             for removed_camera in updated_topics.get(
                 CameraConfigUpdateEnum.remove.name, []
             ):
                 self.__stop_audio_thread(removed_camera)
 
             for camera in self.config.cameras.values():
-                spawn_if_needed(camera)
+                self.spawn_if_needed(camera)
 
         config_subscriber.stop()
 
@@ -212,7 +223,8 @@ class AudioEventMaintainer(threading.Thread):
         self,
         camera: CameraConfig,
         config: FrigateConfig,
-        camera_metrics: DictProxy,
+        metrics: CameraMetrics,
+        embeddings_metrics: DataProcessorMetrics,
         audio_transcription_model_runner: AudioTranscriptionModelRunner | None,
         stop_event: threading.Event,
         genai_manager: Any = None,
@@ -221,7 +233,11 @@ class AudioEventMaintainer(threading.Thread):
 
         self.config = config
         self.camera_config = camera
-        self.camera_metrics = camera_metrics
+        # hold the metrics object rather than indexing the manager dict per
+        # chunk, which costs an IPC round trip and breaks once the camera
+        # maintainer pops the entry on removal
+        self.metrics = metrics
+        self.embeddings_metrics = embeddings_metrics
         self.stop_event = stop_event
         # per-camera stop signal so a single maintainer can be torn down at
         # runtime (e.g. on camera removal) without stopping the whole process
@@ -265,7 +281,7 @@ class AudioEventMaintainer(threading.Thread):
                 camera_config=self.camera_config,
                 requestor=self.requestor,
                 model_runner=self.audio_transcription_model_runner,
-                metrics=self.camera_metrics[self.camera_config.name],
+                metrics=self.embeddings_metrics,
                 stop_event=self.stop_event,
                 genai_manager=self.genai_manager,
             )
@@ -291,8 +307,8 @@ class AudioEventMaintainer(threading.Thread):
         audio_as_float: np.ndarray = audio.astype(np.float32)
         rms, dBFS = self.calculate_audio_levels(audio_as_float)
 
-        self.camera_metrics[self.camera_config.name].audio_rms.value = rms
-        self.camera_metrics[self.camera_config.name].audio_dBFS.value = dBFS
+        self.metrics.audio_rms.value = rms
+        self.metrics.audio_dBFS.value = dBFS
 
         audio_detections: list[tuple[str, float]] = []
 
@@ -377,7 +393,6 @@ class AudioEventMaintainer(threading.Thread):
                 return
 
             time.sleep(self.camera_config.ffmpeg.retry_interval)
-            self.logpipe.dump()
             self.start_or_restart_ffmpeg()
 
         if self.audio_listener is None or self.audio_listener.stdout is None:
