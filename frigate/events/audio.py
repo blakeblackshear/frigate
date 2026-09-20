@@ -393,7 +393,6 @@ class AudioEventMaintainer(threading.Thread):
                 return
 
             time.sleep(self.camera_config.ffmpeg.retry_interval)
-            self.logpipe.dump()
             self.start_or_restart_ffmpeg()
 
         if self.audio_listener is None or self.audio_listener.stdout is None:
