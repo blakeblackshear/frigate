@@ -483,7 +483,7 @@ class FrigateApp:
 
     def start_audio_processor(self) -> None:
         self.audio_process = AudioProcessor(
-            self.config, self.camera_metrics, self.stop_event
+            self.config, self.camera_metrics, self.embeddings_metrics, self.stop_event
         )
         self.audio_process.start()
         self.processes["audio_detector"] = self.audio_process.pid or 0
@@ -556,10 +556,20 @@ class FrigateApp:
                 "output",
                 lambda: OutputProcess(self.config, self.stop_event),
             ),
+            (
+                "audio_process",
+                "audio_detector",
+                lambda: AudioProcessor(
+                    self.config,
+                    self.camera_metrics,
+                    self.embeddings_metrics,
+                    self.stop_event,
+                ),
+            ),
         ]
 
         for attr, key, factory in specs:
-            if not hasattr(self, attr):
+            if getattr(self, attr, None) is None:
                 continue
 
             def on_restart(
