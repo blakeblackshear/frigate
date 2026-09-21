@@ -60,8 +60,6 @@ export default function BirdseyeLivePlayer({
     <div
       ref={containerRef}
       className={cn(
-        // matches LivePlayer: the card owns the corner and clips everything
-        // inside it, so the stream and the overlays stay concentric with it
         "relative flex w-full cursor-pointer justify-center overflow-hidden rounded-lg md:rounded-2xl",
         className,
       )}

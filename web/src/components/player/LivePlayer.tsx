@@ -54,9 +54,6 @@ type LivePlayerProps = {
   onError?: (error: LivePlayerError) => void;
   onMicrophoneError?: (error: TwoWayTalkError) => void;
   onResetLiveMode?: () => void;
-  // Aspect of the source currently on screen: the live stream's while it is
-  // playing, undefined while the still image is showing. The still comes from
-  // the detect stream, which can be shaped differently than the live one.
   onLiveAspectChange?: (aspectRatio: number | undefined) => void;
 };
 
