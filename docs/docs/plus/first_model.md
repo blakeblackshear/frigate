@@ -64,20 +64,20 @@ Frigate+ models generally have much higher scores than the default model provide
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Objects" />. Under **Object filters**, set **Min Score** and **Threshold** for each object type, then click **Save**.
+Navigate to <NavPath path="Settings > Global configuration > Objects" />. Under **Object filters**, set **Minimum confidence** and **Confidence threshold** for each object type, then click **Save**.
 
-| Object            | Min Score | Threshold |
-| ----------------- | --------- | --------- |
-| **dog**           | .7        | .9        |
-| **cat**           | .65       | .8        |
-| **face**          | .7        |           |
-| **package**       | .65       | .9        |
-| **license_plate** | .6        |           |
-| **amazon**        | .75       |           |
-| **ups**           | .75       |           |
-| **fedex**         | .75       |           |
-| **person**        | .65       | .85       |
-| **car**           | .65       | .85       |
+| Object            | Minimum confidence | Confidence threshold |
+| ----------------- | ------------------ | -------------------- |
+| **dog**           | .7                 | .9                   |
+| **cat**           | .65                | .8                   |
+| **face**          | .7                 |                      |
+| **package**       | .65                | .9                   |
+| **license_plate** | .6                 |                      |
+| **amazon**        | .75                |                      |
+| **ups**           | .75                |                      |
+| **fedex**         | .75                |                      |
+| **person**        | .65                | .85                  |
+| **car**           | .65                | .85                  |
 
 </TabItem>
 <TabItem value="yaml">
