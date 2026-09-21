@@ -66,7 +66,7 @@ Frigate supports multiple different detectors that work on different types of ha
   - Runs best with tiny, small, or medium-size models
 
 - <CommunityBadge /> [DEEPX](#deepx-npu): The DEEPX NPU is available in m.2 format and as a HAT+ for the Raspberry Pi 5, allowing for a wide range of compatibility with devices.
-  - [Supports YOLO and DAMO-YOLO model architectures](../../configuration/object_detectors#deepx-npu)
+  - [Supports YOLO model architectures](../../configuration/object_detectors#deepx-npu)
   - Runs best with tiny or small size models
   - Runs efficiently on low power hardware
 
@@ -268,7 +268,7 @@ Frigate supports the DEEPX NPU in both of its form factors: the **DX-M1** M.2 mo
 
 The DEEPX driver and runtime run on the Docker host rather than inside the Frigate container and must be installed before the NPU can be used. See the [installation docs](installation.md#deepx-npu) for the setup steps and [the detector docs](/configuration/object_detectors#deepx-npu) for the configuration.
 
-Frigate does not bundle a model for this detector. Models use DEEPX's `.dxnn` format, and pre-compiled YOLO and DAMO-YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo). Prefer a model with a `_ppu` suffix whenever one is available for the architecture you want: these run part of the post-processing on the NPU itself and are considerably faster, roughly 2.5x for the same architecture and input size. **YOLOX-S with PPU is the recommended starting point.**
+Frigate does not bundle a model for this detector. Models use DEEPX's `.dxnn` format, and pre-compiled YOLO models can be downloaded from the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo). Prefer a model with a `_ppu` suffix whenever one is available for the architecture you want: these run part of the post-processing on the NPU itself and are considerably faster, roughly 2.5x for the same architecture and input size. **YOLOX-S with PPU is the recommended starting point.**
 
 Inference times for a few recommended models, measured through Frigate's own stats on a DX-M1:
 
@@ -279,13 +279,12 @@ Inference times for a few recommended models, measured through Frigate's own sta
 | YOLOv4 (PPU)      | 512        | ~ 20 ms              |
 | YOLOX-S           | 640        | ~ 34 ms              |
 | YOLOv9-s          | 640        | ~ 39 ms              |
-| DAMO-YOLO-T       | 640        | ~ 47 ms              |
 
-Other ModelZoo variants, including the rest of the DAMO-YOLO family, are also supported but have not been measured. Inference speeds vary with the host platform, so a slower host such as a Raspberry Pi 5 will report higher times than those above.
+Other ModelZoo YOLO variants are also supported but have not been measured. Inference speeds vary with the host platform, so a slower host such as a Raspberry Pi 5 will report higher times than those above.
 
 :::note
 
-A few ModelZoo models can not be used with Frigate: SSD models (they are trained on Pascal VOC, so their labels do not match Frigate's), face and pose models, and the PPU builds of YOLOv7.
+A few ModelZoo models can not be used with Frigate: SSD models (they are trained on Pascal VOC, so their labels do not match Frigate's), DAMO-YOLO models, face and pose models, and the PPU builds of YOLOv7.
 
 :::
 

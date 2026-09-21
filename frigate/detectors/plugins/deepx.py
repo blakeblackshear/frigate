@@ -11,7 +11,7 @@ from typing import Literal
 
 import cv2
 import numpy as np
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
@@ -25,22 +25,17 @@ DETECTOR_KEY = "deepx"
 # Installed at first start; DEEPX's PyPI wheels match the libdxrt-bin build.
 DXRT_VERSION = "3.4.0"
 
-# Where the host dxrtd accepts clients. Its abstract socket is unreachable
-# from a container, and a mounted socket file pins a stale inode after a
-# daemon restart, so the directory is what gets mounted.
+# Where the host dxrtd accepts clients; a container cannot reach its abstract
+# socket, and a mounted socket file pins a stale inode after a daemon restart.
 DXRT_IPC_ENDPOINT_ENV = "DXRT_DYNAMIC_IPC_ENDPOINT"
 DXRT_IPC_SOCKET = "/run/dxrt/dxrt_dynamic_ipc.sock"
 
-# Pre-NMS filter, matching Frigate's shared YOLO decoder; per-object
-# min_score and threshold are applied by Frigate afterwards.
+# Pre-NMS filter; Frigate applies per-object min_score and threshold afterwards.
 SCORE_THRESHOLD = 0.4
 NMS_THRESHOLD = 0.4
 
-SUPPORTED_MODEL_TYPES = (
-    ModelTypeEnum.yologeneric,
-    ModelTypeEnum.yolox,
-    ModelTypeEnum.damoyolo,
-)
+# The device half of a `deepx:...` string, as the hardware probe writes it
+DEVICE_INDEX = re.compile(r"(?:PCIe:)?(\d+)")
 
 # YOLOX's raw head concatenates one cell per position of its three strides
 YOLOX_STRIDES = (8, 16, 32)
@@ -54,10 +49,9 @@ PPU_GRID_BYTES = (16, 20)
 PPU_SCORE_BYTES = (20, 24)
 PPU_LABEL_BYTES = (24, 28)
 
-# Anchor sizes are not in the PPU record or the .dxnn, so an anchor-based
-# head is read against the table for its scale count: DEEPX's own reference
-# decoder's tables, shared by every three- or two-scale model it ships
-# except YOLOv7, whose anchors differ.
+# Anchor sizes are in neither the PPU record nor the .dxnn, so a head is read
+# against the table for its scale count: DEEPX's own reference decoder's, which
+# every model it ships shares except YOLOv7.
 PPU_ANCHORS_BY_SCALES = {
     2: np.array(
         [
@@ -80,22 +74,16 @@ PPU_ANCHORS_BY_SCALES = {
 # DXNN_HEADER_SIZE; every offset in the index counts from there.
 DXNN_MAGIC = b"DXNN"
 DXNN_HEADER_SIZE = 8192
-# The compiled graph DX-COM keeps for visualisation, an ONNX ModelProto in
-# plain protobuf beside the encrypted NPU model. Only its node list is read,
-# to see how the tensor the PPU takes as boxes was built.
+# The graph DX-COM keeps for visualisation, an ONNX ModelProto beside the
+# encrypted model; only its nodes are read, for how the box tensor was built.
 DXNN_GRAPH_SECTION = "vis_npu_models"
-# ModelProto.graph, GraphProto.node, then NodeProto's input, output, name
-# and op_type, as onnx.proto numbers them.
+# Field numbers from onnx.proto
 ONNX_GRAPH_FIELD = 7
 ONNX_NODE_FIELD = 1
 ONNX_NODE_FIELDS = {1: "input", 2: "output", 3: "name", 4: "op_type"}
-# A YOLO head splits the DFL output into the two distances a box is built
-# from, so a walk back from the box tensor stops at the split.
+# A YOLO head splits the DFL output into the two distances a box is built from
 PPU_DISTANCE_OPS = ("Split", "Slice")
-# Depth and breadth caps, so a graph that is not the expected shape is
-# answered with None rather than walked forever.
 ONNX_WALK_LIMIT = 16
-# compile_config's ppu.type for the heads decoded as bounding boxes
 PPU_TYPE_ANCHOR_BASED = 0
 PPU_TYPE_ANCHOR_FREE = 1
 # The PPU tensor table, ppu_info_header_t then one ppu_info_t per output
@@ -103,10 +91,8 @@ PPU_TYPE_ANCHOR_FREE = 1
 PPU_TABLE_HEADER = struct.Struct("<BBBB")
 PPU_TABLE_ENTRY = struct.Struct("<HHfBBBBBBBB")
 
-# A nms-in-head output is (N, 6) rows of x_min, y_min, x_max, y_max, score,
-# class, with N decided per frame and capped in the head (300 for the
-# ModelZoo exports). A raw head has thousands of rows, which is what tells
-# the two apart when a 1 or 2 class model also has 6 columns.
+# (N, 6) rows of corner box, score and class; the row count is what tells this
+# from a raw head when a 1 or 2 class model also has 6 columns.
 NMS_IN_HEAD_COLUMNS = 6
 NMS_IN_HEAD_MAX_ROWS = 1000
 
@@ -148,47 +134,23 @@ DEEPX_MANIFEST = RuntimeManifest(
 
 
 def resolve_device(configured: str) -> int:
-    """Resolve the NPU index from the device half of a `deepx:...` string:
-    empty, a bare index, or `PCIe:<index>` as the hardware probe writes it.
-    """
+    """Resolve the NPU index from the device half of a `deepx:...` string: empty, a
+    bare index, or `PCIe:<index>` as the hardware probe writes it."""
     if not configured:
         return 0
 
-    index = configured.rsplit(":", 1)[-1]
+    # the whole string has to match: reading only the tail would take the 1 out
+    # of "PCIe:0,PCIe:1" and silently bind to an NPU the config never named
+    index = DEVICE_INDEX.fullmatch(configured.strip())
 
-    try:
-        return int(index)
-    except ValueError:
+    if index is None:
         raise ValueError(
-            f'"{configured}" is not an NPU index; expected a number or "PCIe:<number>"'
-        ) from None
+            f'"{configured}" is not an NPU index; expected a number or '
+            '"PCIe:<number>". Run several NPUs by listing each one as its own '
+            "devices entry, not by joining them into one string."
+        )
 
-
-def _split_box_and_class_outputs(
-    outputs: list[np.ndarray],
-) -> tuple[np.ndarray, np.ndarray] | None:
-    """Split a 2-tensor raw output into (box tensor, class tensor) by shape:
-    the (1, N, 4) tensor is the boxes, None when ambiguous as with 4 classes."""
-    if len(outputs) != 2:
-        return None
-
-    def is_box_shaped(t: np.ndarray) -> bool:
-        return t.ndim == 3 and t.shape[-1] == 4
-
-    first, second = outputs[0], outputs[1]
-    first_is_box, second_is_box = is_box_shaped(first), is_box_shaped(second)
-
-    if first_is_box and not second_is_box:
-        return first, second
-    if second_is_box and not first_is_box:
-        return second, first
-
-    return None
-
-
-def _shapes(outputs: list[np.ndarray]) -> list[tuple[int, ...]]:
-    """Output shapes, for diagnosing a decode path that can't read them."""
-    return [np.shape(output) for output in outputs]
+    return int(index.group(1))
 
 
 def fill_detections(
@@ -270,8 +232,7 @@ class YoloOutput:
 
 
 def class_count(labelmap: dict[int, str]) -> int:
-    """Highest label id plus one, which bounds the classes even when ids
-    are sparse."""
+    """Highest label id plus one, which bounds the classes even when ids are sparse."""
     if not labelmap:
         raise ValueError("the label map is empty; set labelmap_path")
 
@@ -279,7 +240,6 @@ def class_count(labelmap: dict[int, str]) -> int:
 
 
 def _significant_dims(shape: tuple[int, ...]) -> list[int]:
-    """Drop the batch and any other size-1 axis, leaving rows x columns."""
     return [int(d) for d in shape if d != 1]
 
 
@@ -289,9 +249,7 @@ def infer_yolo_layout(
     ppu: bool,
     dynamic_output: bool,
 ) -> YoloOutput:
-    """Pick the decoder from the output shapes the runtime reports. The
-    label map's class count tells a 4+C anchor-free head from a 5+C
-    anchor-based one; raises ValueError when no layout fits."""
+    """Pick the decoder from the output shapes the runtime reports."""
     if ppu:
         return YoloOutput(YoloLayout.ppu)
 
@@ -307,7 +265,6 @@ def infer_yolo_layout(
     dims = _significant_dims(shapes[0])
 
     if len(dims) == 1:
-        # a single row keeps only its column count
         dims = [1, dims[0]]
 
     if len(dims) != 2:
@@ -339,13 +296,13 @@ def infer_yolo_layout(
 
     width = widths.pop()
     rows = next(d for d in dims if d != width) if dims[0] != dims[1] else dims[0]
-    layouts = [layout for _, layout in hits]
+    # a square output matches the same width on both axes, which is one layout
+    layouts = {layout for _, layout in hits}
 
     if len(layouts) == 1:
-        return YoloOutput(layouts[0], width)
+        return YoloOutput(next(iter(layouts)), width)
 
-    # 6 columns is both NMS-in-head and a 1 or 2 class raw head; a raw head
-    # has thousands of candidate rows, a head with NMS has a few hundred
+    # 6 columns is both NMS-in-head and a 1 or 2 class raw head
     raw = next(layout for layout in layouts if layout is not YoloLayout.nms_in_head)
     if rows > NMS_IN_HEAD_MAX_ROWS:
         return YoloOutput(raw, width)
@@ -354,7 +311,6 @@ def infer_yolo_layout(
 
 
 def _infer_multipart(shapes: list[tuple[int, ...]], num_classes: int) -> YoloOutput:
-    """Accept only what the shared multipart decoder reads."""
     reason = None
 
     if num_classes != MULTIPART_CLASSES:
@@ -368,35 +324,11 @@ def _infer_multipart(shapes: list[tuple[int, ...]], num_classes: int) -> YoloOut
         raise ValueError(
             f"output shapes {[tuple(shape) for shape in shapes]} are not the "
             f"per-scale feature maps of an anchor-based YOLO head ({reason}). "
-            "If this is a DAMO-YOLO model set model_type to damo-yolo; "
-            "otherwise export the model with its detection head included."
+            "A two-tensor output is a DAMO-YOLO head, which this detector does "
+            "not decode; otherwise export the model with its head included."
         )
 
     return YoloOutput(YoloLayout.multipart)
-
-
-def validate_damoyolo_outputs(shapes: list[tuple[int, ...]], num_classes: int) -> None:
-    """Fail unless the model emits DAMO-YOLO's (1, N, num_classes) scores
-    and (1, N, 4) boxes."""
-    dims = [_significant_dims(shape) for shape in shapes]
-    box_like = [d for d in dims if len(d) == 2 and d[1] == 4]
-    class_like = [d for d in dims if len(d) == 2 and d[1] == num_classes]
-
-    if (
-        len(shapes) == 2
-        and len(box_like) == 1
-        and len(class_like) == 1
-        and box_like[0][0] == class_like[0][0]
-    ):
-        return
-
-    raise ValueError(
-        f"output shapes {[tuple(shape) for shape in shapes]} are not DAMO-YOLO's "
-        f"(1, N, {num_classes}) scores and (1, N, 4) boxes. Check that "
-        "labelmap_path matches the model, usually /labelmap/coco-80.txt, and "
-        "that model_type matches the compiled model; a YOLO model needs "
-        "model_type yolo-generic."
-    )
 
 
 def validate_yolox_outputs(
@@ -455,10 +387,8 @@ def ppu_records(outputs: list[np.ndarray]) -> np.ndarray | None:
 
 @dataclass(frozen=True)
 class PpuLayout:
-    """The PPU head's kind (None if unnamed), each scale's grid, finest
-    first, and whether its boxes are a centre and size, as the compiled
-    model states them. `centre_boxes` is None wherever the question does
-    not arise, which is every head but a single-scale anchor-free one."""
+    """The PPU head's kind (None if unnamed), each scale's grid, finest first, and
+    whether its boxes are a centre and size, as the compiled model states them."""
 
     anchor_based: bool | None
     grids: tuple[tuple[int, int], ...]
@@ -474,8 +404,8 @@ class PpuLayout:
 
 
 def read_ppu_layout(path: str) -> PpuLayout | None:
-    """Read the PPU head layout the compiler wrote into a .dxnn, or None
-    when there is none to read; only the index and metadata are read."""
+    """Read the PPU head layout the compiler wrote into a .dxnn, or None when there
+    is none to read."""
     try:
         with open(path, "rb") as model:
             header = model.read(DXNN_HEADER_SIZE)
@@ -530,8 +460,6 @@ def read_ppu_layout(path: str) -> PpuLayout | None:
                             for entry in (data.get(DXNN_GRAPH_SECTION) or {}).values():
                                 nodes += _onnx_nodes(section(entry))
                         except (OSError, ValueError, IndexError, KeyError, TypeError):
-                            # an unreadable graph leaves the format unsettled,
-                            # which the loader refuses with its own reason
                             nodes = []
 
                         centre_boxes = ppu_boxes_are_centres(nodes, bbox_node)
@@ -552,8 +480,6 @@ def read_ppu_layout(path: str) -> PpuLayout | None:
 
 
 def _ppu_grids_from_table(table: bytes) -> dict[int, tuple[int, int]]:
-    """Grid per scale index from the PPU table: field 3 is the scale,
-    fields 8 and 9 its grid, shared by every anchor of that scale."""
     _, tensor_count, _, _ = PPU_TABLE_HEADER.unpack_from(table)
     if len(table) < PPU_TABLE_HEADER.size + tensor_count * PPU_TABLE_ENTRY.size:
         raise ValueError("PPU table shorter than its tensor count")
@@ -569,8 +495,6 @@ def _ppu_grids_from_table(table: bytes) -> dict[int, tuple[int, int]]:
 
 
 def _ppu_output_scale(name: str, ppu: dict | None) -> int | None:
-    """Which scale a PPU output tensor belongs to, from ppu.outputs by
-    name or else the name's own PPU_..._Output_<scale>[_anchor_<n>] form."""
     entry = ((ppu or {}).get("outputs") or {}).get(name)
     if isinstance(entry, dict) and "conv_idx" in entry:
         return int(entry["conv_idx"])
@@ -582,7 +506,6 @@ def _ppu_output_scale(name: str, ppu: dict | None) -> int | None:
 def _ppu_grids_from_outputs(
     outputs: list[dict], ppu: dict | None
 ) -> dict[int, tuple[int, int]]:
-    """Grid per scale index from rmap_info's output tensor shapes."""
     grids: dict[int, tuple[int, int]] = {}
     for output in outputs:
         scale = _ppu_output_scale(str(output.get("name", "")), ppu)
@@ -597,8 +520,6 @@ def _ppu_grids_from_outputs(
 
 
 def _ppu_outputs_are_anchor_based(outputs: list[dict], ppu: dict | None) -> bool | None:
-    """Anchor-based when the PPU outputs are split per anchor; None when
-    nothing says either way."""
     mapping = (ppu or {}).get("outputs") or {}
     if any(
         isinstance(entry, dict) and "anchor_idx" in entry for entry in mapping.values()
@@ -612,8 +533,6 @@ def _ppu_outputs_are_anchor_based(outputs: list[dict], ppu: dict | None) -> bool
 
 
 def _ppu_bbox_node(ppu: dict | None) -> str | None:
-    """The graph node whose output the PPU reads as boxes, which
-    compile_config names per scale for an anchor-free head."""
     layers = (ppu or {}).get("layer")
     if not isinstance(layers, list) or len(layers) != 1:
         return None
@@ -623,7 +542,6 @@ def _ppu_bbox_node(ppu: dict | None) -> str | None:
 
 
 def _proto_varint(blob: bytes, at: int) -> tuple[int, int]:
-    """One protobuf varint and the offset just past it."""
     value = shift = 0
     while True:
         byte = blob[at]
@@ -636,8 +554,6 @@ def _proto_varint(blob: bytes, at: int) -> tuple[int, int]:
 
 
 def _proto_fields(blob: bytes):
-    """Field number and payload of every length-delimited protobuf record
-    in `blob`; records of the other wire types are skipped over."""
     at = 0
     while at < len(blob):
         key, at = _proto_varint(blob, at)
@@ -657,8 +573,6 @@ def _proto_fields(blob: bytes):
 
 
 def _onnx_nodes(blob: bytes) -> list[dict]:
-    """Every node of an ONNX ModelProto's graph, as its op_type, name and
-    the tensor names it reads and writes. Weights are not read."""
     nodes = []
     for field, graph in _proto_fields(blob):
         if field != ONNX_GRAPH_FIELD:
@@ -686,8 +600,6 @@ def _onnx_nodes(blob: bytes) -> list[dict]:
 
 
 def _upstream_concat(node: dict | None, producers: dict) -> dict | None:
-    """The concatenation that assembles the tensor `node` writes, nearest
-    first; None when the box tensor was not built by one."""
     seen: set[str] = set()
     queue = [node] if node else []
     while queue and len(seen) <= ONNX_WALK_LIMIT:
@@ -708,8 +620,6 @@ def _upstream_concat(node: dict | None, producers: dict) -> dict | None:
 
 
 def _box_tensor_sources(producers: dict, tensor: str) -> set[str]:
-    """The tensors this one was built from, stopping at the DFL distances
-    and at anything the graph does not produce, such as a constant."""
     sources: set[str] = set()
     seen: set[str] = set()
     pending = [(tensor, 0)]
@@ -811,8 +721,7 @@ def ppu_anchor_geometry(
     levels, per_level = anchor_table.shape[:2]
     known = (layer_idx < levels) & (box_idx < per_level)
 
-    # index the table with the out-of-range rows folded onto a real entry,
-    # then let the mask drop them rather than raising here
+    # fold the out-of-range rows onto a real entry and let the mask drop them
     layer = np.where(known, layer_idx, 0)
     anchors = anchor_table[layer, np.where(known, box_idx, 0)]
     stride = strides[layer]
@@ -838,10 +747,7 @@ def decode_ppu(
     records: np.ndarray | None = None,
 ) -> np.ndarray:
     """Decode PPU records, leaving only NMS. `strides` is one per scale,
-    finest first, as the model file's grids give them; `centre_boxes` says
-    how a single-scale anchor-free head writes its boxes, which the model
-    file settles at load; `records` reuses an already-parsed buffer
-    instead of re-parsing `outputs`."""
+    finest first."""
     if records is None:
         records = ppu_records(outputs)
 
@@ -859,24 +765,21 @@ def decode_ppu(
         )
         # a record the table cannot place is dropped by the score filter
         scores = np.where(known, scores, 0.0)
+        x_min, y_min = centre_x - box_w * 0.5, centre_y - box_h * 0.5
     elif len(strides) > 1:
         # a multi-scale anchor-free head is YOLOX-style, grid-relative
         centre_x, centre_y, box_w, box_h, known = ppu_grid_regression_geometry(
             records, boxes, strides
         )
         scores = np.where(known, scores, 0.0)
+        x_min, y_min = centre_x - box_w * 0.5, centre_y - box_h * 0.5
+    elif centre_boxes:
+        box_w, box_h = boxes[:, 2], boxes[:, 3]
+        x_min, y_min = boxes[:, 0] - box_w * 0.5, boxes[:, 1] - box_h * 0.5
     else:
-        if centre_boxes:
-            centre_x, centre_y = boxes[:, 0], boxes[:, 1]
-            box_w, box_h = boxes[:, 2], boxes[:, 3]
-        else:
-            box_w = boxes[:, 2] - boxes[:, 0]
-            box_h = boxes[:, 3] - boxes[:, 1]
-            centre_x = boxes[:, 0] + box_w * 0.5
-            centre_y = boxes[:, 1] + box_h * 0.5
-
-    x_min = centre_x - box_w * 0.5
-    y_min = centre_y - box_h * 0.5
+        # the head wrote two corners, so its edges are the answer already
+        x_min, y_min = boxes[:, 0], boxes[:, 1]
+        box_w, box_h = boxes[:, 2] - x_min, boxes[:, 3] - y_min
 
     order = run_nms(x_min, y_min, box_w, box_h, scores, score_threshold, nms_threshold)
 
@@ -901,9 +804,8 @@ def decode_raw_anchor(
     nms_threshold: float,
     columns: int | None = None,
 ) -> np.ndarray:
-    """Decode an anchor-based head: (N, 5+C) rows of cx, cy, w, h,
-    objectness and class scores in pixels, transposed when `columns` says
-    so. Confidence is objectness times the best class score."""
+    """Decode an anchor-based head: (N, 5+C) rows of cx, cy, w, h, objectness and
+    class scores in pixels, transposed when `columns` says so."""
     tensor = outputs[0]
 
     if tensor.ndim < 2 or tensor.size == 0:
@@ -967,71 +869,6 @@ def decode_raw_nms_in_head(
     )
 
 
-def decode_damoyolo_raw(
-    outputs: list[np.ndarray],
-    width: int,
-    height: int,
-    score_threshold: float,
-    nms_threshold: float,
-) -> np.ndarray | None:
-    """Decode DAMO-YOLO's output: DX-COM folds the DFL box head into the
-    model, so it emits (1, N, num_classes) sigmoid class scores and (1, N, 4)
-    boxes as x_min, y_min, x_max, y_max in input pixels, in either order.
-    Anchor-free with no objectness column, leaving the score filter and NMS.
-
-    Returns None when the outputs are not that pair at all, which is a
-    mismatch between the model and the config rather than an empty frame, and
-    stays wrong for every frame after it. A frame that simply held nothing
-    over the threshold comes back as the empty detection array.
-    """
-    split = _split_box_and_class_outputs(outputs)
-
-    if split is None:
-        logger.debug(
-            "Could not identify DAMO-YOLO box/class outputs in %d tensor(s) with "
-            "shapes %s",
-            len(outputs),
-            _shapes(outputs),
-        )
-        return None
-
-    box_output, cls_scores = split
-
-    if cls_scores.ndim != 3 or cls_scores.shape[0] == 0 or cls_scores.shape[1] == 0:
-        logger.debug("Unexpected DAMO-YOLO class output shape %s", cls_scores.shape)
-        return None
-
-    cls_scores = cls_scores[0]
-    boxes = box_output[0]
-    num_priors = cls_scores.shape[0]
-
-    if boxes.shape[0] != num_priors:
-        logger.debug(
-            "DAMO-YOLO box count %d does not match class count %d",
-            boxes.shape[0],
-            num_priors,
-        )
-        return None
-
-    x_min, y_min, x_max, y_max = boxes[:, 0], boxes[:, 1], boxes[:, 2], boxes[:, 3]
-    labels = np.argmax(cls_scores, axis=1)
-    scores = cls_scores[np.arange(num_priors), labels]
-
-    order = run_nms(
-        x_min,
-        y_min,
-        x_max - x_min,
-        y_max - y_min,
-        scores,
-        score_threshold,
-        nms_threshold,
-    )
-
-    return fill_detections(
-        x_min, y_min, x_max, y_max, scores, labels, width, height, order
-    )
-
-
 class DeepxDetectorConfig(BaseDetectorConfig):
     """DEEPX NPU detector running .dxnn models via the DX-RT runtime."""
 
@@ -1052,30 +889,26 @@ class DeepxDetectorConfig(BaseDetectorConfig):
         resolve_device(value)
         return value
 
-    @model_validator(mode="after")
-    def validate_model_type_is_supported(self):
-        """Reject a model type with no decoder here (Frigate defaults it to
-        ssd). The model is None while a bare device string is validated."""
-        if self.model is None:
-            return self
-
-        if self.model.model_type not in SUPPORTED_MODEL_TYPES:
-            supported = ", ".join(t.value for t in SUPPORTED_MODEL_TYPES)
-            raise ValueError(
-                f"model_type '{self.model.model_type.value}' is not supported "
-                f"by the DEEPX detector. Set model.model_type to one of: {supported}."
-            )
-
-        return self
-
 
 class DeepxDetector(DetectionApi):
     """DEEPX NPU detector: DX-RT session plus the decoder the model needs."""
 
     type_key = DETECTOR_KEY
     runtime_manifest = DEEPX_MANIFEST
+    supported_models = [ModelTypeEnum.yologeneric, ModelTypeEnum.yolox]
 
     def __init__(self, config: DeepxDetectorConfig):
+        # before the runtime is installed or the socket is looked for: this
+        # needs no hardware, and ssd, the default, would otherwise be decoded
+        # as YOLO and return nonsense rather than an error
+        if config.model.model_type not in self.supported_models:
+            supported = ", ".join(t.value for t in self.supported_models)
+            raise ValueError(
+                f"model_type '{config.model.model_type.value}' is not supported "
+                f"by the DEEPX detector. Set model.model_type to one of: "
+                f"{supported}."
+            )
+
         self.activate_dependencies()
 
         # skip DX-RT's abstract-socket attempt, which cannot leave the container
@@ -1084,8 +917,7 @@ class DeepxDetector(DetectionApi):
         endpoint = os.environ[DXRT_IPC_ENDPOINT_ENV]
 
         if not endpoint.startswith("@") and not os.path.exists(endpoint):
-            # DX-RT reports this as a bare connect error several layers down,
-            # so name the missing socket while there is still context for it
+            # DX-RT reports this as a bare connect error several layers down
             logger.warning(
                 "No dxrtd socket at %s. Rerun the DEEPX installation script on "
                 "the host so dxrt.service listens there, mount /run/dxrt into "
@@ -1103,9 +935,8 @@ class DeepxDetector(DetectionApi):
                 "startup log for errors."
             ) from None
 
-        # DX-RT checks for dxrtd by scanning /proc, which cannot see the host
-        # daemon from a container. SERVICE only gates that scan; the IPC
-        # client still uses the socket and fails loudly if dxrtd is down.
+        # SERVICE gates only DX-RT's /proc scan for dxrtd, which a container
+        # cannot do for the host; the IPC client still needs the socket
         Configuration().set_enable(Configuration.ITEM.SERVICE, False)
 
         super().__init__(config)
@@ -1129,20 +960,21 @@ class DeepxDetector(DetectionApi):
 
         self.session = InferenceEngine(str(model_path), options)
         self.output = self.inspect_model(config)
-        if self.output is not None and self.output.layout is YoloLayout.yolox:
-            # the shared YOLOX decoder's cell grids and strides for this input
+        if self.output.layout is YoloLayout.yolox:
             self.calculate_grids_strides()
         self.logged_layout = False
         self.ppu_unsupported_scale_reported = False
-        self.damoyolo_outputs_reported = False
 
         self.ppu_layout: PpuLayout | None = None
-        if self.output is not None and self.output.layout is YoloLayout.ppu:
+        self.ppu_strides: np.ndarray | None = None
+        if self.output.layout is YoloLayout.ppu:
             self.ppu_layout = self.inspect_ppu_head(model_path)
+            self.ppu_strides = np.asarray(
+                self.ppu_layout.strides(self.width), np.float32
+            )
 
     def inspect_ppu_head(self, model_path: str) -> PpuLayout:
-        """Read the PPU head layout DX-COM writes into the model file; the
-        head kind, anchor table and strides all come from it."""
+        """Read the PPU head layout DX-COM writes into the model file."""
         layout = read_ppu_layout(model_path)
 
         if layout is None:
@@ -1165,8 +997,7 @@ class DeepxDetector(DetectionApi):
             and layout.scale_count == 1
             and layout.centre_boxes is None
         ):
-            # the two readings of a box field are both plausible geometry, so
-            # a frame cannot settle this; only the compiled graph can
+            # both readings are plausible geometry, so only the graph can settle it
             raise ValueError(
                 f"Could not tell from {model_path} whether its PPU head writes "
                 "boxes as a centre and size or as two corners. The compiled "
@@ -1190,24 +1021,15 @@ class DeepxDetector(DetectionApi):
         )
         return layout
 
-    def inspect_model(self, config: DeepxDetectorConfig) -> YoloOutput | None:
-        """Pick the decoder from what the runtime reports, failing here
-        rather than on the first frame."""
+    def inspect_model(self, config: DeepxDetectorConfig) -> YoloOutput:
+        """Pick the decoder from what the runtime reports, failing here rather than
+        on the first frame."""
         shapes = [
             tuple(info["shape"]) for info in self.session.get_output_tensors_info()
         ]
 
         try:
             num_classes = class_count(config.model.merged_labelmap)
-
-            if self.model_type == ModelTypeEnum.damoyolo:
-                if self.session.is_ppu():
-                    raise ValueError(
-                        "DAMO-YOLO models compiled with PPU support are not supported"
-                    )
-
-                validate_damoyolo_outputs(shapes, num_classes)
-                return None
 
             if self.model_type == ModelTypeEnum.yolox and not self.session.is_ppu():
                 # a YOLOX compiled with PPU support is read as PPU below
@@ -1237,9 +1059,6 @@ class DeepxDetector(DetectionApi):
 
     def decode(self, outputs: list[np.ndarray]) -> np.ndarray:
         """Decode the model output according to its type and detected layout."""
-        if self.model_type == ModelTypeEnum.damoyolo:
-            return self.decode_damoyolo(outputs)
-
         match self.output.layout:
             case YoloLayout.ppu:
                 return self.decode_ppu(outputs)
@@ -1255,8 +1074,6 @@ class DeepxDetector(DetectionApi):
                     self.output.columns,
                 )
             case YoloLayout.anchor_free:
-                # the shared decoder reads (N, 4+C) with the same thresholds;
-                # hand it rows so its own orientation guess is never needed
                 rows = rows_with_columns(outputs[0], self.output.columns)
                 return post_process_yolo([rows], self.width, self.height)
             case YoloLayout.nms_in_head:
@@ -1264,12 +1081,10 @@ class DeepxDetector(DetectionApi):
                     outputs, self.width, self.height, SCORE_THRESHOLD
                 )
             case _:
-                # per-scale feature maps, same thresholds as above
                 return post_process_yolo(outputs, self.width, self.height)
 
     def decode_yolox(self, outputs: list[np.ndarray]) -> np.ndarray:
-        """Decode YOLOX's raw head with Frigate's shared decoder; it writes
-        into its input, so a float copy is oriented as (1, N, 5+C) first."""
+        """Decode YOLOX's raw head with Frigate's shared decoder."""
         rows = rows_with_columns(outputs[0], self.output.columns)
         predictions = np.array(rows, dtype=np.float32).reshape(1, -1, rows.shape[-1])
 
@@ -1304,35 +1119,11 @@ class DeepxDetector(DetectionApi):
             self.height,
             SCORE_THRESHOLD,
             NMS_THRESHOLD,
-            strides=layout.strides(self.width),
+            strides=self.ppu_strides,
             anchor_based=bool(layout.anchor_based),
             centre_boxes=bool(layout.centre_boxes),
             records=records,
         )
-
-    def decode_damoyolo(self, outputs: list[np.ndarray]) -> np.ndarray:
-        """Decode DAMO-YOLO output, reporting once if a frame lacks the
-        expected tensor pair."""
-        detections = decode_damoyolo_raw(
-            outputs, self.width, self.height, SCORE_THRESHOLD, NMS_THRESHOLD
-        )
-
-        if detections is None:
-            if not self.damoyolo_outputs_reported:
-                self.damoyolo_outputs_reported = True
-                logger.error(
-                    "This model does not emit the pair of tensors the DAMO-YOLO "
-                    "decoder reads, one (1, N, 4) of boxes and one (1, N, "
-                    "num_classes) of scores, but %d tensor(s) with shapes %s. "
-                    "Check that model_type matches the compiled model; a YOLO "
-                    "model needs model_type yolo-generic",
-                    len(outputs),
-                    _shapes(outputs),
-                )
-
-            return np.zeros((20, 6), np.float32)
-
-        return detections
 
     def detect_raw(self, tensor_input):
         """Run inference and decode the model output."""

@@ -12,10 +12,13 @@ import numpy as np
 from pydantic import ValidationError
 
 from frigate.detectors.detector_config import ModelConfig, ModelTypeEnum
+from frigate.detectors.device import (
+    DeviceParseError,
+    build_detector_config,
+    parse_device,
+)
 from frigate.detectors.plugins.deepx import (
     DEEPX_MANIFEST,
-    DXRT_IPC_ENDPOINT_ENV,
-    DXRT_IPC_SOCKET,
     DXRT_VERSION,
     PPU_RECORD_SIZE,
     DeepxDetector,
@@ -23,30 +26,26 @@ from frigate.detectors.plugins.deepx import (
     PpuLayout,
     YoloLayout,
     class_count,
-    decode_damoyolo_raw,
-    decode_ppu,
     decode_raw_anchor,
     decode_raw_nms_in_head,
     infer_yolo_layout,
     read_ppu_layout,
     resolve_device,
-    rows_with_columns,
-    validate_damoyolo_outputs,
     validate_yolox_outputs,
 )
-from frigate.util.runtime_deps import ArtifactKind
 
 
 def model_with_type(model_type) -> ModelConfig:
-    """The root model block a device is validated against. model_type lives
-    here rather than on the detector, so every check that keys off it has to
-    be exercised through a model. The label map is left unset so the test does
-    not depend on the image's /labelmap.txt."""
-    return ModelConfig(model_type=model_type, labelmap_path=None)
+    return ModelConfig(
+        model_type=model_type,
+        labelmap_path=None,
+        labelmap={79: "toothbrush"},
+        width=640,
+        height=640,
+    )
 
 
 def build_ppu_record(box, score=0.9, label=0, grid=(7, 9, 2, 2)) -> np.ndarray:
-    """One fixed-width record as the PPU emits it, in a (1, 1, 32) output."""
     record = np.zeros(PPU_RECORD_SIZE, dtype=np.uint8)
     record[0:16] = np.array(box, dtype=np.float32).view(np.uint8)
     record[16:20] = grid
@@ -55,24 +54,19 @@ def build_ppu_record(box, score=0.9, label=0, grid=(7, 9, 2, 2)) -> np.ndarray:
     return record.reshape(1, 1, PPU_RECORD_SIZE)
 
 
-def build_ppu_records(*records: np.ndarray) -> np.ndarray:
-    """Several single records, as build_ppu_record makes them, stacked into
-    one (1, N, 32) output."""
-    return np.concatenate(records, axis=1)
-
-
-def strides_for(scales: int) -> tuple[int, ...]:
-    """The 32 >> k stride ladder of a `scales`-scale head, finest first."""
-    return tuple(32 >> (scales - 1 - i) for i in range(scales))
-
-
-# compile_config.ppu as DX-COM writes it for the two head kinds; the layer
-# names inside are irrelevant to the reader, only the type is
+# compile_config.ppu as DX-COM writes it for the two head kinds
 ANCHOR_BASED_PPU = {"type": 0, "num_classes": 80, "activation": "Sigmoid"}
 ANCHOR_FREE_PPU = {"type": 1, "num_classes": 80}
 
-# the node compile_config names as the tensor the PPU reads as boxes
 PPU_BBOX_NODE = "/head/Mul_2"
+
+# (grid_w, grid_h, entries) per scale, finest first; the grids give the
+# strides at a 640 input
+THREE_SCALE_ANCHORS = [(80, 80, 3), (40, 40, 3), (20, 20, 3)]
+TWO_SCALE_ANCHORS = [(40, 40, 3), (20, 20, 3)]
+FOUR_SCALE_ANCHORS = [(160, 160, 3), (80, 80, 3), (40, 40, 3), (20, 20, 3)]
+THREE_SCALE_FREE = [(80, 80, 1), (40, 40, 1), (20, 20, 1)]
+ONE_SCALE_FREE = [(100, 84, 1)]
 
 
 def proto_varint(value: int) -> bytes:
@@ -86,30 +80,21 @@ def proto_varint(value: int) -> bytes:
 
 
 def proto_bytes(field: int, payload: bytes) -> bytes:
-    """One length-delimited protobuf record."""
     return proto_varint(field << 3 | 2) + proto_varint(len(payload)) + payload
 
 
 def proto_number(field: int, value: int) -> bytes:
-    """One varint record, the wire type the reader has to step over."""
     return proto_varint(field << 3) + proto_varint(value)
 
 
 def onnx_node(op_type: str, name: str, inputs: list, outputs: list) -> bytes:
-    """A NodeProto: input, output, name and op_type, fields 1 to 4."""
     body = b"".join(proto_bytes(1, tensor.encode()) for tensor in inputs)
     body += b"".join(proto_bytes(2, tensor.encode()) for tensor in outputs)
     return body + proto_bytes(3, name.encode()) + proto_bytes(4, op_type.encode())
 
 
 def onnx_box_graph(box_format: str) -> bytes:
-    """The compiled graph DX-COM leaves in the file, cut down to the nodes
-    that build the box tensor: the DFL split, its two distances turned into
-    corners, and for a centre-and-size head their mean and difference. The
-    ModelProto is wrapped in the fields a real one carries around its
-    graph, which the reader has to step over."""
     if box_format == "broken":
-        # a record whose wire type means nothing, as a damaged section reads
         return proto_varint(1 << 3 | 3)
 
     unnamed = box_format == "unnamed"
@@ -132,20 +117,14 @@ def onnx_box_graph(box_format: str) -> bytes:
     elif box_format == "corner":
         nodes.append(graph_node("Concat", "box_concat", ["x1y1", "x2y2"], ["box"]))
     else:
-        # a head that builds its boxes from one distance alone, which is
-        # neither shape and must not be read as either
         nodes.append(graph_node("Concat", "box_concat", ["x1y1", "x1y1"], ["box"]))
 
     box = "box"
     if unnamed:
-        # a reshape between the concat and the node the PPU reads, so the
-        # walk has to step past one unnamed node to reach another
         box = "box_flat"
         nodes.append(graph_node("Reshape", "box_reshape", ["shape", "box"], [box]))
 
-    # compile_config names this one, so it carries a name either way
     nodes.append(onnx_node("Mul", PPU_BBOX_NODE, [box, "strides"], ["bbox_out"]))
-    # graph inputs and initializers sit beside the nodes and are not read
     graph = b"".join(proto_bytes(1, node) for node in nodes)
     graph += proto_bytes(5, b"weights")
     return (
@@ -248,632 +227,321 @@ def write_dxnn(
     return path
 
 
-class TestDeepxPpuLayoutFile(unittest.TestCase):
-    """The PPU head's kind and scale count are written into the .dxnn by
-    DX-COM, so they are read from there rather than guessed from records."""
+def layout_of(shapes, num_classes, ppu=False, dynamic_output=False) -> YoloLayout:
+    return infer_yolo_layout(shapes, num_classes, ppu, dynamic_output).layout
 
+
+class TestDeepxModelFile(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
 
-    def test_reads_the_head_kind_and_one_grid_per_scale(self):
-        # anchor-based: three anchors per scale collapse to one grid each
-        path = write_dxnn(
-            self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3), (20, 20, 3)]
-        )
-        self.assertEqual(
-            read_ppu_layout(path),
-            PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
-        )
+    def layout(self, ppu, layers, **kwargs) -> PpuLayout | None:
+        return read_ppu_layout(write_dxnn(self.tmp.name, ppu, layers, **kwargs))
 
-        # anchor-free with every scale flattened into one tensor
-        path = write_dxnn(
-            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
-        )
-        self.assertEqual(
-            read_ppu_layout(path),
-            PpuLayout(anchor_based=False, grids=((100, 84),), centre_boxes=True),
-        )
+    def test_the_head_kind_and_one_grid_per_scale_are_read(self):
+        cases = {
+            "anchor-based: three anchors per scale collapse to one grid each": (
+                (ANCHOR_BASED_PPU, THREE_SCALE_ANCHORS, {}),
+                PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
+            ),
+            "anchor-free, one scale flattened into a single tensor": (
+                (ANCHOR_FREE_PPU, ONE_SCALE_FREE, {"box_format": "centre"}),
+                PpuLayout(anchor_based=False, grids=((100, 84),), centre_boxes=True),
+            ),
+            "a head kind the compiler does not name still yields the scales": (
+                ({"type": 7}, [(80, 80, 3), (40, 40, 3)], {}),
+                PpuLayout(anchor_based=None, grids=((80, 80), (40, 40))),
+            ),
+            "no table: the per-anchor split says anchor-based": (
+                ({"num_classes": 80}, THREE_SCALE_ANCHORS, {"table": False}),
+                PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
+            ),
+            "no table: compile_config places the scales ahead of the names": (
+                (
+                    {
+                        "type": 1,
+                        "outputs": {
+                            f"PPU_Transpose_Output_{i}": {"conv_idx": 2 - i}
+                            for i in range(3)
+                        },
+                    },
+                    [(20, 20, 1), (40, 40, 1), (80, 80, 1)],
+                    {"table": False},
+                ),
+                PpuLayout(anchor_based=False, grids=((80, 80), (40, 40), (20, 20))),
+            ),
+            "no table: every scale in one (1, cells, channels) tensor": (
+                (ANCHOR_FREE_PPU, [(8400, 1, 1)], {"table": False}),
+                PpuLayout(anchor_based=False, grids=((8400, 1),)),
+            ),
+        }
 
-        # a head kind the compiler does not name leaves the kind open but
-        # still yields the scales
-        path = write_dxnn(self.tmp.name, {"type": 7}, [(80, 80, 3), (40, 40, 3)])
-        self.assertEqual(
-            read_ppu_layout(path),
-            PpuLayout(anchor_based=None, grids=((80, 80), (40, 40))),
-        )
+        for head, ((ppu, layers, kwargs), expected) in cases.items():
+            with self.subTest(head=head):
+                self.assertEqual(self.layout(ppu, layers, **kwargs), expected)
 
-    def test_a_file_without_the_ppu_table_reads_its_output_tensors_instead(self):
-        """A v7-era compile lists its PPU output tensors in rmap_info but
-        has no PPU table; their shapes hold the grids and their names the
-        scale, and a per-anchor split says anchor-based when compile_config
-        names no kind."""
-        path = write_dxnn(
-            self.tmp.name,
-            {"num_classes": 80},
-            [(80, 80, 3), (40, 40, 3), (20, 20, 3)],
-            table=False,
-        )
-        self.assertEqual(
-            read_ppu_layout(path),
-            PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
-        )
-
-        # compile_config's own output map places the scales ahead of the names
-        outputs = {f"PPU_Transpose_Output_{i}": {"conv_idx": 2 - i} for i in range(3)}
-        path = write_dxnn(
-            self.tmp.name,
-            {"type": 1, "outputs": outputs},
-            [(20, 20, 1), (40, 40, 1), (80, 80, 1)],
-            table=False,
-        )
-        self.assertEqual(
-            read_ppu_layout(path),
-            PpuLayout(anchor_based=False, grids=((80, 80), (40, 40), (20, 20))),
-        )
-
-        # every scale flattened into one (1, cells, channels) tensor
-        path = write_dxnn(self.tmp.name, ANCHOR_FREE_PPU, [(8400, 1, 1)], table=False)
-        self.assertEqual(
-            read_ppu_layout(path), PpuLayout(anchor_based=False, grids=((8400, 1),))
-        )
-
-    def test_a_single_scale_head_reads_its_box_format_from_the_graph(self):
-        """Two heads can leave the same metadata and still write their boxes
-        differently, so the format comes from how the compiled graph built
-        the box tensor: one distance per half is corners, both distances in
-        both halves is a centre and size."""
-        for box_format, centre in (("centre", True), ("corner", False)):
+    def test_the_box_format_comes_from_the_compiled_graph(self):
+        for box_format, centre in (
+            ("centre", True),
+            ("corner", False),
+            ("unnamed", True),
+        ):
             with self.subTest(box_format=box_format):
-                path = write_dxnn(
-                    self.tmp.name,
-                    ANCHOR_FREE_PPU,
-                    [(100, 84, 1)],
-                    box_format=box_format,
-                )
                 self.assertEqual(
-                    read_ppu_layout(path),
+                    self.layout(ANCHOR_FREE_PPU, ONE_SCALE_FREE, box_format=box_format),
                     PpuLayout(
-                        anchor_based=False,
-                        grids=((100, 84),),
-                        centre_boxes=centre,
+                        anchor_based=False, grids=((100, 84),), centre_boxes=centre
                     ),
                 )
 
-    def test_a_graph_whose_nodes_are_unnamed_still_gives_its_box_format(self):
-        """A node's name is optional in ONNX, so an exporter can leave every
-        one of them empty and the model still runs. The walk back to the
-        concat has to tell those nodes apart by the tensors they write, or a
-        head Frigate can decode would be refused at load."""
-        path = write_dxnn(
-            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="unnamed"
-        )
-        self.assertEqual(
-            read_ppu_layout(path),
-            PpuLayout(anchor_based=False, grids=((100, 84),), centre_boxes=True),
-        )
-
     def test_a_box_format_the_graph_does_not_answer_is_left_open(self):
-        """Nothing is guessed from the head: a file with no compiled graph,
-        and one whose graph does not build its boxes the way a YOLO head
-        does, both leave the format unsettled for the loader to refuse."""
-        path = write_dxnn(self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)])
-        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+        cases = {
+            "no compiled graph at all": (ANCHOR_FREE_PPU, ONE_SCALE_FREE, {}),
+            "a graph without the node compile_config names": (
+                dict(ANCHOR_FREE_PPU, layer=[{"bbox": "/head/Missing"}]),
+                ONE_SCALE_FREE,
+                {"box_format": "centre"},
+            ),
+            "a graph that builds its boxes from neither shape": (
+                ANCHOR_FREE_PPU,
+                ONE_SCALE_FREE,
+                {"box_format": "neither"},
+            ),
+            "a graph section the reader cannot make sense of": (
+                ANCHOR_FREE_PPU,
+                ONE_SCALE_FREE,
+                {"box_format": "broken"},
+            ),
+            "a grid-decoded head, where the question does not arise": (
+                ANCHOR_FREE_PPU,
+                THREE_SCALE_FREE,
+                {"box_format": "centre"},
+            ),
+        }
 
-        # a graph that does not hold the node compile_config names
-        path = write_dxnn(
-            self.tmp.name,
-            dict(ANCHOR_FREE_PPU, layer=[{"bbox": "/head/Missing"}]),
-            [(100, 84, 1)],
-            box_format="centre",
-        )
-        self.assertIsNone(read_ppu_layout(path).centre_boxes)
-
-        # a graph that builds its boxes from neither shape
-        path = write_dxnn(
-            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="neither"
-        )
-        self.assertIsNone(read_ppu_layout(path).centre_boxes)
-
-        # a graph section the reader cannot make sense of
-        path = write_dxnn(
-            self.tmp.name, ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="broken"
-        )
-        self.assertIsNone(read_ppu_layout(path).centre_boxes)
-
-        # the question does not arise for the heads that are grid-decoded
-        path = write_dxnn(
-            self.tmp.name,
-            ANCHOR_FREE_PPU,
-            [(80, 80, 1), (40, 40, 1), (20, 20, 1)],
-            box_format="centre",
-        )
-        self.assertIsNone(read_ppu_layout(path).centre_boxes)
+        for graph, (ppu, layers, kwargs) in cases.items():
+            with self.subTest(graph=graph):
+                self.assertIsNone(self.layout(ppu, layers, **kwargs).centre_boxes)
 
     def test_nothing_is_read_from_a_model_without_ppu_metadata(self):
         self.assertIsNone(read_ppu_layout(os.path.join(self.tmp.name, "missing")))
 
-        # a non-PPU compile
         path = write_dxnn(self.tmp.name, None, [(80, 80, 3)])
         self.assertIsNone(read_ppu_layout(path))
 
-        # not a .dxnn at all
         with open(path, "wb") as model:
             model.write(b"ONNX" + b"\0" * 100)
         self.assertIsNone(read_ppu_layout(path))
 
-        # a table cut short of the entries it announces
         path = write_dxnn(self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3)])
         os.truncate(path, os.path.getsize(path) - 40)
         self.assertIsNone(read_ppu_layout(path))
 
 
-class TestDeepxPpuDecode(unittest.TestCase):
-    def test_reads_anchor_free_box_bytes_as_pixel_geometry(self):
-        """The grid columns carry no meaning for a single-scale anchor-free
-        head and must not influence the result."""
-        detections = decode_ppu(
-            [build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3)],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(1),
-            anchor_based=False,
-            centre_boxes=True,
-        )
-
-        self.assertEqual(detections[0][0], 3)
-        self.assertAlmostEqual(detections[0][1], 0.9, places=5)
-        # x: 320 +/- 32 -> 288..352, y: 160 +/- 16 -> 144..176
-        self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
-        self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
-        self.assertAlmostEqual(detections[0][4], 176 / 640, places=5)
-        self.assertAlmostEqual(detections[0][5], 352 / 640, places=5)
-
-    def test_reads_anchor_based_box_bytes_through_the_grid_and_anchors(self):
-        """An anchor-based head leaves ratios in the box fields, which the
-        grid columns and the anchor table turn back into pixels."""
-        detections = decode_ppu(
-            [build_ppu_record((0.6, 0.4, 0.3, 0.7), label=5)],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(3),
-            anchor_based=True,
-        )
-
-        # layer 2 is stride 32 and box 2 is the 373x326 anchor, so the centre
-        # is (9.7, 7.3) cells out and the box is 134.28 x 638.96
-        self.assertEqual(detections[0][0], 5)
-        self.assertAlmostEqual(detections[0][2], 0.0, places=5)
-        self.assertAlmostEqual(detections[0][3], 0.380094, places=5)
-        self.assertAlmostEqual(detections[0][4], 0.864187, places=5)
-        self.assertAlmostEqual(detections[0][5], 0.589906, places=5)
-
-    def test_reads_anchor_free_grid_regression_bytes_through_the_grid_and_stride(
-        self,
-    ):
-        """YOLOX's classic anchor-free head leaves its box regression
-        relative to the grid cell it was predicted at, unlike a single-scale
-        head, which the PPU decodes to pixels outright; the scale count
-        tells the two apart."""
-        detections = decode_ppu(
-            [build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7)],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(3),
-            anchor_based=False,
-        )
-
-        # layer 2 of 3 is stride 32: centre (10+1.2, 9+0.5)*32 = (358.4, 304),
-        # size exp(1.0)*32 x exp(0.5)*32 = 86.985 x 52.759
-        self.assertEqual(detections[0][0], 7)
-        self.assertAlmostEqual(detections[0][1], 0.9, places=5)
-        self.assertAlmostEqual(detections[0][2], 0.433782, places=5)
-        self.assertAlmostEqual(detections[0][3], 0.492043, places=5)
-        self.assertAlmostEqual(detections[0][4], 0.516218, places=5)
-        self.assertAlmostEqual(detections[0][5], 0.627957, places=5)
-
-    def test_a_single_scale_anchor_free_head_reads_pixel_geometry(self):
-        """Whatever a single-scale head leaves in the grid and layer fields,
-        its box fields are pixels."""
-        detections = decode_ppu(
-            [build_ppu_record((320.0, 160.0, 64.0, 32.0), grid=(7, 9, 0, 1))],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(1),
-            anchor_based=False,
-            centre_boxes=True,
-        )
-
-        self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
-        self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
-
-    def test_drops_records_the_anchor_table_cannot_place(self):
-        """A record naming a level or box the table does not carry is left
-        out rather than decoded against the wrong anchor."""
-        detections = decode_ppu(
-            [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 2, 5))],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(3),
-            anchor_based=True,
-        )
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_a_two_scale_head_reads_the_tiny_anchor_table_and_stride(self):
-        """A head with only two scales numbers its layers 0
-        and 1, but layer 0 is stride 16 there, not stride 8 as it would be
-        in a three-scale head; scale_count picks the matching table."""
-        detections = decode_ppu(
-            [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(2),
-            anchor_based=True,
-        )
-
-        # layer 0 of 2 is stride 16 and box 1 is the 23x27 anchor, so the
-        # centre is (9.7, 7.3) cells out and the box is 8.28 x 52.92
-        self.assertAlmostEqual(detections[0][2], 0.141156, places=5)
-        self.assertAlmostEqual(detections[0][3], 0.236031, places=5)
-        self.assertAlmostEqual(detections[0][4], 0.223844, places=5)
-        self.assertAlmostEqual(detections[0][5], 0.248969, places=5)
-
-    def test_anchor_based_records_with_an_unsupported_scale_count_are_dropped(self):
-        """A scale_count with no anchor table must drop the records rather
-        than guess against the wrong table."""
-        detections = decode_ppu(
-            [build_ppu_record((0.6, 0.4, 0.3, 0.7))],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(4),
-            anchor_based=True,
-        )
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_the_same_record_decodes_by_the_box_format_it_is_told(self):
-        """A decode-in-head PPU record holds either a centre and size or,
-        for a corner-format head, the two corners in the same four fields.
-        The same four floats are valid geometry read either way, so only
-        the format the model file settled decides between them."""
-        record = [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)]
-
-        corners = decode_ppu(
-            record, 640, 640, 0.25, 0.45, strides=strides_for(1), anchor_based=False
-        )
-        self.assertEqual(corners[0][0], 2)
-        self.assertAlmostEqual(corners[0][2], 50 / 640, places=5)
-        self.assertAlmostEqual(corners[0][3], 100 / 640, places=5)
-        self.assertAlmostEqual(corners[0][4], 250 / 640, places=5)
-        self.assertAlmostEqual(corners[0][5], 300 / 640, places=5)
-
-        centres = decode_ppu(
-            record,
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(1),
-            anchor_based=False,
-            centre_boxes=True,
-        )
-        # centre (100, 50), size 300 x 250, clipped at the frame edge
-        self.assertEqual(centres[0][0], 2)
-        self.assertAlmostEqual(centres[0][2], 0.0, places=5)
-        self.assertAlmostEqual(centres[0][3], 0.0, places=5)
-        self.assertAlmostEqual(centres[0][4], 175 / 640, places=5)
-        self.assertAlmostEqual(centres[0][5], 250 / 640, places=5)
-
-    def test_drops_records_below_the_score_threshold(self):
-        detections = decode_ppu(
-            [build_ppu_record((320.0, 160.0, 64.0, 32.0), score=0.1)],
-            640,
-            640,
-            0.25,
-            0.45,
-            strides=strides_for(1),
-            anchor_based=False,
-        )
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_returns_empty_detections_for_no_records(self):
-        # a frame with no surviving candidate comes back with an empty
-        # leading axis, as seen on hardware
-        for shape in ((1, 0, PPU_RECORD_SIZE), (0, PPU_RECORD_SIZE), (0,)):
-            with self.subTest(shape=shape):
-                out = np.zeros(shape, dtype=np.uint8)
-
-                self.assertTrue(
-                    np.all(
-                        decode_ppu(
-                            [out],
-                            640,
-                            640,
-                            0.25,
-                            0.45,
-                            strides=strides_for(1),
-                            anchor_based=False,
-                        )
-                        == 0
-                    )
-                )
-
-    def test_returns_empty_detections_for_an_unexpected_record_width(self):
-        out = np.zeros((1, 3, 16), dtype=np.uint8)
-
-        self.assertTrue(
-            np.all(
-                decode_ppu(
-                    [out],
-                    640,
-                    640,
-                    0.25,
-                    0.45,
-                    strides=strides_for(1),
-                    anchor_based=False,
-                )
-                == 0
-            )
-        )
-
-
-def layout_of(shapes, num_classes, ppu=False, dynamic_output=False) -> YoloLayout:
-    return infer_yolo_layout(shapes, num_classes, ppu, dynamic_output).layout
-
-
 class TestDeepxLayoutInference(unittest.TestCase):
-    """The output layout is read off the model rather than configured, so
-    every head DX-COM can compile has to be told apart from the others."""
+    def test_a_shape_and_class_count_pick_one_layout(self):
+        cases = {
+            "anchor-free, four columns ahead of the classes": (
+                [(1, 84, 8400)],
+                80,
+                YoloLayout.anchor_free,
+                84,
+            ),
+            "anchor-free, row-major": ([(1, 8400, 84)], 80, YoloLayout.anchor_free, 84),
+            "anchor-based, an objectness column as well": (
+                [(1, 25200, 85)],
+                80,
+                YoloLayout.anchor,
+                85,
+            ),
+            "anchor-based, channel-major": (
+                [(1, 85, 25200)],
+                80,
+                YoloLayout.anchor,
+                85,
+            ),
+            "NMS in the head, a fixed run of corner records": (
+                [(1, 300, 6)],
+                80,
+                YoloLayout.nms_in_head,
+                None,
+            ),
+            # only the label map can tell these two apart
+            "85 columns with 81 classes is anchor-free": (
+                [(1, 8400, 85)],
+                81,
+                YoloLayout.anchor_free,
+                85,
+            ),
+            "85 columns with 80 classes is anchor-based": (
+                [(1, 8400, 85)],
+                80,
+                YoloLayout.anchor,
+                85,
+            ),
+            # 6 columns is all three layouts, told apart by the row count
+            "6 columns and thousands of rows, one class": (
+                [(1, 25200, 6)],
+                1,
+                YoloLayout.anchor,
+                6,
+            ),
+            "6 columns and thousands of rows, two classes": (
+                [(1, 8400, 6)],
+                2,
+                YoloLayout.anchor_free,
+                6,
+            ),
+            "6 columns and a few hundred rows, one class": (
+                [(1, 300, 6)],
+                1,
+                YoloLayout.nms_in_head,
+                None,
+            ),
+            "7 columns with two classes is only anchor-based": (
+                [(1, 8400, 7)],
+                2,
+                YoloLayout.anchor,
+                7,
+            ),
+            # a square output matches the same width on both axes, which must
+            # not read as two candidate layouts
+            "a square output is not ambiguous with itself": (
+                [(1, 85, 85)],
+                80,
+                YoloLayout.anchor,
+                85,
+            ),
+            "three NCHW maps with 255 channels are feature maps": (
+                [(1, 255, 80, 80), (1, 255, 40, 40), (1, 255, 20, 20)],
+                80,
+                YoloLayout.multipart,
+                None,
+            ),
+        }
 
-    def test_ppu_wins_over_every_shape(self):
+        for head, (shapes, num_classes, layout, columns) in cases.items():
+            with self.subTest(head=head):
+                output = infer_yolo_layout(shapes, num_classes, False, False)
+
+                self.assertIs(output.layout, layout)
+                if columns is not None:
+                    self.assertEqual(output.columns, columns)
+
+    def test_the_runtime_flags_outrank_the_shapes(self):
         self.assertIs(layout_of([(8400,)], 80, ppu=True), YoloLayout.ppu)
-
-    def test_an_anchor_free_head_has_four_columns_ahead_of_the_classes(self):
-        for shape in ((1, 84, 8400), (1, 8400, 84)):
-            with self.subTest(shape=shape):
-                output = infer_yolo_layout([shape], 80, False, False)
-
-                self.assertIs(output.layout, YoloLayout.anchor_free)
-                self.assertEqual(output.columns, 84)
-
-    def test_an_anchor_based_head_has_an_objectness_column(self):
-        for shape in ((1, 25200, 85), (1, 85, 25200)):
-            with self.subTest(shape=shape):
-                output = infer_yolo_layout([shape], 80, False, False)
-
-                self.assertIs(output.layout, YoloLayout.anchor)
-                self.assertEqual(output.columns, 85)
-
-    def test_a_six_column_or_dynamic_output_ran_nms_in_the_head(self):
-        self.assertIs(layout_of([(1, 300, 6)], 80), YoloLayout.nms_in_head)
         self.assertIs(
             layout_of([(1, -1, 6)], 80, dynamic_output=True), YoloLayout.nms_in_head
         )
 
-    def test_the_label_map_settles_anchor_against_anchor_free(self):
-        # 85 columns is anchor-free with 81 classes and anchor-based with 80;
-        # only the label map can tell
-        shape = [(1, 8400, 85)]
-        self.assertIs(layout_of(shape, 81), YoloLayout.anchor_free)
-        self.assertIs(layout_of(shape, 80), YoloLayout.anchor)
+    def test_a_shape_no_layout_fits_is_refused_with_the_reason(self):
+        cases = {
+            "fits two layouts": ([(1, 84, 6)], 80),
+            "labelmap_path": ([(1, 8400, 84)], 91),
+            "no output tensor": ([], 80),
+            "255 channels": (
+                [(1, 80, 80, 255), (1, 40, 40, 255), (1, 20, 20, 255)],
+                80,
+            ),
+            "feature maps": ([(1, 8400, 80), (1, 8400, 4)], 80),
+            "80-class": ([(1, 24, 80, 80), (1, 24, 40, 40), (1, 24, 20, 20)], 3),
+        }
 
-    def test_six_columns_on_a_small_model_is_told_apart_by_row_count(self):
-        """One class puts an anchor-based head at 6 columns and two classes
-        put an anchor-free one there, both the width of an nms-in-head
-        output. A raw head has thousands of rows, NMS in the head a few
-        hundred."""
-        self.assertIs(layout_of([(1, 25200, 6)], 1), YoloLayout.anchor)
-        self.assertIs(layout_of([(1, 8400, 6)], 2), YoloLayout.anchor_free)
-        self.assertIs(layout_of([(1, 300, 6)], 1), YoloLayout.nms_in_head)
-        self.assertIs(layout_of([(1, 300, 6)], 2), YoloLayout.nms_in_head)
-
-    def test_a_shape_matching_two_layouts_on_different_axes_is_refused(self):
-        # 84 rows by 6 columns fits anchor-free transposed and nms-in-head
-        with self.assertRaisesRegex(ValueError, "fits two layouts"):
-            layout_of([(1, 84, 6)], 80)
-
-    def test_a_small_label_map_still_reads_an_unambiguous_shape(self):
-        # 2 classes: 7 columns is only anchor-based
-        self.assertIs(layout_of([(1, 8400, 7)], 2), YoloLayout.anchor)
-
-    def test_a_mismatched_label_map_is_reported(self):
-        # the image's default 91-class label map against an 80-class model
-        with self.assertRaisesRegex(ValueError, "labelmap_path"):
-            layout_of([(1, 8400, 84)], 91)
-
-    def test_a_missing_output_is_reported(self):
-        with self.assertRaisesRegex(ValueError, "no output tensor"):
-            layout_of([], 80)
+        for reason, (shapes, num_classes) in cases.items():
+            with (
+                self.subTest(reason=reason),
+                self.assertRaisesRegex(ValueError, reason),
+            ):
+                layout_of(shapes, num_classes)
 
 
-class TestDeepxMultipartInference(unittest.TestCase):
-    """The shared multipart decoder reads one exact layout, so anything else
-    with several outputs has to fail at load rather than on the first frame."""
+class TestDeepxOutputValidation(unittest.TestCase):
+    def test_the_raw_yolox_head_is_read_for_the_configured_input(self):
+        for shapes, size in (
+            ([(1, 8400, 85)], 640),
+            ([(1, 85, 8400)], 640),
+            # 52*52 + 26*26 + 13*13 cells at 416
+            ([(1, 3549, 85)], 416),
+        ):
+            with self.subTest(shapes=shapes, size=size):
+                self.assertEqual(validate_yolox_outputs(shapes, 80, size, size), 85)
 
-    def test_three_nchw_maps_with_255_channels_are_feature_maps(self):
-        shapes = [(1, 255, 80, 80), (1, 255, 40, 40), (1, 255, 20, 20)]
+    def test_another_head_under_yolox_is_refused_with_the_reason(self):
+        cases = {
+            "width and height": ([(1, 8400, 85)], 80, 416),
+            "labelmap_path": ([(1, 8400, 85)], 91, 640),
+            "yolo-generic": ([(1, 8400, 80), (1, 8400, 4)], 80, 640),
+        }
 
-        self.assertIs(layout_of(shapes, 80), YoloLayout.multipart)
+        for reason, (shapes, num_classes, size) in cases.items():
+            with (
+                self.subTest(reason=reason),
+                self.assertRaisesRegex(ValueError, reason),
+            ):
+                validate_yolox_outputs(shapes, num_classes, size, size)
 
-    def test_nhwc_maps_are_refused(self):
-        shapes = [(1, 80, 80, 255), (1, 40, 40, 255), (1, 20, 20, 255)]
-
-        with self.assertRaisesRegex(ValueError, "255 channels"):
-            layout_of(shapes, 80)
-
-    def test_a_damoyolo_pair_under_yolo_generic_is_pointed_at_damo_yolo(self):
-        with self.assertRaisesRegex(ValueError, "damo-yolo"):
-            layout_of([(1, 8400, 80), (1, 8400, 4)], 80)
-
-    def test_a_non_coco_class_count_is_refused(self):
-        shapes = [(1, 24, 80, 80), (1, 24, 40, 40), (1, 24, 20, 20)]
-
-        with self.assertRaisesRegex(ValueError, "80-class"):
-            layout_of(shapes, 3)
-
-
-class TestDeepxDamoyoloValidation(unittest.TestCase):
-    def test_the_modelzoo_pair_passes_in_either_order(self):
-        validate_damoyolo_outputs([(1, 8400, 80), (1, 8400, 4)], 80)
-        validate_damoyolo_outputs([(1, 8400, 4), (1, 8400, 80)], 80)
-
-    def test_a_wrong_class_count_names_the_label_map(self):
-        with self.assertRaisesRegex(ValueError, "labelmap_path"):
-            validate_damoyolo_outputs([(1, 8400, 80), (1, 8400, 4)], 91)
-
-    def test_a_single_yolo_tensor_names_yolo_generic(self):
-        with self.assertRaisesRegex(ValueError, "yolo-generic"):
-            validate_damoyolo_outputs([(1, 84, 8400)], 80)
-
-    def test_mismatched_row_counts_are_refused(self):
-        with self.assertRaises(ValueError):
-            validate_damoyolo_outputs([(1, 8400, 80), (1, 8000, 4)], 80)
-
-
-class TestDeepxYoloxValidation(unittest.TestCase):
-    """model_type yolox takes the raw YOLOX head: one (1, N, 5+C) tensor with
-    N the cells of strides 8, 16 and 32 for the configured input."""
-
-    def test_the_raw_head_passes_in_either_orientation(self):
-        self.assertEqual(validate_yolox_outputs([(1, 8400, 85)], 80, 640, 640), 85)
-        self.assertEqual(validate_yolox_outputs([(1, 85, 8400)], 80, 640, 640), 85)
-        # 52*52 + 26*26 + 13*13 cells at 416
-        self.assertEqual(validate_yolox_outputs([(1, 3549, 85)], 80, 416, 416), 85)
-
-    def test_the_wrong_input_size_or_label_map_is_named(self):
-        with self.assertRaisesRegex(ValueError, "width and height"):
-            validate_yolox_outputs([(1, 8400, 85)], 80, 416, 416)
-
-        with self.assertRaisesRegex(ValueError, "labelmap_path"):
-            validate_yolox_outputs([(1, 8400, 85)], 91, 640, 640)
-
-    def test_another_head_names_yolo_generic(self):
-        with self.assertRaisesRegex(ValueError, "yolo-generic"):
-            validate_yolox_outputs([(1, 8400, 80), (1, 8400, 4)], 80, 640, 640)
-
-
-class TestDeepxClassCount(unittest.TestCase):
-    def test_the_highest_id_bounds_the_count(self):
+    def test_the_label_map_bounds_the_class_count(self):
         self.assertEqual(class_count({0: "person", 79: "toothbrush"}), 80)
 
-    def test_an_empty_label_map_is_reported(self):
         with self.assertRaisesRegex(ValueError, "labelmap_path"):
             class_count({})
 
 
-class TestDeepxRowOrientation(unittest.TestCase):
-    def test_a_channel_major_tensor_is_transposed_by_its_column_count(self):
-        tensor = np.arange(2 * 85).reshape(1, 85, 2).astype(np.float32)
-
-        rows = rows_with_columns(tensor, 85)
-
-        self.assertEqual(rows.shape, (2, 85))
-        np.testing.assert_array_equal(rows[1], tensor[0, :, 1])
-
-    def test_a_row_major_tensor_is_left_alone(self):
-        tensor = np.zeros((1, 300, 6), np.float32)
-
-        self.assertEqual(rows_with_columns(tensor, 6).shape, (300, 6))
-
-    def test_an_empty_dynamic_output_keeps_its_columns(self):
-        self.assertEqual(rows_with_columns(np.zeros((1, 0, 6)), 6).shape, (0, 6))
-
-
-class TestDeepxRawAnchorDecode(unittest.TestCase):
-    def test_a_channel_major_export_is_read_by_column_count(self):
-        """A (1, 85, N) export decodes the same as (1, N, 85) once the
-        decoder is told the row width, instead of reading N-wide rows."""
-        rows = np.zeros((2, 85), np.float32)
-        rows[0, :5] = [320.0, 160.0, 64.0, 32.0, 1.0]
-        rows[0, 5 + 3] = 0.9
-        detections = decode_raw_anchor(
-            [rows.T[np.newaxis]], 640, 640, 0.25, 0.45, columns=85
-        )
-
-        self.assertEqual(detections[0][0], 3)
-        self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
-
-    def test_at_most_twenty_detections_are_returned(self):
-        # 25 well separated confident boxes, all of which survive NMS
-        rows = np.zeros((25, 85), np.float32)
-        for i in range(25):
-            rows[i, :5] = [20.0 + 24 * i, 320.0, 16.0, 16.0, 1.0]
-            rows[i, 5 + (i % 80)] = 0.9
-
-        detections = decode_raw_anchor([rows[np.newaxis]], 640, 640, 0.25, 0.45)
-
-        self.assertEqual(detections.shape, (20, 6))
-        self.assertEqual(int((detections[:, 1] > 0).sum()), 20)
-
-    def build_raw_anchor_output(self, rows):
-        """Build an (1, N, 5+C) tensor with 80 classes."""
+class TestDeepxRawDecode(unittest.TestCase):
+    def anchor_rows(self, rows) -> list:
         out = np.zeros((1, len(rows), 85), dtype=np.float32)
 
-        for i, (cx, cy, w, h, obj, label, cls_score) in enumerate(rows):
+        for i, (cx, cy, w, h, obj, label, score) in enumerate(rows):
             out[0, i, 0:4] = [cx, cy, w, h]
             out[0, i, 4] = obj
-            out[0, i, 5 + label] = cls_score
+            out[0, i, 5 + label] = score
 
         return [out]
 
-    def test_confidence_is_objectness_times_class_score(self):
-        outputs = self.build_raw_anchor_output(
-            [(320.0, 320.0, 40.0, 80.0, 0.8, 3, 0.5)]
-        )
+    def test_an_anchor_based_head_becomes_normalized_corners(self):
+        outputs = self.anchor_rows([(320.0, 160.0, 64.0, 32.0, 0.8, 3, 0.5)])
 
         detections = decode_raw_anchor(outputs, 640, 640, 0.25, 0.45)
 
         self.assertEqual(detections[0][0], 3)
         self.assertAlmostEqual(detections[0][1], 0.4, places=5)
-
-    def test_drops_rows_whose_combined_score_is_below_threshold(self):
-        # 0.4 * 0.5 = 0.2, under a 0.25 threshold even though both parts are
-        # individually above it
-        outputs = self.build_raw_anchor_output(
-            [(320.0, 320.0, 40.0, 80.0, 0.4, 3, 0.5)]
-        )
-
-        detections = decode_raw_anchor(outputs, 640, 640, 0.25, 0.45)
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_converts_center_form_to_normalized_corners(self):
-        outputs = self.build_raw_anchor_output(
-            [(320.0, 160.0, 64.0, 32.0, 1.0, 0, 1.0)]
-        )
-
-        detections = decode_raw_anchor(outputs, 640, 640, 0.25, 0.45)
-
         self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
         self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
         self.assertAlmostEqual(detections[0][4], 176 / 640, places=5)
         self.assertAlmostEqual(detections[0][5], 352 / 640, places=5)
 
+    def test_a_channel_major_export_is_read_by_column_count(self):
+        outputs = self.anchor_rows([(320.0, 160.0, 64.0, 32.0, 1.0, 3, 0.9)])
 
-class TestDeepxRawNmsInHeadDecode(unittest.TestCase):
-    def test_reads_corner_records_without_running_nms(self):
-        """Two heavily overlapping boxes both survive: the head already ran NMS."""
+        detections = decode_raw_anchor(
+            [np.swapaxes(outputs[0], 1, 2)], 640, 640, 0.25, 0.45, columns=85
+        )
+
+        self.assertEqual(detections[0][0], 3)
+        self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
+
+    def test_rows_below_the_combined_threshold_are_dropped(self):
+        # 0.4 * 0.5 = 0.2, under the threshold both parts clear on their own
+        outputs = self.anchor_rows([(320.0, 320.0, 40.0, 80.0, 0.4, 3, 0.5)])
+
+        self.assertTrue(np.all(decode_raw_anchor(outputs, 640, 640, 0.25, 0.45) == 0))
+
+    def test_at_most_twenty_detections_are_returned(self):
+        rows = [(20.0 + 24 * i, 320.0, 16.0, 16.0, 1.0, i % 80, 0.9) for i in range(25)]
+
+        detections = decode_raw_anchor(self.anchor_rows(rows), 640, 640, 0.25, 0.45)
+
+        self.assertEqual(detections.shape, (20, 6))
+        self.assertEqual(int((detections[:, 1] > 0).sum()), 20)
+
+    def test_an_nms_in_head_output_is_read_without_running_nms(self):
         out = np.array(
             [
                 [
                     [100.0, 100.0, 200.0, 200.0, 0.9, 2.0],
                     [102.0, 102.0, 202.0, 202.0, 0.8, 2.0],
+                    [300.0, 300.0, 400.0, 400.0, 0.1, 5.0],
                 ]
             ],
             dtype=np.float32,
@@ -886,553 +554,321 @@ class TestDeepxRawNmsInHeadDecode(unittest.TestCase):
         self.assertAlmostEqual(detections[0][3], 100 / 640, places=5)
         self.assertEqual(detections[1][0], 2)
         self.assertAlmostEqual(detections[1][1], 0.8, places=5)
+        self.assertTrue(np.all(detections[2] == 0))
 
-    def test_applies_the_score_threshold(self):
-        out = np.array(
-            [
-                [
-                    [100.0, 100.0, 200.0, 200.0, 0.9, 2.0],
-                    [300.0, 300.0, 400.0, 400.0, 0.1, 5.0],
-                ]
-            ],
-            dtype=np.float32,
+        empty = np.zeros((1, 0, 6), dtype=np.float32)
+        self.assertTrue(np.all(decode_raw_nms_in_head([empty], 640, 640, 0.25) == 0))
+
+
+class TestDeepxConfig(unittest.TestCase):
+    def test_a_device_string_resolves_to_an_npu_index(self):
+        for configured, index in (("PCIe:1", 1), ("2", 2), ("", 0)):
+            with self.subTest(device=configured):
+                self.assertEqual(resolve_device(configured), index)
+
+    def test_a_device_that_is_not_an_index_is_rejected(self):
+        """The whole string has to be an index. Reading only the tail would
+        take the 1 out of "PCIe:0,PCIe:1" and bind to an NPU the config never
+        named, and several NPUs are configured as separate devices entries."""
+        for configured in (
+            "PCIe:the-fast-one",
+            "PCIe:0,PCIe:1",
+            "0,1",
+            "PCIe:0 PCIe:1",
+            "PCIe:-1",
+            "PCIe:",
+        ):
+            with self.subTest(device=configured):
+                with self.assertRaises(ValueError):
+                    resolve_device(configured)
+
+                with self.assertRaises(ValidationError):
+                    DeepxDetectorConfig(type="deepx", device=configured)
+
+    def test_a_bad_device_is_refused_where_the_config_is_parsed(self):
+        """parse_device builds the detector config to surface a bad device at
+        startup, so the comma-separated form fails there rather than binding a
+        detector process to the wrong NPU."""
+        self.assertEqual(parse_device("deepx:PCIe:1").device, "PCIe:1")
+
+        for raw in ("deepx:PCIe:0,PCIe:1", "deepx:the-fast-one"):
+            with self.subTest(raw=raw), self.assertRaises(DeviceParseError):
+                parse_device(raw)
+
+    def test_a_device_string_builds_this_detector_config(self):
+        """Frigate turns a `deepx:PCIe:0` entry into the detector config with
+        the model already attached, which is the path app.py takes; a bare
+        constructor call does not exercise it."""
+        config = build_detector_config(
+            parse_device("deepx:PCIe:0"), model_with_type(ModelTypeEnum.yologeneric)
         )
 
-        detections = decode_raw_nms_in_head([out], 640, 640, 0.25)
+        self.assertIsInstance(config, DeepxDetectorConfig)
+        self.assertEqual(config.device, "PCIe:0")
+        self.assertEqual(config.model.model_type, ModelTypeEnum.yologeneric)
 
-        self.assertAlmostEqual(detections[0][1], 0.9, places=5)
-        self.assertTrue(np.all(detections[1] == 0))
-
-    def test_returns_empty_detections_for_an_empty_output(self):
-        out = np.zeros((1, 0, 6), dtype=np.float32)
-
-        self.assertTrue(np.all(decode_raw_nms_in_head([out], 640, 640, 0.25) == 0))
-
-
-class TestDeepxDeviceSelection(unittest.TestCase):
-    def test_a_pcie_device_string_resolves_to_its_index(self):
-        self.assertEqual(resolve_device("PCIe:1"), 1)
-
-    def test_a_bare_index_is_accepted(self):
-        self.assertEqual(resolve_device("2"), 2)
-
-    def test_an_empty_device_is_the_first_npu(self):
-        self.assertEqual(resolve_device(""), 0)
-
-    def test_a_non_numeric_device_is_rejected(self):
-        with self.assertRaises(ValueError):
-            resolve_device("PCIe:the-fast-one")
-
-    def test_a_comma_separated_list_is_no_longer_accepted(self):
-        with self.assertRaises(ValidationError):
-            DeepxDetectorConfig(type="deepx", device="0,1")
-
-    def test_the_old_multi_device_field_is_gone(self):
-        self.assertNotIn("device_ids", DeepxDetectorConfig.model_fields)
-
-    def test_the_device_string_lands_on_the_device_field(self):
-        # inherited from BaseDetectorConfig; asserted so a rename is caught here
-        self.assertEqual(DeepxDetectorConfig.device_spec_field, "device")
-        self.assertIn("device", DeepxDetectorConfig.model_fields)
-
-
-class TestDeepxRuntimeManifest(unittest.TestCase):
-    def test_the_detector_declares_a_manifest(self):
-        self.assertIs(DeepxDetector.runtime_manifest, DEEPX_MANIFEST)
-
-    def test_one_wheel_per_supported_machine(self):
-        machines = sorted(m for a in DEEPX_MANIFEST.artifacts for m in a.machines)
-        self.assertEqual(machines, ["aarch64", "x86_64"])
-
-    def test_every_artifact_is_a_pinned_wheel(self):
-        for artifact in DEEPX_MANIFEST.artifacts:
-            with self.subTest(url=artifact.url):
-                self.assertEqual(artifact.kind, ArtifactKind.wheel)
-                self.assertEqual(len(artifact.sha256), 64)
-                self.assertTrue(artifact.url.endswith(".whl"))
-
-    def test_the_wheels_match_the_container_interpreter(self):
-        for artifact in DEEPX_MANIFEST.artifacts:
-            with self.subTest(url=artifact.url):
-                self.assertIn("cp311", artifact.url)
-
-    def test_every_url_carries_the_pinned_version(self):
-        """A PyPI path holds a per-file digest, so a version bump has to rewrite
-        the whole URL rather than only the version constant."""
+    def test_the_runtime_manifest_pins_its_wheels_to_the_version(self):
+        """A PyPI path carries a per-file digest, so bumping DXRT_VERSION has
+        to rewrite the whole URL; a stale one installs the old wheel and fails
+        the sha256 on every user's first start."""
         self.assertEqual(DEEPX_MANIFEST.version, DXRT_VERSION)
 
         for artifact in DEEPX_MANIFEST.artifacts:
             with self.subTest(url=artifact.url):
                 self.assertIn(f"dx_engine-{DXRT_VERSION}-", artifact.url)
 
-    def test_no_library_preloading_is_needed(self):
-        # the wheel is auditwheel-repaired and resolves its own libs by RPATH
-        self.assertEqual(DEEPX_MANIFEST.preload, ())
-        self.assertFalse(DEEPX_MANIFEST.needs_ld_library_path)
+    def test_a_model_less_config_still_validates(self):
+        config = DeepxDetectorConfig(type="deepx")
+
+        self.assertIsNone(config.model)
 
 
-class TestDeepxDamoyoloDecode(unittest.TestCase):
-    """DX-COM emits (1, N, C) sigmoid scores and (1, N, 4) pixel corners, as
-    the compiled ModelZoo models report."""
-
-    def build_output(self, rows, num_classes=80, boxes_first=False):
-        scores = np.zeros((1, len(rows), num_classes), dtype=np.float32)
-        boxes = np.zeros((1, len(rows), 4), dtype=np.float32)
-
-        for i, (x_min, y_min, x_max, y_max, label, score) in enumerate(rows):
-            boxes[0, i] = [x_min, y_min, x_max, y_max]
-            scores[0, i, label] = score
-
-        return [boxes, scores] if boxes_first else [scores, boxes]
-
-    def test_decodes_a_detection_in_either_output_order(self):
-        rows = [(288.0, 144.0, 352.0, 176.0, 3, 0.9)]
-
-        for boxes_first in (False, True):
-            with self.subTest(boxes_first=boxes_first):
-                detections = decode_damoyolo_raw(
-                    self.build_output(rows, boxes_first=boxes_first),
-                    640,
-                    640,
-                    0.25,
-                    0.45,
-                )
-
-                self.assertEqual(detections[0][0], 3)
-                self.assertAlmostEqual(detections[0][1], 0.9, places=5)
-                self.assertAlmostEqual(detections[0][2], 144 / 640, places=5)
-                self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
-                self.assertAlmostEqual(detections[0][4], 176 / 640, places=5)
-                self.assertAlmostEqual(detections[0][5], 352 / 640, places=5)
-
-    def test_clips_boxes_that_run_off_the_frame(self):
-        # DX-COM's decoded corners can fall outside the input
-        detections = decode_damoyolo_raw(
-            self.build_output([(-40.0, 10.0, 700.0, 100.0, 0, 0.9)]),
-            640,
-            640,
-            0.25,
-            0.45,
-        )
-
-        self.assertEqual(detections[0][3], 0.0)
-        self.assertEqual(detections[0][5], 1.0)
-
-    def test_returns_empty_detections_below_score_threshold(self):
-        detections = decode_damoyolo_raw(
-            self.build_output([(288.0, 144.0, 352.0, 176.0, 3, 0.1)]),
-            640,
-            640,
-            0.25,
-            0.45,
-        )
-
-        self.assertTrue(np.all(detections == 0))
-
-    def test_a_box_class_count_mismatch_is_reported_not_read_as_empty(self):
-        """A structural mismatch stays wrong on every later frame, so it comes
-        back as None and the caller reports it, rather than looking like a
-        frame in which nothing cleared the threshold."""
-        scores = np.zeros((1, 5, 80), dtype=np.float32)
-        boxes = np.zeros((1, 4, 4), dtype=np.float32)
-
-        self.assertIsNone(decode_damoyolo_raw([scores, boxes], 640, 640, 0.25, 0.45))
-
-    def test_a_wrong_output_count_is_reported_not_read_as_empty(self):
-        out = np.zeros((1, 8400, 84), dtype=np.float32)
-
-        self.assertIsNone(decode_damoyolo_raw([out], 640, 640, 0.25, 0.45))
-
-
-class TestDeepxCompiledModelShapes(unittest.TestCase):
-    """The output shapes DX-RT 3.4 reports for the compiled 640x640, 80-class
-    models in the DEEPX ModelZoo, each pinned to the decoder it has to land
-    on. Named by the head that produced them, since every model compiled from
-    the same head reports the same shape and the decoder only sees the shape.
-    """
-
-    def test_modelzoo_shapes(self):
-        cases = {
-            "anchor-based, three scales flattened into one tensor": (
-                [(1, 25200, 85)],
-                YoloLayout.anchor,
-            ),
-            "anchor-free, channel-major, no objectness column": (
-                [(1, 84, 8400)],
-                YoloLayout.anchor_free,
-            ),
-            "NMS in the head, a fixed run of corner records": (
-                [(1, 300, 6)],
-                YoloLayout.nms_in_head,
-            ),
-        }
-
-        for head, (shapes, layout) in cases.items():
-            with self.subTest(head=head):
-                self.assertIs(layout_of(shapes, 80), layout)
-
-
-class TestDeepxModelType(unittest.TestCase):
-    def test_a_model_type_with_no_decoder_is_rejected(self):
-        """Frigate defaults model_type to ssd, and every unsupported type
-        would otherwise be decoded as YOLO and return nonsense rather than
-        an error."""
-        for model_type in (ModelTypeEnum.ssd, ModelTypeEnum.dfine):
-            with (
-                self.subTest(model_type=model_type),
-                self.assertRaises(ValidationError),
-            ):
-                DeepxDetectorConfig(type="deepx", model=model_with_type(model_type))
-
-    def test_supported_model_types_are_accepted(self):
-        for model_type in (
-            ModelTypeEnum.yologeneric,
-            ModelTypeEnum.yolox,
-            ModelTypeEnum.damoyolo,
-        ):
-            with self.subTest(model_type=model_type):
-                config = DeepxDetectorConfig(
-                    type="deepx", model=model_with_type(model_type)
-                )
-
-                self.assertEqual(config.model.model_type, model_type)
-
-    def test_an_unresolved_model_defers_the_check(self):
-        """A device string is validated on its own before any model is
-        attached, so an absent model must not fail."""
-        DeepxDetectorConfig(type="deepx")
-
-
-class TestDeepxIpcEndpoint(unittest.TestCase):
-    """dxrtd listens on an abstract and a filesystem socket; only the second
-    one is reachable from a container, so the detector names it up front."""
-
-    def _construct(self):
-        # dx_engine is not installed in the test environment, and forcing the
-        # import to fail keeps this test honest on a machine where it is
-        with (
-            patch.dict(sys.modules, {"dx_engine": None}),
-            self.assertRaises(ImportError),
-        ):
-            DeepxDetector(DeepxDetectorConfig(type="deepx"))
-
-    def test_the_filesystem_socket_is_named_when_nothing_else_is(self):
-        with patch.dict(os.environ):
-            os.environ.pop(DXRT_IPC_ENDPOINT_ENV, None)
-            self._construct()
-            self.assertEqual(os.environ[DXRT_IPC_ENDPOINT_ENV], DXRT_IPC_SOCKET)
-
-    def test_a_blank_endpoint_counts_as_unset(self):
-        # an empty variable would otherwise be handed to DX-RT as the path
-        with patch.dict(os.environ, {DXRT_IPC_ENDPOINT_ENV: ""}):
-            self._construct()
-            self.assertEqual(os.environ[DXRT_IPC_ENDPOINT_ENV], DXRT_IPC_SOCKET)
-
-    def test_an_abstract_endpoint_has_no_file_to_check(self):
-        with (
-            patch.dict(os.environ, {DXRT_IPC_ENDPOINT_ENV: "@dxrt_dynamic_ipc.sock"}),
-            self.assertNoLogs("frigate.detectors.plugins.deepx", level="WARNING"),
-        ):
-            self._construct()
-
-    def test_an_operator_supplied_endpoint_is_left_alone(self):
-        with patch.dict(os.environ, {DXRT_IPC_ENDPOINT_ENV: "/run/dxrt/custom.sock"}):
-            self._construct()
-            self.assertEqual(os.environ[DXRT_IPC_ENDPOINT_ENV], "/run/dxrt/custom.sock")
-
-    def test_a_missing_socket_is_named_before_the_runtime_buries_it(self):
-        """DX-RT reports an absent socket as a bare connect error several
-        layers down, with nothing saying which path it tried."""
-        with (
-            patch.dict(os.environ, {DXRT_IPC_ENDPOINT_ENV: "/run/dxrt/absent.sock"}),
-            self.assertLogs("frigate.detectors.plugins.deepx", level="WARNING") as logs,
-        ):
-            self._construct()
-
-        self.assertTrue(
-            any("/run/dxrt/absent.sock" in r.getMessage() for r in logs.records)
-        )
-
-    def test_the_socket_lives_in_a_mountable_directory(self):
-        # a single socket file bind-mounted on its own pins the inode dxrtd
-        # had at container start, so the directory has to be what is mounted
-        self.assertEqual(os.path.dirname(DXRT_IPC_SOCKET), "/run/dxrt")
-
-
-class TestDeepxServiceCheck(unittest.TestCase):
-    """DX-RT scans /proc for a dxrtd process to decide the daemon is up, which
-    a container cannot satisfy from the host. The runtime's own SERVICE toggle
-    turns that scan off, and the IPC client keeps using the socket."""
-
-    def test_the_process_scan_is_disabled_before_the_model_is_loaded(self):
-        dx_engine = MagicMock()
-        dx_engine.Configuration.ITEM.SERVICE = object()
-        order = []
-        dx_engine.Configuration.return_value.set_enable.side_effect = lambda *a: (
-            order.append("set_enable")
-        )
-        session = MagicMock()
-        session.get_output_tensors_info.return_value = [
-            {"shape": [1, 8400, 80]},
-            {"shape": [1, 8400, 4]},
-        ]
-        session.is_ppu.return_value = False
-
-        def engine(*args):
-            order.append("engine")
-            return session
-
-        dx_engine.InferenceEngine.side_effect = engine
-
-        config = DeepxDetectorConfig(
-            type="deepx",
-            model=ModelConfig(
-                model_type=ModelTypeEnum.damoyolo,
-                labelmap_path=None,
-                labelmap={79: "toothbrush"},
-            ),
-        )
-        config.model.path = "/nonexistent/model.dxnn"
-
-        with (
-            patch.dict(sys.modules, {"dx_engine": dx_engine}),
-            patch.object(DeepxDetector, "activate_dependencies"),
-            patch("os.path.isfile", return_value=True),
-        ):
-            DeepxDetector(config)
-
-        dx_engine.Configuration.return_value.set_enable.assert_called_once_with(
-            dx_engine.Configuration.ITEM.SERVICE, False
-        )
-        self.assertEqual(order, ["set_enable", "engine"])
-
-
-class TestDeepxDetectorLayout(unittest.TestCase):
-    """The detector asks the runtime about the loaded model and keeps the
-    answer; the per-frame decode only dispatches on it."""
-
-    def _detector(
+class DeepxDetectorTestCase(unittest.TestCase):
+    def detector(
         self,
-        model_type,
-        outputs_info,
+        model_type=ModelTypeEnum.yologeneric,
+        outputs_info=None,
         ppu=False,
         dynamic=False,
         model_path="/nonexistent/model.dxnn",
-    ):
+    ) -> DeepxDetector:
         dx_engine = MagicMock()
         dx_engine.Configuration.ITEM.SERVICE = object()
         session = dx_engine.InferenceEngine.return_value
-        session.get_output_tensors_info.return_value = outputs_info
+        session.get_output_tensors_info.return_value = (
+            [{"shape": [8400]}] if ppu else outputs_info or []
+        )
         session.is_ppu.return_value = ppu
         session.has_dynamic_output.return_value = dynamic
 
-        config = DeepxDetectorConfig(
-            type="deepx",
-            model=ModelConfig(
-                model_type=model_type,
-                labelmap_path=None,
-                labelmap={79: "toothbrush"},
-                width=640,
-                height=640,
-            ),
-        )
+        config = DeepxDetectorConfig(type="deepx")
+        config.model = model_with_type(model_type)
         config.model.path = model_path
 
         with (
+            # the detector writes the endpoint into the environment, which the
+            # rest of the suite shares when it runs in one process
+            patch.dict(os.environ),
             patch.dict(sys.modules, {"dx_engine": dx_engine}),
             patch.object(DeepxDetector, "activate_dependencies"),
             patch("os.path.isfile", return_value=True),
         ):
-            return DeepxDetector(config), dx_engine
+            return DeepxDetector(config)
 
-    def test_the_layout_is_read_from_the_model_at_load(self):
-        detector, _ = self._detector(
-            ModelTypeEnum.yologeneric, [{"shape": [1, 84, 8400]}]
+    def ppu_detector(
+        self, ppu, layers, model_type=ModelTypeEnum.yologeneric, box_format=None
+    ) -> DeepxDetector:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+
+        return self.detector(
+            model_type,
+            ppu=True,
+            model_path=write_dxnn(tmp.name, ppu, layers, box_format=box_format),
         )
 
+    def detect(self, detector, outputs) -> np.ndarray:
+        detector.session.run.return_value = outputs
+        return detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+
+
+class TestDeepxModelType(DeepxDetectorTestCase):
+    def test_a_model_type_with_no_decoder_is_rejected(self):
+        for model_type in (ModelTypeEnum.ssd, ModelTypeEnum.dfine):
+            with (
+                self.subTest(model_type=model_type),
+                self.assertRaisesRegex(ValueError, model_type.value),
+            ):
+                self.detector(model_type)
+
+    def test_supported_model_types_are_accepted(self):
+        for model_type, outputs_info in (
+            (ModelTypeEnum.yologeneric, [{"shape": [1, 84, 8400]}]),
+            (ModelTypeEnum.yolox, [{"shape": [1, 8400, 85]}]),
+        ):
+            with self.subTest(model_type=model_type):
+                detector = self.detector(model_type, outputs_info)
+
+                self.assertEqual(detector.model_type, model_type)
+
+
+class TestDeepxDetectorLoad(DeepxDetectorTestCase):
+    def test_the_layout_is_settled_at_load(self):
+        detector = self.detector(ModelTypeEnum.yologeneric, [{"shape": [1, 84, 8400]}])
         self.assertIs(detector.output.layout, YoloLayout.anchor_free)
         self.assertEqual(detector.output.columns, 84)
 
-    def test_a_ppu_model_is_recognized_by_the_runtime_flag(self):
-        detector = self._ppu_detector_for(
-            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
-        )
+        detector = self.detector(ModelTypeEnum.yolox, [{"shape": [1, 8400, 85]}])
+        self.assertIs(detector.output.layout, YoloLayout.yolox)
 
-        self.assertIs(detector.output.layout, YoloLayout.ppu)
+        for model_type in (ModelTypeEnum.yologeneric, ModelTypeEnum.yolox):
+            with self.subTest(model_type=model_type):
+                detector = self.ppu_detector(
+                    ANCHOR_FREE_PPU, THREE_SCALE_FREE, model_type=model_type
+                )
 
-    def test_an_anchor_based_ppu_model_decodes(self):
-        detector = self._ppu_detector_for(
-            ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3), (20, 20, 3)]
-        )
-        detector.session.run.return_value = [
-            build_ppu_record((0.6, 0.4, 0.3, 0.7), label=5)
-        ]
+                self.assertIs(detector.output.layout, YoloLayout.ppu)
+                self.assertEqual(detector.ppu_layout.scale_count, 3)
 
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+    def test_a_model_the_detector_cannot_decode_is_refused_at_load(self):
+        cases = {
+            "Cannot decode DEEPX model": lambda: self.detector(
+                ModelTypeEnum.yologeneric, [{"shape": [1, 8400, 7]}]
+            ),
+            "DX-COM 2.4.0": lambda: self.detector(ModelTypeEnum.yologeneric, ppu=True),
+            "face and pose": lambda: self.ppu_detector({"type": 2}, [(80, 80, 1)]),
+            "centre and size or as two corners": lambda: self.ppu_detector(
+                ANCHOR_FREE_PPU, ONE_SCALE_FREE
+            ),
+        }
 
-        self.assertEqual(detections[0][0], 5)
-        self.assertAlmostEqual(detections[0][3], 0.380094, places=5)
-        self.assertAlmostEqual(detections[0][5], 0.589906, places=5)
+        for reason, load in cases.items():
+            with (
+                self.subTest(reason=reason),
+                self.assertRaisesRegex(ValueError, reason),
+            ):
+                load()
 
-    def _ppu_detector_for(
-        self, ppu, layers, model_type=ModelTypeEnum.yologeneric, box_format=None
-    ):
-        """A PPU detector loaded from a model file that describes its head."""
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        path = write_dxnn(tmp.name, ppu, layers, box_format=box_format)
 
-        detector, _ = self._detector(
-            model_type, [{"shape": [8400]}], ppu=True, model_path=path
-        )
-        detector.width, detector.height = 640, 640
-        return detector
+class TestDeepxDetectRaw(DeepxDetectorTestCase):
+    def test_a_ppu_record_decodes_by_the_head_in_the_model(self):
+        cases = {
+            "anchor-based, layer 2 of 3 at stride 32, the 373x326 anchor": (
+                (ANCHOR_BASED_PPU, THREE_SCALE_ANCHORS, None),
+                build_ppu_record((0.6, 0.4, 0.3, 0.7), label=5),
+                (5, (0.0, 0.380094, 0.864187, 0.589906)),
+            ),
+            "anchor-based, layer 0 of 3 at stride 8, the 16x30 anchor": (
+                (ANCHOR_BASED_PPU, THREE_SCALE_ANCHORS, None),
+                build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0)),
+                (0, (None, 0.116750, None, None)),
+            ),
+            "anchor-based, two scales: layer 0 is stride 16, not stride 8": (
+                (ANCHOR_BASED_PPU, TWO_SCALE_ANCHORS, None),
+                build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0)),
+                (0, (0.141156, 0.236031, 0.223844, 0.248969)),
+            ),
+            "anchor-free, three scales: cell (10, 9) of stride 32": (
+                (ANCHOR_FREE_PPU, THREE_SCALE_FREE, None),
+                build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7),
+                (7, (0.433782, 0.492043, 0.516218, 0.627957)),
+            ),
+            "anchor-free, one scale: the box fields are already pixels": (
+                (ANCHOR_FREE_PPU, ONE_SCALE_FREE, "centre"),
+                build_ppu_record((320.0, 160.0, 64.0, 32.0), label=3),
+                (3, (144 / 640, 288 / 640, 176 / 640, 352 / 640)),
+            ),
+            "anchor-free, one scale: a sub-pixel box stays sub-pixel": (
+                (ANCHOR_FREE_PPU, ONE_SCALE_FREE, "centre"),
+                build_ppu_record((0.6, 0.4, 0.3, 0.7)),
+                (0, (None, 0.45 / 640, None, None)),
+            ),
+            "a corner-format head reads the record as two corners": (
+                (ANCHOR_FREE_PPU, ONE_SCALE_FREE, "corner"),
+                build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2),
+                (2, (50 / 640, 100 / 640, 250 / 640, 300 / 640)),
+            ),
+            "a centre-format head reads it as a centre and size": (
+                (ANCHOR_FREE_PPU, ONE_SCALE_FREE, "centre"),
+                build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2),
+                (2, (0.0, 0.0, 175 / 640, 250 / 640)),
+            ),
+        }
 
-    def test_the_ppu_scale_count_is_read_from_the_model_at_load(self):
-        """A three-scale head reads against the three-scale table from its
-        first frame, whatever layers that frame holds."""
-        detector = self._ppu_detector_for(
-            ANCHOR_BASED_PPU, [(80, 80, 3), (40, 40, 3), (20, 20, 3)]
-        )
-        self.assertEqual(detector.ppu_layout.scale_count, 3)
+        for head, ((ppu, layers, box_format), record, (label, box)) in cases.items():
+            with self.subTest(head=head):
+                detector = self.ppu_detector(ppu, layers, box_format=box_format)
 
-        detector.session.run.return_value = [
-            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))
-        ]
-        first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # layer 0 of 3: stride 8, anchor 16x30
-        self.assertAlmostEqual(first[0][3], 0.116750, places=5)
+                detections = self.detect(detector, [record])
 
-        detector.session.run.return_value = [
-            build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))
-        ]
-        second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        # layer 1 of 3: stride 16, anchor 30x61, not layer 1 of 2
-        self.assertAlmostEqual(second[0][3], 0.0975, places=5)
+                self.assertEqual(detections[0][0], label)
+                for i, expected in enumerate(box, start=2):
+                    if expected is not None:
+                        self.assertAlmostEqual(detections[0][i], expected, places=5)
 
-    def test_an_anchor_free_model_settles_the_head_at_load(self):
-        """An anchor-free head reads a sub-pixel box in the corner as the
-        pixels it is, and a YOLOX-style head is grid-decoded from a first
-        frame holding one record at one layer."""
-        detector = self._ppu_detector_for(
-            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
-        )
-
-        detector.session.run.return_value = [build_ppu_record((0.6, 0.4, 0.3, 0.7))]
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertAlmostEqual(detections[0][3], 0.45 / 640, places=6)
-
-        detector = self._ppu_detector_for(
-            ANCHOR_FREE_PPU, [(80, 80, 1), (40, 40, 1), (20, 20, 1)]
-        )
-        detector.session.run.return_value = [
-            build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 2), label=7)
-        ]
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertAlmostEqual(detections[0][3], 0.492043, places=5)
-
-    def test_a_model_without_a_ppu_layout_is_refused(self):
-        with self.assertRaisesRegex(ValueError, "DX-COM 2.4.0"):
-            self._detector(ModelTypeEnum.yologeneric, [{"shape": [8400]}], ppu=True)
-
-    def test_a_ppu_head_frigate_cannot_decode_is_refused(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        path = write_dxnn(tmp.name, {"type": 2}, [(80, 80, 1)])
-
-        with self.assertRaisesRegex(ValueError, "face and pose"):
-            self._detector(
-                ModelTypeEnum.yologeneric,
-                [{"shape": [8400]}],
-                ppu=True,
-                model_path=path,
-            )
-
-    def test_strides_come_from_the_grids_in_the_model(self):
-        """A head whose grids are not the 32 >> k ladder, here P4 to P6
-        at 16, 32 and 64, decodes at the strides its grids imply."""
-        detector = self._ppu_detector_for(
+    def test_the_strides_come_from_the_grids_in_the_model(self):
+        detector = self.ppu_detector(
             ANCHOR_FREE_PPU, [(40, 40, 1), (20, 20, 1), (10, 10, 1)]
         )
-        detector.session.run.return_value = [
-            build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 0), label=7)
-        ]
 
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        detections = self.detect(
+            detector,
+            [build_ppu_record((1.2, 0.5, 1.0, 0.5), grid=(9, 10, 0, 0), label=7)],
+        )
 
         # layer 0 is stride 16: centre (11.2, 9.5) * 16, size e * 16 x sqrt(e) * 16
         self.assertEqual(detections[0][0], 7)
         self.assertAlmostEqual(detections[0][2], (152 - np.exp(0.5) * 8) / 640, 5)
         self.assertAlmostEqual(detections[0][3], (179.2 - np.exp(1.0) * 8) / 640, 5)
 
-    def test_the_box_format_is_read_from_the_model_at_load(self):
-        """Two heads whose records are indistinguishable decode by what
-        their own file said, from the first frame and on every frame; a
-        centre-format head is never read as corners while it waits for a
-        record to give itself away."""
-        record = [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)]
+    def test_the_head_stays_what_the_model_said_across_frames(self):
+        detector = self.ppu_detector(ANCHOR_BASED_PPU, THREE_SCALE_ANCHORS)
 
-        detector = self._ppu_detector_for(
-            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="centre"
+        first = self.detect(
+            detector, [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 1, 0))]
         )
-        self.assertTrue(detector.ppu_layout.centre_boxes)
+        # layer 0 of 3: stride 8, anchor 16x30
+        self.assertAlmostEqual(first[0][3], 0.116750, places=5)
 
-        detector.session.run.return_value = record
+        second = self.detect(
+            detector, [build_ppu_record((0.5, 0.5, 0.4, 0.4), grid=(3, 4, 0, 1))]
+        )
+        # layer 1 of 3: stride 16, anchor 30x61, not layer 1 of 2
+        self.assertAlmostEqual(second[0][3], 0.0975, places=5)
+
+        detector = self.ppu_detector(
+            ANCHOR_FREE_PPU, ONE_SCALE_FREE, box_format="centre"
+        )
+        record = [build_ppu_record((100.0, 50.0, 300.0, 250.0), label=2)]
         # centre (100, 50), size 300 x 250: the right edge lands at 250
         for frame in range(2):
             with self.subTest(frame=frame):
-                detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-                self.assertAlmostEqual(detections[0][5], 250 / 640, places=5)
+                self.assertAlmostEqual(
+                    self.detect(detector, record)[0][5], 250 / 640, places=5
+                )
 
-        detector = self._ppu_detector_for(
-            ANCHOR_FREE_PPU, [(100, 84, 1)], box_format="corner"
-        )
-        self.assertFalse(detector.ppu_layout.centre_boxes)
+    def test_records_the_head_cannot_place_come_back_empty(self):
+        cases = {
+            "a level or box the anchor table does not carry": (
+                THREE_SCALE_ANCHORS,
+                [build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 2, 5))],
+            ),
+            "a scale count Frigate has no anchor table for": (
+                FOUR_SCALE_ANCHORS,
+                [build_ppu_record((0.6, 0.4, 0.3, 0.7))],
+            ),
+            "a record below the score threshold": (
+                THREE_SCALE_ANCHORS,
+                [build_ppu_record((0.6, 0.4, 0.3, 0.7), score=0.1)],
+            ),
+            "an unexpected record width": (
+                THREE_SCALE_ANCHORS,
+                [np.zeros((1, 3, 16), dtype=np.uint8)],
+            ),
+            **{
+                f"no records at all, shaped {shape}": (
+                    THREE_SCALE_ANCHORS,
+                    [np.zeros(shape, dtype=np.uint8)],
+                )
+                for shape in ((1, 0, PPU_RECORD_SIZE), (0, PPU_RECORD_SIZE), (0,))
+            },
+        }
 
-        detector.session.run.return_value = record
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-        self.assertAlmostEqual(detections[0][5], 300 / 640, places=5)
+        for output, (layers, outputs) in cases.items():
+            with self.subTest(output=output):
+                detector = self.ppu_detector(ANCHOR_BASED_PPU, layers)
 
-    def test_a_single_scale_head_without_a_box_format_is_refused(self):
-        """Nothing in a frame can settle the format, so a file that does not
-        carry the graph fails at load rather than guessing every frame."""
-        with self.assertRaisesRegex(ValueError, "centre and size or as two corners"):
-            self._ppu_detector_for(ANCHOR_FREE_PPU, [(100, 84, 1)])
-
-    def test_an_unsupported_ppu_scale_count_is_reported_once(self):
-        """An anchor-based head with a scale count Frigate has no anchor
-        table for logs once and drops the frame instead of guessing."""
-        detector = self._ppu_detector_for(
-            ANCHOR_BASED_PPU,
-            [(160, 160, 3), (80, 80, 3), (40, 40, 3), (20, 20, 3)],
-        )
-        detector.session.run.return_value = [
-            build_ppu_record((0.6, 0.4, 0.3, 0.7), grid=(7, 9, 2, 3))
-        ]
-
-        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR") as logs:
-            first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-            second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-
-        self.assertTrue(np.all(first == 0) and np.all(second == 0))
-        self.assertEqual(len([r for r in logs.records if r.levelname == "ERROR"]), 1)
+                self.assertTrue(np.all(self.detect(detector, outputs) == 0))
 
     def test_a_yolox_raw_head_is_decoded_through_the_grid(self):
-        """model_type yolox reads the raw head: a cell's x, y offsets are
-        added to its grid position and scaled by the stride, its w, h are
-        exp'd and scaled the same way, and confidence is objectness times
-        the best class score."""
-        detector, _ = self._detector(ModelTypeEnum.yolox, [{"shape": [1, 8400, 85]}])
-        self.assertIs(detector.output.layout, YoloLayout.yolox)
+        detector = self.detector(ModelTypeEnum.yolox, [{"shape": [1, 8400, 85]}])
 
         # cell (x 10, y 5) of the stride-8 grid is row 5 * 80 + 10
         tensor = np.zeros((1, 8400, 85), np.float32)
         tensor[0, 410, :5] = [0.5, 0.5, np.log(4.0), np.log(2.0), 0.9]
         tensor[0, 410, 5 + 7] = 0.8
-        detector.session.run.return_value = [tensor]
-        detector.width, detector.height = 640, 640
 
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        detections = self.detect(detector, [tensor])
 
         # centre (84, 44), size 32 x 16
         self.assertEqual(detections[0][0], 7)
@@ -1442,140 +878,19 @@ class TestDeepxDetectorLayout(unittest.TestCase):
         self.assertAlmostEqual(detections[0][4], 52 / 640, places=5)
         self.assertAlmostEqual(detections[0][5], 100 / 640, places=5)
 
-        # a channel-major export is oriented first
-        detector, _ = self._detector(ModelTypeEnum.yolox, [{"shape": [1, 85, 8400]}])
-        detector.session.run.return_value = [np.swapaxes(tensor, 1, 2)]
-        detector.width, detector.height = 640, 640
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        detector = self.detector(ModelTypeEnum.yolox, [{"shape": [1, 85, 8400]}])
+        detections = self.detect(detector, [np.swapaxes(tensor, 1, 2)])
         self.assertAlmostEqual(detections[0][5], 100 / 640, places=5)
 
-    def test_a_yolox_compiled_with_ppu_support_is_read_as_ppu(self):
-        detector = self._ppu_detector_for(
-            ANCHOR_FREE_PPU,
-            [(80, 80, 1), (40, 40, 1), (20, 20, 1)],
-            model_type=ModelTypeEnum.yolox,
-        )
-
-        self.assertIs(detector.output.layout, YoloLayout.ppu)
-
-    def test_damoyolo_is_checked_against_the_model_at_load(self):
-        """A YOLO model or a wrong label map under damo-yolo fails at load
-        with the reason, rather than returning nothing on every frame."""
-        with self.assertRaisesRegex(ValueError, "yolo-generic"):
-            self._detector(ModelTypeEnum.damoyolo, [{"shape": [1, 84, 8400]}])
-
-        with self.assertRaisesRegex(ValueError, "PPU"):
-            self._detector(
-                ModelTypeEnum.damoyolo,
-                [{"shape": [1, 8400, 80]}, {"shape": [1, 8400, 4]}],
-                ppu=True,
-            )
-
-    def test_damoyolo_frames_that_lose_the_expected_pair_are_reported_once(self):
-        """The load-time check passed; a frame that still does not carry
-        the pair says so once rather than only under debug logging."""
-        detector, _ = self._detector(
-            ModelTypeEnum.damoyolo, [{"shape": [1, 8400, 80]}, {"shape": [1, 8400, 4]}]
-        )
-        detector.width, detector.height = 640, 640
-        detector.session.run.return_value = [np.zeros((1, 8400, 84), dtype=np.float32)]
-
-        with self.assertLogs("frigate.detectors.plugins.deepx", level="ERROR") as logs:
-            first = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-            second = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-
-        self.assertTrue(np.all(first == 0) and np.all(second == 0))
-        self.assertEqual(len([r for r in logs.records if r.levelname == "ERROR"]), 1)
-
-    def test_damoyolo_needs_no_layout(self):
-        detector, _ = self._detector(
-            ModelTypeEnum.damoyolo,
-            [{"shape": [1, 8400, 80]}, {"shape": [1, 8400, 4]}],
-        )
-
-        self.assertIsNone(detector.output)
-
-    def test_an_empty_label_map_fails_at_load_with_the_deepx_context(self):
-        dx_engine = MagicMock()
-        dx_engine.Configuration.ITEM.SERVICE = object()
-        dx_engine.InferenceEngine.return_value.get_output_tensors_info.return_value = [
-            {"shape": [1, 84, 8400]}
-        ]
-        config = DeepxDetectorConfig(
-            type="deepx",
-            model=ModelConfig(model_type=ModelTypeEnum.yologeneric, labelmap_path=None),
-        )
-        config.model.path = "/nonexistent/model.dxnn"
-
-        with (
-            patch.dict(sys.modules, {"dx_engine": dx_engine}),
-            patch.object(DeepxDetector, "activate_dependencies"),
-            patch("os.path.isfile", return_value=True),
-            self.assertRaisesRegex(
-                ValueError, "Cannot decode DEEPX model.*labelmap_path"
-            ),
-        ):
-            DeepxDetector(config)
-
-    def test_the_tensor_layout_is_logged_before_the_first_decode(self):
-        """A decode that raises must still leave the runtime shapes in the
-        log, which is what tells a wrong layout guess apart afterwards."""
-        detector, _ = self._detector(
-            ModelTypeEnum.yologeneric, [{"shape": [1, 84, 8400]}]
-        )
-        detector.width, detector.height = 640, 640
-        detector.session.run.return_value = [np.zeros((1, 84, 8400), np.float32)]
-
-        with (
-            patch.object(detector, "decode", side_effect=RuntimeError("boom")),
-            self.assertLogs("frigate.detectors.plugins.deepx", level="INFO") as logs,
-            self.assertRaises(RuntimeError),
-        ):
-            detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-
-        self.assertTrue(
-            any(
-                "output[0]: shape=(1, 84, 8400)" in r.getMessage() for r in logs.records
-            )
-        )
-
-    def test_an_undecodable_model_fails_at_load(self):
-        with self.assertRaisesRegex(ValueError, "Cannot decode DEEPX model"):
-            self._detector(ModelTypeEnum.yologeneric, [{"shape": [1, 8400, 7]}])
-
-    def test_detect_raw_runs_the_model_output_through_the_detected_layout(self):
-        """End to end on a mocked session: a compiled channel-major
-        anchor-free shape is oriented by its column count and handed to the
-        shared decoder, coming back as Frigate's (20, 6) rows."""
-        detector, _ = self._detector(
-            ModelTypeEnum.yologeneric, [{"shape": [1, 84, 8400]}]
-        )
+    def test_a_raw_head_comes_back_as_frigates_detection_rows(self):
+        detector = self.detector(ModelTypeEnum.yologeneric, [{"shape": [1, 84, 8400]}])
         output = np.zeros((1, 84, 8400), dtype=np.float32)
         output[0, 0:4, 0] = [320.0, 160.0, 64.0, 32.0]
         output[0, 4 + 2, 0] = 0.9
-        detector.session.run.return_value = [output]
-        detector.width, detector.height = 640, 640
 
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
+        detections = self.detect(detector, [output])
 
         self.assertEqual(detections.shape, (20, 6))
         self.assertEqual(detections[0][0], 2)
         self.assertAlmostEqual(detections[0][1], 0.9, places=5)
         self.assertAlmostEqual(detections[0][3], 288 / 640, places=5)
-
-    def test_detect_raw_decodes_damoyolo_without_a_layout(self):
-        detector, _ = self._detector(
-            ModelTypeEnum.damoyolo, [{"shape": [1, 8400, 80]}, {"shape": [1, 8400, 4]}]
-        )
-        scores = np.zeros((1, 8400, 80), dtype=np.float32)
-        boxes = np.zeros((1, 8400, 4), dtype=np.float32)
-        scores[0, 0, 5] = 0.8
-        boxes[0, 0] = [100.0, 100.0, 200.0, 300.0]
-        detector.session.run.return_value = [scores, boxes]
-        detector.width, detector.height = 640, 640
-
-        detections = detector.detect_raw(np.zeros((1, 640, 640, 3), np.uint8))
-
-        self.assertEqual(detections[0][0], 5)
-        self.assertAlmostEqual(detections[0][1], 0.8, places=5)
-        self.assertAlmostEqual(detections[0][4], 300 / 640, places=5)
