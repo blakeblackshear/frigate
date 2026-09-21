@@ -65,7 +65,7 @@ import {
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
 const IMPORT_FAILED_FLAG = "frigate-ui-settings-import-failed";
 
-type ClearTarget = "layouts" | "streaming";
+type ConfirmTarget = "layouts" | "streaming" | "naturalAspect";
 
 type SwitchSettingRowProps = {
   id: string;
@@ -217,24 +217,6 @@ export default function UiSettingsView() {
       });
   }, [config, t, username]);
 
-  const [pendingClear, setPendingClear] = useState<ClearTarget | null>(null);
-
-  const clearConfirmCopy = useCallback(
-    (target: ClearTarget) =>
-      // literal keys per branch: a template key would be invisible to
-      // npm run i18n:extract, which CI verifies
-      target === "layouts"
-        ? {
-            title: t("general.storedLayouts.clearAll"),
-            description: t("general.storedLayouts.clearConfirm"),
-          }
-        : {
-            title: t("general.cameraGroupStreaming.clearAll"),
-            description: t("general.cameraGroupStreaming.clearConfirm"),
-          },
-    [t],
-  );
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImport, setPendingImport] = useState<{
     name: string;
@@ -378,6 +360,64 @@ export default function UiSettingsView() {
     3,
   );
 
+  const [pendingConfirm, setPendingConfirm] = useState<ConfirmTarget | null>(
+    null,
+  );
+
+  const confirmCopy = useCallback(
+    (target: ConfirmTarget) => {
+      // literal keys per branch: a template key would be invisible to
+      // npm run i18n:extract, which CI verifies
+      switch (target) {
+        case "layouts":
+          return {
+            title: t("general.storedLayouts.clearAll"),
+            description: t("general.storedLayouts.clearConfirm"),
+            action: t("button.clear", { ns: "common" }),
+          };
+        case "streaming":
+          return {
+            title: t("general.cameraGroupStreaming.clearAll"),
+            description: t("general.cameraGroupStreaming.clearConfirm"),
+            action: t("button.clear", { ns: "common" }),
+          };
+        case "naturalAspect":
+          return {
+            title: t("general.liveDashboard.naturalAspectLayout.label"),
+            description: t(
+              "general.liveDashboard.naturalAspectLayout.descNote",
+            ),
+            action: naturalAspect
+              ? t("button.disable", { ns: "common" })
+              : t("button.enable", { ns: "common" }),
+          };
+      }
+    },
+    [naturalAspect, t],
+  );
+
+  const handleConfirm = useCallback(() => {
+    switch (pendingConfirm) {
+      case "layouts":
+        clearStoredLayouts();
+        break;
+      case "streaming":
+        clearStreamingSettings();
+        break;
+      case "naturalAspect":
+        setNaturalAspect(!naturalAspect);
+        break;
+    }
+
+    setPendingConfirm(null);
+  }, [
+    pendingConfirm,
+    clearStoredLayouts,
+    clearStreamingSettings,
+    naturalAspect,
+    setNaturalAspect,
+  ]);
+
   const liveDashboardSwitchRows = [
     {
       id: "auto-live",
@@ -410,7 +450,7 @@ export default function UiSettingsView() {
             description: t("general.liveDashboard.naturalAspectLayout.desc"),
             note: t("general.liveDashboard.naturalAspectLayout.descNote"),
             checked: naturalAspect,
-            onCheckedChange: setNaturalAspect,
+            onCheckedChange: () => setPendingConfirm("naturalAspect"),
           },
         ]),
   ];
@@ -481,7 +521,7 @@ export default function UiSettingsView() {
                     id="stored-layouts-clear"
                     aria-label={t("general.storedLayouts.clearAll")}
                     className="w-full md:w-auto"
-                    onClick={() => setPendingClear("layouts")}
+                    onClick={() => setPendingConfirm("layouts")}
                   >
                     {t("general.storedLayouts.clearAll")}
                   </Button>
@@ -497,7 +537,7 @@ export default function UiSettingsView() {
                     id="camera-group-streaming-clear"
                     aria-label={t("general.cameraGroupStreaming.clearAll")}
                     className="w-full md:w-auto"
-                    onClick={() => setPendingClear("streaming")}
+                    onClick={() => setPendingConfirm("streaming")}
                   >
                     {t("general.cameraGroupStreaming.clearAll")}
                   </Button>
@@ -637,20 +677,20 @@ export default function UiSettingsView() {
       )}
 
       <AlertDialog
-        open={pendingClear != null}
+        open={pendingConfirm != null}
         onOpenChange={(open) => {
           if (!open) {
-            setPendingClear(null);
+            setPendingConfirm(null);
           }
         }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {pendingClear && clearConfirmCopy(pendingClear).title}
+              {pendingConfirm && confirmCopy(pendingConfirm).title}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingClear && clearConfirmCopy(pendingClear).description}
+              {pendingConfirm && confirmCopy(pendingConfirm).description}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -659,17 +699,9 @@ export default function UiSettingsView() {
             </AlertDialogCancel>
             <AlertDialogAction
               className={cn(buttonVariants({ variant: "destructive" }))}
-              onClick={() => {
-                if (pendingClear === "layouts") {
-                  clearStoredLayouts();
-                } else {
-                  clearStreamingSettings();
-                }
-
-                setPendingClear(null);
-              }}
+              onClick={handleConfirm}
             >
-              {t("button.clear", { ns: "common" })}
+              {pendingConfirm && confirmCopy(pendingConfirm).action}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
