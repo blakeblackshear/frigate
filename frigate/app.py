@@ -15,6 +15,7 @@ import uvicorn
 from peewee_migrate import Router
 from playhouse.sqlite_ext import SqliteExtDatabase
 
+from frigate.analytics.reporter import AnalyticsReporter
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
 from frigate.camera import CameraMetrics, PTZMetrics
@@ -529,6 +530,15 @@ class FrigateApp:
         )
         self.stats_emitter.start()
 
+    def start_analytics_reporter(self) -> None:
+        self.analytics_reporter = AnalyticsReporter(
+            self.config_holder,
+            self.stats_emitter,
+            self.notice_registry,
+            self.stop_event,
+        )
+        self.analytics_reporter.start()
+
     def start_watchdog(self) -> None:
         self.frigate_watchdog = FrigateWatchdog(self.detectors, self.stop_event)
 
@@ -680,6 +690,7 @@ class FrigateApp:
         self.start_audio_processor()
         self.start_storage_maintainer()
         self.start_stats_emitter()
+        self.start_analytics_reporter()
         self.start_timeline_processor()
         self.start_event_processor()
         self.start_event_cleanup()
@@ -779,6 +790,8 @@ class FrigateApp:
         self.event_cleanup.join()
         self.record_cleanup.join()
         self.stats_emitter.join()
+        # a send in flight can hold the thread for the whole request timeout
+        self.analytics_reporter.join(timeout=5)
         self.frigate_watchdog.join()
         self.camera_maintainer.join()
         self.db.stop()
