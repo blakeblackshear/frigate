@@ -47,8 +47,8 @@ from fastapi.routing import APIRoute
 from ruamel.yaml import YAML
 from ruamel.yaml.scalarstring import LiteralScalarString
 
-from frigate.api import app as main_app
 from frigate.api import (
+    analytics,
     auth,
     camera,
     chat,
@@ -65,6 +65,7 @@ from frigate.api import (
     record,
     review,
 )
+from frigate.api import app as main_app
 from frigate.api.auth import require_admin_by_default
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -138,6 +139,7 @@ ACCESS_NOTES = {
 
 # Mirrors the router set wired up in frigate.api.fastapi_app.
 ROUTERS = [
+    analytics.router,
     auth.router,
     camera.router,
     chat.router,
