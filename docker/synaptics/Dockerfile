@@ -22,6 +22,7 @@ pip3 install --no-deps -U /deps/synap-wheels/*.whl
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+ENV FRIGATE_IMAGE_VARIANT=synaptics
 
 COPY --from=synap1680-wheels /rootfs/usr/local/lib/*.so /usr/lib
 
