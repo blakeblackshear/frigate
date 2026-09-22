@@ -1,0 +1,1482 @@
+{
+  "$defs": {
+    "Arch": {
+      "enum": [
+        "x86_64",
+        "aarch64",
+        "other"
+      ],
+      "title": "Arch",
+      "type": "string"
+    },
+    "BirdseyeModeEnum": {
+      "enum": [
+        "continuous",
+        "motion",
+        "all_objects",
+        "alerts",
+        "detections"
+      ],
+      "title": "BirdseyeModeEnum",
+      "type": "string"
+    },
+    "BirdseyeUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Whether birdseye is on",
+          "title": "Enabled",
+          "type": "boolean",
+          "x-public": true
+        },
+        "modes": {
+          "description": "Birdseye modes",
+          "items": {
+            "$ref": "#/$defs/BirdseyeModeEnum"
+          },
+          "title": "Modes",
+          "type": "array",
+          "x-public": true
+        },
+        "restream": {
+          "description": "Whether birdseye is restreamed",
+          "title": "Restream",
+          "type": "boolean",
+          "x-public": true
+        }
+      },
+      "required": [
+        "enabled",
+        "modes",
+        "restream"
+      ],
+      "title": "BirdseyeUsage",
+      "type": "object"
+    },
+    "CameraTypeEnum": {
+      "enum": [
+        "generic",
+        "lpr"
+      ],
+      "title": "CameraTypeEnum",
+      "type": "string"
+    },
+    "CamerasSection": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "description": "Cameras with audio detection on",
+          "minimum": 0,
+          "title": "Audio",
+          "type": "integer",
+          "x-public": true
+        },
+        "audio_transcription": {
+          "description": "Cameras with audio transcription on",
+          "minimum": 0,
+          "title": "Audio Transcription",
+          "type": "integer",
+          "x-public": true
+        },
+        "autotracking": {
+          "description": "Cameras with PTZ autotracking on",
+          "minimum": 0,
+          "title": "Autotracking",
+          "type": "integer",
+          "x-public": true
+        },
+        "birdseye": {
+          "description": "Cameras in birdseye",
+          "minimum": 0,
+          "title": "Birdseye",
+          "type": "integer",
+          "x-public": true
+        },
+        "cameras_with_zones": {
+          "description": "Cameras with at least one zone",
+          "minimum": 0,
+          "title": "Cameras With Zones",
+          "type": "integer",
+          "x-public": true
+        },
+        "connection_quality": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Cameras by connection quality at send time",
+          "propertyNames": {
+            "$ref": "#/$defs/ConnectionQuality"
+          },
+          "title": "Connection Quality",
+          "type": "object",
+          "x-public": true
+        },
+        "detect": {
+          "description": "Cameras with detection on",
+          "minimum": 0,
+          "title": "Detect",
+          "type": "integer",
+          "x-public": true
+        },
+        "detect_fps": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Cameras by detect fps",
+          "propertyNames": {
+            "$ref": "#/$defs/FpsBucket"
+          },
+          "title": "Detect Fps",
+          "type": "object",
+          "x-public": true
+        },
+        "detect_height": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Cameras by detect resolution height",
+          "propertyNames": {
+            "$ref": "#/$defs/HeightBucket"
+          },
+          "title": "Detect Height",
+          "type": "object",
+          "x-public": true
+        },
+        "enabled": {
+          "description": "Enabled cameras",
+          "minimum": 0,
+          "title": "Enabled",
+          "type": "integer",
+          "x-public": true
+        },
+        "face_recognition": {
+          "description": "Cameras with face recognition on",
+          "minimum": 0,
+          "title": "Face Recognition",
+          "type": "integer",
+          "x-public": true
+        },
+        "go2rtc_restream": {
+          "description": "Cameras with an input from the go2rtc restream",
+          "minimum": 0,
+          "title": "Go2Rtc Restream",
+          "type": "integer",
+          "x-public": true
+        },
+        "hwaccel": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Cameras by the resolved hwaccel preset of the detect input",
+          "propertyNames": {
+            "$ref": "#/$defs/HwaccelKey"
+          },
+          "title": "Hwaccel",
+          "type": "object",
+          "x-public": true
+        },
+        "input_preset": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Cameras by the input preset of the detect input",
+          "propertyNames": {
+            "$ref": "#/$defs/InputPresetKey"
+          },
+          "title": "Input Preset",
+          "type": "object",
+          "x-public": true
+        },
+        "lpr": {
+          "description": "Cameras with license plate recognition on",
+          "minimum": 0,
+          "title": "Lpr",
+          "type": "integer",
+          "x-public": true
+        },
+        "motion_masks": {
+          "description": "Motion masks across cameras",
+          "minimum": 0,
+          "title": "Motion Masks",
+          "type": "integer",
+          "x-public": true
+        },
+        "notifications": {
+          "description": "Cameras with notifications on",
+          "minimum": 0,
+          "title": "Notifications",
+          "type": "integer",
+          "x-public": true
+        },
+        "object_genai": {
+          "description": "Cameras with GenAI object descriptions on",
+          "minimum": 0,
+          "title": "Object Genai",
+          "type": "integer",
+          "x-public": true
+        },
+        "object_masks": {
+          "description": "Object masks across cameras",
+          "minimum": 0,
+          "title": "Object Masks",
+          "type": "integer",
+          "x-public": true
+        },
+        "onvif": {
+          "description": "Cameras with an ONVIF host",
+          "minimum": 0,
+          "title": "Onvif",
+          "type": "integer",
+          "x-public": true
+        },
+        "record": {
+          "description": "Cameras with recording on",
+          "minimum": 0,
+          "title": "Record",
+          "type": "integer",
+          "x-public": true
+        },
+        "retain_days": {
+          "$ref": "#/$defs/RetainDays",
+          "description": "Recording retention",
+          "x-public": true
+        },
+        "review_genai": {
+          "description": "Cameras with GenAI review summaries on",
+          "minimum": 0,
+          "title": "Review Genai",
+          "type": "integer",
+          "x-public": true
+        },
+        "separate_detect_stream": {
+          "description": "Cameras whose detect input differs from their record input",
+          "minimum": 0,
+          "title": "Separate Detect Stream",
+          "type": "integer",
+          "x-public": true
+        },
+        "snapshots": {
+          "description": "Cameras with snapshots on",
+          "minimum": 0,
+          "title": "Snapshots",
+          "type": "integer",
+          "x-public": true
+        },
+        "sub_stream_record": {
+          "description": "Cameras with sub stream recording on",
+          "minimum": 0,
+          "title": "Sub Stream Record",
+          "type": "integer",
+          "x-public": true
+        },
+        "total": {
+          "description": "Configured cameras",
+          "minimum": 0,
+          "title": "Total",
+          "type": "integer",
+          "x-public": true
+        },
+        "types": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Cameras by type",
+          "propertyNames": {
+            "$ref": "#/$defs/CameraTypeEnum"
+          },
+          "title": "Types",
+          "type": "object",
+          "x-public": true
+        },
+        "zones": {
+          "description": "Zones across cameras",
+          "minimum": 0,
+          "title": "Zones",
+          "type": "integer",
+          "x-public": true
+        }
+      },
+      "required": [
+        "total",
+        "enabled",
+        "types",
+        "detect_height",
+        "detect_fps",
+        "hwaccel",
+        "input_preset",
+        "go2rtc_restream",
+        "separate_detect_stream",
+        "detect",
+        "record",
+        "sub_stream_record",
+        "snapshots",
+        "audio",
+        "audio_transcription",
+        "birdseye",
+        "onvif",
+        "autotracking",
+        "face_recognition",
+        "lpr",
+        "review_genai",
+        "object_genai",
+        "notifications",
+        "zones",
+        "cameras_with_zones",
+        "motion_masks",
+        "object_masks",
+        "connection_quality",
+        "retain_days"
+      ],
+      "title": "CamerasSection",
+      "type": "object"
+    },
+    "ClassificationUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "object": {
+          "description": "Custom object classification models",
+          "minimum": 0,
+          "title": "Object",
+          "type": "integer",
+          "x-public": true
+        },
+        "state": {
+          "description": "Custom state classification models",
+          "minimum": 0,
+          "title": "State",
+          "type": "integer",
+          "x-public": true
+        }
+      },
+      "required": [
+        "state",
+        "object"
+      ],
+      "title": "ClassificationUsage",
+      "type": "object"
+    },
+    "ConnectionQuality": {
+      "enum": [
+        "excellent",
+        "fair",
+        "poor",
+        "unusable"
+      ],
+      "title": "ConnectionQuality",
+      "type": "string"
+    },
+    "DecodeFamily": {
+      "enum": [
+        "nvidia",
+        "vaapi",
+        "rkmpp",
+        "intel-qsv",
+        "jetson",
+        "rpi",
+        "other"
+      ],
+      "title": "DecodeFamily",
+      "type": "string"
+    },
+    "DetectionModel": {
+      "additionalProperties": false,
+      "properties": {
+        "detector": {
+          "$ref": "#/$defs/DetectorTypeEnum",
+          "description": "Detector type the model runs on",
+          "x-public": true
+        },
+        "devices": {
+          "description": "Devices the model runs on",
+          "minimum": 0,
+          "title": "Devices",
+          "type": "integer",
+          "x-public": true
+        },
+        "inference_ms": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Mean inference time across the model's detector processes, null before the first stats",
+          "title": "Inference Ms",
+          "x-public": true
+        },
+        "input": {
+          "description": "Model input size as WxH",
+          "pattern": "^\\d{1,5}x\\d{1,5}$",
+          "title": "Input",
+          "type": "string",
+          "x-public": true
+        },
+        "model_type": {
+          "$ref": "#/$defs/ModelTypeEnum",
+          "description": "Model architecture",
+          "x-public": true
+        },
+        "source": {
+          "$ref": "#/$defs/ModelSource",
+          "description": "Where the model came from",
+          "x-public": false
+        }
+      },
+      "required": [
+        "detector",
+        "devices",
+        "model_type",
+        "input",
+        "source",
+        "inference_ms"
+      ],
+      "title": "DetectionModel",
+      "type": "object"
+    },
+    "DetectionSection": {
+      "additionalProperties": false,
+      "properties": {
+        "detection_fps": {
+          "description": "Detections per second across cameras",
+          "minimum": 0.0,
+          "title": "Detection Fps",
+          "type": "number",
+          "x-public": true
+        },
+        "models": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DetectionModel"
+          },
+          "description": "Detection models keyed by scene",
+          "propertyNames": {
+            "$ref": "#/$defs/SceneEnum"
+          },
+          "title": "Models",
+          "type": "object",
+          "x-public": true
+        },
+        "skipped_fps": {
+          "description": "Frames per second skipped across cameras",
+          "minimum": 0.0,
+          "title": "Skipped Fps",
+          "type": "number",
+          "x-public": true
+        }
+      },
+      "required": [
+        "models",
+        "detection_fps",
+        "skipped_fps"
+      ],
+      "title": "DetectionSection",
+      "type": "object"
+    },
+    "DetectorTypeEnum": {
+      "enum": [
+        "axengine",
+        "cpu",
+        "deepx",
+        "edgetpu",
+        "hailo",
+        "memryx",
+        "onnx",
+        "openvino",
+        "rknn",
+        "synaptics",
+        "teflon_tfl",
+        "tensorrt",
+        "zmq"
+      ],
+      "title": "DetectorTypeEnum",
+      "type": "string"
+    },
+    "EnrichmentDevice": {
+      "enum": [
+        "cpu",
+        "cuda",
+        "tensorrt",
+        "migraphx",
+        "openvino_cpu",
+        "openvino_gpu",
+        "openvino_npu",
+        "other"
+      ],
+      "title": "EnrichmentDevice",
+      "type": "string"
+    },
+    "EnrichmentTiming": {
+      "enum": [
+        "face",
+        "lpr",
+        "plate_detection",
+        "image_embedding",
+        "text_embedding",
+        "review_description",
+        "object_description"
+      ],
+      "title": "EnrichmentTiming",
+      "type": "string"
+    },
+    "EnrichmentUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "device": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnrichmentDevice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Device the model loaded on, null when it isn't loaded",
+          "x-public": true
+        },
+        "enabled": {
+          "description": "Whether the enrichment is on",
+          "title": "Enabled",
+          "type": "boolean",
+          "x-public": true
+        },
+        "model_size": {
+          "$ref": "#/$defs/ModelSizeEnum",
+          "description": "Configured model size",
+          "x-public": true
+        }
+      },
+      "required": [
+        "enabled",
+        "model_size",
+        "device"
+      ],
+      "title": "EnrichmentUsage",
+      "type": "object"
+    },
+    "FeaturesSection": {
+      "additionalProperties": false,
+      "properties": {
+        "audio_transcription": {
+          "$ref": "#/$defs/TranscriptionUsage",
+          "description": "Audio transcription",
+          "x-public": true
+        },
+        "auth": {
+          "description": "Whether authentication is on",
+          "title": "Auth",
+          "type": "boolean",
+          "x-public": true
+        },
+        "birdseye": {
+          "$ref": "#/$defs/BirdseyeUsage",
+          "description": "Birdseye",
+          "x-public": true
+        },
+        "camera_groups": {
+          "description": "Camera groups",
+          "minimum": 0,
+          "title": "Camera Groups",
+          "type": "integer",
+          "x-public": true
+        },
+        "classification_models": {
+          "$ref": "#/$defs/ClassificationUsage",
+          "description": "Custom classification models",
+          "x-public": true
+        },
+        "face_recognition": {
+          "$ref": "#/$defs/EnrichmentUsage",
+          "description": "Face recognition",
+          "x-public": true
+        },
+        "genai": {
+          "$ref": "#/$defs/GenAIUsage",
+          "description": "Generative AI providers",
+          "x-public": true
+        },
+        "lpr": {
+          "$ref": "#/$defs/EnrichmentUsage",
+          "description": "License plate recognition",
+          "x-public": true
+        },
+        "mqtt": {
+          "description": "Whether MQTT is on",
+          "title": "Mqtt",
+          "type": "boolean",
+          "x-public": true
+        },
+        "notifications": {
+          "description": "Whether web push notifications are on",
+          "title": "Notifications",
+          "type": "boolean",
+          "x-public": true
+        },
+        "plus_api_key": {
+          "description": "Whether a Frigate+ API key is set",
+          "title": "Plus Api Key",
+          "type": "boolean",
+          "x-public": false
+        },
+        "profiles": {
+          "description": "Profiles",
+          "minimum": 0,
+          "title": "Profiles",
+          "type": "integer",
+          "x-public": true
+        },
+        "proxy_auth": {
+          "description": "Whether a proxy supplies the user header",
+          "title": "Proxy Auth",
+          "type": "boolean",
+          "x-public": true
+        },
+        "semantic_search": {
+          "$ref": "#/$defs/SemanticSearchUsage",
+          "description": "Semantic search",
+          "x-public": true
+        },
+        "tls": {
+          "description": "Whether TLS is on",
+          "title": "Tls",
+          "type": "boolean",
+          "x-public": true
+        },
+        "users": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Users by role",
+          "propertyNames": {
+            "$ref": "#/$defs/UserRole"
+          },
+          "title": "Users",
+          "type": "object",
+          "x-public": true
+        }
+      },
+      "required": [
+        "face_recognition",
+        "lpr",
+        "semantic_search",
+        "audio_transcription",
+        "genai",
+        "classification_models",
+        "birdseye",
+        "mqtt",
+        "notifications",
+        "auth",
+        "proxy_auth",
+        "tls",
+        "users",
+        "camera_groups",
+        "profiles",
+        "plus_api_key"
+      ],
+      "title": "FeaturesSection",
+      "type": "object"
+    },
+    "FpsBucket": {
+      "enum": [
+        "le_5",
+        "6_10",
+        "gt_10"
+      ],
+      "title": "FpsBucket",
+      "type": "string"
+    },
+    "GenAIProviderEnum": {
+      "enum": [
+        "openai",
+        "azure_openai",
+        "gemini",
+        "ollama",
+        "llamacpp"
+      ],
+      "title": "GenAIProviderEnum",
+      "type": "string"
+    },
+    "GenAIRoleEnum": {
+      "enum": [
+        "chat",
+        "descriptions",
+        "embeddings",
+        "transcribe"
+      ],
+      "title": "GenAIRoleEnum",
+      "type": "string"
+    },
+    "GenAIUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "providers": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Configured GenAI providers by type",
+          "propertyNames": {
+            "$ref": "#/$defs/GenAIProviderEnum"
+          },
+          "title": "Providers",
+          "type": "object",
+          "x-public": true
+        },
+        "roles": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Configured GenAI providers by role",
+          "propertyNames": {
+            "$ref": "#/$defs/GenAIRoleEnum"
+          },
+          "title": "Roles",
+          "type": "object",
+          "x-public": true
+        }
+      },
+      "required": [
+        "providers",
+        "roles"
+      ],
+      "title": "GenAIUsage",
+      "type": "object"
+    },
+    "GpuInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "description": "GPU name as the hardware reports it",
+          "maxLength": 64,
+          "title": "Name",
+          "type": "string",
+          "x-public": true
+        },
+        "vendor": {
+          "$ref": "#/$defs/GpuVendor",
+          "description": "GPU vendor",
+          "x-public": true
+        }
+      },
+      "required": [
+        "vendor",
+        "name"
+      ],
+      "title": "GpuInfo",
+      "type": "object"
+    },
+    "GpuVendor": {
+      "enum": [
+        "intel",
+        "amd",
+        "nvidia",
+        "rockchip",
+        "rpi",
+        "other"
+      ],
+      "title": "GpuVendor",
+      "type": "string"
+    },
+    "HardwareKey": {
+      "enum": [
+        "edgetpu:pci",
+        "edgetpu:usb",
+        "openvino:GPU",
+        "openvino:NPU",
+        "onnx:amd",
+        "onnx:nvidia",
+        "tensorrt",
+        "hailo",
+        "memryx",
+        "deepx",
+        "rknn",
+        "axengine",
+        "synaptics",
+        "cpu",
+        "other"
+      ],
+      "title": "HardwareKey",
+      "type": "string"
+    },
+    "HardwareSection": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu_cores": {
+          "description": "Logical CPU count",
+          "minimum": 0,
+          "title": "Cpu Cores",
+          "type": "integer",
+          "x-public": true
+        },
+        "cpu_model": {
+          "description": "CPU or board model as the hardware reports it",
+          "maxLength": 64,
+          "title": "Cpu Model",
+          "type": "string",
+          "x-public": true
+        },
+        "decode_families": {
+          "description": "Hardware decode families this system can use",
+          "items": {
+            "$ref": "#/$defs/DecodeFamily"
+          },
+          "title": "Decode Families",
+          "type": "array",
+          "x-public": true
+        },
+        "detection_hardware": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Detection hardware found, as unit counts by kind",
+          "propertyNames": {
+            "$ref": "#/$defs/HardwareKey"
+          },
+          "title": "Detection Hardware",
+          "type": "object",
+          "x-public": true
+        },
+        "gpus": {
+          "description": "GPUs the stats collector found",
+          "items": {
+            "$ref": "#/$defs/GpuInfo"
+          },
+          "title": "Gpus",
+          "type": "array",
+          "x-public": true
+        },
+        "memory_gb": {
+          "description": "Total memory in GB",
+          "minimum": 0,
+          "title": "Memory Gb",
+          "type": "integer",
+          "x-public": true
+        },
+        "storage": {
+          "$ref": "#/$defs/StorageInfo",
+          "description": "Recordings storage",
+          "x-public": true
+        }
+      },
+      "required": [
+        "cpu_model",
+        "cpu_cores",
+        "memory_gb",
+        "gpus",
+        "decode_families",
+        "detection_hardware",
+        "storage"
+      ],
+      "title": "HardwareSection",
+      "type": "object"
+    },
+    "HealthSection": {
+      "additionalProperties": false,
+      "properties": {
+        "cpu_percent": {
+          "description": "System CPU use at send time",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Cpu Percent",
+          "type": "integer",
+          "x-public": true
+        },
+        "enrichment_ms": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "Mean enrichment inference times in milliseconds",
+          "propertyNames": {
+            "$ref": "#/$defs/EnrichmentTiming"
+          },
+          "title": "Enrichment Ms",
+          "type": "object",
+          "x-public": true
+        },
+        "notices": {
+          "additionalProperties": {
+            "$ref": "#/$defs/NoticeCounts"
+          },
+          "description": "Notice counts by kind since the last accepted report",
+          "propertyNames": {
+            "$ref": "#/$defs/NoticeKindKey"
+          },
+          "title": "Notices",
+          "type": "object",
+          "x-public": false
+        },
+        "retention_unmet": {
+          "description": "Whether storage can't keep the configured retention",
+          "title": "Retention Unmet",
+          "type": "boolean",
+          "x-public": true
+        },
+        "uptime_hours": {
+          "description": "Hours since Frigate started",
+          "minimum": 0,
+          "title": "Uptime Hours",
+          "type": "integer",
+          "x-public": true
+        }
+      },
+      "required": [
+        "uptime_hours",
+        "cpu_percent",
+        "enrichment_ms",
+        "retention_unmet",
+        "notices"
+      ],
+      "title": "HealthSection",
+      "type": "object"
+    },
+    "HeightBucket": {
+      "enum": [
+        "le_360",
+        "480",
+        "720",
+        "1080",
+        "1440",
+        "ge_2160"
+      ],
+      "title": "HeightBucket",
+      "type": "string"
+    },
+    "HwaccelKey": {
+      "enum": [
+        "rpi-64-h264",
+        "rpi-64-h265",
+        "vaapi",
+        "intel-qsv-h264",
+        "intel-qsv-h265",
+        "nvidia",
+        "jetson-h264",
+        "jetson-h265",
+        "rkmpp-no-dump_extra",
+        "vulkan",
+        "amd-amf",
+        "nvidia-h264",
+        "nvidia-h265",
+        "nvidia-mjpeg",
+        "rkmpp",
+        "rk-h264",
+        "rk-h265",
+        "custom",
+        "none"
+      ],
+      "title": "HwaccelKey",
+      "type": "string"
+    },
+    "ImageVariant": {
+      "enum": [
+        "standard",
+        "rpi",
+        "tensorrt",
+        "tensorrt-jp6",
+        "rocm",
+        "rk",
+        "synaptics",
+        "dev",
+        "other"
+      ],
+      "title": "ImageVariant",
+      "type": "string"
+    },
+    "InputPresetKey": {
+      "enum": [
+        "http-jpeg-generic",
+        "http-mjpeg-generic",
+        "http-reolink",
+        "rtmp-generic",
+        "rtsp-generic",
+        "rtsp-restream",
+        "rtsp-restream-low-latency",
+        "rtsp-udp",
+        "rtsp-blue-iris",
+        "custom",
+        "none"
+      ],
+      "title": "InputPresetKey",
+      "type": "string"
+    },
+    "InstallSection": {
+      "additionalProperties": false,
+      "properties": {
+        "arch": {
+          "$ref": "#/$defs/Arch",
+          "description": "CPU architecture",
+          "x-public": true
+        },
+        "image_variant": {
+          "$ref": "#/$defs/ImageVariant",
+          "description": "Published image the install runs",
+          "x-public": true
+        },
+        "install_type": {
+          "$ref": "#/$defs/InstallType",
+          "description": "How Frigate is installed",
+          "x-public": true
+        },
+        "kernel": {
+          "description": "Host kernel as major.minor",
+          "pattern": "^(\\d{1,3}\\.\\d{1,3}|unknown)$",
+          "title": "Kernel",
+          "type": "string",
+          "x-public": true
+        },
+        "run_as_root": {
+          "description": "Whether the main process runs as root",
+          "title": "Run As Root",
+          "type": "boolean",
+          "x-public": true
+        },
+        "version": {
+          "description": "Frigate version string",
+          "maxLength": 32,
+          "title": "Version",
+          "type": "string",
+          "x-public": true
+        }
+      },
+      "required": [
+        "version",
+        "image_variant",
+        "install_type",
+        "arch",
+        "kernel",
+        "run_as_root"
+      ],
+      "title": "InstallSection",
+      "type": "object"
+    },
+    "InstallType": {
+      "enum": [
+        "ha_addon",
+        "docker",
+        "podman",
+        "kubernetes",
+        "unknown"
+      ],
+      "title": "InstallType",
+      "type": "string"
+    },
+    "ModelSizeEnum": {
+      "enum": [
+        "small",
+        "large"
+      ],
+      "title": "ModelSizeEnum",
+      "type": "string"
+    },
+    "ModelSource": {
+      "enum": [
+        "default",
+        "plus",
+        "custom"
+      ],
+      "title": "ModelSource",
+      "type": "string"
+    },
+    "ModelTypeEnum": {
+      "enum": [
+        "dfine",
+        "rfdetr",
+        "ssd",
+        "yolox",
+        "yolonas",
+        "yolo-generic"
+      ],
+      "title": "ModelTypeEnum",
+      "type": "string"
+    },
+    "NoticeCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "dismissals": {
+          "description": "Dismissals since the last accepted report",
+          "minimum": 0,
+          "title": "Dismissals",
+          "type": "integer",
+          "x-public": true
+        },
+        "occurrences": {
+          "description": "Occurrences since the last accepted report",
+          "minimum": 0,
+          "title": "Occurrences",
+          "type": "integer",
+          "x-public": true
+        }
+      },
+      "required": [
+        "occurrences",
+        "dismissals"
+      ],
+      "title": "NoticeCounts",
+      "type": "object"
+    },
+    "NoticeKindKey": {
+      "enum": [
+        "detector_stuck",
+        "model_download_failed",
+        "skipped_detections",
+        "shm_too_low",
+        "failed_login"
+      ],
+      "title": "NoticeKindKey",
+      "type": "string"
+    },
+    "RetainBucket": {
+      "enum": [
+        "0",
+        "1_7",
+        "8_30",
+        "gt_30"
+      ],
+      "title": "RetainBucket",
+      "type": "string"
+    },
+    "RetainDays": {
+      "additionalProperties": false,
+      "properties": {
+        "alerts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Recording cameras by alert retention in days",
+          "propertyNames": {
+            "$ref": "#/$defs/RetainBucket"
+          },
+          "title": "Alerts",
+          "type": "object",
+          "x-public": true
+        },
+        "continuous": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Recording cameras by continuous retention in days",
+          "propertyNames": {
+            "$ref": "#/$defs/RetainBucket"
+          },
+          "title": "Continuous",
+          "type": "object",
+          "x-public": true
+        },
+        "detections": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Recording cameras by detection retention in days",
+          "propertyNames": {
+            "$ref": "#/$defs/RetainBucket"
+          },
+          "title": "Detections",
+          "type": "object",
+          "x-public": true
+        },
+        "motion": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Recording cameras by motion retention in days",
+          "propertyNames": {
+            "$ref": "#/$defs/RetainBucket"
+          },
+          "title": "Motion",
+          "type": "object",
+          "x-public": true
+        }
+      },
+      "required": [
+        "continuous",
+        "motion",
+        "alerts",
+        "detections"
+      ],
+      "title": "RetainDays",
+      "type": "object"
+    },
+    "SceneEnum": {
+      "description": "The camera environment a detection model is intended for.",
+      "enum": [
+        "all",
+        "indoor",
+        "outdoor",
+        "indoor_thermal",
+        "outdoor_thermal"
+      ],
+      "title": "SceneEnum",
+      "type": "string"
+    },
+    "SemanticSearchModel": {
+      "enum": [
+        "jinav1",
+        "jinav2",
+        "genai"
+      ],
+      "title": "SemanticSearchModel",
+      "type": "string"
+    },
+    "SemanticSearchUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "device": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EnrichmentDevice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Device the model loaded on, null when it isn't loaded",
+          "x-public": true
+        },
+        "enabled": {
+          "description": "Whether semantic search is on",
+          "title": "Enabled",
+          "type": "boolean",
+          "x-public": true
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SemanticSearchModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Embedding model, genai for a GenAI provider",
+          "x-public": true
+        },
+        "model_size": {
+          "$ref": "#/$defs/ModelSizeEnum",
+          "description": "Configured model size",
+          "x-public": true
+        },
+        "triggers": {
+          "description": "Semantic search triggers across cameras",
+          "minimum": 0,
+          "title": "Triggers",
+          "type": "integer",
+          "x-public": true
+        }
+      },
+      "required": [
+        "enabled",
+        "model",
+        "model_size",
+        "device",
+        "triggers"
+      ],
+      "title": "SemanticSearchUsage",
+      "type": "object"
+    },
+    "StorageInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "record_fs": {
+          "description": "Filesystem of the recordings volume",
+          "maxLength": 16,
+          "title": "Record Fs",
+          "type": "string",
+          "x-public": true
+        },
+        "record_total_gb": {
+          "description": "Size of the recordings volume in GB",
+          "minimum": 0,
+          "title": "Record Total Gb",
+          "type": "integer",
+          "x-public": true
+        },
+        "record_used_pct": {
+          "description": "Percent of the recordings volume in use",
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Record Used Pct",
+          "type": "integer",
+          "x-public": true
+        }
+      },
+      "required": [
+        "record_fs",
+        "record_total_gb",
+        "record_used_pct"
+      ],
+      "title": "StorageInfo",
+      "type": "object"
+    },
+    "TranscriptionModel": {
+      "enum": [
+        "whisper",
+        "genai"
+      ],
+      "title": "TranscriptionModel",
+      "type": "string"
+    },
+    "TranscriptionUsage": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "description": "Whether audio transcription is on",
+          "title": "Enabled",
+          "type": "boolean",
+          "x-public": true
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TranscriptionModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Transcription model, genai for a GenAI provider",
+          "x-public": true
+        },
+        "model_size": {
+          "$ref": "#/$defs/ModelSizeEnum",
+          "description": "Configured model size",
+          "x-public": true
+        }
+      },
+      "required": [
+        "enabled",
+        "model",
+        "model_size"
+      ],
+      "title": "TranscriptionUsage",
+      "type": "object"
+    },
+    "UserRole": {
+      "enum": [
+        "admin",
+        "viewer",
+        "custom"
+      ],
+      "title": "UserRole",
+      "type": "string"
+    }
+  },
+  "$id": "https://docs.frigate.video/frigate-analytics-schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "cameras": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CamerasSection"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Cameras, null if its collector failed",
+      "x-public": true
+    },
+    "detection": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DetectionSection"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Object detection, null if its collector failed",
+      "x-public": true
+    },
+    "features": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FeaturesSection"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Features, null if its collector failed",
+      "x-public": true
+    },
+    "hardware": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HardwareSection"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Hardware, null if its collector failed",
+      "x-public": true
+    },
+    "health": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/HealthSection"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Health, null if its collector failed",
+      "x-public": true
+    },
+    "install": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InstallSection"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Install, null if its collector failed",
+      "x-public": true
+    },
+    "install_id": {
+      "description": "Random install identifier",
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Install Id",
+      "type": "string",
+      "x-public": false
+    },
+    "report_id": {
+      "description": "Random identifier of this report",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+      "title": "Report Id",
+      "type": "string",
+      "x-public": false
+    },
+    "schema_version": {
+      "description": "Report format version",
+      "minimum": 1,
+      "title": "Schema Version",
+      "type": "integer",
+      "x-public": true
+    },
+    "sent_at": {
+      "description": "Unix time the report was built",
+      "minimum": 0,
+      "title": "Sent At",
+      "type": "integer",
+      "x-public": true
+    }
+  },
+  "required": [
+    "schema_version",
+    "install_id",
+    "report_id",
+    "sent_at",
+    "install",
+    "hardware",
+    "detection",
+    "cameras",
+    "features",
+    "health"
+  ],
+  "title": "AnalyticsReport",
+  "type": "object",
+  "x-schema-version": 1
+}
