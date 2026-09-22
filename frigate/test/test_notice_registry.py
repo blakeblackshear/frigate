@@ -48,6 +48,16 @@ class TestNoticeKinds(unittest.TestCase):
 
         self.assertIsNone(kind.link_for({"version": "0.19.1"}))
 
+    def test_analytics_prompt_links_to_telemetry_settings(self):
+        kind = NOTICE_KINDS["analytics_prompt"]
+
+        self.assertEqual(kind.link_for({}), "/settings?page=systemTelemetry")
+        self.assertFalse(kind.counts_repeats)
+        self.assertFalse(kind.reportable)
+
+    def test_update_available_is_not_reported(self):
+        self.assertFalse(NOTICE_KINDS["update_available"].reportable)
+
 
 class RegistryTestCase(unittest.TestCase):
     def setUp(self):
@@ -276,6 +286,24 @@ class TestNoticeRegistry(RegistryTestCase):
         self.assertEqual(self.registry.dismissed_checks(), [])
         dismissals = {s["kind"]: s["dismissals"] for s in self.registry.stats()}
         self.assertEqual(dismissals["detector_stuck"], 1)
+
+
+class TestMarkReported(RegistryTestCase):
+    def test_moves_watermarks_to_the_snapshot_not_the_current_count(self):
+        self.registry.raise_notice(
+            "detector_stuck", scope="ov", params={"detector": "ov"}
+        )
+        snapshot = self.registry.stats()
+        self.registry.raise_notice(
+            "detector_stuck", scope="ov", params={"detector": "ov"}
+        )
+
+        self.registry.mark_reported(snapshot)
+
+        row = self.registry.stats()[0]
+        self.assertEqual(row["occurrences"], 2)
+        self.assertEqual(row["reported_occurrences"], 1)
+        self.assertEqual(row["reported_dismissals"], 0)
 
 
 class TestApply(RegistryTestCase):

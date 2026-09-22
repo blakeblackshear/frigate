@@ -319,6 +319,19 @@ class NoticeRegistry:
             if row.kind in NOTICE_KINDS
         ]
 
+    def mark_reported(self, snapshot: list[dict[str, Any]]) -> None:
+        """Move the analytics watermarks to the counts a sent report was built from.
+
+        Using the snapshot rather than the current counts sends anything raised
+        while the report was in flight with the next one.
+        """
+        with self._lock:
+            for row in snapshot:
+                NoticeStats.update(
+                    reported_occurrences=row["occurrences"],
+                    reported_dismissals=row["dismissals"],
+                ).where(NoticeStats.kind == row["kind"]).execute()
+
     def _write_repeats(
         self,
         row: Notice,
