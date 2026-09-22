@@ -82,5 +82,30 @@ class TestSwapRuntimeConfig(unittest.TestCase):
         app.genai_manager.update_config.assert_called_once_with(config)
 
 
+class TestConfigHolder(unittest.TestCase):
+    def test_set_passes_the_new_config_to_subscribers(self) -> None:
+        holder = ConfigHolder(MagicMock(name="boot_config"))
+        listener = MagicMock()
+        holder.subscribe(listener)
+        config = MagicMock(name="new_config")
+
+        holder.set(config)
+
+        listener.assert_called_once_with(config)
+
+    def test_a_failing_subscriber_does_not_block_the_swap(self) -> None:
+        holder = ConfigHolder(MagicMock(name="boot_config"))
+        after = MagicMock()
+        holder.subscribe(MagicMock(side_effect=RuntimeError("boom")))
+        holder.subscribe(after)
+        config = MagicMock(name="new_config")
+
+        with self.assertLogs("frigate.config.holder", "ERROR"):
+            holder.set(config)
+
+        self.assertIs(holder.config, config)
+        after.assert_called_once_with(config)
+
+
 if __name__ == "__main__":
     unittest.main()

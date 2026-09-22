@@ -1,8 +1,13 @@
 """Shared handle on the config object that is current for this instance."""
 
+import logging
+from collections.abc import Callable
+
 from .config import FrigateConfig
 
 __all__ = ["ConfigHolder"]
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigHolder:
@@ -23,12 +28,24 @@ class ConfigHolder:
 
     def __init__(self, config: FrigateConfig) -> None:
         self._config = config
+        self._listeners: list[Callable[[FrigateConfig], None]] = []
 
     @property
     def config(self) -> FrigateConfig:
         """The config as of the most recent successful save."""
         return self._config
 
+    def subscribe(self, listener: Callable[[FrigateConfig], None]) -> None:
+        """Call listener on the saving thread with each config installed later."""
+        self._listeners.append(listener)
+
     def set(self, config: FrigateConfig) -> None:
         """Install a freshly parsed config as the current one."""
         self._config = config
+
+        for listener in self._listeners:
+            try:
+                listener(config)
+            except Exception:
+                # a listener bug must not fail the save that has already applied
+                logger.exception("Config listener failed")

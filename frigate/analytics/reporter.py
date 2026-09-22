@@ -19,6 +19,7 @@ from frigate.analytics.state import (
     save_state,
 )
 from frigate.analytics.transport import SendOutcome, send_report
+from frigate.config import FrigateConfig
 from frigate.config.holder import ConfigHolder
 from frigate.const import ANALYTICS_URL
 from frigate.notices import raise_notice, resolve_notice
@@ -37,7 +38,7 @@ PROMPT_KIND = "analytics_prompt"
 
 
 class AnalyticsReporter(threading.Thread):
-    """Reads the live config on every wake, so a settings save needs no restart."""
+    """Follows the live config, so a settings save needs no restart."""
 
     def __init__(
         self,
@@ -66,6 +67,9 @@ class AnalyticsReporter(threading.Thread):
         self.interval = self._next_interval()
         self.opted_in: bool | None = None
         self.warned_unwritable = False
+        # a settings save runs on an API thread while a wake may be mid-attempt
+        self._lock = threading.Lock()
+        config_holder.subscribe(self._on_config)
 
     def _next_interval(self) -> float:
         return INTERVAL_S + self.rng.uniform(-JITTER_S, JITTER_S)
@@ -80,52 +84,66 @@ class AnalyticsReporter(threading.Thread):
             if self.stop_event.wait(WAKE_S):
                 break
 
+    def _on_config(self, config: FrigateConfig) -> None:
+        # a save can turn sharing off and back on between two wakes, so an
+        # opt-out is handled when it's saved rather than at the next wake
+        with self._lock:
+            if not config.safe_mode:
+                self._apply_consent(config.telemetry.analytics)
+
+    def _apply_consent(self, opted_in: bool) -> None:
+        # called with the lock held
+        if opted_in == self.opted_in:
+            return
+
+        self.opted_in = opted_in
+
+        if opted_in:
+            resolve_notice(PROMPT_KIND)
+        else:
+            raise_notice(PROMPT_KIND)
+            delete_state(self.state_path)
+
     def tick(self) -> None:
-        config = self.config_holder.config
+        with self._lock:
+            config = self.config_holder.config
 
-        # safe mode parses a default config where analytics reads as off, and
-        # handling that as an opt-out would delete the install ID
-        if config.safe_mode:
-            return
+            # safe mode parses a default config where analytics reads as off,
+            # and handling that as an opt-out would delete the install ID
+            if config.safe_mode:
+                return
 
-        opted_in = config.telemetry.analytics
+            self._apply_consent(config.telemetry.analytics)
 
-        if opted_in != self.opted_in:
-            self.opted_in = opted_in
+            if not config.telemetry.analytics:
+                return
 
-            if opted_in:
-                resolve_notice(PROMPT_KIND)
-            else:
-                raise_notice(PROMPT_KIND)
-                delete_state(self.state_path)
+            now = self.clock()
 
-        if not opted_in:
-            return
+            if now < self.first_due:
+                return
 
-        now = self.clock()
+            state = load_state(self.state_path) or new_state()
 
-        if now < self.first_due:
-            return
+            if not self._due(state.last_attempt_at, now):
+                return
 
-        state = load_state(self.state_path) or new_state()
+            # saved before sending, so a failing endpoint or a crash mid-send
+            # still waits a full interval; without saved state every boot would
+            # send under a new install ID
+            if not save_state(AnalyticsState(state.install_id, now), self.state_path):
+                if not self.warned_unwritable:
+                    logger.warning(
+                        "Analytics is on, but %s isn't writable, so no report is sent",
+                        self.state_path,
+                    )
+                    self.warned_unwritable = True
 
-        if not self._due(state.last_attempt_at, now):
-            return
+                return
 
-        # saved before sending, so a failing endpoint or a crash mid-send still
-        # waits a full interval; without saved state every boot would send
-        # under a new install ID
-        if not save_state(AnalyticsState(state.install_id, now), self.state_path):
-            if not self.warned_unwritable:
-                logger.warning(
-                    "Analytics is on, but %s can't be written, so no report is sent",
-                    self.state_path,
-                )
-                self.warned_unwritable = True
+            self.interval = self._next_interval()
 
-            return
-
-        self.interval = self._next_interval()
+        # the lock stays free during the request, so a save never waits on it
         self._send(state.install_id, now)
 
     def _due(self, last_attempt_at: float, now: float) -> bool:
@@ -141,9 +159,19 @@ class AnalyticsReporter(threading.Thread):
             stats=self.stats_emitter.get_latest_stats(),
             notice_stats=notice_stats,
         )
-        body = build_report(ctx, install_id, sent_at=int(now)).model_dump_json()
+        report = build_report(ctx, install_id, sent_at=int(now))
+        body = report.model_dump_json()
 
-        if self.send(self.url, body) is SendOutcome.accepted:
+        # consent can be withdrawn while the report builds
+        if not self.config_holder.config.telemetry.analytics:
+            return
+
+        if self.send(self.url, body) is not SendOutcome.accepted:
+            return
+
+        # a failed health section sent no notice counts, so they stay pending
+        if report.health is not None:
             self.notice_registry.mark_reported(notice_stats)
-            logger.info("Sent the daily analytics report")
-            logger.debug("Analytics report: %s", body)
+
+        logger.info("Sent the daily analytics report")
+        logger.debug("Analytics report: %s", body)

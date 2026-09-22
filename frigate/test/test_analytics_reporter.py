@@ -4,7 +4,6 @@ import os
 import tempfile
 import threading
 import unittest
-from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from frigate.analytics import reporter as reporter_module
@@ -18,6 +17,7 @@ from frigate.analytics.reporter import (
 )
 from frigate.analytics.state import AnalyticsState, load_state, save_state
 from frigate.analytics.transport import SendOutcome
+from frigate.config.holder import ConfigHolder
 from frigate.test.analytics_helpers import make_config
 
 SNAPSHOT = [
@@ -42,18 +42,16 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.registry.stats.return_value = SNAPSHOT
         self.stats = Mock()
         self.stats.get_latest_stats.return_value = {}
-        self.holder = SimpleNamespace(
-            config=make_config({"telemetry": {"analytics": True}})
-        )
+        self.holder = ConfigHolder(make_config({"telemetry": {"analytics": True}}))
 
         for name in ("raise_notice", "resolve_notice"):
             patcher = patch.object(reporter_module, name)
             setattr(self, name, patcher.start())
             self.addCleanup(patcher.stop)
 
-        built = Mock()
-        built.model_dump_json.return_value = '{"report": 1}'
-        patcher = patch.object(reporter_module, "build_report", return_value=built)
+        self.built = Mock()
+        self.built.model_dump_json.return_value = '{"report": 1}'
+        patcher = patch.object(reporter_module, "build_report", return_value=self.built)
         self.build_report = patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -126,8 +124,45 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.assertEqual(self.send.call_count, 1)
         self.registry.mark_reported.assert_not_called()
 
+    def test_an_accepted_report_without_health_keeps_the_watermarks(self):
+        self.built.health = None
+        reporter = self.reporter()
+        self.advance(FIRST_DELAY_S[0])
+
+        reporter.tick()
+
+        self.send.assert_called_once()
+        self.registry.mark_reported.assert_not_called()
+
+    def test_consent_withdrawn_while_the_report_builds_stops_the_send(self):
+        reporter = self.reporter()
+        self.advance(FIRST_DELAY_S[0])
+
+        def withdraw(*args, **kwargs):
+            self.holder.set(make_config())
+            return self.built
+
+        self.build_report.side_effect = withdraw
+        reporter.tick()
+
+        self.send.assert_not_called()
+        self.assertFalse(os.path.exists(self.path))
+
+    def test_turning_sharing_off_and_on_between_wakes_starts_a_fresh_identity(self):
+        save_state(AnalyticsState("a" * 32, 0.0), self.path)
+        reporter = self.reporter()
+        reporter.tick()
+
+        self.holder.set(make_config())
+        self.holder.set(make_config({"telemetry": {"analytics": True}}))
+        self.advance(FIRST_DELAY_S[0])
+        reporter.tick()
+
+        self.raise_notice.assert_called_once_with(PROMPT_KIND)
+        self.assertNotEqual(load_state(self.path).install_id, "a" * 32)
+
     def test_opting_out_raises_the_prompt_once_and_deletes_the_state(self):
-        self.holder.config = make_config()
+        self.holder.set(make_config())
         save_state(AnalyticsState("a" * 32, 0.0), self.path)
         reporter = self.reporter()
 
@@ -139,17 +174,17 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.send.assert_not_called()
 
     def test_opting_in_resolves_the_prompt(self):
-        self.holder.config = make_config()
+        self.holder.set(make_config())
         reporter = self.reporter()
         reporter.tick()
 
-        self.holder.config = make_config({"telemetry": {"analytics": True}})
+        self.holder.set(make_config({"telemetry": {"analytics": True}}))
         reporter.tick()
 
         self.resolve_notice.assert_called_once_with(PROMPT_KIND)
 
     def test_safe_mode_touches_nothing(self):
-        self.holder.config = make_config({"safe_mode": True})
+        self.holder.set(make_config({"safe_mode": True}))
         save_state(AnalyticsState("a" * 32, 0.0), self.path)
         reporter = self.reporter()
 
