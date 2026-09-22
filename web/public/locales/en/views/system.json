@@ -56,7 +56,8 @@
         "object_processing_behind": "Tracked object processing could not keep up, so camera frames were dropped. Check CPU utilization, and whether CPU limits or pinning on the container or VM are leaving Frigate too little CPU",
         "failed_login_one": "Failed login attempt for {{user}}",
         "failed_login_other": "Failed login attempts for {{user}}",
-        "update_available": "Frigate {{version}} is available"
+        "update_available": "Frigate {{version}} is available",
+        "analytics_prompt": "Share anonymous usage statistics to help improve Frigate"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
