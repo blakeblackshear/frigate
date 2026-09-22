@@ -170,7 +170,7 @@
       "naturalAspectLayout": {
         "label": "Use Natural Aspect Ratios",
         "desc": "On camera group live view dashboards, size each tile to its camera's own natural aspect ratio. When disabled, cameras are snapped to a standard wide, landscape, or tall tile shape.",
-        "descNote": "Toggling this setting on or off will clear the layout for all camera group live dashboards."
+        "descNote": "Toggling this setting on or off will clear the stored layout for all camera group live dashboards. Manual reconfiguration will be required."
       },
       "liveFallbackTimeout": {
         "label": "Live Player Fallback Timeout",

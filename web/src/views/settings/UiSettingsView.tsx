@@ -1,5 +1,3 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { LuInfo } from "react-icons/lu";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -71,7 +69,6 @@ type SwitchSettingRowProps = {
   id: string;
   label: string;
   description: string;
-  note?: string;
   checked: boolean | undefined;
   onCheckedChange: (checked: boolean | undefined) => void;
 };
@@ -80,7 +77,6 @@ function SwitchSettingRow({
   id,
   label,
   description,
-  note,
   checked,
   onCheckedChange,
 }: SwitchSettingRowProps) {
@@ -100,15 +96,6 @@ function SwitchSettingRow({
           </div>
         </div>
         <p className={DESCRIPTION_CLASS_NAME}>{description}</p>
-        {note && (
-          <Alert
-            variant="info"
-            className="flex items-center gap-2 p-2 [&>svg+div]:translate-y-0 [&>svg]:static [&>svg~*]:pl-0"
-          >
-            <LuInfo className="size-4 shrink-0" />
-            <AlertDescription className="text-xs">{note}</AlertDescription>
-          </Alert>
-        )}
       </div>
       <div className="hidden w-full md:flex md:max-w-2xl md:items-center">
         <Switch
@@ -448,7 +435,6 @@ export default function UiSettingsView() {
             id: "natural-aspect",
             label: t("general.liveDashboard.naturalAspectLayout.label"),
             description: t("general.liveDashboard.naturalAspectLayout.desc"),
-            note: t("general.liveDashboard.naturalAspectLayout.descNote"),
             checked: naturalAspect,
             onCheckedChange: () => setPendingConfirm("naturalAspect"),
           },
