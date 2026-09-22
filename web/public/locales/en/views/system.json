@@ -46,7 +46,7 @@
         "failed_login_one": "Failed login attempt for {{user}}",
         "failed_login_other": "Failed login attempts for {{user}}",
         "update_available": "Frigate {{version}} is available",
-        "analytics_prompt": "Share anonymous usage statistics to help improve Frigate"
+        "analytics_prompt": "Consider sharing anonymous usage statistics to help the developers improve Frigate"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
