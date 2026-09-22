@@ -44,6 +44,7 @@ RUN echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.
 
 WORKDIR /opt/frigate
 COPY --from=rootfs / /
+ENV FRIGATE_IMAGE_VARIANT=rocm
 
 RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
     && sed -i 's/args.append("setuptools")/args.append("setuptools==77.0.3")/' get-pip.py \
