@@ -5,9 +5,16 @@ import { useTranslation } from "react-i18next";
 type PlayerStatsProps = {
   stats: PlayerStatsType;
   minimal: boolean;
+  streamLabel?: string;
+  streamAuto?: boolean;
 };
 
-export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
+export function PlayerStats({
+  stats,
+  minimal,
+  streamLabel,
+  streamAuto = false,
+}: PlayerStatsProps) {
   const { t } = useTranslation(["components/player", "views/live"]);
   const streamTypeLabel = t(
     `stream.technology.name.${stats.streamType.toLowerCase()}`,
@@ -15,6 +22,16 @@ export function PlayerStats({ stats, minimal }: PlayerStatsProps) {
   );
   const fullStatsContent = (
     <>
+      {streamLabel != undefined && (
+        <p>
+          <span className="text-white/70">{t("stats.stream")}</span>{" "}
+          <span className="text-white">
+            {streamAuto
+              ? t("stats.streamAuto", { stream: streamLabel })
+              : streamLabel}
+          </span>
+        </p>
+      )}
       <p>
         <span className="text-white/70">{t("stats.streamType.title")}</span>{" "}
         <span className="text-white">{streamTypeLabel}</span>

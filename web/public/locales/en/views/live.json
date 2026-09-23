@@ -132,6 +132,18 @@
   },
   "stream": {
     "title": "Stream",
+    "auto": {
+      "label": "Auto",
+      "tips": "Switches streams to match your connection",
+      "selected": "Auto · {{stream}}",
+      "floorLabel": "Low bandwidth",
+      "reason": {
+        "bandwidth": "Playing {{stream}} because the connection couldn't keep up with a higher-quality stream",
+        "codec": "Playing {{stream}} because this browser can't play a higher-quality stream",
+        "saveData": "Playing {{stream}} because Data Saver is on",
+        "floor": "Playing the low-bandwidth feed because no stream could keep up"
+      }
+    },
     "audio": {
       "tips": {
         "title": "Audio must be output from your camera and configured in go2rtc for this stream."

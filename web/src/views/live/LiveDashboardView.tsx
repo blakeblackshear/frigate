@@ -298,7 +298,10 @@ export default function LiveDashboardView({
     (cameraName: string, error: LivePlayerError) => {
       setPreferredLiveModes((prevModes) => {
         const newModes = { ...prevModes };
-        if (error === "mse-decode" && webRTCUsableStates[cameraName]) {
+        if (
+          (error === "mse-decode" || error === "mse-codec") &&
+          webRTCUsableStates[cameraName]
+        ) {
           newModes[cameraName] = "webrtc";
         } else {
           newModes[cameraName] = "jsmpeg";
