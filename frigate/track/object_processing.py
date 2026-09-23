@@ -24,6 +24,7 @@ from frigate.comms.event_metadata_updater import (
 from frigate.comms.events_updater import EventEndSubscriber, EventUpdatePublisher
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import (
+    CameraConfig,
     CameraMqttConfig,
     FrigateConfig,
     RecordConfig,
@@ -128,8 +129,10 @@ class TrackedObjectProcessor(threading.Thread):
             )
 
         def update(camera: str, obj: TrackedObject, frame_name: str) -> None:
-            obj.has_snapshot = self.should_save_snapshot(camera, obj)
-            obj.has_clip = self.should_retain_recording(camera, obj)
+            obj.has_snapshot = self.should_save_snapshot(
+                camera_state.camera_config, obj
+            )
+            obj.has_clip = self.should_retain_recording(camera_state.camera_config, obj)
             after = obj.to_dict()
             message = {
                 "before": obj.previous,
@@ -153,8 +156,10 @@ class TrackedObjectProcessor(threading.Thread):
 
         def end(camera: str, obj: TrackedObject, frame_name: str) -> None:
             # populate has_snapshot
-            obj.has_snapshot = self.should_save_snapshot(camera, obj)
-            obj.has_clip = self.should_retain_recording(camera, obj)
+            obj.has_snapshot = self.should_save_snapshot(
+                camera_state.camera_config, obj
+            )
+            obj.has_clip = self.should_retain_recording(camera_state.camera_config, obj)
 
             # write thumbnail to disk if it will be saved as an event
             if obj.has_snapshot or obj.has_clip:
@@ -184,8 +189,8 @@ class TrackedObjectProcessor(threading.Thread):
             )
 
         def snapshot(camera: str, obj: TrackedObject) -> bool:
-            mqtt_config: CameraMqttConfig = self.config.cameras[camera].mqtt
-            if mqtt_config.enabled and self.should_mqtt_snapshot(camera, obj):
+            mqtt_config: CameraMqttConfig = camera_state.camera_config.mqtt
+            if mqtt_config.enabled and self.should_mqtt_snapshot(mqtt_config, obj):
                 jpg_bytes, _ = obj.get_img_bytes(
                     ext="jpg",
                     timestamp=mqtt_config.timestamp,
@@ -238,11 +243,13 @@ class TrackedObjectProcessor(threading.Thread):
         camera_state.on("camera_activity", camera_activity)
         self.camera_states[camera] = camera_state
 
-    def should_save_snapshot(self, camera: str, obj: TrackedObject) -> bool:
+    def should_save_snapshot(
+        self, camera_config: CameraConfig, obj: TrackedObject
+    ) -> bool:
         if obj.false_positive:
             return False
 
-        snapshot_config: SnapshotsConfig = self.config.cameras[camera].snapshots
+        snapshot_config: SnapshotsConfig = camera_config.snapshots
 
         if not snapshot_config.enabled:
             return False
@@ -261,11 +268,13 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_retain_recording(self, camera: str, obj: TrackedObject) -> bool:
+    def should_retain_recording(
+        self, camera_config: CameraConfig, obj: TrackedObject
+    ) -> bool:
         if obj.false_positive:
             return False
 
-        record_config: RecordConfig = self.config.cameras[camera].record
+        record_config: RecordConfig = camera_config.record
 
         # Recording is disabled
         if not record_config.enabled:
@@ -281,13 +290,15 @@ class TrackedObjectProcessor(threading.Thread):
 
         return True
 
-    def should_mqtt_snapshot(self, camera: str, obj: TrackedObject) -> bool:
+    def should_mqtt_snapshot(
+        self, mqtt_config: CameraMqttConfig, obj: TrackedObject
+    ) -> bool:
         # object never changed position
         if obj.is_stationary():
             return False
 
         # if there are required zones and there is no overlap
-        required_zones = self.config.cameras[camera].mqtt.required_zones
+        required_zones = mqtt_config.required_zones
         if len(required_zones) > 0 and not set(obj.entered_zones) & set(required_zones):
             logger.debug(
                 f"Not sending mqtt for {obj.obj_data['id']} because it did not enter required zones"
@@ -297,7 +308,11 @@ class TrackedObjectProcessor(threading.Thread):
         return True
 
     def update_mqtt_motion(
-        self, camera: str, frame_time: float, motion_boxes: list
+        self,
+        camera: str,
+        camera_config: CameraConfig,
+        frame_time: float,
+        motion_boxes: list,
     ) -> None:
         # publish if motion is currently being detected
         if motion_boxes:
@@ -312,7 +327,7 @@ class TrackedObjectProcessor(threading.Thread):
             # always updated latest motion
             self.last_motion_detected[camera] = frame_time
         elif self.last_motion_detected.get(camera, 0) > 0:
-            mqtt_delay = self.config.cameras[camera].motion.mqtt_off_delay
+            mqtt_delay = camera_config.motion.mqtt_off_delay
 
             # If no motion, make sure the off_delay has passed
             if frame_time - self.last_motion_detected.get(camera, 0) >= mqtt_delay:
@@ -783,7 +798,7 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_name, frame_time, current_tracked_objects, motion_boxes, regions
             )
 
-            self.update_mqtt_motion(camera, frame_time, motion_boxes)
+            self.update_mqtt_motion(camera, camera_config, frame_time, motion_boxes)
 
             tracked_objects = [
                 o.to_dict() for o in camera_state.tracked_objects.values()
