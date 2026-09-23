@@ -352,8 +352,9 @@ def stats_snapshot(
     total_camera_fps = total_process_fps = total_skipped_fps = total_detection_fps = 0
 
     stats["cameras"] = {}
-    for name, camera_stats in camera_metrics.items():
-        if name not in config.cameras:
+    for name, camera_stats in list(camera_metrics.items()):
+        camera_config = config.cameras.get(name)
+        if camera_config is None:
             continue
 
         total_camera_fps += camera_stats.camera_fps.value
@@ -370,7 +371,7 @@ def stats_snapshot(
         # Calculate connection quality based on current state
         # This is computed at stats-collection time so offline cameras
         # correctly show as unusable rather than excellent
-        expected_fps = config.cameras[name].detect.fps
+        expected_fps = camera_config.detect.fps
         current_fps = camera_stats.camera_fps.value
         reconnects = camera_stats.reconnects_last_hour.value
         stalls = camera_stats.stalls_last_hour.value
@@ -398,7 +399,7 @@ def stats_snapshot(
             "process_fps": round(camera_stats.process_fps.value, 2),
             "skipped_fps": round(camera_stats.skipped_fps.value, 2),
             "detection_fps": round(camera_stats.detection_fps.value, 2),
-            "detection_enabled": config.cameras[name].detect.enabled,
+            "detection_enabled": camera_config.detect.enabled,
             "pid": pid,
             "capture_pid": capture_pid,
             "ffmpeg_pid": ffmpeg_pid,
