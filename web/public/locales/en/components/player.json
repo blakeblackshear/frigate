@@ -45,7 +45,9 @@
       }
     },
     "decodedFrames": "Decoded Frames:",
-    "droppedFrameRate": "Dropped Frame Rate:"
+    "droppedFrameRate": "Dropped Frame Rate:",
+    "stream": "Stream:",
+    "streamAuto": "{{stream}} (auto)"
   },
   "toast": {
     "success": {

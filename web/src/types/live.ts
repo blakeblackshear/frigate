@@ -31,7 +31,20 @@ export type LiveStreamMetadata = {
   consumers: LiveConsumerMetadata[];
 };
 
-export type LivePlayerError = "stalled" | "startup" | "mse-decode";
+// mse-codec is go2rtc's proof that it has no codec this browser plays;
+// mse-decode also covers transient Safari failures
+export type LivePlayerError =
+  "stalled" | "startup" | "mse-decode" | "mse-codec";
+
+// one second of delivery from the playing transport
+export type LiveHealthSample = {
+  bytes: number;
+  mediaSeconds: number;
+  wallSeconds: number;
+};
+
+// why auto is playing below the top stream
+export type LiveAutoReason = "bandwidth" | "codec" | "saveData" | "floor";
 
 export type TwoWayTalkError = "microphone" | "refused";
 

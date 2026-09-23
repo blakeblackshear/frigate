@@ -92,7 +92,7 @@ go2rtc:
 
 ### Setting Streams For Live UI
 
-You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage.
+You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage. When a camera has more than one stream, the dropdown also offers **Auto**, which is used until you pick a specific stream. Auto starts on the first stream, steps down the list when your connection can't keep up, and steps back up when it recovers. List streams from highest to lowest quality, and avoid names that are plain numbers (such as `720`), which the browser sorts ahead of the others.
 
 Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
 
@@ -362,6 +362,13 @@ When your browser runs into problems playing back your camera streams, it will l
     - `Safari cannot open MediaSource.`
     - `Safari reported InvalidStateError.`
     - `Safari reported decoding errors.`
+
+- **mse-codec**
+  - What it means: go2rtc has no codec for this stream that the browser can play.
+  - What to try: Pick a stream with a codec the browser supports (H.264 is the most compatible), or use a browser that supports the stream's codec. In Auto, Frigate skips this stream for the rest of the session.
+
+  - Possible console messages from the player code:
+    - `mse: streams: codecs not matched: ...`
 
 - **stalled**
   - What it means: Playback has stalled because the player has fallen too far behind live (extended buffering or no data arriving).
