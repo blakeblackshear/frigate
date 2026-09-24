@@ -56,10 +56,9 @@ class EventsPerSecond:
             self._start = now
         # compute the (approximate) events in the last n seconds
         self.expire_timestamps(now)
-        seconds = min(now - self._start, self._last_n_seconds)
-        # avoid divide by zero
-        if seconds == 0:
-            seconds = 1
+        # rate over at least one second, so a burst of events right after
+        # start() is not divided by a tiny window
+        seconds = max(min(now - self._start, self._last_n_seconds), 1.0)
         return len(self._timestamps) / seconds
 
     # remove aged out timestamps
