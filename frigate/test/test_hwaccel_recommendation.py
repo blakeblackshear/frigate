@@ -34,6 +34,12 @@ class HwaccelRecommendationTestCase(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+        self.sys_root = os.path.join(self.root.name, "sys")
+        os.makedirs(self.sys_root)
+        patcher = patch.object(hwaccel, "SYS_ROOT", self.sys_root)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
         drm = patch.object(hwaccel, "enumerate_drm_devices", return_value={})
         self.drm = drm.start()
         self.addCleanup(drm.stop)
@@ -65,6 +71,12 @@ class HwaccelRecommendationTestCase(unittest.TestCase):
     def write_cpuinfo(self, model_name: str) -> None:
         with open(os.path.join(self.proc_root, "cpuinfo"), "w") as f:
             f.write(f"processor\t: 0\nmodel name\t: {model_name}\n")
+
+    def write_video_device(self, vendor: str) -> None:
+        device = os.path.join(self.sys_root, "class", "video4linux", "video0", "device")
+        os.makedirs(device)
+        with open(os.path.join(device, "vendor"), "w") as f:
+            f.write(f"{vendor}\n")
 
     def write_device_tree(self) -> None:
         os.makedirs(os.path.join(self.proc_root, "device-tree"), exist_ok=True)
@@ -189,6 +201,22 @@ class TestAvailableFamilies(HwaccelRecommendationTestCase):
         recommended, families = self.options(["openvino:GPU"], codecs={"h264"})
 
         self.assertIn(recommended, [family.key for family in families])
+
+
+class TestLighter(HwaccelRecommendationTestCase):
+    def test_lighters_media_engine_is_recommended(self):
+        self.write_video_device(hwaccel.LIGHTER_VIRTIO_VENDOR)
+
+        self.assertEqual(self.recommend(codecs={"h264"}), "apple-silicon")
+        self.assertEqual(
+            self.presets()["apple-silicon"],
+            {"h264": "preset-apple-silicon-h264", "h265": "preset-apple-silicon-h265"},
+        )
+
+    def test_another_virtio_media_device_is_not_lighters(self):
+        self.write_video_device("0x554d4551")
+
+        self.assertEqual(self.available(), [])
 
 
 class TestCodecCoverage(HwaccelRecommendationTestCase):

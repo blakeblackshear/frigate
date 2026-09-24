@@ -34,6 +34,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Apple Silicon**
 
 - [Apple Silicon](#apple-silicon-detector): Apple Silicon can run on M1 and newer Apple Silicon devices.
+- <CommunityBadge /> [ONNX](#apple-neural-engine-lighter): the ONNX detector runs on the Neural Engine of M1 and newer Macs when Frigate runs under the lighter container runtime.
 
 **Intel**
 
@@ -484,7 +485,7 @@ See [ONNX supported models](#onnx) for supported models, there are some caveats:
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, TensorRT, and a Mac's Neural Engine. On startup Frigate will automatically try to use a GPU if one is available.
 
 :::info
 
@@ -500,6 +501,9 @@ If the correct build is used for your GPU then the GPU will be detected and used
   - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
   - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image.
 
+- **Apple Silicon Mac** <CommunityBadge />
+  - The Neural Engine will automatically be detected and used with the ONNX detector when Frigate runs under lighter with its Neural Engine device. See [Apple Neural Engine (lighter)](#apple-neural-engine-lighter).
+
 :::
 
 :::tip
@@ -514,6 +518,22 @@ models:
 ```
 
 :::
+
+### Apple Neural Engine (lighter) {#apple-neural-engine-lighter}
+
+[lighter](https://github.com/fieldwork-ai/lighter) is an open-source container runtime for macOS. A container started with its `lighter.sh/ane` device gets an ONNX Runtime execution provider that runs models on the Mac's Neural Engine, and the ONNX detector uses it automatically, with the same models and configuration as on any other hardware. It works on M1 and newer Macs with lighter 0.9.2 or newer.
+
+Give the Frigate container the Neural Engine device. With Docker Compose:
+
+```yaml
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable-standard-arm64
+    devices:
+      - lighter.sh/ane=all
+```
+
+Or with `docker run`, add `--device lighter.sh/ane=all`. Frigate then reports the Neural Engine under **Settings > System > Detection models**, and the ONNX detector's model loads on it. lighter can also decode camera streams on the Mac's media engine; see [Video Decoding](hardware_acceleration_video.md#apple-silicon-mac-lighter).
 
 ### Configuration {#configuration-onnx}
 

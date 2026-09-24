@@ -25,6 +25,7 @@ SYS_ROOT = "/sys"
 DEV_ROOT = "/dev"
 PROC_ROOT = "/proc"
 ETC_ROOT = "/etc"
+LIB_ROOT = "/usr/lib"
 
 # a Coral reports as Global Unichip until its firmware is loaded, then as Google
 CORAL_USB_IDS = {("1a6e", "089a"), ("18d1", "9302")}
@@ -317,6 +318,19 @@ def detect_synaptics() -> DetectionHardware | None:
     return _hardware("synaptics", "synaptics", "Synaptics NPU", units)
 
 
+def detect_lighter_ane() -> DetectionHardware | None:
+    """Find a Mac's Neural Engine by the provider library lighter's device places."""
+    library = os.environ.get(
+        "LIGHTER_ANE_EP", f"{LIB_ROOT}/lighter/liblighter_ane_ep.so"
+    )
+    if not os.path.exists(library):
+        return None
+
+    # runs through onnx, whose session picks lighter's provider when it is present
+    units = [HardwareUnit(device="onnx", label="Neural Engine")]
+    return _hardware("onnx:lighter", "onnx", "Apple Neural Engine", units)
+
+
 def detect_cpu() -> DetectionHardware:
     """The CPU, which is always available."""
     units = [HardwareUnit(device="cpu", label="CPU")]
@@ -338,6 +352,7 @@ PROBES = (
     detect_rockchip,
     detect_axengine,
     detect_synaptics,
+    detect_lighter_ane,
     detect_cpu,
 )
 

@@ -9,6 +9,7 @@ and resolve it per camera against that camera's detect stream.
 """
 
 import logging
+import os
 import re
 
 from pydantic import BaseModel, Field
@@ -23,13 +24,19 @@ from frigate.util.services import enumerate_drm_devices
 
 logger = logging.getLogger(__name__)
 
-# root the /proc reads use, so tests can point them at a fixture tree
+# roots the /proc and /sys reads use, so tests can point them at a fixture tree
 PROC_ROOT = "/proc"
+SYS_ROOT = "/sys"
 
 ANY_CODEC = "any"
 
 # a Raspberry Pi has no detection hardware of its own, so it gets a key here
 RASPBERRY_PI = "raspberrypi"
+
+# lighter (https://github.com/fieldwork-ai/lighter) decodes on a Mac's media
+# engine through virtio-media devices, which carry its virtio vendor id "LGHT"
+LIGHTER_MEDIA = "lighter"
+LIGHTER_VIRTIO_VENDOR = "0x4c474854"
 
 # ffprobe names h265 streams hevc
 CODEC_ALIASES = {"hevc": "h265"}
@@ -52,6 +59,7 @@ DECODE_HARDWARE = (
     "rknn",
     "openvino:GPU",
     "onnx:amd",
+    LIGHTER_MEDIA,
     RASPBERRY_PI,
 )
 
@@ -98,6 +106,10 @@ FAMILY_RPI = HwaccelFamily(
     key="rpi",
     presets={"h264": "preset-rpi-64-h264", "h265": "preset-rpi-64-h265"},
 )
+FAMILY_APPLE = HwaccelFamily(
+    key="apple-silicon",
+    presets={"h264": "preset-apple-silicon-h264", "h265": "preset-apple-silicon-h265"},
+)
 
 
 def _read(path: str) -> str | None:
@@ -139,6 +151,20 @@ def _is_raspberry_pi() -> bool:
     return "raspberrypi" in compatible
 
 
+def _has_lighter_media() -> bool:
+    video = f"{SYS_ROOT}/class/video4linux"
+
+    try:
+        devices = os.listdir(video)
+    except OSError:
+        return False
+
+    return any(
+        _read(f"{video}/{device}/device/vendor") == LIGHTER_VIRTIO_VENDOR
+        for device in devices
+    )
+
+
 def _intel_families(generation: int | None) -> list[HwaccelFamily]:
     """vaapi drives every Intel GPU, qsv only those from gen8 on."""
     if generation is not None and generation < INTEL_QSV_SUPPORTED_GEN:
@@ -163,6 +189,9 @@ def _families(key: str, generation: int | None) -> list[HwaccelFamily]:
 
     if key == "onnx:amd":
         return [FAMILY_VAAPI]
+
+    if key == LIGHTER_MEDIA:
+        return [FAMILY_APPLE]
 
     if key == RASPBERRY_PI:
         return [FAMILY_RPI]
@@ -192,6 +221,9 @@ def _decode_hardware(detector_key: str | None) -> list[str]:
         The hardware keys that can decode video, in recommendation order
     """
     present = {found.key for found in hardware_prober.probe()}
+
+    if _has_lighter_media():
+        present.add(LIGHTER_MEDIA)
 
     if _is_raspberry_pi():
         present.add(RASPBERRY_PI)

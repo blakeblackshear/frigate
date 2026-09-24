@@ -256,7 +256,13 @@ export function detectionRows({
 // ------------------------------------------------------------------ hwaccel
 
 export type HwaccelFamilyKey =
-  "nvidia" | "vaapi" | "intel-qsv" | "rkmpp" | "jetson" | "rpi";
+  | "nvidia"
+  | "vaapi"
+  | "intel-qsv"
+  | "rkmpp"
+  | "jetson"
+  | "rpi"
+  | "apple-silicon";
 
 export type HwaccelClass =
   | { kind: "none" }
@@ -270,6 +276,7 @@ const PRESET_FAMILIES: [string, HwaccelFamilyKey][] = [
   ["preset-rk", "rkmpp"],
   ["preset-jetson", "jetson"],
   ["preset-rpi", "rpi"],
+  ["preset-apple-silicon", "apple-silicon"],
 ];
 
 export function hwaccelFamily(value: string | string[]): HwaccelClass {
@@ -294,6 +301,8 @@ const FAMILY_VENDORS: Record<HwaccelFamilyKey, GpuVendor[]> = {
   vaapi: ["intel", "amd"],
   rkmpp: ["rockchip"],
   rpi: ["rpi"],
+  // lighter reports no decoder usage
+  "apple-silicon": [],
 };
 
 function decoderUsage(

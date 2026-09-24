@@ -1,5 +1,7 @@
 """Tests for the device each model runner reports after loading."""
 
+import os
+import tempfile
 import threading
 import unittest
 from unittest.mock import MagicMock, patch
@@ -38,6 +40,7 @@ class TestRunnerDeviceName(unittest.TestCase):
             self._onnx(["OpenVINOExecutionProvider"]).device_name, "OpenVINO"
         )
         self.assertEqual(self._onnx(["CPUExecutionProvider"]).device_name, "CPU")
+        self.assertEqual(self._onnx(["LighterANE"]).device_name, "Neural Engine")
         self.assertEqual(self._onnx(["ROCMExecutionProvider"]).device_name, "ROCM")
         self.assertEqual(self._onnx([]).device_name, "CPU")
 
@@ -129,3 +132,147 @@ class TestLoadedDeviceSnapshot(unittest.TestCase):
         finally:
             stop.set()
             thread.join(timeout=5)
+
+
+class TestLighterANE(unittest.TestCase):
+    """lighter's plugin provider, picked up by the ONNX session setup."""
+
+    def setUp(self):
+        loaded_devices.clear()
+        self.root = tempfile.TemporaryDirectory()
+        self.addCleanup(self.root.cleanup)
+        self.library = os.path.join(self.root.name, "liblighter_ane_ep.so")
+        env = patch.dict(os.environ, {"LIGHTER_ANE_EP": self.library})
+        env.start()
+        self.addCleanup(env.stop)
+
+    def _device(self) -> MagicMock:
+        device = MagicMock()
+        device.ep_name = "LighterANE"
+        return device
+
+    def test_no_devices_without_the_library(self):
+        with patch.object(detection_runners.ort, "get_ep_devices") as get_ep_devices:
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [])
+        get_ep_devices.assert_not_called()
+
+    def test_the_provider_is_registered_once(self):
+        open(self.library, "w").close()
+        device = self._device()
+        other = MagicMock()
+        other.ep_name = "CPUExecutionProvider"
+
+        with (
+            patch.object(
+                detection_runners.ort,
+                "get_ep_devices",
+                side_effect=[[other], [other, device], [other, device]],
+            ),
+            patch.object(
+                detection_runners.ort, "register_execution_provider_library"
+            ) as register,
+        ):
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [device])
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [device])
+
+        register.assert_called_once_with("LighterANE", self.library)
+
+    def test_a_provider_that_will_not_load_is_skipped(self):
+        open(self.library, "w").close()
+
+        with (
+            patch.object(detection_runners.ort, "get_ep_devices", return_value=[]),
+            patch.object(
+                detection_runners.ort,
+                "register_execution_provider_library",
+                side_effect=RuntimeError("not a provider"),
+            ),
+        ):
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [])
+
+    def test_the_session_runs_on_the_neural_engine(self):
+        device = self._device()
+        session = MagicMock()
+        session.get_providers.return_value = ["LighterANE", "CPUExecutionProvider"]
+        options = MagicMock()
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[device]
+            ),
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=options
+            ),
+            patch.object(
+                detection_runners.ort, "InferenceSession", return_value=session
+            ) as inference_session,
+        ):
+            runner = get_optimized_runner("/models/yolo.onnx", "AUTO", "yolo-generic")
+
+        options.add_provider_for_devices.assert_called_once_with([device], {})
+        inference_session.assert_called_once_with(
+            "/models/yolo.onnx", sess_options=options
+        )
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(
+            loaded_devices["/models/yolo.onnx"], ("yolo-generic", "Neural Engine")
+        )
+
+    def test_a_model_the_neural_engine_cannot_load_uses_the_default_providers(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[MagicMock()]
+            ),
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners, "is_openvino_gpu_npu_available", return_value=False
+            ),
+            patch.object(
+                detection_runners.ort,
+                "InferenceSession",
+                side_effect=[RuntimeError("unsupported"), session],
+            ) as inference_session,
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=MagicMock()
+            ),
+            self.assertLogs(detection_runners.logger, level="WARNING"),
+        ):
+            runner = get_optimized_runner("/models/jina.onnx", "AUTO", "jina-v2")
+
+        self.assertEqual(inference_session.call_count, 2)
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(loaded_devices["/models/jina.onnx"], ("jina-v2", "CPU"))
+
+    def test_a_cpu_model_stays_on_the_cpu(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[MagicMock()]
+            ) as ane,
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners.ort, "InferenceSession", return_value=session
+            ),
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=None
+            ),
+        ):
+            get_optimized_runner("/models/arcface.onnx", "CPU", "arcface")
+
+        ane.assert_not_called()

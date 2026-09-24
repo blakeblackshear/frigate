@@ -78,6 +78,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **Apple Silicon**
 
+- [ONNX via lighter](#apple-silicon): The ONNX detector runs on the Neural Engine of M1 and newer Macs when Frigate runs in the lighter container runtime
+  - [Supports the same model architectures as the ONNX detector](../../configuration/object_detectors#apple-neural-engine-lighter)
+  - Runs inside the Frigate container, with no separate detector process to set up
+  - The recommended way to run Frigate on a Mac
 - [Apple Silicon](#apple-silicon): Apple Silicon is usable on all M1 and newer Apple Silicon devices to provide efficient and fast object detection
   - [Supports primarily ssdlite and mobilenet model architectures](../../configuration/object_detectors#apple-silicon-detector)
   - Runs well with any size models including large
@@ -211,7 +215,13 @@ Inference is done with the `onnx` detector type. Speeds will vary greatly depend
 
 ### Apple Silicon
 
-With the [Apple Silicon](../configuration/object_detectors.md#apple-silicon-detector) detector Frigate can take advantage of the NPU in M1 and newer Apple Silicon.
+Frigate on a Mac is best run in the [lighter](https://github.com/fieldwork-ai/lighter) container runtime, where the [ONNX detector](../configuration/object_detectors.md#apple-neural-engine-lighter) runs on the Neural Engine of M1 and newer Macs from inside the Frigate container. There is no separate detector process to install or keep running, and the same container can decode video on the Mac's media engine.
+
+| Name | YOLOv9 Inference Time                  | YOLO-NAS Inference Time | RF-DETR Inference Time |
+| ---- | -------------------------------------- | ----------------------- | ---------------------- |
+| M1   | t-320: 3.3 ms s-320: 7 ms s-640: 13 ms | 320: 6.6 ms             | Nano-320: 38 ms        |
+
+Alternatively, with the [Apple Silicon](../configuration/object_detectors.md#apple-silicon-detector) detector Frigate can take advantage of the NPU in M1 and newer Apple Silicon.
 
 :::warning
 
