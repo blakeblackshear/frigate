@@ -172,6 +172,17 @@ class TestEmitterNotices(unittest.TestCase):
 
         self.raise_notice.assert_not_called()
 
+    def test_missing_cpu_stats_raise_nothing(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now in ((300, 0.0), (360, 60.0)):
+            stats = self._stats(uptime, 0.0)
+            del stats["cpu_usages"]
+            stats_emitter._update_notices(stats, now)
+
+        self.raise_notice.assert_not_called()
+        self.assertEqual(self.flush_notices.call_count, 2)
+
     def test_startup_window_is_ignored(self):
         stats_emitter = self._emitter()
 

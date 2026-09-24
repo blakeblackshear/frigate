@@ -5,7 +5,7 @@ import threading
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from frigate.const import REPLAY_CAMERA_PREFIX
 from frigate.models import Notice, NoticeStats
@@ -395,8 +395,8 @@ class NoticeRegistry:
     ) -> None:
         # called with the lock held; held repeats from before an acknowledgement
         # still count but leave the notice hidden
-        still_acknowledged = (
-            row.acknowledged_at is not None and last_seen <= row.acknowledged_at
+        still_acknowledged = row.acknowledged_at is not None and (
+            last_seen <= cast(float, row.acknowledged_at)
         )
 
         Notice.update(

@@ -252,6 +252,9 @@ class StatsEmitter(threading.Thread):
         """Update notices based on current stats or time."""
         cameras = stats["cameras"]
 
+        # absent when CPU collection timed out or failed on this tick
+        cpu_usages = stats.get("cpu_usages", {})
+
         if stats["service"]["uptime"] >= STARTUP_GRACE_S:
             # skipped detections
             skipped = {
@@ -272,7 +275,7 @@ class StatsEmitter(threading.Thread):
                 (self.detect_cpu, "detect_high_cpu", "pid"),
             ):
                 averages = {
-                    camera: cpu_average(stats["cpu_usages"], camera_stats.get(pid_key))
+                    camera: cpu_average(cpu_usages, camera_stats.get(pid_key))
                     for camera, camera_stats in cameras.items()
                 }
 
