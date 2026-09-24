@@ -12,6 +12,7 @@ type CameraImageProps = {
   camera: string;
   onload?: () => void;
   searchParams?: string;
+  showWhenDisabled?: boolean;
 };
 
 export default function CameraImage({
@@ -19,6 +20,7 @@ export default function CameraImage({
   camera,
   onload,
   searchParams = "",
+  showWhenDisabled = false,
 }: CameraImageProps) {
   const { data: config } = useSWR("config");
   const apiHost = useApiHost();
@@ -83,7 +85,7 @@ export default function CameraImage({
 
   return (
     <div className={className} ref={containerRef}>
-      {enabled ? (
+      {enabled || showWhenDisabled ? (
         <img
           ref={imgRef}
           className={cn(
@@ -101,7 +103,7 @@ export default function CameraImage({
       ) : (
         <div className="size-full rounded-lg border-2 border-muted bg-background_alt text-center md:rounded-2xl" />
       )}
-      {!imageLoaded && enabled ? (
+      {!imageLoaded && (enabled || showWhenDisabled) ? (
         <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
           <ActivityIndicator />
         </div>

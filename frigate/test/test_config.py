@@ -1838,6 +1838,29 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert frigate_config.cameras["back"].live.quality == 8
+        assert frigate_config.cameras["back"].live.show_last_frame_when_off is False
+
+    def test_live_show_last_frame_when_off(self):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                    "live": {"show_last_frame_when_off": True},
+                }
+            },
+        }
+
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.cameras["back"].live.show_last_frame_when_off is True
 
     def test_global_live_merge(self):
         config = {

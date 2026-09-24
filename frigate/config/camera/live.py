@@ -11,6 +11,11 @@ class CameraLiveConfig(FrigateBaseModel):
         title="Live stream names",
         description="Mapping of configured stream names to restream/go2rtc names used for live playback.",
     )
+    show_last_frame_when_off: bool = Field(
+        default=False,
+        title="Show last frame when off",
+        description="Keep the last available camera frame visible in the Web UI when the camera is intentionally disabled.",
+    )
     height: int = Field(
         default=720,
         title="Live height",

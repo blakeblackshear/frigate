@@ -106,6 +106,7 @@ export interface CameraConfig {
     roles: string[];
   }[];
   live: {
+    show_last_frame_when_off: boolean;
     height: number;
     quality: number;
     streams: { [key: string]: string };

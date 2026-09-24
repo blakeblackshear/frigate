@@ -307,8 +307,8 @@ export class MediaMocker {
   }
 
   async install() {
-    // Camera snapshots
-    await this.page.route("**/api/*/latest.jpg**", (route) =>
+    // Camera snapshots / latest preview frames
+    await this.page.route(/\/api\/[^/]+\/latest\.(?:jpg|webp)(?:\?.*)?$/, (route) =>
       route.fulfill({
         contentType: "image/png",
         body: PLACEHOLDER_PNG,

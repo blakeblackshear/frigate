@@ -51,6 +51,92 @@ test.describe("Live Dashboard @critical", () => {
   });
 });
 
+test.describe("Live intentional camera off behavior @critical", () => {
+  test("opted-in disabled camera retains the still with a compact off indicator", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.api.install({
+      config: {
+        cameras: {
+          front_door: {
+            live: { show_last_frame_when_off: true },
+          },
+        },
+      },
+    });
+    await frigateApp.goto("/");
+    frigateApp.ws.sendCameraActivity({
+      front_door: { config: { enabled: false } },
+    });
+
+    const card = new LivePage(frigateApp.page, !frigateApp.isMobile)
+      .cameraCard("front_door")
+      .first();
+
+    await expect(card.getByText("Camera is off")).toBeVisible({
+      timeout: 5_000,
+    });
+    await expect(card.getByText("Stream Offline")).toHaveCount(0);
+    await expect(card.locator("img")).toBeVisible();
+  });
+
+  test("disabled camera without opt-in keeps the existing off display", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/");
+    frigateApp.ws.sendCameraActivity({
+      front_door: { config: { enabled: false } },
+    });
+
+    const card = new LivePage(frigateApp.page, !frigateApp.isMobile)
+      .cameraCard("front_door")
+      .first();
+
+    await expect(card.getByText("Camera is off")).toBeVisible({
+      timeout: 5_000,
+    });
+  });
+
+  test("opt-in does not hide an unexpected offline stream while enabled", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.api.install({
+      config: {
+        cameras: {
+          front_door: {
+            live: { show_last_frame_when_off: true },
+          },
+        },
+      },
+    });
+    await frigateApp.goto("/");
+    frigateApp.ws.sendCameraActivity({
+      front_door: { config: { enabled: true } },
+    });
+    frigateApp.ws.send(
+      "stats",
+      JSON.stringify({
+        cameras: {
+          front_door: {
+            camera_fps: 0,
+          },
+        },
+        service: {
+          uptime: 86400,
+        },
+      }),
+    );
+
+    const card = new LivePage(frigateApp.page, !frigateApp.isMobile)
+      .cameraCard("front_door")
+      .first();
+
+    await expect(card.getByText("Stream Offline")).toBeVisible({
+      timeout: 5_000,
+    });
+  });
+});
+
 test.describe("Live Single Camera — desktop controls @critical", () => {
   test.skip(
     ({ frigateApp }) => frigateApp.isMobile,

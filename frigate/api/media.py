@@ -231,9 +231,15 @@ async def latest_frame(
             frame_processor.get_current_frame_time(camera_name) + retry_interval
         ):
             last_frame_time = frame_processor.get_current_frame_time(camera_name)
-            preview_path = get_most_recent_preview_frame(
-                camera_name, before=last_frame_time
-            )
+            if (
+                camera_config.live.show_last_frame_when_off
+                and not camera_config.enabled
+            ):
+                preview_path = get_most_recent_preview_frame(camera_name)
+            else:
+                preview_path = get_most_recent_preview_frame(
+                    camera_name, before=last_frame_time
+                )
 
             if preview_path:
                 logger.debug(f"Using most recent preview frame for {camera_name}")

@@ -38,6 +38,13 @@ export interface CameraActivityState {
   }>;
 }
 
+export type CameraActivityOverride = Omit<
+  Partial<CameraActivityState>,
+  "config"
+> & {
+  config?: Partial<CameraActivityState["config"]>;
+};
+
 function defaultCameraActivity(): CameraActivityState {
   return {
     config: {
@@ -63,13 +70,19 @@ function defaultCameraActivity(): CameraActivityState {
 
 export function cameraActivityPayload(
   cameras: string[],
-  overrides?: Partial<Record<string, Partial<CameraActivityState>>>,
+  overrides?: Partial<Record<string, CameraActivityOverride>>,
 ): string {
   const activity: Record<string, CameraActivityState> = {};
   for (const name of cameras) {
+    const defaults = defaultCameraActivity();
+    const override = overrides?.[name];
     activity[name] = {
-      ...defaultCameraActivity(),
-      ...overrides?.[name],
+      ...defaults,
+      ...override,
+      config: {
+        ...defaults.config,
+        ...override?.config,
+      },
     } as CameraActivityState;
   }
   // Double-serialize: the WS payload is a JSON string

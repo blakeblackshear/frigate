@@ -1,6 +1,6 @@
 import os
 import shutil
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import cv2
 import numpy as np
@@ -55,6 +55,32 @@ class TestHttpLatestFrame(BaseTestHttp):
             assert response.headers.get("X-Frigate-Offline") == "true"
             # Verify we got an image (webp)
             assert response.headers.get("content-type") == "image/webp"
+
+    def test_latest_frame_intentionally_off_uses_newest_preview(self):
+        camera = "front_door"
+        self.app.frigate_config.cameras[camera].enabled = False
+        self.app.frigate_config.cameras[camera].live.show_last_frame_when_off = True
+        self.app.detected_frames_processor.get_current_frame.return_value = None
+        self.app.detected_frames_processor.get_current_frame_time.return_value = 1000.0
+
+        dummy_frame = np.zeros((180, 320, 3), np.uint8)
+        preview_path = os.path.join(
+            PREVIEW_CACHE_DIR, f"preview_{camera}-2000.0.{PREVIEW_FRAME_TYPE}"
+        )
+        cv2.imwrite(preview_path, dummy_frame)
+
+        with (
+            patch(
+                "frigate.api.media.get_most_recent_preview_frame",
+                return_value=preview_path,
+            ) as get_preview,
+            AuthTestClient(self.app) as client,
+        ):
+            response = client.get(f"/{camera}/latest.webp")
+
+        assert response.status_code == 200
+        assert response.headers.get("X-Frigate-Offline") == "true"
+        get_preview.assert_called_once_with(camera)
 
     def test_latest_frame_no_fallback_when_live(self):
         camera = "front_door"

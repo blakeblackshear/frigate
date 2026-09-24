@@ -15,6 +15,7 @@ export class WsMocker {
   // the live stats payload wins over the REST one in useAutoFrigateStats, so
   // both come from the same factory or a test's `stats` override is ignored
   private stats: unknown;
+  private cameraActivityOverrides?: Parameters<typeof cameraActivityPayload>[1];
 
   constructor(cameras: string[] = ["front_door", "backyard", "garage"]) {
     this.cameras = cameras;
@@ -41,7 +42,7 @@ export class WsMocker {
 
     if (data.topic === "onConnect") {
       // Send initial camera_activity state
-      this.sendCameraActivity();
+      this.sendCameraActivity(this.cameraActivityOverrides);
 
       // Send initial stats
       this.send(
@@ -128,7 +129,13 @@ export class WsMocker {
 
   /** Send camera_activity with default or custom state */
   sendCameraActivity(overrides?: Parameters<typeof cameraActivityPayload>[1]) {
-    const payload = cameraActivityPayload(this.cameras, overrides);
+    if (overrides !== undefined) {
+      this.cameraActivityOverrides = overrides;
+    }
+    const payload = cameraActivityPayload(
+      this.cameras,
+      this.cameraActivityOverrides,
+    );
     this.send("camera_activity", payload);
   }
 
