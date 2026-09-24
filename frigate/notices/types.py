@@ -86,6 +86,16 @@ _KINDS = (
         link="https://github.com/blakeblackshear/frigate/releases/tag/v{version}",
         counts_repeats=False,
         keep_latest=1,
+        reportable=False,
+    ),
+    # raised while analytics is off; the row keeps a dismissal across restarts
+    NoticeKind(
+        "analytics_prompt",
+        NoticeSeverity.info,
+        "system",
+        link="/settings?page=systemTelemetry",
+        counts_repeats=False,
+        reportable=False,
     ),
 )
 

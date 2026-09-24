@@ -222,6 +222,10 @@
   "telemetry": {
     "label": "Telemetry",
     "description": "System telemetry and stats options including GPU and network bandwidth monitoring.",
+    "analytics": {
+      "label": "Share anonymous analytics",
+      "description": "Send one anonymous usage report a day to help the Frigate maintainers decide what to support. Nothing is sent until this is on."
+    },
     "network_interfaces": {
       "label": "Network interfaces",
       "description": "List of network interface name prefixes to monitor for bandwidth statistics."

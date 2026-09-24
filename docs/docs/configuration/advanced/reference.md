@@ -1194,6 +1194,9 @@ ui:
 
 # Optional: Telemetry configuration
 telemetry:
+  # Optional: Share one anonymous usage report a day (default: shown below)
+  # NOTE: See https://docs.frigate.video/configuration/advanced/analytics for what is sent
+  analytics: False
   # Optional: Enabled network interfaces for bandwidth stats monitoring (default: empty list, let nethogs search all)
   network_interfaces:
     - eth
