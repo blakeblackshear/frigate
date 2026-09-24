@@ -14,17 +14,18 @@ router = APIRouter(tags=[Tags.notices])
 
 
 @router.get("/notices", dependencies=[Depends(require_role(["admin"]))])
-def get_notices(request: Request, include_dismissed: bool = False) -> JSONResponse:
+def get_notices(request: Request, include_hidden: bool = False) -> JSONResponse:
     """Get notices, most severe first.
 
     Args:
-        include_dismissed: Also return dismissed notices, for the history view
+        include_hidden: Also return acknowledged and muted notices, for the
+            hidden list
 
     Returns:
         The notices
     """
     return JSONResponse(
-        content=request.app.notice_registry.active(include_dismissed=include_dismissed)
+        content=request.app.notice_registry.active(include_hidden=include_hidden)
     )
 
 
@@ -34,37 +35,64 @@ def get_notice_stats(request: Request) -> JSONResponse:
     return JSONResponse(content=request.app.notice_registry.stats())
 
 
-@router.get(
-    "/notices/dismissed_checks", dependencies=[Depends(require_role(["admin"]))]
-)
-def get_dismissed_checks(request: Request) -> JSONResponse:
-    """Get the dismissed config and stream check rows, newest first."""
-    return JSONResponse(content=request.app.notice_registry.dismissed_checks())
+@router.get("/notices/muted_checks", dependencies=[Depends(require_role(["admin"]))])
+def get_muted_checks(request: Request) -> JSONResponse:
+    """Get the muted config and stream check rows, newest first."""
+    return JSONResponse(content=request.app.notice_registry.muted_checks())
 
 
-@router.delete("/notices/dismissed", dependencies=[Depends(require_role(["admin"]))])
-def purge_dismissed(request: Request) -> JSONResponse:
-    """Delete every dismissed notice and check row so each can show again."""
-    request.app.notice_registry.purge_dismissed()
-    return JSONResponse(
-        content={"success": True, "message": "Dismissed notices cleared"}
-    )
+@router.delete("/notices/hidden", dependencies=[Depends(require_role(["admin"]))])
+def unhide_all_notices(request: Request) -> JSONResponse:
+    """Show every acknowledged and muted notice and check row again."""
+    request.app.notice_registry.unhide_all()
+    return JSONResponse(content={"success": True, "message": "Notices shown again"})
 
 
 # model notice ids contain a slash, so the id is a path parameter
 @router.post(
-    "/notices/{notice_id:path}/dismiss",
+    "/notices/{notice_id:path}/acknowledge",
     dependencies=[Depends(require_role(["admin"]))],
 )
-def dismiss_notice(request: Request, notice_id: str) -> JSONResponse:
-    """Hide a notice or a config or stream check row.
+def acknowledge_notice(request: Request, notice_id: str) -> JSONResponse:
+    """Hide a notice until it happens again.
 
-    It stays hidden if the same problem happens again.
+    Config and stream check rows and the update notice never repeat, so they
+    can only be muted.
     """
-    if not request.app.notice_registry.dismiss(notice_id):
+    if not request.app.notice_registry.acknowledge(notice_id):
         return JSONResponse(
             content={"success": False, "message": "Notice not found"},
             status_code=404,
         )
 
-    return JSONResponse(content={"success": True, "message": "Notice dismissed"})
+    return JSONResponse(content={"success": True, "message": "Notice acknowledged"})
+
+
+@router.post(
+    "/notices/{notice_id:path}/mute",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def mute_notice(request: Request, notice_id: str) -> JSONResponse:
+    """Hide a notice or a config or stream check row for good."""
+    if not request.app.notice_registry.mute(notice_id):
+        return JSONResponse(
+            content={"success": False, "message": "Notice not found"},
+            status_code=404,
+        )
+
+    return JSONResponse(content={"success": True, "message": "Notice muted"})
+
+
+@router.delete(
+    "/notices/{notice_id:path}/hidden",
+    dependencies=[Depends(require_role(["admin"]))],
+)
+def unhide_notice(request: Request, notice_id: str) -> JSONResponse:
+    """Show an acknowledged or muted notice or check row again."""
+    if not request.app.notice_registry.unhide(notice_id):
+        return JSONResponse(
+            content={"success": False, "message": "Notice not found"},
+            status_code=404,
+        )
+
+    return JSONResponse(content={"success": True, "message": "Notice shown again"})

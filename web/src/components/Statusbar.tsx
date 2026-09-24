@@ -1,20 +1,24 @@
-import { useEmbeddingsReindexProgress } from "@/api/ws";
+import { StatusMessage } from "@/context/statusbar-context";
+import { useAutoFrigateStats } from "@/hooks/use-stats";
+import useStatusMessages from "@/hooks/use-status-messages";
+import StatusMessageList, {
+  StatusMessageItem,
+} from "@/components/StatusMessageList";
 import {
-  StatusBarMessagesContext,
-  StatusMessage,
-} from "@/context/statusbar-context";
-import useStats, { useAutoFrigateStats } from "@/hooks/use-stats";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import StatusBarNotices from "@/components/health/StatusBarNotices";
 import { cn } from "@/lib/utils";
 import type { ProfilesApiResponse } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import { useContext, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useSWR from "swr";
 
 import { FaCheck } from "react-icons/fa";
-import { IoIosWarning } from "react-icons/io";
 import { MdCircle } from "react-icons/md";
 import { Link } from "react-router-dom";
 
@@ -22,9 +26,7 @@ export default function Statusbar() {
   const { t } = useTranslation(["views/system"]);
   const isAdmin = useIsAdmin();
 
-  const { messages, addMessage, clearMessages } = useContext(
-    StatusBarMessagesContext,
-  )!;
+  const messages = useStatusMessages();
 
   const stats = useAutoFrigateStats();
 
@@ -37,21 +39,6 @@ export default function Statusbar() {
 
     return parseInt(systemCpu);
   }, [stats]);
-
-  const { potentialProblems } = useStats(stats);
-
-  useEffect(() => {
-    clearMessages("stats");
-    potentialProblems.forEach((problem) => {
-      addMessage(
-        "stats",
-        problem.text,
-        problem.color,
-        undefined,
-        problem.relevantLink,
-      );
-    });
-  }, [potentialProblems, addMessage, clearMessages]);
 
   const { data: profilesData } = useSWR<ProfilesApiResponse>("profiles");
 
@@ -67,28 +54,6 @@ export default function Statusbar() {
       color: getProfileColor(profilesData.active_profile, allNames),
     };
   }, [profilesData]);
-
-  const { payload: reindexState } = useEmbeddingsReindexProgress();
-
-  useEffect(() => {
-    if (reindexState) {
-      if (reindexState.status == "indexing") {
-        clearMessages("embeddings-reindex");
-        addMessage(
-          "embeddings-reindex",
-          t("stats.reindexingEmbeddings", {
-            processed: Math.floor(
-              (reindexState.processed_objects / reindexState.total_objects) *
-                100,
-            ),
-          }),
-        );
-      }
-      if (reindexState.status === "completed") {
-        clearMessages("embeddings-reindex");
-      }
-    }
-  }, [reindexState, addMessage, clearMessages, t]);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-10 flex h-8 w-full items-center justify-between border-t border-secondary-highlight bg-background_alt px-4 dark:text-secondary-foreground">
@@ -187,42 +152,57 @@ export default function Statusbar() {
           ))}
       </div>
       <div className="no-scrollbar flex h-full max-w-[50%] items-center gap-2 overflow-x-auto">
-        {!isAdmin ? null : Object.entries(messages).length === 0 ? (
+        {!isAdmin ? null : messages.length === 0 ? (
           <Link to="/system#health" className="flex items-center gap-2 text-sm">
             <FaCheck className="size-3 text-green-500" />
             {t("stats.healthy")}
           </Link>
+        ) : messages.length === 1 ? (
+          <StatusMessageItem
+            message={messages[0]}
+            className="whitespace-nowrap"
+          />
         ) : (
-          Object.entries(messages).map(([key, messageArray]) => (
-            <div key={key} className="flex h-full items-center gap-2">
-              {messageArray.map(({ text, color, link }: StatusMessage) => {
-                const message = (
-                  <div
-                    key={text}
-                    className={`flex items-center gap-2 whitespace-nowrap text-sm ${link ? "cursor-pointer hover:underline" : ""}`}
-                  >
-                    <IoIosWarning
-                      className={`size-5 ${color || "text-danger"}`}
-                    />
-                    {text}
-                  </div>
-                );
-
-                if (link) {
-                  return (
-                    <Link key={text} to={link}>
-                      {message}
-                    </Link>
-                  );
-                } else {
-                  return message;
-                }
-              })}
-            </div>
-          ))
+          <StatusMessagesPopover messages={messages} />
         )}
         {isAdmin && <StatusBarNotices />}
       </div>
     </div>
+  );
+}
+
+type StatusMessagesPopoverProps = {
+  messages: StatusMessage[];
+};
+
+/** The most severe message and a count of the rest, which open the full list. */
+function StatusMessagesPopover({ messages }: StatusMessagesPopoverProps) {
+  const { t } = useTranslation(["views/system"]);
+  const [open, setOpen] = useState(false);
+  const [first, ...rest] = messages;
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="flex items-center gap-2 text-sm hover:underline"
+        >
+          <StatusMessageItem
+            message={{ ...first, link: undefined }}
+            className="whitespace-nowrap"
+          />
+          <span className="shrink-0 rounded-full bg-secondary px-1.5 text-xs text-secondary-foreground">
+            {t("stats.moreMessages", { count: rest.length })}
+          </span>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="end" className="w-auto max-w-md">
+        <StatusMessageList
+          messages={messages}
+          onNavigate={() => setOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

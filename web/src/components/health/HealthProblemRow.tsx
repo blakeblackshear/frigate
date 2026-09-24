@@ -2,7 +2,11 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FaTriangleExclamation } from "react-icons/fa6";
 import {
+  LuBell,
+  LuBellOff,
+  LuCheck,
   LuExternalLink,
+  LuEye,
   LuInfo,
   LuSlidersHorizontal,
   LuX,
@@ -51,7 +55,13 @@ export default function HealthProblemRow({ problem }: HealthProblemRowProps) {
     problem.link ||
     problem.docLink ||
     problem.externalLink ||
-    problem.onDismiss;
+    problem.onAcknowledge ||
+    problem.onMute ||
+    problem.onUnhide;
+  const unhideLabel =
+    problem.hidden === "muted"
+      ? t("health.notices.unmute")
+      : t("health.notices.showAgain");
 
   return (
     <div
@@ -150,16 +160,46 @@ export default function HealthProblemRow({ problem }: HealthProblemRowProps) {
               </Button>
             </RowAction>
           )}
-          {problem.onDismiss && (
-            <RowAction label={t("health.notices.dismiss")}>
+          {problem.onAcknowledge && (
+            <RowAction label={t("health.notices.acknowledgeHint")}>
               <Button
                 variant="ghost"
                 size="icon"
                 className={ICON_BUTTON_CLASS}
-                aria-label={t("health.notices.dismiss")}
-                onClick={problem.onDismiss}
+                aria-label={t("health.notices.acknowledge")}
+                onClick={problem.onAcknowledge}
               >
-                <LuX className="size-3.5" />
+                <LuCheck className="size-3.5" />
+              </Button>
+            </RowAction>
+          )}
+          {problem.onMute && (
+            <RowAction label={t("health.notices.muteHint")}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={ICON_BUTTON_CLASS}
+                aria-label={t("health.notices.mute")}
+                onClick={problem.onMute}
+              >
+                <LuBellOff className="size-3.5" />
+              </Button>
+            </RowAction>
+          )}
+          {problem.onUnhide && (
+            <RowAction label={unhideLabel}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className={ICON_BUTTON_CLASS}
+                aria-label={unhideLabel}
+                onClick={problem.onUnhide}
+              >
+                {problem.hidden === "muted" ? (
+                  <LuBell className="size-3.5" />
+                ) : (
+                  <LuEye className="size-3.5" />
+                )}
               </Button>
             </RowAction>
           )}

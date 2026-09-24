@@ -129,7 +129,6 @@ export type ProblemSeverity = "error" | "warning" | "info";
 export type PotentialProblem = {
   text: string;
   severity: ProblemSeverity;
-  color: string;
   relevantLink?: string;
 };
 

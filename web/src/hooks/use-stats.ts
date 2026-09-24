@@ -1,9 +1,5 @@
 import { FrigateConfig } from "@/types/frigateConfig";
-import {
-  CameraDetectThreshold,
-  CameraFfmpegThreshold,
-  InferenceThreshold,
-} from "@/types/graph";
+import { InferenceThreshold } from "@/types/graph";
 import { FrigateStats, PotentialProblem, ProblemSeverity } from "@/types/stats";
 import { useMemo } from "react";
 import useSWR from "swr";
@@ -15,20 +11,12 @@ import { useIsAdmin } from "./use-is-admin";
 
 import { useTranslation } from "react-i18next";
 
-// the status bar has always rendered these exact classes; keep them byte for
-// byte so its output does not change
-const SEVERITY_COLOR: Record<ProblemSeverity, string> = {
-  error: "text-danger",
-  warning: "text-orange-400",
-  info: "text-selected",
-};
-
 function problem(
   severity: ProblemSeverity,
   text: string,
   relevantLink?: string,
 ): PotentialProblem {
-  return { text, severity, color: SEVERITY_COLOR[severity], relevantLink };
+  return { text, severity, relevantLink };
 }
 
 // matches SKIPPED_DETECTIONS_PCT in frigate/stats/emitter.py
@@ -122,19 +110,12 @@ export default function useStats(stats: FrigateStats | undefined) {
       }
     });
 
-    // check camera cpu usages
+    // check for skipped detections
     Object.entries(memoizedStats["cameras"]).forEach(([name, cam]) => {
       // Skip replay cameras
       if (isReplayCamera(name)) {
         return;
       }
-
-      const ffmpegAvg = parseFloat(
-        memoizedStats["cpu_usages"][cam["ffmpeg_pid"]]?.cpu_average,
-      );
-      const detectAvg = parseFloat(
-        memoizedStats["cpu_usages"][cam["pid"]]?.cpu_average,
-      );
 
       const cameraName = config?.cameras?.[name]?.friendly_name ?? name;
 
@@ -148,32 +129,6 @@ export default function useStats(stats: FrigateStats | undefined) {
             t("stats.cameraSkippedDetections", {
               camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
               pct: cam["skipped_pct"],
-            }),
-            "/system#cameras",
-          ),
-        );
-      }
-
-      if (!isNaN(ffmpegAvg) && ffmpegAvg >= CameraFfmpegThreshold.error) {
-        problems.push(
-          problem(
-            "error",
-            t("stats.ffmpegHighCpuUsage", {
-              camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
-              ffmpegAvg,
-            }),
-            "/system#cameras",
-          ),
-        );
-      }
-
-      if (!isNaN(detectAvg) && detectAvg >= CameraDetectThreshold.error) {
-        problems.push(
-          problem(
-            "error",
-            t("stats.detectHighCpuUsage", {
-              camera: capitalizeFirstLetter(capitalizeAll(cameraName)),
-              detectAvg,
             }),
             "/system#cameras",
           ),

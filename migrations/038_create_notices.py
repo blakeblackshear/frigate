@@ -18,18 +18,21 @@ def migrate(migrator, database, fake=False, **kwargs):
         '"first_seen" DATETIME NOT NULL, '
         '"last_seen" DATETIME NOT NULL, '
         '"count" INTEGER NOT NULL, '
-        '"dismissed_at" DATETIME)'
+        '"acknowledged_at" DATETIME, '
+        '"muted_at" DATETIME)'
     )
     migrator.sql('CREATE INDEX IF NOT EXISTS "notice_kind" ON "notice" ("kind")')
     migrator.sql(
         'CREATE TABLE IF NOT EXISTS "noticestats" ('
         '"kind" VARCHAR(50) NOT NULL PRIMARY KEY, '
         '"occurrences" INTEGER NOT NULL, '
-        '"dismissals" INTEGER NOT NULL, '
+        '"acknowledgements" INTEGER NOT NULL, '
+        '"mutes" INTEGER NOT NULL, '
         '"first_seen" DATETIME NOT NULL, '
         '"last_seen" DATETIME NOT NULL, '
         '"reported_occurrences" INTEGER NOT NULL DEFAULT 0, '
-        '"reported_dismissals" INTEGER NOT NULL DEFAULT 0)'
+        '"reported_acknowledgements" INTEGER NOT NULL DEFAULT 0, '
+        '"reported_mutes" INTEGER NOT NULL DEFAULT 0)'
     )
 
 

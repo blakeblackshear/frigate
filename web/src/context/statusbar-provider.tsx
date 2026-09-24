@@ -3,6 +3,7 @@ import {
   StatusBarMessagesContext,
   StatusMessagesState,
 } from "@/context/statusbar-context";
+import { ProblemSeverity } from "@/types/stats";
 
 type StatusBarMessagesProviderProps = {
   children: ReactNode;
@@ -19,21 +20,21 @@ export function StatusBarMessagesProvider({
     (
       key: string,
       message: string,
-      color?: string,
+      severity: ProblemSeverity = "error",
       messageId?: string,
       link?: string,
     ) => {
       if (!key || !message) return;
 
-      const id = messageId ?? Date.now().toString();
-      const msgColor = color ?? "text-danger";
+      // the text is the fallback id, so repeating a message replaces it
+      const id = messageId ?? message;
 
       setMessagesState((prevMessages) => {
         const existingMessages = prevMessages[key] || [];
         // Check if a message with the same ID already exists
         const messageIndex = existingMessages.findIndex((msg) => msg.id === id);
 
-        const newMessage = { id, text: message, color: msgColor, link };
+        const newMessage = { id, text: message, severity, link };
 
         // If the message exists, replace it, otherwise add the new message
         let updatedMessages;

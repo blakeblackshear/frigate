@@ -195,15 +195,20 @@ class Notice(Model):
     first_seen = DateTimeField()
     last_seen = DateTimeField()
     count = IntegerField(default=1)
-    dismissed_at = DateTimeField(null=True)
+    # hidden until the next occurrence
+    acknowledged_at = DateTimeField(null=True)
+    # hidden for good
+    muted_at = DateTimeField(null=True)
 
 
 class NoticeStats(Model):
     kind = CharField(null=False, primary_key=True, max_length=50)
     occurrences = IntegerField(default=0)
-    dismissals = IntegerField(default=0)
+    acknowledgements = IntegerField(default=0)
+    mutes = IntegerField(default=0)
     first_seen = DateTimeField()
     last_seen = DateTimeField()
     # watermarks for a future analytics reporter; unused until then
     reported_occurrences = IntegerField(default=0)
-    reported_dismissals = IntegerField(default=0)
+    reported_acknowledgements = IntegerField(default=0)
+    reported_mutes = IntegerField(default=0)

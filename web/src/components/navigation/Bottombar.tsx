@@ -1,30 +1,15 @@
 import NavItem from "./NavItem";
 import { IoIosWarning } from "react-icons/io";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
-import useSWR from "swr";
-import { FrigateStats } from "@/types/stats";
-import { useEmbeddingsReindexProgress, useFrigateStats } from "@/api/ws";
-import {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import useStats from "@/hooks/use-stats";
+import { useLayoutEffect, useRef, useState } from "react";
+import useStatusMessages from "@/hooks/use-status-messages";
+import StatusMessageList from "../StatusMessageList";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import GeneralSettings from "../menu/GeneralSettings";
 import useNavigation from "@/hooks/use-navigation";
-import {
-  StatusBarMessagesContext,
-  StatusMessage,
-} from "@/context/statusbar-context";
-import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { isMobile } from "react-device-detect";
 import { isPWA } from "@/utils/isPWA";
-import { useTranslation } from "react-i18next";
 
 function Bottombar() {
   const navItems = useNavigation("secondary");
@@ -98,64 +83,12 @@ type StatusAlertNavProps = {
   large?: boolean;
 };
 function StatusAlertNav({ className, large }: StatusAlertNavProps) {
-  const { t } = useTranslation(["views/system"]);
-  const { data: initialStats } = useSWR<FrigateStats>("stats", {
-    revalidateOnFocus: false,
-  });
-  const latestStats = useFrigateStats();
-
-  const { messages, addMessage, clearMessages } = useContext(
-    StatusBarMessagesContext,
-  )!;
-
-  const stats = useMemo(() => {
-    if (latestStats) {
-      return latestStats;
-    }
-
-    return initialStats;
-  }, [initialStats, latestStats]);
-  const { potentialProblems } = useStats(stats);
-
-  useEffect(() => {
-    clearMessages("stats");
-    potentialProblems.forEach((problem) => {
-      addMessage(
-        "stats",
-        problem.text,
-        problem.color,
-        undefined,
-        problem.relevantLink,
-      );
-    });
-  }, [potentialProblems, addMessage, clearMessages]);
-
-  const { payload: reindexState } = useEmbeddingsReindexProgress();
-
-  useEffect(() => {
-    if (reindexState) {
-      if (reindexState.status == "indexing") {
-        clearMessages("embeddings-reindex");
-        addMessage(
-          "embeddings-reindex",
-          t("stats.reindexingEmbeddings", {
-            processed: Math.floor(
-              (reindexState.processed_objects / reindexState.total_objects) *
-                100,
-            ),
-          }),
-        );
-      }
-      if (reindexState.status === "completed") {
-        clearMessages("embeddings-reindex");
-      }
-    }
-  }, [reindexState, addMessage, clearMessages, t]);
+  const messages = useStatusMessages();
 
   const isAdmin = useIsAdmin();
 
   // problems link to admin-only pages
-  if (!isAdmin || !messages || Object.keys(messages).length === 0) {
+  if (!isAdmin || messages.length === 0) {
     return;
   }
 
@@ -163,6 +96,7 @@ function StatusAlertNav({ className, large }: StatusAlertNavProps) {
     <Drawer>
       <DrawerTrigger asChild>
         <div
+          data-testid="status-alert-trigger"
           className={cn(
             "flex flex-col items-center justify-center p-2",
             large && "size-12",
@@ -182,32 +116,10 @@ function StatusAlertNav({ className, large }: StatusAlertNavProps) {
           className,
         )}
       >
-        <div className="scrollbar-container flex h-auto w-full flex-col items-center gap-2 overflow-y-auto overflow-x-hidden px-2 py-4">
-          {Object.entries(messages).map(([key, messageArray]) => (
-            <div key={key} className="flex w-full items-center gap-2">
-              {messageArray.map(({ id, text, color, link }: StatusMessage) => {
-                const message = (
-                  <div key={id} className="flex items-center gap-2 text-xs">
-                    <IoIosWarning
-                      className={`size-5 ${color || "text-danger"}`}
-                    />
-                    {text}
-                  </div>
-                );
-
-                if (link) {
-                  return (
-                    <Link key={id} to={link}>
-                      {message}
-                    </Link>
-                  );
-                } else {
-                  return message;
-                }
-              })}
-            </div>
-          ))}
-        </div>
+        <StatusMessageList
+          messages={messages}
+          className="scrollbar-container w-full overflow-y-auto overflow-x-hidden px-4 py-4"
+        />
       </DrawerContent>
     </Drawer>
   );

@@ -23,9 +23,9 @@ type NoticesPaneProps = {
 
 export default function NoticesPane({ filter }: NoticesPaneProps) {
   const { t } = useTranslation(["views/system", "views/settings", "common"]);
-  const { problems, dismissed, loading, clearDismissed } = useHealthProblems(
+  const { problems, hidden, loading, unhideAll } = useHealthProblems(
     t,
-    filter.showDismissed,
+    filter.showHidden,
   );
   const [confirmClear, setConfirmClear] = useState(false);
 
@@ -37,12 +37,10 @@ export default function NoticesPane({ filter }: NoticesPaneProps) {
     [problems, filter.severities],
   );
 
-  const shownDismissed = useMemo(
+  const shownHidden = useMemo(
     () =>
-      dismissed?.filter((problem) =>
-        filter.severities.includes(problem.severity),
-      ),
-    [dismissed, filter.severities],
+      hidden?.filter((problem) => filter.severities.includes(problem.severity)),
+    [hidden, filter.severities],
   );
 
   return (
@@ -70,32 +68,32 @@ export default function NoticesPane({ filter }: NoticesPaneProps) {
           </div>
         )}
       </div>
-      {filter.showDismissed && (
+      {filter.showHidden && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm text-muted-foreground">
-              {t("health.notices.dismissedTitle")}
+              {t("health.notices.hiddenTitle")}
             </div>
-            {dismissed && dismissed.length > 0 && (
+            {hidden && hidden.length > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setConfirmClear(true)}
               >
-                {t("health.notices.clearDismissed")}
+                {t("health.notices.showAll")}
               </Button>
             )}
           </div>
           <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-            {shownDismissed === undefined ? (
+            {shownHidden === undefined ? (
               <Skeleton className="h-10 w-full" />
-            ) : shownDismissed.length === 0 ? (
+            ) : shownHidden.length === 0 ? (
               <div className="px-1 py-2 text-sm text-muted-foreground">
-                {t("health.notices.noneDismissed")}
+                {t("health.notices.noneHidden")}
               </div>
             ) : (
               <div className="flex flex-col">
-                {shownDismissed.map((problem) => (
+                {shownHidden.map((problem) => (
                   <HealthProblemRow key={problem.id} problem={problem} />
                 ))}
               </div>
@@ -107,10 +105,10 @@ export default function NoticesPane({ filter }: NoticesPaneProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t("health.notices.clearDismissedTitle")}
+              {t("health.notices.showAllTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {t("health.notices.clearDismissedDesc")}
+              {t("health.notices.showAllDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -119,9 +117,9 @@ export default function NoticesPane({ filter }: NoticesPaneProps) {
             </AlertDialogCancel>
             <AlertDialogAction
               className={buttonVariants({ variant: "destructive" })}
-              onClick={clearDismissed}
+              onClick={unhideAll}
             >
-              {t("health.notices.clearDismissed")}
+              {t("health.notices.showAll")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
