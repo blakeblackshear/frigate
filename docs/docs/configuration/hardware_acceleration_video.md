@@ -43,6 +43,10 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 - [RKNN](#rockchip-platform): Frigate can utilize the media engine in RockChip SOCs to accelerate video decoding.
 
+**Apple Silicon Mac** <CommunityBadge />
+
+- [lighter](#apple-silicon-mac-lighter): Frigate can utilize the media engine in Apple Silicon Macs to accelerate video decoding, when running under the lighter container runtime.
+
 **Other Hardware**
 
 Depending on your system, these presets may not be compatible, and you may need to use manual hwaccel args to take advantage of your hardware. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
@@ -533,3 +537,34 @@ output_args:
 Make sure that your SoC supports hardware acceleration for your input stream and your input stream is h264 encoding. For example, if your camera streams with h264 encoding, your SoC must be able to de- and encode with it. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
 
 :::
+
+## Apple Silicon Mac (lighter)
+
+[lighter](https://github.com/fieldwork-ai/lighter) is an open-source container runtime for macOS. It gives a container the Mac's media engine as a standard V4L2 decoder, backed by VideoToolbox, so Frigate decodes H.264 and H.265 streams in hardware with the ffmpeg it already ships. It works on M1 and newer Macs with lighter 0.9.2 or newer.
+
+Give the container the video device. With Docker Compose:
+
+```yaml {4-5}
+services:
+  frigate:
+    ...
+    devices:
+      - lighter.sh/video=all
+```
+
+Or with `docker run`, add `--device lighter.sh/video=all`.
+
+Then set the hardware acceleration arguments:
+
+```yaml
+ffmpeg:
+  hwaccel_args: -c:v h264_v4l2m2m # hevc_v4l2m2m for H.265 streams
+```
+
+:::note
+
+Use these arguments rather than the Raspberry Pi presets. `preset-rpi-64-h264` passes `-c:v:1 h264_v4l2m2m`, which selects the decoder for a second video stream only, so a camera with a single video stream is still decoded in software.
+
+:::
+
+lighter can also run object detection on the Mac's Neural Engine; see [Apple Neural Engine (lighter)](object_detectors.md#apple-neural-engine-lighter).
