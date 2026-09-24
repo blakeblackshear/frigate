@@ -178,6 +178,52 @@ test.describe("UI settings import/export @medium", () => {
     expect(payload.sections.preferences.playbackRate).toBe(2);
   });
 
+  test("exports only layouts built for the current tile sizing mode", async ({
+    frigateApp,
+  }) => {
+    // a group not opened since the mode changed still holds a layout from
+    // the other mode, which would import into a mode that cannot show it
+    await frigateApp.goto("/settings?page=uiSettings");
+
+    await writeIdb(frigateApp.page, {
+      [OUTDOOR_LAYOUT_KEY]: OUTDOOR_LAYOUT,
+      "default-draggable-layout:admin": NATURAL_OUTDOOR_LAYOUT,
+      "naturalAspectLayout:admin": true,
+    });
+
+    const downloadPromise = frigateApp.page.waitForEvent("download");
+    await frigateApp.page
+      .getByRole("button", { name: "Export Settings" })
+      .click();
+    const download = await downloadPromise;
+    const payload = JSON.parse(readFileSync((await download.path())!, "utf-8"));
+
+    expect(payload.sections.layouts).toEqual({
+      default: NATURAL_OUTDOOR_LAYOUT,
+    });
+  });
+
+  test("toggling tile sizing mode clears stored layouts", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "The setting is hidden on phones");
+    await frigateApp.goto("/settings?page=uiSettings");
+    await writeIdb(frigateApp.page, { [OUTDOOR_LAYOUT_KEY]: OUTDOOR_LAYOUT });
+
+    await frigateApp.page.locator("#natural-aspect-desktop").click();
+    await frigateApp.page
+      .getByRole("alertdialog")
+      .getByRole("button", { name: "Enable" })
+      .click();
+
+    await expect
+      .poll(() => readIdb(frigateApp.page, OUTDOOR_LAYOUT_KEY))
+      .toBeNull();
+    expect(await readIdb(frigateApp.page, "naturalAspectLayout:admin")).toBe(
+      true,
+    );
+  });
+
   test("round-trips a layout left unconverted by an upgrade", async ({
     frigateApp,
   }) => {

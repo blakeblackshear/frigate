@@ -369,12 +369,18 @@ export default function DraggableGridLayout({
       const placed = new Set(existing.map((layout) => layout.i));
 
       const tileColumns = GRID_COLS / TILE_BASE_W; // 3 standard columns
-      // Start below existing items so new cameras never overlap the user's.
-      const maxBottom = existing.reduce(
-        (max, layout) => Math.max(max, layout.y + layout.h),
-        0,
+      // Each column starts below every existing tile that overlaps it, so new
+      // cameras fill open columns without overlapping the user's tiles.
+      const colBottoms = Array.from({ length: tileColumns }, (_, c) =>
+        existing.reduce(
+          (max, layout) =>
+            layout.x < (c + 1) * TILE_BASE_W &&
+            layout.x + layout.w > c * TILE_BASE_W
+              ? Math.max(max, layout.y + layout.h)
+              : max,
+          0,
+        ),
       );
-      const colBottoms = new Array(tileColumns).fill(maxBottom);
 
       const result: LayoutItem[] = [...existing];
 

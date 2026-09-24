@@ -38,8 +38,7 @@ test.describe("Masonry live grid @critical", () => {
   test("tiles render at their camera's natural aspect ratio", async ({
     frigateApp,
   }) => {
-    // front_door stays 16:9; backyard is overridden to portrait so the two
-    // tiles must render with opposite orientations.
+    // backyard is 9:16, which bucketed mode would snap to an 8:9 tile
     await frigateApp.installDefaults({
       config: {
         cameras: { backyard: { detect: { width: 720, height: 1280 } } },
@@ -47,8 +46,13 @@ test.describe("Masonry live grid @critical", () => {
     });
     await frigateApp.goto(`/?group=${GROUP}`);
     const live = new LivePage(frigateApp.page, true);
-
     await expect(live.cameraCard("front_door").first()).toBeVisible({
+      timeout: 10_000,
+    });
+
+    await seedLayout(frigateApp.page, "naturalAspectLayout:admin", true);
+    await frigateApp.page.reload();
+    await expect(live.cameraCard("backyard").first()).toBeVisible({
       timeout: 10_000,
     });
 
@@ -58,9 +62,8 @@ test.describe("Masonry live grid @critical", () => {
       "card",
     );
 
-    // 16:9 tile is clearly wider than tall; portrait tile is taller than wide.
-    expect(landscape.w / landscape.h).toBeGreaterThan(1.4);
-    expect(portrait.w / portrait.h).toBeLessThan(1);
+    expect(landscape.w / landscape.h).toBeCloseTo(16 / 9, 1);
+    expect(portrait.w / portrait.h).toBeCloseTo(9 / 16, 1);
   });
 
   test("dragging a tile does not shove other tiles far away", async ({
@@ -208,6 +211,32 @@ test.describe("Masonry live grid @critical", () => {
     await expect
       .poll(span, { timeout: 10_000 })
       .toBeLessThanOrEqual(fresh! + 2);
+  });
+
+  test("a camera added to a saved layout fills an open column", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto(`/?group=${GROUP}`);
+    const live = new LivePage(frigateApp.page, true);
+    await expect(live.cameraCard("front_door").first()).toBeVisible({
+      timeout: 10_000,
+    });
+
+    // one tall tile in the first column; backyard is missing from the layout
+    const key = await persistedLayoutKey(frigateApp.page, GROUP);
+    await seedLayout(frigateApp.page, key, {
+      version: 2,
+      naturalAspect: false,
+      layout: [{ i: "front_door", x: 0, y: 0, w: 32, h: 400 }],
+    });
+    await frigateApp.page.reload();
+
+    await expect
+      .poll(async () => {
+        const stored = await readLayout(frigateApp.page, key);
+        return stored?.layout.find((item) => item.i === "backyard");
+      })
+      .toMatchObject({ x: 32, y: 0 });
   });
 
   test("saved layout from an unreadable version regenerates without error", async ({

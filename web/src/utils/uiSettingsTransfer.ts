@@ -219,6 +219,8 @@ export async function buildExportPayload(
   const layouts: UiSettingsFile["sections"]["layouts"] = {};
   let streaming: UiSettingsFile["sections"]["streaming"] = {};
   const preferences: UiSettingsFile["sections"]["preferences"] = {};
+  const naturalAspect =
+    (await readTransferable("naturalAspectLayout", true, username)) === true;
 
   await Promise.all(
     groupNames.map(async (group) => {
@@ -228,7 +230,9 @@ export async function buildExportPayload(
         username,
       );
 
-      if (value !== undefined) {
+      // a group not opened since the mode changed still holds a layout from
+      // the other mode, which the grid discards, so leave it out of the file
+      if (value !== undefined && layoutIsNatural(value) === naturalAspect) {
         layouts[group] = value;
       }
     }),
@@ -399,8 +403,18 @@ export function summarizeImport(
   };
 }
 
-// Bare arrays are pre-masonry bucketed layouts. A layout only renders under
-// the mode that built it, so importing layouts applies this mode too.
+// Bare arrays are pre-masonry bucketed layouts
+function layoutIsNatural(layout: unknown): boolean {
+  return (
+    typeof layout === "object" &&
+    layout !== null &&
+    !Array.isArray(layout) &&
+    (layout as { naturalAspect?: unknown }).naturalAspect === true
+  );
+}
+
+// A layout only renders under the mode that built it, so importing layouts
+// applies this mode too. Exports hold a single mode.
 export function importedLayoutsNaturalAspect(
   file: UiSettingsFile,
 ): boolean | null {
@@ -410,9 +424,7 @@ export function importedLayoutsNaturalAspect(
     return null;
   }
 
-  return layouts.some(
-    (layout) => !Array.isArray(layout) && layout.naturalAspect === true,
-  );
+  return layouts.some(layoutIsNatural);
 }
 
 export function hasImportableContent(summary: ImportSummary): boolean {

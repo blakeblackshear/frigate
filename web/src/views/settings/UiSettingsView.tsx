@@ -392,7 +392,9 @@ export default function UiSettingsView() {
         clearStreamingSettings();
         break;
       case "naturalAspect":
+        // a layout only renders in the mode that built it
         setNaturalAspect(!naturalAspect);
+        clearStoredLayouts();
         break;
     }
 
