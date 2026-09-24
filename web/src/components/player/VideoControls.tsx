@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { LuFolderX } from "react-icons/lu";
-import { isMobileOnly, isSafari } from "react-device-detect";
+import { isMobileOnly } from "react-device-detect";
 import { LuPause, LuPlay } from "react-icons/lu";
 import {
   DropdownMenu,
@@ -54,7 +54,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   snapshot: false,
   fullscreen: false,
 };
-const PLAYBACK_RATE_DEFAULT = isSafari ? [0.5, 1, 2] : [0.5, 1, 2, 4, 8, 16];
+const PLAYBACK_RATE_DEFAULT = [0.5, 1, 2, 4, 8, 16];
 const MIN_ITEMS_WRAP = 6;
 
 type VideoControlsProps = {
