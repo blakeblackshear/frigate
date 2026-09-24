@@ -73,12 +73,12 @@ def get_lighter_ane_devices() -> list[Any]:
         try:
             ort.register_execution_provider_library(LIGHTER_ANE_EP_NAME, library)
         except Exception as e:
-            logger.warning(f"Failed to load the Neural Engine provider from {library}: {e}")
+            logger.warning(
+                f"Failed to load the Neural Engine provider from {library}: {e}"
+            )
             return []
 
-        devices = [
-            d for d in ort.get_ep_devices() if d.ep_name == LIGHTER_ANE_EP_NAME
-        ]
+        devices = [d for d in ort.get_ep_devices() if d.ep_name == LIGHTER_ANE_EP_NAME]
 
     return devices
 
