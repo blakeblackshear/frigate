@@ -554,22 +554,18 @@ services:
 
 Or with `docker run`, add `--device lighter.sh/video=all`.
 
-Then set the hardware acceleration arguments for the codec your cameras stream. The decoder is specific to the codec, so if your cameras mix H.264 and H.265, set it for the most common codec globally and override it on the other cameras:
+Then set the preset for the codec your cameras stream. The decoder is specific to the codec, so if your cameras mix H.264 and H.265, set the preset for the most common codec globally and override it on the other cameras:
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -c:v h264_v4l2m2m # for H.264 streams
+  hwaccel_args: preset-apple-silicon-h264
 
 cameras:
   garage: # an H.265 camera
     ffmpeg:
-      hwaccel_args: -c:v hevc_v4l2m2m
+      hwaccel_args: preset-apple-silicon-h265
 ```
 
-:::note
-
-Use these arguments rather than the Raspberry Pi presets. `preset-rpi-64-h264` passes `-c:v:1 h264_v4l2m2m`, which selects the decoder for a second video stream only, so a camera with a single video stream is still decoded in software.
-
-:::
+The presets decode on the media engine and encode the Birdseye restream and timelapses there too. Scaling to the detect resolution runs on the CPU, as ffmpeg's V4L2 decoders cannot scale.
 
 lighter can also run object detection on the Mac's Neural Engine; see [Apple Neural Engine (lighter)](object_detectors.md#apple-neural-engine-lighter).

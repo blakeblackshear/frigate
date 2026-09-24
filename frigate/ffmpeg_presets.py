@@ -84,6 +84,8 @@ _user_agent_args = [
 PRESETS_HW_ACCEL_DECODE = {
     "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
+    "preset-apple-silicon-h264": "-c:v h264_v4l2m2m",
+    "preset-apple-silicon-h265": "-c:v hevc_v4l2m2m",
     FFMPEG_HWACCEL_VAAPI: "-hwaccel_flags allow_profile_mismatch -hwaccel vaapi -hwaccel_device {3} -hwaccel_output_format vaapi",
     "preset-intel-qsv-h264": f"-hwaccel qsv -qsv_device {{3}} -hwaccel_output_format qsv -c:v h264_qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
     "preset-intel-qsv-h265": f"-load_plugin hevc_hw -hwaccel qsv -qsv_device {{3}} -hwaccel_output_format qsv{' -bsf:v dump_extra' if LIBAVFORMAT_VERSION_MAJOR >= 61 else ''}",  # https://trac.ffmpeg.org/ticket/9766#comment:17
@@ -120,6 +122,9 @@ PRESETS_HW_ACCEL_DECODE["preset-rk-h265"] = PRESETS_HW_ACCEL_DECODE[
 PRESETS_HW_ACCEL_SCALE = {
     "preset-rpi-64-h264": "-r {0} -vf fps={0},scale={1}:{2}",
     "preset-rpi-64-h265": "-r {0} -vf fps={0},scale={1}:{2}",
+    # ffmpeg's v4l2m2m decoders cannot scale, so frames are scaled on the CPU
+    "preset-apple-silicon-h264": "-r {0} -vf fps={0},scale={1}:{2}",
+    "preset-apple-silicon-h265": "-r {0} -vf fps={0},scale={1}:{2}",
     FFMPEG_HWACCEL_VAAPI: "-r {0} -vf fps={0},scale_vaapi=w={1}:h={2},hwdownload,format=nv12",
     "preset-intel-qsv-h264": "-r {0} -vf vpp_qsv=w={1}:h={2}:format=nv12,hwdownload,format=nv12,fps={0},format=yuv420p",
     "preset-intel-qsv-h265": "-r {0} -vf vpp_qsv=w={1}:h={2}:format=nv12,hwdownload,format=nv12,fps={0},format=yuv420p",
@@ -150,6 +155,8 @@ PRESETS_HW_ACCEL_SCALE["preset-rk-h265"] = PRESETS_HW_ACCEL_SCALE[FFMPEG_HWACCEL
 PRESETS_HW_ACCEL_ENCODE_BIRDSEYE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m {2}",
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m {2}",
+    "preset-apple-silicon-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m {2}",
+    "preset-apple-silicon-h265": "{0} -hide_banner {1} -c:v h264_v4l2m2m {2}",
     # -vaapi_device is required in addition to -hwaccel_device: this is the only
     # birdseye preset that uses hwupload, and ffmpeg 8 initializes filters before
     # the decoder creates a device, so hwupload cannot see an -hwaccel_device one.
@@ -184,6 +191,8 @@ PRESETS_HW_ACCEL_ENCODE_BIRDSEYE["preset-rk-h264"] = PRESETS_HW_ACCEL_ENCODE_BIR
 PRESETS_HW_ACCEL_ENCODE_TIMELAPSE = {
     "preset-rpi-64-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m -pix_fmt yuv420p {2}",
     "preset-rpi-64-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m -pix_fmt yuv420p {2}",
+    "preset-apple-silicon-h264": "{0} -hide_banner {1} -c:v h264_v4l2m2m -pix_fmt yuv420p {2}",
+    "preset-apple-silicon-h265": "{0} -hide_banner {1} -c:v hevc_v4l2m2m -pix_fmt yuv420p {2}",
     FFMPEG_HWACCEL_VAAPI: "{0} -hide_banner -hwaccel vaapi -hwaccel_output_format vaapi -hwaccel_device {3} {1} -c:v h264_vaapi {2}",
     "preset-intel-qsv-h264": "{0} -hide_banner {1} -c:v h264_qsv -profile:v high -level:v 4.1 -async_depth:v 1 {2}",
     "preset-intel-qsv-h265": "{0} -hide_banner {1} -c:v hevc_qsv -profile:v main -level:v 4.1 -async_depth:v 1 {2}",

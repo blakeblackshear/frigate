@@ -48,6 +48,7 @@
         "rkmpp": "RKMPP (Rockchip)",
         "jetson": "NVIDIA Jetson",
         "rpi": "V4L2 (Raspberry Pi)",
+        "apple-silicon": "Media engine (Apple Silicon)",
         "none": "None (software decoding)"
       }
     },

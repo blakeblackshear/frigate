@@ -17,17 +17,19 @@ Hardware acceleration arguments tell FFmpeg to decode your camera's video stream
 
 See [the hardware acceleration docs](/configuration/hardware_acceleration_video.md) for details on setting up hardware acceleration for your GPU / iGPU, then select the preset that matches your hardware.
 
-| Preset (YAML config)  | UI Label                | Usage                             | Notes                                                           |
-| --------------------- | ----------------------- | --------------------------------- | --------------------------------------------------------------- |
-| preset-rpi-64-h264    | Raspberry Pi (H.264)    | 64-bit Raspberry Pi, H.264 stream |                                                                 |
-| preset-rpi-64-h265    | Raspberry Pi (H.265)    | 64-bit Raspberry Pi, H.265 stream |                                                                 |
-| preset-vaapi          | VAAPI (Intel/AMD GPU)   | Intel or AMD GPU via VAAPI        | Check the hwaccel docs to ensure the correct driver is selected |
-| preset-intel-qsv-h264 | Intel QuickSync (H.264) | Intel QuickSync, H.264 stream     | If you have issues, use the VAAPI preset instead                |
-| preset-intel-qsv-h265 | Intel QuickSync (H.265) | Intel QuickSync, H.265 stream     | If you have issues, use the VAAPI preset instead                |
-| preset-nvidia         | NVIDIA GPU              | NVIDIA GPU                        |                                                                 |
-| preset-jetson-h264    | NVIDIA Jetson (H.264)   | NVIDIA Jetson, H.264 stream       |                                                                 |
-| preset-jetson-h265    | NVIDIA Jetson (H.265)   | NVIDIA Jetson, H.265 stream       |                                                                 |
-| preset-rkmpp          | Rockchip RKMPP          | Rockchip MPP                      | Use an image with the `-rk` suffix and run in privileged mode   |
+| Preset (YAML config)      | UI Label                | Usage                                         | Notes                                                           |
+| ------------------------- | ----------------------- | --------------------------------------------- | --------------------------------------------------------------- |
+| preset-rpi-64-h264        | Raspberry Pi (H.264)    | 64-bit Raspberry Pi, H.264 stream             |                                                                 |
+| preset-rpi-64-h265        | Raspberry Pi (H.265)    | 64-bit Raspberry Pi, H.265 stream             |                                                                 |
+| preset-apple-silicon-h264 | Apple Silicon (H.264)   | Apple Silicon Mac under lighter, H.264 stream | Needs the `lighter.sh/video` device                             |
+| preset-apple-silicon-h265 | Apple Silicon (H.265)   | Apple Silicon Mac under lighter, H.265 stream | Needs the `lighter.sh/video` device                             |
+| preset-vaapi              | VAAPI (Intel/AMD GPU)   | Intel or AMD GPU via VAAPI                    | Check the hwaccel docs to ensure the correct driver is selected |
+| preset-intel-qsv-h264     | Intel QuickSync (H.264) | Intel QuickSync, H.264 stream                 | If you have issues, use the VAAPI preset instead                |
+| preset-intel-qsv-h265     | Intel QuickSync (H.265) | Intel QuickSync, H.265 stream                 | If you have issues, use the VAAPI preset instead                |
+| preset-nvidia             | NVIDIA GPU              | NVIDIA GPU                                    |                                                                 |
+| preset-jetson-h264        | NVIDIA Jetson (H.264)   | NVIDIA Jetson, H.264 stream                   |                                                                 |
+| preset-jetson-h265        | NVIDIA Jetson (H.265)   | NVIDIA Jetson, H.265 stream                   |                                                                 |
+| preset-rkmpp              | Rockchip RKMPP          | Rockchip MPP                                  | Use an image with the `-rk` suffix and run in privileged mode   |
 
 <ConfigTabs>
 <TabItem value="ui">

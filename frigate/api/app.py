@@ -429,6 +429,8 @@ def ffmpeg_presets():
         hwaccel_presets = [
             "preset-rpi-64-h264",
             "preset-rpi-64-h265",
+            "preset-apple-silicon-h264",
+            "preset-apple-silicon-h265",
             "preset-jetson-h264",
             "preset-jetson-h265",
             "preset-rkmpp",
