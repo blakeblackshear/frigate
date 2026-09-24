@@ -17,7 +17,7 @@ import {
   useUserPersistence,
   deleteUserNamespacedKey,
 } from "@/hooks/use-user-persistence";
-import { isMobileOnly, isSafari } from "react-device-detect";
+import { isMobileOnly } from "react-device-detect";
 import {
   Select,
   SelectContent,
