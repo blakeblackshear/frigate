@@ -219,6 +219,39 @@ class TestLighterANE(unittest.TestCase):
             loaded_devices["/models/yolo.onnx"], ("yolo-generic", "Neural Engine")
         )
 
+    def test_a_model_the_neural_engine_cannot_load_uses_the_default_providers(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[MagicMock()]
+            ),
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners, "is_openvino_gpu_npu_available", return_value=False
+            ),
+            patch.object(
+                detection_runners.ort,
+                "InferenceSession",
+                side_effect=[RuntimeError("unsupported"), session],
+            ) as inference_session,
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=MagicMock()
+            ),
+            self.assertLogs(detection_runners.logger, level="WARNING"),
+        ):
+            runner = get_optimized_runner("/models/jina.onnx", "AUTO", "jina-v2")
+
+        self.assertEqual(inference_session.call_count, 2)
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(loaded_devices["/models/jina.onnx"], ("jina-v2", "CPU"))
+
     def test_a_cpu_model_stays_on_the_cpu(self):
         session = MagicMock()
         session.get_providers.return_value = ["CPUExecutionProvider"]

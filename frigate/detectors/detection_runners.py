@@ -726,14 +726,19 @@ def get_optimized_runner(
     if device != "CPU" and (ane_devices := get_lighter_ane_devices()):
         sess_options = get_ort_session_options(model_type) or ort.SessionOptions()
         sess_options.add_provider_for_devices(ane_devices, {})
-        return _record_runner(
-            model_path,
-            model_type,
-            ONNXModelRunner(
-                ort.InferenceSession(model_path, sess_options=sess_options),
-                model_type=model_type,
-            ),
-        )
+
+        try:
+            session = ort.InferenceSession(model_path, sess_options=sess_options)
+        except Exception as e:
+            logger.warning(
+                f"Failed to load {model_path} on the Neural Engine, using the default providers: {e}"
+            )
+        else:
+            return _record_runner(
+                model_path,
+                model_type,
+                ONNXModelRunner(session, model_type=model_type),
+            )
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 
