@@ -46,7 +46,41 @@ _PROVIDER_LABELS = {
     "MIGraphXExecutionProvider": "MIGraphX",
     "OpenVINOExecutionProvider": "OpenVINO",
     "CPUExecutionProvider": "CPU",
+    "LighterANE": "Neural Engine",
 }
+
+# lighter (https://github.com/fieldwork-ai/lighter) places an ONNX Runtime plugin
+# execution provider in a container started with --device lighter.sh/ane=all,
+# which runs models on a Mac's Neural Engine; LIGHTER_ANE_EP names where it is
+LIGHTER_ANE_EP_NAME = "LighterANE"
+LIGHTER_ANE_LIBRARY = "/usr/lib/lighter/liblighter_ane_ep.so"
+
+
+def get_lighter_ane_devices() -> list[Any]:
+    """Get the Neural Engine devices lighter's provider offers, registering it once.
+
+    Returns:
+        The provider's ONNX Runtime devices, or an empty list without lighter's device
+    """
+    library = os.environ.get("LIGHTER_ANE_EP", LIGHTER_ANE_LIBRARY)
+
+    if not os.path.exists(library):
+        return []
+
+    devices = [d for d in ort.get_ep_devices() if d.ep_name == LIGHTER_ANE_EP_NAME]
+
+    if not devices:
+        try:
+            ort.register_execution_provider_library(LIGHTER_ANE_EP_NAME, library)
+        except Exception as e:
+            logger.warning(f"Failed to load the Neural Engine provider from {library}: {e}")
+            return []
+
+        devices = [
+            d for d in ort.get_ep_devices() if d.ep_name == LIGHTER_ANE_EP_NAME
+        ]
+
+    return devices
 
 
 def is_arm64_platform() -> bool:
@@ -688,6 +722,18 @@ def get_optimized_runner(
 
         if rknn_path:
             return _record_runner(model_path, model_type, RKNNModelRunner(rknn_path))
+
+    if device != "CPU" and (ane_devices := get_lighter_ane_devices()):
+        sess_options = get_ort_session_options(model_type) or ort.SessionOptions()
+        sess_options.add_provider_for_devices(ane_devices, {})
+        return _record_runner(
+            model_path,
+            model_type,
+            ONNXModelRunner(
+                ort.InferenceSession(model_path, sess_options=sess_options),
+                model_type=model_type,
+            ),
+        )
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 

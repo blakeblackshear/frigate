@@ -25,7 +25,7 @@ class HardwareProbeTestCase(unittest.TestCase):
         self.root = tempfile.TemporaryDirectory()
         self.addCleanup(self.root.cleanup)
 
-        for name in ("SYS_ROOT", "DEV_ROOT", "PROC_ROOT", "ETC_ROOT"):
+        for name in ("SYS_ROOT", "DEV_ROOT", "PROC_ROOT", "ETC_ROOT", "LIB_ROOT"):
             sub = os.path.join(self.root.name, name.split("_")[0].lower())
             os.makedirs(sub, exist_ok=True)
             patcher = patch.object(hardware, name, sub)
@@ -167,6 +167,29 @@ class TestNvidia(HardwareProbeTestCase):
 
 
 class TestAccelerators(HardwareProbeTestCase):
+    def test_the_neural_engine_is_found_by_lighters_provider_library(self):
+        write(os.path.join(self.lib_root, "lighter", "liblighter_ane_ep.so"))
+
+        with patch.dict(os.environ, clear=False) as env:
+            env.pop("LIGHTER_ANE_EP", None)
+            ane = self.probe()["onnx:lighter"]
+
+        self.assertEqual(ane.detector, "onnx")
+        self.assertEqual(ane.units[0].device, "onnx")
+        self.assertEqual(ane.units[0].label, "Neural Engine")
+
+    def test_the_neural_engine_is_found_where_lighter_ane_ep_points(self):
+        library = os.path.join(self.root.name, "elsewhere", "liblighter_ane_ep.so")
+        write(library)
+
+        with patch.dict(os.environ, {"LIGHTER_ANE_EP": library}):
+            self.assertIn("onnx:lighter", self.probe())
+
+    def test_no_neural_engine_is_reported_without_the_library(self):
+        with patch.dict(os.environ, clear=False) as env:
+            env.pop("LIGHTER_ANE_EP", None)
+            self.assertNotIn("onnx:lighter", self.probe())
+
     def test_hailo_is_found_by_its_device_node(self):
         write(os.path.join(self.dev_root, "hailo0"))
 
