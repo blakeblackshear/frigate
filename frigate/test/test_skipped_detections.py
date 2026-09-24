@@ -1,10 +1,14 @@
-"""Tests for the skipped detection rate and the notice it can raise."""
+"""Tests for the per-camera episode notices: skipped detections and high CPU."""
 
 import unittest
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from frigate.stats import emitter
-from frigate.stats.emitter import SkippedDetectionsTracker
+from frigate.stats.emitter import (
+    SKIPPED_DETECTIONS_PCT,
+    EpisodeTracker,
+    cpu_average,
+)
 from frigate.stats.util import skipped_percent
 
 
@@ -19,18 +23,18 @@ class TestSkippedPercent(unittest.TestCase):
         self.assertEqual(skipped_percent(2.0, 5.0, False), 0.0)
 
 
-class TestSkippedDetectionsTracker(unittest.TestCase):
+class TestEpisodeTracker(unittest.TestCase):
     def _cameras(self, pct: float) -> dict:
-        return {"front_door": {"skipped_pct": pct}}
+        return {"front_door": pct}
 
     def test_below_threshold_never_qualifies(self):
-        tracker = SkippedDetectionsTracker()
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
 
         for tick in range(10):
             self.assertEqual(tracker.update(self._cameras(4.9), tick * 15.0), [])
 
     def test_qualifies_once_after_the_hold(self):
-        tracker = SkippedDetectionsTracker()
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
 
         results = [
             tracker.update(self._cameras(10.0), tick * 15.0) for tick in range(8)
@@ -42,7 +46,7 @@ class TestSkippedDetectionsTracker(unittest.TestCase):
         self.assertEqual(results[5:], [[], [], []])
 
     def test_a_dip_restarts_the_hold(self):
-        tracker = SkippedDetectionsTracker()
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
 
         for now, pct in ((0.0, 10.0), (15.0, 10.0), (30.0, 10.0), (45.0, 2.0)):
             self.assertEqual(tracker.update(self._cameras(pct), now), [])
@@ -51,7 +55,7 @@ class TestSkippedDetectionsTracker(unittest.TestCase):
         self.assertEqual(tracker.update(self._cameras(10.0), 120.0), ["front_door"])
 
     def test_recovery_then_relapse_is_a_new_episode(self):
-        tracker = SkippedDetectionsTracker()
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
         tracker.update(self._cameras(10.0), 0.0)
         self.assertEqual(tracker.update(self._cameras(10.0), 60.0), ["front_door"])
 
@@ -61,23 +65,40 @@ class TestSkippedDetectionsTracker(unittest.TestCase):
         self.assertEqual(tracker.update(self._cameras(10.0), 150.0), ["front_door"])
 
     def test_cameras_are_tracked_separately(self):
-        tracker = SkippedDetectionsTracker()
-        tracker.update({"a": {"skipped_pct": 10.0}, "b": {"skipped_pct": 0.0}}, 0.0)
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
+        tracker.update({"a": 10.0, "b": 0.0}, 0.0)
 
-        qualified = tracker.update(
-            {"a": {"skipped_pct": 10.0}, "b": {"skipped_pct": 10.0}}, 60.0
-        )
+        qualified = tracker.update({"a": 10.0, "b": 10.0}, 60.0)
 
         self.assertEqual(qualified, ["a"])
 
     def test_a_removed_camera_starts_a_new_episode(self):
-        tracker = SkippedDetectionsTracker()
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
         tracker.update(self._cameras(10.0), 0.0)
         tracker.update({}, 15.0)
         tracker.update(self._cameras(10.0), 30.0)
 
         self.assertEqual(tracker.update(self._cameras(10.0), 60.0), [])
         self.assertEqual(tracker.update(self._cameras(10.0), 90.0), ["front_door"])
+
+    def test_a_missing_value_ends_the_episode(self):
+        tracker = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
+        tracker.update(self._cameras(10.0), 0.0)
+        tracker.update({"front_door": None}, 30.0)
+
+        self.assertEqual(tracker.update(self._cameras(10.0), 60.0), [])
+
+
+class TestCpuAverage(unittest.TestCase):
+    def test_reads_the_lifetime_average(self):
+        usages = {"42": {"cpu": "80.0", "cpu_average": "25.0"}}
+
+        self.assertEqual(cpu_average(usages, 42), 25.0)
+
+    def test_unknown_process_has_no_average(self):
+        self.assertIsNone(cpu_average({}, 42))
+        self.assertIsNone(cpu_average({"42": {"cpu_average": "25.0"}}, None))
+        self.assertIsNone(cpu_average({"42": {"cpu_average": ""}}, 42))
 
 
 class TestEmitterNotices(unittest.TestCase):
@@ -94,15 +115,25 @@ class TestEmitterNotices(unittest.TestCase):
 
     def _emitter(self) -> emitter.StatsEmitter:
         stats_emitter = emitter.StatsEmitter.__new__(emitter.StatsEmitter)
-        stats_emitter.skipped_detections = SkippedDetectionsTracker()
+        stats_emitter.skipped_detections = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
+        stats_emitter.ffmpeg_cpu = EpisodeTracker(emitter.FFMPEG_HIGH_CPU_PCT)
+        stats_emitter.detect_cpu = EpisodeTracker(emitter.DETECT_HIGH_CPU_PCT)
         stats_emitter._shm_checked = False
         stats_emitter._shm_params = None
         return stats_emitter
 
-    def _stats(self, uptime: int, pct: float) -> dict:
+    def _stats(
+        self, uptime: int, pct: float, ffmpeg_cpu: str = "5.0", detect_cpu: str = "5.0"
+    ) -> dict:
         return {
             "service": {"uptime": uptime, "storage": {"/dev/shm": {}}},
-            "cameras": {"front_door": {"skipped_pct": pct}},
+            "cameras": {
+                "front_door": {"skipped_pct": pct, "ffmpeg_pid": 10, "pid": 11}
+            },
+            "cpu_usages": {
+                "10": {"cpu_average": ffmpeg_cpu},
+                "11": {"cpu_average": detect_cpu},
+            },
         }
 
     def test_qualified_camera_raises_a_notice(self):
@@ -114,6 +145,32 @@ class TestEmitterNotices(unittest.TestCase):
         self.raise_notice.assert_called_once_with(
             "skipped_detections", scope="front_door", params={"pct": 12.5}
         )
+
+    def test_high_cpu_raises_a_notice_per_process(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now in ((300, 0.0), (360, 60.0)):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, ffmpeg_cpu="25.0", detect_cpu="45.0"), now
+            )
+
+        self.assertEqual(
+            self.raise_notice.call_args_list,
+            [
+                call("ffmpeg_high_cpu", scope="front_door", params={"cpu": 25.0}),
+                call("detect_high_cpu", scope="front_door", params={"cpu": 45.0}),
+            ],
+        )
+
+    def test_cpu_below_each_threshold_raises_nothing(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now in ((300, 0.0), (360, 60.0)):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, ffmpeg_cpu="19.0", detect_cpu="39.0"), now
+            )
+
+        self.raise_notice.assert_not_called()
 
     def test_startup_window_is_ignored(self):
         stats_emitter = self._emitter()

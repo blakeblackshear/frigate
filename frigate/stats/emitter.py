@@ -29,38 +29,59 @@ VERSION_REFRESH_S = 24 * 60 * 60
 # a camera skipping at least this percent of its frames is falling behind
 SKIPPED_DETECTIONS_PCT = 5
 
-# for at least this long before it becomes a notice
-SKIPPED_DETECTIONS_HOLD_S = 60
+# lifetime CPU averages at or above these are high; they match
+# CameraFfmpegThreshold.error and CameraDetectThreshold.error in the UI
+FFMPEG_HIGH_CPU_PCT = 20
+DETECT_HIGH_CPU_PCT = 40
+
+# a camera stays over a threshold this long before it becomes a notice
+EPISODE_HOLD_S = 60
 
 # detectors warm up after a start; the status bar waits this long too
 STARTUP_GRACE_S = 120
 
 
-class SkippedDetectionsTracker:
-    """Finds cameras whose skipped share stays high long enough for a notice."""
+def cpu_average(cpu_usages: dict[str, Any], pid: int | None) -> float | None:
+    """A process's CPU use averaged over its lifetime, or None if unknown."""
+    usage = cpu_usages.get(str(pid)) if pid else None
 
-    def __init__(self) -> None:
+    try:
+        return float(usage["cpu_average"]) if usage else None
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+class EpisodeTracker:
+    """Finds cameras whose value stays over a threshold long enough for a notice."""
+
+    def __init__(self, threshold: float) -> None:
+        self._threshold = threshold
         self._since: dict[str, float] = {}
         self._raised: set[str] = set()
 
-    def update(self, cameras: dict[str, dict[str, Any]], now: float) -> list[str]:
-        """Return the cameras whose episode qualified on this sample."""
+    def update(self, values: dict[str, float | None], now: float) -> list[str]:
+        """Return the cameras whose episode qualified on this sample.
+
+        Args:
+            values: Each camera's current value, or None when it has none
+            now: Sample time in seconds
+        """
         qualified: list[str] = []
 
         # a removed camera that comes back starts a new episode
-        for camera in self._since.keys() - cameras.keys():
+        for camera in self._since.keys() - values.keys():
             self._since.pop(camera)
             self._raised.discard(camera)
 
-        for camera, camera_stats in cameras.items():
-            if camera_stats["skipped_pct"] < SKIPPED_DETECTIONS_PCT:
+        for camera, value in values.items():
+            if value is None or value < self._threshold:
                 self._since.pop(camera, None)
                 self._raised.discard(camera)
                 continue
 
             since = self._since.setdefault(camera, now)
 
-            if camera not in self._raised and now - since >= SKIPPED_DETECTIONS_HOLD_S:
+            if camera not in self._raised and now - since >= EPISODE_HOLD_S:
                 self._raised.add(camera)
                 qualified.append(camera)
 
@@ -80,7 +101,9 @@ class StatsEmitter(threading.Thread):
         self.stop_event = stop_event
         self.hardware_stats = HardwareStats(config)
         self.stats_history: list[dict[str, Any]] = []
-        self.skipped_detections = SkippedDetectionsTracker()
+        self.skipped_detections = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
+        self.ffmpeg_cpu = EpisodeTracker(FFMPEG_HIGH_CPU_PCT)
+        self.detect_cpu = EpisodeTracker(DETECT_HIGH_CPU_PCT)
 
         # the shm notice's params as last sent, so only a change is written
         self._shm_checked = False
@@ -227,14 +250,34 @@ class StatsEmitter(threading.Thread):
 
     def _update_notices(self, stats: dict[str, Any], now: float) -> None:
         """Update notices based on current stats or time."""
-        # skipped detections
+        cameras = stats["cameras"]
+
         if stats["service"]["uptime"] >= STARTUP_GRACE_S:
-            for camera in self.skipped_detections.update(stats["cameras"], now):
+            # skipped detections
+            skipped = {
+                camera: camera_stats["skipped_pct"]
+                for camera, camera_stats in cameras.items()
+            }
+
+            for camera in self.skipped_detections.update(skipped, now):
                 raise_notice(
                     "skipped_detections",
                     scope=camera,
-                    params={"pct": stats["cameras"][camera]["skipped_pct"]},
+                    params={"pct": skipped[camera]},
                 )
+
+            # high ffmpeg and detect CPU
+            for tracker, kind, pid_key in (
+                (self.ffmpeg_cpu, "ffmpeg_high_cpu", "ffmpeg_pid"),
+                (self.detect_cpu, "detect_high_cpu", "pid"),
+            ):
+                averages = {
+                    camera: cpu_average(stats["cpu_usages"], camera_stats.get(pid_key))
+                    for camera, camera_stats in cameras.items()
+                }
+
+                for camera in tracker.update(averages, now):
+                    raise_notice(kind, scope=camera, params={"cpu": averages[camera]})
 
         # shm too small for the cameras
         self._update_shm_notice(stats["service"]["storage"]["/dev/shm"])

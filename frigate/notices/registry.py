@@ -393,12 +393,17 @@ class NoticeRegistry:
         last_seen: float,
         params: dict[str, Any],
     ) -> None:
-        # called with the lock held
+        # called with the lock held; held repeats from before an acknowledgement
+        # still count but leave the notice hidden
+        still_acknowledged = (
+            row.acknowledged_at is not None and last_seen <= row.acknowledged_at
+        )
+
         Notice.update(
             count=row.count + count,
             last_seen=last_seen,
             params=params,
-            acknowledged_at=None,
+            acknowledged_at=row.acknowledged_at if still_acknowledged else None,
         ).where(Notice.id == row.id).execute()
         self._bump_occurrences(kind, count, last_seen)
 

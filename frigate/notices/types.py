@@ -66,6 +66,12 @@ _KINDS = (
         "camera",
         link="/system#cameras",
     ),
+    NoticeKind(
+        "ffmpeg_high_cpu", NoticeSeverity.warning, "camera", link="/system#cameras"
+    ),
+    NoticeKind(
+        "detect_high_cpu", NoticeSeverity.warning, "camera", link="/system#cameras"
+    ),
     NoticeKind("shm_too_low", NoticeSeverity.warning, "system", link="/system#storage"),
     # one row per user per burst; the login log lines carry the address
     NoticeKind(

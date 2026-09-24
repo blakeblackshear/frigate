@@ -75,6 +75,11 @@ class RegistryTestCase(unittest.TestCase):
             mock_datetime.now.return_value.timestamp.return_value = timestamp
             self.registry.raise_notice(kind, **kwargs)
 
+    def _acknowledge_at(self, timestamp: float, row_id: str) -> None:
+        with patch("frigate.notices.registry.datetime") as mock_datetime:
+            mock_datetime.now.return_value.timestamp.return_value = timestamp
+            self.registry.acknowledge(row_id)
+
 
 class TestNoticeRegistry(RegistryTestCase):
     def test_raise_inserts_and_counts_one_occurrence(self):
@@ -426,16 +431,26 @@ class TestLifecycleKnobs(RegistryTestCase):
 
         self.assertEqual(self.registry.active()[0]["count"], 1)
 
-    def test_an_acknowledged_notice_returns_when_held_repeats_flush(self):
-        self.registry.raise_notice("batched")
-        self.registry.acknowledge("batched")
+    def test_an_acknowledged_notice_returns_when_a_later_repeat_flushes(self):
+        self._raise_at(1000.0, "batched")
+        self._acknowledge_at(1010.0, "batched")
 
-        self.registry.raise_notice("batched")
+        self._raise_at(1020.0, "batched")
         self.assertEqual(self.registry.active(), [])
 
         self.registry.flush()
 
         self.assertEqual(self.registry.active()[0]["count"], 2)
+
+    def test_repeats_held_from_before_an_acknowledgement_stay_hidden(self):
+        self._raise_at(1000.0, "batched")
+        self._raise_at(1005.0, "batched")
+        self._acknowledge_at(1010.0, "batched")
+
+        self.registry.flush()
+
+        self.assertEqual(self.registry.active(), [])
+        self.assertEqual(self.registry.active(include_hidden=True)[0]["count"], 2)
 
     def test_keep_latest_drops_the_oldest_rows(self):
         for index, scope in enumerate(("a", "b", "c")):
