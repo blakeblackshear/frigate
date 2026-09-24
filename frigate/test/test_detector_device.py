@@ -59,6 +59,10 @@ class TestBuildDetectorConfig(unittest.TestCase):
     def test_detectors_that_name_the_field_something_else(self):
         self.assertEqual(self._build("cpu:4").num_threads, 4)
         self.assertEqual(self._build("rknn:2").num_cores, 2)
+        self.assertEqual(
+            self._build("zmq:tcp://host.docker.internal:5555").endpoint,
+            "tcp://host.docker.internal:5555",
+        )
 
     def test_device_is_coerced_to_the_detector_field_type(self):
         self.assertEqual(self._build("tensorrt:1").device, 1)
@@ -66,6 +70,7 @@ class TestBuildDetectorConfig(unittest.TestCase):
     def test_omitted_device_falls_back_to_the_detector_default(self):
         self.assertEqual(self._build("cpu").num_threads, 3)
         self.assertEqual(self._build("rknn").num_cores, 0)
+        self.assertEqual(self._build("zmq").endpoint, "ipc:///tmp/cache/zmq_detector")
         self.assertEqual(self._build("openvino").device, "AUTO")
         self.assertIsNone(self._build("edgetpu").device)
 
