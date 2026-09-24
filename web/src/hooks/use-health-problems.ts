@@ -5,25 +5,25 @@ import useSWR from "swr";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useHealthChecks } from "@/hooks/use-health-checks";
-import { useNotices } from "@/hooks/use-notices";
+import { hiddenAt, useNotices } from "@/hooks/use-notices";
 import { evaluateConfigHealth } from "@/utils/configHealth";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { sortHealthProblems } from "@/utils/healthSort";
 import { streamHealth } from "@/utils/streamHealth";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { HealthProblem } from "@/types/health";
-import type { DismissedCheck, Notice } from "@/types/notice";
+import type { MutedCheck, Notice } from "@/types/notice";
 
 const EXTERNAL_LINK = /^https?:\/\//;
 
 type HealthProblems = {
-  /** undismissed rows, most severe first */
+  /** shown rows, most severe first */
   problems: HealthProblem[];
-  /** dismissed rows, most recently dismissed first; undefined until loaded */
-  dismissed?: HealthProblem[];
+  /** acknowledged and muted rows, most recently hidden first; undefined until loaded */
+  hidden?: HealthProblem[];
   loading: boolean;
-  /** delete every dismissed row, so each can show again */
-  clearDismissed: () => Promise<void>;
+  /** show every hidden row again */
+  unhideAll: () => Promise<void>;
 };
 
 /**
@@ -34,7 +34,7 @@ type HealthProblems = {
  */
 export function useHealthProblems(
   t: TFunction,
-  showDismissed = false,
+  showHidden = false,
 ): HealthProblems {
   const { data: config } = useSWR<FrigateConfig>("config", {
     revalidateOnFocus: false,
@@ -43,30 +43,40 @@ export function useHealthProblems(
   const locale = useDateLocale();
   const {
     notices,
-    dismissed: dismissedNotices,
-    dismiss,
-    mutateDismissed,
-  } = useNotices(showDismissed);
-  const { data: dismissedChecks, mutate: mutateDismissedChecks } = useSWR<
-    DismissedCheck[]
-  >("notices/dismissed_checks");
+    hidden: hiddenNotices,
+    acknowledge,
+    mute,
+    unhide,
+    mutateHidden,
+  } = useNotices(showHidden);
+  const { data: mutedChecks, mutate: mutateMutedChecks } = useSWR<MutedCheck[]>(
+    "notices/muted_checks",
+  );
   const {
     stream: { results },
   } = useHealthChecks();
 
-  const dismissCheck = useCallback(
+  const muteCheck = useCallback(
     async (id: string) => {
-      await axios.post(`notices/${id}/dismiss`);
-      mutateDismissedChecks();
+      await axios.post(`notices/${id}/mute`);
+      mutateMutedChecks();
     },
-    [mutateDismissedChecks],
+    [mutateMutedChecks],
   );
 
-  const clearDismissed = useCallback(async () => {
-    await axios.delete("notices/dismissed");
-    mutateDismissed();
-    mutateDismissedChecks();
-  }, [mutateDismissed, mutateDismissedChecks]);
+  const unmuteCheck = useCallback(
+    async (id: string) => {
+      await axios.delete(`notices/${id}/hidden`);
+      mutateMutedChecks();
+    },
+    [mutateMutedChecks],
+  );
+
+  const unhideAll = useCallback(async () => {
+    await axios.delete("notices/hidden");
+    mutateHidden();
+    mutateMutedChecks();
+  }, [mutateHidden, mutateMutedChecks]);
 
   const formatTime = useCallback(
     (timestamp: number) =>
@@ -98,23 +108,37 @@ export function useHealthProblems(
           count: notice.count,
         }),
         meta:
-          notice.dismissed_at === null
-            ? t("health.notices.firstSeen", {
+          notice.muted_at !== null
+            ? t("health.notices.mutedAt", {
                 ns: "views/system",
-                time: formatTime(notice.first_seen),
-                count: notice.count,
+                time: formatTime(notice.muted_at),
               })
-            : t("health.notices.dismissedAt", {
-                ns: "views/system",
-                time: formatTime(notice.dismissed_at),
-              }),
+            : notice.acknowledged_at !== null
+              ? t("health.notices.acknowledgedAt", {
+                  ns: "views/system",
+                  time: formatTime(notice.acknowledged_at),
+                })
+              : t("health.notices.firstSeen", {
+                  ns: "views/system",
+                  time: formatTime(notice.first_seen),
+                  count: notice.count,
+                }),
         link: external ? undefined : link,
         externalLink: external ? link : undefined,
-        onDismiss:
-          notice.dismissed_at === null ? () => dismiss(notice.id) : undefined,
+        ...(hiddenAt(notice) > 0
+          ? {
+              hidden: notice.muted_at !== null ? "muted" : "acknowledged",
+              onUnhide: () => unhide(notice.id),
+            }
+          : {
+              onAcknowledge: notice.acknowledgeable
+                ? () => acknowledge(notice.id)
+                : undefined,
+              onMute: () => mute(notice.id),
+            }),
       };
     },
-    [dismiss, formatTime, t],
+    [acknowledge, mute, unhide, formatTime, t],
   );
 
   const checks = useMemo<HealthProblem[]>(
@@ -128,12 +152,10 @@ export function useHealthProblems(
     [config, results, t],
   );
 
-  const dismissedAt = useMemo(
+  const mutedAt = useMemo(
     () =>
-      new Map(
-        (dismissedChecks ?? []).map((check) => [check.id, check.dismissed_at]),
-      ),
-    [dismissedChecks],
+      new Map((mutedChecks ?? []).map((check) => [check.id, check.muted_at])),
+    [mutedChecks],
   );
 
   const problems = useMemo(
@@ -141,27 +163,27 @@ export function useHealthProblems(
       sortHealthProblems([
         ...(notices ?? []).map(noticeRow),
         ...checks
-          .filter((check) => !dismissedAt.has(check.id))
+          .filter((check) => !mutedAt.has(check.id))
           .map((check) => ({
             ...check,
-            onDismiss: () => dismissCheck(check.id),
+            onMute: () => muteCheck(check.id),
           })),
       ]),
-    [notices, noticeRow, checks, dismissedAt, dismissCheck],
+    [notices, noticeRow, checks, mutedAt, muteCheck],
   );
 
-  const dismissed = useMemo(() => {
-    if (!showDismissed || dismissedNotices === undefined) {
+  const hidden = useMemo(() => {
+    if (!showHidden || hiddenNotices === undefined) {
       return undefined;
     }
 
     const rows = [
-      ...dismissedNotices.map((notice) => ({
-        at: notice.dismissed_at ?? 0,
+      ...hiddenNotices.map((notice) => ({
+        at: hiddenAt(notice),
         row: noticeRow(notice),
       })),
       ...checks.flatMap((check) => {
-        const at = dismissedAt.get(check.id);
+        const at = mutedAt.get(check.id);
 
         return at === undefined
           ? []
@@ -170,10 +192,12 @@ export function useHealthProblems(
                 at,
                 row: {
                   ...check,
-                  meta: t("health.notices.dismissedAt", {
+                  meta: t("health.notices.mutedAt", {
                     ns: "views/system",
                     time: formatTime(at),
                   }),
+                  hidden: "muted" as const,
+                  onUnhide: () => unmuteCheck(check.id),
                 },
               },
             ];
@@ -182,17 +206,17 @@ export function useHealthProblems(
 
     return rows.sort((a, b) => b.at - a.at).map(({ row }) => row);
   }, [
-    showDismissed,
-    dismissedNotices,
+    showHidden,
+    hiddenNotices,
     noticeRow,
     checks,
-    dismissedAt,
+    mutedAt,
     formatTime,
+    unmuteCheck,
     t,
   ]);
 
-  const loading =
-    notices === undefined || dismissedChecks === undefined || !config;
+  const loading = notices === undefined || mutedChecks === undefined || !config;
 
-  return { problems, dismissed, loading, clearDismissed };
+  return { problems, hidden, loading, unhideAll };
 }

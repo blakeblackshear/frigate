@@ -16,9 +16,7 @@ from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
 # kinds that switch on the lifecycle knobs, so the tests do not depend on the
 # values the real catalog picks
-BATCHED = NoticeKind(
-    "batched", NoticeSeverity.warning, "system", batch_repeats=True, reopen_at_count=3
-)
+BATCHED = NoticeKind("batched", NoticeSeverity.warning, "system", batch_repeats=True)
 PRUNED = NoticeKind("pruned", NoticeSeverity.info, "system", keep_latest=2)
 TEST_KINDS = {kind.key: kind for kind in (BATCHED, PRUNED)}
 
@@ -122,34 +120,98 @@ class TestNoticeRegistry(RegistryTestCase):
         self.assertEqual(self.registry.stats()[0]["occurrences"], 1)
         self.listener.assert_not_called()
 
-    def test_dismissal_survives_a_re_raise(self):
+    def test_acknowledged_notice_returns_on_a_re_raise(self):
+        self.registry.raise_notice("detector_stuck", scope="ov", params={})
+        self.assertTrue(self.registry.acknowledge("detector_stuck:ov"))
+        self.assertEqual(self.registry.active(), [])
+
+        self.registry.raise_notice("detector_stuck", scope="ov", params={})
+
+        notice = self.registry.active()[0]
+        self.assertEqual(notice["count"], 2)
+        self.assertIsNone(notice["acknowledged_at"])
+
+    def test_muted_notice_stays_hidden_on_a_re_raise(self):
         self.registry.raise_notice("skipped_detections", scope="front_door", params={})
-        self.assertTrue(self.registry.dismiss("skipped_detections:front_door"))
+        self.assertTrue(self.registry.mute("skipped_detections:front_door"))
 
         self.registry.raise_notice("skipped_detections", scope="front_door", params={})
 
         self.assertEqual(self.registry.active(), [])
-        history = self.registry.active(include_dismissed=True)
-        self.assertEqual(history[0]["count"], 2)
-        self.assertIsNotNone(history[0]["dismissed_at"])
+        hidden = self.registry.active(include_hidden=True)
+        self.assertEqual(hidden[0]["count"], 2)
+        self.assertIsNotNone(hidden[0]["muted_at"])
 
-    def test_dismiss_counts_once(self):
+    def test_muting_an_acknowledged_notice_replaces_the_acknowledgement(self):
         self.registry.raise_notice("detector_stuck", scope="ov", params={})
+        self.registry.acknowledge("detector_stuck:ov")
 
-        self.assertTrue(self.registry.dismiss("detector_stuck:ov"))
-        self.assertTrue(self.registry.dismiss("detector_stuck:ov"))
+        self.assertTrue(self.registry.mute("detector_stuck:ov"))
 
-        self.assertEqual(self.registry.stats()[0]["dismissals"], 1)
+        notice = self.registry.active(include_hidden=True)[0]
+        self.assertIsNone(notice["acknowledged_at"])
+        self.assertIsNotNone(notice["muted_at"])
 
-    def test_dismiss_unknown_id(self):
-        self.assertFalse(self.registry.dismiss("nope"))
-
-    def test_dismissed_hidden_unless_requested(self):
+    def test_acknowledging_a_muted_notice_keeps_it_muted(self):
         self.registry.raise_notice("detector_stuck", scope="ov", params={})
-        self.registry.dismiss("detector_stuck:ov")
+        self.registry.mute("detector_stuck:ov")
+
+        self.assertTrue(self.registry.acknowledge("detector_stuck:ov"))
+
+        notice = self.registry.active(include_hidden=True)[0]
+        self.assertIsNone(notice["acknowledged_at"])
+        self.assertIsNotNone(notice["muted_at"])
+
+    def test_acknowledge_and_mute_each_count_once(self):
+        self.registry.raise_notice("detector_stuck", scope="ov", params={})
+        self.registry.raise_notice("shm_too_low", params={})
+
+        self.assertTrue(self.registry.acknowledge("detector_stuck:ov"))
+        self.assertTrue(self.registry.acknowledge("detector_stuck:ov"))
+        self.assertTrue(self.registry.mute("shm_too_low"))
+        self.assertTrue(self.registry.mute("shm_too_low"))
+
+        stats = {s["kind"]: s for s in self.registry.stats()}
+        self.assertEqual(stats["detector_stuck"]["acknowledgements"], 1)
+        self.assertEqual(stats["detector_stuck"]["mutes"], 0)
+        self.assertEqual(stats["shm_too_low"]["mutes"], 1)
+
+    def test_unknown_ids_are_rejected(self):
+        self.assertFalse(self.registry.acknowledge("nope"))
+        self.assertFalse(self.registry.mute("nope"))
+        self.assertFalse(self.registry.unhide("nope"))
+
+    def test_kinds_that_never_repeat_cannot_be_acknowledged(self):
+        self.registry.raise_notice(
+            "update_available", scope="0.19.1", params={"version": "0.19.1"}
+        )
+
+        self.assertFalse(self.registry.acknowledge("update_available:0.19.1"))
+        self.assertFalse(
+            self.registry.acknowledge("config:detect:fps-greater-than-five:global")
+        )
+        self.assertEqual(self.registry.active()[0]["acknowledgeable"], False)
+
+    def test_hidden_notices_listed_only_when_requested(self):
+        self.registry.raise_notice("detector_stuck", scope="ov", params={})
+        self.registry.acknowledge("detector_stuck:ov")
 
         self.assertEqual(self.registry.active(), [])
-        self.assertEqual(len(self.registry.active(include_dismissed=True)), 1)
+        self.assertEqual(len(self.registry.active(include_hidden=True)), 1)
+
+    def test_unhide_shows_a_notice_and_drops_a_check_mute(self):
+        self.registry.raise_notice("detector_stuck", scope="ov", params={})
+        self.registry.mute("detector_stuck:ov")
+        self.registry.mute("config:detect:fps-greater-than-five:global")
+
+        self.assertTrue(self.registry.unhide("detector_stuck:ov"))
+        self.assertTrue(
+            self.registry.unhide("config:detect:fps-greater-than-five:global")
+        )
+
+        notice = self.registry.active()[0]
+        self.assertIsNone(notice["muted_at"])
+        self.assertEqual(self.registry.muted_checks(), [])
 
     def test_resolve_deletes_and_keeps_stats(self):
         self.registry.raise_notice(
@@ -160,7 +222,7 @@ class TestNoticeRegistry(RegistryTestCase):
         self.registry.resolve("model_download_failed", "yolo/model.onnx")
         self.registry.resolve("model_download_failed", "yolo/model.onnx")
 
-        self.assertEqual(self.registry.active(include_dismissed=True), [])
+        self.assertEqual(self.registry.active(include_hidden=True), [])
         self.assertEqual(self.registry.stats()[0]["occurrences"], 1)
         self.listener.assert_called_once()
 
@@ -237,45 +299,47 @@ class TestNoticeRegistry(RegistryTestCase):
             ids, ["model_download_failed:front_door", "skipped_detections:garage"]
         )
 
-    def test_resolve_camera_drops_that_cameras_check_dismissals(self):
+    def test_resolve_camera_drops_that_cameras_check_mutes(self):
         for check_id in (
             "stream:front_door:0:probe",
             "config:detect:fps-greater-than-five:camera.front_door",
             "config:detect:fps-greater-than-five:global",
             "stream:garage:0:probe",
         ):
-            self.assertTrue(self.registry.dismiss(check_id))
+            self.assertTrue(self.registry.mute(check_id))
 
         self.registry.resolve_camera("front_door")
 
-        ids = sorted(check["id"] for check in self.registry.dismissed_checks())
+        ids = sorted(check["id"] for check in self.registry.muted_checks())
         self.assertEqual(
             ids,
             ["config:detect:fps-greater-than-five:global", "stream:garage:0:probe"],
         )
 
-    def test_camera_named_global_keeps_global_check_dismissals(self):
-        self.registry.dismiss("config:detect:fps-greater-than-five:global")
-        self.registry.dismiss("config:detect:fps-greater-than-five:camera.global")
+    def test_camera_named_global_keeps_global_check_mutes(self):
+        self.registry.mute("config:detect:fps-greater-than-five:global")
+        self.registry.mute("config:detect:fps-greater-than-five:camera.global")
 
         self.registry.resolve_camera("global")
 
-        ids = [check["id"] for check in self.registry.dismissed_checks()]
+        ids = [check["id"] for check in self.registry.muted_checks()]
         self.assertEqual(ids, ["config:detect:fps-greater-than-five:global"])
 
-    def test_purge_dismissed_keeps_active_notices_and_counts(self):
+    def test_unhide_all_shows_every_notice_and_keeps_counts(self):
         self.registry.raise_notice("detector_stuck", scope="ov", params={})
         self.registry.raise_notice("skipped_detections", scope="garage", params={})
-        self.registry.dismiss("detector_stuck:ov")
-        self.registry.dismiss("config:detect:fps-greater-than-five:camera.garage")
+        self.registry.acknowledge("detector_stuck:ov")
+        self.registry.mute("skipped_detections:garage")
+        self.registry.mute("config:detect:fps-greater-than-five:camera.garage")
 
-        self.assertEqual(self.registry.purge_dismissed(), 2)
+        self.registry.unhide_all()
 
-        ids = [n["id"] for n in self.registry.active(include_dismissed=True)]
-        self.assertEqual(ids, ["skipped_detections:garage"])
-        self.assertEqual(self.registry.dismissed_checks(), [])
-        dismissals = {s["kind"]: s["dismissals"] for s in self.registry.stats()}
-        self.assertEqual(dismissals["detector_stuck"], 1)
+        ids = sorted(n["id"] for n in self.registry.active())
+        self.assertEqual(ids, ["detector_stuck:ov", "skipped_detections:garage"])
+        self.assertEqual(self.registry.muted_checks(), [])
+        stats = {s["kind"]: s for s in self.registry.stats()}
+        self.assertEqual(stats["detector_stuck"]["acknowledgements"], 1)
+        self.assertEqual(stats["skipped_detections"]["mutes"], 1)
 
 
 class TestApply(RegistryTestCase):
@@ -349,7 +413,7 @@ class TestLifecycleKnobs(RegistryTestCase):
 
         self.registry.flush()
 
-        self.assertEqual(self.registry.active(include_dismissed=True), [])
+        self.assertEqual(self.registry.active(include_hidden=True), [])
         self.listener.assert_not_called()
 
     def test_a_new_row_starts_without_stale_repeats(self):
@@ -362,32 +426,16 @@ class TestLifecycleKnobs(RegistryTestCase):
 
         self.assertEqual(self.registry.active()[0]["count"], 1)
 
-    def test_a_dismissed_notice_reopens_at_the_count(self):
+    def test_an_acknowledged_notice_returns_when_held_repeats_flush(self):
         self.registry.raise_notice("batched")
-        self.registry.dismiss("batched")
+        self.registry.acknowledge("batched")
 
         self.registry.raise_notice("batched")
-        self.registry.flush()
         self.assertEqual(self.registry.active(), [])
 
-        self.registry.raise_notice("batched")
         self.registry.flush()
 
-        notice = self.registry.active()[0]
-        self.assertEqual(notice["count"], BATCHED.reopen_at_count)
-        self.assertIsNone(notice["dismissed_at"])
-
-    def test_a_notice_dismissed_past_the_count_stays_dismissed(self):
-        for _ in range(3):
-            self.registry.raise_notice("batched")
-        self.registry.flush()
-        self.registry.dismiss("batched")
-
-        self.registry.raise_notice("batched")
-        self.registry.flush()
-
-        self.assertEqual(self.registry.active(), [])
-        self.assertEqual(self.registry.active(include_dismissed=True)[0]["count"], 4)
+        self.assertEqual(self.registry.active()[0]["count"], 2)
 
     def test_keep_latest_drops_the_oldest_rows(self):
         for index, scope in enumerate(("a", "b", "c")):
@@ -410,14 +458,13 @@ class TestCatalogLifecycles(RegistryTestCase):
         ids = [n["id"] for n in self.registry.active()]
         self.assertEqual(ids, ["update_available:0.19.1"])
 
-    def test_a_dismissed_failed_login_burst_reopens_at_five_attempts(self):
+    def test_an_acknowledged_failed_login_burst_returns_on_the_next_attempt(self):
         self.registry.raise_notice("failed_login", scope="1000")
-        self.registry.dismiss("failed_login:1000")
+        self.registry.acknowledge("failed_login:1000")
 
-        for _ in range(4):
-            self.registry.raise_notice("failed_login", scope="1000")
+        self.registry.raise_notice("failed_login", scope="1000")
         self.registry.flush()
 
         burst = self.registry.active()[0]
-        self.assertEqual(burst["count"], 5)
-        self.assertIsNone(burst["dismissed_at"])
+        self.assertEqual(burst["count"], 2)
+        self.assertIsNone(burst["acknowledged_at"])

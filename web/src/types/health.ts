@@ -27,16 +27,23 @@ export type HealthProblem = {
   externalLink?: string;
   /** render with a spinner instead of the severity icon (stream check running) */
   pending?: boolean;
-  onDismiss?: () => void;
+  /** why a hidden row is hidden */
+  hidden?: "acknowledged" | "muted";
+  /** hide until the next occurrence; only for kinds that repeat */
+  onAcknowledge?: () => void;
+  /** hide for good */
+  onMute?: () => void;
+  /** show a hidden row again */
+  onUnhide?: () => void;
 };
 
 /** What the Health tab's filter shows. */
 export type NoticeFilter = {
-  showDismissed: boolean;
+  showHidden: boolean;
   severities: HealthSeverity[];
 };
 
 export const DEFAULT_NOTICE_FILTER: NoticeFilter = {
-  showDismissed: false,
+  showHidden: false,
   severities: ["error", "warning", "info"],
 };

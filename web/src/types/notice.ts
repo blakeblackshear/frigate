@@ -13,11 +13,16 @@ export type Notice = {
   first_seen: number;
   last_seen: number;
   count: number;
-  dismissed_at: number | null;
+  /** whether the kind repeats, so acknowledging it can hide it until next time */
+  acknowledgeable: boolean;
+  /** hidden until the next occurrence */
+  acknowledged_at: number | null;
+  /** hidden for good */
+  muted_at: number | null;
 };
 
-/** a config or stream check row an admin dismissed */
-export type DismissedCheck = {
+/** a config or stream check row an admin muted */
+export type MutedCheck = {
   id: string;
-  dismissed_at: number;
+  muted_at: number;
 };

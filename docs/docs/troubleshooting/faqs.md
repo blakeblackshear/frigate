@@ -184,6 +184,6 @@ Filters and masks only hide the incorrect result - they don't teach Frigate what
 
 ### Where do I see problems Frigate has detected?
 
-Open System > Health. The Notices list keeps a record of problems Frigate has found, and you can dismiss any entry to acknowledge it. Ongoing conditions, such as an offline camera or recordings deleted before their retention period, appear in the status bar for admins until they clear, and the status bar links to the Notices list while it has undismissed entries. On mobile, tap the warning icon in the bottom navigation bar to see them.
+Open System > Health. The Notices list keeps a record of problems Frigate has found. Acknowledge an entry to hide it until the problem happens again, or mute it to hide it for good. Hidden entries stay listed under Show hidden in the filter. Ongoing conditions, such as an offline camera or recordings deleted before their retention period, appear in the status bar for admins until they clear, and the status bar links to the Notices list while it has entries showing. On mobile, tap the warning icon in the bottom navigation bar to see them.
 
 The Hardware section below the notices shows whether the detection hardware, hardware acceleration, and enrichment devices in your config were found and are being used, so a GPU that silently fell back to the CPU shows up as a warning. Run stream checks to probe every camera's streams for the same problems the camera wizard reports.

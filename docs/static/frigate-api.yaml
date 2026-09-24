@@ -4174,19 +4174,20 @@ paths:
         Get notices, most severe first.
 
         Args:
-            include_dismissed: Also return dismissed notices, for the history view
+            include_hidden: Also return acknowledged and muted notices, for the
+                hidden list
 
         Returns:
             The notices
       operationId: get_notices_notices_get
       parameters:
-        - name: include_dismissed
+        - name: include_hidden
           in: query
           required: false
           schema:
             type: boolean
             default: false
-            title: Include Dismissed
+            title: Include Hidden
       responses:
         '200':
           description: Successful Response
@@ -4221,16 +4222,16 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
-  /notices/dismissed_checks:
+  /notices/muted_checks:
     get:
       tags:
         - Notices
-      summary: Get Dismissed Checks
+      summary: Get Muted Checks
       description: |-
         **Access:** Admin role required.
 
-        Get the dismissed config and stream check rows, newest first.
-      operationId: get_dismissed_checks_notices_dismissed_checks_get
+        Get the muted config and stream check rows, newest first.
+      operationId: get_muted_checks_notices_muted_checks_get
       responses:
         '200':
           description: Successful Response
@@ -4240,16 +4241,16 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
-  /notices/dismissed:
+  /notices/hidden:
     delete:
       tags:
         - Notices
-      summary: Purge Dismissed
+      summary: Unhide All Notices
       description: |-
         **Access:** Admin role required.
 
-        Delete every dismissed notice and check row so each can show again.
-      operationId: purge_dismissed_notices_dismissed_delete
+        Show every acknowledged and muted notice and check row again.
+      operationId: unhide_all_notices_notices_hidden_delete
       responses:
         '200':
           description: Successful Response
@@ -4259,18 +4260,83 @@ paths:
       security:
         - frigateAdminAuth: []
       x-required-role: admin
-  /notices/{notice_id}/dismiss:
+  /notices/{notice_id}/acknowledge:
     post:
       tags:
         - Notices
-      summary: Dismiss Notice
+      summary: Acknowledge Notice
       description: |-
         **Access:** Admin role required.
 
-        Hide a notice or a config or stream check row.
+        Hide a notice until it happens again.
 
-        It stays hidden if the same problem happens again.
-      operationId: dismiss_notice_notices__notice_id__dismiss_post
+        Config and stream check rows and the update notice never repeat, so they
+        can only be muted.
+      operationId: acknowledge_notice_notices__notice_id__acknowledge_post
+      parameters:
+        - name: notice_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Notice Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/{notice_id}/mute:
+    post:
+      tags:
+        - Notices
+      summary: Mute Notice
+      description: |-
+        **Access:** Admin role required.
+
+        Hide a notice or a config or stream check row for good.
+      operationId: mute_notice_notices__notice_id__mute_post
+      parameters:
+        - name: notice_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Notice Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /notices/{notice_id}/hidden:
+    delete:
+      tags:
+        - Notices
+      summary: Unhide Notice
+      description: |-
+        **Access:** Admin role required.
+
+        Show an acknowledged or muted notice or check row again.
+      operationId: unhide_notice_notices__notice_id__hidden_delete
       parameters:
         - name: notice_id
           in: path

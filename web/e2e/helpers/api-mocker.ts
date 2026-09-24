@@ -49,7 +49,7 @@ export interface ApiMockOverrides {
   };
   users?: { username: string; role: string }[];
   notices?: unknown[];
-  dismissedChecks?: unknown[];
+  mutedChecks?: unknown[];
   /** camera name to the ffprobe entries returned for `paths=camera:<name>` */
   ffprobe?: Record<string, unknown[]>;
 }
@@ -238,8 +238,8 @@ export class ApiMocker {
     await this.page.route("**/api/notices", (route) =>
       route.fulfill({ json: overrides?.notices ?? [] }),
     );
-    await this.page.route("**/api/notices/dismissed_checks", (route) =>
-      route.fulfill({ json: overrides?.dismissedChecks ?? [] }),
+    await this.page.route("**/api/notices/muted_checks", (route) =>
+      route.fulfill({ json: overrides?.mutedChecks ?? [] }),
     );
 
     // Users. GET lists them; POST/PUT (create, password) just succeed, so

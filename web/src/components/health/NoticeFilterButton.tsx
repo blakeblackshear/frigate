@@ -24,7 +24,7 @@ export default function NoticeFilterButton({
   const { t } = useTranslation(["views/system", "components/filter"]);
   const [open, setOpen] = useState(false);
   const active =
-    filter.showDismissed ||
+    filter.showHidden ||
     filter.severities.length < DEFAULT_NOTICE_FILTER.severities.length;
 
   const severityLabels: Record<HealthSeverity, string> = {
@@ -59,10 +59,10 @@ export default function NoticeFilterButton({
   const content = (
     <div className="space-y-3 p-4">
       <FilterSwitch
-        label={t("health.notices.filter.showDismissed")}
-        isChecked={filter.showDismissed}
-        onCheckedChange={(showDismissed) =>
-          onFilterChange({ ...filter, showDismissed })
+        label={t("health.notices.filter.showHidden")}
+        isChecked={filter.showHidden}
+        onCheckedChange={(showHidden) =>
+          onFilterChange({ ...filter, showHidden })
         }
       />
       <DropdownMenuSeparator />

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { useHealthProblems } from "@/hooks/use-health-problems";
 
-/** The count of undismissed Notices rows, shown before the status bar's health text. */
+/** The count of shown Notices rows, shown before the status bar's health text. */
 export default function StatusBarNotices() {
   const { t } = useTranslation(["views/system"]);
   const { problems, loading } = useHealthProblems(t);

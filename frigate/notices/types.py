@@ -28,9 +28,9 @@ class NoticeKind:
         category: camera, detector, model, or system; a camera scope is a
             camera name, and the UI shows it
         link: app route or absolute URL for the row, filled in from params
-        counts_repeats: whether raising an existing notice counts another occurrence
+        counts_repeats: whether raising an existing notice counts another
+            occurrence, which also shows an acknowledged notice again
         batch_repeats: whether repeats wait in memory for the next flush
-        reopen_at_count: count at which a dismissed notice shows again
         keep_latest: rows of this kind to keep; a new row drops the oldest
         reportable: whether a future analytics reporter may send this kind's counts
     """
@@ -41,7 +41,6 @@ class NoticeKind:
     link: str | None = None
     counts_repeats: bool = True
     batch_repeats: bool = False
-    reopen_at_count: int | None = None
     keep_latest: int | None = None
     reportable: bool = True
 
@@ -75,10 +74,9 @@ _KINDS = (
         "system",
         link="/logs",
         batch_repeats=True,
-        reopen_at_count=5,
         keep_latest=100,
     ),
-    # one row per release, so a dismissal lasts until the next release
+    # one row per release, so muting it lasts until the next release
     NoticeKind(
         "update_available",
         NoticeSeverity.info,
@@ -92,7 +90,7 @@ _KINDS = (
 NOTICE_KINDS: dict[str, NoticeKind] = {kind.key: kind for kind in _KINDS}
 
 # the Health tab builds config and stream check rows in the browser, so a notice
-# row of these kinds only records a dismissal; its other fields are placeholders
+# row of these kinds only records a mute; its other fields are placeholders
 CHECK_KINDS = frozenset({"config", "stream"})
 
 

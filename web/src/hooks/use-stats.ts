@@ -15,20 +15,12 @@ import { useIsAdmin } from "./use-is-admin";
 
 import { useTranslation } from "react-i18next";
 
-// the status bar has always rendered these exact classes; keep them byte for
-// byte so its output does not change
-const SEVERITY_COLOR: Record<ProblemSeverity, string> = {
-  error: "text-danger",
-  warning: "text-orange-400",
-  info: "text-selected",
-};
-
 function problem(
   severity: ProblemSeverity,
   text: string,
   relevantLink?: string,
 ): PotentialProblem {
-  return { text, severity, color: SEVERITY_COLOR[severity], relevantLink };
+  return { text, severity, relevantLink };
 }
 
 // matches SKIPPED_DETECTIONS_PCT in frigate/stats/emitter.py

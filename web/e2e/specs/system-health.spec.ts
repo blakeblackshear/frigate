@@ -1,7 +1,8 @@
 /**
  * Health tab tests -- MEDIUM tier.
  *
- * Default tab, notice list rendering, dismiss, empty state, update notice.
+ * Default tab, notice list rendering, acknowledge and mute, empty state,
+ * update notice.
  */
 
 import { test, expect } from "../fixtures/frigate-test";
@@ -23,7 +24,9 @@ const ERROR_NOTICE = {
   first_seen: NOW - 600,
   last_seen: NOW,
   count: 2,
-  dismissed_at: null,
+  acknowledgeable: true,
+  acknowledged_at: null,
+  muted_at: null,
 };
 
 const EVENT_NOTICE = {
@@ -37,7 +40,9 @@ const EVENT_NOTICE = {
   first_seen: NOW - 7200,
   last_seen: NOW - 60,
   count: 3,
-  dismissed_at: null,
+  acknowledgeable: true,
+  acknowledged_at: null,
+  muted_at: null,
 };
 
 test.describe("System — Health tab @medium", () => {
@@ -63,54 +68,61 @@ test.describe("System — Health tab @medium", () => {
       "Downloading model.onnx for yolo failed: timeout",
     );
     await expect(rows.nth(0)).toContainText("2 times");
-    await expect(
-      rows.nth(0).getByRole("button", { name: "Dismiss" }),
-    ).toBeVisible();
     await expect(rows.nth(1)).toContainText("Detector ov was restarted");
     await expect(rows.nth(1)).toContainText("3 times");
-    await expect(
-      rows.nth(1).getByRole("button", { name: "Dismiss" }),
-    ).toBeVisible();
+    for (const index of [0, 1]) {
+      await expect(
+        rows.nth(index).getByRole("button", { name: "Acknowledge" }),
+      ).toBeVisible();
+      await expect(
+        rows.nth(index).getByRole("button", { name: "Mute", exact: true }),
+      ).toBeVisible();
+    }
   });
 
-  test("dismiss posts and removes the row", async ({ frigateApp }) => {
-    await frigateApp.installDefaults({
-      stats: QUIET_STATS,
-      notices: [EVENT_NOTICE],
+  for (const action of ["acknowledge", "mute"] as const) {
+    test(`${action} posts and removes the row`, async ({ frigateApp }) => {
+      await frigateApp.installDefaults({
+        stats: QUIET_STATS,
+        notices: [EVENT_NOTICE],
+      });
+
+      // the list shrinks after the POST so the refetch shows the row gone
+      let hidden = false;
+      await frigateApp.page.route("**/api/notices", (route) =>
+        route.fulfill({ json: hidden ? [] : [EVENT_NOTICE] }),
+      );
+      await frigateApp.page.route(
+        `**/api/notices/detector_stuck/${action}`,
+        (route) => {
+          hidden = true;
+          return route.fulfill({ json: { success: true } });
+        },
+      );
+
+      await frigateApp.goto("/system#health");
+      const request = frigateApp.page.waitForRequest(
+        (req) =>
+          req.url().includes(`/api/notices/detector_stuck/${action}`) &&
+          req.method() === "POST",
+      );
+      await frigateApp.page
+        .getByTestId("health-problem-notice:detector_stuck")
+        .getByRole("button", {
+          name: action === "mute" ? "Mute" : "Acknowledge",
+          exact: true,
+        })
+        .click();
+      await request;
+
+      await expect(
+        frigateApp.page.locator("[data-testid^='health-problem-']"),
+      ).toHaveCount(0, { timeout: 5_000 });
+      await expect(
+        frigateApp.page.getByText("Your Frigate installation is healthy"),
+      ).toBeVisible();
     });
-
-    // the list shrinks after the dismiss so the refetch shows the row gone
-    let dismissed = false;
-    await frigateApp.page.route("**/api/notices", (route) =>
-      route.fulfill({ json: dismissed ? [] : [EVENT_NOTICE] }),
-    );
-    await frigateApp.page.route(
-      "**/api/notices/detector_stuck/dismiss",
-      (route) => {
-        dismissed = true;
-        return route.fulfill({ json: { success: true } });
-      },
-    );
-
-    await frigateApp.goto("/system#health");
-    const request = frigateApp.page.waitForRequest(
-      (req) =>
-        req.url().includes("/api/notices/detector_stuck/dismiss") &&
-        req.method() === "POST",
-    );
-    await frigateApp.page
-      .getByTestId("health-problem-notice:detector_stuck")
-      .getByRole("button", { name: "Dismiss" })
-      .click();
-    await request;
-
-    await expect(
-      frigateApp.page.locator("[data-testid^='health-problem-']"),
-    ).toHaveCount(0, { timeout: 5_000 });
-    await expect(
-      frigateApp.page.getByText("Your Frigate installation is healthy"),
-    ).toBeVisible();
-  });
+  }
 
   test("empty state with no notices", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ stats: QUIET_STATS });
@@ -140,7 +152,9 @@ test.describe("System — Health tab @medium", () => {
           first_seen: NOW - 3600,
           last_seen: NOW,
           count: 1,
-          dismissed_at: null,
+          acknowledgeable: false,
+          acknowledged_at: null,
+          muted_at: null,
         },
       ],
     });
@@ -156,10 +170,23 @@ test.describe("System — Health tab @medium", () => {
       "href",
       "https://github.com/blakeblackshear/frigate/releases/tag/v0.19.0",
     );
-    await expect(row.getByRole("button", { name: "Dismiss" })).toBeVisible();
+    await expect(
+      row.getByRole("button", { name: "Mute", exact: true }),
+    ).toBeVisible();
+    await expect(row.getByRole("button", { name: "Acknowledge" })).toHaveCount(
+      0,
+    );
   });
 
-  test("the filter shows dismissed notices without a Dismiss button", async ({
+  const ACKNOWLEDGED_NOTICE = {
+    ...EVENT_NOTICE,
+    id: "detector_stuck:coral",
+    params: { detector: "coral" },
+    acknowledged_at: NOW - 60,
+  };
+  const MUTED_NOTICE = { ...ERROR_NOTICE, muted_at: NOW - 120 };
+
+  test("the filter shows hidden notices marked by how they were hidden", async ({
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
@@ -169,33 +196,85 @@ test.describe("System — Health tab @medium", () => {
     await frigateApp.page.route(
       (url) =>
         url.pathname.endsWith("/api/notices") &&
-        url.searchParams.get("include_dismissed") === "true",
+        url.searchParams.get("include_hidden") === "true",
       (route) =>
         route.fulfill({
-          json: [EVENT_NOTICE, { ...ERROR_NOTICE, dismissed_at: NOW - 120 }],
+          json: [EVENT_NOTICE, ACKNOWLEDGED_NOTICE, MUTED_NOTICE],
         }),
     );
     await frigateApp.goto("/system#health");
 
     await frigateApp.page.getByRole("button", { name: "Filter" }).click();
-    const showDismissed = frigateApp.page.getByRole("switch", {
-      name: "Show dismissed",
+    const showHidden = frigateApp.page.getByRole("switch", {
+      name: "Show hidden",
     });
-    await expect(showDismissed).toHaveAttribute("aria-checked", "false");
-    await showDismissed.click();
+    await expect(showHidden).toHaveAttribute("aria-checked", "false");
+    await showHidden.click();
+    // mobile opens the filter as a modal drawer, which hides the rows' roles
+    await frigateApp.page.keyboard.press("Escape");
 
-    const row = frigateApp.page.getByTestId(
+    const acknowledged = frigateApp.page.getByTestId(
+      "health-problem-notice:detector_stuck:coral",
+    );
+    await expect(acknowledged).toBeVisible({ timeout: 15_000 });
+    await expect(acknowledged).toContainText("Acknowledged");
+    await expect(
+      acknowledged.getByRole("button", { name: "Show again" }),
+    ).toBeVisible();
+    await expect(
+      acknowledged.getByRole("button", { name: "Acknowledge" }),
+    ).toHaveCount(0);
+
+    const muted = frigateApp.page.getByTestId(
       "health-problem-notice:model_download_failed:yolo/model.onnx",
     );
-    await expect(row).toBeVisible({ timeout: 15_000 });
-    await expect(row).toContainText("Dismissed");
-    await expect(row.getByRole("button", { name: "Dismiss" })).toHaveCount(0);
+    await expect(muted).toContainText("Muted");
+    await expect(muted.getByRole("button", { name: "Unmute" })).toBeVisible();
+    await expect(
+      muted.getByRole("button", { name: "Mute", exact: true }),
+    ).toHaveCount(0);
 
-    await showDismissed.click();
-    await expect(row).toHaveCount(0);
+    await frigateApp.page.getByRole("button", { name: "Filter" }).click();
+    await showHidden.click();
+    await expect(muted).toHaveCount(0);
   });
 
-  test("clear dismissed deletes the dismissed rows after confirming", async ({
+  test("unmute deletes the row's hidden state", async ({ frigateApp }) => {
+    await frigateApp.installDefaults({ stats: QUIET_STATS, notices: [] });
+    await frigateApp.page.route(
+      (url) =>
+        url.pathname.endsWith("/api/notices") &&
+        url.searchParams.get("include_hidden") === "true",
+      (route) => route.fulfill({ json: [MUTED_NOTICE] }),
+    );
+    await frigateApp.page.route(
+      "**/api/notices/model_download_failed:yolo/model.onnx/hidden",
+      (route) => route.fulfill({ json: { success: true } }),
+    );
+    await frigateApp.goto("/system#health");
+
+    await frigateApp.page.getByRole("button", { name: "Filter" }).click();
+    await frigateApp.page.getByRole("switch", { name: "Show hidden" }).click();
+    await frigateApp.page.keyboard.press("Escape");
+
+    const request = frigateApp.page.waitForRequest(
+      (req) =>
+        req
+          .url()
+          .endsWith(
+            "/api/notices/model_download_failed:yolo/model.onnx/hidden",
+          ) && req.method() === "DELETE",
+    );
+    await frigateApp.page
+      .getByTestId(
+        "health-problem-notice:model_download_failed:yolo/model.onnx",
+      )
+      .getByRole("button", { name: "Unmute" })
+      .click({ timeout: 15_000 });
+    await request;
+  });
+
+  test("show all again unhides every row after confirming", async ({
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
@@ -203,29 +282,25 @@ test.describe("System — Health tab @medium", () => {
       notices: [EVENT_NOTICE],
     });
 
-    // the history loses its dismissed row once the DELETE lands
+    // the hidden list loses its muted row once the DELETE lands
     let cleared = false;
     await frigateApp.page.route(
       (url) =>
         url.pathname.endsWith("/api/notices") &&
-        url.searchParams.get("include_dismissed") === "true",
+        url.searchParams.get("include_hidden") === "true",
       (route) =>
         route.fulfill({
-          json: cleared
-            ? [EVENT_NOTICE]
-            : [EVENT_NOTICE, { ...ERROR_NOTICE, dismissed_at: NOW - 120 }],
+          json: cleared ? [EVENT_NOTICE] : [EVENT_NOTICE, MUTED_NOTICE],
         }),
     );
-    await frigateApp.page.route("**/api/notices/dismissed", (route) => {
+    await frigateApp.page.route("**/api/notices/hidden", (route) => {
       cleared = true;
       return route.fulfill({ json: { success: true } });
     });
     await frigateApp.goto("/system#health");
 
     await frigateApp.page.getByRole("button", { name: "Filter" }).click();
-    await frigateApp.page
-      .getByRole("switch", { name: "Show dismissed" })
-      .click();
+    await frigateApp.page.getByRole("switch", { name: "Show hidden" }).click();
     const row = frigateApp.page.getByTestId(
       "health-problem-notice:model_download_failed:yolo/model.onnx",
     );
@@ -233,23 +308,20 @@ test.describe("System — Health tab @medium", () => {
     await frigateApp.page.keyboard.press("Escape");
 
     await frigateApp.page
-      .getByRole("button", { name: "Clear dismissed" })
+      .getByRole("button", { name: "Show all again" })
       .click();
     const request = frigateApp.page.waitForRequest(
       (req) =>
-        req.url().endsWith("/api/notices/dismissed") &&
-        req.method() === "DELETE",
+        req.url().endsWith("/api/notices/hidden") && req.method() === "DELETE",
     );
     await frigateApp.page
       .getByRole("alertdialog")
-      .getByRole("button", { name: "Clear dismissed" })
+      .getByRole("button", { name: "Show all again" })
       .click();
     await request;
 
     await expect(row).toHaveCount(0);
-    await expect(
-      frigateApp.page.getByText("No dismissed notices"),
-    ).toBeVisible();
+    await expect(frigateApp.page.getByText("No hidden notices")).toBeVisible();
   });
 
   test("severity switches hide notices of that severity", async ({
@@ -290,7 +362,9 @@ test.describe("System — Health tab @medium", () => {
       first_seen: start,
       last_seen: start + 60,
       count,
-      dismissed_at: null,
+      acknowledgeable: true,
+      acknowledged_at: null,
+      muted_at: null,
     });
     await frigateApp.installDefaults({
       stats: QUIET_STATS,
@@ -332,7 +406,9 @@ test.describe("System — Health tab @medium", () => {
           first_seen: NOW - 600,
           last_seen: NOW - 600,
           count: 1,
-          dismissed_at: null,
+          acknowledgeable: true,
+          acknowledged_at: null,
+          muted_at: null,
         },
       ],
     });
@@ -363,7 +439,9 @@ test.describe("System — Health tab @medium", () => {
           first_seen: NOW - 600,
           last_seen: NOW - 600,
           count: 1,
-          dismissed_at: null,
+          acknowledgeable: true,
+          acknowledged_at: null,
+          muted_at: null,
         },
       ],
     });
@@ -695,7 +773,7 @@ test.describe("System — Health notices sources @medium", () => {
 
     // the status bar shows a problem, so stats have loaded
     await expect(
-      frigateApp.page.getByText("Front Door is offline"),
+      frigateApp.page.getByText("Recordings are being deleted"),
     ).toBeVisible({ timeout: 15_000 });
     await expect(
       frigateApp.page.locator("[data-testid^='health-problem-']"),
@@ -1046,7 +1124,7 @@ test.describe("System — Health notices sources @medium", () => {
     await expect(frigateApp.page).toHaveURL(/\/system#health/);
   });
 
-  test("status bar counts undismissed notices next to the health text", async ({
+  test("status bar counts shown notices next to the health text", async ({
     frigateApp,
   }) => {
     test.skip(frigateApp.isMobile, "Status bar is desktop-only");
@@ -1089,41 +1167,61 @@ test.describe("System — Health notices sources @medium", () => {
     await expect(frigateApp.page.getByText("System is healthy")).toHaveCount(0);
   });
 
-  test("a config row can be dismissed", async ({ frigateApp }) => {
-    const id = "config:detect:fps-greater-than-five:camera.garage";
-    await frigateApp.installDefaults({
-      config: {
-        cameras: {
-          garage: { detect: { width: 2560, height: 1440, fps: 10 } },
-        },
-      },
-      stats: QUIET_STATS,
-    });
+  // the slow detector warning is added before the offline error
+  const TWO_PROBLEM_STATS = {
+    detectors: { cpu: { inference_speed: 60 } },
+    cameras: { front_door: { camera_fps: 0 } },
+  };
 
-    // the list gains the dismissal after the POST so the refetch hides the row
-    let dismissed = false;
-    await frigateApp.page.route(`**/api/notices/${id}/dismiss`, (route) => {
-      dismissed = true;
-      return route.fulfill({ json: { success: true } });
-    });
-    await frigateApp.page.route("**/api/notices/dismissed_checks", (route) =>
-      route.fulfill({ json: dismissed ? [{ id, dismissed_at: NOW }] : [] }),
-    );
-    await frigateApp.goto("/system#health");
+  test("status bar collapses several problems behind the most severe", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Status bar is desktop-only");
+    await frigateApp.installDefaults({ stats: TWO_PROBLEM_STATS });
+    await frigateApp.goto("/");
 
-    const row = frigateApp.page.getByTestId(`health-problem-${id}`);
-    await expect(row).toBeVisible({ timeout: 15_000 });
-    const request = frigateApp.page.waitForRequest(
-      (req) =>
-        req.url().includes(`/api/notices/${id}/dismiss`) &&
-        req.method() === "POST",
-    );
-    await row.getByRole("button", { name: "Dismiss" }).click();
-    await request;
-    await expect(row).toHaveCount(0);
+    const summary = frigateApp.page.getByRole("button", {
+      name: "Front Door is offline +1",
+    });
+    await expect(summary).toBeVisible({ timeout: 15_000 });
+    await expect(frigateApp.page.getByText("Cpu is slow")).toHaveCount(0);
+
+    await summary.click();
+    const list = frigateApp.page.getByTestId("status-message-list");
+    await expect(list.getByRole("link")).toHaveText([
+      "Front Door is offline",
+      "Cpu is slow (60 ms)",
+    ]);
+
+    await list.getByRole("link", { name: "Cpu is slow (60 ms)" }).click();
+    await expect(frigateApp.page).toHaveURL(/\/system#general/);
+    await expect(list).toHaveCount(0);
   });
 
-  test("dismissed config rows move to the dismissed list", async ({
+  test("mobile status drawer stacks every problem", async ({ frigateApp }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only");
+    await frigateApp.installDefaults({ stats: TWO_PROBLEM_STATS });
+    await frigateApp.goto("/");
+
+    await frigateApp.page
+      .getByTestId("status-alert-trigger")
+      .click({ timeout: 15_000 });
+    const items = frigateApp.page
+      .getByTestId("status-message-list")
+      .getByRole("link");
+    await expect(items).toHaveText([
+      "Front Door is offline",
+      "Cpu is slow (60 ms)",
+    ]);
+
+    const [first, second] = await Promise.all([
+      items.nth(0).boundingBox(),
+      items.nth(1).boundingBox(),
+    ]);
+    expect(second!.y).toBeGreaterThan(first!.y);
+  });
+
+  test("a config row can be muted but not acknowledged", async ({
     frigateApp,
   }) => {
     const id = "config:detect:fps-greater-than-five:camera.garage";
@@ -1134,12 +1232,49 @@ test.describe("System — Health notices sources @medium", () => {
         },
       },
       stats: QUIET_STATS,
-      dismissedChecks: [{ id, dismissed_at: NOW - 120 }],
+    });
+
+    // the list gains the mute after the POST so the refetch hides the row
+    let muted = false;
+    await frigateApp.page.route(`**/api/notices/${id}/mute`, (route) => {
+      muted = true;
+      return route.fulfill({ json: { success: true } });
+    });
+    await frigateApp.page.route("**/api/notices/muted_checks", (route) =>
+      route.fulfill({ json: muted ? [{ id, muted_at: NOW }] : [] }),
+    );
+    await frigateApp.goto("/system#health");
+
+    const row = frigateApp.page.getByTestId(`health-problem-${id}`);
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row.getByRole("button", { name: "Acknowledge" })).toHaveCount(
+      0,
+    );
+    const request = frigateApp.page.waitForRequest(
+      (req) =>
+        req.url().includes(`/api/notices/${id}/mute`) &&
+        req.method() === "POST",
+    );
+    await row.getByRole("button", { name: "Mute", exact: true }).click();
+    await request;
+    await expect(row).toHaveCount(0);
+  });
+
+  test("muted config rows move to the hidden list", async ({ frigateApp }) => {
+    const id = "config:detect:fps-greater-than-five:camera.garage";
+    await frigateApp.installDefaults({
+      config: {
+        cameras: {
+          garage: { detect: { width: 2560, height: 1440, fps: 10 } },
+        },
+      },
+      stats: QUIET_STATS,
+      mutedChecks: [{ id, muted_at: NOW - 120 }],
     });
     await frigateApp.page.route(
       (url) =>
         url.pathname.endsWith("/api/notices") &&
-        url.searchParams.get("include_dismissed") === "true",
+        url.searchParams.get("include_hidden") === "true",
       (route) => route.fulfill({ json: [] }),
     );
     await frigateApp.goto("/system#health");
@@ -1153,12 +1288,14 @@ test.describe("System — Health notices sources @medium", () => {
     await expect(row).toHaveCount(0);
 
     await frigateApp.page.getByRole("button", { name: "Filter" }).click();
-    await frigateApp.page
-      .getByRole("switch", { name: "Show dismissed" })
-      .click();
+    await frigateApp.page.getByRole("switch", { name: "Show hidden" }).click();
+    await frigateApp.page.keyboard.press("Escape");
 
     await expect(row).toBeVisible();
-    await expect(row).toContainText("Dismissed");
-    await expect(row.getByRole("button", { name: "Dismiss" })).toHaveCount(0);
+    await expect(row).toContainText("Muted");
+    await expect(row.getByRole("button", { name: "Unmute" })).toBeVisible();
+    await expect(
+      row.getByRole("button", { name: "Mute", exact: true }),
+    ).toHaveCount(0);
   });
 });

@@ -1,9 +1,10 @@
 import { createContext } from "react";
+import { ProblemSeverity } from "@/types/stats";
 
 export type StatusMessage = {
   id: string;
   text: string;
-  color?: string;
+  severity: ProblemSeverity;
   link?: string;
 };
 
@@ -16,7 +17,7 @@ type StatusBarMessagesContextValue = {
   addMessage: (
     key: string,
     message: string,
-    color?: string,
+    severity?: ProblemSeverity,
     messageId?: string,
     link?: string,
   ) => string | undefined;

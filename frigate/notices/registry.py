@@ -77,9 +77,8 @@ class NoticeRegistry:
     ) -> None:
         """Insert a notice or count another occurrence of it.
 
-        A dismissed notice stays dismissed when it is raised again, unless its
-        kind sets reopen_at_count. A kind that should come back after a
-        dismissal gives each episode its own scope.
+        Another occurrence shows an acknowledged notice again. A muted notice
+        stays hidden.
         """
         definition = NOTICE_KINDS.get(kind)
 
@@ -112,7 +111,6 @@ class NoticeRegistry:
                     first_seen=now,
                     last_seen=now,
                     count=1,
-                    dismissed_at=None,
                 )
                 self._bump_occurrences(kind, 1, now)
 
@@ -175,7 +173,7 @@ class NoticeRegistry:
             self._notify()
 
     def resolve_camera(self, camera: str) -> None:
-        """Drop the notices and check dismissals of a camera being deleted."""
+        """Drop the notices and check mutes of a camera being deleted."""
         camera_kinds = [
             key
             for key, definition in NOTICE_KINDS.items()
@@ -193,7 +191,7 @@ class NoticeRegistry:
             )
 
             # a stream id names its camera first; a config id ends with camera.<name>
-            for check in self.dismissed_checks():
+            for check in self.muted_checks():
                 check_id = check["id"]
 
                 if check_id.startswith(f"stream:{camera}:") or (
@@ -205,26 +203,50 @@ class NoticeRegistry:
         if deleted:
             self._notify()
 
-    def purge_dismissed(self) -> int:
-        """Delete every dismissed row so each can show again. Returns how many."""
-        with self._lock:
-            return int(
-                Notice.delete().where(Notice.dismissed_at.is_null(False)).execute()
-            )
+    def acknowledge(self, row_id: str) -> bool:
+        """Hide a notice until it happens again.
 
-    def dismiss(self, row_id: str) -> bool:
-        """Hide a notice or check row for good. Returns False for an unknown id."""
+        Returns False for an unknown id or a kind that never repeats, such as
+        a check row or the update notice.
+        """
         with self._lock:
             existing = Notice.get_or_none(Notice.id == row_id)
 
             if existing is None:
-                # a check row gets a notice row only once it is dismissed
+                return False
+
+            definition = NOTICE_KINDS.get(existing.kind)
+
+            if definition is None or not definition.counts_repeats:
+                return False
+
+            if existing.acknowledged_at is not None or existing.muted_at is not None:
+                return True
+
+            Notice.update(acknowledged_at=datetime.now().timestamp()).where(
+                Notice.id == row_id
+            ).execute()
+            NoticeStats.update(acknowledgements=NoticeStats.acknowledgements + 1).where(
+                NoticeStats.kind == existing.kind
+            ).execute()
+
+        self._notify()
+        return True
+
+    def mute(self, row_id: str) -> bool:
+        """Hide a notice or check row for good. Returns False for an unknown id."""
+        now = datetime.now().timestamp()
+
+        with self._lock:
+            existing = Notice.get_or_none(Notice.id == row_id)
+
+            if existing is None:
+                # a check row gets a notice row only once it is muted
                 kind, _, scope = row_id.partition(":")
 
                 if kind not in CHECK_KINDS or not scope:
                     return False
 
-                now = datetime.now().timestamp()
                 Notice.create(
                     id=row_id,
                     kind=kind,
@@ -233,40 +255,78 @@ class NoticeRegistry:
                     first_seen=now,
                     last_seen=now,
                     count=1,
-                    dismissed_at=now,
+                    muted_at=now,
                 )
                 return True
 
-            if existing.dismissed_at is not None:
+            if existing.muted_at is not None:
                 return True
 
             if existing.kind not in NOTICE_KINDS:
                 return False
 
-            Notice.update(dismissed_at=datetime.now().timestamp()).where(
+            Notice.update(acknowledged_at=None, muted_at=now).where(
                 Notice.id == row_id
             ).execute()
-            NoticeStats.update(dismissals=NoticeStats.dismissals + 1).where(
+            NoticeStats.update(mutes=NoticeStats.mutes + 1).where(
                 NoticeStats.kind == existing.kind
             ).execute()
 
         self._notify()
         return True
 
-    def dismissed_checks(self) -> list[dict[str, Any]]:
-        """Dismissed config and stream check rows, newest first."""
+    def unhide(self, row_id: str) -> bool:
+        """Show an acknowledged or muted row again. Returns False for an unknown id."""
+        with self._lock:
+            existing = Notice.get_or_none(Notice.id == row_id)
+
+            if existing is None:
+                return False
+
+            if existing.kind in CHECK_KINDS:
+                Notice.delete_by_id(row_id)
+                return True
+
+            Notice.update(acknowledged_at=None, muted_at=None).where(
+                Notice.id == row_id
+            ).execute()
+
+        self._notify()
+        return True
+
+    def unhide_all(self) -> None:
+        """Show every acknowledged and muted row again."""
+        with self._lock:
+            for check in self.muted_checks():
+                Notice.delete_by_id(check["id"])
+
+            shown = (
+                Notice.update(acknowledged_at=None, muted_at=None)
+                .where(
+                    Notice.acknowledged_at.is_null(False)
+                    | Notice.muted_at.is_null(False)
+                )
+                .execute()
+            )
+
+        if shown:
+            self._notify()
+
+    def muted_checks(self) -> list[dict[str, Any]]:
+        """Muted config and stream check rows, newest first."""
         rows = (
             Notice.select()
             .where(Notice.kind.in_(list(CHECK_KINDS)))
-            .order_by(Notice.dismissed_at.desc())
+            .order_by(Notice.muted_at.desc())
         )
-        return [{"id": row.id, "dismissed_at": row.dismissed_at} for row in rows]
+        return [{"id": row.id, "muted_at": row.muted_at} for row in rows]
 
-    def active(self, include_dismissed: bool = False) -> list[dict[str, Any]]:
+    def active(self, include_hidden: bool = False) -> list[dict[str, Any]]:
         """Notices most severe first, then most recent first.
 
         Args:
-            include_dismissed: Also return dismissed notices, for the history view
+            include_hidden: Also return acknowledged and muted notices, for the
+                hidden list
         """
         rows = []
 
@@ -276,7 +336,9 @@ class NoticeRegistry:
             if definition is None:
                 continue
 
-            if row.dismissed_at is not None and not include_dismissed:
+            hidden = row.acknowledged_at is not None or row.muted_at is not None
+
+            if hidden and not include_hidden:
                 continue
 
             rows.append(
@@ -291,7 +353,9 @@ class NoticeRegistry:
                     "first_seen": row.first_seen,
                     "last_seen": row.last_seen,
                     "count": row.count,
-                    "dismissed_at": row.dismissed_at,
+                    "acknowledgeable": definition.counts_repeats,
+                    "acknowledged_at": row.acknowledged_at,
+                    "muted_at": row.muted_at,
                 }
             )
 
@@ -309,11 +373,13 @@ class NoticeRegistry:
             {
                 "kind": row.kind,
                 "occurrences": row.occurrences,
-                "dismissals": row.dismissals,
+                "acknowledgements": row.acknowledgements,
+                "mutes": row.mutes,
                 "first_seen": row.first_seen,
                 "last_seen": row.last_seen,
                 "reported_occurrences": row.reported_occurrences,
-                "reported_dismissals": row.reported_dismissals,
+                "reported_acknowledgements": row.reported_acknowledgements,
+                "reported_mutes": row.reported_mutes,
             }
             for row in NoticeStats.select()
             if row.kind in NOTICE_KINDS
@@ -328,17 +394,12 @@ class NoticeRegistry:
         params: dict[str, Any],
     ) -> None:
         # called with the lock held
-        fields: dict[str, Any] = {
-            "count": row.count + count,
-            "last_seen": last_seen,
-            "params": params,
-        }
-        reopen_at = NOTICE_KINDS[kind].reopen_at_count
-
-        if reopen_at is not None and row.count < reopen_at <= row.count + count:
-            fields["dismissed_at"] = None
-
-        Notice.update(**fields).where(Notice.id == row.id).execute()
+        Notice.update(
+            count=row.count + count,
+            last_seen=last_seen,
+            params=params,
+            acknowledged_at=None,
+        ).where(Notice.id == row.id).execute()
         self._bump_occurrences(kind, count, last_seen)
 
     def _prune(self, kind: str, keep: int) -> None:
@@ -362,7 +423,8 @@ class NoticeRegistry:
             NoticeStats.create(
                 kind=kind,
                 occurrences=count,
-                dismissals=0,
+                acknowledgements=0,
+                mutes=0,
                 first_seen=now,
                 last_seen=now,
             )
