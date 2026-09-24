@@ -3,6 +3,7 @@ import {
   LivePlayerError,
   PlayerStatsType,
   TwoWayTalkError,
+  VideoResolutionType,
 } from "@/types/live";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { webRTCIceServers } from "@/utils/webrtcUtil";
@@ -20,6 +21,7 @@ type WebRtcPlayerProps = {
   pip?: boolean;
   getStats?: boolean;
   setStats?: (stats: PlayerStatsType) => void;
+  setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onPlaying?: () => void;
   onError?: (error: LivePlayerError) => void;
   onMicrophoneError?: (error: TwoWayTalkError) => void;
@@ -36,6 +38,7 @@ export default function WebRtcPlayer({
   pip = false,
   getStats = false,
   setStats,
+  setFullResolution,
   onPlaying,
   onError,
   onMicrophoneError,
@@ -341,6 +344,12 @@ export default function WebRtcPlayer({
   const handleLoadedData = () => {
     if (videoLoadTimeoutRef.current) {
       clearTimeout(videoLoadTimeoutRef.current);
+    }
+    if (videoRef.current) {
+      setFullResolution?.({
+        width: videoRef.current.videoWidth,
+        height: videoRef.current.videoHeight,
+      });
     }
     onPlaying?.();
   };

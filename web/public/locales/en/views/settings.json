@@ -167,6 +167,11 @@
         "label": "Always Show Camera Names",
         "desc": "Always show the camera names in a chip in the multi-camera live view dashboard."
       },
+      "naturalAspectLayout": {
+        "label": "Use Natural Aspect Ratios",
+        "desc": "On camera group live view dashboards, size each tile to its camera's own natural aspect ratio. When disabled, cameras are snapped to a standard wide, landscape, or tall tile shape.",
+        "descNote": "Toggling this setting on or off will clear the stored layout for all camera group live dashboards. Manual reconfiguration will be required."
+      },
       "liveFallbackTimeout": {
         "label": "Live Player Fallback Timeout",
         "desc": "When a camera's high quality live stream is unavailable, fall back to low bandwidth mode after this many seconds. Default: 3."
@@ -175,12 +180,14 @@
     "storedLayouts": {
       "title": "Stored Layouts",
       "desc": "The layout of cameras in a camera group can be dragged/resized. The positions are stored in your browser's local storage.",
-      "clearAll": "Clear All Layouts"
+      "clearAll": "Clear All Layouts",
+      "clearConfirm": "This will clear the stored layout for every camera group in this browser. This cannot be undone."
     },
     "cameraGroupStreaming": {
       "title": "Camera Group Streaming Settings",
       "desc": "Streaming settings for each camera group are stored in your browser's local storage.",
-      "clearAll": "Clear All Streaming Settings"
+      "clearAll": "Clear All Streaming Settings",
+      "clearConfirm": "This will clear the streaming settings for every camera group in this browser. This cannot be undone."
     },
     "backupRestore": {
       "title": "Backup & Restore",
@@ -195,6 +202,9 @@
         "desc": "Choose what to apply from this file. Frigate will reload when the import finishes.",
         "exportedFrom": "Exported {{date}} from Frigate config version {{version}}",
         "layouts_one": "Camera group layouts ({{count}} group)",
+        "layoutsPhone": "Camera group layouts aren't imported on phones, which always use the standard grid.",
+        "layoutsModeOn": "These layouts use camera aspect ratio tile sizing, so importing them will also turn on \"Use Natural Aspect Ratios\".",
+        "layoutsModeOff": "These layouts use standard tile sizing, so importing them will also turn off \"Use Natural Aspect Ratios\".",
         "layouts_other": "Camera group layouts ({{count}} groups)",
         "streaming_one": "Streaming settings ({{count}} camera)",
         "streaming_other": "Streaming settings ({{count}} cameras)",

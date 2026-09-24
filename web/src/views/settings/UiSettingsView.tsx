@@ -10,13 +10,14 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
-import { Button } from "../../components/ui/button";
+import { Button, buttonVariants } from "../../components/ui/button";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import {
   useUserPersistence,
   deleteUserNamespacedKey,
 } from "@/hooks/use-user-persistence";
+import { isMobileOnly } from "react-device-detect";
 import {
   Select,
   SelectContent,
@@ -33,6 +34,17 @@ import {
   CONTROL_COLUMN_CLASS_NAME,
 } from "@/components/card/SettingsGroupCard";
 import Heading from "@/components/ui/heading";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 import ImportUiSettingsDialog from "@/components/overlay/dialog/ImportUiSettingsDialog";
 import {
   applyImportPayload,
@@ -50,6 +62,8 @@ import {
 
 const WEEK_STARTS_ON = ["Sunday", "Monday"];
 const IMPORT_FAILED_FLAG = "frigate-ui-settings-import-failed";
+
+type ConfirmTarget = "layouts" | "streaming" | "naturalAspect";
 
 type SwitchSettingRowProps = {
   id: string;
@@ -321,6 +335,10 @@ export default function UiSettingsView() {
     "displayCameraNames",
     false,
   );
+  const [naturalAspect, setNaturalAspect] = useUserPersistence(
+    "naturalAspectLayout",
+    false,
+  );
   const [playbackRate, setPlaybackRate] = useUserPersistence("playbackRate", 1);
   const [weekStartsOn, setWeekStartsOn] = useUserPersistence("weekStartsOn", 0);
   const [alertVideos, setAlertVideos] = useUserPersistence("alertVideos", true);
@@ -328,6 +346,66 @@ export default function UiSettingsView() {
     "liveFallbackTimeout",
     3,
   );
+
+  const [pendingConfirm, setPendingConfirm] = useState<ConfirmTarget | null>(
+    null,
+  );
+
+  const confirmCopy = useCallback(
+    (target: ConfirmTarget) => {
+      // literal keys per branch: a template key would be invisible to
+      // npm run i18n:extract, which CI verifies
+      switch (target) {
+        case "layouts":
+          return {
+            title: t("general.storedLayouts.clearAll"),
+            description: t("general.storedLayouts.clearConfirm"),
+            action: t("button.clear", { ns: "common" }),
+          };
+        case "streaming":
+          return {
+            title: t("general.cameraGroupStreaming.clearAll"),
+            description: t("general.cameraGroupStreaming.clearConfirm"),
+            action: t("button.clear", { ns: "common" }),
+          };
+        case "naturalAspect":
+          return {
+            title: t("general.liveDashboard.naturalAspectLayout.label"),
+            description: t(
+              "general.liveDashboard.naturalAspectLayout.descNote",
+            ),
+            action: naturalAspect
+              ? t("button.disable", { ns: "common" })
+              : t("button.enable", { ns: "common" }),
+          };
+      }
+    },
+    [naturalAspect, t],
+  );
+
+  const handleConfirm = useCallback(() => {
+    switch (pendingConfirm) {
+      case "layouts":
+        clearStoredLayouts();
+        break;
+      case "streaming":
+        clearStreamingSettings();
+        break;
+      case "naturalAspect":
+        // a layout only renders in the mode that built it
+        setNaturalAspect(!naturalAspect);
+        clearStoredLayouts();
+        break;
+    }
+
+    setPendingConfirm(null);
+  }, [
+    pendingConfirm,
+    clearStoredLayouts,
+    clearStreamingSettings,
+    naturalAspect,
+    setNaturalAspect,
+  ]);
 
   const liveDashboardSwitchRows = [
     {
@@ -351,6 +429,18 @@ export default function UiSettingsView() {
       checked: cameraNames,
       onCheckedChange: setCameraName,
     },
+    // phones use the static grid, so tile sizing has nothing to affect there
+    ...(isMobileOnly
+      ? []
+      : [
+          {
+            id: "natural-aspect",
+            label: t("general.liveDashboard.naturalAspectLayout.label"),
+            description: t("general.liveDashboard.naturalAspectLayout.desc"),
+            checked: naturalAspect,
+            onCheckedChange: () => setPendingConfirm("naturalAspect"),
+          },
+        ]),
   ];
 
   return (
@@ -419,7 +509,7 @@ export default function UiSettingsView() {
                     id="stored-layouts-clear"
                     aria-label={t("general.storedLayouts.clearAll")}
                     className="w-full md:w-auto"
-                    onClick={clearStoredLayouts}
+                    onClick={() => setPendingConfirm("layouts")}
                   >
                     {t("general.storedLayouts.clearAll")}
                   </Button>
@@ -435,7 +525,7 @@ export default function UiSettingsView() {
                     id="camera-group-streaming-clear"
                     aria-label={t("general.cameraGroupStreaming.clearAll")}
                     className="w-full md:w-auto"
-                    onClick={clearStreamingSettings}
+                    onClick={() => setPendingConfirm("streaming")}
                   >
                     {t("general.cameraGroupStreaming.clearAll")}
                   </Button>
@@ -569,9 +659,41 @@ export default function UiSettingsView() {
           fileName={pendingImport.name}
           file={pendingImport.file}
           summary={pendingImport.summary}
+          currentNaturalAspect={naturalAspect ?? false}
           onConfirm={handleImportConfirm}
         />
       )}
+
+      <AlertDialog
+        open={pendingConfirm != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPendingConfirm(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingConfirm && confirmCopy(pendingConfirm).title}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingConfirm && confirmCopy(pendingConfirm).description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("button.cancel", { ns: "common" })}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={cn(buttonVariants({ variant: "destructive" }))}
+              onClick={handleConfirm}
+            >
+              {pendingConfirm && confirmCopy(pendingConfirm).action}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
