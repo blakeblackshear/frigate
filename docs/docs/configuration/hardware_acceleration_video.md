@@ -554,11 +554,16 @@ services:
 
 Or with `docker run`, add `--device lighter.sh/video=all`.
 
-Then set the hardware acceleration arguments:
+Then set the hardware acceleration arguments for the codec your cameras stream. The decoder is specific to the codec, so if your cameras mix H.264 and H.265, set it for the most common codec globally and override it on the other cameras:
 
 ```yaml
 ffmpeg:
-  hwaccel_args: -c:v h264_v4l2m2m # hevc_v4l2m2m for H.265 streams
+  hwaccel_args: -c:v h264_v4l2m2m # for H.264 streams
+
+cameras:
+  garage: # an H.265 camera
+    ffmpeg:
+      hwaccel_args: -c:v hevc_v4l2m2m
 ```
 
 :::note
