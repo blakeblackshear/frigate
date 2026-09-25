@@ -5,6 +5,7 @@ import binascii
 import io
 import json
 import logging
+import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -22,6 +23,11 @@ logger = logging.getLogger(__name__)
 # Gemini requests carrying inline data are capped at ~20 MB total; stay well
 # under it so the request fails as a log line rather than a 400.
 GEMINI_MAX_INLINE_BYTES = 15 * 1024 * 1024
+
+# Image-token probes run on the enrichment thread, so they get a short timeout,
+# no retries, and a cooldown after failure instead of the client's defaults.
+COUNT_TOKENS_TIMEOUT_MS = 5000
+COUNT_TOKENS_RETRY_INTERVAL = 300
 
 
 def _decode_thought_signature(value: Any) -> bytes | None:
@@ -96,10 +102,12 @@ class GeminiClient(GenAIClient):
 
     provider: genai.Client
     _image_token_cache: dict[tuple[int, int], int]
+    _image_token_retry_at: float
 
     def _init_provider(self) -> genai.Client:
         """Initialize the client."""
         self._image_token_cache = {}
+        self._image_token_retry_at = 0.0
 
         # Merge provider_options into HttpOptions
         http_options_dict: dict[str, Any] = {
@@ -244,12 +252,16 @@ class GeminiClient(GenAIClient):
         charge ~1100 tokens for a 320x180 frame, not ~46), and the cost differs
         between model generations, so it is measured with the free count_tokens
         endpoint and cached per (width, height). Falls back to the base heuristic
-        if the request fails.
+        if the request fails, and does not probe again for
+        COUNT_TOKENS_RETRY_INTERVAL seconds.
         """
         cached = self._image_token_cache.get((width, height))
 
         if cached is not None:
             return cached
+
+        if time.monotonic() < self._image_token_retry_at:
+            return super().estimate_image_tokens(width, height)
 
         img = Image.new("RGB", (width, height), (128, 128, 128))
         buf = io.BytesIO()
@@ -261,6 +273,7 @@ class GeminiClient(GenAIClient):
             with_image = self._count_tokens([".", image])
             tokens = max(1, with_image - baseline)
         except Exception as e:
+            self._image_token_retry_at = time.monotonic() + COUNT_TOKENS_RETRY_INTERVAL
             logger.debug(
                 "Gemini image-token count failed for %dx%d (%s); using heuristic",
                 width,
@@ -282,7 +295,14 @@ class GeminiClient(GenAIClient):
     def _count_tokens(self, contents: list[Any]) -> int:
         """Return Gemini's prompt-token count for contents, without generating."""
         total = self.provider.models.count_tokens(
-            model=self.genai_config.model, contents=contents
+            model=self.genai_config.model,
+            contents=contents,
+            config=types.CountTokensConfig(
+                http_options=types.HttpOptions(
+                    timeout=COUNT_TOKENS_TIMEOUT_MS,
+                    retry_options=types.HttpRetryOptions(attempts=1),
+                )
+            ),
         ).total_tokens
 
         if total is None:
