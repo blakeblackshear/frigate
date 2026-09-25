@@ -2,6 +2,7 @@
 
 import base64
 import binascii
+import io
 import json
 import logging
 from collections.abc import AsyncGenerator
@@ -10,6 +11,7 @@ from typing import Any
 from google import genai
 from google.genai import errors, types
 from google.genai.types import FunctionCallingConfigMode
+from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -93,9 +95,12 @@ class GeminiClient(GenAIClient):
     """Generative AI client for Frigate using Gemini."""
 
     provider: genai.Client
+    _image_token_cache: dict[tuple[int, int], int]
 
     def _init_provider(self) -> genai.Client:
         """Initialize the client."""
+        self._image_token_cache = {}
+
         # Merge provider_options into HttpOptions
         http_options_dict: dict[str, Any] = {
             "timeout": int(self.timeout * 1000),  # requires milliseconds
@@ -231,6 +236,59 @@ class GeminiClient(GenAIClient):
         """Get the context window size for Gemini."""
         # Gemini Pro Vision has a 1M token context window
         return 1000000
+
+    def estimate_image_tokens(self, width: int, height: int) -> float:
+        """Ask Gemini how many prompt tokens an image of these dimensions costs.
+
+        Gemini bills images far above the base pixel heuristic (Gemini 3 models
+        charge ~1100 tokens for a 320x180 frame, not ~46), and the cost differs
+        between model generations, so it is measured with the free count_tokens
+        endpoint and cached per (width, height). Falls back to the base heuristic
+        if the request fails.
+        """
+        cached = self._image_token_cache.get((width, height))
+
+        if cached is not None:
+            return cached
+
+        img = Image.new("RGB", (width, height), (128, 128, 128))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=60)
+        image = types.Part.from_bytes(data=buf.getvalue(), mime_type="image/jpeg")
+
+        try:
+            baseline = self._count_tokens(["."])
+            with_image = self._count_tokens([".", image])
+            tokens = max(1, with_image - baseline)
+        except Exception as e:
+            logger.debug(
+                "Gemini image-token count failed for %dx%d (%s); using heuristic",
+                width,
+                height,
+                e,
+            )
+            return super().estimate_image_tokens(width, height)
+
+        self._image_token_cache[(width, height)] = tokens
+        logger.debug(
+            "Gemini model '%s' uses %d tokens for %dx%d images",
+            self.genai_config.model,
+            tokens,
+            width,
+            height,
+        )
+        return tokens
+
+    def _count_tokens(self, contents: list[Any]) -> int:
+        """Return Gemini's prompt-token count for contents, without generating."""
+        total = self.provider.models.count_tokens(
+            model=self.genai_config.model, contents=contents
+        ).total_tokens
+
+        if total is None:
+            raise ValueError("count_tokens returned no total")
+
+        return total
 
     def chat_with_tools(
         self,

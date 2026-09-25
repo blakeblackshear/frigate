@@ -297,6 +297,48 @@ class TestGeminiProvider(unittest.TestCase):
         self.assertEqual(final["content"], "ok")
 
 
+class TestGeminiImageTokens(unittest.TestCase):
+    def _client(self, count_tokens):
+        client = _make_client("gemini", model="gemini-3-flash", api_key="k")
+        client.provider = SimpleNamespace(
+            models=SimpleNamespace(count_tokens=count_tokens)
+        )
+        return client
+
+    def test_measures_image_cost_and_caches_per_size(self):
+        count_tokens = MagicMock(
+            side_effect=lambda model, contents: SimpleNamespace(
+                total_tokens=2 if len(contents) == 1 else 1102
+            )
+        )
+        client = self._client(count_tokens)
+
+        self.assertEqual(client.estimate_image_tokens(320, 180), 1100)
+        self.assertEqual(client.estimate_image_tokens(320, 180), 1100)
+        self.assertEqual(count_tokens.call_count, 2)
+
+        image = count_tokens.call_args.kwargs["contents"][1]
+        self.assertEqual(image.inline_data.mime_type, "image/jpeg")
+        self.assertEqual(count_tokens.call_args.kwargs["model"], "gemini-3-flash")
+
+        client.estimate_image_tokens(640, 360)
+        self.assertEqual(count_tokens.call_count, 4)
+
+    def test_falls_back_to_heuristic_without_caching(self):
+        count_tokens = MagicMock(side_effect=RuntimeError("offline"))
+        client = self._client(count_tokens)
+
+        self.assertEqual(client.estimate_image_tokens(320, 180), 320 * 180 / 1250)
+        client.estimate_image_tokens(320, 180)
+        self.assertEqual(count_tokens.call_count, 2)
+
+    def test_missing_total_falls_back_to_heuristic(self):
+        client = self._client(
+            MagicMock(return_value=SimpleNamespace(total_tokens=None))
+        )
+        self.assertEqual(client.estimate_image_tokens(320, 180), 320 * 180 / 1250)
+
+
 # ---------------------------------------------------------------------------
 # Ollama
 # ---------------------------------------------------------------------------
