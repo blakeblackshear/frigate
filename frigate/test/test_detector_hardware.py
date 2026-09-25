@@ -132,6 +132,16 @@ class TestGpus(HardwareProbeTestCase):
 
         self.assertNotIn("openvino:NPU", self.probe())
 
+    def test_an_amd_npu_is_found_by_its_driver(self):
+        accel = os.path.join(self.sys_root, "class", "accel", "accel0", "device")
+        os.makedirs(accel)
+        os.symlink("/drivers/amdxdna", os.path.join(accel, "driver"))
+
+        npu = self.probe()["vitisai"]
+
+        self.assertEqual(npu.units[0].device, "vitisai")
+        self.assertNotIn("openvino:NPU", self.probe())
+
 
 class TestNvidia(HardwareProbeTestCase):
     def _add_gpu(self, address: str, model: str) -> None:

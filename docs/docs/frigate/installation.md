@@ -474,6 +474,37 @@ The DX-RT python bindings are not shipped in the Frigate image. Frigate download
 
 Finally, configure [hardware object detection](/configuration/object_detectors#deepx-npu) to complete the setup.
 
+### AMD Ryzen AI
+
+The NPU detector targets XDNA 1 (Phoenix, Hawk Point) and is untested on XDNA 2 (Strix Point, Krackan Point), see [supported NPUs](/configuration/object_detectors#supported-npus). It needs a Linux kernel with the `amdxdna` driver (6.14 or newer), which creates `/dev/accel/accel0`. The image contains AMD's Ryzen AI runtime, so Frigate does not publish it and it is built from the Frigate source:
+
+1. Download `ryzen_ai-1.7.1.tgz` from the [Ryzen AI documentation](https://ryzenai.docs.amd.com/en/1.7.1/).
+2. Build the image, which is tagged `frigate:latest-rocm-ryzenai`:
+
+```bash
+make local-rocm-ryzenai RYZENAI_PATH=/path/to/archive
+```
+
+#### Docker configuration
+
+```yaml
+services:
+  frigate:
+    image: frigate:latest-rocm-ryzenai
+    devices:
+      - /dev/accel/accel0:/dev/accel/accel0 # NPU
+      - /dev/dri:/dev/dri # GPU
+      - /dev/kfd:/dev/kfd # GPU
+    group_add:
+      - video
+    environment:
+      HSA_OVERRIDE_GFX_VERSION: "11.0.3" # adapt to your GPU, see the ROCm settings
+```
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#amdrocm-and-ryzen-ai-detector) to complete the setup.
+
 ### Rockchip platform
 
 Make sure that you use a linux distribution that comes with the rockchip BSP kernel 5.10 or 6.1 and necessary drivers (especially rkvdec2 and rknpu). To check, enter the following commands:

@@ -194,6 +194,28 @@ def detect_intel_npu() -> DetectionHardware | None:
     return _hardware("openvino:NPU", "openvino", "Intel NPU", units[:1])
 
 
+def detect_amd_npu() -> DetectionHardware | None:
+    """Find AMD XDNA NPUs, which register as accel devices bound to amdxdna."""
+    units = []
+
+    for accel_path in sorted(glob(f"{SYS_ROOT}/class/accel/accel*")):
+        try:
+            driver = os.path.basename(os.readlink(f"{accel_path}/device/driver"))
+        except OSError:
+            continue
+
+        if driver != "amdxdna":
+            continue
+
+        units.append(HardwareUnit(device="vitisai", label=os.path.basename(accel_path)))
+
+    if not units:
+        return None
+
+    # the Vitis AI runtime has no way to address a specific NPU
+    return _hardware("vitisai", "vitisai", "AMD NPU", units[:1])
+
+
 def detect_amd_gpu() -> DetectionHardware | None:
     """Find AMD GPUs through their DRM driver."""
     pdevs = _drm_devices(AMD_DRM_DRIVERS)
@@ -345,6 +367,7 @@ PROBES = (
     detect_memryx,
     detect_deepx,
     detect_intel_npu,
+    detect_amd_npu,
     detect_intel_gpu,
     detect_nvidia_gpu,
     detect_jetson,
