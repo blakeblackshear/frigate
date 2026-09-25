@@ -30,6 +30,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
+- <CommunityBadge /> [Ryzen AI](#amdrocm-and-ryzen-ai-detector): The XDNA 1 NPU (Phoenix, Hawk Point) and GPUs of AMD Ryzen, in the `rocm-ryzenai` Frigate image.
 
 **Apple Silicon**
 
@@ -481,6 +482,65 @@ See [ONNX supported models](#onnx) for supported models, there are some caveats:
 - YOLO-NAS models are known to not run well on integrated GPUs
 
 <ModelConfigDropdown detectorTitle="AMD ROCm" models={objectDetectorsModels.onnx.models} />
+
+## AMD/ROCm and Ryzen AI Detector
+
+The `rocm-ryzenai` image runs detection on the XDNA 1 NPU and on AMD GPUs. It is built on top of the [ROCm detector](#amdrocm-gpu-detector), and the GPU is driven by the [ONNX detector](#onnx) as in the ROCm image. These detectors can be selected in the model's `devices`:
+
+- `vitisai`: the NPU, through the Vitis AI execution provider.
+- `cpu_yolo`: the CPU, with the same models as the NPU.
+
+### Supported NPUs
+
+The `vitisai` detector targets XDNA 1 (Phoenix, Hawk Point) and is untested on XDNA 2 (Strix Point, Krackan Point). It may load there, but it is not set up to perform well: the Vitis AI execution provider is pinned to `target=X1` and to a statically loaded `4x4.xclbin` overlay built for the XDNA 1 array, which does not describe the XDNA 2 column layout. XDNA 1 has no per-model compilation path, since the overlay is fixed when the session is created, whereas XDNA 2 compiles the partition to an ELF at load time.
+
+The XDNA 1 NPU is INT8 only: models must be XINT8 quantized with power-of-two scales, and BF16 models do not load. XDNA 2 supports BF16 natively, which would remove both constraints and land much closer to the FP32 accuracy.
+
+### Docker settings for NPU access
+
+In addition to the access needed for ROCm, the NPU needs the `/dev/accel` device.
+
+When running docker directly the following flags should be added for device access:
+
+```bash
+$ docker run --device=/dev/accel  \
+    ...
+```
+
+When using Docker Compose:
+
+```yaml {4-6}
+services:
+  frigate:
+    ...
+    devices:
+      ...
+      - /dev/accel
+```
+
+See the [installation docs](../frigate/installation.md#amd-ryzen-ai) for building the image and passing the devices through to the container.
+
+### Configuration {#configuration-ryzenai}
+
+The NPU runs XINT8 quantized YOLO-NAS-S and YOLOv8s ONNX models exported without NMS. Frigate reads the head layout from the model. The dropdown below includes the Dockerfile that builds each model.
+
+<ModelConfigDropdown detectorTitle="AMD Ryzen AI NPU (XDNA 1)" models={objectDetectorsModels.vitisai.models} />
+
+The GPU runs YOLO ONNX models with a raw head and no NMS, such as YOLOv9s, with the `onnx` detector. Set `HSA_OVERRIDE_GFX_VERSION` as described in the [ROCm settings](#docker-settings-for-overriding-the-gpu-chipset), for example `11.0.3` for a Radeon 780M. The first start compiles the model, which takes a few minutes.
+
+```yaml
+models:
+  - path: /config/models/yolov9s.onnx
+    labelmap_path: /labelmap/coco-80.txt
+    model_type: yolo-generic
+    input_tensor: nchw
+    input_pixel_format: rgb
+    input_dtype: float
+    width: 640
+    height: 640
+    devices:
+      - onnx
+```
 
 ## ONNX
 

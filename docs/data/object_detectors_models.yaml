@@ -1026,6 +1026,375 @@ deepx:
             model_type: yolox
             width: 640
             height: 640
+vitisai:
+  title: AMD Ryzen AI NPU (XDNA 1)
+  models:
+    - key: yolonas
+      label: YOLO-NAS-S
+      recommended: true
+      download: |-
+        The NPU runs XINT8 quantized ONNX models with a raw head and no NMS, which the `vitisai` detector decodes itself. The command below exports YOLO-NAS-S and quantizes it with AMD Quark, calibrating on COCO val2017 images (about 780 MB). It runs on the CPU. Set `IMG_SIZE` to `320` or `640` and copy the resulting `yolonas_s_xint8_<IMG_SIZE>.onnx` into `/config/model_cache`. `ADAROUND=1` improves accuracy and takes longer to build, use `ADAROUND=0` for a faster build.
+
+        :::warning
+
+        The pre-trained YOLO-NAS weights from DeciAI are subject to their license and can't be used commercially. For more information, see: https://docs.deci.ai/super-gradients/latest/LICENSE.YOLONAS.html
+
+        :::
+
+        ```sh
+        docker build . --build-arg IMG_SIZE=320 --build-arg N_CALIB=200 --build-arg ADAROUND=1 --output . -f- <<'EOF'
+        # syntax=docker/dockerfile:1.7
+
+        ARG IMG_SIZE=320
+        ARG N_CALIB=200
+        ARG ADAROUND=1
+
+        FROM python:3.11 AS export
+        RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 libglib2.0-0 \
+            && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /w
+
+        RUN uv pip install --system "git+https://github.com/Deci-AI/super-gradients.git"
+        # super-gradients misses requests and pins an old pyOpenSSL
+        RUN uv pip install --system --upgrade requests pyopenssl cryptography
+
+        # sghub.deci.ai is dead, use Deci's CloudFront mirror
+        RUN sed -i 's/sghub\.deci\.ai/d2gjn4b69gu75n.cloudfront.net/g; s/sg-hub-nv\.s3\.amazonaws\.com/d2gjn4b69gu75n.cloudfront.net/g' \
+              /usr/local/lib/python3.11/site-packages/super_gradients/training/pretrained_models.py \
+              /usr/local/lib/python3.11/site-packages/super_gradients/training/utils/checkpoint_utils.py
+
+        ARG IMG_SIZE
+        ENV IMG_SIZE=${IMG_SIZE}
+        ENV TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
+        ENV CRASH_HANDLER=FALSE
+
+        RUN python3 <<'PY'
+        import os, onnx, torch
+        from super_gradients.common.object_names import Models
+        from super_gradients.training import models
+
+        S = int(os.environ["IMG_SIZE"])
+        model = models.get(Models.YOLO_NAS_S, pretrained_weights="coco").eval()
+        model.prep_model_for_conversion(input_size=[1, 3, S, S])
+
+        torch.onnx.export(model, torch.zeros(1, 3, S, S), "full.onnx",
+                          opset_version=17, do_constant_folding=True,
+                          input_names=["images"], dynamic_axes=None, dynamo=False)
+
+        g = onnx.load("full.onnx")
+        bn = sum(1 for n in g.graph.node if n.op_type == "BatchNormalization")
+        print("BatchNormalization left:", bn, "(0 = fused)", flush=True)
+
+        # raw head only, decode and NMS stay on the CPU
+        outs = sorted({n.output[0] for n in g.graph.node if n.op_type == "Conv"
+                       and any(k in n.name.lower() for k in ("cls_pred", "reg_pred"))})
+        assert len(outs) == 6, outs
+        onnx.utils.extract_model("full.onnx", "raw.onnx", ["images"], outs)
+        onnx.checker.check_model(onnx.load("raw.onnx"))
+        print("raw.onnx", outs, flush=True)
+        PY
+
+        FROM python:3.11 AS quant
+        RUN apt-get update && apt-get install --no-install-recommends -y libgl1 libglib2.0-0 \
+            && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /w
+
+        # amd-quark needs onnxruntime named explicitly
+        RUN uv pip install --system amd-quark "onnxruntime>=1.20.1,<=1.22.2" opencv-python-headless
+        # quark.onnx imports torch, the CPU build is enough
+        RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
+        RUN python3 -c "import onnxruntime, cv2, numpy, torch, quark.onnx; \
+            print('deps ok: ort', onnxruntime.__version__, '| torch', torch.__version__)" \
+            || (uv pip list && exit 1)
+
+        ADD http://images.cocodataset.org/zips/val2017.zip /data/val2017.zip
+        RUN cd /data && python3 -c "import zipfile; zipfile.ZipFile('val2017.zip').extractall('.')" \
+            && rm val2017.zip
+
+        COPY --from=export /w/raw.onnx /w/raw.onnx
+
+        ARG IMG_SIZE
+        ARG N_CALIB
+        ARG ADAROUND
+        ENV IMG_SIZE=${IMG_SIZE} N_CALIB=${N_CALIB} ADAROUND=${ADAROUND}
+
+        RUN python3 <<'PY'
+        import glob, os, random, time
+        import cv2, numpy as np
+        from onnxruntime.quantization import CalibrationDataReader
+        from quark.onnx import ModelQuantizer
+        from quark.onnx.quantization.config import Config, get_default_config
+
+        S = int(os.environ["IMG_SIZE"])
+        N = int(os.environ["N_CALIB"])
+        ADAROUND = os.environ["ADAROUND"].lower() not in ("0", "false", "no", "")
+
+        files = sorted(glob.glob("/data/val2017/*.jpg"))
+        random.Random(0).shuffle(files)
+        files = files[:N]
+        print(len(files), "calibration images", flush=True)
+
+        # letterbox with 114 padding
+        def preprocess(path):
+            bgr = cv2.imread(path)
+            h, w = bgr.shape[:2]
+            r = S / max(h, w)
+            nh, nw = round(h * r), round(w * r)
+            canvas = np.full((S, S, 3), 114, np.uint8)
+            canvas[:nh, :nw] = cv2.resize(bgr, (nw, nh))
+            return np.expand_dims(canvas[:, :, ::-1].transpose(2, 0, 1).astype(np.float32) / 255.0, 0)
+
+        class Reader(CalibrationDataReader):
+            def __init__(self, fs): self.it = iter(fs)
+            def get_next(self):
+                f = next(self.it, None)
+                return None if f is None else {"images": preprocess(f)}
+
+        qc = get_default_config("XINT8")
+        qc.include_cle = False
+        if ADAROUND:
+            qc.include_fast_ft = True
+            ft = dict(qc.extra_options.get("FastFinetune", {}))
+            ft.update(OptimAlgorithm="adaround", DataSize=N, NumIterations=300, BatchSize=2)
+            qc.extra_options["FastFinetune"] = ft
+        print("XINT8 CLE=off AdaRound=%s" % ADAROUND, flush=True)
+
+        t = time.time()
+        ModelQuantizer(Config(global_quant_config=qc)).quantize_model("raw.onnx", "xint8.onnx", Reader(files))
+        print("%.1f min" % ((time.time() - t) / 60), flush=True)
+        PY
+
+        RUN python3 <<'PY'
+        import os
+        import numpy as np, onnx, onnxruntime as ort
+
+        S = int(os.environ["IMG_SIZE"])
+        g = onnx.load("xint8.onnx")
+        init = {i.name: i for i in g.graph.initializer}
+        sc = np.concatenate([np.atleast_1d(onnx.numpy_helper.to_array(init[n.input[1]])).ravel()
+                             for n in g.graph.node
+                             if n.op_type in ("QuantizeLinear", "DequantizeLinear") and n.input[1] in init])
+        l2 = np.log2(sc.astype(np.float64))
+        nq = sum(1 for n in g.graph.node if n.op_type == "QuantizeLinear")
+
+        print("QuantizeLinear:", nq, "(157 expected for YOLO-NAS-S)", flush=True)
+        assert bool(np.allclose(l2, np.round(l2))), "scales are not all powers of two"
+
+        s = ort.InferenceSession("xint8.onnx", providers=["CPUExecutionProvider"])
+        o = s.run(None, {"images": np.zeros((1, 3, S, S), np.float32)})
+        print("outputs:", [x.shape for x in o], flush=True)
+        PY
+
+        FROM scratch
+        ARG IMG_SIZE
+        COPY --from=quant /w/xint8.onnx /yolonas_s_xint8_${IMG_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detection models** and select **AMD NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
+
+        | Field                                    | Value                                                                 |
+        | ---------------------------------------- | --------------------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolonas_s_xint8_320.onnx`                        |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                               |
+        | **Object detection model input width**   | `320` (must equal the `IMG_SIZE` you built with)                      |
+        | **Object detection model input height**  | `320` (same)                                                          |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                                       |
+        | **Model Input Tensor Shape**             | `nchw`                                                                |
+        | **Model Input D Type**                   | `float` (values 0..1)                                                 |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value, the detector decodes the head itself) |
+
+        The width and height must match the `IMG_SIZE` the model was built with. Quantization is baked into the model, so the detector needs no other settings.
+      yaml: |-
+        models:
+          - devices:
+              - vitisai
+            path: /config/model_cache/yolonas_s_xint8_320.onnx
+            labelmap_path: /labelmap/coco-80.txt
+            input_tensor: nchw
+            input_dtype: float
+            width: 320 # <--- must equal the IMG_SIZE used to build the model
+            height: 320 # <--- must equal the IMG_SIZE used to build the model
+    - key: yolov8s
+      label: YOLOv8s
+      recommended: false
+      download: |-
+        The NPU runs XINT8 quantized ONNX models with a raw head and no NMS, which the `vitisai` detector decodes itself. The command below exports YOLOv8s and quantizes it with AMD Quark, calibrating on COCO val2017 images (about 780 MB). It runs on the CPU. Set `IMG_SIZE` to `320` or `640` and copy the resulting `yolov8s_xint8_<IMG_SIZE>.onnx` into `/config/model_cache`. It runs faster than YOLO-NAS-S with lower accuracy. YOLOv8 is licensed under AGPL-3.0.
+
+        ```sh
+        docker build . --build-arg IMG_SIZE=320 --build-arg N_CALIB=200 --output . -f- <<'EOF'
+        # syntax=docker/dockerfile:1.7
+
+        ARG IMG_SIZE=320
+        ARG N_CALIB=200
+
+        FROM python:3.11 AS export
+        RUN apt-get update && apt-get install --no-install-recommends -y cmake libgl1 libglib2.0-0 \
+            && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /w
+
+        # CPU torch avoids about 3 GB of CUDA wheels
+        RUN uv pip install --system torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        RUN uv pip install --system ultralytics onnx==1.18.0 onnxruntime onnx-simplifier==0.4.*
+        ADD https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8s.pt yolov8s.pt
+
+        ARG IMG_SIZE
+        ENV IMG_SIZE=${IMG_SIZE}
+        ENV TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
+
+        RUN python3 <<'PY'
+        import os, onnx, torch
+        from onnxsim import simplify
+
+        S = int(os.environ["IMG_SIZE"])
+        ckpt = torch.load("yolov8s.pt", map_location="cpu", weights_only=False)
+        model = (ckpt.get("ema") or ckpt["model"]).float().eval()
+
+        torch.onnx.export(model, torch.randn(1, 3, S, S), "full.onnx",
+                          export_params=True, opset_version=17, do_constant_folding=True,
+                          input_names=["images"], output_names=["output0"], dynamo=False)
+        m, ok = simplify(onnx.load("full.onnx"))
+        assert ok
+        onnx.save(m, "full.onnx")
+
+        # raw head: DFL box logits and class logits, located by structure
+        prod = {o: n for n in m.graph.node for o in n.output}
+        concat = prod[m.graph.output[0].name]
+        sig = [prod[i] for i in concat.input
+               if prod.get(i) is not None and prod[i].op_type == "Sigmoid"][0]
+        cls = sig.input[0]
+        sm = [n for n in m.graph.node if n.op_type == "Softmax"][0]
+        box = prod[prod[sm.input[0]].input[0]].input[0]
+
+        onnx.utils.extract_model("full.onnx", "raw.onnx", ["images"], [box, cls])
+        r = onnx.load("raw.onnx")
+        onnx.checker.check_model(r)
+        print("raw.onnx", [(o.name, [d.dim_value for d in o.type.tensor_type.shape.dim])
+                          for o in r.graph.output], flush=True)
+        PY
+
+        FROM python:3.11 AS quant
+        RUN apt-get update && apt-get install --no-install-recommends -y libgl1 libglib2.0-0 \
+            && rm -rf /var/lib/apt/lists/*
+        COPY --from=ghcr.io/astral-sh/uv:0.10.4 /uv /bin/
+        WORKDIR /w
+
+        # amd-quark needs onnxruntime named explicitly
+        RUN uv pip install --system amd-quark "onnxruntime>=1.20.1,<=1.22.2" opencv-python-headless
+        # quark.onnx imports torch, the CPU build is enough
+        RUN uv pip install --system torch --index-url https://download.pytorch.org/whl/cpu
+        RUN python3 -c "import onnxruntime, cv2, numpy, torch, quark.onnx; \
+            print('deps ok: ort', onnxruntime.__version__, '| torch', torch.__version__)" \
+            || (uv pip list && exit 1)
+
+        ADD http://images.cocodataset.org/zips/val2017.zip /data/val2017.zip
+        RUN cd /data && python3 -c "import zipfile; zipfile.ZipFile('val2017.zip').extractall('.')" \
+            && rm val2017.zip
+
+        COPY --from=export /w/raw.onnx /w/raw.onnx
+
+        ARG IMG_SIZE
+        ARG N_CALIB
+        ENV IMG_SIZE=${IMG_SIZE} N_CALIB=${N_CALIB}
+
+        RUN python3 <<'PY'
+        import glob, os, random, time
+        import cv2, numpy as np
+        from onnxruntime.quantization import CalibrationDataReader
+        from quark.onnx import ModelQuantizer
+        from quark.onnx.quantization.config import Config, get_default_config
+
+        S = int(os.environ["IMG_SIZE"])
+        N = int(os.environ["N_CALIB"])
+
+        files = sorted(glob.glob("/data/val2017/*.jpg"))
+        random.Random(0).shuffle(files)
+        files = files[:N]
+        print(len(files), "calibration images", flush=True)
+
+        # letterbox with centered 114 padding
+        def preprocess(path):
+            bgr = cv2.imread(path)
+            h, w = bgr.shape[:2]
+            s = min(S / w, S / h)
+            nw, nh = int(w * s), int(h * s)
+            top, left = (S - nh) // 2, (S - nw) // 2
+            canvas = cv2.copyMakeBorder(cv2.resize(bgr, (nw, nh)), top, S - nh - top,
+                                        left, S - nw - left, cv2.BORDER_CONSTANT, value=(114, 114, 114))
+            rgb = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
+            return np.expand_dims((rgb.astype(np.float32) / 255.0).transpose(2, 0, 1), 0)
+
+        class Reader(CalibrationDataReader):
+            def __init__(self, fs): self.it = iter(fs)
+            def get_next(self):
+                f = next(self.it, None)
+                return None if f is None else {"images": preprocess(f)}
+
+        # Sigmoid to HardSigmoid is on by default, the DPU needs it
+        qc = get_default_config("XINT8")
+        qc.include_cle = False
+
+        t = time.time()
+        ModelQuantizer(Config(global_quant_config=qc)).quantize_model("raw.onnx", "xint8.onnx", Reader(files))
+        print("%.1f min" % ((time.time() - t) / 60), flush=True)
+        PY
+
+        RUN python3 <<'PY'
+        import os
+        import numpy as np, onnx, onnxruntime as ort
+
+        S = int(os.environ["IMG_SIZE"])
+        g = onnx.load("xint8.onnx")
+        init = {i.name: i for i in g.graph.initializer}
+        sc = np.concatenate([np.atleast_1d(onnx.numpy_helper.to_array(init[n.input[1]])).ravel()
+                             for n in g.graph.node
+                             if n.op_type in ("QuantizeLinear", "DequantizeLinear") and n.input[1] in init])
+        l2 = np.log2(sc.astype(np.float64))
+
+        print("QuantizeLinear:", sum(1 for n in g.graph.node if n.op_type == "QuantizeLinear"),
+              "(226 expected for YOLOv8s)", flush=True)
+        print("HardSigmoid:", sum(1 for n in g.graph.node if n.op_type == "HardSigmoid"),
+              "(57 expected; 0 means the DPU substitution did not happen)", flush=True)
+        assert bool(np.allclose(l2, np.round(l2))), "scales are not all powers of two"
+
+        s = ort.InferenceSession("xint8.onnx", providers=["CPUExecutionProvider"])
+        o = s.run(None, {"images": np.zeros((1, 3, S, S), np.float32)})
+        print("outputs:", [x.shape for x in o], flush=True)
+        PY
+
+        FROM scratch
+        ARG IMG_SIZE
+        COPY --from=quant /w/xint8.onnx /yolov8s_xint8_${IMG_SIZE}.onnx
+        EOF
+        ```
+      ui: |-
+        Navigate to **Settings > System > Detection models** and select **AMD NPU** from the **Hardware** dropdown. Then, on the same model, open the **Custom Model** tab and configure:
+
+        | Field                                    | Value                                                                 |
+        | ---------------------------------------- | --------------------------------------------------------------------- |
+        | **Custom object detector model path**    | `/config/model_cache/yolov8s_xint8_320.onnx`                          |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                                               |
+        | **Object detection model input width**   | `320` (must equal the `IMG_SIZE` you built with)                      |
+        | **Object detection model input height**  | `320` (same)                                                          |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)                                       |
+        | **Model Input Tensor Shape**             | `nchw`                                                                |
+        | **Model Input D Type**                   | `float` (values 0..1)                                                 |
+        | **Object Detection Model Type**          | `ssd` (Frigate's default value, the detector decodes the head itself) |
+
+        The width and height must match the `IMG_SIZE` the model was built with. Quantization is baked into the model, so the detector needs no other settings.
+      yaml: |-
+        models:
+          - devices:
+              - vitisai
+            path: /config/model_cache/yolov8s_xint8_320.onnx
+            labelmap_path: /labelmap/coco-80.txt
+            input_tensor: nchw
+            input_dtype: float
+            width: 320 # <--- must equal the IMG_SIZE used to build the model
+            height: 320 # <--- must equal the IMG_SIZE used to build the model
 tensorrt:
   title: TensorRT
   models:

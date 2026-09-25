@@ -76,6 +76,10 @@ Frigate supports multiple different detectors that work on different types of ha
   - [Supports limited model architectures](../../configuration/object_detectors#amdrocm-gpu-detector)
   - Runs best on discrete AMD GPUs
 
+- <CommunityBadge /> [Ryzen AI](#amd-ryzen-ai): The XDNA 1 NPU (Phoenix, Hawk Point) and GPUs of AMD Ryzen, in the `rocm-ryzenai` image.
+  - [Supports YOLOv8s, YOLO-NAS-S and other YOLO models](../../configuration/object_detectors#amdrocm-and-ryzen-ai-detector)
+  - Runs efficiently on low power hardware
+
 **Apple Silicon**
 
 - [Apple Silicon](#apple-silicon): Apple Silicon is usable on all M1 and newer Apple Silicon devices to provide efficient and fast object detection
@@ -287,6 +291,37 @@ Other ModelZoo YOLO variants are also supported but have not been measured. Infe
 A few ModelZoo models can not be used with Frigate: SSD models (they are trained on Pascal VOC, so their labels do not match Frigate's), DAMO-YOLO models, face and pose models, and the PPU builds of YOLOv7.
 
 :::
+
+### AMD Ryzen AI
+
+Frigate can run detection on the XDNA 1 NPU and the AMD Ryzen GPUs, measured here on a Ryzen 7 7840HS with a Radeon 780M iGPU. See the [installation docs](installation.md#amd-ryzen-ai) for the setup and [the detector docs](/configuration/object_detectors#amdrocm-and-ryzen-ai-detector) for the configuration.
+
+Measured through Frigate's stats with 1x 2048x1536 camera (detect at 1024x768) and 2x 1280x720 cameras detecting on 640x360 substreams, all at 15 fps with detection at 5 fps and constant motion, decoded with `preset-vaapi`. Power is measured at the wall, over an idle of 17 W:
+
+| Detector | Model                            | Inference Time | Detections/s | Dropped | Power over idle |
+| -------- | -------------------------------- | -------------- | ------------ | ------- | --------------- |
+| NPU      | YOLOv8s (XINT8) 320              | ~ 13 ms        | 60           | 0 %     | ~ 5 W           |
+| NPU      | YOLO-NAS-S (XINT8, AdaRound) 320 | ~ 23 ms        | 43           | 21 %    | ~ 5 W           |
+| NPU      | YOLOv8s (XINT8) 640              | ~ 36 ms        | 28           | 45 %    | ~ 5 W           |
+| NPU      | YOLO-NAS-S (XINT8) 640           | ~ 52 ms        | 19           | 53 %    | ~ 5 W           |
+| GPU      | YOLOv9-s 320                     | ~ 12 ms        | 62           | 0 %     | ~ 20 W          |
+| GPU      | YOLOv9-s 640                     | ~ 24 ms        | 41           | 19 %    | ~ 39 W          |
+| CPU      | YOLOv8s (XINT8) 320              | ~ 131 ms       | 8            | 80 %    | ~ 11 W          |
+| CPU      | YOLO-NAS-S (XINT8, AdaRound) 320 | ~ 147 ms       | 7            | 81 %    | ~ 13 W          |
+| CPU      | YOLOv8s (XINT8) 640              | ~ 378 ms       | 3            | 95 %    | ~ 12 W          |
+
+A fully busy NPU draws about 5 W whatever the model, so larger models cost detections rather than power.
+
+Accuracy and standalone speed on the 4800 COCO val2017 (FP32 reference in parentheses):
+
+| Model      | Variant                    | mAP 50:95     | mAP 50        |
+| ---------- | -------------------------- | ------------- | ------------- |
+| YOLO-NAS-S | 640, CALIB=200, ADAROUND=0 | 44.46 (46.23) | 61.02 (62.94) |
+| YOLO-NAS-S | 640, CALIB=200, ADAROUND=1 | 45.31 (46.23) | 62.11 (62.94) |
+| YOLO-NAS-S | 320, CALIB=200, ADAROUND=0 | 36.01         | 50.62         |
+| YOLO-NAS-S | 320, CALIB=200, ADAROUND=1 | 36.83         | 51.75         |
+| YOLOv8s    | 640, CALIB=200             | 37.02 (43.89) | 52.49 (59.95) |
+| YOLOv8s    | 320, CALIB=200             | 29.57         | 43.01         |
 
 ### Nvidia Jetson
 
