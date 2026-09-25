@@ -48,7 +48,7 @@
     "@rjsf/core": "^6.10.0",
     "@rjsf/shadcn": "^6.10.0",
     "@rjsf/utils": "^6.10.0",
-    "@rjsf/validator-ajv8": "^6.10.0",
+    "@rjsf/validator-ajv8": "^6.10.1",
     "apexcharts": "^7.3.0",
     "axios": "^1.20.0",
     "class-variance-authority": "^0.7.1",
