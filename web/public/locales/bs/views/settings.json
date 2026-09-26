@@ -1037,7 +1037,6 @@
       "desc": "Frigate može nativno slati obavijesti na vaš uređaj kada radi u pregledaču ili je instalirana kao PWA."
     },
     "notificationUnavailable": {
-      "title": "Obavijesti nedostupne",
       "desc": "Web obavijesti zahtijevaju sigurni kontekst (<code>https://…</code>). Ovo je ograničenje pregledača. Pristupite Frigate sigurno da biste koristili obavijesti."
     },
     "globalSettings": {
@@ -1135,7 +1134,6 @@
   "triggers": {
     "documentTitle": "Pokretači",
     "semanticSearch": {
-      "title": "Semantička pretraga je onemogućena",
       "desc": "Semantička pretraga mora biti omogućena da biste koristili izazivače."
     },
     "management": {
