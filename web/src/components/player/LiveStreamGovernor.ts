@@ -19,8 +19,6 @@ import type {
 
 // go2rtc bursts its GOP cache when a consumer attaches
 const WARMUP_MS = 3000;
-// bytes this recent mean a stall is congestion rather than a dead source
-const BYTES_RECENT_MS = 2000;
 // media per wall second below this is a low sample. Low samples reset
 // the upswitch clock and feed the chronic window
 const LOW_RATE = 0.85;
@@ -63,7 +61,6 @@ export class LiveStreamGovernor {
 
   private rungStartTs: number;
   private cleanSinceTs: number;
-  private lastBytesTs = Number.NEGATIVE_INFINITY;
   // every sample, signed, for the sustained window
   private shortfalls: Shortfall[] = [];
   // low samples only, for the chronic window
@@ -99,7 +96,6 @@ export class LiveStreamGovernor {
     }
 
     const now = this.now();
-    this.lastBytesTs = now;
 
     if (now - this.rungStartTs < WARMUP_MS) {
       return;
@@ -133,7 +129,7 @@ export class LiveStreamGovernor {
    * A player error. Returns true when auto handled it by stepping down,
    * false to hand it to the error fallback.
    */
-  playerError(error: LivePlayerError): boolean {
+  playerError(error: LivePlayerError, sourceOnline: boolean): boolean {
     const { rung } = this.snapshot;
     if (rung === this.floor) {
       return false;
@@ -150,9 +146,9 @@ export class LiveStreamGovernor {
       return this.stepDown();
     }
 
-    // without recent bytes the source is dead rather than congested,
-    // and a lower stream from the same camera would fail the same way
-    if (this.now() - this.lastBytesTs > BYTES_RECENT_MS) {
+    // an offline camera fails every stream alike; a stall on a live camera
+    // is the viewer's link, even when congestion stops delivery outright
+    if (!sourceOnline) {
       return false;
     }
 
@@ -204,7 +200,6 @@ export class LiveStreamGovernor {
     const now = this.now();
     this.rungStartTs = now;
     this.cleanSinceTs = now;
-    this.lastBytesTs = Number.NEGATIVE_INFINITY;
     this.shortfalls = [];
     this.deficits = [];
   }

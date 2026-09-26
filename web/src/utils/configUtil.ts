@@ -307,6 +307,49 @@ export function buildOverrides(
 }
 
 // ---------------------------------------------------------------------------
+// Ordered maps: config maps whose key order is meaningful
+// ---------------------------------------------------------------------------
+
+// lodash isEqual ignores key order, so ordered maps compare entry lists.
+export function changedOrderedMapPaths(
+  current: unknown,
+  base: unknown,
+  paths: string[],
+): string[] {
+  return paths.filter((path) => {
+    const value = get(current, path);
+
+    if (!isJsonObject(value)) {
+      return false;
+    }
+
+    const baseValue = get(base, path);
+    return !isEqual(
+      Object.entries(value),
+      isJsonObject(baseValue) ? Object.entries(baseValue) : undefined,
+    );
+  });
+}
+
+// Send a changed ordered map whole; per-key overrides cannot carry order.
+export function applyOrderedMaps(
+  overrides: unknown,
+  current: unknown,
+  base: unknown,
+  paths: string[],
+): unknown {
+  const changed = changedOrderedMapPaths(current, base, paths);
+
+  if (changed.length === 0) {
+    return overrides;
+  }
+
+  const result = isJsonObject(overrides) ? cloneDeep(overrides) : {};
+  changed.forEach((path) => set(result, path, cloneDeep(get(current, path))));
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // flattenOverrides — turn an overrides object into a list of leaf paths
 // ---------------------------------------------------------------------------
 

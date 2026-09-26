@@ -1543,7 +1543,27 @@
       "noGo2rtcStreams": "No go2rtc streams configured",
       "availableStreams": "Available streams",
       "useCustom": "Use \"{{value}}\"",
-      "addStream": "Add stream"
+      "addStream": "Add stream",
+      "reorderHandle": "Drag to reorder",
+      "transcodedBadge": "Transcoded",
+      "autoOrder": "Auto order",
+      "autoOrderTips": "Measure each stream's bitrate and sort highest first",
+      "measuring": "Measuring…",
+      "rate": "{{kbps}} kbps",
+      "rateSet": "{{kbps}} kbps (set)",
+      "rateFailed": "Couldn't measure"
+    },
+    "liveTranscode": {
+      "title": "Transcoded streams",
+      "description": "Adds lower-quality streams that go2rtc transcodes in real time while someone is watching.",
+      "unavailable": "Transcoded streams need a go2rtc stream to read from. Add one under go2rtc streams first.",
+      "enable": "Enable transcoded streams",
+      "source": "Source stream",
+      "height": "Height",
+      "heightOption": "{{height}}p",
+      "bitrate": "Bitrate (kbps)",
+      "addQuality": "Add quality",
+      "removeQuality": "Remove quality"
     },
     "timezone": {
       "defaultOption": "Use browser timezone"
@@ -1778,6 +1798,7 @@
   "toast": {
     "success": "Settings saved successfully",
     "applied": "Settings applied successfully",
+    "go2rtcSyncFailed": "Saved, but go2rtc couldn't be updated. Restart Frigate to apply.",
     "successRestartRequired": "Settings saved successfully. Restart Frigate to apply your changes.",
     "error": "Failed to save settings",
     "validationError": "Validation failed: {{message}}",

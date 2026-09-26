@@ -35,6 +35,12 @@ from frigate.util.config import (
     migrate_frigate_config,
 )
 from frigate.util.image import create_mask
+from frigate.util.live_streams import (
+    default_transcode_source,
+    is_transcode_stream_name,
+    transcode_stream_name,
+    transcode_streams,
+)
 from frigate.util.services import auto_detect_hwaccel
 
 from .auth import AuthConfig
@@ -282,11 +288,78 @@ def verify_config_roles(camera_config: CameraConfig) -> None:
         )
 
 
+def apply_live_transcode_streams(
+    frigate_config: FrigateConfig, camera_config: CameraConfig
+) -> None:
+    """Fold a camera's transcoded streams into its live stream list.
+
+    Enabled qualities missing from live.streams are appended, and entries the
+    user placed keep their position. Transcoded names that are no longer
+    generated are dropped unless they name a real go2rtc stream.
+    """
+    live = camera_config.live
+    transcode = live.transcode
+    go2rtc_streams = frigate_config.go2rtc.model_dump().get("streams") or {}
+    generated: dict[str, str] = {}
+
+    if transcode.enabled:
+        if transcode.source is None:
+            transcode.source = default_transcode_source(
+                camera_config.name, live.streams
+            )
+
+        if transcode.source not in go2rtc_streams:
+            raise ValueError(
+                f"Camera {camera_config.name} has transcoded streams enabled, but its source {transcode.source} is not a go2rtc stream."
+            )
+
+        generated = transcode_streams(
+            camera_config.name,
+            transcode.source,
+            [quality.model_dump() for quality in transcode.qualities],
+        )
+
+        for name in generated:
+            if name in go2rtc_streams:
+                raise ValueError(
+                    f"Camera {camera_config.name} generates transcoded stream {name}, which collides with a go2rtc stream of the same name."
+                )
+
+    streams = {
+        label: name
+        for label, name in live.streams.items()
+        if name in generated
+        or name in go2rtc_streams
+        or not is_transcode_stream_name(camera_config.name, name)
+    }
+    placed = set(streams.values())
+
+    for quality in transcode.qualities if transcode.enabled else []:
+        name = transcode_stream_name(camera_config.name, quality.height)
+
+        if name in placed:
+            continue
+
+        label = f"{quality.height}p"
+
+        if label in streams:
+            raise ValueError(
+                f"Camera {camera_config.name} already has a live stream named {label}; rename it or place the transcoded stream under another name."
+            )
+
+        streams[label] = name
+
+    live.streams = streams
+
+
 def verify_valid_live_stream_names(
     frigate_config: FrigateConfig, camera_config: CameraConfig
 ) -> ValueError | None:
     """Verify that a restream exists to use for live view."""
     for _, stream_name in camera_config.live.streams.items():
+        if is_transcode_stream_name(camera_config.name, stream_name):
+            continue
+
         if (
             stream_name
             not in frigate_config.go2rtc.model_dump().get("streams", {}).keys()
@@ -978,6 +1051,8 @@ class FrigateConfig(FrigateBaseModel):
                 "face_recognition": ["enabled", "min_area"],
                 "lpr": ["enabled", "expire_time", "min_area", "enhancement"],
                 "audio_transcription": ["enabled", "live_enabled"],
+                # transcode is camera-level only
+                "live": ["streams", "height", "quality"],
             }
 
             for section in allowed_fields_map:
@@ -1205,6 +1280,8 @@ class FrigateConfig(FrigateBaseModel):
             # Set live view stream if none is set
             if not camera_config.live.streams:
                 camera_config.live.streams = {name: name}
+
+            apply_live_transcode_streams(self, camera_config)
 
             # generate the ffmpeg commands
             camera_config.create_ffmpeg_cmds()

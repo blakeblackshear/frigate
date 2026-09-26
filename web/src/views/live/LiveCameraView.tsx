@@ -108,6 +108,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 import { useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
+import { isRestreamedStream } from "@/utils/liveTranscode";
 import PtzControlPanel from "@/components/overlay/PtzControlPanel";
 import ObjectSettingsView from "../settings/ObjectSettingsView";
 import { useSearchEffect } from "@/hooks/use-overlay-state";
@@ -218,9 +219,7 @@ export default function LiveCameraView({
   );
 
   const isRestreamed = useMemo(
-    () =>
-      config &&
-      Object.keys(config.go2rtc.streams || {}).includes(streamName ?? ""),
+    () => isRestreamedStream(config, streamName),
     [config, streamName],
   );
 
@@ -1404,6 +1403,7 @@ function FrigateCameraFeatures({
                         autoAvailable={autoAvailable}
                         autoReason={autoReason}
                         onSelect={onSelectStream}
+                        onRetry={onResetStream}
                         disabled={debug || forceLowBandwidth}
                       />
 
@@ -1795,6 +1795,7 @@ function FrigateCameraFeatures({
                       autoAvailable={autoAvailable}
                       autoReason={autoReason}
                       onSelect={onSelectStream}
+                      onRetry={onResetStream}
                       disabled={debug || forceLowBandwidth}
                     />
 

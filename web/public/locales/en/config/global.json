@@ -594,6 +594,30 @@
       "label": "Live stream names",
       "description": "Mapping of configured stream names to restream/go2rtc names used for live playback."
     },
+    "transcode": {
+      "label": "Transcoded streams",
+      "description": "Lower-quality live streams transcoded on demand by go2rtc.",
+      "enabled": {
+        "label": "Enable transcoded streams",
+        "description": "Add lower-quality live streams that go2rtc transcodes in real time while someone is watching."
+      },
+      "source": {
+        "label": "Source stream",
+        "description": "go2rtc stream to transcode. Defaults to the first live stream."
+      },
+      "qualities": {
+        "label": "Qualities",
+        "description": "One transcoded stream is added per quality.",
+        "height": {
+          "label": "Height",
+          "description": "Output height in pixels; width follows the source aspect ratio."
+        },
+        "bitrate": {
+          "label": "Bitrate",
+          "description": "Target and maximum video bitrate in kbps."
+        }
+      }
+    },
     "height": {
       "label": "Live height",
       "description": "Height (pixels) to render the jsmpeg live stream in the Web UI; must be <= detect stream height."

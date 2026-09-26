@@ -900,6 +900,21 @@ live:
   streams:
     main_stream: main_stream_name
     sub_stream: sub_stream_name
+  # Optional: Lower-quality live streams transcoded by go2rtc while someone is watching.
+  # NOTE: Set at the camera level only.
+  transcode:
+    # Optional: Enable transcoded streams (default: shown below)
+    enabled: False
+    # Optional: go2rtc stream to transcode (default: the first live stream)
+    source: main_stream_name
+    # Optional: One transcoded stream per quality (default: shown below)
+    qualities:
+      - height: 720
+        bitrate: 1200
+      - height: 480
+        bitrate: 500
+      - height: 360
+        bitrate: 250
   # Optional: Set the height of the jsmpeg stream. (default: 720)
   # This must be less than or equal to the height of the detect stream. Lower resolutions
   # reduce bandwidth required for viewing the jsmpeg stream. Width is computed to match known aspect ratio.
