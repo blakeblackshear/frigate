@@ -563,7 +563,6 @@
     "sendTestNotification": "Skicka testavisering",
     "active": "Aviseringar är aktiva",
     "notificationUnavailable": {
-      "title": "Aviseringar är inte tillgängliga",
       "desc": "Web Push-aviseringar kräver en säker anslutning (<code>https://…</code>). Det är en begränsning i webbläsaren. Använd en säker anslutning till Frigate för att aktivera aviseringar."
     },
     "deviceSpecific": "Enhetsspecifika inställningar",
@@ -795,7 +794,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Semantisk sökning är inaktiverad",
       "desc": "Semantisk sökning måste vara aktiverad för att utlösare ska kunna användas."
     },
     "wizard": {
