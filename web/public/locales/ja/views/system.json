@@ -227,8 +227,6 @@
   },
   "lastRefreshed": "最終更新: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} の FFmpeg の CPU 使用率が高い（{{ffmpegAvg}}%）",
-    "detectHighCpuUsage": "{{camera}} の検知の CPU 使用率が高い（{{detectAvg}}%）",
     "healthy": "システムは正常です",
     "reindexingEmbeddings": "埋め込みを再インデックス中（{{processed}}% 完了）",
     "cameraIsOffline": "{{camera}} はオフラインです",
