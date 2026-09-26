@@ -422,7 +422,6 @@
     },
     "documentTitle": "觸發器",
     "semanticSearch": {
-      "title": "語意搜尋已關閉",
       "desc": "必須啟用語意搜尋功能才能使用觸發器。"
     },
     "management": {
@@ -1259,7 +1258,6 @@
       "desc": "Frigate 在瀏覽器中執行或作為 PWA 安裝時，可以原生向您的裝置傳送推送通知。"
     },
     "notificationUnavailable": {
-      "title": "通知功能不可用",
       "desc": "網頁推送通知需要安全連線（<code>https://…</code>）。這是瀏覽器的限制。請透過安全方式存取 Frigate 以使用通知功能。",
       "descPwa": "在 iOS 上，只有將 Frigate 加到主畫面後，才能使用網頁推播通知。請開啟 <strong>分享</strong> 選單，選擇 <strong>加入主畫面</strong>，然後從新圖示開啟 Frigate，即可為此裝置註冊通知功能。"
     },
