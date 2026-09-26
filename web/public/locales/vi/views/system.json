@@ -135,8 +135,6 @@
     "detectIsSlow": "{{detect}} đang chậm ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} đang rất chậm ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} đang ngoại tuyến",
-    "ffmpegHighCpuUsage": "{{camera}} có mức sử dụng CPU FFmpeg cao ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} có mức sử dụng CPU phát hiện cao ({{detectAvg}}%)",
     "healthy": "Hệ thống đang hoạt động tốt",
     "reindexingEmbeddings": "Đang lập chỉ mục lại các embedding (hoàn thành {{processed}}%)"
   },
