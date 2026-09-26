@@ -50,9 +50,7 @@
     "healthy": "Systém je zdravý",
     "reindexingEmbeddings": "Přeindexování vektorů ({{processed}} % dokončeno)",
     "detectIsSlow": "{{detect}} je pomalé ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} je velmi pomalé ({{speed}} ms)",
-    "detectHighCpuUsage": "{{camera}} má vysoké využití CPU detekcemi ({{detectAvg}} %)",
-    "ffmpegHighCpuUsage": "{{camera}} má vyské využití CPU FFmpegem ({{ffmpegAvg}}%)"
+    "detectIsVerySlow": "{{detect}} je velmi pomalé ({{speed}} ms)"
   },
   "enrichments": {
     "embeddings": {
