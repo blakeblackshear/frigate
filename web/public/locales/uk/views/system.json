@@ -158,8 +158,6 @@
   },
   "lastRefreshed": "Останнє оновлення: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} має високе використання процесора FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} має високе використання процесора для виявлення ({{detectAvg}}%)",
     "healthy": "Система справна",
     "reindexingEmbeddings": "Переіндексація вбудовування (виконано {{processed}}%)",
     "cameraIsOffline": "{{camera}} не в мережі",
