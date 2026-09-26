@@ -134,6 +134,43 @@ test.describe("Auto live stream @mobile", () => {
   });
 });
 
+test.describe("Transcoded live stream @mobile", () => {
+  test("a pinned transcoded stream plays over MSE", async ({ frigateApp }) => {
+    // go2rtc.streams lists only yaml streams; transcoded ones are generated
+    await frigateApp.installDefaults({
+      config: {
+        ...CONFIG,
+        cameras: {
+          front_door: {
+            live: {
+              streams: {
+                Sub: "front_door_sub",
+                "720p": "front_door_transcode_720p",
+              },
+              transcode: {
+                enabled: true,
+                source: "front_door",
+                qualities: [{ height: 720, bitrate: 1200 }],
+              },
+            },
+          },
+        },
+      },
+    });
+    const opened = await mockGo2rtc(frigateApp.page);
+
+    await frigateApp.goto("/");
+    await writeIdb(frigateApp.page, {
+      [STREAM_KEY]: "front_door_transcode_720p",
+    });
+    await frigateApp.goto("/#front_door");
+
+    await expect
+      .poll(() => opened, { timeout: 10_000 })
+      .toContain("front_door_transcode_720p");
+  });
+});
+
 test.describe("Auto live stream selector", () => {
   test.beforeEach(({ frigateApp }) => {
     test.skip(frigateApp.isMobile, "Desktop dropdown only");
@@ -166,6 +203,26 @@ test.describe("Auto live stream selector", () => {
     await expect(
       menu.getByText(/because this browser can't play a higher-quality stream/),
     ).toBeVisible();
+  });
+
+  test("trying the highest quality retries the top stream", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({ config: CONFIG });
+    const opened = await mockGo2rtc(frigateApp.page, ["front_door"]);
+
+    await frigateApp.goto("/#front_door");
+
+    await expect
+      .poll(() => opened, { timeout: 10_000 })
+      .toContain("front_door_sub");
+    const menu = await openDesktopSettings(frigateApp.page);
+    const beforeRetry = opened.length;
+    await menu.getByRole("button", { name: "Try highest quality" }).click();
+
+    await expect
+      .poll(() => opened.slice(beforeRetry), { timeout: 10_000 })
+      .toContain("front_door");
   });
 
   test("a pinned main takes the legacy fallback instead of stepping down", async ({

@@ -39,6 +39,8 @@ export type ConfigFormContext = {
   extraHasChanges?: boolean;
   setExtraHasChanges?: (hasChanges: boolean) => void;
   formData?: JsonObject;
+  /** Key order of each ordered map, so reorders re-render fields */
+  orderedMapsKeyOrder?: string[][];
   pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,

@@ -1,4 +1,6 @@
 import { LiveStreamGovernor } from "@/components/player/LiveStreamGovernor";
+import { isCameraOffline } from "@/hooks/use-camera-activity";
+import { useAutoFrigateStats } from "@/hooks/use-stats";
 import {
   LiveAutoReason,
   LiveHealthSample,
@@ -57,6 +59,9 @@ export function useAutoLiveStream({
   );
   const active = selected && !paused;
 
+  const stats = useAutoFrigateStats();
+  const offline = isCameraOffline(stats, cameraName);
+
   // evidence from before a pin, a pause, or a remount does not count
   useEffect(() => {
     if (active) {
@@ -102,8 +107,8 @@ export function useAutoLiveStream({
   );
 
   const handleError = useCallback(
-    (error: LivePlayerError) => active && governor.playerError(error),
-    [active, governor],
+    (error: LivePlayerError) => active && governor.playerError(error, !offline),
+    [active, governor, offline],
   );
 
   const reset = useCallback(() => governor.reset(), [governor]);

@@ -92,7 +92,7 @@ go2rtc:
 
 ### Setting Streams For Live UI
 
-You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage. When a camera has more than one stream, the dropdown also offers **Auto**, which is used until you pick a specific stream. Auto starts on the first stream, steps down the list when your connection can't keep up, and steps back up when it recovers. List streams from highest to lowest quality, and avoid names that are plain numbers (such as `720`), which the browser sorts ahead of the others.
+You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage. When a camera has more than one stream, the dropdown also offers **Auto**, which is used until you pick a specific stream. Auto starts on the first stream, steps down the list when your connection can't keep up, and steps back up when it recovers. To retry the top stream right away, select **Try highest quality** under the stream picker. List streams from highest to lowest quality, and avoid names that are plain numbers (such as `720`), which the browser sorts ahead of the others. In the UI, drag streams to reorder them, or use **Auto order** to sort them by measured bitrate.
 
 Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
 
@@ -157,6 +157,26 @@ cameras:
 
 </TabItem>
 </ConfigTabs>
+
+### Transcoded streams
+
+When a camera has no suitable sub stream, Frigate can add lower-quality streams that go2rtc transcodes to H.264 while someone is watching. They appear in the stream list like any other stream, so Auto mode can step down to them. Enable them under <NavPath path="Settings > Camera configuration > Live playback" />, or in YAML:
+
+```yaml
+cameras:
+  test_cam:
+    live:
+      transcode:
+        enabled: true
+        source: test_cam # optional, defaults to the first live stream
+        qualities:
+          - height: 720
+            bitrate: 1200 # kbps
+          - height: 480
+            bitrate: 500
+```
+
+Each quality becomes a go2rtc stream named `<camera>_transcode_<height>p`. go2rtc picks a hardware encoder automatically and falls back to the CPU, which costs CPU for each transcode while it is being watched. Check go2rtc's `api/ffmpeg/hardware` page to see which encoder it found. Using a sub stream as the `source` lowers the cost.
 
 ### WebRTC extra configuration:
 

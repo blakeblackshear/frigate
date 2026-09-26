@@ -35,6 +35,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
+import { isRestreamedStream } from "@/utils/liveTranscode";
 import { Switch } from "@/components/ui/switch";
 import { useWebRTCAvailableForStream } from "@/hooks/use-webrtc-availability";
 import StreamTechnologySelect from "@/components/player/StreamTechnologySelect";
@@ -82,9 +83,7 @@ export function CameraStreamingDialog({
   // metadata
 
   const isRestreamed = useMemo(
-    () =>
-      config &&
-      Object.keys(config.go2rtc.streams || {}).includes(streamName ?? ""),
+    () => isRestreamedStream(config, streamName),
     [config, streamName],
   );
 
