@@ -227,8 +227,6 @@
   "metrics": "Metryki systemowe",
   "lastRefreshed": "Ostatnie odświeżenie: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} ma wysokie użycie CPU przez FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} ma wysokie użycie CPU przez detekcję ({{detectAvg}}%)",
     "healthy": "System jest sprawny",
     "reindexingEmbeddings": "Ponowne indeksowanie osadzeń ({{processed}}% ukończone)",
     "detectIsSlow": "{{detect}} jest wolne ({{speed}} ms)",

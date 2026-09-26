@@ -578,7 +578,6 @@
       "desc": "Frigate może wysyłać natywne powiadomienia push na twoje urządzenie, gdy działa w przeglądarce lub jest zainstalowany jako PWA."
     },
     "notificationUnavailable": {
-      "title": "Powiadomienia niedostępne",
       "desc": "Powiadomienia push w przeglądarce wymagają bezpiecznego kontekstu (<code>https://…</code>). To jest ograniczenie przeglądarki. Uzyskaj dostęp do Frigate przez bezpieczne połączenie, aby korzystać z powiadomień.",
       "descPwa": "W systemie iOS powiadomienia web push są dostępne tylko wtedy, gdy Frigate jest zainstalowane na ekranie głównym. Otwórz menu <strong>Udostępnij</strong>, wybierz <strong>Do ekranu początkowego</strong>, a następnie otwórz Frigate z nowej ikony, aby zarejestrować to urządzenie do powiadomień."
     },
@@ -904,7 +903,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Wyszukiwanie semantyczne jest zablokowane",
       "desc": "Wyszukiwanie semantyczne musi być włączone, aby korzystać z triggerów."
     },
     "wizard": {
