@@ -254,8 +254,6 @@
   },
   "stats": {
     "healthy": "Das System läuft problemlos",
-    "ffmpegHighCpuUsage": "{{camera}} hat eine hohe FFmpeg CPU Auslastung ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} hat eine hohe CPU Auslastung bei der Erkennung ({{detectAvg}}%)",
     "reindexingEmbeddings": "Neuindizierung von Einbettungen ({{processed}}% erledigt)",
     "detectIsSlow": "{{detect}} ist langsam ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} ist sehr langsam ({{speed}} ms)",
