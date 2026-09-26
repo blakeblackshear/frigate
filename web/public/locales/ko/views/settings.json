@@ -67,7 +67,6 @@
     },
     "documentTitle": "트리거",
     "semanticSearch": {
-      "title": "시맨틱 검색이 비활성화됨",
       "desc": "트리거 기능을 사용하려면 시맨틱 검색이 활성화되어 있어야 합니다."
     },
     "management": {
@@ -1308,7 +1307,6 @@
       "desc": "Frigate이 브라우저에서 실행 중이거나 PWA로 설치된 경우 기기로 푸시 알림을 기본 전송할 수 있습니다."
     },
     "notificationUnavailable": {
-      "title": "알림을 사용할 수 없음",
       "desc": "웹 푸시 알림을 사용하려면 보안 컨텍스트(<code>https://…</code>)가 필요합니다. 이는 브라우저 자체의 제한 사항입니다. 알림을 사용하려면 Frigate에 보안 연결로 접속하세요.",
       "descPwa": "iOS의 경우 Frigate이 홈 화면에 추가되어 있어야만 웹 푸시 알림을 사용할 수 있습니다. <strong>공유</strong> 메뉴를 열고 <strong>홈 화면에 추가</strong>를 선택한 다음, 새로 생성된 아이콘으로 Frigate을 실행하여 기기를 알림에 등록하세요."
     },

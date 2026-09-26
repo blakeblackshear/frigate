@@ -9,7 +9,8 @@
       "go2rtc": "Registros GoRTC - Frigate",
       "nginx": "Registros Nginx - Frigate",
       "websocket": "Registros de Mensagem - Frigate"
-    }
+    },
+    "health": "Saúde - Frigate"
   },
   "title": "Sistema",
   "metrics": "Métricas do sistema",
@@ -51,9 +52,16 @@
         "camera_activity": "Atividade da câmera",
         "system": "Sistema",
         "camera": "Câmera",
-        "all_cameras": "Todas as cameras"
+        "all_cameras": "Todas as cameras",
+        "cameras_count_one": "{{count}} câmera",
+        "cameras_count_other": "{{count}} câmeras"
       },
-      "empty": "Nenhuma mensagem capturada ainda"
+      "empty": "Nenhuma mensagem capturada ainda",
+      "expanded": {
+        "payload": "Payload"
+      },
+      "count_one": "{{count}} mensagem",
+      "count_other": "{{count}} mensagens"
     }
   },
   "general": {
@@ -97,12 +105,22 @@
         }
       },
       "npuUsage": "Uso da NPU",
-      "npuMemory": "Memória da NPU"
+      "npuMemory": "Memória da NPU",
+      "gpuTemperature": "Temperatura da GPU",
+      "npuTemperature": "Temperatura da NPU",
+      "gpuCompute": "Computação / codificação da GPU"
     },
     "otherProcesses": {
       "title": "Outros processos",
       "processCpuUsage": "Uso de Processamento da CPU",
-      "processMemoryUsage": "Uso de Memória de Processos"
+      "processMemoryUsage": "Uso de Memória de Processos",
+      "series": {
+        "go2rtc": "go2rtc",
+        "review_segment": "segmento de revisão",
+        "embeddings": "embeddings",
+        "recording": "gravação",
+        "audio_detector": "detector de áudio"
+      }
     }
   },
   "storage": {
@@ -123,11 +141,19 @@
       "unused": {
         "title": "Não Utilizado",
         "tips": "Esse valor por não representar com precisão o espaço livre disponí®el para o Frigate se você possui outros arquivos armazenados no seu drive além das gravações do Frigate. O Frigate não rastreia a utilização do armazenamento além de suas próprias gravações."
+      },
+      "subStream": {
+        "information": "Informações de armazenamento do substream",
+        "tips": "As câmeras que gravam um substream mostram o uso de Original e de Baixa qualidade separadamente, usando os mesmos nomes das opções de qualidade na reprodução de gravações. As gravações de baixa qualidade permanecem no disco até o fim do período de retenção, portanto esse detalhamento ainda pode aparecer para uma câmera depois que a gravação do substream for desativada."
       }
     },
     "shm": {
       "title": "Alocação de memória compartilhada (SHM)",
-      "warning": "O tamanho de {{total}}MB de memória compartilhada (SHM) é insuficiente. Aumente para ao menos {{min_shm}}MB."
+      "warning": "O tamanho de {{total}}MB de memória compartilhada (SHM) é insuficiente. Aumente para ao menos {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Vida útil do quadro",
+        "description": "Cada câmera tem {{frames}} slots de quadros na memória compartilhada. Na taxa de quadros da câmera mais rápida, cada quadro fica disponível por aproximadamente {{lifetime}}s antes de ser sobrescrito."
+      }
     }
   },
   "cameras": {
@@ -148,6 +174,23 @@
       "error": "Erro: {{error}}",
       "tips": {
         "title": "Informação de Probe de Câmera"
+      },
+      "keyframes": {
+        "title": "Análise de keyframes",
+        "stillAnalyzing": "Ainda analisando keyframes...",
+        "analyzing": "Analisando keyframes... {{seconds}} segundos restantes",
+        "recordStream": "Stream de gravação:",
+        "keyframeCount": "Keyframes observados:",
+        "observedDuration": "Duração observada:",
+        "segmentLength": "Duração do segmento de gravação:",
+        "ok": "Keyframes a cada ~{{seconds}}s, bom para gravação e reprodução.",
+        "unknown": "Não foi possível determinar o espaçamento dos keyframes.",
+        "recordDisabled": "A gravação está desabilitada para esta câmera.",
+        "gap": "Intervalo entre keyframes (mín. / méd. / máx.):",
+        "warningFixed": "Os keyframes estão espaçados de forma regular, mas esparsa (a cada ~{{seconds}}s). A gravação ainda funciona, mas a reprodução ao vivo e a busca começam mais lentamente. Defina o intervalo de quadros I (keyframe) da câmera para corresponder à sua taxa de quadros.",
+        "errorFixed": "Keyframes a cada ~{{seconds}}s é mais longo que a duração do segmento de gravação ({{segmentTime}}s), então alguns segmentos não têm keyframe e não serão reproduzidos. Reduza o intervalo de quadros I (keyframe) da câmera para corresponder à sua taxa de quadros.",
+        "errorVariable": "Os intervalos entre keyframes chegam a ~{{seconds}}s, mais longos que a duração do segmento de gravação ({{segmentTime}}s). Alguns segmentos não terão keyframe, o que interrompe a reprodução. Desative o codec inteligente/+ da câmera ou reduza o intervalo de keyframes dela.",
+        "warningVariable": "O espaçamento dos keyframes é inconsistente ({{minSeconds}}s a {{maxSeconds}}s), o que geralmente significa que um codec inteligente (H.264+/H.265+) está habilitado. Isso não é recomendado."
       }
     },
     "framesAndDetections": "Quadros / Detecções",
@@ -165,7 +208,8 @@
       "cameraDetect": "{{camName}} detectar",
       "cameraFramesPerSecond": "{{camName}} quadros por segundo",
       "cameraDetectionsPerSecond": "{{camName}} detecções por segundo",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} detecções puladas por segundo"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} detecções puladas por segundo",
+      "cameraGpu": "GPU de {{camName}}"
     },
     "toast": {
       "success": {
@@ -174,17 +218,36 @@
       "error": {
         "unableToProbeCamera": "Não foi possível fazer o probe da câmera: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Qualidade da conexão",
+      "excellent": "Excelente",
+      "fair": "Razoável",
+      "poor": "Ruim",
+      "unusable": "Inutilizável",
+      "expectedFps": "FPS esperado",
+      "fps": "FPS",
+      "stallsLastHour": "Travamentos (última hora)",
+      "reconnectsLastHour": "Reconexões (última hora)"
+    },
+    "noCameras": {
+      "title": "Nenhuma câmera encontrada"
     }
   },
   "lastRefreshed": "Atualizado pela última vez: ",
   "stats": {
     "detectIsVerySlow": "{{detect}} está muito lento ({{speed}} ms)",
-    "ffmpegHighCpuUsage": "{{camera}} possui alta utilização de CPU para FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} possui alta utilização de CPU para detecção ({{detectAvg}}%)",
     "healthy": "O sistema está saudável",
     "cameraIsOffline": "{{camera}} está offline",
     "reindexingEmbeddings": "Reindexando os embeddings ({{processed}}% completado)",
-    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)",
+    "debugReplayActive": "A sessão de replay de depuração está ativa",
+    "cameraSkippedDetections": "{{camera}} está ignorando a detecção em {{pct}}% dos quadros",
+    "systemNotices_one": "{{count}} aviso do sistema",
+    "systemNotices_other": "{{count}} avisos do sistema",
+    "retentionUnmet": "As gravações estão sendo excluídas antes do fim do período de retenção para liberar espaço",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}"
   },
   "enrichments": {
     "title": "Enriquecimentos",
@@ -200,7 +263,113 @@
       "text_embedding": "Embeddings de Texto",
       "image_embedding_speed": "Velocidade de Embeddings de Imagens",
       "face_embedding_speed": "Velocidade de Embedding de Rostos",
-      "face_recognition_speed": "Velocidade de Reconhecimento de Rostos"
+      "face_recognition_speed": "Velocidade de Reconhecimento de Rostos",
+      "object_description_events_per_second": "Descrição de objeto",
+      "classification_speed": "Velocidade de classificação de {{name}}",
+      "classification": "Classificação de {{name}}",
+      "review_description_speed": "Velocidade da descrição de revisão",
+      "review_description": "Descrição de revisão",
+      "review_description_events_per_second": "Descrição de revisão",
+      "object_description": "Descrição de objeto",
+      "object_description_speed": "Velocidade da descrição de objeto",
+      "classification_events_per_second": "Eventos por segundo de classificação de {{name}}"
+    },
+    "averageInf": "Tempo médio de inferência"
+  },
+  "health": {
+    "title": "Saúde",
+    "notices": {
+      "empty": "Sua instalação do Frigate está saudável",
+      "openSettings": "Abrir configurações",
+      "openLink": "Abrir link",
+      "noMatches": "Nenhum aviso corresponde ao filtro",
+      "firstSeen_one": "Visto pela primeira vez {{time}}",
+      "title": "Avisos",
+      "filter": {
+        "severity": "Gravidade",
+        "error": "Erro",
+        "info": "Informação",
+        "warning": "Aviso",
+        "showHidden": "Mostrar ocultos"
+      },
+      "firstSeen_other": "Visto pela primeira vez {{time}} · {{count}} vezes",
+      "kinds": {
+        "detector_stuck": "O detector {{detector}} foi reiniciado depois de parar de responder",
+        "model_download_failed": "Falha ao baixar {{file}} para {{model}}: {{error}}",
+        "skipped_detections": "A detecção não conseguiu acompanhar e ignorou {{pct}}% dos quadros por mais de um minuto",
+        "shm_too_low": "A alocação de /dev/shm ({{total}} MB) deve ser aumentada para pelo menos {{min}} MB",
+        "failed_login_other": "Tentativas de login malsucedidas para {{user}}",
+        "failed_login_one": "Tentativa de login malsucedida para {{user}}",
+        "update_available": "O Frigate {{version}} está disponível",
+        "ffmpeg_high_cpu": "O uso de CPU do FFmpeg está alto ({{cpu}}% em média)",
+        "detect_high_cpu": "O uso de CPU da detecção está alto ({{cpu}}% em média)"
+      },
+      "streamPrefix": "Stream {{index}}: {{message}}",
+      "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
+      "streamProbeFailed": "Não foi possível sondar o stream {{index}}: {{error}}",
+      "cameraProbeFailed": "Não foi possível sondar os streams: {{error}}",
+      "acknowledge": "Confirmar leitura",
+      "mute": "Silenciar",
+      "acknowledgeHint": "Ocultar até que isso aconteça novamente",
+      "muteHint": "Nunca mostrar isto novamente",
+      "showAgain": "Mostrar novamente",
+      "unmute": "Reativar som",
+      "hiddenTitle": "Oculto",
+      "noneHidden": "Nenhum aviso oculto",
+      "showAll": "Mostrar todos novamente",
+      "showAllTitle": "Mostrar todos os avisos ocultos?",
+      "acknowledgedAt": "Confirmado {{time}}",
+      "showAllDesc": "Todos os avisos confirmados e silenciados voltam para a lista de Avisos, incluindo as verificações de configuração e de streams.",
+      "mutedAt": "Silenciado {{time}}"
+    },
+    "hardware": {
+      "title": "Hardware",
+      "objectDetection": "Detecção de objetos",
+      "hardwareAcceleration": "Aceleração de hardware",
+      "enrichments": {
+        "title": "Enriquecimentos",
+        "face_recognition": "Reconhecimento facial",
+        "lpr": "Reconhecimento de placas de veículos",
+        "audio_transcription": "Transcrição de áudio",
+        "semantic_search": "Busca semântica"
+      },
+      "cameraConnections": "Conexões das câmeras",
+      "allCamerasExcellent": "Todas as câmeras têm uma conexão excelente.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "allCameras": "Todas as câmeras",
+      "probeUnavailable": "A detecção de hardware não está disponível",
+      "justStarted": "O Frigate acabou de iniciar",
+      "deviceNotFound": "{{devices}} não foi encontrado neste sistema",
+      "detectorNotRunning": "O processo do detector não está em execução",
+      "inferenceVerySlow": "A inferência está muito lenta ({{speed}} ms)",
+      "nothingConfigured": "Nada configurado",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Argumentos personalizados do ffmpeg",
+      "customArgsNotVerified": "Argumentos personalizados do ffmpeg, não verificados",
+      "inferenceSlow": "A inferência está lenta ({{speed}} ms)",
+      "hwaccelHardwareMissing": "{{family}} está configurado, mas a sondagem de hardware não o reportou",
+      "unrecognizedDevice": "Substituição de dispositivo não reconhecida, não verificada",
+      "decoderUsage": "decodificador {{usage}}",
+      "remoteProvider": "Provedor remoto",
+      "hwaccelNotConfigured": "Nenhuma decodificação por hardware está em uso, mas {{family}} está disponível. Selecione-o nas configurações do ffmpeg",
+      "acceleratorMissing": "Configurado para {{device}}, mas nenhum acelerador compatível foi encontrado",
+      "fellBackToCpu": "Configurado para {{device}}, mas executando na CPU",
+      "modelNotRunYet": "O modelo ainda não foi executado; o dispositivo é verificado após o primeiro uso",
+      "probed": "Sondado",
+      "probing": "Sondando...",
+      "cpuDespiteAccelerator": "Executando na CPU, embora haja um acelerador disponível",
+      "recheck": "Verificar hardware novamente",
+      "cameraStreams": "Streams das câmeras",
+      "streamsNotChecked": "Ainda não verificado",
+      "streamsChecking": "Verificando {{done}} de {{total}}",
+      "streamsClean": "Nenhum problema nos streams",
+      "runAgain": "Executar novamente",
+      "checked": "Verificado",
+      "runStreamChecks": "Executar verificações dos streams",
+      "streamsChecked_other": "{{count}} câmeras verificadas",
+      "streamsFlagged_one": "{{count}} com problemas, listado(s) em Avisos",
+      "streamsFlagged_other": "{{count}} com problemas, listado(s) em Avisos",
+      "streamsChecked_one": "{{count}} câmera verificada"
     }
   }
 }

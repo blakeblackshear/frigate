@@ -98,7 +98,6 @@
       "desc": "O Frigate pode enviar notificações push para o seu dispositivo quando está a ser executado no browser ou instalado como um PWA."
     },
     "notificationUnavailable": {
-      "title": "Notificações indisponíveis",
       "desc": "As notificações push da Web exigem um contexto seguro (<code>https://…</code>). Esta é uma limitação do navegador. Acesse o Frigate com segurança para usar as notificações."
     },
     "cameras": {
@@ -688,7 +687,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Pesquisa Semântica desativada",
       "desc": "Pesquisa Semântica deve estar ativada para usar os Gatilhos."
     }
   },

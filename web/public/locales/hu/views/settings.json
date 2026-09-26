@@ -210,7 +210,6 @@
       }
     },
     "notificationUnavailable": {
-      "title": "Értesítés elérhetetlen",
       "desc": "A webes push értesítésekhez biztonságos környezet (<code>https://…</code>) szükséges. Ez egy böngészői korlátozás. A értesítések használatához férjen hozzá biztonságosan a Frigate-hez."
     },
     "sendTestNotification": "Teszt értesítés küldése",
@@ -711,7 +710,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Szemantikus keresés le van tiltva",
       "desc": "A Triggerek használatához engedélyezni kell a szemantikus keresést."
     },
     "wizard": {

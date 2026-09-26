@@ -3,12 +3,14 @@
     "logs": {
       "frigate": "Frigate Günlükleri - Frigate",
       "go2rtc": "Go2RTC Günlükleri - Frigate",
-      "nginx": "Nginx Günlükleri - Frigate"
+      "nginx": "Nginx Günlükleri - Frigate",
+      "websocket": "Mesaj Günlükleri - Frigate"
     },
     "general": "Genel İstatistikler - Frigate",
     "storage": "Depolama İstatistikleri - Frigate",
     "cameras": "Kamera İstatistikleri - Frigate",
-    "enrichments": "Zenginleştirme İstatistikleri - Frigate"
+    "enrichments": "Zenginleştirme İstatistikleri - Frigate",
+    "health": "Sağlık - Frigate"
   },
   "metrics": "Sistem metrikleri",
   "general": {
@@ -43,7 +45,10 @@
       "gpuEncoder": "GPU Kodlayıcı",
       "title": "Donanım Bilgisi",
       "npuUsage": "NPU Kullanımı",
-      "npuMemory": "NPU Bellek Kullanımı"
+      "npuMemory": "NPU Belleği",
+      "npuTemperature": "NPU Sıcaklığı",
+      "gpuCompute": "GPU Hesaplama / Kodlama",
+      "gpuTemperature": "GPU Sıcaklığı"
     },
     "otherProcesses": {
       "title": "Diğer İşlemler",
@@ -53,118 +58,159 @@
         "go2rtc": "go2rtc",
         "recording": "kayıt",
         "embeddings": "gömüler",
-        "audio_detector": "ses detektörü",
-        "review_segment": "inceleme bölümü"
+        "audio_detector": "ses algılayıcı",
+        "review_segment": "incelenen bölüm"
       }
     },
     "detector": {
       "title": "Algılayıcılar",
       "inferenceSpeed": "Algılayıcı Çıkarım Hızı",
       "memoryUsage": "Algılayıcı Bellek Kullanımı",
-      "cpuUsage": "Algılayıcı İşlemci Kullanımı",
+      "cpuUsage": "Algılayıcı CPU Kullanımı",
       "temperature": "Algılayıcı Sıcaklığı",
-      "cpuUsageInformation": "Tespit modellerine giriş ve çıkış verilerini hazırlarken kullanılan işlemci yoğunluğu. Bu değer, grafik işlemci veya benzeri bir hızlandırıcı kullanılsa bile çıkarım yükünü ölçmek için kullanılmamalıdır."
+      "cpuUsageInformation": "Algılama modellerine girdi ve çıktı verilerini hazırlarken kullanılan CPU. Bu değer, bir GPU veya hızlandırıcı kullanılsa bile çıkarım kullanımını ölçmez."
     },
     "title": "Genel"
   },
   "storage": {
     "title": "Depolama",
-    "overview": "Genel",
+    "overview": "Genel Bakış",
     "recordings": {
       "title": "Kayıtlar",
       "earliestRecording": "Mevcut en erken kayıt:",
-      "tips": "Burada gösterilen değer, Frigate’in veritabanına göre kayıtların diskinizde kullandığı toplam alanı ifade eder. Frigate, diskinizdeki tüm dosyaların alan kullanımını takip etmez."
+      "tips": "Bu değer Frigate veritabanındaki kayıtların kullandığı toplam depolama alanını ifade eder. Frigate, diskinizdeki tüm dosyaların alan kullanımını takip etmez."
     },
     "cameraStorage": {
       "title": "Kamera Depolaması",
       "camera": "Kamera",
       "unused": {
-        "tips": "Eğer diskinizde Frigate'in kayıtları dışında dosyalar varsa bu değer diskinizdeki boş alanı doğru olarak göstermeyebilir. Frigate kendi kayıtları dışındaki dosyaların disk kullanımını takip etmez.",
+        "tips": "Eğer sürücünüzde Frigate'in kayıtları dışında dosyalar varsa bu değer boş alanı doğru olarak göstermeyebilir. Frigate kendi kayıtları dışındaki depolama kullanımını takip etmez.",
         "title": "Kullanılmayan"
       },
-      "percentageOfTotalUsed": "Toplam Yüzde",
+      "percentageOfTotalUsed": "Yüzde",
       "storageUsed": "Depolama",
-      "bandwidth": "Saatlik Veri Kullanımı",
-      "unusedStorageInformation": "Kullanılmayan Depolama Bilgisi"
+      "bandwidth": "Bant Genişliği",
+      "unusedStorageInformation": "Kullanılmayan Depolama Bilgisi",
+      "subStream": {
+        "information": "Alt Yayın Depolama Bilgisi",
+        "tips": "Alt yayın kaydeden kameralar Orijinal ve Düşük kalite kullanımlarını (kayıt oynatma bölümündeki kalite seçenekleriyle aynı adları kullanarak) ayrı ayrı gösterirler. Düşük kaliteli kayıtlar saklama süreleri dolana kadar diskte kalırlar. Dolayısıyla alt kayıt kaydı kapatılmış bir kamera için bu döküm yine de gözükebilir."
+      }
     },
     "shm": {
       "warning": "Şu anki {{total}}MB'lik SHM boyutu yetersiz. Bu boyutu en az {{min_shm}}MB'a çıkartın.",
-      "title": "Ayrılan SHM (paylaşımlı bellek)"
+      "title": "Ayrılan SHM (paylaşımlı bellek)",
+      "frameLifetime": {
+        "title": "Kare yaşam süresi",
+        "description": "Paylaşımlı hafızada her kameranın {{frames}} görüntü karesi yuvası var. En hızlı kameranın hızındayken her bir karenin üzerine yazılmadan önce kareye yaklaşık {{lifetime}} saniyeliğine erişilebiliyor."
+      }
     }
   },
   "cameras": {
     "info": {
       "streamDataFromFFPROBE": "Yayın bilgisi <code>ffprobe</code> ile edinilmiştir.",
       "video": "Video:",
-      "codec": "Kodlama:",
-      "fps": "Kare Hızı:",
+      "codec": "Kodek:",
+      "fps": "Kare/sn:",
       "resolution": "Çözünürlük:",
-      "unknown": "Bilinmeyen",
-      "stream": "Yayın {{idx}}",
+      "unknown": "Bilinmiyor",
+      "stream": "{{idx}}. Yayın",
       "tips": {
-        "title": "Kamera Detayları"
+        "title": "Kamera Yoklama Bilgileri"
       },
-      "fetching": "Kamera Bilgileri Alınıyor",
-      "cameraProbeInfo": "{{camera}} Kamera Detayları",
+      "fetching": "Kamera Verileri Alınıyor",
+      "cameraProbeInfo": "{{camera}} Kamerası Yoklama Bilgileri",
       "error": "Hata: {{error}}",
       "audio": "Ses:",
-      "aspectRatio": "en boy oranı"
+      "aspectRatio": "en:boy oranı",
+      "keyframes": {
+        "title": "Anahtar kare analizi",
+        "analyzing": "Anahtar kareler analiz ediliyor... {{seconds}} saniye kaldı",
+        "stillAnalyzing": "Anahtar kare analizi sürüyor...",
+        "recordStream": "Kayıt yayını:",
+        "keyframeCount": "Gözlenen anahtar kareler:",
+        "observedDuration": "Gözlem süresi:",
+        "gap": "Anahtar kare aralığı (en az / ortalama / en çok):",
+        "segmentLength": "Kayıt parçası uzunluğu:",
+        "ok": "Her ~{{seconds}} saniyede bir anahtar kare, kayıt ve oynatma için iyi.",
+        "warningFixed": "Anahtar kareler düzgün aralıklı ama seyrek (~{{seconds}} saniyede bir). Kayıt alınıyor ama canlı oynatma ve ileri-geri sarmalar daha yavaş. Kameranın I-frame (anahtar kare) aralığını görüntü karesi hızıyla eşleşecek şekilde ayarlayın.",
+        "warningVariable": "Anahtar kare aralığı tutarsız ({{minSeconds}}sn ila {{maxSeconds}}sn). Genelde bir akıllı kodeğin (H.264+/H.265+) etkinleştirildiğini gösterir. Bu önerilmez.",
+        "errorFixed": "Anahtar kare aralığı ~{{seconds}} saniye. Bu da kayıt parçalarından ({{segmentTime}}sn) daha uzun; dolayısıyla bazı parçaların anahtar kareleri yok ve oynatılamayacaklar. Kameranın I-frame (anahtar kare) aralığını kare hızıyla eşleşecek şekilde ayarlayın.",
+        "errorVariable": "Anahtar kare aralığı ~{{seconds}} saniyeyi buluyor; kayıt parçalarından ({{segmentTime}}sn) daha uzun. Bazı parçaların anahtar karesi olmayacak; bu da oynatmayı bozar. Kameradaki akıllı/+ kodeği devre dışı bırakın veya anahtar kare aralığını kısaltın.",
+        "unknown": "Anahtar kare aralığı tespit edilemedi.",
+        "recordDisabled": "Kayıt özelliği bu kamerada devre dışı bırakılmış."
+      }
     },
-    "framesAndDetections": "Kare / Tespit",
+    "framesAndDetections": "Kareler / Algılamalar",
     "label": {
       "camera": "kamera",
       "detect": "tespit",
       "ffmpeg": "FFmpeg",
-      "capture": "kayıt",
+      "capture": "yakalama",
       "skipped": "atlanan",
       "overallDetectionsPerSecond": "toplam tespit/sn",
       "overallFramesPerSecond": "toplam kare/sn",
       "cameraFramesPerSecond": "{{camName}} kare/sn",
       "overallSkippedDetectionsPerSecond": "toplam atlanan tespit/sn",
-      "cameraCapture": "{{camName}} kayıt",
+      "cameraCapture": "{{camName}} yakalama",
       "cameraDetect": "{{camName}} tespit",
       "cameraDetectionsPerSecond": "{{camName}} tespit/sn",
       "cameraSkippedDetectionsPerSecond": "{{camName}} atlanan tespit/sn",
-      "cameraFfmpeg": "{{camName}} FFmpeg"
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
       "success": {
-        "copyToClipboard": "Detaylar panoya kopyalandı."
+        "copyToClipboard": "Yoklama verileri panoya kopyalandı."
       },
       "error": {
-        "unableToProbeCamera": "Kamera detayları alınamadı: {{errorMessage}}"
+        "unableToProbeCamera": "Kamera yoklanamadı: {{errorMessage}}"
       }
     },
     "title": "Kameralar",
-    "overview": "Genel",
+    "overview": "Genel Bakış",
     "connectionQuality": {
-      "expectedFps": "Beklenen FPS",
-      "fps": "FPS"
+      "expectedFps": "Beklenen Kare/sn",
+      "fps": "Kare/sn",
+      "title": "Bağlantı Kalitesi",
+      "excellent": "Mükemmel",
+      "fair": "Ortalama",
+      "poor": "Zayıf",
+      "unusable": "Kullanılamaz",
+      "reconnectsLastHour": "Yeniden bağlanmalar (son saat)",
+      "stallsLastHour": "Takılmalar (son saat)"
+    },
+    "noCameras": {
+      "title": "Hiç Kamera Bulunamadı"
     }
   },
   "lastRefreshed": "Son güncelleme: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} FFmpeg'te yüksek miktarda CPU kullanıyor (%{{ffmpegAvg}})",
     "reindexingEmbeddings": "Gömüler yeniden dizinleniyor (%{{processed}} tamamlandı)",
-    "detectHighCpuUsage": "{{camera}} tespitte yüksek miktarda CPU kullanıyor (%{{detectAvg}})",
     "healthy": "Sistem sağlıklı",
-    "detectIsVerySlow": "{{detect}} çok yavaş çalışıyor ({{speed}} ms)",
+    "detectIsVerySlow": "{{detect}} çok yavaş ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} çevrimdışı",
-    "detectIsSlow": "{{detect}} yavaş çalışıyor ({{speed}} ms)"
+    "detectIsSlow": "{{detect}} yavaş ({{speed}} ms)",
+    "cameraSkippedDetections": "{{camera}}, görüntü karelerinin %{{pct}} kadarında algılamayı atlıyor",
+    "systemNotices_one": "{{count}} sistem bilgilendirmesi",
+    "systemNotices_other": "{{count}} sistem bilgilendirmesi",
+    "retentionUnmet": "Kayıtlar yer açma amacıyla saklama süreleri dolmadan siliniyorlar",
+    "debugReplayActive": "Hata ayıklama oynatımı oturumu aktif",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}"
   },
   "enrichments": {
     "embeddings": {
-      "image_embedding_speed": "Resim Gömü Hızı",
+      "image_embedding_speed": "Görsel Gömüleme Hızı",
       "text_embedding_speed": "Metin Gömü Hızı",
       "plate_recognition_speed": "Plaka Tanıma Hızı",
-      "face_embedding_speed": "Yüz Gömü Hızı",
-      "image_embedding": "Resim Gömüleme",
-      "text_embedding": "Metin Gömülüeme",
+      "face_embedding_speed": "Yüz Gömüleme Hızı",
+      "image_embedding": "Görsel Gömüleme",
+      "text_embedding": "Metin Gömüleme",
       "face_recognition": "Yüz Tanıma",
       "plate_recognition": "Plaka Tanıma",
       "face_recognition_speed": "Yüz Tanıma Hızı",
-      "yolov9_plate_detection_speed": "YOLOv9 Plaka Tanıma Hızı",
-      "yolov9_plate_detection": "YOLOv9 Plaka Tanıma",
+      "yolov9_plate_detection_speed": "YOLOv9 Plaka Algılama Hızı",
+      "yolov9_plate_detection": "YOLOv9 Plaka Algılama",
       "review_description": "İnceleme Açıklaması",
       "review_description_speed": "İnceleme Açıklama Hızı",
       "review_description_events_per_second": "İnceleme Açıklaması",
@@ -173,9 +219,9 @@
       "object_description_events_per_second": "Nesne Açıklaması",
       "classification": "{{name}} Sınıflandırması",
       "classification_speed": "{{name}} Sınıflandırma Hızı",
-      "classification_events_per_second": "{{name}} Saniyede Sınıflandırma Olayları"
+      "classification_events_per_second": "Saniyedeki {{name}} Sınıflandırma Olayı Sayısı"
     },
-    "infPerSecond": "Saniye Başına Çıkarım",
+    "infPerSecond": "Çıkarım / Saniye",
     "title": "Zenginleştirmeler",
     "averageInf": "Ortalama Çıkarım Süresi"
   },
@@ -194,13 +240,136 @@
       "label": "Panoya Kopyala",
       "success": "Günlükler panoya kopyalandı"
     },
-    "tips": "Günlükler sunucudan yansıtılıyor",
+    "tips": "Günlükler sunucudan yayınlanıyor",
     "toast": {
       "error": {
         "whileStreamingLogs": "Günlükler yansıtılırken hata: {{errorMessage}}",
         "fetchingLogsFailed": "Günlükler alınırken hata: {{errorMessage}}"
       }
+    },
+    "websocket": {
+      "label": "Mesajlar",
+      "pause": "Duraklat",
+      "resume": "Devam ettir",
+      "clear": "Temizle",
+      "filter": {
+        "all": "Tüm Konular",
+        "topics": "Konular",
+        "events": "Olaylar",
+        "reviews": "İncelemeler",
+        "classification": "Sınıflandırma",
+        "face_recognition": "Yüz Tanıma",
+        "lpr": "PTS",
+        "camera_activity": "Kamera faaliyeti",
+        "system": "Sistem",
+        "camera": "Kamera",
+        "all_cameras": "Tüm kameralar",
+        "cameras_count_one": "{{count}} Kamera",
+        "cameras_count_other": "{{count}} Kamera"
+      },
+      "empty": "Henüz yakalanan mesaj yok",
+      "count_one": "{{count}} mesaj",
+      "count_other": "{{count}} mesaj",
+      "expanded": {
+        "payload": "Yük (payload)"
+      }
     }
   },
-  "title": "Sistem"
+  "title": "Sistem",
+  "health": {
+    "title": "Sağlık",
+    "notices": {
+      "title": "Bilgilendirmeler",
+      "empty": "Frigate kurulumunuz sağlıklı",
+      "openSettings": "Ayarları aç",
+      "openLink": "Bağlantıyı aç",
+      "noMatches": "Filtreye uygun bilgilendirme yok",
+      "firstSeen_one": "İlk görünüşü {{time}}",
+      "firstSeen_other": "İlk görünüşü {{time}} · {{count}} kez",
+      "filter": {
+        "severity": "Vehamet",
+        "error": "Hata",
+        "warning": "Uyarı",
+        "info": "Bilgi",
+        "showHidden": "Gizlenenleri göster"
+      },
+      "kinds": {
+        "detector_stuck": "{{detector}} algılayıcısı yanıt vermeyi durdurunca yeniden başlatıldı",
+        "model_download_failed": "{{model}} için {{file}} dosyasının indirilmesi başarısız oldu: {{error}}",
+        "skipped_detections": "Algılama yetişemedi ve bir dakikadan uzun bir süre boyunca görüntü karelerinin %{{pct}} kadarı atlandı",
+        "shm_too_low": "/dev/shm tahsisi ({{total}} MB) en az {{min}} MB olacak şekilde artırılmalı",
+        "failed_login_one": "{{user}} kullanıcısı için başarısız oturum açma girişimi",
+        "failed_login_other": "{{user}} kullanıcısı için başarısız oturum açma girişimleri",
+        "update_available": "Frigate {{version}} sürümü çıkmış",
+        "ffmpeg_high_cpu": "FFmpeg CPU kullanımı yüksek (ortalama %{{cpu}})",
+        "detect_high_cpu": "Algılama CPU kullanımı yüksek (ortalama %{{cpu}})"
+      },
+      "streamPrefix": "{{index}}. yayın: {{message}}",
+      "streamPrefixRestream": "{{index}}. Yayın (go2rtc üzerinden): {{message}}",
+      "streamProbeFailed": "{{index}}. yayın yoklanamadı: {{error}}",
+      "cameraProbeFailed": "Yayınlar yoklanamadı: {{error}}",
+      "acknowledge": "Anlaşıldı",
+      "acknowledgeHint": "Tekrarlanana kadar gizle",
+      "mute": "Sessize al",
+      "muteHint": "Bir daha gösterme",
+      "unmute": "Sessizden çıkar",
+      "showAgain": "Tekrar göster",
+      "hiddenTitle": "Gizlenmiş",
+      "noneHidden": "Gizlenmiş bilgilendirme yok",
+      "showAll": "Tümünü tekrar göster",
+      "showAllTitle": "Tüm gizlenmiş bilgilendirmeleri göster?",
+      "showAllDesc": "Anlaşılanların ve sessize alınanların her biri Bilgilendirmeler listesine geri döner; yapılandırma ve yayın kontrolleri dahil.",
+      "acknowledgedAt": "Anlaşıldı: {{time}}",
+      "mutedAt": "Sessize alındı: {{time}}"
+    },
+    "hardware": {
+      "title": "Donanım",
+      "objectDetection": "Nesne algılama",
+      "hardwareAcceleration": "Donanım hızlandırması",
+      "enrichments": {
+        "title": "Zenginleştirmeler",
+        "semantic_search": "Anlamasal arama",
+        "face_recognition": "Yüz tanıma",
+        "lpr": "Plaka tanıma sistemi",
+        "audio_transcription": "Ses transkripsiyonu"
+      },
+      "cameraConnections": "Kamera bağlantıları",
+      "allCamerasExcellent": "Tüm kameraların bağlantısı mükemmel.",
+      "fps": "{{camera}} : {{expected}} kare/sn",
+      "nothingConfigured": "Hiçbir şey yapılandırılmamış",
+      "allCameras": "Tüm kameralar",
+      "probeUnavailable": "Donanım tespiti kullanılamıyor",
+      "justStarted": "Frigate başladı",
+      "deviceNotFound": "{{devices}} bu sistemde bulunamadı",
+      "detectorNotRunning": "Algılayıcı işlemi çalışmıyor",
+      "inferenceVerySlow": "Çıkarım çok yavaş ({{speed}} ms)",
+      "inferenceSlow": "Çıkarım yavaş ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Özelleştirilmiş ffmpeg parametreleri",
+      "customArgsNotVerified": "Özelleştirilmiş ffmpeg parametreleri, doğrulanmamış",
+      "hwaccelNotConfigured": "Donanımsal kod çözümü yok ama {{family}} kullanılabilir. Ffmpeg ayarlarından seçin",
+      "hwaccelHardwareMissing": "{{family}} yapılandırılmış ama donanım yoklayıcı tarafından raporlanmadı",
+      "unrecognizedDevice": "Tanınmamış aygıt istisnası, doğrulanmadı",
+      "decoderUsage": "kod çözücü {{usage}}",
+      "remoteProvider": "Uzak sağlayıcı",
+      "acceleratorMissing": "{{device}} için yapılandırıldı ama uyumlu bir hızlandırıcı bulunamadı",
+      "modelNotRunYet": "Model henüz çalışmadı; aygıt ilk çalışma sonrası doğrulanır",
+      "fellBackToCpu": "{{device}} için yapılandırıldı ama CPU'da çalışıyor",
+      "cpuDespiteAccelerator": "Bir hızlandırıcı olduğu halde CPU'da çalışıyor",
+      "probed": "Yoklandı",
+      "probing": "Yoklanıyor...",
+      "recheck": "Donanımı yeniden kontrol et",
+      "cameraStreams": "Kamera yayınları",
+      "streamsNotChecked": "Henüz kontrol edilmedi",
+      "streamsChecking": "{{done}}. yayın kontrol ediliyor (Toplam: {{total}})",
+      "streamsClean": "Yayınlarda sorun yok",
+      "checked": "Kontrol edildi",
+      "runAgain": "Tekrar çalıştır",
+      "runStreamChecks": "Yayın kontrollerini çalıştır",
+      "streamsChecked_one": "{{count}} kamera kontrol edildi",
+      "streamsChecked_other": "{{count}} kamera kontrol edildi",
+      "streamsFlagged_one": "{{count}} yayında sorun var; Bilgilendirmeler altında listeleniyor",
+      "streamsFlagged_other": "{{count}} yayında sorun var; Bilgilendirmeler altında listeleniyor"
+    }
+  }
 }

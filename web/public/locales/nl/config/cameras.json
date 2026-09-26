@@ -1,11 +1,11 @@
 {
     "label": "CameraConfiguratie",
     "name": {
-        "label": "Camera naam",
-        "description": "Camera naam is vereist"
+        "label": "Cameranaam",
+        "description": "Cameranaam is vereist"
     },
     "friendly_name": {
-        "description": "Camera naam te gebruiken in de Frigate UI",
+        "description": "Cameranaam te gebruiken in de Frigate UI",
         "label": "Eenvoudige naam"
     },
     "enabled": {
@@ -29,7 +29,7 @@
         },
         "listen": {
             "label": "Luistercategorieën",
-            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, praten, schreeuwen)."
+            "description": "Lijst met categorieën van geluidsgebeurtenissen die moeten worden gedetecteerd (zoals blaffen, band_alarm, praten en schreeuwen)."
         },
         "filters": {
             "label": "Geluidsfilters",
@@ -40,12 +40,16 @@
             }
         },
         "enabled_in_config": {
-            "label": "Originele audio-instelling",
+            "label": "Oorspronkelijke audiostatus",
             "description": "Geeft aan of audiodetectie oorspronkelijk was geactiveerd in het statische configuratiebestand."
         },
         "num_threads": {
             "label": "Detectiethreads",
             "description": "Aantal threads voor audiodetectieverwerking."
+        },
+        "labelmap": {
+            "label": "Aanpassing van audiolabels",
+            "description": "Overschrijvingen of hertoewijzingen die aan de standaard audiolabelset worden toegevoegd."
         }
     },
     "audio_transcription": {
@@ -73,6 +77,10 @@
         "order": {
             "label": "Positie",
             "description": "Numerieke positie die de volgorde van de camera in de overzichtsweergave lay-out bepaalt."
+        },
+        "modes": {
+            "label": "Activiteitstypen",
+            "description": "Activiteitstypen waarbij camera’s in Birdseye worden weergegeven."
         }
     },
     "detect": {
@@ -96,7 +104,7 @@
         },
         "min_initialized": {
             "label": "Minimale initialisatieframes",
-            "description": "Aantal opeenvolgende detectieresultaten dat vereist is voordat een gevolgd object wordt aangemaakt. Verhoog deze waarde om valse initialisaties te verminderen. De standaardwaarde is FPS gedeeld door 2."
+            "description": "Aantal opeenvolgende detectieresultaten dat vereist is voordat een gevolgd object wordt aangemaakt. Verhoog deze waarde om valse initialisaties te verminderen. De standaardwaarde is fps gedeeld door 2."
         },
         "max_disappeared": {
             "label": "Maximaal aantal verdwenen frames",
@@ -133,10 +141,15 @@
         "annotation_offset": {
             "label": "Annotatie-offset",
             "description": "Milliseconden om detectieannotaties te verschuiven voor betere uitlijning van tijdlijn-detectiekaders met opnames; kan positief of negatief zijn."
+        },
+        "scene": {
+            "label": "Scène detecteren",
+            "description": "De omgeving waarop deze camera is gericht. Hiermee wordt bepaald welk van de geconfigureerde modellen op deze camera wordt uitgevoerd. Voor camera's die op 'alles' staan, wordt het model gebruikt waarvoor de scène op 'alles' is ingesteld."
         }
     },
     "profiles": {
-        "label": "Profielen"
+        "label": "Profielen",
+        "description": "Benoemde configuratieprofielen met specifieke afwijkende instellingen die tijdens runtime kunnen worden geactiveerd."
     },
     "zones": {
         "label": "Zones",
@@ -153,8 +166,63 @@
             "label": "Zone filters",
             "description": "Filters die op objecten binnen deze zone moeten worden toegepast. Worden gebruikt om het aantal valse positieven te verminderen of om te beperken welke objecten als aanwezig in de zone worden beschouwd.",
             "min_area": {
-                "label": "Minimale oppervlakte van het object"
+                "label": "Minimale oppervlakte van het object",
+                "description": "Minimaal vereist oppervlak van het begrenzingskader voor dit objecttype (in pixels of als percentage). Kan worden opgegeven als aantal pixels (geheel getal) of als percentage (kommagetal tussen 0,000001 en 0,99)."
+            },
+            "max_area": {
+                "label": "Maximaal objectoppervlak",
+                "description": "Maximaal oppervlak van het begrenzingskader voor dit objecttype (in pixels of als percentage). Kan worden opgegeven als aantal pixels (geheel getal) of als percentage (kommagetal tussen 0,000001 en 0,99)."
+            },
+            "min_ratio": {
+                "label": "Minimale beeldverhouding",
+                "description": "Minimale verhouding tussen breedte en hoogte waaraan het begrenzingskader moet voldoen."
+            },
+            "max_ratio": {
+                "label": "Maximale beeldverhouding",
+                "description": "Maximale verhouding tussen breedte en hoogte waaraan het begrenzingskader mag voldoen."
+            },
+            "threshold": {
+                "label": "Betrouwbaarheidsdrempel",
+                "description": "Gemiddelde betrouwbaarheidsdrempel die een detectie moet behalen om het object als correct gedetecteerd te beschouwen."
+            },
+            "min_score": {
+                "label": "Minimale betrouwbaarheid",
+                "description": "Minimale betrouwbaarheid die een detectie in één frame moet hebben om het object mee te tellen."
+            },
+            "mask": {
+                "label": "Filter masker",
+                "description": "Polygooncoördinaten die bepalen op welk deel van het beeld dit filter wordt toegepast."
+            },
+            "raw_mask": {
+                "label": "Onbewerkte maskering"
             }
+        },
+        "enabled_in_config": {
+            "label": "De oorspronkelijke status van de zone bijhouden."
+        },
+        "coordinates": {
+            "label": "Coördinaten",
+            "description": "Polygooncoördinaten die het gebied van de zone bepalen. Kan worden opgegeven als een kommagescheiden tekenreeks of als een lijst met coördinaten. Coördinaten kunnen relatief (0-1) of absoluut (verouderd) zijn."
+        },
+        "distances": {
+            "label": "Werkelijke afstanden",
+            "description": "Optionele werkelijke afstanden voor elke zijde van de vierhoekige zone, gebruikt voor snelheids- of afstandsberekeningen. Indien ingesteld, moeten precies 4 waarden worden opgegeven."
+        },
+        "inertia": {
+            "label": "Traagheidsframes",
+            "description": "Aantal opeenvolgende frames waarin een object in de zone moet worden gedetecteerd voordat het als aanwezig wordt beschouwd. Dit helpt kortstondige detecties uit te filteren."
+        },
+        "loitering_time": {
+            "label": "Minimale verblijftijd in seconden",
+            "description": "Aantal seconden dat een object in de zone moet blijven voordat dit als rondhangen wordt beschouwd. Stel in op 0 om detectie van rondhangen uit te schakelen."
+        },
+        "speed_threshold": {
+            "label": "Minimale snelheid",
+            "description": "Minimale snelheid die een object moet hebben om als aanwezig in de zone te worden beschouwd. Als afstanden zijn ingesteld, wordt de snelheid uitgedrukt in werkelijke eenheden. Wordt gebruikt voor zoneactivering op basis van snelheid."
+        },
+        "objects": {
+            "label": "Objecten voor activering",
+            "description": "Lijst met objecttypen (uit de labelmap) die deze zone kunnen activeren. Kan één tekenreeks of een lijst met tekenreeksen zijn. Indien leeg, worden alle objecten meegenomen."
         }
     },
     "mqtt": {
@@ -169,13 +237,31 @@
             "description": "Plaats een tijdstempel als overlay op afbeeldingen die naar MQTT worden gepubliceerd."
         },
         "bounding_box": {
-            "label": "Voeg een kader toe rond gedetecteerde objecten"
+            "label": "Voeg een kader toe rond gedetecteerde objecten",
+            "description": "Teken begrenzingskaders op afbeeldingen die via MQTT worden gepubliceerd."
+        },
+        "crop": {
+            "label": "Afbeelding bijsnijden",
+            "description": "Naar MQTT gepubliceerde afbeeldingen bijsnijden tot het detectiekader van het gedetecteerde object."
+        },
+        "height": {
+            "label": "Afbeeldingshoogte",
+            "description": "Hoogte (pixels) voor het schalen van via MQTT gepubliceerde afbeeldingen."
+        },
+        "required_zones": {
+            "label": "Vereiste zones",
+            "description": "Zones dat een object moet betreden om een MQTT afbeelding te publiceren."
+        },
+        "quality": {
+            "label": "JPEG kwaliteit",
+            "description": "JPEG kwaliteit voor afbeeldingen gepubliceerd via MQTT (0-100)."
         }
     },
     "notifications": {
         "label": "Meldingen",
         "enabled": {
-            "label": "Meldingen inschakelen"
+            "label": "Meldingen inschakelen",
+            "description": "Notificaties voor deze camera in of uitschakelen."
         },
         "email": {
             "label": "Melding email",
@@ -188,7 +274,8 @@
         "enabled_in_config": {
             "label": "Originele meldingsstatus",
             "description": "Geeft aan of meldingen waren ingeschakeld in de originele statische configuratie."
-        }
+        },
+        "description": "Instelling om notificatie instellingen in te schakelen voor deze camera en te beheren."
     },
     "ffmpeg": {
         "label": "Streams (FFmpeg)",
@@ -219,6 +306,10 @@
             "record": {
                 "label": "Uitvoerargumenten voor opname",
                 "description": "Standaard uitvoerargumenten voor streams met opnamerol."
+            },
+            "record_sub": {
+                "label": "Uitvoerargumenten voor opname van de substream",
+                "description": "Uitvoerargumenten voor streams met de rol record_sub. Als dit niet is ingesteld, worden de uitvoerargumenten voor opname gebruikt."
             }
         },
         "retry_interval": {
@@ -333,7 +424,8 @@
         "label": "Objecten",
         "description": "Standaardinstellingen voor objectvolging, inclusief te volgen labels en per-object filters.",
         "track": {
-            "label": "Te volgen objecten"
+            "label": "Te volgen objecten",
+            "description": "Lijst met objectlabels om te volgen voor deze camera."
         },
         "filters": {
             "label": "Objectfilters",
@@ -527,7 +619,55 @@
             "label": "Originele opnamestatus",
             "description": "Geeft aan of opname was ingeschakeld in de originele statische configuratie."
         },
-        "description": "Instellingen opname en bewaarbeleid voor deze camera."
+        "description": "Instellingen opname en bewaarbeleid voor deze camera.",
+        "sub": {
+            "label": "Substream opname",
+            "description": "Instellingen voor het opnemen van een tweede stream met lagere kwaliteit.",
+            "enabled": {
+                "label": "Substream opname inschakelen",
+                "description": "Het opnemen van een tweede stream met lagere kwaliteit inschakelen voor adaptieve afspeelkwaliteit en langere bewaartermijn."
+            },
+            "continuous": {
+                "label": "Bewaartermijn voor continue substream opnames",
+                "description": "Aantal dagen dat substream opnames worden bewaard, ongeacht gedetecteerde objecten of beweging.",
+                "days": {
+                    "label": "Bewaartermijn in dagen",
+                    "description": "Aantal dagen dat opnames worden bewaard."
+                }
+            },
+            "motion": {
+                "label": "Bewaartermijn voor substream opnames met beweging",
+                "description": "Aantal dagen dat substream opnames met gedetecteerde beweging worden bewaard.",
+                "days": {
+                    "label": "Bewaartermijn in dagen",
+                    "description": "Dagen om opnames te bewaren."
+                }
+            },
+            "alerts": {
+                "label": "Bewaartermijn voor substream opnames met waarschuwingen",
+                "description": "Bewaarinstellingen voor substream opnames met waarschuwingen.",
+                "days": {
+                    "label": "Bewaardagen",
+                    "description": "Aantal dagen om opnames van detectiegebeurtenissen te bewaren."
+                },
+                "mode": {
+                    "label": "Bewaarmodus",
+                    "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+                }
+            },
+            "detections": {
+                "label": "Bewaartermijn voor substream opnames met detecties",
+                "description": "Bewaarinstellingen voor substream opnames met detecties.",
+                "days": {
+                    "label": "Bewaardagen",
+                    "description": "Aantal dagen om opnames van detectiegebeurtenissen te bewaren."
+                },
+                "mode": {
+                    "label": "Bewaarmodus",
+                    "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+                }
+            }
+        }
     },
     "review": {
         "label": "Beoordeling",
@@ -617,6 +757,14 @@
             "activity_context_prompt": {
                 "label": "Activiteitscontextprompt",
                 "description": "Aangepaste prompt die beschrijft wat wel en niet verdachte activiteit is, als context voor GenAI-samenvattingen."
+            },
+            "frame_mode": {
+                "label": "Framemodus",
+                "description": "Hoe frames aan het model worden aangeboden. 'frames' stuurt eerst de prompt en daarna de frames en is geschikt voor modellen die een reeks zelfstandig goed kunnen volgen. 'annotated_frames' voorziet elk frame van een label en voegt tussendoor notities uit objecttracking toe. Dit helpt modellen die moeite hebben om herhaalde of omgekeerde bewegingen goed te volgen."
+            },
+            "response_style": {
+                "label": "Antwoordstijl",
+                "description": "Voorinstelling voor de schrijfstijl van gegenereerde beoordelingsbeschrijvingen. Deze bepaalt de toon en het detailniveau van de titel, samenvatting en scènebeschrijving voor de gebruiker. Met default blijft de standaardprompt ongewijzigd."
             }
         },
         "description": "Instellingen voor waarschuwingen, detecties en GenAI‑samenvattingen die worden gebruikt door de interface en de opslag van deze camera."
@@ -843,6 +991,34 @@
     },
     "best_image_timeout": {
         "label": "Timeout voor het ophalen van de beste afbeelding",
-        "description": "Hoe lang er gewacht wordt op de afbeelding met de hoogste score van betrouwbaarheid"
+        "description": "Hoe lang er gewacht wordt op de afbeelding met de hoogste score van betrouwbaarheid."
+    },
+    "type": {
+        "label": "Cameratype",
+        "description": "Cameratype"
+    },
+    "ui": {
+        "label": "Camera interface",
+        "description": "Weergavevolgorde en zichtbaarheid van deze camera in de gebruikersinterface. De volgorde bepaalt de standaardweergave op het dashboard. Gebruik cameragroepen voor meer gedetailleerde instellingen.",
+        "order": {
+            "label": "Volgorde in de interface",
+            "description": "Numerieke volgorde waarmee de camera in de interface wordt gesorteerd (standaarddashboard en lijsten). Hogere waarden worden later weergegeven."
+        },
+        "dashboard": {
+            "label": "Weergeven op het Live dashboard",
+            "description": "Bepaal of deze camera zichtbaar is op het standaard Live dashboard met alle camera's. De camera blijft elders in de interface beschikbaar, zoals in cameragroepen en instellingen."
+        },
+        "review": {
+            "label": "Weergeven in beoordelingen",
+            "description": "Bepaal of deze camera wordt weergegeven in beoordelingen (waaronder de beoordelingspagina, in het camerafilter, bij bewegingsdetecties en in de geschiedenisweergave)."
+        }
+    },
+    "webui_url": {
+        "label": "Camera URL",
+        "description": "URL om de camera rechtstreeks vanuit de systeempagina te openen"
+    },
+    "enabled_in_config": {
+        "label": "Oorspronkelijke camerastatus",
+        "description": "De oorspronkelijke status van de camera bijhouden."
     }
 }

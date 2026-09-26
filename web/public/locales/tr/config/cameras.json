@@ -9,30 +9,30 @@
     },
     "enabled": {
         "label": "Etkin",
-        "description": "Etkin"
+        "description": "Etkinleştirilmiş"
     },
     "audio": {
-        "label": "Ses olayları",
+        "label": "Ses algılaması",
         "description": "Bu kamera için ses tabanlı olay algılama ayarları.",
         "enabled": {
-            "label": "Ses algılamayı etkinleştir",
-            "description": "Bu kamera için ses tabanlı olay algılamayı etkinleştirin veya devre dışı bırakın."
+            "label": "Ses algılamasını etkinleştir",
+            "description": "Bu kamera için ses olayı algılamasını etkinleştirin veya devre dışı bırakın."
         },
         "max_not_heard": {
-            "label": "Zaman aşımını sonlandır",
-            "description": "Ses tabanlı olayın sona ermesi için yapılandırılmış ses türünün algılanmadığı saniye süresi."
+            "label": "Sonlandırma süresi",
+            "description": "Ses olayı sonlandırılmadan önce, yapılandırılmış türde ses olmadan geçecek saniye süresi."
         },
         "min_volume": {
             "label": "Minimum ses seviyesi",
-            "description": "Ses algılamayı çalıştırmak için gereken minimum RMS ses seviyesi eşiği; daha düşük değerler hassasiyeti artırır (örneğin: 200 yüksek, 500 orta, 1000 düşük)."
+            "description": "Ses algılamasını çalıştırmak için gereken minimum RMS ses seviyesi eşiği; daha düşük değerler hassasiyeti artırır (örneğin: 200 yüksek, 500 orta, 1000 düşük)."
         },
         "listen": {
-            "label": "Dinlenecek ses türleri",
-            "description": "Algılanacak ses olayı türlerinin listesi (örneğin: bark (havlama), fire_alarm (yangın alarmı), speech (konuşma), yell (bağırma))."
+            "label": "Dinlenecek türler",
+            "description": "Algılanacak ses olayı türlerinin listesi (örn: havlama, yangın_alarmı, konuşma, bağırma)."
         },
         "filters": {
             "label": "Ses filtreleri",
-            "description": "Yanlış alarmları azaltmak için kullanılan güven eşikleri gibi ses türüne özel filtre ayarları.",
+            "description": "Her bir ses türü için filtre ayarları; örn: hatalı pozitifleri azaltmak için kullanılan güven eşikleri.",
             "threshold": {
                 "label": "Minimum ses güven eşiği",
                 "description": "Ses olayının sayılması için gereken minimum güven eşiği."
@@ -40,14 +40,18 @@
         },
         "enabled_in_config": {
             "label": "Orijinal ses durumu",
-            "description": "Ses algılamanın statik yapılandırma dosyasında başlangıçta etkinleştirilip etkinleştirilmediğini belirtir."
+            "description": "Ses algılamasının statik yapılandırma dosyasında baştan etkinleştirilip etkinleştirilmediğini belirtir."
         },
         "num_threads": {
-            "label": "Algılama işlemleri",
-            "description": "Ses algılama işleme için kullanılacak iş parçacığı sayısı."
+            "label": "Tespit iş parçacıkları (threads)",
+            "description": "Ses algılama işlemesi için kullanılacak iş parçacığı (thread) sayısı."
+        },
+        "labelmap": {
+            "label": "Ses etiket haritası özelleştirmesi",
+            "description": "Standart ses etiket haritasıyla (labelmap) birleştirilecek istisna veya yeniden eşleme girdileri."
         }
     },
-    "label": "Kamera Konfigürasyonu",
+    "label": "KameraYapılandırması",
     "detect": {
         "stationary": {
             "threshold": {
@@ -56,87 +60,965 @@
             },
             "max_frames": {
                 "label": "Maksimum kare sayısı",
-                "description": "Sabit nesnelerin, izlenmesi bırakılmadan önce ne kadar süre takip edileceğini sınırlar.",
+                "description": "Sabit nesnelerin ne kadar süre takip edilip bırakılacaklarını sınırlar.",
                 "default": {
                     "label": "Varsayılan maksimum kare sayısı",
-                    "description": "Sabit bir nesneyi durdurmadan önce takip etmek için varsayılan maksimum kare sayısı."
+                    "description": "Sabit bir nesneyi takip etmeyi bırakana kadar geçecek varsayılan maksimum kare sayısı."
                 },
                 "objects": {
                     "label": "Nesne maksimum kare sayısı",
-                    "description": "Sabit nesnelerin takip edileceği azami kare sayısı, nesne türüne göre ayrı ayrı geçersiz kılınabilir."
+                    "description": "Sabit nesne takibine yönelik maksimum kare sayısı için nesne bazlı istisnalar."
                 }
             },
             "label": "Sabit nesne yapılandırması",
             "description": "Belirli bir süre boyunca sabit kalan nesneleri algılamak ve yönetmek için ayarlar.",
             "interval": {
                 "label": "Sabit kalma aralığı",
-                "description": "Sabit bir nesnenin hâlâ orada olduğunu doğrulamak için algılama kontrolünün kaç karede bir yapılacağını belirler."
+                "description": "Bir nesnenin sabitliğini doğrulamak için algılama kontrolünün kaç karede bir yapılacağını belirler."
             },
             "classifier": {
                 "label": "Görsel sınıflandırıcıyı etkinleştir",
-                "description": "Çerçeve titreşimleri olsa bile, gerçekten sabit olan nesneleri algılamak için görsel sınıflandırıcıyı kullanır."
+                "description": "Gerçekten sabit duran nesneleri çerçeveler titreştiğinde bile algılamak için bir görsel sınıflandırıcı kullan."
             }
         },
-        "label": "Nesne Algılama",
-        "description": "Nesne algılamayı çalıştırmak ve izleyicileri başlatmak için kullanılan algılama/algılayıcı rolü ayarları.",
+        "label": "Nesne Algılaması",
+        "description": "Nesne algılamasını çalıştırmak ve iz sürücüleri başlatmak için kullanılan tespit/algılama rollerinin ayarları.",
         "enabled": {
-            "label": "Nesne algılamayı etkinleştir",
-            "description": "Bu kamera için nesne algılamayı etkinleştirir veya devre dışı bırakır."
+            "label": "Nesne algılamasını etkinleştir",
+            "description": "Bu kamera için nesne algılamasını etkinleştirir veya devre dışı bırakır."
         },
         "height": {
-            "label": "Algılama yüksekliği",
-            "description": "Algılama akışı için kullanılan karelerin piksel cinsinden yüksekliği; yerel akış çözünürlüğünü kullanmak için boş bırakın."
+            "label": "Tespit yüksekliği",
+            "description": "Tespit yayını için kullanılan karelerin piksel cinsinden yüksekliği; yerel yayın çözünürlüğünü kullanmak için boş bırakın."
         },
         "width": {
-            "label": "Algılama genişliği",
-            "description": "Algılama akışı için kullanılan karelerin piksel cinsinden genişliği; yerel akış çözünürlüğünü kullanmak için boş bırakın."
+            "label": "Tespit genişliği",
+            "description": "Tespit yayını için kullanılan karelerin piksel cinsinden genişliği; yerel yayın çözünürlüğünü kullanmak için boş bırakın."
         },
         "fps": {
-            "label": "Algılama Hızı (FPS)",
+            "label": "Tespit Hızı (Kare/sn)",
             "description": "Algılama için istenen saniyedeki kare sayısı; düşük değerler CPU kullanımını azaltır (önerilen değer 5'tir, yalnızca çok hızlı hareket eden nesneler takip ediliyorsa - en fazla 10 olacak şekilde - daha yüksek ayarlayın)."
         },
         "min_initialized": {
             "label": "Minimum başlangıç karesi",
-            "description": "Takip edilen bir nesne oluşturulmadan önce art arda kaç kez algılanması gerektiğini belirler. Yanlış başlatmaları önlemek için bu değeri yükseltebilirsiniz. Varsayılan değer, FPS değerinin yarısıdır."
+            "description": "Takip edilen bir nesne oluşturulmadan önce art arda kaç kez algılanması gerektiği. Yanlış başlatmaları önlemek için yükseltin. Varsayılan değer kare/sn değerinin yarısıdır."
         },
         "max_disappeared": {
             "label": "Maksimum kayıp kare sayısı",
             "description": "Takip edilen bir nesnenin kaybolduğuna karar verilmeden önce, kaç kare boyunca algılanmaması gerektiğini belirler."
         },
         "annotation_offset": {
-            "label": "Açıklama ofseti",
-            "description": "Zaman çizelgesi çerçevelerini kayıtlarla daha iyi hizalamak için algılama açıklamalarını kaydıracak milisaniye miktarı; pozitif veya negatif olabilir."
+            "label": "Açıklama notu kaydırma değeri",
+            "description": "Zaman şeridi çerçevelerini kayıtlarla daha iyi hizalamak için tespit açıklama notlarının kaydırılacağı milisaniye miktarı; pozitif veya negatif olabilir."
+        },
+        "scene": {
+            "label": "Tespit sahnesi",
+            "description": "Bu kameranın baktığı ortam. Kamerada hangi yapılandırılmış modelin çalışacağını seçmek için kullanılır. \"Tümü\" ayarında bırakılan kameralar \"Tümü\" sahnesi için belirlenmiş modeli çalıştırırlar."
         }
     },
     "audio_transcription": {
         "label": "Ses transkripsiyonu",
-        "description": "Olaylar ve canlı altyazılar için sesin ve konuşmanın metne dökülme ayarları.",
+        "description": "Olaylar ve canlı alt yazılar için canlı ses ve konuşma transkripsiyonu ayarları.",
         "enabled": {
             "label": "Transkripsiyonu etkinleştir",
-            "description": "Manuel tetiklenen ses olayı dökümünü etkinleştirir veya devre dışı bırakır."
+            "description": "Manuel tetiklenen ses olayı transkripsiyonunu etkinleştir veya devre dışı bırak."
         },
         "enabled_in_config": {
-            "label": "Orijinal yazıya dökme durumu"
+            "label": "Orijinal transkripsiyon durumu"
         },
         "live_enabled": {
             "label": "Canlı transkripsiyon",
-            "description": "Ses akışı alındıkça canlı transkripsiyonu etkinleştirir."
+            "description": "Ses yayını alındıkça canlı transkripsiyonu etkinleştirir."
         }
     },
     "birdseye": {
         "label": "Kuşbakışı",
-        "description": "Kuşbakışı bileşik görünümü, birden fazla kamera yayınını tek bir düzende birleştiren ayarlar.",
+        "description": "Birden fazla kamera akışını tek bir düzende birleştiren birleşik Kuşbakışı görünümü ayarları.",
         "enabled": {
             "label": "Kuşbakışı'nı etkinleştir",
             "description": "Kuşbakışı görünüm özelliğini etkinleştirir veya devre dışı bırakır."
         },
         "order": {
-            "label": "Konum",
-            "description": "Kameranın Kuşbakışı düzenindeki sıralamasını belirleyen sayısal konum."
+            "label": "Sıra",
+            "description": "Kameranın Kuşbakışı düzenindeki sıralamasını belirleyen sayısal pozisyon."
+        },
+        "modes": {
+            "label": "Faaliyet türleri",
+            "description": "Kameraları Kuşbakışı'na dahil eden faaliyet türleri."
         }
     },
     "face_recognition": {
         "label": "Yüz tanıma",
-        "description": "Bu kamera için yüz algılama ve tanıma ayarları."
+        "description": "Bu kamera için yüz tespit ve tanıma ayarları.",
+        "enabled": {
+            "label": "Yüz tanımayı etkinleştir",
+            "description": "Yüz tanımayı aç veya kapat."
+        },
+        "min_area": {
+            "label": "Minimum yüz alanı",
+            "description": "Tespit edilen yüz kutusunda tanıma işlemine girişmek için gereken minimum alan (piksel cinsinden)."
+        }
+    },
+    "ffmpeg": {
+        "label": "Yayınlar (FFmpeg)",
+        "description": "Kamera yayını girdileri ve FFmpeg seçenekleri; ikili (binary) dosya yolu, argümanlar, donanım hızlandırması (hwaccel) ve role özgü çıktı argümanları dahil.",
+        "path": {
+            "label": "FFmpeg dosya yolu",
+            "description": "Kullanılacak FFmpeg ikili (binary) dosyasının yolu veya bir sürüm takma adı (\"7.0\" ya da \"8.0\")."
+        },
+        "global_args": {
+            "label": "FFmpeg genel parametreleri",
+            "description": "FFmpeg sürecine aktarılacak genel (global) parametreler."
+        },
+        "hwaccel_args": {
+            "label": "Donanım hızlandırması parametreleri",
+            "description": "FFmpeg için donanım hızlandırması parametreleri. Sağlayıcıya özgü öntanımlı ayarlar önerilir."
+        },
+        "input_args": {
+            "label": "Girdi parametreleri",
+            "description": "FFmpeg girdi yayınlarına uygulanan girdi parametreleri."
+        },
+        "output_args": {
+            "label": "Çıktı parametreleri",
+            "description": "Tespit ve kayıt gibi FFmpeg rollerinde kullanılan varsayılan çıktı parametreleri.",
+            "detect": {
+                "label": "Tespit çıktı parametreleri",
+                "description": "Tespit rollü yayınlar için varsayılan çıktı parametreleri."
+            },
+            "record": {
+                "label": "Kayıt çıktı parametreleri",
+                "description": "Kayıt rollü yayınlar için algılama çıktı parametreleri."
+            },
+            "record_sub": {
+                "label": "Alt yayın kayıt çıktı parametreleri",
+                "description": "Alt kayıt (record_sub) rollü yayınlar için çıktı parametreleri. Bu ayarlanmazsa kayıt çıktı parametreleri kullanılır."
+            }
+        },
+        "retry_interval": {
+            "label": "FFmpeg yeniden deneme süresi",
+            "description": "Hata sonrası kamera yayınını yeniden bağlamadan önce beklenecek süre (saniye). Varsayılan 10'dur."
+        },
+        "apple_compatibility": {
+            "label": "Apple uyumluluğu",
+            "description": "Apple oynatıcısına daha iyi uyumluluk için H.265 kaydederken HEVC etiketlemeyi etkinleştir."
+        },
+        "gpu": {
+            "label": "GPU endeksi",
+            "description": "Eğer varsa donanım hızlandırması için kullanılacak varsayılan GPU endeksi."
+        },
+        "inputs": {
+            "label": "Kamera girdileri",
+            "description": "Bu kamera için girdi yayını tanımları (yollar ve roller).",
+            "path": {
+                "label": "Girdi yolu (path)",
+                "description": "Kamera girdi yayını URL'i veya yolu."
+            },
+            "roles": {
+                "label": "Girdi rolleri",
+                "description": "Bu girdi yayını için roller."
+            },
+            "global_args": {
+                "label": "FFmpeg genel parametreleri",
+                "description": "Bu girdi yayını için FFmpeg genel (global) parametreleri."
+            },
+            "hwaccel_args": {
+                "label": "Donanım hızlandırması parametreleri",
+                "description": "Bu girdi yayını için donanım hızlandırması parametreleri."
+            },
+            "input_args": {
+                "label": "Girdi parametreleri",
+                "description": "Bu yayına özgü girdi parametreleri."
+            }
+        }
+    },
+    "live": {
+        "label": "Canlı oynatma",
+        "description": "Web kullanıcı arayüzünde canlı yayın seçimi, kalite ve çözünürlük kontrolü için kullanılan ayarlar.",
+        "streams": {
+            "label": "Canlı yayın isimleri",
+            "description": "Yapılandırılmış yayın adlarının canlı oynatma için kullanılan restream/go2rtc adlarıyla eşleştirilmesi."
+        },
+        "quality": {
+            "label": "Canlı yayın kalitesi",
+            "description": "jsmpeg yayını için kodlama (encoding) kalitesi (1 en yüksek, 31 en düşük)."
+        },
+        "height": {
+            "label": "Canlı yayın yüksekliği",
+            "description": "Web kullanıcı arayüzünde jsmpeg canlı yayınını oluşturmak için (piksel cinsinden) yükseklik; tespit yayını yüksekliğinden büyük olamaz."
+        }
+    },
+    "lpr": {
+        "label": "Plaka Tanıma Sistemi",
+        "enabled": {
+            "label": "PTS'yi Etkinleştir",
+            "description": "Bu kamerada PTS'yi aç/kapat."
+        },
+        "min_area": {
+            "label": "Minimum plaka alanı",
+            "description": "Tanıma girişimi için gereken minimum plaka alanı (piksel cinsinden)."
+        },
+        "description": "Plaka tanıma sistemi ayarları; tespit eşiği, biçimleme ve bilinen plakalar gibi ayarları içerir.",
+        "expire_time": {
+            "label": "Geçerlilik süresi (saniye)",
+            "description": "Görüş alanından çıkan bir plakanın takibinin kaç saniye sonra sonlandırılacağı (yalnızca PTS'ye özgü kameralar için)."
+        },
+        "enhancement": {
+            "label": "İyileştirme seviyesi",
+            "description": "OCR (Optik Karakter Tanıma) öncesinde plaka görüntülerine uygulanacak iyileştirme seviyesi (0-10). Daha yüksek değerler sonuçları her zaman iyileştirmeyebilir. 5'in üzeri seviyelerin yalnızca gece görüntülenen plakalarda işe yarayabileceği dikkate alınmalıdır."
+        }
+    },
+    "motion": {
+        "enabled": {
+            "label": "Hareket algılamayı etkinleştir",
+            "description": "Bu kamera için hareket algılamayı etkinleştir veya devre dışı bırak."
+        },
+        "label": "Hareket algılama",
+        "improve_contrast": {
+            "label": "Kontrastı iyileştir",
+            "description": "Algılamaya yardımcı olmak için hareket analizinden önce karelere kontrast iyileştirmesi uygulayın."
+        },
+        "mask": {
+            "label": "Maske koordinatları",
+            "description": "Alanları dahil/hariç tutmak için kullanılan hareket maskesi çokgenini tanımlayan sıralı x,y koordinatları."
+        },
+        "description": "Bu kamera için varsayılan hareket algılama ayarları.",
+        "threshold": {
+            "label": "Hareket eşiği",
+            "description": "Hareket algılayıcı tarafından kullanılan piksel farkı eşiği; daha yüksek değerler hassasiyeti azaltır (1-255 arası)."
+        },
+        "lightning_threshold": {
+            "label": "Yıldırım eşiği",
+            "description": "Kısa süreli yıldırımları algılamak ve yok saymak için eşik (0.3 ile 1.0 arasında, düşük değer daha hassastır). Bu hareket algılamasını tamamen engellemez; eşik aşıldığında algılayıcı yalnızca sonraki karelerin analizini durdurur. Bu olaylar sırasında hareket tabanlı kayıtlar oluşturulmaya devam edilir."
+        },
+        "skip_motion_threshold": {
+            "label": "Hareket atlama eşiği",
+            "description": "0.0-1.0 arası bir değere ayarlanırsa ve tek bir karede görüntünün bu orandan daha fazlası değişirse algılayıcı bir hareket kutusu döndürmez ve derhal yeniden ölçüm ayarı (kalibrasyon) yapar. Bu işlem CPU tasarrufu sağlayabilir ve yıldırım, fırtına vb. durumlarda hatalı pozitif sonuçları azaltabilir; ancak bir PTZ kameranın nesne izlemesi gibi gerçek olayları kaçırabilir. Bu tercih birkaç megabyte'lık kaydın kaybedilmesiyle birkaç kısa klibin incelenmesi arasındadır. Bu özelliği devre dışı bırakmak için boş (Hiçbiri) olarak bırakın."
+        },
+        "contour_area": {
+            "label": "Kontur alanı",
+            "description": "Bir hareket konturunun sayılması için gereken minimum kontur alanı (piksel cinsinden)."
+        },
+        "delta_alpha": {
+            "label": "Delta alfası",
+            "description": "Hareket hesaplaması amacıyla görüntü karelerinin farkını alma işlemlerinde kullanılan alfa harmanlama çarpanı."
+        },
+        "frame_alpha": {
+            "label": "Görüntü karesi alfası",
+            "description": "Hareket ön işlemesinde görüntü karelerini harmanlarken kullanılan alfa değeri."
+        },
+        "frame_height": {
+            "label": "Görüntü karesi yüksekliği",
+            "description": "Hareket hesaplanırken görüntü karelerinin ölçeklendirileceği yükseklik (piksel cinsinden)."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT kapatma gecikmesi",
+            "description": "MQTT 'kapalı' (off) durumu yayınlamak için son hareketten sonra beklenecek süre (saniye)."
+        },
+        "enabled_in_config": {
+            "label": "Orijinal hareket durumu",
+            "description": "Hareket algılamasının orijinal statik yapılandırmadaki etkinleştirilme durumunu gösterir."
+        },
+        "raw_mask": {
+            "label": "Ham Maske"
+        }
+    },
+    "objects": {
+        "label": "Nesneler",
+        "description": "Nesne izleme varsayılanları — izlenecek etiketler ve nesne başına filtreler dahil.",
+        "track": {
+            "label": "İzlenecek nesneler",
+            "description": "Bu kamera ile izlenecek nesne etiketleri."
+        },
+        "filters": {
+            "label": "Nesne filtreleri",
+            "description": "Algılanan nesnelere, hatalı pozitifleri azaltmak amacıyla uygulanacak filtreler (alan, oran, güven).",
+            "min_area": {
+                "label": "Minimum nesne alanı",
+                "description": "Bu nesne türü için gereken minimum çerçeve alanı (piksel veya yüzde). Piksel (tamsayı (int)) veya yüzde (0.000001 ile 0.99 arasında kayan noktalı sayı (float)) olabilir."
+            },
+            "max_area": {
+                "label": "Maksimum nesne alanı",
+                "description": "Bu nesne türü için gereken maksimum çerçeve alanı (piksel veya yüzde). Piksel (tamsayı (int)) veya yüzde (0.000001 ile 0.99 arasında kayan noktalı sayı (float)) olabilir."
+            },
+            "min_ratio": {
+                "label": "Minimum en:boy oranı",
+                "description": "Çerçevenin geçerli sayılması için gereken minimum en:boy oranı."
+            },
+            "max_ratio": {
+                "label": "Maksimum en:boy oranı",
+                "description": "Çerçevenin geçerli sayılması için gereken maksimum genişlik:yükseklik oranı."
+            },
+            "threshold": {
+                "label": "Güven eşiği",
+                "description": "Algılamanın gerçek pozitif sayılması için gereken tespit güven eşiği ortalaması."
+            },
+            "min_score": {
+                "label": "Minimum güven",
+                "description": "Algılamanın sayılması için gereken minimum tek kare tespit güven düzeyi."
+            },
+            "mask": {
+                "label": "Filtre maskesi",
+                "description": "Bu filtrenin görüntü karesi içinde uygulanacağı yeri belirleyen çokgen koordinatları."
+            },
+            "raw_mask": {
+                "label": "Ham Maske"
+            }
+        },
+        "mask": {
+            "label": "Nesne maskesi",
+            "description": "Belirlenen alanlarda nesne algılamayı önlemek için kullanılan maske çokgeni."
+        },
+        "raw_mask": {
+            "label": "Ham Maske"
+        },
+        "genai": {
+            "label": "GenAI nesne yapılandırması",
+            "description": "İzlenen nesneleri betimlemeye ve üretim amacıyla kareler göndermeye yönelik GenAI seçenekleri.",
+            "enabled": {
+                "label": "GenAI'ı Etkinleştir",
+                "description": "GenAI'ın takip edilen nesneler için varsayılan olarak açıklamalar oluşturmasını etkinleştirin."
+            },
+            "use_snapshot": {
+                "label": "Anlık fotoğrafları kullan",
+                "description": "GenAI açıklaması üretmek için küçük resimler yerine anlık nesne fotoğraflarını kullan."
+            },
+            "prompt": {
+                "label": "Görsel açıklaması komutu",
+                "description": "GenAI ile açıklamalar oluştururken kullanılan varsayılan komut şablonu."
+            },
+            "object_prompts": {
+                "label": "Nesne komutları",
+                "description": "Belirlenen etiketler için GenAI çıktılarını özelleştirmeye yönelik nesne komutları."
+            },
+            "objects": {
+                "label": "GenAI nesneleri",
+                "description": "GenAI'a varsayılan olarak gönderilecek nesne etiketlerinin listesi."
+            },
+            "required_zones": {
+                "label": "Zorunlu bölgeler",
+                "description": "GenAI tarafından nesne açıklama üretimi tetiklenmesi için girilmesi zorunlu tutulacak bölgeler."
+            },
+            "debug_save_thumbnails": {
+                "label": "Küçük resimleri kaydet",
+                "description": "GenAI'a gönderilen küçük resimleri hata ayıklama ve incelemeler için kaydet."
+            },
+            "send_triggers": {
+                "label": "GenAI tetiklemeleri",
+                "description": "Karelerin GenAI'a ne zaman gönderileceğini tanımlar (bitişte, güncellemeler sonrası, vb.).",
+                "tracked_object_end": {
+                    "label": "Sonlandığında gönder",
+                    "description": "İzlenen nesne sonlandığında GenAI'a bir istek gönder."
+                },
+                "after_significant_updates": {
+                    "label": "Erken GenAI tetiklemesi",
+                    "description": "İzlenen nesne için belirtilen sayıda önemli güncelleme sonrası GenAI'a bir istek gönder."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Orijinal GenAI durumu",
+                "description": "Orijinal statik yapılandırmada GenAI'ın etkinleştirilme durumunu gösterir."
+            }
+        }
+    },
+    "record": {
+        "label": "Kayıt",
+        "description": "Bu kamera için kayıt ve kayıt saklama ayarları.",
+        "enabled": {
+            "label": "Kaydı etkinleştir",
+            "description": "Bu kamera için kaydı etkinleştir veya devre dışı bırak."
+        },
+        "expire_interval": {
+            "label": "Kayıt temizleme aralığı",
+            "description": "Süresi geçmiş kayıt parçalarını silen temizlik geçişleri arası süre (dakika cinsinden)."
+        },
+        "continuous": {
+            "label": "Sürekli saklama",
+            "description": "İzlenen nesnelerden veya hareketten bağımsız olarak kayıtların saklanacağı gün sayısı. Yalnızca uyarı ve tespit kayıtlarını saklamak istiyorsanız 0 olarak ayarlayın.",
+            "days": {
+                "label": "Saklama süresi (gün)",
+                "description": "Kayıtların kaç gün saklanacağı."
+            }
+        },
+        "motion": {
+            "label": "Hareket kayıtlarının saklanması",
+            "description": "Hareketle tetiklenen kayıtların takip edilen nesnelerden bağımsız olarak saklanacağı gün sayısı. Yalnızca uyarı ve tespit kayıtlarını saklamak istiyorsanız 0'a ayarlayın.",
+            "days": {
+                "label": "Saklama süresi (gün)",
+                "description": "Kayıtların kaç gün saklanacağı."
+            }
+        },
+        "detections": {
+            "label": "Tespit kayıtlarının saklanması",
+            "description": "Tespit olayları için kayıt saklama ayarları; yakalama öncesi/sonrası süreleri dahil.",
+            "pre_capture": {
+                "label": "Yakalama öncesi saniyeler",
+                "description": "Tespit olayının öncesinden kayda dahil edilecek saniye sayısı."
+            },
+            "post_capture": {
+                "label": "Yakalama sonrası saniyeler",
+                "description": "Tespit olayının sonrasından kayda dahil edilecek saniye sayısı."
+            },
+            "retain": {
+                "label": "Olay kaydı saklaması",
+                "description": "Tespit olay kayıtları için saklama ayarları.",
+                "days": {
+                    "label": "Saklama süresi (gün)",
+                    "description": "Tespit olayı kayıtlarının saklanacağı gün sayısı."
+                },
+                "mode": {
+                    "label": "Saklama modu",
+                    "description": "Saklama modu: tümü (tüm parçaları kaydet), hareket (hareket içeren parçaları kaydet) veya aktif_nesneler (aktif nesneler içeren parçaları kaydet)."
+                }
+            }
+        },
+        "alerts": {
+            "retain": {
+                "label": "Olay kayıtlarının saklanması",
+                "description": "Tespit olaylarının kayıtları için saklama ayarları.",
+                "days": {
+                    "label": "Saklama süresi (gün)",
+                    "description": "Tespit olayı kayıtlarının saklanacağı gün sayısı."
+                },
+                "mode": {
+                    "label": "Saklama modu",
+                    "description": "Saklama modu: tümü (tüm parçaları kaydet), hareket (hareket içeren parçaları kaydet) veya aktif_nesneler (aktif nesneler içeren parçaları kaydet)."
+                }
+            },
+            "label": "Uyarı kayıtlarının saklanması",
+            "description": "Uyarı olayları için yakalama öncesi/sonrası süreler dahil kayıt saklama ayarları.",
+            "pre_capture": {
+                "label": "Yakalama öncesi saniyeler",
+                "description": "Tespit olayı için yakalama öncesi/sonrası süreler dahil kayıt saklama ayarları."
+            },
+            "post_capture": {
+                "label": "Yakalama sonrası saniyeler",
+                "description": "Tespit olayının sonrasından kayda dahil edilecek saniye sayısı."
+            }
+        },
+        "export": {
+            "label": "Yapılandırmayı dışa aktar",
+            "description": "Kayıtları dışa aktarırken kullanılan, zaman atlamalı çekim ve donanım hızlandırması gibi ayarlar.",
+            "hwaccel_args": {
+                "label": "Hwaccel (donanım hızlandırması) parametrelerini dışa aktar",
+                "description": "Dışa aktarım / kod dönüştürme (transcoding) operasyonları için kullanılan donanım hızlandırması parametreleri."
+            },
+            "max_concurrent": {
+                "label": "Maksimum eş zamanlı dışa aktarım sayısı",
+                "description": "Aynı anda işlenecek en fazla dışa aktarım işi sayısı."
+            },
+            "chapters": {
+                "label": "Dışa aktarılan kayıtlara gömülecek bölüm bilgisi öteverileri (metadata)"
+            }
+        },
+        "preview": {
+            "label": "Önizleme yapılandırması",
+            "description": "Kullanıcı arayüzünde gösterilen kayıtların kalitesini belirleyen ayarlar.",
+            "quality": {
+                "label": "Önizleme kalitesi",
+                "description": "Önizleme kalite seviyesi (çok_düşük, düşük, orta, yüksek, çok_yüksek)."
+            }
+        },
+        "sub": {
+            "label": "Alt yayın kaydı",
+            "description": "Düşük kaliteli ikinci bir yayının kaydı için ayarlar.",
+            "enabled": {
+                "label": "Alt yayın kaydını etkinleştir",
+                "description": "Uyarlamalı (adaptive) kalite ile oynatma ve uzun süreli saklama amacıyla düşük kaliteli ikinci bir yayın kaydını etkinleştir."
+            },
+            "continuous": {
+                "label": "Alt yayın sürekli kayıt saklama süresi",
+                "description": "Alt yayın kayıtlarının izlenen nesneler ve hareketlerden bağımsız olarak saklanacağı gün sayısı.",
+                "days": {
+                    "label": "Saklama süresi (gün)",
+                    "description": "Kayıtların kaç gün saklanacağı."
+                }
+            },
+            "motion": {
+                "label": "Alt yayın hareket saklama süresi",
+                "description": "Hareketle tetiklenen alt yayın kayıtlarının saklanacağı gün sayısı.",
+                "days": {
+                    "label": "Saklama süresi (gün)",
+                    "description": "Kayıtların kaç gün saklanacağı."
+                }
+            },
+            "alerts": {
+                "label": "Alt yayın uyarı saklama süresi",
+                "description": "Uyarılar için alt yayın kayıt ayarları.",
+                "days": {
+                    "label": "Saklama süresi (gün)",
+                    "description": "Tespit olay kayıtlarının saklanacağı gün sayısı."
+                },
+                "mode": {
+                    "label": "Saklama modu",
+                    "description": "Saklama modu: tümü (tüm parçaları sakla), hareket (hareketli parçaları sakla) veya aktif_nesneler (aktif nesneli parçaları sakla)."
+                }
+            },
+            "detections": {
+                "label": "Alt yayın tespit saklama süresi",
+                "description": "Alt yayın tespit kayıtları için saklama ayarları.",
+                "days": {
+                    "label": "Saklama süresi (gün)",
+                    "description": "Tespit olay kayıtlarının saklanacağı gün sayısı."
+                },
+                "mode": {
+                    "label": "Saklama modu",
+                    "description": "Saklama modu: tümü (tüm parçaları sakla), hareket (hareketli parçaları sakla) veya aktif_nesneler (aktif nesneli parçaları sakla)."
+                }
+            }
+        },
+        "enabled_in_config": {
+            "label": "Orijinal kayıt durumu",
+            "description": "Kaydın orijinal statik yapılandırmadaki etkinleştirilme durumunu gösterir."
+        }
+    },
+    "profiles": {
+        "label": "Profiller",
+        "description": "Çalışma zamanında (runtime) etkinleştirilebilen, kısmi istisnalar (overrides) içeren adlandırılmış yapılandırma profilleri."
+    },
+    "zones": {
+        "label": "Bölgeler",
+        "description": "Bölgeler, bir nesnenin belli bir alanda olup olmadığını algılayabilmeniz için görüntü karesinde belirli bir alan tanımlamanızı sağlar.",
+        "friendly_name": {
+            "label": "Bölge adı",
+            "description": "Bölgenin Frigate kullanıcı arayüzünde gözüken kullanıcı dostu adı. Belirtilmezse bölge adının biçimlendirilmiş bir hali kullanılacaktır."
+        },
+        "enabled": {
+            "label": "Etkin",
+            "description": "Bu bölgeyi etkinleştir veya devre dışı bırak. Devre dışı bölgeler çalışma zamanında (runtime) gözardı edilir."
+        },
+        "enabled_in_config": {
+            "label": "Bölgenin orijinal durumunu takip et."
+        },
+        "filters": {
+            "label": "Bölge filtreleri",
+            "description": "Bu bölgedeki nesnelere uygulanacak filtreler. Hatalı pozitifleri azaltmak veya bölgeye dahil edilecek nesneleri kısıtlamak için kullanılır.",
+            "min_area": {
+                "label": "Minimum nesne alanı",
+                "description": "Bu nesne türü için gereken minimum çerçeve alanı (piksel veya yüzde). Piksel (tamsayı / int) veya yüzde (0.000001 and 0.99 arası kayan noktalı sayı / float) olabilir."
+            },
+            "max_area": {
+                "label": "Maksimum nesne alanı",
+                "description": "Bu nesne türü için gereken maksimum çerçeve alanı (piksel veya yüzde). Piksel (tamsayı / int) veya yüzde (0.000001 and 0.99 arası kayan noktalı sayı / float) olabilir."
+            },
+            "min_ratio": {
+                "label": "Minimum en:boy oranı",
+                "description": "Çerçevenin oluşturulması için gereken minimum genişlik/yükseklik oranı."
+            },
+            "max_ratio": {
+                "label": "Maksimum en:boy oranı",
+                "description": "Çerçevenin oluşturulması için gereken maksimum genişlik/yükseklik oranı."
+            },
+            "threshold": {
+                "label": "Güven eşiği",
+                "description": "Nesnenin gerçek pozitif sayılması için gereken ortalama tespit güven eşiği."
+            },
+            "min_score": {
+                "label": "Minimum güven eşiği",
+                "description": "Nesnenin sayılması için gereken minimum tespit güven eşiği."
+            },
+            "mask": {
+                "label": "Filtre maskesi",
+                "description": "Bu filtrenin görüntü karesi içinde nereye uygulanacağını tanımlayan çokgen koordinatları."
+            },
+            "raw_mask": {
+                "label": "Ham Maske"
+            }
+        },
+        "coordinates": {
+            "label": "Koordinatlar",
+            "description": "Bölge alanını tanımlayan çokgen koordinatları. Virgülle ayrılmış bir metin (string) veya koordinat metinleri listesi olabilir. Koordinatlar göreceli (0-1) veya mutlak (eski sistem) olmalıdır."
+        },
+        "distances": {
+            "label": "Gerçek dünya mesafeleri",
+            "description": "Bölge dörtgeninin her kenarı için isteğe bağlı gerçek dünya mesafeleri. Hız veya mesafe hesaplamalarında kullanılır. Belirtilecekse tam olarak 4 değere sahip olmalıdır."
+        },
+        "inertia": {
+            "label": "Eylemsiz görüntü kareleri",
+            "description": "Bir nesnenin mevcut kabul edilmesi için art arda kaç kare boyunca algılanması gerektiği. Anlık geçici algılamaların elenmesine yardımcı olur."
+        },
+        "loitering_time": {
+            "label": "Oyalanma süresi (saniye)",
+            "description": "Bir nesnenin oyalanıyor sayılması için bölgede kalması gereken saniye sayısı. Oyalanma tespitini devre dışı bırakmak için 0 olarak ayarlayın."
+        },
+        "objects": {
+            "description": "Bu bölgeyi tetikleyebilecek etiket haritası (labelmap) kaynaklı nesne türlerinin listesi. Bir metin (string) veya bir metin listesi olabilir. Boş bırakılırsa tüm nesneler değerlendirilir.",
+            "label": "Tetikleme nesneleri"
+        },
+        "speed_threshold": {
+            "label": "Minimum hız",
+            "description": "Bir nesnenin bölge içinde kabul edilmesi için gereken minimum hız (mesafeler belirtilmişse gerçek dünya birimleriyle). Hız tabanlı bölge tetiklemelerinde kullanılır."
+        }
+    },
+    "enabled_in_config": {
+        "label": "Orijinal kamera durumu",
+        "description": "Kameranın orijinal durumunu takip et."
+    },
+    "review": {
+        "label": "İncele",
+        "description": "Bu kamera için kullanıcı arayüzü ve depolama tarafından kullanılan uyarıları, tespitleri ve GenAI (Üretken Yapay Zeka) inceleme özetlerini kontrol eden ayarlar.",
+        "alerts": {
+            "label": "Uyarı yapılandırması",
+            "description": "Takip edilen hangi nesnelerin uyarı oluşturacağı ve uyarıların nasıl saklanacağı.",
+            "enabled": {
+                "label": "Uyarıları etkinleştir",
+                "description": "Bu kamera için uyarı üretimini etkinleştir veya devre dışı bırak."
+            },
+            "labels": {
+                "label": "Uyarı etiketleri",
+                "description": "Uyarı oluşturacak nesne etiketlerinin listesi (örn: araba, kişi)."
+            },
+            "required_zones": {
+                "label": "Zorunlu bölgeler",
+                "description": "Bir nesnenin uyarı oluşturması için girmek zorunda olduğu bölgeler. Her bölgeye izin vermek için boş bırakın."
+            },
+            "enabled_in_config": {
+                "label": "Orijinal uyarı durumu",
+                "description": "Uyarıların statik yapılandırmada baştan etkinleştirilip etkinleştirilmediğini takip eder."
+            },
+            "cutoff_time": {
+                "label": "Uyarı sonlandırma zamanı",
+                "description": "Bir uyarıyı sonlandırmadan önce (yeni bir uyarı faaliyeti oluşmazsa) beklenecek süre (saniye)."
+            }
+        },
+        "detections": {
+            "label": "Tespit yapılandırması",
+            "description": "Hangi takipli nesnelerin (uyarılar dışında) tespitler oluşturacakları ve tespitlerin nasıl saklanacağının ayarları.",
+            "enabled": {
+                "label": "Tespitleri etkinleştir",
+                "description": "Bu kamera için tespit olaylarını etkinleştir veya devre dışı bırak."
+            },
+            "labels": {
+                "label": "Tespit etiketleri",
+                "description": "Tespit olayı oluşturacak nesne etiketlerinin listesi."
+            },
+            "required_zones": {
+                "label": "Zorunlu bölgeler",
+                "description": "Bir nesnenin tespit oluşturması için girmek zorunda olduğu bölgeler. Tüm bölgelere izin vermek için boş bırakın."
+            },
+            "cutoff_time": {
+                "label": "Tespit sonlandırma süresi",
+                "description": "Bir tespiti sonlandırmadan önce (yeni bir tespit faaliyeti oluşmazsa) beklenecek süre (saniye)."
+            },
+            "enabled_in_config": {
+                "label": "Orijinal tespit durumu",
+                "description": "Tespitlerin statik yapılandırmadaki orijinal etkinleştirilme durumunu takip eder."
+            }
+        },
+        "genai": {
+            "label": "GenAI yapılandırması",
+            "description": "Açıklamalar ve incelenen öğelerin özetlerini üretmek için üretken yapay zeka kullanımını kontrol eder.",
+            "enabled": {
+                "label": "GenAI açıklamalarını etkinleştir",
+                "description": "İncelenen öğelerin GenAI ile üretilen açıklamaları ve özetlerini etkinleştir veya devre dışı bırak."
+            },
+            "alerts": {
+                "label": "Uyarılar için GenAI'ı etkinleştir",
+                "description": "Uyarı öğelerinin açıklamalarını üretmek için GenAI kullan."
+            },
+            "detections": {
+                "label": "Tespitler için GenAI'ı etkinleştir",
+                "description": "Tespit öğelerinin açıklamalarını üretmek için GenAI kullan."
+            },
+            "image_source": {
+                "label": "İnceleme görselinin kaynağı",
+                "description": "GenAI'a gönderilen görüntülerin kaynağı ('önizleme' veya 'kayıtlar'); 'kayıtlar' daha kaliteli görüntü kareleri kullanır ancak daha fazla jeton (token) harcar."
+            },
+            "additional_concerns": {
+                "label": "Ek hususlar",
+                "description": "GenAI'ın bu kameradaki faaliyeti değerlendirirken dikkate alması gereken ek hususlar veya notların bir listesi."
+            },
+            "debug_save_thumbnails": {
+                "label": "Küçük resimleri kaydet",
+                "description": "GenAI sağlayıcısına hata ayıklama ve inceleme için gönderilen küçük resimleri kaydet."
+            },
+            "enabled_in_config": {
+                "label": "Orijinal GenAI durumu",
+                "description": "GenAI incelemesinin orijinal statik yapılandırmadaki etkinleştirilme durumunu takip eder."
+            },
+            "preferred_language": {
+                "label": "Tercih edilen dil",
+                "description": "GenAI sağlayıcısından üretilen karşılıkları isterken tercih edilecek dil."
+            },
+            "frame_mode": {
+                "label": "Görüntü karesi modu",
+                "description": "Görüntü karelerinin modele nasıl sunulacağı. 'kareler' komutun ardından kareleri gönderir. Bu bir süreci kendi başına takip edebilen modellere uygundur. 'işlenmiş_kareler' her kareyi etiketler ve nesne takibinden elde edilen notları aralara serpiştirir. Bu da tekrar eden veya tersine dönen faaliyetlerin takibini kaçırabilen modellere yardımcı olur."
+            },
+            "response_style": {
+                "label": "Karşılık tarzı",
+                "description": "Üretilen inceleme açıklamaları öntanımlı yazım tarzı ayarları. Öntanımlar kullanıcıya gösterilen başlık, özet ve sahne açıklamasının üslubunu ve ayrıntı seviyesini belirler. 'default' (varsayılan) yerleşik komutu değiştirmeden bırakır."
+            },
+            "activity_context_prompt": {
+                "label": "Faaliyet bağlam komutu",
+                "description": "GenAI özetleri için bağlam sağlamak amacıyla hangi faaliyetlerin şüpheli olup olmadığını açıklayan özelleştirilmiş komut."
+            }
+        }
+    },
+    "semantic_search": {
+        "label": "Anlamsal Arama",
+        "description": "Benzer öğeleri bulmak için nesne gömüleri (embeddings) oluşturan ve bunları sorgulayan anlamsal (semantik) arama ile ilgili ayarlar.",
+        "triggers": {
+            "label": "Tetikleyiciler",
+            "description": "Kameraya özgü anlamsal arama tetikleyicileri için eylemler ve eşleşme kriterleri.",
+            "friendly_name": {
+                "label": "Kullanıcı dostu isim",
+                "description": "Kullanıcı arayüzünde gösterilecek isteğe bağlı kullanıcı dostu isim."
+            },
+            "enabled": {
+                "label": "Bu tetikleyiciyi etkinleştir",
+                "description": "Bu anlamsal arama tetikleyicisini etkinleştir veya devre dışı bırak."
+            },
+            "type": {
+                "label": "Tetikleyici türü",
+                "description": "Tetikleyici türü: 'küçük_resim' (görselle eşleştir) veya 'açıklama' (metinle eşleştir)."
+            },
+            "data": {
+                "label": "Tetikleyici içeriği",
+                "description": "İzlenen nesnelerle eşleştirilecek metin ifadesi veya küçük resim kimliği."
+            },
+            "threshold": {
+                "label": "Tetikleyici eşiği",
+                "description": "Bu tetikleyiciyi etkinleştirmek için gereken minimum benzerlik puanı (0-1)."
+            },
+            "actions": {
+                "label": "Tetikleyici eylemler",
+                "description": "Tetikleyici eşleşmesinde çalıştırılacak eylemlerin listesi (bildirim, alt etiket, öznitelik)."
+            }
+        }
+    },
+    "snapshots": {
+        "label": "Anlık fotoğraflar",
+        "description": "Takipli nesnelerin API tarafından üretilen anlık fotoğraflarının ayarları.",
+        "enabled": {
+            "label": "Anlık fotoğrafları etkinleştir",
+            "description": "Bu kamera için anlık fotoğrafları etkinleştir veya devre dışı bırak."
+        },
+        "timestamp": {
+            "label": "Zaman damgası basımı",
+            "description": "API'dan gelen anlık fotoğraflara zaman damgası bas."
+        },
+        "bounding_box": {
+            "label": "Çerçeve basımı",
+            "description": "API'dan gelen anlık fotoğraflardaki takipli nesnelere çerçeve çiz."
+        },
+        "crop": {
+            "label": "Anlik fotoğrafı kırp",
+            "description": "API'dan gelen anlık fotoğrafları algılanan nesnenin çerçevesine kırp."
+        },
+        "required_zones": {
+            "label": "Zorunlu bölgeler",
+            "description": "Bir anlık fotoğrafın kaydedilmesi için bir nesnenin girmesi gereken bölgeler."
+        },
+        "height": {
+            "label": "Anlık fotoğraf yüksekliği",
+            "description": "API'dan gelen anlık fotoğrafların yeniden boyutlandırılacağı yükseklik (piksel); orijinal boyutu korumak için boş bırakın."
+        },
+        "retain": {
+            "label": "Anlık fotoğraf saklama süresi",
+            "description": "Anlık fotoğraflar için saklama ayarları; varsayılan gün sayısı ve nesne bazlı istisnalar dahil.",
+            "default": {
+                "label": "Varsayılan saklama süresi",
+                "description": "Anlık fotoğrafların varsayılan olarak saklanacağı gün sayısı."
+            },
+            "objects": {
+                "label": "Nesne saklama süresi",
+                "description": "Anlık fotoğrafların saklanacağı gün sayısı için nesne bazlı istisnalar."
+            }
+        },
+        "quality": {
+            "label": "Anlık fotoğraf kalitesi",
+            "description": "Kaydedilen anlık fotoğraflar için kodlama (encoding) kalitesi (0-100)."
+        }
+    },
+    "timestamp_style": {
+        "label": "Zaman damgası tarzı",
+        "description": "Anlık fotoğraflar ve hata ayıklama görünümüne uygulanan zaman damgaları için tarz seçenekleri.",
+        "position": {
+            "label": "Zaman damgası konumu",
+            "description": "Zaman damgasının görseldeki konumu (sol üst/sağ üst/sol alt/sağ alt)."
+        },
+        "format": {
+            "label": "Zaman damgası biçimi",
+            "description": "Zaman damgası için kullanılacak tarih-saat metninin biçimi (Python datetime biçim kodlarıyla)."
+        },
+        "color": {
+            "label": "Zaman damgası rengi",
+            "description": "Zaman damgası yazısı için RGB renk değerleri (tümü 0-255).",
+            "red": {
+                "label": "Kırmızı",
+                "description": "Zaman damgası renginin kırmızı bileşeni (0-255)."
+            },
+            "green": {
+                "label": "Yeşil",
+                "description": "Zaman damgası renginin yeşil bileşeni (0-255)."
+            },
+            "blue": {
+                "label": "Mavi",
+                "description": "Zaman damgası renginin mavi bileşeni (0-255)."
+            }
+        },
+        "thickness": {
+            "label": "Zaman damgası kalınlığı",
+            "description": "Zaman damgası metninin çizgi kalınlığı."
+        },
+        "effect": {
+            "label": "Zaman damgası efekti",
+            "description": "Zaman damgası metni için görsel efekt (none=yok, solid=opak, shadow=gölge)."
+        }
+    },
+    "best_image_timeout": {
+        "label": "En iyi görsel için zaman aşımı",
+        "description": "En yüksek güven skorlu görselin bekleneceği süre."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "MQTT görsel yayınlama ayarları.",
+        "enabled": {
+            "label": "Görsel gönder",
+            "description": "Bu kamera için anlık nesne fotoğraflarının MQTT konularında yayınlanmasını etkinleştir."
+        },
+        "timestamp": {
+            "label": "Zaman damgası ekle",
+            "description": "MQTT'ye yayınlanan görsellere bir zaman damgası bas."
+        },
+        "bounding_box": {
+            "label": "Çerçeve ekle",
+            "description": "MQTT'ye yayınlanan görsellere çerçeve ekle."
+        },
+        "crop": {
+            "label": "Görseli kırp",
+            "description": "MQTT'ye yayınlanan görselleri algılanan nesnenin çerçevesine kırp."
+        },
+        "height": {
+            "label": "Görsel yüksekliği",
+            "description": "MQTT'ye yayınlanan görsellerin boyutlandırılacağı yükseklik (piksel)."
+        },
+        "required_zones": {
+            "label": "Zorunlu bölgeler",
+            "description": "Bir MQTT görselinin yayınlanması için bir nesnenin girmesi gereken bölgeler."
+        },
+        "quality": {
+            "label": "JPEG kalitesi",
+            "description": "MQTT'ye yayınlanan görsellerin JPEG kalitesi (0-100)."
+        }
+    },
+    "notifications": {
+        "label": "Bildirimler",
+        "description": "Bu kamera için bildirim etkinleştirme ve kontrol ayarları.",
+        "enabled": {
+            "label": "Bildirimleri etkinleştir",
+            "description": "Bu kamera için bildirimleri etkinleştir."
+        },
+        "email": {
+            "label": "Bildirim e-postası",
+            "description": "E-posta adresi. Anlık bildirimler için kullanılır veya bazı bildirim sağlayıcılar için zorunludur."
+        },
+        "cooldown": {
+            "label": "Mola süresi",
+            "description": "Alıcıları spam'lememek için bildirimler arası mola (cooldown) süresi (saniye)."
+        },
+        "enabled_in_config": {
+            "label": "Orijinal bildirim durumu",
+            "description": "Bildirimlerin statik yapılandırmadaki orijinal etkinleştirilme durumunu belirtir."
+        }
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Bu kamera için ONVIF bağlantısı ve PTZ otomatik takip ayarları.",
+        "host": {
+            "label": "ONVIF sunucusu",
+            "description": "Bu kameranın ONVIF hizmetinin sunucusu/host'u (ve isteğe bağlı şeması)."
+        },
+        "port": {
+            "label": "ONVIF portu",
+            "description": "ONVIF hizmeti için port numarası."
+        },
+        "user": {
+            "label": "ONVIF kullanıcı adı",
+            "description": "ONVIF yetkilendirmesi için kullanıcı adı; bazı aygıtlar ONVIF için yönetici (admin) kullanıcısı gerektirir."
+        },
+        "password": {
+            "label": "ONVIF parolası",
+            "description": "ONVIF yetkilendirmesi için parola."
+        },
+        "tls_insecure": {
+            "label": "TLS doğrulamasını devre dışı bırak",
+            "description": "ONVIF için TLS doğrulamasını atla ve özet (digest) kimlik doğrulamasını devre dışı bırak (güvensizdir; yalnızca güvenli ağlarda kullanın)."
+        },
+        "profile": {
+            "label": "ONVIF profili",
+            "description": "Jeton (token) veya isimle eşleşen, PTZ kontrolü kullanımı için belirlenmiş ONVIF medya profili. Belirtilmezse geçerli PTZ yapılandırmasına sahip ilk profil otomatik olarak seçilir."
+        },
+        "autotracking": {
+            "label": "Otomatik takip",
+            "description": "Hareketli nesneleri PTZ kamera hareketleriyle otomatik olarak takip et ve görüntü karesinin merkezinde tut.",
+            "enabled": {
+                "label": "Otomatik takibi etkinleştir",
+                "description": "Algılanan nesnelerin PTZ kamera ile otomatik takibini aç veya kapat."
+            },
+            "calibrate_on_startup": {
+                "label": "Başlangıçta ölçüm ayarı yap",
+                "description": "Takip hassasiyetini artırmak için başlangıçta PTZ motor hızlarını ölç. Frigate ölçüm ayarı (kalibrasyon) sonrasında yapılandırmayı movement_weights (hareket ağırlıkları) ile güncelleyecektir."
+            },
+            "zooming": {
+                "label": "Yaklaştırma modu",
+                "description": "Yaklaştırma davranışını belirle: devre dışı (yalnızca yatay ve dikey dönüş), mutlak (en uyumlu) veya göreceli (eş zamanlı yatak/dikey hareket ve yaklaştırma)."
+            },
+            "zoom_factor": {
+                "label": "Yaklaştırma oranı",
+                "description": "Takip edilen nesnelere yaklaşılma oranını belirle. Düşük değerler görünüm sahnesini geniş tutar; yüksek değerler daha fazla yaklaşır ama takibi kaçırabilir. Değerler 0.1 ila 0.75 arasıdır."
+            },
+            "track": {
+                "label": "Takip edilen nesneler",
+                "description": "Otomatik takibi tetiklemesi gereken nesne türleri listesi."
+            },
+            "required_zones": {
+                "label": "Zorunlu bölgeler",
+                "description": "Otomatik takibin başlaması için nesnelerin bu bölgelerden birine girmesi gerekir."
+            },
+            "return_preset": {
+                "label": "Geri dönüş öntanımı",
+                "description": "Kamera ürün yazılımında (firmware) belirlenmiş, takip sonrası geri dönülecek öntanımlı ONVIF adı."
+            },
+            "timeout": {
+                "label": "Geri dönüş zaman aşımı",
+                "description": "Takip kaybı sonrası kamerayı ön ayar konumuna geri döndürmeden önce bu kadar saniye bekle."
+            },
+            "movement_weights": {
+                "label": "Hareket ağırlıkları",
+                "description": "Kamera ölçüm ayarı (kalibrasyon) tarafından otomatik üretilen ölçüm ayarı değerleri. Manuel olarak değiştirmeyin."
+            },
+            "enabled_in_config": {
+                "label": "Orijinal otomatik takip durumu",
+                "description": "Otomatik takibin yapılandırmadaki etkinleştirilme durumunu izleme amaçlı dahili değer."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Zaman uyumsuzluğunu yoksay",
+            "description": "ONVIF iletişimi için kamera ve Frigate sunucusu arasındaki zaman senkronizasyonu farklarını yoksay."
+        }
+    },
+    "type": {
+        "label": "Kamera türü",
+        "description": "Kamera Türü"
+    },
+    "ui": {
+        "label": "Kamera Arayüzü",
+        "description": "Bu kameranın için kullanıcı arayüzündeki sırası ve görünürlüğü. Sıralama varsayılan görüntü panelini etkiler. Daha ince kontrol için kamera grupları kullanın.",
+        "order": {
+            "label": "Arayüz sıralaması",
+            "description": "Kameranın kullanıcı arayüzünde (varsayılan görüntü paneli ve listeler) sıralanma sayısı; büyük sayılar daha altta çıkar."
+        },
+        "dashboard": {
+            "label": "\"Canlı\" görüntü panelinde göster",
+            "description": "Bu kamera varsayılan \"Tüm Kameralar\" canlı görüntü panelinde görünsün mü? Kamera arayüzün diğer her yerinde kalacaktır; kamera grupları ve ayarlar dahil."
+        },
+        "review": {
+            "label": "İncele'de göster",
+            "description": "Bu kameranın İncele'de görünüp görünmeyeceğini belirleyin (inceleme sayfası ve sayfanın kamera filtresi, hareket incelemesi ve Geçmiş görünümü)."
+        }
+    },
+    "webui_url": {
+        "label": "Kamera URL'i",
+        "description": "Kameraya doğrudan sistem sayfasından ulaşmak için URL"
     }
 }

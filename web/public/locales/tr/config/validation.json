@@ -1,8 +1,38 @@
 {
     "minimum": "En az {{limit}} olmalı",
     "maximum": "En fazla {{limit}} olmalı",
-    "exclusiveMinimum": "{{limit}}’den büyük olmalı",
-    "exclusiveMaximum": "{{limit}}’den küçük olmalı",
+    "exclusiveMinimum": "Değer >{{limit}} olmalı",
+    "exclusiveMaximum": "Değer <{{limit}} olmalı",
     "minLength": "En az {{limit}} karakter olmalı",
-    "maxLength": "En fazla {{limit}} karakter olmalı"
+    "maxLength": "En fazla {{limit}} karakter olmalı",
+    "minItems": "En az {{limit}} öğe içermeli",
+    "maxItems": "En fazla {{limit}} öğe içermeli",
+    "pattern": "Geçersiz biçim",
+    "required": "Bu alan zorunludur",
+    "type": "Geçersiz değer türü",
+    "enum": "İzin verilen değerlerden biri olmalıdır",
+    "const": "Değer beklenen sabitle uyuşmuyor",
+    "uniqueItems": "Tüm öğeler benzersiz olmalıdır",
+    "format": "Geçersiz biçim",
+    "additionalProperties": "Bilinmeyen özellik girilemez",
+    "oneOf": "İzin verilen şemalardan yalnızca biriyle uyuşmalıdır",
+    "anyOf": "İzin verilen şemalardan en az biriyle uyuşmalıdır",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Rol eşleşmeleri yapılandırıldığında rol başlığı zorunludur."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Her rol yalnızca bir girdi yayınına atanabilir.",
+            "detectRequired": "En az bir adet girdi yayını 'tespit' rolüne atanmalıdır.",
+            "hwaccelDetectOnly": "Yalnızca tespit rolüne sahip bir girdi yayını donanım hızlandırması parametrelerini tanımlayabilir."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Çift sayı olmalıdır."
+    },
+    "models": {
+        "defaultRequired": "Modellerden birinin 'Tüm Kameralar' sahnesini kullanması gerekir. Bu olmazsa sahne seçmeyen bir kameranın kullanabileceği bir model kalmaz."
+    }
 }

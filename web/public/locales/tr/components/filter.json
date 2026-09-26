@@ -2,7 +2,7 @@
   "labels": {
     "label": "Etiketler",
     "all": {
-      "title": "Bütün Etiketler",
+      "title": "Tüm Etiketler",
       "short": "Etiketler"
     },
     "count_one": "{{count}} Etiket",
@@ -13,7 +13,7 @@
       "title": "Tüm Tarihler",
       "short": "Tarihler"
     },
-    "selectPreset": "Ön ayar seçin…"
+    "selectPreset": "Öntanımlı ayar seçin…"
   },
   "sort": {
     "label": "Sırala",
@@ -28,21 +28,21 @@
   "filter": "Filtre",
   "zones": {
     "all": {
-      "short": "Alanlar",
-      "title": "Bütün Alanlar"
+      "short": "Bölgeler",
+      "title": "Tüm Alanlar"
     },
-    "label": "Alanlar"
+    "label": "Bölgeler"
   },
   "reset": {
     "label": "Filtreleri varsayılanlara sıfırla"
   },
   "features": {
     "submittedToFrigatePlus": {
-      "tips": "Öncelikle izlenen nesneler içinde fotoğrafı olanlar için filtre uygulamalısınız.<br /><br />Fotoğrafı olmayan nesneler Frigate+’a gönderilemez.",
-      "label": "Frigate+'a Gönderildi"
+      "tips": "Öncelikle anlık fotoğrafı olan takipli nesneleri filtrelemelisiniz.<br /><br />Anlık fotoğrafı olmayan takipli nesneler Frigate+'ya gönderilemez.",
+      "label": "Frigate+'ya Gönderildi"
     },
     "hasVideoClip": "Video klibi var",
-    "hasSnapshot": "Fotoğrafı var",
+    "hasSnapshot": "Anlık fotoğrafı var",
     "label": "Özellikler"
   },
   "score": "Skor",
@@ -58,10 +58,10 @@
       "short": "Kameralar",
       "title": "Tüm Kameralar"
     },
-    "label": "Kameraları Filtrele"
+    "label": "Kamera Filtresi"
   },
   "review": {
-    "showReviewed": "İncelenenleri de Göster"
+    "showReviewed": "İncelenenleri de göster"
   },
   "explore": {
     "settings": {
@@ -69,45 +69,45 @@
         "summary": "Özet",
         "title": "Varsayılan Görünüm",
         "unfilteredGrid": "Filtresiz Izgara",
-        "desc": "Filtre seçilmediğinde, her etiket için en son izlenen nesnelerin özeti ya da filtresiz ızgara görünümü gösterilir."
+        "desc": "Filtre seçilmediğinde, her etiket için en son takip edilen nesnelerin özeti ya da filtresiz ızgara görünümü gösterilir."
       },
       "gridColumns": {
-        "title": "Izgara Sütun Sayısı",
+        "title": "Izgara Sütunları",
         "desc": "Izgara görünümüde gösterilecek sütun sayısı."
       },
       "title": "Ayarlar",
       "searchSource": {
         "options": {
           "thumbnailImage": "Küçük Resim",
-          "description": "Metin Açıklaması"
+          "description": "Açıklama"
         },
         "label": "Arama kaynağı",
-        "desc": "Aramanızda küçük resimleri mi yoksa açıklamaları mı kullanacağınızı seçin."
+        "desc": "Küçük resimleri mi yoksa takip edilen nesnelerin açıklamalarını mı arayacağınızı seçin."
       }
     },
     "date": {
       "selectDateBy": {
-        "label": "Filtrelemek için tarih seçin"
+        "label": "Filtrelenecek tarihi seçin"
       }
     }
   },
   "logSettings": {
-    "filterBySeverity": "Önceliğe göre günlükleri filtrele",
-    "disableLogStreaming": "Günlük akışını devre dışı bırak",
+    "filterBySeverity": "Günlükleri vehamete göre filtrele",
+    "disableLogStreaming": "Günlük yayınını devre dışı bırak",
     "allLogs": "Tüm günlükler",
     "loading": {
-      "title": "Günlük Akışı",
-      "desc": "Günlükler sayfası en aşağıya kaydırıldığında yeni günlük satırları geldikçe aşağıya eklenir."
+      "title": "Yükleniyor",
+      "desc": "Günlük sayfası en aşağıya kaydırıldığında, yeni günlük satırları geldikçe aşağıya eklenirler."
     },
-    "label": "Düzeye göre günlükleri filtrele"
+    "label": "Günlüklerin seviyesini filtrele"
   },
   "trackedObjectDelete": {
     "toast": {
       "success": "Takip edilen nesneler başarıyla silindi.",
       "error": "Takip edilen nesneler silinemedi: {{errorMessage}}"
     },
-    "title": "Silmeyi onayla",
-    "desc": "Bu {{objectLength}} adet izlenen nesneyi sildiğinizde ilgili tüm fotoğraflar, kaydedilmiş tüm gömüler ve ilişkili tüm nesne yaşam döngüsü kayıtları kaldırılır. Bu izlenen nesnelere ait Geçmiş görünümündeki kayıtlı görüntüler <em>SİLİNMEYECEKTİR.</em><br /><br />Devam etmek istediğinize emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
+    "title": "Silmeyi Onayla",
+    "desc": "Bu {{objectLength}} takipli nesneyi sildiğinizde ilgili tüm anlık fotoğraflar, kaydedilmiş tüm gömüler ve ilişkili tüm nesne yaşam döngüsü kayıtları silinir. Bu takipli nesnelere ait Geçmiş görünümündeki kayıtlı görüntüler <em>SİLİNMEYECEKTİR</em>.<br /><br />Devam etmek istediğinize emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklayın."
   },
   "recognizedLicensePlates": {
     "selectPlatesFromList": "Listeden bir veya birden fazla plaka seçin.",
@@ -120,10 +120,10 @@
     "clearAll": "Tümünü temizle"
   },
   "motion": {
-    "showMotionOnly": "Yalnızca Hareket Olanları Göster"
+    "showMotionOnly": "Yalnızca Hareketleri Göster"
   },
   "zoneMask": {
-    "filterBy": "Alana göre filtrele"
+    "filterBy": "Bölge maskesine göre filtrele"
   },
   "classes": {
     "count_one": "{{count}} Sınıf",
@@ -134,7 +134,7 @@
     }
   },
   "attributes": {
-    "label": "Sınıflandırma Özellikleri",
-    "all": "Tüm Özellikler"
+    "label": "Sınıflandırma Öznitelikleri",
+    "all": "Tüm Öznitelikler"
   }
 }

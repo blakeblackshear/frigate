@@ -1,10 +1,10 @@
 {
-  "search": "Arama",
+  "search": "Ara",
   "documentTitle": "Dışa Aktar - Frigate",
   "deleteExport": {
     "label": "Dışa Aktarımı Sil"
   },
-  "deleteExport.desc": "{{exportName}} adlı dışa aktarımı silmek istediğinize emin misiniz?",
+  "deleteExport.desc": "{{exportName}} dışa aktarımını silmek istediğinize emin misiniz?",
   "editExport": {
     "saveExport": "Dışa Aktarımı Kaydet",
     "desc": "Bu dışa aktarım için yeni bir isim girin.",
@@ -12,7 +12,10 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Dışa aktarım adlandırılamadı: {{errorMessage}}"
+      "renameExportFailed": "Dışa aktarım adlandırılamadı: {{errorMessage}}",
+      "assignCaseFailed": "Vaka ataması güncellenemedi: {{errorMessage}}",
+      "caseSaveFailed": "Vaka kaydedilemedi: {{errorMessage}}",
+      "caseDeleteFailed": "Vaka silinemedi: {{errorMessage}}"
     }
   },
   "noExports": "Dışa aktarım bulunamadı",
@@ -20,10 +23,107 @@
     "shareExport": "Dışa aktarmayı paylaş",
     "downloadVideo": "Videoyu İndir",
     "editName": "İsmi Düzenle",
-    "deleteExport": "Dışa Aktarmayı Sil"
+    "deleteExport": "Dışa aktarımı sil",
+    "assignToCase": "Vakaya ekle",
+    "removeFromCase": "Vakadan çıkart"
   },
   "headings": {
-    "uncategorizedExports": "Kategorize Edilmemiş Dışa Aktarım",
+    "uncategorizedExports": "Kategorisiz Aktarımlar",
     "cases": "Durumlar"
+  },
+  "toolbar": {
+    "newCase": "Yeni Vaka",
+    "addExport": "Dışa Aktarım Ekle",
+    "editCase": "Vakayı Düzenle",
+    "deleteCase": "Vakayı Sil"
+  },
+  "deleteCase": {
+    "label": "Vakayı Sil",
+    "desc": "{{caseName}} vakasını silmek istediğinize emin misiniz?",
+    "descKeepExports": "Dışa aktarımlar kategorize edilmemiş halde kalacaklar.",
+    "descDeleteExports": "Bu vakadaki tüm dışa aktarımlar kalıcı olarak silinecek.",
+    "deleteExports": "Dışa aktarımları da sil"
+  },
+  "caseDialog": {
+    "title": "Vakaya ekle",
+    "description": "Mevcut bir vaka seç veya yeni vaka oluştur.",
+    "selectLabel": "Vaka",
+    "newCaseOption": "Yeni vaka oluştur",
+    "nameLabel": "Vaka ismi",
+    "descriptionLabel": "Açıklama"
+  },
+  "caseCard": {
+    "emptyCase": "Henüz dışa aktarım yok"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} dışa aktarımı",
+    "queued": "Sırada",
+    "running": "Çalışıyor",
+    "preparing": "Hazırlanıyor",
+    "copying": "Kopyalanıyor",
+    "encoding": "Dönüştürülüyor",
+    "encodingRetry": "Dönüştürülüyor (tekrar deneniyor)",
+    "merging": "Birleştiriliyor",
+    "finalizing": "Bitiriliyor"
+  },
+  "caseView": {
+    "noDescription": "Açıklama yok",
+    "createdAt": "{{value}} oluşturuldu",
+    "exportCount_one": "1 dışa aktarım",
+    "exportCount_other": "{{count}} dışa aktarım",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kamera",
+    "showMore": "Daha fazla göster",
+    "showLess": "Daha az göster",
+    "emptyTitle": "Bu vaka boş",
+    "emptyDescription": "Vakayı düzenli halde tutmak için mevcut kategorize edilmemiş dışa aktarımları ekle.",
+    "emptyDescriptionNoExports": "Henüz eklenebilecek bir kategorize edilmemiş dışa aktarım yok."
+  },
+  "caseEditor": {
+    "createTitle": "Vaka Oluştur",
+    "editTitle": "Vakayı Düzenle",
+    "namePlaceholder": "Vaka Adı",
+    "descriptionPlaceholder": "Bu vakaya notlar veya bağlam ekle"
+  },
+  "addExportDialog": {
+    "title": "Dışa Aktarımı {{caseName}} Vakasına Ekle",
+    "searchPlaceholder": "Kategorize edilmemiş dışa aktarımları ara",
+    "empty": "Bu aramaya uygun bir kategorize edilmemiş dışa aktarım yok.",
+    "addButton_one": "1 Dışa Aktarım Ekle",
+    "addButton_other": "{{count}} Dışa Aktarım Ekle",
+    "adding": "Ekleniyor..."
+  },
+  "selected_one": "{{count}} seçili",
+  "selected_other": "{{count}} seçili",
+  "bulkActions": {
+    "addToCase": "Vakaya Ekle",
+    "moveToCase": "Vakaya Taşı",
+    "removeFromCase": "Vakadan Çıkart",
+    "delete": "Sil",
+    "deleteNow": "Hemen Sil"
+  },
+  "bulkDelete": {
+    "title": "Dışa Aktarımları Sil",
+    "desc_one": "{{count}} dışa aktarımı silmek istediğinize emin misiniz?",
+    "desc_other": "{{count}} dışa aktarımı silmek istediğinize emin misiniz?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Vakadan Çıkart",
+    "desc_one": "{{count}} dışa aktarım bu vakadan çıkartılsın mı?",
+    "desc_other": "{{count}} dışa aktarım bu vakadan çıkartılsın mı?",
+    "descKeepExports": "Dışa aktarımlar kategorize edilmemişlere taşınacak.",
+    "descDeleteExports": "Dışa aktarımlar kalıcı olarak silinecek.",
+    "deleteExports": "Onun yerine dışa aktarımları sil"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Dışa aktarımlar başarıyla silindi",
+      "reassign": "Vaka ataması başarıyla güncellendi",
+      "remove": "Dışa aktarımlar vakadan başarıyla çıkartıldı"
+    },
+    "error": {
+      "deleteFailed": "Dışa aktarımlar silinemedi: {{errorMessage}}",
+      "reassignFailed": "Vaka ataması güncellenemedi: {{errorMessage}}"
+    }
   }
 }

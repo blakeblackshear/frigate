@@ -855,7 +855,6 @@
       "desc": "Frigate može nativno slati push obavijesti na vaš uređaj kada je pokrenut u pregledniku ili instaliran kao PWA."
     },
     "notificationUnavailable": {
-      "title": "Obavijesti nisu dostupne",
       "desc": "Web push obavijesti zahtijevaju siguran kontekst (<code>https://...</code>). Ovo je ograničenje preglednika. Pristupite Frigateu sigurno kako biste koristili obavijesti."
     },
     "globalSettings": {
@@ -946,7 +945,6 @@
   "triggers": {
     "documentTitle": "Okidači",
     "semanticSearch": {
-      "title": "Semantičko pretraživanje je onemogućeno",
       "desc": "Semantičko pretraživanje mora biti omogućeno za korištenje okidača."
     },
     "management": {

@@ -254,8 +254,6 @@
   "metrics": "Systemmålinger",
   "lastRefreshed": "Sist oppdatert: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} har høy CPU-belastning for FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} har høy CPU-belastning for detektering ({{detectAvg}}%)",
     "healthy": "Systemet fungerer som det skal",
     "reindexingEmbeddings": "Reindeksering av vektorrepresentasjoner ({{processed}}% fullført)",
     "cameraIsOffline": "{{camera}} er frakoblet",

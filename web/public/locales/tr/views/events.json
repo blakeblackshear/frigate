@@ -1,14 +1,14 @@
 {
-  "camera": "kamera",
+  "camera": "Kamera",
   "alerts": "Uyarılar",
   "detections": "Tespitler",
   "empty": {
-    "detection": "İncelenecek tespit öğesi yok",
-    "alert": "İncelenecek uyarı öğesi yok",
+    "detection": "İncelenecek tespit yok",
+    "alert": "İncelenecek uyarı yok",
     "motion": "Hareket verisi bulunamadı",
     "recordingsDisabled": {
       "title": "Kayıt özelliği etkinleştirilmelidir",
-      "description": "İnceleme öğeleri yalnızca bir kamera için kayıt özelliği etkinleştirildiğinde oluşturulabilir."
+      "description": "İnceleme öğeleri yalnızca kamera kayıt özelliği etkinleştirildiğinde oluşturulabilir."
     }
   },
   "events": {
@@ -17,48 +17,80 @@
     "label": "Olaylar"
   },
   "recordings": {
-    "documentTitle": "Kayıtlar - Frigate"
+    "documentTitle": "Kayıtlar - Frigate",
+    "invalidSharedLink": "Ayrıştırma hatası nedeniyle zaman damgalı kayıt bağlantısı açılamıyor.",
+    "invalidSharedCamera": "Bilinmeyen veya yetkisiz bir kamera nedeniyle zaman damgalı kayıt bağlantısı açılamıyor."
   },
   "calendarFilter": {
     "last24Hours": "Son 24 Saat"
   },
   "markAsReviewed": "İncelendi Olarak İşaretle",
   "newReviewItems": {
-    "button": "Yeni İncelenecek Öğeler Var",
-    "label": "Yeni inceleme öğelerini göster"
+    "button": "İncelenecek Yeni Öğeler Var",
+    "label": "Yeni öğeleri incele"
   },
   "documentTitle": "İncele - Frigate",
   "motion": {
     "label": "Hareket",
-    "only": "Yalnızca hareket"
+    "only": "Yalnızca hareketler"
   },
-  "timeline.aria": "Zaman şeridi seçin",
+  "timeline.aria": "Zaman şeridi seç",
   "markTheseItemsAsReviewed": "Bunları incelendi olarak işaretle",
   "allCameras": "Tüm Kameralar",
-  "selected_one": "{{count}} seçildi",
-  "selected_other": "{{count}} seçildi",
+  "selected_one": "{{count}} seçili",
+  "selected_other": "{{count}} seçili",
   "detected": "algılandı",
-  "zoomIn": "Büyüt",
-  "zoomOut": "Küçült",
+  "zoomIn": "Yaklaştır",
+  "zoomOut": "Uzaklaştır",
   "detail": {
-    "label": "Detay",
+    "label": "Ayrıntı",
     "aria": "Ayrıntı görünümünü aç/kapat",
     "trackedObject_one": "{{count}} nesne",
     "trackedObject_other": "{{count}} nesne",
-    "noObjectDetailData": "Nesneye ait ayrıntılı veri bulunmuyor.",
-    "settings": "Ayrıntılı Görünüm Ayarları",
+    "noObjectDetailData": "Nesneye ait ayrıntı verisi yok.",
+    "settings": "Ayrıntı Görünümü Ayarları",
     "alwaysExpandActive": {
-      "title": "Etkin olanı her zaman genişlet",
-      "desc": "Varsa, etkin inceleme öğesinin nesne ayrıntılarını daima göster."
+      "title": "Aktif olanı her zaman genişlet",
+      "desc": "İncelenen öğenin nesne ayrıntıları varsa daima göster."
     },
-    "noDataFound": "İncelenecek ayrıntılı veri bulunmuyor"
+    "noDataFound": "İncelenecek ayrıntı verisi bulunmuyor"
   },
   "objectTrack": {
     "trackedPoint": "Takip edilen nokta",
     "clickToSeek": "Bu zamana atlamak için tıklayın"
   },
   "normalActivity": "Normal",
-  "needsReview": "İnceleme Gerekiyor",
+  "needsReview": "İncelenmesi gerekiyor",
   "securityConcern": "Güvenlik endişesi",
-  "select_all": "Tümü"
+  "select_all": "Tümü",
+  "timeline": {
+    "label": "Zaman şeridi"
+  },
+  "subOnlyQuality": "Bu zaman şeridinde yalnızca düşük kaliteli kayıtlar var",
+  "motionSearch": {
+    "menuItem": "Hareket Ara",
+    "openMenu": "Kamera seçenekleri"
+  },
+  "motionPreviews": {
+    "menuItem": "Hareket önizlemelerini göster",
+    "title": "Hareket önizlemeleri: {{camera}}",
+    "mobileSettingsTitle": "Hareket Önizleme Ayarları",
+    "mobileSettingsDesc": "Oynatma hızı, karartma, kırpma ayarlarını düzenleyin. Yalnızca hareket içeren klipleri incelemek için bir tarih seçin.",
+    "dim": "Karart",
+    "dimAria": "Karartma şiddetini ayarla",
+    "dimDesc": "Hareket alanı görünürlüğünü yükseltmek için karartmayı artırın.",
+    "speed": "Hız",
+    "speedAria": "Önizleme oynatma hızını seç",
+    "speedDesc": "Önizleme kliplerinin oynatılma hızını seçin.",
+    "back": "Geri",
+    "empty": "Önizleme bulunmuyor",
+    "noPreview": "Önizleme kullanılamıyor",
+    "seekAria": "{{camera}} oynatıcısını {{time}} zamanına getir",
+    "filter": "Filtre",
+    "filterDesc": "Yalnızca belli bölgelerde hareket içeren klipleri göstermek için alanlar seçin.",
+    "filterClear": "Temizle",
+    "crop": "Filtrelemek için kırp",
+    "cropAria": "Önizlemelerde filtreli alanları veya tümünü göster",
+    "cropDesc": "Önizlemelerde tam kareyi göstermek yerine seçili filtre alanlarına yaklaştır."
+  }
 }

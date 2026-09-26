@@ -164,8 +164,6 @@
   },
   "lastRefreshed": "Naposledy obnovené: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} má vysoké využitie CPU vo formáte FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} má vysoké využitie CPU pri detekcii ({{detectAvg}}%)",
     "healthy": "Systém je zdravý",
     "reindexingEmbeddings": "Preindexovanie vložených prvkov (dokončené na {{processed}} %)",
     "cameraIsOffline": "{{camera}} je offline",

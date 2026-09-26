@@ -254,8 +254,6 @@
     "averageInf": "Tiempo promedio de inferencia"
   },
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} tiene un uso elevado de CPU por detección ({{detectAvg}}%)",
     "healthy": "El sistema está saludable",
     "reindexingEmbeddings": "Reindexando empotrados ({{processed}}% completado)",
     "detectIsSlow": "{{detect}} es lento ({{speed}} ms)",

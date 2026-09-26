@@ -33,16 +33,16 @@
     "year_other": "{{time}} yıl",
     "hour_one": "{{time}} saat",
     "hour_other": "{{time}} saat",
-    "h": "{{time}} s",
-    "yr": "{{time}} yıl",
-    "mo": "{{time}} ay",
+    "h": "{{time}}sa",
+    "yr": "{{time}}yıl",
+    "mo": "{{time}}ay",
     "untilForTime": "{{time}} saatine kadar",
-    "pm": "ÖS",
-    "am": "ÖÖ",
-    "d": "{{time}} gün",
+    "pm": "ös",
+    "am": "öö",
+    "d": "{{time}}g",
     "day_one": "{{time}} gün",
     "day_other": "{{time}} gün",
-    "m": "{{time}}d",
+    "m": "{{time}}dk",
     "minute_one": "{{time}} dakika",
     "minute_other": "{{time}} dakika",
     "s": "{{time}}sn",
@@ -85,9 +85,9 @@
     "back": "Geri",
     "unselect": "Seçimi kaldır",
     "info": "Bilgi",
-    "enable": "Aç",
-    "disabled": "Kapalı",
-    "disable": "Kapat",
+    "enable": "Etkinleştir",
+    "disabled": "Devre dışı",
+    "disable": "Devre dışı bırak",
     "history": "Geçmiş",
     "cameraAudio": "Kamera Sesi",
     "on": "AÇIK",
@@ -101,39 +101,42 @@
     "apply": "Uygula",
     "reset": "Sıfırla",
     "done": "Bitti",
-    "enabled": "Açık",
+    "enabled": "Etkin",
     "save": "Kaydet",
     "exitFullscreen": "Tam Ekrandan Çık",
-    "pictureInPicture": "Pencere içinde pencere",
+    "pictureInPicture": "Resim içinde resim",
     "copyCoordinates": "Koordinatları kopyala",
     "yes": "Evet",
     "play": "Oynat",
     "no": "Hayır",
     "copy": "Kopyala",
     "cancel": "İptal",
-    "twoWayTalk": "Çift Yönlü Ses",
+    "twoWayTalk": "Çift Yönlü Konuşma",
     "close": "Kapat",
     "delete": "Sil",
     "continue": "Devam Et",
     "add": "Ekle",
     "applying": "Uygulanıyor…",
     "undo": "Geri al",
-    "copiedToClipboard": "Panoya kopyaladı",
+    "copiedToClipboard": "Panoya kopyalandı",
     "modified": "Değiştirilmiş",
-    "overridden": "Üstüne yazılmış",
-    "resetToGlobal": "Genele sıfırla",
+    "overridden": "İstisnalı",
+    "resetToGlobal": "Genel değere sıfırla",
     "resetToDefault": "Varsayılana sıfırla",
     "saveAll": "Hepsini Kaydet",
     "savingAll": "Hepsi Kaydediliyor…",
     "undoAll": "Hepsini Geri Al",
-    "retry": "Yeniden dene"
+    "retry": "Yeniden dene",
+    "expand": "Genişlet",
+    "collapse": "Daralt",
+    "reload": "Yeniden yükle"
   },
   "menu": {
-    "systemLogs": "Sistem günlükleri",
+    "systemLogs": "Günlükler",
     "user": {
       "anonymous": "anonim",
       "account": "Hesap",
-      "current": "Mevcut kullanıcı: {{user}}",
+      "current": "Şu Anki Kullanıcı: {{user}}",
       "setPassword": "Parola Belirle",
       "logout": "Oturumu Kapat",
       "title": "Kullanıcı"
@@ -141,22 +144,22 @@
     "configuration": "Yapılandırma",
     "languages": "Diller",
     "language": {
-      "en": "İngilizce",
+      "en": "English (İngilizce)",
       "zhCN": "简体中文 (Basitleştirilmiş Çince)",
       "withSystem": {
-        "label": "Dil için sistem tercihini kullan"
+        "label": "Dil için sistem ayarlarını kullan"
       },
       "hi": "हिन्दी (Hintçe)",
       "fr": "Français (Fransızca)",
       "pt": "Português (Portekizce)",
       "de": "Deutsch (Almanca)",
       "ja": "日本語 (Japonca)",
-      "tr": "Türkçe (Türkçe)",
+      "tr": "Türkçe",
       "it": "Italiano (İtalyanca)",
       "nl": "Nederlands (Felemenkçe)",
       "sv": "Svenska (İsveççe)",
       "cs": "Čeština (Çekçe)",
-      "nb": "Norsk Bokmål (Bokmål Norveç Dili)",
+      "nb": "Norsk Bokmål (Bokmål Norveççesi)",
       "ko": "한국어 (Korece)",
       "vi": "Tiếng Việt (Vietnamca)",
       "pl": "Polski (Lehçe)",
@@ -166,7 +169,7 @@
       "ro": "Română (Rumence)",
       "hu": "Magyar (Macarca)",
       "fi": "Suomi (Fince)",
-      "da": "Dansk (Danimarka Dili)",
+      "da": "Dansk (Danca)",
       "sk": "Slovenčina (Slovakça)",
       "fa": "فارسی (Farsça)",
       "es": "Español (İspanyolca)",
@@ -185,7 +188,8 @@
       "ur": "اردو (Urduca)",
       "hr": "Hrvatski (Hırvatça)",
       "zhHant": "繁體中文 (Geleneksel Çince)",
-      "bs": "Bosanski (Boşnakça)"
+      "bs": "Bosanski (Boşnakça)",
+      "be": "Беларуская (Belarusça)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -195,7 +199,7 @@
       "red": "Kırmızı",
       "default": "Varsayılan",
       "nord": "Kuzey",
-      "highcontrast": "Yüksek Karşıtlık"
+      "highcontrast": "Yüksek Kontrast"
     },
     "restart": "Frigate'i yeniden başlat",
     "live": {
@@ -219,17 +223,17 @@
     "darkMode": {
       "label": "Karanlık Mod",
       "withSystem": {
-        "label": "Karanlık tema için sistem tercihini kullan"
+        "label": "Karanlık tema için sistem ayarlarını kullan"
       },
-      "light": "Açık",
-      "dark": "Koyu"
+      "light": "Aydınlık",
+      "dark": "Karanlık"
     },
     "export": "Dışa Aktar",
     "configurationEditor": "Yapılandırma düzenleyicisi",
     "help": "Yardım",
-    "faceLibrary": "Yüz Veritabanı",
-    "systemMetrics": "Sistem metrikleri",
-    "uiPlayground": "UI Deneme Alanı",
+    "faceLibrary": "Yüz Kütüphanesi",
+    "systemMetrics": "Sağlık ve Metrikler",
+    "uiPlayground": "Arayüz Deneme Alanı",
     "classification": "Sınıflandırma",
     "profiles": "Profiller",
     "actions": "Eylemler",
@@ -237,10 +241,10 @@
     "features": "Özellikler"
   },
   "label": {
-    "back": "Geri",
-    "hide": "{{item}} öğesini gizle",
-    "show": "{{item}} öğesini göster",
-    "ID": "ID",
+    "back": "Geri git",
+    "hide": "{{item}} gizlensin",
+    "show": "{{item}} gösterilsin",
+    "ID": "Kimlik",
     "none": "Hiçbiri",
     "all": "Tümü",
     "other": "Diğer"
@@ -252,17 +256,17 @@
   },
   "unit": {
     "speed": {
-      "mph": "mph",
-      "kph": "km/s"
+      "mph": "mil/sa",
+      "kph": "km/sa"
     },
     "length": {
-      "feet": "feet",
+      "feet": "fit",
       "meters": "metre"
     },
     "data": {
-      "kbps": "kB/s",
-      "mbps": "MB/s",
-      "gbps": "GB/s",
+      "kbps": "kB/sn",
+      "mbps": "MB/sn",
+      "gbps": "GB/sn",
       "kbph": "kB/saat",
       "mbph": "MB/saat",
       "gbph": "GB/saat"
@@ -278,7 +282,7 @@
       "title": "Önceki"
     },
     "label": "sayfalandırma",
-    "more": "Daha fazla"
+    "more": "Daha fazla sayfa"
   },
   "accessDenied": {
     "title": "Erişim Reddedildi",
@@ -296,12 +300,12 @@
       "success": "Yapılandırma değişiklikleri kaydedildi."
     }
   },
-  "selectItem": "{{item}} seçin",
+  "selectItem": "Seç: {{item}}",
   "role": {
     "title": "Rol",
     "viewer": "Görüntüleyici",
     "admin": "Yönetici",
-    "desc": "Yöneticiler Frigate arayüzündeki bütün özelliklere tam erişim sahibidir. Görüntüleyiciler ise yalnızca kameraları, eski görüntüleri ve inceleme öğelerini görüntülemekle sınırlıdır."
+    "desc": "Yöneticiler Frigate arayüzündeki tüm özelliklere tam erişim sahibidir. Görüntüleyiciler ise yalnızca kameraları, eski görüntüleri ve inceleme öğelerini görüntüleyebilirler."
   },
   "readTheDocumentation": "Dökümantasyonu oku",
   "list": {
@@ -316,9 +320,40 @@
   "information": {
     "pixels": "{{area}}px"
   },
-  "no_items": "Öge bulunmuyor",
+  "no_items": "Hiç öğe yok",
   "validation_errors": "Doğrulama Hataları",
   "credentialField": {
-    "savedPlaceholder": "Kaydedildi — mevcut haliyle kalması için boş bırakın"
+    "savedPlaceholder": "Kaydedildi — mevcut halini tutmak için boş bırakın"
+  },
+  "error": {
+    "title": "Bu sayfanın çalışması durdu",
+    "desc": "Sayfada beklenmedik bir hata oluştu. Sayfayı yenilemek genelde sorunu çözer. Sürekli devam ederse ayrıntıları kopyalayıp GitHub'da bir tartışmaya iliştirin.",
+    "staleTitle": "Yenilenmesi gerekiyor",
+    "staleDesc": "Arayüzün bir kısmı yüklenemedi. Bu genelde sekme açıkken Frigate güncellendiği için olur. Yeni sürümü edinmek için sayfayı yenileyin.",
+    "partial": "Arayüzün bir kısmının çalışması durdu.",
+    "copyDetails": "Ayrıntıları kopyala",
+    "copyFailed": "Ayrıntılar panoya kopyalanamadı"
+  },
+  "commandMenu": {
+    "title": "Komut menüsü",
+    "description": "Sayfaları, kameraları, ayarları ve eylemleri ara",
+    "placeholder": "Sayfaları, kameraları, ayarları ve eylemleri ara",
+    "empty": "Eşleşme yok",
+    "hint": "Açmak için \"{{key}}\" veya \"/\". Çalıştırmak için Enter",
+    "section": {
+      "recent": "Son açılanlar",
+      "pages": "Sayfalar",
+      "cameras": "Kameralar",
+      "cameraGroups": "Kamera grupları",
+      "settings": "Ayarlar",
+      "actions": "Eylemler"
+    },
+    "camera": {
+      "live": "Canlı",
+      "review": "İncele"
+    },
+    "action": {
+      "toggleTheme": "Aydınlık veya karanlık moda geç"
+    }
   }
 }

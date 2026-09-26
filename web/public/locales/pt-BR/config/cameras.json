@@ -664,6 +664,10 @@
             "response_style": {
                 "label": "Estilo de resposta",
                 "description": "Estilo de escrita pré-definido para revisão de descrições geradas. A predefinição ajusta o tom e nível de detalhes do título, resumo e descrição das cenas; 'default' deixa o prompt interno sem alterações."
+            },
+            "frame_mode": {
+                "label": "Modo de quadros",
+                "description": "Como os quadros são apresentados ao modelo. 'frames' envia o prompt seguido dos quadros, o que serve para modelos que acompanham bem uma sequência por conta própria. 'annotated_frames' rotula cada quadro e intercala notas derivadas do rastreamento de objetos, o que ajuda modelos que perdem o fio de atividades que se repetem ou se invertem."
             }
         }
     },

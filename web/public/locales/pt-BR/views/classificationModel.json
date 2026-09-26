@@ -134,7 +134,85 @@
   "wizard": {
     "title": "Criar nova classificação",
     "steps": {
-      "nameAndDefine": "Nomear e definir"
+      "nameAndDefine": "Nomear e definir",
+      "stateArea": "Área de estado",
+      "chooseExamples": "Escolher exemplos"
+    },
+    "step1": {
+      "description": "Modelos de estado monitoram áreas fixas da câmera em busca de mudanças (por ex., porta aberta/fechada). Modelos de objeto adicionam classificações aos objetos detectados (por ex., animais conhecidos, entregadores etc.).",
+      "name": "Nome",
+      "namePlaceholder": "Digite o nome do modelo...",
+      "type": "Tipo",
+      "typeState": "Estado",
+      "typeObject": "Objeto",
+      "objectLabel": "Rótulo do objeto",
+      "objectLabelPlaceholder": "Selecione o tipo de objeto...",
+      "classificationType": "Tipo de classificação",
+      "classificationTypeTip": "Saiba mais sobre os tipos de classificação",
+      "classificationTypeDesc": "Sub-rótulos adicionam texto extra ao rótulo do objeto (por ex., 'Pessoa: UPS'). Atributos são metadados pesquisáveis armazenados separadamente nos metadados do objeto.",
+      "classificationSubLabel": "Sub-rótulo",
+      "classificationAttribute": "Atributo",
+      "classes": "Classes",
+      "classesTip": "Saiba mais sobre as classes",
+      "classesStateDesc": "Defina os diferentes estados em que a área da sua câmera pode estar. Por exemplo: 'aberto' e 'fechado' para um portão de garagem.",
+      "classesObjectDesc": "Defina as diferentes categorias em que os objetos detectados serão classificados. Por exemplo: 'entregador', 'morador', 'estranho' para a classificação de pessoas.",
+      "classPlaceholder": "Digite o nome da classe...",
+      "errors": {
+        "nameRequired": "O nome do modelo é obrigatório",
+        "nameLength": "O nome do modelo deve ter no máximo 64 caracteres",
+        "nameOnlyNumbers": "O nome do modelo não pode conter apenas números",
+        "classRequired": "É necessária pelo menos 1 classe",
+        "classesUnique": "Os nomes das classes devem ser únicos",
+        "stateRequiresTwoClasses": "Modelos de estado exigem pelo menos 2 classes",
+        "objectLabelRequired": "Selecione um rótulo de objeto",
+        "objectTypeRequired": "Selecione um tipo de classificação",
+        "noneNotAllowed": "A classe 'none' não é permitida"
+      },
+      "states": "Estados"
+    },
+    "step2": {
+      "description": "Selecione as câmeras e defina a área a ser monitorada em cada uma. O modelo classificará o estado dessas áreas.",
+      "cameras": "Câmeras",
+      "selectCamera": "Selecionar câmera",
+      "noCameras": "Clique em + para adicionar câmeras",
+      "selectCameraPrompt": "Selecione uma câmera da lista para definir sua área de monitoramento"
+    },
+    "step3": {
+      "selectImagesPrompt": "Selecione todas as imagens com: {{className}}",
+      "selectImagesDescription": "Clique nas imagens para selecioná-las. Clique em Continuar quando terminar esta classe.",
+      "generating": {
+        "title": "Gerando imagens de amostra",
+        "description": "O Frigate está extraindo imagens representativas das suas gravações. Isso pode levar um momento..."
+      },
+      "training": {
+        "title": "Treinando modelo",
+        "description": "Seu modelo está sendo treinado em segundo plano. Feche esta janela e o modelo começará a funcionar assim que o treinamento for concluído."
+      },
+      "retryGenerate": "Tentar gerar novamente",
+      "noImages": "Nenhuma imagem de amostra gerada",
+      "classifying": "Classificando e treinando...",
+      "trainingStarted": "Treinamento iniciado com sucesso",
+      "errors": {
+        "noCameras": "Nenhuma câmera configurada",
+        "noObjectLabel": "Nenhum rótulo de objeto selecionado",
+        "generateFailed": "Falha ao gerar exemplos: {{error}}",
+        "generationFailed": "A geração falhou. Tente novamente.",
+        "classifyFailed": "Falha ao classificar as imagens: {{error}}"
+      },
+      "generateSuccess": "Imagens de amostra geradas com sucesso",
+      "allImagesRequired_one": "Classifique todas as imagens. Falta {{count}} imagem.",
+      "allImagesRequired_many": "Classifique todas as imagens. Faltam {{count}} de imagens.",
+      "allImagesRequired_other": "Classifique todas as imagens. Faltam {{count}} imagens.",
+      "modelCreated": "Modelo criado com sucesso. Use a visualização de Classificações recentes para adicionar imagens dos estados que faltam e, em seguida, treine o modelo.",
+      "missingStatesWarning": {
+        "description": "Nem todas as classes têm exemplos. Tente gerar novos exemplos para encontrar a classe ausente, ou continue e use a visualização de Classificações recentes para adicionar imagens depois.",
+        "title": "Exemplos de classes ausentes"
+      },
+      "refreshExamples": "Gerar novos exemplos",
+      "refreshConfirm": {
+        "title": "Gerar novos exemplos?",
+        "description": "Isso gerará um novo conjunto de imagens e limpará todas as seleções, incluindo as classes anteriores. Você precisará selecionar novamente os exemplos de todas as classes."
+      }
     }
   },
   "disabled": "Desativado"

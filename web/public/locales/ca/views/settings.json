@@ -455,9 +455,8 @@
     },
     "title": "Notificacions",
     "notificationUnavailable": {
-      "title": "Notificacions no disponibles",
-      "desc": "Les notificacions push web requereixen un context segur (<code>https://…</code>). Aquesta és una limitació del navegador. Accedeix a Frigate de manera segura per utilitzar les notificacions.",
-      "descPwa": "A iOS, les notificacions push web només estàn disponibles quan Frigate està instalat a la pantalla principal. Obre el menú <strong>Compartir</strong> , selecciona <strong>Afegir a la pantalla</strong>, i obre Frigate des del nou icona per registrar les notificacions en aquest dispositiu."
+      "desc": "Les notificacions push web requereixen un context segur (https://…). Aquesta és una limitació del navegador. Accedeix a Frigate de manera segura per utilitzar les notificacions.",
+      "descPwa": "A iOS, les notificacions push web només estàn disponibles quan Frigate està instalat a la pantalla principal. Obre el menú Compartir, selecciona Afegir a la pantalla, i obre Frigate des del nou icona per registrar les notificacions en aquest dispositiu."
     },
     "unsavedChanges": "Canvis de notificació no desats",
     "globalSettings": {
@@ -881,8 +880,7 @@
     },
     "addTrigger": "Afegir disaprador",
     "semanticSearch": {
-      "desc": "La cerca semàntica ha d'estar activada per a utilitzar els activadors.",
-      "title": "La cerca semàntica està desactivada"
+      "desc": "La cerca semàntica ha d'estar activada per a utilitzar els activadors."
     },
     "wizard": {
       "title": "Crea un activador",
@@ -1544,7 +1542,9 @@
         "preset-record-generic-audio-aac": "Enregistra (Genèric + Àudio a AAC)",
         "preset-record-mjpeg": "Registre - Càmeres MJPEG",
         "preset-record-jpeg": "Registre - Càmeres JPEG",
-        "preset-record-ubiquiti": "Registre - Càmeres Ubiquiti"
+        "preset-record-ubiquiti": "Registre - Càmeres Ubiquiti",
+        "preset-apple-silicon-h265": "Apple Silicon (H.265)",
+        "preset-apple-silicon-h264": "Apple Silicon (H.264)"
       },
       "sameAsRecord": "Igual que els arguments de sortida del registre"
     },

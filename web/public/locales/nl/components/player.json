@@ -37,8 +37,22 @@
       "submittedFrigatePlus": "Frame succesvol ingediend bij Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Het is niet gelukt om een frame naar Frigate+ te sturen"
+      "submitFrigatePlusFailed": "Het is niet gelukt om een frame naar Frigate+ te sturen",
+      "playRecordingsFailed": "Kan opnames niet afspelen (fout {{code}}): {{message}}"
     }
   },
-  "cameraOff": "De camera staat uit"
+  "cameraOff": "De camera staat uit",
+  "quality": {
+    "autoLow": "Afspelen in lage kwaliteit (beperkte bandbreedte)",
+    "autoLowCodec": "Afspelen in lage kwaliteit (Orgineel niet ondersteund voor deze browser)",
+    "autoLowSaveData": "Afspelen in lage kwaliteit (databesparing)",
+    "main": "Origineel",
+    "sub": "Laag",
+    "notSupportedBrowser": "Niet ondersteund door deze browser",
+    "label": "Kwaliteit",
+    "noAudio": "Geen audio",
+    "audioRate": "{{rate}} kHz audio",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Geen opnames in dit tijdsframe"
+  }
 }

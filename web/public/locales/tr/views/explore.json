@@ -10,57 +10,57 @@
         "viewInExplore": "Keşfet'te Görüntüle"
       },
       "tips": {
-        "hasMissingObjects": "Eğer Frigate'in <em>{{objects}}</em> etiketine sahip nesneleri kaydetmesini istiyorsanız yapılandırmanızı buna göre ayarlayın",
-        "mismatch_one": "Tespit edilmiş olan bir nesne bu İncele öğesine dahil edildi. Bu nesne Alarm veya Tespit olarak derecelendirilemedi veya çoktan silindi/temizlendi.",
-        "mismatch_other": "Tespit edilmiş olan {{count}} adet nesne bu İncele öğesine dahil edildi. Bu nesneler Alarm veya Tespit olarak derecelendirilemedi veya çoktan silindi/temizlendi."
+        "hasMissingObjects": "Frigate'in <em>{{objects}}</em> etiketlerine sahip nesneleri kaydetmesini istiyorsanız yapılandırmanızı ayarlayın",
+        "mismatch_one": "Algılanan {{count}} nesne bu incelenen öğeye dahil edildi. Bu nesne uyarı veya tespit olarak derecelendirilemedi veya çoktan temizlendi/silindi.",
+        "mismatch_other": "Algılanan {{count}} nesne bu incelenen öğeye dahil edildi. Bu nesneler uyarı veya tespit olarak derecelendirilemediler veya çoktan temizlendiler/silindiler."
       },
       "toast": {
         "success": {
-          "updatedSublabel": "Alt etiket başarıyla gücellendi.",
-          "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcının hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir.",
+          "updatedSublabel": "Alt etiket başarıyla güncellendi.",
+          "regenerate": "Yeni bir açıklama {{provider}} sağlayıcısından talep edildi. Sağlayıcınızın hızına bağlı olarak yeni açıklamanın oluşturulması biraz zaman alabilir.",
           "updatedLPR": "Plaka başarıyla güncellendi.",
-          "audioTranscription": "Ses dökümü başarıyla istendi. Frigate sunucun­uzun hızına bağlı olarak döküm işlemi tamamlanması biraz zaman alabilir.",
-          "updatedAttributes": "Özellikler başarıyla güncellendi."
+          "audioTranscription": "Ses transkripsiyonu başarıyla istendi. Frigate sunucunuzun hızına bağlı olarak transkripsiyon işleminin tamamlanması biraz zaman alabilir.",
+          "updatedAttributes": "Öznitelikler başarıyla güncellendi."
         },
         "error": {
           "updatedSublabelFailed": "Alt etiket güncellenemedi: {{errorMessage}}",
           "regenerate": "{{provider}} sağlayıcısından yeni açıklama talep edilemedi: {{errorMessage}}",
           "updatedLPRFailed": "Plaka güncellenemedi: {{errorMessage}}",
-          "audioTranscription": "Ses çözümlemesi talep edilemedi: {{errorMessage}}",
-          "updatedAttributesFailed": "Özellikler güncellenemedi: {{errorMessage}}"
+          "audioTranscription": "Ses transkripsiyonu talep edilemedi: {{errorMessage}}",
+          "updatedAttributesFailed": "Öznitelikler güncellenemedi: {{errorMessage}}"
         }
       }
     },
     "label": "Etiket",
     "editSubLabel": {
       "desc": "Bu {{label}} için yeni bir alt etiket girin",
-      "descNoLabel": "Bu takip edilmiş nesne için yeni bir alt etiket girin",
+      "descNoLabel": "Bu takip edilen nesne için yeni bir alt etiket girin",
       "title": "Alt etiketi gücelle"
     },
     "estimatedSpeed": "Tahmini Hız",
     "camera": "Kamera",
-    "zones": "Alanlar",
+    "zones": "Bölgeler",
     "description": {
       "label": "Açıklama",
       "aiTips": "Frigate, Nesne Geçmişi tamamlanana kadar Üretken Yapay Zeka sağlayıcısından bir resim açıklaması talep etmeyecektir.",
       "placeholder": "Takip edilen nesnenin açıklaması"
     },
-    "expandRegenerationMenu": "Yeniden Üret menüsünü genişlet",
-    "regenerateFromSnapshot": "Fotoğraftan Üret",
-    "regenerateFromThumbnails": "Küçük Resimden Üret",
+    "expandRegenerationMenu": "Yeniden Üretim menüsünü genişlet",
+    "regenerateFromSnapshot": "Anlık Fotoğraftan Yeniden Üret",
+    "regenerateFromThumbnails": "Küçük Resimlerden Yeniden Üret",
     "tips": {
       "descriptionSaved": "Açıklama başarıyla kaydedildi",
       "saveDescriptionFailed": "Açıklama güncellenemedi: {{errorMessage}}"
     },
     "button": {
       "regenerate": {
-        "label": "Nesne açıklaması yeniden üretildi",
+        "label": "Nesne açıklamasını yeniden üret",
         "title": "Yeniden Üret"
       },
-      "findSimilar": "Benzerini Bul"
+      "findSimilar": "Benzerlerini Bul"
     },
     "topScore": {
-      "info": "Tepe skor, bir takip edilen nesne için en yüksek ortalama puandır ve arama sonucundaki küçük resimde gösterilen puandan farklı olabilir.",
+      "info": "Tepe skor, bir takip edilen nesne için en yüksek medyan skordur. Arama sonucundaki küçük resimde gösterilen skordan farklı olabilir.",
       "label": "Tepe Skor"
     },
     "objects": "Nesneler",
@@ -71,19 +71,20 @@
     },
     "recognizedLicensePlate": "Tanınan Plaka",
     "snapshotScore": {
-      "label": "Fotoğraf Skoru"
+      "label": "Anlık Fotoğraf Skoru"
     },
     "score": {
       "label": "Skor"
     },
     "editAttributes": {
-      "title": "Özellikleri düzenle",
-      "desc": "Bu {{label}} için sınıflandırma özelliklerini seçin"
+      "title": "Öznitelikleri düzenle",
+      "desc": "Bu {{label}} için sınıflandırma özniteliklerini seçin"
     },
-    "attributes": "Sınıflandırma Özellikleri",
+    "attributes": "Sınıflandırma Öznitelikleri",
     "title": {
       "label": "Başlık"
-    }
+    },
+    "scoreInfo": "Skor Bilgisi"
   },
   "generativeAI": "Üretken Yapay Zeka",
   "exploreIsUnavailable": {
@@ -92,37 +93,37 @@
       "startingUp": "Başlatılıyor…",
       "estimatedTime": "Tahmini kalan süre:",
       "step": {
-        "thumbnailsEmbedded": "Gömü eklenen küçük resimler: ",
-        "descriptionsEmbedded": "Gömü eklenen açıklamalar: ",
-        "trackedObjectsProcessed": "İşlenen takip edilen nesneler: "
+        "thumbnailsEmbedded": "Gömülenen küçük resimler: ",
+        "descriptionsEmbedded": "Gömülenen açıklamalar: ",
+        "trackedObjectsProcessed": "İşlenen takipli nesneler: "
       },
-      "finishingShortly": "Birazdan tamamlanacak",
-      "context": "Keşfet sayfası nesnelerin gömülerinin yeniden dizinlemesi tamamlandığında kullanılabilecektir."
+      "finishingShortly": "Bitmek üzere",
+      "context": "Keşfet sayfası nesne gömülerinin yeniden dizinlenmesi bittiğinde kullanılabilecektir."
     },
     "downloadingModels": {
       "setup": {
         "visionModel": "Görüş modeli",
-        "visionModelFeatureExtractor": "Görüş modeli özellik çıkarmcısı",
+        "visionModelFeatureExtractor": "Görüş modeli özellik çıkarıcısı",
         "textModel": "Metin modeli",
-        "textTokenizer": "Metin tokenizeri"
+        "textTokenizer": "Metin parçalayıcı (tokenizer)"
       },
       "error": "Bir hata oluştu. Frigate günlüklerini kontrol edin.",
       "tips": {
         "context": "Model indirildikten sonra takip edilmiş nesnelerinizin gömüleri tekrar dizinlemeyi tercih edebilirsiniz."
       },
-      "context": "Frigate, Anlamsal Arama özelliği için gerekli olan gömü modellerini indiriyor. Ağ bağlantınızın hızına göre bu işlem bir kaç dakika sürebilir."
+      "context": "Frigate, Anlamsal Arama özelliği için gereken gömü modellerini indiriyor. Ağ bağlantınızın hızına göre birkaç dakika sürebilir."
     }
   },
   "trackedObjectDetails": "Takip Edilen Nesne Detayları",
   "type": {
-    "details": "detaylar",
-    "snapshot": "fotoğraf",
+    "details": "ayrıntılar",
+    "snapshot": "anlık fotoğraf",
     "video": "video",
     "thumbnail": "küçük resim",
-    "tracking_details": "izleme ayrıntıları"
+    "tracking_details": "takip ayrıntıları"
   },
   "objectLifecycle": {
-    "noImageFound": "Bu zaman damgası için bir resim bulunamadı."
+    "noImageFound": "Bu takipli nesne için görsel bulunamadı."
   },
   "itemMenu": {
     "downloadVideo": {
@@ -131,44 +132,51 @@
     },
     "findSimilar": {
       "aria": "Benzer takip edilen nesneleri bul",
-      "label": "Benzerini bul"
+      "label": "Benzerlerini bul"
     },
     "submitToPlus": {
-      "label": "Frigate+'a gönder",
-      "aria": "Frigate+'a gönder"
+      "label": "Frigate+'ya gönder",
+      "aria": "Frigate Artı'ya gönder"
     },
     "viewInHistory": {
-      "label": "Geçmiş görünümünde görüntüle",
-      "aria": "Geçmiş görünümünde görüntüle"
+      "label": "Geçmiş'te Görüntüle",
+      "aria": "Geçmiş'te Görüntüle"
     },
     "deleteTrackedObject": {
       "label": "Bu takip edilen nesneyi sil"
     },
     "downloadSnapshot": {
-      "aria": "Fotoğrafı indir",
-      "label": "Fotoğrafı indir"
+      "aria": "Anlık fotoğrafı indir",
+      "label": "Anlık fotoğrafı indir"
     },
     "addTrigger": {
-      "label": "Tetik ekle",
-      "aria": "Bu takip edilen nesne için bir tetik ekle"
+      "label": "Tetikleyici ekle",
+      "aria": "Bu takip edilen nesne için bir tetikleyici ekle"
     },
     "audioTranscription": {
-      "label": "Çözümle",
-      "aria": "Ses çözümlemesi iste"
+      "label": "Yazıya Dök",
+      "aria": "Sesin yazıya dökümünü (transkripsiyon) iste"
     },
     "downloadCleanSnapshot": {
-      "label": "Temiz anlık görüntüyü indir",
-      "aria": "Temiz anlık görüntüyü indir"
+      "label": "Temiz anlık fotoğrafı indir",
+      "aria": "Temiz anlık fotoğrafı indir"
     },
     "viewTrackingDetails": {
       "label": "Takip ayrıntılarını görüntüle",
       "aria": "Takip ayrıntılarını göster"
     },
     "showObjectDetails": {
-      "label": "Nesne yolunu göster"
+      "label": "Nesne izini göster"
     },
     "hideObjectDetails": {
-      "label": "Nesne yolunu gizle"
+      "label": "Nesne izini gizle"
+    },
+    "debugReplay": {
+      "label": "Hata Ayıklama Oynatımı",
+      "aria": "Takip edilen bu nesneyi hata ayıklama oynatımında görüntüle"
+    },
+    "more": {
+      "aria": "Daha fazla"
     }
   },
   "noTrackedObjects": "Takip Edilen Nesne Bulunamadı",
@@ -180,63 +188,69 @@
         "success": "Takip edilen nesne başarıyla silindi."
       }
     },
-    "tooltip": "Eşleşme: {{type}} (%{{confidence}})",
-    "previousTrackedObject": "Önceki izlenen nesne",
-    "nextTrackedObject": "Sonraki izlenen nesne"
+    "tooltip": "\"{{type}}\" türüyle eşleşti (%{{confidence}})",
+    "previousTrackedObject": "Önceki takipli nesne",
+    "nextTrackedObject": "Sonraki takipli nesne"
   },
   "dialog": {
     "confirmDelete": {
-      "desc": "Bu takip edilen nesneyi silmek anlık görüntüyü, kaydedilmiş gömü verilerini ve ilişkili yaşam döngüsü kayıtlarını siler. Geçmiş görünümündeki bu izlenen nesneye ait kayıtlı video görüntüleri <em>SİLİNMEYECEKTİR.</em> <br /><br />Devam etmek istediğinizden emin misiniz?",
+      "desc": "Bu takip edilen nesneyi silmek anlık fotoğrafı, kaydedilmiş gömü verilerini ve ilişkili yaşam döngüsü kayıtlarını siler. Bu izlenen nesneye ait Geçmiş görünümündeki kayıtlı video görüntüleri <em>SİLİNMEYECEKTİR</em> .<br /><br />Devam etmek istediğinize emin misiniz?",
       "title": "Silmeyi onayla"
+    },
+    "toast": {
+      "error": "Takip edilen bu nesne silinemedi: {{errorMessage}}"
     }
   },
-  "trackedObjectsCount_one": "{{count}} adet takip edilen nesne ",
-  "trackedObjectsCount_other": "{{count}} adet takip edilen nesne ",
-  "exploreMore": "Daha fazla {{label}} nesnesini keşfet",
+  "trackedObjectsCount_one": "{{count}} takipli nesne ",
+  "trackedObjectsCount_other": "{{count}} takipli nesne ",
+  "exploreMore": "Daha fazla {{label}} nesnesi keşfet",
   "aiAnalysis": {
     "title": "Yapay Zeka Analizi"
   },
   "trackingDetails": {
     "title": "Takip Ayrıntıları",
-    "noImageFound": "Bu zaman damgasına ait bir görsel bulunamadı.",
+    "noImageFound": "Bu zaman damgasına ait görsel bulunamadı.",
     "createObjectMask": "Nesne Maskesi Oluştur",
-    "adjustAnnotationSettings": "Etiketleme ayarlarını düzenle",
+    "adjustAnnotationSettings": "Açıklama notu ayarlarını düzenle",
     "scrollViewTips": "Bu nesnenin yaşam döngüsündeki önemli olayları görmek için tıklayın.",
-    "autoTrackingTips": "Otomatik takip yapan kameralar için sınır kutusu konumları doğru olmayabilir.",
-    "count": "{{second}}’den {{first}}",
+    "autoTrackingTips": "Otomatik takip yapan kameralar için çerçeve konumları doğru olmayacak.",
+    "count": "{{first}}/{{second}}",
     "trackedPoint": "Takip edilen nokta",
     "lifecycleItemDesc": {
-      "visible": "{{label}} tespit edildi",
+      "visible": "{{label}} algılandı",
       "entered_zone": "{{label}}, {{zones}} bölgesine girdi",
-      "active": "{{label}} etkin hale geldi",
-      "stationary": "{{label}} sabit hale geldi",
+      "active": "{{label}} hareketlendi",
+      "stationary": "{{label}} sabitleşti",
       "attribute": {
-        "faceOrLicense_plate": "{{label}} için {{attribute}} tespit edildi",
+        "faceOrLicense_plate": "{{label}} öğesinde {{attribute}} algılandı",
         "other": "{{label}}, {{attribute}} olarak tanındı"
       },
       "gone": "{{label}} ayrıldı",
       "heard": "{{label}} duyuldu",
-      "external": "{{label}} tespit edildi",
+      "external": "{{label}} algılandı",
       "header": {
         "zones": "Bölgeler",
         "ratio": "Oran",
         "area": "Alan",
-        "score": "Skor"
+        "score": "Skor",
+        "computedScore": "Hesaplanan Skor",
+        "topScore": "Tepe Skor",
+        "toggleAdvancedScores": "Gelişmiş skorları aç/kapat"
       }
     },
     "annotationSettings": {
-      "title": "Etiketleme Ayarları",
+      "title": "Açıklama Notu Ayarları",
       "showAllZones": {
         "title": "Tüm Bölgeleri Göster",
         "desc": "Herhangi bir bölgeye nesne girdiğinde, o karede bölgeleri her zaman göster."
       },
       "offset": {
-        "label": "Etiket Kaydırma Değeri",
-        "desc": "Bu veriler kameranızın algılama akışından gelir ancak kayıt akışındaki görüntülerin üzerine bindirilir. İki akış tamamen eşzamanlı olmayabilir, bu durum da sınır kutusu ile görüntünün hizasını kaydırabilir. Bu ayarı kullanarak zaman senkronunu ileri veya geri kaydırarak kayıt akışını ve etiketlemeleri hizalayabilirsiniz.",
-        "millisecondsToOffset": "Algılama etiketlemelerinin kaydırılacağı milisaniye değeri. <em>Varsayılan: 0</em>",
-        "tips": "Videonun oynatımı kutulardan ve yol noktalarından öndeyse değeri düşürün; geride kalıyorsa değeri artırın. Bu değer negatif olabilir.",
+        "label": "Açıklama Notu Kaydırma Değeri",
+        "desc": "Bu veriler kameranızın tespit akışından gelir, ancak kayıt akışındaki görüntülerin üzerine bindirilir. İki yayının birebir eş zamanlı olması pek olası değildir. Bunun sonucunda çerçeve ile görüntünün hizaları kayabilir. Bu ayarı kullanıp açıklama notu zamanlarını ileri veya geri kaydırarak notları kayıtlı görüntülerle daha iyi hizalayabilirsiniz.",
+        "millisecondsToOffset": "Tespit açıklama notlarının kaydırılacağı milisaniye değeri. <em>Varsayılan: 0</em>",
+        "tips": "Videonun oynatımı çerçevelerden ve iz noktalarından öndeyse değeri düşürün; geride kalıyorsa artırın. Bu değer negatif olabilir.",
         "toast": {
-          "success": "{{camera}} için etiketleme zaman kaydırması yapılandırma dosyasına kaydedildi."
+          "success": "{{camera}} için açıklama notunun kaydırma değeri yapılandırma dosyasına kaydedildi."
         }
       }
     },
