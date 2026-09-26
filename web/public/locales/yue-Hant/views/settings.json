@@ -470,7 +470,6 @@
       "desc": "Frigate可原生向你的裝置推送通知，無論在瀏覽器中運行或安裝為PWA。"
     },
     "notificationUnavailable": {
-      "title": "無法使用通知功能",
       "desc": "網頁推送通知需在安全環境下運作（<code>https://…</code>），這是瀏覽器的限制。請透過安全連線存取Frigate以使用通知功能。"
     },
     "globalSettings": {
@@ -680,7 +679,6 @@
   "triggers": {
     "documentTitle": "觸發器",
     "semanticSearch": {
-      "title": "語意搜尋已停用",
       "desc": "必須啟用語意搜尋才能使用觸發器。"
     },
     "management": {
