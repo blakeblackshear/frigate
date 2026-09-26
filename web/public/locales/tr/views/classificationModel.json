@@ -1,12 +1,12 @@
 {
   "documentTitle": "Sınıflandırma Modelleri - Frigate",
   "details": {
-    "scoreInfo": "Skor, modelin nesneyi tespit ettiği tüm durumlar için ortalama güven düzeyini gösterir.",
+    "scoreInfo": "Skor, modelin nesneyi algıladığı tüm durumlar için ortalama güven düzeyini gösterir.",
     "none": "Hiçbiri",
     "unknown": "Bilinmiyor"
   },
   "button": {
-    "deleteClassificationAttempts": "Sınıflandırma Fotoğraflarını Sil",
+    "deleteClassificationAttempts": "Sınıflandırma Görsellerini Sil",
     "renameCategory": "Sınıfı Yeniden Adlandır",
     "deleteCategory": "Sınıfı Sil",
     "deleteImages": "Fotoğrafları Sil",
@@ -17,57 +17,59 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Silinmiş Sınıf",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Silinmiş Fotoğraflar",
-      "deletedImage_other": "",
+      "deletedCategory_one": "{{count}} sınıf silindi",
+      "deletedCategory_other": "{{count}} sınıf silindi",
+      "deletedImage_one": "{{count}} görsel silindi",
+      "deletedImage_other": "{{count}} görsel silindi",
       "deletedModel_one": "{{count}} model başarıyla silindi",
       "deletedModel_other": "{{count}} model başarıyla silindi",
       "categorizedImage": "Fotoğraf Başarıyla Sınıflandırıldı",
       "trainedModel": "Model başarıyla eğitildi.",
       "trainingModel": "Model eğitimi başarıyla başladı.",
       "updatedModel": "Model yapılandırması başarıyla güncellendi",
-      "renamedCategory": "Sınıf başarıyla {{name}} olarak yeniden adlandırıldı"
+      "renamedCategory": "Sınıf başarıyla {{name}} olarak yeniden adlandırıldı",
+      "reclassifiedImage": "Görsel Başarıyla Yeniden Sınıflandırıldı"
     },
     "error": {
       "deleteImageFailed": "Silinemedi: {{errorMessage}}",
       "deleteModelFailed": "Model silinemedi: {{errorMessage}}",
-      "categorizeFailed": "Görsel sınıflandırılamadı: {{errorMessage}}",
+      "categorizeFailed": "Görsel kategorize edilemedi: {{errorMessage}}",
       "trainingFailed": "Model eğitimi başarısız oldu. Ayrıntılar için Frigate günlüklerini kontrol edin.",
       "deleteCategoryFailed": "Sınıf silinemedi: {{errorMessage}}",
       "trainingFailedToStart": "Model eğitimi başlatılamadı: {{errorMessage}}",
       "updateModelFailed": "Model güncellenemedi: {{errorMessage}}",
-      "renameCategoryFailed": "Sınıf yeniden adlandırılamadı: {{errorMessage}}"
+      "renameCategoryFailed": "Sınıf yeniden adlandırılamadı: {{errorMessage}}",
+      "reclassifyFailed": "Görsel yeniden sınıflandırılamadı: {{errorMessage}}"
     }
   },
   "deleteCategory": {
     "title": "Sınıfı Sil",
-    "desc": "{{name}} adlı sınıfı silmek istediğinizden emin misiniz? Bu işlem, sınıfa ait tüm görselleri kalıcı olarak silecek ve modelin yeniden eğitilmesini gerektirecektir.",
+    "desc": "{{name}} sınıfını silmek istediğinize emin misiniz? Bu işlem, tüm ilişkili görselleri kalıcı olarak silecek ve modelin yeniden eğitilmesini gerektirecektir.",
     "minClassesTitle": "Sınıf Silinemiyor",
-    "minClassesDesc": "Bu sınıfı silmeden önce bir sınıflandırma modelinin en az 2 sınıfa sahip olması gerekir. Bu sınıfı silmeden önce başka bir sınıf ekleyin."
+    "minClassesDesc": "Bir sınıflandırma modelinin en az 2 sınıfa sahip olması gerekir. Bu sınıfı silmeden önce başka bir sınıf ekleyin."
   },
   "deleteModel": {
     "title": "Sınıflandırma Modelini Sil",
-    "single": "{{name}} öğesini silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
-    "desc_one": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz.",
-    "desc_other": "{{count}} modeli silmek istediğinizden emin misiniz? Bu işlem, görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silecektir. Bu işlem geri alınamaz."
+    "single": "{{name}} modelini silmek istediğinizden emin misiniz? Görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili verileri kalıcı olarak silinecektir. Bu işlem geri alınamaz.",
+    "desc_one": "{{count}} modeli silmek istediğinizden emin misiniz? Görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili veriler kalıcı olarak silinecektir. Bu işlem geri alınamaz.",
+    "desc_other": "{{count}} modeli silmek istediğinizden emin misiniz? Görseller ve eğitim verileri dâhil olmak üzere tüm ilişkili veriler kalıcı olarak silinecektir. Bu işlem geri alınamaz."
   },
   "deleteDatasetImages": {
-    "title": "Eğitim verisi görsellerini sil",
-    "desc_one": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirir.",
-    "desc_other": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirir."
+    "title": "Veri Kümesi Görsellerini Sil",
+    "desc_one": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirir.",
+    "desc_other": "{{dataset}} veri kümesinden {{count}} görseli silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve modelin yeniden eğitilmesini gerektirir."
   },
   "deleteTrainImages": {
     "title": "Eğitim Görsellerini Sil",
-    "desc_one": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-    "desc_other": "{{count}} görseli silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    "desc_one": "{{count}} görseli silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
+    "desc_other": "{{count}} görseli silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
   },
   "renameCategory": {
     "title": "Sınıfı Yeniden Adlandır",
     "desc": "{{name}} için yeni bir ad girin. Ad değişikliğinin geçerli olması için modeli yeniden eğitmeniz gerekecektir."
   },
   "description": {
-    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir."
+    "invalidName": "Geçersiz isim. İsimler yalnızca harf, rakam, boşluk, kesme işareti, alt çizgi ve tire içerebilir."
   },
   "train": {
     "title": "Son Sınıflandırmalar",
@@ -78,7 +80,7 @@
   "createCategory": {
     "new": "Yeni Sınıf Oluştur"
   },
-  "categorizeImageAs": "Görseli Şu Şekilde Sınıflandır:",
+  "categorizeImageAs": "Görsel Sınıfı:",
   "categorizeImage": "Görseli Sınıflandır",
   "menu": {
     "objects": "Nesneler",
@@ -86,13 +88,13 @@
   },
   "noModels": {
     "object": {
-      "title": "Nesne sınıflandırma modeli mevcut değil",
-      "description": "Algılanan nesneleri sınıflandırmak için özel bir model oluşturun.",
+      "title": "Nesne Sınıflandırma Modeli Yok",
+      "description": "Algılanan nesneleri sınıflandırmak için özelleştirilmiş bir model oluşturun.",
       "buttonText": "Nesne Modeli Oluştur"
     },
     "state": {
       "title": "Durum Sınıflandırma Modeli Yok",
-      "description": "Belirli kamera alanlarındaki durum değişimlerini izlemek ve sınıflandırmak için özel bir model oluşturun.",
+      "description": "Belirli kamera alanlarındaki durum değişimlerini izlemek ve sınıflandırmak için özelleştirilmiş bir model oluşturun.",
       "buttonText": "Durum Modeli Oluştur"
     }
   },
@@ -106,19 +108,32 @@
     "title": "Sınıflandırma Modelini Düzenle",
     "descriptionState": "Bu durum sınıflandırma modeli için sınıfları düzenleyin. Değişiklikler, modelin yeniden eğitilmesini gerektirecektir.",
     "descriptionObject": "Bu nesne sınıflandırma modeli için nesne türünü ve sınıflandırma türünü düzenleyin.",
-    "stateClassesInfo": "Not: Durum sınıflarını değiştirmek, modelin güncellenmiş sınıflarla yeniden eğitilmesini gerektirir."
+    "stateClassesInfo": "Model güncellendi. Sınıf değişikliklerinin geçerli olması için modeli yeniden eğitin.",
+    "enabled": "Etkinleştirildi",
+    "enabledDesc": "Bu modeli çalıştır. Devre dışı olduğunda çalışması ve sınıflandırması durur.",
+    "saveAttempts": "Kaydetme Girişimi Sayısı",
+    "saveAttemptsDesc": "En son sınıflandırmaların kullanıcı arayüzü için tutulacak yeniden sınıflandırma girişimi görsellerinin sayısı.",
+    "motion": "Hareket ile Çalıştır",
+    "motionDesc": "Yapılandırılmış kırpık içinde hareket algılandığında sınıflandırmayı çalıştır.",
+    "interval": "Süre Aralığı",
+    "intervalDesc": "Periyodik sınıflandırma çalışmaları arası süre (saniye). Yalnızca hareket olduğunda çalıştırmak için boş bırakın.",
+    "intervalPlaceholder": "Süre aralığı yok",
+    "errors": {
+      "saveAttemptsInvalid": "Kaydetme girişimi sayısı 0 veya üzeri tamsayı olmalıdır",
+      "intervalInvalid": "Süre aralığı 0'dan büyük tamsayı olmalıdır"
+    }
   },
   "wizard": {
     "title": "Yeni Sınıflandırma Oluştur",
     "steps": {
-      "nameAndDefine": "İsim ver ve Tanımla",
+      "nameAndDefine": "Adlandır ve Tanımla",
       "stateArea": "Durum Alanı",
       "chooseExamples": "Örnekleri Seç"
     },
     "step1": {
-      "description": "Durum modelleri, sabit kamera alanlarındaki değişiklikleri (ör. kapının açılması/kapanması) izler. Nesne modelleri ise algılanan nesnelere ek sınıflandırmalar ekler (ör. bilinen hayvanlar, kuryeler vb.).",
+      "description": "Durum modelleri, sabit kamera alanlarındaki değişiklikleri (ör. kapı açılması/kapanması) gözler. Nesne modelleri ise algılanan nesnelere ek sınıflandırmalar ekler (ör. bilinen hayvanlar, kuryeler vb.).",
       "name": "İsim",
-      "namePlaceholder": "Model ismi girin...",
+      "namePlaceholder": "Model adı girin...",
       "type": "Tür",
       "typeState": "Durum",
       "typeObject": "Nesne",
@@ -126,9 +141,9 @@
       "objectLabelPlaceholder": "Nesne türünü seçin...",
       "classificationType": "Sınıflandırma Türü",
       "classificationTypeTip": "Sınıflandırma türleri hakkında bilgi edinin",
-      "classificationTypeDesc": "Alt etiketler, nesne etiketine ek olarak saklanır (örneğin: “Person: UPS”). Öznitelikler(attributes) ise nesne meta verilerinde saklanan aranabilir meta verilerdir.",
+      "classificationTypeDesc": "Alt etiketler, nesne etiketine ek olarak saklanır (örneğin: \"Kişi: UPS\"). Öznitelikler (attributes) ise nesne öteverilerinde (metadata) saklanan aranabilir verilerdir.",
       "classificationSubLabel": "Alt Etiket",
-      "classificationAttribute": "Özellik",
+      "classificationAttribute": "Öznitelik",
       "classes": "Sınıflar",
       "states": "Durumlar",
       "classesTip": "Sınıflar hakkında bilgi edinin",
@@ -151,13 +166,13 @@
       "description": "İzlenecek alanı her kamera için seçin ve tanımlayın. Model bu alanların durumunu sınıflandıracaktır.",
       "cameras": "Kameralar",
       "selectCamera": "Kamera Seç",
-      "noCameras": "Kameraları eklemek için + simgesine tıklayın",
+      "noCameras": "Kameraları eklemek için +'ya tıklayın",
       "selectCameraPrompt": "Listedeki bir kamerayı seçerek izlenecek alanı tanımlayın"
     },
     "step3": {
-      "selectImagesPrompt": "{{className}} etiketli tüm görselleri seç",
-      "selectImagesDescription": "Görselleri seçmek için üzerlerine tıklayın. Bu sınıfla işiniz bittiğinde Devam Et’e tıklayın.",
-      "allImagesRequired_one": "Lütfen tüm görselleri sınıflandırın. Bir görsel kaldı.",
+      "selectImagesPrompt": "{{className}} sınıfından tüm görselleri seç",
+      "selectImagesDescription": "Görselleri seçmek için üzerlerine tıklayın. Bu sınıfla işiniz bittiğinde Devam Et'e tıklayın.",
+      "allImagesRequired_one": "Lütfen tüm görselleri sınıflandırın. {{count}} görsel kaldı.",
       "allImagesRequired_other": "Lütfen tüm görselleri sınıflandırın. {{count}} görsel kaldı.",
       "generating": {
         "title": "Örnek Görseller Oluşturuluyor",
@@ -167,23 +182,31 @@
         "title": "Model Eğitiliyor",
         "description": "Modeliniz arka planda eğitiliyor. Bu pencereyi kapatabilirsiniz; eğitim tamamlandığında model otomatik olarak çalışmaya başlayacaktır."
       },
-      "retryGenerate": "Oluşturmayı Yeniden Dene",
-      "noImages": "Örnek görsel oluşturulamadı",
+      "retryGenerate": "Üretmeyi Yeniden Dene",
+      "noImages": "Örnek görseller üretilemedi",
       "classifying": "Sınıflandırılıyor ve Eğitiliyor...",
       "trainingStarted": "Eğitim başarıyla başlatıldı",
       "modelCreated": "Model başarıyla oluşturuldu. Eksik durumlar için görseller eklemek üzere Son Sınıflandırmalar görünümünü kullanın ve ardından modeli eğitin.",
       "errors": {
         "noCameras": "Hiç kamera yapılandırılmadı",
-        "noObjectLabel": "Nesne etiketi seçilmedi",
-        "generateFailed": "Örnekler oluşturulamadı: {{error}}",
-        "generationFailed": "Oluşturma başarısız oldu. Lütfen tekrar deneyin.",
+        "noObjectLabel": "Hiç nesne etiketi seçilmedi",
+        "generateFailed": "Örnekler üretilemedi: {{error}}",
+        "generationFailed": "Üretim başarısız oldu. Lütfen tekrar deneyin.",
         "classifyFailed": "Görseller sınıflandırılamadı: {{error}}"
       },
-      "generateSuccess": "Örnek görseller başarıyla oluşturuldu",
+      "generateSuccess": "Örnek görseller başarıyla üretildi",
       "missingStatesWarning": {
-        "title": "Eksik Durum Örnekleri",
-        "description": "En iyi sonuçlar için her bir durum için örnek görseller seçmeniz tavsiye edilir. Tüm durumlar için görsel seçmeden devam edebilirsiniz fakat tüm durumlar için görseller seçilmedikçe model eğitilemeyecektir. Son Sınıflandırmalar arayüzünü kullanarak görselleri sınıflandırmak üzere görüntüleyebilir, yeterince görsel seçildikten sonra da modeli eğitebilirsiniz."
+        "title": "Eksik Sınıf Örnekleri",
+        "description": "Her sınıfta örnekler bulunmaz. Eksik sınıfı bulmak için yeni örnekler üretmeyi deneyin veya devam edip daha sonra Son Sınıflandırmalar görünümünü kullanarak yeni görseller ekleyin."
+      },
+      "refreshExamples": "Yeni örnekler üret",
+      "refreshConfirm": {
+        "title": "Yeni Örnekler Üretilsin Mi?",
+        "description": "Bu işlem yeni bir görsel seti üretecek, önceki sınıflar dahil tüm seçimleri temizleyecektir. Tüm sınıflar için örnekleri yeniden seçmeniz gerekecektir."
       }
     }
-  }
+  },
+  "disabled": "Devre dışı",
+  "reclassifyImageAs": "Görselin Yeni Sınıfı:",
+  "reclassifyImage": "Görseli Yeniden Sınıflandır"
 }

@@ -2,28 +2,32 @@
   "description": {
     "placeholder": "Bu koleksiyona bir isim verin",
     "addFace": "İlk görselinizi yükleyerek Yüz Kütüphanesi’ne yeni bir koleksiyon ekleyin.",
-    "invalidName": "Geçersiz isim. İsimler; yalnızca harf, rakam, boşluk, kesme işareti (’), alt çizgi(_) ve tire (-) içerebilir.",
-    "nameCannotContainHash": "İsim, # içeremez."
+    "invalidName": "Geçersiz isim. İsimler yalnızca harf, rakam, boşluk, kesme işareti, alt çizgi ve tire içerebilir.",
+    "nameCannotContainHash": "İsim \"#\" içeremez."
   },
   "details": {
     "timestamp": "Zaman Damgası",
-    "scoreInfo": "Alt etiket skoru, tanınan tüm yüzlerin güvenilirlik değerlerinin ağırlıklı ortalamasından elde edilir, dolayısıyla fotoğraf üzerinde gösterilen skordan farklı olabilir.",
+    "scoreInfo": "Skor, tüm yüz skorlarının her bir görseldeki yüzün büyüklüğüne göre ağırlıklandırılmış ortalamasıdır.",
     "unknown": "Bilinmiyor"
   },
   "documentTitle": "Yüz Kütüphanesi - Frigate",
   "uploadFaceImage": {
     "title": "Yüz Resmi Yükle",
-    "desc": "Yüzleri taramak ve {{pageToggle}} için dahil etmek üzere bir resim yükleyin"
+    "desc": "Yüzleri taramak ve {{pageToggle}} için dahil etmek üzere bir görsel yükleyin"
   },
   "createFaceLibrary": {
     "new": "Yeni Yüz Oluştur",
-    "nextSteps": "Sağlam bir temel oluşturmak için:<li>Her tespit edilen kişi için **Recent Recognitions (Son Tanımalar)** sekmesini kullanarak görüntüleri seçin ve eğitim gerçekleştirin.</li> <li>En iyi sonuçlar için doğrudan önden çekilmiş yüz görüntülerine odaklanın; yüzlerin açılı göründüğü fotoğrafları eğitimde kullanmaktan kaçının.</li>"
+    "nextSteps": "Sağlam bir temel oluşturmak için:<li>Son Tanımalar sekmesini kullanıp algılanan her bir kişinin görüntüsünü seçerek eğitin.</li><li>En iyi sonuçlar için önden çekilmiş yüz görüntülerine odaklanın; yüzlerin açılı göründüğü fotoğrafları eğitimde kullanmaktan kaçının.</li>"
   },
   "train": {
     "title": "Son Tanımalar",
-    "aria": "Son algılanan nesneleri seç",
-    "empty": "Yakın zamanda yüz tanıma denemesi olmadı",
-    "titleShort": "Son"
+    "aria": "Son algılananları seç",
+    "empty": "Yakın zamanda yüz tanıma girişimi olmadı",
+    "titleShort": "Son",
+    "emptyNoLibrary": {
+      "title": "Bir yüz yükle",
+      "description": "Yüz tanımanın çalışabilmesi için kütüphaneye en az bir yüz eklemeniz gerekir."
+    }
   },
   "deleteFaceLibrary": {
     "title": "İsmi Sil",
@@ -33,30 +37,31 @@
     "deleteFaceAttempts": "Yüzleri Sil",
     "addFace": "Yüz Ekle",
     "reprocessFace": "Yüzü Yeniden İşle",
-    "uploadImage": "Resim Yükle",
+    "uploadImage": "Görsel Yükle",
     "renameFace": "Yüzü Yeniden Adlandır",
     "deleteFace": "Yüzü Sil"
   },
   "imageEntry": {
-    "dropActive": "Resmi buraya bırakın…",
+    "dropActive": "Görseli buraya bırakın…",
     "maxSize": "Maksimum boyut: {{size}} MB",
     "validation": {
-      "selectImage": "Lütfen bir resim dosyası seçin."
+      "selectImage": "Lütfen bir görsel dosyası seçin."
     },
-    "dropInstructions": "Bir görseli buraya sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın"
+    "dropInstructions": "Buraya bir görsel sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın"
   },
   "trainFaceAs": "Yüzü şu olarak eğit:",
   "toast": {
     "success": {
-      "deletedFace_one": "{{count}} yüz başarıyla silindi.",
-      "deletedFace_other": "{{count}} yüz başarıyla silindi.",
-      "deletedName_one": "{{count}} yüz başarıyla silindi.",
-      "deletedName_other": "{{count}} yüz başarıyla silindi.",
+      "deletedFace_one": "{{count}} adet yüz başarıyla silindi.",
+      "deletedFace_other": "{{count}} adet yüz başarıyla silindi.",
+      "deletedName_one": "{{count}} adet yüz başarıyla silindi.",
+      "deletedName_other": "{{count}} adet yüz başarıyla silindi.",
       "addFaceLibrary": "{{name}} başarıyla Yüz Kütüphanesi’ne eklendi!",
       "trainedFace": "Yüz başarıyla eğitildi.",
-      "uploadedImage": "Resim başarıyla yüklendi.",
+      "uploadedImage": "Görsel başarıyla yüklendi.",
       "updatedFaceScore": "Yüz tanıma skoru {{name}} ({{score}}) olarak başarıyla güncellendi.",
-      "renamedFace": "Yüz başarıyla {{name}} olarak adlandırıldı"
+      "renamedFace": "Yüzün adı {{name}} olarak değiştirildi",
+      "reclassifiedFace": "Yüz yeniden sınıflandırıldı."
     },
     "error": {
       "uploadingImageFailed": "Resim yüklenemedi: {{errorMessage}}",
@@ -65,7 +70,8 @@
       "trainFailed": "Eğitme işlemi başarısız oldu: {{errorMessage}}",
       "deleteFaceFailed": "Silme işlemi başarısız: {{errorMessage}}",
       "deleteNameFailed": "İsim silinemedi: {{errorMessage}}",
-      "renameFaceFailed": "Yüz yeniden adlandırılamadı: {{errorMessage}}"
+      "renameFaceFailed": "Yüz yeniden adlandırılamadı: {{errorMessage}}",
+      "reclassifyFailed": "Yüz yeniden sınıflandırılamadı: {{errorMessage}}"
     }
   },
   "trainFace": "Yüzü Eğit",
@@ -74,7 +80,7 @@
     "uploadFace": "Yüz Resmi Yükle",
     "nextSteps": "Sonraki Adımlar",
     "description": {
-      "uploadFace": "{{name}}'in yüzünü önden gösteren bir fotoğraf yükleyin. Fotoğrafın sadece yüzünü gösterecek şekilde kırpılması gerekmez."
+      "uploadFace": "{{name}} kişisinin yüzünü önden gösteren bir fotoğraf yükleyin. Fotoğrafın sadece yüzü gösterecek şekilde kırpılması gerekmez."
     }
   },
   "renameFace": {
@@ -87,5 +93,7 @@
     "desc_one": "Bir adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.",
     "desc_other": "{{count}} adet yüzü silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
   },
-  "nofaces": "Yüz bulunamadı"
+  "nofaces": "Hiç yüz bulunamadı",
+  "reclassifyFaceAs": "Yüzün Yeni Sınıfı:",
+  "reclassifyFace": "Yüzü Yeniden Sınıflandır"
 }
