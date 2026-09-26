@@ -574,7 +574,6 @@
       "title": "Innstillinger for meldingsvarsler"
     },
     "notificationUnavailable": {
-      "title": "Meldingsvarsler utilgjengelig",
       "desc": "Nettleser push-varsler krever et sikkert miljø (<code>https://…</code>). Dette er en nettleserbegrensning. Få tilgang til Frigate på en sikker måte for å bruke meldingsvarsler.",
       "descPwa": "På iOS er web-pushvarsler kun tilgjengelig når Frigate er installert på hjemskjermen din. Åpne <strong>Del</strong>-menyen, velg <strong>Legg til på hjemskjermen</strong>, og åpne deretter Frigate fra det nye ikonet for å registrere denne enheten for varsler."
     },
@@ -839,7 +838,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Semantisk søk er deaktivert",
       "desc": "Semantisk søk må aktiveres for å bruke utløsere."
     },
     "wizard": {
