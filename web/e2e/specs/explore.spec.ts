@@ -216,7 +216,7 @@ test.describe("Explore — content @high", () => {
 // Similarity search URL param
 // ---------------------------------------------------------------------------
 
-test.describe("Explore — back button @high", () => {
+test.describe("Explore: back button @high", () => {
   test("direct visits do not show a back button", async ({ frigateApp }) => {
     await frigateApp.goto("/explore?labels=person");
     await expect(frigateApp.page.getByLabel("Labels").first()).toBeVisible({

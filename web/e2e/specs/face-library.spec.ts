@@ -523,7 +523,7 @@ test.describe("FaceSelectionDialog @high", () => {
   });
 });
 
-test.describe("Face Library — return from Explore @high", () => {
+test.describe("Face Library: return from Explore @high", () => {
   test("Explore back button returns to an outlined collection", async ({
     frigateApp,
   }) => {
