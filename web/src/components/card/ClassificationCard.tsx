@@ -6,7 +6,14 @@ import {
   ClassificationThreshold,
   ClassifiedEvent,
 } from "@/types/classification";
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isIOS, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -85,9 +92,14 @@ export const ClassificationCard = forwardRef<
 
   // interaction
 
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  useContextMenu(imgRef, () => {
+  useImperativeHandle(ref, () => cardRef.current!);
+
+  // Listen on the whole card, since overlays cover most of the image
+
+  useContextMenu(cardRef, () => {
     onClick(data, true);
   });
 
@@ -101,9 +113,9 @@ export const ClassificationCard = forwardRef<
 
   return (
     <div
-      ref={ref}
+      ref={cardRef}
       className={cn(
-        "relative flex size-full flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        "relative flex size-full select-none flex-col overflow-hidden rounded-lg outline outline-[3px]",
         className,
         selected
           ? "shadow-selected outline-selected"
@@ -117,11 +129,7 @@ export const ClassificationCard = forwardRef<
         }
         onClick(data, isMeta);
       }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onClick(data, true);
-      }}
+      style={isIOS ? { WebkitTouchCallout: "none" } : undefined}
     >
       <img
         ref={imgRef}
@@ -130,14 +138,6 @@ export const ClassificationCard = forwardRef<
           imgClassName,
           isMobile && "w-full",
         )}
-        style={
-          isIOS
-            ? {
-                WebkitUserSelect: "none",
-                WebkitTouchCallout: "none",
-              }
-            : undefined
-        }
         draggable={false}
         loading="lazy"
         onLoad={() => setImageLoaded(true)}
@@ -156,7 +156,7 @@ export const ClassificationCard = forwardRef<
         </div>
       )}
       <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute bottom-0 flex w-full select-none flex-row items-center justify-between gap-2 p-2">
+      <div className="absolute bottom-0 flex w-full flex-row items-center justify-between gap-2 p-2">
         <div
           className={cn(
             "flex flex-col items-start text-white",
