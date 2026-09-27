@@ -860,7 +860,7 @@ export default function LiveCameraView({
                 )}
                 <LivePlayer
                   key={camera.name}
-                  className={`${fullscreen ? "*:rounded-none" : ""}`}
+                  className={fullscreen ? "rounded-none" : ""}
                   windowVisible
                   showStillWithoutActivity={false}
                   alwaysShowCameraName={false}

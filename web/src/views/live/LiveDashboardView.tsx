@@ -410,7 +410,7 @@ export default function LiveDashboardView({
 
   return (
     <div
-      className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 md:p-2"
+      className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 [scrollbar-gutter:stable] md:p-2"
       ref={containerRef}
     >
       {isMobile && (
@@ -609,7 +609,7 @@ export default function LiveDashboardView({
                       <LivePlayer
                         cameraRef={cameraRef}
                         key={camera.name}
-                        className={`${grow} rounded-lg bg-black md:rounded-2xl`}
+                        className={`${grow} bg-black`}
                         windowVisible={
                           windowVisible && visibleCameras.includes(camera.name)
                         }

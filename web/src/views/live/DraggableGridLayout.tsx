@@ -8,16 +8,17 @@ import {
 import React, {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { useResizeObserver } from "@/hooks/resize-observer";
 import {
   Layout,
   LayoutItem,
   ResponsiveGridLayout as Responsive,
 } from "react-grid-layout";
+import { aspectRatio, getCompactor } from "react-grid-layout/core";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import {
@@ -28,12 +29,11 @@ import {
   StatsState,
   VolumeState,
 } from "@/types/live";
-import { ASPECT_VERTICAL_LAYOUT, ASPECT_WIDE_LAYOUT } from "@/types/record";
+import { ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
 import useSWR from "swr";
-import { isDesktop, isMobile } from "react-device-detect";
+import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
 import { IoClose } from "react-icons/io5";
@@ -51,6 +51,43 @@ import { Toaster } from "@/components/ui/sonner";
 import LiveContextMenu from "@/components/menu/LiveContextMenu";
 import { useStreamingSettings } from "@/context/streaming-settings-provider";
 import { useTranslation } from "react-i18next";
+
+// rowHeight is 1/VERTICAL_RESOLUTION of a column, so h = round(w *
+// VERTICAL_RESOLUTION / aspect) lands a tile on its camera's aspect. GRID_COLS
+// also sets resize granularity: the aspect constraint derives height from
+// width, making one column the smallest step in both axes.
+const GRID_COLS = 96;
+const TILE_BASE_W = 32;
+const TILE_WIDE_W = 64;
+const VERTICAL_RESOLUTION = 4;
+const DEFAULT_ASPECT = 16 / 9;
+// Bucketed tile shapes, matching the aspect-wide / aspect-tall Tailwind utilities.
+const TILE_ASPECT_WIDE = 32 / 9;
+const TILE_ASPECT_TALL = 8 / 9;
+
+// Cells quantize to whole rows/columns, so the card takes the camera's exact
+// ratio and fits itself inside its cell. --ar and container-type live on the
+// cell; min() picks whichever axis binds first.
+const CARD_FIT =
+  "h-auto w-[min(100%,calc(100cqh*var(--ar)))] aspect-[var(--ar)]";
+
+// Stored coordinates are grid units, so bump this whenever GRID_COLS or
+// VERTICAL_RESOLUTION changes in a released version.
+const LAYOUT_VERSION = 2;
+type PersistedLayout = {
+  version: number;
+  naturalAspect: boolean;
+  layout: Layout;
+};
+
+// Without preventCollision, RGL shoves collided tiles down the page and never
+// compacts them back.
+const FREE_PLACEMENT_COMPACTOR = getCompactor(null, false, true);
+
+// 0.17/0.18 stored a bare array on a 12-column grid whose standard tile was
+// 4x4. Bucketed mode reproduces that geometry, so those layouts convert exactly.
+const LEGACY_GRID_COLS = 12;
+const LEGACY_TILE_ROWS = 4;
 
 type DraggableGridLayoutProps = {
   cameras: CameraConfig[];
@@ -98,6 +135,66 @@ export default function DraggableGridLayout({
   const { data: config } = useSWR<FrigateConfig>("config");
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
+  const aspectRatios = useMemo(() => {
+    const map: { [key: string]: number } = {};
+    if (birdseyeConfig) {
+      map["birdseye"] =
+        (birdseyeConfig.width || 1) / (birdseyeConfig.height || 1);
+    }
+    cameras.forEach((camera) => {
+      map[camera.name] =
+        camera.detect.width / camera.detect.height || DEFAULT_ASPECT;
+    });
+    return map;
+  }, [cameras, birdseyeConfig]);
+
+  const [naturalAspectSetting, , isNaturalAspectLoaded] = useUserPersistence(
+    "naturalAspectLayout",
+    false,
+  );
+  // phones never reach this grid, and the setting is hidden there, so an
+  // imported or stale value must not take effect
+  const naturalAspectLayout = !isMobileOnly && (naturalAspectSetting ?? false);
+
+  // Bucketed mode snaps every camera to one of three tile shapes, matching the
+  // pre-masonry layout; the picture letterboxes inside its bucket.
+  const layoutAspects = useMemo(() => {
+    if (naturalAspectLayout) {
+      return aspectRatios;
+    }
+    const map: { [key: string]: number } = {};
+    Object.entries(aspectRatios).forEach(([name, ratio]) => {
+      map[name] =
+        ratio > ASPECT_WIDE_LAYOUT
+          ? TILE_ASPECT_WIDE
+          : ratio < 1
+            ? TILE_ASPECT_TALL
+            : DEFAULT_ASPECT;
+    });
+    return map;
+  }, [aspectRatios, naturalAspectLayout]);
+
+  // A live stream can be shaped differently than detect, so the card follows
+  // whatever is on screen and falls back to detect. Cells stay detect-sized, so
+  // only the card resizes.
+  const [liveAspects, setLiveAspects] = useState<{
+    [key: string]: number | undefined;
+  }>({});
+
+  const liveAspectHandlers = useMemo(() => {
+    const map: { [key: string]: (aspectRatio: number | undefined) => void } =
+      {};
+    cameras.forEach((camera) => {
+      map[camera.name] = (aspectRatio) =>
+        setLiveAspects((prev) =>
+          prev[camera.name] === aspectRatio
+            ? prev
+            : { ...prev, [camera.name]: aspectRatio },
+        );
+    });
+    return map;
+  }, [cameras]);
+
   // preferred live modes per camera
 
   const [globalAutoLive] = useUserPersistence("autoLiveView", true);
@@ -115,7 +212,31 @@ export default function DraggableGridLayout({
   // grid layout
 
   const [gridLayout, setGridLayout, isGridLayoutLoaded] =
-    useUserPersistence<Layout>(`${cameraGroup}-draggable-layout`);
+    useUserPersistence<PersistedLayout>(`${cameraGroup}-draggable-layout`);
+
+  const readPersistedLayout = useCallback(
+    (stored: PersistedLayout | undefined): Layout | undefined => {
+      if (
+        !stored ||
+        stored.version !== LAYOUT_VERSION ||
+        !Array.isArray(stored.layout)
+      ) {
+        return undefined;
+      }
+      return stored.layout;
+    },
+    [],
+  );
+
+  // Strips per-item `constraints`, which are functions.
+  const toPersisted = useCallback(
+    (layout: Layout): PersistedLayout => ({
+      version: LAYOUT_VERSION,
+      naturalAspect: naturalAspectLayout,
+      layout: layout.map(({ i, x, y, w, h }) => ({ i, x, y, w, h })),
+    }),
+    [naturalAspectLayout],
+  );
 
   const [group] = useUserPersistedOverlayState(
     "cameraGroup",
@@ -140,11 +261,11 @@ export default function DraggableGridLayout({
   useEffect(() => {
     setIsEditMode(false);
     setEditGroup(false);
-    // Reset camera tracking state when group changes to prevent the camera-change
-    // effect from incorrectly overwriting the loaded layout
+    // Keeps the camera-change effect from overwriting the layout we load next.
     setCurrentCameras(undefined);
     setCurrentIncludeBirdseye(undefined);
     setCurrentGridLayout(undefined);
+    setCurrentNaturalAspect(undefined);
   }, [cameraGroup, setIsEditMode]);
 
   // camera state
@@ -155,21 +276,84 @@ export default function DraggableGridLayout({
   const [currentGridLayout, setCurrentGridLayout] = useState<
     Layout | undefined
   >();
+  const [currentNaturalAspect, setCurrentNaturalAspect] = useState<boolean>();
 
   const handleLayoutChange = useCallback(
     (currentLayout: Layout) => {
-      if (!isGridLayoutLoaded || !isEqual(gridLayout, currentGridLayout)) {
+      if (
+        !isGridLayoutLoaded ||
+        !isEqual(readPersistedLayout(gridLayout), currentGridLayout)
+      ) {
         return;
       }
-      // save layout to idb
-      setGridLayout(currentLayout);
+      setGridLayout(toPersisted(currentLayout));
       setShowCircles(true);
     },
-    [setGridLayout, isGridLayoutLoaded, gridLayout, currentGridLayout],
+    [
+      setGridLayout,
+      isGridLayoutLoaded,
+      gridLayout,
+      currentGridLayout,
+      readPersistedLayout,
+      toPersisted,
+    ],
+  );
+
+  const dimsFor = useCallback(
+    (name: string) => {
+      const ratio = layoutAspects[name] ?? DEFAULT_ASPECT;
+      const w = ratio >= ASPECT_WIDE_LAYOUT ? TILE_WIDE_W : TILE_BASE_W;
+      const h = Math.max(1, Math.round((w * VERTICAL_RESOLUTION) / ratio));
+      return { w, h };
+    },
+    [layoutAspects],
+  );
+
+  // Rescale a pre-masonry layout onto the current grid. Both axes scale by a
+  // constant, so tiles the user resized keep their size and their arrangement
+  // stays intact. Only meaningful in bucketed mode, where a tile still has the
+  // shape those coordinates assumed.
+  const convertLegacyLayout = useCallback(
+    (stored: unknown): Layout | undefined => {
+      if (naturalAspectLayout || !Array.isArray(stored) || !stored.length) {
+        return undefined;
+      }
+
+      const xScale = GRID_COLS / LEGACY_GRID_COLS;
+      const yScale =
+        Math.round((TILE_BASE_W * VERTICAL_RESOLUTION) / DEFAULT_ASPECT) /
+        LEGACY_TILE_ROWS;
+      const converted: LayoutItem[] = [];
+
+      for (const item of stored) {
+        if (
+          !item ||
+          typeof item.i !== "string" ||
+          typeof item.x !== "number" ||
+          typeof item.y !== "number" ||
+          typeof item.w !== "number" ||
+          typeof item.h !== "number"
+        ) {
+          return undefined;
+        }
+
+        const w = Math.min(Math.max(1, Math.round(item.w * xScale)), GRID_COLS);
+        converted.push({
+          i: item.i,
+          x: Math.min(Math.max(0, Math.round(item.x * xScale)), GRID_COLS - w),
+          y: Math.max(0, Math.round(item.y * yScale)),
+          w,
+          h: Math.max(1, Math.round(item.h * yScale)),
+        });
+      }
+
+      return converted;
+    },
+    [naturalAspectLayout],
   );
 
   const generateLayout = useCallback(
-    (baseLayout: Layout | undefined) => {
+    (baseLayout: Layout | undefined): Layout | undefined => {
       if (!isGridLayoutLoaded) {
         return;
       }
@@ -179,91 +363,98 @@ export default function DraggableGridLayout({
           ? ["birdseye", ...cameras.map((camera) => camera?.name || "")]
           : cameras.map((camera) => camera?.name || "");
 
-      const optionsMap: LayoutItem[] = baseLayout
-        ? baseLayout.filter((layout) => cameraNames?.includes(layout.i))
+      const existing: LayoutItem[] = baseLayout
+        ? baseLayout.filter((layout) => cameraNames.includes(layout.i))
         : [];
+      const placed = new Set(existing.map((layout) => layout.i));
 
-      cameraNames.forEach((cameraName, index) => {
-        const existingLayout = optionsMap.find(
-          (layout) => layout.i === cameraName,
-        );
+      const tileColumns = GRID_COLS / TILE_BASE_W; // 3 standard columns
+      // Each column starts below every existing tile that overlaps it, so new
+      // cameras fill open columns without overlapping the user's tiles.
+      const colBottoms = Array.from({ length: tileColumns }, (_, c) =>
+        existing.reduce(
+          (max, layout) =>
+            layout.x < (c + 1) * TILE_BASE_W &&
+            layout.x + layout.w > c * TILE_BASE_W
+              ? Math.max(max, layout.y + layout.h)
+              : max,
+          0,
+        ),
+      );
 
-        // Skip if the camera already exists in the layout
-        if (existingLayout) {
+      const result: LayoutItem[] = [...existing];
+
+      cameraNames.forEach((name) => {
+        if (placed.has(name)) {
           return;
         }
+        const { w, h } = dimsFor(name);
 
-        let aspectRatio;
-        let col;
-
-        // Handle "birdseye" camera as a special case
-        if (cameraName === "birdseye") {
-          aspectRatio =
-            (birdseyeConfig?.width || 1) / (birdseyeConfig?.height || 1);
-          col = 0; // Set birdseye camera in the first column
+        if (w === TILE_BASE_W) {
+          let col = 0;
+          for (let c = 1; c < tileColumns; c++) {
+            if (colBottoms[c] < colBottoms[col]) {
+              col = c;
+            }
+          }
+          result.push({
+            i: name,
+            x: col * TILE_BASE_W,
+            y: colBottoms[col],
+            w,
+            h,
+          });
+          colBottoms[col] += h;
         } else {
-          const camera = cameras.find((cam) => cam.name === cameraName);
-          aspectRatio =
-            (camera && camera?.detect.width / camera?.detect.height) || 16 / 9;
-          col = index % 3; // Regular cameras distributed across columns
+          let pair = 0;
+          for (let c = 1; c + 1 < tileColumns; c++) {
+            if (
+              Math.max(colBottoms[c], colBottoms[c + 1]) <
+              Math.max(colBottoms[pair], colBottoms[pair + 1])
+            ) {
+              pair = c;
+            }
+          }
+          const y = Math.max(colBottoms[pair], colBottoms[pair + 1]);
+          result.push({ i: name, x: pair * TILE_BASE_W, y, w, h });
+          colBottoms[pair] = y + h;
+          colBottoms[pair + 1] = y + h;
         }
-
-        // Calculate layout options based on aspect ratio
-        const columnsPerPlayer = 4;
-        let height;
-        let width;
-
-        if (aspectRatio < 1) {
-          // Portrait
-          height = 2 * columnsPerPlayer;
-          width = columnsPerPlayer;
-        } else if (aspectRatio > 2) {
-          // Wide
-          height = 1 * columnsPerPlayer;
-          width = 2 * columnsPerPlayer;
-        } else {
-          // Landscape
-          height = 1 * columnsPerPlayer;
-          width = columnsPerPlayer;
-        }
-
-        const options = {
-          i: cameraName,
-          x: col * width,
-          y: 0, // don't set y, grid does automatically
-          w: width,
-          h: height,
-        };
-
-        optionsMap.push(options);
       });
 
-      return optionsMap;
+      return result;
     },
-    [cameras, isGridLayoutLoaded, includeBirdseye, birdseyeConfig],
+    [cameras, isGridLayoutLoaded, includeBirdseye, birdseyeConfig, dimsFor],
   );
 
   useEffect(() => {
-    if (isGridLayoutLoaded) {
-      if (gridLayout) {
-        // set current grid layout from loaded, possibly adding new cameras
-        const updatedLayout = generateLayout(gridLayout);
-        setCurrentGridLayout(updatedLayout);
-        // Only save if cameras were added (layout changed)
-        if (!isEqual(updatedLayout, gridLayout)) {
-          setGridLayout(updatedLayout);
-        }
-        // Set camera tracking state so the camera-change effect has a baseline
-        setCurrentCameras(cameras);
-        setCurrentIncludeBirdseye(includeBirdseye);
-      } else {
-        // idb is empty, set it with an initial layout
-        const newLayout = generateLayout(undefined);
-        setCurrentGridLayout(newLayout);
-        setGridLayout(newLayout);
-        setCurrentCameras(cameras);
-        setCurrentIncludeBirdseye(includeBirdseye);
+    if (!isGridLayoutLoaded) {
+      return;
+    }
+
+    const saved = readPersistedLayout(gridLayout);
+    const converted = saved ? undefined : convertLegacyLayout(gridLayout);
+    const base = saved ?? converted;
+
+    if (base) {
+      const updatedLayout = generateLayout(base) ?? base;
+      setCurrentGridLayout(updatedLayout);
+      if (converted || !isEqual(updatedLayout, base)) {
+        setGridLayout(toPersisted(updatedLayout));
       }
+      setCurrentCameras(cameras);
+      setCurrentIncludeBirdseye(includeBirdseye);
+      setCurrentNaturalAspect(
+        converted ? naturalAspectLayout : gridLayout?.naturalAspect,
+      );
+    } else {
+      // empty or incompatible (pre-masonry) data
+      const newLayout = generateLayout(undefined) ?? [];
+      setCurrentGridLayout(newLayout);
+      setGridLayout(toPersisted(newLayout));
+      setCurrentCameras(cameras);
+      setCurrentIncludeBirdseye(includeBirdseye);
+      setCurrentNaturalAspect(naturalAspectLayout);
     }
   }, [
     gridLayout,
@@ -272,12 +463,15 @@ export default function DraggableGridLayout({
     generateLayout,
     cameras,
     includeBirdseye,
+    naturalAspectLayout,
+    readPersistedLayout,
+    convertLegacyLayout,
+    toPersisted,
   ]);
 
   useEffect(() => {
-    // Only regenerate layout when cameras change WITHIN an already-loaded group
-    // Skip if currentCameras is undefined (means we just switched groups and
-    // the first useEffect hasn't run yet to set things up)
+    // Only for camera changes within a loaded group; undefined currentCameras
+    // means the load effect above has not run yet.
     if (!isGridLayoutLoaded || currentCameras === undefined) {
       return;
     }
@@ -289,10 +483,10 @@ export default function DraggableGridLayout({
       setCurrentCameras(cameras);
       setCurrentIncludeBirdseye(includeBirdseye);
 
-      // Regenerate layout based on current layout, adding any new cameras
-      const updatedLayout = generateLayout(currentGridLayout);
+      const updatedLayout =
+        generateLayout(currentGridLayout) ?? currentGridLayout ?? [];
       setCurrentGridLayout(updatedLayout);
-      setGridLayout(updatedLayout);
+      setGridLayout(toPersisted(updatedLayout));
     }
   }, [
     cameras,
@@ -303,39 +497,47 @@ export default function DraggableGridLayout({
     generateLayout,
     setGridLayout,
     isGridLayoutLoaded,
+    toPersisted,
   ]);
 
-  const [marginValue, setMarginValue] = useState(16);
+  useEffect(() => {
+    if (
+      !isNaturalAspectLoaded ||
+      currentNaturalAspect === undefined ||
+      currentNaturalAspect === naturalAspectLayout
+    ) {
+      return;
+    }
 
-  // calculate margin value for browsers that don't have default font size of 16px
-  useLayoutEffect(() => {
-    const calculateRemValue = () => {
-      const htmlElement = document.documentElement;
-      const fontSize = window.getComputedStyle(htmlElement).fontSize;
-      setMarginValue(parseFloat(fontSize));
-    };
+    setCurrentNaturalAspect(naturalAspectLayout);
+    const regenerated = generateLayout(undefined) ?? [];
+    setCurrentGridLayout(regenerated);
+    setGridLayout(toPersisted(regenerated));
+  }, [
+    naturalAspectLayout,
+    isNaturalAspectLoaded,
+    currentNaturalAspect,
+    generateLayout,
+    setGridLayout,
+    toPersisted,
+  ]);
 
-    calculateRemValue();
+  const gridContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Commit-time measure: paints the first frame at the real width (no
+  // innerWidth flash), and the setState re-render is what lets
+  // useResizeObserver see a node mounted after the skeleton swap.
+  const [mountWidth, setMountWidth] = useState<number | null>(null);
+
+  const attachGridContainer = useCallback((node: HTMLDivElement | null) => {
+    gridContainerRef.current = node;
+    setMountWidth(node ? node.getBoundingClientRect().width : null);
   }, []);
-
-  const gridContainerRef = useRef<HTMLDivElement>(null);
 
   const [{ width: containerWidth, height: containerHeight }] =
     useResizeObserver(gridContainerRef);
 
-  const scrollBarWidth = useMemo(() => {
-    if (containerWidth && containerHeight && containerRef.current) {
-      return (
-        containerRef.current.offsetWidth - containerRef.current.clientWidth
-      );
-    }
-    return 0;
-  }, [containerRef, containerHeight, containerWidth]);
-
-  const availableWidth = useMemo(
-    () => (scrollBarWidth ? containerWidth + scrollBarWidth : containerWidth),
-    [containerWidth, scrollBarWidth],
-  );
+  const availableWidth = containerWidth || mountWidth || 0;
 
   const hasScrollbar = useMemo(() => {
     if (containerHeight && containerRef.current) {
@@ -346,61 +548,10 @@ export default function DraggableGridLayout({
   }, [containerRef, containerHeight]);
 
   const cellHeight = useMemo(() => {
-    const aspectRatio = 16 / 9;
-    // subtract container margin, 1 camera takes up at least 4 rows
-    // account for additional margin on bottom of each row
-    return (
-      ((availableWidth ?? window.innerWidth) - 2 * marginValue) /
-        12 /
-        aspectRatio -
-      marginValue +
-      marginValue / 4
-    );
-  }, [availableWidth, marginValue]);
-
-  const handleResize = (
-    _layout: Layout,
-    oldLayoutItem: LayoutItem | null,
-    layoutItem: LayoutItem | null,
-    placeholder: LayoutItem | null,
-  ) => {
-    if (!oldLayoutItem || !layoutItem || !placeholder) return;
-
-    const heightDiff = layoutItem.h - oldLayoutItem.h;
-    const widthDiff = layoutItem.w - oldLayoutItem.w;
-    const changeCoef = oldLayoutItem.w / oldLayoutItem.h;
-
-    let newWidth, newHeight;
-
-    if (Math.abs(heightDiff) < Math.abs(widthDiff)) {
-      newHeight = Math.round(layoutItem.w / changeCoef);
-      newWidth = Math.round(newHeight * changeCoef);
-    } else {
-      newWidth = Math.round(layoutItem.h * changeCoef);
-      newHeight = Math.round(newWidth / changeCoef);
-    }
-
-    // Ensure dimensions maintain aspect ratio and fit within the grid
-    if (layoutItem.x + newWidth > 12) {
-      newWidth = 12 - layoutItem.x;
-      newHeight = Math.round(newWidth / changeCoef);
-    }
-
-    if (changeCoef == 0.5) {
-      // portrait
-      newHeight = Math.ceil(newHeight / 2) * 2;
-    } else if (changeCoef == 2) {
-      // pano/wide
-      newHeight = Math.ceil(newHeight * 2) / 2;
-    }
-
-    newWidth = Math.round(newHeight * changeCoef);
-
-    layoutItem.w = newWidth;
-    layoutItem.h = newHeight;
-    placeholder.w = layoutItem.w;
-    placeholder.h = layoutItem.h;
-  };
+    const width = availableWidth || window.innerWidth;
+    const columnWidth = width / GRID_COLS;
+    return columnWidth / VERTICAL_RESOLUTION;
+  }, [availableWidth]);
 
   // audio and stats states
 
@@ -503,6 +654,19 @@ export default function DraggableGridLayout({
     onSaveMuting(true);
   };
 
+  // RGL's per-item constraint derives height from width, holding each tile at
+  // its camera's aspect while resizing. Constraints are functions, so they live
+  // only on this render copy; toPersisted strips them.
+  const layoutWithConstraints = useMemo(() => {
+    if (!currentGridLayout) {
+      return [] as Layout;
+    }
+    return currentGridLayout.map((item) => ({
+      ...item,
+      constraints: [aspectRatio(layoutAspects[item.i] ?? DEFAULT_ASPECT)],
+    }));
+  }, [currentGridLayout, layoutAspects]);
+
   return (
     <>
       <Toaster position="top-center" closeButton={true} />
@@ -525,8 +689,8 @@ export default function DraggableGridLayout({
         </div>
       ) : (
         <div
-          className="no-scrollbar my-2 select-none overflow-x-hidden px-2 pb-8"
-          ref={gridContainerRef}
+          className="no-scrollbar my-2 select-none overflow-x-hidden pb-8"
+          ref={attachGridContainer}
         >
           <EditGroupDialog
             open={editGroup}
@@ -536,28 +700,36 @@ export default function DraggableGridLayout({
           />
           <Responsive
             className="grid-layout"
-            width={availableWidth ?? window.innerWidth}
+            width={availableWidth || window.innerWidth}
             layouts={{
-              lg: currentGridLayout,
-              md: currentGridLayout,
-              sm: currentGridLayout,
-              xs: currentGridLayout,
-              xxs: currentGridLayout,
+              lg: layoutWithConstraints,
+              md: layoutWithConstraints,
+              sm: layoutWithConstraints,
+              xs: layoutWithConstraints,
+              xxs: layoutWithConstraints,
             }}
             rowHeight={cellHeight}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 12, sm: 12, xs: 12, xxs: 12 }}
-            margin={[marginValue, marginValue]}
+            cols={{
+              lg: GRID_COLS,
+              md: GRID_COLS,
+              sm: GRID_COLS,
+              xs: GRID_COLS,
+              xxs: GRID_COLS,
+            }}
+            margin={[0, 0]}
+            compactor={FREE_PLACEMENT_COMPACTOR}
             containerPadding={[0, isEditMode ? 6 : 3]}
             resizeConfig={{
               enabled: isEditMode,
-              handles: isEditMode ? ["sw", "nw", "se", "ne"] : [],
+              // se only: top/left handles fight the aspect constraint at a grid
+              // boundary (RGL re-clamps the opposite edge) and distort the tile.
+              handles: isEditMode ? ["se"] : [],
             }}
             dragConfig={{
               enabled: isEditMode,
             }}
             onDragStop={handleLayoutChange}
-            onResize={handleResize}
             onResizeStart={() => setShowCircles(false)}
             onResizeStop={handleLayoutChange}
           >
@@ -570,22 +742,12 @@ export default function DraggableGridLayout({
                     "outline outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
                 )}
                 birdseyeConfig={birdseyeConfig}
+                aspectRatio={layoutAspects["birdseye"] ?? DEFAULT_ASPECT}
                 liveMode={birdseyeConfig.restream ? "mse" : "jsmpeg"}
                 onClick={() => onSelectCamera("birdseye")}
-              >
-                {isEditMode && showCircles && <CornerCircles />}
-              </BirdseyeLivePlayerGridItem>
+              ></BirdseyeLivePlayerGridItem>
             )}
             {cameras.map((camera) => {
-              let grow;
-              const aspectRatio = camera.detect.width / camera.detect.height;
-              if (aspectRatio > ASPECT_WIDE_LAYOUT) {
-                grow = `aspect-wide w-full`;
-              } else if (aspectRatio < ASPECT_VERTICAL_LAYOUT) {
-                grow = `aspect-tall h-full`;
-              } else {
-                grow = "aspect-video";
-              }
               const availableStreams = camera.live.streams || {};
               const firstStreamEntry = Object.values(availableStreams)[0] || "";
 
@@ -614,7 +776,14 @@ export default function DraggableGridLayout({
                   ?.compatibilityMode || false;
               return (
                 <GridLiveContextMenu
-                  className={grow}
+                  className={CARD_FIT}
+                  aspectRatio={
+                    (naturalAspectLayout
+                      ? liveAspects[camera.name]
+                      : undefined) ??
+                    layoutAspects[camera.name] ??
+                    DEFAULT_ASPECT
+                  }
                   key={camera.name}
                   camera={camera.name}
                   streamName={streamName}
@@ -653,8 +822,8 @@ export default function DraggableGridLayout({
                     useWebGL={useWebGL}
                     cameraRef={cameraRef}
                     className={cn(
-                      "rounded-lg bg-black md:rounded-2xl",
-                      grow,
+                      "size-full",
+                      naturalAspectLayout ? "bg-background" : "bg-black",
                       isEditMode &&
                         showCircles &&
                         "outline-2 outline-muted-foreground hover:cursor-grab hover:outline-4 active:cursor-grabbing",
@@ -675,8 +844,8 @@ export default function DraggableGridLayout({
                     onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                     playAudio={audioStates[camera.name]}
                     volume={volumeStates[camera.name]}
+                    onLiveAspectChange={liveAspectHandlers[camera.name]}
                   />
-                  {isEditMode && showCircles && <CornerCircles />}
                 </GridLiveContextMenu>
               );
             })}
@@ -694,6 +863,7 @@ export default function DraggableGridLayout({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div
+                    data-testid="toggle-edit-layout"
                     className="cursor-pointer rounded-lg bg-secondary text-secondary-foreground opacity-60 transition-all duration-300 hover:bg-muted hover:opacity-100"
                     onClick={() =>
                       setIsEditMode((prevIsEditMode) => !prevIsEditMode)
@@ -762,17 +932,6 @@ export default function DraggableGridLayout({
   );
 }
 
-function CornerCircles() {
-  return (
-    <>
-      <div className="pointer-events-none absolute left-[-4px] top-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
-      <div className="pointer-events-none absolute right-[-4px] top-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
-      <div className="pointer-events-none absolute bottom-[-4px] right-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
-      <div className="pointer-events-none absolute bottom-[-4px] left-[-4px] z-50 size-3 rounded-full bg-primary-variant p-2 text-background outline-2 outline-muted" />
-    </>
-  );
-}
-
 type BirdseyeLivePlayerGridItemProps = {
   style?: React.CSSProperties;
   className?: string;
@@ -781,6 +940,7 @@ type BirdseyeLivePlayerGridItemProps = {
   onTouchEnd?: React.TouchEventHandler<HTMLDivElement>;
   children?: React.ReactNode;
   birdseyeConfig: BirdseyeConfig;
+  aspectRatio: number;
   liveMode: LivePlayerMode;
   onClick: () => void;
 };
@@ -798,6 +958,7 @@ const BirdseyeLivePlayerGridItem = React.forwardRef<
       onTouchEnd,
       children,
       birdseyeConfig,
+      aspectRatio: cellAspect,
       liveMode,
       onClick,
       ...props
@@ -806,7 +967,8 @@ const BirdseyeLivePlayerGridItem = React.forwardRef<
   ) => {
     return (
       <div
-        style={{ ...style }}
+        className="flex items-center justify-center p-1 [container-type:size]"
+        style={{ ...style, "--ar": cellAspect } as React.CSSProperties}
         ref={ref}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}
@@ -814,7 +976,7 @@ const BirdseyeLivePlayerGridItem = React.forwardRef<
         {...props}
       >
         <BirdseyeLivePlayer
-          className={className}
+          className={cn(CARD_FIT, className)}
           birdseyeConfig={birdseyeConfig}
           liveMode={liveMode}
           onClick={onClick}
@@ -829,6 +991,7 @@ const BirdseyeLivePlayerGridItem = React.forwardRef<
 type GridLiveContextMenuProps = {
   className?: string;
   style?: React.CSSProperties;
+  aspectRatio?: number;
   onMouseDown?: React.MouseEventHandler<HTMLDivElement>;
   onMouseUp?: React.MouseEventHandler<HTMLDivElement>;
   onTouchEnd?: React.TouchEventHandler<HTMLDivElement>;
@@ -860,6 +1023,7 @@ const GridLiveContextMenu = React.forwardRef<
     {
       className,
       style,
+      aspectRatio: cameraAspect,
       onMouseDown,
       onMouseUp,
       onTouchEnd,
@@ -887,7 +1051,8 @@ const GridLiveContextMenu = React.forwardRef<
   ) => {
     return (
       <div
-        style={{ ...style }}
+        className="flex items-center justify-center p-1 [container-type:size]"
+        style={{ ...style, "--ar": cameraAspect } as React.CSSProperties}
         ref={ref}
         onMouseDown={onMouseDown}
         onMouseUp={onMouseUp}

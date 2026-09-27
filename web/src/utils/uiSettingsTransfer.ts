@@ -55,6 +55,12 @@ export const TRANSFER_KEYS: TransferKey[] = [
     schema: z.boolean(),
   },
   {
+    key: "naturalAspectLayout",
+    section: "preferences",
+    namespaced: true,
+    schema: z.boolean(),
+  },
+  {
     key: "alertVideos",
     section: "preferences",
     namespaced: true,
@@ -182,13 +188,22 @@ const layoutItemSchema = z
   })
   .passthrough();
 
+// a group whose dashboard has not been opened since upgrading still holds
+// the pre-0.19 bare array, so both shapes reach the file
+const storedLayoutSchema = z.union([
+  z.array(layoutItemSchema),
+  z
+    .object({ version: z.number(), layout: z.array(layoutItemSchema) })
+    .passthrough(),
+]);
+
 export const uiSettingsFileSchema = z.object({
   type: z.literal(UI_SETTINGS_FILE_TYPE),
   version: z.number().int().positive(),
   exported_at: z.string(),
   frigate_version: z.string(),
   sections: z.object({
-    layouts: z.record(z.string(), z.array(layoutItemSchema)),
+    layouts: z.record(z.string(), storedLayoutSchema),
     streaming: allGroupsStreamingSettingsSchema,
     preferences: z.record(z.string(), z.unknown()),
   }),
@@ -204,6 +219,8 @@ export async function buildExportPayload(
   const layouts: UiSettingsFile["sections"]["layouts"] = {};
   let streaming: UiSettingsFile["sections"]["streaming"] = {};
   const preferences: UiSettingsFile["sections"]["preferences"] = {};
+  const naturalAspect =
+    (await readTransferable("naturalAspectLayout", true, username)) === true;
 
   await Promise.all(
     groupNames.map(async (group) => {
@@ -213,7 +230,9 @@ export async function buildExportPayload(
         username,
       );
 
-      if (value !== undefined) {
+      // a group not opened since the mode changed still holds a layout from
+      // the other mode, which the grid discards, so leave it out of the file
+      if (value !== undefined && layoutIsNatural(value) === naturalAspect) {
         layouts[group] = value;
       }
     }),
@@ -384,6 +403,30 @@ export function summarizeImport(
   };
 }
 
+// Bare arrays are pre-masonry bucketed layouts
+function layoutIsNatural(layout: unknown): boolean {
+  return (
+    typeof layout === "object" &&
+    layout !== null &&
+    !Array.isArray(layout) &&
+    (layout as { naturalAspect?: unknown }).naturalAspect === true
+  );
+}
+
+// A layout only renders under the mode that built it, so importing layouts
+// applies this mode too. Exports hold a single mode.
+export function importedLayoutsNaturalAspect(
+  file: UiSettingsFile,
+): boolean | null {
+  const layouts = Object.values(file.sections.layouts);
+
+  if (!layouts.length) {
+    return null;
+  }
+
+  return layouts.some(layoutIsNatural);
+}
+
 export function hasImportableContent(summary: ImportSummary): boolean {
   return (
     summary.layoutGroupCount > 0 ||
@@ -398,6 +441,9 @@ export async function applyImportPayload(
   username: string | undefined,
 ): Promise<void> {
   const writes: Promise<void>[] = [];
+  const layoutsMode = sections.layouts
+    ? importedLayoutsNaturalAspect(file)
+    : null;
 
   if (sections.layouts) {
     Object.entries(file.sections.layouts).forEach(([group, layout]) => {
@@ -408,6 +454,15 @@ export async function applyImportPayload(
         ),
       );
     });
+
+    if (layoutsMode !== null) {
+      writes.push(
+        setData(
+          getUserNamespacedKey("naturalAspectLayout", username),
+          layoutsMode,
+        ),
+      );
+    }
   }
 
   const streamingEntry = TRANSFER_KEYS.find(
@@ -447,6 +502,12 @@ export async function applyImportPayload(
   if (sections.preferences) {
     validPreferenceEntries(file.sections.preferences).forEach(
       ({ entry, value }) => {
+        // the layouts must win this key or they import into a mode that
+        // cannot display them
+        if (entry.key === "naturalAspectLayout" && layoutsMode !== null) {
+          return;
+        }
+
         writes.push(setData(storageKey(entry, username), value));
       },
     );
