@@ -845,6 +845,7 @@ export function TrackingDetails({
                       <div className="text-sm text-secondary-foreground">
                         <Link
                           to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
+                          state={{ canGoBack: true }}
                           className="text-sm"
                         >
                           {event.data.recognized_license_plate}

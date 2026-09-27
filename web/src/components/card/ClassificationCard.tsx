@@ -1,12 +1,20 @@
 import { baseUrl } from "@/api/baseUrl";
 import useContextMenu from "@/hooks/use-contextmenu";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import {
   ClassificationItemData,
   ClassificationThreshold,
   ClassifiedEvent,
 } from "@/types/classification";
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { isDesktop, isIOS, isMobile, isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import TimeAgo from "../dynamic/TimeAgo";
@@ -16,6 +24,7 @@ import { LuSearch, LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { HiSquare2Stack } from "react-icons/hi2";
+import scrollIntoView from "scroll-into-view-if-needed";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import {
   Dialog,
@@ -85,9 +94,14 @@ export const ClassificationCard = forwardRef<
 
   // interaction
 
+  const cardRef = useRef<HTMLDivElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
 
-  useContextMenu(imgRef, () => {
+  useImperativeHandle(ref, () => cardRef.current!);
+
+  // Listen on the whole card, since overlays cover most of the image
+
+  useContextMenu(cardRef, () => {
     onClick(data, true);
   });
 
@@ -101,9 +115,9 @@ export const ClassificationCard = forwardRef<
 
   return (
     <div
-      ref={ref}
+      ref={cardRef}
       className={cn(
-        "relative flex size-full flex-col overflow-hidden rounded-lg outline outline-[3px]",
+        "relative flex size-full select-none flex-col overflow-hidden rounded-lg outline outline-[3px]",
         className,
         selected
           ? "shadow-selected outline-selected"
@@ -117,11 +131,7 @@ export const ClassificationCard = forwardRef<
         }
         onClick(data, isMeta);
       }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        onClick(data, true);
-      }}
+      style={isIOS ? { WebkitTouchCallout: "none" } : undefined}
     >
       <img
         ref={imgRef}
@@ -130,14 +140,6 @@ export const ClassificationCard = forwardRef<
           imgClassName,
           isMobile && "w-full",
         )}
-        style={
-          isIOS
-            ? {
-                WebkitUserSelect: "none",
-                WebkitTouchCallout: "none",
-              }
-            : undefined
-        }
         draggable={false}
         loading="lazy"
         onLoad={() => setImageLoaded(true)}
@@ -156,7 +158,7 @@ export const ClassificationCard = forwardRef<
         </div>
       )}
       <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-black/60 to-transparent" />
-      <div className="absolute bottom-0 flex w-full select-none flex-row items-center justify-between gap-2 p-2">
+      <div className="absolute bottom-0 flex w-full flex-row items-center justify-between gap-2 p-2">
         <div
           className={cn(
             "flex flex-col items-start text-white",
@@ -215,6 +217,41 @@ export function GroupedClassificationCard({
   const navigate = useNavigate();
   const { t } = useTranslation(["views/explore", i18nLibrary]);
   const [detailOpen, setDetailOpen] = useState(false);
+
+  // Explore stores this event in history state so going back can point out the
+  // card the user came from
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [returnEventId, setReturnEventId] = useOverlayState<string | undefined>(
+    "returnEventId",
+  );
+  const [highlighted, setHighlighted] = useState(false);
+
+  useEffect(() => {
+    if (!returnEventId || classifiedEvent?.id !== returnEventId) {
+      return;
+    }
+
+    setReturnEventId(undefined, true);
+    setHighlighted(true);
+  }, [classifiedEvent?.id, returnEventId, setReturnEventId]);
+
+  useEffect(() => {
+    if (!highlighted) {
+      return;
+    }
+
+    if (cardRef.current) {
+      scrollIntoView(cardRef.current, {
+        block: "center",
+        behavior: "smooth",
+        scrollMode: "if-needed",
+      });
+    }
+
+    const timeout = setTimeout(() => setHighlighted(false), 3000);
+    return () => clearTimeout(timeout);
+  }, [highlighted]);
 
   // If the component unmounts while the detail overlay is open, we need to
   // pop the history state that was pushed by useHistoryBack, otherwise it
@@ -308,9 +345,10 @@ export function GroupedClassificationCard({
   return (
     <>
       <ClassificationCard
+        ref={cardRef}
         data={bestItem}
         threshold={threshold}
-        selected={selectedItems.includes(bestItem.filename)}
+        selected={highlighted || selectedItems.includes(bestItem.filename)}
         clickable={true}
         i18nLibrary={i18nLibrary}
         count={group.length}
@@ -404,13 +442,19 @@ export function GroupedClassificationCard({
                     isMobile && "absolute right-4 top-8",
                   )}
                 >
-                  <Tooltip>
+                  <Tooltip open={isDesktop ? undefined : false}>
                     <TooltipTrigger asChild>
                       <div
                         className="cursor-pointer"
                         tabIndex={-1}
+                        aria-label={t("details.item.button.viewInExplore", {
+                          ns: "views/explore",
+                        })}
                         onClick={() => {
-                          navigate(`/explore?event_id=${classifiedEvent.id}`);
+                          setReturnEventId(classifiedEvent.id, true);
+                          navigate(`/explore?event_id=${classifiedEvent.id}`, {
+                            state: { canGoBack: true },
+                          });
                         }}
                       >
                         <LuSearch className="size-4 text-secondary-foreground" />
