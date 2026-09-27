@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useOverlayState } from "@/hooks/use-overlay-state";
 import { usePersistence } from "@/hooks/use-persistence";
+import { useUserPersistence } from "@/hooks/use-user-persistence";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { DEFAULT_DRAWER_FEATURES, ExportMode } from "@/types/filter";
 import { FrigateConfig } from "@/types/frigateConfig";
@@ -182,9 +183,19 @@ export function RecordingView({
     false,
   );
 
-  const [timelineType, setTimelineType] = useOverlayState<TimelineType>(
+  const [savedTimelineType, setSavedTimelineType] =
+    useUserPersistence<TimelineType>("recordingTimelineType");
+  const [timelineType, setOverlayTimelineType] = useOverlayState<TimelineType>(
     "timelineType",
-    recording?.timelineType ?? "timeline",
+    recording?.timelineType ?? savedTimelineType ?? "timeline",
+  );
+
+  const setTimelineType = useCallback(
+    (value: TimelineType, replace?: boolean) => {
+      setOverlayTimelineType(value, replace);
+      setSavedTimelineType(value);
+    },
+    [setOverlayTimelineType, setSavedTimelineType],
   );
 
   const chunkedTimeRange = useMemo(
