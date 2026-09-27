@@ -67,9 +67,12 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **AMD**
 
-- [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
+- [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection (sub-watt power)
   - [Supports limited model architectures](../../configuration/object_detectors#amdrocm-gpu-detector)
   - Runs best on discrete AMD GPUs
+- <CommunityBadge /> [XDNA2 (Ryzen AI)](#amd-xdna2): AMD XDNA2 NPU (low power AI/ML processor separate to the GPU) inside Strix and other "AI" branded AMD platforms
+  - Has only been tested with YOLOv9, in theory other graphs may be compiled too.
+  - Runs via ZMQ proxy which adds some latency, only recommended for local connection
 
 **Apple Silicon**
 
@@ -295,6 +298,32 @@ The inference time of a rk3588 with all 3 cores enabled is typically 25-30 ms fo
 | Name             | AXERA AX650N/AX8850N Inference Time |
 | ---------------- | ----------------------------------- |
 | yolov9-tiny      | ~ 4 ms                              |
+
+### AMD Ryzen AI / XDNA2
+
+Frigate supports AMD XDNA2 NPUs through the community-maintained
+frigate-xdna ZMQ sidecar. It works with stock Frigate and supports
+Frigate+ models or compatible local YOLO ONNX models. Models are compiled
+once on the target system and cached for subsequent use.
+
+Currently qualified on **Ryzen AI Max 300 / Strix Halo**. Other XDNA2
+devices are not yet qualified; XDNA1 is unsupported.
+
+Measured YOLOv9 detector latency on Strix Halo:
+
+| Model | 320 | 640 |
+| ----- | ---: | ---: |
+| YOLOv9-T | ~7.4 ms | unsupported |
+| YOLOv9-S | ~9.0 ms | ~20.0 ms |
+| YOLOv9-M | ~13.1 ms | ~34.4 ms |
+| YOLOv9-C | ~14.1 ms | ~35.2 ms |
+| YOLOv9-E | ~69.4 ms | ~224.8 ms |
+
+**YOLOv9-C at 320 is the recommended quality/performance balance.**
+C at 640 is also usable where the lower throughput is acceptable.
+
+Setup, model preparation, and compatibility details are available
+[in the frigate-xdna documentation](https://github.com/mitchins/frigate-xdna).
 
 ## What does Frigate use the CPU for and what does it use a detector for? (ELI5 Version)
 
