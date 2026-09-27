@@ -894,6 +894,41 @@ deepstack:
             api_url: http://<your_codeproject_ai_server_ip>:<port>/v1/vision/detection
             type: deepstack
             api_timeout: 0.1 # seconds
+xdna2:
+  title: AMD XDNA2
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: |-
+        Prepare the model using the frigate-xdna setup instructions linked above. For local YOLO models, Frigate must have access to the same ONNX file bytes as the sidecar. The example below uses YOLOv9-C at 320x320. Frigate+ models may instead use the same `plus://MODEL_ID` in Frigate and the sidecar.
+      ui: |-
+        Navigate to **Settings > System > Detectors and model** and select **ZMQ IPC** from the detector type dropdown and click **Add**, then set the endpoint to `tcp://xdna:5555`. Then on the same page, in the **Custom Model** tab, configure:
+
+        | Field                                    | Value                                      |
+        | ---------------------------------------- | ------------------------------------------ |
+        | **Custom object detector model path**    | `/config/models/yolov9-c-320.onnx`       |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                   |
+        | **Object detection model input width**   | `320`                                    |
+        | **Object detection model input height**  | `320`                                    |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)          |
+        | **Model Input Tensor Shape**             | `nchw`                                   |
+        | **Model Input D Type**                   | `float`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                           |
+      yaml: |-
+        detectors:
+          xdna:
+            type: zmq
+            endpoint: tcp://xdna:5555
+
+        model:
+          model_type: yolo-generic
+          width: 320
+          height: 320
+          input_tensor: nchw
+          input_dtype: float
+          path: /config/models/yolov9-c-320.onnx
+          labelmap_path: /labelmap/coco-80.txt
 memryx:
   title: MemryX
   models:
