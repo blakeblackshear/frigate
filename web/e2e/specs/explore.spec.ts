@@ -216,6 +216,18 @@ test.describe("Explore — content @high", () => {
 // Similarity search URL param
 // ---------------------------------------------------------------------------
 
+test.describe("Explore — back button @high", () => {
+  test("direct visits do not show a back button", async ({ frigateApp }) => {
+    await frigateApp.goto("/explore?labels=person");
+    await expect(frigateApp.page.getByLabel("Labels").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Go back" }),
+    ).toHaveCount(0);
+  });
+});
+
 test.describe("Explore — similarity search (desktop) @high", () => {
   test.skip(
     ({ frigateApp }) => frigateApp.isMobile,

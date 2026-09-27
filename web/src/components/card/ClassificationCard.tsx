@@ -1,5 +1,6 @@
 import { baseUrl } from "@/api/baseUrl";
 import useContextMenu from "@/hooks/use-contextmenu";
+import { useOverlayState } from "@/hooks/use-overlay-state";
 import { cn } from "@/lib/utils";
 import {
   ClassificationItemData,
@@ -23,6 +24,7 @@ import { LuSearch, LuInfo } from "react-icons/lu";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { useNavigate } from "react-router-dom";
 import { HiSquare2Stack } from "react-icons/hi2";
+import scrollIntoView from "scroll-into-view-if-needed";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import {
   Dialog,
@@ -216,6 +218,41 @@ export function GroupedClassificationCard({
   const { t } = useTranslation(["views/explore", i18nLibrary]);
   const [detailOpen, setDetailOpen] = useState(false);
 
+  // Explore stores this event in history state so going back can point out the
+  // card the user came from
+
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const [returnEventId, setReturnEventId] = useOverlayState<string | undefined>(
+    "returnEventId",
+  );
+  const [highlighted, setHighlighted] = useState(false);
+
+  useEffect(() => {
+    if (!returnEventId || classifiedEvent?.id !== returnEventId) {
+      return;
+    }
+
+    setReturnEventId(undefined, true);
+    setHighlighted(true);
+  }, [classifiedEvent?.id, returnEventId, setReturnEventId]);
+
+  useEffect(() => {
+    if (!highlighted) {
+      return;
+    }
+
+    if (cardRef.current) {
+      scrollIntoView(cardRef.current, {
+        block: "center",
+        behavior: "smooth",
+        scrollMode: "if-needed",
+      });
+    }
+
+    const timeout = setTimeout(() => setHighlighted(false), 3000);
+    return () => clearTimeout(timeout);
+  }, [highlighted]);
+
   // If the component unmounts while the detail overlay is open, we need to
   // pop the history state that was pushed by useHistoryBack, otherwise it
   // leaves a stale entry that breaks back navigation.
@@ -308,9 +345,10 @@ export function GroupedClassificationCard({
   return (
     <>
       <ClassificationCard
+        ref={cardRef}
         data={bestItem}
         threshold={threshold}
-        selected={selectedItems.includes(bestItem.filename)}
+        selected={highlighted || selectedItems.includes(bestItem.filename)}
         clickable={true}
         i18nLibrary={i18nLibrary}
         count={group.length}
@@ -404,13 +442,19 @@ export function GroupedClassificationCard({
                     isMobile && "absolute right-4 top-8",
                   )}
                 >
-                  <Tooltip>
+                  <Tooltip open={isDesktop ? undefined : false}>
                     <TooltipTrigger asChild>
                       <div
                         className="cursor-pointer"
                         tabIndex={-1}
+                        aria-label={t("details.item.button.viewInExplore", {
+                          ns: "views/explore",
+                        })}
                         onClick={() => {
-                          navigate(`/explore?event_id=${classifiedEvent.id}`);
+                          setReturnEventId(classifiedEvent.id, true);
+                          navigate(`/explore?event_id=${classifiedEvent.id}`, {
+                            state: { canGoBack: true },
+                          });
                         }}
                       >
                         <LuSearch className="size-4 text-secondary-foreground" />

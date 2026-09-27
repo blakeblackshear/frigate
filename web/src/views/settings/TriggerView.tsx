@@ -574,6 +574,7 @@ export default function TriggerView({
                               </Badge>
                               <Link
                                 to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
+                                state={{ canGoBack: true }}
                                 className={cn(
                                   "flex items-center gap-1.5 text-xs text-muted-foreground",
                                   !trigger_status?.triggers[trigger.name]
@@ -735,6 +736,7 @@ export default function TriggerView({
                             <TableCell>
                               <Link
                                 to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
+                                state={{ canGoBack: true }}
                                 className={cn(
                                   "flex items-center gap-1.5 text-sm",
                                   !trigger_status?.triggers[trigger.name]
