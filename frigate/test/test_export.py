@@ -543,6 +543,56 @@ class TestPinnedStream(unittest.TestCase):
         self.assertFalse(any("/vod/front/main/" in token for token in cmd))
 
 
+class TestExportTimelineAlignment(unittest.TestCase):
+    def test_unstaged_auto_reads_the_stream_it_serves(self) -> None:
+        # a sub-only range whose main rows are glitches the manifest drops
+        exporter = _make_exporter([_span("/s1.mp4", 1_000, 1_040, False)], {"h264"})
+        streams: list[str] = []
+
+        def rows(stream: str) -> list:
+            streams.append(stream)
+            return [_FakeRow(f"/{stream}.mp4")]
+
+        exporter._get_recordings_for_range = rows  # type: ignore[method-assign]
+        exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertEqual(streams, ["sub"])
+
+    def test_staged_chapters_carry_keyframe_lead_in(self) -> None:
+        exporter = _make_exporter(
+            [
+                _span("/m1.mp4", 1_000, 1_020, True),
+                _span("/s1.mp4", 1_020, 1_040, False),
+            ],
+            {"h264"},
+        )
+        exporter.config.ui.timezone = None
+
+        # each run's vod clip snaps 1.5s back to a keyframe
+        def timeline(_intervals: list, stream: str) -> list[dict]:
+            start, end = (1_000, 1_020) if stream == "main" else (1_020, 1_040)
+            return [
+                {
+                    "start_time": start,
+                    "end_time": end,
+                    "duration": (end - start + 1.5) * 1000,
+                }
+            ]
+
+        with (
+            patch("frigate.record.export.resolve_coverage", return_value=[]),
+            patch("frigate.record.export.realized_timeline", side_effect=timeline),
+        ):
+            windows = exporter._staged_chapter_windows()
+
+        path = exporter._build_recording_segment_chapter_metadata_file(windows)
+        self.addCleanup(os.remove, path)
+        content = Path(path).read_text()
+
+        self.assertIn("START=0\nEND=21500", content)
+        self.assertIn("START=21500\nEND=43000", content)
+
+
 class TestStagedFileCleanup(unittest.TestCase):
     """A staged path must be tracked before ffmpeg can write to it."""
 

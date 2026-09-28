@@ -60,6 +60,15 @@ const CUSTOM_MODEL_FIELDS = [
   "model_type",
 ];
 
+/**
+ * The fields a model can edit. A Frigate+ model's size, format, type, and
+ * labels come from its model info, so only its path stays editable.
+ */
+const editableFields = (model: DetectionModel): string[] =>
+  typeof model.path === "string" && model.path.startsWith("plus://")
+    ? ["path"]
+    : CUSTOM_MODEL_FIELDS;
+
 /** The detector a model runs on, which is the prefix of its device strings. */
 const detectorForModel = (model: DetectionModel): string | undefined =>
   model.devices?.[0]?.split(":")[0];
@@ -169,20 +178,23 @@ export function ModelsField(props: FieldProps) {
     [savedModels],
   );
 
-  // a model serves the cameras naming its scene, plus every camera that names
-  // no scene at all when it is the "all" model
+  // a model serves the cameras naming its scene, and like the backend, the
+  // "all" model also serves every camera whose scene has no model of its own
   const cameraCountForScene = useCallback(
     (scene: string | undefined): number => {
       if (!cameras) {
         return 0;
       }
 
+      const modelScenes = new Set(models.map((model) => model.scene ?? "all"));
+
       return Object.values(cameras).filter((camera) => {
-        const cameraScene = camera?.detect?.scene;
-        return cameraScene ? cameraScene === scene : scene === "all";
+        const cameraScene = camera?.detect?.scene ?? "all";
+        const servedBy = modelScenes.has(cameraScene) ? cameraScene : "all";
+        return servedBy === (scene ?? "all");
       }).length;
     },
-    [cameras],
+    [cameras, models],
   );
 
   const claimedByOtherModels = useCallback(
@@ -314,7 +326,9 @@ export function ModelsField(props: FieldProps) {
         );
 
         return (
-          <Card key={`${baseId}-${index}`} className="w-full">
+          // keyed by scene, which is unique per model, so deleting a card
+          // doesn't hand its state (such as the model source tab) to the next
+          <Card key={`${baseId}-${model.scene ?? index}`} className="w-full">
             <Collapsible
               open={open}
               onOpenChange={(nextOpen) =>
@@ -428,7 +442,7 @@ export function ModelsField(props: FieldProps) {
                     detector={detectorForModel(model)}
                     disabled={disabled || readonly}
                     onPathChange={(path) => updateModel(index, { path })}
-                    customFields={CUSTOM_MODEL_FIELDS.map((fieldName) =>
+                    customFields={editableFields(model).map((fieldName) =>
                       renderField(index, fieldName),
                     )}
                   />

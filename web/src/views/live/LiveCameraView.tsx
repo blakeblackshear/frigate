@@ -27,10 +27,7 @@ import {
 } from "@/components/ui/popover";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import useKeyboardListener from "@/hooks/use-keyboard-listener";
-import {
-  useWebRTCAvailableForStream,
-  useWebRTCGloballyAvailable,
-} from "@/hooks/use-webrtc-availability";
+import { useWebRTCAvailableForStream } from "@/hooks/use-webrtc-availability";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 import {
   LivePlayerError,
@@ -219,14 +216,15 @@ export default function LiveCameraView({
   );
   const isWebRTCAvailable = webRTCAvailability.available;
 
-  // Two-way talk is the sendonly backchannel: global, not per-stream.
-  const { globallyAvailable: webRTCGloballyAvailable } =
-    useWebRTCGloballyAvailable();
-
   // "checking" means the probe has not answered yet, and it re-enters that on
   // every mount, so treating it as unavailable downgrades the saved choice.
   const webRTCVerdictPending = webRTCAvailability.reason === "checking";
   const webRTCUsable = isWebRTCAvailable || webRTCVerdictPending;
+
+  // Two-way talk is a sendonly backchannel, so playback audio that WebRTC
+  // can't carry doesn't rule it out, but the stream's video must connect
+  const talkAvailable =
+    isWebRTCAvailable || webRTCAvailability.reason === "audio-codec";
 
   // Resolves the saved preference without overwriting it. Transient error
   // fallbacks layer on top in preferredLiveMode.
@@ -398,6 +396,14 @@ export default function LiveCameraView({
 
   const [audio, setAudio] = useSessionPersistence("liveAudio", false);
   const [mic, setMic] = useState(false);
+
+  // the mic only connects through the WebRTC player, so it can't stay on
+  // for a stream that has lost it
+  useEffect(() => {
+    if (!talkAvailable) {
+      setMic(false);
+    }
+  }, [talkAvailable]);
   const [webRTC, setWebRTC] = useState(false);
   const [pip, setPip] = useState(false);
   const [lowBandwidth, setLowBandwidth] = useState(false);
@@ -424,7 +430,7 @@ export default function LiveCameraView({
   });
 
   const preferredLiveMode = useMemo(() => {
-    if (mic && isWebRTCAvailable) {
+    if (mic && talkAvailable) {
       return "webrtc";
     }
 
@@ -456,6 +462,7 @@ export default function LiveCameraView({
     lowBandwidth,
     forceLowBandwidth,
     mic,
+    talkAvailable,
     webRTC,
     isRestreamed,
     resolvedUserMode,
@@ -489,7 +496,7 @@ export default function LiveCameraView({
         }
         break;
       case "t":
-        if (supports2WayTalk) {
+        if (supports2WayTalk && talkAvailable) {
           setMic(!mic);
           return true;
         }
@@ -737,11 +744,15 @@ export default function LiveCameraView({
                 Icon={mic ? FaMicrophone : FaMicrophoneSlash}
                 isActive={mic}
                 title={
-                  !webRTCGloballyAvailable
-                    ? t("twoWayTalk.requiresWebRTC", { ns: "views/live" })
-                    : mic
-                      ? t("twoWayTalk.disable", { ns: "views/live" })
-                      : t("twoWayTalk.enable", { ns: "views/live" })
+                  webRTCVerdictPending
+                    ? t("stream.technology.unavailable.checking", {
+                        ns: "views/live",
+                      })
+                    : !talkAvailable
+                      ? t("twoWayTalk.requiresWebRTC", { ns: "views/live" })
+                      : mic
+                        ? t("twoWayTalk.disable", { ns: "views/live" })
+                        : t("twoWayTalk.enable", { ns: "views/live" })
                 }
                 onClick={() => {
                   setMic(!mic);
@@ -749,7 +760,7 @@ export default function LiveCameraView({
                     setAudio(true);
                   }
                 }}
-                disabled={!cameraEnabled || debug || !webRTCGloballyAvailable}
+                disabled={!cameraEnabled || debug || !talkAvailable}
               />
             )}
             {supportsAudioOutput && preferredLiveMode != "jsmpeg" && (

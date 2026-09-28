@@ -1,5 +1,6 @@
 """Tests for sub stream cache segment handling in the recording maintainer."""
 
+import asyncio
 import datetime
 import os
 import tempfile
@@ -531,6 +532,59 @@ class TestSegmentStartChaining(unittest.IsolatedAsyncioTestCase):
         self.assertAlmostEqual(calls[0].args[3].timestamp(), self.T0 + 10.4, places=3)
         self.assertAlmostEqual(calls[1].args[2].timestamp(), self.T0 + 10.4, places=3)
         self.assertAlmostEqual(calls[1].args[3].timestamp(), self.T0 + 20.8, places=3)
+
+    async def test_out_of_order_probes_chain_in_segment_order(self):
+        maintainer = _build_chaining_maintainer(self.T0)
+
+        async def probe(_ffmpeg, cache_path, get_duration=False):
+            # the earlier segment's probe finishes last
+            if "chain0" in cache_path:
+                await asyncio.sleep(0.05)
+
+            return {"has_valid_video": True, "duration": 10.4}
+
+        recordings = [
+            {
+                "start_time": datetime.datetime.fromtimestamp(
+                    self.T0 + offset, tz=datetime.UTC
+                ),
+                "cache_path": f"/tmp/cache/test_cam@chain{offset}.mp4",
+                "stream_type": "main",
+            }
+            for offset in (0, 10)
+        ]
+        first_resolved = asyncio.Event()
+
+        with (
+            patch("frigate.record.maintainer.get_video_properties", probe),
+            patch(
+                "frigate.record.maintainer.get_keyframe_offsets",
+                AsyncMock(return_value=[0]),
+            ),
+            patch(
+                "frigate.record.maintainer.os.path.getmtime",
+                MagicMock(side_effect=OSError("missing")),
+            ),
+        ):
+            await asyncio.gather(
+                maintainer._validate_in_order(
+                    "test_cam", [], recordings[0], None, first_resolved
+                ),
+                maintainer._validate_in_order(
+                    "test_cam", [], recordings[1], first_resolved, asyncio.Event()
+                ),
+            )
+
+        starts = sorted(
+            call.args[2].timestamp() for call in maintainer.move_segment.await_args_list
+        )
+        self.assertEqual(starts[0], self.T0)
+        self.assertAlmostEqual(starts[1], self.T0 + 10.4, places=3)
+        self.assertAlmostEqual(
+            maintainer.last_segment_end[("test_cam", "main")],
+            self.T0 + 20.8,
+            places=3,
+        )
 
     async def test_genuine_gap_is_not_snapped(self):
         maintainer = _build_chaining_maintainer(self.T0)

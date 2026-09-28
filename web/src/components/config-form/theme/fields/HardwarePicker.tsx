@@ -21,7 +21,8 @@ type HardwarePickerProps = {
   // scopes the unit checkbox ids, since several models can list the same unit
   idPrefix: string;
   devices: string[];
-  // device strings already taken by another model, mapped to that model's scene
+  // device strings already taken by another model, mapped to that model's
+  // scene. Only binding for hardware that can't be shared.
   claimedElsewhere: Record<string, string>;
   cameraCount: number;
   disabled?: boolean;
@@ -84,8 +85,11 @@ export function HardwarePicker({
         return;
       }
 
-      // start with the first unit no other model has taken
-      const free = entry.units.find((unit) => !claimedElsewhere[unit.device]);
+      // start with the first unit no other model has taken, falling back to
+      // a taken one when the hardware can be shared
+      const free =
+        entry.units.find((unit) => !claimedElsewhere[unit.device]) ??
+        (entry.unlimited ? entry.units[0] : undefined);
 
       if (!free) {
         onChange([]);
@@ -184,7 +188,9 @@ export function HardwarePicker({
             {t("detectionModels.hardware.unitsDescription")}
           </p>
           {selected.units.map((unit) => {
-            const claimedBy = claimedElsewhere[unit.device];
+            const claimedBy = selected.unlimited
+              ? undefined
+              : claimedElsewhere[unit.device];
 
             return (
               <div

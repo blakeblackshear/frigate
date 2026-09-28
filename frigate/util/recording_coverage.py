@@ -213,17 +213,19 @@ def stream_has_audio(intervals: list[CoverageInterval], main: bool) -> bool:
     )
 
 
-def null_audio_glitches(
-    intervals: list[CoverageInterval], main_audio: bool, sub_audio: bool
-) -> list[CoverageInterval]:
+def null_audio_glitches(intervals: list[CoverageInterval]) -> list[CoverageInterval]:
     """Treat video-only glitch rows on audio-bearing streams as no recording.
 
     nginx-vod requires every clip in a sequence to carry the same track
     count, so a truncated video-only segment (a backend restart can flush
     a sub-second file before any audio packet landed) poisons every
     manifest that includes it. Nulling the row turns the glitch into a
-    hole the span builder skips like any recording gap.
+    hole the span builder skips like any recording gap. Every consumer of
+    a window's coverage (the vod manifest, its realized timelines, and
+    exports) goes through here, so they all agree on which rows exist.
     """
+    main_audio = stream_has_audio(intervals, main=True)
+    sub_audio = stream_has_audio(intervals, main=False)
     result: list[CoverageInterval] = []
     for interval in intervals:
         main = interval.main
@@ -449,9 +451,7 @@ def realized_timelines(
     assembles each variant's realized spans. Keyframe snapping reads the
     per-row index stored at record time, so no file is touched.
     """
-    main_audio = stream_has_audio(intervals, main=True)
-    sub_audio = stream_has_audio(intervals, main=False)
-    nulled = null_audio_glitches(intervals, main_audio, sub_audio)
+    nulled = null_audio_glitches(intervals)
 
     return {
         "auto": realized_timeline(nulled, None),

@@ -63,7 +63,6 @@ from frigate.util.recording_coverage import (
     null_audio_glitches,
     plan_clip,
     resolve_coverage,
-    stream_has_audio,
 )
 
 logger = logging.getLogger(__name__)
@@ -681,15 +680,10 @@ async def _vod_response(
         end_ts,
         force_discontinuity,
     )
-    intervals = resolve_coverage(camera_name, start_ts, end_ts)
-
     # rows contradicting their stream's audio composition are
     # truncated-shutdown glitches
-    main_audio = stream_has_audio(intervals, main=True)
-    sub_audio = stream_has_audio(intervals, main=False)
-
     spans = build_spans(
-        null_audio_glitches(intervals, main_audio, sub_audio),
+        null_audio_glitches(resolve_coverage(camera_name, start_ts, end_ts)),
         stream_preference,
     )
 

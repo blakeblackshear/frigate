@@ -26,6 +26,7 @@ import { useIsAdmin } from "@/hooks/use-is-admin";
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = false;
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl" as const;
+const DEFAULT_MAX_BUFFER_LENGTH_S = 10;
 const unsupportedErrorCodes: number[] = [
   MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
   MediaError.MEDIA_ERR_DECODE,
@@ -148,6 +149,42 @@ export default function HlsVideoPlayer({
   // a ref rather than an effect-scoped counter so the element error
   // handler can hold its toast while a recovery is still possible
   const mediaRecoveryBudgetRef = useRef(0);
+  // hls.js and the element can both report one failure, so each source
+  // toasts at most once
+  const failureReportedRef = useRef(false);
+
+  const reportPlaybackFailure = useCallback(
+    (code: number, message: string) => {
+      if (failureReportedRef.current) {
+        return;
+      }
+
+      failureReportedRef.current = true;
+      toast.error(t("toast.error.playRecordingsFailed", { code, message }), {
+        position: "top-center",
+      });
+    },
+    [t],
+  );
+  const reportPlaybackFailureRef = useRef(reportPlaybackFailure);
+
+  useEffect(() => {
+    reportPlaybackFailureRef.current = reportPlaybackFailure;
+  }, [reportPlaybackFailure]);
+
+  // a quality switch changes the buffer length a commit before the new
+  // source arrives, so it updates the live instance instead of rebuilding
+  // it on the outgoing playlist
+  const bufferLengthRef = useRef(bufferLength);
+
+  useEffect(() => {
+    bufferLengthRef.current = bufferLength;
+
+    if (hlsRef.current) {
+      hlsRef.current.config.maxBufferLength =
+        bufferLength ?? DEFAULT_MAX_BUFFER_LENGTH_S;
+    }
+  }, [bufferLength]);
 
   const applyVideoDimensions = useCallback(
     (width: number, height: number) => {
@@ -225,6 +262,7 @@ export default function HlsVideoPlayer({
     // the element already holds a decoded frame, and keeping it visible
     // bridges the gap while the new source loads
     const currentPlaybackRate = videoRef.current.playbackRate;
+    failureReportedRef.current = false;
 
     if (!useHlsCompat) {
       nativeRetryRef.current = 0;
@@ -236,7 +274,7 @@ export default function HlsVideoPlayer({
 
     // Base HLS configuration
     const hlsConfig: Partial<HlsConfig> = {
-      maxBufferLength: bufferLength ?? 10,
+      maxBufferLength: bufferLengthRef.current ?? DEFAULT_MAX_BUFFER_LENGTH_S,
       maxBufferSize: 20 * 1000 * 1000,
       startPosition: currentSource.startPosition,
     };
@@ -269,10 +307,18 @@ export default function HlsVideoPlayer({
             data.details ===
               Hls.ErrorDetails.BUFFER_INCOMPATIBLE_CODECS_ERROR ||
             data.details === Hls.ErrorDetails.BUFFER_ADD_CODEC_ERROR;
-          if (isCodecError && qualitySignalsRef.current.onFatalCodecError?.()) {
+          if (isCodecError) {
+            // with no stream to fall back to, the element may never raise
+            // an error of its own, so report the failure here
+            if (!qualitySignalsRef.current.onFatalCodecError?.()) {
+              reportPlaybackFailureRef.current(
+                MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
+                data.details,
+              );
+            }
             return;
           }
-          if (!isCodecError && mediaRecoveryBudgetRef.current > 0) {
+          if (mediaRecoveryBudgetRef.current > 0) {
             mediaRecoveryBudgetRef.current -= 1;
             hls.recoverMediaError();
           }
@@ -308,7 +354,7 @@ export default function HlsVideoPlayer({
         hlsRef.current.destroy();
       }
     };
-  }, [videoRef, hlsRef, useHlsCompat, currentSource, bufferLength]);
+  }, [videoRef, hlsRef, useHlsCompat, currentSource]);
 
   // state handling
 
@@ -714,15 +760,7 @@ export default function HlsVideoPlayer({
                 }
               }
 
-              toast.error(
-                t("toast.error.playRecordingsFailed", {
-                  code: mediaError.code,
-                  message: mediaError.message,
-                }),
-                {
-                  position: "top-center",
-                },
-              );
+              reportPlaybackFailure(mediaError.code, mediaError.message);
             }}
           />
         </div>

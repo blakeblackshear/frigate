@@ -1,7 +1,7 @@
 import datetime
 import sys
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 # Mock complex imports before importing maintainer, saving originals so we can
 # restore them after import and avoid polluting sys.modules for other tests.
@@ -48,8 +48,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                     "frigate.record.maintainer.psutil.process_iter", return_value=[]
                 ):
                     with patch("frigate.record.maintainer.logger.warning") as warn:
-                        # Mock validate_and_move_segment to avoid further logic
-                        maintainer.validate_and_move_segment = MagicMock()
+                        # Mock validate_and_move_segment to avoid further logic.
+                        # The requestor is real when another test imported the
+                        # maintainer first, and it would block on a reply.
+                        maintainer.validate_and_move_segment = AsyncMock()
+                        maintainer.requestor = MagicMock()
 
                         try:
                             await maintainer.move_files()

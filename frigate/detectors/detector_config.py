@@ -123,6 +123,7 @@ class ModelConfig(BaseModel):
     _all_attributes: list[str] = PrivateAttr()
     _all_attribute_logos: list[str] = PrivateAttr()
     _model_hash: str = PrivateAttr()
+    _plus_id: str | None = PrivateAttr(default=None)
 
     @property
     def merged_labelmap(self) -> dict[int, str]:
@@ -147,6 +148,11 @@ class ModelConfig(BaseModel):
     @property
     def model_hash(self) -> str:
         return self._model_hash
+
+    @property
+    def plus_id(self) -> str | None:
+        """The Frigate+ model id, once a plus:// path has been resolved."""
+        return self._plus_id
 
     def __init__(self, **config):
         super().__init__(**config)
@@ -178,6 +184,7 @@ class ModelConfig(BaseModel):
         os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
 
         model_id = self.path[7:]
+        self._plus_id = model_id
         self.path = os.path.join(MODEL_CACHE_DIR, model_id)
         model_info_path = f"{self.path}.json"
 

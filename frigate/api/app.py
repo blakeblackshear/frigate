@@ -393,6 +393,11 @@ def config(request: Request):
         model_dict["non_logo_attributes"] = model.non_logo_attributes
         model_dict["labelmap"] = model.merged_labelmap
 
+        # report the configured reference rather than the resolved cache path,
+        # so saving the config back doesn't lose the Frigate+ model
+        if model.plus_id:
+            model_dict["path"] = f"plus://{model.plus_id}"
+
         if not config["plus"]["enabled"]:
             continue
 

@@ -288,6 +288,17 @@ class TestUpdateConfig(HardwareStatsTestCase):
 
         self.assertEqual(set(stats._monitored), {"rockchip"})
 
+    def test_follows_a_runtime_config_swap(self):
+        stats = self.make_stats(self.make_config())
+        self.assertEqual(set(stats._monitored), set())
+
+        swapped = self.make_config("preset-rk-h264")
+        stats.set_config(swapped)
+
+        self.assertEqual(set(stats._monitored), {"rockchip"})
+        self.assertIs(self.subscriber.return_value.config, swapped)
+        self.assertIs(self.subscriber.return_value.camera_configs, swapped.cameras)
+
 
 class TestUpdateStats(HardwareStatsTestCase):
     def run_stats(self, stats: HardwareStats) -> dict:

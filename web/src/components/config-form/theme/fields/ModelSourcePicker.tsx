@@ -38,9 +38,7 @@ function plusModelId(path: unknown): string | undefined {
 
 type ModelSourcePickerProps = {
   path: unknown;
-  // Frigate+ metadata the backend attaches to a saved model, and the only
-  // reliable signal that one is active: it resolves `plus://<id>` to a local
-  // cache path before serving the config back
+  // Frigate+ metadata the backend attaches to a saved model
   plus?: { id: string } | null;
   // the detector this model runs on, used to filter incompatible Plus models
   detector?: string;

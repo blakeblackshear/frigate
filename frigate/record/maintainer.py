@@ -490,9 +490,17 @@ class RecordingMaintainer(threading.Thread):
                 )
             reviews = reviews_by_camera[camera]
 
-            tasks.extend(
-                [self.validate_and_move_segment(camera, reviews, r) for r in recordings]
-            )
+            # probes run concurrently, but each segment's start chains off the
+            # previous segment's end, so starts resolve in segment order
+            previous: asyncio.Event | None = None
+            for recording in recordings:
+                resolved = asyncio.Event()
+                tasks.append(
+                    self._validate_in_order(
+                        camera, reviews, recording, previous, resolved
+                    )
+                )
+                previous = resolved
 
             # publish most recently available recording time and None if disabled
             if stream_type == STREAM_TYPE_MAIN:
@@ -550,12 +558,33 @@ class RecordingMaintainer(threading.Thread):
                 while info and info[0][0] < expire_before:
                     info.pop(0)
 
+    async def _validate_in_order(
+        self,
+        camera: str,
+        reviews: Any,
+        recording: dict[str, Any],
+        previous_start: asyncio.Event | None,
+        start_resolved: asyncio.Event,
+    ) -> dict[str, Any] | None:
+        """Validate a segment, always releasing the next one in its stream."""
+        try:
+            return await self.validate_and_move_segment(
+                camera, reviews, recording, previous_start, start_resolved
+            )
+        finally:
+            start_resolved.set()
+
     def drop_segment(self, cache_path: str) -> None:
         Path(cache_path).unlink(missing_ok=True)
         self.end_time_cache.pop(cache_path, None)
 
     async def validate_and_move_segment(
-        self, camera: str, reviews: Any, recording: dict[str, Any]
+        self,
+        camera: str,
+        reviews: Any,
+        recording: dict[str, Any],
+        previous_start: asyncio.Event | None = None,
+        start_resolved: asyncio.Event | None = None,
     ) -> dict[str, Any] | None:
         cache_path: str = recording["cache_path"]
         start_time: datetime.datetime = recording["start_time"]
@@ -617,6 +646,9 @@ class RecordingMaintainer(threading.Thread):
                 async with self.probe_semaphore:
                     keyframes = await get_keyframe_offsets(cache_path)
 
+                if previous_start is not None:
+                    await previous_start.wait()
+
                 start_time = self._resolve_segment_start(
                     camera, stream_type, start_time, duration, cache_path
                 )
@@ -653,6 +685,11 @@ class RecordingMaintainer(threading.Thread):
                 (camera, stream_type, start_time.timestamp(), cache_path),
                 RecordingsDataTypeEnum.valid.value,
             )
+
+        # the start is settled, so the next segment of the stream can chain
+        # off it while this one waits on retention and the move
+        if start_resolved is not None:
+            start_resolved.set()
 
         record_config = self.config.cameras[camera].record
 

@@ -217,6 +217,23 @@ test.describe("Detection models settings @high", () => {
     ).toBeDisabled();
   });
 
+  test("shareable hardware another model uses can still be picked", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      { scene: "all", devices: ["openvino:GPU.0"] },
+      { scene: "outdoor", devices: ["openvino:GPU.1"] },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(
+      frigateApp.page.locator("#models-0-openvino\\:GPU\\.1").first(),
+    ).toBeEnabled();
+    await expect(frigateApp.page.locator("#pageRoot")).not.toContainText(
+      "used by outdoor",
+    );
+  });
+
   test("adding a model appends a card with an unused scene", async ({
     frigateApp,
   }) => {
@@ -248,15 +265,13 @@ test.describe("Detection models settings @high", () => {
   test("a saved Frigate+ model opens on the Frigate+ tab", async ({
     frigateApp,
   }) => {
-    // the backend resolves plus:// to a cache path before serving the config
-    // back, so the plus metadata is the only signal the model is a Plus one
     await installRoutes(
       frigateApp.page,
       [
         {
           scene: "all",
           devices: ["openvino:GPU.0"],
-          path: "/config/model_cache/abc123",
+          path: "plus://abc123",
           plus: PLUS_MODEL,
         },
       ],
@@ -300,6 +315,65 @@ test.describe("Detection models settings @high", () => {
     await expect.poll(() => saves.length).toBeGreaterThan(0);
 
     expect(saves.at(-1)?.config_data?.models?.[0].path).toBe("plus://abc123");
+  });
+
+  test("saving a Frigate+ model keeps its reference without the Frigate+ fields", async ({
+    frigateApp,
+  }) => {
+    // the backend fills these in from the Frigate+ model info when it loads
+    const saves = await installRoutes(
+      frigateApp.page,
+      [
+        {
+          scene: "all",
+          devices: ["openvino:GPU.0"],
+          path: "plus://abc123",
+          plus: PLUS_MODEL,
+          width: 320,
+          height: 320,
+          input_tensor: "nchw",
+          input_dtype: "float",
+          model_type: "yolo-generic",
+        },
+      ],
+      true,
+    );
+    await openPage(frigateApp);
+
+    await frigateApp.page.locator("#models-0-openvino\\:GPU\\.1").click();
+    await frigateApp.page.getByRole("button", { name: /^Save$/ }).click();
+    await expect.poll(() => saves.length).toBeGreaterThan(0);
+
+    const model = saves.at(-1)?.config_data?.models?.[0];
+    expect(model?.path).toBe("plus://abc123");
+    expect(model?.devices).toEqual(["openvino:GPU.0", "openvino:GPU.1"]);
+    expect(model).not.toHaveProperty("width");
+    expect(model).not.toHaveProperty("input_tensor");
+    expect(model).not.toHaveProperty("model_type");
+    // a leftover dtype from a custom model must not override the int default
+    expect(model).not.toHaveProperty("input_dtype");
+  });
+
+  test("a Frigate+ model only shows its path without a Frigate+ API key", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      {
+        scene: "all",
+        devices: ["openvino:GPU.0"],
+        path: "plus://abc123",
+        width: 320,
+        height: 320,
+      },
+    ]);
+    await openPage(frigateApp);
+
+    const root = frigateApp.page.locator("#pageRoot");
+    await expect(root).toContainText("Custom object detector model path");
+    await expect(root).not.toContainText("Object detection model input width");
+    await expect(root).not.toContainText(
+      "Label map for custom object detector",
+    );
   });
 
   test("a Frigate+ Hailo model is listed by the device it was built for", async ({

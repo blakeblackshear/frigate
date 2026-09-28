@@ -2063,7 +2063,7 @@
       "unrecognized": "This model is configured for hardware that was not found on this system: {{devices}}",
       "description": "The hardware this model runs its detection on.",
       "detectorCountDescription": "How many detection processes to run on this hardware. More detectors keep up with more cameras, at the cost of extra device memory.",
-      "unitsDescription": "Each unit runs its own detection process. A unit already used by another model can not be selected."
+      "unitsDescription": "Each unit runs its own detection process. A unit that can't be shared, such as a Coral, can only be used by one model."
     },
     "tabs": {
       "plus": "Frigate+",
