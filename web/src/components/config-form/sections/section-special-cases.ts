@@ -353,14 +353,14 @@ export function synthesizeMissingFilters(
   return { ...(data as JsonObject), filters: newFilters };
 }
 
-// the backend fills these from the Frigate+ model info when it loads a
-// plus:// model, so saving them would only pin values Frigate+ owns
+// the backend always overwrites these from the Frigate+ model info when it
+// loads a plus:// model, so saving them would only pin values Frigate+ owns.
+// input_dtype is left alone since older model info doesn't supply it.
 const PLUS_SUPPLIED_MODEL_FIELDS = [
   "width",
   "height",
   "input_tensor",
   "input_pixel_format",
-  "input_dtype",
   "model_type",
 ];
 

@@ -332,6 +332,7 @@ test.describe("Detection models settings @high", () => {
           width: 320,
           height: 320,
           input_tensor: "nchw",
+          input_dtype: "float",
           model_type: "yolo-generic",
         },
       ],
@@ -349,6 +350,8 @@ test.describe("Detection models settings @high", () => {
     expect(model).not.toHaveProperty("width");
     expect(model).not.toHaveProperty("input_tensor");
     expect(model).not.toHaveProperty("model_type");
+    // older model info doesn't supply a dtype, so a configured one is kept
+    expect(model?.input_dtype).toBe("float");
   });
 
   test("a Frigate+ model only shows its path without a Frigate+ API key", async ({
