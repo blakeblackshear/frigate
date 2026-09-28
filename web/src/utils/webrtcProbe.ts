@@ -4,7 +4,8 @@ import { baseUrl } from "@/api/baseUrl";
  * Performs a real WebRTC handshake against go2rtc to verify that a media
  * connection can actually be established (validates candidates, port 8555
  * reachability, and STUN/TURN end-to-end). A success is cached for the page
- * session, a failure only for PROBE_FAILURE_TTL_MS.
+ * session, and a failure for PROBE_FAILURE_TTL_MS and only for probes that
+ * start from the same stream.
  */
 
 export type WebRTCProbeResult = {
@@ -19,6 +20,7 @@ const PROBE_FAILURE_TTL_MS = 30_000;
 
 let cachedProbe: {
   promise: Promise<WebRTCProbeResult>;
+  firstStream: string;
   failedAt?: number;
 } | null = null;
 
@@ -161,15 +163,31 @@ export function probeWebRTCAvailability(
   iceServers: RTCIceServer[],
   timeoutMs: number = 5000,
 ): Promise<WebRTCProbeResult> {
-  if (
-    cachedProbe &&
-    (cachedProbe.failedAt === undefined ||
-      Date.now() - cachedProbe.failedAt < PROBE_FAILURE_TTL_MS)
-  ) {
-    return cachedProbe.promise;
+  const firstStream = testStreams[0];
+
+  if (cachedProbe) {
+    const { promise, failedAt } = cachedProbe;
+
+    if (
+      cachedProbe.firstStream === firstStream &&
+      (failedAt === undefined || Date.now() - failedAt < PROBE_FAILURE_TTL_MS)
+    ) {
+      return promise;
+    }
+
+    // a pass from any stream proves the connection, but another stream's
+    // failure says nothing about this one
+    if (failedAt === undefined) {
+      return promise.then((result) =>
+        result.ok
+          ? result
+          : probeWebRTCAvailability(testStreams, iceServers, timeoutMs),
+      );
+    }
   }
 
   const entry: NonNullable<typeof cachedProbe> = {
+    firstStream,
     promise: runProbes(testStreams, iceServers, timeoutMs)
       .catch((err): WebRTCProbeResult => ({
         ok: false,
