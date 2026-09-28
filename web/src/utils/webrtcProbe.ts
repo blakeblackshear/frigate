@@ -17,9 +17,6 @@ export type WebRTCProbeResult = {
 
 const PROBE_FAILURE_TTL_MS = 30_000;
 
-// streams tried per probe when go2rtc refuses the earlier ones
-const MAX_PROBE_STREAMS = 3;
-
 let cachedProbe: {
   promise: Promise<WebRTCProbeResult>;
   failedAt?: number;
@@ -143,7 +140,7 @@ async function runProbes(
 ): Promise<WebRTCProbeResult> {
   let result: WebRTCProbeResult = { ok: false, detail: "no stream to probe" };
 
-  for (const stream of testStreams.slice(0, MAX_PROBE_STREAMS)) {
+  for (const stream of testStreams) {
     result = await runProbe(stream, iceServers, timeoutMs);
 
     if (!result.ok) {
