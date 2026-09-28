@@ -353,14 +353,15 @@ export function synthesizeMissingFilters(
   return { ...(data as JsonObject), filters: newFilters };
 }
 
-// the backend always overwrites these from the Frigate+ model info when it
-// loads a plus:// model, so saving them would only pin values Frigate+ owns.
-// input_dtype is left alone since older model info doesn't supply it.
+// a Frigate+ model's config comes from its model info, so these are either
+// redundant or stale leftovers from a custom model. A missing input_dtype
+// in the model info means the int default.
 const PLUS_SUPPLIED_MODEL_FIELDS = [
   "width",
   "height",
   "input_tensor",
   "input_pixel_format",
+  "input_dtype",
   "model_type",
 ];
 

@@ -350,8 +350,8 @@ test.describe("Detection models settings @high", () => {
     expect(model).not.toHaveProperty("width");
     expect(model).not.toHaveProperty("input_tensor");
     expect(model).not.toHaveProperty("model_type");
-    // older model info doesn't supply a dtype, so a configured one is kept
-    expect(model?.input_dtype).toBe("float");
+    // a leftover dtype from a custom model must not override the int default
+    expect(model).not.toHaveProperty("input_dtype");
   });
 
   test("a Frigate+ model only shows its path without a Frigate+ API key", async ({
