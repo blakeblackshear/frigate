@@ -43,6 +43,7 @@ from frigate.util.recording_coverage import (
     build_spans,
     known_video_codecs,
     null_audio_glitches,
+    realized_timeline,
     resolve_coverage,
     stream_media_summary,
 )
@@ -85,10 +86,20 @@ class StreamRun:
 
 @dataclass
 class _ChapterWindow:
-    """A merged-timeline slice, shaped like the recording rows chapters read."""
+    """A merged-timeline slice, shaped like the recording rows chapters read.
+
+    lead_in is the output time the slice's vod clip plays before start_time,
+    from snapping its first frame back to a keyframe.
+    """
 
     start_time: float
     end_time: float
+    lead_in: float = 0.0
+
+
+def _lead_in(recording: Any) -> float:
+    """Output seconds a chapter source plays before its first wall second."""
+    return recording.lead_in if isinstance(recording, _ChapterWindow) else 0.0
 
 
 # Matches the setpts factor used in timelapse exports (e.g. setpts=0.04*PTS).
@@ -437,16 +448,56 @@ class RecordingExporter(threading.Thread):
             # hand-off to stage around
             return True
 
-        spans, codecs, keep_audio = self._resolve_coverage()
-        runs = self._stream_runs(spans)
+        _spans, codecs, keep_audio = self._resolve_coverage()
+        runs = self._planned_stream_runs()
 
         # a range one stream covers end to end has nothing to hand off,
         # so it stays on the existing path however long it is
         if len(runs) < 2:
             return True
 
-        runs = [piece for run in runs for piece in self._split_long_run(run)]
         return self._stage_stream_runs(runs, codecs, keep_audio)
+
+    def _planned_stream_runs(self) -> list[StreamRun]:
+        """The runs a mixed range is staged as, one pinned vod playlist each."""
+        runs = self._stream_runs(self._merged_spans())
+
+        if len(runs) < 2:
+            return runs
+
+        return [piece for run in runs for piece in self._split_long_run(run)]
+
+    def _staged_chapter_windows(self) -> list[_ChapterWindow]:
+        """Chapter windows for the staged files as they were rendered.
+
+        Each staged run comes from its own pinned vod playlist, whose first
+        clip snaps back to the preceding keyframe, so a staged file runs up
+        to a GOP longer than its slice of the merged timeline. Planning each
+        run the way its playlist does carries that lead-in into the chapter
+        offsets instead of letting it accumulate at every hand-off.
+        """
+        windows: list[_ChapterWindow] = []
+
+        for run in self._planned_stream_runs():
+            intervals = null_audio_glitches(
+                resolve_coverage(self.camera, run.start_time, run.end_time)
+            )
+
+            for clip in realized_timeline(intervals, run.stream_type):
+                # a skipped clip is absent from the playlist and the file
+                if clip["duration"] <= 0:
+                    continue
+
+                span = clip["end_time"] - clip["start_time"]
+                windows.append(
+                    _ChapterWindow(
+                        clip["start_time"],
+                        clip["end_time"],
+                        max(0.0, clip["duration"] / 1000 - span),
+                    )
+                )
+
+        return windows
 
     def _stream_runs(self, spans: list[list[Any]]) -> list[StreamRun]:
         """Collapse the merged spans into contiguous runs of one stream type.
@@ -844,6 +895,8 @@ class RecordingExporter(threading.Thread):
             clipped_end = min(float(rec.end_time), float(self.end_time))
             if clipped_end <= clipped_start:
                 continue
+            # a staged window's keyframe lead-in plays before it
+            output_offset += _lead_in(rec)
             windows.append((clipped_start, clipped_end, output_offset))
             output_offset += clipped_end - clipped_start
 
@@ -991,9 +1044,13 @@ class RecordingExporter(threading.Thread):
             if duration_ms <= 0:
                 continue
 
-            title = datetime.datetime.fromtimestamp(clipped_start, tz=tz).isoformat(
-                timespec="seconds"
-            )
+            # a staged window's keyframe lead-in opens its chapter, with
+            # frames captured that long before the window
+            lead_in = _lead_in(rec)
+            duration_ms += int(round(lead_in * 1000))
+            title = datetime.datetime.fromtimestamp(
+                clipped_start - lead_in, tz=tz
+            ).isoformat(timespec="seconds")
             chapter_blocks.append(
                 "[CHAPTER]\n"
                 "TIMEBASE=1/1000\n"
@@ -1132,12 +1189,12 @@ class RecordingExporter(threading.Thread):
         if self.staged_runs:
             # each run was already rendered to a temp file with a common
             # track timescale, so the concat demuxer has nothing left to
-            # reconcile and every chapter offset lines up with the merged
-            # timeline the staged files reproduce
-            recordings = [
-                _ChapterWindow(span_start, span_end)
-                for _row, span_start, span_end, _is_main in self._merged_spans()
-            ]
+            # reconcile
+            recordings = (
+                self._staged_chapter_windows()
+                if self.chapters not in (None, ChaptersEnum.none)
+                else []
+            )
             playlist_lines: list[str] = [f"file '{path}'" for path in self.staged_runs]
             ffmpeg_input = (
                 "-y -protocol_whitelist pipe,file -f concat -safe 0 -i /dev/stdin"
