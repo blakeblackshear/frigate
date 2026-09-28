@@ -79,7 +79,6 @@ export function evaluateStreamWebRTCAvailability(args: {
 /** Console detail for a reason decided by the global availability check. */
 function describeGlobalReason(
   reason: WebRTCUnavailableReason,
-  testStream: string | undefined,
   probeDetail: string | undefined,
 ): string {
   switch (reason) {
@@ -88,7 +87,7 @@ function describeGlobalReason(
     case "not-configured":
       return "No candidates or ice_servers are set under go2rtc.webrtc.";
     case "unreachable":
-      return `The connectivity probe against stream '${testStream}' failed: ${probeDetail ?? "unknown cause"}.`;
+      return `The connectivity probe failed against ${probeDetail ?? "an unknown stream"}.`;
     default:
       return "";
   }
@@ -98,9 +97,13 @@ function describeGlobalReason(
 let lastProbeSignature: string | null = null;
 
 /**
- * Once-per-session: browser support, go2rtc config, and a live handshake probe.
+ * Browser support, go2rtc config, and a live handshake probe shared by the
+ * page. A failed probe is retried on a later mount or when the page becomes
+ * visible again once its cached result has expired.
  */
-export function useWebRTCGloballyAvailable(): GlobalAvailability {
+export function useWebRTCGloballyAvailable(
+  preferredStream?: string,
+): GlobalAvailability {
   const { data: config } = useSWR<FrigateConfig>("config");
   const [probe, setProbe] = useState<{
     state: "pending" | "pass" | "fail";
@@ -118,11 +121,19 @@ export function useWebRTCGloballyAvailable(): GlobalAvailability {
     );
   }, [config]);
 
-  // Representative restreamed stream to probe against.
-  const testStream = useMemo(() => {
-    const streams = config?.go2rtc?.streams ?? {};
-    return Object.keys(streams)[0];
-  }, [config]);
+  // the stream being viewed is the one most likely to be online
+  const testStreams = useMemo(() => {
+    const streams = Object.keys(config?.go2rtc?.streams ?? {});
+
+    if (!preferredStream || !streams.includes(preferredStream)) {
+      return streams;
+    }
+
+    return [preferredStream, ...streams.filter((s) => s !== preferredStream)];
+  }, [config, preferredStream]);
+  const testStreamsKey = testStreams.join("\n");
+
+  const [retryToken, setRetryToken] = useState(0);
 
   const iceServers = useMemo(
     () => webRTCIceServers(config?.go2rtc?.webrtc?.ice_servers),
@@ -136,9 +147,9 @@ export function useWebRTCGloballyAvailable(): GlobalAvailability {
       JSON.stringify({
         candidates: config?.go2rtc?.webrtc?.candidates ?? [],
         iceServers,
-        testStream,
+        streams: Object.keys(config?.go2rtc?.streams ?? {}),
       }),
-    [config, iceServers, testStream],
+    [config, iceServers],
   );
 
   useEffect(() => {
@@ -153,11 +164,29 @@ export function useWebRTCGloballyAvailable(): GlobalAvailability {
   }, [probeSignature]);
 
   useEffect(() => {
-    if (!browserOk || !configured || !testStream) {
+    if (probe.state !== "fail") {
+      return;
+    }
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        setRetryToken((token) => token + 1);
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [probe.state]);
+
+  useEffect(() => {
+    const streams = testStreamsKey ? testStreamsKey.split("\n") : [];
+
+    if (!browserOk || !configured || streams.length === 0) {
       return;
     }
     let cancelled = false;
-    probeWebRTCAvailability(testStream, iceServers).then((result) => {
+    probeWebRTCAvailability(streams, iceServers).then((result) => {
       if (!cancelled) {
         setProbe({
           state: result.ok ? "pass" : "fail",
@@ -168,7 +197,7 @@ export function useWebRTCGloballyAvailable(): GlobalAvailability {
     return () => {
       cancelled = true;
     };
-  }, [browserOk, configured, testStream, iceServers]);
+  }, [browserOk, configured, testStreamsKey, iceServers, retryToken]);
 
   const availability = useMemo<GlobalAvailability>(() => {
     if (!browserOk) {
@@ -196,9 +225,9 @@ export function useWebRTCGloballyAvailable(): GlobalAvailability {
     logWebRTCUnavailable(
       undefined,
       reason,
-      describeGlobalReason(reason, testStream, probe.detail),
+      describeGlobalReason(reason, probe.detail),
     );
-  }, [config, availability, testStream, probe.detail]);
+  }, [config, availability, probe.detail]);
 
   return availability;
 }
@@ -208,7 +237,8 @@ export function useWebRTCAvailableForStream(
   metadata: LiveStreamMetadata | null | undefined,
   streamName?: string,
 ): StreamAvailability {
-  const { globallyAvailable, globalReason } = useWebRTCGloballyAvailable();
+  const { globallyAvailable, globalReason } =
+    useWebRTCGloballyAvailable(streamName);
 
   const availability = useMemo(
     () =>

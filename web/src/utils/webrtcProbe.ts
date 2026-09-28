@@ -1,18 +1,29 @@
 import { baseUrl } from "@/api/baseUrl";
 
 /**
- * Performs a single real WebRTC handshake against go2rtc to verify that a
- * media connection can actually be established (validates candidates, port
- * 8555 reachability, and STUN/TURN end-to-end). Result is cached per page
- * session via a module-level promise.
+ * Performs a real WebRTC handshake against go2rtc to verify that a media
+ * connection can actually be established (validates candidates, port 8555
+ * reachability, and STUN/TURN end-to-end). A success is cached for the page
+ * session, a failure only for PROBE_FAILURE_TTL_MS.
  */
 
 export type WebRTCProbeResult = {
   ok: boolean;
   detail?: string;
+  // go2rtc could not open the stream's source, which says nothing about
+  // whether WebRTC itself can connect
+  streamError?: boolean;
 };
 
-let probePromise: Promise<WebRTCProbeResult> | null = null;
+const PROBE_FAILURE_TTL_MS = 30_000;
+
+// streams tried per probe when go2rtc refuses the earlier ones
+const MAX_PROBE_STREAMS = 3;
+
+let cachedProbe: {
+  promise: Promise<WebRTCProbeResult>;
+  failedAt?: number;
+} | null = null;
 
 function describeError(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
@@ -118,23 +129,67 @@ function runProbe(
         pc.setRemoteDescription({ type: "answer", sdp: msg.value }).catch(
           (err) => fail(`remote answer rejected: ${describeError(err)}`),
         );
+      } else if (msg.type === "error") {
+        cleanup({ ok: false, streamError: true, detail: msg.value });
       }
     });
   });
 }
 
+async function runProbes(
+  testStreams: string[],
+  iceServers: RTCIceServer[],
+  timeoutMs: number,
+): Promise<WebRTCProbeResult> {
+  let result: WebRTCProbeResult = { ok: false, detail: "no stream to probe" };
+
+  for (const stream of testStreams.slice(0, MAX_PROBE_STREAMS)) {
+    result = await runProbe(stream, iceServers, timeoutMs);
+
+    if (!result.ok) {
+      result.detail = `stream '${stream}': ${result.detail}`;
+    }
+
+    if (!result.streamError) {
+      break;
+    }
+  }
+
+  return result;
+}
+
+/** Probes the streams in order, moving on only when go2rtc refuses one. */
 export function probeWebRTCAvailability(
-  testStream: string,
+  testStreams: string[],
   iceServers: RTCIceServer[],
   timeoutMs: number = 5000,
 ): Promise<WebRTCProbeResult> {
-  if (!probePromise) {
-    probePromise = runProbe(testStream, iceServers, timeoutMs);
+  if (
+    cachedProbe &&
+    (cachedProbe.failedAt === undefined ||
+      Date.now() - cachedProbe.failedAt < PROBE_FAILURE_TTL_MS)
+  ) {
+    return cachedProbe.promise;
   }
-  return probePromise;
+
+  const entry: NonNullable<typeof cachedProbe> = {
+    promise: runProbes(testStreams, iceServers, timeoutMs)
+      .catch((err): WebRTCProbeResult => ({
+        ok: false,
+        detail: describeError(err),
+      }))
+      .then((result) => {
+        if (!result.ok) {
+          entry.failedAt = Date.now();
+        }
+        return result;
+      }),
+  };
+  cachedProbe = entry;
+  return entry.promise;
 }
 
 /** Clears the cached probe result (e.g. when go2rtc config changes). */
 export function resetWebRTCProbe(): void {
-  probePromise = null;
+  cachedProbe = null;
 }
