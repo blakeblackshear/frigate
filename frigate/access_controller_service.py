@@ -34,11 +34,16 @@ def build_controller(device: AccessControl) -> DahuaAccessController:
         password=password,
         port=int(device.port or 80),
         use_auth=bool(username and password),
+        provider=device.provider or "cgi",
+        scheme="https" if device.use_https else "http",
+        sdk_port=int(device.sdk_port or 37777),
+        provider_options=device.provider_options or {},
     )
 
 
 def probe_device_with_info(device: AccessControl) -> tuple[AccessControl, dict | None]:
     """Record a connection result and return the device's raw system info."""
+    info = None
     try:
         info = build_controller(device).get_system_info()
         if not info:
@@ -46,9 +51,24 @@ def probe_device_with_info(device: AccessControl) -> tuple[AccessControl, dict |
         channel_count = int(info.get("channelNumber") or device.channel_count or 1)
     except (requests.RequestException, ValueError, AttributeError, TypeError) as err:
         device.status = (
-            "offline" if isinstance(err, requests.RequestException) else "error"
+            "offline"
+            if isinstance(err, requests.ConnectionError)
+            or (hasattr(err, "status") and err.status is None)
+            else "error"
         )
-        logger.warning("Unable to reach access controller %s: %s", device.id, err)
+        diagnostics = (
+            err.as_dict()
+            if hasattr(err, "as_dict")
+            else {
+                "provider": device.provider,
+                "operation": "get_system_info",
+                "exception_type": type(err).__name__,
+                "message": str(err),
+            }
+        )
+        logger.warning(
+            "Unable to reach access controller %s: %s", device.id, diagnostics
+        )
         fields = [AccessControl.status, AccessControl.last_checked_at]
     else:
         device.name = (
@@ -56,7 +76,7 @@ def probe_device_with_info(device: AccessControl) -> tuple[AccessControl, dict |
         )
         device.type = info.get("deviceType") or device.type or "Dahua"
         device.model = (
-            info.get("deviceType") or info.get("model") or device.model or "Unknown"
+            info.get("model") or info.get("deviceType") or device.model or "Unknown"
         )
         device.serial_number = (
             info.get("serialNumber") or info.get("serial") or device.serial_number or ""
@@ -124,15 +144,18 @@ def _access_granted_card_scan(row: dict) -> bool:
     if method is not None and str(method) not in {"1", "2", "3"}:
         return False
     status = row.get("Status")
+    if status is None:
+        status = row.get("access_status")
     if status is not None:
         return str(status).strip().casefold() in {"1", "true", "success", "succeeded"}
-    event_type = str(row.get("EventType") or "").casefold()
+    event_type = str(row.get("EventType") or row.get("event_code") or "").casefold()
     return event_type in {"accessgranted", "accessallowed"}
 
 
 def _store_record(
     device: AccessControl, row: dict, owner_names: list[str], owners_complete: bool
 ) -> None:
+    row = DahuaAccessController.sanitize_raw_event(row)
     occurred_at = _record_time(row)
     if occurred_at is None:
         return
@@ -143,8 +166,11 @@ def _store_record(
     is_new_scan = _access_granted_card_scan(row) and occurred_at >= (
         device.event_tracking_started_at or 0
     )
+    normalized = DahuaAccessController.normalize_event(row, device.id)
     record = {
         **row,
+        **normalized,
+        **(normalized.get("data") if isinstance(normalized.get("data"), dict) else {}),
         "_owner_names": owner_names,
         "_owner_names_complete": owners_complete,
     }
@@ -160,6 +186,29 @@ def _store_record(
         seconds_before=device.seconds_before,
         seconds_after=device.seconds_after,
     ).on_conflict_ignore().execute()
+
+
+def _store_live_event(device_id: str, event: dict) -> None:
+    """Normalize a provider event and store it in the existing event table."""
+    device = AccessControl.get_or_none(AccessControl.id == device_id)
+    if device is None:
+        return
+    normalized = DahuaAccessController.normalize_event(event, device_id)
+    if normalized["timestamp"] is None:
+        normalized["timestamp"] = time.time()
+        normalized["timestamp_source"] = "received_at"
+    record = {
+        **(event.get("raw") if isinstance(event.get("raw"), dict) else {}),
+        **(normalized.get("data") if isinstance(normalized.get("data"), dict) else {}),
+        **normalized,
+        "live": True,
+    }
+    _store_record(
+        device,
+        record,
+        DahuaAccessController.record_names(record),
+        bool(DahuaAccessController.record_names(record)),
+    )
 
 
 def poll_controller(device_id: str) -> AccessControl | None:
@@ -182,7 +231,19 @@ def poll_controller(device_id: str) -> AccessControl | None:
             datetime.fromtimestamp(poll_end, UTC).astimezone(),
         )
     except (requests.RequestException, ValueError) as err:
-        logger.warning("Unable to fetch access events for %s: %s", device.id, err)
+        diagnostics = (
+            err.as_dict()
+            if hasattr(err, "as_dict")
+            else {
+                "provider": device.provider,
+                "operation": "get_access_records",
+                "exception_type": type(err).__name__,
+                "message": str(err),
+            }
+        )
+        logger.warning(
+            "Unable to fetch access events for %s: %s", device.id, diagnostics
+        )
         return device
     owners_by_card: dict[str, list[str]] = {}
     for row in rows:
@@ -331,10 +392,98 @@ async def poll_all_controllers() -> list[AccessControl | None]:
 async def run_controller_polling() -> None:
     """Refresh controller status and process scans throughout API uptime."""
     await asyncio.sleep(POLL_INTERVAL_SECONDS)
+    listener_tasks: dict[str, asyncio.Task] = {}
+    try:
+        while True:
+            try:
+                device_ids = await asyncio.to_thread(
+                    lambda: [
+                        device.id for device in AccessControl.select(AccessControl.id)
+                    ]
+                )
+                for stopped_id, task in list(listener_tasks.items()):
+                    if task.done():
+                        listener_tasks.pop(stopped_id)
+                for removed_id in listener_tasks.keys() - set(device_ids):
+                    listener_tasks.pop(removed_id).cancel()
+                for device_id in device_ids:
+                    if device_id not in listener_tasks:
+                        listener_tasks[device_id] = asyncio.create_task(
+                            _listen_to_controller(device_id)
+                        )
+                await poll_all_controllers()
+                await asyncio.to_thread(verify_pending_events)
+            except asyncio.CancelledError:
+                raise
+            except Exception:
+                logger.exception("Access controller polling failed")
+            await asyncio.sleep(POLL_INTERVAL_SECONDS)
+    finally:
+        for task in listener_tasks.values():
+            task.cancel()
+        await asyncio.gather(*listener_tasks.values(), return_exceptions=True)
+
+
+async def _listen_to_controller(device_id: str) -> None:
+    """Keep the selected provider's live subscription active."""
     while True:
+        device = await asyncio.to_thread(
+            AccessControl.get_or_none, AccessControl.id == device_id
+        )
+        if device is None:
+            return
         try:
-            await poll_all_controllers()
-            await asyncio.to_thread(verify_pending_events)
-        except Exception:
-            logger.exception("Access controller polling failed")
-        await asyncio.sleep(POLL_INTERVAL_SECONDS)
+            controller = build_controller(device)
+            queue: asyncio.Queue[dict] = asyncio.Queue(maxsize=1000)
+            loop = asyncio.get_running_loop()
+
+            def put_event(event: dict, current_queue=queue) -> None:
+                try:
+                    current_queue.put_nowait(event)
+                except asyncio.QueueFull:
+                    logger.warning(
+                        "Dropping live event for access controller %s because its queue is full",
+                        device_id,
+                    )
+
+            def enqueue(event: dict, current_loop=loop, push_event=put_event) -> None:
+                current_loop.call_soon_threadsafe(push_event, event)
+
+            listener = asyncio.create_task(controller.listen_events_async(enqueue))
+            event_task: asyncio.Task | None = None
+            try:
+                while True:
+                    event_task = asyncio.create_task(queue.get())
+                    completed, _ = await asyncio.wait(
+                        {listener, event_task},
+                        return_when=asyncio.FIRST_COMPLETED,
+                    )
+                    if listener in completed:
+                        event_task.cancel()
+                        await listener
+                        return
+                    event = event_task.result()
+                    event_task = None
+                    await asyncio.to_thread(_store_live_event, device_id, event)
+            finally:
+                if event_task is not None:
+                    event_task.cancel()
+                listener.cancel()
+                await asyncio.gather(listener, return_exceptions=True)
+        except asyncio.CancelledError:
+            raise
+        except Exception as err:  # noqa: BLE001 - keep the background listener alive
+            diagnostics = (
+                err.as_dict()
+                if hasattr(err, "as_dict")
+                else {
+                    "provider": getattr(device, "provider", "unknown"),
+                    "operation": "listen_events",
+                    "exception_type": type(err).__name__,
+                    "message": str(err),
+                }
+            )
+            logger.warning(
+                "Live event subscription failed for %s: %s", device_id, diagnostics
+            )
+            await asyncio.sleep(30)

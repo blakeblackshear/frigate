@@ -214,6 +214,11 @@ class AccessControl(Model):
         default=37777,
     )
 
+    provider = CharField(null=False, default="cgi", max_length=20)
+    sdk_port = IntegerField(null=False, default=37777)
+    use_https = BooleanField(default=False)
+    provider_options = JSONField(default=dict)
+
     channel_count = IntegerField(
         null=False,
         default=1,

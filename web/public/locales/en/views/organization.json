@@ -9,7 +9,8 @@
   "button": {
     "addController": "Add Access Controller",
     "connectAll": "Connect all",
-    "viewFootage": "View footage"
+    "viewFootage": "View footage",
+    "details": "Doors & details"
   },
   "status": {
     "online": "Online",
@@ -64,6 +65,15 @@
     "passwordPlaceholder": "Optional",
     "ipAddress": "IP Address",
     "port": "Port",
+    "provider": "Integration provider",
+    "providerCgi": "CGI / HTTP",
+    "providerNetSdk": "NetSDK",
+    "providerHelp": "CGI capabilities are marked untested until checked against the device. NetSDK requires a separately installed Linux x86_64 provider.",
+    "sdkPort": "NetSDK port",
+    "eventApi": "Live event mechanism",
+    "eventManager": "Event manager CGI",
+    "snapManager": "Snapshot manager CGI",
+    "https": "Use HTTPS for CGI requests",
     "nonAuth": "Leave username and password blank to use non-auth mode.",
     "keepCredentials": "Leave credentials blank to keep the saved values.",
     "clearCredentials": "Remove saved credentials",
@@ -72,6 +82,54 @@
     "noCamera": "No associated camera",
     "secondsBefore": "Seconds before scan",
     "secondsAfter": "Seconds after scan"
+  },
+  "details": {
+    "systemInfo": "Controller information",
+    "notReported": "Serial number not reported",
+    "selectedProvider": "Selected provider: {{provider}}",
+    "preview": "Preview",
+    "previewAlt": "Access controller preview",
+    "previewUnavailable": "No controller preview is available.",
+    "previewDiagnostic": "Controller preview diagnostic",
+    "doors": "Doors",
+    "refreshDoors": "Refresh",
+    "doorsUnavailable": "Door discovery is unavailable for this controller.",
+    "noDoors": "The controller did not report any doors.",
+    "doorStatus": "Door sensor: {{status}}",
+    "unavailable": "unavailable",
+    "offline": "offline",
+    "open": "Unlock",
+    "close": "Relock",
+    "sending": "Sending…",
+    "commandAccepted": "Door command accepted.",
+    "commandFailed": "Door command failed.",
+    "lockCommandNote": "Unlock and relock operate the lock relay. Physical door movement depends on connected hardware; sensor status is shown separately.",
+    "capabilities": "Provider capabilities",
+    "capabilityNames": {
+      "systemInfo": "System information",
+      "connection": "Connection check",
+      "history": "Historical records",
+      "cardOwners": "Card owners",
+      "liveEvents": "Live events",
+      "doorDiscovery": "Door discovery",
+      "doorStatus": "Door status",
+      "unlock": "Unlock command",
+      "relock": "Relock command",
+      "snapshot": "Snapshot",
+      "preview": "Preview image",
+      "previewClip": "Preview clip"
+    },
+    "capabilityStatuses": {
+      "untested": "Not checked on this device",
+      "runtimeUnavailable": "Provider runtime unavailable",
+      "available": "Available",
+      "unsupported": "Not supported"
+    },
+    "doorStates": {
+      "open": "Open",
+      "closed": "Closed",
+      "unknown": "Unknown"
+    }
   },
   "verification": {
     "pending": "Pending",

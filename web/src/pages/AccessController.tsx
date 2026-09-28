@@ -30,13 +30,27 @@ import {
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LuPencil, LuPlay, LuPlus, LuRotateCcw, LuTrash2 } from "react-icons/lu";
+import {
+  LuDoorOpen,
+  LuEye,
+  LuLock,
+  LuLockOpen,
+  LuPencil,
+  LuPlay,
+  LuPlus,
+  LuRotateCcw,
+  LuTrash2,
+} from "react-icons/lu";
 
 type AccessControllerRecord = {
   id: string;
   name: string;
   ip_address: string;
   port: number;
+  provider: "cgi" | "netsdk";
+  sdk_port: number;
+  use_https: boolean;
+  event_api: "eventManager" | "snapManager";
   type: string;
   model: string;
   serial_number: string;
@@ -77,10 +91,29 @@ type DeviceFormValues = {
   password: string;
   ipAddress: string;
   port: number;
+  sdkPort: number;
+  provider: "cgi" | "netsdk";
+  useHttps: boolean;
+  eventApi: "eventManager" | "snapManager";
   associatedCamera: string;
   secondsBefore: number;
   secondsAfter: number;
   clearCredentials: boolean;
+};
+
+type AccessDoor = {
+  id: string;
+  name: string;
+  status: string;
+  online: boolean | null;
+};
+
+type ControllerPreview = {
+  available: boolean;
+  source?: "controller_snapshot" | "frigate_camera";
+  image_url?: string;
+  snapshot_url?: string;
+  provider_diagnostic?: Record<string, unknown>;
 };
 
 type DeviceEditorState = {
@@ -119,6 +152,7 @@ export default function AccessControllerPage() {
   const [footageEvent, setFootageEvent] = useState<EventRecord | null>(null);
   const [retrying, setRetrying] = useState<string[]>([]);
   const [connectingAll, setConnectingAll] = useState(false);
+  const [controllerDetail, setControllerDetail] = useState<AccessControllerRecord | null>(null);
 
   useEffect(() => {
     document.title = t("documentTitle", { ns: "views/organization" });
@@ -199,6 +233,10 @@ export default function AccessControllerPage() {
       name: values.name,
       ip_address: values.ipAddress,
       port: values.port,
+      provider: values.provider,
+      sdk_port: values.sdkPort,
+      use_https: values.useHttps,
+      event_api: values.eventApi,
       associated_camera: values.associatedCamera || null,
       seconds_before: values.secondsBefore,
       seconds_after: values.secondsAfter,
@@ -408,6 +446,14 @@ export default function AccessControllerPage() {
                           <Button
                             variant="ghost"
                             size="sm"
+                            onClick={() => setControllerDetail(device)}
+                          >
+                            <LuEye className="mr-1 size-4" />
+                            {t("button.details", { ns: "views/organization" })}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() =>
                               setDeviceEditor({
                                 mode: "edit",
@@ -548,6 +594,13 @@ export default function AccessControllerPage() {
         />
       )}
 
+      {controllerDetail && (
+        <ControllerDetailsDialog
+          device={controllerDetail}
+          onClose={() => setControllerDetail(null)}
+        />
+      )}
+
       {footageEvent && (
         <Dialog open={true} onOpenChange={(open) => !open && setFootageEvent(null)}>
           <DialogContent className="max-w-4xl">
@@ -612,6 +665,10 @@ function DeviceEditorDialog({
     password: initialDevice?.password ?? "",
     ipAddress: initialDevice?.ip_address ?? "",
     port: initialDevice?.port ?? 80,
+    sdkPort: initialDevice?.sdk_port ?? 37777,
+    provider: initialDevice?.provider ?? "cgi",
+    useHttps: initialDevice?.use_https ?? false,
+    eventApi: initialDevice?.event_api ?? "eventManager",
     associatedCamera: initialDevice?.associated_camera ?? "",
     secondsBefore: initialDevice?.seconds_before ?? 10,
     secondsAfter: initialDevice?.seconds_after ?? 10,
@@ -688,6 +745,56 @@ function DeviceEditorDialog({
                 required
               />
             </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("dialog.provider", { ns: "views/organization" })}</label>
+              <Select
+                value={values.provider}
+                onValueChange={(value: "cgi" | "netsdk") => setValues({ ...values, provider: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cgi">{t("dialog.providerCgi", { ns: "views/organization" })}</SelectItem>
+                  <SelectItem value="netsdk">{t("dialog.providerNetSdk", { ns: "views/organization" })}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("dialog.eventApi", { ns: "views/organization" })}</label>
+              <Select
+                value={values.eventApi}
+                onValueChange={(value: "eventManager" | "snapManager") => setValues({ ...values, eventApi: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="eventManager">{t("dialog.eventManager", { ns: "views/organization" })}</SelectItem>
+                  <SelectItem value="snapManager">{t("dialog.snapManager", { ns: "views/organization" })}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">{t("dialog.sdkPort", { ns: "views/organization" })}</label>
+              <Input
+                type="number"
+                min={1}
+                max={65535}
+                value={values.sdkPort}
+                onChange={(event) => setValues({ ...values, sdkPort: Number(event.target.value) || 37777 })}
+                required
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm font-medium md:col-span-2">
+              <Input
+                className="size-4"
+                type="checkbox"
+                checked={values.useHttps}
+                onChange={(event) => setValues({ ...values, useHttps: event.target.checked })}
+              />
+              {t("dialog.https", { ns: "views/organization" })}
+            </label>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-medium">{t("dialog.associatedCamera", { ns: "views/organization" })}</label>
               <Select
@@ -736,6 +843,9 @@ function DeviceEditorDialog({
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
+            {t("dialog.providerHelp", { ns: "views/organization" })}
+          </p>
+          <p className="text-xs text-muted-foreground">
             {t(mode === "create" ? "dialog.nonAuth" : "dialog.keepCredentials", { ns: "views/organization" })}
           </p>
           {mode === "edit" && (
@@ -759,5 +869,204 @@ function DeviceEditorDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ControllerDetailsDialog({
+  device,
+  onClose,
+}: {
+  device: AccessControllerRecord;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation(["views/organization"]);
+  const {
+    data: doorResult,
+    error: doorsError,
+    mutate: refreshDoors,
+  } = useSWR<{ doors: AccessDoor[] }>(`access-controllers/${device.id}/doors`, {
+    revalidateOnFocus: false,
+  });
+  const { data: preview } = useSWR<ControllerPreview>(
+    `access-controllers/${device.id}/preview`,
+    { revalidateOnFocus: false },
+  );
+  const { data: systemResult } = useSWR<{ system_info: Record<string, unknown> }>(
+    `access-controllers/${device.id}/system-info`,
+    { revalidateOnFocus: false },
+  );
+  const { data: capabilityResult } = useSWR<{
+    capabilities: Record<string, { status: string; reason: string }>;
+  }>(`access-controllers/${device.id}/capabilities`, { revalidateOnFocus: false });
+
+  const capabilityNames: Record<string, string> = {
+    get_system_info: t("details.capabilityNames.systemInfo"),
+    is_online: t("details.capabilityNames.connection"),
+    get_access_records: t("details.capabilityNames.history"),
+    get_card_owners: t("details.capabilityNames.cardOwners"),
+    listen_events: t("details.capabilityNames.liveEvents"),
+    get_doors: t("details.capabilityNames.doorDiscovery"),
+    get_door_status: t("details.capabilityNames.doorStatus"),
+    open_door: t("details.capabilityNames.unlock"),
+    close_door: t("details.capabilityNames.relock"),
+    get_snapshot: t("details.capabilityNames.snapshot"),
+    get_preview: t("details.capabilityNames.preview"),
+    get_preview_clip: t("details.capabilityNames.previewClip"),
+  };
+  const capabilityStatuses: Record<string, string> = {
+    untested: t("details.capabilityStatuses.untested"),
+    "runtime-unavailable": t("details.capabilityStatuses.runtimeUnavailable"),
+    available: t("details.capabilityStatuses.available"),
+    supported: t("details.capabilityStatuses.available"),
+    unsupported: t("details.capabilityStatuses.unsupported"),
+  };
+
+  const previewUrl = preview?.source === "frigate_camera"
+    ? `${baseUrl}${preview.image_url}`
+    : preview?.snapshot_url
+      ? `${baseUrl}api/${preview.snapshot_url}`
+      : undefined;
+
+  return (
+    <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{device.name || device.id}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-5">
+          <section className="space-y-2">
+            <h3 className="font-semibold">{t("details.systemInfo")}</h3>
+            <p className="text-sm text-muted-foreground">
+              {device.model} · {device.serial_number || t("details.notReported")}
+            </p>
+            {systemResult?.system_info && (
+              <pre className="max-h-40 overflow-auto rounded bg-muted p-3 text-xs">
+                {JSON.stringify(systemResult.system_info, null, 2)}
+              </pre>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {t("details.selectedProvider", { provider: device.provider })}
+            </p>
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="font-semibold">{t("details.preview")}</h3>
+            {previewUrl ? (
+              <img className="max-h-80 max-w-full rounded object-contain" src={previewUrl} alt={t("details.previewAlt")} />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("details.previewUnavailable")}</p>
+            )}
+            {preview?.provider_diagnostic && (
+              <details className="text-xs text-muted-foreground">
+                <summary>{t("details.previewDiagnostic")}</summary>
+                <pre className="mt-2 max-h-32 overflow-auto rounded bg-muted p-2">
+                  {JSON.stringify(preview.provider_diagnostic, null, 2)}
+                </pre>
+              </details>
+            )}
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold">{t("details.doors")}</h3>
+              <Button variant="outline" size="sm" onClick={() => void refreshDoors()}>
+                <LuRotateCcw className="mr-2 size-4" />
+                {t("details.refreshDoors")}
+              </Button>
+            </div>
+            {doorsError && (
+              <p className="text-sm text-destructive">
+                {getErrorMessage(doorsError, t("details.doorsUnavailable"))}
+              </p>
+            )}
+            {!doorsError && doorResult?.doors.length === 0 && (
+              <p className="text-sm text-muted-foreground">{t("details.noDoors")}</p>
+            )}
+            <div className="space-y-2">
+              {doorResult?.doors.map((door) => (
+                <DoorControlRow key={door.id} deviceId={device.id} door={door} />
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-2">
+            <h3 className="font-semibold">{t("details.capabilities")}</h3>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {Object.entries(capabilityResult?.capabilities ?? {}).map(([name, capability]) => (
+                <div key={name} className="rounded border px-3 py-2 text-sm">
+                  <span className="font-medium">{capabilityNames[name] ?? name}</span>
+                  <span className="ml-2 text-muted-foreground">
+                    {capabilityStatuses[capability.status] ?? capability.status}
+                  </span>
+                  <p className="mt-1 text-xs text-muted-foreground">{capability.reason}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DoorControlRow({ deviceId, door }: { deviceId: string; door: AccessDoor }) {
+  const { t } = useTranslation(["views/organization"]);
+  const [busy, setBusy] = useState<"open" | "close" | null>(null);
+  const {
+    data: currentStatus,
+    error,
+    mutate,
+  } = useSWR<AccessDoor>(`access-controllers/${deviceId}/doors/${encodeURIComponent(door.id)}`, {
+    refreshInterval: 5000,
+    revalidateOnFocus: false,
+  });
+
+  const handleCommand = async (action: "open" | "close") => {
+    setBusy(action);
+    try {
+      const { data } = await axios.post<{ message: string }>(
+        `access-controllers/${deviceId}/doors/${encodeURIComponent(door.id)}/${action}`,
+      );
+      toast.success(data.message || t("details.commandAccepted"), { position: "top-center" });
+      await mutate();
+    } catch (commandError) {
+      toast.error(getErrorMessage(commandError, t("details.commandFailed")), {
+        position: "top-center",
+      });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const status = currentStatus?.status ?? door.status ?? "unknown";
+  const localizedStatus =
+    status === "open"
+      ? t("details.doorStates.open")
+      : status === "closed"
+        ? t("details.doorStates.closed")
+        : t("details.doorStates.unknown");
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+      <div>
+        <p className="font-medium"><LuDoorOpen className="mr-2 inline size-4" />{door.name}</p>
+        <p className="text-xs text-muted-foreground">
+          {t("details.doorStatus", {
+            status: error ? t("details.unavailable") : localizedStatus,
+          })}
+          {currentStatus?.online === false ? ` · ${t("details.offline")}` : ""}
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => void handleCommand("open")}>
+          <LuLockOpen className="mr-1 size-4" />
+          {busy === "open" ? t("details.sending") : t("details.open")}
+        </Button>
+        <Button size="sm" variant="outline" disabled={busy !== null} onClick={() => void handleCommand("close")}>
+          <LuLock className="mr-1 size-4" />
+          {busy === "close" ? t("details.sending") : t("details.close")}
+        </Button>
+      </div>
+      <p className="w-full text-xs text-muted-foreground">{t("details.lockCommandNote")}</p>
+    </div>
   );
 }
