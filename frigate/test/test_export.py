@@ -543,6 +543,22 @@ class TestPinnedStream(unittest.TestCase):
         self.assertFalse(any("/vod/front/main/" in token for token in cmd))
 
 
+class TestExportTimelineAlignment(unittest.TestCase):
+    def test_unstaged_auto_reads_the_stream_it_serves(self) -> None:
+        # a sub-only range whose main rows are glitches the manifest drops
+        exporter = _make_exporter([_span("/s1.mp4", 1_000, 1_040, False)], {"h264"})
+        streams: list[str] = []
+
+        def rows(stream: str) -> list:
+            streams.append(stream)
+            return [_FakeRow(f"/{stream}.mp4")]
+
+        exporter._get_recordings_for_range = rows  # type: ignore[method-assign]
+        exporter.get_record_export_command("/exports/out.mp4")
+
+        self.assertEqual(streams, ["sub"])
+
+
 class TestStagedFileCleanup(unittest.TestCase):
     """A staged path must be tracked before ffmpeg can write to it."""
 

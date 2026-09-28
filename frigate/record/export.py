@@ -42,6 +42,7 @@ from frigate.util.ownership import chown_to_runtime
 from frigate.util.recording_coverage import (
     build_spans,
     known_video_codecs,
+    null_audio_glitches,
     resolve_coverage,
     stream_media_summary,
 )
@@ -376,15 +377,18 @@ class RecordingExporter(threading.Thread):
     def _resolve_coverage(self) -> tuple[list[list[Any]], set[str], bool]:
         """Resolve the export range into the spans the VOD manifest will serve.
 
-        Delegates to the same coverage resolution the manifest builder
-        uses, so what we plan around and what nginx-vod emits agree by
-        construction. Returns the spans (each [row, start, end, is_main]),
-        the known video codecs, and whether audio survives the range.
+        Delegates to the same coverage resolution and glitch nulling the
+        manifest builder uses, so what we plan around and what nginx-vod
+        emits agree by construction. Returns the spans (each [row, start,
+        end, is_main]), the known video codecs, and whether audio survives
+        the range.
         Memoized: several stages of the export ask the same question, and
         the recordings backing a finished range do not change under us.
         """
         if self._coverage is None:
-            intervals = resolve_coverage(self.camera, self.start_time, self.end_time)
+            intervals = null_audio_glitches(
+                resolve_coverage(self.camera, self.start_time, self.end_time)
+            )
             self._coverage = (
                 build_spans(intervals, self.pinned_stream),
                 known_video_codecs(intervals),
@@ -1149,11 +1153,18 @@ class RecordingExporter(threading.Thread):
             # its own rows are the ones the chapters describe
             recordings = self._get_recordings_for_range(pin)
         else:
-            # never mix streams in one playlist; use main when available
-            # and fall back to sub for expired-main history
-            recordings = self._get_recordings_for_range(STREAM_TYPE_MAIN)
+            # an unstaged auto range resolves to at most one stream run, and
+            # its rows are the ones the chapters describe. Main rows the
+            # manifest drops (glitches, slivers at the edges of a sub range)
+            # must not stand in for it.
+            runs = self._stream_runs(self._merged_spans())
+            recordings = self._get_recordings_for_range(
+                runs[0].stream_type if runs else STREAM_TYPE_MAIN
+            )
 
-            if not recordings:
+            # never mix streams in one playlist; fall back to sub for
+            # expired-main history
+            if not recordings and not runs:
                 recordings = self._get_recordings_for_range(STREAM_TYPE_SUB)
 
         playlist_lines = []
