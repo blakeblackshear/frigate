@@ -340,8 +340,11 @@ export class AutoQualityGovernor {
   private triggerDownswitch(reason: DownswitchReason): boolean {
     const handled = this.requestDownswitch(reason);
     if (handled) {
-      // the low stream starts with a clean record
+      // the low stream starts with a clean record, and the probe lets a
+      // recovered connection (or a wrong downswitch) return to full
+      // quality mid-chunk rather than at the next boundary
       this.resetStallHistory();
+      this.armUpswitchProbe();
     }
     return handled;
   }

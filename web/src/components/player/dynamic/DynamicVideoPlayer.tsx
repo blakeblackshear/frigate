@@ -484,9 +484,6 @@ export default function DynamicVideoPlayer({
       }
       setAutoLowQuality(true);
       setAutoLowReason(reason === "codec" ? "codec" : "bandwidth");
-      // so a recovered connection (or a wrong downswitch) returns to
-      // full quality mid-chunk rather than at the next boundary
-      governor.armUpswitchProbe();
       return true;
     };
     tryUpswitchRef.current = () => {
@@ -495,7 +492,7 @@ export default function DynamicVideoPlayer({
         setAutoLowReason(undefined);
       }
     };
-  }, [resolvedQuality, subAvailable, governor]);
+  }, [resolvedQuality, subAvailable]);
 
   // persisted across sessions so a device on a known-slow connection
   // starts low instead of paying the first stall to find out
@@ -616,7 +613,19 @@ export default function DynamicVideoPlayer({
     governor.sourceLoadStarted();
   }, [source, isScrubbing, governor]);
 
+  const lastChunkRef = useRef(timeRange);
   useEffect(() => {
+    // the seed effect picks the starting quality, so only a later chunk
+    // boundary reconsiders it
+    const lastChunk = lastChunkRef.current;
+    lastChunkRef.current = timeRange;
+    if (
+      lastChunk.after === timeRange.after &&
+      lastChunk.before === timeRange.before
+    ) {
+      return;
+    }
+
     // a chunk boundary is where full quality may be retried, and a
     // natural point to persist what the governor has learned
     setAutoLowQuality((prev) => prev && !governor.shouldRetryMain());
