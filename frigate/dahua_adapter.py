@@ -1,6 +1,7 @@
 """Provider based Dahua access controller integrations."""
 
 import asyncio
+import contextvars
 import importlib.metadata
 import json
 import logging
@@ -15,6 +16,9 @@ import aiohttp
 import requests
 
 logger = logging.getLogger(__name__)
+_redaction_secret: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "dahua_redaction_secret", default=""
+)
 
 
 class DahuaOperationError(requests.RequestException):
@@ -62,6 +66,9 @@ class DahuaNotSupported(DahuaOperationError):
 
 def _safe_body(value: str, limit: int = 2048) -> str:
     """Trim a response body and remove fields that may contain credentials."""
+    secret = _redaction_secret.get()
+    if secret:
+        value = value.replace(secret, "<redacted>")
     value = re.sub(
         r"(?is)([\"']?(?:password|passwd|userpassword|pin|pwd)[\"']?\s*:\s*\")([^\"]*)(\")",
         r"\1<redacted>\3",
@@ -106,6 +113,9 @@ def _safe_raw(value: Any) -> Any:
         }
     if isinstance(value, list):
         return [_safe_raw(item) for item in value]
+    if isinstance(value, str):
+        secret = _redaction_secret.get()
+        return value.replace(secret, "<redacted>") if secret else value
     return value
 
 
@@ -125,7 +135,7 @@ class DahuaConnection:
 
     ip: str
     username: str = "admin"
-    password: str = ""
+    password: str = field(default="", repr=False)
     port: int = 80
     timeout: float = 5
     use_auth: bool = True
@@ -167,9 +177,18 @@ class CgiProvider:
 
     name = "cgi"
 
-    def __init__(self, connection: DahuaConnection) -> None:
+    def __init__(
+        self,
+        connection: DahuaConnection,
+        diagnostic: Callable[[dict[str, Any]], None] | None = None,
+    ) -> None:
         self.connection = connection
         self.base_url = f"{connection.scheme}://{connection.ip}:{connection.port}"
+        self.diagnostic = diagnostic
+
+    def _report(self, detail: dict[str, Any]) -> None:
+        if self.diagnostic is not None:
+            self.diagnostic(_safe_raw(detail))
 
     def _auth(self):
         if not self.connection.use_auth:
@@ -204,6 +223,7 @@ class CgiProvider:
             actual_endpoint = str(response.url)
             if stream and response.status >= 400:
                 body = await response.text(errors="replace")
+                self._report({"provider": self.name, "operation": operation, "endpoint": actual_endpoint, "http_status": response.status, "raw_response": _safe_body(body)})
                 raise DahuaOperationError(
                     self.name,
                     operation,
@@ -215,6 +235,7 @@ class CgiProvider:
                 )
             if not stream and not binary:
                 body = await response.text(errors="replace")
+                self._report({"provider": self.name, "operation": operation, "endpoint": actual_endpoint, "http_status": response.status, "raw_response": _safe_body(body)})
                 code = self._response_error(body)
                 if response.status >= 400 or code:
                     raise DahuaOperationError(
@@ -228,6 +249,7 @@ class CgiProvider:
                     )
             elif not stream:
                 body_bytes = await response.read()
+                self._report({"provider": self.name, "operation": operation, "endpoint": actual_endpoint, "http_status": response.status, "raw_response": f"<binary: {len(body_bytes)} bytes>" if response.status < 400 else _safe_body(body_bytes[:2048].decode("utf-8", errors="replace"))})
                 if response.status >= 400:
                     body = body_bytes.decode("utf-8", errors="replace")
                     raise DahuaOperationError(
@@ -239,6 +261,8 @@ class CgiProvider:
                         dahua_code=self._response_error(body),
                         response_body=body,
                     )
+            if stream:
+                self._report({"provider": self.name, "operation": operation, "endpoint": actual_endpoint, "http_status": response.status, "raw_response": "<event stream connected>"})
             return response.status, path, response, session
         except DahuaOperationError:
             await session.close()
@@ -508,7 +532,7 @@ class CgiProvider:
                     if key.casefold() == "data":
                         event = self._event_from_fields(pending)
                         if event:
-                            callback(event)
+                            callback(_safe_raw(event))
                         pending.clear()
         except (aiohttp.ClientError, TimeoutError) as err:
             error = DahuaOperationError(
@@ -872,6 +896,7 @@ class DahuaAccessController:
         scheme: str = "http",
         sdk_port: int = 37777,
         provider_options: dict[str, Any] | None = None,
+        diagnostic: Callable[[dict[str, Any]], None] | None = None,
     ) -> None:
         self.connection = DahuaConnection(
             ip=ip,
@@ -886,7 +911,7 @@ class DahuaAccessController:
         )
         self.provider_name = provider.casefold()
         if self.provider_name == "cgi":
-            self.provider: DahuaProvider = CgiProvider(self.connection)
+            self.provider: DahuaProvider = CgiProvider(self.connection, diagnostic)
         elif self.provider_name == "netsdk":
             try:
                 self.provider = NetSDKProvider(self.connection)  # type: ignore[assignment]
@@ -901,10 +926,12 @@ class DahuaAccessController:
                     DahuaNotSupported(
                         self.provider_name,
                         "initialize",
-                        f"NetSDK provider could not load: {type(err).__name__}: {_safe_body(str(err))}",
+                        f"NetSDK provider could not load: {type(err).__name__}: {_safe_body(str(err).replace(self.connection.password, '<redacted>') if self.connection.password else str(err))}",
                         endpoint="Dahua NetSDK runtime",
                         response_body=(
-                            str(response_body) if response_body is not None else None
+                            str(response_body).replace(self.connection.password, "<redacted>")
+                            if response_body is not None and self.connection.password
+                            else str(response_body) if response_body is not None else None
                         ),
                     ),
                 )  # type: ignore[assignment]
@@ -913,6 +940,7 @@ class DahuaAccessController:
 
     async def _provider_call(self, operation: str, *args):
         """Invoke one provider operation and attach consistent diagnostics."""
+        redaction_token = _redaction_secret.set(self.connection.password)
         try:
             method = getattr(self.provider, operation)
             return _safe_raw(await method(*args))
@@ -939,6 +967,8 @@ class DahuaAccessController:
                     str(response_body) if response_body is not None else None
                 ),
             ) from err
+        finally:
+            _redaction_secret.reset(redaction_token)
 
     async def get_system_info_async(self) -> dict[str, Any]:
         return await self._provider_call("get_system_info")

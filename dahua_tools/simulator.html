@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dahua Access Controller Simulator</title>
+  <style>
+    :root{font-family:system-ui,sans-serif;color:#e9eef6;background:#101823}body{max-width:1200px;margin:auto;padding:24px}h1{margin-bottom:4px}h2{font-size:1.1rem}p{color:#aab9c9}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:16px}.panel{background:#1c2938;border:1px solid #34475a;border-radius:10px;padding:18px;margin:14px 0}label{display:block;margin:8px 0;color:#c5d2e0}input,select{background:#0f1b28;color:#fff;border:1px solid #52677e;border-radius:5px;padding:8px;max-width:100%}button{background:#2563a8;color:#fff;border:0;border-radius:5px;padding:8px 12px;margin:3px;cursor:pointer}button:hover{background:#3479c3}.danger{background:#954545}.row{border-top:1px solid #34475a;padding:10px 0}.muted{color:#9aacbe}.error{color:#ff9898}.good{color:#95daa5}code{color:#a3d6fb}pre{white-space:pre-wrap;max-height:240px;overflow:auto;background:#111d2a;padding:12px}small{color:#9aacbe}
+  </style>
+</head>
+<body>
+  <h1>Dahua Access Controller Simulator</h1>
+  <p>Persistent local controller. CGI target: <code id="target"></code>. Use provider <code>cgi</code> with authentication disabled.</p>
+  <div id="message" role="status"></div>
+  <div class="grid">
+    <section class="panel"><h2>Controller</h2><form id="controllerForm">
+      <label>Name <input name="name" required></label><label>Model <input name="model" required></label>
+      <label>Serial number <input name="serial" required></label><label>Firmware <input name="firmware" required></label>
+      <label><input name="online" type="checkbox"> Online</label><button>Save controller</button>
+    </form><p id="controllerStatus"></p></section>
+    <section class="panel"><h2>Simulate access</h2><form id="accessForm">
+      <label>Door <select name="door_id" id="accessDoor"></select></label>
+      <label>Card number <input name="card_number" placeholder="Existing or unknown card"></label>
+      <label>Result <select name="result"><option value="auto">Automatic rules</option><option value="grant">Force grant</option><option value="deny">Force denial</option></select></label>
+      <label><input type="checkbox" name="live" checked> Live event and door action</label>
+      <label>Historical timestamp (optional) <input type="datetime-local" name="timestamp"></label>
+      <button>Generate event</button>
+    </form><small>Automatic grant requires an online controller and door, an active card, and an active linked user. Historical events are stored without changing a door.</small></section>
+  </div>
+  <div class="grid">
+    <section class="panel"><h2>Doors</h2><button id="addDoor">Create door</button><div id="doors"></div></section>
+    <section class="panel"><h2>Users</h2><button id="addUser">Create user</button><div id="users"></div></section>
+    <section class="panel"><h2>Cards</h2><button id="addCard">Create card</button><div id="cards"></div><small>Enter comma-separated user IDs when creating or editing a card. Multiple cards can link to multiple users.</small></section>
+  </div>
+  <section class="panel"><h2>Preview image</h2><img src="/cgi-bin/snapshot.cgi" alt="Synthetic controller preview" style="max-width:100%"><button id="refreshImage">Refresh image</button></section>
+  <section class="panel"><h2>Recent stored events</h2><div id="events"></div></section>
+  <section class="panel"><h2>Live events</h2><pre id="liveEvents">Waiting for events</pre></section>
+  <script>
+    const $ = id => document.getElementById(id);
+    const message = (text, error=false) => { $('message').textContent=text; $('message').className=error?'error':'good'; };
+    const node = (tag,text) => { const element=document.createElement(tag); element.textContent=text; return element; };
+    const button = (label,fn,cls='') => { const element=node('button',label); element.type='button'; element.className=cls; element.onclick=fn; return element; };
+    async function api(method,path,body){const response=await fetch(path,{method,headers:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.detail||response.statusText);return data;}
+    async function action(fn){try{await fn();message('Saved');await refresh();}catch(error){message(String(error),true);}}
+    function value(promptText,defaultValue){return window.prompt(promptText,String(defaultValue??''));}
+    function addRow(container,summary,actions){const row=document.createElement('div');row.className='row';row.append(node('div',summary));for(const [label,fn,cls] of actions)row.append(button(label,fn,cls));container.append(row);}
+    async function refresh(){const data=await api('GET','/api/state');const c=data.controller;const form=$('controllerForm');for(const key of ['name','model','serial','firmware'])form.elements[key].value=c[key];form.elements.online.checked=Boolean(c.online);$('controllerStatus').textContent=c.online?'Controller online':'Controller offline';$('target').textContent=location.origin;
+      $('accessDoor').replaceChildren(...data.doors.map(door=>{const option=node('option',`${door.id}: ${door.name}`);option.value=door.id;return option;}));
+      $('doors').replaceChildren();for(const door of data.doors)addRow($('doors'),`#${door.id} ${door.name} | ${door.online?'online':'offline'} | ${door.status}`,[['Edit',()=>action(async()=>{const name=value('Door name',door.name);if(name===null)return;const online=window.confirm('Door online?');const status=window.confirm('Door open?')?'open':'closed';await api('PUT',`/api/doors/${door.id}`,{name,online,status});})],['Open',()=>action(()=>api('POST',`/api/doors/${door.id}/open`))],['Close',()=>action(()=>api('POST',`/api/doors/${door.id}/close`))]]);
+      $('users').replaceChildren();for(const user of data.users)addRow($('users'),`#${user.id} ${user.name} | ${user.active?'active':'inactive'}`,[['Edit',()=>action(async()=>{const name=value('User name',user.name);if(name===null)return;await api('PUT',`/api/users/${user.id}`,{name,active:window.confirm('User active?')});})],['Delete',()=>action(async()=>{if(window.confirm(`Delete user ${user.name}?`))await api('DELETE',`/api/users/${user.id}`);}), 'danger']]);
+      $('cards').replaceChildren();for(const card of data.cards)addRow($('cards'),`${card.number} (${card.name||'unnamed'}) | ${card.active?'active':'inactive'} | users: ${card.user_ids.join(', ')||'none'}`,[['Edit',()=>action(async()=>{const number=value('Card number',card.number);if(number===null)return;const name=value('Card name',card.name);if(name===null)return;const owners=value('User IDs, comma separated',card.user_ids.join(','));if(owners===null)return;await api('PUT',`/api/cards/${encodeURIComponent(card.number)}`,{number,name,active:window.confirm('Card active?'),user_ids:owners.split(',').filter(Boolean).map(Number)});})],['Delete',()=>action(async()=>{if(window.confirm(`Delete card ${card.number}?`))await api('DELETE',`/api/cards/${encodeURIComponent(card.number)}`);}), 'danger']]);
+      $('events').replaceChildren();for(const event of data.events)addRow($('events'),`${new Date(event.timestamp*1000).toLocaleString()} | ${event.code} | door ${event.door_id} | ${event.card_number||'no card'} | ${event.user_name||'no user'} | ${event.result}`,[]);
+    }
+    $('controllerForm').onsubmit=event=>{event.preventDefault();const form=event.target;action(()=>api('PUT','/api/controller',{name:form.elements.name.value,model:form.elements.model.value,serial:form.elements.serial.value,firmware:form.elements.firmware.value,online:form.elements.online.checked}));};
+    $('accessForm').onsubmit=event=>{event.preventDefault();const form=event.target;const time=form.elements.timestamp.value;action(()=>api('POST','/api/events',{door_id:Number(form.elements.door_id.value),card_number:form.elements.card_number.value||null,result:form.elements.result.value,live:form.elements.live.checked,timestamp:time?new Date(time).getTime()/1000:null}));};
+    $('addDoor').onclick=()=>action(async()=>{const name=value('New door name','New door');if(name!==null)await api('POST','/api/doors',{name,online:true,status:'closed'});});
+    $('addUser').onclick=()=>action(async()=>{const name=value('New user name','');if(name)await api('POST','/api/users',{name,active:true});});
+    $('addCard').onclick=()=>action(async()=>{const number=value('New card number','');if(!number)return;const name=value('Card name','');if(name===null)return;const owners=value('User IDs, comma separated','');if(owners===null)return;await api('POST','/api/cards',{number,name,active:true,user_ids:owners.split(',').filter(Boolean).map(Number)});});
+    $('refreshImage').onclick=()=>{document.querySelector('img').src=`/cgi-bin/snapshot.cgi?t=${Date.now()}`;};
+    const live=new EventSource('/api/live');live.onmessage=event=>{const item=JSON.parse(event.data);$('liveEvents').textContent=`${new Date(item.timestamp*1000).toLocaleTimeString()} ${item.code} door ${item.door_id} ${item.result}\n`+$('liveEvents').textContent;refresh().catch(error=>message(String(error),true));};live.onerror=()=>message('Live event stream disconnected',true);
+    refresh().catch(error=>message(String(error),true));
+  </script>
+</body>
+</html>

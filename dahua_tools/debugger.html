@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dahua Access Controller Debugger</title>
+  <style>
+    :root{font-family:system-ui,sans-serif;color:#e9eef6;background:#101823}body{max-width:1160px;margin:auto;padding:24px}h1{margin-bottom:4px}h2{font-size:1.1rem}p,small{color:#acbed0}.panel{background:#1c2938;border:1px solid #34475a;border-radius:10px;padding:18px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}label{display:block;margin:8px 0;color:#c5d2e0}input,select{background:#0f1b28;color:#fff;border:1px solid #52677e;border-radius:5px;padding:8px;width:100%;box-sizing:border-box}input[type=checkbox]{width:auto}button{background:#2563a8;color:#fff;border:0;border-radius:5px;padding:9px 12px;margin:4px;cursor:pointer}button:hover{background:#3479c3}button:disabled{opacity:.55;cursor:default}.success{color:#9be3ad}.failed{color:#ffa1a1}.unsupported{color:#f4cf83}pre{white-space:pre-wrap;overflow:auto;max-height:360px;background:#101b28;padding:12px;border-radius:5px;font-size:.85rem}details{margin:10px 0}summary{cursor:pointer}.result{border-top:1px solid #34475a;padding-top:12px;margin-top:12px}img,video{max-width:100%;display:block;margin:12px 0}
+  </style>
+</head>
+<body>
+  <h1>Dahua Access Controller Debugger</h1>
+  <p>Independent capability checks for DHI-ASI2201-H-W and DHI-ASI2212-H-W. Each button runs one operation against the selected provider.</p>
+  <section class="panel"><h2>Controller connection</h2><div class="grid">
+    <label>IP or hostname <input id="host" placeholder="192.0.2.20" autocomplete="off"></label>
+    <label>Port <input id="port" type="number" value="80" min="1" max="65535"></label>
+    <label>Username <input id="username" value="admin" autocomplete="username"></label>
+    <label>Password <input id="password" type="password" autocomplete="off"></label>
+    <label>Provider <select id="provider"><option value="cgi">CGI / HTTP</option><option value="netsdk">NetSDK plugin</option></select></label>
+    <label>Scheme <select id="scheme"><option value="http">HTTP</option><option value="https">HTTPS</option></select></label>
+    <label>CGI live event endpoint <select id="eventApi"><option value="eventManager">eventManager</option><option value="snapManager">snapManager</option></select></label>
+    <label>NetSDK port <input id="sdkPort" type="number" value="37777" min="1" max="65535"></label>
+    <label>Timeout (seconds) <input id="timeout" type="number" value="5" min="0.1" max="60" step="0.1"></label>
+  </div><label><input id="useAuth" type="checkbox" checked> Use CGI Digest authentication</label><small>Credentials stay in this form and are sent only to this local debugger for the requested operation. Diagnostic output removes passwords.</small></section>
+  <section class="panel"><h2>Operation inputs</h2><div class="grid">
+    <label>Door ID <input id="doorId" value="1"></label>
+    <label>Card number <input id="cardNumber"></label>
+    <label>History start <input id="startTime" type="datetime-local"></label>
+    <label>History end <input id="endTime" type="datetime-local"></label>
+  </div></section>
+  <section class="panel"><h2>Capabilities</h2><div id="buttons"></div><button id="stopLive" disabled>Stop Live Event Listener</button><button id="export">Export diagnostics JSON</button><p id="notice" role="status"></p></section>
+  <section class="panel"><h2>Results</h2><div id="results"></div></section>
+  <script>
+    const $=id=>document.getElementById(id);
+    const definitions=[['connection','Test Connection'],['system_info','Get System Info'],['doors','Get Doors'],['door_status','Get Door Status'],['open_door','Open Door'],['close_door','Close Door'],['card_owners','Get Card Owners'],['historical_records','Get Historical Records'],['live_events','Start Live Event Listener'],['snapshot','Get Snapshot'],['preview','Get Preview'],['preview_clip','Get Preview Clip']];
+    const collected=[];let liveAbort=null;
+    const text=(tag,content)=>{const element=document.createElement(tag);element.textContent=content;return element;};
+    const pretty=value=>JSON.stringify(value,null,2);
+    const target=()=>({host:$('host').value.trim(),port:Number($('port').value),username:$('username').value,password:$('password').value,provider:$('provider').value,scheme:$('scheme').value,event_api:$('eventApi').value,sdk_port:Number($('sdkPort').value),timeout:Number($('timeout').value),use_auth:$('useAuth').checked});
+    const payload=operation=>({target:target(),operation,door_id:$('doorId').value,card_number:$('cardNumber').value,start_time:$('startTime').value?new Date($('startTime').value).toISOString():null,end_time:$('endTime').value?new Date($('endTime').value).toISOString():null});
+    function show(value){collected.unshift(value);const item=document.createElement('div');item.className='result';const status=value.status||'FAILED';const title=text('h3',`${value.request?.operation||'live_events'}: ${status}`);title.className=status==='SUCCESS'?'success':status==='NOT SUPPORTED'?'unsupported':'failed';item.append(title);
+      item.append(text('div',`Provider: ${value.provider||value.request?.provider||'unknown'} | Started: ${value.start_time||'n/a'} | Duration: ${value.duration_ms??'n/a'} ms | HTTP/SDK status: ${value.http_sdk_status??'n/a'}`));
+      for(const [label,field] of [['Request / operation','request'],['Response','response'],['Normalized response','normalized_response'],['Raw response','raw_response'],['Exception / error','exception'],['Detailed logs','logs']]){if(value[field]===undefined||value[field]===null)continue;const detail=document.createElement('details');if(field==='exception')detail.open=true;detail.append(text('summary',label));detail.append(text('pre',pretty(value[field])));item.append(detail);}
+      const media=value.normalized_response||value.response;if(media?.image){const image=document.createElement('img');image.src=media.image;image.alt='Controller snapshot or preview';item.append(image);}if(media?.media){const video=document.createElement('video');video.src=media.media;video.controls=true;item.append(video);}
+      $('results').prepend(item);$('notice').textContent=`Latest result: ${status}`;
+    }
+    async function run(operation){if(!$('host').value.trim()){$('notice').textContent='Enter an IP address or hostname';return;}if(['open_door','close_door'].includes(operation)&&!window.confirm(`${operation==='open_door'?'Open':'Close'} door ${$('doorId').value} on this controller?`))return;
+      if(operation==='live_events'){listen();return;}const request=payload(operation);const tick=performance.now();try{const response=await fetch('/api/operation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request)});const value=await response.json();if(!response.ok)throw Error(pretty(value));show(value);}catch(error){show({status:'FAILED',request:{operation,provider:request.target.provider,target:request.target.host},provider:request.target.provider,start_time:new Date().toISOString(),duration_ms:Math.round(performance.now()-tick),exception:{message:String(error)}});}}
+    async function listen(){if(liveAbort)return;if(!$('host').value.trim()){$('notice').textContent='Enter an IP address or hostname';return;}const request=payload('live_events');const abort=new AbortController();liveAbort=abort;$('stopLive').disabled=false;const started=new Date().toISOString();try{const response=await fetch('/api/live',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request),signal:abort.signal});if(!response.ok)throw Error(pretty(await response.json()));const reader=response.body.getReader();const decoder=new TextDecoder();let pending='';while(true){const chunk=await reader.read();if(chunk.done)break;pending+=decoder.decode(chunk.value,{stream:true});let index;while((index=pending.indexOf('\n'))>=0){const line=pending.slice(0,index);pending=pending.slice(index+1);if(line.trim()){const value=JSON.parse(line);show({...value,request:value.request||{operation:'live_events',provider:request.target.provider,target:request.target.host},provider:request.target.provider,start_time:value.start_time||started});}}}}catch(error){if(error.name!=='AbortError')show({status:'FAILED',request:{operation:'live_events',provider:request.target.provider,target:request.target.host},provider:request.target.provider,start_time:started,exception:{message:String(error)}});}finally{liveAbort=null;$('stopLive').disabled=true;}}
+    $('stopLive').onclick=()=>{if(liveAbort){liveAbort.abort();$('notice').textContent='Live event listener stopped';}};
+    $('export').onclick=()=>{const blob=new Blob([pretty(collected)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='dahua-debug-diagnostics.json';link.click();URL.revokeObjectURL(url);};
+    for(const [operation,label] of definitions){const button=text('button',label);button.onclick=()=>run(operation);$('buttons').append(button);}
+    const end=new Date();const start=new Date(end.getTime()-86400000);const local=date=>new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16);$('startTime').value=local(start);$('endTime').value=local(end);
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+services:
+  simulator:
+    build:
+      context: ..
+      dockerfile: dahua_tools/Dockerfile
+    command: python -m dahua_tools.simulator
+    environment:
+      DAHUA_SIM_HOST: 0.0.0.0
+      DAHUA_SIM_DB: /data/dahua_simulator.db
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - simulator-data:/data
+
+  debugger:
+    build:
+      context: ..
+      dockerfile: dahua_tools/Dockerfile
+    command: python -m dahua_tools.debugger
+    environment:
+      DAHUA_DEBUG_HOST: 0.0.0.0
+    ports:
+      - "127.0.0.1:8081:8081"
+
+volumes:
+  simulator-data:

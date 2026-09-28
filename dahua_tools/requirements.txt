@@ -1,0 +1,5 @@
+aiohttp==3.12.*
+fastapi==0.116.*
+uvicorn==0.35.*
+requests==2.32.*
+Pillow>=11,<13
