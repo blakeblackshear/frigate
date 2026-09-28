@@ -111,15 +111,18 @@ def get_detector_stats(
 ) -> dict[str, dict[str, Any]]:
     """Get stats for all detectors, including temperatures based on detector type."""
     detector_stats: dict[str, dict[str, Any]] = {}
-    detector_type_indices: dict[str, int] = {}
+    # detector type -> device -> index into that type's temperatures
+    device_indices: dict[str, dict[str, int]] = {}
 
     for name, detector in stats_tracking["detectors"].items():
         pid = detector.detect_process.pid if detector.detect_process else None
         detector_type = detector.detector_config.type
 
-        # Keep track of the index for each detector type to match temperatures correctly
-        current_index = detector_type_indices.get(detector_type, 0)
-        detector_type_indices[detector_type] = current_index + 1
+        # temperatures are per physical unit, so a repeated device
+        # ("hailo:PCIe#2", see runner_names) shares its unit's reading
+        device = name.partition("#")[0]
+        type_devices = device_indices.setdefault(detector_type, {})
+        current_index = type_devices.setdefault(device, len(type_devices))
 
         detector_stat = {
             "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),  # type: ignore[attr-defined]
