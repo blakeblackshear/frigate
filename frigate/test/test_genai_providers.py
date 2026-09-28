@@ -19,6 +19,8 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import requests
+
 from frigate.config import GenAIConfig, GenAIProviderEnum
 from frigate.genai import PROVIDERS, load_providers
 
@@ -566,7 +568,6 @@ class TestLlamaCppProvider(unittest.TestCase):
             "supports_audio": False,
             "supports_tools": False,
             "supports_reasoning": False,
-            "media_marker": "<__media__>",
         }
         cls = PROVIDERS[GenAIProviderEnum.llamacpp]
         with patch.object(cls, "_get_model_info", return_value=info):
@@ -588,6 +589,62 @@ class TestLlamaCppProvider(unittest.TestCase):
         ]
         with patch.object(client, "_fetch_models_data", return_value=models_data):
             self.assertEqual(client.list_models(), ["g4", "gemma", "qwen3-asr"])
+
+    @staticmethod
+    def _embeddings_response(vectors):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {
+            "object": "list",
+            "data": [
+                {"object": "embedding", "index": i, "embedding": v}
+                for i, v in enumerate(vectors)
+            ],
+        }
+        return response
+
+    def test_embed_posts_content_arrays_to_v1_embeddings(self):
+        client = self._client()
+        response = self._embeddings_response([[0.1] * 768, [0.2] * 768])
+
+        with patch.object(client, "_post", return_value=response) as post:
+            result = client.embed(texts=["a person"], images=[b"not an image"])
+
+        url = post.call_args.args[0]
+        payload = post.call_args.kwargs["json"]
+        self.assertEqual(url, "http://localhost:9999/v1/embeddings")
+        self.assertEqual(payload["model"], "m")
+        self.assertEqual(payload["encoding_format"], "float")
+        self.assertEqual(
+            payload["input"][0], {"content": [{"type": "text", "text": "a person"}]}
+        )
+        image_parts = payload["input"][1]["content"]
+        self.assertEqual(image_parts[0]["type"], "image_url")
+        self.assertEqual(
+            image_parts[0]["image_url"]["url"],
+            "data:image/jpeg;base64," + base64.b64encode(b"not an image").decode(),
+        )
+        self.assertEqual(image_parts[1], {"type": "text", "text": "\n"})
+        self.assertEqual(len(result), 2)
+        self.assertAlmostEqual(float(result[1][0]), 0.2, places=5)
+
+    def test_embed_normalizes_dimension(self):
+        client = self._client()
+        response = self._embeddings_response([[1.0] * 1024, [1.0] * 512])
+
+        with patch.object(client, "_post", return_value=response):
+            result = client.embed(texts=["long", "short"])
+
+        self.assertEqual([r.shape for r in result], [(768,), (768,)])
+        self.assertEqual(float(result[1][-1]), 0.0)
+
+    def test_embed_request_error_returns_empty(self):
+        client = self._client()
+        response = MagicMock()
+        response.raise_for_status.side_effect = requests.exceptions.HTTPError("400")
+
+        with patch.object(client, "_post", return_value=response):
+            self.assertEqual(client.embed(texts=["a"]), [])
 
 
 # ---------------------------------------------------------------------------
@@ -762,7 +819,6 @@ class TestLlamaCppTranscribe(unittest.TestCase):
             "supports_audio": supports_audio,
             "supports_tools": False,
             "supports_reasoning": False,
-            "media_marker": "<__media__>",
         }
         cls = PROVIDERS[GenAIProviderEnum.llamacpp]
         with patch.object(cls, "_get_model_info", return_value=info):
