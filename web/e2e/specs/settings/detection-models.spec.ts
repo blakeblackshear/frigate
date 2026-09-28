@@ -351,6 +351,28 @@ test.describe("Detection models settings @high", () => {
     expect(model).not.toHaveProperty("model_type");
   });
 
+  test("a Frigate+ model only shows its path without a Frigate+ API key", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      {
+        scene: "all",
+        devices: ["openvino:GPU.0"],
+        path: "plus://abc123",
+        width: 320,
+        height: 320,
+      },
+    ]);
+    await openPage(frigateApp);
+
+    const root = frigateApp.page.locator("#pageRoot");
+    await expect(root).toContainText("Custom object detector model path");
+    await expect(root).not.toContainText("Object detection model input width");
+    await expect(root).not.toContainText(
+      "Label map for custom object detector",
+    );
+  });
+
   test("a Frigate+ Hailo model is listed by the device it was built for", async ({
     frigateApp,
   }) => {

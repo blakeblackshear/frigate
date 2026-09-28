@@ -60,6 +60,15 @@ const CUSTOM_MODEL_FIELDS = [
   "model_type",
 ];
 
+/**
+ * The fields a model can edit. A Frigate+ model's size, format, type, and
+ * labels come from its model info, so only its path stays editable.
+ */
+const editableFields = (model: DetectionModel): string[] =>
+  typeof model.path === "string" && model.path.startsWith("plus://")
+    ? ["path"]
+    : CUSTOM_MODEL_FIELDS;
+
 /** The detector a model runs on, which is the prefix of its device strings. */
 const detectorForModel = (model: DetectionModel): string | undefined =>
   model.devices?.[0]?.split(":")[0];
@@ -433,7 +442,7 @@ export function ModelsField(props: FieldProps) {
                     detector={detectorForModel(model)}
                     disabled={disabled || readonly}
                     onPathChange={(path) => updateModel(index, { path })}
-                    customFields={CUSTOM_MODEL_FIELDS.map((fieldName) =>
+                    customFields={editableFields(model).map((fieldName) =>
                       renderField(index, fieldName),
                     )}
                   />
