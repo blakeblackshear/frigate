@@ -7,6 +7,7 @@
  */
 
 import { RJSFSchema } from "@rjsf/utils";
+import { omit } from "lodash";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { HiddenFieldContext, JsonObject, JsonValue } from "@/types/configForm";
@@ -352,6 +353,17 @@ export function synthesizeMissingFilters(
   return { ...(data as JsonObject), filters: newFilters };
 }
 
+// the backend fills these from the Frigate+ model info when it loads a
+// plus:// model, so saving them would only pin values Frigate+ owns
+const PLUS_SUPPLIED_MODEL_FIELDS = [
+  "width",
+  "height",
+  "input_tensor",
+  "input_pixel_format",
+  "input_dtype",
+  "model_type",
+];
+
 /**
  * Sanitize overrides payloads for section-specific quirks.
  */
@@ -360,6 +372,21 @@ export function sanitizeOverridesForSection(
   level: string,
   overrides: unknown,
 ): unknown {
+  // the models list is saved whole
+  if (sectionPath === "models" && Array.isArray(overrides)) {
+    return overrides.map((model) => {
+      if (
+        !isJsonObject(model) ||
+        typeof model.path !== "string" ||
+        !model.path.startsWith("plus://")
+      ) {
+        return model;
+      }
+
+      return omit(model, PLUS_SUPPLIED_MODEL_FIELDS);
+    });
+  }
+
   if (!overrides || !isJsonObject(overrides)) {
     return overrides;
   }
