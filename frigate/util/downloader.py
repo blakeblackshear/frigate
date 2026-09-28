@@ -14,6 +14,10 @@ from frigate.util.file import FileLock
 
 logger = logging.getLogger(__name__)
 
+# (connect, read) seconds. The read timeout bounds each socket read rather than
+# the whole download, so large models still finish.
+DOWNLOAD_TIMEOUT = (15, 60)
+
 # target path -> first line of the last download error for it; every existing
 # download function swallows its exceptions, so this is how the downloader
 # thread learns why a file is still missing
@@ -124,7 +128,9 @@ class ModelDownloader:
             logger.info(f"Downloading model file from: {url}")
 
         try:
-            with requests.get(url, stream=True, allow_redirects=True) as r:
+            with requests.get(
+                url, stream=True, allow_redirects=True, timeout=DOWNLOAD_TIMEOUT
+            ) as r:
                 r.raise_for_status()
                 with open(temporary_filename, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
