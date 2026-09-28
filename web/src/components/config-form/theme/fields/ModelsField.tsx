@@ -169,20 +169,23 @@ export function ModelsField(props: FieldProps) {
     [savedModels],
   );
 
-  // a model serves the cameras naming its scene, plus every camera that names
-  // no scene at all when it is the "all" model
+  // a model serves the cameras naming its scene, and like the backend, the
+  // "all" model also serves every camera whose scene has no model of its own
   const cameraCountForScene = useCallback(
     (scene: string | undefined): number => {
       if (!cameras) {
         return 0;
       }
 
+      const modelScenes = new Set(models.map((model) => model.scene ?? "all"));
+
       return Object.values(cameras).filter((camera) => {
-        const cameraScene = camera?.detect?.scene;
-        return cameraScene ? cameraScene === scene : scene === "all";
+        const cameraScene = camera?.detect?.scene ?? "all";
+        const servedBy = modelScenes.has(cameraScene) ? cameraScene : "all";
+        return servedBy === (scene ?? "all");
       }).length;
     },
-    [cameras],
+    [cameras, models],
   );
 
   const claimedByOtherModels = useCallback(
@@ -314,7 +317,9 @@ export function ModelsField(props: FieldProps) {
         );
 
         return (
-          <Card key={`${baseId}-${index}`} className="w-full">
+          // keyed by scene, which is unique per model, so deleting a card
+          // doesn't hand its state (such as the model source tab) to the next
+          <Card key={`${baseId}-${model.scene ?? index}`} className="w-full">
             <Collapsible
               open={open}
               onOpenChange={(nextOpen) =>
