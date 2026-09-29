@@ -108,8 +108,6 @@
   },
   "lastRefreshed": "Última atualização: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} tem alta utilização da CPU FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} tem alta utilização da CPU de deteção ({{detectAvg}}%)",
     "healthy": "O sistema está saudável",
     "reindexingEmbeddings": "Reindexando incorporações ({{processed}}% completo)",
     "detectIsVerySlow": "{{detect}} está muito lento ({{speed}} ms)",
