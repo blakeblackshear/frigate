@@ -374,7 +374,6 @@
       "desc": "Frigate může nativně odesílat push notifikace do vašeho zařízení, pokud běží v prohlížeči nebo je nainstalován jako PWA (progresivní webová aplikace)."
     },
     "notificationUnavailable": {
-      "title": "Notifikace Nedostupné",
       "desc": "Webové push notifikace vyžadují zabezpečený kontext (<code>https://…</code>). Jedná se o omezení prohlížeče. Pro použití notifikací přistupujte k Frigate přes zabezpečené připojení."
     },
     "cameras": {
