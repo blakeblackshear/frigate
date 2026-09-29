@@ -310,7 +310,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 primary_end = primary_seg["end_time"]
                 primary_camera = primary_seg["camera"]
                 contextual_items = []
-                seen_contextual_cameras = set()
+                contextual_by_camera: dict[str, dict[str, Any]] = {}
 
                 for seg in segments:
                     seg_camera = seg["camera"]
@@ -325,17 +325,29 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     seg_end = seg["end_time"]
 
                     if seg_start < primary_end and primary_start < seg_end:
-                        # Avoid duplicates if same camera has multiple overlapping segments
-                        if seg_camera not in seen_contextual_cameras:
-                            contextual_item = copy.deepcopy(seg["metadata"])
-                            contextual_item["camera"] = seg_camera
-                            contextual_item["start_time"] = seg_start
-                            contextual_item["end_time"] = seg_end
+                        # Avoid duplicates if same camera has multiple overlapping
+                        # segments, but keep every segment's state changes
+                        existing_item = contextual_by_camera.get(seg_camera)
 
+                        if existing_item is not None:
                             if seg["state_changes"]:
-                                contextual_item["state_changes"] = seg["state_changes"]
-                            contextual_items.append(contextual_item)
-                            seen_contextual_cameras.add(seg_camera)
+                                existing_item.setdefault("state_changes", []).extend(
+                                    seg["state_changes"]
+                                )
+                            continue
+
+                        contextual_item = copy.deepcopy(seg["metadata"])
+                        contextual_item["camera"] = seg_camera
+                        contextual_item["start_time"] = seg_start
+                        contextual_item["end_time"] = seg_end
+
+                        if seg["state_changes"]:
+                            contextual_item["state_changes"] = list(
+                                seg["state_changes"]
+                            )
+
+                        contextual_items.append(contextual_item)
+                        contextual_by_camera[seg_camera] = contextual_item
 
                 # Add context array to primary item
                 primary_item["context"] = contextual_items

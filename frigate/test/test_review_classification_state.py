@@ -1,15 +1,18 @@
 """Tests for attaching state classification changes to review items."""
 
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
+from frigate.comms.embeddings_updater import EmbeddingsRequestEnum
 from frigate.config import FrigateConfig
 from frigate.data_processing.post.review_descriptions import (
+    ReviewDescriptionProcessor,
     format_classification_state_changes,
 )
 from frigate.data_processing.real_time.custom_classification import (
     CustomStateClassificationProcessor,
 )
+from frigate.models import ReviewSegment
 from frigate.review.maintainer import (
     CLASSIFICATION_STATE_PRE_ROLL,
     PendingReviewSegment,
@@ -70,6 +73,19 @@ class TestVerifyStateChange(unittest.TestCase):
         self.verify("open", 20.0)
         self.verify("open", 21.0)
         self.assertEqual(self.verify("open", 22.0), ("closed", 20.0))
+
+    def test_reload_forgets_states_the_model_no_longer_has(self):
+        for timestamp in (1.0, 2.0, 3.0):
+            self.verify("closed", timestamp)
+
+        self.processor.state_history["back_door"] = {"current_state": "open"}
+        self.processor.labelmap = {0: "open", 1: "shut"}
+        self.processor._forget_unknown_states()
+
+        self.assertEqual(list(self.processor.state_history), ["back_door"])
+        self.assertIsNone(self.verify("shut", 10.0))
+        self.assertIsNone(self.verify("shut", 11.0))
+        self.assertEqual(self.verify("shut", 12.0), (None, 10.0))
 
 
 class TestReviewSegmentAttachment(unittest.TestCase):
@@ -174,6 +190,68 @@ class TestChangeTiming(unittest.TestCase):
                 "front gate changed from open to closed, 12s into the activity",
                 "front gate changed from closed to open, after the activity ended",
             ],
+        )
+
+
+class TestSummaryContext(unittest.TestCase):
+    def row(self, camera, start, end, threat, changes=()):
+        return {
+            "camera": camera,
+            "start_time": start,
+            "end_time": end,
+            "data": {
+                "metadata": {"title": camera, "potential_threat_level": threat},
+                "classification_state_changes": list(changes),
+            },
+        }
+
+    def summarize(self, rows):
+        processor = ReviewDescriptionProcessor.__new__(ReviewDescriptionProcessor)
+        processor.config = FrigateConfig.parse_yaml(CONFIG)
+        processor.genai_manager = MagicMock()
+        client = processor.genai_manager.description_client
+
+        with patch.object(ReviewSegment, "select") as select:
+            query = select.return_value.where.return_value.order_by.return_value
+            query.dicts.return_value.iterator.return_value = iter(rows)
+            processor.handle_request(
+                EmbeddingsRequestEnum.summarize_review.value,
+                {"start_ts": 0, "end_ts": 100},
+            )
+
+        return client.generate_review_summary.call_args.args[2]
+
+    def test_overlapping_context_reviews_keep_all_state_changes(self):
+        events = self.summarize(
+            [
+                self.row("front_door", 10, 60, 1),
+                self.row("driveway", 15, 25, 0, [gate_change(20.0)]),
+                self.row("driveway", 30, 40, 0, [gate_change(35.0, "open", "closed")]),
+            ]
+        )
+
+        self.assertEqual(len(events[0]["context"]), 1)
+        self.assertEqual(
+            events[0]["context"][0]["state_changes"],
+            [
+                "front gate changed from closed to open",
+                "front gate changed from open to closed",
+            ],
+        )
+
+    def test_merging_context_does_not_leak_between_primary_events(self):
+        events = self.summarize(
+            [
+                self.row("front_door", 10, 60, 1),
+                self.row("back_door", 12, 22, 1),
+                self.row("driveway", 15, 25, 0, [gate_change(20.0)]),
+                self.row("driveway", 30, 40, 0, [gate_change(35.0, "open", "closed")]),
+            ]
+        )
+
+        self.assertEqual(
+            events[1]["context"][0]["state_changes"],
+            ["front gate changed from closed to open"],
         )
 
 

@@ -381,19 +381,19 @@ def build_frame_captions(
     if not frame_times:
         return []
 
+    span_end = frame_times[-1]
+    timeline: list[tuple[float, str]] = []
     events = get_tracked_events(detection_ids)
 
-    if not events:
-        logger.debug("No tracked events found for review item, skipping annotations")
-        return []
-
-    span_end = frame_times[-1]
-    timeline = [
-        (timestamp, f"[tracker] {note}")
-        for timestamp, note in build_timeline(
-            events, span_end, get_state_changes(detection_ids)
+    # audio and manual review items can have state changes but no tracked objects
+    if events:
+        timeline.extend(
+            (timestamp, f"[tracker] {note}")
+            for timestamp, note in build_timeline(
+                events, span_end, get_state_changes(detection_ids)
+            )
         )
-    ]
+
     timeline.extend(
         (change["timestamp"], f"[state] {describe_classification_change(change)}")
         for change in classification_changes

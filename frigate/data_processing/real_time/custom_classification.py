@@ -91,7 +91,22 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
         self.labelmap = load_labels(labelmap_path, prefill=0, indexed=False)
+        self._forget_unknown_states()
         self.classifications_per_second.start()
+
+    def _forget_unknown_states(self) -> None:
+        """Drop verified states that are not labels of the loaded model.
+
+        A retrained model can rename or remove labels. Keeping a state it can
+        no longer produce would report its first verified state as a change
+        from that obsolete label.
+        """
+        labels = set(self.labelmap.values())
+        self.state_history = {
+            camera: history
+            for camera, history in self.state_history.items()
+            if history["current_state"] in labels
+        }
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()

@@ -357,6 +357,25 @@ class TestClassificationChangeCaptions(unittest.TestCase):
         )
         self.assertTrue(captions[0].splitlines()[1].startswith("[tracker] "))
 
+    def test_change_is_noted_without_tracked_objects(self):
+        with patch(
+            "frigate.data_processing.post.review_annotations.get_tracked_events",
+            return_value=[],
+        ):
+            captions = build_frame_captions(
+                [],
+                [0.0, 10.0],
+                [{"model": "gate", "from": "a", "to": "b", "timestamp": 5.0}],
+            )
+
+        self.assertEqual(
+            captions,
+            [
+                "Frame 1 of 2 (+0.0s):",
+                "Frame 2 of 2 (+10.0s):\n[state] gate changed from a to b",
+            ],
+        )
+
     def test_change_after_the_last_frame_is_dropped(self):
         captions = build_frame_captions(
             ["1789481994.684479-lpyc2z"],
