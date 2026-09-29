@@ -227,8 +227,6 @@
   },
   "lastRefreshed": "最後更新： ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率較高 ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} 的偵測 CPU 使用率較高 ({{detectAvg}}%)",
     "healthy": "系統運作正常",
     "reindexingEmbeddings": "正在重新替嵌入資料建立索引（已完成 {{processed}}%）",
     "cameraIsOffline": "{{camera}} 已離線",
