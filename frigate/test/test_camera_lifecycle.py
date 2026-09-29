@@ -179,12 +179,16 @@ class TestReviewMaintainerRemoval(unittest.TestCase):
         maintainer = ReviewSegmentMaintainer.__new__(ReviewSegmentMaintainer)
         maintainer.active_review_segments = {"deleted_cam": MagicMock()}
         maintainer.indefinite_events = {"deleted_cam": {"1234.5-abcdef": 1.0}}
+        maintainer.recent_classification_state_changes = {
+            "deleted_cam": [{"model": "gate", "from": "a", "to": "b", "timestamp": 1.0}]
+        }
         maintainer.forcibly_end_segment = MagicMock()
 
         maintainer._handle_camera_removed("deleted_cam")
 
         maintainer.forcibly_end_segment.assert_called_once_with("deleted_cam")
         self.assertNotIn("deleted_cam", maintainer.indefinite_events)
+        self.assertNotIn("deleted_cam", maintainer.recent_classification_state_changes)
 
 
 class TestAutotrackerMoveQueue(unittest.TestCase):

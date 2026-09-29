@@ -104,6 +104,21 @@ def build_review_description_prompt(
         else:
             return "\n- (No objects detected)"
 
+    def get_state_changes_section() -> str:
+        # empty when nothing changed so the prompt is otherwise unaffected
+        changes = review_data.get("classification_state_changes")
+
+        if not changes:
+            return ""
+
+        return (
+            "\n\n## State Changes\n\n"
+            "The camera's state classifiers watch fixed areas of the scene and "
+            "reported these changes. They come from the classifiers rather than "
+            "from the images, and they are reliable. Describe each one where it "
+            "fits in the sequence of events.\n- " + "\n- ".join(changes)
+        )
+
     fields = get_review_field_guidelines(response_style)
     frame_guidance = f"\n{FRAME_ANNOTATION_GUIDANCE}" if frame_captions else ""
 
@@ -145,7 +160,7 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 - Camera: {review_data["camera"]}
 - Total frames: {len(thumbnails)} (Frame 1 = earliest, Frame {len(thumbnails)} = latest){frame_guidance}
 - Activity started at {review_data["start"]} and lasted {review_data["duration"]} seconds
-- Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}
+- Zones involved: {", ".join(review_data["zones"]) if review_data["zones"] else "None"}{get_state_changes_section()}
 
 ## Objects in Scene
 
@@ -196,6 +211,17 @@ def build_review_summary_prompt(
         f" to "
         f"{datetime.datetime.fromtimestamp(end_ts).strftime('%B %d, %Y at %I:%M %p')}"
     )
+    has_state_changes = any(
+        "state_changes" in item
+        for event in events
+        for item in [event, *event.get("context", [])]
+    )
+    state_changes_format = (
+        '\n- "state_changes" (only on some events): changes to monitored areas '
+        "reported by the camera's state classifiers, which are reliable"
+        if has_state_changes
+        else ""
+    )
     prompt = f"""
 You are a security officer writing a concise security report.
 
@@ -203,7 +229,7 @@ Time range: {time_range}
 
 Input format: Each event is a JSON object with:
 - "title", "scene", "confidence", "potential_threat_level" (0-2), "other_concerns", "camera", "time", "start_time", "end_time"
-- "context": array of related events from other cameras that occurred during overlapping time periods
+- "context": array of related events from other cameras that occurred during overlapping time periods{state_changes_format}
 
 **Note: Use the "scene" field for event descriptions in the report. Ignore any "shortSummary" field if present.**
 

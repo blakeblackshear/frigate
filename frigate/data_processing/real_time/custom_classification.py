@@ -134,15 +134,20 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         # Don't save if state is stable (detected_state == current_state) AND score is 100%
         return False
 
-    def verify_state_change(self, camera: str, detected_state: str) -> str | None:
+    def verify_state_change(
+        self, camera: str, detected_state: str, timestamp: float
+    ) -> tuple[str | None, float] | None:
         """
         Verify state change requires 3 consecutive identical states before publishing.
-        Returns state to publish or None if verification not complete.
+        Returns (previous state, time the new state was first seen) once verified,
+        or None if verification not complete. The previous state is None for the
+        first state verified on a camera.
         """
         if camera not in self.state_history:
             self.state_history[camera] = {
                 "current_state": None,
                 "pending_state": None,
+                "pending_since": 0.0,
                 "consecutive_count": 0,
             }
 
@@ -157,12 +162,14 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             verification["consecutive_count"] += 1
 
             if verification["consecutive_count"] >= 3:
+                previous_state = verification["current_state"]
                 verification["current_state"] = detected_state
                 verification["pending_state"] = None
                 verification["consecutive_count"] = 0
-                return detected_state
+                return previous_state, verification["pending_since"]
         else:
             verification["pending_state"] = detected_state
+            verification["pending_since"] = timestamp
             verification["consecutive_count"] = 1
             logger.debug(
                 f"New state '{detected_state}' detected for {camera}, need {3 - verification['consecutive_count']} more consecutive detections"
@@ -340,16 +347,19 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             )
             return
 
-        verified_state = self.verify_state_change(camera, detected_state)
+        verified = self.verify_state_change(camera, detected_state, timestamp)
 
-        if verified_state is not None:
+        if verified is not None:
+            previous_state, changed_at = verified
             self._emit_result(
                 {
                     "type": "classification",
                     "processor": "state",
                     "model_name": self.model_config.name,
                     "camera": camera,
-                    "state": verified_state,
+                    "state": detected_state,
+                    "previous_state": previous_state,
+                    "timestamp": changed_at,
                 }
             )
 

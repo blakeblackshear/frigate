@@ -7,6 +7,7 @@ from frigate.genai.prompts import (
     REVIEW_DESCRIPTION_FIELD_GUIDELINES,
     REVIEW_RESPONSE_STYLES,
     build_review_description_prompt,
+    build_review_summary_prompt,
     get_review_field_guidelines,
 )
 
@@ -81,6 +82,50 @@ class TestReviewResponseStyle(unittest.TestCase):
             REVIEW_RESPONSE_STYLES["natural"]["shortSummary"],
             prompt,
         )
+
+
+class TestClassificationStateChanges(unittest.TestCase):
+    def _build_prompt(self, **extra) -> str:
+        review_data = {
+            "camera": "Front Door",
+            "start": "Monday, 09:30 AM",
+            "duration": 25,
+            "zones": [],
+            "unified_objects": ["person"],
+            **extra,
+        }
+        return build_review_description_prompt(
+            review_data, [b"fake-image"], [], None, "activity context"
+        )
+
+    def test_no_changes_leaves_prompt_unchanged(self):
+        self.assertEqual(
+            self._build_prompt(classification_state_changes=[]),
+            self._build_prompt(),
+        )
+        self.assertNotIn("## State Changes", self._build_prompt())
+
+    def test_changes_are_listed_before_objects(self):
+        change = "front gate changed from closed to open, 12s into the activity"
+        prompt = self._build_prompt(classification_state_changes=[change])
+        self.assertIn(f"\n- {change}\n\n## Objects in Scene", prompt)
+        self.assertLess(
+            prompt.index("## Sequence Details"), prompt.index("## State Changes")
+        )
+
+    def test_summary_describes_state_changes_only_when_present(self):
+        event = {"title": "Person at door", "camera": "Front Door", "context": []}
+        without = build_review_summary_prompt(0, 3600, [event], None)
+        self.assertNotIn('"state_changes"', without)
+
+        context_event = {
+            **event,
+            "context": [
+                {"camera": "Driveway", "state_changes": ["gate changed from a to b"]}
+            ],
+        }
+        with_changes = build_review_summary_prompt(0, 3600, [context_event], None)
+        self.assertIn('- "state_changes"', with_changes)
 
 
 if __name__ == "__main__":

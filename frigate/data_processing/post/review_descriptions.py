@@ -40,7 +40,7 @@ from frigate.util.image import get_image_from_recording
 
 from ..post.api import PostProcessorApi
 from ..types import DataProcessorMetrics
-from .review_annotations import build_frame_captions
+from .review_annotations import build_frame_captions, describe_classification_change
 
 logger = logging.getLogger(__name__)
 
@@ -254,6 +254,10 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                     "start_time": r["start_time"],
                     "end_time": r["end_time"],
                     "metadata": r["data"]["metadata"],
+                    "state_changes": [
+                        describe_classification_change(change)
+                        for change in sorted_classification_state_changes(r["data"])
+                    ],
                 }
                 for r in (
                     ReviewSegment.select(
@@ -298,6 +302,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 primary_item["start_time"] = primary_seg["start_time"]
                 primary_item["end_time"] = primary_seg["end_time"]
 
+                if primary_seg["state_changes"]:
+                    primary_item["state_changes"] = primary_seg["state_changes"]
+
                 # Find overlapping contextual items from other cameras
                 primary_start = primary_seg["start_time"]
                 primary_end = primary_seg["end_time"]
@@ -324,6 +331,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                             contextual_item["camera"] = seg_camera
                             contextual_item["start_time"] = seg_start
                             contextual_item["end_time"] = seg_end
+
+                            if seg["state_changes"]:
+                                contextual_item["state_changes"] = seg["state_changes"]
                             contextual_items.append(contextual_item)
                             seen_contextual_cameras.add(seg_camera)
 
@@ -439,6 +449,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             captions = build_frame_captions(
                 final_data["data"].get("detections") or [],
                 [timestamp for _, timestamp in frames],
+                sorted_classification_state_changes(final_data["data"]),
             )
 
             if not captions:
@@ -688,6 +699,39 @@ def get_recording_buffer_extension(duration: float) -> float:
     return buffer_extension
 
 
+def sorted_classification_state_changes(
+    review_data: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """A review item's state classification changes in time order."""
+    return sorted(
+        review_data.get("classification_state_changes") or [],
+        key=lambda change: change["timestamp"],
+    )
+
+
+def format_classification_state_changes(
+    changes: list[dict[str, Any]], start_time: float, end_time: float
+) -> list[str]:
+    """Phrase state classification changes with their timing in the activity.
+
+    Changes are attached while the review item is active, which runs past its
+    end_time by the review cutoff, and a few seconds before its start.
+    """
+    lines = []
+
+    for change in changes:
+        if change["timestamp"] < start_time:
+            when = "just before the activity started"
+        elif change["timestamp"] > end_time:
+            when = "after the activity ended"
+        else:
+            when = f"{round(change['timestamp'] - start_time)}s into the activity"
+
+        lines.append(f"{describe_classification_change(change)}, {when}")
+
+    return lines
+
+
 def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
@@ -743,6 +787,13 @@ def run_analysis(
                 unified_objects.append(object_type)
 
     analytics_data["unified_objects"] = unified_objects
+    analytics_data["classification_state_changes"] = (
+        format_classification_state_changes(
+            sorted_classification_state_changes(final_data["data"]),
+            final_data["start_time"],
+            final_data["end_time"],
+        )
+    )
 
     metadata = genai_client.generate_review_description(
         analytics_data,
