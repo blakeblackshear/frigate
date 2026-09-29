@@ -134,6 +134,15 @@ telemetry:
   version_check: false
 ```
 
+### Anonymous Analytics
+
+If [anonymous analytics](/configuration/advanced/analytics) sharing is turned on, Frigate sends one report a day to `https://analytics.frigate.video`. It's off by default, so no outbound connection happens unless you enable it:
+
+```yaml
+telemetry:
+  analytics: true
+```
+
 ### Push Notifications
 
 When [notifications](/configuration/notifications) are enabled and users have registered for push notifications in the web UI, Frigate sends push messages through the browser vendor's push service (e.g., Google FCM, Mozilla autopush). This requires internet access from the Frigate server to these push endpoints.
@@ -170,7 +179,7 @@ To run Frigate in an air-gapped or offline environment:
 2. **Pre-download the training base weights**: If you plan to train custom classification models, set `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` before training, then run one training job while online. Without this variable the base weights are cached outside `/config/` and are lost whenever the container is recreated, so a later training run will fail offline. If the machine never has internet access, copy the weights in manually as described below.
 3. **Disable version check**: Set `telemetry.version_check: false` in your configuration.
 4. **Block outbound model requests**: Set the `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` environment variables to prevent HuggingFace and Transformers from attempting any network requests.
-5. **Avoid cloud features**: Do not configure Frigate+, Generative AI providers that require internet, or cloud MQTT brokers.
+5. **Avoid cloud features**: Do not configure Frigate+, Generative AI providers that require internet, or cloud MQTT brokers, and leave anonymous analytics off (its default).
 6. **Use local model mirrors**: If limited internet is available, set the `HF_ENDPOINT`, `GITHUB_ENDPOINT`, `GITHUB_RAW_ENDPOINT`, and `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` environment variables to point to local mirrors.
 
 After these steps, Frigate will operate with no outbound internet connections.

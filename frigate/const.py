@@ -101,6 +101,9 @@ MAX_WAL_SIZE = 10  # MB
 
 DEFAULT_FFMPEG_VERSION = os.environ.get("DEFAULT_FFMPEG_VERSION", "")
 INCLUDED_FFMPEG_VERSIONS = os.environ.get("INCLUDED_FFMPEG_VERSIONS", "").split(":")
+ANALYTICS_URL = os.environ.get(
+    "FRIGATE_ANALYTICS_URL", "https://analytics.frigate.video/report"
+)
 LIBAVFORMAT_VERSION_MAJOR = int(os.environ.get("LIBAVFORMAT_VERSION_MAJOR", "59"))
 FFMPEG_HWACCEL_NVIDIA = "preset-nvidia"
 FFMPEG_HWACCEL_VAAPI = "preset-vaapi"

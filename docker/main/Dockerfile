@@ -381,6 +381,7 @@ FROM deps AS frigate
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+ENV FRIGATE_IMAGE_VARIANT=standard
 
 # Pre-compile bytecode so a read-only rootfs doesn't force re-parsing the
 # source tree on every boot (pip-installed packages are already compiled)

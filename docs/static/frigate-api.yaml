@@ -10,6 +10,25 @@ servers:
   - url: https://demo.frigate.video/api
   - url: http://localhost:5001/api
 paths:
+  /analytics/preview:
+    get:
+      tags:
+        - Analytics
+      summary: Get Analytics Preview
+      description: |-
+        **Access:** Admin role required.
+
+        Get the analytics report Frigate would send next, without sending it.
+      operationId: get_analytics_preview_analytics_preview_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /auth/first_time_login:
     get:
       tags:

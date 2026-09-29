@@ -1,4 +1,9 @@
 {
+  "analyticsPreview": {
+    "show": "Preview the report",
+    "desc": "Frigate sends this report once a day while sharing is on. It never includes camera names, zones, labels, or addresses.",
+    "error": "Unable to build the preview"
+  },
   "documentTitle": {
     "default": "Settings - Frigate",
     "authentication": "Authentication Settings - Frigate",

@@ -17,6 +17,11 @@ from frigate.util.builtin import deep_merge
 
 
 class TestConfig(unittest.TestCase):
+    def test_analytics_is_off_by_default(self):
+        frigate_config = FrigateConfig(**self.minimal)
+
+        self.assertFalse(frigate_config.telemetry.analytics)
+
     def setUp(self):
         self.minimal = {
             "mqtt": {"host": "mqtt"},
