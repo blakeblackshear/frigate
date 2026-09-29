@@ -189,8 +189,6 @@
   },
   "lastRefreshed": "Voor het laatst vernieuwd: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} zorgt voor hoge FFmpeg CPU belasting ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} zorgt voor hoge detectie CPU belasting ({{detectAvg}}%)",
     "healthy": "Geen problemen",
     "reindexingEmbeddings": "Herindexering van inbeddingen ({{processed}}% compleet)",
     "detectIsSlow": "{{detect}} is traag ({{speed}} ms)",

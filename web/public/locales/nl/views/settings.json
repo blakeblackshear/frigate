@@ -574,7 +574,6 @@
       "desc": "Frigate kan rechtstreeks pushmeldingen naar uw apparaat verzenden als het in de browser actief is of als een PWA geïnstalleerd is."
     },
     "notificationUnavailable": {
-      "title": "Meldingen niet beschikbaar",
       "desc": "Webpushmeldingen vereisen een veilige omgeving (<code>https://…</code>). Dit is een beperking van de browser. Open Frigate via een beveiligde verbinding om meldingen te kunnen ontvangen."
     },
     "globalSettings": {
@@ -838,7 +837,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Semantisch zoeken is uitgeschakeld",
       "desc": "Semantisch zoeken moet ingeschakeld zijn om triggers te kunnen gebruiken."
     },
     "wizard": {

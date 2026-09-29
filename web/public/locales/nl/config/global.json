@@ -15,7 +15,7 @@
         },
         "listen": {
             "label": "Luistercategorieën",
-            "description": "Lijst van luistercategorie gebeurtenissen voor detectie (zoals: blaffen, band_alarm, praten, schreeuwen)."
+            "description": "Lijst met categorieën van geluidsgebeurtenissen die moeten worden gedetecteerd (zoals blaffen, band_alarm, praten en schreeuwen)."
         },
         "filters": {
             "label": "Geluidsfilters",
@@ -26,14 +26,18 @@
             }
         },
         "enabled_in_config": {
-            "label": "Originele audio-instelling",
+            "label": "Oorspronkelijke audiostatus",
             "description": "Geeft aan of audiodetectie oorspronkelijk was geactiveerd in het statische configuratiebestand."
         },
         "num_threads": {
             "label": "Detectiethreads",
             "description": "Aantal threads voor audiodetectieverwerking."
         },
-        "description": "Instellingen voor audiogebaseerde gebeurtenisdetectie voor alle camera's; kan per camera worden overschreven."
+        "description": "Instellingen voor audiogebaseerde gebeurtenisdetectie voor alle camera's; kan per camera worden overschreven.",
+        "labelmap": {
+            "label": "Aanpassing van audiolabels",
+            "description": "Overschrijvingen of hertoewijzingen die aan de standaard audiolabelset worden toegevoegd."
+        }
     },
     "audio_transcription": {
         "label": "Audiotranscriptie",
@@ -105,6 +109,10 @@
         "idle_heartbeat_fps": {
             "label": "Inactief heartbeat-FPS",
             "description": "Frames per seconde voor het opnieuw verzenden van het laatste Birdseye-frame tijdens inactiviteit; stel 0 in om uit te schakelen."
+        },
+        "modes": {
+            "label": "Activiteitstypen",
+            "description": "Activiteitstypen waarbij camera’s in Birdseye worden weergegeven."
         }
     },
     "detect": {
@@ -128,7 +136,7 @@
         },
         "min_initialized": {
             "label": "Minimale initialisatieframes",
-            "description": "Aantal opeenvolgende detectieresultaten dat vereist is voordat een gevolgd object wordt aangemaakt. Verhoog deze waarde om valse initialisaties te verminderen. De standaardwaarde is FPS gedeeld door 2."
+            "description": "Aantal opeenvolgende detectieresultaten dat vereist is voordat een gevolgd object wordt aangemaakt. Verhoog deze waarde om valse initialisaties te verminderen. De standaardwaarde is fps gedeeld door 2."
         },
         "max_disappeared": {
             "label": "Maximaal aantal verdwenen frames",
@@ -165,6 +173,10 @@
         "annotation_offset": {
             "label": "Annotatie-offset",
             "description": "Milliseconden om detectieannotaties te verschuiven voor betere uitlijning van tijdlijn-detectiekaders met opnames; kan positief of negatief zijn."
+        },
+        "scene": {
+            "label": "Scène detecteren",
+            "description": "De omgeving waarop deze camera is gericht. Hiermee wordt bepaald welk van de geconfigureerde modellen op deze camera wordt uitgevoerd. Voor camera's die op 'alles' staan, wordt het model gebruikt waarvoor de scène op 'alles' is ingesteld."
         }
     },
     "version": {
@@ -512,6 +524,10 @@
             "record": {
                 "label": "Uitvoerargumenten voor opname",
                 "description": "Standaard uitvoerargumenten voor streams met opnamerol."
+            },
+            "record_sub": {
+                "label": "Uitvoerargumenten voor opname van de substream",
+                "description": "Uitvoerargumenten voor streams met de rol record_sub. Als dit niet is ingesteld, worden de uitvoerargumenten voor opname gebruikt."
             }
         },
         "retry_interval": {
@@ -821,6 +837,54 @@
         "enabled_in_config": {
             "label": "Originele opnamestatus",
             "description": "Geeft aan of opname was ingeschakeld in de originele statische configuratie."
+        },
+        "sub": {
+            "label": "Substream opname",
+            "description": "Instellingen voor het opnemen van een tweede stream met lagere kwaliteit.",
+            "enabled": {
+                "label": "Substream opname inschakelen",
+                "description": "Het opnemen van een tweede stream met lagere kwaliteit inschakelen voor adaptieve afspeelkwaliteit en langere bewaartermijn."
+            },
+            "continuous": {
+                "label": "Bewaartermijn voor continue substream opnames",
+                "description": "Aantal dagen dat substream opnames worden bewaard, ongeacht gedetecteerde objecten of beweging.",
+                "days": {
+                    "label": "Bewaartermijn in dagen",
+                    "description": "Aantal dagen dat opnames worden bewaard."
+                }
+            },
+            "motion": {
+                "label": "Bewaartermijn voor substream opnames met beweging",
+                "description": "Aantal dagen dat substream opnames met gedetecteerde beweging worden bewaard.",
+                "days": {
+                    "label": "Bewaartermijn in dagen",
+                    "description": "Dagen om opnames te bewaren."
+                }
+            },
+            "alerts": {
+                "label": "Bewaartermijn voor substream opnames met waarschuwingen",
+                "description": "Bewaarinstellingen voor substream opnames met waarschuwingen.",
+                "days": {
+                    "label": "Bewaardagen",
+                    "description": "Aantal dagen om opnames van detectiegebeurtenissen te bewaren."
+                },
+                "mode": {
+                    "label": "Bewaarmodus",
+                    "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+                }
+            },
+            "detections": {
+                "label": "Bewaartermijn voor substream opnames met detecties",
+                "description": "Bewaarinstellingen voor substream opnames met detecties.",
+                "days": {
+                    "label": "Bewaardagen",
+                    "description": "Aantal dagen om opnames van detectiegebeurtenissen te bewaren."
+                },
+                "mode": {
+                    "label": "Bewaarmodus",
+                    "description": "Bewaarmodus: all (alle segmenten), motion (segmenten met beweging) of active_objects (segmenten met actieve objecten)."
+                }
+            }
         }
     },
     "review": {
@@ -912,6 +976,14 @@
             "activity_context_prompt": {
                 "label": "Activiteitscontextprompt",
                 "description": "Aangepaste prompt die beschrijft wat wel en niet verdachte activiteit is, als context voor GenAI-samenvattingen."
+            },
+            "frame_mode": {
+                "label": "Framemodus",
+                "description": "Hoe frames aan het model worden aangeboden. 'frames' stuurt eerst de prompt en daarna de frames en is geschikt voor modellen die een reeks zelfstandig goed kunnen volgen. 'annotated_frames' voorziet elk frame van een label en voegt tussendoor notities uit objecttracking toe. Dit helpt modellen die moeite hebben om herhaalde of omgekeerde bewegingen goed te volgen."
+            },
+            "response_style": {
+                "label": "Antwoordstijl",
+                "description": "Voorinstelling voor de schrijfstijl van gegenereerde beoordelingsbeschrijvingen. Deze bepaalt de toon en het detailniveau van de titel, samenvatting en scènebeschrijving voor de gebruiker. Met default blijft de standaardprompt ongewijzigd."
             }
         }
     },
