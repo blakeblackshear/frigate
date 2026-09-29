@@ -1,8 +1,6 @@
 {
   "lastRefreshed": "רענון אחרון: ",
   "stats": {
-    "ffmpegHighCpuUsage": "ל-{{camera}} יש צריכת מעבד גבוהה של FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "ל-{{camera}} יש צריכת CPU גבוהה ({{detectAvg}}%)",
     "healthy": "המערכת פועלת בצורה תקינה",
     "reindexingEmbeddings": "אינדקס מחדש של ההטמעות ({{processed}}% הושלם)",
     "cameraIsOffline": "{{camera}} לא זמינה",
