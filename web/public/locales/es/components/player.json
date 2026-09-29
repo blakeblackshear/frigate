@@ -35,10 +35,25 @@
       "submittedFrigatePlus": "Fotograma enviado correctamente a Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Error al enviar el fotograma a Frigate+"
+      "submitFrigatePlusFailed": "Error al enviar el fotograma a Frigate+",
+      "playRecordingsFailed": "Falló al reproducir grabaciones(error{{code}}:{{message}})"
     }
   },
   "livePlayerRequiredIOSVersion": "Se requiere iOS 17.1 o superior para este tipo de transmisión en vivo.",
   "noRecordingsFoundForThisTime": "No se encontraron grabaciones para este momento",
-  "cameraOff": "La cámara está apagada"
+  "cameraOff": "La cámara está apagada",
+  "quality": {
+    "auto": "Auto",
+    "autoLow": "Reproduciendo con baja calidad (ancho de banda limitado)",
+    "autoLowCodec": "Reproduciendo con baja calidad (Este navegador no soporta la calidad original)",
+    "autoLowSaveData": "Reproduciendo con baja calidad (ahorro de datos)",
+    "main": "Original",
+    "sub": "Baja",
+    "notSupportedBrowser": "No soportado por este navegador",
+    "label": "Calidad",
+    "noAudio": "Sin audio",
+    "audioRate": "{{rate}}kHz audio",
+    "audioCodecRate": "{{codec}}{{rate}}kHz",
+    "noRecordings": "Sin grabaciones en este rango de tiempo"
+  }
 }
