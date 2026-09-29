@@ -226,8 +226,6 @@
     }
   },
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} استفادهٔ CPU بالایی برای FFmpeg دارد ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} استفادهٔ CPU بالایی برای تشخیص دارد ({{detectAvg}}%)",
     "reindexingEmbeddings": "بازتولید نمایهٔ embeddingها ({{processed}}% تکمیل شده)",
     "cameraIsOffline": "{{camera}} آفلاین است",
     "detectIsVerySlow": "{{detect}} بسیار کند است ({{speed}} ms)",
