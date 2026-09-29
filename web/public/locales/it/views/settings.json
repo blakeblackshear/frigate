@@ -661,7 +661,6 @@
     "registerDevice": "Registra questo dispositivo",
     "notificationUnavailable": {
       "desc": "Le notifiche push web richiedono un contesto sicuro (<code>https://...</code>). Questa è una limitazione del browser. Accedi a Frigate in modo sicuro per utilizzare le notifiche.",
-      "title": "Notifiche non disponibili",
       "descPwa": "Su iOS, le notifiche push web sono disponibili solo se Frigate è installato sulla schermata Home. Apri il menu <strong>Condividi</strong>, scegli <strong>Aggiungi alla schermata Home</strong>, quindi apri Frigate dalla nuova icona per registrare questo dispositivo per le notifiche."
     },
     "deviceSpecific": "Impostazioni specifiche del dispositivo",
@@ -842,7 +841,6 @@
       }
     },
     "semanticSearch": {
-      "title": "La ricerca semantica è disabilitata",
       "desc": "Per utilizzare gli attivatori, è necessario abilitare la ricerca semantica."
     },
     "wizard": {
