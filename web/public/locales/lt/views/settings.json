@@ -605,7 +605,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Semantic Paieška išjungta",
       "desc": "Norint naudoti Trigerius Semantic Paieška privalo būti įjungta."
     }
   },
@@ -616,7 +615,6 @@
       "desc": "Frigate praneįimai sukurti veikti su push pranešimais į įrenginį kai naršoma per naršyklę arba įdiegta kaip PWA."
     },
     "notificationUnavailable": {
-      "title": "Pranešimai Negalimi",
       "desc": "Web push pranešimai reikalauja saugios aplinkos (<code>https://...</code>). Tai yra naršyklės apribojimai. Atsidarykit Frigate saugiu kanalu kad galėtumėte naudotis pranešimais."
     },
     "globalSettings": {
