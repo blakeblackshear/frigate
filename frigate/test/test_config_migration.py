@@ -20,7 +20,7 @@ class TestMigrateModels(unittest.TestCase):
     def test_single_cpu_detector(self):
         migrated = migrate_models({"detectors": {"cpu": {"type": "cpu"}}})
 
-        self.assertEqual(migrated["models"], [{"scene": "all", "devices": ["cpu"]}])
+        self.assertEqual(migrated["models"], [{"scene": "default", "devices": ["cpu"]}])
         self.assertNotIn("detectors", migrated)
 
     def test_model_settings_are_carried_over(self):
@@ -35,7 +35,7 @@ class TestMigrateModels(unittest.TestCase):
             migrated["models"],
             [
                 {
-                    "scene": "all",
+                    "scene": "default",
                     "path": "plus://abc",
                     "width": 320,
                     "devices": ["edgetpu:pci:0"],
@@ -262,7 +262,7 @@ class TestMigrateConfigFile(unittest.TestCase):
             "mqtt:\n"
             "  enabled: false\n"
             "models:\n"
-            "  - scene: all\n"
+            "  - scene: default\n"
             "    devices:\n"
             "      - openvino:GPU\n"
             "cameras: {}\n"
@@ -270,7 +270,7 @@ class TestMigrateConfigFile(unittest.TestCase):
         )
 
         self.assertEqual(
-            migrated["models"], [{"scene": "all", "devices": ["openvino:GPU"]}]
+            migrated["models"], [{"scene": "default", "devices": ["openvino:GPU"]}]
         )
         self.assertFalse(
             os.path.exists(os.path.join(self.temp_dir.name, "backup_config.yaml"))
@@ -298,7 +298,7 @@ class TestMigrateConfigFile(unittest.TestCase):
             "mqtt:\n"
             "  enabled: false\n"
             "models:\n"
-            "  - scene: all\n"
+            "  - scene: default\n"
             "    devices:\n"
             "      - hailo8l:PCIe\n"
             "cameras: {}\n"

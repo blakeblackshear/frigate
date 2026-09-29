@@ -10,6 +10,7 @@ import type { FrigateConfig } from "@/types/frigateConfig";
 import type { HealthProblem } from "@/types/health";
 import { getSectionConfig } from "@/utils/configUtil";
 import { activeCameras } from "@/utils/health";
+import { getSceneLabel } from "@/utils/modelUtil";
 import { resolveMessageKey } from "@/utils/runtimeOverrides";
 
 function healthMessages(
@@ -119,10 +120,7 @@ export function evaluateConfigHealth(
         section === "models" && Array.isArray(sectionData)
           ? sectionData.map((model, index) => ({
               formData: model as ConfigSectionData,
-              scope: t(
-                `detectionModels.scenes.${(model as { scene?: string }).scene || "all"}`,
-                { ns: "views/settings" },
-              ),
+              scope: getSceneLabel(t, (model as { scene?: string }).scene),
               idSuffix: `model${index}`,
             }))
           : [

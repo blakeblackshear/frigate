@@ -15,7 +15,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateSubscriber,
 )
 from frigate.const import REPLAY_CAMERA_PREFIX
-from frigate.detectors.detector_config import SceneEnum
 from frigate.models import Regions
 from frigate.object_detection.util import detection_frame_size
 from frigate.util.builtin import empty_and_close_queue
@@ -31,7 +30,7 @@ class CameraMaintainer(threading.Thread):
     def __init__(
         self,
         config: FrigateConfig,
-        detection_queues: dict[SceneEnum, Queue],
+        detection_queues: dict[str, Queue],
         detected_frames_queue: Queue,
         camera_metrics: DictProxy,
         ptz_metrics: dict[str, PTZMetrics],

@@ -1,10 +1,30 @@
+import type { TFunction } from "i18next";
 import { DetectionModelConfig, FrigateConfig } from "@/types/frigateConfig";
+
+/** The scene of the model used by cameras that don't name one. */
+export const DEFAULT_SCENE = "default";
+
+/** Display name for a scene; custom scenes are shown as the user named them. */
+export function getSceneLabel(t: TFunction, scene: string | undefined): string {
+  if (!scene || scene === DEFAULT_SCENE) {
+    return t("detectionModels.scenes.default", { ns: "views/settings" });
+  }
+
+  return scene;
+}
+
+/** The distinct scenes of the configured models, default first. */
+export function getModelScenes(config?: FrigateConfig): string[] {
+  const scenes = new Set<string>([DEFAULT_SCENE]);
+  config?.models?.forEach((model) => scenes.add(model.scene || DEFAULT_SCENE));
+  return [...scenes];
+}
 
 /**
  * The model a camera runs on, matched by the camera's detect scene.
  *
- * Falls back to the model for every scene, then to the only configured model,
- * which is what the backend does when a camera does not name a scene.
+ * Falls back to the default model, then to the only configured model, which
+ * is what the backend does when a camera does not name a scene.
  */
 export function getModelForCamera(
   config?: FrigateConfig,
@@ -26,7 +46,7 @@ export function getModelForCamera(
     }
   }
 
-  return models.find((model) => model.scene == "all") ?? models[0];
+  return models.find((model) => model.scene == DEFAULT_SCENE) ?? models[0];
 }
 
 /** The model used when the question is not about a specific camera. */

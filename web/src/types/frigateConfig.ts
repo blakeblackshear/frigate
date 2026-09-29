@@ -490,6 +490,7 @@ export interface FrigateConfig {
     height: number | null;
     max_disappeared: number | null;
     min_initialized: number | null;
+    scene: string;
     stationary: {
       interval: number | null;
       max_frames: {

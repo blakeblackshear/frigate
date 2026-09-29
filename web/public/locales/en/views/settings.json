@@ -1986,7 +1986,7 @@
       "fpsGreaterThanFive": "Setting the detect FPS higher than 5 is not recommended. Higher values may cause performance issues and will not provide any benefit.",
       "disabled": "Object detection is disabled. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function.",
       "runtimeDisabled": "Object detection is enabled in your config, but it is currently turned off for this camera. Snapshots, review items, and enrichments such as face recognition, license plate recognition, and Generative AI will not function until it is turned back on from the camera's live view, or until the active profile stops disabling it.",
-      "sceneWithoutModel": "No detection model is configured for this scene, so this camera falls back to the model with a scene of 'All cameras'. Add a model for this scene to give the camera its own.",
+      "sceneWithoutModel": "No detection model is configured for this scene, so this camera falls back to the Default model. Add a model for this scene to give the camera its own.",
       "resolutionShouldBeMultipleOfFour": "For best results, detect width and height should be multiples of 4. Other even values may produce visual artifacts or slight distortion in the detect stream.",
       "aspectRatioMismatch": "The width and height you've entered don't match the aspect ratio of your current detect resolution. This may produce a stretched or distorted image.",
       "maxFramesSet": "Setting max frames overrides default behavior and disables stationary object tracking. There are very few situations where this is needed, use with caution.",
@@ -2036,20 +2036,17 @@
   },
   "detectionModels": {
     "title": "Detection models",
-    "description": "Configure the object detection models and the hardware each one runs on. Cameras choose a model by their scene in the camera's detect settings.",
+    "description": "Configure the object detection models and the hardware each one runs on. Add a model for a scene only when some cameras need a differently trained model, such as thermal cameras. Cameras choose a model by their scene in the camera's detect settings.",
     "addModel": "Add model",
     "cameras_one": "{{count}} camera",
     "cameras_other": "{{count}} cameras",
     "scene": {
       "label": "Scene",
-      "description": "The environment this model is for. Cameras pick a model by setting the same scene in their detect settings, and the model with a scene of all is used by any camera that does not set one."
+      "placeholder": "thermal",
+      "description": "A name for the cameras this model is for. Cameras pick a model by setting the same scene in their detect settings, and the Default model is used by any camera that does not set one. Use scenes to run different models, not to split one model across hardware, since models that use the same model file are combined."
     },
     "scenes": {
-      "all": "All cameras",
-      "indoor": "Indoor",
-      "outdoor": "Outdoor",
-      "indoor_thermal": "Indoor thermal",
-      "outdoor_thermal": "Outdoor thermal"
+      "default": "Default"
     },
     "hardware": {
       "label": "Hardware",

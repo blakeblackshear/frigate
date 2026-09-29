@@ -2,7 +2,7 @@ import type { FormValidation } from "@rjsf/utils";
 import type { TFunction } from "i18next";
 import { validateDetectDimensions } from "./detect";
 import { validateFfmpegInputRoles } from "./ffmpeg";
-import { validateDefaultModelExists } from "./models";
+import { validateModelScenes } from "./models";
 import { validateProxyRoleHeader } from "./proxy";
 
 export type SectionValidation = (
@@ -30,8 +30,7 @@ export function getSectionValidation({
   }
 
   if (sectionPath === "models") {
-    return (formData, errors) =>
-      validateDefaultModelExists(formData, errors, t);
+    return (formData, errors) => validateModelScenes(formData, errors, t);
   }
 
   if (sectionPath === "proxy" && level === "global") {

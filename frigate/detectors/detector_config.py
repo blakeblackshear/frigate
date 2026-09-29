@@ -47,21 +47,17 @@ class ModelTypeEnum(str, Enum):
     yologeneric = "yolo-generic"
 
 
-class SceneEnum(str, Enum):
-    """The camera environment a detection model is intended for."""
-
-    all = "all"
-    indoor = "indoor"
-    outdoor = "outdoor"
-    indoor_thermal = "indoor_thermal"
-    outdoor_thermal = "outdoor_thermal"
+# the scene of the model used by cameras that don't name one
+DEFAULT_SCENE = "default"
+SCENE_PATTERN = r"^[A-Za-z0-9_-]+$"
 
 
 class ModelConfig(BaseModel):
-    scene: SceneEnum = Field(
-        default=SceneEnum.all,
+    scene: str = Field(
+        default=DEFAULT_SCENE,
+        pattern=SCENE_PATTERN,
         title="Model scene",
-        description="The camera environment this model is used for. Cameras select a model by setting detect.scene to a matching value, and 'all' is used by any camera that does not set one.",
+        description="A name for the camera environment this model is used for, such as 'thermal'. Cameras select a model by setting detect.scene to a matching value, and the 'default' model is used by any camera that does not set one.",
     )
     devices: list[str] = Field(
         default_factory=list,

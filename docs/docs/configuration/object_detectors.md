@@ -103,32 +103,36 @@ Coral EdgeTPU and MemryX accelerators can only be opened by one process, so thos
 
 ### Running more than one model
 
-Cameras can be split across models by scene, which is useful when indoor and outdoor cameras benefit from differently trained models. Each model declares the `scene` it is for, and each camera picks one with `detect -> scene`:
+Cameras can be split across models by scene, which is useful when some cameras benefit from a differently trained model, such as thermal cameras. Each model declares the `scene` it is for, and each camera picks one with `detect -> scene`:
 
 ```yaml
 models:
-  - scene: outdoor
-    path: plus://your-outdoor-model
+  - scene: default
+    path: plus://your-model
     devices:
       - edgetpu:pci:0
-  - scene: indoor
-    path: /config/model_cache/indoor.onnx
+  - scene: thermal
+    path: /config/model_cache/thermal.onnx
     model_type: yolo-generic
     devices:
       - openvino:GPU
 
 cameras:
   driveway:
-    detect:
-      scene: outdoor
     ...
-  hallway:
+  backyard_thermal:
     detect:
-      scene: indoor
+      scene: thermal
     ...
 ```
 
-Available scenes are `all`, `indoor`, `outdoor`, `indoor_thermal`, and `outdoor_thermal`. A model with a scene of `all` is used by every camera that does not set one, and `all` is the default when a model does not declare a scene. Changing a camera's scene requires a restart.
+A scene is any name made up of letters, numbers, `_`, and `-`. The model with a scene of `default` is used by every camera that does not set one (or sets a scene that no model is configured for), and `default` is used when a model does not declare a scene. Changing a camera's scene requires a restart.
+
+:::warning
+
+Scenes are for running **different** models. Do not configure the same model under several scenes to dedicate a detector to specific cameras: every detector of a model already serves every camera using it, and splitting them only leaves some detectors idle while others fall behind. Frigate detects models that use the same model file, even under a different path or file name, combines them into one model with all of their hardware, and logs a warning.
+
+:::
 
 ### Choosing a model size
 
