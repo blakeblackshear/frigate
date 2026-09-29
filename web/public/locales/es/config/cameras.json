@@ -496,6 +496,9 @@
         "annotation_offset": {
             "label": "Desplazamiento de anotaciones",
             "description": "Milisegundos para desplazar las anotaciones de detección y alinear mejor los cuadros delimitadores de la línea de tiempo con las grabaciones; puede ser positivo o negativo."
+        },
+        "scene": {
+            "label": "Detectar escena"
         }
     },
     "record": {
@@ -599,6 +602,19 @@
         "enabled_in_config": {
             "label": "Estado de grabación original",
             "description": "Indica si la grabación estaba habilitada en la configuración estática original."
+        },
+        "sub": {
+            "continuous": {
+                "days": {
+                    "label": "Días de retención",
+                    "description": "Días a retener las grabaciones."
+                }
+            },
+            "motion": {
+                "days": {
+                    "label": "Días de retención"
+                }
+            }
         }
     },
     "ui": {
@@ -735,6 +751,9 @@
         "order": {
             "label": "Posición",
             "description": "Posición numérica que controla el orden de la cámara en el diseño de Birdseye."
+        },
+        "modes": {
+            "label": "Tipos de actividad"
         }
     },
     "ffmpeg": {
