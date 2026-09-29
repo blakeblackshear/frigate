@@ -257,6 +257,60 @@ test.describe("Detection models settings @high", () => {
     await expect(scene).toBeFocused();
   });
 
+  test("one model file cannot be split across scenes", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      {
+        scene: "default",
+        devices: ["openvino:GPU.0"],
+        path: "/config/model_cache/yolo.onnx",
+      },
+      {
+        scene: "driveway",
+        devices: ["openvino:GPU.1"],
+        path: "/config/model_cache/other.onnx",
+      },
+    ]);
+    await openPage(frigateApp);
+
+    await frigateApp.page
+      .locator("#root_1_path")
+      .fill("/config/model_cache/yolo.onnx");
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "The Default and driveway models use the same model file",
+    );
+    await expect(
+      frigateApp.page.getByRole("button", { name: /^Save$/ }),
+    ).toBeDisabled();
+  });
+
+  test("one model file may run on different detectors", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      {
+        scene: "default",
+        devices: ["openvino:GPU.0"],
+        path: "/config/model_cache/yolo.onnx",
+      },
+      {
+        scene: "driveway",
+        devices: ["onnx"],
+        path: "/config/model_cache/yolo.onnx",
+      },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "driveway",
+    );
+    await expect(frigateApp.page.locator("#pageRoot")).not.toContainText(
+      "models use the same model file",
+    );
+  });
+
   test("two models cannot share a scene", async ({ frigateApp }) => {
     await installRoutes(frigateApp.page, [
       { scene: "default", devices: ["cpu"] },
