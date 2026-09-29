@@ -29,6 +29,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
+- <CommunityBadge /> [XDNA2](#amd-xdna2): AMD Ryzen AI / XDNA2 NPUs can run object detection through the community-maintained `frigate-xdna` ZMQ sidecar.
 
 **Apple Silicon**
 
@@ -507,6 +508,28 @@ Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and p
 To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
+
+## AMD XDNA2
+
+AMD Ryzen AI / XDNA2 NPUs can be used through the community-maintained
+[frigate-xdna](https://github.com/mitchins/frigate-xdna) detector sidecar.
+The sidecar runs separately from Frigate and connects using Frigate's ZMQ
+detector interface.
+
+Currently qualified on **Ryzen AI Max 300 / Strix Halo**. Other XDNA2 devices
+are not yet qualified; XDNA1 is unsupported.
+
+Follow the frigate-xdna setup instructions to prepare and start the sidecar
+before starting Frigate.
+
+### Configuration {#configuration-xdna2}
+
+Using the detector config below will connect Frigate to the sidecar:
+
+<ModelConfigDropdown detectorTitle="AMD XDNA2" models={objectDetectorsModels.xdna2.models} />
+
+The example assumes Frigate and the sidecar share a Docker network where the
+sidecar is named `xdna`.
 
 ## MemryX MX3
 
