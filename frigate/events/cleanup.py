@@ -365,6 +365,7 @@ class EventCleanup(threading.Thread):
                     chunk = ids_to_delete[i : i + CHUNK_SIZE]
                     logger.debug(f"Deleting {len(chunk)} events from the database")
                     Event.delete().where(Event.id << chunk).execute()
+                    Timeline.delete().where(Timeline.source_id << chunk).execute()
 
                     # embeddings are always cleaned up, even when semantic search
                     # is disabled, so that they don't outlive their events
