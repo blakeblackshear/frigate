@@ -576,7 +576,6 @@
       "desc": "临时暂停所有已注册设备上特定摄像头的通知。"
     },
     "notificationUnavailable": {
-      "title": "通知功能不可用",
       "desc": "网页推送通知需要安全连接（<code>https://…</code>）。这是浏览器的限制。请通过安全方式访问 Frigate 以使用通知功能。",
       "descPwa": "在 iOS 设备上，只有将 Frigate 安装到主屏幕后，才能使用网页推送通知。请打开<strong>分享</strong>菜单，选择<strong>添加到主屏幕</strong>，然后从新生成的图标打开 Frigate，即可注册此设备以接收通知。"
     },
@@ -836,7 +835,6 @@
       }
     },
     "semanticSearch": {
-      "title": "语义搜索已关闭",
       "desc": "必须启用语义搜索功能才能使用触发器。"
     },
     "wizard": {
