@@ -239,15 +239,15 @@
     "reindexingEmbeddings": "Reindexant vectors ({{processed}}% completat)",
     "healthy": "El sistema és saludable",
     "cameraIsOffline": "{{camera}} està fora de línia",
-    "ffmpegHighCpuUsage": "{{camera}} te un ús elevat de CPU per FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} te un ús elevat de CPU per la detecció ({{detectAvg}}%)",
     "detectIsVerySlow": "{{detect}} és molt lent ({{speed}} ms)",
     "detectIsSlow": "{{detect}} és lent ({{speed}} ms)",
     "debugReplayActive": "La sessió de repetició de depuració està activa",
     "cameraSkippedDetections": "{{camera}} està ometent la detecció en {{pct}}% de fotogrames",
     "systemNotices_one": "{{count}} avís del sistema",
     "systemNotices_other": "{{count}} avisos del sistema",
-    "retentionUnmet": "Els enregistraments s'estan suprimint abans que acabi el seu període de retenció a l'espai lliure"
+    "retentionUnmet": "Els enregistraments s'estan suprimint abans que acabi el seu període de retenció a l'espai lliure",
+    "moreMessages_other": "+{{count}}",
+    "moreMessages_one": "+{{count}}"
   },
   "enrichments": {
     "title": "Anàlisi avançada",
@@ -281,24 +281,17 @@
     "notices": {
       "title": "Avís",
       "empty": "La instal·lació de Frigate és saludable",
-      "dismiss": "Descarta",
       "openSettings": "Obre la configuració",
       "openLink": "Obre l'enllaç",
       "noMatches": "No hi ha avisos que coincideixin amb el filtre",
-      "dismissedTitle": "Descartat",
-      "noneDismissed": "No hi ha avisos descartats",
-      "clearDismissed": "Neteja descartada",
-      "clearDismissedTitle": "Voleu netejar els avisos descartats?",
-      "clearDismissedDesc": "S'elimina cada avís acomiadat. Les comprovacions de configuració i flux es mostren de nou immediatament, i altres avisos tornen la propera vegada que succeeixin.",
       "firstSeen_one": "{{time}} vist per primera vegada",
       "firstSeen_other": "{{time}} · {{count}} vegades",
-      "dismissedAt": "S'ha suprimit {{time}}",
       "filter": {
-        "showDismissed": "Mostra descartat",
         "severity": "Severitat",
         "warning": "Avís",
         "error": "Error",
-        "info": "Info"
+        "info": "Info",
+        "showHidden": "Mostra els ocults"
       },
       "kinds": {
         "detector_stuck": "S'ha reiniciat el detector {{detector}} després que deixés de respondre",
@@ -307,12 +300,27 @@
         "shm_too_low": "L'assignació /dev/shm ({{total}} MB) s'hauria d'augmentar a com a mínim {{min}} MB",
         "failed_login_one": "Error en l'intent d'inici de sessió de {{user}}",
         "failed_login_other": "Intents d'inici de sessió fallits per {{user}}",
-        "update_available": "Frigate {{version}} està disponible"
+        "update_available": "Frigate {{version}} està disponible",
+        "ffmpeg_high_cpu": "L'ús de la CPU FFmpeg és alt ({{cpu}}% mitjana)",
+        "detect_high_cpu": "L'ús de la CPU de detecció és alt ({{cpu}}% mitjana)"
       },
       "streamPrefix": "Flux {{index}}: {{message}}",
       "streamPrefixRestream": "Flux {{index}} (via go2rtc): {{message}}",
       "streamProbeFailed": "No s'ha pogut provar el flux {{index}}: {{error}}",
-      "cameraProbeFailed": "No s'han pogut explorar els fluxos: {{error}}"
+      "cameraProbeFailed": "No s'han pogut explorar els fluxos: {{error}}",
+      "acknowledge": "Agraïment",
+      "acknowledgeHint": "Amaga fins que això torni a passar",
+      "mute": "Silenciar",
+      "muteHint": "No ho mostris mai més",
+      "unmute": "No silenciis",
+      "showAgain": "Torna a mostrar",
+      "hiddenTitle": "Ocultar",
+      "noneHidden": "No hi ha avisos ocults",
+      "showAll": "Mostra-ho tot de nou",
+      "showAllTitle": "Voleu mostrar tots els avisos ocults?",
+      "showAllDesc": "Cada avís reconegut i silenciat torna a la llista d'avisos, incloent-hi les comprovacions de configuració i flux.",
+      "acknowledgedAt": "Reconegut {{time}}",
+      "mutedAt": "Mutat {{time}}"
     },
     "hardware": {
       "title": "Maquinari",
