@@ -159,13 +159,16 @@
     "saveAll": "保存全部",
     "savingAll": "保存全部中…",
     "undoAll": "撤销全部",
-    "retry": "重试"
+    "retry": "重试",
+    "expand": "展开",
+    "collapse": "收起",
+    "reload": "刷新"
   },
   "menu": {
     "system": "系统",
-    "systemMetrics": "系统信息",
+    "systemMetrics": "运行健康状况",
     "configuration": "配置",
-    "systemLogs": "系统日志",
+    "systemLogs": "日志",
     "settings": "设置",
     "configurationEditor": "配置编辑器",
     "languages": "Languages / 语言",
@@ -314,5 +317,11 @@
   "validation_errors": "验证错误",
   "credentialField": {
     "savedPlaceholder": "已保存 — 留空则保留当前设置"
+  },
+  "error": {
+    "title": "此页面已停止工作",
+    "desc": "页面发生未知错误。通常刷新就可解决。若反复出现，请复制详情并提交至 GitHub 讨论区。",
+    "staleTitle": "需要重新加载",
+    "staleDesc": "部分界面组件无法加载，出现此情况通常是因为 Frigate 已更新，而你的浏览器标签页仍停留在旧版本。请刷新页面以获取最新版本。"
   }
 }
