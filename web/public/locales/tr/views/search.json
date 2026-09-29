@@ -1,30 +1,30 @@
 {
   "button": {
     "save": "Aramayı kaydet",
-    "filterActive": "Fitreler açık",
+    "filterActive": "Fitreler aktif",
     "filterInformation": "Filtrele",
     "clear": "Aramayı temizle",
     "delete": "Kayıtlı aramayı sil"
   },
-  "trackedObjectId": "Takip Edilen Nesne ID",
+  "trackedObjectId": "Takip Edilen Nesne Kimliği",
   "filter": {
     "label": {
-      "min_score": "Min. Skor",
+      "min_score": "Minimum Skor",
       "recognized_license_plate": "Tanınan Plaka",
       "search_type": "Arama Türü",
-      "has_snapshot": "Fotoğrafı var",
+      "has_snapshot": "Anlık Fotoğrafı Var",
       "cameras": "Kameralar",
-      "max_score": "Maks. Skor",
+      "max_score": "Maksimum Skor",
       "labels": "Etiketler",
       "time_range": "Zaman Aralığı",
       "before": "Önce",
-      "zones": "Alanlar",
+      "zones": "Bölgeler",
       "after": "Sonra",
       "has_clip": "Klibi var",
-      "min_speed": "Min. Hız",
+      "min_speed": "Minimum Hız",
       "sub_labels": "Alt Etiketler",
-      "max_speed": "Maks. Hız",
-      "attributes": "Özellikler"
+      "max_speed": "Maksimum Hız",
+      "attributes": "Öznitelikler"
     },
     "searchType": {
       "description": "Açıklama",
@@ -33,13 +33,13 @@
     "tips": {
       "title": "Metin filtreleri nasıl kullanılır",
       "desc": {
-        "text": "Filtreler arama sonuçlarınızı daraltmanıza yardımcı olur. Giriş alanındaki kullanımları şöyledir:",
+        "text": "Filtreler arama sonuçlarınızı daraltmanıza yardımcı olur. Girdi alanında şöyle kullanılır:",
         "exampleLabel": "Örnek:",
         "step1": "Bir filtre anahtarını iki nokta üst üste ile beraber yazın (örn. belli kameraları seçmek için \"cameras:\").",
         "step2": "Önerilen bir değer seçin veya kendiniz girin.",
         "step3": "Birden fazla filtreyi aralarında boşluk bırakarak kullanabilirsiniz.",
-        "step4": "Tarih filtreleri (before: ve after:) {{DateFormat}} formatını kullanır.",
-        "step5": "Zaman aralığı filtreleri {{exampleTime}} formatını kullanır.",
+        "step4": "Tarih filtreleri (before: ve after:) (önce ve sonra) {{DateFormat}} biçimini kullanır.",
+        "step5": "Zaman aralığı filtreleri {{exampleTime}} biçimini kullanır.",
         "step6": "Filtreleri kaldırmak için yanlarındaki çarpıya basın."
       }
     },
@@ -67,7 +67,7 @@
     "title": "Benzerlik Araması",
     "clear": "Benzerlik aramasını temizle"
   },
-  "searchFor": "{{inputValue}} için Arat",
-  "search": "Arama",
+  "searchFor": "\"{{inputValue}}\" değerini arat",
+  "search": "Ara",
   "savedSearches": "Kayıtlı Aramalar"
 }
