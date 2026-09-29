@@ -221,38 +221,37 @@ class TestSummaryContext(unittest.TestCase):
 
         return client.generate_review_summary.call_args.args[2]
 
-    def test_overlapping_context_reviews_keep_all_state_changes(self):
+    def test_context_state_changes_stay_with_their_review(self):
         events = self.summarize(
             [
                 self.row("front_door", 10, 60, 1),
                 self.row("driveway", 15, 25, 0, [gate_change(20.0)]),
                 self.row("driveway", 30, 40, 0, [gate_change(35.0, "open", "closed")]),
+            ]
+        )
+
+        self.assertEqual(
+            [
+                (item["start_time"], item["end_time"], item["state_changes"])
+                for item in events[0]["context"]
+            ],
+            [
+                (15, 25, ["front gate changed from closed to open"]),
+                (30, 40, ["front gate changed from open to closed"]),
+            ],
+        )
+
+    def test_later_context_review_without_changes_is_deduplicated(self):
+        events = self.summarize(
+            [
+                self.row("front_door", 10, 60, 1),
+                self.row("driveway", 15, 25, 0, [gate_change(20.0)]),
+                self.row("driveway", 30, 40, 0),
             ]
         )
 
         self.assertEqual(len(events[0]["context"]), 1)
-        self.assertEqual(
-            events[0]["context"][0]["state_changes"],
-            [
-                "front gate changed from closed to open",
-                "front gate changed from open to closed",
-            ],
-        )
-
-    def test_merging_context_does_not_leak_between_primary_events(self):
-        events = self.summarize(
-            [
-                self.row("front_door", 10, 60, 1),
-                self.row("back_door", 12, 22, 1),
-                self.row("driveway", 15, 25, 0, [gate_change(20.0)]),
-                self.row("driveway", 30, 40, 0, [gate_change(35.0, "open", "closed")]),
-            ]
-        )
-
-        self.assertEqual(
-            events[1]["context"][0]["state_changes"],
-            ["front gate changed from closed to open"],
-        )
+        self.assertEqual(events[0]["context"][0]["start_time"], 15)
 
 
 if __name__ == "__main__":
