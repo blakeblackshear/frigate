@@ -841,7 +841,6 @@
       "desc": "Frigate dokáže natívne odosielať push notifikácie do vášho zariadenia, keď je spustený v prehliadači alebo nainštalovaný ako PWA."
     },
     "notificationUnavailable": {
-      "title": "Notifikacie su nedostupné",
       "desc": "Webové push notifikácie vyžadujú zabezpečený kontext (<code>https://…</code>). Ide o obmedzenie prehliadača. Ak chcete používať notifikácie, pristupujte k Frigate bezpečne."
     },
     "globalSettings": {
@@ -932,7 +931,6 @@
   "triggers": {
     "documentTitle": "Spúšťače",
     "semanticSearch": {
-      "title": "Sémantické vyhľadávanie je vypnuté",
       "desc": "Na používanie spúšťačov musí byť povolené sémantické vyhľadávanie."
     },
     "management": {
