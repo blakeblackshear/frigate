@@ -580,7 +580,6 @@
     },
     "title": "Benachrichtigungen",
     "notificationUnavailable": {
-      "title": "Benachrichtigungen nicht verfügbar",
       "desc": "Web Push Benachrichtigungen erfordern einen sicheren Kontext (<code>https://…</code>). Das ist eine Vorgabe des Browsers. Greife auf Frigate gesichert zu um Benachrichtigungen zu nutzen.",
       "descPwa": "Unter iOS sind Web-Push-Benachrichtigungen nur verfügbar, wenn Frigate auf Ihrem Startbildschirm installiert ist. Öffnen Sie das Menü <strong>Teilen</strong>, wählen Sie <strong>Zum Startbildschirm hinzufügen</strong> und öffnen Sie Frigate über das neue Symbol, um dieses Gerät für Benachrichtigungen zu registrieren."
     },
@@ -839,7 +838,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Semantische Suche ist deaktiviert",
       "desc": "Semantische Suche muss aktiviert sein um Auslöser nutzen zu können."
     },
     "wizard": {
