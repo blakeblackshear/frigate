@@ -56,6 +56,11 @@
         "labelmap": {
             "label": "Personalização de etiquetas de áudio",
             "description": "Sobrepõe ou re-mapeia entradas para mesclar ao lablemap de áudio padrão."
+        },
+        "description": "Configurações da detecção de eventos baseada em áudio para todas as câmeras; podem ser substituídas por câmera.",
+        "enabled": {
+            "label": "Habilitar detecção de áudio",
+            "description": "Habilita ou desabilita a detecção de eventos de áudio em todas as câmeras; pode ser substituído por câmera."
         }
     },
     "auth": {
@@ -88,6 +93,22 @@
         "refresh_time": {
             "label": "Janela de atualização da sessão",
             "description": "Quando uma seção está a poucos segundos da expiração, atualizar para o tempo total."
+        },
+        "trusted_proxies": {
+            "label": "Proxies confiáveis",
+            "description": "Lista de IPs de proxies confiáveis usados para determinar o IP do cliente na limitação de taxa."
+        },
+        "hash_iterations": {
+            "label": "Iterações de hash",
+            "description": "Número de iterações PBKDF2-SHA256 a serem usadas ao gerar o hash das senhas dos usuários."
+        },
+        "roles": {
+            "label": "Mapeamentos de funções",
+            "description": "Mapeia funções para listas de câmeras. Uma lista vazia concede acesso a todas as câmeras para a função."
+        },
+        "admin_first_time_login": {
+            "label": "Sinalizador de primeiro acesso do administrador",
+            "description": "Quando verdadeiro, a interface pode exibir na página de login um link de ajuda informando aos usuários como entrar após a redefinição da senha do administrador. "
         }
     },
     "audio_transcription": {
@@ -100,11 +121,28 @@
         "enabled": {
             "label": "Habilitar a transcrição de áudio",
             "description": "Ativar ou desativar a transcrição automática de áudio para todas as câmeras; pode ser configurado individualmente por câmera."
+        },
+        "language": {
+            "label": "Idioma da transcrição",
+            "description": "Código de idioma usado para transcrição/tradução (por exemplo, 'en' para inglês) ou 'auto' para que o modelo o detecte. Consulte https://whisper-api.com/docs/languages/ para ver os códigos de idioma compatíveis."
+        },
+        "device": {
+            "label": "Dispositivo de transcrição",
+            "description": "Chave do dispositivo (CPU/GPU) em que o modelo de transcrição será executado. Atualmente, apenas GPUs NVIDIA com CUDA são compatíveis com a transcrição."
+        },
+        "model_size": {
+            "label": "Tamanho do modelo",
+            "description": "Tamanho do modelo a ser usado na transcrição offline de eventos de áudio."
+        },
+        "model": {
+            "label": "Modelo de transcrição de áudio ou nome do provedor de IA generativa",
+            "description": "O backend de transcrição: 'whisper' para os modelos locais integrados do Frigate, ou o nome de um provedor de IA generativa com a função transcribe."
         }
     },
     "detect": {
         "enabled": {
-            "label": "Ativar detecção de objetos"
+            "label": "Ativar detecção de objetos",
+            "description": "Habilita ou desabilita a detecção de objetos para todas as câmeras; pode ser substituído por câmera."
         },
         "height": {
             "label": "Detectar altura",
@@ -168,11 +206,45 @@
     "face_recognition": {
         "label": "Reconhecimento facial",
         "enabled": {
-            "label": "Ativar reconhecimento facial"
+            "label": "Ativar reconhecimento facial",
+            "description": "Habilita ou desabilita o reconhecimento facial para todas as câmeras; pode ser substituído por câmera."
         },
         "min_area": {
             "label": "Área mínima do rosto",
             "description": "Área mínima (em pixels) da caixa delimitadora de um rosto detectado necessária para tentar o reconhecimento."
+        },
+        "description": "Configurações de detecção e reconhecimento facial para todas as câmeras; podem ser substituídas por câmera.",
+        "model_size": {
+            "label": "Tamanho do modelo",
+            "description": "Tamanho do modelo a ser usado nos embeddings faciais (small/large); o maior pode exigir GPU."
+        },
+        "unknown_score": {
+            "description": "Limite de distância abaixo do qual um rosto é considerado uma possível correspondência (quanto maior, mais rigoroso).",
+            "label": "Limite de pontuação para desconhecido"
+        },
+        "detection_threshold": {
+            "label": "Limite de detecção",
+            "description": "Confiança mínima de detecção necessária para considerar válida uma detecção de rosto."
+        },
+        "recognition_threshold": {
+            "label": "Limite de reconhecimento",
+            "description": "Limite de distância entre embeddings faciais para considerar que dois rostos correspondem."
+        },
+        "min_faces": {
+            "label": "Mínimo de rostos",
+            "description": "Número mínimo de reconhecimentos faciais necessários antes de aplicar um sub-rótulo reconhecido a uma pessoa."
+        },
+        "save_attempts": {
+            "label": "Tentativas a salvar",
+            "description": "Número de tentativas de reconhecimento facial a manter para a interface de reconhecimentos recentes."
+        },
+        "blur_confidence_filter": {
+            "description": "Ajusta as pontuações de confiança com base no desfoque da imagem para reduzir falsos positivos em rostos de baixa qualidade.",
+            "label": "Filtro de confiança por desfoque"
+        },
+        "device": {
+            "label": "Dispositivo",
+            "description": "Esta é uma substituição, para escolher um dispositivo específico. Consulte https://onnxruntime.ai/docs/execution-providers/ para mais informações"
         }
     },
     "ffmpeg": {
@@ -243,7 +315,9 @@
                 "label": "Argumentos de entrada",
                 "description": "Argumentos de entrada específicos para este fluxo."
             }
-        }
+        },
+        "label": "FFmpeg",
+        "description": "Configurações do FFmpeg, incluindo caminho do binário, argumentos, opções de hwaccel e argumentos de saída por função."
     },
     "birdseye": {
         "order": {
@@ -259,6 +333,42 @@
         "modes": {
             "label": "Tipos de Atividade",
             "description": "Tipos de atividade que incluem câmeras em modo panorâmico."
+        },
+        "restream": {
+            "label": "Restream RTSP",
+            "description": "Retransmite a saída do Birdseye como um feed RTSP; habilitar isto manterá o Birdseye em execução contínua."
+        },
+        "width": {
+            "description": "Largura de saída (em pixels) do quadro composto do Birdseye.",
+            "label": "Largura"
+        },
+        "height": {
+            "label": "Altura",
+            "description": "Altura de saída (em pixels) do quadro composto do Birdseye."
+        },
+        "quality": {
+            "label": "Qualidade de codificação",
+            "description": "Qualidade de codificação do feed mpeg1 do Birdseye (1 é a maior qualidade, 31 a menor)."
+        },
+        "inactivity_threshold": {
+            "label": "Limite de inatividade",
+            "description": "Segundos de inatividade após os quais uma câmera deixará de ser exibida no Birdseye."
+        },
+        "layout": {
+            "label": "Layout",
+            "description": "Opções de layout para a composição do Birdseye.",
+            "scaling_factor": {
+                "label": "Fator de escala",
+                "description": "Fator de escala usado pelo cálculo de layout (intervalo de 1,0 a 5,0)."
+            },
+            "max_cameras": {
+                "description": "Número máximo de câmeras exibidas ao mesmo tempo no Birdseye; mostra as câmeras mais recentes.",
+                "label": "Máximo de câmeras"
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "FPS do heartbeat em inatividade",
+            "description": "Quadros por segundo com os quais o último quadro composto do Birdseye é reenviado quando ocioso; defina como 0 para desabilitar."
         }
     },
     "live": {
@@ -274,11 +384,13 @@
         "quality": {
             "description": "Qualidade de codificação para o fluxo jsmpeg (1 para a mais alta, 31 para a mais baixa).",
             "label": "Qualidade da transmissão"
-        }
+        },
+        "description": "Configurações para controlar a resolução e a qualidade do stream ao vivo jsmpeg. Isto não afeta as câmeras com restream que usam o go2rtc para a visualização ao vivo."
     },
     "motion": {
         "enabled": {
-            "label": "Ativar detecção de movimento"
+            "label": "Ativar detecção de movimento",
+            "description": "Habilita ou desabilita a detecção de movimento para todas as câmeras; pode ser substituído por câmera."
         },
         "threshold": {
             "label": "Limiar de movimento",
@@ -327,13 +439,15 @@
         "raw_mask": {
             "label": "Máscara Bruta"
         },
-        "label": "Detecção de movimento"
+        "label": "Detecção de movimento",
+        "description": "Configurações padrão de detecção de movimento aplicadas às câmeras, a menos que sejam substituídas por câmera."
     },
     "objects": {
         "label": "Objetos",
         "description": "Configurações padrão de rastreamento de objetos, incluindo quais rótulos rastrear e filtros por objeto.",
         "track": {
-            "label": "Objetos a rastrear"
+            "label": "Objetos a rastrear",
+            "description": "Lista de rótulos de objetos a serem rastreados em todas as câmeras; pode ser substituída por câmera."
         },
         "filters": {
             "label": "Filtros de objeto",
@@ -424,11 +538,47 @@
                 "label": "Estado original da GenAI",
                 "description": "Indica se a GenAI foi habilitada na configuração estática original."
             }
+        },
+        "filters_attribute": {
+            "label": "Filtros de atributos",
+            "description": "Filtros aplicados aos atributos detectados para reduzir falsos positivos (área, proporção, confiança).",
+            "min_area": {
+                "label": "Área mínima do atributo",
+                "description": "Área mínima da caixa delimitadora (pixels ou porcentagem) exigida para este atributo. Pode ser em pixels (inteiro) ou porcentagem (decimal entre 0,000001 e 0,99)."
+            },
+            "max_area": {
+                "label": "Área máxima do atributo",
+                "description": "Área máxima da caixa delimitadora (pixels ou porcentagem) permitida para este atributo. Pode ser em pixels (inteiro) ou porcentagem (decimal entre 0,000001 e 0,99)."
+            },
+            "min_ratio": {
+                "description": "Proporção mínima entre largura e altura exigida para que a caixa delimitadora seja considerada.",
+                "label": "Proporção mínima"
+            },
+            "max_ratio": {
+                "label": "Proporção máxima",
+                "description": "Proporção máxima entre largura e altura permitida para que a caixa delimitadora seja considerada."
+            },
+            "threshold": {
+                "label": "Limite de confiança",
+                "description": "Limite de confiança média de detecção necessário para que o atributo seja considerado um verdadeiro positivo."
+            },
+            "min_score": {
+                "label": "Confiança mínima",
+                "description": "Confiança mínima de detecção em um único quadro necessária para associar este atributo ao seu objeto pai."
+            },
+            "mask": {
+                "label": "Máscara do filtro",
+                "description": "Coordenadas do polígono que definem onde este filtro se aplica dentro do quadro."
+            },
+            "raw_mask": {
+                "label": "Máscara bruta"
+            }
         }
     },
     "lpr": {
         "enabled": {
-            "label": "Ativar LPR"
+            "label": "Ativar LPR",
+            "description": "Habilita ou desabilita o reconhecimento de placas de veículos para todas as câmeras; pode ser substituído por câmera."
         },
         "expire_time": {
             "label": "Segundos para expirar",
@@ -443,12 +593,59 @@
             "description": "Nível de aprimoramento (0-10) a ser aplicado aos recortes da placa antes do OCR; valores mais altos nem sempre melhoram os resultados, e níveis acima de 5 podem funcionar apenas com placas noturnas, devendo ser utilizados com cautela."
         },
         "label": "Reconhecimento de placa veicular",
-        "description": "Configurações de reconhecimento de placa veicular, incluindo limites de detecção, formatação e placas conhecidas."
+        "description": "Configurações de reconhecimento de placa veicular, incluindo limites de detecção, formatação e placas conhecidas.",
+        "model_size": {
+            "label": "Tamanho do modelo",
+            "description": "Tamanho do modelo usado para detecção/reconhecimento de texto. A maioria dos usuários deve usar 'small'."
+        },
+        "detection_threshold": {
+            "description": "Limite de confiança de detecção para iniciar o OCR em uma suspeita de placa.",
+            "label": "Limite de detecção"
+        },
+        "recognition_threshold": {
+            "label": "Limite de reconhecimento",
+            "description": "Limite de confiança necessário para que o texto da placa reconhecida seja anexado como sub-rótulo."
+        },
+        "min_plate_length": {
+            "label": "Tamanho mínimo da placa",
+            "description": "Número mínimo de caracteres que uma placa reconhecida deve conter para ser considerada válida."
+        },
+        "format": {
+            "label": "Regex do formato da placa",
+            "description": "Regex opcional para validar as placas reconhecidas em relação a um formato esperado."
+        },
+        "match_distance": {
+            "label": "Distância de correspondência",
+            "description": "Número de caracteres diferentes permitidos ao comparar as placas detectadas com as placas conhecidas."
+        },
+        "known_plates": {
+            "description": "Lista de placas ou regexes a serem rastreadas ou alertadas de forma especial.",
+            "label": "Placas conhecidas"
+        },
+        "debug_save_plates": {
+            "label": "Salvar placas para depuração",
+            "description": "Salva as imagens recortadas das placas para depurar o desempenho do LPR."
+        },
+        "device": {
+            "label": "Dispositivo",
+            "description": "Esta é uma substituição, para escolher um dispositivo específico. Consulte https://onnxruntime.ai/docs/execution-providers/ para mais informações"
+        },
+        "replace_rules": {
+            "label": "Regras de substituição",
+            "description": "Regras de substituição por regex usadas para normalizar as placas detectadas antes da comparação.",
+            "pattern": {
+                "label": "Padrão regex"
+            },
+            "replacement": {
+                "label": "Texto de substituição"
+            }
+        }
     },
     "record": {
         "label": "Gravação",
         "enabled": {
-            "label": "Ativar gravação"
+            "label": "Ativar gravação",
+            "description": "Habilita ou desabilita a gravação para todas as câmeras; pode ser substituído por câmera."
         },
         "expire_interval": {
             "label": "Intervalo de limpeza de gravação",
@@ -592,7 +789,8 @@
                     "description": "Modo de retenção: all (salvar todos os segmentos), motion (salvar segmentos com movimento), ou active_objects (salvar segmentos com objetos ativos)."
                 }
             }
-        }
+        },
+        "description": "Configurações de gravação e retenção aplicadas às câmeras, a menos que sejam substituídas por câmera."
     },
     "review": {
         "label": "Rever",
@@ -600,7 +798,8 @@
             "label": "Configuração de alertas",
             "description": "Configurações sobre quais objetos monitorados geram alertas e como os alertas são retidos.",
             "enabled": {
-                "label": "Ativar alertas"
+                "label": "Ativar alertas",
+                "description": "Habilita ou desabilita a geração de alertas para todas as câmeras; pode ser substituído por câmera."
             },
             "labels": {
                 "label": "Etiquetas de alerta",
@@ -623,7 +822,8 @@
             "label": "Configuração de detecções",
             "description": "Configurações que definem para quais objetos rastreados são geradas detecções (sem gerar alerta) e como essas detecções são retidas.",
             "enabled": {
-                "label": "Ativar detecções"
+                "label": "Ativar detecções",
+                "description": "Habilita ou desabilita os eventos de detecção para todas as câmeras; pode ser substituído por câmera."
             },
             "labels": {
                 "label": "Rótulos de detecção",
@@ -684,8 +884,13 @@
             "response_style": {
                 "label": "Estilo de resposta",
                 "description": "Estilo de escrita pré-definido para revisão de descrições geradas. A predefinição ajusta o tom e nível de detalhes do título, resumo e descrição das cenas; 'default' deixa o prompt interno sem alterações."
+            },
+            "frame_mode": {
+                "label": "Modo de quadros",
+                "description": "Como os quadros são apresentados ao modelo. 'frames' envia o prompt seguido dos quadros, o que serve para modelos que acompanham bem uma sequência por conta própria. 'annotated_frames' rotula cada quadro e intercala notas derivadas do rastreamento de objetos, o que ajuda modelos que perdem o fio de atividades que se repetem ou se invertem."
             }
-        }
+        },
+        "description": "Configurações que controlam alertas, detecções e resumos de revisão por IA generativa usados pela interface e pelo armazenamento."
     },
     "semantic_search": {
         "label": "Busca semântica",
@@ -716,12 +921,34 @@
                 "label": "Acionar ações",
                 "description": "Lista de ações a serem executadas quando o gatilho for acionado (notificação, sub-rótulo, atributo)."
             }
+        },
+        "description": "Configurações da Busca semântica, que cria e consulta embeddings de objetos para encontrar itens semelhantes.",
+        "enabled": {
+            "label": "Habilitar busca semântica",
+            "description": "Habilita ou desabilita o recurso de busca semântica."
+        },
+        "reindex": {
+            "description": "Aciona uma reindexação completa dos objetos rastreados históricos no banco de dados de embeddings.",
+            "label": "Reindexar na inicialização"
+        },
+        "model": {
+            "description": "O modelo de embeddings a ser usado na busca semântica (por exemplo, 'jinav1') ou o nome de um provedor de IA generativa com a função embeddings.",
+            "label": "Modelo de busca semântica ou nome do provedor de IA generativa"
+        },
+        "model_size": {
+            "label": "Tamanho do modelo",
+            "description": "Selecione o tamanho do modelo; 'small' é executado na CPU e 'large' normalmente exige GPU."
+        },
+        "device": {
+            "label": "Dispositivo",
+            "description": "Esta é uma substituição, para escolher um dispositivo específico. Consulte https://onnxruntime.ai/docs/execution-providers/ para mais informações"
         }
     },
     "snapshots": {
         "label": "Instantâneas",
         "enabled": {
-            "label": "Habilitar instantâneas"
+            "label": "Habilitar instantâneas",
+            "description": "Habilita ou desabilita o salvamento de snapshots para todas as câmeras; pode ser substituído por câmera."
         },
         "timestamp": {
             "label": "Sobreposição de marca de tempo",
@@ -758,11 +985,13 @@
         "quality": {
             "label": "Qualidade da captura",
             "description": "Qualidade de codificação das capturas salvas (0-100)."
-        }
+        },
+        "description": "Configurações dos snapshots de objetos rastreados gerados pela API para todas as câmeras; podem ser substituídas por câmera."
     },
     "notifications": {
         "enabled": {
-            "label": "Ativar notificações"
+            "label": "Ativar notificações",
+            "description": "Habilita ou desabilita as notificações de todas as câmeras; pode ser substituído por câmera."
         },
         "email": {
             "label": "Notificação por E-mail",
@@ -776,7 +1005,8 @@
         "cooldown": {
             "label": "Intervalo de espera",
             "description": "Intervalo (em segundos) entre notificações para evitar o envio excessivo de mensagens aos destinatários."
-        }
+        },
+        "description": "Configurações para habilitar e controlar as notificações de todas as câmeras; podem ser substituídas por câmera."
     },
     "onvif": {
         "label": "ONVIF",
@@ -887,18 +1117,415 @@
         "effect": {
             "label": "Efeito da marcação de tempo",
             "description": "Efeito visual para o texto do marcação de tempo (nenhum, sólido, sombra)."
-        }
+        },
+        "description": "Opções de estilo dos carimbos de data/hora exibidos no feed, aplicadas à visualização de depuração e aos snapshots."
     },
     "mqtt": {
-        "label": "MQTT"
+        "label": "MQTT",
+        "description": "Configurações para conectar e publicar telemetria, snapshots e detalhes de eventos em um broker MQTT.",
+        "enabled": {
+            "label": "Habilitar MQTT",
+            "description": "Habilita ou desabilita a integração MQTT para estados, eventos e snapshots."
+        },
+        "host": {
+            "label": "Host MQTT",
+            "description": "Nome de host ou endereço IP do broker MQTT."
+        },
+        "port": {
+            "label": "Porta MQTT",
+            "description": "Porta do broker MQTT (geralmente 1883 para MQTT sem criptografia)."
+        },
+        "topic_prefix": {
+            "description": "Prefixo de tópico MQTT para todos os tópicos do Frigate; deve ser único se você executar várias instâncias.",
+            "label": "Prefixo do tópico"
+        },
+        "client_id": {
+            "label": "ID do cliente",
+            "description": "Identificador do cliente usado ao se conectar ao broker MQTT; deve ser único para cada instância."
+        },
+        "stats_interval": {
+            "label": "Intervalo de estatísticas",
+            "description": "Intervalo, em segundos, para publicar estatísticas do sistema e das câmeras no MQTT."
+        },
+        "user": {
+            "label": "Usuário MQTT",
+            "description": "Usuário MQTT opcional; pode ser fornecido por variáveis de ambiente ou segredos."
+        },
+        "password": {
+            "label": "Senha MQTT",
+            "description": "Senha MQTT opcional; pode ser fornecida por variáveis de ambiente ou segredos."
+        },
+        "tls_ca_certs": {
+            "description": "Caminho para o certificado da CA para conexões TLS com o broker (para certificados autoassinados).",
+            "label": "Certificados CA do TLS"
+        },
+        "tls_client_cert": {
+            "label": "Certificado do cliente",
+            "description": "Caminho do certificado do cliente para autenticação mútua TLS; não defina usuário/senha ao usar certificados de cliente."
+        },
+        "tls_client_key": {
+            "label": "Chave do cliente",
+            "description": "Caminho da chave privada do certificado do cliente."
+        },
+        "tls_insecure": {
+            "label": "TLS inseguro",
+            "description": "Permite conexões TLS inseguras ignorando a verificação do nome do host (não recomendado)."
+        },
+        "qos": {
+            "label": "QoS do MQTT",
+            "description": "Nível de Qualidade de Serviço para publicações/assinaturas MQTT (0, 1 ou 2)."
+        }
     },
     "profiles": {
-        "label": "Perfis"
+        "label": "Perfis",
+        "description": "Definições de perfis nomeados com nomes amigáveis. Os perfis das câmeras devem referenciar os nomes definidos aqui.",
+        "friendly_name": {
+            "label": "Nome amigável",
+            "description": "Nome de exibição deste perfil mostrado na interface."
+        }
     },
     "camera_ui": {
-        "label": "Interface da Câmera"
+        "label": "Interface da Câmera",
+        "description": "Ordem de exibição e visibilidade desta câmera na interface. A ordem afeta o painel padrão. Para um controle mais detalhado, use grupos de câmeras.",
+        "order": {
+            "label": "Ordem na interface",
+            "description": "Ordem numérica usada para ordenar a câmera na interface (painel padrão e listas); números maiores aparecem depois."
+        },
+        "dashboard": {
+            "label": "Mostrar no painel ao vivo",
+            "description": "Alterna se esta câmera fica visível no painel ao vivo padrão de Todas as câmeras. A câmera continua disponível em todos os outros lugares da interface, incluindo grupos de câmeras e configurações."
+        },
+        "review": {
+            "label": "Mostrar na revisão",
+            "description": "Alterna se esta câmera fica visível na revisão (a página de revisão e seu filtro de câmeras, a revisão de movimento e a visualização de histórico)."
+        }
     },
     "ui": {
-        "label": "UI"
+        "label": "UI",
+        "description": "Preferências da interface do usuário, como fuso horário, formatação de hora/data e unidades.",
+        "timezone": {
+            "description": "Fuso horário opcional a ser exibido em toda a interface (usa o horário local do navegador se não for definido).",
+            "label": "Fuso horário"
+        },
+        "time_format": {
+            "label": "Formato de hora",
+            "description": "Formato de hora a ser usado na interface (browser, 12hour ou 24hour)."
+        },
+        "unit_system": {
+            "label": "Sistema de unidades",
+            "description": "Sistema de unidades para exibição (metric ou imperial), usado na interface e no MQTT."
+        }
+    },
+    "database": {
+        "description": "Configurações do banco de dados SQLite usado pelo Frigate para armazenar os metadados de objetos rastreados e de gravações.",
+        "path": {
+            "label": "Caminho do banco de dados",
+            "description": "Caminho no sistema de arquivos onde o arquivo do banco de dados SQLite do Frigate será armazenado."
+        },
+        "label": "Banco de dados"
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Configurações do serviço de restreaming go2rtc integrado, usado para retransmissão e tradução de streams ao vivo."
+    },
+    "networking": {
+        "label": "Rede",
+        "description": "Configurações relacionadas à rede, como a habilitação de IPv6 nos endpoints do Frigate.",
+        "ipv6": {
+            "label": "Configuração de IPv6",
+            "description": "Configurações específicas de IPv6 para os serviços de rede do Frigate.",
+            "enabled": {
+                "description": "Habilita o suporte a IPv6 nos serviços do Frigate (API e interface), quando aplicável.",
+                "label": "Habilitar IPv6"
+            }
+        },
+        "listen": {
+            "description": "Configuração das portas de escuta internas e externas. Destina-se a usuários avançados. Na maioria dos casos, recomenda-se alterar a seção de portas do seu arquivo Docker Compose.",
+            "internal": {
+                "label": "Porta interna",
+                "description": "Porta de escuta interna do Frigate (padrão 5000)."
+            },
+            "label": "Configuração das portas de escuta",
+            "external": {
+                "label": "Porta externa",
+                "description": "Porta de escuta externa do Frigate (padrão 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "header_map": {
+            "label": "Mapeamento de cabeçalhos",
+            "description": "Mapeia os cabeçalhos recebidos do proxy para os campos de usuário e função do Frigate na autenticação via proxy.",
+            "user": {
+                "description": "Cabeçalho que contém o nome de usuário autenticado fornecido pelo proxy de origem.",
+                "label": "Cabeçalho de usuário"
+            },
+            "role": {
+                "label": "Cabeçalho de função",
+                "description": "Cabeçalho que contém a função ou os grupos do usuário autenticado fornecidos pelo proxy de origem."
+            },
+            "role_map": {
+                "label": "Mapeamento de funções",
+                "description": "Mapeia os valores de grupo do proxy de origem para funções do Frigate (por exemplo, mapear grupos de administradores para a função admin)."
+            }
+        },
+        "description": "Configurações para integrar o Frigate atrás de um proxy reverso que repassa cabeçalhos de usuário autenticado.",
+        "logout_url": {
+            "label": "URL de logout",
+            "description": "URL para a qual os usuários são redirecionados ao sair pelo proxy."
+        },
+        "auth_secret": {
+            "label": "Segredo do proxy",
+            "description": "Segredo opcional verificado no cabeçalho X-Proxy-Secret para validar proxies confiáveis."
+        },
+        "default_role": {
+            "description": "Função padrão atribuída aos usuários autenticados por proxy quando nenhum mapeamento de função se aplica. Defina como 'none' para negar acesso a usuários não mapeados.",
+            "label": "Função padrão"
+        },
+        "separator": {
+            "label": "Caractere separador",
+            "description": "Caractere usado para dividir vários valores fornecidos nos cabeçalhos do proxy."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetria",
+        "description": "Opções de telemetria e estatísticas do sistema, incluindo o monitoramento de GPU e de largura de banda de rede.",
+        "network_interfaces": {
+            "label": "Interfaces de rede",
+            "description": "Lista de prefixos de nomes de interfaces de rede a serem monitoradas para as estatísticas de largura de banda."
+        },
+        "stats": {
+            "label": "Estatísticas do sistema",
+            "description": "Opções para habilitar/desabilitar a coleta de várias estatísticas do sistema e da GPU.",
+            "amd_gpu_stats": {
+                "label": "Estatísticas da GPU AMD",
+                "description": "Habilita a coleta de estatísticas da GPU AMD, se houver uma GPU AMD presente."
+            },
+            "intel_gpu_stats": {
+                "label": "Estatísticas da GPU Intel",
+                "description": "Habilita a coleta de estatísticas da GPU Intel, se houver uma GPU Intel presente."
+            },
+            "network_bandwidth": {
+                "label": "Largura de banda de rede",
+                "description": "Habilita o monitoramento da largura de banda de rede por processo para os processos ffmpeg das câmeras e para os detectores (requer capabilities)."
+            },
+            "intel_gpu_device": {
+                "description": "Endereço do barramento PCI ou caminho do dispositivo DRM (por ex., /dev/dri/card1) usado para fixar as estatísticas da GPU Intel em um dispositivo específico quando houver vários.",
+                "label": "Dispositivo da GPU Intel"
+            }
+        },
+        "version_check": {
+            "description": "Habilita uma verificação externa para detectar se há uma versão mais recente do Frigate disponível.",
+            "label": "Verificação de versão"
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Configurações de TLS para os endpoints web do Frigate (porta 8971).",
+        "enabled": {
+            "label": "Habilitar TLS",
+            "description": "Habilita o TLS para a interface web e a API do Frigate na porta TLS configurada."
+        }
+    },
+    "genai": {
+        "label": "Configuração de IA generativa",
+        "description": "Configurações dos provedores de IA generativa integrados, usados para gerar descrições de objetos e resumos de revisão.",
+        "api_key": {
+            "label": "Chave de API",
+            "description": "Chave de API exigida por alguns provedores (também pode ser definida por variáveis de ambiente)."
+        },
+        "base_url": {
+            "label": "URL base",
+            "description": "URL base para provedores auto-hospedados ou compatíveis (por exemplo, uma instância do Ollama)."
+        },
+        "model": {
+            "label": "Modelo",
+            "description": "O modelo do provedor a ser usado para gerar descrições ou resumos."
+        },
+        "provider": {
+            "label": "Provedor",
+            "description": "O provedor de IA generativa a ser usado (por exemplo: ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "Funções",
+            "description": "Funções da IA generativa (chat, descriptions, embeddings, transcribe); um provedor por função. Apenas chat, descriptions e embeddings são concedidas por padrão; transcribe deve ser listada explicitamente."
+        },
+        "provider_options": {
+            "label": "Opções do provedor",
+            "description": "Opções adicionais específicas do provedor a serem passadas ao cliente de IA generativa."
+        },
+        "runtime_options": {
+            "label": "Opções de execução",
+            "description": "Opções de execução passadas ao provedor a cada chamada de inferência."
+        }
+    },
+    "classification": {
+        "label": "Classificação de objetos",
+        "description": "Configurações dos modelos de classificação usados para refinar os rótulos de objetos ou classificar estados.",
+        "bird": {
+            "label": "Configuração da classificação de pássaros",
+            "description": "Configurações específicas dos modelos de classificação de pássaros.",
+            "enabled": {
+                "label": "Classificação de pássaros",
+                "description": "Habilita ou desabilita a classificação de pássaros."
+            },
+            "threshold": {
+                "description": "Pontuação mínima de classificação necessária para aceitar uma classificação de pássaro.",
+                "label": "Pontuação mínima"
+            }
+        },
+        "custom": {
+            "label": "Modelos de classificação personalizados",
+            "enabled": {
+                "label": "Habilitar modelo",
+                "description": "Habilita ou desabilita o modelo de classificação personalizado."
+            },
+            "description": "Configuração dos modelos de classificação personalizados usados para detecção de objetos ou de estados.",
+            "name": {
+                "label": "Nome do modelo",
+                "description": "Identificador do modelo de classificação personalizado a ser usado."
+            },
+            "threshold": {
+                "label": "Limite de pontuação",
+                "description": "Limite de pontuação usado para alterar o estado da classificação."
+            },
+            "save_attempts": {
+                "label": "Tentativas a salvar",
+                "description": "Quantas tentativas de classificação salvar para a interface de classificações recentes."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Classificar objetos",
+                    "description": "Lista de tipos de objeto nos quais executar a classificação de objetos."
+                },
+                "classification_type": {
+                    "description": "Tipo de classificação aplicado: 'sub_label' (adiciona um sub_label) ou outros tipos compatíveis.",
+                    "label": "Tipo de classificação"
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Câmeras de classificação",
+                    "description": "Recorte e configurações por câmera para executar a classificação de estados.",
+                    "crop": {
+                        "label": "Recorte da classificação",
+                        "description": "Coordenadas do recorte a serem usadas para executar a classificação nesta câmera."
+                    }
+                },
+                "motion": {
+                    "label": "Executar ao detectar movimento",
+                    "description": "Se verdadeiro, executa a classificação quando movimento for detectado dentro do recorte especificado."
+                },
+                "interval": {
+                    "label": "Intervalo de classificação",
+                    "description": "Intervalo (em segundos) entre as execuções periódicas de classificação de estados."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "description": "Configuração dos grupos de câmeras nomeados usados para organizar as câmeras na interface.",
+        "cameras": {
+            "label": "Lista de câmeras",
+            "description": "Lista dos nomes das câmeras incluídas neste grupo."
+        },
+        "label": "Grupos de câmeras",
+        "icon": {
+            "label": "Ícone do grupo",
+            "description": "Ícone usado para representar o grupo de câmeras na interface."
+        },
+        "order": {
+            "label": "Ordem de classificação",
+            "description": "Ordem numérica usada para ordenar os grupos de câmeras na interface; números maiores aparecem depois."
+        }
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Configurações de publicação de imagens via MQTT.",
+        "enabled": {
+            "description": "Habilita a publicação de snapshots dos objetos nos tópicos MQTT para esta câmera.",
+            "label": "Enviar imagem"
+        },
+        "timestamp": {
+            "label": "Adicionar carimbo de data/hora",
+            "description": "Sobrepõe um carimbo de data/hora nas imagens publicadas no MQTT."
+        },
+        "bounding_box": {
+            "label": "Adicionar caixa delimitadora",
+            "description": "Desenha caixas delimitadoras nas imagens publicadas via MQTT."
+        },
+        "crop": {
+            "label": "Recortar imagem",
+            "description": "Recorta as imagens publicadas no MQTT para a caixa delimitadora do objeto detectado."
+        },
+        "height": {
+            "label": "Altura da imagem",
+            "description": "Altura (em pixels) para redimensionar as imagens publicadas via MQTT."
+        },
+        "required_zones": {
+            "description": "Zonas em que um objeto deve entrar para que uma imagem seja publicada no MQTT.",
+            "label": "Zonas obrigatórias"
+        },
+        "quality": {
+            "label": "Qualidade JPEG",
+            "description": "Qualidade JPEG das imagens publicadas no MQTT (0-100)."
+        }
+    },
+    "active_profile": {
+        "label": "Perfil ativo",
+        "description": "Nome do perfil atualmente ativo. Apenas em tempo de execução, não é gravado no YAML."
+    },
+    "models": {
+        "label": "Modelos de detecção",
+        "scene": {
+            "label": "Cena do modelo",
+            "description": "O ambiente da câmera para o qual este modelo é usado. As câmeras selecionam um modelo definindo detect.scene com um valor correspondente, e 'all' é usado por qualquer câmera que não defina um."
+        },
+        "description": "Modelos de detecção de objetos e o hardware em que cada um é executado. As câmeras escolhem um modelo fazendo a correspondência entre o detect.scene delas e o scene do modelo.",
+        "devices": {
+            "label": "Hardware de detecção",
+            "description": "Hardware em que este modelo é executado, no formato '<detector>' ou '<detector>:<device>' (por exemplo, 'edgetpu:pci:0' ou 'openvino:GPU'). Listar o mesmo dispositivo mais de uma vez executa processos de inferência adicionais nele."
+        },
+        "path": {
+            "label": "Caminho do modelo personalizado do detector de objetos",
+            "description": "Caminho para um arquivo de modelo de detecção personalizado (ou plus://<model_id> para modelos do Frigate+)."
+        },
+        "labelmap_path": {
+            "description": "Caminho para um arquivo de labelmap que associa classes numéricas a rótulos de texto para o detector.",
+            "label": "Mapa de rótulos do detector de objetos personalizado"
+        },
+        "width": {
+            "label": "Largura de entrada do modelo de detecção de objetos",
+            "description": "Largura do tensor de entrada do modelo, em pixels."
+        },
+        "height": {
+            "label": "Altura de entrada do modelo de detecção de objetos",
+            "description": "Altura do tensor de entrada do modelo, em pixels."
+        },
+        "labelmap": {
+            "label": "Personalização do labelmap",
+            "description": "Substituições ou remapeamentos de entradas a serem mesclados ao labelmap padrão."
+        },
+        "attributes_map": {
+            "label": "Mapa de rótulos de objetos para seus rótulos de atributos",
+            "description": "Mapeamento de rótulos de objetos para rótulos de atributos usado para anexar metadados (por exemplo, 'car' -> ['license_plate'])."
+        },
+        "input_tensor": {
+            "label": "Formato do tensor de entrada do modelo",
+            "description": "Formato de tensor esperado pelo modelo: 'nhwc' ou 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Formato de cor dos pixels de entrada do modelo",
+            "description": "Espaço de cor dos pixels esperado pelo modelo: 'rgb', 'bgr' ou 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Tipo de dado de entrada do modelo",
+            "description": "Tipo de dado do tensor de entrada do modelo (por exemplo, 'float32')."
+        },
+        "model_type": {
+            "label": "Tipo de modelo de detecção de objetos",
+            "description": "Tipo de arquitetura do modelo detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine), usado por alguns detectores para otimização."
+        }
     }
 }
