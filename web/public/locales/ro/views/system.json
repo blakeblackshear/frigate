@@ -265,15 +265,15 @@
     "reindexingEmbeddings": "Se reindexează înglobările ({{processed}}% gata)",
     "detectIsVerySlow": "{{detect}} este foarte lent ({{speed}} ms)",
     "detectIsSlow": "{{detect}} este lent ({{speed}} ms)",
-    "detectHighCpuUsage": "{{camera}} are o utilizare ridicată CPU detecție ({{detectAvg}}%)",
-    "ffmpegHighCpuUsage": "{{camera}} are o utilizare ridicată CPU FFmpeg ({{ffmpegAvg}}%)",
     "cameraIsOffline": "{{camera}} este offline",
     "healthy": "Sistemul este sănătos",
     "debugReplayActive": "Sesiunea de reluare de depanare este activă",
     "cameraSkippedDetections": "{{camera}} omite detecția pe {{pct}}% din cadre",
     "systemNotices_one": "{{count}} notificare de sistem",
     "systemNotices_other": "{{count}} notificări de sistem",
-    "retentionUnmet": "Înregistrările sunt șterse înainte de încheierea perioadei de retenție pentru a elibera spațiu"
+    "retentionUnmet": "Înregistrările sunt șterse înainte de încheierea perioadei de retenție pentru a elibera spațiu",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}"
   },
   "lastRefreshed": "Ultima actualizare: ",
   "health": {
@@ -281,24 +281,17 @@
     "notices": {
       "title": "Notificări",
       "empty": "Instalația ta Frigate este în stare bună",
-      "dismiss": "Respinge",
       "openSettings": "Deschide setările",
       "openLink": "Deschide linkul",
       "noMatches": "Nicio notificare nu se potrivește cu filtrul",
-      "dismissedTitle": "Respinse",
-      "noneDismissed": "Nicio notificare respinsă",
-      "clearDismissed": "Șterge respinse",
-      "clearDismissedTitle": "Ștergi notificările respinse?",
-      "clearDismissedDesc": "Fiecare notificare respinsă este ștearsă. Verificările de configurare și de stream-uri reapar imediat, iar celelalte notificări vor reveni data viitoare când apar.",
       "firstSeen_one": "Văzută prima dată {{time}}",
       "firstSeen_other": "Văzută prima dată {{time}} · de {{count}} ori",
-      "dismissedAt": "Respinsă {{time}}",
       "filter": {
-        "showDismissed": "Arată cele respinse",
         "severity": "Severitate",
         "error": "Eroare",
         "warning": "Avertisment",
-        "info": "Info"
+        "info": "Info",
+        "showHidden": "Afișează cele ascunse"
       },
       "kinds": {
         "detector_stuck": "Detectorul {{detector}} a fost repornit după ce a încetat să mai răspundă",
@@ -307,12 +300,27 @@
         "shm_too_low": "Alocarea /dev/shm ({{total}} MB) ar trebui mărită la cel puțin {{min}} MB",
         "failed_login_one": "Încercare eșuată de autentificare pentru {{user}}",
         "failed_login_other": "Încercări eșuate de autentificare pentru {{user}}",
-        "update_available": "Frigate {{version}} este disponibil"
+        "update_available": "Frigate {{version}} este disponibil",
+        "ffmpeg_high_cpu": "Utilizarea CPU FFmpeg este ridicată (medie {{cpu}}%)",
+        "detect_high_cpu": "Utilizarea CPU pentru detecție este ridicată (medie {{cpu}}%)"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
       "streamProbeFailed": "Stream-ul {{index}} nu a putut fi sondat: {{error}}",
-      "cameraProbeFailed": "Stream-urile nu au putut fi sondate: {{error}}"
+      "cameraProbeFailed": "Stream-urile nu au putut fi sondate: {{error}}",
+      "acknowledge": "Confirmă",
+      "acknowledgeHint": "Ascunde până când se întâmplă din nou",
+      "mute": "Fără sunet",
+      "muteHint": "Nu mai afișa niciodată",
+      "unmute": "Cu sunet",
+      "showAgain": "Afișează din nou",
+      "hiddenTitle": "Ascuns",
+      "noneHidden": "Nicio notificare ascunsă",
+      "showAll": "Afișează totul din nou",
+      "showAllTitle": "Afișează toate notificările ascunse?",
+      "showAllDesc": "Fiecare notificare confirmată și silențiată revine în lista de notificări, inclusiv verificările de configurație și de flux.",
+      "acknowledgedAt": "Confirmat {{time}}",
+      "mutedAt": "Fără sunet {{time}}"
     },
     "hardware": {
       "title": "Hardware",

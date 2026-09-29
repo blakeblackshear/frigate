@@ -661,9 +661,8 @@
       "title": "Email"
     },
     "notificationUnavailable": {
-      "desc": "Notificările push web necesită un context securizat (<code>https://…</code>). Aceasta este o limitare a browserului. Accesează Frigate în mod securizat pentru a utiliza notificările.",
-      "title": "Notificări Indisponibile",
-      "descPwa": "Pe iOS, notificările web push sunt disponibile doar când Frigate este instalat pe ecranul principal. Deschide meniul <strong>Partajare</strong>, alege <strong>Adaugă pe ecranul principal</strong>, apoi deschide Frigate din noua pictogramă pentru a înregistra acest dispozitiv pentru notificări."
+      "desc": "Notificările web push necesită un context securizat (https://…). Aceasta este o limitare a browserului. Accesează Frigate printr-o conexiune securizată pentru a utiliza notificările.Trimite următorul șir de caractere când ești gata.",
+      "descPwa": "Pe iOS, notificările web push sunt disponibile doar când Frigate este instalat pe ecranul principal. Deschide meniul de partajare, alege „Adaugă pe ecranul principal”, apoi deschide Frigate din noua pictogramă pentru a înregistra acest dispozitiv pentru notificări."
     },
     "cameras": {
       "title": "Camere",
@@ -881,7 +880,6 @@
       }
     },
     "semanticSearch": {
-      "title": "Căutarea Semantică este dezactivată",
       "desc": "Căutarea Semantică trebuie să fie activată pentru a folosi Triggere."
     },
     "wizard": {
@@ -1544,7 +1542,9 @@
         "preset-record-generic-audio-aac": "Înregistrare (Generic + Audio în AAC)",
         "preset-record-mjpeg": "Înregistrare - Camere MJPEG",
         "preset-record-jpeg": "Înregistrare - Camere JPEG",
-        "preset-record-ubiquiti": "Înregistrare - Camere Ubiquiti"
+        "preset-record-ubiquiti": "Înregistrare - Camere Ubiquiti",
+        "preset-apple-silicon-h264": "Apple Silicon (H.264)",
+        "preset-apple-silicon-h265": "Apple Silicon (H.265)"
       },
       "sameAsRecord": "La fel ca argumentele de ieșire pentru înregistrare"
     },
