@@ -227,8 +227,6 @@
   },
   "lastRefreshed": "Обновлено: ",
   "stats": {
-    "ffmpegHighCpuUsage": "Камера {{camera}} использует чрезмерно много ресурсов CPU в FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "Камера {{camera}} использует слишком много ресурсов CPU для детекции ({{detectAvg}}%)",
     "healthy": "Система в порядке",
     "reindexingEmbeddings": "Переиндексация эмбеддингов (выполнено {{processed}} %)",
     "cameraIsOffline": "{{camera}} не в сети",
