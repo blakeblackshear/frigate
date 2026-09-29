@@ -286,6 +286,42 @@ test.describe("Detection models settings @high", () => {
     ).toBeDisabled();
   });
 
+  test("two models without a path share the detector's default model", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      { scene: "default", devices: ["cpu"] },
+      { scene: "driveway", devices: ["cpu"] },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "The Default and driveway models use the same model file",
+    );
+  });
+
+  test("another spelling of the same path is the same model", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      {
+        scene: "default",
+        devices: ["openvino:GPU.0"],
+        path: "/config/model_cache/yolo.onnx",
+      },
+      {
+        scene: "driveway",
+        devices: ["openvino:GPU.1"],
+        path: "/config//model_cache/./tmp/../yolo.onnx",
+      },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "The Default and driveway models use the same model file",
+    );
+  });
+
   test("one model file may run on different detectors", async ({
     frigateApp,
   }) => {
