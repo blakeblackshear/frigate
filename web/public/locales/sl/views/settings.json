@@ -757,7 +757,6 @@
     },
     "documentTitle": "Sprožilci",
     "semanticSearch": {
-      "title": "Semantično iskanje je onemogočeno",
       "desc": "Za uporabo sprožilcev mora biti omogočeno semantično iskanje."
     },
     "management": {
@@ -1094,7 +1093,6 @@
       "desc": "Frigate lahko pošilja potisna obvestila (push) neposredno na tvojo napravo, ko teče v brskalniku ali je nameščen kot PWA."
     },
     "notificationUnavailable": {
-      "title": "Obvestila niso na voljo",
       "desc": "Spletna potisna obvestila zahtevajo varno povezavo (<code>https://…</code>). To je omejitev brskalnika. Za uporabo obvestil dostopaj do Frigate prek varne povezave."
     },
     "globalSettings": {

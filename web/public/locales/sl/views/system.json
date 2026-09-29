@@ -207,8 +207,6 @@
   },
   "lastRefreshed": "Zadnja osvežitev: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} ima visoko porabo procesorja FFmpeg ({{ffmpegAvg}} %)",
-    "detectHighCpuUsage": "{{camera}} ima visoko porabo procesorja za zaznavanje ({{detectAvg}} %)",
     "healthy": "Sistem deluje brezhibno",
     "reindexingEmbeddings": "Ponovno indeksiranje vdelav ({{processed}} % končano)",
     "cameraIsOffline": "Kamera {{camera}} je brez povezave",
