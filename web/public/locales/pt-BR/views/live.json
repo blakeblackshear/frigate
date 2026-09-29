@@ -6,7 +6,12 @@
   "lowBandwidthMode": "Modo de baixa largura de banda",
   "twoWayTalk": {
     "enable": "Habilitar Fala em Dois Sentidos",
-    "disable": "Desabilitar Fala em Dois Sentidos"
+    "disable": "Desabilitar Fala em Dois Sentidos",
+    "error": {
+      "microphone": "A conversa bidirecional não conseguiu acessar o seu microfone",
+      "refused": "A conversa bidirecional falhou ao iniciar. Consulte o console do navegador para mais detalhes."
+    },
+    "requiresWebRTC": "A conversa bidirecional exige WebRTC, que não está disponível"
   },
   "cameraAudio": {
     "enable": "Habilitar Áudio da Câmera",
@@ -131,14 +136,40 @@
     },
     "lowBandwidth": {
       "tips": "A transmissão ao vivo está em modo de economia de dados devido a erros de buffering ou de transmissão.",
-      "resetStream": "Resetar transmissão"
+      "resetStream": "Resetar transmissão",
+      "force": {
+        "label": "Forçar modo de baixa largura de banda",
+        "desc": "Sempre reproduz o feed de baixa largura de banda integrado do Frigate em vez do stream selecionado. Funciona em qualquer conexão, mas tem qualidade inferior e não tem áudio."
+      }
     },
     "playInBackground": {
       "label": "Reproduzir em segundo plano",
       "tips": "Habilitar essa opção para continuar a transmissão quando o reprodutor estiver oculto."
     },
     "debug": {
-      "picker": "A seleção da transmissão fica indisponível em modo de depuração. A visualização de depuração sempre usa o papel de detecção atribuído à transmissão."
+      "picker": "A seleção da transmissão fica indisponível em modo de depuração. A visualização de depuração sempre usa o papel de detecção atribuído à transmissão.",
+      "technology": "A seleção da tecnologia de stream não está disponível no modo de depuração."
+    },
+    "mode": "Tecnologia de streaming",
+    "technology": {
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "description": "Escolha a sua tecnologia de streaming preferida. O Frigate ainda pode recorrer ao modo de baixa largura de banda em caso de erros de reprodução ou de rede.",
+      "tips": {
+        "mse": "Padrão recomendado, ampla compatibilidade e reprodução fluida",
+        "webrtc": "Requer configuração adicional e não é compatível com todos os dispositivos"
+      },
+      "unavailable": {
+        "not-configured": "O WebRTC não está configurado. Defina candidates ou ice_servers do WebRTC no go2rtc.",
+        "unreachable": "O WebRTC não conseguiu se conectar. Verifique se a porta 8555 está acessível e se qualquer servidor STUN/TURN está correto.",
+        "video-codec": "O codec de vídeo deste stream não é compatível com o WebRTC neste navegador.",
+        "audio-codec": "O codec de áudio deste stream não é compatível com o WebRTC. Transcodifique para opus ou G.711 com o go2rtc.",
+        "checking": "Verificando a disponibilidade do WebRTC…",
+        "browser": "Seu navegador não é compatível com WebRTC."
+      }
     }
   },
   "cameraSettings": {

@@ -25,7 +25,9 @@
     "noFoundForTimePeriod": "Nenhum evento encontrado neste período."
   },
   "recordings": {
-    "documentTitle": "Gravações - Frigate"
+    "documentTitle": "Gravações - Frigate",
+    "invalidSharedLink": "Não foi possível abrir o link da gravação com carimbo de data/hora devido a um erro de análise.",
+    "invalidSharedCamera": "Não foi possível abrir o link da gravação com carimbo de data/hora devido a uma câmera desconhecida ou não autorizada."
   },
   "calendarFilter": {
     "last24Hours": "Últimas 24 horas"
@@ -35,10 +37,10 @@
     "button": "Novos Itens para Revisar",
     "label": "Ver novos itens para revisão"
   },
-  "selected_one": "{{count}} selecionado(s)",
+  "selected_one": "{{count}} selecionados",
   "documentTitle": "Revisar - Frigate",
   "markAsReviewed": "Marcar como Revisado",
-  "selected_other": "{{count}} selecionado(s)",
+  "selected_other": "{{count}} selecionados",
   "camera": "Câmera",
   "detected": "detectado",
   "detail": {
@@ -62,5 +64,33 @@
   "zoomOut": "Diminuir o zoom",
   "select_all": "Todos",
   "normalActivity": "Normal",
-  "needsReview": "Precisa de revisão"
+  "needsReview": "Precisa de revisão",
+  "securityConcern": "Questão de segurança",
+  "motionSearch": {
+    "menuItem": "Busca de movimento",
+    "openMenu": "Opções da câmera"
+  },
+  "motionPreviews": {
+    "menuItem": "Ver prévias de movimento",
+    "title": "Prévias de movimento: {{camera}}",
+    "mobileSettingsTitle": "Configurações da prévia de movimento",
+    "mobileSettingsDesc": "Ajuste a velocidade de reprodução, o escurecimento e o recorte, e escolha uma data para revisar clipes apenas com movimento.",
+    "dimAria": "Ajustar a intensidade do escurecimento",
+    "dim": "Escurecer",
+    "speed": "Velocidade",
+    "dimDesc": "Aumente o escurecimento para aumentar a visibilidade da área de movimento.",
+    "speedAria": "Selecione a velocidade de reprodução da prévia",
+    "speedDesc": "Escolha a rapidez com que os clipes de prévia são reproduzidos.",
+    "back": "Voltar",
+    "empty": "Nenhuma prévia disponível",
+    "noPreview": "Prévia indisponível",
+    "seekAria": "Ir para {{time}} no player de {{camera}}",
+    "filterDesc": "Selecione áreas para mostrar apenas os clipes com movimento nessas regiões.",
+    "filterClear": "Limpar",
+    "filter": "Filtro",
+    "crop": "Recortar para o filtro",
+    "cropAria": "Alterna o recorte das prévias para as áreas filtradas",
+    "cropDesc": "Amplia as prévias nas áreas de filtro selecionadas em vez de mostrar o quadro completo."
+  },
+  "subOnlyQuality": "Apenas gravações de baixa qualidade estão disponíveis neste intervalo de tempo"
 }
