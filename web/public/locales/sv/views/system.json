@@ -164,8 +164,6 @@
   },
   "lastRefreshed": "Senast uppdaterad: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} har hög CPU-användning för FFmpeg ({{ffmpegAvg}} %)",
-    "detectHighCpuUsage": "{{camera}} har hög CPU-användning för detektering ({{detectAvg}} %)",
     "healthy": "Systemet fungerar normalt",
     "reindexingEmbeddings": "Omindexering av inbäddningar ({{processed}} % klart)",
     "cameraIsOffline": "{{camera}} är frånkopplad",
