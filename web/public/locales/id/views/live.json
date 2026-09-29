@@ -6,7 +6,12 @@
   "lowBandwidthMode": "Mode bandwidth rendah",
   "twoWayTalk": {
     "enable": "Aktifkan Audio Dua Arah",
-    "disable": "Nonaktifkan Audio Dua Arah"
+    "disable": "Nonaktifkan Audio Dua Arah",
+    "requiresWebRTC": "Percakapan dua arah memerlukan WebRTC, yang tidak tersedia",
+    "error": {
+      "microphone": "Percakapan dua arah tidak dapat mengakses mikrofon Anda",
+      "refused": "Percakapan dua arah gagal dimulai. Lihat konsol browser untuk detail."
+    }
   },
   "cameraAudio": {
     "enable": "Aktifkan Audio Kamera",
@@ -131,7 +136,8 @@
       "unavailable": "Audio tidak tersedia untuk stream ini"
     },
     "debug": {
-      "picker": "Pemilihan stream tidak tersedia dalam mode debug. Tampilan debug selalu menggunakan stream yang ditetapkan ke peran detect."
+      "picker": "Pemilihan stream tidak tersedia dalam mode debug. Tampilan debug selalu menggunakan stream yang ditetapkan ke peran detect.",
+      "technology": "Pemilihan teknologi streaming tidak tersedia dalam mode debug."
     },
     "twoWayTalk": {
       "tips": "Perangkat Anda harus mendukung fitur ini dan WebRTC harus dikonfigurasi untuk audio dua arah.",
@@ -140,11 +146,36 @@
     },
     "lowBandwidth": {
       "tips": "Tampilan live berada dalam mode bandwidth rendah karena buffering atau kesalahan stream.",
-      "resetStream": "Atur ulang stream"
+      "resetStream": "Atur ulang stream",
+      "force": {
+        "label": "Paksa mode bandwidth rendah",
+        "desc": "Selalu putar feed bandwidth rendah bawaan Frigate, bukan stream yang dipilih. Berfungsi pada semua koneksi, tetapi kualitasnya lebih rendah dan tanpa audio."
+      }
     },
     "playInBackground": {
       "label": "Putar di latar belakang",
       "tips": "Aktifkan opsi ini untuk melanjutkan streaming saat pemutar disembunyikan."
+    },
+    "mode": "Teknologi Streaming",
+    "technology": {
+      "description": "Pilih teknologi streaming yang Anda inginkan. Frigate mungkin tetap beralih ke mode bandwidth rendah jika terjadi kesalahan pemutaran atau jaringan.",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "Default yang direkomendasikan, kompatibilitas luas dan pemutaran lancar",
+        "webrtc": "Memerlukan pengaturan tambahan dan tidak didukung pada setiap perangkat"
+      },
+      "unavailable": {
+        "browser": "Browser Anda tidak mendukung WebRTC.",
+        "not-configured": "WebRTC belum dikonfigurasi. Atur candidates WebRTC go2rtc atau ice_servers.",
+        "unreachable": "WebRTC tidak dapat terhubung. Pastikan port 8555 dapat dijangkau dan server STUN/TURN telah dikonfigurasi dengan benar.",
+        "video-codec": "Codec video stream ini tidak didukung oleh WebRTC pada browser ini.",
+        "audio-codec": "Codec audio stream ini tidak didukung oleh WebRTC. Lakukan transcoding ke Opus atau G.711 menggunakan go2rtc.",
+        "checking": "Memeriksa ketersediaan WebRTC…"
+      }
     }
   },
   "cameraSettings": {
@@ -154,7 +185,8 @@
     "snapshots": "Snapshot",
     "audioDetection": "Deteksi Audio",
     "transcription": "Transkripsi Audio",
-    "autotracking": "Pelacakan Otomatis"
+    "autotracking": "Pelacakan Otomatis",
+    "camera": "Kamera"
   },
   "history": {
     "label": "Tampilkan rekaman historis"
@@ -191,5 +223,9 @@
       "description": "Grup kamera ini tidak memiliki kamera yang ditetapkan atau diaktifkan.",
       "buttonText": "Kelola Grup"
     }
+  },
+  "camera": {
+    "turnOn": "Nyalakan Kamera",
+    "turnOff": "Matikan Kamera"
   }
 }

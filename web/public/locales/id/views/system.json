@@ -214,8 +214,6 @@
   },
   "lastRefreshed": "Terakhir diperbarui: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} memiliki penggunaan CPU FFmpeg yang tinggi ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} memiliki penggunaan CPU deteksi yang tinggi ({{detectAvg}}%)",
     "healthy": "Sistem sehat",
     "reindexingEmbeddings": "Mengindeks ulang embedding ({{processed}}% selesai)",
     "cameraIsOffline": "{{camera}} sedang offline",

@@ -58,7 +58,7 @@
     "systemTelemetry": "Telemetri",
     "systemBirdseye": "Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorsAndModel": "Detektor dan model",
+    "systemDetectorsAndModel": "Model deteksi",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "Stream go2rtc",
     "integrationSemanticSearch": "Pencarian semantik",
@@ -68,7 +68,7 @@
     "integrationObjectClassification": "Klasifikasi objek",
     "integrationAudioTranscription": "Transkripsi audio",
     "cameraDetect": "Deteksi objek",
-    "cameraFfmpeg": "FFmpeg",
+    "cameraFfmpeg": "Stream (FFmpeg)",
     "cameraRecording": "Perekaman",
     "cameraSnapshots": "Cuplikan",
     "cameraMotion": "Deteksi gerakan",
@@ -150,17 +150,48 @@
     "toast": {
       "success": {
         "clearStoredLayout": "Tata letak tersimpan untuk {{cameraName}} telah dihapus",
-        "clearStreamingSettings": "Pengaturan streaming untuk semua grup kamera telah dihapus."
+        "clearStreamingSettings": "Pengaturan streaming untuk semua grup kamera telah dihapus.",
+        "exportUiSettings": "Pengaturan diekspor",
+        "importUiSettings": "Pengaturan diimpor"
       },
       "error": {
         "clearStoredLayoutFailed": "Gagal menghapus tata letak tersimpan: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Gagal menghapus pengaturan streaming: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Gagal menghapus pengaturan streaming: {{errorMessage}}",
+        "exportUiSettingsFailed": "Gagal mengekspor pengaturan",
+        "importNothingToApply": "Gagal mengimpor pengaturan: file tidak berisi pengaturan",
+        "importInvalidJson": "Gagal mengimpor pengaturan: file bukan JSON yang valid",
+        "importWrongType": "Gagal mengimpor pengaturan: file bukan ekspor pengaturan Frigate",
+        "importUnsupportedVersion": "Gagal mengimpor pengaturan: file memerlukan versi Frigate yang lebih baru",
+        "importInvalidSchema": "Gagal mengimpor pengaturan: file tidak valid",
+        "importUiSettingsFailed": "Gagal mengimpor pengaturan"
+      }
+    },
+    "backupRestore": {
+      "title": "Pencadangan & Pemulihan",
+      "transfer": {
+        "label": "File Pengaturan Perangkat",
+        "desc": "Tata letak grup kamera, pengaturan streaming, dan preferensi UI disimpan di browser Anda. Ekspor ke file untuk mencadangkannya atau memindahkannya ke perangkat lain.",
+        "export": "Ekspor Pengaturan",
+        "import": "Impor Pengaturan"
+      },
+      "importDialog": {
+        "title": "Impor Pengaturan",
+        "desc": "Pilih yang akan diterapkan dari file ini. Frigate akan dimuat ulang setelah impor selesai.",
+        "exportedFrom": "Diekspor pada {{date}} dari konfigurasi Frigate versi {{version}}",
+        "layouts_other": "Tata letak grup kamera ({{count}} grup)",
+        "streaming_other": "Pengaturan streaming ({{count}} kamera)",
+        "preferences_other": "Preferensi UI ({{count}} pengaturan)",
+        "unknownGroups_other": "Grup kamera {{groups}} tidak ada di server ini. Pengaturannya akan disimpan tetapi tidak digunakan.",
+        "unknownCameras_other": "Kamera {{cameras}} tidak ada di server ini. Pengaturan streamingnya akan diabaikan.",
+        "confirm": "Impor"
       }
     }
   },
   "configMessages": {
     "audioTranscription": {
-      "audioDetectionDisabled": "Deteksi audio tidak diaktifkan untuk kamera ini. Transkripsi audio memerlukan deteksi audio yang aktif."
+      "audioDetectionDisabled": "Deteksi audio tidak diaktifkan untuk kamera ini. Transkripsi audio memerlukan deteksi audio yang aktif.",
+      "audioDetectionRuntimeDisabled": "Deteksi audio diaktifkan dalam konfigurasi Anda, tetapi saat ini dinonaktifkan untuk kamera ini, sehingga transkripsi audio tidak akan berjalan. Aktifkan kembali dari tampilan langsung kamera, atau periksa apakah profil aktif menonaktifkannya.",
+      "genaiProviderSelected": "Penyedia GenAI dipilih, sehingga pengaturan perangkat dan ukuran model diabaikan."
     },
     "detect": {
       "fpsGreaterThanFive": "Mengatur FPS deteksi lebih dari 5 tidak direkomendasikan. Nilai yang lebih tinggi dapat menyebabkan masalah performa dan tidak akan memberikan manfaat apa pun.",
@@ -170,7 +201,9 @@
       "maxFramesSet": "Menetapkan frame maksimum akan menimpa perilaku default dan menonaktifkan pelacakan objek diam. Hanya sedikit situasi yang memerlukan ini, gunakan dengan hati-hati.",
       "squareResolution": "Resolusi deteksi berbentuk persegi tidak lazim. Lebar dan tinggi deteksi harus sesuai dengan rasio aspek kamera Anda, misalnya 16:9, bukan dimensi model deteksi objek. Rasio aspek yang tidak sesuai dapat meregangkan gambar dan mengurangi akurasi deteksi.",
       "resolutionHigh": "Resolusi deteksi ini lebih tinggi daripada yang direkomendasikan dan dapat meningkatkan penggunaan sumber daya tanpa meningkatkan akurasi deteksi. Resolusi deteksi 1080p atau lebih rendah direkomendasikan untuk sebagian besar kamera.",
-      "globalResolutionMultipleCameras": "Resolusi deteksi global ditetapkan saat beberapa kamera dikonfigurasi. Kecuali semua kamera memiliki resolusi dan rasio aspek yang sama, lebar dan tinggi deteksi sebaiknya ditentukan per kamera agar sesuai dengan rasio aspek asli masing-masing kamera."
+      "globalResolutionMultipleCameras": "Resolusi deteksi global ditetapkan saat beberapa kamera dikonfigurasi. Kecuali semua kamera memiliki resolusi dan rasio aspek yang sama, lebar dan tinggi deteksi sebaiknya ditentukan per kamera agar sesuai dengan rasio aspek asli masing-masing kamera.",
+      "runtimeDisabled": "Deteksi objek diaktifkan dalam konfigurasi Anda, tetapi saat ini dinonaktifkan untuk kamera ini. Snapshot, item tinjauan, dan pengayaan seperti pengenalan wajah, pengenalan pelat nomor, serta Generative AI tidak akan berfungsi hingga fitur tersebut diaktifkan kembali dari tampilan langsung kamera, atau hingga profil aktif berhenti menonaktifkannya.",
+      "sceneWithoutModel": "Tidak ada model deteksi yang dikonfigurasi untuk scene ini, sehingga kamera ini menggunakan model dengan scene “All cameras” sebagai cadangan. Tambahkan model untuk scene ini agar kamera memiliki modelnya sendiri."
     },
     "faceRecognition": {
       "globalDisabled": "Pengayaan pengenalan wajah harus diaktifkan agar fitur pengenalan wajah berfungsi pada kamera ini.",
@@ -179,14 +212,17 @@
     },
     "lpr": {
       "globalDisabled": "Pengayaan pengenalan pelat nomor harus diaktifkan agar fitur LPR berfungsi pada kamera ini.",
-      "vehicleNotTracked": "Pengenalan pelat nomor memerlukan 'car' atau 'motorcycle' untuk dilacak. Aktifkan 'car' atau 'motorcycle' di Objek untuk kamera ini.",
+      "vehicleNotTracked": "Pengenalan pelat nomor memerlukan kendaraan untuk dilacak. Aktifkan “car” atau jenis kendaraan lain pada Objects untuk kamera ini.",
       "modelSizeLarge": "Model 'large' dioptimalkan untuk pelat nomor multi-baris. Model 'small' memberikan performa lebih baik daripada 'large' dan sebaiknya digunakan kecuali wilayah Anda menggunakan format pelat multi-baris."
     },
     "review": {
       "recordDisabled": "Perekaman dinonaktifkan, item tinjauan tidak akan dibuat.",
       "detectDisabled": "Deteksi objek dinonaktifkan. Item tinjauan memerlukan objek yang terdeteksi untuk mengategorikan alert dan deteksi.",
       "allNonAlertDetections": "Semua aktivitas non-alert akan disertakan sebagai deteksi.",
-      "genaiImageSourceRecordingsRecordDisabled": "Sumber gambar disetel ke 'rekaman', tetapi perekaman dinonaktifkan. Frigate akan kembali ke gambar pratinjau."
+      "genaiImageSourceRecordingsRecordDisabled": "Sumber gambar disetel ke 'rekaman', tetapi perekaman dinonaktifkan. Frigate akan kembali ke gambar pratinjau.",
+      "recordRuntimeDisabled": "Perekaman diaktifkan dalam konfigurasi Anda, tetapi saat ini dinonaktifkan untuk kamera ini, sehingga item tinjauan tidak akan dibuat. Aktifkan kembali dari tampilan langsung kamera, atau periksa apakah profil aktif menonaktifkannya.",
+      "detectRuntimeDisabled": "Deteksi objek diaktifkan dalam konfigurasi Anda, tetapi saat ini dinonaktifkan untuk kamera ini. Item tinjauan memerlukan objek yang terdeteksi untuk mengategorikan peringatan dan deteksi. Aktifkan kembali dari tampilan langsung kamera, atau periksa apakah profil aktif menonaktifkannya.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "Sumber gambar diatur ke “recordings”, tetapi perekaman saat ini dinonaktifkan untuk kamera ini meskipun konfigurasi Anda mengaktifkannya. Frigate akan menggunakan gambar pratinjau sebagai pengganti."
     },
     "audio": {
       "noAudioRole": "Tidak ada stream yang memiliki peran audio yang didefinisikan. Anda harus mengaktifkan peran audio agar deteksi audio berfungsi."
@@ -195,16 +231,30 @@
       "genaiNoDescriptionsProvider": "Anda harus mengonfigurasi penyedia GenAI dengan peran 'deskripsi' agar deskripsi dapat dibuat."
     },
     "record": {
-      "noRecordRole": "Tidak ada stream yang memiliki peran record yang didefinisikan. Perekaman tidak akan berfungsi."
+      "noRecordRole": "Tidak ada stream yang memiliki peran record yang didefinisikan. Perekaman tidak akan berfungsi.",
+      "noRecordSubRole": "Tidak ada stream yang memiliki peran record_sub. Perekaman sub stream tidak akan berfungsi."
     },
     "snapshots": {
-      "detectDisabled": "Deteksi objek dinonaktifkan. Cuplikan dihasilkan dari objek yang terlacak dan tidak akan dibuat."
+      "detectDisabled": "Deteksi objek dinonaktifkan. Cuplikan dihasilkan dari objek yang terlacak dan tidak akan dibuat.",
+      "detectRuntimeDisabled": "Deteksi objek diaktifkan dalam konfigurasi Anda, tetapi saat ini dinonaktifkan untuk kamera ini, sehingga snapshot tidak akan dibuat. Aktifkan kembali dari tampilan langsung kamera, atau periksa apakah profil aktif menonaktifkannya."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Ukuran 'small' dengan model Jina V2 memiliki RAM tinggi dan biaya inferensi. Model 'large' dengan GPU diskrit direkomendasikan."
     },
     "onvif": {
       "autotrackingNoZones": "Pelacakan otomatis memerlukan setidaknya satu zona. Tentukan zona untuk kamera ini di Masker / Zona, lalu tetapkan sebagai zona wajib di bawah."
+    },
+    "model": {
+      "optimizedFor320": "Frigate dioptimalkan untuk model 320x320, yang merupakan pilihan terbaik untuk sebagian besar konfigurasi. Model 640x640 lebih lambat dan hanya membantu dalam skenario tertentu.",
+      "inputDimensionsNotDetectResolution": "Lebar dan tinggi input model adalah dimensi input model deteksi objek, bukan resolusi deteksi kamera Anda. Nilainya harus sesuai dengan dimensi model yang digunakan—biasanya ukuran persegi seperti 320x320 atau 640x640."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Argumen akselerasi perangkat keras manual tidak direkomendasikan. Kecuali terdapat kebutuhan khusus, pilih preset yang sesuai dengan perangkat keras Anda.",
+      "inputsMissingGo2rtcStream": "Input di bawah ini mengarah ke restream go2rtc yang sudah tidak ada. Pilih restream yang tersedia atau masukkan URL kamera secara manual; jika tidak, kamera ini akan gagal terhubung."
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "Birdseye mencakup objek yang dilacak, tetapi deteksi objek dinonaktifkan untuk kamera ini. Kamera tidak akan muncul di Birdseye.",
+      "objectTrackingDetectRuntimeDisabled": "Birdseye mencakup objek yang dilacak, tetapi deteksi objek saat ini dinonaktifkan untuk kamera ini meskipun konfigurasi Anda mengaktifkannya. Kamera tidak akan muncul di Birdseye hingga deteksi objek diaktifkan kembali dari tampilan langsung kamera, atau hingga profil aktif berhenti menonaktifkannya."
     }
   },
   "button": {
@@ -222,7 +272,10 @@
       "heading_other": "Bagian global ini memiliki bidang yang ditimpa di {{count}} kamera.",
       "othersField_other": "{{count}} lainnya",
       "profilePrefix": "Profil {{profile}}: {{fields}}"
-    }
+    },
+    "overriddenLive": "Ditimpa (Langsung)",
+    "overriddenLiveTooltip": "Kamera ini berjalan dengan nilai yang berbeda dari nilai yang tersimpan dalam konfigurasi Anda, yang ditampilkan di sini. Tampilan langsung, MQTT, atau profil aktif dapat mengubahnya saat Frigate berjalan.",
+    "overriddenLiveValue": "Nilai yang berjalan: {{value}}"
   },
   "menuDot": {
     "overrideGlobal": "Bagian ini menimpa konfigurasi global",
@@ -407,7 +460,7 @@
       }
     },
     "step3": {
-      "description": "Konfigurasikan peran stream dan tambahkan stream tambahan untuk kamera Anda.",
+      "description": "Konfigurasikan fitur, peran stream, dan tambahkan stream tambahan untuk kamera Anda.",
       "streamsTitle": "Stream Kamera",
       "addStream": "Tambah Stream",
       "addAnotherStream": "Tambah Stream Lain",
@@ -441,11 +494,26 @@
         "title": "Peran Stream",
         "detect": "Umpan utama untuk deteksi objek.",
         "record": "Menyimpan segmen umpan video berdasarkan pengaturan konfigurasi.",
-        "audio": "Umpan untuk deteksi berbasis audio."
+        "audio": "Umpan untuk deteksi berbasis audio.",
+        "record_sub": "Rekaman berkualitas lebih rendah untuk pemutaran adaptif dan retensi lebih lama (biasanya sub stream kamera)."
       },
       "featuresPopover": {
         "title": "Fitur Stream",
         "description": "Gunakan restreaming go2rtc untuk mengurangi koneksi ke kamera Anda."
+      },
+      "appleCompatibility": {
+        "title": "Tingkatkan pemutaran pada perangkat Apple",
+        "description": "Aktifkan jika Anda menonton rekaman melalui Safari atau perangkat iPhone, iPad, atau Mac."
+      },
+      "ptz": {
+        "title": "Aktifkan Kontrol PTZ",
+        "detectedNote": "Dukungan PTZ telah terdeteksi melalui ONVIF. Jika ini adalah kamera PTZ, mengaktifkan opsi ini memungkinkan Anda mengendalikan fungsi pan/tilt/zoom kamera dari UI.",
+        "connectionDetails": "Detail koneksi ONVIF",
+        "host": "Host ONVIF",
+        "port": "Port ONVIF",
+        "username": "Nama Pengguna ONVIF",
+        "password": "Kata Sandi ONVIF",
+        "hostRequiredWarning": "Host dan port ONVIF diperlukan saat kontrol PTZ diaktifkan."
       }
     },
     "step4": {
@@ -506,7 +574,7 @@
     "deleteCameraDialog": {
       "title": "Hapus Kamera",
       "description": "Menghapus kamera akan menghapus secara permanen semua rekaman, objek terlacak, dan konfigurasi untuk kamera tersebut. Semua stream go2rtc yang terkait dengan kamera ini mungkin masih perlu dihapus secara manual.",
-      "selectPlaceholder": "Pilih kamera...",
+      "selectPlaceholder": "Pilih kamera…",
       "confirmTitle": "Apakah Anda yakin?",
       "confirmWarning": "Menghapus <strong>{{cameraName}}</strong> tidak dapat dibatalkan.",
       "deleteExports": "Juga hapus ekspor untuk kamera ini",
@@ -542,7 +610,7 @@
         "webuiUrlHelp": "URL untuk membuka web UI kamera langsung dari tampilan Debug. Biarkan kosong untuk menonaktifkan tautan.",
         "webuiUrlInvalid": "Harus berupa URL yang valid (misalnya, https://example.com).",
         "dashboardLabel": "Tampilkan di dasbor Live",
-        "dashboardHelp": "Tampilkan kamera ini di dasbor Live.",
+        "dashboardHelp": "Tampilkan kamera ini pada dasbor tampilan langsung Semua Kamera secara default. Kamera tetap tersedia di semua tempat lain, termasuk grup kamera.",
         "reviewLabel": "Tampilkan di Review",
         "reviewHelp": "Tampilkan kamera ini di Review, termasuk filter kamera, review gerakan, dan tampilan riwayat."
       }
@@ -1089,7 +1157,7 @@
       },
       "createUser": {
         "title": "Buat Pengguna Baru",
-        "desc": "Tambahkan akun pengguna baru dan tentukan perannya untuk akses ke area UI Frigate.",
+        "desc": "Tambahkan akun pengguna baru dan tentukan peran untuk akses ke area UI Frigate.",
         "usernameOnlyInclude": "Nama pengguna hanya boleh berisi huruf, angka, . atau _",
         "confirmPassword": "Harap konfirmasi kata sandi Anda"
       },
@@ -1192,9 +1260,8 @@
       "desc": "Frigate dapat secara native mengirim notifikasi push ke perangkat Anda saat berjalan di browser atau diinstal sebagai PWA."
     },
     "notificationUnavailable": {
-      "title": "Notifikasi Tidak Tersedia",
-      "desc": "Notifikasi push web memerlukan konteks aman (<code>https://…</code>). Ini adalah batasan browser. Akses Frigate secara aman untuk menggunakan notifikasi.",
-      "descPwa": "Di iOS, notifikasi push web hanya tersedia jika Frigate dipasang ke Layar Utama Anda. Buka menu <strong>Bagikan</strong>, pilih <strong>Tambahkan ke Layar Utama</strong>, lalu buka Frigate dari ikon baru tersebut untuk mendaftarkan perangkat ini agar menerima notifikasi."
+      "desc": "Notifikasi push web memerlukan konteks aman ([https://…](https://…)). Ini merupakan batasan browser. Akses Frigate secara aman untuk menggunakan notifikasi.",
+      "descPwa": "Di iOS, notifikasi push web hanya tersedia jika Frigate dipasang ke Layar Utama. Buka menu Bagikan, pilih Tambahkan ke Layar Utama, lalu buka Frigate dari ikon baru untuk mendaftarkan perangkat ini untuk notifikasi."
     },
     "globalSettings": {
       "title": "Pengaturan Global",
@@ -1300,7 +1367,6 @@
   "triggers": {
     "documentTitle": "Pemicu",
     "semanticSearch": {
-      "title": "Pencarian Semantik dinonaktifkan",
       "desc": "Pencarian Semantik harus diaktifkan untuk menggunakan Pemicu."
     },
     "management": {
@@ -1458,7 +1524,9 @@
         "orphansDeleted": "File Yatim Piatu Dihapus",
         "aborted": "Dibatalkan. Penghapusan akan melebihi ambang keamanan.",
         "error": "Kesalahan",
-        "totals": "Total"
+        "totals": "Total",
+        "spaceToReclaim": "Ruang yang Dapat Diklaim Kembali",
+        "spaceReclaimed": "Ruang Berhasil Diklaim Kembali"
       },
       "event_snapshots": "Cuplikan Objek Terlacak",
       "event_thumbnails": "Thumbnail Objek Terlacak",
@@ -1500,11 +1568,23 @@
       "keyLabel": "Kunci",
       "valueLabel": "Nilai",
       "keyPlaceholder": "Kunci baru",
-      "remove": "Hapus"
+      "remove": "Hapus",
+      "providerNameLabel": "Nama penyedia",
+      "providerNamePlaceholder": "mis., openai",
+      "variableNameLabel": "Nama variabel",
+      "variableNamePlaceholder": "mis., MY_VARIABLE",
+      "loggerNameLabel": "Nama logger",
+      "loggerNamePlaceholder": "mis., frigate.record",
+      "keyPatternError": "Gunakan hanya huruf, angka, tanda hubung, dan garis bawah (tanpa spasi)"
     },
     "knownPlates": {
       "namePlaceholder": "mis., Mobil Istri",
-      "platePlaceholder": "Nomor pelat atau regex"
+      "platePlaceholder": "Nomor pelat atau regex",
+      "assignedTo": "Ditugaskan kepada {{name}}",
+      "detected": "Pelat nomor terdeteksi",
+      "noneDetected": "Belum ada pelat nomor yang terdeteksi",
+      "search": "Cari atau masukkan pelat nomor",
+      "useCustom": "Gunakan \"{{value}}\""
     },
     "timezone": {
       "defaultOption": "Gunakan zona waktu browser"
@@ -1549,10 +1629,21 @@
         "preset-record-mjpeg": "Rekam - Kamera MJPEG",
         "preset-record-jpeg": "Rekam - Kamera JPEG",
         "preset-record-ubiquiti": "Rekam - Kamera Ubiquiti"
-      }
+      },
+      "sameAsRecord": "Sama seperti argumen keluaran rekaman"
     },
     "cameraInputs": {
-      "itemTitle": "Stream {{index}}"
+      "itemTitle": "Stream {{index}}",
+      "sourceMode": {
+        "restream": "Restream (go2rtc)",
+        "manual": "Jalur input manual",
+        "go2rtcStreamLabel": "Stream go2rtc",
+        "go2rtcStreamPlaceholder": "Pilih stream go2rtc",
+        "noGo2rtcStreams": "Tidak ada stream go2rtc yang dikonfigurasi",
+        "go2rtcStreamSearch": "Cari stream...",
+        "availableStreams": "Stream yang tersedia",
+        "noMatchingStreams": "Tidak ada stream yang sesuai"
+      }
     },
     "restartRequiredField": "Perlu mulai ulang",
     "restartRequiredFooter": "Konfigurasi berubah - Perlu mulai ulang",
@@ -1624,14 +1715,18 @@
       "options": {
         "detect": "Deteksi",
         "record": "Rekam",
-        "audio": "Audio"
-      }
+        "audio": "Audio",
+        "record_sub": "Rekam (Sub Stream)"
+      },
+      "roleInUse": "Sudah ditetapkan ke stream lain",
+      "recordSubConflict": "Sebuah stream tidak dapat memiliki peran record dan record_sub sekaligus"
     },
     "genaiRoles": {
       "options": {
         "embeddings": "Embedding",
         "descriptions": "Deskripsi",
-        "chat": "Chat"
+        "chat": "Chat",
+        "transcribe": "Transkripsi"
       }
     },
     "semanticSearchModel": {
@@ -1689,7 +1784,26 @@
     },
     "defaultRole": {
       "admin": "Admin",
-      "viewer": "Penampil"
+      "viewer": "Penampil",
+      "none": "Tidak ada (tolak akses)"
+    },
+    "birdseyeModes": {
+      "summary": "{{count}} dipilih",
+      "options": {
+        "continuous": "Kontinu",
+        "motion": "Gerakan",
+        "all_objects": "Semua objek",
+        "alerts": "Peringatan",
+        "detections": "Deteksi"
+      }
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Pilih model…",
+      "builtIn": "Model Bawaan",
+      "genaiProviders": "Penyedia GenAI"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "Tidak berlaku untuk penyedia GenAI"
     }
   },
   "globalConfig": {
@@ -1856,6 +1970,10 @@
     "imageSource": {
       "recordings": "Rekaman",
       "previews": "Pratinjau"
+    },
+    "frameMode": {
+      "frames": "Frame",
+      "annotated_frames": "Frame beranotasi"
     }
   },
   "logger": {
@@ -1881,5 +1999,42 @@
   "modelSize": {
     "small": "Kecil",
     "large": "Besar"
+  },
+  "detectionModels": {
+    "title": "Model deteksi",
+    "description": "Konfigurasikan model deteksi objek dan perangkat keras yang digunakan oleh setiap model. Kamera memilih model berdasarkan scene dalam pengaturan deteksi kamera.",
+    "addModel": "Tambahkan model",
+    "cameras_other": "{{count}} kamera",
+    "scene": {
+      "label": "Scene",
+      "description": "Lingkungan yang menjadi tujuan model ini. Kamera memilih model dengan menetapkan scene yang sama dalam pengaturan deteksinya, sedangkan model dengan scene “all” digunakan oleh setiap kamera yang tidak menetapkan scene."
+    },
+    "scenes": {
+      "all": "Semua kamera",
+      "indoor": "Dalam ruangan",
+      "outdoor": "Luar ruangan",
+      "indoor_thermal": "Termal dalam ruangan",
+      "outdoor_thermal": "Termal luar ruangan"
+    },
+    "hardware": {
+      "label": "Perangkat keras",
+      "placeholder": "Pilih perangkat keras",
+      "loading": "Mencari perangkat keras deteksi...",
+      "none": "Tidak ada perangkat keras yang dipilih",
+      "claimedBy": "digunakan oleh {{scene}}",
+      "detectorCount": "Detektor",
+      "countRecommended_other": "Direkomendasikan untuk {{count}} kamera",
+      "unrecognized": "Model ini dikonfigurasi untuk perangkat keras yang tidak ditemukan pada sistem ini: {{devices}}",
+      "description": "Perangkat keras tempat model ini menjalankan proses deteksi.",
+      "detectorCountDescription": "Jumlah proses deteksi yang dijalankan pada perangkat keras ini. Lebih banyak detektor dapat menangani lebih banyak kamera, dengan konsekuensi penggunaan memori perangkat tambahan.",
+      "unitsDescription": "Setiap unit menjalankan proses deteksinya sendiri. Unit yang sudah digunakan oleh model lain tidak dapat dipilih."
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Model Kustom"
+    },
+    "plusModel": {
+      "noModelSelected": "Pilih model Frigate+"
+    }
   }
 }
