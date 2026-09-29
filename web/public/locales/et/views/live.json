@@ -21,7 +21,12 @@
   "lowBandwidthMode": "Väikese ribalaiusega režiim",
   "twoWayTalk": {
     "enable": "Lülita kahepoolne kõneside sisse",
-    "disable": "Lülita kahepoolne kõneside välja"
+    "disable": "Lülita kahepoolne kõneside välja",
+    "requiresWebRTC": "Kahepoolne suhtlus eeldab WebRTC kasutamist, aga see poel saadaval",
+    "error": {
+      "microphone": "Kahepoolsel suhtlusel puudub ligipääs sinu mikrofonile",
+      "refused": "Kahepoolse suhtluse käivitamine ei õnnestunud. Lisateavet leiad veebibrauseri konsoolist."
+    }
   },
   "cameraAudio": {
     "enable": "Lülita kaamera heli sisse",
@@ -112,10 +117,36 @@
     "title": "Voogedastus",
     "lowBandwidth": {
       "resetStream": "Lähtesta voogedastus",
-      "tips": "Reaalaja pilt on puhverdamise või voogedastuse vigade tõttu madala ribalaiusega režiimis."
+      "tips": "Reaalaja pilt on puhverdamise või voogedastuse vigade tõttu madala ribalaiusega režiimis.",
+      "force": {
+        "label": "Kasuta sundkorras väikese ribalaiusega režiimi",
+        "desc": "Valitud voogedastuse asemel esita sisu alati Frigate'i sisseehitatud väikese ribalaiusega voogedastusena. Toimib igasuguste ühendustega, aga pildikvaliteet on kehvem ning heliriba pole kasutusel."
+      }
     },
     "debug": {
-      "picker": "Voogedastuse osa valik pole silumisrežiimis saadaval. Silumisvaade kasutab alati voogedastust, millele on määratud tuvastamisroll."
+      "picker": "Voogedastuse osa valik pole silumisrežiimis saadaval. Silumisvaade kasutab alati voogedastust, millele on määratud tuvastamisroll.",
+      "technology": "Voogedastuse tehnoloogia valik pole silumisrežiimis saadaval."
+    },
+    "mode": "Voogedastuse tehnoloogia",
+    "technology": {
+      "description": "Vali eelistatud voogedastuse tehnoloogia. Taasesituse ja võrguvigade puhul võib Frigate tagavaravariandina kasutada väikese ribalaiusega režiimi.",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "Soovitatud vaikimisi väärtus, millel on lai ühilduvus ja sujuv taasesitus",
+        "webrtc": "Vajab täiendavat seadistust ja pole igas seadmes toetatud"
+      },
+      "unavailable": {
+        "browser": "Sinu veebibrauseris puudub WebRTC tugi.",
+        "not-configured": "WebRTC pole seadistatud. Seadista go2rtc webrtc kandidaadid või ice_server teenused.",
+        "unreachable": "WebRTC ühendamine ei õnnestunud. Kontrolli, et port 8555 on kättesaadav ja STUN/TURN-serveri seadistus on õige.",
+        "video-codec": "Selles veebibrauseris puudub WebRTC jaoks antud voogedastuse videokoodeki tugi.",
+        "audio-codec": "WebRTC ei toeta selle voogedastuse helikoodekit. Kodeeri go2rtc abil opus või G.711 vormingusse.",
+        "checking": "Kontrollin WebRTC saadavust…"
+      }
     }
   },
   "notifications": "Teavitused",
