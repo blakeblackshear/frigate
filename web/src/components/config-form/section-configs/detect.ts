@@ -1,10 +1,11 @@
 import type { HiddenFieldContext } from "@/types/configForm";
-import { DEFAULT_SCENE, getModelScenes } from "@/utils/modelUtil";
+import { DEFAULT_SCENE, getSceneChoices } from "@/utils/modelUtil";
 import type { SectionConfigOverrides } from "./types";
 
-// picking a scene only means something once there is more than one model
-const hideSceneWithOneModel = ({ fullConfig }: HiddenFieldContext): string[] =>
-  getModelScenes(fullConfig).length > 1 ? [] : ["scene"];
+// picking a scene only means something when there is more than one choice,
+// which includes a saved scene that no model uses
+const hideSceneWithoutChoice = (ctx: HiddenFieldContext): string[] =>
+  getSceneChoices(ctx).length > 1 ? [] : ["scene"];
 
 const detect: SectionConfigOverrides = {
   base: {
@@ -209,7 +210,7 @@ const detect: SectionConfigOverrides = {
         },
       },
     },
-    hiddenFields: ["enabled_in_config", hideSceneWithOneModel],
+    hiddenFields: ["enabled_in_config", hideSceneWithoutChoice],
     advancedFields: [
       "min_initialized",
       "max_disappeared",

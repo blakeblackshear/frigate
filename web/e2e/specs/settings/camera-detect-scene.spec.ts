@@ -2,8 +2,8 @@
  * Camera detect scene tests -- MEDIUM tier.
  *
  * Scenes are free-form names declared by the configured models, so a camera
- * only needs to pick one when there is more than one model, and the choices
- * are the default scene plus the scenes of those models.
+ * only needs to pick one when there is a choice to make. The choices are the
+ * scenes of the configured models, plus a saved scene that no model uses.
  */
 
 import { readFileSync } from "node:fs";
@@ -26,8 +26,14 @@ const SETTINGS_URL = "/settings?page=cameraDetect&camera=front_door";
 async function installRoutes(
   page: Page,
   models: { scene: string; devices: string[] }[],
+  cameraScene?: string,
 ) {
-  const config = configFactory({ models } as never);
+  const config = configFactory({
+    models,
+    ...(cameraScene
+      ? { cameras: { front_door: { detect: { scene: cameraScene } } } }
+      : {}),
+  } as never);
 
   await page.route("**/api/config/schema.json", (route) =>
     route.fulfill({ json: CONFIG_SCHEMA }),
@@ -69,5 +75,61 @@ test.describe("camera detect scene @medium", () => {
     await frigateApp.page.locator("#root_scene").click();
     const options = frigateApp.page.getByRole("option");
     await expect(options).toHaveText(["Default", "thermal"]);
+  });
+
+  test("a saved scene no model uses stays editable", async ({ frigateApp }) => {
+    // the camera falls back to the default model, but its saved scene would
+    // silently take effect if a model for it were added later
+    await installRoutes(
+      frigateApp.page,
+      [{ scene: "default", devices: ["cpu"] }],
+      "garage",
+    );
+    await frigateApp.goto(SETTINGS_URL);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "Detect scene",
+    );
+
+    await frigateApp.page.locator("#root_scene").click();
+    await expect(frigateApp.page.getByRole("option")).toHaveText([
+      "Default",
+      "garage",
+    ]);
+  });
+
+  test("default is only offered when a default model exists", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(
+      frigateApp.page,
+      [
+        { scene: "thermal", devices: ["cpu"] },
+        { scene: "visible", devices: ["openvino:GPU.0"] },
+      ],
+      "thermal",
+    );
+    await frigateApp.goto(SETTINGS_URL);
+
+    await frigateApp.page.locator("#root_scene").click();
+    await expect(frigateApp.page.getByRole("option")).toHaveText([
+      "thermal",
+      "visible",
+    ]);
+  });
+
+  test("one model every camera selects needs no choice", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(
+      frigateApp.page,
+      [{ scene: "thermal", devices: ["cpu"] }],
+      "thermal",
+    );
+    await frigateApp.goto(SETTINGS_URL);
+
+    const root = frigateApp.page.locator("#pageRoot");
+    await expect(root).toContainText("Detect FPS");
+    await expect(root).not.toContainText("Detect scene");
   });
 });

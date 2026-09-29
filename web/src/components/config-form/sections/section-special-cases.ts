@@ -12,7 +12,7 @@ import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { HiddenFieldContext, JsonObject, JsonValue } from "@/types/configForm";
 import { getEffectiveAttributeLabels } from "@/utils/configUtil";
-import { getModelScenes } from "@/utils/modelUtil";
+import { getSceneChoices } from "@/utils/modelUtil";
 
 /**
  * Sections that require special handling at the global level.
@@ -40,7 +40,7 @@ export function isSpecialCaseSection(
  *
  * - genai: Inject a default provider value on the additionalProperties shape.
  * - detect: Scenes are free-form names, so offer the configured model scenes
- *   as the choices for `scene`.
+ *   (and a saved scene no model uses) as the choices for `scene`.
  * - objects: Promote tracked attribute labels (face, license_plate, courier
  *   logos) from `filters.additionalProperties` to explicit
  *   `filters.properties.<attr>` entries with a restricted FilterConfig
@@ -104,23 +104,11 @@ function modifyDetectSchema(
 
   if (!ctx || !properties?.scene) return schema;
 
-  // keep a saved scene that no model uses selectable, so the form doesn't
-  // silently swap it for another value
-  const saved =
-    (ctx.level !== "global"
-      ? ctx.fullCameraConfig?.detect?.scene
-      : undefined) ?? ctx.fullConfig.detect?.scene;
-  const scenes = getModelScenes(ctx.fullConfig);
-
-  if (saved && !scenes.includes(saved)) {
-    scenes.push(saved);
-  }
-
   return {
     ...schema,
     properties: {
       ...properties,
-      scene: { ...properties.scene, enum: scenes },
+      scene: { ...properties.scene, enum: getSceneChoices(ctx) },
     },
   };
 }

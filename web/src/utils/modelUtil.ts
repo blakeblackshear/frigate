@@ -1,4 +1,5 @@
 import type { TFunction } from "i18next";
+import type { HiddenFieldContext } from "@/types/configForm";
 import { DetectionModelConfig, FrigateConfig } from "@/types/frigateConfig";
 
 /** The scene of the model used by cameras that don't name one. */
@@ -13,11 +14,29 @@ export function getSceneLabel(t: TFunction, scene: string | undefined): string {
   return scene;
 }
 
-/** The distinct scenes of the configured models, default first. */
-export function getModelScenes(config?: FrigateConfig): string[] {
-  const scenes = new Set<string>([DEFAULT_SCENE]);
-  config?.models?.forEach((model) => scenes.add(model.scene || DEFAULT_SCENE));
-  return [...scenes];
+/**
+ * The scenes a detect section can choose from: those of the configured models,
+ * default first when a default model exists, plus the saved scene when no model
+ * uses it, so it can still be seen and changed.
+ */
+export function getSceneChoices(
+  ctx: Pick<HiddenFieldContext, "fullConfig" | "fullCameraConfig" | "level">,
+): string[] {
+  const scenes = [
+    ...new Set(
+      ctx.fullConfig.models?.map((model) => model.scene || DEFAULT_SCENE),
+    ),
+  ].sort((a, b) => Number(b === DEFAULT_SCENE) - Number(a === DEFAULT_SCENE));
+  const saved =
+    (ctx.level !== "global"
+      ? ctx.fullCameraConfig?.detect?.scene
+      : undefined) ?? ctx.fullConfig.detect?.scene;
+
+  if (saved && !scenes.includes(saved)) {
+    scenes.push(saved);
+  }
+
+  return scenes;
 }
 
 /**
