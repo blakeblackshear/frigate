@@ -180,9 +180,7 @@
     "detectIsSlow": "{{detect}} 偵測速度慢 ({{speed}} 毫秒)",
     "detectIsVerySlow": "{{detect}} 偵測速度非常慢 ({{speed}} 毫秒)",
     "cameraIsOffline": "{{camera}} 已離線",
-    "detectHighCpuUsage": "{{camera}} 的偵測 CPU 使用率過高 ({{detectAvg}}%)",
     "healthy": "系統運作正常",
-    "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率過高 ({{ffmpegAvg}}%)",
     "reindexingEmbeddings": "重新索引嵌入資料 (已完成 {{processed}}%)"
   },
   "enrichments": {
