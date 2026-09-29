@@ -56,8 +56,7 @@
       "title": "Cài đặt Thông báo"
     },
     "notificationUnavailable": {
-      "desc": "Thông báo đẩy web yêu cầu một ngữ cảnh an toàn (<code>https://…</code>). Đây là một hạn chế của trình duyệt. Truy cập Frigate một cách an toàn để sử dụng thông báo.",
-      "title": "Thông báo không khả dụng"
+      "desc": "Thông báo đẩy web yêu cầu một ngữ cảnh an toàn (<code>https://…</code>). Đây là một hạn chế của trình duyệt. Truy cập Frigate một cách an toàn để sử dụng thông báo."
     },
     "globalSettings": {
       "desc": "Tạm thời đình chỉ thông báo cho các camera cụ thể trên tất cả các thiết bị đã đăng ký.",

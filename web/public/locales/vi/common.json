@@ -234,7 +234,8 @@
     "deleteNow": "Xóa ngay",
     "next": "Tiếp theo",
     "saving": "Đang lưu…",
-    "continue": "Tiếp tục"
+    "continue": "Tiếp tục",
+    "clear": "Xóa"
   },
   "toast": {
     "copyUrlToClipboard": "Đã sao chép liên kết.",
