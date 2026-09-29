@@ -11,7 +11,11 @@ from typing import Any
 from peewee import DoesNotExist
 
 from frigate.comms.config_updater import ConfigSubscriber
-from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
+from frigate.comms.detections_updater import (
+    DetectionPublisher,
+    DetectionSubscriber,
+    DetectionTypeEnum,
+)
 from frigate.comms.embeddings_updater import (
     EmbeddingsRequestEnum,
     EmbeddingsResponder,
@@ -168,6 +172,7 @@ class EmbeddingMaintainer(threading.Thread):
         )
         self.review_subscriber = ReviewDataSubscriber("")
         self.detection_subscriber = DetectionSubscriber(DetectionTypeEnum.video.value)
+        self.detection_publisher = DetectionPublisher(DetectionTypeEnum.all.value)
         self.embeddings_responder = EmbeddingsResponder()
         self.frame_manager = SharedMemoryFrameManager()
 
@@ -356,6 +361,7 @@ class EmbeddingMaintainer(threading.Thread):
         self.event_end_subscriber.stop()
         self.recordings_subscriber.stop()
         self.detection_subscriber.stop()
+        self.detection_publisher.stop()
         self.event_metadata_publisher.stop()
         self.event_metadata_subscriber.stop()
         self.embeddings_responder.stop()
@@ -851,6 +857,21 @@ class EmbeddingMaintainer(threading.Thread):
                         f"{result['camera']}/classification/{result['model_name']}",
                         result["state"],
                     )
+
+                    # the first state verified after startup is not a change
+                    if result["previous_state"] is not None:
+                        self.detection_publisher.publish(
+                            (
+                                result["camera"],
+                                {
+                                    "model": result["model_name"],
+                                    "from": result["previous_state"],
+                                    "to": result["state"],
+                                    "timestamp": result["timestamp"],
+                                },
+                            ),
+                            DetectionTypeEnum.classification_state.value,
+                        )
                 elif result["processor"] == "object":
                     object_id = result["object_id"]
                     camera = result["camera"]

@@ -201,6 +201,8 @@ Review items are sent to the model as a sequence of still frames. Some models fo
 
 The notes come from tracking data rather than from the images, so they describe activity the model may not have picked up on its own. In testing with a person carrying three waste bins to the curb one at a time, `gemma4` described a single trip on every attempt with `frames`, and consistently described multiple trips with `annotated_frames`. Models that already handle these sequences well, such as the `qwen3-vl` family, gain little and should stay on `frames`.
 
+Changes reported by [state classification](/configuration/custom_classification/state_classification#review-items) models during the review item are listed in the prompt in both modes. `annotated_frames` also notes each change before the frame where it happened.
+
 Annotated mode also caps the number of frames, since the notes already establish the order of events and extra near-duplicate frames tend to crowd out the middle of a clip. Longer review items are sampled more sparsely as a result, and typically use fewer tokens than `frames` mode for the same item.
 
 :::note

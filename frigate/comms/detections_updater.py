@@ -12,6 +12,7 @@ class DetectionTypeEnum(str, Enum):
     video = "video"
     audio = "audio"
     lpr = "lpr"
+    classification_state = "classification_state"
 
 
 class DetectionPublisher(Publisher):

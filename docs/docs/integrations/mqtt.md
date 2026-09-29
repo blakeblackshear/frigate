@@ -212,6 +212,7 @@ An `update` with the same ID will be published when:
 - The severity changes from `detection` to `alert`
 - Additional objects are detected
 - An object is recognized via face, lpr, etc.
+- A [state classification](/configuration/custom_classification/state_classification#review-items) model changes state
 
 When the review activity has ended a final `end` message is published.
 
@@ -235,7 +236,8 @@ When the review activity has ended a final `end` message is published.
       "objects": ["person", "car"],
       "sub_labels": [],
       "zones": [],
-      "audio": []
+      "audio": [],
+      "classification_state_changes": []
     }
   },
   "after": {
@@ -254,7 +256,16 @@ When the review activity has ended a final `end` message is published.
       "objects": ["person", "car"],
       "sub_labels": ["Bob"],
       "zones": ["front_yard"],
-      "audio": []
+      "audio": [],
+      "classification_state_changes": [
+        // verified changes of state classification models on this camera
+        {
+          "model": "front_gate",
+          "from": "closed",
+          "to": "open",
+          "timestamp": 1718987131.52
+        }
+      ]
     }
   }
 }

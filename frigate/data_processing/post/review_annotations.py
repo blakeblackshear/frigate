@@ -1,10 +1,10 @@
 """Frame annotations derived from object tracking data.
 
 Builds short notes describing what changed during a review item, keyed to the
-frames sampled from it. Everything here comes from tracked object data already
-in the database (each event's `path_data` trajectory and the timeline's
-stationary/active changes), so the notes can be stated to the model as fact
-rather than as something it must perceive.
+frames sampled from it. Everything here comes from data already recorded
+(each event's `path_data` trajectory, the timeline's stationary/active
+changes, and the review item's state classification changes), so the notes
+can be stated to the model as fact rather than as something it must perceive.
 """
 
 import logging
@@ -93,6 +93,15 @@ def event_name(event: dict[str, Any]) -> str:
 
     article = "an" if label[:1].lower() in "aeiou" else "a"
     return f"{article} {label}"
+
+
+def describe_classification_change(change: dict[str, Any]) -> str:
+    """Phrase a state classification change, e.g. 'front gate changed from
+    closed to open'."""
+    model = str(change["model"]).replace("_", " ")
+    before = str(change["from"]).replace("_", " ")
+    after = str(change["to"]).replace("_", " ")
+    return f"{model} changed from {before} to {after}"
 
 
 def path_legs(points: list[Point]) -> list[Leg]:
@@ -359,25 +368,38 @@ def get_state_changes(detection_ids: list[str]) -> list[dict[str, Any]]:
 def build_frame_captions(
     detection_ids: list[str],
     frame_times: list[float],
+    classification_changes: Sequence[dict[str, Any]] = (),
 ) -> list[str]:
     """A caption for each sampled frame, in frame order.
 
     Every frame gets its index and elapsed time so the model can tell them
-    apart; frames where something changed also carry the tracker notes for
-    that moment. Returns an empty list when there is nothing to say, which
-    callers treat as a reason to fall back to sending plain frames.
+    apart; frames where something changed also carry the tracker and state
+    classification notes for that moment. Returns an empty list when there is
+    nothing to say, which callers treat as a reason to fall back to sending
+    plain frames.
     """
     if not frame_times:
         return []
 
+    span_end = frame_times[-1]
+    timeline: list[tuple[float, str]] = []
     events = get_tracked_events(detection_ids)
 
-    if not events:
-        logger.debug("No tracked events found for review item, skipping annotations")
-        return []
+    # audio and manual review items can have state changes but no tracked objects
+    if events:
+        timeline.extend(
+            (timestamp, f"[tracker] {note}")
+            for timestamp, note in build_timeline(
+                events, span_end, get_state_changes(detection_ids)
+            )
+        )
 
-    timeline = build_timeline(events, frame_times[-1], get_state_changes(detection_ids))
-    buckets = annotations_by_frame(timeline, frame_times)
+    timeline.extend(
+        (change["timestamp"], f"[state] {describe_classification_change(change)}")
+        for change in classification_changes
+        if change["timestamp"] <= span_end
+    )
+    buckets = annotations_by_frame(sorted(timeline, key=lambda m: m[0]), frame_times)
 
     if not buckets:
         return []
@@ -388,7 +410,7 @@ def build_frame_captions(
 
     for index, timestamp in enumerate(frame_times):
         lines = [f"Frame {index + 1} of {total} (+{timestamp - origin:.1f}s):"]
-        lines.extend(f"[tracker] {note}" for note in buckets.get(index, []))
+        lines.extend(buckets.get(index, []))
         captions.append("\n".join(lines))
 
     return captions
