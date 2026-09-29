@@ -3,11 +3,11 @@
     "title": "Frigate'i yeniden başlatmak istediğinize emin misiniz?",
     "button": "Yeniden Başlat",
     "restarting": {
-      "content": "Bu sayfa {{countdown}} saniye sonra yeniden yüklenecektir.",
-      "title": "Frigate Yeniden Başlatılıyor",
+      "content": "Bu sayfa {{countdown}} saniye sonra yeniden yüklenecek.",
+      "title": "Frigate Yeniden Başlıyor",
       "button": "Şimdi Yeniden Yükle"
     },
-    "description": "Bu Frigate'i kısa süreliğine yeniden başlayana kadar durduracak."
+    "description": "Frigate yeniden başlayana kadar kısa süreliğine duracaktır."
   },
   "explore": {
     "plus": {
@@ -16,22 +16,22 @@
           "submitted": "Gönderildi"
         },
         "question": {
-          "ask_an": "Bu nesne bir <code>{{label}}</code> nesnesi mi?",
+          "ask_an": "Bu bir <code>{{label}}</code> nesnesi mi?",
           "label": "Bu etiketi Frigate+ için onaylayın",
-          "ask_a": "Bu nesne bir <code>{{label}}</code> mi?",
+          "ask_a": "Bu bir <code>{{label}}</code> nesnesi mi?",
           "ask_full": "Bu nesne bir <code>{{untranslatedLabel}}</code> ({{translatedLabel}}) nesnesi mi?"
         },
         "toast": {
-          "error": "Frigate+'a gönderilemedi. Lütfen ağ bağlantınızı kontrol edin ve tekrar deneyin."
+          "error": "Frigate+'ya gönderilemedi. Lütfen ağ bağlantınızı kontrol edin ve tekrar deneyin."
         }
       },
       "submitToPlus": {
         "label": "Frigate+'ya Gönder",
-        "desc": "Görülmesini istemediğiniz yerlerdeki nesneler yanlış pozitif değildir. Bunları yanlış pozitif olarak göndermek modeli yanıltacaktır."
+        "desc": "Kaçınmak istediğiniz yerlerdeki nesneler yanlış pozitif değildir. Bunları yanlış pozitif olarak göndermek modeli yanıltacaktır."
       }
     },
     "video": {
-      "viewInHistory": "Geçmiş Görünümünde Görüntüle"
+      "viewInHistory": "Geçmiş'te Görüntüle"
     }
   },
   "export": {
@@ -46,24 +46,24 @@
         "title": "Başlangıç Zamanı",
         "label": "Başlangıç Zamanını Seç"
       },
-      "fromTimeline": "Zaman Şeridinde Seç",
-      "custom": "Özel"
+      "fromTimeline": "Zaman Şeridinden Seç",
+      "custom": "Özelleştirilmiş"
     },
     "select": "Seç",
     "export": "Dışa Aktar",
     "selectOrExport": "Seç veya Dışa Aktar",
     "toast": {
-      "success": "Dışa aktarma başarıyla başlatıldı. Dosyayı dışa aktarmalar sayfasında görüntüleyebilirsiniz.",
+      "success": "Dışa aktarım başarıyla başlatıldı. Dosyayı dışa aktarımlar sayfasında görüntüleyebilirsiniz.",
       "error": {
         "failed": "Dışa aktarım sıraya alınamadı: {{error}}",
         "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
         "noValidTimeSelected": "Geçerli bir zaman aralığı seçilmedi"
       },
       "view": "Görüntüle",
-      "queued": "Dışa aktarımlar kuyruğa alındı. İlerlemeyi dışa aktarım sayfasından görebilirsiniz.",
-      "batchSuccess_one": "1 Adet dışa aktarım başlatıldı. Durum açılıyor.",
-      "batchSuccess_other": "{{count}} Adet dışa aktarım başlatıldı. Durum açılıyor.",
-      "batchPartial": "{{total}} üzerinden {{successful}} adet dışa aktarım başlatıldı. Başarısız: {{failedCameras}}",
+      "queued": "Dışa aktarım sıraya alındı. İlerlemeyi dışa aktarım sayfasından görebilirsiniz.",
+      "batchSuccess_one": "1 adet dışa aktarım başlatıldı. Vaka açılıyor.",
+      "batchSuccess_other": "{{count}} adet dışa aktarım başlatıldı. Vaka açılıyor.",
+      "batchPartial": "{{total}} dışa aktarımın {{successful}} tanesi başladı. Başarısız kameralar: {{failedCameras}}",
       "batchFailed": "{{total}} dışa aktarma işlemi başlatılamadı. Başarısız kameralar: {{failedCameras}}",
       "batchQueuedSuccess_one": "1 dışa aktarım sıraya alındı.",
       "batchQueuedSuccess_other": "{{count}} dışa aktarım sıraya alındı.",
@@ -73,100 +73,109 @@
     "fromTimeline": {
       "saveExport": "Dışa Aktarımı Kaydet",
       "previewExport": "Dışa Aktarımı Önizle",
-      "useThisRange": "Use This Range",
-      "queueingExport": "Dışa aktarma sıraya alınıyor..."
+      "useThisRange": "Bu Aralığı Kullan",
+      "queueingExport": "Dışa aktarım sıraya alınıyor..."
     },
     "name": {
-      "placeholder": "Dışa Aktarımı Adlandırın"
+      "placeholder": "Dışa Aktarımı Adlandır"
     },
     "case": {
-      "newCaseOption": "Yeni durum oluştur",
-      "newCaseNamePlaceholder": "Yeni durum ismi",
-      "newCaseDescriptionPlaceholder": "Durum açıklaması",
-      "label": "Durum",
-      "nonAdminHelp": "Bu dışa aktarımlar için yeni durumlar oluşturulacak.",
-      "placeholder": "Durum seç"
+      "newCaseOption": "Yeni vaka oluştur",
+      "newCaseNamePlaceholder": "Yeni vaka ismi",
+      "newCaseDescriptionPlaceholder": "Vaka açıklaması",
+      "label": "Vaka",
+      "nonAdminHelp": "Bu dışa aktarımlar için yeni bir vaka oluşturulacak.",
+      "placeholder": "Bir vaka seç"
     },
-    "queueing": "Dışa aktarımlar kuyruğa alınıyor...",
+    "queueing": "Dışa aktarım sıraya alınıyor...",
     "tabs": {
       "export": "Tek Kamera",
       "multiCamera": "Çoklu Kamera"
     },
     "multiCamera": {
-      "timeRange": "Zaman Aralığı",
-      "selectFromTimeline": "Zaman çizelgesinden seç",
+      "timeRange": "Zaman aralığı",
+      "selectFromTimeline": "Zaman Şeridinden Seç",
       "cameraSelection": "Kameralar",
-      "cameraSelectionHelp": "Bu zaman aralığında ki obje takibi olan kameralar önceden seçildi",
-      "checkingActivity": "Kamera faliyeti kontrol ediliyor...",
-      "noCameras": "Kamera mevcut değil",
-      "detectionCount_one": "1 adet takip edilen obje",
-      "detectionCount_other": "{{count}} adet takip edilen obje",
+      "cameraSelectionHelp": "Bu zaman aralığında nesne takip etmiş kameralar otomatik seçildi",
+      "checkingActivity": "Kamera faaliyeti kontrol ediliyor...",
+      "noCameras": "Hiç kamera yok",
+      "detectionCount_one": "1 takipli nesne",
+      "detectionCount_other": "{{count}} takipli nesne",
       "nameLabel": "Dışa aktarım ismi",
       "namePlaceholder": "Dışa aktarım için opsiyonel temel isim",
-      "queueingButton": "Dışa aktarımlar kuyruğa alınıyor...",
-      "exportButton_one": "1 Adet Kamera Dışarı Aktarıldı",
-      "exportButton_other": "{{count}} Adet Kamera Dışarı Aktarıldı",
-      "searchOrSelectGroup": "Kamera grubu arayın veya seçin...",
+      "queueingButton": "Dışa aktarımlar sıraya alınıyor...",
+      "exportButton_one": "1 Kamerayı Dışa Aktar",
+      "exportButton_other": "{{count}} Kamerayı Dışa Aktar",
+      "searchOrSelectGroup": "Arayın veya kamera grubu seçin...",
       "selectAll": "Tüm kameraları seç",
-      "clearSelection": "Seçimi kaldır",
-      "selectWithActivity": "Nesne takibi yapan kameralar",
+      "clearSelection": "Seçimi temizle",
+      "selectWithActivity": "Nesne takibi yapmış kameralar",
       "selectGroup": "Grup seç",
       "noMatchingCameras": "Arama kriterlerinize uyan kamera bulunamadı",
-      "selectedCount": "{{selected}} / {{total}} seçilen"
+      "selectedCount": "{{selected}} / {{total}} seçili"
     },
     "multi": {
-      "title_one": "1 Adet Değerlendirme Dışarı Aktarıldı",
-      "title_other": "{{count}} Adet Değerlendirme Dışarı Aktarıldı",
-      "description": "Seçilmiş değerlendirmeleri tek tek dışa aktarın. Bütün dışa aktarımlar tek bir durum altında toplanacak.",
-      "descriptionNoCase": "Seçilmiş değerlendirmeleri tek tek dışa aktar.",
-      "caseNamePlaceholder": "Değerlendirme dışa aktarımı - {{date}}",
-      "exportButton_one": "1 Adet Değerlendirme'yi dışa akatar",
-      "exportButton_other": "{{count}} Adet Değerlendirme'yi dışa akatar",
+      "title_one": "1 incelemeyi dışa aktar",
+      "title_other": "{{count}} incelemeyi dışa aktar",
+      "description": "Seçilmiş incelemelerin her birini dışa aktar. Bütün dışa aktarımlar tek bir vaka altında toplanacak.",
+      "descriptionNoCase": "Seçilmiş incelemelerin her birini dışa aktar.",
+      "caseNamePlaceholder": "İnceleme dışa aktarımı - {{date}}",
+      "exportButton_one": "1 incelemeyi dışa aktar",
+      "exportButton_other": "{{count}} incelemeyi dışa aktar",
       "exportingButton": "Dışa aktarılıyor...",
       "toast": {
-        "started_one": "1 Adet dışa aktarın başladı. Durum açılıyor.",
-        "started_other": "{{count}} Adet dışa aktarın başladı. Durum açılıyor.",
-        "partial": "{{total}} üzerinden {{successful}} dışa aktarıldı. Başarısız: {{failedItems}}",
-        "failed": "{{total}} Adet dışa aktarım başarısız oldu. Başarısız: {{failedItems}}"
+        "started_one": "1 dışa aktarım başladı.",
+        "started_other": "{{count}} dışa aktarım başladı.",
+        "partial": "{{total}} dışa aktarımın {{successful}} tanesi başladı. Başarısız: {{failedItems}}",
+        "failed": "{{total}} adet dışa aktarım başlatılamadı. Başarısız: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Kalite",
+      "auto": "Otomatik",
+      "main": "Orijinal",
+      "sub": "Düşük",
+      "autoDesc": "Ana yayını kullanır. Ana yayın yoksa daha düşük kaliteli alt yayına geçer.",
+      "mainDesc": "Yalnızca orijinal kalitedeki ana yayını dışa aktarır. Ana yayında bulunmayan zaman aralıkları eksik kalacaktır.",
+      "subDesc": "Yalnızca düşük kaliteli alt yayını dışa aktarır. Alt yayında bulunmayan zaman aralıkları eksik kalacaktır."
     }
   },
   "streaming": {
-    "label": "Akış",
+    "label": "Yayın",
     "restreaming": {
-      "disabled": "Bu kamera için Yeniden Akış devre dışı.",
+      "disabled": "Bu kamera için Yeniden Yayın etkinleştirilmemiş.",
       "desc": {
         "title": "Bu kameradan ek canlı gösterim seçenekleri ve sesli yayın almak için go2rtc'yi yapılandırın."
       }
     },
     "showStats": {
-      "label": "Akış istatistiklerini göster",
-      "desc": "Kamera akışının üzerinde akış istastistiklerini görmek için bu seçeneği aktifleştirin."
+      "label": "Yayın istatistiklerini göster",
+      "desc": "Kamera akışı üzerinde yayın istatistiklerini görmek için bu seçeneği etkinleştirin."
     },
     "debugView": "Hata Ayıklama Görünümü"
   },
   "search": {
     "saveSearch": {
-      "desc": "Kayıtlı aramaya bir isim verin.",
+      "desc": "Bu kayıtlı aramaya bir isim verin.",
       "placeholder": "Aramanız için bir isim girin",
-      "overwrite": "{{searchName}} zaten var. Bu isimle kaydetmek mevcut olanın üzerine yazacaktır.",
+      "overwrite": "{{searchName}} zaten var. Kaydederseniz mevcut değerin üzerine yazılacak.",
       "label": "Aramayı Kaydet",
       "button": {
         "save": {
           "label": "Bu aramayı kaydet"
         }
       },
-      "success": "Arama ({{searchName}}) kaydedildi."
+      "success": "({{searchName}}) araması kaydedildi."
     }
   },
   "recording": {
     "confirmDelete": {
       "title": "Silmeyi Onayla",
       "desc": {
-        "selected": "Bu inceleme öğesiyle ilişkili tüm kaydedilmiş videoları silmek istediğinizden emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutarak tıklatın."
+        "selected": "Bu inceleme öğesiyle ilişkili tüm kayıtlı videoları silmek istediğinize emin misiniz?<br /><br />Gelecekte bu diyaloğu pas geçmek için <em>Shift</em> tuşuna basılı tutun."
       },
       "toast": {
-        "success": "Seçili incele öğelerinin ilişkili olduğu video kayıtları başarıyla silinmiştir.",
+        "success": "Seçili inceleme öğelerinin ilişkili olduğu video kayıtları başarıyla silinmiştir.",
         "error": "Siliemedi: {{error}}"
       }
     },
@@ -174,22 +183,29 @@
       "export": "Dışa Aktar",
       "markAsReviewed": "İncelendi olarak işaretle",
       "deleteNow": "Şimdi Sil",
-      "markAsUnreviewed": "Gözden geçirilmedi olarak işaretle"
+      "markAsUnreviewed": "İncelenmedi olarak işaretle",
+      "generateDescription": "Açıklama üret"
     },
     "shareTimestamp": {
       "label": "Zaman Damgasını Paylaş",
       "title": "Zaman Damgasını Paylaş",
-      "description": "Mevcut oynatıcı konumuna ait zaman damgalı bir URL paylaşın veya özel bir zaman damgası seçin. Bunun herkese açık bir paylaşım URL'si olmadığını ve yalnızca Frigate ile bu kameraya erişimi olan kullanıcılar tarafından görüntülenebileceğini unutmayın.",
-      "custom": "Özel Zaman Damgası",
-      "button": "Zaman Damgalı URL'yi Paylaş",
+      "description": "Mevcut oynatıcı konumuna ait zaman damgalı bir URL paylaşın veya özelleştirilmiş bir zaman damgası seçin. Bunun herkese açık bir paylaşım URL'i olmadığını ve yalnızca Frigate ile bu kameraya erişimi olan kullanıcılar tarafından görüntülenebileceğini unutmayın.",
+      "custom": "Özelleştirilmiş Zaman Damgası",
+      "button": "Zaman Damgası URL'ini Paylaş",
       "shareTitle": "Frigate İnceleme Zaman Damgası: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Bu inceleme öğesi için bir Üretken Yapay Zeka açıklaması istendi.",
+        "error": "Açıklama isteği başarısız oldu: {{error}}"
+      }
     }
   },
   "imagePicker": {
     "selectImage": "Takip edilen nesnenin küçük resmini seçin",
     "noImages": "Bu kamera için küçük resim bulunamadı",
     "search": {
-      "placeholder": "Etiket/alt etiket kullanarak arama yapın..."
+      "placeholder": "Etiket veya alt etiket kullanarak arayın..."
     },
     "unknownLabel": "Kaydedilen Tetikleme Görseli"
   }

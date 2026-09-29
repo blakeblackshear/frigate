@@ -1,7 +1,7 @@
 {
   "streamOffline": {
     "title": "Yayın Çevrimdışı",
-    "desc": "{{cameraName}} isimli kameranın <code>tespit</code> akışından hiç bir görüntü alınamadı, hata günlüklerini kontrol edin"
+    "desc": "{{cameraName}} kamerasının <code>tespit</code> yayınından hiçbir görüntü karesi alınmadı; hata günlüklerini kontrol edin"
   },
   "stats": {
     "streamType": {
@@ -12,9 +12,9 @@
       "title": "Bant genişliği:",
       "short": "Bant genişliği"
     },
-    "decodedFrames": "Çözülen kareler:",
+    "decodedFrames": "Çözülen kare:",
     "droppedFrameRate": "Atlanan Kare Oranı:",
-    "totalFrames": "Toplam Kareler:",
+    "totalFrames": "Toplam Kare:",
     "droppedFrames": {
       "short": {
         "title": "Atlanan",
@@ -26,19 +26,34 @@
   "noPreviewFound": "Önizleme Bulunamadı",
   "toast": {
     "success": {
-      "submittedFrigatePlus": "Kare başarıyla Frigate+'a gönderildi"
+      "submittedFrigatePlus": "Kare başarıyla Frigate+'ya gönderildi"
     },
     "error": {
-      "submitFrigatePlusFailed": "Kare Frigate+'a gönderilemedi"
+      "submitFrigatePlusFailed": "Kare Frigate+'ya gönderilemedi",
+      "playRecordingsFailed": "Kayıtlar oynatılamadı (hata {{code}}): {{message}}"
     }
   },
-  "noRecordingsFoundForThisTime": "Bu zaman aralığı için kayıt bulunamadı",
+  "noRecordingsFoundForThisTime": "Bu zaman için kayıt bulunamadı",
   "noPreviewFoundFor": "{{cameraName}} için Önizleme Bulunamadı",
   "livePlayerRequiredIOSVersion": "Bu canlı yayın türü için iOS 17.1 veya daha yeni sürüm gereklidir.",
   "submitFrigatePlus": {
     "title": "Bu kare Frigate+'ya gönderilsin mi?",
     "submit": "Gönder",
-    "previewError": "Önizleme şuan aktif edilemiyor. Kayıt şuan mevcut olmayabilir."
+    "previewError": "Anlık fotoğraf önizlemesi yüklenemedi. Kayıt şu an mevcut olmayabilir."
   },
-  "cameraOff": "Kamera kapalı"
+  "cameraOff": "Kamera kapalı",
+  "quality": {
+    "auto": "Otomatik",
+    "autoLow": "Düşük kalite oynatılıyor (sınırlı bant genişliği)",
+    "autoLowCodec": "Düşük kalite oynatılıyor (Orijinali bu tarayıcıda desteklenmiyor)",
+    "autoLowSaveData": "Düşük kalite oynatılıyor (veri tasarruf seçeneği)",
+    "main": "Orijinal",
+    "sub": "Düşük",
+    "notSupportedBrowser": "Bu tarayıcıda desteklenmiyor",
+    "label": "Kalite",
+    "noAudio": "Ses yok",
+    "audioRate": "{{rate}} kHz ses",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Bu zaman aralığında kayıt yok"
+  }
 }
