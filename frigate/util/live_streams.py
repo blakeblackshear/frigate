@@ -81,6 +81,7 @@ def raw_transcode_streams(config: dict[str, Any]) -> dict[str, str]:
     resolves defaults the same way the validator does.
     """
     streams: dict[str, str] = {}
+    global_streams = (config.get("live") or {}).get("streams") or {}
 
     for camera, camera_config in (config.get("cameras") or {}).items():
         live = (camera_config or {}).get("live") or {}
@@ -89,8 +90,15 @@ def raw_transcode_streams(config: dict[str, Any]) -> dict[str, str]:
         if not transcode.get("enabled"):
             continue
 
+        # cameras inherit global live streams after their own, like deep_merge
+        camera_streams = live.get("streams") or {}
+        live_streams = camera_streams | {
+            label: name
+            for label, name in global_streams.items()
+            if label not in camera_streams
+        }
         source = transcode.get("source") or default_transcode_source(
-            camera, live.get("streams") or {camera: camera}
+            camera, live_streams or {camera: camera}
         )
 
         if source is None:

@@ -150,6 +150,37 @@ test.describe("live stream order and transcoded streams @medium", () => {
     ).toEqual(["Main", "Sub"]);
   });
 
+  test("save all keeps a reorder made on another page", async ({
+    frigateApp,
+  }) => {
+    const capture = await installRoutes(frigateApp.page);
+    await frigateApp.goto(SETTINGS_URL);
+
+    await expect
+      .poll(() => streamNames(frigateApp.page))
+      .toEqual(["Sub", "Main"]);
+
+    await dragRow(frigateApp.page, 1, 0);
+    await expect
+      .poll(() => streamNames(frigateApp.page))
+      .toEqual(["Main", "Sub"]);
+
+    await frigateApp.page.getByText("Snapshots", { exact: true }).click();
+    await frigateApp.page.getByRole("button", { name: "Save All" }).click();
+
+    await expect.poll(() => capture.saved()).not.toBeNull();
+    const saved = capture.saved() as {
+      replace_paths: string[];
+      config_data: {
+        cameras: { front_door: { live: { streams: Record<string, string> } } };
+      };
+    };
+    expect(saved.replace_paths).toEqual(["cameras.front_door.live.streams"]);
+    expect(
+      Object.keys(saved.config_data.cameras.front_door.live.streams),
+    ).toEqual(["Main", "Sub"]);
+  });
+
   test("enabling transcoding saves the shown source", async ({
     frigateApp,
   }) => {

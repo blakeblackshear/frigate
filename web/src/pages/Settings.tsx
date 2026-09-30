@@ -875,6 +875,9 @@ export default function Settings() {
           requires_restart: payload.needsRestart ? 1 : 0,
           update_topic: payload.updateTopic,
           config_data: configData,
+          ...(payload.replacePaths?.length
+            ? { replace_paths: payload.replacePaths }
+            : {}),
         });
 
         if (payload.needsRestart) {

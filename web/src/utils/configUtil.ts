@@ -556,6 +556,7 @@ export interface SectionSavePayload {
   updateTopic: string | undefined;
   needsRestart: boolean;
   pendingDataKey: string;
+  replacePaths?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -765,7 +766,13 @@ export function prepareSectionSavePayload(opts: {
   );
 
   // Build overrides
-  const overrides = buildOverrides(pendingData, rawData, effectiveDefaults);
+  const orderedMaps = sectionConfig.orderedMaps ?? [];
+  const overrides = applyOrderedMaps(
+    buildOverrides(pendingData, rawData, effectiveDefaults),
+    pendingData,
+    rawData,
+    orderedMaps,
+  );
   const sanitizedOverrides = sanitizeOverridesForSection(
     schemaSection,
     level,
@@ -815,6 +822,9 @@ export function prepareSectionSavePayload(opts: {
     updateTopic,
     needsRestart,
     pendingDataKey,
+    replacePaths: changedOrderedMapPaths(pendingData, rawData, orderedMaps).map(
+      (path) => `${basePath}.${path}`,
+    ),
   };
 }
 

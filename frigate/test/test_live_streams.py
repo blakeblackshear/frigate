@@ -202,6 +202,19 @@ class TestLiveTranscodeConfig(unittest.TestCase):
 
         self.assertEqual(config.cameras["front"].live.transcode.source, "front_sub")
 
+    def test_startup_and_validation_agree_on_inherited_source(self):
+        config = camera_config({"transcode": {"enabled": True}})
+        config["live"] = {"streams": {"Sub": "front_sub"}}
+
+        self.assertEqual(
+            raw_transcode_streams(config),
+            generated_transcode_streams(FrigateConfig(**config)),
+        )
+        self.assertEqual(
+            raw_transcode_streams(config)["front_transcode_360p"],
+            transcode_stream_source("front_sub", 360, 250),
+        )
+
     def test_placed_entries_keep_position_and_label(self):
         streams = self.streams(
             {

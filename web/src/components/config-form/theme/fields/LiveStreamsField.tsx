@@ -484,10 +484,13 @@ export function LiveStreamsField(props: FieldProps) {
   );
 
   // Auto order commits after measuring, so edits made meanwhile must survive
+  // and a camera switched to meanwhile must not receive the result
   const dataRef = useRef(data);
+  const cameraRef = useRef(camera);
   useEffect(() => {
     dataRef.current = data;
-  }, [data]);
+    cameraRef.current = camera;
+  }, [data, camera]);
 
   const [measurement, setMeasurement] = useState<{
     data: LiveStreamsData;
@@ -526,6 +529,11 @@ export function LiveStreamsField(props: FieldProps) {
         }
       }),
     );
+
+    if (cameraRef.current !== camera) {
+      setMeasuring(false);
+      return;
+    }
 
     const next = Object.fromEntries(measured);
     const latest = dataRef.current;
