@@ -499,7 +499,8 @@ class CameraWatchdog(threading.Thread):
 
                         continue
                     elif not stale:
-                        self._send_record_status("online", now)
+                        if poll is None:
+                            self._send_record_status("online", now)
                         p["latest_segment_time"] = self.latest_cache_segment_time
 
                 if poll is None:
