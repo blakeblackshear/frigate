@@ -571,6 +571,8 @@ notifications:
   enabled: False
   # Optional: Email for push service to reach out to
   # NOTE: This is required to use notifications
+  # NOTE: Email can be specified with an environment variable or docker secrets that must begin with 'FRIGATE_'.
+  #       e.g. email: '{FRIGATE_NOTIFICATION_EMAIL}'
   email: "admin@example.com"
   # Optional: Cooldown time for notifications in seconds (default: shown below)
   cooldown: 0
