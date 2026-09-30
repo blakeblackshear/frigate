@@ -191,6 +191,9 @@ class TimelineProcessor(threading.Thread):
             timeline_entry[Timeline.class_type] = "gone"
             self.insert_or_save(timeline_entry, prev_event_data, event_data)
 
+            # drop entries for events that ended without being saved
+            self.pre_event_cache.pop(event_id, None)
+
     def handle_api_entry(
         self,
         camera: str,
