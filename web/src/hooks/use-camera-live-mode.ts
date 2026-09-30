@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { LivePlayerMode } from "@/types/live";
 import useDeferredStreamMetadata from "./use-deferred-stream-metadata";
 import { detectCameraAudioFeatures } from "@/utils/cameraUtil";
+import { isRestreamedStream } from "@/utils/liveTranscode";
 import {
   evaluateStreamWebRTCAvailability,
   useWebRTCGloballyAvailable,
@@ -51,18 +52,14 @@ export default function useCameraLiveMode(
     cameras.forEach((camera) => {
       if (activeStreams && activeStreams[camera.name]) {
         const selectedStreamName = activeStreams[camera.name];
-        const isRestreamed = Object.keys(config.go2rtc.streams || {}).includes(
-          selectedStreamName,
-        );
+        const isRestreamed = isRestreamedStream(config, selectedStreamName);
 
         if (isRestreamed) {
           streamNames.add(selectedStreamName);
         }
       } else {
         Object.values(camera.live.streams).forEach((streamName) => {
-          const isRestreamed = Object.keys(
-            config.go2rtc.streams || {},
-          ).includes(streamName);
+          const isRestreamed = isRestreamedStream(config, streamName);
 
           if (isRestreamed) {
             streamNames.add(streamName);
@@ -125,9 +122,7 @@ export default function useCameraLiveMode(
     cameras.forEach((camera) => {
       const selectedStreamName =
         activeStreams?.[camera.name] ?? Object.values(camera.live.streams)[0];
-      const isRestreamed =
-        config &&
-        Object.keys(config.go2rtc.streams || {}).includes(selectedStreamName);
+      const isRestreamed = isRestreamedStream(config, selectedStreamName);
 
       newIsRestreamedStates[camera.name] = isRestreamed ?? false;
 
@@ -181,9 +176,7 @@ export default function useCameraLiveMode(
         (cameraConfig
           ? Object.values(cameraConfig.live.streams)[0]
           : cameraName);
-      const isRestreamed =
-        config &&
-        Object.keys(config.go2rtc.streams || {}).includes(selectedStreamName);
+      const isRestreamed = isRestreamedStream(config, selectedStreamName);
 
       setPreferredLiveModes((prevModes) => ({
         ...prevModes,

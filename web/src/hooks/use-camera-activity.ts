@@ -13,6 +13,7 @@ import { useTimelineUtils } from "./use-timeline-utils";
 import useDeepMemo from "./use-deep-memo";
 import { isEqual } from "lodash";
 import { useAutoFrigateStats } from "./use-stats";
+import { FrigateStats } from "@/types/stats";
 import useSWR from "swr";
 import { getAttributeLabels } from "@/utils/iconUtil";
 
@@ -29,6 +30,19 @@ type useCameraActivityReturn = {
   audio_detections: AudioDetection[];
   offline: boolean;
 };
+
+export function isCameraOffline(
+  stats: FrigateStats | undefined,
+  cameraName: string | undefined,
+): boolean {
+  if (!stats?.cameras || !cameraName) {
+    return false;
+  }
+
+  return (
+    stats.cameras[cameraName]?.camera_fps == 0 && stats.service.uptime > 60
+  );
+}
 
 export function useCameraActivity(
   camera: CameraConfig | undefined,
@@ -167,25 +181,10 @@ export function useCameraActivity(
 
   const stats = useAutoFrigateStats();
 
-  const offline = useMemo(() => {
-    if (!stats) {
-      return false;
-    }
-
-    const cameras = stats["cameras"];
-
-    if (!cameras) {
-      return false;
-    }
-
-    if (!camera?.name) {
-      return false;
-    }
-
-    return (
-      cameras[camera.name]?.camera_fps == 0 && stats["service"].uptime > 60
-    );
-  }, [camera, stats]);
+  const offline = useMemo(
+    () => isCameraOffline(stats, camera?.name),
+    [camera, stats],
+  );
 
   const isCameraEnabled = cameraEnabled ? cameraEnabled === "ON" : true;
 
