@@ -1,4 +1,11 @@
+import type { HiddenFieldContext } from "@/types/configForm";
+import { DEFAULT_SCENE, getSceneChoices } from "@/utils/modelUtil";
 import type { SectionConfigOverrides } from "./types";
+
+// picking a scene only means something when there is more than one choice,
+// which includes a saved scene that no model uses
+const hideSceneWithoutChoice = (ctx: HiddenFieldContext): string[] =>
+  getSceneChoices(ctx).length > 1 ? [] : ["scene"];
 
 const detect: SectionConfigOverrides = {
   base: {
@@ -123,7 +130,7 @@ const detect: SectionConfigOverrides = {
         docLink: "/configuration/object_detectors#running-more-than-one-model",
         condition: (ctx) => {
           const scene = ctx.formData?.scene as string | undefined;
-          if (!scene || scene === "all") return false;
+          if (!scene || scene === DEFAULT_SCENE) return false;
           const models = ctx.fullConfig?.models;
           if (!models) return false;
           return !models.some((model) => model.scene === scene);
@@ -194,6 +201,7 @@ const detect: SectionConfigOverrides = {
       scene: {
         "ui:options": {
           enumI18nPrefix: "detectionModels.scenes",
+          enumI18nOptional: true,
         },
       },
       annotation_offset: {
@@ -202,7 +210,7 @@ const detect: SectionConfigOverrides = {
         },
       },
     },
-    hiddenFields: ["enabled_in_config"],
+    hiddenFields: ["enabled_in_config", hideSceneWithoutChoice],
     advancedFields: [
       "min_initialized",
       "max_disappeared",

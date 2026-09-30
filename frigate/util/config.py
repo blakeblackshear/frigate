@@ -978,7 +978,7 @@ def migrate_models(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any
             ", ".join(sorted(detector_types)),
         )
 
-    entry: dict[str, Any] = {"scene": "all", **model}
+    entry: dict[str, Any] = {"scene": "default", **model}
 
     if model_path:
         entry["path"] = model_path

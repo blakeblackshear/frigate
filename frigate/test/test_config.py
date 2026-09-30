@@ -1,5 +1,6 @@
 import json
 import os
+import tempfile
 import unittest
 from copy import deepcopy
 from unittest.mock import patch
@@ -11,7 +12,6 @@ from ruamel.yaml.constructor import DuplicateKeyError
 from frigate.config import BirdseyeModeEnum, FrigateConfig, RetainModeEnum
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
-from frigate.detectors.detector_config import SceneEnum
 from frigate.detectors.device import build_detector_config, runner_names
 from frigate.util.builtin import deep_merge
 
@@ -68,7 +68,7 @@ class TestConfig(unittest.TestCase):
     def test_config_class(self):
         frigate_config = FrigateConfig(**self.minimal)
         model = frigate_config.primary_model
-        assert model.scene == SceneEnum.all
+        assert model.scene == "default"
         assert model.width == 320
         assert frigate_config.devices_for_model(model)[0].detector == (
             DetectorTypeEnum.cpu
@@ -140,8 +140,8 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
 
-        assert frigate_config.model_for_camera("back").scene == SceneEnum.outdoor
-        assert frigate_config.model_for_camera("front").scene == SceneEnum.indoor
+        assert frigate_config.model_for_camera("back").scene == "outdoor"
+        assert frigate_config.model_for_camera("front").scene == "indoor"
         assert frigate_config.model_for_camera("back").width == 320
         assert frigate_config.model_for_camera("front").width == 300
 
@@ -177,7 +177,7 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
 
-        assert frigate_config.model_for_camera("back").scene == SceneEnum.all
+        assert frigate_config.model_for_camera("back").scene == "default"
 
     @patch("frigate.detectors.detector_config.load_labels")
     def test_model_for_camera_resolves_camera_added_after_parse(self, mock_labels):
@@ -205,7 +205,7 @@ class TestConfig(unittest.TestCase):
         new_config = FrigateConfig(**(deep_merge(deepcopy(config), added)))
         frigate_config.cameras["new_cam"] = new_config.cameras["new_cam"]
 
-        assert frigate_config.model_for_camera("new_cam").scene == SceneEnum.outdoor
+        assert frigate_config.model_for_camera("new_cam").scene == "outdoor"
         assert frigate_config.model_for_camera("new_cam").width == 416
 
     @patch("frigate.detectors.detector_config.load_labels")
@@ -221,7 +221,7 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**(deep_merge(deepcopy(config), self.minimal)))
 
         # a caller racing a runtime remove may still name the popped camera
-        assert frigate_config.model_for_camera("removed").scene == SceneEnum.all
+        assert frigate_config.model_for_camera("removed").scene == "default"
 
     @patch("frigate.detectors.detector_config.load_labels")
     def test_camera_scene_without_a_model_or_a_default(self, mock_labels):
@@ -255,6 +255,124 @@ class TestConfig(unittest.TestCase):
 
         with self.assertRaises(ValidationError):
             FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_scene_names_are_not_a_fixed_list(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"devices": ["cpu"]},
+                {"scene": "garage_thermal", "devices": ["openvino:CPU"]},
+            ],
+            "cameras": {"back": {"detect": {"scene": "garage_thermal"}}},
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert frigate_config.model_for_camera("back").scene == "garage_thermal"
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_scene_names_must_be_simple_identifiers(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {"models": [{"scene": "front yard", "devices": ["cpu"]}]}
+
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**(deep_merge(config, self.minimal)))
+
+    def _two_scene_config(self, default_path: str, outdoor_path: str) -> dict:
+        return {
+            "models": [
+                {"path": default_path, "devices": ["openvino:CPU"]},
+                {"scene": "outdoor", "path": outdoor_path, "devices": ["openvino:GPU"]},
+            ],
+            "cameras": {"back": {"detect": {"scene": "outdoor"}}},
+        }
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_models_with_the_same_path_are_combined(self, mock_labels):
+        mock_labels.return_value = {}
+        config = self._two_scene_config("/etc/hosts", "/etc/hosts")
+
+        with self.assertLogs("frigate.config.config", level="WARNING") as logs:
+            frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert len(frigate_config.models) == 1
+        model = frigate_config.primary_model
+        assert model.devices == ["openvino:CPU", "openvino:GPU"]
+        assert [d.raw for d in frigate_config.devices_for_model(model)] == [
+            "openvino:CPU",
+            "openvino:GPU",
+        ]
+        assert frigate_config.model_for_camera("back") is model
+        assert frigate_config.cameras["back"].detect.scene == "default"
+        assert any("same model file" in line for line in logs.output)
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_models_with_the_same_file_contents_are_combined(self, mock_labels):
+        mock_labels.return_value = {}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            first = os.path.join(temp_dir, "model.onnx")
+            copy = os.path.join(temp_dir, "renamed.onnx")
+
+            for path in (first, copy):
+                with open(path, "wb") as f:
+                    f.write(b"same weights")
+
+            config = self._two_scene_config(first, copy)
+            frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert len(frigate_config.models) == 1
+        assert frigate_config.model_for_camera("back").scene == "default"
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_models_with_different_files_are_kept_apart(self, mock_labels):
+        mock_labels.return_value = {}
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            first = os.path.join(temp_dir, "model.onnx")
+            other = os.path.join(temp_dir, "thermal.onnx")
+
+            for path, contents in ((first, b"visible"), (other, b"thermal")):
+                with open(path, "wb") as f:
+                    f.write(contents)
+
+            config = self._two_scene_config(first, other)
+            frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert len(frigate_config.models) == 2
+        assert frigate_config.model_for_camera("back").scene == "outdoor"
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_combined_models_keep_the_default_model(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"scene": "outdoor", "path": "/etc/hosts", "devices": ["openvino:GPU"]},
+                {"path": "/etc/hosts", "devices": ["openvino:CPU"]},
+            ],
+            "cameras": {"back": {"detect": {"scene": "outdoor"}}},
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert [model.scene for model in frigate_config.models] == ["default"]
+        assert frigate_config.primary_model.devices == ["openvino:CPU", "openvino:GPU"]
+        assert frigate_config.model_for_camera("back").scene == "default"
+
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_models_on_different_detectors_are_kept_apart(self, mock_labels):
+        mock_labels.return_value = {}
+        config = {
+            "models": [
+                {"path": "/etc/hosts", "devices": ["openvino:CPU"]},
+                {"scene": "outdoor", "path": "/etc/hosts", "devices": ["onnx"]},
+            ],
+        }
+
+        frigate_config = FrigateConfig(**(deep_merge(config, self.minimal)))
+
+        assert len(frigate_config.models) == 2
 
     @patch("frigate.detectors.detector_config.load_labels")
     def test_model_devices_must_share_a_detector(self, mock_labels):

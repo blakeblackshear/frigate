@@ -9,7 +9,6 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateSubscriber,
 )
 from frigate.const import SUB_CACHE_TAG
-from frigate.detectors.detector_config import SceneEnum
 
 
 def _build_scene_frigate_config(scene: str | None) -> FrigateConfig:
@@ -119,7 +118,7 @@ class TestRecordUpdateRecreatesFfmpegCmds(unittest.TestCase):
         subscriber = CameraConfigUpdateSubscriber(
             config, {}, [CameraConfigUpdateEnum.add, CameraConfigUpdateEnum.remove]
         )
-        assert config.model_for_camera("front_door").scene == SceneEnum.outdoor
+        assert config.model_for_camera("front_door").scene == "outdoor"
 
         subscriber.subscriber.check_for_update.side_effect = [
             ("config/cameras/front_door/remove", config.cameras["front_door"]),
@@ -136,7 +135,7 @@ class TestRecordUpdateRecreatesFfmpegCmds(unittest.TestCase):
         ]
         subscriber.check_for_updates()
 
-        assert config.model_for_camera("front_door").scene == SceneEnum.all
+        assert config.model_for_camera("front_door").scene == "default"
 
     def test_unchanged_record_update_keeps_existing_cmds(self):
         camera_config = _build_camera_config(sub_enabled=False)

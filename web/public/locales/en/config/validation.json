@@ -33,6 +33,8 @@
     "dimensionMustBeEven": "Must be an even number."
   },
   "models": {
-    "defaultRequired": "One model must use a scene of 'All cameras'. Without it, any camera that does not choose a scene has no model to fall back to."
+    "defaultRequired": "One model must use the default scene. Without it, any camera that does not choose a scene has no model to fall back to.",
+    "sceneDuplicate": "Each model must use a different scene.",
+    "sameModel": "The {{scene}} and {{other}} models use the same model file. Running one model under several scenes only splits the detection work across separate detectors, which is slower than one model with all of the hardware listed under it."
   }
 }

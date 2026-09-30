@@ -277,10 +277,10 @@
   },
   "models": {
     "label": "Detection models",
-    "description": "Object detection models and the hardware each one runs on. Cameras pick a model by matching their detect.scene against a model's scene.",
+    "description": "Object detection models and the hardware each one runs on. Cameras pick a model by matching their detect.scene against a model's scene, falling back to the 'default' model.",
     "scene": {
       "label": "Model scene",
-      "description": "The camera environment this model is used for. Cameras select a model by setting detect.scene to a matching value, and 'all' is used by any camera that does not set one."
+      "description": "A name for the camera environment this model is used for, such as 'thermal'. Cameras select a model by setting detect.scene to a matching value, and the 'default' model is used by any camera that does not set one."
     },
     "devices": {
       "label": "Detection hardware",
@@ -468,7 +468,7 @@
     },
     "scene": {
       "label": "Detect scene",
-      "description": "The environment this camera looks at, used to pick which of the configured models runs on it. Cameras left on 'all' run the model configured with a scene of 'all'."
+      "description": "The environment this camera looks at, used to pick which of the configured models runs on it. Cameras left on 'default' run the model configured with a scene of 'default'."
     },
     "fps": {
       "label": "Detect FPS",

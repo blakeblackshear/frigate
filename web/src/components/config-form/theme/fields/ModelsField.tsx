@@ -22,14 +22,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -39,6 +33,7 @@ import type { ConfigFormContext } from "@/types/configForm";
 import useSWR from "swr";
 import { DetectionHardware } from "@/types/hardware";
 import { summarizeDevices } from "@/utils/detectionHardware";
+import { DEFAULT_SCENE, getSceneLabel } from "@/utils/modelUtil";
 import { HardwarePicker } from "./HardwarePicker";
 import { ModelSourcePicker } from "./ModelSourcePicker";
 
@@ -103,16 +98,6 @@ const getItemProperties = (
   return schema.properties as Record<string, RJSFSchema>;
 };
 
-const getSceneOptions = (itemSchema: RJSFSchema | undefined): string[] => {
-  const scene = getItemProperties(itemSchema).scene as
-    Record<string, unknown> | undefined;
-  const values = scene?.enum;
-
-  return Array.isArray(values)
-    ? values.filter((v): v is string => typeof v === "string")
-    : [];
-};
-
 export function ModelsField(props: FieldProps) {
   const {
     schema,
@@ -147,10 +132,15 @@ export function ModelsField(props: FieldProps) {
       ((uiSchema as { items?: UiSchema } | undefined)?.items ?? {}) as UiSchema,
     [uiSchema],
   );
-  const sceneOptions = useMemo(() => getSceneOptions(itemSchema), [itemSchema]);
   const SchemaField = registry.fields.SchemaField;
 
   const [openByIndex, setOpenByIndex] = useState<Record<number, boolean>>({});
+  // scenes are edited in place, so cards need a key that survives a rename and
+  // doesn't hand a deleted card's state (such as the model source tab) to the
+  // next one
+  const [cardKeys, setCardKeys] = useState<number[]>(() =>
+    models.map((_, index) => index),
+  );
 
   // shared with HardwarePicker through the SWR cache, so this is not a second
   // request
@@ -164,34 +154,53 @@ export function ModelsField(props: FieldProps) {
       }
       return next;
     });
+    setCardKeys((previous) => {
+      if (previous.length === models.length) {
+        return previous;
+      }
+
+      const next = previous.slice(0, models.length);
+      let key = Math.max(-1, ...previous);
+      while (next.length < models.length) {
+        key += 1;
+        next.push(key);
+      }
+      return next;
+    });
   }, [models.length]);
 
   const cameras = formContext?.fullConfig?.cameras;
   const savedModels = formContext?.fullConfig?.models;
 
   // `plus` is a readonly field stripped from the form data, so read it from the
-  // full config. Match on scene rather than index, which shifts when a model is
-  // added or removed.
-  const savedPlusForScene = useCallback(
-    (scene: string | undefined) =>
-      savedModels?.find((saved) => saved.scene === scene)?.plus,
+  // full config. Match on path rather than index, which shifts when a model is
+  // added or removed, or scene, which can be renamed.
+  const savedPlusForPath = useCallback(
+    (path: unknown) =>
+      typeof path === "string"
+        ? savedModels?.find((saved) => saved.path === path)?.plus
+        : undefined,
     [savedModels],
   );
 
   // a model serves the cameras naming its scene, and like the backend, the
-  // "all" model also serves every camera whose scene has no model of its own
+  // default model also serves every camera whose scene has no model of its own
   const cameraCountForScene = useCallback(
     (scene: string | undefined): number => {
       if (!cameras) {
         return 0;
       }
 
-      const modelScenes = new Set(models.map((model) => model.scene ?? "all"));
+      const modelScenes = new Set(
+        models.map((model) => model.scene ?? DEFAULT_SCENE),
+      );
 
       return Object.values(cameras).filter((camera) => {
-        const cameraScene = camera?.detect?.scene ?? "all";
-        const servedBy = modelScenes.has(cameraScene) ? cameraScene : "all";
-        return servedBy === (scene ?? "all");
+        const cameraScene = camera?.detect?.scene ?? DEFAULT_SCENE;
+        const servedBy = modelScenes.has(cameraScene)
+          ? cameraScene
+          : DEFAULT_SCENE;
+        return servedBy === (scene ?? DEFAULT_SCENE);
       }).length;
     },
     [cameras, models],
@@ -207,13 +216,15 @@ export function ModelsField(props: FieldProps) {
         }
 
         (model.devices ?? []).forEach((device) => {
-          claimed[device] = model.scene ?? String(currentIndex + 1);
+          claimed[device] = model.scene
+            ? getSceneLabel(t, model.scene)
+            : String(currentIndex + 1);
         });
       });
 
       return claimed;
     },
-    [models],
+    [models, t],
   );
 
   const updateModel = useCallback(
@@ -229,12 +240,15 @@ export function ModelsField(props: FieldProps) {
     const base = itemSchema
       ? (applySchemaDefaults(itemSchema) as DetectionModel)
       : ({} as DetectionModel);
-    const taken = new Set(models.map((model) => model.scene));
-    const scene = sceneOptions.find((option) => !taken.has(option));
-
-    onChange([...models, { ...base, scene, devices: [] }], fieldPathId.path);
+    // the default scene is almost always taken, so leave the new model's
+    // scene for the user to name
+    onChange(
+      [...models, { ...base, scene: "", devices: [] }],
+      fieldPathId.path,
+    );
     setOpenByIndex((previous) => ({ ...previous, [models.length]: true }));
-  }, [models, itemSchema, sceneOptions, onChange, fieldPathId.path]);
+    setCardKeys((previous) => [...previous, Math.max(-1, ...previous) + 1]);
+  }, [models, itemSchema, onChange, fieldPathId.path]);
 
   const handleRemoveModel = useCallback(
     (index: number) => {
@@ -254,6 +268,9 @@ export function ModelsField(props: FieldProps) {
         });
         return next;
       });
+      setCardKeys((previous) =>
+        previous.filter((_, currentIndex) => currentIndex !== index),
+      );
     },
     [models, onChange, fieldPathId.path],
   );
@@ -319,16 +336,16 @@ export function ModelsField(props: FieldProps) {
     <div className="space-y-4">
       {models.map((model, index) => {
         const open = openByIndex[index] ?? true;
-        const takenScenes = new Set(
-          models
-            .filter((_, currentIndex) => currentIndex !== index)
-            .map((other) => other.scene),
-        );
+        const sceneErrors = (
+          (errorSchema as Record<string, ErrorSchema> | undefined)?.[index] as
+            Record<string, ErrorSchema> | undefined
+        )?.scene?.__errors;
 
         return (
-          // keyed by scene, which is unique per model, so deleting a card
-          // doesn't hand its state (such as the model source tab) to the next
-          <Card key={`${baseId}-${model.scene ?? index}`} className="w-full">
+          <Card
+            key={`${baseId}-${cardKeys[index] ?? index}`}
+            className="w-full"
+          >
             <Collapsible
               open={open}
               onOpenChange={(nextOpen) =>
@@ -342,9 +359,7 @@ export function ModelsField(props: FieldProps) {
                 <div className="flex items-center justify-between gap-4">
                   <CollapsibleTrigger asChild>
                     <CardTitle className="flex-1 cursor-pointer text-sm">
-                      <span>
-                        {t(`detectionModels.scenes.${model.scene ?? "all"}`)}
-                      </span>
+                      <span>{getSceneLabel(t, model.scene)}</span>
                       <span className="mt-1 block text-xs font-normal text-muted-foreground">
                         {summarizeDevices(
                           hardware ?? [],
@@ -401,27 +416,24 @@ export function ModelsField(props: FieldProps) {
               <CollapsibleContent>
                 <CardContent className="space-y-6 p-4 pt-0">
                   <div className="space-y-1">
-                    <Label>{t("detectionModels.scene.label")}</Label>
-                    <Select
+                    <Label htmlFor={`${baseId}-${index}-scene`}>
+                      {t("detectionModels.scene.label")}
+                    </Label>
+                    <Input
+                      id={`${baseId}-${index}-scene`}
+                      className="max-w-xs"
                       value={model.scene ?? ""}
-                      onValueChange={(scene) => updateModel(index, { scene })}
+                      placeholder={t("detectionModels.scene.placeholder")}
+                      onChange={(event) =>
+                        updateModel(index, { scene: event.target.value.trim() })
+                      }
                       disabled={disabled || readonly}
-                    >
-                      <SelectTrigger className="max-w-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {sceneOptions.map((scene) => (
-                          <SelectItem
-                            key={scene}
-                            value={scene}
-                            disabled={takenScenes.has(scene)}
-                          >
-                            {t(`detectionModels.scenes.${scene}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    />
+                    {!hideError && sceneErrors?.length ? (
+                      <p className="text-xs text-destructive">
+                        {sceneErrors.join(", ")}
+                      </p>
+                    ) : null}
                     <p className="text-xs text-muted-foreground">
                       {t("detectionModels.scene.description")}
                     </p>
@@ -438,7 +450,7 @@ export function ModelsField(props: FieldProps) {
 
                   <ModelSourcePicker
                     path={model.path}
-                    plus={savedPlusForScene(model.scene)}
+                    plus={savedPlusForPath(model.path)}
                     detector={detectorForModel(model)}
                     disabled={disabled || readonly}
                     onPathChange={(path) => updateModel(index, { path })}
@@ -453,19 +465,17 @@ export function ModelsField(props: FieldProps) {
         );
       })}
 
-      {models.length < sceneOptions.length ? (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={handleAddModel}
-          disabled={disabled || readonly}
-          className="gap-2"
-        >
-          <LuPlus className="h-4 w-4" />
-          {t("detectionModels.addModel")}
-        </Button>
-      ) : null}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={handleAddModel}
+        disabled={disabled || readonly}
+        className="gap-2"
+      >
+        <LuPlus className="h-4 w-4" />
+        {t("detectionModels.addModel")}
+      </Button>
     </div>
   );
 }
