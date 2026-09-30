@@ -57,6 +57,10 @@ class TestHttpApp(BaseTestHttp):
         with AuthTestClient(app) as client:
             assert client.get("/faces", headers=viewer).status_code == 403
             assert client.get("/faces").status_code == 200
+            assert (
+                client.post("/faces/train/person/classify", headers=viewer).status_code
+                == 403
+            )
 
             # Camera routes for the same name stay reachable by viewers
             response = client.get("/faces/recordings/summary", headers=viewer)
