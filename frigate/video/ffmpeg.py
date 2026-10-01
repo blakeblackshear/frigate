@@ -18,6 +18,7 @@ from frigate.comms.recordings_updater import (
     RecordingsDataTypeEnum,
 )
 from frigate.config import CameraConfig, LoggerConfig
+from frigate.config.camera.ffmpeg import CameraRoleEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -181,27 +182,38 @@ class CameraWatchdog(threading.Thread):
         # Status caching to reduce message volume
         self._last_detect_status: str | None = None
         self._last_record_status: str | None = None
-        self._last_status_update_time: float = 0.0
+        self._last_detect_status_update_time: float = 0.0
+        self._last_record_status_update_time: float = 0.0
 
     def _send_detect_status(self, status: str, now: float) -> None:
         """Send detect status only if changed or retry_interval has elapsed."""
         if (
             status != self._last_detect_status
-            or (now - self._last_status_update_time) >= self.sleeptime
+            or (now - self._last_detect_status_update_time) >= self.sleeptime
         ):
             self.requestor.send_data(f"{self.config.name}/status/detect", status)
             self._last_detect_status = status
-            self._last_status_update_time = now
+            self._last_detect_status_update_time = now
 
     def _send_record_status(self, status: str, now: float) -> None:
         """Send record status only if changed or retry_interval has elapsed."""
         if (
             status != self._last_record_status
-            or (now - self._last_status_update_time) >= self.sleeptime
+            or (now - self._last_record_status_update_time) >= self.sleeptime
         ):
             self.requestor.send_data(f"{self.config.name}/status/record", status)
             self._last_record_status = status
-            self._last_status_update_time = now
+            self._last_record_status_update_time = now
+
+    def _send_roles_offline(self, roles: list[CameraRoleEnum], now: float) -> None:
+        """Send offline status for each role of a restarted ffmpeg process."""
+        for role in roles:
+            if role == CameraRoleEnum.record:
+                self._send_record_status("offline", now)
+            else:
+                self.requestor.send_data(
+                    f"{self.config.name}/status/{role.value}", "offline"
+                )
 
     def _check_config_updates(self) -> dict[str, list[str]]:
         """Check for config updates and return the update dict."""
@@ -478,10 +490,7 @@ class CameraWatchdog(threading.Thread):
                             ffmpeg_process=p["process"],
                         )
 
-                        for role in p["roles"]:
-                            self.requestor.send_data(
-                                f"{self.config.name}/status/{role.value}", "offline"
-                            )
+                        self._send_roles_offline(p["roles"], now)
 
                         self.record_grace_until = now_utc + timedelta(
                             seconds=RECORD_GRACE_SECONDS
@@ -490,16 +499,14 @@ class CameraWatchdog(threading.Thread):
 
                         continue
                     elif not stale:
-                        self._send_record_status("online", now)
+                        if poll is None:
+                            self._send_record_status("online", now)
                         p["latest_segment_time"] = self.latest_cache_segment_time
 
                 if poll is None:
                     continue
 
-                for role in p["roles"]:
-                    self.requestor.send_data(
-                        f"{self.config.name}/status/{role.value}", "offline"
-                    )
+                self._send_roles_offline(p["roles"], now)
 
                 p["logpipe"].dump()
                 p["process"] = start_or_restart_ffmpeg(
