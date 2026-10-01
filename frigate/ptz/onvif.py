@@ -966,6 +966,10 @@ class OnvifController:
                     }
                 else:
                     logger.warning(f"ONVIF initialization failed for {camera_name}")
+                    self.failed_cams[camera_name] = {
+                        "retry_attempts": attempts + 1,
+                        "last_attempt": time.time(),
+                    }
             except Exception as e:
                 logger.error(
                     f"Error during ONVIF initialization for {camera_name}: {e}"
