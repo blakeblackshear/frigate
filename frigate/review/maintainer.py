@@ -590,50 +590,57 @@ class ReviewSegmentMaintainer(threading.Thread):
                 except FileNotFoundError:
                     return
 
-            if (
-                segment.severity == SeverityEnum.alert
-                and segment.last_alert_time is not None
-                and frame_time
-                > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
-            ):
-                needs_new_detection = (
-                    segment.last_detection_time > segment.last_alert_time
-                    and (
-                        segment.last_detection_time
-                        + camera_config.review.detections.cutoff_time
-                    )
-                    > frame_time
+        # detection-level activity must not keep an alert open, it continues
+        # in a new detection segment once the alert is cut off
+        if (
+            segment.severity == SeverityEnum.alert
+            and segment.last_alert_time is not None
+            and frame_time
+            > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
+        ):
+            needs_new_detection = (
+                segment.last_detection_time > segment.last_alert_time
+                and (
+                    segment.last_detection_time
+                    + camera_config.review.detections.cutoff_time
                 )
-                last_detection_time = segment.last_detection_time
+                > frame_time
+            )
+            last_detection_time = segment.last_detection_time
 
-                end_time = self._publish_segment_end(segment, prev_data)
+            end_time = self._publish_segment_end(segment, prev_data)
 
-                if needs_new_detection:
-                    new_detections: dict[str, str] = {}
-                    new_zones = set()
+            if needs_new_detection:
+                new_detections: dict[str, str] = {}
+                new_zones = set()
 
-                    for o in activity.categorized_objects["detections"]:
-                        new_detections[o["id"]] = o["label"]
-                        new_zones.update(o["current_zones"])
+                for o in activity.categorized_objects["detections"]:
+                    new_detections[o["id"]] = o["label"]
+                    new_zones.update(o["current_zones"])
 
-                    if new_detections:
-                        new_segment = PendingReviewSegment(
-                            segment.camera,
-                            end_time,
-                            SeverityEnum.detection,
-                            new_detections,
-                            sub_labels={},
-                            audio=set(),
-                            zones=list(new_zones),
-                        )
-                        self._activate_segment(new_segment)
-                        self._publish_segment_start(new_segment)
-                        new_segment.last_detection_time = last_detection_time
-            elif segment.severity == SeverityEnum.detection and frame_time > (
+                if new_detections:
+                    new_segment = PendingReviewSegment(
+                        segment.camera,
+                        end_time,
+                        SeverityEnum.detection,
+                        new_detections,
+                        sub_labels={},
+                        audio=set(),
+                        zones=list(new_zones),
+                    )
+                    self._activate_segment(new_segment)
+                    self._publish_segment_start(new_segment)
+                    new_segment.last_detection_time = last_detection_time
+        elif (
+            not has_activity
+            and segment.severity == SeverityEnum.detection
+            and frame_time
+            > (
                 segment.last_detection_time
                 + camera_config.review.detections.cutoff_time
-            ):
-                self._publish_segment_end(segment, prev_data)
+            )
+        ):
+            self._publish_segment_end(segment, prev_data)
 
     def check_if_new_segment(
         self,
