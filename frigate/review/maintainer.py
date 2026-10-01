@@ -66,9 +66,9 @@ class PendingReviewSegment:
         self.zones = zones
         self.audio = audio
         self.classification_state_changes: list[dict[str, Any]] = []
-        # detection-level objects active after the last alert activity, these
-        # move to a new detection segment when the alert is cut off
-        self.pending_detections: dict[str, dict[str, Any]] = {}
+        # detection-level activity after the last alert activity, split by the
+        # detection cutoff, these are published when the alert is cut off
+        self.pending_detections: list[PendingReviewSegment] = []
         self.thumb_time: float | None = None
         self.last_alert_time: float | None = None
         self.last_detection_time: float = frame_time
@@ -487,6 +487,55 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.indefinite_events.pop(camera, None)
         self.recent_classification_state_changes.pop(camera, None)
 
+    def _track_pending_detection(
+        self,
+        segment: PendingReviewSegment,
+        camera_config: CameraConfig,
+        frame_name: str,
+        frame_time: float,
+        objects: list[dict[str, Any]],
+    ) -> None:
+        """Hold detection-level activity seen after an alert's last alert
+        activity, starting a separate detection when the gap since the previous
+        activity exceeds the detection cutoff."""
+        pending = segment.pending_detections[-1] if segment.pending_detections else None
+
+        if pending is None or frame_time > (
+            pending.last_detection_time + camera_config.review.detections.cutoff_time
+        ):
+            pending = PendingReviewSegment(
+                segment.camera,
+                frame_time,
+                SeverityEnum.detection,
+                {},
+                sub_labels={},
+                audio=set(),
+                zones=[],
+            )
+            segment.pending_detections.append(pending)
+
+        pending.last_detection_time = frame_time
+
+        for obj in objects:
+            pending.add_object(obj, self.config.all_attributes)
+
+        if len(objects) <= pending.frame_active_count:
+            return
+
+        try:
+            yuv_frame = self.frame_manager.get(
+                frame_name, camera_config.frame_shape_yuv
+            )
+        except FileNotFoundError:
+            return
+
+        if yuv_frame is None:
+            logger.debug(f"Failed to get frame {frame_name} from SHM")
+            return
+
+        pending.update_frame(camera_config, yuv_frame, objects)
+        self.frame_manager.close(frame_name)
+
     def update_existing_segment(
         self,
         segment: PendingReviewSegment,
@@ -524,10 +573,18 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 # alert activity resumed, so the pending detection activity
                 # falls within this alert
-                for pending in segment.pending_detections.values():
-                    segment.add_object(pending, self.config.all_attributes)
+                for pending in segment.pending_detections:
+                    segment.detections.update(pending.detections)
+                    segment.sub_labels.update(pending.sub_labels)
 
-                segment.pending_detections = {}
+                    for zone in pending.zones:
+                        if zone not in segment.zones:
+                            segment.zones.append(zone)
+
+                    Path(pending.frame_path).unlink(missing_ok=True)
+                    should_update_state = True
+
+                segment.pending_detections = []
 
             if activity.has_activity_category(SeverityEnum.detection):
                 if (
@@ -535,6 +592,8 @@ class ReviewSegmentMaintainer(threading.Thread):
                     or frame_time > segment.last_detection_time
                 ):
                     segment.last_detection_time = frame_time
+
+            pending_objects: list[dict[str, Any]] = []
 
             for object in activity.get_all_objects():
                 # Alert-level objects should always be added (they extend/upgrade the segment)
@@ -550,13 +609,18 @@ class ReviewSegmentMaintainer(threading.Thread):
                         segment.last_alert_time is not None
                         and frame_time > segment.last_alert_time
                     ):
-                        segment.pending_detections[object["id"]] = object
+                        pending_objects.append(object)
 
                     # Only add if it started during the alert's active period
                     if object["start_time"] > segment.last_alert_time:
                         continue
 
                 segment.add_object(object, self.config.all_attributes)
+
+            if pending_objects:
+                self._track_pending_detection(
+                    segment, camera_config, frame_name, frame_time, pending_objects
+                )
 
             if len(activity.get_all_objects()) > segment.frame_active_count:
                 should_update_state = True
@@ -616,25 +680,18 @@ class ReviewSegmentMaintainer(threading.Thread):
             and frame_time
             > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
         ):
-            end_time = self._publish_segment_end(segment, prev_data)
+            self._publish_segment_end(segment, prev_data)
 
-            if segment.pending_detections:
-                new_segment = PendingReviewSegment(
-                    segment.camera,
-                    end_time,
-                    SeverityEnum.detection,
-                    {},
-                    sub_labels={},
-                    audio=set(),
-                    zones=[],
-                )
+            for pending in segment.pending_detections:
+                self._activate_segment(pending)
+                self._publish_segment_start(pending)
 
-                for pending in segment.pending_detections.values():
-                    new_segment.add_object(pending, self.config.all_attributes)
-
-                self._activate_segment(new_segment)
-                self._publish_segment_start(new_segment)
-                new_segment.last_detection_time = segment.last_detection_time
+                # only the latest detection can still be ongoing
+                if frame_time > (
+                    pending.last_detection_time
+                    + camera_config.review.detections.cutoff_time
+                ):
+                    self._publish_segment_end(pending, pending.get_data(False))
         elif (
             not has_activity
             and segment.severity == SeverityEnum.detection

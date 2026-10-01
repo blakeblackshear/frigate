@@ -10,6 +10,7 @@ import json
 import tempfile
 import threading
 import unittest
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -50,7 +51,7 @@ class ReviewFlowTestCase(unittest.TestCase):
     review_config = ""
 
     def setUp(self) -> None:
-        clips_dir = tempfile.TemporaryDirectory()
+        self.clips_dir = clips_dir = tempfile.TemporaryDirectory()
         self.addCleanup(clips_dir.cleanup)
         clips_patch = patch("frigate.review.maintainer.CLIPS_DIR", clips_dir.name)
         clips_patch.start()
@@ -485,7 +486,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
 
         detection = self.maintainer.active_review_segments[CAMERA]
         self.assertEqual(detection.severity.value, "detection")
-        self.assertEqual(detection.start_time, 1)
+        self.assertEqual(detection.start_time, 11)
         self.assertEqual(list(detection.detections.values()), ["dog"])
 
         # the detection ends once the dog stops moving
@@ -516,8 +517,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
 
         detection = self.maintainer.active_review_segments[CAMERA]
         self.assertEqual(detection.severity.value, "detection")
-        self.assertGreaterEqual(detection.start_time, 1)
-        self.assertLessEqual(detection.start_time, 11)
+        self.assertEqual(detection.start_time, 11)
         self.assertEqual(list(detection.detections.values()), ["dog"])
 
     def test_detection_leaving_before_alert_cutoff_gets_detection(self) -> None:
@@ -545,8 +545,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertEqual(ends[0]["end_time"], 1)
         self.assertEqual(ends[0]["data"]["objects"], ["person"])
         self.assertEqual(ends[1]["data"]["objects"], ["dog"])
-        self.assertGreaterEqual(ends[1]["start_time"], 1)
-        self.assertLessEqual(ends[1]["start_time"], 11)
+        self.assertEqual(ends[1]["start_time"], 11)
         self.assertEqual(ends[1]["end_time"], 21)
 
     def test_detection_older_than_detection_cutoff_gets_detection(self) -> None:
@@ -575,9 +574,84 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertEqual(ends[0]["end_time"], 1)
         self.assertEqual(ends[0]["data"]["objects"], ["person"])
         self.assertEqual(ends[1]["data"]["objects"], ["dog"])
-        self.assertEqual(ends[1]["start_time"], 1)
+        self.assertEqual(ends[1]["start_time"], 3)
         self.assertEqual(ends[1]["end_time"], 5)
         self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+
+    def test_separate_detection_activity_after_alert_is_not_combined(self) -> None:
+        # the dog and cat are seen further apart than the detection cutoff
+        # while the alert is waiting to be cut off
+        cat_time = 3 + self.detection_cutoff + 6
+        self.assertLess(cat_time, 1 + self.alert_cutoff)
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (3, [self.tracked("d1", "dog", 3, start_time=3)]),
+            (4, []),
+            (cat_time, [self.tracked("c1", "cat", cat_time, start_time=cat_time)]),
+            (2 + self.alert_cutoff, []),
+            (cat_time + self.detection_cutoff + 1, []),
+        )
+
+        self.assertEqual(
+            [(t, s) for t, s in self.review_summary() if t != "update"],
+            [
+                ("new", "alert"),
+                ("end", "alert"),
+                ("new", "detection"),
+                ("end", "detection"),
+                ("new", "detection"),
+                ("end", "detection"),
+            ],
+        )
+        ends = [r["after"] for r in self.reviews() if r["type"] == "end"]
+        self.assertEqual(ends[0]["data"]["objects"], ["person"])
+        self.assertEqual(ends[1]["data"]["objects"], ["dog"])
+        self.assertEqual((ends[1]["start_time"], ends[1]["end_time"]), (3, 3))
+        self.assertEqual(ends[2]["data"]["objects"], ["cat"])
+        self.assertEqual(
+            (ends[2]["start_time"], ends[2]["end_time"]), (cat_time, cat_time)
+        )
+        for detection in ends[1:]:
+            self.assertTrue(Path(detection["thumb_path"]).is_file())
+            self.assertIsNotNone(detection["data"]["thumb_time"])
+
+    def test_resumed_alert_publishes_pending_detection_objects(self) -> None:
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=5)]),
+            (10, [self.tracked("p1", "person", 10, start_time=1)]),
+        )
+
+        latest = self.reviews()[-1]
+        self.assertEqual(latest["type"], "update")
+        self.assertEqual(latest["after"]["severity"], "alert")
+        self.assertCountEqual(latest["after"]["data"]["objects"], ["person", "dog"])
+
+        # the dog's held detection thumbnail is discarded with it
+        thumbs = list(Path(self.clips_dir.name, "review").iterdir())
+        self.assertEqual(
+            [t.name for t in thumbs], [Path(latest["after"]["thumb_path"]).name]
+        )
+
+    def test_split_detection_has_thumbnail_of_its_activity(self) -> None:
+        dog_frames = [
+            (t, [self.tracked("d1", "dog", t, start_time=11)])
+            for t in range(11, 2 + self.alert_cutoff + 10, 10)
+        ]
+        self.feed((1, [self.tracked("p1", "person", 1, start_time=1)]), *dog_frames)
+
+        new_detection = next(
+            r["after"]
+            for r in self.reviews()
+            if r["type"] == "new" and r["after"]["severity"] == "detection"
+        )
+        self.assertTrue(Path(new_detection["thumb_path"]).is_file())
+        # captured from the dog's first frame, not a later fallback frame
+        self.assertIsNotNone(new_detection["data"]["thumb_time"])
+        self.assertIn(
+            f"{CAMERA}_11",
+            [c.args[0] for c in self.maintainer.frame_manager.get.call_args_list],
+        )
 
 
 if __name__ == "__main__":
