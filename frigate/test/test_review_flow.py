@@ -653,6 +653,47 @@ class TestReviewLifecycle(ReviewFlowTestCase):
             [c.args[0] for c in self.maintainer.frame_manager.get.call_args_list],
         )
 
+    def assert_force_end_publishes_pending_detection(self, topic: str) -> None:
+        # the dog is held as a pending detection when the alert is ended
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=5)]),
+        )
+
+        if topic == "remove":
+            # the config updater has already dropped the camera
+            self.maintainer.config.cameras.pop(CAMERA)
+
+        self.maintainer.config_subscriber.check_for_updates.side_effect = [
+            {topic: [CAMERA]}
+        ]
+        self.feed()
+
+        self.assertEqual(
+            [(t, s) for t, s in self.review_summary() if t != "update"],
+            [
+                ("new", "alert"),
+                ("end", "alert"),
+                ("new", "detection"),
+                ("end", "detection"),
+            ],
+        )
+        end = self.reviews()[-1]["after"]
+        self.assertEqual(end["data"]["objects"], ["dog"])
+        self.assertEqual((end["start_time"], end["end_time"]), (5, 5))
+        self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+
+        # every thumbnail on disk belongs to a published review
+        published = {Path(r["after"]["thumb_path"]).name for r in self.reviews()}
+        on_disk = {t.name for t in Path(self.clips_dir.name, "review").iterdir()}
+        self.assertEqual(on_disk, published)
+
+    def test_disabled_camera_publishes_pending_detections(self) -> None:
+        self.assert_force_end_publishes_pending_detection("enabled")
+
+    def test_removed_camera_publishes_pending_detections(self) -> None:
+        self.assert_force_end_publishes_pending_detection("remove")
+
 
 if __name__ == "__main__":
     unittest.main()

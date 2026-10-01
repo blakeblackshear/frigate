@@ -452,8 +452,28 @@ class ReviewSegmentMaintainer(threading.Thread):
                     segment.last_detection_time = now
 
             prev_data = segment.get_data(False)
-            return self._publish_segment_end(segment, prev_data)
+            end_time = self._publish_segment_end(segment, prev_data)
+            self._publish_pending_detections(segment, None)
+            return end_time
         return None
+
+    def _publish_pending_detections(
+        self, segment: PendingReviewSegment, ongoing_since: float | None
+    ) -> None:
+        """Publish the detections held while an ended alert was active.
+
+        A detection with activity after ongoing_since stays open, only the
+        latest can. With None every detection is ended, this does not read the
+        camera config since a removed camera is no longer in it.
+        """
+        for pending in segment.pending_detections:
+            self._activate_segment(pending)
+            self._publish_segment_start(pending)
+
+            if ongoing_since is None or pending.last_detection_time < ongoing_since:
+                self._publish_segment_end(pending, pending.get_data(False))
+
+        segment.pending_detections = []
 
     def get_manual_event_severity(self, camera: str, label: str) -> SeverityEnum | None:
         """Determine the review severity for a manual event label.
@@ -681,17 +701,9 @@ class ReviewSegmentMaintainer(threading.Thread):
             > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
         ):
             self._publish_segment_end(segment, prev_data)
-
-            for pending in segment.pending_detections:
-                self._activate_segment(pending)
-                self._publish_segment_start(pending)
-
-                # only the latest detection can still be ongoing
-                if frame_time > (
-                    pending.last_detection_time
-                    + camera_config.review.detections.cutoff_time
-                ):
-                    self._publish_segment_end(pending, pending.get_data(False))
+            self._publish_pending_detections(
+                segment, frame_time - camera_config.review.detections.cutoff_time
+            )
         elif (
             not has_activity
             and segment.severity == SeverityEnum.detection
