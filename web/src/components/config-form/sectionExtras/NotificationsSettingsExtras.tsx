@@ -627,7 +627,11 @@ export default function NotificationsSettingsExtras({
             <SettingsGroupCard title={t("notification.deviceSpecific")}>
               <div className={cn("space-y-2", isAdmin && "md:max-w-[50%]")}>
                 <Button
-                  aria-label={t("notification.registerDevice")}
+                  aria-label={
+                    registration != null
+                      ? t("notification.unregisterDevice")
+                      : t("notification.registerDevice")
+                  }
                   className="w-full md:w-auto"
                   disabled={!shouldFetchPubKey || publicKey == undefined}
                   onClick={() => {
