@@ -1535,8 +1535,6 @@ class PtzAutoTracker:
         # returns camera to preset after timeout when tracking is over
         autotracker_config = self.config.cameras[camera].onvif.autotracking
 
-        if not self.autotracker_init[camera]:
-            self._autotracker_setup(self.config.cameras[camera], camera)
         # regularly update camera status
         if not self.ptz_metrics[camera].motor_stopped.is_set():
             await self.onvif.get_camera_status(camera)
