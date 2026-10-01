@@ -66,6 +66,9 @@ class PendingReviewSegment:
         self.zones = zones
         self.audio = audio
         self.classification_state_changes: list[dict[str, Any]] = []
+        # detection-level objects active after the last alert activity, these
+        # move to a new detection segment when the alert is cut off
+        self.pending_detections: dict[str, dict[str, Any]] = {}
         self.thumb_time: float | None = None
         self.last_alert_time: float | None = None
         self.last_detection_time: float = frame_time
@@ -82,6 +85,20 @@ class PendingReviewSegment:
         self.frame_path = os.path.join(
             CLIPS_DIR, f"review/thumb-{self.camera}-{self.id}.webp"
         )
+
+    def add_object(self, obj: dict[str, Any], attributes: list[str]) -> None:
+        """Add a tracked object's label, sub label, and zones to the segment."""
+        if not obj["sub_label"]:
+            self.detections[obj["id"]] = obj["label"]
+        elif obj["sub_label"][0] in attributes:
+            self.detections[obj["id"]] = obj["sub_label"][0]
+        else:
+            self.detections[obj["id"]] = f"{obj['label']}-verified"
+            self.sub_labels[obj["id"]] = obj["sub_label"][0]
+
+        for zone in obj["current_zones"]:
+            if zone not in self.zones:
+                self.zones.append(zone)
 
     def update_frame(
         self,
@@ -505,6 +522,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                     should_update_state = True
                     should_update_image = True
 
+                # alert activity resumed, so the pending detection activity
+                # falls within this alert
+                for pending in segment.pending_detections.values():
+                    segment.add_object(pending, self.config.all_attributes)
+
+                segment.pending_detections = {}
+
             if activity.has_activity_category(SeverityEnum.detection):
                 if (
                     segment.last_detection_time is None
@@ -522,23 +546,17 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 if not is_alert_object and segment.severity == SeverityEnum.alert:
                     # This is a detection-level object
+                    if (
+                        segment.last_alert_time is not None
+                        and frame_time > segment.last_alert_time
+                    ):
+                        segment.pending_detections[object["id"]] = object
+
                     # Only add if it started during the alert's active period
                     if object["start_time"] > segment.last_alert_time:
                         continue
 
-                if not object["sub_label"]:
-                    segment.detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in self.config.all_attributes:
-                    segment.detections[object["id"]] = object["sub_label"][0]
-                else:
-                    segment.detections[object["id"]] = f"{object['label']}-verified"
-                    segment.sub_labels[object["id"]] = object["sub_label"][0]
-
-                # keep zones up to date
-                if len(object["current_zones"]) > 0:
-                    for zone in object["current_zones"]:
-                        if zone not in segment.zones:
-                            segment.zones.append(zone)
+                segment.add_object(object, self.config.all_attributes)
 
             if len(activity.get_all_objects()) > segment.frame_active_count:
                 should_update_state = True
@@ -598,39 +616,25 @@ class ReviewSegmentMaintainer(threading.Thread):
             and frame_time
             > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
         ):
-            needs_new_detection = (
-                segment.last_detection_time > segment.last_alert_time
-                and (
-                    segment.last_detection_time
-                    + camera_config.review.detections.cutoff_time
-                )
-                > frame_time
-            )
-            last_detection_time = segment.last_detection_time
-
             end_time = self._publish_segment_end(segment, prev_data)
 
-            if needs_new_detection:
-                new_detections: dict[str, str] = {}
-                new_zones = set()
+            if segment.pending_detections:
+                new_segment = PendingReviewSegment(
+                    segment.camera,
+                    end_time,
+                    SeverityEnum.detection,
+                    {},
+                    sub_labels={},
+                    audio=set(),
+                    zones=[],
+                )
 
-                for o in activity.categorized_objects["detections"]:
-                    new_detections[o["id"]] = o["label"]
-                    new_zones.update(o["current_zones"])
+                for pending in segment.pending_detections.values():
+                    new_segment.add_object(pending, self.config.all_attributes)
 
-                if new_detections:
-                    new_segment = PendingReviewSegment(
-                        segment.camera,
-                        end_time,
-                        SeverityEnum.detection,
-                        new_detections,
-                        sub_labels={},
-                        audio=set(),
-                        zones=list(new_zones),
-                    )
-                    self._activate_segment(new_segment)
-                    self._publish_segment_start(new_segment)
-                    new_segment.last_detection_time = last_detection_time
+                self._activate_segment(new_segment)
+                self._publish_segment_start(new_segment)
+                new_segment.last_detection_time = segment.last_detection_time
         elif (
             not has_activity
             and segment.severity == SeverityEnum.detection

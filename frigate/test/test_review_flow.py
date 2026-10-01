@@ -498,6 +498,87 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertEqual(end["after"]["id"], detection.id)
         self.assertEqual(end["after"]["end_time"], last_dog_time)
 
+    def test_detection_starting_after_alert_activity_is_split_out(self) -> None:
+        # the dog only shows up after the person has left
+        dog_frames = [
+            (t, [self.tracked("d1", "dog", t, start_time=11)])
+            for t in range(11, 2 + self.alert_cutoff + 10, 10)
+        ]
+        self.feed((1, [self.tracked("p1", "person", 1, start_time=1)]), *dog_frames)
+
+        self.assertEqual(
+            [(t, s) for t, s in self.review_summary() if t != "update"],
+            [("new", "alert"), ("end", "alert"), ("new", "detection")],
+        )
+        alert_end = next(r for r in self.reviews() if r["type"] == "end")
+        self.assertEqual(alert_end["after"]["end_time"], 1)
+        self.assertEqual(alert_end["after"]["data"]["objects"], ["person"])
+
+        detection = self.maintainer.active_review_segments[CAMERA]
+        self.assertEqual(detection.severity.value, "detection")
+        self.assertGreaterEqual(detection.start_time, 1)
+        self.assertLessEqual(detection.start_time, 11)
+        self.assertEqual(list(detection.detections.values()), ["dog"])
+
+    def test_detection_leaving_before_alert_cutoff_gets_detection(self) -> None:
+        # the dog comes and goes after the person left, all before the alert
+        # cutoff, so nothing is active when the alert ends
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (11, [self.tracked("d1", "dog", 11, start_time=11)]),
+            (21, [self.tracked("d1", "dog", 21, start_time=11)]),
+            (31, []),
+            (2 + self.alert_cutoff, []),
+            (22 + self.detection_cutoff, []),
+        )
+
+        self.assertEqual(
+            [(t, s) for t, s in self.review_summary() if t != "update"],
+            [
+                ("new", "alert"),
+                ("end", "alert"),
+                ("new", "detection"),
+                ("end", "detection"),
+            ],
+        )
+        ends = [r["after"] for r in self.reviews() if r["type"] == "end"]
+        self.assertEqual(ends[0]["end_time"], 1)
+        self.assertEqual(ends[0]["data"]["objects"], ["person"])
+        self.assertEqual(ends[1]["data"]["objects"], ["dog"])
+        self.assertGreaterEqual(ends[1]["start_time"], 1)
+        self.assertLessEqual(ends[1]["start_time"], 11)
+        self.assertEqual(ends[1]["end_time"], 21)
+
+    def test_detection_older_than_detection_cutoff_gets_detection(self) -> None:
+        # the dog is gone longer than the detection cutoff by the time the
+        # alert ends, its activity still needs a detection
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (3, [self.tracked("d1", "dog", 3, start_time=3)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=3)]),
+            (6, []),
+            (2 + self.alert_cutoff, []),
+            (3 + self.alert_cutoff, []),
+        )
+        self.assertGreater(2 + self.alert_cutoff, 5 + self.detection_cutoff)
+
+        self.assertEqual(
+            [(t, s) for t, s in self.review_summary() if t != "update"],
+            [
+                ("new", "alert"),
+                ("end", "alert"),
+                ("new", "detection"),
+                ("end", "detection"),
+            ],
+        )
+        ends = [r["after"] for r in self.reviews() if r["type"] == "end"]
+        self.assertEqual(ends[0]["end_time"], 1)
+        self.assertEqual(ends[0]["data"]["objects"], ["person"])
+        self.assertEqual(ends[1]["data"]["objects"], ["dog"])
+        self.assertEqual(ends[1]["start_time"], 1)
+        self.assertEqual(ends[1]["end_time"], 5)
+        self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+
 
 if __name__ == "__main__":
     unittest.main()
