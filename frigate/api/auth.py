@@ -332,6 +332,7 @@ def get_remote_addr(request: Request):
         try:
             ip = ipaddress.ip_address(addr.strip())
         except ValueError:
+            logger.debug("Invalid address in X-Forwarded-For header")
             return direct_addr or "127.0.0.1"
 
         logger.debug(f"Checking {ip} (v{ip.version})")
