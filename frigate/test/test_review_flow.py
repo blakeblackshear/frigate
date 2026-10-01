@@ -83,6 +83,14 @@ class ReviewFlowTestCase(unittest.TestCase):
     def stationary_threshold(self) -> int:
         return self.maintainer.config.cameras[CAMERA].detect.stationary.threshold
 
+    @property
+    def alert_cutoff(self) -> int:
+        return self.maintainer.config.cameras[CAMERA].review.alerts.cutoff_time
+
+    @property
+    def detection_cutoff(self) -> int:
+        return self.maintainer.config.cameras[CAMERA].review.detections.cutoff_time
+
     def tracked(
         self,
         obj_id: str,
@@ -95,12 +103,13 @@ class ReviewFlowTestCase(unittest.TestCase):
         loitering: bool = False,
         moved: bool = True,
         false_positive: bool = False,
+        sub_label: tuple[str, float] | None = None,
     ) -> dict[str, Any]:
         """Build a tracked object as published by the object processor."""
         return {
             "id": obj_id,
             "label": label,
-            "sub_label": None,
+            "sub_label": sub_label,
             "frame_time": frame_time,
             "start_time": start_time,
             "motionless_count": self.stationary_threshold if stationary else 0,
@@ -142,6 +151,13 @@ class ReviewFlowTestCase(unittest.TestCase):
 
     def review_summary(self) -> list[tuple[str, str]]:
         return [(r["type"], r["after"]["severity"]) for r in self.reviews()]
+
+    def non_update_summary(self) -> list[tuple[str, str]]:
+        return [(t, s) for t, s in self.review_summary() if t != "update"]
+
+    def thumbnails(self) -> set[str]:
+        """Names of the review thumbnails on disk."""
+        return {t.name for t in Path(self.clips_dir.name, "review").iterdir()}
 
     def assert_no_review(self) -> None:
         self.assertEqual(self.reviews(), [])
@@ -265,6 +281,44 @@ class TestDetectionRequiredZones(ReviewFlowTestCase):
 
         self.assertEqual(self.review_summary(), [("new", "alert")])
 
+    def test_activity_outside_required_zone_after_alert_is_not_held(self) -> None:
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=5, zones=["driveway"])]),
+        )
+        self.assertEqual(
+            self.maintainer.active_review_segments[CAMERA].pending_detections, []
+        )
+
+        self.feed((2 + self.alert_cutoff, []))
+
+        self.assertEqual(
+            self.non_update_summary(), [("new", "alert"), ("end", "alert")]
+        )
+        self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+        self.assertEqual(len(self.thumbnails()), 1)
+
+    def test_activity_inside_required_zone_after_alert_is_split_out(self) -> None:
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=5, zones=["yard"])]),
+            (2 + self.alert_cutoff, []),
+        )
+
+        # the dog is past the detection cutoff, so it is ended right away
+        self.assertEqual(
+            self.non_update_summary(),
+            [
+                ("new", "alert"),
+                ("end", "alert"),
+                ("new", "detection"),
+                ("end", "detection"),
+            ],
+        )
+        detection = self.reviews()[-1]["after"]
+        self.assertEqual(detection["data"]["objects"], ["dog"])
+        self.assertEqual(detection["data"]["zones"], ["yard"])
+
 
 class TestDetectionLabels(ReviewFlowTestCase):
     review_config = """
@@ -321,6 +375,23 @@ class TestDetectionsDisabled(ReviewFlowTestCase):
 
         self.assert_no_review()
 
+    def test_activity_after_alert_is_not_held(self) -> None:
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=5)]),
+        )
+        self.assertEqual(
+            self.maintainer.active_review_segments[CAMERA].pending_detections, []
+        )
+
+        self.feed((2 + self.alert_cutoff, []))
+
+        self.assertEqual(
+            self.non_update_summary(), [("new", "alert"), ("end", "alert")]
+        )
+        self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+        self.assertEqual(len(self.thumbnails()), 1)
+
 
 class TestAlertsAndDetectionsDisabled(ReviewFlowTestCase):
     review_config = """
@@ -338,14 +409,6 @@ class TestAlertsAndDetectionsDisabled(ReviewFlowTestCase):
 
 
 class TestReviewLifecycle(ReviewFlowTestCase):
-    @property
-    def alert_cutoff(self) -> int:
-        return self.maintainer.config.cameras[CAMERA].review.alerts.cutoff_time
-
-    @property
-    def detection_cutoff(self) -> int:
-        return self.maintainer.config.cameras[CAMERA].review.detections.cutoff_time
-
     def test_detection_upgrades_to_alert_when_alert_object_appears(self) -> None:
         self.feed(
             (1, [self.tracked("d1", "dog", 1)]),
@@ -452,7 +515,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         )
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [("new", "alert"), ("end", "alert"), ("new", "detection")],
         )
         ids = {r["after"]["id"] for r in self.reviews() if r["type"] != "update"}
@@ -478,7 +541,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         )
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [("new", "alert"), ("end", "alert"), ("new", "detection")],
         )
         alert_end = next(r for r in self.reviews() if r["type"] == "end")
@@ -508,7 +571,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.feed((1, [self.tracked("p1", "person", 1, start_time=1)]), *dog_frames)
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [("new", "alert"), ("end", "alert"), ("new", "detection")],
         )
         alert_end = next(r for r in self.reviews() if r["type"] == "end")
@@ -533,7 +596,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         )
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [
                 ("new", "alert"),
                 ("end", "alert"),
@@ -562,7 +625,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertGreater(2 + self.alert_cutoff, 5 + self.detection_cutoff)
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [
                 ("new", "alert"),
                 ("end", "alert"),
@@ -593,7 +656,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         )
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [
                 ("new", "alert"),
                 ("end", "alert"),
@@ -626,12 +689,6 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertEqual(latest["type"], "update")
         self.assertEqual(latest["after"]["severity"], "alert")
         self.assertCountEqual(latest["after"]["data"]["objects"], ["person", "dog"])
-
-        # the dog's held detection thumbnail is discarded with it
-        thumbs = list(Path(self.clips_dir.name, "review").iterdir())
-        self.assertEqual(
-            [t.name for t in thumbs], [Path(latest["after"]["thumb_path"]).name]
-        )
 
     def test_split_detection_has_thumbnail_of_its_activity(self) -> None:
         dog_frames = [
@@ -670,7 +727,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.feed()
 
         self.assertEqual(
-            [(t, s) for t, s in self.review_summary() if t != "update"],
+            self.non_update_summary(),
             [
                 ("new", "alert"),
                 ("end", "alert"),
@@ -685,14 +742,115 @@ class TestReviewLifecycle(ReviewFlowTestCase):
 
         # every thumbnail on disk belongs to a published review
         published = {Path(r["after"]["thumb_path"]).name for r in self.reviews()}
-        on_disk = {t.name for t in Path(self.clips_dir.name, "review").iterdir()}
-        self.assertEqual(on_disk, published)
+        self.assertEqual(self.thumbnails(), published)
 
     def test_disabled_camera_publishes_pending_detections(self) -> None:
         self.assert_force_end_publishes_pending_detection("enabled")
 
     def test_removed_camera_publishes_pending_detections(self) -> None:
         self.assert_force_end_publishes_pending_detection("remove")
+
+    def test_pending_thumbnail_removed_when_alert_resumes(self) -> None:
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (5, [self.tracked("d1", "dog", 5, start_time=5)]),
+        )
+        alert = self.maintainer.active_review_segments[CAMERA]
+        pending_thumb = Path(alert.pending_detections[0].frame_path)
+        self.assertTrue(pending_thumb.is_file())
+
+        self.feed((10, [self.tracked("p1", "person", 10, start_time=1)]))
+
+        self.assertEqual(alert.pending_detections, [])
+        self.assertFalse(pending_thumb.exists())
+        self.assertEqual(self.thumbnails(), {Path(alert.frame_path).name})
+
+    def test_multiple_pending_objects_share_one_detection(self) -> None:
+        # objects within the detection cutoff of each other, whether seen
+        # together or later, make up one detection
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (
+                5,
+                [
+                    self.tracked("d1", "dog", 5, start_time=5),
+                    self.tracked("c1", "cat", 5, start_time=5),
+                ],
+            ),
+            (20, [self.tracked("b1", "bird", 20, start_time=20)]),
+            (21, []),
+            (2 + self.alert_cutoff, []),
+            (21 + self.detection_cutoff, []),
+        )
+
+        self.assertEqual(
+            self.non_update_summary(),
+            [
+                ("new", "alert"),
+                ("end", "alert"),
+                ("new", "detection"),
+                ("end", "detection"),
+            ],
+        )
+        end = self.reviews()[-1]["after"]
+        self.assertCountEqual(end["data"]["objects"], ["dog", "cat", "bird"])
+        self.assertCountEqual(end["data"]["detections"], ["d1", "c1", "b1"])
+        self.assertEqual((end["start_time"], end["end_time"]), (5, 20))
+        # the thumbnail is framed on both objects seen together, the bird
+        # alone is fewer objects so it does not replace it
+        frames = [c.args[0] for c in self.maintainer.frame_manager.get.call_args_list]
+        self.assertIn(f"{CAMERA}_5", frames)
+        self.assertNotIn(f"{CAMERA}_20", frames)
+
+
+class TestSplitDetectionLabels(ReviewFlowTestCase):
+    review_config = """
+    review:
+      alerts:
+        labels:
+          - person
+"""
+
+    def test_split_detection_keeps_sub_labels_and_zones(self) -> None:
+        self.feed(
+            (1, [self.tracked("p1", "person", 1, start_time=1)]),
+            (
+                5,
+                [
+                    self.tracked(
+                        "d1",
+                        "dog",
+                        5,
+                        start_time=5,
+                        zones=["yard"],
+                        sub_label=("Rex", 0.95),
+                    ),
+                    self.tracked(
+                        "c1",
+                        "car",
+                        5,
+                        start_time=5,
+                        zones=["driveway"],
+                        sub_label=("fedex", 0.9),
+                    ),
+                ],
+            ),
+            (2 + self.alert_cutoff, []),
+        )
+
+        ends = [r["after"] for r in self.reviews() if r["type"] == "end"]
+        self.assertEqual(len(ends), 2)
+        alert_end, detection = ends
+        self.assertEqual(alert_end["data"]["objects"], ["person"])
+        self.assertEqual(alert_end["data"]["sub_labels"], [])
+        self.assertEqual(alert_end["data"]["zones"], [])
+
+        self.assertEqual(detection["severity"], "detection")
+        # attributes replace the label, other sub labels verify it
+        self.assertCountEqual(detection["data"]["objects"], ["dog-verified", "fedex"])
+        self.assertEqual(detection["data"]["verified_objects"], ["dog-verified"])
+        self.assertEqual(detection["data"]["sub_labels"], ["Rex"])
+        self.assertCountEqual(detection["data"]["zones"], ["yard", "driveway"])
 
 
 if __name__ == "__main__":
