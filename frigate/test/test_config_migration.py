@@ -257,6 +257,31 @@ class TestMigrateConfigFile(unittest.TestCase):
         self.assertEqual(migrated["models"][0]["devices"], ["openvino:GPU"])
         self.assertNotIn("detectors", migrated)
 
+    def test_top_level_changes_survive_later_steps(self):
+        # 0.16 adds detect and 0.17 splits genai, both at the top level
+        migrated = self._migrate(
+            "mqtt:\n"
+            "  enabled: false\n"
+            "genai:\n"
+            "  provider: ollama\n"
+            "  model: llava\n"
+            "  prompt: describe it\n"
+            "cameras: {}\n"
+            "version: 0.15-1\n"
+        )
+
+        self.assertEqual(migrated["version"], CURRENT_CONFIG_VERSION)
+        self.assertTrue(migrated["detect"]["enabled"])
+        self.assertEqual(migrated["objects"]["genai"], {"prompt": "describe it"})
+        self.assertEqual(
+            migrated["genai"]["default"],
+            {
+                "provider": "ollama",
+                "model": "llava",
+                "roles": ["descriptions", "chat"],
+            },
+        )
+
     def test_a_migrated_config_is_left_alone(self):
         migrated = self._migrate(
             "mqtt:\n"

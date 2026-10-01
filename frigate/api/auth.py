@@ -324,11 +324,17 @@ def get_remote_addr(request: Request):
             network = ipaddress.ip_network(proxy)
         except ValueError:
             logger.warning(f"Unable to parse trusted network: {proxy}")
+            continue
         trusted_proxies.append(network)
 
     # return the first remote address that is not trusted
     for addr in route:
-        ip = ipaddress.ip_address(addr.strip())
+        try:
+            ip = ipaddress.ip_address(addr.strip())
+        except ValueError:
+            logger.debug("Invalid address in X-Forwarded-For header")
+            return direct_addr or "127.0.0.1"
+
         logger.debug(f"Checking {ip} (v{ip.version})")
         trusted = False
         for trusted_proxy in trusted_proxies:
@@ -473,12 +479,11 @@ def create_encoded_jwt(user, role, expiration, secret):
 
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, max_age, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
-    # SameSite is intentionally left unset (browsers default to Lax). Setting
-    # SameSite=Lax/Strict would stop the cookie from being sent in cross-origin
-    # iframes, breaking embedded views such as the Home Assistant Frigate card.
-    # CSRF is instead mitigated by requiring a custom X-CSRF-TOKEN header, which
-    # cross-origin pages cannot set without a CORS preflight that Frigate never
-    # grants (see check_csrf in api/fastapi_app.py).
+    # Starlette sets SameSite=Lax by default. The cookie is still sent to
+    # same-site iframes (e.g. Home Assistant on the same host or domain), but
+    # not to cross-site ones. CSRF is also mitigated by requiring a custom
+    # X-CSRF-TOKEN header, which cross-origin pages cannot set without a CORS
+    # preflight that Frigate never grants (see check_csrf in api/fastapi_app.py).
     response.set_cookie(
         key=cookie_name,
         value=encoded_jwt,
