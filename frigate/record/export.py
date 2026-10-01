@@ -1375,7 +1375,7 @@ class RecordingExporter(threading.Thread):
 
             if preview.end_time > self.end_time:
                 playlist_lines.append(
-                    f"outpoint {int(preview.end_time - self.end_time)}"
+                    f"outpoint {int(self.end_time - preview.start_time)}"
                 )
 
         ffmpeg_input = (
