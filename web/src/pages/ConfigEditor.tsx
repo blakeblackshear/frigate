@@ -287,7 +287,6 @@ function ConfigEditor() {
             </Button>
             <Button
               size="sm"
-              disabled={!hasChanges}
               className="flex items-center gap-2"
               aria-label={t("saveAndRestart")}
               onClick={handleSaveAndRestart}
@@ -300,7 +299,6 @@ function ConfigEditor() {
             </Button>
             <Button
               size="sm"
-              disabled={!hasChanges}
               className="flex items-center gap-2"
               aria-label={t("saveOnly")}
               onClick={() => onHandleSaveConfig("saveonly")}
