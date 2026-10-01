@@ -1397,9 +1397,6 @@ class PtzAutoTracker:
     def is_autotracking(self, camera: str):
         return self.tracked_object[camera] is not None
 
-    def autotracked_object_region(self, camera: str):
-        return self.tracked_object[camera]["region"]
-
     def autotrack_object(self, camera: str, obj: TrackedObject):
         if camera not in self.config.cameras:
             return
