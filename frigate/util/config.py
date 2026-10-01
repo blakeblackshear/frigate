@@ -191,7 +191,7 @@ def migrate_frigate_config(config_file: str):
 
     if previous_version < "0.14":
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
-        new_config = migrate_014(config)
+        new_config = migrate_014(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.14"
@@ -209,35 +209,35 @@ def migrate_frigate_config(config_file: str):
 
     if previous_version < "0.15-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-0...")
-        new_config = migrate_015_0(config)
+        new_config = migrate_015_0(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.15-0"
 
     if previous_version < "0.15-1":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-1...")
-        new_config = migrate_015_1(config)
+        new_config = migrate_015_1(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.15-1"
 
     if previous_version < "0.16-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.16-0...")
-        new_config = migrate_016_0(config)
+        new_config = migrate_016_0(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.16-0"
 
     if previous_version < "0.17-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.17-0...")
-        new_config = migrate_017_0(config)
+        new_config = migrate_017_0(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.17-0"
 
     if previous_version < "0.18-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.18-0...")
-        new_config = migrate_018_0(config)
+        new_config = migrate_018_0(new_config)
         with open(config_file, "w") as f:
             yaml.dump(new_config, f)
         previous_version = "0.18-0"
