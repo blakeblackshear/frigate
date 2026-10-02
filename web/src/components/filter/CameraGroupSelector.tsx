@@ -181,9 +181,14 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
             setGroup(name, group != "default");
           }}
         >
-          {config && config.icon && isValidIconName(config.icon) && (
-            <IconRenderer icon={LuIcons[config.icon]} className="size-5" />
-          )}
+          <IconRenderer
+            icon={
+              isValidIconName(config.icon)
+                ? LuIcons[config.icon]
+                : LuIcons.LuFolder
+            }
+            className="size-5"
+          />
         </Button>
       )),
     ];
@@ -264,12 +269,14 @@ export function CameraGroupSelector({ className }: CameraGroupSelectorProps) {
                     onMouseEnter={() => showTooltip(name)}
                     onMouseLeave={() => showTooltip(undefined)}
                   >
-                    {config && config.icon && isValidIconName(config.icon) && (
-                      <IconRenderer
-                        icon={LuIcons[config.icon]}
-                        className="size-4"
-                      />
-                    )}
+                    <IconRenderer
+                      icon={
+                        isValidIconName(config.icon)
+                          ? LuIcons[config.icon]
+                          : LuIcons.LuFolder
+                      }
+                      className="size-4"
+                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipPortal>

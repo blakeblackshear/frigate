@@ -72,6 +72,7 @@ export default function OverflowStrip({
 
     const observer = new ResizeObserver(compute);
     observer.observe(wrapper);
+    observer.observe(measure);
 
     return () => observer.disconnect();
   }, [items.length, gapClassName]);

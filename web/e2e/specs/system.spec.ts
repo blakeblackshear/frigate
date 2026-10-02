@@ -11,16 +11,7 @@ import {
   expectBodyInteractive,
   waitForBodyInteractive,
 } from "../helpers/overlay-interaction";
-
-// On mobile the tabs sit in an OverflowStrip, which keeps an inert copy of
-// every tab for measurement and hides the ones that do not fit behind a kebab.
-// The selected tab always stays in the strip.
-
-function tab(frigateApp: FrigateApp, name: string) {
-  return frigateApp.page
-    .locator(`[aria-label="Select ${name}" i]:not([inert] *)`)
-    .first();
-}
+import { systemTab } from "../helpers/system-tabs";
 
 async function selectTab(frigateApp: FrigateApp, name: string) {
   const kebab = frigateApp.page.getByLabel("Show all tabs");
@@ -34,13 +25,17 @@ async function selectTab(frigateApp: FrigateApp, name: string) {
     return;
   }
 
-  await tab(frigateApp, name).click();
+  await systemTab(frigateApp, name).click();
 }
 
 async function expectTabActive(frigateApp: FrigateApp, name: string) {
-  await expect(tab(frigateApp, name)).toHaveAttribute("data-state", "on", {
-    timeout: 5_000,
-  });
+  await expect(systemTab(frigateApp, name)).toHaveAttribute(
+    "data-state",
+    "on",
+    {
+      timeout: 5_000,
+    },
+  );
 }
 
 test.describe("System — tabs @medium", () => {
@@ -48,14 +43,14 @@ test.describe("System — tabs @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
     );
     if (!frigateApp.isMobile) {
-      await expect(tab(frigateApp, "storage")).toBeVisible();
-      await expect(tab(frigateApp, "cameras")).toBeVisible();
+      await expect(systemTab(frigateApp, "storage")).toBeVisible();
+      await expect(systemTab(frigateApp, "cameras")).toBeVisible();
     }
   });
 
@@ -63,14 +58,14 @@ test.describe("System — tabs @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
     );
     await selectTab(frigateApp, "storage");
     await expectTabActive(frigateApp, "storage");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "off",
     );
@@ -78,7 +73,7 @@ test.describe("System — tabs @medium", () => {
 
   test("Cameras tab activates", async ({ frigateApp }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -91,7 +86,7 @@ test.describe("System — tabs @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -112,7 +107,7 @@ test.describe("System — tabs @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -133,7 +128,7 @@ test.describe("System — tabs @medium", () => {
     } else {
       // Mobile: tab activation (data-state "on") already asserted above.
       // Additionally confirm general tab is no longer the active tab.
-      await expect(tab(frigateApp, "general")).toHaveAttribute(
+      await expect(systemTab(frigateApp, "general")).toHaveAttribute(
         "data-state",
         "off",
         { timeout: 5_000 },
@@ -143,7 +138,7 @@ test.describe("System — tabs @medium", () => {
 
   test("cameras tab renders each configured camera", async ({ frigateApp }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -170,7 +165,7 @@ test.describe("System — tabs @medium", () => {
       config: { semantic_search: { enabled: true } },
     });
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -238,14 +233,14 @@ test.describe("System — mobile @medium @mobile", () => {
 
   test("tabs render at mobile viewport", async ({ frigateApp }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toBeVisible({
+    await expect(systemTab(frigateApp, "general")).toBeVisible({
       timeout: 15_000,
     });
   });
 
   test("switching tabs works at mobile viewport", async ({ frigateApp }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -258,7 +253,7 @@ test.describe("System — mobile @medium @mobile", () => {
     frigateApp,
   }) => {
     await frigateApp.goto("/system#general");
-    await expect(tab(frigateApp, "general")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "general")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
