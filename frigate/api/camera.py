@@ -35,7 +35,11 @@ from frigate.config.camera.updater import (
 )
 from frigate.config.env import substitute_frigate_vars
 from frigate.models import User
-from frigate.util.builtin import clean_camera_user_pass, get_record_segment_time
+from frigate.util.builtin import (
+    clean_camera_user_pass,
+    clear_orphaned_comments,
+    get_record_segment_time,
+)
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 from frigate.util.image import run_ffmpeg_snapshot
@@ -1201,6 +1205,7 @@ async def delete_camera(
                 # Remove camera from config
                 if "cameras" in data and camera_name in data["cameras"]:
                     del data["cameras"][camera_name]
+                    clear_orphaned_comments(data["cameras"], data, "cameras")
 
                 # Remove camera from auth roles
                 auth = data.get("auth", {})
