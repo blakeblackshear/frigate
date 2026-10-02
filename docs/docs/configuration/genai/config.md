@@ -322,7 +322,7 @@ To start using Gemini, you must first get an API key from [Google AI Studio](htt
 1. Navigate to <NavPath path="Settings > Enrichments > Generative AI" />.
    - Set **Provider** to `gemini`
    - Set **API key** to your Gemini API key (or use an environment variable such as `{FRIGATE_GEMINI_API_KEY}`)
-   - Set **Model** to the desired model (e.g., `gemini-2.5-flash`)
+   - Set **Model** to the desired model (e.g., `gemini-3.5-flash-lite`)
 
 </TabItem>
 <TabItem value="yaml">
@@ -332,11 +332,17 @@ genai:
   my_provider:
     provider: gemini
     api_key: "{FRIGATE_GEMINI_API_KEY}"
-    model: gemini-2.5-flash
+    model: gemini-3.5-flash-lite
 ```
 
 </TabItem>
 </ConfigTabs>
+
+:::tip
+
+Gemini 3.x models charge a (roughly) flat ~1,100 tokens per image regardless of resolution, so a 180p preview frame costs the same as a 480p recording frame. Set the review [image source](/configuration/genai/genai_review#image-source) to `recordings` to send higher quality frames at no extra cost, as long as recordings are enabled for the camera.
+
+:::
 
 :::note
 
