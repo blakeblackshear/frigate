@@ -311,9 +311,12 @@ def config(request: Request):
         mode="json", warnings="none", exclude_none=True
     )
 
-    # remove environment_vars for non-admin users
-    if request.headers.get("remote-role") != "admin":
+    is_admin = request.headers.get("remote-role") == "admin"
+
+    # hide environment_vars and the notification email from non-admin users
+    if not is_admin:
         config.pop("environment_vars", None)
+        redact_credential(config["notifications"], "email")
 
     # redact mqtt credentials
     redact_credential(config["mqtt"], "password")
@@ -370,7 +373,15 @@ def config(request: Request):
                 camera_name
             )
             if base_sections:
-                camera_dict["base_config"] = base_sections
+                # copy so redaction below can't alter the profile manager's cache
+                camera_dict["base_config"] = copy.deepcopy(base_sections)
+
+        # cameras inherit the global notification email
+        if not is_admin:
+            redact_credential(camera_dict["notifications"], "email")
+            redact_credential(
+                camera_dict.get("base_config", {}).get("notifications", {}), "email"
+            )
 
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(

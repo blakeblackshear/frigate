@@ -218,7 +218,7 @@ export default function InputWithTags({
       }
 
       return current_suggestions.filter((suggestion) =>
-        suggestion.toLowerCase().startsWith(currentWord),
+        suggestion.toLowerCase().startsWith(currentWord.toLowerCase()),
       );
     },
     [inputValue, suggestions, currentFilterType],

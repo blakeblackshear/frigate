@@ -30,6 +30,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [ROCm](#amdrocm-gpu-detector): ROCm can run on AMD Discrete GPUs to provide efficient object detection.
 - [ONNX](#onnx): ROCm will automatically be detected and used as a detector in the `-rocm` Frigate image when a supported ONNX model is configured.
+- <CommunityBadge /> [XDNA2](#amd-xdna2): AMD Ryzen AI / XDNA2 NPUs can run object detection through the community-maintained `frigate-xdna` ZMQ sidecar.
 
 **Apple Silicon**
 
@@ -566,6 +567,28 @@ A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
 
 # Community Supported Detectors
+
+## AMD XDNA2
+
+AMD Ryzen AI / XDNA2 NPUs can be used through the community-maintained
+[frigate-xdna](https://github.com/mitchins/frigate-xdna) detector sidecar.
+The sidecar runs separately from Frigate and connects using Frigate's ZMQ
+detector interface.
+
+Currently qualified on **Ryzen AI Max 300 / Strix Halo**. Other XDNA2 devices
+are not yet qualified; XDNA1 is unsupported.
+
+Follow the frigate-xdna setup instructions to prepare and start the sidecar
+before starting Frigate.
+
+### Configuration {#configuration-xdna2}
+
+Using the detector config below will connect Frigate to the sidecar:
+
+<ModelConfigDropdown detectorTitle="AMD XDNA2" models={objectDetectorsModels.xdna2.models} />
+
+The example assumes Frigate and the sidecar share a Docker network where the
+sidecar is named `xdna`.
 
 ## MemryX MX3
 

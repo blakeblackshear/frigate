@@ -130,23 +130,18 @@ def require_admin_by_default():
         if path.startswith(EXEMPT_PREFIXES):
             return
 
-        # Dynamic camera path exemption:
-        # Any path whose first segment matches a configured camera name should
-        # bypass the global admin requirement. These endpoints enforce access
-        # via route-level dependencies (e.g. require_camera_access) to ensure
-        # per-camera authorization. This allows non-admin authenticated users
-        # (e.g. viewer role) to access camera-specific resources without
-        # needing admin privileges.
-        try:
-            if path.startswith("/"):
-                first_segment = path.split("/", 2)[1]
-                if (
-                    first_segment
-                    and first_segment in request.app.frigate_config.cameras
-                ):
-                    return
-        except Exception:
-            pass
+        # Camera routes enforce per-camera access via route-level dependencies
+        # (e.g. require_camera_access). Match on the route template, not the raw
+        # path, so a camera named like another namespace (e.g. "faces") can't
+        # waive the admin check for that namespace's routes.
+        route = request.scope.get("route")
+        if (
+            route is not None
+            and route.path.startswith("/{camera_name}")
+            and request.path_params.get("camera_name")
+            in request.app.frigate_config.cameras
+        ):
+            return
 
         # For all other paths, require admin role
         # Internal port requests have admin role set automatically
@@ -324,11 +319,17 @@ def get_remote_addr(request: Request):
             network = ipaddress.ip_network(proxy)
         except ValueError:
             logger.warning(f"Unable to parse trusted network: {proxy}")
+            continue
         trusted_proxies.append(network)
 
     # return the first remote address that is not trusted
     for addr in route:
-        ip = ipaddress.ip_address(addr.strip())
+        try:
+            ip = ipaddress.ip_address(addr.strip())
+        except ValueError:
+            logger.debug("Invalid address in X-Forwarded-For header")
+            return direct_addr or "127.0.0.1"
+
         logger.debug(f"Checking {ip} (v{ip.version})")
         trusted = False
         for trusted_proxy in trusted_proxies:
@@ -473,12 +474,11 @@ def create_encoded_jwt(user, role, expiration, secret):
 
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, max_age, secure):
     # TODO: ideally this would set secure as well, but that requires TLS
-    # SameSite is intentionally left unset (browsers default to Lax). Setting
-    # SameSite=Lax/Strict would stop the cookie from being sent in cross-origin
-    # iframes, breaking embedded views such as the Home Assistant Frigate card.
-    # CSRF is instead mitigated by requiring a custom X-CSRF-TOKEN header, which
-    # cross-origin pages cannot set without a CORS preflight that Frigate never
-    # grants (see check_csrf in api/fastapi_app.py).
+    # Starlette sets SameSite=Lax by default. The cookie is still sent to
+    # same-site iframes (e.g. Home Assistant on the same host or domain), but
+    # not to cross-site ones. CSRF is also mitigated by requiring a custom
+    # X-CSRF-TOKEN header, which cross-origin pages cannot set without a CORS
+    # preflight that Frigate never grants (see check_csrf in api/fastapi_app.py).
     response.set_cookie(
         key=cookie_name,
         value=encoded_jwt,

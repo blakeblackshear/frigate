@@ -44,8 +44,9 @@ export default function useStatusMessages(): StatusMessage[] {
 
   useEffect(() => {
     if (reindexState) {
-      if (reindexState.status == "indexing") {
-        clearMessages("embeddings-reindex");
+      clearMessages("embeddings-reindex");
+
+      if (reindexState.status === "indexing") {
         addMessage(
           "embeddings-reindex",
           t("stats.reindexingEmbeddings", {
@@ -55,9 +56,12 @@ export default function useStatusMessages(): StatusMessage[] {
             ),
           }),
         );
-      }
-      if (reindexState.status === "completed") {
-        clearMessages("embeddings-reindex");
+      } else if (reindexState.status === "failed") {
+        addMessage(
+          "embeddings-reindex",
+          t("stats.reindexEmbeddingsFailed"),
+          "error",
+        );
       }
     }
   }, [reindexState, addMessage, clearMessages, t]);

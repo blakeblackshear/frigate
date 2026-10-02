@@ -1397,9 +1397,6 @@ class PtzAutoTracker:
     def is_autotracking(self, camera: str):
         return self.tracked_object[camera] is not None
 
-    def autotracked_object_region(self, camera: str):
-        return self.tracked_object[camera]["region"]
-
     def autotrack_object(self, camera: str, obj: TrackedObject):
         if camera not in self.config.cameras:
             return
@@ -1538,8 +1535,6 @@ class PtzAutoTracker:
         # returns camera to preset after timeout when tracking is over
         autotracker_config = self.config.cameras[camera].onvif.autotracking
 
-        if not self.autotracker_init[camera]:
-            self._autotracker_setup(self.config.cameras[camera], camera)
         # regularly update camera status
         if not self.ptz_metrics[camera].motor_stopped.is_set():
             await self.onvif.get_camera_status(camera)

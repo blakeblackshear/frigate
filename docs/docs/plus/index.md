@@ -65,11 +65,11 @@ Some users may find that Frigate+ models result in more false positives initiall
 
 Frigate+ models support a more relevant set of objects for security cameras. The labels for annotation in Frigate+ are configurable by editing the camera in the Cameras section of Frigate+. Currently, the following objects are supported:
 
-- **People**: `person`, `face`
-- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `school_bus`, `license_plate`
+- **People**: `person`, `face`, `baby`
+- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `school_bus`, `garbage truck`, `license_plate`
 - **Delivery Logos**: `amazon`, `usps`, `ups`, `fedex`, `dhl`, `an_post`, `purolator`, `postnl`, `nzpost`, `postnord`, `gls`, `dpd`, `canada_post`, `royal_mail`
-- **Animals**: `dog`, `cat`, `deer`, `horse`, `bird`, `raccoon`, `fox`, `bear`, `cow`, `squirrel`, `goat`, `rabbit`, `skunk`, `kangaroo`
-- **Other**: `package`, `waste_bin`, `bbq_grill`, `robot_lawnmower`, `umbrella`
+- **Animals**: `dog`, `cat`, `deer`, `horse`, `bird`, `raccoon`, `fox`, `bear`, `cow`, `squirrel`, `goat`, `rabbit`, `skunk`, `kangaroo`, `possum`, `rodent`
+- **Other**: `package`, `waste_bin`, `bbq_grill`, `robot_lawnmower`, `umbrella`, `baby_stroller`
 
 Other object types available in the default Frigate model are not available. Additional object types will be added in future releases.
 
@@ -77,9 +77,12 @@ Other object types available in the default Frigate model are not available. Add
 
 Candidate labels are also available for annotation. These labels don't have enough data to be included in the model yet, but using them will help add support sooner. You can enable these labels by editing the camera settings.
 
-Where possible, these labels are mapped to existing labels during training. For example, any `baby` labels are mapped to `person` until support for new labels is added.
+Where possible, these labels are mapped to existing labels during training. For example, any `duck` labels are mapped to `bird` until support for new labels is added.
 
-The candidate labels are: `baby`, `bpost`, `badger`, `possum`, `rodent`, `chicken`, `groundhog`, `boar`, `hedgehog`, `tractor`, `golf cart`, `garbage truck`, `bus`, `sports ball`, `la_poste`, `lawnmower`, `heron`, `rickshaw`, `wombat`, `auspost`, `aramex`, `bobcat`, `mustelid`, `transoflex`, `airplane`, `drone`, `mountain_lion`, `crocodile`, `turkey`, `baby_stroller`, `monkey`, `coyote`, `porcupine`, `parcelforce`, `sheep`, `snake`, `helicopter`, `lizard`, `duck`, `hermes`, `cargus`, `fan_courier`, `sameday`
+- **Vehicles**: `tractor`, `golf_cart`, `bus`, `airplane`, `helicopter`, `rickshaw`, `scooter`
+- **Delivery Logos**: `bpost`, `auspost`, `aramex`, `transoflex`, `parcelforce`, `hermes`, `cargus`, `fan_courier`, `sameday`, `la_poste`
+- **Animals**: `badger`, `chicken`, `duck`, `turkey`, `groundhog`, `boar`, `hedgehog`, `wombat`, `bobcat`, `mustelid`, `mountain_lion`, `crocodile`, `monkey`, `coyote`, `porcupine`, `sheep`, `snake`, `lizard`, `heron`, `elk`, `moose`, `pig`, `donkey`, `civet`
+- **Other**: `sports_ball`, `drone`, `lawnmower`
 
 Candidate labels are not available for automatic suggestions.
 

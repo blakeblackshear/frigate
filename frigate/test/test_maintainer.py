@@ -16,7 +16,7 @@ for name in _MOCKED_MODULES:
     sys.modules[name] = MagicMock()
 
 # Now import the class under test
-from frigate.config import FrigateConfig  # noqa: E402
+from frigate.config import FrigateConfig, RetainModeEnum  # noqa: E402
 from frigate.record.maintainer import RecordingMaintainer  # noqa: E402
 
 # Restore original modules (or remove mock if there was no original)
@@ -123,6 +123,80 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
 
         self.assertIsNone(result)
         maintainer.drop_segment.assert_called_once_with(cache_path)
+
+    async def test_defers_review_overlap_segment_until_metadata_catches_up(self):
+        # Regression: a segment overlapping an active_objects review must not
+        # be dropped while detection metadata lags behind the segment end,
+        # the missing frames may hold the active objects (or continuous
+        # retention would keep it anyway).
+        config = MagicMock(spec=FrigateConfig)
+
+        camera_config = MagicMock()
+        camera_config.record.enabled = True
+        camera_config.record.continuous.days = 7
+        camera_config.record.motion.days = 0
+        camera_config.record.alerts.retain.mode = RetainModeEnum.active_objects
+        camera_config.record.get_review_pre_capture.return_value = 5
+        camera_config.record.get_review_post_capture.return_value = 5
+        config.cameras = {"test_cam": camera_config}
+
+        stop_event = MagicMock()
+        maintainer = RecordingMaintainer(config, stop_event)
+
+        now = datetime.datetime.now(datetime.UTC)
+        start_time = now - datetime.timedelta(seconds=20)
+        end_time = now - datetime.timedelta(seconds=10)
+        cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
+
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, False, None, None, None, [])
+        }
+        # Metadata has only reached partway into the segment.
+        maintainer.object_recordings_info["test_cam"] = [
+            (end_time.timestamp() - 8, [], [], [])
+        ]
+        maintainer.audio_recordings_info["test_cam"] = []
+
+        maintainer.drop_segment = MagicMock()
+        maintainer.move_segment = AsyncMock(return_value=None)
+        maintainer.recordings_publisher = MagicMock()
+
+        review = MagicMock()
+        review.severity = "alert"
+        review.start_time = start_time.timestamp() - 30
+        review.end_time = None
+
+        result = await maintainer.validate_and_move_segment(
+            "test_cam",
+            reviews=[review],
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
+        )
+
+        self.assertIsNone(result)
+        maintainer.drop_segment.assert_not_called()
+        maintainer.move_segment.assert_not_awaited()
+
+        # Once metadata passes the segment end, continuous retention keeps it.
+        maintainer.object_recordings_info["test_cam"].append(
+            (now.timestamp(), [], [], [])
+        )
+
+        await maintainer.validate_and_move_segment(
+            "test_cam",
+            reviews=[review],
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
+        )
+
+        maintainer.drop_segment.assert_not_called()
+        maintainer.move_segment.assert_awaited_once()
 
     async def test_expire_stale_recordings_info_drops_only_absent_cameras(self):
         config = MagicMock(spec=FrigateConfig)

@@ -27,6 +27,10 @@ The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant das
 It supports automatically setting the sub labels in Frigate for person objects that are detected and recognized.
 This is a fork (with fixed errors and new features) of [original Double Take](https://github.com/jakowenko/double-take) project which, unfortunately, isn't being maintained by author.
 
+## [frigate-abr](https://github.com/007hacky007/frigate-abr)
+
+[frigate-abr](https://github.com/007hacky007/frigate-abr) is a drop-in Docker image of Frigate that adds adaptive bitrate (ABR) playback for recordings: a sidecar transcodes footage to lower quality tiers on demand, for reviewing over slow remote connections. Segments are transcoded when played and cached, so no additional stream is recorded. Frigate itself is not modified.
+
 ## [Frigate Notify](https://github.com/0x2142/frigate-notify)
 
 [Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.

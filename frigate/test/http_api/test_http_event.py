@@ -168,6 +168,29 @@ class TestHttpApp(BaseTestHttp):
             assert events[0]["id"] == id
             assert events[1]["id"] == id2
 
+    def test_get_event_list_offset_pages_score_sort(self):
+        now = datetime.now().timestamp()
+        scores = [0.6, 0.9, 0.7, 0.95, 0.8]
+
+        with AuthTestClient(self.app) as client:
+            for i, score in enumerate(scores):
+                super().insert_mock_event(
+                    f"event-{i}", start_time=now + i, data={"score": score}
+                )
+
+            params = {"sort": "score_desc"}
+            full = [e["id"] for e in client.get("/events", params=params).json()]
+            paged = [
+                e["id"]
+                for offset in (0, 2, 4)
+                for e in client.get(
+                    "/events", params={**params, "limit": 2, "offset": offset}
+                ).json()
+            ]
+
+            assert full == ["event-3", "event-1", "event-4", "event-2", "event-0"]
+            assert paged == full
+
     def test_get_event_list_match_multilingual_attribute(self):
         event_id = "123456.zh"
         attribute = "中文标签"
@@ -218,6 +241,85 @@ class TestHttpApp(BaseTestHttp):
             ).json()
             assert len(events) == 1
             assert events[0]["id"] == event_id
+
+    def test_events_search_offset_pages_score_sort(self):
+        now = datetime.now().timestamp()
+        scores = [0.6, 0.9, 0.7, 0.95, 0.8]
+        ids = [f"event-{i}" for i in range(len(scores))]
+        mock_embeddings = Mock()
+        mock_embeddings.search_thumbnail.return_value = [
+            (event_id, 0.1 * i) for i, event_id in enumerate(ids)
+        ]
+
+        self.app.frigate_config.semantic_search.enabled = True
+        self.app.embeddings = mock_embeddings
+
+        with AuthTestClient(self.app) as client:
+            for i, score in enumerate(scores):
+                super().insert_mock_event(
+                    ids[i], start_time=now + i, data={"score": score}
+                )
+
+            params = {
+                "search_type": "similarity",
+                "event_id": ids[0],
+                "sort": "score_desc",
+            }
+            paged = [
+                e["id"]
+                for offset in (0, 2, 4)
+                for e in client.get(
+                    "/events/search",
+                    params={**params, "limit": 2, "offset": offset},
+                ).json()
+            ]
+
+            assert paged == ["event-3", "event-1", "event-4", "event-2", "event-0"]
+
+    def test_events_search_offset_pages_orders_ties_by_id(self):
+        now = datetime.now().timestamp()
+        ids = ["event-c", "event-a", "event-b"]
+        mock_embeddings = Mock()
+        mock_embeddings.search_thumbnail.return_value = [
+            (event_id, 0.1) for event_id in ids
+        ]
+
+        self.app.frigate_config.semantic_search.enabled = True
+        self.app.embeddings = mock_embeddings
+
+        with AuthTestClient(self.app) as client:
+            for i, event_id in enumerate(ids):
+                super().insert_mock_event(
+                    event_id, start_time=now + i, data={"score": 0.8}
+                )
+
+            for sort in ("score_desc", "relevance"):
+                params = {
+                    "search_type": "similarity",
+                    "event_id": ids[0],
+                    "sort": sort,
+                }
+                paged = [
+                    e["id"]
+                    for offset in (0, 1, 2)
+                    for e in client.get(
+                        "/events/search",
+                        params={**params, "limit": 1, "offset": offset},
+                    ).json()
+                ]
+
+                assert paged == ["event-a", "event-b", "event-c"]
+
+    def test_event_list_rejects_negative_offset(self):
+        with AuthTestClient(self.app) as client:
+            response = client.get("/events", params={"offset": -5})
+            assert response.status_code == 422
+
+            response = client.get(
+                "/events/search",
+                params={"query": "car", "offset": -5},
+            )
+            assert response.status_code == 422
 
     def test_similarity_search_hides_unauthorized_anchor_event(self):
         mock_embeddings = Mock()

@@ -1162,7 +1162,9 @@
       "actions": "Actions",
       "noRoles": "No custom roles found.",
       "editCameras": "Edit Cameras",
-      "deleteRole": "Delete Role"
+      "deleteRole": "Delete Role",
+      "cameraCount_one": "{{count}} camera",
+      "cameraCount_other": "{{count}} cameras"
     },
     "toast": {
       "success": {
@@ -2038,7 +2040,11 @@
     },
     "record": {
       "noRecordRole": "No streams have the record role defined. Recording will not function.",
-      "noRecordSubRole": "No streams have the record_sub role defined. Sub stream recording will not function."
+      "noRecordSubRole": "No streams have the record_sub role defined. Sub stream recording will not function.",
+      "profileBaseDisabled": "Recording is disabled in this camera's base config, so enabling it in a profile has no effect. Enable recording in the base config and use a profile to disable it instead."
+    },
+    "notifications": {
+      "profileBaseDisabled": "No cameras have notifications enabled in their base config, so enabling them in a profile has no effect. Enable notifications in the base config of at least one camera."
     },
     "birdseye": {
       "objectTrackingDetectDisabled": "Birdseye includes tracked objects, but object detection is disabled for this camera. The camera will not appear in Birdseye.",
