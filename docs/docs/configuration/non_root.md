@@ -252,7 +252,7 @@ What each device needs when you're setting it up by hand. The automatic grant co
 | Hailo                     | `/dev/hailo0`                                               | udev rule granting a group, then that GID in `EXTRA_GROUPS`                                                      |
 | NVIDIA                    | nvidia runtime                                              | Nothing, works with the nvidia-container-toolkit defaults                                                        |
 | AMD ROCm                  | `/dev/kfd`, `/dev/dri`                                      | Host `video` and `render` GIDs in `EXTRA_GROUPS`                                                                 |
-| Raspberry Pi              | `/dev/video11`                                              | Host `video` GID in `EXTRA_GROUPS`                                                                               |
+| Raspberry Pi              | `/dev/video10`                                              | Host `video` GID in `EXTRA_GROUPS`                                                                               |
 | Rockchip                  | `/dev/dri`, `/dev/dma_heap`, `/dev/rga`, `/dev/mpp_service` | Commonly `root:root` `0600`, so all four need udev rules. If you can't grant all four, use `FRIGATE_RUN_AS_ROOT` |
 | Axera (AXCL)              | `/dev/ax_*` per the AXCL driver docs                        | Unverified. Check node ownership on your hardware before assuming this works                                     |
 | Synaptics SL1680          | per the Synaptics docs                                      | Unverified                                                                                                       |
