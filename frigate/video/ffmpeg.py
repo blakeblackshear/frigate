@@ -120,6 +120,7 @@ class RoleStatus:
     last_update_time: float = 0.0
 
     def send(self, status: str, now: float) -> None:
+        """Publish a changed status or resend it after the configured interval."""
         if (
             status != self.last_status
             or (now - self.last_update_time) >= self.resend_interval
