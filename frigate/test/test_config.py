@@ -6,6 +6,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import numpy as np
+import requests
 from pydantic import ValidationError
 from ruamel.yaml.constructor import DuplicateKeyError
 
@@ -1594,6 +1595,31 @@ class TestConfig(unittest.TestCase):
 
         frigate_config = FrigateConfig(**config)
         assert frigate_config.primary_model.merged_labelmap[0] == "amazon"
+
+    @patch(
+        "frigate.plus.PlusApi.get_model_download_url",
+        side_effect=requests.exceptions.ConnectionError,
+    )
+    def test_plus_unreachable_is_validation_error(self, _):
+        config = {
+            "mqtt": {"host": "mqtt"},
+            "models": [{"path": "plus://unreachable", "devices": ["cpu"]}],
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+
+        with self.assertRaisesRegex(ValidationError, "Unable to connect to Frigate+"):
+            FrigateConfig(**config)
 
     def test_fails_on_invalid_role(self):
         config = {

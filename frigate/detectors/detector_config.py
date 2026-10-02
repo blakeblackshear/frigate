@@ -186,15 +186,28 @@ class ModelConfig(BaseModel):
 
         # download the model if it doesn't exist
         if not os.path.isfile(self.path):
-            download_url = plus_api.get_model_download_url(model_id)
-            r = requests.get(download_url)
+            try:
+                download_url = plus_api.get_model_download_url(model_id)
+                r = requests.get(download_url)
+            except requests.exceptions.ConnectionError as e:
+                raise ValueError(
+                    f"Unable to connect to Frigate+ to download model {model_id}"
+                ) from e
+
             with open(self.path, "wb") as f:
                 f.write(r.content)
 
         # download the model info if it doesn't exist
         if not os.path.isfile(model_info_path):
+            try:
+                model_info = plus_api.get_model_info(model_id)
+            except requests.exceptions.ConnectionError as e:
+                raise ValueError(
+                    f"Unable to connect to Frigate+ to download model info for {model_id}"
+                ) from e
+
             with open(model_info_path, "w") as f:
-                json.dump(plus_api.get_model_info(model_id), f)
+                json.dump(model_info, f)
 
         model_info = load_plus_model_info(model_id)
 
