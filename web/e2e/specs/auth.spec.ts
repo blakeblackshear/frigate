@@ -7,12 +7,13 @@
  */
 
 import { test, expect } from "../fixtures/frigate-test";
+import { systemTab } from "../helpers/system-tabs";
 import { viewerProfile } from "../fixtures/mock-data/profile";
 
 test.describe("Auth — admin access @high", () => {
   test("admin /system renders general tab", async ({ frigateApp }) => {
     await frigateApp.goto("/system");
-    await expect(frigateApp.page.getByLabel("Select general")).toBeVisible({
+    await expect(systemTab(frigateApp, "general")).toBeVisible({
       timeout: 15_000,
     });
   });
@@ -28,7 +29,7 @@ test.describe("Auth — admin access @high", () => {
 
   test("admin /logs renders frigate tab", async ({ frigateApp }) => {
     await frigateApp.goto("/logs");
-    await expect(frigateApp.page.getByLabel("Select frigate")).toBeVisible({
+    await expect(systemTab(frigateApp, "frigate")).toBeVisible({
       timeout: 5_000,
     });
   });

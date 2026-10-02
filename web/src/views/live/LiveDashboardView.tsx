@@ -419,7 +419,7 @@ export default function LiveDashboardView({
       {isMobile && (
         <div className="relative flex h-11 items-center justify-between">
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
-          <div className="w-[45%]">
+          <div className="w-[calc(50%-1rem)]">
             <CameraGroupSelector />
           </div>
           {(!cameraGroup || cameraGroup == "default" || isMobileOnly) && (

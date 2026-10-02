@@ -6,6 +6,7 @@
  */
 
 import { test, expect } from "../fixtures/frigate-test";
+import { systemTab } from "../helpers/system-tabs";
 import { viewerProfile } from "../fixtures/mock-data/profile";
 
 const NOW = Math.floor(Date.now() / 1000);
@@ -55,7 +56,7 @@ test.describe("System — Health tab @medium", () => {
     });
     await frigateApp.goto("/system");
 
-    await expect(frigateApp.page.getByLabel("Select health")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "health")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
@@ -801,7 +802,7 @@ test.describe("System — Health notices sources @medium", () => {
       stats: QUIET_STATS,
     });
     await frigateApp.goto("/system#health");
-    await expect(frigateApp.page.getByLabel("Select health")).toHaveAttribute(
+    await expect(systemTab(frigateApp, "health")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 15_000 },
