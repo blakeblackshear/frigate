@@ -45,10 +45,10 @@ Any detection below `min_score` will be immediately thrown out and never tracked
 
 Navigate to <NavPath path="Settings > Global configuration > Objects" /> to set score filters globally.
 
-| Field                                   | Description                                                      |
-| --------------------------------------- | ---------------------------------------------------------------- |
-| **Object filters > Person > Min Score** | Minimum score for a single detection to initiate tracking        |
-| **Object filters > Person > Threshold** | Minimum computed (median) score to be considered a true positive |
+| Field                                              | Description                                                      |
+| -------------------------------------------------- | ---------------------------------------------------------------- |
+| **Object filters > Person > Minimum confidence**   | Minimum score for a single detection to initiate tracking        |
+| **Object filters > Person > Confidence threshold** | Minimum computed (median) score to be considered a true positive |
 
 To override score filters for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" /> and select the camera.
 
@@ -103,12 +103,12 @@ Conceptually, a ratio of 1 is a square, 0.5 is a "tall skinny" box, and 2 is a "
 
 Navigate to <NavPath path="Settings > Global configuration > Objects" /> to set shape filters globally.
 
-| Field                                   | Description                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| **Object filters > Person > Min Area**  | Minimum bounding box area in pixels (or decimal for percentage of frame) |
-| **Object filters > Person > Max Area**  | Maximum bounding box area in pixels (or decimal for percentage of frame) |
-| **Object filters > Person > Min Ratio** | Minimum width/height ratio of the bounding box                           |
-| **Object filters > Person > Max Ratio** | Maximum width/height ratio of the bounding box                           |
+| Field                                              | Description                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Object filters > Person > Minimum object area**  | Minimum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Maximum object area**  | Maximum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Minimum aspect ratio** | Minimum width/height ratio of the bounding box                           |
+| **Object filters > Person > Maximum aspect ratio** | Maximum width/height ratio of the bounding box                           |
 
 To override shape filters for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" /> and select the camera.
 

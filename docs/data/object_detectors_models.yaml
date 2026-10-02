@@ -824,6 +824,38 @@ cpu:
         models:
           - devices:
               - cpu:3
+xdna2:
+  title: AMD XDNA2
+  models:
+    - key: yolov9
+      label: YOLOv9
+      recommended: true
+      download: |-
+        Prepare the model using the frigate-xdna setup instructions linked above. For local YOLO models, Frigate must have access to the same ONNX file bytes as the sidecar. The example below uses YOLOv9-C at 320x320. Frigate+ models may instead use the same `plus://MODEL_ID` in Frigate and the sidecar.
+      ui: |-
+        Navigate to **Settings > System > Detection models** and add a model. The ZMQ endpoint is not reported by the hardware probe, so set `devices` to `zmq:tcp://xdna:5555` in YAML. Then, on the same model, open the **Custom Model** tab and configure:
+
+        | Field                                    | Value                                      |
+        | ---------------------------------------- | ------------------------------------------ |
+        | **Custom object detector model path**    | `/config/models/yolov9-c-320.onnx`       |
+        | **Label map for custom object detector** | `/labelmap/coco-80.txt`                   |
+        | **Object detection model input width**   | `320`                                    |
+        | **Object detection model input height**  | `320`                                    |
+        | **Model Input Pixel Color Format**       | `rgb` (Frigate's default value)          |
+        | **Model Input Tensor Shape**             | `nchw`                                   |
+        | **Model Input D Type**                   | `float`                                  |
+        | **Object Detection Model Type**          | `yolo-generic`                           |
+      yaml: |-
+        models:
+          - devices:
+              - zmq:tcp://xdna:5555
+            model_type: yolo-generic
+            width: 320
+            height: 320
+            input_tensor: nchw
+            input_dtype: float
+            path: /config/models/yolov9-c-320.onnx
+            labelmap_path: /labelmap/coco-80.txt
 memryx:
   title: MemryX
   models:

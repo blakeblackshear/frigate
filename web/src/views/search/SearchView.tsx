@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { SearchFilter, SearchResult, SearchSource } from "@/types/search";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { isMobileOnly } from "react-device-detect";
+import { isDesktop, isMobileOnly } from "react-device-detect";
 import { LuImage, LuSearchX, LuText } from "react-icons/lu";
 import useSWR from "swr";
 import ExploreView from "../explore/ExploreView";
@@ -32,7 +32,9 @@ import { TooltipPortal } from "@radix-ui/react-tooltip";
 import SearchActionGroup from "@/components/filter/SearchActionGroup";
 import { Trans, useTranslation } from "react-i18next";
 import { use24HourTime } from "@/hooks/use-date-utils";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { IoMdArrowRoundBack } from "react-icons/io";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 
 type SearchViewProps = {
@@ -80,6 +82,10 @@ export default function SearchView({
   });
   const is24Hour = use24HourTime(config);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // set by in-app links, since an iOS home screen app has no back gesture
+  const canGoBack = location.state?.canGoBack === true;
 
   const { data: exploreEvents } = useSWR<SearchResult[]>(
     (!searchFilter || Object.keys(searchFilter).length === 0) &&
@@ -534,17 +540,39 @@ export default function SearchView({
           isMobileOnly && "mb-2 h-auto flex-wrap gap-2 space-y-0",
         )}
       >
-        {config?.semantic_search?.enabled && (
-          <div className={cn("z-[41] w-full lg:absolute lg:top-0 lg:w-1/3")}>
-            <InputWithTags
-              inputFocused={inputFocused}
-              setInputFocused={setInputFocused}
-              filters={searchFilter ?? {}}
-              setFilters={setSearchFilter}
-              search={search}
-              setSearch={setSearch}
-              allSuggestions={suggestionsValues}
-            />
+        {(canGoBack || config?.semantic_search?.enabled) && (
+          <div
+            className={cn(
+              "z-[41] flex w-full flex-row items-start gap-2 lg:absolute lg:top-0 lg:w-1/3",
+            )}
+          >
+            {canGoBack && (
+              <Button
+                className="flex shrink-0 items-center gap-2.5 rounded-lg"
+                aria-label={t("label.back", { ns: "common" })}
+                onClick={() => navigate(-1)}
+              >
+                <IoMdArrowRoundBack className="size-5 text-secondary-foreground" />
+                {isDesktop && (
+                  <div className="text-primary">
+                    {t("button.back", { ns: "common" })}
+                  </div>
+                )}
+              </Button>
+            )}
+            {config?.semantic_search?.enabled && (
+              <div className="min-w-0 flex-1">
+                <InputWithTags
+                  inputFocused={inputFocused}
+                  setInputFocused={setInputFocused}
+                  filters={searchFilter ?? {}}
+                  setFilters={setSearchFilter}
+                  search={search}
+                  setSearch={setSearch}
+                  allSuggestions={suggestionsValues}
+                />
+              </div>
+            )}
           </div>
         )}
 

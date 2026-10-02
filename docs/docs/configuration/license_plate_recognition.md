@@ -378,10 +378,10 @@ Navigate to <NavPath path="Settings > Camera configuration > Object detection" /
 
 Navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 
-| Field                                          | Description         |
-| ---------------------------------------------- | ------------------- |
-| **Objects to track**                           | Add `license_plate` |
-| **Object filters > License Plate > Threshold** | Set to `0.7`        |
+| Field                                                     | Description         |
+| --------------------------------------------------------- | ------------------- |
+| **Objects to track**                                      | Add `license_plate` |
+| **Object filters > License Plate > Confidence threshold** | Set to `0.7`        |
 
 Navigate to <NavPath path="Settings > Camera configuration > Motion detection" />.
 

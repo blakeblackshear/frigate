@@ -49,6 +49,25 @@ class TestHttpApp(BaseTestHttp):
             assert response.status_code == 200
             assert response.json()["front_door"]["usage_percent"] == 25.0
 
+    def test_camera_name_collision_keeps_admin_default(self):
+        self.minimal_config["cameras"]["faces"] = self.minimal_config["cameras"].pop(
+            "front_door"
+        )
+        app = super().create_app(enforce_default_admin=True)
+        viewer = {"remote-user": "viewer", "remote-role": "viewer"}
+
+        with AuthTestClient(app) as client:
+            assert client.get("/faces", headers=viewer).status_code == 403
+            assert client.get("/faces").status_code == 200
+            assert (
+                client.post("/faces/train/person/classify", headers=viewer).status_code
+                == 403
+            )
+
+            # Camera routes for the same name stay reachable by viewers
+            response = client.get("/faces/recordings/summary", headers=viewer)
+            assert response.status_code == 200
+
     def test_config_set_in_memory_replaces_objects_track_list(self):
         self.minimal_config["cameras"]["front_door"]["objects"] = {
             "track": ["person", "car"],

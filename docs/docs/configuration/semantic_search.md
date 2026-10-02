@@ -245,8 +245,8 @@ Triggers are best configured through the Frigate UI.
 1. Navigate to <NavPath path="Settings > Enrichments > Triggers" /> and select a camera from the dropdown menu.
 2. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
 3. In the **Create Trigger** wizard:
-   - Enter a **Name** for the trigger (e.g., "Red Car Alert").
-   - Enter a descriptive **Friendly Name** for the trigger (e.g., "Red car on the driveway camera").
+   - Enter a **Name** for the trigger (e.g., "Red Car Alert"). Frigate derives the trigger's
+     internal **ID** from this name, which can be revealed and edited with the show/hide toggle.
    - Select the **Type** (`Thumbnail` or `Description`).
    - For `Thumbnail`, select an image to trigger this action when a similar thumbnail image is detected, based on the threshold.
    - For `Description`, enter text to trigger this action when a similar tracked object description is detected.

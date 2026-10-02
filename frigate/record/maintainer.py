@@ -691,6 +691,22 @@ class RecordingMaintainer(threading.Thread):
         if start_resolved is not None:
             start_resolved.set()
 
+        # assume that empty means the relevant recording info has not been received yet
+        camera_info = self.object_recordings_info[camera]
+        most_recently_processed_frame_time = (
+            camera_info[-1][0] if len(camera_info) > 0 else 0
+        )
+
+        # ensure delayed segment info does not lead to lost segments, every
+        # retention decision below depends on complete stats for the segment
+        if (
+            datetime.datetime.fromtimestamp(
+                most_recently_processed_frame_time
+            ).astimezone(datetime.UTC)
+            < end_time
+        ):
+            return None
+
         record_config = self.config.cameras[camera].record
 
         # sub's alerts/detections carry the retain mode directly, unlike
@@ -718,43 +734,28 @@ class RecordingMaintainer(threading.Thread):
         # we should first just check if this segment matches that
         # and avoid any DB calls
         if highest is not None:
-            # assume that empty means the relevant recording info has not been received yet
-            camera_info = self.object_recordings_info[camera]
-            most_recently_processed_frame_time = (
-                camera_info[-1][0] if len(camera_info) > 0 else 0
+            record_mode = (
+                RetainModeEnum.all if highest == "continuous" else RetainModeEnum.motion
             )
+            segment_stats = self.segment_stats(camera, start_time, end_time)
 
-            # ensure delayed segment info does not lead to lost segments
-            if (
-                datetime.datetime.fromtimestamp(
-                    most_recently_processed_frame_time
-                ).astimezone(datetime.UTC)
-                >= end_time
-            ):
-                record_mode = (
-                    RetainModeEnum.all
-                    if highest == "continuous"
-                    else RetainModeEnum.motion
+            # Here we only check if we should move the segment based on non-object recording retention
+            # we will always want to check for overlapping review items below before dropping the segment
+            if not segment_stats.should_discard_segment(record_mode):
+                return await self.move_segment(
+                    camera,
+                    stream_type,
+                    start_time,
+                    end_time,
+                    duration,
+                    cache_path,
+                    segment_stats,
+                    has_audio,
+                    audio_rate,
+                    audio_codec,
+                    video_codec,
+                    keyframes,
                 )
-                segment_stats = self.segment_stats(camera, start_time, end_time)
-
-                # Here we only check if we should move the segment based on non-object recording retention
-                # we will always want to check for overlapping review items below before dropping the segment
-                if not segment_stats.should_discard_segment(record_mode):
-                    return await self.move_segment(
-                        camera,
-                        stream_type,
-                        start_time,
-                        end_time,
-                        duration,
-                        cache_path,
-                        segment_stats,
-                        has_audio,
-                        audio_rate,
-                        audio_codec,
-                        video_codec,
-                        keyframes,
-                    )
 
         # we fell through the continuous / motion check, so we need to check the review items
         # if the cached segment overlaps with the review items:
@@ -816,10 +817,6 @@ class RecordingMaintainer(threading.Thread):
         # continuous/motion retention (either disabled or segment_stats said
         # discard), so waiting longer just fills the cache.
         else:
-            camera_info = self.object_recordings_info[camera]
-            most_recently_processed_frame_time = (
-                camera_info[-1][0] if len(camera_info) > 0 else 0
-            )
             retain_cutoff = datetime.datetime.fromtimestamp(
                 most_recently_processed_frame_time - record_config.event_pre_capture
             ).astimezone(datetime.UTC)

@@ -54,7 +54,7 @@ An object filter mask drops any [bounding box](#bounding-box) whose bottom cente
 
 ## Min Score
 
-The lowest score a detected object can have to be kept during tracking. Anything scoring below the minimum is assumed to be a [false positive](#false-positive) and discarded.
+The lowest score a detected object can have to be kept during tracking. Anything scoring below the minimum is assumed to be a [false positive](#false-positive) and discarded. Set with `min_score` in the config, shown as **Minimum confidence** in the settings UI.
 
 ## Model
 
@@ -86,7 +86,7 @@ A more specific identity assigned to a [tracked object](#tracked-object-event-in
 
 ## Threshold
 
-The median score an object must reach to be considered a true positive.
+The median score an object must reach to be considered a true positive. Set with `threshold` in the config, shown as **Confidence threshold** in the settings UI.
 
 ## Top Score
 

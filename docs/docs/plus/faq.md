@@ -21,7 +21,13 @@ Yes. Models and metadata are stored in the `model_cache` directory within the co
 
 ### Can I keep using my Frigate+ models even if I do not renew my subscription?
 
-Yes. Subscriptions to Frigate+ provide access to the infrastructure used to train the models. Models trained with your subscription are yours to keep and use forever. However, do note that the terms and conditions prohibit you from sharing, reselling, or creating derivative products from the models.
+Yes. Subscriptions to Frigate+ provide access to the infrastructure used to train the models. Models you train during an active subscription remain licensed for your continued use even after your subscription ends — models already in your model cache will keep working indefinitely. An active subscription is required to train new models and download new versions.
+
+### Can I use Frigate+ models commercially?
+
+A standard subscription covers use on camera systems you own or operate, including for your business. A shop, restaurant, warehouse, or office running Frigate+ at its own locations (including multiple locations) is exactly the kind of use the subscription is for.
+What the standard subscription does not cover is using Frigate+ models to provide a product or service to others. If you're deploying models at your customers' sites, bundling them with hardware you sell, or running them as part of a hosted or managed service, even if your customers never receive the model files themselves, you'll need a commercial license.
+Note that professional installers are fine under standard subscriptions when each customer holds their own Frigate+ subscription. The commercial license is for cases where your license powers your customers' sites.
 
 ### Why can't I submit images to Frigate+?
 
