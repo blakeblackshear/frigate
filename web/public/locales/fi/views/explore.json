@@ -70,7 +70,6 @@
         "visionModelFeatureExtractor": "Näkömallin piirreluokkain"
       },
       "tips": {
-        "documentation": "Lue dokumentaatio",
         "context": "Saatat haluta uudelleenindeksoida seurattavien kohteiden upotukset, kun mallit on ladattu."
       },
       "error": "Tapahtui virhe. Tarkista Frigaten lokit."
@@ -79,51 +78,13 @@
   "exploreMore": "Selaa lisää {{label}}-tyyppisiä kohteita",
   "generativeAI": "Generatiivinen AI",
   "objectLifecycle": {
-    "annotationSettings": {
-      "offset": {
-        "documentation": "Lue dokumentaatio "
-      },
-      "showAllZones": {
-        "title": "Näytä kaikki vyöhykkeet"
-      }
-    },
-    "lifecycleItemDesc": {
-      "header": {
-        "zones": "Vyöhykkeet",
-        "ratio": "Suhde",
-        "area": "Alue"
-      },
-      "active": "{{label}} aktivoitui",
-      "stationary": "{{label}} pysähtyi",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} havaittiin nimikkeelle {{label}}",
-        "other": "{{label}} tunnistettu {{attribute}}:na"
-      },
-      "gone": "{{label}} poistui",
-      "entered_zone": "{{label}} ilmestyi vyöhykkeelle {{zones}}",
-      "visible": "{{label}} havaittu",
-      "heard": "{{label}} kuului",
-      "external": "{{label}} havaittiin"
-    },
-    "trackedPoint": "Seurattu piste",
-    "carousel": {
-      "previous": "Edellinen",
-      "next": "Seuraava"
-    },
-    "count": "{{first}} / {{second}}",
-    "title": "Kohteen elinkaari",
-    "noImageFound": "Tältä aikaleimalta ei löytynyt kuvia.",
-    "createObjectMask": "Luo kohdemaski",
-    "scrollViewTips": "Vieritä katsoaksesi merkittäviä hetkiä kohteen elinkaarelta.",
-    "autoTrackingTips": "Kohteen rajojen sijainti on epätarkka automaattisesti seuraaville kameroille.",
-    "adjustAnnotationSettings": "Säädä merkintäasetuksia"
+    "noImageFound": "Tältä aikaleimalta ei löytynyt kuvia."
   },
   "trackedObjectDetails": "Seurattavien kohteiden tiedot",
   "type": {
     "details": "tiedot",
     "snapshot": "kuvankaappaus",
-    "video": "video",
-    "object_lifecycle": "kohteen elinkaari"
+    "video": "video"
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -140,10 +101,6 @@
     "downloadVideo": {
       "label": "Lataa video",
       "aria": "Lataa video"
-    },
-    "viewObjectLifecycle": {
-      "label": "Tarkastele objektin elinkaarta",
-      "aria": "Näytä objektin elinkaari"
     },
     "findSimilar": {
       "label": "Etsi samankaltaisia"

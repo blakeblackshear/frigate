@@ -15,14 +15,6 @@
       "title": "Pasovna širina:",
       "short": "Pasovna širina"
     },
-    "latency": {
-      "value": "{{seconds}} sekund",
-      "title": "Zakasnitev:",
-      "short": {
-        "value": "{{seconds}} s",
-        "title": "Zakasnitev"
-      }
-    },
     "totalFrames": "Skupno število slik:",
     "droppedFrames": {
       "title": "Izpuščene slike:",
@@ -39,7 +31,6 @@
     "title": "Tok ni povezan",
     "desc": "Pretok <code>detect</code> za kamero {{cameraName}} ne prejema slik, preveri dnevnike napak."
   },
-  "cameraDisabled": "Kamera je onemogočena",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Okvir je bil uspešno poslan v Frigate+"

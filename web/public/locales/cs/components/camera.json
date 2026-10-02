@@ -29,7 +29,6 @@
         "audioIsUnavailable": "Audio není k dispozici pro tento stream",
         "audio": {
           "tips": {
-            "document": "Přečtěte si dokumentaci ",
             "title": "Pro tento stream musí být výstup zvuku z vaší kamery a nakonfigurován v go2rtc."
           }
         },

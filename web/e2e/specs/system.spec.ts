@@ -72,7 +72,15 @@ test.describe("System — tabs @medium", () => {
       { timeout: 15_000 },
     );
     await expect(frigateApp.page.getByText("0.15.0-test")).toBeVisible();
-    await expect(frigateApp.page.getByText(/Last refreshed/)).toBeVisible();
+
+    if (frigateApp.isMobile) {
+      // the "Last refreshed" label is dropped on mobile so the timestamp
+      // clears the centered logo
+      await expect(frigateApp.page.getByText(/Last refreshed/)).toHaveCount(0);
+      await expect(frigateApp.page.getByText(/Just now|ago/)).toBeVisible();
+    } else {
+      await expect(frigateApp.page.getByText(/Last refreshed/)).toBeVisible();
+    }
   });
 
   test("storage tab renders content after switching", async ({
@@ -229,6 +237,47 @@ test.describe("System — mobile @medium @mobile", () => {
     );
     await frigateApp.page.getByLabel("Select storage").click();
     await expect(frigateApp.page.getByLabel("Select storage")).toHaveAttribute(
+      "data-state",
+      "on",
+      { timeout: 5_000 },
+    );
+  });
+
+  test("header controls leave the logo uncovered on a narrow phone", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.goto("/system#general");
+    await expect(frigateApp.page.getByLabel("Select general")).toHaveAttribute(
+      "data-state",
+      "on",
+      { timeout: 15_000 },
+    );
+    await frigateApp.page.setViewportSize({ width: 320, height: 740 });
+
+    const logo = frigateApp.page.locator("svg.fill-current").first();
+    const tabs = frigateApp.page
+      .locator("[data-radix-scroll-area-viewport]")
+      .filter({ has: frigateApp.page.getByLabel("Select general") });
+    const refreshed = frigateApp.page.getByText(/Just now|ago/);
+
+    const logoBox = await logo.boundingBox();
+    const tabsBox = await tabs.boundingBox();
+    const refreshedBox = await refreshed.boundingBox();
+
+    expect(tabsBox!.x + tabsBox!.width).toBeLessThanOrEqual(logoBox!.x + 1);
+    expect(refreshedBox!.x).toBeGreaterThanOrEqual(logoBox!.x + logoBox!.width);
+
+    // the clipped tabs stay reachable by scrolling
+    const overflow = await tabs.evaluate((el) => ({
+      scroll: el.scrollWidth,
+      client: el.clientWidth,
+    }));
+    expect(overflow.scroll).toBeGreaterThan(overflow.client);
+    await tabs.evaluate((el) => {
+      el.scrollLeft = el.scrollWidth;
+    });
+    await frigateApp.page.getByLabel("Select cameras").click();
+    await expect(frigateApp.page.getByLabel("Select cameras")).toHaveAttribute(
       "data-state",
       "on",
       { timeout: 5_000 },

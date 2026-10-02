@@ -27,8 +27,7 @@ import type { GenAIModelsResponse } from "@/types/chat";
 import { getSizedFieldClassName } from "../utils";
 
 type ProbeResponse =
-  | { success: true; models: string[] }
-  | { success: false; message: string };
+  { success: true; models: string[] } | { success: false; message: string };
 
 type ProbeStatus = "idle" | "probing" | "success" | "error";
 
@@ -60,19 +59,31 @@ export function GenAIModelWidget(props: WidgetProps) {
 
   const formContext = registry?.formContext as ConfigFormContext | undefined;
 
-  // Build a fingerprint from the saved config's provider + base_url so the
-  // SWR key changes (and models are refetched) whenever those fields are saved.
-  const configFingerprint = useMemo(() => {
-    if (!providerKey) return "";
+  const savedEntry = useMemo<Record<string, unknown> | null>(() => {
+    if (!providerKey) return null;
     const genai = (
       formContext?.fullConfig as Record<string, unknown> | undefined
     )?.genai;
-    if (!genai || typeof genai !== "object" || Array.isArray(genai)) return "";
+    if (!genai || typeof genai !== "object" || Array.isArray(genai)) {
+      return null;
+    }
     const entry = (genai as Record<string, unknown>)[providerKey];
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) return "";
-    const e = entry as Record<string, unknown>;
-    return `${e.provider ?? ""}|${e.base_url ?? ""}`;
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+      return null;
+    }
+    return entry as Record<string, unknown>;
   }, [providerKey, formContext?.fullConfig]);
+
+  const savedProvider =
+    typeof savedEntry?.provider === "string" ? savedEntry.provider : null;
+  const savedModel =
+    typeof savedEntry?.model === "string" ? savedEntry.model : "";
+
+  // Build a fingerprint from the saved config's provider + base_url so the
+  // SWR key changes (and models are refetched) whenever those fields are saved.
+  const configFingerprint = savedEntry
+    ? `${savedEntry.provider ?? ""}|${savedEntry.base_url ?? ""}`
+    : "";
 
   const { data: allModels, mutate: mutateModels } = useSWR<GenAIModelsResponse>(
     "genai/models",
@@ -148,6 +159,18 @@ export function GenAIModelWidget(props: WidgetProps) {
   const formProvider =
     typeof formEntry?.provider === "string" ? formEntry.provider : null;
   const canProbe = Boolean(formProvider) && !probing;
+
+  // A model name belongs to its provider, so switching provider clears it,
+  // unless the form holds the saved provider and model together
+  const prevFormProvider = useRef(formProvider);
+  useEffect(() => {
+    const previous = prevFormProvider.current;
+    prevFormProvider.current = formProvider;
+
+    if (previous === formProvider) return;
+    if (formProvider === savedProvider && value === savedModel) return;
+    if (typeof value === "string" && value) onChange("");
+  }, [formProvider, savedProvider, savedModel, value, onChange]);
 
   const probe = async () => {
     if (!formEntry || !formProvider) return;

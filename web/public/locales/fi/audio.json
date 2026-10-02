@@ -161,5 +161,14 @@
   "alarm": "Hälytys",
   "ambient_music": "Tunnelmamusiikki",
   "ambulance": "Ambulanssi",
-  "angry_music": "Vihainen musiikki"
+  "angry_music": "Vihainen musiikki",
+  "heart_murmur": "Sydämen sivuääni",
+  "purr": "Kehräys",
+  "moo": "Ammuu",
+  "turkey": "Kalkkuna",
+  "goose": "Hanhi",
+  "banjo": "Banjo",
+  "sitar": "Sitar",
+  "mandolin": "Mandoliini",
+  "ukulele": "Ukulele"
 }

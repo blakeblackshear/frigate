@@ -31,7 +31,7 @@
   "synthetic_singing": "Canto Sintético",
   "groan": "Gemido",
   "grunt": "Grunhido",
-  "whistling": "Assobio",
+  "whistling": "Assobiando",
   "breathing": "Respiração",
   "camera": "Câmera",
   "wheeze": "Chiado",
@@ -136,7 +136,7 @@
   "plucked_string_instrument": "Instrumento de Cordas Dedilhadas",
   "guitar": "Violão",
   "electric_guitar": "Guitarra",
-  "bass_guitar": "Baixo",
+  "bass_guitar": "Contra-Baixo",
   "acoustic_guitar": "Violão Acústico",
   "steel_guitar": "Guitarra Havaiana",
   "tapping": "Batidas Leves",
@@ -396,7 +396,7 @@
   "smoke_detector": "Detector de Fumaça",
   "fire_alarm": "Alarme de Incêndio",
   "foghorn": "Buzina de Nevoeiro",
-  "whistle": "Apito",
+  "whistle": "Assobio",
   "steam_whistle": "Apito a Vapor",
   "mechanisms": "Mecanismos",
   "ratchet": "Catraca",
@@ -498,5 +498,5 @@
   "mains_hum": "Zumbido Elétrico",
   "sidetone": "Retorno de Voz",
   "throbbing": "Latejante",
-  "sodeling": "Soldagem"
+  "chird": "Apito"
 }

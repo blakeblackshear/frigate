@@ -60,7 +60,6 @@
       "error": {
         "failed": "Det gick inte att köa exporten: {{error}}",
         "endTimeMustAfterStartTime": "Sluttiden måste vara efter starttiden",
-        "noVaildTimeSelected": "Inget giltigt tidsintervall valt",
         "noValidTimeSelected": "Inget giltigt tidsintervall valt"
       },
       "view": "Visa",
@@ -127,8 +126,6 @@
       "toast": {
         "started_one": "Startade 1 export.",
         "started_other": "Startade {{count}} exporter.",
-        "startedNoCase_one": "Startade 1 export.",
-        "startedNoCase_other": "Startade {{count}} exporter.",
         "partial": "Startade {{successful}} av {{total}} exporter. Följande misslyckades: {{failedItems}}",
         "failed": "Det gick inte att starta {{total}} exporter. Följande misslyckades: {{failedItems}}"
       }
@@ -139,8 +136,7 @@
     "restreaming": {
       "disabled": "Vidareströmning är inte aktiverad för den här kameran.",
       "desc": {
-        "title": "Konfigurera go2rtc för fler alternativ för livevisning och ljud från den här kameran.",
-        "readTheDocumentation": "Läs dokumentationen"
+        "title": "Konfigurera go2rtc för fler alternativ för livevisning och ljud från den här kameran."
       }
     },
     "showStats": {

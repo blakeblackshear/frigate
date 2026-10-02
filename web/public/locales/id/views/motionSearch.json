@@ -43,8 +43,6 @@
         "thresholdDesc": "Nilai yang lebih rendah mendeteksi perubahan yang lebih kecil (1-255)",
         "minArea": "Luas Perubahan Minimum",
         "minAreaDesc": "Persentase minimum dari wilayah yang diminati yang harus berubah agar dianggap signifikan",
-        "frameSkip": "Lewati Frame",
-        "frameSkipDesc": "Proses setiap frame ke-N. Atur ini ke frame rate kamera Anda untuk memproses satu frame per detik (misalnya 5 untuk kamera 5 FPS, 30 untuk kamera 30 FPS). Nilai yang lebih tinggi akan lebih cepat, tetapi bisa melewatkan kejadian gerakan singkat.",
         "maxResults": "Jumlah Hasil Maksimum",
         "maxResultsDesc": "Berhenti setelah sebanyak ini cap waktu yang cocok"
     },

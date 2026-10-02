@@ -2,7 +2,6 @@
   "search": "Sök",
   "documentTitle": "Exporter - Frigate",
   "noExports": "Inga exporter hittade",
-  "deleteExport": "Radera export",
   "deleteExport.desc": "Är du säker på att du vill ta bort {{exportName}}?",
   "editExport": {
     "desc": "Ange ett nytt namn för denna export.",

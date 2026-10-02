@@ -57,7 +57,11 @@
             "label": "감지 스레드 수",
             "description": "오디오 감지 처리에 사용할 스레드 수입니다."
         },
-        "description": "모든 카메라에 대한 오디오 기반 이벤트 감지 설정입니다. 카메라별로 재정의할 수 있습니다."
+        "description": "모든 카메라에 대한 오디오 기반 이벤트 감지 설정입니다. 카메라별로 재정의할 수 있습니다.",
+        "labelmap": {
+            "label": "오디오 라벨 맵 사용자 지정",
+            "description": "표준 오디오 라벨 맵에 병합할 재지정 또는 재매핑 항목입니다."
+        }
     },
     "auth": {
         "label": "인증",
@@ -220,7 +224,7 @@
         }
     },
     "audio_transcription": {
-        "label": "오디오 텍스트 변환 (STT)",
+        "label": "오디오 텍스트 변환",
         "description": "이벤트 및 실시간 자막 처리에 사용되는 실시간 음성 전사 설정입니다.",
         "live_enabled": {
             "label": "실시간 텍스트 변환",
@@ -249,10 +253,6 @@
         "enabled": {
             "label": "버드아이 활성화",
             "description": "버드아이 뷰 기능을 활성화하거나 비활성화합니다."
-        },
-        "mode": {
-            "label": "추적 모드",
-            "description": "카메라를 버드아이에 포함하는 기준 모드: 'objects', 'motion', 또는 'continuous'."
         },
         "order": {
             "label": "표시 순서",
@@ -293,11 +293,15 @@
         "idle_heartbeat_fps": {
             "label": "유휴 하트비트 FPS",
             "description": "유휴 상태일 때 마지막으로 합성된 버드아이 프레임을 재전송할 초당 프레임 수입니다 (0은 비활성화)."
+        },
+        "modes": {
+            "label": "활동 유형",
+            "description": "버드아이 화면에 카메라를 포함할 활동 유형입니다."
         }
     },
     "detect": {
         "label": "객체 감지",
-        "description": "객체 감지를 실행하고 트래커를 초기화하는 데 사용되는 detect 역할 설정입니다.",
+        "description": "객체 감지를 실행하고 트래커를 초기화하는 데 사용되는 감지 역할 설정입니다.",
         "enabled": {
             "label": "객체 감지 활성화",
             "description": "모든 카메라의 객체 감지를 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
@@ -353,6 +357,10 @@
         "annotation_offset": {
             "label": "어노테이션 오프셋",
             "description": "녹화 영상과 타임라인 바운딩 박스의 싱크를 맞추기 위해 감지 어노테이션을 전후로 이동할 밀리초(ms) 단위 시간입니다 (양수 또는 음수 가능)."
+        },
+        "scene": {
+            "label": "감지 장면",
+            "description": "이 카메라가 비추는 환경으로, 구성된 모델 중 어떤 모델을 실행할지 선택하는 데 사용됩니다. '전체'로 설정된 카메라는 장면이 '전체'로 구성된 모델을 실행합니다."
         }
     },
     "face_recognition": {
@@ -426,6 +434,10 @@
             "record": {
                 "label": "녹화(record) 출력 인수",
                 "description": "record 역할 스트림에 적용할 기본 출력 인수입니다."
+            },
+            "record_sub": {
+                "label": "서브 스트림 녹화 출력 인수",
+                "description": "서브 녹화 스트림에 적용할 출력 인수입니다. 설정하지 않으면 기본 녹화 출력 인수가 사용됩니다."
             }
         },
         "retry_interval": {
@@ -838,7 +850,55 @@
             "label": "초기 녹화 상태",
             "description": "초기 정적 구성에서 녹화가 활성화되어 있었는지 여부를 나타냅니다."
         },
-        "description": "카메라별로 재정의하지 않는 한 모든 카메라에 적용되는 녹화 및 보관 설정입니다."
+        "description": "카메라별로 재정의하지 않는 한 모든 카메라에 적용되는 녹화 및 보관 설정입니다.",
+        "sub": {
+            "label": "서브 스트림 녹화",
+            "description": "두 번째 저화질 스트림을 녹화하기 위한 설정입니다.",
+            "enabled": {
+                "label": "서브 스트림 녹화 사용",
+                "description": "적응형 화질 재생 및 보관 기간 연장을 위해 두 번째 저화질 스트림 녹화를 활성화합니다."
+            },
+            "continuous": {
+                "label": "서브 스트림 상시 녹화 보관 기간",
+                "description": "추적된 객체나 움직임 발생 여부와 관계없이 서브 스트림 녹화본을 보관할 일수입니다.",
+                "days": {
+                    "label": "보관 일수",
+                    "description": "녹화본을 보관할 일수입니다."
+                }
+            },
+            "motion": {
+                "label": "서브 스트림 움직임 녹화 보관 기간",
+                "description": "움직임 감지로 트리거된 서브 스트림 녹화본을 보관할 일수입니다.",
+                "days": {
+                    "label": "보관 일수",
+                    "description": "녹화본을 보관할 일수입니다."
+                }
+            },
+            "alerts": {
+                "label": "서브 스트림 알림 녹화 보관 기간",
+                "description": "알림 이벤트에 대한 서브 스트림 녹화본의 보관 설정입니다.",
+                "days": {
+                    "label": "보관 일수",
+                    "description": "감지 이벤트 녹화본을 보관할 일수입니다."
+                },
+                "mode": {
+                    "label": "보관 모드",
+                    "description": "보관 모드: 전체(모든 구간 저장), 모션(움직임이 있는 구간 저장), 활성객체(활성 객체가 있는 구간 저장)."
+                }
+            },
+            "detections": {
+                "label": "서브 스트림 감지 녹화 보관 기간",
+                "description": "감지 이벤트에 대한 서브 스트림 녹화본의 보관 설정입니다.",
+                "days": {
+                    "label": "보관 일수",
+                    "description": "감지 이벤트 녹화본을 보관할 일수입니다."
+                },
+                "mode": {
+                    "label": "보관 모드",
+                    "description": "보관 모드: 전체(모든 구간 저장), 모션(움직임이 있는 구간 저장), 활성객체(활성 객체가 있는 구간 저장)."
+                }
+            }
+        }
     },
     "review": {
         "label": "다시보기",
@@ -928,6 +988,10 @@
             "activity_context_prompt": {
                 "label": "활동 맥락 프롬프트",
                 "description": "GenAI 요약에 맥락을 제공하기 위해 어떤 활동이 의심스럽거나 정상적인지 설명하는 커스텀 프롬프트입니다."
+            },
+            "response_style": {
+                "label": "응답 스타일",
+                "description": "생성된 검토 설명의 작성 스타일 프리셋입니다. 프리셋은 사용자에게 표시되는 제목, 요약 및 장면 설명의 톤과 세부 수준을 조정하며, '초기값'으로 설정하면 내장 프롬프트를 그대로 유지합니다."
             }
         },
         "description": "UI 및 저장소에서 사용하는 알림, 감지 및 GenAI 요약을 제어하는 설정입니다."
@@ -1177,7 +1241,7 @@
         },
         "default_role": {
             "label": "기본 역할",
-            "description": "일치하는 역할 매핑이 없을 때 프록시 인증 사용자에게 할당할 기본 역할입니다."
+            "description": "일치하는 역할 매핑이 없을 때 프록시 인증 사용자에게 할당할 기본 역할입니다. 매핑되지 않은 사용자의 접근을 차단하려면 '없음'으로 설정하세요."
         },
         "separator": {
             "label": "구분자 문자",
@@ -1238,213 +1302,6 @@
         "unit_system": {
             "label": "단위 체계",
             "description": "UI 및 MQTT에 표시할 단위 체계입니다 (metric: 미터법, imperial: 야드파운드법)."
-        }
-    },
-    "detectors": {
-        "label": "감지기 하드웨어",
-        "description": "객체 감지기(CPU, GPU, ONNX 백엔드) 및 감지기별 모델 설정입니다.",
-        "type": {
-            "label": "유형"
-        },
-        "model": {
-            "label": "감지기 전용 모델 설정",
-            "description": "감지기별 모델 설정 옵션(경로, 입력 크기 등)입니다.",
-            "path": {
-                "label": "커스텀 감지 모델 경로",
-                "description": "사용자 지정 감지 모델 파일의 경로(또는 Frigate+ 모델용 plus://<model_id>)입니다."
-            },
-            "labelmap_path": {
-                "label": "커스텀 감지기 레이블 맵",
-                "description": "감지기용 숫자 클래스를 문자열 레이블로 매핑하는 labelmap 파일 경로입니다."
-            },
-            "width": {
-                "label": "모델 입력 너비",
-                "description": "모델 입력 텐서의 너비(픽셀)입니다."
-            },
-            "height": {
-                "label": "모델 입력 높이",
-                "description": "모델 입력 텐서의 높이(픽셀)입니다."
-            },
-            "labelmap": {
-                "label": "레이블 맵 사용자 정의",
-                "description": "표준 레이블 맵에 병합할 재정의 또는 리매핑 항목입니다."
-            },
-            "attributes_map": {
-                "label": "객체 레이블과 속성 레이블 매핑",
-                "description": "메타데이터를 첨부하기 위한 객체 레이블과 속성 레이블 간의 매핑입니다 (예: 'car' -> ['license_plate'])."
-            },
-            "input_tensor": {
-                "label": "모델 입력 텐서 형태",
-                "description": "모델이 요구하는 텐서 형식입니다: 'nhwc' 또는 'nchw'."
-            },
-            "input_pixel_format": {
-                "label": "모델 입력 색상 포맷",
-                "description": "모델이 요구하는 픽셀 색상 공간입니다: 'rgb', 'bgr', 또는 'yuv'."
-            },
-            "input_dtype": {
-                "label": "모델 입력 데이터 타입",
-                "description": "모델 입력 텐서의 데이터 타입입니다 (예: 'float32')."
-            },
-            "model_type": {
-                "label": "객체 감지 모델 유형",
-                "description": "일부 감지기에서 최적화에 사용하는 감지기 아키텍처 유형(ssd, yolox, yolonas, yolo-generic, rfdetr, dfine)입니다."
-            }
-        },
-        "model_path": {
-            "label": "감지기 전용 모델 경로",
-            "description": "선택한 감지기에서 요구하는 감지 모델 바이너리의 파일 경로입니다."
-        },
-        "axengine": {
-            "label": "AXEngine NPU",
-            "description": "AXEngine 런타임을 통해 컴파일된 .axmodel 파일을 실행하는 AXERA AX650N/AX8850N NPU 감지기입니다."
-        },
-        "cpu": {
-            "label": "CPU",
-            "description": "하드웨어 가속 없이 호스트 CPU에서 TensorFlow Lite 모델을 실행하는 CPU TFLite 감지기입니다 (권장되지 않음).",
-            "num_threads": {
-                "label": "감지 스레드 수",
-                "description": "CPU 기반 추론 처리에 사용할 스레드 수입니다."
-            }
-        },
-        "deepstack": {
-            "label": "DeepStack",
-            "description": "원격 DeepStack HTTP API로 이미지를 전송하여 추론하는 DeepStack/CodeProject.AI 감지기입니다 (권장되지 않음).",
-            "api_url": {
-                "label": "DeepStack API URL",
-                "description": "DeepStack API의 엔드포인트 URL입니다."
-            },
-            "api_timeout": {
-                "label": "DeepStack API 제한 시간(초)",
-                "description": "DeepStack API 요청에 허용되는 최대 시간입니다."
-            },
-            "api_key": {
-                "label": "DeepStack API 키",
-                "description": "인증이 필요한 DeepStack 서비스에 전달할 선택적 API 키입니다."
-            }
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "EdgeTPU 델리게이트를 사용하여 Coral EdgeTPU용으로 컴파일된 TensorFlow Lite 모델을 실행하는 감지기입니다.",
-            "device": {
-                "label": "디바이스 유형",
-                "description": "EdgeTPU 추론에 사용할 디바이스입니다 (예: 'usb', 'pci')."
-            }
-        },
-        "hailo8l": {
-            "label": "Hailo-8/Hailo-8L",
-            "description": "Hailo 하드웨어 추론을 위해 HEF 모델과 HailoRT SDK를 사용하는 Hailo-8/Hailo-8L 감지기입니다.",
-            "device": {
-                "label": "디바이스 유형",
-                "description": "Hailo 추론에 사용할 디바이스입니다 (예: 'PCIe', 'M.2')."
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "MemryX 가속기에서 컴파일된 DFP 모델을 실행하는 MemryX MX3 감지기입니다.",
-            "device": {
-                "label": "디바이스 경로",
-                "description": "MemryX 추론에 사용할 디바이스 경로입니다 (예: 'PCIe')."
-            }
-        },
-        "onnx": {
-            "label": "ONNX",
-            "description": "ONNX 모델을 실행하는 감지기입니다. 사용 가능한 가속 백엔드(CUDA/ROCm/OpenVINO)가 있을 경우 자동으로 활용합니다.",
-            "device": {
-                "label": "디바이스 유형",
-                "description": "ONNX 추론에 사용할 디바이스입니다 (예: 'AUTO', 'CPU', 'GPU')."
-            }
-        },
-        "openvino": {
-            "label": "OpenVINO",
-            "description": "AMD 및 Intel CPU, Intel GPU 및 Intel VPU 하드웨어를 지원하는 OpenVINO 감지기입니다.",
-            "device": {
-                "label": "디바이스 유형",
-                "description": "OpenVINO 추론에 사용할 디바이스입니다 (예: 'CPU', 'GPU', 'NPU')."
-            }
-        },
-        "rknn": {
-            "label": "RKNN",
-            "description": "Rockchip NPU용 RKNN 감지기입니다. Rockchip 하드웨어에서 컴파일된 RKNN 모델을 실행합니다.",
-            "num_cores": {
-                "label": "사용할 NPU 코어 수.",
-                "description": "추론에 사용할 NPU 코어 수입니다 (0은 자동)."
-            }
-        },
-        "synaptics": {
-            "label": "Synaptics",
-            "description": "Synaptics 하드웨어에서 Synap SDK를 사용하여 .synap 형식의 모델을 실행하는 Synaptics NPU 감지기입니다."
-        },
-        "teflon_tfl": {
-            "label": "Teflon",
-            "description": "지원되는 GPU에서 추론을 가속하기 위해 Mesa Teflon 델리게이트 라이브러리를 사용하는 TFLite 감지기입니다."
-        },
-        "tensorrt": {
-            "label": "TensorRT",
-            "description": "직렬화된 TensorRT 엔진을 사용하여 Nvidia Jetson 기기에서 가속 추론을 수행하는 TensorRT 감지기입니다.",
-            "device": {
-                "label": "GPU 디바이스 인덱스",
-                "description": "추론에 사용할 GPU 디바이스 인덱스입니다."
-            }
-        },
-        "zmq": {
-            "label": "ZMQ IPC",
-            "description": "ZeroMQ IPC 엔드포인트를 통해 외부 프로세스로 추론을 위임하는 ZMQ IPC 감지기입니다.",
-            "endpoint": {
-                "label": "ZMQ IPC 엔드포인트",
-                "description": "연결할 ZMQ 엔드포인트 주소입니다."
-            },
-            "request_timeout_ms": {
-                "label": "ZMQ 요청 제한 시간(밀리초)",
-                "description": "ZMQ 요청의 만료 시간(ms)입니다."
-            },
-            "linger_ms": {
-                "label": "ZMQ 소켓 린거(밀리초)",
-                "description": "소켓 종료 시 대기할 린거 기간(ms)입니다."
-            }
-        }
-    },
-    "model": {
-        "label": "감지 모델",
-        "description": "커스텀 객체 감지 모델 및 입력 형태를 구성하기 위한 설정입니다.",
-        "path": {
-            "label": "커스텀 감지 모델 경로",
-            "description": "사용자 지정 감지 모델 파일의 경로(또는 Frigate+ 모델용 plus://<model_id>)입니다."
-        },
-        "labelmap_path": {
-            "label": "커스텀 감지기 레이블 맵",
-            "description": "감지기용 숫자 클래스를 문자열 레이블로 매핑하는 labelmap 파일 경로입니다."
-        },
-        "width": {
-            "label": "모델 입력 너비",
-            "description": "모델 입력 텐서의 너비(픽셀)입니다."
-        },
-        "height": {
-            "label": "모델 입력 높이",
-            "description": "모델 입력 텐서의 높이(픽셀)입니다."
-        },
-        "labelmap": {
-            "label": "레이블 맵 사용자 정의",
-            "description": "표준 레이블 맵에 병합할 재정의 또는 리매핑 항목입니다."
-        },
-        "attributes_map": {
-            "label": "객체 레이블과 속성 레이블 매핑",
-            "description": "메타데이터를 첨부하기 위한 객체 레이블과 속성 레이블 간의 매핑입니다 (예: 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-            "label": "모델 입력 텐서 형태",
-            "description": "모델이 요구하는 텐서 형식입니다: 'nhwc' 또는 'nchw'."
-        },
-        "input_pixel_format": {
-            "label": "모델 입력 색상 포맷",
-            "description": "모델이 요구하는 픽셀 색상 공간입니다: 'rgb', 'bgr', 또는 'yuv'."
-        },
-        "input_dtype": {
-            "label": "모델 입력 데이터 타입",
-            "description": "모델 입력 텐서의 데이터 타입입니다 (예: 'float32')."
-        },
-        "model_type": {
-            "label": "객체 감지 모델 유형",
-            "description": "일부 감지기에서 최적화에 사용하는 감지기 아키텍처 유형(ssd, yolox, yolonas, yolo-generic, rfdetr, dfine)입니다."
         }
     },
     "genai": {
@@ -1609,6 +1466,58 @@
         "review": {
             "label": "다시보기에 표시",
             "description": "다시보기 페이지(카메라 필터, 모션 검토 및 기록 뷰 포함)에서 이 카메라를 표시할지 여부를 전환합니다."
+        }
+    },
+    "models": {
+        "label": "감지 모델",
+        "description": "객체 감지 모델과 각 모델이 실행되는 하드웨어입니다. 카메라는 자신의 detect.scene 값과 모델의 scene 값을 일치시켜 사용할 모델을 선택합니다.",
+        "scene": {
+            "label": "모델 장면",
+            "description": "이 모델이 사용되는 카메라 환경입니다. 카메라는 detect.scene을 일치하는 값으로 설정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 모두 '전체'를 사용합니다."
+        },
+        "devices": {
+            "label": "감지 하드웨어",
+            "description": "이 모델이 실행되는 하드웨어로, '<detector>' 또는 '<detector>:<device>' 형식으로 지정합니다 (예: 'edgetpu:pci:0' 또는 'openvino:GPU'). 동일한 장치를 여러 번 나열하면 해당 장치에서 추론 프로세스를 추가로 실행합니다."
+        },
+        "path": {
+            "label": "사용자 지정 객체 감지기 모델 경로",
+            "description": "사용자 지정 감지 모델 파일의 경로입니다 (Frigate+ 모델의 경우 plus://<model_id>)."
+        },
+        "labelmap_path": {
+            "label": "사용자 지정 객체 감지기 라벨 맵",
+            "description": "감지기에 사용되는 숫자 클래스를 문자열 라벨로 매핑하는 라벨 맵 파일의 경로입니다."
+        },
+        "width": {
+            "label": "객체 감지 모델 입력 너비",
+            "description": "모델 입력 텐서의 너비(픽셀 단위)입니다."
+        },
+        "height": {
+            "label": "객체 감지 모델 입력 높이",
+            "description": "모델 입력 텐서의 높이(픽셀 단위)입니다."
+        },
+        "labelmap": {
+            "label": "라벨 맵 사용자 지정",
+            "description": "표준 라벨 맵에 병합할 재지정 또는 재매핑 항목입니다."
+        },
+        "attributes_map": {
+            "label": "객체 라벨-속성 라벨 매핑 맵",
+            "description": "메타데이터를 첨부하는 데 사용되는 객체 라벨과 속성 라벨 간의 매핑입니다 (예: '자동차' -> ['번호판'])."
+        },
+        "input_tensor": {
+            "label": "모델 입력 텐서 형태",
+            "description": "모델이 요구하는 텐서 형식: 'nhwc' 또는 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "모델 입력 픽셀 색상 형식",
+            "description": "모델이 요구하는 픽셀 색 공간: 'rgb', 'bgr' 또는 'yuv'."
+        },
+        "input_dtype": {
+            "label": "모델 입력 D 타입",
+            "description": "모델 입력 텐서의 데이터 타입입니다 (예: 'float32')."
+        },
+        "model_type": {
+            "label": "객체 감지 모델 유형",
+            "description": "일부 감지기에서 최적화를 위해 사용하는 감지기 모델 아키텍처 유형(ssd, yolox, yolonas, yolo-generic, rfdetr, dfine)입니다."
         }
     }
 }

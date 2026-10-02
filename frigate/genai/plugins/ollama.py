@@ -14,7 +14,7 @@ from ollama import ResponseError
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import parse_tool_calls_from_message
+from frigate.genai.utils import interleave_images, parse_tool_calls_from_message
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +50,28 @@ def _extract_ollama_stats(response: Any) -> dict[str, Any] | None:
     return stats or None
 
 
+# Ollama replaces each occurrence of this marker in a message, in order, with
+# the next image from the message's images list. Without markers it puts every
+# image before the text.
+IMAGE_PLACEHOLDER = "[img]"
+
+
+def _flatten_parts(parts: list[str | bytes]) -> tuple[str, list[bytes] | None]:
+    """Collapse ordered text and image parts into Ollama's (content, images)
+    shape, marking where each image goes so the order survives."""
+    text: list[str] = []
+    images: list[bytes] = []
+
+    for part in parts:
+        if isinstance(part, bytes):
+            text.append(IMAGE_PLACEHOLDER)
+            images.append(part)
+        elif part:
+            text.append(part)
+
+    return "\n".join(text), (images or None)
+
+
 def _normalize_multimodal_content(
     content: Any,
 ) -> tuple[str | None, list[bytes] | None]:
@@ -58,13 +80,13 @@ def _normalize_multimodal_content(
     The chat API constructs user messages with content as a list of
     ``{"type": "text"}`` and ``{"type": "image_url"}`` parts when a tool
     returns a live frame. Ollama's SDK requires content to be a string and
-    images to be passed in a separate field, so we extract each.
+    images to be passed in a separate field, so images are pulled out and
+    their positions marked with placeholders.
     """
     if not isinstance(content, list):
         return content, None
 
-    text_parts: list[str] = []
-    images: list[bytes] = []
+    parts: list[str | bytes] = []
     for part in content:
         if not isinstance(part, dict):
             continue
@@ -72,17 +94,20 @@ def _normalize_multimodal_content(
         if part_type == "text":
             text = part.get("text")
             if text:
-                text_parts.append(str(text))
+                parts.append(str(text))
         elif part_type == "image_url":
             url = (part.get("image_url") or {}).get("url", "")
             if isinstance(url, str) and url.startswith("data:"):
                 try:
                     encoded = url.split(",", 1)[1]
-                    images.append(base64.b64decode(encoded, validate=True))
+                    parts.append(base64.b64decode(encoded, validate=True))
                 except (ValueError, IndexError, binascii.Error) as e:
                     logger.debug("Failed to decode multimodal image url: %s", e)
 
-    return ("\n".join(text_parts) if text_parts else None), (images or None)
+    if not parts:
+        return None, None
+
+    return _flatten_parts(parts)
 
 
 @register_genai_provider(GenAIProviderEnum.ollama)
@@ -196,58 +221,46 @@ class OllamaClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
-        """Submit a request to Ollama"""
+        """Submit a request to Ollama through the chat API, the same path the
+        tool-calling chat uses, with image placeholders keeping any captions
+        next to their frames."""
         if self.provider is None:
             logger.warning(
                 "Ollama provider has not been initialized, a description will not be generated. Check your Ollama configuration."
             )
             return None
+
+        content, message_images = _flatten_parts(
+            interleave_images(prompt, images, image_captions)
+        )
+        message: dict[str, Any] = {"role": "user", "content": content}
+
+        if message_images:
+            message["images"] = message_images
+
+        request_params = self._build_request_params(
+            [message], None, None, enable_thinking=enable_thinking
+        )
+
+        if response_format and response_format.get("type") == "json_schema":
+            schema = response_format.get("json_schema", {}).get("schema")
+            if schema:
+                request_params["format"] = self._clean_schema_for_ollama(schema)
+
+        logger.debug(
+            "Ollama chat request: model=%s, prompt_len=%s, image_count=%s, "
+            "has_format=%s, think=%s",
+            self.genai_config.model,
+            len(prompt),
+            len(images),
+            "format" in request_params,
+            request_params.get("think"),
+        )
+
         try:
-            ollama_options = {
-                **self.provider_options,
-                **self.genai_config.runtime_options,
-            }
-            if response_format and response_format.get("type") == "json_schema":
-                schema = response_format.get("json_schema", {}).get("schema")
-                if schema:
-                    ollama_options["format"] = self._clean_schema_for_ollama(schema)
-            if self.supports_toggleable_thinking:
-                ollama_options["think"] = enable_thinking
-            logger.debug(
-                "Ollama generate request: model=%s, prompt_len=%s, image_count=%s, "
-                "has_format=%s, options=%s",
-                self.genai_config.model,
-                len(prompt),
-                len(images) if images else 0,
-                "format" in ollama_options,
-                {k: v for k, v in ollama_options.items() if k != "format"},
-            )
-            result = self.provider.generate(
-                self.genai_config.model,
-                prompt,
-                images=images if images else None,
-                **ollama_options,
-            )
-            logger.debug(
-                "Ollama generate response: done=%s, done_reason=%s, eval_count=%s, "
-                "prompt_eval_count=%s, response_len=%s",
-                result.get("done"),
-                result.get("done_reason"),
-                result.get("eval_count"),
-                result.get("prompt_eval_count"),
-                len(result.get("response", "") or ""),
-            )
-            response_text = str(result["response"]).strip()
-            if not response_text:
-                logger.warning(
-                    "Ollama returned a blank response for model %s (done_reason=%s, "
-                    "eval_count=%s). Check model output, ensure thinking is disabled.",
-                    self.genai_config.model,
-                    result.get("done_reason"),
-                    result.get("eval_count"),
-                )
-            return response_text
+            response = self.provider.chat(**request_params)
         except (
             TimeoutException,
             ResponseError,
@@ -256,6 +269,27 @@ class OllamaClient(GenAIClient):
         ) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
+
+        logger.debug(
+            "Ollama chat response: done=%s, done_reason=%s, eval_count=%s, "
+            "prompt_eval_count=%s",
+            response.get("done"),
+            response.get("done_reason"),
+            response.get("eval_count"),
+            response.get("prompt_eval_count"),
+        )
+        response_text = self._message_from_response(response)["content"] or ""
+
+        if not response_text:
+            logger.warning(
+                "Ollama returned a blank response for model %s (done_reason=%s, "
+                "eval_count=%s). Check model output, ensure thinking is disabled.",
+                self.genai_config.model,
+                response.get("done_reason"),
+                response.get("eval_count"),
+            )
+
+        return response_text
 
     def list_models(self) -> list[str]:
         """Return available model names from the Ollama server."""
@@ -306,6 +340,8 @@ class OllamaClient(GenAIClient):
             }
             if images:
                 msg_dict["images"] = images
+            elif msg.get("images"):
+                msg_dict["images"] = msg["images"]
             if msg.get("tool_call_id"):
                 msg_dict["tool_call_id"] = msg["tool_call_id"]
             if msg.get("name"):

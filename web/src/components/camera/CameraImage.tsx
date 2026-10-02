@@ -103,7 +103,7 @@ export default function CameraImage({
       )}
       {!imageLoaded && enabled ? (
         <div className="absolute bottom-0 left-0 right-0 top-0 flex items-center justify-center">
-          <ActivityIndicator />
+          <ActivityIndicator className={"w-full [.bg-black_&]:text-white"} />
         </div>
       ) : null}
     </div>

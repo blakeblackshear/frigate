@@ -204,11 +204,20 @@ Light guidelines and advice:
 npm run lint
 ```
 
-- Add to unit tests and ensure they pass. As much as possible, you should strive to _increase_ test coverage whenever making changes. This will help ensure features do not accidentally become broken in the future.
-- If you run into error messages like "TypeError: Cannot read properties of undefined (reading 'context')" when running tests, this may be due to these issues (https://github.com/vitest-dev/vitest/issues/1910, https://github.com/vitest-dev/vitest/issues/1652) in vitest, but I haven't been able to resolve them.
+- Ensure the backend [unit tests](#unit-tests) pass. Your PR cannot be merged unless tests pass.
+
+```shell
+python3 -u -m unittest
+```
+
+- Ensure the end-to-end tests pass. They run in Playwright against a production build with mocked API data, so they don't need a running Frigate instance. Add or update tests in `web/e2e/specs/` when you change UI behavior.
 
 ```console
-npm run test
+# First-time setup
+npx playwright install chromium
+
+# Build the app and run all tests
+npm run e2e:build && npm run e2e
 ```
 
 - Test in different browsers. Firefox, Chrome, and Safari all have different quirks that make them unique targets to interact with.

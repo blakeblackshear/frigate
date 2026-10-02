@@ -52,7 +52,6 @@
     "toast": {
       "error": {
         "endTimeMustAfterStartTime": "زمان پایان باید بعد از زمان شروع باشد",
-        "noVaildTimeSelected": "بازهٔ زمانی معتبر انتخاب نشده است",
         "failed": "شروع خروجی‌گیری ناموفق بود: {{error}}",
         "noValidTimeSelected": "بازهٔ زمانی معتبر انتخاب نشده است"
       },
@@ -114,8 +113,6 @@
       "toast": {
         "started_one": "۱ خروجی شروع شد.",
         "started_other": "{{count}} خروجی شروع شد.",
-        "startedNoCase_one": "۱ خروجی آغاز شد.",
-        "startedNoCase_other": "{{count}} خروجی آغاز شد.",
         "partial": "{{successful}} از {{total}} خروجی آغاز شد. موارد ناموفق: {{failedItems}}",
         "failed": "شروع {{total}} خروجی ناموفق بود. ناموفق: {{failedItems}}"
       }

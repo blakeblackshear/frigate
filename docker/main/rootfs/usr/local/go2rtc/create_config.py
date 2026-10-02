@@ -3,19 +3,19 @@
 import json
 import os
 import sys
-from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.config.env import substitute_frigate_vars
+from frigate.config.env import apply_config_env_vars, substitute_frigate_vars
 from frigate.const import (
     BIRDSEYE_PIPE,
     LIBAVFORMAT_VERSION_MAJOR,
 )
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 from frigate.util.config import find_config_file, resolve_ffmpeg_path
+from frigate.util.live_streams import raw_transcode_streams
 from frigate.util.services import (
     is_go2rtc_arbitrary_exec_allowed,
     is_restricted_go2rtc_source,
@@ -24,15 +24,6 @@ from frigate.util.services import (
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
-
-FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
-# read docker secret files as env vars too
-if os.path.isdir("/run/secrets"):
-    for secret_file in os.listdir("/run/secrets"):
-        if secret_file.startswith("FRIGATE_"):
-            FRIGATE_ENV_VARS[secret_file] = (
-                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
-            )
 
 config_file = find_config_file()
 
@@ -46,6 +37,20 @@ try:
         config: dict[str, Any] = json.loads(raw_config)
 except FileNotFoundError:
     config: dict[str, Any] = {}
+
+# No validator runs here, so install environment_vars ourselves. FRIGATE_
+# names only: anything else lands in os.environ, where the exec gate reads
+# GO2RTC_ALLOW_ARBITRARY_EXEC.
+config_env_vars = config.get("environment_vars")
+apply_config_env_vars(
+    {
+        key: value
+        for key, value in config_env_vars.items()
+        if str(key).startswith("FRIGATE_")
+    }
+    if isinstance(config_env_vars, dict)
+    else {}
+)
 
 go2rtc_config: dict[str, Any] = config.get("go2rtc", {})
 
@@ -113,7 +118,7 @@ for name in list(go2rtc_config.get("streams", {})):
 
     if isinstance(stream, str):
         try:
-            formatted_stream = stream.format(**FRIGATE_ENV_VARS)
+            formatted_stream = substitute_frigate_vars(stream)
             if is_restricted_go2rtc_source(formatted_stream):
                 print(
                     f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
@@ -122,7 +127,7 @@ for name in list(go2rtc_config.get("streams", {})):
                 del go2rtc_config["streams"][name]
                 continue
             go2rtc_config["streams"][name] = formatted_stream
-        except KeyError as e:
+        except ValueError as e:
             print(
                 "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
             )
@@ -132,7 +137,7 @@ for name in list(go2rtc_config.get("streams", {})):
         filtered_streams = []
         for i, stream_item in enumerate(stream):
             try:
-                formatted_stream = stream_item.format(**FRIGATE_ENV_VARS)
+                formatted_stream = substitute_frigate_vars(stream_item)
                 if is_restricted_go2rtc_source(formatted_stream):
                     print(
                         f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "
@@ -141,7 +146,7 @@ for name in list(go2rtc_config.get("streams", {})):
                     continue
 
                 filtered_streams.append(formatted_stream)
-            except KeyError as e:
+            except ValueError as e:
                 print(
                     "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
                 )
@@ -170,6 +175,17 @@ for name in list(go2rtc_config.get("streams", {})):
             del go2rtc_config["streams"][name]
             continue
 
+# add transcoded live streams; a user stream with the same name wins here and
+# fails Frigate's config validation
+transcoded_streams = raw_transcode_streams(config)
+
+if transcoded_streams:
+    if go2rtc_config.get("streams") is None:
+        go2rtc_config["streams"] = {}
+
+    for name, source in transcoded_streams.items():
+        go2rtc_config["streams"].setdefault(name, source)
+
 # add birdseye restream stream if enabled
 if config.get("birdseye", {}).get("restream", False):
     birdseye: dict[str, Any] = config.get("birdseye")
@@ -185,3 +201,6 @@ if config.get("birdseye", {}).get("restream", False):
 # Write go2rtc_config to /dev/shm/go2rtc.yaml
 with open("/dev/shm/go2rtc.yaml", "w") as f:
     yaml.dump(go2rtc_config, f)
+
+# config contains camera credentials; do not leave it world-readable
+os.chmod("/dev/shm/go2rtc.yaml", 0o640)

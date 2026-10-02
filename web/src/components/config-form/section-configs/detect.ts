@@ -1,4 +1,11 @@
+import type { HiddenFieldContext } from "@/types/configForm";
+import { DEFAULT_SCENE, getSceneChoices } from "@/utils/modelUtil";
 import type { SectionConfigOverrides } from "./types";
+
+// picking a scene only means something when there is more than one choice,
+// which includes a saved scene that no model uses
+const hideSceneWithoutChoice = (ctx: HiddenFieldContext): string[] =>
+  getSceneChoices(ctx).length > 1 ? [] : ["scene"];
 
 const detect: SectionConfigOverrides = {
   base: {
@@ -15,6 +22,7 @@ const detect: SectionConfigOverrides = {
     fieldMessages: [
       {
         key: "detect-resolution-not-multiple-of-four",
+        health: true,
         field: "width",
         position: "before",
         messageKey: "configMessages.detect.resolutionShouldBeMultipleOfFour",
@@ -46,6 +54,7 @@ const detect: SectionConfigOverrides = {
       },
       {
         key: "detect-resolution-high",
+        health: true,
         field: "width",
         position: "before",
         messageKey: "configMessages.detect.resolutionHigh",
@@ -61,6 +70,7 @@ const detect: SectionConfigOverrides = {
       },
       {
         key: "detect-square-resolution",
+        health: true,
         field: "width",
         position: "before",
         messageKey: "configMessages.detect.squareResolution",
@@ -111,7 +121,24 @@ const detect: SectionConfigOverrides = {
         },
       },
       {
+        key: "detect-scene-without-model",
+        health: true,
+        field: "scene",
+        position: "after",
+        messageKey: "configMessages.detect.sceneWithoutModel",
+        severity: "warning",
+        docLink: "/configuration/object_detectors#running-more-than-one-model",
+        condition: (ctx) => {
+          const scene = ctx.formData?.scene as string | undefined;
+          if (!scene || scene === DEFAULT_SCENE) return false;
+          const models = ctx.fullConfig?.models;
+          if (!models) return false;
+          return !models.some((model) => model.scene === scene);
+        },
+      },
+      {
         key: "fps-greater-than-five",
+        health: true,
         field: "fps",
         messageKey: "configMessages.detect.fpsGreaterThanFive",
         severity: "info",
@@ -153,6 +180,7 @@ const detect: SectionConfigOverrides = {
     ],
     fieldOrder: [
       "enabled",
+      "scene",
       "width",
       "height",
       "fps",
@@ -170,13 +198,19 @@ const detect: SectionConfigOverrides = {
       tracking: ["min_initialized", "max_disappeared"],
     },
     uiSchema: {
+      scene: {
+        "ui:options": {
+          enumI18nPrefix: "detectionModels.scenes",
+          enumI18nOptional: true,
+        },
+      },
       annotation_offset: {
         "ui:options": {
           signed: true,
         },
       },
     },
-    hiddenFields: ["enabled_in_config"],
+    hiddenFields: ["enabled_in_config", hideSceneWithoutChoice],
     advancedFields: [
       "min_initialized",
       "max_disappeared",
@@ -186,6 +220,7 @@ const detect: SectionConfigOverrides = {
   },
   global: {
     restartRequired: [
+      "scene",
       "fps",
       "width",
       "height",
@@ -195,6 +230,7 @@ const detect: SectionConfigOverrides = {
   },
   camera: {
     restartRequired: [
+      "scene",
       "fps",
       "width",
       "height",
@@ -211,6 +247,7 @@ const detect: SectionConfigOverrides = {
     hiddenFields: [
       "enabled",
       "enabled_in_config",
+      "scene",
       "min_initialized",
       "max_disappeared",
       "annotation_offset",

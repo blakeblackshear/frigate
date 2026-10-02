@@ -67,7 +67,6 @@
     },
     "documentTitle": "트리거",
     "semanticSearch": {
-      "title": "시맨틱 검색이 비활성화됨",
       "desc": "트리거 기능을 사용하려면 시맨틱 검색이 활성화되어 있어야 합니다."
     },
     "management": {
@@ -123,7 +122,6 @@
   "documentTitle": {
     "default": "설정 - Frigate",
     "authentication": "인증 설정 - Frigate",
-    "camera": "카메라 설정 - Frigate",
     "enrichments": "확장 기능 설정 - Frigate",
     "masksAndZones": "마스크 및 구역 편집기 - Frigate",
     "motionTuner": "움직임 튜너 - Frigate",
@@ -270,7 +268,6 @@
     "globalConfig": "전역 설정",
     "system": "시스템",
     "integrations": "연동 기능",
-    "profileSettings": "프로필 설정",
     "globalDetect": "객체 감지",
     "globalRecording": "녹화",
     "globalSnapshots": "스냅샷",
@@ -292,8 +289,6 @@
     "systemTelemetry": "원격 측정",
     "systemBirdseye": "버드아이",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorHardware": "감지기 하드웨어",
-    "systemDetectionModel": "감지 모델",
     "systemMqtt": "MQTT",
     "integrationSemanticSearch": "시맨틱 검색",
     "integrationGenerativeAi": "생성형 AI",
@@ -324,7 +319,7 @@
     "regionGrid": "영역 그리드",
     "profiles": "프로필",
     "uiSettings": "UI 설정",
-    "systemDetectorsAndModel": "감지기 및 모델",
+    "systemDetectorsAndModel": "감지 모델",
     "systemGo2rtcStreams": "go2rtc 스트림",
     "maintenance": "유지 관리"
   },
@@ -388,11 +383,40 @@
     "toast": {
       "success": {
         "clearStoredLayout": "{{cameraName}}의 저장된 레이아웃을 초기화했습니다",
-        "clearStreamingSettings": "모든 카메라 그룹의 스트리밍 설정을 초기화했습니다."
+        "clearStreamingSettings": "모든 카메라 그룹의 스트리밍 설정을 초기화했습니다.",
+        "exportUiSettings": "설정을 내보냈습니다",
+        "importUiSettings": "설정을 가져왔습니다"
       },
       "error": {
         "clearStoredLayoutFailed": "저장된 레이아웃 초기화 실패: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "스트리밍 설정 초기화 실패: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "스트리밍 설정 초기화 실패: {{errorMessage}}",
+        "exportUiSettingsFailed": "설정 내보내기 실패",
+        "importNothingToApply": "설정 가져오기 실패: 파일에 설정 데이터가 없습니다",
+        "importInvalidJson": "설정 가져오기 실패: 올바른 JSON 파일이 아닙니다",
+        "importWrongType": "설정 가져오기 실패: Frigate 설정 내보내기 파일이 아닙니다",
+        "importUnsupportedVersion": "설정 가져오기 실패: 최신 버전의 Frigate가 필요한 파일입니다",
+        "importInvalidSchema": "설정 가져오기 실패: 파일 형식이 잘못되었습니다",
+        "importUiSettingsFailed": "설정 가져오기 실패"
+      }
+    },
+    "backupRestore": {
+      "title": "백업 및 복원",
+      "transfer": {
+        "label": "장치 설정 파일",
+        "desc": "카메라 그룹 레이아웃, 스트리밍 설정 및 UI 환경설정은 브라우저에 저장됩니다. 백업하거나 다른 장치로 이동하려면 파일로 내보내세요.",
+        "export": "설정 내보내기",
+        "import": "설정 가져오기"
+      },
+      "importDialog": {
+        "title": "설정 가져오기",
+        "desc": "이 파일에서 적용할 항목을 선택하세요. 가져오기가 완료되면 Frigate이 새로고침됩니다.",
+        "exportedFrom": "내보낸 날짜: {{date}} (Frigate 설정 버전 {{version}})",
+        "layouts_other": "카메라 그룹 레이아웃 ({{count}}개 그룹)",
+        "streaming_other": "스트리밍 설정 ({{count}}개 카메라)",
+        "preferences_other": "UI 환경설정 ({{count}}개 설정)",
+        "unknownGroups_other": "카메라 그룹 {{groups}}이(가) 이 서버에 없습니다. 해당 설정은 저장되지만 사용되지 않습니다.",
+        "unknownCameras_other": "카메라 {{cameras}}이(가) 이 서버에 없습니다. 해당 스트리밍 설정은 무시됩니다.",
+        "confirm": "가져오기"
       }
     }
   },
@@ -596,7 +620,7 @@
       }
     },
     "step3": {
-      "description": "스트림 역할을 구성하고 카메라에 추가 스트림을 연결합니다.",
+      "description": "기능 및 스트림 역할을 구성하고 카메라에 추가 스트림을 연결합니다.",
       "streamsTitle": "카메라 스트림",
       "addStream": "스트림 추가",
       "addAnotherStream": "다른 스트림 추가",
@@ -630,11 +654,26 @@
         "title": "스트림 역할",
         "detect": "객체 감지를 위한 메인 피드입니다.",
         "record": "설정에 따라 영상 세그먼트를 저장합니다.",
-        "audio": "오디오 기반 감지를 위한 피드입니다."
+        "audio": "오디오 기반 감지를 위한 피드입니다.",
+        "record_sub": "적응형 재생 및 보관 기간 연장을 위한 저화질 녹화본 (일반적으로 카메라의 서브 스트림)."
       },
       "featuresPopover": {
         "title": "스트림 기능",
         "description": "go2rtc 재스트리밍을 사용하여 카메라에 가해지는 동시 연결 수를 줄입니다."
+      },
+      "appleCompatibility": {
+        "title": "Apple 기기 재생 품질 개선",
+        "description": "Safari 브라우저나 iPhone, iPad, Mac에서 녹화본을 시청하는 경우 이 기능을 켜세요."
+      },
+      "ptz": {
+        "title": "PTZ 제어 사용",
+        "detectedNote": "ONVIF를 통해 PTZ 지원이 감지되었습니다. PTZ 카메라인 경우 이 옵션을 활성화하면 UI에서 카메라의 팬/틸트/줌 기능을 제어할 수 있습니다.",
+        "connectionDetails": "ONVIF 연결 세부 정보",
+        "host": "ONVIF 호스트",
+        "port": "ONVIF 포트",
+        "username": "ONVIF 사용자명",
+        "password": "ONVIF 비밀번호",
+        "hostRequiredWarning": "PTZ 제어를 활성화하려면 ONVIF 호스트와 포트가 필요합니다."
       }
     },
     "step4": {
@@ -1268,7 +1307,6 @@
       "desc": "Frigate이 브라우저에서 실행 중이거나 PWA로 설치된 경우 기기로 푸시 알림을 기본 전송할 수 있습니다."
     },
     "notificationUnavailable": {
-      "title": "알림을 사용할 수 없음",
       "desc": "웹 푸시 알림을 사용하려면 보안 컨텍스트(<code>https://…</code>)가 필요합니다. 이는 브라우저 자체의 제한 사항입니다. 알림을 사용하려면 Frigate에 보안 연결로 접속하세요.",
       "descPwa": "iOS의 경우 Frigate이 홈 화면에 추가되어 있어야만 웹 푸시 알림을 사용할 수 있습니다. <strong>공유</strong> 메뉴를 열고 <strong>홈 화면에 추가</strong>를 선택한 다음, 새로 생성된 아이콘으로 Frigate을 실행하여 기기를 알림에 등록하세요."
     },
@@ -1373,31 +1411,6 @@
       "error": "설정 변경 사항 저장 실패: {{errorMessage}}"
     }
   },
-  "detectorsAndModel": {
-    "title": "감지기 및 모델",
-    "description": "객체 감지를 실행하는 감지기 백엔드와 감지기가 사용하는 모델을 구성합니다. 감지기와 모델이 항상 일치하도록 변경 사항은 함께 저장됩니다.",
-    "cardTitles": {
-      "detector": "감지기 하드웨어",
-      "model": "감지 모델"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "커스텀 모델"
-    },
-    "mismatch": {
-      "warning": "현재 Frigate+ 모델 \"{{model}}\"은(는) {{required}} 감지기가 필요합니다. 저장하기 전에 아래에서 호환되는 모델을 선택하거나 커스텀 모델로 전환하세요."
-    },
-    "plusModel": {
-      "requiresDetector": "필요 감지기: {{detector}}",
-      "noModelSelected": "Frigate+ 모델 선택"
-    },
-    "toast": {
-      "saveSuccess": "감지기 및 모델 설정이 저장되었습니다. 변경 사항을 적용하려면 Frigate를 재시작하세요.",
-      "saveError": "감지기 및 모델 설정 저장 실패"
-    },
-    "unsavedChanges": "저장되지 않은 감지기 및 모델 변경 사항",
-    "restartRequired": "재시작 필요 (감지기 또는 모델 변경됨)"
-  },
   "maintenance": {
     "title": "유지 관리",
     "sync": {
@@ -1438,7 +1451,9 @@
         "orphansDeleted": "삭제된 고아 파일",
         "aborted": "중단됨. 삭제량이 안전 임계값을 초과합니다.",
         "error": "오류",
-        "totals": "합계"
+        "totals": "합계",
+        "spaceToReclaim": "확보 가능한 공간",
+        "spaceReclaimed": "확보된 공간"
       },
       "event_snapshots": "추적 객체 스냅샷",
       "event_thumbnails": "추적 객체 썸네일",
@@ -1491,7 +1506,12 @@
     },
     "knownPlates": {
       "namePlaceholder": "예: 아내 차량",
-      "platePlaceholder": "번호판 번호 또는 정규식"
+      "platePlaceholder": "번호판 번호 또는 정규식",
+      "assignedTo": "{{name}}에게 지정됨",
+      "detected": "감지된 번호판",
+      "noneDetected": "아직 감지된 번호판 없음",
+      "search": "번호판 검색 또는 입력",
+      "useCustom": "\"{{value}}\" 사용"
     },
     "liveStreams": {
       "streamNameLabel": "스트림 이름",
@@ -1547,7 +1567,8 @@
         "preset-record-mjpeg": "녹화 - MJPEG 카메라",
         "preset-record-jpeg": "녹화 - JPEG 카메라",
         "preset-record-ubiquiti": "녹화 - Ubiquiti 카메라"
-      }
+      },
+      "sameAsRecord": "녹화 출력 인수와 동일"
     },
     "cameraInputs": {
       "itemTitle": "스트림 {{index}}",
@@ -1595,16 +1616,6 @@
     "detect": {
       "title": "감지 설정"
     },
-    "detectors": {
-      "title": "감지기 설정",
-      "singleType": "{{type}} 유형의 감지기는 하나만 허용됩니다.",
-      "keyRequired": "감지기 이름은 필수입니다.",
-      "keyDuplicate": "감지기 이름이 이미 존재합니다.",
-      "noSchema": "사용 가능한 감지기 스키마가 없습니다.",
-      "none": "구성된 감지기 인스턴스가 없습니다.",
-      "add": "감지기 추가",
-      "addCustomKey": "커스텀 키 추가"
-    },
     "record": {
       "title": "녹화 설정"
     },
@@ -1642,8 +1653,11 @@
       "options": {
         "detect": "감지",
         "record": "녹화",
-        "audio": "오디오"
-      }
+        "audio": "오디오",
+        "record_sub": "녹화 (서브 스트림)"
+      },
+      "roleInUse": "다른 스트림에 이미 할당됨",
+      "recordSubConflict": "하나의 스트림에 녹화 및 서브 녹화 역할을 동시에 지정할 수 없습니다"
     },
     "genaiRoles": {
       "options": {
@@ -1696,7 +1710,18 @@
     },
     "defaultRole": {
       "admin": "관리자",
-      "viewer": "조회자"
+      "viewer": "조회자",
+      "none": "없음 (접근 차단)"
+    },
+    "birdseyeModes": {
+      "summary": "{{count}}개 선택됨",
+      "options": {
+        "continuous": "상시",
+        "motion": "움직임",
+        "all_objects": "모든 객체",
+        "alerts": "알림",
+        "detections": "감지"
+      }
     }
   },
   "globalConfig": {
@@ -1828,11 +1853,6 @@
     }
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "객체",
-      "motion": "움직임",
-      "continuous": "상시"
-    },
     "cameraOrder": {
       "label": "카메라 순서",
       "description": "카메라를 드래그하여 버드아이 레이아웃 내 표시 순서를 설정하세요.",
@@ -1915,7 +1935,8 @@
       "maxFramesSet": "max_frames 값을 설정하면 기본 동작이 재정의되어 정지 객체 추적이 비활성화됩니다. 극히 드문 상황에서만 필요하므로 주의해서 사용하세요.",
       "squareResolution": "정사각형 감지 해상도는 일반적이지 않습니다. 감지 너비와 높이는 객체 감지 모델의 크기가 아니라 카메라의 화면 비율(예: 16:9)과 일치해야 합니다. 가로세로 비율이 맞지 않으면 이미지가 왜곡되어 감지 정확도가 떨어질 수 있습니다.",
       "resolutionHigh": "이 감지 해상도는 권장값보다 높아 감지 정확도 개선 없이 자원 소모만 크게 증가시킬 수 있습니다. 대부분의 카메라에는 1080p 이하의 감지 해상도를 권장합니다.",
-      "globalResolutionMultipleCameras": "여러 대의 카메라가 구성된 상태에서 전역 감지 해상도가 설정되어 있습니다. 모든 카메라의 해상도와 화면 비율이 동일하지 않다면, 각 카메라의 기본 화면 비율에 맞게 카메라별로 감지 너비와 높이를 지정해야 합니다."
+      "globalResolutionMultipleCameras": "여러 대의 카메라가 구성된 상태에서 전역 감지 해상도가 설정되어 있습니다. 모든 카메라의 해상도와 화면 비율이 동일하지 않다면, 각 카메라의 기본 화면 비율에 맞게 카메라별로 감지 너비와 높이를 지정해야 합니다.",
+      "sceneWithoutModel": "이 장면에 대해 구성된 감지 모델이 없어, 이 카메라는 '모든 카메라' 장면의 모델을 대체 사용합니다. 카메라 전용 모델을 사용하려면 이 장면에 대한 모델을 추가하세요."
     },
     "model": {
       "optimizedFor320": "Frigate은 대부분의 환경에 가장 적합한 320x320 모델에 최적화되어 있습니다. 640x640 모델은 처리 속도가 느리며 특수한 시나리오에서만 유용합니다.",
@@ -1939,23 +1960,57 @@
       "modelSizeLarge": "'large' 모델은 여러 줄로 된 번호판 형식에 최적화되어 있습니다. 사용 지역에 여러 줄 번호판이 사용되지 않는 한, 'small' 모델이 'large'보다 성능이 훨씬 우수하므로 'small' 사용을 권장합니다."
     },
     "record": {
-      "noRecordRole": "record 역할이 지정된 스트림이 없습니다. 녹화 기능이 작동하지 않습니다."
-    },
-    "birdseye": {
-      "objectsModeDetectDisabled": "버드아이가 '객체(objects)' 모드로 설정되어 있지만 이 카메라에서 객체 감지가 비활성화되어 있습니다. 해당 카메라는 버드아이에 표시되지 않습니다."
+      "noRecordRole": "record 역할이 지정된 스트림이 없습니다. 녹화 기능이 작동하지 않습니다.",
+      "noRecordSubRole": "서브 녹화 역할이 정의된 스트림이 없습니다. 서브 스트림 녹화가 작동하지 않습니다."
     },
     "snapshots": {
       "detectDisabled": "객체 감지가 비활성화되어 있습니다. 스냅샷은 추적된 객체로부터 생성되므로 스냅샷이 생성되지 않습니다."
-    },
-    "detectors": {
-      "mixedTypes": "모든 감지기는 동일한 유형이어야 합니다. 다른 유형을 사용하려면 기존 감지기를 삭제하세요.",
-      "mixedTypesSuggestion": "모든 감지기는 동일한 유형이어야 합니다. 기존 감지기를 제거하거나 {{type}}을(를) 선택하세요."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Jina V2 모델의 'small' 크기는 RAM 소모량과 추론 비용이 높습니다. 외장 GPU 환경에서 'large' 모델을 사용하는 것을 권장합니다."
     },
     "onvif": {
       "autotrackingNoZones": "자동 추적에는 최소 하나 이상의 구역이 필요합니다. '마스크 / 구역'에서 이 카메라에 구역을 정의한 다음, 아래에서 필수 구역으로 지정하세요."
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "버드아이에 추적된 객체가 포함되어 있지만, 이 카메라의 객체 감지 기능이 비활성화되어 있습니다. 카메라가 버드아이에 표시되지 않습니다."
+    }
+  },
+  "detectionModels": {
+    "title": "감지 모델",
+    "description": "객체 감지 모델과 각 모델이 실행되는 하드웨어를 구성합니다. 카메라는 감지 설정의 장면에 따라 모델을 선택합니다.",
+    "addModel": "모델 추가",
+    "cameras_other": "{{count}}개 카메라",
+    "scene": {
+      "label": "장면",
+      "description": "이 모델이 사용되는 환경입니다. 카메라는 감지 설정에서 동일한 장면을 지정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 '전체' 장면의 모델을 사용합니다."
+    },
+    "scenes": {
+      "all": "모든 카메라",
+      "indoor": "실내",
+      "outdoor": "실외",
+      "indoor_thermal": "실내 열화상",
+      "outdoor_thermal": "실외 열화상"
+    },
+    "hardware": {
+      "label": "하드웨어",
+      "placeholder": "하드웨어 선택",
+      "loading": "감지 하드웨어 검색 중...",
+      "none": "선택된 하드웨어 없음",
+      "claimedBy": "{{scene}}에서 사용 중",
+      "detectorCount": "감지기 수",
+      "countRecommended_other": "{{count}}개 카메라에 권장",
+      "unrecognized": "이 모델은 시스템에서 찾을 수 없는 하드웨어로 구성되어 있습니다: {{devices}}",
+      "description": "이 모델이 감지를 실행할 하드웨어입니다.",
+      "detectorCountDescription": "이 하드웨어에서 실행할 감지 프로세스 수입니다. 감지기 수가 많을수록 더 많은 카메라를 처리할 수 있지만 추가 장치 메모리가 소모됩니다.",
+      "unitsDescription": "각 장치 단위는 자체 감지 프로세스를 실행합니다. 다른 모델에서 이미 사용 중인 장치 단위는 선택할 수 없습니다."
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "사용자 지정 모델"
+    },
+    "plusModel": {
+      "noModelSelected": "Frigate+ 모델을 선택하세요"
     }
   }
 }

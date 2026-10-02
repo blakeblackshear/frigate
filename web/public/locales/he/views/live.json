@@ -19,7 +19,6 @@
     "ended": "הקלטה ידנית לפי דרישה הסתיימה.",
     "failedToEnd": "סיום ההקלטה הידנית לפי דרישה נכשל."
   },
-  "documentTitle": "שידור חי - Frigate",
   "documentTitle.withCamera": "{{camera}} - שידור חי- Frigate",
   "lowBandwidthMode": "מצב רוחב פס נמוך",
   "twoWayTalk": {
@@ -73,10 +72,6 @@
       }
     }
   },
-  "camera": {
-    "enable": "אפשור מצלמה",
-    "disable": "השבתת מצלמה"
-  },
   "muteCameras": {
     "enable": "השתק את כל המצלמות",
     "disable": "ביטול השתקה לכל המצלמות"
@@ -107,7 +102,6 @@
   },
   "stream": {
     "twoWayTalk": {
-      "tips.documentation": "קרא את התיעוד ",
       "available": "שיחה דו-כיוונית זמינה עבור שידור זה",
       "tips": "המכשיר שלך חייב לתמוך בתכונה ו-WebRTC חייב להיות מוגדר לתקשורת דו-כיוונית.",
       "unavailable": "שיחה דו-כיוונית אינה זמינה עבור שידור זה"
@@ -123,8 +117,7 @@
     "title": "שידור",
     "audio": {
       "tips": {
-        "title": "יש להפיק קול מהמצלמה שלך ולהגדיר אותו ב-go2rtc עבור שידור זה.",
-        "documentation": "עיין בתיעוד "
+        "title": "יש להפיק קול מהמצלמה שלך ולהגדיר אותו ב-go2rtc עבור שידור זה."
       },
       "available": "קול זמין עבור שידור זה",
       "unavailable": "קול אינו זמין עבור שידור זה"
@@ -135,7 +128,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} הגדרות",
-    "cameraEnabled": "המצלמה מאופשרת",
     "objectDetection": "זיהוי אובייקטים",
     "recording": "הקלטה",
     "snapshots": "לכידת תמונה",
@@ -157,8 +149,7 @@
       "all": "הכל",
       "motion": "תנועה",
       "active_objects": "אובייקטים פעילים"
-    },
-    "notAllTips": "תצורת שמירת ההקלטה שלך ב-{{source}} מוגדרת ל-<code>מצב: {{effectiveRetainMode}}</code>, כך שהקלטה לפי דרישה זו תשמור רק מקטעים עם {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "עריכת פריסת תצוגה",

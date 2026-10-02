@@ -55,6 +55,12 @@
         "auto_scroll": {
             "title": "Desplaçament automàtic",
             "desc": "Segueix els missatges nous a mesura que arriben."
+        },
+        "always_allow": {
+            "title": "Accions sempre permeses",
+            "desc": "Accions que l'assistent pot executar sense preguntar primer.",
+            "none": "Cap",
+            "reset": "Restableix"
         }
     },
     "stats": {
@@ -68,5 +74,15 @@
     },
     "thinking": {
         "toggle": "Commuta el pensament"
+    },
+    "approval": {
+        "title": "Aprova {{tool}}?",
+        "desc": "Aquesta acció canvia alguna cosa a Frigate. Revisa els detalls abans d'aprovar.",
+        "approve": "Aprova",
+        "always_allow": "Permet sempre",
+        "reject": "Rebutja",
+        "approved": "Aprovat",
+        "rejected": "Rebutjat",
+        "placeholder": "Aprova o rebutja l'acció pendent de continuar"
     }
 }

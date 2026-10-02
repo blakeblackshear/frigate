@@ -2,7 +2,6 @@
 
 import asyncio
 import copy
-import json
 import logging
 import os
 import platform
@@ -11,7 +10,6 @@ import urllib
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
-from pathlib import Path as FilePath
 from typing import Any
 
 import aiofiles
@@ -56,6 +54,7 @@ from frigate.jobs.media_sync import (
     start_media_sync_job,
 )
 from frigate.models import Event, Timeline
+from frigate.plus import load_plus_model_info
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
@@ -64,6 +63,7 @@ from frigate.util.builtin import (
     flatten_config_data,
     load_labels,
     process_config_query_string,
+    split_config_key_path,
     update_yaml_file_bulk,
 )
 from frigate.util.config import (
@@ -71,6 +71,11 @@ from frigate.util.config import (
     find_config_file,
     redact_credential,
 )
+from frigate.util.live_streams import (
+    generated_transcode_streams,
+    sync_transcode_streams,
+)
+from frigate.util.object_names import get_categorized_object_names
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
     get_nvidia_driver_info,
@@ -189,6 +194,20 @@ def genai_models(request: Request):
     return JSONResponse(content=request.app.genai_manager.list_models())
 
 
+@router.get(
+    "/genai/roles",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get the model assigned to each GenAI role",
+    description=(
+        "Returns the selected model and its context size for each configured "
+        "GenAI role. Reads only what the client saved when it initialized, so "
+        "the provider is not queried for its model list."
+    ),
+)
+def genai_roles(request: Request):
+    return JSONResponse(content=request.app.genai_manager.role_info())
+
+
 @router.post(
     "/genai/probe",
     dependencies=[Depends(require_role(["admin"]))],
@@ -291,14 +310,13 @@ def config(request: Request):
     config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
-    config["detectors"] = {
-        name: detector.model_dump(mode="json", warnings="none", exclude_none=True)
-        for name, detector in config_obj.detectors.items()
-    }
 
-    # remove environment_vars for non-admin users
-    if request.headers.get("remote-role") != "admin":
+    is_admin = request.headers.get("remote-role") == "admin"
+
+    # hide environment_vars and the notification email from non-admin users
+    if not is_admin:
         config.pop("environment_vars", None)
+        redact_credential(config["notifications"], "email")
 
     # redact mqtt credentials
     redact_credential(config["mqtt"], "password")
@@ -355,7 +373,15 @@ def config(request: Request):
                 camera_name
             )
             if base_sections:
-                camera_dict["base_config"] = base_sections
+                # copy so redaction below can't alter the profile manager's cache
+                camera_dict["base_config"] = copy.deepcopy(base_sections)
+
+        # cameras inherit the global notification email
+        if not is_admin:
+            redact_credential(camera_dict["notifications"], "email")
+            redact_credential(
+                camera_dict.get("base_config", {}).get("notifications", {}), "email"
+            )
 
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
@@ -375,31 +401,27 @@ def config(request: Request):
         config["go2rtc"]["streams"][stream_name] = cleaned
 
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
-    config["model"]["colormap"] = config_obj.model.colormap
-    config["model"]["all_attributes"] = config_obj.model.all_attributes
-    config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
 
-    # Add model plus data if plus is enabled
-    if config["plus"]["enabled"]:
-        model_path = config.get("model", {}).get("path")
-        if model_path:
-            model_json_path = FilePath(model_path).with_suffix(".json")
-            try:
-                with open(model_json_path) as f:
-                    model_plus_data = json.load(f)
-                config["model"]["plus"] = model_plus_data
-            except FileNotFoundError:
-                config["model"]["plus"] = None
-            except json.JSONDecodeError:
-                config["model"]["plus"] = None
-        else:
-            config["model"]["plus"] = None
+    for index, model in enumerate(config_obj.models):
+        model_dict = config["models"][index]
+        model_dict["colormap"] = model.colormap
+        model_dict["all_attributes"] = model.all_attributes
+        model_dict["non_logo_attributes"] = model.non_logo_attributes
+        model_dict["labelmap"] = model.merged_labelmap
 
-    # use merged labelamp
-    for detector_config in config["detectors"].values():
-        detector_config["model"]["labelmap"] = (
-            request.app.frigate_config.model.merged_labelmap
-        )
+        # report the configured reference rather than the resolved cache path,
+        # so saving the config back doesn't lose the Frigate+ model
+        if model.plus_id:
+            model_dict["path"] = f"plus://{model.plus_id}"
+
+        if not config["plus"]["enabled"]:
+            continue
+
+        # Add model plus data if plus is enabled
+        model_dict["plus"] = None
+
+        if model.path:
+            model_dict["plus"] = load_plus_model_info(os.path.basename(model.path))
 
     return JSONResponse(content=config)
 
@@ -428,6 +450,8 @@ def ffmpeg_presets():
         hwaccel_presets = [
             "preset-rpi-64-h264",
             "preset-rpi-64-h265",
+            "preset-apple-silicon-h264",
+            "preset-apple-silicon-h265",
             "preset-jetson-h264",
             "preset-jetson-h265",
             "preset-rkmpp",
@@ -807,6 +831,17 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
         )
 
 
+def _config_path_exists(data: Any, key_path: str) -> bool:
+    """Return whether a dotted config path is present in parsed yaml."""
+    for key in split_config_key_path(key_path):
+        if not isinstance(data, dict) or key not in data:
+            return False
+
+        data = data[key]
+
+    return True
+
+
 @router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
 def config_set(request: Request, body: AppConfigSetBody):
     config_file = find_config_file()
@@ -860,6 +895,19 @@ def config_set(request: Request, body: AppConfigSetBody):
                         ),
                         status_code=400,
                     )
+
+                # delete replaced paths first so their maps are rewritten in
+                # the order sent; update_yaml would otherwise keep old order
+                if body.replace_paths:
+                    old_yaml = ruamel.yaml.YAML(typ="safe").load(old_raw_config) or {}
+                    updates = {
+                        **{
+                            path: ""
+                            for path in body.replace_paths
+                            if _config_path_exists(old_yaml, path)
+                        },
+                        **updates,
+                    }
 
                 # apply all updates in a single operation
                 update_yaml_file_bulk(config_file, updates)
@@ -924,9 +972,15 @@ def config_set(request: Request, body: AppConfigSetBody):
             if request.app.dispatcher is not None:
                 request.app.dispatcher.clear_runtime_state_for_yaml_keys(updates.keys())
 
+            go2rtc_synced = True
+
             if body.requires_restart == 0 or body.update_topic:
                 old_config: FrigateConfig = request.app.frigate_config
                 swap_runtime_config(request.app, config)
+                go2rtc_synced = sync_transcode_streams(
+                    generated_transcode_streams(old_config),
+                    generated_transcode_streams(config),
+                )
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):
@@ -986,6 +1040,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                             if body.requires_restart == 0
                             else "Config successfully updated, restart to apply"
                         ),
+                        "go2rtc_synced": go2rtc_synced,
                     }
                 ),
                 status_code=200,
@@ -1313,9 +1368,41 @@ def get_sub_labels(
     return JSONResponse(content=sub_labels)
 
 
+@router.get(
+    "/categorized_object_names",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get known object names by object type",
+    description="""Returns the sub labels and attributes this install can attach,
+    grouped by object type. Unlike /sub_labels, which reflects what has already been
+    detected, this reads the config and model files, so it covers recognized face
+    names, named license plates, custom object classification categories, and the
+    detector attributes of tracked objects.""",
+)
+def categorized_object_names(
+    request: Request,
+    object_type: str | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    return JSONResponse(
+        content=get_categorized_object_names(
+            request.app.frigate_config, allowed_cameras, object_type
+        )
+    )
+
+
 @router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_audio_labels():
+def get_audio_labels(request: Request):
     labels = load_labels("/audio-labelmap.txt", prefill=521)
+
+    # configured overrides group several audio classes under one label, and the
+    # detector merges them over the defaults at runtime. Offer them here too, or
+    # a grouped label could never be picked in the UI.
+    config: FrigateConfig = request.app.frigate_config
+    labels.update(config.audio.labelmap)
+
+    for camera in config.cameras.values():
+        labels.update(camera.audio.labelmap)
+
     return JSONResponse(content=labels)
 
 
@@ -1337,11 +1424,14 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 
     modelList = models["list"]
 
+    config: FrigateConfig = request.app.frigate_config
+    primary_model = config.primary_model
+
     # current model type
-    modelType = request.app.frigate_config.model.model_type
+    modelType = primary_model.model_type
 
     # current detectorType for comparing to supportedDetectors
-    detectorType = list(request.app.frigate_config.detectors.values())[0].type
+    detectorType = config.devices_for_model(primary_model)[0].detector
 
     validModels = []
 

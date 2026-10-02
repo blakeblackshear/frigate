@@ -6,7 +6,12 @@
   "lowBandwidthMode": "Mod Latime de Banda Limitata",
   "twoWayTalk": {
     "enable": "Activare dialog",
-    "disable": "Dezactivează conversația bidirecțională"
+    "disable": "Dezactivează conversația bidirecțională",
+    "requiresWebRTC": "Convorbirea bidirecțională necesită WebRTC, care este indisponibil",
+    "error": {
+      "microphone": "Convorbirea bidirecțională nu ți-a putut accesa microfonul",
+      "refused": "Pornirea convorbirii bidirecționale a eșuat. Vezi consola browserului pentru detalii."
+    }
   },
   "ptz": {
     "zoom": {
@@ -57,8 +62,6 @@
     "disable": "Dezactivează sunetul camerei"
   },
   "camera": {
-    "enable": "Activează camera",
-    "disable": "Dezactivează camera",
     "turnOn": "Camera este pornittă",
     "turnOff": "Oprește camera"
   },
@@ -121,33 +124,56 @@
     "title": "Stream",
     "audio": {
       "tips": {
-        "title": "Sunetul trebuie să fie redat de camera dvs. și configurat în go2rtc pentru acest stream.",
-        "documentation": "Citește documentația "
+        "title": "Sunetul trebuie să fie redat de camera dvs. și configurat în go2rtc pentru acest stream."
       },
       "available": "Sunetul este disponibil pentru acest stream",
       "unavailable": "Sunetul nu este disponibil pentru acest stream"
     },
     "twoWayTalk": {
       "tips": "Dispozitivul dvs. trebuie să suporte această funcție, iar WebRTC trebuie configurat pentru comunicare bidirecțională.",
-      "tips.documentation": "Citește documentația ",
       "available": "Comunicarea bidirecțională este disponibilă pentru acest stream",
       "unavailable": "Comunicarea bidirecțională nu este disponibilă pentru acest stream"
     },
     "lowBandwidth": {
       "tips": "Vizualizarea live este în modul de lățime de bandă redusă din cauza întârzierilor sau a erorilor de streaming.",
-      "resetStream": "Resetează stream-ul"
+      "resetStream": "Resetează stream-ul",
+      "force": {
+        "label": "Forțează modul de lățime de bandă redusă",
+        "desc": "Redă întotdeauna fluxul integrat Frigate de lățime de bandă redusă în locul stream-ului selectat. Funcționează pe orice conexiune, dar are calitate mai scăzută și este fără audio."
+      }
     },
     "playInBackground": {
       "label": "Redare în fundal",
       "tips": "Activează această opțiune pentru a continua streaming-ul când player-ul este ascuns."
     },
     "debug": {
-      "picker": "Selectarea stream-ului nu este disponibilă în modul de depanare. Vizualizarea de depanare folosește întotdeauna stream-ul atribuit rolului de detectare."
+      "picker": "Selectarea stream-ului nu este disponibilă în modul de depanare. Vizualizarea de depanare folosește întotdeauna stream-ul atribuit rolului de detectare.",
+      "technology": "Selectarea tehnologiei de stream este indisponibilă în modul de depanare."
+    },
+    "mode": "Tehnologie de streaming",
+    "technology": {
+      "description": "Alege tehnologia de streaming preferată. Frigate poate totuși să revină la modul de lățime de bandă redusă în caz de erori de redare sau de rețea.",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "Opțiunea implicită recomandată, compatibilitate largă și redare fluentă",
+        "webrtc": "Necesită configurare suplimentară și nu este suportat pe orice dispozitiv"
+      },
+      "unavailable": {
+        "browser": "Browserul tău nu suportă WebRTC.",
+        "not-configured": "WebRTC nu este configurat. Setează candidații webrtc sau ice_servers în go2rtc.",
+        "unreachable": "WebRTC nu s-a putut conecta. Verifică dacă portul 8555 este accesibil și dacă serverul STUN/TURN este corect.",
+        "video-codec": "Codecul video al acestui stream nu este suportat de WebRTC în acest browser.",
+        "audio-codec": "Codecul audio al acestui stream nu este suportat de WebRTC. Transcodifică în opus sau G.711 cu go2rtc.",
+        "checking": "Se verifică disponibilitatea WebRTC…"
+      }
     }
   },
   "cameraSettings": {
     "title": "Setări pentru {{camera}}",
-    "cameraEnabled": "Cameră activată",
     "objectDetection": "Detectare obiecte",
     "recording": "Înregistrare",
     "snapshots": "Snapshot-uri",
@@ -164,8 +190,7 @@
       "all": "Toate",
       "motion": "Mișcare",
       "active_objects": "Obiecte active"
-    },
-    "notAllTips": "Configurația ta de retenție pentru înregistrările {{source}} este setată la <code>mode: {{effectiveRetainMode}}</code>, astfel că această înregistrare la cerere va păstra doar segmentele cu {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Editează aspectul",

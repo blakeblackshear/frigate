@@ -85,6 +85,14 @@ An optional config, `save_attempts`, can be set as a key under the model name. T
 </TabItem>
 </ConfigTabs>
 
+## Review items
+
+When a model's state changes while its camera has an active review item, the change is recorded on that review item. This includes changes in the few seconds before the item starts, such as a garage door opening just before the car is detected. State changes never create or extend review items on their own, and the first state reported after Frigate starts is not recorded as a change.
+
+Recorded changes appear in the review item's data as `classification_state_changes` (see the [`frigate/reviews`](/integrations/mqtt#frigatereviews) MQTT topic) and are passed to [GenAI review summaries](/configuration/genai/genai_review) as facts, so a description can note that a gate was opened during the activity.
+
+Change times are most accurate with `motion: true`. A model that only runs on an `interval` notices a change at its next run, so the change may be recorded late or attached to a later review item.
+
 ## Training the model
 
 Creating and training the model is done within the Frigate UI using the `Classification` page. The process consists of three steps:

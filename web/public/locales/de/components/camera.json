@@ -51,8 +51,7 @@
         },
         "audio": {
           "tips": {
-            "title": "Audio muss in der Kamera verfügbar und in go2rtc für diesen Stream konfiguriert sein.",
-            "document": "Lies die Dokumentation. "
+            "title": "Audio muss in der Kamera verfügbar und in go2rtc für diesen Stream konfiguriert sein."
           }
         },
         "desc": "Ändere die Live Stream Optionen für das Dashboard dieser Kameragruppe. <em>Diese Einstellungen sind geräte-/browserspezifisch.</em>",

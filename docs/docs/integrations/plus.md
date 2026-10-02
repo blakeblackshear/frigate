@@ -59,13 +59,12 @@ You can view all of your submitted images at [https://plus.frigate.video](https:
 
 Once you have [requested your first model](../plus/first_model.md) and gotten your own model ID, it can be used with a special model path. No other information needs to be configured for Frigate+ models because it fetches the remaining config from Frigate+ automatically.
 
-You can either choose the new model from the <NavPath path="Settings > System > Detectors and model" /> pane in the Frigate UI (the **Frigate+ Model** tab), or manually set the model at the root level in your config:
+You can either choose the new model from the <NavPath path="Settings > System > Detection models" /> pane in the Frigate UI (on the **Frigate+** tab of the model you want to change), or set it on that model in your config:
 
 ```yaml
-detectors: ...
-
-model:
-  path: plus://<your_model_id>
+models:
+  - devices: ...
+    path: plus://<your_model_id>
 ```
 
 :::note
@@ -79,10 +78,11 @@ Models are downloaded into the `/config/model_cache` folder and only downloaded 
 If needed, you can override the labelmap for Frigate+ models. This is not recommended as renaming labels will break the Submit to Frigate+ feature if the labels are not available in Frigate+.
 
 ```yaml
-model:
-  path: plus://<your_model_id>
-  labelmap:
-    3: animal
-    4: animal
-    5: animal
+models:
+  - devices: ...
+    path: plus://<your_model_id>
+    labelmap:
+      3: animal
+      4: animal
+      5: animal
 ```

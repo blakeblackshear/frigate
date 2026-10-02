@@ -100,7 +100,6 @@
         "textTokenizer": "Textový tokenizér"
       },
       "tips": {
-        "documentation": "Přečtěte si dokumentaci",
         "context": "Můžete reindexovat vložení vašich sledovaných oběktů hned jak budou modely staženy."
       },
       "error": "Nastala chyba. Zkontrolujte protokoly Frigate."
@@ -121,53 +120,7 @@
     "nextTrackedObject": "Následující sledovaný objekt"
   },
   "objectLifecycle": {
-    "count": "{{first}} z {{second}}",
-    "trackedPoint": "Sledovaný bod",
-    "lifecycleItemDesc": {
-      "external": "{{label}} detekován",
-      "header": {
-        "zones": "Zóny",
-        "ratio": "Poměr",
-        "area": "Oblast"
-      },
-      "entered_zone": "{{label}} vstoupil do {{zones}}",
-      "active": "{{label}} začal být aktivní",
-      "stationary": "{{label}} se stal statickým",
-      "visible": "{{label}} detekován",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} detekován pro {{label}}",
-        "other": "{{label}} rozpoznán jako {{attribute}}"
-      },
-      "heard": "{{label}} slyšen",
-      "gone": "{{label}} opuštěn"
-    },
-    "annotationSettings": {
-      "showAllZones": {
-        "title": "Zobrazit všechny zóny",
-        "desc": "Vždy zobrazit zóny na snímcích, kde objekty vstoupily do zóny."
-      },
-      "offset": {
-        "label": "Odsazení popisku",
-        "documentation": "Přečtěte si dokumentaci ",
-        "millisecondsToOffset": "Milisekundy pro posun zobrazení popisku detekce. <em>Výchozí: 0</em>",
-        "desc": "Tato data pocházejí z detekčního zdroje vaší kamery, ale jsou překryta na snímcích ze záznamu. Je nepravděpodobné, že by tyto dva proudy byly dokonale synchronizované. Výsledkem je, že ohraničující rámeček a stopáž nebudou dokonale zarovnány. K nastavení však lze použít pole <code>annotation_offset</code>.",
-        "tips": "TIP: Představte si, že existuje klip události s osobou, která jde zleva doprava. Pokud je ohraničovací rámeček na časové ose události konzistentně vlevo od osoby, měla by být hodnota snížena. Podobně, pokud osoba chodí zleva doprava a ohraničující rámeček je trvale před osobou, měla by být hodnota zvýšena.",
-        "toast": {
-          "success": "Posun anotace pro {{camera}} byl uložen do konfiguračního souboru. Restartujte Frigate, aby se změny projevily."
-        }
-      },
-      "title": "Nastavení popisků"
-    },
-    "carousel": {
-      "previous": "Předchozí snímek",
-      "next": "Následující snímek"
-    },
-    "title": "Životní cyklus Objektu",
-    "noImageFound": "Žádný obrázek pro toto časové razítko.",
-    "createObjectMask": "Vytvořit masku objektu",
-    "adjustAnnotationSettings": "Upravit nastavení poznámek",
-    "scrollViewTips": "Posouváním zobrazíte významné okamžiky životního cyklu tohoto objektu.",
-    "autoTrackingTips": "Pozice ohraničení bude nepřesná pro kamery s automatickým sledováním."
+    "noImageFound": "Žádný obrázek pro toto časové razítko."
   },
   "itemMenu": {
     "downloadSnapshot": {
@@ -192,10 +145,6 @@
     "submitToPlus": {
       "aria": "Odeslat do Frigate Plus",
       "label": "Odeslat do Frigate+"
-    },
-    "viewObjectLifecycle": {
-      "label": "Zobrazit životní cyklus objektu",
-      "aria": "Ukázat životní cyklus objektu"
     },
     "addTrigger": {
       "label": "Přidat spouštěč",
@@ -223,7 +172,6 @@
     "details": "detaily",
     "snapshot": "snímek",
     "video": "video",
-    "object_lifecycle": "životní cyklus objektu",
     "thumbnail": "Náhled",
     "tracking_details": "detaily sledování"
   },

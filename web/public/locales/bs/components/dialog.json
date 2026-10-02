@@ -98,9 +98,6 @@
         "started_one": "Pokrenut 1 izvoz. Otvaranje slučaja sada.",
         "started_few": "Pokrenuta {{count}} izvoza. Otvaranje slučaja sada.",
         "started_other": "Pokrenuto {{count}} izvoza. Otvaranje slučaja sada.",
-        "startedNoCase_one": "Pokrenut 1 izvoz.",
-        "startedNoCase_few": "Pokrenuta {{count}} izvoza.",
-        "startedNoCase_other": "Pokrenuto {{count}} izvoza.",
         "partial": "Pokrenuto {{successful}} od {{total}} izvoza. Neuspješno: {{failedItems}}",
         "failed": "Neuspješno pokretanje {{total}} izvoza. Neuspješno: {{failedItems}}"
       }
@@ -121,8 +118,7 @@
       "batchQueueFailed": "Neuspješno dodavanje {{total}} izvoza. Neuspješne kamere: {{failedCameras}}",
       "error": {
         "failed": "Neuspješno dodavanje izvoza: {{error}}",
-        "endTimeMustAfterStartTime": "Krajnje vrijeme mora biti nakon početnog vremena",
-        "noVaildTimeSelected": "Nije odabran valjan vremenski opseg"
+        "endTimeMustAfterStartTime": "Krajnje vrijeme mora biti nakon početnog vremena"
       }
     },
     "fromTimeline": {

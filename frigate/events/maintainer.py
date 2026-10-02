@@ -159,7 +159,8 @@ class EventProcessor(threading.Thread):
             if width is None or height is None:
                 return
 
-            first_detector = list(self.config.detectors.values())[0]
+            camera_model = self.config.model_for_camera(camera)
+            camera_detector = self.config.devices_for_model(camera_model)[0].detector
 
             start_time = event_data["start_time"]
             end_time = (
@@ -229,13 +230,9 @@ class EventProcessor(threading.Thread):
                 Event.thumbnail: event_data.get("thumbnail"),
                 Event.has_clip: event_data["has_clip"],
                 Event.has_snapshot: event_data["has_snapshot"],
-                Event.model_hash: first_detector.model.model_hash
-                if first_detector.model
-                else None,
-                Event.model_type: first_detector.model.model_type
-                if first_detector.model
-                else None,
-                Event.detector_type: first_detector.type,
+                Event.model_hash: camera_model.model_hash,
+                Event.model_type: camera_model.model_type,
+                Event.detector_type: camera_detector,
                 Event.data: {
                     "box": box,
                     "region": region,

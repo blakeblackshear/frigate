@@ -10,6 +10,7 @@ import { MdHome } from "react-icons/md";
 import { Button, buttonVariants } from "../ui/button";
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -66,7 +67,8 @@ import { z } from "zod";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { useUserPersistence } from "@/hooks/use-user-persistence";
+import { deleteUserNamespacedKey } from "@/hooks/use-user-persistence";
+import { AuthContext } from "@/context/auth-context";
 import { TooltipPortal } from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import * as LuIcons from "react-icons/lu";
@@ -499,9 +501,8 @@ function NewGroupDialog({
   const [editState, setEditState] = useState<"none" | "add" | "edit">("none");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [, , , deleteGridLayout] = useUserPersistence(
-    `${activeGroup}-draggable-layout`,
-  );
+  const { auth } = useContext(AuthContext);
+  const username = auth?.user?.username;
 
   useEffect(() => {
     if (!open) {
@@ -513,15 +514,14 @@ function NewGroupDialog({
 
   const onDeleteGroup = useCallback(
     async (name: string) => {
-      deleteGridLayout();
-      deleteGroup();
-
       await axios
         .put(`config/set?camera_groups.${name}`, { requires_restart: 0 })
         .then((res) => {
           if (res.status === 200) {
+            deleteUserNamespacedKey(`${name}-draggable-layout`, username);
             if (activeGroup == name) {
               // deleting current group
+              deleteGroup();
               setGroup("default");
             }
             updateConfig();
@@ -557,15 +557,7 @@ function NewGroupDialog({
           setIsLoading(false);
         });
     },
-    [
-      updateConfig,
-      activeGroup,
-      setGroup,
-      setOpen,
-      deleteGroup,
-      deleteGridLayout,
-      t,
-    ],
+    [updateConfig, activeGroup, setGroup, setOpen, deleteGroup, username, t],
   );
 
   const onSave = () => {

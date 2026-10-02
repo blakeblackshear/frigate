@@ -16,18 +16,6 @@
         "desc": "Los objetos en ubicaciones que deseas evitar no son falsos positivos. Enviarlos como falsos positivos confundirá al modelo."
       },
       "review": {
-        "false": {
-          "label": "No confirmar esta etiqueta para Frigate Plus",
-          "false_one": "Esto no es un {{label}}",
-          "false_many": "Esto no es un {{label}}",
-          "false_other": "Esto no es un {{label}}"
-        },
-        "true": {
-          "true_one": "Esto es un {{label}}",
-          "true_many": "Esto es un {{label}}",
-          "true_other": "Esto es un {{label}}",
-          "label": "Confirmar esta etiqueta para Frigate+"
-        },
         "state": {
           "submitted": "Enviado"
         },
@@ -70,7 +58,6 @@
     "toast": {
       "error": {
         "failed": "No se pudo iniciar la exportación: {{error}}",
-        "noVaildTimeSelected": "No se seleccionó un rango de tiempo válido",
         "endTimeMustAfterStartTime": "La hora de finalización debe ser posterior a la hora de inicio",
         "noValidTimeSelected": "Rango de tiempo seleccionado no valido"
       },
@@ -147,20 +134,25 @@
         "started_one": "Se inició 1 exportación. Abriendo el caso ahora.",
         "started_many": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
         "started_other": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
-        "startedNoCase_one": "Se inició 1 exportación.",
-        "startedNoCase_many": "Se iniciaron {{count}} exportaciones.",
-        "startedNoCase_other": "Se iniciaron {{count}} exportaciones.",
         "partial": "Se iniciaron {{successful}} de {{total}} exportaciones. Fallidas: {{failedItems}}",
         "failed": "No se pudieron iniciar {{total}} exportaciones. Fallidas: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Calidad",
+      "auto": "Auto",
+      "main": "Original",
+      "sub": "Bajo",
+      "autoDesc": "Usa el stream princial y vuelve a la calidad baja del sub-stream si la principal no está disponible.",
+      "mainDesc": "Exporta sólo la calidad original del stream principal. Los tiempos dónde el stream principal no esté disponible estarán faltantes.",
+      "subDesc": "Exporta sólo la calidad inferior del sub-stream. Los tiempos dónde el sub-steam no está disponible faltarán."
     }
   },
   "streaming": {
     "restreaming": {
       "disabled": "La retransmisión no está habilitada para esta cámara.",
       "desc": {
-        "title": "Configura go2rtc para opciones adicionales de vista en vivo y audio para esta cámara.",
-        "readTheDocumentation": "Leer la documentación"
+        "title": "Configura go2rtc para opciones adicionales de vista en vivo y audio para esta cámara."
       }
     },
     "debugView": "Vista de depuración",
@@ -199,7 +191,8 @@
       "export": "Exportar",
       "markAsReviewed": "Marcar como revisado",
       "deleteNow": "Eliminar ahora",
-      "markAsUnreviewed": "Marcar como no revisado"
+      "markAsUnreviewed": "Marcar como no revisado",
+      "generateDescription": "Generar descripción"
     },
     "shareTimestamp": {
       "description": "Comparta una URL con marca de tiempo de la posición actual del reproductor o elija una marca de tiempo personalizada. Tenga en cuenta que esta no es una URL pública para compartir y solo es accesible para los usuarios que tienen acceso a Frigate y a esta cámara.",
@@ -208,6 +201,11 @@
       "custom": "Marca de tiempo personalizada",
       "button": "Compartir URL de la marca de tiempo",
       "shareTitle": "Marca de tiempo de revisión de Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "error": "Falló al pedir descripción: {{error}}"
+      }
     }
   },
   "imagePicker": {

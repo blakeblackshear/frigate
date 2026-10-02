@@ -43,7 +43,7 @@ genai:
 
 The examples on this page all use `my_provider`, but the name is arbitrary and is only used to reference the provider elsewhere in the config (for example, `semantic_search.model`).
 
-Each provider handles one or more **roles**: `chat`, `descriptions`, and `embeddings`. A provider handles all three by default, and each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option.
+Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings`, and `transcribe`. A provider handles the first three by default; `transcribe` must always be listed explicitly, and is not available on Ollama, which has no audio input. Each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option.
 
 If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
@@ -63,11 +63,11 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 You must use a vision-capable model with Frigate. The following models are recommended for local deployment of the `descriptions` and `chat` roles:
 
-| Model               | Notes                                                                                                                                                                |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl`          | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object.                                              |
-| `qwen3.6`/`qwen3.8` | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
-| `gemma4`            | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action.                                     |
+| Model               | Review [frame mode](/configuration/genai/genai_review#frame-mode) | Notes                                                                                                                                                                |
+| ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qwen3-vl`          | `frames`                                                              | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object. Follows a sequence of frames on its own.     |
+| `qwen3.6`/`qwen3.8` | `frames`                                                              | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
+| `gemma4`            | `annotated_frames`                                                    | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action. Loses track of activity that repeats or reverses, so it benefits from annotated frames. |
 
 #### Embedding models
 
@@ -76,6 +76,17 @@ The `embeddings` role needs a different kind of model. Text queries are matched 
 | Model                | Notes                                                                                                                                                               |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Must be served by llama.cpp started with `--embeddings` and `--mmproj`. |
+
+#### Transcription models
+
+The `transcribe` role needs a model that accepts audio input. A text-only or vision-only model cannot serve this role. The following are recommended for local deployment of the `transcribe` role:
+
+| Model       | Notes                                                                                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `qwen3-asr` | Dedicated speech recognition model covering 30 languages, and the better choice for transcription quality. It only transcribes, so it cannot be shared with the `descriptions` or `chat` roles.            |
+| `gemma4`    | General multimodal model that accepts audio as well as images, so one served model can cover `transcribe` alongside the other roles. Transcript quality is below `qwen3-asr`, particularly on noisy audio. |
+
+Both must be served by llama.cpp started with the matching audio `--mmproj`. llama.cpp only reports audio support when an audio projector is loaded. Without it Frigate sees the model as text-only and the `transcribe` role is unavailable in the UI. Frigate transcribes through the server's `/v1/audio/transcriptions` route, which llama.cpp serves for any audio-capable model.
 
 :::info
 
@@ -517,6 +528,6 @@ objects:
 7. If descriptions are generated but the results are poor or inconsistent, look at the model and the context window.
    - Empty fields, missing `shortSummary` values, or `Failed to parse review description` errors usually mean the model is not following the requested JSON schema. Smaller models struggle with structured output. Try a larger parameter size or one of the [recommended models](#recommended-local-models).
    - Frigate calculates how many frames to send from the context size the provider reports. If your server reports a different value than it is actually running with, frames will be truncated or the request will fail. Pin the value by adding `context_size` under <NavPath path="Settings > Enrichments > Generative AI > Provider options" /> (`genai.<provider>.provider_options`), and for Ollama also confirm `options.num_ctx` there matches the context you have configured.
-   - Check **Review Description Speed** and **Object Description Speed** in <NavPath path="System metrics > Enrichments" />. If inference takes tens of seconds, requests will queue behind each other and descriptions will appear to stop. For Ollama, review `OLLAMA_NUM_PARALLEL`, `OLLAMA_MAX_QUEUE`, and `OLLAMA_MAX_LOADED_MODELS` so that concurrent requests from Frigate are handled the way you expect.
+   - Check **Review Description Speed** and **Object Description Speed** in <NavPath path="Health and Metrics > Enrichments" />. If inference takes tens of seconds, requests will queue behind each other and descriptions will appear to stop. For Ollama, review `OLLAMA_NUM_PARALLEL`, `OLLAMA_MAX_QUEUE`, and `OLLAMA_MAX_LOADED_MODELS` so that concurrent requests from Frigate are handled the way you expect.
 
 </FaqItem>

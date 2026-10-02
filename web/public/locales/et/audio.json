@@ -274,7 +274,7 @@
   "soundtrack_music": "Filmimuusika",
   "jingle": "Kõlisemine/tilisemine",
   "theme_music": "Tunnusmuusika",
-  "steel_guitar": "Steel Kitarr",
+  "steel_guitar": "Steel-kitarr",
   "tapping": "Koputamine",
   "strum": "Klimberdus",
   "drum_machine": "Trummimasin",
@@ -337,5 +337,13 @@
   "television": "Televiisor",
   "scream": "Karjumine",
   "pour": "Valamine",
-  "drip": "Tilkumine"
+  "drip": "Tilkumine",
+  "snare_drum": "Väike trumm / soolotrumm",
+  "rimshot": "Trummi äärelöök",
+  "drum_roll": "Trummipõrin",
+  "timpani": "Timpanid",
+  "tabla": "Tabla-trumm Indiast",
+  "cymbal": "Simbel",
+  "hi_hat": "Pedaaliga taldrikukomplekt",
+  "wood_block": "Väike õõnesplokktrumm"
 }

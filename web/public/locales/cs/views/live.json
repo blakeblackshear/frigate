@@ -1,5 +1,4 @@
 {
-  "documentTitle": "Živě - Frigate",
   "documentTitle.withCamera": "{{camera}}-Živě-Frigate",
   "lowBandwidthMode": "Režim nízké šířky pásma",
   "twoWayTalk": {
@@ -52,10 +51,6 @@
         "label": "Rozostření PTZ kamery"
       }
     }
-  },
-  "camera": {
-    "enable": "Povolit kameru",
-    "disable": "Zakázat kameru"
   },
   "muteCameras": {
     "enable": "Ztlumit všechny kamery",
@@ -114,14 +109,12 @@
     "title": "Proud",
     "audio": {
       "tips": {
-        "title": "Zvuk musí být kamerou vysílán a nakonfigurován v go2rtc pro tento stream.",
-        "documentation": "Přečtěte si dokumentaci "
+        "title": "Zvuk musí být kamerou vysílán a nakonfigurován v go2rtc pro tento stream."
       },
       "available": "Zvuk je dostupný pro tento stream",
       "unavailable": "Zvuk není dostupný pro tento stream"
     },
     "twoWayTalk": {
-      "tips.documentation": "Přečtěte si dokumentaci ",
       "available": "Obousměrný hovor je dostupný pro tento stream",
       "unavailable": "Obousměrný hovor není dostupný pro tento stream",
       "tips": "Vaše zařízení musí tuto funkci podporovat a WebRTC musí být nakonfigurováno pro obousměrnou komunikaci."
@@ -137,7 +130,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Nastavení",
-    "cameraEnabled": "Kamera Povolena",
     "objectDetection": "Detekce Objektu",
     "snapshots": "Snímky",
     "audioDetection": "Detekce Zvuku",
@@ -153,8 +145,7 @@
       "all": "Vše",
       "motion": "Pohyb",
       "active_objects": "Aktivní Objekty"
-    },
-    "notAllTips": "Vaše nastavení uchovávání záznamů pro zdroj {{source}} je nastaveno na <code>režim: {{effectiveRetainMode}}</code>, takže tento záznam na vyžádání bude uchovávat pouze segmenty s režimem {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "exitEdit": "Ukončit Úpravu",

@@ -42,7 +42,7 @@ export function getLifecycleItemDescription(
         label,
       });
     case "attribute": {
-      let title = "";
+      let title: string;
       if (
         lifecycleItem.data.attribute == "face" ||
         lifecycleItem.data.attribute == "license_plate"

@@ -57,8 +57,7 @@
       "view": "Prikaz",
       "error": {
         "failed": "Nije uspjelo pokretanje izvoza: {{error}}",
-        "endTimeMustAfterStartTime": "Vrijeme završetka mora biti nakon vremena početka",
-        "noVaildTimeSelected": "Nema odabranog valjanog vremenskog raspona"
+        "endTimeMustAfterStartTime": "Vrijeme završetka mora biti nakon vremena početka"
       }
     },
     "fromTimeline": {

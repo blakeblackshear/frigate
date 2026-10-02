@@ -55,9 +55,34 @@
         "auto_scroll": {
             "title": "Rolagem automática",
             "desc": "Acompanhe as novas mensagens à medida que chegam."
+        },
+        "always_allow": {
+            "title": "Ações sempre permitidas",
+            "desc": "Ações que o assistente pode executar sem solicitar permissão.",
+            "none": "Nenhum",
+            "reset": "Redefinir"
         }
     },
     "stats": {
-        "context": "{{tokens}} tokens"
+        "context": "{{tokens}} tokens",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Raciocinando…",
+        "show": "Mostrar raciocínio",
+        "hide": "Ocultar raciocínio"
+    },
+    "thinking": {
+        "toggle": "Alternar o pensamento"
+    },
+    "approval": {
+        "title": "Aprovar {{tool}}?",
+        "desc": "Esta ação muda algo no Frigate. Revise os detalhes antes de aprovar.",
+        "approve": "Aprovar",
+        "always_allow": "Sempre permitir",
+        "reject": "Rejeitar",
+        "approved": "Aprovado",
+        "rejected": "Rejeitado",
+        "placeholder": "Aprovar ou rejeitar as ações pendentes para continuar"
     }
 }

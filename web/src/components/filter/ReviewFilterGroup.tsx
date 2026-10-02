@@ -14,12 +14,10 @@ import { FaCheckCircle, FaFilter, FaRunning } from "react-icons/fa";
 import { isDesktop, isMobile } from "react-device-detect";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
-import MobileReviewSettingsDrawer, {
-  DrawerFeatures,
-} from "../overlay/MobileReviewSettingsDrawer";
+import MobileReviewSettingsDrawer from "../overlay/MobileReviewSettingsDrawer";
 import useOptimisticState from "@/hooks/use-optimistic-state";
 import FilterSwitch from "./FilterSwitch";
-import { FilterList, GeneralFilter } from "@/types/filter";
+import { DrawerFeatures, FilterList, GeneralFilter } from "@/types/filter";
 import CalendarFilterButton from "./CalendarFilterButton";
 import { CamerasFilterButton } from "./CamerasFilterButton";
 import PlatformAwareDialog from "../overlay/dialog/PlatformAwareDialog";
@@ -28,14 +26,7 @@ import { getTranslatedLabel } from "@/utils/i18n";
 import { useAllowedCameras } from "@/hooks/use-allowed-cameras";
 import { cn } from "@/lib/utils";
 
-const REVIEW_FILTERS = [
-  "cameras",
-  "reviewed",
-  "date",
-  "general",
-  "motionOnly",
-] as const;
-type ReviewFilters = (typeof REVIEW_FILTERS)[number];
+type ReviewFilters = "cameras" | "reviewed" | "date" | "general" | "motionOnly";
 const DEFAULT_REVIEW_FILTERS: ReviewFilters[] = [
   "cameras",
   "reviewed",
@@ -355,8 +346,6 @@ function GeneralFilterButton({
       showAll: showAll,
       ...filter,
     });
-    // only refresh when state changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLabels, selectedZones, showAll, filter]);
 
   const trigger = (

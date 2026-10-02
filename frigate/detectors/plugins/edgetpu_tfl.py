@@ -1,7 +1,7 @@
 import logging
 import math
 import os
-from typing import Literal
+from typing import ClassVar, Literal
 
 import cv2
 import numpy as np
@@ -27,6 +27,9 @@ class EdgeTpuDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="EdgeTPU",
     )
+
+    # a TPU can only be opened by one process
+    shareable: ClassVar[bool] = False
 
     type: Literal[DETECTOR_KEY]
     device: str = Field(

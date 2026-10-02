@@ -81,7 +81,6 @@
       "error": {
         "failed": "Nepavyko sudaryti išrašų eilės: {{error}}",
         "endTimeMustAfterStartTime": "Pabaigos Laikas privalo būti vėliau nei pradžios laikas",
-        "noVaildTimeSelected": "Nėra pasirinkto tinkamo laikotarpio",
         "noValidTimeSelected": "Pasirinktas laiko tarpas nėra tinkamas"
       },
       "view": "Žiūrėti",

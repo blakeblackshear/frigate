@@ -49,8 +49,6 @@
         "thresholdDesc": "Los valores más bajos detectan cambios más pequeños (1-255)",
         "minArea": "Área mínima de cambio",
         "minAreaDesc": "Tamaño mínimo de una única región en movimiento, expresado como porcentaje de la región de interés",
-        "frameSkip": "Salto de fotogramas",
-        "frameSkipDesc": "Procesa cada N fotogramas. Establécelo según la tasa de FPS de tu cámara para procesar un fotograma por segundo (p. ej., 5 para una cámara de 5 FPS, 30 para una cámara de 30 FPS). Los valores más altos serán más rápidos, pero pueden omitir eventos de movimiento breves.",
         "maxResults": "Resultados máximos",
         "maxResultsDesc": "Detener después de esta cantidad de marcas de tiempo coincidentes"
     },

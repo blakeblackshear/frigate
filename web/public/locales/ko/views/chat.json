@@ -55,6 +55,12 @@
         "auto_scroll": {
             "title": "자동 스크롤",
             "desc": "새 메시지가 도착하면 화면을 자동으로 아래로 이동합니다."
+        },
+        "always_allow": {
+            "title": "항상 허용된 작업",
+            "desc": "어시스턴트가 매번 확인하지 않고 바로 실행할 수 있는 작업입니다.",
+            "none": "없음",
+            "reset": "초기화"
         }
     },
     "stats": {
@@ -68,5 +74,15 @@
     },
     "thinking": {
         "toggle": "생각 과정 전환"
+    },
+    "approval": {
+        "title": "{{tool}} 작업을 승인하시겠습니까?",
+        "desc": "이 작업은 Frigate의 설정을 변경합니다. 승인하기 전에 세부 정보를 검토하세요.",
+        "approve": "승인",
+        "always_allow": "항상 허용",
+        "reject": "거부",
+        "approved": "승인됨",
+        "rejected": "거부됨",
+        "placeholder": "계속하려면 대기 중인 작업을 승인하거나 거부하세요"
     }
 }

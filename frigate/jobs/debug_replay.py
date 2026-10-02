@@ -216,11 +216,11 @@ class ExportDebugReplaySource(DebugReplaySource):
     """
 
     def __init__(self, export: Export, duration: float) -> None:
-        self._camera = cast(str, export.camera)
+        self._camera = export.camera
         # Export.date is declared DateTimeField but Frigate writes raw unix
         # timestamps to the column.
         self._start_ts = float(cast(Any, export.date))
-        self._video_path = cast(str, export.video_path)
+        self._video_path = export.video_path
         self._duration = duration
 
     @property

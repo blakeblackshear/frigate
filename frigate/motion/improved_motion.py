@@ -188,8 +188,12 @@ class ImprovedMotionDetector(MotionDetector):
             self.config.skip_motion_threshold is not None
             and pct_motion > self.config.skip_motion_threshold
         ):
-            # force a recalibration so we transition to the new background
+            # recalibrate so we transition to the new background. the frame
+            # still has to be blended in here, otherwise the background stays
+            # frozen and every subsequent frame skips as well
             self.calibrating = True
+            cv2.accumulateWeighted(resized_frame, self.avg_frame, 0.2)
+            self.motion_frame_count = 0
             return []
 
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated

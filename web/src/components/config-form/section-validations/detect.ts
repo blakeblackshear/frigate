@@ -17,11 +17,9 @@ export function validateDetectDimensions(
   const height = data.height;
 
   const widthErrors = errors.width as
-    | { addError?: (message: string) => void }
-    | undefined;
+    { addError?: (message: string) => void } | undefined;
   const heightErrors = errors.height as
-    | { addError?: (message: string) => void }
-    | undefined;
+    { addError?: (message: string) => void } | undefined;
 
   const message = t("detect.dimensionMustBeEven", { ns: "config/validation" });
 

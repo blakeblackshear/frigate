@@ -11,8 +11,15 @@ from openai import OpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
+
+# gpt-transcribe replaced the singular `language` field with a `languages` array
+# and rejects a request that sends both. Older transcription models
+# (gpt-4o-transcribe, gpt-4o-mini-transcribe, whisper-1) still take the singular
+# form. https://developers.openai.com/api/docs/guides/speech-to-text
+_LANGUAGES_ARRAY_MODEL_PREFIX = "gpt-transcribe"
 
 
 def _stats_from_openai_usage(usage: Any) -> dict[str, Any] | None:
@@ -63,21 +70,21 @@ class OpenAIClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to OpenAI."""
-        encoded_images = [base64.b64encode(image).decode("utf-8") for image in images]
-        messages_content: list[dict] = [
-            {
-                "type": "text",
-                "text": prompt,
-            }
-        ]
-        for image in encoded_images:
+        messages_content: list[dict] = []
+        for part in interleave_images(prompt, images, image_captions):
+            if isinstance(part, str):
+                messages_content.append({"type": "text", "text": part})
+                continue
+
+            encoded = base64.b64encode(part).decode("utf-8")
             messages_content.append(
                 {
                     "type": "image_url",
                     "image_url": {
-                        "url": f"data:image/jpeg;base64,{image}",
+                        "url": f"data:image/jpeg;base64,{encoded}",
                         "detail": "low",
                     },
                 }
@@ -132,6 +139,51 @@ class OpenAIClient(GenAIClient):
         except (TimeoutException, Exception) as e:
             logger.warning("OpenAI returned an error: %s", str(e))
             return None
+
+    @property
+    def supports_transcription(self) -> bool:
+        """OpenAI exposes /v1/audio/transcriptions for its speech models."""
+        return True
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio via the OpenAI audio transcriptions endpoint."""
+        try:
+            # runtime_options are chat-completion parameters; the transcriptions
+            # endpoint rejects unknown fields, so they are deliberately not splatted
+            # in here the way _send() does.
+            request_params: dict[str, Any] = {
+                "model": self.genai_config.model,
+                "file": ("audio.wav", audio, mime_type),
+                "response_format": "text",
+                "timeout": self.timeout,
+            }
+
+            if language:
+                if (
+                    self.genai_config.model.strip()
+                    .lower()
+                    .startswith(_LANGUAGES_ARRAY_MODEL_PREFIX)
+                ):
+                    # not a typed parameter on the SDK method, so it has to ride
+                    # along in extra_body
+                    request_params["extra_body"] = {"languages": [language]}
+                else:
+                    request_params["language"] = language
+
+            result = self.provider.audio.transcriptions.create(**request_params)
+        except (TimeoutException, Exception) as e:
+            logger.warning("OpenAI returned an error: %s", str(e))
+            return None
+
+        # response_format="text" yields a bare string, but some compatible
+        # servers still return the object form
+        text = result if isinstance(result, str) else getattr(result, "text", None)
+        return text.strip() if text else None
 
     def list_models(self) -> list[str]:
         """Return available model IDs from the OpenAI-compatible API."""

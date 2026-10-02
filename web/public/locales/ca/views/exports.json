@@ -63,7 +63,8 @@
     "copying": "Copiant",
     "encoding": "Codificant",
     "encodingRetry": "Codificant (reintent)",
-    "finalizing": "Finalitzant"
+    "finalizing": "Finalitzant",
+    "merging": "Fusió"
   },
   "caseView": {
     "noDescription": "Sense descripció",

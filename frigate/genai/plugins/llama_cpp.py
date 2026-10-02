@@ -14,7 +14,7 @@ from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import parse_tool_calls_from_message
+from frigate.genai.utils import interleave_images, parse_tool_calls_from_message
 
 logger = logging.getLogger(__name__)
 
@@ -103,11 +103,10 @@ class LlamaCppClient(GenAIClient):
     _supports_reasoning: bool
     _image_token_cache: dict[tuple[int, int], int]
     _text_baseline_tokens: int | None
-    _media_marker: str
 
     @property
     def supports_embeddings(self) -> bool:
-        """llama.cpp exposes an /embeddings endpoint for any loaded model."""
+        """llama.cpp exposes a /v1/embeddings endpoint for any loaded model."""
         return True
 
     def _auth_headers(self) -> dict | None:
@@ -159,7 +158,6 @@ class LlamaCppClient(GenAIClient):
         self._supports_reasoning = False
         self._image_token_cache = {}
         self._text_baseline_tokens = None
-        self._media_marker = "<__media__>"
 
         base_url = (
             self.genai_config.base_url.rstrip("/")
@@ -187,7 +185,6 @@ class LlamaCppClient(GenAIClient):
         self._supports_audio = info["supports_audio"]
         self._supports_tools = info["supports_tools"]
         self._supports_reasoning = info["supports_reasoning"]
-        self._media_marker = info["media_marker"]
 
         logger.info(
             "llama.cpp model '%s' initialized — context: %s, vision: %s, audio: %s, tools: %s, reasoning: %s",
@@ -215,9 +212,7 @@ class LlamaCppClient(GenAIClient):
         `architecture.input_modalities` (text/image/audio) — the primary
         source. When proxied through llama-swap, the same entry carries
         `status.args` (server launch argv) and, for the loaded model,
-        `meta.n_ctx`. /props remains the only source for `media_marker`,
-        which the server randomizes per startup unless LLAMA_MEDIA_MARKER
-        is set.
+        `meta.n_ctx`.
         """
         info: dict[str, Any] = {
             "context_size": None,
@@ -225,7 +220,6 @@ class LlamaCppClient(GenAIClient):
             "supports_audio": False,
             "supports_tools": False,
             "supports_reasoning": False,
-            "media_marker": "<__media__>",
         }
 
         model_entry: dict[str, Any] | None = None
@@ -314,16 +308,8 @@ class LlamaCppClient(GenAIClient):
             # in the Jinja chat template itself.
             chat_template = props.get("chat_template") or ""
             info["supports_reasoning"] = "enable_thinking" in chat_template
-
-            media_marker = props.get("media_marker")
-            if isinstance(media_marker, str) and media_marker:
-                info["media_marker"] = media_marker
         except Exception as e:
-            logger.warning(
-                "Failed to query llama.cpp /props endpoint: %s. "
-                "Image embeddings may fail if the server randomized its media marker.",
-                e,
-            )
+            logger.warning("Failed to query llama.cpp /props endpoint: %s", e)
 
         return info
 
@@ -333,6 +319,7 @@ class LlamaCppClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
@@ -342,18 +329,17 @@ class LlamaCppClient(GenAIClient):
             return None
 
         try:
-            content = [
-                {
-                    "type": "text",
-                    "text": prompt,
-                }
-            ]
-            for image in images:
-                encoded_image = base64.b64encode(image).decode("utf-8")
+            content: list[dict[str, Any]] = []
+            for part in interleave_images(prompt, images, image_captions):
+                if isinstance(part, str):
+                    content.append({"type": "text", "text": part})
+                    continue
+
+                encoded_image = base64.b64encode(part).decode("utf-8")
                 content.append(
                     {
                         "type": "image_url",
-                        "image_url": {  # type: ignore[dict-item]
+                        "image_url": {
                             "url": f"data:image/jpeg;base64,{encoded_image}",
                         },
                     }
@@ -409,6 +395,123 @@ class LlamaCppClient(GenAIClient):
         return self._supports_audio
 
     @property
+    def supports_transcription(self) -> bool:
+        """Audio-capable models can transcribe through chat completions."""
+        return self._supports_audio
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio through the OpenAI-compatible transcriptions route.
+
+        llama.cpp serves /v1/audio/transcriptions for any audio-capable model,
+        not only a separately loaded whisper (ggml-org/llama.cpp#21863), so it
+        covers exactly the models supports_transcription detects. It takes the
+        language as a native multipart field, which is the only thing dedicated
+        ASR models honor: they read the chat prompt as contextual biasing, so
+        asking one there to use a language does nothing.
+
+        Falls back to chat completions when the server predates that route.
+        """
+        if self.provider is None:
+            logger.warning(
+                "llama.cpp provider has not been initialized, audio will not be transcribed. Check your llama.cpp configuration."
+            )
+            return None
+
+        if not self._supports_audio:
+            logger.warning(
+                "llama.cpp model '%s' does not accept audio input",
+                self.genai_config.model,
+            )
+            return None
+
+        try:
+            data = {"model": self.genai_config.model, "response_format": "json"}
+
+            if language:
+                data["language"] = language
+
+            response = self._post(
+                f"{self.provider}/v1/audio/transcriptions",
+                files={"file": ("audio.wav", audio, mime_type)},
+                data=data,
+                timeout=self.timeout,
+            )
+
+            if response.status_code == 404:
+                logger.debug(
+                    "llama.cpp server has no /v1/audio/transcriptions route, using chat completions"
+                )
+                return self._transcribe_via_chat(audio, language)
+
+            response.raise_for_status()
+            result = response.json()
+            text = result.get("text") if isinstance(result, dict) else None
+
+            return str(text).strip() or None if text else None
+        except Exception as e:
+            logger.warning("llama.cpp returned an error: %s", str(e))
+            return None
+
+    def _transcribe_via_chat(self, audio: bytes, language: str | None) -> str | None:
+        """Transcribe through /v1/chat/completions, for servers without the
+        transcriptions route.
+        """
+        prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
+
+        if language:
+            prompt += f" The speech is in language '{language}'."
+
+        try:
+            encoded_audio = base64.b64encode(audio).decode("utf-8")
+            payload: dict[str, Any] = {
+                "model": self.genai_config.model,
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt},
+                            {
+                                "type": "input_audio",
+                                "input_audio": {
+                                    "data": encoded_audio,
+                                    "format": "wav",
+                                },
+                            },
+                        ],
+                    },
+                ],
+                **self.provider_options,
+            }
+
+            response = self._post(
+                f"{self.provider}/v1/chat/completions",
+                json=payload,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            result = response.json()
+
+            if (
+                result is not None
+                and "choices" in result
+                and len(result["choices"]) > 0
+            ):
+                choice = result["choices"][0]
+
+                if "message" in choice and choice["message"].get("content"):
+                    return str(choice["message"]["content"].strip()) or None
+
+            return None
+        except Exception as e:
+            logger.warning("llama.cpp returned an error: %s", str(e))
+            return None
+
+    @property
     def supports_tools(self) -> bool:
         """Whether the loaded model supports tool/function calling."""
         return self._supports_tools
@@ -417,27 +520,72 @@ class LlamaCppClient(GenAIClient):
     def supports_toggleable_thinking(self) -> bool:
         return self._supports_reasoning
 
-    def list_models(self) -> list[str]:
-        """Return available model IDs from the llama.cpp server."""
+    def _fetch_models_data(self) -> list[dict[str, Any]]:
+        """Return the raw /v1/models entries, or an empty list if unreachable."""
         base_url = self.provider or (
             self.genai_config.base_url.rstrip("/")
             if self.genai_config.base_url
             else None
         )
+
         if base_url is None:
             return []
+
         try:
             response = self._get(f"{base_url}/v1/models", timeout=10)
             response.raise_for_status()
-            models = []
-            for m in response.json().get("data", []):
-                models.append(m.get("id", "unknown"))
-                for alias in m.get("aliases", []):
-                    models.append(alias)
-            return sorted(models)
+            data = response.json().get("data", [])
         except Exception as e:
             logger.warning("Failed to list llama.cpp models: %s", e)
             return []
+
+        return data if isinstance(data, list) else []
+
+    def list_models(self) -> list[str]:
+        """Return available model IDs from the llama.cpp server."""
+        models: set[str] = set()
+
+        # llama-server lists the id among the aliases when --alias is set
+        for m in self._fetch_models_data():
+            models.add(m.get("id", "unknown"))
+            models.update(m.get("aliases", []))
+
+        return sorted(models)
+
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Report input modalities for every model the server serves.
+
+        Since ggml-org/llama.cpp#22952 each /v1/models entry carries
+        architecture.input_modalities, so a single request describes every
+        model rather than just the configured one. That is what lets the UI
+        answer "can the model I just picked transcribe" before the config is
+        saved and a client for it exists.
+
+        Models whose entry predates that field are omitted rather than reported
+        as incapable, so an older server falls back to the /props probe instead
+        of silently losing capabilities it actually has.
+        """
+        capabilities: dict[str, dict[str, bool]] = {}
+
+        for model in self._fetch_models_data():
+            architecture = model.get("architecture") or {}
+            modalities = architecture.get("input_modalities")
+
+            if not isinstance(modalities, list) or not modalities:
+                continue
+
+            flags = {
+                "supports_vision": "image" in modalities,
+                "supports_transcription": "audio" in modalities,
+            }
+
+            names = [model.get("id"), *(model.get("aliases") or [])]
+
+            for name in names:
+                if isinstance(name, str) and name:
+                    capabilities[name] = flags
+
+        return capabilities
 
     def get_context_size(self) -> int:
         """Get the context window size for llama.cpp.
@@ -629,41 +777,16 @@ class LlamaCppClient(GenAIClient):
             )
         return result if result else None
 
-    def _refresh_media_marker(self) -> bool:
-        """Re-fetch /props and update the cached media marker if it changed.
-
-        The server randomizes the marker per startup (unless LLAMA_MEDIA_MARKER
-        is set), so a stale marker indicates a restart. Returns True iff the
-        marker was updated to a new value — used to gate a one-shot retry of
-        a failed embeddings request.
-        """
-        if self.provider is None:
-            return False
-        try:
-            props = self._fetch_llama_props(self.provider, self.genai_config.model)
-        except Exception as e:
-            logger.warning("Failed to refresh llama.cpp media marker: %s", e)
-            return False
-
-        marker = props.get("media_marker")
-
-        if not isinstance(marker, str) or not marker or marker == self._media_marker:
-            return False
-
-        logger.info("llama.cpp media marker changed (server restart); refreshed")
-        self._media_marker = marker
-        return True
-
     def embed(
         self,
         texts: list[str] | None = None,
         images: list[bytes] | None = None,
     ) -> list[np.ndarray]:
-        """Generate embeddings via llama.cpp /embeddings endpoint.
+        """Generate embeddings via llama.cpp /v1/embeddings endpoint.
 
-        Supports batch requests. Uses content format with prompt_string and
-        multimodal_data for images (PR #15108). Server must be started with
-        --embeddings and --mmproj for multimodal support.
+        Each text or image is one entry in `input`, using the chat-style
+        content array from ggml-org/llama.cpp#29556. Server must be started
+        with --embeddings, and --mmproj for image support.
         """
         if self.provider is None:
             logger.warning(
@@ -678,49 +801,42 @@ class LlamaCppClient(GenAIClient):
 
         EMBEDDING_DIM = 768
 
-        encoded_images: list[str] = []
+        inputs: list[dict[str, Any]] = [
+            {"content": [{"type": "text", "text": text}]} for text in texts
+        ]
+
         for img in images:
             # llama.cpp uses STB which does not support WebP; convert to JPEG
             jpeg_bytes = _to_jpeg(img)
             to_encode = jpeg_bytes if jpeg_bytes is not None else img
-            encoded_images.append(base64.b64encode(to_encode).decode("utf-8"))
-
-        def build_content() -> list[dict[str, Any]]:
-            # prompt_string must contain the server's media marker placeholder
-            # for each image. The marker is randomized per server startup.
-            content: list[dict[str, Any]] = []
-            for text in texts:
-                content.append({"prompt_string": text})
-            for encoded in encoded_images:
-                content.append(
-                    {
-                        "prompt_string": f"{self._media_marker}\n",
-                        "multimodal_data": [encoded],
-                    }
-                )
-            return content
-
-        def post_embeddings() -> requests.Response:
-            return self._post(
-                f"{self.provider}/embeddings",
-                json={"model": self.genai_config.model, "content": build_content()},
-                timeout=self.timeout,
+            encoded = base64.b64encode(to_encode).decode("utf-8")
+            # The trailing newline keeps tokenization identical to the older
+            # "<__media__>\n" prompt_string format, so indexed vectors stay valid
+            inputs.append(
+                {
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{encoded}"},
+                        },
+                        {"type": "text", "text": "\n"},
+                    ]
+                }
             )
 
         try:
-            try:
-                response = post_embeddings()
-                response.raise_for_status()
-            except requests.exceptions.RequestException:
-                # The server may have restarted with a new media marker.
-                # Refresh from /props; only retry if the marker actually changed.
-                if not encoded_images or not self._refresh_media_marker():
-                    raise
-                response = post_embeddings()
-                response.raise_for_status()
-            result = response.json()
+            response = self._post(
+                f"{self.provider}/v1/embeddings",
+                json={
+                    "model": self.genai_config.model,
+                    "input": inputs,
+                    "encoding_format": "float",
+                },
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            items = response.json().get("data")
 
-            items = result.get("data", result) if isinstance(result, dict) else result
             if not isinstance(items, list):
                 logger.warning("llama.cpp embeddings returned unexpected format")
                 return []
@@ -731,11 +847,7 @@ class LlamaCppClient(GenAIClient):
                 if emb is None:
                     logger.warning("llama.cpp embeddings item missing embedding field")
                     continue
-                arr = np.array(emb, dtype=np.float32)
-                if arr.ndim > 1:
-                    # llama.cpp can return token-level embeddings; pool per item
-                    arr = arr.mean(axis=0)
-                arr = arr.flatten()
+                arr = np.array(emb, dtype=np.float32).flatten()
                 orig_dim = arr.size
                 if orig_dim != EMBEDDING_DIM:
                     if orig_dim > EMBEDDING_DIM:

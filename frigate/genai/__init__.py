@@ -104,14 +104,30 @@ class GenAIClient:
         preferred_language: str | None,
         debug_save: bool,
         activity_context_prompt: str,
+        response_style: str = "default",
+        frame_captions: list[str] | None = None,
     ) -> ReviewMetadata | None:
-        """Generate a description for the review item activity."""
+        """Generate a description for the review item activity.
+
+        `frame_captions` holds one caption per thumbnail for the annotated
+        frame mode; each is sent directly before its frame.
+        """
+        if frame_captions and len(frame_captions) != len(thumbnails):
+            logger.warning(
+                "Got %d frame captions for %d thumbnails, sending plain frames",
+                len(frame_captions),
+                len(thumbnails),
+            )
+            frame_captions = None
+
         context_prompt = build_review_description_prompt(
             review_data,
             thumbnails,
             concerns,
             preferred_language,
             activity_context_prompt,
+            response_style,
+            frame_captions,
         )
 
         logger.debug(
@@ -127,9 +143,30 @@ class GenAIClient:
             ) as f:
                 f.write(context_prompt)
 
+            if frame_captions:
+                # One file per frame, numbered to match the image it precedes
+                # (0.txt goes with 0.jpg), so the debug folder replays without
+                # having to re-derive the mapping.
+                for index, caption in enumerate(frame_captions):
+                    with open(
+                        os.path.join(
+                            CLIPS_DIR,
+                            "genai-requests",
+                            review_data["id"],
+                            f"{index}.txt",
+                        ),
+                        "w",
+                    ) as f:
+                        f.write(caption)
+
         response_format = build_review_description_response_format(concerns)
 
-        response = self._send(context_prompt, thumbnails, response_format)
+        response = self._send(
+            context_prompt,
+            thumbnails,
+            response_format,
+            image_captions=frame_captions,
+        )
 
         if debug_save and response:
             with open(
@@ -267,6 +304,7 @@ class GenAIClient:
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to the provider.
 
@@ -274,6 +312,10 @@ class GenAIClient:
         ``supports_toggleable_thinking``. Description-style callers leave it
         at the default (off) since synthesis tasks don't benefit from
         reasoning traces.
+
+        ``image_captions`` carries one caption per image, to be placed
+        immediately before its image so the model can tell the frames apart.
+        Providers build their request order with ``interleave_images``.
         """
         return None
 
@@ -296,12 +338,32 @@ class GenAIClient:
         """Whether the configured model can generate embeddings via embed()."""
         return False
 
+    @property
+    def supports_transcription(self) -> bool:
+        """Whether the configured model can transcribe audio via transcribe()."""
+        return False
+
     def list_models(self) -> list[str]:
         """Return the list of model names available from this provider.
 
         Providers should override this to query their backend.
         """
         return []
+
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Return capability flags for each model the provider serves.
+
+        Only providers whose backend advertises capabilities per model can
+        populate this; llama.cpp reports input modalities for every model it
+        serves, so one request describes them all. An empty mapping means "no
+        per-model information available", and callers fall back to this
+        client's own capability properties, which describe only the configured
+        model. A model absent from a non-empty mapping means the same thing.
+
+        Returns:
+            Model name (including aliases) to its capability flags
+        """
+        return {}
 
     def get_context_size(self) -> int:
         """Get the context window size for this provider in tokens."""
@@ -333,6 +395,33 @@ class GenAIClient:
             self.__class__.__name__,
         )
         return []
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe speech audio to text.
+
+        Audio is passed as a self-describing blob rather than raw samples so
+        every provider receives a container it can declare, and WAV framing
+        lives in one place instead of in each plugin.
+
+        Args:
+            audio: The encoded audio payload (WAV bytes by default)
+            language: Optional ISO language hint for the provider
+            mime_type: Media type of ``audio``
+
+        Returns:
+            The transcript, or None when the provider cannot produce one
+        """
+        logger.warning(
+            "%s does not support transcription. "
+            "This method should be overridden by the provider implementation.",
+            self.__class__.__name__,
+        )
+        return None
 
     def chat_with_tools(
         self,

@@ -50,6 +50,10 @@
       "deleteNow": "Smazat hned",
       "export": "Exportovat",
       "markAsUnreviewed": "Označit jako nezkontrolované"
+    },
+    "shareTimestamp": {
+      "label": "Sdílet časovou značku",
+      "title": "Sdílet časovou značku"
     }
   },
   "export": {
@@ -75,14 +79,15 @@
       "success": "Export úspěšně spuštěn. Soubor najdete na stránce exportů.",
       "error": {
         "failed": "Chyba spuštění exportu: {{error}}",
-        "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku",
-        "noVaildTimeSelected": "Není vybráno žádné platné časové období"
+        "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku"
       },
       "view": "Zobrazení",
       "queued": "Export zařazen do fronty. Průběh zobrazíte na stránce Exporty.",
       "batchSuccess_one": "Začal 1 export. Nyní se otevírá případ.",
       "batchSuccess_few": "Začaly {{count}} exporty. Nyní se otevírá případ.",
-      "batchSuccess_other": "Začalo {{count}} exportů. Nyní se otevírá případ."
+      "batchSuccess_other": "Začalo {{count}} exportů. Nyní se otevírá případ.",
+      "batchPartial": "Spuštěno {{successful}} z {{total}} exportů. Neúspěšné kamery: {{failedCameras}}",
+      "batchQueuedPartial": "Ve frontě {{successful}} z {{total}} exportů. Neúspěšné kamery: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Uložit export",
@@ -143,9 +148,6 @@
         "started_one": "Spuštěn 1 export. Otevírá se případ.",
         "started_few": "Spuštěny {{count}} exporty. Otevírá se případ.",
         "started_other": "Spuštěno {{count}} exportů. Otevírá se případ.",
-        "startedNoCase_one": "Spuštěn 1 export.",
-        "startedNoCase_few": "Spuštěny {{count}} exporty.",
-        "startedNoCase_other": "Spuštěno {{count}} exportů.",
         "partial": "Spuštěno {{successful}} z {{total}} exportů. Selhalo: {{failedItems}}",
         "failed": "Nepodařilo se spustit {{total}} exportů. Selhalo: {{failedItems}}"
       }
@@ -156,8 +158,7 @@
     "restreaming": {
       "disabled": "Restreaming pro tuto kameru není povolen.",
       "desc": {
-        "title": "Nastavte go2rtc pro rozšiřující živé zobrazení a pro zvuk pro tuto kameru.",
-        "readTheDocumentation": "Přečtěte si dokumentaci"
+        "title": "Nastavte go2rtc pro rozšiřující živé zobrazení a pro zvuk pro tuto kameru."
       }
     },
     "showStats": {

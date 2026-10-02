@@ -22,8 +22,9 @@ Frigate supports multiple different detectors that work on different types of ha
 **Most Hardware**
 
 - [Coral EdgeTPU](#edge-tpu-detector): The Google Coral EdgeTPU is available in USB, Mini PCIe, and m.2 formats allowing for a wide range of compatibility with devices.
-- [Hailo](#hailo-8): The Hailo8 and Hailo8L AI Acceleration module is available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
+- [Hailo](#hailo): The Hailo-8, Hailo-8L and Hailo-8R AI Acceleration modules are available in m.2 format with a HAT for RPi devices, offering a wide range of compatibility with devices.
 - <CommunityBadge /> [MemryX](#memryx-mx3): The MX3 Acceleration module is available in m.2 format, offering broad compatibility across various platforms.
+- <CommunityBadge /> [DEEPX](#deepx-npu): The DEEPX NPU is available in m.2 format and as a HAT+ for the Raspberry Pi 5, offering broad compatibility across various platforms.
 
 **AMD**
 
@@ -34,6 +35,7 @@ Frigate supports multiple different detectors that work on different types of ha
 **Apple Silicon**
 
 - [Apple Silicon](#apple-silicon-detector): Apple Silicon can run on M1 and newer Apple Silicon devices.
+- <CommunityBadge /> [ONNX](#apple-neural-engine-lighter): the ONNX detector runs on the Neural Engine of M1 and newer Macs when Frigate runs under the lighter container runtime.
 
 **Intel**
 
@@ -69,9 +71,67 @@ Frigate supports multiple different detectors that work on different types of ha
 
 :::note
 
-Multiple detectors can not be mixed for object detection (ex: OpenVINO and Coral EdgeTPU can not be used for object detection at the same time).
+A single model can not be spread across different detector types (ex: OpenVINO and Coral EdgeTPU can not run the same model at the same time). Configuring more than one model, each on its own detector type, is supported.
 
 This does not affect using hardware for accelerating other tasks such as [semantic search](./semantic_search.md)
+
+:::
+
+### Configuring models and hardware
+
+Object detection is configured with a `models` list. Each entry describes one model and the hardware it runs on:
+
+```yaml
+models:
+  - devices:
+      - openvino:GPU
+    path: /config/model_cache/yolov9-s.onnx
+    model_type: yolo-generic
+    width: 320
+    height: 320
+```
+
+Each entry in `devices` is a detector type, optionally followed by a colon and a device for that detector, such as `edgetpu:pci:0`, `openvino:NPU`, or `tensorrt:0`. The per-detector sections below document the device values each one accepts. Listing several devices runs the model on all of them, and listing the **same** device more than once runs additional inference processes against it, which can improve throughput on hardware that keeps up with more than one stream:
+
+```yaml
+models:
+  - devices:
+      - openvino:GPU
+      - openvino:GPU
+```
+
+Coral EdgeTPU and MemryX accelerators can only be opened by one process, so those devices can not be repeated.
+
+### Running more than one model
+
+Cameras can be split across models by scene, which is useful when some cameras benefit from a differently trained model, such as thermal cameras. Each model declares the `scene` it is for, and each camera picks one with `detect -> scene`:
+
+```yaml
+models:
+  - scene: default
+    path: plus://your-model
+    devices:
+      - edgetpu:pci:0
+  - scene: thermal
+    path: /config/model_cache/thermal.onnx
+    model_type: yolo-generic
+    devices:
+      - openvino:GPU
+
+cameras:
+  driveway:
+    ...
+  backyard_thermal:
+    detect:
+      scene: thermal
+    ...
+```
+
+A scene is any name made up of letters, numbers, `_`, and `-`. The model with a scene of `default` is used by every camera that does not set one (or sets a scene that no model is configured for), and `default` is used when a model does not declare a scene. Changing a camera's scene requires a restart.
+
+:::warning
+
+Scenes are for running **different** models. Do not configure the same model under several scenes to dedicate a detector to specific cameras: every detector of a model already serves every camera using it, and splitting them only leaves some detectors idle while others fall behind. Frigate detects models that use the same model file, even under a different path or file name, combines them into one model with all of their hardware, and logs a warning.
 
 :::
 
@@ -81,7 +141,7 @@ Along with picking a detector for your hardware, you will choose a model's **inp
 
 **Resolution (320x320 vs 640x640):** Frigate is optimized for `320x320` models, and `320x320` is the best choice for the vast majority of setups. Frigate is specifically designed to compensate for the smaller model by cropping a region of motion from the full frame and zooming into it before running detection, so a `320x320` model is actually _better_ at small and distant objects, not worse. A `640x640` model is slower and uses more resources, and its main benefit is fitting more objects into a single inference when many objects are spread across a large area. Recent versions of Frigate have improved support for `640x640` models, but `320x320` remains the recommended starting point for nearly all setups.
 
-**Variant size (tiny/small/medium):** Larger variants are gradually more accurate but slower. Whether the difference is noticeable depends on your specific cameras and scenes. A good rule of thumb is to use the largest model your hardware can run without skipping detections, which you can monitor on the <NavPath path="System > Metrics > Cameras" /> page in the UI. Better accuracy only helps if your detector keeps up with the detection load across all cameras.
+**Variant size (tiny/small/medium):** Larger variants are gradually more accurate but slower. Whether the difference is noticeable depends on your specific cameras and scenes. A good rule of thumb is to use the largest model your hardware can run without skipping detections, which you can monitor on the <NavPath path="Health and Metrics > Cameras" /> page in the UI. Better accuracy only helps if your detector keeps up with the detection load across all cameras.
 
 **Acceptable inference time depends on your hardware.** Inference time alone does not tell the whole story, because different hardware has different capacity. A GPU can run multiple instances of the same model concurrently, so an inference time around 30ms can still keep up with several cameras. A Google Coral runs only a single instance of the model, so it needs a much lower inference time (around 10ms) to keep up.
 
@@ -93,11 +153,11 @@ The best detection accuracy comes from a model trained on images that look like 
 
 # Officially Supported Detectors
 
-Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. When using multiple detectors they will run in dedicated processes, but pull from a common queue of detection requests from across all cameras.
+Frigate provides a number of builtin detector types. By default, Frigate will use a single CPU detector. Other detectors may require additional configuration as described below. Each of a model's devices runs in a dedicated process, and they pull from a common queue of detection requests from the cameras assigned to that model.
 
 ## Edge TPU Detector
 
-The Edge TPU detector type runs TensorFlow Lite models utilizing the Google Coral delegate for hardware acceleration. To configure an Edge TPU detector, set the `"type"` attribute to `"edgetpu"`.
+The Edge TPU detector type runs TensorFlow Lite models utilizing the Google Coral delegate for hardware acceleration. To use it, prefix a model's device with `edgetpu`.
 
 The Edge TPU device can be specified using the `"device"` attribute according to the [Documentation for the TensorFlow Lite Python API](https://coral.ai/docs/edgetpu/multiple-edgetpu/#using-the-tensorflow-lite-python-api). If not set, the delegate will use the first device it finds.
 
@@ -112,16 +172,15 @@ See [common Edge TPU troubleshooting steps](/troubleshooting/edgetpu) if the Edg
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `usb`.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 ```
 
 </TabItem>
@@ -132,19 +191,16 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `usb:0` and `usb:1` as the device for each.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown and check each Coral the model should run on.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral1:
-    type: edgetpu
-    device: usb:0
-  coral2:
-    type: edgetpu
-    device: usb:1
+models:
+  - devices:
+      - edgetpu:usb:0
+      - edgetpu:usb:1
 ```
 
 </TabItem>
@@ -157,16 +213,15 @@ _warning: may have [compatibility issues](https://github.com/blakeblackshear/fri
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then leave the device field empty.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select the **Coral EdgeTPU** entry from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: ""
+models:
+  - devices:
+      - 'edgetpu:'
 ```
 
 </TabItem>
@@ -177,16 +232,15 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add**, then set device to `pci`.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (PCIe)** from the **Hardware** dropdown.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral:
-    type: edgetpu
-    device: pci
+models:
+  - devices:
+      - edgetpu:pci
 ```
 
 </TabItem>
@@ -197,19 +251,16 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors, specifying `pci:0` and `pci:1` as the device for each.
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (PCIe)** from the **Hardware** dropdown and check each Coral the model should run on.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral1:
-    type: edgetpu
-    device: pci:0
-  coral2:
-    type: edgetpu
-    device: pci:1
+models:
+  - devices:
+      - edgetpu:pci:0
+      - edgetpu:pci:1
 ```
 
 </TabItem>
@@ -220,19 +271,16 @@ detectors:
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" /> and select **EdgeTPU** from the detector type dropdown and click **Add** to add multiple detectors with different device types (e.g., `usb` and `pci`).
+Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown. USB and PCIe Corals are listed as separate hardware, so mixing the two on one model has to be done in YAML.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors:
-  coral_usb:
-    type: edgetpu
-    device: usb
-  coral_pci:
-    type: edgetpu
-    device: pci
+models:
+  - devices:
+      - edgetpu:usb
+      - edgetpu:pci
 ```
 
 </TabItem>
@@ -244,9 +292,9 @@ detectors:
 
 ---
 
-## Hailo-8
+## Hailo
 
-This detector is available for use with both Hailo-8 and Hailo-8L AI Acceleration Modules. The integration automatically detects your hardware architecture via the Hailo CLI and selects the appropriate default model if no custom model is specified.
+This detector is available for use with the Hailo-8, Hailo-8L and Hailo-8R AI Acceleration Modules. The integration identifies which of them is attached and selects the matching default model if no custom model is specified.
 
 See the [installation docs](../frigate/installation.md#hailo-8) for information on configuring the Hailo hardware.
 
@@ -256,16 +304,22 @@ If no custom model is provided, the Hailo detector downloads a default model fro
 
 :::
 
+:::info
+
+The HailoRT runtime is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time a Hailo detector is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+
+:::
+
 ### Configuration {#configuration-hailo}
 
 When configuring the Hailo detector, you have two options to specify the model: a local **path** or a **URL**.
 If both are provided, the detector will first check for the model at the given local path. If the file is not found, it will download the model from the specified URL. The model file is cached under `/config/model_cache/hailo`.
 
-<ModelConfigDropdown detectorTitle="Hailo-8/Hailo-8L" models={objectDetectorsModels.hailo8l.models} />
+<ModelConfigDropdown detectorTitle="Hailo" models={objectDetectorsModels.hailo.models} />
 
 For additional ready-to-use models, please visit: https://github.com/hailo-ai/hailo_model_zoo
 
-Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
+Hailo supports all models in the Hailo Model Zoo that include HailoRT post-processing. You're welcome to choose any of these pre-configured models for your implementation.
 
 > **Note:**
 > The config.path parameter can accept either a local file path or a URL ending with .hef. When provided, the detector will first check if the path is a local file path. If the file exists locally, it will use it directly. If the file is not found locally or if a URL was provided, it will attempt to download the model from the specified URL.
@@ -274,7 +328,7 @@ Hailo8 supports all models in the Hailo Model Zoo that include HailoRT post-proc
 
 ## OpenVINO Detector
 
-The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel NPUs. To configure an OpenVINO detector, set the `"type"` attribute to `"openvino"`.
+The OpenVINO detector type runs an OpenVINO IR model on AMD and Intel CPUs, Intel GPUs and Intel NPUs. To use it, prefix a model's device with `openvino`.
 
 The OpenVINO device to be used is specified using the `"device"` attribute according to the naming conventions in the [Device Documentation](https://docs.openvino.ai/2025/openvino-workflow/running-inference/inference-devices-and-modes.html). The most common devices are `CPU`, `GPU`, or `NPU`.
 
@@ -287,18 +341,17 @@ OpenVINO is supported on 6th Gen Intel platforms (Skylake) and newer. It will al
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
-detectors:
-  ov_0:
-    type: openvino
-    device: GPU # or NPU
-  ov_1:
-    type: openvino
-    device: GPU # or NPU
+models:
+  - devices:
+      - openvino:GPU # or NPU
+      - openvino:GPU # or NPU
 ```
 
 :::
 
 ### Intel NPU host requirements {#intel-npu-requirements}
+
+The NPU device must be passed into the container by adding `/dev/accel:/dev/accel` to the `devices` section of your compose file. Frigate grants the runtime user access to the device automatically; see [hardware device access](/configuration/non_root#hardware-device-access) if you manage device permissions yourself.
 
 The NPU firmware is loaded by the host kernel and is not part of the Frigate image. Everything else the NPU needs is bundled in the container, so host NPU libraries should never be mounted in.
 
@@ -313,6 +366,12 @@ Intel NPUs cannot be used under Home Assistant OS, which does not include the NP
 ---
 
 ## Apple Silicon detector
+
+:::warning
+
+The Apple Silicon detector client is being reworked. Its extra options no longer have a place in the config, so only the endpoint carried in the device string is honored right now, and `request_timeout_ms` and `linger_ms` are ignored. Anything else is dropped when your config is migrated.
+
+:::
 
 The NPU in Apple Silicon can't be accessed from within a container, so the [Apple Silicon detector client](https://github.com/frigate-nvr/apple-silicon-detector) must first be setup. It is recommended to use the Frigate docker image with `-standard-arm64` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-standard-arm64`.
 
@@ -431,7 +490,7 @@ See [ONNX supported models](#onnx) for supported models, there are some caveats:
 
 ## ONNX
 
-ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, and TensorRT. On startup Frigate will automatically try to use a GPU if one is available.
+ONNX is an open format for building machine learning models, Frigate supports running ONNX models on CPU, OpenVINO, ROCm, TensorRT, and a Mac's Neural Engine. On startup Frigate will automatically try to use a GPU if one is available.
 
 :::info
 
@@ -447,6 +506,9 @@ If the correct build is used for your GPU then the GPU will be detected and used
   - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
   - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image.
 
+- **Apple Silicon Mac** <CommunityBadge />
+  - The Neural Engine will automatically be detected and used with the ONNX detector when Frigate runs under lighter with its Neural Engine device. See [Apple Neural Engine (lighter)](#apple-neural-engine-lighter).
+
 :::
 
 :::tip
@@ -454,14 +516,29 @@ If the correct build is used for your GPU then the GPU will be detected and used
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
-detectors:
-  onnx_0:
-    type: onnx
-  onnx_1:
-    type: onnx
+models:
+  - devices:
+      - onnx
+      - onnx
 ```
 
 :::
+
+### Apple Neural Engine (lighter) {#apple-neural-engine-lighter}
+
+[lighter](https://github.com/fieldwork-ai/lighter) is an open-source container runtime for macOS. A container started with its `lighter.sh/ane` device gets an ONNX Runtime execution provider that runs models on the Mac's Neural Engine, and the ONNX detector uses it automatically, with the same models and configuration as on any other hardware. It works on M1 and newer Macs with lighter 0.9.2 or newer.
+
+Give the Frigate container the Neural Engine device. With Docker Compose:
+
+```yaml
+services:
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:stable-standard-arm64
+    devices:
+      - lighter.sh/ane=all
+```
+
+Or with `docker run`, add `--device lighter.sh/ane=all`. Frigate then reports the Neural Engine under **Settings > System > Detection models**, and the ONNX detector's model loads on it. lighter can also decode camera streams on the Mac's media engine; see [Video Decoding](hardware_acceleration_video.md#apple-silicon-mac-lighter).
 
 ### Configuration {#configuration-onnx}
 
@@ -471,7 +548,7 @@ detectors:
 
 ## CPU Detector (not recommended)
 
-The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To configure a CPU based detector, set the `"type"` attribute to `"cpu"`.
+The CPU detector type runs a TensorFlow Lite model utilizing the CPU without hardware acceleration. It is recommended to use a hardware accelerated detector type instead for better performance. To use it, set a model's device to `cpu`.
 
 :::danger
 
@@ -481,31 +558,13 @@ The CPU detector is not recommended for general use. If you do not have GPU or E
 
 The number of threads used by the interpreter can be specified using the `"num_threads"` attribute, and defaults to `3.`
 
-A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with `model.path`.
+A TensorFlow Lite model is provided in the container at `/cpu_model.tflite` and is used by this detector type by default. To provide your own model, bind mount the file into the container and provide the path with the model's `path`.
 
 ### Configuration {#configuration-cpu}
 
 <ModelConfigDropdown detectorTitle="CPU" models={objectDetectorsModels.cpu.models} />
 
 When using CPU detectors, you can add one CPU detector per camera. Adding more detectors than the number of cameras should not improve performance.
-
-## Deepstack / CodeProject.AI Server Detector
-
-The Deepstack / CodeProject.AI Server detector for Frigate allows you to integrate Deepstack and CodeProject.AI object detection capabilities into Frigate. CodeProject.AI and DeepStack are open-source AI platforms that can be run on various devices such as the Raspberry Pi, Nvidia Jetson, and other compatible hardware. It is important to note that the integration is performed over the network, so the inference times may not be as fast as native Frigate detectors, but it still provides an efficient and reliable solution for object detection and tracking.
-
-### Setup {#setup-deepstack}
-
-To get started with CodeProject.AI, visit their [official website](https://www.codeproject.com/Articles/5322557/CodeProject-AI-Server-AI-the-easy-way) to follow the instructions to download and install the AI server on your preferred device. Detailed setup instructions for CodeProject.AI are outside the scope of the Frigate documentation.
-
-To integrate CodeProject.AI into Frigate, configure the detector as follows:
-
-### Configuration {#configuration-deepstack}
-
-<ModelConfigDropdown detectorTitle="DeepStack" models={objectDetectorsModels.deepstack.models} />
-
-Replace `<your_codeproject_ai_server_ip>` and `<port>` with the IP address and port of your CodeProject.AI server.
-
-To verify that the integration is working correctly, start Frigate and observe the logs for any error messages related to CodeProject.AI. Additionally, you can check the Frigate web interface to see if the objects detected by CodeProject.AI are being displayed and tracked properly.
 
 # Community Supported Detectors
 
@@ -538,6 +597,12 @@ This detector is available for use with the MemryX MX3 accelerator M.2 module. F
 See the [installation docs](../frigate/installation.md#memryx-mx3) for information on configuring the MemryX hardware.
 
 To configure a MemryX detector, simply set the `type` attribute to `memryx` and follow the configuration guide below.
+
+:::info
+
+The MemryX SDK is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time a MemryX detector is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+
+:::
 
 ### Configuration {#configuration-memryx}
 
@@ -575,7 +640,7 @@ For detailed instructions on compiling models, refer to the [MemryX Compiler](ht
 
 3. Depending on the model, the compiler may also generate a cropped post-processing network. If present, it will be named with the suffix `_post.onnx`.
 
-4. Bind-mount the `.zip` file into the container and specify its path using `model.path` in your config.
+4. Bind-mount the `.zip` file into the container and specify its path using the model's `path` in your config.
 
 5. Update `labelmap_path` to match your custom model's labels.
 
@@ -592,6 +657,63 @@ For detailed instructions on compiling models, refer to the [MemryX Compiler](ht
 # ├── yolonas.dfp          (a file ending with .dfp)
 # └── yolonas_post.onnx    (optional; only if the model includes a cropped post-processing network)
 ```
+
+---
+
+## DEEPX NPU
+
+This detector is available for use with the DEEPX NPU, both the DX-M1 M.2 module and the DX-M1M on the Sixfab AI HAT+ for the Raspberry Pi 5. The configuration below applies unchanged to either form factor. DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
+
+See the [installation docs](../frigate/installation.md#deepx-npu) for information on installing the DEEPX kernel driver and runtime on the host and passing the NPU through to the container.
+
+To run a model on a DEEPX NPU, list a `deepx` device on that model.
+
+:::info
+
+The DX-RT Python bindings are not part of the Frigate image. They are downloaded and installed into `/config/.local` the first time a DEEPX device is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+
+:::
+
+### Configuration {#configuration-deepx}
+
+<ModelConfigDropdown detectorTitle="DEEPX" models={objectDetectorsModels.deepx.models} />
+
+Frigate does not bundle a model for this detector. Models must be compiled to DEEPX's `.dxnn` format. Two model types are supported:
+
+- `yolo-generic` for YOLO object detection models, the recommended default. The detector reads the model's output layout from the compiled file, so anchor-based, anchor-free and NMS-in-head models all work with the same configuration, as do models compiled with DEEPX's Post-Processing Unit (PPU) support.
+- `yolox` for YOLOX models compiled without PPU support, whose raw head needs Frigate's YOLOX decoder. A YOLOX model compiled with PPU support works under either `yolox` or `yolo-generic`.
+
+The quickest way to get one is the [DEEPX ModelZoo](https://developer.deepx.ai/modelzoo), which publishes pre-compiled `.dxnn` files for a range of YOLO object detection models. Download the `.dxnn`, bind-mount it into the container, and point the model's `path` at it. Alternatively, compile your own model with the DX-COM compiler. The recommended starting point is `yolox-s_640x640_ppu.dxnn`, the fastest ModelZoo model measured through Frigate:
+
+```yaml
+models:
+  - devices:
+      - deepx:PCIe:0
+    path: /config/model_cache/deepx/yolox-s_640x640_ppu.dxnn
+    labelmap_path: /labelmap/coco-80.txt
+    model_type: yolo-generic
+    width: 640
+    height: 640
+```
+
+For PPU models, use a `.dxnn` compiled with DX-COM 2.4.0 or later. Frigate reads the PPU head layout the compiler writes into the file and refuses to load a PPU model without it.
+
+`model_type` must be set to `yolo-generic` or `yolox` to match the model; `yolo-generic` is the recommended default unless the model is a raw YOLOX export. Frigate defaults it to `ssd`, which this detector does not support, so the detector refuses to start on a model that leaves it unset.
+
+`width` and `height` must match the resolution the model was compiled for. Quantization parameters are baked into the `.dxnn` file at compile time, so no normalization is applied on the host and Frigate's default `input_tensor`, `input_pixel_format`, and `input_dtype` values do not need to be overridden.
+
+A DEEPX device is `PCIe:<index>`, as reported on the detector settings page. The NPU daemon multiplexes across processes, so the same device may be listed more than once to run additional inference processes against it:
+
+```yaml
+models:
+  - devices:
+      - deepx:PCIe:0
+      - deepx:PCIe:0
+```
+
+#### Label maps
+
+The object detection models in the DEEPX ModelZoo are trained on the standard 80-class COCO label set, so `labelmap_path` must be set to `/labelmap/coco-80.txt`. Frigate's default label map uses an extended 91-class COCO scheme, and leaving it in place will cause detections to be reported as the wrong object type. For `yolo-generic` models the label map is also what the detector uses to tell the output layout, so a label map with the wrong number of classes is reported as an error at startup.
 
 ---
 
@@ -705,13 +827,10 @@ If no custom model is provided, the RKNN detector downloads a default model from
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming NPU resources are available. An example configuration would be:
 
 ```yaml
-detectors:
-  rknn_0:
-    type: rknn
-    num_cores: 0
-  rknn_1:
-    type: rknn
-    num_cores: 0
+models:
+  - devices:
+      - rknn:0
+      - rknn:0
 ```
 
 :::
@@ -799,6 +918,12 @@ See the [installation docs](../frigate/installation.md#axera) for information on
 :::info
 
 The AXEngine detector downloads its default model from HuggingFace on first startup. Once cached, the model works fully offline. See [Network Requirements](/frigate/network_requirements#hardware-specific-detector-models) for details.
+
+:::
+
+:::info
+
+The AXEngine python package is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time an AXEngine detector is configured, verified against a pinned checksum, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the file yourself.
 
 :::
 

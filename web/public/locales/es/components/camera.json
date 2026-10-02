@@ -33,8 +33,7 @@
         "audioIsUnavailable": "El audio no está disponible para esta transmisión",
         "audio": {
           "tips": {
-            "title": "El audio debe provenir de tu cámara y estar configurado en go2rtc para esta transmisión.",
-            "document": "Leer la documentación "
+            "title": "El audio debe provenir de tu cámara y estar configurado en go2rtc para esta transmisión."
           }
         },
         "streamMethod": {

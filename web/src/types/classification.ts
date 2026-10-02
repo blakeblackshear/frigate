@@ -1,4 +1,4 @@
-const TRAIN_FILTERS = ["class", "score"] as const;
+export const TRAIN_FILTERS = ["class", "score"] as const;
 export type TrainFilters = (typeof TRAIN_FILTERS)[number];
 
 export type TrainFilter = {

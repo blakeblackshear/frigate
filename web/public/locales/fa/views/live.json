@@ -72,8 +72,6 @@
     "downloadStarted": "دانلود عکس فوری آغاز شد."
   },
   "camera": {
-    "enable": "فعال کردن دوربین",
-    "disable": "غیرفعال کردن دوربین",
     "turnOn": "روشن کردن دوربین",
     "turnOff": "خاموش کردن دوربین"
   },
@@ -131,7 +129,6 @@
     "snapshots": "اسنپ‌شات‌ها",
     "audioDetection": "تشخیص صدا",
     "autotracking": "ردیابی خودکار",
-    "cameraEnabled": "دوربین فعال",
     "recording": "ضبط",
     "transcription": "رونویسی صوتی",
     "camera": "دوربین"
