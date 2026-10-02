@@ -6,7 +6,7 @@ import unittest
 
 from ruamel.yaml import YAML
 
-from frigate.util.builtin import update_yaml_file_bulk
+from frigate.util.builtin import clear_orphaned_comments, update_yaml_file_bulk
 
 
 class TestUpdateYaml(unittest.TestCase):
@@ -177,6 +177,27 @@ class TestUpdateYaml(unittest.TestCase):
         data = self._load()
         assert data["cameras"]["cam1"]["detect"]["fps"] == 5
         assert "# tuned for the pi" in self._read()
+
+    def test_delete_only_camera_with_comment_on_cameras_key(self):
+        """Deleting the only camera stays parseable when the cameras key
+        carries the default config's trailing comment."""
+        self._write(
+            "cameras: # No cameras defined, UI wizard should be used\n"
+            "  cam1:\n"
+            "    enabled: true\n"
+            "version: 0.18-0\n"
+        )
+        yaml = YAML()
+        with open(self.config_path) as f:
+            data = yaml.load(f)
+        del data["cameras"]["cam1"]
+        clear_orphaned_comments(data["cameras"], data, "cameras")
+        with open(self.config_path, "w") as f:
+            yaml.dump(data, f)
+
+        data = self._load()
+        assert data["cameras"] == {}
+        assert data["version"] == "0.18-0"
 
 
 if __name__ == "__main__":
