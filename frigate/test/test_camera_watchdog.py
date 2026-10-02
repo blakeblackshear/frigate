@@ -59,7 +59,6 @@ def build_watchdog(
             MagicMock(),
         )
 
-    watchdog.requestor = MagicMock()
     return watchdog
 
 
@@ -108,8 +107,8 @@ class TestCameraWatchdogStreamHealth(unittest.TestCase):
     def test_status_goes_to_the_matching_role_topic(self):
         watchdog = self._build_watchdog()
 
-        watchdog._send_record_status(STREAM_TYPE_MAIN, "online", 100.0)
-        watchdog._send_record_status(STREAM_TYPE_SUB, "offline", 100.0)
+        watchdog.record_status[STREAM_TYPE_MAIN].send("online", 100.0)
+        watchdog.record_status[STREAM_TYPE_SUB].send("offline", 100.0)
 
         watchdog.requestor.send_data.assert_any_call(
             "front_door/status/record", "online"
@@ -121,9 +120,9 @@ class TestCameraWatchdogStreamHealth(unittest.TestCase):
     def test_status_is_cached_per_stream(self):
         watchdog = self._build_watchdog()
 
-        watchdog._send_record_status(STREAM_TYPE_MAIN, "online", 100.0)
-        watchdog._send_record_status(STREAM_TYPE_SUB, "online", 100.0)
-        watchdog._send_record_status(STREAM_TYPE_MAIN, "online", 100.0)
+        watchdog.record_status[STREAM_TYPE_MAIN].send("online", 100.0)
+        watchdog.record_status[STREAM_TYPE_SUB].send("online", 100.0)
+        watchdog.record_status[STREAM_TYPE_MAIN].send("online", 100.0)
 
         assert watchdog.requestor.send_data.call_count == 2
 
