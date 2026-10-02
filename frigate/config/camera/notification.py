@@ -1,6 +1,7 @@
 from pydantic import Field
 
 from ..base import FrigateBaseModel
+from ..env import EnvString
 
 __all__ = ["NotificationConfig"]
 
@@ -11,7 +12,7 @@ class NotificationConfig(FrigateBaseModel):
         title="Enable notifications",
         description="Enable or disable notifications for all cameras; can be overridden per-camera.",
     )
-    email: str | None = Field(
+    email: EnvString | None = Field(
         default=None,
         title="Notification email",
         description="Email address used for push notifications or required by certain notification providers.",
