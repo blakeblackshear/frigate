@@ -245,7 +245,8 @@
     "retry": "Reîncearcă",
     "expand": "Extinde",
     "collapse": "Restrânge",
-    "reload": "Reîncarcă"
+    "reload": "Reîncarcă",
+    "clear": "Șterge"
   },
   "unit": {
     "speed": {
