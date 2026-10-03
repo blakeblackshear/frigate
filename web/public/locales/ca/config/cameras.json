@@ -144,7 +144,7 @@
         },
         "scene": {
             "label": "Detecta l'escena",
-            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'totes' executen el model configurat amb una escena de 'totes'."
+            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'default' executen el model configurat amb una escena de 'default'."
         }
     },
     "face_recognition": {
@@ -245,6 +245,30 @@
         "quality": {
             "label": "Qualitat del directe",
             "description": "Qualitat de codificació per al flux jsmpeg (1 més alt, 31 més baix)."
+        },
+        "transcode": {
+            "label": "Fluxos transcodificats",
+            "description": "Fluxos en viu de baixa qualitat transcodificats sota demanda per go2rtc.",
+            "enabled": {
+                "label": "Habilita els fluxos transcodificats",
+                "description": "Afegeix fluxos en viu de baixa qualitat que go2rtc transcodifica en temps real mentre algú està mirant."
+            },
+            "source": {
+                "label": "Flux d'origen",
+                "description": "go2rtc flux a transcodificar. Per defecte al primer flux en viu."
+            },
+            "qualities": {
+                "label": "Qualitats",
+                "description": "S'afegeix un flux transcodificat per qualitat.",
+                "height": {
+                    "label": "Alçada",
+                    "description": "Alçada de sortida en píxels; l'amplada segueix la relació d'aspecte de la font."
+                },
+                "bitrate": {
+                    "label": "Taxa de bits",
+                    "description": "Taxa de bits de vídeo objectiu i màxima en kbps."
+                }
+            }
         }
     },
     "lpr": {

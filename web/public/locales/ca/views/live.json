@@ -166,6 +166,19 @@
         "webrtc": "WebRTC",
         "jsmpeg": "JSMpeg"
       }
+    },
+    "auto": {
+      "label": "Automàtic",
+      "tips": "Canvia els fluxos perquè coincideixin amb la vostra connexió",
+      "selected": "Automàtic · {{stream}}",
+      "floorLabel": "Amplada de banda baixa",
+      "retry": "Prova la màxima qualitat",
+      "reason": {
+        "bandwidth": "S'està reproduint {{stream}} perquè la connexió no s'ha pogut mantenir actualitzada amb un flux de més qualitat",
+        "codec": "S'està reproduint {{stream}} perquè aquest navegador no pot reproduir un flux de més qualitat",
+        "saveData": "S'està reproduint {{stream}} perquè l'estalvi de dades està activat",
+        "floor": "S'està reproduint el canal d'amplada de banda baixa perquè cap flux no podria mantenir-se"
+      }
     }
   },
   "streamingSettings": "Paràmetres de transmissió",
