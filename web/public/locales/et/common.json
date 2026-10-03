@@ -256,7 +256,8 @@
     "retry": "Proovi uuesti",
     "expand": "Laienda",
     "collapse": "Ahenda",
-    "reload": "Laadi uuesti"
+    "reload": "Laadi uuesti",
+    "clear": "Eemalda"
   },
   "label": {
     "back": "Mine tagasi",

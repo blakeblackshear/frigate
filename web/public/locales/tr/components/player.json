@@ -21,7 +21,9 @@
         "value": "{{droppedFrames}} kare"
       },
       "title": "Atlanan Kareler:"
-    }
+    },
+    "stream": "Yayın:",
+    "streamAuto": "{{stream}} (otomatik)"
   },
   "noPreviewFound": "Önizleme Bulunamadı",
   "toast": {

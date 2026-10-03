@@ -207,7 +207,8 @@
       "changeRole": {
         "roleInfo": {
           "admin": "Peakasutaja",
-          "viewer": "Vaataja"
+          "viewer": "Vaataja",
+          "viewerDesc": "Piiratud reaalajas juhtpaneeliga, ülevaatamisega, uurimisvaatega ja ekportimisega."
         }
       }
     },

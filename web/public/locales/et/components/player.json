@@ -25,7 +25,9 @@
       }
     },
     "decodedFrames": "Dekodeeritud kaadreid:",
-    "droppedFrameRate": "Vahelejäänud kaadrite sagedus:"
+    "droppedFrameRate": "Vahelejäänud kaadrite sagedus:",
+    "stream": "Voogedastus:",
+    "streamAuto": "{{stream}} (automaatne)"
   },
   "livePlayerRequiredIOSVersion": "Selle voogedastuse tüübi jaoks on vajalik iOS-i versioon 17.1 või uuem.",
   "streamOffline": {

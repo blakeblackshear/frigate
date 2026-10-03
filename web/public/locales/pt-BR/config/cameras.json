@@ -257,7 +257,7 @@
             "description": "Limiar de diferença de pixels utilizado pelo detector de movimento; valores mais altos reduzem a sensibilidade (faixa de 1 a 255)."
         },
         "lightning_threshold": {
-            "label": "Limiar de relâmpago",
+            "label": "Limiar de iluminação",
             "description": "Limite para detectar e ignorar picos breves de luminosidade (valores mais baixos indicam maior sensibilidade; valores entre 0,3 e 1,0). Isso não impede totalmente a detecção de movimento; apenas faz com que o detector pare de analisar quadros adicionais assim que o limite é excedido. Gravações baseadas em movimento continuam sendo geradas durante esses eventos."
         },
         "skip_motion_threshold": {

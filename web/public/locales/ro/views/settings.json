@@ -119,17 +119,24 @@
       "liveFallbackTimeout": {
         "label": "Timp de expirare pentru player-ul live",
         "desc": "Când stream-ul live de înaltă calitate nu este disponibil, comută pe modul de bandă redusă după acest număr de secunde. Implicit: 3."
+      },
+      "naturalAspectLayout": {
+        "label": "Folosește rapoartele de aspect naturale",
+        "desc": "Pe tablourile de bord pentru vizualizarea în direct a grupurilor de camere, ajustează fiecare cadru la proporțiile naturale ale camerei respective. Când opțiunea este dezactivată, camerele sunt fixate la un format de cadru standard lat, peisaj sau înalt.",
+        "descNote": "Activarea sau dezactivarea acestei setări va șterge aranjamentul salvat pentru toate tablourile de bord pentru vizualizarea în direct a grupurilor de camere. Va fi necesară reconfigurarea manuală."
       }
     },
     "storedLayouts": {
       "title": "Layout-uri Salvate",
       "desc": "Aranjamentul camerelor într-un grup poate fi tras sau redimensionat. Pozițiile sunt stocate în memoria locală a browserului tău.",
-      "clearAll": "Șterge toate layout-urile"
+      "clearAll": "Șterge toate layout-urile",
+      "clearConfirm": "Acest lucru va șterge aranjamentul salvat pentru fiecare grup de camere din acest browser. Această acțiune nu poate fi anulată."
     },
     "cameraGroupStreaming": {
       "title": "Setări Streaming Grup Camere",
       "desc": "Setările de streaming pentru fiecare grup de camere sunt stocate în memoria locală a browserului tău.",
-      "clearAll": "Șterge toate setările de streaming"
+      "clearAll": "Șterge toate setările de streaming",
+      "clearConfirm": "Acest lucru va șterge setările de streaming pentru fiecare grup de camere din acest browser. Această acțiune nu poate fi anulată."
     },
     "recordingsViewer": {
       "title": "Vizualizator Înregistrări",
@@ -193,7 +200,10 @@
         "unknownCameras_one": "Camera {{cameras}} nu se află pe acest server. Setările sale de streaming vor fi ignorate.",
         "unknownCameras_few": "Camerele {{cameras}} nu se află pe acest server. Setările lor de streaming vor fi ignorate.",
         "unknownCameras_other": "Camerele {{cameras}} nu se află pe acest server. Setările lor de streaming vor fi ignorate.",
-        "confirm": "Importă"
+        "confirm": "Importă",
+        "layoutsPhone": "Aranjamentele grupurilor de camere nu sunt importate pe telefoane, acestea folosind întotdeauna grila standard.",
+        "layoutsModeOn": "Aceste aranjamente folosesc dimensionarea cadrelor în funcție de raportul de aspect al camerei, așa că importarea lor va activa și opțiunea „Folosește rapoartele de aspect naturale”.",
+        "layoutsModeOff": "Aceste aranjamente folosesc dimensionarea standard a cadrelor, așa că importarea lor va dezactiva și opțiunea „Folosește rapoartele de aspect naturale”."
       }
     }
   },
@@ -912,7 +922,10 @@
       "actions": "Acțiuni",
       "noRoles": "Nu s-au găsit roluri personalizate.",
       "editCameras": "Editează camerele",
-      "deleteRole": "Șterge rolul"
+      "deleteRole": "Șterge rolul",
+      "cameraCount_one": "{{count}} cameră",
+      "cameraCount_few": "{{count}} camere",
+      "cameraCount_other": "{{count}} de camere"
     },
     "toast": {
       "success": {
@@ -1698,7 +1711,15 @@
       "noGo2rtcStreams": "Niciun stream go2rtc configurat",
       "availableStreams": "Stream-uri disponibile",
       "useCustom": "Folosește \"{{value}}\"",
-      "addStream": "Adaugă stream"
+      "addStream": "Adaugă stream",
+      "reorderHandle": "Trage pentru a reordona",
+      "transcodedBadge": "Transcodat",
+      "autoOrder": "Ordonare automată",
+      "autoOrderTips": "Măsoară bitrate-ul fiecărui stream și le sortează începând cu cel mai mare",
+      "measuring": "Se măsoară…",
+      "rate": "{{kbps}} kbps",
+      "rateSet": "{{kbps}} kbps (setat)",
+      "rateFailed": "Nu s-a putut măsura"
     },
     "ptzPresets": {
       "placeholder": "Selectați sau introduceți o presetare...",
@@ -1729,6 +1750,18 @@
     },
     "audioTranscriptionModelSize": {
       "notApplicable": "Nu se aplică pentru furnizorii GenAI"
+    },
+    "liveTranscode": {
+      "title": "Stream-uri transcodate",
+      "description": "Adaugă stream-uri de calitate mai scăzută pe care go2rtc le transcodează în timp real în timp ce cineva se uită.",
+      "unavailable": "Stream-urile transcodate au nevoie de un stream go2rtc din care să citească. Adaugă mai întâi unul la stream-uri go2rtc.",
+      "enable": "Activează stream-urile transcodate",
+      "source": "Stream sursă",
+      "height": "Înălțime",
+      "heightOption": "{{height}}p",
+      "bitrate": "Bitrate (kbps)",
+      "addQuality": "Adaugă calitate",
+      "removeQuality": "Șterge calitate"
     }
   },
   "globalConfig": {
@@ -1767,7 +1800,8 @@
     "applied": "Setările au fost aplicate cu succes",
     "saveAllSuccessRestartRequired_one": "{{count}} secțiune salvată cu succes. Repornește Frigate pentru a aplica modificările.",
     "saveAllSuccessRestartRequired_few": "{{count}} secțiuni salvate cu succes. Repornește Frigate pentru a aplica modificările.",
-    "saveAllSuccessRestartRequired_other": "{{count}} de secțiuni salvate cu succes. Repornește Frigate pentru a aplica modificările."
+    "saveAllSuccessRestartRequired_other": "{{count}} de secțiuni salvate cu succes. Repornește Frigate pentru a aplica modificările.",
+    "go2rtcSyncFailed": "Salvat, dar go2rtc nu a putut fi actualizat. Repornește Frigate pentru a aplica."
   },
   "unsavedChanges": "Ai modificări nesalvate",
   "confirmReset": "Confirmă Resetarea",
@@ -1944,7 +1978,7 @@
       "resolutionHigh": "Această rezoluție de detecție este mai mare decât cea recomandată și poate cauza un consum crescut de resurse fără a îmbunătăți acuratețea detecției. O rezoluție de detecție de 1080p sau mai mică este recomandată pentru majoritatea camerelor.",
       "globalResolutionMultipleCameras": "O rezoluție de detecție globală este setată în timp ce sunt configurate mai multe camere. Dacă nu cumva toate camerele împart aceeași rezoluție și același raport de aspect, lățimea și înălțimea de detecție ar trebui definite per cameră pentru a se potrivi cu raportul de aspect nativ al fiecărei camere.",
       "runtimeDisabled": "Detecția obiectelor este activată în configurația ta, dar este dezactivată în prezent pentru această cameră. Snapshot-urile, elementele de recenzie și funcțiile suplimentare precum recunoașterea facială, recunoașterea numerelor de înmatriculare și Inteligența Artificială Generativă nu vor funcționa până nu o pornești din nou din vizualizarea live a camerei sau până când profilul activ nu o mai dezactivază.",
-      "sceneWithoutModel": "Nu este configurat niciun model de detecție pentru această scenă, așa că această cameră revine la modelul cu scena 'All cameras'. Adaugă un model pentru această scenă pentru a-i oferi camerei propriul model."
+      "sceneWithoutModel": "Niciun model de detecție nu este configurat pentru această scenă, așa că această cameră recurge la modelul Default. Adaugă un model pentru această scenă pentru a-i oferi camerei propriul model."
     },
     "faceRecognition": {
       "globalDisabled": "Îmbogățirea pentru recunoaștere facială trebuie activată pentru ca funcțiile de recunoaștere facială să funcționeze pe această cameră.",
@@ -1958,7 +1992,8 @@
     },
     "record": {
       "noRecordRole": "Niciun flux nu are rolul de înregistrare definit. Înregistrarea nu va funcționa.",
-      "noRecordSubRole": "Niciun stream nu are definit rolul record_sub. Înregistrarea sub-stream-ului nu va funcționa."
+      "noRecordSubRole": "Niciun stream nu are definit rolul record_sub. Înregistrarea sub-stream-ului nu va funcționa.",
+      "profileBaseDisabled": "Înregistrarea este dezactivată în configurația de bază a acestei camere, așa că activarea ei într-un profil nu are niciun efect. Activează înregistrarea în configurația de bază și folosește un profil pentru a o dezactiva în schimb."
     },
     "snapshots": {
       "detectDisabled": "Detecția obiectelor este dezactivată. Snapshot-urile sunt generate din obiectele urmărite și nu vor fi create.",
@@ -1984,6 +2019,9 @@
     "birdseye": {
       "objectTrackingDetectDisabled": "Birdseye include obiecte urmărite, dar detecția obiectelor este dezactivată pentru această cameră. Camera nu va apărea în Birdseye.",
       "objectTrackingDetectRuntimeDisabled": "Birdseye include obiecte urmărite, dar detecția obiectelor este dezactivată în prezent pentru această cameră, deși este activată în configurația ta. Camera nu va apărea în Birdseye până când nu este pornită din nou din vizualizarea live a camerei sau până când profilul activ nu o mai dezactivează."
+    },
+    "notifications": {
+      "profileBaseDisabled": "Nicio cameră nu are notificările activate în configurația de bază, așa că activarea lor într-un profil nu are niciun efect. Activează notificările în configurația de bază a cel puțin unei camere."
     }
   },
   "birdseye": {
@@ -2048,21 +2086,15 @@
   },
   "detectionModels": {
     "title": "Modele de detecție",
-    "description": "Configurează modelele de detecție a obiectelor și componentele hardware pe care rulează fiecare. Camerele aleg un model după scenă în setările lor de detecție.",
+    "description": "Configurează modelele de detecție a obiectelor și hardware-ul pe care rulează fiecare. Adaugă un model pentru o scenă doar atunci când unele camere necesită un model antrenat diferit, cum ar fi camerele cu termoviziune. Camerele aleg un model în funcție de scena lor din setările de detecție ale camerei.",
     "addModel": "Adaugă model",
     "cameras_one": "1 cameră",
     "cameras_few": "{{count}} camere",
     "cameras_other": "{{count}} de camere",
     "scene": {
       "label": "Scenă",
-      "description": "Mediul pentru care este conceput acest model. Camerele aleg un model setând aceeași scenă în setările lor de detecție, iar modelul cu scena 'all' este utilizat de orice cameră care nu își setează una."
-    },
-    "scenes": {
-      "all": "Toate camerele",
-      "indoor": "Interior",
-      "outdoor": "Exterior",
-      "indoor_thermal": "Interior termic",
-      "outdoor_thermal": "Exterior termic"
+      "description": "Un nume pentru camerele cărora le este destinat acest model. Camerele aleg un model prin setarea aceleiași scene în setările lor de detecție, iar modelul Default este utilizat de orice cameră care nu are o setare definită. Folosește scenele pentru a rula modele diferite, nu pentru a împărți un singur model între resurse hardware, deoarece modelele care utilizează același fișier de model sunt combinate.",
+      "placeholder": "termică"
     },
     "hardware": {
       "label": "Hardware",
@@ -2077,7 +2109,7 @@
       "unrecognized": "Acest model este configurat pentru hardware care nu a fost găsit pe acest sistem: {{devices}}",
       "description": "Hardware-ul pe care acest model își rulează detecția.",
       "detectorCountDescription": "Câte procese de detecție să ruleze pe acest hardware. Mai mulți detectori fac față mai multor camere, cu consum suplimentar de memorie.",
-      "unitsDescription": "Fiecare unitate își rulează propriul proces de detecție. O unitate deja utilizată de un alt model nu poate fi selectată."
+      "unitsDescription": "Fiecare unitate rulează propriul proces de detecție. O unitate care nu poate fi partajată, cum ar fi un Coral, poate fi utilizată de un singur model."
     },
     "tabs": {
       "plus": "Frigate+",
@@ -2085,6 +2117,9 @@
     },
     "plusModel": {
       "noModelSelected": "Selectează un model Frigate+"
+    },
+    "scenes": {
+      "default": "Implicit"
     }
   }
 }

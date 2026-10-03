@@ -2009,13 +2009,6 @@
       "label": "Scene",
       "description": "Lingkungan yang menjadi tujuan model ini. Kamera memilih model dengan menetapkan scene yang sama dalam pengaturan deteksinya, sedangkan model dengan scene “all” digunakan oleh setiap kamera yang tidak menetapkan scene."
     },
-    "scenes": {
-      "all": "Semua kamera",
-      "indoor": "Dalam ruangan",
-      "outdoor": "Luar ruangan",
-      "indoor_thermal": "Termal dalam ruangan",
-      "outdoor_thermal": "Termal luar ruangan"
-    },
     "hardware": {
       "label": "Perangkat keras",
       "placeholder": "Pilih perangkat keras",

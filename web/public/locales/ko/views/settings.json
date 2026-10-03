@@ -1985,13 +1985,6 @@
       "label": "장면",
       "description": "이 모델이 사용되는 환경입니다. 카메라는 감지 설정에서 동일한 장면을 지정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 '전체' 장면의 모델을 사용합니다."
     },
-    "scenes": {
-      "all": "모든 카메라",
-      "indoor": "실내",
-      "outdoor": "실외",
-      "indoor_thermal": "실내 열화상",
-      "outdoor_thermal": "실외 열화상"
-    },
     "hardware": {
       "label": "하드웨어",
       "placeholder": "하드웨어 선택",

@@ -131,9 +131,9 @@
       "exportButton_other": "Exportar {{count}} revisiones",
       "exportingButton": "Exportando...",
       "toast": {
-        "started_one": "Se inició 1 exportación. Abriendo el caso ahora.",
-        "started_many": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
-        "started_other": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
+        "started_one": "Se inició 1 exportación.",
+        "started_many": "Se iniciaron {{count}} exportaciones.",
+        "started_other": "Se iniciaron {{count}} exportaciones.",
         "partial": "Se iniciaron {{successful}} de {{total}} exportaciones. Fallidas: {{failedItems}}",
         "failed": "No se pudieron iniciar {{total}} exportaciones. Fallidas: {{failedItems}}"
       }

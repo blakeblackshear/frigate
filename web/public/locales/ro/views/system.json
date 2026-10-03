@@ -273,7 +273,8 @@
     "systemNotices_other": "{{count}} notificări de sistem",
     "retentionUnmet": "Înregistrările sunt șterse înainte de încheierea perioadei de retenție pentru a elibera spațiu",
     "moreMessages_one": "+{{count}}",
-    "moreMessages_other": "+{{count}}"
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Reindexarea embedding-urilor a eșuat, verifică jurnalele"
   },
   "lastRefreshed": "Ultima actualizare: ",
   "health": {

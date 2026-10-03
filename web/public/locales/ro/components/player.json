@@ -30,7 +30,9 @@
       }
     },
     "decodedFrames": "Cadre Decodate:",
-    "droppedFrameRate": "Rata de Cadre Pierdute:"
+    "droppedFrameRate": "Rata de Cadre Pierdute:",
+    "stream": "Stream:",
+    "streamAuto": "{{stream}} (auto)"
   },
   "toast": {
     "error": {
