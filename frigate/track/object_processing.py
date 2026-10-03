@@ -41,7 +41,7 @@ from frigate.const import (
 )
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event, ReviewSegment, Timeline
-from frigate.ptz.autotrack import PtzAutoTrackerThread
+from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager
 
@@ -60,7 +60,7 @@ class TrackedObjectProcessor(threading.Thread):
         config: FrigateConfig,
         dispatcher: Dispatcher,
         tracked_objects_queue: MpQueue,
-        ptz_autotracker_thread: PtzAutoTrackerThread,
+        ptz_autotracker_thread: PtzAutoTracker,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(name="detected_frames_processor")
@@ -153,7 +153,7 @@ class TrackedObjectProcessor(threading.Thread):
             )
 
         def autotrack(camera: str, obj: TrackedObject, frame_name: str) -> None:
-            self.ptz_autotracker_thread.ptz_autotracker.autotrack_object(camera, obj)
+            self.ptz_autotracker_thread.autotrack_object(camera, obj)
 
         def end(camera: str, obj: TrackedObject, frame_name: str) -> None:
             # populate has_snapshot
@@ -177,7 +177,7 @@ class TrackedObjectProcessor(threading.Thread):
                     "type": "end",
                 }
                 self.dispatcher.publish("events", json.dumps(message), retain=False)
-                self.ptz_autotracker_thread.ptz_autotracker.end_object(camera, obj)
+                self.ptz_autotracker_thread.end_object(camera, obj)
 
             self.event_sender.publish(
                 (

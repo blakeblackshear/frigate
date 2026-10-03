@@ -2,14 +2,9 @@
 
 Regression coverage for a camera that is initialized while autotracking is off and
 has it enabled later, which is the normal wizard flow: set the camera up first,
-configure autotracking afterwards. The autotracking-only request objects used to
-be created only when autotracking was enabled at init time, so the camera was left
-with init=True but no status_request. get_camera_status skips its re-init branch
-when init is True, so it went straight to the missing key and raised KeyError on
-the tracking thread.
-
-The request objects are built from the locally parsed WSDL and cost no network, so
-they are always created and init=True now implies they exist.
+configure autotracking afterwards. get_camera_status skips its re-init branch when
+init is True, so everything it reads must exist whether or not autotracking was
+enabled at init time.
 
 Also covers the inverse direction: the ptz movement timestamps must not be written
 for a camera that has autotracking off, because nothing clears them back out.
@@ -99,7 +94,6 @@ def _make_controller(autotracking_enabled: bool) -> OnvifController:
     controller.config = config
     controller.cams = {CAMERA: {"onvif": _make_onvif_camera(), "init": False}}
     controller.failed_cams = {}
-    controller.camera_configs = {CAMERA: config.cameras[CAMERA]}
     controller.ptz_metrics = {CAMERA: MagicMock()}
     return controller
 
@@ -110,7 +104,6 @@ def _make_move_controller(autotracking_enabled: bool) -> OnvifController:
     config = _config(autotracking_enabled)
     controller = OnvifController.__new__(OnvifController)
     controller.config = config
-    controller.camera_configs = {CAMERA: config.cameras[CAMERA]}
     controller.failed_cams = {}
 
     ptz = MagicMock()
@@ -135,38 +128,25 @@ def _make_move_controller(autotracking_enabled: bool) -> OnvifController:
 
 
 class TestOnvifInitRequests(unittest.IsolatedAsyncioTestCase):
-    async def test_status_request_created_when_autotracking_disabled(self) -> None:
+    async def test_camera_status_independent_of_autotracking_at_init(self) -> None:
         # the wizard flow: onvif configured first, autotracking enabled later
-        controller = _make_controller(autotracking_enabled=False)
-
-        self.assertTrue(await controller._init_onvif(CAMERA))
-
-        cam = controller.cams[CAMERA]
-        self.assertTrue(cam["init"])
-        self.assertIn("status_request", cam)
-        self.assertIn("service_capabilities_request", cam)
-
-    async def test_status_request_created_when_autotracking_enabled(self) -> None:
-        controller = _make_controller(autotracking_enabled=True)
-
-        self.assertTrue(await controller._init_onvif(CAMERA))
-
-        cam = controller.cams[CAMERA]
-        self.assertIn("status_request", cam)
-        self.assertIn("service_capabilities_request", cam)
-
-    async def test_init_implies_status_request_exists(self) -> None:
-        # the invariant get_camera_status relies on: it skips re-init when init is
-        # True and then reads status_request without guarding
         for autotracking_enabled in (True, False):
             with self.subTest(autotracking_enabled=autotracking_enabled):
                 controller = _make_controller(autotracking_enabled)
+                controller.status_locks = {CAMERA: asyncio.Lock()}
 
-                await controller._init_onvif(CAMERA)
+                self.assertTrue(await controller._init_onvif(CAMERA))
 
-                cam = controller.cams[CAMERA]
-                if cam["init"]:
-                    self.assertEqual(cam["status_request"].request_type, "GetStatus")
+                status = MagicMock()
+                status.MoveStatus.PanTilt = "IDLE"
+                status.MoveStatus.Zoom = "IDLE"
+                ptz = controller.cams[CAMERA]["ptz"]
+                ptz.GetStatus = AsyncMock(return_value=status)
+
+                await controller.get_camera_status(CAMERA)
+
+                ptz.GetStatus.assert_awaited_once_with({"ProfileToken": "profile_1"})
+                self.assertFalse(controller.cams[CAMERA]["active"])
 
     async def test_requests_built_without_contacting_camera(self) -> None:
         # create_type is a local WSDL lookup; cameras that do not implement

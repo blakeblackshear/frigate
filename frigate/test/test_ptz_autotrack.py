@@ -83,6 +83,28 @@ class TestAutotrackerInitGuards(unittest.IsolatedAsyncioTestCase):
         tracker.onvif.get_camera_status.assert_not_called()
 
 
+class TestAutotrackerEnqueueMove(unittest.TestCase):
+    def _enqueue(self, pan: float, tilt: float, zoom: float) -> MagicMock:
+        tracker = _make_tracker()
+        tracker.move_queues = {CAMERA: MagicMock()}
+        tracker.move_queue_locks = {CAMERA: MagicMock()}
+        tracker.move_queue_locks[CAMERA].locked.return_value = False
+
+        tracker._enqueue_move(CAMERA, 1000.0, pan, tilt, zoom)
+
+        return tracker.onvif.loop.call_soon_threadsafe
+
+    def test_move_is_clipped_to_the_onvif_range(self) -> None:
+        # velocity estimates can push the predicted centroid outside the frame
+        call_soon = self._enqueue(1.7, -2.5, 0.4)
+
+        call_soon.assert_called_once()
+        self.assertEqual(call_soon.call_args.args[1], (1000.0, 1.0, -1.0, 0.4))
+
+    def test_empty_move_is_not_enqueued(self) -> None:
+        self._enqueue(0, 0, 0).assert_not_called()
+
+
 class TestAutotrackerMetricSync(unittest.TestCase):
     def test_metric_follows_config_when_enabled_by_update(self) -> None:
         # autotracking enabled via a config save: the metric was seeded False when
