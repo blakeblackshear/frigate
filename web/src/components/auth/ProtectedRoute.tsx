@@ -3,10 +3,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { AuthContext } from "@/context/auth-context";
 import ActivityIndicator from "../indicators/activity-indicator";
 import {
+  getLoginUrl,
   isRedirectingToLogin,
   setRedirectingToLogin,
 } from "@/api/auth-redirect";
-import { baseUrl } from "@/api/baseUrl";
 
 export default function ProtectedRoute({
   requiredRoles,
@@ -25,7 +25,7 @@ export default function ProtectedRoute({
       !isRedirectingToLogin()
     ) {
       setRedirectingToLogin(true);
-      window.location.href = `${baseUrl}login`;
+      window.location.href = getLoginUrl();
     }
   }, [auth.isLoading, auth.isAuthenticated, auth.user]);
 
