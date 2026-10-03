@@ -38,7 +38,7 @@ unidecode == 1.4.*
 titlecase == 2.4.*
 # Image Manipulation
 numpy == 1.26.*
-opencv-python-headless == 4.11.0.*
+opencv-python-headless == 5.0.0.*
 opencv-contrib-python == 4.11.0.*
 scipy == 1.16.*
 # OpenVino & ONNX
