@@ -14,7 +14,7 @@ markupsafe == 3.0.*
 python-multipart == 0.0.31
 # Classification Model Training
 tensorflow == 2.19.* ; platform_machine == 'aarch64'
-tensorflow-cpu == 2.19.* ; platform_machine == 'x86_64'
+tensorflow-cpu == 2.21.* ; platform_machine == 'x86_64'
 # General
 mypy == 1.6.1
 onvif-zeep-async == 4.0.*
