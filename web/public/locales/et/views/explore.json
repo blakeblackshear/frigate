@@ -23,6 +23,34 @@
     "downloadVideo": {
       "label": "Laadi video alla",
       "aria": "Laadi video alla"
+    },
+    "addTrigger": {
+      "label": "Lisa päästik",
+      "aria": "Lisa päästik selle jälgitava objekti jaoks"
+    },
+    "audioTranscription": {
+      "label": "Kirjuta üles",
+      "aria": "Palu heli üleskirjutust tekstina"
+    },
+    "submitToPlus": {
+      "label": "Edasta Frigate+ teenusesse",
+      "aria": "Edasta Frigate Plus teenusesse"
+    },
+    "viewInHistory": {
+      "label": "Vaata ajaloos",
+      "aria": "Vaata ajaloos"
+    },
+    "deleteTrackedObject": {
+      "label": "Kustuta see jälgitav objekt"
+    },
+    "showObjectDetails": {
+      "label": "Näita objekti teekonda"
+    },
+    "hideObjectDetails": {
+      "label": "Peida objekti teekond"
+    },
+    "more": {
+      "aria": "Veel"
     }
   },
   "trackingDetails": {
@@ -124,14 +152,20 @@
       "desc": "Vaata objekti üksikasju",
       "toast": {
         "success": {
-          "updatedLPR": "Sõiduki numbrimärgi uuendamine õnnestus."
+          "updatedLPR": "Sõiduki numbrimärgi uuendamine õnnestus.",
+          "updatedSublabel": "Alamsildi uuendamine õnnestus.",
+          "updatedAttributes": "Atribuutide uuendamine õnnestus."
         },
         "error": {
-          "updatedLPRFailed": "Sõiduki numbrimärgi uuendamine ei õnnestunud: {{errorMessage}}"
+          "updatedLPRFailed": "Sõiduki numbrimärgi uuendamine ei õnnestunud: {{errorMessage}}",
+          "updatedSublabelFailed": "Alamsildi uuendamine ei õnnestunud: {{errorMessage}}",
+          "updatedAttributesFailed": "Atribuutide uuendamine ei õnnestunud: {{errorMessage}}",
+          "audioTranscription": "Heli üleskirjutuspäringu tegemine ei õnnestunud: {{errorMessage}}"
         }
       },
       "button": {
-        "share": "Jaga seda ülevaadatud objekti"
+        "share": "Jaga seda ülevaadatud objekti",
+        "viewInExplore": "Vaata uurimisvaates"
       }
     },
     "snapshotScore": {
@@ -186,16 +220,36 @@
     "editAttributes": {
       "title": "Atribuutide muutmine",
       "desc": "Valige selle sildi '{{label}}' jaoks klassifikatsiooniatribuudid"
-    }
+    },
+    "regenerateFromThumbnails": "Loo uuesti pisipiltide vaatest",
+    "expandRegenerationMenu": "Näita uuesti loomise menüüd"
   },
   "trackedObjectDetails": "Jälgitava objekti üksikasjad",
   "aiAnalysis": {
-    "title": "Tehisintellekti analüüs"
+    "title": "Analüüs tehisaru abil"
   },
   "concerns": {
     "label": "Mured"
   },
   "objectLifecycle": {
-    "noImageFound": "Selle jälgitava objekti kohta ei leitud pilti."
+    "noImageFound": "Selle jälgitava objekti kohta ei leidunud pilti."
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Kinnita kustutamine"
+    },
+    "toast": {
+      "error": "Viga selle jälgitava objekti kustutamisel: {{errorMessage}}"
+    }
+  },
+  "searchResult": {
+    "previousTrackedObject": "Eelmine jälgitav objekt",
+    "nextTrackedObject": "Järgmine jälgitav objekt",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Jälgitava objekti kustutamine õnnestus.",
+        "error": "Jälgitava objekti kustutamine ei õnnestunud: {{errorMessage}}"
+      }
+    }
   }
 }

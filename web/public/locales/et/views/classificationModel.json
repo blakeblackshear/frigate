@@ -2,7 +2,17 @@
   "toast": {
     "success": {
       "deletedModel_one": "{{count}} mudeli kustutamine õnnestus",
-      "deletedModel_other": "{{count}} mudeli kustutamine õnnestus"
+      "deletedModel_other": "{{count}} mudeli kustutamine õnnestus",
+      "categorizedImage": "Pildi klassifitseerimine õnnestus",
+      "reclassifiedImage": "Pildi uuesti klassifitseerimine õnnestus",
+      "trainedModel": "Mudeli õpetamine õnnestus.",
+      "trainingModel": "Mudeli õpetamise käivitamine õnnestus.",
+      "updatedModel": "Mudeli seadistuse muutmine õnnestus",
+      "renamedCategory": "Klassi nime muutmine õnnestus, uus nimi on {{name}}",
+      "deletedCategory_one": "{{count}} klass on kustutatud",
+      "deletedCategory_other": "{{count}} klassi on kustutatud",
+      "deletedImage_one": "{{count}} pilt on kustutatud",
+      "deletedImage_other": "{{count}} pilti on kustutatud"
     }
   },
   "documentTitle": "Klassifitseerimise mudelid - Frigate",
@@ -13,12 +23,13 @@
   },
   "button": {
     "deleteClassificationAttempts": "Kustuta klassifitseerimispildid",
-    "renameCategory": "Muuda klassi nimi",
+    "renameCategory": "Muuda klassi nime",
     "deleteCategory": "Kustuta klass",
     "deleteImages": "Kustuta pildid",
     "addClassification": "Lisa klassifikatsioon",
     "deleteModels": "Kustuta mudelid",
-    "editModel": "Muuda mudelit"
+    "editModel": "Muuda mudelit",
+    "trainModel": "Õpeta mudelit"
   },
   "description": {
     "invalidName": "Vigane nimi. Nimed võivad sisaldada ainult tähti, numbreid, tühikuid, ülakomasid, alakriipse ja sidekriipse."
@@ -42,7 +53,10 @@
     }
   },
   "tooltip": {
-    "trainingInProgress": "Mudel on parasjagu õppimas"
+    "trainingInProgress": "Mudel on parasjagu õppimas",
+    "noNewImages": "Õpetamiseks ei leidu pilte. Esmalt klassifitseeri andmekogu jaoks veel pilte.",
+    "noChanges": "Peale eelmist õpetamist pole andmekogu muutunud.",
+    "modelNotReady": "Mudel pole õpetamiseks valmis"
   },
   "train": {
     "titleShort": "Hiljutised"
