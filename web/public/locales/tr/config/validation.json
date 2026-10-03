@@ -33,6 +33,8 @@
         "dimensionMustBeEven": "Çift sayı olmalıdır."
     },
     "models": {
-        "defaultRequired": "Modellerden birinin 'Tüm Kameralar' sahnesini kullanması gerekir. Bu olmazsa sahne seçmeyen bir kameranın kullanabileceği bir model kalmaz."
+        "defaultRequired": "Modellerden birinin varsayılan sahneyi kullanması gerekir. Bu olmazsa sahne seçmeyen bir kameranın kullanabileceği bir model kalmaz.",
+        "sceneDuplicate": "Her model farklı bir sahne kullanmalıdır.",
+        "sameModel": "{{scene}} ve {{other}} modelleri aynı model dosyasını kullanıyorlar. Bir modeli farklı sahnelerde çalıştırmak yalnızca tespit işini farklı algılayıcılara böler. Bu da tek modelin altında tüm donanımların listelenmesinden daha yavaştır."
     }
 }
