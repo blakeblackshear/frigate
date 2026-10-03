@@ -566,8 +566,9 @@ class OnvifController:
             return
 
         metrics = self.ptz_metrics.get(camera_name)
+        camera_config = self.config.cameras.get(camera_name)
 
-        if metrics is None:
+        if metrics is None or camera_config is None:
             return
 
         logger.debug(
@@ -583,7 +584,7 @@ class OnvifController:
         cam["active"] = True
 
         # only track start_time for autotracking
-        if metrics.autotracker_enabled.value:
+        if camera_config.onvif.autotracking.enabled:
             metrics.motor_stopped.clear()
             logger.debug(f"{camera_name}: PTZ start time: {metrics.frame_time.value}")
             metrics.start_time.value = metrics.frame_time.value

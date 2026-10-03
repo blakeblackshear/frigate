@@ -29,7 +29,6 @@ class TestImprovedMotionDetector(unittest.TestCase):
 
         class DummyPTZ:
             def __init__(self):
-                self.autotracker_enabled = _Stub(False)
                 self.motor_stopped = _Stub(False)
                 self.stop_time = _Stub(0)
 

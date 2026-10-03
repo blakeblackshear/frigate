@@ -166,11 +166,7 @@ class FrigateApp:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
             self.camera_metrics[camera_name] = CameraMetrics(self.metrics_manager)
-            self.ptz_metrics[camera_name] = PTZMetrics(
-                autotracker_enabled=self.config.cameras[
-                    camera_name
-                ].onvif.autotracking.enabled
-            )
+            self.ptz_metrics[camera_name] = PTZMetrics()
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to

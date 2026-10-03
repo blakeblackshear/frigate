@@ -121,9 +121,7 @@ def _make_move_controller(autotracking_enabled: bool) -> OnvifController:
             },
         }
     }
-    controller.ptz_metrics = {
-        CAMERA: PTZMetrics(autotracker_enabled=autotracking_enabled)
-    }
+    controller.ptz_metrics = {CAMERA: PTZMetrics()}
     return controller
 
 

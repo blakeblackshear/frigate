@@ -23,6 +23,7 @@ from frigate.config import CameraConfig, FrigateConfig, ZoomingModeEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
+    CameraConfigUpdateTopic,
 )
 from frigate.const import (
     AUTOTRACKING_MAX_AREA_RATIO,
@@ -236,7 +237,7 @@ class PtzAutoTracker(threading.Thread):
 
     def run(self) -> None:
         while not self.stop_event.wait(1):
-            self.check_for_updates()
+            self.config_subscriber.check_for_updates()
 
             for camera, camera_config in list(self.config.cameras.items()):
                 if not camera_config.enabled:
@@ -256,29 +257,6 @@ class PtzAutoTracker(threading.Thread):
 
         self.config_subscriber.stop()
         logger.info("Exiting autotracker...")
-
-    def check_for_updates(self) -> None:
-        """Apply camera config updates and mirror autotracking state to ptz metrics.
-
-        The camera processes read autotracker_enabled rather than the config, so it
-        has to follow every path that can change autotracking, not just the mqtt
-        toggle that writes it directly.
-        """
-        updates = self.config_subscriber.check_for_updates()
-
-        for cameras in updates.values():
-            for camera in cameras:
-                camera_config = self.config.cameras.get(camera)
-                metrics = self.ptz_metrics.get(camera)
-
-                # a camera added at runtime gets its metrics from the maintainer on
-                # another thread, which seeds them from this same config value
-                if camera_config is None or metrics is None:
-                    continue
-
-                metrics.autotracker_enabled.value = (
-                    camera_config.onvif.autotracking.enabled
-                )
 
     async def _autotracker_setup(self, camera_config: CameraConfig, camera: str):
         logger.debug(f"{camera}: Autotracker init")
@@ -337,14 +315,19 @@ class PtzAutoTracker(threading.Thread):
             if camera_config.onvif.autotracking.calibrate_on_startup:
                 await self._calibrate_camera(camera)
 
-        self.ptz_metrics[camera].tracking_active.clear()
         self.dispatcher.publish(f"{camera}/ptz_autotracker/active", "OFF", retain=False)
         self.autotracker_init[camera] = True
 
     def _disable(self, camera: str, reason: str) -> None:
         logger.warning(f"Disabling autotracking for {camera}: {reason}")
-        self.config.cameras[camera].onvif.autotracking.enabled = False
-        self.ptz_metrics[camera].autotracker_enabled.value = False
+        autotracking_config = self.config.cameras[camera].onvif.autotracking
+        autotracking_config.enabled = False
+
+        # the camera process holds its own copy of the config
+        self.dispatcher.config_updater.publish_update(
+            CameraConfigUpdateTopic(CameraConfigUpdateEnum.autotracking, camera),
+            autotracking_config,
+        )
 
     def _reset_tracked_object_metrics(self, camera: str) -> None:
         zoom_factor = self.config.cameras[camera].onvif.autotracking.zoom_factor
@@ -1307,7 +1290,6 @@ class PtzAutoTracker(threading.Thread):
                 logger.debug(
                     f"{camera}: New object: {obj.obj_data['id']} {obj.obj_data['box']} {obj.obj_data['frame_time']}"
                 )
-                self.ptz_metrics[camera].tracking_active.set()
                 self.dispatcher.publish(
                     f"{camera}/ptz_autotracker/active", "ON", retain=False
                 )
@@ -1441,7 +1423,6 @@ class PtzAutoTracker(threading.Thread):
             # update stored zoom level from preset
             await self._wait_until_stopped(camera)
 
-            self.ptz_metrics[camera].tracking_active.clear()
             self.dispatcher.publish(
                 f"{camera}/ptz_autotracker/active", "OFF", retain=False
             )
