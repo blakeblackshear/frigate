@@ -134,10 +134,8 @@ class CameraState:
                         and self.camera_config.detect.width is not None
                         and self.camera_config.detect.height is not None
                     ):
-                        max_target_box = (
-                            self.ptz_autotracker_thread.tracked_object_metrics[
-                                self.name
-                            ]["max_target_box"]
+                        max_target_box = self.ptz_autotracker_thread.max_target_box(
+                            self.name
                         )
                         side_length = max_target_box * (
                             max(

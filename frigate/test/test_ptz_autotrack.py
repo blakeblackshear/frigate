@@ -123,5 +123,19 @@ class TestAutotrackerDisable(unittest.TestCase):
         self.assertIs(payload, autotracking)
 
 
+class TestAutotrackerMaxTargetBox(unittest.TestCase):
+    def test_follows_live_zoom_factor(self) -> None:
+        # the debug overlay and the zoom decisions both read this, so it has to
+        # track a zoom_factor changed while an object is being followed
+        tracker = _make_tracker()
+        autotracking = tracker.config.cameras[CAMERA].onvif.autotracking
+
+        autotracking.zoom_factor = 0.5
+        self.assertAlmostEqual(tracker.max_target_box(CAMERA), 0.6**2)
+
+        autotracking.zoom_factor = 0.25
+        self.assertAlmostEqual(tracker.max_target_box(CAMERA), 0.6**4)
+
+
 if __name__ == "__main__":
     unittest.main()
