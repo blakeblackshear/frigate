@@ -16,7 +16,7 @@ from frigate.config import (
     ZoomingModeEnum,
 )
 from frigate.const import CLIPS_DIR, THUMB_DIR
-from frigate.ptz.autotrack import PtzAutoTracker
+from frigate.ptz.autotrack import PtzAutoTracker, calculate_max_target_box
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
     SharedMemoryFrameManager,
@@ -134,8 +134,8 @@ class CameraState:
                         and self.camera_config.detect.width is not None
                         and self.camera_config.detect.height is not None
                     ):
-                        max_target_box = self.ptz_autotracker_thread.max_target_box(
-                            self.name
+                        max_target_box = calculate_max_target_box(
+                            self.camera_config.onvif.autotracking.zoom_factor
                         )
                         side_length = max_target_box * (
                             max(

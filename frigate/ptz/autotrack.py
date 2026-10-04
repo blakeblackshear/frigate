@@ -43,6 +43,11 @@ from frigate.util.image import SharedMemoryFrameManager, intersection_over_union
 logger = logging.getLogger(__name__)
 
 
+def calculate_max_target_box(zoom_factor: float) -> float:
+    """Return the largest target box ratio allowed for a zoom factor."""
+    return AUTOTRACKING_MAX_AREA_RATIO ** (1 / zoom_factor)
+
+
 def ptz_moving_at_frame_time(frame_time, ptz_start_time, ptz_stop_time):
     # Determine if the PTZ was in motion at the set frame time
     # for non ptz/autotracking cameras, this will always return False
@@ -331,11 +336,6 @@ class PtzAutoTracker(threading.Thread):
 
     def _reset_tracked_object_metrics(self, camera: str) -> None:
         self.tracked_object_metrics[camera] = {}
-
-    def max_target_box(self, camera: str) -> float:
-        """Return the largest target box ratio allowed for the zoom factor."""
-        zoom_factor = self.config.cameras[camera].onvif.autotracking.zoom_factor
-        return AUTOTRACKING_MAX_AREA_RATIO ** (1 / zoom_factor)
 
     async def _wait_until_stopped(
         self, camera: str, metrics: PTZMetrics | None = None
@@ -945,7 +945,7 @@ class PtzAutoTracker(threading.Thread):
         camera_config = self.config.cameras[camera]
         tom = self.tracked_object_metrics[camera]
         zoom_factor = camera_config.onvif.autotracking.zoom_factor
-        max_target_box = self.max_target_box(camera)
+        max_target_box = calculate_max_target_box(zoom_factor)
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
@@ -1179,7 +1179,7 @@ class PtzAutoTracker(threading.Thread):
         camera_config = self.config.cameras[camera]
         tom = self.tracked_object_metrics[camera]
         zoom_factor = camera_config.onvif.autotracking.zoom_factor
-        max_target_box = self.max_target_box(camera)
+        max_target_box = calculate_max_target_box(zoom_factor)
 
         # frame width and height
         camera_width = camera_config.frame_shape[1]

@@ -17,7 +17,7 @@ from unittest.mock import MagicMock
 from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdateEnum
-from frigate.ptz.autotrack import PtzAutoTracker
+from frigate.ptz.autotrack import PtzAutoTracker, calculate_max_target_box
 
 CAMERA = "ptz_cam"
 
@@ -123,18 +123,10 @@ class TestAutotrackerDisable(unittest.TestCase):
         self.assertIs(payload, autotracking)
 
 
-class TestAutotrackerMaxTargetBox(unittest.TestCase):
-    def test_follows_live_zoom_factor(self) -> None:
-        # the debug overlay and the zoom decisions both read this, so it has to
-        # track a zoom_factor changed while an object is being followed
-        tracker = _make_tracker()
-        autotracking = tracker.config.cameras[CAMERA].onvif.autotracking
-
-        autotracking.zoom_factor = 0.5
-        self.assertAlmostEqual(tracker.max_target_box(CAMERA), 0.6**2)
-
-        autotracking.zoom_factor = 0.25
-        self.assertAlmostEqual(tracker.max_target_box(CAMERA), 0.6**4)
+class TestMaxTargetBox(unittest.TestCase):
+    def test_follows_zoom_factor(self) -> None:
+        self.assertAlmostEqual(calculate_max_target_box(0.5), 0.6**2)
+        self.assertAlmostEqual(calculate_max_target_box(0.25), 0.6**4)
 
 
 if __name__ == "__main__":
