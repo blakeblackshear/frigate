@@ -330,10 +330,7 @@ class PtzAutoTracker(threading.Thread):
         )
 
     def _reset_tracked_object_metrics(self, camera: str) -> None:
-        zoom_factor = self.config.cameras[camera].onvif.autotracking.zoom_factor
-        self.tracked_object_metrics[camera] = {
-            "max_target_box": AUTOTRACKING_MAX_AREA_RATIO ** (1 / zoom_factor)
-        }
+        self.tracked_object_metrics[camera] = {}
 
     async def _wait_until_stopped(
         self, camera: str, metrics: PTZMetrics | None = None
@@ -943,6 +940,7 @@ class PtzAutoTracker(threading.Thread):
         camera_config = self.config.cameras[camera]
         tom = self.tracked_object_metrics[camera]
         zoom_factor = camera_config.onvif.autotracking.zoom_factor
+        max_target_box = AUTOTRACKING_MAX_AREA_RATIO ** (1 / zoom_factor)
         camera_width = camera_config.frame_shape[1]
         camera_height = camera_config.frame_shape[0]
         camera_fps = camera_config.detect.fps
@@ -979,16 +977,14 @@ class PtzAutoTracker(threading.Thread):
 
         calculated_target_box = self._predict_target_box(camera, predicted_time)
 
-        below_area_threshold = calculated_target_box < tom["max_target_box"]
+        below_area_threshold = calculated_target_box < max_target_box
 
         # introduce some hysteresis to prevent a yo-yo zooming effect
         zoom_out_hysteresis = (
-            calculated_target_box
-            > tom["max_target_box"] * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
+            calculated_target_box > max_target_box * AUTOTRACKING_ZOOM_OUT_HYSTERESIS
         )
         zoom_in_hysteresis = (
-            calculated_target_box
-            < tom["max_target_box"] * AUTOTRACKING_ZOOM_IN_HYSTERESIS
+            calculated_target_box < max_target_box * AUTOTRACKING_ZOOM_IN_HYSTERESIS
         )
 
         at_max_zoom = (
@@ -1007,7 +1003,7 @@ class PtzAutoTracker(threading.Thread):
             f"{camera}: Zoom test: below distance threshold: {(below_distance_threshold)}"
         )
         logger.debug(
-            f"{camera}: Zoom test: below area threshold: {(below_area_threshold)} target: {tom['target_box']}, calculated: {calculated_target_box}, max: {tom['max_target_box']}"
+            f"{camera}: Zoom test: below area threshold: {(below_area_threshold)} target: {tom['target_box']}, calculated: {calculated_target_box}, max: {max_target_box}"
         )
         logger.debug(
             f"{camera}: Zoom test: below dimension threshold: {below_dimension_threshold} width: {bb_right - bb_left}, max width: {camera_width * (zoom_factor + 0.1)}, height: {bb_bottom - bb_top}, max height: {camera_height * (zoom_factor + 0.1)}"
@@ -1018,10 +1014,10 @@ class PtzAutoTracker(threading.Thread):
         logger.debug(f"{camera}: Zoom test: at max zoom: {at_max_zoom}")
         logger.debug(f"{camera}: Zoom test: at min zoom: {at_min_zoom}")
         logger.debug(
-            f"{camera}: Zoom test: zoom in hysteresis limit: {zoom_in_hysteresis} value: {AUTOTRACKING_ZOOM_IN_HYSTERESIS} original: {tom['original_target_box']} max: {tom['max_target_box']} target: {calculated_target_box if calculated_target_box else tom['target_box']}"
+            f"{camera}: Zoom test: zoom in hysteresis limit: {zoom_in_hysteresis} value: {AUTOTRACKING_ZOOM_IN_HYSTERESIS} original: {tom['original_target_box']} max: {max_target_box} target: {calculated_target_box if calculated_target_box else tom['target_box']}"
         )
         logger.debug(
-            f"{camera}: Zoom test: zoom out hysteresis limit: {zoom_out_hysteresis} value: {AUTOTRACKING_ZOOM_OUT_HYSTERESIS} original: {tom['original_target_box']} max: {tom['max_target_box']} target: {calculated_target_box if calculated_target_box else tom['target_box']}"
+            f"{camera}: Zoom test: zoom out hysteresis limit: {zoom_out_hysteresis} value: {AUTOTRACKING_ZOOM_OUT_HYSTERESIS} original: {tom['original_target_box']} max: {max_target_box} target: {calculated_target_box if calculated_target_box else tom['target_box']}"
         )
 
         # Zoom in conditions (and)
@@ -1178,6 +1174,7 @@ class PtzAutoTracker(threading.Thread):
         camera_config = self.config.cameras[camera]
         tom = self.tracked_object_metrics[camera]
         zoom_factor = camera_config.onvif.autotracking.zoom_factor
+        max_target_box = AUTOTRACKING_MAX_AREA_RATIO ** (1 / zoom_factor)
 
         # frame width and height
         camera_width = camera_config.frame_shape[1]
@@ -1217,10 +1214,10 @@ class PtzAutoTracker(threading.Thread):
             # this is our initial zoom in on a new object
             if "target_box" not in tom:
                 zoom = target_box**zoom_factor
-                if zoom > tom["max_target_box"]:
+                if zoom > max_target_box:
                     zoom = -(1 - zoom)
                 logger.debug(
-                    f"{camera}: target box: {target_box}, max: {tom['max_target_box']}, calc zoom: {zoom}"
+                    f"{camera}: target box: {target_box}, max: {max_target_box}, calc zoom: {zoom}"
                 )
             else:
                 if (
@@ -1240,10 +1237,10 @@ class PtzAutoTracker(threading.Thread):
                             f"{camera}: Zooming prediction: predicted movement time: {predicted_movement_time}, original box: {tom['target_box']}, calculated box: {calculated_target_box}"
                         )
                     # zoom value
-                    ratio = tom["max_target_box"] / calculated_target_box
+                    ratio = max_target_box / calculated_target_box
                     zoom = (ratio - 1) / (ratio + 1)
                     logger.debug(
-                        f"{camera}: limit: {tom['max_target_box']}, ratio: {ratio} zoom calculation: {zoom}"
+                        f"{camera}: limit: {max_target_box}, ratio: {ratio} zoom calculation: {zoom}"
                     )
                     if not result:
                         # zoom out with special condition if zooming out because of velocity, edges, etc.
