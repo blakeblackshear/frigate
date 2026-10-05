@@ -77,7 +77,7 @@ from frigate.notices.registry import NoticeRegistry
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.object_detection.util import detection_frame_size
 from frigate.output.output import OutputProcess
-from frigate.ptz.autotrack import PtzAutoTrackerThread
+from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
@@ -166,11 +166,7 @@ class FrigateApp:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
             self.camera_metrics[camera_name] = CameraMetrics(self.metrics_manager)
-            self.ptz_metrics[camera_name] = PTZMetrics(
-                autotracker_enabled=self.config.cameras[
-                    camera_name
-                ].onvif.autotracking.enabled
-            )
+            self.ptz_metrics[camera_name] = PTZMetrics()
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
@@ -443,7 +439,7 @@ class FrigateApp:
                 )
 
     def start_ptz_autotracker(self) -> None:
-        self.ptz_autotracker_thread = PtzAutoTrackerThread(
+        self.ptz_autotracker_thread = PtzAutoTracker(
             self.config,
             self.onvif_controller,
             self.ptz_metrics,

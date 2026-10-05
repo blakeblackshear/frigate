@@ -223,7 +223,7 @@ class NorfairTracker(ObjectTracker):
             ),
         }
 
-        if self.ptz_metrics.autotracker_enabled.value:
+        if self.camera_config.onvif.autotracking.enabled:
             self.ptz_motion_estimator = PtzMotionEstimator(
                 self.camera_config, self.ptz_metrics
             )
@@ -515,7 +515,7 @@ class NorfairTracker(ObjectTracker):
         yuv_frame: np.ndarray | None = None
 
         if (
-            self.ptz_metrics.autotracker_enabled.value
+            self.camera_config.onvif.autotracking.enabled
             or self.detect_config.stationary.classifier
         ):
             yuv_frame = self.frame_manager.get(
@@ -534,7 +534,7 @@ class NorfairTracker(ObjectTracker):
             points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
 
             embedding = None
-            if self.ptz_metrics.autotracker_enabled.value:
+            if self.camera_config.onvif.autotracking.enabled:
                 embedding = get_histogram(
                     yuv_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
                 )
@@ -559,7 +559,7 @@ class NorfairTracker(ObjectTracker):
 
         coord_transformations = None
 
-        if self.ptz_metrics.autotracker_enabled.value:
+        if self.camera_config.onvif.autotracking.enabled:
             # we must have been enabled by mqtt, so set up the estimator
             if not self.ptz_motion_estimator:
                 self.ptz_motion_estimator = PtzMotionEstimator(

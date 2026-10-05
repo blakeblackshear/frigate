@@ -759,15 +759,13 @@ class Dispatcher:
                     "Autotracking must be enabled in the config to be turned on via MQTT."
                 )
                 return
-            if not self.ptz_metrics[camera_name].autotracker_enabled.value:
+            if not ptz_autotracker_settings.enabled:
                 logger.info(f"Turning on ptz autotracker for {camera_name}")
-                self.ptz_metrics[camera_name].autotracker_enabled.value = True
                 self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = True
         elif payload == "OFF":
-            if self.ptz_metrics[camera_name].autotracker_enabled.value:
+            if ptz_autotracker_settings.enabled:
                 logger.info(f"Turning off ptz autotracker for {camera_name}")
-                self.ptz_metrics[camera_name].autotracker_enabled.value = False
                 self.ptz_metrics[camera_name].start_time.value = 0
                 ptz_autotracker_settings.enabled = False
 
