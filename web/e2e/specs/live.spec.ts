@@ -287,3 +287,22 @@ test.describe("Live mobile layout @critical @mobile", () => {
     await expect(frigateApp.page.locator("body")).toBeVisible();
   });
 });
+
+test.describe("Live camera groups @medium", () => {
+  test("a group with an invalid icon renders a fallback icon", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({
+      config: {
+        camera_groups: {
+          outdoor: { cameras: ["front_door"], icon: "generic" },
+        },
+      },
+    });
+    await frigateApp.goto("/");
+    const group = frigateApp.page
+      .locator('[aria-label="Camera Groups"]:not([inert] *)')
+      .first();
+    await expect(group.locator("svg")).toBeVisible({ timeout: 10_000 });
+  });
+});
