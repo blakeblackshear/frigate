@@ -1,7 +1,6 @@
 """Unit tests for recordings/media API endpoints."""
 
 import threading
-import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from unittest.mock import patch
@@ -546,10 +545,13 @@ class TestHttpMedia(BaseTestHttp):
     def test_recording_snapshot_does_not_block_event_loop(self):
         self._insert_recording("snapshot", 1000, 1010)
         started = threading.Event()
+        release = threading.Event()
+        finished = threading.Event()
 
         def slow_image(*args):
             started.set()
-            time.sleep(1)
+            release.wait(timeout=5)
+            finished.set()
             return b"jpeg"
 
         with (
@@ -561,12 +563,12 @@ class TestHttpMedia(BaseTestHttp):
                 client.get, "/front_door/recordings/1005/snapshot.jpg"
             )
             self.assertTrue(started.wait(timeout=2))
-            started_at = time.monotonic()
             version = client.get("/version")
-            elapsed = time.monotonic() - started_at
+            blocked = finished.is_set()
+            release.set()
 
             self.assertEqual(version.status_code, 200)
-            self.assertLess(elapsed, 0.5)
+            self.assertFalse(blocked)
             self.assertEqual(snapshot.result().status_code, 200)
 
     def test_recording_snapshot_hit_returns_image(self):
@@ -601,3 +603,17 @@ class TestHttpMedia(BaseTestHttp):
 
         self.assertEqual(response.status_code, 404)
         image.assert_not_called()
+
+    def test_plus_snapshot_hit_uploads_image(self):
+        self._insert_recording("snapshot", 1000, 1010)
+
+        with (
+            AuthTestClient(self.app) as client,
+            patch("frigate.api.media.get_image_from_recording", return_value=b"png"),
+            patch("frigate.api.media.cv2.imdecode", return_value="frame"),
+            patch.object(self.app.frigate_config.plus_api, "upload_image") as upload,
+        ):
+            response = client.post("/front_door/plus/1005")
+
+        self.assertEqual(response.status_code, 200)
+        upload.assert_called_once_with("frame", "front_door")
