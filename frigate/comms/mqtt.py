@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import queue
+import selectors
 import threading
 import time
 from collections.abc import Callable
@@ -358,7 +359,7 @@ class MqttClient(Communicator):
             deadline = time.monotonic() + MQTT_SHUTDOWN_FLUSH_TIMEOUT
             while not message_info.is_published() and time.monotonic() < deadline:
                 if (
-                    self.client.loop(timeout=MQTT_PUBLISH_WAIT_INTERVAL)
+                    self._loop_client(timeout=MQTT_PUBLISH_WAIT_INTERVAL)
                     != mqtt.MQTT_ERR_SUCCESS
                 ):
                     break
@@ -367,6 +368,37 @@ class MqttClient(Communicator):
                 "MQTT is dormant and the broker could not be told Frigate is offline",
                 exc_info=True,
             )
+
+    def _loop_client(self, timeout: float) -> int:
+        """Drive Paho without select()'s limit on socket file descriptors."""
+        client = self.client
+        if client is None:
+            return mqtt.MQTT_ERR_NO_CONN
+        sock = client.socket()
+        if sock is None:
+            return mqtt.MQTT_ERR_NO_CONN
+
+        events = selectors.EVENT_READ
+        if client.want_write():
+            events |= selectors.EVENT_WRITE
+        # TLS can have decrypted bytes buffered even when the socket is not ready.
+        pending = hasattr(sock, "pending") and sock.pending() > 0
+        with selectors.DefaultSelector() as selector:
+            selector.register(sock, events)
+            ready = selector.select(0.0 if pending else timeout)
+
+        ready_events = 0
+        for _, mask in ready:
+            ready_events |= mask
+        if pending or ready_events & selectors.EVENT_READ:
+            result = client.loop_read()
+            if result != mqtt.MQTT_ERR_SUCCESS or client.socket() is None:
+                return result
+        if ready_events & selectors.EVENT_WRITE:
+            result = client.loop_write()
+            if result != mqtt.MQTT_ERR_SUCCESS or client.socket() is None:
+                return result
+        return client.loop_misc()
 
     def _mqtt_loop_worker(self) -> None:
         # The worker owns all socket I/O so reconnect, subscribe, and publish
@@ -384,7 +416,7 @@ class MqttClient(Communicator):
 
             assert self.client is not None
             try:
-                result = self.client.loop(timeout=MQTT_LOOP_TIMEOUT)
+                result = self._loop_client(timeout=MQTT_LOOP_TIMEOUT)
             except (OSError, mqtt.WebsocketConnectionError) as err:
                 logger.warning("MQTT loop error: %s", err)
                 self._schedule_reconnect()
@@ -617,7 +649,7 @@ class MqttClient(Communicator):
                 return
 
             try:
-                result = self.client.loop(timeout=MQTT_PUBLISH_WAIT_INTERVAL)
+                result = self._loop_client(timeout=MQTT_PUBLISH_WAIT_INTERVAL)
             except (OSError, mqtt.WebsocketConnectionError) as err:
                 logger.warning("MQTT publish wait failed: %s", err)
                 self._schedule_reconnect()
