@@ -1,12 +1,19 @@
 import useSWR from "swr";
 import { FrigateStats } from "@/types/stats";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import TimeAgo from "@/components/dynamic/TimeAgo";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Toggle } from "@/components/ui/toggle";
+import OverflowStrip from "@/components/mobile/OverflowStrip";
 import { isDesktop, isMobile } from "react-device-detect";
 import GeneralMetrics from "@/views/system/GeneralMetrics";
 import StorageMetrics from "@/views/system/StorageMetrics";
-import { LuActivity, LuHardDrive, LuSearchCode } from "react-icons/lu";
+import {
+  LuActivity,
+  LuHardDrive,
+  LuHeartPulse,
+  LuSearchCode,
+} from "react-icons/lu";
 import { FaVideo } from "react-icons/fa";
 import Logo from "@/components/Logo";
 import useOptimisticState from "@/hooks/use-optimistic-state";
@@ -15,10 +22,29 @@ import { useHashState } from "@/hooks/use-overlay-state";
 import { Toaster } from "@/components/ui/sonner";
 import { FrigateConfig } from "@/types/frigateConfig";
 import EnrichmentMetrics from "@/views/system/EnrichmentMetrics";
+import HealthMetrics from "@/views/system/HealthMetrics";
+import NoticeFilterButton from "@/components/health/NoticeFilterButton";
+import { DEFAULT_NOTICE_FILTER, NoticeFilter } from "@/types/health";
 import { useTranslation } from "react-i18next";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
-const allMetrics = ["general", "enrichments", "storage", "cameras"] as const;
+const allMetrics = [
+  "health",
+  "general",
+  "enrichments",
+  "storage",
+  "cameras",
+] as const;
 type SystemMetric = (typeof allMetrics)[number];
+
+const metricIcons: Record<SystemMetric, ReactNode> = {
+  health: <LuHeartPulse className="size-4" />,
+  general: <LuActivity className="size-4" />,
+  enrichments: <LuSearchCode className="size-4" />,
+  storage: <LuHardDrive className="size-4" />,
+  cameras: <FaVideo className="size-4" />,
+};
 
 function System() {
   const { t } = useTranslation(["views/system"]);
@@ -44,21 +70,23 @@ function System() {
   // stats page
 
   const [page, setPage] = useHashState<SystemMetric>();
+  // useHashState yields "" with no hash, which ?? would not catch
   const [pageToggle, setPageToggle] = useOptimisticState(
-    page ?? "general",
+    page || "health",
     setPage,
     100,
   );
   const [lastUpdated, setLastUpdated] = useState<number>(
     Math.floor(Date.now() / 1000),
   );
+  const [noticeFilter, setNoticeFilter] = useState<NoticeFilter>(
+    DEFAULT_NOTICE_FILTER,
+  );
 
   // Track which tabs have been visited so we can keep them mounted after first visit.
   // Using a ref updated during render avoids extra render cycles from state/effects.
   const visitedTabsRef = useRef(new Set<string>());
-  if (page) {
-    visitedTabsRef.current.add(page);
-  }
+  visitedTabsRef.current.add(pageToggle);
   const visitedTabs = visitedTabsRef.current;
 
   useEffect(() => {
@@ -80,39 +108,77 @@ function System() {
         {isMobile && (
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
         )}
-        <ToggleGroup
-          className="*:rounded-md *:px-3 *:py-4"
-          type="single"
-          size="sm"
-          value={pageToggle}
-          onValueChange={(value: SystemMetric) => {
-            if (value) {
-              setPageToggle(value);
-            }
-          }} // don't allow the severity to be unselected
-        >
-          {Object.values(metrics).map((item) => (
-            <ToggleGroupItem
-              key={item}
-              className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
-              value={item}
-              aria-label={`Select ${item}`}
-            >
-              {item == "general" && <LuActivity className="size-4" />}
-              {item == "enrichments" && <LuSearchCode className="size-4" />}
-              {item == "storage" && <LuHardDrive className="size-4" />}
-              {item == "cameras" && <FaVideo className="size-4" />}
-              {isDesktop && (
-                <div className="smart-capitalize">{t(item + ".title")}</div>
-              )}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        {isMobile ? (
+          <div className="w-[calc(50%-1rem)]">
+            <OverflowStrip
+              items={metrics.map((item) => (
+                <Toggle
+                  key={item}
+                  className={cn(
+                    "shrink-0 rounded-md px-3 py-4",
+                    pageToggle != item && "*:text-muted-foreground",
+                  )}
+                  size="sm"
+                  pressed={pageToggle == item}
+                  onPressedChange={() => setPageToggle(item)}
+                  aria-label={t("selectItem", {
+                    ns: "common",
+                    item: t(item + ".title"),
+                  })}
+                >
+                  {metricIcons[item]}
+                </Toggle>
+              ))}
+              activeIndex={metrics.indexOf(pageToggle)}
+              gapClassName="gap-0.5"
+              showAllLabel={t("showAllTabs")}
+              showLessLabel={t("showLessTabs")}
+            />
+          </div>
+        ) : (
+          <ScrollArea className="whitespace-nowrap">
+            <div className="flex flex-row">
+              <ToggleGroup
+                className="*:rounded-md *:px-3 *:py-4"
+                type="single"
+                size="sm"
+                value={pageToggle}
+                onValueChange={(value: SystemMetric) => {
+                  if (value) {
+                    setPageToggle(value);
+                  }
+                }} // don't allow the severity to be unselected
+              >
+                {Object.values(metrics).map((item) => (
+                  <ToggleGroupItem
+                    key={item}
+                    className={`flex items-center justify-between gap-2 ${pageToggle == item ? "" : "*:text-muted-foreground"}`}
+                    value={item}
+                    aria-label={t("selectItem", {
+                      ns: "common",
+                      item: t(item + ".title"),
+                    })}
+                  >
+                    {metricIcons[item]}
+                    <div className="smart-capitalize">{t(item + ".title")}</div>
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+              <ScrollBar orientation="horizontal" className="h-0" />
+            </div>
+          </ScrollArea>
+        )}
 
         <div className="flex h-full items-center">
-          {lastUpdated && (
+          {pageToggle == "health" && (
+            <NoticeFilterButton
+              filter={noticeFilter}
+              onFilterChange={setNoticeFilter}
+            />
+          )}
+          {lastUpdated && pageToggle != "health" && (
             <div className="h-full content-center text-sm text-muted-foreground">
-              {t("lastRefreshed")}
+              {isDesktop && t("lastRefreshed")}
               <TimeAgo time={lastUpdated * 1000} dense />
             </div>
           )}
@@ -126,6 +192,11 @@ function System() {
           </div>
         )}
       </div>
+      {visitedTabs.has("health") && (
+        <div className={pageToggle == "health" ? "contents" : "hidden"}>
+          <HealthMetrics noticeFilter={noticeFilter} />
+        </div>
+      )}
       {visitedTabs.has("general") && (
         <div className={page == "general" ? "contents" : "hidden"}>
           <GeneralMetrics

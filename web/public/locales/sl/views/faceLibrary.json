@@ -6,13 +6,9 @@
     "nameCannotContainHash": "Ime ne sme vsebovati znaka #."
   },
   "details": {
-    "person": "Oseba",
     "unknown": "Neznan",
     "timestamp": "Časovna značka",
-    "subLabelScore": "Ocena Podoznake",
-    "scoreInfo": "Ocena je uteženo povprečje vseh ocen obraza, uteženo glede na velikost obraza na posamezni sliki.",
-    "face": "Podrobnosti Obraza",
-    "faceDesc": "Podrobnosti sledenega objekta, ki je ustvaril ta obraz"
+    "scoreInfo": "Ocena je uteženo povprečje vseh ocen obraza, uteženo glede na velikost obraza na posamezni sliki."
   },
   "uploadFaceImage": {
     "title": "Naloži sliko obraza",
@@ -54,8 +50,6 @@
   "documentTitle": "Knjižnica obrazov - Frigate",
   "collections": "Zbirke",
   "createFaceLibrary": {
-    "title": "Ustvari Zbirko",
-    "desc": "Ustvari novo zbirko",
     "new": "Ustvari nov obraz",
     "nextSteps": "Za dobre temelje:<li>Uporabi zavihek Zadnje prepoznave za izbiro in učenje slik za vsako zaznano osebo.</li><li>Za najboljše rezultate se osredotoči na slike od spredaj; izogibaj se slikam, ki zajamejo obraz pod kotom.</li></ul>"
   },
@@ -73,8 +67,6 @@
     "empty": "Ni zadnjih poskusov prepoznave obrazov",
     "titleShort": "Zadnje"
   },
-  "selectItem": "Izberi {{item}}",
-  "selectFace": "Izberi Obraz",
   "deleteFaceLibrary": {
     "title": "Izbriši ime",
     "desc": "Ali si prepričan, da želiš izbrisati zbirko {{name}}? To bo trajno izbrisalo vse povezane obraze."
@@ -100,8 +92,6 @@
     "maxSize": "Največja velikost: {{size}} MB"
   },
   "nofaces": "Ni razpoložljivih obrazov",
-  "pixels": "{{area}}px",
-  "readTheDocs": "Preberi dokumentacijo",
   "trainFaceAs": "Nauči obraz kot:",
   "trainFace": "Nauči obraz"
 }

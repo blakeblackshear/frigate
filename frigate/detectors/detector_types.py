@@ -2,7 +2,7 @@ import importlib
 import logging
 import pkgutil
 from enum import Enum
-from typing import Annotated, Union
+from typing import Annotated, Union, get_args
 
 from pydantic import Field
 
@@ -39,3 +39,21 @@ DetectorConfig = Annotated[
     Union[tuple(BaseDetectorConfig.__subclasses__())],  # noqa: UP007
     Field(discriminator="type"),
 ]
+
+
+def _discriminator_value(config_class: type[BaseDetectorConfig]) -> str | None:
+    """Read the Literal value of a detector config class' type field."""
+    field = config_class.model_fields.get("type")
+
+    if field is None:
+        return None
+
+    values = get_args(field.annotation)
+    return values[0] if values else None
+
+
+config_types: dict[str, type[BaseDetectorConfig]] = {
+    key: config_class
+    for config_class in BaseDetectorConfig.__subclasses__()
+    if (key := _discriminator_value(config_class)) is not None
+}

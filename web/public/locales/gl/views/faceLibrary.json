@@ -5,7 +5,6 @@
     "invalidName": "Nome non válido. Os nomes só poden incluír letras, números, espazos, apóstrofes, guións baixos e guións."
   },
   "details": {
-    "unknown": "Descoñecido",
-    "person": "Persoa"
+    "unknown": "Descoñecido"
   }
 }

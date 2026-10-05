@@ -46,8 +46,6 @@
         "thresholdDesc": "Niższe wartości wykrywają mniejsze zmiany (1-255)",
         "minArea": "Minimalny obszar zmiany",
         "minAreaDesc": "Minimalny rozmiar pojedynczego poruszającego się obszaru jako procent obszaru zainteresowania",
-        "frameSkip": "Pominięcie klatki",
-        "frameSkipDesc": "Przetwarza co N klatkę. Ustaw wartość na liczbę klatek na sekundę swojej kamery, aby przetwarzać jedną klatkę na sekundę (np. 5 dla kamery o 5 klatkach na sekundę, 30 dla kamery o 30 klatkach na sekundę). Wyższe wartości zapewniają większą szybkość ale mogą powodować pominięcie krótkich zdarzeń ruchu.",
         "maxResults": "Maksymalna liczba wyników",
         "maxResultsDesc": "Zatrzymaj po znalezieniu tylu pasujących znaczników czasu"
     },

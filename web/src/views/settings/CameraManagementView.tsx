@@ -58,7 +58,7 @@ import {
 import type { ProfileState } from "@/types/profile";
 import { getProfileColor } from "@/utils/profileColors";
 import { isReplayCamera } from "@/utils/cameraUtil";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 import { cn } from "@/lib/utils";
 import {
   Select,

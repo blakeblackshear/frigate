@@ -22,12 +22,12 @@ import { HiOutlineDotsVertical, HiTrash } from "react-icons/hi";
 import { isMobile } from "react-device-detect";
 import { toRGBColorString } from "@/utils/canvasUtil";
 import { Polygon, PolygonType } from "@/types/canvas";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { removeRequiredZoneQuery, reviewQueries } from "@/utils/zoneEdutUtil";
+import { zoneReferenceUpdates } from "@/utils/zoneEdutUtil";
 import IconWrapper from "../ui/icon-wrapper";
 import { buttonVariants } from "@/components/ui/button";
 import { Trans, useTranslation } from "react-i18next";
@@ -35,6 +35,7 @@ import ActivityIndicator from "../indicators/activity-indicator";
 import { cn } from "@/lib/utils";
 import { useMotionMaskState, useObjectMaskState, useZoneState } from "@/api/ws";
 import { getProfileColor } from "@/utils/profileColors";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 
 type PolygonItemProps = {
   polygon: Polygon;
@@ -72,6 +73,7 @@ export default function PolygonItem({
   const { t } = useTranslation("views/settings");
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
+  const statusBar = useContext(StatusBarMessagesContext);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const { payload: motionMaskState, send: sendMotionMaskState } =
     useMotionMaskState(polygon.camera, polygon.name);
@@ -137,148 +139,66 @@ export default function PolygonItem({
       setIsLoading(true);
       setLoadingPolygonIndex(index);
 
+      let cameraUpdate: Record<string, unknown>;
+      let needsRestart = false;
+
       if (polygon.type === "zone") {
-        let url: string;
+        const deleteSection = { zones: { [polygon.name]: null } };
 
         if (editingProfile) {
-          // Profile mode: just delete the profile zone
-          url = `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${polygon.name}`;
+          cameraUpdate = { profiles: { [editingProfile]: deleteSection } };
         } else {
-          // Base mode: handle review queries
-          const { alertQueries, detectionQueries } = reviewQueries(
-            polygon.name,
-            false,
-            false,
-            polygon.camera,
-            cameraConfig?.review.alerts.required_zones || [],
-            cameraConfig?.review.detections.required_zones || [],
-          );
-          const genaiQueries = removeRequiredZoneQuery(
-            polygon.name,
-            polygon.camera,
-            "objects.genai",
-            cameraConfig?.objects.genai.required_zones || [],
-          );
-          const snapshotQueries = removeRequiredZoneQuery(
-            polygon.name,
-            polygon.camera,
-            "snapshots",
-            cameraConfig?.snapshots.required_zones || [],
-          );
-          const mqttQueries = removeRequiredZoneQuery(
-            polygon.name,
-            polygon.camera,
-            "mqtt",
-            cameraConfig?.mqtt.required_zones || [],
-          );
-          const autotrackQueries = removeRequiredZoneQuery(
-            polygon.name,
-            polygon.camera,
-            "onvif.autotracking",
-            cameraConfig?.onvif.autotracking.required_zones || [],
-          );
-          // Also delete from profiles that have overrides for this zone
-          let profileQueries = "";
+          const references = zoneReferenceUpdates(cameraConfig, polygon.name);
+          // Processes other than object tracking only reload these on restart
+          needsRestart = Object.keys(references).length > 0;
+          cameraUpdate = { ...deleteSection, ...references };
+        }
+      } else {
+        const deleteSection =
+          polygon.type === "motion_mask"
+            ? { motion: { mask: { [polygon.name]: null } } }
+            : !polygon.objects.length
+              ? { objects: { mask: { [polygon.name]: null } } }
+              : {
+                  objects: {
+                    filters: {
+                      [polygon.objects[0]]: {
+                        mask: { [polygon.name]: null },
+                      },
+                    },
+                  },
+                };
+
+        if (editingProfile) {
+          cameraUpdate = { profiles: { [editingProfile]: deleteSection } };
+        } else {
+          // Base mode: also delete from profiles that have overrides for this mask
+          const profileDeletes: Record<string, unknown> = {};
           if (allProfileNames && cameraConfig) {
             for (const profileName of allProfileNames) {
-              if (
-                cameraConfig.profiles?.[profileName]?.zones?.[polygon.name] !==
-                undefined
-              ) {
-                profileQueries += `&cameras.${polygon.camera}.profiles.${profileName}.zones.${polygon.name}`;
+              const profileData = cameraConfig.profiles?.[profileName];
+              if (!profileData) continue;
+
+              const hasMask =
+                polygon.type === "motion_mask"
+                  ? profileData.motion?.mask?.[polygon.name] !== undefined
+                  : polygon.type === "object_mask"
+                    ? profileData.objects?.mask?.[polygon.name] !== undefined ||
+                      Object.values(profileData.objects?.filters || {}).some(
+                        (f) => f?.mask?.[polygon.name] !== undefined,
+                      )
+                    : false;
+
+              if (hasMask) {
+                profileDeletes[profileName] = deleteSection;
               }
             }
           }
-          url = `cameras.${polygon.camera}.zones.${polygon.name}${alertQueries}${detectionQueries}${genaiQueries}${snapshotQueries}${mqttQueries}${autotrackQueries}${profileQueries}`;
+          cameraUpdate =
+            Object.keys(profileDeletes).length > 0
+              ? { ...deleteSection, profiles: profileDeletes }
+              : deleteSection;
         }
-
-        await axios
-          .put(`config/set?${url}`, {
-            requires_restart: 0,
-            update_topic: updateTopic,
-          })
-          .then((res) => {
-            if (res.status === 200) {
-              toast.success(
-                t("masksAndZones.form.polygonDrawing.delete.success", {
-                  name: polygon?.friendly_name ?? polygon?.name,
-                }),
-                { position: "top-center" },
-              );
-              updateConfig();
-              onDeleted?.();
-            } else {
-              toast.error(
-                t("toast.save.error.title", {
-                  ns: "common",
-                  errorMessage: res.statusText,
-                }),
-                { position: "top-center" },
-              );
-            }
-          })
-          .catch((error) => {
-            const errorMessage =
-              error.response?.data?.message ||
-              error.response?.data?.detail ||
-              "Unknown error";
-            toast.error(
-              t("toast.save.error.title", { errorMessage, ns: "common" }),
-              { position: "top-center" },
-            );
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-        return;
-      }
-
-      // Motion masks and object masks use JSON body format
-      const deleteSection =
-        polygon.type === "motion_mask"
-          ? { motion: { mask: { [polygon.name]: null } } }
-          : !polygon.objects.length
-            ? { objects: { mask: { [polygon.name]: null } } }
-            : {
-                objects: {
-                  filters: {
-                    [polygon.objects[0]]: {
-                      mask: { [polygon.name]: null },
-                    },
-                  },
-                },
-              };
-
-      let cameraUpdate: Record<string, unknown>;
-      if (editingProfile) {
-        cameraUpdate = { profiles: { [editingProfile]: deleteSection } };
-      } else {
-        // Base mode: also delete from profiles that have overrides for this mask
-        const profileDeletes: Record<string, unknown> = {};
-        if (allProfileNames && cameraConfig) {
-          for (const profileName of allProfileNames) {
-            const profileData = cameraConfig.profiles?.[profileName];
-            if (!profileData) continue;
-
-            const hasMask =
-              polygon.type === "motion_mask"
-                ? profileData.motion?.mask?.[polygon.name] !== undefined
-                : polygon.type === "object_mask"
-                  ? profileData.objects?.mask?.[polygon.name] !== undefined ||
-                    Object.values(profileData.objects?.filters || {}).some(
-                      (f) => f?.mask?.[polygon.name] !== undefined,
-                    )
-                  : false;
-
-            if (hasMask) {
-              profileDeletes[profileName] = deleteSection;
-            }
-          }
-        }
-        cameraUpdate =
-          Object.keys(profileDeletes).length > 0
-            ? { ...deleteSection, profiles: profileDeletes }
-            : deleteSection;
       }
 
       const configUpdate = {
@@ -290,17 +210,29 @@ export default function PolygonItem({
       await axios
         .put("config/set", {
           config_data: configUpdate,
-          requires_restart: 0,
+          requires_restart: needsRestart ? 1 : 0,
           update_topic: updateTopic,
         })
         .then((res) => {
           if (res.status === 200) {
-            toast.success(
-              t("masksAndZones.form.polygonDrawing.delete.success", {
-                name: polygon?.friendly_name ?? polygon?.name,
-              }),
-              { position: "top-center" },
-            );
+            if (needsRestart) {
+              statusBar?.addMessage(
+                "config_restart_required",
+                t("configForm.restartRequiredFooter"),
+                undefined,
+                "config_restart_required",
+              );
+              toast.success(t("toast.successRestartRequired"), {
+                position: "top-center",
+              });
+            } else {
+              toast.success(
+                t("masksAndZones.form.polygonDrawing.delete.success", {
+                  name: polygon?.friendly_name ?? polygon?.name,
+                }),
+                { position: "top-center" },
+              );
+            }
             updateConfig();
             onDeleted?.();
           } else {
@@ -338,6 +270,7 @@ export default function PolygonItem({
       editingProfile,
       allProfileNames,
       onDeleted,
+      statusBar,
     ],
   );
 
@@ -593,6 +526,7 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={LuPencil}
+                  aria-label={t("button.edit", { ns: "common" })}
                   disabled={isLoading}
                   className={cn(
                     "size-[15px] cursor-pointer",
@@ -637,6 +571,7 @@ export default function PolygonItem({
               <TooltipTrigger asChild>
                 <IconWrapper
                   icon={HiTrash}
+                  aria-label={t("button.delete", { ns: "common" })}
                   disabled={isLoading}
                   className={cn(
                     "size-[15px] cursor-pointer",

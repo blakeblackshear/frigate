@@ -60,10 +60,10 @@ ARG DEBIAN_FRONTEND
 RUN --mount=type=bind,source=docker/main/build_intel_media_driver.sh,target=/deps/build_intel_media_driver.sh \
     /deps/build_intel_media_driver.sh
 
-FROM scratch AS go2rtc
+FROM wget AS go2rtc
 ARG TARGETARCH
-WORKDIR /rootfs/usr/local/go2rtc/bin
-ADD --link --chmod=755 "https://github.com/AlexxIT/go2rtc/releases/download/v1.9.14/go2rtc_linux_${TARGETARCH}" go2rtc
+RUN --mount=type=bind,source=docker/main/install_go2rtc.sh,target=/deps/install_go2rtc.sh \
+    /deps/install_go2rtc.sh
 
 FROM wget AS tempio
 ARG TARGETARCH
@@ -146,6 +146,8 @@ RUN wget -q https://github.com/openvinotoolkit/open_model_zoo/raw/master/data/da
 RUN wget -qO - https://www.kaggle.com/api/v1/models/google/yamnet/tfLite/classification-tflite/1/download | tar xvz && mv 1.tflite cpu_audio_model.tflite
 COPY audio-labelmap.txt .
 
+RUN chmod -R a+rX /rootfs
+
 
 FROM wget AS s6-overlay
 ARG TARGETARCH
@@ -200,10 +202,6 @@ RUN pip3 wheel --wheel-dir=/wheels -r /requirements-wheels.txt && \
         pip3 wheel --wheel-dir=/wheels -r /requirements-dev.txt; \
     fi
 
-# Install HailoRT & Wheels
-RUN --mount=type=bind,source=docker/main/install_hailort.sh,target=/deps/install_hailort.sh \
-    /deps/install_hailort.sh
-
 # Collect deps in a single layer
 FROM scratch AS deps-rootfs
 COPY --from=nginx /usr/local/nginx/ /usr/local/nginx/
@@ -214,7 +212,6 @@ COPY --from=libusb-build /usr/local/lib /usr/local/lib
 COPY --from=tempio /rootfs/ /
 COPY --from=s6-overlay /rootfs/ /
 COPY --from=models /rootfs/ /
-COPY --from=wheels /rootfs/ /
 COPY docker/main/rootfs/ /
 
 
@@ -265,6 +262,23 @@ ENV PATH="/usr/local/go2rtc/bin:/usr/local/tempio/bin:/usr/local/nginx/sbin:${PA
 RUN --mount=type=bind,source=docker/main/install_deps.sh,target=/deps/install_deps.sh \
     /deps/install_deps.sh
 
+# Runtime users. frigate may be remapped at start via PUID/PGID (init-usermod)
+# or replaced entirely with docker's --user. go2rtc is intentionally separate
+# and more restricted. frigate-data is the shared group for /config access.
+# -o tolerates variant base images that already contain uid/gid 1000.
+RUN groupadd -o --gid 1000 frigate \
+    && useradd -o --uid 1000 --gid frigate --no-create-home --shell /usr/sbin/nologin frigate \
+    && groupadd --system go2rtc \
+    && useradd --system --gid go2rtc --no-create-home --shell /usr/sbin/nologin go2rtc \
+    && groupadd --system frigate-data \
+    && usermod -aG frigate-data frigate \
+    && usermod -aG frigate-data go2rtc \
+    && for grp in video render plugdev audio; do \
+         if getent group "$grp" >/dev/null; then \
+           usermod -aG "$grp" frigate && usermod -aG "$grp" go2rtc; \
+         fi; \
+       done
+
 ENV DEFAULT_FFMPEG_VERSION="8.0"
 ENV INCLUDED_FFMPEG_VERSIONS="${DEFAULT_FFMPEG_VERSION}:7.0:5.0"
 
@@ -275,15 +289,11 @@ RUN wget -q https://bootstrap.pypa.io/get-pip.py -O get-pip.py \
 RUN --mount=type=bind,from=wheels,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
 
-# Install Axera Engine
-RUN pip3 install https://github.com/AXERA-TECH/pyaxengine/releases/download/0.1.3-frigate/axengine-0.1.3-py3-none-any.whl
-
+# The Hailo, MemryX, and Axera runtimes are installed at first start by
+# frigate/util/runtime_deps.py, only when that detector is configured.
+# Axera's native libraries are bind mounted from the host.
 ENV PATH="${PATH}:/usr/bin/axcl"
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/lib/axcl"
-
-# Install MemryX runtime (requires libgomp (OpenMP) in the final docker image)
-RUN --mount=type=bind,source=docker/main/install_memryx.sh,target=/deps/install_memryx.sh \
-    bash -c "bash /deps/install_memryx.sh"
 
 COPY --from=deps-rootfs / /
 
@@ -297,6 +307,9 @@ EXPOSE 8555/tcp 8555/udp
 ENV S6_LOGGING_SCRIPT="T 1 n0 s10000000 T"
 # Do not fail on long-running download scripts
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=0
+# Allow running with a read-only root filesystem: s6 copies its scan dir into
+# /run and executes service scripts from there, so /run must allow exec
+ENV S6_READ_ONLY_ROOT=1
 
 ENTRYPOINT ["/init"]
 CMD []
@@ -306,6 +319,11 @@ HEALTHCHECK --start-period=300s --start-interval=5s --interval=15s --timeout=5s 
 
 # Frigate deps with Node.js and NPM for devcontainer
 FROM deps AS devcontainer
+
+# /config here is the developer's bind-mounted checkout, not a data volume, so
+# the prepare ownership sweep must not run: it would chown the source tree to
+# the runtime uid and lock out any container user that isn't 1000.
+ENV FRIGATE_RUN_AS_ROOT=true
 
 # Do not start the actual Frigate service on devcontainer as it will be started by VS Code
 # But start a fake service for simulating the logs
@@ -363,3 +381,7 @@ FROM deps AS frigate
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+
+# Pre-compile bytecode so a read-only rootfs doesn't force re-parsing the
+# source tree on every boot (pip-installed packages are already compiled)
+RUN python3 -m compileall -q -j0 /opt/frigate/frigate

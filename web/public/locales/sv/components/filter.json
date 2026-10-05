@@ -5,7 +5,6 @@
       "short": "Etiketter"
     },
     "label": "Etiketter",
-    "count": "{{count}} Etiketter",
     "count_one": "{{count}} etikett",
     "count_other": "{{count}} etiketter"
   },

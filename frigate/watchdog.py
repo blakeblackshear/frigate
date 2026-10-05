@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from multiprocessing.synchronize import Event as MpEvent
 
+from frigate.notices import raise_notice
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.util.process import FrigateProcess
 from frigate.util.services import restart_frigate
@@ -111,27 +112,30 @@ class FrigateWatchdog(threading.Thread):
         except Exception:
             logger.exception("Failed to restart %s", entry.name)
 
+    def _check_detectors(self) -> None:
+        now = datetime.datetime.now().timestamp()
+
+        for name, detector in self.detectors.items():
+            detection_start = detector.detection_start.value  # type: ignore[attr-defined]
+            # issue https://github.com/python/typeshed/issues/8799
+            # from mypy 0.981 onwards
+            if detection_start > 0.0 and now - detection_start > 10:
+                logger.info(
+                    "Detection appears to be stuck. Restarting detection process..."
+                )
+                detector.start_or_restart()
+                raise_notice("detector_stuck", scope=name, params={"detector": name})
+            elif (
+                detector.detect_process is not None
+                and not detector.detect_process.is_alive()
+            ):
+                logger.info("Detection appears to have stopped. Exiting Frigate...")
+                restart_frigate()
+
     def run(self) -> None:
         time.sleep(10)
         while not self.stop_event.wait(10):
-            now = datetime.datetime.now().timestamp()
-
-            # check the detection processes
-            for detector in self.detectors.values():
-                detection_start = detector.detection_start.value  # type: ignore[attr-defined]
-                # issue https://github.com/python/typeshed/issues/8799
-                # from mypy 0.981 onwards
-                if detection_start > 0.0 and now - detection_start > 10:
-                    logger.info(
-                        "Detection appears to be stuck. Restarting detection process..."
-                    )
-                    detector.start_or_restart()
-                elif (
-                    detector.detect_process is not None
-                    and not detector.detect_process.is_alive()
-                ):
-                    logger.info("Detection appears to have stopped. Exiting Frigate...")
-                    restart_frigate()
+            self._check_detectors()
 
             for entry in self._monitored:
                 self._check_process(entry)

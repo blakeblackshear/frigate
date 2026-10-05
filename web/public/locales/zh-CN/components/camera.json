@@ -35,8 +35,7 @@
         "audioIsUnavailable": "此视频流不支持音频传输",
         "audio": {
           "tips": {
-            "title": "音频必须从您的摄像头输出并在 go2rtc 中配置此流。",
-            "document": "阅读文档 "
+            "title": "音频必须从您的摄像头输出并在 go2rtc 中配置此流。"
           }
         },
         "streamMethod": {

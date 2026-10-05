@@ -12,7 +12,6 @@
     "title": "Prijenos je offline",
     "desc": "Nisu primljeni okviri na {{cameraName}} <code>detect</code> prijenos, provjerite zapise o greškama"
   },
-  "cameraDisabled": "Kamera je onemogućena",
   "stats": {
     "streamType": {
       "title": "Tip prijenosa:",
@@ -21,14 +20,6 @@
     "bandwidth": {
       "title": "Širina pojasa:",
       "short": "Širina pojasa"
-    },
-    "latency": {
-      "title": "Kasnjenje:",
-      "value": "{{seconds}} sekundi",
-      "short": {
-        "title": "Kasnjenje",
-        "value": "{{seconds}} sek"
-      }
     },
     "totalFrames": "Ukupno okvira:",
     "droppedFrames": {

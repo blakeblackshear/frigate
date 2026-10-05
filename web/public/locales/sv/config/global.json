@@ -55,10 +55,6 @@
             "label": "Aktivera fågelperspektiv",
             "description": "Aktivera eller inaktivera fågelperspektivvyn."
         },
-        "mode": {
-            "label": "Visningsläge",
-            "description": "Läge för vilka kameror som ska tas med i fågelperspektivet: \"objects\" (objekt), \"motion\" (rörelse) eller \"continuous\" (kontinuerligt)."
-        },
         "order": {
             "label": "Position",
             "description": "Numerisk position som styr kamerans ordning i fågelperspektivlayouten."
@@ -1030,36 +1026,6 @@
         "enabled": {
             "label": "Aktivera TLS",
             "description": "Aktivera TLS för Frigates webbgränssnitt och API på den konfigurerade TLS-porten."
-        }
-    },
-    "detectors": {
-        "label": "Detektorhårdvara",
-        "description": "Konfiguration av objektdetektorer (CPU, GPU, ONNX-bakändar) och eventuella detektorspecifika modellinställningar.",
-        "type": {
-            "label": "Typ"
-        },
-        "model": {
-            "label": "Detektorspecifika modellinställningar",
-            "description": "Detektorspecifika modellalternativ, till exempel sökväg och indatastorlek.",
-            "path": {
-                "label": "Sökväg för anpassad objektdetektormodell",
-                "description": "Sökväg till en anpassad objektdetektionsmodell (eller \"plus://<model_id>\" för Frigate+-modeller)."
-            },
-            "labelmap_path": {
-                "label": "Etikettkarta för anpassad objektdetektor",
-                "description": "Sökväg till en labelmap-fil som mappar numeriska klasser till textetiketter för detektorn."
-            },
-            "width": {
-                "label": "Indatabredd för objektdetekteringsmodell",
-                "description": "Bredd på modellens indatatensor i pixlar."
-            },
-            "height": {
-                "label": "Indatahöjd för objektdetekteringsmodell",
-                "description": "Höjd på modellens indatatensor i pixlar."
-            },
-            "labelmap": {
-                "label": "Anpassad etikettkarta"
-            }
         }
     }
 }

@@ -1,21 +1,8 @@
 export type FfmpegVideoOption = "copy" | "h264" | "h265" | "exclude";
 export type FfmpegAudioOption =
-  | "copy"
-  | "aac"
-  | "opus"
-  | "pcmu"
-  | "pcma"
-  | "pcm"
-  | "mp3"
-  | "exclude";
+  "copy" | "aac" | "opus" | "pcmu" | "pcma" | "pcm" | "mp3" | "exclude";
 export type FfmpegHardwareOption =
-  | "none"
-  | "auto"
-  | "vaapi"
-  | "cuda"
-  | "v4l2m2m"
-  | "dxva2"
-  | "videotoolbox";
+  "none" | "auto" | "vaapi" | "cuda" | "v4l2m2m" | "dxva2" | "videotoolbox";
 
 export type ParsedFfmpegUrl = {
   isFfmpeg: boolean;

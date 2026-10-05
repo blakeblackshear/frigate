@@ -1,11 +1,5 @@
 type PtzFeature =
-  | "pt"
-  | "zoom"
-  | "pt-r"
-  | "zoom-r"
-  | "zoom-a"
-  | "pt-r-fov"
-  | "focus";
+  "pt" | "zoom" | "pt-r" | "zoom-r" | "zoom-a" | "pt-r-fov" | "focus";
 
 export type OnvifProfile = {
   name: string;

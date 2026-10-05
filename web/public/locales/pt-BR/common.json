@@ -160,11 +160,14 @@
     "savingAll": "Salvando Tudo…",
     "undoAll": "Desfazer Tudo",
     "applying": "Aplicando…",
-    "retry": "Tente novamente"
+    "retry": "Tente novamente",
+    "expand": "Expandir",
+    "collapse": "Recolher",
+    "reload": "Recarregar"
   },
   "menu": {
     "system": "Sistema",
-    "systemMetrics": "Métricas de sistema",
+    "systemMetrics": "Saúde e Métricas",
     "configuration": "Configuração",
     "language": {
       "hi": "हिन्दी (Hindi)",
@@ -211,7 +214,8 @@
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Croata)",
       "bs": "Bosanski (Bósnio)",
-      "zhHant": "Chinês Tradicional"
+      "zhHant": "Chinês Tradicional",
+      "be": "Bielorrusso"
     },
     "systemLogs": "Logs de sistema",
     "settings": "Configurações",
@@ -327,5 +331,36 @@
   "validation_errors": "Erros de validação",
   "credentialField": {
     "savedPlaceholder": "Salvo - deixar em branco para manter a atual"
+  },
+  "error": {
+    "title": "Esta pagina parou de funcionar",
+    "desc": "A página encontrou um erro inesperado. Recarregar normalmente resolve o problema. Se continuar acontecendo, copie os detalhes do erro e anexe à um chamado no GitHub.",
+    "staleTitle": "Recarregamento necessário",
+    "staleDesc": "Partes da interface não foram carregadas, o que normalmente significa que o Frigate foi atualizado enquanto a aba estava aberta. Recarregue para atualizar para a nova versao.",
+    "partial": "Parte da interface parou de funcionar.",
+    "copyDetails": "Copiar detalhes",
+    "copyFailed": "Não foi possível copiar os detalhes para a área de transferência"
+  },
+  "commandMenu": {
+    "title": "Menu de comandos",
+    "description": "Buscar páginas, câmeras, configurações, e ações",
+    "placeholder": "Buscar páginas, câmeras, configurações, e ações",
+    "empty": "Nenhum registro",
+    "hint": "{{key}} ou / para abrir, Enter para executar",
+    "section": {
+      "recent": "Recente",
+      "pages": "Páginas",
+      "cameras": "Câmeras",
+      "cameraGroups": "Grupos de câmera",
+      "settings": "Configurações",
+      "actions": "Ações"
+    },
+    "camera": {
+      "live": "Ao vivo",
+      "review": "Revisar"
+    },
+    "action": {
+      "toggleTheme": "Alternar modo claro e escuro"
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { GenAIRole } from "@/types/frigateConfig";
 export type ToolCallFunction = {
   name: string;
   arguments: string;
@@ -20,9 +21,19 @@ export type ChatMessage = {
 };
 
 export type ToolCall = {
+  id?: string;
   name: string;
   arguments?: Record<string, unknown>;
   response?: string;
+};
+
+export type ToolDecision = "approve" | "reject";
+
+/** A state-changing tool call the backend paused on, awaiting the user. */
+export type PendingToolCall = {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
 };
 
 export type StartingRequest = {
@@ -39,11 +50,31 @@ export type ChatStats = {
 
 export type ShowStatsMode = "while_generating" | "always";
 
+// Capability flags a provider can report for a model it has not loaded.
+// Keyed by model name (and alias) in GenAIProviderInfo.model_capabilities.
+export type GenAIModelCapabilities = {
+  supports_vision?: boolean;
+  supports_embeddings?: boolean;
+  supports_transcription?: boolean;
+};
+
 export type GenAIProviderInfo = {
   models: string[];
   roles: string[];
   supports_toggleable_thinking: boolean;
   supports_embeddings: boolean;
+  supports_transcription: boolean;
+  // Per-model capabilities, when the provider can report them without loading
+  // the model. The top-level flags above describe the configured model only.
+  model_capabilities?: Record<string, GenAIModelCapabilities>;
 };
 
 export type GenAIModelsResponse = Record<string, GenAIProviderInfo>;
+
+export type GenAIRoleInfo = {
+  name: string;
+  model: string;
+  context_size: number;
+};
+
+export type GenAIRolesResponse = Partial<Record<GenAIRole, GenAIRoleInfo>>;

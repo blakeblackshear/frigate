@@ -14,7 +14,7 @@ import { useCallback, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { toast } from "sonner";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 import { cn } from "@/lib/utils";
 
 type RegionGridSettingsViewProps = {

@@ -61,7 +61,7 @@ export function useDateLocale(): Locale {
         try {
           const loadedLocale = await localeLoader();
           setLocale(loadedLocale);
-        } catch (error) {
+        } catch {
           setLocale(enUS);
         }
       } else {

@@ -46,6 +46,10 @@
         "num_threads": {
             "label": "Thread-uri detecție",
             "description": "Numărul de thread-uri pentru procesarea detecției audio."
+        },
+        "labelmap": {
+            "label": "Personalizare mapare etichete audio (labelmap)",
+            "description": "Suprascrieri sau intrări de remapare de combinat în maparea standard de etichete audio."
         }
     },
     "audio_transcription": {
@@ -70,13 +74,13 @@
             "label": "Activare Birdseye",
             "description": "Activează sau dezactivează funcția Birdseye."
         },
-        "mode": {
-            "label": "Mod urmărire",
-            "description": "Modul de includere a camerelor în Birdseye: 'objects', 'motion' sau 'continuous'."
-        },
         "order": {
             "label": "Poziție",
             "description": "Poziția numerică ce controlează ordinea camerei în layout-ul Birdseye."
+        },
+        "modes": {
+            "label": "Tipuri de activitate",
+            "description": "Tipuri de activitate care includ camerele în Birdseye."
         }
     },
     "detect": {
@@ -137,6 +141,10 @@
         "annotation_offset": {
             "label": "Offset adnotare",
             "description": "Milisecunde pentru a decala adnotările de detecție pentru a alinia mai bine chenarele cu înregistrarea."
+        },
+        "scene": {
+            "label": "Scenă de detecție",
+            "description": "Mediul la care se uită această cameră, utilizat pentru a alege care dintre modelele configurate rulează pe ea. Camerele lăsate pe 'all' rulează modelul configurat cu scena 'all'."
         }
     },
     "face_recognition": {
@@ -180,6 +188,10 @@
             "record": {
                 "label": "Argumente ieșire record",
                 "description": "Argumente implicite pentru stream-urile cu rol record."
+            },
+            "record_sub": {
+                "label": "Argumente de ieșire pentru înregistrarea sub-stream-ului",
+                "description": "Argumente de ieșire pentru stream-urile cu rolul record_sub. Argumentele de ieșire pentru înregistrare sunt utilizate când acesta nu este setat."
             }
         },
         "retry_interval": {
@@ -509,6 +521,54 @@
         "enabled_in_config": {
             "label": "Stare înregistrare originală",
             "description": "Indică dacă înregistrarea a fost activă în configurația inițială."
+        },
+        "sub": {
+            "label": "Înregistrare sub-stream",
+            "description": "Setări pentru înregistrarea unui al doilea stream, de calitate mai scăzută.",
+            "enabled": {
+                "label": "Activează înregistrarea sub-stream-ului",
+                "description": "Activează înregistrarea unui al doilea stream, de calitate mai scăzută, pentru redare adaptivă și retenție extinsă."
+            },
+            "continuous": {
+                "label": "Retenție continuă sub-stream",
+                "description": "Numărul de zile de păstrare a înregistrărilor de sub-stream, indiferent de obiectele urmărite sau mișcare.",
+                "days": {
+                    "label": "Zile de retenție",
+                    "description": "Zile pentru păstrarea înregistrărilor."
+                }
+            },
+            "motion": {
+                "label": "Retenție la mișcare sub-stream",
+                "description": "Numărul de zile de păstrare a înregistrărilor de sub-stream declanșate de mișcare.",
+                "days": {
+                    "label": "Zile de retenție",
+                    "description": "Zile pentru păstrarea înregistrărilor."
+                }
+            },
+            "alerts": {
+                "label": "Retenție alerte sub-stream",
+                "description": "Setări de retenție pentru înregistrările de sub-stream ale alertelor.",
+                "days": {
+                    "label": "Zile de retenție",
+                    "description": "Numărul de zile de păstrare a înregistrărilor evenimentelor de detecție."
+                },
+                "mode": {
+                    "label": "Mod de retenție",
+                    "description": "Mod pentru retenție: all (salvează toate segmentele), motion (salvează segmentele cu mișcare) sau active_objects (salvează segmentele cu obiecte active)."
+                }
+            },
+            "detections": {
+                "label": "Retenție detecții sub-stream",
+                "description": "Setări de retenție pentru înregistrările de sub-stream ale detecțiilor.",
+                "days": {
+                    "label": "Zile de retenție",
+                    "description": "Numărul de zile de păstrare a înregistrărilor evenimentelor de detecție."
+                },
+                "mode": {
+                    "label": "Mod de retenție",
+                    "description": "Mod pentru retenție: all (salvează toate segmentele), motion (salvează segmentele cu mișcare) sau active_objects (salvează segmentele cu obiecte active)."
+                }
+            }
         }
     },
     "review": {
@@ -600,6 +660,14 @@
             "activity_context_prompt": {
                 "label": "Prompt context activitate",
                 "description": "Prompt personalizat care descrie ce este suspect și ce nu pentru rezumatele GenAI."
+            },
+            "frame_mode": {
+                "label": "Mod cadre",
+                "description": "Modul în care cadrele sunt prezentate modelului. 'frames' trimite cerința (prompt-ul) urmată de cadre, ceea ce se potrivește modelelor care urmăresc bine o secvență de la sine. 'annotated_frames' etichetează fiecare cadru și intercalează note derivate din urmărirea obiectelor, ceea ce ajută modelele care pierd șirul activităților ce se repetă sau se inversează."
+            },
+            "response_style": {
+                "label": "Stil de răspuns",
+                "description": "Presetare pentru stilul de scriere al descrierilor de recenzie generate. Presetările ajustează tonul și nivelul de detalii al titlului, rezumatului și descrierii scenei destinate utilizatorului; 'default' lasă cerința (prompt-ul) integrată neschimbată."
             }
         }
     },
@@ -642,10 +710,6 @@
             "label": "Activează snapshot-urile",
             "description": "Activează sau dezactivează salvarea de snapshots pentru această cameră."
         },
-        "clean_copy": {
-            "label": "Salvează copie curată",
-            "description": "Salvează și o copie fără adnotări a snapshot-ului."
-        },
         "timestamp": {
             "label": "Overlay timestamp",
             "description": "Suprapune data și ora pe snapshot-urile din API."
@@ -672,10 +736,6 @@
             "default": {
                 "label": "Retenție implicită",
                 "description": "Numărul implicit de zile pentru păstrare."
-            },
-            "mode": {
-                "label": "Mod retenție",
-                "description": "Mod retenție: 'all', 'motion' sau 'active_objects'."
             },
             "objects": {
                 "label": "Retenție per obiect",

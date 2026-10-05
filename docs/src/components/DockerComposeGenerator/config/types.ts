@@ -104,6 +104,10 @@ export interface DeviceConfig {
   extraHosts?: string[];
   /** Security options, e.g. ["apparmor=unconfined"] */
   securityOpt?: string[];
+  /** Set only when this device type cannot work without full privileged mode */
+  privileged?: boolean;
+  /** Why privileged mode is required, rendered as an inline comment */
+  privilegedReason?: string;
   /** Whether this device type needs the NVIDIA GPU config UI */
   needsNvidiaConfig?: boolean;
 }
@@ -127,6 +131,10 @@ export interface HardwareOption {
   volumes?: VolumeMapping[];
   /** Extra environment variables */
   env?: Record<string, string>;
+  /** Set only when this hardware cannot work without full privileged mode */
+  privileged?: boolean;
+  /** Why privileged mode is required, rendered as an inline comment */
+  privilegedReason?: string;
 }
 
 /** Port definition */

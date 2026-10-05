@@ -21,6 +21,7 @@ const semanticSearch: SectionConfigOverrides = {
     fieldMessages: [
       {
         key: "jinav2-small-model-size",
+        health: (ctx) => ctx.fullConfig.semantic_search?.enabled === true,
         field: "model_size",
         messageKey: "configMessages.semanticSearch.jinav2SmallModelSize",
         severity: "warning",

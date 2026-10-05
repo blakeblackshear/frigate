@@ -55,14 +55,19 @@
     "toast": {
       "error": {
         "failed": "Viennin aloitus epäonnistui: {{error}}",
-        "endTimeMustAfterStartTime": "Lopetusajan pitää olla aloitusajan jälkeen",
-        "noVaildTimeSelected": "Sopivaa aikaikkunaa ei valittuna"
+        "endTimeMustAfterStartTime": "Lopetusajan pitää olla aloitusajan jälkeen"
       },
       "success": "Vienti käynnistettiin onnistuneesti. Katso tiedosto /export kansiossa."
     },
     "fromTimeline": {
       "saveExport": "Tallenna vienti",
       "previewExport": "Esikatsele vientiä"
+    },
+    "multiCamera": {
+      "noCameras": "Ei kameroita saatavilla",
+      "cameraSelection": "Kamerat",
+      "selectAll": "Valitse kaikki kamerat",
+      "selectGroup": "Valitse ryhmä"
     }
   },
   "streaming": {
@@ -70,14 +75,19 @@
     "restreaming": {
       "disabled": "Uudelleentoisto ei ole käytettävissä tällä kameralla.",
       "desc": {
-        "title": "Määritä go2rtc saadaksesi lisäreaaliaikanäkymän vaihtoehtoja ja ääntä tälle kameralle.",
-        "readTheDocumentation": "Lue dokumentaatio"
+        "title": "Määritä go2rtc saadaksesi lisäreaaliaikanäkymän vaihtoehtoja ja ääntä tälle kameralle."
       }
     }
   },
   "search": {
     "saveSearch": {
-      "label": "Tallenna haku"
+      "label": "Tallenna haku",
+      "button": {
+        "save": {
+          "label": "Tallenna tämä haku"
+        }
+      },
+      "placeholder": "Nimeä haku"
     }
   },
   "imagePicker": {

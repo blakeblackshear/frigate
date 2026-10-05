@@ -34,11 +34,9 @@
     }
   },
   "type": {
-    "video": "βίντεο",
-    "object_lifecycle": "κύκλος ζωής αντικειμένου"
+    "video": "βίντεο"
   },
   "objectLifecycle": {
-    "title": "Κύκλος Ζωής Αντικειμένου",
     "noImageFound": "Δεν βρέθηκε εικόνα για αυτό το χρονικό σημείο."
   },
   "trackedObjectsCount_one": "{{count}} παρακολουθούμενο αντικείμενο ",

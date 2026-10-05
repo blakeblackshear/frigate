@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import shutil
-from pathlib import Path
 from typing import Any
 
 import cv2
@@ -19,14 +18,16 @@ from frigate.comms.event_metadata_updater import (
 )
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import FACE_DIR, MODEL_CACHE_DIR
-from frigate.data_processing.common.face.model import (
+from frigate.const import FACE_DIR
+from frigate.data_processing.common.face.detector import FaceDetector
+from frigate.data_processing.common.face.recognizer import (
     ArcFaceRecognizer,
     FaceNetRecognizer,
     FaceRecognizer,
 )
 from frigate.types import TrackedObjectUpdateTypesEnum
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
+from frigate.util.file import trim_oldest_files
 from frigate.util.image import area
 from frigate.util.path import safe_join, sanitize_path_component
 
@@ -36,7 +37,6 @@ from .api import RealTimeProcessorApi
 logger = logging.getLogger(__name__)
 
 
-MAX_DETECTION_HEIGHT = 1080
 MAX_FACES_ATTEMPTS_AFTER_REC = 6
 MAX_FACE_ATTEMPTS = 12
 
@@ -53,7 +53,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.face_config = config.face_recognition
         self.requestor = requestor
         self.sub_label_publisher = sub_label_publisher
-        self.face_detector: cv2.FaceDetectorYN | None = None
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.camera_current_people: dict[str, list[str]] = {}
@@ -61,38 +60,14 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.faces_per_second = EventsPerSecond()
         self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
 
-        GITHUB_ENDPOINT = os.environ.get("GITHUB_ENDPOINT", "https://github.com")
-
-        download_path = os.path.join(MODEL_CACHE_DIR, "facedet")
-        self.model_files = {
-            "facedet.onnx": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/facedet.onnx",
-            "landmarkdet.yaml": f"{GITHUB_ENDPOINT}/NickM-27/facenet-onnx/releases/download/v1.0/landmarkdet.yaml",
-        }
-
-        if not all(
-            os.path.exists(os.path.join(download_path, n))
-            for n in self.model_files.keys()
-        ):
-            # conditionally import ModelDownloader
-            from frigate.util.downloader import ModelDownloader
-
-            self.downloader = ModelDownloader(
-                model_name="facedet",
-                download_path=download_path,
-                file_names=list(self.model_files.keys()),
-                download_func=self.__download_models,
-                complete_func=self.__build_detector,
-            )
-            self.downloader.ensure_model_files()
-        else:
-            self.__build_detector()
+        self.face_detector = FaceDetector(on_ready=self.faces_per_second.start)
 
         self.label_map: dict[int, str] = {}
 
         if self.face_config.model_size == "small":
-            self.recognizer = FaceNetRecognizer(self.config)
+            self.recognizer = FaceNetRecognizer(self.config, self.face_detector)
         else:
-            self.recognizer = ArcFaceRecognizer(self.config)
+            self.recognizer = ArcFaceRecognizer(self.config, self.face_detector)
 
         self.recognizer.build()
 
@@ -112,67 +87,6 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 camera_config.face_recognition.min_area = payload.min_area
 
         logger.debug("Face recognition config updated dynamically")
-
-    def __download_models(self, path: str) -> None:
-        try:
-            file_name = os.path.basename(path)
-            # conditionally import ModelDownloader
-            from frigate.util.downloader import ModelDownloader
-
-            ModelDownloader.download_from_url(self.model_files[file_name], path)
-        except Exception as e:
-            logger.error(f"Failed to download {path}: {e}")
-
-    def __build_detector(self) -> None:
-        self.face_detector = cv2.FaceDetectorYN.create(
-            os.path.join(MODEL_CACHE_DIR, "facedet/facedet.onnx"),
-            config="",
-            input_size=(320, 320),
-            score_threshold=0.5,
-            nms_threshold=0.3,
-        )
-        self.faces_per_second.start()
-
-    def __detect_face(
-        self, input: np.ndarray, threshold: float
-    ) -> tuple[int, int, int, int] | None:
-        """Detect faces in input image."""
-        if not self.face_detector:
-            return None
-
-        # YN face detector fails at extreme definitions
-        # this rescales to a size that can properly detect faces
-        # still retaining plenty of detail
-        if input.shape[0] > MAX_DETECTION_HEIGHT:
-            scale_factor = MAX_DETECTION_HEIGHT / input.shape[0]
-            new_width = int(scale_factor * input.shape[1])
-            input = cv2.resize(input, (new_width, MAX_DETECTION_HEIGHT))
-        else:
-            scale_factor = 1
-
-        self.face_detector.setInputSize((input.shape[1], input.shape[0]))
-        faces = self.face_detector.detect(input)
-
-        if faces is None or faces[1] is None:
-            return None  # type: ignore[unreachable]
-
-        face = None
-
-        for _, potential_face in enumerate(faces[1]):
-            if potential_face[-1] < threshold:
-                continue
-
-            raw_bbox = potential_face[0:4].astype(np.uint16)
-            x: int = int(max(raw_bbox[0], 0) / scale_factor)
-            y: int = int(max(raw_bbox[1], 0) / scale_factor)
-            w: int = int(raw_bbox[2] / scale_factor)
-            h: int = int(raw_bbox[3] / scale_factor)
-            bbox = (x, y, x + w, y + h)
-
-            if face is None or area(bbox) > area(face):  # type: ignore[unreachable]
-                face = bbox
-
-        return face
 
     def __update_metrics(self, duration: float) -> None:
         self.faces_per_second.update()
@@ -221,6 +135,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 return
 
         face: dict[str, Any] | None = None
+        face_box: tuple[int, int, int, int]
 
         if self.requires_face_detection:
             logger.debug("Running manual face detection.")
@@ -234,12 +149,15 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
             left, top, right, bottom = person_box
             person = bgr[top:bottom, left:right]
-            face_box = self.__detect_face(person, self.face_config.detection_threshold)
+            detection = self.face_detector.detect(
+                person, self.face_config.detection_threshold
+            )
 
-            if not face_box:
+            if detection is None:
                 logger.debug("Detected no faces for person object.")
                 return
 
+            face_box = detection.face
             face_frame = person[
                 max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
                 max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
@@ -271,16 +189,18 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 logger.debug(f"No face attributes found for {id}")
                 return
 
-            face_box = face.get("box")
+            attr_box = face.get("box")
 
             # check that face is valid
             if (
-                not face_box
-                or area(face_box)
+                not attr_box
+                or area(attr_box)
                 < self.config.cameras[camera].face_recognition.min_area
             ):
                 logger.debug(f"Invalid face box {face}")
                 return
+
+            face_box = attr_box
 
             face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
@@ -364,11 +284,12 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
             # detect faces with lower confidence since we expect the face
             # to be visible in uploaded images
-            face_box = self.__detect_face(img, 0.5)
+            detection = self.face_detector.detect(img, 0.5)
 
-            if not face_box:
+            if detection is None:
                 return {"message": "No face was detected.", "success": False}
 
+            face_box = detection.face
             face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
             res = self.recognizer.classify(face)
 
@@ -396,14 +317,15 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
 
                 # detect faces with lower confidence since we expect the face
                 # to be visible in uploaded images
-                face_box = self.__detect_face(img, 0.5)
+                detection = self.face_detector.detect(img, 0.5)
 
-                if not face_box:
+                if detection is None:
                     return {
                         "message": "No face was detected.",
                         "success": False,
                     }
 
+                face_box = detection.face
                 face = img[face_box[1] : face_box[3], face_box[0] : face_box[2]]
                 _, thumbnail = cv2.imencode(
                     ".webp", face, [int(cv2.IMWRITE_WEBP_QUALITY), 100]
@@ -567,13 +489,4 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             )
             os.makedirs(folder, exist_ok=True)
             cv2.imwrite(file, frame)
-
-            files = sorted(
-                filter(lambda f: f.endswith(".webp"), os.listdir(folder)),
-                key=lambda f: os.path.getctime(os.path.join(folder, f)),
-                reverse=True,
-            )
-
-            # delete oldest face image if maximum is reached
-            if len(files) > self.config.face_recognition.save_attempts:
-                Path(os.path.join(folder, files[-1])).unlink(missing_ok=True)
+            trim_oldest_files(folder, self.config.face_recognition.save_attempts)

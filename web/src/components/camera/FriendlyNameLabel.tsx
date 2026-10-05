@@ -4,13 +4,15 @@ import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { CameraConfig } from "@/types/frigateConfig";
 import { useZoneFriendlyName } from "@/hooks/use-zone-friendly-name";
 
-interface CameraNameLabelProps
-  extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> {
+interface CameraNameLabelProps extends React.ComponentPropsWithoutRef<
+  typeof LabelPrimitive.Root
+> {
   camera?: string | CameraConfig;
 }
 
-interface ZoneNameLabelProps
-  extends React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> {
+interface ZoneNameLabelProps extends React.ComponentPropsWithoutRef<
+  typeof LabelPrimitive.Root
+> {
   zone: string;
   camera?: string;
 }

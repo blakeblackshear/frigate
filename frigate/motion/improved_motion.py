@@ -19,6 +19,7 @@ class ImprovedMotionDetector(MotionDetector):
         config: RuntimeMotionConfig,
         fps: int,
         ptz_metrics: PTZMetrics | None = None,
+        autotracking_enabled: bool = False,
         name: str = "improved",
         blur_radius: int = 1,
         interpolation: int = cv2.INTER_NEAREST,
@@ -45,6 +46,7 @@ class ImprovedMotionDetector(MotionDetector):
         self.contrast_values[:, 1:2] = 255
         self.contrast_values_index = 0
         self.ptz_metrics = ptz_metrics
+        self.autotracking_enabled = autotracking_enabled
         self.last_stop_time: float | None = None
 
     def is_calibrating(self) -> bool:
@@ -59,8 +61,7 @@ class ImprovedMotionDetector(MotionDetector):
         # if ptz motor is moving from autotracking, quickly return
         # a single box that is 80% of the frame
         if self.ptz_metrics is not None and (
-            self.ptz_metrics.autotracker_enabled.value
-            and not self.ptz_metrics.motor_stopped.is_set()
+            self.autotracking_enabled and not self.ptz_metrics.motor_stopped.is_set()
         ):
             return [
                 (
@@ -162,7 +163,7 @@ class ImprovedMotionDetector(MotionDetector):
         # if so, reassign the average to the current frame so we begin with a new baseline
         if self.ptz_metrics is not None and (
             # ensure we only do this for cameras with autotracking enabled
-            self.ptz_metrics.autotracker_enabled.value
+            self.autotracking_enabled
             and self.ptz_metrics.motor_stopped.is_set()
             and (
                 self.last_stop_time is None
@@ -188,8 +189,12 @@ class ImprovedMotionDetector(MotionDetector):
             self.config.skip_motion_threshold is not None
             and pct_motion > self.config.skip_motion_threshold
         ):
-            # force a recalibration so we transition to the new background
+            # recalibrate so we transition to the new background. the frame
+            # still has to be blended in here, otherwise the background stays
+            # frozen and every subsequent frame skips as well
             self.calibrating = True
+            cv2.accumulateWeighted(resized_frame, self.avg_frame, 0.2)
+            self.motion_frame_count = 0
             return []
 
         # once the motion is less than 5% and the number of contours is < 4, assume its calibrated

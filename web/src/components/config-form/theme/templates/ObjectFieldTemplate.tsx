@@ -252,11 +252,7 @@ export function ObjectFieldTemplate(props: ObjectFieldTemplateProps) {
     ? getTranslatedLabel(filterObjectLabel, isAudioLabels ? "audio" : "object")
     : undefined;
   if (path) {
-    translationPath = buildTranslationPath(
-      path,
-      sectionI18nPrefix,
-      formContext,
-    );
+    translationPath = buildTranslationPath(path, formContext);
     // Also get the last property name for fallback label generation
     for (let i = path.length - 1; i >= 0; i -= 1) {
       const segment = path[i];

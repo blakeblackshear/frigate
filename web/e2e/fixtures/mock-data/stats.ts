@@ -2,7 +2,7 @@
  * FrigateStats factory for E2E tests.
  */
 
-import type { DeepPartial } from "./config";
+import { deepMerge, type DeepPartial } from "./config";
 
 function cameraStats(_name: string) {
   return {
@@ -16,6 +16,7 @@ function cameraStats(_name: string) {
     pid: 102,
     process_fps: 5.0,
     skipped_fps: 0,
+    skipped_pct: 0,
     connection_quality: "excellent" as const,
     expected_fps: 5,
     reconnects_last_hour: 0,
@@ -41,6 +42,13 @@ export const BASE_STATS = {
   },
   gpu_usages: {},
   npu_usages: {},
+  embeddings: {
+    image_embedding_speed: 0,
+    face_embedding_speed: 0,
+    plate_recognition_speed: 0,
+    text_embedding_speed: 0,
+    devices: {} as Record<string, string>,
+  },
   processes: {},
   service: {
     last_updated: Date.now() / 1000,
@@ -57,10 +65,18 @@ export const BASE_STATS = {
         used: 500000000,
         mount_type: "tmpfs",
       },
+      "/dev/shm": {
+        free: 98,
+        total: 128,
+        used: 30,
+        mount_type: "tmpfs",
+        min_shm: 64,
+      },
     },
     uptime: 86400,
     latest_version: "0.15.0",
     version: "0.15.0-test",
+    retention_unmet: false,
   },
   camera_fps: 15.0,
   process_fps: 15.0,
@@ -72,5 +88,5 @@ export function statsFactory(
   overrides?: DeepPartial<typeof BASE_STATS>,
 ): typeof BASE_STATS {
   if (!overrides) return BASE_STATS;
-  return { ...BASE_STATS, ...overrides } as typeof BASE_STATS;
+  return deepMerge(BASE_STATS, overrides) as typeof BASE_STATS;
 }

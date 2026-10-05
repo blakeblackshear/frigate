@@ -107,10 +107,6 @@
             "label": "開啟鳥瞰圖",
             "description": "開啟或關閉鳥瞰圖功能。"
         },
-        "mode": {
-            "label": "追蹤模式",
-            "description": "在鳥瞰檢視中包含攝影機的模式：'objects'（目標）、'motion'（動作）或 'continuous'（持續）。"
-        },
         "order": {
             "label": "排序位置",
             "description": "用於控制攝影機在鳥瞰檢視佈局中排序位置的數值。"
@@ -640,10 +636,6 @@
             "default": {
                 "label": "預設保留",
                 "description": "保留快照的預設天數。"
-            },
-            "mode": {
-                "label": "保留模式",
-                "description": "保留模式：all（儲存所有片段）、motion（儲存有動作的片段）或 active_objects（儲存有活動目標的片段）。"
             },
             "objects": {
                 "label": "目標保留",

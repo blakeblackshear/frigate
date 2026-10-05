@@ -15,7 +15,6 @@
       "description": "Stavke za pregled mogu biti stvorene za kameru jedino kada su snimanja uključena za tu kameru."
     }
   },
-  "timeline": "Vremenska linija",
   "timeline.aria": "Odaberi vremensku liniju",
   "zoomOut": "Udalji",
   "events": {

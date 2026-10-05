@@ -5,19 +5,13 @@
     "invalidName": "Nama tidak valid. Nama hanya dapat berisi huruf, angka, spasi, apostrof, garis bawah, dan tanda hubung."
   },
   "details": {
-    "person": "Orang",
-    "subLabelScore": "Skor Sub Label",
-    "face": "Detail Wajah",
     "scoreInfo": "Skor sub label adalah nilai gabungan dari tingkat keyakinan sistem dalam mengenali wajah. Nilai ini bisa berbeda dengan skor yang terlihat pada gambar cuplikan.",
     "timestamp": "Cap waktu",
-    "unknown": "Tidak diketahui",
-    "faceDesc": "Detail objek terlacak yang menghasilkan wajah ini"
+    "unknown": "Tidak diketahui"
   },
   "documentTitle": "Perpustakaan Wajah - Frigate",
   "collections": "Koleksi",
   "createFaceLibrary": {
-    "desc": "Buat koleksi baru",
-    "title": "Buat Koleksi",
     "nextSteps": "Untuk membangun fondasi yang kuat:<li>Gunakan tab Pengenalan Terbaru untuk memilih dan melatih gambar untuk setiap orang yang terdeteksi.</li><li>Fokus pada gambar langsung untuk hasil terbaik; hindari melatih gambar yang menangkap wajah pada sudut tertentu.</li></ul>",
     "new": "Buat Wajah Baru"
   },

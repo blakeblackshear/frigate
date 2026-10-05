@@ -5,7 +5,7 @@
   "toast": {
     "error": {
       "noValidTimeSelected": "Geçerli bir zaman aralığı seçilmedi",
-      "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanında sonra olmalıdır"
+      "endTimeMustAfterStartTime": "Bitiş zamanı başlangıç zamanından sonra olmalıdır"
     }
   },
   "calendar": "Takvim"

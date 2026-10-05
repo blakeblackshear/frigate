@@ -43,8 +43,6 @@
   "camera": "Càmera",
   "selected_one": "{{count}} seleccionats",
   "selected_other": "{{count}} seleccionats",
-  "suspiciousActivity": "Activitat sospitosa",
-  "threateningActivity": "Activitat amenaçadora",
   "detail": {
     "noDataFound": "No hi ha dades detallades a revisar",
     "trackedObject_one": "{{count}} objecte",
@@ -93,5 +91,6 @@
     "crop": "Escapça per filtrar",
     "cropAria": "Commuta la vista prèvia d'escapçament a les àrees filtrades",
     "cropDesc": "Amplia les vistes prèvies a les àrees de filtre seleccionades en lloc de mostrar el fotograma complet."
-  }
+  },
+  "subOnlyQuality": "Només els enregistraments de baixa qualitat estan disponibles en aquest interval de temps"
 }

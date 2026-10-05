@@ -657,7 +657,9 @@ export default function AuthenticationView({
                           </Badge>
                         ) : roleData.cameras.length > 5 ? (
                           <Badge variant="outline" className="text-xs">
-                            {roleData.cameras.length} cameras
+                            {t("roles.table.cameraCount", {
+                              count: roleData.cameras.length,
+                            })}
                           </Badge>
                         ) : (
                           <div className="flex flex-wrap gap-1">
@@ -778,7 +780,7 @@ export default function AuthenticationView({
           if (selectedRoleForDelete) {
             try {
               await onDeleteRole(selectedRoleForDelete);
-            } catch (error) {
+            } catch {
               // Error handling is already done in onDeleteRole
             }
           }

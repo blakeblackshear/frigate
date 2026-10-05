@@ -1,9 +1,13 @@
 """Tests for environment variable handling."""
 
 import os
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
+from pydantic import ValidationError
+
+from frigate.config import FrigateConfig, env
 from frigate.config.env import (
     FRIGATE_ENV_VARS,
     validate_env_string,
@@ -105,9 +109,10 @@ class TestEnvString(unittest.TestCase):
         self.assertEqual(result, "192.168.1.1")
 
     def test_unknown_var_raises(self):
-        """Referencing an unknown var raises KeyError."""
-        with self.assertRaises(KeyError):
+        """Referencing an unknown var raises UnknownVariableError."""
+        with self.assertRaises(env.UnknownVariableError) as ctx:
             validate_env_string("{FRIGATE_NONEXISTENT_VAR}")
+        self.assertIn("FRIGATE_NONEXISTENT_VAR", str(ctx.exception))
 
     def test_non_frigate_braces_passthrough(self):
         """Braces that are not {FRIGATE_*} placeholders pass through untouched.
@@ -176,6 +181,18 @@ class TestEnvString(unittest.TestCase):
             validate_env_string("{FRIGATE_FOO!r}")
 
 
+class TestUnknownVariableSurfacing(unittest.TestCase):
+    """An undefined variable must reach the user as a config validation error."""
+
+    def test_unknown_var_is_a_validation_error(self):
+        """Pydantic reports the field path instead of raising KeyError."""
+        with self.assertRaises(ValidationError) as ctx:
+            FrigateConfig.parse_object(
+                {"mqtt": {"host": "{FRIGATE_NOT_SET_ANYWHERE}"}, "cameras": {}}
+            )
+        self.assertIn("FRIGATE_NOT_SET_ANYWHERE", str(ctx.exception))
+
+
 class TestEnvVars(unittest.TestCase):
     def setUp(self):
         self._original_env_vars = dict(FRIGATE_ENV_VARS)
@@ -184,6 +201,7 @@ class TestEnvVars(unittest.TestCase):
     def tearDown(self):
         FRIGATE_ENV_VARS.clear()
         FRIGATE_ENV_VARS.update(self._original_env_vars)
+        env._CONFIG_ENV_VARS.clear()
         # Clean up any env vars we set
         for key in list(os.environ.keys()):
             if key not in self._original_environ:
@@ -231,6 +249,297 @@ class TestEnvVars(unittest.TestCase):
         validate_env_vars({"FRIGATE_BROKER": "mqtt.local"}, ctx)
         result = validate_env_string("{FRIGATE_BROKER}")
         self.assertEqual(result, "mqtt.local")
+
+
+class TestVariableSources(unittest.TestCase):
+    """Precedence between the sources that feed FRIGATE_ENV_VARS."""
+
+    def setUp(self):
+        self._original_env_vars = dict(env.FRIGATE_ENV_VARS)
+        self._original_os_environ = dict(os.environ)
+
+    def tearDown(self):
+        env.FRIGATE_ENV_VARS.clear()
+        env.FRIGATE_ENV_VARS.update(self._original_env_vars)
+        env._CONFIG_ENV_VARS.clear()
+        env._WARNED_COLLISIONS.clear()
+        os.environ.clear()
+        os.environ.update(self._original_os_environ)
+
+    def test_container_env_beats_config_env_vars(self):
+        """A container env var wins over the same key in environment_vars."""
+        with patch.dict(env._CONTAINER_ENV, {"FRIGATE_MQTT_HOST": "from_env"}):
+            env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "from_config"})
+            self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_MQTT_HOST"], "from_env")
+
+    def test_credentials_dir_beats_container_env(self):
+        """A credentials directory file wins over a container env var."""
+        with (
+            patch.dict(env._CONTAINER_ENV, {"FRIGATE_MQTT_HOST": "from_env"}),
+            patch.dict(env._CREDENTIALS_DIR, {"FRIGATE_MQTT_HOST": "from_creds"}),
+        ):
+            env._rebuild()
+            self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_MQTT_HOST"], "from_creds")
+
+    def test_config_env_vars_used_when_no_other_source(self):
+        """environment_vars still resolves when nothing else defines the key."""
+        env.apply_config_env_vars({"FRIGATE_CAM_PASS": "hunter2"})
+        self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CAM_PASS"], "hunter2")
+
+    def test_config_env_vars_do_not_become_container_env(self):
+        """environment_vars writes os.environ but must not gain env precedence."""
+        env.apply_config_env_vars({"FRIGATE_CAM_PASS": "from_config"})
+        self.assertEqual(os.environ["FRIGATE_CAM_PASS"], "from_config")
+        self.assertNotIn("FRIGATE_CAM_PASS", env._CONTAINER_ENV)
+
+    def test_non_frigate_config_env_vars_only_set_os_environ(self):
+        """Unprefixed environment_vars keys reach os.environ but not substitution."""
+        env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "i965"})
+        self.assertEqual(os.environ["LIBVA_DRIVER_NAME"], "i965")
+        self.assertNotIn("LIBVA_DRIVER_NAME", env.FRIGATE_ENV_VARS)
+
+    def test_collision_warns_once_naming_the_winner(self):
+        """A key from two sources logs one warning naming the source that won."""
+        with patch.dict(env._CONTAINER_ENV, {"FRIGATE_MQTT_HOST": "from_env"}):
+            with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+                env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "from_config"})
+            self.assertEqual(len(logs.output), 1)
+            self.assertIn("FRIGATE_MQTT_HOST", logs.output[0])
+            self.assertIn("using the value from container environment", logs.output[0])
+            self.assertNotIn("environment_vars", logs.output[0])
+
+            with self.assertNoLogs("frigate.config.env", level="WARNING"):
+                env._rebuild()
+
+
+class TestSecretsFile(unittest.TestCase):
+    """Reading <config dir>/secrets.yaml."""
+
+    def setUp(self):
+        self._original_env_vars = dict(env.FRIGATE_ENV_VARS)
+        self._original_os_environ = dict(os.environ)
+        self._dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self._dir.cleanup)
+        os.environ["CONFIG_FILE"] = os.path.join(self._dir.name, "config.yml")
+
+    def tearDown(self):
+        env.FRIGATE_ENV_VARS.clear()
+        env.FRIGATE_ENV_VARS.update(self._original_env_vars)
+        env._SECRETS_FILE.clear()
+        env._CONFIG_ENV_VARS.clear()
+        env._WARNED_COLLISIONS.clear()
+        os.environ.clear()
+        os.environ.update(self._original_os_environ)
+
+    def _write(self, contents: str, name: str = "secrets.yaml") -> None:
+        with open(os.path.join(self._dir.name, name), "w") as f:
+            f.write(contents)
+
+    def test_missing_file_is_not_an_error(self):
+        """No secrets.yaml means no values and no exception."""
+        self.assertEqual(env._load_secrets_file(), {})
+
+    def test_flat_map_is_read(self):
+        """A flat FRIGATE_* map loads."""
+        self._write("FRIGATE_CAM_USER: viewer\nFRIGATE_CAM_PASS: 'p@ss w0rd'\n")
+        self.assertEqual(
+            env._load_secrets_file(),
+            {"FRIGATE_CAM_USER": "viewer", "FRIGATE_CAM_PASS": "p@ss w0rd"},
+        )
+
+    def test_yml_extension_is_read(self):
+        """secrets.yml works the same as secrets.yaml."""
+        self._write("FRIGATE_CAM_USER: viewer\n", name="secrets.yml")
+        self.assertEqual(env._load_secrets_file(), {"FRIGATE_CAM_USER": "viewer"})
+
+    def test_numeric_value_is_coerced_to_string(self):
+        """Unquoted numbers become strings so they can be substituted."""
+        self._write("FRIGATE_MQTT_PORT: 1883\n")
+        self.assertEqual(env._load_secrets_file(), {"FRIGATE_MQTT_PORT": "1883"})
+
+    def test_unprefixed_key_is_ignored_with_a_warning(self):
+        """Names must start with FRIGATE_, matching the credentials directory."""
+        self._write("cam_pass: hunter2\nFRIGATE_CAM_PASS: hunter2\n")
+        with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+            values = env._load_secrets_file()
+        self.assertEqual(values, {"FRIGATE_CAM_PASS": "hunter2"})
+        self.assertIn("cam_pass", logs.output[0])
+
+    def test_non_mapping_document_raises(self):
+        """A list or scalar document is a config error."""
+        self._write("- FRIGATE_CAM_PASS\n")
+        with self.assertRaises(ValueError):
+            env._load_secrets_file()
+
+    def test_nested_value_raises_naming_the_key(self):
+        """Nesting is not supported and the error names the key."""
+        self._write("FRIGATE_CAMS:\n  alley: hunter2\n")
+        with self.assertRaises(ValueError) as ctx:
+            env._load_secrets_file()
+        self.assertIn("FRIGATE_CAMS", str(ctx.exception))
+
+    def test_secrets_file_beats_config_env_vars(self):
+        """secrets.yaml outranks the environment_vars block."""
+        self._write("FRIGATE_CAM_PASS: from_secrets\n")
+        env.apply_config_env_vars({"FRIGATE_CAM_PASS": "from_config"})
+        env._SECRETS_FILE.update(env._load_secrets_file())
+        env._rebuild()
+        self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CAM_PASS"], "from_secrets")
+
+    def test_container_env_beats_secrets_file(self):
+        """The container environment outranks secrets.yaml."""
+        self._write("FRIGATE_CAM_PASS: from_secrets\n")
+        env._SECRETS_FILE.update(env._load_secrets_file())
+        with patch.dict(env._CONTAINER_ENV, {"FRIGATE_CAM_PASS": "from_env"}):
+            env._rebuild()
+            self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CAM_PASS"], "from_env")
+
+
+class TestSecretsReload(unittest.TestCase):
+    """secrets.yaml is re-read when a config is parsed."""
+
+    def setUp(self):
+        self._original_env_vars = dict(env.FRIGATE_ENV_VARS)
+        self._original_os_environ = dict(os.environ)
+        self._dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self._dir.cleanup)
+        os.environ["CONFIG_FILE"] = os.path.join(self._dir.name, "config.yml")
+
+    def tearDown(self):
+        env.FRIGATE_ENV_VARS.clear()
+        env.FRIGATE_ENV_VARS.update(self._original_env_vars)
+        env._SECRETS_FILE.clear()
+        env._CONFIG_ENV_VARS.clear()
+        env._WARNED_COLLISIONS.clear()
+        os.environ.clear()
+        os.environ.update(self._original_os_environ)
+        env.reload_sources()
+
+    def test_new_secret_resolves_without_restart(self):
+        """A key written after import is picked up by the next parse."""
+        with open(os.path.join(self._dir.name, "secrets.yaml"), "w") as f:
+            f.write("FRIGATE_MQTT_HOST: mqtt.internal\n")
+
+        config = FrigateConfig.parse_yaml(
+            'mqtt:\n  host: "{FRIGATE_MQTT_HOST}"\ncameras: {}\n'
+        )
+        self.assertEqual(config.mqtt.host, "mqtt.internal")
+
+    def test_config_env_vars_survive_the_reload(self):
+        """environment_vars is only installed when install=True, so it has to
+        outlive the reload that a later non-install parse triggers. This is
+        the /config/save path: a config that starts fine must still validate.
+        """
+        env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "from_config"})
+        config = FrigateConfig.parse_yaml(
+            'mqtt:\n  host: "{FRIGATE_MQTT_HOST}"\ncameras: {}\n'
+        )
+        self.assertEqual(config.mqtt.host, "from_config")
+        self.assertEqual(env._CONFIG_ENV_VARS["FRIGATE_MQTT_HOST"], "from_config")
+
+
+class TestSourceRobustness(unittest.TestCase):
+    """Reload behavior, bad input, and the os.environ export."""
+
+    def setUp(self):
+        self._original_env_vars = dict(env.FRIGATE_ENV_VARS)
+        self._original_os_environ = dict(os.environ)
+        self._dir = tempfile.TemporaryDirectory()
+        self._creds = tempfile.TemporaryDirectory()
+        self.addCleanup(self._dir.cleanup)
+        self.addCleanup(self._creds.cleanup)
+        os.environ["CONFIG_FILE"] = os.path.join(self._dir.name, "config.yml")
+        os.environ["CREDENTIALS_DIRECTORY"] = self._creds.name
+
+    def tearDown(self):
+        env.FRIGATE_ENV_VARS.clear()
+        env.FRIGATE_ENV_VARS.update(self._original_env_vars)
+        env._SECRETS_FILE.clear()
+        env._CONFIG_ENV_VARS.clear()
+        env._CREDENTIALS_DIR.clear()
+        env._WARNED_COLLISIONS.clear()
+        os.environ.clear()
+        os.environ.update(self._original_os_environ)
+        env.reload_sources()
+
+    def _write_secrets(self, contents: str) -> None:
+        with open(os.path.join(self._dir.name, "secrets.yaml"), "w") as f:
+            f.write(contents)
+
+    def test_os_environ_gets_the_winning_value(self):
+        """FRIGATE_JWT_SECRET and friends are read straight from os.environ."""
+        self._write_secrets("FRIGATE_JWT_SECRET: from_secrets\n")
+        env.reload_sources()
+        env.apply_config_env_vars({"FRIGATE_JWT_SECRET": "from_config"})
+        self.assertEqual(os.environ["FRIGATE_JWT_SECRET"], "from_secrets")
+        self.assertEqual(
+            os.environ["FRIGATE_JWT_SECRET"],
+            env.FRIGATE_ENV_VARS["FRIGATE_JWT_SECRET"],
+        )
+
+    def test_rebuild_without_warn_stays_quiet_then_warns_later(self):
+        """The import-time rebuild must not consume the one-shot warning."""
+        self._write_secrets("FRIGATE_DUPE: from_secrets\n")
+        env.reload_sources()
+        env._CONFIG_ENV_VARS["FRIGATE_DUPE"] = "from_config"
+
+        with self.assertNoLogs("frigate.config.env", level="WARNING"):
+            env._rebuild(warn=False)
+
+        with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+            env._rebuild()
+        self.assertIn("FRIGATE_DUPE", logs.output[0])
+
+    def test_malformed_secrets_file_keeps_last_good_values(self):
+        """A typo must not raise, since this runs at import and on every parse."""
+        self._write_secrets("FRIGATE_CAM_PASS: hunter2\n")
+        env.reload_sources()
+
+        self._write_secrets("FRIGATE_CAMS:\n  alley: hunter2\n")
+        with self.assertLogs("frigate.config.env", level="ERROR") as logs:
+            env.reload_sources()
+
+        self.assertIn("FRIGATE_CAMS", logs.output[0])
+        self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CAM_PASS"], "hunter2")
+
+    def test_duplicate_key_error_does_not_log_the_values(self):
+        """ruamel's duplicate key message quotes both values; the log must not."""
+        self._write_secrets("FRIGATE_CAM_PASS: hunter2\nFRIGATE_CAM_PASS: hunter3\n")
+        with self.assertLogs("frigate.config.env", level="ERROR") as logs:
+            env.reload_sources()
+
+        self.assertNotIn("hunter2", logs.output[0])
+        self.assertNotIn("hunter3", logs.output[0])
+        self.assertIn("secrets.yaml", logs.output[0])
+
+    def test_deleted_secret_stops_resolving(self):
+        """Removing a name takes effect on the next parse, not on restart."""
+        self._write_secrets("FRIGATE_GONE: hunter2\n")
+        env.reload_sources()
+        self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_GONE"], "hunter2")
+
+        os.remove(os.path.join(self._dir.name, "secrets.yaml"))
+        env.reload_sources()
+        self.assertNotIn("FRIGATE_GONE", env.FRIGATE_ENV_VARS)
+
+    def test_reload_rereads_the_credentials_directory(self):
+        """The credentials directory is refreshed, not just secrets.yaml."""
+        with open(os.path.join(self._creds.name, "FRIGATE_CRED"), "w") as f:
+            f.write("from_creds\n")
+        env.reload_sources()
+        self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CRED"], "from_creds")
+
+    def test_unreadable_credentials_entry_is_skipped(self):
+        """A subdirectory must not take down validation on every parse."""
+        os.mkdir(os.path.join(self._creds.name, "FRIGATE_NOT_A_FILE"))
+        with open(os.path.join(self._creds.name, "FRIGATE_CRED"), "w") as f:
+            f.write("from_creds\n")
+
+        with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+            env.reload_sources()
+
+        self.assertIn("FRIGATE_NOT_A_FILE", logs.output[0])
+        self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CRED"], "from_creds")
 
 
 if __name__ == "__main__":

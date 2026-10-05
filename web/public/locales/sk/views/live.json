@@ -1,5 +1,4 @@
 {
-  "documentTitle": "Naživo - Frigate",
   "documentTitle.withCamera": "{{camera}} - Naživo - Frigate",
   "lowBandwidthMode": "Režim nízkej šírky pásma",
   "twoWayTalk": {
@@ -52,10 +51,6 @@
         "label": "Výstup zaostrenia PTZ kamery"
       }
     }
-  },
-  "camera": {
-    "enable": "Povoliť kameru",
-    "disable": "Zakázať kameru"
   },
   "muteCameras": {
     "enable": "Stlmiť všetky kamery",
@@ -143,7 +138,6 @@
   },
   "cameraSettings": {
     "title": "Nastavenia {{camera}}",
-    "cameraEnabled": "Kamera povolená",
     "objectDetection": "Detekcia objektov",
     "recording": "Nahrávanie",
     "snapshots": "Snímky",
@@ -159,8 +153,7 @@
       "all": "Všetko",
       "motion": "Pohyb",
       "active_objects": "Aktívne objekty"
-    },
-    "notAllTips": "Vaša konfigurácia uchovávania nahrávok {{source}} je nastavená na režim <code>: {{effectiveRetainMode}}<code>, takže táto nahrávka na požiadanie uchová iba segmenty s nastavením {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Upraviť rozloženie",

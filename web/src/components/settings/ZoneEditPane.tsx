@@ -11,14 +11,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ZoneFormValuesType, Polygon } from "@/types/canvas";
-import { reviewQueries } from "@/utils/zoneEdutUtil";
+import { zoneReferenceUpdates } from "@/utils/zoneEdutUtil";
 import { Switch } from "../ui/switch";
 import { Label } from "../ui/label";
 import PolygonEditControls from "./PolygonEditControls";
@@ -35,6 +35,7 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 import { getTranslatedLabel } from "@/utils/i18n";
 import NameAndIdFields from "../input/NameAndIdFields";
 import { useZoneState } from "@/api/ws";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 
 type ZoneEditPaneProps = {
   polygons?: Polygon[];
@@ -71,6 +72,7 @@ export default function ZoneEditPane({
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config, mutate: updateConfig } =
     useSWR<FrigateConfig>("config");
+  const statusBar = useContext(StatusBarMessagesContext);
 
   const cameras = useMemo(() => {
     if (!config) {
@@ -95,29 +97,8 @@ export default function ZoneEditPane({
 
   const isExistingZone = !!polygon && polygon.name.length > 0;
 
-  const idDisabled = useMemo(() => {
-    if (!isExistingZone || !polygon) {
-      return false;
-    }
-    if (editingProfile) {
-      return true;
-    }
-    const cam = config?.cameras[polygon.camera];
-    if (!cam) {
-      return false;
-    }
-    const inRequiredZones =
-      cam.review.alerts.required_zones.includes(polygon.name) ||
-      cam.review.detections.required_zones.includes(polygon.name) ||
-      cam.objects.genai.required_zones.includes(polygon.name) ||
-      cam.snapshots.required_zones.includes(polygon.name) ||
-      cam.mqtt.required_zones.includes(polygon.name) ||
-      cam.onvif.autotracking.required_zones.includes(polygon.name);
-    const hasProfileOverride = Object.values(cam.profiles ?? {}).some(
-      (profile) => profile?.zones && polygon.name in profile.zones,
-    );
-    return inRequiredZones || hasProfileOverride;
-  }, [config, polygon, editingProfile, isExistingZone]);
+  // A profile zone overrides a base zone by name, so its id is fixed
+  const idDisabled = isExistingZone && !!editingProfile;
 
   const cameraConfig = useMemo(() => {
     if (polygon?.camera && config) {
@@ -316,7 +297,11 @@ export default function ZoneEditPane({
     return profileZone ?? cam.zones[polygon.name];
   }, [polygon, config, editingProfile]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<
+    z.input<typeof formSchema>,
+    unknown,
+    z.output<typeof formSchema>
+  >({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
@@ -366,7 +351,7 @@ export default function ZoneEditPane({
   }, [polygon?.isFinished, form]);
 
   const saveToConfig = useCallback(
-    async (
+    (
       {
         name: zoneName,
         friendly_name,
@@ -387,102 +372,43 @@ export default function ZoneEditPane({
         return;
       }
 
-      // Determine config path prefix based on profile mode
-      const pathPrefix = editingProfile
-        ? `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${zoneName}`
-        : `cameras.${polygon.camera}.zones.${zoneName}`;
-
-      const oldPathPrefix = editingProfile
-        ? `cameras.${polygon.camera}.profiles.${editingProfile}.zones.${polygon.name}`
-        : `cameras.${polygon.camera}.zones.${polygon.name}`;
-
-      let mutatedConfig = config;
-      let alertQueries = "";
-      let detectionQueries = "";
-
       const renamingZone = zoneName != polygon.name && polygon.name != "";
 
+      // config/set fails to delete a key the YAML lacks. The base zone comes
+      // back with defaults filled in, so only a non-empty value proves the key
+      // is written. Profile overrides hold only keys set in the YAML.
+      const writtenZone = (
+        renamingZone
+          ? undefined
+          : editingProfile
+            ? cameraConfig?.profiles?.[editingProfile]?.zones?.[polygon.name]
+            : (cameraConfig?.base_config?.zones ?? cameraConfig?.zones)?.[
+                polygon.name
+              ]
+      ) as Record<string, unknown> | undefined;
+      const canRemove = (key: string) => {
+        const value = writtenZone?.[key];
+        return value != null && !(Array.isArray(value) && value.length == 0);
+      };
+
+      const zoneData: Record<string, unknown> = {
+        coordinates: flattenPoints(
+          interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
+        ).join(","),
+        enabled,
+      };
+
       if (renamingZone) {
-        // rename - delete old zone and replace with new
-        let renameAlertQueries = "";
-        let renameDetectionQueries = "";
+        // The form has no filters field, so carry the old zone's over
+        const baseZones = (cameraConfig?.base_config?.zones ??
+          cameraConfig?.zones) as
+          Record<string, { filters?: Record<string, unknown> }> | undefined;
+        const filters = baseZones?.[polygon.name]?.filters;
 
-        // Only handle review queries for base config (not profiles)
-        if (!editingProfile) {
-          const zoneInAlerts =
-            cameraConfig?.review.alerts.required_zones.includes(polygon.name) ??
-            false;
-          const zoneInDetections =
-            cameraConfig?.review.detections.required_zones.includes(
-              polygon.name,
-            ) ?? false;
-
-          ({
-            alertQueries: renameAlertQueries,
-            detectionQueries: renameDetectionQueries,
-          } = reviewQueries(
-            polygon.name,
-            false,
-            false,
-            polygon.camera,
-            cameraConfig?.review.alerts.required_zones || [],
-            cameraConfig?.review.detections.required_zones || [],
-          ));
-
-          try {
-            await axios.put(
-              `config/set?${oldPathPrefix}${renameAlertQueries}${renameDetectionQueries}`,
-              {
-                requires_restart: 0,
-                update_topic: `config/cameras/${polygon.camera}/zones`,
-              },
-            );
-
-            // Wait for the config to be updated
-            mutatedConfig = await updateConfig();
-          } catch {
-            toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
-              position: "top-center",
-            });
-            setIsLoading(false);
-            return;
-          }
-
-          // make sure new zone name is readded to review
-          ({ alertQueries, detectionQueries } = reviewQueries(
-            zoneName,
-            zoneInAlerts,
-            zoneInDetections,
-            polygon.camera,
-            mutatedConfig?.cameras[polygon.camera]?.review.alerts
-              .required_zones || [],
-            mutatedConfig?.cameras[polygon.camera]?.review.detections
-              .required_zones || [],
-          ));
-        } else {
-          // Profile mode: just delete the old profile zone path
-          try {
-            await axios.put(`config/set?${oldPathPrefix}`, {
-              requires_restart: 0,
-            });
-            mutatedConfig = await updateConfig();
-          } catch {
-            toast.error(t("toast.save.error.noMessage", { ns: "common" }), {
-              position: "top-center",
-            });
-            setIsLoading(false);
-            return;
-          }
+        if (filters && Object.keys(filters).length > 0) {
+          zoneData.filters = filters;
         }
       }
-
-      const coordinates = flattenPoints(
-        interpolatePoints(polygon.points, scaledWidth, scaledHeight, 1, 1),
-      ).join(",");
-
-      let objectQueries = objects
-        .map((object) => `&${pathPrefix}.objects=${object}`)
-        .join("");
 
       const same_objects =
         form_objects.length == objects.length &&
@@ -490,69 +416,86 @@ export default function ZoneEditPane({
           return element === objects[index];
         });
 
-      // deleting objects
-      if (!objectQueries && !same_objects && !renamingZone) {
-        objectQueries = `&${pathPrefix}.objects`;
+      if (objects.length > 0) {
+        zoneData.objects = objects;
+      } else if (!same_objects && canRemove("objects")) {
+        zoneData.objects = null;
       }
 
-      let inertiaQuery = "";
       if (inertia) {
-        inertiaQuery = `&${pathPrefix}.inertia=${inertia}`;
+        zoneData.inertia = inertia;
       }
 
-      let loiteringTimeQuery = "";
-      if (loitering_time >= 0) {
-        loiteringTimeQuery = `&${pathPrefix}.loitering_time=${loitering_time}`;
+      if (typeof loitering_time === "number") {
+        zoneData.loitering_time = loitering_time;
       }
 
-      let distancesQuery = "";
       const distances = [lineA, lineB, lineC, lineD].filter(Boolean).join(",");
       if (speedEstimation) {
-        distancesQuery = `&${pathPrefix}.distances=${distances}`;
-      } else {
-        if (distances != "") {
-          distancesQuery = `&${pathPrefix}.distances`;
-        }
+        zoneData.distances = distances;
+      } else if (canRemove("distances")) {
+        zoneData.distances = null;
       }
 
-      let speedThresholdQuery = "";
-      if (speed_threshold >= 0 && speedEstimation) {
-        speedThresholdQuery = `&${pathPrefix}.speed_threshold=${speed_threshold}`;
-      } else {
-        if (resolvedZoneData?.speed_threshold) {
-          speedThresholdQuery = `&${pathPrefix}.speed_threshold`;
-        }
+      if (typeof speed_threshold === "number" && speedEstimation) {
+        zoneData.speed_threshold = speed_threshold;
+      } else if (canRemove("speed_threshold")) {
+        zoneData.speed_threshold = null;
       }
 
-      let friendlyNameQuery = "";
-      if (friendly_name && friendly_name !== zoneName) {
-        friendlyNameQuery = `&${pathPrefix}.friendly_name=${encodeURIComponent(friendly_name)}`;
+      // The name field falls back to the old id when the zone has no name
+      const unnamed = !polygon.friendly_name && friendly_name === polygon.name;
+      if (friendly_name && friendly_name !== zoneName && !unnamed) {
+        zoneData.friendly_name = friendly_name;
       }
 
-      const enabledQuery = `&${pathPrefix}.enabled=${enabled ? "True" : "False"}`;
+      const zones = renamingZone
+        ? { [polygon.name]: null, [zoneName]: zoneData }
+        : { [zoneName]: zoneData };
+
+      const references =
+        renamingZone && !editingProfile && cameraConfig
+          ? zoneReferenceUpdates(cameraConfig, polygon.name, zoneName)
+          : {};
+      // Processes other than object tracking only reload these on restart
+      const needsRestart = Object.keys(references).length > 0;
+
+      const cameraData = editingProfile
+        ? { profiles: { [editingProfile]: { zones } } }
+        : { zones, ...references };
 
       const updateTopic = editingProfile
         ? undefined
         : `config/cameras/${polygon.camera}/zones`;
 
       axios
-        .put(
-          `config/set?${pathPrefix}.coordinates=${coordinates}${enabledQuery}${inertiaQuery}${loiteringTimeQuery}${speedThresholdQuery}${distancesQuery}${objectQueries}${friendlyNameQuery}${alertQueries}${detectionQueries}`,
-          {
-            requires_restart: 0,
-            update_topic: updateTopic,
-          },
-        )
+        .put("config/set", {
+          config_data: { cameras: { [polygon.camera]: cameraData } },
+          requires_restart: needsRestart ? 1 : 0,
+          update_topic: updateTopic,
+        })
         .then((res) => {
           if (res.status === 200) {
-            toast.success(
-              t("masksAndZones.zones.toast.success", {
-                zoneName: friendly_name || zoneName,
-              }),
-              {
+            if (needsRestart) {
+              statusBar?.addMessage(
+                "config_restart_required",
+                t("configForm.restartRequiredFooter"),
+                undefined,
+                "config_restart_required",
+              );
+              toast.success(t("toast.successRestartRequired"), {
                 position: "top-center",
-              },
-            );
+              });
+            } else {
+              toast.success(
+                t("masksAndZones.zones.toast.success", {
+                  zoneName: friendly_name || zoneName,
+                }),
+                {
+                  position: "top-center",
+                },
+              );
+            }
             updateConfig();
             // Only publish WS state for base config when zone has a name and
             // wasn't renamed (the hook is bound to the old name).
@@ -591,7 +534,6 @@ export default function ZoneEditPane({
         });
     },
     [
-      config,
       updateConfig,
       polygon,
       scaledWidth,
@@ -601,11 +543,11 @@ export default function ZoneEditPane({
       t,
       sendZoneState,
       editingProfile,
-      resolvedZoneData,
+      statusBar,
     ],
   );
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit(values: z.output<typeof formSchema>) {
     if (activePolygonIndex === undefined || !values || !polygons) {
       return;
     }
@@ -678,6 +620,7 @@ export default function ZoneEditPane({
             nameDescription={t("masksAndZones.zones.name.tips")}
             placeholderName={t("masksAndZones.zones.name.inputPlaceHolder")}
             idDisabled={idDisabled}
+            autoFillId={!isExistingZone}
           />
           <FormField
             control={form.control}

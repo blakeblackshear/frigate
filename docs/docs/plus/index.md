@@ -41,7 +41,7 @@ Rockchip models are automatically converted as of 0.17. For 0.16, YOLOv9 onnx mo
 
 ## Supported detector types
 
-Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), ONNX (`onnx`), Hailo (`hailo8l`), and Rockchip (`rknn`) detectors.
+Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), ONNX (`onnx`), Hailo (`hailo`), and Rockchip (`rknn`) detectors.
 
 | Hardware                                                                         | Recommended Detector Type | Recommended Model Type |
 | -------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
@@ -50,7 +50,7 @@ Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVi
 | [Intel](/configuration/object_detectors.md#openvino-detector)                    | `openvino`                | `yolov9`               |
 | [NVidia GPU](/configuration/object_detectors#onnx)                               | `onnx`                    | `yolov9`               |
 | [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)             | `onnx`                    | `yolov9`               |
-| [Hailo8/Hailo8L/Hailo8R](/configuration/object_detectors#hailo-8)                | `hailo8l`                 | `yolov9`               |
+| [Hailo8/Hailo8L/Hailo8R](/configuration/object_detectors#hailo)                  | `hailo`                   | `yolov9`               |
 | [Rockchip NPU](/configuration/object_detectors#rockchip-platform)                | `rknn`                    | `yolov9`               |
 
 ## Improving your model

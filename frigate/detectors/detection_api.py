@@ -1,9 +1,11 @@
 import logging
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 import numpy as np
 
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.runtime_deps import RuntimeManifest, activate, ensure_installed
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +13,10 @@ logger = logging.getLogger(__name__)
 class DetectionApi(ABC):
     type_key: str
     supported_models: list[ModelTypeEnum]
+
+    # pinned SDK artifacts that are installed at runtime instead of being
+    # shipped in the image; None when the runtime is already available
+    runtime_manifest: ClassVar[RuntimeManifest | None] = None
 
     @abstractmethod
     def __init__(self, detector_config: BaseDetectorConfig):
@@ -22,6 +28,23 @@ class DetectionApi(ABC):
     @abstractmethod
     def detect_raw(self, tensor_input):
         pass
+
+    @classmethod
+    def ensure_dependencies(cls) -> None:
+        """Download and install this detector's runtime if it is not present.
+
+        Runs once in the main process before detector processes start, so a
+        single install serves every process and the user site is on sys.path
+        before it is inherited.
+        """
+        if cls.runtime_manifest is not None:
+            ensure_installed(cls.runtime_manifest)
+
+    @classmethod
+    def activate_dependencies(cls) -> None:
+        """Make the installed runtime importable in the current process."""
+        if cls.runtime_manifest is not None:
+            activate(cls.runtime_manifest)
 
     def calculate_grids_strides(self, expanded=True) -> None:
         grids = []

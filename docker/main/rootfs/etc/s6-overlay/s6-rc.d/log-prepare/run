@@ -7,5 +7,12 @@ set -o errexit -o nounset -o pipefail
 dirs=(/dev/shm/logs/frigate /dev/shm/logs/go2rtc /dev/shm/logs/nginx /dev/shm/logs/certsync)
 
 mkdir -p "${dirs[@]}"
-chown nobody:nogroup "${dirs[@]}"
+
+# logutil-service drops s6-log to nobody, so the dirs must stay nobody-owned
+# in root mode. Under docker --user we are already the (only) target user,
+# chown would fail, and the plain s6-log fallback in the *-log services
+# writes as us (the mkdir above is sufficient, /dev/shm is 1777).
+if [[ "$(id -u)" -eq 0 ]]; then
+    chown nobody:nogroup "${dirs[@]}"
+fi
 chmod 02755 "${dirs[@]}"

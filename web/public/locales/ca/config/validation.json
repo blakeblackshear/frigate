@@ -31,5 +31,8 @@
     },
     "detect": {
         "dimensionMustBeEven": "Ha de ser un nombre parell."
+    },
+    "models": {
+        "defaultRequired": "Un model ha d'utilitzar una escena de \"Totes les càmeres\". Sense ella, qualsevol càmera que no esculli una escena no té cap model al qual tornar."
     }
 }

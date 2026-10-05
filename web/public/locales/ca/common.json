@@ -55,9 +55,9 @@
       "be": "Беларуская (belarús)"
     },
     "system": "Sistema",
-    "systemMetrics": "Mètriques del sistema",
+    "systemMetrics": "Salut i Mètriques",
     "configuration": "Configuració",
-    "systemLogs": "Registres del sistema",
+    "systemLogs": "Registres",
     "configurationEditor": "Editor de configuració",
     "languages": "Idiomes",
     "settings": "Opcions",
@@ -287,7 +287,10 @@
     "savingAll": "S'està desant tot…",
     "undoAll": "Desfés-ho tot",
     "applying": "S'està aplicant…",
-    "retry": "Torna a intentar"
+    "retry": "Torna a intentar",
+    "expand": "Expandeix",
+    "collapse": "Redueix",
+    "reload": "Torna a carregar"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada al porta-retalls.",
@@ -328,5 +331,36 @@
   "validation_errors": "Errors de validació",
   "credentialField": {
     "savedPlaceholder": "Desat — deixa en blanc per mantenir l'actual"
+  },
+  "error": {
+    "title": "Aquesta pàgina ha deixat de funcionar",
+    "desc": "La pàgina ha tingut un error inesperat. La recàrrega normalment la neteja. Si continua passant, copieu els detalls i adjunteu-los a una discussió sobre GitHub.",
+    "staleTitle": "Recàrrega requerida",
+    "staleDesc": "No s'ha pogut carregar part de la interfície, cosa que normalment significa que Frigate s'ha actualitzat mentre aquesta pestanya estava oberta. Torna a carregar per a recollir la nova versió.",
+    "partial": "Part de la interfície va deixar de funcionar.",
+    "copyDetails": "Copia els detalls",
+    "copyFailed": "No s'han pogut copiar els detalls al porta-retalls"
+  },
+  "commandMenu": {
+    "title": "Menú d'ordres",
+    "description": "Cerca pàgines, càmeres, paràmetres i accions",
+    "placeholder": "Cerca pàgines, càmeres, paràmetres i accions",
+    "empty": "Sense coincidències",
+    "hint": "{{key}} o / per obrir, Intro per executar",
+    "section": {
+      "recent": "Recent",
+      "pages": "Pàg",
+      "cameras": "Càmeres",
+      "cameraGroups": "Grups de càmera",
+      "settings": "Configuració",
+      "actions": "Accions"
+    },
+    "camera": {
+      "live": "Directe",
+      "review": "Revisió"
+    },
+    "action": {
+      "toggleTheme": "Commuta el mode clar i fosc"
+    }
   }
 }

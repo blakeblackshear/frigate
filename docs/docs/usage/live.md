@@ -40,7 +40,7 @@ Deleting a group also clears any custom layout you saved for it.
 
 ## Rearranging a camera group layout
 
-On desktop and tablet, each camera group has its own freely-arrangeable grid. Enter **Edit Layout** mode from the layout button in the lower-right corner: camera tiles gain a drag handle and corner resize handles. Drag a tile to reposition it and drag a corner to resize it (the aspect ratio is preserved). Exit edit mode to save. The layout is stored in your browser per device, so each device can have its own arrangement.
+On desktop and tablet, each camera group has its own freely-arrangeable grid. Enter **Edit Layout** mode from the layout button in the lower-right corner: camera tiles gain a drag handle and corner resize handles. Drag a tile to reposition it and drag a corner to resize it (the aspect ratio is preserved). Exit edit mode to save. The layout is stored in your browser per device, so each device can have its own arrangement, and layouts can be exported to a file and imported on another device.
 
 The default **All Cameras** dashboard is not manually arrangeable. It automatically sizes tiles based on each camera's aspect ratio (wide cameras span two columns, tall cameras span two rows).
 
@@ -68,7 +68,7 @@ For non-default groups, the context menu also exposes **Streaming Settings** for
 - the **streaming method**: **No Streaming**, **Smart Streaming** (recommended), or **Continuous Streaming** (higher bandwidth), and
 - **compatibility mode**, for devices that have trouble rendering the default player.
 
-These settings are saved per group and per device in your browser, not in your config file.
+These settings are saved per group and per device in your browser, not in your config file, and can be exported to a file and imported on another device.
 
 ## The single-camera view
 

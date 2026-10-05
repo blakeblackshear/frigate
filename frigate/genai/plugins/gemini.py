@@ -13,8 +13,13 @@ from google.genai.types import FunctionCallingConfigMode
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
+
+# Gemini requests carrying inline data are capped at ~20 MB total; stay well
+# under it so the request fails as a log line rather than a 400.
+GEMINI_MAX_INLINE_BYTES = 15 * 1024 * 1024
 
 
 def _decode_thought_signature(value: Any) -> bytes | None:
@@ -118,11 +123,16 @@ class GeminiClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
-        contents = [prompt] + [
-            types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
+        contents: list[Any] = [
+            part
+            if isinstance(part, str)
+            else types.Part.from_bytes(data=part, mime_type="image/jpeg")
+            for part in interleave_images(prompt, images, image_captions)
         ]
+
         try:
             # Merge runtime_options into generation_config if provided
             generation_config_dict: dict[str, Any] = {"candidate_count": 1}
@@ -136,7 +146,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=contents,  # type: ignore[arg-type]
+                contents=contents,
                 config=types.GenerateContentConfig(
                     **generation_config_dict,
                 ),
@@ -156,6 +166,58 @@ class GeminiClient(GenAIClient):
             # No description was generated
             return None
         return description
+
+    @property
+    def supports_transcription(self) -> bool:
+        """Gemini models accept inline audio parts."""
+        return True
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio by sending it as an inline part alongside a prompt."""
+        if len(audio) > GEMINI_MAX_INLINE_BYTES:
+            logger.warning(
+                "Audio payload of %d bytes exceeds the Gemini inline limit; skipping transcription",
+                len(audio),
+            )
+            return None
+
+        prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
+
+        if language:
+            prompt += f" The speech is in language '{language}'."
+
+        try:
+            contents: list[Any] = [
+                prompt,
+                types.Part.from_bytes(data=audio, mime_type=mime_type),
+            ]
+            response = self.provider.models.generate_content(
+                model=self.genai_config.model,
+                contents=contents,
+                config=types.GenerateContentConfig(candidate_count=1),
+            )
+        except errors.APIError as e:
+            logger.warning("Gemini returned an error: %s", str(e))
+            return None
+        except Exception as e:
+            logger.warning("An unexpected error occurred with Gemini: %s", str(e))
+            return None
+
+        try:
+            if response.text is None:
+                return None
+
+            transcript = response.text.strip()
+        except (ValueError, AttributeError):
+            # No transcript was generated
+            return None
+
+        return transcript or None
 
     def list_models(self) -> list[str]:
         """Return available model names from Gemini."""

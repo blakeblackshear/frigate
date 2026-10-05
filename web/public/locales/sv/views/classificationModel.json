@@ -185,6 +185,5 @@
     "noNewImages": "Det finns inga nya bilder att träna med. Klassificera först fler bilder i datamängden.",
     "noChanges": "Inga ändringar i datamängden sedan den senaste träningen.",
     "modelNotReady": "Modellen är inte redo för träning"
-  },
-  "none": "Ingen"
+  }
 }

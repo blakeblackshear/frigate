@@ -1,5 +1,4 @@
 {
-  "documentTitle": "Live - Frigate",
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
   "twoWayTalk": {
     "enable": "Aktivér tovejskommunikation",
@@ -52,10 +51,6 @@
       }
     },
     "presets": "PTZ kamera forudindstillinger"
-  },
-  "camera": {
-    "enable": "Aktivér kamera",
-    "disable": "Deaktivér kamera"
   },
   "muteCameras": {
     "enable": "Slå lyd på alle kameraer fra",

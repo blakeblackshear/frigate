@@ -145,7 +145,11 @@ class BaseTestHttp(unittest.TestCase):
             pass
 
     def create_app(
-        self, stats=None, event_metadata_publisher=None, enforce_default_admin=False
+        self,
+        stats=None,
+        event_metadata_publisher=None,
+        notice_registry=None,
+        enforce_default_admin=False,
     ):
         from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 
@@ -161,6 +165,7 @@ class BaseTestHttp(unittest.TestCase):
             None,
             DebugReplayManager(),
             enforce_default_admin=enforce_default_admin,
+            notice_registry=notice_registry,
         )
 
         # Default test mocks for authentication

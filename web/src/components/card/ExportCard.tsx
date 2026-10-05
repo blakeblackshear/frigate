@@ -490,6 +490,8 @@ export function ActiveExportJobCard({
         return t("jobCard.encoding");
       case "encoding_retry":
         return t("jobCard.encodingRetry");
+      case "merging":
+        return t("jobCard.merging");
       case "finalizing":
         return t("jobCard.finalizing");
       default:
@@ -498,7 +500,10 @@ export function ActiveExportJobCard({
   }, [step, t]);
 
   const hasDeterminateProgress =
-    step === "copying" || step === "encoding" || step === "encoding_retry";
+    step === "copying" ||
+    step === "encoding" ||
+    step === "encoding_retry" ||
+    step === "merging";
 
   return (
     <div

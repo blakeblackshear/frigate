@@ -40,6 +40,10 @@ logger = logging.getLogger(__name__)
 THUMB_HEIGHT = 180
 THUMB_WIDTH = 320
 
+# seconds before a review item starts that a state classification change is
+# still attached to it, e.g. a garage door opening before the car is visible
+CLASSIFICATION_STATE_PRE_ROLL = 5
+
 
 class PendingReviewSegment:
     def __init__(
@@ -61,6 +65,10 @@ class PendingReviewSegment:
         self.sub_labels = sub_labels
         self.zones = zones
         self.audio = audio
+        self.classification_state_changes: list[dict[str, Any]] = []
+        # detection-level activity after the last alert activity, split by the
+        # detection cutoff, these are published when the alert is cut off
+        self.pending_detections: list[PendingReviewSegment] = []
         self.thumb_time: float | None = None
         self.last_alert_time: float | None = None
         self.last_detection_time: float = frame_time
@@ -77,6 +85,20 @@ class PendingReviewSegment:
         self.frame_path = os.path.join(
             CLIPS_DIR, f"review/thumb-{self.camera}-{self.id}.webp"
         )
+
+    def add_object(self, obj: dict[str, Any], attributes: list[str]) -> None:
+        """Add a tracked object's label, sub label, and zones to the segment."""
+        if not obj["sub_label"]:
+            self.detections[obj["id"]] = obj["label"]
+        elif obj["sub_label"][0] in attributes:
+            self.detections[obj["id"]] = obj["sub_label"][0]
+        else:
+            self.detections[obj["id"]] = f"{obj['label']}-verified"
+            self.sub_labels[obj["id"]] = obj["sub_label"][0]
+
+        for zone in obj["current_zones"]:
+            if zone not in self.zones:
+                self.zones.append(zone)
 
     def update_frame(
         self,
@@ -162,6 +184,7 @@ class PendingReviewSegment:
                     "sub_labels": list(self.sub_labels.values()),
                     "zones": self.zones,
                     "audio": list(self.audio),
+                    "classification_state_changes": self.classification_state_changes,
                     "thumb_time": self.thumb_time,
                     "metadata": None,
                 },
@@ -293,6 +316,9 @@ class ReviewSegmentMaintainer(threading.Thread):
         # manual events
         self.indefinite_events: dict[str, dict[str, Any]] = {}
 
+        # state classification changes seen while a camera had no review item
+        self.recent_classification_state_changes: dict[str, list[dict[str, Any]]] = {}
+
         # ensure dirs
         Path(os.path.join(CLIPS_DIR, "review")).mkdir(exist_ok=True)
 
@@ -374,6 +400,43 @@ class ReviewSegmentMaintainer(threading.Thread):
         self.active_review_segments[segment.camera] = None
         return end_time
 
+    def _activate_segment(self, segment: PendingReviewSegment) -> None:
+        """Make a segment the camera's active one, attaching any state
+        classification changes seen just before it started."""
+        self.active_review_segments[segment.camera] = segment
+        recent = self.recent_classification_state_changes.pop(segment.camera, [])
+        segment.classification_state_changes.extend(
+            c
+            for c in recent
+            if c["timestamp"] >= segment.start_time - CLASSIFICATION_STATE_PRE_ROLL
+        )
+
+    def handle_classification_state_change(
+        self, camera: str, change: dict[str, Any]
+    ) -> None:
+        """Attach a verified state classification change to the active segment.
+
+        State changes never start, extend, or upgrade a segment. A change seen
+        with no active segment is held briefly for a segment starting right
+        after it.
+        """
+        segment = self.active_review_segments.get(camera)
+
+        if segment is None:
+            cutoff = change["timestamp"] - CLASSIFICATION_STATE_PRE_ROLL
+            self.recent_classification_state_changes[camera] = [
+                c
+                for c in self.recent_classification_state_changes.get(camera, [])
+                if c["timestamp"] >= cutoff
+            ] + [change]
+            return
+
+        prev_data = segment.get_data(False)
+        segment.classification_state_changes.append(change)
+        self._publish_segment_update(
+            segment, self.config.cameras[camera], None, [], prev_data
+        )
+
     def forcibly_end_segment(self, camera: str) -> Any:
         """Forcibly end the pending segment for a camera."""
         segment = self.active_review_segments.get(camera)
@@ -389,8 +452,28 @@ class ReviewSegmentMaintainer(threading.Thread):
                     segment.last_detection_time = now
 
             prev_data = segment.get_data(False)
-            return self._publish_segment_end(segment, prev_data)
+            end_time = self._publish_segment_end(segment, prev_data)
+            self._publish_pending_detections(segment, None)
+            return end_time
         return None
+
+    def _publish_pending_detections(
+        self, segment: PendingReviewSegment, ongoing_since: float | None
+    ) -> None:
+        """Publish the detections held while an ended alert was active.
+
+        A detection with activity after ongoing_since stays open, only the
+        latest can. With None every detection is ended, this does not read the
+        camera config since a removed camera is no longer in it.
+        """
+        for pending in segment.pending_detections:
+            self._activate_segment(pending)
+            self._publish_segment_start(pending)
+
+            if ongoing_since is None or pending.last_detection_time < ongoing_since:
+                self._publish_segment_end(pending, pending.get_data(False))
+
+        segment.pending_detections = []
 
     def get_manual_event_severity(self, camera: str, label: str) -> SeverityEnum | None:
         """Determine the review severity for a manual event label.
@@ -417,6 +500,61 @@ class ReviewSegmentMaintainer(threading.Thread):
             return SeverityEnum.alert
 
         return None
+
+    def _handle_camera_removed(self, camera: str) -> None:
+        """Close out a deleted camera's segment so a reused name cannot inherit it."""
+        self.forcibly_end_segment(camera)
+        self.indefinite_events.pop(camera, None)
+        self.recent_classification_state_changes.pop(camera, None)
+
+    def _track_pending_detection(
+        self,
+        segment: PendingReviewSegment,
+        camera_config: CameraConfig,
+        frame_name: str,
+        frame_time: float,
+        objects: list[dict[str, Any]],
+    ) -> None:
+        """Hold detection-level activity seen after an alert's last alert
+        activity, starting a separate detection when the gap since the previous
+        activity exceeds the detection cutoff."""
+        pending = segment.pending_detections[-1] if segment.pending_detections else None
+
+        if pending is None or frame_time > (
+            pending.last_detection_time + camera_config.review.detections.cutoff_time
+        ):
+            pending = PendingReviewSegment(
+                segment.camera,
+                frame_time,
+                SeverityEnum.detection,
+                {},
+                sub_labels={},
+                audio=set(),
+                zones=[],
+            )
+            segment.pending_detections.append(pending)
+
+        pending.last_detection_time = frame_time
+
+        for obj in objects:
+            pending.add_object(obj, self.config.all_attributes)
+
+        if len(objects) <= pending.frame_active_count:
+            return
+
+        try:
+            yuv_frame = self.frame_manager.get(
+                frame_name, camera_config.frame_shape_yuv
+            )
+        except FileNotFoundError:
+            return
+
+        if yuv_frame is None:
+            logger.debug(f"Failed to get frame {frame_name} from SHM")
+            return
+
+        pending.update_frame(camera_config, yuv_frame, objects)
+        self.frame_manager.close(frame_name)
 
     def update_existing_segment(
         self,
@@ -453,12 +591,29 @@ class ReviewSegmentMaintainer(threading.Thread):
                     should_update_state = True
                     should_update_image = True
 
+                # alert activity resumed, so the pending detection activity
+                # falls within this alert
+                for pending in segment.pending_detections:
+                    segment.detections.update(pending.detections)
+                    segment.sub_labels.update(pending.sub_labels)
+
+                    for zone in pending.zones:
+                        if zone not in segment.zones:
+                            segment.zones.append(zone)
+
+                    Path(pending.frame_path).unlink(missing_ok=True)
+                    should_update_state = True
+
+                segment.pending_detections = []
+
             if activity.has_activity_category(SeverityEnum.detection):
                 if (
                     segment.last_detection_time is None
                     or frame_time > segment.last_detection_time
                 ):
                     segment.last_detection_time = frame_time
+
+            pending_objects: list[dict[str, Any]] = []
 
             for object in activity.get_all_objects():
                 # Alert-level objects should always be added (they extend/upgrade the segment)
@@ -470,23 +625,22 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 if not is_alert_object and segment.severity == SeverityEnum.alert:
                     # This is a detection-level object
+                    if (
+                        segment.last_alert_time is not None
+                        and frame_time > segment.last_alert_time
+                    ):
+                        pending_objects.append(object)
+
                     # Only add if it started during the alert's active period
                     if object["start_time"] > segment.last_alert_time:
                         continue
 
-                if not object["sub_label"]:
-                    segment.detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in self.config.model.all_attributes:
-                    segment.detections[object["id"]] = object["sub_label"][0]
-                else:
-                    segment.detections[object["id"]] = f"{object['label']}-verified"
-                    segment.sub_labels[object["id"]] = object["sub_label"][0]
+                segment.add_object(object, self.config.all_attributes)
 
-                # keep zones up to date
-                if len(object["current_zones"]) > 0:
-                    for zone in object["current_zones"]:
-                        if zone not in segment.zones:
-                            segment.zones.append(zone)
+            if pending_objects:
+                self._track_pending_detection(
+                    segment, camera_config, frame_name, frame_time, pending_objects
+                )
 
             if len(activity.get_all_objects()) > segment.frame_active_count:
                 should_update_state = True
@@ -538,50 +692,28 @@ class ReviewSegmentMaintainer(threading.Thread):
                 except FileNotFoundError:
                     return
 
-            if (
-                segment.severity == SeverityEnum.alert
-                and segment.last_alert_time is not None
-                and frame_time
-                > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
-            ):
-                needs_new_detection = (
-                    segment.last_detection_time > segment.last_alert_time
-                    and (
-                        segment.last_detection_time
-                        + camera_config.review.detections.cutoff_time
-                    )
-                    > frame_time
-                )
-                last_detection_time = segment.last_detection_time
-
-                end_time = self._publish_segment_end(segment, prev_data)
-
-                if needs_new_detection:
-                    new_detections: dict[str, str] = {}
-                    new_zones = set()
-
-                    for o in activity.categorized_objects["detections"]:
-                        new_detections[o["id"]] = o["label"]
-                        new_zones.update(o["current_zones"])
-
-                    if new_detections:
-                        new_segment = PendingReviewSegment(
-                            segment.camera,
-                            end_time,
-                            SeverityEnum.detection,
-                            new_detections,
-                            sub_labels={},
-                            audio=set(),
-                            zones=list(new_zones),
-                        )
-                        self.active_review_segments[segment.camera] = new_segment
-                        self._publish_segment_start(new_segment)
-                        new_segment.last_detection_time = last_detection_time
-            elif segment.severity == SeverityEnum.detection and frame_time > (
+        # detection-level activity must not keep an alert open, it continues
+        # in a new detection segment once the alert is cut off
+        if (
+            segment.severity == SeverityEnum.alert
+            and segment.last_alert_time is not None
+            and frame_time
+            > (segment.last_alert_time + camera_config.review.alerts.cutoff_time)
+        ):
+            self._publish_segment_end(segment, prev_data)
+            self._publish_pending_detections(
+                segment, frame_time - camera_config.review.detections.cutoff_time
+            )
+        elif (
+            not has_activity
+            and segment.severity == SeverityEnum.detection
+            and frame_time
+            > (
                 segment.last_detection_time
                 + camera_config.review.detections.cutoff_time
-            ):
-                self._publish_segment_end(segment, prev_data)
+            )
+        ):
+            self._publish_segment_end(segment, prev_data)
 
     def check_if_new_segment(
         self,
@@ -614,7 +746,7 @@ class ReviewSegmentMaintainer(threading.Thread):
             for object in activity.get_all_objects():
                 if not object["sub_label"]:
                     detections[object["id"]] = object["label"]
-                elif object["sub_label"][0] in self.config.model.all_attributes:
+                elif object["sub_label"][0] in self.config.all_attributes:
                     detections[object["id"]] = object["sub_label"][0]
                 else:
                     detections[object["id"]] = f"{object['label']}-verified"
@@ -634,7 +766,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                     audio=set(),
                     zones=zones,
                 )
-                self.active_review_segments[camera] = new_segment
+                self._activate_segment(new_segment)
 
                 try:
                     yuv_frame = self.frame_manager.get(
@@ -665,6 +797,10 @@ class ReviewSegmentMaintainer(threading.Thread):
             if "enabled" in updated_topics:
                 for camera in updated_topics["enabled"]:
                     self.forcibly_end_segment(camera)
+
+            if "remove" in updated_topics:
+                for camera in updated_topics["remove"]:
+                    self._handle_camera_removed(camera)
 
             result = self.detection_subscriber.check_for_update(timeout=1)
 
@@ -704,6 +840,10 @@ class ReviewSegmentMaintainer(threading.Thread):
 
                 if camera not in self.indefinite_events:
                     self.indefinite_events[camera] = {}
+            elif topic == DetectionTypeEnum.classification_state.value:
+                (camera, classification_change) = data
+            else:
+                continue
 
             if camera not in self.config.cameras:
                 continue
@@ -712,6 +852,10 @@ class ReviewSegmentMaintainer(threading.Thread):
                 not self.config.cameras[camera].enabled
                 or not self.config.cameras[camera].record.enabled
             ):
+                continue
+
+            if topic == DetectionTypeEnum.classification_state:
+                self.handle_classification_state_change(camera, classification_change)
                 continue
 
             current_segment = self.active_review_segments.get(camera)
@@ -855,14 +999,16 @@ class ReviewSegmentMaintainer(threading.Thread):
                                 severity = SeverityEnum.detection
 
                     if severity:
-                        self.active_review_segments[camera] = PendingReviewSegment(
-                            camera,
-                            frame_time,
-                            severity,
-                            {},
-                            {},
-                            [],
-                            detections,
+                        self._activate_segment(
+                            PendingReviewSegment(
+                                camera,
+                                frame_time,
+                                severity,
+                                {},
+                                {},
+                                [],
+                                detections,
+                            )
                         )
                 elif topic == DetectionTypeEnum.api:
                     severity = self.get_manual_event_severity(
@@ -879,7 +1025,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             [],
                             set(),
                         )
-                        self.active_review_segments[camera] = api_segment
+                        self._activate_segment(api_segment)
 
                         if manual_info["state"] == ManualEventState.start:
                             self.indefinite_events[camera][manual_info["event_id"]] = (
@@ -906,7 +1052,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             [],
                             set(),
                         )
-                        self.active_review_segments[camera] = lpr_segment
+                        self._activate_segment(lpr_segment)
 
                         if manual_info["state"] == ManualEventState.start:
                             self.indefinite_events[camera][manual_info["event_id"]] = (

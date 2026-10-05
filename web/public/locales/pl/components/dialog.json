@@ -16,18 +16,6 @@
         "desc": "Obiekty w miejscach, których chcesz unikać, nie są fałszywymi alarmami. Zgłaszanie ich jako fałszywe alarmy zdezorientuje model."
       },
       "review": {
-        "true": {
-          "label": "Potwierdź tę etykietę dla Frigate Plus",
-          "true_one": "To jest {{label}}",
-          "true_few": "To są {{label}}",
-          "true_many": "To są {{label}}"
-        },
-        "false": {
-          "label": "Nie potwierdzaj tej etykiety dla Frigate Plus",
-          "false_one": "To nie jest {{label}}",
-          "false_few": "To nie są {{label}}",
-          "false_many": "To nie są {{label}}"
-        },
         "state": {
           "submitted": "Przesłano"
         },
@@ -73,7 +61,6 @@
       "error": {
         "failed": "Nie udało się zakolejkować eksportu: {{error}}",
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
-        "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu",
         "noValidTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
       },
       "view": "Widok",
@@ -147,9 +134,6 @@
         "started_one": "Rozpoczęto 1 eksport.",
         "started_few": "Rozpoczęto {{count}} eksporty.",
         "started_many": "Rozpoczęto {{count}} eksportów.",
-        "startedNoCase_one": "Rozpoczęto 1 eksport.",
-        "startedNoCase_few": "Rozpoczęto {{count}} eksportów.",
-        "startedNoCase_many": "Rozpoczęto {{count}} eksportów.",
         "partial": "Rozpoczęto {{successful}} z {{total}} eksportów. Niepowodzenia: {{failedItems}}",
         "failed": "Nie udało się uruchomić {{total}} eksportów. Niepowodzenia: {{failedItems}}"
       }
@@ -186,8 +170,7 @@
     "restreaming": {
       "disabled": "Restreaming nie jest włączony dla tej kamery.",
       "desc": {
-        "title": "Skonfiguruj go2rtc dla dodatkowych opcji podglądu na żywo i dźwięku dla tej kamery.",
-        "readTheDocumentation": "Przeczytaj dokumentację"
+        "title": "Skonfiguruj go2rtc dla dodatkowych opcji podglądu na żywo i dźwięku dla tej kamery."
       }
     },
     "showStats": {

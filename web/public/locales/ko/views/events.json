@@ -60,8 +60,6 @@
   "selected_other": "{{count}}개 선택됨",
   "camera": "카메라",
   "detected": "감지됨",
-  "suspiciousActivity": "수상한 행동",
-  "threateningActivity": "위협적인 행동",
   "zoomIn": "확대",
   "zoomOut": "축소",
   "select_all": "전체",
@@ -93,5 +91,6 @@
     "crop": "필터 영역으로 확대",
     "cropAria": "미리보기를 필터 영역으로 자르기 전환",
     "cropDesc": "전체 화면 대신 선택한 필터 영역으로 미리보기를 확대합니다."
-  }
+  },
+  "subOnlyQuality": "이 시간 범위에는 저화질 녹화본만 사용할 수 있습니다"
 }

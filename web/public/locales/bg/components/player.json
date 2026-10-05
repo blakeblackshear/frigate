@@ -1,14 +1,6 @@
 {
   "noPreviewFoundFor": "Не е намерен предварителен преглед за {{cameraName}}",
   "stats": {
-    "latency": {
-      "short": {
-        "value": "{{seconds}} сек",
-        "title": "Закъснение"
-      },
-      "title": "Закъснение:",
-      "value": "{{seconds}} секунди"
-    },
     "streamType": {
       "title": "Тип поток:",
       "short": "Тип"
@@ -40,7 +32,6 @@
   "noPreviewFound": "Не е намерен предварителен преглед",
   "noRecordingsFoundForThisTime": "За това време не са намерени записи",
   "livePlayerRequiredIOSVersion": "За този тип поток на живо се изисква iOS 17.1 или по-нова версия.",
-  "cameraDisabled": "Камерата е изключена",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Успешно изпратен кадър към Frigate+"

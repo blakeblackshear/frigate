@@ -72,7 +72,7 @@ class LicensePlateProcessingMixin:
         # Object config
         self.lp_objects: list[str] = []
 
-        for obj, attributes in self.config.model.attributes_map.items():
+        for obj, attributes in self.config.all_attributes_map.items():
             if "license_plate" in attributes:
                 self.lp_objects.append(obj)
 
@@ -176,6 +176,7 @@ class LicensePlateProcessingMixin:
         """
         input_shape = [3, 48, 320]
         num_images = len(images)
+        outputs: list[np.ndarray] = []
 
         for index in range(0, num_images, self.batch_size):
             input_h, input_w = input_shape[1], input_shape[2]
@@ -195,11 +196,11 @@ class LicensePlateProcessingMixin:
                 norm_image = norm_image[np.newaxis, :]
                 norm_images.append(norm_image)
 
-        try:
-            outputs = self.model_runner.recognition_model(norm_images)  # type: ignore[arg-type]
-        except Exception as e:
-            logger.warning(f"Error running LPR recognition model: {e}")
-            return [], []
+            try:
+                outputs.extend(self.model_runner.recognition_model(norm_images))  # type: ignore[arg-type]
+            except Exception as e:
+                logger.warning(f"Error running LPR recognition model: {e}")
+                return [], []
 
         return self.ctc_decoder(outputs)
 

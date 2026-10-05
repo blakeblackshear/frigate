@@ -43,8 +43,6 @@ class CameraMetrics:
 
 
 class PTZMetrics:
-    autotracker_enabled: Synchronized
-
     start_time: Synchronized
     stop_time: Synchronized
     frame_time: Synchronized
@@ -52,13 +50,10 @@ class PTZMetrics:
     max_zoom: Synchronized
     min_zoom: Synchronized
 
-    tracking_active: Event
     motor_stopped: Event
     reset: Event
 
-    def __init__(self, *, autotracker_enabled: bool):
-        self.autotracker_enabled = mp.Value("i", autotracker_enabled)  # type: ignore[assignment]
-
+    def __init__(self) -> None:
         self.start_time = mp.Value("d", 0)  # type: ignore[assignment]
         self.stop_time = mp.Value("d", 0)  # type: ignore[assignment]
         self.frame_time = mp.Value("d", 0)  # type: ignore[assignment]
@@ -66,7 +61,6 @@ class PTZMetrics:
         self.max_zoom = mp.Value("d", 0)  # type: ignore[assignment]
         self.min_zoom = mp.Value("d", 0)  # type: ignore[assignment]
 
-        self.tracking_active = mp.Event()
         self.motor_stopped = mp.Event()
         self.reset = mp.Event()
 
