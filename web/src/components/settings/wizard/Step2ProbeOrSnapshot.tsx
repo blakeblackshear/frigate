@@ -222,6 +222,7 @@ export default function Step2ProbeOrSnapshot({
             wizardData.username,
             wizardData.password,
           );
+          update.reolinkProtocol = protocol;
           if (protocol === "http-flv") {
             update.brandTemplate = "reolink";
           }
@@ -294,73 +295,72 @@ export default function Step2ProbeOrSnapshot({
     [probeUri],
   );
 
-  const generateDynamicStreamUrl = useCallback(
-    async (data: Partial<WizardFormData>): Promise<string | null> => {
+  const generateDynamicStreamUrls = useCallback(
+    async (data: Partial<WizardFormData>): Promise<string[]> => {
       const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
-      if (!brand || !data.host) return null;
+      const host = data.host;
+      if (!brand || !host) return [];
 
       let protocol = undefined;
       if (data.brandTemplate === "reolink" && data.username && data.password) {
         try {
           protocol = await detectReolinkCamera(
-            data.host,
+            host,
             data.username,
             data.password,
           );
         } catch {
-          return null;
+          return [];
         }
+        onUpdate({ reolinkProtocol: protocol });
       }
 
-      const protocolKey = protocol || "rtsp";
+      // Only some Reolink cameras above 5MP serve http-flv, so RTSP is the
+      // fallback when the http-flv stream does not probe.
+      const protocolKeys =
+        protocol === "rtsp" ? ["http-flv", "rtsp"] : [protocol || "rtsp"];
       const templates: Record<string, string> = brand.dynamicTemplates || {};
 
-      if (Object.keys(templates).includes(protocolKey)) {
-        const template =
-          templates[protocolKey as keyof typeof brand.dynamicTemplates];
-        return template
-          .replace("{username}", data.username || "")
-          .replace("{password}", data.password || "")
-          .replace("{host}", data.host);
-      }
-
-      return null;
+      return protocolKeys
+        .filter((key) => key in templates)
+        .map((key) =>
+          templates[key]
+            .replace("{username}", data.username || "")
+            .replace("{password}", data.password || "")
+            .replace("{host}", host),
+        );
     },
-    [],
+    [onUpdate],
   );
 
-  const generateStreamUrl = useCallback(
-    async (data: Partial<WizardFormData>): Promise<string> => {
+  const generateStreamUrls = useCallback(
+    async (data: Partial<WizardFormData>): Promise<string[]> => {
       if (data.brandTemplate === "other") {
-        return data.customUrl || "";
+        return data.customUrl ? [data.customUrl] : [];
       }
 
       const brand = CAMERA_BRANDS.find((b) => b.value === data.brandTemplate);
-      if (!brand || !data.host) return "";
+      if (!brand || !data.host) return [];
 
       if (brand.template === "dynamic" && "dynamicTemplates" in brand) {
-        const dynamicUrl = await generateDynamicStreamUrl(data);
-
-        if (dynamicUrl) {
-          return dynamicUrl;
-        }
-
-        return "";
+        return generateDynamicStreamUrls(data);
       }
 
-      return brand.template
-        .replace("{username}", data.username || "")
-        .replace("{password}", data.password || "")
-        .replace("{host}", data.host);
+      return [
+        brand.template
+          .replace("{username}", data.username || "")
+          .replace("{password}", data.password || "")
+          .replace("{host}", data.host),
+      ];
     },
-    [generateDynamicStreamUrl],
+    [generateDynamicStreamUrls],
   );
 
   const testConnection = useCallback(
     async (showToast = true) => {
-      const streamUrl = await generateStreamUrl(wizardData);
+      const streamUrls = await generateStreamUrls(wizardData);
 
-      if (!streamUrl) {
+      if (streamUrls.length === 0) {
         toast.error(t("cameraWizard.commonErrors.noUrl"));
         return;
       }
@@ -370,8 +370,18 @@ export default function Step2ProbeOrSnapshot({
       setTestResult(null);
 
       try {
-        setTestStatus(t("cameraWizard.step2.testing.probingMetadata"));
-        const result = await probeUri(streamUrl, true, setTestStatus);
+        let streamUrl = streamUrls[0];
+        let result: TestResult | undefined;
+
+        for (const url of streamUrls) {
+          streamUrl = url;
+          setTestStatus(t("cameraWizard.step2.testing.probingMetadata"));
+          result = await probeUri(url, true, setTestStatus);
+
+          if (result.success && result.resolution) {
+            break;
+          }
+        }
 
         if (result && result.success) {
           setTestResult(result);
@@ -434,7 +444,7 @@ export default function Step2ProbeOrSnapshot({
         setTestStatus("");
       }
     },
-    [wizardData, generateStreamUrl, t, onUpdate, probeUri],
+    [wizardData, generateStreamUrls, t, onUpdate, probeUri],
   );
 
   const handleContinue = useCallback(() => {

@@ -13,7 +13,7 @@ export type StreamIssueInput = {
   url: string;
   roles: StreamRole[];
   brand?: CameraBrand;
-  useFfmpeg?: boolean;
+  reolinkProtocol?: "http-flv" | "rtsp" | null;
   restream?: boolean;
   testResult?: TestResult;
 };
@@ -94,27 +94,18 @@ export function getStreamIssues(
   const result: StreamIssue[] = [];
   const { roles, testResult } = input;
 
-  if (input.brand === "reolink") {
-    const streamUrl = input.url.toLowerCase();
-    if (streamUrl.startsWith("rtsp://")) {
-      result.push({
-        type: "warning",
-        rule: "reolink-rtsp",
-        message: t("cameraWizard.step4.issues.brands.reolink-rtsp", {
-          ns: "views/settings",
-        }),
-      });
-    }
-
-    if (streamUrl.startsWith("http://") && !input.useFfmpeg) {
-      result.push({
-        type: "warning",
-        rule: "reolink-http",
-        message: t("cameraWizard.step4.issues.brands.reolink-http", {
-          ns: "views/settings",
-        }),
-      });
-    }
+  if (
+    input.brand === "reolink" &&
+    input.reolinkProtocol !== "rtsp" &&
+    input.url.toLowerCase().startsWith("rtsp://")
+  ) {
+    result.push({
+      type: "warning",
+      rule: "reolink-rtsp",
+      message: t("cameraWizard.step4.issues.brands.reolink-rtsp", {
+        ns: "views/settings",
+      }),
+    });
   }
 
   if (testResult?.videoCodec) {
@@ -268,7 +259,7 @@ export function getStreamIssues(
 export function resolveRestreamSource(
   path: string,
   streams: Record<string, string | string[]> | undefined,
-): { url: string; useFfmpeg: boolean } | undefined {
+): { url: string } | undefined {
   const name = parseRestreamStreamName(path);
 
   if (!name || !streams) {
@@ -288,11 +279,8 @@ export function resolveRestreamSource(
   }
 
   if (source.startsWith("ffmpeg:")) {
-    return {
-      url: source.slice("ffmpeg:".length).split("#")[0],
-      useFfmpeg: true,
-    };
+    return { url: source.slice("ffmpeg:".length).split("#")[0] };
   }
 
-  return { url: source, useFfmpeg: false };
+  return { url: source };
 }

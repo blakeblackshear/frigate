@@ -499,7 +499,7 @@ function StreamIssues({
           url: stream.url,
           roles: stream.roles,
           brand: wizardData.brandTemplate,
-          useFfmpeg: stream.useFfmpeg,
+          reolinkProtocol: wizardData.reolinkProtocol,
           restream: stream.restream,
           testResult: stream.testResult,
         },

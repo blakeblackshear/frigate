@@ -169,10 +169,9 @@ The [Add Camera Wizard](cameras.md#adding-a-camera-with-the-add-camera-wizard) i
 
 1. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />.
 2. Choose **Manual selection** as the stream detection method and select **Reolink** as the camera brand.
-3. The wizard queries the camera and automatically uses an http-flv stream for cameras 5MP and lower, or an RTSP stream for higher resolution cameras.
-4. In the validation step, enable **Use stream compatibility mode** for http-flv streams when the wizard recommends it.
+3. The wizard queries the camera and automatically uses an http-flv stream for cameras 5MP and lower. For higher resolution cameras, it tries the http-flv stream first and falls back to RTSP when the camera does not support it.
 
-If you use the **Probe camera** method instead, the discovered stream URLs will be RTSP. For Reolink cameras where http-flv is recommended, the wizard will show a warning in the validation step.
+If you use the **Probe camera** method instead, the discovered stream URLs will be RTSP. For Reolink cameras 5MP and lower, where http-flv is recommended, the wizard will show a warning in the validation step.
 
 The wizard covers standard single-camera setups. For two way talk, cameras connected through a Reolink NVR, or audio transcoding for WebRTC live view, configure the camera manually as shown below.
 
@@ -203,20 +202,20 @@ go2rtc:
     your_reolink_camera:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
     your_reolink_camera_sub:
-      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+      - "http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
     # example for connecting to a Reolink camera that supports two way talk
     your_reolink_camera_twt:
       - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_main.bcs&user=username&password=password#video=copy#audio=copy#audio=opus"
       - "rtsp://username:password@reolink_ip/Preview_01_sub"
     your_reolink_camera_twt_sub:
-      - "ffmpeg:http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
+      - "http://reolink_ip/flv?port=1935&app=bcs&stream=channel0_ext.bcs&user=username&password=password"
       - "rtsp://username:password@reolink_ip/Preview_01_sub"
     # example for connecting to a Reolink NVR
     your_reolink_camera_via_nvr:
-      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_main.bcs&user=username&password=password" # channel numbers are 0-15
+      - "http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_main.bcs&user=username&password=password" # channel numbers are 0-15
       - "ffmpeg:your_reolink_camera_via_nvr#audio=aac"
     your_reolink_camera_via_nvr_sub:
-      - "ffmpeg:http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_ext.bcs&user=username&password=password"
+      - "http://reolink_nvr_ip/flv?port=1935&app=bcs&stream=channel3_ext.bcs&user=username&password=password"
 
 cameras:
   your_reolink_camera:

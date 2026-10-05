@@ -110,6 +110,7 @@ export type WizardFormData = {
   username?: string;
   password?: string;
   brandTemplate?: CameraBrand;
+  reolinkProtocol?: "http-flv" | "rtsp" | null; // null when detection failed
   customUrl?: string;
   streams?: StreamConfig[];
   probeMode?: boolean; // true for probe, false for manual

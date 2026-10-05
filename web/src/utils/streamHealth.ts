@@ -12,7 +12,7 @@ import {
 } from "@/utils/streamIssues";
 
 // rules the add camera wizard shows that do not belong on the Health tab
-const WIZARD_ONLY_RULES = new Set(["restream", "reolink-rtsp", "reolink-http"]);
+const WIZARD_ONLY_RULES = new Set(["restream", "reolink-rtsp"]);
 
 /**
  * Whether the record output keeps the camera's audio codec. The default
@@ -115,7 +115,6 @@ export function streamHealth(
           url,
           roles: input.roles as StreamRole[],
           brand: inferCameraBrand(url),
-          useFfmpeg: restream?.useFfmpeg,
           restream: !!restream,
           testResult: result,
         },
