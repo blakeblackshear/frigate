@@ -91,7 +91,7 @@ export default function CameraInfoDialog({
         open={showCameraInfoDialog}
         onOpenChange={setShowCameraInfoDialog}
       >
-        <DialogContent>
+        <DialogContent className="scrollbar-container max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="smart-capitalize">
               {t("cameras.info.cameraProbeInfo", {

@@ -351,8 +351,13 @@ async def get_snapshot_from_recording(
         mime_type = "png" if format == "png" else "jpeg"
         config: FrigateConfig = request.app.frigate_config
 
-        image_data = get_image_from_recording(
-            config.ffmpeg, recording.path, time_in_segment, codec, height
+        image_data = await asyncio.to_thread(
+            get_image_from_recording,
+            config.ffmpeg,
+            recording.path,
+            time_in_segment,
+            codec,
+            height,
         )
 
         if not image_data:
@@ -406,8 +411,12 @@ async def submit_recording_snapshot_to_plus(
         config: FrigateConfig = request.app.frigate_config
         recording: Recordings = recording_query.get()
         time_in_segment = frame_time - recording.start_time
-        image_data = get_image_from_recording(
-            config.ffmpeg, recording.path, time_in_segment, "png"
+        image_data = await asyncio.to_thread(
+            get_image_from_recording,
+            config.ffmpeg,
+            recording.path,
+            time_in_segment,
+            "png",
         )
 
         if not image_data:

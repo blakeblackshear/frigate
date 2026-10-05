@@ -1,6 +1,9 @@
 """Unit tests for recordings/media API endpoints."""
 
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytz
 from fastapi import Request
@@ -527,3 +530,90 @@ class TestHttpMedia(BaseTestHttp):
 
             assert response.status_code == 200
             assert response.json() == [{"start_time": 1010, "end_time": 1030}]
+
+    def _insert_recording(self, id: str, start_time: float, end_time: float) -> None:
+        Recordings.insert(
+            id=id,
+            path=f"/media/recordings/{id}.mp4",
+            camera="front_door",
+            start_time=start_time,
+            end_time=end_time,
+            duration=end_time - start_time,
+            motion=0,
+        ).execute()
+
+    def test_recording_snapshot_does_not_block_event_loop(self):
+        self._insert_recording("snapshot", 1000, 1010)
+        started = threading.Event()
+        release = threading.Event()
+        finished = threading.Event()
+
+        def slow_image(*args):
+            started.set()
+            release.wait(timeout=5)
+            finished.set()
+            return b"jpeg"
+
+        with (
+            AuthTestClient(self.app) as client,
+            patch("frigate.api.media.get_image_from_recording", slow_image),
+            ThreadPoolExecutor(max_workers=1) as executor,
+        ):
+            snapshot = executor.submit(
+                client.get, "/front_door/recordings/1005/snapshot.jpg"
+            )
+            self.assertTrue(started.wait(timeout=2))
+            version = client.get("/version")
+            blocked = finished.is_set()
+            release.set()
+
+            self.assertEqual(version.status_code, 200)
+            self.assertFalse(blocked)
+            self.assertEqual(snapshot.result().status_code, 200)
+
+    def test_recording_snapshot_hit_returns_image(self):
+        self._insert_recording("snapshot", 1000, 1010)
+
+        with (
+            AuthTestClient(self.app) as client,
+            patch("frigate.api.media.get_image_from_recording", return_value=b"jpeg"),
+        ):
+            response = client.get("/front_door/recordings/1005/snapshot.jpg")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "image/jpeg")
+        self.assertEqual(response.content, b"jpeg")
+
+    def test_recording_snapshot_misses_return_404(self):
+        self._insert_recording("snapshot", 1000, 1010)
+
+        with AuthTestClient(self.app) as client:
+            absent = client.get("/front_door/recordings/2000/snapshot.jpg")
+            rounded_miss = client.get("/front_door/recordings/1010.5/snapshot.jpg")
+
+        self.assertEqual(absent.status_code, 404)
+        self.assertEqual(rounded_miss.status_code, 404)
+
+    def test_plus_snapshot_miss_returns_404_without_image_lookup(self):
+        with (
+            AuthTestClient(self.app) as client,
+            patch("frigate.api.media.get_image_from_recording") as image,
+        ):
+            response = client.post("/front_door/plus/1005")
+
+        self.assertEqual(response.status_code, 404)
+        image.assert_not_called()
+
+    def test_plus_snapshot_hit_uploads_image(self):
+        self._insert_recording("snapshot", 1000, 1010)
+
+        with (
+            AuthTestClient(self.app) as client,
+            patch("frigate.api.media.get_image_from_recording", return_value=b"png"),
+            patch("frigate.api.media.cv2.imdecode", return_value="frame"),
+            patch.object(self.app.frigate_config.plus_api, "upload_image") as upload,
+        ):
+            response = client.post("/front_door/plus/1005")
+
+        self.assertEqual(response.status_code, 200)
+        upload.assert_called_once_with("frame", "front_door")
