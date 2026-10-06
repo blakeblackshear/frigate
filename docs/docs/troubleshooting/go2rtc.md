@@ -190,14 +190,14 @@ If you rename or remove a go2rtc stream while experimenting and the live stream 
 
 Several camera brands have well-known quirks with go2rtc. Rather than repeat them here, see the [camera-specific configuration](/configuration/camera_specific) page, which covers them in detail. The highlights:
 
-- **Reolink**: RTSP is unreliable on many models; the **http-flv** stream is recommended, and you must enable HTTP/RTMP in the camera and **reboot** it. 6MP+ models stream H.265 over http-flv-enhanced, which requires FFmpeg 8.0. See [Reolink Cameras](/configuration/camera_specific#reolink-cameras).
+- **Reolink**: RTSP is unreliable on many models; the **http-flv** stream through the FFmpeg module is recommended, and you must enable HTTP/RTMP in the camera and **reboot** it. 6MP+ models stream H.265 over http-flv-enhanced, which requires FFmpeg 8.0. See [Reolink Cameras](/configuration/camera_specific#reolink-cameras).
 - **TP-Link Tapo**: use go2rtc's native `tapo://` source for stability and two-way audio; a stale RTSP credential can often be revived by clicking play once in the go2rtc web UI.
 - **Ubiquiti/UniFi Protect**: use the `rtspx://` scheme (not `rtsps://…?enableSrtp`).
 - **Amcrest/Dahua**: use the `/cam/realmonitor?channel=1&subtype=N` scheme, where `subtype=0` is the main stream. See [Amcrest & Dahua](/configuration/camera_specific#amcrest--dahua).
 
 ## Non-RTSP sources and the FFmpeg module
 
-go2rtc's native zero-copy handling only supports well-formed RTSP H.264/H.265. Anything else (MJPEG, RTMP, or unusual codecs) must be handed to the FFmpeg module by prefixing the source with `ffmpeg:`. This is also necessary for some camera streams to be parsed at all, at the cost of slightly slower startup. MJPEG and other non-H.264 sources additionally need `#video=h264` (with `#hardware`) before they can be used for the `record`, `detect`, or restream roles. See [MJPEG Cameras](/configuration/camera_specific#mjpeg-cameras) for a complete example.
+go2rtc's native zero-copy handling only supports well-formed RTSP H.264/H.265. Anything else (MJPEG, HTTP/HTTP-FLV, RTMP, or unusual codecs) must be handed to the FFmpeg module by prefixing the source with `ffmpeg:`. This is also necessary for some camera streams to be parsed at all, at the cost of slightly slower startup. MJPEG and other non-H.264 sources additionally need `#video=h264` (with `#hardware`) before they can be used for the `record`, `detect`, or restream roles. See [MJPEG Cameras](/configuration/camera_specific#mjpeg-cameras) for a complete example.
 
 ## Hardware-accelerated transcoding with FFmpeg 8
 

@@ -393,6 +393,9 @@ export default function Step2ProbeOrSnapshot({
                 url: streamUrl,
                 roles: ["detect"] as StreamRole[],
                 testResult: result,
+                useFfmpeg:
+                  wizardData.brandTemplate === "reolink" &&
+                  streamUrl.startsWith("http://"),
               },
             ],
           });

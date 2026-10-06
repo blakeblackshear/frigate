@@ -500,6 +500,7 @@ function StreamIssues({
           roles: stream.roles,
           brand: wizardData.brandTemplate,
           reolinkProtocol: wizardData.reolinkProtocol,
+          useFfmpeg: stream.useFfmpeg,
           restream: stream.restream,
           testResult: stream.testResult,
         },

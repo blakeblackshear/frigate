@@ -3,7 +3,8 @@
  *
  * The wizard asks the camera for its resolution, then probes http-flv first
  * above 5MP and falls back to RTSP. The Step 4 RTSP warning is only for
- * cameras that should be on http-flv.
+ * cameras that should be on http-flv. An http-flv stream the wizard selects
+ * is registered with go2rtc through the ffmpeg module.
  */
 
 import { test, expect } from "../../fixtures/frigate-test";
@@ -12,6 +13,7 @@ import type { Page } from "@playwright/test";
 const FLV_PATH = "channel0_main.bcs";
 const RTSP_PATH = "Preview_01_main";
 const RTSP_WARNING = "Reolink RTSP is not recommended";
+const HTTP_WARNING = "Reolink HTTP streams should use FFmpeg";
 
 const FFPROBE_OK = [
   {
@@ -105,6 +107,20 @@ test.describe("Camera wizard Reolink stream selection @medium @mobile", () => {
 
     expect(probed).toEqual([FLV_PATH]);
     await expect(dialog.locator(`input[value*="${FLV_PATH}"]`)).toBeVisible();
+
+    const registered: string[] = [];
+    await frigateApp.page.route("**/api/go2rtc/streams/**", (route) => {
+      const src = new URL(route.request().url()).searchParams.get("src");
+      if (src) registered.push(src);
+      return route.fulfill({ json: {} });
+    });
+
+    await dialog.getByRole("button", { name: /^Next$/i }).click();
+    await expect(
+      dialog.getByRole("button", { name: /Save New Camera/i }),
+    ).toBeVisible();
+    await expect.poll(() => registered[0]).toMatch(/^ffmpeg:http:\/\//);
+    await expect(dialog.getByText(HTTP_WARNING)).toHaveCount(0);
   });
 
   test("above 5MP falls back to RTSP without a warning", async ({
