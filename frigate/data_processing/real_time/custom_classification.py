@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import time
 from typing import Any
 
 import cv2
@@ -55,6 +56,8 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         self.tensor_output_details: list[dict[str, Any]] | None = None
         self.labelmap: dict[int, str] = {}
         self.classifications_per_second = EventsPerSecond()
+        self._last_cps_value: float = 0.0
+        self._last_cps_update: float = 0.0
         self.state_history: dict[str, dict[str, Any]] = {}
 
         if (
@@ -112,6 +115,29 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         self.classifications_per_second.update()
         if self.inference_speed:
             self.inference_speed.update(duration)
+
+    def _update_cps(self) -> None:
+        if (
+            not self.metrics
+            or self.model_config.name not in self.metrics.classification_cps
+        ):
+            return
+
+        eps = self.classifications_per_second.eps()
+        if eps == 0.0 and self._last_cps_value == 0.0:
+            return
+
+        now = time.monotonic()
+        if now - self._last_cps_update >= 1.0 or (
+            eps > 0.0 and self._last_cps_value == 0.0
+        ):
+            self._last_cps_value = eps
+            self._last_cps_update = now
+            self.metrics.classification_cps[self.model_config.name].value = eps
+
+    def drain_results(self) -> list[dict[str, Any]]:
+        self._update_cps()
+        return super().drain_results()
 
     def _should_save_image(
         self, camera: str, detected_state: str, score: float = 1.0
@@ -203,13 +229,11 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
 
         camera = str(frame_data.get("camera"))
 
-        if camera not in self.model_config.state_config.cameras:
+        if (
+            not self.model_config.state_config
+            or camera not in self.model_config.state_config.cameras
+        ):
             return
-
-        if self.metrics and self.model_config.name in self.metrics.classification_cps:
-            self.metrics.classification_cps[
-                self.model_config.name
-            ].value = self.classifications_per_second.eps()
 
         camera_config = self.model_config.state_config.cameras[camera]
         crop = [
@@ -431,6 +455,8 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
         self.classification_history: dict[str, list[tuple[str, float, float]]] = {}
         self.labelmap: dict[int, str] = {}
         self.classifications_per_second = EventsPerSecond()
+        self._last_cps_value: float = 0.0
+        self._last_cps_update: float = 0.0
 
         if (
             self.metrics
@@ -470,6 +496,29 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
         self.classifications_per_second.update()
         if self.inference_speed:
             self.inference_speed.update(duration)
+
+    def _update_cps(self) -> None:
+        if (
+            not self.metrics
+            or self.model_config.name not in self.metrics.classification_cps
+        ):
+            return
+
+        eps = self.classifications_per_second.eps()
+        if eps == 0.0 and self._last_cps_value == 0.0:
+            return
+
+        now = time.monotonic()
+        if now - self._last_cps_update >= 1.0 or (
+            eps > 0.0 and self._last_cps_value == 0.0
+        ):
+            self._last_cps_value = eps
+            self._last_cps_update = now
+            self.metrics.classification_cps[self.model_config.name].value = eps
+
+    def drain_results(self) -> list[dict[str, Any]]:
+        self._update_cps()
+        return super().drain_results()
 
     def get_weighted_score(
         self,
@@ -567,11 +616,6 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
             >= MAX_OBJECT_CLASSIFICATIONS
         ):
             return
-
-        if self.metrics and self.model_config.name in self.metrics.classification_cps:
-            self.metrics.classification_cps[
-                self.model_config.name
-            ].value = self.classifications_per_second.eps()
 
         now = datetime.datetime.now().timestamp()
         x, y, x2, y2 = calculate_region(

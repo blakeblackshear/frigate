@@ -206,6 +206,27 @@ class TestCustomObjectClassificationDeferred(unittest.TestCase):
         results = proc.drain_results()
         self.assertEqual(len(results), 0)
 
+    def test_drain_results_updates_and_decays_cps_metric(self):
+        """drain_results updates and throttles classification_cps metric."""
+        proc = self._make_processor()
+        cps_metric = MagicMock()
+        proc.metrics.classification_cps = {"test_breed": cps_metric}
+
+        # Initially 0.0 and no events: drain_results does not write to IPC
+        proc.drain_results()
+        self.assertEqual(cps_metric.mock_calls, [])
+
+        # Trigger a classification event
+        proc.classifications_per_second.update()
+        proc.drain_results()
+        self.assertGreater(proc._last_cps_value, 0.0)
+        self.assertEqual(cps_metric.value, proc._last_cps_value)
+
+        # Immediate subsequent drain throttles IPC write
+        cps_metric.reset_mock()
+        proc.drain_results()
+        self.assertEqual(cps_metric.mock_calls, [])
+
 
 if __name__ == "__main__":
     unittest.main()

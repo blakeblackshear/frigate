@@ -839,6 +839,7 @@ class EmbeddingMaintainer(threading.Thread):
 
             if (
                 isinstance(processor, CustomStateClassificationProcessor)
+                and processor.model_config.state_config is not None
                 and camera in processor.model_config.state_config.cameras
             ):
                 processor.process_frame(
