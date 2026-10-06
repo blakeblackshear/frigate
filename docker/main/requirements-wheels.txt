@@ -2,9 +2,8 @@ aiofiles == 25.1.*
 click == 8.5.*
 # FastAPI
 aiohttp == 3.12.*
-starlette == 0.47.*
 starlette-context == 0.5.*
-fastapi[standard-no-fastapi-cloud-cli] == 0.116.*
+fastapi[standard-no-fastapi-cloud-cli] == 0.142.*
 uvicorn == 0.52.*
 slowapi == 0.1.*
 joserfc == 1.6.*
