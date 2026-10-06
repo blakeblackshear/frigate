@@ -126,12 +126,18 @@ class TestMqttClientLifecycle(unittest.TestCase):
             os.makedirs(MODEL_CACHE_DIR)
 
         self.config = build_config()
-        self.client = MqttClient(self.config)
+        self.client = self._build_client()
         self.receiver = RuntimeSnapshotReceiver()
         self.client.attach_dispatcher(build_dispatcher(self.config, []))
 
-    def test_subscribe_stores_receiver_without_starting_worker(self) -> None:
+    def _build_client(self) -> MqttClient:
         client = MqttClient(self.config)
+        self.addCleanup(client._wake_recv.close)
+        self.addCleanup(client._wake_send.close)
+        return client
+
+    def test_subscribe_stores_receiver_without_starting_worker(self) -> None:
+        client = self._build_client()
 
         with patch.object(client, "_start_worker") as mock_start_worker:
             client.subscribe(self.receiver._receive)
@@ -142,7 +148,7 @@ class TestMqttClientLifecycle(unittest.TestCase):
         mock_start_worker.assert_not_called()
 
     def test_attach_dispatcher_supplies_command_surface(self) -> None:
-        client = MqttClient(self.config)
+        client = self._build_client()
 
         self.assertFalse(client._is_supported_command_topic("front/detect/set"))
 
@@ -294,6 +300,13 @@ class TestMqttClientLifecycle(unittest.TestCase):
         self.assertTrue(self.client.connected)
         self.assertEqual(self.client._subscription_mid, 42)
         self.client.client.subscribe.assert_called_once_with("frigate/#", qos=0)
+
+    def test_publish_wakes_worker(self) -> None:
+        self.client.connected = True
+
+        self.client.publish("events", "payload")
+
+        self.assertEqual(self.client._wake_recv.recv(16), b"\0")
 
     def test_handle_connect_event_reconnects_on_recoverable_subscribe_error(
         self,

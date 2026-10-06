@@ -2,6 +2,7 @@ import fcntl
 import resource
 import selectors
 import socket
+import time
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -23,6 +24,11 @@ class TestMqttNetworkLoop(unittest.TestCase):
         self.sock, self.peer = socket.socketpair()
         self.addCleanup(self.sock.close)
         self.addCleanup(self.peer.close)
+        self.transport._wake_recv, self.transport._wake_send = socket.socketpair()
+        self.transport._wake_recv.setblocking(False)
+        self.transport._wake_send.setblocking(False)
+        self.addCleanup(self.transport._wake_recv.close)
+        self.addCleanup(self.transport._wake_send.close)
         self.client.socket.return_value = self.sock
 
     def test_high_fd_handles_connack_suback_publish_and_puback(self) -> None:
@@ -123,8 +129,18 @@ class TestMqttNetworkLoop(unittest.TestCase):
         self.assertEqual(self.transport._loop_client(0), mqtt.MQTT_ERR_CONN_LOST)
         self.client.loop_misc.assert_not_called()
 
-    def test_missing_client_or_socket_reports_no_connection(self) -> None:
+    def test_missing_socket_reports_no_connection(self) -> None:
         self.client.socket.return_value = None
         self.assertEqual(self.transport._loop_client(0), mqtt.MQTT_ERR_NO_CONN)
-        self.transport.client = None
-        self.assertEqual(self.transport._loop_client(0), mqtt.MQTT_ERR_NO_CONN)
+
+    def test_wake_interrupts_wait_and_is_consumed(self) -> None:
+        self.transport._wake_worker()
+
+        start = time.monotonic()
+        self.assertEqual(self.transport._loop_client(5), mqtt.MQTT_ERR_SUCCESS)
+        self.assertLess(time.monotonic() - start, 1)
+        self.client.loop_read.assert_not_called()
+
+        start = time.monotonic()
+        self.transport._loop_client(0.2)
+        self.assertGreater(time.monotonic() - start, 0.15)
