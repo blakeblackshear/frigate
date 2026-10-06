@@ -201,14 +201,15 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         ):
             return
 
-        if self.metrics and self.model_config.name in self.metrics.classification_cps:
-            self.metrics.classification_cps[
-                self.model_config.name
-            ].value = self.classifications_per_second.eps()
         camera = str(frame_data.get("camera"))
 
         if camera not in self.model_config.state_config.cameras:
             return
+
+        if self.metrics and self.model_config.name in self.metrics.classification_cps:
+            self.metrics.classification_cps[
+                self.model_config.name
+            ].value = self.classifications_per_second.eps()
 
         camera_config = self.model_config.state_config.cameras[camera]
         crop = [
@@ -549,11 +550,6 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
         ):
             return
 
-        if self.metrics and self.model_config.name in self.metrics.classification_cps:
-            self.metrics.classification_cps[
-                self.model_config.name
-            ].value = self.classifications_per_second.eps()
-
         if obj_data["false_positive"]:
             return
 
@@ -571,6 +567,11 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
             >= MAX_OBJECT_CLASSIFICATIONS
         ):
             return
+
+        if self.metrics and self.model_config.name in self.metrics.classification_cps:
+            self.metrics.classification_cps[
+                self.model_config.name
+            ].value = self.classifications_per_second.eps()
 
         now = datetime.datetime.now().timestamp()
         x, y, x2, y2 = calculate_region(

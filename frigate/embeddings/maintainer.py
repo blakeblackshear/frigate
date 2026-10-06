@@ -807,11 +807,12 @@ class EmbeddingMaintainer(threading.Thread):
             and "license_plate" not in camera_config.objects.track
         )
 
-        has_enabled_custom = any(
-            c.enabled for c in self.config.classification.custom.values()
+        has_enabled_custom_state = any(
+            c.enabled and c.state_config and camera in c.state_config.cameras
+            for c in self.config.classification.custom.values()
         )
 
-        if not dedicated_lpr_enabled and not has_enabled_custom:
+        if not dedicated_lpr_enabled and not has_enabled_custom_state:
             # no active features that use this data
             return
 
@@ -836,7 +837,10 @@ class EmbeddingMaintainer(threading.Thread):
             ):
                 processor.process_frame(camera, yuv_frame, True)
 
-            if isinstance(processor, CustomStateClassificationProcessor):
+            if (
+                isinstance(processor, CustomStateClassificationProcessor)
+                and camera in processor.model_config.state_config.cameras
+            ):
                 processor.process_frame(
                     {"camera": camera, "motion": motion_boxes}, yuv_frame
                 )
