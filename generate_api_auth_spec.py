@@ -136,33 +136,36 @@ ACCESS_NOTES = {
 }
 
 
+# Mirrors the router set wired up in frigate.api.fastapi_app.
+ROUTERS = [
+    auth.router,
+    camera.router,
+    chat.router,
+    classification.router,
+    review.router,
+    main_app.router,
+    preview.router,
+    notification.router,
+    export.router,
+    hardware.router,
+    notices.router,
+    event.router,
+    media.router,
+    motion_search.router,
+    record.router,
+    debug_replay.router,
+]
+
+
 def build_app() -> FastAPI:
     """Build a bare app with every router mounted.
 
-    This mirrors the router set wired up in frigate.api.fastapi_app. It omits
-    the global admin dependency and all runtime state; the OpenAPI route table
-    and the per-route dependencies are all we need to export and classify.
+    It omits the global admin dependency and all runtime state; the OpenAPI
+    route table and the per-route dependencies are all we need to export and
+    classify.
     """
     app = FastAPI()
-    routers = [
-        auth.router,
-        camera.router,
-        chat.router,
-        classification.router,
-        review.router,
-        main_app.router,
-        preview.router,
-        notification.router,
-        export.router,
-        hardware.router,
-        notices.router,
-        event.router,
-        media.router,
-        motion_search.router,
-        record.router,
-        debug_replay.router,
-    ]
-    for router in routers:
+    for router in ROUTERS:
         app.include_router(router)
     return app
 
@@ -318,13 +321,17 @@ def _classify_base(
 
 
 def build_access_map(
-    app: FastAPI,
     exempt_paths: set[str],
     exempt_prefixes: tuple[str, ...],
 ) -> dict[tuple[str, str], dict]:
     """Map (path, lowercase method) -> classification details."""
     access_map: dict[tuple[str, str], dict] = {}
-    for route in app.routes:
+
+    # app.routes holds opaque wrappers for included routers on newer FastAPI.
+    # The routers mount without a prefix, so their own routes carry final paths.
+    routes = [route for router in ROUTERS for route in router.routes]
+
+    for route in routes:
         if not isinstance(route, APIRoute):
             continue
         level, roles, flag = classify_route(route, exempt_paths, exempt_prefixes)
@@ -515,7 +522,7 @@ def render(spec: dict) -> str:
 def build_spec() -> tuple[dict, dict, list, list, list]:
     app = build_app()
     exempt_paths, exempt_prefixes = read_exempt_rules()
-    access_map = build_access_map(app, exempt_paths, exempt_prefixes)
+    access_map = build_access_map(exempt_paths, exempt_prefixes)
 
     spec = base_document(app.openapi())
     normalized = strip_volatile_defaults(spec)
