@@ -13,6 +13,7 @@ export type StreamIssueInput = {
   url: string;
   roles: StreamRole[];
   brand?: CameraBrand;
+  reolinkProtocol?: "http-flv" | "rtsp" | null;
   useFfmpeg?: boolean;
   restream?: boolean;
   testResult?: TestResult;
@@ -96,7 +97,7 @@ export function getStreamIssues(
 
   if (input.brand === "reolink") {
     const streamUrl = input.url.toLowerCase();
-    if (streamUrl.startsWith("rtsp://")) {
+    if (streamUrl.startsWith("rtsp://") && input.reolinkProtocol !== "rtsp") {
       result.push({
         type: "warning",
         rule: "reolink-rtsp",
