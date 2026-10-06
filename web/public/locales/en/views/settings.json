@@ -1997,6 +1997,9 @@
       "genaiImageSourceRecordingsRecordDisabled": "Image source is set to 'recordings', but recording is disabled. Frigate will fall back to preview images.",
       "genaiImageSourceRecordingsRecordRuntimeDisabled": "Image source is set to 'recordings', but recording is currently turned off for this camera even though your config enables it. Frigate will fall back to preview images."
     },
+    "live": {
+      "noGo2rtcStream": "Live view for this camera is using a basic player with a lower frame rate and no audio. Set up a go2rtc stream for this camera to get smoother video and audio."
+    },
     "audio": {
       "noAudioRole": "No streams have the audio role defined. You must enable the audio role for audio detection to function."
     },

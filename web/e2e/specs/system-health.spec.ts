@@ -14,6 +14,17 @@ const NOW = Math.floor(Date.now() / 1000);
 // the fixture detector runs at 75.5 ms, above the live warning threshold
 const QUIET_STATS = { detectors: { cpu: { inference_speed: 10 } } };
 
+// the fixture has no go2rtc streams, which gives every camera a live view hint
+const RESTREAMED = {
+  go2rtc: {
+    streams: {
+      front_door: ["rtsp://x"],
+      backyard: ["rtsp://x"],
+      garage: ["rtsp://x"],
+    },
+  },
+};
+
 const ERROR_NOTICE = {
   id: "model_download_failed:yolo/model.onnx",
   kind: "model_download_failed",
@@ -51,6 +62,7 @@ test.describe("System — Health tab @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
+      config: RESTREAMED,
       stats: QUIET_STATS,
       notices: [ERROR_NOTICE, EVENT_NOTICE],
     });
@@ -84,6 +96,7 @@ test.describe("System — Health tab @medium", () => {
   for (const action of ["acknowledge", "mute"] as const) {
     test(`${action} posts and removes the row`, async ({ frigateApp }) => {
       await frigateApp.installDefaults({
+        config: RESTREAMED,
         stats: QUIET_STATS,
         notices: [EVENT_NOTICE],
       });
@@ -126,7 +139,10 @@ test.describe("System — Health tab @medium", () => {
   }
 
   test("empty state with no notices", async ({ frigateApp }) => {
-    await frigateApp.installDefaults({ stats: QUIET_STATS });
+    await frigateApp.installDefaults({
+      config: RESTREAMED,
+      stats: QUIET_STATS,
+    });
     await frigateApp.goto("/system#health");
 
     await expect(
@@ -329,6 +345,7 @@ test.describe("System — Health tab @medium", () => {
     frigateApp,
   }) => {
     await frigateApp.installDefaults({
+      config: RESTREAMED,
       stats: QUIET_STATS,
       notices: [ERROR_NOTICE, EVENT_NOTICE],
     });
@@ -765,6 +782,7 @@ test.describe("System — Health notices sources @medium", () => {
   test("status bar problems stay out of the list", async ({ frigateApp }) => {
     test.skip(frigateApp.isMobile, "Status bar is desktop-only");
     await frigateApp.installDefaults({
+      config: RESTREAMED,
       stats: {
         service: { retention_unmet: true },
         cameras: { front_door: { camera_fps: 0 } },
@@ -827,6 +845,28 @@ test.describe("System — Health notices sources @medium", () => {
     await expect(
       frigateApp.page.getByText("No streams have the record role defined"),
     ).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("a camera without a go2rtc stream gets a live view hint", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({
+      config: { go2rtc: { streams: { front_door: ["rtsp://x"] } } },
+      stats: QUIET_STATS,
+    });
+    await frigateApp.goto("/system#health");
+
+    const row = frigateApp.page.getByTestId(
+      "health-problem-config:live:no-go2rtc-stream:camera.backyard",
+    );
+    await expect(row).toBeVisible({ timeout: 15_000 });
+    await expect(row).toHaveAttribute("data-severity", "info");
+    await expect(row).toContainText("lower frame rate and no audio");
+    await expect(
+      frigateApp.page.getByTestId(
+        "health-problem-config:live:no-go2rtc-stream:camera.front_door",
+      ),
+    ).toHaveCount(0);
   });
 
   test("a global config problem is not repeated per camera", async ({
@@ -893,7 +933,10 @@ test.describe("System — Health notices sources @medium", () => {
   test("empty state when stats, config, and registry are clean", async ({
     frigateApp,
   }) => {
-    await frigateApp.installDefaults({ stats: QUIET_STATS });
+    await frigateApp.installDefaults({
+      config: RESTREAMED,
+      stats: QUIET_STATS,
+    });
     await frigateApp.goto("/system#health");
 
     await expect(
@@ -1130,6 +1173,7 @@ test.describe("System — Health notices sources @medium", () => {
   }) => {
     test.skip(frigateApp.isMobile, "Status bar is desktop-only");
     await frigateApp.installDefaults({
+      config: RESTREAMED,
       stats: QUIET_STATS,
       notices: [EVENT_NOTICE],
     });
