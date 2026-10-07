@@ -186,7 +186,7 @@ Frigate is able to utilize an Nvidia GPU which supports the 12.x series of CUDA 
 
 #### Minimum Hardware Support
 
-12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Maxwell-era GPUs (Compute Capability 5.x) are no longer supported for object detection — the onnxruntime updates in 0.16.x dropped them; see [this discussion](https://github.com/blakeblackshear/frigate/discussions/20088) for details and a community workaround. For other GPUs, check the NVIDIA GPU Compute Capability table linked below.
+12.x series of CUDA libraries are used which have minor version compatibility. The minimum driver version on the host system must be `>=545`. Maxwell-era GPUs (Compute Capability 5.x) are no longer supported for object detection because the onnxruntime updates in 0.16.x dropped them; see [this discussion](https://github.com/blakeblackshear/frigate/discussions/20088) for details and a community workaround. For other GPUs, check the NVIDIA GPU Compute Capability table linked below.
 
 Make sure your host system has the [nvidia-container-runtime](https://docs.docker.com/config/containers/resource_constraints/#access-an-nvidia-gpu) installed to pass through the GPU to the container and the host system has a compatible driver installed for your GPU.
 
