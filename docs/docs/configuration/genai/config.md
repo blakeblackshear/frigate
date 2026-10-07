@@ -73,9 +73,10 @@ You must use a vision-capable model with Frigate. The following models are recom
 
 The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
 
-| Model                | Notes                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Must be served by llama.cpp started with `--embeddings` and `--mmproj`. |
+| Model                | Notes                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `embeddinggemma-2`   | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Strong semantic search accuracy with efficient inference on a small model. |
+| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Good performance, large model that requires strong hardware for inference. |
 
 :::info
 
