@@ -500,6 +500,94 @@ class TestBirdseyeLiveActivity(unittest.TestCase):
         assert self.manager.active_cameras == {"front"}
 
 
+class TestBirdseyeCameraHold(unittest.TestCase):
+    """Test that min_camera_hold prevents rapid camera switching."""
+
+    def setUp(self):
+        config = {
+            "mqtt": {"enabled": False},
+            "birdseye": {
+                "enabled": True,
+                "modes": ["motion"],
+                "inactivity_threshold": 30,
+                "layout": {"min_camera_hold": 5},
+            },
+            "cameras": {
+                camera: {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                }
+                for camera in ("back", "front")
+            },
+        }
+        self.config = FrigateConfig(**config)
+        self.manager = BirdsEyeFrameManager(self.config, mp.Event())
+
+        for camera_data in self.manager.cameras.values():
+            camera_data["current_frame"] = None
+            camera_data["current_frame_time"] = 100.0
+            camera_data["last_active_frame"] = 0.0
+            camera_data["live_active"] = False
+
+    def test_single_camera_switch_blocked_within_hold_period(self):
+        """A second camera should not replace the first within min_camera_hold."""
+        self.manager.cameras["front"]["last_active_frame"] = 95.0
+        self.manager.update_frame()
+        assert self.manager.active_cameras == {"front"}
+
+        self.manager.cameras["front"]["last_active_frame"] = 0.0
+        self.manager.cameras["back"]["last_active_frame"] = 99.0
+        self.manager.cameras["back"]["current_frame_time"] = 100.0
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == {"front"}
+
+    def test_single_camera_switch_allowed_after_hold_period(self):
+        """After min_camera_hold elapses, a different camera can take over."""
+        self.manager.cameras["front"]["last_active_frame"] = 95.0
+        self.manager.update_frame()
+        assert self.manager.active_cameras == {"front"}
+
+        self.manager.last_layout_change_time -= 6
+        self.manager.cameras["front"]["last_active_frame"] = 0.0
+        self.manager.cameras["back"]["last_active_frame"] = 99.0
+        self.manager.cameras["back"]["current_frame_time"] = 100.0
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == {"back"}
+
+    def test_max_cameras_cooldown_applies_when_more_active_than_max(self):
+        """The max_cameras cooldown should apply even when more cameras are active than max."""
+        self.config.birdseye.layout.max_cameras = 1
+        self.manager.cameras["front"]["last_active_frame"] = 95.0
+        self.manager.cameras["front"]["current_frame_time"] = 100.0
+        self.manager.update_frame()
+        assert "front" in self.manager.active_cameras
+
+        self.manager.cameras["back"]["last_active_frame"] = 99.0
+        self.manager.cameras["back"]["current_frame_time"] = 100.0
+        self.manager.update_frame()
+
+        assert "front" in self.manager.active_cameras
+
+    def test_camera_count_change_ignores_hold(self):
+        """Adding a camera (count change) should not be blocked by min_camera_hold."""
+        self.manager.cameras["front"]["last_active_frame"] = 95.0
+        self.manager.update_frame()
+        assert self.manager.active_cameras == {"front"}
+
+        self.manager.cameras["back"]["last_active_frame"] = 99.0
+        self.manager.cameras["back"]["current_frame_time"] = 100.0
+        self.manager.cameras["front"]["last_active_frame"] = 95.0
+        self.manager.update_frame()
+
+        assert self.manager.active_cameras == {"front", "back"}
+
+
 class TestBirdseyeModePayload(unittest.TestCase):
     """Test the MQTT payload contract for Birdseye activity modes."""
 

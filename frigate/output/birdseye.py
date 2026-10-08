@@ -349,6 +349,7 @@ class BirdsEyeFrameManager:
         self.active_cameras: set[str] = set()
         self.layout_camera_order: list[str] = []
         self.last_output_time = 0.0
+        self.last_layout_change_time = 0.0
 
     def add_camera(self, cam: str) -> None:
         """Add a camera to self.cameras with the correct structure."""
@@ -492,12 +493,15 @@ class BirdsEyeFrameManager:
         logger.debug(f"Active cameras: {active_cameras}")
 
         max_cameras = self.config.birdseye.layout.max_cameras
+        min_hold = self.config.birdseye.layout.min_camera_hold
         max_camera_refresh = False
         if max_cameras:
             now = datetime.datetime.now().timestamp()
 
-            if len(active_cameras) == max_cameras and now - self.last_refresh_time < 10:
-                # don't refresh cameras too often
+            if (
+                len(active_cameras) >= max_cameras
+                and now - self.last_refresh_time < min_hold
+            ):
                 active_cameras = self.active_cameras
             else:
                 limited_active_cameras = sorted(
@@ -531,12 +535,17 @@ class BirdsEyeFrameManager:
             layout_changed = True
         else:
             # Determine if layout needs resetting
+            now = datetime.datetime.now().timestamp()
             if len(self.active_cameras) - len(active_cameras) == 0:
                 if (
                     len(self.active_cameras) == 1
                     and self.active_cameras != active_cameras
                 ):
-                    reset_layout = True
+                    if now - self.last_layout_change_time >= min_hold:
+                        reset_layout = True
+                    else:
+                        active_cameras = self.active_cameras
+                        reset_layout = False
                 elif max_camera_refresh:
                     reset_layout = True
                 else:
@@ -555,6 +564,7 @@ class BirdsEyeFrameManager:
                 self.clear_frame()
                 self.active_cameras = active_cameras
                 self.layout_camera_order = sorted_active_cameras
+                self.last_layout_change_time = now
                 layout_changed = True  # Layout is changing due to reset
                 # this also converts added_cameras from a set to a list since we need
                 # to pop elements in order
