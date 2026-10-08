@@ -75,12 +75,6 @@ class BirdseyeLayoutConfig(FrigateBaseModel):
         title="Max cameras",
         description="Maximum number of cameras to display at once in Birdseye; shows the most recent cameras.",
     )
-    min_camera_hold: int = Field(
-        default=5,
-        title="Minimum camera hold time",
-        description="Minimum number of seconds to hold the current camera(s) before switching to a different one; prevents rapid flipping when multiple cameras have activity.",
-        ge=0,
-    )
 
 
 class BirdseyeConfig(FrigateBaseModel):

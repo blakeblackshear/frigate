@@ -30,6 +30,9 @@ from frigate.util.image import (
 
 logger = logging.getLogger(__name__)
 
+# Minimum seconds to hold the current camera before switching to a different one
+CAMERA_HOLD_SECONDS = 5
+
 
 @dataclass(frozen=True, slots=True)
 class BirdseyeActivity:
@@ -493,14 +496,13 @@ class BirdsEyeFrameManager:
         logger.debug(f"Active cameras: {active_cameras}")
 
         max_cameras = self.config.birdseye.layout.max_cameras
-        min_hold = self.config.birdseye.layout.min_camera_hold
         max_camera_refresh = False
         if max_cameras:
             now = datetime.datetime.now().timestamp()
 
             if (
                 len(active_cameras) >= max_cameras
-                and now - self.last_refresh_time < min_hold
+                and now - self.last_refresh_time < CAMERA_HOLD_SECONDS
             ):
                 active_cameras = self.active_cameras
             else:
@@ -541,7 +543,7 @@ class BirdsEyeFrameManager:
                     len(self.active_cameras) == 1
                     and self.active_cameras != active_cameras
                 ):
-                    if now - self.last_layout_change_time >= min_hold:
+                    if now - self.last_layout_change_time >= CAMERA_HOLD_SECONDS:
                         reset_layout = True
                     else:
                         active_cameras = self.active_cameras

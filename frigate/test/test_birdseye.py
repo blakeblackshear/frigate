@@ -11,6 +11,7 @@ from frigate.config import (
     birdseye_modes_to_mqtt_payload,
 )
 from frigate.output.birdseye import (
+    CAMERA_HOLD_SECONDS,
     Birdseye,
     BirdseyeActivity,
     BirdsEyeFrameManager,
@@ -501,7 +502,7 @@ class TestBirdseyeLiveActivity(unittest.TestCase):
 
 
 class TestBirdseyeCameraHold(unittest.TestCase):
-    """Test that min_camera_hold prevents rapid camera switching."""
+    """Test that CAMERA_HOLD_SECONDS prevents rapid camera switching."""
 
     def setUp(self):
         config = {
@@ -510,7 +511,6 @@ class TestBirdseyeCameraHold(unittest.TestCase):
                 "enabled": True,
                 "modes": ["motion"],
                 "inactivity_threshold": 30,
-                "layout": {"min_camera_hold": 5},
             },
             "cameras": {
                 camera: {
@@ -534,7 +534,7 @@ class TestBirdseyeCameraHold(unittest.TestCase):
             camera_data["live_active"] = False
 
     def test_single_camera_switch_blocked_within_hold_period(self):
-        """A second camera should not replace the first within min_camera_hold."""
+        """A second camera should not replace the first within the hold period."""
         self.manager.cameras["front"]["last_active_frame"] = 95.0
         self.manager.update_frame()
         assert self.manager.active_cameras == {"front"}
@@ -547,12 +547,12 @@ class TestBirdseyeCameraHold(unittest.TestCase):
         assert self.manager.active_cameras == {"front"}
 
     def test_single_camera_switch_allowed_after_hold_period(self):
-        """After min_camera_hold elapses, a different camera can take over."""
+        """After the hold period elapses, a different camera can take over."""
         self.manager.cameras["front"]["last_active_frame"] = 95.0
         self.manager.update_frame()
         assert self.manager.active_cameras == {"front"}
 
-        self.manager.last_layout_change_time -= 6
+        self.manager.last_layout_change_time -= (CAMERA_HOLD_SECONDS + 1)
         self.manager.cameras["front"]["last_active_frame"] = 0.0
         self.manager.cameras["back"]["last_active_frame"] = 99.0
         self.manager.cameras["back"]["current_frame_time"] = 100.0
@@ -575,7 +575,7 @@ class TestBirdseyeCameraHold(unittest.TestCase):
         assert "front" in self.manager.active_cameras
 
     def test_camera_count_change_ignores_hold(self):
-        """Adding a camera (count change) should not be blocked by min_camera_hold."""
+        """Adding a camera (count change) should not be blocked by the hold period."""
         self.manager.cameras["front"]["last_active_frame"] = 95.0
         self.manager.update_frame()
         assert self.manager.active_cameras == {"front"}
