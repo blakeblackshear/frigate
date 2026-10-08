@@ -499,9 +499,11 @@ class BirdsEyeFrameManager:
         max_camera_refresh = False
         if max_cameras:
             now = datetime.datetime.now().timestamp()
+            limited_count = min(len(active_cameras), max_cameras)
 
             if (
-                len(active_cameras) >= max_cameras
+                limited_count == len(self.active_cameras)
+                and len(self.active_cameras) > 0
                 and now - self.last_refresh_time < CAMERA_HOLD_SECONDS
             ):
                 active_cameras = self.active_cameras
