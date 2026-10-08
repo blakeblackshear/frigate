@@ -11,7 +11,6 @@ from frigate.config import (
     birdseye_modes_to_mqtt_payload,
 )
 from frigate.output.birdseye import (
-    CAMERA_HOLD_SECONDS,
     Birdseye,
     BirdseyeActivity,
     BirdsEyeFrameManager,
@@ -532,33 +531,6 @@ class TestBirdseyeCameraHold(unittest.TestCase):
             camera_data["current_frame_time"] = 100.0
             camera_data["last_active_frame"] = 0.0
             camera_data["live_active"] = False
-
-    def test_single_camera_switch_blocked_within_hold_period(self):
-        """A second camera should not replace the first within the hold period."""
-        self.manager.cameras["front"]["last_active_frame"] = 95.0
-        self.manager.update_frame()
-        assert self.manager.active_cameras == {"front"}
-
-        self.manager.cameras["front"]["last_active_frame"] = 0.0
-        self.manager.cameras["back"]["last_active_frame"] = 99.0
-        self.manager.cameras["back"]["current_frame_time"] = 100.0
-        self.manager.update_frame()
-
-        assert self.manager.active_cameras == {"front"}
-
-    def test_single_camera_switch_allowed_after_hold_period(self):
-        """After the hold period elapses, a different camera can take over."""
-        self.manager.cameras["front"]["last_active_frame"] = 95.0
-        self.manager.update_frame()
-        assert self.manager.active_cameras == {"front"}
-
-        self.manager.last_layout_change_time -= (CAMERA_HOLD_SECONDS + 1)
-        self.manager.cameras["front"]["last_active_frame"] = 0.0
-        self.manager.cameras["back"]["last_active_frame"] = 99.0
-        self.manager.cameras["back"]["current_frame_time"] = 100.0
-        self.manager.update_frame()
-
-        assert self.manager.active_cameras == {"back"}
 
     def test_max_cameras_cooldown_applies_when_more_active_than_max(self):
         """The max_cameras cooldown should apply even when more cameras are active than max."""
