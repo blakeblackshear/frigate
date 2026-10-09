@@ -453,6 +453,21 @@ class TestHttpExport(BaseTestHttp):
             assert unchanged.name == "front door export"
             assert unchanged.video_path == video
 
+    def test_reap_stale_exports_removes_staged_runs(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            staged = os.path.join(tmpdir, "export_stage_front_door_abc_0.mp4")
+            finished = os.path.join(tmpdir, "front_door_export.mp4")
+
+            for path in (staged, finished):
+                with open(path, "w") as handle:
+                    handle.write("video")
+
+            with patch("frigate.jobs.export.EXPORT_DIR", tmpdir):
+                reap_stale_exports()
+
+            assert not os.path.exists(staged)
+            assert os.path.exists(finished)
+
     def test_reap_stale_exports_deletes_rows_with_no_file(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             stale_video = os.path.join(tmpdir, "stale.mp4")

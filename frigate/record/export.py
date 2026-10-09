@@ -559,7 +559,7 @@ class RecordingExporter(threading.Thread):
         )
 
     def _staged_run_path(self, index: int) -> str:
-        return os.path.join(CACHE_DIR, f"export_stage_{self.export_id}_{index}.mp4")
+        return os.path.join(EXPORT_DIR, f"export_stage_{self.export_id}_{index}.mp4")
 
     def _probe_stream_resolution(self, run: StreamRun) -> tuple[int, int] | None:
         """Probe one recording from a run for its resolution.

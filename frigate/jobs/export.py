@@ -15,7 +15,7 @@ from peewee import DoesNotExist
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.camera.record import ChaptersEnum
-from frigate.const import UPDATE_JOB_STATE
+from frigate.const import EXPORT_DIR, UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.models import Export
 from frigate.record.export import (
@@ -415,6 +415,10 @@ def reap_stale_exports() -> None:
     this in a try/except. A failure on a single row will not stop the rest
     of the sweep, and a failure in the top-level query will log and return.
     """
+    # staged stream runs live on disk, so a killed export leaves them behind
+    for staged in Path(EXPORT_DIR).glob("export_stage_*"):
+        staged.unlink(missing_ok=True)
+
     try:
         stale_exports = list(Export.select().where(Export.in_progress == True))  # noqa: E712
     except Exception:
