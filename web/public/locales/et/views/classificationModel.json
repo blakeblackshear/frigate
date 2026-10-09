@@ -2,7 +2,28 @@
   "toast": {
     "success": {
       "deletedModel_one": "{{count}} mudeli kustutamine õnnestus",
-      "deletedModel_other": "{{count}} mudeli kustutamine õnnestus"
+      "deletedModel_other": "{{count}} mudeli kustutamine õnnestus",
+      "categorizedImage": "Pildi klassifitseerimine õnnestus",
+      "reclassifiedImage": "Pildi uuesti klassifitseerimine õnnestus",
+      "trainedModel": "Mudeli õpetamine õnnestus.",
+      "trainingModel": "Mudeli õpetamise käivitamine õnnestus.",
+      "updatedModel": "Mudeli seadistuse muutmine õnnestus",
+      "renamedCategory": "Klassi nime muutmine õnnestus, uus nimi on {{name}}",
+      "deletedCategory_one": "{{count}} klass on kustutatud",
+      "deletedCategory_other": "{{count}} klassi on kustutatud",
+      "deletedImage_one": "{{count}} pilt on kustutatud",
+      "deletedImage_other": "{{count}} pilti on kustutatud"
+    },
+    "error": {
+      "deleteImageFailed": "Kustutamine ei õnnestunud: {{errorMessage}}",
+      "deleteCategoryFailed": "Klassi kustutamine ei õnnestunud: {{errorMessage}}",
+      "deleteModelFailed": "Mudeli kustutamine ei õnnestunud: {{errorMessage}}",
+      "categorizeFailed": "Pildi kategoriseerimine ei õnnestunud: {{errorMessage}}",
+      "trainingFailed": "Mudeli koolitamine ei õnnestunud. Üksikasjalikumat teavet leiad Frigate'i logidest.",
+      "trainingFailedToStart": "Mudeli koolitamise alustamine ei õnnestunud: {{errorMessage}}",
+      "updateModelFailed": "Mudeli uuendamine ei õnnestunud: {{errorMessage}}",
+      "renameCategoryFailed": "Klassi nime muutmine ei õnnestunud: {{errorMessage}}",
+      "reclassifyFailed": "Pildi klassifitseerimise muutmine ei õnnestunud: {{errorMessage}}"
     }
   },
   "documentTitle": "Klassifitseerimise mudelid - Frigate",
@@ -13,27 +34,32 @@
   },
   "button": {
     "deleteClassificationAttempts": "Kustuta klassifitseerimispildid",
-    "renameCategory": "Muuda klassi nimi",
+    "renameCategory": "Muuda klassi nime",
     "deleteCategory": "Kustuta klass",
     "deleteImages": "Kustuta pildid",
     "addClassification": "Lisa klassifikatsioon",
     "deleteModels": "Kustuta mudelid",
-    "editModel": "Muuda mudelit"
+    "editModel": "Muuda mudelit",
+    "trainModel": "Õpeta mudelit"
   },
   "description": {
     "invalidName": "Vigane nimi. Nimed võivad sisaldada ainult tähti, numbreid, tühikuid, ülakomasid, alakriipse ja sidekriipse."
   },
   "deleteModel": {
     "desc_one": "Kas oled kindel, et soovid kustutada {{count}} mudeli? Järgnevaga kustuvad jäädavalt kõik seotud andmed, sealhulgas pildid ja koolitusandmed. Seda tegevust ei saa tagasi pöörata.",
-    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} mudelit? Järgnevaga kustuvad jäädavalt kõik seotud andmed, sealhulgas pildid ja koolitusandmed. Seda tegevust ei saa tagasi pöörata."
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} mudelit? Järgnevaga kustuvad jäädavalt kõik seotud andmed, sealhulgas pildid ja koolitusandmed. Seda tegevust ei saa tagasi pöörata.",
+    "title": "Kustuta klassifitseerimismudel",
+    "single": "Kas oled kindel, et soovid „{{name}}“ mudeli kustutada? Sellega kustuvad jäädavalt ka kõik seotud andmed, pildid ja koolitusandmed. Seda tegevust ei saa tagasi pöörata."
   },
   "deleteDatasetImages": {
     "desc_one": "Kas oled kindel, et soovid kustutada {{count}} pildi {{dataset}} andmekogust? Seda tegevust ei saa tagasi pöörata ja hiljem on vaja mudelit uuesti koolitada.",
-    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} pilti {{dataset}} andmekogust? Seda tegevust ei saa tagasi pöörata ja hiljem on vaja mudelit uuesti koolitada."
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} pilti {{dataset}} andmekogust? Seda tegevust ei saa tagasi pöörata ja hiljem on vaja mudelit uuesti koolitada.",
+    "title": "Kustuta andmekogumi pildid"
   },
   "deleteTrainImages": {
     "desc_one": "Kas oled kindel, et soovid kustutada {{count}} pildi? Seda tegevust ei saa tagasi pöörata.",
-    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} pilti? Seda tegevust ei saa tagasi pöörata."
+    "desc_other": "Kas oled kindel, et soovid kustutada {{count}} pilti? Seda tegevust ei saa tagasi pöörata.",
+    "title": "Kustuta koolitamisel kasutatud pildid"
   },
   "wizard": {
     "step3": {
@@ -42,10 +68,49 @@
     }
   },
   "tooltip": {
-    "trainingInProgress": "Mudel on parasjagu õppimas"
+    "trainingInProgress": "Mudel on parasjagu õppimas",
+    "noNewImages": "Õpetamiseks ei leidu pilte. Esmalt klassifitseeri andmekogu jaoks veel pilte.",
+    "noChanges": "Peale eelmist õpetamist pole andmekogu muutunud.",
+    "modelNotReady": "Mudel pole õpetamiseks valmis"
   },
   "train": {
-    "titleShort": "Hiljutised"
+    "titleShort": "Hiljutised",
+    "aria": "Vali hiljutised klassifitseerimised",
+    "title": "Hiljutised klassifitseerimised"
   },
-  "disabled": "Keelatud"
+  "disabled": "Keelatud",
+  "deleteCategory": {
+    "title": "Kustuta klass",
+    "minClassesTitle": "Klassi kustutamine ei õnnestunud",
+    "minClassesDesc": "Klassifitseerimismudelis peab olema vähemalt 2 klassi. Neist ühe kustutamiseks pead esmalt ühe uue lisama.",
+    "desc": "Kas oled kindel, et soovid „{{name}}“ klassi kustutada? Sellega kustuvad jäädavalt ka kõik seotud pildid ja mudel vajab uuesti õpetamist."
+  },
+  "edit": {
+    "title": "Muuda klassifitseerimismudelit",
+    "errors": {
+      "intervalInvalid": "Välp peab olema nullist suurem täisarv",
+      "saveAttemptsInvalid": "Salvestamiskatsete arv peab olema nullist suurem täisarv"
+    }
+  },
+  "categorizeImageAs": "Klassifitseeri pilt kui:",
+  "categorizeImage": "Klassifitseeri pilt",
+  "reclassifyImageAs": "Klassifitseeri pilt uuesti kui:",
+  "reclassifyImage": "Klassifitseeri pilt uuesti",
+  "menu": {
+    "objects": "Objektid",
+    "states": "Olekud"
+  },
+  "noModels": {
+    "object": {
+      "title": "Objekti klassifitseerimismudeleid ei leidu"
+    }
+  },
+  "createCategory": {
+    "new": "Lisa uus klass"
+  },
+  "categories": "Klassid",
+  "renameCategory": {
+    "desc": "Sisesta „{{name}}“ kategooria jaoks uus nimi. Et nimemuudatus jõustuks, pead mudelit uuesti koolitama.",
+    "title": "Muuda klassi nime"
+  }
 }

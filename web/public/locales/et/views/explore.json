@@ -23,6 +23,38 @@
     "downloadVideo": {
       "label": "Laadi video alla",
       "aria": "Laadi video alla"
+    },
+    "addTrigger": {
+      "label": "Lisa päästik",
+      "aria": "Lisa päästik selle jälgitava objekti jaoks"
+    },
+    "audioTranscription": {
+      "label": "Kirjuta üles",
+      "aria": "Palu heli üleskirjutust tekstina"
+    },
+    "submitToPlus": {
+      "label": "Edasta Frigate+ teenusesse",
+      "aria": "Edasta Frigate Plus teenusesse"
+    },
+    "viewInHistory": {
+      "label": "Vaata ajaloos",
+      "aria": "Vaata ajaloos"
+    },
+    "deleteTrackedObject": {
+      "label": "Kustuta see jälgitav objekt"
+    },
+    "showObjectDetails": {
+      "label": "Näita objekti teekonda"
+    },
+    "hideObjectDetails": {
+      "label": "Peida objekti teekond"
+    },
+    "more": {
+      "aria": "Veel"
+    },
+    "debugReplay": {
+      "label": "Kordus veaotsingu jaoks",
+      "aria": "Vaata jälgitavat objekti korduses veaotsingu jaoks"
     }
   },
   "trackingDetails": {
@@ -118,20 +150,30 @@
     "item": {
       "tips": {
         "mismatch_one": "Tuvastasin {{count}} võõra objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud.",
-        "mismatch_other": "Tuvastasin {{count}} võõrast objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud."
+        "mismatch_other": "Tuvastasin {{count}} võõrast objekti ja need on lisatud ülevaatamiseks. Need objektid kas ei ole piisavad häire või tuvastamise jaoks, aga ka võivad juba olla eemaldatud või kustutatud.",
+        "hasMissingObjects": "Kui tahad, et Frigate salvestaks jälgitavaid objekte järgmiste siltide alusel, siis kohenda oma seadistusi: <em>{{objects}}</em>"
       },
       "title": "Vaata objekti üksikasju",
       "desc": "Vaata objekti üksikasju",
       "toast": {
         "success": {
-          "updatedLPR": "Sõiduki numbrimärgi uuendamine õnnestus."
+          "updatedLPR": "Sõiduki numbrimärgi uuendamine õnnestus.",
+          "updatedSublabel": "Alamsildi uuendamine õnnestus.",
+          "updatedAttributes": "Atribuutide uuendamine õnnestus.",
+          "audioTranscription": "Heli üleskirjutuse päringu tegemine õnnestus. Vastavalt sinu Frigate'i serveri jõudlusele võib selleks võib kuluda aega.",
+          "regenerate": "Uue kirjelduse koostamise päring on edastatud teenusepakkujale {{provider}}. Sõltuvalt teenusepakkuja töökiirusest võib selleks kuluda aega."
         },
         "error": {
-          "updatedLPRFailed": "Sõiduki numbrimärgi uuendamine ei õnnestunud: {{errorMessage}}"
+          "updatedLPRFailed": "Sõiduki numbrimärgi uuendamine ei õnnestunud: {{errorMessage}}",
+          "updatedSublabelFailed": "Alamsildi uuendamine ei õnnestunud: {{errorMessage}}",
+          "updatedAttributesFailed": "Atribuutide uuendamine ei õnnestunud: {{errorMessage}}",
+          "audioTranscription": "Heli üleskirjutuspäringu tegemine ei õnnestunud: {{errorMessage}}",
+          "regenerate": "Uue kirjelduspäringu tegemine {{provider}} teenusepakkujale ei õnnestunud: {{errorMessage}}"
         }
       },
       "button": {
-        "share": "Jaga seda ülevaadatud objekti"
+        "share": "Jaga seda ülevaadatud objekti",
+        "viewInExplore": "Vaata uurimisvaates"
       }
     },
     "snapshotScore": {
@@ -186,16 +228,38 @@
     "editAttributes": {
       "title": "Atribuutide muutmine",
       "desc": "Valige selle sildi '{{label}}' jaoks klassifikatsiooniatribuudid"
-    }
+    },
+    "regenerateFromThumbnails": "Loo uuesti pisipiltide vaatest",
+    "expandRegenerationMenu": "Näita uuesti loomise menüüd"
   },
   "trackedObjectDetails": "Jälgitava objekti üksikasjad",
   "aiAnalysis": {
-    "title": "Tehisintellekti analüüs"
+    "title": "Analüüs tehisaru abil"
   },
   "concerns": {
     "label": "Mured"
   },
   "objectLifecycle": {
-    "noImageFound": "Selle jälgitava objekti kohta ei leitud pilti."
+    "noImageFound": "Selle jälgitava objekti kohta ei leidunud pilti."
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Kinnita kustutamine",
+      "desc": "Selle jälgitava objekti kustutamine eemaldab ka hetktõmmise, kõik salvestatud lõimingud ja jälgimisega seotud üksikasjad. Selle jälgitava objekti kohta salvestatud videomaterjal <em>EI</em> kuulu kustutamisele. <br /><br />Kas oled kindel, et soovid jätkata?"
+    },
+    "toast": {
+      "error": "Viga selle jälgitava objekti kustutamisel: {{errorMessage}}"
+    }
+  },
+  "searchResult": {
+    "previousTrackedObject": "Eelmine jälgitav objekt",
+    "nextTrackedObject": "Järgmine jälgitav objekt",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Jälgitava objekti kustutamine õnnestus.",
+        "error": "Jälgitava objekti kustutamine ei õnnestunud: {{errorMessage}}"
+      }
+    },
+    "tooltip": "Vaste tüübile {{type}} kindluse määraga {{confidence}}%"
   }
 }
