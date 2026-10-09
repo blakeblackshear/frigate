@@ -170,12 +170,7 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         return None
 
     def process_frame(self, frame_data: dict[str, Any], frame: np.ndarray) -> None:
-        if (
-            not self.model_config.name
-            or not self.model_config.state_config
-            or not self.tensor_input_details
-            or not self.tensor_output_details
-        ):
+        if not self.model_config.name or not self.model_config.state_config:
             return
 
         if self.metrics and self.model_config.name in self.metrics.classification_cps:
@@ -515,12 +510,7 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
         return best_label, avg_score
 
     def process_frame(self, obj_data: dict[str, Any], frame: np.ndarray) -> None:
-        if (
-            not self.model_config.name
-            or not self.model_config.object_config
-            or not self.tensor_input_details
-            or not self.tensor_output_details
-        ):
+        if not self.model_config.name or not self.model_config.object_config:
             return
 
         if self.metrics and self.model_config.name in self.metrics.classification_cps:
