@@ -43,7 +43,19 @@ genai:
 
 The examples on this page all use `my_provider`, but the name is arbitrary and is only used to reference the provider elsewhere in the config (for example, `semantic_search.model`).
 
-Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings`, and `transcribe`. A provider handles the first three by default; `transcribe` must always be listed explicitly, and is not available on Ollama, which has no audio input. Each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option.
+Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings`, and `transcribe`. A provider handles the first three by default; `transcribe` must always be listed explicitly. Each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option. Not every provider supports every role; see [Provider support](#provider-support).
+
+### Provider support
+
+| Provider                      | Descriptions | Chat | Embeddings | Transcription |
+| ----------------------------- | :----------: | :--: | :--------: | :-----------: |
+| llama.cpp (`llamacpp`)        |      ✅      |  ✅  |     ✅     |      ✅       |
+| Ollama (`ollama`)             |      ✅      |  ✅  |     ✅     |      ❌       |
+| OpenAI (`openai`)             |      ✅      |  ✅  |     ❌     |      ✅       |
+| Azure OpenAI (`azure_openai`) |      ✅      |  ✅  |     ❌     |      ✅       |
+| Google Gemini (`gemini`)      |      ✅      |  ✅  |     ❌     |      ✅       |
+
+A ✅ means Frigate can use the provider for that feature. The configured model must also support it: a vision model for descriptions and chat, a multimodal embedding model for embeddings (see [Embedding models](#embedding-models)), and an audio-capable model for transcription. Some features also need extra provider setup, covered in each provider's section below. OpenAI-compatible servers use the `openai` provider, so they follow the OpenAI row.
 
 If the provider you choose requires an API key, you may either directly paste it in your configuration, or store it in an environment variable prefixed with `FRIGATE_`.
 
@@ -73,9 +85,10 @@ You must use a vision-capable model with Frigate. The following models are recom
 
 The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
 
-| Model                | Notes                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Must be served by llama.cpp started with `--embeddings` and `--mmproj`. |
+| Model                | Notes                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `embeddinggemma-2`   | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Strong semantic search accuracy with efficient inference on a small model. |
+| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Good performance, large model that requires strong hardware for inference. |
 
 #### Transcription models
 
@@ -152,6 +165,10 @@ genai:
 
 Frigate queries the llama.cpp server for the model's context size at startup and logs it along with the other detected capabilities. If `context_size` is set in `provider_options`, that value is always used instead, even when the server reports its own.
 
+#### Embeddings
+
+To serve the `embeddings` role for [Semantic Search](/configuration/semantic_search#genai-provider), start the llama.cpp server with `--embeddings`, plus `--mmproj` for image support. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
+
 ### Ollama
 
 [Ollama](https://ollama.com/) allows you to self-host large language models and keep everything running locally. It is highly recommended to host this server on a machine with an Nvidia graphics card, or on a Apple silicon Mac for best performance.
@@ -196,6 +213,10 @@ genai:
 
 </TabItem>
 </ConfigTabs>
+
+#### Embeddings
+
+Ollama can serve the `embeddings` role for [Semantic Search](/configuration/semantic_search#genai-provider). Embedding images requires Ollama 0.40.1 or newer and an embedding model with a vision encoder, such as `embeddinggemma-2:440m`. For a saved provider, the UI hides the role unless Ollama reports its model as an embedding model. Use a separate provider entry for the embedding model rather than adding the role to a vision chat model.
 
 ### OpenAI-Compatible
 

@@ -289,7 +289,7 @@ The only field that is valid at the camera level is `enabled`. In particular `mo
 
 #### GenAI Provider
 
-Frigate can send audio to a GenAI provider for transcription when that provider has the `transcribe` role. This is useful if you already run a GenAI provider, or if you do not have the CPU/GPU headroom for a local whisper model. Supported providers are **OpenAI**, **Azure OpenAI**, **Gemini**, and **llama.cpp** with an audio-capable model (a dedicated ASR model such as Qwen3-ASR, or a general multimodal model that accepts audio). Ollama is not supported as it has no audio input.
+Frigate can send audio to a GenAI provider for transcription when that provider has the `transcribe` role. This is useful if you already run a GenAI provider, or if you do not have the CPU/GPU headroom for a local whisper model. See [Provider support](/configuration/genai/config#provider-support) for which providers can serve this role. The model must accept audio: either a dedicated ASR model such as Qwen3-ASR, or a general multimodal model that accepts audio.
 
 To use a GenAI provider for audio transcription:
 
