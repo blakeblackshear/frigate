@@ -57,7 +57,7 @@ from frigate.api.defs.response.export_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
-from frigate.api.media_auth import MediaAuthResolution, resolve_media_uri
+from frigate.api.media_auth import deny_response_for_media_uri
 from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.jobs.export import (
     ExportJob,
@@ -134,23 +134,20 @@ def _validate_export_case(export_case_id: str | None) -> JSONResponse | None:
 def _sanitize_existing_image(
     request: Request,
     image_path: str | None,
-    camera: str,
 ) -> tuple[str | None, JSONResponse | None]:
     if not image_path:
         return None, None
 
     existing_image = sanitize_contained_path(image_path, CLIPS_DIR)
 
-    # CLIPS_DIR is shared by every camera, so the image must also belong to
-    # the camera being exported.
-    if existing_image is not None:
-        resolution = resolve_media_uri(
-            f"/clips/{os.path.relpath(existing_image, CLIPS_DIR)}",
-            request.app.frigate_config,
-        )
-
-        if resolution != (MediaAuthResolution.CAMERA, camera):
-            existing_image = None
+    # CLIPS_DIR is shared by every camera, so the caller must also be allowed
+    # to read the image.
+    if existing_image is not None and deny_response_for_media_uri(
+        f"/clips/{quote(os.path.relpath(existing_image, CLIPS_DIR))}",
+        request.headers.get("remote-role"),
+        request.app.frigate_config,
+    ):
+        existing_image = None
 
     if existing_image is None:
         return None, JSONResponse(
@@ -695,7 +692,7 @@ def export_recordings_batch(
     sanitized_images: list[str | None] = []
     for item in body.items:
         existing_image, image_validation_error = _sanitize_existing_image(
-            request, item.image_path, item.camera
+            request, item.image_path
         )
         if image_validation_error is not None:
             return image_validation_error
@@ -843,7 +840,7 @@ def export_recording(
     playback_source = body.source
     friendly_name = body.name
     existing_image, image_validation_error = _sanitize_existing_image(
-        request, body.image_path, camera_name
+        request, body.image_path
     )
     if image_validation_error is not None:
         return image_validation_error
@@ -983,7 +980,7 @@ def export_recording_custom(
     playback_source = body.source
     friendly_name = body.name
     existing_image, image_validation_error = _sanitize_existing_image(
-        request, body.image_path, camera_name
+        request, body.image_path
     )
     if image_validation_error is not None:
         return image_validation_error
