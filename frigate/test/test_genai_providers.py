@@ -498,6 +498,51 @@ class TestOllamaProvider(unittest.TestCase):
         self.assertEqual(payload["options"], {"num_ctx": 2048})
         self.assertEqual(payload["keep_alive"], "10m")
 
+    @staticmethod
+    def _chat_counting_prompt_tokens(**params):
+        """Fake chat that reports 10 prompt tokens plus 250 per image."""
+        images = params["messages"][0].get("images") or []
+        return {
+            "message": {"content": "."},
+            "prompt_eval_count": 10 + 250 * len(images),
+        }
+
+    def test_image_tokens_probed_with_one_token_requests(self):
+        client = _make_client(
+            "ollama",
+            model="qwen3-vl",
+            base_url="http://localhost:9999",
+            provider_options={"options": {"num_ctx": 16384}},
+        )
+        client.provider = MagicMock()
+        client.provider.chat.side_effect = self._chat_counting_prompt_tokens
+        client._supports_thinking_cache = False
+
+        self.assertEqual(client.estimate_image_tokens(320, 180), 250)
+
+        calls = client.provider.chat.call_args_list
+        self.assertEqual(len(calls), 2)
+        for call in calls:
+            self.assertEqual(
+                call.kwargs["options"], {"num_ctx": 16384, "num_predict": 1}
+            )
+        image = calls[1].kwargs["messages"][0]["images"][0]
+        self.assertEqual(image[:2], b"\xff\xd8")
+
+    def test_image_token_probe_error_uses_heuristic(self):
+        from ollama import ResponseError
+
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.side_effect = [
+            {"message": {"content": "."}, "prompt_eval_count": 10},
+            ResponseError("model does not support images", 400),
+        ]
+        client._supports_thinking_cache = False
+
+        self.assertEqual(client.estimate_image_tokens(250, 100), 20)
+        self.assertEqual(client._image_token_cache, {})
+
     def test_embed_server_error_returns_empty(self):
         from ollama import ResponseError
 
@@ -719,6 +764,46 @@ class TestLlamaCppProvider(unittest.TestCase):
 
         self.assertEqual([r.shape for r in result], [(768,), (768,)])
         self.assertEqual(float(result[1][-1]), 0.0)
+
+    @staticmethod
+    def _post_counting_prompt_tokens(url, json=None, timeout=None):
+        """Fake chat completion: 12 prompt tokens plus 300 per image part."""
+        content = json["messages"][0]["content"]
+        images = [p for p in content if p["type"] == "image_url"]
+        response = MagicMock()
+        response.json.return_value = {
+            "usage": {"prompt_tokens": 12 + 300 * len(images)}
+        }
+        return response
+
+    def test_image_tokens_probed_once_per_dimension(self):
+        client = self._client()
+
+        with patch.object(
+            client, "_post", side_effect=self._post_counting_prompt_tokens
+        ) as post:
+            self.assertEqual(client.estimate_image_tokens(320, 180), 300)
+            self.assertEqual(client.estimate_image_tokens(320, 180), 300)
+            self.assertEqual(client.estimate_image_tokens(640, 360), 300)
+
+        # one shared text baseline, then one image request per new dimension
+        self.assertEqual(post.call_count, 3)
+        payload = post.call_args_list[0].kwargs["json"]
+        self.assertEqual(payload["max_tokens"], 1)
+        self.assertEqual(
+            post.call_args_list[0].args[0], "http://localhost:9999/v1/chat/completions"
+        )
+
+    def test_image_token_probe_failure_is_not_cached(self):
+        client = self._client()
+
+        with patch.object(
+            client, "_post", side_effect=requests.exceptions.ConnectionError("down")
+        ):
+            self.assertEqual(client.estimate_image_tokens(250, 100), 20)
+
+        self.assertEqual(client._image_token_cache, {})
+        self.assertIsNone(client._text_baseline_tokens)
 
     def test_embed_request_error_returns_empty(self):
         client = self._client()
@@ -983,6 +1068,14 @@ class TestLlamaCppTranscribe(unittest.TestCase):
             self.assertIsNone(client.transcribe(WAV_BYTES))
 
         post.assert_not_called()
+
+
+class TestImageTokenEstimate(unittest.TestCase):
+    def test_provider_without_token_counts_uses_heuristic(self):
+        client = _make_client("gemini", model="m", api_key="k")
+
+        self.assertEqual(client.estimate_image_tokens(250, 100), 20)
+        self.assertEqual(client._image_token_cache, {})
 
 
 class TestBaseClientTranscribe(unittest.TestCase):

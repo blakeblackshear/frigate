@@ -22,6 +22,7 @@ from frigate.genai.prompts import (
     build_review_description_response_format,
     build_review_summary_prompt,
 )
+from frigate.genai.utils import synthetic_jpeg
 from frigate.models import Event
 from frigate.util.builtin import has_non_finite_number
 
@@ -66,6 +67,8 @@ class GenAIClient:
         self.genai_config: GenAIConfig = genai_config
         self.timeout = timeout
         self.validate_model = validate_model
+        self._image_token_cache: dict[tuple[int, int], int] = {}
+        self._text_baseline_tokens: int | None = None
         self.provider = self._init_provider()
         self._last_init_attempt = time.monotonic()
 
@@ -372,10 +375,63 @@ class GenAIClient:
     def estimate_image_tokens(self, width: int, height: int) -> float:
         """Estimate prompt tokens consumed by a single image of the given dimensions.
 
-        Default heuristic: ~1 token per 1250 pixels. Providers that can measure or
-        know their model's exact image-token cost should override.
+        Providers that implement ``_count_prompt_tokens`` are probed for the
+        model's real cost: the same minimal prompt is counted with and without a
+        synthetic image, and the difference is cached per (width, height) since
+        image tokenization depends only on the dimensions and the loaded model.
+        Otherwise, or if probing fails, falls back to ~1 token per 1250 pixels.
         """
-        return (width * height) / 1250
+        heuristic = (width * height) / 1250
+
+        if self.provider is None:
+            return heuristic
+
+        cached = self._image_token_cache.get((width, height))
+
+        if cached is not None:
+            return cached
+
+        try:
+            if self._text_baseline_tokens is None:
+                self._text_baseline_tokens = self._count_prompt_tokens(None)
+
+            if self._text_baseline_tokens is None:
+                return heuristic
+
+            with_image = self._count_prompt_tokens(synthetic_jpeg(width, height))
+        except Exception as e:
+            logger.debug(
+                "%s image-token probe failed for %dx%d (%s); using heuristic",
+                self.__class__.__name__,
+                width,
+                height,
+                e,
+            )
+            return heuristic
+
+        if with_image is None:
+            return heuristic
+
+        tokens = max(1, with_image - self._text_baseline_tokens)
+        self._image_token_cache[(width, height)] = tokens
+        logger.debug(
+            "%s model '%s' uses ~%d tokens for %dx%d images",
+            self.__class__.__name__,
+            self.genai_config.model,
+            tokens,
+            width,
+            height,
+        )
+        return tokens
+
+    def _count_prompt_tokens(self, image: bytes | None) -> int | None:
+        """Prompt tokens the provider reports for a minimal "." request, with
+        ``image`` attached when given.
+
+        Return None when the provider cannot report prompt tokens; raise on
+        request failures. Used by estimate_image_tokens.
+        """
+        return None
 
     def embed(
         self,

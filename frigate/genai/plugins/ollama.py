@@ -340,6 +340,31 @@ class OllamaClient(GenAIClient):
             self.genai_config.provider_options.get("options", {}).get("num_ctx", 4096)
         )
 
+    def _count_prompt_tokens(self, image: bytes | None) -> int | None:
+        """Send a 1-token chat request and return Ollama's prompt_eval_count.
+
+        Reuses the description request options so the probe runs with the same
+        num_ctx; a different value would make Ollama reload the model.
+        """
+        if self.provider is None:
+            return None
+
+        message: dict[str, Any] = {"role": "user", "content": "."}
+
+        if image is not None:
+            message["images"] = [image]
+
+        request_params = self._build_request_params(
+            [message], None, None, enable_thinking=False
+        )
+        request_params["options"] = {
+            **(request_params.get("options") or {}),
+            "num_predict": 1,
+        }
+        response = self.provider.chat(**request_params)
+        count = response.get("prompt_eval_count")
+        return int(count) if count is not None else None
+
     def embed(
         self,
         texts: list[str] | None = None,

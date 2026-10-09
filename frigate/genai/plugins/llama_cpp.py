@@ -1,7 +1,6 @@
 """llama.cpp Provider for Frigate AI."""
 
 import base64
-import io
 import json
 import logging
 from collections.abc import AsyncGenerator
@@ -10,7 +9,6 @@ from typing import Any, cast
 import httpx
 import numpy as np
 import requests
-from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
@@ -91,8 +89,6 @@ class LlamaCppClient(GenAIClient):
     _supports_audio: bool
     _supports_tools: bool
     _supports_reasoning: bool
-    _image_token_cache: dict[tuple[int, int], int]
-    _text_baseline_tokens: int | None
 
     @property
     def supports_embeddings(self) -> bool:
@@ -146,8 +142,6 @@ class LlamaCppClient(GenAIClient):
         self._supports_audio = False
         self._supports_tools = False
         self._supports_reasoning = False
-        self._image_token_cache = {}
-        self._text_baseline_tokens = None
 
         base_url = (
             self.genai_config.base_url.rstrip("/")
@@ -591,78 +585,23 @@ class LlamaCppClient(GenAIClient):
             return self._context_size
         return 4096
 
-    def estimate_image_tokens(self, width: int, height: int) -> float:
-        """Probe the llama.cpp server to learn the model's image-token cost at the
-        requested dimensions.
-
-        llama.cpp's image tokenization is a deterministic function of dimensions and
-        the loaded mmproj, so the result is cached per (width, height) for the
-        lifetime of the process. Falls back to the base pixel heuristic if the
-        server is unreachable or the response is malformed.
-        """
-        if self.provider is None:
-            return super().estimate_image_tokens(width, height)
-
-        cached = self._image_token_cache.get((width, height))
-
-        if cached is not None:
-            return cached
-
-        try:
-            baseline = self._probe_baseline_tokens()
-            with_image = self._probe_image_prompt_tokens(width, height)
-            tokens = max(1, with_image - baseline)
-        except Exception as e:
-            logger.debug(
-                "llama.cpp image-token probe failed for %dx%d (%s); using heuristic",
-                width,
-                height,
-                e,
-            )
-            return super().estimate_image_tokens(width, height)
-
-        self._image_token_cache[(width, height)] = tokens
-        logger.debug(
-            "llama.cpp model '%s' uses ~%d tokens for %dx%d images",
-            self.genai_config.model,
-            tokens,
-            width,
-            height,
-        )
-        return tokens
-
-    def _probe_baseline_tokens(self) -> int:
-        """Return prompt_tokens for a minimal text-only request. Cached after first call."""
-        if self._text_baseline_tokens is not None:
-            return self._text_baseline_tokens
-
-        self._text_baseline_tokens = self._probe_prompt_tokens(
-            [{"type": "text", "text": "."}]
-        )
-        return self._text_baseline_tokens
-
-    def _probe_image_prompt_tokens(self, width: int, height: int) -> int:
-        """Return prompt_tokens for a single synthetic image plus minimal text."""
-        img = Image.new("RGB", (width, height), (128, 128, 128))
-        buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=60)
-        encoded = base64.b64encode(buf.getvalue()).decode("utf-8")
-        return self._probe_prompt_tokens(
-            [
-                {"type": "text", "text": "."},
-                {
-                    "type": "image_url",
-                    "image_url": {"url": f"data:image/jpeg;base64,{encoded}"},
-                },
-            ]
-        )
-
-    def _probe_prompt_tokens(self, content: list[dict[str, Any]]) -> int:
+    def _count_prompt_tokens(self, image: bytes | None) -> int | None:
         """POST a 1-token chat completion and return reported prompt_tokens.
 
         Uses a generous timeout to absorb a cold model load on the first probe
         when the server lazily loads models on demand (e.g. llama-swap).
         """
+        content: list[dict[str, Any]] = [{"type": "text", "text": "."}]
+
+        if image is not None:
+            encoded = base64.b64encode(image).decode("utf-8")
+            content.append(
+                {
+                    "type": "image_url",
+                    "image_url": {"url": f"data:image/jpeg;base64,{encoded}"},
+                }
+            )
+
         payload = {
             "model": self.genai_config.model,
             "messages": [{"role": "user", "content": content}],

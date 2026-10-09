@@ -28,6 +28,15 @@ def to_jpeg(img_bytes: bytes) -> bytes | None:
         return None
 
 
+def synthetic_jpeg(width: int, height: int) -> bytes:
+    """A flat gray JPEG of the given dimensions, for measuring image token cost."""
+    buf = io.BytesIO()
+    Image.new("RGB", (width, height), (128, 128, 128)).save(
+        buf, format="JPEG", quality=60
+    )
+    return buf.getvalue()
+
+
 def interleave_images(
     prompt: str, images: list[bytes], captions: list[str] | None = None
 ) -> list[str | bytes]:
