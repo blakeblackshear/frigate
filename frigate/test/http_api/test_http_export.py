@@ -4,6 +4,7 @@ import tempfile
 import zipfile
 from unittest.mock import patch
 
+from frigate.const import CLIPS_DIR
 from frigate.jobs.export import (
     ExportJob,
     get_export_job_manager,
@@ -948,6 +949,60 @@ class TestHttpExport(BaseTestHttp):
 
         assert response.status_code == 400
         assert ExportCase.select().count() == 0
+
+    def test_batch_export_rejects_other_camera_image_path(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        for image_path in (
+            f"{CLIPS_DIR}/review/thumb-backyard-123.456-abc.webp",
+            f"{CLIPS_DIR}/thumbs/backyard/123.webp",
+            f"{CLIPS_DIR}/faces/someone/1.webp",
+        ):
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                                "image_path": image_path,
+                            }
+                        ],
+                    },
+                )
+
+            assert response.status_code == 400, image_path
+
+    def test_batch_export_accepts_own_camera_image_path(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                                "image_path": (
+                                    f"{CLIPS_DIR}/review/thumb-front_door-123.456-abc.webp"
+                                ),
+                            }
+                        ],
+                    },
+                )
+
+        assert response.status_code == 202
+        assert start_export_job.call_args.args[1].image_path == (
+            f"{CLIPS_DIR}/review/thumb-front_door-123.456-abc.webp"
+        )
 
     def test_batch_export_non_admin_can_queue(self):
         self._insert_recording("rec-front", "front_door", 100, 400)
