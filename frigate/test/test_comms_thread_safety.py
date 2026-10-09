@@ -14,6 +14,7 @@ from frigate.comms import config_updater, embeddings_updater, inter_process
 from frigate.comms.config_updater import ConfigPublisher, ConfigSubscriber
 from frigate.comms.embeddings_updater import EmbeddingsRequestor
 from frigate.comms.inter_process import InterProcessRequestor
+from frigate.comms.webpush import WebPushClient
 
 THREADS = 8
 CALLS = 100
@@ -139,6 +140,53 @@ class TestSharedConfigPublisher(unittest.TestCase):
             self.assertEqual(received, THREADS * PUBLISH_CALLS)
             subscriber.stop()
             publisher.stop()
+
+
+class FakeConfigSubscriber:
+    """Records whether two threads read at the same time."""
+
+    def __init__(self) -> None:
+        self.reading = threading.Lock()
+        self.overlapped = False
+
+    def _read(self) -> None:
+        if not self.reading.acquire(blocking=False):
+            self.overlapped = True
+            return
+
+        time.sleep(0.001)
+        self.reading.release()
+
+    def check_for_update(self) -> tuple[None, None]:
+        self._read()
+        return (None, None)
+
+    def check_for_updates(self) -> dict:
+        self._read()
+        return {}
+
+
+class TestSharedWebPushClient(unittest.TestCase):
+    def test_config_subscribers_read_by_one_thread_at_a_time(self) -> None:
+        client = WebPushClient.__new__(WebPushClient)
+        client.config_lock = threading.Lock()
+        client.global_config_subscriber = FakeConfigSubscriber()
+        client.config_subscriber = FakeConfigSubscriber()
+
+        def publish() -> None:
+            for _ in range(20):
+                client.publish("topic", "payload")
+
+        threads = [threading.Thread(target=publish) for _ in range(THREADS)]
+
+        for thread in threads:
+            thread.start()
+
+        for thread in threads:
+            thread.join()
+
+        self.assertFalse(client.global_config_subscriber.overlapped)
+        self.assertFalse(client.config_subscriber.overlapped)
 
 
 if __name__ == "__main__":
