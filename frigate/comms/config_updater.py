@@ -1,6 +1,7 @@
 """Facilitates communication between processes."""
 
 import multiprocessing as mp
+import threading
 from _pickle import UnpicklingError
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -18,11 +19,13 @@ class ConfigPublisher:
         self.socket = self.context.socket(zmq.PUB)
         self.socket.bind(SOCKET_PUB_SUB)
         self.stop_event: MpEvent = mp.Event()
+        self.lock = threading.Lock()
 
     def publish(self, topic: str, payload: Any) -> None:
         """There is no communication back to the processes."""
-        self.socket.send_string(topic, flags=zmq.SNDMORE)
-        self.socket.send_pyobj(payload)
+        with self.lock:
+            self.socket.send_string(topic, flags=zmq.SNDMORE)
+            self.socket.send_pyobj(payload)
 
     def stop(self) -> None:
         self.stop_event.set()

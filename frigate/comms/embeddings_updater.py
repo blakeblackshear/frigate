@@ -1,6 +1,7 @@
 """Facilitates communication between processes."""
 
 import logging
+import threading
 from collections.abc import Callable
 from enum import Enum
 from typing import Any
@@ -78,14 +79,21 @@ class EmbeddingsRequestor:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
+        self.lock = threading.Lock()
 
     def send_data(self, topic: str, data: Any) -> Any:
         """Sends data and then waits for reply."""
+        # an overlapping call fails fast so a slow reply can't stall the API
+        if not self.lock.acquire(blocking=False):
+            return ""
+
         try:
             self.socket.send_json((topic, data))
             return self.socket.recv_json()
         except zmq.ZMQError:
             return ""
+        finally:
+            self.lock.release()
 
     def stop(self) -> None:
         self.socket.close()

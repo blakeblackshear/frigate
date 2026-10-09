@@ -70,6 +70,7 @@ class WebPushClient(Communicator):
             for c in self.config.cameras.values()
         }
         self.suspension_broadcaster: Callable[[str, Any, bool], None] | None = None
+        self.config_lock = threading.Lock()
         self.last_camera_notification_time: dict[str, float] = {
             c.name: 0  # type: ignore[misc]
             for c in self.config.cameras.values()
@@ -205,28 +206,29 @@ class WebPushClient(Communicator):
 
     def publish(self, topic: str, payload: Any, retain: bool = False) -> None:
         """Wrapper for publishing when client is in valid state."""
-        # check for updated global config (notifications, auth)
-        while True:
-            config_topic, config_payload = (
-                self.global_config_subscriber.check_for_update()
-            )
-            if config_topic is None:
-                break
-            if config_topic == "config/notifications" and config_payload:
-                self.config.notifications = config_payload
-            elif config_topic == "config/auth":
-                if isinstance(config_payload, AuthConfig):
-                    self.config.auth = config_payload
+        with self.config_lock:
+            # check for updated global config (notifications, auth)
+            while True:
+                config_topic, config_payload = (
+                    self.global_config_subscriber.check_for_update()
+                )
+                if config_topic is None:
+                    break
+                if config_topic == "config/notifications" and config_payload:
+                    self.config.notifications = config_payload
+                elif config_topic == "config/auth":
+                    if isinstance(config_payload, AuthConfig):
+                        self.config.auth = config_payload
+                    self._refresh_user_cameras()
+
+            updates = self.config_subscriber.check_for_updates()
+
+            if "add" in updates:
+                for camera in updates["add"]:
+                    self.suspended_cameras[camera] = 0
+                    self.last_camera_notification_time[camera] = 0
+
                 self._refresh_user_cameras()
-
-        updates = self.config_subscriber.check_for_updates()
-
-        if "add" in updates:
-            for camera in updates["add"]:
-                self.suspended_cameras[camera] = 0
-                self.last_camera_notification_time[camera] = 0
-
-            self._refresh_user_cameras()
 
         if topic == "reviews":
             decoded = json.loads(payload)
