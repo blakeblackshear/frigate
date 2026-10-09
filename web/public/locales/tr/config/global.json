@@ -124,7 +124,7 @@
         },
         "scene": {
             "label": "Tespit sahnesi",
-            "description": "Bu kameranın baktığı ortam. Kamerada hangi yapılandırılmış modelin çalışacağını seçmek için kullanılır. \"Tümü\" ayarında bırakılan kameralar \"Tümü\" sahnesi için belirlenmiş modeli çalıştırırlar."
+            "description": "Bu kameranın baktığı ortam. Kamerada hangi yapılandırılmış modelin çalışacağını seçmek için kullanılır. \"varsayılan\" ayarında bırakılan kameralar \"varsayılan\" sahnesi için belirlenmiş modeli çalıştırırlar."
         }
     },
     "audio_transcription": {
@@ -385,7 +385,31 @@
             "label": "Canlı yayın yüksekliği",
             "description": "Web kullanıcı arayüzünde jsmpeg canlı yayınını oluşturmak için (piksel cinsinden) yükseklik; tespit yayını yüksekliğinden büyük olamaz."
         },
-        "description": "Jsmpeg canlı yayın çözünürlüğü ve kalitesini kontrol eden ayarlar. Canlı görünüm için go2rtc kullanarak yeniden yayınlanan kameraları etkilemez."
+        "description": "Jsmpeg canlı yayın çözünürlüğü ve kalitesini kontrol eden ayarlar. Canlı görünüm için go2rtc kullanarak yeniden yayınlanan kameraları etkilemez.",
+        "transcode": {
+            "label": "Kod dönüşümlü yayınlar",
+            "description": "go2rtc ile talep üzerine kod dönüşümü yapılan daha düşük kaliteli canlı yayınlar.",
+            "enabled": {
+                "label": "Kod dönüşümlü yayınları etkinleştir",
+                "description": "Birisi izlerken go2rtc ile eş zamanlı olarak kod dönüşümü yapılan daha düşük kaliteli canlı yayınlar ekleyin."
+            },
+            "source": {
+                "label": "Kaynak yayın",
+                "description": "Kod dönüşümü yapılacak go2rtc yayını. Varsayılan olarak ilk canlı yayını kullanır."
+            },
+            "qualities": {
+                "label": "Kaliteler",
+                "description": "Kalite başına bir kod dönüşümlü yayın eklenir.",
+                "height": {
+                    "label": "Yükseklik",
+                    "description": "Piksel cinsinden çıktı yüksekliği; genişlik kaynağın en:boy oranını takip eder."
+                },
+                "bitrate": {
+                    "label": "Bit hızı",
+                    "description": "kbps cinsinden hedef ve maksimum video bit hızı."
+                }
+            }
+        }
     },
     "lpr": {
         "label": "Plaka Tanıma Sistemi",
@@ -1314,10 +1338,10 @@
     },
     "models": {
         "label": "Algılama modelleri",
-        "description": "Nesne algılama modelleri ve her birinin üzerinde çalıştığı donanım. Kameralar kendi detect.scene (algılama sahnesi) değerlerini modelin sahnesine eşleştirerek uygun modeli seçerler.",
+        "description": "Nesne algılama modelleri ve her birinin üzerinde çalıştığı donanım. Kameralar kendi detect.scene (algılama sahnesi) değerlerini modelin sahnesine eşleştirerek uygun modeli seçerler. Eşleşme olmadığında \"varsayılan\" model seçilir.",
         "scene": {
             "label": "Model sahnesi",
-            "description": "Bu modelin kullanıldığı kamera ortamı. Kameralar detect.scene'i eşleşen bir değere ayarlayarak model seçerler. Seçmeyen kameralar için 'all' (tümü) kullanılır."
+            "description": "Bu modelin kullanıldığı kamera ortamının adı, örneğin \"termal\". Kameralar detect.scene'i eşleşen bir değere ayarlayarak model seçerler. Seçmeyen kameralar için \"varsayılan\" (default) model kullanılır."
         },
         "devices": {
             "label": "Algılama donanımı",
@@ -1345,7 +1369,7 @@
         },
         "attributes_map": {
             "label": "Nesne etiketlerini nesnelerin öznitelik etiketlerine eşleştiren harita",
-            "description": "Nesne etiketlerinden, meta veri iliştirme amaçlı kullanılan öznitelik (attribute) etiketlerine eşleşmeler (örneğin 'car' -> ['license_plate'])."
+            "description": "Nesne etiketlerinden, meta veri iliştirme amaçlı kullanılan öznitelik (attribute) etiketlerine eşleşmeler (örneğin 'araba' -> ['araç_plakası'])."
         },
         "input_tensor": {
             "label": "Model Girdi Tensör Şekli",

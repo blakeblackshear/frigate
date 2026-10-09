@@ -196,7 +196,8 @@
     "retentionUnmet": "Kayıtlar yer açma amacıyla saklama süreleri dolmadan siliniyorlar",
     "debugReplayActive": "Hata ayıklama oynatımı oturumu aktif",
     "moreMessages_one": "+{{count}}",
-    "moreMessages_other": "+{{count}}"
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Gömüler yeniden dizinlenemedi. Günlükleri kontrol edin."
   },
   "enrichments": {
     "embeddings": {
@@ -371,5 +372,7 @@
       "streamsFlagged_one": "{{count}} yayında sorun var; Bilgilendirmeler altında listeleniyor",
       "streamsFlagged_other": "{{count}} yayında sorun var; Bilgilendirmeler altında listeleniyor"
     }
-  }
+  },
+  "showAllTabs": "Tüm sekmeleri göster",
+  "showLessTabs": "Daha az göster"
 }
