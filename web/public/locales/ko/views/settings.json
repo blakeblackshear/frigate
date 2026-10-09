@@ -352,17 +352,24 @@
       "liveFallbackTimeout": {
         "label": "실시간 플레이어 폴백 제한 시간",
         "desc": "카메라의 고화질 실시간 스트림을 사용할 수 없을 때, 저대역폭 모드로 전환하기까지 대기할 시간(초)입니다. 기본값: 3."
+      },
+      "naturalAspectLayout": {
+        "label": "원본 화면비 사용",
+        "desc": "카메라 그룹 라이브 뷰 대시보드에서 각 타일의 크기를 카메라의 원본 화면비에 맞춥니다. 비활성화하면 타일이 표준 와이드, 가로형 또는 세로형 규격에 맞춰 정렬됩니다.",
+        "descNote": "이 설정을 켜거나 끄면 모든 카메라 그룹 라이브 대시보드에 저장된 레이아웃이 초기화됩니다. 이후 수동으로 다시 구성해야 합니다."
       }
     },
     "storedLayouts": {
       "title": "저장된 레이아웃",
       "desc": "카메라 그룹 내 카메라 배치를 드래그하거나 크기를 조정할 수 있습니다. 배치 위치는 브라우저의 로컬 저장소에 저장됩니다.",
-      "clearAll": "모든 레이아웃 초기화"
+      "clearAll": "모든 레이아웃 초기화",
+      "clearConfirm": "이 브라우저에 저장된 모든 카메라 그룹 레이아웃이 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
     },
     "cameraGroupStreaming": {
       "title": "카메라 그룹 스트리밍 설정",
       "desc": "각 카메라 그룹의 스트리밍 설정은 브라우저의 로컬 저장소에 저장됩니다.",
-      "clearAll": "모든 스트리밍 설정 초기화"
+      "clearAll": "모든 스트리밍 설정 초기화",
+      "clearConfirm": "이 브라우저에 저장된 모든 카메라 그룹의 스트리밍 설정이 삭제됩니다. 이 작업은 되돌릴 수 없습니다."
     },
     "recordingsViewer": {
       "title": "녹화 영상 뷰어",
@@ -416,7 +423,10 @@
         "preferences_other": "UI 환경설정 ({{count}}개 설정)",
         "unknownGroups_other": "카메라 그룹 {{groups}}이(가) 이 서버에 없습니다. 해당 설정은 저장되지만 사용되지 않습니다.",
         "unknownCameras_other": "카메라 {{cameras}}이(가) 이 서버에 없습니다. 해당 스트리밍 설정은 무시됩니다.",
-        "confirm": "가져오기"
+        "confirm": "가져오기",
+        "layoutsPhone": "항상 표준 그리드를 사용하는 스마트폰 환경에서는 카메라 그룹 레이아웃을 가져오지 않습니다.",
+        "layoutsModeOn": "이 레이아웃은 카메라 화면비 기반 타일 크기를 사용하므로, 가져오기를 진행하면 \"원본 화면비 사용\" 설정도 함께 켜집니다.",
+        "layoutsModeOff": "이 레이아웃은 표준 타일 크기를 사용하므로, 가져오기를 진행하면 \"원본 화면비 사용\" 설정도 함께 꺼집니다."
       }
     }
   },
@@ -445,11 +455,11 @@
         "desc": "시맨틱 검색 임베딩에 사용할 모델 크기입니다.",
         "small": {
           "title": "소형",
-          "desc": "<em>small</em>은 양자화된 모델을 사용하여 RAM을 적게 차지하고 CPU에서 더 빠르게 실행되며, 임베딩 품질 저하도 거의 없습니다."
+          "desc": "<em>소형</em>은 양자화된 모델을 사용하여 RAM을 적게 차지하고 CPU에서 더 빠르게 실행되며, 임베딩 품질 저하도 거의 없습니다."
         },
         "large": {
           "title": "대형",
-          "desc": "<em>large</em>는 전체 Jina 모델을 사용하며 환경이 지원될 경우 GPU에서 자동으로 실행됩니다."
+          "desc": "<em>대형</em> 모델은 전체 Jina 모델을 사용하며 환경이 지원될 경우 GPU에서 자동으로 실행됩니다."
         }
       }
     },
@@ -461,11 +471,11 @@
         "desc": "얼굴 인식에 사용할 모델 크기입니다.",
         "small": {
           "title": "소형",
-          "desc": "<em>small</em>은 대부분의 CPU에서 효율적으로 구동되는 FaceNet 얼굴 임베딩 모델을 사용합니다."
+          "desc": "<em>소형</em>은 대부분의 CPU에서 효율적으로 구동되는 FaceNet 얼굴 임베딩 모델을 사용합니다."
         },
         "large": {
-          "title": "large",
-          "desc": "<em>large</em>는 ArcFace 얼굴 임베딩 모델을 사용하며 환경이 지원될 경우 GPU에서 자동으로 구동됩니다."
+          "title": "대형",
+          "desc": "<em>대형</em> 모델은 ArcFace 얼굴 임베딩 모델을 사용하며 환경이 지원될 경우 GPU에서 자동으로 구동됩니다."
         }
       }
     },
@@ -514,7 +524,10 @@
       "heading_other": "이 전역 섹션에는 카메라 {{count}}대에서 재정의된 필드가 포함되어 있습니다.",
       "othersField_other": "기타 {{count}}개",
       "profilePrefix": "{{profile}} 프로필: {{fields}}"
-    }
+    },
+    "overriddenLive": "재지정됨 (라이브)",
+    "overriddenLiveTooltip": "이 카메라는 설정에 저장된 값과 다른 값으로 실행 중입니다 (설정값은 여기에 표시됨). 라이브 뷰, MQTT 또는 활성 프로필에 의해 Frigate 실행 중에 변경될 수 있습니다.",
+    "overriddenLiveValue": "현재 적용된 값: {{value}}"
   },
   "menuDot": {
     "overrideGlobal": "이 섹션은 전역 구성을 재정의합니다",
@@ -815,7 +828,7 @@
     "cameraType": {
       "title": "카메라 유형",
       "label": "카메라 유형",
-      "description": "각 카메라의 유형을 설정합니다. 전용 LPR 카메라는 먼 거리의 차량 번호판을 포착하기 위해 강력한 광학 줌을 갖춘 단일 목적 카메라입니다. 번호판에 초점이 맞춰진 전용 카메라가 아니라면 일반 카메라 유형을 사용해야 합니다.",
+      "description": "각 카메라의 유형을 설정합니다. 전용 번호판 인식 카메라는 먼 거리의 차량 번호판을 포착하기 위해 강력한 광학 줌을 갖춘 단일 목적 카메라입니다. 번호판에 초점이 맞춰진 전용 카메라가 아니라면 일반 카메라 유형을 사용해야 합니다.",
       "normal": "일반",
       "dedicatedLpr": "전용 LPR",
       "saveSuccess": "{{cameraName}}의 카메라 유형을 업데이트했습니다. 변경 사항을 적용하려면 Frigate를 재시작하세요."
@@ -874,7 +887,7 @@
           "face_recognition": "얼굴 인식",
           "semantic_search": "시맨틱 검색",
           "genai": "생성형 AI",
-          "type": "카메라 유형 (일반 / 전용 LPR)",
+          "type": "카메라 유형 (일반 / 전용 번호판 인식용)",
           "profiles": "프로필",
           "detect": "감지 해상도",
           "zones": "구역",
@@ -1252,7 +1265,8 @@
       "actions": "작업",
       "noRoles": "사용자 정의 역할이 없습니다.",
       "editCameras": "카메라 수정",
-      "deleteRole": "역할 삭제"
+      "deleteRole": "역할 삭제",
+      "cameraCount_other": "{{count}}개 카메라"
     },
     "toast": {
       "success": {
@@ -1307,8 +1321,8 @@
       "desc": "Frigate이 브라우저에서 실행 중이거나 PWA로 설치된 경우 기기로 푸시 알림을 기본 전송할 수 있습니다."
     },
     "notificationUnavailable": {
-      "desc": "웹 푸시 알림을 사용하려면 보안 컨텍스트(<code>https://…</code>)가 필요합니다. 이는 브라우저 자체의 제한 사항입니다. 알림을 사용하려면 Frigate에 보안 연결로 접속하세요.",
-      "descPwa": "iOS의 경우 Frigate이 홈 화면에 추가되어 있어야만 웹 푸시 알림을 사용할 수 있습니다. <strong>공유</strong> 메뉴를 열고 <strong>홈 화면에 추가</strong>를 선택한 다음, 새로 생성된 아이콘으로 Frigate을 실행하여 기기를 알림에 등록하세요."
+      "desc": "웹 푸시 알림을 사용하려면 보안 연결(https://…)이 필요합니다. 이는 브라우저 제한 사항입니다. 알림을 사용하려면 보안 연결을 통해 Frigate에 접속하세요.",
+      "descPwa": "iOS에서는 Frigate를 홈 화면에 추가한 경우에만 웹 푸시 알림을 사용할 수 있습니다. 공유 메뉴를 열고 '홈 화면에 추가'를 선택한 뒤, 생성된 새 아이콘으로 Frigate를 열어 이 기기를 알림에 등록하세요."
     },
     "globalSettings": {
       "title": "전역 설정",
@@ -1522,7 +1536,15 @@
       "noGo2rtcStreams": "설정된 go2rtc 스트림 없음",
       "availableStreams": "사용 가능한 스트림",
       "useCustom": "\"{{value}}\" 사용",
-      "addStream": "스트림 추가"
+      "addStream": "스트림 추가",
+      "reorderHandle": "드래그하여 순서 변경",
+      "transcodedBadge": "트랜스코딩됨",
+      "autoOrder": "자동 정렬",
+      "autoOrderTips": "각 스트림의 비트레이트를 측정하여 높은 순서대로 정렬합니다",
+      "measuring": "측정 중…",
+      "rate": "{{kbps}} kbps",
+      "rateSet": "{{kbps}} kbps (지정됨)",
+      "rateFailed": "측정 실패"
     },
     "timezone": {
       "defaultOption": "브라우저 시간대 사용"
@@ -1566,7 +1588,9 @@
         "preset-record-generic-audio-aac": "녹화 (범용 + 오디오 AAC 변환)",
         "preset-record-mjpeg": "녹화 - MJPEG 카메라",
         "preset-record-jpeg": "녹화 - JPEG 카메라",
-        "preset-record-ubiquiti": "녹화 - Ubiquiti 카메라"
+        "preset-record-ubiquiti": "녹화 - Ubiquiti 카메라",
+        "preset-apple-silicon-h264": "Apple Silicon (H.264)",
+        "preset-apple-silicon-h265": "Apple Silicon (H.265)"
       },
       "sameAsRecord": "녹화 출력 인수와 동일"
     },
@@ -1663,7 +1687,8 @@
       "options": {
         "embeddings": "임베딩",
         "descriptions": "설명",
-        "chat": "채팅"
+        "chat": "채팅",
+        "transcribe": "오디오 변환"
       }
     },
     "semanticSearchModel": {
@@ -1722,6 +1747,26 @@
         "alerts": "알림",
         "detections": "감지"
       }
+    },
+    "liveTranscode": {
+      "title": "트랜스코딩된 스트림",
+      "description": "사용자가 시청하는 동안 go2rtc가 실시간으로 트랜스코딩하는 저화질 스트림을 추가합니다.",
+      "unavailable": "트랜스코딩된 스트림을 사용하려면 소스로 읽어올 go2rtc 스트림이 필요합니다. 먼저 go2rtc 스트림 설정에서 스트림을 추가하세요.",
+      "enable": "트랜스코딩된 스트림 사용",
+      "source": "소스 스트림",
+      "height": "높이",
+      "heightOption": "{{height}}p",
+      "bitrate": "비트레이트 (kbps)",
+      "addQuality": "화질 추가",
+      "removeQuality": "화질 제거"
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "모델 선택…",
+      "builtIn": "내장 모델",
+      "genaiProviders": "GenAI 공급자"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "GenAI 공급자에는 해당 없음"
     }
   },
   "globalConfig": {
@@ -1754,7 +1799,8 @@
     "saveAllSuccess_other": "모든 {{count}}개 섹션을 성공적으로 저장했습니다.",
     "saveAllSuccessRestartRequired_other": "모든 {{count}}개 섹션을 성공적으로 저장했습니다. 변경 사항을 적용하려면 Frigate를 재시작하세요.",
     "saveAllPartial_other": "총 {{totalCount}}개 중 {{successCount}}개 섹션 저장 완료. {{failCount}}개 실패.",
-    "saveAllFailure": "모든 섹션 저장 실패."
+    "saveAllFailure": "모든 섹션 저장 실패.",
+    "go2rtcSyncFailed": "저장되었지만 go2rtc 설정을 업데이트하지 못했습니다. 적용하려면 Frigate를 재시작하세요."
   },
   "profiles": {
     "title": "프로필",
@@ -1888,14 +1934,18 @@
     "imageSource": {
       "recordings": "녹화 영상",
       "previews": "미리보기"
+    },
+    "frameMode": {
+      "frames": "프레임",
+      "annotated_frames": "주석이 포함된 프레임"
     }
   },
   "logger": {
     "logLevel": {
-      "debug": "Debug",
-      "info": "Info",
+      "debug": "디버그",
+      "info": "정보",
       "warning": "경고",
-      "error": "Error",
+      "error": "오류",
       "critical": "심각"
     }
   },
@@ -1911,21 +1961,26 @@
     }
   },
   "modelSize": {
-    "small": "작음 (Small)",
-    "large": "큼 (Large)"
+    "small": "소형",
+    "large": "대형"
   },
   "configMessages": {
     "review": {
       "recordDisabled": "녹화가 비활성화되어 있어 다시보기 항목이 생성되지 않습니다.",
       "detectDisabled": "객체 감지가 비활성화되어 있습니다. 다시보기 항목은 알림 및 감지를 분류하기 위해 감지된 객체가 필요합니다.",
       "allNonAlertDetections": "알림이 아닌 모든 활동은 일반 감지 이벤트로 포함됩니다.",
-      "genaiImageSourceRecordingsRecordDisabled": "이미지 소스가 '녹화 영상(recordings)'으로 설정되어 있지만 녹화가 비활성화되어 있습니다. Frigate이 미리보기 이미지로 대체합니다."
+      "genaiImageSourceRecordingsRecordDisabled": "이미지 소스가 '녹화 영상(recordings)'으로 설정되어 있지만 녹화가 비활성화되어 있습니다. Frigate이 미리보기 이미지로 대체합니다.",
+      "recordRuntimeDisabled": "설정 파일에서는 녹화가 활성화되어 있으나 현재 이 카메라의 녹화 기능이 꺼져 있어 검토 항목이 생성되지 않습니다. 카메라 라이브 뷰에서 다시 켜거나, 활성 프로필에서 비활성화하고 있는지 확인하세요.",
+      "detectRuntimeDisabled": "설정 파일에서는 객체 감지가 활성화되어 있으나 현재 이 카메라의 객체 감지 기능이 꺼져 있습니다. 검토 항목에서 알림과 감지를 분류하려면 감지된 객체가 필요합니다. 카메라 라이브 뷰에서 다시 켜거나, 활성 프로필에서 비활성화하고 있는지 확인하세요.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "이미지 소스가 'recordings'로 설정되어 있으나, 설정 파일의 활성화 여부와 관계없이 현재 이 카메라의 녹화 기능이 꺼져 있습니다. 미리보기 이미지를 대체 사용합니다."
     },
     "audio": {
       "noAudioRole": "audio 역할이 정의된 스트림이 없습니다. 오디오 감지가 작동하려면 스트림에 audio 역할을 지정해야 합니다."
     },
     "audioTranscription": {
-      "audioDetectionDisabled": "이 카메라에 오디오 감지가 활성화되어 있지 않습니다. 오디오 텍스트 변환을 사용하려면 오디오 감지가 켜져 있어야 합니다."
+      "audioDetectionDisabled": "이 카메라에 오디오 감지가 활성화되어 있지 않습니다. 오디오 텍스트 변환을 사용하려면 오디오 감지가 켜져 있어야 합니다.",
+      "audioDetectionRuntimeDisabled": "설정 파일에서는 오디오 감지가 활성화되어 있으나 현재 이 카메라의 오디오 감지 기능이 꺼져 있어 오디오 텍스트 변환이 실행되지 않습니다. 카메라 라이브 뷰에서 다시 켜거나, 활성 프로필에서 비활성화하고 있는지 확인하세요.",
+      "genaiProviderSelected": "GenAI 공급자가 선택되어 장치 및 모델 크기 설정은 무시됩니다."
     },
     "detect": {
       "fpsGreaterThanFive": "감지 FPS를 5보다 높게 설정하는 것은 권장되지 않습니다. 높은 값은 성능 문제를 일으킬 수 있으며 감지 품질에 실질적인 이점이 없습니다.",
@@ -1936,7 +1991,8 @@
       "squareResolution": "정사각형 감지 해상도는 일반적이지 않습니다. 감지 너비와 높이는 객체 감지 모델의 크기가 아니라 카메라의 화면 비율(예: 16:9)과 일치해야 합니다. 가로세로 비율이 맞지 않으면 이미지가 왜곡되어 감지 정확도가 떨어질 수 있습니다.",
       "resolutionHigh": "이 감지 해상도는 권장값보다 높아 감지 정확도 개선 없이 자원 소모만 크게 증가시킬 수 있습니다. 대부분의 카메라에는 1080p 이하의 감지 해상도를 권장합니다.",
       "globalResolutionMultipleCameras": "여러 대의 카메라가 구성된 상태에서 전역 감지 해상도가 설정되어 있습니다. 모든 카메라의 해상도와 화면 비율이 동일하지 않다면, 각 카메라의 기본 화면 비율에 맞게 카메라별로 감지 너비와 높이를 지정해야 합니다.",
-      "sceneWithoutModel": "이 장면에 대해 구성된 감지 모델이 없어, 이 카메라는 '모든 카메라' 장면의 모델을 대체 사용합니다. 카메라 전용 모델을 사용하려면 이 장면에 대한 모델을 추가하세요."
+      "sceneWithoutModel": "이 장면에 대해 구성된 감지 모델이 없어, 이 카메라는 '기본' 모델을 대체 사용합니다. 카메라 전용 모델을 사용하려면 이 장면에 대한 모델을 추가하세요.",
+      "runtimeDisabled": "설정 파일에서는 객체 감지가 활성화되어 있으나 현재 이 카메라의 객체 감지 기능이 꺼져 있습니다. 카메라 라이브 뷰에서 다시 켜거나 활성 프로필의 비활성화 상태가 해제될 때까지 스냅샷, 검토 항목 및 얼굴 인식, 번호판 인식, 생성형 AI 등의 확장 기능이 작동하지 않습니다."
     },
     "model": {
       "optimizedFor320": "Frigate은 대부분의 환경에 가장 적합한 320x320 모델에 최적화되어 있습니다. 640x640 모델은 처리 속도가 느리며 특수한 시나리오에서만 유용합니다.",
@@ -1952,45 +2008,45 @@
     "faceRecognition": {
       "globalDisabled": "이 카메라에서 얼굴 인식 기능을 사용하려면 먼저 전역 확장 기능에서 얼굴 인식을 활성화해야 합니다.",
       "personNotTracked": "얼굴 인식을 사용하려면 'person' 객체가 추적되어야 합니다. 이 카메라의 객체 설정에서 'person'을 활성화하세요.",
-      "modelSizeLarge": "'large' 모델은 원활한 동작을 위해 GPU 또는 NPU가 필요합니다. CPU 전용 시스템에서는 'small' 모델을 사용하세요."
+      "modelSizeLarge": "'대형' 모델은 원활한 동작을 위해 GPU 또는 NPU가 필요합니다. CPU 전용 시스템에서는 '소형' 모델을 사용하세요."
     },
     "lpr": {
       "globalDisabled": "이 카메라에서 차량 번호판 인식 기능을 사용하려면 먼저 전역 확장 기능에서 번호판 인식을 활성화해야 합니다.",
       "vehicleNotTracked": "차량 번호판 인식을 사용하려면 차량 객체가 추적되어야 합니다. 이 카메라의 객체 설정에서 'car' 또는 다른 차량 유형을 활성화하세요.",
-      "modelSizeLarge": "'large' 모델은 여러 줄로 된 번호판 형식에 최적화되어 있습니다. 사용 지역에 여러 줄 번호판이 사용되지 않는 한, 'small' 모델이 'large'보다 성능이 훨씬 우수하므로 'small' 사용을 권장합니다."
+      "modelSizeLarge": "'대형' 모델은 여러 줄로 된 번호판 형식에 최적화되어 있습니다. 사용 지역에 여러 줄 번호판이 사용되지 않는 한, '소형' 모델이 '대형'보다 성능이 훨씬 우수하므로 '소형' 사용을 권장합니다."
     },
     "record": {
       "noRecordRole": "record 역할이 지정된 스트림이 없습니다. 녹화 기능이 작동하지 않습니다.",
-      "noRecordSubRole": "서브 녹화 역할이 정의된 스트림이 없습니다. 서브 스트림 녹화가 작동하지 않습니다."
+      "noRecordSubRole": "서브 녹화 역할이 정의된 스트림이 없습니다. 서브 스트림 녹화가 작동하지 않습니다.",
+      "profileBaseDisabled": "카메라 기본 설정에서 녹화가 비활성화되어 있어, 프로필에서 활성화해도 적용되지 않습니다. 기본 설정에서 녹화를 켜고 프로필을 사용해 비활성화하도록 변경하세요."
     },
     "snapshots": {
-      "detectDisabled": "객체 감지가 비활성화되어 있습니다. 스냅샷은 추적된 객체로부터 생성되므로 스냅샷이 생성되지 않습니다."
+      "detectDisabled": "객체 감지가 비활성화되어 있습니다. 스냅샷은 추적된 객체로부터 생성되므로 스냅샷이 생성되지 않습니다.",
+      "detectRuntimeDisabled": "설정 파일에서는 객체 감지가 활성화되어 있으나 현재 이 카메라의 객체 감지 기능이 꺼져 있어 스냅샷이 생성되지 않습니다. 카메라 라이브 뷰에서 다시 켜거나, 활성 프로필에서 비활성화하고 있는지 확인하세요."
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "Jina V2 모델의 'small' 크기는 RAM 소모량과 추론 비용이 높습니다. 외장 GPU 환경에서 'large' 모델을 사용하는 것을 권장합니다."
+      "jinav2SmallModelSize": "Jina V2 모델의 '소형' 모델은 RAM 소모량과 추론 비용이 높습니다. 외장 GPU 환경에서 '대형' 모델을 사용하는 것을 권장합니다."
     },
     "onvif": {
       "autotrackingNoZones": "자동 추적에는 최소 하나 이상의 구역이 필요합니다. '마스크 / 구역'에서 이 카메라에 구역을 정의한 다음, 아래에서 필수 구역으로 지정하세요."
     },
     "birdseye": {
-      "objectTrackingDetectDisabled": "버드아이에 추적된 객체가 포함되어 있지만, 이 카메라의 객체 감지 기능이 비활성화되어 있습니다. 카메라가 버드아이에 표시되지 않습니다."
+      "objectTrackingDetectDisabled": "버드아이에 추적된 객체가 포함되어 있지만, 이 카메라의 객체 감지 기능이 비활성화되어 있습니다. 카메라가 버드아이에 표시되지 않습니다.",
+      "objectTrackingDetectRuntimeDisabled": "버드아이에 추적된 객체가 포함되어 있으나, 설정 파일의 활성화 여부와 관계없이 현재 이 카메라의 객체 감지 기능이 꺼져 있습니다. 카메라 라이브 뷰에서 다시 켜거나 활성 프로필의 비활성화 상태가 해제될 때까지 카메라가 버드아이에 표시되지 않습니다."
+    },
+    "notifications": {
+      "profileBaseDisabled": "기본 설정에서 알림이 활성화된 카메라가 없어, 프로필에서 활성화해도 적용되지 않습니다. 최소 한 대 이상의 카메라 기본 설정에서 알림을 켜세요."
     }
   },
   "detectionModels": {
     "title": "감지 모델",
-    "description": "객체 감지 모델과 각 모델이 실행되는 하드웨어를 구성합니다. 카메라는 감지 설정의 장면에 따라 모델을 선택합니다.",
+    "description": "객체 감지 모델과 각 모델이 실행되는 하드웨어를 구성합니다. 열화상 카메라처럼 일부 카메라에 다르게 학습된 모델이 필요한 경우에만 장면에 맞는 모델을 추가하세요. 카메라는 감지 설정에 지정된 장면에 따라 모델을 선택합니다.",
     "addModel": "모델 추가",
     "cameras_other": "{{count}}개 카메라",
     "scene": {
       "label": "장면",
-      "description": "이 모델이 사용되는 환경입니다. 카메라는 감지 설정에서 동일한 장면을 지정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 '전체' 장면의 모델을 사용합니다."
-    },
-    "scenes": {
-      "all": "모든 카메라",
-      "indoor": "실내",
-      "outdoor": "실외",
-      "indoor_thermal": "실내 열화상",
-      "outdoor_thermal": "실외 열화상"
+      "description": "이 모델이 적용될 카메라 환경의 이름입니다. 카메라는 감지 설정에서 동일한 장면을 지정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 기본(Default) 모델을 사용합니다. 동일한 모델 파일을 사용하는 모델들은 하나로 통합되므로, 하드웨어 분산을 목적으로 장면을 나누지 마시고 서로 다른 모델을 실행할 때만 장면을 구분하세요.",
+      "placeholder": "열영상"
     },
     "hardware": {
       "label": "하드웨어",
@@ -2003,7 +2059,7 @@
       "unrecognized": "이 모델은 시스템에서 찾을 수 없는 하드웨어로 구성되어 있습니다: {{devices}}",
       "description": "이 모델이 감지를 실행할 하드웨어입니다.",
       "detectorCountDescription": "이 하드웨어에서 실행할 감지 프로세스 수입니다. 감지기 수가 많을수록 더 많은 카메라를 처리할 수 있지만 추가 장치 메모리가 소모됩니다.",
-      "unitsDescription": "각 장치 단위는 자체 감지 프로세스를 실행합니다. 다른 모델에서 이미 사용 중인 장치 단위는 선택할 수 없습니다."
+      "unitsDescription": "각 장치 단위는 자체 감지 프로세스를 실행합니다. Coral처럼 공유할 수 없는 장치 단위는 하나의 모델에서만 사용할 수 있습니다."
     },
     "tabs": {
       "plus": "Frigate+",
@@ -2011,6 +2067,9 @@
     },
     "plusModel": {
       "noModelSelected": "Frigate+ 모델을 선택하세요"
+    },
+    "scenes": {
+      "default": "기본값"
     }
   }
 }

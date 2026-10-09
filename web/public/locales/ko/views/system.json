@@ -245,7 +245,10 @@
     "cameraSkippedDetections": "{{camera}} 카메라가 프레임의 {{pct}}%에서 감지를 건너뛰고 있습니다",
     "systemNotices_one": "{{count}}개의 시스템 알림",
     "systemNotices_other": "{{count}}개의 시스템 알림",
-    "retentionUnmet": "디스크 공간 확보를 위해 보관 기간이 만료되기 전에 녹화본이 삭제되고 있습니다"
+    "retentionUnmet": "디스크 공간 확보를 위해 보관 기간이 만료되기 전에 녹화본이 삭제되고 있습니다",
+    "moreMessages_one": "+{{count}}개",
+    "moreMessages_other": "+{{count}}개",
+    "reindexEmbeddingsFailed": "임베딩 재인덱싱 실패, 로그를 확인하세요"
   },
   "enrichments": {
     "title": "확장 기능",
@@ -288,7 +291,8 @@
         "severity": "심각도",
         "error": "오류",
         "warning": "경고",
-        "info": "정보"
+        "info": "정보",
+        "showHidden": "숨김 항목 표시"
       },
       "kinds": {
         "detector_stuck": "감지기 {{detector}}의 응답이 없어 재시작되었습니다",
@@ -297,12 +301,27 @@
         "shm_too_low": "/dev/shm 할당량({{total}} MB)을 최소 {{min}} MB 이상으로 늘려야 합니다",
         "failed_login_one": "{{user}} 계정 로그인 시도 실패",
         "failed_login_other": "{{user}} 계정 로그인 시도 실패",
-        "update_available": "Frigate {{version}} 버전을 사용할 수 있습니다"
+        "update_available": "Frigate {{version}} 버전을 사용할 수 있습니다",
+        "ffmpeg_high_cpu": "FFmpeg CPU 사용량이 높음 (평균 {{cpu}}%)",
+        "detect_high_cpu": "감지 프로세스 CPU 사용량이 높음 (평균 {{cpu}}%)"
       },
       "streamPrefix": "스트림 {{index}}: {{message}}",
       "streamPrefixRestream": "스트림 {{index}} (go2rtc 경유): {{message}}",
       "streamProbeFailed": "스트림 {{index}} 정보를 감지할 수 없음: {{error}}",
-      "cameraProbeFailed": "스트림 정보를 감지할 수 없음: {{error}}"
+      "cameraProbeFailed": "스트림 정보를 감지할 수 없음: {{error}}",
+      "acknowledge": "확인",
+      "acknowledgeHint": "이 문제가 다시 발생할 때까지 숨기기",
+      "mute": "음소거",
+      "muteHint": "다시 표시하지 않음",
+      "unmute": "음소거 해제",
+      "showAgain": "다시 표시",
+      "hiddenTitle": "숨김",
+      "noneHidden": "숨겨진 알림 없음",
+      "showAll": "모두 다시 표시",
+      "showAllTitle": "숨겨진 알림을 모두 다시 표시하시겠습니까?",
+      "showAllDesc": "확인 및 음소거된 모든 알림(설정 및 스트림 점검 항목 포함)이 알림 목록으로 다시 복원됩니다.",
+      "acknowledgedAt": "확인됨: {{time}}",
+      "mutedAt": "음소거됨: {{time}}"
     },
     "hardware": {
       "title": "하드웨어",
@@ -353,5 +372,7 @@
       "streamsFlagged_one": "{{count}}개에 문제 있음 (알림에 나열됨)",
       "streamsFlagged_other": "{{count}}개에 문제 있음 (알림에 나열됨)"
     }
-  }
+  },
+  "showAllTabs": "모든 탭 표시",
+  "showLessTabs": "간략히 표시"
 }
