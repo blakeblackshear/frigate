@@ -137,6 +137,15 @@
         "partial": "{{successful}} exportations sur {{total}} lancées. Échecs : {{failedItems}}",
         "failed": "Échec du démarrage des exports {{total}}. Échec : {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualité",
+      "auto": "Automatique",
+      "main": "Originale",
+      "sub": "Basse",
+      "autoDesc": "Utilise le flux principal et bascule vers le flux secondaire de moindre qualité lorsque le flux principal n'est pas disponible.",
+      "mainDesc": "Exporte uniquement le flux principal dans sa qualité d'origine. Les plages temporelles durant lesquelles le flux principal n'est pas disponible seront absentes.",
+      "subDesc": "Exporte uniquement le sous-flux de qualité inférieure. Les plages horaires durant lesquelles le sous-flux n'est pas disponible seront absentes."
     }
   },
   "search": {
@@ -182,7 +191,8 @@
       "export": "Exporter",
       "markAsReviewed": "Marquer comme traité",
       "deleteNow": "Supprimer maintenant",
-      "markAsUnreviewed": "Marquer comme non traité"
+      "markAsUnreviewed": "Marquer comme non traité",
+      "generateDescription": "Générer une description"
     },
     "shareTimestamp": {
       "label": "Partager cette date",
@@ -191,6 +201,12 @@
       "custom": "Horodatage personnalisé",
       "button": "Partager le lien de l'horodatage",
       "shareTitle": "Horodatage de la revue Frigate : {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Une description générée par IA a été demandée pour cet élément à examiner.",
+        "error": "Échec de la demande de description : {{error}}"
+      }
     }
   },
   "imagePicker": {

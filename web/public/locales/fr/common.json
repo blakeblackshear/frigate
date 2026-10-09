@@ -132,7 +132,11 @@
     "savingAll": "Enregistrement de tout en cours…",
     "undoAll": "Tout annuler",
     "applying": "Enregistrement …",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "expand": "Développer",
+    "collapse": "Réduire",
+    "clear": "Vider",
+    "reload": "Recharger"
   },
   "menu": {
     "configuration": "Configuration",
@@ -181,7 +185,8 @@
       "ur": "اردو (Ourdou)",
       "hr": "Hrvatski (Croate)",
       "bs": "Bosanski (Bosnien)",
-      "zhHant": "繁體中文 (chinois traditionnel)"
+      "zhHant": "繁體中文 (chinois traditionnel)",
+      "be": "Bielorusse"
     },
     "appearance": "Apparence",
     "darkMode": {
@@ -327,5 +332,36 @@
   "validation_errors": "Erreurs de validation",
   "credentialField": {
     "savedPlaceholder": "Enregistré — laissez vide pour conserver la version actuelle"
+  },
+  "error": {
+    "title": "Cette page a cesser de fonctionner",
+    "desc": "Une erreur inattendue s'est produite sur la page. Un rechargement permet généralement de la résoudre. Si le problème persiste, copiez les détails et joignez-les à une discussion sur GitHub.",
+    "staleTitle": "Rechargement requis",
+    "staleDesc": "Une partie de l'interface n'a pas pu être chargée, ce qui signifie généralement que Frigate a été mis à jour alors que cet onglet était ouvert. Actualisez la page pour charger la nouvelle version.",
+    "partial": "Une partie de l'interface a cessé de fonctionner",
+    "copyDetails": "Coper les détails",
+    "copyFailed": "Impossible de copier les détails dans le presse-papiers"
+  },
+  "commandMenu": {
+    "title": "Menu de commandes",
+    "description": "Chercher des pages, caméras, paramètres et actions",
+    "placeholder": "Chercher des pages, caméras, paramètres et actions",
+    "empty": "Aucun résultat",
+    "hint": "{{key}} ou / pour ouvrir, Entrée pour exécuter",
+    "section": {
+      "recent": "Récent",
+      "pages": "Pages",
+      "cameras": "Caméras",
+      "cameraGroups": "Groupes de caméra",
+      "settings": "Réglages",
+      "actions": "Actions"
+    },
+    "camera": {
+      "live": "Direct",
+      "review": "Vérifier"
+    },
+    "action": {
+      "toggleTheme": "Basculer entre les modes clair et sombre"
+    }
   }
 }
