@@ -170,6 +170,19 @@
         "audio-codec": "Codecul audio al acestui stream nu este suportat de WebRTC. Transcodifică în opus sau G.711 cu go2rtc.",
         "checking": "Se verifică disponibilitatea WebRTC…"
       }
+    },
+    "auto": {
+      "label": "Auto",
+      "selected": "Auto · {{stream}}",
+      "tips": "Comută fluxurile pentru a se adapta conexiunii tale",
+      "floorLabel": "Lățime de bandă redusă",
+      "retry": "Încearcă cea mai înaltă calitate",
+      "reason": {
+        "bandwidth": "Se redă {{stream}} deoarece conexiunea nu a putut susține un flux de calitate superioară",
+        "codec": "Se redă {{stream}} deoarece acest browser nu poate reda un flux de calitate superioară",
+        "saveData": "Se redă {{stream}} deoarece funcția Economisire date este activată",
+        "floor": "Se redă fluxul cu lățime de bandă redusă deoarece niciun alt flux nu a făcut față"
+      }
     }
   },
   "cameraSettings": {
