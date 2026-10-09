@@ -85,6 +85,30 @@
         "quality": {
             "label": "Qualitat del directe",
             "description": "Qualitat de codificació per al flux jsmpeg (1 més alt, 31 més baix)."
+        },
+        "transcode": {
+            "label": "Fluxos transcodificats",
+            "description": "Fluxos en viu de baixa qualitat transcodificats sota demanda per go2rtc.",
+            "enabled": {
+                "label": "Habilita els fluxos transcodificats",
+                "description": "Afegeix fluxos en viu de baixa qualitat que go2rtc transcodifica en temps real mentre algú està mirant."
+            },
+            "source": {
+                "label": "Flux d'origen",
+                "description": "go2rtc flux a transcodificar. Per defecte al primer flux en viu."
+            },
+            "qualities": {
+                "label": "Qualitats",
+                "description": "S'afegeix un flux transcodificat per qualitat.",
+                "height": {
+                    "label": "Alçada",
+                    "description": "Alçada de sortida en píxels; l'amplada segueix la relació d'aspecte de la font."
+                },
+                "bitrate": {
+                    "label": "Taxa de bits",
+                    "description": "Taxa de bits de vídeo objectiu i màxima en kbps."
+                }
+            }
         }
     },
     "ui": {
@@ -1267,7 +1291,7 @@
         },
         "scene": {
             "label": "Detecta l'escena",
-            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'totes' executen el model configurat amb una escena de 'totes'."
+            "description": "L'entorn que mira aquesta càmera, utilitzat per triar quin dels models configurats s'executa en ell. Les càmeres que queden a 'default' executen el model configurat amb una escena de 'default'."
         }
     },
     "classification": {
@@ -1478,10 +1502,10 @@
     },
     "models": {
         "label": "Models de detecció",
-        "description": "Models de detecció d'objectes i el maquinari en què s'executa. Les càmeres trien un model fent coincidir el seu detect.scene amb l'escena d'un model.",
+        "description": "Models de detecció d'objectes i el maquinari en què s'executa. Les càmeres trien un model fent coincidir el seu detect.scene amb l'escena d'un model, tornant al model 'per defecte'.",
         "scene": {
             "label": "Escena del model",
-            "description": "L'entorn de la càmera per al qual s'utilitza aquest model. Les càmeres seleccionen un model establint detect.scene a un valor coincident, i «all» és utilitzat per qualsevol càmera que no n'estableixi un."
+            "description": "Un nom per a l'entorn de la càmera per al qual s'utilitza aquest model, com ara «termal». Les càmeres seleccionen un model establint detect.scene a un valor coincident, i el model «predeterminat» és utilitzat per qualsevol càmera que no n'estableixi un."
         },
         "devices": {
             "label": "hardware de detecció",

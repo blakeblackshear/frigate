@@ -247,7 +247,8 @@
     "systemNotices_other": "{{count}} avisos del sistema",
     "retentionUnmet": "Els enregistraments s'estan suprimint abans que acabi el seu període de retenció a l'espai lliure",
     "moreMessages_other": "+{{count}}",
-    "moreMessages_one": "+{{count}}"
+    "moreMessages_one": "+{{count}}",
+    "reindexEmbeddingsFailed": "Ha fallat la reindexació de les incrustacions, comproveu els registres"
   },
   "enrichments": {
     "title": "Anàlisi avançada",
@@ -371,5 +372,7 @@
       "streamsFlagged_other": "{{count}} amb problemes, llistat a Avisos",
       "inferenceMs": "{{speed}} ms"
     }
-  }
+  },
+  "showAllTabs": "Mostra totes les pestanyes",
+  "showLessTabs": "Mostra menys"
 }

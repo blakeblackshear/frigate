@@ -290,7 +290,8 @@
     "retry": "Torna a intentar",
     "expand": "Expandeix",
     "collapse": "Redueix",
-    "reload": "Torna a carregar"
+    "reload": "Torna a carregar",
+    "clear": "Neteja"
   },
   "toast": {
     "copyUrlToClipboard": "URL copiada al porta-retalls.",
