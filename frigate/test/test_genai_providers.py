@@ -427,6 +427,88 @@ class TestOllamaProvider(unittest.TestCase):
         self.assertEqual(message["content"], "prompt\n[img]")
         self.assertEqual(message["images"], [b"a"])
 
+    def test_capabilities_drive_embeddings_and_thinking(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.show.return_value = {"capabilities": ["embedding", "vision"]}
+
+        self.assertTrue(client.supports_embeddings)
+        self.assertFalse(client.supports_toggleable_thinking)
+        client.provider.show.assert_called_once()
+
+    def test_capability_lookup_failure_is_not_cached(self):
+        from ollama import ResponseError
+
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.show.side_effect = [
+            ResponseError("unavailable", 503),
+            {"capabilities": ["embedding"]},
+        ]
+
+        self.assertFalse(client.supports_embeddings)
+        self.assertTrue(client.supports_embeddings)
+
+    @staticmethod
+    def _webp_bytes():
+        import io
+
+        from PIL import Image
+
+        buf = io.BytesIO()
+        Image.new("RGB", (8, 8), (200, 10, 10)).save(buf, format="WEBP")
+        return buf.getvalue()
+
+    def test_embed_posts_text_and_image_items(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider._request_raw.return_value.json.return_value = {
+            "embeddings": [[0.1] * 768, [0.2] * 768]
+        }
+
+        result = client.embed(texts=["a person"], images=[self._webp_bytes()])
+
+        args = client.provider._request_raw.call_args
+        self.assertEqual(args.args, ("POST", "/api/embed"))
+        payload = args.kwargs["json"]
+        self.assertEqual(payload["model"], "llama3")
+        self.assertEqual(payload["input"][0], "a person")
+        self.assertEqual(list(payload["input"][1]), ["image"])
+        # WebP thumbnails are converted to JPEG before being sent
+        image = base64.b64decode(payload["input"][1]["image"])
+        self.assertEqual(image[:2], b"\xff\xd8")
+        self.assertEqual(len(result), 2)
+        self.assertAlmostEqual(float(result[1][0]), 0.2, places=5)
+
+    def test_embed_passes_configured_options(self):
+        client = _make_client(
+            "ollama",
+            model="embeddinggemma-2",
+            base_url="http://localhost:9999",
+            provider_options={"options": {"num_ctx": 2048}, "keep_alive": "10m"},
+        )
+        client.provider = MagicMock()
+        client.provider._request_raw.return_value.json.return_value = {
+            "embeddings": [[0.1] * 768]
+        }
+
+        client.embed(texts=["a"])
+
+        payload = client.provider._request_raw.call_args.kwargs["json"]
+        self.assertEqual(payload["options"], {"num_ctx": 2048})
+        self.assertEqual(payload["keep_alive"], "10m")
+
+    def test_embed_server_error_returns_empty(self):
+        from ollama import ResponseError
+
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider._request_raw.side_effect = ResponseError(
+            "model does not support media embeddings", 400
+        )
+
+        self.assertEqual(client.embed(images=[self._webp_bytes()]), [])
+
 
 # ---------------------------------------------------------------------------
 # llama.cpp

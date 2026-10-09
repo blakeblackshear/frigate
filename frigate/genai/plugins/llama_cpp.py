@@ -14,7 +14,11 @@ from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import interleave_images, parse_tool_calls_from_message
+from frigate.genai.utils import (
+    interleave_images,
+    parse_tool_calls_from_message,
+    to_jpeg,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -74,20 +78,6 @@ def _parse_launch_arg(args: list[str], flag: str) -> str | None:
     if idx + 1 >= len(args):
         return None
     return args[idx + 1]
-
-
-def _to_jpeg(img_bytes: bytes) -> bytes | None:
-    """Convert image bytes to JPEG. llama.cpp/STB does not support WebP."""
-    try:
-        img = Image.open(io.BytesIO(img_bytes))
-        if img.mode != "RGB":
-            img = img.convert("RGB")  # type: ignore[assignment]
-        buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=85)
-        return buf.getvalue()
-    except Exception as e:
-        logger.warning("Failed to convert image to JPEG: %s", e)
-        return None
 
 
 @register_genai_provider(GenAIProviderEnum.llamacpp)
@@ -807,7 +797,7 @@ class LlamaCppClient(GenAIClient):
 
         for img in images:
             # llama.cpp uses STB which does not support WebP; convert to JPEG
-            jpeg_bytes = _to_jpeg(img)
+            jpeg_bytes = to_jpeg(img)
             to_encode = jpeg_bytes if jpeg_bytes is not None else img
             encoded = base64.b64encode(to_encode).decode("utf-8")
             # The trailing newline keeps tokenization identical to the older
