@@ -1,10 +1,40 @@
 """Shared helpers for GenAI providers and chat (OpenAI-style messages, tool call parsing)."""
 
+import io
 import json
 import logging
 from typing import Any
 
+from PIL import Image
+
 logger = logging.getLogger(__name__)
+
+
+def to_jpeg(img_bytes: bytes) -> bytes | None:
+    """Convert image bytes to JPEG.
+
+    Some provider image decoders (e.g. llama.cpp's STB) do not support WebP,
+    which is the format Frigate stores thumbnails in.
+    """
+    try:
+        img = Image.open(io.BytesIO(img_bytes))
+        if img.mode != "RGB":
+            img = img.convert("RGB")  # type: ignore[assignment]
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=85)
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning("Failed to convert image to JPEG: %s", e)
+        return None
+
+
+def synthetic_jpeg(width: int, height: int) -> bytes:
+    """A flat gray JPEG of the given dimensions, for measuring image token cost."""
+    buf = io.BytesIO()
+    Image.new("RGB", (width, height), (128, 128, 128)).save(
+        buf, format="JPEG", quality=60
+    )
+    return buf.getvalue()
 
 
 def interleave_images(

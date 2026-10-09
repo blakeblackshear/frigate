@@ -7,6 +7,7 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import numpy as np
 from httpx import RemoteProtocolError, TimeoutException
 from ollama import AsyncClient as OllamaAsyncClient
 from ollama import Client as ApiClient
@@ -14,7 +15,11 @@ from ollama import ResponseError
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import interleave_images, parse_tool_calls_from_message
+from frigate.genai.utils import (
+    interleave_images,
+    parse_tool_calls_from_message,
+    to_jpeg,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -124,22 +129,38 @@ class OllamaClient(GenAIClient):
 
     provider: ApiClient | None
     provider_options: dict[str, Any]
+    _capabilities_cache: list[str] | None = None
     _supports_thinking_cache: bool | None = None
+
+    def _model_capabilities(self) -> list[str] | None:
+        """Capabilities Ollama reports for the configured model, or None when
+        they could not be fetched. Only successful lookups are cached."""
+        if self._capabilities_cache is not None:
+            return self._capabilities_cache
+        if self.provider is None:
+            return None
+        try:
+            response = self.provider.show(self.genai_config.model)
+        except Exception as e:
+            logger.debug("Failed to query Ollama model capabilities: %s", e)
+            return None
+        self._capabilities_cache = list(response.get("capabilities") or [])
+        return self._capabilities_cache
 
     @property
     def supports_toggleable_thinking(self) -> bool:
         if self._supports_thinking_cache is not None:
             return self._supports_thinking_cache
-        if self.provider is None:
+        capabilities = self._model_capabilities()
+        if capabilities is None:
             return False
-        try:
-            response = self.provider.show(self.genai_config.model)
-            capabilities = response.get("capabilities") or []
-            self._supports_thinking_cache = "thinking" in capabilities
-        except Exception as e:
-            logger.debug("Failed to query Ollama model capabilities: %s", e)
-            self._supports_thinking_cache = False
+        self._supports_thinking_cache = "thinking" in capabilities
         return self._supports_thinking_cache
+
+    @property
+    def supports_embeddings(self) -> bool:
+        """Whether Ollama reports the configured model as an embedding model."""
+        return "embedding" in (self._model_capabilities() or [])
 
     def _auth_headers(self) -> dict | None:
         if self.genai_config.api_key:
@@ -321,6 +342,93 @@ class OllamaClient(GenAIClient):
         return int(
             self.genai_config.provider_options.get("options", {}).get("num_ctx", 4096)
         )
+
+    def _count_prompt_tokens(self, image: bytes | None) -> int | None:
+        """Send a 1-token chat request and return Ollama's prompt_eval_count.
+
+        Reuses the description request options so the probe runs with the same
+        num_ctx; a different value would make Ollama reload the model.
+        """
+        if self.provider is None:
+            return None
+
+        message: dict[str, Any] = {"role": "user", "content": "."}
+
+        if image is not None:
+            message["images"] = [image]
+
+        request_params = self._build_request_params(
+            [message], None, None, enable_thinking=False
+        )
+        request_params["options"] = {
+            **(request_params.get("options") or {}),
+            "num_predict": 1,
+        }
+        response = self.provider.chat(**request_params)
+        count = response.get("prompt_eval_count")
+        return int(count) if count is not None else None
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Generate embeddings via Ollama's /api/embed endpoint.
+
+        Each text is a plain string in `input` and each image is an
+        ``{"image": <base64>}`` item. Image input requires Ollama 0.40.1 or
+        newer and a model with a vision encoder (e.g. embeddinggemma-2:440m).
+        """
+        if self.provider is None:
+            logger.warning(
+                "Ollama provider has not been initialized. Check your Ollama configuration."
+            )
+            return []
+
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        inputs: list[str | dict[str, str]] = list(texts)
+        for img in images:
+            jpeg_bytes = to_jpeg(img)
+            to_encode = jpeg_bytes if jpeg_bytes is not None else img
+            inputs.append({"image": base64.b64encode(to_encode).decode("utf-8")})
+
+        payload: dict[str, Any] = {"model": self.genai_config.model, "input": inputs}
+        for key in ("options", "keep_alive"):
+            if key in self.genai_config.provider_options:
+                payload[key] = self.genai_config.provider_options[key]
+
+        try:
+            # The ollama SDK's embed() validates input as strings only, so
+            # image items have to bypass it and post the JSON directly.
+            response = self.provider._request_raw("POST", "/api/embed", json=payload)
+            body = response.json()
+        except (
+            TimeoutException,
+            ResponseError,
+            RemoteProtocolError,
+            ConnectionError,
+            ValueError,
+        ) as e:
+            logger.warning("Ollama embeddings error: %s", str(e))
+            return []
+
+        vectors = body.get("embeddings") if isinstance(body, dict) else None
+        if not isinstance(vectors, list):
+            logger.warning("Ollama embeddings returned unexpected format")
+            return []
+
+        if len(vectors) != len(inputs):
+            logger.warning(
+                "Ollama returned %d embeddings for %d inputs",
+                len(vectors),
+                len(inputs),
+            )
+
+        return [np.asarray(v, dtype=np.float32).flatten() for v in vectors]
 
     def _build_request_params(
         self,
