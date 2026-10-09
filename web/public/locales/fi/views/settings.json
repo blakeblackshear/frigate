@@ -3,15 +3,19 @@
     "masksAndZones": "Peite ja vyöhykemuokkain - Frigate",
     "motionTuner": "Liikesäädin - Frigate",
     "default": "Asetukset - Frigate",
-    "general": "Yleiset asetukset - Frigate",
-    "frigatePlus": "Frigate+ asetukset - Frigate",
+    "general": "Käyttöliittymäasetukset - Frigate",
+    "frigatePlus": "Frigate+ Asetukset - Frigate",
     "object": "Virheenjäljitys - Frigate",
     "authentication": "Autentikointiasetukset - Frigate",
     "notifications": "Ilmoitusasetukset - Frigate",
     "enrichments": "Laajennusasetukset – Frigate",
     "cameraManagement": "Hallitse Kameroita - Frigate",
-    "globalConfig": "Globaali konfiguraatio - Frigate",
-    "cameraConfig": "Kamera konfiguraatio - Frigate"
+    "globalConfig": "Yleisasetukset - Frigate",
+    "cameraConfig": "Kamera-asetukset - Frigate",
+    "detectorsAndModel": "Tunnistimet ja mallit - Frigate",
+    "maintenance": "Ylläpito - Frigate",
+    "profiles": "Profiilit - Frigate",
+    "cameraReview": "Kameran tarkastusasetukset - Frigate"
   },
   "menu": {
     "ui": "Käyttöliittymä",
@@ -23,7 +27,10 @@
     "motionTuner": "Liikesäädin",
     "notifications": "Ilmoitukset",
     "enrichments": "Rikasteet",
-    "triggers": "Laukaisimet"
+    "triggers": "Laukaisimet",
+    "cameraManagement": "Kamerahallinta",
+    "cameraReview": "Tarkasta",
+    "roles": "Roolit"
   },
   "dialog": {
     "unsavedChanges": {
@@ -470,5 +477,13 @@
     "licensePlateRecognition": {
       "title": "Rekisterikilven tunnistaminen"
     }
+  },
+  "button": {
+    "overriddenGlobal": "Ohitettu (Yleiset)",
+    "overriddenGlobalTooltip": "Tämä kamera ohittaa yleisasetukset tässä osiossa",
+    "overriddenGlobalHeading_one": "Tämä kamera ohittaa {{count}} kentän yleisasetuksista:",
+    "overriddenGlobalHeading_other": "Nämä kamerat ohittavat {{count}} kenttää yleisasetuksista:",
+    "overriddenGlobalNoDeltas": "Tämä kamera ohittaa yleisasetukset, mutta yhdenkään kentän arvot eivät eroa.",
+    "overriddenLive": "Ohitettu (Live)"
   }
 }

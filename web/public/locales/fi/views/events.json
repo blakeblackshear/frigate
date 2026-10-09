@@ -5,7 +5,8 @@
     "motion": "Ei liiketietoja",
     "alert": "Ei hälyytyksiä tarkastettavaksi",
     "recordingsDisabled": {
-      "title": "Tallenteet täytyy ottaa käyttöön"
+      "title": "Tallenteet täytyy olla käytössä",
+      "description": "Tarkastettavia kohteita voi luoda ainoastaan mikäli kameran tallennus on päällä."
     }
   },
   "detections": "Havainnot",
@@ -21,25 +22,68 @@
   "events": {
     "label": "Tapahtumat",
     "aria": "Valitse tapahtumat",
-    "noFoundForTimePeriod": "Tapahtumia ei löydetty tältä ajanjaksolta."
+    "noFoundForTimePeriod": "Ei tapahtumia tällä ajanjaksolla."
   },
-  "documentTitle": "Tarkastelu - Frigate",
+  "documentTitle": "Tarkastus - Frigate",
   "detected": "havaittu",
   "selected_one": "{{count}} valittu",
-  "selected_other": "{{count}} valittu",
+  "selected_other": "{{count}} valittuna",
   "recordings": {
-    "documentTitle": "Tallenteet - Frigate"
+    "documentTitle": "Tallenteet - Frigate",
+    "invalidSharedLink": "Aikaleimattua tallennusta ei voi avata jäsennysvirheen vuoksi.",
+    "invalidSharedCamera": "Aikaleimattua tallennusta ei voi avata tuntemattomasta tai luvattomasta kamerasta."
   },
   "calendarFilter": {
     "last24Hours": "Viimeiset 24 tuntia"
   },
-  "markAsReviewed": "Merkitse katselmoiduksi",
-  "markTheseItemsAsReviewed": "Merkitse nämä kohteet katselmoiduksi",
+  "markAsReviewed": "Merkitse tarkastetuksi",
+  "markTheseItemsAsReviewed": "Merkitse nämä kohteet tarkastetuksi",
   "newReviewItems": {
-    "label": "Näytä uudet katselmoitavat kohteet",
-    "button": "Uudet katselmoitavat kohteet"
+    "label": "Näytä uudet tarkastettavat kohteet",
+    "button": "Uudet tarkastettavat kohteet"
   },
   "camera": "Kamera",
   "zoomIn": "Lähennä",
-  "zoomOut": "Loitonna"
+  "zoomOut": "Loitonna",
+  "motionPreviews": {
+    "filterClear": "Tyhjennä",
+    "menuItem": "Näytä liike-esikatselut",
+    "title": "Liike-esikatselukset: {{camera}}",
+    "mobileSettingsTitle": "Liike-esikatseluasetukset",
+    "dim": "Himmennys",
+    "speed": "Nopeus",
+    "speedAria": "Valitse esikatselun toistonopeus",
+    "speedDesc": "Valitse kuinka nopeasti esikatseluklippi toistetaan.",
+    "back": "Takaisin",
+    "empty": "Esikatseluita ei saatavilla",
+    "noPreview": "Esikatselu ei käytettävissä",
+    "seekAria": "Etsi {{camera}} toistin aikaan {{time}}",
+    "filter": "Suodatin"
+  },
+  "detail": {
+    "label": "Lisätiedot",
+    "noDataFound": "Ei lisätietoja arvioitavaksi",
+    "aria": "Lisätietonäkymä päälle/pois",
+    "trackedObject_one": "{{count}} kohde",
+    "trackedObject_other": "{{count}} kohdetta",
+    "noObjectDetailData": "Kohteen lisätietoja ei saatavilla.",
+    "settings": "Lisätietonäkymän asetukset",
+    "alwaysExpandActive": {
+      "title": "Laajenna aina aktiivinen",
+      "desc": "Laajenna aina aktiivisen arviointikohteen lisätiedot mikäli saatavissa."
+    }
+  },
+  "subOnlyQuality": "Tällä ajanjaksolla on ainoastaan matalalaatuisia tallenteita",
+  "objectTrack": {
+    "trackedPoint": "Seurattu kohta",
+    "clickToSeek": "Klikkaa hakeaksesi tähän aikaan asti"
+  },
+  "select_all": "Kaikki",
+  "normalActivity": "Normaali",
+  "needsReview": "Vaatii tarkastusta",
+  "securityConcern": "Turvallisuushuoli",
+  "motionSearch": {
+    "menuItem": "Liikehaku",
+    "openMenu": "Kamera-asetukset"
+  }
 }

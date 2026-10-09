@@ -18,5 +18,12 @@
             "label": "Ota ääni havainnointi käyttöön",
             "description": "Ota tai poista käytöstä ääni tapahtuman havaiseminen tälle kameralle."
         }
+    },
+    "semantic_search": {
+        "triggers": {
+            "actions": {
+                "description": "Suoritettavat toiminnot laukaisuehdon täyttyessä (ilmoitus, aliotsikko, ominaisuus)."
+            }
+        }
     }
 }

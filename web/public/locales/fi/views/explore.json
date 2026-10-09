@@ -10,8 +10,8 @@
       },
       "toast": {
         "error": {
-          "updatedSublabelFailed": "Alatunnisteen päivitys epäonnistui",
-          "updatedLPRFailed": "Rekisterikilven päivitys epäonnistui"
+          "updatedSublabelFailed": "Alaotsikon {{errorMessage}} päivitys epäonnistui",
+          "updatedLPRFailed": "Rekisterikilven {{errorMessage}} päivitys epäonnistui"
         }
       }
     },
@@ -23,12 +23,12 @@
     "label": "Tunniste",
     "editSubLabel": {
       "title": "Editoi alitunnistetta",
-      "desc": "Syötä uusi alitunniste tähän",
+      "desc": "Syötä uusi alitunniste tälle {{label}}",
       "descNoLabel": "Lisää uusi alatunniste tähän seurattuun kohteeseen"
     },
     "editLPR": {
       "title": "Muokkaa rekisterikilpeä",
-      "desc": "Syötä uusi rekisterikilven arvo tähän",
+      "desc": "Syötä uusi rekisteritunnus tälle {{label}}",
       "descNoLabel": "Syötä uusi rekisterikilven arvo tähän seurattuun objektiin"
     },
     "snapshotScore": {

@@ -12,6 +12,28 @@
     "deleteCategory": "Poista luokka",
     "addClassification": "Lisää luokitus",
     "deleteModels": "Poista mallit",
-    "editModel": "Muokkaa mallia"
+    "editModel": "Muokkaa mallia",
+    "renameCategory": "Nimeä luokka uudelleen"
+  },
+  "toast": {
+    "success": {
+      "deletedModel_one": "Onnistuneesti poistettu {{count}} malli",
+      "deletedModel_other": "Onnistuneesti poistettu {{count}} mallia",
+      "categorizedImage": "Onnistuneesti luokiteltu kuva",
+      "trainedModel": "Onnistuneesti opetettu malli.",
+      "trainingModel": "Onnistuneesti aloitettu mallin koulutus.",
+      "updatedModel": "Onnistuneesti päivitetty mallin määritykset",
+      "renamedCategory": "Onnistuneesti uudelleennimetty luokka {{name}}ksi",
+      "deletedCategory_one": "Poistettu {{count}} luokka",
+      "deletedCategory_other": "Poistettu {{count}} luokkaa",
+      "deletedImage_one": "Poistettu {{count}} kuva",
+      "deletedImage_other": "Poistettu {{count}} kuvaa"
+    },
+    "error": {
+      "deleteImageFailed": "Virhe poistettaessa: {{errorMessage}}",
+      "deleteCategoryFailed": "Luokan poistaminen epäonnistui: {{errorMessage}}",
+      "deleteModelFailed": "Mallin poistaminen epäonnistui: {{errorMessage}}",
+      "categorizeFailed": "Kuvan luokittelu epäonnistui: {{errorMessage}}"
+    }
   }
 }
