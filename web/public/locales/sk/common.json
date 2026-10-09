@@ -161,7 +161,11 @@
     "retry": "Skúste to znova",
     "add": "Pridať",
     "applying": "Aplikovanie…",
-    "undo": "Späť"
+    "undo": "Späť",
+    "expand": "Rozšíriť",
+    "clear": "Vymazať",
+    "reload": "Obnoviť",
+    "collapse": "Zbaliť"
   },
   "menu": {
     "system": "Systém",
@@ -214,7 +218,9 @@
       "withSystem": {
         "label": "Použiť systémové nastavenia pre jazyk"
       },
-      "hr": "Hrvatski (Croatian)"
+      "hr": "Hrvatski (Croatian)",
+      "be": "Bielorusky",
+      "bs": "Bosniansky"
     },
     "restart": "Reštartovať Frigate",
     "live": {
@@ -325,5 +331,35 @@
   "validation_errors": "Chyby overenia",
   "credentialField": {
     "savedPlaceholder": "Uložené – pre aktuálne informácie nechajte prázdne"
+  },
+  "error": {
+    "title": "Stránka neodpovedá",
+    "desc": "Došlo k neočakávanej chybe. Zvyčajne stačí obnoviť stránku. Ak problém pretrváva, skopírujte detaily a pripojte ich do diskusie na GitHub-e.",
+    "staleTitle": "Je nutné obnoviť stránku",
+    "partial": "Niektorá súčasť rozhrania nereaguje.",
+    "copyDetails": "Skopírujte detaily",
+    "copyFailed": "Nepodarilo sa skopírovať detaily do schránky"
+  },
+  "commandMenu": {
+    "title": "Príkazy",
+    "description": "Vyhľadávanie, kamery, nastavenia a príkazy",
+    "placeholder": "Vyhľadávanie, kamery, nastavenia a príkazy",
+    "empty": "Žiadna zhoda",
+    "hint": "{{key}} alebo / pre otvorenie, Enter pre spustenie",
+    "section": {
+      "recent": "Aktuálny",
+      "pages": "Stránky",
+      "cameras": "Kamery",
+      "cameraGroups": "Skupiny kamier",
+      "settings": "Nastavenia",
+      "actions": "Akcie"
+    },
+    "camera": {
+      "live": "Naživo",
+      "review": "Prehľad"
+    },
+    "action": {
+      "toggleTheme": "Prepnúť svetlý a tmavý režim"
+    }
   }
 }

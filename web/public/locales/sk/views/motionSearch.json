@@ -1,1 +1,7 @@
-{}
+{
+    "documentTitle": "Hľadanie pohybu - Frigate",
+    "title": "Hľadanie pohybu",
+    "startSearch": "Spustiť hľadanie",
+    "searchStarted": "Hľadám",
+    "searchCancelled": "Vyhľadávanie zrušené"
+}

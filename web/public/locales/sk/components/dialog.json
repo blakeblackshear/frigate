@@ -99,10 +99,28 @@
       "detectionCount_few": "{{count}} sledované objekty",
       "detectionCount_other": "{{count}} sledovaných objektov",
       "nameLabel": "Názov exportu",
-      "namePlaceholder": "",
-      "exportButton_one": "",
-      "exportButton_few": "",
-      "exportButton_other": ""
+      "namePlaceholder": "Nepovinné spoločné meno pre tieto exporty",
+      "exportButton_one": "Exportuj 1 kameru",
+      "exportButton_few": "Exportuj {{count}} kamery",
+      "exportButton_other": "Exportuj {{count}} kamier",
+      "queueingButton": "Pridať do poradia pre export..."
+    },
+    "stream": {
+      "label": "Kvalita",
+      "auto": "Automaticky",
+      "main": "Pôvodný",
+      "sub": "Nízky",
+      "autoDesc": "Používa hlavný stream, alebo v prípade nedostupnosti prejde na nižšiu kvalitu streamu.",
+      "mainDesc": "Vyexportuje iba hlavný stream v pôvodnej kvalite. Časové úseky, kde nie je k dispozícii hlavný stream, budú vynechané.",
+      "subDesc": "Vyexportuje iba sub stream v nižšej kvalite. Časové úseky, kde nie je k dispozícii sub stream, budú vynechané."
+    },
+    "multi": {
+      "title_one": "Exportuj prehľad",
+      "title_few": "Exportuj {{count}} prehľady",
+      "title_other": "Exportuj {{count}} prehľadov",
+      "description": "Exportuj vybrané prehľady. Všetky exporty budú zoskupené pod jeden záznam.",
+      "descriptionNoCase": "Exportuj všetky vybrané prehľady.",
+      "caseNamePlaceholder": "Prehľad export - {{date}}"
     }
   },
   "streaming": {

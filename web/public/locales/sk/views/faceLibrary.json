@@ -2,7 +2,8 @@
   "description": {
     "addFace": "Pridajte novú kolekciu do Face Library nahrať svoj prvý obrázok.",
     "invalidName": "Neplatné meno. Mená môžu obsahovať iba písmená, čísla, medzery, apostrofy, podčiarkovníky a spojovníky.",
-    "placeholder": "Zadajte názov pre túto kolekciu"
+    "placeholder": "Zadajte názov pre túto kolekciu",
+    "nameCannotContainHash": "Názov nesmie obsahovať #."
   },
   "details": {
     "scoreInfo": "Skóre podúrovne je vážené skóre všetkých rozpoznaných dôverností tváre, to ale môže byť odlišné od skóre zobrazeného na snímke.",
