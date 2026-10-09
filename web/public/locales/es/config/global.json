@@ -55,9 +55,13 @@
         },
         "num_threads": {
             "label": "Hilos de detección",
-            "description": "Número de hilos a usar para procesamiento de detección de audio."
+            "description": "Número de hilos a usar en el procesamiento de detección de audio."
         },
-        "description": "Ajustes para la detección de eventos basada en audio en todas las cámaras; se pueden sobrescribir por cámara."
+        "description": "Ajustes para la detección de eventos basada en audio en todas las cámaras; se pueden sobrescribir por cámara.",
+        "labelmap": {
+            "label": "Personalización del mapa de etiquetas de audio",
+            "description": "Anula o reasigna entradas para fusionarlas con el mapa de etiquetas de audio estándar."
+        }
     },
     "auth": {
         "label": "Autenticación",
@@ -103,7 +107,7 @@
             "description": "Número de iteraciones PBKDF2-SHA256 que se utilizarán al generar el hash de las contraseñas de los usuarios."
         },
         "roles": {
-            "label": "Asignaciones de roles",
+            "label": "Mapeo de roles",
             "description": "Asigna roles a listas de cámaras. Una lista vacía concede acceso a todas las cámaras para ese rol."
         }
     },
@@ -431,7 +435,7 @@
             "description": "Carácter usado para separar varios valores proporcionados en las cabeceras del proxy."
         },
         "default_role": {
-            "description": "Rol predeterminado asignado a los usuarios autenticados mediante proxy cuando no se aplica ninguna asignación de roles.",
+            "description": "Rol predeterminado asignado a los usuarios autenticados mediante proxy cuando no se aplica ningún mapeo de roles. Establézcalo en ‘none’ para denegar el acceso a los usuarios sin mapear.",
             "label": "Rol predeterminado"
         },
         "description": "Configuración para integrar Frigate detrás de un proxy inverso que transmite encabezados de usuario autenticados.",
@@ -511,12 +515,12 @@
     "audio_transcription": {
         "description": "Configuración para la transcripción de audio en directo y de voz utilizada para eventos y subtítulos en directo.",
         "language": {
-            "description": "Código de idioma utilizado para la transcripción/traducción (por ejemplo, 'es' para Español). Consulte https://whisper-api.com/docs/languages/ para ver los códigos de idioma compatibles.",
+            "description": "Código de idioma utilizado para la transcripción/traducción (por ejemplo, 'es' para español), o 'auto' para permitir que el modelo lo detecte automáticamente. Consulte https://whisper-api.com/docs/languages/ para ver los códigos de idioma compatibles.",
             "label": "Idioma de transcripción"
         },
         "enabled": {
             "description": "Habilitar o deshabilitar la transcripción automática de audio para todas las cámaras; puede anularse por cámara.",
-            "label": "Habilitar transcripción de audio"
+            "label": "Habilitar la transcripción de audio"
         },
         "label": "Transcripción de audio",
         "live_enabled": {
@@ -659,7 +663,7 @@
             "label": "FPS de detección"
         },
         "min_initialized": {
-            "description": "Número de detecciones consecutivas requeridas antes de crear un objeto rastreado. Auméntelo para reducir las inicializaciones falsas. El valor predeterminado es los FPS divididos por 2.",
+            "description": "Número de detecciones consecutivas necesarias antes de crear un objeto rastreado. Aumente este valor para reducir las inicializaciones falsas. El valor predeterminado es fps dividido entre 2.",
             "label": "Fotogramas mínimos de inicialización"
         },
         "height": {
@@ -713,7 +717,8 @@
             "description": "Milisegundos para desplazar las anotaciones de detección y alinear mejor los cuadros delimitadores de la línea de tiempo con las grabaciones; puede ser positivo o negativo."
         },
         "scene": {
-            "label": "Detectar escena"
+            "label": "Detectar escena",
+            "description": "El entorno que enfoca esta cámara se utiliza para seleccionar cuál de los modelos configurados se ejecuta en ella. Las cámaras que se dejan en \"predeterminado\" ejecutan el modelo configurado con una escena \"predeterminada\"."
         }
     },
     "record": {
@@ -823,11 +828,46 @@
                 "days": {
                     "label": "Días de retención",
                     "description": "Días a retener las grabaciones."
-                }
+                },
+                "label": "Retención continua de subflujo",
+                "description": "Número de días que se conservarán las grabaciones de subflujos independientemente de los objetos rastreados o del movimiento."
             },
             "motion": {
                 "days": {
-                    "label": "Días de retención"
+                    "label": "Días de retención",
+                    "description": "Días de conservación de las grabaciones."
+                },
+                "label": "Retención de movimiento del substream",
+                "description": "Número de días que se conservarán las grabaciones del substream activadas por movimiento."
+            },
+            "label": "Grabación de subflujo",
+            "description": "Configuración para grabar una segunda transmisión de menor calidad.",
+            "enabled": {
+                "label": "Habilitar la grabación de subflujos",
+                "description": "Permite grabar una segunda transmisión de menor calidad para una reproducción con calidad adaptativa y una retención prolongada."
+            },
+            "alerts": {
+                "label": "Retención de alertas del substream",
+                "description": "Configuración de conservación de las grabaciones de alertas del substream.",
+                "days": {
+                    "label": "Días de conservación",
+                    "description": "Número de días que se conservarán las grabaciones de eventos de detección."
+                },
+                "mode": {
+                    "label": "Modo de rentención",
+                    "description": "Modo de conservación: all (guardar todos los segmentos), motion (guardar los segmentos con movimiento) o active_objects (guardar los segmentos con objetos activos)."
+                }
+            },
+            "detections": {
+                "label": "Conservación de detecciones del substream",
+                "description": "Configuración de conservación de las grabaciones de detecciones del substream.",
+                "days": {
+                    "label": "Días de retención",
+                    "description": "Número de días que se conservarán las grabaciones de eventos de detección."
+                },
+                "mode": {
+                    "label": "Modo retención",
+                    "description": "Modo de conservación: all (guardar todos los segmentos), motion (guardar los segmentos con movimiento) o active_objects (guardar los segmentos con objetos activos)."
                 }
             }
         }
@@ -862,6 +902,30 @@
         "quality": {
             "label": "Calidad en directo",
             "description": "Calidad de codificación para el flujo jsmpeg (1 la más alta, 31 la más baja)."
+        },
+        "transcode": {
+            "label": "Transmisiones transcodificadas",
+            "description": "Transmisiones en directo de menor calidad transcodificadas bajo demanda por go2rtc.",
+            "enabled": {
+                "label": "Habilitar transmisiones transcodificadas",
+                "description": "Agregar transmisiones en vivo de menor calidad que go2rtc transcodifica en tiempo real mientras alguien las está viendo."
+            },
+            "source": {
+                "label": "Flujo de origen",
+                "description": "Transmisión go2rtc para transcodificar. Por defecto, se utiliza la primera transmisión en vivo."
+            },
+            "qualities": {
+                "label": "Cualidad",
+                "description": "Se añade una transmisión transcodificada por cada nivel de calidad.",
+                "height": {
+                    "label": "Altura",
+                    "description": "La altura de salida se muestra en píxeles; el ancho conserva la relación de aspecto de la fuente."
+                },
+                "bitrate": {
+                    "label": "Tasa de bits",
+                    "description": "Tasa de bits de vídeo objetivo y máxima en kbps."
+                }
+            }
         }
     },
     "semantic_search": {
@@ -1003,6 +1067,14 @@
             "preferred_language": {
                 "label": "Idioma preferido",
                 "description": "Idioma preferido que se solicitará al proveedor de GenAI para las respuestas generadas."
+            },
+            "frame_mode": {
+                "label": "Modo de fotogramas",
+                "description": "Cómo se presentan los fotogramas al modelo. ‘frames’ envía primero el prompt y, a continuación, los fotogramas, lo que resulta adecuado para modelos capaces de seguir bien una secuencia por sí mismos. ‘annotated_frames’ etiqueta cada fotograma e intercala notas obtenidas del seguimiento de objetos, lo que ayuda a los modelos que pueden perder el hilo de actividades que se repiten o cambian de dirección."
+            },
+            "response_style": {
+                "label": "Estilo responsivo",
+                "description": "Estilo de redacción predefinido para las descripciones de revisión generadas. Los ajustes predefinidos modifican el tono y el nivel de detalle del título, el resumen y la descripción de la escena que se muestran al usuario; ‘default’ mantiene sin cambios el prompt integrado."
             }
         },
         "label": "Revisión",
@@ -1056,7 +1128,8 @@
             "description": "Fotogramas por segundo para reenviar el último fotograma compuesto de Birdseye en reposo; establécelo en 0 para deshabilitarlo."
         },
         "modes": {
-            "label": "Tipos de actividad"
+            "label": "Tipos de actividad",
+            "description": "Tipos de actividades que incluyen cámaras en Birdseye."
         }
     },
     "ffmpeg": {
@@ -1078,6 +1151,10 @@
             "record": {
                 "label": "Argumentos de salida de grabación",
                 "description": "Argumentos de salida predeterminados para los flujos con rol de grabación."
+            },
+            "record_sub": {
+                "label": "Argumentos de salida del registro de subflujo",
+                "description": "Argumentos de salida para flujos de rol record_sub. Los argumentos de salida de registro se utilizan cuando esto no está configurado."
             }
         },
         "description": "Configuración de FFmpeg, incluyendo la ruta del binario, argumentos, opciones de aceleración por hardware y argumentos de salida por rol.",
@@ -1152,7 +1229,7 @@
         },
         "roles": {
             "label": "Roles",
-            "description": "Roles de GenAI (chat, descriptions, embeddings); un proveedor por rol."
+            "description": "Roles de GenAI (chat, descriptions, embeddings, transcribe); un proveedor por rol. De forma predeterminada, solo se conceden los roles de chat, descriptions y embeddings; el rol de transcribe debe indicarse explícitamente."
         },
         "provider_options": {
             "label": "Opciones del proveedor",
