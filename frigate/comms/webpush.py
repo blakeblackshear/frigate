@@ -41,6 +41,20 @@ class PushNotification:
     ttl: int = 0
 
 
+def _build_web_pushers(user: str, subs: list[dict[str, Any]]) -> list[WebPusher]:
+    """Build pushers for a user's stored subscriptions, skipping unusable ones."""
+    pushers: list[WebPusher] = []
+
+    for sub in subs:
+        # WebPusher decodes the stored keys and raises on malformed ones
+        try:
+            pushers.append(WebPusher(sub))
+        except Exception:
+            logger.warning("Skipping invalid notification subscription for %s", user)
+
+    return pushers
+
+
 class WebPushClient(Communicator):
     """Frigate wrapper for webpush client."""
 
@@ -82,9 +96,9 @@ class WebPushClient(Communicator):
             User.select(User.username, User.notification_tokens).dicts().iterator()
         )
         for user in users:
-            self.web_pushers[user["username"]] = []
-            for sub in user["notification_tokens"]:
-                self.web_pushers[user["username"]].append(WebPusher(sub))
+            self.web_pushers[user["username"]] = _build_web_pushers(
+                user["username"], user["notification_tokens"]
+            )
 
         # notification and auth config updater
         self.global_config_subscriber = ConfigSubscriber("config/")
@@ -142,10 +156,7 @@ class WebPushClient(Communicator):
                     User.username == user
                 ).execute()
 
-                self.web_pushers[user] = []
-
-                for sub in user_subs:
-                    self.web_pushers[user].append(WebPusher(sub))
+                self.web_pushers[user] = _build_web_pushers(user, user_subs)
 
                 logger.info(
                     f"Cleaned up {len(expired)} notification subscriptions for {user}"

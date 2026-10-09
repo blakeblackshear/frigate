@@ -1,8 +1,10 @@
 """Tests for push notification subscription validation."""
 
 import unittest
+from base64 import urlsafe_b64encode
 
 from frigate.api.notification import _validate_push_endpoint, _validate_subscription
+from frigate.comms.webpush import _build_web_pushers
 
 VALID_ENDPOINTS = [
     "https://fcm.googleapis.com/fcm/send/dGhpcy1pcy1hLXRva2Vu",
@@ -148,3 +150,16 @@ class TestValidateSubscription(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestBuildWebPushers(unittest.TestCase):
+    def test_skips_subscriptions_with_malformed_keys(self):
+        bad = _subscription(VALID_ENDPOINTS[0])
+        good = _subscription(VALID_ENDPOINTS[0])
+        good["keys"]["p256dh"] = urlsafe_b64encode(b"\x04" + bytes(64)).decode()
+
+        with self.assertLogs("frigate.comms.webpush", level="WARNING"):
+            pushers = _build_web_pushers("viewer", [bad, good])
+
+        self.assertEqual(len(pushers), 1)
+        self.assertEqual(pushers[0].receiver_key, b"\x04" + bytes(64))
