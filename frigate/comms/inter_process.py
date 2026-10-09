@@ -73,14 +73,16 @@ class InterProcessRequestor:
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REQ)
         self.socket.connect(SOCKET_REP_REQ)
+        self.lock = threading.Lock()
 
     def send_data(self, topic: str, data: Any) -> Any:
         """Sends data and then waits for reply."""
-        try:
-            self.socket.send_json((topic, data))
-            return self.socket.recv_json()
-        except zmq.ZMQError:
-            return ""
+        with self.lock:
+            try:
+                self.socket.send_json((topic, data))
+                return self.socket.recv_json()
+            except zmq.ZMQError:
+                return ""
 
     def stop(self) -> None:
         self.socket.close(linger=0)
