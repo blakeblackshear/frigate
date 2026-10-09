@@ -449,6 +449,21 @@ class TestOllamaProvider(unittest.TestCase):
         self.assertFalse(client.supports_embeddings)
         self.assertTrue(client.supports_embeddings)
 
+    def test_thinking_rechecked_after_provider_recovers(self):
+        client = self._client()
+        client.provider = None
+
+        self.assertFalse(client.supports_toggleable_thinking)
+
+        client.provider = MagicMock()
+        client.provider.show.return_value = {"capabilities": ["thinking"]}
+
+        self.assertTrue(client.supports_toggleable_thinking)
+        params = client._build_request_params(
+            [{"role": "user", "content": "hi"}], None, None, enable_thinking=True
+        )
+        self.assertTrue(params["think"])
+
     @staticmethod
     def _webp_bytes():
         import io

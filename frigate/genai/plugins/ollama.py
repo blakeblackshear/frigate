@@ -149,9 +149,12 @@ class OllamaClient(GenAIClient):
 
     @property
     def supports_toggleable_thinking(self) -> bool:
-        if self._supports_thinking_cache is None:
-            capabilities = self._model_capabilities() or []
-            self._supports_thinking_cache = "thinking" in capabilities
+        if self._supports_thinking_cache is not None:
+            return self._supports_thinking_cache
+        capabilities = self._model_capabilities()
+        if capabilities is None:
+            return False
+        self._supports_thinking_cache = "thinking" in capabilities
         return self._supports_thinking_cache
 
     @property

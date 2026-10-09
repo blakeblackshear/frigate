@@ -133,11 +133,11 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 ### GenAI Provider
 
-Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. See [Provider support](/configuration/genai/config#provider-support) for which providers can serve this role.
+Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. See [Provider support](/configuration/genai/genai_config#provider-support) for which providers can serve this role.
 
 To use a GenAI provider for semantic search:
 
-1. Configure a GenAI provider with `embeddings` in its `roles`, using a multimodal embedding model (both text and images). See [Embedding models](/configuration/genai/config#embedding-models) for recommendations, and your provider's section of the [GenAI docs](/configuration/genai/config) for any extra setup it needs.
+1. Configure a GenAI provider with `embeddings` in its `roles`, using a multimodal embedding model (both text and images). See [Embedding models](/configuration/genai/genai_config#embedding-models) for recommendations, and your provider's section of the [GenAI docs](/configuration/genai/genai_config) for any extra setup it needs.
 2. Set the semantic search model to the GenAI config key (e.g. `default`).
 
 <ConfigTabs>
