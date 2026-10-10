@@ -34,15 +34,15 @@ runs:
       run: sudo systemctl start docker
       shell: bash
     - id: lowercaseRepo
-      uses: ASzc/change-string-case-action@v5
+      uses: ASzc/change-string-case-action@v8
       with:
         string: ${{ github.repository }}
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@v4
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v4
     - name: Log in to the Container registry
-      uses: docker/login-action@465a07811f14bebb1938fbed4728c6a1ff8901fc
+      uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
