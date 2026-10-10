@@ -85,6 +85,7 @@ def apply_log_levels(default: str, log_levels: dict[str, LogLevel]) -> None:
     log_levels = {
         "absl": LogLevel.error,
         "httpx": LogLevel.error,
+        "httpx2": LogLevel.error,
         "h5py": LogLevel.error,
         "keras": LogLevel.error,
         "matplotlib": LogLevel.error,
