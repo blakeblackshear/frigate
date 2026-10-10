@@ -53,6 +53,7 @@
         "ffmpeg_high_cpu": "FFmpeg CPU usage is high ({{cpu}}% average)",
         "detect_high_cpu": "Detection CPU usage is high ({{cpu}}% average)",
         "shm_too_low": "/dev/shm allocation ({{total}} MB) should be increased to at least {{min}} MB",
+        "object_processing_behind": "Tracked object processing could not keep up, so camera frames were dropped. Check CPU utilization, and whether CPU limits or pinning on the container or VM are leaving Frigate too little CPU",
         "failed_login_one": "Failed login attempt for {{user}}",
         "failed_login_other": "Failed login attempts for {{user}}",
         "update_available": "Frigate {{version}} is available"
