@@ -2,6 +2,7 @@
 
 import logging
 import os
+import shutil
 import threading
 
 from transformers import AutoTokenizer, CLIPImageProcessor
@@ -50,6 +51,13 @@ class JinaV1TextEmbedding(BaseEmbedding):
         self.runner = None
         self._lock = threading.Lock()
         files_names = list(self.download_urls.keys()) + [self.tokenizer_file]
+
+        # an interrupted download leaves the hub cache without the saved tokenizer
+        tokenizer_path = os.path.join(self.download_path, self.tokenizer_file)
+        if os.path.isdir(tokenizer_path) and not os.path.exists(
+            os.path.join(tokenizer_path, "tokenizer_config.json")
+        ):
+            shutil.rmtree(tokenizer_path)
 
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names
