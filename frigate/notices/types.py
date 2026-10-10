@@ -73,6 +73,15 @@ _KINDS = (
         "detect_high_cpu", NoticeSeverity.warning, "camera", link="/system#cameras"
     ),
     NoticeKind("shm_too_low", NoticeSeverity.warning, "system", link="/system#storage"),
+    # every camera process raises it when the shared queue backs up, so repeats
+    # wait for the next flush instead of writing once per camera
+    NoticeKind(
+        "object_processing_behind",
+        NoticeSeverity.warning,
+        "system",
+        link="/system#cameras",
+        batch_repeats=True,
+    ),
     # one row per user per burst; the login log lines carry the address
     NoticeKind(
         "failed_login",
