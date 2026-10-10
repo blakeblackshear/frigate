@@ -2,6 +2,7 @@
 
 import logging
 import queue
+import threading
 import time
 from collections import deque
 from datetime import UTC, datetime
@@ -60,7 +61,6 @@ logger = logging.getLogger(__name__)
 DROPPED_FRAMES_NOTICE_COUNT = 5
 DROPPED_FRAMES_WINDOW_S = 30
 
-# raising a notice is a blocking round trip to the main process
 DROPPED_FRAMES_NOTICE_INTERVAL_S = 60
 
 
@@ -72,6 +72,10 @@ class DroppedFrameTracker:
         self._enabled = not camera.startswith(REPLAY_CAMERA_PREFIX)
         self._drops: deque[float] = deque()
         self._last_notice: float | None = None
+
+        # raising a notice waits on the main process, which answers every
+        # process's requests one at a time, so it runs off the frame loop
+        self._sender: threading.Thread | None = None
 
     def dropped(self, now: float) -> None:
         """Record a dropped frame and raise the notice if enough were dropped.
@@ -87,15 +91,25 @@ class DroppedFrameTracker:
         while now - self._drops[0] > DROPPED_FRAMES_WINDOW_S:
             self._drops.popleft()
 
-        if len(self._drops) < DROPPED_FRAMES_NOTICE_COUNT or (
-            self._last_notice is not None
-            and now - self._last_notice < DROPPED_FRAMES_NOTICE_INTERVAL_S
+        if (
+            len(self._drops) < DROPPED_FRAMES_NOTICE_COUNT
+            or (
+                self._last_notice is not None
+                and now - self._last_notice < DROPPED_FRAMES_NOTICE_INTERVAL_S
+            )
+            or (self._sender is not None and self._sender.is_alive())
         ):
             return
 
         self._drops.clear()
         self._last_notice = now
-        raise_notice("object_processing_behind")
+        self._sender = threading.Thread(
+            target=raise_notice,
+            args=("object_processing_behind",),
+            name="dropped_frames_notice",
+            daemon=True,
+        )
+        self._sender.start()
 
 
 class CameraTracker(FrigateProcess):
