@@ -121,18 +121,22 @@
         "desc": "Quan el flux en viu d'alta qualitat d'una càmera no està disponible, torneu al mode d'amplada de banda baixa després d'aquests molts segons. Per defecte: 3."
       },
       "naturalAspectLayout": {
-        "label": "Utilitza relació natural d'aspecte"
+        "label": "Utilitza relació natural d'aspecte",
+        "desc": "En els panells de visualització en viu del grup de càmeres, dimensiona cada fitxa a la seva relació d'aspecte natural. Quan està desactivat, les càmeres s'ajusten a una forma estàndard de rajola ampla, paisatgística o alta.",
+        "descNote": "Si activeu o desactiveu aquesta opció, esborrarà la disposició emmagatzemada per a tots els taulers de control en directe del grup de càmeres. Es requerirà una reconfiguració manual."
       }
     },
     "storedLayouts": {
       "title": "Disposicions desades",
       "desc": "La disposició de les càmeres en un grup es pot arrossegar i redimensionar. Les posicions es guarden a l’emmagatzematge local del teu navegador.",
-      "clearAll": "Esborra tots les disposicions"
+      "clearAll": "Esborra tots les disposicions",
+      "clearConfirm": "Això netejarà la disposició emmagatzemada per a cada grup de càmeres d'aquest navegador. Això no es pot desfer."
     },
     "cameraGroupStreaming": {
       "desc": "La configuració de la transmissió per a cada grup de càmeres s'emmagatzema de manera local al vostre navegador.",
       "title": "Parmàmetres de transmissió del grup de càmeres",
-      "clearAll": "Esborra tots els paràmetres de transmissió"
+      "clearAll": "Esborra tots els paràmetres de transmissió",
+      "clearConfirm": "Això netejarà la configuració de transmissió per a cada grup de càmeres d'aquest navegador. Això no es pot desfer."
     },
     "recordingsViewer": {
       "title": "Visualitzador d'enregistraments",
@@ -196,7 +200,10 @@
         "unknownCameras_one": "La càmera {{cameras}} no és en aquest servidor. S'ignorarà la seva configuració de transmissió.",
         "unknownCameras_many": "Les càmeres {{cameras}} no són en aquest servidor. S'ignoraran els seus paràmetres de transmissió.",
         "unknownCameras_other": "Les càmeres {{cameras}} no són en aquest servidor. S'ignoraran els seus paràmetres de transmissió.",
-        "confirm": "Importa"
+        "confirm": "Importa",
+        "layoutsPhone": "Les disposicions del grup de càmeres no s'importen als telèfons, que sempre utilitzen la quadrícula estàndard.",
+        "layoutsModeOff": "Aquestes disposicions utilitzen la mida estàndard de la tessel·la, de manera que importar-les també desactivarà «Utilitza la relació d'aspecte natural».",
+        "layoutsModeOn": "Aquestes disposicions utilitzen la mida de la rajola de la relació d'aspecte de la càmera, de manera que la importació d'elles també activarà \"Utilitza les proporcions d'aspecte natural\"."
       }
     }
   },
@@ -946,7 +953,10 @@
       "actions": "Accions",
       "noRoles": "No s'han trobat rols personalitzats.",
       "editCameras": "Editar Càmeres",
-      "deleteRole": "Eliminar Rol"
+      "deleteRole": "Eliminar Rol",
+      "cameraCount_one": "{{count}} càmera",
+      "cameraCount_many": "{{count}} càmeres",
+      "cameraCount_other": "{{count}} càmeres"
     },
     "toast": {
       "success": {
@@ -1701,7 +1711,15 @@
       "noGo2rtcStreams": "No s'ha configurat cap flux go2rtc",
       "availableStreams": "Fluxos disponibles",
       "useCustom": "Utilitza \"{{value}}\"",
-      "addStream": "Afegeix un flux"
+      "addStream": "Afegeix un flux",
+      "reorderHandle": "Arrossega per reordenar",
+      "transcodedBadge": "Transcodificat",
+      "autoOrder": "Ordre automàtic",
+      "autoOrderTips": "Mesura la taxa de bits de cada flux i ordena primer la més alta",
+      "measuring": "Mesurant…",
+      "rateSet": "{{kbps}} kbps (set)",
+      "rateFailed": "No s'ha pogut mesurar",
+      "rate": "{{kbps}} kbps"
     },
     "ptzPresets": {
       "placeholder": "Selecciona o entra una configuració...",
@@ -1732,6 +1750,18 @@
     },
     "audioTranscriptionModelSize": {
       "notApplicable": "No aplicable als proveïdors de GenAI"
+    },
+    "liveTranscode": {
+      "title": "Fluxos transcodificats",
+      "description": "Afegeix fluxos de baixa qualitat que go2rtc transcodifica en temps real mentre algú està mirant.",
+      "unavailable": "Els fluxos transcodificats necessiten un flux go2rtc per llegir-lo. Afegiu-ne un sota els fluxos go2rtc primer.",
+      "enable": "Habilita els fluxos transcodificats",
+      "source": "Flux d'origen",
+      "height": "Alçada",
+      "addQuality": "Afegeix qualitat",
+      "removeQuality": "Elimina la qualitat",
+      "bitrate": "Bitrate (kbps)",
+      "heightOption": "{{height}}p"
     }
   },
   "globalConfig": {
@@ -1770,7 +1800,8 @@
     "applied": "La configuració s'ha aplicat correctament",
     "saveAllSuccessRestartRequired_one": "S'ha desat la secció {{count}} correctament. Reinicia Frigate per aplicar els canvis.",
     "saveAllSuccessRestartRequired_many": "Totes les {{count}} seccions s'han desat correctament. Reinicia Frigate per aplicar els canvis.",
-    "saveAllSuccessRestartRequired_other": "Totes les {{count}} seccions s'han desat correctament. Reinicia Frigate per aplicar els canvis."
+    "saveAllSuccessRestartRequired_other": "Totes les {{count}} seccions s'han desat correctament. Reinicia Frigate per aplicar els canvis.",
+    "go2rtcSyncFailed": "S'ha desat, però no s'ha pogut actualitzar go2rtc. Reinicia la fragata a aplicar."
   },
   "unsavedChanges": "Teniu canvis sense desar",
   "confirmReset": "Confirma el restabliment",
@@ -1946,7 +1977,7 @@
       "squareResolution": "Una resolució de detecció quadrada és inusual. L'amplada i l'alçada de la detecció han de coincidir amb la relació d'aspecte de la càmera (per exemple, 16:9), no amb les dimensions del model de detecció d'objectes. Una relació d'aspecte no coincident pot estirar la imatge i reduir la precisió de detecció.",
       "resolutionHigh": "Aquesta resolució de detecció és més alta del recomanat i pot causar un ús més elevat dels recursos sense millorar la precisió de detecció. Es recomana una resolució de detecció a o per sota de 1080p per a la majoria de les càmeres.",
       "globalResolutionMultipleCameras": "S'estableix una resolució de detecció global mentre es configuren diverses càmeres. Tret que totes les càmeres comparteixin la mateixa resolució i relació d'aspecte, l'amplada i l'alçada de la detecció s'haurien de definir per càmera perquè coincideixi amb la relació d'aspecte nativa de cada càmera.",
-      "sceneWithoutModel": "No s'ha configurat cap model de detecció per a aquesta escena, de manera que aquesta càmera torna al model amb una escena de 'Totes les càmeres'. Afegiu un model per a aquesta escena per donar la càmera pròpia.",
+      "sceneWithoutModel": "Aquestes disposicions utilitzen la mida de la rajola de la relació d'aspecte de la càmera, de manera que la importació d'elles també activarà \"Utilitza les proporcions d'aspecte natural\".",
       "runtimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera. Instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran fins que no s'encengui des de la vista en viu de la càmera, o fins que el perfil actiu deixi d'inhabilitar-lo."
     },
     "faceRecognition": {
@@ -1961,7 +1992,8 @@
     },
     "record": {
       "noRecordRole": "Cap flux té el rol de registre definit. L'enregistrament no funcionarà.",
-      "noRecordSubRole": "Cap flux té definit el rol recordsubsub. L'enregistrament del substream no funcionarà."
+      "noRecordSubRole": "Cap flux té definit el rol recordsubsub. L'enregistrament del substream no funcionarà.",
+      "profileBaseDisabled": "L'enregistrament està desactivat en la configuració base d'aquesta càmera, de manera que habilitar-lo en un perfil no té cap efecte. Habilita l'enregistrament a la configuració base i utilitza un perfil per desactivar-lo."
     },
     "snapshots": {
       "detectDisabled": "La detecció d'objectes està desactivada. Les instantànies es generen a partir d'objectes rastrejats i no es crearan.",
@@ -1987,6 +2019,9 @@
     "birdseye": {
       "objectTrackingDetectDisabled": "Birdseye inclou objectes rastrejats, però la detecció d'objectes està desactivada per a aquesta càmera. La càmera no apareixerà a Birdseye.",
       "objectTrackingDetectRuntimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera. Instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran fins que no s'encengui des de la vista en viu de la càmera, o fins que el perfil actiu deixi d'inhabilitar-lo."
+    },
+    "notifications": {
+      "profileBaseDisabled": "Cap càmera té les notificacions habilitades a la seva configuració base, de manera que habilitar-les en un perfil no té cap efecte. Habilita les notificacions a la configuració base d'almenys una càmera."
     }
   },
   "modelSize": {
@@ -2051,21 +2086,15 @@
   },
   "detectionModels": {
     "title": "Models de detecció",
-    "description": "Configura els models de detecció d'objectes i el maquinari que s'executa. Les càmeres trien un model segons la seva escena a la configuració de detecció de la càmera.",
+    "description": "Configura els models de detecció d'objectes i el maquinari que s'executa. Afegir un model per a una escena només quan algunes càmeres necessiten un model entrenat diferent, com les càmeres tèrmiques. Les càmeres trien un model segons la seva escena a la configuració de detecció de la càmera.",
     "addModel": "Afegeix un model",
     "cameras_one": "{{count}} càmera",
     "cameras_many": "{{count}} càmeres",
     "cameras_other": "{{count}} càmeres",
     "scene": {
       "label": "Escena",
-      "description": "L'entorn per al qual serveix aquest model. Les càmeres trien un model establint la mateixa escena a la seva configuració de detecció, i el model amb una escena de tots és utilitzat per qualsevol càmera que no en estableixi una."
-    },
-    "scenes": {
-      "all": "Totes les càmeres",
-      "indoor": "Interior",
-      "outdoor": "Exterior",
-      "indoor_thermal": "Tèrmiques interiors",
-      "outdoor_thermal": "Tèrmiques exterior"
+      "description": "Un nom per a les càmeres per a les quals és aquest model. Les càmeres trien un model establint la mateixa escena a la seva configuració de detecció, i el model per defecte és utilitzat per qualsevol càmera que no n'estableixi un. Utilitzeu escenes per executar diferents models, no per dividir un model a través del maquinari, ja que es combinen models que utilitzen el mateix fitxer de model.",
+      "placeholder": "tèrmic"
     },
     "hardware": {
       "label": "Maquinari",
@@ -2080,7 +2109,7 @@
       "unrecognized": "Aquest model està configurat per al maquinari que no s'ha trobat en aquest sistema: {{devices}}",
       "description": "El maquinari en el qual aquest model executa la seva detecció.",
       "detectorCountDescription": "Quants processos de detecció s'han d'executar en aquest maquinari. Més detectors es mantenen al dia amb més càmeres, a costa de la memòria extra del dispositiu.",
-      "unitsDescription": "Cada unitat executa el seu propi procés de detecció. No es pot seleccionar una unitat ja utilitzada per un altre model."
+      "unitsDescription": "Cada unitat executa el seu propi procés de detecció. Una unitat que no es pot compartir, com un Coral, només es pot utilitzar per un model."
     },
     "tabs": {
       "plus": "Frigate+",
@@ -2088,6 +2117,9 @@
     },
     "plusModel": {
       "noModelSelected": "Selecciona un model Frigate+"
+    },
+    "scenes": {
+      "default": "Per defecte"
     }
   }
 }

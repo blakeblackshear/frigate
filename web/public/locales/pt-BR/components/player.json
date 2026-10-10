@@ -30,7 +30,9 @@
       }
     },
     "decodedFrames": "Quadros Decodificados:",
-    "droppedFrameRate": "Taxa de Quadros Perdidos:"
+    "droppedFrameRate": "Taxa de Quadros Perdidos:",
+    "stream": "Transmissão:",
+    "streamAuto": "{{stream}} (auto)"
   },
   "toast": {
     "success": {

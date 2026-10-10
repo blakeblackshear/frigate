@@ -22,7 +22,9 @@
       }
     },
     "decodedFrames": "디코딩된 프레임:",
-    "droppedFrameRate": "프레임 손실률:"
+    "droppedFrameRate": "프레임 손실률:",
+    "stream": "스트림:",
+    "streamAuto": "{{stream}} (자동)"
   },
   "noRecordingsFoundForThisTime": "해당 시간대에 저장된 녹화 영상이 없습니다",
   "noPreviewFound": "미리보기를 찾을 수 없습니다",

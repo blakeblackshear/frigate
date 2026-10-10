@@ -268,7 +268,8 @@
     "retry": "Coba Lagi",
     "expand": "Perluas",
     "collapse": "Ciutkan",
-    "reload": "Muat ulang"
+    "reload": "Muat ulang",
+    "clear": "Bersihkan"
   },
   "toast": {
     "copyUrlToClipboard": "URL disalin ke papan klip.",

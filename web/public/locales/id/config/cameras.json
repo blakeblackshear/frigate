@@ -112,7 +112,7 @@
         },
         "scene": {
             "label": "Deteksi adegan",
-            "description": "Lingkungan yang dilihat oleh kamera ini, digunakan untuk memilih mana dari model terkonfigurasi yang berjalan padanya. Kamera yang dibiarkan pada 'semua' akan menjalankan model yang dikonfigurasi dengan adegan 'semua'."
+            "description": "Lingkungan yang ditampakkan oleh kamera ini, digunakan untuk memilih model mana konfigurasi mana yang digunakan. Kamera dengan konfigurasi 'default' akan menjalankan model yang dikonfigurasi dengan skenario 'default'."
         },
         "min_initialized": {
             "label": "Jumlah minimum bingkai inisialisasi",
@@ -245,6 +245,20 @@
         "quality": {
             "label": "Kualitas pemutaran langsung",
             "description": "Kualitas encoding untuk stream jsmpeg (1 tertinggi, 31 terendah)."
+        },
+        "transcode": {
+            "source": {
+                "label": "Sumber Aliran Data"
+            },
+            "qualities": {
+                "label": "Kualitas",
+                "height": {
+                    "label": "Tinggi"
+                },
+                "bitrate": {
+                    "label": "Laju bit"
+                }
+            }
         }
     },
     "lpr": {
@@ -305,6 +319,52 @@
         "frame_height": {
             "label": "Tinggi bingkai",
             "description": "Tinggi dalam piksel untuk mengubah skala bingkai (*frame*) saat menghitung gerakan."
+        },
+        "mask": {
+            "label": "Tandai Koordinat"
+        }
+    },
+    "objects": {
+        "label": "Obyek",
+        "track": {
+            "label": "Obyek untuk dilacak"
+        },
+        "filters": {
+            "label": "Filter Obyek",
+            "min_area": {
+                "label": "Area minimum obyek",
+                "description": "Luas kotak pembatas minimum (piksel atau persentase) yang diperlukan untuk jenis objek ini. Nilainya bisa berupa piksel (int) atau persentase (float antara 0,000001 dan 0,99)."
+            },
+            "max_area": {
+                "label": "Area maksimum obyek",
+                "description": "Luas kotak pembatas maksimum (piksel atau persentase) yang diizinkan untuk jenis objek ini. Nilainya bisa berupa piksel (int) atau persentase (float antara 0,000001 dan 0,99)."
+            },
+            "min_ratio": {
+                "label": "Aspek rasio minimum",
+                "description": "Rasio lebar/tinggi minimum diperlukan agar kotak pembatas memenuhi syarat."
+            },
+            "max_ratio": {
+                "label": "Aspek rasio maksimum",
+                "description": "Rasio lebar/tinggi maksimum yang diizinkan agar bounding box memenuhi syarat."
+            },
+            "threshold": {
+                "label": "Ambang batas kepercayaan",
+                "description": "Ambang batas keyakinan deteksi rata-rata yang diperlukan agar objek dianggap sebagai *true positive*."
+            },
+            "min_score": {
+                "label": "Kepercayaan minimum",
+                "description": "Tingkat keyakinan deteksi minimum pada satu bingkai yang diperlukan agar objek dapat dihitung."
+            }
+        },
+        "genai": {
+            "required_zones": {
+                "label": "Zona wajib",
+                "description": "Zona yang harus dimasukan agar objek memenuhi syarat untuk pembuatan deskripsi GenAI."
+            },
+            "debug_save_thumbnails": {
+                "label": "Simpan gambar mini",
+                "description": "Simpan gambar mini yang dikirim ke GenAI untuk keperluan debugging dan peninjauan."
+            }
         }
     }
 }

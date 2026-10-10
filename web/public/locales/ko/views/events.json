@@ -87,7 +87,7 @@
     "seekAria": "{{camera}} 플레이어를 {{time}} 위치로 이동",
     "filter": "필터",
     "filterDesc": "선택한 영역에 움직임이 있는 클립만 표시합니다.",
-    "filterClear": "초기화",
+    "filterClear": "지우기",
     "crop": "필터 영역으로 확대",
     "cropAria": "미리보기를 필터 영역으로 자르기 전환",
     "cropDesc": "전체 화면 대신 선택한 필터 영역으로 미리보기를 확대합니다."

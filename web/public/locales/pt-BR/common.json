@@ -163,7 +163,8 @@
     "retry": "Tente novamente",
     "expand": "Expandir",
     "collapse": "Recolher",
-    "reload": "Recarregar"
+    "reload": "Recarregar",
+    "clear": "Limpar"
   },
   "menu": {
     "system": "Sistema",

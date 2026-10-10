@@ -46,10 +46,10 @@
       "selectStream": "Vali voog",
       "selectQuality": "Valige kvaliteet",
       "notConnected": "Pole ühendatud",
-      "testFailedTitle": "Test ebaõnnestus",
+      "testFailedTitle": "Testimine ei õnnestunud",
       "testStream": "Testi ühendust",
       "testSuccess": "Voo test edukas!",
-      "testFailed": "Voo test ebaõnnestus",
+      "testFailed": "Voogedastuse testimine ei õnnestunud",
       "selectResolution": "Vali resolutsioon",
       "noStreamFound": "Voogu ei leitud",
       "addAnotherStream": "Lisa järgmine voog",
@@ -80,8 +80,8 @@
       "uriCopy": "Kopeeri",
       "connected": "Ühendatud",
       "testSuccess": "Ühenduse test õnnestus!",
-      "testFailed": "Ühenduse test ebaõnnestus. Palun kontrollige sisestatud andmeid ja proovige uuesti.",
-      "testFailedTitle": "Test ebaõnnestus",
+      "testFailed": "Ühenduse testimine ei õnnestunud. Palun kontrolli sisestatud andmeid ja proovi uuesti.",
+      "testFailedTitle": "Testimine ei õnnestunud",
       "streamDetails": "Voo üksikasjad",
       "probing": "Tuvastan kaamerat...",
       "ptzSupport": "PTZ tugi",
@@ -94,14 +94,14 @@
       "candidateStreamTitle": "Kandidaat {{number}}",
       "probeSuccessful": "Tuvastamine õnnestus",
       "probeError": "Tuvastamise viga",
-      "probeNoSuccess": "Tuvastamine ebaõnnestus",
+      "probeNoSuccess": "Tuvastamine ei õnnestunud",
       "deviceInfo": "Seadme info",
       "autotrackingSupport": "Automaatse jälgimise tugi",
       "uriCopied": "URI kopeeriti lõikelauale",
       "rtspCandidates": "RTSP kandidaadid",
       "probingDevice": "Tuvastan seadet...",
       "description": "Tuvasta kaamera vooge või seadista käsitsi seaded vastavalt valitud tuvastusmeetodile.",
-      "probeFailed": "Kaamera tuvastamine ebaõnnestus: {{error}}"
+      "probeFailed": "Kaamera tuvastamine ei õnnestunud: {{error}}"
     },
     "testResultLabels": {
       "resolution": "Resolutsioon",
@@ -123,7 +123,7 @@
     },
     "commonErrors": {
       "noUrl": "Palun sisestage kehtiv voogesituse URL",
-      "testFailed": "Voo test ebaõnnestus: {{error}}"
+      "testFailed": "Voogedastuse testimine ei õnnestunud: {{error}}"
     },
     "save": {
       "success": "Uue kaamera '{{cameraName}}' salvestamine õnnestus.",
@@ -207,7 +207,8 @@
       "changeRole": {
         "roleInfo": {
           "admin": "Peakasutaja",
-          "viewer": "Vaataja"
+          "viewer": "Vaataja",
+          "viewerDesc": "Piiratud reaalajas juhtpaneeliga, ülevaatamisega, uurimisvaatega ja ekportimisega."
         }
       }
     },
@@ -499,7 +500,7 @@
         "confirmButton": "Indekseeri uuesti",
         "label": "Indekseeri kohe uuesti",
         "alreadyInProgress": "Ümberindekseerimine on juba käimas.",
-        "error": "Uuesti indekseerimise alustamine ebaõnnestus: {{errorMessage}}",
+        "error": "Uuesti indekseerimise alustamine ei õnnestunud: {{errorMessage}}",
         "success": "Ümberindekseerimine algas edukalt.",
         "confirmTitle": "Kinnita uuesti indekseerimine"
       },
@@ -538,7 +539,7 @@
     "restart_required": "Taaskäivitamine on vajalik (Andmerikastuse seadeid on muudetud)",
     "toast": {
       "success": "Andmerikastamise seaded on salvestatud. Muudatuste rakendamiseks taaskäivitage Frigate.",
-      "error": "Seadete muudatuste salvestamine ebaõnnestus: {{errorMessage}}"
+      "error": "Seadete muudatuste salvestamine ei õnnestunud: {{errorMessage}}"
     }
   },
   "cameraReview": {

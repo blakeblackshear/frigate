@@ -32,7 +32,8 @@
         "camera": "Kamera"
       },
       "count_one": "{{count}} viesti",
-      "count_other": "{{count}} viestiä"
+      "count_other": "{{count}} viestiä",
+      "clear": "Tyhjennä"
     }
   },
   "documentTitle": {
@@ -45,7 +46,8 @@
       "go2rtc": "Go2RTC lokit - Frigate",
       "nginx": "Nginx lokit - Frigate",
       "websocket": "Viestilokit - Frigate"
-    }
+    },
+    "health": "Kunto - Frigate"
   },
   "title": "Järjestelmä",
   "metrics": "Järjestelmämittarit",
@@ -94,6 +96,52 @@
       "classification_events_per_second": "{{name}} Luokittelutapahtumia Sekunnissa",
       "object_description_events_per_second": "Objektin Kuvaus",
       "classification": "{{name}} Luokittelu"
+    }
+  },
+  "showAllTabs": "Näytä kaikki välilehdet",
+  "showLessTabs": "Näytä vähemmän",
+  "health": {
+    "title": "Kunto",
+    "notices": {
+      "title": "Tiedotteet",
+      "empty": "Frigate asennuksesi on kunnossa",
+      "acknowledge": "Hyväksy",
+      "acknowledgeHint": "Pillota kunnes tapahtuu uudestaan",
+      "mute": "Mykistä",
+      "muteHint": "Älä näytä tätä enää",
+      "unmute": "Poista mykistys",
+      "showAgain": "Näytä uudestaan",
+      "openSettings": "Avaa asetukset",
+      "openLink": "Avaa linkki",
+      "noMatches": "Ei suodatuksen mukaisia tiedotuksia",
+      "hiddenTitle": "Piilotettu",
+      "noneHidden": "Ei piilotettuja tiedotteita",
+      "showAll": "Näytä kaikki taas",
+      "showAllTitle": "Näytä piilotetut tiedotteet?",
+      "showAllDesc": "Jokainen hyväksytty ja mykistetty tiedote palaa Tiedote listalle, mukaanlukien asetukset ja stream tarkistukset.",
+      "firstSeen_one": "Ensimmäinen havainto {{time}}",
+      "firstSeen_other": "Ensimmäinen havainto{{time}}· {{count}} kertaa",
+      "acknowledgedAt": "Kuitattu {{time}}",
+      "mutedAt": "Mykistetty {{time}}",
+      "filter": {
+        "showHidden": "Näytä piilotetut",
+        "severity": "Vakavuus",
+        "error": "Virhe",
+        "warning": "Varoitus",
+        "info": "Info"
+      },
+      "kinds": {
+        "detector_stuck": "Tunnistin {{detector}} käynnistettiin uudestaan koska se ei vastannut",
+        "model_download_failed": "Lataaminen {{file}} mallille {{model}} epäonnistui: {{error}}",
+        "skipped_detections": "Tunnistaminen ei pysynyt vauhdissa ja pudotti {{pct}}% kuvakehyksistä minuutissa",
+        "ffmpeg_high_cpu": "FFmpegin prosessorikäyttö on korkea ({{cpu}}% keskiarvo)",
+        "detect_high_cpu": "Tunnistuksen prosessorikäyttö on korkea ({{cpu}}% keskiarvo)",
+        "shm_too_low": "/dev/shm allokaatiota ({{total}} MB) pitäisi lisätä ainakin {{min}} MB",
+        "failed_login_one": "Epäonnistunut kirjautuminen käyttäjälle {{user}}",
+        "failed_login_other": "Epäonnistuneet kirjautumisyritykset käyttäjälle {{user}}",
+        "update_available": "Frigate {{version}} on saatavilla"
+      },
+      "streamPrefix": "Striimi {{index}}: {{message}}"
     }
   }
 }

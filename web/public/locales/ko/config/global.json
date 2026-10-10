@@ -16,7 +16,7 @@
         "description": "기본 로그 상세도 및 구성 요소별 로그 수준 재정의를 제어합니다.",
         "default": {
             "label": "로그 수준",
-            "description": "전역 기본 로그 수준(debug, info, warning, error)입니다."
+            "description": "전역 기본 로그 수준(디버그, 정보, 경고, 오류, 심각)을 선택하세요."
         },
         "logs": {
             "label": "프로세스별 로그 수준",
@@ -236,7 +236,7 @@
         },
         "language": {
             "label": "변환 언어",
-            "description": "텍스트 변환/번역에 사용할 언어 코드입니다 (예: 한국어는 'ko', 영어는 'en')."
+            "description": "텍스트 변환 및 번역에 사용할 언어 코드(예: 한국어는 'ko', 영어는 'en')입니다. 모델이 자동으로 감지하도록 하려면 'auto'로 지정합니다. 지원되는 언어 코드는 https://whisper-api.com/docs/languages/ 를 참조하세요."
         },
         "device": {
             "label": "변환 디바이스",
@@ -245,6 +245,10 @@
         "model_size": {
             "label": "모델 크기",
             "description": "오프라인 오디오 이벤트 텍스트 변환에 사용할 모델 크기입니다."
+        },
+        "model": {
+            "label": "오디오 텍스트 변환 모델 또는 GenAI 공급자 이름",
+            "description": "텍스트 변환 백엔드: Frigate 내장 로컬 모델의 경우 'whisper', 또는 오디오 변환(transcribe) 역할이 지정된 GenAI 공급자 이름입니다."
         }
     },
     "birdseye": {
@@ -360,7 +364,7 @@
         },
         "scene": {
             "label": "감지 장면",
-            "description": "이 카메라가 비추는 환경으로, 구성된 모델 중 어떤 모델을 실행할지 선택하는 데 사용됩니다. '전체'로 설정된 카메라는 장면이 '전체'로 구성된 모델을 실행합니다."
+            "description": "이 카메라가 비추는 환경으로, 구성된 모델 중 어떤 모델을 실행할지 선택하는 데 사용됩니다. '기본'으로 설정된 카메라는 장면이 '기본'으로 구성된 모델을 실행합니다."
         }
     },
     "face_recognition": {
@@ -376,7 +380,7 @@
         "description": "모든 카메라에 대한 얼굴 감지 및 인식 설정입니다. 카메라별로 재정의할 수 있습니다.",
         "model_size": {
             "label": "모델 크기",
-            "description": "얼굴 임베딩에 사용할 모델 크기(small/large)입니다. 큰 모델은 GPU가 필요할 수 있습니다."
+            "description": "얼굴 임베딩에 사용할 모델 크기(소형/대형)입니다. 대형 모델은 GPU가 필요할 수 있습니다."
         },
         "unknown_score": {
             "label": "미확인 점수 임계값",
@@ -493,18 +497,42 @@
             "label": "실시간 품질",
             "description": "jsmpeg 스트림의 인코딩 품질입니다 (1 최고 품질, 31 최저 품질)."
         },
-        "description": "jsmpeg 실시간 스트림의 해상도 및 품질을 제어하는 설정입니다. go2rtc를 사용하는 재스트리밍 카메라에는 영향을 미치지 않습니다."
+        "description": "jsmpeg 실시간 스트림의 해상도 및 품질을 제어하는 설정입니다. go2rtc를 사용하는 재스트리밍 카메라에는 영향을 미치지 않습니다.",
+        "transcode": {
+            "label": "트랜스코딩된 스트림",
+            "description": "go2rtc를 통해 요청 시 실시간으로 트랜스코딩되는 저화질 라이브 스트림입니다.",
+            "enabled": {
+                "label": "트랜스코딩된 스트림 사용",
+                "description": "사용자가 시청하는 동안 go2rtc가 실시간으로 트랜스코딩하는 저화질 라이브 스트림을 추가합니다."
+            },
+            "source": {
+                "label": "소스 스트림",
+                "description": "트랜스코딩할 go2rtc 스트림입니다. 기본값은 첫 번째 라이브 스트림입니다."
+            },
+            "qualities": {
+                "label": "화질 목록",
+                "description": "화질당 하나의 트랜스코딩된 스트림이 추가됩니다.",
+                "height": {
+                    "label": "높이",
+                    "description": "출력 높이(픽셀 단위)이며, 너비는 원본 화면비에 맞춰 자동 조정됩니다."
+                },
+                "bitrate": {
+                    "label": "비트레이트",
+                    "description": "목표 및 최대 비디오 비트레이트(kbps 단위)입니다."
+                }
+            }
+        }
     },
     "lpr": {
         "label": "차량 번호판 인식",
         "description": "감지 임계값, 포맷, 등록된 번호판 등을 포함한 차량 번호판 인식 설정입니다.",
         "enabled": {
-            "label": "LPR 활성화",
-            "description": "모든 카메라의 번호판 인식을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
+            "label": "차량 번호판 인식 활성화",
+            "description": "모든 카메라의 차량 번호판 인식을 활성화하거나 비활성화합니다. 카메라별로 재정의할 수 있습니다."
         },
         "expire_time": {
             "label": "만료 시간(초)",
-            "description": "시야에서 사라진 번호판이 트래커에서 만료되기까지의 시간(초)입니다 (전용 LPR 카메라 전용)."
+            "description": "시야에서 사라진 번호판이 트래커에서 만료되기까지의 시간(초)입니다 (전용 번호판 인식 카메라 전용)."
         },
         "min_area": {
             "label": "최소 번호판 크기",
@@ -516,7 +544,7 @@
         },
         "model_size": {
             "label": "모델 크기",
-            "description": "텍스트 감지/인식에 사용할 모델 크기입니다. 대부분 'small' 사용을 권장합니다."
+            "description": "텍스트 감지/인식에 사용할 모델 크기입니다. 대부분 '소형' 사용을 권장합니다."
         },
         "detection_threshold": {
             "label": "감지 임계값",
@@ -544,7 +572,7 @@
         },
         "debug_save_plates": {
             "label": "디버그 번호판 저장",
-            "description": "LPR 성능 디버깅을 위해 번호판 크롭 이미지를 저장합니다."
+            "description": "차량 번호판 인식 성능 디버깅을 위해 번호판 크롭 이미지를 저장합니다."
         },
         "device": {
             "label": "디바이스",
@@ -992,6 +1020,10 @@
             "response_style": {
                 "label": "응답 스타일",
                 "description": "생성된 검토 설명의 작성 스타일 프리셋입니다. 프리셋은 사용자에게 표시되는 제목, 요약 및 장면 설명의 톤과 세부 수준을 조정하며, '초기값'으로 설정하면 내장 프롬프트를 그대로 유지합니다."
+            },
+            "frame_mode": {
+                "label": "프레임 모드",
+                "description": "모델에 프레임을 전달하는 방식입니다. '프레임'은 프롬프트 뒤에 프레임을 순서대로 전송하여 시퀀스를 자체적으로 잘 추적하는 모델에 적합합니다. '주석이 달린 프레임'은 각 프레임에 라벨을 붙이고 객체 추적 기반 메모를 함께 삽입하여, 반복되거나 반전되는 동작의 흐름을 놓치기 쉬운 모델에 유용합니다."
             }
         },
         "description": "UI 및 저장소에서 사용하는 알림, 감지 및 GenAI 요약을 제어하는 설정입니다."
@@ -1041,7 +1073,7 @@
         },
         "model_size": {
             "label": "모델 크기",
-            "description": "모델 크기 선택입니다 ('small'은 CPU에서 실행 가능하며, 'large'는 일반적으로 GPU가 필요함)."
+            "description": "모델 크기 선택입니다 ('소형'은 CPU에서 실행 가능하며, '대형'은 일반적으로 GPU가 필요합니다)."
         },
         "device": {
             "label": "디바이스",
@@ -1297,11 +1329,11 @@
         },
         "time_format": {
             "label": "시간 표기 형식",
-            "description": "UI에서 사용할 시간 표기 형식입니다 (browser, 12hour, 또는 24hour)."
+            "description": "UI에서 사용할 시간 표기 형식입니다 (브라우저 설정, 12시간제, 또는 24시간)."
         },
         "unit_system": {
             "label": "단위 체계",
-            "description": "UI 및 MQTT에 표시할 단위 체계입니다 (metric: 미터법, imperial: 야드파운드법)."
+            "description": "UI 및 MQTT에 표시할 단위 체계입니다 (미터법, 야드파운드법)."
         }
     },
     "genai": {
@@ -1325,7 +1357,7 @@
         },
         "roles": {
             "label": "역할",
-            "description": "GenAI 역할 분담(chat, descriptions, embeddings)입니다. 역할당 하나의 제공업체가 매핑됩니다."
+            "description": "생성형 AI(GenAI) 역할(채팅, 설명 생성, 임베딩, 오디오 변환)로, 역할당 하나의 공급자만 지정할 수 있습니다. 기본적으로 채팅, 설명 생성, 임베딩만 부여되며, 오디오 변환(transcribe)은 명시적으로 지정해야 합니다."
         },
         "provider_options": {
             "label": "제공업체 옵션",
@@ -1470,10 +1502,10 @@
     },
     "models": {
         "label": "감지 모델",
-        "description": "객체 감지 모델과 각 모델이 실행되는 하드웨어입니다. 카메라는 자신의 detect.scene 값과 모델의 scene 값을 일치시켜 사용할 모델을 선택합니다.",
+        "description": "객체 감지 모델과 각 모델이 실행되는 하드웨어입니다. 카메라는 detect.scene 값을 모델의 scene 값과 일치시켜 모델을 선택하며, 일치하는 항목이 없으면 'default' 모델을 사용합니다.",
         "scene": {
             "label": "모델 장면",
-            "description": "이 모델이 사용되는 카메라 환경입니다. 카메라는 detect.scene을 일치하는 값으로 설정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 모두 '전체'를 사용합니다."
+            "description": "이 모델이 사용되는 카메라 환경의 이름입니다 (예: 'thermal'). 카메라는 detect.scene을 일치하는 값으로 설정하여 모델을 선택하며, 별도로 설정하지 않은 카메라는 'default' 모델을 사용합니다."
         },
         "devices": {
             "label": "감지 하드웨어",

@@ -1,1 +1,8 @@
-{}
+{
+    "documentTitle": "Chat - Frigate",
+    "title": "Frigate Chat",
+    "placeholder": "Čo vás zaujíma...",
+    "error": "Nastala chyba. Skúste znovu prosím.",
+    "processing": "Spracovávam...",
+    "toolsUsed": "Použité nástroje: {{tools}}"
+}

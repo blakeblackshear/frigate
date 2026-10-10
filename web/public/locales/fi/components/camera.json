@@ -67,7 +67,10 @@
         "placeholder": "Valitse kuvavirta"
       },
       "birdseye": "Linnun silmä"
-    }
+    },
+    "showAll": "Näytä kaikki kameraryhmät",
+    "showLess": "Näytä vähemmän",
+    "editGroups": "Muokkaa kameraryhmiä"
   },
   "debug": {
     "options": {
@@ -81,6 +84,7 @@
     "zones": "Vyöhykkeet",
     "mask": "Peite",
     "motion": "Liike",
-    "regions": "Alueet"
+    "regions": "Alueet",
+    "paths": "Tiedostopolku"
   }
 }

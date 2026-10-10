@@ -1336,7 +1336,9 @@
       "actions": "Eylemler",
       "noRoles": "Özelleştirilmiş rol bulunamadı.",
       "editCameras": "Kameraları Düzenle",
-      "deleteRole": "Rolü Sil"
+      "deleteRole": "Rolü Sil",
+      "cameraCount_one": "{{count}} kamera",
+      "cameraCount_other": "{{count}} kamera"
     },
     "toast": {
       "success": {
@@ -1553,7 +1555,15 @@
       "noGo2rtcStreams": "Yapılandırılmış go2rtc yayını yok",
       "availableStreams": "Mevcut yayınlar",
       "useCustom": "\"{{value}}\" kullanılsın",
-      "addStream": "Yayın ekle"
+      "addStream": "Yayın ekle",
+      "reorderHandle": "Yeniden sıralamak için sürükleyin",
+      "transcodedBadge": "Kod dönüşümlü",
+      "autoOrder": "Otomatik sırala",
+      "autoOrderTips": "Her yayının bit hızını ölçerek yüksekten düşüğe sırala",
+      "measuring": "Ölçülüyor…",
+      "rate": "{{kbps}} kbps",
+      "rateSet": "{{kbps}} kbps (ayarlı)",
+      "rateFailed": "Ölçülemedi"
     },
     "timezone": {
       "defaultOption": "Tarayıcı saat dilimini kullan"
@@ -1588,7 +1598,7 @@
         "preset-http-mjpeg-generic": "HTTP MJPEG (Jenerik)",
         "preset-http-reolink": "HTTP - Reolink Kameraları",
         "preset-rtmp-generic": "RTMP (Jenerik)",
-        "preset-rtsp-generic": "RTSP (Genel)",
+        "preset-rtsp-generic": "RTSP (Standart)",
         "preset-rtsp-restream": "RTSP - go2rtc ile yeniden yayın",
         "preset-rtsp-restream-low-latency": "RTSP - go2rtc ile yeniden yayın (Düşük Gecikme)",
         "preset-rtsp-udp": "RTSP - UDP",
@@ -1764,6 +1774,18 @@
     },
     "audioTranscriptionModelSize": {
       "notApplicable": "GenAI sağlayıcıları için uygun değil"
+    },
+    "liveTranscode": {
+      "title": "Kod dönüşümlü yayınlar",
+      "description": "Birisi izlerken go2rtc ile eş zamanlı kod dönüşümü yapılan daha düşük kaliteli yayınlar ekler.",
+      "unavailable": "Kod dönüşümlü yayınların bir go2rtc yayınını okuması gerekir. Önce go2rtc yayınlarına bir tane ekleyin.",
+      "enable": "Kod dönüşümlü yayınları etkinleştir",
+      "source": "Kaynak yayın",
+      "height": "Yükseklik",
+      "heightOption": "{{height}}p",
+      "bitrate": "Bit hızı (kbps)",
+      "addQuality": "Kalite ekle",
+      "removeQuality": "Kaliteyi kaldır"
     }
   },
   "globalConfig": {
@@ -1799,7 +1821,8 @@
     "saveAllSuccessRestartRequired_other": "{{count}} bölümün tümü başarıyla kaydedildi. Değişikliklerinizi uygulamak için Frigate'i yeniden başlatın.",
     "saveAllPartial_one": "{{totalCount}} bölümün {{successCount}} tanesi kaydedildi. {{failCount}} tanesi başarısız.",
     "saveAllPartial_other": "{{totalCount}} bölümün {{successCount}} tanesi kaydedildi. {{failCount}} tanesi başarısız.",
-    "saveAllFailure": "Tüm bölümler kaydedilemedi."
+    "saveAllFailure": "Tüm bölümler kaydedilemedi.",
+    "go2rtcSyncFailed": "Kaydedildi ama go2rtc güncellenemedi. Uygulamak için Frigate'i yeniden başlatın."
   },
   "profiles": {
     "title": "Profiller",
@@ -1986,7 +2009,7 @@
       "fpsGreaterThanFive": "Tespit kare/sn değerini 5'ten yükseğe ayarlamak önerilmez. Daha yüksek değerler performans sorunlarına yol açabilir ve bir faydaları olmaz.",
       "disabled": "Nesne algılaması devre dışı. Yüz tanıma, plaka tanıma ve Üretken Yapay Zeka gibi zenginleştirmeler, anlık fotoğraflar ve inceleme öğeleri çalışmayacak.",
       "runtimeDisabled": "Nesne algılaması yapılandırmanızda etkinleştirilmiş ama bu kamera için kapatılmış. Kameranın canlı görünümünden geri açılana veya aktif profil bunu devre dışı bırakmayı kesene kadar yüz tanıma, plaka tanıma ve Üretken Yapay Zeka gibi zenginleştirmeler, anlık fotoğraflar ve inceleme öğeleri çalışmayacak.",
-      "sceneWithoutModel": "Bu sahne için yapılandırılmış bir algılama modeli olmadığından kamera onun yerine 'Tüm Kameralar' sahnesine ayarlı modeli kullanıyor. Kameraya kendi modelini vermek için bu sahneye bir model ekleyin.",
+      "sceneWithoutModel": "Bu sahne için yapılandırılmış bir algılama modeli olmadığından kamera onun yerine Varsayılan modeli kullanıyor. Kameraya kendi modelini vermek için bu sahneye bir model ekleyin.",
       "resolutionShouldBeMultipleOfFour": "En iyi sonuçlar için tespit genişliği ve yüksekliği 4'ün katları olmalıdır. Diğer çift sayılar tespit yayınında görsel pürüzlere ve küçük bozulmalara yol açabilir.",
       "aspectRatioMismatch": "Girdiğiniz genişlik ve yükseklik mevcut algılama çözünürlüğünüzün en:boy oranıyla eşleşmiyor. Bu gerilmiş veya bozulmuş bir görüntü üretebilir.",
       "maxFramesSet": "Maksimum kare sayısını ayarlamak varsayılan davranışı değiştirir ve sabit nesne takibini devre dışı bırakır. Buna gerek duyulan durumlar çok enderdir, dikkatli kullanın.",
@@ -2017,7 +2040,8 @@
     },
     "record": {
       "noRecordRole": "Kayıt (record) rolü tanımlanmış bir yayın yok. Kayıt özelliği çalışmayacak.",
-      "noRecordSubRole": "Alt kayıt (record_sub) rolü tanımlanmış bir yayın yok. Alt yayın kayıt özelliği çalışmayacak."
+      "noRecordSubRole": "Alt kayıt (record_sub) rolü tanımlanmış bir yayın yok. Alt yayın kayıt özelliği çalışmayacak.",
+      "profileBaseDisabled": "Bu kameranın temel yapılandırmasında kayıt özelliği devre dışı bırakılmış. Bu nedenle kayıt özelliğini bir profilde etkinleştirmenin etkisi olmaz. Kayıt özelliğini temel yapılandırmada etkinleştirin ve devre dışı bırakmak için de bir profil kullanın."
     },
     "birdseye": {
       "objectTrackingDetectDisabled": "Algılanan nesneler de Kuşbakışı'nda gösterilir; ancak nesne algılaması bu kamerada devre dışı bırakılmış. Bu kamera Kuşbakışı'nda gözükmeyecek.",
@@ -2032,24 +2056,21 @@
     },
     "onvif": {
       "autotrackingNoZones": "Otomatik takip için en az bir bölge gerekir. Maskeler / Bölgeler'den bu kamera için bir bölge tanımlayın, sonra da aşağıda zorunlu bölge olarak ayarlayın."
+    },
+    "notifications": {
+      "profileBaseDisabled": "Hiçbir kameranın temel yapılandırmasında bildirimler etkinleştirilmemiş. Bu nedenle bildirimleri bir profilde etkinleştirmenin de etkisi olmayacaktır. En az bir kameranın temel yapılandırmasında bildirimleri etkinleştirin."
     }
   },
   "detectionModels": {
     "title": "Algılama modelleri",
-    "description": "Nesne algılama modellerini ve her birinin çalışacağı donanımı yapılandırın. Kameralar kendi algılama ayarlarındaki sahneye göre bir model seçerler.",
+    "description": "Nesne algılama modellerini ve her birinin çalışacağı donanımı yapılandırın. Yalnızca bazı (örneğin termal) kameralar için farklı eğitilmiş bir model gerekiyorsa sahne modeli ekleyin. Kameralar kendi algılama ayarlarındaki sahneye göre bir model seçerler.",
     "addModel": "Model ekle",
     "cameras_one": "{{count}} kamera",
     "cameras_other": "{{count}} kamera",
     "scene": {
       "label": "Sahne",
-      "description": "Bu modelin kullanılacağı ortam. Kameralar algılama ayarlarında aynı sahneyi ayarlayarak bir model seçerler. Ayarlamayan kameralar \"tümü\" sahneli modeli kullanırlar."
-    },
-    "scenes": {
-      "all": "Tüm kameralar",
-      "indoor": "İç mekan",
-      "outdoor": "Dış mekan",
-      "indoor_thermal": "İç mekan termal",
-      "outdoor_thermal": "Dış mekan termal"
+      "description": "Bu modelin kullanılacağı kameralar için bir ad. Kameralar algılama ayarlarında aynı sahneyi ayarlayarak bir model seçerler. Ayarlamayan kameralar Varsayılan modeli kullanırlar. Sahneleri farklı modeller çalıştırmak için kullanın, tek bir modeli farklı donanımlara ayırmak için değil. Zira aynı model dosyasını kullanan modeller birleştirilir.",
+      "placeholder": "termal"
     },
     "hardware": {
       "label": "Donanım",
@@ -2063,7 +2084,7 @@
       "unrecognized": "Bu model bu sistemde bulunmayan donanım(lar) için yapılandırılmış: {{devices}}",
       "description": "Bu modelin algılama işlemlerini çalıştırdığı donanım.",
       "detectorCountDescription": "Bu donanımda çalışan algılama işlemi (process) sayısı. Daha fazla algılayıcı daha fazla kameraya yetişir; karşılığında fazladan aygıt hafızası harcar.",
-      "unitsDescription": "Her birim kendi algılama işlemini çalıştırır. Başka bir modelin kullanmakta olduğu bir birim seçilemez."
+      "unitsDescription": "Her birim kendi algılama işlemini çalıştırır. Paylaşılamayacak bir birim (örn. Coral) yalnızca tek bir model tarafından kullanılabilir."
     },
     "tabs": {
       "plus": "Frigate+",
@@ -2071,6 +2092,9 @@
     },
     "plusModel": {
       "noModelSelected": "Bir Frigate+ modeli seçin"
+    },
+    "scenes": {
+      "default": "Varsayılan"
     }
   }
 }

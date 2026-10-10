@@ -192,5 +192,6 @@
     "descriptionState": "Upravte triedy pre tento model stavovej klasifikácie. Zmeny budú vyžadovať pretrénovanie modelu.",
     "descriptionObject": "Upravte typ objektu a typ klasifikácie pre tento objektový model klasifikácie.",
     "stateClassesInfo": "Poznámka: Zmena tried stavov vyžaduje pretrénovanie modelu s aktualizovanými triedami."
-  }
+  },
+  "disabled": "Zablokované"
 }

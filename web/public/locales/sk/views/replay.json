@@ -1,1 +1,8 @@
-{}
+{
+    "title": "Prehrať chybový záznam",
+    "websocket_messages": "Správy",
+    "dialog": {
+        "camera": "Zdrojová kamera",
+        "timeRange": "Časový rozsah"
+    }
+}
