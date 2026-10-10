@@ -19,7 +19,7 @@ class ReviewSummaryQueryParams(BaseModel):
     cameras: str = "all"
     labels: str = "all"
     zones: str = "all"
-    timezone: str = "utc"
+    timezone: str = "UTC"
 
 
 class ReviewActivityMotionQueryParams(BaseModel):

@@ -15,8 +15,8 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, cast
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import pytz
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist
 
@@ -48,7 +48,7 @@ from frigate.util.recording_coverage import (
     stream_media_summary,
 )
 from frigate.util.services import get_video_properties
-from frigate.util.time import is_current_hour
+from frigate.util.time import get_normalized_tz_name, is_current_hour
 
 logger = logging.getLogger(__name__)
 
@@ -862,8 +862,8 @@ class RecordingExporter(threading.Thread):
         tz_name = self.config.ui.timezone
         if tz_name:
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
+                tz = ZoneInfo(get_normalized_tz_name(tz_name))
+            except (ValueError, ZoneInfoNotFoundError):
                 tz = None
             if tz is not None:
                 return datetime.datetime.fromtimestamp(timestamp, tz=tz).strftime(
@@ -1026,8 +1026,8 @@ class RecordingExporter(threading.Thread):
         tz: datetime.tzinfo | None = None
         if tz_name:
             try:
-                tz = pytz.timezone(tz_name)
-            except pytz.UnknownTimeZoneError:
+                tz = ZoneInfo(get_normalized_tz_name(tz_name))
+            except (ValueError, ZoneInfoNotFoundError):
                 tz = None
         if tz is None:
             tz = datetime.UTC
