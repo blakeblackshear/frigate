@@ -20,6 +20,7 @@ from frigate.api.media_auth import (
     resolve_media_uri,
 )
 from frigate.config import FrigateConfig
+from frigate.const import EXPORT_DIR
 from frigate.models import Event, Export, Recordings, ReviewSegment
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 
@@ -231,8 +232,8 @@ class TestExportResolution(unittest.TestCase):
             camera=camera,
             name=f"export-{export_id}",
             date=int(datetime.datetime.now().timestamp()),
-            video_path=f"/media/frigate/exports/{filename}",
-            thumb_path=f"/media/frigate/exports/{filename}.jpg",
+            video_path=os.path.join(EXPORT_DIR, filename),
+            thumb_path=os.path.join(EXPORT_DIR, f"{filename}.jpg"),
             in_progress=False,
         ).execute()
 
