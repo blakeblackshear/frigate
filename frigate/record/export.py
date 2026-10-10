@@ -16,7 +16,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, cast
 
-import pytz  # type: ignore[import-untyped]
+import pytz
 from pathvalidate import sanitize_filename
 from peewee import DoesNotExist
 

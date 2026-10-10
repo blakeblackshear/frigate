@@ -155,7 +155,7 @@ export function CombinedStorageGraph({
           formatter: function (val, opts) {
             const entry = opts ? series[opts.seriesIndex] : undefined;
             if (entry) {
-              return `${getUnitSize(entry.usage)} (${val.toFixed(2)}%)`;
+              return `${getUnitSize(entry.usage)} (${(val ?? 0).toFixed(2)}%)`;
             }
           },
         },

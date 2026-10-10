@@ -12,8 +12,8 @@ from pathlib import Path
 
 import psutil
 import uvicorn
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
@@ -186,7 +186,7 @@ class FrigateApp:
         self.timeline_queue: Queue = mp.Queue()
 
     def init_database(self) -> None:
-        def vacuum_db(db: SqliteExtDatabase) -> None:
+        def vacuum_db(db: SqliteDatabase) -> None:
             logger.info("Running database vacuum")
             db.execute_sql("VACUUM;")
 
@@ -197,7 +197,7 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save DB state")
 
         # Migrate DB schema
-        migrate_db = SqliteExtDatabase(self.config.database.path)
+        migrate_db = SqliteDatabase(self.config.database.path)
 
         # Run migrations
         del logging.getLogger("peewee_migrate").handlers[:]

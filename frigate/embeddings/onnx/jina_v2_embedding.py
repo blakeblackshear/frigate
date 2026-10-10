@@ -97,7 +97,7 @@ class JinaV2Embedding(BaseEmbedding):
 
                 tokenizer = AutoTokenizer.from_pretrained(
                     self.model_name,
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                     cache_dir=os.path.join(
                         MODEL_CACHE_DIR, self.model_name, "tokenizer"
                     ),
@@ -129,9 +129,8 @@ class JinaV2Embedding(BaseEmbedding):
                 f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer"
             )
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                cache_dir=tokenizer_path,
-                trust_remote_code=True,
+                tokenizer_path,
+                trust_remote_code=False,
                 clean_up_tokenization_spaces=True,
             )
 

@@ -4,7 +4,7 @@ import datetime
 import unittest
 from unittest.mock import MagicMock
 
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.config import FrigateConfig
 from frigate.events.cleanup import EventCleanup
@@ -15,7 +15,7 @@ class TestEventCleanupSubRetention(unittest.TestCase):
     def setUp(self):
         # in-memory database keeps these tests isolated from the shared
         # on-disk test.db used by the http api tests
-        self.db = SqliteExtDatabase(":memory:")
+        self.db = SqliteDatabase(":memory:")
         models = [Event, Timeline]
         self.db.bind(models)
         self.db.create_tables(models)

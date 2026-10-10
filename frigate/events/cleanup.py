@@ -82,7 +82,7 @@ class EventCleanup(threading.Thread):
                 datetime.datetime.now() - datetime.timedelta(days=expire_days)
             ).timestamp()
             # grab all events after specific time
-            expired_events: list[Event] = (
+            expired_events: list[Event] = list(
                 Event.select(
                     Event.id,
                     Event.camera,
@@ -97,7 +97,6 @@ class EventCleanup(threading.Thread):
                 .namedtuples()
                 .iterator()
             )
-            expired_events = list(expired_events)
             logger.debug(f"{len(expired_events)} events can be expired")
 
             # delete the media from disk
@@ -159,7 +158,7 @@ class EventCleanup(threading.Thread):
                     datetime.datetime.now() - datetime.timedelta(days=expire_days)
                 ).timestamp()
                 # grab all events after specific time
-                expired_events = (
+                camera_events = (
                     Event.select(
                         Event.id,
                         Event.camera,
@@ -178,7 +177,7 @@ class EventCleanup(threading.Thread):
                 # delete the grabbed clips from disk
                 # only snapshots are stored in /clips
                 # so no need to delete mp4 files
-                for event in expired_events:
+                for event in camera_events:
                     events_to_update.append(str(event.id))
                     deleted = delete_event_snapshot(event)
 
@@ -212,7 +211,7 @@ class EventCleanup(threading.Thread):
             datetime.datetime.now() - datetime.timedelta(days=expire_days)
         ).timestamp()
         # grab all events after specific time
-        expired_events: list[Event] = (
+        expired_events: list[Event] = list(
             Event.select(
                 Event.id,
                 Event.camera,
@@ -225,7 +224,6 @@ class EventCleanup(threading.Thread):
             .namedtuples()
             .iterator()
         )
-        expired_events = list(expired_events)
         logger.debug(f"{len(expired_events)} events can be expired")
         # delete the media from disk
         for expired in expired_events:
@@ -235,7 +233,7 @@ class EventCleanup(threading.Thread):
             try:
                 media_path.unlink(missing_ok=True)
                 if file_extension == "jpg":
-                    media_path = Path(
+                    media_path = Path(  # type: ignore[unreachable]
                         f"{os.path.join(CLIPS_DIR, media_name)}-clean.webp"
                     )
                     media_path.unlink(missing_ok=True)
@@ -289,7 +287,7 @@ class EventCleanup(threading.Thread):
                 now - datetime.timedelta(days=camera.record.effective_detection_days)
             ).timestamp()
             # grab all events after specific time
-            expired_events = (
+            camera_events = (
                 Event.select(
                     Event.id,
                     Event.camera,
@@ -316,7 +314,7 @@ class EventCleanup(threading.Thread):
             # delete the grabbed clips from disk
             # only snapshots are stored in /clips
             # so no need to delete mp4 files
-            for event in expired_events:
+            for event in camera_events:
                 events_to_update.append(event.id)
 
         # update the clips attribute for the db entry

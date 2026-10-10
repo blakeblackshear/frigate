@@ -10,7 +10,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from pathlib import Path
 from typing import Any
 
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.config import CameraConfig, FrigateConfig, RetainModeEnum
 from frigate.const import (
@@ -88,7 +88,7 @@ class RecordingCleanup(threading.Thread):
         if (
             os.stat(f"{self.config.database.path}-wal").st_size / (1024 * 1024)
         ) > MAX_WAL_SIZE:
-            db = SqliteExtDatabase(self.config.database.path)
+            db = SqliteDatabase(self.config.database.path)
             db.execute_sql("PRAGMA wal_checkpoint(TRUNCATE);")
             db.close()
 

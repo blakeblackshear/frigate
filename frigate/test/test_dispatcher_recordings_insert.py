@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.comms.dispatcher import Dispatcher
 from frigate.const import INSERT_MANY_RECORDINGS
@@ -30,7 +30,7 @@ class TestInsertManyRecordings(unittest.TestCase):
     """A duplicate path must not cost the rest of the batch."""
 
     def setUp(self):
-        self.db = SqliteExtDatabase(":memory:")
+        self.db = SqliteDatabase(":memory:")
         self.db.bind([Recordings])
         self.db.create_tables([Recordings])
 
