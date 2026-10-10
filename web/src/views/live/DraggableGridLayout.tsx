@@ -32,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useResizeObserver } from "@/hooks/resize-observer";
 import { isEqual } from "lodash";
 import useSWR from "swr";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { isDesktop, isMobile } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
@@ -97,6 +98,7 @@ export default function DraggableGridLayout({
 }: DraggableGridLayoutProps) {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isAdmin = useIsAdmin();
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   // preferred live modes per camera
@@ -723,7 +725,7 @@ export default function DraggableGridLayout({
               </Tooltip>
               {!isEditMode && (
                 <>
-                  {!fullscreen && (
+                  {!fullscreen && isAdmin && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
