@@ -44,7 +44,7 @@ function App() {
 
   return (
     <Providers>
-      <BrowserRouter basename={window.baseUrl}>
+      <BrowserRouter basename={window.baseUrl} useTransitions={false}>
         <Wrapper>
           {config?.safe_mode ? <SafeAppView /> : <DefaultAppView />}
         </Wrapper>

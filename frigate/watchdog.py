@@ -116,7 +116,7 @@ class FrigateWatchdog(threading.Thread):
         now = datetime.datetime.now().timestamp()
 
         for name, detector in self.detectors.items():
-            detection_start = detector.detection_start.value  # type: ignore[attr-defined]
+            detection_start = detector.detection_start.value
             # issue https://github.com/python/typeshed/issues/8799
             # from mypy 0.981 onwards
             if detection_start > 0.0 and now - detection_start > 10:

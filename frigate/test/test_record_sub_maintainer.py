@@ -8,7 +8,7 @@ import unittest
 from collections import defaultdict
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.config import FrigateConfig
 from frigate.models import Recordings
@@ -719,7 +719,7 @@ class TestSegmentChainSeeding(unittest.IsolatedAsyncioTestCase):
     T0 = datetime.datetime(2026, 6, 10, 14, 30, 22, tzinfo=datetime.UTC).timestamp()
 
     def setUp(self):
-        self.db = SqliteExtDatabase(":memory:")
+        self.db = SqliteDatabase(":memory:")
         self.db.bind([Recordings])
         self.db.create_tables([Recordings])
 

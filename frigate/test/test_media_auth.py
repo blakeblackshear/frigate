@@ -9,8 +9,8 @@ import logging
 import os
 import unittest
 
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.media_auth import (
@@ -208,7 +208,7 @@ class TestExportResolution(unittest.TestCase):
     """Export resolution requires a DB lookup."""
 
     def setUp(self):
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
         Router(migrate_db).run()
         migrate_db.close()

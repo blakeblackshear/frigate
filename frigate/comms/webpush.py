@@ -6,7 +6,7 @@ import logging
 import os
 import queue
 import threading
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -72,7 +72,7 @@ class WebPushClient(Communicator):
         # Pull keys from PEM or generate if they do not exist
         self.vapid = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
 
-        users: list[dict[str, Any]] = (
+        users: Iterator[dict[str, Any]] = (
             User.select(User.username, User.notification_tokens).dicts().iterator()
         )
         for user in users:

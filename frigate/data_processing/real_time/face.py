@@ -365,7 +365,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 img = cv2.imread(current_file)
 
             if img is None:
-                return {  # type: ignore[unreachable]
+                return {
                     "message": "Invalid image file.",
                     "success": False,
                 }

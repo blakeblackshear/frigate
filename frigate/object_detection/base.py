@@ -360,7 +360,7 @@ class ObjectDetectProcess:
                 # detection_start is set only after detection_queue.get()
                 # returns. If it was reset during the grace period, the process
                 # recovered and may be waiting on the shared queue again.
-                if self.detection_start.value == 0.0:  # type: ignore[attr-defined]
+                if self.detection_start.value == 0.0:
                     logging.info("Detection process recovered before restart")
                     return
 
@@ -369,7 +369,7 @@ class ObjectDetectProcess:
                 self.detect_process.join()
             logging.info("Detection process has exited...")
 
-        self.detection_start.value = 0.0  # type: ignore[attr-defined]
+        self.detection_start.value = 0.0
 
         # Async path for MemryX
         if self.detector_config.type == "memryx":

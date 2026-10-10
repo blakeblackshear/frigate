@@ -6,8 +6,8 @@ from unittest.mock import patch
 
 from fastapi import Request
 from fastapi.testclient import TestClient
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 from pydantic import Json
 
@@ -38,7 +38,7 @@ class AuthTestClient(TestClient):
 class BaseTestHttp(unittest.TestCase):
     def setUp(self, models):
         # setup clean database for each test run
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()

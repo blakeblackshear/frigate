@@ -5,7 +5,7 @@ import json
 import unittest
 from types import SimpleNamespace
 
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.api.media import _vod_response
 from frigate.const import MAX_SEGMENT_DURATION
@@ -24,7 +24,7 @@ class CoverageDbTestCase(unittest.TestCase):
     def setUp(self):
         # in-memory database keeps these tests isolated from the shared
         # on-disk test.db used by the http api tests
-        self.db = SqliteExtDatabase(":memory:")
+        self.db = SqliteDatabase(":memory:")
         models = [Recordings]
         self.db.bind(models)
         self.db.create_tables(models)

@@ -2,10 +2,10 @@
 
 import logging
 import os
+import shutil
 import threading
-import warnings
 
-from transformers import AutoFeatureExtractor, AutoTokenizer
+from transformers import AutoTokenizer, CLIPImageProcessor
 from transformers.utils.logging import disable_progress_bar
 
 from frigate.comms.inter_process import InterProcessRequestor
@@ -20,12 +20,6 @@ from frigate.types import ModelStatusTypesEnum
 from frigate.util.downloader import ModelDownloader
 
 from .base_embedding import BaseEmbedding
-
-warnings.filterwarnings(
-    "ignore",
-    category=FutureWarning,
-    message="The class CLIPFeatureExtractor is deprecated",
-)
 
 # disables the progress bar for downloading tokenizers and feature extractors
 disable_progress_bar()
@@ -57,6 +51,13 @@ class JinaV1TextEmbedding(BaseEmbedding):
         self.runner = None
         self._lock = threading.Lock()
         files_names = list(self.download_urls.keys()) + [self.tokenizer_file]
+
+        # an interrupted download leaves the hub cache without the saved tokenizer
+        tokenizer_path = os.path.join(self.download_path, self.tokenizer_file)
+        if os.path.isdir(tokenizer_path) and not os.path.exists(
+            os.path.join(tokenizer_path, "tokenizer_config.json")
+        ):
+            shutil.rmtree(tokenizer_path)
 
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names
@@ -92,7 +93,7 @@ class JinaV1TextEmbedding(BaseEmbedding):
 
                 tokenizer = AutoTokenizer.from_pretrained(
                     self.model_name,
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                     cache_dir=f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer",
                     clean_up_tokenization_spaces=True,
                 )
@@ -123,9 +124,8 @@ class JinaV1TextEmbedding(BaseEmbedding):
                 f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer"
             )
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                cache_dir=tokenizer_path,
-                trust_remote_code=True,
+                tokenizer_path,
+                trust_remote_code=False,
                 clean_up_tokenization_spaces=True,
             )
 
@@ -209,7 +209,7 @@ class JinaV1ImageEmbedding(BaseEmbedding):
             if self.downloader:
                 self.downloader.wait_for_download()
 
-            self.feature_extractor = AutoFeatureExtractor.from_pretrained(
+            self.feature_extractor = CLIPImageProcessor.from_pretrained(
                 f"{MODEL_CACHE_DIR}/{self.model_name}",
             )
 

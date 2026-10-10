@@ -5,8 +5,8 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.models import Notice, NoticeStats
@@ -49,7 +49,7 @@ class TestNoticeKinds(unittest.TestCase):
 
 class RegistryTestCase(unittest.TestCase):
     def setUp(self):
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()

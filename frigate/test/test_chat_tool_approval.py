@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, patch
 
 import cv2
 import numpy as np
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.api.chat import (
     TOOL_REJECTED_RESULT,
@@ -214,7 +214,7 @@ class DatabaseTestCase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
         self.tmp.close()
-        self.db = SqliteExtDatabase(self.tmp.name)
+        self.db = SqliteDatabase(self.tmp.name)
         for model in self.models:
             model.bind(self.db, bind_refs=False, bind_backrefs=False)
         self.db.connect()

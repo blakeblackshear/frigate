@@ -54,12 +54,12 @@ class PTZMetrics:
     reset: Event
 
     def __init__(self) -> None:
-        self.start_time = mp.Value("d", 0)  # type: ignore[assignment]
-        self.stop_time = mp.Value("d", 0)  # type: ignore[assignment]
-        self.frame_time = mp.Value("d", 0)  # type: ignore[assignment]
-        self.zoom_level = mp.Value("d", 0)  # type: ignore[assignment]
-        self.max_zoom = mp.Value("d", 0)  # type: ignore[assignment]
-        self.min_zoom = mp.Value("d", 0)  # type: ignore[assignment]
+        self.start_time = mp.Value("d", 0)
+        self.stop_time = mp.Value("d", 0)
+        self.frame_time = mp.Value("d", 0)
+        self.zoom_level = mp.Value("d", 0)
+        self.max_zoom = mp.Value("d", 0)
+        self.min_zoom = mp.Value("d", 0)
 
         self.motor_stopped = mp.Event()
         self.reset = mp.Event()

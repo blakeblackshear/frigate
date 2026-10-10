@@ -5,9 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
-from peewee import DoesNotExist
+from peewee import DoesNotExist, SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.config import FrigateConfig
@@ -20,7 +19,7 @@ from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
 class TestHttp(unittest.TestCase):
     def setUp(self):
         # setup clean database for each test run
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase("test.db")
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()

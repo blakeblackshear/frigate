@@ -859,7 +859,7 @@ class RecordingMaintainer(threading.Thread):
 
         for box in motion_boxes:
             if len(box) < 4:
-                continue
+                continue  # type: ignore[unreachable]
             x1, y1, x2, y2 = box
 
             # Convert pixel coordinates to grid cells
