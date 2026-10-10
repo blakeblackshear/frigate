@@ -912,7 +912,7 @@ def create_user(
     HASH_ITERATIONS = request.app.frigate_config.auth.hash_iterations
     config_roles = list(request.app.frigate_config.auth.roles.keys())
 
-    if not re.match("^[A-Za-z0-9._]+$", body.username):
+    if not re.match(r"^(?!\.+$)[A-Za-z0-9._]+$", body.username):
         return JSONResponse(content={"message": "Invalid username"}, status_code=400)
 
     if body.role not in config_roles:
