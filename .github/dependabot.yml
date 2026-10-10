@@ -1,40 +1,157 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "/"
+    # Local composite actions are only scanned when their directory is listed
+    directories:
+      - "/"
+      - "/.github/actions/setup"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    target-branch: dev
-  - package-ecosystem: "docker"
-    directory: "/docker"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    target-branch: dev
+      interval: weekly
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns: ["*"]
+      actions-security:
+        applies-to: security-updates
+        patterns: ["*"]
+
   - package-ecosystem: "pip"
     directory: "/docker/main"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    target-branch: dev
+      interval: weekly
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
+    groups:
+      # Sets that fail pip resolution unless they move together
+      peewee:
+        patterns: ["peewee", "peewee-migrate"]
+      crypto:
+        patterns: ["cryptography", "joserfc", "pywebpush", "py-vapid"]
+      pydantic-genai:
+        patterns: ["pydantic", "google-genai"]
+      pip-main-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      pip-main-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      # numpy 2.5 needs Python 3.12; norfair, tflite_runtime and rknn-toolkit2
+      # cap numpy below 2
+      - dependency-name: "numpy"
+        versions: [">=2"]
+      # Every OpenCV wheel from 4.12 requires numpy 2
+      - dependency-name: "opencv-python-headless"
+        versions: [">=4.12"]
+      - dependency-name: "opencv-contrib-python"
+        versions: [">=4.12"]
+      # aarch64 only. Rockchip rknn-toolkit2 caps protobuf at 4.25.4 and
+      # TensorFlow 2.21 needs protobuf 6.31 or newer.
+      - dependency-name: "tensorflow"
+        versions: [">=2.20"]
+      # Needs Python 3.12 and numpy 2
+      - dependency-name: "librosa"
+        versions: [">=1.0"]
+      # Needs Python 3.12
+      - dependency-name: "scipy"
+        versions: [">=1.18"]
+      # Newer stubs report false errors against peewee 4
+      - dependency-name: "types-peewee"
+        versions: [">=4.1"]
+      # sdist only and imported by HailoRT; needs a Hailo device to test
+      - dependency-name: "netifaces"
+        versions: [">=0.11"]
+
   - package-ecosystem: "pip"
     directory: "/docker/tensorrt"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    target-branch: dev
+      interval: weekly
+    # No pull request check builds these images, so version updates are off.
+    # Security updates still open.
+    open-pull-requests-limit: 0
+    groups:
+      pip-trt-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      # onnx 1.17 and newer write a newer IR and opset than TensorRT 8.6 on
+      # JetPack 6 is known to parse
+      - dependency-name: "onnx"
+        versions: [">=1.17"]
+      # 1.27 moved to CUDA 13, and the image ships the CUDA 12.8 wheel set
+      - dependency-name: "onnxruntime-gpu"
+        versions: [">=1.27"]
+      # Hand-matched CUDA 12.8 set (2c9a25e67); move as a block
+      - dependency-name: "nvidia-*"
+      # Must match the JetPack CUDA runtime
+      - dependency-name: "cuda-python"
+        versions: [">=12.9"]
+
   - package-ecosystem: "npm"
     directory: "/web"
     schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    target-branch: dev
+      interval: weekly
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
+    groups:
+      radix:
+        patterns: ["@radix-ui/*"]
+      rjsf:
+        patterns: ["@rjsf/*"]
+      web-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      web-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      # typescript-eslint peers typescript below 6.1
+      - dependency-name: "typescript"
+        versions: [">=6.1"]
+      # Tailwind 4 is a config rewrite; scrollbar 4 and merge 3 depend on it
+      - dependency-name: "tailwindcss"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwind-scrollbar"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "tailwind-merge"
+        update-types: ["version-update:semver-major"]
+      # Intermittent failure in the UI settings import spec, cause not found
+      - dependency-name: "zod"
+        update-types: ["version-update:semver-major"]
+      # Needs an on-device pinch test before moving
+      - dependency-name: "react-zoom-pan-pinch"
+        update-types: ["version-update:semver-major"]
+      # Build fails until monaco-worker-manager releases its PR 4
+      - dependency-name: "monaco-editor"
+        versions: [">=0.55.0"]
+      # Later versions need Node 22 and extract false keys
+      - dependency-name: "i18next-cli"
+        versions: [">1.5.11"]
+      # 6.11.0 refills the saved model in the GenAI settings form
+      - dependency-name: "@rjsf/*"
+        versions: ["6.11.0"]
+
   - package-ecosystem: "npm"
     directory: "/docs"
     schedule:
-      interval: daily
+      interval: weekly
+    cooldown:
+      default-days: 3
+    open-pull-requests-limit: 5
     allow:
       - dependency-name: "@docusaurus/*"
-    open-pull-requests-limit: 10
-    target-branch: dev
+    groups:
+      docusaurus:
+        patterns: ["@docusaurus/*"]
+      docs-security:
+        applies-to: security-updates
+        patterns: ["*"]
+    ignore:
+      # A Docusaurus major needs the openapi plugin and theme moved in the
+      # same commit
+      - dependency-name: "@docusaurus/*"
+        update-types: ["version-update:semver-major"]
