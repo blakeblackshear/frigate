@@ -80,7 +80,7 @@ export default function CreateUserDialog({
       user: z
         .string()
         .min(1, t("users.dialog.form.usernameIsRequired"))
-        .regex(/^[A-Za-z0-9._]+$/, {
+        .regex(/^(?!\.+$)[A-Za-z0-9._]+$/, {
           message: t("users.dialog.createUser.usernameOnlyInclude"),
         }),
       password: z
