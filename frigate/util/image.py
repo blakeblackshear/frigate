@@ -1241,9 +1241,42 @@ def get_image_from_recording(
     return image_data
 
 
-def get_histogram(image, x_min, y_min, x_max, y_max):
-    image_bgr = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_I420)
-    image_bgr = image_bgr[y_min:y_max, x_min:x_max]
+def get_histogram(
+    image: np.ndarray, x_min: int, y_min: int, x_max: int, y_max: int
+) -> np.ndarray:
+    """Return a normalized 8x8x8 BGR histogram of a box in an I420 frame.
+
+    The box is cropped from each YUV plane before color conversion, so the
+    cost depends on the box size rather than the frame size. Box edges are
+    widened to even coordinates to keep chroma alignment.
+    """
+    height = image.shape[0] * 2 // 3
+    width = image.shape[1]
+    x_min = max(0, x_min // 2 * 2)
+    y_min = max(0, y_min // 2 * 2)
+    x_max = min(width, (x_max + 1) // 2 * 2)
+    y_max = min(height, (y_max + 1) // 2 * 2)
+
+    if x_max - x_min < 2 or y_max - y_min < 2:
+        return np.zeros(512, np.float32)
+
+    flat = image.reshape(-1)
+    y_size = height * width
+    uv_size = y_size // 4
+    y_plane = flat[:y_size].reshape(height, width)
+    u_plane = flat[y_size : y_size + uv_size].reshape(height // 2, width // 2)
+    v_plane = flat[y_size + uv_size : y_size + 2 * uv_size].reshape(
+        height // 2, width // 2
+    )
+
+    crop = np.concatenate(
+        (
+            y_plane[y_min:y_max, x_min:x_max].ravel(),
+            u_plane[y_min // 2 : y_max // 2, x_min // 2 : x_max // 2].ravel(),
+            v_plane[y_min // 2 : y_max // 2, x_min // 2 : x_max // 2].ravel(),
+        )
+    ).reshape((y_max - y_min) * 3 // 2, x_max - x_min)
+    image_bgr = cv2.cvtColor(crop, cv2.COLOR_YUV2BGR_I420)
 
     hist = cv2.calcHist(
         [image_bgr], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256]
