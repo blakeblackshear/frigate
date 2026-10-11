@@ -132,7 +132,8 @@ ffmpeg:
 
 Frigate reads Intel GPU utilization directly from the kernel's per-client DRM usage counters exposed at `/proc/<pid>/fdinfo/<fd>`. This requires:
 
-- Linux kernel **5.19 or newer** for the `i915` driver, or any release of the `xe` driver.
+- An Intel GPU from Broadwell (5th gen) or newer. Older GPUs do not expose these counters on any kernel.
+- Linux kernel **5.19 or newer** for the `i915` driver (**6.5 or newer** on 12th gen and newer), or any release of the `xe` driver.
 - Frigate running with permission to read other processes' fdinfo. Running as root inside the container (the default) satisfies this; non-root setups may need `CAP_SYS_PTRACE`.
 
 No `intel_gpu_top` binary, `CAP_PERFMON`, privileged mode, or `perf_event_paranoid` tuning is required.
