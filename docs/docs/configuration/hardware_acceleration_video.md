@@ -325,7 +325,7 @@ services:
   frigate:
     ...
     devices:
-      - /dev/video11:/dev/video11
+      - /dev/video10:/dev/video10 # for h264 decoding
 ```
 
 Or with `docker run`:
@@ -334,17 +334,22 @@ Or with `docker run`:
 docker run -d \
   --name frigate \
   ...
-  --device /dev/video11 \
+  --device /dev/video10 \
   ghcr.io/blakeblackshear/frigate:stable
 ```
 
-`/dev/video11` is the correct device (on Raspberry Pi 4B). You can check
-by running the following and looking for `H264`:
+`/dev/video10` is the correct device (on Raspberry Pi 4B) for h264 hardware
+decoding. You can check by running the following:
 
 ```bash
 for d in /dev/video*; do
   echo -e "---\n$d"
-  v4l2-ctl --list-formats-ext -d $d
+  output=$(v4l2-ctl --all -d $d)
+
+  if grep -q 'H264' <<< "$output" &&
+   grep -q 'decode' <<< "$output"; then
+   grep -E 'H264|decode' <<< "$output"
+  fi
 done
 ```
 
