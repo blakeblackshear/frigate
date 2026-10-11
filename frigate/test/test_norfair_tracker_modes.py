@@ -112,6 +112,16 @@ class TestTrackerSelection(unittest.TestCase):
 
         self.assertEqual(set(tracker.tracked_objects), ids)
 
+    def test_track_list_edit_while_disabled_keeps_objects(self):
+        tracker = self.make_tracker(enabled=False)
+        self.run_frames(tracker, 10)
+        ids = set(tracker.tracked_objects)
+
+        self.apply_onvif_update(tracker, _config(enabled=False, track=["car"]))
+        self.run_frames(tracker, 5)
+
+        self.assertEqual(set(tracker.tracked_objects), ids)
+
     def test_runtime_toggle_keeps_objects(self):
         # MQTT and the autotracker only flip enabled, never enabled_in_config
         tracker = self.make_tracker(enabled=True)

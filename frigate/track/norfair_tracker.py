@@ -220,12 +220,16 @@ class NorfairTracker(ObjectTracker):
 
     def _tracker_selection(self) -> tuple[bool | None, tuple[str, ...]]:
         autotracking = self.camera_config.onvif.autotracking
+
+        if not autotracking.enabled_in_config:
+            return (False, ())
+
         ptz_labels = tuple(
             label
             for label in self.ptz_object_type_configs
             if label in autotracking.track
         )
-        return (autotracking.enabled_in_config, ptz_labels)
+        return (True, ptz_labels)
 
     def sync_trackers(self) -> None:
         """Rebuild the trackers when the config that selects them has changed.
@@ -282,7 +286,8 @@ class NorfairTracker(ObjectTracker):
             ),
         }
 
-    def default_mode(self) -> str:
+    def _default_mode(self) -> str:
+        """Pick the default tracker from saved config, not the runtime toggle."""
         return (
             "ptz"
             if self.camera_config.onvif.autotracking.enabled_in_config
@@ -294,7 +299,7 @@ class NorfairTracker(ObjectTracker):
         trackers = self.trackers.get(object_type)
 
         if trackers is None:
-            return self.default_tracker[self.default_mode()]
+            return self.default_tracker[self._default_mode()]
 
         # sync_trackers only creates a ptz tracker for labels the config selects
         return trackers["ptz"] if "ptz" in trackers else trackers["static"]
@@ -616,7 +621,7 @@ class NorfairTracker(ObjectTracker):
                 default_detections.extend(dets)
 
         # Update default tracker with untracked detections
-        tracked_objects = self.default_tracker[self.default_mode()].update(
+        tracked_objects = self.default_tracker[self._default_mode()].update(
             detections=default_detections, coord_transformations=coord_transformations
         )
         all_tracked_objects.extend(tracked_objects)
