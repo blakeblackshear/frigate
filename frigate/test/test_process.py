@@ -15,7 +15,7 @@ ENV_KEY = "FRIGATE_TEST_PROCESS_ENV"
 
 class EnvReportingProcess(FrigateProcess):
     def __init__(self, stop_event, result_queue):
-        super().__init__(stop_event, 0, name="env_reporter")
+        super().__init__(stop_event, 0, name="env_reporter", daemon=True)
         self.result_queue = result_queue
 
     def run(self) -> None:
@@ -71,6 +71,10 @@ class TestWorkerEnvironment(unittest.TestCase):
             self.assertEqual(result_queue.get(timeout=60), "applied")
         finally:
             runner.join(timeout=10)
+
+            if runner.is_alive():
+                runner.terminate()
+                runner.join()
 
 
 if __name__ == "__main__":
