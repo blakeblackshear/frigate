@@ -1,14 +1,19 @@
 """Utilities for creating and manipulating image frames."""
 
 import datetime
+import fcntl
 import logging
+import re
+import struct
 import subprocess as sp
 import threading
 from abc import ABC, abstractmethod
+from collections.abc import Callable, Sequence
+from contextlib import AbstractContextManager
 from multiprocessing import resource_tracker as _mprt
 from multiprocessing import shared_memory as _mpshm
 from string import printable
-from typing import Any, AnyStr
+from typing import Any, ClassVar, NamedTuple
 
 import cv2
 import numpy as np
@@ -982,27 +987,31 @@ def clipped(obj, frame_shape):
 
 class FrameManager(ABC):
     @abstractmethod
-    def create(self, name: str, size: int) -> AnyStr:
+    def create(self, name: str, size: int) -> None:
         pass
 
     @abstractmethod
-    def write(self, name: str) -> memoryview | None:
+    def write(self, name: str) -> AbstractContextManager[Any]:
         pass
 
     @abstractmethod
-    def get(self, name: str, timeout_ms: int = 0):
+    def read(self, name: str) -> AbstractContextManager[Any]:
         pass
 
     @abstractmethod
-    def close(self, name: str):
+    def get(self, name: str, shape: Sequence[int]) -> np.ndarray | None:
         pass
 
     @abstractmethod
-    def delete(self, name: str):
+    def close(self, name: str) -> None:
         pass
 
     @abstractmethod
-    def cleanup(self):
+    def delete(self, name: str) -> None:
+        pass
+
+    @abstractmethod
+    def cleanup(self) -> None:
         pass
 
 
@@ -1051,91 +1060,334 @@ class UntrackedSharedMemory(_mpshm.SharedMemory):
 
 
 class SharedMemoryFrameManager(FrameManager):
+    class Locker(AbstractContextManager):
+        """Note: locking is realized via OFD filelock operated on each shared memory file descriptor;
+        this alone protects againt multi-process accesses to the same shared memory block,
+        and can also be extended to include multi-thread safety by forcing each thread to
+        query its own shared memory mapping (e.g. by making the entire "shm_store" table thread-local),
+        which results in contention between threads holding different file descriptors but actually to the same shared memory block.
+
+        Nonetheless, since SharedMemoryFrameManager itself is not thread-safe to begin with, this implementation assumes that only
+        multi-process accesses need to be taken care of
+
+        Side note:
+        OFD filelock is only supported on linux platforms, and the file descriptor attribute defined in multiprocessing.shared_memory.SharedMemory
+        is actually an undocumented one, so this implementation is hardly portable; however, since frigate is a container app
+        run in a controlled environment, portability is probably less an issue.
+        """
+
+        __FILELOCK_ARG_FORMAT: ClassVar[str] = "hhllhh"
+
+        def __init__(
+            self,
+            shm: UntrackedSharedMemory | None,
+            write: bool,
+            block: bool,
+            enter_target: Callable[[bool], Any],
+            exit_target: Callable[[bool], None],
+        ):
+            self.__shm = shm
+            self.__write = write
+            self.__block = block
+            self.__enter_target = enter_target
+            self.__exit_target = exit_target
+
+        def __enter__(self):
+            locked = False
+            if self.__shm is not None and self.__shm._fd >= 0:
+                try:
+                    filelock_arg = struct.pack(
+                        self.__FILELOCK_ARG_FORMAT,
+                        fcntl.F_WRLCK if self.__write else fcntl.F_RDLCK,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                    )
+                    fcntl.fcntl(
+                        self.__shm._fd,
+                        fcntl.F_OFD_SETLKW if self.__block else fcntl.F_OFD_SETLK,
+                        filelock_arg,
+                    )
+                    locked = True
+                except BlockingIOError:
+                    # Reaching here when failing to acquire the lock in the non-blocking mode
+                    pass
+
+            return self.__enter_target(locked)
+
+        def __exit__(self, exc_type, exc_value, traceback):
+            self.__exit_target()
+
+            if self.__shm is not None and self.__shm._fd >= 0:
+                # Releasing the lock; note that it is OK to unlock a OFD filelock even when it is not locked
+                filelock_arg = struct.pack(
+                    self.__FILELOCK_ARG_FORMAT, fcntl.F_UNLCK, 0, 0, 0, 0, 0
+                )
+                fcntl.fcntl(self.__shm._fd, fcntl.F_OFD_SETLKW, filelock_arg)
+
+    # Note: there are two types of names used throughout this class:
+    # "shm_name" is the name of a specific shared memory block where frames come and go, and
+    # most of functions take this type of name as input; while
+    # "unique_name" is the name that identifies a specific frame. It is returned by write(), and
+    # currently only read() accepts that type of name
+
+    class FrameWriteHandle(NamedTuple):
+        unique_name: str
+        buffer: np.ndarray
+
+    class FrameReadHandle(NamedTuple):
+        shm_name: str
+        buffer: np.ndarray
+
+    SERIAL_FORMAT: ClassVar[NamedTuple] = NamedTuple(
+        "SerialFormat", (("format_str", str), ("nbytes", int), ("value_mask", int))
+    )("i", struct.calcsize("i"), (1 << (struct.calcsize("i") * 8 - 1)) - 1)
+    __UNIQUE_NAME_PATTERN: ClassVar[re.Pattern] = re.compile(
+        r"^\((?P<shm_name>.*),(?P<serial_hex>[0-9a-f]{"
+        + f"{SERIAL_FORMAT.nbytes * 2}"
+        + r"})\)$"
+    )
+
     def __init__(self):
         self.shm_store: dict[str, UntrackedSharedMemory] = {}
 
-    def create(self, name: str, size) -> AnyStr:
+    def __del__(self):
+        # In case still in use by other processes
+        # all shm references cached in a SharedMemoryFrameManager instance are only closed when that instance gets GC.
+        #
+        # For unlinking to happen, users must call cleanup() explicitly
+        for shm_name in tuple(self.shm_store.keys()):
+            self.__close_impl(shm_name, unlink=False)
+
+    def create(self, shm_name: str, size: int) -> None:
+        """create() allocates a shared memory block of the size equal to (size + SERIAL_FORMAT.nbytes)
+        with the extra trailing bytes recording a serial number that helps to distinguish different frames written
+        into the same block
+        """
         try:
             shm = UntrackedSharedMemory(
-                name=name,
+                name=shm_name,
                 create=True,
-                size=size,
+                size=size + self.SERIAL_FORMAT.nbytes,
             )
         except FileExistsError:
-            shm = UntrackedSharedMemory(name=name)
+            # Deleting the existing block and then recreating it,
+            # so that create() has a consistent behavior that always create a brand new shm block
+            self.__close_impl(shm_name, unlink=True)
+            shm = UntrackedSharedMemory(
+                name=shm_name,
+                create=True,
+                size=size + self.SERIAL_FORMAT.nbytes,
+            )
 
-        self.shm_store[name] = shm
-        return shm.buf
+        shm.buf[-self.SERIAL_FORMAT.nbytes :].cast(self.SERIAL_FORMAT.format_str)[
+            0
+        ] = -1
+        self.shm_store[shm_name] = shm
 
-    def write(self, name: str) -> memoryview | None:
-        try:
-            if name in self.shm_store:
-                shm = self.shm_store[name]
-            else:
-                shm = UntrackedSharedMemory(name=name)
-                self.shm_store[name] = shm
-            return shm.buf
-        except FileNotFoundError:
-            logger.info(f"the file {name} not found")
-            return None
+        # To prevent users from operating on shared memory blocks without synchronization,
+        # the memoryview created is not returned directly any more (albeit one can still use get() to obtain it).
 
-    def get(self, name: str, shape) -> np.ndarray | None:
-        try:
-            required = int(np.prod(shape))
-            shm = self.shm_store.get(name)
-            if shm is not None and shm.size != required:
-                # stale cached ref from a same-name recreate — drop and reopen
+    def __retrieve_existing_shm(
+        self, shm_name: str, required_size: int | None
+    ) -> UntrackedSharedMemory:
+        def meet_requirement(shm):
+            return required_size is None or shm.size == required_size
+
+        shm = self.shm_store.get(shm_name)
+        if shm is not None and not meet_requirement(shm):
+            # stale cached ref from a same-name recreate — drop and reopen
+            try:
+                shm.close()
+            except Exception:
+                pass
+            self.shm_store.pop(shm_name, None)
+            shm = None
+        if shm is None:
+            shm = UntrackedSharedMemory(name=shm_name)
+            if not meet_requirement(shm):
+                # mid-recreate: OS segment doesn't match shape yet; skip
                 try:
                     shm.close()
                 except Exception:
                     pass
-                self.shm_store.pop(name, None)
-                shm = None
-            if shm is None:
-                shm = UntrackedSharedMemory(name=name)
-                if shm.size != required:
-                    # mid-recreate: OS segment doesn't match shape yet; skip
-                    try:
-                        shm.close()
-                    except Exception:
-                        pass
-                    return None
-                self.shm_store[name] = shm
+                logger.info(f'The size of the existing "{shm_name}" file mismatched')
+                raise FileNotFoundError()
+            self.shm_store[shm_name] = shm
+
+        return shm
+
+    def write(
+        self, shm_name: str, shape: Sequence[int] | None = None, block: bool = False
+    ) -> Locker:
+        """write() should only be called with names of shared memory blocks created by create(),
+        where extra bytes are allocated for storing a serial number. write() assumes the existance of
+        that field and uses it to generate a unique name tuple every time it gets called
+        """
+        shm = None
+        try:
+            required_size = (
+                None
+                if shape is None
+                else int(np.prod(shape)) + self.SERIAL_FORMAT.nbytes
+            )
+            shm = self.__retrieve_existing_shm(shm_name, required_size)
+        except FileNotFoundError:
+            logger.info(f"the file {shm_name} not found")
+
+        def enter_target(locked: bool) -> self.FrameWriteHandle | None:
+            nonlocal self, shm_name, shape, shm
+
+            if locked:
+                # Obtaining a new serial number
+                serial = shm.buf[-self.SERIAL_FORMAT.nbytes :].cast(
+                    self.SERIAL_FORMAT.format_str
+                )
+                serial[0] = (serial[0] + 1) & self.SERIAL_FORMAT.value_mask
+
+                unique_name = f"({shm_name},{serial.hex()})"
+                if shape is None:
+                    shape = (shm.size - self.SERIAL_FORMAT.nbytes,)
+                data = np.ndarray(
+                    shape, dtype=np.uint8, buffer=shm.buf[: -self.SERIAL_FORMAT.nbytes]
+                )
+
+                return self.FrameWriteHandle(unique_name, data)
+
+            return None
+
+        return self.Locker(
+            shm,
+            write=True,
+            block=block,
+            enter_target=enter_target,
+            exit_target=lambda: None,
+        )
+
+    def __extract_name_components(self, shm_or_unique_name) -> dict[str, str | None]:
+        name_test = self.__UNIQUE_NAME_PATTERN.match(shm_or_unique_name)
+        if name_test:
+            return name_test.groupdict()
+        else:
+            return {"shm_name": shm_or_unique_name, "serial_hex": None}
+
+    def read(
+        self,
+        shm_or_unique_name: str,
+        shape: Sequence[int] | None = None,
+        block: bool = True,
+    ) -> Locker:
+        """raed() can be called with either unique names that trigger serial verification for querying a
+        specific frame; or shm names when callers do not care about which frame ends up being obtained
+        (as long as it comes from that shm block).
+        """
+        shm = None
+        name_comps = self.__extract_name_components(shm_or_unique_name)
+        shm_name = name_comps["shm_name"]
+        serial_to_be_matched = name_comps["serial_hex"]
+        if serial_to_be_matched is not None:
+            serial_to_be_matched = memoryview(bytes.fromhex(serial_to_be_matched)).cast(
+                self.SERIAL_FORMAT.format_str
+            )
+
+        try:
+            required_size = (
+                None
+                if shape is None
+                else int(np.prod(shape)) + self.SERIAL_FORMAT.nbytes
+            )
+            shm = self.__retrieve_existing_shm(shm_name, required_size)
+        except FileNotFoundError:
+            logger.info(f"the file {shm_name} not found")
+
+        def enter_target(locked: bool) -> self.FrameReadHandle | None:
+            nonlocal self, shape, shm, serial_to_be_matched
+
+            if locked:
+                if serial_to_be_matched is None:
+                    # In this case, serial verification is not required,
+                    # so the result is always "matched"
+                    serial_matched = True
+                else:
+                    serial = shm.buf[-self.SERIAL_FORMAT.nbytes :].cast(
+                        self.SERIAL_FORMAT.format_str
+                    )
+                    serial_matched = serial_to_be_matched == serial
+
+                if serial_matched:
+                    if shape is None:
+                        shape = (shm.size - self.SERIAL_FORMAT.nbytes,)
+                    data = np.ndarray(
+                        shape,
+                        dtype=np.uint8,
+                        buffer=shm.buf[: -self.SERIAL_FORMAT.nbytes],
+                    )
+                    data.setflags(write=False)
+
+                    return self.FrameReadHandle(shm.name, data)
+
+            return None
+
+        return self.Locker(
+            shm,
+            write=False,
+            block=block,
+            enter_target=enter_target,
+            exit_target=lambda: None,
+        )
+
+    def get(self, shm_name: str, shape: Sequence[int]) -> np.ndarray | None:
+        """Retrieving the designated shared memory block in an unmanaged way"""
+        try:
+            shm = self.__retrieve_existing_shm(shm_name, int(np.prod(shape)))
             return np.ndarray(shape, dtype=np.uint8, buffer=shm.buf)
         except FileNotFoundError:
             return None
 
-    def close(self, name: str):
-        if name in self.shm_store:
-            self.shm_store[name].close()
-            del self.shm_store[name]
-
-    def delete(self, name: str):
-        if name in self.shm_store:
-            self.shm_store[name].close()
-
+    def __close_impl(self, shm_name: str, unlink: bool) -> None:
+        shm = self.shm_store.pop(shm_name, None)
+        if not shm and unlink:
+            # In the case where unlinking is required,
+            # shm not present in shm_store is also considered
+            # a valid target
             try:
-                self.shm_store[name].unlink()
+                shm = UntrackedSharedMemory(name=shm_name)
             except FileNotFoundError:
                 pass
 
-            del self.shm_store[name]
-        else:
-            try:
-                shm = UntrackedSharedMemory(name=name)
+        def exit_target() -> None:
+            nonlocal shm, unlink
+
+            if shm:
                 shm.close()
-                shm.unlink()
-            except FileNotFoundError:
-                pass
+                if unlink:
+                    try:
+                        shm.unlink()
+                    except FileNotFoundError:
+                        pass
+
+        with self.Locker(
+            shm,
+            write=True,
+            block=True,
+            enter_target=lambda locked: None,
+            exit_target=exit_target,
+        ):
+            pass
+
+    def close(self, shm_or_unique_name: str):
+        name_comps = self.__extract_name_components(shm_or_unique_name)
+        self.__close_impl(name_comps["shm_name"], unlink=False)
+
+    def delete(self, shm_or_unique_name: str):
+        name_comps = self.__extract_name_components(shm_or_unique_name)
+        self.__close_impl(name_comps["shm_name"], unlink=True)
 
     def cleanup(self) -> None:
-        for shm in self.shm_store.values():
-            shm.close()
-
-            try:
-                shm.unlink()
-            except FileNotFoundError:
-                pass
+        for shm_name in tuple(self.shm_store.keys()):
+            self.__close_impl(shm_name, unlink=True)
 
 
 def create_mask(frame_shape, mask):

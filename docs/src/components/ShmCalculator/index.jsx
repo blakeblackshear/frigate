@@ -19,9 +19,10 @@ const ShmCalculator = () => {
     }
 
     // Single camera base SHM calculation (excluding logs)
-    // Formula: (width * height * 1.5 * 20 + 270480) / 1048576
+    // Formula: ((width * height * 1.5 + 4) * 20 + 270480) / 1048576
+    // Note that 4 extra bytes per frame are additionally reserved for the internal use
     const singleCameraBase =
-      (width * height * 1.5 * 20 + 270480) / 1048576;
+      ((width * height * 1.5 + 4) * 20 + 270480) / 1048576;
     setSingleCameraShm(`${singleCameraBase.toFixed(2)}mb`);
 
     // Total SHM calculation (multiple cameras, including logs)
@@ -150,7 +151,7 @@ const ShmCalculator = () => {
               <strong>Single Camera:</strong> {formatWithUnit(singleCameraShm)}
             </p>
             <p>
-              <strong>Formula:</strong> (width × height × 1.5 × 20 + 270480) ÷
+              <strong>Formula:</strong> ((width × height × 1.5 + 4) × 20 + 270480) ÷
               1048576
             </p>
             {cameraCount > 1 && (

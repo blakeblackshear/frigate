@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import random
 import string
@@ -546,122 +547,132 @@ class NorfairTracker(ObjectTracker):
     ) -> None:
         # Group detections by object type
         detections_by_type: dict[str, list[Detection]] = {}
-        yuv_frame: np.ndarray | None = None
 
         if (
             self.camera_config.onvif.autotracking.enabled
             or self.detect_config.stationary.classifier
         ):
-            yuv_frame = self.frame_manager.get(
+            yuv_frame_locker = self.frame_manager.read(
                 frame_name, self.camera_config.frame_shape_yuv
             )
-        for obj in detections:
-            label = obj[0]
-            if label not in detections_by_type:
-                detections_by_type[label] = []
+        else:
+            yuv_frame_locker = contextlib.nullcontext()
 
-            # centroid is used for other things downstream
-            centroid_x = int((obj[2][0] + obj[2][2]) / 2.0)
-            centroid_y = int((obj[2][1] + obj[2][3]) / 2.0)
+        with yuv_frame_locker as yuv_frame:
+            if yuv_frame:
+                yuv_frame = yuv_frame.buffer
 
-            # track based on top,left and bottom,right corners instead of centroid
-            points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
+            for obj in detections:
+                label = obj[0]
+                if label not in detections_by_type:
+                    detections_by_type[label] = []
 
-            embedding = None
-            if self.camera_config.onvif.autotracking.enabled and yuv_frame is not None:
-                embedding = get_histogram(
-                    yuv_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
+                # centroid is used for other things downstream
+                centroid_x = int((obj[2][0] + obj[2][2]) / 2.0)
+                centroid_y = int((obj[2][1] + obj[2][3]) / 2.0)
+
+                # track based on top,left and bottom,right corners instead of centroid
+                points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
+
+                embedding = None
+                if (
+                    self.camera_config.onvif.autotracking.enabled
+                    and yuv_frame is not None
+                ):
+                    embedding = get_histogram(
+                        yuv_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
+                    )
+
+                detection = Detection(
+                    points=points,
+                    label=label,
+                    # TODO: stationary objects won't have embeddings
+                    embedding=embedding,
+                    data={
+                        "label": label,
+                        "score": obj[1],
+                        "box": obj[2],
+                        "area": obj[3],
+                        "ratio": obj[4],
+                        "region": obj[5],
+                        "frame_time": frame_time,
+                        "centroid": (centroid_x, centroid_y),
+                    },
+                )
+                detections_by_type[label].append(detection)
+
+            coord_transformations = None
+
+            if self.camera_config.onvif.autotracking.enabled:
+                # we must have been enabled by mqtt, so set up the estimator
+                if not self.ptz_motion_estimator:
+                    self.ptz_motion_estimator = PtzMotionEstimator(
+                        self.camera_config, self.ptz_metrics
+                    )
+
+                coord_transformations = self.ptz_motion_estimator.motion_estimator(
+                    detections, frame_name, frame_time, self.camera_name
                 )
 
-            detection = Detection(
-                points=points,
-                label=label,
-                # TODO: stationary objects won't have embeddings
-                embedding=embedding,
-                data={
-                    "label": label,
-                    "score": obj[1],
-                    "box": obj[2],
-                    "area": obj[3],
-                    "ratio": obj[4],
-                    "region": obj[5],
-                    "frame_time": frame_time,
-                    "centroid": (centroid_x, centroid_y),
-                },
-            )
-            detections_by_type[label].append(detection)
-
-        coord_transformations = None
-
-        if self.camera_config.onvif.autotracking.enabled:
-            # we must have been enabled by mqtt, so set up the estimator
-            if not self.ptz_motion_estimator:
-                self.ptz_motion_estimator = PtzMotionEstimator(
-                    self.camera_config, self.ptz_metrics
+            # Update all configured trackers
+            all_tracked_objects = []
+            for label in self.trackers:
+                tracker = self.get_tracker(label)
+                tracked_objects = tracker.update(
+                    detections=detections_by_type.get(label, []),
+                    coord_transformations=coord_transformations,
                 )
+                all_tracked_objects.extend(tracked_objects)
 
-            coord_transformations = self.ptz_motion_estimator.motion_estimator(
-                detections, frame_name, frame_time, self.camera_name
-            )
+            # Collect detections for objects without specific trackers
+            default_detections = []
+            for label, dets in detections_by_type.items():
+                if label not in self.trackers:
+                    default_detections.extend(dets)
 
-        # Update all configured trackers
-        all_tracked_objects = []
-        for label in self.trackers:
-            tracker = self.get_tracker(label)
-            tracked_objects = tracker.update(
-                detections=detections_by_type.get(label, []),
+            # Update default tracker with untracked detections
+            tracked_objects = self.default_tracker[self._default_mode()].update(
+                detections=default_detections,
                 coord_transformations=coord_transformations,
             )
             all_tracked_objects.extend(tracked_objects)
 
-        # Collect detections for objects without specific trackers
-        default_detections = []
-        for label, dets in detections_by_type.items():
-            if label not in self.trackers:
-                default_detections.extend(dets)
-
-        # Update default tracker with untracked detections
-        tracked_objects = self.default_tracker[self._default_mode()].update(
-            detections=default_detections, coord_transformations=coord_transformations
-        )
-        all_tracked_objects.extend(tracked_objects)
-
-        # update or create new tracks
-        active_ids = []
-        for t in all_tracked_objects:
-            estimate = tuple(t.estimate.flatten().astype(int))
-            # keep the estimate within the bounds of the image
-            estimate = (
-                max(0, estimate[0]),
-                max(0, estimate[1]),
-                min(self.detect_config.width - 1, estimate[2]),  # type: ignore[operator]
-                min(self.detect_config.height - 1, estimate[3]),  # type: ignore[operator]
-            )
-            new_obj = {
-                **t.last_detection.data,
-                "estimate": estimate,
-                "estimate_velocity": t.estimate_velocity,
-            }
-            active_ids.append(str(t.global_id))
-            if str(t.global_id) not in self.track_id_map:
-                self.register(str(t.global_id), new_obj)
-            # if there wasn't a detection in this frame, increment disappeared
-            elif t.last_detection.data["frame_time"] != frame_time:
-                id = self.track_id_map[str(t.global_id)]
-                self.disappeared[id] += 1
-                # sometimes the estimate gets way off
-                # only update if the upper left corner is actually upper left
-                if estimate[0] < estimate[2] and estimate[1] < estimate[3]:
-                    self.tracked_objects[id]["estimate"] = new_obj["estimate"]
-            # else update it
-            else:
-                thresholds = get_stationary_threshold(new_obj["label"])
-                self.update(
-                    str(t.global_id),
-                    new_obj,
-                    thresholds,
-                    yuv_frame if thresholds.motion_classifier_enabled else None,
+            # update or create new tracks
+            active_ids = []
+            for t in all_tracked_objects:
+                estimate = tuple(t.estimate.flatten().astype(int))
+                # keep the estimate within the bounds of the image
+                estimate = (
+                    max(0, estimate[0]),
+                    max(0, estimate[1]),
+                    min(self.detect_config.width - 1, estimate[2]),  # type: ignore[operator]
+                    min(self.detect_config.height - 1, estimate[3]),  # type: ignore[operator]
                 )
+                new_obj = {
+                    **t.last_detection.data,
+                    "estimate": estimate,
+                    "estimate_velocity": t.estimate_velocity,
+                }
+                active_ids.append(str(t.global_id))
+                if str(t.global_id) not in self.track_id_map:
+                    self.register(str(t.global_id), new_obj)
+                # if there wasn't a detection in this frame, increment disappeared
+                elif t.last_detection.data["frame_time"] != frame_time:
+                    id = self.track_id_map[str(t.global_id)]
+                    self.disappeared[id] += 1
+                    # sometimes the estimate gets way off
+                    # only update if the upper left corner is actually upper left
+                    if estimate[0] < estimate[2] and estimate[1] < estimate[3]:
+                        self.tracked_objects[id]["estimate"] = new_obj["estimate"]
+                # else update it
+                else:
+                    thresholds = get_stationary_threshold(new_obj["label"])
+                    self.update(
+                        str(t.global_id),
+                        new_obj,
+                        thresholds,
+                        yuv_frame if thresholds.motion_classifier_enabled else None,
+                    )
 
         # clear expired tracks
         expired_ids = [k for k in self.track_id_map.keys() if k not in active_ids]

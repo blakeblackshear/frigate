@@ -1,6 +1,8 @@
 """Tracker selection when autotracking config changes at runtime."""
 
+import contextlib
 import unittest
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -46,8 +48,10 @@ class TestTrackerSelection(unittest.TestCase):
         camera_config = _config(enabled).cameras[CAMERA]
         tracker = NorfairTracker(camera_config, PTZMetrics())
         tracker.frame_manager = MagicMock()
-        tracker.frame_manager.get.return_value = np.zeros(
-            camera_config.frame_shape_yuv, dtype=np.uint8
+        tracker.frame_manager.read.return_value = contextlib.nullcontext(
+            SimpleNamespace(
+                buffer=np.zeros(camera_config.frame_shape_yuv, dtype=np.uint8)
+            )
         )
         tracker.ptz_motion_estimator = MagicMock()
         tracker.ptz_motion_estimator.motion_estimator.return_value = None

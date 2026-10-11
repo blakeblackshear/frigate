@@ -5,8 +5,8 @@ import numpy as np
 import zmq
 from pydantic import parse_obj_as
 
-import frigate.detectors as detectors
 import frigate.object_detection.base
+from frigate import detectors
 from frigate.config import DetectorConfig, ModelConfig
 from frigate.detectors import DetectorTypeEnum
 from frigate.detectors.detector_config import InputTensorEnum
@@ -15,25 +15,27 @@ from frigate.detectors.detector_config import InputTensorEnum
 class TestLocalObjectDetector(unittest.TestCase):
     def test_localdetectorprocess_should_only_create_specified_detector_type(self):
         for det_type in detectors.api_types:
-            with self.subTest(det_type=det_type):
-                with patch.dict(
+            with (
+                self.subTest(det_type=det_type),
+                patch.dict(
                     "frigate.detectors.api_types",
                     {det_type: Mock() for det_type in DetectorTypeEnum},
-                ):
-                    test_cfg = parse_obj_as(
-                        DetectorConfig, ({"type": det_type, "model": {}})
-                    )
-                    test_cfg.model.path = "/test/modelpath"
-                    test_obj = frigate.object_detection.base.LocalObjectDetector(
-                        detector_config=test_cfg
-                    )
+                ),
+            ):
+                test_cfg = parse_obj_as(
+                    DetectorConfig, ({"type": det_type, "model": {}})
+                )
+                test_cfg.model.path = "/test/modelpath"
+                test_obj = frigate.object_detection.base.LocalObjectDetector(
+                    detector_config=test_cfg
+                )
 
-                    assert test_obj is not None
-                    for api_key, mock_detector in detectors.api_types.items():
-                        if test_cfg.type == api_key:
-                            mock_detector.assert_called_once_with(test_cfg)
-                        else:
-                            mock_detector.assert_not_called()
+                assert test_obj is not None
+                for api_key, mock_detector in detectors.api_types.items():
+                    if test_cfg.type == api_key:
+                        mock_detector.assert_called_once_with(test_cfg)
+                    else:
+                        mock_detector.assert_not_called()
 
     @patch.dict(
         "frigate.detectors.api_types",
@@ -155,6 +157,8 @@ class TestRemoteObjectDetector(unittest.TestCase):
         detector.np_shm = np.zeros((1, 320, 320, 3), np.uint8)
         detector.out_np_shm = np.array(rows, np.float32)
         detector.detection_queue = MagicMock()
+        detector.frame_manager = MagicMock()
+        detector.input_frame_shape = MagicMock()
         detector.detector_subscriber = MagicMock()
         detector.detector_subscriber.socket.recv_string.side_effect = zmq.Again()
         detector.detector_subscriber.check_for_update.return_value = "front_door"

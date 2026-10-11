@@ -348,9 +348,14 @@ class CameraState:
         if self._discard_stale_resolution_state(current_detections):
             return
 
-        current_frame = self.frame_manager.get(
+        with self.frame_manager.read(
             frame_name, self.camera_config.frame_shape_yuv
-        )
+        ) as frame_handle:
+            # Since we always need a copy of the frame retrieved at the end of this function,
+            # we can do it here first, and have a rather small critical session;
+            # then using this copy through out this function, eventually transfering the ownership
+            # of the copy there.
+            current_frame = None if not frame_handle else np.copy(frame_handle.buffer)
 
         tracked_objects = self.tracked_objects.copy()
         current_ids = set(current_detections.keys())
@@ -601,10 +606,7 @@ class CameraState:
 
             if current_frame is not None:
                 self.current_frame_time = frame_time
-                self._current_frame = np.copy(current_frame)
-
-                if self.previous_frame_id is not None:
-                    self.frame_manager.close(self.previous_frame_id)
+                self._current_frame = current_frame
 
             self.previous_frame_id = frame_name
 

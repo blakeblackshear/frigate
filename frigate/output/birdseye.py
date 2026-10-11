@@ -870,7 +870,7 @@ class Birdseye:
         )
 
         if config.birdseye.restream:
-            self.birdseye_buffer: Any = self.frame_manager.create(
+            self.frame_manager.create(
                 "birdseye",
                 self.birdseye_manager.yuv_shape[0] * self.birdseye_manager.yuv_shape[1],
             )
@@ -879,12 +879,18 @@ class Birdseye:
         self.broadcaster.start()
 
     def __send_new_frame(self) -> None:
-        frame_bytes = self.birdseye_manager.frame.tobytes()
 
         if self.config.birdseye.restream:
-            self.birdseye_buffer[:] = frame_bytes
+            # Specifically asking frame_manager to return the shm wrapped in ndarray with the same shape
+            # as self.birdseye_manager.frame, since its shape might get changed (despite the same size)
+            with self.frame_manager.write(
+                "birdseye", self.birdseye_manager.frame.shape
+            ) as frame_handle:
+                if frame_handle:
+                    frame_handle.buffer[...] = self.birdseye_manager.frame
 
         try:
+            frame_bytes = self.birdseye_manager.frame.tobytes()
             self.input.put_nowait(frame_bytes)
         except queue.Full:
             # drop frames if queue is full

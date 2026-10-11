@@ -29,6 +29,7 @@ from frigate.const import (
     SHM_FRAMES_VAR,
 )
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
+from frigate.util.image import SharedMemoryFrameManager
 
 logger = logging.getLogger(__name__)
 
@@ -1666,13 +1667,19 @@ def calculate_shm_requirements(config) -> dict:
     for camera in config.cameras.values():
         if camera.enabled_in_config and camera.detect.width and camera.detect.height:
             cam_total_frame_size += round(
-                (camera.detect.width * camera.detect.height * 1.5 + 270480) / 1048576,
+                (
+                    camera.detect.width * camera.detect.height * 1.5
+                    + SharedMemoryFrameManager.SERIAL_FORMAT.nbytes
+                    + 270480
+                )
+                / 1048576,
                 1,
             )
 
     # leave room for 2 cameras that are added dynamically, if a user wants to add more cameras they may need to increase the SHM size and restart after adding them.
     cam_total_frame_size += 2 * round(
-        (1280 * 720 * 1.5 + 270480) / 1048576,
+        (1280 * 720 * 1.5 + SharedMemoryFrameManager.SERIAL_FORMAT.nbytes + 270480)
+        / 1048576,
         1,
     )
 

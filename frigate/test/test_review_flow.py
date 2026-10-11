@@ -6,11 +6,13 @@ published review updates are checked for the expected alert, detection, or
 lack of a review item.
 """
 
+import contextlib
 import json
 import tempfile
 import threading
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -74,8 +76,13 @@ class ReviewFlowTestCase(unittest.TestCase):
         maintainer.config_subscriber.check_for_updates.return_value = {}
         maintainer.detection_subscriber = MagicMock()
         maintainer.frame_manager = MagicMock()
-        maintainer.frame_manager.get.side_effect = lambda _name, shape: np.zeros(
-            shape, np.uint8
+        maintainer.frame_manager.read.side_effect = lambda _name, shape: (
+            contextlib.nullcontext(
+                SimpleNamespace(shm_name=_name, buffer=np.zeros(shape, np.uint8))
+            )
+        )
+        maintainer.frame_manager.FrameReadHandle.side_effect = lambda _name, buffer: (
+            SimpleNamespace(shm_name=_name, buffer=buffer)
         )
         return maintainer
 
@@ -707,7 +714,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertIsNotNone(new_detection["data"]["thumb_time"])
         self.assertIn(
             f"{CAMERA}_11",
-            [c.args[0] for c in self.maintainer.frame_manager.get.call_args_list],
+            [c.args[0] for c in self.maintainer.frame_manager.read.call_args_list],
         )
 
     def assert_force_end_publishes_pending_detection(self, topic: str) -> None:
@@ -798,7 +805,7 @@ class TestReviewLifecycle(ReviewFlowTestCase):
         self.assertEqual((end["start_time"], end["end_time"]), (5, 20))
         # the thumbnail is framed on both objects seen together, the bird
         # alone is fewer objects so it does not replace it
-        frames = [c.args[0] for c in self.maintainer.frame_manager.get.call_args_list]
+        frames = [c.args[0] for c in self.maintainer.frame_manager.read.call_args_list]
         self.assertIn(f"{CAMERA}_5", frames)
         self.assertNotIn(f"{CAMERA}_20", frames)
 

@@ -1,5 +1,6 @@
 """Maintain review segments in db."""
 
+import contextlib
 import copy
 import datetime
 import json
@@ -542,19 +543,16 @@ class ReviewSegmentMaintainer(threading.Thread):
         if len(objects) <= pending.frame_active_count:
             return
 
-        try:
-            yuv_frame = self.frame_manager.get(
-                frame_name, camera_config.frame_shape_yuv
-            )
-        except FileNotFoundError:
-            return
+        with self.frame_manager.read(
+            frame_name, camera_config.frame_shape_yuv
+        ) as yuv_frame:
+            if yuv_frame is None:
+                logger.debug(f"Failed to get frame {frame_name} from SHM")
+                return
 
-        if yuv_frame is None:
-            logger.debug(f"Failed to get frame {frame_name} from SHM")
-            return
+            yuv_frame = yuv_frame.buffer
 
-        pending.update_frame(camera_config, yuv_frame, objects)
-        self.frame_manager.close(frame_name)
+            pending.update_frame(camera_config, yuv_frame, objects)
 
     def update_existing_segment(
         self,
@@ -652,40 +650,45 @@ class ReviewSegmentMaintainer(threading.Thread):
             if should_update_state:
                 try:
                     if should_update_image:
-                        yuv_frame = self.frame_manager.get(
+                        yuv_frame_locker = self.frame_manager.read(
                             frame_name, camera_config.frame_shape_yuv
                         )
+                    else:
+                        yuv_frame_locker = contextlib.nullcontext(
+                            self.frame_manager.FrameReadHandle(frame_name, None)
+                        )
 
+                    with yuv_frame_locker as yuv_frame:
                         if yuv_frame is None:
                             logger.debug(f"Failed to get frame {frame_name} from SHM")
                             return
-                    else:
-                        yuv_frame = None
 
-                    self._publish_segment_update(
-                        segment,
-                        camera_config,
-                        yuv_frame,
-                        activity.get_all_objects(),
-                        prev_data,
-                    )
-                    self.frame_manager.close(frame_name)
+                        yuv_frame = yuv_frame.buffer
+
+                        self._publish_segment_update(
+                            segment,
+                            camera_config,
+                            yuv_frame,
+                            activity.get_all_objects(),
+                            prev_data,
+                        )
                 except FileNotFoundError:
                     return
 
         if not has_activity:
             if not segment.has_frame:
                 try:
-                    yuv_frame = self.frame_manager.get(
+                    with self.frame_manager.read(
                         frame_name, camera_config.frame_shape_yuv
-                    )
+                    ) as yuv_frame:
+                        if yuv_frame is None:
+                            logger.debug(f"Failed to get frame {frame_name} from SHM")
+                            return
 
-                    if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_name} from SHM")
-                        return
+                        yuv_frame = yuv_frame.buffer
 
-                    segment.save_full_frame(camera_config, yuv_frame)
-                    self.frame_manager.close(frame_name)
+                        segment.save_full_frame(camera_config, yuv_frame)
+
                     self._publish_segment_update(
                         segment, camera_config, None, [], prev_data
                     )
@@ -769,18 +772,19 @@ class ReviewSegmentMaintainer(threading.Thread):
                 self._activate_segment(new_segment)
 
                 try:
-                    yuv_frame = self.frame_manager.get(
+                    with self.frame_manager.read(
                         frame_name, camera_config.frame_shape_yuv
-                    )
+                    ) as yuv_frame:
+                        if yuv_frame is None:
+                            logger.debug(f"Failed to get frame {frame_name} from SHM")
+                            return
 
-                    if yuv_frame is None:
-                        logger.debug(f"Failed to get frame {frame_name} from SHM")
-                        return
+                        yuv_frame = yuv_frame.buffer
 
-                    new_segment.update_frame(
-                        camera_config, yuv_frame, activity.get_all_objects()
-                    )
-                    self.frame_manager.close(frame_name)
+                        new_segment.update_frame(
+                            camera_config, yuv_frame, activity.get_all_objects()
+                        )
+
                     self._publish_segment_start(new_segment)
                 except FileNotFoundError:
                     return

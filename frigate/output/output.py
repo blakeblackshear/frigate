@@ -240,63 +240,63 @@ class OutputProcess(FrigateProcess):
             ):
                 continue
 
-            frame = frame_manager.get(
+            with frame_manager.read(
                 frame_name, self.config.cameras[camera].frame_shape_yuv
-            )
+            ) as frame:
+                if frame is None:
+                    logger.debug(f"Failed to get frame {frame_name} from SHM")
+                    failed_frame_requests[camera] = (
+                        failed_frame_requests.get(camera, 0) + 1
+                    )
 
-            if frame is None:
-                logger.debug(f"Failed to get frame {frame_name} from SHM")
-                failed_frame_requests[camera] = failed_frame_requests.get(camera, 0) + 1
+                    if (
+                        failed_frame_requests[camera]
+                        > self.config.cameras[camera].detect.fps
+                    ):
+                        logger.warning(
+                            f"Failed to retrieve many frames for {camera} from SHM, consider increasing SHM size if this continues."
+                        )
 
-                if (
-                    failed_frame_requests[camera]
-                    > self.config.cameras[camera].detect.fps
+                    continue
+                else:
+                    frame = frame.buffer
+                    failed_frame_requests[camera] = 0
+
+                # send frames for low fps recording
+                preview_recorders[camera].write_data(
+                    current_tracked_objects, motion_boxes, frame_time, frame
+                )
+                preview_write_times[camera] = frame_time
+
+                # send camera frame to ffmpeg process if websockets are connected
+                if any(
+                    ws.environ["PATH_INFO"].endswith(camera)
+                    and ws_has_camera_access(ws, camera, self.config)
+                    for ws in websocket_server.manager
                 ):
-                    logger.warning(
-                        f"Failed to retrieve many frames for {camera} from SHM, consider increasing SHM size if this continues."
+                    # write to the converter for the camera if clients are listening to the specific camera
+                    jsmpeg_cameras[camera].write_frame(frame.tobytes())
+
+                # send output data to birdseye if websocket is connected or restreaming
+                if (
+                    self.config.birdseye.enabled
+                    and birdseye is not None
+                    and (
+                        self.config.birdseye.restream
+                        or any(
+                            ws.environ["PATH_INFO"].endswith("birdseye")
+                            and ws_has_camera_access(ws, "birdseye", self.config)
+                            for ws in websocket_server.manager
+                        )
                     )
-
-                continue
-            else:
-                failed_frame_requests[camera] = 0
-
-            # send frames for low fps recording
-            preview_recorders[camera].write_data(
-                current_tracked_objects, motion_boxes, frame_time, frame
-            )
-            preview_write_times[camera] = frame_time
-
-            # send camera frame to ffmpeg process if websockets are connected
-            if any(
-                ws.environ["PATH_INFO"].endswith(camera)
-                and ws_has_camera_access(ws, camera, self.config)
-                for ws in websocket_server.manager
-            ):
-                # write to the converter for the camera if clients are listening to the specific camera
-                jsmpeg_cameras[camera].write_frame(frame.tobytes())
-
-            # send output data to birdseye if websocket is connected or restreaming
-            if (
-                self.config.birdseye.enabled
-                and birdseye is not None
-                and (
-                    self.config.birdseye.restream
-                    or any(
-                        ws.environ["PATH_INFO"].endswith("birdseye")
-                        and ws_has_camera_access(ws, "birdseye", self.config)
-                        for ws in websocket_server.manager
+                ):
+                    birdseye.write_data(
+                        camera,
+                        current_tracked_objects,
+                        motion_boxes,
+                        frame_time,
+                        frame,
                     )
-                )
-            ):
-                birdseye.write_data(
-                    camera,
-                    current_tracked_objects,
-                    motion_boxes,
-                    frame_time,
-                    frame,
-                )
-
-            frame_manager.close(frame_name)
 
         move_preview_frames("clips")
 
@@ -321,7 +321,6 @@ class OutputProcess(FrigateProcess):
             camera_config = self.config.cameras.get(camera)
 
             if camera_config is not None:
-                frame_manager.get(frame_name, camera_config.frame_shape_yuv)
                 frame_manager.close(frame_name)
 
         detection_subscriber.stop()

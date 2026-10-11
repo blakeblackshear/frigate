@@ -148,29 +148,30 @@ class DetectorRunner(FrigateProcess):
 
         while not self.stop_event.is_set():
             try:
-                connection_id = self.detection_queue.get(timeout=1)
+                frame_name = self.detection_queue.get(timeout=1)
             except queue.Empty:
                 continue
-            input_frame = frame_manager.get(
-                connection_id,
+            with frame_manager.read(
+                frame_name,
                 (
                     1,
                     self.detector_config.model.height,  # type: ignore[union-attr]
                     self.detector_config.model.width,  # type: ignore[union-attr]
                     3,
                 ),
-            )
+            ) as input_frame:
+                if input_frame is None:
+                    logger.warning(f"Failed to get frame {frame_name} from SHM")
+                    continue
 
-            if input_frame is None:
-                logger.warning(f"Failed to get frame {connection_id} from SHM")
-                continue
+                connection_id = input_frame.shm_name
+                input_frame = input_frame.buffer
 
-            # detect and send the output
-            self.start_time.value = datetime.datetime.now().timestamp()
-            mono_start = time.monotonic()
-            detections = object_detector.detect_raw(input_frame)
-            duration = time.monotonic() - mono_start
-            frame_manager.close(connection_id)
+                # detect and send the output
+                self.start_time.value = datetime.datetime.now().timestamp()
+                mono_start = time.monotonic()
+                detections = object_detector.detect_raw(input_frame)
+                duration = time.monotonic() - mono_start
 
             if connection_id not in self.outputs:
                 self.create_output_shm(connection_id)
@@ -205,7 +206,6 @@ class AsyncDetectorRunner(FrigateProcess):
         self.config = config
         self.detector_config = detector_config
         self.outputs: dict[str, Any] = {}
-        self._frame_manager: SharedMemoryFrameManager | None = None
         self._publisher: ObjectDetectorPublisher | None = None
         self._detector: AsyncLocalObjectDetector | None = None
         self.send_times: deque[float] = deque()
@@ -216,32 +216,38 @@ class AsyncDetectorRunner(FrigateProcess):
         self.outputs[name] = {"shm": out_shm, "np": out_np}
 
     def _detect_worker(self) -> None:
+        # Since SharedMemoryFrameManager is not a thread-safe class,
+        # its instantiation is delayed until we enter the thread that uses it,
+        # to make sure it is only visible to the owner thread
+        frame_manager: SharedMemoryFrameManager = SharedMemoryFrameManager()
+
         logger.info("Starting Detect Worker Thread")
         while not self.stop_event.is_set():
             try:
-                connection_id = self.detection_queue.get(timeout=1)
+                frame_name = self.detection_queue.get(timeout=1)
             except queue.Empty:
                 continue
 
-            assert self._frame_manager is not None
-            input_frame = self._frame_manager.get(
-                connection_id,
+            with frame_manager.read(
+                frame_name,
                 (
                     1,
                     self.detector_config.model.height,  # type: ignore[union-attr]
                     self.detector_config.model.width,  # type: ignore[union-attr]
                     3,
                 ),
-            )
+            ) as input_frame:
+                if input_frame is None:
+                    logger.warning(f"Failed to get frame {frame_name} from SHM")
+                    continue
 
-            if input_frame is None:
-                logger.warning(f"Failed to get frame {connection_id} from SHM")
-                continue
+                connection_id = input_frame.shm_name
+                input_frame = input_frame.buffer
 
-            # mark start time and send to accelerator
-            self.send_times.append(time.perf_counter())
-            assert self._detector is not None
-            self._detector.async_send_input(input_frame, connection_id)
+                # mark start time and send to accelerator
+                self.send_times.append(time.perf_counter())
+                assert self._detector is not None
+                self._detector.async_send_input(input_frame, connection_id)
 
     def _result_worker(self) -> None:
         logger.info("Starting Result Worker Thread")
@@ -259,10 +265,6 @@ class AsyncDetectorRunner(FrigateProcess):
             ts = self.send_times.popleft()
             duration = time.perf_counter() - ts
 
-            # release input buffer
-            assert self._frame_manager is not None
-            self._frame_manager.close(connection_id)
-
             if connection_id not in self.outputs:
                 self.create_output_shm(connection_id)
 
@@ -279,7 +281,6 @@ class AsyncDetectorRunner(FrigateProcess):
     def run(self) -> None:
         self.pre_run_setup(self.config.logger)
 
-        self._frame_manager = SharedMemoryFrameManager()
         self._publisher = ObjectDetectorPublisher()
         self._detector = AsyncLocalObjectDetector(
             detector_config=self.detector_config, stop_event=self.stop_event
@@ -414,12 +415,8 @@ class RemoteObjectDetector:
         self.unnamed_class_ids: set[int] = set()
         self.detection_queue = detection_queue
         self.stop_event = stop_event
-        self.shm = UntrackedSharedMemory(name=self.name, create=False)
-        self.np_shm: np.ndarray = np.ndarray(
-            (1, model_config.height, model_config.width, 3),
-            dtype=np.uint8,
-            buffer=self.shm.buf,
-        )
+        self.frame_manager = SharedMemoryFrameManager()
+        self.input_frame_shape = (1, model_config.height, model_config.width, 3)
         self.out_shm = UntrackedSharedMemory(name=f"out-{self.name}", create=False)
         self.out_np_shm: np.ndarray = np.ndarray(
             (20, 6), dtype=np.float32, buffer=self.out_shm.buf
@@ -442,9 +439,22 @@ class RemoteObjectDetector:
                 break
 
         # copy input to shared memory
-        self.np_shm[:] = tensor_input[:]
-        self.detection_queue.put(self.name)
-        result = self.detector_subscriber.check_for_update()
+        frame_name = None
+        with self.frame_manager.write(
+            shm_name=self.name, shape=self.input_frame_shape
+        ) as frame_handle:
+            if frame_handle:
+                frame_handle.buffer[...] = tensor_input
+                frame_name = frame_handle.unique_name
+
+        if frame_name is not None:
+            self.detection_queue.put(frame_name)
+            result = self.detector_subscriber.check_for_update()
+        else:
+            logger.warning(
+                f"{self.name}: skipping a request for detection as the detector's input frame shm is still busy"
+            )
+            result = None
 
         # if it timed out
         if result is None:

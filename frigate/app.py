@@ -89,7 +89,7 @@ from frigate.storage import StorageMaintainer
 from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
-from frigate.util.image import UntrackedSharedMemory
+from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.ownership import chown_to_runtime
 from frigate.util.process import FrigateProcess
 from frigate.util.runtime_deps import RuntimeDependencyError
@@ -112,6 +112,7 @@ class FrigateApp:
         }
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
+        self.frame_manager: SharedMemoryFrameManager = SharedMemoryFrameManager()
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: DictProxy = self.metrics_manager.dict()
 
@@ -398,14 +399,10 @@ class FrigateApp:
             model = self.config.model_for_camera(name)
             model_cameras[model.scene].append(name)
 
-            try:
-                shm_in = UntrackedSharedMemory(
-                    name=name,
-                    create=True,
-                    size=detection_frame_size(model),
-                )
-            except FileExistsError:
-                shm_in = UntrackedSharedMemory(name=name)
+            # The current implementation retrieves detectors' input frames through
+            # SharedMemoryFrameManager inside object_processing/base.py; for consistency
+            # the frame cache are created via SharedMemoryFrameManager as well
+            self.frame_manager.create(name, detection_frame_size(model))
 
             try:
                 shm_out = UntrackedSharedMemory(
@@ -414,7 +411,6 @@ class FrigateApp:
             except FileExistsError:
                 shm_out = UntrackedSharedMemory(name=f"out-{name}")
 
-            self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
         # a device may be listed more than once to run additional inference
@@ -793,6 +789,7 @@ class FrigateApp:
             shm = self.detection_shms.pop()
             shm.close()
             shm.unlink()
+        self.frame_manager.cleanup()
 
         _stop_logging()
         self.metrics_manager.shutdown()
