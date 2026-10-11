@@ -487,8 +487,9 @@ def get_intel_gpu_stats(
     Each DRM client FD exposes monotonic per-engine busy counters via
     /proc/<pid>/fdinfo/<fd>. For i915 this requires kernel 6.5 or newer:
     earlier kernels omit the per-engine counters whenever GuC submission is
-    active, which is the default on 12th gen and newer. Xe has exposed them
-    since its first release. We sample twice and divide busy-time deltas by
+    active, which is the default on 12th gen and newer. i915 never exposes
+    them on GPUs older than Broadwell (Gen8). Xe has exposed them since its
+    first release. We sample twice and divide busy-time deltas by
     wall-clock to derive utilization. Render/3D and Compute are pooled into
     "compute"; Video and VideoEnhance into "dec". Overall "gpu" is the sum of
     those pools (clamped to 100%).
@@ -557,10 +558,11 @@ def get_intel_gpu_stats(
         # i915 suppresses per-client engine counters while GuC submission is
         # active on kernels older than 6.5 (kernel commit 1324680a80eb lifted
         # this), which covers stock Debian 12 and Ubuntu 22.04 on 12th gen
-        # and newer.
+        # and newer. It never publishes them for pre-Broadwell GPUs.
         logger.warning(
             "Unable to collect Intel GPU stats: found %d DRM client(s) for %s but "
-            "no per-engine counters. Kernel 6.5 or newer is required.",
+            "the kernel reports no usage for them. GPUs older than Broadwell "
+            "(5th gen) are not supported. 12th gen and newer need kernel 6.5+",
             len(snapshot_a),
             "/".join(sorted({client["driver"] for client in snapshot_a.values()})),
         )
