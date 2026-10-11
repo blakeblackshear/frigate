@@ -66,7 +66,8 @@ const HAILO_PLUS_MODELS = [
   },
 ];
 
-// NVIDIA probes before AMD, and AMD's index-less "onnx" prefixes NVIDIA's units
+// a migrated `type: onnx` detector is the bare "onnx", and a Ryzen iGPU is
+// always probed alongside an NVIDIA card
 const ONNX_GPU_HARDWARE = [
   {
     key: "onnx:nvidia",
@@ -238,7 +239,7 @@ test.describe("Detection models settings @high", () => {
     ).not.toBeChecked();
   });
 
-  test("an exact unit match beats an index-less one", async ({
+  test("a migrated onnx device resolves to the NVIDIA GPU", async ({
     frigateApp,
   }) => {
     await installRoutes(
@@ -251,7 +252,7 @@ test.describe("Detection models settings @high", () => {
     await openPage(frigateApp);
 
     await expect(frigateApp.page.locator("#pageRoot")).toContainText(
-      "AMD GPU \u2022 3 cameras",
+      "NVIDIA GeForce RTX 3060 \u2022 3 cameras",
     );
   });
 
