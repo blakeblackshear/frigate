@@ -653,6 +653,17 @@ class TestStagedFileCleanup(unittest.TestCase):
 
             self.assertEqual(os.listdir(tmpdir), [])
 
+    def test_unwritable_staging_directory_fails_the_run(self) -> None:
+        """A raise here would skip the failed-export cleanup."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            exporter = self._exporter(tmpdir)
+            runs = [StreamRun("main", 1_000, 1_020, "/m1.mp4")]
+
+            with patch(
+                "frigate.record.export.os.makedirs", side_effect=OSError("no space")
+            ):
+                self.assertFalse(exporter._stage_stream_runs(runs, {"h264"}, False))
+
 
 class TestStagingFailure(unittest.TestCase):
     def test_failed_staging_aborts_rather_than_falling_back(self) -> None:

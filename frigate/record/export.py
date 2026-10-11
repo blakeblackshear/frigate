@@ -715,7 +715,17 @@ class RecordingExporter(threading.Thread):
 
         for index, run in enumerate(runs):
             dest = self._staged_run_path(index)
-            os.makedirs(os.path.dirname(dest), exist_ok=True)
+
+            try:
+                os.makedirs(os.path.dirname(dest), exist_ok=True)
+            except OSError:
+                logger.exception(
+                    "Failed to create staging directory for export %s",
+                    self.export_id,
+                )
+                self._cleanup_staged_runs()
+                return False
+
             weight = 100.0 * run.duration / total_duration
             base = 100.0 * completed / total_duration
 
