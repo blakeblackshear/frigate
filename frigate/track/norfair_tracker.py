@@ -180,48 +180,9 @@ class NorfairTracker(ObjectTracker):
         }
 
         self.trackers: dict[str, dict[str, Tracker]] = {}
-        # Handle static trackers
-        for obj_type, tracker_config in self.object_type_configs.items():
-            if obj_type in self.camera_config.objects.track:
-                if obj_type not in self.trackers:
-                    self.trackers[obj_type] = {}
-                self.trackers[obj_type]["static"] = self._create_tracker(
-                    obj_type, tracker_config
-                )
-
-        # Handle PTZ trackers
-        for obj_type, tracker_config in self.ptz_object_type_configs.items():
-            if (
-                obj_type in self.camera_config.onvif.autotracking.track
-                and self.camera_config.onvif.autotracking.enabled_in_config
-            ):
-                if obj_type not in self.trackers:
-                    self.trackers[obj_type] = {}
-                self.trackers[obj_type]["ptz"] = self._create_tracker(
-                    obj_type, tracker_config
-                )
-
-        # Initialize default trackers
-        self.default_tracker = {
-            "static": Tracker(
-                distance_function=frigate_distance,
-                distance_threshold=self.default_tracker_config[  # type: ignore[arg-type]
-                    "distance_threshold"
-                ],
-                initialization_delay=self.detect_config.min_initialized,
-                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
-                filter_factory=self.default_tracker_config["filter_factory"],  # type: ignore[arg-type]
-            ),
-            "ptz": Tracker(
-                distance_function=frigate_distance,
-                distance_threshold=self.default_ptz_tracker_config[
-                    "distance_threshold"
-                ],  # type: ignore[arg-type]
-                initialization_delay=self.detect_config.min_initialized,
-                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
-                filter_factory=self.default_ptz_tracker_config["filter_factory"],  # type: ignore[arg-type]
-            ),
-        }
+        self.default_tracker: dict[str, Tracker] = {}
+        self.tracker_selection: tuple[bool | None, tuple[str, ...]] | None = None
+        self.sync_trackers()
 
         if self.camera_config.onvif.autotracking.enabled:
             self.ptz_motion_estimator = PtzMotionEstimator(
@@ -257,18 +218,86 @@ class NorfairTracker(ObjectTracker):
 
         return Tracker(**tracker_params)
 
-    def get_tracker(self, object_type: str) -> Tracker:
-        """Get the appropriate tracker based on object type and camera mode."""
-        mode = (
+    def _tracker_selection(self) -> tuple[bool | None, tuple[str, ...]]:
+        autotracking = self.camera_config.onvif.autotracking
+        ptz_labels = tuple(
+            label
+            for label in self.ptz_object_type_configs
+            if label in autotracking.track
+        )
+        return (autotracking.enabled_in_config, ptz_labels)
+
+    def sync_trackers(self) -> None:
+        """Rebuild the trackers when the config that selects them has changed.
+
+        The camera process receives onvif config updates at runtime, so which
+        labels use a PTZ tracker can change after startup. Rebuilding drops
+        norfair state, so an update that leaves the selection alone is a no-op.
+        """
+        selection = self._tracker_selection()
+
+        if selection == self.tracker_selection:
+            return
+
+        if self.tracker_selection is not None:
+            logger.debug(
+                "%s: autotracking changed, rebuilding trackers", self.camera_name
+            )
+
+        self.tracker_selection = selection
+        ptz_enabled, ptz_labels = selection
+        self.trackers = {}
+
+        for obj_type, tracker_config in self.object_type_configs.items():
+            if obj_type in self.camera_config.objects.track:
+                self.trackers.setdefault(obj_type, {})["static"] = self._create_tracker(
+                    obj_type, tracker_config
+                )
+
+        if ptz_enabled:
+            for obj_type, tracker_config in self.ptz_object_type_configs.items():
+                if obj_type in ptz_labels:
+                    self.trackers.setdefault(obj_type, {})["ptz"] = (
+                        self._create_tracker(obj_type, tracker_config)
+                    )
+
+        self.default_tracker = {
+            "static": Tracker(
+                distance_function=frigate_distance,
+                distance_threshold=self.default_tracker_config[  # type: ignore[arg-type]
+                    "distance_threshold"
+                ],
+                initialization_delay=self.detect_config.min_initialized,
+                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
+                filter_factory=self.default_tracker_config["filter_factory"],  # type: ignore[arg-type]
+            ),
+            "ptz": Tracker(
+                distance_function=frigate_distance,
+                distance_threshold=self.default_ptz_tracker_config[
+                    "distance_threshold"
+                ],  # type: ignore[arg-type]
+                initialization_delay=self.detect_config.min_initialized,
+                hit_counter_max=self.detect_config.max_disappeared,  # type: ignore[arg-type]
+                filter_factory=self.default_ptz_tracker_config["filter_factory"],  # type: ignore[arg-type]
+            ),
+        }
+
+    def default_mode(self) -> str:
+        return (
             "ptz"
             if self.camera_config.onvif.autotracking.enabled_in_config
-            and object_type in self.camera_config.onvif.autotracking.track
-            and object_type in self.ptz_object_type_configs.keys()
             else "static"
         )
-        if object_type in self.trackers:
-            return self.trackers[object_type][mode]
-        return self.default_tracker[mode]
+
+    def get_tracker(self, object_type: str) -> Tracker:
+        """Get the tracker that match_and_update feeds this label's detections to."""
+        trackers = self.trackers.get(object_type)
+
+        if trackers is None:
+            return self.default_tracker[self.default_mode()]
+
+        # sync_trackers only creates a ptz tracker for labels the config selects
+        return trackers["ptz"] if "ptz" in trackers else trackers["static"]
 
     def register(self, track_id: str, obj: dict[str, Any]) -> None:
         rand_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
@@ -534,7 +563,7 @@ class NorfairTracker(ObjectTracker):
             points = np.array([[obj[2][0], obj[2][1]], [obj[2][2], obj[2][3]]])
 
             embedding = None
-            if self.camera_config.onvif.autotracking.enabled:
+            if self.camera_config.onvif.autotracking.enabled and yuv_frame is not None:
                 embedding = get_histogram(
                     yuv_frame, obj[2][0], obj[2][1], obj[2][2], obj[2][3]
                 )
@@ -587,12 +616,7 @@ class NorfairTracker(ObjectTracker):
                 default_detections.extend(dets)
 
         # Update default tracker with untracked detections
-        mode = (
-            "ptz"
-            if self.camera_config.onvif.autotracking.enabled_in_config
-            else "static"
-        )
-        tracked_objects = self.default_tracker[mode].update(
+        tracked_objects = self.default_tracker[self.default_mode()].update(
             detections=default_detections, coord_transformations=coord_transformations
         )
         all_tracked_objects.extend(tracked_objects)

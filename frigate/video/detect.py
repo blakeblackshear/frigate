@@ -302,6 +302,7 @@ def process_frames(
             motion_detector.autotracking_enabled = (
                 camera_config.onvif.autotracking.enabled
             )
+            object_tracker.sync_trackers()
 
         if (
             not camera_enabled
