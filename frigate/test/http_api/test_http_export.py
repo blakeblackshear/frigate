@@ -455,17 +455,19 @@ class TestHttpExport(BaseTestHttp):
 
     def test_reap_stale_exports_removes_staged_runs(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            staged = os.path.join(tmpdir, "export_stage_front_door_abc_0.mp4")
-            finished = os.path.join(tmpdir, "front_door_export.mp4")
+            staging_dir = os.path.join(tmpdir, "staging")
+            os.makedirs(staging_dir)
+            staged = os.path.join(staging_dir, "front_door_abc_0.mp4")
+            finished = os.path.join(tmpdir, "export_stage_saved_abc.mp4")
 
             for path in (staged, finished):
                 with open(path, "w") as handle:
                     handle.write("video")
 
-            with patch("frigate.jobs.export.EXPORT_DIR", tmpdir):
+            with patch("frigate.jobs.export.EXPORT_STAGING_DIR", staging_dir):
                 reap_stale_exports()
 
-            assert not os.path.exists(staged)
+            assert not os.path.exists(staging_dir)
             assert os.path.exists(finished)
 
     def test_reap_stale_exports_deletes_rows_with_no_file(self):

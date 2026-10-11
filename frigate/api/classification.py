@@ -1,5 +1,6 @@
 """Object classification APIs."""
 
+import asyncio
 import datetime
 import logging
 import os
@@ -1290,7 +1291,9 @@ async def generate_object_examples(request: Request, body: GenerateObjectExample
     if model_name is None:
         return invalid_name_response(body.model_name)
 
-    collect_object_classification_examples(model_name, body.label)
+    await asyncio.to_thread(
+        collect_object_classification_examples, model_name, body.label
+    )
 
     return JSONResponse(
         content={"success": True, "message": "Example generation completed"},

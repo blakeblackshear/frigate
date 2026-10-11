@@ -21,8 +21,17 @@ export function hardwareForDevices(
     return undefined;
   }
 
-  return hardware.find((entry) =>
-    devices.every((device) => resolveUnitDevice(entry, device)),
+  // an exact unit match on any entry wins over an index-less one, so "onnx"
+  // picks an AMD GPU rather than the first NVIDIA unit "onnx:0"
+  return (
+    hardware.find((entry) =>
+      devices.every((device) =>
+        entry.units.some((unit) => unit.device === device),
+      ),
+    ) ??
+    hardware.find((entry) =>
+      devices.every((device) => resolveUnitDevice(entry, device)),
+    )
   );
 }
 

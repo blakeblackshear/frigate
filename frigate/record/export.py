@@ -26,6 +26,7 @@ from frigate.const import (
     CACHE_DIR,
     CLIPS_DIR,
     EXPORT_DIR,
+    EXPORT_STAGING_DIR,
     MAX_PLAYLIST_SECONDS,
     PREVIEW_FRAME_TYPE,
     STREAM_TYPE_MAIN,
@@ -559,7 +560,7 @@ class RecordingExporter(threading.Thread):
         )
 
     def _staged_run_path(self, index: int) -> str:
-        return os.path.join(EXPORT_DIR, f"export_stage_{self.export_id}_{index}.mp4")
+        return os.path.join(EXPORT_STAGING_DIR, f"{self.export_id}_{index}.mp4")
 
     def _probe_stream_resolution(self, run: StreamRun) -> tuple[int, int] | None:
         """Probe one recording from a run for its resolution.
@@ -714,6 +715,7 @@ class RecordingExporter(threading.Thread):
 
         for index, run in enumerate(runs):
             dest = self._staged_run_path(index)
+            os.makedirs(os.path.dirname(dest), exist_ok=True)
             weight = 100.0 * run.duration / total_duration
             base = 100.0 * completed / total_duration
 
