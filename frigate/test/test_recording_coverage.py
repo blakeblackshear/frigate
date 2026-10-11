@@ -13,6 +13,7 @@ from frigate.models import Recordings
 from frigate.util.recording_coverage import (
     _rows_query,
     coverage_spans,
+    null_audio_glitches,
     plan_clip,
     realized_timeline,
     resolve_coverage,
@@ -165,6 +166,22 @@ class TestRecordingCoverage(CoverageDbTestCase):
         summary = stream_media_summary(resolve_coverage("front_door", 1000.0, 1020.0))
         expected = int(5 * 1024 * 1024 * 8 / 10)
         assert summary["main"]["bitrate"] == expected
+
+    def test_unknown_audio_row_keeps_video_only_stream(self):
+        self._insert("s1", 1000.0, 1010.0, "sub", has_audio=False)
+        self._insert("s2", 1010.0, 1020.0, "sub", has_audio=None)
+        self._insert("s3", 1020.0, 1030.0, "sub", has_audio=False)
+        kept = null_audio_glitches(resolve_coverage("front_door", 1000.0, 1030.0))
+        self.assertEqual(
+            [i.sub.path for i in kept], [f"/tmp/s{n}.mp4" for n in (1, 2, 3)]
+        )
+
+    def test_video_only_glitch_dropped_on_audio_stream(self):
+        self._insert("s1", 1000.0, 1010.0, "sub", has_audio=True)
+        self._insert("s2", 1010.0, 1020.0, "sub", has_audio=False)
+        self._insert("s3", 1020.0, 1030.0, "sub", has_audio=None)
+        kept = null_audio_glitches(resolve_coverage("front_door", 1000.0, 1030.0))
+        self.assertEqual([i.sub.path for i in kept], ["/tmp/s1.mp4", "/tmp/s3.mp4"])
 
     def test_other_camera_rows_excluded(self):
         self._insert("m1", 1000.0, 1010.0, "main")

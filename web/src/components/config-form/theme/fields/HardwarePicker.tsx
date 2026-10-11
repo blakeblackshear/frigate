@@ -15,6 +15,7 @@ import {
   hardwareForDevices,
   MAX_DETECTORS,
   recommendedDetectorCount,
+  resolveUnitDevice,
 } from "@/utils/detectionHardware";
 
 type HardwarePickerProps = {
@@ -60,9 +61,13 @@ export function HardwarePicker({
       return [];
     }
 
+    const assigned = devices.map((device) =>
+      resolveUnitDevice(selected, device),
+    );
+
     return selected.units
       .map((unit) => unit.device)
-      .filter((device) => devices.includes(device));
+      .filter((device) => assigned.includes(device));
   }, [selected, devices]);
 
   /** Spread `count` detectors round robin over the selected units. */
@@ -200,7 +205,7 @@ export function HardwarePicker({
                 <Checkbox
                   id={`${idPrefix}-${unit.device}`}
                   className="size-5 text-white accent-white data-[state=checked]:bg-selected data-[state=checked]:text-white"
-                  checked={devices.includes(unit.device)}
+                  checked={selectedUnits.includes(unit.device)}
                   disabled={disabled || Boolean(claimedBy)}
                   onCheckedChange={(checked) =>
                     handleUnitToggle(unit.device, checked === true)

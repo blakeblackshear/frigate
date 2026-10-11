@@ -21,10 +21,31 @@ export function hardwareForDevices(
     return undefined;
   }
 
-  return hardware.find((entry) => {
-    const known = new Set(entry.units.map((unit) => unit.device));
-    return devices.every((device) => known.has(device));
-  });
+  return hardware.find((entry) =>
+    devices.every((device) => resolveUnitDevice(entry, device)),
+  );
+}
+
+/**
+ * The unit device string a configured device refers to.
+ *
+ * A config may leave the index off, such as "edgetpu:usb", which the detector
+ * resolves to the first unit of that kind.
+ */
+export function resolveUnitDevice(
+  entry: DetectionHardware,
+  device: string,
+): string | undefined {
+  const unitDevices = entry.units.map((unit) => unit.device);
+
+  return (
+    unitDevices.find((candidate) => candidate === device) ??
+    unitDevices.find(
+      (candidate) =>
+        candidate.startsWith(`${device}:`) ||
+        candidate.startsWith(`${device}.`),
+    )
+  );
 }
 
 /**

@@ -747,8 +747,14 @@ def collect_object_classification_examples(
     selected_events = _select_balanced_events(events, target_count=100)
     logger.debug(f"Selected {len(selected_events)} events")
 
-    # Step 3: Extract thumbnails from events
-    thumbnails = _extract_event_thumbnails(selected_events, temp_dir)
+    # Step 3: Extract thumbnails from events, falling back to the remaining
+    # events when the selected ones have no image on disk
+    selected_ids = {e.id for e in selected_events}
+    remaining_events = [e for e in events if e.id not in selected_ids]
+    random.shuffle(remaining_events)
+    thumbnails = _extract_event_thumbnails(
+        selected_events + remaining_events, temp_dir, target_count=100
+    )
     logger.debug(f"Successfully extracted {len(thumbnails)} thumbnails")
 
     # Step 4: Select 24 most visually distinct thumbnails
@@ -833,10 +839,16 @@ def _select_balanced_events(
         else:
             selected.extend(remaining)
 
+    # groups are ordered oldest first, so truncating unshuffled keeps only the
+    # oldest events, which are the least likely to still have images on disk
+    random.shuffle(selected)
+
     return selected[:target_count]
 
 
-def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]:
+def _extract_event_thumbnails(
+    events: list[Event], output_dir: str, target_count: int = 100
+) -> list[str]:
     """
     Extract a training image for each event.
 
@@ -850,8 +862,9 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
     using a step ladder sized from the box/region area ratio.
 
     Args:
-        events: List of Event objects
+        events: List of Event objects, in order of preference
         output_dir: Directory to save crops
+        target_count: Number of images to extract before stopping
 
     Returns:
         List of paths to successfully extracted images
@@ -859,6 +872,9 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
     image_paths = []
 
     for idx, event in enumerate(events):
+        if len(image_paths) >= target_count:
+            break
+
         try:
             img = _load_event_classification_crop(event)
             if img is None:

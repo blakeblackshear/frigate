@@ -53,6 +53,14 @@ go2rtc:
 
 Point the camera's inputs at the restream as described in the [restream docs](/configuration/restream.md), and swap `detect -> width` and `detect -> height` to match the rotated resolution.
 
+### Can I add a privacy mask to hide part of my camera's view?
+
+Frigate does not have privacy masks. [Motion masks and object filter masks](../configuration/masks.md) only affect detection, they don't hide anything in live view, recordings, or snapshots.
+
+Privacy masks are best configured in the camera's firmware settings so the area is blacked out before the video ever leaves the camera and no extra processing is needed. Check there first.
+
+If your camera does not support privacy masks, there is no efficient alternative. Frigate copies the camera's video into recordings and live view without decoding it, so part of the image can't be hidden without transcoding (re-encoding) the stream. This can be done with a custom ffmpeg filter in go2rtc, but it is not recommended. Every masked camera needs a continuous re-encode, which significantly increases CPU usage, especially for high resolution streams.
+
 ### My mjpeg stream or snapshots look green and crazy
 
 This almost always means that the width/height defined for your camera are not correct. Double check the resolution with VLC or another player. Also make sure you don't have the width and height values backwards.

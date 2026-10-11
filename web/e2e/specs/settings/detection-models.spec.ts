@@ -66,6 +66,27 @@ const HAILO_PLUS_MODELS = [
   },
 ];
 
+// a migrated `type: onnx` detector is the bare "onnx", and a Ryzen iGPU is
+// always probed alongside an NVIDIA card
+const ONNX_GPU_HARDWARE = [
+  {
+    key: "onnx:nvidia",
+    detector: "onnx",
+    name: "NVIDIA GeForce RTX 3060",
+    units: [{ device: "onnx:0", label: "NVIDIA GeForce RTX 3060" }],
+    count: 1,
+    unlimited: true,
+  },
+  {
+    key: "onnx:amd",
+    detector: "onnx",
+    name: "AMD GPU",
+    units: [{ device: "onnx", label: "renderD128" }],
+    count: 1,
+    unlimited: true,
+  },
+];
+
 const HAILO_HARDWARE = [
   {
     key: "hailo",
@@ -84,7 +105,7 @@ async function installRoutes(
   models: Model[],
   plusEnabled = false,
   plusModels: unknown[] = [PLUS_MODEL],
-  hailoHardware = false,
+  hardware?: unknown[],
 ) {
   const config = configFactory({
     models,
@@ -107,9 +128,9 @@ async function installRoutes(
     route.fulfill({ json: plusModels }),
   );
 
-  if (hailoHardware) {
+  if (hardware) {
     await page.route("**/api/hardware/probe**", (route) =>
-      route.fulfill({ json: HAILO_HARDWARE }),
+      route.fulfill({ json: hardware }),
     );
   }
   await page.route("**/api/config/set", async (route) => {
@@ -200,6 +221,39 @@ test.describe("Detection models settings @high", () => {
     await expect(
       frigateApp.page.locator("#models-0-edgetpu\\:pci\\:1"),
     ).not.toBeChecked();
+  });
+
+  test("a device without an index selects the first unit", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(frigateApp.page, [
+      { scene: "default", devices: ["edgetpu:pci"] },
+    ]);
+    await openPage(frigateApp);
+
+    await expect(
+      frigateApp.page.locator("#models-0-edgetpu\\:pci\\:0"),
+    ).toBeChecked();
+    await expect(
+      frigateApp.page.locator("#models-0-edgetpu\\:pci\\:1"),
+    ).not.toBeChecked();
+  });
+
+  test("a migrated onnx device resolves to the NVIDIA GPU", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(
+      frigateApp.page,
+      [{ scene: "default", devices: ["onnx"] }],
+      false,
+      [PLUS_MODEL],
+      ONNX_GPU_HARDWARE,
+    );
+    await openPage(frigateApp);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "NVIDIA GeForce RTX 3060 \u2022 3 cameras",
+    );
   });
 
   test("a unit claimed by another model cannot be picked", async ({
@@ -510,7 +564,7 @@ test.describe("Detection models settings @high", () => {
       ],
       true,
       HAILO_PLUS_MODELS,
-      true,
+      HAILO_HARDWARE,
     );
     await openPage(frigateApp);
 

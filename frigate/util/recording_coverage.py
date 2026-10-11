@@ -204,11 +204,12 @@ def coverage_spans(intervals: list[CoverageInterval]) -> list[dict[str, Any]]:
 def stream_has_audio(intervals: list[CoverageInterval], main: bool) -> bool:
     """Whether a stream is audio-bearing over a coverage window.
 
-    A stream counts as audio-bearing unless EVERY one of its rows reports
-    has_audio False; NULL (legacy or undetermined) counts as audio.
+    A stream counts as audio-bearing only when one of its rows is known
+    to carry audio. A NULL row (legacy, or a segment ffprobe could not
+    read) proves nothing either way.
     """
     return any(
-        row is not None and row.has_audio is not False
+        row is not None and row.has_audio is True
         for row in ((interval.main if main else interval.sub) for interval in intervals)
     )
 
