@@ -990,7 +990,13 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def get(self, name: str, timeout_ms: int = 0):
+    def get(
+        self, name: str, shape: tuple[int, ...], frame_time: float | None = None
+    ) -> np.ndarray | None:
+        pass
+
+    @abstractmethod
+    def frame_times(self, camera: str) -> np.ndarray | None:
         pass
 
     @abstractmethod
@@ -1099,8 +1105,22 @@ class SharedMemoryFrameManager(FrameManager):
         )
 
     def get(
-        self, name: str, shape, frame_time: float | None = None
+        self, name: str, shape: tuple[int, ...], frame_time: float | None = None
     ) -> np.ndarray | None:
+        """Map a frame slot as an array without copying it.
+
+        The array points into shared memory, so it is only valid until the next
+        close(), delete(), or get() of the same name. Copy it to keep it longer.
+
+        Args:
+            name: Slot name, such as front_door_frame3
+            shape: Array shape, which must match the slot's size
+            frame_time: Time of the frame the caller was told is in the slot
+
+        Returns:
+            The frame, or None when the slot is missing, the wrong size, or holds
+            a different frame than frame_time
+        """
         if frame_time is not None and not self._holds(name, frame_time):
             # a mapping left over from a same-size recreate of the camera
             # looks the same as a lapped slot, so reopen by name once
