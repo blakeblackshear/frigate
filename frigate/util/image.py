@@ -990,11 +990,21 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def get(self, name: str, timeout_ms: int = 0):
+    def get(
+        self, name: str, shape: tuple[int, ...], frame_time: float | None = None
+    ) -> np.ndarray | None:
+        pass
+
+    @abstractmethod
+    def frame_times(self, camera: str) -> np.ndarray | None:
         pass
 
     @abstractmethod
     def close(self, name: str):
+        pass
+
+    @abstractmethod
+    def close_camera(self, camera: str) -> None:
         pass
 
     @abstractmethod
@@ -1079,7 +1089,56 @@ class SharedMemoryFrameManager(FrameManager):
             logger.info(f"the file {name} not found")
             return None
 
-    def get(self, name: str, shape) -> np.ndarray | None:
+    def frame_times(self, camera: str) -> np.ndarray | None:
+        """Per-slot write times for a camera's frame ring, stamped by capture."""
+        buf = self.write(f"{camera}_frame_times")
+
+        if buf is None:
+            return None
+
+        return np.ndarray((len(buf) // 8,), dtype=np.float64, buffer=buf)
+
+    def _holds(self, name: str, frame_time: float) -> bool:
+        camera, _, index = name.rpartition("_frame")
+        times = self.frame_times(camera)
+        return (
+            times is not None
+            and index.isdigit()
+            and int(index) < len(times)
+            and times[int(index)] == frame_time
+        )
+
+    def get(
+        self, name: str, shape: tuple[int, ...], frame_time: float | None = None
+    ) -> np.ndarray | None:
+        """Map a frame slot as an array without copying it.
+
+        The array points into shared memory, so it is only valid until the next
+        close(), delete(), or get() of the same name, and capture overwrites its
+        pixels once the ring wraps back to this slot. Copy it to keep it longer.
+
+        Args:
+            name: Slot name, such as front_door_frame3
+            shape: Array shape, which must match the slot's size
+            frame_time: Time of the frame the caller was told is in the slot
+
+        Returns:
+            The frame, or None when the slot is missing, the wrong size, or holds
+            a different frame than frame_time
+        """
+        if frame_time is not None and not self._holds(name, frame_time):
+            # a ledger left over from a same-size recreate of the camera looks
+            # the same as a lapped slot, so reopen it by name once
+            camera = name.rpartition("_frame")[0]
+            self.close(f"{camera}_frame_times")
+
+            if not self._holds(name, frame_time):
+                logger.debug("%s no longer holds the frame from %s", name, frame_time)
+                return None
+
+            # the ledger was replaced, so every cached slot maps the old segments
+            self.close_camera(camera)
+
         try:
             required = int(np.prod(shape))
             shm = self.shm_store.get(name)
@@ -1109,6 +1168,14 @@ class SharedMemoryFrameManager(FrameManager):
         if name in self.shm_store:
             self.shm_store[name].close()
             del self.shm_store[name]
+
+    def close_camera(self, camera: str) -> None:
+        """Drop every cached mapping for a camera's frame ring and ledger."""
+        for name in list(self.shm_store):
+            owner, _, suffix = name.rpartition("_frame")
+
+            if owner == camera and (suffix.isdigit() or suffix == "_times"):
+                self.close(name)
 
     def delete(self, name: str):
         if name in self.shm_store:

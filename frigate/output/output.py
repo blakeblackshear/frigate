@@ -145,6 +145,7 @@ class OutputProcess(FrigateProcess):
                 CameraConfigUpdateEnum.birdseye,
                 CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.record,
+                CameraConfigUpdateEnum.remove,
             ],
         )
         birdseye_config_subscriber = ConfigSubscriber("config/birdseye", exact=True)
@@ -208,6 +209,10 @@ class OutputProcess(FrigateProcess):
                             birdseye,
                         )
 
+            if CameraConfigUpdateEnum.remove in updates:
+                for camera in updates["remove"]:
+                    frame_manager.close_camera(camera)
+
             _result = detection_subscriber.check_for_update(timeout=1)
             if _result is None:
                 continue
@@ -241,7 +246,7 @@ class OutputProcess(FrigateProcess):
                 continue
 
             frame = frame_manager.get(
-                frame_name, self.config.cameras[camera].frame_shape_yuv
+                frame_name, self.config.cameras[camera].frame_shape_yuv, frame_time
             )
 
             if frame is None:
@@ -296,8 +301,6 @@ class OutputProcess(FrigateProcess):
                     frame,
                 )
 
-            frame_manager.close(frame_name)
-
         move_preview_frames("clips")
 
         while True:
@@ -308,21 +311,6 @@ class OutputProcess(FrigateProcess):
 
             if not topic or data is None:
                 break
-
-            (
-                camera,
-                frame_name,
-                frame_time,
-                current_tracked_objects,
-                motion_boxes,
-                regions,
-            ) = data
-
-            camera_config = self.config.cameras.get(camera)
-
-            if camera_config is not None:
-                frame_manager.get(frame_name, camera_config.frame_shape_yuv)
-                frame_manager.close(frame_name)
 
         detection_subscriber.stop()
 

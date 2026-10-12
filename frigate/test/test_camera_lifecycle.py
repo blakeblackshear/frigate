@@ -183,10 +183,12 @@ class TestReviewMaintainerRemoval(unittest.TestCase):
             "deleted_cam": [{"model": "gate", "from": "a", "to": "b", "timestamp": 1.0}]
         }
         maintainer.forcibly_end_segment = MagicMock()
+        maintainer.frame_manager = MagicMock()
 
         maintainer._handle_camera_removed("deleted_cam")
 
         maintainer.forcibly_end_segment.assert_called_once_with("deleted_cam")
+        maintainer.frame_manager.close_camera.assert_called_once_with("deleted_cam")
         self.assertNotIn("deleted_cam", maintainer.indefinite_events)
         self.assertNotIn("deleted_cam", maintainer.recent_classification_state_changes)
 
