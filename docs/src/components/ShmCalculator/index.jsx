@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import Admonition from "@theme/Admonition";
 import styles from "./styles.module.css";
 
-// mirrors calculate_shm_requirements() in frigate/util/services.py
+// follows calculate_shm_requirements() in frigate/util/services.py, but sizes
+// for 25 frames so float rounding can't land under its 20 frame warning
 const MB = 1048576;
 const RESERVED_MB = 50; // logs + nginx cache
-const MIN_FRAMES = 20;
+const TARGET_FRAMES = 25;
 const DEFAULT_FRAMES = 50;
 
 const frameMb = (width, height) =>
@@ -34,9 +35,9 @@ const ShmCalculator = () => {
 
     const cameraFramesMb = cameraCount * frameMb(width, height) + addedCamerasMb;
 
-    setSingleCameraShm(formatMb(frameMb(width, height) * MIN_FRAMES));
-    setAddedCamerasShm(formatMb(addedCamerasMb * MIN_FRAMES));
-    setResult(formatMb(Math.round(RESERVED_MB + cameraFramesMb * MIN_FRAMES)));
+    setSingleCameraShm(formatMb(frameMb(width, height) * TARGET_FRAMES));
+    setAddedCamerasShm(formatMb(addedCamerasMb * TARGET_FRAMES));
+    setResult(formatMb(Math.round(RESERVED_MB + cameraFramesMb * TARGET_FRAMES)));
     setFullRingShm(
       formatMb(Math.round(RESERVED_MB + cameraFramesMb * DEFAULT_FRAMES)),
     );
@@ -161,7 +162,7 @@ const ShmCalculator = () => {
             </p>
             <p>
               <strong>Formula:</strong> (width × height × 1.5 + 270480) ÷
-              1048576 × {MIN_FRAMES} frames
+              1048576 × {TARGET_FRAMES} frames
             </p>
             <p>
               <strong>Room for 2 Added Cameras:</strong>{" "}
