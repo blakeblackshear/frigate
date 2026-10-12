@@ -3,7 +3,7 @@ from pydantic.json_schema import SkipJsonSchema
 
 
 class MediaRecordingsSummaryQueryParams(BaseModel):
-    timezone: str = "utc"
+    timezone: str = "UTC"
     cameras: str | None = "all"
 
 
