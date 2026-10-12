@@ -7,8 +7,9 @@ from unittest.mock import MagicMock, patch
 
 from pydantic import ValidationError
 
-from frigate.config import FrigateConfig, env
-from frigate.config.env import (
+from frigate.config import FrigateConfig
+from frigate.util import env
+from frigate.util.env import (
     FRIGATE_ENV_VARS,
     validate_env_string,
     validate_env_vars,
@@ -301,14 +302,14 @@ class TestVariableSources(unittest.TestCase):
     def test_collision_warns_once_naming_the_winner(self):
         """A key from two sources logs one warning naming the source that won."""
         with patch.dict(env._CONTAINER_ENV, {"FRIGATE_MQTT_HOST": "from_env"}):
-            with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+            with self.assertLogs("frigate.util.env", level="WARNING") as logs:
                 env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "from_config"})
             self.assertEqual(len(logs.output), 1)
             self.assertIn("FRIGATE_MQTT_HOST", logs.output[0])
             self.assertIn("using the value from container environment", logs.output[0])
             self.assertNotIn("environment_vars", logs.output[0])
 
-            with self.assertNoLogs("frigate.config.env", level="WARNING"):
+            with self.assertNoLogs("frigate.util.env", level="WARNING"):
                 env._rebuild()
 
 
@@ -360,7 +361,7 @@ class TestSecretsFile(unittest.TestCase):
     def test_unprefixed_key_is_ignored_with_a_warning(self):
         """Names must start with FRIGATE_, matching the credentials directory."""
         self._write("cam_pass: hunter2\nFRIGATE_CAM_PASS: hunter2\n")
-        with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+        with self.assertLogs("frigate.util.env", level="WARNING") as logs:
             values = env._load_secrets_file()
         self.assertEqual(values, {"FRIGATE_CAM_PASS": "hunter2"})
         self.assertIn("cam_pass", logs.output[0])
@@ -483,10 +484,10 @@ class TestSourceRobustness(unittest.TestCase):
         env.reload_sources()
         env._CONFIG_ENV_VARS["FRIGATE_DUPE"] = "from_config"
 
-        with self.assertNoLogs("frigate.config.env", level="WARNING"):
+        with self.assertNoLogs("frigate.util.env", level="WARNING"):
             env._rebuild(warn=False)
 
-        with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+        with self.assertLogs("frigate.util.env", level="WARNING") as logs:
             env._rebuild()
         self.assertIn("FRIGATE_DUPE", logs.output[0])
 
@@ -496,7 +497,7 @@ class TestSourceRobustness(unittest.TestCase):
         env.reload_sources()
 
         self._write_secrets("FRIGATE_CAMS:\n  alley: hunter2\n")
-        with self.assertLogs("frigate.config.env", level="ERROR") as logs:
+        with self.assertLogs("frigate.util.env", level="ERROR") as logs:
             env.reload_sources()
 
         self.assertIn("FRIGATE_CAMS", logs.output[0])
@@ -505,7 +506,7 @@ class TestSourceRobustness(unittest.TestCase):
     def test_duplicate_key_error_does_not_log_the_values(self):
         """ruamel's duplicate key message quotes both values; the log must not."""
         self._write_secrets("FRIGATE_CAM_PASS: hunter2\nFRIGATE_CAM_PASS: hunter3\n")
-        with self.assertLogs("frigate.config.env", level="ERROR") as logs:
+        with self.assertLogs("frigate.util.env", level="ERROR") as logs:
             env.reload_sources()
 
         self.assertNotIn("hunter2", logs.output[0])
@@ -535,7 +536,7 @@ class TestSourceRobustness(unittest.TestCase):
         with open(os.path.join(self._creds.name, "FRIGATE_CRED"), "w") as f:
             f.write("from_creds\n")
 
-        with self.assertLogs("frigate.config.env", level="WARNING") as logs:
+        with self.assertLogs("frigate.util.env", level="WARNING") as logs:
             env.reload_sources()
 
         self.assertIn("FRIGATE_NOT_A_FILE", logs.output[0])

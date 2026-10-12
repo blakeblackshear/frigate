@@ -3,9 +3,9 @@ from enum import Enum
 from pydantic import Field, field_validator
 
 from frigate.util.config import resolve_ffmpeg_path
+from frigate.util.env import EnvString
 
 from ..base import FrigateBaseModel
-from ..env import EnvString
 
 __all__ = [
     "CameraFfmpegConfig",

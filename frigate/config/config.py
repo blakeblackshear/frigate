@@ -34,6 +34,7 @@ from frigate.util.config import (
     get_relative_coordinates,
     migrate_frigate_config,
 )
+from frigate.util.env import EnvVars, reload_sources
 from frigate.util.image import create_mask
 from frigate.util.live_streams import (
     default_transcode_source,
@@ -71,7 +72,6 @@ from .classification import (
     SemanticSearchModelEnum,
 )
 from .database import DatabaseConfig
-from .env import EnvVars, reload_sources
 from .logger import LoggerConfig
 from .mqtt import MqttConfig
 from .network import NetworkingConfig

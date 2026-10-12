@@ -4,12 +4,12 @@ from unittest.mock import Mock, patch
 
 import frigate.genai
 from frigate.config import GenAIProviderEnum
-from frigate.config.env import FRIGATE_ENV_VARS
 from frigate.const import MODEL_CACHE_DIR, REDACTED_CREDENTIAL_SENTINEL
 from frigate.genai import GenAIClient
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
+from frigate.util.env import FRIGATE_ENV_VARS
 
 
 class TestHttpApp(BaseTestHttp):

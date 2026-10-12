@@ -4,7 +4,7 @@ from pydantic import ValidationError
 
 from frigate.api.auth import resolve_role
 from frigate.config import AuthConfig, HeaderMappingConfig, ProxyConfig
-from frigate.config.env import FRIGATE_ENV_VARS
+from frigate.util.env import FRIGATE_ENV_VARS
 
 
 class TestProxyRoleResolution(unittest.TestCase):

@@ -1,7 +1,8 @@
 from pydantic import Field, field_validator
 
+from frigate.util.env import EnvString
+
 from .base import FrigateBaseModel
-from .env import EnvString
 
 __all__ = ["ProxyConfig", "HeaderMappingConfig"]
 
