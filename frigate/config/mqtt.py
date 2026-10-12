@@ -3,9 +3,9 @@ from typing import Self
 from pydantic import Field, ValidationInfo, model_validator
 
 from frigate.const import FREQUENCY_STATS_POINTS
+from frigate.util.env import EnvString
 
 from .base import FrigateBaseModel
-from .env import EnvString
 
 __all__ = ["MqttConfig"]
 

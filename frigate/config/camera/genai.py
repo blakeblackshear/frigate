@@ -3,8 +3,9 @@ from typing import Any, Self
 
 from pydantic import Field, model_validator
 
+from frigate.util.env import EnvString
+
 from ..base import FrigateBaseModel
-from ..env import EnvString
 
 __all__ = ["GenAIConfig", "GenAIProviderEnum", "GenAIRoleEnum"]
 
