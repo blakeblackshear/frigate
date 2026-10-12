@@ -404,7 +404,7 @@ class CameraState:
             self.send_mqtt_snapshot(new_obj, object_type)
 
             for c in self.callbacks["start"]:
-                c(self.name, new_obj, frame_name)
+                c(self.name, new_obj, frame_name, frame_time)
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
@@ -416,7 +416,7 @@ class CameraState:
 
             if autotracker_update or significant_update:
                 for c in self.callbacks["autotrack"]:
-                    c(self.name, updated_obj, frame_name)
+                    c(self.name, updated_obj, frame_name, frame_time)
 
             if thumb_update and current_frame is not None:
                 # ensure this frame is stored in the cache
@@ -466,7 +466,7 @@ class CameraState:
             ):
                 # call event handlers
                 for c in self.callbacks["update"]:
-                    c(self.name, updated_obj, frame_name)
+                    c(self.name, updated_obj, frame_name, frame_time)
                 updated_obj.last_published = frame_time
 
             # send MQTT snapshot when object first enters a required zone,
@@ -488,7 +488,7 @@ class CameraState:
                 removed_obj.obj_data["end_time"] = frame_time
                 logger.debug(f"{self.name}: end callback for object {id}")
                 for c in self.callbacks["end"]:
-                    c(self.name, removed_obj, frame_name)
+                    c(self.name, removed_obj, frame_name, frame_time)
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects

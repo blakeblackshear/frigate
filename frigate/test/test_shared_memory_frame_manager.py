@@ -7,6 +7,7 @@ the old, smaller segment.
 """
 
 import queue
+import threading
 import unittest
 from multiprocessing import Event, Value
 from types import SimpleNamespace
@@ -14,6 +15,9 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
+from frigate.embeddings.maintainer import EmbeddingMaintainer
+from frigate.events.types import EventStateEnum, EventTypeEnum
+from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.image import SharedMemoryFrameManager
 from frigate.video.ffmpeg import capture_frames
 
@@ -349,6 +353,81 @@ class TestCaptureFrames(unittest.TestCase):
         # the second read refills slot 0, which the first frame had stamped
         self.assertEqual([name for name, _ in puts], ["cam_frame0", "cam_frame0"])
         self.assertEqual(self.times_during_read[1][0], 0)
+
+
+class TestTrackedObjectEventsCarryFrameTime(unittest.TestCase):
+    """Tracked object events carry the time of the frame they name, which can
+    differ from the object's own frame_time when it wasn't detected in that
+    frame."""
+
+    def _callbacks(self) -> tuple[dict, MagicMock]:
+        processor = TrackedObjectProcessor.__new__(TrackedObjectProcessor)
+        processor.config = SimpleNamespace(cameras={"cam": SimpleNamespace(name="cam")})
+        processor.event_sender = MagicMock()
+        processor.dispatcher = MagicMock()
+        processor.ptz_autotracker_thread = MagicMock()
+        processor.camera_states = {}
+        processor.camera_states_lock = threading.Lock()
+        processor.frame_manager = MagicMock()
+        processor.should_save_snapshot = MagicMock(return_value=False)
+        processor.should_retain_recording = MagicMock(return_value=False)
+        callbacks: dict = {}
+
+        with patch("frigate.track.object_processing.CameraState") as state_cls:
+            state_cls.return_value.on.side_effect = lambda name, fn: callbacks.update(
+                {name: fn}
+            )
+            processor.create_camera_state("cam")
+
+        return callbacks, processor.event_sender
+
+    def test_start_update_end_publish_frame_time(self) -> None:
+        callbacks, sender = self._callbacks()
+        obj = MagicMock()
+        obj.to_dict.return_value = {"id": "1", "frame_time": 10.0}
+        obj.obj_data = {"frame_time": 10.0}
+        obj.previous = {"false_positive": True}
+        obj.false_positive = True
+
+        callbacks["start"]("cam", obj, "cam_frame3", 12.5)
+        callbacks["update"]("cam", obj, "cam_frame4", 13.0)
+        callbacks["end"]("cam", obj, "cam_frame5", 13.5)
+
+        payloads = [c.args[0] for c in sender.publish.call_args_list]
+        self.assertEqual(
+            [(p[1], p[3], p[5]) for p in payloads],
+            [
+                (EventStateEnum.start, "cam_frame3", 12.5),
+                (EventStateEnum.update, "cam_frame4", 13.0),
+                (EventStateEnum.end, "cam_frame5", 13.5),
+            ],
+        )
+
+
+class TestEmbeddingsObjectUpdateVerifiesFrame(unittest.TestCase):
+    def test_object_update_reads_frame_at_event_frame_time(self) -> None:
+        maintainer = EmbeddingMaintainer.__new__(EmbeddingMaintainer)
+        maintainer.config = SimpleNamespace(
+            cameras={"cam": SimpleNamespace(frame_shape_yuv=(6, 4))},
+            semantic_search=SimpleNamespace(enabled=False),
+        )
+        maintainer.event_subscriber = MagicMock()
+        maintainer.event_subscriber.check_for_update.return_value = (
+            EventTypeEnum.tracked_object,
+            EventStateEnum.update,
+            "cam",
+            "cam_frame4",
+            {"id": "1", "label": "person", "frame_time": 10.0},
+            13.0,
+        )
+        maintainer.realtime_processors = [MagicMock()]
+        maintainer.post_processors = []
+        maintainer.frame_manager = MagicMock()
+
+        maintainer._process_updates()
+
+        maintainer.frame_manager.get.assert_called_once_with("cam_frame4", (6, 4), 13.0)
+        maintainer.frame_manager.close.assert_not_called()
 
 
 if __name__ == "__main__":

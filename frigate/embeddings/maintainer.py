@@ -517,7 +517,7 @@ class EmbeddingMaintainer(threading.Thread):
         if update is None:
             return
 
-        source_type, event_type, camera, frame_name, data = update
+        source_type, event_type, camera, frame_name, data, frame_time = update
 
         logger.debug(
             f"Received update - source_type: {source_type}, camera: {camera}, data label: {data.get('label') if data else 'None'}"
@@ -546,7 +546,7 @@ class EmbeddingMaintainer(threading.Thread):
         # Create our own thumbnail based on the bounding box and the frame time
         try:
             yuv_frame = self.frame_manager.get(
-                frame_name, camera_config.frame_shape_yuv
+                frame_name, camera_config.frame_shape_yuv, frame_time
             )
         except FileNotFoundError:
             logger.debug(f"Frame {frame_name} not found for camera {camera}")
@@ -582,8 +582,6 @@ class EmbeddingMaintainer(threading.Thread):
                     },
                     PostProcessDataEnum.tracked_object,
                 )
-
-        self.frame_manager.close(frame_name)
 
     def _process_finalized(self) -> None:
         """Process the end of an event."""
