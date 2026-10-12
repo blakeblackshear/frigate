@@ -1171,8 +1171,11 @@ class SharedMemoryFrameManager(FrameManager):
 
     def close_camera(self, camera: str) -> None:
         """Drop every cached mapping for a camera's frame ring and ledger."""
-        for name in [n for n in self.shm_store if n.startswith(f"{camera}_frame")]:
-            self.close(name)
+        for name in list(self.shm_store):
+            owner, _, suffix = name.rpartition("_frame")
+
+            if owner == camera and (suffix.isdigit() or suffix == "_times"):
+                self.close(name)
 
     def delete(self, name: str):
         if name in self.shm_store:

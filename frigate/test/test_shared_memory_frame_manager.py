@@ -289,10 +289,17 @@ class TestSharedMemoryFrameManagerFrameTimes(unittest.TestCase):
         manager.shm_store.update(
             _segments(cam_frame0=1, cam_frame1=1, cam_frame_times=8, other_frame0=1)
         )
+        # a camera named cam_frame shares the cam_frame prefix
+        manager.shm_store.update(
+            {"cam_frame_frame0": _fake_shm(1), "cam_frame_frame_times": _fake_shm(8)}
+        )
 
         manager.close_camera("cam")
 
-        self.assertEqual(set(manager.shm_store), {"other_frame0"})
+        self.assertEqual(
+            set(manager.shm_store),
+            {"other_frame0", "cam_frame_frame0", "cam_frame_frame_times"},
+        )
 
     def test_get_without_frame_time_skips_ledger(self) -> None:
         manager = SharedMemoryFrameManager()
