@@ -1108,6 +1108,7 @@ class SharedMemoryFrameManager(FrameManager):
             self.close(f"{name.rpartition('_frame')[0]}_frame_times")
 
             if not self._holds(name, frame_time):
+                logger.debug("%s no longer holds the frame from %s", name, frame_time)
                 return None
 
         try:

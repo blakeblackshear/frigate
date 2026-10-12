@@ -217,13 +217,19 @@ class TestSharedMemoryFrameManagerFrameTimes(unittest.TestCase):
         segments = _segments(cam_frame0=2_500, cam_frame_times=8 * 2)
         np.frombuffer(segments["cam_frame_times"].buf, dtype=np.float64)[0] = 200.0
 
-        with patch(
-            "frigate.util.image.UntrackedSharedMemory",
-            side_effect=_open_from(segments),
+        with (
+            patch(
+                "frigate.util.image.UntrackedSharedMemory",
+                side_effect=_open_from(segments),
+            ),
+            self.assertLogs("frigate.util.image", "DEBUG") as logs,
         ):
             arr = manager.get("cam_frame0", (50, 50), frame_time=100.25)
 
         self.assertIsNone(arr)
+        self.assertIn(
+            "cam_frame0 no longer holds the frame from 100.25", logs.output[0]
+        )
 
     def test_get_returns_none_when_slot_index_is_beyond_ledger(self) -> None:
         manager = SharedMemoryFrameManager()
