@@ -2,42 +2,53 @@ import React, { useState, useEffect } from "react";
 import Admonition from "@theme/Admonition";
 import styles from "./styles.module.css";
 
+// follows calculate_shm_requirements() in frigate/util/services.py, but sizes
+// for 25 frames so float rounding can't land under its 20 frame warning
+const MB = 1048576;
+const RESERVED_MB = 50; // logs + nginx cache
+const TARGET_FRAMES = 25;
+const DEFAULT_FRAMES = 50;
+
+const frameMb = (width, height) =>
+  Math.round(((width * height * 1.5 + 270480) / MB) * 10) / 10;
+
+// room for 2 cameras added at runtime, sized as 720p
+const addedCamerasMb = 2 * frameMb(1280, 720);
+
 const ShmCalculator = () => {
   const [width, setWidth] = useState(1280);
   const [height, setHeight] = useState(720);
   const [cameraCount, setCameraCount] = useState(1);
-  const [result, setResult] = useState("26.32MB");
-  const [singleCameraShm, setSingleCameraShm] = useState("26.32MB");
-  const [totalShm, setTotalShm] = useState("26.32MB");
+  const [result, setResult] = useState("-");
+  const [singleCameraShm, setSingleCameraShm] = useState("-");
+  const [addedCamerasShm, setAddedCamerasShm] = useState("-");
+  const [fullRingShm, setFullRingShm] = useState("-");
 
   const calculate = () => {
     if (!width || !height || !cameraCount) {
       setResult("Please enter valid values");
       setSingleCameraShm("-");
-      setTotalShm("-");
+      setAddedCamerasShm("-");
+      setFullRingShm("-");
       return;
     }
 
-    // Single camera base SHM calculation (excluding logs)
-    // Formula: (width * height * 1.5 * 20 + 270480) / 1048576
-    const singleCameraBase =
-      (width * height * 1.5 * 20 + 270480) / 1048576;
-    setSingleCameraShm(`${singleCameraBase.toFixed(2)}mb`);
+    const cameraFramesMb = cameraCount * frameMb(width, height) + addedCamerasMb;
 
-    // Total SHM calculation (multiple cameras, including logs)
-    const totalBase = singleCameraBase * cameraCount;
-    const finalResult = totalBase + 40; // Default includes logs +40mb
+    setSingleCameraShm(formatMb(frameMb(width, height) * TARGET_FRAMES));
+    setAddedCamerasShm(formatMb(addedCamerasMb * TARGET_FRAMES));
+    setResult(formatMb(Math.round(RESERVED_MB + cameraFramesMb * TARGET_FRAMES)));
+    setFullRingShm(
+      formatMb(Math.round(RESERVED_MB + cameraFramesMb * DEFAULT_FRAMES)),
+    );
+  };
 
-    setTotalShm(`${(totalBase + 40).toFixed(2)}mb`);
-
-    // Format result
-    if (finalResult < 1) {
-      setResult(`${(finalResult * 1024).toFixed(2)}kb`);
-    } else if (finalResult >= 1024) {
-      setResult(`${(finalResult / 1024).toFixed(2)}gb`);
-    } else {
-      setResult(`${finalResult.toFixed(2)}mb`);
+  const formatMb = (value) => {
+    if (value >= 1024) {
+      return `${(value / 1024).toFixed(2)}gb`;
     }
+
+    return `${Number(value.toFixed(2))}mb`;
   };
 
   const formatWithUnit = (value) => {
@@ -147,19 +158,27 @@ const ShmCalculator = () => {
           </div>
           <div className={styles.formulaDisplay}>
             <p>
-              <strong>Single Camera:</strong> {formatWithUnit(singleCameraShm)}
+              <strong>Per Camera:</strong> {formatWithUnit(singleCameraShm)}
             </p>
             <p>
-              <strong>Formula:</strong> (width × height × 1.5 × 20 + 270480) ÷
-              1048576
+              <strong>Formula:</strong> (width × height × 1.5 + 270480) ÷
+              1048576 × {TARGET_FRAMES} frames
             </p>
-            {cameraCount > 1 && (
-              <p>
-                <strong>Total ({cameraCount} cameras):</strong> {formatWithUnit(totalShm)}
-              </p>
-            )}
             <p>
-              <strong>With Logs:</strong> + 40<span className={styles.unit}>mb</span>
+              <strong>Room for 2 Added Cameras:</strong>{" "}
+              {formatWithUnit(addedCamerasShm)}
+            </p>
+            <p>
+              <strong>Logs and Cache:</strong> + {RESERVED_MB}
+              <span className={styles.unit}>mb</span>
+            </p>
+            <p>
+              <strong>Birdseye Restream:</strong> + 8
+              <span className={styles.unit}>mb</span> if enabled
+            </p>
+            <p>
+              <strong>For {DEFAULT_FRAMES} Frames:</strong>{" "}
+              {formatWithUnit(fullRingShm)}
             </p>
           </div>
         </div>
