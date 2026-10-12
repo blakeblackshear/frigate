@@ -169,6 +169,10 @@ class CameraMaintainer(threading.Thread):
             frame_size = config.frame_shape_yuv[0] * config.frame_shape_yuv[1]
             self.frame_manager.create(f"{config.name}_frame{i}", frame_size)
 
+        # a leftover ledger from an unclean exit may be the wrong length
+        self.frame_manager.delete(f"{config.name}_frame_times")
+        self.frame_manager.create(f"{config.name}_frame_times", max(count, 1) * 8)
+
         capture_process = CameraCapture(
             config,
             count,

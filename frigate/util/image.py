@@ -1079,7 +1079,37 @@ class SharedMemoryFrameManager(FrameManager):
             logger.info(f"the file {name} not found")
             return None
 
-    def get(self, name: str, shape) -> np.ndarray | None:
+    def frame_times(self, camera: str) -> np.ndarray | None:
+        """Per-slot write times for a camera's frame ring, stamped by capture."""
+        buf = self.write(f"{camera}_frame_times")
+
+        if buf is None:
+            return None
+
+        return np.ndarray((len(buf) // 8,), dtype=np.float64, buffer=buf)
+
+    def _holds(self, name: str, frame_time: float) -> bool:
+        camera, _, index = name.rpartition("_frame")
+        times = self.frame_times(camera)
+        return (
+            times is not None
+            and index.isdigit()
+            and int(index) < len(times)
+            and times[int(index)] == frame_time
+        )
+
+    def get(
+        self, name: str, shape, frame_time: float | None = None
+    ) -> np.ndarray | None:
+        if frame_time is not None and not self._holds(name, frame_time):
+            # a mapping left over from a same-size recreate of the camera
+            # looks the same as a lapped slot, so reopen by name once
+            self.close(name)
+            self.close(f"{name.rpartition('_frame')[0]}_frame_times")
+
+            if not self._holds(name, frame_time):
+                return None
+
         try:
             required = int(np.prod(shape))
             shm = self.shm_store.get(name)

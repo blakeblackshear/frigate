@@ -349,7 +349,7 @@ class CameraState:
             return
 
         current_frame = self.frame_manager.get(
-            frame_name, self.camera_config.frame_shape_yuv
+            frame_name, self.camera_config.frame_shape_yuv, frame_time
         )
 
         tracked_objects = self.tracked_objects.copy()
@@ -602,9 +602,6 @@ class CameraState:
             if current_frame is not None:
                 self.current_frame_time = frame_time
                 self._current_frame = np.copy(current_frame)
-
-                if self.previous_frame_id is not None:
-                    self.frame_manager.close(self.previous_frame_id)
 
             self.previous_frame_id = frame_name
 

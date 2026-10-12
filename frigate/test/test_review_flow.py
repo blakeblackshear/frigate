@@ -74,8 +74,8 @@ class ReviewFlowTestCase(unittest.TestCase):
         maintainer.config_subscriber.check_for_updates.return_value = {}
         maintainer.detection_subscriber = MagicMock()
         maintainer.frame_manager = MagicMock()
-        maintainer.frame_manager.get.side_effect = lambda _name, shape: np.zeros(
-            shape, np.uint8
+        maintainer.frame_manager.get.side_effect = lambda _name, shape, _t=None: (
+            np.zeros(shape, np.uint8)
         )
         return maintainer
 

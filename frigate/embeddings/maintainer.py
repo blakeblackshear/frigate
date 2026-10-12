@@ -793,7 +793,7 @@ class EmbeddingMaintainer(threading.Thread):
         if topic is None:
             return
 
-        camera, frame_name, _, _, motion_boxes, _ = data
+        camera, frame_name, frame_time, _, motion_boxes, _ = data
 
         if not camera or camera not in self.config.cameras:
             return
@@ -817,7 +817,7 @@ class EmbeddingMaintainer(threading.Thread):
 
         try:
             yuv_frame = self.frame_manager.get(
-                frame_name, camera_config.frame_shape_yuv
+                frame_name, camera_config.frame_shape_yuv, frame_time
             )
         except FileNotFoundError:
             pass
@@ -840,8 +840,6 @@ class EmbeddingMaintainer(threading.Thread):
                 processor.process_frame(
                     {"camera": camera, "motion": motion_boxes}, yuv_frame
                 )
-
-        self.frame_manager.close(frame_name)
 
     def _process_deferred_results(self) -> None:
         """Drain results from deferred processors and perform IPC side-effects."""

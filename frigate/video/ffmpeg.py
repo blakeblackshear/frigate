@@ -64,6 +64,7 @@ def capture_frames(
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
+    frame_times = frame_manager.frame_times(config.name)
 
     while not stop_event.is_set():
         # CameraWatchdog applies enabled updates onto this same CameraConfig
@@ -78,6 +79,11 @@ def capture_frames(
         current_frame.value = datetime.now().timestamp()
         frame_name = f"{config.name}_frame{frame_index}"
         frame_buffer = frame_manager.write(frame_name)
+
+        # readinto fills the slot for the whole pipe wait, so readers must not
+        # match it until the frame is complete
+        frame_times[frame_index] = 0
+
         try:
             if ffmpeg_process.stdout.readinto(frame_buffer) != frame_size:
                 raise EOFError("incomplete frame")
@@ -96,16 +102,17 @@ def capture_frames(
 
             continue
 
+        frame_times[frame_index] = current_frame.value
         frame_rate.update()
 
         # don't lock the queue to check, just try since it should rarely be full
         try:
             # add to the queue
             frame_queue.put((frame_name, current_frame.value), False)
-            frame_manager.close(frame_name)
         except queue.Full:
-            # if the queue is full, skip this frame
+            # nobody was told about this slot, so the next frame reuses it
             skipped_eps.update()
+            continue
 
         frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
 

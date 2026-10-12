@@ -170,7 +170,6 @@ class DetectorRunner(FrigateProcess):
             mono_start = time.monotonic()
             detections = object_detector.detect_raw(input_frame)
             duration = time.monotonic() - mono_start
-            frame_manager.close(connection_id)
 
             if connection_id not in self.outputs:
                 self.create_output_shm(connection_id)
@@ -258,10 +257,6 @@ class AsyncDetectorRunner(FrigateProcess):
                 continue
             ts = self.send_times.popleft()
             duration = time.perf_counter() - ts
-
-            # release input buffer
-            assert self._frame_manager is not None
-            self._frame_manager.close(connection_id)
 
             if connection_id not in self.outputs:
                 self.create_output_shm(connection_id)
