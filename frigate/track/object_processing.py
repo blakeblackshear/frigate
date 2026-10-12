@@ -763,6 +763,7 @@ class TrackedObjectProcessor(threading.Thread):
                         continue
 
                     camera_state.shutdown()
+                    self.frame_manager.close_camera(camera)
 
                     with self.camera_states_lock:
                         self.camera_states.pop(camera)

@@ -504,6 +504,7 @@ class ReviewSegmentMaintainer(threading.Thread):
     def _handle_camera_removed(self, camera: str) -> None:
         """Close out a deleted camera's segment so a reused name cannot inherit it."""
         self.forcibly_end_segment(camera)
+        self.frame_manager.close_camera(camera)
         self.indefinite_events.pop(camera, None)
         self.recent_classification_state_changes.pop(camera, None)
 

@@ -243,26 +243,56 @@ class TestSharedMemoryFrameManagerFrameTimes(unittest.TestCase):
 
         self.assertIsNone(arr)
 
-    def test_get_reopens_once_when_cached_ledger_is_stale(self) -> None:
+    def test_get_reopens_every_cached_slot_when_ledger_is_stale(self) -> None:
         """A camera recreated at the same resolution gets new segments under
-        the old names. A long-lived reader still mapped to the unlinked
-        ledger sees a mismatch, which must trigger one reopen by name before
-        the frame is declared gone."""
+        the old names. A long-lived reader still mapped to the unlinked ledger
+        sees a mismatch, which must drop every cached slot of that camera, not
+        only the one being read, or later reads return the old pixels."""
         manager = SharedMemoryFrameManager()
-        stale = _segments(cam_frame0=2_500, cam_frame_times=8 * 2)
+        stale = _segments(cam_frame0=2_500, cam_frame1=2_500, cam_frame_times=8 * 2)
         manager.shm_store.update(stale)
-        current = _segments(cam_frame0=2_500, cam_frame_times=8 * 2)
-        np.frombuffer(current["cam_frame_times"].buf, dtype=np.float64)[0] = 100.25
+        current = _segments(cam_frame0=2_500, cam_frame1=2_500, cam_frame_times=8 * 2)
+        current["cam_frame1"].buf[0] = 7
+        np.frombuffer(current["cam_frame_times"].buf, dtype=np.float64)[:] = (
+            100.25,
+            100.5,
+        )
 
         with patch(
             "frigate.util.image.UntrackedSharedMemory",
             side_effect=_open_from(current),
         ):
+            first = manager.get("cam_frame0", (50, 50), frame_time=100.25)
+            second = manager.get("cam_frame1", (50, 50), frame_time=100.5)
+
+        self.assertIsNotNone(first)
+        self.assertEqual(second[0, 0], 7)
+        self.assertIs(manager.shm_store["cam_frame1"], current["cam_frame1"])
+
+    def test_get_keeps_cached_slots_when_only_lapped(self) -> None:
+        manager = SharedMemoryFrameManager()
+        segments = _segments(cam_frame0=2_500, cam_frame1=2_500, cam_frame_times=8 * 2)
+        manager.shm_store.update(segments)
+        np.frombuffer(segments["cam_frame_times"].buf, dtype=np.float64)[0] = 200.0
+
+        with patch(
+            "frigate.util.image.UntrackedSharedMemory",
+            side_effect=_open_from(segments),
+        ):
             arr = manager.get("cam_frame0", (50, 50), frame_time=100.25)
 
-        self.assertIsNotNone(arr)
-        self.assertIs(manager.shm_store["cam_frame0"], current["cam_frame0"])
-        self.assertIs(manager.shm_store["cam_frame_times"], current["cam_frame_times"])
+        self.assertIsNone(arr)
+        self.assertIs(manager.shm_store["cam_frame1"], segments["cam_frame1"])
+
+    def test_close_camera_drops_only_that_camera(self) -> None:
+        manager = SharedMemoryFrameManager()
+        manager.shm_store.update(
+            _segments(cam_frame0=1, cam_frame1=1, cam_frame_times=8, other_frame0=1)
+        )
+
+        manager.close_camera("cam")
+
+        self.assertEqual(set(manager.shm_store), {"other_frame0"})
 
     def test_get_without_frame_time_skips_ledger(self) -> None:
         manager = SharedMemoryFrameManager()

@@ -145,6 +145,7 @@ class OutputProcess(FrigateProcess):
                 CameraConfigUpdateEnum.birdseye,
                 CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.record,
+                CameraConfigUpdateEnum.remove,
             ],
         )
         birdseye_config_subscriber = ConfigSubscriber("config/birdseye", exact=True)
@@ -207,6 +208,10 @@ class OutputProcess(FrigateProcess):
                             preview_write_times,
                             birdseye,
                         )
+
+            if CameraConfigUpdateEnum.remove in updates:
+                for camera in updates["remove"]:
+                    frame_manager.close_camera(camera)
 
             _result = detection_subscriber.check_for_update(timeout=1)
             if _result is None:

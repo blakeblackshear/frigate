@@ -332,6 +332,9 @@ class EmbeddingMaintainer(threading.Thread):
         """Apply camera config updates and register newly enabled processors."""
         updated_topics = self.config_updater.check_for_updates()
 
+        for camera in updated_topics.get("remove", []):
+            self.frame_manager.close_camera(camera)
+
         if updated_topics.keys() & GENAI_UPDATE_TOPICS:
             self._sync_genai_processors()
 
