@@ -39,7 +39,6 @@ import re
 import shutil
 import threading
 import time
-import urllib.request
 import zipfile
 from typing import ClassVar, Literal
 
@@ -230,9 +229,12 @@ def _resolve_model_json(path, build_root) -> str:
         extract_dir = os.path.join(cache, name)
         if not os.path.isfile(zip_path):
             os.makedirs(cache, exist_ok=True)
-            logger.info("axelera: downloading model from %s", model_url)
             try:
-                urllib.request.urlretrieve(_url_with_scheme(model_url), zip_path)
+                # function level like runtime_deps: keeps the detector API
+                # import (and this module) free of the downloader's IPC stack
+                from frigate.util.downloader import ModelDownloader
+
+                ModelDownloader.download_from_url(_url_with_scheme(model_url), zip_path)
             except OSError as exc:
                 raise RuntimeError(
                     f"Failed to download model from {model_url}: {exc}"
