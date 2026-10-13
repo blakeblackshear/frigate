@@ -839,7 +839,9 @@ def get_axcl_npu_stats() -> dict[str, str | float] | None:
 
 
 _axelera_board_temp_cache: tuple[float, float] | None = None
+_axelera_board_temp_error_until = 0.0
 _AXELERA_BOARD_TEMP_TTL = 5.0
+_AXELERA_BOARD_TEMP_ERROR_COOLDOWN = 60.0
 
 
 def get_axelera_board_temp() -> float | None:
@@ -849,11 +851,13 @@ def get_axelera_board_temp() -> float | None:
     stream, so it is safe to call while a detector is running. ``axcmd`` ships
     with the runtime wheel; ``find_tool`` prefers the runtime-installed copy
     under the user base. Results are cached for a few seconds so one stats tick
-    spawns axcmd at most once.
+    spawns axcmd at most once, and a failed read starts a cooldown so an
+    unresponsive board does not delay every stats update.
 
     NOTE: this function is blocking (up to ~5s on a hung board).
     """
     global _axelera_board_temp_cache
+    global _axelera_board_temp_error_until
 
     now = time.monotonic()
     if (
@@ -861,6 +865,11 @@ def get_axelera_board_temp() -> float | None:
         and now - _axelera_board_temp_cache[0] < _AXELERA_BOARD_TEMP_TTL
     ):
         return _axelera_board_temp_cache[1]
+
+    if now < _axelera_board_temp_error_until:
+        # the last read already cost up to 5s; back off instead of paying
+        # that cost again on every stats update while the board is down
+        return None
 
     try:
         from frigate.util.runtime_deps import find_tool
@@ -881,9 +890,11 @@ def get_axelera_board_temp() -> float | None:
             check=False,
         )
     except (OSError, sp.TimeoutExpired):
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
         return None
 
     if result.returncode != 0:
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
         return None
 
     # anchor on the board-controller line ("N: temp_sensorX@YY = <value>") so
@@ -891,11 +902,13 @@ def get_axelera_board_temp() -> float | None:
     match = re.search(r"temp_sensor[^=\n]*=\s*([\d.]+)", result.stdout)
 
     if match is None:
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
         return None
 
     try:
         temp = round(float(match.group(1)), 1)
     except ValueError:
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
         return None
 
     _axelera_board_temp_cache = (now, temp)

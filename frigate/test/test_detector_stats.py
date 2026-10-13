@@ -44,5 +44,31 @@ class TestDetectorTemperatures(unittest.TestCase):
             self.assertEqual(get_hardware_temperatures("axelera"), [None])
 
 
+class TestAxeleraBoardTempCooldown(unittest.TestCase):
+    """A failed board read backs off instead of delaying every stats update."""
+
+    def test_failed_read_starts_a_cooldown(self):
+        import subprocess as sp
+
+        import frigate.util.services as services
+
+        with (
+            patch.object(services, "_axelera_board_temp_cache", None),
+            patch.object(services, "_axelera_board_temp_error_until", 0.0),
+            patch("frigate.util.runtime_deps.find_tool", return_value="/bin/true"),
+            patch.object(
+                services.sp,
+                "run",
+                side_effect=sp.TimeoutExpired(cmd="axcmd", timeout=5),
+            ) as run_mock,
+        ):
+            self.assertIsNone(services.get_axelera_board_temp())
+            # the cooldown prevents the second update from paying the
+            # blocking read cost again while the board is unresponsive
+            self.assertIsNone(services.get_axelera_board_temp())
+
+        self.assertEqual(run_mock.call_count, 1)
+
+
 if __name__ == "__main__":
     unittest.main()
