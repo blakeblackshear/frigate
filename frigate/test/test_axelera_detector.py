@@ -7,6 +7,7 @@ compiled-model discovery guard, and the zip extraction escape guard, without
 the vendor SDK or a Metis card.
 """
 
+import hashlib
 import json
 import os
 import shutil
@@ -120,13 +121,18 @@ class _FakeModelDownloader:
     """The ModelDownloader stand-in bound into the stubbed downloader module."""
 
     calls: ClassVar[list] = []
+    version: ClassVar[int] = 0
 
     @staticmethod
     def download_from_url(download_url, save_path, silent=False):
         _FakeModelDownloader.calls.append((download_url, save_path))
+        _FakeModelDownloader.version += 1
         with zipfile.ZipFile(save_path, "w") as archive:
             archive.writestr("fakenet/1/model.json", json.dumps({"inputs": []}))
-            archive.writestr("fakenet/1/postprocess_graph.onnx", b"fake")
+            archive.writestr(
+                "fakenet/1/postprocess_graph.onnx",
+                f"fake v{_FakeModelDownloader.version}".encode(),
+            )
 
 
 def _make_engine(root: str, outputs):
@@ -373,9 +379,17 @@ class TestModelDownload(unittest.TestCase):
     def test_https_url_downloads_and_resolves(self):
         calls, got = self._resolve("https://example.com/models/fakenet.zip")
 
+        shasum = hashlib.sha256(b"https://example.com/models/fakenet.zip").hexdigest()[
+            :12
+        ]
         self.assertEqual(calls[0][0], "https://example.com/models/fakenet.zip")
-        self.assertTrue(calls[0][1].endswith(os.path.join("axelera", "fakenet.zip")))
-        self.assertTrue(got.endswith(os.path.join("fakenet", "1", "model.json")))
+        self.assertTrue(
+            calls[0][1].endswith(os.path.join("axelera", f"fakenet-{shasum}.zip"))
+        )
+        # the extract directory carries the source identity in its name
+        extract_dir = os.path.dirname(os.path.dirname(os.path.dirname(got)))
+        self.assertTrue(os.path.basename(extract_dir).startswith(f"fakenet-{shasum}-"))
+        self.assertTrue(got.endswith(os.path.join("1", "model.json")))
 
     def test_scheme_less_host_url_gets_http_prefix(self):
         calls, _ = self._resolve("www.example.com/models/fakenet.zip")
@@ -385,7 +399,136 @@ class TestModelDownload(unittest.TestCase):
     def test_url_without_filename_falls_back_to_default_preset_name(self):
         calls, _ = self._resolve("https://example.com/")
 
-        self.assertTrue(calls[0][1].endswith("yolox-s-coco-onnx.zip"))
+        shasum = hashlib.sha256(b"https://example.com/").hexdigest()[:12]
+        self.assertTrue(calls[0][1].endswith(f"yolox-s-coco-onnx-{shasum}.zip"))
+
+
+class TestModelCacheIdentity(unittest.TestCase):
+    """Cache identity: source URL + archive content; prune is conservative."""
+
+    def _resolve(self, url, tmp_name):
+        _FakeModelDownloader.calls = []
+        stub = types.ModuleType("frigate.util.downloader")
+        setattr(stub, "ModelDownloader", _FakeModelDownloader)
+        saved_cache = ax.MODEL_CACHE_DIR
+        ax.MODEL_CACHE_DIR = os.path.join(tmp_name, "cache")
+        try:
+            with patch.dict(sys.modules, {"frigate.util.downloader": stub}):
+                got = ax._resolve_model_json(url, tmp_name)
+        finally:
+            ax.MODEL_CACHE_DIR = saved_cache
+        return got
+
+    def test_replaced_archive_extracts_into_a_fresh_directory(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            first = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+            zip_path = _FakeModelDownloader.calls[0][1]
+            # the cache path now holds a different archive (re-fetched
+            # upstream, a pre-seeded image, a mirror refresh)
+            with zipfile.ZipFile(zip_path, "w") as archive:
+                archive.writestr("fakenet/1/model.json", json.dumps({"inputs": []}))
+                archive.writestr("fakenet/1/postprocess_graph.onnx", b"replaced")
+            second = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+
+            self.assertNotEqual(first, second)
+            cache = os.path.join(tmp.name, "cache", "axelera")
+            entries = sorted(e for e in os.listdir(cache) if e != "bin")
+            # the superseded variant was pruned; the new one remains with the zip
+            self.assertEqual(len(entries), 2)
+            self.assertTrue(all(e.startswith("fakenet-") for e in entries))
+            second_dir = os.path.dirname(os.path.dirname(os.path.dirname(second)))
+            self.assertIn(os.path.basename(second_dir), entries)
+        finally:
+            tmp.cleanup()
+
+    def test_unchanged_archive_reuses_the_extracted_directory(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            first = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+            self.assertEqual(len(_FakeModelDownloader.calls), 1)
+            second = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+
+            # no second download happened (cache hit on the source-keyed zip)
+            self.assertEqual(len(_FakeModelDownloader.calls), 0)
+            self.assertEqual(first, second)
+        finally:
+            tmp.cleanup()
+
+    def test_prune_keeps_other_models_shims_and_foreign_sources(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            cache = os.path.join(tmp.name, "axelera")
+            os.makedirs(os.path.join(cache, "bin"))
+            with open(os.path.join(cache, "bin", "lspci"), "w"):
+                pass
+            os.makedirs(os.path.join(cache, "fakenet-aaa-111"))
+            os.makedirs(os.path.join(cache, "othernet-aaa-111"))
+            # a legacy-named entry of the same model goes; other models stay
+            with open(os.path.join(cache, "fakenet.zip"), "w"):
+                pass
+
+            ax._prune_model_cache(
+                cache,
+                [os.path.join(cache, "fakenet-aaa-111")],
+                "fakenet",
+                "aaa",
+                True,
+            )
+
+            entries = os.listdir(cache)
+            self.assertIn("bin", entries)
+            self.assertIn("othernet-aaa-111", entries)
+            self.assertNotIn("fakenet.zip", entries)
+
+            # without a fresh download, another source's variants survive
+            foreign_cache = os.path.join(tmp.name, "foreign")
+            os.makedirs(foreign_cache)
+            os.makedirs(os.path.join(foreign_cache, "fakenet-bbb-222"))
+            with open(os.path.join(foreign_cache, "fakenet-bbb.zip"), "w"):
+                pass
+            ax._prune_model_cache(foreign_cache, [], "fakenet", "aaa", False)
+            self.assertEqual(
+                sorted(os.listdir(foreign_cache)),
+                ["fakenet-bbb-222", "fakenet-bbb.zip"],
+            )
+        finally:
+            tmp.cleanup()
+
+
+class TestLabelLookupFallback(unittest.TestCase):
+    """Renamed labels keep the canonical model name as a lookup fallback."""
+
+    def test_rename_keeps_canonical_fallback(self):
+        labels = ["person", "bus", "truck"] + [f"c{i}" for i in range(3, 80)]
+        lookup = ax._build_label_lookup({0: "visitor"}, labels)
+        self.assertEqual(lookup["visitor"], 0)
+        self.assertEqual(lookup["person"], 0)
+
+    def test_coco_80_renames_keep_broken_out_classes(self):
+        # the recommended /labelmap/coco-80.txt renames bus (5) and truck (7) to car
+        labels = ["person", "c1", "c2", "c3", "c4", "bus", "c6", "truck"] + [
+            f"c{i}" for i in range(8, 80)
+        ]
+        merged = {i: name for i, name in enumerate(labels) if i not in (5, 7)}
+        merged.update({5: "car", 7: "car"})
+        lookup = ax._build_label_lookup(merged, labels)
+        self.assertEqual(lookup["car"], 7)
+        self.assertEqual(lookup["person"], 0)
+        self.assertEqual(lookup["bus"], 5)
+        self.assertEqual(lookup["truck"], 7)
+
+    def test_rename_collision_gives_the_rename_precedence(self):
+        labels = ["person", "bus"]
+        # class 1 (bus) renamed to person: person -> 1 (the rename wins)
+        lookup = ax._build_label_lookup({0: "visitor", 1: "person"}, labels)
+        self.assertEqual(lookup["person"], 1)
+        self.assertEqual(lookup["bus"], 1)
+        self.assertEqual(lookup["visitor"], 0)
+
+    def test_empty_labelmap_yields_empty_lookup(self):
+        # the detector turns an empty lookup into its actionable ValueError
+        self.assertEqual(ax._build_label_lookup(None, ["person", "bus"]), {})
 
 
 class TestBackpressure(unittest.TestCase):

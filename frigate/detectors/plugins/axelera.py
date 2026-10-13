@@ -31,6 +31,7 @@ the raw int8 AIPU tensors into boxes + class scores, so the plugin only
 dequantizes the heads and runs a thin class-max + NMS.
 """
 
+import hashlib
 import json
 import logging
 import os
@@ -185,6 +186,73 @@ def _looks_like_path(value: str) -> bool:
     return "/" in value or "." in value
 
 
+def _build_label_lookup(
+    merged_labelmap: dict[int, str] | None, labels: list[str]
+) -> dict[str, int]:
+    """Map label names to class ids for the decode lookup.
+
+    The user's merged labelmap decides by NAME, so a rename (person ->
+    visitor) must not drop the original class name the compiled model
+    carries at that index: detections still arrive under the canonical
+    name, and a lookup keyed only by the renamed entries would skip every
+    one of them (the recommended /labelmap/coco-80.txt also renames bus
+    and truck to car, and two classes can share one new name). Every
+    canonical model label stays addressable; the user's rename wins a
+    name collision. With no labelmap configured the lookup stays empty
+    and the detector reports the actionable error.
+    """
+    lookup: dict[str, int] = {}
+    if not merged_labelmap:
+        return lookup
+    for class_id, label in merged_labelmap.items():
+        if label is not None:
+            lookup[str(label).strip()] = class_id
+    for class_id, label in enumerate(labels):
+        if label:
+            lookup.setdefault(label, class_id)
+    return lookup
+
+
+def _prune_model_cache(
+    cache: str, keep: list[str], name: str, source: str, downloaded: bool
+) -> None:
+    """Remove superseded axelera model cache entries for one model name.
+
+    URL models are cached under source-and-content keyed names, so an older
+    variant of the same model name is dead weight once a fresh download
+    resolved. Entries of other model names are never touched, and without a
+    fresh download other-source variants survive too (several detectors may
+    resolve different mirrors of the same archive name). The enumeration
+    shims (bin/) are not models and are never touched.
+    """
+    keep_set = {os.path.normpath(path) for path in keep}
+    source_zip = f"{name}-{source}.zip"
+    try:
+        entries = os.listdir(cache)
+    except OSError:
+        return
+    for entry in entries:
+        if entry == "bin":
+            continue
+        same_name = entry.startswith(f"{name}-") or entry in (name, f"{name}.zip")
+        if not same_name:
+            continue
+        if not downloaded and entry != source_zip and f"-{source}-" not in entry:
+            # a different source's variant, and nothing was fetched now:
+            # another detector may still be using it
+            continue
+        full = os.path.normpath(os.path.join(cache, entry))
+        if full in keep_set:
+            continue
+        try:
+            if os.path.isdir(full):
+                shutil.rmtree(full)
+            else:
+                os.remove(full)
+        except OSError:
+            logger.warning("axelera: could not prune stale cache entry %s", full)
+
+
 def _extract_model_zip(zip_path: str, dest_dir: str) -> None:
     """Unpack a compiled-model zip into ``dest_dir`` (idempotent)."""
     marker = os.path.join(dest_dir, ".extracted")
@@ -225,9 +293,12 @@ def _resolve_model_json(path, build_root) -> str:
         name = os.path.splitext(os.path.basename(model_url.split("?")[0]))[0]
         name = name or AX_DEFAULT_NETWORK
         cache = os.path.join(MODEL_CACHE_DIR, "axelera")
-        zip_path = os.path.join(cache, f"{name}.zip")
-        extract_dir = os.path.join(cache, name)
-        if not os.path.isfile(zip_path):
+        # the source URL is part of the cache identity: the same archive
+        # file name served by different sources must not share an entry
+        source = hashlib.sha256(_url_with_scheme(model_url).encode()).hexdigest()[:12]
+        zip_path = os.path.join(cache, f"{name}-{source}.zip")
+        downloaded = not os.path.isfile(zip_path)
+        if downloaded:
             os.makedirs(cache, exist_ok=True)
             try:
                 # function level like runtime_deps: keeps the detector API
@@ -241,7 +312,18 @@ def _resolve_model_json(path, build_root) -> str:
                 ) from exc
         if not zipfile.is_zipfile(zip_path):
             raise ValueError(f"downloaded model from {model_url} is not a zip archive")
+        # the archive's own fingerprint is the second half of the identity:
+        # a replaced archive (same name, same URL) extracts into a fresh
+        # directory instead of being skipped by an existing .extracted marker
+        zip_hash = hashlib.md5()
+        with open(zip_path, "rb") as f:
+            while chunk := f.read(8192):
+                zip_hash.update(chunk)
+        extract_dir = os.path.join(cache, f"{name}-{source}-{zip_hash.hexdigest()}")
         _extract_model_zip(zip_path, extract_dir)
+        # superseded variants of this model name go once a fresh download
+        # landed; other models and (without a download) other sources stay
+        _prune_model_cache(cache, [zip_path, extract_dir], name, source, downloaded)
         return _find_model_json(extract_dir)
 
     if model_path and _looks_like_path(model_path):
@@ -944,18 +1026,6 @@ class AxeleraDetector(DetectionApi):
         build_root = os.environ.get("AXELERA_BUILD_ROOT", AX_DEFAULT_BUILD_ROOT)
         self.working_model = _resolve_model_json(model.path, build_root)
 
-        # label name -> Frigate class id by NAME (independent of ordering)
-        self._labelmap = {}
-        for class_id, label in (model.merged_labelmap or {}).items():
-            if label is not None:
-                self._labelmap[str(label).strip()] = class_id
-        if not self._labelmap:
-            raise ValueError(
-                "axelera: the labelmap is empty; every detection would be "
-                "dropped in the label lookup. Set labelmap_path (e.g. "
-                "/labelmap/coco-80.txt) or an inline labelmap for the model."
-            )
-
         # COCO-ordered label names from the compiled model metadata (index -> name)
         labels = _read_model_labels(os.path.dirname(self.working_model))
         if len(labels) == 0:
@@ -963,6 +1033,16 @@ class AxeleraDetector(DetectionApi):
                 "axelera: the compiled model carries no label list; every "
                 "detection would fall out of the labelmap lookup while the "
                 "detector reports healthy"
+            )
+
+        # label name -> Frigate class id by NAME (independent of ordering),
+        # with the canonical model labels kept as fallbacks after a rename
+        self._labelmap = _build_label_lookup(model.merged_labelmap, labels)
+        if not self._labelmap:
+            raise ValueError(
+                "axelera: the labelmap is empty; every detection would be "
+                "dropped in the label lookup. Set labelmap_path (e.g. "
+                "/labelmap/coco-80.txt) or an inline labelmap for the model."
             )
 
         self._inference = _AxeleraRuntimeInference(
