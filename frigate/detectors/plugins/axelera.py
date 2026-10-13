@@ -15,28 +15,25 @@ so per-frame latency is the flat model time (~21 ms for YOLO-NAS M 704x576,
 measured), independent of scene activity.
 
 Model configuration:
-  - ``path`` = path to a COMPILED model directory (containing ``1/model.json``
-    + ``1/postprocess_graph.onnx``), a zip archive of one, or to the
-    ``model.json`` itself; a preset name (e.g. ``yolox-s-coco-onnx``) is looked
-    up under ``AXELERA_BUILD_ROOT`` (default ``/opt/voyager-sdk/build``), and
-    http(s)/scheme-less host URLs download into the model cache.
-  - ``labelmap_path`` / ``labelmap``: labels are mapped to class ids BY NAME
-    via the merged labelmap, independent of label ordering.
-  - ``width`` / ``height``: input frame dimensions (the coordinate space of the
-    region Frigate sends, e.g. 704x576); the plugin letterboxes to the model's
-    square input (640x640 for the YOLO presets) and maps boxes back.
+  - ``path`` = a .zip of the COMPILED model output (containing ``1/model.json``
+    + ``1/manifest.json`` + ``1/postprocess_graph.onnx``), local or http(s)
+    URL (the memryx custom-model pattern); the selected archive extracts
+    fresh on every start.
+  - ``labelmap_path`` / ``labelmap``: Frigate's labelmap names the class
+    index the decode returns, so renames and the coco-80 bus/truck->car
+    mapping need no plugin-side code.
+  - ``width`` / ``height``: must equal the compiled model input size; the
+    plugin raises at init otherwise (no letterboxing).
 
 The SDK's own baked postprocess graph (``1/postprocess_graph.onnx``) converts
 the raw int8 AIPU tensors into boxes + class scores, so the plugin only
 dequantizes the heads and runs a thin class-max + NMS.
 """
 
-import hashlib
 import json
 import logging
 import os
 import queue
-import re
 import shutil
 import threading
 import time
@@ -50,6 +47,7 @@ from pydantic import ConfigDict, Field
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
+from frigate.util.file import FileLock
 from frigate.util.model import xyxy_to_xywh_for_nms
 from frigate.util.runtime_deps import (
     Artifact,
@@ -133,7 +131,6 @@ AXELERA_MANIFEST = RuntimeManifest(
 )
 
 AX_DEFAULT_NETWORK = "yolox-s-coco-onnx"
-AX_DEFAULT_BUILD_ROOT = "/opt/voyager-sdk/build"
 MAX_ROWS = 20
 # int8 zero-point the compiled inputs are offset by (px - 128); also the
 # filler for the padded border. Everything else about a specific compiled
@@ -156,100 +153,13 @@ BUFFER_SETS = 3
 # ----------------- Utility Functions ----------------- #
 
 
-# Matches a scheme-less host URL: host([:port])/path, e.g. www.example.com/model.zip
-# or localhost:8000/model.zip (bare filenames like foo.zip and relative paths like
-# models/foo.zip have no leading dotted host and stay local paths / presets).
-_HOST_URL_RE = re.compile(
-    r"^(localhost|[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z]{2,})(:[0-9]+)?/"
-)
-
-
 def is_url(value: str) -> bool:
-    """Return True for http(s) URLs and scheme-less host URLs.
-
-    A bare host such as ``www.example.com/model.zip`` (no scheme) is a usable
-    URL too: rejecting it would raise FileNotFoundError on a valid remote
-    model. ``_url_with_scheme`` prepends ``http://`` before any fetch.
-    """
-    return value.startswith(("http://", "https://")) or bool(_HOST_URL_RE.match(value))
-
-
-def _url_with_scheme(value: str) -> str:
-    """Prepend http:// to a scheme-less host URL (vetted by is_url)."""
-    if value.startswith(("http://", "https://")):
-        return value
-    return f"http://{value}"
-
-
-def _looks_like_path(value: str) -> bool:
-    """Heuristic: a value that should refer to a file on disk, not a preset."""
-    return "/" in value or "." in value
-
-
-def _build_label_lookup(
-    merged_labelmap: dict[int, str] | None, labels: list[str]
-) -> dict[str, int]:
-    """Map label names to class ids for the decode lookup.
-
-    The user's merged labelmap decides by NAME, so a rename (person ->
-    visitor) must not drop the original class name the compiled model
-    carries at that index: detections still arrive under the canonical
-    name, and a lookup keyed only by the renamed entries would skip every
-    one of them (the recommended /labelmap/coco-80.txt also renames bus
-    and truck to car, and two classes can share one new name). Every
-    canonical model label stays addressable; the user's rename wins a
-    name collision. With no labelmap configured the lookup stays empty
-    and the detector reports the actionable error.
-    """
-    lookup: dict[str, int] = {}
-    if not merged_labelmap:
-        return lookup
-    for class_id, label in merged_labelmap.items():
-        if label is not None:
-            lookup[str(label).strip()] = class_id
-    for class_id, label in enumerate(labels):
-        if label:
-            lookup.setdefault(label, class_id)
-    return lookup
-
-
-def _prune_model_cache(cache: str, keep: list[str], name: str, source: str) -> None:
-    """Remove superseded generated cache entries for one source.
-
-    Only entries this resolver generated (``<name>-<source>-<32 hex digits>``)
-    are candidates: a download never touches user-provided directories (the
-    docs-recommended ``<name>/`` layout, ``<name>.zip`` archives), other
-    models, or look-alike names (``yolox.zip`` cannot match ``yolox-s-*``
-    because the source hash separates them), and another source's variant is
-    a different identity that stays.
-    """
-    keep_set = {os.path.normpath(path) for path in keep}
-    generated = re.compile(rf"^{re.escape(name)}-{re.escape(source)}-([0-9a-f]{{32}})$")
-    try:
-        entries = os.listdir(cache)
-    except OSError:
-        return
-    for entry in entries:
-        if not generated.match(entry):
-            continue
-        full = os.path.normpath(os.path.join(cache, entry))
-        if full in keep_set:
-            continue
-        try:
-            if os.path.isdir(full):
-                shutil.rmtree(full)
-            else:
-                os.remove(full)
-        except OSError:
-            logger.warning("axelera: could not prune stale cache entry %s", full)
+    """Return True for http(s) URLs."""
+    return value.startswith(("http://", "https://"))
 
 
 def _extract_model_zip(zip_path: str, dest_dir: str) -> None:
-    """Unpack a compiled-model zip into ``dest_dir`` (idempotent)."""
-    marker = os.path.join(dest_dir, ".extracted")
-    if os.path.isfile(marker):
-        return
-    os.makedirs(dest_dir, exist_ok=True)
+    """Unpack a compiled-model zip into ``dest_dir`` (caller wipes it first)."""
     with zipfile.ZipFile(zip_path) as archive:
         for member in archive.infolist():
             if member.is_dir():
@@ -262,88 +172,60 @@ def _extract_model_zip(zip_path: str, dest_dir: str) -> None:
             os.makedirs(os.path.dirname(target), exist_ok=True)
             with archive.open(member) as source, open(target, "wb") as out:
                 out.write(source.read())
-    with open(marker, "w") as f:
-        f.write(zip_path)
 
 
-def _resolve_model_json(path, build_root) -> str:
-    """Resolve ``path`` to the compiled ``model.json`` for axelera.runtime.
+def _resolve_model_json(path) -> str:
+    """Resolve ``path`` (a .zip of the compiled output) to its ``model.json``.
 
-    One string decides everything (hailo8l's set_path_and_url pattern): a URL
-    (with or without scheme) downloads to the cache and unpacks; anything else
-    is a local path or a bare SDK model-zoo preset name. Returns the path to
-    ``1/model.json`` (or ``model.json``) for a directory, the model.json
-    itself when given, a compiled-model dir found under ``build_root`` for a
-    bare preset name, or the unpacked contents of a compiled-model zip.
-    Raises FileNotFoundError otherwise.
+    Like the memryx custom-model flow, ``path`` is always a zip of the
+    compiled output: an http(s) URL downloads into the model cache, a local
+    zip is verified, and the selected archive extracts fresh on every start
+    (under a lock, as several processes may start at once), so a replaced
+    archive is always the model that runs. Anything else raises.
     """
-    model_url = path if (path and is_url(path)) else None
-    model_path = None if model_url else path
-
-    if model_url:
-        name = os.path.splitext(os.path.basename(model_url.split("?")[0]))[0]
+    if not path:
+        raise ValueError(
+            "axelera: the model path is required (a .zip of the compiled "
+            "model, local or http(s) URL)."
+        )
+    if is_url(path):
+        name = os.path.splitext(os.path.basename(path.split("?")[0]))[0]
         name = name or AX_DEFAULT_NETWORK
         cache = os.path.join(MODEL_CACHE_DIR, "axelera")
-        # the source URL is part of the cache identity: the same archive
-        # file name served by different sources must not share an entry
-        source = hashlib.sha256(_url_with_scheme(model_url).encode()).hexdigest()[:12]
-        zip_path = os.path.join(cache, f"{name}-{source}.zip")
-        downloaded = not os.path.isfile(zip_path)
-        if downloaded:
+        zip_path = os.path.join(cache, f"{name}.zip")
+        if not os.path.isfile(zip_path):
             os.makedirs(cache, exist_ok=True)
             try:
                 # function level like runtime_deps: keeps the detector API
                 # import (and this module) free of the downloader's IPC stack
                 from frigate.util.downloader import ModelDownloader
 
-                ModelDownloader.download_from_url(_url_with_scheme(model_url), zip_path)
+                ModelDownloader.download_from_url(path, zip_path)
             except OSError as exc:
                 raise RuntimeError(
-                    f"Failed to download model from {model_url}: {exc}"
+                    f"Failed to download model from {path}: {exc}"
                 ) from exc
-        if not zipfile.is_zipfile(zip_path):
-            raise ValueError(f"downloaded model from {model_url} is not a zip archive")
-        # the archive's own fingerprint is the second half of the identity:
-        # a replaced archive (same name, same URL) extracts into a fresh
-        # directory instead of being skipped by an existing .extracted marker
-        zip_hash = hashlib.md5()
-        with open(zip_path, "rb") as f:
-            while chunk := f.read(8192):
-                zip_hash.update(chunk)
-        extract_dir = os.path.join(cache, f"{name}-{source}-{zip_hash.hexdigest()}")
-        _extract_model_zip(zip_path, extract_dir)
-        # superseded generated variants of this source go; user-provided
-        # directories, other models and other sources stay
-        _prune_model_cache(cache, [zip_path, extract_dir], name, source)
-        return _find_model_json(extract_dir)
-
-    if model_path and _looks_like_path(model_path):
-        if os.path.isfile(model_path) and model_path.endswith(".zip"):
-            extract_dir = os.path.join(
-                MODEL_CACHE_DIR,
-                "axelera",
-                os.path.splitext(os.path.basename(model_path))[0],
+    else:
+        if not path.endswith(".zip"):
+            raise ValueError(
+                f"Invalid model path: {path}. Only .zip files are supported. "
+                "Please provide a .zip model archive."
             )
-            _extract_model_zip(model_path, extract_dir)
-            return _find_model_json(extract_dir)
-        return _find_model_json(model_path)
+        if not os.path.isfile(path):
+            raise FileNotFoundError(f"Custom model zip not found: {path}")
+        zip_path = path
+        name = os.path.splitext(os.path.basename(path))[0] or AX_DEFAULT_NETWORK
 
-    preset = model_path or AX_DEFAULT_NETWORK
-    root = build_root or AX_DEFAULT_BUILD_ROOT
-    for candidate in (
-        os.path.join(root, preset, preset, "1", "model.json"),
-        os.path.join(root, preset, "1", "model.json"),
-        os.path.join(root, preset, "model.json"),
-        os.path.join(root, preset, preset, "model.json"),
-    ):
-        if os.path.isfile(candidate):
-            return candidate
-    raise FileNotFoundError(
-        f"Compiled model not found for {model_path!r} under {root}. "
-        "Point path at the compiled model directory (e.g. a dir "
-        "containing 1/model.json), a zip of one, or a preset that was "
-        "built into the AXELERA_BUILD_ROOT."
-    )
+    if not zipfile.is_zipfile(zip_path):
+        raise ValueError(f"model archive {zip_path} is not a zip file")
+    cache = os.path.join(MODEL_CACHE_DIR, "axelera")
+    os.makedirs(cache, exist_ok=True)
+    extract_dir = os.path.join(cache, f"{name}-extracted")
+    with FileLock(os.path.join(cache, f".{name}.lock")):
+        if os.path.isdir(extract_dir):
+            shutil.rmtree(extract_dir)
+        _extract_model_zip(zip_path, extract_dir)
+    return _find_model_json(extract_dir)
 
 
 def _find_model_json(where: str) -> str:
@@ -437,42 +319,35 @@ def _read_model_manifest(model_dir: str) -> dict:
     The compiler writes two JSONs next to the kernel: ``1/model.json`` (padded
     kernel I/O only) and ``1/manifest.json`` (original/padded shapes, the exact
     content offset inside the padded input, per-output padded channel counts
-    and dequantize (scale, zero-point) for every head). ``1/manifest.json`` is
-    the cross-model source of truth (verified for YOLO-NAS M and YOLOX-S);
-    fall back to ``<parent>/quantized/manifest.json`` for older compilations.
+    and dequantize (scale, zero-point) for every head).
     """
-    candidates = [
-        os.path.join(model_dir, "manifest.json"),
-        os.path.join(os.path.dirname(model_dir), "quantized", "manifest.json"),
-    ]
-    for candidate in candidates:
-        if not os.path.isfile(candidate):
-            continue
-        try:
-            with open(candidate) as f:
-                manifest = json.load(f)
-        except Exception as exc:
-            raise ValueError(
-                f"could not parse compiled manifest {candidate}: {exc}"
-            ) from exc
-        required = (
-            "input_shapes",
-            "input_shapes_original",
-            "output_shapes",
-            "output_shapes_original",
-            "dequantize_params",
+    candidate = os.path.join(model_dir, "manifest.json")
+    if not os.path.isfile(candidate):
+        raise FileNotFoundError(
+            "compiled manifest not found next to the model kernel. Point "
+            "path at a zip of a directory compiled by the Voyager SDK that "
+            "contains 1/model.json + 1/manifest.json + 1/postprocess_graph.onnx."
         )
-        missing = [k for k in required if k not in manifest]
-        if missing:
-            raise ValueError(
-                f"compiled manifest {candidate} missing required keys: {missing}"
-            )
-        return manifest
-    raise FileNotFoundError(
-        "compiled manifest not found next to the model kernel. Point "
-        "path at a directory compiled by the Voyager SDK that contains "
-        "1/model.json + 1/manifest.json + 1/postprocess_graph.onnx."
+    try:
+        with open(candidate) as f:
+            manifest = json.load(f)
+    except Exception as exc:
+        raise ValueError(
+            f"could not parse compiled manifest {candidate}: {exc}"
+        ) from exc
+    required = (
+        "input_shapes",
+        "input_shapes_original",
+        "output_shapes",
+        "output_shapes_original",
+        "dequantize_params",
     )
+    missing = [k for k in required if k not in manifest]
+    if missing:
+        raise ValueError(
+            f"compiled manifest {candidate} missing required keys: {missing}"
+        )
+    return manifest
 
 
 # ----------------- AxeleraRuntimeInference (engine) ----------------- #
@@ -483,7 +358,7 @@ class _AxeleraRuntimeInference:
 
     Frigate's AsyncDetectorRunner calls ``submit(connection_id, frame)`` from
     the detect thread and ``collect()`` from the result thread. Two engine
-    threads process frames strictly in order: a producer letterboxes +
+    threads process frames strictly in order: a producer resizes +
     quantizes + runs the model (``ModelInstance.run``, synchronous and flat:
     ~21 ms measured), and a consumer feeds the int8 heads through the SDK's
     baked ``postprocess_graph.onnx`` while the NPU is already busy on the next
@@ -497,16 +372,14 @@ class _AxeleraRuntimeInference:
     def __init__(
         self,
         model_json,
-        labels: list[str],
-        labelmap: dict,
+        model_type: ModelTypeEnum,
         width: int,
         height: int,
         pixel_format: str = "bgr",
         runtime_factory=None,
         onnx_factory=None,
     ) -> None:
-        self._labels = labels
-        self._labelmap = labelmap
+        self._model_type = model_type
         self._width, self._height = int(width), int(height)
         # the compiled model consumes RGB planes; Frigate delivers BGR when
         # input_pixel_format is bgr (flip below), RGB when rgb (no flip)
@@ -563,7 +436,7 @@ class _AxeleraRuntimeInference:
         manifest = _read_model_manifest(model_dir)
 
         # input: padded NHWC (1, H, W, 4) exactly as the runtime expects it,
-        # plus the original NCHW (1, C, H, W) workspace the letterbox targets
+        # plus the original NCHW (1, C, H, W) workspace the resize targets
         in_padded = [int(x) for x in manifest["input_shapes"][0]]
         in_orig = [int(x) for x in manifest["input_shapes_original"][0]]
         if len(in_padded) != 4 or in_padded[3] != 4 or in_orig[1] != 3:
@@ -649,7 +522,7 @@ class _AxeleraRuntimeInference:
                 )
             self._feed_index.append(matches[0])
 
-        # pooled letterbox-input + raw-int8-output sets, ping-ponged between
+        # pooled model-input + raw-int8-output sets, ping-ponged between
         # the producer (runs the model) and the decoder (postprocesses the
         # previous frame's outputs while the NPU is busy on the next one).
         self._pool: queue.Queue = queue.Queue(maxsize=BUFFER_SETS)
@@ -673,19 +546,17 @@ class _AxeleraRuntimeInference:
             )
             for pin in pp_inputs
         }
-        # letterbox geometry from the frame coords (width x height) into the
-        # model's own workspace (640x640 for the YOLO presets)
-        self._scale = min(self._model_w / self._width, self._model_h / self._height)
-        new_w = round(self._width * self._scale)
-        new_h = round(self._height * self._scale)
-        self._new_w, self._new_h = max(1, new_w), max(1, new_h)
-        self._pad_t = (self._model_h - self._new_h) // 2
-        self._pad_l = (self._model_w - self._new_w) // 2
-        # per-frame letterbox scratch (producer-thread-owned): the resized
-        # frame, the channel-oriented copy, and the quantized int8
-        self._resize_scratch = np.zeros((self._new_h, self._new_w, 3), np.uint8)
-        self._orient_scratch = np.zeros((self._new_h, self._new_w, 3), np.uint8)
-        self._quant_scratch = np.zeros((self._new_h, self._new_w, 3), np.int8)
+        if (self._width, self._height) != (self._model_w, self._model_h):
+            raise ValueError(
+                f"axelera: model width/height must match the compiled input "
+                f"({self._model_w}x{self._model_h}); configured "
+                f"{self._width}x{self._height}"
+            )
+        # per-frame scratch (producer-thread-owned): the resized frame, the
+        # channel-oriented copy, and the quantized int8
+        self._resize_scratch = np.zeros((self._model_h, self._model_w, 3), np.uint8)
+        self._orient_scratch = np.zeros((self._model_h, self._model_w, 3), np.uint8)
+        self._quant_scratch = np.zeros((self._model_h, self._model_w, 3), np.int8)
 
     # -- public contract used by AxeleraDetector --------------------------
 
@@ -778,7 +649,7 @@ class _AxeleraRuntimeInference:
         )
 
     def _producer(self) -> None:
-        """Letterbox + quantize + run(); hand raw outputs to the decoder.
+        """Resize + quantize + run(); hand raw outputs to the decoder.
 
         All ``ModelInstance.run`` calls happen on THIS single thread, so the
         three in-flight buffer sets never execute the model in parallel (a
@@ -848,17 +719,16 @@ class _AxeleraRuntimeInference:
             self._push_result(connection_id, rows)
 
     def _preprocess(self, frame: np.ndarray, buf: np.ndarray) -> None:
-        """Letterbox the source (H, W, 3) into the padded input buffer.
+        """Resize the source (H, W, 3) into the model input and quantize.
 
         All three passes write into preallocated scratch: resize straight into
         the scratch buffer (cv2 ``dst=``), an in-place channel swap (no strided
         ``[..., ::-1]`` copy at write time), and an out= subtract for the
-        int8 quantisation. The frame is small enough that a memset of only the
-        padded border strips is cheaper than refilling the whole buffer.
+        int8 quantize.
         """
         cv2.resize(
             frame,
-            (self._new_w, self._new_h),
+            (self._model_w, self._model_h),
             interpolation=cv2.INTER_LINEAR,
             dst=self._resize_scratch,
         )
@@ -884,18 +754,14 @@ class _AxeleraRuntimeInference:
             dtype=np.int8,
             casting="unsafe",
         )
-        y0, y1 = self._pad_t, self._pad_t + self._new_h
-        x0, x1 = self._pad_l, self._pad_l + self._new_w
-        ct, cl = self._content_top, self._content_left
-        # clear only the border strips the previous frame left dirty: rows
-        # outside the content band and, within it, columns outside it
-        top = ct + y0
-        bot = ct + y1
-        buf[0, :top, :, :].fill(INPUT_Q_ZERO)
-        buf[0, bot:, :, :].fill(INPUT_Q_ZERO)
-        buf[0, top:bot, : cl + x0, :].fill(INPUT_Q_ZERO)
-        buf[0, top:bot, cl + x1 :, :].fill(INPUT_Q_ZERO)
-        dst = buf[0, ct + y0 : ct + y1, cl + x0 : cl + x1]
+        # the frame fills the whole content region; anything the compiler
+        # padded around it stays at the zero-point filler
+        buf[0, :, :, :].fill(INPUT_Q_ZERO)
+        dst = buf[
+            0,
+            self._content_top : self._content_top + self._model_h,
+            self._content_left : self._content_left + self._model_w,
+        ]
         dst[..., 0:3] = self._quant_scratch
         dst[..., 3] = 127
 
@@ -935,9 +801,8 @@ class _AxeleraRuntimeInference:
             raw = pp_out[0][0]
             cx, cy, w, h = raw[:, 0], raw[:, 1], raw[:, 2], raw[:, 3]
             boxes = np.stack([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2], axis=1)
-            total = raw.shape[-1]
             cls = raw[:, 4:]
-            if total == 4 + 1 + len(self._labels):
+            if self._model_type == ModelTypeEnum.yolox:
                 cls = raw[:, 5:] * raw[:, 4:5]  # YOLOX: score = obj * cls
             if cls.shape[1] == 0:
                 return np.zeros((MAX_ROWS, 6), np.float32)
@@ -947,29 +812,20 @@ class _AxeleraRuntimeInference:
         boxes, conf, cls_idx = boxes[keep], conf[keep], cls_idx[keep]
         if len(conf) == 0:
             return np.zeros((MAX_ROWS, 6), np.float32)
-        # inverse letterbox into the source (width x height) frame space
-        bx = (boxes[:, [0, 2]] - self._pad_l) / self._scale
-        by = (boxes[:, [1, 3]] - self._pad_t) / self._scale
-        x0i = np.clip(bx[:, 0], 0, self._width)
-        x1i = np.clip(bx[:, 1], 0, self._width)
-        y0i = np.clip(by[:, 0], 0, self._height)
-        y1i = np.clip(by[:, 1], 0, self._height)
+        # boxes are already in the frame space: the input is not letterboxed
+        # (width/height must equal the compiled input size)
+        x0i = np.clip(boxes[:, 0], 0, self._width)
+        x1i = np.clip(boxes[:, 2], 0, self._width)
+        y0i = np.clip(boxes[:, 1], 0, self._height)
+        y1i = np.clip(boxes[:, 3], 0, self._height)
         # NMS on the model-space boxes (scale-invariant IoU), per class
         keep_nms = _nms_per_class(boxes, conf, cls_idx, NMS_IOU_THRESHOLD)
         rows = []
         for i in keep_nms:
-            label = (
-                self._labels[cls_idx[i]]
-                if 0 <= cls_idx[i] < len(self._labels)
-                else None
-            )
-            class_id = self._labelmap.get(label)
-            if class_id is None:
-                continue
             score = float(conf[i])
             rows.append(
                 (
-                    class_id,
+                    int(cls_idx[i]),
                     score,
                     float(y0i[i]) / self._height,
                     float(x0i[i]) / self._width,
@@ -1001,9 +857,8 @@ class AxeleraDetector(DetectionApi):
         model = detector_config.model
         if model is None:
             raise ValueError(
-                "axelera: the model block is required "
-                "(path to a compiled model directory/zip/JSON, URL, or SDK "
-                "model-zoo preset name)."
+                "axelera: the model block is required (a .zip of the compiled "
+                "model output, local or http(s) URL)."
             )
         # the runtime wheels install into the user site at first start
         self.activate_dependencies()
@@ -1014,32 +869,11 @@ class AxeleraDetector(DetectionApi):
         self.width = model.width
         self.height = model.height
 
-        build_root = os.environ.get("AXELERA_BUILD_ROOT", AX_DEFAULT_BUILD_ROOT)
-        self.working_model = _resolve_model_json(model.path, build_root)
-
-        # COCO-ordered label names from the compiled model metadata (index -> name)
-        labels = _read_model_labels(os.path.dirname(self.working_model))
-        if len(labels) == 0:
-            raise ValueError(
-                "axelera: the compiled model carries no label list; every "
-                "detection would fall out of the labelmap lookup while the "
-                "detector reports healthy"
-            )
-
-        # label name -> Frigate class id by NAME (independent of ordering),
-        # with the canonical model labels kept as fallbacks after a rename
-        self._labelmap = _build_label_lookup(model.merged_labelmap, labels)
-        if not self._labelmap:
-            raise ValueError(
-                "axelera: the labelmap is empty; every detection would be "
-                "dropped in the label lookup. Set labelmap_path (e.g. "
-                "/labelmap/coco-80.txt) or an inline labelmap for the model."
-            )
+        self.working_model = _resolve_model_json(model.path)
 
         self._inference = _AxeleraRuntimeInference(
             model_json=self.working_model,
-            labels=labels,
-            labelmap=self._labelmap,
+            model_type=model.model_type,
             width=self.width,
             height=self.height,
             pixel_format=str(
@@ -1068,7 +902,7 @@ class AxeleraDetector(DetectionApi):
             if frame.shape[0] != 1:
                 raise ValueError(f"Unexpected batch dimension in frame: {frame.shape}")
             frame = frame[0]
-        # BGR uint8 for the model (letterboxing/quantization happen in the
+        # BGR uint8 for the model (resize/quantization happen in the
         # worker). This must be a REAL copy: the tensor backs the camera's
         # shared memory, which the runner unmaps once this frame's result is
         # collected, potentially before the producer thread reads a queued
@@ -1176,36 +1010,6 @@ def _point_runtime_at_installed_firmware() -> None:
     os.environ.setdefault(
         "AIPU_RUNTIME_STAGE0_OMEGA",
         os.path.join(omega, "bin", "start_axelera_runtime_stage0.bin"),
-    )
-
-
-def _read_model_labels(model_dir: str) -> list[str]:
-    """Read the COCO-ordered label list from the compiled model metadata.
-
-    Raises ``ValueError`` when no label list is found: silently continuing
-    with an empty list would drop every detection in the labelmap lookup
-    while the detector reports healthy.
-    """
-    # model_info.json lives next to the model's parent (1/ holds the kernel)
-    candidates = [model_dir, os.path.dirname(model_dir)]
-    for base in candidates:
-        for name in ("model_info.json", "model.json"):
-            path = os.path.join(base, name)
-            if not os.path.isfile(path):
-                continue
-            try:
-                with open(path) as f:
-                    data = json.load(f)
-                for key in ("labels", "class_names"):
-                    if isinstance(data.get(key), list) and data[key]:
-                        return [str(x).strip() for x in data[key]]
-            except Exception as exc:  # noqa: BLE001
-                logger.debug("axelera: could not read labels from %s: %s", path, exc)
-    raise ValueError(
-        "axelera: no label list found in the compiled model metadata "
-        f"(looked for model_info.json / model.json with a 'labels' or "
-        f"'class_names' list next to {model_dir}); detections could not be "
-        "mapped to Frigate labels"
     )
 
 

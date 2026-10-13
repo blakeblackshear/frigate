@@ -959,23 +959,18 @@ The Axelera runtime is not part of the Frigate image. It is downloaded and insta
 
 #### Using a Custom Model
 
-Models must be compiled for the Metis NPU with the Axelera Voyager SDK before Frigate can run them. The runtime consumes the compiled output directory, which contains `1/model.json`, `1/manifest.json`, and the baked `1/postprocess_graph.onnx`.
+Models must be compiled for the Metis NPU with the Axelera Voyager SDK before Frigate can run them. The compiled output is a directory containing `1/model.json`, `1/manifest.json`, and the baked `1/postprocess_graph.onnx`.
 
-Compile the model on a machine with the Voyager SDK installed (compilation is not supported inside the Frigate container), for example with the SDK's `deploy.py` against a model-zoo yaml. Then either:
-
-- place the compiled directory under `/config` and point the model's `path` at it, or
-- zip the compiled directory and point `path` at the zip (bind-mounted, or at a URL).
+Compile the model on a machine with the Voyager SDK installed (compilation is not supported inside the Frigate container), for example with the SDK's `deploy.py` against a model-zoo yaml. Then zip the compiled output and point the model's `path` at the zip (bind-mounted, or at an http(s) URL); the archive extracts fresh on every start.
 
 ```yaml
 models:
   - devices:
       - axelera:PCIe
-    path: /config/model_cache/axelera/yolox-s-coco-onnx
-    width: 640 # the compiled input size; Frigate resizes square regions to it
+    path: /config/model_cache/axelera/yolox-s-coco-onnx.zip
+    width: 640 # must equal the compiled input size
     height: 640
     input_pixel_format: bgr # Frigate delivers BGR; the plugin feeds RGB planes
     model_type: yolox
     labelmap_path: /labelmap/coco-80.txt
 ```
-
-A bare preset name (no slash or dot, e.g. `yolox-s-coco-onnx`) is also accepted and resolved under `AXELERA_BUILD_ROOT` (default `/opt/voyager-sdk/build`) for setups that build models into the image.

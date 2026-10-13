@@ -251,21 +251,6 @@ class ModelConfig(BaseModel):
     def compute_model_hash(self) -> None:
         if not self.path or not os.path.exists(self.path):
             self._model_hash = hashlib.md5(b"unknown").hexdigest()
-        elif os.path.isdir(self.path):
-            # deterministic directory hash: relpath + contents in sorted walk
-            # order, so it is stable across restarts (it lands in the events
-            # table) and changes when any compiled file changes
-            dir_hash = hashlib.md5()
-            for root, dirs, files in os.walk(self.path):
-                dirs.sort()
-                for name in sorted(files):
-                    dir_hash.update(
-                        os.path.relpath(os.path.join(root, name), self.path).encode()
-                    )
-                    with open(os.path.join(root, name), "rb") as f:
-                        while chunk := f.read(8192):
-                            dir_hash.update(chunk)
-            self._model_hash = dir_hash.hexdigest()
         else:
             with open(self.path, "rb") as f:
                 file_hash = hashlib.md5()

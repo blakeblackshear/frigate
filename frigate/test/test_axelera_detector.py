@@ -1,13 +1,12 @@
 """Offline unit tests for the Axelera Metis detector plugin.
 
 The runtime and onnxruntime objects are constructor-injected, so these cover
-the decode paths (fused cxcywh and two-output scores+boxes), the
-inverse-letterbox coordinate mapping into the camera frame space, the
-compiled-model discovery guard, and the zip extraction escape guard, without
+the decode paths (fused cxcywh and two-output scores+boxes), the raw class
+index contract, the zip-only model resolution (download, fresh extraction,
+rejection of anything else), and the zip extraction escape guard, without
 the vendor SDK or a Metis card.
 """
 
-import hashlib
 import json
 import os
 import shutil
@@ -21,9 +20,8 @@ from unittest.mock import patch
 
 import numpy as np
 
+from frigate.detectors.detector_config import ModelTypeEnum
 from frigate.detectors.plugins import axelera as ax
-
-LABELS = ["person"] + [f"c{i}" for i in range(1, 80)]
 
 MANIFEST = {
     "input_shapes": [[1, 642, 656, 4]],
@@ -45,9 +43,15 @@ def _make_compiled_model(root: str) -> str:
         json.dump({"inputs": []}, f)
     with open(os.path.join(kernel, "postprocess_graph.onnx"), "wb") as f:
         f.write(b"fake")
-    with open(os.path.join(root, "fakenet", "model_info.json"), "w") as f:
-        json.dump({"labels": LABELS}, f)
     return os.path.join(kernel, "model.json")
+
+
+def _make_model_zip(zip_path: str, kernel_payload: bytes = b"fake") -> None:
+    """Write a compiled-model zip: fakenet/1/{model.json,manifest.json,onnx}."""
+    with zipfile.ZipFile(zip_path, "w") as archive:
+        archive.writestr("fakenet/1/model.json", json.dumps({"inputs": []}))
+        archive.writestr("fakenet/1/manifest.json", json.dumps(MANIFEST))
+        archive.writestr("fakenet/1/postprocess_graph.onnx", kernel_payload)
 
 
 class _FakeInput:
@@ -121,29 +125,21 @@ class _FakeModelDownloader:
     """The ModelDownloader stand-in bound into the stubbed downloader module."""
 
     calls: ClassVar[list] = []
-    version: ClassVar[int] = 0
 
     @staticmethod
     def download_from_url(download_url, save_path, silent=False):
         _FakeModelDownloader.calls.append((download_url, save_path))
-        _FakeModelDownloader.version += 1
-        with zipfile.ZipFile(save_path, "w") as archive:
-            archive.writestr("fakenet/1/model.json", json.dumps({"inputs": []}))
-            archive.writestr(
-                "fakenet/1/postprocess_graph.onnx",
-                f"fake v{_FakeModelDownloader.version}".encode(),
-            )
+        _make_model_zip(save_path)
 
 
-def _make_engine(root: str, outputs):
+def _make_engine(root: str, outputs, model_type=ModelTypeEnum.yolox):
     model_json = _make_compiled_model(root)
     _FakeOnnx.outputs = outputs
     return ax._AxeleraRuntimeInference(
         model_json=model_json,
-        labels=LABELS,
-        labelmap={name: i for i, name in enumerate(LABELS)},
-        width=704,
-        height=576,
+        model_type=model_type,
+        width=640,
+        height=640,
         runtime_factory=_FakeContext,
         onnx_factory=_FakeOnnx,
     )
@@ -185,42 +181,58 @@ class TestDecodeFused(unittest.TestCase):
         self.assertEqual(rows.shape, (ax.MAX_ROWS, 6))
         self.assertEqual(rows.dtype, np.float32)
 
-    def test_inverse_letterbox_maps_to_frame_space(self):
-        # frame 704x576 -> scale 640/704, pad_l 0, pad_t 58
+    def test_boxes_map_straight_to_the_frame_space(self):
+        # no letterbox: the frame is the model input (640x640), so model
+        # xyxy maps to normalized frame coords 1:1
         out_bufs = [np.zeros((1, 80, 80, 128), np.int8)]
         rows = self.engine._decode(out_bufs)
         class_id, score, ymin, xmin, ymax, xmax = rows[0]
-        self.assertEqual(int(class_id), 0)  # person via name lookup
+        self.assertEqual(int(class_id), 0)  # raw class index, not a name
         self.assertAlmostEqual(float(score), 0.9, places=5)  # obj * cls
-        scale = self.engine._scale
-        self.assertAlmostEqual(float(scale), 640 / 704, places=6)
-        # model xyxy -> frame px -> normalized; asymmetric letterbox must not
-        # collapse x and y
-        self.assertAlmostEqual(float(xmin), (288 - 0) / scale / 704, places=4)
-        self.assertAlmostEqual(float(xmax), (352 - 0) / scale / 704, places=4)
-        self.assertAlmostEqual(float(ymin), (288 - 58) / scale / 576, places=4)
-        self.assertAlmostEqual(float(ymax), (352 - 58) / scale / 576, places=4)
+        self.assertAlmostEqual(float(xmin), 288 / 640, places=4)
+        self.assertAlmostEqual(float(xmax), 352 / 640, places=4)
+        self.assertAlmostEqual(float(ymin), 288 / 640, places=4)
+        self.assertAlmostEqual(float(ymax), 352 / 640, places=4)
         self.assertLess(float(ymin), float(ymax))
         self.assertLess(float(xmin), float(xmax))
+
+    def test_class_index_passes_through_unmapped(self):
+        # detections carry the raw class index; Frigate's labelmap names it
+        out = np.zeros((1, 8400, 85), np.float32)
+        out[0, 0, 0:5] = [320, 320, 64, 64, 1.0]
+        out[0, 0, 5 + 5] = 0.9  # class 5
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            engine = _make_engine(tmp.name, [out])
+            rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
+            self.assertEqual(int(rows[0][0]), 5)
+        finally:
+            tmp.cleanup()
+
+    def test_yolox_score_multiplies_objectness(self):
+        out = _fused_row(320, 320, 64, 64, 0.5, 0.9)  # obj 0.5 * cls 0.9
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            engine = _make_engine(tmp.name, out, ModelTypeEnum.yolox)
+            rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
+            self.assertAlmostEqual(float(rows[0][1]), 0.45, places=5)
+        finally:
+            tmp.cleanup()
+
+    def test_yolonas_score_skips_objectness(self):
+        out = _fused_row(320, 320, 64, 64, 0.5, 0.9)  # cls used as-is
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            engine = _make_engine(tmp.name, out, ModelTypeEnum.yolonas)
+            rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
+            self.assertAlmostEqual(float(rows[0][1]), 0.9, places=5)
+        finally:
+            tmp.cleanup()
 
     def test_below_conf_threshold_yields_zero_rows(self):
         tmp = tempfile.TemporaryDirectory()
         try:
             engine = _make_engine(tmp.name, _fused_row(320, 320, 64, 64, 1.0, 0.1))
-            rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
-            self.assertEqual(float(np.abs(rows).sum()), 0.0)
-        finally:
-            tmp.cleanup()
-
-    def test_unmapped_label_is_dropped(self):
-        # detection maps to class 5 (a c5 label) which the labelmap lacks
-        out = np.zeros((1, 8400, 85), np.float32)
-        out[0, 0, 0:5] = [320, 320, 64, 64, 1.0]
-        out[0, 0, 5 + 5] = 0.9
-        tmp = tempfile.TemporaryDirectory()
-        try:
-            engine = _make_engine(tmp.name, [out])
-            engine._labelmap = {"person": 0}  # c5 absent
             rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
             self.assertEqual(float(np.abs(rows).sum()), 0.0)
         finally:
@@ -241,13 +253,44 @@ class TestDecodeTwoOutputs(unittest.TestCase):
             rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
             self.assertEqual(int(rows[0][0]), 0)
             self.assertAlmostEqual(float(rows[0][1]), 0.8, places=5)
-            scale = engine._scale
-            self.assertAlmostEqual(
-                float(rows[0][2]), (288 - 58) / scale / 576, places=4
+            self.assertAlmostEqual(float(rows[0][2]), 288 / 640, places=4)
+            self.assertAlmostEqual(float(rows[0][4]), 352 / 640, places=4)
+        finally:
+            tmp.cleanup()
+
+
+class TestModelDimensions(unittest.TestCase):
+    """width/height must equal the compiled input; no letterboxing."""
+
+    def test_mismatched_dimensions_raise(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            model_json = _make_compiled_model(tmp.name)
+            with self.assertRaises(ValueError):
+                ax._AxeleraRuntimeInference(
+                    model_json=model_json,
+                    model_type=ModelTypeEnum.yolox,
+                    width=704,
+                    height=576,
+                    runtime_factory=_FakeContext,
+                    onnx_factory=_FakeOnnx,
+                )
+        finally:
+            tmp.cleanup()
+
+    def test_matching_dimensions_initialize(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            model_json = _make_compiled_model(tmp.name)
+            engine = ax._AxeleraRuntimeInference(
+                model_json=model_json,
+                model_type=ModelTypeEnum.yolox,
+                width=640,
+                height=640,
+                runtime_factory=_FakeContext,
+                onnx_factory=_FakeOnnx,
             )
-            self.assertAlmostEqual(
-                float(rows[0][4]), (352 - 58) / scale / 576, places=4
-            )
+            self.assertEqual((engine._width, engine._height), (640, 640))
         finally:
             tmp.cleanup()
 
@@ -356,10 +399,10 @@ class TestRuntimeToolShims(unittest.TestCase):
             tmp.cleanup()
 
 
-class TestModelDownload(unittest.TestCase):
-    """URL models go through the atomic downloader (.part file + rename)."""
+class TestModelResolve(unittest.TestCase):
+    """`path` is a .zip of the compiled output, local or http(s) URL."""
 
-    def _resolve(self, url):
+    def _resolve(self, path):
         _FakeModelDownloader.calls = []
         # the plugin imports the downloader lazily at the call site (its module
         # chain pulls the IPC stack), so the test binds a stub module instead
@@ -370,7 +413,7 @@ class TestModelDownload(unittest.TestCase):
         ax.MODEL_CACHE_DIR = os.path.join(tmp.name, "cache")
         try:
             with patch.dict(sys.modules, {"frigate.util.downloader": stub}):
-                got = ax._resolve_model_json(url, tmp.name)
+                got = ax._resolve_model_json(path)
         finally:
             ax.MODEL_CACHE_DIR = saved_cache
             tmp.cleanup()
@@ -379,163 +422,104 @@ class TestModelDownload(unittest.TestCase):
     def test_https_url_downloads_and_resolves(self):
         calls, got = self._resolve("https://example.com/models/fakenet.zip")
 
-        shasum = hashlib.sha256(b"https://example.com/models/fakenet.zip").hexdigest()[
-            :12
-        ]
         self.assertEqual(calls[0][0], "https://example.com/models/fakenet.zip")
-        self.assertTrue(
-            calls[0][1].endswith(os.path.join("axelera", f"fakenet-{shasum}.zip"))
-        )
-        # the extract directory carries the source identity in its name
-        extract_dir = os.path.dirname(os.path.dirname(os.path.dirname(got)))
-        self.assertTrue(os.path.basename(extract_dir).startswith(f"fakenet-{shasum}-"))
-        self.assertTrue(got.endswith(os.path.join("1", "model.json")))
+        self.assertTrue(calls[0][1].endswith(os.path.join("axelera", "fakenet.zip")))
+        self.assertTrue(got.endswith(os.path.join("fakenet", "1", "model.json")))
 
-    def test_scheme_less_host_url_gets_http_prefix(self):
-        calls, _ = self._resolve("www.example.com/models/fakenet.zip")
-
-        self.assertEqual(calls[0][0], "http://www.example.com/models/fakenet.zip")
-
-    def test_url_without_filename_falls_back_to_default_preset_name(self):
+    def test_url_without_filename_falls_back_to_default_name(self):
         calls, _ = self._resolve("https://example.com/")
 
-        shasum = hashlib.sha256(b"https://example.com/").hexdigest()[:12]
-        self.assertTrue(calls[0][1].endswith(f"yolox-s-coco-onnx-{shasum}.zip"))
+        self.assertTrue(calls[0][1].endswith("yolox-s-coco-onnx.zip"))
+
+    def test_scheme_less_host_is_rejected(self):
+        # no scheme means a local path; a host-looking string is not a file
+        with self.assertRaises(FileNotFoundError):
+            self._resolve("www.example.com/models/fakenet.zip")
+
+    def test_local_zip_resolves(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            zip_path = os.path.join(tmp.name, "fakenet.zip")
+            _make_model_zip(zip_path)
+            _FakeModelDownloader.calls = []
+            stub = types.ModuleType("frigate.util.downloader")
+            setattr(stub, "ModelDownloader", _FakeModelDownloader)
+            saved_cache = ax.MODEL_CACHE_DIR
+            ax.MODEL_CACHE_DIR = os.path.join(tmp.name, "cache")
+            try:
+                with patch.dict(sys.modules, {"frigate.util.downloader": stub}):
+                    got = ax._resolve_model_json(zip_path)
+            finally:
+                ax.MODEL_CACHE_DIR = saved_cache
+            self.assertEqual(_FakeModelDownloader.calls, [])
+            self.assertTrue(got.endswith(os.path.join("fakenet", "1", "model.json")))
+        finally:
+            tmp.cleanup()
+
+    def test_non_zip_path_is_rejected(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            model_json = _make_compiled_model(tmp.name)
+            with self.assertRaises(ValueError):
+                self._resolve(model_json)
+            with self.assertRaises(ValueError):
+                self._resolve(os.path.join(tmp.name, "fakenet"))
+        finally:
+            tmp.cleanup()
+
+    def test_missing_local_zip_raises_filenotfound(self):
+        with self.assertRaises(FileNotFoundError):
+            self._resolve("/nope/fakenet.zip")
 
 
-class TestModelCacheIdentity(unittest.TestCase):
-    """Cache identity: source URL + archive content; prune is conservative."""
+class TestFreshExtract(unittest.TestCase):
+    """The selected archive extracts fresh on every start."""
 
-    def _resolve(self, url, tmp_name):
-        _FakeModelDownloader.calls = []
+    def _resolve(self, path, tmp_name):
         stub = types.ModuleType("frigate.util.downloader")
         setattr(stub, "ModelDownloader", _FakeModelDownloader)
         saved_cache = ax.MODEL_CACHE_DIR
         ax.MODEL_CACHE_DIR = os.path.join(tmp_name, "cache")
         try:
             with patch.dict(sys.modules, {"frigate.util.downloader": stub}):
-                got = ax._resolve_model_json(url, tmp_name)
+                return ax._resolve_model_json(path)
         finally:
             ax.MODEL_CACHE_DIR = saved_cache
-        return got
 
-    def test_replaced_archive_extracts_into_a_fresh_directory(self):
+    def test_replaced_archive_becomes_the_model_that_runs(self):
         tmp = tempfile.TemporaryDirectory()
         try:
-            first = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+            _FakeModelDownloader.calls = []
+            self._resolve("https://example.com/models/fakenet.zip", tmp.name)
             zip_path = _FakeModelDownloader.calls[0][1]
-            # the cache path now holds a different archive (re-fetched
-            # upstream, a pre-seeded image, a mirror refresh)
-            with zipfile.ZipFile(zip_path, "w") as archive:
-                archive.writestr("fakenet/1/model.json", json.dumps({"inputs": []}))
-                archive.writestr("fakenet/1/postprocess_graph.onnx", b"replaced")
-            second = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+            # the archive at the cache path is replaced (re-fetched upstream,
+            # a pre-seeded image, a mirror refresh)
+            _make_model_zip(zip_path, kernel_payload=b"replaced")
+            self._resolve("https://example.com/models/fakenet.zip", tmp.name)
 
-            self.assertNotEqual(first, second)
-            cache = os.path.join(tmp.name, "cache", "axelera")
-            entries = sorted(e for e in os.listdir(cache) if e != "bin")
-            # the superseded variant was pruned; the new one remains with the zip
-            self.assertEqual(len(entries), 2)
-            self.assertTrue(all(e.startswith("fakenet-") for e in entries))
-            second_dir = os.path.dirname(os.path.dirname(os.path.dirname(second)))
-            self.assertIn(os.path.basename(second_dir), entries)
-        finally:
-            tmp.cleanup()
-
-    def test_unchanged_archive_reuses_the_extracted_directory(self):
-        tmp = tempfile.TemporaryDirectory()
-        try:
-            first = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
-            self.assertEqual(len(_FakeModelDownloader.calls), 1)
-            second = self._resolve("https://example.com/models/fakenet.zip", tmp.name)
-
-            # no second download happened (cache hit on the source-keyed zip)
-            self.assertEqual(len(_FakeModelDownloader.calls), 0)
-            self.assertEqual(first, second)
-        finally:
-            tmp.cleanup()
-
-    def test_prune_never_touches_user_dirs_or_other_identities(self):
-        tmp = tempfile.TemporaryDirectory()
-        try:
-            cache = os.path.join(tmp.name, "axelera")
-            # user-provided layouts and unrelated entries
-            os.makedirs(os.path.join(cache, "bin"))
-            with open(os.path.join(cache, "bin", "lspci"), "w"):
-                pass
-            os.makedirs(os.path.join(cache, "fakenet"))  # docs-recommended dir
-            os.makedirs(os.path.join(cache, "fakenet-aaa-backup"))  # not a hash
-            os.makedirs(os.path.join(cache, "fakenet-bbb-" + "2" * 32))  # other src
-            os.makedirs(os.path.join(cache, "othernet-aaa-" + "3" * 32))  # other model
-            with open(os.path.join(cache, "fakenet.zip"), "w"):
-                pass  # user-provided archive
-
-            ax._prune_model_cache(cache, [], "fakenet", "aaa")
-
-            entries = sorted(os.listdir(cache))
-            self.assertEqual(
-                entries,
-                sorted(
-                    [
-                        "bin",
-                        "fakenet",
-                        "fakenet-aaa-backup",
-                        f"fakenet-bbb-{'2' * 32}",
-                        f"othernet-aaa-{'3' * 32}",
-                        "fakenet.zip",
-                    ]
-                ),
+            extract_dir = os.path.join(
+                tmp.name, "cache", "axelera", "fakenet-extracted"
             )
-
-            # only the generated variant of the SAME source is removable:
-            # the kept one stays, a superseded one goes
-            stale = os.path.join(cache, f"fakenet-aaa-{'1' * 32}")
-            os.makedirs(stale)
-            kept = os.path.join(cache, f"fakenet-aaa-{'4' * 32}")
-            os.makedirs(kept)
-            ax._prune_model_cache(cache, [kept], "fakenet", "aaa")
-
-            self.assertFalse(os.path.exists(stale))
-            self.assertTrue(os.path.exists(kept))
-            # 6 untouched entries + the kept generated variant (stale pruned)
-            self.assertEqual(len(os.listdir(cache)), 7)
+            with open(
+                os.path.join(extract_dir, "fakenet", "1", "postprocess_graph.onnx"),
+                "rb",
+            ) as f:
+                self.assertEqual(f.read(), b"replaced")
         finally:
             tmp.cleanup()
 
+    def test_same_archive_does_not_download_twice(self):
+        tmp = tempfile.TemporaryDirectory()
+        try:
+            _FakeModelDownloader.calls = []
+            self._resolve("https://example.com/models/fakenet.zip", tmp.name)
+            self.assertEqual(len(_FakeModelDownloader.calls), 1)
+            self._resolve("https://example.com/models/fakenet.zip", tmp.name)
 
-class TestLabelLookupFallback(unittest.TestCase):
-    """Renamed labels keep the canonical model name as a lookup fallback."""
-
-    def test_rename_keeps_canonical_fallback(self):
-        labels = ["person", "bus", "truck"] + [f"c{i}" for i in range(3, 80)]
-        lookup = ax._build_label_lookup({0: "visitor"}, labels)
-        self.assertEqual(lookup["visitor"], 0)
-        self.assertEqual(lookup["person"], 0)
-
-    def test_coco_80_renames_keep_broken_out_classes(self):
-        # the recommended /labelmap/coco-80.txt renames bus (5) and truck (7) to car
-        labels = ["person", "c1", "c2", "c3", "c4", "bus", "c6", "truck"] + [
-            f"c{i}" for i in range(8, 80)
-        ]
-        merged = {i: name for i, name in enumerate(labels) if i not in (5, 7)}
-        merged.update({5: "car", 7: "car"})
-        lookup = ax._build_label_lookup(merged, labels)
-        self.assertEqual(lookup["car"], 7)
-        self.assertEqual(lookup["person"], 0)
-        self.assertEqual(lookup["bus"], 5)
-        self.assertEqual(lookup["truck"], 7)
-
-    def test_rename_collision_gives_the_rename_precedence(self):
-        labels = ["person", "bus"]
-        # class 1 (bus) renamed to person: person -> 1 (the rename wins)
-        lookup = ax._build_label_lookup({0: "visitor", 1: "person"}, labels)
-        self.assertEqual(lookup["person"], 1)
-        self.assertEqual(lookup["bus"], 1)
-        self.assertEqual(lookup["visitor"], 0)
-
-    def test_empty_labelmap_yields_empty_lookup(self):
-        # the detector turns an empty lookup into its actionable ValueError
-        self.assertEqual(ax._build_label_lookup(None, ["person", "bus"]), {})
+            # the zip is cached (no second download), the extract is fresh
+            self.assertEqual(len(_FakeModelDownloader.calls), 1)
+        finally:
+            tmp.cleanup()
 
 
 class TestBackpressure(unittest.TestCase):
@@ -548,7 +532,7 @@ class TestBackpressure(unittest.TestCase):
 
     def test_full_input_queue_still_delivers_zero_rows(self):
         engine = self._engine()
-        frame = np.zeros((1, 576, 704, 3), np.uint8)
+        frame = np.zeros((1, 640, 640, 3), np.uint8)
         for i in range(ax.QUEUE_MAXSIZE):
             engine._frame_q.put_nowait((f"cam{i}", frame))
 
