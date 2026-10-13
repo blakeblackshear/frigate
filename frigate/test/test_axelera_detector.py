@@ -455,43 +455,50 @@ class TestModelCacheIdentity(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_prune_keeps_other_models_shims_and_foreign_sources(self):
+    def test_prune_never_touches_user_dirs_or_other_identities(self):
         tmp = tempfile.TemporaryDirectory()
         try:
             cache = os.path.join(tmp.name, "axelera")
+            # user-provided layouts and unrelated entries
             os.makedirs(os.path.join(cache, "bin"))
             with open(os.path.join(cache, "bin", "lspci"), "w"):
                 pass
-            os.makedirs(os.path.join(cache, "fakenet-aaa-111"))
-            os.makedirs(os.path.join(cache, "othernet-aaa-111"))
-            # a legacy-named entry of the same model goes; other models stay
+            os.makedirs(os.path.join(cache, "fakenet"))  # docs-recommended dir
+            os.makedirs(os.path.join(cache, "fakenet-aaa-backup"))  # not a hash
+            os.makedirs(os.path.join(cache, "fakenet-bbb-" + "2" * 32))  # other src
+            os.makedirs(os.path.join(cache, "othernet-aaa-" + "3" * 32))  # other model
             with open(os.path.join(cache, "fakenet.zip"), "w"):
-                pass
+                pass  # user-provided archive
 
-            ax._prune_model_cache(
-                cache,
-                [os.path.join(cache, "fakenet-aaa-111")],
-                "fakenet",
-                "aaa",
-                True,
-            )
+            ax._prune_model_cache(cache, [], "fakenet", "aaa")
 
-            entries = os.listdir(cache)
-            self.assertIn("bin", entries)
-            self.assertIn("othernet-aaa-111", entries)
-            self.assertNotIn("fakenet.zip", entries)
-
-            # without a fresh download, another source's variants survive
-            foreign_cache = os.path.join(tmp.name, "foreign")
-            os.makedirs(foreign_cache)
-            os.makedirs(os.path.join(foreign_cache, "fakenet-bbb-222"))
-            with open(os.path.join(foreign_cache, "fakenet-bbb.zip"), "w"):
-                pass
-            ax._prune_model_cache(foreign_cache, [], "fakenet", "aaa", False)
+            entries = sorted(os.listdir(cache))
             self.assertEqual(
-                sorted(os.listdir(foreign_cache)),
-                ["fakenet-bbb-222", "fakenet-bbb.zip"],
+                entries,
+                sorted(
+                    [
+                        "bin",
+                        "fakenet",
+                        "fakenet-aaa-backup",
+                        f"fakenet-bbb-{'2' * 32}",
+                        f"othernet-aaa-{'3' * 32}",
+                        "fakenet.zip",
+                    ]
+                ),
             )
+
+            # only the generated variant of the SAME source is removable:
+            # the kept one stays, a superseded one goes
+            stale = os.path.join(cache, f"fakenet-aaa-{'1' * 32}")
+            os.makedirs(stale)
+            kept = os.path.join(cache, f"fakenet-aaa-{'4' * 32}")
+            os.makedirs(kept)
+            ax._prune_model_cache(cache, [kept], "fakenet", "aaa")
+
+            self.assertFalse(os.path.exists(stale))
+            self.assertTrue(os.path.exists(kept))
+            # 6 untouched entries + the kept generated variant (stale pruned)
+            self.assertEqual(len(os.listdir(cache)), 7)
         finally:
             tmp.cleanup()
 

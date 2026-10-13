@@ -213,33 +213,24 @@ def _build_label_lookup(
     return lookup
 
 
-def _prune_model_cache(
-    cache: str, keep: list[str], name: str, source: str, downloaded: bool
-) -> None:
-    """Remove superseded axelera model cache entries for one model name.
+def _prune_model_cache(cache: str, keep: list[str], name: str, source: str) -> None:
+    """Remove superseded generated cache entries for one source.
 
-    URL models are cached under source-and-content keyed names, so an older
-    variant of the same model name is dead weight once a fresh download
-    resolved. Entries of other model names are never touched, and without a
-    fresh download other-source variants survive too (several detectors may
-    resolve different mirrors of the same archive name). The enumeration
-    shims (bin/) are not models and are never touched.
+    Only entries this resolver generated (``<name>-<source>-<32 hex digits>``)
+    are candidates: a download never touches user-provided directories (the
+    docs-recommended ``<name>/`` layout, ``<name>.zip`` archives), other
+    models, or look-alike names (``yolox.zip`` cannot match ``yolox-s-*``
+    because the source hash separates them), and another source's variant is
+    a different identity that stays.
     """
     keep_set = {os.path.normpath(path) for path in keep}
-    source_zip = f"{name}-{source}.zip"
+    generated = re.compile(rf"^{re.escape(name)}-{re.escape(source)}-([0-9a-f]{{32}})$")
     try:
         entries = os.listdir(cache)
     except OSError:
         return
     for entry in entries:
-        if entry == "bin":
-            continue
-        same_name = entry.startswith(f"{name}-") or entry in (name, f"{name}.zip")
-        if not same_name:
-            continue
-        if not downloaded and entry != source_zip and f"-{source}-" not in entry:
-            # a different source's variant, and nothing was fetched now:
-            # another detector may still be using it
+        if not generated.match(entry):
             continue
         full = os.path.normpath(os.path.join(cache, entry))
         if full in keep_set:
@@ -321,9 +312,9 @@ def _resolve_model_json(path, build_root) -> str:
                 zip_hash.update(chunk)
         extract_dir = os.path.join(cache, f"{name}-{source}-{zip_hash.hexdigest()}")
         _extract_model_zip(zip_path, extract_dir)
-        # superseded variants of this model name go once a fresh download
-        # landed; other models and (without a download) other sources stay
-        _prune_model_cache(cache, [zip_path, extract_dir], name, source, downloaded)
+        # superseded generated variants of this source go; user-provided
+        # directories, other models and other sources stay
+        _prune_model_cache(cache, [zip_path, extract_dir], name, source)
         return _find_model_json(extract_dir)
 
     if model_path and _looks_like_path(model_path):
