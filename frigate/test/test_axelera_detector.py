@@ -220,11 +220,14 @@ class TestDecodeFused(unittest.TestCase):
             tmp.cleanup()
 
     def test_yolonas_score_skips_objectness(self):
-        out = _fused_row(320, 320, 64, 64, 0.5, 0.9)  # cls used as-is
+        out = np.zeros((1, 8400, 84), np.float32)
+        out[0, 0, :4] = [320, 320, 64, 64]
+        out[0, 0, 4] = 0.9  # class 0, with no objectness column
         tmp = tempfile.TemporaryDirectory()
         try:
-            engine = _make_engine(tmp.name, out, ModelTypeEnum.yolonas)
+            engine = _make_engine(tmp.name, [out], ModelTypeEnum.yolonas)
             rows = engine._decode([np.zeros((1, 80, 80, 128), np.int8)])
+            self.assertEqual(int(rows[0][0]), 0)
             self.assertAlmostEqual(float(rows[0][1]), 0.9, places=5)
         finally:
             tmp.cleanup()
