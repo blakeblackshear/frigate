@@ -45,7 +45,6 @@ class BaseLocalDetector(ObjectDetector):
         detector_config: BaseDetectorConfig | None = None,
         labels: str | None = None,
         stop_event: MpEvent | None = None,
-        duty_value: Any = None,
     ) -> None:
         self.fps = EventsPerSecond()
         if labels is None:
@@ -65,10 +64,6 @@ class BaseLocalDetector(ObjectDetector):
         # If the detector supports stop_event, pass it
         if hasattr(self.detect_api, "set_stop_event") and stop_event:
             self.detect_api.set_stop_event(stop_event)
-
-        # If the detector publishes a run duty cycle, hand it the shared Value
-        if hasattr(self.detect_api, "set_duty_value") and duty_value is not None:
-            self.detect_api.set_duty_value(duty_value)
 
     def _transform_input(self, tensor_input: np.ndarray) -> np.ndarray:
         if self.input_transform:
@@ -200,7 +195,6 @@ class AsyncDetectorRunner(FrigateProcess):
         config: FrigateConfig,
         detector_config: BaseDetectorConfig,
         stop_event: MpEvent,
-        duty_value: Any = None,
     ) -> None:
         super().__init__(stop_event, PROCESS_PRIORITY_HIGH, name=name, daemon=True)
         self.detection_queue = detection_queue
@@ -209,7 +203,6 @@ class AsyncDetectorRunner(FrigateProcess):
         self.start_time = start_time
         self.config = config
         self.detector_config = detector_config
-        self.duty_value = duty_value
         self.outputs: dict[str, Any] = {}
         self._frame_manager: SharedMemoryFrameManager | None = None
         self._publisher: ObjectDetectorPublisher | None = None
@@ -286,7 +279,6 @@ class AsyncDetectorRunner(FrigateProcess):
         self._detector = AsyncLocalObjectDetector(
             detector_config=self.detector_config,
             stop_event=self.stop_event,
-            duty_value=self.duty_value,
         )
 
         for name in self.cameras:
@@ -334,9 +326,6 @@ class ObjectDetectProcess:
         self.detection_queue = detection_queue
         self.avg_inference_speed = Value("d", 0.01)
         self.detection_start = Value("d", 0.0)
-        # async detectors that time their accelerator runs publish a windowed
-        # duty cycle here (see AsyncDetectorRunner); read by the stats poller
-        self.run_duty_cycle = Value("d", -1.0)
         self.detect_process: FrigateProcess | None = None
         self.config = config
         self.detector_config = detector_config
@@ -380,10 +369,6 @@ class ObjectDetectProcess:
 
         # Async path for MemryX and Axelera (send/receive contract)
         if self.detector_config.type in ("memryx", "axelera"):
-            # a replacement process publishes its own window; clear the previous
-            # process's duty cycle so stats never show stale utilization while the
-            # new detector is still initializing
-            self.run_duty_cycle.value = -1.0
             self.detect_process = AsyncDetectorRunner(
                 f"frigate.detector:{self.name}",
                 self.detection_queue,
@@ -393,7 +378,6 @@ class ObjectDetectProcess:
                 self.config,
                 self.detector_config,
                 self.stop_event,
-                duty_value=self.run_duty_cycle,
             )
         else:
             self.detect_process = DetectorRunner(

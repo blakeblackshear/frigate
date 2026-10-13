@@ -36,7 +36,6 @@ import os
 import queue
 import shutil
 import threading
-import time
 import zipfile
 from typing import ClassVar, Literal
 
@@ -60,19 +59,16 @@ logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "axelera"
 
-# window length over which the producer thread averages ModelInstance.run
-# time before publishing the run duty cycle to the shared stats Value
-USAGE_WINDOW_SECONDS = 2.0
-
 # The Axelera runtime SDK is installed at first start rather than shipped in
 # the image. The wheels come from Axelera's public Artifactory PyPI index
 # (readable without credentials) and are pinned by sha256. The runtime wheel
 # is auditwheel-repaired (all native deps bundled under axelera_runtime.libs
-# and resolved through $ORIGIN RPATH), the runtime2 wheel bundles its own
-# compiled core, and the firmware wheel ships the AIPU device firmware under
-# axelera/omega so the pip install is fully self contained.
+# and resolved through $ORIGIN RPATH) and the firmware wheel ships the AIPU
+# device firmware under axelera/omega so the pip install is fully self
+# contained. axelera.runtime imports axelera.runtime2 only inside a try for
+# its separate "new runtime API"; the low-level API this plugin uses lives in
+# axelera.runtime.objects and works without it, so runtime2 is not installed.
 AXELERA_RUNTIME_VERSION = "1.8.0"
-AXELERA_RUNTIME2_VERSION = "0.2.0"
 AXELERA_FIRMWARE_VERSION = "1.8.0"
 AXELERA_PYPI = "https://software.axelera.ai/artifactory/axelera-pypi"
 
@@ -97,24 +93,6 @@ AXELERA_MANIFEST = RuntimeManifest(
                 ".manylinux_2_28_aarch64.whl"
             ),
             sha256="5ec8a048fa94d261080c11b840044f5f7b62fce1f0a43ba8733fc880f40d86ef",
-            kind=ArtifactKind.wheel,
-            machines=("aarch64",),
-        ),
-        Artifact(
-            url=(
-                f"{AXELERA_PYPI}/axelera-runtime2/{AXELERA_RUNTIME2_VERSION}/"
-                "axelera_runtime2-0.2.0-cp311-cp311-manylinux_2_28_x86_64.whl"
-            ),
-            sha256="020522241f3940feb4d38317724c1e75c49a1f1753ed1e869e187018dc112aff",
-            kind=ArtifactKind.wheel,
-            machines=("x86_64",),
-        ),
-        Artifact(
-            url=(
-                f"{AXELERA_PYPI}/axelera-runtime2/{AXELERA_RUNTIME2_VERSION}/"
-                "axelera_runtime2-0.2.0-cp311-cp311-manylinux_2_28_aarch64.whl"
-            ),
-            sha256="45dc987b438c15d5a9d66b79d7cf79a78f9f9627447b1c6a5ffd4140deea8bdf",
             kind=ArtifactKind.wheel,
             machines=("aarch64",),
         ),
@@ -389,11 +367,6 @@ class _AxeleraRuntimeInference:
         self._stop = threading.Event()
         self._producer_thread: threading.Thread | None = None
         self._consumer_thread: threading.Thread | None = None
-        self._usage_busy = 0.0
-        self._usage_window_start = time.monotonic()
-        # multiprocessing.Value("d") handed in via set_duty_value; None means
-        # nobody reads the duty cycle (tests, standalone use)
-        self._duty_value = None
 
         if runtime_factory is None:
             try:
@@ -660,8 +633,6 @@ class _AxeleraRuntimeInference:
             try:
                 connection_id, frame = self._frame_q.get(timeout=0.25)
             except queue.Empty:
-                # keep the duty cycle window turning while the card idles
-                self._publish_duty(time.monotonic())
                 continue
             try:
                 in_buf, out_bufs = self._pool.get(timeout=1.0)
@@ -671,37 +642,12 @@ class _AxeleraRuntimeInference:
                 continue
             try:
                 self._preprocess(frame, in_buf)
-                run_t0 = time.monotonic()
                 self._instance.run([in_buf], out_bufs)
-                self._note_run(run_t0, time.monotonic())
                 self._decode_q.put_nowait((connection_id, in_buf, out_bufs))
             except Exception:
                 logger.exception("axelera: inference failed for %s", connection_id)
                 self._pool.put((in_buf, out_bufs))
                 self._push_result(connection_id, np.zeros((MAX_ROWS, 6), np.float32))
-
-    def _note_run(self, t0: float, t1: float) -> None:
-        """Accumulate run time and publish a windowed duty cycle.
-
-        ModelInstance.run blocks until the AIPU completes, so busy/wall over
-        a window is the detector thread's run duty cycle: host-side occupancy
-        of the blocking call (including DMA and driver time), which the
-        runtime exposes no device-side counter to read instead. The value
-        rides a multiprocessing.Value to the main process's stats poller.
-        """
-        self._usage_busy += t1 - t0
-        self._publish_duty(time.monotonic())
-
-    def _publish_duty(self, now: float) -> None:
-        if now - self._usage_window_start < USAGE_WINDOW_SECONDS:
-            return
-        window = now - self._usage_window_start
-        if window > 0 and self._duty_value is not None:
-            self._duty_value.value = min(
-                100.0, round(100.0 * self._usage_busy / window, 1)
-            )
-        self._usage_window_start = now
-        self._usage_busy = 0.0
 
     def _consumer(self) -> None:
         """Decode the raw int8 heads (dequant + onnx + NMS) to (20,6) rows."""
@@ -913,10 +859,6 @@ class AxeleraDetector(DetectionApi):
     def receive_output(self):
         """Return (connection_id, rows) for the next completed inference."""
         return self._inference.collect()
-
-    def set_duty_value(self, duty_value) -> None:
-        """Hand the shared stats Value to the producer thread's duty meter."""
-        self._inference._duty_value = duty_value
 
     def shutdown(self) -> None:
         """Gracefully shut down the runtime and release the Metis device."""

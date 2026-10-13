@@ -245,34 +245,6 @@ def get_go2rtc_pid(cpu_usages: dict[str, dict[str, Any]]) -> int | None:
     return None
 
 
-def fold_run_duty_cycles(stats: dict[str, Any], detectors: dict[str, Any]) -> None:
-    """Fold detector run duty cycles into the matching polled NPU entries.
-
-    Async detector processes publish their run duty cycle through shared
-    Values (not device counters); a negative value means the detector has
-    not produced a window yet. Several processes can share one hardware
-    type, so the busiest published window is the representative device
-    load. The polled entry can be absent while the hardware poll retries
-    (a failed temperature read hides the entry for an hour), but the duty
-    cycle is measured in the detector process and stays valid, so a
-    duty-only entry is created in that case.
-    """
-    npu_usages = stats.get("npu_usages", {})
-    duty_cycles: dict[str, list[float]] = {}
-    for detector in detectors.values():
-        duty = detector.run_duty_cycle.value
-        detector_type = detector.detector_config.type
-        if duty >= 0.0:
-            duty_cycles.setdefault(detector_type, []).append(duty)
-    for detector_type, cycles in duty_cycles.items():
-        if detector_type in npu_usages:
-            npu_usages[detector_type]["npu"] = round(max(cycles), 1)
-        else:
-            stats.setdefault("npu_usages", {})[detector_type] = {
-                "npu": round(max(cycles), 1)
-            }
-
-
 def stats_snapshot(
     config: FrigateConfig,
     stats_tracking: StatsTrackingTypes,
@@ -357,8 +329,6 @@ def stats_snapshot(
     )
 
     hardware_stats.update_stats(stats)
-
-    fold_run_duty_cycles(stats, stats_tracking["detectors"])
 
     if config.telemetry.stats.network_bandwidth:
         bandwidth_stats = get_bandwidth_stats(config)

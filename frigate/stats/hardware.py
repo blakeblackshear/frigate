@@ -196,20 +196,6 @@ def _poll_axengine(config: FrigateConfig) -> HardwarePollResult:
     return HardwarePollResult(npu={"axengine": npu_usage})
 
 
-def _poll_axelera(config: FrigateConfig) -> HardwarePollResult:
-    # the runtime exposes no device-side usage counter; the board controller
-    # temperature is the only honest device readout. The run duty cycle is a
-    # detector-process stat, added to npu_usages in stats_snapshot
-    board_temp = get_axelera_board_temp()
-
-    if board_temp is None:
-        return HardwarePollResult(ok=False)
-
-    entry: dict[str, Any] = {"mem": "-%", "temp": board_temp}
-
-    return HardwarePollResult(npu={"axelera": entry})
-
-
 POLLERS: dict[str, Callable[[FrigateConfig], HardwarePollResult]] = {
     "nvidia": _poll_nvidia,
     "jetson": _poll_jetson,
@@ -219,7 +205,6 @@ POLLERS: dict[str, Callable[[FrigateConfig], HardwarePollResult]] = {
     "rpi": _poll_rpi,
     "intel_npu": _poll_intel_npu,
     "axengine": _poll_axengine,
-    "axelera": _poll_axelera,
 }
 
 
@@ -406,8 +391,6 @@ class HardwareStats:
                     names.add("rockchip")
                 elif spec.detector == "axengine":
                     names.add("axengine")
-                elif spec.detector == "axelera":
-                    names.add("axelera")
                 elif spec.detector == "tensorrt":
                     names.add("jetson")
                 elif spec.detector == "openvino":
@@ -499,5 +482,7 @@ def get_hardware_temperatures(detector_type: str) -> list[float | None]:
     elif detector_type == "hailo":
         hailo_temps = get_hailo_temps()
         return [hailo_temps[name] for name in sorted(hailo_temps.keys())]
+    elif detector_type == "axelera":
+        return [get_axelera_board_temp()]
 
     return []
