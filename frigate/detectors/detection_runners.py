@@ -89,30 +89,46 @@ def is_arm64_platform() -> bool:
     return machine in ("aarch64", "arm64", "armv8", "armv7l")
 
 
-def get_ort_session_options(model_type: str | None = None) -> ort.SessionOptions | None:
+def get_ort_session_options(
+    model_type: str | None = None, cpu: bool = False
+) -> ort.SessionOptions | None:
     """Get ONNX Runtime session options with appropriate settings.
 
     Args:
         model_type: Model being loaded, used to pin its graph optimization level.
+        cpu: Whether the session runs on the CPU execution provider.
 
     Returns:
-        SessionOptions with a pinned optimization level, or None for default settings.
+        SessionOptions for enrichment models, or None for default settings.
     """
     # Import here to avoid circular imports
-    from frigate.embeddings.types import EnrichmentModelTypeEnum
+    from frigate.embeddings.types import (
+        ENRICHMENT_FOR_MODEL_TYPE,
+        EnrichmentModelTypeEnum,
+    )
+
+    if model_type not in ENRICHMENT_FOR_MODEL_TYPE:
+        return None
+
+    sess_options = ort.SessionOptions()
+
+    if cpu:
+        # idle intra-op threads otherwise spin for ~1s after every run, keeping
+        # most cores busy while an enrichment runs even once a second
+        sess_options.add_session_config_entry("session.intra_op.allow_spinning", "0")
 
     if model_type == EnrichmentModelTypeEnum.jina_v2.value:
         # below EXTENDED the CUDA EP returns an identical vector for every image,
         # and ORT_ENABLE_ALL fails to build on CPU with a SimplifiedLayerNormFusion error
-        level = ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        sess_options.graph_optimization_level = (
+            ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        )
     elif model_type == EnrichmentModelTypeEnum.jina_v1.value:
         # aggressive optimizations create or expect nodes that don't exist
-        level = ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
-    else:
-        return None
+        sess_options.graph_optimization_level = (
+            ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+        )
 
-    sess_options = ort.SessionOptions()
-    sess_options.graph_optimization_level = level
     return sess_options
 
 
@@ -789,7 +805,9 @@ def get_optimized_runner(
         ONNXModelRunner(
             ort.InferenceSession(
                 model_path,
-                sess_options=get_ort_session_options(model_type),
+                sess_options=get_ort_session_options(
+                    model_type, cpu=providers[0] == "CPUExecutionProvider"
+                ),
                 providers=providers,
                 provider_options=options,
             ),
