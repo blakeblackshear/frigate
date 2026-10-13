@@ -35,8 +35,8 @@
       "showAll": "Show all again",
       "showAllTitle": "Show all hidden notices?",
       "showAllDesc": "Every acknowledged and muted notice returns to the Notices list, including config and stream checks.",
-      "firstSeen_one": "First seen {{time}}",
-      "firstSeen_other": "First seen {{time}} · {{count}} times",
+      "occurred_one": "Occurred {{time}}",
+      "occurred_other": "Last occurred {{lastTime}} · {{count}} times since {{time}}",
       "acknowledgedAt": "Acknowledged {{time}}",
       "mutedAt": "Muted {{time}}",
       "filter": {
