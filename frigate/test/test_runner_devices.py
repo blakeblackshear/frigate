@@ -98,6 +98,47 @@ class TestLoadRegistry(unittest.TestCase):
         self.assertIsInstance(runner, ONNXModelRunner)
         self.assertEqual(loaded_devices["/models/arcface.onnx"], ("arcface", "CPU"))
 
+    def test_only_cpu_enrichment_sessions_disable_spinning(self):
+        for provider, expected in [
+            ("CPUExecutionProvider", "0"),
+            ("CUDAExecutionProvider", None),
+        ]:
+            with (
+                self.subTest(provider=provider),
+                patch.object(
+                    detection_runners, "is_rknn_compatible", return_value=False
+                ),
+                patch.object(
+                    detection_runners,
+                    "get_ort_providers",
+                    return_value=([provider], [{"device_id": 0}]),
+                ),
+                patch.object(
+                    detection_runners,
+                    "is_openvino_gpu_npu_available",
+                    return_value=False,
+                ),
+                patch.object(
+                    detection_runners, "get_lighter_ane_devices", return_value=[]
+                ),
+                patch.object(detection_runners.ort, "InferenceSession") as session,
+            ):
+                session.return_value.get_providers.return_value = [provider]
+
+                # paddleocr skips the CUDA graph runner, which takes no options
+                get_optimized_runner("/models/paddleocr.onnx", "GPU", "paddleocr")
+
+                options = session.call_args.kwargs["sess_options"]
+
+                try:
+                    spinning = options.get_session_config_entry(
+                        "session.intra_op.allow_spinning"
+                    )
+                except RuntimeError:
+                    spinning = None
+
+                self.assertEqual(spinning, expected)
+
 
 class TestLoadedDeviceSnapshot(unittest.TestCase):
     def setUp(self):

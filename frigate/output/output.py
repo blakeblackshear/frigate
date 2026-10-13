@@ -8,6 +8,7 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from wsgiref.simple_server import make_server
 
+import cv2
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
     WebSocketWSGIRequestHandler,
@@ -121,6 +122,10 @@ class OutputProcess(FrigateProcess):
 
     def run(self) -> None:
         self.pre_run_setup(self.config.logger)
+
+        # birdseye resizes are small, and OpenCV's per-core thread pool burns
+        # ~3x the CPU of running them inline
+        cv2.setNumThreads(1)
 
         frame_manager = SharedMemoryFrameManager()
 
