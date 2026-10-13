@@ -131,7 +131,7 @@ environment:
   DEVICE_ACL_PATHS: "/dev/mydev*"
 ```
 
-Some vendor runtimes also look for a device node under a name `--device` cannot pass in. The Axelera Metis runtime enumerates the colon-form `/dev/metis-0:1:0`, which host udev creates as a symlink — and Docker does not copy symlinks into the container. `DEVICE_ALIASES` recreates such aliases at startup as a comma separated list of `alias=target` pairs:
+Some vendor runtimes also look for a device node under a name `--device` cannot pass in. The Axelera Metis runtime enumerates the colon-form `/dev/metis-0:1:0`, which host udev creates as a symlink. Docker does not copy symlinks into the container. `DEVICE_ALIASES` recreates such aliases at startup as a comma separated list of `alias=target` pairs:
 
 ```yaml
 environment:
