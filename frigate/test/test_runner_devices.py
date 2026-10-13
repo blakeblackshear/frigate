@@ -118,6 +118,9 @@ class TestLoadRegistry(unittest.TestCase):
                     "is_openvino_gpu_npu_available",
                     return_value=False,
                 ),
+                patch.object(
+                    detection_runners, "get_lighter_ane_devices", return_value=[]
+                ),
                 patch.object(detection_runners.ort, "InferenceSession") as session,
             ):
                 session.return_value.get_providers.return_value = [provider]
