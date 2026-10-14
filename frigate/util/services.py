@@ -12,6 +12,7 @@ import subprocess as sp
 import time
 import traceback
 from datetime import datetime
+from enum import Enum
 from typing import Any
 
 import cv2
@@ -1043,22 +1044,30 @@ def _go2rtc_stream_sources(stream: Any) -> list[Any]:
     return stream if isinstance(stream, list) else [stream]
 
 
+class Go2rtcStreamIssue(str, Enum):
+    """Why a go2rtc stream source was rejected."""
+
+    restricted = "restricted"
+    unknown_variable = "unknown_variable"
+    invalid_placeholder = "invalid_placeholder"
+
+
 def find_restricted_go2rtc_stream_changes(
     old_streams: dict[str, Any] | None, new_streams: dict[str, Any] | None
-) -> list[str]:
-    """Return the names of go2rtc streams with new restricted sources.
+) -> dict[str, Go2rtcStreamIssue]:
+    """Return the go2rtc streams with new sources that must be rejected.
 
     Used when the config is changed through the API. A source that is already
     in the saved config for the same stream is left alone, so streams the
-    operator configured on disk keep working; any other source must pass
-    `is_restricted_go2rtc_api_source`.
+    operator configured on disk keep working; any other source must resolve
+    its {FRIGATE_*} placeholders and pass `is_restricted_go2rtc_api_source`.
     """
     # imported here since frigate.config imports this module
     from frigate.config.env import substitute_frigate_vars
 
     old_streams = old_streams if isinstance(old_streams, dict) else {}
     new_streams = new_streams if isinstance(new_streams, dict) else {}
-    restricted = []
+    issues: dict[str, Go2rtcStreamIssue] = {}
 
     for name, stream in new_streams.items():
         existing = _go2rtc_stream_sources(old_streams.get(name))
@@ -1071,24 +1080,27 @@ def find_restricted_go2rtc_stream_changes(
                 # the map form is only usable with arbitrary exec enabled
                 if is_go2rtc_arbitrary_exec_allowed():
                     continue
-                restricted.append(name)
+                issues[name] = Go2rtcStreamIssue.restricted
                 break
 
-            # go2rtc startup resolves sources with the same substitution, and
-            # refuses to start on one it cannot resolve
+            # only sources whose placeholders resolve here are accepted, so the
+            # resolved value checked below is what go2rtc loads at startup
             try:
                 resolved_source = substitute_frigate_vars(source)
-            except (KeyError, ValueError):
-                restricted.append(name)
+            except KeyError:
+                issues[name] = Go2rtcStreamIssue.unknown_variable
+                break
+            except ValueError:
+                issues[name] = Go2rtcStreamIssue.invalid_placeholder
                 break
 
             if is_restricted_go2rtc_api_source(
                 source
             ) or is_restricted_go2rtc_api_source(resolved_source):
-                restricted.append(name)
+                issues[name] = Go2rtcStreamIssue.restricted
                 break
 
-    return restricted
+    return issues
 
 
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:

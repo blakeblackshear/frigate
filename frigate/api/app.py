@@ -73,6 +73,7 @@ from frigate.util.config import (
 )
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
+    Go2rtcStreamIssue,
     find_restricted_go2rtc_stream_changes,
     get_nvidia_driver_info,
     process_logs,
@@ -556,19 +557,26 @@ def _restricted_go2rtc_streams_response(
         # with no readable saved config, every source is treated as new
         old_streams = None
 
-    restricted = find_restricted_go2rtc_stream_changes(old_streams, new_streams)
-    if not restricted:
+    issues = find_restricted_go2rtc_stream_changes(old_streams, new_streams)
+    if not issues:
         return None
 
-    logger.warning(
-        "Rejected config change with restricted go2rtc stream sources: %s",
-        ", ".join(restricted),
-    )
+    messages = []
+    for issue, label in (
+        (Go2rtcStreamIssue.restricted, "Restricted go2rtc stream source in"),
+        (Go2rtcStreamIssue.unknown_variable, "Unknown variable in go2rtc stream"),
+        (
+            Go2rtcStreamIssue.invalid_placeholder,
+            "Invalid variable placeholder in go2rtc stream",
+        ),
+    ):
+        names = [name for name, found in issues.items() if found == issue]
+        if names:
+            messages.append(f"{label}: {', '.join(names)}")
+
+    logger.warning("Rejected config change: %s", "; ".join(messages))
     return JSONResponse(
-        content={
-            "success": False,
-            "message": f"Restricted go2rtc stream source in: {', '.join(restricted)}",
-        },
+        content={"success": False, "message": "; ".join(messages)},
         status_code=400,
     )
 

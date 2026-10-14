@@ -177,14 +177,37 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
     def test_set_rejects_unresolvable_placeholder(self):
         before = self._read_config()
         with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_RTSP_USER": "user"}):
-            for src in (
-                "{FRIGATE_RTSP_USER!r}fmpeg:front_door#raw=-vn",
-                "{FRIGATE_RTSP_USER:>5}",
-                "rtsp://{FRIGATE_UNDEFINED}@10.0.0.2:554/video",
+            for src, message in (
+                (
+                    "{FRIGATE_RTSP_USER!r}fmpeg:front_door#raw=-vn",
+                    "Invalid variable placeholder in go2rtc stream: new_stream",
+                ),
+                (
+                    "{FRIGATE_RTSP_USER:>5}",
+                    "Invalid variable placeholder in go2rtc stream: new_stream",
+                ),
+                (
+                    "rtsp://{FRIGATE_UNDEFINED}@10.0.0.2:554/video",
+                    "Unknown variable in go2rtc stream: new_stream",
+                ),
             ):
                 resp = self._set_streams({"new_stream": [src]})
                 assert resp.status_code == 400, src
+                assert resp.json()["message"] == message, src
                 assert self._read_config() == before
+
+    def test_set_reports_each_issue(self):
+        resp = self._set_streams(
+            {
+                "typo_stream": ["rtsp://{FRIGATE_UNDEFINED}@10.0.0.2:554/video"],
+                "injected_stream": [_INJECTED_SRC],
+            }
+        )
+        assert resp.status_code == 400
+        assert resp.json()["message"] == (
+            "Restricted go2rtc stream source in: injected_stream; "
+            "Unknown variable in go2rtc stream: typo_stream"
+        )
 
     def test_set_allows_resolvable_placeholder(self):
         src = "rtsp://{FRIGATE_RTSP_USER}@10.0.0.2:554/video"
