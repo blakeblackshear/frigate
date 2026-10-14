@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import ruamel.yaml
 
+from frigate.config.env import FRIGATE_ENV_VARS
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -167,3 +168,24 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
         assert resp.status_code == 400
         assert "Restricted go2rtc stream source" in resp.json()["message"]
         assert self._read_config() == before
+
+    # --- {FRIGATE_*} placeholders resolve the same way as at go2rtc startup ---
+
+    def test_set_rejects_unresolvable_placeholder(self):
+        before = self._read_config()
+        with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_RTSP_USER": "user"}):
+            for src in (
+                "{FRIGATE_RTSP_USER!r}fmpeg:front_door#raw=-vn",
+                "{FRIGATE_RTSP_USER:>5}",
+                "rtsp://{FRIGATE_UNDEFINED}@10.0.0.2:554/video",
+            ):
+                resp = self._set_streams({"new_stream": [src]})
+                assert resp.status_code == 400, src
+                assert self._read_config() == before
+
+    def test_set_allows_resolvable_placeholder(self):
+        src = "rtsp://{FRIGATE_RTSP_USER}@10.0.0.2:554/video"
+        with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_RTSP_USER": "user"}):
+            resp = self._set_streams({"new_stream": [src]})
+        assert resp.status_code == 200, resp.text
+        assert src in self._read_config()

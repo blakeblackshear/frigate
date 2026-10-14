@@ -1073,10 +1073,13 @@ def find_restricted_go2rtc_stream_changes(
                 restricted.append(name)
                 break
 
+            # go2rtc startup resolves sources with the same substitution, and
+            # refuses to start on one it cannot resolve
             try:
                 resolved_source = substitute_frigate_vars(source)
             except (KeyError, ValueError):
-                resolved_source = source
+                restricted.append(name)
+                break
 
             if is_restricted_go2rtc_api_source(
                 source
