@@ -1038,6 +1038,55 @@ def is_restricted_go2rtc_api_source(stream_source: str) -> bool:
     return not is_go2rtc_arbitrary_exec_allowed()
 
 
+def _go2rtc_stream_sources(stream: Any) -> list[Any]:
+    return stream if isinstance(stream, list) else [stream]
+
+
+def find_restricted_go2rtc_stream_changes(
+    old_streams: dict[str, Any] | None, new_streams: dict[str, Any] | None
+) -> list[str]:
+    """Return the names of go2rtc streams with new restricted sources.
+
+    Used when the config is changed through the API. A source that is already
+    in the saved config for the same stream is left alone, so streams the
+    operator configured on disk keep working; any other source must pass
+    `is_restricted_go2rtc_api_source`.
+    """
+    # imported here since frigate.config imports this module
+    from frigate.config.env import substitute_frigate_vars
+
+    old_streams = old_streams if isinstance(old_streams, dict) else {}
+    new_streams = new_streams if isinstance(new_streams, dict) else {}
+    restricted = []
+
+    for name, stream in new_streams.items():
+        existing = _go2rtc_stream_sources(old_streams.get(name))
+
+        for source in _go2rtc_stream_sources(stream):
+            if source in existing:
+                continue
+
+            if not isinstance(source, str):
+                # the map form is only usable with arbitrary exec enabled
+                if is_go2rtc_arbitrary_exec_allowed():
+                    continue
+                restricted.append(name)
+                break
+
+            try:
+                resolved_source = substitute_frigate_vars(source)
+            except (KeyError, ValueError):
+                resolved_source = source
+
+            if is_restricted_go2rtc_api_source(
+                source
+            ) or is_restricted_go2rtc_api_source(resolved_source):
+                restricted.append(name)
+                break
+
+    return restricted
+
+
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)
