@@ -11,7 +11,7 @@ import secrets
 import time
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, unquote
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -1175,7 +1175,8 @@ def _is_existing_go2rtc_stream(request: Request, stream_name: str) -> bool:
 # (see auth_request.conf). Each names the desired stream via the `src` query
 # param, so the camera-level check must happen here in the `/auth` subrequest —
 # `require_go2rtc_stream_access` only guards the REST `/go2rtc/streams/{name}`
-# endpoint, not these proxied live-stream paths.
+# endpoint, not these proxied live-stream paths. The nginx locations are prefix
+# matches, so anything under these paths is proxied too.
 GO2RTC_STREAM_PROXY_PATHS = frozenset(
     {
         "/live/mse/api/ws",
@@ -1183,6 +1184,47 @@ GO2RTC_STREAM_PROXY_PATHS = frozenset(
         "/api/go2rtc/webrtc",
     }
 )
+
+_URI_SCHEME_AND_AUTHORITY = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://[^/?]*")
+
+
+def _split_request_uri(request_uri: str) -> tuple[str, str]:
+    """Split a raw request URI into its path and query string.
+
+    urlparse is not used since it reads a path starting with `//` as a host.
+    """
+    uri = _URI_SCHEME_AND_AUTHORITY.sub("", request_uri, count=1)
+    path, _, query = uri.partition("?")
+    return path, query
+
+
+def _normalize_request_path(path: str) -> str:
+    """Normalize a raw request path the way nginx does before matching locations.
+
+    nginx percent-decodes the path, merges repeated slashes and resolves dot
+    segments, while `X-Original-URL` carries the raw `$request_uri`.
+    """
+    segments: list[str] = []
+    for segment in unquote(path).split("/"):
+        if segment in ("", "."):
+            continue
+        if segment == "..":
+            if segments:
+                segments.pop()
+            continue
+        segments.append(segment)
+
+    return "/" + "/".join(segments)
+
+
+def _is_go2rtc_stream_proxy_request(path: str, request: Request) -> bool:
+    # nginx marks requests routed through the go2rtc stream locations, and the
+    # normalized path catches them if that marker is ever missing
+    if request.headers.get("x-go2rtc-stream-proxy") == "1":
+        return True
+
+    normalized = _normalize_request_path(path)
+    return any(normalized.startswith(p) for p in GO2RTC_STREAM_PROXY_PATHS)
 
 
 def deny_response_for_go2rtc_stream(
@@ -1200,12 +1242,12 @@ def deny_response_for_go2rtc_stream(
     if not original_url:
         return None
 
-    parsed = urlparse(original_url)
-    if parsed.path not in GO2RTC_STREAM_PROXY_PATHS:
+    path, query = _split_request_uri(original_url)
+    if not _is_go2rtc_stream_proxy_request(path, request):
         return None
 
     frigate_config = request.app.frigate_config
-    sources = parse_qs(parsed.query, keep_blank_values=True).get("src", [])
+    sources = parse_qs(query, keep_blank_values=True).get("src", [])
 
     # an unknown src would make go2rtc create an ad hoc stream from it, which
     # bypasses the restricted-source checks on PUT /go2rtc/streams

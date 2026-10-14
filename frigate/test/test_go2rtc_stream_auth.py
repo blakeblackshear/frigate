@@ -50,7 +50,9 @@ _CONFIG = {
 
 
 def _request(config: FrigateConfig) -> types.SimpleNamespace:
-    return types.SimpleNamespace(app=types.SimpleNamespace(frigate_config=config))
+    return types.SimpleNamespace(
+        app=types.SimpleNamespace(frigate_config=config), headers={}
+    )
 
 
 class TestDenyResponseForGo2rtcStream(unittest.TestCase):
@@ -258,6 +260,36 @@ class TestDenyResponseForGo2rtcStream(unittest.TestCase):
         self.assertEqual(
             self._deny("http://host/live/mse/api/ws?src=wizard_test", "admin"), 403
         )
+
+    # --- path spellings nginx normalizes before matching its location ---
+
+    def test_path_variants_are_checked(self):
+        for path in (
+            "/live/mse/api/%77s",
+            "/live/mse/api%2Fws",
+            "//live/mse/api/ws",
+            "/live//mse/api/ws",
+            "/live/mse/api/./ws",
+            "/live/other/../mse/api/ws",
+            "/live/mse/api/%2e/ws",
+            "/%6Cive/webrtc/api/ws",
+            "/api/go2rtc/%77ebrtc",
+            "/live/mse/api/ws/",
+            "/live/mse/api/ws/extra",
+            "http://host//live/mse/api/ws",
+        ):
+            self.assertEqual(self._deny(f"{path}?src=nonexistent", "viewer"), 403, path)
+
+    def test_path_variants_allow_existing_stream(self):
+        self.assertIsNone(self._deny("/live/mse/api/%77s?src=front_door", "viewer"))
+
+    def test_nginx_marker_applies_check(self):
+        self.request.headers = {"x-go2rtc-stream-proxy": "1"}
+        self.assertEqual(self._deny("/unexpected?src=nonexistent", "viewer"), 403)
+
+    def test_unrelated_paths_not_checked(self):
+        for path in ("/live/mse/api", "/api/go2rtc/streams", "/live/jsmpeg/x"):
+            self.assertIsNone(self._deny(f"{path}?src=nonexistent", "viewer"), path)
 
 
 if __name__ == "__main__":
