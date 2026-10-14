@@ -12,6 +12,7 @@ import subprocess as sp
 import time
 import traceback
 from datetime import datetime
+from enum import Enum
 from typing import Any
 
 import cv2
@@ -984,6 +985,122 @@ def is_restricted_go2rtc_source(stream_source: str) -> bool:
     if not stream_source.strip().startswith(("echo:", "expr:", "exec:")):
         return False
     return not is_go2rtc_arbitrary_exec_allowed()
+
+
+# go2rtc expands an `ffmpeg:` source into an `exec:` command line built from its
+# `#key=value` parameters, so only parameters that map to fixed presets or plain
+# numbers are accepted from the API
+_GO2RTC_FFMPEG_NAME_PARAMS = frozenset({"video", "audio", "hardware"})
+_GO2RTC_FFMPEG_NUMERIC_PARAMS = frozenset(
+    {"width", "height", "rotate", "bitrate", "timeout"}
+)
+_GO2RTC_FFMPEG_FLAG_PARAMS = frozenset({"async"})
+# a preset or codec name, optionally with a sample rate (e.g. opus/16000)
+_GO2RTC_FFMPEG_NAME_VALUE = re.compile(r"^([A-Za-z0-9_]*|[A-Za-z0-9_]+/[0-9]{1,6})$")
+_GO2RTC_FFMPEG_NUMERIC_VALUE = re.compile(r"^-?[0-9]+[kKmM]?$")
+
+
+def _is_safe_go2rtc_ffmpeg_source(stream_source: str) -> bool:
+    """Check that an `ffmpeg:` source only uses allowlisted parameters."""
+    if any(c in stream_source for c in "'\"") or re.search(r"\s", stream_source):
+        return False
+
+    _, *params = stream_source.split("#")
+    for param in params:
+        key, has_value, value = param.partition("=")
+        if key in _GO2RTC_FFMPEG_NAME_PARAMS:
+            if not _GO2RTC_FFMPEG_NAME_VALUE.match(value):
+                return False
+        elif key in _GO2RTC_FFMPEG_NUMERIC_PARAMS:
+            if not _GO2RTC_FFMPEG_NUMERIC_VALUE.match(value):
+                return False
+        elif key in _GO2RTC_FFMPEG_FLAG_PARAMS:
+            if has_value:
+                return False
+        else:
+            return False
+
+    return True
+
+
+def is_restricted_go2rtc_api_source(stream_source: str) -> bool:
+    """Check if a stream source submitted through the API is restricted.
+
+    In addition to the echo/expr/exec sources, this restricts `ffmpeg:` sources
+    whose parameters could inject arbitrary ffmpeg arguments. The
+    GO2RTC_ALLOW_ARBITRARY_EXEC override lifts both restrictions.
+    """
+    source = stream_source.strip()
+    if is_restricted_go2rtc_source(source):
+        return True
+    if not source.startswith("ffmpeg:"):
+        return False
+    if _is_safe_go2rtc_ffmpeg_source(source[len("ffmpeg:") :]):
+        return False
+    return not is_go2rtc_arbitrary_exec_allowed()
+
+
+def _go2rtc_stream_sources(stream: Any) -> list[Any]:
+    return stream if isinstance(stream, list) else [stream]
+
+
+class Go2rtcStreamIssue(str, Enum):
+    """Why a go2rtc stream source was rejected."""
+
+    restricted = "restricted"
+    unknown_variable = "unknown_variable"
+    invalid_placeholder = "invalid_placeholder"
+
+
+def find_restricted_go2rtc_stream_changes(
+    old_streams: dict[str, Any] | None, new_streams: dict[str, Any] | None
+) -> dict[str, Go2rtcStreamIssue]:
+    """Return the go2rtc streams with new sources that must be rejected.
+
+    Used when the config is changed through the API. A source that is already
+    in the saved config for the same stream is left alone, so streams the
+    operator configured on disk keep working; any other source must resolve
+    its {FRIGATE_*} placeholders and pass `is_restricted_go2rtc_api_source`.
+    """
+    # imported here since frigate.config imports this module
+    from frigate.config.env import substitute_frigate_vars
+
+    old_streams = old_streams if isinstance(old_streams, dict) else {}
+    new_streams = new_streams if isinstance(new_streams, dict) else {}
+    issues: dict[str, Go2rtcStreamIssue] = {}
+
+    for name, stream in new_streams.items():
+        existing = _go2rtc_stream_sources(old_streams.get(name))
+
+        for source in _go2rtc_stream_sources(stream):
+            if source in existing:
+                continue
+
+            if not isinstance(source, str):
+                # the map form is only usable with arbitrary exec enabled
+                if is_go2rtc_arbitrary_exec_allowed():
+                    continue
+                issues[name] = Go2rtcStreamIssue.restricted
+                break
+
+            # only sources whose placeholders resolve here are accepted, so the
+            # resolved value checked below is what go2rtc loads at startup
+            try:
+                resolved_source = substitute_frigate_vars(source)
+            except KeyError:
+                issues[name] = Go2rtcStreamIssue.unknown_variable
+                break
+            except ValueError:
+                issues[name] = Go2rtcStreamIssue.invalid_placeholder
+                break
+
+            if is_restricted_go2rtc_api_source(
+                source
+            ) or is_restricted_go2rtc_api_source(resolved_source):
+                issues[name] = Go2rtcStreamIssue.restricted
+                break
+
+    return issues
 
 
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:

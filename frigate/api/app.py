@@ -73,6 +73,8 @@ from frigate.util.config import (
 )
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
+    Go2rtcStreamIssue,
+    find_restricted_go2rtc_stream_changes,
     get_nvidia_driver_info,
     process_logs,
     restart_frigate,
@@ -522,6 +524,63 @@ def config_raw():
         )
 
 
+def _go2rtc_streams(raw_config: str) -> Any:
+    """Load go2rtc.streams with the same loader Frigate and go2rtc startup use.
+
+    Raises ruamel.yaml.YAMLError when the config cannot be parsed.
+    """
+    loaded = ruamel.yaml.YAML().load(raw_config)
+    go2rtc = loaded.get("go2rtc") if isinstance(loaded, dict) else None
+    return go2rtc.get("streams") if isinstance(go2rtc, dict) else None
+
+
+def _restricted_go2rtc_streams_response(
+    old_raw_config: str, new_raw_config: str
+) -> JSONResponse | None:
+    """Reject config changes that add restricted go2rtc stream sources.
+
+    The same sources are rejected by PUT /go2rtc/streams, and go2rtc would
+    otherwise load them from the saved config on the next restart.
+    """
+    try:
+        new_streams = _go2rtc_streams(new_raw_config)
+    except ruamel.yaml.YAMLError:
+        logger.warning("Rejected config change that could not be parsed")
+        return JSONResponse(
+            content={"success": False, "message": "Unable to parse config"},
+            status_code=400,
+        )
+
+    try:
+        old_streams = _go2rtc_streams(old_raw_config)
+    except ruamel.yaml.YAMLError:
+        # with no readable saved config, every source is treated as new
+        old_streams = None
+
+    issues = find_restricted_go2rtc_stream_changes(old_streams, new_streams)
+    if not issues:
+        return None
+
+    messages = []
+    for issue, label in (
+        (Go2rtcStreamIssue.restricted, "Restricted go2rtc stream source in"),
+        (Go2rtcStreamIssue.unknown_variable, "Unknown variable in go2rtc stream"),
+        (
+            Go2rtcStreamIssue.invalid_placeholder,
+            "Invalid variable placeholder in go2rtc stream",
+        ),
+    ):
+        names = [name for name, found in issues.items() if found == issue]
+        if names:
+            messages.append(f"{label}: {', '.join(names)}")
+
+    logger.warning("Rejected config change: %s", "; ".join(messages))
+    return JSONResponse(
+        content={"success": False, "message": "; ".join(messages)},
+        status_code=400,
+    )
+
+
 @router.post("/config/save", dependencies=[Depends(require_role(["admin"]))])
 def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
     new_config = body.decode()
@@ -598,10 +657,22 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
             status_code=400,
         )
 
+    config_file = find_config_file()
+
+    try:
+        with open(config_file) as f:
+            old_raw_config = f.read()
+    except OSError:
+        old_raw_config = ""
+
+    restricted_response = _restricted_go2rtc_streams_response(
+        old_raw_config, new_config
+    )
+    if restricted_response is not None:
+        return restricted_response
+
     # Save the config to file
     try:
-        config_file = find_config_file()
-
         with open(config_file, "w") as f:
             f.write(new_config)
             f.close()
@@ -912,6 +983,13 @@ def config_set(request: Request, body: AppConfigSetBody):
                         ),
                         status_code=400,
                     )
+                restricted_response = _restricted_go2rtc_streams_response(
+                    old_raw_config, new_raw_config
+                )
+                if restricted_response is not None:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                    return restricted_response
             except Exception as e:
                 logging.error(f"Error updating config: {e}")
                 return JSONResponse(

@@ -403,6 +403,77 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
                 forwarded_src = mock_put.call_args.kwargs["params"]["src"]
                 assert forwarded_src == "exec:/tmp/something"
 
+    def test_add_stream_rejects_ffmpeg_argument_injection(self):
+        """PUT /go2rtc/streams must reject ffmpeg: sources whose parameters can
+        inject arbitrary ffmpeg arguments, since go2rtc expands them to exec:"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        with patch("frigate.api.camera.requests.put") as mock_put:
+            with AuthTestClient(app) as client:
+                for src in (
+                    # shape of the source in GHSA-qjjw-3v66-279f
+                    "ffmpeg:#input='-f''h264''-i''data:placeholder''-c''copy'",
+                    "ffmpeg:#input=-re",
+                    "ffmpeg:front_door#raw=-vn",
+                    "ffmpeg:front_door#video=-vn",
+                    "ffmpeg:front_door#video=out.mp4",
+                    "ffmpeg:front_door#drawtext=x",
+                    "ffmpeg:front_door#width=1x",
+                    "ffmpeg:front_door#audio=/16000",
+                    "ffmpeg:front_door#audio=opus/",
+                    "ffmpeg:front_door#audio=opus/16000/1",
+                    "ffmpeg:'front_door'",
+                    "  ffmpeg:#input=-re",
+                ):
+                    resp = client.put("/go2rtc/streams/injected", params={"src": src})
+                    assert resp.status_code == 400, (
+                        f"Expected 400 for ffmpeg src {src!r}; got {resp.status_code}"
+                    )
+                    assert resp.json().get("success") is False
+            mock_put.assert_not_called()
+
+    def test_add_stream_allows_standard_ffmpeg_sources(self):
+        """ffmpeg: sources built by the UI and shown in the docs must still be
+        forwarded to go2rtc"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
+        with patch(
+            "frigate.api.camera.requests.put", return_value=mock_response
+        ) as mock_put:
+            with AuthTestClient(app) as client:
+                for src in (
+                    "ffmpeg:rtsp://10.0.0.1:554/video",
+                    "ffmpeg:rtsp://10.0.0.1:554/video#video=copy#audio=copy",
+                    "ffmpeg:rtsp://10.0.0.1:554/video#video=h264#hardware",
+                    "ffmpeg:front_door#audio=opus",
+                    "ffmpeg:front_door#video=h264#hardware=vaapi",
+                    "ffmpeg:front_door#video=h264#width=1280#rotate=-90",
+                    # documented HomeKit source
+                    "ffmpeg:front_door#video=h264#width=1280#height=720#audio=opus/16000",
+                    "ffmpeg:http://10.0.0.1/flv?port=1935&app=bcs#video=copy",
+                ):
+                    resp = client.put("/go2rtc/streams/legit", params={"src": src})
+                    assert resp.status_code == 200, (
+                        f"Expected 200 for ffmpeg src {src!r}; got {resp.status_code}"
+                    )
+                    forwarded_src = mock_put.call_args.kwargs["params"]["src"]
+                    assert forwarded_src == src
+
+    def test_add_stream_allows_ffmpeg_injection_when_override_set(self):
+        """GO2RTC_ALLOW_ARBITRARY_EXEC also lifts the ffmpeg: parameter check"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
+        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+            with patch(
+                "frigate.api.camera.requests.put", return_value=mock_response
+            ) as mock_put:
+                with AuthTestClient(app) as client:
+                    resp = client.put(
+                        "/go2rtc/streams/legit",
+                        params={"src": "ffmpeg:front_door#raw=-vn"},
+                    )
+                assert resp.status_code == 200
+                mock_put.assert_called_once()
+
     def test_stream_alias_blocked_when_owning_camera_disallowed(self):
         """limited_user cannot access a stream alias that belongs to a camera they
         are not allowed to see."""
