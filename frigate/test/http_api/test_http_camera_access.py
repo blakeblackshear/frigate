@@ -418,6 +418,9 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
                     "ffmpeg:front_door#video=out.mp4",
                     "ffmpeg:front_door#drawtext=x",
                     "ffmpeg:front_door#width=1x",
+                    "ffmpeg:front_door#audio=/16000",
+                    "ffmpeg:front_door#audio=opus/",
+                    "ffmpeg:front_door#audio=opus/16000/1",
                     "ffmpeg:'front_door'",
                     "  ffmpeg:#input=-re",
                 ):
@@ -444,6 +447,8 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
                     "ffmpeg:front_door#audio=opus",
                     "ffmpeg:front_door#video=h264#hardware=vaapi",
                     "ffmpeg:front_door#video=h264#width=1280#rotate=-90",
+                    # documented HomeKit source
+                    "ffmpeg:front_door#video=h264#width=1280#height=720#audio=opus/16000",
                     "ffmpeg:http://10.0.0.1/flv?port=1935&app=bcs#video=copy",
                 ):
                     resp = client.put("/go2rtc/streams/legit", params={"src": src})

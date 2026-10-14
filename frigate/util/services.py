@@ -994,7 +994,8 @@ _GO2RTC_FFMPEG_NUMERIC_PARAMS = frozenset(
     {"width", "height", "rotate", "bitrate", "timeout"}
 )
 _GO2RTC_FFMPEG_FLAG_PARAMS = frozenset({"async"})
-_GO2RTC_FFMPEG_NAME_VALUE = re.compile(r"^[A-Za-z0-9_]*$")
+# a preset or codec name, optionally with a sample rate (e.g. opus/16000)
+_GO2RTC_FFMPEG_NAME_VALUE = re.compile(r"^([A-Za-z0-9_]*|[A-Za-z0-9_]+/[0-9]{1,6})$")
 _GO2RTC_FFMPEG_NUMERIC_VALUE = re.compile(r"^-?[0-9]+[kKmM]?$")
 
 
