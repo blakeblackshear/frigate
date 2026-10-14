@@ -71,13 +71,13 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
                 },
             )
 
-    def _save_streams(self, streams: dict):
+    def _save_streams(self, streams: dict, prefix: str = ""):
         config = copy.deepcopy(_CONFIG)
         config["go2rtc"]["streams"].update(streams)
         with AuthTestClient(self.app) as client:
             return client.post(
                 "/config/save?save_option=saveonly",
-                content=_dump(config),
+                content=prefix + _dump(config),
                 headers={"Content-Type": "text/plain"},
             )
 
@@ -153,3 +153,17 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
         config = self._read_config()
         assert _EXISTING_SRC in config
         assert "rtsp://10.0.0.2:554/video" in config
+
+    def test_save_tagged_config_with_standard_source_allowed(self):
+        # a tag on the root map still passes validation and startup parsing
+        resp = self._save_streams(
+            {"new_stream": "rtsp://10.0.0.2:554/video"}, prefix="!config\n"
+        )
+        assert resp.status_code == 200, resp.text
+
+    def test_save_tagged_config_with_injected_source_rejected(self):
+        before = self._read_config()
+        resp = self._save_streams({"new_stream": [_INJECTED_SRC]}, prefix="!config\n")
+        assert resp.status_code == 400
+        assert "Restricted go2rtc stream source" in resp.json()["message"]
+        assert self._read_config() == before

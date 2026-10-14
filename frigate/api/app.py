@@ -523,16 +523,13 @@ def config_raw():
         )
 
 
-def _load_yaml_dict(raw_config: str) -> dict[str, Any]:
-    try:
-        loaded = ruamel.yaml.YAML(typ="safe", pure=True).load(raw_config)
-    except ruamel.yaml.YAMLError:
-        return {}
-    return loaded if isinstance(loaded, dict) else {}
-
-
 def _go2rtc_streams(raw_config: str) -> Any:
-    go2rtc = _load_yaml_dict(raw_config).get("go2rtc")
+    """Load go2rtc.streams with the same loader Frigate and go2rtc startup use.
+
+    Raises ruamel.yaml.YAMLError when the config cannot be parsed.
+    """
+    loaded = ruamel.yaml.YAML().load(raw_config)
+    go2rtc = loaded.get("go2rtc") if isinstance(loaded, dict) else None
     return go2rtc.get("streams") if isinstance(go2rtc, dict) else None
 
 
@@ -544,9 +541,22 @@ def _restricted_go2rtc_streams_response(
     The same sources are rejected by PUT /go2rtc/streams, and go2rtc would
     otherwise load them from the saved config on the next restart.
     """
-    restricted = find_restricted_go2rtc_stream_changes(
-        _go2rtc_streams(old_raw_config), _go2rtc_streams(new_raw_config)
-    )
+    try:
+        new_streams = _go2rtc_streams(new_raw_config)
+    except ruamel.yaml.YAMLError:
+        logger.warning("Rejected config change that could not be parsed")
+        return JSONResponse(
+            content={"success": False, "message": "Unable to parse config"},
+            status_code=400,
+        )
+
+    try:
+        old_streams = _go2rtc_streams(old_raw_config)
+    except ruamel.yaml.YAMLError:
+        # with no readable saved config, every source is treated as new
+        old_streams = None
+
+    restricted = find_restricted_go2rtc_stream_changes(old_streams, new_streams)
     if not restricted:
         return None
 
