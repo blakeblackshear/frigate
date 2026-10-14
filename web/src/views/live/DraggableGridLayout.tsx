@@ -33,6 +33,7 @@ import { ASPECT_WIDE_LAYOUT } from "@/types/record";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isEqual } from "lodash";
 import useSWR from "swr";
+import { useIsAdmin } from "@/hooks/use-is-admin";
 import { isDesktop, isMobile, isMobileOnly } from "react-device-detect";
 import BirdseyeLivePlayer from "@/components/player/BirdseyeLivePlayer";
 import LivePlayer from "@/components/player/LivePlayer";
@@ -133,6 +134,7 @@ export default function DraggableGridLayout({
 }: DraggableGridLayoutProps) {
   const { t } = useTranslation(["views/live"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const isAdmin = useIsAdmin();
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
   const aspectRatios = useMemo(() => {
@@ -884,7 +886,7 @@ export default function DraggableGridLayout({
               </Tooltip>
               {!isEditMode && (
                 <>
-                  {!fullscreen && (
+                  {!fullscreen && isAdmin && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div

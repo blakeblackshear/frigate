@@ -489,7 +489,7 @@ function MSEPlayer({
           if (sb.buffered && sb.buffered.length) {
             const end = sb.buffered.end(sb.buffered.length - 1) - 15;
             const start = sb.buffered.start(0);
-            if (end > start) {
+            if (end - start > 1) {
               sb.remove(start, end);
               msRef.current?.setLiveSeekableRange(end, end + 15);
             }

@@ -34,7 +34,11 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.models import User
-from frigate.util.builtin import clean_camera_user_pass, get_record_segment_time
+from frigate.util.builtin import (
+    clean_camera_user_pass,
+    clear_orphaned_comments,
+    get_record_segment_time,
+)
 from frigate.util.camera_cleanup import cleanup_camera_db, cleanup_camera_files
 from frigate.util.config import find_config_file
 from frigate.util.env import UnknownVariableError, substitute_frigate_vars
@@ -47,7 +51,7 @@ from frigate.util.live_streams import (
 from frigate.util.services import (
     analyze_record_keyframes,
     ffprobe_stream,
-    is_restricted_go2rtc_source,
+    is_restricted_go2rtc_api_source,
 )
 
 logger = logging.getLogger(__name__)
@@ -153,9 +157,9 @@ def go2rtc_camera_stream(request: Request, stream_name: str):
 )
 def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
     """Add or update a go2rtc stream configuration."""
-    if src and is_restricted_go2rtc_source(src):
+    if src and is_restricted_go2rtc_api_source(src):
         logger.warning(
-            "Rejected go2rtc stream '%s' with restricted source type (echo/expr/exec)",
+            "Rejected go2rtc stream '%s' with restricted source",
             stream_name,
         )
         return JSONResponse(
@@ -174,9 +178,9 @@ def go2rtc_add_stream(request: Request, stream_name: str, src: str = ""):
             except UnknownVariableError:
                 resolved_src = src
 
-            if is_restricted_go2rtc_source(resolved_src):
+            if is_restricted_go2rtc_api_source(resolved_src):
                 logger.warning(
-                    "Rejected go2rtc stream '%s' with restricted source type (echo/expr/exec)",
+                    "Rejected go2rtc stream '%s' with restricted source",
                     stream_name,
                 )
                 return JSONResponse(
@@ -1273,6 +1277,7 @@ async def delete_camera(
                 # Remove camera from config
                 if "cameras" in data and camera_name in data["cameras"]:
                     del data["cameras"][camera_name]
+                    clear_orphaned_comments(data["cameras"], data, "cameras")
 
                 # Remove camera from auth roles
                 auth = data.get("auth", {})

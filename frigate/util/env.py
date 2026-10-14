@@ -165,12 +165,25 @@ def reload_sources(warn: bool = True) -> None:
     _rebuild(warn)
 
 
+# Security overrides that must come from the container environment, which is
+# controlled by the operator, rather than from the config, which admins can edit
+_PROTECTED_ENV_VARS = frozenset({"GO2RTC_ALLOW_ARBITRARY_EXEC"})
+
+
 def apply_config_env_vars(values: Mapping[str, object]) -> None:
     """Install the environment_vars block as the lowest priority source.
 
-    Unprefixed keys only set os.environ.
+    Unprefixed keys only set os.environ. Protected security overrides are
+    skipped.
     """
     for key, value in values.items():
+        if key.upper() in _PROTECTED_ENV_VARS:
+            logger.warning(
+                "Ignoring %s in environment_vars, it must be set in the container environment",
+                key,
+            )
+            continue
+
         resolved = str(value)
 
         if key.startswith("FRIGATE_"):
