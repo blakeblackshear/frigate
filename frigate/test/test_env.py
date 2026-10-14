@@ -228,6 +228,26 @@ class TestEnvVars(unittest.TestCase):
         result = validate_env_string("{FRIGATE_BROKER}")
         self.assertEqual(result, "mqtt.local")
 
+    def test_install_ignores_go2rtc_exec_override(self):
+        """The go2rtc exec override cannot be enabled from the config."""
+        from frigate.util.services import is_go2rtc_arbitrary_exec_allowed
+
+        os.environ.pop("GO2RTC_ALLOW_ARBITRARY_EXEC", None)
+        ctx = self._make_context(install=True)
+        with patch("frigate.util.services.os.path.isfile", return_value=False):
+            for key in ("GO2RTC_ALLOW_ARBITRARY_EXEC", "go2rtc_allow_arbitrary_exec"):
+                validate_env_vars({key: "true", "OTHER_VAR": "value"}, ctx)
+                self.assertNotIn(key, os.environ)
+                self.assertFalse(is_go2rtc_arbitrary_exec_allowed())
+        self.assertEqual(os.environ.get("OTHER_VAR"), "value")
+
+    def test_install_keeps_container_go2rtc_exec_override(self):
+        """An override set in the container environment is left untouched."""
+        os.environ["GO2RTC_ALLOW_ARBITRARY_EXEC"] = "true"
+        ctx = self._make_context(install=True)
+        validate_env_vars({"GO2RTC_ALLOW_ARBITRARY_EXEC": "false"}, ctx)
+        self.assertEqual(os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC"), "true")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,12 @@
+import logging
 import os
 import re
 from pathlib import Path
 from typing import Annotated
 
 from pydantic import AfterValidator, ValidationInfo
+
+logger = logging.getLogger(__name__)
 
 FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
 secrets_dir = os.environ.get("CREDENTIALS_DIRECTORY", "/run/secrets")
@@ -15,6 +18,10 @@ if os.path.isdir(secrets_dir) and os.access(secrets_dir, os.R_OK):
                 Path(os.path.join(secrets_dir, secret_file)).read_text().strip()
             )
 
+
+# Security overrides that must come from the container environment, which is
+# controlled by the operator, rather than from the config, which admins can edit
+_PROTECTED_ENV_VARS = frozenset({"GO2RTC_ALLOW_ARBITRARY_EXEC"})
 
 # Matches a FRIGATE_* identifier following an opening brace.
 _FRIGATE_IDENT_RE = re.compile(r"FRIGATE_[A-Za-z0-9_]+")
@@ -95,6 +102,13 @@ EnvString = Annotated[str, AfterValidator(validate_env_string)]
 def validate_env_vars(v: dict[str, str], info: ValidationInfo) -> dict[str, str]:
     if isinstance(info.context, dict) and info.context.get("install", False):
         for k, val in v.items():
+            if k.upper() in _PROTECTED_ENV_VARS:
+                logger.warning(
+                    "Ignoring %s in environment_vars, it must be set in the container environment",
+                    k,
+                )
+                continue
+
             os.environ[k] = val
             if k.startswith("FRIGATE_"):
                 FRIGATE_ENV_VARS[k] = val
