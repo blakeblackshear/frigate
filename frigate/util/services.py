@@ -986,6 +986,58 @@ def is_restricted_go2rtc_source(stream_source: str) -> bool:
     return not is_go2rtc_arbitrary_exec_allowed()
 
 
+# go2rtc expands an `ffmpeg:` source into an `exec:` command line built from its
+# `#key=value` parameters, so only parameters that map to fixed presets or plain
+# numbers are accepted from the API
+_GO2RTC_FFMPEG_NAME_PARAMS = frozenset({"video", "audio", "hardware"})
+_GO2RTC_FFMPEG_NUMERIC_PARAMS = frozenset(
+    {"width", "height", "rotate", "bitrate", "timeout"}
+)
+_GO2RTC_FFMPEG_FLAG_PARAMS = frozenset({"async"})
+_GO2RTC_FFMPEG_NAME_VALUE = re.compile(r"^[A-Za-z0-9_]*$")
+_GO2RTC_FFMPEG_NUMERIC_VALUE = re.compile(r"^-?[0-9]+[kKmM]?$")
+
+
+def _is_safe_go2rtc_ffmpeg_source(stream_source: str) -> bool:
+    """Check that an `ffmpeg:` source only uses allowlisted parameters."""
+    if any(c in stream_source for c in "'\"") or re.search(r"\s", stream_source):
+        return False
+
+    _, *params = stream_source.split("#")
+    for param in params:
+        key, has_value, value = param.partition("=")
+        if key in _GO2RTC_FFMPEG_NAME_PARAMS:
+            if not _GO2RTC_FFMPEG_NAME_VALUE.match(value):
+                return False
+        elif key in _GO2RTC_FFMPEG_NUMERIC_PARAMS:
+            if not _GO2RTC_FFMPEG_NUMERIC_VALUE.match(value):
+                return False
+        elif key in _GO2RTC_FFMPEG_FLAG_PARAMS:
+            if has_value:
+                return False
+        else:
+            return False
+
+    return True
+
+
+def is_restricted_go2rtc_api_source(stream_source: str) -> bool:
+    """Check if a stream source submitted through the API is restricted.
+
+    In addition to the echo/expr/exec sources, this restricts `ffmpeg:` sources
+    whose parameters could inject arbitrary ffmpeg arguments. The
+    GO2RTC_ALLOW_ARBITRARY_EXEC override lifts both restrictions.
+    """
+    source = stream_source.strip()
+    if is_restricted_go2rtc_source(source):
+        return True
+    if not source.startswith("ffmpeg:"):
+        return False
+    if _is_safe_go2rtc_ffmpeg_source(source[len("ffmpeg:") :]):
+        return False
+    return not is_go2rtc_arbitrary_exec_allowed()
+
+
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
     """Run ffprobe on stream."""
     clean_path = escape_special_characters(path)

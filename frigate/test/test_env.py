@@ -49,14 +49,10 @@ class TestGo2RtcAddStreamSubstitution(unittest.TestCase):
     def test_mixed_localtime_and_frigate_var(self):
         """%{localtime\\:...} alongside {FRIGATE_USER} substitutes only the var."""
         FRIGATE_ENV_VARS["FRIGATE_USER"] = "admin"
-        src = (
-            "ffmpeg:rtsp://host/s#raw=-vf "
-            "drawtext=text=%{localtime\\:%Y-%m-%d}:user={FRIGATE_USER}"
-        )
+        src = "rtsp://host/s?text=%{localtime\\:%Y-%m-%d}&user={FRIGATE_USER}"
         self.assertEqual(
             self._call_route(src),
-            "ffmpeg:rtsp://host/s#raw=-vf "
-            "drawtext=text=%{localtime\\:%Y-%m-%d}:user=admin",
+            "rtsp://host/s?text=%{localtime\\:%Y-%m-%d}&user=admin",
         )
 
     def test_unknown_var_falls_back_to_raw_src(self):
