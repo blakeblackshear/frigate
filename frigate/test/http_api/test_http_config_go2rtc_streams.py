@@ -56,6 +56,9 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
         find_patch.start()
         self.addCleanup(find_patch.stop)
 
+        env_patch = patch.dict(os.environ)
+        env_patch.start()
+        self.addCleanup(env_patch.stop)
         os.environ.pop("GO2RTC_ALLOW_ARBITRARY_EXEC", None)
 
     def _read_config(self) -> str:

@@ -232,6 +232,9 @@ class TestEnvVars(unittest.TestCase):
         """The go2rtc exec override cannot be enabled from the config."""
         from frigate.util.services import is_go2rtc_arbitrary_exec_allowed
 
+        env_patch = patch.dict(os.environ)
+        env_patch.start()
+        self.addCleanup(env_patch.stop)
         os.environ.pop("GO2RTC_ALLOW_ARBITRARY_EXEC", None)
         ctx = self._make_context(install=True)
         with patch("frigate.util.services.os.path.isfile", return_value=False):
@@ -243,10 +246,10 @@ class TestEnvVars(unittest.TestCase):
 
     def test_install_keeps_container_go2rtc_exec_override(self):
         """An override set in the container environment is left untouched."""
-        os.environ["GO2RTC_ALLOW_ARBITRARY_EXEC"] = "true"
         ctx = self._make_context(install=True)
-        validate_env_vars({"GO2RTC_ALLOW_ARBITRARY_EXEC": "false"}, ctx)
-        self.assertEqual(os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC"), "true")
+        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+            validate_env_vars({"GO2RTC_ALLOW_ARBITRARY_EXEC": "false"}, ctx)
+            self.assertEqual(os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC"), "true")
 
 
 if __name__ == "__main__":
