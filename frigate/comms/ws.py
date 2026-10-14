@@ -482,6 +482,8 @@ class WebSocket(WebSocket_):  # type: ignore[misc]
         self._aborted = False
 
     def opened(self) -> None:
+        """Set a send timeout on the socket and start this client's writer thread."""
+
         # ws4py writes close and pong frames on the shared manager thread, so a
         # stalled client must not block sendall forever. SO_SNDTIMEO leaves recv
         # (and idle clients) untouched, unlike settimeout().
@@ -497,6 +499,11 @@ class WebSocket(WebSocket_):  # type: ignore[misc]
         self._writer.start()
 
     def send(self, payload: Any, binary: bool = False) -> None:
+        """Queue a message for this client's writer thread.
+
+        Returns without waiting for delivery. Disconnects the client if its queue
+        is full.
+        """
         try:
             self._send_queue.put_nowait((payload, binary))
         except queue.Full:
@@ -532,6 +539,7 @@ class WebSocket(WebSocket_):  # type: ignore[misc]
                 pass
 
     def closed(self, code: int, reason: str | None = None) -> None:
+        """Signal the writer thread to exit."""
         try:
             self._send_queue.put_nowait(None)
         except queue.Full:
