@@ -3,6 +3,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from ruamel.yaml import YAML
@@ -23,6 +24,15 @@ from frigate.util.services import (
 sys.path.remove("/opt/frigate")
 
 yaml = YAML()
+
+FRIGATE_ENV_VARS = {k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")}
+# read docker secret files as env vars too
+if os.path.isdir("/run/secrets"):
+    for secret_file in os.listdir("/run/secrets"):
+        if secret_file.startswith("FRIGATE_"):
+            FRIGATE_ENV_VARS[secret_file] = (
+                Path(os.path.join("/run/secrets", secret_file)).read_text().strip()
+            )
 
 config_file = find_config_file()
 
@@ -103,7 +113,7 @@ for name in list(go2rtc_config.get("streams", {})):
 
     if isinstance(stream, str):
         try:
-            formatted_stream = substitute_frigate_vars(stream)
+            formatted_stream = stream.format(**FRIGATE_ENV_VARS)
             if is_restricted_go2rtc_source(formatted_stream):
                 print(
                     f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
@@ -112,7 +122,7 @@ for name in list(go2rtc_config.get("streams", {})):
                 del go2rtc_config["streams"][name]
                 continue
             go2rtc_config["streams"][name] = formatted_stream
-        except (KeyError, ValueError) as e:
+        except KeyError as e:
             print(
                 "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
             )
@@ -122,7 +132,7 @@ for name in list(go2rtc_config.get("streams", {})):
         filtered_streams = []
         for i, stream_item in enumerate(stream):
             try:
-                formatted_stream = substitute_frigate_vars(stream_item)
+                formatted_stream = stream_item.format(**FRIGATE_ENV_VARS)
                 if is_restricted_go2rtc_source(formatted_stream):
                     print(
                         f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "
@@ -131,7 +141,7 @@ for name in list(go2rtc_config.get("streams", {})):
                     continue
 
                 filtered_streams.append(formatted_stream)
-            except (KeyError, ValueError) as e:
+            except KeyError as e:
                 print(
                     "[ERROR] Invalid substitution found, see https://docs.frigate.video/configuration/restream#advanced-restream-configurations for more info."
                 )
