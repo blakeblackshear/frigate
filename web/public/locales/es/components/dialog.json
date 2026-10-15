@@ -131,16 +131,16 @@
       "exportButton_other": "Exportar {{count}} revisiones",
       "exportingButton": "Exportando...",
       "toast": {
-        "started_one": "Se inició 1 exportación. Abriendo el caso ahora.",
-        "started_many": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
-        "started_other": "Se iniciaron {{count}} exportaciones. Abriendo el caso ahora.",
+        "started_one": "Se inició 1 exportación.",
+        "started_many": "Se iniciaron {{count}} exportaciones.",
+        "started_other": "Se iniciaron {{count}} exportaciones.",
         "partial": "Se iniciaron {{successful}} de {{total}} exportaciones. Fallidas: {{failedItems}}",
         "failed": "No se pudieron iniciar {{total}} exportaciones. Fallidas: {{failedItems}}"
       }
     },
     "stream": {
       "label": "Calidad",
-      "auto": "Auto",
+      "auto": "Automático",
       "main": "Original",
       "sub": "Bajo",
       "autoDesc": "Usa el stream princial y vuelve a la calidad baja del sub-stream si la principal no está disponible.",
@@ -204,14 +204,14 @@
     },
     "genaiDescription": {
       "toast": {
-        "error": "Falló al pedir descripción: {{error}}"
+        "error": "Error al solicitar la descripción: {{error}}"
       }
     }
   },
   "imagePicker": {
-    "selectImage": "Seleccione la miniatura de un objeto rastreado",
+    "selectImage": "Seleccionar la miniatura de un objeto rastreado",
     "search": {
-      "placeholder": "Búsqueda por etiqueta o sub-etiqueta..."
+      "placeholder": "Búsqueda por etiqueta o subetiqueta…"
     },
     "noImages": "No se encontraron miniaturas para esta cámara",
     "unknownLabel": "Imagen de activación guardada"
