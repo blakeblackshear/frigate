@@ -186,6 +186,7 @@ class TrackedObject:
         # check zones
         current_zones = []
         bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
+        detected = obj_data["frame_time"] == current_frame_time
         in_loitering_zone = False
         in_speed_zone = False
 
@@ -275,11 +276,13 @@ class TrackedObject:
 
                         loitering_score = self.zone_loitering.get(name, 0) + 1
 
-                        # loitering time is configured as seconds, convert to count of frames
+                        # loitering time is configured as seconds, convert to count of frames.
+                        # a lost object keeps counting but can't newly enter a zone
+                        # until it is detected again
                         if loitering_score >= (
                             self.camera_config.zones[name].loitering_time
                             * self.camera_config.detect.fps
-                        ):
+                        ) and (detected or name in self.current_zones):
                             current_zones.append(name)
 
                             if name not in self.entered_zones:

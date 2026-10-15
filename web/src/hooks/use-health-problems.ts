@@ -118,9 +118,10 @@ export function useHealthProblems(
                   ns: "views/system",
                   time: formatTime(notice.acknowledged_at),
                 })
-              : t("health.notices.firstSeen", {
+              : t("health.notices.occurred", {
                   ns: "views/system",
                   time: formatTime(notice.first_seen),
+                  lastTime: formatTime(notice.last_seen),
                   count: notice.count,
                 }),
         link: external ? undefined : link,
