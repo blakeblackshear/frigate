@@ -312,9 +312,9 @@ class CameraWatchdog(threading.Thread):
 
     def reset_capture_thread(self, terminate: bool = True) -> None:
         if terminate:
-            # communicate() buffers raw frames in memory when a stalled process
-            # floods stdout. The timeout and kill bound wait() even if no reader
-            # drains the pipe.
+            # The capture thread keeps draining stdout, so wait() is enough here.
+            # communicate() would also buffer every frame ffmpeg writes before it
+            # exits, which can be many duplicates after a stall.
             self.ffmpeg_detect_process.terminate()
             try:
                 self.logger.info("Waiting for ffmpeg to exit gracefully...")
