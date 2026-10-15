@@ -251,7 +251,7 @@ backend NVR
     http-reuse safe
     server Frigate XXX.XXX.XXX.XXX:8971
 ```
-The above config is created for a Layer 7 proxy (application layer, in this case http), if streaming the camera feeds are a little spotty or somewhat unstable, you can try to change the *mode* from http to tcp in both the frontend and backend config, which sets up a Layer 4 proxy (proxy by protocol).
+The above config is created for a Layer 7 proxy (application layer, in this case http), if streaming the camera feeds are a little spotty or somewhat unstable, you can try to change the *mode* from http to tcp in both the frontend and backend config, which sets up a Layer 4 proxy (proxy by protocol). Make sure you change hdr(host) to req.ssl_sni in the frontend Condition to make the host based condition work on tcp traffic. 
 
 ## OPNSense HAProxy add-on
 
