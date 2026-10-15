@@ -46,6 +46,7 @@ There are many solutions available to implement reverse proxies and the communit
 - [Traefik](#traefik-reverse-proxy)
 - [Caddy](#caddy-reverse-proxy)
 - [HAProxy](#haproxy)
+- [OPNSense HAProxy Add-on](#opnsense-haproxy-add-on)
 
 ## Apache2 Reverse Proxy
 
@@ -227,7 +228,7 @@ This example is for a pure haproxy installation on a dedicated host. It assumes 
 The frontend config:
 ```# Public Service: SSLSecured (Frigate)
 frontend SSLSecured
-    bind XXX.XXX.XXX.XXX:443 ssl /etx/haproxy/ssl/frigate.cert
+    bind XXX.XXX.XXX.XXX:443 ssl /etc/haproxy/certs/frigate.cert
     mode http
     option http-keep-alive
     default_backend NVR
@@ -250,4 +251,36 @@ backend NVR
     http-reuse safe
     server Frigate XXX.XXX.XXX.XXX:8971
 ```
-The above config is created for a Layer 7 proxy (application layer), if streaming the camera feeds are a little spotty or somewhat unstable, you can change the *mode* from http to tcp, which sets up a Layer 7 proxy (proxy by protocol).
+The above config is created for a Layer 7 proxy (application layer, in this case http), if streaming the camera feeds are a little spotty or somewhat unstable, you can try to change the *mode* from http to tcp in both the frontend and backend config, which sets up a Layer 7 proxy (proxy by protocol).
+
+## OPNSense HAProxy add-on
+
+This guide is for the OPNSense firewall add-on *os-haproxy* and is configured and tested on version 5.1 of the add-on on OPNSense 26.7.
+The guide starts where you are already done setting up the system, *have a certificate added to the certificate store* and *installed the plugin/add-on*.
+
+Step by step plan:
+1. Add a Real Server under *Real Servers*;
+2. Fill in the fields *Name or Prefix* and *Description*;
+3. set *Type* to **static**;
+4. fill in the frigate IP in the *FQDN or IP* field;
+5. under *Common Options* fill *Port* with the port number for your Frigate (e.g. 8971) and
+6. Click **Save** to store this configuration.
+7. Under *Virtual Services* open *Backend Pools*;
+8. Add a *Backend Pool*;
+9. Fill in the fields *Name or Prefix* and *Description* but use something else then what you used under *Real Servers* otherwise if and when rules and conditions are needed it gets really confusing really fast, the use of them is out of the scope of this guide for a basic functioning haproxy add-on;
+10. set *Mode* to **HTTP (Layer 7)**;
+11. set *Balancing Algorithm* to **Source-IP Hash**;
+12. set *Servers* by choosing the *Real Servers* instance you added in step 2->6;
+13. Click **Save** to store this configuration.
+14. Under *Virtual Services* open *Public Services*;
+15. Add a *Public Service*;
+16. Fill in the fields *Name or Prefix* and *Description* but use something else then what you used under *Real Servers* otherwise if and when rules and conditions are needed it gets really confusing really fast, the use of them is out of the scope of this guide for a basic functioning haproxy add-on;
+17. Fill in the external address the haproxy instance will be listening on in *Listen Addresses*;
+18. set *Type* to **HTTP/HTTPS (SSL offloading)**
+19. set *Default Backend Pool* to the option carrying *the name you used in step 9*;
+20. check *Enable SSL Offloading*;
+21. Under *SSL Offloading* you set *Default certificate* to the certificate you added before you started following this guide;
+22. Click **Save** to store this configuration.
+23. Click **Apply** to reload the haproxy config on the service running.
+
+This will forward all requests on port 443 to your frigate instance. If that is not what you want or have more then one website alive behind the haproxy you will need to create a *Rules* rule to check the URL used and a *Condition* to trigger the use of the configured backend under *Rules & Checks* when the rule hits. This is a hint for those who need it, though it is out of the scope of this guide.
