@@ -148,7 +148,7 @@
     "disabled": "Pois käytöstä",
     "done": "Valmis",
     "enabled": "Käytössä",
-    "enable": "Ota käyttöön",
+    "enable": "Aktivoi",
     "disable": "Poista käytöstä",
     "save": "Tallenna",
     "saving": "Tallennetaan…",
@@ -166,12 +166,43 @@
     "play": "Toista",
     "next": "Seuraava",
     "delete": "Poista",
-    "info": "Info"
+    "info": "Info",
+    "fullscreen": "Koko näyttö",
+    "copiedToClipboard": "Kopioitu leikepöydälle",
+    "undo": "Kumoa",
+    "add": "Lisää",
+    "apply": "Ota käyttöön",
+    "applying": "Otetaan käyttöön…",
+    "clear": "Tyhjennä",
+    "expand": "laajenna",
+    "collapse": "Supista",
+    "pictureInPicture": "Kuva kuvassa",
+    "twoWayTalk": "Kahdensuuntainen puhe",
+    "cameraAudio": "Kameran ääni",
+    "exitFullscreen": "Poistu koko näytöstä",
+    "copyCoordinates": "Kopioi koordinaatit"
   },
   "unit": {
     "length": {
       "feet": "jalka"
     }
   },
-  "readTheDocumentation": "Lue dokumentaatio"
+  "readTheDocumentation": "Lue dokumentaatio",
+  "label": {
+    "hide": "Piilota {{item}}",
+    "show": "Näytä {{item}}",
+    "ID": "ID",
+    "none": "Ei mitään",
+    "all": "Kaikki",
+    "other": "Muu"
+  },
+  "list": {
+    "two": "{{0}} ja {{1}}",
+    "many": "{{items}}, ja {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Vaihtoehtoinen",
+    "internalID": "Frigaten sisäisesti käyttämä ID asetuksissa ja tietokannassa"
+  }
 }
