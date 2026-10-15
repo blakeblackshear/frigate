@@ -147,6 +147,19 @@
         "audio-codec": "WebRTC ei toeta selle voogedastuse helikoodekit. Kodeeri go2rtc abil opus või G.711 vormingusse.",
         "checking": "Kontrollin WebRTC saadavust…"
       }
+    },
+    "auto": {
+      "label": "Automaatne",
+      "selected": "Automaatne · {{stream}}",
+      "floorLabel": "Väike ribalaius",
+      "retry": "Proovi parimat kvaliteeti",
+      "reason": {
+        "bandwidth": "Kuna parema kvaliteediga voogesitus selle ühendusega ei toiminud, siis on nüüd kasutusel {{stream}}",
+        "codec": "Kuna see veebibrauser ei oska esitada parema kvaliteediga voogesitust, siis on nüüd kasutusel {{stream}}",
+        "saveData": "Kuna andmesäästaja on lülitatud sisse, siis on nüüd kasutusel {{stream}}",
+        "floor": "Kuna ükski muu lahendus ei toiminud, siis kasutan väikese ribalaiusega voogesitust"
+      },
+      "tips": "Sinu võrguühendusele sobiliku voogesituse kasutamine"
     }
   },
   "notifications": "Teavitused",
