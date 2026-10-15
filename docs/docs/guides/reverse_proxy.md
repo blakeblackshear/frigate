@@ -284,4 +284,4 @@ Step by step plan:
 23. Click **Save** to store this configuration.
 24. Click **Apply** to reload the haproxy config on the service running.
 
-This will forward all requests on port 443 to your frigate instance. If that is not what you want or have more then one website alive behind the haproxy you will need to create a *Rules* rule to check the URL used and a *Condition* to trigger the use of the configured backend under *Rules & Checks* when the rule hits. This is a hint for those who need it, though it is out of the scope of this guide.
+**NOTE: This will forward _ALL_ requests on port 443 to your frigate instance.** If that is not what you want or have more then one website alive behind the haproxy you will need to create a *Condition* to trigger when the right URL is used and a *Rules* rule to use the right backend under *Rules & Checks* when the condition is met. This is a useful hint for those who need it, though it is out of the scope of this guide.
