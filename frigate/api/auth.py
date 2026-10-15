@@ -31,6 +31,7 @@ from frigate.api.media_auth import (
     check_camera_access,
     deny_response_for_media_uri,
     is_role_restricted,
+    split_request_uri,
 )
 from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
@@ -1185,18 +1186,6 @@ GO2RTC_STREAM_PROXY_PATHS = frozenset(
     }
 )
 
-_URI_SCHEME_AND_AUTHORITY = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://[^/?]*")
-
-
-def _split_request_uri(request_uri: str) -> tuple[str, str]:
-    """Split a raw request URI into its path and query string.
-
-    urlparse is not used since it reads a path starting with `//` as a host.
-    """
-    uri = _URI_SCHEME_AND_AUTHORITY.sub("", request_uri, count=1)
-    path, _, query = uri.partition("?")
-    return path, query
-
 
 def _normalize_request_path(path: str) -> str:
     """Normalize a raw request path the way nginx does before matching locations.
@@ -1242,7 +1231,7 @@ def deny_response_for_go2rtc_stream(
     if not original_url:
         return None
 
-    path, query = _split_request_uri(original_url)
+    path, query = split_request_uri(original_url)
     if not _is_go2rtc_stream_proxy_request(path, request):
         return None
 

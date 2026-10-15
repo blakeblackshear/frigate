@@ -13,8 +13,9 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from enum import Enum
-from urllib.parse import unquote, urlparse
+from urllib.parse import unquote
 
 from peewee import DoesNotExist
 
@@ -23,6 +24,8 @@ from frigate.const import EXPORT_DIR
 from frigate.models import Export, User
 
 logger = logging.getLogger(__name__)
+
+_URI_SCHEME_AND_AUTHORITY = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://[^/?]*")
 
 
 class MediaAuthResolution(str, Enum):
@@ -41,6 +44,16 @@ class MediaAuthResolution(str, Enum):
     UNKNOWN = "unknown"
 
 
+def split_request_uri(request_uri: str) -> tuple[str, str]:
+    """Split a raw request URI into its path and query string.
+
+    urlparse is not used since it reads a path starting with `//` as a host.
+    """
+    uri = _URI_SCHEME_AND_AUTHORITY.sub("", request_uri, count=1)
+    path, _, query = uri.partition("?")
+    return path, query
+
+
 def extract_path(original_url: str | None) -> str | None:
     """Return the decoded path component of nginx's `X-Original-URL` header.
 
@@ -49,14 +62,14 @@ def extract_path(original_url: str | None) -> str | None:
     request like `/recordings/.../allowed_cam/../forbidden_cam/file.mp4`
     would (1) parse as the allowed camera in our auth check, (2) be served
     as the forbidden camera by nginx. To close the bypass we reject any URI
-    whose path contains `.` or `..` segments outright.
+    whose path contains `.` or `..` segments outright. Repeated slashes are
+    merged, as nginx does before matching locations.
     """
     if not original_url:
         return None
 
-    parsed = urlparse(original_url)
-    raw_path = parsed.path or original_url
-    decoded = unquote(raw_path)
+    path, _ = split_request_uri(original_url)
+    decoded = re.sub(r"/{2,}", "/", unquote(path))
     if not decoded:
         return None
 
@@ -255,8 +268,7 @@ def deny_response_for_media_uri(
     # For media-root URIs that's a traversal attempt — deny outright. For
     # non-media URIs, pass through (nginx / the backend handle them).
     if path is None:
-        raw = urlparse(original_url).path or original_url
-        decoded = unquote(raw)
+        decoded = unquote(split_request_uri(original_url)[0])
         first = decoded.lstrip("/").split("/", 1)[0] if decoded else ""
         if first in ("clips", "recordings", "exports"):
             return 403
