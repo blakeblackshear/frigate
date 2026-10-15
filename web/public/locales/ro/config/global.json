@@ -180,7 +180,7 @@
         },
         "scene": {
             "label": "Scenă de detecție",
-            "description": "Mediul la care se uită această cameră, utilizat pentru a alege care dintre modelele configurate rulează pe ea. Camerele lăsate pe 'all' rulează modelul configurat cu scena 'all'."
+            "description": "Mediul observat de această cameră, utilizat pentru a alege care dintre modelele configurate rulează pe aceasta. Camerele lăsate pe „implicit” rulează modelul configurat cu scena „implicit”."
         }
     },
     "face_recognition": {
@@ -313,7 +313,31 @@
             "label": "Calitate live",
             "description": "Calitatea encodării pentru stream-ul jsmpeg (1 maxim, 31 minim)."
         },
-        "description": "Setări pentru a controla rezoluția și calitatea stream live jsmpeg. Acest lucru nu afectează camerele retransmise care folosesc go2rtc pentru vizualizare live."
+        "description": "Setări pentru a controla rezoluția și calitatea stream live jsmpeg. Acest lucru nu afectează camerele retransmise care folosesc go2rtc pentru vizualizare live.",
+        "transcode": {
+            "label": "Stream-uri transcodate",
+            "description": "Stream-uri live de calitate mai scăzută, transcodate la cerere de go2rtc.",
+            "enabled": {
+                "label": "Activează stream-urile transcodate",
+                "description": "Adaugă stream-uri live de calitate mai scăzută pe care go2rtc le transcodează în timp real în timp ce cineva se uită."
+            },
+            "source": {
+                "label": "Stream sursă",
+                "description": "Stream go2rtc de transcodat. Implicit este primul stream live."
+            },
+            "qualities": {
+                "label": "Calități",
+                "description": "Se adaugă câte un stream transcodat pentru fiecare calitate.",
+                "height": {
+                    "label": "Înălțime",
+                    "description": "Înălțimea de ieșire în pixeli; lățimea respectă raportul de aspect al sursei."
+                },
+                "bitrate": {
+                    "label": "Bitrate",
+                    "description": "Bitrate video țintă și maxim în kbps."
+                }
+            }
+        }
     },
     "lpr": {
         "label": "Recunoaștere numere înmatriculare",
@@ -1478,10 +1502,10 @@
     },
     "models": {
         "label": "Modele de detecție",
-        "description": "Modelele de detecție a obiectelor și hardware-ul pe care rulează fiecare. Camerele aleg un model potrivind detect.scene cu scena unui model.",
+        "description": "Modelele de detecție a obiectelor și hardware-ul pe care rulează fiecare. Camerele aleg un model prin potrivirea parametrului lor detect.scene cu scena unui model, recurgând la modelul „default” ca variantă de rezervă.",
         "scene": {
             "label": "Scenă model",
-            "description": "Mediul camerei pentru care este utilizat acest model. Camerele selectează un model setând detect.scene la o valoare potrivită, iar 'all' este utilizat de orice cameră care nu setează una."
+            "description": "Un nume pentru mediul camerei pentru care este utilizat acest model, cum ar fi 'termal'. Camerele selectează un model prin setarea valorii detect.scene la o valoare corespunzătoare, iar modelul 'implicit' este folosit de orice cameră care nu are o setare definită."
         },
         "devices": {
             "label": "Hardware de detecție",

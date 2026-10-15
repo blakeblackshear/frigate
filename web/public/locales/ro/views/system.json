@@ -273,7 +273,8 @@
     "systemNotices_other": "{{count}} notificări de sistem",
     "retentionUnmet": "Înregistrările sunt șterse înainte de încheierea perioadei de retenție pentru a elibera spațiu",
     "moreMessages_one": "+{{count}}",
-    "moreMessages_other": "+{{count}}"
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Reindexarea embedding-urilor a eșuat, verifică jurnalele"
   },
   "lastRefreshed": "Ultima actualizare: ",
   "health": {
@@ -284,8 +285,6 @@
       "openSettings": "Deschide setările",
       "openLink": "Deschide linkul",
       "noMatches": "Nicio notificare nu se potrivește cu filtrul",
-      "firstSeen_one": "Văzută prima dată {{time}}",
-      "firstSeen_other": "Văzută prima dată {{time}} · de {{count}} ori",
       "filter": {
         "severity": "Severitate",
         "error": "Eroare",
@@ -302,7 +301,8 @@
         "failed_login_other": "Încercări eșuate de autentificare pentru {{user}}",
         "update_available": "Frigate {{version}} este disponibil",
         "ffmpeg_high_cpu": "Utilizarea CPU FFmpeg este ridicată (medie {{cpu}}%)",
-        "detect_high_cpu": "Utilizarea CPU pentru detecție este ridicată (medie {{cpu}}%)"
+        "detect_high_cpu": "Utilizarea CPU pentru detecție este ridicată (medie {{cpu}}%)",
+        "object_processing_behind": "Procesarea obiectelor urmărite nu a făcut față, așa că au fost omise cadre de la cameră. Verifică utilizarea CPU-ului și dacă limitele sau fixarea (pinning) CPU-ului pe container sau VM lasă prea puține resurse de procesare pentru Frigate"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
@@ -371,5 +371,7 @@
       "streamsFlagged_one": "{{count}} cu probleme, listate la Notificări",
       "streamsFlagged_other": "{{count}} cu probleme, listate la Notificări"
     }
-  }
+  },
+  "showAllTabs": "Afișează toate filele",
+  "showLessTabs": "Afișează mai puțin"
 }
