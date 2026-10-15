@@ -33,6 +33,8 @@
         "dimensionMustBeEven": "Trebuie să fie un număr par."
     },
     "models": {
-        "defaultRequired": "Un model trebuie să utilizeze o scenă „Toate camerele”. Fără aceasta, orice cameră care nu alege o scenă nu va avea niciun model la care să revină."
+        "defaultRequired": "Un model trebuie să folosească scena implicită. În lipsa acesteia, orice cameră care nu alege o scenă nu va avea un model de rezervă la care să recurgă.",
+        "sceneDuplicate": "Fiecare model trebuie să folosească o scenă diferită.",
+        "sameModel": "Modelele {{scene}} și {{other}} folosesc același fișier de model. Rularea unui model sub mai multe scene doar împarte sarcina de detecție între detectoare separate, ceea ce este mai lent decât un singur model care are tot hardware-ul alocat sub el."
     }
 }
