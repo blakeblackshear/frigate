@@ -3,7 +3,11 @@
   "lowBandwidthMode": "Režim nízkej šírky pásma",
   "twoWayTalk": {
     "enable": "Povoliť obojsmernú komunikáciu",
-    "disable": "Zakázať obojsmernú komunikáciu"
+    "disable": "Zakázať obojsmernú komunikáciu",
+    "requiresWebRTC": "Obojstranná hlasová komunikácia vyžaduje WebRTC, ktoré je nedostupné",
+    "error": {
+      "microphone": "Obojstranná komunikácia nevie získať prístup ku vášmu mikrofónu"
+    }
   },
   "cameraAudio": {
     "enable": "Povoliť zvuk kamery",
@@ -176,5 +180,8 @@
     "noVideoSource": "Žiadny zdroj videa k dispozícii pre snapshot.",
     "captureFailed": "Nepodarilo sa zachytiť snímku.",
     "downloadStarted": "Sťahovanie snímky sa začalo."
+  },
+  "documentTitle": {
+    "default": "Naživo - Frigate"
   }
 }
