@@ -21,7 +21,7 @@
     "attachment_picker_placeholder": "이벤트를 첨부해 주세요",
     "quick_reply_find_similar": "유사한 감지 기록 찾기",
     "quick_reply_tell_me_more": "자세한 설명 요청",
-    "quick_reply_when_else": "다른 시간대 감지 확인",
+    "quick_reply_when_else": "다른 시간대 감지 확인하시겠어요?",
     "quick_reply_find_similar_text": "이와 유사한 감지 기록을 찾아주세요.",
     "quick_reply_tell_me_more_text": "이 내용에 대해 더 자세히 알려주세요.",
     "quick_reply_when_else_text": "이 대상이 다른 때에 또 감지된 적이 있나요?",
@@ -34,7 +34,7 @@
     "starting_requests": {
         "show_recent_events": "최근 이벤트 표시",
         "show_camera_status": "카메라 상태 확인",
-        "recap": "부재 중 발생한 이벤트 요약",
+        "recap": "부재 중 발생한 이벤트를 요약할까요?",
         "watch_camera": "카메라 활동 감시"
     },
     "starting_requests_prompts": {
