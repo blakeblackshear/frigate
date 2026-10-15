@@ -31,7 +31,9 @@
       }
     },
     "decodedFrames": "Дэкадаваныя кадры:",
-    "droppedFrameRate": "Частата страты кадраў:"
+    "droppedFrameRate": "Частата страты кадраў:",
+    "stream": "Плынь:",
+    "streamAuto": "{{stream}} (аўта)"
   },
   "toast": {
     "success": {

@@ -245,7 +245,10 @@
     "cameraSkippedDetections": "{{camera}} прапускае дэтэктаванне на {{pct}}% кадраў",
     "systemNotices_one": "{{count}} сістэмная заўвага",
     "systemNotices_other": "{{count}} сістэмнай заўвагі",
-    "retentionUnmet": "Запісы выдаляюцца да заканчэння тэрміну захоўвання, каб вызваліць месца"
+    "retentionUnmet": "Запісы выдаляюцца да заканчэння тэрміну захоўвання, каб вызваліць месца",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Не ўдалося пераіндэксаваць убудаванні, праверце журналы"
   },
   "enrichments": {
     "title": "Узбагачэнні",
@@ -282,13 +285,12 @@
       "openSettings": "Адкрыць налады",
       "openLink": "Адкрыць спасылку",
       "noMatches": "Няма заўваг, якія адпавядаюць фільтру",
-      "firstSeen_one": "Упершыню {{time}}",
-      "firstSeen_other": "Упершыню {{time}} · {{count}} разу",
       "filter": {
         "severity": "Узровень важнасці",
         "error": "Памылка",
         "warning": "Папярэджанне",
-        "info": "Звесткі"
+        "info": "Звесткі",
+        "showHidden": "Паказаць схаваныя"
       },
       "kinds": {
         "detector_stuck": "Дэтэктар {{detector}} перазапушчаны пасля таго, як перастаў адказваць",
@@ -297,12 +299,28 @@
         "shm_too_low": "Выдзеленую памяць /dev/shm ({{total}} МБ) трэба павялічыць прынамсі да {{min}} МБ",
         "failed_login_one": "Няўдалая спроба ўваходу для {{user}}",
         "failed_login_other": "Няўдалыя спробы ўваходу для {{user}}",
-        "update_available": "Даступная Frigate {{version}}"
+        "update_available": "Даступная Frigate {{version}}",
+        "ffmpeg_high_cpu": "Высокае выкарыстанне CPU працэсам FFmpeg ({{cpu}}% у сярэднім)",
+        "detect_high_cpu": "Высокае выкарыстанне CPU дэтэктаваннем ({{cpu}}% у сярэднім)",
+        "object_processing_behind": "Апрацоўка аб'ектаў пад адсочваннем не паспявала, таму кадры камеры адкідаліся. Праверце выкарыстанне CPU, а таксама ці не пакідаюць Frigate занадта мала CPU абмежаванні або замацоўванне працэсара на кантэйнеры ці віртуальнай машыне"
       },
       "streamPrefix": "Плынь {{index}}: {{message}}",
       "streamPrefixRestream": "Плынь {{index}} (праз go2rtc): {{message}}",
       "streamProbeFailed": "Не ўдалося зандзіраваць плынь {{index}}: {{error}}",
-      "cameraProbeFailed": "Не ўдалося зандзіраваць плыні: {{error}}"
+      "cameraProbeFailed": "Не ўдалося зандзіраваць плыні: {{error}}",
+      "acknowledge": "Прыняць да ведама",
+      "acknowledgeHint": "Схаваць, пакуль гэта не паўторыцца",
+      "muteHint": "Больш ніколі не паказваць",
+      "showAgain": "Паказаць зноў",
+      "hiddenTitle": "Схаваныя",
+      "noneHidden": "Няма схаваных заўваг",
+      "showAll": "Паказаць усе зноў",
+      "showAllTitle": "Паказаць усе схаваныя заўвагі?",
+      "acknowledgedAt": "Прынята да ведама {{time}}",
+      "mute": "Не паказваць зноў",
+      "unmute": "Зноў паказваць гэтую заўвагу",
+      "showAllDesc": "Усе заўвагі, прынятыя да ведама і схаваныя назаўсёды, вернуцца ў спіс заўваг, у тым ліку праверкі канфігурацыі і плыняў.",
+      "mutedAt": "Схавана назаўсёды {{time}}"
     },
     "hardware": {
       "title": "Абсталяванне",
@@ -353,5 +371,7 @@
       "streamsFlagged_one": "{{count}} з праблемамі, пералічана ў Заўвагах",
       "streamsFlagged_other": "{{count}} з праблемамі, пералічана ў Заўвагах"
     }
-  }
+  },
+  "showAllTabs": "Паказаць усе ўкладкі",
+  "showLessTabs": "Паказаць меней"
 }
