@@ -11,7 +11,7 @@ import secrets
 import time
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import parse_qs, unquote
+from urllib.parse import parse_qs
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -31,6 +31,7 @@ from frigate.api.media_auth import (
     check_camera_access,
     deny_response_for_media_uri,
     is_role_restricted,
+    normalize_request_path,
     split_request_uri,
 )
 from frigate.config import AuthConfig, ProxyConfig
@@ -1187,32 +1188,13 @@ GO2RTC_STREAM_PROXY_PATHS = frozenset(
 )
 
 
-def _normalize_request_path(path: str) -> str:
-    """Normalize a raw request path the way nginx does before matching locations.
-
-    nginx percent-decodes the path, merges repeated slashes and resolves dot
-    segments, while `X-Original-URL` carries the raw `$request_uri`.
-    """
-    segments: list[str] = []
-    for segment in unquote(path).split("/"):
-        if segment in ("", "."):
-            continue
-        if segment == "..":
-            if segments:
-                segments.pop()
-            continue
-        segments.append(segment)
-
-    return "/" + "/".join(segments)
-
-
 def _is_go2rtc_stream_proxy_request(path: str, request: Request) -> bool:
     # nginx marks requests routed through the go2rtc stream locations, and the
     # normalized path catches them if that marker is ever missing
     if request.headers.get("x-go2rtc-stream-proxy") == "1":
         return True
 
-    normalized = _normalize_request_path(path)
+    normalized = normalize_request_path(path)
     return any(normalized.startswith(p) for p in GO2RTC_STREAM_PROXY_PATHS)
 
 

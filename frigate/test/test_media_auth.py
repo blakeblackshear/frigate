@@ -406,6 +406,18 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
             self._deny("//clips/front_door/../back_door-1.jpg", "admin"), 403
         )
 
+    def test_traversal_from_non_media_prefix_denied(self):
+        # nginx resolves these into a media root before serving
+        for url in (
+            "/x/../clips/back_door-1.jpg",
+            "/x/%2E%2E/clips/back_door-1.jpg",
+            "/./clips/front_door/../back_door-1.jpg",
+            "/api/../recordings/2026-05-11/14/back_door/00.00.mp4",
+            "/clips/back_door-1.jpg#/../../x",
+        ):
+            self.assertEqual(self._deny(url, "limited_user"), 403, url)
+        self.assertIsNone(self._deny("/x/../api/events", "limited_user"))
+
 
 if __name__ == "__main__":
     unittest.main()
