@@ -17,7 +17,9 @@
       }
     },
     "decodedFrames": "Fotogrames decodificats:",
-    "droppedFrameRate": "Taxa de fotogrames perduts:"
+    "droppedFrameRate": "Taxa de fotogrames perduts:",
+    "stream": "Flux:",
+    "streamAuto": "{{stream}} (auto)"
   },
   "noRecordingsFoundForThisTime": "No s'han trobat enregistraments en aquesta hora",
   "noPreviewFound": "No s'ha trobat previsualització",

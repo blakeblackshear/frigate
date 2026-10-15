@@ -247,7 +247,8 @@
     "systemNotices_other": "{{count}} avisos del sistema",
     "retentionUnmet": "Els enregistraments s'estan suprimint abans que acabi el seu període de retenció a l'espai lliure",
     "moreMessages_other": "+{{count}}",
-    "moreMessages_one": "+{{count}}"
+    "moreMessages_one": "+{{count}}",
+    "reindexEmbeddingsFailed": "Ha fallat la reindexació de les incrustacions, comproveu els registres"
   },
   "enrichments": {
     "title": "Anàlisi avançada",
@@ -284,8 +285,6 @@
       "openSettings": "Obre la configuració",
       "openLink": "Obre l'enllaç",
       "noMatches": "No hi ha avisos que coincideixin amb el filtre",
-      "firstSeen_one": "{{time}} vist per primera vegada",
-      "firstSeen_other": "{{time}} · {{count}} vegades",
       "filter": {
         "severity": "Severitat",
         "warning": "Avís",
@@ -302,7 +301,8 @@
         "failed_login_other": "Intents d'inici de sessió fallits per {{user}}",
         "update_available": "Frigate {{version}} està disponible",
         "ffmpeg_high_cpu": "L'ús de la CPU FFmpeg és alt ({{cpu}}% mitjana)",
-        "detect_high_cpu": "L'ús de la CPU de detecció és alt ({{cpu}}% mitjana)"
+        "detect_high_cpu": "L'ús de la CPU de detecció és alt ({{cpu}}% mitjana)",
+        "object_processing_behind": "No s'ha pogut mantenir el processament d'objectes rastrejat, de manera que s'han deixat anar els fotogrames de la càmera. Comprova la utilització de la CPU, i si els límits de la CPU o la fixació al contenidor o VM estan deixant la Frigate massa poca CPU"
       },
       "streamPrefix": "Flux {{index}}: {{message}}",
       "streamPrefixRestream": "Flux {{index}} (via go2rtc): {{message}}",
@@ -371,5 +371,7 @@
       "streamsFlagged_other": "{{count}} amb problemes, llistat a Avisos",
       "inferenceMs": "{{speed}} ms"
     }
-  }
+  },
+  "showAllTabs": "Mostra totes les pestanyes",
+  "showLessTabs": "Mostra menys"
 }
