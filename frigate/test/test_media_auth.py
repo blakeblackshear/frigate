@@ -76,6 +76,20 @@ class TestExtractPath(unittest.TestCase):
         self.assertIsNone(extract_path(None))
         self.assertIsNone(extract_path(""))
 
+    def test_leading_double_slash_is_path(self):
+        self.assertEqual(
+            extract_path("//clips/front_door-1.jpg"), "/clips/front_door-1.jpg"
+        )
+
+    def test_repeated_slashes_merged(self):
+        self.assertEqual(
+            extract_path("/recordings//2026-05-11/14//front_door/00.00.mp4"),
+            "/recordings/2026-05-11/14/front_door/00.00.mp4",
+        )
+        self.assertEqual(
+            extract_path("/%2Fclips/front_door-1.jpg"), "/clips/front_door-1.jpg"
+        )
+
 
 class TestResolveMediaUri(unittest.TestCase):
     def setUp(self):
@@ -375,6 +389,34 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         # don't want a stale DB to lock out admins.
         self.assertIsNone(self._deny("/clips/nonexistent-1.jpg", "admin"))
         self.assertIsNone(self._deny("/clips/nonexistent-1.jpg", "viewer"))
+
+    def test_repeated_slashes_resolve_to_owning_camera(self):
+        # nginx merges repeated slashes before matching the media locations
+        for url in (
+            "//clips/back_door-1.jpg",
+            "/clips//back_door-1.jpg",
+            "//recordings/2026-05-11/14/back_door/00.00.mp4",
+            "/recordings//2026-05-11/14/back_door/00.00.mp4",
+        ):
+            self.assertEqual(self._deny(url, "limited_user"), 403, url)
+        self.assertIsNone(self._deny("//clips/front_door-1.jpg", "limited_user"))
+
+    def test_traversal_with_leading_double_slash_denied(self):
+        self.assertEqual(
+            self._deny("//clips/front_door/../back_door-1.jpg", "admin"), 403
+        )
+
+    def test_traversal_from_non_media_prefix_denied(self):
+        # nginx resolves these into a media root before serving
+        for url in (
+            "/x/../clips/back_door-1.jpg",
+            "/x/%2E%2E/clips/back_door-1.jpg",
+            "/./clips/front_door/../back_door-1.jpg",
+            "/api/../recordings/2026-05-11/14/back_door/00.00.mp4",
+            "/clips/back_door-1.jpg#/../../x",
+        ):
+            self.assertEqual(self._deny(url, "limited_user"), 403, url)
+        self.assertIsNone(self._deny("/x/../api/events", "limited_user"))
 
 
 if __name__ == "__main__":
