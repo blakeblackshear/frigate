@@ -9,7 +9,8 @@
       "go2rtc": "Logi Go2RTC - Frigate",
       "nginx": "Logi Nginx - Frigate",
       "websocket": "Logi komunikatów - Frigate"
-    }
+    },
+    "health": "Zdrowie – Frigate"
   },
   "general": {
     "hardwareInfo": {
@@ -260,5 +261,38 @@
       "object_description_events_per_second": "Opis obiektu"
     },
     "averageInf": "Średni czas wnioskowania"
+  },
+  "showAllTabs": "Pokaż wszystkie zakładki",
+  "showLessTabs": "Pokaż mniej",
+  "health": {
+    "title": "Zdrowie",
+    "notices": {
+      "title": "Ogłoszenia",
+      "empty": "Instalacja programu Frigate działa poprawnie",
+      "acknowledge": "Potwierdzić",
+      "acknowledgeHint": "Ukryj, dopóki to się nie powtórzy",
+      "mute": "Wycisz",
+      "muteHint": "Nigdy nie pokazuj tego więcej",
+      "unmute": "Włącz dźwięk",
+      "showAgain": "Pokaż ponownie",
+      "openSettings": "Otwórz ustawienia",
+      "openLink": "Otwórz link",
+      "hiddenTitle": "Ukryte",
+      "noneHidden": "Zero ukrytych ogłoszeń",
+      "showAll": "Pokaż ponownie wszystko",
+      "showAllTitle": "Wyświetlić wszystkie ukryte ogłoszenia?",
+      "acknowledgedAt": "Potwierdzono o {{time}}",
+      "mutedAt": "Wyciszone {{time}}",
+      "filter": {
+        "showHidden": "Pokaż ukryte",
+        "severity": "Intensywność",
+        "error": "Błąd",
+        "warning": "Ostrzeżenie",
+        "info": "Informacje"
+      },
+      "kinds": {
+        "detector_stuck": "Detektor {{detector}} został ponownie uruchomiony po tym, jak przestał odpowiadać"
+      }
+    }
   }
 }
