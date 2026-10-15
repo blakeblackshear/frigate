@@ -1,1 +1,80 @@
-{}
+{
+    "documentTitle": "Vyhledávání pohybu – Frigate",
+    "title": "Vyhledávání pohybu",
+    "description": "Nakreslete polygon vymezující oblast zájmu a zadejte časový rozsah, ve kterém se mají hledat změny pohybu v této oblasti.",
+    "selectCamera": "Vyhledávání pohybu se načítá",
+    "startSearch": "Spustit vyhledávání",
+    "searchStarted": "Vyhledávání spuštěno",
+    "searchCancelled": "Vyhledávání zrušeno",
+    "cancelSearch": "Zrušit",
+    "searching": "Probíhá vyhledávání.",
+    "scanning": "Prohledávání {{time}}",
+    "searchComplete": "Vyhledávání dokončeno",
+    "noResultsYet": "Spusťte vyhledávání změn pohybu ve vybrané oblasti",
+    "noChangesFound": "Ve vybrané oblasti nebyly zjištěny žádné změny pixelů",
+    "changesFound_one": "Nalezena {{count}} změna pohybu",
+    "changesFound_few": "Nalezeny {{count}} změny pohybu",
+    "changesFound_other": "Nalezeno {{count}} změn pohybu",
+    "framesProcessed": "Počet zpracovaných snímků: {{count}}",
+    "jumpToTime": "Přejít na tento čas",
+    "results": "Výsledky",
+    "showSegmentHeatmap": "Teplotní mapa",
+    "newSearch": "Nové vyhledávání",
+    "clearResults": "Vymazat výsledky",
+    "clearROI": "Vymazat polygon",
+    "polygonControls": {
+        "points_one": "{{count}} bod",
+        "points_few": "{{count}} body",
+        "points_other": "{{count}} bodů",
+        "undo": "Vrátit poslední bod",
+        "reset": "Obnovit polygon",
+        "drawMode": "Kreslit",
+        "moveMode": "Přesouvat"
+    },
+    "motionHeatmapLabel": "Teplotní mapa pohybu",
+    "dialog": {
+        "title": "Vyhledávání pohybu",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Náhled kamery {{camera}}"
+    },
+    "timeRange": {
+        "title": "Rozsah vyhledávání",
+        "start": "Čas začátku",
+        "end": "Čas konce"
+    },
+    "settings": {
+        "title": "Nastavení vyhledávání",
+        "parallelMode": "Paralelní režim",
+        "parallelModeDesc": "Prohledávat více časových rozsahů záznamů současně (rychlejší; vyžaduje více prostředků pro dekódování)",
+        "threshold": "Práh citlivosti",
+        "thresholdDesc": "Nižší hodnoty zachytí menší změny (1–255)",
+        "minArea": "Minimální plocha změny",
+        "minAreaDesc": "Minimální velikost jednotlivé oblasti s pohybem jako procento oblasti zájmu",
+        "maxResults": "Maximální počet výsledků",
+        "maxResultsDesc": "Zastavit po nalezení tohoto počtu odpovídajících časových značek"
+    },
+    "errors": {
+        "noCamera": "Vyberte kameru",
+        "noROI": "Nakreslete oblast zájmu",
+        "noTimeRange": "Vyberte časový rozsah",
+        "invalidTimeRange": "Čas konce musí být po čase začátku",
+        "searchFailed": "Vyhledávání selhalo: {{message}}",
+        "polygonTooSmall": "Polygon musí mít alespoň 3 body",
+        "unknown": "Neznámá chyba"
+    },
+    "changePercentage": "Změněno {{percentage}} %",
+    "metrics": {
+        "title": "Statistiky vyhledávání",
+        "segmentsScanned": "Prohledané segmenty",
+        "segmentsProcessed": "Zpracováno",
+        "segmentsSkippedInactive": "Přeskočeno (bez aktivity)",
+        "segmentsSkippedHeatmap": "Přeskočeno (bez překryvu s oblastí zájmu)",
+        "fallbackFullRange": "Záložní prohledání celého rozsahu",
+        "framesDecoded": "Dekódované snímky",
+        "wallTime": "Doba vyhledávání",
+        "segmentErrors": "Chyby segmentů",
+        "seconds": "{{seconds}} s",
+        "minutesSeconds": "{{minutes}} min {{seconds}} s",
+        "scanSummary": "{{segments}} segmentů · {{time}}"
+    }
+}

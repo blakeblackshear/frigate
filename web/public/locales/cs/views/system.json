@@ -11,11 +11,28 @@
       "fetching": "Získávám data o kameře",
       "codec": "Kodek:",
       "tips": {
-        "title": "Informace o sondování kamery"
+        "title": "Výsledky prověření kamery"
       },
       "streamDataFromFFPROBE": "Data ze streamu jsou získávána pomocí <code>ffprobe</code>.",
-      "cameraProbeInfo": "{{camera}} Informace o sondování kamery",
-      "aspectRatio": "zachovat poměr stran"
+      "cameraProbeInfo": "Výsledky prověření kamery {{camera}}",
+      "aspectRatio": "poměr stran",
+      "keyframes": {
+        "title": "Analýza klíčových snímků",
+        "analyzing": "Analýza klíčových snímků… zbývá {{seconds}} s",
+        "stillAnalyzing": "Analýza klíčových snímků stále probíhá…",
+        "recordStream": "Stream pro záznam:",
+        "keyframeCount": "Počet zaznamenaných klíčových snímků:",
+        "observedDuration": "Sledovaná doba:",
+        "gap": "Rozestup klíčových snímků (min. / prům. / max.):",
+        "segmentLength": "Délka segmentu záznamu:",
+        "ok": "Klíčové snímky každých přibližně {{seconds}} s, vhodné pro záznam a přehrávání.",
+        "warningFixed": "Klíčové snímky jsou pravidelné, ale řídké (každých přibližně {{seconds}} s). Záznam funguje, ale živé přehrávání a posun začínají pomaleji. Nastavte interval I-snímků (klíčových snímků) kamery podle její snímkové frekvence.",
+        "warningVariable": "Rozestupy klíčových snímků jsou nepravidelné ({{minSeconds}} s až {{maxSeconds}} s), což obvykle znamená zapnutý chytrý kodek (H.264+/H.265+). To se nedoporučuje.",
+        "errorFixed": "Interval klíčových snímků přibližně {{seconds}} s je delší než segment záznamu ({{segmentTime}} s), takže některé segmenty nemají klíčový snímek a nelze je přehrát. Zkraťte interval I-snímků (klíčových snímků) kamery podle její snímkové frekvence.",
+        "errorVariable": "Rozestupy klíčových snímků dosahují přibližně {{seconds}} s, více než délka segmentu záznamu ({{segmentTime}} s). Některé segmenty nebudou mít klíčový snímek, což znemožní přehrávání. Vypněte chytrý/+ kodek na kameře nebo zkraťte interval klíčových snímků.",
+        "unknown": "Nepodařilo se určit rozestupy klíčových snímků.",
+        "recordDisabled": "Záznam je pro tuto kameru zakázán."
+      }
     },
     "label": {
       "camera": "kamera",
@@ -31,7 +48,8 @@
       "cameraDetect": "detekce {{camName}}",
       "cameraFramesPerSecond": "{{camName}} snímků za sekundu",
       "cameraDetectionsPerSecond": "{{camName}} detekcí za sekundu",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} přeskočených detekcí za sekundu"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} přeskočených detekcí za sekundu",
+      "cameraGpu": "GPU kamery {{camName}}"
     },
     "title": "Kamery",
     "overview": "Přehled",
@@ -43,6 +61,20 @@
       "error": {
         "unableToProbeCamera": "Nemohu sondovat kameru: {{errorMessage}}"
       }
+    },
+    "noCameras": {
+      "title": "Nebyly nalezeny žádné kamery"
+    },
+    "connectionQuality": {
+      "title": "Kvalita připojení",
+      "excellent": "Výborná",
+      "fair": "Přijatelná",
+      "poor": "Špatná",
+      "unusable": "Nepoužitelná",
+      "fps": "FPS",
+      "expectedFps": "Očekávané FPS",
+      "reconnectsLastHour": "Opětovná připojení (poslední hodina)",
+      "stallsLastHour": "Výpadky (poslední hodina)"
     }
   },
   "stats": {
@@ -50,32 +82,50 @@
     "healthy": "Systém je zdravý",
     "reindexingEmbeddings": "Přeindexování vektorů ({{processed}} % dokončeno)",
     "detectIsSlow": "{{detect}} je pomalé ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} je velmi pomalé ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} je velmi pomalé ({{speed}} ms)",
+    "cameraSkippedDetections": "Kamera {{camera}} vynechává detekci u {{pct}} % snímků",
+    "systemNotices_one": "{{count}} systémové upozornění",
+    "systemNotices_other": "{{count}} systémových upozornění",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Opětovná indexace vektorových reprezentací selhala, zkontrolujte protokoly",
+    "retentionUnmet": "Záznamy se odstraňují před koncem doby uchovávání, aby se uvolnilo místo",
+    "debugReplayActive": "Relace ladicího přehrávání je aktivní"
   },
   "enrichments": {
     "embeddings": {
-      "face_recognition_speed": "Rychlost rozpoznávání obličeje",
-      "plate_recognition_speed": "Rychlost rozpoznávání SPZ",
-      "plate_recognition": "Rozpoznávání SPZ",
-      "face_recognition": "Rozpoznávání obličeje",
-      "image_embedding_speed": "Rychlost vkládání obrázku",
-      "text_embedding_speed": "Rychlost vkládání textu",
-      "text_embedding": "Vkládání textu",
-      "image_embedding": "Vkládání obrázku",
-      "face_embedding_speed": "Rychlost vkládání obličeje",
-      "yolov9_plate_detection_speed": "YOLOv9 rychlost detekce SPZ",
-      "yolov9_plate_detection": "YOLOv9 Detekce SPZ"
+      "face_recognition_speed": "Rychlost rozpoznávání obličejů",
+      "plate_recognition_speed": "Rychlost rozpoznávání registračních značek",
+      "plate_recognition": "Rozpoznávání registračních značek",
+      "face_recognition": "Rozpoznávání obličejů",
+      "image_embedding_speed": "Rychlost tvorby vektorových reprezentací obrázků",
+      "text_embedding_speed": "Rychlost tvorby vektorových reprezentací textu",
+      "text_embedding": "Vektorová reprezentace textu",
+      "image_embedding": "Vektorová reprezentace obrázku",
+      "face_embedding_speed": "Rychlost tvorby vektorových reprezentací obličejů",
+      "yolov9_plate_detection_speed": "Rychlost detekce registračních značek YOLOv9",
+      "yolov9_plate_detection": "Detekce registračních značek YOLOv9",
+      "review_description": "Popis revize",
+      "review_description_speed": "Rychlost popisu revize",
+      "review_description_events_per_second": "Popis revize",
+      "object_description": "Popis objektu",
+      "object_description_speed": "Rychlost popisu objektu",
+      "object_description_events_per_second": "Popis objektu",
+      "classification": "Klasifikace {{name}}",
+      "classification_speed": "Rychlost klasifikace {{name}}",
+      "classification_events_per_second": "Počet klasifikačních událostí {{name}} za sekundu"
     },
     "infPerSecond": "Inferencí za sekundu",
-    "title": "Obohacení"
+    "title": "Obohacení",
+    "averageInf": "Průměrná doba inference"
   },
   "general": {
     "detector": {
-      "temperature": "Detekční teplota",
+      "temperature": "Teplota detektoru",
       "title": "Detektory",
-      "inferenceSpeed": "Detekční rychlost",
-      "memoryUsage": "Detektor využití paměti",
-      "cpuUsage": "Detektor využití CPU",
+      "inferenceSpeed": "Rychlost inference detektoru",
+      "memoryUsage": "Využití paměti detektorem",
+      "cpuUsage": "Využití CPU detektorem",
       "cpuUsageInformation": "CPU používané při přípravě vstupních a výstupních dat do/z detekčních modelů. Tato hodnota neměří využití inferenčních operací, ani v případě použití GPU nebo akcelerátoru."
     },
     "hardwareInfo": {
@@ -106,10 +156,13 @@
       },
       "npuUsage": "Využití NPU",
       "npuMemory": "Paměť NPU",
-      "gpuUsage": "Využití CPU",
+      "gpuUsage": "Využití GPU",
       "gpuMemory": "Paměť GPU",
       "gpuEncoder": "GPU kodér",
-      "gpuDecoder": "GPU Dekodér"
+      "gpuDecoder": "GPU Dekodér",
+      "gpuCompute": "Výpočty / kódování GPU",
+      "gpuTemperature": "Teplota GPU",
+      "npuTemperature": "Teplota NPU"
     },
     "otherProcesses": {
       "title": "Ostatní procesy",
@@ -117,12 +170,13 @@
       "processMemoryUsage": "Využití paměti procesy",
       "series": {
         "go2rtc": "go2rtc",
-        "recording": "nahrávání",
-        "review_segment": "revidovat segment",
-        "embeddings": "vložení"
+        "recording": "záznam",
+        "review_segment": "segment revize",
+        "embeddings": "vektorové reprezentace",
+        "audio_detector": "detektor zvuku"
       }
     },
-    "title": "Hlavní"
+    "title": "Obecné"
   },
   "storage": {
     "cameraStorage": {
@@ -131,35 +185,45 @@
       "title": "Úložiště kamery",
       "unused": {
         "title": "Nepoužité",
-        "tips": "Tato hodnota nemusí přesně reprezentovat volné místo dostupné pro Frigate, pokud máte na disku uloženy další soubory kromě nahrávek Frigate. Frigate nesleduje využití úložiště mimo své nahrávky."
+        "tips": "Tato hodnota nemusí přesně odpovídat volnému místu dostupnému pro Frigate, pokud máte na disku další soubory kromě jeho záznamů. Frigate nesleduje využití úložiště mimo své záznamy."
       },
       "bandwidth": "Šířka pásma",
       "unusedStorageInformation": "Informace o nepoužitém úložišti",
-      "percentageOfTotalUsed": "Procento celkem"
+      "percentageOfTotalUsed": "Procento celkem",
+      "subStream": {
+        "information": "Informace o úložišti vedlejšího streamu",
+        "tips": "U kamer se záznamem vedlejšího streamu se využití úložiště zobrazuje samostatně pro původní a nízkou kvalitu, pod stejnými názvy jako volby kvality při přehrávání záznamů. Záznamy v nízké kvalitě zůstávají na disku do konce doby uchovávání, takže se toto rozdělení může zobrazovat i po vypnutí záznamu vedlejšího streamu."
+      }
     },
     "recordings": {
       "title": "Záznamy",
-      "earliestRecording": "Nejstarší dostupná nahrávka:",
+      "earliestRecording": "Nejstarší dostupný záznam:",
       "tips": "Tato hodnota uvádí celkové využití disku záznamy uloženými v databázi Frigate. Frigate nesleduje využití disku ostatními soubory na vašem disku."
     },
     "title": "Úložiště",
     "overview": "Přehled",
     "shm": {
       "title": "přiřazení SHM (sdílené paměti)",
-      "warning": "Nynější velikost SHM činící {{total}}MB je příliš malá. Zvyšte ji alespoň na {{min_shm}}MB."
+      "warning": "Nynější velikost SHM činící {{total}}MB je příliš malá. Zvyšte ji alespoň na {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Doba dostupnosti snímku",
+        "description": "Každá kamera má ve sdílené paměti {{frames}} slotů pro snímky. Při snímkové frekvenci nejrychlejší kamery je každý snímek dostupný přibližně {{lifetime}} s před přepsáním."
+      }
     }
   },
   "lastRefreshed": "Poslední aktualizace: ",
   "documentTitle": {
     "cameras": "Statistiky kamer – Frigate",
-    "storage": "Statistiky uložiště - Frigate",
+    "storage": "Statistiky úložiště – Frigate",
     "general": "Obecné statistiky - Frigate",
-    "enrichments": "Statistiky obohacení - Frigate",
+    "enrichments": "Statistiky obohacení – Frigate",
     "logs": {
       "frigate": "Protokoly Frigate - Frigate",
       "go2rtc": "Protokoly Go2RTC - Frigate",
-      "nginx": "Protokoly Nginx - Frigate"
-    }
+      "nginx": "Protokoly Nginx - Frigate",
+      "websocket": "Protokoly zpráv – Frigate"
+    },
+    "health": "Stav systému – Frigate"
   },
   "title": "Systém",
   "logs": {
@@ -171,11 +235,11 @@
     "type": {
       "label": "Typ",
       "message": "Zpráva",
-      "timestamp": "Časové razítko",
+      "timestamp": "Časová značka",
       "tag": "Štítek (Tag)"
     },
     "download": {
-      "label": "Stáhnout záznamy"
+      "label": "Stáhnout protokoly"
     },
     "tips": "Protokoly jsou streamovány ze serveru",
     "toast": {
@@ -183,7 +247,131 @@
         "fetchingLogsFailed": "Chyba při načítání protokolů: {{errorMessage}}",
         "whileStreamingLogs": "Chyba při streamování protokolů: {{errorMessage}}"
       }
+    },
+    "websocket": {
+      "label": "Zprávy",
+      "pause": "Pozastavit",
+      "resume": "Pokračovat",
+      "clear": "Vymazat",
+      "filter": {
+        "all": "Všechna témata",
+        "topics": "Témata",
+        "events": "Události",
+        "reviews": "Revize",
+        "classification": "Klasifikace",
+        "face_recognition": "Rozpoznávání obličejů",
+        "lpr": "LPR",
+        "camera_activity": "Aktivita kamer",
+        "system": "Systém",
+        "camera": "Kamera",
+        "all_cameras": "Všechny kamery",
+        "cameras_count_one": "{{count}} kamera",
+        "cameras_count_other": "{{count}} kamer"
+      },
+      "empty": "Zatím nebyly zachyceny žádné zprávy",
+      "count_one": "{{count}} zpráva",
+      "count_other": "{{count}} zpráv",
+      "expanded": {
+        "payload": "Obsah zprávy"
+      }
     }
   },
-  "metrics": "Systémové metriky"
+  "metrics": "Systémové metriky",
+  "showAllTabs": "Zobrazit všechny karty",
+  "showLessTabs": "Zobrazit méně",
+  "health": {
+    "title": "Stav systému",
+    "notices": {
+      "title": "Hlášení",
+      "empty": "Vaše instalace Frigate je v pořádku",
+      "acknowledge": "Vzít na vědomí",
+      "acknowledgeHint": "Skrýt do dalšího výskytu",
+      "mute": "Trvale skrýt",
+      "muteHint": "Už nezobrazovat",
+      "unmute": "Zrušit trvalé skrytí",
+      "showAgain": "Zobrazit znovu",
+      "openSettings": "Otevřít nastavení",
+      "openLink": "Otevřít odkaz",
+      "noMatches": "Žádná hlášení neodpovídají filtru",
+      "hiddenTitle": "Skrytá",
+      "noneHidden": "Žádná skrytá hlášení",
+      "showAll": "Znovu zobrazit všechna",
+      "showAllTitle": "Zobrazit všechna skrytá hlášení?",
+      "showAllDesc": "Všechna potvrzená a trvale skrytá hlášení se vrátí do seznamu hlášení včetně kontrol konfigurace a streamů.",
+      "acknowledgedAt": "Vzato na vědomí {{time}}",
+      "mutedAt": "Trvale skryto {{time}}",
+      "filter": {
+        "showHidden": "Zobrazit skrytá",
+        "severity": "Závažnost",
+        "error": "Chyba",
+        "warning": "Varování",
+        "info": "Informace"
+      },
+      "kinds": {
+        "detector_stuck": "Detektor {{detector}} byl restartován, protože přestal odpovídat",
+        "model_download_failed": "Stažení {{file}} pro {{model}} selhalo: {{error}}",
+        "skipped_detections": "Detekce nestíhala a déle než minutu vynechávala {{pct}} % snímků",
+        "ffmpeg_high_cpu": "Využití CPU procesem FFmpeg je vysoké (průměr {{cpu}} %)",
+        "detect_high_cpu": "Využití CPU detekcí je vysoké (průměr {{cpu}} %)",
+        "shm_too_low": "Přidělenou paměť /dev/shm ({{total}} MB) je třeba zvýšit alespoň na {{min}} MB",
+        "object_processing_behind": "Zpracování sledovaných objektů nestíhalo, proto byly snímky kamer vynechány. Zkontrolujte využití CPU a zda limity CPU nebo přiřazení jader kontejneru či virtuálního stroje neposkytují Frigate příliš málo výkonu CPU",
+        "failed_login_one": "Neúspěšný pokus o přihlášení uživatele {{user}}",
+        "failed_login_other": "Neúspěšné pokusy o přihlášení uživatele {{user}}",
+        "update_available": "Je dostupný Frigate {{version}}"
+      },
+      "streamPrefix": "Stream {{index}}: {{message}}",
+      "streamPrefixRestream": "Stream {{index}} (přes go2rtc): {{message}}",
+      "streamProbeFailed": "Stream {{index}} se nepodařilo prověřit: {{error}}",
+      "cameraProbeFailed": "Streamy se nepodařilo prověřit: {{error}}"
+    },
+    "hardware": {
+      "title": "Hardware",
+      "objectDetection": "Detekce objektů",
+      "hardwareAcceleration": "Hardwarová akcelerace",
+      "enrichments": {
+        "title": "Obohacení",
+        "semantic_search": "Sémantické vyhledávání",
+        "face_recognition": "Rozpoznávání obličejů",
+        "lpr": "Rozpoznávání registračních značek",
+        "audio_transcription": "Přepis zvuku"
+      },
+      "cameraConnections": "Připojení kamer",
+      "allCamerasExcellent": "Všechny kamery mají výborné připojení.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "Nic není nastaveno",
+      "allCameras": "Všechny kamery",
+      "probeUnavailable": "Detekce hardwaru není dostupná",
+      "justStarted": "Frigate právě nastartoval",
+      "deviceNotFound": "V tomto systému nebylo nalezeno zařízení {{devices}}",
+      "detectorNotRunning": "Proces detektoru neběží",
+      "inferenceVerySlow": "Inference je velmi pomalá ({{speed}} ms)",
+      "inferenceSlow": "Inference je pomalá ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Vlastní argumenty FFmpeg",
+      "customArgsNotVerified": "Vlastní argumenty FFmpeg, neověřeno",
+      "hwaccelNotConfigured": "Nepoužívá se hardwarové dekódování, ale {{family}} je dostupné. Vyberte jej v nastavení FFmpeg",
+      "hwaccelHardwareMissing": "Je nastaveno {{family}}, ale kontrola hardwaru jej nenalezla",
+      "unrecognizedDevice": "Nerozpoznané nastavení zařízení, neověřeno",
+      "decoderUsage": "dekodér {{usage}}",
+      "remoteProvider": "Vzdálený poskytovatel",
+      "acceleratorMissing": "Je nastaveno {{device}}, ale nebyl nalezen kompatibilní akcelerátor",
+      "modelNotRunYet": "Model ještě neběžel; zařízení se ověří po prvním použití",
+      "fellBackToCpu": "Je nastaveno {{device}}, ale zpracování běží na CPU",
+      "cpuDespiteAccelerator": "Zpracování běží na CPU, přestože je dostupný akcelerátor",
+      "probed": "Prověřeno",
+      "probing": "Prověřování…",
+      "recheck": "Znovu ověřit hardware",
+      "cameraStreams": "Streamy kamer",
+      "streamsNotChecked": "Zatím neověřeno",
+      "streamsChecking": "Kontrola {{done}} z {{total}}",
+      "streamsClean": "Žádné problémy se streamy",
+      "checked": "Ověřeno",
+      "runAgain": "Spustit znovu",
+      "runStreamChecks": "Spustit kontrolu streamů",
+      "streamsChecked_one": "{{count}} kamera zkontrolována",
+      "streamsChecked_other": "{{count}} kamer zkontrolováno",
+      "streamsFlagged_one": "{{count}} s problémy, podrobnosti v části Upozornění",
+      "streamsFlagged_other": "{{count}} s problémy, podrobnosti v části Upozornění"
+    }
+  }
 }

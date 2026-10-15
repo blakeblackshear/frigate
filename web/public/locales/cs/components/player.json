@@ -4,12 +4,13 @@
   "noPreviewFoundFor": "Náhled nenalezen pro {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Odeslat tento snímek do služby Frigate+?",
-    "submit": "Odeslat"
+    "submit": "Odeslat",
+    "previewError": "Nepodařilo se načíst náhled snímku. Záznam nemusí být v tuto chvíli dostupný."
   },
   "livePlayerRequiredIOSVersion": "Pro tento typ živého přenosu je vyžadován systém iOS 17.1 nebo novější.",
   "streamOffline": {
     "title": "Přenos je offline",
-    "desc": "Žádné snímky nebyly zaznamenány na {{cameraName}} <code>detect</code>přenosu, zkontrolujte logy chyb"
+    "desc": "Ze streamu <code>detect</code> kamery {{cameraName}} nebyly přijaty žádné snímky. Zkontrolujte chybové protokoly."
   },
   "stats": {
     "streamType": {
@@ -25,18 +26,36 @@
       "title": "Ztracené snímky:",
       "short": {
         "title": "Ztracené",
-        "value": "{{droppedFrames}} snímků"
+        "value": "Počet ztracených snímků: {{droppedFrames}}"
       }
     },
     "decodedFrames": "Dekódované snímky:",
-    "droppedFrameRate": "Frekvence ztracených snímků:"
+    "droppedFrameRate": "Frekvence ztracených snímků:",
+    "stream": "Stream:",
+    "streamAuto": "{{stream}} (automaticky)"
   },
   "toast": {
     "success": {
-      "submittedFrigatePlus": "Snimek byl úspěšně odeslán službě Frigate+"
+      "submittedFrigatePlus": "Snímek byl úspěšně odeslán do Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Nepodařilo se odeslat snímek službě Frigate+"
+      "submitFrigatePlusFailed": "Nepodařilo se odeslat snímek službě Frigate+",
+      "playRecordingsFailed": "Nepodařilo se přehrát záznamy (chyba {{code}}): {{message}}"
     }
+  },
+  "cameraOff": "Kamera je vypnutá",
+  "quality": {
+    "auto": "Automaticky",
+    "autoLow": "Přehrávání v nízké kvalitě (omezená přenosová rychlost)",
+    "autoLowCodec": "Přehrávání v nízké kvalitě (původní kvalitu tento prohlížeč nepodporuje)",
+    "autoLowSaveData": "Přehrávání v nízké kvalitě (úspora dat)",
+    "main": "Původní",
+    "sub": "Nízká",
+    "notSupportedBrowser": "Tento prohlížeč nepodporuje",
+    "label": "Kvalita",
+    "noAudio": "Bez zvuku",
+    "audioRate": "Zvuk {{rate}} kHz",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "V tomto časovém rozsahu nejsou žádné záznamy"
   }
 }

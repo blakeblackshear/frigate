@@ -1,1 +1,1555 @@
-{}
+{
+    "audio": {
+        "label": "Detekce zvuku",
+        "enabled": {
+            "label": "Povolit detekci zvuku",
+            "description": "Povolit nebo zakázat detekci zvukových událostí pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "max_not_heard": {
+            "label": "Časový limit ukončení",
+            "description": "Počet sekund bez nastaveného typu zvuku, po kterém se zvuková událost ukončí."
+        },
+        "min_volume": {
+            "label": "Minimální hlasitost",
+            "description": "Minimální práh efektivní hlasitosti RMS pro spuštění detekce zvuku; nižší hodnoty zvyšují citlivost (např. 200 vysoká, 500 střední, 1000 nízká)."
+        },
+        "listen": {
+            "label": "Sledované typy zvuku",
+            "description": "Seznam typů zvukových událostí k detekci (například bark, fire_alarm, speech, yell)."
+        },
+        "labelmap": {
+            "label": "Úprava mapy zvukových štítků",
+            "description": "Přepsání nebo přemapování položek, které se sloučí se standardní mapou zvukových štítků."
+        },
+        "filters": {
+            "label": "Zvukové filtry",
+            "description": "Nastavení filtrů pro jednotlivé typy zvuku, například prahy spolehlivosti pro omezení falešných detekcí.",
+            "threshold": {
+                "label": "Minimální spolehlivost detekce zvuku",
+                "description": "Minimální práh spolehlivosti pro započítání zvukové události."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Původní stav detekce zvuku",
+            "description": "Udává, zda byla detekce zvuku původně povolena ve statickém konfiguračním souboru."
+        },
+        "num_threads": {
+            "label": "Vlákna detekce",
+            "description": "Počet vláken pro zpracování detekce zvuku."
+        },
+        "description": "Nastavení detekce zvukových událostí pro všechny kamery; lze přepsat pro jednotlivé kamery."
+    },
+    "audio_transcription": {
+        "label": "Přepis zvuku",
+        "description": "Nastavení přepisu živého zvuku a řeči pro události a živé titulky.",
+        "live_enabled": {
+            "label": "Živý přepis",
+            "description": "Povolit průběžný přepis zvuku při jeho příjmu."
+        },
+        "enabled": {
+            "label": "Povolit přepis zvuku",
+            "description": "Povolit nebo zakázat automatický přepis zvuku pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "language": {
+            "label": "Jazyk přepisu",
+            "description": "Kód jazyka pro přepis/překlad (například 'en' pro angličtinu) nebo 'auto' pro automatické rozpoznání modelem. Podporované kódy jazyků najdete na https://whisper-api.com/docs/languages/."
+        },
+        "model": {
+            "label": "Model přepisu zvuku nebo název poskytovatele generativní AI",
+            "description": "Zpracování přepisu: 'whisper' pro vestavěné místní modely Frigate nebo název poskytovatele generativní AI s rolí transcribe."
+        },
+        "device": {
+            "label": "Zařízení pro přepis",
+            "description": "Klíč zařízení (CPU/GPU), na kterém poběží model přepisu. Pro přepis jsou aktuálně podporovány pouze GPU NVIDIA CUDA."
+        },
+        "model_size": {
+            "label": "Velikost modelu",
+            "description": "Velikost modelu pro offline přepis zvukových událostí."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Nastavení složeného zobrazení Birdseye, které spojuje obraz z více kamer do jednoho rozložení.",
+        "enabled": {
+            "label": "Povolit Birdseye",
+            "description": "Povolit nebo zakázat zobrazení Birdseye."
+        },
+        "modes": {
+            "label": "Typy aktivity",
+            "description": "Typy aktivity, při kterých se kamery zařadí do Birdseye."
+        },
+        "order": {
+            "label": "Pozice",
+            "description": "Číselná pozice určující pořadí kamery v rozložení Birdseye."
+        },
+        "restream": {
+            "label": "Předávání přes RTSP",
+            "description": "Předávat výstup Birdseye jako stream RTSP; zapnutí zajistí nepřetržitý běh Birdseye."
+        },
+        "width": {
+            "label": "Šířka",
+            "description": "Výstupní šířka složeného snímku Birdseye v pixelech."
+        },
+        "height": {
+            "label": "Výška",
+            "description": "Výstupní výška složeného snímku Birdseye v pixelech."
+        },
+        "quality": {
+            "label": "Kvalita kódování",
+            "description": "Kvalita kódování streamu MPEG-1 Birdseye (1 nejvyšší kvalita, 31 nejnižší)."
+        },
+        "inactivity_threshold": {
+            "label": "Práh neaktivity",
+            "description": "Počet sekund neaktivity, po kterém se kamera přestane zobrazovat v Birdseye."
+        },
+        "layout": {
+            "label": "Rozložení",
+            "description": "Možnosti rozložení zobrazení Birdseye.",
+            "scaling_factor": {
+                "label": "Faktor měřítka",
+                "description": "Faktor měřítka používaný při výpočtu rozložení (rozsah 1,0 až 5,0)."
+            },
+            "max_cameras": {
+                "label": "Maximální počet kamer",
+                "description": "Maximální počet současně zobrazených kamer v Birdseye; zobrazují se kamery s nejnovější aktivitou."
+            }
+        },
+        "idle_heartbeat_fps": {
+            "label": "FPS při nečinnosti",
+            "description": "Počet opětovných odeslání posledního složeného snímku Birdseye za sekundu při nečinnosti; hodnota 0 tuto funkci vypne."
+        }
+    },
+    "detect": {
+        "label": "Detekce objektů",
+        "description": "Nastavení role detekce/detect pro detekci objektů a inicializaci jejich sledování.",
+        "enabled": {
+            "label": "Povolit detekci objektů",
+            "description": "Povolit nebo zakázat detekci objektů pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "height": {
+            "label": "Výška pro detekci",
+            "description": "Výška snímků detekčního streamu v pixelech; ponechte prázdné pro použití původního rozlišení streamu."
+        },
+        "width": {
+            "label": "Šířka pro detekci",
+            "description": "Šířka snímků detekčního streamu v pixelech; ponechte prázdné pro použití původního rozlišení streamu."
+        },
+        "scene": {
+            "label": "Scéna detekce",
+            "description": "Prostředí snímané kamerou, podle kterého se vybírá jeden z nastavených modelů. Kamery s hodnotou 'default' používají model se scénou 'default'."
+        },
+        "fps": {
+            "label": "FPS detekce",
+            "description": "Požadovaný počet snímků za sekundu pro detekci; nižší hodnoty snižují využití CPU (doporučená hodnota je 5; vyšší hodnotu, nejvýše 10, nastavte pouze při sledování velmi rychle se pohybujících objektů)."
+        },
+        "min_initialized": {
+            "label": "Minimální počet snímků pro inicializaci",
+            "description": "Počet po sobě jdoucích detekcí potřebných k vytvoření sledovaného objektu. Vyšší hodnota omezí falešné inicializace. Výchozí hodnota je fps děleno 2."
+        },
+        "max_disappeared": {
+            "label": "Maximální počet snímků bez detekce",
+            "description": "Počet snímků bez detekce, po kterém je sledovaný objekt považován za zmizelý."
+        },
+        "stationary": {
+            "label": "Konfigurace nehybných objektů",
+            "description": "Nastavení detekce a správy objektů, které zůstávají po určitou dobu nehybné.",
+            "interval": {
+                "label": "Interval kontroly nehybných objektů",
+                "description": "Jak často (v počtu snímků) se provádí detekce pro potvrzení nehybného objektu."
+            },
+            "threshold": {
+                "label": "Práh nehybnosti",
+                "description": "Počet snímků beze změny pozice potřebných k označení objektu jako nehybného."
+            },
+            "max_frames": {
+                "label": "Maximální počet snímků",
+                "description": "Omezuje dobu sledování nehybných objektů před jejich vyřazením.",
+                "default": {
+                    "label": "Výchozí maximální počet snímků",
+                    "description": "Výchozí maximální počet snímků sledování nehybného objektu před ukončením."
+                },
+                "objects": {
+                    "label": "Maximální počet snímků pro objekty",
+                    "description": "Přepsání maximálního počtu snímků sledování nehybných objektů pro jednotlivé typy objektů."
+                }
+            },
+            "classifier": {
+                "label": "Povolit vizuální klasifikátor",
+                "description": "Použít vizuální klasifikátor k rozpoznání skutečně nehybných objektů i při kolísání ohraničujících rámečků."
+            }
+        },
+        "annotation_offset": {
+            "label": "Posun anotací",
+            "description": "Posun anotací detekce v milisekundách pro lepší sladění ohraničujících rámečků na časové ose se záznamy; může být kladný nebo záporný."
+        }
+    },
+    "face_recognition": {
+        "label": "Rozpoznávání obličejů",
+        "enabled": {
+            "label": "Povolit rozpoznávání obličejů",
+            "description": "Povolit nebo zakázat rozpoznávání obličejů pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "min_area": {
+            "label": "Minimální plocha obličeje",
+            "description": "Minimální plocha rámečku detekovaného obličeje v pixelech pro pokus o rozpoznání."
+        },
+        "description": "Nastavení detekce a rozpoznávání obličejů pro všechny kamery; lze přepsat pro jednotlivé kamery.",
+        "model_size": {
+            "label": "Velikost modelu",
+            "description": "Velikost modelu pro vektorové reprezentace obličejů: malý (small) nebo velký (large); větší může vyžadovat GPU."
+        },
+        "unknown_score": {
+            "label": "Práh skóre neznámého obličeje",
+            "description": "Minimální skóre spolehlivosti pro možnou shodu obličeje. Shody se skóre na tomto prahu nebo pod ním jsou označeny jako neznámé; vyšší hodnota je přísnější."
+        },
+        "detection_threshold": {
+            "label": "Práh detekce",
+            "description": "Minimální spolehlivost detekce potřebná pro přijetí detekovaného obličeje."
+        },
+        "recognition_threshold": {
+            "label": "Práh rozpoznávání",
+            "description": "Minimální skóre spolehlivosti rozpoznání pro přiřazení jména osoby jako podštítku objektu."
+        },
+        "min_faces": {
+            "label": "Minimální počet rozpoznání obličeje",
+            "description": "Minimální počet rozpoznání obličeje před přiřazením rozpoznaného podštítku osobě."
+        },
+        "save_attempts": {
+            "label": "Ukládat pokusy",
+            "description": "Počet pokusů o rozpoznání obličeje uchovávaných pro zobrazení nedávných rozpoznání."
+        },
+        "blur_confidence_filter": {
+            "label": "Filtr spolehlivosti podle rozmazání",
+            "description": "Upravit skóre spolehlivosti podle rozmazání obrazu pro omezení falešných detekcí u nekvalitních snímků obličejů."
+        },
+        "device": {
+            "label": "Zařízení",
+            "description": "Přepsání nastavení pro použití konkrétního zařízení. Další informace najdete na https://onnxruntime.ai/docs/execution-providers/"
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "Cesta k FFmpeg",
+            "description": "Cesta ke spustitelnému souboru FFmpeg nebo alias verze (\"7.0\" nebo \"8.0\")."
+        },
+        "global_args": {
+            "label": "Globální argumenty FFmpeg",
+            "description": "Globální argumenty předávané procesům FFmpeg."
+        },
+        "hwaccel_args": {
+            "label": "Argumenty hardwarové akcelerace",
+            "description": "Argumenty hardwarové akcelerace pro FFmpeg. Doporučují se předvolby pro konkrétní poskytovatele."
+        },
+        "input_args": {
+            "label": "Vstupní argumenty",
+            "description": "Vstupní argumenty použité pro vstupní streamy FFmpeg."
+        },
+        "output_args": {
+            "label": "Výstupní argumenty",
+            "description": "Výchozí výstupní argumenty pro různé role FFmpeg, například detect a record.",
+            "detect": {
+                "label": "Výstupní argumenty detekce",
+                "description": "Výchozí výstupní argumenty pro streamy s rolí detect."
+            },
+            "record": {
+                "label": "Výstupní argumenty záznamu",
+                "description": "Výchozí výstupní argumenty pro streamy s rolí record."
+            },
+            "record_sub": {
+                "label": "Výstupní argumenty záznamu vedlejšího streamu",
+                "description": "Výstupní argumenty pro streamy s rolí record_sub. Pokud nejsou nastaveny, použijí se výstupní argumenty record."
+            }
+        },
+        "retry_interval": {
+            "label": "Interval opakování FFmpeg",
+            "description": "Počet sekund před dalším pokusem o připojení streamu kamery po selhání. Výchozí hodnota je 10."
+        },
+        "apple_compatibility": {
+            "label": "Kompatibilita s Apple",
+            "description": "Povolit označení HEVC pro lepší kompatibilitu s přehrávači Apple při záznamu H.265."
+        },
+        "gpu": {
+            "label": "Index GPU",
+            "description": "Výchozí index GPU pro hardwarovou akceleraci, pokud je dostupná."
+        },
+        "inputs": {
+            "label": "Vstupy kamery",
+            "description": "Seznam definic vstupních streamů (cesty a role) pro tuto kameru.",
+            "path": {
+                "label": "Vstupní cesta",
+                "description": "URL nebo cesta ke vstupnímu streamu kamery."
+            },
+            "roles": {
+                "label": "Vstupní role",
+                "description": "Role tohoto vstupního streamu."
+            },
+            "global_args": {
+                "label": "Globální argumenty FFmpeg",
+                "description": "Globální argumenty FFmpeg pro tento vstupní stream."
+            },
+            "hwaccel_args": {
+                "label": "Argumenty hardwarové akcelerace",
+                "description": "Argumenty hardwarové akcelerace pro tento vstupní stream."
+            },
+            "input_args": {
+                "label": "Vstupní argumenty",
+                "description": "Vstupní argumenty specifické pro tento stream."
+            }
+        },
+        "label": "FFmpeg",
+        "description": "Nastavení FFmpeg včetně cesty ke spustitelnému souboru, argumentů, hardwarové akcelerace a výstupních argumentů jednotlivých rolí."
+    },
+    "live": {
+        "label": "Živé přehrávání",
+        "streams": {
+            "label": "Názvy živých streamů",
+            "description": "Mapování nastavených názvů streamů na názvy streamů předávaných přes go2rtc pro živé přehrávání."
+        },
+        "transcode": {
+            "label": "Překódované streamy",
+            "description": "Živé streamy s nižší kvalitou překódované na vyžádání pomocí go2rtc.",
+            "enabled": {
+                "label": "Povolit překódované streamy",
+                "description": "Přidat živé streamy s nižší kvalitou, které go2rtc překóduje v reálném čase, když je někdo sleduje."
+            },
+            "source": {
+                "label": "Zdrojový stream",
+                "description": "Stream go2rtc k překódování. Výchozí je první živý stream."
+            },
+            "qualities": {
+                "label": "Úrovně kvality",
+                "description": "Pro každou úroveň kvality se přidá jeden překódovaný stream.",
+                "height": {
+                    "label": "Výška",
+                    "description": "Výstupní výška v pixelech; šířka se řídí poměrem stran zdroje."
+                },
+                "bitrate": {
+                    "label": "Datový tok",
+                    "description": "Cílový a maximální datový tok videa v kb/s."
+                }
+            }
+        },
+        "height": {
+            "label": "Výška živého obrazu",
+            "description": "Výška v pixelech pro vykreslení živého streamu jsmpeg ve webovém rozhraní; musí být <= výška detekčního streamu."
+        },
+        "quality": {
+            "label": "Kvalita živého obrazu",
+            "description": "Kvalita kódování streamu jsmpeg (1 nejvyšší, 31 nejnižší)."
+        },
+        "description": "Nastavení rozlišení a kvality živého streamu jsmpeg. Neovlivňuje kamery, které pro živé zobrazení používají předávání streamu přes go2rtc."
+    },
+    "lpr": {
+        "label": "Rozpoznávání registračních značek",
+        "description": "Nastavení rozpoznávání registračních značek včetně prahů detekce, formátování a známých značek.",
+        "enabled": {
+            "label": "Povolit LPR",
+            "description": "Povolit nebo zakázat rozpoznávání registračních značek pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "expire_time": {
+            "label": "Doba vyřazení v sekundách",
+            "description": "Doba v sekundách, po které se neviděná registrační značka vyřadí ze sledování (pouze pro vyhrazené kamery LPR)."
+        },
+        "min_area": {
+            "label": "Minimální plocha registrační značky",
+            "description": "Minimální plocha registrační značky v pixelech pro pokus o rozpoznání."
+        },
+        "enhancement": {
+            "label": "Úroveň vylepšení",
+            "description": "Úroveň vylepšení (0–10) výřezů registračních značek před OCR; vyšší hodnoty nemusí zlepšit výsledky. Úrovně nad 5 mohou fungovat pouze pro noční snímky značek a měly by se používat opatrně."
+        },
+        "model_size": {
+            "label": "Velikost modelu",
+            "description": "Velikost modelu pro detekci a rozpoznávání textu. Většina uživatelů by měla použít malý model (small)."
+        },
+        "detection_threshold": {
+            "label": "Práh detekce",
+            "description": "Práh spolehlivosti detekce pro spuštění OCR na pravděpodobné registrační značce."
+        },
+        "recognition_threshold": {
+            "label": "Práh rozpoznávání",
+            "description": "Práh spolehlivosti potřebný k připojení rozpoznaného textu registrační značky jako podštítku."
+        },
+        "min_plate_length": {
+            "label": "Minimální délka registrační značky",
+            "description": "Minimální počet znaků rozpoznané registrační značky pro její přijetí."
+        },
+        "format": {
+            "label": "Regulární výraz formátu registrační značky",
+            "description": "Volitelný regulární výraz pro ověření rozpoznaných registračních značek vůči očekávanému formátu."
+        },
+        "match_distance": {
+            "label": "Vzdálenost shody",
+            "description": "Počet povolených rozdílů ve znacích při porovnání detekovaných registračních značek se známými."
+        },
+        "known_plates": {
+            "label": "Známé registrační značky",
+            "description": "Seznam registračních značek nebo regulárních výrazů pro zvláštní sledování či upozornění."
+        },
+        "debug_save_plates": {
+            "label": "Ukládat registrační značky pro ladění",
+            "description": "Ukládat výřezy registračních značek pro ladění výkonu LPR."
+        },
+        "device": {
+            "label": "Zařízení",
+            "description": "Přepsání nastavení pro použití konkrétního zařízení. Další informace najdete na https://onnxruntime.ai/docs/execution-providers/"
+        },
+        "replace_rules": {
+            "label": "Pravidla nahrazování",
+            "description": "Pravidla nahrazování pomocí regulárních výrazů pro normalizaci detekovaných registračních značek před porovnáním.",
+            "pattern": {
+                "label": "Vzor regulárního výrazu"
+            },
+            "replacement": {
+                "label": "Náhradní řetězec"
+            }
+        }
+    },
+    "motion": {
+        "label": "Detekce pohybu",
+        "enabled": {
+            "label": "Povolit detekci pohybu",
+            "description": "Povolit nebo zakázat detekci pohybu pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "threshold": {
+            "label": "Práh pohybu",
+            "description": "Práh rozdílu pixelů používaný detektorem pohybu; vyšší hodnoty snižují citlivost (rozsah 1–255)."
+        },
+        "lightning_threshold": {
+            "label": "Práh záblesků",
+            "description": "Práh pro detekci a ignorování krátkých změn osvětlení (nižší hodnota je citlivější, rozsah 0,3 až 1,0). Detekci pohybu zcela nezastaví; po překročení prahu pouze ukončí analýzu dalších snímků. Záznamy založené na pohybu se během těchto událostí nadále vytvářejí."
+        },
+        "skip_motion_threshold": {
+            "label": "Práh vynechání pohybu",
+            "description": "Pokud je nastavena hodnota od 0,0 do 1,0 a v jednom snímku se změní větší podíl obrazu, detektor nevrátí žádné rámečky pohybu a ihned se znovu zkalibruje. To může šetřit CPU a omezit falešné detekce při blescích, bouřkách apod., ale také přehlédnout skutečné události, například automatické sledování objektu PTZ kamerou. Jde o kompromis mezi vynecháním několika megabajtů záznamů a prohlédnutím několika krátkých klipů. Ponechte nenastavené (None) pro vypnutí této funkce."
+        },
+        "improve_contrast": {
+            "label": "Zlepšit kontrast",
+            "description": "Před analýzou pohybu zlepšit kontrast snímků pro usnadnění detekce."
+        },
+        "contour_area": {
+            "label": "Plocha obrysu",
+            "description": "Minimální plocha obrysu v pixelech potřebná pro započítání pohybu."
+        },
+        "delta_alpha": {
+            "label": "Delta alpha",
+            "description": "Koeficient alfa pro prolínání při výpočtu rozdílů snímků pro detekci pohybu."
+        },
+        "frame_alpha": {
+            "label": "Frame alpha",
+            "description": "Hodnota alfa při prolínání snímků během předzpracování pro detekci pohybu."
+        },
+        "frame_height": {
+            "label": "Výška snímku",
+            "description": "Výška v pixelech, na kterou se snímky zmenší při výpočtu pohybu."
+        },
+        "mask": {
+            "label": "Souřadnice masky",
+            "description": "Uspořádané souřadnice x,y definující polygon masky pohybu pro zahrnutí nebo vyloučení oblastí."
+        },
+        "mqtt_off_delay": {
+            "label": "Prodleva vypnutí MQTT",
+            "description": "Počet sekund po posledním pohybu před publikováním stavu MQTT 'off'."
+        },
+        "enabled_in_config": {
+            "label": "Původní stav detekce pohybu",
+            "description": "Udává, zda byla detekce pohybu povolena v původní statické konfiguraci."
+        },
+        "raw_mask": {
+            "label": "Nezpracovaná maska"
+        },
+        "description": "Výchozí nastavení detekce pohybu pro kamery, pokud není přepsáno pro jednotlivé kamery."
+    },
+    "objects": {
+        "label": "Objekty",
+        "description": "Výchozí nastavení sledování objektů včetně sledovaných štítků a filtrů pro jednotlivé objekty.",
+        "track": {
+            "label": "Sledované objekty",
+            "description": "Seznam štítků objektů sledovaných na všech kamerách; lze přepsat pro jednotlivé kamery."
+        },
+        "filters": {
+            "label": "Filtry objektů",
+            "description": "Filtry detekovaných objektů pro omezení falešných detekcí (plocha, poměr stran, spolehlivost).",
+            "min_area": {
+                "label": "Minimální plocha objektu",
+                "description": "Minimální plocha ohraničujícího rámečku (v pixelech nebo jako podíl obrazu) pro tento typ objektu. Lze zadat pixely (int) nebo podíl (float od 0.000001 do 0.99)."
+            },
+            "max_area": {
+                "label": "Maximální plocha objektu",
+                "description": "Maximální povolená plocha ohraničujícího rámečku (v pixelech nebo jako podíl obrazu) pro tento typ objektu. Lze zadat pixely (int) nebo podíl (float od 0.000001 do 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minimální poměr stran",
+                "description": "Minimální poměr šířky k výšce potřebný pro přijetí ohraničujícího rámečku."
+            },
+            "max_ratio": {
+                "label": "Maximální poměr stran",
+                "description": "Maximální povolený poměr šířky k výšce pro přijetí ohraničujícího rámečku."
+            },
+            "threshold": {
+                "label": "Práh spolehlivosti",
+                "description": "Práh průměrné spolehlivosti detekce potřebný k označení objektu jako skutečné detekce."
+            },
+            "min_score": {
+                "label": "Minimální spolehlivost",
+                "description": "Minimální spolehlivost detekce v jednom snímku potřebná k započítání objektu."
+            },
+            "mask": {
+                "label": "Maska filtru",
+                "description": "Souřadnice polygonu určující, kde ve snímku se tento filtr uplatní."
+            },
+            "raw_mask": {
+                "label": "Nezpracovaná maska"
+            }
+        },
+        "mask": {
+            "label": "Maska objektů",
+            "description": "Polygon masky pro zabránění detekci objektů v určených oblastech."
+        },
+        "raw_mask": {
+            "label": "Nezpracovaná maska"
+        },
+        "genai": {
+            "label": "Konfigurace generativní AI pro objekty",
+            "description": "Možnosti generativní AI pro popis sledovaných objektů a odesílání snímků ke generování.",
+            "enabled": {
+                "label": "Povolit generativní AI",
+                "description": "Ve výchozím nastavení povolit generování popisů sledovaných objektů pomocí generativní AI."
+            },
+            "use_snapshot": {
+                "label": "Použít snímky",
+                "description": "Pro generování popisů pomocí generativní AI použít snímky objektů místo miniatur."
+            },
+            "prompt": {
+                "label": "Prompt pro popis",
+                "description": "Výchozí šablona promptu pro generování popisů pomocí generativní AI."
+            },
+            "object_prompts": {
+                "label": "Prompty objektů",
+                "description": "Prompty pro jednotlivé typy objektů pro přizpůsobení výstupů generativní AI konkrétním štítkům."
+            },
+            "objects": {
+                "label": "Objekty pro generativní AI",
+                "description": "Seznam štítků objektů, které se ve výchozím nastavení odesílají generativní AI."
+            },
+            "required_zones": {
+                "label": "Požadované zóny",
+                "description": "Zóny, do kterých musí objekty vstoupit pro generování popisu pomocí generativní AI."
+            },
+            "debug_save_thumbnails": {
+                "label": "Ukládat miniatury",
+                "description": "Ukládat miniatury odeslané generativní AI pro ladění a kontrolu."
+            },
+            "send_triggers": {
+                "label": "Spouštěče generativní AI",
+                "description": "Určuje, kdy se snímky odesílají generativní AI (při ukončení, po aktualizacích apod.).",
+                "tracked_object_end": {
+                    "label": "Odeslat při ukončení",
+                    "description": "Odeslat požadavek generativní AI při ukončení sledování objektu."
+                },
+                "after_significant_updates": {
+                    "label": "Časný spouštěč generativní AI",
+                    "description": "Odeslat požadavek generativní AI po určeném počtu významných aktualizací sledovaného objektu."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Původní stav generativní AI",
+                "description": "Udává, zda byla generativní AI povolena v původní statické konfiguraci."
+            }
+        },
+        "filters_attribute": {
+            "label": "Filtry atributů",
+            "description": "Filtry detekovaných atributů pro omezení falešných detekcí (plocha, poměr stran, spolehlivost).",
+            "min_area": {
+                "label": "Minimální plocha atributu",
+                "description": "Minimální plocha ohraničujícího rámečku (v pixelech nebo jako podíl obrazu) pro tento atribut. Lze zadat pixely (int) nebo podíl (float od 0.000001 do 0.99)."
+            },
+            "max_area": {
+                "label": "Maximální plocha atributu",
+                "description": "Maximální povolená plocha ohraničujícího rámečku (v pixelech nebo jako podíl obrazu) pro tento atribut. Lze zadat pixely (int) nebo podíl (float od 0.000001 do 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minimální poměr stran",
+                "description": "Minimální poměr šířky k výšce potřebný pro přijetí ohraničujícího rámečku."
+            },
+            "max_ratio": {
+                "label": "Maximální poměr stran",
+                "description": "Maximální povolený poměr šířky k výšce pro přijetí ohraničujícího rámečku."
+            },
+            "threshold": {
+                "label": "Práh spolehlivosti",
+                "description": "Práh průměrné spolehlivosti detekce potřebný k označení atributu jako skutečné detekce."
+            },
+            "min_score": {
+                "label": "Minimální spolehlivost",
+                "description": "Minimální spolehlivost detekce v jednom snímku potřebná k přiřazení atributu nadřazenému objektu."
+            },
+            "mask": {
+                "label": "Maska filtru",
+                "description": "Souřadnice polygonu určující, kde ve snímku se tento filtr uplatní."
+            },
+            "raw_mask": {
+                "label": "Nezpracovaná maska"
+            }
+        }
+    },
+    "record": {
+        "label": "Záznam",
+        "enabled": {
+            "label": "Povolit záznam",
+            "description": "Povolit nebo zakázat záznam pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "expire_interval": {
+            "label": "Interval úklidu záznamů",
+            "description": "Počet minut mezi úklidy, které odstraňují segmenty záznamů po uplynutí doby uchovávání."
+        },
+        "continuous": {
+            "label": "Uchovávání nepřetržitých záznamů",
+            "description": "Počet dní uchovávání záznamů bez ohledu na sledované objekty nebo pohyb. Nastavte 0, pokud chcete uchovávat jen záznamy upozornění a detekcí.",
+            "days": {
+                "label": "Doba uchovávání ve dnech",
+                "description": "Počet dní uchovávání záznamů."
+            }
+        },
+        "motion": {
+            "label": "Uchovávání záznamů pohybu",
+            "description": "Počet dní uchovávání záznamů spuštěných pohybem bez ohledu na sledované objekty. Nastavte 0, pokud chcete uchovávat jen záznamy upozornění a detekcí.",
+            "days": {
+                "label": "Doba uchovávání ve dnech",
+                "description": "Počet dní uchovávání záznamů."
+            }
+        },
+        "detections": {
+            "label": "Uchovávání detekcí",
+            "description": "Nastavení uchovávání záznamů detekcí včetně doby před událostí a po ní.",
+            "pre_capture": {
+                "label": "Sekundy před událostí",
+                "description": "Počet sekund před detekovanou událostí, které se zahrnou do záznamu."
+            },
+            "post_capture": {
+                "label": "Sekundy po události",
+                "description": "Počet sekund po detekované události, které se zahrnou do záznamu."
+            },
+            "retain": {
+                "label": "Uchovávání událostí",
+                "description": "Nastavení uchovávání záznamů detekovaných událostí.",
+                "days": {
+                    "label": "Doba uchovávání ve dnech",
+                    "description": "Počet dní uchovávání záznamů detekovaných událostí."
+                },
+                "mode": {
+                    "label": "Režim uchovávání",
+                    "description": "Režim uchovávání: all (všechny segmenty), motion (segmenty s pohybem) nebo active_objects (segmenty s aktivními objekty)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Uchovávání upozornění",
+            "description": "Nastavení uchovávání záznamů upozornění včetně doby před událostí a po ní.",
+            "pre_capture": {
+                "label": "Sekundy před událostí",
+                "description": "Počet sekund před detekovanou událostí, které se zahrnou do záznamu."
+            },
+            "post_capture": {
+                "label": "Sekundy po události",
+                "description": "Počet sekund po detekované události, které se zahrnou do záznamu."
+            },
+            "retain": {
+                "label": "Uchovávání událostí",
+                "description": "Nastavení uchovávání záznamů detekovaných událostí.",
+                "days": {
+                    "label": "Doba uchovávání ve dnech",
+                    "description": "Počet dní uchovávání záznamů detekovaných událostí."
+                },
+                "mode": {
+                    "label": "Režim uchovávání",
+                    "description": "Režim uchovávání: all (všechny segmenty), motion (segmenty s pohybem) nebo active_objects (segmenty s aktivními objekty)."
+                }
+            }
+        },
+        "export": {
+            "label": "Konfigurace exportu",
+            "description": "Nastavení exportu záznamů, například časosběru a hardwarové akcelerace.",
+            "hwaccel_args": {
+                "label": "Argumenty hardwarové akcelerace exportu",
+                "description": "Argumenty hardwarové akcelerace pro export a překódování."
+            },
+            "max_concurrent": {
+                "label": "Maximální počet souběžných exportů",
+                "description": "Maximální počet současně zpracovávaných úloh exportu."
+            },
+            "chapters": {
+                "label": "Metadata kapitol vložená do exportovaných záznamů"
+            }
+        },
+        "preview": {
+            "label": "Konfigurace náhledů",
+            "description": "Nastavení kvality náhledů záznamů zobrazovaných v rozhraní.",
+            "quality": {
+                "label": "Kvalita náhledů",
+                "description": "Úroveň kvality náhledu (very_low, low, medium, high, very_high)."
+            }
+        },
+        "sub": {
+            "label": "Záznam vedlejšího streamu",
+            "description": "Nastavení záznamu druhého streamu s nižší kvalitou.",
+            "enabled": {
+                "label": "Povolit záznam vedlejšího streamu",
+                "description": "Povolit záznam druhého streamu s nižší kvalitou pro přehrávání s adaptivní kvalitou a delší uchovávání."
+            },
+            "continuous": {
+                "label": "Nepřetržité uchovávání vedlejšího streamu",
+                "description": "Počet dní uchovávání záznamů vedlejšího streamu bez ohledu na sledované objekty nebo pohyb.",
+                "days": {
+                    "label": "Doba uchovávání ve dnech",
+                    "description": "Počet dní uchovávání záznamů."
+                }
+            },
+            "motion": {
+                "label": "Uchovávání pohybu ve vedlejším streamu",
+                "description": "Počet dní uchovávání záznamů vedlejšího streamu spuštěných pohybem.",
+                "days": {
+                    "label": "Doba uchovávání ve dnech",
+                    "description": "Počet dní uchovávání záznamů."
+                }
+            },
+            "alerts": {
+                "label": "Uchovávání upozornění ve vedlejším streamu",
+                "description": "Nastavení uchovávání záznamů upozornění ve vedlejším streamu.",
+                "days": {
+                    "label": "Doba uchovávání ve dnech",
+                    "description": "Počet dní uchovávání záznamů detekovaných událostí."
+                },
+                "mode": {
+                    "label": "Režim uchovávání",
+                    "description": "Režim uchovávání: all (všechny segmenty), motion (segmenty s pohybem) nebo active_objects (segmenty s aktivními objekty)."
+                }
+            },
+            "detections": {
+                "label": "Uchovávání detekcí ve vedlejším streamu",
+                "description": "Nastavení uchovávání záznamů detekcí ve vedlejším streamu.",
+                "days": {
+                    "label": "Doba uchovávání ve dnech",
+                    "description": "Počet dní uchovávání záznamů detekovaných událostí."
+                },
+                "mode": {
+                    "label": "Režim uchovávání",
+                    "description": "Režim uchovávání: all (všechny segmenty), motion (segmenty s pohybem) nebo active_objects (segmenty s aktivními objekty)."
+                }
+            }
+        },
+        "enabled_in_config": {
+            "label": "Původní stav záznamu",
+            "description": "Udává, zda byl záznam povolen v původní statické konfiguraci."
+        },
+        "description": "Nastavení záznamu a uchovávání pro kamery, pokud není přepsáno pro jednotlivé kamery."
+    },
+    "review": {
+        "label": "Revize",
+        "alerts": {
+            "label": "Konfigurace upozornění",
+            "description": "Nastavení sledovaných objektů, které vyvolávají upozornění, a uchovávání upozornění.",
+            "enabled": {
+                "label": "Povolit upozornění",
+                "description": "Povolit nebo zakázat vytváření upozornění pro všechny kamery; lze přepsat pro jednotlivé kamery."
+            },
+            "labels": {
+                "label": "Štítky upozornění",
+                "description": "Seznam štítků objektů, které vyvolávají upozornění (například car, person)."
+            },
+            "required_zones": {
+                "label": "Požadované zóny",
+                "description": "Zóny, do kterých musí objekt vstoupit pro vyvolání upozornění; ponechte prázdné pro povolení libovolné zóny."
+            },
+            "enabled_in_config": {
+                "label": "Původní stav upozornění",
+                "description": "Udává, zda byla upozornění původně povolena ve statické konfiguraci."
+            },
+            "cutoff_time": {
+                "label": "Čas ukončení upozornění",
+                "description": "Počet sekund bez aktivity vyvolávající upozornění, po kterém se upozornění ukončí."
+            }
+        },
+        "detections": {
+            "label": "Konfigurace detekcí",
+            "description": "Nastavení sledovaných objektů, které vytvářejí detekce bez upozornění, a uchovávání detekcí.",
+            "enabled": {
+                "label": "Povolit detekce",
+                "description": "Povolit nebo zakázat události detekce pro všechny kamery; lze přepsat pro jednotlivé kamery."
+            },
+            "labels": {
+                "label": "Štítky detekcí",
+                "description": "Seznam štítků objektů, které vytvářejí události detekce."
+            },
+            "required_zones": {
+                "label": "Požadované zóny",
+                "description": "Zóny, do kterých musí objekt vstoupit pro vytvoření detekce; ponechte prázdné pro povolení libovolné zóny."
+            },
+            "cutoff_time": {
+                "label": "Čas ukončení detekce",
+                "description": "Počet sekund bez aktivity vyvolávající detekci, po kterém se detekce ukončí."
+            },
+            "enabled_in_config": {
+                "label": "Původní stav detekcí",
+                "description": "Udává, zda byly detekce původně povoleny ve statické konfiguraci."
+            }
+        },
+        "genai": {
+            "label": "Konfigurace generativní AI",
+            "description": "Řídí použití generativní AI pro vytváření popisů a souhrnů položek revize.",
+            "enabled": {
+                "label": "Povolit popisy generativní AI",
+                "description": "Povolit nebo zakázat popisy a souhrny položek revize vytvářené generativní AI."
+            },
+            "alerts": {
+                "label": "Povolit generativní AI pro upozornění",
+                "description": "Použít generativní AI pro vytváření popisů upozornění."
+            },
+            "detections": {
+                "label": "Povolit generativní AI pro detekce",
+                "description": "Použít generativní AI pro vytváření popisů detekcí."
+            },
+            "image_source": {
+                "label": "Zdroj obrázků revize",
+                "description": "Zdroj obrázků odesílaných generativní AI ('preview' nebo 'recordings'); 'recordings' používá kvalitnější snímky, ale více tokenů."
+            },
+            "additional_concerns": {
+                "label": "Další okolnosti ke zvážení",
+                "description": "Seznam dalších okolností nebo poznámek, které má generativní AI zohlednit při hodnocení aktivity na této kameře."
+            },
+            "debug_save_thumbnails": {
+                "label": "Ukládat miniatury",
+                "description": "Ukládat miniatury odeslané poskytovateli generativní AI pro ladění a kontrolu."
+            },
+            "enabled_in_config": {
+                "label": "Původní stav generativní AI",
+                "description": "Udává, zda bylo hodnocení pomocí generativní AI původně povoleno ve statické konfiguraci."
+            },
+            "preferred_language": {
+                "label": "Preferovaný jazyk",
+                "description": "Preferovaný jazyk odpovědí požadovaný od poskytovatele generativní AI."
+            },
+            "frame_mode": {
+                "label": "Režim snímků",
+                "description": "Způsob předávání snímků modelu. 'frames' odešle prompt a poté snímky, což vyhovuje modelům, které samy dobře sledují posloupnost. 'annotated_frames' označí každý snímek a proloží jej poznámkami ze sledování objektů, což pomáhá modelům, které ztrácejí přehled o opakující se nebo obrácené aktivitě."
+            },
+            "response_style": {
+                "label": "Styl odpovědí",
+                "description": "Předvolba stylu psaní generovaných popisů revize. Předvolby upravují tón a podrobnost názvu, souhrnu a popisu scény pro uživatele; 'default' ponechá vestavěný prompt beze změny."
+            },
+            "activity_context_prompt": {
+                "label": "Prompt pro kontext aktivity",
+                "description": "Vlastní prompt popisující, co je a není podezřelá aktivita, pro doplnění kontextu souhrnů generativní AI."
+            }
+        },
+        "description": "Nastavení upozornění, detekcí a souhrnů revizí pomocí generativní AI pro rozhraní a úložiště."
+    },
+    "semantic_search": {
+        "label": "Sémantické vyhledávání",
+        "triggers": {
+            "label": "Spouštěče",
+            "description": "Akce a kritéria shody spouštěčů sémantického vyhledávání pro konkrétní kamery.",
+            "friendly_name": {
+                "label": "Zobrazovaný název",
+                "description": "Volitelný název tohoto spouštěče zobrazovaný v rozhraní."
+            },
+            "enabled": {
+                "label": "Povolit tento spouštěč",
+                "description": "Povolit nebo zakázat tento spouštěč sémantického vyhledávání."
+            },
+            "type": {
+                "label": "Typ spouštěče",
+                "description": "Typ spouštěče: 'thumbnail' (porovnání s obrázkem) nebo 'description' (porovnání s textem)."
+            },
+            "data": {
+                "label": "Obsah spouštěče",
+                "description": "Textová fráze nebo ID miniatury pro porovnání se sledovanými objekty."
+            },
+            "threshold": {
+                "label": "Práh spouštěče",
+                "description": "Minimální skóre podobnosti (0–1) potřebné k aktivaci spouštěče."
+            },
+            "actions": {
+                "label": "Akce spouštěče",
+                "description": "Seznam akcí provedených při shodě spouštěče (notification, sub_label, attribute)."
+            }
+        },
+        "description": "Nastavení sémantického vyhledávání, které vytváří a prohledává vektorové reprezentace objektů pro nalezení podobných položek.",
+        "enabled": {
+            "label": "Povolit sémantické vyhledávání",
+            "description": "Povolit nebo zakázat sémantické vyhledávání."
+        },
+        "reindex": {
+            "label": "Znovu indexovat při spuštění",
+            "description": "Spustit úplnou opětovnou indexaci dříve sledovaných objektů v databázi vektorových reprezentací."
+        },
+        "model": {
+            "label": "Model sémantického vyhledávání nebo název poskytovatele generativní AI",
+            "description": "Model vektorových reprezentací pro sémantické vyhledávání (například 'jinav1') nebo název poskytovatele generativní AI s rolí embeddings."
+        },
+        "model_size": {
+            "label": "Velikost modelu",
+            "description": "Vyberte velikost modelu; malý (small) běží na CPU a velký (large) obvykle vyžaduje GPU."
+        },
+        "device": {
+            "label": "Zařízení",
+            "description": "Přepsání nastavení pro použití konkrétního zařízení. Další informace najdete na https://onnxruntime.ai/docs/execution-providers/"
+        }
+    },
+    "snapshots": {
+        "label": "Snímky",
+        "enabled": {
+            "label": "Povolit snímky",
+            "description": "Povolit nebo zakázat ukládání snímků pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "timestamp": {
+            "label": "Zobrazení časové značky",
+            "description": "Zobrazit časovou značku na snímcích z API."
+        },
+        "bounding_box": {
+            "label": "Zobrazení ohraničujícího rámečku",
+            "description": "Vykreslit ohraničující rámečky sledovaných objektů na snímcích z API."
+        },
+        "crop": {
+            "label": "Oříznout snímek",
+            "description": "Oříznout snímky z API podle ohraničujícího rámečku detekovaného objektu."
+        },
+        "required_zones": {
+            "label": "Požadované zóny",
+            "description": "Zóny, do kterých musí objekt vstoupit, aby se uložil snímek."
+        },
+        "height": {
+            "label": "Výška snímku",
+            "description": "Výška v pixelech, na kterou se změní velikost snímků z API; ponechte prázdné pro zachování původní velikosti."
+        },
+        "retain": {
+            "label": "Uchovávání snímků",
+            "description": "Nastavení uchovávání snímků včetně výchozího počtu dní a výjimek pro jednotlivé typy objektů.",
+            "default": {
+                "label": "Výchozí uchovávání",
+                "description": "Výchozí počet dní uchovávání snímků."
+            },
+            "objects": {
+                "label": "Uchovávání podle objektu",
+                "description": "Přepsání počtu dní uchovávání snímků pro jednotlivé typy objektů."
+            }
+        },
+        "quality": {
+            "label": "Kvalita snímku",
+            "description": "Kvalita kódování uložených snímků (0–100)."
+        },
+        "description": "Nastavení snímků sledovaných objektů vytvářených přes API pro všechny kamery; lze přepsat pro jednotlivé kamery."
+    },
+    "timestamp_style": {
+        "label": "Styl časové značky",
+        "position": {
+            "label": "Pozice časové značky",
+            "description": "Pozice časové značky na obrázku (tl/tr/bl/br)."
+        },
+        "format": {
+            "label": "Formát časové značky",
+            "description": "Formátovací řetězec data a času pro časové značky (formátovací kódy Python datetime)."
+        },
+        "color": {
+            "label": "Barva časové značky",
+            "description": "Hodnoty RGB pro text časové značky (všechny hodnoty 0–255).",
+            "red": {
+                "label": "Červená",
+                "description": "Červená složka barvy časové značky (0–255)."
+            },
+            "green": {
+                "label": "Zelená",
+                "description": "Zelená složka barvy časové značky (0–255)."
+            },
+            "blue": {
+                "label": "Modrá",
+                "description": "Modrá složka barvy časové značky (0–255)."
+            }
+        },
+        "thickness": {
+            "label": "Tloušťka časové značky",
+            "description": "Tloušťka čar textu časové značky."
+        },
+        "effect": {
+            "label": "Efekt časové značky",
+            "description": "Vizuální efekt textu časové značky (none, solid, shadow)."
+        },
+        "description": "Možnosti vzhledu časových značek v obrazu pro ladicí zobrazení a snímky."
+    },
+    "mqtt": {
+        "label": "MQTT",
+        "description": "Nastavení připojení k brokeru MQTT a publikování telemetrie, snímků a podrobností událostí.",
+        "enabled": {
+            "label": "Povolit MQTT",
+            "description": "Povolit nebo zakázat integraci MQTT pro stavy, události a snímky."
+        },
+        "host": {
+            "label": "Hostitel MQTT",
+            "description": "Název hostitele nebo IP adresa brokeru MQTT."
+        },
+        "port": {
+            "label": "Port MQTT",
+            "description": "Port brokeru MQTT (obvykle 1883 pro nešifrované MQTT)."
+        },
+        "topic_prefix": {
+            "label": "Prefix témat",
+            "description": "Prefix všech témat MQTT Frigate; při provozu více instancí musí být jedinečný."
+        },
+        "client_id": {
+            "label": "ID klienta",
+            "description": "Identifikátor klienta při připojení k brokeru MQTT; měl by být pro každou instanci jedinečný."
+        },
+        "stats_interval": {
+            "label": "Interval statistik",
+            "description": "Interval publikování statistik systému a kamer do MQTT v sekundách."
+        },
+        "user": {
+            "label": "Uživatelské jméno MQTT",
+            "description": "Volitelné uživatelské jméno MQTT; lze zadat pomocí proměnných prostředí nebo tajných hodnot."
+        },
+        "password": {
+            "label": "Heslo MQTT",
+            "description": "Volitelné heslo MQTT; lze zadat pomocí proměnných prostředí nebo tajných hodnot."
+        },
+        "tls_ca_certs": {
+            "label": "Certifikáty CA pro TLS",
+            "description": "Cesta k certifikátu CA pro připojení TLS k brokeru (pro certifikáty podepsané vlastní autoritou)."
+        },
+        "tls_client_cert": {
+            "label": "Klientský certifikát",
+            "description": "Cesta ke klientskému certifikátu pro vzájemné ověřování TLS; při použití klientských certifikátů nenastavujte uživatelské jméno ani heslo."
+        },
+        "tls_client_key": {
+            "label": "Klientský klíč",
+            "description": "Cesta k soukromému klíči klientského certifikátu."
+        },
+        "tls_insecure": {
+            "label": "Nezabezpečené TLS",
+            "description": "Povolit nezabezpečená připojení TLS vynecháním ověření názvu hostitele (nedoporučuje se)."
+        },
+        "qos": {
+            "label": "MQTT QoS",
+            "description": "Úroveň kvality služby pro publikování a odběr MQTT (0, 1 nebo 2)."
+        }
+    },
+    "notifications": {
+        "label": "Oznámení",
+        "enabled": {
+            "label": "Povolit oznámení",
+            "description": "Povolit nebo zakázat oznámení pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        },
+        "email": {
+            "label": "E-mail pro oznámení",
+            "description": "E-mailová adresa používaná pro push oznámení nebo vyžadovaná některými poskytovateli oznámení."
+        },
+        "cooldown": {
+            "label": "Prodleva mezi oznámeními",
+            "description": "Prodleva v sekundách mezi oznámeními, která zabraňuje zahlcení příjemců."
+        },
+        "enabled_in_config": {
+            "label": "Původní stav oznámení",
+            "description": "Udává, zda byla oznámení povolena v původní statické konfiguraci."
+        },
+        "description": "Nastavení povolení a řízení oznámení pro všechny kamery; lze přepsat pro jednotlivé kamery."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Nastavení připojení ONVIF a automatického sledování PTZ pro tuto kameru.",
+        "host": {
+            "label": "Hostitel ONVIF",
+            "description": "Hostitel (a volitelné schéma) služby ONVIF této kamery."
+        },
+        "port": {
+            "label": "Port ONVIF",
+            "description": "Číslo portu služby ONVIF."
+        },
+        "user": {
+            "label": "Uživatelské jméno ONVIF",
+            "description": "Uživatelské jméno pro ověřování ONVIF; některá zařízení vyžadují uživatele admin."
+        },
+        "password": {
+            "label": "Heslo ONVIF",
+            "description": "Heslo pro ověřování ONVIF."
+        },
+        "tls_insecure": {
+            "label": "Vypnout ověřování TLS",
+            "description": "Vynechat ověření TLS a vypnout ověřování Digest pro ONVIF (nezabezpečené; používejte jen v bezpečných sítích)."
+        },
+        "profile": {
+            "label": "Profil ONVIF",
+            "description": "Konkrétní mediální profil ONVIF pro ovládání PTZ, určený tokenem nebo názvem. Pokud není nastaven, automaticky se vybere první profil s platnou konfigurací PTZ."
+        },
+        "autotracking": {
+            "label": "Automatické sledování",
+            "description": "Automaticky sledovat pohybující se objekty a udržovat je ve středu obrazu pomocí pohybů PTZ kamery.",
+            "enabled": {
+                "label": "Povolit automatické sledování",
+                "description": "Povolit nebo zakázat automatické sledování detekovaných objektů PTZ kamerou."
+            },
+            "calibrate_on_startup": {
+                "label": "Kalibrovat při spuštění",
+                "description": "Při spuštění změřit rychlosti motorů PTZ pro zlepšení přesnosti sledování. Frigate po kalibraci aktualizuje movement_weights v konfiguraci."
+            },
+            "zooming": {
+                "label": "Režim zoomu",
+                "description": "Chování zoomu: disabled (pouze otáčení a naklánění), absolute (nejvyšší kompatibilita) nebo relative (současné otáčení, naklánění a zoom)."
+            },
+            "zoom_factor": {
+                "label": "Faktor zoomu",
+                "description": "Úroveň přiblížení sledovaných objektů. Nižší hodnoty ponechají v záběru větší část scény; vyšší přiblíží objekt více, ale mohou vést ke ztrátě sledování. Hodnoty od 0,1 do 0,75."
+            },
+            "track": {
+                "label": "Sledované objekty",
+                "description": "Seznam typů objektů, které mají spouštět automatické sledování."
+            },
+            "required_zones": {
+                "label": "Požadované zóny",
+                "description": "Objekty musí vstoupit do jedné z těchto zón před zahájením automatického sledování."
+            },
+            "return_preset": {
+                "label": "Pozice pro návrat",
+                "description": "Název předvolby ONVIF nastavené ve firmwaru kamery, do které se kamera vrátí po ukončení sledování."
+            },
+            "timeout": {
+                "label": "Prodleva návratu",
+                "description": "Počet sekund po ztrátě sledování před návratem kamery do přednastavené pozice."
+            },
+            "movement_weights": {
+                "label": "Váhy pohybu",
+                "description": "Kalibrační hodnoty automaticky vytvořené kalibrací kamery. Neupravujte ručně."
+            },
+            "enabled_in_config": {
+                "label": "Původní stav automatického sledování",
+                "description": "Interní pole zaznamenávající, zda bylo automatické sledování povoleno v konfiguraci."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Ignorovat rozdíl času",
+            "description": "Ignorovat rozdíly v synchronizaci času mezi kamerou a serverem Frigate při komunikaci ONVIF."
+        }
+    },
+    "profiles": {
+        "label": "Profily",
+        "description": "Definice pojmenovaných profilů se zobrazovanými názvy. Profily kamer musí odkazovat na zde definované názvy.",
+        "friendly_name": {
+            "label": "Zobrazovaný název",
+            "description": "Název tohoto profilu zobrazovaný v rozhraní."
+        }
+    },
+    "version": {
+        "label": "Aktuální verze konfigurace",
+        "description": "Číselná nebo textová verze aktivní konfigurace pro rozpoznání migrací či změn formátu."
+    },
+    "safe_mode": {
+        "label": "Nouzový režim",
+        "description": "Při zapnutí se Frigate spustí v nouzovém režimu s omezenými funkcemi pro řešení problémů."
+    },
+    "environment_vars": {
+        "label": "Proměnné prostředí",
+        "description": "Dvojice klíč/hodnota proměnných prostředí pro proces Frigate v Home Assistant OS. Mimo HAOS použijte nastavení proměnných prostředí Dockeru."
+    },
+    "logger": {
+        "label": "Protokolování",
+        "description": "Řídí výchozí podrobnost protokolů a úrovně protokolování jednotlivých komponent.",
+        "default": {
+            "label": "Úroveň protokolování",
+            "description": "Výchozí globální úroveň protokolování (debug, info, warning, error)."
+        },
+        "logs": {
+            "label": "Úroveň protokolování procesů",
+            "description": "Přepsání úrovně protokolování jednotlivých komponent pro zvýšení nebo snížení podrobnosti konkrétních modulů."
+        }
+    },
+    "auth": {
+        "label": "Ověřování",
+        "description": "Nastavení ověřování a relací včetně cookies a omezení četnosti požadavků.",
+        "enabled": {
+            "label": "Povolit ověřování",
+            "description": "Povolit vestavěné ověřování v uživatelském rozhraní Frigate."
+        },
+        "reset_admin_password": {
+            "label": "Obnovit heslo správce",
+            "description": "Pokud je hodnota true, při spuštění obnovit heslo uživatele admin a vypsat nové heslo do protokolů."
+        },
+        "cookie_name": {
+            "label": "Název JWT cookie",
+            "description": "Název cookie pro uložení tokenu JWT pro vestavěné ověřování."
+        },
+        "cookie_secure": {
+            "label": "Příznak Secure u cookie",
+            "description": "Nastavit příznak Secure u ověřovací cookie; při použití TLS by měl být zapnutý."
+        },
+        "session_length": {
+            "label": "Délka relace",
+            "description": "Doba trvání relace založené na JWT v sekundách."
+        },
+        "refresh_time": {
+            "label": "Interval obnovení relace",
+            "description": "Pokud do vypršení relace zbývá tento počet sekund, obnovit ji na plnou délku."
+        },
+        "failed_login_rate_limit": {
+            "label": "Omezení neúspěšných přihlášení",
+            "description": "Pravidla omezení četnosti neúspěšných pokusů o přihlášení pro omezení útoků hrubou silou."
+        },
+        "trusted_proxies": {
+            "label": "Důvěryhodné proxy",
+            "description": "Seznam IP adres důvěryhodných proxy používaný při určování IP adresy klienta pro omezení četnosti požadavků."
+        },
+        "hash_iterations": {
+            "label": "Počet iterací hashování",
+            "description": "Počet iterací PBKDF2-SHA256 při hashování hesel uživatelů."
+        },
+        "roles": {
+            "label": "Mapování rolí",
+            "description": "Mapování rolí na seznamy kamer. Prázdný seznam poskytuje dané roli přístup ke všem kamerám."
+        },
+        "admin_first_time_login": {
+            "label": "Příznak prvního přihlášení správce",
+            "description": "Při hodnotě true může rozhraní na přihlašovací stránce zobrazit odkaz na nápovědu k přihlášení po obnovení hesla správce. "
+        }
+    },
+    "database": {
+        "label": "Databáze",
+        "description": "Nastavení databáze SQLite, do které Frigate ukládá metadata sledovaných objektů a záznamů.",
+        "path": {
+            "label": "Cesta k databázi",
+            "description": "Cesta v souborovém systému, kam se uloží soubor databáze SQLite Frigate."
+        }
+    },
+    "go2rtc": {
+        "label": "go2rtc",
+        "description": "Nastavení integrované služby go2rtc pro předávání a převod živých streamů."
+    },
+    "networking": {
+        "label": "Síť",
+        "description": "Síťová nastavení, například povolení IPv6 pro koncové body Frigate.",
+        "ipv6": {
+            "label": "Konfigurace IPv6",
+            "description": "Nastavení IPv6 pro síťové služby Frigate.",
+            "enabled": {
+                "label": "Povolit IPv6",
+                "description": "Povolit podporu IPv6 ve službách Frigate (API a uživatelské rozhraní), kde je to možné."
+            }
+        },
+        "listen": {
+            "label": "Konfigurace naslouchajících portů",
+            "description": "Konfigurace interních a externích naslouchajících portů. Určeno pro pokročilé uživatele. Ve většině případů se doporučuje změnit sekci ports v souboru Docker Compose.",
+            "internal": {
+                "label": "Interní port",
+                "description": "Interní naslouchající port Frigate (výchozí 5000)."
+            },
+            "external": {
+                "label": "Externí port",
+                "description": "Externí naslouchající port Frigate (výchozí 8971)."
+            }
+        }
+    },
+    "proxy": {
+        "label": "Proxy",
+        "description": "Nastavení integrace Frigate za reverzní proxy, která předává hlavičky ověřeného uživatele.",
+        "header_map": {
+            "label": "Mapování hlaviček",
+            "description": "Mapování příchozích hlaviček proxy na pole uživatele a role Frigate pro ověřování pomocí proxy.",
+            "user": {
+                "label": "Hlavička uživatele",
+                "description": "Hlavička obsahující ověřené uživatelské jméno předané nadřazenou proxy."
+            },
+            "role": {
+                "label": "Hlavička role",
+                "description": "Hlavička obsahující roli nebo skupiny ověřeného uživatele z nadřazené proxy."
+            },
+            "role_map": {
+                "label": "Mapování rolí",
+                "description": "Mapování hodnot skupin z nadřazené proxy na role Frigate (například skupin správců na roli admin)."
+            }
+        },
+        "logout_url": {
+            "label": "URL pro odhlášení",
+            "description": "URL, na kterou se uživatelé přesměrují při odhlášení přes proxy."
+        },
+        "auth_secret": {
+            "label": "Tajná hodnota proxy",
+            "description": "Volitelná tajná hodnota porovnávaná s hlavičkou X-Proxy-Secret pro ověření důvěryhodných proxy."
+        },
+        "default_role": {
+            "label": "Výchozí role",
+            "description": "Výchozí role přiřazená uživatelům ověřeným přes proxy, pokud se neuplatní žádné mapování rolí. Hodnota 'none' zakáže přístup uživatelům bez mapování."
+        },
+        "separator": {
+            "label": "Oddělovací znak",
+            "description": "Znak pro rozdělení více hodnot předaných v hlavičkách proxy."
+        }
+    },
+    "telemetry": {
+        "label": "Telemetrie",
+        "description": "Možnosti telemetrie a statistik systému včetně sledování GPU a síťového provozu.",
+        "network_interfaces": {
+            "label": "Síťová rozhraní",
+            "description": "Seznam prefixů názvů síťových rozhraní sledovaných pro statistiky přenosové rychlosti."
+        },
+        "stats": {
+            "label": "Statistiky systému",
+            "description": "Možnosti zapnutí a vypnutí sběru různých statistik systému a GPU.",
+            "amd_gpu_stats": {
+                "label": "Statistiky AMD GPU",
+                "description": "Povolit sběr statistik AMD GPU, pokud je AMD GPU přítomno."
+            },
+            "intel_gpu_stats": {
+                "label": "Statistiky Intel GPU",
+                "description": "Povolit sběr statistik Intel GPU, pokud je Intel GPU přítomno."
+            },
+            "network_bandwidth": {
+                "label": "Síťová přenosová rychlost",
+                "description": "Povolit sledování síťové přenosové rychlosti procesů FFmpeg kamer a detektorů (vyžaduje oprávnění capabilities)."
+            },
+            "intel_gpu_device": {
+                "label": "Zařízení Intel GPU",
+                "description": "Adresa sběrnice PCI nebo cesta k zařízení DRM (např. /dev/dri/card1) pro přiřazení statistik Intel GPU konkrétnímu zařízení, pokud je jich přítomno více."
+            }
+        },
+        "version_check": {
+            "label": "Kontrola verze",
+            "description": "Povolit odchozí kontrolu dostupnosti novější verze Frigate."
+        }
+    },
+    "tls": {
+        "label": "TLS",
+        "description": "Nastavení TLS pro webové koncové body Frigate (port 8971).",
+        "enabled": {
+            "label": "Povolit TLS",
+            "description": "Povolit TLS pro webové rozhraní a API Frigate na nastaveném portu TLS."
+        }
+    },
+    "ui": {
+        "label": "Uživatelské rozhraní",
+        "description": "Předvolby uživatelského rozhraní, například časové pásmo, formát času a data a jednotky.",
+        "timezone": {
+            "label": "Časové pásmo",
+            "description": "Volitelné časové pásmo pro celé rozhraní (pokud není nastaveno, použije se místní čas prohlížeče)."
+        },
+        "time_format": {
+            "label": "Formát času",
+            "description": "Formát času v rozhraní (browser, 12hour nebo 24hour)."
+        },
+        "unit_system": {
+            "label": "Soustava jednotek",
+            "description": "Soustava jednotek pro zobrazení v rozhraní a MQTT (metrická nebo imperiální)."
+        }
+    },
+    "models": {
+        "label": "Modely detekce",
+        "description": "Modely detekce objektů a hardware, na kterém jednotlivé modely běží. Kamery vybírají model podle shody detect.scene se scénou modelu; jinak použijí model 'default'.",
+        "scene": {
+            "label": "Scéna modelu",
+            "description": "Název prostředí kamery, pro které se model používá, například 'thermal'. Kamery vybírají model nastavením detect.scene na odpovídající hodnotu. Model 'default' používají kamery, které scénu nenastaví."
+        },
+        "devices": {
+            "label": "Hardware pro detekci",
+            "description": "Hardware, na kterém model běží, ve tvaru '<detector>' nebo '<detector>:<device>' (například 'edgetpu:pci:0' nebo 'openvino:GPU'). Vícenásobné uvedení stejného zařízení na něm spustí další procesy inference."
+        },
+        "path": {
+            "label": "Cesta k vlastnímu modelu detekce objektů",
+            "description": "Cesta k souboru vlastního modelu detekce (nebo plus://<model_id> pro modely Frigate+)."
+        },
+        "labelmap_path": {
+            "label": "Mapa štítků pro vlastní detektor objektů",
+            "description": "Cesta k souboru mapy štítků, který pro detektor mapuje číselné třídy na textové štítky."
+        },
+        "width": {
+            "label": "Šířka vstupu modelu detekce objektů",
+            "description": "Šířka vstupního tenzoru modelu v pixelech."
+        },
+        "height": {
+            "label": "Výška vstupu modelu detekce objektů",
+            "description": "Výška vstupního tenzoru modelu v pixelech."
+        },
+        "labelmap": {
+            "label": "Úprava mapy štítků",
+            "description": "Přepsání nebo přemapování položek, které se sloučí se standardní mapou štítků."
+        },
+        "attributes_map": {
+            "label": "Mapa štítků objektů na štítky jejich atributů",
+            "description": "Mapování štítků objektů na štítky atributů pro připojení metadat (například 'car' -> ['license_plate'])."
+        },
+        "input_tensor": {
+            "label": "Tvar vstupního tenzoru modelu",
+            "description": "Formát tenzoru očekávaný modelem: 'nhwc' nebo 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Barevný formát vstupních pixelů modelu",
+            "description": "Barevný prostor pixelů očekávaný modelem: 'rgb', 'bgr' nebo 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Datový typ vstupu modelu",
+            "description": "Datový typ vstupního tenzoru modelu (například 'float32')."
+        },
+        "model_type": {
+            "label": "Typ modelu detekce objektů",
+            "description": "Typ architektury modelu detektoru (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) používaný některými detektory pro optimalizaci."
+        }
+    },
+    "genai": {
+        "label": "Konfigurace generativní AI",
+        "description": "Nastavení integrovaných poskytovatelů generativní AI pro vytváření popisů objektů a souhrnů revizí.",
+        "api_key": {
+            "label": "Klíč API",
+            "description": "Klíč API vyžadovaný některými poskytovateli (lze také nastavit pomocí proměnných prostředí)."
+        },
+        "base_url": {
+            "label": "Základní URL",
+            "description": "Základní URL pro vlastní nebo kompatibilní poskytovatele (například instanci Ollama)."
+        },
+        "model": {
+            "label": "Model",
+            "description": "Model poskytovatele používaný pro generování popisů nebo souhrnů."
+        },
+        "provider": {
+            "label": "Poskytovatel",
+            "description": "Poskytovatel generativní AI (například ollama, gemini, openai)."
+        },
+        "roles": {
+            "label": "Role",
+            "description": "Role generativní AI (chat, descriptions, embeddings, transcribe); jeden poskytovatel na roli. Ve výchozím nastavení jsou uděleny pouze chat, descriptions a embeddings; transcribe musí být uvedena výslovně."
+        },
+        "provider_options": {
+            "label": "Možnosti poskytovatele",
+            "description": "Další možnosti specifické pro poskytovatele předávané klientovi generativní AI."
+        },
+        "runtime_options": {
+            "label": "Možnosti za běhu",
+            "description": "Možnosti předávané poskytovateli při každém volání inference."
+        }
+    },
+    "classification": {
+        "label": "Klasifikace objektů",
+        "description": "Nastavení klasifikačních modelů pro zpřesnění štítků objektů nebo klasifikaci stavu.",
+        "bird": {
+            "label": "Konfigurace klasifikace ptáků",
+            "description": "Nastavení specifická pro modely klasifikace ptáků.",
+            "enabled": {
+                "label": "Klasifikace ptáků",
+                "description": "Povolit nebo zakázat klasifikaci ptáků."
+            },
+            "threshold": {
+                "label": "Minimální skóre",
+                "description": "Minimální klasifikační skóre pro přijetí klasifikace ptáka."
+            }
+        },
+        "custom": {
+            "label": "Vlastní klasifikační modely",
+            "description": "Konfigurace vlastních klasifikačních modelů pro objekty nebo detekci stavu.",
+            "enabled": {
+                "label": "Povolit model",
+                "description": "Povolit nebo zakázat vlastní klasifikační model."
+            },
+            "name": {
+                "label": "Název modelu",
+                "description": "Identifikátor vlastního klasifikačního modelu, který se má použít."
+            },
+            "threshold": {
+                "label": "Práh skóre",
+                "description": "Práh skóre pro změnu stavu klasifikace."
+            },
+            "save_attempts": {
+                "label": "Ukládat pokusy",
+                "description": "Počet pokusů o klasifikaci uložených pro zobrazení nedávných klasifikací."
+            },
+            "object_config": {
+                "objects": {
+                    "label": "Klasifikované objekty",
+                    "description": "Seznam typů objektů, na kterých se provádí klasifikace."
+                },
+                "classification_type": {
+                    "label": "Typ klasifikace",
+                    "description": "Použitý typ klasifikace: 'sub_label' (přidá sub_label) nebo jiné podporované typy."
+                }
+            },
+            "state_config": {
+                "cameras": {
+                    "label": "Kamery pro klasifikaci",
+                    "description": "Výřez a nastavení jednotlivých kamer pro klasifikaci stavu.",
+                    "crop": {
+                        "label": "Výřez pro klasifikaci",
+                        "description": "Souřadnice výřezu pro klasifikaci na této kameře."
+                    }
+                },
+                "motion": {
+                    "label": "Spouštět při pohybu",
+                    "description": "Při hodnotě true spustit klasifikaci, když je v určeném výřezu detekován pohyb."
+                },
+                "interval": {
+                    "label": "Interval klasifikace",
+                    "description": "Interval v sekundách mezi pravidelnými spuštěními klasifikace stavu."
+                }
+            }
+        }
+    },
+    "camera_groups": {
+        "label": "Skupiny kamer",
+        "description": "Konfigurace pojmenovaných skupin kamer pro uspořádání kamer v rozhraní.",
+        "cameras": {
+            "label": "Seznam kamer",
+            "description": "Pole názvů kamer zahrnutých do této skupiny."
+        },
+        "icon": {
+            "label": "Ikona skupiny",
+            "description": "Ikona skupiny kamer v rozhraní."
+        },
+        "order": {
+            "label": "Pořadí řazení",
+            "description": "Číselné pořadí skupin kamer v rozhraní; vyšší čísla se zobrazují později."
+        }
+    },
+    "active_profile": {
+        "label": "Aktivní profil",
+        "description": "Název aktuálně aktivního profilu. Platí pouze za běhu, neukládá se do YAML."
+    },
+    "camera_mqtt": {
+        "label": "MQTT",
+        "description": "Nastavení publikování obrázků přes MQTT.",
+        "enabled": {
+            "label": "Odesílat obrázek",
+            "description": "Povolit publikování snímků objektů do témat MQTT pro tuto kameru."
+        },
+        "timestamp": {
+            "label": "Přidat časovou značku",
+            "description": "Zobrazit časovou značku na obrázcích publikovaných do MQTT."
+        },
+        "bounding_box": {
+            "label": "Přidat ohraničující rámeček",
+            "description": "Vykreslit ohraničující rámečky na obrázcích publikovaných přes MQTT."
+        },
+        "crop": {
+            "label": "Oříznout obrázek",
+            "description": "Oříznout obrázky publikované do MQTT podle ohraničujícího rámečku detekovaného objektu."
+        },
+        "height": {
+            "label": "Výška obrázku",
+            "description": "Výška v pixelech, na kterou se změní velikost obrázků publikovaných přes MQTT."
+        },
+        "required_zones": {
+            "label": "Požadované zóny",
+            "description": "Zóny, do kterých musí objekt vstoupit pro publikování obrázku MQTT."
+        },
+        "quality": {
+            "label": "Kvalita JPEG",
+            "description": "Kvalita JPEG obrázků publikovaných do MQTT (0–100)."
+        }
+    },
+    "camera_ui": {
+        "label": "Kamera v rozhraní",
+        "description": "Pořadí a viditelnost této kamery v rozhraní. Pořadí ovlivňuje výchozí přehled. Pro podrobnější řízení použijte skupiny kamer.",
+        "order": {
+            "label": "Pořadí v rozhraní",
+            "description": "Číselné pořadí kamery v rozhraní (výchozí přehled a seznamy); vyšší čísla se zobrazují později."
+        },
+        "dashboard": {
+            "label": "Zobrazit v živém přehledu",
+            "description": "Určuje viditelnost kamery ve výchozím živém přehledu Všechny kamery. Kamera zůstává dostupná všude jinde v rozhraní, včetně skupin kamer a nastavení."
+        },
+        "review": {
+            "label": "Zobrazit v revizi",
+            "description": "Určuje viditelnost kamery v revizi (na stránce revize a v jejím filtru kamer, v revizi pohybu a v historii)."
+        }
+    }
+}

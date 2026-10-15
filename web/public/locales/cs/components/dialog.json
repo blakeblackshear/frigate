@@ -4,7 +4,7 @@
     "button": "Restartovat",
     "restarting": {
       "title": "Frigate restartuje",
-      "content": "Tato stránka bude obnovena za {{countdown}} sekund.",
+      "content": "Tato stránka se znovu načte za {{countdown}} s.",
       "button": "Vynutit opětovné načtení"
     },
     "description": "Frigate bude během restartu krátce nedostupný."
@@ -31,34 +31,45 @@
       }
     },
     "video": {
-      "viewInHistory": "Zobrazit historii"
+      "viewInHistory": "Zobrazit v historii"
     }
   },
   "recording": {
     "confirmDelete": {
       "toast": {
-        "success": "Videozáznam spojený s vybranými položkami přehledu byl úspěšně smazán.",
+        "success": "Videozáznam spojený s vybranými položkami revize byl úspěšně smazán.",
         "error": "Chyba mazání: {{error}}"
       },
       "title": "Potvrdit odstranění",
       "desc": {
-        "selected": "Opravdu chcete smazat všechna nahraná videa spojená s touto položkou přehledu?<br /><br />Chcete-li tento dialog v budoucnu obejít, podržte klávesu <em>Shift</em>."
+        "selected": "Opravdu chcete smazat všechna nahraná videa spojená s touto položkou revize?<br /><br />Chcete-li tento dialog v budoucnu obejít, podržte klávesu <em>Shift</em>."
       }
     },
     "button": {
       "markAsReviewed": "Označit jako zkontrolované",
-      "deleteNow": "Smazat hned",
+      "deleteNow": "Odstranit nyní",
       "export": "Exportovat",
-      "markAsUnreviewed": "Označit jako nezkontrolované"
+      "markAsUnreviewed": "Označit jako nezkontrolované",
+      "generateDescription": "Vygenerovat popis"
     },
     "shareTimestamp": {
       "label": "Sdílet časovou značku",
-      "title": "Sdílet časovou značku"
+      "title": "Sdílet časovou značku",
+      "description": "Sdílejte URL s časovou značkou aktuální pozice přehrávače nebo vyberte vlastní časovou značku. Nejde o veřejný odkaz; je přístupný pouze uživatelům s přístupem k Frigate a této kameře.",
+      "custom": "Vlastní časová značka",
+      "button": "Sdílet URL s časovou značkou",
+      "shareTitle": "Časová značka revize Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Bylo vyžádáno vygenerování popisu této položky revize pomocí generativní AI.",
+        "error": "Nepodařilo se vyžádat popis: {{error}}"
+      }
     }
   },
   "export": {
     "time": {
-      "fromTimeline": "Vybrat z Časové osy",
+      "fromTimeline": "Vybrat z časové osy",
       "custom": "Vlastní",
       "lastHour_one": "Minulou hodinu",
       "lastHour_few": "Minulé {{count}} hodiny",
@@ -74,12 +85,13 @@
     },
     "select": "Vybrat",
     "export": "Exportovat",
-    "selectOrExport": "Vybrat pro Export",
+    "selectOrExport": "Vybrat nebo exportovat",
     "toast": {
       "success": "Export úspěšně spuštěn. Soubor najdete na stránce exportů.",
       "error": {
-        "failed": "Chyba spuštění exportu: {{error}}",
-        "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku"
+        "failed": "Nepodařilo se zařadit export do fronty: {{error}}",
+        "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku",
+        "noValidTimeSelected": "Není vybrán platný časový rozsah"
       },
       "view": "Zobrazení",
       "queued": "Export zařazen do fronty. Průběh zobrazíte na stránce Exporty.",
@@ -87,11 +99,18 @@
       "batchSuccess_few": "Začaly {{count}} exporty. Nyní se otevírá případ.",
       "batchSuccess_other": "Začalo {{count}} exportů. Nyní se otevírá případ.",
       "batchPartial": "Spuštěno {{successful}} z {{total}} exportů. Neúspěšné kamery: {{failedCameras}}",
-      "batchQueuedPartial": "Ve frontě {{successful}} z {{total}} exportů. Neúspěšné kamery: {{failedCameras}}"
+      "batchQueuedPartial": "Ve frontě {{successful}} z {{total}} exportů. Neúspěšné kamery: {{failedCameras}}",
+      "batchFailed": "Selhalo zahájení {{total}} exportů. Selhalo kamer: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Zařazen jeden export.",
+      "batchQueuedSuccess_few": "Zařazeny {{count}} exporty.",
+      "batchQueuedSuccess_other": "Zařazeno {{count}} exportů.",
+      "batchQueueFailed": "Selhalo přidání {{total}} exportu. Selhalo kamer: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Uložit export",
-      "previewExport": "Prohlížet export"
+      "previewExport": "Prohlížet export",
+      "queueingExport": "Zařazování exportu do fronty…",
+      "useThisRange": "Použít časové okno"
     },
     "name": {
       "placeholder": "Jméno exportu"
@@ -104,7 +123,7 @@
       "nonAdminHelp": "Pro tyto exporty bude vytvořen nový případ.",
       "placeholder": "Vyberte případ"
     },
-    "queueing": "Přidávání exportu do fronty…",
+    "queueing": "Zařazování exportu do fronty…",
     "tabs": {
       "export": "Jedna kamera",
       "multiCamera": "Vícekamerový"
@@ -122,7 +141,7 @@
       "noMatchingCameras": "Žádná kamera neodpovídá vašemu hledání",
       "selectedCount": "{{selected}} / {{total}} vybráno",
       "checkingActivity": "Kontrola aktivity kamer…",
-      "noCameras": "Nejsou k dispozici žádné kamery",
+      "noCameras": "Nejsou dostupné žádné kamery",
       "detectionCount_one": "1 sledovaný objekt",
       "detectionCount_few": "{{count}} sledované objekty",
       "detectionCount_other": "{{count}} sledovaných objektů",
@@ -134,23 +153,32 @@
       "exportButton_other": "Exportovat {{count}} kamer"
     },
     "multi": {
-      "title_one": "Exportovat 1 kontrolu",
-      "title_few": "Exportovat {{count}} kontroly",
-      "title_other": "Exportovat {{count}} kontrol",
-      "description": "Exportujte každou vybranou kontrolu. Všechny exporty budou seskupeny do jednoho případu.",
-      "descriptionNoCase": "Exportujte každou vybranou kontrolu.",
-      "caseNamePlaceholder": "Export kontroly – {{date}}",
-      "exportButton_one": "Exportovat 1 kontrolu",
-      "exportButton_few": "Exportovat {{count}} kontroly",
-      "exportButton_other": "Exportovat {{count}} kontrol",
+      "title_one": "Exportovat 1 položku revize",
+      "title_few": "Exportovat {{count}} položky revize",
+      "title_other": "Exportovat {{count}} položek revize",
+      "description": "Exportujte každou vybranou položku revize. Všechny exporty se seskupí do jednoho případu.",
+      "descriptionNoCase": "Exportujte každou vybranou položku revize.",
+      "caseNamePlaceholder": "Export revize – {{date}}",
+      "exportButton_one": "Exportovat 1 položku revize",
+      "exportButton_few": "Exportovat {{count}} položky revize",
+      "exportButton_other": "Exportovat {{count}} položek revize",
       "exportingButton": "Exportování…",
       "toast": {
-        "started_one": "Spuštěn 1 export. Otevírá se případ.",
-        "started_few": "Spuštěny {{count}} exporty. Otevírá se případ.",
-        "started_other": "Spuštěno {{count}} exportů. Otevírá se případ.",
+        "started_one": "Spuštěn 1 export.",
+        "started_few": "Spuštěny {{count}} exporty.",
+        "started_other": "Spuštěno {{count}} exportů.",
         "partial": "Spuštěno {{successful}} z {{total}} exportů. Selhalo: {{failedItems}}",
         "failed": "Nepodařilo se spustit {{total}} exportů. Selhalo: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Kvalita",
+      "auto": "Automaticky",
+      "main": "Původní",
+      "sub": "Nízká",
+      "autoDesc": "Použije hlavní stream; pokud není dostupný, použije vedlejší stream s nižší kvalitou.",
+      "mainDesc": "Exportuje pouze hlavní stream v původní kvalitě. Časové rozsahy bez hlavního streamu budou chybět.",
+      "subDesc": "Exportuje pouze vedlejší stream s nižší kvalitou. Časové rozsahy bez vedlejšího streamu budou chybět."
     }
   },
   "streaming": {

@@ -1,1 +1,40 @@
-{}
+{
+    "minimum": "Musí být alespoň {{limit}}",
+    "maximum": "Musí být nejvýše {{limit}}",
+    "exclusiveMinimum": "Musí být větší než {{limit}}",
+    "exclusiveMaximum": "Musí být menší než {{limit}}",
+    "minLength": "Minimální počet znaků: {{limit}}",
+    "maxLength": "Maximální počet znaků: {{limit}}",
+    "minItems": "Minimální počet položek: {{limit}}",
+    "maxItems": "Maximální počet položek: {{limit}}",
+    "pattern": "Neplatný formát",
+    "required": "Toto pole je povinné",
+    "type": "Neplatný typ hodnoty",
+    "enum": "Musí být jednou z povolených hodnot",
+    "const": "Hodnota neodpovídá očekávané konstantě",
+    "uniqueItems": "Všechny položky musí být jedinečné",
+    "format": "Neplatný formát",
+    "additionalProperties": "Neznámá vlastnost není povolena",
+    "oneOf": "Musí odpovídat právě jednomu z povolených schémat",
+    "anyOf": "Musí odpovídat alespoň jednomu z povolených schémat",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Při nastavení mapování rolí je vyžadována hlavička role."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Každou roli lze přiřadit pouze jednomu vstupnímu streamu.",
+            "detectRequired": "Alespoň jednomu vstupnímu streamu musí být přiřazena role 'detect'.",
+            "hwaccelDetectOnly": "Argumenty hardwarové akcelerace lze definovat pouze u vstupního streamu s rolí detect."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Musí být sudé číslo."
+    },
+    "models": {
+        "defaultRequired": "Jeden model musí používat výchozí scénu. Bez něj nemá kamera, která si nezvolí scénu, žádný záložní model.",
+        "sceneDuplicate": "Každý model musí používat jinou scénu.",
+        "sameModel": "Modely {{scene}} a {{other}} používají stejný soubor modelu. Spuštění jednoho modelu pod více scénami pouze rozděluje detekci mezi samostatné detektory, což je pomalejší než jeden model s veškerým hardwarem uvedeným v jeho konfiguraci."
+    }
+}
