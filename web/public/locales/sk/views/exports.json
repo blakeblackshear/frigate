@@ -18,5 +18,12 @@
     "downloadVideo": "Stiahnite si video",
     "editName": "Upraviť meno",
     "deleteExport": "Odstrániť export"
+  },
+  "headings": {
+    "cases": "Prípady",
+    "uncategorizedExports": "Nezaradené exporty"
+  },
+  "deleteExport": {
+    "label": "Zmazať export"
   }
 }

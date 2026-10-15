@@ -60,13 +60,17 @@
       "success": "Export bol úspešne spustený. Súbor si pozrite na stránke exportov.",
       "error": {
         "failed": "Chyba spustenia exportu: {{error}}",
-        "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku"
+        "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku",
+        "noValidTimeSelected": "Nie je vybraný žiadny časový úsek."
       },
-      "view": "Zobraziť"
+      "view": "Zobraziť",
+      "queued": "Export zaradený do poradia. Aktuálny stav exportov nájdete na stránke exportov."
     },
     "fromTimeline": {
       "saveExport": "Uložiť Export",
-      "previewExport": "Export ukážky"
+      "previewExport": "Export ukážky",
+      "queueingExport": "Zaraďujem do zoznamu exportov...",
+      "useThisRange": "Použi tento rozsah"
     },
     "case": {
       "newCaseOption": "Vytvoriť nový prípad",
@@ -99,10 +103,35 @@
       "detectionCount_few": "{{count}} sledované objekty",
       "detectionCount_other": "{{count}} sledovaných objektov",
       "nameLabel": "Názov exportu",
-      "namePlaceholder": "",
-      "exportButton_one": "",
-      "exportButton_few": "",
-      "exportButton_other": ""
+      "namePlaceholder": "Nepovinné spoločné meno pre tieto exporty",
+      "exportButton_one": "Exportuj 1 kameru",
+      "exportButton_few": "Exportuj {{count}} kamery",
+      "exportButton_other": "Exportuj {{count}} kamier",
+      "queueingButton": "Pridať do poradia pre export..."
+    },
+    "stream": {
+      "label": "Kvalita",
+      "auto": "Automaticky",
+      "main": "Pôvodný",
+      "sub": "Nízky",
+      "autoDesc": "Používa hlavný stream, alebo v prípade nedostupnosti prejde na nižšiu kvalitu streamu.",
+      "mainDesc": "Vyexportuje iba hlavný stream v pôvodnej kvalite. Časové úseky, kde nie je k dispozícii hlavný stream, budú vynechané.",
+      "subDesc": "Vyexportuje iba sub stream v nižšej kvalite. Časové úseky, kde nie je k dispozícii sub stream, budú vynechané."
+    },
+    "multi": {
+      "title_one": "Exportuj prehľad",
+      "title_few": "Exportuj {{count}} prehľady",
+      "title_other": "Exportuj {{count}} prehľadov",
+      "description": "Exportuj vybrané prehľady. Všetky exporty budú zoskupené pod jeden záznam.",
+      "descriptionNoCase": "Exportuj všetky vybrané prehľady.",
+      "caseNamePlaceholder": "Prehľad export - {{date}}",
+      "exportingButton": "Exportujem...",
+      "toast": {
+        "started_one": "Spúšťam jeden export",
+        "started_few": "Spúšťam {{count}} exporty.",
+        "started_other": "Spúšťam {{count}} exportov.",
+        "partial": "Spustených {{successful}} exportov z celkovo {{total}}. Zlyhalo: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -149,6 +178,10 @@
       "markAsReviewed": "Označiť ako skontrolované",
       "deleteNow": "Odstrániť teraz",
       "markAsUnreviewed": "Označiť ako neskontrolované"
+    },
+    "shareTimestamp": {
+      "label": "Zdieľať časovú značku",
+      "title": "Zdieľať časovú značku"
     }
   },
   "imagePicker": {
