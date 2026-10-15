@@ -81,6 +81,19 @@
         "audio-codec": "Bu yayının ses kodeği WebRTC tarafından desteklenmiyor. go2rtc ile opus veya G.711'e dönüştürün.",
         "checking": "WebRTC uygunluğu kontrol ediliyor…"
       }
+    },
+    "auto": {
+      "label": "Otomatik",
+      "tips": "Bağlantınıza denk yayını seçer",
+      "selected": "Otomatik · {{stream}}",
+      "floorLabel": "Düşük bant genişliği",
+      "retry": "En yüksek kaliteyi dene",
+      "reason": {
+        "bandwidth": "Bağlantı daha kaliteli bir yayına yetemediği için {{stream}} oynatılıyor",
+        "codec": "Bu tarayıcı daha kaliteli bir yayın oynatamadığı için {{stream}} oynatılıyor",
+        "saveData": "Veri Tasarrufu açık olduğu için {{stream}} oynatılıyor",
+        "floor": "Hiçbir yayın yetişemediği için düşük bant genişlikli akış oynatılıyor"
+      }
     }
   },
   "cameraSettings": {
@@ -200,7 +213,7 @@
     "disable": "Canlı Ses Dökümünü Kapat"
   },
   "snapshot": {
-    "takeSnapshot": "Anlık Fotoğrafı İndir",
+    "takeSnapshot": "Anlık fotoğrafı indir",
     "noVideoSource": "Anlık fotoğraf için kullanılabilir bir video kaynağı yok.",
     "captureFailed": "Anlık fotoğraf yakalanamadı.",
     "downloadStarted": "Anlık fotoğraf indirilmeye başlandı."

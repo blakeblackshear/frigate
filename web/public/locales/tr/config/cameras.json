@@ -113,7 +113,7 @@
         },
         "scene": {
             "label": "Tespit sahnesi",
-            "description": "Bu kameranın baktığı ortam. Kamerada hangi yapılandırılmış modelin çalışacağını seçmek için kullanılır. \"Tümü\" ayarında bırakılan kameralar \"Tümü\" sahnesi için belirlenmiş modeli çalıştırırlar."
+            "description": "Bu kameranın baktığı ortam. Kamerada hangi yapılandırılmış modelin çalışacağını seçmek için kullanılır. \"varsayılan\" ayarında bırakılan kameralar \"varsayılan\" sahnesi için belirlenmiş modeli çalıştırırlar."
         }
     },
     "audio_transcription": {
@@ -121,7 +121,7 @@
         "description": "Olaylar ve canlı alt yazılar için canlı ses ve konuşma dökümü ayarları.",
         "enabled": {
             "label": "Ses dökümünü etkinleştir",
-            "description": "Elle tetiklenen ses olaylarının metne dönüştürülmesini etkinleştir veya devre dışı bırak."
+            "description": "Manuel tetiklenen ses olaylarının metne dönüştürülmesini etkinleştir veya devre dışı bırak."
         },
         "enabled_in_config": {
             "label": "Orijinal metne dönüştürme durumu"
@@ -245,6 +245,30 @@
         "height": {
             "label": "Canlı yayın yüksekliği",
             "description": "Web kullanıcı arayüzünde jsmpeg canlı yayınını oluşturmak için (piksel cinsinden) yükseklik; tespit yayını yüksekliğinden büyük olamaz."
+        },
+        "transcode": {
+            "label": "Kod dönüşümlü yayınlar",
+            "description": "go2rtc ile talep üzerine kod dönüşümü yapılan daha düşük kaliteli canlı yayınlar.",
+            "enabled": {
+                "label": "Kod dönüşümlü yayınları etkinleştir",
+                "description": "Birisi izlerken go2rtc ile eş zamanlı olarak kod dönüşümü yapılan daha düşük kaliteli canlı yayınlar ekleyin."
+            },
+            "source": {
+                "label": "Kaynak yayın",
+                "description": "Kod dönüşümü yapılacak go2rtc yayını. Varsayılan olarak ilk canlı yayını kullanır."
+            },
+            "qualities": {
+                "label": "Kaliteler",
+                "description": "Kalite başına bir kod dönüşümlü yayın eklenir.",
+                "height": {
+                    "label": "Yükseklik",
+                    "description": "Piksel cinsinden çıktı yüksekliği; genişlik kaynağın en:boy oranını takip eder."
+                },
+                "bitrate": {
+                    "label": "Bit hızı",
+                    "description": "kbps cinsinden hedef ve maksimum video bit hızı."
+                }
+            }
         }
     },
     "lpr": {
