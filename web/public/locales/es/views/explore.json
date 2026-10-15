@@ -155,8 +155,8 @@
       "aria": "Solicitar transcripción de audio"
     },
     "addTrigger": {
-      "label": "Añadir disparador",
-      "aria": "Añadir disparador para este objeto rastreado"
+      "label": "Agregar disparador",
+      "aria": "Agregar disparador para este objeto rastreado"
     },
     "downloadCleanSnapshot": {
       "label": "Descargue instantánea limpia",
@@ -221,8 +221,8 @@
     "count": "{{first}} de {{second}}",
     "lifecycleItemDesc": {
       "visible": "{{label}} detectado",
-      "active": "{{label}} está activo",
-      "stationary": "{{label}} se volvió estacionario",
+      "active": "{{label}} se activó",
+      "stationary": "{{label}} quedó inmóvil",
       "attribute": {
         "faceOrLicense_plate": "{{attribute}} detectado para {{label}}",
         "other": "{{label}} reconocido como {{attribute}}"
@@ -239,7 +239,7 @@
         "topScore": "Puntuación más alta",
         "toggleAdvancedScores": "Alternar puntuaciones avanzadas"
       },
-      "entered_zone": "{{label}} ha entrado en {{zones}}"
+      "entered_zone": "{{label}} entro en {{zones}}"
     },
     "trackedPoint": "Punto rastreado",
     "annotationSettings": {

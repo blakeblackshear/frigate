@@ -263,7 +263,8 @@
     "retry": "Reintentar",
     "expand": "Expandir",
     "collapse": "Colapsar",
-    "reload": "Recargar"
+    "reload": "Recargar",
+    "clear": "Borrar"
   },
   "toast": {
     "save": {
