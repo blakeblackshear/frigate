@@ -310,26 +310,20 @@ class CameraWatchdog(threading.Thread):
         self._check_config_updates()
         return self.config.enabled
 
-    def reset_capture_thread(
-        self, terminate: bool = True, drain_output: bool = True
-    ) -> None:
+    def reset_capture_thread(self, terminate: bool = True) -> None:
         if terminate:
+            # communicate() buffers raw frames in memory when a stalled process
+            # floods stdout. The timeout and kill bound wait() even if no reader
+            # drains the pipe.
             self.ffmpeg_detect_process.terminate()
             try:
                 self.logger.info("Waiting for ffmpeg to exit gracefully...")
-
-                if drain_output:
-                    self.ffmpeg_detect_process.communicate(timeout=30)
-                else:
-                    self.ffmpeg_detect_process.wait(timeout=30)
+                self.ffmpeg_detect_process.wait(timeout=30)
             except sp.TimeoutExpired:
                 self.logger.info("FFmpeg did not exit. Force killing...")
                 self.ffmpeg_detect_process.kill()
 
-                if drain_output:
-                    self.ffmpeg_detect_process.communicate()
-                else:
-                    self.ffmpeg_detect_process.wait()
+                self.ffmpeg_detect_process.wait()
 
         # Update reconnects
         now = datetime.now().timestamp()
@@ -497,7 +491,7 @@ class CameraWatchdog(threading.Thread):
                         f"{self.config.name} exceeded fps limit. Exiting ffmpeg..."
                     )
                     if can_restart:
-                        self.reset_capture_thread(drain_output=False)
+                        self.reset_capture_thread()
                         last_restart_time = now
             elif now - self.capture_thread.current_frame.value > 20:
                 self.detect_status.send("offline", now)
