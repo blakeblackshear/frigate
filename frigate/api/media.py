@@ -42,6 +42,7 @@ from frigate.config.camera.snapshots import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
     INSTALL_DIR,
+    MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
     STREAM_TYPE_MAIN,
     STREAM_TYPE_SUB,
@@ -350,6 +351,7 @@ async def get_snapshot_from_recording(
             .where(
                 (frame_time >= Recordings.start_time)
                 & (frame_time <= Recordings.end_time)
+                & (Recordings.start_time >= frame_time - MAX_SEGMENT_DURATION)
             )
             .where(Recordings.camera == camera_name)
             .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
@@ -369,6 +371,7 @@ async def get_snapshot_from_recording(
                 .where(
                     (frame_time >= Recordings.start_time)
                     & (frame_time <= Recordings.end_time)
+                    & (Recordings.start_time >= frame_time - MAX_SEGMENT_DURATION)
                 )
                 .where(Recordings.camera == camera_name)
                 .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
@@ -433,7 +436,9 @@ async def submit_recording_snapshot_to_plus(
             Recordings.start_time,
         )
         .where(
-            (frame_time >= Recordings.start_time) & (frame_time <= Recordings.end_time)
+            (frame_time >= Recordings.start_time)
+            & (frame_time <= Recordings.end_time)
+            & (Recordings.start_time >= frame_time - MAX_SEGMENT_DURATION)
         )
         .where(Recordings.camera == camera_name)
         .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
