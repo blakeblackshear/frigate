@@ -45,6 +45,7 @@ There are many solutions available to implement reverse proxies and the communit
 - [Nginx](#nginx-reverse-proxy)
 - [Traefik](#traefik-reverse-proxy)
 - [Caddy](#caddy-reverse-proxy)
+- [HAProxy](#haproxy)
 
 ## Apache2 Reverse Proxy
 
@@ -218,3 +219,35 @@ frigate.YOUR_DOMAIN.TLD {
 }
 
 ```
+
+## HAProxy
+
+This example is for a pure haproxy installation on a dedicated host. It assumes you have already combined the certificate parts in de cert file.
+
+The frontend config:
+```# Public Service: SSLSecured (Frigate)
+frontend SSLSecured
+    bind XXX.XXX.XXX.XXX:443 ssl /etx/haproxy/ssl/frigate.cert
+    mode http
+    option http-keep-alive
+    default_backend NVR
+
+    # CONDITION: NVR
+    acl acl_frigate hdr(host) -i nvr.example.video
+
+    # RULE: NVR
+    use_backend NVR if acl_frigate
+```
+
+The backend config:
+```# Backend Pool: NVR (Frigate)
+backend NVR
+    mode http
+    balance source
+    # stickiness
+    stick-table type ipv4 size 50k expire 30m  
+    stick on src
+    http-reuse safe
+    server Frigate XXX.XXX.XXX.XXX:8971
+```
+The above config is created for a Layer 7 proxy (application layer), if streaming the camera feeds are a little spotty or somewhat unstable, you can change the *mode* from http to tcp, which sets up a Layer 7 proxy (proxy by protocol).
