@@ -128,7 +128,7 @@ class ZoneConfig(BaseModel):
         # we know if any points are > 1 then it is using the
         # old native resolution coordinates
         if isinstance(coordinates, list):
-            explicit = any(p.split(",")[0] > "1.0" for p in coordinates)
+            explicit = any(float(p.split(",")[0]) > 1.0 for p in coordinates)
             try:
                 self._contour = np.array(
                     [
@@ -157,7 +157,7 @@ class ZoneConfig(BaseModel):
                 )
         elif isinstance(coordinates, str):
             points = coordinates.split(",")
-            explicit = any(p > "1.0" for p in points)
+            explicit = any(float(p) > 1.0 for p in points)
             try:
                 self._contour = np.array(
                     [
