@@ -33,6 +33,8 @@
         "dimensionMustBeEven": "Ha de ser un nombre parell."
     },
     "models": {
-        "defaultRequired": "Un model ha d'utilitzar una escena de \"Totes les càmeres\". Sense ella, qualsevol càmera que no esculli una escena no té cap model al qual tornar."
+        "defaultRequired": "Un model ha d'utilitzar l'escena per defecte. Sense ella, qualsevol càmera que no esculli una escena no té cap model al qual tornar.",
+        "sceneDuplicate": "Cada model ha d'utilitzar una escena diferent.",
+        "sameModel": "Els models {{scene}} i {{other}} utilitzen el mateix fitxer de model. L'execució d'un model sota diverses escenes només divideix el treball de detecció a través de detectors separats, que és més lent que un model amb tot el maquinari que apareix a sota."
     }
 }
