@@ -1,3 +1,5 @@
+"""Request models for ONVIF preset management."""
+
 from pydantic import BaseModel, Field
 
 
