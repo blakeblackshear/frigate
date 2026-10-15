@@ -22,7 +22,7 @@
       "deletedImage_one": "{{count}} görsel silindi",
       "deletedImage_other": "{{count}} görsel silindi",
       "deletedModel_one": "{{count}} model başarıyla silindi",
-      "deletedModel_other": "{{count}} modeller başarıyla silindi",
+      "deletedModel_other": "{{count}} model başarıyla silindi",
       "categorizedImage": "Fotoğraf Başarıyla Sınıflandırıldı",
       "trainedModel": "Model başarıyla eğitildi.",
       "trainingModel": "Model eğitimi başarıyla başladı.",

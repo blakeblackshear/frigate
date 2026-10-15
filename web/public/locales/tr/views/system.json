@@ -196,7 +196,8 @@
     "retentionUnmet": "Kayıtlar yer açma amacıyla saklama süreleri dolmadan siliniyorlar",
     "debugReplayActive": "Hata ayıklama oynatımı oturumu aktif",
     "moreMessages_one": "+{{count}}",
-    "moreMessages_other": "+{{count}}"
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Gömüler yeniden dizinlenemedi. Günlükleri kontrol edin."
   },
   "enrichments": {
     "embeddings": {
@@ -284,8 +285,6 @@
       "openSettings": "Ayarları aç",
       "openLink": "Bağlantıyı aç",
       "noMatches": "Filtreye uygun bilgilendirme yok",
-      "firstSeen_one": "İlk görünüşü {{time}}",
-      "firstSeen_other": "İlk görünüşü {{time}} · {{count}} kez",
       "filter": {
         "severity": "Vehamet",
         "error": "Hata",
@@ -302,7 +301,8 @@
         "failed_login_other": "{{user}} kullanıcısı için başarısız oturum açma girişimleri",
         "update_available": "Frigate {{version}} sürümü çıkmış",
         "ffmpeg_high_cpu": "FFmpeg CPU kullanımı yüksek (ortalama %{{cpu}})",
-        "detect_high_cpu": "Algılama CPU kullanımı yüksek (ortalama %{{cpu}})"
+        "detect_high_cpu": "Algılama CPU kullanımı yüksek (ortalama %{{cpu}})",
+        "object_processing_behind": "Takipli nesneler eş zamanlı işlenemediği için kamera kareleri atlandı. CPU kullanımını kontrol edin. Konteyner ya da sanal makine (VM) üzerindeki CPU limitleri veya sabitlemeleri (pinning) de Frigate'e çok az CPU bırakıyor olabilir"
       },
       "streamPrefix": "{{index}}. yayın: {{message}}",
       "streamPrefixRestream": "{{index}}. Yayın (go2rtc üzerinden): {{message}}",
@@ -371,5 +371,7 @@
       "streamsFlagged_one": "{{count}} yayında sorun var; Bilgilendirmeler altında listeleniyor",
       "streamsFlagged_other": "{{count}} yayında sorun var; Bilgilendirmeler altında listeleniyor"
     }
-  }
+  },
+  "showAllTabs": "Tüm sekmeleri göster",
+  "showLessTabs": "Daha az göster"
 }
