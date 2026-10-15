@@ -1000,12 +1000,12 @@ def get_relative_coordinates(
     # old native resolution coordinates
     where = f" for camera {camera_name}" if camera_name else ""
     if mask:
-        if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+        if isinstance(mask, list) and any(float(x) > 1.0 for x in mask[0].split(",")):
             relative_masks = []
             for m in mask:
                 points = m.split(",")
 
-                if any(x > "1.0" for x in points):
+                if any(float(x) > 1.0 for x in points):
                     rel_points = []
                     for i in range(0, len(points), 2):
                         x = int(points[i])
@@ -1026,7 +1026,7 @@ def get_relative_coordinates(
                     relative_masks.append(m)
 
             mask = relative_masks
-        elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+        elif isinstance(mask, str) and any(float(x) > 1.0 for x in mask.split(",")):
             points = mask.split(",")
             rel_points = []
 
