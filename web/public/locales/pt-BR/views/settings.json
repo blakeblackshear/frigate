@@ -1859,12 +1859,12 @@
     "addStream": "Adicionar stream",
     "addStreamDesc": "Digite um nome para o novo stream. Esse nome será usado para referenciar o stream na configuração da sua câmera.",
     "addUrl": "Adicionar URL",
-    "streamName": "Nome do stream",
+    "streamName": "Nome do fluxo",
     "streamNamePlaceholder": "ex.: porta_da_frente",
     "streamUrlPlaceholder": "ex.: rtsp://usuario:senha@192.168.1.100/stream",
     "deleteStreamConfirm": "Tem certeza de que deseja excluir o stream \"{{streamName}}\"? As câmeras que fazem referência a este stream podem parar de funcionar.",
     "noStreams": "Nenhum stream do go2rtc configurado. Adicione um stream para começar.",
-    "deleteStream": "Excluir stream",
+    "deleteStream": "Excluir fluxo",
     "validation": {
       "nameDuplicate": "Já existe um stream com este nome",
       "nameRequired": "O nome do stream é obrigatório",
@@ -2056,13 +2056,6 @@
     "scene": {
       "label": "Cena",
       "description": "O ambiente para o qual este modelo se destina. As câmeras escolhem um modelo definindo a mesma cena nas suas configurações de detecção, e o modelo com a cena all é usado por qualquer câmera que não defina uma."
-    },
-    "scenes": {
-      "all": "Todas as câmeras",
-      "indoor": "Interno",
-      "outdoor": "Externo",
-      "indoor_thermal": "Térmica interna",
-      "outdoor_thermal": "Térmica externa"
     },
     "hardware": {
       "label": "Hardware",

@@ -283,7 +283,6 @@
       "openSettings": "Abrir configurações",
       "openLink": "Abrir link",
       "noMatches": "Nenhum aviso corresponde ao filtro",
-      "firstSeen_one": "Visto pela primeira vez {{time}}",
       "title": "Avisos",
       "filter": {
         "severity": "Gravidade",
@@ -292,7 +291,6 @@
         "warning": "Aviso",
         "showHidden": "Mostrar ocultos"
       },
-      "firstSeen_other": "Visto pela primeira vez {{time}} · {{count}} vezes",
       "kinds": {
         "detector_stuck": "O detector {{detector}} foi reiniciado depois de parar de responder",
         "model_download_failed": "Falha ao baixar {{file}} para {{model}}: {{error}}",
