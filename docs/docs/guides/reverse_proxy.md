@@ -228,7 +228,7 @@ This example is for a pure haproxy installation on a dedicated host. It assumes 
 The frontend config:
 ```# Public Service: SSLSecured (Frigate)
 frontend SSLSecured
-    bind XXX.XXX.XXX.XXX:443 ssl /etc/haproxy/certs/frigate.cert
+    bind XXX.XXX.XXX.XXX:443 ssl crt /etc/haproxy/certs/frigate.cert
     mode http
     option http-keep-alive
     default_backend NVR
@@ -251,7 +251,7 @@ backend NVR
     http-reuse safe
     server Frigate XXX.XXX.XXX.XXX:8971
 ```
-The above config is created for a Layer 7 proxy (application layer, in this case http), if streaming the camera feeds are a little spotty or somewhat unstable, you can try to change the *mode* from http to tcp in both the frontend and backend config, which sets up a Layer 7 proxy (proxy by protocol).
+The above config is created for a Layer 7 proxy (application layer, in this case http), if streaming the camera feeds are a little spotty or somewhat unstable, you can try to change the *mode* from http to tcp in both the frontend and backend config, which sets up a Layer 4 proxy (proxy by protocol).
 
 ## OPNSense HAProxy add-on
 
