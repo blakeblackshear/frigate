@@ -516,6 +516,7 @@ Topic to send PTZ commands to camera.
 | `MOVE_<dir>`           | send command to continuously move in `<dir>`, possible values are [UP, DOWN, LEFT, RIGHT] |
 | `ZOOM_<dir>`           | send command to continuously zoom `<dir>`, possible values are [IN, OUT]                  |
 | `STOP`                 | send command to stop moving                                                               |
+| `HOME`                 | send command to move to the camera's home position                                        |
 
 ### `frigate/<camera_name>/ptz_autotracker/set`
 

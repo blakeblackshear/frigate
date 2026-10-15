@@ -13,12 +13,20 @@ for a camera that has autotracking off, because nothing clears them back out.
 import asyncio
 import threading
 import unittest
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock
 
 from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
-from frigate.ptz.onvif import OnvifController
+from frigate.ptz.onvif import (
+    DuplicatePresetError,
+    OnvifCommandEnum,
+    OnvifController,
+    OnvifRequestError,
+    OnvifUnavailableError,
+    PresetNotFoundError,
+)
 
 CAMERA = "ptz_cam"
 
@@ -212,6 +220,222 @@ class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
                 1001.0, metrics.start_time.value, metrics.stop_time.value
             )
         )
+
+
+class _Preset(dict):
+    """zeep preset objects support both item and attribute access."""
+
+    def __init__(self, token: str, name: str) -> None:
+        super().__init__(token=token)
+        self.Name = name
+
+
+def _make_node(
+    home_supported: bool = True, fixed_home: bool | None = None
+) -> SimpleNamespace:
+    # SimpleNamespace rather than MagicMock, whose missing attributes are truthy
+    node = SimpleNamespace(
+        token="node_1", HomeSupported=home_supported, MaximumNumberOfPresets=8
+    )
+    if fixed_home is not None:
+        node.FixedHomePosition = fixed_home
+    return node
+
+
+async def _make_preset_controller(
+    presets: list[_Preset], node: SimpleNamespace | None = None
+) -> OnvifController:
+    """An initialized controller whose camera serves presets like a real one:
+    SetPreset and RemovePreset change what GetPresets returns next."""
+    controller = _make_controller(autotracking_enabled=False)
+    controller.cams[CAMERA].update(
+        {"presets": {}, "preset_details": [], "max_presets": None}
+    )
+    controller.preset_locks = {CAMERA: asyncio.Lock()}
+    ptz = controller.cams[CAMERA]["onvif"].create_ptz_service.return_value
+    stored = list(presets)
+
+    async def set_preset(request: dict) -> str:
+        # yield like a network call so overlapping requests can interleave
+        await asyncio.sleep(0)
+        token = request.get("PresetToken")
+        if token is None:
+            token = f"new_{len(stored)}"
+            stored.append(_Preset(token, request["PresetName"]))
+        else:
+            index = next(i for i, p in enumerate(stored) if p["token"] == token)
+            stored[index] = _Preset(token, request["PresetName"])
+        return token
+
+    async def remove_preset(request: dict) -> None:
+        stored[:] = [p for p in stored if p["token"] != request["PresetToken"]]
+
+    ptz.GetPresets = AsyncMock(side_effect=lambda _: list(stored))
+    ptz.SetPreset = AsyncMock(side_effect=set_preset)
+    ptz.RemovePreset = AsyncMock(side_effect=remove_preset)
+    ptz.SetHomePosition = AsyncMock()
+    ptz.GotoHomePosition = AsyncMock()
+    ptz.GetNodes = AsyncMock(return_value=[node or _make_node()])
+
+    assert await controller._init_onvif(CAMERA)
+    return controller
+
+
+class TestPresetManagement(unittest.IsolatedAsyncioTestCase):
+    async def test_presets_loaded_with_original_names(self) -> None:
+        controller = await _make_preset_controller(
+            [_Preset("1", "Driveway"), _Preset("2", "Gate")]
+        )
+        cam = controller.cams[CAMERA]
+
+        self.assertEqual(cam["presets"], {"driveway": "1", "gate": "2"})
+        self.assertEqual(
+            cam["preset_details"],
+            [{"token": "1", "name": "Driveway"}, {"token": "2", "name": "Gate"}],
+        )
+        self.assertEqual(cam["max_presets"], 8)
+
+    async def test_create_preset_refreshes_cache(self) -> None:
+        controller = await _make_preset_controller([_Preset("1", "Driveway")])
+        ptz = controller.cams[CAMERA]["ptz"]
+
+        token = await controller.set_preset(CAMERA, "  Porch ")
+
+        ptz.SetPreset.assert_awaited_once_with(
+            {"ProfileToken": "profile_1", "PresetName": "Porch"}
+        )
+        self.assertEqual(token, "new_1")
+        self.assertEqual(controller.cams[CAMERA]["presets"]["porch"], "new_1")
+
+    async def test_overwrite_keeps_name_and_sends_token(self) -> None:
+        controller = await _make_preset_controller([_Preset("1", "Driveway")])
+        ptz = controller.cams[CAMERA]["ptz"]
+
+        token = await controller.set_preset(CAMERA, None, "1")
+
+        ptz.SetPreset.assert_awaited_once_with(
+            {"ProfileToken": "profile_1", "PresetName": "Driveway", "PresetToken": "1"}
+        )
+        self.assertEqual(token, "1")
+
+    async def test_overwrite_with_new_name(self) -> None:
+        controller = await _make_preset_controller([_Preset("1", "Driveway")])
+
+        await controller.set_preset(CAMERA, "Garage", "1")
+
+        self.assertEqual(controller.cams[CAMERA]["presets"], {"garage": "1"})
+
+    async def test_rejected_without_contacting_camera(self) -> None:
+        controller = await _make_preset_controller(
+            [_Preset("1", "Driveway"), _Preset("2", "Gate")]
+        )
+        ptz = controller.cams[CAMERA]["ptz"]
+
+        for name, token, error in (
+            # duplicate, recalled by lowercase name
+            ("driveway", None, DuplicatePresetError),
+            ("Gate", "1", DuplicatePresetError),  # renaming onto another preset
+            ("   ", None, OnvifRequestError),
+            ("Porch", "missing", PresetNotFoundError),
+        ):
+            with self.subTest(name=name, token=token):
+                with self.assertRaises(error):
+                    await controller.set_preset(CAMERA, name, token)
+
+        with self.assertRaises(PresetNotFoundError):
+            await controller.remove_preset(CAMERA, "missing")
+
+        ptz.SetPreset.assert_not_awaited()
+        ptz.RemovePreset.assert_not_awaited()
+
+    async def test_camera_fault_propagates(self) -> None:
+        controller = await _make_preset_controller([])
+        controller.cams[CAMERA]["ptz"].SetPreset.side_effect = Exception("full")
+
+        with self.assertRaisesRegex(Exception, "full"):
+            await controller.set_preset(CAMERA, "Porch")
+
+    async def test_remove_preset_refreshes_cache(self) -> None:
+        controller = await _make_preset_controller(
+            [_Preset("1", "Driveway"), _Preset("2", "Gate")]
+        )
+
+        await controller.remove_preset(CAMERA, "1")
+
+        controller.cams[CAMERA]["ptz"].RemovePreset.assert_awaited_once_with(
+            {"ProfileToken": "profile_1", "PresetToken": "1"}
+        )
+        self.assertEqual(controller.cams[CAMERA]["presets"], {"gate": "2"})
+
+    async def test_unconfigured_camera(self) -> None:
+        controller = await _make_preset_controller([])
+
+        with self.assertRaises(OnvifUnavailableError):
+            await controller.set_preset("other_cam", "Porch")
+
+    async def test_home_features(self) -> None:
+        for node, expected in (
+            (_make_node(home_supported=True), ["home", "home-set"]),
+            (_make_node(home_supported=True, fixed_home=True), ["home"]),
+            (_make_node(home_supported=False), []),
+        ):
+            with self.subTest(node=node):
+                controller = await _make_preset_controller([], node)
+                features = controller.cams[CAMERA]["features"]
+                self.assertEqual(
+                    [f for f in features if f.startswith("home")], expected
+                )
+
+    async def test_home_commands(self) -> None:
+        controller = await _make_preset_controller([])
+        controller.ptz_metrics = {CAMERA: PTZMetrics()}
+        ptz = controller.cams[CAMERA]["ptz"]
+
+        await controller.set_home(CAMERA)
+        await controller.handle_command_async(CAMERA, OnvifCommandEnum.home)
+
+        ptz.SetHomePosition.assert_awaited_once_with({"ProfileToken": "profile_1"})
+        ptz.GotoHomePosition.assert_awaited_once_with({"ProfileToken": "profile_1"})
+        self.assertFalse(controller.cams[CAMERA]["active"])
+
+    async def test_failed_home_command_clears_active(self) -> None:
+        controller = await _make_preset_controller([])
+        controller.ptz_metrics = {CAMERA: PTZMetrics()}
+        controller.cams[CAMERA]["ptz"].GotoHomePosition.side_effect = Exception(
+            "home not supported"
+        )
+
+        await controller.handle_command_async(CAMERA, OnvifCommandEnum.home)
+
+        self.assertFalse(controller.cams[CAMERA]["active"])
+
+    async def test_write_succeeds_when_refresh_fails(self) -> None:
+        controller = await _make_preset_controller(
+            [_Preset("1", "Driveway"), _Preset("2", "Gate")]
+        )
+        ptz = controller.cams[CAMERA]["ptz"]
+        ptz.GetPresets.side_effect = Exception("timeout")
+
+        token = await controller.set_preset(CAMERA, "Porch")
+        await controller.set_preset(CAMERA, "Garage", "1")
+        await controller.remove_preset(CAMERA, "2")
+
+        self.assertEqual(token, "new_2")
+        self.assertEqual(
+            controller.cams[CAMERA]["presets"], {"porch": "new_2", "garage": "1"}
+        )
+
+    async def test_overlapping_creates_reject_duplicate(self) -> None:
+        controller = await _make_preset_controller([])
+
+        results = await asyncio.gather(
+            controller.set_preset(CAMERA, "Porch"),
+            controller.set_preset(CAMERA, "porch"),
+            return_exceptions=True,
+        )
+
+        self.assertEqual(sum(isinstance(r, DuplicatePresetError) for r in results), 1)
+        self.assertEqual(controller.cams[CAMERA]["presets"], {"porch": "new_0"})
 
 
 class TestOnvifClose(unittest.TestCase):

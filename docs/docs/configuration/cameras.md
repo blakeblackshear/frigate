@@ -223,6 +223,12 @@ If your camera has multiple ONVIF profiles, you can specify which one to use for
 
 An ONVIF-capable camera that supports relative movement within the field of view (FOV) can also be configured to automatically track moving objects and keep them in the center of the frame. For autotracking setup, see the [autotracking](autotracking.md) docs.
 
+### Managing presets and the home position
+
+Admin users can manage the camera's ONVIF presets directly from the PTZ controls in the Live view, without opening the camera's own web interface. The presets menu opens a preset manager where the camera's current position can be saved as a new preset or as the home position, and existing presets can be overwritten or deleted. A home button appears when the camera reports home position support.
+
+Presets are stored on the camera itself. ONVIF has no rename operation, so overwriting a preset (with or without a new name) always stores the camera's current position. If a preset is used as the autotracking `return_preset`, renaming or deleting it requires updating the config as well.
+
 ## ONVIF PTZ camera recommendations
 
 This list of working and non-working PTZ cameras is based on user feedback. If you'd like to report specific quirks or issues with a manufacturer or camera that would be helpful for other users, open a pull request to add to this list.

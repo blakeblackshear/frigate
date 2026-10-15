@@ -5926,6 +5926,167 @@ paths:
         - frigateUserAuth: []
       x-required-role: camera
       description: '**Access:** Authenticated user with access to the referenced camera.'
+  /{camera_name}/ptz/presets:
+    post:
+      tags:
+        - Media
+      summary: Camera Ptz Preset Create
+      description: |-
+        **Access:** Admin role required.
+
+        Save the current camera position as a new ONVIF preset.
+      operationId: camera_ptz_preset_create__camera_name__ptz_presets_post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PtzPresetCreateBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /{camera_name}/ptz/presets/{token}:
+    put:
+      tags:
+        - Media
+      summary: Camera Ptz Preset Update
+      description: |-
+        **Access:** Admin role required.
+
+        Overwrite an ONVIF preset with the current camera position, optionally renaming it.
+      operationId: 
+        camera_ptz_preset_update__camera_name__ptz_presets__token__put
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PtzPresetUpdateBody'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+    delete:
+      tags:
+        - Media
+      summary: Camera Ptz Preset Delete
+      description: |-
+        **Access:** Admin role required.
+
+        Delete an ONVIF preset from the camera.
+      operationId: 
+        camera_ptz_preset_delete__camera_name__ptz_presets__token__delete
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+            title: Token
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
+  /{camera_name}/ptz/home:
+    post:
+      tags:
+        - Media
+      summary: Camera Ptz Home Set
+      description: |-
+        **Access:** Admin role required.
+
+        Save the current camera position as the ONVIF home position.
+      operationId: camera_ptz_home_set__camera_name__ptz_home_post
+      parameters:
+        - name: camera_name
+          in: path
+          required: true
+          schema:
+            anyOf:
+              - type: string
+              - type: 'null'
+            title: Camera Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /{camera_name}/latest.{extension}:
     get:
       tags:
@@ -9395,6 +9556,28 @@ components:
         - end
       title: PreviewModel
       description: Model representing a single preview clip.
+    PtzPresetCreateBody:
+      properties:
+        name:
+          type: string
+          maxLength: 64
+          minLength: 1
+          title: Preset name
+      type: object
+      required:
+        - name
+      title: PtzPresetCreateBody
+    PtzPresetUpdateBody:
+      properties:
+        name:
+          anyOf:
+            - type: string
+              maxLength: 64
+              minLength: 1
+            - type: 'null'
+          title: New preset name, or None to keep the current name
+      type: object
+      title: PtzPresetUpdateBody
     RegenerateDescriptionEnum:
       type: string
       enum:

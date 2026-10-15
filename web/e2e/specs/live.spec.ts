@@ -7,9 +7,14 @@
  * now-deleted ptz-overlay.spec.ts.
  */
 
-import { test, expect } from "../fixtures/frigate-test";
+import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
+import { viewerProfile } from "../fixtures/mock-data/profile";
 import { LivePage } from "../pages/live.page";
-import { installWsFrameCapture, waitForWsFrame } from "../helpers/ws-frames";
+import {
+  installWsFrameCapture,
+  readWsFrames,
+  waitForWsFrame,
+} from "../helpers/ws-frames";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -238,6 +243,373 @@ test.describe("Live PTZ preset dropdown @critical", () => {
     await expect
       .poll(() => menu.isVisible().catch(() => false), { timeout: 1_000 })
       .toBe(false);
+  });
+});
+
+test.describe("Live PTZ preset management @high", () => {
+  // Presets are written to the camera through the REST API (admin only);
+  // recalling a preset or home still goes over the ptz WS topic.
+
+  const PRESETS = [
+    { token: "tok 1", name: "Driveway" },
+    { token: "2", name: "Gate" },
+  ];
+
+  async function installPtz(
+    frigateApp: FrigateApp,
+    {
+      features = ["pt", "zoom", "home", "home-set"],
+      profile,
+    }: { features?: string[]; profile?: ReturnType<typeof viewerProfile> } = {},
+  ) {
+    await frigateApp.api.install({
+      profile,
+      config: {
+        cameras: {
+          [PTZ_CAMERA]: {
+            onvif: {
+              host: "10.0.0.50",
+              autotracking: { return_preset: "driveway" },
+            },
+          },
+        },
+      },
+    });
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/info`, (route) =>
+      route.fulfill({
+        json: {
+          name: PTZ_CAMERA,
+          features,
+          presets: PRESETS.map((p) => p.name.toLowerCase()),
+          preset_details: PRESETS,
+          max_presets: 8,
+          profiles: [],
+        },
+      }),
+    );
+  }
+
+  async function openPresetMenu(frigateApp: FrigateApp) {
+    const trigger = frigateApp.page.getByRole("button", {
+      name: "PTZ camera presets",
+    });
+    await expect(trigger).toBeVisible({ timeout: 5_000 });
+    await trigger.click();
+    const menu = frigateApp.page.getByRole("menu");
+    await expect(menu).toBeVisible({ timeout: 3_000 });
+    return menu;
+  }
+
+  async function openPresetManager(frigateApp: FrigateApp) {
+    const menu = await openPresetMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Manage presets" }).click();
+    const manager = frigateApp.page.getByRole("dialog", {
+      name: "PTZ presets",
+    });
+    await expect(manager).toBeVisible();
+    return manager;
+  }
+
+  // saving a new preset is reached through the preset manager
+  async function openCreateDialog(frigateApp: FrigateApp) {
+    const manager = await openPresetManager(frigateApp);
+    await manager.getByRole("button", { name: "Add preset" }).click();
+    const dialog = frigateApp.page.getByRole("dialog", {
+      name: "Save current position as preset",
+    });
+    await expect(dialog).toBeVisible();
+    return dialog;
+  }
+
+  test("admin saves the current position as a new preset", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+
+    let body: unknown;
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/presets`, (route) => {
+      body = route.request().postDataJSON();
+      return route.fulfill({
+        json: { success: true, message: "Preset saved", token: "3" },
+      });
+    });
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const dialog = await openCreateDialog(frigateApp);
+    await dialog.getByRole("textbox").fill("Porch");
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    await expect.poll(() => body).toEqual({ name: "Porch" });
+    await expect(
+      frigateApp.page.getByText("Preset saved").first(),
+    ).toBeVisible();
+    await expect(dialog).not.toBeVisible();
+  });
+
+  test("a validation error from the API shows a toast instead of crashing", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+    // FastAPI 422 bodies carry a list of objects in detail
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/presets`, (route) =>
+      route.fulfill({
+        status: 422,
+        json: {
+          detail: [
+            {
+              type: "string_too_long",
+              loc: ["body", "name"],
+              msg: "String should have at most 64 characters",
+              input: "x",
+            },
+          ],
+        },
+      }),
+    );
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const dialog = await openCreateDialog(frigateApp);
+    await dialog.getByRole("textbox").fill("Porch");
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    await expect(
+      frigateApp.page.getByText("The camera rejected the request").first(),
+    ).toBeVisible();
+    await expect(dialog).toBeVisible();
+  });
+
+  test("a rejected request shows the translated reason, not server text", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/presets`, (route) =>
+      route.fulfill({
+        status: 409,
+        json: {
+          success: false,
+          message: "server text",
+          reason: "duplicate_name",
+        },
+      }),
+    );
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const dialog = await openCreateDialog(frigateApp);
+    // 63 letters and an emoji are 64 characters, the most the API accepts
+    await dialog.getByRole("textbox").fill(`${"a".repeat(63)}🙂`);
+    await dialog.getByRole("button", { name: "Save" }).click();
+
+    await expect(
+      frigateApp.page
+        .getByText("A preset with this name already exists")
+        .first(),
+    ).toBeVisible();
+    await expect(frigateApp.page.getByText("server text")).toHaveCount(0);
+  });
+
+  test("names outside 1-64 characters are rejected before any request", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+    let requests = 0;
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/presets`, (route) => {
+      requests += 1;
+      return route.fulfill({ json: { success: true, message: "ok" } });
+    });
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const dialog = await openCreateDialog(frigateApp);
+
+    for (const name of ["x".repeat(65), "   "]) {
+      await dialog.getByRole("textbox").fill(name);
+      await dialog.getByRole("button", { name: "Save" }).click();
+      await expect(
+        dialog.getByText("Preset names must be 1 to 64 characters"),
+      ).toBeVisible();
+    }
+    expect(requests).toBe(0);
+  });
+
+  test("typing a preset name with digits does not recall presets", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+    await installWsFrameCapture(frigateApp.page);
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const dialog = await openCreateDialog(frigateApp);
+    await dialog.getByRole("textbox").click();
+    // "1" and "2" are the preset hotkeys for Driveway and Gate
+    await frigateApp.page.keyboard.type("Cam 12");
+    await frigateApp.page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    // the manager stays open underneath
+    await frigateApp.page.keyboard.press("Escape");
+    await expect(
+      frigateApp.page.getByRole("dialog", { name: "PTZ presets" }),
+    ).not.toBeVisible();
+
+    // recall Gate from the menu; frames are sent in order, so any frame the
+    // typing produced would already be captured once this one arrives
+    const reopened = await openPresetMenu(frigateApp);
+    await reopened.getByRole("menuitem", { name: "Gate" }).click();
+    await waitForWsFrame(frigateApp.page, (frame) =>
+      frame.includes("preset_Gate"),
+    );
+    const presetFrames = (await readWsFrames(frigateApp.page)).filter((frame) =>
+      frame.includes("preset_"),
+    );
+    expect(presetFrames).toHaveLength(1);
+  });
+
+  test("the menu offers only the preset manager besides the presets", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const menu = await openPresetMenu(frigateApp);
+    await expect(menu.getByRole("menuitem")).toHaveText([
+      "Driveway",
+      "Gate",
+      "Manage presets",
+    ]);
+  });
+
+  test("opening the manager does not show a preset action tooltip", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const manager = await openPresetManager(frigateApp);
+    await expect(
+      manager.getByRole("button", { name: "Move to preset" }).first(),
+    ).not.toBeFocused();
+    await expect(frigateApp.page.getByRole("tooltip")).toHaveCount(0);
+  });
+
+  test("manager overwrites with a new name and deletes by encoded token", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+
+    const requests: { method: string; url: string; body: unknown }[] = [];
+    await frigateApp.page.route(
+      `**/api/${PTZ_CAMERA}/ptz/presets/**`,
+      (route) => {
+        const request = route.request();
+        requests.push({
+          method: request.method(),
+          url: request.url(),
+          body: request.postDataJSON(),
+        });
+        return route.fulfill({ json: { success: true, message: "ok" } });
+      },
+    );
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const manager = await openPresetManager(frigateApp);
+    await expect(manager.getByText("2 of 8 presets")).toBeVisible();
+
+    // overwrite Driveway (the autotracking return preset) under a new name
+    await manager
+      .getByRole("button", { name: "Overwrite with current position" })
+      .first()
+      .click();
+    const overwrite = frigateApp.page.getByRole("dialog", {
+      name: "Overwrite preset Driveway",
+    });
+    await expect(
+      overwrite.getByText(/Autotracking uses this preset as its return preset/),
+    ).toBeVisible();
+    await overwrite.getByRole("textbox").fill("Drive");
+    await overwrite.getByRole("button", { name: "Save" }).click();
+    await expect
+      .poll(() => requests.at(-1))
+      .toEqual({
+        method: "PUT",
+        url: expect.stringMatching(/\/ptz\/presets\/tok%201$/),
+        body: { name: "Drive" },
+      });
+
+    // delete Gate
+    await manager.getByRole("button", { name: "Delete" }).nth(1).click();
+    const confirm = frigateApp.page.getByRole("alertdialog");
+    await expect(confirm).toContainText("Delete preset Gate?");
+    await confirm.getByRole("button", { name: "Delete" }).click();
+    await expect
+      .poll(() => requests.at(-1)?.method + " " + requests.at(-1)?.url)
+      .toMatch(/^DELETE .*\/ptz\/presets\/2$/);
+  });
+
+  test("home button recalls home over WS and set home posts", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp);
+    await installWsFrameCapture(frigateApp.page);
+
+    let setHomeCalls = 0;
+    await frigateApp.page.route(`**/api/${PTZ_CAMERA}/ptz/home`, (route) => {
+      setHomeCalls += 1;
+      return route.fulfill({ json: { success: true, message: "ok" } });
+    });
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    await frigateApp.page
+      .getByRole("button", { name: "Move PTZ camera to its home position" })
+      .click();
+    await waitForWsFrame(
+      frigateApp.page,
+      (frame) =>
+        frame.includes(`"${PTZ_CAMERA}/ptz"`) && frame.includes('"HOME"'),
+    );
+
+    const manager = await openPresetManager(frigateApp);
+    await manager
+      .getByRole("button", { name: "Set current position as home" })
+      .click();
+    await expect.poll(() => setHomeCalls).toBe(1);
+    await expect(
+      frigateApp.page.getByText("Home position saved").first(),
+    ).toBeVisible();
+  });
+
+  test("fixed home position hides set home", async ({ frigateApp }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp, { features: ["pt", "zoom", "home"] });
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const manager = await openPresetManager(frigateApp);
+    await expect(
+      manager.getByRole("button", { name: "Add preset" }),
+    ).toBeVisible();
+    await expect(
+      manager.getByRole("button", { name: "Set current position as home" }),
+    ).toHaveCount(0);
+  });
+
+  test("viewer can recall presets but not manage them", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "PTZ preset dropdown is desktop-only");
+    await installPtz(frigateApp, { profile: viewerProfile() });
+
+    await frigateApp.goto(`/#${PTZ_CAMERA}`);
+    const menu = await openPresetMenu(frigateApp);
+    await expect(menu.getByRole("menuitem", { name: "Gate" })).toBeVisible();
+    await expect(
+      menu.getByRole("menuitem", { name: "Manage presets" }),
+    ).toHaveCount(0);
   });
 });
 

@@ -8,7 +8,7 @@ import os
 import subprocess as sp
 import tempfile
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Coroutine, Iterator
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path as FilePath
@@ -35,6 +35,10 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaLatestFrameQueryParams,
     MediaMjpegFeedQueryParams,
 )
+from frigate.api.defs.request.ptz_body import (
+    PtzPresetCreateBody,
+    PtzPresetUpdateBody,
+)
 from frigate.api.defs.tags import Tags
 from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
@@ -48,6 +52,7 @@ from frigate.const import (
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
 from frigate.output.preview import get_most_recent_preview_frame
+from frigate.ptz.onvif import OnvifRequestError, OnvifUnavailableError
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.file import (
@@ -196,6 +201,148 @@ async def camera_ptz_info(request: Request, camera_name: str):
             content={"success": False, "message": "Camera not found"},
             status_code=404,
         )
+
+
+# details stay in the server log; clients get a stable message and a reason
+# code the web UI translates
+PTZ_ERRORS: dict[str, tuple[int, str]] = {
+    "onvif_unavailable": (404, "ONVIF is not available for this camera"),
+    "preset_not_found": (404, "Preset not found"),
+    "duplicate_name": (409, "A preset with this name already exists"),
+    "invalid_request": (400, "Invalid preset request"),
+    "camera_rejected": (502, "The camera rejected the request"),
+}
+
+
+def _ptz_error(reason: str) -> JSONResponse:
+    status_code, message = PTZ_ERRORS[reason]
+    return JSONResponse(
+        content={"success": False, "message": message, "reason": reason},
+        status_code=status_code,
+    )
+
+
+async def _ptz_management_request(
+    request: Request,
+    camera_name: str,
+    method: Callable[..., Coroutine[Any, Any, Any]],
+    *args: Any,
+    message: str,
+) -> JSONResponse:
+    """Run a PTZ management call on the OnvifController loop and map its errors."""
+    if camera_name not in request.app.frigate_config.cameras:
+        return JSONResponse(
+            content={"success": False, "message": "Camera not found"},
+            status_code=404,
+        )
+
+    future = asyncio.run_coroutine_threadsafe(
+        method(camera_name, *args), request.app.onvif.loop
+    )
+
+    try:
+        result = await asyncio.wrap_future(future)
+    except OnvifUnavailableError as e:
+        logger.warning("PTZ request for %s failed: %s", camera_name, e)
+        return _ptz_error("onvif_unavailable")
+    except OnvifRequestError as e:
+        logger.debug("PTZ request for %s rejected: %s", camera_name, e)
+        return _ptz_error(e.reason)
+    except Exception as e:
+        # zeep faults carry the camera's own explanation in .message
+        logger.error(
+            "Camera %s rejected PTZ request: %s",
+            camera_name,
+            getattr(e, "message", None) or e,
+        )
+        return _ptz_error("camera_rejected")
+
+    content: dict[str, Any] = {"success": True, "message": message}
+
+    if isinstance(result, str):
+        content["token"] = result
+
+    return JSONResponse(content=content)
+
+
+@router.post(
+    "/{camera_name}/ptz/presets",
+    dependencies=[
+        Depends(require_camera_access),
+        Depends(require_role(["admin"])),
+    ],
+    description="Save the current camera position as a new ONVIF preset.",
+)
+async def camera_ptz_preset_create(
+    request: Request, camera_name: str, body: PtzPresetCreateBody
+):
+    """Save the current camera position as a new ONVIF preset."""
+    return await _ptz_management_request(
+        request,
+        camera_name,
+        request.app.onvif.set_preset,
+        body.name,
+        message="Preset saved",
+    )
+
+
+@router.put(
+    "/{camera_name}/ptz/presets/{token}",
+    dependencies=[
+        Depends(require_camera_access),
+        Depends(require_role(["admin"])),
+    ],
+    description="Overwrite an ONVIF preset with the current camera position, optionally renaming it.",
+)
+async def camera_ptz_preset_update(
+    request: Request, camera_name: str, token: str, body: PtzPresetUpdateBody
+):
+    """Overwrite a preset with the current position, optionally renaming it."""
+    return await _ptz_management_request(
+        request,
+        camera_name,
+        request.app.onvif.set_preset,
+        body.name,
+        token,
+        message="Preset updated",
+    )
+
+
+@router.delete(
+    "/{camera_name}/ptz/presets/{token}",
+    dependencies=[
+        Depends(require_camera_access),
+        Depends(require_role(["admin"])),
+    ],
+    description="Delete an ONVIF preset from the camera.",
+)
+async def camera_ptz_preset_delete(request: Request, camera_name: str, token: str):
+    """Delete an ONVIF preset from the camera."""
+    return await _ptz_management_request(
+        request,
+        camera_name,
+        request.app.onvif.remove_preset,
+        token,
+        message="Preset deleted",
+    )
+
+
+@router.post(
+    "/{camera_name}/ptz/home",
+    dependencies=[
+        Depends(require_camera_access),
+        Depends(require_role(["admin"])),
+    ],
+    description="Save the current camera position as the ONVIF home position.",
+)
+async def camera_ptz_home_set(request: Request, camera_name: str):
+    """Save the current camera position as the ONVIF home position."""
+    return await _ptz_management_request(
+        request,
+        camera_name,
+        request.app.onvif.set_home,
+        message="Home position saved",
+    )
 
 
 @router.get(

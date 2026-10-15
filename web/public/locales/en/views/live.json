@@ -59,7 +59,52 @@
         "label": "Click in the frame to center the PTZ camera"
       }
     },
-    "presets": "PTZ camera presets"
+    "presets": "PTZ camera presets",
+    "home": {
+      "goto": "Move PTZ camera to its home position",
+      "set": "Set current position as home",
+      "setSuccess": "Home position saved"
+    },
+    "presetManagement": {
+      "manage": "Manage presets",
+      "title": "PTZ presets",
+      "desc": "Presets are stored on the camera. Saving always stores the camera's current position.",
+      "empty": "This camera has no presets yet.",
+      "count_one": "{{count}} of {{max}} presets",
+      "count_other": "{{count}} of {{max}} presets",
+      "goto": "Move to preset",
+      "create": {
+        "label": "Add preset",
+        "title": "Save current position as preset",
+        "desc": "The camera stores its current position under this name.",
+        "placeholder": "Preset name"
+      },
+      "overwrite": {
+        "label": "Overwrite with current position",
+        "title": "Overwrite preset {{name}}",
+        "desc": "ONVIF cannot rename a preset without moving it, so this stores the camera's current position. Change the name to rename the preset."
+      },
+      "delete": {
+        "title": "Delete preset {{name}}?",
+        "desc": "The preset is removed from the camera."
+      },
+      "returnPresetWarning": {
+        "rename": "Autotracking uses this preset as its return preset; renaming it will stop autotracking from returning here until the config is updated.",
+        "delete": "Autotracking uses this preset as its return preset; it will no longer return after tracking ends until the config is updated."
+      },
+      "success": {
+        "create": "Preset saved",
+        "overwrite": "Preset updated",
+        "delete": "Preset deleted"
+      },
+      "error": "The camera rejected the request",
+      "errors": {
+        "onvifUnavailable": "ONVIF is not available for this camera",
+        "presetNotFound": "This preset no longer exists on the camera",
+        "duplicateName": "A preset with this name already exists"
+      },
+      "invalidName": "Preset names must be 1 to 64 characters"
+    }
   },
   "camera": {
     "turnOn": "Turn Camera On",
