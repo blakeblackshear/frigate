@@ -33,6 +33,8 @@
         "dimensionMustBeEven": "Peab olema paarisarv."
     },
     "models": {
-        "defaultRequired": "Üks mudel peab kasutama stseeni „Kõik kaamerad“. Ilma selleta ei ole ühelgi kaameral, millel stseen on valimata,pole tagavaravariandina kasutatavat mudelit."
+        "defaultRequired": "Üks mudel peab kasutama vaikimisi stseeni. Ilma selleta ei ole ühelgi kaameral, millel stseen on valimata, tagavaravariandina kasutatavat mudelit.",
+        "sceneDuplicate": "Iga mudel peab kasutama erinevat stseeni.",
+        "sameModel": "„{{scene}}“ stseen ja {{other}} muud mudelit kasutavad sama mudelifaili. Ühe mudeli käitamine mitmes stseenis jagab tuvastustöö lihtsalt eraldi tuvastajate vahel, mis on aeglasem kui ühe mudeli kasutamine, mille all on loetletud kogu riistvara."
     }
 }

@@ -39,7 +39,7 @@
           "label": "Kinnita see silt Frigate+ teenuse jaoks"
         },
         "toast": {
-          "error": "Frigate+ teenusesse saatmine ebaõnnestus. Palun kontrolli oma võrguühendust ja proovi uuesti."
+          "error": "Frigate+ teenusesse saatmine ei õnnestunud. Palun kontrolli seadme võrguühenduse toimimist ja proovi uuesti."
         }
       },
       "submitToPlus": {
@@ -81,7 +81,7 @@
       "batchSuccess_one": "Alustasin 1 ekspordiga. Avan juhtumi kohe.",
       "batchSuccess_other": "Alustasin {{count}} ekspordiga. Avan juhtumi kohe.",
       "batchPartial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestunud kaamerad: {{failedCameras}}",
-      "batchFailed": "{{total}} eksporti ebaõnnestus algatada. Ebaõnnestunud kaamerad: {{failedCameras}}",
+      "batchFailed": "{{total}} ekspordi algatamine ei õnnestunud. Ebaõnnestunud kaamerad: {{failedCameras}}",
       "batchQueuedSuccess_one": "1 eksportimine on lisatud järjekorda.",
       "batchQueuedSuccess_other": "{{count}} eksportimist on lisatud järjekorda.",
       "batchQueuedPartial": "{{successful}}/{{total}} ekspordist on järjekorda lisatud. Ebaõnnestunud kaamerad: {{failedCameras}}",
@@ -141,7 +141,7 @@
         "started_one": "Alustasin ühte eksportimist.",
         "started_other": "Alustasin {{count}} eksportimisega.",
         "partial": "Alustasin {{successful}}/{{total}} ekspordiga. Ebaõnnestusid: {{failedItems}}",
-        "failed": "{{total}} ekspordi algatamine ebaõnnestus. Ebaõnnestunud: {{failedItems}}"
+        "failed": "{{total}} ekspordi algatamine ei õnnestunud. Ebaõnnestunud: {{failedItems}}"
       }
     },
     "stream": {
