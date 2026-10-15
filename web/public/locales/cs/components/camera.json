@@ -16,7 +16,7 @@
             "continuousStreaming": {
               "label": "Kontinuální streamování",
               "desc": {
-                "title": "Obraz z kamery bude vždy živým přenosem, když je viditelný na dashboardu, i když není detekována žádná aktivita.",
+                "title": "Když je kamera viditelná v živém přehledu, její obraz se vždy přehrává jako živý stream, i když není detekována žádná aktivita.",
                 "warning": "Nepřetržité streamování může způsobit velké využití šířky pásma a problémy s výkonem. Používejte opatrně."
               }
             }
@@ -25,11 +25,11 @@
           "placeholder": "Vyberte metodu vysílání"
         },
         "label": "Nastavení streamování kamery",
-        "audioIsAvailable": "Audio je k dispozici pro tento stream",
+        "audioIsAvailable": "Zvuk je dostupný pro tento stream",
         "audioIsUnavailable": "Audio není k dispozici pro tento stream",
         "audio": {
           "tips": {
-            "title": "Pro tento stream musí být výstup zvuku z vaší kamery a nakonfigurován v go2rtc."
+            "title": "Pro tento stream musí kamera poskytovat zvuk a jeho přenos musí být nastaven v go2rtc."
           }
         },
         "compatibilityMode": {
@@ -37,11 +37,11 @@
           "desc": "Tuto možnost povolte pouze v případě, že živý přenos vaší kamery zobrazuje barevné artefakty a má na pravé straně obrazu diagonální čáru."
         },
         "title": "Nastavení streamování {{cameraName}}",
-        "desc": "Změní možnosti živého vysílání pro dashboard této skupiny kamer. <em>Tato nastavení jsou specifická pro zařízení/prohlížeč.</em>",
-        "stream": "Proud",
-        "placeholder": "Vyberte proud"
+        "desc": "Změní možnosti živého streamování pro přehled této skupiny kamer. <em>Tato nastavení jsou specifická pro zařízení/prohlížeč.</em>",
+        "stream": "Stream",
+        "placeholder": "Vyberte stream"
       },
-      "birdseye": "Ptačí oko"
+      "birdseye": "Birdseye"
     },
     "delete": {
       "confirm": {
@@ -52,8 +52,8 @@
     },
     "add": "Přidat skupinu kamer",
     "name": {
-      "label": "Jméno",
-      "placeholder": "Zadejte jméno…",
+      "label": "Název",
+      "placeholder": "Zadejte název…",
       "errorMessage": {
         "exists": "Tento název skupiny kamer již existuje.",
         "mustLeastCharacters": "Název skupiny kamer musí mít minimálně 2 znaky.",
@@ -81,9 +81,9 @@
     },
     "zones": "Zóny",
     "motion": "Pohyb",
-    "regions": "Kraje",
-    "timestamp": "Časové razítko",
-    "boundingBox": "Ohraničení",
+    "regions": "Oblasti",
+    "timestamp": "Časová značka",
+    "boundingBox": "Ohraničující rámeček",
     "mask": "Maska",
     "paths": "Cesty"
   }

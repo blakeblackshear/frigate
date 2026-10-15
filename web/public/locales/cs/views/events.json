@@ -1,5 +1,5 @@
 {
-  "alerts": "Výstrahy",
+  "alerts": "Upozornění",
   "detections": "Detekce",
   "motion": {
     "label": "Pohyb",
@@ -7,12 +7,12 @@
   },
   "allCameras": "Všechny kamery",
   "empty": {
-    "alert": "Nejsou žádné výstrahy na kontrolu",
+    "alert": "Nejsou žádná upozornění ke kontrole",
     "detection": "Nejsou žádné detekce na kontrolu",
     "motion": "Nenalezena žádná data o pohybu",
     "recordingsDisabled": {
-      "title": "Nahrávání musí být povoleno",
-      "description": "Položky revize lze pro kameru vytvořit pouze tehdy, je-li pro ni povoleno nahrávání."
+      "title": "Záznam musí být povolen",
+      "description": "Položky revize se vytvářejí pouze pro kamery s povoleným záznamem."
     }
   },
   "timeline.aria": "Zvolit časovou osu",
@@ -21,7 +21,7 @@
     "aria": "Zvolit události",
     "noFoundForTimePeriod": "Pro toto časové období nebyly nalezeny žádné události."
   },
-  "documentTitle": "Revize - Frigate",
+  "documentTitle": "Revize – Frigate",
   "camera": "Kamera",
   "calendarFilter": {
     "last24Hours": "Posledních 24 hodin"
@@ -30,10 +30,12 @@
   "markTheseItemsAsReviewed": "Označit tyto položky jako zkontrolované",
   "newReviewItems": {
     "label": "Zobrazit nové položky revize",
-    "button": "Nové položky revize"
+    "button": "Nové položky ke kontrole"
   },
   "recordings": {
-    "documentTitle": "Záznamy - Frigate"
+    "documentTitle": "Záznamy - Frigate",
+    "invalidSharedLink": "Odkaz na záznam s časovou značkou nelze otevřít kvůli chybě při jeho zpracování.",
+    "invalidSharedCamera": "Odkaz na záznam s časovou značkou nelze otevřít, protože kamera není známá nebo k ní nemáte oprávnění."
   },
   "detected": "Detekováno",
   "selected_one": "{{count}} vybráno",
@@ -50,7 +52,7 @@
     "settings": "Nastavení Detailního Zobrazení",
     "alwaysExpandActive": {
       "title": "Vždy rozbalit aktivní",
-      "desc": "Vždy zobrazit podrobnosti objektu aktivní položky revize, pokud jsou k dispozici."
+      "desc": "Vždy rozbalit podrobnosti objektu aktivní položky revize, pokud jsou dostupné."
     }
   },
   "objectTrack": {
@@ -59,6 +61,36 @@
   },
   "select_all": "Vše",
   "normalActivity": "Normální",
-  "needsReview": "Potřebuje revizi",
-  "securityConcern": "Obava o bezpečnost"
+  "needsReview": "Vyžaduje kontrolu",
+  "securityConcern": "Obava o bezpečnost",
+  "timeline": {
+    "label": "Časová osa"
+  },
+  "subOnlyQuality": "V tomto časovém rozsahu jsou dostupné pouze záznamy v nízké kvalitě",
+  "motionSearch": {
+    "menuItem": "Vyhledávání pohybu",
+    "openMenu": "Možnosti kamery"
+  },
+  "motionPreviews": {
+    "menuItem": "Zobrazit náhledy pohybu",
+    "title": "Náhledy pohybu: {{camera}}",
+    "mobileSettingsTitle": "Nastavení náhledů pohybu",
+    "mobileSettingsDesc": "Upravte rychlost přehrávání, ztmavení a oříznutí a vyberte datum pro prohlížení klipů obsahujících pouze pohyb.",
+    "dim": "Ztmavení",
+    "dimAria": "Upravit intenzitu ztmavení",
+    "dimDesc": "Zvýšením ztmavení lépe zvýrazníte oblasti s pohybem.",
+    "speed": "Rychlost",
+    "speedAria": "Vybrat rychlost přehrávání náhledů",
+    "speedDesc": "Zvolte rychlost přehrávání náhledových klipů.",
+    "back": "Zpět",
+    "empty": "Nejsou dostupné žádné náhledy",
+    "noPreview": "Náhled není dostupný",
+    "seekAria": "Přejít v přehrávači {{camera}} na {{time}}",
+    "filter": "Filtr",
+    "filterDesc": "Vyberte oblasti pro zobrazení pouze klipů s pohybem v těchto oblastech.",
+    "filterClear": "Vymazat",
+    "crop": "Oříznout podle filtru",
+    "cropAria": "Přepnout oříznutí náhledů na filtrované oblasti",
+    "cropDesc": "Přiblížit náhledy na vybrané oblasti filtru místo zobrazení celého snímku."
+  }
 }

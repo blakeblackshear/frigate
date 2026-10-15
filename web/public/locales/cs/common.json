@@ -1,7 +1,7 @@
 {
   "time": {
     "untilForTime": "Do {{time}}",
-    "untilForRestart": "Do doby, než se Frigarte restartuje.",
+    "untilForRestart": "Do restartu Frigate.",
     "untilRestart": "Do restartu",
     "justNow": "Teď",
     "today": "Dnes",
@@ -22,7 +22,7 @@
     "pm": "odpoledne",
     "am": "ráno",
     "year_one": "{{time}} rok",
-    "year_few": "{{time}} let",
+    "year_few": "{{time}} roky",
     "year_other": "{{time}} let",
     "month_one": "{{time}} měsíc",
     "month_few": "{{time}} měsíce",
@@ -86,28 +86,28 @@
   },
   "button": {
     "twoWayTalk": "Obousměrná komunikace",
-    "enabled": "Zapnuto",
+    "enabled": "Povoleno",
     "cameraAudio": "Zvuk kamery",
-    "apply": "Použij",
+    "apply": "Aplikovat",
     "reset": "Reset",
     "done": "Hotovo",
     "on": "Zapnuto",
     "off": "Vypnuto",
     "edit": "Upravit",
-    "enable": "Zapni",
-    "disabled": "Vypnuto",
-    "disable": "Vypni",
+    "enable": "Povolit",
+    "disabled": "Zakázáno",
+    "disable": "Zakázat",
     "save": "Uložit",
-    "saving": "Ukládám…",
+    "saving": "Ukládání…",
     "cancel": "Zrušit",
-    "close": "Zavři",
-    "copy": "Zkopíruj",
+    "close": "Zavřít",
+    "copy": "Kopírovat",
     "back": "Zpět",
     "history": "Historie",
     "fullscreen": "Celá obrazovka",
     "exitFullscreen": "Opustit režim celé obrazovky",
     "pictureInPicture": "Obraz v obraze",
-    "copyCoordinates": "Zkopíruj souřadnice",
+    "copyCoordinates": "Kopírovat souřadnice",
     "delete": "Odstranit",
     "yes": "Ano",
     "no": "Ne",
@@ -115,14 +115,14 @@
     "info": "Informace",
     "suspended": "Pozastaveno",
     "unsuspended": "Zrušit pozastavení",
-    "play": "Hrát",
+    "play": "Přehrát",
     "unselect": "Zrušit výběr",
-    "deleteNow": "Smazat hned",
+    "deleteNow": "Odstranit nyní",
     "next": "Další",
     "export": "Exportovat",
     "continue": "Pokračovat",
     "add": "Přidat",
-    "applying": "Aplikuje se…",
+    "applying": "Aplikování…",
     "undo": "Vrátit",
     "copiedToClipboard": "Zkopírováno do schránky",
     "modified": "Upraveno",
@@ -132,10 +132,14 @@
     "saveAll": "Uložit vše",
     "savingAll": "Ukládání…",
     "undoAll": "Vrátit vše",
-    "retry": "Zkusit znovu"
+    "retry": "Zkusit znovu",
+    "expand": "Rozbalit",
+    "clear": "Vymazat",
+    "reload": "Znovu načíst",
+    "collapse": "Sbalit"
   },
   "label": {
-    "back": "Jdi zpět",
+    "back": "Zpět",
     "hide": "Skrýt {{item}}",
     "show": "Zobrazit {{item}}",
     "ID": "ID",
@@ -149,7 +153,7 @@
       "mph": "míle/h"
     },
     "length": {
-      "feet": "stopa",
+      "feet": "stopy",
       "meters": "metry"
     },
     "data": {
@@ -180,7 +184,7 @@
     "review": "Revize",
     "explore": "Prozkoumat",
     "system": "Systém",
-    "systemMetrics": "Systémové metriky",
+    "systemMetrics": "Stav systému a metriky",
     "configuration": "Konfigurace",
     "language": {
       "yue": "粵語 (kantonština)",
@@ -215,9 +219,9 @@
       "ro": "Română (Rumunština)",
       "hu": "Magyar (Maďarština)",
       "pl": "Polski (Polština)",
-      "th": "ไทย (Thaiština)",
+      "th": "ไทย (thajština)",
       "ca": "Català (Katalánština)",
-      "sl": "Slovinština (Slovinština)",
+      "sl": "Slovenščina (slovinština)",
       "ptBR": "Português brasileiro (Brazilská Portugalština)",
       "sr": "Српски (Srbština)",
       "lt": "Lietuvių (Litevština)",
@@ -236,7 +240,7 @@
       "label": "Téma",
       "blue": "Modrá",
       "green": "Zelená",
-      "nord": "Polární",
+      "nord": "Nord",
       "red": "Červená"
     },
     "help": "Nápověda",
@@ -249,7 +253,7 @@
       "account": "Účet",
       "anonymous": "anonymní"
     },
-    "systemLogs": "Systémový záznam",
+    "systemLogs": "Protokoly",
     "settings": "Nastavení",
     "languages": "Jazyky",
     "appearance": "Vzhled",
@@ -263,8 +267,8 @@
     },
     "export": "Exportovat",
     "uiPlayground": "UI hřiště",
-    "faceLibrary": "Knihovna Obličejů",
-    "configurationEditor": "Editor Konfigurace",
+    "faceLibrary": "Knihovna obličejů",
+    "configurationEditor": "Editor konfigurace",
     "withSystem": "Systém",
     "classification": "Klasifikace",
     "profiles": "Profily",
@@ -309,17 +313,17 @@
     "title": "Role",
     "admin": "Správce",
     "viewer": "Divák",
-    "desc": "Správci mají plný přístup ke všem funkcím v uživatelském rozhraní Frigate. Diváci jsou omezeni na sledování kamer, položek přehledu a historických záznamů v UI."
+    "desc": "Správci mají plný přístup ke všem funkcím v uživatelském rozhraní Frigate. Diváci jsou omezeni na sledování kamer, položek revize a historických záznamů v UI."
   },
   "readTheDocumentation": "Přečtěte si dokumentaci",
   "list": {
     "two": "{{0}} a {{1}}",
-    "many": "{{items}}, a {{last}}",
+    "many": "{{items}} a {{last}}",
     "separatorWithSpace": ", "
   },
   "field": {
     "optional": "Volitelné",
-    "internalID": "Interní ID Frigate používá v konfiguraci a databázi"
+    "internalID": "Interní ID, které Frigate používá v konfiguraci a databázi"
   },
   "information": {
     "pixels": "{{area}}px"
@@ -328,5 +332,36 @@
   "validation_errors": "Chyby ověření",
   "credentialField": {
     "savedPlaceholder": "Uloženo – ponechte prázdné pro zachování aktuální hodnoty"
+  },
+  "error": {
+    "title": "Tato stránka přestala odpovídat",
+    "desc": "Na stránce došlo k neočekávané chybě. Opětovné načtení ji obvykle vyřeší. Pokud chyba přetrvává, zkopírujte podrobnosti a přiložte je k diskusi na GitHubu.",
+    "staleTitle": "Je potřeba obnovit stránku",
+    "staleDesc": "Část rozhraní se nepodařilo načíst. Obvykle to znamená, že Frigate byl aktualizován, když byla tato karta otevřená. Znovu načtěte stránku pro použití nové verze.",
+    "partial": "Část rozhraní přestala odpovídat.",
+    "copyDetails": "Kopírovat detaily",
+    "copyFailed": "Nebylo možné zkopírovat detaily do schránky"
+  },
+  "commandMenu": {
+    "title": "Nabídka příkazů",
+    "description": "Vyhledávání stránek, kamer, nastavení a akcí",
+    "placeholder": "Vyhledávání stránek, kamer, nastavení a akcí",
+    "empty": "Žádné shody",
+    "hint": "{{key}} nebo / pro otevření, Enter pro spuštění",
+    "section": {
+      "recent": "Nedávné",
+      "pages": "Stránky",
+      "cameras": "Kamery",
+      "cameraGroups": "Skupiny kamer",
+      "settings": "Nastavení",
+      "actions": "Akce"
+    },
+    "camera": {
+      "live": "Živě",
+      "review": "Revize"
+    },
+    "action": {
+      "toggleTheme": "Přepnout světlý a tmavý režim"
+    }
   }
 }

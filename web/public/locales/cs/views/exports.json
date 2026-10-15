@@ -10,13 +10,120 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Nepodařilo se přejmenovat export: {{errorMessage}}"
+      "renameExportFailed": "Nepodařilo se přejmenovat export: {{errorMessage}}",
+      "assignCaseFailed": "Nepodařilo se změnit přiřazení k případu: {{errorMessage}}",
+      "caseSaveFailed": "Nepodařilo se uložit případ: {{errorMessage}}",
+      "caseDeleteFailed": "Nepodařilo se odstranit případ: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Sdílet export",
     "downloadVideo": "Stáhnout video",
     "deleteExport": "Smazat export",
-    "editName": "Upravit jméno"
+    "editName": "Upravit jméno",
+    "assignToCase": "Přidat do případu",
+    "removeFromCase": "Odebrat z případu"
+  },
+  "headings": {
+    "cases": "Případy",
+    "uncategorizedExports": "Nezařazené exporty"
+  },
+  "deleteExport": {
+    "label": "Odstranit export"
+  },
+  "toolbar": {
+    "newCase": "Nový případ",
+    "addExport": "Přidat export",
+    "editCase": "Upravit případ",
+    "deleteCase": "Odstranit případ"
+  },
+  "deleteCase": {
+    "label": "Odstranit případ",
+    "desc": "Opravdu chcete odstranit {{caseName}}?",
+    "descKeepExports": "Exporty zůstanou dostupné jako nezařazené.",
+    "descDeleteExports": "Všechny exporty v tomto případu budou trvale odstraněny.",
+    "deleteExports": "Odstranit také exporty"
+  },
+  "caseDialog": {
+    "title": "Přidat do případu",
+    "description": "Vyberte existující případ nebo vytvořte nový.",
+    "selectLabel": "Případ",
+    "newCaseOption": "Vytvořit nový případ",
+    "nameLabel": "Název případu",
+    "descriptionLabel": "Popis"
+  },
+  "caseCard": {
+    "emptyCase": "Zatím žádné exporty"
+  },
+  "jobCard": {
+    "defaultName": "Export kamery {{camera}}",
+    "queued": "Ve frontě",
+    "running": "Probíhá",
+    "preparing": "Příprava",
+    "copying": "Kopírování",
+    "encoding": "Kódování",
+    "encodingRetry": "Kódování (opakovaný pokus)",
+    "merging": "Slučování",
+    "finalizing": "Dokončování"
+  },
+  "caseView": {
+    "noDescription": "Bez popisu",
+    "createdAt": "Vytvořeno {{value}}",
+    "exportCount_one": "1 export",
+    "exportCount_other": "{{count}} exportů",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kamer",
+    "showMore": "Zobrazit více",
+    "showLess": "Zobrazit méně",
+    "emptyTitle": "Tento případ je prázdný",
+    "emptyDescription": "Přidejte existující nezařazené exporty pro uspořádání případu.",
+    "emptyDescriptionNoExports": "Zatím nejsou k dispozici žádné nezařazené exporty k přidání."
+  },
+  "caseEditor": {
+    "createTitle": "Vytvořit případ",
+    "editTitle": "Upravit případ",
+    "namePlaceholder": "Název případu",
+    "descriptionPlaceholder": "Přidejte poznámky nebo kontext k tomuto případu"
+  },
+  "addExportDialog": {
+    "title": "Přidat export do případu {{caseName}}",
+    "searchPlaceholder": "Hledat nezařazené exporty",
+    "empty": "Žádné nezařazené exporty neodpovídají tomuto hledání.",
+    "addButton_one": "Přidat 1 export",
+    "addButton_other": "Přidat {{count}} exportů",
+    "adding": "Přidávání…"
+  },
+  "selected_one": "{{count}} vybráno",
+  "selected_other": "{{count}} vybráno",
+  "bulkActions": {
+    "addToCase": "Přidat do případu",
+    "moveToCase": "Přesunout do případu",
+    "removeFromCase": "Odebrat z případu",
+    "delete": "Odstranit",
+    "deleteNow": "Odstranit nyní"
+  },
+  "bulkDelete": {
+    "title": "Odstranit exporty",
+    "desc_one": "Opravdu chcete odstranit {{count}} export?",
+    "desc_other": "Opravdu chcete odstranit {{count}} exportů?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Odebrat z případu",
+    "desc_one": "Odebrat {{count}} export z tohoto případu?",
+    "desc_other": "Odebrat {{count}} exportů z tohoto případu?",
+    "descKeepExports": "Exporty budou přesunuty mezi nezařazené.",
+    "descDeleteExports": "Exporty budou trvale odstraněny.",
+    "deleteExports": "Místo toho odstranit exporty"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exporty byly úspěšně odstraněny",
+      "reassign": "Přiřazení k případu bylo úspěšně změněno",
+      "remove": "Exporty byly úspěšně odebrány z případu"
+    },
+    "error": {
+      "deleteFailed": "Nepodařilo se odstranit exporty: {{errorMessage}}",
+      "reassignFailed": "Nepodařilo se změnit přiřazení k případu: {{errorMessage}}"
+    }
   }
 }

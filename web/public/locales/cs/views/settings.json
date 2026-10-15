@@ -2,20 +2,25 @@
   "documentTitle": {
     "default": "Nastavení - Frigate",
     "authentication": "Nastavení ověřování - Frigate",
-    "notifications": "Nastavení notifikací - Frigate",
+    "notifications": "Nastavení oznámení - Frigate",
     "masksAndZones": "Editor masky a zón - Frigate",
     "motionTuner": "Ladění detekce pohybu - Frigate",
     "object": "Ladění - Frigate",
     "general": "Nastavení rozhraní - Frigate",
     "frigatePlus": "Frigate+ nastavení - Frigate",
-    "enrichments": "Nastavení obohacení - Frigate",
+    "enrichments": "Nastavení obohacení – Frigate",
     "cameraManagement": "Správa kamer - Frigate",
-    "cameraReview": "Nastavení kontroly kamery - Frigate"
+    "cameraReview": "Nastavení revize kamery – Frigate",
+    "globalConfig": "Globální konfigurace – Frigate",
+    "cameraConfig": "Konfigurace kamer – Frigate",
+    "detectorsAndModel": "Detektory a model – Frigate",
+    "maintenance": "Údržba – Frigate",
+    "profiles": "Profily – Frigate"
   },
   "frigatePlus": {
     "toast": {
       "error": "Chyba při ukládání změn konfigurace: {{errorMessage}}",
-      "success": "Nastavení Frigate+ byla uložena. Restartujte Frigate+ pro aplikování změn."
+      "success": "Nastavení Frigate+ bylo uloženo. Pro aplikování změn restartujte Frigate."
     },
     "modelInfo": {
       "cameras": "Kamery",
@@ -27,21 +32,29 @@
       },
       "loading": "Načítám informace o modelu…",
       "error": "Chyba načítání informací o modelu",
-      "availableModels": "Dostupné Moduly",
+      "availableModels": "Dostupné modely Frigate+",
       "supportedDetectors": "Podporované Detektory",
       "title": "Informace o Modelu",
       "modelType": "Typ Modelu",
       "trainDate": "Datum Tréninku",
-      "baseModel": "Základní Model"
+      "baseModel": "Základní Model",
+      "noModelLoaded": "Aktuálně není načten žádný model Frigate+.",
+      "selectModel": "Vyberte model",
+      "noModelsAvailable": "Nejsou dostupné žádné modely",
+      "filter": {
+        "ariaLabel": "Filtrovat modely podle typu",
+        "baseModels": "Základní modely",
+        "fineTunedModels": "Doladěné modely"
+      }
     },
     "snapshotConfig": {
-      "desc": "Odesílání do Frigate+ vyžaduje, aby byly ve vaší konfiguraci povoleny jak běžné snímky, tak snímky typu <code>clean_copy</code>.",
+      "desc": "Odesílání do Frigate+ vyžaduje povolené snímky v konfiguraci.",
       "title": "Nastavení Snímku",
       "table": {
         "snapshots": "Snímky",
         "camera": "Kamera"
       },
-      "cleanCopyWarning": "Některé kamery mají povolené snímky, ale volba <code>clean_copy</code> je zakázaná. Pro možnost odesílání snímků z těchto kamer do služby Frigate+ je nutné tuto volbu povolit v konfiguraci snímků."
+      "cleanCopyWarning": "Některé kamery mají snímky zakázané"
     },
     "apiKey": {
       "notValidated": "API klíč Frigate+ nebyl rozpoznán nebo nebyl ověřen",
@@ -52,17 +65,25 @@
     },
     "unsavedChanges": "Neuložené změny nastavení Frigate+",
     "title": "Nastavení Frigate+",
-    "restart_required": "Vyžadován restart (model Frigate+ změněn)"
+    "restart_required": "Vyžadován restart (model Frigate+ změněn)",
+    "description": "Frigate+ je předplacená služba poskytující další funkce pro vaši instanci Frigate, včetně vlastních modelů detekce objektů trénovaných na vašich datech. Zde můžete spravovat nastavení modelů Frigate+.",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "Aktuální model",
+      "otherModels": "Další modely",
+      "configuration": "Konfigurace"
+    },
+    "changeInDetectorsAndModel": "Změnit model"
   },
   "masksAndZones": {
     "zones": {
       "speedEstimation": {
         "title": "Odhad rychlosti",
         "desc": "Povolit odhad rychlosti pro objekty v této zóně. Zóna musí mít přesně 4 body.",
-        "lineADistance": "Vzdálenost linky A ({{unit}})",
-        "lineBDistance": "Vzdálenost linky B ({{unit}})",
-        "lineCDistance": "Vzdálenost linky C ({{unit}})",
-        "lineDDistance": "Vzdálenost linky D ({{unit}})"
+        "lineADistance": "Délka strany A ({{unit}})",
+        "lineBDistance": "Délka strany B ({{unit}})",
+        "lineCDistance": "Délka strany C ({{unit}})",
+        "lineDDistance": "Délka strany D ({{unit}})"
       },
       "name": {
         "inputPlaceHolder": "Zadejte jméno…",
@@ -71,11 +92,11 @@
       },
       "inertia": {
         "title": "Setrvačnost",
-        "desc": "Určuje, po kolika snímcích strávených v zóně je objekt považován za přítomný v této zóně.<em>Výchozí hodnota: 3</em>"
+        "desc": "Určuje počet snímků, ve kterých musí být objekt v zóně pro potvrzení jeho přítomnosti. <em>Výchozí hodnota: 3</em>"
       },
       "loiteringTime": {
         "title": "Doba setrvání",
-        "desc": "Nastavuje minimální dobu v sekundách, po kterou musí být objekt v zóně, aby došlo k aktivaci.<em>Výchozí hodnota: 0</em>"
+        "desc": "Minimální doba v sekundách, po kterou musí být objekt v zóně pro její aktivaci. <em>Výchozí hodnota: 0</em>"
       },
       "objects": {
         "title": "Objekty",
@@ -103,10 +124,14 @@
       "add": "Přidat Zónu",
       "edit": "Upravit Zónu",
       "documentTitle": "Upravit Zónu - Frigate",
-      "clickDrawPolygon": "Klikněte pro kreslení polygonu na obrázku.",
+      "clickDrawPolygon": "Kliknutím nakreslete polygon do obrázku.",
       "point_one": "{{count}} bod",
       "point_few": "{{count}} body",
-      "point_other": "{{count}} bodů"
+      "point_other": "{{count}} bodů",
+      "enabled": {
+        "title": "Povoleno",
+        "description": "Určuje, zda je zóna aktivní a povolená v konfiguračním souboru. Při zakázání ji nelze povolit přes MQTT. Zakázané zóny se za běhu ignorují."
+      }
     },
     "motionMasks": {
       "context": {
@@ -116,23 +141,29 @@
         "title": "Maska detekce pohybu pokrývá {{polygonArea}}% záběru kamery. Příliš velké masky detekce pohybu nejsou doporučovány.",
         "tips": "Masky detekce pohybu nebrání detekci objektů. Místo toho byste měli použít požadovanou zónu."
       },
-      "documentTitle": "Editovat Masku Detekce pohybu - Frigate",
+      "documentTitle": "Upravit masku pohybu – Frigate",
       "desc": {
         "title": "Masky detekce pohybu slouží k zabránění nežádoucím typům pohybu ve spuštění detekce. Příliš rozsáhlé maskování však může ztížit sledování objektů.",
         "documentation": "Dokumentace"
       },
-      "label": "Maska Detekce pohybu",
-      "add": "Nová Maska Detekce pohybu",
-      "edit": "Upravit Masku Detekce pohybu",
+      "label": "Maska pohybu",
+      "add": "Nová maska pohybu",
+      "edit": "Upravit masku pohybu",
       "point_one": "{{count}} bod",
       "point_few": "{{count}} body",
       "point_other": "{{count}} bodů",
-      "clickDrawPolygon": "Kliknutím nakreslíte polygon do obrázku.",
+      "clickDrawPolygon": "Kliknutím nakreslete polygon do obrázku.",
       "toast": {
         "success": {
           "title": "{{polygonName}} byl uložen.",
-          "noName": "Maska Detekce pohybu byla uložena."
+          "noName": "Maska pohybu byla uložena."
         }
+      },
+      "defaultName": "Maska pohybu {{number}}",
+      "name": {
+        "title": "Název",
+        "description": "Volitelný zobrazovaný název této masky pohybu.",
+        "placeholder": "Zadejte název…"
       }
     },
     "filter": {
@@ -154,7 +185,8 @@
           "mustNotBeSameWithCamera": "Název Zóny nesmí být stejný jako název kamery.",
           "mustNotContainPeriod": "Název zóny nesmí obsahovat tečky.",
           "alreadyExists": "Zóna se stejným názvem u této kamery již existuje.",
-          "mustBeAtLeastTwoCharacters": "Název Zóny musí mít minimálně 2 znaky."
+          "mustBeAtLeastTwoCharacters": "Název Zóny musí mít minimálně 2 znaky.",
+          "mustHaveAtLeastOneLetter": "Název zóny musí obsahovat alespoň jedno písmeno."
         }
       },
       "inertia": {
@@ -168,8 +200,8 @@
           "false": "Nepřichytávat body"
         },
         "delete": {
-          "title": "Potvrdit Smazání",
-          "desc": "Opravdu chcete smazat {{type}}<em>{{name}}</em>?",
+          "title": "Potvrdit odstranění",
+          "desc": "Opravdu chcete odstranit položku typu {{type}} s názvem <em>{{name}}</em>?",
           "success": "{{name}} bylo smazáno."
         },
         "error": {
@@ -178,7 +210,16 @@
         "reset": {
           "label": "Vymazat všechny body"
         },
-        "removeLastPoint": "Odebrat poslední bod"
+        "removeLastPoint": "Odebrat poslední bod",
+        "type": {
+          "zone": "zóna",
+          "motion_mask": "maska pohybu",
+          "object_mask": "maska objektů"
+        },
+        "revertOverride": {
+          "title": "Obnovit základní konfiguraci",
+          "desc": "Odstraní se přepsání v profilu pro položku typu {{type}} s názvem <em>{{name}}</em> a obnoví se základní konfigurace."
+        }
       },
       "distance": {
         "error": {
@@ -195,17 +236,28 @@
         "error": {
           "mustBeGreaterOrEqualTo": "Prahová hodnota rychlosti musí být větší nebo rovna 0,1."
         }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID nesmí být prázdné.",
+          "alreadyExists": "Maska s tímto ID již pro tuto kameru existuje."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Název nesmí být prázdný."
+        }
       }
     },
     "objectMasks": {
-      "label": "Masky Objektu",
-      "documentTitle": "Upravit Masku Objektu - Frigate",
+      "label": "Masky objektů",
+      "documentTitle": "Upravit masku objektů – Frigate",
       "desc": {
         "documentation": "Dokumentace",
         "title": "Masky filtrování objektů slouží k odfiltrování falešných detekcí daného typu objektu na základě jeho umístění."
       },
-      "add": "Přidat Masku Objektu",
-      "edit": "Upravit Masku Objektu",
+      "add": "Přidat masku objektů",
+      "edit": "Upravit masku objektů",
       "objects": {
         "title": "Objekty",
         "allObjectTypes": "Všechny typy objektů",
@@ -216,31 +268,103 @@
       "toast": {
         "success": {
           "title": "{{polygonName}} byl uložen.",
-          "noName": "Maska Objektu byla uložena."
+          "noName": "Maska objektů byla uložena."
         }
       },
       "point_one": "{{count}} bod",
       "point_few": "{{count}} body",
-      "point_other": "{{count}} bodů"
+      "point_other": "{{count}} bodů",
+      "name": {
+        "title": "Název",
+        "description": "Volitelný zobrazovaný název této masky objektů.",
+        "placeholder": "Zadejte název…"
+      }
     },
-    "motionMaskLabel": "Maska Detekce pohybu {{number}}",
-    "objectMaskLabel": "Maska Objektu {{number}} {{label}}"
+    "motionMaskLabel": "Maska pohybu {{number}}",
+    "objectMaskLabel": "Maska objektů {{number}}",
+    "disabledInConfig": "Položka je zakázána v konfiguračním souboru",
+    "addDisabledProfile": "Nejprve přidejte do základní konfigurace a poté přepište v profilu",
+    "profileBase": "(základní)",
+    "profileOverride": "(přepsáno)",
+    "masks": {
+      "enabled": {
+        "title": "Povoleno",
+        "description": "Určuje, zda je maska povolená v konfiguračním souboru. Při zakázání ji nelze povolit přes MQTT. Zakázané masky se za běhu ignorují."
+      }
+    }
   },
   "menu": {
     "ui": "Uživatelské rozhraní",
     "cameras": "Nastavení kamery",
-    "masksAndZones": "Masky / Zóny",
+    "masksAndZones": "Masky / zóny",
     "motionTuner": "Ladění detekce pohybu",
     "debug": "Ladění",
     "users": "Uživatelé",
-    "notifications": "Notifikace",
+    "notifications": "Oznámení",
     "frigateplus": "Frigate+",
     "enrichments": "Obohacení",
     "triggers": "Spouštěče",
     "cameraManagement": "Správa",
-    "cameraReview": "Kontrola",
+    "cameraReview": "Revize",
     "roles": "Role",
-    "profiles": "Profily"
+    "profiles": "Profily",
+    "general": "Obecné",
+    "globalConfig": "Globální konfigurace",
+    "system": "Systém",
+    "integrations": "Integrace",
+    "uiSettings": "Nastavení rozhraní",
+    "globalDetect": "Detekce objektů",
+    "globalRecording": "Záznam",
+    "globalSnapshots": "Snímky",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Detekce pohybu",
+    "globalObjects": "Objekty",
+    "globalReview": "Revize",
+    "globalAudioEvents": "Detekce zvuku",
+    "globalLivePlayback": "Živé přehrávání",
+    "globalTimestampStyle": "Styl časové značky",
+    "systemDatabase": "Databáze",
+    "systemTls": "TLS",
+    "systemAuthentication": "Ověřování",
+    "systemNetworking": "Síť",
+    "systemProxy": "Proxy",
+    "systemUi": "Uživatelské rozhraní",
+    "systemLogging": "Protokolování",
+    "systemEnvironmentVariables": "Proměnné prostředí",
+    "systemTelemetry": "Telemetrie",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemDetectorsAndModel": "Modely detekce",
+    "systemMqtt": "MQTT",
+    "systemGo2rtcStreams": "Streamy go2rtc",
+    "integrationSemanticSearch": "Sémantické vyhledávání",
+    "integrationGenerativeAi": "Generativní AI",
+    "integrationFaceRecognition": "Rozpoznávání obličejů",
+    "integrationLpr": "Rozpoznávání registračních značek",
+    "integrationObjectClassification": "Klasifikace objektů",
+    "integrationAudioTranscription": "Přepis zvuku",
+    "cameraDetect": "Detekce objektů",
+    "cameraFfmpeg": "Streamy (FFmpeg)",
+    "cameraRecording": "Záznam",
+    "cameraSnapshots": "Snímky",
+    "cameraMotion": "Detekce pohybu",
+    "cameraObjects": "Objekty",
+    "cameraConfigReview": "Revize",
+    "cameraAudioEvents": "Detekce zvuku",
+    "cameraAudioTranscription": "Přepis zvuku",
+    "cameraNotifications": "Oznámení",
+    "cameraLivePlayback": "Živé přehrávání",
+    "cameraBirdseye": "Birdseye",
+    "cameraFaceRecognition": "Rozpoznávání obličejů",
+    "cameraLpr": "Rozpoznávání registračních značek",
+    "cameraMqttConfig": "MQTT",
+    "cameraOnvif": "ONVIF",
+    "cameraUi": "Kamera v rozhraní",
+    "cameraTimestampStyle": "Styl časové značky",
+    "cameraMqtt": "MQTT kamery",
+    "maintenance": "Údržba",
+    "mediaSync": "Synchronizace médií",
+    "regionGrid": "Mřížka oblastí"
   },
   "dialog": {
     "unsavedChanges": {
@@ -255,45 +379,53 @@
   "general": {
     "title": "Nastavení rozhraní",
     "liveDashboard": {
-      "title": "Živý dashboard",
+      "title": "Živý přehled",
       "automaticLiveView": {
         "desc": "Při detekci aktivity se automaticky přepne na živý náhled kamery. Vypnutí této možnosti způsobí, že se statické snímky z kamery na ovládacím panelu Live aktualizují pouze jednou za minutu.",
         "label": "Automatický živý náhled"
       },
       "playAlertVideos": {
-        "label": "Přehrát videa s výstrahou",
-        "desc": "Ve výchozím nastavení se nedávná upozornění na ovládacím panelu Živě přehrávají jako malá opakující se videa. Vypněte tuto možnost, chcete-li na tomto zařízení/prohlížeči zobrazovat pouze statický obrázek nedávných výstrah."
+        "label": "Přehrávat videa upozornění",
+        "desc": "Ve výchozím nastavení se nedávná upozornění v živém přehledu přehrávají jako malá videa ve smyčce. Vypněte tuto možnost pro zobrazení pouze statického obrázku nedávných upozornění na tomto zařízení či v tomto prohlížeči."
       },
       "displayCameraNames": {
         "label": "Vždy zobrazit názvy kamer",
         "desc": "Vždy zobrazit názvy kamer v čipu na ovládacím panelu živého náhledu s více kamerami."
       },
       "liveFallbackTimeout": {
-        "label": "Časový limit pádu živého přehrávání"
+        "label": "Časový limit přechodu na záložní živý stream",
+        "desc": "Pokud není dostupný kvalitní živý stream kamery, přejít po tomto počtu sekund do režimu nízké přenosové rychlosti. Výchozí hodnota: 3."
+      },
+      "naturalAspectLayout": {
+        "label": "Používat původní poměry stran",
+        "desc": "V živých přehledech skupin kamer přizpůsobit každou dlaždici původnímu poměru stran její kamery. Při vypnutí se kamery zarovnají do standardních širokých, vodorovných nebo vysokých dlaždic.",
+        "descNote": "Zapnutí nebo vypnutí tohoto nastavení vymaže uložená rozložení všech živých přehledů skupin kamer. Bude nutné je znovu ručně nastavit."
       }
     },
     "storedLayouts": {
       "title": "Uložené rozložení",
       "desc": "Rozložení kamer ve skupině kamer lze přetáhnout nebo jim změnit velikost. Pozice jsou uloženy v místním úložišti vašeho prohlížeče.",
-      "clearAll": "Smazat všechna rozložení"
+      "clearAll": "Smazat všechna rozložení",
+      "clearConfirm": "Vymaže se uložené rozložení všech skupin kamer v tomto prohlížeči. Tuto akci nelze vrátit zpět."
     },
     "cameraGroupStreaming": {
       "title": "Nastavení streamování skupiny kamer",
-      "desc": "Nastavení streamování pro každou kameru je uloženo v místním uložišti vašeho prohlížeče.",
-      "clearAll": "Vymazat všechna nastavení streamování"
+      "desc": "Nastavení streamování každé skupiny kamer se ukládá v místním úložišti prohlížeče.",
+      "clearAll": "Vymazat všechna nastavení streamování",
+      "clearConfirm": "Vymaže se nastavení streamování všech skupin kamer v tomto prohlížeči. Tuto akci nelze vrátit zpět."
     },
     "recordingsViewer": {
-      "title": "Prohlížeč nahrávek",
+      "title": "Prohlížeč záznamů",
       "defaultPlaybackRate": {
         "label": "Výchozí rychlost přehrávání",
-        "desc": "Výchozí rychlost přehrávání pro nahrávky."
+        "desc": "Výchozí rychlost přehrávání záznamů."
       }
     },
     "calendar": {
       "title": "Kalendář",
       "firstWeekday": {
         "label": "První den týdne",
-        "desc": "Den, kterým bude začínat týden v kalendáři kontrol.",
+        "desc": "Den, kterým začíná týden v kalendáři revize.",
         "sunday": "Neděle",
         "monday": "Pondělí"
       }
@@ -301,21 +433,63 @@
     "toast": {
       "success": {
         "clearStoredLayout": "Vymazáno uložené rozvržení pro kameru {{cameraName}}",
-        "clearStreamingSettings": "Vymazány nastavení streamování pro všechny skupiny kamer."
+        "clearStreamingSettings": "Nastavení streamování všech skupin kamer bylo vymazáno.",
+        "exportUiSettings": "Nastavení bylo exportováno",
+        "importUiSettings": "Nastavení bylo importováno"
       },
       "error": {
         "clearStoredLayoutFailed": "Chyba mazání uloženého rozvržení: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Chyba mazání nastavení streamování: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Chyba mazání nastavení streamování: {{errorMessage}}",
+        "exportUiSettingsFailed": "Nepodařilo se exportovat nastavení",
+        "importNothingToApply": "Nepodařilo se importovat nastavení: soubor neobsahuje žádná nastavení",
+        "importInvalidJson": "Nepodařilo se importovat nastavení: soubor není platný JSON",
+        "importWrongType": "Nepodařilo se importovat nastavení: soubor není exportem nastavení Frigate",
+        "importUnsupportedVersion": "Nepodařilo se importovat nastavení: soubor vyžaduje novější verzi Frigate",
+        "importInvalidSchema": "Nepodařilo se importovat nastavení: soubor má nesprávnou strukturu",
+        "importUiSettingsFailed": "Nepodařilo se importovat nastavení"
+      }
+    },
+    "backupRestore": {
+      "title": "Zálohování a obnovení",
+      "transfer": {
+        "label": "Soubor nastavení zařízení",
+        "desc": "Rozložení skupin kamer, nastavení streamování a předvolby rozhraní se ukládají v prohlížeči. Exportujte je do souboru pro zálohování nebo přenos na jiné zařízení.",
+        "export": "Exportovat nastavení",
+        "import": "Importovat nastavení"
+      },
+      "importDialog": {
+        "title": "Importovat nastavení",
+        "desc": "Vyberte, co se má z tohoto souboru použít. Po dokončení importu se Frigate znovu načte.",
+        "exportedFrom": "Exportováno {{date}} z konfigurace Frigate verze {{version}}",
+        "layouts_one": "Rozložení skupin kamer ({{count}} skupina)",
+        "layouts_few": "Rozložení skupin kamer ({{count}} skupiny)",
+        "layouts_other": "Rozložení skupin kamer ({{count}} skupin)",
+        "layoutsPhone": "Na telefonech se rozložení skupin kamer neimportují; vždy se používá standardní mřížka.",
+        "layoutsModeOn": "Tato rozložení používají dlaždice podle poměru stran kamer, proto import zároveň zapne „Používat původní poměry stran“.",
+        "layoutsModeOff": "Tato rozložení používají standardní velikosti dlaždic, proto import zároveň vypne „Používat původní poměry stran“.",
+        "streaming_one": "Nastavení streamování ({{count}} kamera)",
+        "streaming_few": "Nastavení streamování ({{count}} kamery)",
+        "streaming_other": "Nastavení streamování ({{count}} kamer)",
+        "preferences_one": "Předvolby rozhraní ({{count}} nastavení)",
+        "preferences_few": "Předvolby rozhraní ({{count}} nastavení)",
+        "preferences_other": "Předvolby rozhraní ({{count}} nastavení)",
+        "unknownGroups_one": "Skupina kamer {{groups}} na tomto serveru neexistuje. Její nastavení bude uloženo, ale nepoužije se.",
+        "unknownGroups_few": "Skupiny kamer {{groups}} na tomto serveru neexistují. Jejich nastavení bude uloženo, ale nepoužije se.",
+        "unknownGroups_other": "Skupiny kamer {{groups}} na tomto serveru neexistují. Jejich nastavení bude uloženo, ale nepoužije se.",
+        "unknownCameras_one": "Kamera {{cameras}} na tomto serveru neexistuje. Její nastavení streamování bude ignorováno.",
+        "unknownCameras_few": "Kamery {{cameras}} na tomto serveru neexistují. Jejich nastavení streamování bude ignorováno.",
+        "unknownCameras_other": "Kamery {{cameras}} na tomto serveru neexistují. Jejich nastavení streamování bude ignorováno.",
+        "confirm": "Importovat"
       }
     }
   },
   "debug": {
     "timestamp": {
-      "title": "Časové razítko",
-      "desc": "Překrýt obrázek časovým razítkem"
+      "title": "Časová značka",
+      "desc": "Překrýt obrázek časovou značkou"
     },
     "regions": {
-      "title": "Regiony",
+      "title": "Oblasti",
       "desc": "Zobrazit rámeček oblasti zájmu odesílané detektoru objektů",
       "tips": "<p><strong>Boxy oblastí zájmu</strong></p><br><p>Jasně zelené boxy budou překryty na oblastech zájmu ve snímku, které jsou odesílány detektoru objektů.</p>"
     },
@@ -335,7 +509,7 @@
       "desc": "Zobrazit obrys všech definovaných zón"
     },
     "mask": {
-      "title": "Masky detekce pohybu",
+      "title": "Masky pohybu",
       "desc": "Zobrazit polygony masek detekce pohybu"
     },
     "debugging": "Ladění",
@@ -352,7 +526,7 @@
       "tips": "Povolte tuto možnost pro nakreslení obdélníku na obraz kamery, který zobrazí jeho plochu a poměr stran. Tyto hodnoty pak můžete použít pro nastavení parametrů tvarového filtru objektu ve vaší konfiguraci.",
       "score": "Skóre",
       "ratio": "Poměr",
-      "area": "Oblast"
+      "area": "Plocha"
     },
     "openCameraWebUI": "Otevřít webové rozhraní {{camera}}",
     "audio": {
@@ -370,34 +544,35 @@
   },
   "notification": {
     "notificationSettings": {
-      "title": "Nastavení notifikací",
-      "desc": "Frigate může nativně odesílat push notifikace do vašeho zařízení, pokud běží v prohlížeči nebo je nainstalován jako PWA (progresivní webová aplikace)."
+      "title": "Nastavení oznámení",
+      "desc": "Frigate může nativně odesílat push oznámení do vašeho zařízení, pokud běží v prohlížeči nebo je nainstalován jako PWA (progresivní webová aplikace)."
     },
     "notificationUnavailable": {
-      "desc": "Webové push notifikace vyžadují zabezpečený kontext (<code>https://…</code>). Jedná se o omezení prohlížeče. Pro použití notifikací přistupujte k Frigate přes zabezpečené připojení."
+      "desc": "Webová push oznámení vyžadují zabezpečený kontext (https://…). Jde o omezení prohlížeče. Pro použití oznámení přistupujte k Frigate přes zabezpečené připojení.",
+      "descPwa": "Na iOS jsou webová push oznámení dostupná pouze po přidání Frigate na plochu. Otevřete nabídku sdílení, zvolte Přidat na plochu a poté otevřete Frigate přes novou ikonu pro registraci zařízení k oznámením."
     },
     "cameras": {
       "title": "Kamery",
-      "desc": "Vyberte kamery, pro které chcete povolit notifikace.",
-      "noCameras": "Žádné dostupné kamery"
+      "desc": "Vyberte kamery, pro které chcete povolit oznámení.",
+      "noCameras": "Nejsou dostupné žádné kamery"
     },
-    "title": "Notifikace",
+    "title": "Oznámení",
     "email": {
       "placeholder": "např. example@email.com",
       "title": "Email",
-      "desc": "Je vyžadována platná e-mailová adresa, která bude použita k upozornění v případě problémů se službou push notifikací."
+      "desc": "Je vyžadována platná e-mailová adresa, která bude použita k upozornění v případě problémů se službou push oznámení."
     },
     "registerDevice": "Registrovat Toto Zařízení",
     "deviceSpecific": "Nastavení specifická pro zařízení",
     "unregisterDevice": "Odregistrovat Toto Zařízení",
-    "sendTestNotification": "Poslat testovací notifikaci",
-    "unsavedRegistrations": "Neuložené přihlášky k Notifikacím",
-    "unsavedChanges": "Neuložené změny Notifikací",
+    "sendTestNotification": "Odeslat testovací oznámení",
+    "unsavedRegistrations": "Neuložené registrace oznámení",
+    "unsavedChanges": "Neuložené změny oznámení",
     "globalSettings": {
-      "desc": "Dočasně pozastavit notifikace pro vybrané kamery na všech registrovaných zařízeních.",
+      "desc": "Dočasně pozastavit oznámení pro vybrané kamery na všech registrovaných zařízeních.",
       "title": "Globální nastavení"
     },
-    "active": "Notifikace Aktivní",
+    "active": "Oznámení Aktivní",
     "suspendTime": {
       "suspend": "Pozastavit",
       "12hours": "Pozastavit na 12 hodin",
@@ -410,15 +585,15 @@
     },
     "toast": {
       "error": {
-        "registerFailed": "Nepodařilo se uložit registraci notifikací."
+        "registerFailed": "Nepodařilo se uložit registraci oznámení."
       },
       "success": {
-        "registered": "Notifikace byly úspěšně zaregistrovány. Pro odesílání notifikací (včetně testovací) je nutné Frigate restartovat.",
-        "settingSaved": "Nastavení notifikací bylo uloženo."
+        "registered": "Oznámení byly úspěšně zaregistrovány. Pro odesílání oznámení (včetně testovací) je nutné Frigate restartovat.",
+        "settingSaved": "Nastavení oznámení bylo uloženo."
       }
     },
     "cancelSuspension": "Zrušit Pozastavení",
-    "suspended": "Notifikace pozastaveny {{time}}"
+    "suspended": "Oznámení pozastaveny {{time}}"
   },
   "users": {
     "dialog": {
@@ -438,6 +613,12 @@
           "confirm": {
             "title": "Potvrdit heslo",
             "placeholder": "Potvrdit heslo"
+          },
+          "show": "Zobrazit heslo",
+          "hide": "Skrýt heslo",
+          "requirements": {
+            "title": "Požadavky na heslo:",
+            "length": "Alespoň 12 znaků"
           }
         },
         "newPassword": {
@@ -447,19 +628,24 @@
             "placeholder": "Zopakujte nové heslo"
           }
         },
-        "usernameIsRequired": "Uživatelské jméno je nutné",
+        "usernameIsRequired": "Uživatelské jméno je povinné",
         "user": {
           "title": "Uživatelské jméno",
           "desc": "Povolena jsou pouze písmena, čísla, tečky a podtržítka.",
           "placeholder": "Vložte uživatelské jméno"
         },
-        "passwordIsRequired": "Je vyžadováno heslo"
+        "passwordIsRequired": "Heslo je povinné",
+        "currentPassword": {
+          "title": "Aktuální heslo",
+          "placeholder": "Zadejte aktuální heslo"
+        }
       },
       "createUser": {
         "title": "Vytvořit nového uživatele",
         "desc": "Přidejte nový uživatelský účet a zadejte roli pro určení přístupu k jednotlivým částem uživatelského rozhraní Frigate.",
         "usernameOnlyInclude": "Uživatelské jméno smí obsahovat pouze písmena, čísla, . nebo _",
-        "confirmPassword": "Potvrďte prosím heslo"
+        "confirmPassword": "Potvrďte prosím heslo",
+        "usernameOnlyDots": "Uživatelské jméno nesmí obsahovat pouze tečky"
       },
       "deleteUser": {
         "title": "Smazat Uživatele",
@@ -472,7 +658,7 @@
           "admin": "Správce",
           "adminDesc": "Plný přístup ke všem funkcím.",
           "viewer": "Divák",
-          "viewerDesc": "Omezení pouze na Živé dashboardy, Revize, Průzkumníka a Exporty.",
+          "viewerDesc": "Přístup pouze k živým přehledům, stránkám Revize a Prozkoumat a exportům.",
           "customDesc": "Vlastní role s konkrétním přístupem ke kameře."
         },
         "title": "Změnit Roli Uživatele",
@@ -481,10 +667,15 @@
       },
       "passwordSetting": {
         "updatePassword": "Aktualizovat heslo pro uživatele {{username}}",
-        "setPassword": "Nastavit Heslo",
+        "setPassword": "Nastavit heslo",
         "desc": "Vytvořte silné heslo pro zabezpečení tohoto účtu.",
         "cannotBeEmpty": "Heslo nemůže být prázdné",
-        "doNotMatch": "Hesla nesouhlasí"
+        "doNotMatch": "Hesla nesouhlasí",
+        "currentPasswordRequired": "Aktuální heslo je povinné",
+        "incorrectCurrentPassword": "Aktuální heslo je nesprávné",
+        "passwordVerificationFailed": "Nepodařilo se ověřit heslo",
+        "multiDeviceWarning": "Na ostatních zařízeních, kde jste přihlášeni, bude nutné se znovu přihlásit během {{refresh_time}}.",
+        "multiDeviceAdmin": "Změnou tajného klíče JWT můžete také okamžitě vynutit opětovné ověření všech uživatelů."
       }
     },
     "table": {
@@ -492,11 +683,11 @@
       "actions": "Akce",
       "noUsers": "Žádní uživatelé nebyli nalezeni.",
       "changeRole": "Změnit roli uživatele",
-      "password": "Resetovat Heslo",
+      "password": "Obnovit heslo",
       "deleteUser": "Smazat uživatele",
       "role": "Role"
     },
-    "updatePassword": "Resetovat heslo",
+    "updatePassword": "Obnovit heslo",
     "toast": {
       "success": {
         "createUser": "Uživatel {{user}} úspěšně vytvořen",
@@ -537,51 +728,51 @@
       "desc": "Prahová hodnota určuje, jak velká změna jasu pixelu je nutná, aby byl považován za pohyb. <em>Výchozí: 30</em>"
     },
     "contourArea": {
-      "title": "Obrysová Oblast",
+      "title": "Plocha obrysu",
       "desc": "Hodnota plochy obrysu se používá k rozhodnutí, které skupiny změněných pixelů se kvalifikují jako pohyb. <em>Výchozí: 10</em>"
     }
   },
   "enrichments": {
     "title": "Nastavení obohacení",
     "faceRecognition": {
-      "title": "Rozpoznání obličeje",
-      "desc": "Rozpoznávání obličeje umožňuje přiřadit lidem jména a po rozpoznání jejich obličeje. Frigate přiřadí jméno osoby jako podštítek. Tyto informace jsou zahrnuty v uživatelském rozhraní, filtrech a také v oznámeních.",
+      "title": "Rozpoznávání obličejů",
+      "desc": "Rozpoznávání obličejů umožňuje přiřadit lidem jména. Po rozpoznání obličeje Frigate přiřadí jméno osoby jako podštítek. Tyto informace se zobrazují v rozhraní, filtrech a oznámeních.",
       "modelSize": {
-        "label": "Velikost Modelu",
+        "label": "Velikost modelu",
         "desc": "Velikost modelu použitého pro rozpoznání obličeje.",
         "small": {
-          "title": "malý",
-          "desc": "Použití metody <em>malý</em> využívá model vkládání obličejů FaceNet, který efektivně běží na většině procesorů."
+          "title": "Malý",
+          "desc": "Volba <em>malý (small)</em> používá model vektorových reprezentací obličejů FaceNet, který efektivně běží na většině CPU."
         },
         "large": {
-          "title": "velký",
-          "desc": "Použití metody <em>velký</em> využívá model vkládání obličejů ArcFace a v případě potřeby se automaticky spustí na GPU."
+          "title": "Velký",
+          "desc": "Volba <em>velký (large)</em> používá model vektorových reprezentací obličejů ArcFace a automaticky poběží na GPU, pokud je to možné."
         }
       }
     },
     "semanticSearch": {
       "reindexNow": {
-        "confirmDesc": "Jste si jisti, že chcete znovu indexovat všechny vložené sledované objekty? Tento proces poběží na pozadí, ale může maximálně zatížit váš procesor a trvat poměrně dlouho. Průběh můžete sledovat na stránce Prozkoumat.",
+        "confirmDesc": "Opravdu chcete znovu indexovat vektorové reprezentace všech sledovaných objektů? Proces poběží na pozadí, ale může plně zatížit CPU a trvat delší dobu. Průběh můžete sledovat na stránce Prozkoumat.",
         "confirmTitle": "Potvrdit Reindexování",
         "label": "Přeindexovat nyní",
-        "desc": "Reindexování regeneruje vložení pro všechny sledované objekty. Tento proces běží na pozadí a může maximálně zatížit váš procesor a trvat poměrně dlouho v závislosti na počtu sledovaných objektů.",
+        "desc": "Opětovná indexace znovu vytvoří vektorové reprezentace všech sledovaných objektů. Proces běží na pozadí a podle počtu objektů může plně zatížit CPU a trvat delší dobu.",
         "confirmButton": "Přeindexovat",
         "success": "Přeindexování úspěšně spuštěno.",
         "alreadyInProgress": "Přeindexování je již spuštěno.",
         "error": "Chyba spuštění přeindexování: {{errorMessage}}"
       },
       "title": "Sémantické vyhledávání",
-      "desc": "Sémantické vyhledávání ve Frigate umožňuje najít sledované objekty v rámci vašich zkontrolovaných položek pomocí samotného obrázku, uživatelem definovaného textového popisu nebo automaticky generovaného popisu.",
+      "desc": "Sémantické vyhledávání ve Frigate umožňuje najít sledované objekty v položkách revize pomocí samotného obrázku, vlastního textového popisu nebo automaticky generovaného popisu.",
       "modelSize": {
         "label": "Velikost modelu",
-        "desc": "Velikost modelu použitého pro vkládání sémantického vyhledávání.",
+        "desc": "Velikost modelu pro vektorové reprezentace sémantického vyhledávání.",
         "small": {
-          "title": "malý",
-          "desc": "Použitím <em>malého</em> modelu se využívá kvantizovaná verze modelu, která spotřebovává méně RAM a běží rychleji na CPU s velmi zanedbatelným rozdílem v kvalitě vkládání."
+          "title": "Malý",
+          "desc": "Volba <em>malý (small)</em> používá kvantizovanou verzi modelu, která spotřebuje méně RAM a na CPU běží rychleji, s velmi malým rozdílem v kvalitě vektorových reprezentací."
         },
         "large": {
-          "title": "velký",
-          "desc": "Použití parametru <em>velký</em> využívá celý model Jina a v případě potřeby se automaticky spustí na GPU."
+          "title": "Velký",
+          "desc": "Volba <em>velký (large)</em> používá plný model Jina a automaticky poběží na GPU, pokud je to možné."
         }
       }
     },
@@ -589,15 +780,15 @@
       "desc": "Klasifikace ptáků identifikuje známé ptáky pomocí kvantovaného modelu Tensorflow. Po rozpoznání známého ptáka se jeho běžný název přidá jako sub_label. Tato informace je zahrnuta v uživatelském rozhraní, filtrech a také v oznámeních.",
       "title": "Klasifikace ptáků"
     },
-    "unsavedChanges": "Neuložené změny nastavení Obohacení",
+    "unsavedChanges": "Neuložené změny nastavení obohacení",
     "licensePlateRecognition": {
-      "title": "Rozpoznání SPZ",
+      "title": "Rozpoznávání registračních značek",
       "desc": "Frigate dokáže rozpoznávat SPZ vozidel a automaticky přidávat detekované znaky do pole recognized_license_plate nebo název známé SPZ jako sub_label k objektům typu auto. Běžným případem použití může být čtení SPZ aut vjíždějících na příjezdovou cestu nebo aut projíždějících po ulici."
     },
-    "restart_required": "Nutný restart (nastavení Obohacení změněno)",
+    "restart_required": "Vyžaduje restart (nastavení obohacení změněno)",
     "toast": {
-      "success": "Nastavení Obohacení uloženo. Restartujte Frigate aby se změny aplikovaly.",
-      "error": "Chyba ukládání změn konfigurace: {{errorMessage}}"
+      "success": "Nastavení obohacení bylo uloženo. Pro aplikování změn restartujte Frigate.",
+      "error": "Chyba při ukládání změn konfigurace: {{errorMessage}}"
     }
   },
   "triggers": {
@@ -615,7 +806,7 @@
       "actions": "Akce",
       "noTriggers": "Pro tuto kameru nejsou nakonfigurovány žádné spouštěče.",
       "edit": "Upravit",
-      "deleteTrigger": "Smazat spouštěč",
+      "deleteTrigger": "Odstranit spouštěč",
       "lastTriggered": "Naposledy spuštěno"
     },
     "type": {
@@ -623,7 +814,9 @@
       "description": "Popis"
     },
     "actions": {
-      "notification": "Odeslat oznámení"
+      "notification": "Odeslat oznámení",
+      "sub_label": "Přidat podštítek",
+      "attribute": "Přidat atribut"
     },
     "dialog": {
       "createTrigger": {
@@ -646,14 +839,17 @@
             "minLength": "Pole musí mít alespoň 2 znaky.",
             "invalidCharacters": "Pole může obsahovat pouze písmena, číslice, podtržítka a pomlčky.",
             "alreadyExists": "Spouštěč s tímto názvem již pro tuto kameru existuje."
-          }
+          },
+          "description": "Zadejte jedinečný název nebo popis pro identifikaci spouštěče"
         },
         "enabled": {
           "description": "Povolit nebo zakázat tento spouštěč"
         },
         "type": {
           "title": "Typ",
-          "placeholder": "Vybrat typ spouštěče"
+          "placeholder": "Vybrat typ spouštěče",
+          "description": "Spustit při detekci podobného popisu sledovaného objektu",
+          "thumbnail": "Spustit při detekci podobné miniatury sledovaného objektu"
         },
         "content": {
           "title": "Obsah",
@@ -667,7 +863,7 @@
         },
         "actions": {
           "title": "Akce",
-          "desc": "Ve výchozím nastavení Frigate odesílá MQTT zprávu pro všechny spouštěče. Podřazené popisky přidávají název spouštěče k popisku objektu. Atributy jsou prohledávatelná metadata uložená samostatně v metadatech sledovaného objektu.",
+          "desc": "Ve výchozím nastavení Frigate odesílá zprávu MQTT pro všechny spouštěče. Podštítky přidávají název spouštěče ke štítku objektu. Atributy jsou vyhledatelná metadata uložená samostatně v metadatech sledovaného objektu.",
           "error": {
             "min": "Musí být vybrána alespoň jedna akce."
           }
@@ -677,7 +873,8 @@
           "error": {
             "min": "Práh musí být alespoň 0",
             "max": "Práh musí být nanejvýš 1"
-          }
+          },
+          "desc": "Nastavte práh podobnosti tohoto spouštěče. Vyšší práh vyžaduje bližší shodu pro aktivaci."
         }
       }
     },
@@ -692,6 +889,26 @@
         "updateTriggerFailed": "Nepodařilo se aktualizovat spouštěč: {{errorMessage}}",
         "deleteTriggerFailed": "Nepodařilo se smazat spouštěč: {{errorMessage}}"
       }
+    },
+    "semanticSearch": {
+      "desc": "Pro použití spouštěčů musí být povoleno sémantické vyhledávání."
+    },
+    "wizard": {
+      "title": "Vytvořit spouštěč",
+      "step1": {
+        "description": "Nastavte základní parametry spouštěče."
+      },
+      "step2": {
+        "description": "Nastavte obsah, který spustí tuto akci."
+      },
+      "step3": {
+        "description": "Nastavte práh a akce tohoto spouštěče."
+      },
+      "steps": {
+        "nameAndType": "Název a typ",
+        "configureData": "Nastavení dat",
+        "thresholdAndActions": "Práh a akce"
+      }
     }
   },
   "roles": {
@@ -702,16 +919,19 @@
       "actions": "Akce",
       "noRoles": "Nebyly nalezeny žádné vlastní role.",
       "editCameras": "Upravit kamery",
-      "deleteRole": "Smazat roli"
+      "deleteRole": "Smazat roli",
+      "cameraCount_one": "{{count}} kamera",
+      "cameraCount_few": "{{count}} kamery",
+      "cameraCount_other": "{{count}} kamer"
     },
     "toast": {
       "success": {
         "createRole": "Role {{role}} byla úspěšně vytvořena",
         "updateCameras": "Kamery byly aktualizovány pro roli {{role}}",
         "deleteRole": "Role {{role}} byla úspěšně smazána",
-        "userRolesUpdated_one": "{{count}} uživatel přiřazený k této roli byl aktualizován na „diváka“, který má přístup ke všem kamerám.",
-        "userRolesUpdated_few": "{{count}} uživatelé přiřazení k této roli bylo aktualizováno na „diváky“, kteří mají přístup ke všem kamerám.",
-        "userRolesUpdated_other": "{{count}} uživatelů přiřazených k této roli bylo aktualizováno na „diváky“, kteří mají přístup ke všem kamerám."
+        "userRolesUpdated_one": "{{count}} uživatel přiřazený k této roli byl převeden na roli „divák“, která má přístup ke všem kamerám.",
+        "userRolesUpdated_few": "{{count}} uživatelé přiřazení k této roli byli převedeni na roli „divák“, která má přístup ke všem kamerám.",
+        "userRolesUpdated_other": "{{count}} uživatelů přiřazených k této roli bylo převedeno na roli „divák“, která má přístup ke všem kamerám."
       },
       "error": {
         "createRoleFailed": "Nepodařilo se vytvořit roli: {{errorMessage}}",
@@ -758,33 +978,1152 @@
   },
   "cameraWizard": {
     "save": {
-      "success": "Nová kamera {{cameraName}} úspěšně uložena."
+      "success": "Nová kamera {{cameraName}} úspěšně uložena.",
+      "failure": "Chyba při ukládání kamery {{cameraName}}."
     },
     "step2": {
       "testSuccess": "Test připojení v pořádku!",
       "probeSuccessful": "Sonda úspěšná",
-      "probeNoSuccess": "Sonda neúspěšná"
+      "probeNoSuccess": "Sonda neúspěšná",
+      "description": "Prověřte dostupné streamy kamery nebo proveďte ruční nastavení podle vybraného způsobu zjištění streamů.",
+      "testFailed": "Test připojení selhal. Zkontrolujte zadané údaje a zkuste to znovu.",
+      "testFailedTitle": "Test selhal",
+      "streamDetails": "Podrobnosti streamu",
+      "probing": "Prověřování kamery…",
+      "retry": "Zkusit znovu",
+      "testing": {
+        "probingMetadata": "Zjišťování metadat kamery…",
+        "fetchingSnapshot": "Získávání snímku kamery…"
+      },
+      "probeFailed": "Nepodařilo se prověřit kameru: {{error}}",
+      "probingDevice": "Prověřování zařízení…",
+      "probeError": "Chyba prověření",
+      "deviceInfo": "Informace o zařízení",
+      "manufacturer": "Výrobce",
+      "model": "Model",
+      "firmware": "Firmware",
+      "profiles": "Profily",
+      "ptzSupport": "Podpora PTZ",
+      "autotrackingSupport": "Podpora automatického sledování",
+      "presets": "Předvolby",
+      "rtspCandidates": "Nalezené URL RTSP",
+      "rtspCandidatesDescription": "Prověřením kamery byly nalezeny následující URL RTSP. Otestujte připojení pro zobrazení metadat streamu.",
+      "noRtspCandidates": "Z kamery nebyly získány žádné URL RTSP. Přihlašovací údaje mohou být nesprávné nebo kamera nepodporuje ONVIF či použitý způsob získání URL RTSP. Vraťte se zpět a zadejte URL RTSP ručně.",
+      "candidateStreamTitle": "Možnost {{number}}",
+      "useCandidate": "Použít",
+      "uriCopy": "Kopírovat",
+      "uriCopied": "URI zkopírováno do schránky",
+      "testConnection": "Otestovat připojení",
+      "toggleUriView": "Kliknutím přepnete zobrazení celého URI",
+      "connected": "Připojeno",
+      "notConnected": "Nepřipojeno",
+      "errors": {
+        "hostRequired": "Hostitel / IP adresa je povinná"
+      }
     },
     "step3": {
-      "testSuccess": "Test streamu v pořádku!"
+      "testSuccess": "Test streamu v pořádku!",
+      "description": "Nastavte funkce a role streamů a přidejte další streamy kamery.",
+      "streamsTitle": "Streamy kamery",
+      "addStream": "Přidat stream",
+      "addAnotherStream": "Přidat další stream",
+      "streamTitle": "Stream {{number}}",
+      "streamUrl": "URL streamu",
+      "streamUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "selectStream": "Vyberte stream",
+      "searchCandidates": "Hledat dostupné možnosti…",
+      "noStreamFound": "Nebyl nalezen žádný stream",
+      "url": "URL",
+      "resolution": "Rozlišení",
+      "selectResolution": "Vyberte rozlišení",
+      "quality": "Kvalita",
+      "selectQuality": "Vyberte kvalitu",
+      "roles": "Role",
+      "roleLabels": {
+        "detect": "Detekce objektů",
+        "record": "Záznam",
+        "audio": "Zvuk"
+      },
+      "testStream": "Otestovat připojení",
+      "testFailed": "Test streamu selhal",
+      "testFailedTitle": "Test selhal",
+      "connected": "Připojeno",
+      "notConnected": "Nepřipojeno",
+      "featuresTitle": "Funkce",
+      "go2rtc": "Snížit počet připojení ke kameře",
+      "appleCompatibility": {
+        "title": "Zlepšit přehrávání na zařízeních Apple",
+        "description": "Zapněte, pokud sledujete záznamy v Safari nebo na iPhonu, iPadu či Macu."
+      },
+      "detectRoleWarning": "Pro pokračování musí mít alespoň jeden stream roli \"detect\".",
+      "rolesPopover": {
+        "title": "Role streamů",
+        "detect": "Hlavní stream pro detekci objektů.",
+        "record": "Ukládá segmenty video streamu podle konfigurace.",
+        "record_sub": "Záznamy v nižší kvalitě pro adaptivní přehrávání a delší uchovávání (obvykle vedlejší stream kamery).",
+        "audio": "Stream pro detekci zvuku."
+      },
+      "featuresPopover": {
+        "title": "Funkce streamů",
+        "description": "Použijte předávání streamů přes go2rtc pro snížení počtu připojení ke kameře."
+      },
+      "ptz": {
+        "title": "Povolit ovládání PTZ",
+        "detectedNote": "Přes ONVIF byla zjištěna podpora PTZ. U PTZ kamery tato volba umožní ovládat otáčení, naklánění a zoom z rozhraní.",
+        "connectionDetails": "Údaje připojení ONVIF",
+        "host": "Hostitel ONVIF",
+        "port": "Port ONVIF",
+        "username": "Uživatelské jméno ONVIF",
+        "password": "Heslo ONVIF",
+        "hostRequiredWarning": "Při povoleném ovládání PTZ je vyžadován hostitel a port ONVIF."
+      }
     },
     "step4": {
       "reconnectionSuccess": "Opakované připojení úspěšné.",
-      "streamValidated": "Stream {{number}} úspěšně ověřený"
+      "streamValidated": "Stream {{number}} úspěšně ověřený",
+      "description": "Závěrečné ověření a analýza před uložením nové kamery. Před uložením připojte všechny streamy.",
+      "validationTitle": "Ověření streamů",
+      "connectAllStreams": "Připojit všechny streamy",
+      "reconnectionPartial": "Některé streamy se nepodařilo znovu připojit.",
+      "streamUnavailable": "Náhled streamu není dostupný",
+      "reload": "Znovu načíst",
+      "connecting": "Připojování…",
+      "streamTitle": "Stream {{number}}",
+      "valid": "Platné",
+      "failed": "Selhalo",
+      "notTested": "Neotestováno",
+      "connectStream": "Připojit",
+      "connectingStream": "Připojování",
+      "disconnectStream": "Odpojit",
+      "estimatedBandwidth": "Odhadovaná přenosová rychlost",
+      "roles": "Role",
+      "ffmpegModule": "Použít režim kompatibility streamu",
+      "ffmpegModuleDescription": "Pokud se stream nenačte ani po několika pokusech, zkuste tuto volbu zapnout. Frigate pak použije modul FFmpeg s go2rtc, což může zlepšit kompatibilitu s některými streamy kamer.",
+      "none": "Žádné",
+      "error": "Chyba",
+      "streamValidationFailed": "Ověření streamu {{number}} selhalo",
+      "saveAndApply": "Uložit novou kameru",
+      "saveError": "Neplatná konfigurace. Zkontrolujte nastavení.",
+      "issues": {
+        "title": "Ověření streamů",
+        "videoCodecGood": "Videokodek je {{codec}}.",
+        "audioCodecGood": "Zvukový kodek je {{codec}}.",
+        "resolutionHigh": "Rozlišení {{resolution}} může zvýšit spotřebu prostředků.",
+        "resolutionLow": "Rozlišení {{resolution}} může být příliš nízké pro spolehlivou detekci malých objektů.",
+        "resolutionUnknown": "Rozlišení tohoto streamu se nepodařilo zjistit. Nastavte rozlišení detekce ručně v nastavení nebo konfiguraci.",
+        "noAudioWarning": "V tomto streamu nebyl zjištěn zvuk; záznamy budou bez zvuku.",
+        "audioCodecRecordError": "Pro zvuk v záznamech je vyžadován zvukový kodek AAC.",
+        "audioCodecRequired": "Pro detekci zvuku je vyžadován zvukový stream.",
+        "restreamingWarning": "Snížení počtu připojení ke kameře pro stream záznamu může mírně zvýšit využití CPU.",
+        "brands": {
+          "reolink-rtsp": "Reolink RTSP se nedoporučuje. Povolte HTTP v nastavení firmwaru kamery a spusťte průvodce znovu.",
+          "reolink-http": "Streamy Reolink HTTP by měly pro lepší kompatibilitu používat FFmpeg. U tohoto streamu zapněte 'Použít režim kompatibility streamu'."
+        },
+        "dahua": {
+          "substreamWarning": "Vedlejší stream 1 má pevně dané nízké rozlišení. Mnoho kamer Dahua / Amcrest / EmpireTech podporuje další vedlejší streamy, které je nutné povolit v nastavení kamery. Doporučuje se je ověřit a využít, pokud jsou dostupné."
+        },
+        "hikvision": {
+          "substreamWarning": "Vedlejší stream 1 má pevně dané nízké rozlišení. Mnoho kamer Hikvision podporuje další vedlejší streamy, které je nutné povolit v nastavení kamery. Doporučuje se je ověřit a využít, pokud jsou dostupné."
+        }
+      }
+    },
+    "title": "Přidat kameru",
+    "description": "Podle následujících kroků přidejte novou kameru do své instalace Frigate.",
+    "steps": {
+      "nameAndConnection": "Název a připojení",
+      "probeOrSnapshot": "Prověření nebo snímek",
+      "streamConfiguration": "Konfigurace streamů",
+      "validationAndTesting": "Ověření a testování"
+    },
+    "testResultLabels": {
+      "resolution": "Rozlišení",
+      "video": "Video",
+      "audio": "Zvuk",
+      "fps": "FPS"
+    },
+    "commonErrors": {
+      "noUrl": "Zadejte platnou URL streamu",
+      "testFailed": "Test streamu selhal: {{error}}"
+    },
+    "step1": {
+      "description": "Zadejte údaje kamery a zvolte její automatické prověření nebo ruční výběr značky.",
+      "cameraName": "Název kamery",
+      "cameraNamePlaceholder": "např. hlavni_vchod nebo Přehled dvora",
+      "host": "Hostitel / IP adresa",
+      "port": "Port",
+      "username": "Uživatelské jméno",
+      "usernamePlaceholder": "Volitelné",
+      "password": "Heslo",
+      "passwordPlaceholder": "Volitelné",
+      "selectTransport": "Vyberte transportní protokol",
+      "cameraBrand": "Značka kamery",
+      "selectBrand": "Vyberte značku kamery pro šablonu URL",
+      "customUrl": "Vlastní URL streamu",
+      "brandInformation": "Informace o značce",
+      "brandUrlFormat": "Pro kamery s URL RTSP ve formátu: {{exampleUrl}}",
+      "customUrlPlaceholder": "rtsp://username:password@host:port/path",
+      "connectionSettings": "Nastavení připojení",
+      "detectionMethod": "Způsob zjištění streamů",
+      "onvifPort": "Port ONVIF",
+      "probeMode": "Prověřit kameru",
+      "manualMode": "Ruční výběr",
+      "detectionMethodDescription": "Prověřte kameru přes ONVIF (pokud je podporováno) pro zjištění URL streamů nebo ručně vyberte značku kamery pro použití předdefinovaných URL. Pro zadání vlastní URL RTSP zvolte ruční metodu a možnost „Jiné“.",
+      "onvifPortDescription": "U kamer s podporou ONVIF je to obvykle 80 nebo 8080.",
+      "useDigestAuth": "Použít ověřování Digest",
+      "useDigestAuthDescription": "Použít ověřování HTTP Digest pro ONVIF. Některé kamery mohou vyžadovat samostatné jméno a heslo pro ONVIF místo běžného uživatele admin.",
+      "errors": {
+        "brandOrCustomUrlRequired": "Vyberte značku kamery a zadejte hostitele / IP adresu nebo zvolte 'Jiné' a vlastní URL",
+        "nameRequired": "Název kamery je povinný",
+        "nameLength": "Název kamery smí mít nejvýše 64 znaků",
+        "invalidCharacters": "Název kamery obsahuje neplatné znaky",
+        "nameExists": "Název kamery již existuje",
+        "customUrlRtspRequired": "Vlastní URL musí začínat \"rtsp://\" nebo \"rtsps://\". Streamy kamer mimo RTSP je nutné nastavit ručně."
+      }
     }
   },
   "cameraManagement": {
     "cameraConfig": {
       "toast": {
         "success": "Kamera {{cameraName}} úspěšně uložena"
+      },
+      "add": "Přidat kameru",
+      "edit": "Upravit kameru",
+      "description": "Nastavte kameru včetně vstupních streamů a jejich rolí.",
+      "name": "Název kamery",
+      "nameRequired": "Název kamery je povinný",
+      "nameLength": "Název kamery smí mít nejvýše 64 znaků.",
+      "namePlaceholder": "např. hlavni_vchod nebo Přehled dvora",
+      "enabled": "Povoleno",
+      "ffmpeg": {
+        "inputs": "Vstupní streamy",
+        "path": "Cesta streamu",
+        "pathRequired": "Cesta streamu je povinná",
+        "pathPlaceholder": "rtsp://...",
+        "roles": "Role",
+        "rolesRequired": "Je vyžadována alespoň jedna role",
+        "rolesUnique": "Každou roli (audio, detect, record) lze přiřadit pouze jednomu streamu",
+        "addInput": "Přidat vstupní stream",
+        "removeInput": "Odebrat vstupní stream",
+        "inputsRequired": "Je vyžadován alespoň jeden vstupní stream"
+      },
+      "go2rtcStreams": "Streamy go2rtc",
+      "streamUrls": "URL streamů",
+      "addUrl": "Přidat URL",
+      "addGo2rtcStream": "Přidat stream go2rtc"
+    },
+    "title": "Správa kamer",
+    "description": "Přidávejte, upravujte a odstraňujte kamery, ovládejte jejich stav a nastavujte výjimky pro profily a typy kamer. Pro nastavení streamů, detekce, pohybu a dalších parametrů kamery vyberte příslušnou sekci v konfiguraci kamer.",
+    "addCamera": "Přidat novou kameru",
+    "deleteCamera": "Odstranit kameru",
+    "deleteCameraDialog": {
+      "title": "Odstranit kameru",
+      "description": "Odstraněním kamery se trvale odstraní všechny její záznamy, sledované objekty a konfigurace. Související streamy go2rtc může být nutné odstranit ručně.",
+      "selectPlaceholder": "Vyberte kameru…",
+      "confirmTitle": "Opravdu chcete pokračovat?",
+      "confirmWarning": "Odstranění kamery <strong>{{cameraName}}</strong> nelze vrátit zpět.",
+      "deleteExports": "Odstranit také exporty této kamery",
+      "confirmButton": "Trvale odstranit",
+      "success": "Kamera {{cameraName}} byla úspěšně odstraněna",
+      "error": "Nepodařilo se odstranit kameru {{cameraName}}"
+    },
+    "editCamera": "Upravit kameru:",
+    "selectCamera": "Vyberte kameru",
+    "backToSettings": "Zpět do nastavení kamery",
+    "streams": {
+      "title": "Stav a podrobnosti kamer",
+      "label": "Stav kamery",
+      "description": "Nastavte provozní stav každé kamery.<br /><br /><strong>Zapnuto</strong>: streamy se zpracovávají běžným způsobem.<br /><strong>Vypnuto</strong>: dočasně pozastaví zpracování. Stav se nezachová po restartu Frigate.<br /><strong>Zakázáno</strong>: zastaví zpracování a uloží změnu do konfigurace. Opětovné povolení zakázané kamery vyžaduje restart.<br /><br /><em>Poznámka: Zákaz neovlivní předávání streamů go2rtc.</em><br /><br />Tažením úchytu změníte pořadí aktivních kamer v celém rozhraní včetně živého přehledu a seznamů pro výběr kamer.",
+      "disabledSubheading": "Zakázáno v konfiguraci",
+      "status": {
+        "on": "Zapnuto",
+        "off": "Vypnuto",
+        "disabled": "Zakázáno"
+      },
+      "enableSuccess": "Kamera {{cameraName}} byla povolena. Pro aplikování změny restartujte Frigate.",
+      "disableSuccess": "Kamera {{cameraName}} byla zakázána a změna uložena do konfigurace.",
+      "reorderHandle": "Tažením změňte pořadí",
+      "saving": "Ukládání…",
+      "saved": "Uloženo",
+      "details": {
+        "edit": "Upravit podrobnosti kamery",
+        "title": "Upravit podrobnosti kamery",
+        "description": "Upravte zobrazovaný název, externí URL a viditelnost této kamery v celém rozhraní Frigate.",
+        "friendlyNameLabel": "Zobrazovaný název",
+        "friendlyNameHelp": "Název kamery zobrazovaný v celém rozhraní Frigate. Ponechte prázdné pro použití ID kamery.",
+        "webuiUrlLabel": "URL webového rozhraní kamery",
+        "webuiUrlHelp": "URL pro přímý přístup k webovému rozhraní kamery z ladicího zobrazení. Ponechte prázdné pro vypnutí odkazu.",
+        "webuiUrlInvalid": "Musí být platná URL (např. https://example.com).",
+        "dashboardLabel": "Zobrazit v živém přehledu",
+        "dashboardHelp": "Zobrazit kameru ve výchozím živém přehledu Všechny kamery. Zůstane dostupná i jinde, včetně skupin kamer.",
+        "reviewLabel": "Zobrazit v revizi",
+        "reviewHelp": "Zobrazit kameru v revizi včetně filtru kamer, revize pohybu a historie."
+      }
+    },
+    "profiles": {
+      "title": "Přepsání kamer v profilech",
+      "selectLabel": "Vyberte profil",
+      "description": "Nastavte, které kamery se při aktivaci profilu zapnou nebo vypnou. Kamery s volbou „Zdědit“ zachovají svůj výchozí stav.",
+      "inherit": "Zdědit",
+      "on": "Zapnuto",
+      "off": "Vypnuto"
+    },
+    "cameraType": {
+      "title": "Typ kamery",
+      "label": "Typ kamery",
+      "description": "Nastavte typ každé kamery. Vyhrazené kamery LPR jsou jednoúčelové kamery s výkonným optickým zoomem pro snímání registračních značek vzdálených vozidel. Většina kamer by měla používat běžný typ, pokud nejsou určeny přímo pro LPR a nemají záběr úzce zaměřený na registrační značky.",
+      "normal": "Běžná",
+      "dedicatedLpr": "Vyhrazená pro LPR",
+      "saveSuccess": "Typ kamery {{cameraName}} byl změněn. Pro aplikování změn restartujte Frigate."
+    },
+    "clone": {
+      "sectionTitle": "Kopírování nastavení",
+      "sectionDescription": "Zkopírujte konfiguraci jedné kamery do jiné nebo nové kamery.",
+      "button": "Zkopírovat nastavení",
+      "title": "Zkopírovat nastavení kamery",
+      "description": "Zkopírujte konfiguraci kamery do jedné či více dalších kamer nebo nové kamery. Identifikační údaje (název, zobrazovaný název, URL webového rozhraní, pořadí) se nikdy nekopírují.",
+      "source": {
+        "label": "Zdrojová kamera",
+        "placeholder": "Vyberte zdrojovou kameru",
+        "required": "Vyberte zdrojovou kameru"
+      },
+      "target": {
+        "legend": "Cíl",
+        "newRadio": "Nová kamera",
+        "newNameLabel": "Název kamery",
+        "newNamePlaceholder": "např. zadni_vchod nebo Zadní vchod",
+        "newNameRequired": "Název kamery je povinný",
+        "newNameInvalid": "Neplatný název kamery",
+        "newNameCollision": "Kamera s tímto názvem již existuje",
+        "newStreamsForced": "U nové kamery se streamy kopírují vždy.",
+        "existingCamerasRadio": "Existující kamery",
+        "allCameras": "Všechny kamery",
+        "existingPlaceholder": "Vyberte alespoň jednu kameru",
+        "existingDisabled": "Nejsou k dispozici další kamery pro kopírování"
+      },
+      "categories": {
+        "legend": "Nastavení ke zkopírování",
+        "description": "Vyberte nastavení, která se mají zkopírovat ze zdrojové kamery.",
+        "selectAll": "Vybrat vše",
+        "selectNone": "Zrušit výběr",
+        "resetDefaults": "Obnovit výchozí hodnoty",
+        "general": "Obecné",
+        "spatial": "Prostorová nastavení",
+        "streams": "Streamy",
+        "spatialWarningTitle": "Rozdílné rozlišení",
+        "spatialWarning": "Rozlišení detekce zdrojové kamery {{srcCamera}} ({{srcWidth}}×{{srcHeight}}) se liší od kamer: {{cameras}}. Polygony na nich nemusí odpovídat. Tyto volby jsou ve výchozím nastavení vypnuté; zapněte je pro kopírování beze změny.",
+        "restartHint": "Vyžaduje restart",
+        "items": {
+          "record": "Záznam",
+          "snapshots": "Snímky",
+          "review": "Revize",
+          "motion": "Detekce pohybu",
+          "objects": "Objekty",
+          "audio": "Detekce zvuku",
+          "audio_transcription": "Přepis zvuku",
+          "notifications": "Oznámení",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Styl časové značky",
+          "onvif": "ONVIF",
+          "lpr": "Rozpoznávání registračních značek",
+          "face_recognition": "Rozpoznávání obličejů",
+          "semantic_search": "Sémantické vyhledávání",
+          "genai": "Generativní AI",
+          "type": "Typ kamery (běžná / vyhrazená pro LPR)",
+          "profiles": "Profily",
+          "detect": "Rozměry pro detekci",
+          "zones": "Zóny",
+          "motion_mask": "Masky pohybu",
+          "object_masks": "Masky objektů",
+          "ffmpeg_live": "URL a role streamů"
+        }
+      },
+      "footer": {
+        "changeCount_one": "Bude aplikována {{count}} změna",
+        "changeCount_few": "Budou aplikovány {{count}} změny",
+        "changeCount_other": "Bude aplikováno {{count}} změn",
+        "restartNeeded": "Některé změny budou vyžadovat restart.",
+        "liveOnly": "Všechny změny se aplikují za běhu bez restartu.",
+        "submit": "Zkopírovat",
+        "submitting": "Kopírování…"
+      },
+      "toast": {
+        "success": "Nastavení bylo zkopírováno do kamery {{cameraName}}",
+        "successWithRestart": "Nastavení bylo zkopírováno do kamery {{cameraName}}. Pro aplikování všech změn restartujte Frigate.",
+        "successMulti_one": "Nastavení zkopírováno do {{count}} kamery",
+        "successMulti_few": "Nastavení zkopírováno do {{count}} kamer",
+        "successMulti_other": "Nastavení zkopírováno do {{count}} kamer",
+        "successMultiWithRestart_one": "Nastavení zkopírováno do {{count}} kamery. Restartujte Frigate, aby se aplikovaly všechny změny.",
+        "successMultiWithRestart_few": "Nastavení zkopírováno do {{count}} kamer. Restartujte Frigate, aby se aplikovaly všechny změny.",
+        "successMultiWithRestart_other": "Nastavení zkopírováno do {{count}} kamer. Restartujte Frigate, aby se aplikovaly všechny změny.",
+        "partialFailure": "Počet aplikovaných sekcí: {{successCount}}; sekce '{{failedSection}}' selhala: {{errorMessage}}",
+        "partialFailureMulti": "Počet kamer s úspěšným kopírováním: {{successCount}}; selhalo pro {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "Kamera {{cameraName}} byla vytvořena, ale některá nastavení se nepodařilo zkopírovat: {{errorMessage}}",
+        "sourceMissing": "Zdrojová kamera již neexistuje",
+        "submitError": "Nepodařilo se zkopírovat kameru: {{errorMessage}}"
       }
     }
   },
   "cameraReview": {
     "reviewClassification": {
       "toast": {
-        "success": "Konfigurace Klasifikací Revizí byla uložena. Restartujte Frigate pro aplikování změn."
+        "success": "Konfigurace klasifikace revize byla uložena. Pro aplikování změn restartujte Frigate."
+      },
+      "title": "Klasifikace revize",
+      "desc": "Frigate rozděluje položky revize na upozornění a detekce. Ve výchozím nastavení jsou všechny objekty <em>person</em> a <em>car</em> považovány za upozornění. Rozdělení můžete zpřesnit nastavením požadovaných zón.",
+      "noDefinedZones": "Pro tuto kameru nejsou definovány žádné zóny.",
+      "objectAlertsTips": "Všechny objekty {{alertsLabels}} na kameře {{cameraName}} se zobrazí jako upozornění.",
+      "zoneObjectAlertsTips": "Všechny objekty {{alertsLabels}} detekované v zóně {{zone}} na kameře {{cameraName}} se zobrazí jako upozornění.",
+      "objectDetectionsTips": "Všechny nezařazené objekty {{detectionsLabels}} na kameře {{cameraName}} se zobrazí jako detekce bez ohledu na zónu.",
+      "zoneObjectDetectionsTips": {
+        "text": "Všechny nezařazené objekty {{detectionsLabels}} v zóně {{zone}} na kameře {{cameraName}} se zobrazí jako detekce.",
+        "notSelectDetections": "Všechny objekty {{detectionsLabels}} detekované v zóně {{zone}} na kameře {{cameraName}}, které nejsou zařazeny jako upozornění, se zobrazí jako detekce bez ohledu na zónu.",
+        "regardlessOfZoneObjectDetectionsTips": "Všechny nezařazené objekty {{detectionsLabels}} na kameře {{cameraName}} se zobrazí jako detekce bez ohledu na zónu."
+      },
+      "unsavedChanges": "Neuložené nastavení klasifikace revize pro kameru {{camera}}",
+      "selectAlertsZones": "Vyberte zóny pro upozornění",
+      "selectDetectionsZones": "Vyberte zóny pro detekce",
+      "limitDetections": "Omezit detekce na konkrétní zóny"
+    },
+    "title": "Nastavení revize kamery",
+    "object_descriptions": {
+      "title": "Popisy objektů pomocí generativní AI",
+      "desc": "Dočasně povolit nebo zakázat popisy objektů pomocí generativní AI pro tuto kameru do restartu Frigate. Při zakázání nebudou požadovány popisy sledovaných objektů na této kameře."
+    },
+    "review_descriptions": {
+      "title": "Popisy revizí pomocí generativní AI",
+      "desc": "Dočasně povolit nebo zakázat popisy revizí pomocí generativní AI pro tuto kameru do restartu Frigate. Při zakázání nebudou požadovány popisy položek revize na této kameře."
+    },
+    "review": {
+      "title": "Revize",
+      "desc": "Dočasně povolit nebo zakázat upozornění a detekce pro tuto kameru do restartu Frigate. Při zakázání se nebudou vytvářet nové položky revize. ",
+      "alerts": "Upozornění ",
+      "detections": "Detekce "
+    }
+  },
+  "button": {
+    "overriddenGlobal": "Přepsáno (globální)",
+    "overriddenGlobalTooltip": "Tato kamera přepisuje globální nastavení v této sekci",
+    "overriddenGlobalHeading_one": "Tato kamera přepisuje {{count}} pole z globální konfigurace:",
+    "overriddenGlobalHeading_few": "Tato kamera přepisuje {{count}} pole z globální konfigurace:",
+    "overriddenGlobalHeading_other": "Tato kamera přepisuje {{count}} polí z globální konfigurace:",
+    "overriddenGlobalNoDeltas": "Tato kamera přepisuje globální konfiguraci, ale hodnoty polí se neliší.",
+    "overriddenLive": "Přepsáno (za běhu)",
+    "overriddenLiveTooltip": "Tato kamera běží s jinou hodnotou, než je zde zobrazená hodnota uložená v konfiguraci. Za běhu Frigate ji může změnit živé zobrazení, MQTT nebo aktivní profil.",
+    "overriddenLiveValue": "Hodnota za běhu: {{value}}",
+    "overriddenBaseConfig": "Přepsáno (základní konfigurace)",
+    "overriddenBaseConfigTooltip": "Profil {{profile}} přepisuje nastavení v této sekci",
+    "overriddenBaseConfigHeading_one": "Profil {{profile}} přepisuje {{count}} pole ze základní konfigurace:",
+    "overriddenBaseConfigHeading_few": "Profil {{profile}} přepisuje {{count}} pole ze základní konfigurace:",
+    "overriddenBaseConfigHeading_other": "Profil {{profile}} přepisuje {{count}} polí ze základní konfigurace:",
+    "overriddenBaseConfigNoDeltas": "Profil {{profile}} přepisuje tuto sekci, ale hodnoty polí se od základní konfigurace neliší.",
+    "overriddenInCameras": {
+      "label_one": "Přepsáno u {{count}} kamery",
+      "label_few": "Přepsáno u {{count}} kamer",
+      "label_other": "Přepsáno u {{count}} kamer",
+      "tooltip_one": "{{count}} kamera přepisuje hodnoty v této sekci. Kliknutím zobrazíte podrobnosti.",
+      "tooltip_few": "{{count}} kamery přepisují hodnoty v této sekci. Kliknutím zobrazíte podrobnosti.",
+      "tooltip_other": "{{count}} kamer přepisuje hodnoty v této sekci. Kliknutím zobrazíte podrobnosti.",
+      "heading_one": "Tato globální sekce obsahuje pole, která přepisuje {{count}} kamera.",
+      "heading_few": "Tato globální sekce obsahuje pole, která přepisují {{count}} kamery.",
+      "heading_other": "Tato globální sekce obsahuje pole, která přepisuje {{count}} kamer.",
+      "othersField_one": "{{count}} další",
+      "othersField_few": "{{count}} další",
+      "othersField_other": "{{count}} dalších",
+      "profilePrefix": "Profil {{profile}}: {{fields}}"
+    }
+  },
+  "menuDot": {
+    "overrideGlobal": "Tato sekce přepisuje globální konfiguraci",
+    "overrideProfile": "Tuto sekci přepisuje profil {{profile}}",
+    "unsaved": "V této sekci jsou neuložené změny"
+  },
+  "saveAllPreview": {
+    "title": "Změny k uložení",
+    "triggerLabel": "Zkontrolovat čekající změny",
+    "empty": "Žádné čekající změny.",
+    "scope": {
+      "label": "Rozsah",
+      "global": "Globální",
+      "camera": "Kamera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profil"
+    },
+    "field": {
+      "label": "Pole"
+    },
+    "value": {
+      "label": "Nová hodnota",
+      "reset": "Obnovit"
+    }
+  },
+  "timestampPosition": {
+    "tl": "Vlevo nahoře",
+    "tr": "Vpravo nahoře",
+    "bl": "Vlevo dole",
+    "br": "Vpravo dole"
+  },
+  "maintenance": {
+    "title": "Údržba",
+    "sync": {
+      "title": "Synchronizace médií",
+      "desc": "Frigate pravidelně uklízí média podle nastavené doby uchovávání. Několik osiřelých souborů za běhu je běžných. Tato funkce odstraní z disku osiřelé mediální soubory, na které již databáze neodkazuje.",
+      "started": "Synchronizace médií spuštěna.",
+      "alreadyRunning": "Synchronizace již probíhá",
+      "error": "Nepodařilo se spustit synchronizaci",
+      "currentStatus": "Stav",
+      "jobId": "ID úlohy",
+      "startTime": "Čas začátku",
+      "endTime": "Čas konce",
+      "statusLabel": "Stav",
+      "results": "Výsledky",
+      "errorLabel": "Chyba",
+      "mediaTypes": "Typy médií",
+      "allMedia": "Všechna média",
+      "dryRun": "Zkušební běh",
+      "dryRunEnabled": "Žádné soubory nebudou odstraněny",
+      "dryRunDisabled": "Soubory budou odstraněny",
+      "force": "Vynutit",
+      "forceDesc": "Obejít bezpečnostní práh a dokončit synchronizaci i při odstranění více než 50 % souborů.",
+      "verbose": "Podrobný výpis",
+      "verboseDesc": "Zapsat úplný seznam osiřelých souborů na disk pro kontrolu.",
+      "running": "Probíhá synchronizace…",
+      "start": "Spustit synchronizaci",
+      "inProgress": "Probíhá synchronizace. Tato stránka je dočasně zablokovaná.",
+      "status": {
+        "queued": "Ve frontě",
+        "running": "Probíhá",
+        "completed": "Dokončeno",
+        "failed": "Selhalo",
+        "notRunning": "Neběží"
+      },
+      "resultsFields": {
+        "filesChecked": "Zkontrolované soubory",
+        "orphansFound": "Nalezené osiřelé soubory",
+        "orphansDeleted": "Odstraněné osiřelé soubory",
+        "spaceToReclaim": "Místo k uvolnění",
+        "spaceReclaimed": "Uvolněné místo",
+        "aborted": "Přerušeno. Odstranění by překročilo bezpečnostní práh.",
+        "error": "Chyba",
+        "totals": "Celkem"
+      },
+      "event_snapshots": "Snímky sledovaných objektů",
+      "event_thumbnails": "Miniatury sledovaných objektů",
+      "review_thumbnails": "Miniatury revizí",
+      "previews": "Náhledy",
+      "exports": "Exporty",
+      "recordings": "Záznamy"
+    },
+    "regionGrid": {
+      "title": "Mřížka oblastí",
+      "desc": "Mřížka oblastí optimalizuje detekci tím, že se učí, kde se v záběru kamery obvykle objevují objekty různých velikostí. Frigate tato data používá k efektivnímu určení velikosti detekčních oblastí. Mřížka se automaticky vytváří postupně z dat sledovaných objektů.",
+      "clear": "Vymazat mřížku oblastí",
+      "clearConfirmTitle": "Vymazat mřížku oblastí",
+      "clearConfirmDesc": "Vymazání mřížky oblastí se nedoporučuje, pokud jste nedávno nezměnili velikost modelu detektoru nebo fyzickou pozici kamery a nemáte problémy se sledováním objektů. Mřížka se postupně automaticky obnoví při sledování objektů. Pro použití změn je nutný restart Frigate.",
+      "clearSuccess": "Mřížka oblastí byla úspěšně vymazána",
+      "clearError": "Nepodařilo se vymazat mřížku oblastí",
+      "restartRequired": "Pro použití změn mřížky oblastí je nutný restart"
+    }
+  },
+  "configForm": {
+    "global": {
+      "title": "Globální nastavení",
+      "description": "Tato nastavení platí pro všechny kamery, pokud nejsou přepsána v nastavení konkrétní kamery."
+    },
+    "camera": {
+      "title": "Nastavení kamery",
+      "description": "Tato nastavení platí pouze pro tuto kameru a přepisují globální nastavení.",
+      "noCameras": "Nejsou dostupné žádné kamery"
+    },
+    "advancedSettingsCount": "Pokročilá nastavení ({{count}})",
+    "advancedCount": "Pokročilé ({{count}})",
+    "showAdvanced": "Zobrazit pokročilá nastavení",
+    "tabs": {
+      "sharedDefaults": "Společné výchozí hodnoty",
+      "system": "Systém",
+      "integrations": "Integrace"
+    },
+    "additionalProperties": {
+      "keyLabel": "Klíč",
+      "valueLabel": "Hodnota",
+      "keyPlaceholder": "Nový klíč",
+      "remove": "Odebrat",
+      "providerNameLabel": "Název poskytovatele",
+      "providerNamePlaceholder": "např. openai",
+      "variableNameLabel": "Název proměnné",
+      "variableNamePlaceholder": "např. MOJE_PROMENNA",
+      "loggerNameLabel": "Název loggeru",
+      "loggerNamePlaceholder": "např. frigate.record",
+      "keyPatternError": "Používejte pouze písmena, číslice, spojovníky a podtržítka (bez mezer)"
+    },
+    "knownPlates": {
+      "assignedTo": "Přiřazeno k {{name}}",
+      "detected": "Detekované registrační značky",
+      "namePlaceholder": "např. Manželčino auto",
+      "noneDetected": "Zatím nebyly detekovány žádné registrační značky",
+      "platePlaceholder": "Registrační značka nebo regulární výraz",
+      "search": "Vyhledejte nebo zadejte registrační značku",
+      "useCustom": "Použít \"{{value}}\""
+    },
+    "liveStreams": {
+      "streamNameLabel": "Název streamu",
+      "streamNamePlaceholder": "např. Hlavní HD stream",
+      "go2rtcStreamLabel": "Stream go2rtc",
+      "go2rtcStreamPlaceholder": "Vyberte stream go2rtc",
+      "go2rtcStreamSearch": "Vyhledejte nebo zadejte název streamu…",
+      "noGo2rtcStreams": "Nejsou nastaveny žádné streamy go2rtc",
+      "availableStreams": "Dostupné streamy",
+      "useCustom": "Použít \"{{value}}\"",
+      "addStream": "Přidat stream",
+      "reorderHandle": "Tažením změňte pořadí",
+      "transcodedBadge": "Překódovaný",
+      "autoOrder": "Automatické řazení",
+      "autoOrderTips": "Změřit datový tok každého streamu a seřadit od nejvyššího",
+      "measuring": "Měření…",
+      "rate": "{{kbps}} kb/s",
+      "rateSet": "{{kbps}} kb/s (nastaveno)",
+      "rateFailed": "Nepodařilo se změřit"
+    },
+    "liveTranscode": {
+      "title": "Překódované streamy",
+      "description": "Přidává streamy s nižší kvalitou, které go2rtc překóduje v reálném čase, když je někdo sleduje.",
+      "unavailable": "Překódované streamy potřebují zdrojový stream go2rtc. Nejprve jej přidejte v sekci streamů go2rtc.",
+      "enable": "Povolit překódované streamy",
+      "source": "Zdrojový stream",
+      "height": "Výška",
+      "heightOption": "{{height}}p",
+      "bitrate": "Datový tok (kb/s)",
+      "addQuality": "Přidat úroveň kvality",
+      "removeQuality": "Odebrat úroveň kvality"
+    },
+    "timezone": {
+      "defaultOption": "Použít časové pásmo prohlížeče"
+    },
+    "roleMap": {
+      "empty": "Žádná mapování rolí",
+      "roleLabel": "Role",
+      "groupsLabel": "Skupiny",
+      "addMapping": "Přidat mapování role",
+      "remove": "Odebrat"
+    },
+    "ffmpegArgs": {
+      "preset": "Předvolba",
+      "manual": "Ruční argumenty",
+      "inherit": "Zdědit z nastavení kamery",
+      "none": "Žádné",
+      "sameAsRecord": "Stejné jako výstupní argumenty record",
+      "useGlobalSetting": "Zdědit z globálního nastavení",
+      "selectPreset": "Vyberte předvolbu",
+      "manualPlaceholder": "Zadejte argumenty FFmpeg",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-apple-silicon-h264": "Apple Silicon (H.264)",
+        "preset-apple-silicon-h265": "Apple Silicon (H.265)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (obecné)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (obecné)",
+        "preset-http-reolink": "HTTP – kamery Reolink",
+        "preset-rtmp-generic": "RTMP (obecné)",
+        "preset-rtsp-generic": "RTSP (obecné)",
+        "preset-rtsp-restream": "RTSP – předávání z go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP – předávání z go2rtc (nízká latence)",
+        "preset-rtsp-udp": "RTSP – UDP",
+        "preset-rtsp-blue-iris": "RTSP – Blue Iris",
+        "preset-record-generic": "Záznam (obecné, bez zvuku)",
+        "preset-record-generic-audio-copy": "Záznam (obecné + kopírování zvuku)",
+        "preset-record-generic-audio-aac": "Záznam (obecné + převod zvuku na AAC)",
+        "preset-record-mjpeg": "Záznam – kamery MJPEG",
+        "preset-record-jpeg": "Záznam – kamery JPEG",
+        "preset-record-ubiquiti": "Záznam – kamery Ubiquiti"
       }
+    },
+    "cameraInputs": {
+      "itemTitle": "Stream {{index}}",
+      "sourceMode": {
+        "restream": "Předávání streamu (go2rtc)",
+        "manual": "Ruční vstupní cesta",
+        "go2rtcStreamLabel": "Stream go2rtc",
+        "go2rtcStreamPlaceholder": "Vyberte stream go2rtc",
+        "noGo2rtcStreams": "Nejsou nastaveny žádné streamy go2rtc",
+        "go2rtcStreamSearch": "Hledat streamy…",
+        "availableStreams": "Dostupné streamy",
+        "noMatchingStreams": "Žádné odpovídající streamy"
+      }
+    },
+    "restartRequiredField": "Vyžaduje restart",
+    "restartRequiredFooter": "Konfigurace změněna – vyžaduje restart",
+    "sections": {
+      "detect": "Detekce",
+      "record": "Záznam",
+      "snapshots": "Snímky",
+      "motion": "Pohyb",
+      "objects": "Objekty",
+      "review": "Revize",
+      "audio": "Zvuk",
+      "notifications": "Oznámení",
+      "live": "Živé zobrazení",
+      "timestamp_style": "Časové značky",
+      "mqtt": "MQTT",
+      "database": "Databáze",
+      "telemetry": "Telemetrie",
+      "auth": "Ověřování",
+      "tls": "TLS",
+      "proxy": "Proxy",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "Detektory",
+      "model": "Model",
+      "semantic_search": "Sémantické vyhledávání",
+      "genai": "Generativní AI",
+      "face_recognition": "Rozpoznávání obličejů",
+      "lpr": "Rozpoznávání registračních značek",
+      "birdseye": "Birdseye",
+      "masksAndZones": "Masky / zóny"
+    },
+    "detect": {
+      "title": "Nastavení detekce"
+    },
+    "record": {
+      "title": "Nastavení záznamu"
+    },
+    "snapshots": {
+      "title": "Nastavení snímků"
+    },
+    "motion": {
+      "title": "Nastavení pohybu"
+    },
+    "objects": {
+      "title": "Nastavení objektů"
+    },
+    "audioLabels": {
+      "summary": "Počet vybraných zvukových štítků: {{count}}",
+      "empty": "Nejsou dostupné žádné zvukové štítky"
+    },
+    "objectLabels": {
+      "summary": "Počet vybraných typů objektů: {{count}}",
+      "empty": "Nejsou dostupné žádné štítky objektů"
+    },
+    "reviewLabels": {
+      "summary": "Počet vybraných štítků: {{count}}",
+      "empty": "Nejsou dostupné žádné štítky"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} pro {{label}}"
+    },
+    "zoneNames": {
+      "summary": "Vybráno: {{count}}",
+      "empty": "Nejsou dostupné žádné zóny"
+    },
+    "birdseyeModes": {
+      "summary": "Vybráno: {{count}}",
+      "options": {
+        "continuous": "Nepřetržitě",
+        "motion": "Pohyb",
+        "all_objects": "Všechny objekty",
+        "alerts": "Upozornění",
+        "detections": "Detekce"
+      }
+    },
+    "inputRoles": {
+      "summary": "Počet vybraných rolí: {{count}}",
+      "empty": "Nejsou dostupné žádné role",
+      "roleInUse": "Již přiřazeno jinému streamu",
+      "recordSubConflict": "Stream nemůže mít současně role record a record_sub",
+      "options": {
+        "detect": "Detekce",
+        "record": "Záznam",
+        "record_sub": "Záznam (vedlejší stream)",
+        "audio": "Zvuk"
+      }
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Vektorová reprezentace",
+        "descriptions": "Popisy",
+        "chat": "Chat",
+        "transcribe": "Přepis"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Vyberte model…",
+      "builtIn": "Vestavěné modely",
+      "genaiProviders": "Poskytovatelé generativní AI"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "Nevztahuje se na poskytovatele generativní AI"
+    },
+    "review": {
+      "title": "Nastavení revize"
+    },
+    "audio": {
+      "title": "Nastavení zvuku"
+    },
+    "notifications": {
+      "title": "Nastavení oznámení"
+    },
+    "live": {
+      "title": "Nastavení živého zobrazení"
+    },
+    "timestamp_style": {
+      "title": "Nastavení časových značek"
+    },
+    "searchPlaceholder": "Hledat…",
+    "addCustomLabel": "Přidat vlastní štítek…",
+    "genaiModel": {
+      "placeholder": "Vyberte nebo zadejte model…",
+      "search": "Vyhledejte nebo zadejte model…",
+      "noModels": "Nejsou dostupné žádné modely",
+      "available": "Dostupné modely",
+      "useCustom": "Použít \"{{value}}\"",
+      "refresh": "Obnovit modely",
+      "probeFailed": "Nepodařilo se zjistit modely",
+      "fetchedModels": "Seznam modelů byl úspěšně získán"
+    },
+    "ptzPresets": {
+      "placeholder": "Vyberte nebo zadejte předvolbu…",
+      "search": "Vyhledejte nebo zadejte předvolbu…",
+      "noPresets": "Nejsou dostupné žádné předvolby",
+      "available": "Předvolby kamery",
+      "useCustom": "Použít \"{{value}}\""
+    },
+    "defaultRole": {
+      "admin": "Správce",
+      "viewer": "Divák",
+      "none": "Žádná (odepřít přístup)"
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Vyberte model…",
+      "builtIn": "Vestavěné modely",
+      "genaiProviders": "Poskytovatelé generativní AI"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "Nevztahuje se na poskytovatele generativní AI"
+    }
+  },
+  "globalConfig": {
+    "title": "Globální konfigurace",
+    "description": "Nastavte globální parametry, které platí pro všechny kamery, pokud nejsou přepsány.",
+    "toast": {
+      "success": "Globální nastavení bylo úspěšně uloženo",
+      "error": "Nepodařilo se uložit globální nastavení",
+      "validationError": "Ověření selhalo"
+    }
+  },
+  "cameraConfig": {
+    "title": "Konfigurace kamer",
+    "description": "Nastavte parametry jednotlivých kamer. Tato nastavení přepisují globální výchozí hodnoty.",
+    "overriddenBadge": "Přepsáno",
+    "resetToGlobal": "Obnovit globální nastavení",
+    "toast": {
+      "success": "Nastavení kamery bylo úspěšně uloženo",
+      "error": "Nepodařilo se uložit nastavení kamery"
+    }
+  },
+  "toast": {
+    "success": "Nastavení bylo úspěšně uloženo",
+    "applied": "Nastavení bylo úspěšně aplikováno",
+    "go2rtcSyncFailed": "Uloženo, ale go2rtc se nepodařilo aktualizovat. Pro aplikování změn restartujte Frigate.",
+    "successRestartRequired": "Nastavení bylo úspěšně uloženo. Pro aplikování změn restartujte Frigate.",
+    "error": "Nepodařilo se uložit nastavení",
+    "validationError": "Ověření selhalo: {{message}}",
+    "resetSuccess": "Obnoveny globální výchozí hodnoty",
+    "resetError": "Nepodařilo se obnovit nastavení",
+    "saveAllSuccess_one": "Úspěšně uložena {{count}} sekce.",
+    "saveAllSuccess_few": "Úspěšně uloženy všechny {{count}} sekce.",
+    "saveAllSuccess_other": "Úspěšně uloženo všech {{count}} sekcí.",
+    "saveAllSuccessRestartRequired_one": "Úspěšně uložena {{count}} sekce. Restartujte Frigate, aby se aplikovaly změny.",
+    "saveAllSuccessRestartRequired_few": "Úspěšně uloženy všechny {{count}} sekce. Restartujte Frigate, aby se aplikovaly změny.",
+    "saveAllSuccessRestartRequired_other": "Úspěšně uloženo všech {{count}} sekcí. Restartujte Frigate, aby se aplikovaly změny.",
+    "saveAllPartial_one": "Uloženo {{successCount}} z {{totalCount}} sekcí. Neúspěšných: {{failCount}}.",
+    "saveAllPartial_few": "Uloženo {{successCount}} z {{totalCount}} sekcí. Neúspěšných: {{failCount}}.",
+    "saveAllPartial_other": "Uloženo {{successCount}} z {{totalCount}} sekcí. Neúspěšných: {{failCount}}.",
+    "saveAllFailure": "Nepodařilo se uložit všechny sekce."
+  },
+  "profiles": {
+    "title": "Profily",
+    "activeProfile": "Aktivní profil",
+    "noActiveProfile": "Žádný aktivní profil",
+    "active": "Aktivní",
+    "activated": "Profil '{{profile}}' byl aktivován",
+    "activateFailed": "Nepodařilo se nastavit profil",
+    "deactivated": "Profil byl deaktivován",
+    "noProfiles": "Nejsou definovány žádné profily.",
+    "noOverrides": "Žádná přepsání",
+    "cameraCount_one": "{{count}} kamera",
+    "cameraCount_few": "{{count}} kamery",
+    "cameraCount_other": "{{count}} kamer",
+    "columnCamera": "Kamera",
+    "columnOverrides": "Přepsání v profilu",
+    "baseConfig": "Základní konfigurace",
+    "addProfile": "Přidat profil",
+    "newProfile": "Nový profil",
+    "profileNamePlaceholder": "např. Zajištěno, Pryč, Noční režim",
+    "friendlyNameLabel": "Název profilu",
+    "profileIdLabel": "ID profilu",
+    "profileIdDescription": "Interní identifikátor používaný v konfiguraci a automatizacích",
+    "nameInvalid": "Jsou povolena pouze malá písmena, číslice a podtržítka",
+    "nameDuplicate": "Profil s tímto názvem již existuje",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Musí mít alespoň 2 znaky",
+      "mustNotContainPeriod": "Nesmí obsahovat tečky",
+      "alreadyExists": "Profil s tímto ID již existuje"
+    },
+    "renameProfile": "Přejmenovat profil",
+    "renameSuccess": "Profil byl přejmenován na '{{profile}}'",
+    "deleteProfile": "Odstranit profil",
+    "deleteProfileConfirm": "Odstranit profil \"{{profile}}\" ze všech kamer? Tuto akci nelze vrátit zpět.",
+    "deleteSuccess": "Profil '{{profile}}' byl odstraněn",
+    "createSuccess": "Profil '{{profile}}' byl vytvořen",
+    "removeOverride": "Odebrat přepsání v profilu",
+    "deleteSection": "Odstranit přepsání sekce",
+    "deleteSectionConfirm": "Odebrat přepsání sekce {{section}} pro profil {{profile}} na kameře {{camera}}?",
+    "deleteSectionSuccess": "Přepsání sekce {{section}} pro profil {{profile}} bylo odebráno",
+    "enableSwitch": "Povolit profily",
+    "enabledDescription": "Profily jsou povoleny. Vytvořte níže nový profil, přejděte do sekce konfigurace kamery, proveďte změny a uložte je.",
+    "disabledDescription": "Profily umožňují definovat pojmenované sady přepsání konfigurace kamer (např. zajištěno, pryč, noc), které lze aktivovat podle potřeby."
+  },
+  "unsavedChanges": "Máte neuložené změny",
+  "confirmReset": "Potvrdit obnovení",
+  "resetToDefaultDescription": "Všechna nastavení v této sekci se obnoví na výchozí hodnoty. Tuto akci nelze vrátit zpět.",
+  "resetToGlobalDescription": "Nastavení v této sekci se obnoví na globální výchozí hodnoty. Tuto akci nelze vrátit zpět.",
+  "go2rtcStreams": {
+    "title": "Streamy go2rtc",
+    "description": "Spravujte konfiguraci streamů go2rtc pro předávání streamů kamer. Každý stream má název a jednu nebo více zdrojových URL.",
+    "addStream": "Přidat stream",
+    "addStreamDesc": "Zadejte název nového streamu. Tento název se použije pro odkazy na stream v konfiguraci kamer.",
+    "addUrl": "Přidat URL",
+    "sourceNumber": "Zdroj {{index}}",
+    "streamName": "Název streamu",
+    "streamNamePlaceholder": "např. hlavni_vchod",
+    "streamUrlPlaceholder": "např. rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "Odstranit stream",
+    "deleteStreamConfirm": "Opravdu chcete odstranit stream \"{{streamName}}\"? Kamery, které na něj odkazují, mohou přestat fungovat.",
+    "noStreams": "Nejsou nastaveny žádné streamy go2rtc. Začněte přidáním streamu.",
+    "validation": {
+      "nameRequired": "Název streamu je povinný",
+      "nameDuplicate": "Stream s tímto názvem již existuje",
+      "nameInvalid": "Název streamu smí obsahovat pouze písmena, číslice, podtržítka a spojovníky",
+      "urlRequired": "Je vyžadována alespoň jedna URL"
+    },
+    "renameStream": "Přejmenovat stream",
+    "renameStreamDesc": "Zadejte nový název streamu. Přejmenování může narušit kamery nebo jiné streamy, které na něj odkazují názvem.",
+    "newStreamName": "Nový název streamu",
+    "ffmpeg": {
+      "useFfmpegModule": "Použít režim kompatibility (FFmpeg)",
+      "video": "Video",
+      "audio": "Zvuk",
+      "hardware": "Hardwarová akcelerace",
+      "videoCopy": "Kopírovat",
+      "videoH264": "Překódovat na H.264",
+      "videoH265": "Překódovat na H.265",
+      "videoExclude": "Vynechat",
+      "audioCopy": "Kopírovat",
+      "audioAac": "Překódovat na AAC",
+      "audioOpus": "Překódovat na Opus",
+      "audioPcmu": "Překódovat na PCM μ-law",
+      "audioPcma": "Překódovat na PCM A-law",
+      "audioPcm": "Překódovat na PCM",
+      "audioMp3": "Překódovat na MP3",
+      "audioExclude": "Vynechat",
+      "hardwareNone": "Bez hardwarové akcelerace",
+      "hardwareAuto": "Automaticky (doporučeno)",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Přidat videokodek",
+      "addAudioCodec": "Přidat zvukový kodek",
+      "removeCodec": "Odebrat kodek"
+    }
+  },
+  "birdseye": {
+    "cameraOrder": {
+      "label": "Pořadí kamer",
+      "description": "Tažením kamer nastavte jejich pořadí v rozložení Birdseye.",
+      "reorderHandle": "Tažením změňte pořadí",
+      "saving": "Ukládání…",
+      "saved": "Uloženo"
+    }
+  },
+  "retainMode": {
+    "all": "Vše",
+    "motion": "Pohyb",
+    "active_objects": "Aktivní objekty"
+  },
+  "previewQuality": {
+    "very_high": "Velmi vysoká",
+    "high": "Vysoká",
+    "medium": "Střední",
+    "low": "Nízká",
+    "very_low": "Velmi nízká"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Podle prohlížeče",
+      "12hour": "12hodinový",
+      "24hour": "24hodinový"
+    },
+    "unitSystem": {
+      "metric": "Metrické",
+      "imperial": "Imperiální"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Záznamy",
+      "previews": "Náhledy"
+    },
+    "frameMode": {
+      "frames": "Snímky",
+      "annotated_frames": "Anotované snímky"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Ladění",
+      "info": "Informace",
+      "warning": "Varování",
+      "error": "Chyba",
+      "critical": "Kritická chyba"
+    }
+  },
+  "onvif": {
+    "profileAuto": "Automaticky",
+    "profileLoading": "Načítání profilů…",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Zakázáno",
+        "absolute": "Absolutní",
+        "relative": "Relativní"
+      }
+    }
+  },
+  "modelSize": {
+    "small": "Malý",
+    "large": "Velký"
+  },
+  "configMessages": {
+    "review": {
+      "recordDisabled": "Záznam je zakázán; položky revize se nebudou vytvářet.",
+      "recordRuntimeDisabled": "Záznam je v konfiguraci povolen, ale na této kameře je aktuálně vypnutý, takže se nebudou vytvářet položky revize. Zapněte jej v živém zobrazení kamery nebo ověřte, zda jej nevypíná aktivní profil.",
+      "detectDisabled": "Detekce objektů je zakázána. Položky revize potřebují detekované objekty pro rozdělení na upozornění a detekce.",
+      "detectRuntimeDisabled": "Detekce objektů je v konfiguraci povolena, ale na této kameře je aktuálně vypnutá. Položky revize potřebují detekované objekty pro rozdělení na upozornění a detekce. Zapněte ji v živém zobrazení kamery nebo ověřte, zda ji nevypíná aktivní profil.",
+      "allNonAlertDetections": "Veškerá aktivita bez upozornění se zahrne mezi detekce.",
+      "genaiImageSourceRecordingsRecordDisabled": "Zdroj obrázků je nastaven na 'recordings', ale záznam je zakázán. Frigate použije náhledové obrázky.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "Zdroj obrázků je nastaven na 'recordings', ale záznam je na této kameře aktuálně vypnutý, přestože jej konfigurace povoluje. Frigate použije náhledové obrázky."
+    },
+    "live": {
+      "noGo2rtcStream": "Živé zobrazení této kamery používá základní přehrávač s nižší snímkovou frekvencí a bez zvuku. Pro plynulejší video a zvuk nastavte stream go2rtc."
+    },
+    "audio": {
+      "noAudioRole": "Žádný stream nemá roli audio. Pro funkční detekci zvuku musíte povolit roli audio."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Detekce zvuku není na této kameře povolena. Přepis zvuku vyžaduje aktivní detekci zvuku.",
+      "audioDetectionRuntimeDisabled": "Detekce zvuku je v konfiguraci povolena, ale na této kameře je aktuálně vypnutá, takže přepis zvuku nebude fungovat. Zapněte ji v živém zobrazení kamery nebo ověřte, zda ji nevypíná aktivní profil.",
+      "genaiProviderSelected": "Je vybrán poskytovatel generativní AI, proto se nastavení zařízení a velikosti modelu ignoruje."
+    },
+    "detect": {
+      "fpsGreaterThanFive": "Pro většinu kamer je doporučeno 5 FPS detekce. Vyšší hodnoty zvyšují zátěž CPU/GPU a při plynulém sledování nepřinášejí užitek. Pokud objekt projde celým záběrem přibližně za sekundu, lze postupně zvýšit hodnotu až na doporučené maximum 10 FPS. Přínos ověřte v ladicím zobrazení.",
+      "disabled": "Detekce objektů je zakázána. Snímky, položky revize a obohacení jako rozpoznávání obličejů, registračních značek a generativní AI nebudou fungovat.",
+      "runtimeDisabled": "Detekce objektů je v konfiguraci povolena, ale na této kameře je aktuálně vypnutá. Snímky, položky revize a obohacení jako rozpoznávání obličejů, registračních značek a generativní AI nebudou fungovat, dokud ji nezapnete v živém zobrazení kamery nebo ji aktivní profil nepřestane vypínat.",
+      "sceneWithoutModel": "Pro tuto scénu není nastaven model detekce, proto kamera používá výchozí model. Přidejte model pro tuto scénu, pokud má kamera používat vlastní.",
+      "resolutionShouldBeMultipleOfFour": "Pro nejlepší výsledky by šířka a výška detekce měly být násobky 4. Jiné sudé hodnoty mohou způsobit obrazové artefakty nebo mírné zkreslení detekčního streamu.",
+      "aspectRatioMismatch": "Zadaná šířka a výška neodpovídají poměru stran aktuálního rozlišení detekce. Obraz může být roztažený nebo zkreslený.",
+      "maxFramesSet": "Nastavení maximálního počtu snímků přepíše výchozí chování a vypne sledování nehybných objektů. Je to potřeba jen ve velmi málo případech; používejte opatrně.",
+      "squareResolution": "Čtvercové rozlišení detekce je neobvyklé. Šířka a výška detekce mají odpovídat poměru stran kamery (například 16:9), nikoli rozměrům modelu detekce objektů. Nesprávný poměr stran může roztáhnout obraz a snížit přesnost detekce.",
+      "resolutionHigh": "Toto rozlišení detekce je vyšší než doporučené a může zvýšit spotřebu prostředků bez zlepšení přesnosti. Pro většinu kamer se doporučuje rozlišení detekce nejvýše 1080p.",
+      "globalResolutionMultipleCameras": "Je nastaveno globální rozlišení detekce pro více kamer. Pokud nemají všechny kamery stejné rozlišení a poměr stran, nastavte šířku a výšku detekce u každé zvlášť podle jejího původního poměru stran."
+    },
+    "model": {
+      "optimizedFor320": "Frigate je optimalizován pro model 320×320, který je nejlepší volbou pro většinu instalací. Model 640×640 je pomalejší a pomáhá jen v konkrétních situacích.",
+      "inputDimensionsNotDetectResolution": "Šířka a výška vstupu modelu jsou rozměry vstupu modelu detekce objektů, nikoli rozlišení detekce kamery. Musí odpovídat používanému modelu, obvykle čtvercovému rozměru 320×320 nebo 640×640."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Ruční argumenty hardwarové akcelerace se nedoporučují. Pokud nemáte zvláštní požadavky, vyberte předvolbu odpovídající hardwaru.",
+      "inputsMissingGo2rtcStream": "Níže uvedený vstup odkazuje na neexistující stream předávaný přes go2rtc. Vyberte existující stream nebo zadejte URL kamery ručně, jinak se kamera nepřipojí."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Pro generování popisů musíte nastavit poskytovatele generativní AI s rolí 'descriptions'."
+    },
+    "faceRecognition": {
+      "globalDisabled": "Pro rozpoznávání obličejů na této kameře musí být globálně povoleno obohacení rozpoznáváním obličejů.",
+      "personNotTracked": "Rozpoznávání obličejů vyžaduje sledování objektu 'person'. Povolte 'person' v nastavení objektů této kamery.",
+      "modelSizeLarge": "Velký model (large) vyžaduje GPU nebo NPU pro přiměřený výkon. Na systémech pouze s CPU použijte malý model (small)."
+    },
+    "lpr": {
+      "globalDisabled": "Pro funkční LPR na této kameře musí být globálně povoleno obohacení rozpoznáváním registračních značek.",
+      "vehicleNotTracked": "Rozpoznávání registračních značek vyžaduje sledování vozidla. Povolte 'car' nebo jiný typ vozidla v nastavení objektů této kamery.",
+      "modelSizeLarge": "Velký model (large) je optimalizován pro víceřádkové registrační značky. Malý model (small) má lepší výkon a měl by se používat, pokud váš region nepoužívá víceřádkové značky."
+    },
+    "record": {
+      "noRecordRole": "Žádný stream nemá roli record. Záznam nebude fungovat.",
+      "noRecordSubRole": "Žádný stream nemá roli record_sub. Záznam vedlejšího streamu nebude fungovat.",
+      "profileBaseDisabled": "Záznam je zakázán v základní konfiguraci kamery, takže jeho povolení v profilu nemá účinek. Povolte záznam v základní konfiguraci a profilem jej případně vypínejte."
+    },
+    "notifications": {
+      "profileBaseDisabled": "Žádná kamera nemá oznámení povolena v základní konfiguraci, takže jejich povolení v profilu nemá účinek. Povolte oznámení v základní konfiguraci alespoň jedné kamery."
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "Birdseye zahrnuje sledované objekty, ale detekce objektů je na této kameře zakázána. Kamera se v Birdseye neobjeví.",
+      "objectTrackingDetectRuntimeDisabled": "Birdseye zahrnuje sledované objekty, ale detekce objektů je na této kameře aktuálně vypnutá, přestože ji konfigurace povoluje. Kamera se v Birdseye neobjeví, dokud detekci nezapnete v živém zobrazení nebo ji aktivní profil nepřestane vypínat."
+    },
+    "snapshots": {
+      "detectDisabled": "Detekce objektů je zakázána. Snímky se vytvářejí ze sledovaných objektů, proto se nebudou vytvářet.",
+      "detectRuntimeDisabled": "Detekce objektů je v konfiguraci povolena, ale na této kameře je aktuálně vypnutá, takže se nebudou vytvářet snímky. Zapněte ji v živém zobrazení kamery nebo ověřte, zda ji nevypíná aktivní profil."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Malý model (small) Jina V2 má vysoké nároky na RAM a inferenci. Doporučuje se velký model (large) se samostatným GPU."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Automatické sledování vyžaduje alespoň jednu zónu. Definujte zónu této kamery v sekci Masky / zóny a níže ji nastavte jako požadovanou."
+    }
+  },
+  "detectionModels": {
+    "title": "Modely detekce",
+    "description": "Nastavte modely detekce objektů a hardware, na kterém běží. Model pro scénu přidávejte pouze tehdy, když některé kamery potřebují jinak natrénovaný model, například termokamery. Kamery vybírají model podle scény v nastavení detekce.",
+    "addModel": "Přidat model",
+    "cameras_one": "{{count}} kamera",
+    "cameras_few": "{{count}} kamery",
+    "cameras_other": "{{count}} kamer",
+    "scene": {
+      "label": "Scéna",
+      "placeholder": "thermal",
+      "description": "Název pro kamery, kterým je model určen. Kamery vybírají model nastavením stejné scény v detekci; kamery bez scény používají výchozí model. Scény slouží pro různé modely, nikoli pro rozdělení jednoho modelu mezi hardware, protože modely se stejným souborem se slučují."
+    },
+    "scenes": {
+      "default": "Výchozí"
+    },
+    "hardware": {
+      "label": "Hardware",
+      "placeholder": "Vyberte hardware",
+      "loading": "Hledání hardwaru pro detekci…",
+      "none": "Není vybrán žádný hardware",
+      "claimedBy": "používá scéna {{scene}}",
+      "detectorCount": "Detektory",
+      "countRecommended_one": "Doporučeno pro {{count}} kameru",
+      "countRecommended_few": "Doporučeno pro {{count}} kamery",
+      "countRecommended_other": "Doporučeno pro {{count}} kamer",
+      "unrecognized": "Tento model je nastaven pro hardware, který nebyl v systému nalezen: {{devices}}",
+      "description": "Hardware, na kterém tento model provádí detekci.",
+      "detectorCountDescription": "Počet procesů detekce na tomto hardwaru. Více detektorů zvládne více kamer, ale vyžaduje více paměti zařízení.",
+      "unitsDescription": "Každá jednotka spouští vlastní proces detekce. Jednotku, kterou nelze sdílet, například Coral, může používat pouze jeden model."
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Vlastní model"
+    },
+    "plusModel": {
+      "noModelSelected": "Vyberte model Frigate+"
     }
   }
 }

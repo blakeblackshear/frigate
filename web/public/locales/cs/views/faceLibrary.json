@@ -1,10 +1,10 @@
 {
   "imageEntry": {
-    "dropInstructions": "Přetáhněte obrázek sem, nebo klikněte na výběr",
+    "dropInstructions": "Přetáhněte nebo vložte obrázek sem, případně jej vyberte kliknutím",
     "maxSize": "Maximální velikost: {{size}}MB",
     "dropActive": "Přetáhněte obrázek zde…",
     "validation": {
-      "selectImage": "Prosím vyberte soubor obrázků."
+      "selectImage": "Vyberte soubor s obrázkem."
     }
   },
   "createFaceLibrary": {
@@ -13,14 +13,14 @@
   },
   "details": {
     "unknown": "Neznámý",
-    "scoreInfo": "Skóre dílčího popisku je vážené skóre všech jistot rozpoznání obličejů, ale to může být odlišné od skóre zobrazeného na snímku.",
-    "timestamp": "Časové razítko"
+    "scoreInfo": "Skóre je vážený průměr všech skóre obličeje; váhou je velikost obličeje na každém obrázku.",
+    "timestamp": "Časová značka"
   },
   "deleteFaceAttempts": {
     "title": "Odstranit obličeje",
-    "desc_one": "Skutečně chcete vymazat {{count}} obličej? Tato akce je nevratná.",
-    "desc_few": "Skutečně chcete vymazat {{count}} obličeje? Tato akce je nevratná.",
-    "desc_other": "Skutečně chcete vymazat {{count}} obličejů? Tato akce je nevratná."
+    "desc_one": "Opravdu chcete odstranit {{count}} obličej? Tato akce je nevratná.",
+    "desc_few": "Opravdu chcete odstranit {{count}} obličeje? Tato akce je nevratná.",
+    "desc_other": "Opravdu chcete odstranit {{count}} obličejů? Tato akce je nevratná."
   },
   "nofaces": "Žádné tváře",
   "deleteFaceLibrary": {
@@ -29,14 +29,19 @@
   },
   "train": {
     "title": "Nedávná rozpoznání",
-    "empty": "Nejsou zde žádné předchozí pokusy o rozpoznání obličeje",
+    "empty": "Nejsou k dispozici žádné nedávné pokusy o rozpoznání obličeje",
     "aria": "Vybrat poslední rozpoznávání",
-    "titleShort": "Nedávný"
+    "titleShort": "Nedávný",
+    "emptyNoLibrary": {
+      "title": "Nahrát obličej",
+      "description": "Aby rozpoznávání obličejů fungovalo, musíte do knihovny přidat alespoň jeden obličej."
+    }
   },
   "description": {
     "addFace": "Přidejte novou kolekci do Knihovny obličejů nahráním prvního obrázku.",
     "placeholder": "Zadejte název pro tuto kolekci",
-    "invalidName": "Neplatné jméno. Jméno můžou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a spojovníky."
+    "invalidName": "Neplatné jméno. Jména smějí obsahovat pouze písmena, číslice, mezery, apostrofy, podtržítka a spojovníky.",
+    "nameCannotContainHash": "Jméno nesmí obsahovat #."
   },
   "documentTitle": "Knihovna obličejů - Frigate",
   "uploadFaceImage": {
@@ -44,12 +49,12 @@
     "desc": "Nahrajte obrázek pro skenování tváří a zahrňte jej pro {{pageToggle}}"
   },
   "button": {
-    "deleteFaceAttempts": "Odstranění obličeje",
+    "deleteFaceAttempts": "Odstranit obličeje",
     "addFace": "Přidat obličej",
     "renameFace": "Přejmenovat obličej",
     "deleteFace": "Odstranit obličej",
     "uploadImage": "Nahrát obrázek",
-    "reprocessFace": "Přepracovat Obličej"
+    "reprocessFace": "Znovu zpracovat obličej"
   },
   "trainFace": "Trénovat obličej",
   "renameFace": {
@@ -61,14 +66,15 @@
       "renamedFace": "Úspěšně přejmenovaný obličej na {{name}}",
       "trainedFace": "Úspěšně vytrénovaný obličej.",
       "uploadedImage": "Úspěšně nahraný obrázek.",
-      "deletedFace_one": "Úspěšně odstraněna {{count}} tvář.",
-      "deletedFace_few": "Úspěšně odstraněny {{count}} tváře.",
-      "deletedFace_other": "Úspěšně odstraněny {{count}} tváře.",
+      "deletedFace_one": "Úspěšně odstraněn {{count}} obličej.",
+      "deletedFace_few": "Úspěšně odstraněny {{count}} obličeje.",
+      "deletedFace_other": "Úspěšně odstraněno {{count}} obličejů.",
       "deletedName_one": "{{count}} obličej byl úspěšně odstraněn.",
-      "deletedName_few": "{{count}} tváře byly úspěšně odstraněny.",
-      "deletedName_other": "{{count}} tváře byly úspěšně odstraněny.",
+      "deletedName_few": "{{count}} obličeje byly úspěšně odstraněny.",
+      "deletedName_other": "{{count}} obličejů bylo úspěšně odstraněno.",
       "updatedFaceScore": "Úspěšně aktualizováno skóre obličeje na {{name}} ({{score}}).",
-      "addFaceLibrary": "{{name}} byl(a) úspěšně přidán(a) do Knihovny obličejů!"
+      "addFaceLibrary": "{{name}} byl(a) úspěšně přidán(a) do Knihovny obličejů!",
+      "reclassifiedFace": "Obličej byl úspěšně přeřazen."
     },
     "error": {
       "renameFaceFailed": "Chyba při přejmenování obličeje: {{errorMessage}}",
@@ -77,7 +83,8 @@
       "deleteFaceFailed": "Chyba při mazání: {{errorMessage}}",
       "uploadingImageFailed": "Chyba při nahrávání obrázku: {{errorMessage}}",
       "addFaceLibraryFailed": "Nepodařilo se nastavit jméno obličeje: {{errorMessage}}",
-      "deleteNameFailed": "Chyba při mazání jména: {{errorMessage}}"
+      "deleteNameFailed": "Chyba při mazání jména: {{errorMessage}}",
+      "reclassifyFailed": "Nepodařilo se přeřadit obličej: {{errorMessage}}"
     }
   },
   "steps": {
@@ -89,5 +96,7 @@
     }
   },
   "collections": "Kolekce",
-  "trainFaceAs": "Trénovat Obličej jako:"
+  "trainFaceAs": "Trénovat Obličej jako:",
+  "reclassifyFaceAs": "Přeřadit obličej jako:",
+  "reclassifyFace": "Přeřadit obličej"
 }
