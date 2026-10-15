@@ -19,6 +19,7 @@ from frigate.const import (
     STREAM_TYPE_SUB,
 )
 from frigate.models import Recordings
+from frigate.util.recording_coverage import recording_overlap
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +68,7 @@ def _get_recordings_for_range(
             Recordings.start_time,
             Recordings.end_time,
         )
-        .where(
-            (Recordings.start_time.between(start_ts, end_ts))
-            | (Recordings.end_time.between(start_ts, end_ts))
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
+        .where(recording_overlap(start_ts, end_ts))
         .where(Recordings.camera == camera_name)
         .where(Recordings.stream_type == stream_type)
         .order_by(Recordings.start_time.asc())

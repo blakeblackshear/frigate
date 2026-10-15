@@ -80,6 +80,7 @@ from frigate.record.export import (
     validate_ffmpeg_args,
 )
 from frigate.util.path import sanitize_contained_path
+from frigate.util.recording_coverage import recording_overlap
 from frigate.util.time import is_current_hour
 
 logger = logging.getLogger(__name__)
@@ -177,15 +178,7 @@ def _validate_export_source(
 ) -> str | None:
     if playback_source == PlaybackSourceEnum.recordings:
         query = Recordings.select().where(
-            (
-                Recordings.start_time.between(start_time, end_time)
-                | Recordings.end_time.between(start_time, end_time)
-                | (
-                    (start_time > Recordings.start_time)
-                    & (end_time < Recordings.end_time)
-                )
-            )
-            & (Recordings.camera == camera_name)
+            recording_overlap(start_time, end_time) & (Recordings.camera == camera_name)
         )
 
         # a pinned export reads only that stream, so the other stream's
@@ -250,9 +243,7 @@ def _get_item_recording_export_errors(
 
         query = Recordings.select(Recordings.start_time, Recordings.end_time).where(
             Recordings.camera == camera_name,
-            Recordings.start_time.between(min_start, max_end)
-            | Recordings.end_time.between(min_start, max_end)
-            | ((min_start > Recordings.start_time) & (max_end < Recordings.end_time)),
+            recording_overlap(min_start, max_end),
         )
 
         # a pinned batch reads only that stream, so the other stream's

@@ -37,6 +37,7 @@ from frigate.genai.manager import GenAIClientManager
 from frigate.models import Recordings, ReviewSegment
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import get_image_from_recording
+from frigate.util.recording_coverage import recording_overlap
 
 from ..post.api import PostProcessorApi
 from ..types import DataProcessorMetrics
@@ -592,7 +593,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                         Recordings.path,
                         Recordings.start_time,
                     )
-                    .where((ts >= Recordings.start_time) & (ts <= Recordings.end_time))
+                    .where(recording_overlap(ts, ts))
                     .where(Recordings.camera == camera)
                     .where(Recordings.stream_type == STREAM_TYPE_MAIN)
                     .order_by(Recordings.start_time.desc())

@@ -42,7 +42,6 @@ from frigate.config.camera.snapshots import SnapshotsConfig
 from frigate.const import (
     CACHE_DIR,
     INSTALL_DIR,
-    MAX_SEGMENT_DURATION,
     PREVIEW_FRAME_TYPE,
     STREAM_TYPE_MAIN,
     STREAM_TYPE_SUB,
@@ -63,6 +62,7 @@ from frigate.util.recording_coverage import (
     build_spans,
     null_audio_glitches,
     plan_clip,
+    recording_overlap,
     resolve_coverage,
 )
 from frigate.util.time import get_normalized_tz_name
@@ -348,11 +348,7 @@ async def get_snapshot_from_recording(
                 Recordings.path,
                 Recordings.start_time,
             )
-            .where(
-                (frame_time >= Recordings.start_time)
-                & (frame_time <= Recordings.end_time)
-                & (Recordings.start_time >= frame_time - MAX_SEGMENT_DURATION)
-            )
+            .where(recording_overlap(frame_time, frame_time))
             .where(Recordings.camera == camera_name)
             .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
             .limit(1)
@@ -368,11 +364,7 @@ async def get_snapshot_from_recording(
                     Recordings.path,
                     Recordings.start_time,
                 )
-                .where(
-                    (frame_time >= Recordings.start_time)
-                    & (frame_time <= Recordings.end_time)
-                    & (Recordings.start_time >= frame_time - MAX_SEGMENT_DURATION)
-                )
+                .where(recording_overlap(frame_time, frame_time))
                 .where(Recordings.camera == camera_name)
                 .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
                 .limit(1)
@@ -435,11 +427,7 @@ async def submit_recording_snapshot_to_plus(
             Recordings.path,
             Recordings.start_time,
         )
-        .where(
-            (frame_time >= Recordings.start_time)
-            & (frame_time <= Recordings.end_time)
-            & (Recordings.start_time >= frame_time - MAX_SEGMENT_DURATION)
-        )
+        .where(recording_overlap(frame_time, frame_time))
         .where(Recordings.camera == camera_name)
         .order_by(Recordings.stream_type.asc(), Recordings.start_time.desc())
         .limit(1)
@@ -553,11 +541,7 @@ async def recording_clip(
                 Recordings.start_time,
                 Recordings.end_time,
             )
-            .where(
-                (Recordings.start_time.between(start_ts, end_ts))
-                | (Recordings.end_time.between(start_ts, end_ts))
-                | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-            )
+            .where(recording_overlap(start_ts, end_ts))
             .where(Recordings.camera == camera_name)
             .where(Recordings.stream_type == stream_type)
             .order_by(Recordings.start_time.asc())

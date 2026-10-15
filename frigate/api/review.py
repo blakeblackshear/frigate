@@ -37,6 +37,7 @@ from frigate.const import STREAM_TYPE_MAIN
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
+from frigate.util.recording_coverage import recording_overlap
 from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
@@ -585,14 +586,7 @@ def delete_reviews(body: ReviewModifyMultipleBody):
         camera_name = review["camera"]
         recordings = (
             Recordings.select(Recordings.id, Recordings.path)
-            .where(
-                Recordings.start_time.between(start_time, end_time)
-                | Recordings.end_time.between(start_time, end_time)
-                | (
-                    (start_time > Recordings.start_time)
-                    & (end_time < Recordings.end_time)
-                )
-            )
+            .where(recording_overlap(start_time, end_time))
             .where(Recordings.camera == camera_name)
             .dicts()
             .iterator()

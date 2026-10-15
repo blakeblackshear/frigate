@@ -23,6 +23,19 @@ class CoverageInterval:
     sub: Any | None
 
 
+def recording_overlap(after: float, before: float) -> Any:
+    """Match recordings overlapping [after, before] as a bounded index range.
+
+    Segments never reach MAX_SEGMENT_DURATION, so the start_time lower bound
+    drops no rows and keeps SQLite from walking the camera's whole history.
+    """
+    return (
+        (Recordings.start_time <= before)
+        & (Recordings.end_time >= after)
+        & (Recordings.start_time >= after - MAX_SEGMENT_DURATION)
+    )
+
+
 def _rows_query(camera: str, after: float, before: float, stream_type: str) -> Any:
     return (
         Recordings.select(

@@ -36,6 +36,7 @@ from frigate.util.recording_coverage import (
     coverage_spans,
     known_video_codecs,
     realized_timelines,
+    recording_overlap,
     resolve_coverage,
     stream_media_summary,
 )
@@ -537,11 +538,7 @@ async def delete_recordings(
 
     # Build query to find overlapping recordings
     clauses = [
-        (
-            Recordings.start_time.between(start, end)
-            | Recordings.end_time.between(start, end)
-            | ((start > Recordings.start_time) & (end < Recordings.end_time))
-        ),
+        recording_overlap(start, end),
         (Recordings.camera << camera_list),
     ]
 

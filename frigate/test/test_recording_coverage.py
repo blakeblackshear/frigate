@@ -16,6 +16,7 @@ from frigate.util.recording_coverage import (
     null_audio_glitches,
     plan_clip,
     realized_timeline,
+    recording_overlap,
     resolve_coverage,
     stream_media_summary,
 )
@@ -274,6 +275,33 @@ class TestRecordingCoverage(CoverageDbTestCase):
         plan = plan_clip(row, 1000.1, 1000.15)
         assert plan.skipped
         assert plan.duration_ms == 0
+
+
+class TestRecordingOverlap(CoverageDbTestCase):
+    def test_matches_unbounded_overlap(self):
+        spans = [(1000, 1010), (1010, 1020), (1100, 1100 + MAX_SEGMENT_DURATION - 0.5)]
+        for i, (start, end) in enumerate(spans):
+            self._insert(f"r{i}", start, end, "main")
+
+        probes = [995, 1000, 1005, 1010, 1015, 1020, 1050, 1100, 1650, 1699.5, 1700]
+        for after in probes:
+            for before in probes:
+                if before < after:
+                    continue
+
+                with self.subTest(after=after, before=before):
+                    unbounded = Recordings.select(Recordings.id).where(
+                        Recordings.start_time.between(after, before)
+                        | Recordings.end_time.between(after, before)
+                        | (
+                            (after > Recordings.start_time)
+                            & (before < Recordings.end_time)
+                        )
+                    )
+                    bounded = Recordings.select(Recordings.id).where(
+                        recording_overlap(after, before)
+                    )
+                    self.assertEqual({r.id for r in bounded}, {r.id for r in unbounded})
 
 
 class TestVodManifestPolicy(CoverageDbTestCase):
