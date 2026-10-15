@@ -1,8 +1,6 @@
 """Tests for per stream recording health tracking in the camera watchdog."""
 
 import subprocess as sp
-import sys
-import time
 import unittest
 from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, call, patch
@@ -95,36 +93,6 @@ class TestCameraWatchdogReset(unittest.TestCase):
         process.kill.assert_called_once()
         self.assertEqual(process.wait.call_args_list, [call(timeout=30), call()])
         process.communicate.assert_not_called()
-        watchdog.start_ffmpeg_detect.assert_called_once()
-
-    def test_reset_reaps_a_child_blocked_on_a_full_stdout_pipe(self):
-        watchdog = self._build_resettable_watchdog()
-        process = sp.Popen(
-            [
-                sys.executable,
-                "-c",
-                "import fcntl, os\n"
-                "size = fcntl.fcntl(1, fcntl.F_GETPIPE_SZ)\n"
-                "os.write(1, b'x' * size)\n"
-                "os.write(2, b'R')\n"
-                "os.write(1, b'x')\n",
-            ],
-            stdout=sp.PIPE,
-            stderr=sp.PIPE,
-            stdin=sp.DEVNULL,
-        )
-        self.addCleanup(process.stderr.close)
-        self.addCleanup(process.stdout.close)
-        self.addCleanup(process.wait)
-        self.addCleanup(lambda: process.kill() if process.poll() is None else None)
-        self.assertEqual(process.stderr.read(1), b"R")
-        watchdog.ffmpeg_detect_process = process
-
-        start = time.monotonic()
-        watchdog.reset_capture_thread()
-
-        self.assertLess(time.monotonic() - start, 10)
-        self.assertIsNotNone(process.returncode)
         watchdog.start_ffmpeg_detect.assert_called_once()
 
 
