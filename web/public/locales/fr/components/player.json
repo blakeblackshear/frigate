@@ -30,15 +30,32 @@
     },
     "decodedFrames": "Images décodées :",
     "droppedFrameRate": "Taux d'images perdues :",
-    "totalFrames": "Total images :"
+    "totalFrames": "Total images :",
+    "stream": "Flux :",
+    "streamAuto": "{{stream}} (automatique)"
   },
   "toast": {
     "error": {
-      "submitFrigatePlusFailed": "Échec de la soumission de l'image à Frigate+"
+      "submitFrigatePlusFailed": "Échec de la soumission de l'image à Frigate+",
+      "playRecordingsFailed": "Échec de la lecture des enregistrements (erreur {{code}}) : {{message}}"
     },
     "success": {
       "submittedFrigatePlus": "Image soumise avec succès à Frigate+"
     }
   },
-  "cameraOff": "La camera est éteinte"
+  "cameraOff": "La camera est éteinte",
+  "quality": {
+    "auto": "Automatique",
+    "autoLow": "Lecture en basse qualité (bande passante limitée)",
+    "autoLowCodec": "Lecture en basse qualité (Originale non supportée par ce navigateur)",
+    "autoLowSaveData": "Lecture en basse qualité (économiseur de données)",
+    "main": "Originale",
+    "sub": "Basse",
+    "notSupportedBrowser": "Non supporté par ce navigateur",
+    "label": "Qualité",
+    "noAudio": "Pas d'audio",
+    "audioRate": "{{rate}} kHz audio",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Pas d'enregistrement dans cette plage de temps"
+  }
 }
