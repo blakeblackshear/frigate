@@ -137,6 +137,15 @@
         "partial": "Avviate {{successful}} esportazioni su un totale di {{total}}. Fallite: {{failedItems}}",
         "failed": "Impossibile avviare {{total}} esportazioni. Errori: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualità",
+      "auto": "Auto",
+      "main": "Originale",
+      "sub": "Basso",
+      "autoDesc": "Utilizza lo stream principale e, qualora questo non fosse disponibile, ricorre allo stream secondario di qualità inferiore.",
+      "mainDesc": "Viene esportato solo lo stream principale in qualità originale. Gli intervalli di tempo in cui lo stream principale non è disponibile risulteranno mancanti.",
+      "subDesc": "Esporta solo lo stream secondario di qualità inferiore. Gli intervalli temporali in cui lo stream secondario non è disponibile risulteranno mancanti."
     }
   },
   "streaming": {
@@ -172,7 +181,8 @@
       "export": "Esporta",
       "markAsReviewed": "Segna come visto",
       "deleteNow": "Elimina ora",
-      "markAsUnreviewed": "Segna come non visto"
+      "markAsUnreviewed": "Segna come non visto",
+      "generateDescription": "Genera descrizione"
     },
     "confirmDelete": {
       "desc": {
@@ -191,6 +201,12 @@
       "custom": "Orario personalizzato",
       "button": "URL dell'orario di condivisione",
       "shareTitle": "Orario revisione Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "È stata richiesta una descrizione generata dall'intelligenza artificiale (GenAI) per questo elemento da rivedere.",
+        "error": "Impossibile richiedere la descrizione: {{error}}"
+      }
     }
   },
   "imagePicker": {
