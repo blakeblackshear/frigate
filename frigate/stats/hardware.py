@@ -21,6 +21,7 @@ from frigate.detectors.hardware import DEV_ROOT, hardware_prober
 from frigate.util.services import (
     get_amd_gpu_stats,
     get_axcl_npu_stats,
+    get_axelera_board_temp,
     get_cpu_stats,
     get_hailo_temps,
     get_intel_gpu_stats,
@@ -481,5 +482,7 @@ def get_hardware_temperatures(detector_type: str) -> list[float | None]:
     elif detector_type == "hailo":
         hailo_temps = get_hailo_temps()
         return [hailo_temps[name] for name in sorted(hailo_temps.keys())]
+    elif detector_type == "axelera":
+        return [get_axelera_board_temp()]
 
     return []
