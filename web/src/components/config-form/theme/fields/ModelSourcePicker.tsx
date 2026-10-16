@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import useSWR from "swr";
 import axios from "axios";
@@ -10,6 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { describeSupportedDetectors } from "@/utils/plusModels";
@@ -79,10 +80,7 @@ export function ModelSourcePicker({
     },
   });
 
-  const entries = useMemo(
-    () => Object.entries(availableModels ?? {}),
-    [availableModels],
-  );
+  const [showIncompatible, setShowIncompatible] = useState(false);
 
   // the tab cannot be derived from the path alone: switching to Frigate+
   // leaves the path untouched until a model is picked
@@ -101,6 +99,16 @@ export function ModelSourcePicker({
 
   const isCompatible = (model: FrigatePlusModel) =>
     !detector || model.supportedDetectors.includes(detector);
+
+  const allEntries = Object.entries(availableModels ?? {});
+  const hasIncompatible = allEntries.some(([, model]) => !isCompatible(model));
+
+  // the saved model stays listed even when incompatible
+  const entries = showIncompatible
+    ? allEntries
+    : allEntries.filter(
+        ([id, model]) => isCompatible(model) || id === selectedId,
+      );
 
   if (!plusEnabled) {
     return <div className="space-y-6">{customFields}</div>;
@@ -123,7 +131,21 @@ export function ModelSourcePicker({
       </TabsList>
 
       <TabsContent value="plus" className="space-y-1">
-        <Label>{t("frigatePlus.modelInfo.availableModels")}</Label>
+        <div className="flex max-w-2xl items-center justify-between">
+          <Label>{t("frigatePlus.modelInfo.availableModels")}</Label>
+          {hasIncompatible && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="plus-show-incompatible" className="text-xs">
+                {t("frigatePlus.modelInfo.showIncompatible")}
+              </Label>
+              <Switch
+                id="plus-show-incompatible"
+                checked={showIncompatible}
+                onCheckedChange={setShowIncompatible}
+              />
+            </div>
+          )}
+        </div>
         <Select
           value={selectedId ?? ""}
           onValueChange={(id) => onPathChange(`${PLUS_PREFIX}${id}`)}

@@ -1310,6 +1310,7 @@
       "loadingAvailableModels": "Loading available models…",
       "selectModel": "Select a model",
       "noModelsAvailable": "No models available",
+      "showIncompatible": "Show incompatible models",
       "filter": {
         "ariaLabel": "Filter models by type",
         "baseModels": "Base Models",
