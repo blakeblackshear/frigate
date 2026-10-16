@@ -85,7 +85,9 @@ function describeGlobalReason(
     case "browser":
       return "This browser does not expose RTCPeerConnection.";
     case "not-configured":
-      return "No candidates or ice_servers are set under go2rtc.webrtc.";
+      return probeDetail
+        ? `No candidates or ice_servers are set under go2rtc.webrtc, and the probe with go2rtc's defaults failed against ${probeDetail}.`
+        : "No candidates or ice_servers are set under go2rtc.webrtc.";
     case "unreachable":
       return `The connectivity probe failed against ${probeDetail ?? "an unknown stream"}.`;
     default:
