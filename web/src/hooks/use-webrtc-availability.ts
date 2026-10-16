@@ -121,6 +121,10 @@ export function useWebRTCGloballyAvailable(
     );
   }, [config]);
 
+  // go2rtc fills in default candidates at startup when none are set, so only
+  // the probe can tell whether WebRTC works
+  const defaultCandidates = config?.go2rtc?.webrtc?.candidates == null;
+
   // the stream being viewed is the one most likely to be online
   const testStreams = useMemo(() => {
     const streams = Object.keys(config?.go2rtc?.streams ?? {});
@@ -182,7 +186,11 @@ export function useWebRTCGloballyAvailable(
   useEffect(() => {
     const streams = testStreamsKey ? testStreamsKey.split("\n") : [];
 
-    if (!browserOk || !configured || streams.length === 0) {
+    if (
+      !browserOk ||
+      (!configured && !defaultCandidates) ||
+      streams.length === 0
+    ) {
       return;
     }
     let cancelled = false;
@@ -197,23 +205,33 @@ export function useWebRTCGloballyAvailable(
     return () => {
       cancelled = true;
     };
-  }, [browserOk, configured, testStreamsKey, iceServers, retryToken]);
+  }, [
+    browserOk,
+    configured,
+    defaultCandidates,
+    testStreamsKey,
+    iceServers,
+    retryToken,
+  ]);
 
   const availability = useMemo<GlobalAvailability>(() => {
     if (!browserOk) {
       return { globallyAvailable: false, globalReason: "browser" };
     }
-    if (!configured) {
+    if (!configured && !defaultCandidates) {
       return { globallyAvailable: false, globalReason: "not-configured" };
     }
     if (probe.state === "pending") {
       return { globallyAvailable: false, globalReason: "checking" };
     }
     if (probe.state === "fail") {
-      return { globallyAvailable: false, globalReason: "unreachable" };
+      return {
+        globallyAvailable: false,
+        globalReason: configured ? "unreachable" : "not-configured",
+      };
     }
     return { globallyAvailable: true, globalReason: null };
-  }, [browserOk, configured, probe]);
+  }, [browserOk, configured, defaultCandidates, probe]);
 
   useEffect(() => {
     const reason = availability.globalReason;

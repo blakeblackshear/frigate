@@ -38,7 +38,7 @@ Frigate [defaults to MSE](#why-does-frigate-prefer-mse-over-webrtc-for-live-view
 
 - The choices are saved **per device, per camera** in your browser's local storage.
 - **WebRTC is only selectable when it can actually work for that stream.** When it can't, the option is shown disabled with the reason inline, and a more detailed reason (the failing codecs, or why the connectivity check failed) is logged to your browser's console. Common reasons:
-  - **Not configured**: no `candidates` or `ice_servers` are set under `go2rtc.webrtc` (see [WebRTC extra configuration](#webrtc-extra-configuration)).
+  - **Not configured**: no `candidates` or `ice_servers` are set under `go2rtc.webrtc`, and the connectivity check failed with go2rtc's default candidates (see [WebRTC extra configuration](#webrtc-extra-configuration)). This is a setup note rather than an error, since live view works without WebRTC.
   - **Could not connect**: e.g. port `8555` isn't reachable, or a STUN/TURN server is misconfigured. Frigate runs a one-time WebRTC connectivity check when the Live view opens; the option may briefly show as "checking" while it runs.
   - **Unsupported video codec**: the stream's video codec can't be played over WebRTC in your browser, most commonly H.265/HEVC in Firefox or Edge.
   - **Unsupported audio codec**: WebRTC needs opus or G.711 audio, so a stream whose playback audio is only AAC (without an added opus/G.711 track) can't carry audio over WebRTC. See [Audio Support](#audio-support) for how to add one.

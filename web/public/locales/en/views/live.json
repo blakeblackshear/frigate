@@ -187,7 +187,8 @@
       },
       "unavailable": {
         "browser": "Your browser does not support WebRTC.",
-        "not-configured": "WebRTC is not configured. Set go2rtc webrtc candidates or ice_servers.",
+        "not-configured": "To enable, add this server's IP:8555 under go2rtc → webrtc → candidates.",
+        "notConfiguredOptional": "Optional: live view works without it. WebRTC is mainly needed for two-way talk.",
         "unreachable": "WebRTC could not connect. Check that port 8555 is reachable and any STUN/TURN server is correct.",
         "video-codec": "This stream's video codec is not supported by WebRTC in this browser.",
         "audio-codec": "This stream's audio codec is not supported by WebRTC. Transcode to opus or G.711 with go2rtc.",

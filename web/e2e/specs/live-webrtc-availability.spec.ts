@@ -110,6 +110,15 @@ test.describe("WebRTC availability gating @critical", () => {
     // distinguishes enabled from disabled options.
     const mseOption = frigateApp.page.getByRole("option", { name: /MSE/ });
     await expect(mseOption).not.toHaveAttribute("aria-disabled", "true");
+
+    // a missing setting, shown as a neutral note rather than an error
+    await expect(webrtcOption).toContainText(
+      "under go2rtc → webrtc → candidates",
+    );
+    await expect(webrtcOption).toContainText(
+      "Optional: live view works without it.",
+    );
+    await expect(webrtcOption.locator(".text-danger")).toHaveCount(0);
   });
 
   test("the unavailable reason is logged to the console once", async ({
@@ -212,6 +221,62 @@ test.describe("WebRTC availability gating @critical", () => {
     await expect(webrtcOption).toBeVisible({ timeout: 3_000 });
     await expect(webrtcOption).toHaveAttribute("aria-disabled", "true");
     await expect(webrtcOption).toContainText(/Checking WebRTC availability/i);
+  });
+
+  test("desktop: unset candidates run the probe before reporting not configured", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop dropdown only");
+
+    // Count probe connections. The probe fails fast against the preview
+    // server, which with go2rtc's default candidates means setup is missing.
+    let probes = 0;
+    await frigateApp.page.routeWebSocket("**/live/webrtc/api/ws**", (ws) => {
+      probes++;
+      ws.close();
+    });
+
+    await frigateApp.installDefaults({
+      config: {
+        go2rtc: {
+          streams: { front_door: ["rtsp://127.0.0.1:8554/front_door"] },
+        },
+      },
+    });
+
+    await frigateApp.page.route("**/api/go2rtc/streams/front_door**", (route) =>
+      route.fulfill({
+        json: {
+          producers: [{ medias: ["video, recvonly, H264"] }],
+          consumers: [],
+        },
+      }),
+    );
+
+    await frigateApp.goto("/#front_door");
+
+    const live = new LivePage(frigateApp.page, true);
+    await expect(live.backButton).toBeVisible({ timeout: 10_000 });
+
+    await frigateApp.page.locator("button:has(svg)").last().click();
+
+    const menu = frigateApp.page
+      .locator('[role="menu"], [data-radix-menu-content]')
+      .first();
+    await expect(menu).toBeVisible({ timeout: 3_000 });
+    await menu
+      .locator('div:has(> label[for="streaming-mode"]) [role="combobox"]')
+      .first()
+      .click();
+
+    const webrtcOption = frigateApp.page.getByRole("option", {
+      name: /WebRTC/,
+    });
+    await expect(webrtcOption).toBeVisible({ timeout: 3_000 });
+    await expect(webrtcOption).toContainText(
+      "under go2rtc → webrtc → candidates",
+    );
+    expect(probes).toBeGreaterThan(0);
   });
 
   test("desktop: JSMpeg is no longer offered in the technology selector", async ({
