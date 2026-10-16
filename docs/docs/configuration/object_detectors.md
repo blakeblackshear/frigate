@@ -87,7 +87,7 @@ Along with picking a detector for your hardware, you will choose a model's **inp
 
 :::tip
 
-The best detection accuracy comes from a model trained on images that look like what Frigate actually sees: security camera footage cropped to regions of interest. You can train or fine-tune your own model on images like this and run it as a custom model (see the per-detector sections below), but [Frigate+](/plus) makes this much easier by handling the training for you on images submitted from your own cameras. For YOLOv9, the `s` (small) variant at `320x320` resolution is a good place to start.
+The best detection accuracy comes from a model trained on images that look like what Frigate actually sees: security camera footage cropped to regions of interest. You can train or fine-tune your own model on images like this and run it as a custom model (see the per-detector sections below), but [Frigate+](/plus) makes this much easier by handling the training for you on images submitted from your own cameras. For YOLOv9, the `s` (small) variant at `320x320` resolution is a good place to start, and the larger `c` variant is available for more powerful hardware.
 
 :::
 
