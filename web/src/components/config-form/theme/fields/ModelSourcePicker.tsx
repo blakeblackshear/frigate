@@ -1,4 +1,4 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useId, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import useSWR from "swr";
 import axios from "axios";
@@ -81,6 +81,7 @@ export function ModelSourcePicker({
   });
 
   const [showIncompatible, setShowIncompatible] = useState(false);
+  const showIncompatibleId = useId();
 
   // the tab cannot be derived from the path alone: switching to Frigate+
   // leaves the path untouched until a model is picked
@@ -135,11 +136,11 @@ export function ModelSourcePicker({
           <Label>{t("frigatePlus.modelInfo.availableModels")}</Label>
           {hasIncompatible && (
             <div className="flex items-center gap-2">
-              <Label htmlFor="plus-show-incompatible" className="text-xs">
+              <Label htmlFor={showIncompatibleId} className="text-xs">
                 {t("frigatePlus.modelInfo.showIncompatible")}
               </Label>
               <Switch
-                id="plus-show-incompatible"
+                id={showIncompatibleId}
                 checked={showIncompatible}
                 onCheckedChange={setShowIncompatible}
               />
