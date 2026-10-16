@@ -217,6 +217,8 @@ COPY docker/main/rootfs/ /
 
 # Frigate deps (ffmpeg, python, nginx, go2rtc, s6-overlay, etc)
 FROM slim-base AS deps
+LABEL org.opencontainers.image.source="https://github.com/blakeblackshear/frigate"
+
 ARG TARGETARCH
 ARG BASE_IMAGE
 
