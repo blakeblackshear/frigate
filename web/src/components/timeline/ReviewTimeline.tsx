@@ -369,6 +369,9 @@ export function ReviewTimeline({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
           {children}
         </div>
+        {onZoomChange && currentZoomLevelIndex !== -1 && !isMobile && (
+          <div className="h-14" />
+        )}
         {children && (
           <>
             {showHandlebar && (
