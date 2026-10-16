@@ -556,7 +556,7 @@ motion:
       # Optional: Whether this mask is active (default: true)
       enabled: true
       # Required: Coordinates polygon for the mask
-      coordinates: "0.000,0.469,1.000,0.469,1.000,1.000,0.000,1.000"
+      coordinates: "0.000,0.469,1.0,0.469,1.0,1.0,0.000,1.0"
   # Optional: improve contrast (default: shown below)
   # Enables dynamic contrast improvement. This should help improve night detections at the cost of making motion detection more sensitive
   # for daytime.
