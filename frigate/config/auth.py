@@ -1,3 +1,5 @@
+import ipaddress
+
 from pydantic import Field, field_validator, model_validator
 
 from .base import FrigateBaseModel
@@ -67,6 +69,14 @@ class AuthConfig(FrigateBaseModel):
             "When true the UI may show a help link on the login page informing users how to sign in after an admin password reset. "
         ),
     )
+
+    @field_validator("trusted_proxies")
+    @classmethod
+    def validate_trusted_proxies(cls, v: list[str]) -> list[str]:
+        for proxy in v:
+            ipaddress.ip_network(proxy, strict=False)
+
+        return v
 
     @field_validator("roles")
     @classmethod

@@ -75,6 +75,16 @@ class TestConfig(unittest.TestCase):
             DetectorTypeEnum.cpu
         )
 
+    def test_trusted_proxies_reject_invalid_networks(self):
+        config = {
+            "auth": {"trusted_proxies": ["172.18.0.0/16", "192.168.1.1/24", "fd00::/8"]}
+        }
+        FrigateConfig(**deep_merge(config, self.minimal))
+
+        config = {"auth": {"trusted_proxies": ["172.18.0.0/33"]}}
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**deep_merge(config, self.minimal))
+
     @patch("frigate.detectors.detector_config.load_labels")
     def test_model_custom_path(self, mock_labels):
         mock_labels.return_value = {}
