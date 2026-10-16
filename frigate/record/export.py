@@ -45,6 +45,7 @@ from frigate.util.recording_coverage import (
     known_video_codecs,
     null_audio_glitches,
     realized_timeline,
+    recording_overlap,
     resolve_coverage,
     stream_media_summary,
 )
@@ -773,14 +774,7 @@ class RecordingExporter(threading.Thread):
                 Recordings.start_time,
                 Recordings.end_time,
             )
-            .where(
-                Recordings.start_time.between(self.start_time, self.end_time)
-                | Recordings.end_time.between(self.start_time, self.end_time)
-                | (
-                    (self.start_time > Recordings.start_time)
-                    & (self.end_time < Recordings.end_time)
-                )
-            )
+            .where(recording_overlap(self.start_time, self.end_time))
             .where(
                 (Recordings.camera == self.camera)
                 & (Recordings.stream_type == stream_type)

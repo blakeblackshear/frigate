@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { LivePlayerMode, WebRTCUnavailableReason } from "@/types/live";
-import { LuX } from "react-icons/lu";
+import { LuInfo, LuX } from "react-icons/lu";
 import { useTranslation } from "react-i18next";
 
 type StreamTechnologySelectProps = {
@@ -28,6 +28,7 @@ export default function StreamTechnologySelect({
   const { t } = useTranslation(["views/live"]);
 
   const isChecking = webRTCUnavailableReason === "checking";
+  const isNotConfigured = webRTCUnavailableReason === "not-configured";
 
   return (
     <Select
@@ -68,7 +69,7 @@ export default function StreamTechnologySelect({
               <span
                 className={cn(
                   "mt-1 flex flex-row items-start gap-1.5 rounded-md border p-2",
-                  isChecking
+                  isChecking || isNotConfigured
                     ? "border-secondary-foreground/20 bg-secondary-foreground/10"
                     : "border-danger/20 bg-danger/10",
                 )}
@@ -78,12 +79,21 @@ export default function StreamTechnologySelect({
                     className="mt-0.5 size-3.5 shrink-0"
                     size={14}
                   />
+                ) : isNotConfigured ? (
+                  <LuInfo className="mt-0.5 size-3.5 shrink-0" />
                 ) : (
                   <LuX className="mt-0.5 size-3.5 shrink-0 text-danger" />
                 )}
-                <span className="text-xs text-secondary-foreground">
-                  {t(
-                    `stream.technology.unavailable.${webRTCUnavailableReason}`,
+                <span className="flex flex-col gap-1 text-xs text-secondary-foreground">
+                  <span>
+                    {t(
+                      `stream.technology.unavailable.${webRTCUnavailableReason}`,
+                    )}
+                  </span>
+                  {isNotConfigured && (
+                    <span className="text-muted-foreground">
+                      {t("stream.technology.unavailable.notConfiguredOptional")}
+                    </span>
                   )}
                 </span>
               </span>

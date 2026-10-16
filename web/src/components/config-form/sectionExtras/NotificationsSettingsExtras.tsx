@@ -403,6 +403,11 @@ export default function NotificationsSettingsExtras({
             .post("notifications/register", {
               sub: pushSubscription,
             })
+            .then(() => {
+              toast.success(t("notification.toast.success.registered"), {
+                position: "top-center",
+              });
+            })
             .catch(() => {
               toast.error(t("notification.toast.error.registerFailed"), {
                 position: "top-center",
@@ -411,9 +416,6 @@ export default function NotificationsSettingsExtras({
               workerRegistration.unregister();
               setRegistration(null);
             });
-          toast.success(t("notification.toast.success.registered"), {
-            position: "top-center",
-          });
         });
     },
     [addMessage, publicKey, t],

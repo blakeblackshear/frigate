@@ -413,16 +413,23 @@ export default function AuthenticationView({
           <p className="text-sm text-muted-foreground">
             {t("users.management.desc")}
           </p>
+          {config.auth?.enabled === false && (
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("users.management.authDisabled")}
+            </p>
+          )}
         </div>
-        <Button
-          className="flex items-center gap-2 self-start sm:self-auto"
-          aria-label={t("users.addUser")}
-          variant="default"
-          onClick={() => setShowCreate(true)}
-        >
-          <LuPlus className="size-4" />
-          {t("users.addUser")}
-        </Button>
+        {config.auth?.enabled !== false && (
+          <Button
+            className="flex items-center gap-2 self-start sm:self-auto"
+            aria-label={t("users.addUser")}
+            variant="default"
+            onClick={() => setShowCreate(true)}
+          >
+            <LuPlus className="size-4" />
+            {t("users.addUser")}
+          </Button>
+        )}
       </div>
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="scrollbar-container flex-1 overflow-hidden rounded-lg border border-border bg-background_alt md:mr-3">
@@ -505,27 +512,29 @@ export default function AuthenticationView({
                               </Tooltip>
                             )}
 
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 px-2"
-                                  onClick={() => {
-                                    setShowSetPassword(true);
-                                    setSelectedUser(user.username);
-                                  }}
-                                >
-                                  <FaUserEdit className="size-3.5" />
-                                  <span className="ml-1.5 hidden sm:inline-block">
-                                    {t("users.table.password")}
-                                  </span>
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>{t("users.updatePassword")}</p>
-                              </TooltipContent>
-                            </Tooltip>
+                            {config.auth?.enabled !== false && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 px-2"
+                                    onClick={() => {
+                                      setShowSetPassword(true);
+                                      setSelectedUser(user.username);
+                                    }}
+                                  >
+                                    <FaUserEdit className="size-3.5" />
+                                    <span className="ml-1.5 hidden sm:inline-block">
+                                      {t("users.table.password")}
+                                    </span>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>{t("users.updatePassword")}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
 
                             {user.username !== "admin" && (
                               <Tooltip>

@@ -32,6 +32,7 @@ from frigate.util.image import (
     relative_box_to_absolute,
 )
 from frigate.util.process import FrigateProcess
+from frigate.util.recording_coverage import recording_overlap
 
 BATCH_SIZE = 16
 EPOCHS = 50
@@ -553,8 +554,7 @@ def _extract_keyframes(
             recording = (
                 Recordings.select()
                 .where(
-                    (timestamp >= Recordings.start_time)
-                    & (timestamp <= Recordings.end_time)
+                    recording_overlap(timestamp, timestamp)
                     & (Recordings.camera == camera)
                     & (Recordings.stream_type == STREAM_TYPE_MAIN)
                 )

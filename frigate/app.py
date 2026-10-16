@@ -581,7 +581,12 @@ class FrigateApp:
 
     def init_auth(self) -> None:
         if self.config.auth.enabled:
-            if User.select().count() == 0:
+            if (
+                User.select().count() == 0
+                or User.select()
+                .where((User.username == "admin") & (User.password_hash == ""))
+                .exists()
+            ):
                 password = secrets.token_hex(16)
                 password_hash = hash_password(
                     password, iterations=self.config.auth.hash_iterations
@@ -593,6 +598,9 @@ class FrigateApp:
                         User.password_hash: password_hash,
                         User.notification_tokens: [],
                     }
+                ).on_conflict(
+                    conflict_target=[User.username],
+                    update={User.password_hash: password_hash},
                 ).execute()
 
                 self.config.auth.admin_first_time_login = True
@@ -623,6 +631,19 @@ class FrigateApp:
                 logger.info(f"***    Password: {password}   ***")
                 logger.info("********************************************************")
                 logger.info("********************************************************")
+        else:
+            # Notification registrations store tokens on the admin row. Its
+            # empty password hash marks it for a generated password if auth
+            # is enabled later.
+            if User.select().count() == 0:
+                User.insert(
+                    {
+                        User.username: "admin",
+                        User.role: "admin",
+                        User.password_hash: "",
+                        User.notification_tokens: [],
+                    }
+                ).execute()
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
