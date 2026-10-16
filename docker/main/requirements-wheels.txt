@@ -42,7 +42,7 @@ opencv-python-headless == 4.11.0.*
 opencv-contrib-python == 4.11.0.*
 scipy == 1.17.*
 # OpenVino & ONNX
-openvino == 2025.4.*
+openvino == 2026.4.*
 onnxruntime == 1.30.*
 # Embeddings
 transformers == 5.19.*
