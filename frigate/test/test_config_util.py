@@ -26,6 +26,7 @@ class TestSwapRuntimeConfig(unittest.TestCase):
         app.genai_manager.update_config.assert_called_once_with(config)
         app.profile_manager.update_config.assert_called_once_with(config)
         self.assertIs(app.stats_emitter.config, config)
+        app.stats_emitter.hardware_stats.set_config.assert_called_once_with(config)
         self.assertIs(app.dispatcher.config, config)
         for comm in app.dispatcher.comms:
             self.assertIs(comm.config, config)

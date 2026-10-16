@@ -122,6 +122,7 @@ const sidebars: SidebarsConfig = {
           "configuration/ffmpeg_presets",
           "configuration/pwa",
           "configuration/tls",
+          "configuration/non_root",
         ],
       },
       {

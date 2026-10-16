@@ -55,8 +55,7 @@ export function CameraPathWidget(props: WidgetProps) {
   const [showCredentials, setShowCredentials] = useState(false);
 
   const formContext = props.registry?.formContext as
-    | ConfigFormContext
-    | undefined;
+    ConfigFormContext | undefined;
   const isCameraLevel = formContext?.level === "camera";
   const cameraName = formContext?.cameraName;
   const inputIndex = useMemo(() => getInputIndexFromWidgetId(id), [id]);

@@ -63,6 +63,7 @@
     "copying": "Copying",
     "encoding": "Encoding",
     "encodingRetry": "Encoding (retry)",
+    "merging": "Merging",
     "finalizing": "Finalizing"
   },
   "caseView": {

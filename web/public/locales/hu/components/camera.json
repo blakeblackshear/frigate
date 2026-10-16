@@ -32,7 +32,6 @@
         "audioIsUnavailable": "Nem elérhető hang ehhez az adáshoz",
         "audio": {
           "tips": {
-            "document": "Olvassa el a leírást ",
             "title": "A hangnak a kamerából kell jönnie és be kell állítva legyen a go2rtc-ben ehhez az adáshoz."
           }
         },

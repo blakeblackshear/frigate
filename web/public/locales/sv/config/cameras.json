@@ -70,10 +70,6 @@
             "label": "Aktivera fågelperspektiv",
             "description": "Aktivera eller inaktivera fågelperspektivvyn."
         },
-        "mode": {
-            "label": "Visningsläge",
-            "description": "Läge för vilka kameror som ska tas med i fågelperspektivet: \"objects\" (objekt), \"motion\" (rörelse) eller \"continuous\" (kontinuerligt)."
-        },
         "order": {
             "label": "Position",
             "description": "Numerisk position som styr kamerans ordning i fågelperspektivlayouten."

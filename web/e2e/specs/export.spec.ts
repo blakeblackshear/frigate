@@ -867,6 +867,31 @@ test.describe("Multi-Camera Export from History @high", () => {
     await frigateApp.page.route("**/api/recordings/unavailable**", (route) =>
       route.fulfill({ json: [] }),
     );
+    // registered after the broad recordings route so it wins the match;
+    // coverage is an object, and the array above crashes the player
+    await frigateApp.page.route("**/api/*/recordings/coverage**", (route) =>
+      route.fulfill({
+        json: {
+          spans: [
+            {
+              start_time: playbackTime - 3600,
+              end_time: playbackTime + 600,
+              streams: ["main"],
+            },
+          ],
+          codecs_compatible: true,
+          streams: {
+            main: {
+              video_codec: "h264",
+              audio_rate: null,
+              audio_codec: null,
+              has_audio: false,
+              bitrate: 2_000_000,
+            },
+          },
+        },
+      }),
+    );
 
     await frigateApp.goto(`/review?timestamp=front_door_${playbackTime}`);
   }

@@ -295,7 +295,7 @@ export default function LiveBirdseyeView({
               onClick={handleOverlayClick}
             >
               <BirdseyeLivePlayer
-                className={`${fullscreen ? "*:rounded-none" : ""}`}
+                className={fullscreen ? "rounded-none" : ""}
                 birdseyeConfig={config.birdseye}
                 liveMode={preferredLiveMode}
                 containerRef={containerRef}

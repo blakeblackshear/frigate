@@ -1,5 +1,4 @@
 {
-  "selectItem": "Wybierz {{item}}",
   "description": {
     "addFace": "Dodaj nową kolekcję do biblioteki twarzy, przesyłając swoje pierwsze zdjęcie.",
     "placeholder": "Wprowadź nazwę tej kolekcji",
@@ -7,12 +6,7 @@
     "nameCannotContainHash": "Nazwa nie może zawierać #."
   },
   "details": {
-    "person": "Osoba",
-    "confidence": "Pewność",
-    "face": "Szczegóły twarzy",
-    "faceDesc": "Szczegóły śledzonego obiektu, który wygenerował tę twarz",
     "timestamp": "Znacznik czasu",
-    "subLabelScore": "Ocena podetykiety",
     "scoreInfo": "Ocena podetykiety to ważona ocena uwzględniająca wszystkie rozpoznane twarze i ich poziom rozpoznania , dlatego może się różnić od oceny pokazanej na stopklatce.",
     "unknown": "Nieznany"
   },
@@ -22,8 +16,6 @@
     "desc": "Wgraj obraz do skanowania twarzy i dołącz do {{pageToggle}}"
   },
   "createFaceLibrary": {
-    "title": "Utwórz kolekcję",
-    "desc": "Utwórz nową kolekcję",
     "new": "Utwórz nową twarz",
     "nextSteps": "Aby zbudować solidną podstawę: <li>Użyj zakładki Ostatnie rozpoznania, aby wybrać i trenować na obrazach dla każdej wykrytej osoby.</li><li>Skup się na zdjęciach twarzy na wprost dla najlepszych wyników; unikaj trenowania na zdjęciach, które pokazują twarze pod kątem.</li></ul>"
   },
@@ -37,7 +29,6 @@
       "description": "Musisz dodać co najmniej jedną twarz do biblioteki, aby rozpoznawanie twarzy mogło działać."
     }
   },
-  "selectFace": "Wybierz twarz",
   "deleteFaceLibrary": {
     "title": "Usuń nazwę",
     "desc": "Czy na pewno chcesz usunąć kolekcję {{name}}? Spowoduje to trwałe usunięcie wszystkich powiązanych twarzy."
@@ -84,7 +75,6 @@
       "reclassifyFailed": "Nie udało się przeklasyfikować twarzy: {{errorMessage}}"
     }
   },
-  "readTheDocs": "Przeczytaj dokumentację",
   "trainFaceAs": "Trenuj twarz jako:",
   "trainFace": "Trenuj twarz",
   "steps": {
@@ -107,7 +97,6 @@
     "desc_many": "Czy na pewno chcesz usunąć {{count}} twarzy? Tej czynności nie można cofnąć."
   },
   "nofaces": "Brak dostępnych twarzy",
-  "pixels": "{{area}}px",
   "reclassifyFaceAs": "Przeklasyfikuj twarz jako:",
   "reclassifyFace": "Przeklasyfikuj twarz"
 }

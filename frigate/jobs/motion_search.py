@@ -15,7 +15,7 @@ import numpy as np
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import UPDATE_JOB_STATE
+from frigate.const import STREAM_TYPE_MAIN, UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.jobs.manager import (
     get_job_by_id,
@@ -35,6 +35,7 @@ from frigate.jobs.motion_search_decode import (
 )
 from frigate.models import Recordings
 from frigate.types import JobStatusTypesEnum
+from frigate.util.recording_coverage import recording_overlap
 
 logger = logging.getLogger(__name__)
 
@@ -469,22 +470,10 @@ class MotionSearchRunner(threading.Thread):
         recordings = list(
             Recordings.select()
             .where(
-                (
-                    Recordings.start_time.between(
-                        self.job.start_time_range, self.job.end_time_range
-                    )
-                )
-                | (
-                    Recordings.end_time.between(
-                        self.job.start_time_range, self.job.end_time_range
-                    )
-                )
-                | (
-                    (self.job.start_time_range > Recordings.start_time)
-                    & (self.job.end_time_range < Recordings.end_time)
-                )
+                recording_overlap(self.job.start_time_range, self.job.end_time_range)
             )
             .where(Recordings.camera == camera_name)
+            .where(Recordings.stream_type == STREAM_TYPE_MAIN)
             .order_by(Recordings.start_time.asc())
         )
 

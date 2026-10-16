@@ -63,5 +63,44 @@
     "addExport": "Export toevoegen",
     "editCase": "Wijzig zaak",
     "deleteCase": "Verwijder zaak"
+  },
+  "bulkActions": {
+    "delete": "Verwijderen",
+    "deleteNow": "Nu verwijderen",
+    "addToCase": "Toevoegen aan case",
+    "moveToCase": "Verplaatsen naar case",
+    "removeFromCase": "Verwijderen uit case"
+  },
+  "bulkDelete": {
+    "title": "Exports Verwijderen",
+    "desc_one": "Weet je zeker dat je {{count}} export wilt verwijderen?",
+    "desc_other": "Weet je zeker dat je {{count}} exports wilt verwijderen?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Uit case verwijderen",
+    "desc_one": "{{count}} export uit deze case verwijderen?",
+    "desc_other": "Remove {{count}} exports from this case?",
+    "deleteExports": "Toch verwijderen",
+    "descDeleteExports": "Exports worden permanent verwijderd."
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exports zijn verwijderd",
+      "reassign": "Case-toewijzing is bijgewerkt",
+      "remove": "Exports zijn uit de case verwijderd."
+    },
+    "error": {
+      "deleteFailed": "Exports konden niet worden verwijderd: {{errorMessage}}",
+      "reassignFailed": "Case-toewijzing kon niet worden bijgewerkt: {{errorMessage}}"
+    }
+  },
+  "jobCard": {
+    "copying": "Kopiëren",
+    "encoding": "Coderen",
+    "encodingRetry": "Coderen (opnieuw)",
+    "finalizing": "Afronden"
+  },
+  "caseView": {
+    "noDescription": "Geen beschrijving"
   }
 }

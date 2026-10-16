@@ -10,7 +10,9 @@ import { MdCircle } from "react-icons/md";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { useCameraActivity } from "@/hooks/use-camera-activity";
 import {
+  LiveHealthSample,
   LivePlayerError,
+  TwoWayTalkError,
   LivePlayerMode,
   PlayerStatsType,
   VideoResolutionType,
@@ -51,7 +53,11 @@ type LivePlayerProps = {
   onClick?: () => void;
   setFullResolution?: React.Dispatch<React.SetStateAction<VideoResolutionType>>;
   onError?: (error: LivePlayerError) => void;
+  onHealthSample?: (sample: LiveHealthSample) => void;
+  streamAuto?: boolean;
+  onMicrophoneError?: (error: TwoWayTalkError) => void;
   onResetLiveMode?: () => void;
+  onLiveAspectChange?: (aspectRatio: number | undefined) => void;
 };
 
 export default function LivePlayer({
@@ -76,7 +82,11 @@ export default function LivePlayer({
   onClick,
   setFullResolution,
   onError,
+  onHealthSample,
+  streamAuto = false,
+  onMicrophoneError,
   onResetLiveMode,
+  onLiveAspectChange,
 }: LivePlayerProps) {
   const { t } = useTranslation(["components/player"]);
 
@@ -98,12 +108,19 @@ export default function LivePlayer({
   const [stats, setStats] = useState<PlayerStatsType>({
     streamType: "-",
     bandwidth: 0, // in kBps
-    latency: undefined, // in seconds
     totalFrames: 0,
     droppedFrames: undefined,
     decodedFrames: 0,
     droppedFrameRate: 0, // percentage
   });
+
+  const streamLabel = useMemo(
+    () =>
+      Object.keys(cameraConfig.live.streams).find(
+        (label) => cameraConfig.live.streams[label] === streamName,
+      ),
+    [cameraConfig.live.streams, streamName],
+  );
 
   // camera activity
 
@@ -125,6 +142,37 @@ export default function LivePlayer({
   // camera live state
 
   const [liveReady, setLiveReady] = useState(false);
+  const [liveAspect, setLiveAspect] = useState<number | undefined>();
+
+  const handleFullResolution = useCallback(
+    (value: React.SetStateAction<VideoResolutionType>) => {
+      setFullResolution?.(value);
+
+      if (typeof value === "function") {
+        return;
+      }
+
+      setLiveAspect(
+        value.width && value.height ? value.width / value.height : undefined,
+      );
+    },
+    [setFullResolution],
+  );
+
+  useEffect(() => {
+    onLiveAspectChange?.(liveReady ? liveAspect : undefined);
+  }, [liveReady, liveAspect, onLiveAspectChange]);
+
+  // The card can be a different shape than the picture (a bucketed tile, or a
+  // still whose detect aspect differs from the stream), so overlays that are
+  // meant to sit on the image have to be fitted to it rather than to the card.
+  const pictureAspect = useMemo(() => {
+    if (liveReady && liveAspect) {
+      return liveAspect;
+    }
+    const { width, height } = cameraConfig.detect;
+    return width && height ? width / height : 16 / 9;
+  }, [liveReady, liveAspect, cameraConfig.detect]);
 
   const liveReadyRef = useRef(liveReady);
   const cameraActiveRef = useRef(cameraActive);
@@ -195,21 +243,17 @@ export default function LivePlayer({
   }, [preferredLiveMode]);
 
   const [key, setKey] = useState(0);
-  const prevStreamNameRef = useRef(streamName);
 
-  const resetPlayer = () => {
-    setLiveReady(false);
-    setKey((prevKey) => prevKey + 1);
-  };
-
-  useEffect(() => {
-    if (prevStreamNameRef.current !== streamName) {
-      prevStreamNameRef.current = streamName;
-      if (streamName) {
-        resetPlayer();
-      }
+  // the stream is part of the MSE and WebRTC keys, so a stream change
+  // remounts them in the same render and the new player is hidden until it
+  // plays. jsmpeg plays the camera, not the stream, and keeps playing
+  const [renderedStream, setRenderedStream] = useState(streamName);
+  if (renderedStream !== streamName) {
+    setRenderedStream(streamName);
+    if (preferredLiveMode !== "jsmpeg") {
+      setLiveReady(false);
     }
-  }, [streamName]);
+  }
 
   useEffect(() => {
     if (showStillWithoutActivity && !autoLive) {
@@ -259,12 +303,13 @@ export default function LivePlayer({
   } else if (preferredLiveMode == "webrtc") {
     player = (
       <WebRtcPlayer
-        key={"webrtc_" + key}
-        className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
+        key={`webrtc_${streamName}_${key}`}
+        className={`size-full ${liveReady ? "" : "hidden"}`}
         camera={streamName}
         playbackEnabled={cameraActive || liveReady}
         getStats={showStats}
         setStats={setStats}
+        setFullResolution={handleFullResolution}
         audioEnabled={playAudio}
         volume={volume}
         microphoneEnabled={micEnabled}
@@ -272,14 +317,16 @@ export default function LivePlayer({
         onPlaying={playerIsPlaying}
         pip={pip}
         onError={onError}
+        onHealthSample={onHealthSample}
+        onMicrophoneError={onMicrophoneError}
       />
     );
   } else if (preferredLiveMode == "mse") {
     if ("MediaSource" in window || "ManagedMediaSource" in window) {
       player = (
         <MSEPlayer
-          key={"mse_" + key}
-          className={`size-full rounded-lg md:rounded-2xl ${liveReady ? "" : "hidden"}`}
+          key={`mse_${streamName}_${key}`}
+          className={`size-full ${liveReady ? "" : "hidden"}`}
           camera={streamName}
           playbackEnabled={cameraActive || liveReady}
           audioEnabled={playAudio}
@@ -289,8 +336,9 @@ export default function LivePlayer({
           setStats={setStats}
           onPlaying={playerIsPlaying}
           pip={pip}
-          setFullResolution={setFullResolution}
+          setFullResolution={handleFullResolution}
           onError={onError}
+          onHealthSample={onHealthSample}
         />
       );
     } else {
@@ -305,7 +353,7 @@ export default function LivePlayer({
       player = (
         <JSMpegPlayer
           key={"jsmpeg_" + key}
-          className="flex justify-center overflow-hidden rounded-lg md:rounded-2xl"
+          className="flex justify-center overflow-hidden"
           camera={cameraConfig.name}
           width={cameraConfig.detect.width}
           height={cameraConfig.detect.height}
@@ -322,7 +370,9 @@ export default function LivePlayer({
       player = null;
     }
   } else {
-    player = <ActivityIndicator />;
+    player = (
+      <ActivityIndicator className={"w-full [.bg-black_&]:text-white"} />
+    );
   }
 
   return (
@@ -337,10 +387,12 @@ export default function LivePlayer({
       }}
       data-camera={cameraConfig.name}
       className={cn(
-        "relative flex w-full cursor-pointer justify-center outline",
+        // the card owns the corner: overflow-hidden clips the stream, the still
+        // image, and every overlay to this one radius so they stay concentric
+        "relative flex w-full cursor-pointer justify-center overflow-hidden rounded-lg outline md:rounded-2xl",
         activeTracking &&
           ((showStillWithoutActivity && !liveReady) || liveReady)
-          ? "outline-3 rounded-lg shadow-severity_alert outline-severity_alert md:rounded-2xl"
+          ? "shadow-severity_alert outline-[3px] outline-severity_alert"
           : "outline-0 outline-background",
         "transition-all duration-500",
         className,
@@ -354,16 +406,24 @@ export default function LivePlayer({
     >
       {cameraEnabled &&
         ((showStillWithoutActivity && !liveReady) || liveReady) && (
-          <ImageShadowOverlay
-            upperClassName="md:rounded-2xl"
-            lowerClassName="md:rounded-2xl"
-          />
+          <div
+            className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center [container-type:size]"
+            style={{ "--pic-ar": pictureAspect } as React.CSSProperties}
+          >
+            <div className="relative aspect-[var(--pic-ar)] h-auto w-[min(100%,calc(100cqh*var(--pic-ar)))]">
+              <ImageShadowOverlay />
+            </div>
+          </div>
         )}
       {player}
       {cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
-        !liveReady && <ActivityIndicator />}
+        !liveReady && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <ActivityIndicator className={"w-full [.bg-black_&]:text-white"} />
+          </div>
+        )}
 
       {((showStillWithoutActivity && !liveReady) || liveReady) &&
         objects.length > 0 && (
@@ -440,7 +500,7 @@ export default function LivePlayer({
 
       {offline && inDashboard && (
         <>
-          <div className="absolute inset-0 rounded-lg bg-black/50 md:rounded-2xl" />
+          <div className="absolute inset-0 bg-black/50" />
           <div className="absolute inset-0 left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 p-3 text-center">
               <div>{t("streamOffline.title")}</div>
@@ -484,7 +544,7 @@ export default function LivePlayer({
       )}
 
       {!cameraEnabled && (
-        <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-secondary-foreground bg-background_alt">
+        <div className="relative flex h-full w-full items-center justify-center border border-secondary-foreground bg-background_alt">
           <div className="flex h-32 flex-col items-center justify-center rounded-lg p-4 md:h-48 md:w-48">
             <LuVideoOff className="mb-2 size-8 md:size-10" />
             <p className="max-w-32 text-center text-sm md:max-w-40 md:text-base">
@@ -512,7 +572,12 @@ export default function LivePlayer({
           )}
       </div>
       {showStats && (
-        <PlayerStats stats={stats} minimal={cameraRef !== undefined} />
+        <PlayerStats
+          stats={stats}
+          minimal={cameraRef !== undefined}
+          streamLabel={preferredLiveMode === "jsmpeg" ? undefined : streamLabel}
+          streamAuto={streamAuto}
+        />
       )}
     </div>
   );

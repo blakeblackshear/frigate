@@ -48,8 +48,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                     "frigate.record.maintainer.psutil.process_iter", return_value=[]
                 ):
                     with patch("frigate.record.maintainer.logger.warning") as warn:
-                        # Mock validate_and_move_segment to avoid further logic
-                        maintainer.validate_and_move_segment = MagicMock()
+                        # Mock validate_and_move_segment to avoid further logic.
+                        # The requestor is real when another test imported the
+                        # maintainer first, and it would block on a reply.
+                        maintainer.validate_and_move_segment = AsyncMock()
+                        maintainer.requestor = MagicMock()
 
                         try:
                             await maintainer.move_files()
@@ -98,7 +101,9 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         end_time = now - datetime.timedelta(seconds=10)
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
-        maintainer.end_time_cache = {cache_path: (end_time, 10.0)}
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, None, None, None, None, None)
+        }
         # Single processed frame well past end_time with no motion/objects.
         maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
         maintainer.audio_recordings_info["test_cam"] = []
@@ -109,7 +114,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         result = await maintainer.validate_and_move_segment(
             "test_cam",
             reviews=[],
-            recording={"start_time": start_time, "cache_path": cache_path},
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
         )
 
         self.assertIsNone(result)
@@ -139,7 +148,9 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         end_time = now - datetime.timedelta(seconds=10)
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
-        maintainer.end_time_cache = {cache_path: (end_time, 10.0)}
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, False, None, None, None, [])
+        }
         # Metadata has only reached partway into the segment.
         maintainer.object_recordings_info["test_cam"] = [
             (end_time.timestamp() - 8, [], [], [])
@@ -158,7 +169,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         result = await maintainer.validate_and_move_segment(
             "test_cam",
             reviews=[review],
-            recording={"start_time": start_time, "cache_path": cache_path},
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
         )
 
         self.assertIsNone(result)
@@ -173,7 +188,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         await maintainer.validate_and_move_segment(
             "test_cam",
             reviews=[review],
-            recording={"start_time": start_time, "cache_path": cache_path},
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
         )
 
         maintainer.drop_segment.assert_not_called()
@@ -201,7 +220,8 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
             (recent, 0, []),
         ]
 
-        grouped_recordings = {"present_cam": [{"start_time": ancient}]}
+        # keyed by (camera, stream_type), matching what move_files passes
+        grouped_recordings = {("present_cam", "main"): [{"start_time": ancient}]}
 
         maintainer._expire_stale_recordings_info(grouped_recordings)
 

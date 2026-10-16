@@ -1,5 +1,6 @@
 """Tests for go2rtc stream source restrictions on config/save and config/set."""
 
+import contextlib
 import copy
 import os
 import tempfile
@@ -7,9 +8,9 @@ from unittest.mock import patch
 
 import ruamel.yaml
 
-from frigate.config.env import FRIGATE_ENV_VARS
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
+from frigate.util.env import _CONTAINER_ENV, FRIGATE_ENV_VARS, reload_sources
 
 # shape of the source in GHSA-qjjw-3v66-279f, with the payload replaced
 _INJECTED_SRC = "ffmpeg:#input='-f''h264''-i''data:placeholder''-c''copy'"
@@ -29,6 +30,14 @@ _CONFIG = {
         },
     },
 }
+
+
+@contextlib.contextmanager
+def _frigate_vars(values: dict[str, str]):
+    # config parsing rebuilds FRIGATE_ENV_VARS from its sources
+    with patch.dict(_CONTAINER_ENV, values), patch.dict(FRIGATE_ENV_VARS, values):
+        yield
+    reload_sources(warn=False)
 
 
 def _dump(config: dict) -> str:
@@ -56,10 +65,10 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
         find_patch.start()
         self.addCleanup(find_patch.stop)
 
-        env_patch = patch.dict(os.environ)
-        env_patch.start()
-        self.addCleanup(env_patch.stop)
-        os.environ.pop("GO2RTC_ALLOW_ARBITRARY_EXEC", None)
+        # the override is read once at import; make sure it is off here
+        exec_patch = patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", None)
+        exec_patch.start()
+        self.addCleanup(exec_patch.stop)
 
     def _read_config(self) -> str:
         with open(self.config_path) as f:
@@ -126,7 +135,7 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
         assert _EXISTING_SRC in self._read_config()
 
     def test_set_allows_injected_source_when_override_set(self):
-        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+        with patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", "true"):
             resp = self._set_streams({"new_stream": [_INJECTED_SRC]})
         assert resp.status_code == 200, resp.text
 
@@ -176,7 +185,7 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
 
     def test_set_rejects_unresolvable_placeholder(self):
         before = self._read_config()
-        with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_RTSP_USER": "user"}):
+        with _frigate_vars({"FRIGATE_RTSP_USER": "user"}):
             for src, message in (
                 (
                     "{FRIGATE_RTSP_USER!r}fmpeg:front_door#raw=-vn",
@@ -211,7 +220,7 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
 
     def test_set_allows_resolvable_placeholder(self):
         src = "rtsp://{FRIGATE_RTSP_USER}@10.0.0.2:554/video"
-        with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_RTSP_USER": "user"}):
+        with _frigate_vars({"FRIGATE_RTSP_USER": "user"}):
             resp = self._set_streams({"new_stream": [src]})
         assert resp.status_code == 200, resp.text
         assert src in self._read_config()

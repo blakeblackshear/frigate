@@ -132,8 +132,7 @@ export default function Events() {
     setMotionSearchDay(normalizedDay);
   }, []);
 
-  const [notificationTab, setNotificationTab] =
-    useState<TimelineType>("timeline");
+  const [notificationTab, setNotificationTab] = useState<TimelineType>();
 
   const getReviewDayBounds = useCallback((date: Date) => {
     const now = Date.now() / 1000;
@@ -518,6 +517,7 @@ export default function Events() {
     previewTimes ?? { after: 0, before: 0 },
     {
       fetchPreviews: previewTimes != undefined,
+      refreshOnHourRollover: true,
     },
   );
 

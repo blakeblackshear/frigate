@@ -65,8 +65,9 @@
       "batchQueuedSuccess_other": "{{count}} ekspor antrian.",
       "batchQueueFailed": "Gagal mengantrekan {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
       "error": {
-        "failed": "Ekspor gagal mengantri: {{error}}",
-        "noValidTimeSelected": "Rentang waktu yang dipilih tidak valid"
+        "failed": "Gagal mengantrekan ekspor: {{error}}",
+        "noValidTimeSelected": "Rentang waktu yang dipilih tidak valid",
+        "endTimeMustAfterStartTime": "Waktu selesai harus setelah waktu mulai"
       }
     },
     "case": {
@@ -104,7 +105,6 @@
     "multi": {
       "title_other": "Ekspor {{count}} Ulasan",
       "toast": {
-        "startedNoCase_other": "{{count}} Ekspor Dimulai.",
         "started_other": "{{count}} ekspor dimulai.",
         "partial": "Memulai {{successful}} dari {{total}} ekspor. Gagal: {{failedItems}}",
         "failed": "Gagal memulai {{total}} ekspor. Gagal: {{failedItems}}"
@@ -121,6 +121,15 @@
       "queueingExport": "Antrean Ekspor...",
       "previewExport": "Pratinjau Ekspor",
       "useThisRange": "Gunakan Rentang Ini"
+    },
+    "stream": {
+      "label": "Kualitas",
+      "auto": "Otomatis",
+      "main": "Asli",
+      "sub": "Rendah",
+      "autoDesc": "Menggunakan streaming utama dan beralih ke sub-stream berkualitas lebih rendah jika streaming utama tidak tersedia.",
+      "mainDesc": "Mengekspor streaming utama dengan kualitas asli saja. Rentang waktu di mana streaming utama tidak tersedia akan terpotong.",
+      "subDesc": "Mengekspor sub-stream berkualitas lebih rendah saja. Rentang waktu di mana sub-stream tidak tersedia akan terpotong."
     }
   },
   "search": {
@@ -148,14 +157,15 @@
       "label": "Tampilkan statistik streaming",
       "desc": "Aktifkan opsi ini untuk menampilkan statistik streaming sebagai overlay pada tampilan kamera."
     },
-    "debugView": "Tampilan Debug"
+    "debugView": "Tampilan Debug",
+    "label": "Streaming"
   },
   "recording": {
     "shareTimestamp": {
       "label": "Bagikan Cap Waktu",
       "title": "Bagikan Cap Waktu",
       "custom": "Cap Waktu Kustom",
-      "button": "Bagikan URL Cap Waktu",
+      "button": "Bagikan URL Stempel Waktu",
       "description": "Bagikan URL bertanda waktu sesuai posisi pemutar saat ini atau pilih tanda waktu kustom. Perlu dicatat bahwa ini bukan URL bagikan publik dan hanya dapat diakses oleh pengguna yang memiliki akses ke Frigate dan kamera ini.",
       "shareTitle": "Pratinjau Penunjuk Waktu Frigate : {{camera}}"
     },
@@ -173,11 +183,18 @@
       "export": "Ekspor",
       "markAsReviewed": "Tandai sebagai sudah ditinjau",
       "markAsUnreviewed": "Tandai sebagai belum ditinjau",
-      "deleteNow": "Hapus Sekarang"
+      "deleteNow": "Hapus Sekarang",
+      "generateDescription": "Buat deskripsi"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Deskripsi AI Generatif telah diminta untuk item tinjauan ini.",
+        "error": "Gagal meminta deskripsi: {{error}}"
+      }
     }
   },
   "imagePicker": {
-    "selectImage": "Pilih gambar mini objek yang dilacak.",
+    "selectImage": "Pilih miniatur objek yang dilacak",
     "unknownLabel": "Gambar Pemicu Tersimpan",
     "search": {
       "placeholder": "Cari berdasarkan label atau sub-label..."

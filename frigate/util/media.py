@@ -1,10 +1,11 @@
 """Recordings Utilities."""
 
+import asyncio
+import contextlib
 import datetime
 import errno
 import logging
 import os
-import subprocess as sp
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -40,6 +41,14 @@ FFPROBE_PATH = (
 )
 
 
+def _file_size(path: str) -> int:
+    """Return the size of a file in bytes, or 0 if it cannot be read."""
+    try:
+        return os.path.getsize(path)
+    except OSError:
+        return 0
+
+
 @dataclass
 class SyncResult:
     """Result of a sync operation."""
@@ -48,6 +57,7 @@ class SyncResult:
     files_checked: int = 0
     orphans_found: int = 0
     orphans_deleted: int = 0
+    bytes_reclaimed: int = 0
     orphan_paths: list[str] = field(default_factory=list)
     orphan_db_paths: list[str] = field(default_factory=list)
     aborted: bool = False
@@ -59,6 +69,7 @@ class SyncResult:
             "files_checked": self.files_checked,
             "orphans_found": self.orphans_found,
             "orphans_deleted": self.orphans_deleted,
+            "bytes_reclaimed": self.bytes_reclaimed,
             "aborted": self.aborted,
             "error": self.error,
         }
@@ -234,6 +245,7 @@ def sync_recordings(
                 return result
 
         if dry_run:
+            result.bytes_reclaimed = sum(_file_size(f) for f in files_to_delete)
             logger.info(
                 f"Recordings sync (dry run): Found {len(files_to_delete)} orphaned files"
             )
@@ -242,11 +254,15 @@ def sync_recordings(
         # Delete orphans
         logger.info(f"Deleting {len(files_to_delete)} orphaned recordings files")
         for file in files_to_delete:
+            size = _file_size(file)
             try:
                 os.unlink(file)
-                result.orphans_deleted += 1
             except OSError as e:
                 logger.error(f"Failed to delete {file}: {e}")
+                continue
+
+            result.orphans_deleted += 1
+            result.bytes_reclaimed += size
 
         logger.debug("End sync recordings.")
 
@@ -324,6 +340,7 @@ def sync_event_snapshots(dry_run: bool = False, force: bool = False) -> SyncResu
                 return result
 
         if dry_run:
+            result.bytes_reclaimed = sum(_file_size(p) for p in orphans)
             logger.info(
                 f"Event snapshots sync (dry run): Found {len(orphans)} orphaned files"
             )
@@ -332,11 +349,15 @@ def sync_event_snapshots(dry_run: bool = False, force: bool = False) -> SyncResu
         # Delete orphans
         logger.info(f"Deleting {len(orphans)} orphaned event snapshot files")
         for file_path in orphans:
+            size = _file_size(file_path)
             try:
                 os.unlink(file_path)
-                result.orphans_deleted += 1
             except OSError as e:
                 logger.error(f"Failed to delete {file_path}: {e}")
+                continue
+
+            result.orphans_deleted += 1
+            result.bytes_reclaimed += size
 
     except Exception as e:
         logger.error(f"Error syncing event snapshots: {e}")
@@ -420,6 +441,7 @@ def sync_event_thumbnails(dry_run: bool = False, force: bool = False) -> SyncRes
                 return result
 
         if dry_run:
+            result.bytes_reclaimed = sum(_file_size(p) for p in orphans)
             logger.info(
                 f"Event thumbnails sync (dry run): Found {len(orphans)} orphaned files"
             )
@@ -428,11 +450,15 @@ def sync_event_thumbnails(dry_run: bool = False, force: bool = False) -> SyncRes
         # Delete orphans
         logger.info(f"Deleting {len(orphans)} orphaned event thumbnail files")
         for file_path in orphans:
+            size = _file_size(file_path)
             try:
                 os.unlink(file_path)
-                result.orphans_deleted += 1
             except OSError as e:
                 logger.error(f"Failed to delete {file_path}: {e}")
+                continue
+
+            result.orphans_deleted += 1
+            result.bytes_reclaimed += size
 
     except Exception as e:
         logger.error(f"Error syncing event thumbnails: {e}")
@@ -500,6 +526,7 @@ def sync_review_thumbnails(dry_run: bool = False, force: bool = False) -> SyncRe
                 return result
 
         if dry_run:
+            result.bytes_reclaimed = sum(_file_size(p) for p in orphans)
             logger.info(
                 f"Review thumbnails sync (dry run): Found {len(orphans)} orphaned files"
             )
@@ -508,11 +535,15 @@ def sync_review_thumbnails(dry_run: bool = False, force: bool = False) -> SyncRe
         # Delete orphans
         logger.info(f"Deleting {len(orphans)} orphaned review thumbnail files")
         for file_path in orphans:
+            size = _file_size(file_path)
             try:
                 os.unlink(file_path)
-                result.orphans_deleted += 1
             except OSError as e:
                 logger.error(f"Failed to delete {file_path}: {e}")
+                continue
+
+            result.orphans_deleted += 1
+            result.bytes_reclaimed += size
 
     except Exception as e:
         logger.error(f"Error syncing review thumbnails: {e}")
@@ -580,17 +611,22 @@ def sync_previews(dry_run: bool = False, force: bool = False) -> SyncResult:
                 return result
 
         if dry_run:
+            result.bytes_reclaimed = sum(_file_size(p) for p in orphans)
             logger.info(f"Previews sync (dry run): Found {len(orphans)} orphaned files")
             return result
 
         # Delete orphans
         logger.info(f"Deleting {len(orphans)} orphaned preview files")
         for file_path in orphans:
+            size = _file_size(file_path)
             try:
                 os.unlink(file_path)
-                result.orphans_deleted += 1
             except OSError as e:
                 logger.error(f"Failed to delete {file_path}: {e}")
+                continue
+
+            result.orphans_deleted += 1
+            result.bytes_reclaimed += size
 
     except Exception as e:
         logger.error(f"Error syncing previews: {e}")
@@ -672,17 +708,22 @@ def sync_exports(dry_run: bool = False, force: bool = False) -> SyncResult:
                 return result
 
         if dry_run:
+            result.bytes_reclaimed = sum(_file_size(p) for p in orphans)
             logger.info(f"Exports sync (dry run): Found {len(orphans)} orphaned files")
             return result
 
         # Delete orphans
         logger.info(f"Deleting {len(orphans)} orphaned export files")
         for file_path in orphans:
+            size = _file_size(file_path)
             try:
                 os.unlink(file_path)
-                result.orphans_deleted += 1
             except OSError as e:
                 logger.error(f"Failed to delete {file_path}: {e}")
+                continue
+
+            result.orphans_deleted += 1
+            result.bytes_reclaimed += size
 
     except Exception as e:
         logger.error(f"Error syncing exports: {e}")
@@ -733,6 +774,21 @@ class MediaSyncResults:
         return total
 
     @property
+    def total_bytes_reclaimed(self) -> int:
+        total = 0
+        for result in [
+            self.event_snapshots,
+            self.event_thumbnails,
+            self.review_thumbnails,
+            self.previews,
+            self.exports,
+            self.recordings,
+        ]:
+            if result:
+                total += result.bytes_reclaimed
+        return total
+
+    @property
     def total_orphans_deleted(self) -> int:
         total = 0
         for result in [
@@ -763,6 +819,7 @@ class MediaSyncResults:
                     "files_checked": result.files_checked,
                     "orphans_found": result.orphans_found,
                     "orphans_deleted": result.orphans_deleted,
+                    "bytes_reclaimed": result.bytes_reclaimed,
                     "aborted": result.aborted,
                     "error": result.error,
                 }
@@ -770,6 +827,7 @@ class MediaSyncResults:
             "files_checked": self.total_files_checked,
             "orphans_found": self.total_orphans_found,
             "orphans_deleted": self.total_orphans_deleted,
+            "bytes_reclaimed": self.total_bytes_reclaimed,
         }
         return results
 
@@ -873,44 +931,50 @@ def sync_all_media(
     logger.info(
         f"Media sync complete: checked {results.total_files_checked} files, "
         f"found {results.total_orphans_found} orphans, "
-        f"deleted {results.total_orphans_deleted}"
+        f"deleted {results.total_orphans_deleted}, "
+        f"reclaimed {results.total_bytes_reclaimed} bytes"
     )
 
     return results
 
 
-def get_keyframe_before(path: str, offset_ms: int) -> int | None:
-    """Get the timestamp (ms) of the last keyframe at or before offset_ms.
+async def get_keyframe_offsets(path: str) -> list[int] | None:
+    """Get every video keyframe offset (ms from segment start) in an mp4.
 
-    Uses ffprobe packet index to read keyframe positions from the mp4 file.
-    Returns None if ffprobe fails or no keyframe is found before the offset.
+    Runs at record time so playback never needs to probe. Returns None if
+    ffprobe fails, so the caller stores NULL and playback falls back to
+    serving whole files.
     """
+    proc = None
     try:
-        result = sp.run(
-            [
-                FFPROBE_PATH,
-                "-select_streams",
-                "v:0",
-                "-show_entries",
-                "packet=pts_time,flags",
-                "-of",
-                "csv=p=0",
-                "-loglevel",
-                "error",
-                path,
-            ],
-            capture_output=True,
-            timeout=5,
+        proc = await asyncio.create_subprocess_exec(
+            FFPROBE_PATH,
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "packet=pts_time,flags",
+            "-of",
+            "csv=p=0",
+            "-loglevel",
+            "error",
+            path,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.DEVNULL,
         )
-    except (sp.TimeoutExpired, FileNotFoundError):
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=5)
+    except (TimeoutError, FileNotFoundError):
+        if proc is not None and proc.returncode is None:
+            with contextlib.suppress(ProcessLookupError):
+                proc.kill()
+            with contextlib.suppress(TimeoutError):
+                await asyncio.wait_for(proc.communicate(), timeout=2)
         return None
 
-    if result.returncode != 0:
+    if proc.returncode != 0:
         return None
 
-    offset_s = offset_ms / 1000.0
-    best_ms = None
-    for line in result.stdout.decode().strip().splitlines():
+    offsets: list[int] = []
+    for line in stdout.decode().strip().splitlines():
         parts = line.strip().split(",")
         if len(parts) != 2:
             continue
@@ -918,12 +982,8 @@ def get_keyframe_before(path: str, offset_ms: int) -> int | None:
         if "K" not in flags:
             continue
         try:
-            ts = float(ts_str)
+            offsets.append(int(float(ts_str) * 1000))
         except ValueError:
             continue
-        if ts <= offset_s:
-            best_ms = int(ts * 1000)
-        else:
-            break
 
-    return best_ms
+    return offsets

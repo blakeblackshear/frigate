@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Any, Literal
+from typing import Any, ClassVar, Literal
 
 import numpy as np
 import zmq
@@ -21,6 +21,7 @@ class ZmqDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="ZMQ IPC",
     )
+    device_spec_field: ClassVar[str] = "endpoint"
 
     type: Literal[DETECTOR_KEY]
     endpoint: str = Field(

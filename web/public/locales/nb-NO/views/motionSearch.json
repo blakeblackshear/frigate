@@ -47,8 +47,6 @@
         "thresholdDesc": "Lavere verdier detekterer mindre endringer (1–255)",
         "minArea": "Minimum endringsområde",
         "minAreaDesc": "Minimumsstørrelse for et enkelt bevegelsesområde, som en prosentandel av interesseområdet",
-        "frameSkip": "Bilde-sprang",
-        "frameSkipDesc": "Behandle hvert N-te bilde. Sett denne til kameraets bildefrekvens for å behandle ett bilde i sekundet (f.eks. 5 for et 5 FPS-kamera, 30 for et 30 FPS-kamera). Høyere verdier vil være raskere, men kan gå glipp av korte bevegelseshendelser.",
         "maxResults": "Maksimalt antall resultater",
         "maxResultsDesc": "Stopp etter dette antallet samsvarende tidsstempler"
     },

@@ -2,7 +2,7 @@
   "saveOnly": "Sadece Kaydet",
   "toast": {
     "error": {
-      "savingError": "Yapılandırma kaydedilirken hata"
+      "savingError": "Yapılandırma kaydedilirken hata oluştu"
     },
     "success": {
       "copyToClipboard": "Yapılandırma panoya kopyalandı."
