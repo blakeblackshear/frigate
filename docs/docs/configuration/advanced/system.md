@@ -444,3 +444,16 @@ docker run                                \
   -u -m frigate                           \
   --validate-config
 ```
+
+### Disabling safe mode
+
+When config validation fails at startup, Frigate prints the errors and starts in [safe mode](/troubleshooting/common_errors#unable-to-start-frigate-in-safe-mode) so you can fix the config from the WebUI. In environments where the config cannot be changed at runtime, for example a read-only mounted config in Kubernetes, you may prefer Frigate to crash instead, so the orchestrator restarts the container and your alerts fire.
+
+Set the `FRIGATE_ALLOW_SAFE_MODE` environment variable to `false` to disable the safe mode fallback:
+
+```yaml
+environment:
+  FRIGATE_ALLOW_SAFE_MODE: "false"
+```
+
+With it set, an invalid config prints the validation errors and exits with code `1` instead of starting in safe mode. It is matched against the exact lowercase string `false`, so `True`, `FALSE`, and `0` all keep the default behavior.
