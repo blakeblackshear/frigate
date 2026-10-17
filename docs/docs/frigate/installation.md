@@ -621,7 +621,7 @@ services:
     devices:
       - /dev/bus/usb:/dev/bus/usb # Passes the USB Coral, needs to be modified for other versions
       - /dev/apex_0:/dev/apex_0 # Passes a PCIe Coral, follow driver instructions here https://github.com/jnicolson/gasket-builder
-      - /dev/video11:/dev/video11 # For Raspberry Pi 4B
+      - /dev/video10:/dev/video10 # For h264 on Raspberry Pi 4B
       - /dev/dri/renderD128:/dev/dri/renderD128 # AMD / Intel GPU, needs to be updated for your hardware
       - /dev/kfd:/dev/kfd # AMD Kernel Fusion Driver for ROCm
       - /dev/accel:/dev/accel # AMD / Intel NPU
