@@ -547,13 +547,9 @@ class EmbeddingMaintainer(threading.Thread):
             return
 
         # Create our own thumbnail based on the bounding box and the frame time
-        try:
-            yuv_frame = self.frame_manager.get(
-                frame_name, camera_config.frame_shape_yuv, frame_time
-            )
-        except FileNotFoundError:
-            logger.debug(f"Frame {frame_name} not found for camera {camera}")
-            pass
+        yuv_frame = self.frame_manager.get(
+            frame_name, camera_config.frame_shape_yuv, frame_time
+        )
 
         if yuv_frame is None:
             logger.debug(
@@ -816,12 +812,9 @@ class EmbeddingMaintainer(threading.Thread):
             # no active features that use this data
             return
 
-        try:
-            yuv_frame = self.frame_manager.get(
-                frame_name, camera_config.frame_shape_yuv, frame_time
-            )
-        except FileNotFoundError:
-            pass
+        yuv_frame = self.frame_manager.get(
+            frame_name, camera_config.frame_shape_yuv, frame_time
+        )
 
         if yuv_frame is None:
             logger.debug(
