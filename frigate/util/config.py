@@ -145,6 +145,16 @@ def find_config_file() -> str:
     return config_path
 
 
+def is_safe_mode_allowed() -> bool:
+    """Report whether Frigate may fall back to safe mode on an invalid config.
+
+    Set FRIGATE_ALLOW_SAFE_MODE=false to exit with a non-zero code instead,
+    for environments where the config cannot be fixed at runtime, like a
+    read-only mounted config in Kubernetes.
+    """
+    return os.environ.get("FRIGATE_ALLOW_SAFE_MODE", "true") != "false"
+
+
 def migrate_frigate_config(config_file: str):
     """handle migrating the frigate config."""
     logger.info("Checking if frigate config needs migration...")

@@ -11,7 +11,7 @@ from pydantic import ValidationError
 from frigate.app import FrigateApp
 from frigate.config import FrigateConfig
 from frigate.log import setup_logging
-from frigate.util.config import find_config_file
+from frigate.util.config import find_config_file, is_safe_mode_allowed
 
 
 def main() -> None:
@@ -103,6 +103,10 @@ def main() -> None:
 
         # force a non-zero exit code for config failures
         if args.validate_config:
+            sys.exit(1)
+
+        if not is_safe_mode_allowed():
+            print("Safe mode is disabled (FRIGATE_ALLOW_SAFE_MODE=false).")
             sys.exit(1)
 
         # attempt to start Frigate in recovery mode
