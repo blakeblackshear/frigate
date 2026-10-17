@@ -1734,21 +1734,52 @@ async def delete_event(request: Request, event_id: str):
     response_model=EventMultiDeleteResponse,
     dependencies=[Depends(require_role(["admin"]))],
     summary="Delete events",
-    description="""Deletes a list of events from the database.
-    Returns a success message or an error if the events are not found.
+    description="""Deletes events from the database.
+
+    Either provide a list of event IDs, or use the after/before unix
+    timestamp filters (optionally scoped to a single camera) to delete all
+    events in a time range, for example everything older than a given time.
+    When event IDs are provided, the filters are ignored.
+
+    Returns a success message or an error if no events are found.
     """,
 )
 async def delete_events(request: Request, body: EventsDeleteBody):
-    if not body.event_ids:
-        return JSONResponse(
-            content=({"success": False, "message": "No event IDs provided."}),
-            status_code=404,
-        )
+    if body.event_ids:
+        event_ids = list(body.event_ids)
+    else:
+        if body.camera is None and body.after is None and body.before is None:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "No event IDs or filters provided.",
+                },
+                status_code=400,
+            )
+
+        query = Event.select(Event.id)
+        if body.camera is not None:
+            query = query.where(Event.camera == body.camera)
+        if body.after is not None:
+            query = query.where(Event.start_time > body.after)
+        if body.before is not None:
+            query = query.where(Event.start_time < body.before)
+
+        event_ids = [event.id for event in query]
+
+        if not event_ids:
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "No events matched the given filters.",
+                },
+                status_code=404,
+            )
 
     deleted_events = []
     not_found_events = []
 
-    for event_id in body.event_ids:
+    for event_id in event_ids:
         result = await delete_single_event(event_id, request)
         if result["success"]:
             deleted_events.append(event_id)

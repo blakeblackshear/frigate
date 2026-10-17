@@ -45,7 +45,19 @@ class EventsEndBody(BaseModel):
 
 
 class EventsDeleteBody(BaseModel):
-    event_ids: list[str] = Field(title="The event IDs to delete")
+    event_ids: list[str] = Field(title="The event IDs to delete", default_factory=list)
+    camera: str | None = Field(
+        title="Only delete events from this camera. Used with the after/before filters.",
+        default=None,
+    )
+    after: float | None = Field(
+        title="Delete events that started after this unix timestamp. At least one of event_ids, after, or before is required.",
+        default=None,
+    )
+    before: float | None = Field(
+        title="Delete events that started before this unix timestamp. Useful for deleting all events older than a given time.",
+        default=None,
+    )
 
 
 class SubmitPlusBody(BaseModel):
