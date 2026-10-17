@@ -53,7 +53,7 @@ Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings
 | Ollama (`ollama`)             |      ✅      |  ✅  |     ✅     |      ❌       |
 | OpenAI (`openai`)             |      ✅      |  ✅  |     ❌     |      ✅       |
 | Azure OpenAI (`azure_openai`) |      ✅      |  ✅  |     ❌     |      ✅       |
-| Google Gemini (`gemini`)      |      ✅      |  ✅  |     ❌     |      ✅       |
+| Google Gemini (`gemini`)      |      ✅      |  ✅  |     ✅     |      ✅       |
 
 A ✅ means Frigate can use the provider for that feature. The configured model must also support it: a vision model for descriptions and chat, a multimodal embedding model for embeddings (see [Embedding models](#embedding-models)), and an audio-capable model for transcription. Some features also need extra provider setup, covered in each provider's section below. OpenAI-compatible servers use the `openai` provider, so they follow the OpenAI row.
 
@@ -89,6 +89,8 @@ The `embeddings` role needs a different kind of model. Text queries are matched 
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `embeddinggemma-2`   | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Strong semantic search accuracy with efficient inference on a small model. |
 | `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Good performance, large model that requires strong hardware for inference. |
+
+`gemini-embedding-2` on Google Gemini serves the same role from the cloud. See [Google Gemini](#google-gemini). That sends thumbnails and search text to Google.
 
 #### Transcription models
 
@@ -375,6 +377,30 @@ genai:
 Other HTTP options are available, see the [python-genai documentation](https://github.com/googleapis/python-genai).
 
 :::
+
+#### Embeddings
+
+Gemini can serve the `embeddings` role for [Semantic Search](/configuration/semantic_search#genai-provider) when the model is a multimodal embedding model such as `gemini-embedding-2`. Give that model its own provider entry. A chat model such as `gemini-2.5-flash` does not produce retrieval vectors. Frigate does not ask Gemini which models are embedding models, so the role stays available on every Gemini provider. Assign it only to the embedding model.
+
+`gemini-embedding-2` returns one vector per request. Several text or image parts in the same call are combined into that single vector, so Frigate sends each description, search query, and thumbnail on its own. Thumbnails are stored as WebP. The embedding API accepts PNG and JPEG only, so each thumbnail is transcoded to JPEG before it is sent.
+
+The default vector length is 3072. Frigate asks for 768 dimensions, which is what the semantic search database stores. Descriptions and search queries share one text path, so both are prefixed with `task: search result | query:`. Images are not prefixed. `task_type` applies to `gemini-embedding-001`, not to `gemini-embedding-2`.
+
+A failed request for a new event is logged and that thumbnail is skipped, so the embeddings process keeps running. Reindexing sends every stored thumbnail to Google and uses API quota. A failed request during reindex stops the reindex. See [Network Requirements](/frigate/network_requirements#generative-ai).
+
+```yaml
+genai:
+  gemini_embeddings:
+    provider: gemini
+    api_key: "{FRIGATE_GEMINI_API_KEY}"
+    model: gemini-embedding-2
+    roles:
+      - embeddings
+
+semantic_search:
+  enabled: True
+  model: gemini_embeddings
+```
 
 ### OpenAI
 
