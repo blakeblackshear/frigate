@@ -911,8 +911,12 @@ def start_motion_search_job(
 
         _motion_search_jobs[job.id] = (job, cancel_event)
 
-    runner = MotionSearchRunner(job, config, cancel_event)
-    runner.start()
+    try:
+        MotionSearchRunner(job, config, cancel_event).start()
+    except Exception:
+        with _jobs_lock:
+            del _motion_search_jobs[job.id]
+        raise
 
     logger.debug(
         "Started motion search job %s for camera %s: "
