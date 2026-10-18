@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import queue
-import socket
 import threading
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
@@ -122,20 +121,6 @@ class _NoRedirectSession(requests.Session):
 
 
 _push_session = _NoRedirectSession()
-
-
-def _resolves_to_public_address(endpoint: str) -> bool:
-    hostname = urlparse(endpoint).hostname
-
-    if not hostname:
-        return False
-
-    try:
-        infos = socket.getaddrinfo(hostname, 443, proto=socket.IPPROTO_TCP)
-    except (socket.gaierror, UnicodeError):
-        return False
-
-    return all(ipaddress.ip_address(info[4][0]).is_global for info in infos)
 
 
 def _vapid_audience(endpoint: str) -> str:
@@ -433,15 +418,6 @@ class WebPushClient(Communicator):
 
                 for pusher in self.web_pushers[notification.user]:
                     endpoint = pusher.subscription_info["endpoint"]
-
-                    # Resolve-then-send leaves a DNS rebinding window. Closing it
-                    # needs the connection pinned to the checked address.
-                    if not _resolves_to_public_address(endpoint):
-                        logger.warning(
-                            "Skipping notification to %s: endpoint does not resolve to a public address",
-                            notification.user,
-                        )
-                        continue
 
                     headers = self.claim_headers[_vapid_audience(endpoint)].copy()
                     headers["urgency"] = "high"
