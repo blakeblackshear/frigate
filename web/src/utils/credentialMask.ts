@@ -1,40 +1,28 @@
-const MASKED_AUTH_PATTERN = /:\/\/\*:\*@/i;
-const MASKED_QUERY_PATTERN = /(?:[?&])user=\*&password=\*/i;
+// Mirrors clean_camera_user_pass and REGEX_MASKED_CREDENTIAL in the backend.
+const CREDENTIAL_QUERY_KEYS =
+  "(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd|[a-z_]*token|[a-z_]*secret|[a-z_]*private|api_?key|auth)";
+const URL_USERINFO_PATTERN = /:\/\/(?:[^\s/:]*:\S*|[^\s/]+)@/g;
+const CREDENTIAL_QUERY_PATTERN = new RegExp(
+  `([?&]${CREDENTIAL_QUERY_KEYS}=)[^&\\s]*`,
+  "gi",
+);
+const MASKED_PATTERN = new RegExp(
+  `://\\*:\\*@|[?&]${CREDENTIAL_QUERY_KEYS}=\\*(?![^&\\s])`,
+  "i",
+);
 
 export const isMaskedPath = (value: string): boolean =>
-  MASKED_AUTH_PATTERN.test(value) || MASKED_QUERY_PATTERN.test(value);
-
-export const hasCredentials = (value: string): boolean => {
-  if (!value) {
-    return false;
-  }
-
-  if (isMaskedPath(value)) {
-    return true;
-  }
-
-  try {
-    const parsed = new URL(value);
-    if (parsed.username || parsed.password) {
-      return true;
-    }
-
-    return (
-      parsed.searchParams.has("user") && parsed.searchParams.has("password")
-    );
-  } catch {
-    return /:\/\/[^:@/\s]+:[^@/\s]+@/.test(value);
-  }
-};
+  MASKED_PATTERN.test(value);
 
 export const maskCredentials = (value: string): string => {
   if (!value) {
     return value;
   }
 
-  const maskedAuth = value.replace(/:\/\/[^:@/\s]+:[^@/\s]*@/g, "://*:*@");
-
-  return maskedAuth
-    .replace(/([?&]user=)[^&]*/gi, "$1*")
-    .replace(/([?&]password=)[^&]*/gi, "$1*");
+  return value
+    .replace(CREDENTIAL_QUERY_PATTERN, "$1*")
+    .replace(URL_USERINFO_PATTERN, "://*:*@");
 };
+
+export const hasCredentials = (value: string): boolean =>
+  !!value && (isMaskedPath(value) || maskCredentials(value) !== value);

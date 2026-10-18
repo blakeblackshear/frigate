@@ -61,6 +61,7 @@ from frigate.util.builtin import (
     clean_camera_user_pass,
     deep_merge,
     flatten_config_data,
+    is_masked_camera_path,
     load_labels,
     process_config_query_string,
     split_config_key_path,
@@ -770,9 +771,7 @@ def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> No
             path = input_obj.get("path")
             if not isinstance(path, str):
                 continue
-            if ("://*:*@" in path or "user=*&password=*" in path) and index < len(
-                existing_paths
-            ):
+            if is_masked_camera_path(path) and index < len(existing_paths):
                 input_obj["path"] = existing_paths[index]
 
 

@@ -503,6 +503,71 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
         finally:
             os.unlink(config_path)
 
+    camera_path = "rtsp://10.0.0.1:554/video?password=s3cret&user=admin"
+
+    def _add_credentials(self):
+        """Give the config a credentialed camera path and go2rtc secrets."""
+        self.minimal_config["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"] = (
+            self.camera_path
+        )
+        self.minimal_config["go2rtc"] = {
+            "rtsp": {"username": "rtspuser", "password": "rtsppass"},
+            "api": {"username": "apiuser", "password": "apipass"},
+            "webrtc": {
+                "candidates": ["10.0.0.5:8555"],
+                "ice_servers": [
+                    {
+                        "urls": ["turn:turn.example.com:3478"],
+                        "username": "turnuser",
+                        "credential": "turnpass",
+                    }
+                ],
+            },
+        }
+
+    def _read_config_file(self, config_path):
+        with open(config_path) as f:
+            raw = f.read()
+        return raw, ruamel.yaml.YAML().load(raw)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_camera_path_round_trips(self, mock_find_config):
+        self._add_credentials()
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                camera = client.get("/config").json()["cameras"]["front_door"]
+                inputs = camera["ffmpeg"]["inputs"]
+                self.assertNotIn("s3cret", inputs[0]["path"])
+
+                resp = client.put(
+                    "/config/set",
+                    json={
+                        "config_data": {
+                            "cameras": {
+                                "front_door": {
+                                    "ffmpeg": {"inputs": inputs},
+                                    "detect": {"fps": 7},
+                                }
+                            }
+                        },
+                        "requires_restart": 0,
+                    },
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            _, saved = self._read_config_file(config_path)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"],
+                self.camera_path,
+            )
+        finally:
+            os.unlink(config_path)
+
 
 if __name__ == "__main__":
     unittest.main()
