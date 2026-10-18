@@ -584,8 +584,10 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             {"path": path, "roles": [role]} for path, role in paths
         ]
 
+    # config parsing rebuilds FRIGATE_ENV_VARS from its sources
+    @patch.dict("frigate.util.env._CONTAINER_ENV", {"FRIGATE_RTSP_PASSWORD": "s3cret"})
     @patch.dict(
-        "frigate.config.env.FRIGATE_ENV_VARS", {"FRIGATE_RTSP_PASSWORD": "s3cret"}
+        "frigate.util.env.FRIGATE_ENV_VARS", {"FRIGATE_RTSP_PASSWORD": "s3cret"}
     )
     @patch("frigate.api.app.find_config_file")
     def test_masked_path_keeps_env_placeholder(self, mock_find_config):
