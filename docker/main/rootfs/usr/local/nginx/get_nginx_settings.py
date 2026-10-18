@@ -36,18 +36,24 @@ ipv6_config.setdefault("enabled", False)
 
 listen_config: dict[str, Any] = networking_config.get("listen", {})
 
-# Frigate's own validation runs elsewhere, and a bad value here must not stop
-# nginx from serving the safe-mode UI, which uses the default ports
-for key, default in (("internal", 5000), ("external", 8971)):
-    try:
-        value, port = parse_listen_address(listen_config.get(key, default))
-    except ValueError:
-        print(
-            f"[WARN] Invalid networking.listen.{key}, using {default}",
-            file=sys.stderr,
-        )
-        value, port = default, default
+# Frigate's own validation runs elsewhere, and a bad or colliding value here must
+# not stop nginx from serving the safe-mode UI, which uses the default ports
+listen_defaults = {"internal": 5000, "external": 8971}
 
+try:
+    listen_parsed = {
+        key: parse_listen_address(listen_config.get(key, default))
+        for key, default in listen_defaults.items()
+    }
+    if listen_parsed["internal"][1] == listen_parsed["external"][1]:
+        raise ValueError("internal and external share a port")
+except ValueError as e:
+    print(f"[WARN] Invalid networking.listen ({e}), using defaults", file=sys.stderr)
+    listen_parsed = {
+        key: (default, default) for key, default in listen_defaults.items()
+    }
+
+for key, (value, port) in listen_parsed.items():
     listen_config[key] = value
     listen_config[f"{key}_port"] = port
 
