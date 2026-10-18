@@ -66,17 +66,26 @@ export function CameraPathWidget(props: WidgetProps) {
     shouldFetchRawPaths ? "config/raw_paths" : null,
   );
 
+  const rawValue = typeof value === "string" ? value : "";
+
+  // Match by masked value, as the backend restores on save, so deleting or
+  // reordering inputs never reveals another input's path
   const rawPath = useMemo(() => {
-    if (!cameraName || inputIndex === undefined) {
+    if (!cameraName || !isMaskedPath(rawValue)) {
       return undefined;
     }
 
-    const path =
-      rawPaths?.cameras?.[cameraName]?.ffmpeg?.inputs?.[inputIndex]?.path;
-    return typeof path === "string" ? path : undefined;
-  }, [cameraName, inputIndex, rawPaths]);
+    const matches = new Set(
+      (rawPaths?.cameras?.[cameraName]?.ffmpeg?.inputs ?? [])
+        .map((input) => input.path)
+        .filter(
+          (path): path is string =>
+            typeof path === "string" && maskCredentials(path) === rawValue,
+        ),
+    );
+    return matches.size === 1 ? [...matches][0] : undefined;
+  }, [cameraName, rawPaths, rawValue]);
 
-  const rawValue = typeof value === "string" ? value : "";
   const resolvedValue =
     isMaskedPath(rawValue) && rawPath ? rawPath : (rawValue ?? "");
   const canReveal =
