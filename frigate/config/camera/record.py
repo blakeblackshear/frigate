@@ -147,6 +147,7 @@ class RecordConfig(FrigateBaseModel):
     )
     expire_interval: int = Field(
         default=60,
+        ge=1,
         title="Record cleanup interval",
         description="Minutes between cleanup passes that remove expired recording segments.",
     )

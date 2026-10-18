@@ -41,6 +41,7 @@ from frigate.const import (
 )
 from frigate.events.types import EventStateEnum, EventTypeEnum
 from frigate.models import Event, ReviewSegment, Timeline
+from frigate.output.birdseye import get_canvas_shape
 from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import SharedMemoryFrameManager
@@ -71,6 +72,14 @@ class TrackedObjectProcessor(threading.Thread):
         self.camera_states: dict[str, CameraState] = {}
         self.camera_states_lock = threading.Lock()
         self.frame_manager = SharedMemoryFrameManager()
+        self.birdseye_yuv_shape: tuple[int, int] | None = None
+
+        if config.birdseye.enabled and config.birdseye.restream:
+            birdseye_width, birdseye_height = get_canvas_shape(
+                config.birdseye.width, config.birdseye.height
+            )
+            self.birdseye_yuv_shape = (birdseye_height * 3 // 2, birdseye_width)
+
         self.last_motion_detected: dict[str, float] = {}
         self.ptz_autotracker_thread = ptz_autotracker_thread
 
@@ -387,10 +396,10 @@ class TrackedObjectProcessor(threading.Thread):
         self, camera: str, draw_options: dict[str, Any] = {}
     ) -> np.ndarray | None:
         if camera == "birdseye":
-            return self.frame_manager.get(
-                "birdseye",
-                (self.config.birdseye.height * 3 // 2, self.config.birdseye.width),
-            )
+            if self.birdseye_yuv_shape is None:
+                return None
+
+            return self.frame_manager.get("birdseye", self.birdseye_yuv_shape)
 
         camera_state = self.get_camera_state(camera)
 

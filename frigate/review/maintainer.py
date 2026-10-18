@@ -543,12 +543,9 @@ class ReviewSegmentMaintainer(threading.Thread):
         if len(objects) <= pending.frame_active_count:
             return
 
-        try:
-            yuv_frame = self.frame_manager.get(
-                frame_name, camera_config.frame_shape_yuv, frame_time
-            )
-        except FileNotFoundError:
-            return
+        yuv_frame = self.frame_manager.get(
+            frame_name, camera_config.frame_shape_yuv, frame_time
+        )
 
         if yuv_frame is None:
             logger.debug(f"Failed to get frame {frame_name} from SHM")

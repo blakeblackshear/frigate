@@ -1000,6 +1000,7 @@ class RecordingMaintainer(threading.Thread):
                     logger.error(f"Unable to convert {cache_path} to {file_path}")
                     if p.stderr:
                         logger.error((await p.stderr.read()).decode("ascii"))
+                    Path(file_path).unlink(missing_ok=True)
                     return None
                 else:
                     logger.debug(
@@ -1017,7 +1018,7 @@ class RecordingMaintainer(threading.Thread):
                 except OSError:
                     segment_size = 0
 
-                os.remove(cache_path)
+                self.drop_segment(cache_path)
 
                 rand_id = "".join(
                     random.choices(string.ascii_lowercase + string.digits, k=6)
@@ -1046,10 +1047,8 @@ class RecordingMaintainer(threading.Thread):
                 }
         except Exception:
             logger.exception(f"Unable to store recording segment {cache_path}")
-            Path(cache_path).unlink(missing_ok=True)
 
-        # clear end_time cache
-        self.end_time_cache.pop(cache_path, None)
+        self.drop_segment(cache_path)
         return None
 
     def run(self) -> None:
