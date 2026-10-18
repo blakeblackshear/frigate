@@ -21,8 +21,8 @@ export const maskCredentials = (value: string): string => {
   }
 
   return value
-    .replace(CREDENTIAL_QUERY_PATTERN, "$1*")
-    .replace(URL_USERINFO_PATTERN, "://*:*@");
+    .replace(URL_USERINFO_PATTERN, "://*:*@")
+    .replace(CREDENTIAL_QUERY_PATTERN, "$1*");
 };
 
 export const hasCredentials = (value: string): boolean =>

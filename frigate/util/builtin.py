@@ -121,9 +121,10 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
 def clean_camera_user_pass(line: str) -> str:
     """Mask URL userinfo and credential query parameters in line."""
 
-    # Query values go first so an "@" inside one can't extend the userinfo match.
-    line = re.sub(REGEX_CREDENTIAL_QUERY_PARAM, r"\1*", line)
-    return re.sub(REGEX_URL_USERINFO, "://*:*@", line)
+    # Userinfo goes first so a credential key inside a password can't expose the
+    # rest of it. An "@" in a later query value only over-masks the host.
+    line = re.sub(REGEX_URL_USERINFO, "://*:*@", line)
+    return re.sub(REGEX_CREDENTIAL_QUERY_PARAM, r"\1*", line)
 
 
 def is_masked_camera_path(path: str) -> bool:

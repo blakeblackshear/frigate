@@ -894,19 +894,28 @@ def _restore_redacted_ice_servers(
             or REDACTED_CREDENTIAL_SENTINEL not in server.values()
         ):
             continue
-        match = next(
-            (
-                saved
-                for saved in saved_servers
-                if isinstance(saved, dict) and saved.get("urls") == server.get("urls")
-            ),
-            None,
-        )
-        if match is None:
+        redacted = [
+            key
+            for key, value in server.items()
+            if value == REDACTED_CREDENTIAL_SENTINEL
+        ]
+        matches = [
+            saved
+            for saved in saved_servers
+            if isinstance(saved, dict) and saved.get("urls") == server.get("urls")
+        ]
+
+        # Servers sharing urls but holding different accounts can't be told apart
+        if not matches or any(
+            other.get(key) != matches[0].get(key)
+            for other in matches[1:]
+            for key in redacted
+        ):
             return (
-                "An ICE server contains saved credentials but its urls changed; "
-                "resend it with real values"
+                "An ICE server contains saved credentials that could not be matched "
+                "by urls; resend it with real values"
             )
+        match = matches[0]
         for key, value in list(server.items()):
             if value != REDACTED_CREDENTIAL_SENTINEL:
                 continue

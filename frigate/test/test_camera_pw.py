@@ -64,6 +64,8 @@ class TestUserPassMasking(unittest.TestCase):
             "rtsp://admin:12#abc@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
             "rtsp://admin:7?x@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
             "rtsps://u:1/2@h/x": "rtsps://*:*@h/x",
+            "rtsp://admin:pre&token=suf@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
+            "rtsp://admin:a?pwd=b@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
             "http://h/x?api_key=a&apikey=b&access_token=c": (
                 "http://h/x?api_key=*&apikey=*&access_token=*"
             ),

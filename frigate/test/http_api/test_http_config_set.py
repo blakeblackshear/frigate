@@ -799,6 +799,39 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             os.unlink(config_path)
 
     @patch("frigate.api.app.find_config_file")
+    def test_redacted_ice_servers_sharing_urls_are_rejected(self, mock_find_config):
+        self._add_credentials()
+        self.minimal_config["go2rtc"]["webrtc"]["ice_servers"].append(
+            {
+                "urls": ["turn:turn.example.com:3478"],
+                "username": "otheruser",
+                "credential": "otherpass",
+            }
+        )
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                ice_servers = client.get("/config").json()["go2rtc"]["webrtc"][
+                    "ice_servers"
+                ]
+                resp = self._save(
+                    client, {"go2rtc": {"webrtc": {"ice_servers": ice_servers}}}
+                )
+                self.assertEqual(resp.status_code, 400)
+
+            _, saved = self._read_config_file(config_path)
+            self.assertEqual(
+                [s["credential"] for s in saved["go2rtc"]["webrtc"]["ice_servers"]],
+                ["turnpass", "otherpass"],
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
     def test_masked_inputs_restore_by_value(self, mock_find_config):
         main = "rtsp://u:MAIN@10.0.0.1:554/main"
         sub = "rtsp://u:SUB@10.0.0.1:554/sub"
