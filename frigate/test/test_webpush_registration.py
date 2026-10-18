@@ -3,8 +3,12 @@
 import unittest
 from base64 import urlsafe_b64encode
 
-from frigate.api.notification import _validate_push_endpoint, _validate_subscription
-from frigate.comms.webpush import _build_web_pushers
+from frigate.api.notification import _validate_subscription
+from frigate.comms.webpush import (
+    _build_web_pushers,
+    _vapid_audience,
+    validate_push_endpoint,
+)
 
 VALID_ENDPOINTS = [
     "https://fcm.googleapis.com/fcm/send/dGhpcy1pcy1hLXRva2Vu",
@@ -26,11 +30,11 @@ class TestValidatePushEndpoint(unittest.TestCase):
     def test_accepts_real_push_service_endpoints(self):
         for endpoint in VALID_ENDPOINTS:
             with self.subTest(endpoint=endpoint):
-                self.assertIsNone(_validate_push_endpoint(endpoint))
+                self.assertIsNone(validate_push_endpoint(endpoint))
 
     def test_rejects_http(self):
         self.assertIsNotNone(
-            _validate_push_endpoint("http://fcm.googleapis.com/fcm/send/token")
+            validate_push_endpoint("http://fcm.googleapis.com/fcm/send/token")
         )
 
     def test_rejects_non_http_schemes(self):
@@ -40,7 +44,7 @@ class TestValidatePushEndpoint(unittest.TestCase):
             "//example.com/token",
         ):
             with self.subTest(endpoint=endpoint):
-                self.assertIsNotNone(_validate_push_endpoint(endpoint))
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
     def test_rejects_localhost(self):
         for endpoint in (
@@ -50,7 +54,7 @@ class TestValidatePushEndpoint(unittest.TestCase):
             "https://[::1]/token",
         ):
             with self.subTest(endpoint=endpoint):
-                self.assertIsNotNone(_validate_push_endpoint(endpoint))
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
     def test_rejects_private_addresses(self):
         for endpoint in (
@@ -61,7 +65,7 @@ class TestValidatePushEndpoint(unittest.TestCase):
             "https://0.0.0.0/token",
         ):
             with self.subTest(endpoint=endpoint):
-                self.assertIsNotNone(_validate_push_endpoint(endpoint))
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
     def test_rejects_internal_hostnames(self):
         for endpoint in (
@@ -71,16 +75,16 @@ class TestValidatePushEndpoint(unittest.TestCase):
             "https://host.home.arpa/token",
         ):
             with self.subTest(endpoint=endpoint):
-                self.assertIsNotNone(_validate_push_endpoint(endpoint))
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
     def test_rejects_non_default_port(self):
         self.assertIsNotNone(
-            _validate_push_endpoint("https://fcm.googleapis.com:8080/fcm/send/token")
+            validate_push_endpoint("https://fcm.googleapis.com:8080/fcm/send/token")
         )
 
     def test_rejects_embedded_credentials(self):
         self.assertIsNotNone(
-            _validate_push_endpoint(
+            validate_push_endpoint(
                 "https://user:pass@fcm.googleapis.com/fcm/send/token"
             )
         )
@@ -88,26 +92,26 @@ class TestValidatePushEndpoint(unittest.TestCase):
     def test_rejects_endpoint_without_path(self):
         for endpoint in ("https://fcm.googleapis.com", "https://fcm.googleapis.com/"):
             with self.subTest(endpoint=endpoint):
-                self.assertIsNotNone(_validate_push_endpoint(endpoint))
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
-    def test_rejects_endpoint_that_breaks_audience_parsing(self):
-        # webpush.py locates the host by searching for a separator after index
-        # 10, which raises ValueError when the url has no path at all
-        endpoint = "https://fcm.googleapis.com"
-
-        with self.assertRaises(ValueError):
-            endpoint.index("/", 10)
-
-        self.assertIsNotNone(_validate_push_endpoint(endpoint))
+    def test_rejects_empty_hostname_labels(self):
+        for endpoint in (
+            "https://./x",
+            "https://fcm..googleapis.com/token",
+            "https://.fcm.googleapis.com/token",
+            "https://fcm.googleapis.com./token",
+        ):
+            with self.subTest(endpoint=endpoint):
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
     def test_rejects_missing_or_non_string_endpoint(self):
         for endpoint in (None, "", 5, {"url": "https://example.com/token"}):
             with self.subTest(endpoint=endpoint):
-                self.assertIsNotNone(_validate_push_endpoint(endpoint))
+                self.assertIsNotNone(validate_push_endpoint(endpoint))
 
     def test_rejects_overlong_endpoint(self):
         self.assertIsNotNone(
-            _validate_push_endpoint(f"https://fcm.googleapis.com/{'a' * 4096}")
+            validate_push_endpoint(f"https://fcm.googleapis.com/{'a' * 4096}")
         )
 
 
@@ -148,10 +152,6 @@ class TestValidateSubscription(unittest.TestCase):
                 self.assertIsNotNone(_validate_subscription(sub))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestBuildWebPushers(unittest.TestCase):
     def test_skips_subscriptions_with_malformed_keys(self):
         bad = _subscription(VALID_ENDPOINTS[0])
@@ -163,3 +163,28 @@ class TestBuildWebPushers(unittest.TestCase):
 
         self.assertEqual(len(pushers), 1)
         self.assertEqual(pushers[0].receiver_key, b"\x04" + bytes(64))
+
+    def test_skips_subscriptions_with_invalid_endpoints(self):
+        good = _subscription(VALID_ENDPOINTS[0])
+        good["keys"]["p256dh"] = urlsafe_b64encode(b"\x04" + bytes(64)).decode()
+        bad = dict(good, endpoint="https://./x")
+
+        with self.assertLogs("frigate.comms.webpush", level="WARNING"):
+            pushers = _build_web_pushers("viewer", [bad, "not-a-dict", good])
+
+        self.assertEqual(len(pushers), 1)
+        self.assertEqual(pushers[0].subscription_info["endpoint"], VALID_ENDPOINTS[0])
+
+
+class TestVapidAudience(unittest.TestCase):
+    def test_uses_scheme_and_host(self):
+        self.assertEqual(
+            _vapid_audience(VALID_ENDPOINTS[0]), "https://fcm.googleapis.com"
+        )
+        self.assertEqual(
+            _vapid_audience(VALID_ENDPOINTS[4]), "https://fcm.googleapis.com:443"
+        )
+
+
+if __name__ == "__main__":
+    unittest.main()
