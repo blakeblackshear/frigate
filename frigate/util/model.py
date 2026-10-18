@@ -385,15 +385,9 @@ def get_ort_providers(
                     }
                 )
         elif provider == "MIGraphXExecutionProvider":
-            migraphx_cache_dir = os.path.join(MODEL_CACHE_DIR, "migraphx")
-            os.makedirs(migraphx_cache_dir, exist_ok=True)
-
-            providers.append(provider)
-            options.append(
-                {
-                    "migraphx_model_cache_dir": migraphx_cache_dir,
-                }
-            )
+            # MIGraphX is a plugin provider, which ONNX Runtime can't create by
+            # name, so get_optimized_runner selects it through its devices
+            continue
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
             options.append(
