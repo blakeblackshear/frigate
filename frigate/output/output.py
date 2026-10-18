@@ -14,11 +14,10 @@ from ws4py.server.wsgirefserver import (
     WebSocketWSGIRequestHandler,
     WSGIServer,
 )
-from ws4py.server.wsgiutils import WebSocketWSGIApplication
 
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
-from frigate.comms.ws import WebSocket
+from frigate.comms.ws import OriginCheckedWebSocketApplication, WebSocket
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -136,7 +135,7 @@ class OutputProcess(FrigateProcess):
             8082,
             server_class=WSGIServer,
             handler_class=WebSocketWSGIRequestHandler,
-            app=WebSocketWSGIApplication(handler_cls=WebSocket),
+            app=OriginCheckedWebSocketApplication(handler_cls=WebSocket),
         )
         websocket_server.initialize_websockets_manager()
         websocket_thread = threading.Thread(target=websocket_server.serve_forever)

@@ -9,6 +9,7 @@ import struct
 import threading
 from collections.abc import Callable
 from typing import Any
+from urllib.parse import urlsplit
 from wsgiref.simple_server import make_server
 
 from ws4py.server.wsgirefserver import (
@@ -472,6 +473,52 @@ def _materialize_for_ws(
     return None
 
 
+def _hostname(value: str) -> str | None:
+    try:
+        return urlsplit(value).hostname
+    except ValueError:
+        return None
+
+
+def ws_origin_allowed(environ: dict[str, Any]) -> bool:
+    """Return True unless a browser opened the handshake from a foreign origin.
+
+    Browsers always send Origin on a WebSocket handshake and cannot add custom
+    headers to one, so a missing Origin means a non-browser client and a proxy
+    supplied X-Forwarded-Host cannot be forged by the page. Ports are ignored
+    because nginx forwards Host without one.
+    """
+    origin = environ.get("HTTP_ORIGIN")
+    if origin is None:
+        return True
+
+    origin_host = _hostname(origin)
+    if not origin_host:
+        return False
+
+    forwarded_host = environ.get("HTTP_X_FORWARDED_HOST", "").split(",")[0].strip()
+    hosts = (forwarded_host, environ.get("HTTP_HOST", ""))
+    return any(origin_host == _hostname(f"//{host}") for host in hosts if host)
+
+
+class OriginCheckedWebSocketApplication(WebSocketWSGIApplication):  # type: ignore[misc]
+    """ws4py application that rejects cross-origin browser handshakes."""
+
+    def __call__(self, environ: dict[str, Any], start_response: Callable) -> Any:
+        if not ws_origin_allowed(environ):
+            logger.warning(
+                "Rejected cross-origin websocket handshake: origin=%s, host=%s, "
+                "x-forwarded-host=%s",
+                environ.get("HTTP_ORIGIN"),
+                environ.get("HTTP_HOST"),
+                environ.get("HTTP_X_FORWARDED_HOST"),
+            )
+            start_response("403 Forbidden", [("Content-Length", "0")])
+            return []
+
+        return super().__call__(environ, start_response)
+
+
 class WebSocket(WebSocket_):  # type: ignore[misc]
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -621,7 +668,7 @@ class WebSocketClient(Communicator):
             5002,
             server_class=WSGIServer,
             handler_class=WebSocketWSGIRequestHandler,
-            app=WebSocketWSGIApplication(handler_cls=_WebSocketHandler),
+            app=OriginCheckedWebSocketApplication(handler_cls=_WebSocketHandler),
         )
         self.websocket_server.initialize_websockets_manager()
         self.websocket_thread = threading.Thread(
