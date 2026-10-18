@@ -90,6 +90,7 @@ type MotionSearchViewProps = {
 };
 
 const DEFAULT_EXPORT_WINDOW_SECONDS = 60;
+const MAX_SEARCH_RANGE_HOURS = 48;
 const NO_REVIEW_EVENTS: ReviewSegment[] = [];
 
 export default function MotionSearchView({
@@ -860,6 +861,16 @@ export default function MotionSearchView({
       return;
     }
 
+    if (
+      searchRange.before - searchRange.after >
+      MAX_SEARCH_RANGE_HOURS * 3600
+    ) {
+      toast.error(
+        t("errors.timeRangeTooLong", { hours: MAX_SEARCH_RANGE_HOURS }),
+      );
+      return;
+    }
+
     setIsSearching(true);
     setSearchResults([]);
     setHasSearched(true);
@@ -892,6 +903,20 @@ export default function MotionSearchView({
         setIsSearching(false);
       }
     } catch (error) {
+      const status = axios.isAxiosError(error)
+        ? error.response?.status
+        : undefined;
+
+      if (status === 409 || status === 429) {
+        toast.error(
+          t(
+            status === 409 ? "errors.alreadyRunning" : "errors.tooManySearches",
+          ),
+        );
+        setIsSearching(false);
+        return;
+      }
+
       let errorMessage = t("errors.unknown");
 
       if (axios.isAxiosError<{ message?: string; detail?: string }>(error)) {
