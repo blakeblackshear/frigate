@@ -1,5 +1,7 @@
 import type { WidgetProps } from "@rjsf/utils";
 import useSWR from "swr";
+import get from "lodash/get";
+import isEqual from "lodash/isEqual";
 import { useMemo, useState, type FocusEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { LuEye, LuEyeOff } from "react-icons/lu";
@@ -21,6 +23,7 @@ type RawPathsResponse = {
       ffmpeg?: {
         inputs?: Array<{
           path?: string;
+          roles?: string[];
         }>;
       };
     }
@@ -68,23 +71,32 @@ export function CameraPathWidget(props: WidgetProps) {
 
   const rawValue = typeof value === "string" ? value : "";
 
-  // Match by masked value, as the backend restores on save, so deleting or
-  // reordering inputs never reveals another input's path
+  const roles =
+    inputIndex === undefined
+      ? undefined
+      : get(formContext?.formData, ["inputs", inputIndex, "roles"]);
+
+  // Match by masked value with roles breaking a tie, as the backend restores
+  // on save, so deleting or reordering inputs never reveals another input's path
   const rawPath = useMemo(() => {
     if (!cameraName || !isMaskedPath(rawValue)) {
       return undefined;
     }
 
-    const matches = new Set(
-      (rawPaths?.cameras?.[cameraName]?.ffmpeg?.inputs ?? [])
-        .map((input) => input.path)
-        .filter(
-          (path): path is string =>
-            typeof path === "string" && maskCredentials(path) === rawValue,
-        ),
+    let matches = (
+      rawPaths?.cameras?.[cameraName]?.ffmpeg?.inputs ?? []
+    ).filter(
+      (input): input is { path: string; roles?: string[] } =>
+        typeof input.path === "string" &&
+        maskCredentials(input.path) === rawValue,
     );
-    return matches.size === 1 ? [...matches][0] : undefined;
-  }, [cameraName, rawPaths, rawValue]);
+    if (new Set(matches.map((input) => input.path)).size > 1) {
+      matches = matches.filter((input) => isEqual(input.roles, roles));
+    }
+
+    const paths = new Set(matches.map((input) => input.path));
+    return paths.size === 1 ? [...paths][0] : undefined;
+  }, [cameraName, rawPaths, rawValue, roles]);
 
   const resolvedValue =
     isMaskedPath(rawValue) && rawPath ? rawPath : (rawValue ?? "");

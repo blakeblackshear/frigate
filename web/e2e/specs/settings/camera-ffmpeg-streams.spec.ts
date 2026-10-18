@@ -235,4 +235,33 @@ test.describe("camera ffmpeg input source toggle @medium", () => {
     await paths.focus();
     await expect(paths).toHaveValue(sub);
   });
+
+  test("inputs with the same masked path each reveal their own path by role", async ({
+    frigateApp,
+  }) => {
+    const record = "rtsp://admin:one@10.0.0.1:554/live";
+    const detect = "rtsp://viewer:two@10.0.0.1:554/live";
+    const masked = "rtsp://*:*@10.0.0.1:554/live";
+    await installRoutes(
+      frigateApp.page,
+      [
+        { path: masked, roles: ["record"] },
+        { path: masked, roles: ["detect"] },
+      ],
+      [
+        { path: record, roles: ["record"] },
+        { path: detect, roles: ["detect"] },
+      ],
+    );
+    await frigateApp.goto("/settings?page=cameraFfmpeg&camera=front_door");
+
+    const paths = frigateApp.page.getByRole("textbox", { name: "Input path" });
+    await expect(paths).toHaveCount(2);
+
+    await paths.nth(0).focus();
+    await expect(paths.nth(0)).toHaveValue(record);
+
+    await paths.nth(1).focus();
+    await expect(paths.nth(1)).toHaveValue(detect);
+  });
 });

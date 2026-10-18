@@ -453,13 +453,6 @@ def _redact_go2rtc_credentials(go2rtc: dict[str, Any]) -> None:
         for name in list(go2rtc["publish"]):
             redact_credential(go2rtc["publish"], name)
 
-    webrtc = go2rtc.get("webrtc")
-    if isinstance(webrtc, dict):
-        for ice_server in webrtc.get("ice_servers") or []:
-            if isinstance(ice_server, dict):
-                redact_credential(ice_server, "username")
-                redact_credential(ice_server, "credential")
-
 
 @router.get("/profiles", dependencies=[Depends(allow_any_authenticated())])
 def get_profiles(request: Request):
@@ -851,7 +844,7 @@ def _resolve_frigate_vars(value: str) -> str:
 
 
 def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
-    """Shape the in-memory camera inputs and go2rtc like the saved YAML."""
+    """Shape the in-memory camera inputs like the saved YAML."""
     return {
         "cameras": {
             name: {
@@ -864,67 +857,7 @@ def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
             }
             for name, camera in config.cameras.items()
         },
-        "go2rtc": config.go2rtc.model_dump(mode="json", warnings="none"),
     }
-
-
-def _restore_redacted_ice_servers(
-    config_data: dict, saved_go2rtc: dict[str, Any]
-) -> str | None:
-    """Fill redacted ICE server fields from the saved server with the same urls.
-
-    Lists are written whole, so the sentinel can't be dropped per field like
-    other redacted credentials. Mutates `config_data` in place and returns an
-    error message when a redacted server has no saved match.
-    """
-    go2rtc = config_data.get("go2rtc")
-    webrtc = go2rtc.get("webrtc") if isinstance(go2rtc, dict) else None
-    ice_servers = webrtc.get("ice_servers") if isinstance(webrtc, dict) else None
-    if not isinstance(ice_servers, list):
-        return None
-
-    saved_webrtc = saved_go2rtc.get("webrtc")
-    saved_servers = (
-        saved_webrtc.get("ice_servers") or [] if isinstance(saved_webrtc, dict) else []
-    )
-
-    for server in ice_servers:
-        if (
-            not isinstance(server, dict)
-            or REDACTED_CREDENTIAL_SENTINEL not in server.values()
-        ):
-            continue
-        redacted = [
-            key
-            for key, value in server.items()
-            if value == REDACTED_CREDENTIAL_SENTINEL
-        ]
-        matches = [
-            saved
-            for saved in saved_servers
-            if isinstance(saved, dict) and saved.get("urls") == server.get("urls")
-        ]
-
-        # Servers sharing urls but holding different accounts can't be told apart
-        if not matches or any(
-            other.get(key) != matches[0].get(key)
-            for other in matches[1:]
-            for key in redacted
-        ):
-            return (
-                "An ICE server contains saved credentials that could not be matched "
-                "by urls; resend it with real values"
-            )
-        match = matches[0]
-        for key, value in list(server.items()):
-            if value != REDACTED_CREDENTIAL_SENTINEL:
-                continue
-            if key in match:
-                server[key] = match[key]
-            else:
-                del server[key]
-
-    return None
 
 
 def _config_data_to_updates(
@@ -933,15 +866,9 @@ def _config_data_to_updates(
     """Flatten a /config/set payload after restoring masked credentials.
 
     `saved` is the config the masked values were taken from. Returns the flat
-    updates, or an error message when a masked or redacted value can't be
-    restored.
+    updates, or an error message when a masked value can't be restored.
     """
-    saved_go2rtc = saved.get("go2rtc")
-    error = _restore_masked_camera_paths(
-        config_data, saved
-    ) or _restore_redacted_ice_servers(
-        config_data, saved_go2rtc if isinstance(saved_go2rtc, dict) else {}
-    )
+    error = _restore_masked_camera_paths(config_data, saved)
     if error:
         return {}, error
 
