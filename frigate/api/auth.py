@@ -824,9 +824,11 @@ def auth(request: Request):
             logger.debug("jwt token issued before password change")
             return fail_response
 
-        # matches the fallback login applies to a role removed from the config
         if role not in auth_config.roles:
-            role = "viewer"
+            logger.debug(
+                "jwt user %s has role %s, which is not in the config", user, role
+            )
+            return fail_response
 
         current_time = int(time.time())
 
@@ -961,13 +963,16 @@ def login(request: Request, body: AppPostLoginBody):
 
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
-        role = getattr(db_user, "role", "viewer")
-        config_roles_set = set(request.app.frigate_config.auth.roles.keys())
-        if role not in config_roles_set:
+        role = db_user.role
+        if role not in request.app.frigate_config.auth.roles:
             logger.warning(
-                f"User {db_user.username} has an invalid role {role}, falling back to 'viewer'."
+                "Login refused for user '%s' with role '%s', which is not in the config",
+                user,
+                role,
             )
-            role = "viewer"
+            failed_logins.record(user, time.time(), known=True)
+            return JSONResponse(content={"message": "Login failed"}, status_code=401)
+
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, role, expiration, request.app.jwt_token)
         response = Response("", 200)

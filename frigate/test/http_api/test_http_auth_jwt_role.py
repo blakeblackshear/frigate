@@ -115,14 +115,22 @@ class TestAuthJwtRole(BaseTestHttp):
         self.assertEqual(resp.status_code, 202)
         self.assertEqual(resp.headers["remote-role"], "garage")
 
-    def test_role_removed_from_config_falls_back_to_viewer(self):
+    def test_role_removed_from_config_is_rejected(self):
         User.update(role="removed_role").where(User.username == "bob").execute()
         app = self._create_app()
         with AuthTestClient(app) as client:
-            resp = self._auth(client, self._token(app, "bob", "removed_role"))
+            for source in ("bearer", "cookie"):
+                resp = self._auth(client, self._token(app, "bob", "garage"), source)
+                self.assertEqual(resp.status_code, 401)
+                self.assertNotIn("remote-role", resp.headers)
 
-        self.assertEqual(resp.status_code, 202)
-        self.assertEqual(resp.headers["remote-role"], "viewer")
+    def test_login_refused_for_role_removed_from_config(self):
+        User.update(role="removed_role").where(User.username == "bob").execute()
+        with AuthTestClient(self._create_app()) as client:
+            resp = client.post("/login", json={"user": "bob", "password": PASSWORD})
+
+        self.assertEqual(resp.status_code, 401)
+        self.assertNotIn("set-cookie", resp.headers)
 
     def test_demoted_user_gets_new_role_on_next_request(self):
         app = self._create_app()
