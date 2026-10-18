@@ -559,9 +559,14 @@ class CameraWatchdog(threading.Thread):
 
                 self._send_roles_offline(p["roles"], now)
 
-                p["process"] = start_or_restart_ffmpeg(
-                    p["cmd"], self.logger, p["logpipe"], ffmpeg_process=p["process"]
-                )
+                if can_restart:
+                    p["process"] = start_or_restart_ffmpeg(
+                        p["cmd"],
+                        self.logger,
+                        p["logpipe"],
+                        ffmpeg_process=p["process"],
+                    )
+                    last_restart_time = now
 
             if self.detect_process_records_sub and self.config.record.stream_enabled(
                 STREAM_TYPE_SUB
