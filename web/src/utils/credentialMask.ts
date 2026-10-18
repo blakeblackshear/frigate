@@ -1,7 +1,8 @@
 // Mirrors clean_camera_user_pass and REGEX_MASKED_CREDENTIAL in the backend.
 const CREDENTIAL_QUERY_KEYS =
-  "(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd|[a-z_]*token|[a-z_]*secret|[a-z_]*private|api_?key|auth)";
-const URL_USERINFO_PATTERN = /:\/\/(?:[^\s/:]*:\S*|[^\s/]+)@/g;
+  "(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd|(?:[a-z_]*_)?token|(?:[a-z_]*_)?secret|client_private|api_?key)";
+const URL_USERINFO_PATTERN =
+  /:\/\/(?:[^\s/?#:[\]]*:(?!\d+(?:[/?#,\s]|$))(?:(?!:\/\/)\S)*|[^\s/?#]+)@/g;
 const CREDENTIAL_QUERY_PATTERN = new RegExp(
   `([?&]${CREDENTIAL_QUERY_KEYS}=)[^&\\s]*`,
   "gi",

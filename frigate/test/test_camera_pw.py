@@ -1,5 +1,6 @@
 """Test camera user and password cleanup."""
 
+import time
 import unittest
 
 from frigate.util.builtin import (
@@ -57,6 +58,11 @@ class TestUserPassMasking(unittest.TestCase):
             "rtsp://:pw@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
             "tapo://cloudpassword@10.0.0.2": "tapo://*:*@10.0.0.2",
             "rtsp://u:p@ss@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
+            "rtsp://user:pa/ss@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
+            "rtsp://u:p@ss#x@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
+            "http://h/x?api_key=a&apikey=b&access_token=c": (
+                "http://h/x?api_key=*&apikey=*&access_token=*"
+            ),
             "http://h/cgi?user=admin&password=x": "http://h/cgi?user=*&password=*",
             "http://h/cgi?password=x&user=admin&channel=1": (
                 "http://h/cgi?password=*&user=*&channel=1"
@@ -94,6 +100,11 @@ class TestUserPassMasking(unittest.TestCase):
             "ffmpeg:front_door#video=copy",
             "rtsp://127.0.0.1:8554/front_door?video=copy&audio=aac",
             "homekit://10.0.0.2:51827?device_id=d",
+            "rtsp://10.0.0.1:554/live?x=a@b",
+            "rtsp://10.0.0.1:554/path@thing",
+            "http://10.0.0.1/snap.jpg?email=me@x.com",
+            "http://h/x?auth=a&author=b&authorization=c&user_agent=d&autoken=e",
+            "http://h/x?private=1&passthrough=1",
             "Camera front_door is not responding",
         ):
             with self.subTest(line=line):
@@ -102,5 +113,17 @@ class TestUserPassMasking(unittest.TestCase):
 
     def test_commas_outside_credentials_survive(self):
         """ffprobe splits multiple paths on commas left after masking."""
-        self.assertIn(",", clean_camera_user_pass("rtsp://a/x,rtsp://u:p@b/y"))
+        for line in (
+            "rtsp://a/x,rtsp://u:p@b/y",
+            "rtsp://a:554/x,rtsp://u:p@b/y",
+        ):
+            with self.subTest(line=line):
+                self.assertIn(",", clean_camera_user_pass(line))
         self.assertNotIn(",", clean_camera_user_pass("rtsp://u:p,q@b/y"))
+
+    def test_long_line_masks_in_linear_time(self):
+        """Log lines run through the mask, so a long one must stay fast."""
+        start = time.perf_counter()
+        clean_camera_user_pass("rtsp://u:p" * 20000)
+        clean_camera_user_pass("rtsp://" + "a." * 40000)
+        self.assertLess(time.perf_counter() - start, 1)

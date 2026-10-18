@@ -117,10 +117,16 @@ SUPPORTED_RK_SOCS = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
 REGEX_RTSP_CAMERA_USER_PASS = r":\/\/[a-zA-Z0-9_-]+:[\S]+@"
-REGEX_URL_USERINFO = r"://(?:[^\s/:]*:\S*|[^\s/]+)@"
+# A "user:" userinfo may hold "/", "#" or "@" in the password, so it runs to the
+# last "@" before the next URL. A port after the colon is rejected so a bare
+# host:port/path@x is not taken for credentials. Anything else stops at the
+# authority end.
+REGEX_URL_USERINFO = (
+    r"://(?:[^\s/?#:\[\]]*:(?!\d+(?:[/?#,\s]|$))(?:(?!://)\S)*|[^\s/?#]+)@"
+)
 _CREDENTIAL_QUERY_KEYS = (
     r"(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd"
-    r"|[a-z_]*token|[a-z_]*secret|[a-z_]*private|api_?key|auth)"
+    r"|(?:[a-z_]*_)?token|(?:[a-z_]*_)?secret|client_private|api_?key)"
 )
 REGEX_CREDENTIAL_QUERY_PARAM = rf"(?i)([?&]{_CREDENTIAL_QUERY_KEYS}=)[^&\s]*"
 REGEX_MASKED_CREDENTIAL = rf"(?i)://\*:\*@|[?&]{_CREDENTIAL_QUERY_KEYS}=\*(?![^&\s])"
