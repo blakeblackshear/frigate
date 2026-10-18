@@ -118,7 +118,8 @@ auth:
   cookie_name: frigate_token
   # Optional: Set secure flag on cookie. (default: shown below)
   # NOTE: Frigate sets the flag automatically when serving TLS. Set this to True
-  # when a reverse proxy terminates TLS in front of Frigate
+  # when a reverse proxy terminates TLS in front of Frigate. A proxy that connects
+  # to the TLS port must serve Frigate to browsers over HTTPS
   cookie_secure: False
   # Optional: Session length in seconds (default: shown below)
   session_length: 86400 # 24 hours
