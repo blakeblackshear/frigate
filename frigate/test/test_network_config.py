@@ -36,6 +36,50 @@ class TestListenConfig(unittest.TestCase):
         self.assertEqual(listen.internal_port, 5001)
         self.assertEqual(listen.external_port, 8971)
 
+    def test_valid_listen_values_are_rebuilt(self):
+        cases = {
+            5000: 5000,
+            "5000": 5000,
+            "127.0.0.1:5000": "127.0.0.1:5000",
+            "0.0.0.0:5000": "0.0.0.0:5000",
+            "[::1]:5000": "[::1]:5000",
+            "[::]:5000": "[::]:5000",
+            "[2001:DB8:0:0::1]:5000": "[2001:db8::1]:5000",
+        }
+
+        for value, expected in cases.items():
+            with self.subTest(value=value):
+                listen = ListenConfig(internal=value)
+
+                self.assertEqual(listen.internal, expected)
+                self.assertEqual(listen.internal_port, 5000)
+
+    def test_invalid_listen_values_rejected(self):
+        cases = [
+            "5000; location /x/ { alias /; autoindex on; } #:5000",
+            "127.0.0.1:5000; include /etc/passwd",
+            "5000 ssl",
+            " 5000",
+            "5000;",
+            "5000\n",
+            "localhost:5000",
+            "::1:5000",
+            "[127.0.0.1]:5000",
+            "[fe80::1%eth0]:5000",
+            ":5000",
+            "127.0.0.1:",
+            "127.0.0.1:+5000",
+            "127.0.0.01:5000",
+            0,
+            65536,
+            -1,
+        ]
+
+        for value in cases:
+            with self.subTest(value=value):
+                with self.assertRaises(ValidationError):
+                    ListenConfig(internal=value)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
