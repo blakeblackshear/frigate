@@ -90,7 +90,6 @@ type MotionSearchViewProps = {
 };
 
 const DEFAULT_EXPORT_WINDOW_SECONDS = 60;
-const MAX_SEARCH_RANGE_HOURS = 48;
 const NO_REVIEW_EVENTS: ReviewSegment[] = [];
 
 export default function MotionSearchView({
@@ -858,16 +857,6 @@ export default function MotionSearchView({
 
     if (searchRange.before < searchRange.after) {
       toast.error(t("errors.invalidTimeRange"));
-      return;
-    }
-
-    if (
-      searchRange.before - searchRange.after >
-      MAX_SEARCH_RANGE_HOURS * 3600
-    ) {
-      toast.error(
-        t("errors.timeRangeTooLong", { hours: MAX_SEARCH_RANGE_HOURS }),
-      );
       return;
     }
 
