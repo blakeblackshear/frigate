@@ -360,6 +360,7 @@ For example, in Nginx:
 
 ```
 location /frigate {
+    proxy_set_header Host $host;
     proxy_set_header X-Ingress-Path /frigate;
     proxy_pass http://frigate_backend;
 }

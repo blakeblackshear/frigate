@@ -163,6 +163,7 @@ The settings below enabled connection upgrade, sets up logging (optional) and pr
   error_log /data/logs/proxy-host-40_error.log warn;
 
   location / {
+    proxy_set_header Host $host;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $http_connection;
     proxy_http_version 1.1;
