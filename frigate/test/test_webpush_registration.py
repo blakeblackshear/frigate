@@ -165,17 +165,40 @@ class TestBuildWebPushers(unittest.TestCase):
         self.assertEqual(len(pushers), 1)
         self.assertEqual(pushers[0].receiver_key, b"\x04" + bytes(64))
 
-    def test_skips_subscriptions_with_invalid_endpoints(self):
-        good = _subscription(VALID_ENDPOINTS[0])
-        good["keys"]["p256dh"] = urlsafe_b64encode(b"\x04" + bytes(64)).decode()
-        bad = dict(good, endpoint="https://./x")
+    def _valid_keys_subscription(self, endpoint: str) -> dict:
+        sub = _subscription(endpoint)
+        sub["keys"]["p256dh"] = urlsafe_b64encode(b"\x04" + bytes(64)).decode()
+        return sub
 
-        with self.assertLogs("frigate.comms.webpush", level="WARNING"):
-            pushers = _build_web_pushers("viewer", [bad, "not-a-dict", good])
+    def test_skips_stored_rows_that_break_the_audience(self):
+        good = self._valid_keys_subscription(VALID_ENDPOINTS[0])
+        rows = [
+            self._valid_keys_subscription("https://./secret-token"),
+            self._valid_keys_subscription("https://[::1/secret-token"),
+            {"keys": good["keys"]},
+            "not-a-dict",
+            good,
+        ]
 
+        with self.assertLogs("frigate.comms.webpush", level="WARNING") as logs:
+            pushers = _build_web_pushers("viewer", rows)
+
+        self.assertEqual(len(logs.output), 4)
+        self.assertIn("'.'", logs.output[0])
+        self.assertNotIn("secret-token", "".join(logs.output))
         self.assertEqual(len(pushers), 1)
         self.assertEqual(pushers[0].subscription_info["endpoint"], VALID_ENDPOINTS[0])
         self.assertIsInstance(pushers[0].mod_or_session, _NoRedirectSession)
+
+    def test_keeps_stored_self_hosted_endpoints(self):
+        rows = [
+            self._valid_keys_subscription("https://ntfy.example.com:8443/up123"),
+            self._valid_keys_subscription("https://ntfy.example.com/"),
+        ]
+
+        pushers = _build_web_pushers("viewer", rows)
+
+        self.assertEqual(len(pushers), 2)
 
 
 class TestVapidAudience(unittest.TestCase):

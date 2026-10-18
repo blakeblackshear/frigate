@@ -133,14 +133,29 @@ def _build_web_pushers(user: str, subs: list[dict[str, Any]]) -> list[WebPusher]
     pushers: list[WebPusher] = []
 
     for sub in subs:
-        # Rows stored before registration validation can hold any endpoint
-        reason = validate_push_endpoint(
-            sub.get("endpoint") if isinstance(sub, dict) else None
-        )
+        # Stored rows may predate registration validation, so only skip the
+        # endpoints that would break building the VAPID audience
+        endpoint = sub.get("endpoint") if isinstance(sub, dict) else None
 
-        if reason:
+        if not isinstance(endpoint, str):
             logger.warning(
-                "Skipping notification subscription for %s: %s", user, reason
+                "Skipping notification subscription for %s: no endpoint", user
+            )
+            continue
+
+        try:
+            hostname = urlparse(endpoint).hostname or ""
+        except ValueError:
+            logger.warning(
+                "Skipping notification subscription for %s: unparsable endpoint", user
+            )
+            continue
+
+        if "" in hostname.split("."):
+            logger.warning(
+                "Skipping notification subscription for %s: invalid endpoint host %r",
+                user,
+                hostname,
             )
             continue
 
