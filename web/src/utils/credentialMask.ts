@@ -2,7 +2,11 @@
 const CREDENTIAL_QUERY_KEYS =
   "(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd|(?:[a-z_]*_)?token|(?:[a-z_]*_)?secret|client_private|api_?key)";
 const URL_USERINFO_PATTERN =
-  /:\/\/(?:[^\s/?#:[\]]*:(?:(?!:\/\/)\S)*|[^\s/?#]+)@/g;
+  /:\/\/((?:[^\s/?#:[\]]*:(?:(?!:\/\/)\S)*|[^\s/?#]+))@((?:(?!:\/\/)\S)*)/g;
+const CREDENTIAL_QUERY_KEY_PATTERN = new RegExp(
+  `[?&]${CREDENTIAL_QUERY_KEYS}=`,
+  "i",
+);
 const CREDENTIAL_QUERY_PATTERN = new RegExp(
   `([?&]${CREDENTIAL_QUERY_KEYS}=)[^&\\s]*`,
   "gi",
@@ -21,7 +25,11 @@ export const maskCredentials = (value: string): string => {
   }
 
   return value
-    .replace(URL_USERINFO_PATTERN, "://*:*@")
+    .replace(URL_USERINFO_PATTERN, (_match, userinfo: string, rest: string) =>
+      CREDENTIAL_QUERY_KEY_PATTERN.test(userinfo)
+        ? "://*:*@"
+        : `://*:*@${rest}`,
+    )
     .replace(CREDENTIAL_QUERY_PATTERN, "$1*");
 };
 

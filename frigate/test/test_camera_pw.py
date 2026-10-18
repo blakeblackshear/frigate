@@ -64,8 +64,14 @@ class TestUserPassMasking(unittest.TestCase):
             "rtsp://admin:12#abc@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
             "rtsp://admin:7?x@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
             "rtsps://u:1/2@h/x": "rtsps://*:*@h/x",
-            "rtsp://admin:pre&token=suf@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
-            "rtsp://admin:a?pwd=b@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
+            "rtsp://admin:pre&token=suf@10.0.0.2/x": "rtsp://*:*@",
+            "rtsp://admin:a?pwd=b@10.0.0.2/x": "rtsp://*:*@",
+            "rtsp://10.0.0.2:554/live?password=pre@suf": "rtsp://*:*@",
+            "http://10.0.0.2:88/cgi?cmd=snap&usr=admin&pwd=P@ss": "http://*:*@",
+            "ffmpeg:http://h:80/flv?user=u&password=p@ss#video=copy": (
+                "ffmpeg:http://*:*@"
+            ),
+            "rtsp://u:p@10.0.0.2:554/live?token=t": "rtsp://*:*@10.0.0.2:554/live?token=*",
             "http://h/x?api_key=a&apikey=b&access_token=c": (
                 "http://h/x?api_key=*&apikey=*&access_token=*"
             ),

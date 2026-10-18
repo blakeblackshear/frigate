@@ -21,6 +21,7 @@ import numpy as np
 from ruamel.yaml import YAML
 
 from frigate.const import (
+    REGEX_CREDENTIAL_QUERY_KEY,
     REGEX_CREDENTIAL_QUERY_PARAM,
     REGEX_MASKED_CREDENTIAL,
     REGEX_RTSP_CAMERA_USER_PASS,
@@ -121,10 +122,17 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
 def clean_camera_user_pass(line: str) -> str:
     """Mask URL userinfo and credential query parameters in line."""
 
-    # Userinfo goes first so a credential key inside a password can't expose the
-    # rest of it. An "@" in a later query value only over-masks the host.
-    line = re.sub(REGEX_URL_USERINFO, "://*:*@", line)
+    line = re.sub(REGEX_URL_USERINFO, _mask_userinfo, line)
     return re.sub(REGEX_CREDENTIAL_QUERY_PARAM, r"\1*", line)
+
+
+def _mask_userinfo(match: re.Match[str]) -> str:
+    # A credential key in the userinfo means a query password holds "@" or a
+    # password holds a query key. Neither split is safe, so mask the whole URL.
+    if re.search(REGEX_CREDENTIAL_QUERY_KEY, match.group(1)):
+        return "://*:*@"
+
+    return f"://*:*@{match.group(2)}"
 
 
 def is_masked_camera_path(path: str) -> bool:
