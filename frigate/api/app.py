@@ -403,6 +403,19 @@ def config(request: Request):
 
         config["go2rtc"]["streams"][stream_name] = cleaned
 
+    for section in ("rtsp", "api"):
+        go2rtc_section = config["go2rtc"].get(section)
+        if isinstance(go2rtc_section, dict):
+            redact_credential(go2rtc_section, "username")
+            redact_credential(go2rtc_section, "password")
+
+    webrtc = config["go2rtc"].get("webrtc")
+    if isinstance(webrtc, dict):
+        for ice_server in webrtc.get("ice_servers") or []:
+            if isinstance(ice_server, dict):
+                redact_credential(ice_server, "username")
+                redact_credential(ice_server, "credential")
+
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
 
     for index, model in enumerate(config_obj.models):
@@ -788,9 +801,11 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
             _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
             updates = flatten_config_data(body.config_data)
             updates = {k: ("" if v is None else v) for k, v in updates.items()}
-            # Drop any field whose value is still the redaction sentinel
+            # Drop any field whose value still holds the redaction sentinel
             updates = {
-                k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL
+                k: v
+                for k, v in updates.items()
+                if REDACTED_CREDENTIAL_SENTINEL not in str(v)
             }
 
         if not updates:
@@ -948,11 +963,12 @@ def config_set(request: Request, body: AppConfigSetBody):
                     # Convert None values to empty strings for deletion (e.g., when deleting masks)
                     updates = {k: ("" if v is None else v) for k, v in updates.items()}
                     # Drop sentinel-valued fields so untouched credential
-                    # placeholders don't clobber the saved YAML value.
+                    # placeholders don't clobber the saved YAML value. Lists
+                    # are leaf values, so check for a sentinel nested inside.
                     updates = {
                         k: v
                         for k, v in updates.items()
-                        if v != REDACTED_CREDENTIAL_SENTINEL
+                        if REDACTED_CREDENTIAL_SENTINEL not in str(v)
                     }
 
                 if not updates:

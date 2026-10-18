@@ -14,6 +14,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.config.holder import ConfigHolder
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -564,6 +565,46 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             self.assertEqual(
                 saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"],
                 self.camera_path,
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_go2rtc_credentials_redacted_and_round_trip(self, mock_find_config):
+        self._add_credentials()
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                go2rtc = client.get("/config").json()["go2rtc"]
+                ice_server = go2rtc["webrtc"]["ice_servers"][0]
+
+                for section in ("rtsp", "api"):
+                    self.assertEqual(
+                        go2rtc[section]["username"], REDACTED_CREDENTIAL_SENTINEL
+                    )
+                    self.assertEqual(
+                        go2rtc[section]["password"], REDACTED_CREDENTIAL_SENTINEL
+                    )
+                self.assertEqual(ice_server["credential"], REDACTED_CREDENTIAL_SENTINEL)
+                self.assertEqual(ice_server["username"], REDACTED_CREDENTIAL_SENTINEL)
+                self.assertEqual(go2rtc["webrtc"]["candidates"], ["10.0.0.5:8555"])
+
+                resp = client.put(
+                    "/config/set",
+                    json={"config_data": {"go2rtc": go2rtc}, "requires_restart": 0},
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            raw, saved = self._read_config_file(config_path)
+            self.assertNotIn(REDACTED_CREDENTIAL_SENTINEL, raw)
+            self.assertEqual(saved["go2rtc"]["rtsp"]["password"], "rtsppass")
+            self.assertEqual(saved["go2rtc"]["api"]["password"], "apipass")
+            self.assertEqual(
+                saved["go2rtc"]["webrtc"]["ice_servers"][0]["credential"], "turnpass"
             )
         finally:
             os.unlink(config_path)
