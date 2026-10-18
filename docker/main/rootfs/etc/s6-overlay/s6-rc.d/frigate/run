@@ -32,9 +32,11 @@ set_libva_version
 # under $HOME/.local.
 run_as=()
 runtime_home="${HOME}"
-if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
-    run_as=(s6-setuidgid frigate)
+if [[ "$runs_as_root" -eq 0 ]]; then
     runtime_home=/config
+    if [[ "$(id -u)" -eq 0 ]]; then
+        run_as=(s6-setuidgid frigate)
+    fi
 fi
 run_as+=(env
     "HOME=${runtime_home}"
