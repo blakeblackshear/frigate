@@ -1017,7 +1017,7 @@ class RecordingMaintainer(threading.Thread):
                 except OSError:
                     segment_size = 0
 
-                os.remove(cache_path)
+                self.drop_segment(cache_path)
 
                 rand_id = "".join(
                     random.choices(string.ascii_lowercase + string.digits, k=6)
