@@ -623,6 +623,100 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             os.unlink(config_path)
 
     @patch("frigate.api.app.find_config_file")
+    def test_over_masked_path_round_trips(self, mock_find_config):
+        path = "rtsp://10.0.0.1:554/live?x=a@b"
+        self._set_inputs([(path, "detect")])
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                inputs = client.get("/config").json()["cameras"]["front_door"][
+                    "ffmpeg"
+                ]["inputs"]
+                self.assertNotEqual(inputs[0]["path"], path)
+
+                resp = self._save(
+                    client,
+                    {"cameras": {"front_door": {"ffmpeg": {"inputs": inputs}}}},
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            _, saved = self._read_config_file(config_path)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"], path
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_unrestorable_masked_values_are_rejected(self, mock_find_config):
+        self._add_credentials()
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                for name, request in (
+                    (
+                        "index-keyed inputs",
+                        {
+                            "json": {
+                                "config_data": {
+                                    "cameras": {
+                                        "front_door": {
+                                            "ffmpeg": {
+                                                "inputs": {
+                                                    "0": {"path": "rtsp://*:*@h/x"}
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "requires_restart": 0,
+                            }
+                        },
+                    ),
+                    (
+                        "go2rtc streams",
+                        {
+                            "json": {
+                                "config_data": {
+                                    "go2rtc": {"streams": {"cam": ["rtsp://*:*@h/x"]}}
+                                },
+                                "requires_restart": 0,
+                            }
+                        },
+                    ),
+                    (
+                        "query string",
+                        {
+                            "params": {
+                                "cameras.front_door.ffmpeg.inputs.0.path": (
+                                    "rtsp://*:*@h/x"
+                                ),
+                                "go2rtc.rtsp.password": REDACTED_CREDENTIAL_SENTINEL,
+                            },
+                            "json": {"requires_restart": 0},
+                        },
+                    ),
+                ):
+                    with self.subTest(name):
+                        resp = client.put("/config/set", **request)
+                        self.assertEqual(resp.status_code, 400)
+                        self.assertIn("credentials", resp.json()["message"])
+
+            raw, _ = self._read_config_file(config_path)
+            self.assertNotIn("*:*", raw)
+            self.assertNotIn(REDACTED_CREDENTIAL_SENTINEL, raw)
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
     def test_go2rtc_credentials_redacted_and_round_trip(self, mock_find_config):
         self._add_credentials()
         config_path = self._write_config_file()

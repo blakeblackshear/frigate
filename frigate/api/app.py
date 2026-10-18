@@ -943,10 +943,36 @@ def _config_data_to_updates(
     # clobber the saved YAML value.
     updates = {k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL}
 
-    if any(REDACTED_CREDENTIAL_SENTINEL in str(v) for v in updates.values()):
-        return {}, "Config contains saved credentials; resend with real values"
+    error = _find_masked_update(updates)
+    if error:
+        return {}, error
 
     return updates, None
+
+
+def _holds_masked_value(value: Any) -> bool:
+    if isinstance(value, str):
+        return REDACTED_CREDENTIAL_SENTINEL in value or is_masked_camera_path(value)
+    if isinstance(value, dict):
+        return any(_holds_masked_value(v) for v in value.values())
+    if isinstance(value, list):
+        return any(_holds_masked_value(v) for v in value)
+    return False
+
+
+def _find_masked_update(updates: dict[str, Any]) -> str | None:
+    """Return an error naming the first update that still holds a masked value.
+
+    Runs after the restores so a masked path or redaction sentinel that could
+    not be restored is never written over the real credential.
+    """
+    for key, value in updates.items():
+        if _holds_masked_value(value):
+            return (
+                f"{key} contains masked or saved credentials; "
+                "resend it with real values"
+            )
+    return None
 
 
 def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
@@ -1112,8 +1138,11 @@ def config_set(request: Request, body: AppConfigSetBody):
                 # Filter out empty keys but keep blank values for non-empty keys
                 query_string = {k: v for k, v in query_string.items() if k}
 
+                error = None
+
                 if query_string:
                     updates = process_config_query_string(query_string)
+                    error = _find_masked_update(updates)
                 elif body.config_data:
                     try:
                         saved_config = ruamel.yaml.YAML(typ="safe").load(old_raw_config)
@@ -1123,11 +1152,12 @@ def config_set(request: Request, body: AppConfigSetBody):
                         body.config_data,
                         saved_config if isinstance(saved_config, dict) else {},
                     )
-                    if error:
-                        return JSONResponse(
-                            content={"success": False, "message": error},
-                            status_code=400,
-                        )
+
+                if error:
+                    return JSONResponse(
+                        content={"success": False, "message": error},
+                        status_code=400,
+                    )
 
                 if not updates:
                     return JSONResponse(
