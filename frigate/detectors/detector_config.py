@@ -219,11 +219,18 @@ class ModelConfig(BaseModel):
 
         self.width = model_info["width"]
         self.height = model_info["height"]
-        self.input_tensor = InputTensorEnum(model_info["inputShape"])
-        self.input_pixel_format = PixelFormatEnum(model_info["pixelFormat"])
         self.model_type = ModelTypeEnum(model_info["type"])
 
-        if model_info.get("inputDataType"):
+        # An explicitly configured input format wins over the model metadata.
+        set_by_user = self.model_fields_set
+
+        if "input_tensor" not in set_by_user:
+            self.input_tensor = InputTensorEnum(model_info["inputShape"])
+
+        if "input_pixel_format" not in set_by_user:
+            self.input_pixel_format = PixelFormatEnum(model_info["pixelFormat"])
+
+        if model_info.get("inputDataType") and "input_dtype" not in set_by_user:
             self.input_dtype = InputDTypeEnum(model_info["inputDataType"])
 
         # RKNN always uses NHWC
