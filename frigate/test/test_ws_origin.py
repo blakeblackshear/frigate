@@ -1,16 +1,21 @@
-"""Tests for the WebSocket handshake Origin check."""
+"""Tests for the same-origin check on WebSocket handshakes."""
 
 import unittest
 from unittest.mock import MagicMock
 
-from frigate.comms.ws import (
-    OriginCheckedWebSocketApplication,
-    WebSocket,
-    ws_origin_allowed,
-)
+from frigate.comms.ws import OriginCheckedWebSocketApplication, WebSocket
+from frigate.util.origin import origin_allowed
 
 
-class TestWsOriginAllowed(unittest.TestCase):
+def ws_origin_allowed(environ: dict[str, str]) -> bool:
+    return origin_allowed(
+        environ.get("HTTP_ORIGIN"),
+        environ.get("HTTP_HOST"),
+        environ.get("HTTP_X_FORWARDED_HOST"),
+    )
+
+
+class TestOriginAllowed(unittest.TestCase):
     def test_missing_origin_allowed(self):
         self.assertTrue(ws_origin_allowed({"HTTP_HOST": "frigate.lan"}))
 

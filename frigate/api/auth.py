@@ -39,6 +39,7 @@ from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 from frigate.notices import raise_notice
+from frigate.util.origin import origin_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -689,6 +690,17 @@ def auth(request: Request):
 
     success_response = Response("", status_code=202)
 
+    original_url = request.headers.get("x-original-url")
+
+    if _is_cross_origin_stream_request(original_url, request):
+        logger.warning(
+            "Rejected cross-origin request: origin=%s, host=%s, x-forwarded-host=%s",
+            request.headers.get("origin"),
+            request.headers.get("x-original-host"),
+            request.headers.get("x-forwarded-host"),
+        )
+        return Response("", status_code=403)
+
     # dont require auth if the request is on the internal port
     # this header is set by Frigate's nginx proxy, so it cant be spoofed.
     # the port is the boot-time snapshot rather than the live config value:
@@ -712,7 +724,6 @@ def auth(request: Request):
         logger.debug("X-Proxy-Secret header does not match configured secret value")
         return fail_response
 
-    original_url = request.headers.get("x-original-url")
     frigate_config = request.app.frigate_config
 
     # if auth is disabled, just apply the proxy header map and return success
@@ -1283,6 +1294,22 @@ def _is_go2rtc_stream_proxy_request(path: str, request: Request) -> bool:
 
     normalized = normalize_request_path(path)
     return any(normalized.startswith(p) for p in GO2RTC_STREAM_PROXY_PATHS)
+
+
+def _is_cross_origin_stream_request(original_url: str | None, request: Request) -> bool:
+    # the internal port grants admin, so a browser on another site must be
+    # stopped before that early return
+    upgrade = request.headers.get("x-original-upgrade", "").lower()
+    if upgrade != "websocket" and not _is_go2rtc_stream_proxy_request(
+        original_url or "", request
+    ):
+        return False
+
+    return not origin_allowed(
+        request.headers.get("origin"),
+        request.headers.get("x-original-host"),
+        request.headers.get("x-forwarded-host"),
+    )
 
 
 def deny_response_for_go2rtc_stream(

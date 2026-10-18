@@ -9,7 +9,6 @@ import struct
 import threading
 from collections.abc import Callable
 from typing import Any
-from urllib.parse import urlsplit
 from wsgiref.simple_server import make_server
 
 from ws4py.server.wsgirefserver import (
@@ -41,6 +40,7 @@ from frigate.const import (
 )
 from frigate.models import User
 from frigate.output.ws_auth import ws_has_camera_access
+from frigate.util.origin import origin_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -473,39 +473,15 @@ def _materialize_for_ws(
     return None
 
 
-def _hostname(value: str) -> str | None:
-    try:
-        return urlsplit(value).hostname
-    except ValueError:
-        return None
-
-
-def ws_origin_allowed(environ: dict[str, Any]) -> bool:
-    """Return True unless a browser opened the handshake from a foreign origin.
-
-    Browsers always send Origin on a WebSocket handshake, so a missing Origin
-    means a non-browser client. A page cannot add headers to a handshake, so
-    X-Forwarded-Host comes from a proxy. Ports are ignored because nginx
-    forwards Host without one.
-    """
-    origin = environ.get("HTTP_ORIGIN")
-    if origin is None:
-        return True
-
-    origin_host = _hostname(origin)
-    if not origin_host:
-        return False
-
-    forwarded_host = environ.get("HTTP_X_FORWARDED_HOST", "").split(",")[0].strip()
-    hosts = (forwarded_host, environ.get("HTTP_HOST", ""))
-    return any(origin_host == _hostname(f"//{host}") for host in hosts if host)
-
-
 class OriginCheckedWebSocketApplication(WebSocketWSGIApplication):  # type: ignore[misc]
     """ws4py application that rejects cross-origin browser handshakes."""
 
     def __call__(self, environ: dict[str, Any], start_response: Callable) -> Any:
-        if not ws_origin_allowed(environ):
+        if not origin_allowed(
+            environ.get("HTTP_ORIGIN"),
+            environ.get("HTTP_HOST"),
+            environ.get("HTTP_X_FORWARDED_HOST"),
+        ):
             logger.warning(
                 "Rejected cross-origin websocket handshake: origin=%s, host=%s, "
                 "x-forwarded-host=%s",
