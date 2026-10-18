@@ -4,6 +4,7 @@ import logging
 import os
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from peewee import DoesNotExist
@@ -193,9 +194,10 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             logger.debug("Recognizer not initialized")
             return None
 
-        try:  # type: ignore[unreachable]
-            # Save audio data to a temporary wav (faster-whisper expects a file)
-            temp_wav = os.path.join(CACHE_DIR, f"temp_audio_{int(time.time())}.wav")
+        # Save audio data to a temporary wav (faster-whisper expects a file)
+        temp_wav = os.path.join(CACHE_DIR, f"temp_audio_{int(time.time())}.wav")  # type: ignore[unreachable]
+
+        try:
             with open(temp_wav, "wb") as f:
                 f.write(audio_data)
 
@@ -204,8 +206,6 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
                 language=resolve_language(self.config.audio_transcription.language),
                 beam_size=5,
             )
-
-            os.remove(temp_wav)
 
             # Combine all segment texts
             text = " ".join(segment.text.strip() for segment in segments)
@@ -222,6 +222,8 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         except Exception as e:
             logger.error(f"Error transcribing audio: {e}")
             return None
+        finally:
+            Path(temp_wav).unlink(missing_ok=True)
 
     def _transcription_wrapper(self, event: dict[str, Any]) -> None:
         """Wrapper to run transcription and reset running flag when done."""
