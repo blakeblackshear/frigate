@@ -14,8 +14,7 @@ fi
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
-# This runs as root before any /config path enters the environment; -I skips
-# the user site-packages under $HOME
+# Runs as root with root's HOME and LD_LIBRARY_PATH; -I skips user site-packages
 function set_libva_version() {
     local ffmpeg_path
     ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py)
@@ -45,7 +44,7 @@ run_as+=(env
 
 # opt out of openvino telemetry; the marker lands under the service's HOME
 if [ -e /usr/local/bin/opt_in_out ]; then
-  "${run_as[@]}" /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1
+  "${run_as[@]}" /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1 || true
 fi
 
 echo "[INFO] Starting Frigate..."

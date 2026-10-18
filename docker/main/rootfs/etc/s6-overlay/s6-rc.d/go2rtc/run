@@ -66,23 +66,18 @@ function set_libva_version() {
 
 set_libva_version
 
-if [[ -e "/dev/shm/go2rtc.yaml" || -L "/dev/shm/go2rtc.yaml" ]]; then
-    echo "[INFO] Removing stale config from last run..."
-    rm /dev/shm/go2rtc.yaml
+# create_config.py creates the file exclusively and fails if anything
+# reappears at this path
+rm -f /dev/shm/go2rtc.yaml
+
+echo "[INFO] Preparing new go2rtc config..."
+
+if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
+    # Running as a Home Assistant Add-on, infer the IP address and port
+    get_ip_and_port_from_supervisor
 fi
 
-if [[ ! -f "/dev/shm/go2rtc.yaml" ]]; then
-    echo "[INFO] Preparing new go2rtc config..."
-
-    if [[ -n "${SUPERVISOR_TOKEN:-}" ]]; then
-        # Running as a Home Assistant Add-on, infer the IP address and port
-        get_ip_and_port_from_supervisor
-    fi
-
-    python3 -I /usr/local/go2rtc/create_config.py
-else
-    echo "[WARNING] Unable to remove existing go2rtc config. Changes made to your frigate config file may not be recognized. Please remove the /dev/shm/go2rtc.yaml from your docker host manually."
-fi
+python3 -I /usr/local/go2rtc/create_config.py
 
 # HomeKit persistence. The helper is symlink-safe; hand off to go2rtc only when dropping.
 readonly homekit_config_path="/config/go2rtc_homekit.yml"
