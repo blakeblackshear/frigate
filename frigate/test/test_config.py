@@ -11,6 +11,7 @@ from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.util.builtin import deep_merge
+from frigate.util.config import resolve_ffmpeg_path
 
 
 class TestConfig(unittest.TestCase):
@@ -1763,6 +1764,55 @@ class TestAttributeFilterDefaults(unittest.TestCase):
         config = self._build_config({"face": {"min_score": 0.3}})
         face_filter = config.objects.filters["face"]
         self.assertEqual(face_filter.min_score, 0.3)
+
+
+class TestFfmpegPath(unittest.TestCase):
+    # ffmpeg commands are split on spaces, so this would run /bin/sh
+    UNSAFE_PATH = "/bin/sh -c id;#"
+
+    def setUp(self):
+        self.minimal = {
+            "mqtt": {"host": "mqtt"},
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                }
+            },
+        }
+
+    def test_custom_path_allowed(self):
+        config = deep_merge(
+            {"ffmpeg": {"path": "/usr/lib/jellyfin-ffmpeg"}}, self.minimal
+        )
+        frigate_config = FrigateConfig(**config)
+        self.assertEqual(
+            frigate_config.cameras["back"].ffmpeg.ffmpeg_path,
+            "/usr/lib/jellyfin-ffmpeg/bin/ffmpeg",
+        )
+
+    def test_unsafe_global_path_rejected(self):
+        for path in (self.UNSAFE_PATH, "/opt/my ffmpeg", "/opt/'x'", "/opt/x\n"):
+            config = deep_merge({"ffmpeg": {"path": path}}, self.minimal)
+            with self.assertRaises(ValidationError, msg=path):
+                FrigateConfig(**config)
+
+    def test_unsafe_camera_path_rejected(self):
+        config = deep_merge(
+            {"cameras": {"back": {"ffmpeg": {"path": self.UNSAFE_PATH}}}},
+            self.minimal,
+        )
+        with self.assertRaises(ValidationError):
+            FrigateConfig(**config)
+
+    def test_resolve_falls_back_for_unsafe_path(self):
+        self.assertEqual(
+            resolve_ffmpeg_path(self.UNSAFE_PATH), resolve_ffmpeg_path("default")
+        )
 
 
 if __name__ == "__main__":

@@ -85,6 +85,23 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
                 headers={"Content-Type": "text/plain"},
             )
 
+    def _set_go2rtc(self, go2rtc: dict):
+        with AuthTestClient(self.app) as client:
+            return client.put(
+                "/config/set",
+                json={"config_data": {"go2rtc": go2rtc}, "requires_restart": 1},
+            )
+
+    def _save_go2rtc(self, go2rtc: dict):
+        config = copy.deepcopy(_CONFIG)
+        config["go2rtc"].update(go2rtc)
+        with AuthTestClient(self.app) as client:
+            return client.post(
+                "/config/save?save_option=saveonly",
+                content=_dump(config),
+                headers={"Content-Type": "text/plain"},
+            )
+
     # --- config/set ---
 
     def test_set_rejects_injected_ffmpeg_source(self):
@@ -215,3 +232,84 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
             resp = self._set_streams({"new_stream": [src]})
         assert resp.status_code == 200, resp.text
         assert src in self._read_config()
+
+    # --- go2rtc ffmpeg and ngrok options ---
+
+    def test_save_rejects_ffmpeg_bin_override(self):
+        before = self._read_config()
+        resp = self._save_go2rtc({"ffmpeg": {"bin": "/bin/sh", "global": "-c 'id' x"}})
+        assert resp.status_code == 400
+        assert resp.json()["message"] == (
+            "Restricted go2rtc option: ffmpeg.bin, ffmpeg.global"
+        )
+        assert self._read_config() == before
+
+    def test_set_rejects_ffmpeg_bin_override(self):
+        before = self._read_config()
+        resp = self._set_go2rtc({"ffmpeg": {"bin": "/bin/sh"}})
+        assert resp.status_code == 400
+        assert self._read_config() == before
+
+    def test_save_rejects_ffmpeg_template_override(self):
+        before = self._read_config()
+        resp = self._save_go2rtc({"ffmpeg": {"rtsp": "-i {input} -y /config/x"}})
+        assert resp.status_code == 400
+        assert "ffmpeg.rtsp" in resp.json()["message"]
+        assert self._read_config() == before
+
+    def test_set_rejects_custom_ffmpeg_template(self):
+        # a stream can reference any template key with #video=<name>
+        before = self._read_config()
+        resp = self._set_go2rtc({"ffmpeg": {"evil": "-y /config/x"}})
+        assert resp.status_code == 400
+        assert self._read_config() == before
+
+    def test_save_rejects_ngrok(self):
+        before = self._read_config()
+        resp = self._save_go2rtc({"ngrok": {"command": "/bin/sh -c id"}})
+        assert resp.status_code == 400
+        assert resp.json()["message"] == "Restricted go2rtc option: ngrok.command"
+        assert self._read_config() == before
+
+    def test_set_rejects_ngrok(self):
+        before = self._read_config()
+        resp = self._set_go2rtc({"ngrok": {"command": "/bin/sh -c id"}})
+        assert resp.status_code == 400
+        assert self._read_config() == before
+
+    def test_save_keeps_existing_ffmpeg_template_on_disk(self):
+        go2rtc = {"ffmpeg": {"global": "-vaapi_device /dev/dri/renderD128"}}
+        config = copy.deepcopy(_CONFIG)
+        config["go2rtc"].update(go2rtc)
+        with open(self.config_path, "w") as f:
+            f.write(_dump(config))
+
+        resp = self._save_go2rtc(go2rtc)
+        assert resp.status_code == 200, resp.text
+
+        resp = self._save_go2rtc({"ffmpeg": {"global": "-hide_banner"}})
+        assert resp.status_code == 400
+
+    def test_exec_options_allowed_when_override_set(self):
+        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+            resp = self._save_go2rtc(
+                {
+                    "ffmpeg": {"bin": "/usr/bin/ffmpeg", "rtsp": "-i {input}"},
+                    "ngrok": {"command": "ngrok tcp 8555"},
+                }
+            )
+        assert resp.status_code == 200, resp.text
+        assert "ngrok tcp 8555" in self._read_config()
+
+    def test_save_rejects_unsafe_ffmpeg_path(self):
+        before = self._read_config()
+        config = copy.deepcopy(_CONFIG)
+        config["ffmpeg"] = {"path": "/bin/sh -c id;#"}
+        with AuthTestClient(self.app) as client:
+            resp = client.post(
+                "/config/save?save_option=saveonly",
+                content=_dump(config),
+                headers={"Content-Type": "text/plain"},
+            )
+        assert resp.status_code == 400
+        assert self._read_config() == before
