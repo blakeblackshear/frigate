@@ -8,7 +8,7 @@ from collections.abc import Callable, Generator, Iterable
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 
 import cv2
 import numpy as np
@@ -17,10 +17,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import STREAM_TYPE_MAIN, UPDATE_JOB_STATE
 from frigate.jobs.job import Job
-from frigate.jobs.manager import (
-    get_job_by_id,
-    set_current_job,
-)
 from frigate.jobs.motion_search_batch import (
     build_segment_time_map,
     coalesce_runs,
@@ -53,6 +49,10 @@ PROGRESS_BROADCAST_INTERVAL = 1.0
 # Output frame rate for the fixed-cadence fallback used on long-GOP cameras
 # (where keyframe sampling is too sparse). Keyframe cameras ignore this.
 FALLBACK_SAMPLE_FPS = 2.0
+# Each parallel job runs up to 4 decode workers, so this bounds total ffmpeg load.
+MAX_ACTIVE_JOBS = 3
+# Finished jobs stay pollable for this long before eviction (seconds).
+FINISHED_JOB_TTL = 600.0
 
 
 @dataclass
@@ -98,6 +98,7 @@ class MotionSearchJob(Job):
     min_area: float = 5.0
     parallel: bool = False
     max_results: int = 25
+    username: str = ""
 
     # Track progress
     total_frames_processed: int = 0
@@ -112,6 +113,7 @@ class MotionSearchJob(Job):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for WebSocket transmission."""
         d = asdict(self)
+        d.pop("username")
         if self.metrics:
             d["metrics"] = self.metrics.to_dict()
         return d
@@ -833,9 +835,27 @@ class MotionSearchRunner(threading.Thread):
         return deduplicated
 
 
-# Module-level state for managing per-camera jobs
+class MotionSearchUserBusyError(Exception):
+    """The user already has an active motion search job."""
+
+
+class MotionSearchCapacityError(Exception):
+    """The global limit of active motion search jobs is reached."""
+
+
 _motion_search_jobs: dict[str, tuple[MotionSearchJob, threading.Event]] = {}
 _jobs_lock = threading.Lock()
+
+
+def _evict_finished_jobs(now: float) -> None:
+    """Drop jobs that finished more than FINISHED_JOB_TTL ago. Caller holds the lock."""
+    expired = [
+        job_id
+        for job_id, (job, _) in _motion_search_jobs.items()
+        if job.end_time is not None and now - job.end_time > FINISHED_JOB_TTL
+    ]
+    for job_id in expired:
+        del _motion_search_jobs[job_id]
 
 
 def stop_all_motion_search_jobs() -> None:
@@ -857,10 +877,12 @@ def start_motion_search_job(
     min_area: float = 5.0,
     parallel: bool = False,
     max_results: int = 25,
+    username: str = "",
 ) -> str:
     """Start a new motion search job.
 
-    Returns the job ID.
+    Returns the job ID. Raises MotionSearchUserBusyError when the user already
+    has an active job and MotionSearchCapacityError when MAX_ACTIVE_JOBS are active.
     """
     job = MotionSearchJob(
         camera=camera_name,
@@ -871,14 +893,23 @@ def start_motion_search_job(
         min_area=min_area,
         parallel=parallel,
         max_results=max_results,
+        username=username,
     )
 
     cancel_event = threading.Event()
 
     with _jobs_lock:
-        _motion_search_jobs[job.id] = (job, cancel_event)
+        _evict_finished_jobs(datetime.now().timestamp())
 
-    set_current_job(job)
+        # A cancelled job keeps its thread until the runner sets end_time, so
+        # count threads rather than statuses.
+        active = [j for j, _ in _motion_search_jobs.values() if j.end_time is None]
+        if any(j.username == username for j in active):
+            raise MotionSearchUserBusyError()
+        if len(active) >= MAX_ACTIVE_JOBS:
+            raise MotionSearchCapacityError()
+
+        _motion_search_jobs[job.id] = (job, cancel_event)
 
     runner = MotionSearchRunner(job, config, cancel_event)
     runner.start()
@@ -904,10 +935,7 @@ def get_motion_search_job(job_id: str) -> MotionSearchJob | None:
     """Get a motion search job by ID."""
     with _jobs_lock:
         job_entry = _motion_search_jobs.get(job_id)
-        if job_entry:
-            return job_entry[0]
-    # Check completed jobs via manager
-    return cast(MotionSearchJob | None, get_job_by_id("motion_search", job_id))
+    return job_entry[0] if job_entry else None
 
 
 def cancel_motion_search_job(job_id: str) -> bool:

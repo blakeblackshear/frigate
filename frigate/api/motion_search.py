@@ -10,6 +10,8 @@ from pydantic import BaseModel, Field
 from frigate.api.auth import require_camera_access
 from frigate.api.defs.tags import Tags
 from frigate.jobs.motion_search import (
+    MotionSearchCapacityError,
+    MotionSearchUserBusyError,
     cancel_motion_search_job,
     get_motion_search_job,
     start_motion_search_job,
@@ -19,6 +21,9 @@ from frigate.types import JobStatusTypesEnum
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.motion_search])
+
+# Covers the UI's day windows (25 h on a DST fall-back day) with room to spare.
+MAX_SEARCH_RANGE_SECONDS = 48 * 3600
 
 
 class MotionSearchRequest(BaseModel):
@@ -138,18 +143,44 @@ async def start_motion_search(
             status_code=400,
         )
 
-    # Start the job using the jobs module
-    job_id = start_motion_search_job(
-        config=config,
-        camera_name=camera_name,
-        start_time=body.start_time,
-        end_time=body.end_time,
-        polygon_points=body.polygon_points,
-        threshold=body.threshold,
-        min_area=body.min_area,
-        parallel=body.parallel,
-        max_results=body.max_results,
-    )
+    if body.end_time - body.start_time > MAX_SEARCH_RANGE_SECONDS:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Time range must be 48 hours or less",
+            },
+            status_code=400,
+        )
+
+    try:
+        job_id = start_motion_search_job(
+            config=config,
+            camera_name=camera_name,
+            start_time=body.start_time,
+            end_time=body.end_time,
+            polygon_points=body.polygon_points,
+            threshold=body.threshold,
+            min_area=body.min_area,
+            parallel=body.parallel,
+            max_results=body.max_results,
+            username=request.headers.get("remote-user", "anonymous"),
+        )
+    except MotionSearchUserBusyError:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "A motion search is already running for this user",
+            },
+            status_code=409,
+        )
+    except MotionSearchCapacityError:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Too many motion searches are running",
+            },
+            status_code=429,
+        )
 
     return JSONResponse(
         content={
