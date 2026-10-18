@@ -1046,10 +1046,8 @@ class RecordingMaintainer(threading.Thread):
                 }
         except Exception:
             logger.exception(f"Unable to store recording segment {cache_path}")
-            Path(cache_path).unlink(missing_ok=True)
 
-        # clear end_time cache
-        self.end_time_cache.pop(cache_path, None)
+        self.drop_segment(cache_path)
         return None
 
     def run(self) -> None:
