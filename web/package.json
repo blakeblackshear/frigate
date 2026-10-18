@@ -127,7 +127,6 @@
   },
   "overrides": {
     "@radix-ui/react-compose-refs": "1.1.2",
-    "@radix-ui/react-popper": "1.2.8",
     "@radix-ui/react-slot": "1.5.0"
   }
 }
