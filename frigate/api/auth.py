@@ -1300,9 +1300,8 @@ def _is_cross_origin_stream_request(original_url: str | None, request: Request) 
     # the internal port grants admin, so a browser on another site must be
     # stopped before that early return
     upgrade = request.headers.get("x-original-upgrade", "").lower()
-    if upgrade != "websocket" and not _is_go2rtc_stream_proxy_request(
-        original_url or "", request
-    ):
+    path = split_request_uri(original_url or "")[0]
+    if upgrade != "websocket" and not _is_go2rtc_stream_proxy_request(path, request):
         return False
 
     return not origin_allowed(
