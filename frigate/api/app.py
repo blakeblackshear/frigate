@@ -403,18 +403,7 @@ def config(request: Request):
 
         config["go2rtc"]["streams"][stream_name] = cleaned
 
-    for section in ("rtsp", "api"):
-        go2rtc_section = config["go2rtc"].get(section)
-        if isinstance(go2rtc_section, dict):
-            redact_credential(go2rtc_section, "username")
-            redact_credential(go2rtc_section, "password")
-
-    webrtc = config["go2rtc"].get("webrtc")
-    if isinstance(webrtc, dict):
-        for ice_server in webrtc.get("ice_servers") or []:
-            if isinstance(ice_server, dict):
-                redact_credential(ice_server, "username")
-                redact_credential(ice_server, "credential")
+    _redact_go2rtc_credentials(config["go2rtc"])
 
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
 
@@ -440,6 +429,35 @@ def config(request: Request):
             model_dict["plus"] = load_plus_model_info(os.path.basename(model.path))
 
     return JSONResponse(content=config)
+
+
+def _redact_go2rtc_credentials(go2rtc: dict[str, Any]) -> None:
+    """Redact go2rtc secrets outside of stream URLs, in place."""
+    for section in ("rtsp", "api", "mqtt"):
+        if isinstance(go2rtc.get(section), dict):
+            redact_credential(go2rtc[section], "username")
+            redact_credential(go2rtc[section], "password")
+
+    if isinstance(go2rtc.get("ngrok"), dict):
+        redact_credential(go2rtc["ngrok"], "command")
+
+    if isinstance(go2rtc.get("homekit"), dict):
+        for accessory in go2rtc["homekit"].values():
+            if isinstance(accessory, dict):
+                for key in ("pin", "device_private", "pairings"):
+                    redact_credential(accessory, key)
+
+    # publish destinations carry stream keys in the URL path
+    if isinstance(go2rtc.get("publish"), dict):
+        for name in list(go2rtc["publish"]):
+            redact_credential(go2rtc["publish"], name)
+
+    webrtc = go2rtc.get("webrtc")
+    if isinstance(webrtc, dict):
+        for ice_server in webrtc.get("ice_servers") or []:
+            if isinstance(ice_server, dict):
+                redact_credential(ice_server, "username")
+                redact_credential(ice_server, "credential")
 
 
 @router.get("/profiles", dependencies=[Depends(allow_any_authenticated())])
@@ -756,17 +774,21 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> None:
-    """Substitute incoming `*:*` masked credentials with the in-memory ones.
+def _restore_masked_camera_paths(
+    config_data: dict, config: FrigateConfig
+) -> str | None:
+    """Substitute incoming masked camera paths with the in-memory ones.
 
     The /config response masks ffmpeg input credentials, so the settings UI
     sends the masked path back when sibling fields (e.g. hwaccel_args) are
-    edited.  Without this we'd write `rtsp://*:*@host` into YAML and lose
-    the real credentials.  Mutates `config_data` in place.
+    edited. Each masked path is matched to the existing input that masks to
+    the same value, with roles breaking a tie, so deleting or reordering inputs
+    keeps each path's own credentials. Mutates `config_data` in place and
+    returns an error message when a masked path has no single match.
     """
     cameras = config_data.get("cameras")
     if not isinstance(cameras, dict):
-        return
+        return None
 
     for camera_name, camera_data in cameras.items():
         if not isinstance(camera_data, dict):
@@ -775,17 +797,109 @@ def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> No
         if not isinstance(inputs, list):
             continue
         existing = config.cameras.get(camera_name)
-        if existing is None:
-            continue
-        existing_paths = [inp.path for inp in existing.ffmpeg.inputs]
+        existing_inputs = existing.ffmpeg.inputs if existing else []
+
         for index, input_obj in enumerate(inputs):
             if not isinstance(input_obj, dict):
                 continue
             path = input_obj.get("path")
-            if not isinstance(path, str):
+            if not isinstance(path, str) or not is_masked_camera_path(path):
                 continue
-            if is_masked_camera_path(path) and index < len(existing_paths):
-                input_obj["path"] = existing_paths[index]
+            candidates = [
+                inp
+                for inp in existing_inputs
+                if clean_camera_user_pass(inp.path) == path
+            ]
+            if len({inp.path for inp in candidates}) > 1:
+                candidates = [
+                    inp for inp in candidates if inp.roles == input_obj.get("roles")
+                ]
+            real_paths = {inp.path for inp in candidates}
+            if len(real_paths) != 1:
+                return (
+                    f"Input {index} of camera {camera_name} has masked credentials "
+                    "that could not be matched; resend it with real credentials"
+                )
+            input_obj["path"] = real_paths.pop()
+
+    return None
+
+
+def _restore_redacted_ice_servers(
+    config_data: dict, saved_go2rtc: dict[str, Any]
+) -> str | None:
+    """Fill redacted ICE server fields from the saved server with the same urls.
+
+    Lists are written whole, so the sentinel can't be dropped per field like
+    other redacted credentials. Mutates `config_data` in place and returns an
+    error message when a redacted server has no saved match.
+    """
+    go2rtc = config_data.get("go2rtc")
+    webrtc = go2rtc.get("webrtc") if isinstance(go2rtc, dict) else None
+    ice_servers = webrtc.get("ice_servers") if isinstance(webrtc, dict) else None
+    if not isinstance(ice_servers, list):
+        return None
+
+    saved_webrtc = saved_go2rtc.get("webrtc")
+    saved_servers = (
+        saved_webrtc.get("ice_servers") or [] if isinstance(saved_webrtc, dict) else []
+    )
+
+    for server in ice_servers:
+        if (
+            not isinstance(server, dict)
+            or REDACTED_CREDENTIAL_SENTINEL not in server.values()
+        ):
+            continue
+        match = next(
+            (
+                saved
+                for saved in saved_servers
+                if isinstance(saved, dict) and saved.get("urls") == server.get("urls")
+            ),
+            None,
+        )
+        if match is None:
+            return (
+                "An ICE server contains saved credentials but its urls changed; "
+                "resend it with real values"
+            )
+        for key, value in list(server.items()):
+            if value != REDACTED_CREDENTIAL_SENTINEL:
+                continue
+            if key in match:
+                server[key] = match[key]
+            else:
+                del server[key]
+
+    return None
+
+
+def _config_data_to_updates(
+    config_data: dict, config: FrigateConfig, saved_go2rtc: dict[str, Any]
+) -> tuple[dict[str, Any], str | None]:
+    """Flatten a /config/set payload after restoring masked credentials.
+
+    Returns the flat updates, or an error message when a masked or redacted
+    value can't be restored.
+    """
+    error = _restore_masked_camera_paths(
+        config_data, config
+    ) or _restore_redacted_ice_servers(config_data, saved_go2rtc)
+    if error:
+        return {}, error
+
+    updates = flatten_config_data(config_data)
+    # Convert None values to empty strings for deletion (e.g., when deleting masks)
+    updates = {k: ("" if v is None else v) for k, v in updates.items()}
+    # Drop sentinel-valued fields so untouched credential placeholders don't
+    # clobber the saved YAML value.
+    updates = {k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL}
+
+    if any(REDACTED_CREDENTIAL_SENTINEL in str(v) for v in updates.values()):
+        return {}, "Config contains saved credentials; resend with real values"
+
+    return updates, None
 
 
 def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
@@ -798,15 +912,17 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
     try:
         updates = {}
         if body.config_data:
-            _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
-            updates = flatten_config_data(body.config_data)
-            updates = {k: ("" if v is None else v) for k, v in updates.items()}
-            # Drop any field whose value still holds the redaction sentinel
-            updates = {
-                k: v
-                for k, v in updates.items()
-                if REDACTED_CREDENTIAL_SENTINEL not in str(v)
-            }
+            updates, error = _config_data_to_updates(
+                body.config_data,
+                request.app.frigate_config,
+                request.app.frigate_config.go2rtc.model_dump(
+                    mode="json", warnings="none"
+                ),
+            )
+            if error:
+                return JSONResponse(
+                    content={"success": False, "message": error}, status_code=400
+                )
 
         if not updates:
             return JSONResponse(
@@ -956,20 +1072,23 @@ def config_set(request: Request, body: AppConfigSetBody):
                 if query_string:
                     updates = process_config_query_string(query_string)
                 elif body.config_data:
-                    _restore_masked_camera_paths(
-                        body.config_data, request.app.frigate_config
+                    try:
+                        saved_config = ruamel.yaml.YAML(typ="safe").load(old_raw_config)
+                    except ruamel.yaml.YAMLError:
+                        saved_config = None
+                    saved_go2rtc = (
+                        saved_config.get("go2rtc") or {}
+                        if isinstance(saved_config, dict)
+                        else {}
                     )
-                    updates = flatten_config_data(body.config_data)
-                    # Convert None values to empty strings for deletion (e.g., when deleting masks)
-                    updates = {k: ("" if v is None else v) for k, v in updates.items()}
-                    # Drop sentinel-valued fields so untouched credential
-                    # placeholders don't clobber the saved YAML value. Lists
-                    # are leaf values, so check for a sentinel nested inside.
-                    updates = {
-                        k: v
-                        for k, v in updates.items()
-                        if REDACTED_CREDENTIAL_SENTINEL not in str(v)
-                    }
+                    updates, error = _config_data_to_updates(
+                        body.config_data, request.app.frigate_config, saved_go2rtc
+                    )
+                    if error:
+                        return JSONResponse(
+                            content={"success": False, "message": error},
+                            status_code=400,
+                        )
 
                 if not updates:
                     return JSONResponse(
