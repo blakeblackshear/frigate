@@ -66,7 +66,7 @@ function set_libva_version() {
 
 set_libva_version
 
-if [[ -f "/dev/shm/go2rtc.yaml" ]]; then
+if [[ -e "/dev/shm/go2rtc.yaml" || -L "/dev/shm/go2rtc.yaml" ]]; then
     echo "[INFO] Removing stale config from last run..."
     rm /dev/shm/go2rtc.yaml
 fi
@@ -88,7 +88,7 @@ fi
 readonly homekit_config_path="/config/go2rtc_homekit.yml"
 if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
     python3 /usr/local/go2rtc/prepare_homekit.py "${homekit_config_path}" --chown
-    chown go2rtc:go2rtc /dev/shm/go2rtc.yaml 2>/dev/null || true
+    chown -h go2rtc:go2rtc /dev/shm/go2rtc.yaml 2>/dev/null || true
 else
     python3 /usr/local/go2rtc/prepare_homekit.py "${homekit_config_path}"
 fi
