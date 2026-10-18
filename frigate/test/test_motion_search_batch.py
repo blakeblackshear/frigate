@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from frigate.jobs.motion_search_batch import (
     build_segment_time_map,
     coalesce_runs,
-    keyframes_cover_stream,
     stream_time_to_absolute,
 )
 
@@ -57,17 +56,3 @@ class TestTimestampMapping(unittest.TestCase):
         run = [_Seg("a", 1000.0, 1010.0)]
         time_map = build_segment_time_map(run)
         self.assertAlmostEqual(stream_time_to_absolute(time_map, 9.9), 1009.9)
-
-
-class TestKeyframesCoverStream(unittest.TestCase):
-    def test_dense_keyframes_cover(self):
-        self.assertTrue(keyframes_cover_stream([0.5, 2.5, 4.5, 6.5, 8.5], 10.0, 5.0))
-
-    def test_gap_from_skipped_segment(self):
-        self.assertFalse(keyframes_cover_stream([0.5, 2.5, 12.5, 14.5], 20.0, 5.0))
-
-    def test_truncated_tail(self):
-        self.assertFalse(keyframes_cover_stream([0.5, 2.5, 4.5], 20.0, 5.0))
-
-    def test_empty(self):
-        self.assertFalse(keyframes_cover_stream([], 10.0, 5.0))

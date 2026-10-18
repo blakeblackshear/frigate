@@ -73,14 +73,3 @@ def stream_time_to_absolute(
         idx = 0
     stream_offset, abs_start, _duration = time_map[idx]
     return abs_start + (stream_time - stream_offset)
-
-
-def keyframes_cover_stream(pts: list[float], duration: float, max_hole: float) -> bool:
-    """True if sorted keyframe ``pts`` span 0..``duration`` with no gap over ``max_hole``.
-
-    A segment skipped or cut short by a read timeout leaves such a gap.
-    """
-    if not pts:
-        return False
-    edges = [0.0, *pts, duration]
-    return max(b - a for a, b in zip(edges, edges[1:])) <= max_hole

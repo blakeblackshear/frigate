@@ -23,9 +23,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.motion_search])
 
-# Covers the UI's day windows (25 h on a DST fall-back day) with room to spare.
-MAX_SEARCH_RANGE_SECONDS = 48 * 3600
-
 
 class MotionSearchRequest(BaseModel):
     """Request body for motion search."""
@@ -154,15 +151,6 @@ async def start_motion_search(
             content={
                 "success": False,
                 "message": "Start time must be before end time",
-            },
-            status_code=400,
-        )
-
-    if body.end_time - body.start_time > MAX_SEARCH_RANGE_SECONDS:
-        return JSONResponse(
-            content={
-                "success": False,
-                "message": f"Time range must be {MAX_SEARCH_RANGE_SECONDS // 3600} hours or less",
             },
             status_code=400,
         )

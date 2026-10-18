@@ -1,6 +1,5 @@
 """Tests for the motion search hardware-accelerated decode helpers."""
 
-import io
 import subprocess as sp
 import unittest
 from types import SimpleNamespace
@@ -9,7 +8,6 @@ from unittest import mock
 from frigate.jobs.motion_search_decode import (
     KEYFRAME_MAX_GAP_SECONDS,
     build_vod_decode_command,
-    iter_vod_frames,
     keyframe_sampling_eligible,
     probe_video_dimensions,
     probe_vod_keyframe_pts,
@@ -104,7 +102,6 @@ class TestVodDecodeCommand(unittest.TestCase):
         joined = " ".join(cmd)
         self.assertIn("-skip_frame nokey", joined)
         self.assertIn("-protocol_whitelist pipe,file,http,tcp", joined)
-        self.assertLess(cmd.index("-rw_timeout"), cmd.index("-i"))
         self.assertIn(f"-i {self.URL}", joined)
         self.assertIn("crop=100:80:10:20", joined)
         self.assertIn("scale=50:40", joined)
@@ -143,44 +140,6 @@ class TestVodDecodeCommand(unittest.TestCase):
         self.assertIn("format=nv12", joined)
 
 
-class TestVodDecodeSkippedSegment(unittest.TestCase):
-    def _decode(self, stderr_output: bytes) -> list:
-        def popen(cmd, stdout, stderr):
-            stderr.write(stderr_output)
-            return mock.Mock(stdout=io.BytesIO(b"\0" * 8))
-
-        with (
-            mock.patch("frigate.jobs.motion_search_decode.sp.Popen", side_effect=popen),
-            mock.patch("frigate.jobs.motion_search_decode.terminate_ffmpeg_stream"),
-        ):
-            return list(
-                iter_vod_frames(
-                    "ffmpeg",
-                    "http://x/index.m3u8",
-                    2,
-                    2,
-                    1,
-                    [],
-                    None,
-                    None,
-                    True,
-                    lambda: False,
-                    skip_nonkey=False,
-                    fps_rate=2.0,
-                )
-            )
-
-    def test_clean_decode_returns_frames(self):
-        self.assertEqual(len(self._decode(b"")), 2)
-
-    def test_skipped_segment_raises(self):
-        stderr = (
-            b"[hls @ 0x1] Segment 1 of playlist 0 failed too many times, skipping\n"
-        )
-        with self.assertRaises(RuntimeError):
-            self._decode(stderr)
-
-
 class TestProbeVodKeyframePts(unittest.TestCase):
     def _proc(self, stdout="", returncode=0):
         proc = mock.Mock(returncode=returncode)
@@ -197,13 +156,11 @@ class TestProbeVodKeyframePts(unittest.TestCase):
         with mock.patch(
             "frigate.jobs.motion_search_decode.sp.Popen",
             return_value=self._proc(sample),
-        ) as popen:
+        ):
             pts = probe_vod_keyframe_pts(
                 "ffprobe", "http://x/index.m3u8", lambda: False
             )
         self.assertEqual(pts, [0.0, 2.0])
-        cmd = popen.call_args.args[0]
-        self.assertLess(cmd.index("-rw_timeout"), cmd.index("-i"))
 
     def test_returns_empty_on_failure(self):
         with mock.patch(
@@ -237,10 +194,9 @@ class TestProbeVideoDimensions(unittest.TestCase):
         completed = mock.Mock(stdout=sample, returncode=0)
         with mock.patch(
             "frigate.jobs.motion_search_decode.sp.run", return_value=completed
-        ) as run:
+        ):
             dims = probe_video_dimensions("ffprobe", "/tmp/a.mp4")
         assert dims is not None
-        self.assertIn("-rw_timeout", run.call_args.args[0])
         width, height, fps = dims
         self.assertEqual((width, height), (1920, 1080))
         self.assertAlmostEqual(fps, 29.97, places=2)

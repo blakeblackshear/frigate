@@ -97,14 +97,6 @@ class TestHttpMotionSearch(BaseTestHttp):
                 self.assertEqual(self.start(client, f"user{i}").status_code, 200)
             self.assertEqual(self.start(client, "late").status_code, 429)
 
-    def test_over_long_range_rejected(self):
-        body = {**BODY, "end_time": BODY["start_time"] + 48 * 3600 + 1}
-        with AuthTestClient(self.app) as client:
-            resp = self.start(client, "alice", body)
-
-        self.assertEqual(resp.status_code, 400)
-        self.assertEqual(motion_search._motion_search_jobs, {})
-
     def test_finished_jobs_evicted_after_ttl(self):
         with AuthTestClient(self.app) as client:
             old_id = self.start(client, "alice").json()["job_id"]

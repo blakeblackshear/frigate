@@ -107,16 +107,7 @@ def keyframe_sampling_eligible(
     return max(gaps) <= max_gap
 
 
-# rw_timeout (microseconds) ends a stalled VOD read instead of blocking forever.
-# The HLS demuxer logs this at warning level when a segment read fails or times out.
-HLS_SEGMENT_SKIPPED = b"failed too many times, skipping"
-
-VOD_PROTOCOL_ARGS = [
-    "-protocol_whitelist",
-    "pipe,file,http,tcp",
-    "-rw_timeout",
-    "30000000",
-]
+VOD_PROTOCOL_ARGS = ["-protocol_whitelist", "pipe,file,http,tcp"]
 
 
 def build_vod_decode_command(
@@ -153,7 +144,7 @@ def build_vod_decode_command(
         filters.append(f"scale={sw}:{sh}")
 
     pix_fmt = "gray" if gray else "bgr24"
-    cmd = [ffmpeg_path, "-hide_banner", "-loglevel", "warning"]
+    cmd = [ffmpeg_path, "-hide_banner", "-loglevel", "error"]
     if skip_nonkey:
         cmd += ["-skip_frame", "nokey"]
     cmd += [*decode_args, *VOD_PROTOCOL_ARGS, "-i", vod_url, "-an"]
@@ -215,12 +206,7 @@ def _run_vod_decode(
             yield frame
     finally:
         terminate_ffmpeg_stream(proc)
-        stderr_file.seek(0)
-        segment_skipped = HLS_SEGMENT_SKIPPED in stderr_file.read()
         stderr_file.close()
-
-    if segment_skipped and not should_stop():
-        raise RuntimeError("VOD decode skipped a segment that failed to load")
 
     if count == 0 and software_retry and not should_stop():
         logger.warning("Hardware VOD decode produced no frames, retrying in software")
@@ -355,7 +341,6 @@ def probe_video_dimensions(
         ffprobe_path,
         "-v",
         "error",
-        *VOD_PROTOCOL_ARGS,
         "-select_streams",
         "v:0",
         "-show_entries",
