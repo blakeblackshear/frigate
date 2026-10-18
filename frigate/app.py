@@ -622,6 +622,7 @@ class FrigateApp:
                     username="admin",
                     role="admin",
                     password_hash=password_hash,
+                    password_changed_at=datetime.datetime.now(),
                     notification_tokens=[],
                 ).execute()
 
