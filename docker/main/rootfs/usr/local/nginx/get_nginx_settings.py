@@ -36,26 +36,28 @@ ipv6_config.setdefault("enabled", False)
 
 listen_config: dict[str, Any] = networking_config.get("listen", {})
 
-# Frigate's own validation runs elsewhere, and a bad or colliding value here must
-# not stop nginx from serving the safe-mode UI, which uses the default ports
-listen_defaults = {"internal": 5000, "external": 8971}
+# Frigate's own validation runs elsewhere, and a bad value here must not stop nginx
+# from serving the safe-mode UI. Valid values are kept so a fallback never widens
+# the unauthenticated internal listener beyond the configured address.
+for key, default in (("internal", 5000), ("external", 8971)):
+    try:
+        value, port = parse_listen_address(listen_config.get(key, default))
+    except ValueError:
+        print(
+            f"[WARN] Invalid networking.listen.{key}, using {default}",
+            file=sys.stderr,
+        )
+        value, port = default, default
 
-try:
-    listen_parsed = {
-        key: parse_listen_address(listen_config.get(key, default))
-        for key, default in listen_defaults.items()
-    }
-    if listen_parsed["internal"][1] == listen_parsed["external"][1]:
-        raise ValueError("internal and external share a port")
-except ValueError as e:
-    print(f"[WARN] Invalid networking.listen ({e}), using defaults", file=sys.stderr)
-    listen_parsed = {
-        key: (default, default) for key, default in listen_defaults.items()
-    }
-
-for key, (value, port) in listen_parsed.items():
     listen_config[key] = value
     listen_config[f"{key}_port"] = port
+
+if listen_config["internal_port"] == listen_config["external_port"]:
+    print(
+        "[ERROR] networking.listen.internal and external share a port",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 base_path = os.environ.get("FRIGATE_BASE_PATH", "")
 
