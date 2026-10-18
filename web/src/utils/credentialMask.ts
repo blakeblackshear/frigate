@@ -2,7 +2,7 @@
 const CREDENTIAL_QUERY_KEYS =
   "(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd|(?:[a-z_]*_)?token|(?:[a-z_]*_)?secret|client_private|api_?key)";
 const URL_USERINFO_PATTERN =
-  /:\/\/(?:[^\s/?#:[\]]*:(?!\d+(?:[/?#,\s]|$))(?:(?!:\/\/)\S)*|[^\s/?#]+)@/g;
+  /:\/\/(?:[^\s/?#:[\]]*:(?:(?!:\/\/)\S)*|[^\s/?#]+)@/g;
 const CREDENTIAL_QUERY_PATTERN = new RegExp(
   `([?&]${CREDENTIAL_QUERY_KEYS}=)[^&\\s]*`,
   "gi",

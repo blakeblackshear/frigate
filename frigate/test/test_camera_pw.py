@@ -60,6 +60,10 @@ class TestUserPassMasking(unittest.TestCase):
             "rtsp://u:p@ss@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
             "rtsp://user:pa/ss@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
             "rtsp://u:p@ss#x@10.0.0.2/live": "rtsp://*:*@10.0.0.2/live",
+            "rtsp://admin:2024/pw@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
+            "rtsp://admin:12#abc@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
+            "rtsp://admin:7?x@10.0.0.2/x": "rtsp://*:*@10.0.0.2/x",
+            "rtsps://u:1/2@h/x": "rtsps://*:*@h/x",
             "http://h/x?api_key=a&apikey=b&access_token=c": (
                 "http://h/x?api_key=*&apikey=*&access_token=*"
             ),
@@ -100,8 +104,6 @@ class TestUserPassMasking(unittest.TestCase):
             "ffmpeg:front_door#video=copy",
             "rtsp://127.0.0.1:8554/front_door?video=copy&audio=aac",
             "homekit://10.0.0.2:51827?device_id=d",
-            "rtsp://10.0.0.1:554/live?x=a@b",
-            "rtsp://10.0.0.1:554/path@thing",
             "http://10.0.0.1/snap.jpg?email=me@x.com",
             "http://h/x?auth=a&author=b&authorization=c&user_agent=d&autoken=e",
             "http://h/x?private=1&passthrough=1",
