@@ -52,7 +52,11 @@ class BaseLocalDetector(ObjectDetector):
         else:
             self.labels = load_labels(labels)
 
-        if detector_config and detector_config.model:
+        # When the transform is offloaded, the detector applies the model's
+        # layout and dtype itself and takes the frame as captured: uint8 NHWC.
+        offload_transform = getattr(detector_config, "offload_input_transform", False)
+
+        if detector_config and detector_config.model and not offload_transform:
             self.input_transform = tensor_transform(detector_config.model.input_tensor)
             self.dtype = detector_config.model.input_dtype
         else:

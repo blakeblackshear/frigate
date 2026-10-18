@@ -39,6 +39,11 @@ class ZmqDetectorConfig(BaseDetectorConfig):
         title="ZMQ socket linger in milliseconds",
         description="Socket linger period in milliseconds.",
     )
+    offload_input_transform: bool = Field(
+        default=False,
+        title="Offload input transform",
+        description="Send the frame without the model's tensor and dtype transform pre-applied, for detectors that support transform acceleration.",
+    )
 
 
 class ZmqIpcDetector(DetectionApi):
@@ -53,6 +58,12 @@ class ZmqIpcDetector(DetectionApi):
           "shape": List[int],
           "dtype": str,  # numpy dtype string, e.g. "uint8", "float32"
         }
+      and, when offload_input_transform is set, also:
+        {
+          "input_tensor": str,  # InputTensorEnum value, e.g. "nhwc", "nchw"
+          "input_dtype": str,   # InputDTypeEnum value: "float", "float_denorm", "int"
+        }
+      which describe the transform the receiver is expected to apply.
       tensor_bytes are the raw bytes of the numpy array in C-order.
 
     - Response is expected to be either:
@@ -77,6 +88,7 @@ class ZmqIpcDetector(DetectionApi):
         self._endpoint = detector_config.endpoint
         self._request_timeout_ms = detector_config.request_timeout_ms
         self._linger_ms = detector_config.linger_ms
+        self._offload_input_transform = detector_config.offload_input_transform
         self._socket = None
         self._create_socket()
 
@@ -272,6 +284,11 @@ class ZmqIpcDetector(DetectionApi):
             "dtype": str(tensor_input.dtype.name),
             "model_type": str(self.detector_config.model.model_type.name),
         }
+
+        if self._offload_input_transform:
+            header["input_tensor"] = self.detector_config.model.input_tensor.value
+            header["input_dtype"] = self.detector_config.model.input_dtype.value
+
         return json.dumps(header).encode("utf-8")
 
     def _decode_response(self, frames: list[bytes]) -> np.ndarray:
