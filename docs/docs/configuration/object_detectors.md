@@ -394,6 +394,22 @@ Note that the labelmap uses a subset of the complete COCO label set that has onl
 
 Support for AMD GPUs is provided using the [ONNX detector](#onnx). In order to utilize the AMD GPU for object detection use a frigate docker image with `-rocm` suffix, for example `ghcr.io/blakeblackshear/frigate:stable-rocm`.
 
+### Supported GPUs {#supported-gpus-rocm}
+
+The `-rocm` image includes ROCm support for these GPU chipsets, which work without any chipset override:
+
+| Chipset                                      | Example GPUs                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| gfx1030 (RDNA2)                              | Radeon RX 6800 / 6800 XT / 6900 XT / 6950 XT, Radeon PRO W6800           |
+| gfx1100, gfx1101, gfx1102 (RDNA3)            | Radeon RX 7900 / 7800 / 7700 / 7600 series, Radeon PRO W7000 series      |
+| gfx1103 (RDNA3 integrated)                   | Radeon 780M / 760M in Ryzen 7040, 8040, 8000G, and 200 series processors |
+| gfx1150, gfx1151, gfx1152, gfx1153 (RDNA3.5) | Integrated GPUs in Ryzen AI 300 / 400 series and Ryzen AI Max processors |
+| gfx1200, gfx1201 (RDNA4)                     | Radeon RX 9060 / 9070 series, Radeon AI PRO R9700                        |
+
+Other RDNA2 GPUs (gfx1031 through gfx1036), such as the Radeon RX 6700 / 6600 / 6500 series and the Radeon 680M / 660M integrated GPUs, run on the gfx1030 support by [overriding the chipset](#docker-settings-for-overriding-the-gpu-chipset) to `10.3.0`.
+
+Older GPUs, including RDNA1 (Radeon RX 5000 series) and Vega based dedicated and integrated GPUs, are not supported.
+
 ### Docker settings for GPU access
 
 ROCm needs access to the `/dev/kfd` and `/dev/dri` devices. When docker or frigate is not run under root then also `video` (and possibly `render` and `ssl/_ssl`) groups should be added.
@@ -420,19 +436,10 @@ For reference on recommended settings see [running ROCm/pytorch in Docker](https
 
 ### Docker settings for overriding the GPU chipset
 
-Your GPU might work just fine without any special configuration but in many cases they need manual settings. AMD/ROCm software stack comes with a limited set of GPU drivers and for newer or missing models you will have to override the chipset version to an older/generic version to get things working.
-
-Also AMD/ROCm does not "officially" support integrated GPUs. It still does work with most of them just fine but requires special settings. One has to configure the `HSA_OVERRIDE_GFX_VERSION` environment variable. See the [ROCm bug report](https://github.com/ROCm/ROCm/issues/1743) for context and examples.
-
-For the rocm frigate build there is some automatic detection:
-
-- gfx1031 -> 10.3.0
-- gfx1103 -> 11.0.0
-
-If you have something else you might need to override the `HSA_OVERRIDE_GFX_VERSION` at Docker launch. Suppose the version you want is `10.0.0`, then you should configure it from command line as:
+A GPU whose chipset isn't in the [supported GPUs](#supported-gpus-rocm) list can run on the support for a closely related chipset by setting the `HSA_OVERRIDE_GFX_VERSION` environment variable. RDNA2 GPUs other than gfx1030 (gfx1031 through gfx1036) need this, using `10.3.0`:
 
 ```bash
-$ docker run -e HSA_OVERRIDE_GFX_VERSION=10.0.0 \
+$ docker run -e HSA_OVERRIDE_GFX_VERSION=10.3.0 \
     ...
 ```
 
@@ -443,16 +450,17 @@ services:
   frigate:
     ...
     environment:
-      HSA_OVERRIDE_GFX_VERSION: "10.0.0"
+      HSA_OVERRIDE_GFX_VERSION: "10.3.0"
 ```
 
-Figuring out what version you need can be complicated as you can't tell the chipset name and driver from the AMD brand name.
+GPUs in the supported list don't need an override. An override that was set for the Radeon 780M / 760M (gfx1103) on an earlier version of Frigate is no longer needed and can be removed.
 
-- first make sure that rocm environment is running properly by running `/opt/rocm/bin/rocminfo` in the frigate container -- it should list both the CPU and the GPU with their properties
-- find the chipset version you have (gfxNNN) from the output of the `rocminfo` (see below)
-- use a search engine to query what `HSA_OVERRIDE_GFX_VERSION` you need for the given gfx name ("gfxNNN ROCm HSA_OVERRIDE_GFX_VERSION")
-- override the `HSA_OVERRIDE_GFX_VERSION` with relevant value
-- if things are not working check the frigate docker logs
+You can't tell the chipset from the AMD brand name, so check it in the container:
+
+- first make sure that the ROCm environment is running properly by running `/opt/rocm/bin/rocminfo` in the Frigate container. It should list both the CPU and the GPU with their properties
+- find the chipset version you have (gfxNNN) from the output of `rocminfo` (see below)
+- if the chipset isn't in the supported list, set `HSA_OVERRIDE_GFX_VERSION` to the closest supported chipset, written as major.minor.stepping (for example gfx1030 is `10.3.0`)
+- if things are not working check the Frigate docker logs
 
 #### Figuring out if AMD/ROCm is working and found your GPU
 
