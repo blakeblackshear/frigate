@@ -2,6 +2,7 @@
 
 import os
 import time
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import MagicMock, Mock, patch
 
@@ -178,8 +179,28 @@ class TestAuthJwtRole(BaseTestHttp):
             for source in ("bearer", "cookie"):
                 self.assertEqual(self._auth(client, old_token, source).status_code, 401)
 
-            resp = self._auth(client, self._token(app, "bob", "garage"))
+            changed_at = app.user_sessions["bob"][1]
+            resp = self._auth(client, self._token(app, "bob", "garage", changed_at))
             self.assertEqual(resp.status_code, 202)
+
+    def test_password_change_revokes_token_from_the_same_second(self):
+        app = self._create_app()
+        changed_at = datetime.now().replace(microsecond=500000)
+        old_token = self._token(app, "bob", "garage", iat=int(changed_at.timestamp()))
+
+        with (
+            patch("frigate.api.auth.datetime") as mock_datetime,
+            AuthTestClient(app) as client,
+        ):
+            mock_datetime.now.return_value = changed_at
+            resp = client.put(
+                "/users/bob/password",
+                json={"password": "a-brand-new-password"},
+            )
+            self.assertEqual(resp.status_code, 200)
+
+            for source in ("bearer", "cookie"):
+                self.assertEqual(self._auth(client, old_token, source).status_code, 401)
 
     def test_own_password_change_cookie_stays_valid(self):
         app = self._create_app()
