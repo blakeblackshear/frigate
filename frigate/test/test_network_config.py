@@ -45,6 +45,12 @@ class TestListenConfig(unittest.TestCase):
             "[::1]:5000": "[::1]:5000",
             "[::]:5000": "[::]:5000",
             "[2001:DB8:0:0::1]:5000": "[2001:db8::1]:5000",
+            " 5000 ": 5000,
+            "5000\n": 5000,
+            " 127.0.0.1:5000 ": "127.0.0.1:5000",
+            "localhost:5000": "localhost:5000",
+            "frigate-host.lan:5000": "frigate-host.lan:5000",
+            "*:5000": "*:5000",
         }
 
         for value, expected in cases.items():
@@ -59,23 +65,40 @@ class TestListenConfig(unittest.TestCase):
             "5000; location /x/ { alias /; autoindex on; } #:5000",
             "127.0.0.1:5000; include /etc/passwd",
             "5000 ssl",
-            " 5000",
             "5000;",
-            "5000\n",
-            "localhost:5000",
             "::1:5000",
             "[127.0.0.1]:5000",
             "[fe80::1%eth0]:5000",
+            "local host:5000",
+            "localhost;:5000",
+            "local{host}:5000",
+            "host#:5000",
+            "'localhost':5000",
+            '"localhost":5000',
+            "-host:5000",
+            "host-:5000",
+            "host..lan:5000",
+            "**:5000",
+            "*.lan:5000",
+            "unix:/tmp/sock:5000",
+            "5000 5001",
             ":5000",
             "127.0.0.1:",
             "127.0.0.1:+5000",
-            "127.0.0.01:5000",
             0,
             65536,
             -1,
         ]
 
         for value in cases:
+            with self.subTest(value=value):
+                with self.assertRaises(ValidationError):
+                    ListenConfig(internal=value)
+
+    def test_bool_listen_value_rejected(self):
+        # get_nginx_settings.py sees the raw bool and falls back to the default,
+        # so accepting it as port 1 would split nginx and the auth port check
+        for value in (True, False):
             with self.subTest(value=value):
                 with self.assertRaises(ValidationError):
                     ListenConfig(internal=value)

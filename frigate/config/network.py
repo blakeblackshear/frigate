@@ -27,7 +27,9 @@ class ListenConfig(FrigateBaseModel):
         description="External listening port for Frigate (default 8971).",
     )
 
-    @field_validator("internal", "external")
+    # Runs before pydantic coerces a bool to an int port, which
+    # get_nginx_settings.py rejects when it reads the raw YAML
+    @field_validator("internal", "external", mode="before")
     @classmethod
     def validate_listen(cls, value: int | str) -> int | str:
         return parse_listen_address(value)[0]
