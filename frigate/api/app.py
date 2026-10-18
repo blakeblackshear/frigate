@@ -45,6 +45,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
+from frigate.config.env import substitute_frigate_vars
 from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
 from frigate.genai import PROVIDERS, load_providers
@@ -774,21 +775,24 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-def _restore_masked_camera_paths(
-    config_data: dict, config: FrigateConfig
-) -> str | None:
-    """Substitute incoming masked camera paths with the in-memory ones.
+def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
+    """Substitute incoming masked camera paths with the saved ones.
 
     The /config response masks ffmpeg input credentials, so the settings UI
     sends the masked path back when sibling fields (e.g. hwaccel_args) are
-    edited. Each masked path is matched to the existing input that masks to
-    the same value, with roles breaking a tie, so deleting or reordering inputs
-    keeps each path's own credentials. Mutates `config_data` in place and
+    edited. Each masked path is matched to the saved input that masks to the
+    same value, with roles breaking a tie, so deleting or reordering inputs
+    keeps each path's own credentials. The saved path is restored as written,
+    keeping any {FRIGATE_*} placeholder. Mutates `config_data` in place and
     returns an error message when a masked path has no single match.
     """
     cameras = config_data.get("cameras")
     if not isinstance(cameras, dict):
         return None
+
+    saved_cameras = saved.get("cameras")
+    if not isinstance(saved_cameras, dict):
+        saved_cameras = {}
 
     for camera_name, camera_data in cameras.items():
         if not isinstance(camera_data, dict):
@@ -796,8 +800,19 @@ def _restore_masked_camera_paths(
         inputs = camera_data.get("ffmpeg", {}).get("inputs")
         if not isinstance(inputs, list):
             continue
-        existing = config.cameras.get(camera_name)
-        existing_inputs = existing.ffmpeg.inputs if existing else []
+
+        saved_camera = saved_cameras.get(camera_name)
+        saved_ffmpeg = (
+            saved_camera.get("ffmpeg") if isinstance(saved_camera, dict) else None
+        )
+        saved_inputs = [
+            inp
+            for inp in (
+                saved_ffmpeg.get("inputs") if isinstance(saved_ffmpeg, dict) else None
+            )
+            or []
+            if isinstance(inp, dict) and isinstance(inp.get("path"), str)
+        ]
 
         for index, input_obj in enumerate(inputs):
             if not isinstance(input_obj, dict):
@@ -807,14 +822,16 @@ def _restore_masked_camera_paths(
                 continue
             candidates = [
                 inp
-                for inp in existing_inputs
-                if clean_camera_user_pass(inp.path) == path
+                for inp in saved_inputs
+                if clean_camera_user_pass(_resolve_frigate_vars(inp["path"])) == path
             ]
-            if len({inp.path for inp in candidates}) > 1:
+            if len({inp["path"] for inp in candidates}) > 1:
                 candidates = [
-                    inp for inp in candidates if inp.roles == input_obj.get("roles")
+                    inp
+                    for inp in candidates
+                    if inp.get("roles") == input_obj.get("roles")
                 ]
-            real_paths = {inp.path for inp in candidates}
+            real_paths = {inp["path"] for inp in candidates}
             if len(real_paths) != 1:
                 return (
                     f"Input {index} of camera {camera_name} has masked credentials "
@@ -823,6 +840,32 @@ def _restore_masked_camera_paths(
             input_obj["path"] = real_paths.pop()
 
     return None
+
+
+def _resolve_frigate_vars(value: str) -> str:
+    """Resolve {FRIGATE_*} placeholders the way /config shows them."""
+    try:
+        return substitute_frigate_vars(value)
+    except (KeyError, ValueError):
+        return value
+
+
+def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
+    """Shape the in-memory camera inputs and go2rtc like the saved YAML."""
+    return {
+        "cameras": {
+            name: {
+                "ffmpeg": {
+                    "inputs": [
+                        {"path": inp.path, "roles": [role.value for role in inp.roles]}
+                        for inp in camera.ffmpeg.inputs
+                    ]
+                }
+            }
+            for name, camera in config.cameras.items()
+        },
+        "go2rtc": config.go2rtc.model_dump(mode="json", warnings="none"),
+    }
 
 
 def _restore_redacted_ice_servers(
@@ -876,16 +919,20 @@ def _restore_redacted_ice_servers(
 
 
 def _config_data_to_updates(
-    config_data: dict, config: FrigateConfig, saved_go2rtc: dict[str, Any]
+    config_data: dict, saved: dict[str, Any]
 ) -> tuple[dict[str, Any], str | None]:
     """Flatten a /config/set payload after restoring masked credentials.
 
-    Returns the flat updates, or an error message when a masked or redacted
-    value can't be restored.
+    `saved` is the config the masked values were taken from. Returns the flat
+    updates, or an error message when a masked or redacted value can't be
+    restored.
     """
+    saved_go2rtc = saved.get("go2rtc")
     error = _restore_masked_camera_paths(
-        config_data, config
-    ) or _restore_redacted_ice_servers(config_data, saved_go2rtc)
+        config_data, saved
+    ) or _restore_redacted_ice_servers(
+        config_data, saved_go2rtc if isinstance(saved_go2rtc, dict) else {}
+    )
     if error:
         return {}, error
 
@@ -913,11 +960,7 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
         updates = {}
         if body.config_data:
             updates, error = _config_data_to_updates(
-                body.config_data,
-                request.app.frigate_config,
-                request.app.frigate_config.go2rtc.model_dump(
-                    mode="json", warnings="none"
-                ),
+                body.config_data, _saved_config_from_memory(request.app.frigate_config)
             )
             if error:
                 return JSONResponse(
@@ -1076,13 +1119,9 @@ def config_set(request: Request, body: AppConfigSetBody):
                         saved_config = ruamel.yaml.YAML(typ="safe").load(old_raw_config)
                     except ruamel.yaml.YAMLError:
                         saved_config = None
-                    saved_go2rtc = (
-                        saved_config.get("go2rtc") or {}
-                        if isinstance(saved_config, dict)
-                        else {}
-                    )
                     updates, error = _config_data_to_updates(
-                        body.config_data, request.app.frigate_config, saved_go2rtc
+                        body.config_data,
+                        saved_config if isinstance(saved_config, dict) else {},
                     )
                     if error:
                         return JSONResponse(

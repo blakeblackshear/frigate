@@ -584,6 +584,44 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             {"path": path, "roles": [role]} for path, role in paths
         ]
 
+    @patch.dict(
+        "frigate.config.env.FRIGATE_ENV_VARS", {"FRIGATE_RTSP_PASSWORD": "s3cret"}
+    )
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_path_keeps_env_placeholder(self, mock_find_config):
+        path = "rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.0.0.1:554/live"
+        self._set_inputs([(path, "detect")])
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                camera = client.get("/config").json()["cameras"]["front_door"]
+                self.assertNotIn("s3cret", str(camera))
+
+                resp = self._save(
+                    client,
+                    {
+                        "cameras": {
+                            "front_door": {
+                                "ffmpeg": {"inputs": camera["ffmpeg"]["inputs"]},
+                                "detect": {"fps": 7},
+                            }
+                        }
+                    },
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            raw, saved = self._read_config_file(config_path)
+            self.assertNotIn("s3cret", raw)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"], path
+            )
+        finally:
+            os.unlink(config_path)
+
     @patch("frigate.api.app.find_config_file")
     def test_go2rtc_credentials_redacted_and_round_trip(self, mock_find_config):
         self._add_credentials()
