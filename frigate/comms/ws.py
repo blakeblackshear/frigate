@@ -483,10 +483,10 @@ def _hostname(value: str) -> str | None:
 def ws_origin_allowed(environ: dict[str, Any]) -> bool:
     """Return True unless a browser opened the handshake from a foreign origin.
 
-    Browsers always send Origin on a WebSocket handshake and cannot add custom
-    headers to one, so a missing Origin means a non-browser client and a proxy
-    supplied X-Forwarded-Host cannot be forged by the page. Ports are ignored
-    because nginx forwards Host without one.
+    Browsers always send Origin on a WebSocket handshake, so a missing Origin
+    means a non-browser client. A page cannot add headers to a handshake, so
+    X-Forwarded-Host comes from a proxy. Ports are ignored because nginx
+    forwards Host without one.
     """
     origin = environ.get("HTTP_ORIGIN")
     if origin is None:

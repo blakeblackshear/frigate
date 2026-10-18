@@ -194,7 +194,7 @@ class OutputProcess(FrigateProcess):
                 self.config.birdseye = birdseye_config
                 logger.debug("Applied dynamic birdseye config update")
 
-            # user changes publish None on this topic, role edits an AuthConfig
+            # user endpoints publish None on this topic and role edits an AuthConfig
             _, auth_config = auth_config_subscriber.check_for_update()
 
             if isinstance(auth_config, AuthConfig):
