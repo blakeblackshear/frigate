@@ -18,7 +18,7 @@ from ws4py.server.wsgirefserver import (
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.comms.detections_updater import DetectionSubscriber, DetectionTypeEnum
 from frigate.comms.ws import OriginCheckedWebSocketApplication, WebSocket
-from frigate.config import FrigateConfig
+from frigate.config import AuthConfig, FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -153,6 +153,7 @@ class OutputProcess(FrigateProcess):
             ],
         )
         birdseye_config_subscriber = ConfigSubscriber("config/birdseye", exact=True)
+        auth_config_subscriber = ConfigSubscriber("config/auth", exact=True)
 
         jsmpeg_cameras: dict[str, JsmpegCamera] = {}
         birdseye: Birdseye | None = None
@@ -192,6 +193,13 @@ class OutputProcess(FrigateProcess):
                 # already resolved against yaml by the config parse
                 self.config.birdseye = birdseye_config
                 logger.debug("Applied dynamic birdseye config update")
+
+            # user changes publish None on this topic, role edits an AuthConfig
+            _, auth_config = auth_config_subscriber.check_for_update()
+
+            if isinstance(auth_config, AuthConfig):
+                self.config.auth = auth_config
+                logger.debug("Applied dynamic auth config update")
 
             # drain review updates every iteration, not just when birdseye is
             # being consumed, so a dropped end never strands a camera
@@ -329,6 +337,7 @@ class OutputProcess(FrigateProcess):
 
         config_subscriber.stop()
         birdseye_config_subscriber.stop()
+        auth_config_subscriber.stop()
         websocket_server.manager.close_all()
         websocket_server.manager.stop()
         websocket_server.manager.join()
