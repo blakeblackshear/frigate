@@ -490,8 +490,15 @@ def refresh_user_session(request: Request, username: str) -> None:
         request.app.user_sessions[username] = _user_session(user)
 
 
+def is_secure_request(request: Request) -> bool:
+    # nginx sets X-Forwarded-Proto to its own scheme, replacing any client value
+    return (
+        request.app.frigate_config.auth.cookie_secure
+        or request.headers.get("x-forwarded-proto") == "https"
+    )
+
+
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, max_age, secure):
-    # TODO: ideally this would set secure as well, but that requires TLS
     # Starlette sets SameSite=Lax by default. The cookie is still sent to
     # same-site iframes (e.g. Home Assistant on the same host or domain), but
     # not to cross-site ones. CSRF is also mitigated by requiring a custom
@@ -844,7 +851,7 @@ def auth(request: Request):
                 JWT_COOKIE_NAME,
                 new_encoded_jwt,
                 JWT_SESSION_LENGTH,
-                request.app.frigate_config.auth.cookie_secure,
+                is_secure_request(request),
             )
 
         success_response.headers["remote-user"] = user
@@ -963,7 +970,7 @@ def login(request: Request, body: AppPostLoginBody):
             JWT_COOKIE_NAME,
             encoded_jwt,
             JWT_SESSION_LENGTH,
-            request.app.frigate_config.auth.cookie_secure,
+            is_secure_request(request),
         )
         # Clear admin_first_time_login flag after successful admin login so the
         # UI stops showing the first-time login documentation link.
@@ -1138,7 +1145,7 @@ async def update_password(
             JWT_COOKIE_NAME,
             encoded_jwt,
             JWT_SESSION_LENGTH,
-            request.app.frigate_config.auth.cookie_secure,
+            is_secure_request(request),
         )
 
     return response

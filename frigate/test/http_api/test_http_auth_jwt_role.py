@@ -229,3 +229,45 @@ class TestAuthJwtRole(BaseTestHttp):
 
         self.assertEqual(resp.status_code, 202)
         self.assertIn("frigate_token=", resp.headers["set-cookie"])
+
+    def _login_cookie(self, headers: dict | None = None) -> str:
+        with AuthTestClient(self._create_app()) as client:
+            resp = client.post(
+                "/login",
+                json={"user": "bob", "password": PASSWORD},
+                headers=headers or {},
+            )
+
+        self.assertEqual(resp.status_code, 200)
+        return resp.headers["set-cookie"].lower()
+
+    def test_login_cookie_is_secure_over_tls(self):
+        cookie = self._login_cookie({"x-forwarded-proto": "https"})
+        self.assertIn("; secure", cookie)
+
+    def test_login_cookie_is_not_secure_over_http(self):
+        cookie = self._login_cookie({"x-forwarded-proto": "http"})
+        self.assertNotIn("; secure", cookie)
+
+    def test_cookie_secure_config_forces_secure(self):
+        self.minimal_config["auth"]["cookie_secure"] = True
+        cookie = self._login_cookie()
+        self.assertIn("; secure", cookie)
+
+    def test_refreshed_cookie_is_secure_over_tls(self):
+        app = self._create_app()
+        token = jwt.encode(
+            {"alg": "HS256"},
+            {"sub": "bob", "exp": int(time.time()) + 60, "iat": int(time.time())},
+            app.jwt_token,
+        )
+
+        with AuthTestClient(app) as client:
+            client.cookies.set("frigate_token", token)
+            resp = client.get(
+                "/auth",
+                headers={"x-server-port": "8971", "x-forwarded-proto": "https"},
+            )
+
+        self.assertEqual(resp.status_code, 202)
+        self.assertIn("; secure", resp.headers["set-cookie"].lower())
