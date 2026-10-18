@@ -3,10 +3,10 @@
   "savedSearches": "Uložená vyhledávání",
   "searchFor": "Hledat {{inputValue}}",
   "button": {
-    "clear": "Vymazat vyhledávaní",
+    "clear": "Vymazat vyhledávání",
     "save": "Uložit vyhledávání",
-    "delete": "Vymazat uložená vyhledávání",
-    "filterInformation": "Filtrovat informace",
+    "delete": "Odstranit uložené vyhledávání",
+    "filterInformation": "Informace o filtrech",
     "filterActive": "Aktivní filtry"
   },
   "trackedObjectId": "ID sledovaného objektu",
@@ -15,23 +15,23 @@
       "cameras": "Kamery",
       "labels": "Štítky",
       "zones": "Zóny",
-      "sub_labels": "Podružné Štítky",
+      "sub_labels": "Podštítky",
       "max_speed": "Max rychlost",
       "min_speed": "Min rychlost",
       "search_type": "Typ Hledání",
-      "time_range": "Časový Rozsah",
+      "time_range": "Časový rozsah",
       "before": "Před",
       "after": "Po",
       "max_score": "Maximální Skóre",
       "min_score": "Minimální Skóre",
-      "recognized_license_plate": "Rozpoznaná SPZ",
+      "recognized_license_plate": "Rozpoznaná registrační značka",
       "has_clip": "Má Klip",
       "has_snapshot": "Má Snímek",
       "attributes": "Atributy"
     },
     "tips": {
       "desc": {
-        "step1": "Zadejte název filtru následovaný dvojtečkou (např. „kamery:“).",
+        "step1": "Zadejte název klíče filtru následovaný dvojtečkou (např. „cameras:“).",
         "step2": "Vyberte hodnotu z nabízených možností nebo zadejte vlastní.",
         "step3": "Použijte více filtrů tak, že je přidáte jeden po druhém s mezerou mezi nimi.",
         "step4": "Datumové filtry (before: a after:) používají formát {{DateFormat}}.",
@@ -43,7 +43,7 @@
       "title": "Jak používat textové filtry"
     },
     "searchType": {
-      "thumbnail": "Náhled",
+      "thumbnail": "Miniatura",
       "description": "Popis"
     },
     "toast": {

@@ -8,6 +8,7 @@ MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
 EXPORT_DIR = f"{BASE_DIR}/exports"
+EXPORT_STAGING_DIR = f"{EXPORT_DIR}/staging"
 FACE_DIR = f"{CLIPS_DIR}/faces"
 THUMB_DIR = f"{CLIPS_DIR}/thumbs"
 RECORD_DIR = f"{BASE_DIR}/recordings"
@@ -22,6 +23,15 @@ PLUS_API_HOST = "https://api.frigate.video"
 SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
 
 REDACTED_CREDENTIAL_SENTINEL = "__FRIGATE_SAVED_CREDENTIAL__"
+
+# Stream type constants
+
+STREAM_TYPE_MAIN = "main"
+STREAM_TYPE_SUB = "sub"
+SUB_CACHE_TAG = "@sub"
+RECORD_STREAM_TYPES = (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
+ROLE_TO_STREAM_TYPE = {"record": STREAM_TYPE_MAIN, "record_sub": STREAM_TYPE_SUB}
+STREAM_TYPE_TO_ROLE = {v: k for k, v in ROLE_TO_STREAM_TYPE.items()}
 
 # Attribute & Object constants
 
@@ -146,6 +156,7 @@ UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
 UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
 UPDATE_JOB_STATE = "update_job_state"
+UPDATE_NOTICE = "update_notice"
 NOTIFICATION_TEST = "notification_test"
 
 # IO Nice Values

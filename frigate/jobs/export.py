@@ -2,6 +2,7 @@
 
 import logging
 import os
+import shutil
 import threading
 import time
 from collections.abc import Callable
@@ -15,10 +16,14 @@ from peewee import DoesNotExist
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.config.camera.record import ChaptersEnum
-from frigate.const import UPDATE_JOB_STATE
+from frigate.const import EXPORT_STAGING_DIR, UPDATE_JOB_STATE
 from frigate.jobs.job import Job
 from frigate.models import Export
-from frigate.record.export import PlaybackSourceEnum, RecordingExporter
+from frigate.record.export import (
+    ExportStreamEnum,
+    PlaybackSourceEnum,
+    RecordingExporter,
+)
 from frigate.types import JobStatusTypesEnum
 
 logger = logging.getLogger(__name__)
@@ -58,6 +63,7 @@ class ExportJob(Job):
     ffmpeg_output_args: str | None = None
     cpu_fallback: bool = False
     chapters: ChaptersEnum | None = None
+    stream: ExportStreamEnum = ExportStreamEnum.auto
     current_step: str = "queued"
     progress_percent: float = 0.0
 
@@ -347,6 +353,7 @@ class ExportJobManager:
             job.ffmpeg_output_args,
             job.cpu_fallback,
             job.chapters,
+            job.stream,
             on_progress=self._make_progress_callback(job),
         )
 
@@ -409,6 +416,9 @@ def reap_stale_exports() -> None:
     this in a try/except. A failure on a single row will not stop the rest
     of the sweep, and a failure in the top-level query will log and return.
     """
+    # staged stream runs live on disk, so a killed export leaves them behind
+    shutil.rmtree(EXPORT_STAGING_DIR, ignore_errors=True)
+
     try:
         stale_exports = list(Export.select().where(Export.in_progress == True))  # noqa: E712
     except Exception:

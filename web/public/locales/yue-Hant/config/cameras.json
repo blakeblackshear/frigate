@@ -69,10 +69,6 @@
             "label": "啟用 Birdseye",
             "description": "啟用或停用 Birdseye 功能。"
         },
-        "mode": {
-            "label": "追蹤模式",
-            "description": "鏡頭在 Birdseye 中的顯示模式：objects（物件）、motion（動作）、continuous（持續）。"
-        },
         "order": {
             "label": "位置",
             "description": "控制鏡頭在 Birdseye 佈局中排序的數值位置。"
@@ -584,10 +580,6 @@
         "description": "此鏡頭保存追蹤物件 JPEG 快照的設定。",
         "enabled": {
             "label": "啟用快照",
-            "description": "啟用或停用此鏡頭保存快照。"
-        },
-        "clean_copy": {
-            "label": "保存原始副本",
             "description": "啟用或停用此鏡頭保存快照。"
         },
         "timestamp": {

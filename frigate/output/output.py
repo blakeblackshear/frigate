@@ -8,6 +8,7 @@ import threading
 from multiprocessing.synchronize import Event as MpEvent
 from wsgiref.simple_server import make_server
 
+import cv2
 from ws4py.server.wsgirefserver import (
     WebSocketWSGIHandler,
     WebSocketWSGIRequestHandler,
@@ -51,8 +52,12 @@ def check_disabled_camera_update(
 
     for camera, last_update in write_times.items():
         offline_time = now - last_update
+        camera_config = config.cameras.get(camera)
 
-        if config.cameras[camera].enabled:
+        if camera_config is None:
+            continue
+
+        if camera_config.enabled:
             has_enabled_camera = True
         else:
             # flag camera as offline when it is disabled
@@ -62,8 +67,8 @@ def check_disabled_camera_update(
             # last camera update was more than 1 second ago
             # need to send empty data to birdseye because current
             # frame is now out of date
-            cam_width = config.cameras[camera].detect.width
-            cam_height = config.cameras[camera].detect.height
+            cam_width = camera_config.detect.width
+            cam_height = camera_config.detect.height
 
             if cam_width is None or cam_height is None:
                 raise ValueError(f"Camera {camera} detect dimensions not configured")
@@ -118,6 +123,10 @@ class OutputProcess(FrigateProcess):
     def run(self) -> None:
         self.pre_run_setup(self.config.logger)
 
+        # birdseye resizes are small, and OpenCV's per-core thread pool burns
+        # ~3x the CPU of running them inline
+        cv2.setNumThreads(1)
+
         frame_manager = SharedMemoryFrameManager()
 
         # start a websocket server on 8082
@@ -141,6 +150,7 @@ class OutputProcess(FrigateProcess):
                 CameraConfigUpdateEnum.birdseye,
                 CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.record,
+                CameraConfigUpdateEnum.remove,
             ],
         )
         birdseye_config_subscriber = ConfigSubscriber("config/birdseye", exact=True)
@@ -184,6 +194,11 @@ class OutputProcess(FrigateProcess):
                 self.config.birdseye = birdseye_config
                 logger.debug("Applied dynamic birdseye config update")
 
+            # drain review updates every iteration, not just when birdseye is
+            # being consumed, so a dropped end never strands a camera
+            if birdseye is not None:
+                birdseye.check_review_updates()
+
             # check if there is an updated config
             updates = config_subscriber.check_for_updates()
 
@@ -198,6 +213,10 @@ class OutputProcess(FrigateProcess):
                             preview_write_times,
                             birdseye,
                         )
+
+            if CameraConfigUpdateEnum.remove in updates:
+                for camera in updates["remove"]:
+                    frame_manager.close_camera(camera)
 
             _result = detection_subscriber.check_for_update(timeout=1)
             if _result is None:
@@ -232,7 +251,7 @@ class OutputProcess(FrigateProcess):
                 continue
 
             frame = frame_manager.get(
-                frame_name, self.config.cameras[camera].frame_shape_yuv
+                frame_name, self.config.cameras[camera].frame_shape_yuv, frame_time
             )
 
             if frame is None:
@@ -287,8 +306,6 @@ class OutputProcess(FrigateProcess):
                     frame,
                 )
 
-            frame_manager.close(frame_name)
-
         move_preview_frames("clips")
 
         while True:
@@ -299,20 +316,6 @@ class OutputProcess(FrigateProcess):
 
             if not topic or data is None:
                 break
-
-            (
-                camera,
-                frame_name,
-                frame_time,
-                current_tracked_objects,
-                motion_boxes,
-                regions,
-            ) = data
-
-            frame = frame_manager.get(
-                frame_name, self.config.cameras[camera].frame_shape_yuv
-            )
-            frame_manager.close(frame_name)
 
         detection_subscriber.stop()
 

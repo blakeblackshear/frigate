@@ -110,6 +110,34 @@ class GenAIClientManager:
         name = self._role_map.get(GenAIRoleEnum.embeddings)
         return self._get_client(name) if name else None
 
+    @property
+    def transcribe_client(self) -> "GenAIClient | None":
+        """Client configured for the transcribe role."""
+        name = self._role_map.get(GenAIRoleEnum.transcribe)
+        return self._get_client(name) if name else None
+
+    def role_info(self) -> dict[str, dict[str, Any]]:
+        """Return the model selected for each configured role and its context size.
+
+        Only reads state the client saved when it initialized, so unlike
+        list_models() this does not ask the provider for its catalog.
+        """
+        result: dict[str, dict[str, Any]] = {}
+
+        for role, name in self._role_map.items():
+            client = self._get_client(name)
+
+            if not client:
+                continue
+
+            result[role.value] = {
+                "name": name,
+                "model": self._configs[name].model,
+                "context_size": client.get_context_size(),
+            }
+
+        return result
+
     def list_models(self) -> dict[str, dict[str, Any]]:
         """Return per-entry model lists and capabilities, keyed by config entry name."""
         result: dict[str, dict[str, Any]] = {}
@@ -122,5 +150,11 @@ class GenAIClientManager:
                 "roles": [r.value for r in genai_cfg.roles],
                 "supports_toggleable_thinking": client.supports_toggleable_thinking,
                 "supports_embeddings": client.supports_embeddings,
+                "supports_transcription": client.supports_transcription,
+                # Capabilities of the configured model are above; this maps every
+                # model the provider serves to its own, so the UI can react to a
+                # model selected but not yet saved. Empty when the provider
+                # cannot report capabilities without loading a model.
+                "model_capabilities": client.list_model_capabilities(),
             }
         return result

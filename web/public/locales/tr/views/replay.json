@@ -1,1 +1,60 @@
-{}
+{
+    "title": "Hata Ayıklama Oynatımı",
+    "description": "Hata ayıklama için kamera kayıtlarını yeniden oynat. Nesne listesi, algılanan nesnelerin gecikmeli özetini gösterir. Mesajlar sekmesi ise Frigate'in oynatılan görüntüdeki dahili mesaj akışını gösterir.",
+    "websocket_messages": "Mesajlar",
+    "dialog": {
+        "title": "Hata Ayıklama Oynatımını Başlat",
+        "description": "Nesne algılaması ve takip hatalarını ayıklamak amacıyla geçmiş kayıtları döngü halinde oynatan bir geçici yeniden oynatma kamerası oluşturun. Bu yeniden oynatma kamerası, kaynak kamerayla aynı algılama yapılandırmasına sahip olacaktır. Başlamak için bir zaman aralığı seçin.",
+        "camera": "Kaynak Kamera",
+        "timeRange": "Zaman Aralığı",
+        "preset": {
+            "1m": "Son 1 Dakika",
+            "5m": "Son 5 Dakika",
+            "timeline": "Zaman Şeridinden",
+            "custom": "Özelleştirilmiş"
+        },
+        "startButton": "Oynatımı Başlat",
+        "selectFromTimeline": "Seç",
+        "starting": "Oynatım başlatılıyor...",
+        "startLabel": "Başlat",
+        "endLabel": "Bitir",
+        "toast": {
+            "error": "Hata ayıklama oynatımı başlatılamadı: {{error}}",
+            "alreadyActive": "Bir oynatım oturumu zaten aktif",
+            "noRecordings": "Seçili zaman aralığında kayıt bulunamadı",
+            "stopError": "Hata ayıklama oynatımı durudulamadı: {{error}}",
+            "goToReplay": "Oynatıma Git"
+        }
+    },
+    "page": {
+        "noSession": "Aktif Hata Oynatım Oturumu Yok",
+        "noSessionDesc": "Araç çubuğundan Eylemler'e tıklayıp Hata Ayıklama Oynatımı'nı seçerek Geçmiş görünümü içinden bir Hata Ayıklama Oynatımı başlatın.",
+        "goToRecordings": "Geçmiş'e Git",
+        "preparingClip": "Klip hazırlanıyor…",
+        "preparingClipDesc": "Frigate seçili zaman aralığı için kayıtları birleştiriyor. Uzun aralıklarda bu bir dakika sürebilir.",
+        "startingCamera": "Hata Ayıklama Oynatımı Başlatılıyor…",
+        "startError": {
+            "title": "Hata Ayıklama Oynatımı başlatılamadı",
+            "back": "Geçmiş'e Dön"
+        },
+        "sourceCamera": "Kaynak Kamera",
+        "replayCamera": "Oynatım Kamerası",
+        "initializingReplay": "Hata Ayıklama Oynatımı Hazırlanıyor...",
+        "stoppingReplay": "Hata Ayıklama Oynatımı Durduruluyor...",
+        "stopReplay": "Oynatımı Durdur",
+        "confirmStop": {
+            "title": "Hata Ayıklama Oynatımını Durdur?",
+            "description": "Oturum durdurulacak ve tüm geçici veriler temizlenecek. Emin misiniz?",
+            "confirm": "Oynatımı Durdur",
+            "cancel": "İptal"
+        },
+        "activity": "Faaliyet",
+        "objects": "Nesne Listesi",
+        "audioDetections": "Ses Algılamaları",
+        "noActivity": "Faaliyet algılanmadı",
+        "activeTracking": "Aktif takip",
+        "noActiveTracking": "Aktif takip yok",
+        "configuration": "Yapılandırma",
+        "configurationDesc": "Hata Ayıklama Oynatımı kamerası için hareket algılaması ve nesne takibi ince ayarları. Değişiklikler Frigate yapılandırma dosyanıza kaydedilmez."
+    }
+}

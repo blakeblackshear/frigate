@@ -9,7 +9,6 @@
     "title": "Transmissão Off-line",
     "desc": "Nenhum quadro foi recebido na transmissão de <code>detecção</code> {{cameraName}}, verifique os logs de erro"
   },
-  "cameraDisabled": "A câmara está desativada",
   "stats": {
     "streamType": {
       "title": "Tipo de transmissão:",
@@ -18,14 +17,6 @@
     "bandwidth": {
       "title": "Largura de banda:",
       "short": "Largura de banda"
-    },
-    "latency": {
-      "value": "{{seconds}} segundos",
-      "short": {
-        "title": "Latência",
-        "value": "{{seconds}} seg"
-      },
-      "title": "Latência:"
     },
     "totalFrames": "Total de quadros:",
     "droppedFrames": {

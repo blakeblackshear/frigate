@@ -3,6 +3,9 @@
 import errno
 import json
 import logging
+import queue
+import socket
+import struct
 import threading
 from collections.abc import Callable
 from typing import Any
@@ -31,6 +34,7 @@ from frigate.const import (
     UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
     UPDATE_EVENT_DESCRIPTION,
     UPDATE_MODEL_STATE,
+    UPDATE_NOTICE,
     UPDATE_REVIEW_DESCRIPTION,
     UPSERT_REVIEW_SEGMENT,
 )
@@ -56,6 +60,7 @@ _WS_BLOCKED_TOPICS = frozenset(
         UPDATE_EMBEDDINGS_REINDEX_PROGRESS,
         UPDATE_BIRDSEYE_LAYOUT,
         UPDATE_AUDIO_TRANSCRIPTION_STATE,
+        UPDATE_NOTICE,
     }
 )
 
@@ -73,6 +78,12 @@ _WS_VIEWER_TOPICS = frozenset(
 
 # Camera-scoped command topics a camera-authorized (non-admin) user may send.
 _WS_CAMERA_COMMAND_TOPICS = frozenset({"ptz"})
+
+# Max outbound messages waiting on a client's writer thread.
+WS_MAX_PENDING_MESSAGES = 256
+
+# Seconds a single send() may wait for a client to free socket buffer space.
+WS_SEND_TIMEOUT = 10
 
 
 def _check_ws_authorization(
@@ -155,6 +166,16 @@ _WS_GLOBAL_OUTBOUND_TOPICS = frozenset(
 _WS_UNRESTRICTED_ONLY_TOPICS = frozenset(
     {
         "birdseye_layout",
+    }
+)
+
+# Topics only an admin connection may receive. unrestricted_only is not
+# enough: the built-in viewer role has an empty camera allow-list, which the
+# camera policy treats as full access, while the REST side of these topics
+# is admin-only.
+_WS_ADMIN_ONLY_TOPICS = frozenset(
+    {
+        "notices",
     }
 )
 
@@ -280,6 +301,7 @@ def _classify_outbound(
       - "global"             : send to every authenticated client
       - "drop"               : send to nobody (fail-closed for unknowns)
       - "unrestricted_only"  : send only to admin/full-access roles
+      - "admin_only"         : send only to connections with the admin role
       - "camera"             : extra is the owning camera name
       - "payload_camera"     : extra is the JSON key path to the camera name
       - "reshape_by_camera_key"
@@ -288,6 +310,8 @@ def _classify_outbound(
     """
     if topic in _WS_GLOBAL_OUTBOUND_TOPICS:
         return ("global", None)
+    if topic in _WS_ADMIN_ONLY_TOPICS:
+        return ("admin_only", None)
     if topic in _WS_UNRESTRICTED_ONLY_TOPICS:
         return ("unrestricted_only", None)
     if topic in _WS_RESHAPE_BY_CAMERA_KEY_TOPICS:
@@ -391,6 +415,9 @@ def _materialize_for_ws(
     if kind == "unrestricted_only":
         return full_message if _ws_is_unrestricted(ws, config) else None
 
+    if kind == "admin_only":
+        return full_message if "admin" in _ws_valid_roles(ws, config) else None
+
     if kind == "camera":
         return full_message if ws_has_camera_access(ws, extra, config) else None
 
@@ -446,6 +473,78 @@ def _materialize_for_ws(
 
 
 class WebSocket(WebSocket_):  # type: ignore[misc]
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._send_queue: queue.Queue[tuple[Any, bool] | None] = queue.Queue(
+            maxsize=WS_MAX_PENDING_MESSAGES
+        )
+        self._writer: threading.Thread | None = None
+        self._aborted = False
+
+    def opened(self) -> None:
+        """Set a send timeout on the socket and start this client's writer thread."""
+
+        # ws4py writes close and pong frames on the shared manager thread, so a
+        # stalled client must not block sendall forever. SO_SNDTIMEO leaves recv
+        # (and idle clients) untouched, unlike settimeout().
+        self.sock.setsockopt(
+            socket.SOL_SOCKET, socket.SO_SNDTIMEO, struct.pack("ll", WS_SEND_TIMEOUT, 0)
+        )
+
+        # every client gets its own writer so a client that stops reading only
+        # blocks itself, never the thread that called publish()
+        self._writer = threading.Thread(
+            target=self._drain_send_queue, name="ws_writer", daemon=True
+        )
+        self._writer.start()
+
+    def send(self, payload: Any, binary: bool = False) -> None:
+        """Queue a message for this client's writer thread.
+
+        Returns without waiting for delivery. Disconnects the client if its queue
+        is full.
+        """
+        try:
+            self._send_queue.put_nowait((payload, binary))
+        except queue.Full:
+            self._abort("Websocket client is not keeping up, disconnecting it")
+
+    def _drain_send_queue(self) -> None:
+        while True:
+            item = self._send_queue.get()
+            if item is None or self.terminated or self.sock is None:
+                return
+            try:
+                super().send(*item)
+            except Exception:
+                self._abort()
+                return
+
+    def _abort(self, reason: str | None = None) -> None:
+        # publish() keeps hitting a full queue until the manager thread removes
+        # the connection, so only act (and log) the first time
+        if self._aborted:
+            return
+        self._aborted = True
+        if reason:
+            logger.warning(reason)
+
+        # shutdown rather than close so the ws4py manager thread sees EOF and
+        # runs its normal unregister/terminate; this also unblocks a stuck sendall
+        sock = self.sock
+        if sock is not None:
+            try:
+                sock.shutdown(socket.SHUT_RDWR)
+            except OSError:
+                pass
+
+    def closed(self, code: int, reason: str | None = None) -> None:
+        """Signal the writer thread to exit."""
+        try:
+            self._send_queue.put_nowait(None)
+        except queue.Full:
+            pass
+
     def unhandled_error(self, error: Any) -> None:
         """
         Handles the unfriendly socket closures on the server side
@@ -466,7 +565,6 @@ class WebSocketClient(Communicator):
 
     def subscribe(self, receiver: Callable) -> None:
         self._dispatcher = receiver
-        self.start()
 
     def start(self) -> None:
         """Start the websocket client."""
@@ -580,10 +678,7 @@ class WebSocketClient(Communicator):
             )
             if message is None:
                 continue
-            try:
-                ws.send(message)
-            except (ConnectionResetError, BrokenPipeError, ValueError):
-                pass
+            ws.send(message)
 
     def stop(self) -> None:
         if self.websocket_server is not None:

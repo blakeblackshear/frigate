@@ -16,7 +16,7 @@ from frigate.config import (
     ZoomingModeEnum,
 )
 from frigate.const import CLIPS_DIR, THUMB_DIR
-from frigate.ptz.autotrack import PtzAutoTrackerThread
+from frigate.ptz.autotrack import PtzAutoTracker, calculate_max_target_box
 from frigate.track.tracked_object import TrackedObject
 from frigate.util.image import (
     SharedMemoryFrameManager,
@@ -35,11 +35,12 @@ class CameraState:
         name: str,
         config: FrigateConfig,
         frame_manager: SharedMemoryFrameManager,
-        ptz_autotracker_thread: PtzAutoTrackerThread,
+        ptz_autotracker_thread: PtzAutoTracker,
     ) -> None:
         self.name = name
         self.config = config
         self.camera_config = config.cameras[name]
+        self.model = config.model_for_camera(name)
         self.frame_manager = frame_manager
         self.best_objects: dict[str, TrackedObject] = {}
         self.tracked_objects: dict[str, TrackedObject] = {}
@@ -62,7 +63,7 @@ class CameraState:
         self.lpr_min_obj_area: int = 0
         self.lp_objects = {
             label
-            for label, attributes in config.model.attributes_map.items()
+            for label, attributes in self.model.attributes_map.items()
             if "license_plate" in attributes
         }
 
@@ -106,9 +107,7 @@ class CameraState:
                         thickness = 1
                     else:
                         thickness = 2
-                        color = self.config.model.colormap.get(
-                            obj["label"], (255, 255, 255)
-                        )
+                        color = self.model.colormap.get(obj["label"], (255, 255, 255))
                 else:
                     thickness = 1
                     color = (255, 0, 0)
@@ -116,23 +115,17 @@ class CameraState:
                 # draw thicker box around ptz autotracked object
                 if (
                     self.camera_config.onvif.autotracking.enabled
-                    and self.ptz_autotracker_thread.ptz_autotracker.autotracker_init.get(
-                        self.name
-                    )
-                    and self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
-                        self.name
-                    ]
+                    and self.ptz_autotracker_thread.autotracker_init.get(self.name)
+                    and self.ptz_autotracker_thread.tracked_object[self.name]
                     is not None
                     and obj["id"]
-                    == self.ptz_autotracker_thread.ptz_autotracker.tracked_object[
+                    == self.ptz_autotracker_thread.tracked_object[  # type: ignore[union-attr]
                         self.name
-                    ].obj_data["id"]  # type: ignore[attr-defined]
+                    ].obj_data["id"]
                     and obj["frame_time"] == frame_time
                 ):
                     thickness = 5
-                    color = self.config.model.colormap.get(
-                        obj["label"], (255, 255, 255)
-                    )
+                    color = self.model.colormap.get(obj["label"], (255, 255, 255))
 
                     # debug autotracking zooming - show the zoom factor box
                     if (
@@ -141,9 +134,9 @@ class CameraState:
                         and self.camera_config.detect.width is not None
                         and self.camera_config.detect.height is not None
                     ):
-                        max_target_box = self.ptz_autotracker_thread.ptz_autotracker.tracked_object_metrics[
-                            self.name
-                        ]["max_target_box"]  # type: ignore[index]
+                        max_target_box = calculate_max_target_box(
+                            self.camera_config.onvif.autotracking.zoom_factor
+                        )
                         side_length = max_target_box * (
                             max(
                                 self.camera_config.detect.width,
@@ -266,9 +259,7 @@ class CameraState:
         if draw_options.get("paths"):
             for obj in tracked_objects.values():
                 if obj["frame_time"] == frame_time and obj["path_data"]:
-                    color = self.config.model.colormap.get(
-                        obj["label"], (255, 255, 255)
-                    )
+                    color = self.model.colormap.get(obj["label"], (255, 255, 255))
 
                     path_points = [
                         (
@@ -358,7 +349,7 @@ class CameraState:
             return
 
         current_frame = self.frame_manager.get(
-            frame_name, self.camera_config.frame_shape_yuv
+            frame_name, self.camera_config.frame_shape_yuv, frame_time
         )
 
         tracked_objects = self.tracked_objects.copy()
@@ -371,7 +362,7 @@ class CameraState:
         for id in new_ids:
             logger.debug(f"{self.name}: New tracked object ID: {id}")
             new_obj = tracked_objects[id] = TrackedObject(
-                self.config.model,
+                self.model,
                 self.camera_config,
                 self.config.ui,
                 self.frame_cache,
@@ -401,7 +392,6 @@ class CameraState:
                 "attributes": new_obj.obj_data["attributes"],
                 "current_estimated_speed": 0,
                 "velocity_angle": 0,
-                "path_data": [],
                 "recognized_license_plate": None,
                 "recognized_license_plate_score": None,
             }
@@ -413,7 +403,7 @@ class CameraState:
             self.send_mqtt_snapshot(new_obj, object_type)
 
             for c in self.callbacks["start"]:
-                c(self.name, new_obj, frame_name)
+                c(self.name, new_obj, frame_name, frame_time)
 
         for id in updated_ids:
             updated_obj = tracked_objects[id]
@@ -425,7 +415,7 @@ class CameraState:
 
             if autotracker_update or significant_update:
                 for c in self.callbacks["autotrack"]:
-                    c(self.name, updated_obj, frame_name)
+                    c(self.name, updated_obj, frame_name, frame_time)
 
             if thumb_update and current_frame is not None:
                 # ensure this frame is stored in the cache
@@ -475,7 +465,7 @@ class CameraState:
             ):
                 # call event handlers
                 for c in self.callbacks["update"]:
-                    c(self.name, updated_obj, frame_name)
+                    c(self.name, updated_obj, frame_name, frame_time)
                 updated_obj.last_published = frame_time
 
             # send MQTT snapshot when object first enters a required zone,
@@ -497,7 +487,7 @@ class CameraState:
                 removed_obj.obj_data["end_time"] = frame_time
                 logger.debug(f"{self.name}: end callback for object {id}")
                 for c in self.callbacks["end"]:
-                    c(self.name, removed_obj, frame_name)
+                    c(self.name, removed_obj, frame_name, frame_time)
 
         # TODO: can i switch to looking this up and only changing when an event ends?
         # maintain best objects
@@ -515,7 +505,7 @@ class CameraState:
                 sub_label = None
 
                 if obj.obj_data.get("sub_label"):
-                    if obj.obj_data["sub_label"][0] in self.config.model.all_attributes:
+                    if obj.obj_data["sub_label"][0] in self.model.all_attributes:
                         label = obj.obj_data["sub_label"][0]
                     else:
                         label = f"{object_type}-verified"
@@ -611,9 +601,6 @@ class CameraState:
             if current_frame is not None:
                 self.current_frame_time = frame_time
                 self._current_frame = np.copy(current_frame)
-
-                if self.previous_frame_id is not None:
-                    self.frame_manager.close(self.previous_frame_id)
 
             self.previous_frame_id = frame_name
 

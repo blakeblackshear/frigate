@@ -3,11 +3,11 @@
   "labels": {
     "label": "Štítky",
     "all": {
-      "title": "Všechny popisky",
-      "short": "Popisky"
+      "title": "Všechny štítky",
+      "short": "Štítky"
     },
-    "count_one": "{{count}} Štítek",
-    "count_other": "{{count}} Štítků"
+    "count_one": "{{count}} štítek",
+    "count_other": "{{count}} štítků"
   },
   "dates": {
     "selectPreset": "Vyberte předvolbu…",
@@ -23,8 +23,8 @@
   "timeRange": "Časový rozsah",
   "score": "Skóre",
   "subLabels": {
-    "all": "Všechny podružné štítky",
-    "label": "Podružné Štítky"
+    "all": "Všechny podštítky",
+    "label": "Podštítky"
   },
   "features": {
     "label": "Funkce",
@@ -37,7 +37,7 @@
   },
   "sort": {
     "label": "Seřadit",
-    "relevance": "Závažnost",
+    "relevance": "Relevance",
     "dateAsc": "Datum (Vzestupně)",
     "dateDesc": "Datum (Sestupně)",
     "scoreAsc": "Skóre objektu (Vzestupně)",
@@ -46,13 +46,13 @@
     "speedDesc": "Odhadovaná rychlost (Sestupně)"
   },
   "motion": {
-    "showMotionOnly": "Pouze zpomalené záběry"
+    "showMotionOnly": "Zobrazit pouze pohyb"
   },
   "explore": {
     "settings": {
       "title": "Nastavení",
       "searchSource": {
-        "label": "Hledat zdroj",
+        "label": "Zdroj vyhledávání",
         "options": {
           "thumbnailImage": "Obrázek náhledu",
           "description": "Popis"
@@ -87,13 +87,13 @@
     "allLogs": "Všechny protokoly"
   },
   "recognizedLicensePlates": {
-    "title": "Rozeznané SPZ",
-    "loadFailed": "Chyba načítání rozeznaných SPZ.",
-    "loading": "Načítám rozeznané SPZ…",
-    "placeholder": "Zadejte text pro hledání SPZ…",
-    "selectPlatesFromList": "Vyberte jednu, nebo více SPZ ze seznamu.",
-    "noLicensePlatesFound": "Žádné SPZ nebyly nalezeny.",
-    "selectAll": "Označit vše",
+    "title": "Rozpoznané registrační značky",
+    "loadFailed": "Nepodařilo se načíst rozpoznané registrační značky.",
+    "loading": "Načítání rozpoznaných registračních značek…",
+    "placeholder": "Zadejte text pro hledání registračních značek…",
+    "selectPlatesFromList": "Vyberte jednu nebo více registračních značek ze seznamu.",
+    "noLicensePlatesFound": "Nebyly nalezeny žádné registrační značky.",
+    "selectAll": "Vybrat vše",
     "clearAll": "Vymazat vše"
   },
   "zones": {
@@ -109,7 +109,7 @@
       "error": "Chyba při mazání sledovaných objektů: {{errorMessage}}"
     },
     "title": "Potvrdit odstranění",
-    "desc": "Smazáním těchto {{objectLength}} sledovaných objektů dojde k odstranění snímku, všech uložených vektorových reprezentací (embeddingů) a souvisejících záznamů o životním cyklu objektu. Záznamy z kamery v náhledu historie <em>NEBUDOU</em> smazány.<br/><br/>Přejete si to skutečně udělat?<br/><br/>Podržte <em>Shift</em> pro přeskočení tohoto dialogu v budoucnosti."
+    "desc": "Smazáním těchto {{objectLength}} sledovaných objektů dojde k odstranění snímku, všech uložených vektorových reprezentací (embeddingů) a souvisejících záznamů o životním cyklu objektu. Záznamy z kamery v náhledu historie <em>NEBUDOU</em> smazány.<br /><br />Přejete si to skutečně udělat?<br /><br />Podržte <em>Shift</em> pro přeskočení tohoto dialogu v budoucnosti."
   },
   "zoneMask": {
     "filterBy": "Filtrovat podle masky zóny"
@@ -130,11 +130,11 @@
     "all": {
       "title": "Všechny třídy"
     },
-    "count_one": "Třída {{count}}",
-    "count_other": "Třídy {{count}}"
+    "count_one": "{{count}} třída",
+    "count_other": "{{count}} tříd"
   },
   "attributes": {
-    "label": "Atributy Klasifikace",
-    "all": "Všechny Atributy"
+    "label": "Klasifikační atributy",
+    "all": "Všechny atributy"
   }
 }

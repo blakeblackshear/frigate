@@ -605,8 +605,7 @@ export function buildClonedCameraPayloads({
   // deleting a key not in the YAML. Cloned above so this won't mutate the cache.
   const syntheticCameraObj = syntheticTargetCamera as unknown as JsonObject;
   const baseConfigObj = syntheticCameraObj.base_config as
-    | Record<string, JsonObject>
-    | undefined;
+    Record<string, JsonObject> | undefined;
   for (const section of Object.keys(FILTER_SECTION_DEFS)) {
     const syntheticSection = syntheticCameraObj[section];
     if (syntheticSection && typeof syntheticSection === "object") {

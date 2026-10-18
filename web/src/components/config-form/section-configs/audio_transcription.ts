@@ -6,7 +6,14 @@ const audioTranscription: SectionConfigOverrides = {
     messages: [
       {
         key: "audio-detection-disabled",
+        health: (ctx) =>
+          ctx.fullCameraConfig?.audio_transcription?.enabled === true,
         messageKey: "configMessages.audioTranscription.audioDetectionDisabled",
+        runtimeOverride: {
+          section: "audio",
+          messageKey:
+            "configMessages.audioTranscription.audioDetectionRuntimeDisabled",
+        },
         severity: "warning",
         condition: (ctx) => {
           if (ctx.level === "camera" && ctx.fullCameraConfig) {
@@ -32,9 +39,31 @@ const audioTranscription: SectionConfigOverrides = {
     },
   },
   global: {
-    fieldOrder: ["enabled", "language", "device", "model_size"],
+    fieldOrder: ["enabled", "model", "language", "device", "model_size"],
     advancedFields: ["language", "device", "model_size"],
-    restartRequired: ["enabled", "language", "device", "model_size"],
+    restartRequired: ["enabled", "model", "language", "device", "model_size"],
+    fieldMessages: [
+      {
+        key: "genai-provider-ignores-local-settings",
+        field: "device",
+        messageKey: "configMessages.audioTranscription.genaiProviderSelected",
+        severity: "info",
+        position: "after",
+        condition: (ctx) =>
+          typeof ctx.formData?.model === "string" &&
+          ctx.formData.model !== "" &&
+          ctx.formData.model !== "whisper",
+      },
+    ],
+    uiSchema: {
+      model: {
+        "ui:widget": "audioTranscriptionModel",
+      },
+      model_size: {
+        "ui:widget": "audioTranscriptionModelSize",
+        "ui:options": { size: "xs", enumI18nPrefix: "modelSize" },
+      },
+    },
   },
 };
 

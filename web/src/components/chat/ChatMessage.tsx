@@ -71,10 +71,10 @@ export function MessageBubble({
 
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     const text = content?.trim() || "";
     if (!text) return;
-    if (copy(text)) {
+    if (await copy(text)) {
       setCopied(true);
       toast.success(t("button.copiedToClipboard", { ns: "common" }));
       setTimeout(() => setCopied(false), 2000);
@@ -133,7 +133,7 @@ export function MessageBubble({
             variant="select"
             size="icon"
             className="size-9 rounded-full"
-            disabled={!draftContent.trim()}
+            disabled={!draftContent.trim() || onEditSubmit == null}
             onClick={handleEditSubmit}
             aria-label={t("send")}
           >

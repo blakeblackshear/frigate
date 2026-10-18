@@ -51,7 +51,8 @@
     "hasSnapshot": "Memiliki Cuplikan",
     "hasVideoClip": "Memiliki Klip Video",
     "submittedToFrigatePlus": {
-      "label": "Dikirim ke Frigate+"
+      "label": "Dikirim ke Frigate+",
+      "tips": "Anda harus menyaring objek terlacak yang memiliki cuplikan (snapshot) terlebih dahulu.<br /><br />Objek terlacak tanpa cuplikan tidak dapat dikirimkan ke Frigate+."
     }
   },
   "cameras": {
@@ -81,8 +82,59 @@
     "settings": {
       "title": "Pengaturan",
       "defaultView": {
-        "title": "Tampilan Default"
+        "title": "Tampilan Default",
+        "desc": "Bila tidak ada filter yang dipilih, tampilkan ringkasan objek teracak terbaru untuk setiap label, atau tampilkan kisi tanpa filter.",
+        "summary": "Ringkasan",
+        "unfilteredGrid": "Kisi Tanpa Filter"
+      },
+      "gridColumns": {
+        "title": "Kolom Kisi",
+        "desc": "Pilih jumlah kolom pada tampilan kisi."
+      },
+      "searchSource": {
+        "label": "Sumber Pencarian",
+        "desc": "Pilih apakah ingin mencari miniatur atau deskripsi dari objek yang dilacak.",
+        "options": {
+          "thumbnailImage": "Gambar Thumbnail",
+          "description": "Deskripsi"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Pilih tanggal untuk memfilter"
       }
     }
+  },
+  "logSettings": {
+    "label": "Filter Log Level",
+    "filterBySeverity": "Filter log berdasarkan tingkat keparahan",
+    "loading": {
+      "title": "Memuat",
+      "desc": "Saat panel log digulir ke paling bawah, log baru akan otomatis di-stream seiring ditambahkan."
+    },
+    "disableLogStreaming": "Nonaktifkan streaming log",
+    "allLogs": "Semua Log"
+  },
+  "trackedObjectDelete": {
+    "title": "Konfirmasi Hapus",
+    "desc": "Menghapus {{objectLength}} objek yang dilacak ini akan menghapus snapshot, embedding yang tersimpan, dan entri siklus hidup objek yang terkait. Rekaman video dari objek yang dilacak ini di tampilan History <em>TIDAK</em> akan dihapus.<br /><br />Apakah Anda yakin ingin melanjutkan?<br /><br />Tahan tombol <em>Shift</em> untuk melewati dialog ini di masa mendatang.",
+    "toast": {
+      "success": "Objek yang dilacak berhasil dihapus.",
+      "error": "Gagal menghapus objek yang dilacak: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filter berdasarkan zone mask"
+  },
+  "recognizedLicensePlates": {
+    "title": "Plat Nomor yang Terkenali",
+    "loadFailed": "Gagal memuat plat nomor yang dikenali.",
+    "loading": "Memuat plat nomor yang dikenali…",
+    "placeholder": "Ketik untuk mencari plat nomor…",
+    "noLicensePlatesFound": "Plat nomor tidak ditemukan.",
+    "selectPlatesFromList": "Pilih satu atau beberapa plat nomor dari daftar.",
+    "selectAll": "Pilih semua",
+    "clearAll": "Hapus semua"
   }
 }

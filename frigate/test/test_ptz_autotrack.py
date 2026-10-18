@@ -7,9 +7,8 @@ KeyError on the autotracker thread or silently keep the wrong state:
 
 - autotracker_init only got an entry for cameras enabled when PtzAutoTracker was
   constructed, so runtime-enabled cameras raised KeyError on lookup.
-- ptz_metrics autotracker_enabled is what the camera processes read, but nothing
-  updated it when autotracking was enabled through a config save, so it stayed
-  False and the tracker never built a motion estimator.
+- _disable only changed the main process config, so the camera process kept
+  running its motion estimator for a camera that could not autotrack.
 """
 
 import unittest
@@ -17,7 +16,8 @@ from unittest.mock import MagicMock
 
 from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig
-from frigate.ptz.autotrack import PtzAutoTracker
+from frigate.config.camera.updater import CameraConfigUpdateEnum
+from frigate.ptz.autotrack import PtzAutoTracker, calculate_max_target_box
 
 CAMERA = "ptz_cam"
 
@@ -53,8 +53,9 @@ def _make_tracker(autotracking_enabled: bool = True) -> PtzAutoTracker:
     onvif over the network. Only the config/metrics state is relevant here."""
     tracker = PtzAutoTracker.__new__(PtzAutoTracker)
     tracker.config = _config(autotracking_enabled)
-    tracker.ptz_metrics = {CAMERA: PTZMetrics(autotracker_enabled=False)}
+    tracker.ptz_metrics = {CAMERA: PTZMetrics()}
     tracker.onvif = MagicMock()
+    tracker.dispatcher = MagicMock()
     tracker.config_subscriber = MagicMock()
     tracker.autotracker_init = {}
     tracker.calibrating = {}
@@ -83,47 +84,49 @@ class TestAutotrackerInitGuards(unittest.IsolatedAsyncioTestCase):
         tracker.onvif.get_camera_status.assert_not_called()
 
 
-class TestAutotrackerMetricSync(unittest.TestCase):
-    def test_metric_follows_config_when_enabled_by_update(self) -> None:
-        # autotracking enabled via a config save: the metric was seeded False when
-        # the camera was added and nothing else updates it
+class TestAutotrackerEnqueueMove(unittest.TestCase):
+    def _enqueue(self, pan: float, tilt: float, zoom: float) -> MagicMock:
+        tracker = _make_tracker()
+        tracker.move_queues = {CAMERA: MagicMock()}
+        tracker.move_queue_locks = {CAMERA: MagicMock()}
+        tracker.move_queue_locks[CAMERA].locked.return_value = False
+
+        tracker._enqueue_move(CAMERA, 1000.0, pan, tilt, zoom)
+
+        return tracker.onvif.loop.call_soon_threadsafe
+
+    def test_move_is_clipped_to_the_onvif_range(self) -> None:
+        # velocity estimates can push the predicted centroid outside the frame
+        call_soon = self._enqueue(1.7, -2.5, 0.4)
+
+        call_soon.assert_called_once()
+        self.assertEqual(call_soon.call_args.args[1], (1000.0, 1.0, -1.0, 0.4))
+
+    def test_empty_move_is_not_enqueued(self) -> None:
+        self._enqueue(0, 0, 0).assert_not_called()
+
+
+class TestAutotrackerDisable(unittest.TestCase):
+    def test_disable_publishes_to_camera_process(self) -> None:
         tracker = _make_tracker(autotracking_enabled=True)
-        metrics = tracker.ptz_metrics[CAMERA]
-        self.assertFalse(metrics.autotracker_enabled.value)
 
-        tracker.config_subscriber.check_for_updates.return_value = {"onvif": [CAMERA]}
-        tracker.check_for_updates()
+        tracker._disable(CAMERA, "onvif connection failed")
 
-        self.assertTrue(metrics.autotracker_enabled.value)
+        autotracking = tracker.config.cameras[CAMERA].onvif.autotracking
+        self.assertFalse(autotracking.enabled)
 
-    def test_metric_follows_config_when_disabled_by_update(self) -> None:
-        tracker = _make_tracker(autotracking_enabled=False)
-        metrics = tracker.ptz_metrics[CAMERA]
-        metrics.autotracker_enabled.value = True
+        publish = tracker.dispatcher.config_updater.publish_update
+        publish.assert_called_once()
+        topic, payload = publish.call_args.args
+        self.assertEqual(topic.update_type, CameraConfigUpdateEnum.autotracking)
+        self.assertEqual(topic.camera, CAMERA)
+        self.assertIs(payload, autotracking)
 
-        tracker.config_subscriber.check_for_updates.return_value = {
-            "autotracking": [CAMERA]
-        }
-        tracker.check_for_updates()
 
-        self.assertFalse(metrics.autotracker_enabled.value)
-
-    def test_metric_sync_skips_camera_without_metrics(self) -> None:
-        # `add` reaches the maintainer and the autotracker on separate threads with
-        # no ordering guarantee, so the metrics may not exist yet
-        tracker = _make_tracker()
-        tracker.ptz_metrics = {}
-        tracker.config_subscriber.check_for_updates.return_value = {"add": [CAMERA]}
-
-        tracker.check_for_updates()
-
-    def test_metric_sync_skips_unknown_camera(self) -> None:
-        tracker = _make_tracker()
-        tracker.config_subscriber.check_for_updates.return_value = {
-            "add": ["not_in_config"]
-        }
-
-        tracker.check_for_updates()
+class TestMaxTargetBox(unittest.TestCase):
+    def test_follows_zoom_factor(self) -> None:
+        self.assertAlmostEqual(calculate_max_target_box(0.5), 0.6**2)
+        self.assertAlmostEqual(calculate_max_target_box(0.25), 0.6**4)
 
 
 if __name__ == "__main__":

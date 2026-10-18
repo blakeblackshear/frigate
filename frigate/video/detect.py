@@ -2,7 +2,9 @@
 
 import logging
 import queue
+import threading
 import time
+from collections import deque
 from datetime import UTC, datetime
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
@@ -20,10 +22,12 @@ from frigate.config.camera.updater import (
 )
 from frigate.const import (
     PROCESS_PRIORITY_HIGH,
+    REPLAY_CAMERA_PREFIX,
     REQUEST_REGION_GRID,
 )
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
+from frigate.notices import raise_notice
 from frigate.object_detection.base import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
@@ -51,6 +55,61 @@ from frigate.util.process import FrigateProcess
 from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
+
+# this many frames dropped within the window because the shared detected frames
+# queue was full means tracked object processing is falling behind
+DROPPED_FRAMES_NOTICE_COUNT = 5
+DROPPED_FRAMES_WINDOW_S = 30
+
+DROPPED_FRAMES_NOTICE_INTERVAL_S = 60
+
+
+class DroppedFrameTracker:
+    """Raises a notice when a camera drops frames because object processing is behind."""
+
+    def __init__(self, camera: str) -> None:
+        # a debug replay can feed frames faster than real time
+        self._enabled = not camera.startswith(REPLAY_CAMERA_PREFIX)
+        self._drops: deque[float] = deque()
+        self._last_notice: float | None = None
+
+        # raising a notice waits on the main process, which answers every
+        # process's requests one at a time, so it runs off the frame loop
+        self._sender: threading.Thread | None = None
+
+    def dropped(self, now: float) -> None:
+        """Record a dropped frame and raise the notice if enough were dropped.
+
+        Args:
+            now: Monotonic time of the drop in seconds
+        """
+        if not self._enabled:
+            return
+
+        self._drops.append(now)
+
+        while now - self._drops[0] > DROPPED_FRAMES_WINDOW_S:
+            self._drops.popleft()
+
+        if (
+            len(self._drops) < DROPPED_FRAMES_NOTICE_COUNT
+            or (
+                self._last_notice is not None
+                and now - self._last_notice < DROPPED_FRAMES_NOTICE_INTERVAL_S
+            )
+            or (self._sender is not None and self._sender.is_alive())
+        ):
+            return
+
+        self._drops.clear()
+        self._last_notice = now
+        self._sender = threading.Thread(
+            target=raise_notice,
+            args=("object_processing_behind",),
+            name="dropped_frames_notice",
+            daemon=True,
+        )
+        self._sender.start()
 
 
 class CameraTracker(FrigateProcess):
@@ -85,6 +144,11 @@ class CameraTracker(FrigateProcess):
 
     def run(self) -> None:
         self.pre_run_setup(self.log_config)
+
+        # OpenCV only sees small images here, and its default per-core thread
+        # pool burns ~5x the CPU of running them inline
+        cv2.setNumThreads(1)
+
         frame_queue = self.camera_metrics.frame_queue
         frame_shape = self.config.frame_shape
 
@@ -94,6 +158,7 @@ class CameraTracker(FrigateProcess):
             self.config.detect.fps,
             name=self.config.name,
             ptz_metrics=self.ptz_metrics,
+            autotracking_enabled=self.config.onvif.autotracking.enabled,
         )
         object_detector = RemoteObjectDetector(
             self.config.name,
@@ -195,15 +260,18 @@ def process_frames(
         None,
         {camera_config.name: camera_config},
         [
+            CameraConfigUpdateEnum.autotracking,
             CameraConfigUpdateEnum.detect,
             CameraConfigUpdateEnum.enabled,
             CameraConfigUpdateEnum.motion,
             CameraConfigUpdateEnum.objects,
+            CameraConfigUpdateEnum.onvif,
         ],
     )
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
+    dropped_frames = DroppedFrameTracker(camera_config.name)
 
     startup_scan = True
     stationary_frame_counter = 0
@@ -234,6 +302,12 @@ def process_frames(
         if "motion" in updated_configs:
             motion_detector.config = camera_config.motion
             motion_detector.update_mask()
+
+        if "autotracking" in updated_configs or "onvif" in updated_configs:
+            motion_detector.autotracking_enabled = (
+                camera_config.onvif.autotracking.enabled
+            )
+            object_tracker.sync_trackers()
 
         if (
             not camera_enabled
@@ -349,8 +423,8 @@ def process_frames(
 
             # only add in the motion boxes when not calibrating and a ptz is not moving via autotracking
             # the ptz timestamps are only maintained while autotracking is on, so gate
-            # on the metric rather than trusting them to be reset otherwise
-            ptz_moving = ptz_metrics.autotracker_enabled.value and (
+            # on the config rather than trusting them to be reset otherwise
+            ptz_moving = camera_config.onvif.autotracking.enabled and (
                 ptz_moving_at_frame_time(
                     frame_time,
                     ptz_metrics.start_time.value,
@@ -533,7 +607,7 @@ def process_frames(
             )
         # add to the queue if not full
         if detected_objects_queue.full():
-            frame_manager.close(frame_name)
+            dropped_frames.dropped(time.monotonic())
             continue
         else:
             fps_tracker.update()
@@ -549,7 +623,6 @@ def process_frames(
                 )
             )
             camera_metrics.detection_fps.value = object_detector.fps.eps()
-            frame_manager.close(frame_name)
 
     motion_detector.stop()
     requestor.stop()

@@ -70,10 +70,6 @@
             "label": "开启鸟瞰图",
             "description": "开启或关闭鸟瞰图功能。"
         },
-        "mode": {
-            "label": "追踪模式",
-            "description": "在鸟瞰视图中包含摄像头的模式有：“基于目标”、“基于画面变动”或“连续”。"
-        },
         "order": {
             "label": "排序位置",
             "description": "用于控制摄像头在鸟瞰视图布局中排序位置的数值。"
@@ -641,10 +637,6 @@
             "label": "开启快照",
             "description": "开启或关闭此摄像头的快照保存。"
         },
-        "clean_copy": {
-            "label": "保存干净副本",
-            "description": "除了带注释的快照外，还保存一份不带注释的干净快照副本。"
-        },
         "timestamp": {
             "label": "时间戳叠加",
             "description": "在 API 生成的快照上叠加时间戳。"
@@ -671,10 +663,6 @@
             "default": {
                 "label": "默认保留",
                 "description": "保留快照的默认天数。"
-            },
-            "mode": {
-                "label": "保留模式",
-                "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
             },
             "objects": {
                 "label": "目标保留",

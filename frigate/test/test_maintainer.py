@@ -1,6 +1,9 @@
 import datetime
+import os
 import sys
+import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Mock complex imports before importing maintainer, saving originals so we can
@@ -17,7 +20,7 @@ for name in _MOCKED_MODULES:
 
 # Now import the class under test
 from frigate.config import FrigateConfig, RetainModeEnum  # noqa: E402
-from frigate.record.maintainer import RecordingMaintainer  # noqa: E402
+from frigate.record.maintainer import RecordingMaintainer, SegmentInfo  # noqa: E402
 
 # Restore original modules (or remove mock if there was no original)
 for name, orig in _originals.items():
@@ -48,8 +51,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                     "frigate.record.maintainer.psutil.process_iter", return_value=[]
                 ):
                     with patch("frigate.record.maintainer.logger.warning") as warn:
-                        # Mock validate_and_move_segment to avoid further logic
-                        maintainer.validate_and_move_segment = MagicMock()
+                        # Mock validate_and_move_segment to avoid further logic.
+                        # The requestor is real when another test imported the
+                        # maintainer first, and it would block on a reply.
+                        maintainer.validate_and_move_segment = AsyncMock()
+                        maintainer.requestor = MagicMock()
 
                         try:
                             await maintainer.move_files()
@@ -98,7 +104,9 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         end_time = now - datetime.timedelta(seconds=10)
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
-        maintainer.end_time_cache = {cache_path: (end_time, 10.0)}
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, None, None, None, None, None)
+        }
         # Single processed frame well past end_time with no motion/objects.
         maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
         maintainer.audio_recordings_info["test_cam"] = []
@@ -109,7 +117,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         result = await maintainer.validate_and_move_segment(
             "test_cam",
             reviews=[],
-            recording={"start_time": start_time, "cache_path": cache_path},
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
         )
 
         self.assertIsNone(result)
@@ -139,7 +151,9 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         end_time = now - datetime.timedelta(seconds=10)
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
-        maintainer.end_time_cache = {cache_path: (end_time, 10.0)}
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, False, None, None, None, [])
+        }
         # Metadata has only reached partway into the segment.
         maintainer.object_recordings_info["test_cam"] = [
             (end_time.timestamp() - 8, [], [], [])
@@ -158,7 +172,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         result = await maintainer.validate_and_move_segment(
             "test_cam",
             reviews=[review],
-            recording={"start_time": start_time, "cache_path": cache_path},
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
         )
 
         self.assertIsNone(result)
@@ -173,7 +191,11 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         await maintainer.validate_and_move_segment(
             "test_cam",
             reviews=[review],
-            recording={"start_time": start_time, "cache_path": cache_path},
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
         )
 
         maintainer.drop_segment.assert_not_called()
@@ -201,7 +223,8 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
             (recent, 0, []),
         ]
 
-        grouped_recordings = {"present_cam": [{"start_time": ancient}]}
+        # keyed by (camera, stream_type), matching what move_files passes
+        grouped_recordings = {("present_cam", "main"): [{"start_time": ancient}]}
 
         maintainer._expire_stale_recordings_info(grouped_recordings)
 
@@ -218,6 +241,87 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             maintainer.audio_recordings_info["absent_cam"], [(recent, 0, [])]
         )
+
+
+class TestMoveSegment(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.record_dir = os.path.join(self.tmp.name, "recordings")
+        self.cache_path = os.path.join(
+            self.tmp.name, "test_cam@20260417150000+0000.mp4"
+        )
+        self.dest_path = os.path.join(
+            self.record_dir, "2026-04-17", "15", "test_cam", "00.00.mp4"
+        )
+        Path(self.cache_path).write_bytes(b"segment")
+
+        config = MagicMock(spec=FrigateConfig)
+        config.cameras = {}
+        config.ffmpeg = MagicMock(ffmpeg_path="ffmpeg")
+        self.maintainer = RecordingMaintainer(config, MagicMock())
+        self.maintainer.end_time_cache = {self.cache_path: MagicMock()}
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    async def _move(self, returncode: int = 0) -> tuple[dict | None, AsyncMock]:
+        def fake_exec(*args, **kwargs):
+            # ffmpeg leaves its output behind even when it fails partway
+            Path(args[-1]).write_bytes(b"remuxed")
+            process = MagicMock()
+            process.wait = AsyncMock()
+            process.returncode = returncode
+            process.stderr = None
+            return process
+
+        start = datetime.datetime(2026, 4, 17, 15, 0, 0, tzinfo=datetime.UTC)
+        exec_mock = AsyncMock(side_effect=fake_exec)
+
+        with (
+            patch("frigate.record.maintainer.RECORD_DIR", self.record_dir),
+            patch("frigate.record.maintainer.chown_to_runtime"),
+            patch(
+                "frigate.record.maintainer.asyncio.create_subprocess_exec", exec_mock
+            ),
+        ):
+            result = await self.maintainer.move_segment(
+                "test_cam",
+                "main",
+                start,
+                start + datetime.timedelta(seconds=10),
+                10.0,
+                self.cache_path,
+                SegmentInfo(0, 0, 0, 0),
+            )
+
+        return result, exec_mock
+
+    async def test_successful_move_clears_cache_entry(self):
+        result, _ = await self._move()
+
+        self.assertIsNotNone(result)
+        self.assertTrue(os.path.exists(self.dest_path))
+        self.assertFalse(os.path.exists(self.cache_path))
+        self.assertNotIn(self.cache_path, self.maintainer.end_time_cache)
+
+    async def test_existing_destination_drops_cache_file(self):
+        os.makedirs(os.path.dirname(self.dest_path))
+        Path(self.dest_path).write_bytes(b"existing")
+
+        result, exec_mock = await self._move()
+
+        self.assertIsNone(result)
+        exec_mock.assert_not_awaited()
+        self.assertFalse(os.path.exists(self.cache_path))
+        self.assertNotIn(self.cache_path, self.maintainer.end_time_cache)
+
+    async def test_failed_move_removes_partial_output_for_retry(self):
+        result, _ = await self._move(returncode=1)
+
+        self.assertIsNone(result)
+        self.assertFalse(os.path.exists(self.dest_path))
+        self.assertTrue(os.path.exists(self.cache_path))
+        self.assertIn(self.cache_path, self.maintainer.end_time_cache)
 
 
 if __name__ == "__main__":

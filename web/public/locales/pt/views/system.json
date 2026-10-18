@@ -108,14 +108,11 @@
   },
   "lastRefreshed": "Última atualização: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} tem alta utilização da CPU FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} tem alta utilização da CPU de deteção ({{detectAvg}}%)",
     "healthy": "O sistema está saudável",
     "reindexingEmbeddings": "Reindexando incorporações ({{processed}}% completo)",
     "detectIsVerySlow": "{{detect}} está muito lento ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} está off-line",
-    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)",
-    "shmTooLow": "/dev/shm alocação ({{total}} MB) deveria ser aumentada pelo menos {{min}} MB."
+    "detectIsSlow": "{{detect}} está lento ({{speed}} ms)"
   },
   "general": {
     "title": "Geral",

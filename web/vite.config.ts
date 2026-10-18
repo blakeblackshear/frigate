@@ -1,16 +1,12 @@
-/// <reference types="vitest" />
 import path, { resolve } from "path";
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import monacoEditorPlugin from "vite-plugin-monaco-editor";
 
 const proxyHost = process.env.PROXY_HOST || "localhost:5000";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    "import.meta.vitest": "undefined",
-  },
   server: {
     proxy: {
       "/api": {
@@ -37,14 +33,14 @@ export default defineConfig({
       },
     },
   },
-  esbuild: {
-    keepNames: true,
-  },
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       input: {
-        main: resolve(__dirname, "index.html"),
-        login: resolve(__dirname, "login.html"),
+        main: resolve(import.meta.dirname, "index.html"),
+        login: resolve(import.meta.dirname, "login.html"),
+      },
+      output: {
+        keepNames: true,
       },
     },
   },
@@ -57,24 +53,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
-  },
-  test: {
-    environment: "jsdom",
-    alias: {
-      "testing-library": path.resolve(
-        __dirname,
-        "./__test__/testing-library.js",
-      ),
-    },
-    setupFiles: ["./__test__/test-setup.ts"],
-    includeSource: ["src/**/*.{js,jsx,ts,tsx}"],
-    coverage: {
-      reporter: ["text-summary", "text"],
-    },
-    mockReset: true,
-    restoreMocks: true,
-    globals: true,
   },
 });

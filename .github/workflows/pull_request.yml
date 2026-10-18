@@ -16,10 +16,10 @@ jobs:
     name: Web - Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 20.x
       - run: npm install
@@ -35,10 +35,10 @@ jobs:
     name: Web - Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 20.x
       - run: npm install
@@ -46,18 +46,15 @@ jobs:
       - name: Build web
         run: npm run build
         working-directory: ./web
-      # - name: Test
-      #   run: npm run test
-      #   working-directory: ./web
 
   web_e2e:
     name: Web - E2E Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 20.x
       - run: npm install
@@ -86,11 +83,11 @@ jobs:
     name: Python Checks
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Set up Python ${{ env.DEFAULT_PYTHON }}
-        uses: actions/setup-python@v5.4.0
+        uses: actions/setup-python@v7.0.0
         with:
           python-version: ${{ env.DEFAULT_PYTHON }}
       - name: Install requirements
@@ -109,10 +106,10 @@ jobs:
     name: Python Tests
     steps:
       - name: Check out code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: 20.x
       - name: Install devcontainer cli
