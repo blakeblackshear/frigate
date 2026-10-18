@@ -195,11 +195,13 @@ class OutputProcess(FrigateProcess):
                 logger.debug("Applied dynamic birdseye config update")
 
             # user endpoints publish None on this topic and role edits an AuthConfig
-            _, auth_config = auth_config_subscriber.check_for_update()
-
-            if isinstance(auth_config, AuthConfig):
-                self.config.auth = auth_config
-                logger.debug("Applied dynamic auth config update")
+            while True:
+                auth_topic, auth_config = auth_config_subscriber.check_for_update()
+                if auth_topic is None:
+                    break
+                if isinstance(auth_config, AuthConfig):
+                    self.config.auth = auth_config
+                    logger.debug("Applied dynamic auth config update")
 
             # drain review updates every iteration, not just when birdseye is
             # being consumed, so a dropped end never strands a camera
