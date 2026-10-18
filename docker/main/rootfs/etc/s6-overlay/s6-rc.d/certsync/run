@@ -61,7 +61,7 @@ do
             ;;
     esac
 
-    liveprint=`echo | openssl s_client -showcerts -connect 127.0.0.1:$listen_external_port 2>&1 | openssl x509 -fingerprint 2>&1 | grep -i fingerprint  || echo 'failed'`
+    liveprint=`openssl s_client -showcerts -connect 127.0.0.1:$listen_external_port </dev/null 2>&1 | openssl x509 -fingerprint 2>&1 | grep -i fingerprint  || echo 'failed'`
 
     case "$liveprint" in
         *Fingerprint*)
