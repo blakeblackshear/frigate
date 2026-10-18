@@ -14,8 +14,8 @@ fi
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
-# Runs as root before any /config path enters the environment; -I skips the
-# user site-packages under $HOME
+# This runs as root before any /config path enters the environment; -I skips
+# the user site-packages under $HOME
 function set_libva_version() {
     local ffmpeg_path
     ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py)
@@ -26,10 +26,10 @@ function set_libva_version() {
 echo "[INFO] Preparing Frigate..."
 set_libva_version
 
-# HOME=/root survives s6-setuidgid, so the drop sets HOME=/config. The runtime
-# user owns /config, so these paths go only to the service process, never to
-# root. Detector runtimes installed at first start (pip install --user) live
-# under $HOME/.local.
+# HOME=/root survives s6-setuidgid, so any run that is not root gets
+# HOME=/config explicitly. The runtime user owns /config, so these paths go
+# only to the service process, never to root. Detector runtimes installed at
+# first start (pip install --user) live under $HOME/.local.
 run_as=()
 runtime_home="${HOME}"
 if [[ "$runs_as_root" -eq 0 ]]; then

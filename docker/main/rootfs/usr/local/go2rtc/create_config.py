@@ -199,8 +199,8 @@ if config.get("birdseye", {}).get("restream", False):
         go2rtc_config["streams"] = {"birdseye": ffmpeg_cmd}
 
 # The run script removes the old file first. Exclusive create never follows a
-# link the go2rtc user planted in sticky /dev/shm. 0640 because the config
-# contains camera credentials.
+# link the go2rtc user planted in sticky /dev/shm. The config contains camera
+# credentials, so it is not world-readable.
 fd = os.open(
     "/dev/shm/go2rtc.yaml",
     os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
