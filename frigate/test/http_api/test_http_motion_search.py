@@ -1,5 +1,6 @@
 """Tests for motion search job limits."""
 
+from datetime import datetime
 from unittest.mock import patch
 
 from frigate.jobs import motion_search
@@ -23,7 +24,7 @@ class TestHttpMotionSearch(BaseTestHttp):
         self.addCleanup(motion_search._motion_search_jobs.clear)
 
         runner_patch = patch("frigate.jobs.motion_search.MotionSearchRunner")
-        runner_patch.start()
+        self.runner = runner_patch.start()
         self.addCleanup(runner_patch.stop)
 
     def start(self, client: AuthTestClient, user: str, body: dict = BODY):
@@ -38,8 +39,44 @@ class TestHttpMotionSearch(BaseTestHttp):
     def test_user_can_start_again_after_job_finishes(self):
         with AuthTestClient(self.app) as client:
             job_id = self.start(client, "alice").json()["job_id"]
-            motion_search.get_motion_search_job(job_id).end_time = 1.0
+            job = motion_search.get_motion_search_job(job_id)
+            job.end_time = datetime.now().timestamp()
             self.assertEqual(self.start(client, "alice").status_code, 200)
+            self.assertIsNotNone(motion_search.get_motion_search_job(job_id))
+
+    def test_cancelled_job_holds_slot_until_grace_expires(self):
+        with AuthTestClient(self.app) as client:
+            job_id = self.start(client, "alice").json()["job_id"]
+            job = motion_search.get_motion_search_job(job_id)
+            job.status = "cancelled"
+            job.cancelled_at = datetime.now().timestamp()
+            self.assertEqual(self.start(client, "alice").status_code, 409)
+
+            job.cancelled_at -= motion_search.CANCEL_GRACE_SECONDS + 1
+            self.assertEqual(self.start(client, "alice").status_code, 200)
+
+    def test_start_failure_releases_slot(self):
+        self.runner.return_value.start.side_effect = RuntimeError("boom")
+        with AuthTestClient(self.app) as client:
+            with self.assertRaises(RuntimeError):
+                self.start(client, "alice")
+            self.assertEqual(motion_search._motion_search_jobs, {})
+            self.runner.return_value.requestor.stop.assert_called_once()
+
+            self.runner.return_value.start.side_effect = None
+            self.assertEqual(self.start(client, "alice").status_code, 200)
+
+    def test_shared_identity_skips_per_user_limit(self):
+        with AuthTestClient(self.app) as client:
+            self.assertEqual(self.start(client, "anonymous").status_code, 200)
+            self.assertEqual(self.start(client, "anonymous").status_code, 200)
+
+        motion_search._motion_search_jobs.clear()
+        self.minimal_config["auth"] = {"enabled": False}
+        app = self.create_app()
+        with AuthTestClient(app) as client:
+            self.assertEqual(self.start(client, "viewer").status_code, 200)
+            self.assertEqual(self.start(client, "viewer").status_code, 200)
 
     def test_global_cap_enforced(self):
         with AuthTestClient(self.app) as client:

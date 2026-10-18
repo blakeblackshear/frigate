@@ -101,6 +101,7 @@ class TestVodDecodeCommand(unittest.TestCase):
         joined = " ".join(cmd)
         self.assertIn("-skip_frame nokey", joined)
         self.assertIn("-protocol_whitelist pipe,file,http,tcp", joined)
+        self.assertLess(cmd.index("-rw_timeout"), cmd.index("-i"))
         self.assertIn(f"-i {self.URL}", joined)
         self.assertIn("crop=100:80:10:20", joined)
         self.assertIn("scale=50:40", joined)

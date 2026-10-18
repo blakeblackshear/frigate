@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from frigate.api.auth import require_camera_access
 from frigate.api.defs.tags import Tags
+from frigate.config import FrigateConfig
 from frigate.jobs.motion_search import (
     MotionSearchCapacityError,
     MotionSearchUserBusyError,
@@ -100,6 +101,20 @@ class MotionSearchStatusResponse(BaseModel):
     progress: float | None = None
 
 
+def _per_user_identity(request: Request, config: FrigateConfig) -> str | None:
+    """Return the requesting user, or None when callers share one identity.
+
+    Internal-port requests are all "anonymous", and with auth disabled and no
+    proxy user header every browser is "viewer".
+    """
+    username = request.headers.get("remote-user")
+    if not username or username == "anonymous":
+        return None
+    if config.auth.enabled or config.proxy.header_map.user:
+        return username
+    return None
+
+
 @router.post(
     "/{camera_name}/search/motion",
     response_model=MotionSearchStartResponse,
@@ -147,7 +162,7 @@ async def start_motion_search(
         return JSONResponse(
             content={
                 "success": False,
-                "message": "Time range must be 48 hours or less",
+                "message": f"Time range must be {MAX_SEARCH_RANGE_SECONDS // 3600} hours or less",
             },
             status_code=400,
         )
@@ -163,7 +178,7 @@ async def start_motion_search(
             min_area=body.min_area,
             parallel=body.parallel,
             max_results=body.max_results,
-            username=request.headers.get("remote-user", "anonymous"),
+            username=_per_user_identity(request, config),
         )
     except MotionSearchUserBusyError:
         return JSONResponse(

@@ -53,6 +53,8 @@ FALLBACK_SAMPLE_FPS = 2.0
 MAX_ACTIVE_JOBS = 3
 # Finished jobs stay pollable for this long before eviction (seconds).
 FINISHED_JOB_TTL = 600.0
+# A cancelled job stops holding a slot after this long, even if its thread is wedged.
+CANCEL_GRACE_SECONDS = 60.0
 
 
 @dataclass
@@ -98,7 +100,8 @@ class MotionSearchJob(Job):
     min_area: float = 5.0
     parallel: bool = False
     max_results: int = 25
-    username: str = ""
+    username: str | None = None
+    cancelled_at: float | None = None
 
     # Track progress
     total_frames_processed: int = 0
@@ -114,6 +117,7 @@ class MotionSearchJob(Job):
         """Convert to dictionary for WebSocket transmission."""
         d = asdict(self)
         d.pop("username")
+        d.pop("cancelled_at")
         if self.metrics:
             d["metrics"] = self.metrics.to_dict()
         return d
@@ -779,13 +783,15 @@ class MotionSearchRunner(threading.Thread):
                         run_results, frames = completed.pop(next_idx)
                         if self._merge_run(runs[next_idx], run_results, frames, state):
                             self.internal_stop_event.set()
-                            for pending in futures:
-                                pending.cancel()
                             break
                         next_idx += 1
 
                     if self.internal_stop_event.is_set():
                         break
+
+                # Queued runs would otherwise still execute when the pool exits.
+                for pending in futures:
+                    pending.cancel()
         else:
             for run in runs:
                 if self._should_stop():
@@ -858,6 +864,13 @@ def _evict_finished_jobs(now: float) -> None:
         del _motion_search_jobs[job_id]
 
 
+def _is_active(job: MotionSearchJob, now: float) -> bool:
+    """True while the job's thread may still be running and holding a slot."""
+    if job.end_time is not None:
+        return False
+    return job.cancelled_at is None or now - job.cancelled_at < CANCEL_GRACE_SECONDS
+
+
 def stop_all_motion_search_jobs() -> None:
     """Cancel all running motion search jobs for clean shutdown."""
     with _jobs_lock:
@@ -877,12 +890,13 @@ def start_motion_search_job(
     min_area: float = 5.0,
     parallel: bool = False,
     max_results: int = 25,
-    username: str = "",
+    username: str | None = None,
 ) -> str:
     """Start a new motion search job.
 
-    Returns the job ID. Raises MotionSearchUserBusyError when the user already
+    Returns the job ID. Raises MotionSearchUserBusyError when ``username`` already
     has an active job and MotionSearchCapacityError when MAX_ACTIVE_JOBS are active.
+    Pass ``username=None`` when callers share an identity to skip the per-user check.
     """
     job = MotionSearchJob(
         camera=camera_name,
@@ -899,21 +913,26 @@ def start_motion_search_job(
     cancel_event = threading.Event()
 
     with _jobs_lock:
-        _evict_finished_jobs(datetime.now().timestamp())
+        now = datetime.now().timestamp()
+        _evict_finished_jobs(now)
 
         # A cancelled job keeps its thread until the runner sets end_time, so
         # count threads rather than statuses.
-        active = [j for j, _ in _motion_search_jobs.values() if j.end_time is None]
-        if any(j.username == username for j in active):
+        active = [j for j, _ in _motion_search_jobs.values() if _is_active(j, now)]
+        if username is not None and any(j.username == username for j in active):
             raise MotionSearchUserBusyError()
         if len(active) >= MAX_ACTIVE_JOBS:
             raise MotionSearchCapacityError()
 
         _motion_search_jobs[job.id] = (job, cancel_event)
 
+    runner: MotionSearchRunner | None = None
     try:
-        MotionSearchRunner(job, config, cancel_event).start()
+        runner = MotionSearchRunner(job, config, cancel_event)
+        runner.start()
     except Exception:
+        if runner is not None:
+            runner.requestor.stop()
         with _jobs_lock:
             del _motion_search_jobs[job.id]
         raise
@@ -960,6 +979,7 @@ def cancel_motion_search_job(job_id: str) -> bool:
 
         cancel_event.set()
         job.status = JobStatusTypesEnum.cancelled
+        job.cancelled_at = datetime.now().timestamp()
         job_payload = job.to_dict()
         logger.info("Cancelled motion search job %s", job_id)
 

@@ -106,7 +106,13 @@ def keyframe_sampling_eligible(
     return max(gaps) <= max_gap
 
 
-VOD_PROTOCOL_ARGS = ["-protocol_whitelist", "pipe,file,http,tcp"]
+# rw_timeout (microseconds) ends a stalled VOD read instead of blocking forever.
+VOD_PROTOCOL_ARGS = [
+    "-protocol_whitelist",
+    "pipe,file,http,tcp",
+    "-rw_timeout",
+    "30000000",
+]
 
 
 def build_vod_decode_command(
