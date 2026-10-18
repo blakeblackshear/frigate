@@ -20,6 +20,7 @@ from frigate.jobs.job import Job
 from frigate.jobs.motion_search_batch import (
     build_segment_time_map,
     coalesce_runs,
+    keyframes_cover_stream,
     stream_time_to_absolute,
 )
 from frigate.jobs.motion_search_decode import (
@@ -53,6 +54,9 @@ FALLBACK_SAMPLE_FPS = 2.0
 MAX_ACTIVE_JOBS = 3
 # Finished jobs stay pollable for this long before eviction (seconds).
 FINISHED_JOB_TTL = 600.0
+# Missing stream time beyond this marks a run as truncated, e.g. a segment the
+# HLS demuxer skipped after a read timeout.
+MAX_STREAM_HOLE_SECONDS = 5.0
 # A cancelled job stops holding a slot after this long, even if its thread is wedged.
 CANCEL_GRACE_SECONDS = 60.0
 
@@ -585,7 +589,7 @@ class MotionSearchRunner(threading.Thread):
 
         # Decide keyframe vs fixed-cadence sampling once from the first run's GOP
         # (keyframe structure is a per-camera constant).
-        first_pts = probe_vod_keyframe_pts(ffprobe_path, first_url)
+        first_pts = probe_vod_keyframe_pts(ffprobe_path, first_url, self._should_stop)
         self.use_keyframe = keyframe_sampling_eligible(first_pts)
 
         logger.debug(
@@ -647,38 +651,47 @@ class MotionSearchRunner(threading.Thread):
         time_map = build_segment_time_map(run)
 
         if self.use_keyframe:
-            kf_pts = probe_vod_keyframe_pts(self.ffprobe_path, vod_url)
-            frames = list(
-                iter_vod_frames(
-                    self.ffmpeg_path,
-                    vod_url,
-                    self.scaled[0],
-                    self.scaled[1],
-                    self.channels,
-                    self.decode_args,
-                    self.crop,
-                    self.scaled,
-                    True,
-                    self._should_stop,
-                    skip_nonkey=True,
-                    fps_rate=None,
+            kf_pts = probe_vod_keyframe_pts(
+                self.ffprobe_path, vod_url, self._should_stop
+            )
+            # Probe and decode fetch the stream separately, so equal counts only
+            # pair frames with timestamps when the probe saw the whole stream.
+            if keyframes_cover_stream(
+                kf_pts, _stream_duration(time_map), MAX_STREAM_HOLE_SECONDS
+            ):
+                frames = list(
+                    iter_vod_frames(
+                        self.ffmpeg_path,
+                        vod_url,
+                        self.scaled[0],
+                        self.scaled[1],
+                        self.channels,
+                        self.decode_args,
+                        self.crop,
+                        self.scaled,
+                        True,
+                        self._should_stop,
+                        skip_nonkey=True,
+                        fps_rate=None,
+                    )
                 )
-            )
-            if kf_pts and len(frames) == len(kf_pts):
-                abs_times = [stream_time_to_absolute(time_map, p) for p in kf_pts]
-                indexed = list(enumerate(frames))
+                if len(frames) == len(kf_pts):
+                    abs_times = [stream_time_to_absolute(time_map, p) for p in kf_pts]
+                    indexed = list(enumerate(frames))
 
-                def _ts_kf(i: int) -> float:
-                    return abs_times[i]
+                    def _ts_kf(i: int) -> float:
+                        return abs_times[i]
 
-                results = self._detect_with_progress(indexed, _ts_kf)
-                return results, len(frames)
+                    results = self._detect_with_progress(indexed, _ts_kf)
+                    return results, len(frames)
 
-            logger.debug(
-                "Keyframe count mismatch (%d decoded vs %d probed), using cadence",
-                len(frames),
-                len(kf_pts),
-            )
+                logger.debug(
+                    "Keyframe count mismatch (%d decoded vs %d probed), using cadence",
+                    len(frames),
+                    len(kf_pts),
+                )
+            else:
+                logger.debug("Keyframe probe has a gap, using cadence")
 
         return self._process_run_cadence(vod_url, time_map)
 
@@ -702,6 +715,15 @@ class MotionSearchRunner(threading.Thread):
                 fps_rate=self.fps_rate,
             )
         )
+        expected = _stream_duration(time_map) * self.fps_rate
+        if (
+            not self._should_stop()
+            and expected - len(frames) > MAX_STREAM_HOLE_SECONDS * self.fps_rate
+        ):
+            raise RuntimeError(
+                f"VOD decode returned {len(frames)} of ~{expected:.0f} frames"
+            )
+
         indexed = list(enumerate(frames))
 
         def _ts_fps(i: int) -> float:
@@ -864,6 +886,11 @@ def _evict_finished_jobs(now: float) -> None:
         del _motion_search_jobs[job_id]
 
 
+def _stream_duration(time_map: list[tuple[float, float, float]]) -> float:
+    offset, _, duration = time_map[-1]
+    return offset + duration
+
+
 def _is_active(job: MotionSearchJob, now: float) -> bool:
     """True while the job's thread may still be running and holding a slot."""
     if job.end_time is not None:
@@ -919,7 +946,11 @@ def start_motion_search_job(
         # A cancelled job keeps its thread until the runner sets end_time, so
         # count threads rather than statuses.
         active = [j for j, _ in _motion_search_jobs.values() if _is_active(j, now)]
-        if username is not None and any(j.username == username for j in active):
+        # The UI forgets a cancelled job at once, so it only counts globally.
+        if username is not None and any(
+            j.username == username and j.status != JobStatusTypesEnum.cancelled
+            for j in active
+        ):
             raise MotionSearchUserBusyError()
         if len(active) >= MAX_ACTIVE_JOBS:
             raise MotionSearchCapacityError()

@@ -1,5 +1,7 @@
 """Tests for the motion search hardware-accelerated decode helpers."""
 
+import io
+import subprocess as sp
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -7,6 +9,7 @@ from unittest import mock
 from frigate.jobs.motion_search_decode import (
     KEYFRAME_MAX_GAP_SECONDS,
     build_vod_decode_command,
+    iter_vod_frames,
     keyframe_sampling_eligible,
     probe_video_dimensions,
     probe_vod_keyframe_pts,
@@ -140,7 +143,50 @@ class TestVodDecodeCommand(unittest.TestCase):
         self.assertIn("format=nv12", joined)
 
 
+class TestVodDecodeSkippedSegment(unittest.TestCase):
+    def _decode(self, stderr_output: bytes) -> list:
+        def popen(cmd, stdout, stderr):
+            stderr.write(stderr_output)
+            return mock.Mock(stdout=io.BytesIO(b"\0" * 8))
+
+        with (
+            mock.patch("frigate.jobs.motion_search_decode.sp.Popen", side_effect=popen),
+            mock.patch("frigate.jobs.motion_search_decode.terminate_ffmpeg_stream"),
+        ):
+            return list(
+                iter_vod_frames(
+                    "ffmpeg",
+                    "http://x/index.m3u8",
+                    2,
+                    2,
+                    1,
+                    [],
+                    None,
+                    None,
+                    True,
+                    lambda: False,
+                    skip_nonkey=False,
+                    fps_rate=2.0,
+                )
+            )
+
+    def test_clean_decode_returns_frames(self):
+        self.assertEqual(len(self._decode(b"")), 2)
+
+    def test_skipped_segment_raises(self):
+        stderr = (
+            b"[hls @ 0x1] Segment 1 of playlist 0 failed too many times, skipping\n"
+        )
+        with self.assertRaises(RuntimeError):
+            self._decode(stderr)
+
+
 class TestProbeVodKeyframePts(unittest.TestCase):
+    def _proc(self, stdout="", returncode=0):
+        proc = mock.Mock(returncode=returncode)
+        proc.communicate.return_value = (stdout, None)
+        return proc
+
     def test_parses_keyframe_packets(self):
         sample = (
             '{"packets":['
@@ -148,19 +194,39 @@ class TestProbeVodKeyframePts(unittest.TestCase):
             '{"pts_time":"1.000000","flags":"___"},'
             '{"pts_time":"2.000000","flags":"K__"}]}'
         )
-        completed = mock.Mock(stdout=sample, returncode=0)
         with mock.patch(
-            "frigate.jobs.motion_search_decode.sp.run", return_value=completed
-        ):
-            pts = probe_vod_keyframe_pts("ffprobe", "http://x/index.m3u8")
+            "frigate.jobs.motion_search_decode.sp.Popen",
+            return_value=self._proc(sample),
+        ) as popen:
+            pts = probe_vod_keyframe_pts(
+                "ffprobe", "http://x/index.m3u8", lambda: False
+            )
         self.assertEqual(pts, [0.0, 2.0])
+        cmd = popen.call_args.args[0]
+        self.assertLess(cmd.index("-rw_timeout"), cmd.index("-i"))
 
     def test_returns_empty_on_failure(self):
         with mock.patch(
-            "frigate.jobs.motion_search_decode.sp.run",
+            "frigate.jobs.motion_search_decode.sp.Popen",
             side_effect=OSError("boom"),
         ):
-            self.assertEqual(probe_vod_keyframe_pts("ffprobe", "http://x"), [])
+            self.assertEqual(
+                probe_vod_keyframe_pts("ffprobe", "http://x", lambda: False), []
+            )
+
+    def test_stop_request_kills_probe(self):
+        proc = self._proc()
+        proc.communicate.side_effect = [
+            sp.TimeoutExpired("ffprobe", 0.5),
+            ("", None),
+        ]
+        with mock.patch(
+            "frigate.jobs.motion_search_decode.sp.Popen", return_value=proc
+        ):
+            self.assertEqual(
+                probe_vod_keyframe_pts("ffprobe", "http://x", lambda: True), []
+            )
+        proc.kill.assert_called_once()
 
 
 class TestProbeVideoDimensions(unittest.TestCase):
@@ -171,9 +237,10 @@ class TestProbeVideoDimensions(unittest.TestCase):
         completed = mock.Mock(stdout=sample, returncode=0)
         with mock.patch(
             "frigate.jobs.motion_search_decode.sp.run", return_value=completed
-        ):
+        ) as run:
             dims = probe_video_dimensions("ffprobe", "/tmp/a.mp4")
         assert dims is not None
+        self.assertIn("-rw_timeout", run.call_args.args[0])
         width, height, fps = dims
         self.assertEqual((width, height), (1920, 1080))
         self.assertAlmostEqual(fps, 29.97, places=2)

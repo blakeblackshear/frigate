@@ -10,6 +10,7 @@ import json
 import logging
 import subprocess as sp
 import tempfile
+import time
 from collections.abc import Callable, Generator
 from typing import IO
 
@@ -107,6 +108,9 @@ def keyframe_sampling_eligible(
 
 
 # rw_timeout (microseconds) ends a stalled VOD read instead of blocking forever.
+# The HLS demuxer logs this at warning level when a segment read fails or times out.
+HLS_SEGMENT_SKIPPED = b"failed too many times, skipping"
+
 VOD_PROTOCOL_ARGS = [
     "-protocol_whitelist",
     "pipe,file,http,tcp",
@@ -149,7 +153,7 @@ def build_vod_decode_command(
         filters.append(f"scale={sw}:{sh}")
 
     pix_fmt = "gray" if gray else "bgr24"
-    cmd = [ffmpeg_path, "-hide_banner", "-loglevel", "error"]
+    cmd = [ffmpeg_path, "-hide_banner", "-loglevel", "warning"]
     if skip_nonkey:
         cmd += ["-skip_frame", "nokey"]
     cmd += [*decode_args, *VOD_PROTOCOL_ARGS, "-i", vod_url, "-an"]
@@ -211,7 +215,12 @@ def _run_vod_decode(
             yield frame
     finally:
         terminate_ffmpeg_stream(proc)
+        stderr_file.seek(0)
+        segment_skipped = HLS_SEGMENT_SKIPPED in stderr_file.read()
         stderr_file.close()
+
+    if segment_skipped and not should_stop():
+        raise RuntimeError("VOD decode skipped a segment that failed to load")
 
     if count == 0 and software_retry and not should_stop():
         logger.warning("Hardware VOD decode produced no frames, retrying in software")
@@ -270,11 +279,16 @@ def iter_vod_frames(
     )
 
 
-def probe_vod_keyframe_pts(ffprobe_path: str, vod_url: str) -> list[float]:
+KEYFRAME_PROBE_TIMEOUT = 120.0
+
+
+def probe_vod_keyframe_pts(
+    ffprobe_path: str, vod_url: str, should_stop: Callable[[], bool]
+) -> list[float]:
     """Return keyframe presentation timestamps (VOD stream time) in order.
 
     Reads packet flags via ffprobe over the VOD URL (no decode). Returns [] on
-    any failure so the caller can fall back.
+    any failure, timeout, or stop request so the caller can fall back.
     """
     cmd = [
         ffprobe_path,
@@ -292,16 +306,27 @@ def probe_vod_keyframe_pts(ffprobe_path: str, vod_url: str) -> list[float]:
         "json",
     ]
     try:
-        completed = sp.run(cmd, capture_output=True, text=True, timeout=120)
-    except (OSError, sp.SubprocessError):
+        proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.DEVNULL, text=True)
+    except OSError:
         logger.warning("ffprobe failed for VOD keyframe probe")
         return []
 
-    if completed.returncode != 0 or not completed.stdout:
+    deadline = time.monotonic() + KEYFRAME_PROBE_TIMEOUT
+    while True:
+        try:
+            stdout, _ = proc.communicate(timeout=0.5)
+            break
+        except sp.TimeoutExpired:
+            if should_stop() or time.monotonic() > deadline:
+                proc.kill()
+                proc.communicate()
+                return []
+
+    if proc.returncode != 0 or not stdout:
         return []
 
     try:
-        packets = json.loads(completed.stdout).get("packets", [])
+        packets = json.loads(stdout).get("packets", [])
     except json.JSONDecodeError:
         return []
 
@@ -330,6 +355,7 @@ def probe_video_dimensions(
         ffprobe_path,
         "-v",
         "error",
+        *VOD_PROTOCOL_ARGS,
         "-select_streams",
         "v:0",
         "-show_entries",
