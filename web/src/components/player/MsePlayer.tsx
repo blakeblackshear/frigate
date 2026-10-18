@@ -753,23 +753,6 @@ function MSEPlayer({
     videoRef.current.volume = volume;
   }, [volume, videoRef]);
 
-  // ensure we disconnect for slower connections
-
-  useEffect(() => {
-    if (wsRef.current?.readyState === WebSocket.OPEN && !playbackEnabled) {
-      if (bufferTimeout) {
-        clearTimeout(bufferTimeout);
-        setBufferTimeout(undefined);
-      }
-
-      setTimeout(() => {
-        if (!playbackEnabled) onDisconnect();
-      }, 10000);
-    }
-    // we know that these deps are correct
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playbackEnabled]);
-
   // stats and health samples
 
   const onHealthSampleRef = useRef(onHealthSample);
