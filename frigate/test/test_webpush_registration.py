@@ -6,6 +6,7 @@ from base64 import urlsafe_b64encode
 from frigate.api.notification import _validate_subscription
 from frigate.comms.webpush import (
     _build_web_pushers,
+    _NoRedirectSession,
     _vapid_audience,
     validate_push_endpoint,
 )
@@ -174,6 +175,7 @@ class TestBuildWebPushers(unittest.TestCase):
 
         self.assertEqual(len(pushers), 1)
         self.assertEqual(pushers[0].subscription_info["endpoint"], VALID_ENDPOINTS[0])
+        self.assertIsInstance(pushers[0].mod_or_session, _NoRedirectSession)
 
 
 class TestVapidAudience(unittest.TestCase):

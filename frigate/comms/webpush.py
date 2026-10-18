@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import queue
+import socket
 import threading
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 from urllib.parse import urlparse
 
+import requests
 from py_vapid import Vapid01
 from pywebpush import WebPusher
 from titlecase import titlecase
@@ -108,6 +110,34 @@ def validate_push_endpoint(endpoint: Any) -> str | None:
     return None
 
 
+class _NoRedirectSession(requests.Session):
+    """Session that never follows redirects.
+
+    A push endpoint could otherwise redirect the send to an internal URL.
+    """
+
+    def request(self, *args: Any, **kwargs: Any) -> requests.Response:
+        kwargs["allow_redirects"] = False
+        return super().request(*args, **kwargs)
+
+
+_push_session = _NoRedirectSession()
+
+
+def _resolves_to_public_address(endpoint: str) -> bool:
+    hostname = urlparse(endpoint).hostname
+
+    if not hostname:
+        return False
+
+    try:
+        infos = socket.getaddrinfo(hostname, 443, proto=socket.IPPROTO_TCP)
+    except (socket.gaierror, UnicodeError):
+        return False
+
+    return all(ipaddress.ip_address(info[4][0]).is_global for info in infos)
+
+
 def _vapid_audience(endpoint: str) -> str:
     parsed = urlparse(endpoint)
     return f"{parsed.scheme}://{parsed.netloc}"
@@ -131,7 +161,7 @@ def _build_web_pushers(user: str, subs: list[dict[str, Any]]) -> list[WebPusher]
 
         # WebPusher decodes the stored keys and raises on malformed ones
         try:
-            pushers.append(WebPusher(sub))
+            pushers.append(WebPusher(sub, requests_session=_push_session))
         except Exception:
             logger.warning("Skipping invalid notification subscription for %s", user)
 
@@ -403,6 +433,16 @@ class WebPushClient(Communicator):
 
                 for pusher in self.web_pushers[notification.user]:
                     endpoint = pusher.subscription_info["endpoint"]
+
+                    # Resolve-then-send leaves a DNS rebinding window. Closing it
+                    # needs the connection pinned to the checked address.
+                    if not _resolves_to_public_address(endpoint):
+                        logger.warning(
+                            "Skipping notification to %s: endpoint does not resolve to a public address",
+                            notification.user,
+                        )
+                        continue
+
                     headers = self.claim_headers[_vapid_audience(endpoint)].copy()
                     headers["urgency"] = "high"
 
