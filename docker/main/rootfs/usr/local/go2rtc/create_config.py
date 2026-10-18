@@ -12,7 +12,11 @@ sys.path.insert(0, "/opt/frigate")
 from frigate.config.env import substitute_frigate_vars
 from frigate.const import BIRDSEYE_PIPE
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
-from frigate.util.config import find_config_file, resolve_ffmpeg_path
+from frigate.util.config import (
+    find_config_file,
+    is_valid_ffmpeg_path,
+    resolve_ffmpeg_path,
+)
 from frigate.util.services import (
     apply_go2rtc_ffmpeg_config,
     is_go2rtc_arbitrary_exec_allowed,
@@ -90,6 +94,10 @@ if go2rtc_config.get("rtsp", {}).get("password") is not None:
 
 # ensure ffmpeg path is set correctly
 path = config.get("ffmpeg", {}).get("path", "default")
+if not is_valid_ffmpeg_path(path):
+    print(
+        "[ERROR] ffmpeg path contains spaces, quotes or shell characters, using the default ffmpeg instead."
+    )
 ffmpeg_path = resolve_ffmpeg_path(path, "ffmpeg")
 
 for key in apply_go2rtc_ffmpeg_config(go2rtc_config, ffmpeg_path):

@@ -300,3 +300,16 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
             )
         assert resp.status_code == 200, resp.text
         assert "ngrok tcp 8555" in self._read_config()
+
+    def test_save_rejects_unsafe_ffmpeg_path(self):
+        before = self._read_config()
+        config = copy.deepcopy(_CONFIG)
+        config["ffmpeg"] = {"path": "/bin/sh -c id;#"}
+        with AuthTestClient(self.app) as client:
+            resp = client.post(
+                "/config/save?save_option=saveonly",
+                content=_dump(config),
+                headers={"Content-Type": "text/plain"},
+            )
+        assert resp.status_code == 400
+        assert self._read_config() == before
