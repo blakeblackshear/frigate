@@ -10,13 +10,11 @@ from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
 from frigate.config.env import substitute_frigate_vars
-from frigate.const import (
-    BIRDSEYE_PIPE,
-    LIBAVFORMAT_VERSION_MAJOR,
-)
+from frigate.const import BIRDSEYE_PIPE
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_encode
 from frigate.util.config import find_config_file, resolve_ffmpeg_path
 from frigate.util.services import (
+    apply_go2rtc_ffmpeg_config,
     is_go2rtc_arbitrary_exec_allowed,
     is_restricted_go2rtc_source,
 )
@@ -94,18 +92,11 @@ if go2rtc_config.get("rtsp", {}).get("password") is not None:
 path = config.get("ffmpeg", {}).get("path", "default")
 ffmpeg_path = resolve_ffmpeg_path(path, "ffmpeg")
 
-if go2rtc_config.get("ffmpeg") is None:
-    go2rtc_config["ffmpeg"] = {"bin": ffmpeg_path}
-elif go2rtc_config["ffmpeg"].get("bin") is None:
-    go2rtc_config["ffmpeg"]["bin"] = ffmpeg_path
-
-# need to replace ffmpeg command when using ffmpeg4
-if LIBAVFORMAT_VERSION_MAJOR < 59:
-    rtsp_args = "-fflags nobuffer -flags low_delay -stimeout 10000000 -user_agent go2rtc/ffmpeg -rtsp_transport tcp -i {input}"
-    if go2rtc_config.get("ffmpeg") is None:
-        go2rtc_config["ffmpeg"] = {"rtsp": rtsp_args}
-    elif go2rtc_config["ffmpeg"].get("rtsp") is None:
-        go2rtc_config["ffmpeg"]["rtsp"] = rtsp_args
+for key in apply_go2rtc_ffmpeg_config(go2rtc_config, ffmpeg_path):
+    print(
+        f"[ERROR] go2rtc option '{key}' was ignored because it is disabled by default for security. "
+        f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec."
+    )
 
 
 for name in list(go2rtc_config.get("streams", {})):
