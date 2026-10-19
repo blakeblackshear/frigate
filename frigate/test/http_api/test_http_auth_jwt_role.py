@@ -159,6 +159,21 @@ class TestAuthJwtRole(BaseTestHttp):
             for source in ("bearer", "cookie"):
                 self.assertEqual(self._auth(client, token, source).status_code, 401)
 
+    def test_recreated_user_rejects_token_from_deleted_account(self):
+        app = self._create_app()
+        token = self._token(app, "bob", "garage", iat=int(time.time()) - 10)
+
+        with AuthTestClient(app) as client:
+            self.assertEqual(client.delete("/users/bob").status_code, 200)
+            resp = client.post(
+                "/users",
+                json={"username": "bob", "password": PASSWORD, "role": "viewer"},
+            )
+            self.assertEqual(resp.status_code, 200)
+
+            for source in ("bearer", "cookie"):
+                self.assertEqual(self._auth(client, token, source).status_code, 401)
+
     def test_created_user_is_accepted(self):
         app = self._create_app()
         with AuthTestClient(app) as client:

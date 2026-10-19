@@ -493,6 +493,7 @@ def refresh_user_session(request: Request, username: str) -> None:
 
 
 def is_secure_request(request: Request) -> bool:
+    """Check the cookie setting and nginx's forwarded scheme for HTTPS."""
     # nginx sets X-Forwarded-Proto to its own scheme, replacing any client value
     return (
         request.app.frigate_config.auth.cookie_secure
@@ -1043,6 +1044,7 @@ def create_user(
             User.username: body.username,
             User.password_hash: password_hash,
             User.role: role,
+            User.password_changed_at: datetime.now(),
             User.notification_tokens: [],
         }
     ).execute()
