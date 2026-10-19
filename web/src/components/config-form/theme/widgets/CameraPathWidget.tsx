@@ -1,5 +1,7 @@
 import type { WidgetProps } from "@rjsf/utils";
 import useSWR from "swr";
+import get from "lodash/get";
+import isEqual from "lodash/isEqual";
 import { useMemo, useState, type FocusEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { LuEye, LuEyeOff } from "react-icons/lu";
@@ -21,6 +23,7 @@ type RawPathsResponse = {
       ffmpeg?: {
         inputs?: Array<{
           path?: string;
+          roles?: string[];
         }>;
       };
     }
@@ -66,17 +69,35 @@ export function CameraPathWidget(props: WidgetProps) {
     shouldFetchRawPaths ? "config/raw_paths" : null,
   );
 
+  const rawValue = typeof value === "string" ? value : "";
+
+  const roles =
+    inputIndex === undefined
+      ? undefined
+      : get(formContext?.formData, ["inputs", inputIndex, "roles"]);
+
+  // Match by masked value with roles breaking a tie, as the backend restores
+  // on save, so deleting or reordering inputs never reveals another input's path
   const rawPath = useMemo(() => {
-    if (!cameraName || inputIndex === undefined) {
+    if (!cameraName || !isMaskedPath(rawValue)) {
       return undefined;
     }
 
-    const path =
-      rawPaths?.cameras?.[cameraName]?.ffmpeg?.inputs?.[inputIndex]?.path;
-    return typeof path === "string" ? path : undefined;
-  }, [cameraName, inputIndex, rawPaths]);
+    let matches = (
+      rawPaths?.cameras?.[cameraName]?.ffmpeg?.inputs ?? []
+    ).filter(
+      (input): input is { path: string; roles?: string[] } =>
+        typeof input.path === "string" &&
+        maskCredentials(input.path) === rawValue,
+    );
+    if (new Set(matches.map((input) => input.path)).size > 1) {
+      matches = matches.filter((input) => isEqual(input.roles, roles));
+    }
 
-  const rawValue = typeof value === "string" ? value : "";
+    const paths = new Set(matches.map((input) => input.path));
+    return paths.size === 1 ? [...paths][0] : undefined;
+  }, [cameraName, rawPaths, rawValue, roles]);
+
   const resolvedValue =
     isMaskedPath(rawValue) && rawPath ? rawPath : (rawValue ?? "");
   const canReveal =

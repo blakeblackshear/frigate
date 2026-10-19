@@ -21,8 +21,11 @@ import numpy as np
 from ruamel.yaml import YAML
 
 from frigate.const import (
-    REGEX_HTTP_CAMERA_USER_PASS,
+    REGEX_CREDENTIAL_QUERY_KEY,
+    REGEX_CREDENTIAL_QUERY_PARAM,
+    REGEX_MASKED_CREDENTIAL,
     REGEX_RTSP_CAMERA_USER_PASS,
+    REGEX_URL_USERINFO,
     STREAM_TYPE_MAIN,
     STREAM_TYPE_SUB,
 )
@@ -117,9 +120,24 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
 
 
 def clean_camera_user_pass(line: str) -> str:
-    """Removes user and password from line."""
-    rtsp_cleaned = re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
-    return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", rtsp_cleaned)
+    """Mask URL userinfo and credential query parameters in line."""
+
+    line = re.sub(REGEX_URL_USERINFO, _mask_userinfo, line)
+    return re.sub(REGEX_CREDENTIAL_QUERY_PARAM, r"\1*", line)
+
+
+def _mask_userinfo(match: re.Match[str]) -> str:
+    # A credential key in the userinfo means a query password holds "@" or a
+    # password holds a query key. Neither split is safe, so mask the whole URL.
+    if re.search(REGEX_CREDENTIAL_QUERY_KEY, match.group(1)):
+        return "://*:*@"
+
+    return f"://*:*@{match.group(2)}"
+
+
+def is_masked_camera_path(path: str) -> bool:
+    """Return True if path holds credentials masked by clean_camera_user_pass."""
+    return re.search(REGEX_MASKED_CREDENTIAL, path) is not None
 
 
 def escape_special_characters(path: str) -> str:
