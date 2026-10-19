@@ -474,9 +474,10 @@ class RecordingMaintainer(threading.Thread):
             # get all reviews whose post capture reaches the oldest cache file
             # or with end_time None; shared across stream types
             if camera not in reviews_by_camera:
-                camera_config = self.config.cameras.get(camera)
                 post_capture = (
-                    camera_config.record.event_post_capture if camera_config else 0
+                    self.config.cameras[camera].record.event_post_capture
+                    if camera in self.config.cameras
+                    else 0
                 )
                 reviews_by_camera[camera] = (
                     ReviewSegment.select(

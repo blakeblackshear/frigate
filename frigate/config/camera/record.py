@@ -226,6 +226,7 @@ class RecordConfig(FrigateBaseModel):
 
     @property
     def event_post_capture(self) -> int:
+        """Largest post-capture window used to fetch candidate reviews."""
         return max(
             self.alerts.post_capture,
             self.detections.post_capture,
