@@ -117,7 +117,9 @@ auth:
   # Optional: Cookie to store the JWT token for native auth (default: shown below)
   cookie_name: frigate_token
   # Optional: Set secure flag on cookie. (default: shown below)
-  # NOTE: This should be set to True if you are using TLS
+  # NOTE: Frigate sets the flag automatically when serving TLS. Set this to True
+  # when a reverse proxy terminates TLS in front of Frigate. A proxy that connects
+  # to the TLS port must serve Frigate to browsers over HTTPS
   cookie_secure: False
   # Optional: Session length in seconds (default: shown below)
   session_length: 86400 # 24 hours

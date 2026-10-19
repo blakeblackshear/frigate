@@ -27,7 +27,7 @@ class AuthConfig(FrigateBaseModel):
     cookie_secure: bool = Field(
         default=False,
         title="Secure cookie flag",
-        description="Set the secure flag on the auth cookie; should be true when using TLS.",
+        description="Always set the secure flag on the auth cookie. Frigate sets it automatically when serving TLS; enable this when a reverse proxy terminates TLS in front of Frigate. A proxy that connects to the TLS port must serve Frigate to browsers over HTTPS.",
     )
     session_length: int = Field(
         default=86400,
