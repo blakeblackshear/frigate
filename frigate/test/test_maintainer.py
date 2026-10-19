@@ -127,6 +127,116 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(result)
         maintainer.drop_segment.assert_called_once_with(cache_path)
 
+    async def test_quiet_segment_kept_by_later_overlapping_alert(self):
+        config = MagicMock(spec=FrigateConfig)
+
+        camera_config = MagicMock()
+        camera_config.record.enabled = True
+        camera_config.record.continuous.days = 0
+        camera_config.record.motion.days = 0
+        camera_config.record.alerts.retain.mode = RetainModeEnum.all
+        camera_config.record.detections.retain.mode = RetainModeEnum.motion
+        camera_config.record.event_pre_capture = 60
+        camera_config.record.get_review_pre_capture.return_value = 60
+        camera_config.record.get_review_post_capture.return_value = 60
+        config.cameras = {"test_cam": camera_config}
+
+        maintainer = RecordingMaintainer(config, MagicMock())
+
+        now = datetime.datetime.now(datetime.UTC)
+        start_time = now - datetime.timedelta(seconds=20)
+        end_time = now - datetime.timedelta(seconds=10)
+        cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
+
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, False, None, None, None, [])
+        }
+        maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
+        maintainer.audio_recordings_info["test_cam"] = []
+
+        maintainer.drop_segment = MagicMock()
+        maintainer.move_segment = AsyncMock(return_value=None)
+        maintainer.recordings_publisher = MagicMock()
+
+        # the detection's post capture and the alert's window both cover the segment
+        detection = MagicMock()
+        detection.severity = "detection"
+        detection.start_time = start_time.timestamp() - 50
+        detection.end_time = start_time.timestamp() - 40
+        alert = MagicMock()
+        alert.severity = "alert"
+        alert.start_time = start_time.timestamp() - 10
+        alert.end_time = start_time.timestamp()
+
+        await maintainer.validate_and_move_segment(
+            "test_cam",
+            reviews=[detection, alert],
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
+        )
+
+        maintainer.move_segment.assert_awaited_once()
+        maintainer.drop_segment.assert_not_called()
+
+    async def test_quiet_segment_kept_by_later_alert_with_longer_pre_capture(self):
+        config = MagicMock(spec=FrigateConfig)
+
+        camera_config = MagicMock()
+        camera_config.record.enabled = True
+        camera_config.record.continuous.days = 0
+        camera_config.record.motion.days = 0
+        camera_config.record.alerts.retain.mode = RetainModeEnum.all
+        camera_config.record.detections.retain.mode = RetainModeEnum.all
+        camera_config.record.event_pre_capture = 30
+        camera_config.record.get_review_pre_capture.side_effect = lambda s: (
+            30 if s == "alert" else 5
+        )
+        camera_config.record.get_review_post_capture.return_value = 5
+        config.cameras = {"test_cam": camera_config}
+
+        maintainer = RecordingMaintainer(config, MagicMock())
+
+        now = datetime.datetime.now(datetime.UTC)
+        start_time = now - datetime.timedelta(seconds=20)
+        end_time = now - datetime.timedelta(seconds=10)
+        cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
+
+        maintainer.end_time_cache = {
+            cache_path: (end_time, 10.0, False, None, None, None, [])
+        }
+        maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
+        maintainer.audio_recordings_info["test_cam"] = []
+
+        maintainer.drop_segment = MagicMock()
+        maintainer.move_segment = AsyncMock(return_value=None)
+        maintainer.recordings_publisher = MagicMock()
+
+        # the detection's pre capture starts after the segment, the alert's reaches it
+        detection = MagicMock()
+        detection.severity = "detection"
+        detection.start_time = end_time.timestamp() + 10
+        detection.end_time = end_time.timestamp() + 12
+        alert = MagicMock()
+        alert.severity = "alert"
+        alert.start_time = end_time.timestamp() + 20
+        alert.end_time = end_time.timestamp() + 25
+
+        await maintainer.validate_and_move_segment(
+            "test_cam",
+            reviews=[detection, alert],
+            recording={
+                "start_time": start_time,
+                "cache_path": cache_path,
+                "stream_type": "main",
+            },
+        )
+
+        maintainer.move_segment.assert_awaited_once()
+        maintainer.drop_segment.assert_not_called()
+
     async def test_defers_review_overlap_segment_until_metadata_catches_up(self):
         # Regression: a segment overlapping an active_objects review must not
         # be dropped while detection metadata lags behind the segment end,
@@ -139,6 +249,7 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         camera_config.record.continuous.days = 7
         camera_config.record.motion.days = 0
         camera_config.record.alerts.retain.mode = RetainModeEnum.active_objects
+        camera_config.record.event_pre_capture = 5
         camera_config.record.get_review_pre_capture.return_value = 5
         camera_config.record.get_review_post_capture.return_value = 5
         config.cameras = {"test_cam": camera_config}
