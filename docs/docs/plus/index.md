@@ -5,25 +5,41 @@ title: Models
 
 <a href="https://frigate.video/plus" target="_blank" rel="nofollow">Frigate+</a> offers models trained on images submitted by Frigate+ users from their security cameras and is specifically designed for the way Frigate NVR analyzes video footage. These models offer higher accuracy with less resources. The images you upload are used to fine tune a base model trained from images uploaded by all Frigate+ users. This fine tuning process results in a model that is optimized for accuracy in your specific conditions.
 
-With a subscription, 12 model trainings to fine tune your model per year are included. In addition, you will have access to any base models published while your subscription is active. If you cancel your subscription, you will retain access to any trained and base models in your account. An active subscription is required to submit model requests or purchase additional trainings. New base models are published quarterly with target dates of January 15th, April 15th, July 15th, and October 15th.
+With a subscription, 12 model trainings to fine tune your model per year are included. In addition, you will have access to any base models published while your subscription is active. If you cancel your subscription, you will retain access to any trained and base models in your account. An active subscription is required to submit model requests or purchase additional trainings. New base models are published twice per year.
 
 Information on how to integrate Frigate+ with Frigate can be found in the [integration docs](../integrations/plus.md).
 
 ## Available model types
 
-There are three model types offered in Frigate+, `mobiledet`, `yolonas`, and `yolov9`. All of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
+There are three model types offered in Frigate+, `yolov9`, `yolonas`, and `mobiledet` (legacy). All of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
 
 Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models.
 
 | Model Type  | Description                                                                                                                                                    |
 | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mobiledet` | Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                              |
-| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                   |
 | `yolov9`    | A leading SOTA (state of the art) object detection model with similar performance to yolonas, but on a wider range of hardware options. Runs on most hardware. |
+| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                   |
+| `mobiledet` | Legacy. Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                      |
+
+:::warning
+
+`mobiledet` is a legacy model type. Base model 2026.3 is the last base model update for `mobiledet`, and it is planned to be removed from Frigate+ in 2027. If you are using `mobiledet` with a Google Coral, request a `yolov9` model with the `edgetpu` variant instead.
+
+:::
 
 ### YOLOv9 Details
 
-YOLOv9 models are available in `s`, `t`, `edgetpu` variants. When requesting a `yolov9` model, you will be prompted to choose a variant. If you want the model to be compatible with a Google Coral, you will need to choose the `edgetpu` variant. If you are unsure what variant to choose, you should perform some tests with the base models to find the performance level that suits you. The `s` size is most similar to the current `yolonas` models in terms of inference times and accuracy, and a good place to start is the `320x320` resolution model for `yolov9s`.
+YOLOv9 models are available in `t`, `s`, `c`, and `edgetpu` variants, and an `m` size is coming soon. When requesting a `yolov9` model, you will be prompted to choose a variant. If you want the model to be compatible with a Google Coral, you will need to choose the `edgetpu` variant, which requires Frigate 0.17 or later. If you are unsure what variant to choose, you should perform some tests with the base models to find the performance level that suits you. The `s` size is most similar to the current `yolonas` models in terms of inference times and accuracy, and a good place to start is the `320x320` resolution model for `yolov9s`. The `c` size is larger and offers higher accuracy at the cost of slower inference, so it is best suited to more powerful hardware such as GPUs.
+
+| Variant   | Size                 | Parameters | Speed and accuracy                                          | Best suited for                                    |
+| --------- | -------------------- | ---------- | ----------------------------------------------------------- | -------------------------------------------------- |
+| `t`       | Tiny                 | ~2.0M      | Fastest inference, lowest accuracy                          | Low power hardware or a large number of cameras    |
+| `s`       | Small                | ~7.1M      | Balanced. Similar inference times and accuracy to `yolonas` | Most users. Start with `320x320`                   |
+| `m`       | Medium (coming soon) | ~20.0M     | Slower than `s` with higher accuracy                        | Mid-range GPUs and NPUs                            |
+| `c`       | Compact              | ~25.3M     | Highest accuracy, slowest inference                         | More powerful hardware such as GPUs                |
+| `edgetpu` | N/A                  | N/A        | Optimized to run on the Coral's Edge TPU                    | Google Coral devices only (requires Frigate 0.17+) |
+
+Parameter counts are for the standard YOLOv9 architectures. Actual inference times depend on your hardware and the input resolution you choose, so test with the base models before requesting a model.
 
 :::info
 
@@ -33,7 +49,7 @@ When switching to YOLOv9, you may need to adjust your thresholds for some object
 
 #### Hailo Support
 
-If you have a Hailo device, you will need to specify the hardware you have when submitting a model request because they are not cross compatible. Please test using the available base models before submitting your model request.
+If you have a Hailo device, you will need to specify the hardware you have when submitting a model request because they are not cross compatible. Hailo models are available for the `t`, `s`, and `c` variants on Hailo8, Hailo8L, and Hailo8R devices. Please test using the available base models before submitting your model request.
 
 #### Rockchip (RKNN) Support
 
@@ -43,15 +59,15 @@ Rockchip models are automatically converted as of 0.17. For 0.16, YOLOv9 onnx mo
 
 Currently, Frigate+ models support CPU (`cpu`), Google Coral (`edgetpu`), OpenVino (`openvino`), ONNX (`onnx`), Hailo (`hailo8l`), and Rockchip (`rknn`) detectors.
 
-| Hardware                                                                         | Recommended Detector Type | Recommended Model Type |
-| -------------------------------------------------------------------------------- | ------------------------- | ---------------------- |
-| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)           | `cpu`                     | `mobiledet`            |
-| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector) | `edgetpu`                 | `yolov9`               |
-| [Intel](/configuration/object_detectors.md#openvino-detector)                    | `openvino`                | `yolov9`               |
-| [NVidia GPU](/configuration/object_detectors#onnx)                               | `onnx`                    | `yolov9`               |
-| [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)             | `onnx`                    | `yolov9`               |
-| [Hailo8/Hailo8L/Hailo8R](/configuration/object_detectors#hailo-8)                | `hailo8l`                 | `yolov9`               |
-| [Rockchip NPU](/configuration/object_detectors#rockchip-platform)                | `rknn`                    | `yolov9`               |
+| Hardware                                                                         | Recommended Detector Type   | Recommended Model Type |
+| -------------------------------------------------------------------------------- | --------------------------- | ---------------------- |
+| [CPU](/configuration/object_detectors.md#cpu-detector-not-recommended)           | `openvino (or alternative)` | `yolov9`               |
+| [Coral (all form factors)](/configuration/object_detectors.md#edge-tpu-detector) | `edgetpu`                   | `yolov9`               |
+| [Intel](/configuration/object_detectors.md#openvino-detector)                    | `openvino`                  | `yolov9`               |
+| [NVidia GPU](/configuration/object_detectors#onnx)                               | `onnx`                      | `yolov9`               |
+| [AMD ROCm GPU](/configuration/object_detectors#amdrocm-gpu-detector)             | `onnx`                      | `yolov9`               |
+| [Hailo8/Hailo8L/Hailo8R](/configuration/object_detectors#hailo-8)                | `hailo8l`                   | `yolov9`               |
+| [Rockchip NPU](/configuration/object_detectors#rockchip-platform)                | `rknn`                      | `yolov9`               |
 
 ## Improving your model
 
@@ -66,7 +82,7 @@ Some users may find that Frigate+ models result in more false positives initiall
 Frigate+ models support a more relevant set of objects for security cameras. The labels for annotation in Frigate+ are configurable by editing the camera in the Cameras section of Frigate+. Currently, the following objects are supported:
 
 - **People**: `person`, `face`, `baby`
-- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `school_bus`, `garbage truck`, `license_plate`
+- **Vehicles**: `car`, `motorcycle`, `bicycle`, `boat`, `school_bus`, `garbage_truck`, `license_plate`
 - **Delivery Logos**: `amazon`, `usps`, `ups`, `fedex`, `dhl`, `an_post`, `purolator`, `postnl`, `nzpost`, `postnord`, `gls`, `dpd`, `canada_post`, `royal_mail`
 - **Animals**: `dog`, `cat`, `deer`, `horse`, `bird`, `raccoon`, `fox`, `bear`, `cow`, `squirrel`, `goat`, `rabbit`, `skunk`, `kangaroo`, `possum`, `rodent`
 - **Other**: `package`, `waste_bin`, `bbq_grill`, `robot_lawnmower`, `umbrella`, `baby_stroller`
@@ -81,7 +97,7 @@ Where possible, these labels are mapped to existing labels during training. For 
 
 - **Vehicles**: `tractor`, `golf_cart`, `bus`, `airplane`, `helicopter`, `rickshaw`, `scooter`
 - **Delivery Logos**: `bpost`, `auspost`, `aramex`, `transoflex`, `parcelforce`, `hermes`, `cargus`, `fan_courier`, `sameday`, `la_poste`
-- **Animals**: `badger`, `chicken`, `duck`, `turkey`, `groundhog`, `boar`, `hedgehog`, `wombat`, `bobcat`, `mustelid`, `mountain_lion`, `crocodile`, `monkey`, `coyote`, `porcupine`, `sheep`, `snake`, `lizard`, `heron`, `elk`, `moose`, `pig`, `donkey`, `civet`
+- **Animals**: `badger`, `chicken`, `duck`, `turkey`, `groundhog`, `boar`, `hedgehog`, `wombat`, `bobcat`, `mustelid`, `mountain_lion`, `crocodile`, `monkey`, `coyote`, `porcupine`, `sheep`, `snake`, `lizard`, `heron`, `elk`, `moose`, `pig`, `donkey`, `civet`, `chipmunk`
 - **Other**: `sports_ball`, `drone`, `lawnmower`
 
 Candidate labels are not available for automatic suggestions.
