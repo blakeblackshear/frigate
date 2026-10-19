@@ -471,9 +471,13 @@ class RecordingMaintainer(threading.Thread):
         for key, recordings in grouped_recordings.items():
             camera, stream_type = key
 
-            # get all reviews with the end time after the start of the oldest
-            # cache file or with end_time None; shared across stream types
+            # get all reviews whose post capture reaches the oldest cache file
+            # or with end_time None; shared across stream types
             if camera not in reviews_by_camera:
+                camera_config = self.config.cameras.get(camera)
+                post_capture = (
+                    camera_config.record.event_post_capture if camera_config else 0
+                )
                 reviews_by_camera[camera] = (
                     ReviewSegment.select(
                         ReviewSegment.start_time,
@@ -484,7 +488,10 @@ class RecordingMaintainer(threading.Thread):
                     .where(
                         ReviewSegment.camera == camera,
                         (ReviewSegment.end_time == None)
-                        | (ReviewSegment.end_time >= min_start_per_camera[camera]),
+                        | (
+                            ReviewSegment.end_time
+                            >= min_start_per_camera[camera] - post_capture
+                        ),
                     )
                     .order_by(ReviewSegment.start_time)
                 )
