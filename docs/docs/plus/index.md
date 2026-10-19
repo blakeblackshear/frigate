@@ -31,6 +31,16 @@ Not all model types are supported by all detectors, so it's important to choose 
 
 YOLOv9 models are available in `t`, `s`, `c`, and `edgetpu` variants, and an `m` size is coming soon. When requesting a `yolov9` model, you will be prompted to choose a variant. If you want the model to be compatible with a Google Coral, you will need to choose the `edgetpu` variant, which requires Frigate 0.17 or later. If you are unsure what variant to choose, you should perform some tests with the base models to find the performance level that suits you. The `s` size is most similar to the current `yolonas` models in terms of inference times and accuracy, and a good place to start is the `320x320` resolution model for `yolov9s`. The `c` size is larger and offers higher accuracy at the cost of slower inference, so it is best suited to more powerful hardware such as GPUs.
 
+| Variant   | Size                 | Parameters | Speed and accuracy                                          | Best suited for                                    |
+| --------- | -------------------- | ---------- | ----------------------------------------------------------- | -------------------------------------------------- |
+| `t`       | Tiny                 | ~2.0M      | Fastest inference, lowest accuracy                          | Low power hardware or a large number of cameras    |
+| `s`       | Small                | ~7.1M      | Balanced. Similar inference times and accuracy to `yolonas` | Most users. Start with `320x320`                   |
+| `m`       | Medium (coming soon) | ~20.0M     | Slower than `s` with higher accuracy                        | Mid-range GPUs and NPUs                            |
+| `c`       | Compact              | ~25.3M     | Highest accuracy, slowest inference                         | More powerful hardware such as GPUs                |
+| `edgetpu` | N/A                  | N/A        | Optimized to run on the Coral's Edge TPU                    | Google Coral devices only (requires Frigate 0.17+) |
+
+Parameter counts are for the standard YOLOv9 architectures. Actual inference times depend on your hardware and the input resolution you choose, so test with the base models before requesting a model.
+
 :::info
 
 When switching to YOLOv9, you may need to adjust your thresholds for some objects.
