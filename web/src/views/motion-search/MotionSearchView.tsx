@@ -892,6 +892,20 @@ export default function MotionSearchView({
         setIsSearching(false);
       }
     } catch (error) {
+      const status = axios.isAxiosError(error)
+        ? error.response?.status
+        : undefined;
+
+      if (status === 409 || status === 429) {
+        toast.error(
+          t(
+            status === 409 ? "errors.alreadyRunning" : "errors.tooManySearches",
+          ),
+        );
+        setIsSearching(false);
+        return;
+      }
+
       let errorMessage = t("errors.unknown");
 
       if (axios.isAxiosError<{ message?: string; detail?: string }>(error)) {

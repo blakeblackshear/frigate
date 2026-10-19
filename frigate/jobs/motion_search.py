@@ -8,7 +8,7 @@ from collections.abc import Callable, Generator, Iterable
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 
 import cv2
 import numpy as np
@@ -17,10 +17,6 @@ from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
 from frigate.const import STREAM_TYPE_MAIN, UPDATE_JOB_STATE
 from frigate.jobs.job import Job
-from frigate.jobs.manager import (
-    get_job_by_id,
-    set_current_job,
-)
 from frigate.jobs.motion_search_batch import (
     build_segment_time_map,
     coalesce_runs,
@@ -53,6 +49,12 @@ PROGRESS_BROADCAST_INTERVAL = 1.0
 # Output frame rate for the fixed-cadence fallback used on long-GOP cameras
 # (where keyframe sampling is too sparse). Keyframe cameras ignore this.
 FALLBACK_SAMPLE_FPS = 2.0
+# Each parallel job runs up to 4 decode workers, so this bounds total ffmpeg load.
+MAX_ACTIVE_JOBS = 3
+# Finished jobs stay pollable for this long before eviction (seconds).
+FINISHED_JOB_TTL = 600.0
+# A cancelled job stops holding a slot after this long, even if its thread is wedged.
+CANCEL_GRACE_SECONDS = 60.0
 
 
 @dataclass
@@ -98,6 +100,8 @@ class MotionSearchJob(Job):
     min_area: float = 5.0
     parallel: bool = False
     max_results: int = 25
+    username: str | None = None
+    cancelled_at: float | None = None
 
     # Track progress
     total_frames_processed: int = 0
@@ -112,6 +116,8 @@ class MotionSearchJob(Job):
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for WebSocket transmission."""
         d = asdict(self)
+        d.pop("username")
+        d.pop("cancelled_at")
         if self.metrics:
             d["metrics"] = self.metrics.to_dict()
         return d
@@ -579,7 +585,7 @@ class MotionSearchRunner(threading.Thread):
 
         # Decide keyframe vs fixed-cadence sampling once from the first run's GOP
         # (keyframe structure is a per-camera constant).
-        first_pts = probe_vod_keyframe_pts(ffprobe_path, first_url)
+        first_pts = probe_vod_keyframe_pts(ffprobe_path, first_url, self._should_stop)
         self.use_keyframe = keyframe_sampling_eligible(first_pts)
 
         logger.debug(
@@ -641,7 +647,9 @@ class MotionSearchRunner(threading.Thread):
         time_map = build_segment_time_map(run)
 
         if self.use_keyframe:
-            kf_pts = probe_vod_keyframe_pts(self.ffprobe_path, vod_url)
+            kf_pts = probe_vod_keyframe_pts(
+                self.ffprobe_path, vod_url, self._should_stop
+            )
             frames = list(
                 iter_vod_frames(
                     self.ffmpeg_path,
@@ -777,13 +785,15 @@ class MotionSearchRunner(threading.Thread):
                         run_results, frames = completed.pop(next_idx)
                         if self._merge_run(runs[next_idx], run_results, frames, state):
                             self.internal_stop_event.set()
-                            for pending in futures:
-                                pending.cancel()
                             break
                         next_idx += 1
 
                     if self.internal_stop_event.is_set():
                         break
+
+                # Queued runs would otherwise still execute when the pool exits.
+                for pending in futures:
+                    pending.cancel()
         else:
             for run in runs:
                 if self._should_stop():
@@ -833,9 +843,34 @@ class MotionSearchRunner(threading.Thread):
         return deduplicated
 
 
-# Module-level state for managing per-camera jobs
+class MotionSearchUserBusyError(Exception):
+    """The user already has an active motion search job."""
+
+
+class MotionSearchCapacityError(Exception):
+    """The global limit of active motion search jobs is reached."""
+
+
 _motion_search_jobs: dict[str, tuple[MotionSearchJob, threading.Event]] = {}
 _jobs_lock = threading.Lock()
+
+
+def _evict_finished_jobs(now: float) -> None:
+    """Drop jobs that finished more than FINISHED_JOB_TTL ago. Caller holds the lock."""
+    expired = [
+        job_id
+        for job_id, (job, _) in _motion_search_jobs.items()
+        if job.end_time is not None and now - job.end_time > FINISHED_JOB_TTL
+    ]
+    for job_id in expired:
+        del _motion_search_jobs[job_id]
+
+
+def _is_active(job: MotionSearchJob, now: float) -> bool:
+    """True while the job's thread may still be running and holding a slot."""
+    if job.end_time is not None:
+        return False
+    return job.cancelled_at is None or now - job.cancelled_at < CANCEL_GRACE_SECONDS
 
 
 def stop_all_motion_search_jobs() -> None:
@@ -857,10 +892,13 @@ def start_motion_search_job(
     min_area: float = 5.0,
     parallel: bool = False,
     max_results: int = 25,
+    username: str | None = None,
 ) -> str:
     """Start a new motion search job.
 
-    Returns the job ID.
+    Returns the job ID. Raises MotionSearchUserBusyError when ``username`` already
+    has an active job and MotionSearchCapacityError when MAX_ACTIVE_JOBS are active.
+    Pass ``username=None`` when callers share an identity to skip the per-user check.
     """
     job = MotionSearchJob(
         camera=camera_name,
@@ -871,17 +909,38 @@ def start_motion_search_job(
         min_area=min_area,
         parallel=parallel,
         max_results=max_results,
+        username=username,
     )
 
     cancel_event = threading.Event()
 
     with _jobs_lock:
+        now = datetime.now().timestamp()
+        _evict_finished_jobs(now)
+
+        # A cancelled job keeps its thread until the runner sets end_time, so it
+        # still counts toward the global cap. Its user may start a new search.
+        active = [j for j, _ in _motion_search_jobs.values() if _is_active(j, now)]
+        if username is not None and any(
+            j.username == username and j.status != JobStatusTypesEnum.cancelled
+            for j in active
+        ):
+            raise MotionSearchUserBusyError()
+        if len(active) >= MAX_ACTIVE_JOBS:
+            raise MotionSearchCapacityError()
+
         _motion_search_jobs[job.id] = (job, cancel_event)
 
-    set_current_job(job)
-
-    runner = MotionSearchRunner(job, config, cancel_event)
-    runner.start()
+    runner: MotionSearchRunner | None = None
+    try:
+        runner = MotionSearchRunner(job, config, cancel_event)
+        runner.start()
+    except Exception:
+        if runner is not None:
+            runner.requestor.stop()
+        with _jobs_lock:
+            del _motion_search_jobs[job.id]
+        raise
 
     logger.debug(
         "Started motion search job %s for camera %s: "
@@ -904,10 +963,7 @@ def get_motion_search_job(job_id: str) -> MotionSearchJob | None:
     """Get a motion search job by ID."""
     with _jobs_lock:
         job_entry = _motion_search_jobs.get(job_id)
-        if job_entry:
-            return job_entry[0]
-    # Check completed jobs via manager
-    return cast(MotionSearchJob | None, get_job_by_id("motion_search", job_id))
+    return job_entry[0] if job_entry else None
 
 
 def cancel_motion_search_job(job_id: str) -> bool:
@@ -928,6 +984,7 @@ def cancel_motion_search_job(job_id: str) -> bool:
 
         cancel_event.set()
         job.status = JobStatusTypesEnum.cancelled
+        job.cancelled_at = datetime.now().timestamp()
         job_payload = job.to_dict()
         logger.info("Cancelled motion search job %s", job_id)
 
