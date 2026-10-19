@@ -131,15 +131,6 @@ environment:
   DEVICE_ACL_PATHS: "/dev/mydev*"
 ```
 
-Some vendor runtimes also look for a device node under a name `--device` cannot pass in. The Axelera Metis runtime enumerates the colon-form `/dev/metis-0:1:0`, which host udev creates as a symlink. Docker does not copy symlinks into the container. `DEVICE_ALIASES` recreates such aliases at startup as a comma separated list of `alias=target` pairs:
-
-```yaml
-environment:
-  DEVICE_ALIASES: "/dev/metis-0:1:0=/dev/metis-0-1-0"
-```
-
-Creating an alias writes to `/dev`, so unlike the ACL grant it needs the container to start as root: under Docker's `user:` mode the container cannot write to `/dev`, so `DEVICE_ALIASES` cannot run there. The colon name can still reach a `user:` container without an alias: `docker run` accepts a bind mount under a colon target (a compose volume specification rejects it), so grant the raw node with `--device` and mount it under the name the runtime needs with `--mount type=bind,source=/dev/metis-0-1-0,target=/dev/metis-0:1:0`.
-
 Set `FRIGATE_DEVICE_ACLS=false` if you manage device permissions yourself and want Frigate to leave them alone.
 
 Frigate grants access by adding an ACL entry for the runtime users. The device's owner and mode are unchanged, and nothing is made world accessible. One thing to know: `--device` nodes belong to the container, but a bind mounted `/dev/bus/usb` (the usual Coral USB setup) shares the host's device nodes, so the entry is visible on the host until udev recreates the node.

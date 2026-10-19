@@ -391,11 +391,12 @@ class _AxeleraRuntimeInference:
         devices = self._ctx.list_devices()
         if not devices:
             raise RuntimeError(
-                "axelera: no Metis device enumerated; check that the "
-                "/dev/metis-<bus>-<dev>-<fn> node is passed into the "
-                "container (see the install docs for the DEVICE_ALIASES "
-                "variable the runtime's colon-form node name needs) and "
-                "that the metis driver is loaded on the host"
+                "axelera: no Metis device enumerated; the runtime needs the "
+                "raw /dev/metis-<bus>-<dev>-<fn> node in the container and "
+                "the colon-separated name (e.g. /dev/metis-0:1:0) present "
+                "as a symlink to it. See the install docs for the CDI "
+                "device spec that provides both, and check that the metis "
+                "driver is loaded on the host"
             )
         # hold the device connection on self: the runtime releases the device
         # when the connection object is garbage collected, so it must outlive

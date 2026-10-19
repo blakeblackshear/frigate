@@ -610,21 +610,35 @@ Install the Metis PCIe kernel driver and firmware on the **host** following [Axe
 
 To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
-Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
+The runtime enumerates the card by the colon-separated name the host udev rules create as a symlink (for example `/dev/metis-0:1:0`). Docker cannot pass that name as a `--device` argument, and a bind mount resolves the symlink to the raw node, which the runtime does not enumerate. A CDI device spec defines the container path and host path as separate fields, and a `startContainer` hook recreates the symlink inside the container.
+
+Create `/etc/cdi/axelera.yaml` on the host, matching the node `ls /dev/metis*` prints:
+
+```yaml
+cdiVersion: "0.6.0"
+kind: axelera.ai/metis
+devices:
+  - name: "0"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/metis-0-1-0
+          hostPath: /dev/metis-0-1-0
+        - path: /dev/dma_heap/system
+      hooks:
+        - hookName: startContainer
+          path: /bin/ln
+          args: ["/bin/ln", "-s", "metis-0-1-0", "/dev/metis-0:1:0"]
+          timeout: 5
+```
+
+Then grant the device in your `docker-compose.yml` file:
 
 ```yaml
 devices:
-  - /dev/dma_heap/system
-  # the exact node is printed by `ls /dev/metis*`, e.g. /dev/metis-0-1-0
-  - /dev/metis-0-1-0
-environment:
-  # the runtime enumerates the card by the colon-separated name the host
-  # udev rules use (e.g. /dev/metis-0:1:0); docker cannot map colon-named
-  # nodes, so Frigate creates the symlink at startup instead
-  - DEVICE_ALIASES=/dev/metis-0:1:0=/dev/metis-0-1-0
+  - axelera.ai/metis=0
 ```
 
-If you are using `docker run`, add `--device /dev/dma_heap/system --device /dev/metis-0-1-0 -e DEVICE_ALIASES=/dev/metis-0:1:0=/dev/metis-0-1-0` to your command. Match the pair to your node: replace the dashes in the `metis-<bus>-<dev>-<fn>` suffix with colons for the alias side.
+If you are using `docker run`, add `--device axelera.ai/metis=0` to your command. CDI is enabled by default in Docker 28 and later; older versions need `"features": {"cdi": true}` in `daemon.json`. The hook runs as the container user, so this setup needs the container to start as root and does not work under Docker's `user:` mode.
 
 :::warning
 
