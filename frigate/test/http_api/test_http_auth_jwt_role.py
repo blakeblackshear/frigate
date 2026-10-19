@@ -191,10 +191,10 @@ class TestAuthJwtRole(BaseTestHttp):
             resp = self._auth(client, self._token(app, "bob", "garage", changed_at))
             self.assertEqual(resp.status_code, 202)
 
-    def test_password_change_revokes_token_from_the_same_second(self):
+    def test_login_in_the_same_second_as_password_change_is_valid(self):
         app = self._create_app()
         changed_at = datetime.now().replace(microsecond=500000)
-        old_token = self._token(app, "bob", "garage", iat=int(changed_at.timestamp()))
+        new_token = self._token(app, "bob", "garage", iat=int(changed_at.timestamp()))
 
         with (
             patch("frigate.api.auth.datetime") as mock_datetime,
@@ -208,7 +208,7 @@ class TestAuthJwtRole(BaseTestHttp):
             self.assertEqual(resp.status_code, 200)
 
             for source in ("bearer", "cookie"):
-                self.assertEqual(self._auth(client, old_token, source).status_code, 401)
+                self.assertEqual(self._auth(client, new_token, source).status_code, 202)
 
     def test_own_password_change_cookie_stays_valid(self):
         app = self._create_app()

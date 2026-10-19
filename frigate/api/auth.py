@@ -5,7 +5,6 @@ import hashlib
 import ipaddress
 import json
 import logging
-import math
 import os
 import re
 import secrets
@@ -464,13 +463,10 @@ def validate_password_strength(password: str) -> tuple[bool, str | None]:
     return True, None
 
 
-def create_encoded_jwt(user, role, expiration, secret, iat: int | None = None):
-    if iat is None:
-        iat = int(time.time())
-
+def create_encoded_jwt(user, role, expiration, secret):
     return jwt.encode(
         {"alg": "HS256"},
-        {"sub": user, "role": role, "exp": expiration, "iat": iat},
+        {"sub": user, "role": role, "exp": expiration, "iat": int(time.time())},
         secret,
     )
 
@@ -478,8 +474,8 @@ def create_encoded_jwt(user, role, expiration, secret, iat: int | None = None):
 def _user_session(user: User) -> tuple[str, int | None]:
     changed_at = user.password_changed_at
 
-    # rounded up so a token issued earlier in the same second is revoked
-    return user.role, math.ceil(changed_at.timestamp()) if changed_at else None
+    # floored like iat, so a login in the same second as the change stays valid
+    return user.role, int(changed_at.timestamp()) if changed_at else None
 
 
 def load_user_sessions() -> dict[str, tuple[str, int | None]]:
@@ -1131,11 +1127,10 @@ async def update_password(
         )
 
     password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
-    changed_at = datetime.now()
     User.update(
         {
             User.password_hash: password_hash,
-            User.password_changed_at: changed_at,
+            User.password_changed_at: datetime.now(),
         }
     ).where(User.username == username).execute()
     refresh_user_session(request, username)
@@ -1149,11 +1144,7 @@ async def update_password(
 
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(
-            username,
-            current_role,
-            expiration,
-            request.app.jwt_token,
-            iat=math.ceil(changed_at.timestamp()),
+            username, current_role, expiration, request.app.jwt_token
         )
         # Set new JWT cookie on response
         set_jwt_cookie(
