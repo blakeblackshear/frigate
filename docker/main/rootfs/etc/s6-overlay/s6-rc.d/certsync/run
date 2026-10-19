@@ -36,8 +36,8 @@ else
     lefile="/config/tls/fullchain.pem"
 fi
 
-tls_enabled=`python3 /usr/local/nginx/get_nginx_settings.py | jq -r .tls.enabled`
-listen_external_port=`python3 /usr/local/nginx/get_nginx_settings.py | jq -r .listen.external_port`
+tls_enabled=`python3 -I /usr/local/nginx/get_nginx_settings.py | jq -r .tls.enabled`
+listen_external_port=`python3 -I /usr/local/nginx/get_nginx_settings.py | jq -r .listen.external_port`
 
 while true
 do

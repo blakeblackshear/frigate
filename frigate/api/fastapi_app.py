@@ -196,7 +196,9 @@ def create_fastapi_app(
             key_bytes = str(secret).encode("utf-8")
 
         app.jwt_token = OctKey.import_key(key_bytes)
+        app.user_sessions = auth.load_user_sessions()
     else:
         app.jwt_token = None
+        app.user_sessions = {}
 
     return app

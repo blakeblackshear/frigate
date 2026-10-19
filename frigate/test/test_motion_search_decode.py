@@ -1,5 +1,6 @@
 """Tests for the motion search hardware-accelerated decode helpers."""
 
+import subprocess as sp
 import unittest
 from types import SimpleNamespace
 from unittest import mock
@@ -140,6 +141,11 @@ class TestVodDecodeCommand(unittest.TestCase):
 
 
 class TestProbeVodKeyframePts(unittest.TestCase):
+    def _proc(self, stdout="", returncode=0):
+        proc = mock.Mock(returncode=returncode)
+        proc.communicate.return_value = (stdout, None)
+        return proc
+
     def test_parses_keyframe_packets(self):
         sample = (
             '{"packets":['
@@ -147,19 +153,37 @@ class TestProbeVodKeyframePts(unittest.TestCase):
             '{"pts_time":"1.000000","flags":"___"},'
             '{"pts_time":"2.000000","flags":"K__"}]}'
         )
-        completed = mock.Mock(stdout=sample, returncode=0)
         with mock.patch(
-            "frigate.jobs.motion_search_decode.sp.run", return_value=completed
+            "frigate.jobs.motion_search_decode.sp.Popen",
+            return_value=self._proc(sample),
         ):
-            pts = probe_vod_keyframe_pts("ffprobe", "http://x/index.m3u8")
+            pts = probe_vod_keyframe_pts(
+                "ffprobe", "http://x/index.m3u8", lambda: False
+            )
         self.assertEqual(pts, [0.0, 2.0])
 
     def test_returns_empty_on_failure(self):
         with mock.patch(
-            "frigate.jobs.motion_search_decode.sp.run",
+            "frigate.jobs.motion_search_decode.sp.Popen",
             side_effect=OSError("boom"),
         ):
-            self.assertEqual(probe_vod_keyframe_pts("ffprobe", "http://x"), [])
+            self.assertEqual(
+                probe_vod_keyframe_pts("ffprobe", "http://x", lambda: False), []
+            )
+
+    def test_stop_request_kills_probe(self):
+        proc = self._proc()
+        proc.communicate.side_effect = [
+            sp.TimeoutExpired("ffprobe", 0.5),
+            ("", None),
+        ]
+        with mock.patch(
+            "frigate.jobs.motion_search_decode.sp.Popen", return_value=proc
+        ):
+            self.assertEqual(
+                probe_vod_keyframe_pts("ffprobe", "http://x", lambda: True), []
+            )
+        proc.kill.assert_called_once()
 
 
 class TestProbeVideoDimensions(unittest.TestCase):

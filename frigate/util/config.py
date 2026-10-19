@@ -1,8 +1,10 @@
 """configuration utils."""
 
 import asyncio
+import ipaddress
 import logging
 import os
+import re
 import shutil
 from functools import cache
 from typing import Any
@@ -124,6 +126,49 @@ def redact_credential(obj: dict[str, Any], key: str) -> None:
         obj[key] = REDACTED_CREDENTIAL_SENTINEL
     else:
         obj.pop(key, None)
+
+
+LISTEN_HOSTNAME = re.compile(
+    r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*"
+)
+
+
+def parse_listen_address(value: int | str) -> tuple[int | str, int]:
+    """Validate a networking.listen value and rebuild it from its parsed parts.
+
+    Accepts a port, "host:port", "*:port", or "[IPv6]:port", where host is an
+    IPv4 address or an RFC 1123 hostname. nginx receives the rebuilt value
+    verbatim, so anything else raises ValueError.
+
+    Returns:
+        The normalized value (an int for a bare port) and the port
+    """
+    if isinstance(value, bool) or not isinstance(value, int | str):
+        raise ValueError(f"invalid listen value: {value!r}")
+
+    host, sep, port_text = str(value).strip().rpartition(":")
+
+    if not re.fullmatch(r"[0-9]{1,5}", port_text) or not (1 <= int(port_text) <= 65535):
+        raise ValueError(f"invalid listen port: {value!r}")
+
+    port = int(port_text)
+
+    if not sep:
+        return port, port
+
+    if host.startswith("[") and host.endswith("]"):
+        address = ipaddress.IPv6Address(host[1:-1])
+
+        if address.scope_id:
+            raise ValueError(f"listen address must not have a scope ID: {value!r}")
+
+        return f"[{address}]:{port}", port
+
+    if host != "*" and not LISTEN_HOSTNAME.fullmatch(host):
+        raise ValueError(f"invalid listen address: {value!r}")
+
+    return f"{host}:{port}", port
 
 
 def find_config_file() -> str:

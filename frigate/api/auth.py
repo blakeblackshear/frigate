@@ -472,8 +472,37 @@ def create_encoded_jwt(user, role, expiration, secret):
     )
 
 
+def _user_session(user: User) -> tuple[str, int | None]:
+    changed_at = user.password_changed_at
+
+    # floored like iat, so a login in the same second as the change stays valid
+    return user.role, int(changed_at.timestamp()) if changed_at else None
+
+
+def load_user_sessions() -> dict[str, tuple[str, int | None]]:
+    """Map each username to its role and password change time for /auth."""
+    return {user.username: _user_session(user) for user in User.select()}
+
+
+def refresh_user_session(request: Request, username: str) -> None:
+    """Sync the /auth session map after a user is created, changed or deleted."""
+    user = User.get_or_none(User.username == username)
+    if user is None:
+        request.app.user_sessions.pop(username, None)
+    else:
+        request.app.user_sessions[username] = _user_session(user)
+
+
+def is_secure_request(request: Request) -> bool:
+    """Check the cookie setting and nginx's forwarded scheme for HTTPS."""
+    # nginx sets X-Forwarded-Proto to its own scheme, replacing any client value
+    return (
+        request.app.frigate_config.auth.cookie_secure
+        or request.headers.get("x-forwarded-proto") == "https"
+    )
+
+
 def set_jwt_cookie(response: Response, cookie_name, encoded_jwt, max_age, secure):
-    # TODO: ideally this would set secure as well, but that requires TLS
     # Starlette sets SameSite=Lax by default. The cookie is still sent to
     # same-site iframes (e.g. Home Assistant on the same host or domain), but
     # not to cross-site ones. CSRF is also mitigated by requiring a custom
@@ -761,7 +790,6 @@ def auth(request: Request):
     fail_response.headers["location"] = "/login"
 
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
-    JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
     JWT_REFRESH = request.app.frigate_config.auth.refresh_time
     JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
 
@@ -787,20 +815,27 @@ def auth(request: Request):
         if "sub" not in token.claims:
             logger.debug("user not set in jwt token")
             return fail_response
-        if "role" not in token.claims:
-            logger.debug("role not set in jwt token")
-            return fail_response
         if "exp" not in token.claims:
             logger.debug("exp not set in jwt token")
             return fail_response
 
         user = token.claims.get("sub")
-        role = token.claims.get("role")
+        session = request.app.user_sessions.get(user)
+        if session is None:
+            logger.debug("jwt user %s no longer exists", user)
+            return fail_response
 
-        # the token keeps the role it was issued with, so a role removed from
-        # the config since then must send the user back through login
+        role, password_changed_at = session
+        if password_changed_at is not None and (
+            int(token.claims.get("iat", 0)) < password_changed_at
+        ):
+            logger.debug("jwt token issued before password change")
+            return fail_response
+
         if role not in auth_config.roles:
-            logger.debug("jwt role %s is not in the config", role)
+            logger.debug(
+                "jwt user %s has role %s, which is not in the config", user, role
+            )
             return fail_response
 
         current_time = int(time.time())
@@ -823,25 +858,6 @@ def auth(request: Request):
         # if the jwt cookie is expiring soon
         if jwt_source == "cookie" and expiration - JWT_REFRESH <= current_time:
             logger.debug("jwt token expiring soon, refreshing cookie")
-
-            # Check if password has been changed since token was issued
-            # If so, force re-login by rejecting the refresh
-            try:
-                user_obj = User.get_by_id(user)
-                if user_obj.password_changed_at is not None:
-                    token_iat = int(token.claims.get("iat", 0))
-                    password_changed_timestamp = int(
-                        user_obj.password_changed_at.timestamp()
-                    )
-                    if token_iat < password_changed_timestamp:
-                        logger.debug(
-                            "jwt token issued before password change, rejecting refresh"
-                        )
-                        return fail_response
-            except DoesNotExist:
-                logger.debug("user not found")
-                return fail_response
-
             new_expiration = current_time + JWT_SESSION_LENGTH
             new_encoded_jwt = create_encoded_jwt(
                 user, role, new_expiration, request.app.jwt_token
@@ -851,7 +867,7 @@ def auth(request: Request):
                 JWT_COOKIE_NAME,
                 new_encoded_jwt,
                 JWT_SESSION_LENGTH,
-                JWT_COOKIE_SECURE,
+                is_secure_request(request),
             )
 
         success_response.headers["remote-user"] = user
@@ -940,7 +956,6 @@ def login(request: Request, body: AppPostLoginBody):
         )
 
     JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
-    JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
     JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
     user = body.user
     password = body.password
@@ -956,13 +971,16 @@ def login(request: Request, body: AppPostLoginBody):
 
     password_hash = db_user.password_hash
     if verify_password(password, password_hash):
-        role = getattr(db_user, "role", "viewer")
-        config_roles_set = set(request.app.frigate_config.auth.roles.keys())
-        if role not in config_roles_set:
+        role = db_user.role
+        if role not in request.app.frigate_config.auth.roles:
             logger.warning(
-                f"User {db_user.username} has an invalid role {role}, falling back to 'viewer'."
+                "Login refused for user '%s' with role '%s', which is not in the config",
+                user,
+                role,
             )
-            role = "viewer"
+            failed_logins.record(user, time.time(), known=True)
+            return JSONResponse(content={"message": "Login failed"}, status_code=401)
+
         expiration = int(time.time()) + JWT_SESSION_LENGTH
         encoded_jwt = create_encoded_jwt(user, role, expiration, request.app.jwt_token)
         response = Response("", 200)
@@ -971,7 +989,7 @@ def login(request: Request, body: AppPostLoginBody):
             JWT_COOKIE_NAME,
             encoded_jwt,
             JWT_SESSION_LENGTH,
-            JWT_COOKIE_SECURE,
+            is_secure_request(request),
         )
         # Clear admin_first_time_login flag after successful admin login so the
         # UI stops showing the first-time login documentation link.
@@ -1037,9 +1055,11 @@ def create_user(
             User.username: body.username,
             User.password_hash: password_hash,
             User.role: role,
+            User.password_changed_at: datetime.now(),
             User.notification_tokens: [],
         }
     ).execute()
+    refresh_user_session(request, body.username)
     request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"username": body.username})
 
@@ -1058,6 +1078,7 @@ def delete_user(request: Request, username: str):
         )
 
     User.delete_by_id(username)
+    refresh_user_session(request, username)
     request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"success": True})
 
@@ -1125,13 +1146,13 @@ async def update_password(
             User.password_changed_at: datetime.now(),
         }
     ).where(User.username == username).execute()
+    refresh_user_session(request, username)
 
     response = JSONResponse(content={"success": True})
 
     # If user changed their own password, issue a new JWT to keep them logged in
     if current_username == username:
         JWT_COOKIE_NAME = request.app.frigate_config.auth.cookie_name
-        JWT_COOKIE_SECURE = request.app.frigate_config.auth.cookie_secure
         JWT_SESSION_LENGTH = request.app.frigate_config.auth.session_length
 
         expiration = int(time.time()) + JWT_SESSION_LENGTH
@@ -1144,7 +1165,7 @@ async def update_password(
             JWT_COOKIE_NAME,
             encoded_jwt,
             JWT_SESSION_LENGTH,
-            JWT_COOKIE_SECURE,
+            is_secure_request(request),
         )
 
     return response
@@ -1184,6 +1205,7 @@ async def update_role(
         )
 
     User.set_by_id(username, {User.role: body.role})
+    refresh_user_session(request, username)
     request.app.config_publisher.publisher.publish("config/auth", None)
     return JSONResponse(content={"success": True})
 

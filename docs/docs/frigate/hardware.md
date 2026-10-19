@@ -72,7 +72,7 @@ Frigate supports multiple different detectors that work on different types of ha
 
 **AMD**
 
-- [ROCm](#rocm---amd-gpu): ROCm can run on AMD Discrete GPUs to provide efficient object detection
+- [ROCm](#rocm---amd-gpu): ROCm can run on AMD discrete and recent integrated GPUs to provide efficient object detection
   - [Supports limited model architectures](../../configuration/object_detectors#amdrocm-gpu-detector)
   - Runs best on discrete AMD GPUs
 - <CommunityBadge /> [XDNA2 (Ryzen AI)](#amd-xdna2): AMD XDNA2 NPU (sub-watt power AI/ML processor separate to the GPU) inside Strix and other "AI" branded AMD platforms
@@ -240,7 +240,7 @@ Apple Silicon can not run within a container, so a ZMQ proxy is utilized to comm
 
 ### ROCm - AMD GPU
 
-With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many discrete AMD GPUs.
+With the [ROCm](../configuration/object_detectors.md#amdrocm-gpu-detector) detector Frigate can take advantage of many AMD discrete and integrated GPUs, see the [supported GPUs](../configuration/object_detectors.md#supported-gpus-rocm).
 
 | Name           | YOLOv9 Inference Time       | YOLO-NAS Inference Time   | RF-DETR Inference Time |
 | -------------- | --------------------------- | ------------------------- | ---------------------- |

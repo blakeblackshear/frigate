@@ -1,6 +1,7 @@
 """Handle sending notifications for Frigate via Firebase."""
 
 import datetime
+import ipaddress
 import json
 import logging
 import os
@@ -10,7 +11,9 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
+from urllib.parse import urlparse
 
+import requests
 from py_vapid import Vapid01
 from pywebpush import WebPusher
 from titlecase import titlecase
@@ -41,14 +44,124 @@ class PushNotification:
     ttl: int = 0
 
 
+# Push endpoints are opaque URLs but stay well under this in practice
+MAX_ENDPOINT_LENGTH = 2048
+
+# Suffixes that only ever resolve on the local network
+INTERNAL_HOST_SUFFIXES = (".local", ".localdomain", ".internal", ".home.arpa")
+
+
+def validate_push_endpoint(endpoint: Any) -> str | None:
+    """Return a reason the endpoint is unusable, or None when it is valid.
+
+    Subscriptions are issued by the browser vendor's push service, so a valid
+    endpoint is always a public https URL. Anything else is either a broken
+    registration or an attempt to aim the notification sender somewhere it
+    should not reach.
+    """
+    if not isinstance(endpoint, str) or not endpoint:
+        return "endpoint must be a url"
+
+    if len(endpoint) > MAX_ENDPOINT_LENGTH:
+        return "endpoint is too long"
+
+    try:
+        parsed = urlparse(endpoint)
+        port = parsed.port
+    except ValueError:
+        return "endpoint is not a valid url"
+
+    if parsed.scheme != "https":
+        return "endpoint must use https"
+
+    if parsed.username or parsed.password:
+        return "endpoint must not include credentials"
+
+    if port is not None and port != 443:
+        return "endpoint must use the default https port"
+
+    hostname = parsed.hostname
+
+    if not hostname:
+        return "endpoint must include a hostname"
+
+    try:
+        address = ipaddress.ip_address(hostname)
+    except ValueError:
+        address = None
+
+    if address is not None:
+        # A push service is never reachable at an address only this network can
+        # route, so anything non-global is a misconfiguration at best
+        if not address.is_global:
+            return "endpoint must not use a private address"
+    elif hostname == "localhost" or "." not in hostname:
+        return "endpoint must use a fully qualified hostname"
+    elif "" in hostname.split("."):
+        return "endpoint hostname must not contain empty labels"
+    elif hostname.endswith(INTERNAL_HOST_SUFFIXES):
+        return "endpoint must not use an internal hostname"
+
+    # The subscription token lives in the path
+    if len(parsed.path) <= 1:
+        return "endpoint must include a subscription path"
+
+    return None
+
+
+class _NoRedirectSession(requests.Session):
+    """Session that never follows redirects.
+
+    A push endpoint could otherwise redirect the send to an internal URL.
+    """
+
+    def request(self, *args: Any, **kwargs: Any) -> requests.Response:
+        kwargs["allow_redirects"] = False
+        return super().request(*args, **kwargs)
+
+
+_push_session = _NoRedirectSession()
+
+
+def _vapid_audience(endpoint: str) -> str:
+    parsed = urlparse(endpoint)
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
 def _build_web_pushers(user: str, subs: list[dict[str, Any]]) -> list[WebPusher]:
     """Build pushers for a user's stored subscriptions, skipping unusable ones."""
     pushers: list[WebPusher] = []
 
     for sub in subs:
+        # Stored rows may predate registration validation, so only skip the
+        # endpoints that would break building the VAPID audience
+        endpoint = sub.get("endpoint") if isinstance(sub, dict) else None
+
+        if not isinstance(endpoint, str):
+            logger.warning(
+                "Skipping notification subscription for %s: no endpoint", user
+            )
+            continue
+
+        try:
+            hostname = urlparse(endpoint).hostname or ""
+        except ValueError:
+            logger.warning(
+                "Skipping notification subscription for %s: unparsable endpoint", user
+            )
+            continue
+
+        if "" in hostname.split("."):
+            logger.warning(
+                "Skipping notification subscription for %s: invalid endpoint host %r",
+                user,
+                hostname,
+            )
+            continue
+
         # WebPusher decodes the stored keys and raises on malformed ones
         try:
-            pushers.append(WebPusher(sub))
+            pushers.append(WebPusher(sub, requests_session=_push_session))
         except Exception:
             logger.warning("Skipping invalid notification subscription for %s", user)
 
@@ -131,7 +244,7 @@ class WebPushClient(Communicator):
             for pushers in self.web_pushers.values():
                 for push in pushers:
                     endpoint: str = push.subscription_info["endpoint"]
-                    endpoints.add(endpoint[0 : endpoint.index("/", 10)])
+                    endpoints.add(_vapid_audience(endpoint))
 
             # create new claim
             for endpoint in endpoints:
@@ -320,9 +433,8 @@ class WebPushClient(Communicator):
 
                 for pusher in self.web_pushers[notification.user]:
                     endpoint = pusher.subscription_info["endpoint"]
-                    headers = self.claim_headers[
-                        endpoint[: endpoint.index("/", 10)]
-                    ].copy()
+
+                    headers = self.claim_headers[_vapid_audience(endpoint)].copy()
                     headers["urgency"] = "high"
 
                     resp = pusher.send(

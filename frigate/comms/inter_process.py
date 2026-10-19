@@ -50,7 +50,13 @@ class InterProcessCommunicator(Communicator):
 
                     if isinstance(raw, list):
                         (topic, value) = raw
-                        response = self._dispatcher(topic, value)
+
+                        # REP owes a reply, so a handler error must not end the thread
+                        try:
+                            response = self._dispatcher(topic, value)
+                        except Exception:
+                            logger.exception("Error handling IPC topic %s", topic)
+                            response = None
                     else:
                         logging.warning(
                             f"Received unexpected data type in ZMQ recv_json: {type(raw)}"

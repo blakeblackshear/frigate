@@ -10,6 +10,7 @@ import json
 import logging
 import subprocess as sp
 import tempfile
+import time
 from collections.abc import Callable, Generator
 from typing import IO
 
@@ -264,11 +265,16 @@ def iter_vod_frames(
     )
 
 
-def probe_vod_keyframe_pts(ffprobe_path: str, vod_url: str) -> list[float]:
+KEYFRAME_PROBE_TIMEOUT = 120.0
+
+
+def probe_vod_keyframe_pts(
+    ffprobe_path: str, vod_url: str, should_stop: Callable[[], bool]
+) -> list[float]:
     """Return keyframe presentation timestamps (VOD stream time) in order.
 
     Reads packet flags via ffprobe over the VOD URL (no decode). Returns [] on
-    any failure so the caller can fall back.
+    any failure, timeout, or stop request so the caller can fall back.
     """
     cmd = [
         ffprobe_path,
@@ -286,16 +292,27 @@ def probe_vod_keyframe_pts(ffprobe_path: str, vod_url: str) -> list[float]:
         "json",
     ]
     try:
-        completed = sp.run(cmd, capture_output=True, text=True, timeout=120)
-    except (OSError, sp.SubprocessError):
+        proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.DEVNULL, text=True)
+    except OSError:
         logger.warning("ffprobe failed for VOD keyframe probe")
         return []
 
-    if completed.returncode != 0 or not completed.stdout:
+    deadline = time.monotonic() + KEYFRAME_PROBE_TIMEOUT
+    while True:
+        try:
+            stdout, _ = proc.communicate(timeout=0.5)
+            break
+        except sp.TimeoutExpired:
+            if should_stop() or time.monotonic() > deadline:
+                proc.kill()
+                proc.communicate()
+                return []
+
+    if proc.returncode != 0 or not stdout:
         return []
 
     try:
-        packets = json.loads(completed.stdout).get("packets", [])
+        packets = json.loads(stdout).get("packets", [])
     except json.JSONDecodeError:
         return []
 

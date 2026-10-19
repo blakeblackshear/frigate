@@ -23,7 +23,7 @@ pandas == 3.0.*
 peewee == 4.5.*
 peewee_migrate == 2.3.*
 psutil == 7.2.*
-pydantic == 2.13.*
+pydantic == 2.14.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 tzdata == 2026.5
 pyzmq == 27.2.*
@@ -42,16 +42,16 @@ opencv-python-headless == 4.11.0.*
 opencv-contrib-python == 4.11.0.*
 scipy == 1.17.*
 # OpenVino & ONNX
-openvino == 2025.4.*
+openvino == 2026.4.*
 onnxruntime == 1.30.*
 # Embeddings
 transformers == 5.19.*
 # Generative AI
-google-genai == 2.29.*
+google-genai == 2.31.*
 ollama == 0.6.*
 openai == 3.26.*
 # push notifications
-py-vapid == 1.9.4
+py-vapid == 1.9.6
 pywebpush == 2.5.*
 # alpr
 pyclipper == 1.4.*

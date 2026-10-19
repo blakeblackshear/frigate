@@ -338,7 +338,12 @@ def process_frames(
             continue
 
         if datetime.now().astimezone(UTC) > next_region_update:
-            region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_config.name)
+            updated_grid = requestor.send_data(REQUEST_REGION_GRID, camera_config.name)
+
+            # A failed request replies empty, so keep the current grid
+            if updated_grid:
+                region_grid = updated_grid
+
             next_region_update = get_tomorrow_at_time(2)
 
         try:

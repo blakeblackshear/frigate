@@ -14,6 +14,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateTopic,
 )
 from frigate.config.holder import ConfigHolder
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
@@ -500,6 +501,358 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
             self.assertIsNot(holder.config, boot_config)
             self.assertIs(holder.config, app.frigate_config)
             self.assertEqual(holder.config.birdseye.inactivity_threshold, 5)
+        finally:
+            os.unlink(config_path)
+
+    camera_path = "rtsp://10.0.0.1:554/video?password=s3cret&user=admin"
+
+    def _add_credentials(self):
+        """Give the config a credentialed camera path and go2rtc secrets."""
+        self.minimal_config["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"] = (
+            self.camera_path
+        )
+        self.minimal_config["go2rtc"] = {
+            "rtsp": {"username": "rtspuser", "password": "rtsppass"},
+            "api": {"username": "apiuser", "password": "apipass"},
+            "mqtt": {"username": "mquser", "password": "mqpass"},
+            "ngrok": {"command": "ngrok tcp 8555 --authtoken ngroksecret"},
+            "homekit": {"front_door": {"pin": "19550224"}},
+            "publish": {"front_door": "rtmp://a.rtmp.youtube.com/live2/streamkey"},
+            "webrtc": {
+                "candidates": ["10.0.0.5:8555"],
+                "ice_servers": [
+                    {
+                        "urls": ["turn:turn.example.com:3478"],
+                        "username": "turnuser",
+                        "credential": "turnpass",
+                    }
+                ],
+            },
+        }
+
+    def _read_config_file(self, config_path):
+        with open(config_path) as f:
+            raw = f.read()
+        return raw, ruamel.yaml.YAML().load(raw)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_camera_path_round_trips(self, mock_find_config):
+        self._add_credentials()
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                camera = client.get("/config").json()["cameras"]["front_door"]
+                inputs = camera["ffmpeg"]["inputs"]
+                self.assertNotIn("s3cret", inputs[0]["path"])
+
+                resp = client.put(
+                    "/config/set",
+                    json={
+                        "config_data": {
+                            "cameras": {
+                                "front_door": {
+                                    "ffmpeg": {"inputs": inputs},
+                                    "detect": {"fps": 7},
+                                }
+                            }
+                        },
+                        "requires_restart": 0,
+                    },
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            _, saved = self._read_config_file(config_path)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"],
+                self.camera_path,
+            )
+        finally:
+            os.unlink(config_path)
+
+    def _save(self, client, config_data):
+        return client.put(
+            "/config/set",
+            json={"config_data": config_data, "requires_restart": 0},
+        )
+
+    def _set_inputs(self, paths):
+        self.minimal_config["cameras"]["front_door"]["ffmpeg"]["inputs"] = [
+            {"path": path, "roles": [role]} for path, role in paths
+        ]
+
+    # config parsing rebuilds FRIGATE_ENV_VARS from its sources
+    @patch.dict("frigate.util.env._CONTAINER_ENV", {"FRIGATE_RTSP_PASSWORD": "s3cret"})
+    @patch.dict(
+        "frigate.util.env.FRIGATE_ENV_VARS", {"FRIGATE_RTSP_PASSWORD": "s3cret"}
+    )
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_path_keeps_env_placeholder(self, mock_find_config):
+        path = "rtsp://admin:{FRIGATE_RTSP_PASSWORD}@10.0.0.1:554/live"
+        self._set_inputs([(path, "detect")])
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                camera = client.get("/config").json()["cameras"]["front_door"]
+                self.assertNotIn("s3cret", str(camera))
+
+                resp = self._save(
+                    client,
+                    {
+                        "cameras": {
+                            "front_door": {
+                                "ffmpeg": {"inputs": camera["ffmpeg"]["inputs"]},
+                                "detect": {"fps": 7},
+                            }
+                        }
+                    },
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            raw, saved = self._read_config_file(config_path)
+            self.assertNotIn("s3cret", raw)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"], path
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_over_masked_path_round_trips(self, mock_find_config):
+        path = "rtsp://10.0.0.1:554/live?x=a@b"
+        self._set_inputs([(path, "detect")])
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                inputs = client.get("/config").json()["cameras"]["front_door"][
+                    "ffmpeg"
+                ]["inputs"]
+                self.assertNotEqual(inputs[0]["path"], path)
+
+                resp = self._save(
+                    client,
+                    {"cameras": {"front_door": {"ffmpeg": {"inputs": inputs}}}},
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            _, saved = self._read_config_file(config_path)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"], path
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_unrestorable_masked_values_are_rejected(self, mock_find_config):
+        self._add_credentials()
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                for name, request in (
+                    (
+                        "index-keyed inputs",
+                        {
+                            "json": {
+                                "config_data": {
+                                    "cameras": {
+                                        "front_door": {
+                                            "ffmpeg": {
+                                                "inputs": {
+                                                    "0": {"path": "rtsp://*:*@h/x"}
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "requires_restart": 0,
+                            }
+                        },
+                    ),
+                    (
+                        "go2rtc streams",
+                        {
+                            "json": {
+                                "config_data": {
+                                    "go2rtc": {"streams": {"cam": ["rtsp://*:*@h/x"]}}
+                                },
+                                "requires_restart": 0,
+                            }
+                        },
+                    ),
+                    (
+                        "query string",
+                        {
+                            "params": {
+                                "cameras.front_door.ffmpeg.inputs.0.path": (
+                                    "rtsp://*:*@h/x"
+                                ),
+                                "go2rtc.rtsp.password": REDACTED_CREDENTIAL_SENTINEL,
+                            },
+                            "json": {"requires_restart": 0},
+                        },
+                    ),
+                ):
+                    with self.subTest(name):
+                        resp = client.put("/config/set", **request)
+                        self.assertEqual(resp.status_code, 400)
+                        self.assertIn("credentials", resp.json()["message"])
+
+            raw, _ = self._read_config_file(config_path)
+            self.assertNotIn("*:*", raw)
+            self.assertNotIn(REDACTED_CREDENTIAL_SENTINEL, raw)
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_go2rtc_credentials_redacted_and_round_trip(self, mock_find_config):
+        self._add_credentials()
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                response = client.get("/config").json()
+                body = str(response)
+                for secret in (
+                    "rtsppass",
+                    "apipass",
+                    "mqpass",
+                    "ngroksecret",
+                    "19550224",
+                    "streamkey",
+                ):
+                    self.assertNotIn(secret, body)
+
+                go2rtc = response["go2rtc"]
+                self.assertEqual(go2rtc["webrtc"]["candidates"], ["10.0.0.5:8555"])
+                # browsers need the TURN account to relay WebRTC
+                self.assertEqual(
+                    go2rtc["webrtc"]["ice_servers"][0]["credential"], "turnpass"
+                )
+
+                go2rtc.pop("ngrok")
+                go2rtc["webrtc"]["candidates"] = ["10.0.0.9:8555"]
+                self.assertEqual(
+                    self._save(client, {"go2rtc": go2rtc}).status_code, 200
+                )
+
+            raw, saved = self._read_config_file(config_path)
+            self.assertNotIn(REDACTED_CREDENTIAL_SENTINEL, raw)
+            self.assertEqual(saved["go2rtc"]["rtsp"]["password"], "rtsppass")
+            self.assertEqual(saved["go2rtc"]["mqtt"]["password"], "mqpass")
+            self.assertEqual(
+                saved["go2rtc"]["homekit"]["front_door"]["pin"], "19550224"
+            )
+            self.assertIn("streamkey", saved["go2rtc"]["publish"]["front_door"])
+            self.assertEqual(saved["go2rtc"]["webrtc"]["candidates"], ["10.0.0.9:8555"])
+            self.assertEqual(
+                saved["go2rtc"]["webrtc"]["ice_servers"][0]["credential"], "turnpass"
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_inputs_restore_by_value(self, mock_find_config):
+        main = "rtsp://u:MAIN@10.0.0.1:554/main"
+        sub = "rtsp://u:SUB@10.0.0.1:554/sub"
+
+        for name, edit, expected in (
+            ("delete first", lambda inputs: [inputs[1]], [sub]),
+            ("reorder", lambda inputs: [inputs[1], inputs[0]], [sub, main]),
+        ):
+            with self.subTest(name):
+                self._set_inputs([(main, "record"), (sub, "detect")])
+                config_path = self._write_config_file()
+                mock_find_config.return_value = config_path
+
+                try:
+                    app, _ = self._create_app_with_publisher()
+
+                    with AuthTestClient(app) as client:
+                        inputs = client.get("/config").json()["cameras"]["front_door"][
+                            "ffmpeg"
+                        ]["inputs"]
+                        resp = self._save(
+                            client,
+                            {
+                                "cameras": {
+                                    "front_door": {"ffmpeg": {"inputs": edit(inputs)}}
+                                }
+                            },
+                        )
+                        self.assertEqual(resp.status_code, 200)
+
+                    _, saved = self._read_config_file(config_path)
+                    saved_inputs = saved["cameras"]["front_door"]["ffmpeg"]["inputs"]
+                    self.assertEqual([i["path"] for i in saved_inputs], expected)
+                finally:
+                    os.unlink(config_path)
+
+    @patch("frigate.api.app.find_config_file")
+    def test_ambiguous_or_unmatched_masked_input(self, mock_find_config):
+        self._set_inputs(
+            [
+                ("rtsp://u:one@10.0.0.1:554/live", "record"),
+                ("rtsp://u:two@10.0.0.1:554/live", "detect"),
+            ]
+        )
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                inputs = client.get("/config").json()["cameras"]["front_door"][
+                    "ffmpeg"
+                ]["inputs"]
+
+                # both inputs mask to the same value and roles no longer tell
+                # them apart
+                remaining = dict(inputs[1], roles=["detect", "record"])
+                resp = self._save(
+                    client,
+                    {"cameras": {"front_door": {"ffmpeg": {"inputs": [remaining]}}}},
+                )
+                self.assertEqual(resp.status_code, 400)
+
+                inputs[0]["path"] = "rtsp://*:*@10.0.0.99:554/live"
+                resp = self._save(
+                    client,
+                    {"cameras": {"front_door": {"ffmpeg": {"inputs": inputs}}}},
+                )
+                self.assertEqual(resp.status_code, 400)
+
+                # roles break the tie when the second input stays as it was
+                resp = self._save(
+                    client,
+                    {"cameras": {"front_door": {"ffmpeg": {"inputs": [inputs[1]]}}}},
+                )
+                self.assertEqual(resp.status_code, 200)
+
+            raw, saved = self._read_config_file(config_path)
+            self.assertNotIn("*:*", raw)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"],
+                "rtsp://u:two@10.0.0.1:554/live",
+            )
         finally:
             os.unlink(config_path)
 
