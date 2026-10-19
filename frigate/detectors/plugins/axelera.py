@@ -207,20 +207,19 @@ def _resolve_model_json(path) -> str:
 
 
 def _find_model_json(where: str) -> str:
-    """Locate the runtime's model.json under a dir or return the path itself.
+    """Locate the runtime's model.json under an extracted model zip.
 
-    A zip may have unpacked with a single top-level directory wrapper, so a
-    directory without a direct model.json is searched one level down. Only an
-    unambiguous single match is accepted: several candidate subdirectories
-    raise instead of returning whichever sorts first, because silently picking
-    one would run a model the user never selected.
+    ``where`` is the extract directory, so model.json sits either at its root
+    (``1/model.json`` or ``model.json``) or under the single top-level folder
+    the archive was wrapped in. Only an unambiguous single match is accepted:
+    several candidate subdirectories raise instead of returning whichever
+    sorts first, because silently picking one would run a model the user
+    never selected.
     """
-    if os.path.isfile(where) and os.path.basename(where) == "model.json":
-        return where
     if not os.path.isdir(where):
         raise FileNotFoundError(
-            f"model.json not found for {where}. Point path at the compiled "
-            "model directory (containing 1/model.json) or the model.json itself."
+            f"model.json not found under {where}. The model zip must contain "
+            "1/model.json at its root or under one top-level folder."
         )
     for candidate in (
         os.path.join(where, "1", "model.json"),
@@ -245,13 +244,13 @@ def _find_model_json(where: str) -> str:
     if len(matches) > 1:
         listed = ", ".join(os.path.relpath(m, where) for m in matches)
         raise ValueError(
-            f"multiple compiled models found under {where}: {listed}. Point "
-            "path at the specific model directory (containing 1/model.json) "
-            "or the model.json itself."
+            f"multiple compiled models found under {where}: {listed}. The "
+            "model zip must contain exactly one model.json, at its root or "
+            "under one top-level folder."
         )
     raise FileNotFoundError(
-        f"model.json not found for {where}. Point path at the compiled "
-        "model directory (containing 1/model.json) or the model.json itself."
+        f"model.json not found under {where}. The model zip must contain "
+        "1/model.json at its root or under one top-level folder."
     )
 
 
