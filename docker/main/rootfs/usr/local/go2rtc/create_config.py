@@ -198,9 +198,13 @@ if config.get("birdseye", {}).get("restream", False):
     else:
         go2rtc_config["streams"] = {"birdseye": ffmpeg_cmd}
 
-# Write go2rtc_config to /dev/shm/go2rtc.yaml
-with open("/dev/shm/go2rtc.yaml", "w") as f:
+# The run script removes the old file first. Exclusive create never follows a
+# link the go2rtc user planted in sticky /dev/shm. The config contains camera
+# credentials, so it is not world-readable.
+fd = os.open(
+    "/dev/shm/go2rtc.yaml",
+    os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+    0o640,
+)
+with os.fdopen(fd, "w") as f:
     yaml.dump(go2rtc_config, f)
-
-# config contains camera credentials; do not leave it world-readable
-os.chmod("/dev/shm/go2rtc.yaml", 0o640)

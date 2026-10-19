@@ -124,7 +124,7 @@ fi
 mkdir -p /etc/letsencrypt/www 2>/dev/null || true
 
 # nginx settings are read once; both templates consume them
-nginx_settings=$(python3 /usr/local/nginx/get_nginx_settings.py)
+nginx_settings=$(python3 -I /usr/local/nginx/get_nginx_settings.py)
 
 # build templates for optional FRIGATE_BASE_PATH environment variable
 echo "$nginx_settings" | \

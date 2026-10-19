@@ -8,7 +8,7 @@ from typing import Any
 from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.util.config import find_config_file
+from frigate.util.config import find_config_file, parse_listen_address
 
 sys.path.remove("/opt/frigate")
 
@@ -35,20 +35,29 @@ ipv6_config: dict[str, Any] = networking_config.get("ipv6", {})
 ipv6_config.setdefault("enabled", False)
 
 listen_config: dict[str, Any] = networking_config.get("listen", {})
-listen_config.setdefault("internal", 5000)
-listen_config.setdefault("external", 8971)
 
-# handle case where internal port is a string with ip:port
-internal_port = listen_config["internal"]
-if type(internal_port) is str:
-    internal_port = int(internal_port.split(":")[-1])
-listen_config["internal_port"] = internal_port
+# Frigate's own validation runs elsewhere, and a bad value here must not stop nginx
+# from serving the safe-mode UI. Valid values are kept so a fallback never widens
+# the unauthenticated internal listener beyond the configured address.
+for key, default in (("internal", 5000), ("external", 8971)):
+    try:
+        value, port = parse_listen_address(listen_config.get(key, default))
+    except ValueError:
+        print(
+            f"[WARN] Invalid networking.listen.{key}, using {default}",
+            file=sys.stderr,
+        )
+        value, port = default, default
 
-# handle case where external port is a string with ip:port
-external_port = listen_config["external"]
-if type(external_port) is str:
-    external_port = int(external_port.split(":")[-1])
-listen_config["external_port"] = external_port
+    listen_config[key] = value
+    listen_config[f"{key}_port"] = port
+
+if listen_config["internal_port"] == listen_config["external_port"]:
+    print(
+        "[ERROR] networking.listen.internal and external share a port",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 base_path = os.environ.get("FRIGATE_BASE_PATH", "")
 
