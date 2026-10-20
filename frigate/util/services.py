@@ -980,9 +980,15 @@ def is_go2rtc_arbitrary_exec_allowed() -> bool:
 
 
 def is_restricted_go2rtc_source(stream_source: str) -> bool:
-    """Check if a stream source is a restricted type (echo, expr, or exec)
-    and the GO2RTC_ALLOW_ARBITRARY_EXEC override is not set."""
-    if not stream_source.strip().startswith(("echo:", "expr:", "exec:")):
+    """Check if a stream source is restricted and the
+    GO2RTC_ALLOW_ARBITRARY_EXEC override is not set.
+
+    Restricted sources are the echo, expr and exec schemes, and any source
+    using go2rtc's `${VAR:default}` expansion, which go2rtc runs over the raw
+    config before parsing and whose default can name an exec source.
+    """
+    source = stream_source.strip()
+    if not source.startswith(("echo:", "expr:", "exec:")) and "${" not in source:
         return False
     return not is_go2rtc_arbitrary_exec_allowed()
 

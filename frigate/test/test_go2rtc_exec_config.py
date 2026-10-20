@@ -4,7 +4,11 @@ import os
 import unittest
 from unittest.mock import patch
 
-from frigate.util.services import apply_go2rtc_ffmpeg_config
+from frigate.util.services import (
+    apply_go2rtc_ffmpeg_config,
+    is_restricted_go2rtc_api_source,
+    is_restricted_go2rtc_source,
+)
 
 FFMPEG_PATH = "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
 
@@ -45,6 +49,40 @@ class TestApplyGo2rtcFfmpegConfig(unittest.TestCase):
             assert apply_go2rtc_ffmpeg_config(config, FFMPEG_PATH) == []
         assert config["ffmpeg"]["bin"] == "/usr/bin/ffmpeg"
         assert config["ngrok"] == {"command": "ngrok tcp 8555"}
+
+
+class TestRestrictedGo2rtcVarExpansion(unittest.TestCase):
+    """go2rtc expands `${VAR:default}` over the raw config before parsing, and
+    the default can name an exec source, so a `${` source is restricted."""
+
+    def setUp(self):
+        exec_patch = patch(
+            "frigate.util.services.is_go2rtc_arbitrary_exec_allowed",
+            return_value=False,
+        )
+        self.mock_exec_allowed = exec_patch.start()
+        self.addCleanup(exec_patch.stop)
+
+    def test_var_expansion_source_is_restricted(self):
+        for source in (
+            "${NOPE:exec:touch /tmp/x}",
+            "rtsp://host/${CAM}",
+            "  ${NOPE:exec:id}",
+        ):
+            self.assertTrue(is_restricted_go2rtc_source(source), source)
+            self.assertTrue(is_restricted_go2rtc_api_source(source), source)
+
+    def test_plain_sources_are_not_restricted(self):
+        for source in (
+            "rtsp://user:pass@host/stream",
+            "ffmpeg:front#video=h264#height=720",
+        ):
+            self.assertFalse(is_restricted_go2rtc_source(source), source)
+            self.assertFalse(is_restricted_go2rtc_api_source(source), source)
+
+    def test_var_expansion_allowed_when_override_set(self):
+        self.mock_exec_allowed.return_value = True
+        self.assertFalse(is_restricted_go2rtc_source("${NOPE:exec:id}"))
 
 
 if __name__ == "__main__":
