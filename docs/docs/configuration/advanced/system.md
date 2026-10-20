@@ -65,7 +65,16 @@ go2rtc:
 
 This section sets environment variables in the Frigate process for those unable to modify the environment of the container, like within Home Assistant OS. It's meant for process settings such as `LIBVA_DRIVER_NAME` or the TensorFlow thread counts below. Docker users should set environment variables in their `docker run` command (`-e LIBVA_DRIVER_NAME=i965`) or `docker-compose.yml` file (`environment:` section) instead. Values set here are stored in plain text in your config file, so credentials belong in `secrets.yaml`, Docker environment variables, or Docker secrets instead.
 
-Names prefixed with `FRIGATE_` set here also take part in `{FRIGATE_VARIABLE_NAME}` substitution (see [below](#substitution-sources-and-precedence)), but `secrets.yaml` is the better home for them.
+Besides `FRIGATE_` names, only these are accepted, and a variable already set in the container environment keeps its container value:
+
+- `LIBVA_DRIVER_NAME` and `HSA_OVERRIDE_GFX_VERSION`
+- `TF_INTRA_OP_PARALLELISM_THREADS`, `TF_INTER_OP_PARALLELISM_THREADS`, `TF_DATASET_THREAD_POOL_SIZE`, and `SHM_MAX_FRAMES`
+- `USE_FP16`, `HF_HUB_OFFLINE`, and `TRANSFORMERS_OFFLINE`
+- `HF_ENDPOINT`, `GITHUB_ENDPOINT`, `GITHUB_RAW_ENDPOINT`, and `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` (an `http://` or `https://` URL)
+
+Any other name is ignored with a warning and must be set in the container environment.
+
+Names prefixed with `FRIGATE_` set here take part in `{FRIGATE_VARIABLE_NAME}` substitution (see [below](#substitution-sources-and-precedence)), but `secrets.yaml` is the better home for them. Of these, only `FRIGATE_JWT_SECRET` is also set in the process environment.
 
 <ConfigTabs>
 <TabItem value="ui">

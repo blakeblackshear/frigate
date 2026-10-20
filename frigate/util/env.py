@@ -26,6 +26,8 @@ _SECRETS_FILE: dict[str, str] = {}
 _CONTAINER_ENV: dict[str, str] = {
     k: v for k, v in os.environ.items() if k.startswith("FRIGATE_")
 }
+# Empty image defaults, like ROCm's HSA_OVERRIDE_GFX_VERSION, don't count as set.
+_CONTAINER_ENV_NAMES = frozenset(k for k, v in os.environ.items() if v)
 _CREDENTIALS_DIR: dict[str, str] = {}
 
 _SOURCES: tuple[tuple[str, dict[str, str]], ...] = (
@@ -165,38 +167,80 @@ def reload_sources(warn: bool = True) -> None:
     _rebuild(warn)
 
 
-# Security overrides that must come from the container environment, which is
-# controlled by the operator, rather than from the config, which admins can edit
-_PROTECTED_ENV_VARS = frozenset({"GO2RTC_ALLOW_ARBITRARY_EXEC"})
+_INT = re.compile(r"\d+", re.ASCII)
+_WORD = re.compile(r"\w+", re.ASCII)
+_URL = re.compile(r"https?://\S+")
+
+# The only unprefixed names the config may export, with the values each accepts.
+# Anything else, such as LD_PRELOAD, can load code into Frigate or its children.
+_ALLOWED_ENV_VARS: dict[str, re.Pattern[str]] = {
+    "LIBVA_DRIVER_NAME": re.compile(r"[A-Za-z0-9_]+"),
+    "TF_INTRA_OP_PARALLELISM_THREADS": _INT,
+    "TF_INTER_OP_PARALLELISM_THREADS": _INT,
+    "TF_DATASET_THREAD_POOL_SIZE": _INT,
+    "SHM_MAX_FRAMES": _INT,
+    "USE_FP16": _WORD,
+    "HF_HUB_OFFLINE": _WORD,
+    "TRANSFORMERS_OFFLINE": _WORD,
+    "HSA_OVERRIDE_GFX_VERSION": re.compile(r"[0-9.]+"),
+    "HF_ENDPOINT": _URL,
+    "GITHUB_ENDPOINT": _URL,
+    "GITHUB_RAW_ENDPOINT": _URL,
+    "TF_KERAS_MOBILENET_V2_WEIGHTS_URL": _URL,
+}
+
+# Auth reads it from os.environ; every other FRIGATE_ name only feeds substitution.
+_EXPORTED_FRIGATE_VARS = frozenset({"FRIGATE_JWT_SECRET"})
 
 
 def apply_config_env_vars(values: Mapping[str, object]) -> None:
     """Install the environment_vars block as the lowest priority source.
 
-    Unprefixed keys only set os.environ. Protected security overrides are
-    skipped.
+    FRIGATE_ keys feed substitution. Allowlisted unprefixed keys with valid
+    values are exported to os.environ. A name the container already set is
+    never overwritten.
     """
+    exports: dict[str, str] = {}
+
     for key, value in values.items():
-        if key.upper() in _PROTECTED_ENV_VARS:
+        resolved = str(value)
+
+        if key.startswith("FRIGATE_"):
+            _CONFIG_ENV_VARS[key] = resolved
+            continue
+
+        pattern = _ALLOWED_ENV_VARS.get(key)
+
+        if pattern is None:
             logger.warning(
                 "Ignoring %s in environment_vars, it must be set in the container environment",
                 key,
             )
             continue
 
-        resolved = str(value)
+        if not pattern.fullmatch(resolved):
+            logger.warning("Ignoring %s in environment_vars, unsupported value", key)
+            continue
 
-        if key.startswith("FRIGATE_"):
-            _CONFIG_ENV_VARS[key] = resolved
-        else:
-            os.environ[key] = resolved
+        exports[key] = resolved
 
     _rebuild()
 
-    # Export the winning value; auth reads FRIGATE_JWT_SECRET from os.environ.
-    for key in values:
-        if key.startswith("FRIGATE_"):
-            os.environ[key] = FRIGATE_ENV_VARS[key]
+    for key in _EXPORTED_FRIGATE_VARS & values.keys():
+        exports[key] = FRIGATE_ENV_VARS[key]
+
+    for key, value in exports.items():
+        if key in _CONTAINER_ENV_NAMES:
+            logger.info(
+                "Ignoring %s in environment_vars, the container environment sets it",
+                key,
+            )
+            continue
+
+        try:
+            os.environ[key] = value
+        except ValueError:
+            logger.warning("Ignoring %s in environment_vars, unsupported value", key)
 
 
 reload_sources(warn=False)

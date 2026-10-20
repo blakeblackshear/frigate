@@ -40,16 +40,10 @@ try:
 except FileNotFoundError:
     config: dict[str, Any] = {}
 
-# No validator runs here, so install environment_vars ourselves. FRIGATE_
-# names only: anything else lands in os.environ, where the exec gate reads
-# GO2RTC_ALLOW_ARBITRARY_EXEC.
+# No validator runs here, so install environment_vars ourselves.
 config_env_vars = config.get("environment_vars")
 apply_config_env_vars(
-    {
-        key: value
-        for key, value in config_env_vars.items()
-        if str(key).startswith("FRIGATE_")
-    }
+    {str(key): value for key, value in config_env_vars.items()}
     if isinstance(config_env_vars, dict)
     else {}
 )

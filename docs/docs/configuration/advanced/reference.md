@@ -240,7 +240,7 @@ logger:
 
 # Optional: set environment variables
 environment_vars:
-  EXAMPLE_VAR: value
+  LIBVA_DRIVER_NAME: i965
 
 # Optional: birdseye configuration
 # NOTE: Can (enabled, mode) be overridden at the camera level
