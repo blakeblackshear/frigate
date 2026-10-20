@@ -739,6 +739,13 @@ def auth(request: Request):
         int(request.headers.get("x-server-port", default=0))
         == request.app.auth_internal_port
     ):
+        # go2rtc runs the producer an unknown src describes for any caller
+        deny_status = deny_response_for_go2rtc_stream(
+            request.headers.get("x-original-url"), None, request
+        )
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
         success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
         return success_response
