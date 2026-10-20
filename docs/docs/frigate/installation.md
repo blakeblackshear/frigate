@@ -627,7 +627,7 @@ devices:
       hooks:
         - hookName: startContainer
           path: /bin/ln
-          args: ["/bin/ln", "-s", "metis-0-1-0", "/dev/metis-0:1:0"]
+          args: ["/bin/ln", "-sf", "metis-0-1-0", "/dev/metis-0:1:0"]
           timeout: 5
 ```
 
