@@ -103,7 +103,7 @@ if not is_valid_ffmpeg_path(path):
     print(
         "[ERROR] ffmpeg path contains spaces, quotes or shell characters, using the default ffmpeg instead."
     )
-ffmpeg_path = resolve_ffmpeg_path(path, "ffmpeg")
+ffmpeg_path = resolve_ffmpeg_path(path, "ffmpeg", "go2rtc")
 
 for key in apply_go2rtc_ffmpeg_config(go2rtc_config, ffmpeg_path):
     print(
