@@ -627,6 +627,7 @@ def _restricted_go2rtc_response(
             Go2rtcStreamIssue.invalid_placeholder,
             "Invalid variable placeholder in go2rtc stream",
         ),
+        (Go2rtcStreamIssue.invalid_name, "Invalid go2rtc stream name"),
     ):
         names = [name for name, found in issues.items() if found == issue]
         if names:

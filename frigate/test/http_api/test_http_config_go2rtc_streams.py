@@ -151,6 +151,19 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
         assert resp.status_code == 200, resp.text
         assert _EXISTING_SRC in self._read_config()
 
+    def test_set_rejects_stream_name_with_ffmpeg_params(self):
+        before = self._read_config()
+        resp = self._set_streams(
+            {"x#raw=-f#raw=mpegts#raw=/tmp/x": "rtsp://10.0.0.2:554/video"}
+        )
+        assert resp.status_code == 400
+        assert "Invalid go2rtc stream name" in resp.json()["message"]
+        assert self._read_config() == before
+
+    def test_set_allows_plain_stream_names(self):
+        resp = self._set_streams({"back-yard.main_2": "rtsp://10.0.0.2:554/video"})
+        assert resp.status_code == 200, resp.text
+
     def test_set_allows_injected_source_when_override_set(self):
         with patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", "true"):
             resp = self._set_streams({"new_stream": [_INJECTED_SRC]})

@@ -31,6 +31,16 @@ def is_transcode_stream_name(camera: str, name: str) -> bool:
     return re.fullmatch(rf"{re.escape(camera)}_transcode_\d+p", name) is not None
 
 
+def is_valid_go2rtc_stream_name(name: str) -> bool:
+    """Return whether a stream name is safe to splice into a go2rtc source.
+
+    go2rtc splits sources on `#` and ffmpeg commands on whitespace, and expands
+    `${VAR}` at load, so a name with any of these, or with quotes, could add its
+    own parameters.
+    """
+    return re.search(r"[\s#$'\"]", name) is None
+
+
 def transcode_stream_source(source: str, height: int, bitrate: int) -> str:
     """Build the go2rtc ffmpeg source that transcodes a stream to H.264.
 
@@ -101,7 +111,9 @@ def raw_transcode_streams(config: dict[str, Any]) -> dict[str, str]:
             camera, live_streams or {camera: camera}
         )
 
-        if source is None:
+        # an unsafe name fails Frigate's validation; skipping it here keeps
+        # it out of go2rtc
+        if source is None or not is_valid_go2rtc_stream_name(str(source)):
             continue
 
         qualities = transcode.get("qualities")

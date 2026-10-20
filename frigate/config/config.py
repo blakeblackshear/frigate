@@ -39,6 +39,7 @@ from frigate.util.image import create_mask
 from frigate.util.live_streams import (
     default_transcode_source,
     is_transcode_stream_name,
+    is_valid_go2rtc_stream_name,
     transcode_stream_name,
     transcode_streams,
 )
@@ -312,6 +313,11 @@ def apply_live_transcode_streams(
         if transcode.source not in go2rtc_streams:
             raise ValueError(
                 f"Camera {camera_config.name} has transcoded streams enabled, but its source {transcode.source} is not a go2rtc stream."
+            )
+
+        if not is_valid_go2rtc_stream_name(transcode.source):
+            raise ValueError(
+                f"Camera {camera_config.name} transcodes go2rtc stream {transcode.source}, whose name contains '#', whitespace or quotes."
             )
 
         generated = transcode_streams(
