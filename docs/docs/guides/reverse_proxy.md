@@ -37,6 +37,8 @@ Your reverse proxy must be configured to forward the `Upgrade` and `Connection` 
 
 Note that some proxies disable WebSocket support by default. For example, Nginx Proxy Manager has a "Websockets Support" toggle that must be enabled.
 
+Frigate rejects WebSocket connections opened from a page on another site. Your proxy must either preserve the original `Host` header or send it in `X-Forwarded-Host`, otherwise Frigate cannot tell the connection came from its own UI.
+
 ## Proxies
 
 There are many solutions available to implement reverse proxies and the community is invited to help out documenting others through a contribution to this page.
@@ -161,6 +163,7 @@ The settings below enabled connection upgrade, sets up logging (optional) and pr
   error_log /data/logs/proxy-host-40_error.log warn;
 
   location / {
+    proxy_set_header Host $host;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection $http_connection;
     proxy_http_version 1.1;

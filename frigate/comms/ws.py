@@ -40,6 +40,7 @@ from frigate.const import (
 )
 from frigate.models import User
 from frigate.output.ws_auth import ws_has_camera_access
+from frigate.util.origin import origin_allowed
 
 logger = logging.getLogger(__name__)
 
@@ -472,6 +473,28 @@ def _materialize_for_ws(
     return None
 
 
+class OriginCheckedWebSocketApplication(WebSocketWSGIApplication):  # type: ignore[misc]
+    """ws4py application that rejects cross-origin browser handshakes."""
+
+    def __call__(self, environ: dict[str, Any], start_response: Callable) -> Any:
+        if not origin_allowed(
+            environ.get("HTTP_ORIGIN"),
+            environ.get("HTTP_HOST"),
+            environ.get("HTTP_X_FORWARDED_HOST"),
+        ):
+            logger.warning(
+                "Rejected cross-origin websocket handshake: origin=%s, host=%s, "
+                "x-forwarded-host=%s",
+                environ.get("HTTP_ORIGIN"),
+                environ.get("HTTP_HOST"),
+                environ.get("HTTP_X_FORWARDED_HOST"),
+            )
+            start_response("403 Forbidden", [("Content-Length", "0")])
+            return []
+
+        return super().__call__(environ, start_response)
+
+
 class WebSocket(WebSocket_):  # type: ignore[misc]
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
@@ -621,7 +644,7 @@ class WebSocketClient(Communicator):
             5002,
             server_class=WSGIServer,
             handler_class=WebSocketWSGIRequestHandler,
-            app=WebSocketWSGIApplication(handler_cls=_WebSocketHandler),
+            app=OriginCheckedWebSocketApplication(handler_cls=_WebSocketHandler),
         )
         self.websocket_server.initialize_websockets_manager()
         self.websocket_thread = threading.Thread(
