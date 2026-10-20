@@ -277,7 +277,8 @@ class AsyncDetectorRunner(FrigateProcess):
         self._frame_manager = SharedMemoryFrameManager()
         self._publisher = ObjectDetectorPublisher()
         self._detector = AsyncLocalObjectDetector(
-            detector_config=self.detector_config, stop_event=self.stop_event
+            detector_config=self.detector_config,
+            stop_event=self.stop_event,
         )
 
         for name in self.cameras:
@@ -366,8 +367,8 @@ class ObjectDetectProcess:
 
         self.detection_start.value = 0.0
 
-        # Async path for MemryX
-        if self.detector_config.type == "memryx":
+        # Async path for MemryX and Axelera (send/receive contract)
+        if self.detector_config.type in ("memryx", "axelera"):
             self.detect_process = AsyncDetectorRunner(
                 f"frigate.detector:{self.name}",
                 self.detection_queue,

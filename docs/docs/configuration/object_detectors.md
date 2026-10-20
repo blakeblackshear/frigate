@@ -63,6 +63,10 @@ Frigate supports multiple different detectors that work on different types of ha
 
 - [AXEngine](#axera): axmodels can run on AXERA AI acceleration.
 
+**Axelera** <CommunityBadge />
+
+- [Axelera Metis](#axelera-metis): The Metis AI Accelerator is available in M.2 and PCIe formats, running compiled YOLO models through the vendor runtime.
+
 **For Testing**
 
 - [CPU Detector (not recommended for actual use](#cpu-detector-not-recommended): Use a CPU to run tflite model, this is not recommended and in most cases OpenVINO can be used in CPU mode with better results.
@@ -100,7 +104,7 @@ models:
       - openvino:GPU
 ```
 
-Coral EdgeTPU and MemryX accelerators can only be opened by one process, so those devices can not be repeated.
+Coral EdgeTPU, MemryX, and Axelera Metis accelerators can only be opened by one process, so those devices can not be repeated.
 
 ### Running more than one model
 
@@ -940,3 +944,41 @@ The AXEngine python package is not part of the Frigate image. It is downloaded a
 When configuring the AXEngine detector, you have to specify the model name.
 
 <ModelConfigDropdown detectorTitle="AXEngine" models={objectDetectorsModels.axengine.models} />
+
+---
+
+## Axelera Metis
+
+<CommunityBadge />
+
+Hardware accelerated object detection is supported on the Axelera Metis AI Accelerator, available in M.2 and PCIe card formats. Inference runs through Axelera's low-level runtime (`axelera.runtime`), which executes compiled YOLO-family models with a flat per-frame latency.
+
+See the [installation docs](../frigate/installation.md#axelera-metis) for information on configuring the Metis hardware.
+
+:::info
+
+The Axelera runtime is not part of the Frigate image. It is downloaded and installed into `/config/.local` the first time an Axelera detector is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+
+:::
+
+### Configuration {#configuration-axelera}
+
+<ModelConfigDropdown detectorTitle="Axelera Metis" models={objectDetectorsModels.axelera.models} />
+
+#### Using a Custom Model
+
+Models must be compiled for the Metis NPU with the Axelera Voyager SDK before Frigate can run them. The compiled output is a directory containing `1/model.json`, `1/manifest.json`, and the baked `1/postprocess_graph.onnx`.
+
+Compile the model on a machine with the Voyager SDK installed (compilation is not supported inside the Frigate container), for example with the SDK's `deploy.py` against a model-zoo yaml. Then zip the compiled output and point the model's `path` at the zip (bind-mounted, or at an http(s) URL); the archive extracts fresh on every start.
+
+```yaml
+models:
+  - devices:
+      - axelera:PCIe
+    path: /config/model_cache/axelera/yolox-s-coco-onnx.zip
+    width: 640 # must equal the compiled input size
+    height: 640
+    input_pixel_format: bgr # Frigate delivers BGR; the plugin feeds RGB planes
+    model_type: yolox
+    labelmap_path: /labelmap/coco-80.txt
+```

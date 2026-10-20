@@ -227,6 +227,14 @@ class TestAccelerators(HardwareProbeTestCase):
     def test_no_deepx_is_reported_without_a_node(self):
         self.assertNotIn("deepx", self.probe())
 
+    def test_an_axelera_metis_is_a_single_unit(self):
+        write(os.path.join(self.dev_root, "metis0"))
+
+        axelera = self.probe()["axelera"]
+
+        self.assertEqual(axelera.units[0].device, "axelera:PCIe")
+        self.assertEqual(axelera.count, 1)
+
     def test_a_supported_rockchip_soc_is_reported(self):
         write(
             os.path.join(self.proc_root, "device-tree", "compatible"),
