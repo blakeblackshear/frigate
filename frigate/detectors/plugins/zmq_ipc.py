@@ -53,6 +53,12 @@ class ZmqIpcDetector(DetectionApi):
           "shape": List[int],
           "dtype": str,  # numpy dtype string, e.g. "uint8", "float32"
         }
+      and, when the detector reported input_transform_offload, also:
+        {
+          "input_tensor": str,  # InputTensorEnum value, e.g. "nhwc", "nchw"
+          "input_dtype": str,   # InputDTypeEnum value: "float", "float_denorm", "int"
+        }
+      which describe the transform the detector is expected to apply itself.
       tensor_bytes are the raw bytes of the numpy array in C-order.
 
     - Response is expected to be either:
@@ -77,6 +83,8 @@ class ZmqIpcDetector(DetectionApi):
         self._endpoint = detector_config.endpoint
         self._request_timeout_ms = detector_config.request_timeout_ms
         self._linger_ms = detector_config.linger_ms
+        # Reported by the detector during the model handshake.
+        self.input_transform_offload = False
         self._socket = None
         self._create_socket()
 
@@ -148,6 +156,7 @@ class ZmqIpcDetector(DetectionApi):
                     response = json.loads(response_frames[0].decode("utf-8"))
                     model_available = response.get("model_available", False)
                     model_loaded = response.get("model_loaded", False)
+                    self._read_offload_support(response)
 
                     if model_available and model_loaded:
                         return True
@@ -266,12 +275,26 @@ class ZmqIpcDetector(DetectionApi):
             logger.error(f"Failed to send model data: {e}")
             return False
 
+    def _read_offload_support(self, response: dict[str, Any]) -> None:
+        """Record whether the detector applies the input transform itself."""
+        offload = response.get("input_transform_offload", False) is True
+        if offload != self.input_transform_offload:
+            self.input_transform_offload = offload
+            logger.info(
+                f"Detector input transform offload: {'on' if offload else 'off'}"
+            )
+
     def _build_header(self, tensor_input: np.ndarray) -> bytes:
         header: dict[str, Any] = {
             "shape": list(tensor_input.shape),
             "dtype": str(tensor_input.dtype.name),
             "model_type": str(self.detector_config.model.model_type.name),
         }
+
+        if self.input_transform_offload:
+            header["input_tensor"] = self.detector_config.model.input_tensor.value
+            header["input_dtype"] = self.detector_config.model.input_dtype.value
+
         return json.dumps(header).encode("utf-8")
 
     def _decode_response(self, frames: list[bytes]) -> np.ndarray:
