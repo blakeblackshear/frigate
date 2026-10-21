@@ -1,0 +1,29 @@
+name: ArchLens cache
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: archlens-warm
+  cancel-in-progress: true
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: archlens/ArchLens-Action@v0.2.0-rc.3
+        with:
+          ast-language-image: "python:3.14-bookworm"
+          package-install: "apt-get install git -y"
+          warm-cache: 'true'
