@@ -115,7 +115,7 @@ for name in list(go2rtc_config.get("streams", {})):
             formatted_stream = stream.format(**FRIGATE_ENV_VARS)
             if is_restricted_go2rtc_source(formatted_stream):
                 print(
-                    f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec) which is disabled by default for security. "
+                    f"[ERROR] Stream '{name}' uses a restricted source (echo/expr/exec or ${{VAR}}) which is disabled by default for security. "
                     f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
                 )
                 del go2rtc_config["streams"][name]
@@ -134,7 +134,7 @@ for name in list(go2rtc_config.get("streams", {})):
                 formatted_stream = stream_item.format(**FRIGATE_ENV_VARS)
                 if is_restricted_go2rtc_source(formatted_stream):
                     print(
-                        f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec) which is disabled by default for security. "
+                        f"[ERROR] Stream '{name}' item {i + 1} uses a restricted source (echo/expr/exec or ${{VAR}}) which is disabled by default for security. "
                         f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
                     )
                     continue
@@ -150,7 +150,7 @@ for name in list(go2rtc_config.get("streams", {})):
             go2rtc_config["streams"][name] = filtered_streams
         else:
             print(
-                f"[ERROR] Stream '{name}' was removed because all sources were restricted (echo/expr/exec). "
+                f"[ERROR] Stream '{name}' was removed because all sources were restricted (echo/expr/exec or ${{VAR}}). "
                 f"Set GO2RTC_ALLOW_ARBITRARY_EXEC=true to enable arbitrary exec sources."
             )
             del go2rtc_config["streams"][name]

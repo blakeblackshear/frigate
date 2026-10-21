@@ -313,3 +313,27 @@ class TestConfigGo2rtcStreamRestrictions(BaseTestHttp):
             )
         assert resp.status_code == 400
         assert self._read_config() == before
+
+    # --- go2rtc ${VAR} expansion ---
+
+    def test_set_rejects_var_expansion_source(self):
+        before = self._read_config()
+        resp = self._set_streams({"new_stream": "${NOPE:exec:touch /tmp/pwned}"})
+        assert resp.status_code == 400
+        assert "Restricted go2rtc stream source" in resp.json()["message"]
+        assert self._read_config() == before
+
+    def test_set_rejects_escaped_var_expansion_source(self):
+        before = self._read_config()
+        resp = self._set_streams({"new_stream": "${{NOPE:exec:id}}"})
+        assert resp.status_code == 400
+        assert "Restricted go2rtc stream source" in resp.json()["message"]
+        assert self._read_config() == before
+
+    def test_set_allows_var_expansion_source_when_override_set(self):
+        with patch(
+            "frigate.util.services.is_go2rtc_arbitrary_exec_allowed",
+            return_value=True,
+        ):
+            resp = self._set_streams({"new_stream": "${NOPE:exec:id}"})
+        assert resp.status_code == 200, resp.text
