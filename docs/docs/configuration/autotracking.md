@@ -192,7 +192,7 @@ In security and surveillance, it's common to use "spotter" cameras in combinatio
 
 <FaqItem id="which-ptz-camera-should-i-use-for-autotracking" question="Which PTZ camera should I use for autotracking?">
 
-See the community-maintained list of [ONVIF PTZ camera recommendations](cameras.md#onvif-ptz-camera-recommendations) for cameras and brands reported to work (and not work) with autotracking. This is not an exhaustive list that is frequently updated, so other cameras not listed may also work well. Frigate's autotracking was developed with a Dahua SD1A404XB-GNR (now sold as the EmpireTech PTZ1A4M-4X-S2), and Dahua / EmpireTech PTZs are the most consistently reported as working well.
+See [ONVIF PTZ camera recommendations](cameras.md#onvif-ptz-camera-recommendations) for how to check a camera's autotracking support before buying. Frigate's autotracking was developed with a Dahua SD1A404XB-GNR (now sold as the EmpireTech PTZ1A4M-4X-S2), and Dahua / EmpireTech PTZs are the most consistently reported as working well.
 
 When comparing models:
 
@@ -209,7 +209,7 @@ No. Reolink cameras (including the TrackMix series) lack the ONVIF FOV RelativeM
 
 <FaqItem id="im-seeing-an-error-in-the-logs-that-my-camera-is-still-in-onvif-moving-status-what-does-this-mean" question={"I'm seeing an error in the logs that my camera \"is still in ONVIF 'MOVING' status.\" What does this mean?"}>
 
-There are two possible known reasons for this (and perhaps others yet unknown): a slow PTZ motor or buggy camera firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config. This may also be the case with other non-Hikvision cameras utilizing Hikvision firmware, such as some Annke models. In rare cases the vendor may provide fixed firmware on request; for example, Annke has supplied firmware that resolves this for the CZ504 (see the [camera recommendations list](cameras.md#onvif-ptz-camera-recommendations)).
+There are two possible known reasons for this (and perhaps others yet unknown): a slow PTZ motor or buggy camera firmware. Frigate uses an ONVIF parameter provided by the camera, `MoveStatus`, to determine when the PTZ's motor is moving or idle. According to some users, Hikvision PTZs (even with the latest firmware), are not updating this value after PTZ movement. Unfortunately there is no workaround to this bug in Hikvision firmware, so autotracking will not function correctly and should be disabled in your config. This may also be the case with other non-Hikvision cameras utilizing Hikvision firmware, such as some Annke models.
 
 </FaqItem>
 
