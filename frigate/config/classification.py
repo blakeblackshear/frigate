@@ -325,6 +325,18 @@ class FaceRecognitionConfig(FrigateBaseModel):
         title="Minimum faces",
         description="Minimum number of face recognitions required before applying a recognized sub-label to a person.",
     )
+    max_attempts: int = Field(
+        default=12,
+        ge=1,
+        title="Maximum attempts",
+        description="Maximum number of face recognition attempts per tracked person before giving up on recognizing them.",
+    )
+    max_attempts_after_recognition: int = Field(
+        default=6,
+        ge=1,
+        title="Maximum attempts after recognition",
+        description="Number of face recognition attempts to keep running on a tracked person after they have been recognized, to refine the result.",
+    )
     save_attempts: int = Field(
         default=200,
         ge=0,

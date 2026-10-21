@@ -1321,6 +1321,14 @@
       "label": "Minimum faces",
       "description": "Minimum number of face recognitions required before applying a recognized sub-label to a person."
     },
+    "max_attempts": {
+      "label": "Maximum attempts",
+      "description": "Maximum number of face recognition attempts per tracked person before giving up on recognizing them."
+    },
+    "max_attempts_after_recognition": {
+      "label": "Maximum attempts after recognition",
+      "description": "Number of face recognition attempts to keep running on a tracked person after they have been recognized, to refine the result."
+    },
     "save_attempts": {
       "label": "Save attempts",
       "description": "Number of face recognition attempts to retain for recent recognition UI."

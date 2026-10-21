@@ -37,10 +37,6 @@ from .api import RealTimeProcessorApi
 logger = logging.getLogger(__name__)
 
 
-MAX_FACES_ATTEMPTS_AFTER_REC = 6
-MAX_FACE_ATTEMPTS = 12
-
-
 class FaceRealTimeProcessor(RealTimeProcessorApi):
     def __init__(
         self,
@@ -118,19 +114,18 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
             return
 
         # check if we have hit limits
-        if (
-            id in self.person_face_history
-            and len(self.person_face_history[id]) >= MAX_FACES_ATTEMPTS_AFTER_REC
-        ):
-            # if we are at max attempts after rec and we have a rec
-            if obj_data.get("sub_label"):
-                logger.debug(
-                    "Not processing due to hitting max attempts after true recognition."
-                )
-                return
+        if id in self.person_face_history:
+            attempts = len(self.person_face_history[id])
 
-            # if we don't have a rec and are at max attempts
-            if len(self.person_face_history[id]) >= MAX_FACE_ATTEMPTS:
+            # a recognized person gets a few more attempts to refine the result
+            if obj_data.get("sub_label"):
+                if attempts >= self.face_config.max_attempts_after_recognition:
+                    logger.debug(
+                        "Not processing due to hitting max attempts after true recognition."
+                    )
+                    return
+            # an unrecognized person is given up on after max_attempts
+            elif attempts >= self.face_config.max_attempts:
                 logger.debug("Not processing due to hitting max rec attempts.")
                 return
 

@@ -754,6 +754,10 @@ face_recognition:
   min_area: 500
   # Optional: Min face recognitions for the sub label to be applied to the person object (default: shown below)
   min_faces: 1
+  # Optional: Max face recognition attempts per tracked person before giving up on them (default: shown below)
+  max_attempts: 12
+  # Optional: Attempts to keep making on a person after they have been recognized, to refine the result (default: shown below)
+  max_attempts_after_recognition: 6
   # Optional: Number of images of recognized faces to save for training (default: shown below)
   save_attempts: 200
   # Optional: Apply a blur quality filter to adjust confidence based on the blur level of the image (default: shown below)

@@ -470,6 +470,20 @@ class TestConfig(unittest.TestCase):
         frigate_config = FrigateConfig(**config)
         assert "dog" in frigate_config.cameras["back"].objects.track
 
+    def test_face_recognition_attempt_limits(self):
+        config = deepcopy(self.minimal)
+        config["face_recognition"] = {
+            "enabled": True,
+            "max_attempts": 40,
+            "max_attempts_after_recognition": 10,
+        }
+        frigate_config = FrigateConfig(**config)
+        assert frigate_config.face_recognition.max_attempts == 40
+        assert frigate_config.face_recognition.max_attempts_after_recognition == 10
+
+        config["face_recognition"] = {"enabled": True, "max_attempts": 0}
+        self.assertRaises(ValidationError, lambda: FrigateConfig(**config))
+
     def test_deep_merge_override_replaces_list_values(self):
         base = {"objects": {"track": ["person", "face"]}}
         update = {"objects": {"track": ["person"]}}

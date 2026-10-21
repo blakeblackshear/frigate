@@ -116,6 +116,10 @@ Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
   - Default: `0.9`
 - **Minimum faces**: Min face recognitions for the sub label to be applied to the person object.
   - Default: `1`
+- **Maximum attempts**: How many face recognition attempts to make per tracked person before giving up on recognizing them. Attempts are made on frames where a face is found within the person's box, whether or not they score well, so a person who keeps their face turned away for the first attempts may never be recognized. Raise this if people are only recognized late in a visit, at the cost of more inference while they are on camera.
+  - Default: `12`
+- **Maximum attempts after recognition**: How many attempts to keep making on a person after they have been recognized, so that the result can be refined.
+  - Default: `6`
 - **Save attempts**: Number of images of recognized faces to save for training.
   - Default: `200`
 - **Blur confidence filter**: Enables a filter that calculates how blurry the face is and adjusts the confidence based on this.
@@ -133,6 +137,8 @@ face_recognition:
   unknown_score: 0.8
   recognition_threshold: 0.9
   min_faces: 1
+  max_attempts: 12
+  max_attempts_after_recognition: 6
   save_attempts: 200
   blur_confidence_filter: true
   device: None
