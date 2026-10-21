@@ -55,6 +55,10 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 [Periscope](https://github.com/maksz42/periscope) is a lightweight Android app that turns old devices into live viewers for Frigate. It works on Android 2.2 and above, including Android TV. It supports authentication and HTTPS.
 
+## [reostream](https://github.com/VoltTech21/reostream)
+
+[reostream](https://github.com/VoltTech21/reostream) is a proxy for Reolink cameras that pulls video over Reolink's own protocol (the one the Reolink app and NVR use) instead of the camera's RTSP server, and serves it back as RTSP for go2rtc and Frigate. It helps models whose RTSP stream smears, drops frames or loses full resolution, and supports two-way talk.
+
 ## [Scrypted - Frigate bridge plugin](https://github.com/apocaliss92/scrypted-frigate-bridge)
 
 [Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is a plugin that allows you to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
