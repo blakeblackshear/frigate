@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: archlens/ArchLens-Action@v0.2.0-rc.3
+      - uses: archlens/ArchLens-Action@v0.2.0-rc.4
         with:
           ast-language-image: "python:3.14-bookworm"
           package-install: "apt-get install git -y"
