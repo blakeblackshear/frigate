@@ -2,7 +2,7 @@ name: ArchLens cache
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   schedule:
     - cron: '0 3 * * 1'
   workflow_dispatch:
