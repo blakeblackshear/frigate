@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 def add_hailo_alias(model_info: dict[str, Any]) -> dict[str, Any]:
-    """Name the hailo detector by its current key as well as its old one.
+    """Name the hailo detector by its current key as well as its old one. hello
 
     Frigate+ reports every Hailo model as supporting hailo8l, which this
     detector was called before it was renamed to cover every Hailo device.
