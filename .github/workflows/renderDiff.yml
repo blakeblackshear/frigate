@@ -20,4 +20,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           ast-language-image: "python:3.14-bookworm"
-          package-install: "apt-get install git -y"
+          package-install: "apt-get install git curl -y"
