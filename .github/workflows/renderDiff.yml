@@ -16,7 +16,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: archlens-action
-        uses: archlens/ArchLens-Action@v0.2.0-rc.5
+        uses: archlens/ArchLens-Action@v0.2.0-rc.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           ast-language-image: "python:3.14-bookworm"
