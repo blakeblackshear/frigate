@@ -28,7 +28,7 @@ Many cheaper or older PTZs may not support this standard. Frigate will report an
 
 The FeatureList on the [ONVIF Conformant Products Database](https://www.onvif.org/conformant-products/) can provide a starting point to determine a camera's compatibility with Frigate's autotracking. Look to see if a camera lists `PTZRelative`, `PTZRelativePanTilt` and/or `PTZRelativeZoom`. These features are required for autotracking, but some cameras still fail to respond even if they claim support.
 
-A growing list of cameras and brands that have been reported by users to work with Frigate's autotracking can be found [here](cameras.md).
+The [CCTV Camera Database](https://www.cctv-database.com/) is useful for researching a specific model.
 
 ## Configuration
 
