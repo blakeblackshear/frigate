@@ -32,3 +32,8 @@ docs/src/components/DockerComposeGenerator/config/ports.ts
 # GenAI review prompt tester local data (frames from real cameras)
 testing-scripts/genai-review-examples/*
 !testing-scripts/genai-review-examples/README.md
+
+
+# Archlens
+**/.archlens
+diagrams/

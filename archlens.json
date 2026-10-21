@@ -1,0 +1,21 @@
+{
+	"name": "Frigate",
+	"github": {
+		"url": "https://github.com/archlens/ArchLens",
+		"branch": "dev"
+	},
+	"rootFolder": "./frigate",
+	"views": {
+		"completeView": {
+			"include": [
+				"**/*.py",
+				"*.py"
+			],
+			"exclude": [
+				"test/*"
+			]
+		}
+	},
+	"saveLocation": "./diagrams/",
+	"runCommand": "python3 ../ast_parser/ast_parser.py"
+}

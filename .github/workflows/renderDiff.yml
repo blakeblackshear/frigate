@@ -1,0 +1,23 @@
+name: RenderDiff on Pull-Request
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: archlens-action
+        uses: archlens/ArchLens-Action@v0.2.0-rc.3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          ast-language-image: "python:3.14-bookworm"
+          package-install: "apt-get install git -y"
