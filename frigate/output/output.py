@@ -285,11 +285,16 @@ class OutputProcess(FrigateProcess):
             )
             preview_write_times[camera] = frame_time
 
+            manager = websocket_server.manager
+            with manager.lock:
+                websockets = list(manager.websockets.values())
+
             # send camera frame to ffmpeg process if websockets are connected
             if any(
-                ws.environ["PATH_INFO"].endswith(camera)
+                not ws.terminated
+                and ws.environ["PATH_INFO"].endswith(camera)
                 and ws_has_camera_access(ws, camera, self.config)
-                for ws in websocket_server.manager
+                for ws in websockets
             ):
                 # write to the converter for the camera if clients are listening to the specific camera
                 jsmpeg_cameras[camera].write_frame(frame.tobytes())
@@ -301,9 +306,10 @@ class OutputProcess(FrigateProcess):
                 and (
                     self.config.birdseye.restream
                     or any(
-                        ws.environ["PATH_INFO"].endswith("birdseye")
+                        not ws.terminated
+                        and ws.environ["PATH_INFO"].endswith("birdseye")
                         and ws_has_camera_access(ws, "birdseye", self.config)
-                        for ws in websocket_server.manager
+                        for ws in websockets
                     )
                 )
             ):
