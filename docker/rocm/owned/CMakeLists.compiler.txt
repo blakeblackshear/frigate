@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.13)
+project(owned_compiler_probe LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+find_package(rocMLIR CONFIG REQUIRED)
+find_package(hip CONFIG REQUIRED)
+add_executable(owned-compiler-probe compiler-probe.cpp)
+target_link_libraries(owned-compiler-probe PRIVATE rocMLIR::rockCompiler hip::host)

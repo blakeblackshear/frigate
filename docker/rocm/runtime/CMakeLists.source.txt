@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.13)
+project(migraphx_py LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+find_package(pybind11 REQUIRED)
+pybind11_add_module(migraphx_py migraphx_py.cpp)
+target_include_directories(migraphx_py PRIVATE
+    /opt/rocm/include
+    /opt/rocm/lib/migraphx/include
+)
+target_link_directories(migraphx_py PRIVATE
+    /opt/rocm/lib
+    /opt/rocm/lib/migraphx/lib
+)
+target_link_libraries(migraphx_py PRIVATE migraphx migraphx_tf migraphx_onnx)
+set_target_properties(migraphx_py PROPERTIES OUTPUT_NAME migraphx)
+install(TARGETS migraphx_py LIBRARY DESTINATION lib)

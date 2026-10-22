@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/blakeblackshear/frigate",
+  "commit": "91e91c68efe504e17b7fd3fb437b34068b4387ca",
+  "version": "0.19.0-91e91c6",
+  "image": "ghcr.io/blakeblackshear/frigate@sha256:8d81aee0dace0f5b2112c1a90477654ce89486c346c098a8ea0bd2b6a611198b",
+  "python_abi": "cp311",
+  "application_patch": [
+    "frigate/detectors/plugins/migraphx.py",
+    "frigate/detectors/legacy_amd.py"
+  ]
+}

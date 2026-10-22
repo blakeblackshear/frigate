@@ -1,0 +1,4 @@
+# Keep resolved download manifests expandable without dominating code review.
+runtime/source-lock.json linguist-generated=true
+runtime/builder-inputs.sha256 linguist-generated=true
+common/runtime-os-lock.json linguist-generated=true

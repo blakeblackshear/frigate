@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "purpose": "Pinned OS libraries and HIPRTC headers, extracted without upgrading the application OS",
+  "artifacts": [
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/gcc-14/libstdc%2B%2B-14-dev_14.2.0-19_amd64.deb",
+      "bytes": 2375760,
+      "sha256": "4b962fac5f1af0bd8b1b3f97e0f47b9d8e9a79e88802143f00ebfbd78ad87a7b",
+      "package": "libstdc++-14-dev",
+      "version": "14.2.0-19",
+      "path": "runtime-os/libstdc++-14-dev_14.2.0-19_amd64.deb",
+      "group": "runtime-os"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/gcc-14/libgcc-14-dev_14.2.0-19_amd64.deb",
+      "bytes": 2672328,
+      "sha256": "ca6f2d36d96b19b3eb71405b0b80134d8c89380b02204a2512e5c58ceb090628",
+      "package": "libgcc-14-dev",
+      "version": "14.2.0-19",
+      "path": "runtime-os/libgcc-14-dev_14.2.0-19_amd64.deb",
+      "group": "runtime-os"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/n/numactl/libnuma1_2.0.19-1_amd64.deb",
+      "bytes": 22212,
+      "sha256": "e578583f73f8208564e5035b18aa729c441fc7ecb389c666923552e123f4d655",
+      "package": "libnuma1",
+      "version": "2.0.19-1",
+      "path": "runtime-os/libnuma1_2.0.19-1_amd64.deb",
+      "group": "runtime-os"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/l/llvm-toolchain-19/libomp5-19_19.1.7-3%2Bb1_amd64.deb",
+      "bytes": 644612,
+      "sha256": "a18b2ff537431348bcb276ecf7b682040a3991afd03020ebe3c2973fc4747ea8",
+      "package": "libomp5-19",
+      "version": "1:19.1.7-3+b1",
+      "path": "runtime-os/libomp5-19_19.1.7-3+b1_amd64.deb",
+      "group": "runtime-os"
+    },
+    {
+      "url": "https://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.41-12+deb13u4_amd64.deb",
+      "bytes": 1994660,
+      "sha256": "1fda734dabcd80b77266a09ab62b0f1e3e16d8091db62899890b2200745632a2",
+      "package": "libc6-dev",
+      "version": "2.41-12+deb13u4",
+      "path": "runtime-os/libc6-dev_2.41-12+deb13u4_amd64.deb",
+      "group": "runtime-os"
+    },
+    {
+      "url": "https://security.debian.org/debian-security/pool/updates/main/l/linux/linux-libc-dev_6.12.113-1_all.deb",
+      "bytes": 3021244,
+      "sha256": "b2d475e01aaf0030c72bd3a0300d311f8be64aa9e82d82eae5da1a04f4010071",
+      "package": "linux-libc-dev",
+      "version": "6.12.113-1",
+      "path": "runtime-os/linux-libc-dev_6.12.113-1_all.deb",
+      "group": "runtime-os"
+    }
+  ]
+}

@@ -1,0 +1,1270 @@
+{
+  "schema_version": 1,
+  "purpose": "Source reproduction of the documented Gary7.2.4 legacy runtime; offline qualification first",
+  "reference_recipe": {
+    "repository": "garymathews/AMDMIGraphX",
+    "commit": "b7057cc3a8460f7bcea15ec20f2c1b4940a4b5ef",
+    "equivalent_amd_src_tree": "56a22f66ece4c729743ac590ce82fdcd8d506dab",
+    "binary_asset_exact_source_provenance": "not established"
+  },
+  "images": {
+    "sdk": "rocm/dev-ubuntu-22.04@sha256:a50a8547101ac9e7c35848ff609a56335214b789b468c9eb05dcd006a4a38c25",
+    "binding": "debian@sha256:a4672c0cb26fbdde88e38fa2dfb6c681942306680e41e4378b28770b6e79ee91",
+    "application": "ghcr.io/blakeblackshear/frigate@sha256:d9004df234df7e6ec701d37be4db60610e2c604614cb831bb369067388a6b460"
+  },
+  "runtime": {
+    "rocm": "7.2.4",
+    "migraphx": "2.15.0",
+    "classic_rocmlir": "2.0.0",
+    "rocmlir_dialect_api": 4,
+    "gfx900_rocblas_kernel_release": "6.3.4",
+    "python_binding_abi": "cp311"
+  },
+  "build_profile": {
+    "GPU_TARGETS": [
+      "gfx900",
+      "gfx908",
+      "gfx90a",
+      "gfx942",
+      "gfx950",
+      "gfx1030",
+      "gfx1100",
+      "gfx1101",
+      "gfx1200",
+      "gfx1201"
+    ],
+    "MIGRAPHX_ENABLE_CPU": true,
+    "MIGRAPHX_ENABLE_MLIR": true,
+    "MIGRAPHX_USE_COMPOSABLEKERNEL": true,
+    "MIGRAPHX_USE_HIPBLASLT": true,
+    "build_jobs": 2,
+    "compile_network": "none",
+    "gpu_devices": false
+  },
+  "artifacts": [
+    {
+      "path": "sources/migraphx.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/ROCm/AMDMIGraphX/tar.gz/07ef4ba4f9ef95d241b7be165e60ad148f3344ee",
+      "bytes": 4900099,
+      "sha256": "9309d04525dfb2cad75c1ed3472227c9736933502b85ccb327a280a8913a13a2",
+      "commit": "07ef4ba4f9ef95d241b7be165e60ad148f3344ee",
+      "repo": "ROCm/AMDMIGraphX"
+    },
+    {
+      "path": "sources/rocmlir.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/ROCm/rocMLIR/tar.gz/6671a1ee31d44e1f2f7743a26a71ffc4ce9169bf",
+      "bytes": 257076290,
+      "sha256": "3e2ae6f5531e1aa9e4fb6704174b1c8576a943ea4f8843b703e99aad0941c28a",
+      "commit": "6671a1ee31d44e1f2f7743a26a71ffc4ce9169bf",
+      "repo": "ROCm/rocMLIR"
+    },
+    {
+      "path": "sources/composable-kernel.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/ROCm/composable_kernel/tar.gz/b7775add2d28251674d81e220cd4a857b90b997a",
+      "bytes": 2265341,
+      "sha256": "afaf0c55623050909e77e7f0b2d054d9371eda8fd958342c1a5c1d4aa8038ddb",
+      "commit": "b7775add2d28251674d81e220cd4a857b90b997a",
+      "repo": "ROCm/composable_kernel"
+    },
+    {
+      "path": "sources/googletest.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/google/googletest/tar.gz/b85864c64758dec007208e56af933fc3f52044ee",
+      "bytes": 849107,
+      "sha256": "acbf9ad566a9f34170245ca1e96d8918d255ee4eba4264279b19dc5e0e2383d9",
+      "commit": "b85864c64758dec007208e56af933fc3f52044ee",
+      "repo": "google/googletest"
+    },
+    {
+      "path": "sources/half.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/ROCm/half/tar.gz/4f19ce3e56f3d3a17cf69f9db4ff3722f7445b0d",
+      "bytes": 109601,
+      "sha256": "d4f8435ef7f016013a9332fe27e87b2ebc63ffdf57666b9dd7bccabec4f2a4db",
+      "commit": "4f19ce3e56f3d3a17cf69f9db4ff3722f7445b0d",
+      "repo": "ROCm/half"
+    },
+    {
+      "path": "sources/onednn.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/uxlfoundation/oneDNN/tar.gz/2c8d20640d5068e2d85e378b266644fe86220e84",
+      "bytes": 8945993,
+      "sha256": "80a3deca47158827ed355891eef97710516529646732bda649ea19b58c63dc37",
+      "commit": "2c8d20640d5068e2d85e378b266644fe86220e84",
+      "repo": "uxlfoundation/oneDNN"
+    },
+    {
+      "path": "sources/msgpack.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/msgpack/msgpack-c/tar.gz/6e7deb809120881634b3ca895e66b2a946084f34",
+      "bytes": 505774,
+      "sha256": "1be7c4c210b3df79a53303c2bf90b1bb250a5b1d42c5b17a237d2a868567a768",
+      "commit": "6e7deb809120881634b3ca895e66b2a946084f34",
+      "repo": "msgpack/msgpack-c"
+    },
+    {
+      "path": "sources/pybind11.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/pybind/pybind11/tar.gz/3e9dfa2866941655c56877882565e7577de6fc7b",
+      "bytes": 771508,
+      "sha256": "9a7d245f405f470798b9d2a48912cc97230658024775299eac203f7c9c9ae37c",
+      "commit": "3e9dfa2866941655c56877882565e7577de6fc7b",
+      "repo": "pybind/pybind11"
+    },
+    {
+      "path": "sources/abseil.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/abseil/abseil-cpp/tar.gz/bc257a88f7c1939f24e0379f14a3589e926c950c",
+      "bytes": 2221180,
+      "sha256": "6b4ddf2d9fa04737dc1bce6f14ed56df96b12c868ec8a34437932acf4012521c",
+      "commit": "bc257a88f7c1939f24e0379f14a3589e926c950c",
+      "repo": "abseil/abseil-cpp",
+      "tag": "20250512.0"
+    },
+    {
+      "path": "sources/protobuf.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/protocolbuffers/protobuf/tar.gz/d295af5c3002c08e1bfd9d7f9e175d0a4d015f1e",
+      "bytes": 9529272,
+      "sha256": "000afdf8dd0af9f294726138eb4ea4dea28a84831e07f5edf6fff0fdf6d026f9",
+      "commit": "d295af5c3002c08e1bfd9d7f9e175d0a4d015f1e",
+      "repo": "protocolbuffers/protobuf",
+      "tag": "v30.0"
+    },
+    {
+      "path": "sources/json.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/nlohmann/json/tar.gz/e7452d87783fbf6e9d320d515675e26dfd1271c5",
+      "bytes": 6813781,
+      "sha256": "bae919adba2935bda8ca0bcbfccdbae39b7e669c3aef043cdaa879e6facff89e",
+      "commit": "e7452d87783fbf6e9d320d515675e26dfd1271c5",
+      "repo": "nlohmann/json",
+      "tag": "v3.8.0"
+    },
+    {
+      "path": "sources/sqlite.tar.gz",
+      "group": "source",
+      "url": "https://www.sqlite.org/2025/sqlite-autoconf-3500400.tar.gz",
+      "bytes": 3173050,
+      "sha256": "a3db587a1b92ee5ddac2f66b3edb41b26f9c867275782d46c3a088977d6a5b18"
+    },
+    {
+      "path": "sources/rocm-cmake-7.2.tar.gz",
+      "group": "source",
+      "url": "https://codeload.github.com/ROCm/rocm-cmake/tar.gz/b3959201846b9d9250a6f2a386ad43be04d1d051",
+      "bytes": 90971,
+      "sha256": "63e084ef60ffbf6874d76baa74ce012e2d5c212268df2fb5db69d56654bd9612",
+      "commit": "b3959201846b9d9250a6f2a386ad43be04d1d051",
+      "repo": "ROCm/rocm-cmake"
+    },
+    {
+      "path": "sources/cmake.tar.gz",
+      "group": "tool",
+      "url": "https://github.com/Kitware/CMake/releases/download/v3.31.10/cmake-3.31.10-linux-x86_64.tar.gz",
+      "bytes": 55010952,
+      "sha256": "3cb3dd247b6a1de2d0f4b20c6fd4326c9024e894cebc9dc8699758887e566ca7"
+    },
+    {
+      "path": "sources/rocblas-gfx900.deb",
+      "group": "legacy-kernels",
+      "url": "https://repo.radeon.com/rocm/apt/6.3.4/pool/main/r/rocblas/rocblas_4.3.0.60304-76~22.04_amd64.deb",
+      "bytes": 149216276,
+      "sha256": "8f3ca6d113ffdc7f478326f243f23b9791b38f2b07fac36a329a34e67b6dc73e"
+    },
+    {
+      "path": "sdk/bison_2%3a3.8.2+dfsg-1ubuntu0.22.04.1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/b/bison/bison_3.8.2%2bdfsg-1ubuntu0.22.04.1_amd64.deb",
+      "group": "sdk",
+      "bytes": 748182,
+      "sha256": "40ba998a24ce53a420fc3f8188b833fde276564df1a7e90acaf875f4f9b76c4e"
+    },
+    {
+      "path": "sdk/bzip2_1.0.8-5ubuntu0.1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/b/bzip2/bzip2_1.0.8-5ubuntu0.1_amd64.deb",
+      "group": "sdk",
+      "bytes": 34844,
+      "sha256": "de495ecb37e8c64fc28548c81cffb4b79597b4f8ecf50c8511d8eb5a53527e65"
+    },
+    {
+      "path": "sdk/flex_2.6.4-8build2_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/f/flex/flex_2.6.4-8build2_amd64.deb",
+      "group": "sdk",
+      "bytes": 306728,
+      "sha256": "980674f410fa6cb5e41d1bdf434a9391dcec0ac8fae5194cd90f9598ae074d8d"
+    },
+    {
+      "path": "sdk/git-man_1%3a2.34.1-1ubuntu1.18_all.deb",
+      "url": "http://security.ubuntu.com/ubuntu/pool/main/g/git/git-man_2.34.1-1ubuntu1.18_all.deb",
+      "group": "sdk",
+      "bytes": 953588,
+      "sha256": "342f24d0ef1e546afac4adfca447fb469fed2c091d436e8f6ff8f6609780bf81"
+    },
+    {
+      "path": "sdk/git_1%3a2.34.1-1ubuntu1.18_amd64.deb",
+      "url": "http://security.ubuntu.com/ubuntu/pool/main/g/git/git_2.34.1-1ubuntu1.18_amd64.deb",
+      "group": "sdk",
+      "bytes": 3174390,
+      "sha256": "9551f894b8acd4a748ecec4a63678e359b9f05d2bbe7227584e2b9e8bb42ef88"
+    },
+    {
+      "path": "sdk/hipblas-common-dev_1.4.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/h/hipblas-common-dev/hipblas-common-dev_1.4.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 5770,
+      "sha256": "0e54948e117d8f295c1cbb97a0b9f9f98831896237b99eb323ca2812c0dff42a"
+    },
+    {
+      "path": "sdk/hipblas-dev_3.2.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/h/hipblas-dev/hipblas-dev_3.2.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 75432,
+      "sha256": "112ad401de2ef5131f8320de4f26e0d841f7da2f1ab6d7a5f25c15b5aef803e3"
+    },
+    {
+      "path": "sdk/hipblas_3.2.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/h/hipblas/hipblas_3.2.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 108628,
+      "sha256": "a79f4baa3e8989be56937d0f477089d443d47ca8ed65668c7dd84e6f01c0a4f9"
+    },
+    {
+      "path": "sdk/hipblaslt-dev_1.2.2.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/h/hipblaslt-dev/hipblaslt-dev_1.2.2.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 234400,
+      "sha256": "8979099155966a038e0ffe600db70fda059b7ca9e8823fe0b028342b9dcc8e50"
+    },
+    {
+      "path": "sdk/hipblaslt_1.2.2.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/h/hipblaslt/hipblaslt_1.2.2.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 1619313110,
+      "sha256": "9410cd5310c4bd64535ee7b5c9733711a4ca74deb2f9018a0ec9d030472216cc"
+    },
+    {
+      "path": "sdk/libbsd-dev_0.11.5-1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libb/libbsd/libbsd-dev_0.11.5-1_amd64.deb",
+      "group": "sdk",
+      "bytes": 168470,
+      "sha256": "16f20fc8f05bdb68b0db046a4f91dfe664d91409bc4e196b302ab5432bce5022"
+    },
+    {
+      "path": "sdk/libbz2-1.0_1.0.8-5ubuntu0.1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/b/bzip2/libbz2-1.0_1.0.8-5ubuntu0.1_amd64.deb",
+      "group": "sdk",
+      "bytes": 34524,
+      "sha256": "2fd35bb1ac601fa1bf35da2fa08dba3541766ca791927342b5efcb18ef17aecb"
+    },
+    {
+      "path": "sdk/libcurl3-gnutls_7.81.0-1ubuntu1.30_amd64.deb",
+      "url": "http://security.ubuntu.com/ubuntu/pool/main/c/curl/libcurl3-gnutls_7.81.0-1ubuntu1.30_amd64.deb",
+      "group": "sdk",
+      "bytes": 286816,
+      "sha256": "e3e731484718b90118b576f8d186d20a37ef9f9eff7dcc83d6f4e1976398f923"
+    },
+    {
+      "path": "sdk/libedit-dev_3.1-20210910-1build1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libe/libedit/libedit-dev_3.1-20210910-1build1_amd64.deb",
+      "group": "sdk",
+      "bytes": 118216,
+      "sha256": "6b8f4c32a81aafc56edb7b332c76cad0c84854ef3105d1d64df16dbad7e9a8fd"
+    },
+    {
+      "path": "sdk/liberror-perl_0.17029-1_all.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libe/liberror-perl/liberror-perl_0.17029-1_all.deb",
+      "group": "sdk",
+      "bytes": 26460,
+      "sha256": "13c044def376282cd2a6a4b21e5ec829a6ac8aecd745183df22570e320cec08e"
+    },
+    {
+      "path": "sdk/libffi-dev_3.4.2-4_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi-dev_3.4.2-4_amd64.deb",
+      "group": "sdk",
+      "bytes": 63712,
+      "sha256": "41995a2341a425d2bf74be3ade3a73e66922be181f7b60ae29d6762c37493fc2"
+    },
+    {
+      "path": "sdk/libglib2.0-0_2.72.4-0ubuntu2.10_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/g/glib2.0/libglib2.0-0_2.72.4-0ubuntu2.10_amd64.deb",
+      "group": "sdk",
+      "bytes": 1468764,
+      "sha256": "b82973c5d9698e48297000e74d2dc7431e726db8f0f948ea56be7f9e4c9e66fb"
+    },
+    {
+      "path": "sdk/libllvm14_1%3a14.0.0-1ubuntu1.1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/l/llvm-toolchain-14/libllvm14_14.0.0-1ubuntu1.1_amd64.deb",
+      "group": "sdk",
+      "bytes": 23967046,
+      "sha256": "9044b614a6c7fb6262e7cbeb13dc731fc0c92bed96281c1a3920dd706442ee8e"
+    },
+    {
+      "path": "sdk/libmd-dev_1.0.4-1build1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libm/libmd/libmd-dev_1.0.4-1build1_amd64.deb",
+      "group": "sdk",
+      "bytes": 39988,
+      "sha256": "a2cefd3f43134c7e662b43d5da1bc42bb80927032f3a142da845939d09288bc5"
+    },
+    {
+      "path": "sdk/libomp-14-dev_1%3a14.0.0-1ubuntu1.1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-14/libomp-14-dev_14.0.0-1ubuntu1.1_amd64.deb",
+      "group": "sdk",
+      "bytes": 346780,
+      "sha256": "ce3d72f3d7c1b499b156303c8415e729fe027da7ab2f45653e92e3e64593c402"
+    },
+    {
+      "path": "sdk/libomp-dev_1%3a14.0-55~exp2_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-defaults/libomp-dev_14.0-55%7eexp2_amd64.deb",
+      "group": "sdk",
+      "bytes": 3074,
+      "sha256": "445f75e6fd75fe5606e7a2855b8bf13ddb4301ae4ed6d364d30b5e403f86e634"
+    },
+    {
+      "path": "sdk/libomp5-14_1%3a14.0.0-1ubuntu1.1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/l/llvm-toolchain-14/libomp5-14_14.0.0-1ubuntu1.1_amd64.deb",
+      "group": "sdk",
+      "bytes": 388556,
+      "sha256": "7b69ec021dd19555c16e250827f57be88381ff2fff9bdbd1b3a2d25d27558cea"
+    },
+    {
+      "path": "sdk/libpopt0_1.18-3build1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/p/popt/libpopt0_1.18-3build1_amd64.deb",
+      "group": "sdk",
+      "bytes": 28160,
+      "sha256": "253dfe5a676d48eb1020ca3580e77b3683ccdc3a712747e834aa59edf50d0ced"
+    },
+    {
+      "path": "sdk/libsigsegv2_2.13-1ubuntu3_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/libs/libsigsegv/libsigsegv2_2.13-1ubuntu3_amd64.deb",
+      "group": "sdk",
+      "bytes": 14612,
+      "sha256": "894fcb0804df54dca59edbd0860d6f3eeac25d1555aebd3fa99d80665969f891"
+    },
+    {
+      "path": "sdk/libssl-dev_3.0.2-0ubuntu1.30_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl-dev_3.0.2-0ubuntu1.30_amd64.deb",
+      "group": "sdk",
+      "bytes": 2377254,
+      "sha256": "8a47dfa7f9bd4d54ac9dc9a1db14891a9133841bf44f12c3db086f2d4321bac6"
+    },
+    {
+      "path": "sdk/libssl3_3.0.2-0ubuntu1.30_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl3_3.0.2-0ubuntu1.30_amd64.deb",
+      "group": "sdk",
+      "bytes": 1907006,
+      "sha256": "d1b4636e32ac6d3b95d583ac05ac548b1aa248414bae1c51b14f54be0f8fd7bc"
+    },
+    {
+      "path": "sdk/libtbb-dev_2021.5.0-7ubuntu2_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/o/onetbb/libtbb-dev_2021.5.0-7ubuntu2_amd64.deb",
+      "group": "sdk",
+      "bytes": 190718,
+      "sha256": "d3052b9b07c59315cc87d18f7a9ed9c3c5d8d7c446104cdcba6bd17ddfb1fbaa"
+    },
+    {
+      "path": "sdk/libtbb12_2021.5.0-7ubuntu2_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/o/onetbb/libtbb12_2021.5.0-7ubuntu2_amd64.deb",
+      "group": "sdk",
+      "bytes": 84772,
+      "sha256": "05981f9120f8fb5c2e5a1e1f2a6017976077500141fc4eaf0d3106be6b793c4a"
+    },
+    {
+      "path": "sdk/libtbbmalloc2_2021.5.0-7ubuntu2_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/o/onetbb/libtbbmalloc2_2021.5.0-7ubuntu2_amd64.deb",
+      "group": "sdk",
+      "bytes": 49622,
+      "sha256": "7b3bd4bde4c92b17c94d27001c884b285eadb0272dd67b4c5405e1de6af20066"
+    },
+    {
+      "path": "sdk/m4_1.4.18-5ubuntu2_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/m/m4/m4_1.4.18-5ubuntu2_amd64.deb",
+      "group": "sdk",
+      "bytes": 198836,
+      "sha256": "572a544d2c18bf49d25c465720c570cd8e6e38731386ac9c0a7f29bed2486f3e"
+    },
+    {
+      "path": "sdk/miopen-hip-dev_3.5.1.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/m/miopen-hip-dev/miopen-hip-dev_3.5.1.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 49382,
+      "sha256": "d3a188f8bdba242b4de77f7645ce11e2c5d750b1a01adeb61c1f22f6cb40f78c"
+    },
+    {
+      "path": "sdk/miopen-hip_3.5.1.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/m/miopen-hip/miopen-hip_3.5.1.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 307827694,
+      "sha256": "26798b0da3ba4078d0c925b1e815427a19d38be2818dc4873bca14ea14bd555d"
+    },
+    {
+      "path": "sdk/ninja-build_1.10.1-1_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/universe/n/ninja-build/ninja-build_1.10.1-1_amd64.deb",
+      "group": "sdk",
+      "bytes": 111368,
+      "sha256": "ca8aae8ac7efad41d1f96a7e227653bd62b24e89cc7ddb18cec262f1869877b2"
+    },
+    {
+      "path": "sdk/pkg-config_0.29.2-1ubuntu3_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/p/pkg-config/pkg-config_0.29.2-1ubuntu3_amd64.deb",
+      "group": "sdk",
+      "bytes": 48218,
+      "sha256": "69da4190d948d0bf7444ead040791b7924bd1a08a10ec13cd7f0bb9baab09c53"
+    },
+    {
+      "path": "sdk/rocblas-dev_5.2.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/r/rocblas-dev/rocblas-dev_5.2.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 92278,
+      "sha256": "b242b9bfbf32f3478c4750d0467ac35df8ffc0b3212950ae6de8b1e8f4b5b125"
+    },
+    {
+      "path": "sdk/rocblas_5.2.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/r/rocblas/rocblas_5.2.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 164785056,
+      "sha256": "53f8224dfff50547fa60d7e6681c5e8fa8e2e07b9a3fc3c5861456702e541a99"
+    },
+    {
+      "path": "sdk/rocm-llvm-dev_22.0.0.26084.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/r/rocm-llvm-dev/rocm-llvm-dev_22.0.0.26084.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 1702457818,
+      "sha256": "f89bf9eb3f8e19560b74b77384ada879e005ac589bd4fd3804298a438a20536c"
+    },
+    {
+      "path": "sdk/rocrand_4.2.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/r/rocrand/rocrand_4.2.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 39596854,
+      "sha256": "d12388d8bab03361e8f1a4c0f8752ca6e4e497087ac5f3b51c01374056f77b29"
+    },
+    {
+      "path": "sdk/rocsolver_3.32.0.70204-93~22.04_amd64.deb",
+      "url": "https://repo.radeon.com/rocm/apt/7.2.4/pool/main/r/rocsolver/rocsolver_3.32.0.70204-93%7e22.04_amd64.deb",
+      "group": "sdk",
+      "bytes": 767681422,
+      "sha256": "7d661fde6b22e21553deba07708fed01d7e292c7d28b65b0fcfed65e120cd542"
+    },
+    {
+      "path": "sdk/rsync_3.2.7-0ubuntu0.22.04.7_amd64.deb",
+      "url": "http://archive.ubuntu.com/ubuntu/pool/main/r/rsync/rsync_3.2.7-0ubuntu0.22.04.7_amd64.deb",
+      "group": "sdk",
+      "bytes": 444910,
+      "sha256": "0f1f6c57367d67027f735171e69c769fe4c5552e267314a31f5e92064e36c153"
+    },
+    {
+      "path": "sdk/xz-utils_5.2.5-2ubuntu1.2_amd64.deb",
+      "url": "http://security.ubuntu.com/ubuntu/pool/main/x/xz-utils/xz-utils_5.2.5-2ubuntu1.2_amd64.deb",
+      "group": "sdk",
+      "bytes": 84830,
+      "sha256": "f8c1cb748418a5be33851f8b6e218f0b82db0680dc34d4a675f9aa065f6c63fe"
+    },
+    {
+      "path": "binding/binutils-common_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/binutils-common_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 2486664,
+      "sha256": "ab314134f43a0891a48f69a9bc33d825da748fa5e0ba2bebb7a5c491b026f1a0"
+    },
+    {
+      "path": "binding/binutils-x86-64-linux-gnu_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/binutils-x86-64-linux-gnu_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 2245848,
+      "sha256": "2d7ea8a570d768224d7f2424abbe6f373d2154865a1fa7f56c80d43ecf492521"
+    },
+    {
+      "path": "binding/binutils_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/binutils_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 64980,
+      "sha256": "83c3e20b53e1fbd84d764c3ba27d26a0376e361ae5d7fb37120196934dd87424"
+    },
+    {
+      "path": "binding/build-essential_12.9_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/build-essential/build-essential_12.9_amd64.deb",
+      "group": "binding",
+      "bytes": 7704,
+      "sha256": "bbfd38de41898a06326f2a6ce4cc43e8e399f5566381231065b01d70499d5ba5"
+    },
+    {
+      "path": "binding/bzip2_1.0.8-5+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/bzip2/bzip2_1.0.8-5%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 49804,
+      "sha256": "438871b3f5c5c7a357a9840951dab9dab8db7eb1ff760a563226fafa111b99e5"
+    },
+    {
+      "path": "binding/ca-certificates_20250419~deb12u2_all.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/c/ca-certificates/ca-certificates_20250419%7edeb12u2_all.deb",
+      "group": "binding",
+      "bytes": 160948,
+      "sha256": "b9f76b5271a7ac373fd5e7e1b5b826a71ddd702b42a0d104955ecb1acfffc94b"
+    },
+    {
+      "path": "binding/cmake-data_3.25.1-1_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/c/cmake/cmake-data_3.25.1-1_all.deb",
+      "group": "binding",
+      "bytes": 2026484,
+      "sha256": "8371f9694da94fd551a3ea653e2e25d99747471ca0b48cc029bf5c792ea590a3"
+    },
+    {
+      "path": "binding/cmake_3.25.1-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/c/cmake/cmake_3.25.1-1_amd64.deb",
+      "group": "binding",
+      "bytes": 8692248,
+      "sha256": "257a11063855f09e48696057fdb1ba2bcf1069502e0302576831dc2fb1571d7f"
+    },
+    {
+      "path": "binding/cpp-12_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/cpp-12_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 9767788,
+      "sha256": "fedbb98e877adde83c983c6071537ea25ac52b277ac6e4637d85025949ca1454"
+    },
+    {
+      "path": "binding/cpp_4%3a12.2.0-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-defaults/cpp_12.2.0-3_amd64.deb",
+      "group": "binding",
+      "bytes": 6836,
+      "sha256": "a63db920f7aa1857a57beab185423deffb6111fa09437a99bbb4ef724fb7ba78"
+    },
+    {
+      "path": "binding/dpkg-dev_1.21.23_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/d/dpkg/dpkg-dev_1.21.23_all.deb",
+      "group": "binding",
+      "bytes": 1354256,
+      "sha256": "43547075395dbe9290e6a5f34e9ba93aa5dcf7dfc5698c3d30cc3c85e5f7e3de"
+    },
+    {
+      "path": "binding/g++-12_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/g%2b%2b-12_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 10694076,
+      "sha256": "68b182badae4ace7d472f1393c559d3532a95a2d70817498b10bb481d2627251"
+    },
+    {
+      "path": "binding/g++_4%3a12.2.0-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-defaults/g%2b%2b_12.2.0-3_amd64.deb",
+      "group": "binding",
+      "bytes": 1356,
+      "sha256": "26c451a660728cf7c15548a281e17eef2f36fab28499371e83fc2d3accb499d7"
+    },
+    {
+      "path": "binding/gcc-12_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/gcc-12_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 19268852,
+      "sha256": "b46f33cc2ec245e435e043807038cecf4b201ef004800e9dfc1455240360e49d"
+    },
+    {
+      "path": "binding/gcc_4%3a12.2.0-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-defaults/gcc_12.2.0-3_amd64.deb",
+      "group": "binding",
+      "bytes": 5216,
+      "sha256": "bb63b0fb2797e2a3a294dab8a02614930c557ec1f4ea96637c244b8b5f87e630"
+    },
+    {
+      "path": "binding/libarchive13_3.6.2-1+deb12u5_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/liba/libarchive/libarchive13_3.6.2-1%2bdeb12u5_amd64.deb",
+      "group": "binding",
+      "bytes": 345488,
+      "sha256": "45419b8c7646c1af12783ae31906ce2da4c465c1a948b01f8f44152d8269f403"
+    },
+    {
+      "path": "binding/libasan8_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libasan8_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 2192652,
+      "sha256": "e7ac5d797d7d438a130674a8e463530f06aa02ecf919ca054d75eaa2f7849ec7"
+    },
+    {
+      "path": "binding/libatomic1_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libatomic1_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 9376,
+      "sha256": "fbd4e154a6b444229ea002cc209df099209c0adc09102e5fd21239a3d2b55e2d"
+    },
+    {
+      "path": "binding/libbinutils_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/libbinutils_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 572104,
+      "sha256": "fcf55b99e5f8a78f3c8ce9b6957f1024f394cf20c196b100d308a57e43547710"
+    },
+    {
+      "path": "binding/libbrotli1_1.0.9-2+b6_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/brotli/libbrotli1_1.0.9-2%2bb6_amd64.deb",
+      "group": "binding",
+      "bytes": 275248,
+      "sha256": "563b4caec1aa5e876bd3355b36e7a38e1484baf5a293b48d1e8bd22db786e4d7"
+    },
+    {
+      "path": "binding/libc-dev-bin_2.36-9+deb12u14_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/glibc/libc-dev-bin_2.36-9%2bdeb12u14_amd64.deb",
+      "group": "binding",
+      "bytes": 48056,
+      "sha256": "f61d923b703401023bec2ac3d9d1c9ad7341930fbe11736f7f5ef64b489d03c4"
+    },
+    {
+      "path": "binding/libc6-dev_2.36-9+deb12u14_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/glibc/libc6-dev_2.36-9%2bdeb12u14_amd64.deb",
+      "group": "binding",
+      "bytes": 1903668,
+      "sha256": "0218fc2befcd784c1b0c6292c0a137ce89fad054efaa579ad083bee0f2c01aae"
+    },
+    {
+      "path": "binding/libcc1-0_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libcc1-0_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 41736,
+      "sha256": "4ee6009633003f47de98333ea7f7d8835ec563ae2ac4f30251dbfee04d75d46b"
+    },
+    {
+      "path": "binding/libcrypt-dev_1%3a4.4.33-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libx/libxcrypt/libcrypt-dev_4.4.33-2_amd64.deb",
+      "group": "binding",
+      "bytes": 118144,
+      "sha256": "81ccd29130f75a9e3adabc80e61921abff42f76761e1f792fa2d1bb69af7f52f"
+    },
+    {
+      "path": "binding/libctf-nobfd0_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/libctf-nobfd0_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 153384,
+      "sha256": "ef1dfcf22de41ea90ebd3d505447ccccd999e96b85aa777a1d7d981dc3b347aa"
+    },
+    {
+      "path": "binding/libctf0_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/libctf0_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 89796,
+      "sha256": "3fb7b6f326be3fae4a87a3d33b9269bd06c1e4346a24bd737f265067e3b7427f"
+    },
+    {
+      "path": "binding/libcurl4_7.88.1-10+deb12u15_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/c/curl/libcurl4_7.88.1-10%2bdeb12u15_amd64.deb",
+      "group": "binding",
+      "bytes": 392184,
+      "sha256": "3042904de01f9c4fbdcf1452b8f81abedcf2b015f9b9deba109063322b5bd68b"
+    },
+    {
+      "path": "binding/libdpkg-perl_1.21.23_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/d/dpkg/libdpkg-perl_1.21.23_all.deb",
+      "group": "binding",
+      "bytes": 603796,
+      "sha256": "3f817fd9266ce2638c64b5df77da11f98f5df4f3301e1c04140be16790f72112"
+    },
+    {
+      "path": "binding/libdrm-amdgpu1_2.4.114-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libd/libdrm/libdrm-amdgpu1_2.4.114-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 20864,
+      "sha256": "b75a71e96f1faac0f131ac657e09efcbe8968eef62cc34b8abfcff2ff9f0cccd"
+    },
+    {
+      "path": "binding/libdrm-common_2.4.114-1_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libd/libdrm/libdrm-common_2.4.114-1_all.deb",
+      "group": "binding",
+      "bytes": 7112,
+      "sha256": "32f9664138b38b224383c6986457d5ad2ec8efd559b1a0ce7749405f7a451aad"
+    },
+    {
+      "path": "binding/libdrm2_2.4.114-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libd/libdrm/libdrm2_2.4.114-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 37472,
+      "sha256": "be18fb670797ba32da9628cf3e8acd83160d8db8c8dd842501dd8e401c3b5371"
+    },
+    {
+      "path": "binding/libelf1_0.188-2.1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/e/elfutils/libelf1_0.188-2.1_amd64.deb",
+      "group": "binding",
+      "bytes": 173796,
+      "sha256": "619add379c606b3ac6c1a175853b918e6939598a83d8ebadf3bdfd50d10b3c8c"
+    },
+    {
+      "path": "binding/libexpat1-dev_2.5.0-1+deb12u4_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/e/expat/libexpat1-dev_2.5.0-1%2bdeb12u4_amd64.deb",
+      "group": "binding",
+      "bytes": 157084,
+      "sha256": "74ed207919d0022cc081aa5b2cb982229b345e0d81a41049a1d944b903b3f90b"
+    },
+    {
+      "path": "binding/libexpat1_2.5.0-1+deb12u4_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/e/expat/libexpat1_2.5.0-1%2bdeb12u4_amd64.deb",
+      "group": "binding",
+      "bytes": 105852,
+      "sha256": "ed010cc41577d75ab01cccc6afa93496d9a99f1e16bd469caf58e1b81fddae80"
+    },
+    {
+      "path": "binding/libgcc-12-dev_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libgcc-12-dev_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 2437204,
+      "sha256": "d720259380a84f2ffc6fe516eff5cbe9c8a005138e8d6a5748747ba4b3404a82"
+    },
+    {
+      "path": "binding/libgdbm-compat4_1.23-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gdbm/libgdbm-compat4_1.23-3_amd64.deb",
+      "group": "binding",
+      "bytes": 48156,
+      "sha256": "4af36a590b68d415a78d9238b932b6a4579f515ec8a8016597498acff5b515a4"
+    },
+    {
+      "path": "binding/libgdbm6_1.23-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gdbm/libgdbm6_1.23-3_amd64.deb",
+      "group": "binding",
+      "bytes": 72248,
+      "sha256": "95fe4a1336532450e67bd067892f46eaa484139919ea8d067a9ffcbf5a4bf883"
+    },
+    {
+      "path": "binding/libgfortran5_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libgfortran5_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 792696,
+      "sha256": "63d38775d20c425c1f00914b52167ae0e3b4639facdb0aa734877279fb716fbb"
+    },
+    {
+      "path": "binding/libgomp1_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libgomp1_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 115772,
+      "sha256": "48fec46bda7f5b1638b9e959889bfbc20491247d402d120bb152687eb48143d7"
+    },
+    {
+      "path": "binding/libgprofng0_2.40-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/b/binutils/libgprofng0_2.40-2_amd64.deb",
+      "group": "binding",
+      "bytes": 812120,
+      "sha256": "a3c4092d84f19d13caf90f3c96eec53db8819f0e3a5247434944d71ed75fa53d"
+    },
+    {
+      "path": "binding/libgssapi-krb5-2_1.20.1-2+deb12u5_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/k/krb5/libgssapi-krb5-2_1.20.1-2%2bdeb12u5_amd64.deb",
+      "group": "binding",
+      "bytes": 135168,
+      "sha256": "d8b87aea91b956b416c01a28c44ff6228315ae3b73de40acddac3dc5043607d2"
+    },
+    {
+      "path": "binding/libhwloc15_2.9.0-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/h/hwloc/libhwloc15_2.9.0-1_amd64.deb",
+      "group": "binding",
+      "bytes": 153644,
+      "sha256": "4e7194b5d9adbb1a7d11a9501a4be4a4fa22876b69c73b7998056f552962c0e4"
+    },
+    {
+      "path": "binding/libicu72_72.1-3+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/i/icu/libicu72_72.1-3%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 9376124,
+      "sha256": "f7f6f99c6d7b025914df2447fc93e11d22c44c0c8bdd8b6f36691c9e7ddcef88"
+    },
+    {
+      "path": "binding/libisl23_0.25-1.1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/i/isl/libisl23_0.25-1.1_amd64.deb",
+      "group": "binding",
+      "bytes": 683060,
+      "sha256": "ebff0b2f8b220c74224197523019366e97ee4770d464bebc48e4865114e4da0e"
+    },
+    {
+      "path": "binding/libitm1_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libitm1_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 26140,
+      "sha256": "0ed5b35dfd1346cccbf065408ec789db6c44c1d0a16ae84533411dea09632979"
+    },
+    {
+      "path": "binding/libjansson4_2.14-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/j/jansson/libjansson4_2.14-2_amd64.deb",
+      "group": "binding",
+      "bytes": 40788,
+      "sha256": "3fc9742f9f1a37bcb9931df6074b4d1483419ef832ad5349f47323e75fc27864"
+    },
+    {
+      "path": "binding/libjs-jquery_3.6.1+dfsg+~3.5.14-1_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/n/node-jquery/libjs-jquery_3.6.1%2bdfsg%2b%7e3.5.14-1_all.deb",
+      "group": "binding",
+      "bytes": 326128,
+      "sha256": "a58c9ff6afe96c769cb6535754c909410760e4efa1e1540236194e489adcfb25"
+    },
+    {
+      "path": "binding/libjs-sphinxdoc_5.3.0-4_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/s/sphinx/libjs-sphinxdoc_5.3.0-4_all.deb",
+      "group": "binding",
+      "bytes": 130384,
+      "sha256": "93c0e211e0399659b224a49f86147bac4b2282b7e23fbfaa2edf990979cee59a"
+    },
+    {
+      "path": "binding/libjs-underscore_1.13.4~dfsg+~1.11.4-3_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/u/underscore/libjs-underscore_1.13.4%7edfsg%2b%7e1.11.4-3_all.deb",
+      "group": "binding",
+      "bytes": 115632,
+      "sha256": "4a0fbc90e7f62ea50c4ac7453352721fa60bb5eac87e9f39a027908faff29015"
+    },
+    {
+      "path": "binding/libjsoncpp25_1.9.5-4_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libj/libjsoncpp/libjsoncpp25_1.9.5-4_amd64.deb",
+      "group": "binding",
+      "bytes": 78572,
+      "sha256": "4ab06b9ce67470579be3112bf2b6b314012f93bfff619580b93a902d6b1221c5"
+    },
+    {
+      "path": "binding/libk5crypto3_1.20.1-2+deb12u5_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/k/krb5/libk5crypto3_1.20.1-2%2bdeb12u5_amd64.deb",
+      "group": "binding",
+      "bytes": 79712,
+      "sha256": "7b6e47d15c5c9cdcd456137533d8308aeba608a54cec73b28bd59bfc4b54cf06"
+    },
+    {
+      "path": "binding/libkeyutils1_1.6.3-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/k/keyutils/libkeyutils1_1.6.3-2_amd64.deb",
+      "group": "binding",
+      "bytes": 8808,
+      "sha256": "cfac89e6a7a54ff3c6a4f843310e25efeddaa771baeae470bd98bd588c373563"
+    },
+    {
+      "path": "binding/libkrb5-3_1.20.1-2+deb12u5_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/k/krb5/libkrb5-3_1.20.1-2%2bdeb12u5_amd64.deb",
+      "group": "binding",
+      "bytes": 332280,
+      "sha256": "c90801be09701af221b54dd502a59cb378b7284ff31e480738baca317d2f7653"
+    },
+    {
+      "path": "binding/libkrb5support0_1.20.1-2+deb12u5_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/k/krb5/libkrb5support0_1.20.1-2%2bdeb12u5_amd64.deb",
+      "group": "binding",
+      "bytes": 33212,
+      "sha256": "8b9c05f2d8d461a10d657b118f572af5bf8fd6c8f93dcef81e852c5ab0f428ab"
+    },
+    {
+      "path": "binding/libldap-2.5-0_2.5.13+dfsg-5_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/o/openldap/libldap-2.5-0_2.5.13%2bdfsg-5_amd64.deb",
+      "group": "binding",
+      "bytes": 183248,
+      "sha256": "4b6c30f6554149c594628d945edc6003f0eea8d0cc1341638c0e71375db147ed"
+    },
+    {
+      "path": "binding/liblsan0_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/liblsan0_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 969300,
+      "sha256": "d234ab339c0ba31a4fb44e2334cf5a8d15b87f2c2f9e74fadfaa877f92dcf22a"
+    },
+    {
+      "path": "binding/libmpc3_1.3.1-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/m/mpclib3/libmpc3_1.3.1-1_amd64.deb",
+      "group": "binding",
+      "bytes": 51480,
+      "sha256": "d7f79544790e44f9b0c8cb9034a18c58d37f8702a15f32539050718679e52f80"
+    },
+    {
+      "path": "binding/libmpfr6_4.2.0-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/m/mpfr4/libmpfr6_4.2.0-1_amd64.deb",
+      "group": "binding",
+      "bytes": 700900,
+      "sha256": "37b7a2b4e78890b6a074777f27b96c84f58e81558ba08410c2b6c0ca4a4ad77b"
+    },
+    {
+      "path": "binding/libncursesw6_6.4-4_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/n/ncurses/libncursesw6_6.4-4_amd64.deb",
+      "group": "binding",
+      "bytes": 133824,
+      "sha256": "98fa7a53dc565a38b65fb70422ad08001bf5361d8fbc74255280c329996a6bec"
+    },
+    {
+      "path": "binding/libnghttp2-14_1.52.0-1+deb12u3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/n/nghttp2/libnghttp2-14_1.52.0-1%2bdeb12u3_amd64.deb",
+      "group": "binding",
+      "bytes": 72404,
+      "sha256": "5a5736cee57e51c1baed869979e6ecdbc6495e939e33203d6cfe3b6e5a149e3f"
+    },
+    {
+      "path": "binding/libnsl-dev_1.3.0-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libn/libnsl/libnsl-dev_1.3.0-2_amd64.deb",
+      "group": "binding",
+      "bytes": 66436,
+      "sha256": "bb81a188c119cd7fdebae723cbc95887b6c549b2fe4fb7e268a9c8846444da99"
+    },
+    {
+      "path": "binding/libnsl2_1.3.0-2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libn/libnsl/libnsl2_1.3.0-2_amd64.deb",
+      "group": "binding",
+      "bytes": 39480,
+      "sha256": "c0d83437fdb016cb289436f49f28a36be44b3e8f1f2498c7e3a095f709c0d6f8"
+    },
+    {
+      "path": "binding/libnuma1_2.0.16-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/n/numactl/libnuma1_2.0.16-1_amd64.deb",
+      "group": "binding",
+      "bytes": 20964,
+      "sha256": "639e1ab6bd66ead40db8a22c332d7199679fa22db261cac34444eb8eb4c17dda"
+    },
+    {
+      "path": "binding/libomp5-14_1%3a14.0.6-12_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/l/llvm-toolchain-14/libomp5-14_14.0.6-12_amd64.deb",
+      "group": "binding",
+      "bytes": 383468,
+      "sha256": "348a9d81c23fe7f2b632c44345bf0c1dfdefe40144e7684a07678755a3deaec9"
+    },
+    {
+      "path": "binding/libperl5.36_5.36.0-7+deb12u4_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/perl/libperl5.36_5.36.0-7%2bdeb12u4_amd64.deb",
+      "group": "binding",
+      "bytes": 4207640,
+      "sha256": "ed8480b621ad574c25aea30d36194d0133ea74093756ecbe3dff157d0510ef7f"
+    },
+    {
+      "path": "binding/libproc2-0_2%3a4.0.2-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/procps/libproc2-0_4.0.2-3_amd64.deb",
+      "group": "binding",
+      "bytes": 62804,
+      "sha256": "e82ba5d01929eafb8b9954606a3c38b0332a987c2b3432388b4ee7365e54deae"
+    },
+    {
+      "path": "binding/libpsl5_0.21.2-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libp/libpsl/libpsl5_0.21.2-1_amd64.deb",
+      "group": "binding",
+      "bytes": 58684,
+      "sha256": "4f0d35610204e4e754b057748719744114621f2f6f4202d846c314860a981afb"
+    },
+    {
+      "path": "binding/libpython3-dev_3.11.2-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-defaults/libpython3-dev_3.11.2-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 9572,
+      "sha256": "ded769fd142b6a49f7f2eb9b27056a1340a96d99f7d96e5a0f449585d22c9602"
+    },
+    {
+      "path": "binding/libpython3-stdlib_3.11.2-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-defaults/libpython3-stdlib_3.11.2-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 9312,
+      "sha256": "4e58891d5c951a1e360ed9eaa814413cb5e84deadce3f08e801ac680434c786e"
+    },
+    {
+      "path": "binding/libpython3.11-dev_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/libpython3.11-dev_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 4739284,
+      "sha256": "e9b4cc9172df9536f6bd637a69886ccccd18e7c648a89bed565a748affeef6d6"
+    },
+    {
+      "path": "binding/libpython3.11-minimal_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/libpython3.11-minimal_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 820928,
+      "sha256": "69f41cfa3f4ba17284e538f843069d7529c53c207d2ae17a5b02785944870e33"
+    },
+    {
+      "path": "binding/libpython3.11-stdlib_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/libpython3.11-stdlib_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 1798408,
+      "sha256": "10f13e000ee757f5f2d2d3569f9e30546214a0c850acd78695feae373bfa3e53"
+    },
+    {
+      "path": "binding/libpython3.11_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/libpython3.11_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 1988800,
+      "sha256": "5737023cb469c012203bc6f4e6f522459d7561be499a69139df278785ec62129"
+    },
+    {
+      "path": "binding/libquadmath0_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libquadmath0_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 144616,
+      "sha256": "3f0c9a4c730da2fdab001cae596625438598fd2996d29d888feeb4c1cdc9011f"
+    },
+    {
+      "path": "binding/libreadline8_8.2-1.3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/r/readline/libreadline8_8.2-1.3_amd64.deb",
+      "group": "binding",
+      "bytes": 165760,
+      "sha256": "e02ebbd3701cf468dbf98d6d917fbe0325e881f07fe8b316150c8d2a64486e66"
+    },
+    {
+      "path": "binding/librhash0_1.4.3-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/r/rhash/librhash0_1.4.3-3_amd64.deb",
+      "group": "binding",
+      "bytes": 134112,
+      "sha256": "d9ba48a51fd4734aaaf3a75fd94b6352a02f9eaa88d3bec84cd0b5d3090f9d2a"
+    },
+    {
+      "path": "binding/librtmp1_2.4+20151223.gitfa8646d.1-2+b2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/r/rtmpdump/librtmp1_2.4%2b20151223.gitfa8646d.1-2%2bb2_amd64.deb",
+      "group": "binding",
+      "bytes": 60824,
+      "sha256": "e1f69020dc2c466e421ec6a58406b643be8b5c382abf0f8989011c1d3df91c87"
+    },
+    {
+      "path": "binding/libsasl2-2_2.1.28+dfsg-10_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/c/cyrus-sasl2/libsasl2-2_2.1.28%2bdfsg-10_amd64.deb",
+      "group": "binding",
+      "bytes": 59712,
+      "sha256": "11ee190ad39f8d7af441d2c8347388b9449434c73acc67b4b372445ac4152efa"
+    },
+    {
+      "path": "binding/libsasl2-modules-db_2.1.28+dfsg-10_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/c/cyrus-sasl2/libsasl2-modules-db_2.1.28%2bdfsg-10_amd64.deb",
+      "group": "binding",
+      "bytes": 20336,
+      "sha256": "3ac4fd6cbe3b3b06e68d24b931bf3eb9385b42f15604a37ed25310e948ca0ee6"
+    },
+    {
+      "path": "binding/libsqlite3-0_3.40.1-2+deb12u2_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/s/sqlite3/libsqlite3-0_3.40.1-2%2bdeb12u2_amd64.deb",
+      "group": "binding",
+      "bytes": 838808,
+      "sha256": "a8d78b40e9b4e422224aeebfe0e4dfc243f6acf3532490b0c05480d4283d41e2"
+    },
+    {
+      "path": "binding/libssh2-1_1.10.0-3+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/libs/libssh2/libssh2-1_1.10.0-3%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 175976,
+      "sha256": "fff72a194e493f88e100a2567e22472bb4ab828d429c2956965c6f2f134f1b3a"
+    },
+    {
+      "path": "binding/libssl3_3.0.22-1~deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/o/openssl/libssl3_3.0.22-1%7edeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 2039240,
+      "sha256": "f0a8aa8429209e556c278a9936bbd5f7d2cdb9f7e4e23b1e43ed399217ba80c1"
+    },
+    {
+      "path": "binding/libstdc++-12-dev_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libstdc%2b%2b-12-dev_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 2047292,
+      "sha256": "d28def6c23630432b57cb38a4c2fd67a79d4e0484027386ca6e8d6005c3d7a73"
+    },
+    {
+      "path": "binding/libtbb12_2021.8.0-2+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/o/onetbb/libtbb12_2021.8.0-2%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 79592,
+      "sha256": "5665882b77b1e88154a0709a213500176d7cbb3e8aaeceffaeaf4cd35de18bce"
+    },
+    {
+      "path": "binding/libtbbbind-2-5_2021.8.0-2+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/o/onetbb/libtbbbind-2-5_2021.8.0-2%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 13612,
+      "sha256": "361895dd5b2b4bac5e83f5f3a69ea67d635f340bcfa9203ef59948101547e864"
+    },
+    {
+      "path": "binding/libtbbmalloc2_2021.8.0-2+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/o/onetbb/libtbbmalloc2_2021.8.0-2%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 46376,
+      "sha256": "c1ae1a60490c415cc1bf8b3485a42f77c331b49e48f083f9ae05df6734d7c4de"
+    },
+    {
+      "path": "binding/libtirpc-common_1.3.3+ds-1_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libt/libtirpc/libtirpc-common_1.3.3%2bds-1_all.deb",
+      "group": "binding",
+      "bytes": 14048,
+      "sha256": "3e3ef129b4bf61513144236e15e1b4ec57fa5ae3dc8a72137abdbefb7a63af85"
+    },
+    {
+      "path": "binding/libtirpc-dev_1.3.3+ds-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libt/libtirpc/libtirpc-dev_1.3.3%2bds-1_amd64.deb",
+      "group": "binding",
+      "bytes": 191428,
+      "sha256": "03326473eed54ffa27efae19aa5d6aeb402930968f869f318445513093691d55"
+    },
+    {
+      "path": "binding/libtirpc3_1.3.3+ds-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libt/libtirpc/libtirpc3_1.3.3%2bds-1_amd64.deb",
+      "group": "binding",
+      "bytes": 85192,
+      "sha256": "2a46d5a5e9486da11ffeff5740931740d6deae4f92cd6098df060dc5dff1e1c7"
+    },
+    {
+      "path": "binding/libtsan2_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libtsan2_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 2196972,
+      "sha256": "06906663d644a75a1a836382ecd80b61461129c06f02935ce408b25809f6c958"
+    },
+    {
+      "path": "binding/libubsan1_12.2.0-14+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/g/gcc-12/libubsan1_12.2.0-14%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 883056,
+      "sha256": "744f52adf00ffd45d44806b1c7e802a36bd27e479c9bc8457128fde357faa530"
+    },
+    {
+      "path": "binding/libuv1_1.44.2-1+deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libu/libuv1/libuv1_1.44.2-1%2bdeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 135616,
+      "sha256": "204f0e13354b44e6d19317887a53dab6f26696e8d95838db970b81f2a393f7fd"
+    },
+    {
+      "path": "binding/libxml2_2.9.14+dfsg-1.3~deb12u6_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/libx/libxml2/libxml2_2.9.14%2bdfsg-1.3%7edeb12u6_amd64.deb",
+      "group": "binding",
+      "bytes": 688760,
+      "sha256": "4460e39dda10a815881374217cde08474747cfa018358cd8612c14b390eff53b"
+    },
+    {
+      "path": "binding/linux-libc-dev_6.1.190-1_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/l/linux/linux-libc-dev_6.1.190-1_amd64.deb",
+      "group": "binding",
+      "bytes": 2408528,
+      "sha256": "a88a129991cbb7db1715bed232c9808b91ac0fb7149660558b9df0d074348f05"
+    },
+    {
+      "path": "binding/make_4.3-4.1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/m/make-dfsg/make_4.3-4.1_amd64.deb",
+      "group": "binding",
+      "bytes": 395632,
+      "sha256": "a1a83af8cbd854af887b72ad196b1f4af58387815e21ced1000253a116a46e2a"
+    },
+    {
+      "path": "binding/media-types_10.0.0_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/m/media-types/media-types_10.0.0_all.deb",
+      "group": "binding",
+      "bytes": 26136,
+      "sha256": "aaa46dcb3b39948ae2e0fdb72cfcb2f48c0b59f19785a3da8045c05eb19955dd"
+    },
+    {
+      "path": "binding/ninja-build_1.11.1-2~deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/n/ninja-build/ninja-build_1.11.1-2%7edeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 134996,
+      "sha256": "e75fe14ee81334f52efe955aaaddac07d26f117bac60488ea19ea7a8b564e62c"
+    },
+    {
+      "path": "binding/openssl_3.0.22-1~deb12u1_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/o/openssl/openssl_3.0.22-1%7edeb12u1_amd64.deb",
+      "group": "binding",
+      "bytes": 1442052,
+      "sha256": "6f43fb5e9f3ceb0e36c91d0a148282a8eaf174b441c17d3665b6ba049b33d2c2"
+    },
+    {
+      "path": "binding/patch_2.7.6-7_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/patch/patch_2.7.6-7_amd64.deb",
+      "group": "binding",
+      "bytes": 127848,
+      "sha256": "8c6d49b771530dbe26d7bd060582dc7d2b4eeb603a20789debc1ef4bbbc4ef67"
+    },
+    {
+      "path": "binding/perl-base_5.36.0-7+deb12u4_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/perl/perl-base_5.36.0-7%2bdeb12u4_amd64.deb",
+      "group": "binding",
+      "bytes": 1609596,
+      "sha256": "d7d1943aec9597629bf73075efcc5ef6dc9bda96d78e80d843156ecd448478b8"
+    },
+    {
+      "path": "binding/perl-modules-5.36_5.36.0-7+deb12u4_all.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/perl/perl-modules-5.36_5.36.0-7%2bdeb12u4_all.deb",
+      "group": "binding",
+      "bytes": 2817356,
+      "sha256": "3ed38ffa8320e9bf7597cefa01b6a6ace4a08ccc77cdfd15ef7d8b711dea7166"
+    },
+    {
+      "path": "binding/perl_5.36.0-7+deb12u4_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/perl/perl_5.36.0-7%2bdeb12u4_amd64.deb",
+      "group": "binding",
+      "bytes": 239392,
+      "sha256": "67e7a883c5d835939638f89a750799282df243ac1446281aa92ef9e19300940b"
+    },
+    {
+      "path": "binding/procps_2%3a4.0.2-3_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/procps/procps_4.0.2-3_amd64.deb",
+      "group": "binding",
+      "bytes": 708712,
+      "sha256": "d9d0e75779cb79af869181f17b93c5c263a2b89cac6a0193c436160a4483ddc1"
+    },
+    {
+      "path": "binding/python3-dev_3.11.2-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-defaults/python3-dev_3.11.2-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 26180,
+      "sha256": "74c35488ce04fd9a371522d2ef3ef3a3d0ba585d5afcb4ce4ec9c6a531377518"
+    },
+    {
+      "path": "binding/python3-distutils_3.11.2-3_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-stdlib-extensions/python3-distutils_3.11.2-3_all.deb",
+      "group": "binding",
+      "bytes": 130936,
+      "sha256": "a620b555f301860a08e30534c7e6f7d79818e5e1977bfec39a612e7003074318"
+    },
+    {
+      "path": "binding/python3-lib2to3_3.11.2-3_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-stdlib-extensions/python3-lib2to3_3.11.2-3_all.deb",
+      "group": "binding",
+      "bytes": 76284,
+      "sha256": "4e7f5e01e49a0622d10db3d0995666a6ead6a369cd127a996e9a4f9e91696a51"
+    },
+    {
+      "path": "binding/python3-minimal_3.11.2-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-defaults/python3-minimal_3.11.2-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 26312,
+      "sha256": "30f9618670e686d781afbfc713eb0830c29d2819e9cb2a0488800dad6bb99faa"
+    },
+    {
+      "path": "binding/python3.11-dev_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/python3.11-dev_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 619256,
+      "sha256": "f222beb47ebc306c00c5ed1cb1e6db246b4bfb908770299eba46a0309c186944"
+    },
+    {
+      "path": "binding/python3.11-minimal_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/python3.11-minimal_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 2054684,
+      "sha256": "b5f855ab922dfcd5d1a3223b2118c3dae13ffc7751b0cd5dc24740386323a33a"
+    },
+    {
+      "path": "binding/python3.11_3.11.2-6+deb12u9_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/p/python3.11/python3.11_3.11.2-6%2bdeb12u9_amd64.deb",
+      "group": "binding",
+      "bytes": 575032,
+      "sha256": "4facf334e0e0830a87013852f8c3a1cfee11ad702f72f240adf9ad5b9a334e7c"
+    },
+    {
+      "path": "binding/python3_3.11.2-1+b1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/p/python3-defaults/python3_3.11.2-1%2bb1_amd64.deb",
+      "group": "binding",
+      "bytes": 26300,
+      "sha256": "33f6dafbd1a6902d9063172ec7dbd4b2225e12009e0d7ec5c933a72c2f5f3b74"
+    },
+    {
+      "path": "binding/readline-common_8.2-1.3_all.deb",
+      "url": "http://deb.debian.org/debian/pool/main/r/readline/readline-common_8.2-1.3_all.deb",
+      "group": "binding",
+      "bytes": 68988,
+      "sha256": "69317523fe56429aa361545416ad339d138c1500e5a604856a80dd9074b4e35c"
+    },
+    {
+      "path": "binding/rpcsvc-proto_1.4.3-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/r/rpcsvc-proto/rpcsvc-proto_1.4.3-1_amd64.deb",
+      "group": "binding",
+      "bytes": 63268,
+      "sha256": "32ac0692694f8a34cc90c895f4fc739680fb2ef0e2d4870a68833682bf1c81a3"
+    },
+    {
+      "path": "binding/xz-utils_5.4.1-1+deb12u2_amd64.deb",
+      "url": "http://deb.debian.org/debian-security/pool/updates/main/x/xz-utils/xz-utils_5.4.1-1%2bdeb12u2_amd64.deb",
+      "group": "binding",
+      "bytes": 471448,
+      "sha256": "f99fc3fe4b4e5baecf5fd8b53853a82e1e71cb5ec187b36b0ddcf227a8961c8f"
+    },
+    {
+      "path": "binding/zlib1g-dev_1%3a1.2.13.dfsg-1_amd64.deb",
+      "url": "http://deb.debian.org/debian/pool/main/z/zlib/zlib1g-dev_1.2.13.dfsg-1_amd64.deb",
+      "group": "binding",
+      "bytes": 916272,
+      "sha256": "f9ce531f60cbd5df37996af9370e0171be96902a17ec2bdbd8d62038c354094f"
+    }
+  ]
+}
