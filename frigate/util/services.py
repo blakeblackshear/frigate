@@ -261,7 +261,7 @@ def is_vaapi_amd_driver() -> bool:
         output = p.stdout.decode("unicode_escape").split("\n")
 
         # VA Info will print out the friendly name of the driver
-        return any("AMD Radeon Graphics" in line for line in output)
+        return any(" for AMD " in line for line in output)
 
 
 def get_amd_gpu_stats() -> dict[str, str] | None:
