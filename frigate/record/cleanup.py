@@ -516,10 +516,13 @@ class RecordingCleanup(threading.Thread):
                 logger.info("Exiting recording cleanup...")
                 break
 
-            self.clean_tmp_previews()
+            try:
+                self.clean_tmp_previews()
 
-            if counter == 0:
-                self.clean_tmp_clips()
-                maybe_empty_dirs = self.expire_recordings()
-                remove_empty_directories(Path(RECORD_DIR), maybe_empty_dirs)
-                self.truncate_wal()
+                if counter == 0:
+                    self.clean_tmp_clips()
+                    maybe_empty_dirs = self.expire_recordings()
+                    remove_empty_directories(Path(RECORD_DIR), maybe_empty_dirs)
+                    self.truncate_wal()
+            except Exception:
+                logger.exception("Recording cleanup pass failed")
