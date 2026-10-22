@@ -12,6 +12,7 @@ type AutoUpdatingCameraImageProps = {
 };
 
 const MIN_LOAD_TIMEOUT_MS = 200;
+const ERROR_RETRY_MS = 1000;
 
 export default function AutoUpdatingCameraImage({
   camera,
@@ -68,6 +69,24 @@ export default function AutoUpdatingCameraImage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, setFps]);
 
+  const handleError = useCallback(() => {
+    if (reloadInterval == -1) {
+      return;
+    }
+
+    // the periodic cache url doesn't change between retries, so drop it
+    setIsCached(true);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(
+      () => setKey(Date.now()),
+      Math.max(reloadInterval, ERROR_RETRY_MS),
+    );
+  }, [reloadInterval]);
+
   // periodic cache to reduce loading indicator
 
   const [isCached, setIsCached] = useState(false);
@@ -92,6 +111,7 @@ export default function AutoUpdatingCameraImage({
       <CameraImage
         camera={camera}
         onload={handleLoad}
+        onerror={handleError}
         searchParams={cacheKey}
         className={cameraClasses}
       />
