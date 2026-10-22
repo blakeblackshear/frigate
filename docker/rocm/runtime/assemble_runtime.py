@@ -1,20 +1,33 @@
-"""Package the owned inference libraries and pinned AMD runtime dependencies."""
+"""Package the owned 10.1 stack, preserving the SDK's relative library layout."""
 
 import hashlib
 import json
+import os
 import shutil
 import subprocess
+import sys
+import tempfile
 from pathlib import Path
 
-ROOT = Path("/runtime")
-ROCM = Path("/opt/rocm").resolve()
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "owned"))
+from gfx90c_code import inspect_gfx90c_code
+
 PREFIX = Path("/opt/owned-deps")
-DEST = ROOT / "opt/rocm-7.2.4"
-PRIVATE_LIB = DEST / "lib/migraphx/lib"
+SDK = PREFIX / "sdk"
+ROOT = Path("/runtime")
+SDK_DEST = ROOT / "opt/rocm-python"
+DEST = SDK_DEST / "_rocm_sdk_devel"
+PRIVATE = DEST / "lib/migraphx/lib"
+
+
+def sha256(path: Path) -> str:
+    """Hash a native artifact without loading it into memory."""
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def copy_file(source: Path, destination: Path) -> None:
-    """Copy the file and any symlink target beside it."""
+    """Keep SONAME symlinks beside their actual targets."""
     destination.parent.mkdir(parents=True, exist_ok=True)
     if source.is_symlink():
         target = source.resolve(strict=True)
@@ -22,131 +35,178 @@ def copy_file(source: Path, destination: Path) -> None:
         destination.unlink(missing_ok=True)
         destination.symlink_to(target.name)
     else:
+        destination.unlink(missing_ok=True)
         shutil.copy2(source, destination)
 
 
-def native_elf(path: Path) -> bool:
-    """Identify x86-64 libraries without interpreting GPU code objects."""
-    with path.open("rb") as file:
-        header = file.read(20)
-    return header[:4] == b"\x7fELF" and header[18:20] == b">\x00"
-
-
 def main() -> None:
-    """Assemble only the inference closure; never enumerate or use a GPU."""
+    """Assemble runtime files without initializing HSA or enumerating devices."""
     assert not Path("/dev/kfd").exists() and not Path("/dev/dri").exists()
-    PRIVATE_LIB.mkdir(parents=True, exist_ok=True)
-    custom_libraries = sorted(PREFIX.rglob("*.so*"))
-    assert any(path.name.startswith("libmigraphx_gpu.so") for path in custom_libraries)
-    for path in custom_libraries:
-        if path.is_file():
-            copy_file(path, PRIVATE_LIB / path.name)
-    shutil.copytree(PREFIX / "include", DEST / "lib/migraphx/include")
-    shutil.copytree(
-        PREFIX / "lib/migraphx/include",
-        DEST / "lib/migraphx/include",
-        dirs_exist_ok=True,
-    )
-    shutil.copytree(PREFIX / "share/frigate", DEST / "share/frigate")
-
-    # These components can be loaded dynamically, so ldd alone is insufficient.
-    # Include both the runtime compiler and the MIOpen/rocBLAS fallback paths.
-    roots = (
-        "libMIOpen.so*",
-        "libamd_comgr.so*",
-        "libamdhip64.so*",
-        "libhiprtc.so*",
-        "libhipblas.so*",
-        "libhipblaslt.so*",
-        "libhsa-runtime64.so*",
-        "librocblas.so*",
-        "librocroller.so*",
-        "libroctracer64.so*",
-        "libroctx64.so*",
-    )
-    libraries = list(custom_libraries)
-    for name in ("migraphx-driver", "migraphx-hiprtc-driver"):
-        matches = {path.resolve() for path in PREFIX.rglob(name) if path.is_file()}
-        executables = [path for path in matches if native_elf(path)]
-        assert len(executables) == 1, f"Missing or ambiguous compiler helper: {name}"
-        executable = executables[0]
-        copy_file(executable, DEST / "lib/migraphx/bin" / name)
-        (DEST / "bin").mkdir(exist_ok=True)
-        (DEST / "bin" / name).symlink_to("../lib/migraphx/bin/" + name)
-        libraries.append(executable)
-    assert (ROCM / "bin/rocminfo").is_file()
-    copy_file(ROCM / "bin/rocminfo", DEST / "bin/rocminfo")
-    libraries.append(ROCM / "bin/rocminfo")
-    for pattern in roots:
-        matches = list((ROCM / "lib").glob(pattern))
-        if pattern != "librocroller.so*":
-            assert matches, f"Missing required AMD library: {pattern}"
-        for path in matches:
-            copy_file(path, DEST / "lib" / path.name)
-            libraries.append(path)
-
-    visited = set()
-    while libraries:
-        path = libraries.pop().resolve()
-        if path in visited or not native_elf(path):
-            continue
-        visited.add(path)
-        linked = subprocess.run(["ldd", str(path)], capture_output=True, text=True)
-        assert linked.returncode == 0, linked.stderr
-        assert "not found" not in linked.stdout, linked.stdout
-        for line in linked.stdout.splitlines():
-            fields = line.split()
-            if len(fields) >= 3 and fields[1] == "=>" and fields[2].startswith("/"):
-                dependency = Path(fields[2])
-                resolved = dependency.resolve(strict=True)
-                if resolved.is_relative_to(ROCM):
-                    copy_file(dependency, DEST / "lib" / dependency.name)
-                    libraries.append(dependency)
-                elif resolved.is_relative_to(PREFIX):
-                    copy_file(dependency, PRIVATE_LIB / dependency.name)
-                    libraries.append(dependency)
-
-    shutil.copytree(ROCM / "include/hip", DEST / "include/hip", symlinks=True)
-    shutil.copytree(ROCM / "share/miopen/db", DEST / "share/miopen/db", symlinks=True)
-    shutil.copytree(
-        ROCM / "lib/rocblas/library", DEST / "lib/rocblas/library", symlinks=True
-    )
     subprocess.run(
-        ["dpkg-deb", "-x", "/inputs/sources/rocblas-gfx900.deb", "/legacy-kernels"],
+        [
+            "python3",
+            "/recipes/source_inputs.py",
+            "verify",
+            "--lock",
+            "/recipes/runtime-os-lock.json",
+            "--root",
+            "/inputs",
+        ],
         check=True,
     )
-    legacy = next(Path("/legacy-kernels/opt").glob("rocm-*"))
-    kernels = list((legacy / "lib/rocblas/library").glob("*gfx900*"))
-    assert kernels, "The legacy package contains no gfx900 kernel bundle"
-    for path in kernels:
-        copy_file(path, DEST / "lib/rocblas/library" / path.name)
-    for path in legacy.glob("share/doc/*"):
-        if path.is_dir():
-            shutil.copytree(
-                path,
-                DEST / "share/frigate/licenses/rocblas-6.3.4" / path.name,
-                symlinks=True,
-            )
-    # Preserve upstream notices from both source-built and packaged components.
-    for path in ROCM.glob("share/doc/*"):
-        if path.is_dir():
-            shutil.copytree(path, DEST / "share/doc" / path.name, symlinks=True)
+    if SDK_DEST.exists():
+        shutil.rmtree(SDK_DEST)
+    if (ROOT / "usr").exists():
+        shutil.rmtree(ROOT / "usr")
+    SDK_DEST.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(SDK, SDK_DEST, symlinks=True)
+    alias = ROOT / "opt/rocm-10.1.0"
+    alias.unlink(missing_ok=True)
+    alias.symlink_to("rocm-python/_rocm_sdk_devel")
+    PRIVATE.mkdir(parents=True, exist_ok=True)
+
+    libraries = [
+        path
+        for path in (PREFIX / "lib").rglob("*.so*")
+        if path.is_file() and not path.name.startswith("migraphx.cpython-")
+    ]
+    assert any(path.name.startswith("libmigraphx_gpu.so") for path in libraries)
+    assert (PREFIX / "lib/librockCompiler.a").is_file()
+    for path in libraries:
+        copy_file(path, PRIVATE / path.name)
+    for source in (PREFIX / "include", PREFIX / "lib/migraphx/include"):
+        if source.is_dir():
+            shutil.copytree(source, DEST / "lib/migraphx/include", dirs_exist_ok=True)
+
+    # Replace the SDK's stock BLAS, not just the linker-facing symlink. Other
+    # SDK libraries also resolve this SONAME through their sibling-relative RPATH.
+    owned_blas = {path.resolve() for path in (PREFIX / "lib").glob("librocblas.so*")}
+    assert len(owned_blas) == 1, "Missing or ambiguous owned rocBLAS"
+    blas = owned_blas.pop()
+    for path in (PREFIX / "lib").glob("librocblas.so*"):
+        copy_file(path, DEST / "lib" / path.name)
+    stock_blas = SDK_DEST / "_rocm_sdk_libraries/lib/librocblas.so.5"
+    assert stock_blas.is_file()
+    stock_blas.unlink()
+    shutil.copy2(blas, stock_blas)
+    assert sha256(stock_blas) == sha256(blas)
+
+    kernels = PREFIX / "lib/rocblas/library"
+    assert kernels.is_dir()
+    native_kernels = sorted(
+        path for path in kernels.rglob("*gfx90c*") if path.is_file()
+    )
+    assert native_kernels, "No native gfx90c Tensile library was produced"
+    native_code = [
+        {"file": str(path.relative_to(kernels)), **inspect_gfx90c_code(path)}
+        for path in native_kernels
+        if path.suffix in {".co", ".hsaco"}
+    ]
+    assert native_code, "No native device code objects were produced"
+    shutil.copytree(kernels, DEST / "lib/rocblas/library", dirs_exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="rocblas-fatbin-") as temporary:
+        fatbin = Path(temporary) / "fatbin"
+        subprocess.run(
+            [
+                "objcopy",
+                "-O",
+                "binary",
+                "--only-section=.hip_fatbin",
+                str(blas),
+                str(fatbin),
+            ],
+            check=True,
+        )
+        fatbin_bytes = fatbin.stat().st_size
+        assert fatbin_bytes >= 1_000_000, (
+            "rocBLAS device-code section is unexpectedly small"
+        )
+
+    bindings = {path.resolve() for path in PREFIX.rglob("migraphx.cpython-311-*.so")}
+    assert len(bindings) == 1
+    binding = bindings.pop()
+    copy_file(binding, DEST / "lib" / binding.name)
+    for name in ("migraphx-driver", "migraphx-hiprtc-driver"):
+        matches = {path.resolve() for path in PREFIX.rglob(name) if path.is_file()}
+        # CMake can also install a shell convenience wrapper. Select the ELF.
+        native = [path for path in matches if path.open("rb").read(4) == b"\x7fELF"]
+        assert len(native) == 1, f"Missing or ambiguous {name}"
+        copy_file(native[0], DEST / "lib/migraphx/bin" / name)
+        helper = DEST / "bin" / name
+        helper.unlink(missing_ok=True)
+        helper.symlink_to("../lib/migraphx/bin/" + name)
+    assert (DEST / "bin/rocminfo").is_file()
+
+    with tempfile.TemporaryDirectory(prefix="runtime-os-") as temporary:
+        extracted = Path(temporary)
+        for package in sorted(Path("/inputs/runtime-os").glob("*.deb")):
+            subprocess.run(["dpkg-deb", "-x", str(package), temporary], check=True)
+        shutil.copytree(
+            extracted / "usr/include",
+            ROOT / "usr/include",
+            symlinks=True,
+            dirs_exist_ok=True,
+        )
+        shutil.copytree(
+            extracted / "usr/lib/gcc/x86_64-linux-gnu/14",
+            ROOT / "usr/lib/gcc/x86_64-linux-gnu/14",
+            symlinks=True,
+            dirs_exist_ok=True,
+        )
+        for pattern in (
+            "usr/lib/x86_64-linux-gnu/libnuma.so.*",
+            "usr/lib/llvm-19/lib/libomp.so*",
+        ):
+            for source in extracted.glob(pattern):
+                copy_file(source, ROOT / "usr/lib/x86_64-linux-gnu" / source.name)
+        shutil.copytree(
+            extracted / "usr/share/doc",
+            ROOT / "usr/share/doc",
+            symlinks=True,
+            dirs_exist_ok=True,
+        )
+
+    # Upstream's split Python helper links to libpython, unlike the standalone
+    # 7.2 binding. Use the exact Debian runtime that supplied its build headers.
+    with tempfile.TemporaryDirectory(prefix="runtime-python-") as temporary:
+        extracted = Path(temporary)
+        for package in sorted(Path("/inputs/builder").glob("libpython3.11*.deb")):
+            subprocess.run(["dpkg-deb", "-x", str(package), temporary], check=True)
+        python_libraries = list(
+            extracted.glob("usr/lib/x86_64-linux-gnu/libpython3.11.so*")
+        )
+        assert python_libraries, "Missing locked CPython shared runtime"
+        for library in python_libraries:
+            copy_file(library, PRIVATE / library.name)
+        copyright_file = extracted / "usr/share/doc/libpython3.11-minimal/copyright"
+        assert copyright_file.is_file()
+        license_dir = DEST / "share/frigate/licenses/python3.11"
+        license_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(copyright_file, license_dir / "copyright")
+
+    metadata = DEST / "share/frigate"
+    shutil.copytree(PREFIX / "share/frigate", metadata, dirs_exist_ok=True)
+    shutil.copy2("/recipes/runtime-os-lock.json", metadata)
     lock = json.loads(Path("/recipes/source-lock.json").read_text())
     manifest = {
-        "source_lock_sha256": hashlib.sha256(
-            Path("/recipes/source-lock.json").read_bytes()
-        ).hexdigest(),
+        "source_lock_sha256": sha256(metadata / "source-lock.json"),
+        "runtime_os_lock_sha256": sha256(metadata / "runtime-os-lock.json"),
+        "python_binding_sha256": sha256(binding),
+        "python_shared_runtime_sha256": sha256(PRIVATE / "libpython3.11.so.1.0"),
+        "classic_compiler_archive_sha256": sha256(PREFIX / "lib/librockCompiler.a"),
         "runtime": lock["runtime"],
-        "reference_binary_provenance": "not established; this is a new source build",
+        "reference_binary_provenance": "owned source build; no Gary binary payload",
         "gpu_qualified": False,
-        "amd_dependency_libraries": sorted(
-            str(path) for path in visited if path.is_relative_to(ROCM)
-        ),
-        "gfx900_kernel_files": sorted(path.name for path in kernels),
+        "rocblas_source_binary_sha256": sha256(blas),
+        "rocblas_fatbin_bytes": fatbin_bytes,
+        "gfx90c_kernel_files": [
+            str(path.relative_to(kernels)) for path in native_kernels
+        ],
+        "gfx90c_kernel_code_objects": native_code,
+        "sdk_layout": "AMD wheel siblings, with owned rocBLAS replacing stock SONAME",
     }
-    (DEST / "share/frigate/source-build.json").write_text(
-        json.dumps(manifest, indent=2) + "\n"
-    )
+    (metadata / "source-build.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    assert os.access(DEST / "bin/rocminfo", os.X_OK)
 
 
 if __name__ == "__main__":

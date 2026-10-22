@@ -1,0 +1,15 @@
+--- a/src/targets/gpu/lowering.cpp
++++ b/src/targets/gpu/lowering.cpp
+@@ -285,7 +285,11 @@
+             // if the hardware is defaulted to use rocBLAS (such as gfx90).
+             if(not has_fp8_inputs and
+                ((string_value_of(MIGRAPHX_SET_GEMM_PROVIDER{}) == "rocblas") or
+-                not hipblaslt_supported() or gpu::gfx_default_rocblas()))
++                not hipblaslt_supported()
++#if MIGRAPHX_USE_HIPBLASLT
++                    or gpu::gfx_default_rocblas()
++#endif
++                    ))
+             {
+                 return mod->replace_instruction(
+                     ins, rocblas_gemm<Op>{Op{}, 1, 0, compute_fp32}, refs);
