@@ -122,12 +122,14 @@ updates:
       # Intermittent failure in the UI settings import spec, cause not found
       - dependency-name: "zod"
         update-types: ["version-update:semver-major"]
-      # Needs an on-device pinch test before moving
+      # Every later version clamps the pan when the player hides or drops
+      # pinch gestures near the edges, 4.2.0 included
       - dependency-name: "react-zoom-pan-pinch"
-        update-types: ["version-update:semver-major"]
-      # Build fails until monaco-worker-manager releases its PR 4
+        versions: [">3.4.4"]
+      # 0.54 pins a vulnerable dompurify; 0.55+ breaks YAML validation until
+      # monaco-worker-manager releases its PR 4
       - dependency-name: "monaco-editor"
-        versions: [">=0.55.0"]
+        versions: [">=0.54.0"]
       # Later versions need Node 22 and extract false keys
       - dependency-name: "i18next-cli"
         versions: [">1.5.11"]
