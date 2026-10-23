@@ -503,7 +503,8 @@
     "title": "Kullanıcılar",
     "management": {
       "title": "Kullanıcı Yönetimi",
-      "desc": "Bu Frigate kurulumundaki kullanıcı hesaplarını yönetin."
+      "desc": "Bu Frigate kurulumundaki kullanıcı hesaplarını yönetin.",
+      "authDisabled": "Yerleşik kimlik doğrulama devre dışı bırakılmış. Bu hesaplarla giriş yapılabilmesi için etkinleştirilmesi gerekir."
     },
     "addUser": "Kullanıcı Ekle",
     "toast": {
@@ -707,7 +708,8 @@
         "ariaLabel": "Modelleri türe göre filtrele",
         "baseModels": "Temel Modeller",
         "fineTunedModels": "İnce Ayarlanmış Modeller"
-      }
+      },
+      "showIncompatible": "Uyumsuz modelleri göster"
     },
     "toast": {
       "success": "Frigate+ ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",

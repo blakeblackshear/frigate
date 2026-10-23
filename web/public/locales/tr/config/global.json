@@ -268,7 +268,7 @@
         },
         "cookie_secure": {
             "label": "Güvenli çerez bayrağı",
-            "description": "Kimlik doğrulama çerezinde güvenli bayrağı (flag) etkinleştir; TLS kullanırken etkin olmalıdır."
+            "description": "Kimlik doğrulama çerezinde güvenli bayrağı (flag) daima etkinleştir. Frigate, TLS üzerinden hizmet verirken bu ayarı otomatik olarak yapar. Ters vekil sunucu Frigate'in önünde TLS sonlandırma işlemini gerçekleştirdiğinde bu ayarı etkinleştirin. TLS portuna bağlanan bir vekil sunucu, Frigate'i tarayıcılara HTTPS üzerinden sunmalıdır."
         },
         "session_length": {
             "label": "Oturum süresi",
