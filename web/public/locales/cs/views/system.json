@@ -322,7 +322,9 @@
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (přes go2rtc): {{message}}",
       "streamProbeFailed": "Stream {{index}} se nepodařilo prověřit: {{error}}",
-      "cameraProbeFailed": "Streamy se nepodařilo prověřit: {{error}}"
+      "cameraProbeFailed": "Streamy se nepodařilo prověřit: {{error}}",
+      "occurred_one": "Výskyt: {{time}}",
+      "occurred_other": "Poslední výskyt: {{lastTime}} · {{count}} výskytů od {{time}}"
     },
     "hardware": {
       "title": "Hardware",
