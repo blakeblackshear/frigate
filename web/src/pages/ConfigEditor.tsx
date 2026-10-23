@@ -147,6 +147,9 @@ function ConfigEditor() {
         language: "yaml",
         model: modelRef.current,
         scrollBeyondLastLine: false,
+        // Keep the textarea input. CommandMenu doesn't treat EditContext's
+        // host div as a text field, so "/" would open the menu.
+        editContext: false,
         theme: (systemTheme || theme) == "dark" ? "vs-dark" : "vs-light",
       });
       editorRef.current?.addCommand(
