@@ -257,6 +257,6 @@ To keep recording off by default, leave `record.enabled: true` in the base confi
 
 ### Can I schedule profiles to be enabled or disabled at certain times?
 
-Not within Frigate itself. Frigate is an NVR, not an automation platform, so it intentionally does not include a scheduler for activating profiles. Instead, activate profiles from an automation platform that already handles time- and event-based triggers well, such as [Home Assistant](https://www.home-assistant.io/) or [Node-RED](https://nodered.org/). These integrate with Frigate and give you far more robust and flexible scheduling than a built-in scheduler could.
+Not within Frigate itself. Frigate is an NVR, not an automation platform, so it intentionally does not include a scheduler for activating profiles. Instead, activate profiles from an automation platform that already handles time- and event-based triggers well, such as [Home Assistant](https://www.home-assistant.io/) or [Node-RED](https://nodered.org/). These integrate with Frigate and give you far more robust and flexible scheduling than a built-in scheduler could. The [Auto Arm](https://autoarm.rhizomatics.org.uk/configuration/frigate/) Home Assistant custom component will switch the profile as part of its sunrise/sunset/occupancy/calendar based alarm panel setting.
 
 If you prefer something lightweight, a simple script driven by a cron job that toggles profiles on a schedule works too.
