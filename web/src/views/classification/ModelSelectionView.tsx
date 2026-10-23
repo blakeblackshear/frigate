@@ -271,16 +271,15 @@ function ModelCard({ config, onClick, onUpdate, onDelete }: ModelCardProps) {
       (key) => key != "none" && key.toLowerCase() != "unknown",
     );
 
-    if (keys.length === 0) {
+    const selectedKey = keys.find(
+      (key) => (dataset.categories[key]?.length ?? 0) > 0,
+    );
+
+    if (!selectedKey) {
       return undefined;
     }
 
-    const selectedKey = keys[0];
     const images = dataset.categories[selectedKey];
-
-    if (!images || images.length === 0) {
-      return undefined;
-    }
 
     return {
       name: selectedKey,
