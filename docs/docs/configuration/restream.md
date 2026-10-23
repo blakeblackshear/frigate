@@ -225,7 +225,7 @@ go2rtc's `${VAR:default}` variable syntax is also disabled by default in stream 
 
 If you attempt to use these sources in your configuration, the streams will be removed and an error message will be printed in the logs.
 
-To enable these sources, you must set the environment variable `GO2RTC_ALLOW_ARBITRARY_EXEC=true`. This can be done in your Docker Compose file or container environment:
+To enable these sources, you must set the environment variable `GO2RTC_ALLOW_ARBITRARY_EXEC=true`. This can be done in your Docker Compose file or container environment, or for Home Assistant App users with the `go2rtc_allow_arbitrary_exec` option in the App's configuration. The `environment_vars` section of the Frigate config can't enable it:
 
 ```yaml
 environment:

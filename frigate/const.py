@@ -8,6 +8,7 @@ MODEL_CACHE_DIR = f"{CONFIG_DIR}/model_cache"
 BASE_DIR = "/media/frigate"
 CLIPS_DIR = f"{BASE_DIR}/clips"
 EXPORT_DIR = f"{BASE_DIR}/exports"
+EXPORT_STAGING_DIR = f"{EXPORT_DIR}/staging"
 FACE_DIR = f"{CLIPS_DIR}/faces"
 THUMB_DIR = f"{CLIPS_DIR}/thumbs"
 RECORD_DIR = f"{BASE_DIR}/recordings"
@@ -22,6 +23,15 @@ PLUS_API_HOST = "https://api.frigate.video"
 SHM_FRAMES_VAR = "SHM_MAX_FRAMES"
 
 REDACTED_CREDENTIAL_SENTINEL = "__FRIGATE_SAVED_CREDENTIAL__"
+
+# Stream type constants
+
+STREAM_TYPE_MAIN = "main"
+STREAM_TYPE_SUB = "sub"
+SUB_CACHE_TAG = "@sub"
+RECORD_STREAM_TYPES = (STREAM_TYPE_MAIN, STREAM_TYPE_SUB)
+ROLE_TO_STREAM_TYPE = {"record": STREAM_TYPE_MAIN, "record_sub": STREAM_TYPE_SUB}
+STREAM_TYPE_TO_ROLE = {v: k for k, v in ROLE_TO_STREAM_TYPE.items()}
 
 # Attribute & Object constants
 
@@ -107,7 +117,19 @@ SUPPORTED_RK_SOCS = ["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"]
 
 REGEX_CAMERA_NAME = r"^[a-zA-Z0-9_-]+$"
 REGEX_RTSP_CAMERA_USER_PASS = r":\/\/[a-zA-Z0-9_-]+:[\S]+@"
-REGEX_HTTP_CAMERA_USER_PASS = r"user=[a-zA-Z0-9_-]+&password=[\S]+"
+# A "user:" userinfo may hold "/", "#" or "@" in the password, so it runs to the
+# last "@" before the next URL. Anything else stops at the authority end. Group 1
+# is the userinfo and group 2 the rest of the URL.
+REGEX_URL_USERINFO = (
+    r"://((?:[^\s/?#:\[\]]*:(?:(?!://)\S)*|[^\s/?#]+))@((?:(?!://)\S)*)"
+)
+_CREDENTIAL_QUERY_KEYS = (
+    r"(?:user(?:name)?|usr|login|pass(?:word|wd)?|pwd"
+    r"|(?:[a-z_]*_)?token|(?:[a-z_]*_)?secret|client_private|api_?key)"
+)
+REGEX_CREDENTIAL_QUERY_KEY = rf"(?i)[?&]{_CREDENTIAL_QUERY_KEYS}="
+REGEX_CREDENTIAL_QUERY_PARAM = rf"(?i)([?&]{_CREDENTIAL_QUERY_KEYS}=)[^&\s]*"
+REGEX_MASKED_CREDENTIAL = rf"(?i)://\*:\*@|[?&]{_CREDENTIAL_QUERY_KEYS}=\*(?![^&\s])"
 REGEX_JSON = re.compile(r"^\s*\{")
 
 # Known Driver Names
@@ -146,6 +168,7 @@ UPDATE_MODEL_STATE = "update_model_state"
 UPDATE_EMBEDDINGS_REINDEX_PROGRESS = "handle_embeddings_reindex_progress"
 UPDATE_BIRDSEYE_LAYOUT = "update_birdseye_layout"
 UPDATE_JOB_STATE = "update_job_state"
+UPDATE_NOTICE = "update_notice"
 NOTIFICATION_TEST = "notification_test"
 
 # IO Nice Values

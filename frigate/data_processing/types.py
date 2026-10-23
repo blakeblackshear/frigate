@@ -28,6 +28,7 @@ class DataProcessorMetrics:
     object_desc_dps: ValueProxy[float]
     classification_speeds: DictProxy[str, ValueProxy[float]]
     classification_cps: DictProxy[str, ValueProxy[float]]
+    runtime_devices: DictProxy[str, str]
 
     def __init__(self, manager: SyncManager, custom_classification_models: list[str]):
         self.image_embeddings_speed = manager.Value("d", 0.0)
@@ -46,6 +47,7 @@ class DataProcessorMetrics:
         self.object_desc_dps = manager.Value("d", 0.0)
         self.classification_speeds = manager.dict()
         self.classification_cps = manager.dict()
+        self.runtime_devices = manager.dict()
 
         if custom_classification_models:
             for key in custom_classification_models:

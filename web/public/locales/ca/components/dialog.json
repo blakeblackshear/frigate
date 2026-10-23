@@ -60,7 +60,6 @@
       "success": "Exportació inciada amb èxit. Pots veure l'arxiu a la pàgina d'exportacions.",
       "error": {
         "endTimeMustAfterStartTime": "L'hora de finalització ha de ser posterior a l'hora d'inici",
-        "noVaildTimeSelected": "No s'ha seleccionat un rang de temps vàlid",
         "failed": "No s'ha pogut inciar l'exportació: {{error}}",
         "noValidTimeSelected": "No s'ha seleccionat cap interval de temps vàlid"
       },
@@ -135,12 +134,18 @@
         "started_one": "S'ha iniciat l'exportació 1.",
         "started_many": "S'han iniciat {{count}} exportacions.",
         "started_other": "S'han iniciat {{count}} exportacions.",
-        "startedNoCase_one": "S'ha iniciat l'exportació 1.",
-        "startedNoCase_many": "S'han iniciat {{count}} exportacions.",
-        "startedNoCase_other": "S'han iniciat {{count}} exportacions.",
         "partial": "S'han iniciat {{successful}} de {{total}} exportacions. Ha fallat: {{failedItems}}",
         "failed": "No s'han pogut iniciar {{total}} exportacions. Ha fallat: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualitat",
+      "auto": "Automàtic",
+      "main": "Original",
+      "sub": "Baix",
+      "autoDesc": "Utilitza el flux principal i torna al flux de menor qualitat quan el principal no està disponible.",
+      "mainDesc": "Exporta només el flux principal de qualitat original. Faltaran els intervals de temps on el flux principal no està disponible.",
+      "subDesc": "Exporta només el subflux de menor qualitat. Faltaran els intervals de temps on el subflux no està disponible."
     }
   },
   "streaming": {
@@ -148,8 +153,7 @@
     "restreaming": {
       "disabled": "La retransmissió no està habilitada per a aquesta càmera.",
       "desc": {
-        "title": "Configurar go2rtc per a àudio i opcions addicionals de visualització en directe per a aquesta càmera.",
-        "readTheDocumentation": "Llegir la documentació"
+        "title": "Configurar go2rtc per a àudio i opcions addicionals de visualització en directe per a aquesta càmera."
       }
     },
     "showStats": {
@@ -177,7 +181,8 @@
       "deleteNow": "Suprimir ara",
       "export": "Exportar",
       "markAsReviewed": "Marcar com a revisat",
-      "markAsUnreviewed": "Marcar com no revisat"
+      "markAsUnreviewed": "Marcar com no revisat",
+      "generateDescription": "Genera la descripció"
     },
     "confirmDelete": {
       "title": "Confirmar la supressió",
@@ -196,6 +201,12 @@
       "custom": "Marca horària personalitzada",
       "button": "Comparteix l'URL de la marca horària",
       "shareTitle": "Marca de temps de revisió de Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "S'ha sol·licitat una descripció de IA Generativa per a aquest element de revisió.",
+        "error": "No s'ha pogut sol·licitar la descripció: {{error}}"
+      }
     }
   },
   "imagePicker": {

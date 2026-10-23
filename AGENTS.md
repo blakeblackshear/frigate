@@ -160,7 +160,7 @@ When reviewing code, do NOT comment on:
 
 ### Code Quality
 
-- **Linting**: ESLint (see `web/.eslintrc.cjs`)
+- **Linting**: ESLint (see `web/eslint.config.js`)
 - **Formatting**: Prettier with Tailwind CSS plugin
 - **Type Safety**: TypeScript strict mode enabled
 

@@ -100,7 +100,7 @@ VS Code supports JSON schemas for automatically validating configuration files. 
 
 ## Environment Variable Substitution
 
-Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the [reference config](./advanced/reference.md). For example, the following values can be replaced at runtime by using environment variables:
+Frigate supports the use of environment variables starting with `FRIGATE_` **only** where specifically indicated in the [reference config](./advanced/reference.md). See [substitution sources and precedence](./advanced/system.md#substitution-sources-and-precedence) for where those values can come from, including `secrets.yaml`. For example, the following values can be replaced at runtime by using environment variables:
 
 ```yaml
 mqtt:
@@ -154,7 +154,7 @@ Here are some common starter configuration examples. These can be configured thr
 
 1. Navigate to <NavPath path="Settings > System > MQTT" /> and configure the MQTT connection to your Home Assistant Mosquitto broker
 2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `Raspberry Pi (H.264)`
-3. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
+3. Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown
 4. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
 5. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
 6. Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and add your camera with the appropriate RTSP stream URL
@@ -172,10 +172,9 @@ mqtt:
 ffmpeg:
   hwaccel_args: preset-rpi-64-h264
 
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 
 record:
   enabled: True
@@ -233,7 +232,7 @@ cameras:
 
 1. Navigate to <NavPath path="Settings > System > MQTT" /> and set **Enable MQTT** to off
 2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`
-3. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `EdgeTPU` and **Device** `usb`
+3. Navigate to <NavPath path="Settings > System > Detection models" /> and select **Coral EdgeTPU (USB)** from the **Hardware** dropdown
 4. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
 5. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
 6. Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and add your camera with the appropriate RTSP stream URL
@@ -249,10 +248,9 @@ mqtt:
 ffmpeg:
   hwaccel_args: preset-vaapi
 
-detectors:
-  coral:
-    type: edgetpu
-    device: usb
+models:
+  - devices:
+      - edgetpu:usb
 
 record:
   enabled: True
@@ -310,8 +308,8 @@ cameras:
 
 1. Navigate to <NavPath path="Settings > System > MQTT" /> and configure the connection to your MQTT broker
 2. Navigate to <NavPath path="Settings > Global configuration > FFmpeg" /> and set **Hardware acceleration arguments** to `VAAPI (Intel/AMD GPU)`
-3. Navigate to <NavPath path="Settings > System > Detectors and model" /> and add a detector with **Type** `openvino` and **Device** `AUTO`
-4. On the same page, in the **Custom Model** tab, configure the OpenVINO model path and settings
+3. Navigate to <NavPath path="Settings > System > Detection models" /> and select **Intel GPU** from the **Hardware** dropdown
+4. On the same model, open the **Custom Model** tab and configure the OpenVINO model path and settings
 5. Navigate to <NavPath path="Settings > Global configuration > Recording" /> and set **Enable recording** to on, **Motion retention > Retention days** to `7`, **Alert retention > Event retention > Retention days** to `30`, **Alert retention > Event retention > Retention mode** to `motion`, **Detection retention > Event retention > Retention days** to `30`, **Detection retention > Event retention > Retention mode** to `motion`
 6. Navigate to <NavPath path="Settings > Global configuration > Snapshots" /> and set **Enable snapshots** to on, **Snapshot retention > Default retention** to `30`
 7. Navigate to <NavPath path="Settings > Global configuration > Camera management" /> and add your camera with the appropriate RTSP stream URL
@@ -329,15 +327,12 @@ mqtt:
 ffmpeg:
   hwaccel_args: preset-vaapi
 
-detectors:
-  ov:
-    type: openvino
-    device: AUTO
-
-model:
-  width: 300
-  height: 300
-  input_tensor: nhwc
+models:
+  - devices:
+      - openvino:AUTO
+    width: 300
+    height: 300
+    input_tensor: nhwc
   input_pixel_format: bgr
   path: /openvino-model/ssdlite_mobilenet_v2.xml
   labelmap_path: /openvino-model/coco_91cl_bkgr.txt

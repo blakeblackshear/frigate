@@ -4,19 +4,20 @@
 
 set -o errexit -o nounset -o pipefail
 
-# opt out of openvino telemetry
-if [ -e /usr/local/bin/opt_in_out ]; then
-  /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1
+runs_as_root=0
+if [[ "$(id -u)" -eq 0 ]]; then
+    if [[ "${FRIGATE_RUN_AS_ROOT:-false}" == "true" ]] || /usr/local/bin/service-runs-as-root frigate; then
+        runs_as_root=1
+    fi
 fi
-
-# Logs should be sent to stdout so that s6 can collect them
 
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
+# Runs as root with root's HOME and LD_LIBRARY_PATH; -I skips user site-packages
 function set_libva_version() {
     local ffmpeg_path
-    ffmpeg_path=$(python3 /usr/local/ffmpeg/get_ffmpeg_path.py)
+    ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py)
     LIBAVFORMAT_VERSION_MAJOR=$("$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+")
     export LIBAVFORMAT_VERSION_MAJOR
 }
@@ -24,10 +25,32 @@ function set_libva_version() {
 echo "[INFO] Preparing Frigate..."
 set_libva_version
 
+# HOME=/root survives s6-setuidgid, so any run that is not root gets
+# HOME=/config explicitly. The runtime user owns /config, so these paths go
+# only to the service process, never to root. Detector runtimes installed at
+# first start (pip install --user) live under $HOME/.local.
+run_as=()
+runtime_home="${HOME}"
+if [[ "$runs_as_root" -eq 0 ]]; then
+    runtime_home=/config
+    if [[ "$(id -u)" -eq 0 ]]; then
+        run_as=(s6-setuidgid frigate)
+    fi
+fi
+run_as+=(env
+    "HOME=${runtime_home}"
+    "LD_LIBRARY_PATH=${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}${runtime_home}/.local/lib"
+    "PATH=${PATH}:${runtime_home}/.local/bin")
+
+# opt out of openvino telemetry; the marker lands under the service's HOME
+if [ -e /usr/local/bin/opt_in_out ]; then
+  "${run_as[@]}" /usr/local/bin/opt_in_out --opt_out > /dev/null 2>&1 || true
+fi
+
 echo "[INFO] Starting Frigate..."
 
 cd /opt/frigate || echo "[ERROR] Failed to change working directory to /opt/frigate"
 
 # Replace the bash process with the Frigate process, redirecting stderr to stdout
 exec 2>&1
-exec python3 -u -m frigate
+exec "${run_as[@]}" python3 -u -m frigate

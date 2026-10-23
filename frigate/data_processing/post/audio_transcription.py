@@ -4,12 +4,14 @@ import logging
 import os
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from peewee import DoesNotExist
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
+from frigate.config.classification import AudioTranscriptionModelEnum
 from frigate.const import (
     CACHE_DIR,
     MODEL_CACHE_DIR,
@@ -18,8 +20,13 @@ from frigate.const import (
 )
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.embeddings.embeddings import Embeddings
+from frigate.genai.manager import GenAIClientManager
 from frigate.types import TrackedObjectUpdateTypesEnum
-from frigate.util.audio import get_audio_from_recording
+from frigate.util.audio import (
+    clean_transcript,
+    get_audio_from_recording,
+    resolve_language,
+)
 
 from ..types import DataProcessorMetrics
 from .api import PostProcessorApi
@@ -34,15 +41,25 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         requestor: InterProcessRequestor,
         embeddings: Embeddings,
         metrics: DataProcessorMetrics,
+        genai_manager: GenAIClientManager | None = None,
     ):
         super().__init__(config, metrics, None)
         self.config = config
         self.requestor = requestor
         self.embeddings = embeddings
+        self.genai_manager = genai_manager
         self.recognizer = None
         self.transcription_lock = threading.Lock()
         self.transcription_thread: threading.Thread | None = None
         self.transcription_running = False
+        self._use_genai = not isinstance(
+            config.audio_transcription.model, AudioTranscriptionModelEnum
+        )
+
+        if self._use_genai:
+            # never build the local recognizer on the GenAI path; WhisperModel
+            # downloads several hundred MB on first use
+            return
 
         # faster-whisper handles model downloading automatically
         self.model_path = os.path.join(MODEL_CACHE_DIR, "whisper")
@@ -83,6 +100,10 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         """
         event_id = data["event_id"]
         camera_name = data["camera"]
+        camera_config = self.config.cameras.get(camera_name)
+
+        if camera_config is None:
+            return
 
         if data_type == PostProcessDataEnum.recording:
             start_ts = data["frame_time"]
@@ -104,7 +125,7 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
 
         try:
             audio_data = get_audio_from_recording(
-                self.config.cameras[camera_name].ffmpeg,
+                camera_config.ffmpeg,
                 camera_name,
                 start_ts,
                 end_ts,
@@ -143,24 +164,48 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
             logger.error(f"Error in audio transcription post-processing: {e}")
 
     def __transcribe_audio(self, audio_data: bytes) -> str | None:
+        """Transcribe WAV audio data with the configured backend."""
+        if self._use_genai:
+            return self.__transcribe_audio_genai(audio_data)
+
+        return self.__transcribe_audio_whisper(audio_data)
+
+    def __transcribe_audio_genai(self, audio_data: bytes) -> str | None:
+        """Hand the WAV bytes to the GenAI provider holding the transcribe role."""
+        client = self.genai_manager.transcribe_client if self.genai_manager else None
+
+        if not client:
+            logger.error(
+                "audio_transcription.model is '%s' (GenAI provider) but no transcribe "
+                "client is configured. Ensure the GenAI provider has 'transcribe' in its roles",
+                self.config.audio_transcription.model,
+            )
+            return None
+
+        text = client.transcribe(
+            audio_data,
+            language=resolve_language(self.config.audio_transcription.language),
+        )
+        return clean_transcript(text) or None
+
+    def __transcribe_audio_whisper(self, audio_data: bytes) -> str | None:
         """Transcribe WAV audio data using faster-whisper."""
         if not self.recognizer:
             logger.debug("Recognizer not initialized")
             return None
 
-        try:  # type: ignore[unreachable]
-            # Save audio data to a temporary wav (faster-whisper expects a file)
-            temp_wav = os.path.join(CACHE_DIR, f"temp_audio_{int(time.time())}.wav")
+        # Save audio data to a temporary wav (faster-whisper expects a file)
+        temp_wav = os.path.join(CACHE_DIR, f"temp_audio_{int(time.time())}.wav")  # type: ignore[unreachable]
+
+        try:
             with open(temp_wav, "wb") as f:
                 f.write(audio_data)
 
             segments, info = self.recognizer.transcribe(
                 temp_wav,
-                language=self.config.audio_transcription.language,
+                language=resolve_language(self.config.audio_transcription.language),
                 beam_size=5,
             )
-
-            os.remove(temp_wav)
 
             # Combine all segment texts
             text = " ".join(segment.text.strip() for segment in segments)
@@ -177,6 +222,8 @@ class AudioTranscriptionPostProcessor(PostProcessorApi):
         except Exception as e:
             logger.error(f"Error transcribing audio: {e}")
             return None
+        finally:
+            Path(temp_wav).unlink(missing_ok=True)
 
     def _transcription_wrapper(self, event: dict[str, Any]) -> None:
         """Wrapper to run transcription and reset running flag when done."""

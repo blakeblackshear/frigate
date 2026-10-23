@@ -1,0 +1,533 @@
+"""Tests for the device each model runner reports after loading."""
+
+import os
+import sys
+import tempfile
+import threading
+import unittest
+from unittest.mock import MagicMock, patch
+
+from frigate.detectors import detection_runners, hardware
+from frigate.detectors.detection_runners import (
+    CudaGraphRunner,
+    ONNXModelRunner,
+    OpenVINOModelRunner,
+    RKNNModelRunner,
+    get_optimized_runner,
+    loaded_devices,
+    record_loaded_device,
+    snapshot_loaded_devices,
+)
+from frigate.util import model as model_util
+
+
+class TestRunnerDeviceName(unittest.TestCase):
+    def _onnx(self, providers: list[str]) -> ONNXModelRunner:
+        session = MagicMock()
+        session.get_providers.return_value = providers
+        return ONNXModelRunner(session, "arcface")
+
+    def test_onnx_provider_names(self):
+        self.assertEqual(
+            self._onnx(["CUDAExecutionProvider", "CPUExecutionProvider"]).device_name,
+            "CUDA",
+        )
+        self.assertEqual(
+            self._onnx(["TensorrtExecutionProvider"]).device_name, "TensorRT"
+        )
+        self.assertEqual(
+            self._onnx(["MIGraphXExecutionProvider"]).device_name, "MIGraphX"
+        )
+        self.assertEqual(
+            self._onnx(["OpenVINOExecutionProvider"]).device_name, "OpenVINO"
+        )
+        self.assertEqual(self._onnx(["CPUExecutionProvider"]).device_name, "CPU")
+        self.assertEqual(self._onnx(["LighterANE"]).device_name, "Neural Engine")
+        self.assertEqual(self._onnx(["ROCMExecutionProvider"]).device_name, "ROCM")
+        self.assertEqual(self._onnx([]).device_name, "CPU")
+
+    def test_cuda_graph_runner(self):
+        runner = CudaGraphRunner(MagicMock(), 0)
+        self.assertEqual(runner.device_name, "CUDA")
+
+    def test_openvino_reports_compiled_device(self):
+        runner = OpenVINOModelRunner.__new__(OpenVINOModelRunner)
+        runner.compiled_device = "GPU"
+        runner.compiled_model = MagicMock()
+        self.assertEqual(runner.device_name, "OpenVINO GPU")
+
+    def test_openvino_auto_resolves_execution_device(self):
+        runner = OpenVINOModelRunner.__new__(OpenVINOModelRunner)
+        runner.compiled_device = "AUTO"
+        runner.compiled_model = MagicMock()
+        runner.compiled_model.get_property.return_value = ["GPU.0"]
+        self.assertEqual(runner.device_name, "OpenVINO GPU.0")
+        runner.compiled_model.get_property.side_effect = RuntimeError("no prop")
+        self.assertEqual(runner.device_name, "OpenVINO AUTO")
+
+    def test_rknn(self):
+        runner = RKNNModelRunner.__new__(RKNNModelRunner)
+        self.assertEqual(runner.device_name, "RKNN")
+
+
+class TestLoadRegistry(unittest.TestCase):
+    def setUp(self):
+        loaded_devices.clear()
+
+    def test_get_optimized_runner_records_device(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners, "is_openvino_gpu_npu_available", return_value=False
+            ),
+            patch.object(
+                detection_runners.ort, "InferenceSession", return_value=session
+            ),
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=None
+            ),
+        ):
+            runner = get_optimized_runner("/models/arcface.onnx", "GPU", "arcface")
+
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(loaded_devices["/models/arcface.onnx"], ("arcface", "CPU"))
+
+    def test_only_cpu_enrichment_sessions_disable_spinning(self):
+        for provider, expected in [
+            ("CPUExecutionProvider", "0"),
+            ("CUDAExecutionProvider", None),
+        ]:
+            with (
+                self.subTest(provider=provider),
+                patch.object(
+                    detection_runners, "is_rknn_compatible", return_value=False
+                ),
+                patch.object(
+                    detection_runners,
+                    "get_ort_providers",
+                    return_value=([provider], [{"device_id": 0}]),
+                ),
+                patch.object(
+                    detection_runners,
+                    "is_openvino_gpu_npu_available",
+                    return_value=False,
+                ),
+                patch.object(
+                    detection_runners, "get_lighter_ane_devices", return_value=[]
+                ),
+                patch.object(detection_runners.ort, "InferenceSession") as session,
+            ):
+                session.return_value.get_providers.return_value = [provider]
+
+                # paddleocr skips the CUDA graph runner, which takes no options
+                get_optimized_runner("/models/paddleocr.onnx", "GPU", "paddleocr")
+
+                options = session.call_args.kwargs["sess_options"]
+
+                try:
+                    spinning = options.get_session_config_entry(
+                        "session.intra_op.allow_spinning"
+                    )
+                except RuntimeError:
+                    spinning = None
+
+                self.assertEqual(spinning, expected)
+
+
+class TestLoadedDeviceSnapshot(unittest.TestCase):
+    def setUp(self):
+        loaded_devices.clear()
+
+    def test_record_and_snapshot_copy(self):
+        record_loaded_device("/m/a.onnx", "arcface", "CUDA")
+
+        snapshot = snapshot_loaded_devices()
+        self.assertEqual(snapshot, {"/m/a.onnx": ("arcface", "CUDA")})
+
+        # a copy, so a load on another thread cannot disturb a fold in progress
+        record_loaded_device("/m/b.onnx", "jina_v1", "CPU")
+        self.assertNotIn("/m/b.onnx", snapshot)
+        self.assertIn("/m/b.onnx", loaded_devices)
+
+    def test_snapshot_survives_concurrent_inserts(self):
+        stop = threading.Event()
+
+        def writer() -> None:
+            i = 0
+            while not stop.is_set():
+                record_loaded_device(f"/m/{i}.onnx", "paddleocr", "CPU")
+                i += 1
+
+        thread = threading.Thread(target=writer, daemon=True)
+        thread.start()
+        try:
+            for _ in range(200):
+                for _entry in snapshot_loaded_devices().values():
+                    pass
+        finally:
+            stop.set()
+            thread.join(timeout=5)
+
+
+class TestLighterANE(unittest.TestCase):
+    """lighter's plugin provider, picked up by the ONNX session setup."""
+
+    def setUp(self):
+        loaded_devices.clear()
+        self.root = tempfile.TemporaryDirectory()
+        self.addCleanup(self.root.cleanup)
+        self.library = os.path.join(self.root.name, "liblighter_ane_ep.so")
+        env = patch.dict(os.environ, {"LIGHTER_ANE_EP": self.library})
+        env.start()
+        self.addCleanup(env.stop)
+
+    def _device(self) -> MagicMock:
+        device = MagicMock()
+        device.ep_name = "LighterANE"
+        return device
+
+    def test_no_devices_without_the_library(self):
+        with patch.object(detection_runners.ort, "get_ep_devices") as get_ep_devices:
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [])
+        get_ep_devices.assert_not_called()
+
+    def test_the_provider_is_registered_once(self):
+        open(self.library, "w").close()
+        device = self._device()
+        other = MagicMock()
+        other.ep_name = "CPUExecutionProvider"
+
+        with (
+            patch.object(
+                detection_runners.ort,
+                "get_ep_devices",
+                side_effect=[[other], [other, device], [other, device]],
+            ),
+            patch.object(
+                detection_runners.ort, "register_execution_provider_library"
+            ) as register,
+        ):
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [device])
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [device])
+
+        register.assert_called_once_with("LighterANE", self.library)
+
+    def test_a_provider_that_will_not_load_is_skipped(self):
+        open(self.library, "w").close()
+
+        with (
+            patch.object(detection_runners.ort, "get_ep_devices", return_value=[]),
+            patch.object(
+                detection_runners.ort,
+                "register_execution_provider_library",
+                side_effect=RuntimeError("not a provider"),
+            ),
+        ):
+            self.assertEqual(detection_runners.get_lighter_ane_devices(), [])
+
+    def test_the_session_runs_on_the_neural_engine(self):
+        device = self._device()
+        session = MagicMock()
+        session.get_providers.return_value = ["LighterANE", "CPUExecutionProvider"]
+        options = MagicMock()
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[device]
+            ),
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=options
+            ),
+            patch.object(
+                detection_runners.ort, "InferenceSession", return_value=session
+            ) as inference_session,
+        ):
+            runner = get_optimized_runner("/models/yolo.onnx", "AUTO", "yolo-generic")
+
+        options.add_provider_for_devices.assert_called_once_with([device], {})
+        inference_session.assert_called_once_with(
+            "/models/yolo.onnx", sess_options=options
+        )
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(
+            loaded_devices["/models/yolo.onnx"], ("yolo-generic", "Neural Engine")
+        )
+
+    def test_a_model_the_neural_engine_cannot_load_uses_the_default_providers(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[MagicMock()]
+            ),
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners, "is_openvino_gpu_npu_available", return_value=False
+            ),
+            patch.object(
+                detection_runners.ort,
+                "InferenceSession",
+                side_effect=[RuntimeError("unsupported"), session],
+            ) as inference_session,
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=MagicMock()
+            ),
+            self.assertLogs(detection_runners.logger, level="WARNING"),
+        ):
+            runner = get_optimized_runner("/models/jina.onnx", "AUTO", "jina-v2")
+
+        self.assertEqual(inference_session.call_count, 2)
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(loaded_devices["/models/jina.onnx"], ("jina-v2", "CPU"))
+
+    def test_a_cpu_model_stays_on_the_cpu(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(
+                detection_runners, "get_lighter_ane_devices", return_value=[MagicMock()]
+            ) as ane,
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners.ort, "InferenceSession", return_value=session
+            ),
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=None
+            ),
+        ):
+            get_optimized_runner("/models/arcface.onnx", "CPU", "arcface")
+
+        ane.assert_not_called()
+
+
+class TestMIGraphX(unittest.TestCase):
+    """AMD's MIGraphX plugin provider, selected through its devices in the ROCm image."""
+
+    def setUp(self):
+        loaded_devices.clear()
+        self.root = tempfile.TemporaryDirectory()
+        self.addCleanup(self.root.cleanup)
+
+        for patcher in (
+            patch.object(hardware, "detect_amd_gpu", return_value=MagicMock()),
+            patch.object(detection_runners, "MODEL_CACHE_DIR", self.root.name),
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(detection_runners, "get_lighter_ane_devices", return_value=[]),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+        self.plugin = MagicMock()
+        self.plugin.get_library_path.return_value = "/site/libmigraphx-ep.so"
+
+    def _device(self) -> MagicMock:
+        device = MagicMock()
+        device.ep_name = "MIGraphXExecutionProvider"
+        return device
+
+    def test_no_devices_outside_the_rocm_image(self):
+        with (
+            patch.dict(sys.modules, {"onnxruntime_ep_migraphx": None}),
+            patch.object(
+                detection_runners.ort, "register_execution_provider_library"
+            ) as register,
+        ):
+            self.assertEqual(detection_runners.get_migraphx_devices(), [])
+            self.assertEqual(detection_runners.get_migraphx_devices(), [])
+
+        register.assert_not_called()
+
+    def test_no_devices_without_an_amd_gpu(self):
+        with (
+            patch.dict(sys.modules, {"onnxruntime_ep_migraphx": self.plugin}),
+            patch.object(hardware, "detect_amd_gpu", return_value=None),
+            patch.object(detection_runners.ort, "get_ep_devices") as get_ep_devices,
+            patch.object(
+                detection_runners.ort, "register_execution_provider_library"
+            ) as register,
+        ):
+            self.assertEqual(detection_runners.get_migraphx_devices(), [])
+
+        get_ep_devices.assert_not_called()
+        register.assert_not_called()
+
+    def test_the_provider_is_registered_once(self):
+        device = self._device()
+        other = MagicMock()
+        other.ep_name = "CPUExecutionProvider"
+
+        with (
+            patch.dict(sys.modules, {"onnxruntime_ep_migraphx": self.plugin}),
+            patch.object(
+                detection_runners.ort,
+                "get_ep_devices",
+                side_effect=[[other], [other, device], [other, device]],
+            ),
+            patch.object(
+                detection_runners.ort, "register_execution_provider_library"
+            ) as register,
+        ):
+            self.assertEqual(detection_runners.get_migraphx_devices(), [device])
+            self.assertEqual(detection_runners.get_migraphx_devices(), [device])
+
+        register.assert_called_once_with(
+            "MIGraphXExecutionProvider", "/site/libmigraphx-ep.so"
+        )
+
+    def test_a_provider_that_will_not_load_is_skipped(self):
+        with (
+            patch.dict(sys.modules, {"onnxruntime_ep_migraphx": self.plugin}),
+            patch.object(detection_runners.ort, "get_ep_devices", return_value=[]),
+            patch.object(
+                detection_runners.ort,
+                "register_execution_provider_library",
+                side_effect=RuntimeError("libamdhip64.so.7: cannot open shared object"),
+            ),
+            self.assertLogs(detection_runners.logger, level="WARNING"),
+        ):
+            self.assertEqual(detection_runners.get_migraphx_devices(), [])
+
+    def test_the_session_runs_on_the_first_gpu(self):
+        device = self._device()
+        session = MagicMock()
+        session.get_providers.return_value = [
+            "MIGraphXExecutionProvider",
+            "CPUExecutionProvider",
+        ]
+        options = MagicMock()
+
+        with (
+            patch.object(
+                detection_runners,
+                "get_migraphx_devices",
+                return_value=[device, self._device()],
+            ),
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=options
+            ),
+            patch.object(
+                detection_runners.ort, "InferenceSession", return_value=session
+            ) as inference_session,
+        ):
+            runner = get_optimized_runner("/models/yolo.onnx", "AUTO", "yolo-generic")
+
+        cache_dir = os.path.join(self.root.name, "migraphx/ort")
+        options.add_provider_for_devices.assert_called_once_with(
+            [device], {"cache_dir": cache_dir}
+        )
+        inference_session.assert_called_once_with(
+            "/models/yolo.onnx", sess_options=options
+        )
+        self.assertTrue(os.path.isdir(cache_dir))
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(
+            loaded_devices["/models/yolo.onnx"], ("yolo-generic", "MIGraphX")
+        )
+
+    def test_a_model_migraphx_cannot_load_uses_the_default_providers(self):
+        session = MagicMock()
+        session.get_providers.return_value = ["CPUExecutionProvider"]
+
+        with (
+            patch.object(
+                detection_runners,
+                "get_migraphx_devices",
+                return_value=[self._device()],
+            ),
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CPUExecutionProvider"], [{}]),
+            ),
+            patch.object(
+                detection_runners, "is_openvino_gpu_npu_available", return_value=False
+            ),
+            patch.object(
+                detection_runners.ort,
+                "InferenceSession",
+                side_effect=[RuntimeError("compile failed"), session],
+            ) as inference_session,
+            patch.object(
+                detection_runners, "get_ort_session_options", return_value=MagicMock()
+            ),
+            self.assertLogs(detection_runners.logger, level="WARNING"),
+        ):
+            runner = get_optimized_runner("/models/arcface.onnx", "AUTO", "arcface")
+
+        self.assertEqual(inference_session.call_count, 2)
+        self.assertIsInstance(runner, ONNXModelRunner)
+        self.assertEqual(loaded_devices["/models/arcface.onnx"], ("arcface", "CPU"))
+
+    def test_unsupported_models_and_cpu_models_skip_migraphx(self):
+        for model_path, device, model_type in [
+            ("/models/paddleocr.onnx", "AUTO", "paddleocr"),
+            ("/models/dfine.onnx", "AUTO", "dfine"),
+            ("/models/yolo.onnx", "CPU", "yolo-generic"),
+        ]:
+            session = MagicMock()
+            session.get_providers.return_value = ["CPUExecutionProvider"]
+
+            with (
+                self.subTest(model_type=model_type, device=device),
+                patch.object(
+                    detection_runners,
+                    "get_migraphx_devices",
+                    return_value=[self._device()],
+                ) as migraphx,
+                patch.object(
+                    detection_runners,
+                    "get_ort_providers",
+                    return_value=(["CPUExecutionProvider"], [{}]),
+                ),
+                patch.object(
+                    detection_runners,
+                    "is_openvino_gpu_npu_available",
+                    return_value=False,
+                ),
+                patch.object(
+                    detection_runners.ort, "InferenceSession", return_value=session
+                ),
+                patch.object(
+                    detection_runners, "get_ort_session_options", return_value=None
+                ),
+            ):
+                get_optimized_runner(model_path, device, model_type)
+
+            migraphx.assert_not_called()
+            self.assertEqual(loaded_devices[model_path], (model_type, "CPU"))
+
+    def test_migraphx_is_never_requested_by_name(self):
+        with patch.object(
+            model_util.ort,
+            "get_available_providers",
+            return_value=[
+                "AzureExecutionProvider",
+                "CPUExecutionProvider",
+                "MIGraphXExecutionProvider",
+            ],
+        ):
+            providers, options = model_util.get_ort_providers()
+
+        self.assertEqual(providers, ["CPUExecutionProvider"])
+        self.assertEqual(options, [{"enable_cpu_mem_arena": False}])

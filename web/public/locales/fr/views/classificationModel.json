@@ -194,6 +194,5 @@
     "noNewImages": "Aucune nouvelle image pour l'entraînement. Veuillez d'abord classifier plus d'images dans le jeu de données.",
     "modelNotReady": "Le modèle n'est pas prêt pour l'entraînement.",
     "noChanges": "Aucune modification du jeu de données depuis le dernier entraînement"
-  },
-  "none": "Aucun"
+  }
 }

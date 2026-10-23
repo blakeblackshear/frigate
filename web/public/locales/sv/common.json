@@ -126,7 +126,10 @@
     "saveAll": "Spara alla",
     "savingAll": "Sparar alla…",
     "retry": "Försök igen",
-    "undoAll": "Ångra alla"
+    "undoAll": "Ångra alla",
+    "expand": "Expandera",
+    "collapse": "Kollapsa",
+    "reload": "Ladda om"
   },
   "menu": {
     "language": {
@@ -320,5 +323,23 @@
   "validation_errors": "Valideringsfel",
   "credentialField": {
     "savedPlaceholder": "Sparat – lämna tomt för att behålla det aktuella värdet"
+  },
+  "error": {
+    "title": "Denna sida slutade fungera",
+    "partial": "Delar av gränssnittet slutade fungera.",
+    "copyDetails": "Kopiera detaljer",
+    "copyFailed": "Kunde inte kopiera detaljer till klippbordet"
+  },
+  "commandMenu": {
+    "description": "Sök sidor, kameror, inställningar och åtgärder",
+    "placeholder": "Sök sidor, kameror, inställningar och åtgärder",
+    "empty": "Inga träffar",
+    "section": {
+      "pages": "Sidor",
+      "cameras": "Kameror",
+      "cameraGroups": "",
+      "settings": "Inställningar",
+      "actions": "Åtgärder"
+    }
   }
 }

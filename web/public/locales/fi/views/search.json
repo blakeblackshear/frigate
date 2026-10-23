@@ -1,5 +1,5 @@
 {
-  "search": "Etsi",
+  "search": "Haku",
   "savedSearches": "Tallennetut haut",
   "searchFor": "Etsi {{inputValue}}",
   "button": {
@@ -27,7 +27,7 @@
       "recognized_license_plate": "Tunnistettu rekisterikilpi",
       "has_clip": "Leike löytyy",
       "has_snapshot": "Tilannekuva löytyy",
-      "attributes": "Muuttujat"
+      "attributes": "Attribuutit"
     },
     "searchType": {
       "thumbnail": "Kuvake",
@@ -54,7 +54,7 @@
         "step4": "Päivämääräsuodattimet (ennen: ja jälkeen:) käyttävät {{DateFormat}} muotoa.",
         "step5": "Aikavälin suodatin käyttää {{exampleTime}} muotoa."
       },
-      "title": "Tekstisuodattimien käyttö"
+      "title": "Kuinka käyttää tekstisuodattimia"
     },
     "header": {
       "currentFilterType": "Suodata arvoja",

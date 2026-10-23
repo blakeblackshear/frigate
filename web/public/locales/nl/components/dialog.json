@@ -16,16 +16,6 @@
         "desc": "Objecten op locaties die je wilt vermijden, zijn geen vals-positieven. Als je ze als vals-positieven indient, brengt dit het model in verwarring."
       },
       "review": {
-        "true": {
-          "true_one": "Dit is een {{label}}",
-          "true_other": "Dit zijn {{label}}",
-          "label": "Bevestig dit label voor Frigate Plus"
-        },
-        "false": {
-          "false_one": "Dit is geen {{label}}",
-          "false_other": "Dit zijn geen {{label}}",
-          "label": "Bevestig dit label niet voor Frigate Plus"
-        },
         "state": {
           "submitted": "Ingediend"
         },
@@ -66,7 +56,6 @@
     "toast": {
       "error": {
         "failed": "Exporter naar wachtrij mislukt: {{error}}",
-        "noVaildTimeSelected": "Geen geldig tijdsbereik geselecteerd",
         "endTimeMustAfterStartTime": "Eindtijd moet na starttijd zijn",
         "noValidTimeSelected": "Geen geldige tijd voor geselecteerd bereik"
       },
@@ -131,8 +120,6 @@
       "description": "Exporteer alle geselecteerde reviews. Alle exports worden samengevoegd in één case.",
       "descriptionNoCase": "Exporteer elke geselecteerde review.",
       "toast": {
-        "startedNoCase_one": "1 export gestart.",
-        "startedNoCase_other": "{{count}} Exports gestart.",
         "partial": "{{successful}} van {{total}} exports gestart. Mislukte items: {{failedItems}}",
         "failed": "Het starten van {{total}} exports is mislukt. Mislukt: {{failedItems}}",
         "started_one": "1 export gestart. Zaak wordt aangemaakt.",
@@ -142,14 +129,22 @@
       "exportButton_one": "Exporteer 1 revisie",
       "exportButton_other": "Exporteer {{count}} revisies",
       "caseNamePlaceholder": "Inspecteer export - {{date}}"
+    },
+    "stream": {
+      "autoDesc": "Gebruikt de hoofdstream en schakelt over naar de substream met lagere kwaliteit als de hoofdstream niet beschikbaar is.",
+      "mainDesc": "Exporteert alleen de hoofdstream in de oorspronkelijke kwaliteit. Periodes waarin de hoofdstream niet beschikbaar is ontbreken in de export.",
+      "subDesc": "Exporteert alleen de substream met lagere kwaliteit. Periodes waarin de substream niet beschikbaar is ontbreken in de export.",
+      "label": "Kwaliteit",
+      "auto": "Auto",
+      "main": "Orgineel",
+      "sub": "Laag"
     }
   },
   "streaming": {
     "label": "Stream",
     "restreaming": {
       "desc": {
-        "title": "Stel go2rtc in voor extra liveweergaveopties en audio voor deze camera.",
-        "readTheDocumentation": "Lees de documentatie"
+        "title": "Stel go2rtc in voor extra liveweergaveopties en audio voor deze camera."
       },
       "disabled": "Herstreamen is niet ingeschakeld voor deze camera."
     },
@@ -178,7 +173,8 @@
       "deleteNow": "Verwijder nu",
       "export": "Exporteren",
       "markAsReviewed": "Markeren als beoordeeld",
-      "markAsUnreviewed": "Markeren als niet beoordeeld"
+      "markAsUnreviewed": "Markeren als niet beoordeeld",
+      "generateDescription": "Beschrijving genereren"
     },
     "confirmDelete": {
       "desc": {
@@ -197,6 +193,12 @@
       "custom": "Aangepaste tijdstempel",
       "button": "Deel tijdstempel URL",
       "shareTitle": "Frigate Beoordelingstijdstempel: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Er is een AI-beschrijving aangevraagd voor dit item.",
+        "error": "Aanvragen van beschrijving mislukt: {{error}}"
+      }
     }
   },
   "imagePicker": {

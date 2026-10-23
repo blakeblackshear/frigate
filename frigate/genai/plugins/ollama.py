@@ -7,6 +7,7 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import numpy as np
 from httpx import RemoteProtocolError, TimeoutException
 from ollama import AsyncClient as OllamaAsyncClient
 from ollama import Client as ApiClient
@@ -14,7 +15,11 @@ from ollama import ResponseError
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import parse_tool_calls_from_message
+from frigate.genai.utils import (
+    interleave_images,
+    parse_tool_calls_from_message,
+    to_jpeg,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +55,28 @@ def _extract_ollama_stats(response: Any) -> dict[str, Any] | None:
     return stats or None
 
 
+# Ollama replaces each occurrence of this marker in a message, in order, with
+# the next image from the message's images list. Without markers it puts every
+# image before the text.
+IMAGE_PLACEHOLDER = "[img]"
+
+
+def _flatten_parts(parts: list[str | bytes]) -> tuple[str, list[bytes] | None]:
+    """Collapse ordered text and image parts into Ollama's (content, images)
+    shape, marking where each image goes so the order survives."""
+    text: list[str] = []
+    images: list[bytes] = []
+
+    for part in parts:
+        if isinstance(part, bytes):
+            text.append(IMAGE_PLACEHOLDER)
+            images.append(part)
+        elif part:
+            text.append(part)
+
+    return "\n".join(text), (images or None)
+
+
 def _normalize_multimodal_content(
     content: Any,
 ) -> tuple[str | None, list[bytes] | None]:
@@ -58,13 +85,13 @@ def _normalize_multimodal_content(
     The chat API constructs user messages with content as a list of
     ``{"type": "text"}`` and ``{"type": "image_url"}`` parts when a tool
     returns a live frame. Ollama's SDK requires content to be a string and
-    images to be passed in a separate field, so we extract each.
+    images to be passed in a separate field, so images are pulled out and
+    their positions marked with placeholders.
     """
     if not isinstance(content, list):
         return content, None
 
-    text_parts: list[str] = []
-    images: list[bytes] = []
+    parts: list[str | bytes] = []
     for part in content:
         if not isinstance(part, dict):
             continue
@@ -72,17 +99,20 @@ def _normalize_multimodal_content(
         if part_type == "text":
             text = part.get("text")
             if text:
-                text_parts.append(str(text))
+                parts.append(str(text))
         elif part_type == "image_url":
             url = (part.get("image_url") or {}).get("url", "")
             if isinstance(url, str) and url.startswith("data:"):
                 try:
                     encoded = url.split(",", 1)[1]
-                    images.append(base64.b64decode(encoded, validate=True))
+                    parts.append(base64.b64decode(encoded, validate=True))
                 except (ValueError, IndexError, binascii.Error) as e:
                     logger.debug("Failed to decode multimodal image url: %s", e)
 
-    return ("\n".join(text_parts) if text_parts else None), (images or None)
+    if not parts:
+        return None, None
+
+    return _flatten_parts(parts)
 
 
 @register_genai_provider(GenAIProviderEnum.ollama)
@@ -99,22 +129,38 @@ class OllamaClient(GenAIClient):
 
     provider: ApiClient | None
     provider_options: dict[str, Any]
+    _capabilities_cache: list[str] | None = None
     _supports_thinking_cache: bool | None = None
+
+    def _model_capabilities(self) -> list[str] | None:
+        """Capabilities Ollama reports for the configured model, or None when
+        they could not be fetched. Only successful lookups are cached."""
+        if self._capabilities_cache is not None:
+            return self._capabilities_cache
+        if self.provider is None:
+            return None
+        try:
+            response = self.provider.show(self.genai_config.model)
+        except Exception as e:
+            logger.debug("Failed to query Ollama model capabilities: %s", e)
+            return None
+        self._capabilities_cache = list(response.get("capabilities") or [])
+        return self._capabilities_cache
 
     @property
     def supports_toggleable_thinking(self) -> bool:
         if self._supports_thinking_cache is not None:
             return self._supports_thinking_cache
-        if self.provider is None:
+        capabilities = self._model_capabilities()
+        if capabilities is None:
             return False
-        try:
-            response = self.provider.show(self.genai_config.model)
-            capabilities = response.get("capabilities") or []
-            self._supports_thinking_cache = "thinking" in capabilities
-        except Exception as e:
-            logger.debug("Failed to query Ollama model capabilities: %s", e)
-            self._supports_thinking_cache = False
+        self._supports_thinking_cache = "thinking" in capabilities
         return self._supports_thinking_cache
+
+    @property
+    def supports_embeddings(self) -> bool:
+        """Whether Ollama reports the configured model as an embedding model."""
+        return "embedding" in (self._model_capabilities() or [])
 
     def _auth_headers(self) -> dict | None:
         if self.genai_config.api_key:
@@ -196,58 +242,46 @@ class OllamaClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
-        """Submit a request to Ollama"""
+        """Submit a request to Ollama through the chat API, the same path the
+        tool-calling chat uses, with image placeholders keeping any captions
+        next to their frames."""
         if self.provider is None:
             logger.warning(
                 "Ollama provider has not been initialized, a description will not be generated. Check your Ollama configuration."
             )
             return None
+
+        content, message_images = _flatten_parts(
+            interleave_images(prompt, images, image_captions)
+        )
+        message: dict[str, Any] = {"role": "user", "content": content}
+
+        if message_images:
+            message["images"] = message_images
+
+        request_params = self._build_request_params(
+            [message], None, None, enable_thinking=enable_thinking
+        )
+
+        if response_format and response_format.get("type") == "json_schema":
+            schema = response_format.get("json_schema", {}).get("schema")
+            if schema:
+                request_params["format"] = self._clean_schema_for_ollama(schema)
+
+        logger.debug(
+            "Ollama chat request: model=%s, prompt_len=%s, image_count=%s, "
+            "has_format=%s, think=%s",
+            self.genai_config.model,
+            len(prompt),
+            len(images),
+            "format" in request_params,
+            request_params.get("think"),
+        )
+
         try:
-            ollama_options = {
-                **self.provider_options,
-                **self.genai_config.runtime_options,
-            }
-            if response_format and response_format.get("type") == "json_schema":
-                schema = response_format.get("json_schema", {}).get("schema")
-                if schema:
-                    ollama_options["format"] = self._clean_schema_for_ollama(schema)
-            if self.supports_toggleable_thinking:
-                ollama_options["think"] = enable_thinking
-            logger.debug(
-                "Ollama generate request: model=%s, prompt_len=%s, image_count=%s, "
-                "has_format=%s, options=%s",
-                self.genai_config.model,
-                len(prompt),
-                len(images) if images else 0,
-                "format" in ollama_options,
-                {k: v for k, v in ollama_options.items() if k != "format"},
-            )
-            result = self.provider.generate(
-                self.genai_config.model,
-                prompt,
-                images=images if images else None,
-                **ollama_options,
-            )
-            logger.debug(
-                "Ollama generate response: done=%s, done_reason=%s, eval_count=%s, "
-                "prompt_eval_count=%s, response_len=%s",
-                result.get("done"),
-                result.get("done_reason"),
-                result.get("eval_count"),
-                result.get("prompt_eval_count"),
-                len(result.get("response", "") or ""),
-            )
-            response_text = str(result["response"]).strip()
-            if not response_text:
-                logger.warning(
-                    "Ollama returned a blank response for model %s (done_reason=%s, "
-                    "eval_count=%s). Check model output, ensure thinking is disabled.",
-                    self.genai_config.model,
-                    result.get("done_reason"),
-                    result.get("eval_count"),
-                )
-            return response_text
+            response = self.provider.chat(**request_params)
         except (
             TimeoutException,
             ResponseError,
@@ -256,6 +290,27 @@ class OllamaClient(GenAIClient):
         ) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
+
+        logger.debug(
+            "Ollama chat response: done=%s, done_reason=%s, eval_count=%s, "
+            "prompt_eval_count=%s",
+            response.get("done"),
+            response.get("done_reason"),
+            response.get("eval_count"),
+            response.get("prompt_eval_count"),
+        )
+        response_text = self._message_from_response(response)["content"] or ""
+
+        if not response_text:
+            logger.warning(
+                "Ollama returned a blank response for model %s (done_reason=%s, "
+                "eval_count=%s). Check model output, ensure thinking is disabled.",
+                self.genai_config.model,
+                response.get("done_reason"),
+                response.get("eval_count"),
+            )
+
+        return response_text
 
     def list_models(self) -> list[str]:
         """Return available model names from the Ollama server."""
@@ -288,6 +343,93 @@ class OllamaClient(GenAIClient):
             self.genai_config.provider_options.get("options", {}).get("num_ctx", 4096)
         )
 
+    def _count_prompt_tokens(self, image: bytes | None) -> int | None:
+        """Send a 1-token chat request and return Ollama's prompt_eval_count.
+
+        Reuses the description request options so the probe runs with the same
+        num_ctx; a different value would make Ollama reload the model.
+        """
+        if self.provider is None:
+            return None
+
+        message: dict[str, Any] = {"role": "user", "content": "."}
+
+        if image is not None:
+            message["images"] = [image]
+
+        request_params = self._build_request_params(
+            [message], None, None, enable_thinking=False
+        )
+        request_params["options"] = {
+            **(request_params.get("options") or {}),
+            "num_predict": 1,
+        }
+        response = self.provider.chat(**request_params)
+        count = response.get("prompt_eval_count")
+        return int(count) if count is not None else None
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Generate embeddings via Ollama's /api/embed endpoint.
+
+        Each text is a plain string in `input` and each image is an
+        ``{"image": <base64>}`` item. Image input requires Ollama 0.40.1 or
+        newer and a model with a vision encoder (e.g. embeddinggemma-2:440m).
+        """
+        if self.provider is None:
+            logger.warning(
+                "Ollama provider has not been initialized. Check your Ollama configuration."
+            )
+            return []
+
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        inputs: list[str | dict[str, str]] = list(texts)
+        for img in images:
+            jpeg_bytes = to_jpeg(img)
+            to_encode = jpeg_bytes if jpeg_bytes is not None else img
+            inputs.append({"image": base64.b64encode(to_encode).decode("utf-8")})
+
+        payload: dict[str, Any] = {"model": self.genai_config.model, "input": inputs}
+        for key in ("options", "keep_alive"):
+            if key in self.genai_config.provider_options:
+                payload[key] = self.genai_config.provider_options[key]
+
+        try:
+            # The ollama SDK's embed() validates input as strings only, so
+            # image items have to bypass it and post the JSON directly.
+            response = self.provider._request_raw("POST", "/api/embed", json=payload)
+            body = response.json()
+        except (
+            TimeoutException,
+            ResponseError,
+            RemoteProtocolError,
+            ConnectionError,
+            ValueError,
+        ) as e:
+            logger.warning("Ollama embeddings error: %s", str(e))
+            return []
+
+        vectors = body.get("embeddings") if isinstance(body, dict) else None
+        if not isinstance(vectors, list):
+            logger.warning("Ollama embeddings returned unexpected format")
+            return []
+
+        if len(vectors) != len(inputs):
+            logger.warning(
+                "Ollama returned %d embeddings for %d inputs",
+                len(vectors),
+                len(inputs),
+            )
+
+        return [np.asarray(v, dtype=np.float32).flatten() for v in vectors]
+
     def _build_request_params(
         self,
         messages: list[dict[str, Any]],
@@ -306,6 +448,8 @@ class OllamaClient(GenAIClient):
             }
             if images:
                 msg_dict["images"] = images
+            elif msg.get("images"):
+                msg_dict["images"] = msg["images"]
             if msg.get("tool_call_id"):
                 msg_dict["tool_call_id"] = msg["tool_call_id"]
             if msg.get("name"):

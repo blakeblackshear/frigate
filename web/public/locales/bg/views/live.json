@@ -39,8 +39,6 @@
     "disable": "Изключи аудио разпознаване"
   },
   "camera": {
-    "enable": "Включи камера",
-    "disable": "Изключи камера",
     "turnOn": "Включване на камера",
     "turnOff": "Изключване на камера"
   },
@@ -65,10 +63,6 @@
     },
     "recordDisabledTips": "Тъй като записът е изключен или ограничен в конфигурацията за тази камера, ще бъде запазена само моментна снимка."
   },
-  "cameraSettings": {
-    "cameraEnabled": "Камерата е включена"
-  },
-  "documentTitle": "Наживо - Frigate",
   "documentTitle.withCamera": "{{camera}} - На живо - Фригейт",
   "noCameras": {
     "default": {

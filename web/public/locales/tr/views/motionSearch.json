@@ -2,9 +2,77 @@
     "newSearch": "Yeni Arama",
     "clearResults": "Sonuçları Temizle",
     "dialog": {
-        "cameraLabel": "Kamera"
+        "cameraLabel": "Kamera",
+        "title": "Hareket Ara",
+        "previewAlt": "{{camera}} kamerasının önizlemesi"
     },
     "timeRange": {
-        "end": "Bitiş Zamanı"
+        "end": "Bitiş zamanı",
+        "title": "Arama Aralığı",
+        "start": "Başlangıç zamanı"
+    },
+    "documentTitle": "Hareket Ara - Frigate",
+    "title": "Hareket Ara",
+    "description": "İlgi bölgesi tanımlamak için bir çokgen çizin ve o bölgedeki hareket değişimlerini aramak için bir zaman aralığı belirtin.",
+    "selectCamera": "Hareket Araması yükleniyor",
+    "startSearch": "Aramayı Başlat",
+    "searchStarted": "Arama başlatıldı",
+    "searchCancelled": "Arama iptal edildi",
+    "cancelSearch": "İptal",
+    "searching": "Arama sürüyor.",
+    "scanning": "{{time}} taranıyor",
+    "searchComplete": "Arama tamamlandı",
+    "noResultsYet": "Seçili bölgede hareket değişimlerini bulmak için bir arama yap",
+    "noChangesFound": "Seçili bölgede piksel değişimleri algılanmadı",
+    "changesFound_one": "{{count}} hareket değişimi bulundu",
+    "changesFound_other": "{{count}} hareket değişimi bulundu",
+    "framesProcessed": "{{count}} görüntü karesi işlendi",
+    "jumpToTime": "Bu zamana zıpla",
+    "results": "Sonuçlar",
+    "showSegmentHeatmap": "Isı Haritası",
+    "clearROI": "Çokgeni sil",
+    "polygonControls": {
+        "points_one": "{{count}} nokta",
+        "points_other": "{{count}} nokta",
+        "undo": "Son noktayı geri al",
+        "reset": "Çokgeni sıfırla",
+        "drawMode": "Çiz",
+        "moveMode": "Taşı"
+    },
+    "motionHeatmapLabel": "Hareket Isı Haritası",
+    "settings": {
+        "title": "Arama Ayarları",
+        "parallelMode": "Paralel mod",
+        "parallelModeDesc": "Birden fazla kayıt aralığını aynı anda tara (daha hızlıdır; daha fazla deşifre (decoding) kaynağı kullanır)",
+        "threshold": "Hassasiyet Eşiği",
+        "thresholdDesc": "Daha düşük değerler daha küçük farkları algılar (1-255)",
+        "minArea": "Minimum Değişim Alanı",
+        "minAreaDesc": "Tek bir hareketli bölgenin minimum büyüklüğü, ilgi bölgesinin yüzdesi olarak",
+        "maxResults": "Maksimum Sonuç Sayısı",
+        "maxResultsDesc": "Bu sayıda eşleşen zaman damgası bulunca dur"
+    },
+    "errors": {
+        "noCamera": "Lütfen bir kamera seçin",
+        "noROI": "Lütfen bir ilgi bölgesi çizin",
+        "noTimeRange": "Lütfen bir zaman aralığı seçin",
+        "invalidTimeRange": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
+        "searchFailed": "Arama başarısız oldu: {{message}}",
+        "polygonTooSmall": "Çokgenin en az 3 noktası olmalıdır",
+        "unknown": "Bilinmeyen hata"
+    },
+    "changePercentage": "%{{percentage}} değişti",
+    "metrics": {
+        "title": "Arama Metrikleri",
+        "segmentsScanned": "Taranan parça sayısı",
+        "segmentsProcessed": "İşlenen",
+        "segmentsSkippedInactive": "Atlanan (faaliyet yok)",
+        "segmentsSkippedHeatmap": "Atlanan (ilgi bölgesi örtüşmedi)",
+        "fallbackFullRange": "Tam kapsamlı tarama (yedek plana geçiş)",
+        "framesDecoded": "Deşifre edilen (decoded) kare sayısı",
+        "wallTime": "Arama zamanı",
+        "segmentErrors": "Parça hataları",
+        "seconds": "{{seconds}}sn",
+        "minutesSeconds": "{{minutes}}d {{seconds}}sn",
+        "scanSummary": "{{segments}} parça · {{time}}"
     }
 }

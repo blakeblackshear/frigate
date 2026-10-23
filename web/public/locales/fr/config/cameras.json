@@ -69,10 +69,6 @@
             "label": "Activer la vue à vol d'oiseau",
             "description": "Activer ou désactiver la fonctionalité de vue à vol d'oiseau."
         },
-        "mode": {
-            "label": "Mode de suivi",
-            "description": "Mode pour l'inclusion des caméras dans la vue à vol d'oiseau : 'objects', 'motion', ou 'continuous'."
-        },
         "order": {
             "label": "Emplacement",
             "description": "Emplacement numérique contrôlant l'ordre de la caméra dans la disposition en vue à vol d'oiseau."
@@ -525,7 +521,8 @@
                 "description": "Liste d'étiquettes d'objets considérés comme des alertes (par exemple : voiture, personne)."
             },
             "required_zones": {
-                "label": "Zones requises"
+                "label": "Zones requises",
+                "description": "Zones qu'un objet doit entrer pour être considéré comme une alerte. (Laisser vide afin d'autoriser n'importe quelle zone.)"
             },
             "enabled_in_config": {
                 "label": "État des alertes originales",
@@ -534,7 +531,8 @@
             "cutoff_time": {
                 "label": "Temps de coupure des alertes",
                 "description": "Délai en secondes après l'absence d'activité déclenchant une alerte avant de la couper."
-            }
+            },
+            "description": "Paramètres pour lesquels les objets suivis génèrent des alertes et comment ces alertes sont conservées."
         },
         "detections": {
             "label": "Configuration des détections",
@@ -580,7 +578,8 @@
                 "description": "Source des images envoyées à l'IA générative (« aperçu » ou « enregistrements ») ; « enregistrements » utilise des images de meilleure qualité mais plus de jetons d'IA."
             },
             "additional_concerns": {
-                "label": "Autres préoccupations"
+                "label": "Autres préoccupations",
+                "description": "Une liste de préoccupations ou de notes supplémentaires que la GenAI devrait prendre en compte lors de l'évaluation de l'activité sur cette caméra."
             }
         }
     }

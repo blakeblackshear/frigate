@@ -6,12 +6,7 @@
     "nameCannotContainHash": "Le nom ne peut pas contenir le caractère #."
   },
   "details": {
-    "person": "Personne",
-    "confidence": "Confiance",
-    "face": "Détails du visage",
     "timestamp": "Horodatage",
-    "faceDesc": "Détails de l'objet suivi qui a généré ce visage",
-    "subLabelScore": "Score de sous-libellé",
     "scoreInfo": "Le score du sous-libellé correspond au score pondéré de tous les scores de confiance des visages reconnus. Il est donc possible qu'il ne corresponde pas au score affiché sur l'instantané.",
     "unknown": "Inconnu"
   },
@@ -21,8 +16,6 @@
     "desc": "Téléversez une image pour rechercher des visages et l'inclure dans {{pageToggle}}."
   },
   "createFaceLibrary": {
-    "title": "Créer une collection",
-    "desc": "Créer une nouvelle collection",
     "new": "Créer un nouveau visage",
     "nextSteps": "Pour construire une base solide :<li>Utilisez l'onglet Reconnaissances récentes pour sélectionner et entraîner des images pour chaque personne détectée.</li><li>Privilégiez les images de face pour de meilleurs résultats et évitez d'entraîner le modèle avec des images où les visages sont de biais.</li></ul>"
   },
@@ -32,7 +25,6 @@
     "empty": "Il n'y a pas de tentatives récentes de reconnaissance faciale.",
     "titleShort": "Récent"
   },
-  "selectFace": "Sélectionner un visage",
   "button": {
     "addFace": "Ajouter un visage",
     "uploadImage": "Téléverser une image",
@@ -41,7 +33,6 @@
     "renameFace": "Renommer le visage",
     "deleteFace": "Supprimer le visage"
   },
-  "selectItem": "Sélectionner {{item}}",
   "deleteFaceLibrary": {
     "title": "Supprimer le nom",
     "desc": "Êtes-vous certain de vouloir supprimer la collection {{name}} ? Cette action supprimera définitivement tous les visages associés."
@@ -54,7 +45,6 @@
       "selectImage": "Veuillez sélectionner un fichier image."
     }
   },
-  "readTheDocs": "Lire la documentation",
   "toast": {
     "success": {
       "deletedName_one": "{{count}} visage a été supprimé avec succès.",
@@ -103,7 +93,6 @@
     "desc_other": "Êtes-vous sûr de vouloir supprimer {{count}} visages ? Cette action est irréversible."
   },
   "nofaces": "Aucun visage disponible",
-  "pixels": "{{area}} pixels",
   "reclassifyFaceAs": "Reclassifier le visage en :",
   "reclassifyFace": "Reclassifier le visage"
 }

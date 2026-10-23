@@ -23,7 +23,6 @@
         "textModel": "Modèle de texte"
       },
       "tips": {
-        "documentation": "Lire la documentation",
         "context": "Une fois les modèles téléchargés, il est conseillé de réindexer les embeddings de vos objets suivis."
       },
       "error": "Une erreur est survenue. Vérifiez les journaux Frigate."
@@ -119,59 +118,12 @@
   "type": {
     "details": "détails",
     "video": "vidéo",
-    "object_lifecycle": "cycle de vie de l'objet",
     "snapshot": "instantané",
     "thumbnail": "Miniature",
     "tracking_details": "Détails du suivi"
   },
   "objectLifecycle": {
-    "title": "Cycle de vie de l'objet",
-    "noImageFound": "Aucune image trouvée pour cet horodatage",
-    "createObjectMask": "Créer un masque d'objet",
-    "scrollViewTips": "Faites défiler pour voir les moments clés du cycle de vie de cet objet.",
-    "adjustAnnotationSettings": "Ajuster les paramètres d'annotation",
-    "autoTrackingTips": "Les positions des cadres englobants seront imprécises pour les caméras à suivi automatique.",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} détecté",
-      "entered_zone": "{{label}} est entré dans {{zones}}.",
-      "stationary": "{{label}} est devenu stationnaire.",
-      "attribute": {
-        "other": "{{label}} reconnu comme {{attribute}}",
-        "faceOrLicense_plate": "{{attribute}} détecté pour {{label}}"
-      },
-      "gone": "{{label}} parti",
-      "heard": "{{label}} entendu",
-      "external": "{{label}} détecté",
-      "active": "{{label}} est devenu actif.",
-      "header": {
-        "zones": "Zones",
-        "area": "Aire",
-        "ratio": "Ratio"
-      }
-    },
-    "annotationSettings": {
-      "title": "Paramètres d'annotation",
-      "showAllZones": {
-        "title": "Afficher toutes les zones",
-        "desc": "Afficher systématiquement les zones sur les images quand des objets y sont entrés"
-      },
-      "offset": {
-        "label": "Décalage de l'annotation",
-        "documentation": "Lire la documentation ",
-        "desc": "Ces données, issues du flux de détection de votre caméra, sont incrustées dans les images du flux d'enregistrement. Cependant, une synchronisation parfaite entre ces deux flux est rarement garantie. Il est donc possible que le cadre englobant et la séquence ne soient pas parfaitement alignés. Pour corriger ce décalage, vous pouvez utiliser le champ <code>annotation_offset</code>.",
-        "millisecondsToOffset": "Décalage des annotations de détection en millisecondes. <em>Par défaut : 0</em>",
-        "tips": "Astuce : Pour mieux comprendre, visualisez un clip où une personne se déplace de gauche à droite. Si le cadre englobant affiché sur la ligne de temps de l'événement se trouve constamment à gauche de la personne, cela signifie que vous devriez réduire la valeur. À l'inverse, si ce même cadre englobant apparaît systématiquement en avance sur la personne qui marche de gauche à droite, alors vous devrez l'augmenter.",
-        "toast": {
-          "success": "Le décalage d'annotation pour {{camera}} a été enregistré dans le fichier de configuration. Redémarrez Frigate pour appliquer vos modifications."
-        }
-      }
-    },
-    "carousel": {
-      "next": "Diapositive suivante",
-      "previous": "Diapositive précédente"
-    },
-    "trackedPoint": "Point de suivi",
-    "count": "{{first}} de {{second}}"
+    "noImageFound": "Aucune image trouvée pour cet horodatage"
   },
   "trackedObjectDetails": "Détails de l'objet suivi",
   "itemMenu": {
@@ -182,10 +134,6 @@
     "findSimilar": {
       "label": "Trouver des éléments similaires",
       "aria": "Trouver des objets suivis similaires"
-    },
-    "viewObjectLifecycle": {
-      "aria": "Afficher le cycle de vie de l'objet",
-      "label": "Visualiser le cycle de vie de l'objet"
     },
     "viewInHistory": {
       "label": "Afficher dans la chronologie",

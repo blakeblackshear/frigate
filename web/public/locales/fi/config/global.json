@@ -17,5 +17,55 @@
         "enabled": {
             "label": "Ota ääni havainnointi käyttöön"
         }
+    },
+    "semantic_search": {
+        "triggers": {
+            "actions": {
+                "description": "Suoritettavat toiminnot laukaisuehdon täyttyessä (ilmoitus, aliotsikko, ominaisuus)."
+            }
+        }
+    },
+    "models": {
+        "attributes_map": {
+            "label": "Kohdetunnisteiden ja niiden ominaisuustunnisteiden vastaavuusmääritys",
+            "description": "Kohteiden ja ominaisuuksien linkitys metatietojen lisäämiseksi (esim. 'auto' -> ['rekisterikilpi'])."
+        }
+    },
+    "objects": {
+        "filters_attribute": {
+            "label": "Ominaisuussuodattimet",
+            "description": "Havaittuihin ominaisuuksiin asetetut suodattimet väärien havaintojen vähentämiseksi (alue, tiheys, luotto).",
+            "min_area": {
+                "label": "Ominaisuuden minimikoko",
+                "description": "Vaadittava minimi aluerajaus (pikselit tai prosenttiosuus) tälle ominaisuudelle. Voi olla pikselit (luku) tai prosenttiosuus (desimaaliluku välillä 0.000001 - 0.99)."
+            },
+            "max_area": {
+                "label": "Maksimi ominaisuusalue",
+                "description": "Sallittu maksimi aluerajaus (pikselit tai prosenttiosuus) tälle ominaisuudelle. Voi olla pikselit (luku) tai prosenttiosuus (desimaaliluku välillä 0.000001 - 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minimi kuvasuhde",
+                "description": "Hyväksytyn alueen minimi leveys/korkeussuhde."
+            },
+            "max_ratio": {
+                "label": "Maksimi kuvasuhde",
+                "description": "Hyväksytyn alueen maksimi leveys/korkeussuhde."
+            },
+            "threshold": {
+                "label": "Luottamuskynnys",
+                "description": "Keskimääräinen luottamusraja ominaisuuden vahvistamiseksi oikeaksi löydökseksi."
+            },
+            "min_score": {
+                "label": "Minimi luottamuusraja",
+                "description": "Yksittäisen kuvaruudun minimivarmuusraja ominaisuuden liittämiseksi pääkohteeseen."
+            },
+            "mask": {
+                "label": "Suodatinmaski",
+                "description": "Monikulmion koordinaatit, jotka rajaavat suodattimen alueen kehyksessä."
+            },
+            "raw_mask": {
+                "label": "Raakamaski"
+            }
+        }
     }
 }

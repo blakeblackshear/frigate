@@ -75,6 +75,21 @@ class TestPreviewLoader(unittest.TestCase):
 
         self.assertIsNone(get_most_recent_preview_frame(camera))
 
+    def test_get_most_recent_preview_frame_hyphenated_camera(self):
+        for name in ("preview_front-2000.0", "preview_front-door-3000.0"):
+            with open(
+                os.path.join(PREVIEW_CACHE_DIR, f"{name}.{PREVIEW_FRAME_TYPE}"), "w"
+            ) as f:
+                f.write("test")
+
+        expected_path = os.path.join(
+            PREVIEW_CACHE_DIR, f"preview_front-2000.0.{PREVIEW_FRAME_TYPE}"
+        )
+        self.assertEqual(get_most_recent_preview_frame("front"), expected_path)
+        self.assertEqual(
+            get_most_recent_preview_frame("front", before=5000.0), expected_path
+        )
+
     def test_get_most_recent_preview_frame_no_directory(self):
         shutil.rmtree(PREVIEW_CACHE_DIR)
         self.assertIsNone(get_most_recent_preview_frame("test_camera"))

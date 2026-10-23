@@ -101,6 +101,71 @@ class TestAuthInternalPort(BaseTestHttp):
             self.assertEqual(resp.headers["remote-user"], "anonymous")
             self.assertEqual(resp.headers["remote-role"], "admin")
 
+    def _internal_auth(self, original_url: str, **headers: str):
+        app = self._create_app()
+
+        with AuthTestClient(app) as client:
+            return client.get(
+                "/auth",
+                headers={
+                    "x-server-port": "5000",
+                    "x-original-url": original_url,
+                    "x-original-host": "frigate.lan:5000",
+                    **{k.replace("_", "-"): v for k, v in headers.items()},
+                },
+            )
+
+    def test_cross_origin_websocket_on_internal_port_denied(self):
+        resp = self._internal_auth(
+            "/ws", origin="https://evil.example", x_original_upgrade="websocket"
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    def test_cross_origin_go2rtc_stream_denied(self):
+        resp = self._internal_auth(
+            "/live/mse/api/ws?src=front_door",
+            origin="https://evil.example",
+            x_original_upgrade="websocket",
+            x_go2rtc_stream_proxy="1",
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    def test_cross_origin_webrtc_post_denied(self):
+        # the offer POST is not an upgrade, so the stream marker alone gates it
+        resp = self._internal_auth(
+            "/api/go2rtc/webrtc?src=front_door",
+            origin="https://evil.example",
+            x_go2rtc_stream_proxy="1",
+        )
+        self.assertEqual(resp.status_code, 403)
+
+    def test_same_origin_websocket_allowed(self):
+        resp = self._internal_auth(
+            "/live/mse/api/ws?src=front_door",
+            origin="http://frigate.lan:5000",
+            x_original_upgrade="websocket",
+            x_go2rtc_stream_proxy="1",
+        )
+        self.assertEqual(resp.status_code, 202)
+
+    def test_websocket_without_origin_allowed(self):
+        resp = self._internal_auth("/ws", x_original_upgrade="websocket")
+        self.assertEqual(resp.status_code, 202)
+
+    def test_forwarded_host_origin_allowed(self):
+        # Home Assistant integration proxy: Host is Frigate, Origin is HA
+        resp = self._internal_auth(
+            "/api/go2rtc/webrtc?src=front_door",
+            origin="https://ha.example.com:8123",
+            x_forwarded_host="ha.example.com:8123",
+            x_go2rtc_stream_proxy="1",
+        )
+        self.assertEqual(resp.status_code, 202)
+
+    def test_cross_origin_plain_http_not_checked(self):
+        resp = self._internal_auth("/api/events", origin="https://evil.example")
+        self.assertEqual(resp.status_code, 202)
+
     def test_external_port_requires_auth(self):
         app = self._create_app()
 

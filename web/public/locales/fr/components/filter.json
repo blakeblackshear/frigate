@@ -5,7 +5,6 @@
       "title": "Toutes les étiquettes",
       "short": "Étiquettes"
     },
-    "count": "{{count}} Étiquettes",
     "count_one": "{{count}} étiquette",
     "count_other": "{{count}} étiquettes"
   },

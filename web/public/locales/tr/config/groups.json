@@ -1,11 +1,11 @@
 {
     "audio": {
         "global": {
-            "detection": "Genel Tespit",
+            "detection": "Genel Algılama",
             "sensitivity": "Genel Hassasiyet"
         },
         "cameras": {
-            "detection": "Tespit",
+            "detection": "Algılama",
             "sensitivity": "Hassasiyet"
         }
     },
@@ -39,15 +39,17 @@
     },
     "record": {
         "global": {
-            "events": "Genel Etkinlikler"
+            "events": "Genel Olaylar",
+            "retention": "Genel Kayıt Saklama"
         },
         "cameras": {
-            "events": "Etkinlikler"
+            "events": "Olaylar",
+            "retention": "Saklama Süresi"
         }
     },
     "ffmpeg": {
         "cameras": {
-            "cameraFfmpeg": "Kamera özel FFmpeg argümanları"
+            "cameraFfmpeg": "Kameraya özgü FFmpeg parametreleri"
         }
     },
     "motion": {

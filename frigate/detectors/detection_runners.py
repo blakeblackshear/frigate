@@ -10,6 +10,7 @@ from typing import Any
 import numpy as np
 import onnxruntime as ort
 
+from frigate.const import MODEL_CACHE_DIR
 from frigate.util.model import get_ort_providers
 from frigate.util.rknn_converter import auto_convert_model, is_rknn_compatible
 
@@ -18,6 +19,109 @@ logger = logging.getLogger(__name__)
 # Process-wide lock serializing all OpenVINO compile/inference calls
 _OPENVINO_LOCK = threading.Lock()
 
+# model file path -> (model type, device the runner actually loaded on); the
+# embeddings maintainer folds this per enrichment for the stats endpoint.
+# Models load on several threads (reindex, lazy first use), so writes and
+# snapshots go through the lock.
+loaded_devices: dict[str, tuple[str, str]] = {}
+_loaded_devices_lock = threading.Lock()
+
+
+def record_loaded_device(model_path: str, model_type: str, device: str) -> None:
+    """Record the device a model loaded on, for the enrichment stats."""
+    with _loaded_devices_lock:
+        loaded_devices[model_path] = (model_type, device)
+
+    logger.info("Loaded %s model on %s", model_type, device)
+
+
+def snapshot_loaded_devices() -> dict[str, tuple[str, str]]:
+    """A copy that is safe to iterate while other threads load models."""
+    with _loaded_devices_lock:
+        return dict(loaded_devices)
+
+
+_PROVIDER_LABELS = {
+    "CUDAExecutionProvider": "CUDA",
+    "TensorrtExecutionProvider": "TensorRT",
+    "MIGraphXExecutionProvider": "MIGraphX",
+    "OpenVINOExecutionProvider": "OpenVINO",
+    "CPUExecutionProvider": "CPU",
+    "LighterANE": "Neural Engine",
+}
+
+# lighter (https://github.com/fieldwork-ai/lighter) places an ONNX Runtime plugin
+# execution provider in a container started with --device lighter.sh/ane=all,
+# which runs models on a Mac's Neural Engine; LIGHTER_ANE_EP names where it is
+LIGHTER_ANE_EP_NAME = "LighterANE"
+LIGHTER_ANE_LIBRARY = "/usr/lib/lighter/liblighter_ane_ep.so"
+
+# AMD's MIGraphX plugin execution provider, installed in the ROCm image
+MIGRAPHX_EP_NAME = "MIGraphXExecutionProvider"
+
+
+def get_lighter_ane_devices() -> list[Any]:
+    """Get the Neural Engine devices lighter's provider offers, registering it once.
+
+    Returns:
+        The provider's ONNX Runtime devices, or an empty list without lighter's device
+    """
+    library = os.environ.get("LIGHTER_ANE_EP", LIGHTER_ANE_LIBRARY)
+
+    if not os.path.exists(library):
+        return []
+
+    devices = [d for d in ort.get_ep_devices() if d.ep_name == LIGHTER_ANE_EP_NAME]
+
+    if not devices:
+        try:
+            ort.register_execution_provider_library(LIGHTER_ANE_EP_NAME, library)
+        except Exception as e:
+            logger.warning(
+                f"Failed to load the Neural Engine provider from {library}: {e}"
+            )
+            return []
+
+        devices = [d for d in ort.get_ep_devices() if d.ep_name == LIGHTER_ANE_EP_NAME]
+
+    return devices
+
+
+def get_migraphx_devices() -> list[Any]:
+    """Get the AMD GPU devices the MIGraphX provider offers, registering it once.
+
+    Returns:
+        The provider's ONNX Runtime devices, or an empty list outside the ROCm
+        image or without an AMD GPU
+    """
+    # Import here to avoid circular imports
+    from frigate.detectors.hardware import detect_amd_gpu
+
+    try:
+        import onnxruntime_ep_migraphx
+    except ImportError:
+        return []
+
+    # ONNX Runtime finds the provider's GPUs in the same /sys/class/drm entries,
+    # so an AMD GPU here means the provider lists it once registered
+    if detect_amd_gpu() is None:
+        return []
+
+    devices = [d for d in ort.get_ep_devices() if d.ep_name == MIGRAPHX_EP_NAME]
+
+    if not devices:
+        try:
+            ort.register_execution_provider_library(
+                MIGRAPHX_EP_NAME, onnxruntime_ep_migraphx.get_library_path()
+            )
+        except Exception as e:
+            logger.warning("Failed to load the MIGraphX provider: %s", e)
+            return []
+
+        devices = [d for d in ort.get_ep_devices() if d.ep_name == MIGRAPHX_EP_NAME]
+
+    return devices
+
 
 def is_arm64_platform() -> bool:
     """Check if we're running on an ARM platform."""
@@ -25,30 +129,46 @@ def is_arm64_platform() -> bool:
     return machine in ("aarch64", "arm64", "armv8", "armv7l")
 
 
-def get_ort_session_options(model_type: str | None = None) -> ort.SessionOptions | None:
+def get_ort_session_options(
+    model_type: str | None = None, cpu: bool = False
+) -> ort.SessionOptions | None:
     """Get ONNX Runtime session options with appropriate settings.
 
     Args:
         model_type: Model being loaded, used to pin its graph optimization level.
+        cpu: Whether the session runs on the CPU execution provider.
 
     Returns:
-        SessionOptions with a pinned optimization level, or None for default settings.
+        SessionOptions for enrichment models, or None for default settings.
     """
     # Import here to avoid circular imports
-    from frigate.embeddings.types import EnrichmentModelTypeEnum
+    from frigate.embeddings.types import (
+        ENRICHMENT_FOR_MODEL_TYPE,
+        EnrichmentModelTypeEnum,
+    )
+
+    if model_type not in ENRICHMENT_FOR_MODEL_TYPE:
+        return None
+
+    sess_options = ort.SessionOptions()
+
+    if cpu:
+        # idle intra-op threads otherwise spin for ~1s after every run, keeping
+        # most cores busy while an enrichment runs even once a second
+        sess_options.add_session_config_entry("session.intra_op.allow_spinning", "0")
 
     if model_type == EnrichmentModelTypeEnum.jina_v2.value:
         # below EXTENDED the CUDA EP returns an identical vector for every image,
         # and ORT_ENABLE_ALL fails to build on CPU with a SimplifiedLayerNormFusion error
-        level = ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        sess_options.graph_optimization_level = (
+            ort.GraphOptimizationLevel.ORT_ENABLE_EXTENDED
+        )
     elif model_type == EnrichmentModelTypeEnum.jina_v1.value:
         # aggressive optimizations create or expect nodes that don't exist
-        level = ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
-    else:
-        return None
+        sess_options.graph_optimization_level = (
+            ort.GraphOptimizationLevel.ORT_ENABLE_BASIC
+        )
 
-    sess_options = ort.SessionOptions()
-    sess_options.graph_optimization_level = level
     return sess_options
 
 
@@ -117,6 +237,12 @@ class BaseModelRunner(ABC):
         """Run inference with the model."""
         pass
 
+    @property
+    @abstractmethod
+    def device_name(self) -> str:
+        """Short label of the device the model actually loaded on."""
+        pass
+
 
 class ONNXModelRunner(BaseModelRunner):
     """Run ONNX models using ONNX Runtime."""
@@ -173,6 +299,18 @@ class ONNXModelRunner(BaseModelRunner):
                 return self.ort.run(None, input)
 
         return self.ort.run(None, input)
+
+    @property
+    def device_name(self) -> str:
+        providers = self.ort.get_providers()
+
+        if not providers:
+            return "CPU"
+
+        provider = providers[0]
+        return _PROVIDER_LABELS.get(
+            provider, provider.removesuffix("ExecutionProvider")
+        )
 
 
 class CudaGraphRunner(BaseModelRunner):
@@ -261,6 +399,10 @@ class CudaGraphRunner(BaseModelRunner):
         self._session.run_with_iobinding(self._io_binding, ro)
         return self._io_binding.copy_outputs_to_cpu()
 
+    @property
+    def device_name(self) -> str:
+        return "CUDA"
+
 
 class OpenVINOModelRunner(BaseModelRunner):
     """OpenVINO model runner that handles inference efficiently."""
@@ -331,17 +473,30 @@ class OpenVINOModelRunner(BaseModelRunner):
             except Exception as e:
                 logger.debug(f"GPU_QUEUE_THROTTLE not supported: {e}")
 
+        # Some keys must be passed as compile-time config so that it can be caught
+        compile_config = {}
+
         if device == "NPU" and OpenVINOModelRunner.is_detection_model(model_type):
-            try:
-                self.ov_core.set_property(device, {"NPU_TURBO": "YES"})
-            except Exception as e:
-                logger.debug(f"NPU_TURBO not supported by driver: {e}")
+            compile_config["NPU_TURBO"] = "YES"
+
+        self.compiled_device = device
 
         # Compile model under the shared lock
         with _OPENVINO_LOCK:
-            self.compiled_model = self.ov_core.compile_model(
-                model=model_path, device_name=device
-            )
+            try:
+                self.compiled_model = self.ov_core.compile_model(
+                    model=model_path, device_name=device, config=compile_config
+                )
+            except RuntimeError as e:
+                if not compile_config:
+                    raise
+
+                logger.debug(
+                    f"Failed to compile with {compile_config}, retrying without: {e}"
+                )
+                self.compiled_model = self.ov_core.compile_model(
+                    model=model_path, device_name=device
+                )
 
             # Create reusable inference request
             self.infer_request = self.compiled_model.create_infer_request()
@@ -356,6 +511,22 @@ class OpenVINOModelRunner(BaseModelRunner):
             except RuntimeError:
                 # model is complex and has dynamic shape
                 pass
+
+    @property
+    def device_name(self) -> str:
+        device = self.compiled_device
+
+        if device == "AUTO":
+            try:
+                resolved = self.compiled_model.get_property("EXECUTION_DEVICES")
+
+                if resolved:
+                    device = ",".join(str(d) for d in resolved)
+            except Exception:
+                # older OpenVINO builds do not expose the property
+                pass
+
+        return f"OpenVINO {device}"
 
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
@@ -504,6 +675,10 @@ class RKNNModelRunner(BaseModelRunner):
             logger.error(f"Error loading RKNN model: {e}")
             raise
 
+    @property
+    def device_name(self) -> str:
+        return "RKNN"
+
     def get_input_names(self) -> list[str]:
         """Get input names for the model."""
         # For detection models, we typically use "input" as the default input name
@@ -584,6 +759,14 @@ class RKNNModelRunner(BaseModelRunner):
                 pass
 
 
+def _record_runner(
+    model_path: str, model_type: str, runner: BaseModelRunner
+) -> BaseModelRunner:
+    """Record the device a freshly loaded runner ended up on."""
+    record_loaded_device(model_path, model_type, runner.device_name)
+    return runner
+
+
 def get_optimized_runner(
     model_path: str, device: str | None, model_type: str, **kwargs
 ) -> BaseModelRunner:
@@ -594,16 +777,66 @@ def get_optimized_runner(
         rknn_path = auto_convert_model(model_path)
 
         if rknn_path:
-            return RKNNModelRunner(rknn_path)
+            return _record_runner(model_path, model_type, RKNNModelRunner(rknn_path))
+
+    if device != "CPU" and (ane_devices := get_lighter_ane_devices()):
+        sess_options = get_ort_session_options(model_type) or ort.SessionOptions()
+        sess_options.add_provider_for_devices(ane_devices, {})
+
+        try:
+            session = ort.InferenceSession(model_path, sess_options=sess_options)
+        except Exception as e:
+            logger.warning(
+                f"Failed to load {model_path} on the Neural Engine, using the default providers: {e}"
+            )
+        else:
+            return _record_runner(
+                model_path,
+                model_type,
+                ONNXModelRunner(session, model_type=model_type),
+            )
+
+    if (
+        device != "CPU"
+        and not ONNXModelRunner.is_migraphx_complex_model(model_type)
+        and (migraphx_devices := get_migraphx_devices())
+    ):
+        migraphx_cache_dir = os.path.join(MODEL_CACHE_DIR, "migraphx/ort")
+        os.makedirs(migraphx_cache_dir, exist_ok=True)
+        sess_options = get_ort_session_options(model_type) or ort.SessionOptions()
+        # only the first AMD GPU is used, matching detect_amd_gpu
+        sess_options.add_provider_for_devices(
+            migraphx_devices[:1], {"cache_dir": migraphx_cache_dir}
+        )
+
+        try:
+            session = ort.InferenceSession(model_path, sess_options=sess_options)
+        except Exception as e:
+            logger.warning(
+                "Failed to load %s with MIGraphX, using the default providers: %s",
+                model_path,
+                e,
+            )
+        else:
+            return _record_runner(
+                model_path,
+                model_type,
+                ONNXModelRunner(session, model_type=model_type),
+            )
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 
     if providers[0] == "CPUExecutionProvider":
         # In the default image, ONNXRuntime is used so we will only get CPUExecutionProvider
-        # In other images we will get CUDA / ROCm which are preferred over OpenVINO
-        # There is currently no way to prioritize OpenVINO over CUDA / ROCm in these images
+        # In other images we will get CUDA which is preferred over OpenVINO, while
+        # MIGraphX in the ROCm image is already handled above
+        # There is currently no way to prioritize OpenVINO over CUDA in these images
         if device != "CPU" and is_openvino_gpu_npu_available():
-            return OpenVINOModelRunner(model_path, device, model_type, **kwargs)
+            return _record_runner(
+                model_path,
+                model_type,
+                OpenVINOModelRunner(model_path, device, model_type, **kwargs),
+            )
 
     if (
         CudaGraphRunner.is_model_supported(model_type)
@@ -613,30 +846,31 @@ def get_optimized_runner(
             **options[0],
             "enable_cuda_graph": True,
         }
-        return CudaGraphRunner(
+        return _record_runner(
+            model_path,
+            model_type,
+            CudaGraphRunner(
+                ort.InferenceSession(
+                    model_path,
+                    providers=providers,
+                    provider_options=options,
+                ),
+                options[0]["device_id"],
+            ),
+        )
+
+    return _record_runner(
+        model_path,
+        model_type,
+        ONNXModelRunner(
             ort.InferenceSession(
                 model_path,
+                sess_options=get_ort_session_options(
+                    model_type, cpu=providers[0] == "CPUExecutionProvider"
+                ),
                 providers=providers,
                 provider_options=options,
             ),
-            options[0]["device_id"],
-        )
-
-    if (
-        providers
-        and providers[0] == "MIGraphXExecutionProvider"
-        and ONNXModelRunner.is_migraphx_complex_model(model_type)
-    ):
-        # Don't use MIGraphX for models that are not supported
-        providers.pop(0)
-        options.pop(0)
-
-    return ONNXModelRunner(
-        ort.InferenceSession(
-            model_path,
-            sess_options=get_ort_session_options(model_type),
-            providers=providers,
-            provider_options=options,
+            model_type=model_type,
         ),
-        model_type=model_type,
     )

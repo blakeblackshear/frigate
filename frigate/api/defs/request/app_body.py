@@ -10,6 +10,8 @@ class AppConfigSetBody(BaseModel):
     update_topic: str | None = None
     config_data: dict[str, Any] | None = None
     skip_save: bool = False
+    # paths rewritten whole, so a map saves in the order sent
+    replace_paths: list[str] = Field(default_factory=list)
 
 
 class GenAIProbeBody(BaseModel):

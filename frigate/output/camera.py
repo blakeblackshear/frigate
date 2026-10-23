@@ -127,12 +127,7 @@ class BroadcastThread(threading.Thread):
                         and ws.environ["PATH_INFO"] == f"/{self.camera}"
                         and ws_has_camera_access(ws, self.camera, self.config)
                     ):
-                        try:
-                            ws.send(buf, binary=True)
-                        except ValueError:
-                            pass
-                        except (BrokenPipeError, ConnectionResetError) as e:
-                            logger.debug(f"Websocket unexpectedly closed {e}")
+                        ws.send(buf, binary=True)
             elif self.converter.process.poll() is not None:
                 break
 

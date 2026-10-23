@@ -127,7 +127,7 @@ export default function ClassificationModelWizardDialog({
         await axios.delete(
           `/classification/${wizardState.step1Data.modelName}`,
         );
-      } catch (error) {
+      } catch {
         // Silently fail - user is already cancelling
       }
     }

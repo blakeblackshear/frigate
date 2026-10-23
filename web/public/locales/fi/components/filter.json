@@ -87,5 +87,9 @@
     "toast": {
       "error": "Seurattujen kohteiden poistaminen epäonnistui: {{errorMessage}}"
     }
+  },
+  "attributes": {
+    "label": "Luokitusominaisuudet",
+    "all": "Kaikki ominaisuudet"
   }
 }

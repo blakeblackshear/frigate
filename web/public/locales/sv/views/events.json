@@ -16,7 +16,6 @@
     }
   },
   "documentTitle": "Granska - Frigate",
-  "timeline": "Tidslinje",
   "events": {
     "noFoundForTimePeriod": "Inga händelser hittades för den här tidsperioden.",
     "aria": "Välj händelse",
@@ -39,8 +38,6 @@
   "detected": "upptäckt",
   "selected_one": "{{count}} valt",
   "selected_other": "{{count}} valda",
-  "suspiciousActivity": "Misstänkt aktivitet",
-  "threateningActivity": "Hotande aktivitet",
   "detail": {
     "noDataFound": "Inga detaljerade data att granska",
     "aria": "Växla detaljvy",

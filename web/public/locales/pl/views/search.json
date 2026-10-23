@@ -47,8 +47,6 @@
       "title": "Jak używać filtrów tekstowych",
       "desc": {
         "text": "Filtry pomagają zawęzić wyniki wyszukiwania. Oto jak używać ich w polu wejściowym:",
-        "example": "Przykład: <code className=\"text-primary\">cameras:front_door label:person before:01012024 time_range:3:00PM-4:00PM </code>",
-        "step": "<ul className=\"list-disc pl-5 text-sm text-primary-variant\"><li>Wpisz nazwę filtra, a następnie dwukropek (np., \"kamery:\").</li><li>Wybierz wartość z sugestii lub wpisz własną.</li><li>Używaj wielu filtrów, dodając je jeden po drugim z odstępem pomiędzy.</li><li>Filtry dat (przed: i po:) używają formatu <em>{{DateFormat}}</em>.</li><li>Filtr zakresu czasu używa formatu <em>{{exampleTime}}</em>.</li><li>Usuwaj filtry klikając 'x' obok nich.</li></ul>",
         "step2": "Wybierz wartość z sugestii lub wpisz własną.",
         "step3": "Użyj kilku filtrów dodając jeden po drugim i oddzielając je spacją.",
         "exampleLabel": "Przykład:",

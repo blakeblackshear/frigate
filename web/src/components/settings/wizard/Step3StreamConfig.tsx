@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useTranslation } from "react-i18next";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { LuPlus, LuTrash2, LuX } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import axios from "axios";
@@ -26,12 +26,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
-import { isMobile } from "react-device-detect";
+import { isIOS, isMobile, isSafari } from "react-device-detect";
 import {
   LuInfo,
   LuExternalLink,
   LuCheck,
   LuChevronsUpDown,
+  LuChevronDown,
+  LuChevronRight,
+  LuEye,
+  LuEyeOff,
 } from "react-icons/lu";
 import { Link } from "react-router-dom";
 import { useDocDomain } from "@/hooks/use-doc-domain";
@@ -44,6 +48,19 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { hevcRecordingStreamId } from "@/utils/cameraUtil";
+
+// Recording the sub stream from the same stream as record would just
+// re-record the main stream, so the two roles are mutually exclusive.
+const CONFLICTING_ROLES: Partial<Record<StreamRole, StreamRole>> = {
+  record: "record_sub",
+  record_sub: "record",
+};
 
 type Step3StreamConfigProps = {
   wizardData: Partial<WizardFormData>;
@@ -64,6 +81,53 @@ export default function Step3StreamConfig({
   const { getLocaleDocUrl } = useDocDomain();
   const [testingStreams, setTestingStreams] = useState<Set<string>>(new Set());
   const [openCombobox, setOpenCombobox] = useState<string | null>(null);
+  const [showOnvifPassword, setShowOnvifPassword] = useState(false);
+  const [onvifDetailsOpen, setOnvifDetailsOpen] = useState(false);
+
+  const onvif = wizardData.onvif;
+  const ptzSupported = wizardData.probeResult?.ptz_supported === true;
+  const panTiltSupported = wizardData.probeResult?.pan_tilt_supported === true;
+  const onvifInvalid = !!onvif?.enabled && (!onvif.host?.trim() || !onvif.port);
+
+  // Seed the PTZ pane once from the successful ONVIF probe
+  useEffect(() => {
+    // run only on first entry and never clobber a user's later toggle-off or edits
+    if (ptzSupported && wizardData.onvif === undefined) {
+      onUpdate({
+        onvif: {
+          enabled: panTiltSupported,
+          host: wizardData.host ?? "",
+          port: wizardData.onvifPort ?? 8000,
+          user: wizardData.username ?? "",
+          password: wizardData.password ?? "",
+        },
+      });
+    }
+  }, [
+    ptzSupported,
+    panTiltSupported,
+    wizardData.onvif,
+    wizardData.host,
+    wizardData.onvifPort,
+    wizardData.username,
+    wizardData.password,
+    onUpdate,
+  ]);
+
+  const updateOnvif = useCallback(
+    (updates: Partial<NonNullable<WizardFormData["onvif"]>>) => {
+      onUpdate({
+        onvif: {
+          enabled: false,
+          host: "",
+          port: 8000,
+          ...wizardData.onvif,
+          ...updates,
+        },
+      });
+    },
+    [onUpdate, wizardData.onvif],
+  );
 
   const streams = useMemo(() => wizardData.streams || [], [wizardData.streams]);
 
@@ -163,9 +227,12 @@ export default function Step3StreamConfig({
         const newRoles = stream.roles.filter((r) => r !== role);
         updateStream(streamId, { roles: newRoles });
       } else {
-        // Check if role is already used in another stream
         const usedRoles = getUsedRolesExcludingStream(streamId);
-        if (!usedRoles.has(role)) {
+        const conflictingRole = CONFLICTING_ROLES[role];
+        const hasConflict = conflictingRole
+          ? stream.roles.includes(conflictingRole)
+          : false;
+        if (!usedRoles.has(role) && !hasConflict) {
           // Allow adding the role
           const newRoles = [...stream.roles, role];
           updateStream(streamId, { roles: newRoles });
@@ -322,6 +389,22 @@ export default function Step3StreamConfig({
   );
 
   const hasDetectRole = streams.some((s) => s.roles.includes("detect"));
+
+  const appleCompatibilityStreamId = useMemo(
+    () => hevcRecordingStreamId(streams),
+    [streams],
+  );
+
+  useEffect(() => {
+    // undefined, not false: a deliberate toggle-off must not be re-seeded
+    if (
+      (isSafari || isIOS) &&
+      appleCompatibilityStreamId &&
+      wizardData.appleCompatibility === undefined
+    ) {
+      onUpdate({ appleCompatibility: true });
+    }
+  }, [appleCompatibilityStreamId, wizardData.appleCompatibility, onUpdate]);
 
   return (
     <div className="space-y-6">
@@ -618,6 +701,10 @@ export default function Step3StreamConfig({
                             {t("cameraWizard.step3.rolesPopover.record")}
                           </div>
                           <div>
+                            <strong>record_sub</strong> -{" "}
+                            {t("cameraWizard.step3.rolesPopover.record_sub")}
+                          </div>
+                          <div>
                             <strong>audio</strong> -{" "}
                             {t("cameraWizard.step3.rolesPopover.audio")}
                           </div>
@@ -639,25 +726,35 @@ export default function Step3StreamConfig({
                 </div>
                 <div className="rounded-lg bg-background p-3">
                   <div className="flex flex-wrap gap-2">
-                    {(["detect", "record", "audio"] as const).map((role) => {
-                      const isUsedElsewhere = getUsedRolesExcludingStream(
-                        stream.id,
-                      ).has(role);
-                      const isChecked = stream.roles.includes(role);
-                      return (
-                        <div
-                          key={role}
-                          className="flex w-full items-center justify-between"
-                        >
-                          <span className="text-sm capitalize">{role}</span>
-                          <Switch
-                            checked={isChecked}
-                            onCheckedChange={() => toggleRole(stream.id, role)}
-                            disabled={!isChecked && isUsedElsewhere}
-                          />
-                        </div>
-                      );
-                    })}
+                    {(["detect", "record", "record_sub", "audio"] as const).map(
+                      (role) => {
+                        const isUsedElsewhere = getUsedRolesExcludingStream(
+                          stream.id,
+                        ).has(role);
+                        const conflictingRole = CONFLICTING_ROLES[role];
+                        const hasConflict = conflictingRole
+                          ? stream.roles.includes(conflictingRole)
+                          : false;
+                        const isChecked = stream.roles.includes(role);
+                        return (
+                          <div
+                            key={role}
+                            className="flex w-full items-center justify-between"
+                          >
+                            <span className="text-sm capitalize">{role}</span>
+                            <Switch
+                              checked={isChecked}
+                              onCheckedChange={() =>
+                                toggleRole(stream.id, role)
+                              }
+                              disabled={
+                                !isChecked && (isUsedElsewhere || hasConflict)
+                              }
+                            />
+                          </div>
+                        );
+                      },
+                    )}
                   </div>
                 </div>
               </div>
@@ -698,7 +795,7 @@ export default function Step3StreamConfig({
                     </PopoverContent>
                   </Popover>
                 </div>
-                <div className="rounded-lg bg-background p-3">
+                <div className="space-y-3 rounded-lg bg-background p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">
                       {t("cameraWizard.step3.go2rtc")}
@@ -708,6 +805,27 @@ export default function Step3StreamConfig({
                       onCheckedChange={() => setRestream(stream.id)}
                     />
                   </div>
+
+                  {appleCompatibilityStreamId === stream.id && (
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          {t("cameraWizard.step3.appleCompatibility.title")}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            "cameraWizard.step3.appleCompatibility.description",
+                          )}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={wizardData.appleCompatibility ?? false}
+                        onCheckedChange={(checked) =>
+                          onUpdate({ appleCompatibility: checked })
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -725,9 +843,133 @@ export default function Step3StreamConfig({
         </Button>
       </div>
 
+      {ptzSupported && (
+        <Card className="bg-secondary text-primary">
+          <CardContent className="space-y-2 p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h4 className="font-medium">
+                  {t("cameraWizard.step3.ptz.title")}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {t("cameraWizard.step3.ptz.detectedNote")}
+                </p>
+              </div>
+              <Switch
+                checked={onvif?.enabled ?? false}
+                onCheckedChange={(checked) => updateOnvif({ enabled: checked })}
+              />
+            </div>
+
+            {onvif?.enabled && (
+              <Collapsible
+                open={onvifDetailsOpen || onvifInvalid}
+                onOpenChange={setOnvifDetailsOpen}
+              >
+                <CollapsibleTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-start gap-2 pl-0 hover:bg-transparent"
+                  >
+                    {onvifDetailsOpen || onvifInvalid ? (
+                      <LuChevronDown className="size-4" />
+                    ) : (
+                      <LuChevronRight className="size-4" />
+                    )}
+                    {t("cameraWizard.step3.ptz.connectionDetails")}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="mt-2 space-y-4 rounded-lg bg-background p-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-primary-variant">
+                      {t("cameraWizard.step3.ptz.host")}
+                    </Label>
+                    <Input
+                      value={onvif.host}
+                      onChange={(e) => updateOnvif({ host: e.target.value })}
+                      className="h-8"
+                      placeholder="192.168.1.100"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-primary-variant">
+                      {t("cameraWizard.step3.ptz.port")}
+                    </Label>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      value={onvif.port || ""}
+                      onChange={(e) => {
+                        const parsed = parseInt(e.target.value, 10);
+                        updateOnvif({ port: isNaN(parsed) ? 0 : parsed });
+                      }}
+                      className="h-8"
+                      placeholder="8000"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-primary-variant">
+                      {t("cameraWizard.step3.ptz.username")}
+                    </Label>
+                    <Input
+                      value={onvif.user ?? ""}
+                      onChange={(e) => updateOnvif({ user: e.target.value })}
+                      className="h-8"
+                      placeholder={t("cameraWizard.step1.usernamePlaceholder")}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-primary-variant">
+                      {t("cameraWizard.step3.ptz.password")}
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        type={showOnvifPassword ? "text" : "password"}
+                        value={onvif.password ?? ""}
+                        onChange={(e) =>
+                          updateOnvif({ password: e.target.value })
+                        }
+                        className="h-8 pr-10"
+                        placeholder={t(
+                          "cameraWizard.step1.passwordPlaceholder",
+                        )}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        onClick={() => setShowOnvifPassword((s) => !s)}
+                      >
+                        {showOnvifPassword ? (
+                          <LuEyeOff className="size-4" />
+                        ) : (
+                          <LuEye className="size-4" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {!hasDetectRole && (
         <div className="rounded-lg border border-danger/50 p-3 text-sm text-danger">
           {t("cameraWizard.step3.detectRoleWarning")}
+        </div>
+      )}
+
+      {onvifInvalid && (
+        <div className="rounded-lg border border-danger/50 p-3 text-sm text-danger">
+          {t("cameraWizard.step3.ptz.hostRequiredWarning")}
         </div>
       )}
 

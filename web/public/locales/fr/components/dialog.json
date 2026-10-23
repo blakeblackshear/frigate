@@ -16,18 +16,6 @@
         "desc": "Les objets situés dans des zones à ignorer ne doivent pas être signalés comme de faux positifs, car cela nuirait à la précision du modèle."
       },
       "review": {
-        "true": {
-          "label": "Confirmez cette étiquette pour Frigate Plus",
-          "true_one": "C'est un {{label}}",
-          "true_many": "Ce sont des {{label}}",
-          "true_other": "Ce sont des {{label}}"
-        },
-        "false": {
-          "false_one": "Ceci n'est pas un {{label}}",
-          "false_many": "Ceux-ci ne sont pas des {{label}}",
-          "false_other": "Ceux-ci ne sont pas des {{label}}",
-          "label": "Ne pas confirmer cette étiquette pour Frigate Plus"
-        },
         "state": {
           "submitted": "Soumis"
         },
@@ -67,7 +55,6 @@
       "error": {
         "failed": "Échec de la mis en attente de l'exportation : {{error}}",
         "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début.",
-        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide.",
         "noValidTimeSelected": "Interval de temps invalide"
       },
       "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
@@ -147,12 +134,18 @@
         "started_one": "Un export a démarré. Ouverture du dossier en cours.",
         "started_many": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
         "started_other": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
-        "startedNoCase_one": "Un export a démarré.",
-        "startedNoCase_many": "{{count}} exports ont démarré.",
-        "startedNoCase_other": "{{count}} exports ont démarré.",
         "partial": "{{successful}} exportations sur {{total}} lancées. Échecs : {{failedItems}}",
         "failed": "Échec du démarrage des exports {{total}}. Échec : {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualité",
+      "auto": "Automatique",
+      "main": "Originale",
+      "sub": "Basse",
+      "autoDesc": "Utilise le flux principal et bascule vers le flux secondaire de moindre qualité lorsque le flux principal n'est pas disponible.",
+      "mainDesc": "Exporte uniquement le flux principal dans sa qualité d'origine. Les plages temporelles durant lesquelles le flux principal n'est pas disponible seront absentes.",
+      "subDesc": "Exporte uniquement le sous-flux de qualité inférieure. Les plages horaires durant lesquelles le sous-flux n'est pas disponible seront absentes."
     }
   },
   "search": {
@@ -174,7 +167,6 @@
     "restreaming": {
       "disabled": "La rediffusion n'est pas activée pour cette caméra.",
       "desc": {
-        "readTheDocumentation": "Lire la documentation",
         "title": "Configurez go2rtc pour bénéficier d'options de visualisation en direct supplémentaires et de l'audio pour cette caméra."
       }
     },
@@ -199,7 +191,8 @@
       "export": "Exporter",
       "markAsReviewed": "Marquer comme traité",
       "deleteNow": "Supprimer maintenant",
-      "markAsUnreviewed": "Marquer comme non traité"
+      "markAsUnreviewed": "Marquer comme non traité",
+      "generateDescription": "Générer une description"
     },
     "shareTimestamp": {
       "label": "Partager cette date",
@@ -208,6 +201,12 @@
       "custom": "Horodatage personnalisé",
       "button": "Partager le lien de l'horodatage",
       "shareTitle": "Horodatage de la revue Frigate : {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Une description générée par IA a été demandée pour cet élément à examiner.",
+        "error": "Échec de la demande de description : {{error}}"
+      }
     }
   },
   "imagePicker": {
