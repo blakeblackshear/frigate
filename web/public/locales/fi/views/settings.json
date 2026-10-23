@@ -30,7 +30,9 @@
     "triggers": "Laukaisimet",
     "cameraManagement": "Kamerahallinta",
     "cameraReview": "Tarkasta",
-    "roles": "Roolit"
+    "roles": "Roolit",
+    "profiles": "Profiilit",
+    "system": "Järjestelmä"
   },
   "dialog": {
     "unsavedChanges": {
@@ -43,7 +45,7 @@
     "noCamera": "Ei kameraa"
   },
   "general": {
-    "title": "Yleiset asetukset",
+    "title": "Käyttöliittymäasetukset",
     "liveDashboard": {
       "automaticLiveView": {
         "label": "Automaattinen reaaliaika-näkymä",
@@ -166,7 +168,7 @@
       "name": {
         "title": "Nimi",
         "inputPlaceHolder": "Anna nimi…",
-        "tips": "Nimen on oltava vähintään kaksi merkkiä pitkä, eikä se saa olla kameran tai toisen vyöhykkeen nimi."
+        "tips": "Nimen on oltava vähintään kaksi merkkiä pitkä, vähintään yksi kirjain, eikä se saa olla kameran tai toisen vyöhykkeen nimi tällä kameralla."
       },
       "point_one": "{{count}} piste",
       "point_other": "{{count}} pisteet",
@@ -186,7 +188,7 @@
         }
       },
       "toast": {
-        "success": "Vyöhyke ({{zoneName}}) on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi."
+        "success": "Vyöhyke ({{zoneName}}) on tallennettu."
       }
     },
     "toast": {
@@ -202,52 +204,63 @@
       "point_one": "{{count}} piste",
       "point_other": "{{count}} pisteet",
       "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan.",
-      "label": "Liikepeitto",
+      "label": "Liikemaski",
       "context": {
-        "title": "Liikepeittoja käytetään estämään ei-toivottujen liiketyyppien (esimerkiksi puiden oksat, kameroiden aikaleimat) aiheuttamat tunnistukset. Liikepeittoja tulisi käyttää <em>hyvin säästeliäästi</em>, sillä liiallinen maskaus vaikeuttaa kohteiden seurantaa."
+        "title": "Liikemaskeja käytetään estämään ei-toivottujen liiketyyppien (esimerkiksi puiden oksat, kameroiden aikaleimat) aiheuttamat tunnistukset. Liikemaskeja tulisi käyttää <em>hyvin säästeliäästi</em>, sillä ylimaskaaminen vaikeuttaa kohteiden seurantaa."
       },
-      "documentTitle": "Muokkaa liikepeittoa - Frigate",
+      "documentTitle": "Muokkaa liikemaskia - Frigate",
       "desc": {
-        "title": "Liikepeittoa käytetään estämään ei-toivottujen liiketyyppien aiheuttamat tunnistukset. Liiallinen peittäminen vaikeuttaa kohteiden seurantaa.",
+        "title": "Liikemaskia käytetään estämään ei-toivottujen liiketyyppien aiheuttamat tunnistukset. Liiallinen peittäminen vaikeuttaa kohteiden seurantaa.",
         "documentation": "Dokumentaatio"
       },
-      "add": "Uusi liikepeitto",
-      "edit": "Muokkaa liikepeittoa",
+      "add": "Uusi liikemaski",
+      "edit": "Muokkaa liikemaskia",
       "polygonAreaTooLarge": {
-        "title": "Liikepeitto peittää {{polygonArea}}% kameran kuvasta. Suuria liikemaskeja ei suositella.",
-        "tips": "Liikepeitto eivät estä kohteiden havaitsemista. Sinun tulisi sen sijaan käyttää vaadittua vyöhykettä."
+        "title": "Liikemaski peittää {{polygonArea}}% kameran kuvasta. Suuria liikemaskeja ei suositella.",
+        "tips": "Liikemaskit eivät estä kohteiden havaitsemista. Sinun tulisi sen sijaan käyttää vaadittua vyöhykettä."
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi.",
-          "noName": "Liikepeitto on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi."
+          "title": "{{polygonName}} on tallennettu.",
+          "noName": "Liikemaski on tallennettu."
         }
       }
     },
     "objectMasks": {
       "point_one": "{{count}} piste",
       "point_other": "{{count}} pisteet",
-      "label": "Kohdepeitot",
-      "context": "Objektisuodatinpeittoja käytetään suodattamaan pois väärät positiiviset tulokset tietylle kohdetyypille sijainnin perusteella.",
+      "label": "Kohdemaskit",
+      "context": "Kohdesuodatinpeittoja käytetään suodattamaan pois väärät positiiviset tulokset tietylle kohdetyypille sijainnin perusteella.",
       "objects": {
         "title": "Kohteet",
-        "desc": "Kohdetyyppi, jota käytetään tähän kohdepeittoon.",
+        "desc": "Kohdetyyppi, jota käytetään tähän kohdemaskiin.",
         "allObjectTypes": "Kaikki kohdetyypit"
       },
       "toast": {
         "success": {
-          "title": "{{polygonName}} on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi.",
-          "noName": "Kohdepeitto on tallennettu. Käynnistä Frigatti uudelleen muutosten käyttöönottamiseksi."
+          "title": "{{polygonName}} on tallennettu.",
+          "noName": "Kohdemaski on tallennettu."
         }
       },
-      "documentTitle": "Muokkaa kohdepeittoa - Frigate",
+      "documentTitle": "Muokkaa kohdemaskia - Frigate",
       "desc": {
-        "title": "Objektisuodatinpeittoja käytetään suodattamaan pois väärät positiiviset tulokset tietylle kohdetyypille sijainnin perusteella.",
+        "title": "Objektisuodatinmaskeja käytetään suodattamaan pois väärät positiiviset tulokset tietylle kohdetyypille sijainnin perusteella.",
         "documentation": "Dokumentaatio"
       },
       "add": "Lisää kohdepeitto",
       "edit": "Muokkaa kohdepeittoa",
-      "clickDrawPolygon": "Napsauta piirtääksesi monikulmion kuvaan."
+      "clickDrawPolygon": "Klikkaa piirtääksesi monikulmion kuvaan.",
+      "name": {
+        "title": "Nimi",
+        "description": "Vapaaehtoinen selkokielinen nimi tälle kohdemaskille.",
+        "placeholder": "Syötä nimi..."
+      }
+    },
+    "masks": {
+      "enabled": {
+        "title": "Käytössä",
+        "description": "Onko tämä maski käytössä config tiedostossa. Mikäli ei, MQTT ei voi sitä aktivoida. Käytöstä poistettuja maskeja ei huomioida suoritusaikana."
+      }
     }
   },
   "debug": {
@@ -286,7 +299,8 @@
       "title": "Liikelaatikot",
       "desc": "Näytä laatikot alueiden ympärillä, joilla liikettä havaitaan",
       "tips": "<p><strong>Liikelaatikot</strong></p><br><p>Punaiset laatikot peittävät ruudun alueet, joilla liikettä havaitaan parhaillaan.</p>"
-    }
+    },
+    "title": "Vianmääritys"
   },
   "users": {
     "title": "Käyttäjät",
@@ -295,7 +309,7 @@
       "desc": "Hallinnoi tämän Frigate-instanssin käyttäjätilejä."
     },
     "addUser": "Lisää käyttäjä",
-    "updatePassword": "Päivitä salasana",
+    "updatePassword": "Nollaa salasana",
     "toast": {
       "success": {
         "roleUpdated": "Rooli päivitetty käyttäjälle {{user}}",
@@ -315,7 +329,7 @@
       "actions": "Toiminnot",
       "noUsers": "Käyttäjiä ei löytynyt.",
       "changeRole": "Vaihda käyttäjäroolia",
-      "password": "Salasana",
+      "password": "Nollaa salasana",
       "deleteUser": "Poista tili",
       "role": "Rooli"
     },
@@ -335,19 +349,32 @@
     }
   },
   "motionDetectionTuner": {
-    "title": "Liiketunnistuksen säätäminen",
+    "title": "Liiketunnistuksen säätö",
     "desc": {
-      "title": "Frigate käyttää liiketunnistusta ensimmäisenä tarkistuksena nähdäkseen, tapahtuuko kuvassa jotain, mikä kannattaisi tarkistaa objektitunnistuksella.",
+      "title": "Frigate käyttää liiketunnistusta ensimmäisenä tarkistuksena nähdäkseen, tapahtuuko kuvassa jotain, mikä kannattaisi tarkistaa kohdetunnistuksella.",
       "documentation": "Lue liikkeensäädön opas"
     },
     "Threshold": {
-      "title": "Kynnys"
+      "title": "Kynnys",
+      "desc": "Kynnysarvo määrittelee paljonko pikselin luminenssin pitää muuttua jotta se tulkitaan liikkeeksi. <em>Oletus: 30</em>"
+    },
+    "unsavedChanges": "Tallentamatta olevat liiketunnistuksen säädöt ({{camera}})",
+    "contourArea": {
+      "title": "Ääriviivan pinta-ala",
+      "desc": "Ääriviivan pinta-alaa käytetään päättämään mitkä muuttuneet pikseliryhnmät luokitellaan liikkeeksi.<em>Oletus: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Paranna kontrastia",
+      "desc": "Paranna tummien näkymien kontrastia. <em>Oletus: ON</em>"
+    },
+    "toast": {
+      "success": "Liikeasetukset tallennettu."
     }
   },
   "triggers": {
     "documentTitle": "Laukaisimet",
     "management": {
-      "title": "Laukaisimen hallinta"
+      "title": "Laukaisimet"
     },
     "addTrigger": "Lisää laukaisin",
     "table": {
@@ -384,10 +411,10 @@
       "form": {
         "name": {
           "title": "Nimi",
-          "placeholder": "Syötä laukaisimen nimi",
+          "placeholder": "Nimeä laukaisin",
           "error": {
-            "minLength": "Nimen on oltava vähintään 2 merkkiä pitkä.",
-            "invalidCharacters": "Nimi voi sisältää vain kirjaimia, numeroita, alaviivoja ja väliviivoja.",
+            "minLength": "Kentän on oltava vähintään 2 merkkiä pitkä.",
+            "invalidCharacters": "Kenttä voi sisältää vain kirjaimia, numeroita, alaviivoja ja väliviivoja.",
             "alreadyExists": "Tällä nimellä oleva laukaisin on jo olemassa tälle kameralle."
           }
         },
@@ -400,9 +427,9 @@
         },
         "content": {
           "title": "Sisältö",
-          "imagePlaceholder": "Valitse kuva",
+          "imagePlaceholder": "Valitse pikkukuva",
           "textPlaceholder": "Kirjoita tekstisisältö",
-          "imageDesc": "Valitse kuva, joka laukaisee tämän toiminnon, kun samankaltainen kuva havaitaan.",
+          "imageDesc": "Näytetään vain 100 viimeisintä pikkukuvaa. Mikäli et löydä haluamaasi, tarkastele aikaisempia kohteita Selaimessa ja aseta laukaisin siellä menuvalikosta.",
           "textDesc": "Syötä teksti, joka laukaisee tämän toiminnon, kun vastaava seurattavan kohteen kuvaus havaitaan.",
           "error": {
             "required": "Sisältö on pakollinen."
@@ -417,7 +444,7 @@
         },
         "actions": {
           "title": "Toiminnot",
-          "desc": "Oletuksena Frigate lähettää MQTT-viestin kaikille laukaisimille. Valitse lisätoiminto, joka suoritetaan, kun tämä laukaisija laukeaa.",
+          "desc": "Oletuksena Frigate lähettää MQTT-viestin kaikille laukaisimille. Alatunnisteet lisäävät laukaisimen nimen kohdetunnisteeseen. Ominaisuuksia voi etsiä metadatasta, joka on tallennettu erikseen seurattavan kohteen metadataan.",
           "error": {
             "min": "Vähintään yksi toiminto on valittava."
           }
@@ -454,7 +481,7 @@
       "desc": "Semanttisen haun avulla Frigatessa voit etsiä seurattavia kohteita tarkistettavista kohteista joko kuvan, käyttäjän määrittämän tekstikuvauksen tai automaattisesti luodun kuvauksen avulla.",
       "reindexNow": {
         "label": "Uudelleenindeksoi nyt",
-        "desc": "Uudelleindeksointi luo uudelleen upotukset kaikille seuratuille objekteille. Tämä prosessi suoritetaan taustalla ja voi kuormittaa prosessorin maksimiin ja viedä melko paljon aikaa riippuen seurattujen objektien määrästä.",
+        "desc": "Uudelleindeksointi luo uudelleen upotukset kaikille seuratuille kohteille. Prosessi suoritetaan taustalla ja voi kuormittaa prosessorin maksimiin ja viedä kohtalaisesti aikaa riippuen seurattujen kohteiden määrästä.",
         "confirmTitle": "Vahvista uudelleenindeksointi"
       }
     },

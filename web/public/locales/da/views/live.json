@@ -2,7 +2,12 @@
   "documentTitle.withCamera": "{{camera}} - Live - Frigate",
   "twoWayTalk": {
     "enable": "Aktivér tovejskommunikation",
-    "disable": "Deaktiver tovejskommunikation"
+    "disable": "Deaktiver tovejskommunikation",
+    "requiresWebRTC": "Tovejskommunikation kræver WebRTC, hvilket ikke er tilgængeligt",
+    "error": {
+      "microphone": "Tovejskommunikation kunne ikke få adgang til din mikrofon",
+      "refused": "Tovejskommunikation kunne ikke startes. Se browserkonsollen for detaljer."
+    }
   },
   "cameraAudio": {
     "enable": "Aktivér kameralyd",
@@ -14,7 +19,8 @@
       "clickMove": {
         "label": "Klik i billedrammen for at centrere kameraet",
         "enable": "Aktivér klik for at flytte",
-        "disable": "Deaktiver klik for at flytte"
+        "disable": "Deaktiver klik for at flytte",
+        "enableWithZoom": "Aktivér klik for at flytte / træk for at zoome"
       },
       "left": {
         "label": "Flyt PTZ-kameraet til venstre"
@@ -62,7 +68,8 @@
   },
   "recording": {
     "enable": "Aktivér optagelse",
-    "disable": "Deaktiver optagelse"
+    "disable": "Deaktiver optagelse",
+    "disabledInConfig": "Optagelse skal først aktiveres i Indstillinger for dette kamera."
   },
   "snapshots": {
     "enable": "Aktivér Snapshots",
@@ -107,6 +114,14 @@
     "failedToStart": "Manuel optagelse fejlede.",
     "recordDisabledTips": "Da optagelsen er deaktiveret eller begrænset i konfig for dette kamera, gemmes der kun et snapshot.",
     "end": "Afslut manuel optagelse",
-    "ended": "Afsluttet manuel optagelse."
+    "ended": "Afsluttet manuel optagelse.",
+    "failedToEnd": "Kunne ikke afslutte manuel optagelse."
+  },
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
+  "camera": {
+    "turnOn": "Tænd kamera",
+    "turnOff": "Sluk kamera"
   }
 }

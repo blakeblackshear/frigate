@@ -164,11 +164,12 @@
       },
       "unavailable": {
         "browser": "Browserul tău nu suportă WebRTC.",
-        "not-configured": "WebRTC nu este configurat. Setează candidații webrtc sau ice_servers în go2rtc.",
+        "not-configured": "Pentru a activa, adaugă IP-ul acestui server:8555 în go2rtc → webrtc → candidates.",
         "unreachable": "WebRTC nu s-a putut conecta. Verifică dacă portul 8555 este accesibil și dacă serverul STUN/TURN este corect.",
         "video-codec": "Codecul video al acestui stream nu este suportat de WebRTC în acest browser.",
         "audio-codec": "Codecul audio al acestui stream nu este suportat de WebRTC. Transcodifică în opus sau G.711 cu go2rtc.",
-        "checking": "Se verifică disponibilitatea WebRTC…"
+        "checking": "Se verifică disponibilitatea WebRTC…",
+        "notConfiguredOptional": "Opțional: vizualizarea live funcționează și fără el. WebRTC este necesar în principal pentru comunicare bidirecțională."
       }
     },
     "auto": {

@@ -8,12 +8,12 @@
   "button": {
     "deleteImages": "Poista kuvat",
     "trainModel": "Kouluta malli",
-    "deleteClassificationAttempts": "Poista luokitellut kuvat",
+    "deleteClassificationAttempts": "Poista luokittelukuvat",
     "deleteCategory": "Poista luokka",
-    "addClassification": "Lisää luokitus",
+    "addClassification": "Lisää luokittelu",
     "deleteModels": "Poista mallit",
     "editModel": "Muokkaa mallia",
-    "renameCategory": "Nimeä luokka uudelleen"
+    "renameCategory": "Uudelleennimeä luokka"
   },
   "toast": {
     "success": {
@@ -35,5 +35,9 @@
       "deleteModelFailed": "Mallin poistaminen epäonnistui: {{errorMessage}}",
       "categorizeFailed": "Kuvan luokittelu epäonnistui: {{errorMessage}}"
     }
+  },
+  "tooltip": {
+    "trainingInProgress": "Malli kouluttautuu parhaillaan",
+    "noNewImages": "Ei uusia kuvia koulutusta varten. Luokittele ensin lisää kuvia aineistossa."
   }
 }
