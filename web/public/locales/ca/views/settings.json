@@ -662,14 +662,16 @@
         "title": "Crear un nou usuari",
         "confirmPassword": "Siusplau, confirma la contrasenya",
         "usernameOnlyInclude": "El nom d'usuari només pot contenir lletres, números, . o _",
-        "desc": "Afegeix un compte d'usuari nou i especifica un rol per a l'accés a les àrees de la interfície d'usuari de Frigate."
+        "desc": "Afegeix un compte d'usuari nou i especifica un rol per a l'accés a les àrees de la interfície d'usuari de Frigate.",
+        "usernameOnlyDots": "El nom d'usuari no pot contenir només punts"
       }
     },
     "title": "Usuaris",
     "addUser": "Afegir usuari",
     "management": {
       "title": "Gestió d'usuaris",
-      "desc": "Gestioneu els comptes d'usuari d'aquesta instància de Frigate."
+      "desc": "Gestioneu els comptes d'usuari d'aquesta instància de Frigate.",
+      "authDisabled": "L'autenticació integrada està desactivada. Aquests comptes només s'utilitzen per iniciar sessió una vegada que està habilitat."
     },
     "updatePassword": "Restableix la contrasenya"
   },
@@ -706,7 +708,8 @@
         "ariaLabel": "Filtra els models per tipus",
         "baseModels": "Models de base",
         "fineTunedModels": "Models ajustats"
-      }
+      },
+      "showIncompatible": "Mostra models incompatibles"
     },
     "apiKey": {
       "plusLink": "Llegeix més sobre Frigate+",
