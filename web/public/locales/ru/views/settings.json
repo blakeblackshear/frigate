@@ -49,7 +49,7 @@
     "systemTelemetry": "Телеметрия",
     "systemBirdseye": "Режим Birdseye",
     "systemFfmpeg": "FFmpeg",
-    "systemDetectorsAndModel": "Детекторы и модель",
+    "systemDetectorsAndModel": "Модели обнаружения",
     "systemMqtt": "MQTT",
     "systemGo2rtcStreams": "потоки go2rtc",
     "integrationSemanticSearch": "Семантический поиск",
@@ -237,7 +237,8 @@
         "title": "Создать нового пользователя",
         "usernameOnlyInclude": "Имя пользователя может включать только буквы, цифры, . или _",
         "desc": "Добавить новую учетную запись пользователя и определить роль для доступа к разделам интерфейса Frigate.",
-        "confirmPassword": "Пожалуйста, подтвердите пароль"
+        "confirmPassword": "Пожалуйста, подтвердите пароль",
+        "usernameOnlyDots": "Имя пользователя не может состоять только из точек"
       }
     },
     "title": "Пользователи",
@@ -1938,5 +1939,8 @@
     "onvif": {
       "autotrackingNoZones": "Для автослежения требуется хотя бы одна зона. Определите зону для этой камеры в Масках/Зонах, затем установите ее как обязательную зону ниже."
     }
+  },
+  "detectionModels": {
+    "title": "Модели обнаружения"
   }
 }

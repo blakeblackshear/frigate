@@ -30,11 +30,14 @@
       }
     },
     "decodedFrames": "Декодированные кадры:",
-    "droppedFrameRate": "Частота пропущенных кадров:"
+    "droppedFrameRate": "Частота пропущенных кадров:",
+    "stream": "Поток:",
+    "streamAuto": "{{stream}} (авто)"
   },
   "toast": {
     "error": {
-      "submitFrigatePlusFailed": "Не удалось отправить кадр в Frigate+"
+      "submitFrigatePlusFailed": "Не удалось отправить кадр в Frigate+",
+      "playRecordingsFailed": "Не удалось воспроизвести записи (ошибка {{code}}): {{message}}"
     },
     "success": {
       "submittedFrigatePlus": "Кадр успешно загружен в Frigate+"
@@ -49,6 +52,10 @@
     "main": "Оригинал",
     "sub": "Низкое",
     "notSupportedBrowser": "Не поддерживается этим браузером",
-    "label": "Качество"
+    "label": "Качество",
+    "noAudio": "Нет звука",
+    "audioRate": "Звук {{rate}} кГц",
+    "audioCodecRate": "{{codec}} {{rate}} кГц",
+    "noRecordings": "Нет записей в этом временном диапазоне"
   }
 }
