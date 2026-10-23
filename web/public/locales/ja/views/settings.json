@@ -1839,8 +1839,8 @@
     "autotracking": {
       "zooming": {
         "disabled": "無効",
-        "absolute": "絶対値",
-        "relative": "相対値"
+        "absolute": "絶対的",
+        "relative": "相対的"
       }
     }
   },
