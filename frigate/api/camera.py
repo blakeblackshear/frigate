@@ -84,9 +84,13 @@ def _is_valid_host(host: str) -> bool:
 
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
 async def go2rtc_streams(request: Request):
-    r = await asyncio.to_thread(requests.get, "http://127.0.0.1:1984/api/streams")
-    if not r.ok:
-        logger.error("Failed to fetch streams from go2rtc")
+    try:
+        r = await asyncio.to_thread(
+            requests.get, "http://127.0.0.1:1984/api/streams", timeout=10
+        )
+        r.raise_for_status()
+    except requests.RequestException as e:
+        logger.error("Failed to fetch streams from go2rtc: %s", e)
         return JSONResponse(
             content=({"success": False, "message": "Error fetching stream data"}),
             status_code=500,
@@ -121,16 +125,21 @@ async def go2rtc_streams(request: Request):
     dependencies=[Depends(require_go2rtc_stream_access)],
 )
 def go2rtc_camera_stream(request: Request, stream_name: str):
-    r = requests.get(
-        "http://127.0.0.1:1984/api/streams",
-        params={
-            "src": stream_name,
-            "video": "all",
-            "audio": "all",
-            "microphone": "",
-        },
-    )
-    if not r.ok:
+    try:
+        r = requests.get(
+            "http://127.0.0.1:1984/api/streams",
+            params={
+                "src": stream_name,
+                "video": "all",
+                "audio": "all",
+                "microphone": "",
+            },
+            # go2rtc probes each source in turn, so one unresponsive source
+            # can take 10s or more
+            timeout=(2, 35),
+        )
+        r.raise_for_status()
+    except requests.RequestException as e:
         camera_config = request.app.frigate_config.cameras.get(stream_name)
 
         if camera_config is None:
@@ -140,7 +149,7 @@ def go2rtc_camera_stream(request: Request, stream_name: str):
                     break
 
         if camera_config and camera_config.enabled:
-            logger.error("Failed to fetch streams from go2rtc")
+            logger.error("Failed to fetch streams from go2rtc: %s", e)
 
         return JSONResponse(
             content=({"success": False, "message": "Error fetching stream data"}),

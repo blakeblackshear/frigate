@@ -149,7 +149,7 @@ export default function CameraInfoDialog({
                                       <span>
                                         {t("cameras.info.resolution")}{" "}
                                         <span className="text-primary">
-                                          t("cameras.info.unknown")
+                                          {t("cameras.info.unknown")}
                                         </span>
                                       </span>
                                     )}

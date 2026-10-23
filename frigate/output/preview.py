@@ -392,18 +392,20 @@ class PreviewRecorder:
     ) -> None:
         self.offline = False
 
-        # always write the first frame
         if self.start_time == 0:
             self.start_time = frame_time
-            self.output_frames.append(frame_time)
-            self.write_frame_to_cache(frame_time, frame)
+
+            if self.config.record.enabled:
+                self.output_frames.append(frame_time)
+                self.write_frame_to_cache(frame_time, frame)
+
             return
 
         # check if PREVIEW clip should be generated and cached frames reset
         if frame_time >= self.segment_end:
             if len(self.output_frames) > 0:
                 # save last frame to ensure consistent duration
-                if self.config.record:
+                if self.config.record.enabled:
                     self.output_frames.append(frame_time)
                     self.write_frame_to_cache(frame_time, frame)
 

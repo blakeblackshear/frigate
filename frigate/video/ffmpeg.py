@@ -483,16 +483,18 @@ class CameraWatchdog(threading.Thread):
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
                 self.fps_overflow_count += 1
 
-                if self.fps_overflow_count == 3:
+                # Require 3 retry intervals of sustained overflow. camera_fps
+                # averages the last 10s, so one burst of buffered frames stays
+                # over the limit for several 1s ticks.
+                if self.fps_overflow_count >= 3 * self.sleeptime and can_restart:
                     self.detect_status.send("offline", now)
                     self.fps_overflow_count = 0
                     self.camera_fps.value = 0
                     self.logger.info(
                         f"{self.config.name} exceeded fps limit. Exiting ffmpeg..."
                     )
-                    if can_restart:
-                        self.reset_capture_thread()
-                        last_restart_time = now
+                    self.reset_capture_thread()
+                    last_restart_time = now
             elif now - self.capture_thread.current_frame.value > 20:
                 self.detect_status.send("offline", now)
                 self.camera_fps.value = 0
