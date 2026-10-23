@@ -66,6 +66,10 @@ class BaseLocalDetector(ObjectDetector):
             self.detect_api.set_stop_event(stop_event)
 
     def _transform_input(self, tensor_input: np.ndarray) -> np.ndarray:
+        # If the detector supports input transform offloading, return the frame unmodified
+        if getattr(self.detect_api, "input_transform_offload", False) is True:
+            return tensor_input
+
         if self.input_transform:
             tensor_input = np.transpose(tensor_input, self.input_transform)
 
