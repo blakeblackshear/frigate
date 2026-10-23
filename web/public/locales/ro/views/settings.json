@@ -629,7 +629,8 @@
     "addUser": "Adaugă utilizator",
     "management": {
       "desc": "Gestionează conturile de utilizator ale acestei instanțe Frigate.",
-      "title": "Administrare utilizatori"
+      "title": "Administrare utilizatori",
+      "authDisabled": "Autentificarea integrată este dezactivată. Aceste conturi sunt folosite doar pentru a te conecta odată ce este activată."
     },
     "toast": {
       "success": {
@@ -750,7 +751,8 @@
         "ariaLabel": "Filtrează modelele după tip",
         "baseModels": "Modele de bază",
         "fineTunedModels": "Modele optimizate"
-      }
+      },
+      "showIncompatible": "Afișează modelele incompatibile"
     },
     "toast": {
       "error": "Eroare la salvarea modificărilor de config: {{errorMessage}}",
