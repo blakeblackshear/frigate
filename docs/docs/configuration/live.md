@@ -339,7 +339,7 @@ When your browser runs into problems playing back your camera streams, it will l
     - Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution.
     - Also check your camera's keyframe (I-frame) interval: shorter intervals make playback start and recover faster.
     - You can also try increasing the timeout value in <NavPath path="Settings > UI" /> .
-    - Also ensure your browser doesn't have JavaScript V8 optimisations disabled ("JavaScript optimisation and security" setting in Chrome-based browsers).
+    - Also ensure your browser doesn't have JavaScript V8 optimizations disabled ("JavaScript optimisation and security" setting in Chrome-based browsers).
 
   - Possible console messages from the player code:
     - `Buffer time (10 seconds) exceeded, browser may not be playing media correctly.`
