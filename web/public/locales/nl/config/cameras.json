@@ -363,7 +363,31 @@
             "label": "Live kwaliteit",
             "description": "Coderingskwaliteit voor de jsmpeg-stream (1 hoogste, 31 laagste)."
         },
-        "description": "Instellingen die door de webinterface worden gebruikt om de selectie, resolutie en kwaliteit van livestreams te regelen."
+        "description": "Instellingen die door de webinterface worden gebruikt om de selectie, resolutie en kwaliteit van livestreams te regelen.",
+        "transcode": {
+            "label": "Getranscodeerde streams",
+            "description": "Lagekwaliteit-livestreams on-demand getranscodeerd door go2rtc.",
+            "enabled": {
+                "label": "Getranscodeerde streams activeren",
+                "description": "Voeg lagekwaliteit-livestreams toe die go2rtc realtime transcodeert tijdens het kijken."
+            },
+            "source": {
+                "label": "Bronstream",
+                "description": "go2rtc-stream om te transcoderen. Standaard de eerste livestream."
+            },
+            "qualities": {
+                "label": "Kwaliteit",
+                "description": "Er wordt één getranscodeerde stream per kwaliteit toegevoegd.",
+                "height": {
+                    "label": "Hoogte",
+                    "description": "Uitvoerhoogte in pixels; breedte volgt de bronverhouding."
+                },
+                "bitrate": {
+                    "label": "Bitrate",
+                    "description": "Doelbitrate en maximale videobitrate in kbps."
+                }
+            }
+        }
     },
     "motion": {
         "label": "Bewegingsdetectie",
