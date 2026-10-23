@@ -224,6 +224,14 @@ class RecordConfig(FrigateBaseModel):
             self.detections.pre_capture,
         )
 
+    @property
+    def event_post_capture(self) -> int:
+        """Largest post-capture window used to fetch candidate reviews."""
+        return max(
+            self.alerts.post_capture,
+            self.detections.post_capture,
+        )
+
     def get_review_pre_capture(self, severity: SeverityEnum) -> int:
         if severity == SeverityEnum.alert:
             return self.alerts.pre_capture

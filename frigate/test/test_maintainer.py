@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
+from peewee import SqliteDatabase
+
 # Mock complex imports before importing maintainer, saving originals so we can
 # restore them after import and avoid polluting sys.modules for other tests.
 _MOCKED_MODULES = [
@@ -20,6 +22,7 @@ for name in _MOCKED_MODULES:
 
 # Now import the class under test
 from frigate.config import FrigateConfig, RetainModeEnum  # noqa: E402
+from frigate.models import ReviewSegment  # noqa: E402
 from frigate.record.maintainer import RecordingMaintainer, SegmentInfo  # noqa: E402
 
 # Restore original modules (or remove mock if there was no original)
@@ -80,6 +83,53 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
                             len(matching),
                             f"Expected a single warning for unexpected files, got {len(matching)}",
                         )
+
+    async def test_ended_review_stays_eligible_through_post_capture(self):
+        config = MagicMock(spec=FrigateConfig)
+        camera_config = MagicMock()
+        camera_config.record.sub.enabled = False
+        camera_config.record.event_post_capture = 60
+        config.cameras = {"test_cam": camera_config}
+
+        maintainer = RecordingMaintainer(config, MagicMock())
+        maintainer.requestor = MagicMock()
+        maintainer.recordings_publisher = MagicMock()
+        maintainer.validate_and_move_segment = AsyncMock(return_value=None)
+
+        db = SqliteDatabase(":memory:")
+        with db.bind_ctx([ReviewSegment]):
+            db.create_tables([ReviewSegment])
+
+            # oldest cached segment starts 40s after the review ended
+            segment_start = datetime.datetime(
+                2026, 10, 19, 13, 1, 40, tzinfo=datetime.UTC
+            )
+            ReviewSegment.create(
+                id="review",
+                camera="test_cam",
+                start_time=segment_start.timestamp() - 50,
+                end_time=segment_start.timestamp() - 40,
+                severity="alert",
+                thumb_path="",
+                data={},
+            )
+
+            with tempfile.TemporaryDirectory() as cache_dir:
+                name = segment_start.strftime("%Y%m%d%H%M%S%z")
+                Path(cache_dir, f"test_cam@{name}.mp4").touch()
+
+                with (
+                    patch("frigate.record.maintainer.CACHE_DIR", cache_dir),
+                    patch(
+                        "frigate.record.maintainer.psutil.process_iter", return_value=[]
+                    ),
+                ):
+                    await maintainer.move_files()
+
+            reviews = maintainer.validate_and_move_segment.call_args.args[1]
+            self.assertEqual(
+                [segment_start.timestamp() - 40], [r.end_time for r in reviews]
+            )
 
     async def test_drops_quiet_segment_when_only_motion_retention(self):
         # Regression: when motion retention is enabled but a segment has no
