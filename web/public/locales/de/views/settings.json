@@ -66,7 +66,7 @@
     "cameraDetect": "Objekterkennung",
     "cameraFfmpeg": "Streams (FFmpeg)",
     "cameraRecording": "Aufnahme",
-    "cameraSnapshots": "Momentaufnahme",
+    "cameraSnapshots": "Schnappschüsse",
     "cameraMotion": "Bewegungserkennung",
     "cameraObjects": "Objekte",
     "cameraConfigReview": "Überprüfung",
@@ -155,6 +155,26 @@
       "error": {
         "clearStoredLayoutFailed": "Das gespeicherte Layout konnte nicht gelöscht werden: {{errorMessage}}",
         "clearStreamingSettingsFailed": "Die Streaming-Einstellungen konnten nicht gelöscht werden: {{errorMessage}}"
+      }
+    },
+    "backupRestore": {
+      "title": "Sichern & Wiederherstellen",
+      "transfer": {
+        "label": "Geräteeinstellungsdatei",
+        "desc": "Kamera Gruppen Layout, Streaming Einstellungen und Benutzeroberflächen Einstellungen werden in Ihrem Browser gespeichert. Exportieren Sie die Werte in eine Datei zur Sicherung oder Übertragung auf ein anderes Gerät.",
+        "export": "Export Einstellungen",
+        "import": "Import Einstellungen"
+      },
+      "importDialog": {
+        "title": "Import Einstellungen",
+        "desc": "Wählen Sie was von dieser Datei zutrifft. Frigate wird neu laden wenn der Import beendet ist.",
+        "exportedFrom": "Exportiert {{date}} von Frigate Konfiguration Version {{version}}",
+        "layouts_one": "Kamera Gruppe Layouts ({{count}} Gruppe)",
+        "layouts_other": "Kamera Gruppen Layouts ({{count}} Gruppen)",
+        "streaming_one": "Streaming Einstellungen ({{count}} Kamera)",
+        "streaming_other": "Streaming Einstellungen ({{count}} Kameras)",
+        "preferences_one": "Benutzeroberfläche Vorgaben ({{count}} Einstellung)",
+        "preferences_other": "Benutzeroberfläche Vorgaben ({{count}} Einstellungen)"
       }
     }
   },
@@ -1367,7 +1387,9 @@
     "overriddenGlobalNoDeltas": "Diese Kamera überschreibt die globale Konfiguration, es gibt jedoch keine Abweichungen bei den Feldwerten.",
     "overriddenBaseConfigHeading_one": "Das Profil {{profile}} überschreibt das Feld {{count}} aus der Basiskonfiguration:",
     "overriddenBaseConfigHeading_other": "Das Profil {{profile}} überschreibt di Felder {{count}} aus der Basiskonfiguration:",
-    "overriddenBaseConfigNoDeltas": "Das Profil {{profile}} überschreibt diesen Abschnitt, jedoch weichen keine Feldwerte von der Basiskonfiguration ab."
+    "overriddenBaseConfigNoDeltas": "Das Profil {{profile}} überschreibt diesen Abschnitt, jedoch weichen keine Feldwerte von der Basiskonfiguration ab.",
+    "overriddenLiveTooltip": "Diese Kamera verwendet einen anderen Wert als der in der Konfiguration gespeicherte und hier gezeigte Wert. Die Live Anzeige, MQTT, oder ein aktives Profil kann den Wert während des Betriebs ändern.",
+    "overriddenLiveValue": "Laufender Wert: {{value}}"
   },
   "timestampPosition": {
     "tl": "Oben links",
@@ -1894,7 +1916,7 @@
       "24hour": "24 Stunden"
     },
     "unitSystem": {
-      "metric": "Metrik",
+      "metric": "Metrisch",
       "imperial": "Imperial"
     }
   },

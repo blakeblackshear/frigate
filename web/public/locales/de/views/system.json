@@ -214,7 +214,7 @@
       "title": "Verbindungsqualität",
       "excellent": "Ausgezeichnet",
       "fair": "Fair",
-      "poor": "arm",
+      "poor": "schwach",
       "unusable": "Unbrauchbar",
       "fps": "FPS",
       "expectedFps": "Erwartete FPS",
