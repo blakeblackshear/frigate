@@ -45,6 +45,7 @@ type ReviewFilterGroupProps = {
   filterList?: FilterList;
   showReviewed: boolean;
   mainCamera?: string;
+  enableDatePresets?: boolean;
   setShowReviewed: (show: boolean) => void;
   onUpdateFilter: (filter: ReviewFilter) => void;
   setMotionOnly: React.Dispatch<React.SetStateAction<boolean>>;
@@ -60,6 +61,7 @@ export default function ReviewFilterGroup({
   filterList,
   showReviewed,
   mainCamera,
+  enableDatePresets = false,
   setShowReviewed,
   onUpdateFilter,
   setMotionOnly,
@@ -181,6 +183,7 @@ export default function ReviewFilterGroup({
         ...filter,
         after: day == undefined ? undefined : day.getTime() / 1000,
         before: day == undefined ? undefined : getEndOfDayTimestamp(day),
+        datePreset: undefined,
       });
     },
     [filter, onUpdateFilter],
@@ -215,6 +218,8 @@ export default function ReviewFilterGroup({
               : new Date(filter.after * 1000)
           }
           updateSelectedDay={onUpdateSelectedDay}
+          reviewFilter={enableDatePresets ? filter : undefined}
+          updateReviewFilter={enableDatePresets ? onUpdateFilter : undefined}
         />
       )}
       {filters.includes("motionOnly") && (
@@ -239,6 +244,7 @@ export default function ReviewFilterGroup({
       {isMobile && mobileSettingsFeatures.length > 0 && (
         <MobileReviewSettingsDrawer
           features={mobileSettingsFeatures}
+          enableDatePresets={enableDatePresets}
           filter={filter}
           currentSeverity={currentSeverity}
           reviewSummary={reviewSummary}

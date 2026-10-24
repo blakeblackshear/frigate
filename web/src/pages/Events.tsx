@@ -139,6 +139,7 @@ export default function Events() {
     return {
       after: getBeginningOfDayTimestamp(date),
       before: Math.min(getEndOfDayTimestamp(date), now),
+      datePreset: undefined,
     };
   }, []);
 

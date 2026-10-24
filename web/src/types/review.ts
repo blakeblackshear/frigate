@@ -36,12 +36,16 @@ export type SegmentedReviewData =
     }
   | undefined;
 
+export type ReviewDatePreset =
+  "currentWeek" | "lastWeek" | "currentMonth" | "lastMonth";
+
 export type ReviewFilter = {
   cameras?: string[];
   labels?: string[];
   zones?: string[];
   before?: number;
   after?: number;
+  datePreset?: ReviewDatePreset;
   showAll?: boolean;
 };
 

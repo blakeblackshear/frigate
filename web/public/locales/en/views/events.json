@@ -51,7 +51,8 @@
     "invalidSharedCamera": "Unable to open timestamped recording link due to an unknown or unauthorized camera."
   },
   "calendarFilter": {
-    "last24Hours": "Last 24 Hours"
+    "last24Hours": "Last 24 Hours",
+    "period": "Select time period"
   },
   "markAsReviewed": "Mark as Reviewed",
   "markTheseItemsAsReviewed": "Mark these items as reviewed",

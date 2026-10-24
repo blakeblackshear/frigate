@@ -9,6 +9,8 @@
 import { test, expect } from "../fixtures/frigate-test";
 import { BasePage } from "../pages/base.page";
 import { ReviewPage } from "../pages/review.page";
+import { getReviewPresetRange } from "../../src/utils/reviewDatePreset";
+import type { ReviewSegment } from "../../src/types/review";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -226,5 +228,198 @@ test.describe("Review — mobile @critical @mobile", () => {
     await expect(frigateApp.page).toHaveURL(/\/review/);
     await base.navigateTo("/");
     await expect(frigateApp.page).toHaveURL(/\/$/);
+  });
+});
+
+test.describe("Review calendar period boundaries", () => {
+  const now = new Date("2026-10-24T17:00:00Z");
+  const iso = (timestamp?: number) => new Date(timestamp! * 1000).toISOString();
+
+  for (const [preset, after, before] of [
+    ["currentWeek", "2026-10-18T22:00:00.000Z", "2026-10-24T17:00:00.000Z"],
+    ["lastWeek", "2026-10-11T22:00:00.000Z", "2026-10-18T22:00:00.000Z"],
+    ["currentMonth", "2026-09-30T22:00:00.000Z", "2026-10-24T17:00:00.000Z"],
+    ["lastMonth", "2026-08-31T22:00:00.000Z", "2026-09-30T22:00:00.000Z"],
+  ] as const) {
+    test(`${preset} uses local calendar boundaries`, () => {
+      const range = getReviewPresetRange(preset, now, "Europe/Berlin", 1);
+      expect(iso(range.after)).toBe(after);
+      expect(iso(range.before)).toBe(before);
+    });
+  }
+
+  test("week boundaries follow the user's configured first day", () => {
+    const sunday = getReviewPresetRange("currentWeek", now, "Europe/Berlin", 0);
+    const monday = getReviewPresetRange("currentWeek", now, "Europe/Berlin", 1);
+    expect(iso(sunday.after)).toBe("2026-10-17T22:00:00.000Z");
+    expect(iso(monday.after)).toBe("2026-10-18T22:00:00.000Z");
+  });
+
+  test("uses the configured timezone when UTC is still Sunday", () => {
+    const instant = new Date("2026-10-25T23:30:00Z");
+    const berlin = getReviewPresetRange(
+      "currentWeek",
+      instant,
+      "Europe/Berlin",
+      1,
+    );
+    const newYork = getReviewPresetRange(
+      "currentWeek",
+      instant,
+      "America/New_York",
+      1,
+    );
+    expect(iso(berlin.after)).toBe("2026-10-25T23:00:00.000Z");
+    expect(iso(newYork.after)).toBe("2026-10-19T04:00:00.000Z");
+  });
+
+  for (const [date, hours, after, before] of [
+    [
+      "2026-03-30T10:00:00Z",
+      167,
+      "2026-03-22T23:00:00.000Z",
+      "2026-03-29T22:00:00.000Z",
+    ],
+    [
+      "2026-10-26T10:00:00Z",
+      169,
+      "2026-10-18T22:00:00.000Z",
+      "2026-10-25T23:00:00.000Z",
+    ],
+  ] as const) {
+    test(`handles a ${hours}-hour week across daylight saving time`, () => {
+      const range = getReviewPresetRange(
+        "lastWeek",
+        new Date(date),
+        "Europe/Berlin",
+        1,
+      );
+      expect(iso(range.after)).toBe(after);
+      expect(iso(range.before)).toBe(before);
+      expect((range.before! - range.after!) / 3600).toBe(hours);
+    });
+  }
+
+  test("handles the previous year and leap February", () => {
+    const december = getReviewPresetRange(
+      "lastMonth",
+      new Date("2026-01-06T12:00:00Z"),
+      "Europe/Berlin",
+    );
+    expect(iso(december.after)).toBe("2025-11-30T23:00:00.000Z");
+    expect(iso(december.before)).toBe("2025-12-31T23:00:00.000Z");
+    const february = getReviewPresetRange(
+      "lastMonth",
+      new Date("2024-03-03T12:00:00Z"),
+      "Europe/Berlin",
+    );
+    expect((february.before! - february.after!) / 86400).toBe(29);
+  });
+
+  test("reset restores the rolling 24-hour bounds", () => {
+    expect(getReviewPresetRange(undefined, now)).toEqual({
+      after: undefined,
+      before: undefined,
+    });
+  });
+});
+
+test.describe("Review date presets @critical @mobile", () => {
+  test("all presets send calendar bounds, retain filters, and count the full period", async ({
+    frigateApp,
+  }) => {
+    const page = frigateApp.page;
+    const now = new Date("2026-10-24T17:00:00Z");
+    await page.clock.install({ time: now });
+    await frigateApp.installDefaults({
+      config: { ui: { timezone: "Europe/Berlin" } },
+    });
+    const reviews: ReviewSegment[] = [
+      "2026-10-24T12:00:00Z",
+      "2026-10-02T12:00:00Z",
+      "2026-09-15T12:00:00Z",
+    ].map((date, index) => ({
+      id: `${Date.parse(date) / 1000}-${index}`,
+      camera: "front_door",
+      severity: "alert",
+      start_time: Date.parse(date) / 1000,
+      end_time: Date.parse(date) / 1000 + 30,
+      thumb_path: `/clips/review/preset-${index}.webp`,
+      has_been_reviewed: false,
+      data: {
+        audio: [],
+        detections: [],
+        objects: ["person"],
+        significant_motion_areas: [],
+        zones: [],
+      },
+    }));
+    await page.route("**/api/review?*", (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      const after = Number(params.get("after"));
+      const before = Number(params.get("before"));
+      return route.fulfill({
+        json: reviews.filter(
+          (item) => item.start_time < before && item.end_time! > after,
+        ),
+      });
+    });
+    await frigateApp.goto("/review?labels=person");
+    const review = new ReviewPage(page, !frigateApp.isMobile);
+    await expect(review.alertsTab).toBeVisible();
+    await review.camerasFilterTrigger.click();
+    await page.getByRole("switch", { name: "Front Door", exact: true }).check();
+    await page.getByRole("button", { name: "Apply", exact: true }).click();
+    const openCalendar = async () => {
+      if (frigateApp.isMobile) {
+        await page
+          .getByRole("button", { name: "Filters", exact: true })
+          .click();
+        await page
+          .getByRole("button", { name: "Calendar", exact: true })
+          .click();
+      } else {
+        await review.calendarTrigger.click();
+      }
+    };
+    const group = page.getByRole("group", { name: "Select time period" });
+    const unix = (date: string) => Date.parse(date) / 1000;
+    for (const [label, start, end, count] of [
+      ["This Week", "2026-10-17T22:00:00Z", undefined, 1],
+      ["Last Week", "2026-10-10T22:00:00Z", "2026-10-17T22:00:00Z", 0],
+      ["This Month", "2026-09-30T22:00:00Z", undefined, 2],
+      ["Last Month", "2026-08-31T22:00:00Z", "2026-09-30T22:00:00Z", 1],
+    ] as const) {
+      await openCalendar();
+      const requestPromise = page.waitForRequest(
+        (request) => new URL(request.url()).pathname === "/api/review",
+      );
+      await group.getByRole("button", { name: label, exact: true }).click();
+      const params = new URL((await requestPromise).url()).searchParams;
+      expect(params.get("cameras")).toBe("front_door");
+      expect(params.get("labels")).toBe("person");
+      expect(Number(params.get("after"))).toBe(unix(start));
+      if (end) {
+        expect(Number(params.get("before"))).toBe(unix(end));
+      } else {
+        expect(Number(params.get("before"))).toBeGreaterThanOrEqual(
+          now.getTime() / 1000,
+        );
+        expect(Number(params.get("before"))).toBeLessThan(
+          now.getTime() / 1000 + 60,
+        );
+      }
+      await expect(group).not.toBeVisible();
+      await expect(review.alertsTab).toContainText(`∙ ${count}`);
+    }
+    await openCalendar();
+    await group
+      .getByRole("button", { name: "Last 24 Hours", exact: true })
+      .click();
+    await expect(group).not.toBeVisible();
+    await openCalendar();
+    await expect(
+      group.getByRole("button", { name: "Last 24 Hours", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 });

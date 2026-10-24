@@ -154,6 +154,19 @@ export default function EventView({
   // review counts
 
   const reviewCounts = useMemo(() => {
+    if (filter?.datePreset) {
+      if (!reviewItems)
+        return { alert: -1, detection: -1, significant_motion: -1 };
+      const visible = (item: ReviewSegment) =>
+        showReviewed || !item.has_been_reviewed;
+      return {
+        alert: reviewItems.alert.filter(visible).length,
+        detection: reviewItems.detection.filter(visible).length,
+        significant_motion:
+          reviewItems.significant_motion.filter(visible).length,
+      };
+    }
+
     if (!reviewSummary) {
       return { alert: -1, detection: -1, significant_motion: -1 };
     }
@@ -182,7 +195,7 @@ export default function EventView({
         detection: summary.total_detection - summary.reviewed_detection,
       };
     }
-  }, [filter, showReviewed, reviewSummary]);
+  }, [filter, showReviewed, reviewSummary, reviewItems]);
 
   const emptyCardData: EmptyCardData = useMemo(() => {
     if (
@@ -461,6 +474,7 @@ export default function EventView({
 
           {selectedReviews.length <= 0 ? (
             <ReviewFilterGroup
+              enableDatePresets
               filters={
                 severity == "significant_motion"
                   ? ["cameras", "date", "motionOnly"]
@@ -1199,6 +1213,7 @@ function MotionReview({
         ...filter,
         after: day == undefined ? undefined : day.getTime() / 1000,
         before: day == undefined ? undefined : getEndOfDayTimestamp(day),
+        datePreset: undefined,
       });
     },
     [filter, updateFilter],
