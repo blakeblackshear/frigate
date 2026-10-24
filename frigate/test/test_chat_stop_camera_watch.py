@@ -1,10 +1,11 @@
-"""Tests for the stop_camera_watch chat tool."""
+"""Tests for camera watch ownership in the chat tools."""
 
+import asyncio
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from frigate.api.chat import _execute_stop_camera_watch
+from frigate.api.chat import _execute_start_camera_watch, _execute_stop_camera_watch
 from frigate.jobs.vlm_watch import VLMWatchJob
 
 
@@ -38,6 +39,24 @@ class TestStopCameraWatch(unittest.TestCase):
 
         self.assertTrue(result["success"])
         self.stop.assert_called_once()
+
+
+class TestStartCameraWatch(unittest.TestCase):
+    @patch("frigate.api.chat.require_camera_access", new_callable=AsyncMock)
+    @patch("frigate.api.chat.start_vlm_watch_job", return_value="job1")
+    def test_records_caller_as_owner(self, start, _access):
+        request = _request("alice", "viewer")
+        request.app = MagicMock()
+        request.app.frigate_config.cameras = {"front": None}
+        request.app.genai_manager.chat_client.supports_vision = True
+
+        asyncio.run(
+            _execute_start_camera_watch(
+                request, {"camera": "front", "condition": "person"}
+            )
+        )
+
+        self.assertEqual(start.call_args.kwargs["username"], "alice")
 
 
 if __name__ == "__main__":
