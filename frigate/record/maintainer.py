@@ -42,7 +42,7 @@ from frigate.const import (
 )
 from frigate.models import Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
-from frigate.util.media import get_keyframe_offsets
+from frigate.util.media import get_playback_index
 from frigate.util.ownership import chown_to_runtime
 from frigate.util.services import get_video_properties
 
@@ -188,7 +188,7 @@ class RecordingMaintainer(threading.Thread):
         self.object_recordings_info: dict[str, list] = defaultdict(list)
         self.audio_recordings_info: dict[str, list] = defaultdict(list)
         # cache_path -> (end_time, duration, has_audio, audio_rate,
-        # audio_codec, video_codec, keyframes)
+        # audio_codec, video_codec, keyframes, audio_duration)
         self.end_time_cache: dict[
             str,
             tuple[
@@ -199,6 +199,7 @@ class RecordingMaintainer(threading.Thread):
                 str | None,
                 str | None,
                 list[int] | None,
+                float | None,
             ],
         ] = {}
         # last known capture end per (camera, stream_type); 0.0 marks a key
@@ -619,6 +620,7 @@ class RecordingMaintainer(threading.Thread):
                 audio_codec,
                 video_codec,
                 keyframes,
+                audio_duration,
             ) = self.end_time_cache[cache_path]
             # recover the resolved start rather than reusing the truncated
             # filename timestamp
@@ -652,7 +654,7 @@ class RecordingMaintainer(threading.Thread):
                 # playback snaps mid-file entry points against these offsets
                 # instead of probing files on demand
                 async with self.probe_semaphore:
-                    keyframes = await get_keyframe_offsets(cache_path)
+                    keyframes, audio_duration = await get_playback_index(cache_path)
 
                 if previous_start is not None:
                     await previous_start.wait()
@@ -669,6 +671,7 @@ class RecordingMaintainer(threading.Thread):
                     audio_codec,
                     video_codec,
                     keyframes,
+                    audio_duration,
                 )
                 # segments later discarded by retention still advance the
                 # chain for the next kept segment
@@ -763,6 +766,7 @@ class RecordingMaintainer(threading.Thread):
                     audio_codec,
                     video_codec,
                     keyframes,
+                    audio_duration,
                 )
 
         # we fell through the continuous / motion check, so we need to check the review items
@@ -815,6 +819,7 @@ class RecordingMaintainer(threading.Thread):
                     audio_codec,
                     video_codec,
                     keyframes,
+                    audio_duration,
                 )
             else:
                 self.drop_segment(cache_path)
@@ -960,6 +965,7 @@ class RecordingMaintainer(threading.Thread):
         audio_codec: str | None = None,
         video_codec: str | None = None,
         keyframes: list[int] | None = None,
+        audio_duration: float | None = None,
     ) -> dict[str, Any] | None:
         path_time = segment_path_time(cache_path) or start_time
 
@@ -1053,6 +1059,7 @@ class RecordingMaintainer(threading.Thread):
                     Recordings.audio_codec.name: audio_codec,
                     Recordings.video_codec.name: video_codec,
                     Recordings.keyframes.name: keyframes,
+                    Recordings.audio_duration.name: audio_duration,
                 }
         except Exception:
             logger.exception(f"Unable to store recording segment {cache_path}")

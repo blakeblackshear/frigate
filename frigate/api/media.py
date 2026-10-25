@@ -624,14 +624,14 @@ async def recording_clip(
 
 
 def _build_vod_clip(
-    row: Any, start: float, end: float
+    row: Any, start: float, end: float, shared: bool
 ) -> tuple[dict[str, Any], int] | None:
     """Build one nginx-vod clip dict + duration (ms) for a recording row trimmed to [start, end).
 
     Realization comes entirely from the shared plan_clip, so the coverage
     endpoint's realized timelines match this manifest by construction.
     """
-    plan = plan_clip(row, start, end)
+    plan = plan_clip(row, start, end, shared)
 
     if plan.skipped:
         return None
@@ -707,7 +707,7 @@ async def _vod_response(
             row.end_time,
             row.duration,
         )
-        built = _build_vod_clip(row, span_start, span_end)
+        built = _build_vod_clip(row, span_start, span_end, len(spans) > 1)
 
         if built is None:
             continue

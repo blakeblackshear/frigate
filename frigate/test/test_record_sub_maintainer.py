@@ -77,8 +77,8 @@ async def _validate_segment(
     with (
         patch("frigate.record.maintainer.get_video_properties", probe),
         patch(
-            "frigate.record.maintainer.get_keyframe_offsets",
-            AsyncMock(return_value=[0]),
+            "frigate.record.maintainer.get_playback_index",
+            AsyncMock(return_value=([0], 10.0)),
         ),
         patch("frigate.record.maintainer.os.path.getmtime", getmtime),
     ):
@@ -178,7 +178,7 @@ class TestValidateAndMoveSubSegment(unittest.IsolatedAsyncioTestCase):
         # pre-fill the end time cache so no ffprobe is attempted; the
         # audio and codec fields stay unknown without one
         maintainer.end_time_cache = {
-            cache_path: (end_time, 10.0, None, None, None, None, None)
+            cache_path: (end_time, 10.0, None, None, None, None, None, None)
         }
         # a processed frame past end_time so the segment is considered ready
         maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
@@ -264,8 +264,8 @@ class TestSegmentAudioPresence(unittest.IsolatedAsyncioTestCase):
                 with (
                     patch("frigate.record.maintainer.get_video_properties", probe),
                     patch(
-                        "frigate.record.maintainer.get_keyframe_offsets",
-                        AsyncMock(return_value=[0, 2000]),
+                        "frigate.record.maintainer.get_playback_index",
+                        AsyncMock(return_value=([0, 2000], 9.5)),
                     ),
                 ):
                     await maintainer.validate_and_move_segment(
@@ -284,6 +284,7 @@ class TestSegmentAudioPresence(unittest.IsolatedAsyncioTestCase):
                 self.assertEqual(call_args[8], audio_rate)
                 self.assertEqual(call_args[9], audio_codec)
                 self.assertEqual(call_args[11], [0, 2000])
+                self.assertEqual(call_args[12], 9.5)
                 self.assertEqual(call_args[10], video_codec)
                 # the probe result is cached alongside the end time so the
                 # cached path stays as informed as the probed path
@@ -558,8 +559,8 @@ class TestSegmentStartChaining(unittest.IsolatedAsyncioTestCase):
         with (
             patch("frigate.record.maintainer.get_video_properties", probe),
             patch(
-                "frigate.record.maintainer.get_keyframe_offsets",
-                AsyncMock(return_value=[0]),
+                "frigate.record.maintainer.get_playback_index",
+                AsyncMock(return_value=([0], 10.0)),
             ),
             patch(
                 "frigate.record.maintainer.os.path.getmtime",
