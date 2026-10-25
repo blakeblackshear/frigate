@@ -28,7 +28,7 @@ git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 tzdata == 2026.5
 pyzmq == 27.2.*
 ruamel.yaml == 0.19.*
-tzlocal == 5.4.4
+tzlocal == 5.4.5
 requests == 2.34.*
 types-requests == 2.33.*
 norfair == 2.3.*
