@@ -121,9 +121,14 @@ async function confirmImport(page: Page) {
   // route change, so #pageRoot is already present and waiting for it
   // alone can race the navigation. Wait for the "load" event first so
   // the evaluate() calls below run against the post-reload document.
+  // scoped to the dialog: until it opens, a page-wide "Import" match is the
+  // Import Settings button, which only reopens the file chooser
   await Promise.all([
     page.waitForEvent("load"),
-    page.getByRole("button", { name: "Import" }).click(),
+    page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Import", exact: true })
+      .click(),
   ]);
   await page.waitForSelector("#pageRoot");
 }
@@ -270,6 +275,9 @@ test.describe("UI settings import/export @medium", () => {
     // naturalAspectLayout preference must not override that.
     await frigateApp.goto("/settings?page=uiSettings");
     await writeIdb(frigateApp.page, { "naturalAspectLayout:admin": true });
+    // the view reads the setting once on mount, so load it again after the
+    // write
+    await frigateApp.goto("/settings?page=uiSettings");
 
     await chooseImportFile(
       frigateApp.page,
