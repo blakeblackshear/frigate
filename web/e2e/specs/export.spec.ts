@@ -988,6 +988,58 @@ test.describe("Multi-Camera Export from History @high", () => {
       "Front gate follow-up",
     );
   });
+
+  test("a blank case name shows an error and disables export", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    const caseName = form.getByPlaceholder(/new case name/i);
+    await expect(caseName).toHaveValue(/^Multi-camera export - /, {
+      timeout: 5_000,
+    });
+    await expect(form.getByText("Case name is required")).toBeHidden();
+
+    await caseName.fill("");
+
+    await expect(form.getByText("Case name is required")).toBeVisible();
+    await expect(
+      form.getByRole("button", { name: /^export \d+ cameras?$/i }),
+    ).toBeDisabled();
+  });
+
+  test("clearing a time field keeps the previous valid range", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+
+    let capturedPayload: { items: { end_time: unknown }[] } | null = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: { export_case_id: null, export_ids: [], results: [] },
+      });
+    });
+
+    const form = await openMultiCameraTab(frigateApp);
+
+    const firstCamera = form.locator("button[aria-pressed]").first();
+    await expect(firstCamera).toBeVisible({ timeout: 5_000 });
+    if ((await firstCamera.getAttribute("aria-pressed")) === "false") {
+      await firstCamera.click();
+    }
+
+    await form.getByRole("button", { name: /^end time$/i }).click();
+    await frigateApp.page.locator("#endTime").fill("");
+    await frigateApp.page.keyboard.press("Escape");
+
+    await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
+
+    await expect.poll(() => capturedPayload).not.toBeNull();
+    expect(typeof capturedPayload!.items[0].end_time).toBe("number");
+  });
 });
 
 test.describe("Export Page - Active Job Progress @medium", () => {
