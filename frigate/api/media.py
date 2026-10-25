@@ -337,7 +337,7 @@ async def get_snapshot_from_recording(
     request: Request,
     camera_name: str,
     frame_time: float,
-    format: str = Path(enum=["png", "jpg"]),
+    format: str = Path(json_schema_extra={"enum": ["png", "jpg"]}),
     height: int = None,
 ):
     if camera_name not in request.app.frigate_config.cameras:
@@ -1061,7 +1061,7 @@ async def event_thumbnail(
     max_cache_age: int = Query(
         2592000, description="Max cache age in seconds. Default 30 days in seconds."
     ),
-    format: str = Query(default="ios", enum=["ios", "android"]),
+    format: str = Query(default="ios", json_schema_extra={"enum": ["ios", "android"]}),
 ):
     thumbnail_bytes = None
     event_complete = False
@@ -1858,7 +1858,7 @@ async def preview_mp4(
 async def review_preview(
     request: Request,
     event_id: str,
-    format: str = Query(default="gif", enum=["gif", "mp4"]),
+    format: str = Query(default="gif", json_schema_extra={"enum": ["gif", "mp4"]}),
 ):
     try:
         review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == event_id)
