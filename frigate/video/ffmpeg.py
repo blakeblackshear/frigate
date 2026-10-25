@@ -474,10 +474,10 @@ class CameraWatchdog(threading.Thread):
             if not self.capture_thread.is_alive():
                 self.detect_status.send("offline", now)
                 self.camera_fps.value = 0
-                self.logger.error(
-                    f"Ffmpeg process crashed unexpectedly for {self.config.name}."
-                )
                 if can_restart:
+                    self.logger.error(
+                        f"Ffmpeg process crashed unexpectedly for {self.config.name}."
+                    )
                     self.reset_capture_thread(terminate=False)
                     last_restart_time = now
             elif self.camera_fps.value >= (self.config.detect.fps + 10):
@@ -498,10 +498,10 @@ class CameraWatchdog(threading.Thread):
             elif now - self.capture_thread.current_frame.value > 20:
                 self.detect_status.send("offline", now)
                 self.camera_fps.value = 0
-                self.logger.info(
-                    f"No frames received from {self.config.name} in 20 seconds. Exiting ffmpeg..."
-                )
                 if can_restart:
+                    self.logger.info(
+                        f"No frames received from {self.config.name} in 20 seconds. Exiting ffmpeg..."
+                    )
                     self.reset_capture_thread()
                     last_restart_time = now
             else:
