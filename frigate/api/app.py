@@ -1315,7 +1315,7 @@ def nvinfo():
     dependencies=[Depends(require_role(["admin"]))],
 )
 async def logs(
-    service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
+    service: str = Path(json_schema_extra={"enum": ["frigate", "nginx", "go2rtc"]}),
     download: str | None = None,
     stream: bool | None = False,
     start: int | None = 0,
