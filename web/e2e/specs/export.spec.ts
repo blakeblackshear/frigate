@@ -1,4 +1,5 @@
 import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
+import { viewerProfile } from "../fixtures/mock-data/profile";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -1039,6 +1040,34 @@ test.describe("Multi-Camera Export from History @high", () => {
 
     await expect.poll(() => capturedPayload).not.toBeNull();
     expect(typeof capturedPayload!.items[0].end_time).toBe("number");
+  });
+
+  test("viewers can export without a case", async ({ frigateApp }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+
+    let capturedPayload: Record<string, unknown> | null = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: { export_case_id: null, export_ids: [], results: [] },
+      });
+    });
+
+    const form = await openMultiCameraTab(frigateApp);
+
+    const firstCamera = form.locator("button[aria-pressed]").first();
+    await expect(firstCamera).toBeVisible({ timeout: 5_000 });
+    if ((await firstCamera.getAttribute("aria-pressed")) === "false") {
+      await firstCamera.click();
+    }
+
+    await expect(form.getByPlaceholder(/new case name/i)).toBeHidden();
+    await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
+
+    await expect.poll(() => capturedPayload).not.toBeNull();
+    expect(capturedPayload).not.toHaveProperty("new_case_name");
+    expect(capturedPayload).not.toHaveProperty("export_case_id");
   });
 });
 
