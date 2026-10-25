@@ -1015,7 +1015,7 @@ test.describe("Multi-Camera Export from History @high", () => {
   }) => {
     await frigateApp.installDefaults();
 
-    let capturedPayload: { items: { end_time: unknown }[] } | null = null;
+    let capturedPayload: { items: { end_time: number }[] } | null = null;
     await frigateApp.page.route("**/api/exports/batch", async (route) => {
       capturedPayload = route.request().postDataJSON();
       await route.fulfill({
@@ -1032,14 +1032,25 @@ test.describe("Multi-Camera Export from History @high", () => {
       await firstCamera.click();
     }
 
+    // the seeded end can equal the picker's fallback, so move it off that
+    // value before clearing
     await form.getByRole("button", { name: /^end time$/i }).click();
-    await frigateApp.page.locator("#endTime").fill("");
+    const endInput = frigateApp.page.locator("#endTime");
+    const [hour, minute, second] = (await endInput.inputValue()).split(":");
+    const chosen = `${hour}:${minute}:${String((Number(second) + 30) % 60).padStart(2, "0")}`;
+    await endInput.fill(chosen);
+    await endInput.fill("");
+    await expect(endInput).toHaveValue(chosen);
     await frigateApp.page.keyboard.press("Escape");
 
     await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
 
     await expect.poll(() => capturedPayload).not.toBeNull();
-    expect(typeof capturedPayload!.items[0].end_time).toBe("number");
+    const submittedClock = await frigateApp.page.evaluate(
+      (endTime) => new Date(endTime * 1000).toTimeString().slice(0, 8),
+      capturedPayload!.items[0].end_time,
+    );
+    expect(submittedClock).toBe(chosen);
   });
 
   test("viewers can export without a case", async ({ frigateApp }) => {
