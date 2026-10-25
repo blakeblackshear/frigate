@@ -477,6 +477,31 @@ class TestVodAudioCutShort(CoverageDbTestCase):
         clips = self._clips(1005.0, 1020.0)
         assert len(clips) == 2
 
+    def test_video_only_range_keeps_clip(self):
+        # a video-only sub row serves the whole range without audio, so
+        # nginx-vod never compares audio tracks
+        self._insert(
+            "m1",
+            1000.0,
+            1010.0,
+            "main",
+            has_audio=True,
+            audio_codec="aac",
+            audio_rate=16000,
+            keyframes=self.KEYFRAMES,
+            audio_duration=2.112,
+        )
+        self._insert(
+            "s1", 1010.0, 1020.0, "sub", has_audio=False, keyframes=self.KEYFRAMES
+        )
+        clips = self._clips(1005.0, 1020.0)
+        assert [c["path"] for c in clips] == ["/tmp/m1.mp4", "/tmp/s1.mp4"]
+        assert all(c["tracks"] == "v" for c in clips)
+        timeline = realized_timeline(
+            resolve_coverage("front_door", 1005.0, 1020.0), None
+        )
+        assert timeline[0]["duration"] > 0
+
     def test_sole_clip_is_kept(self):
         # alone in its sequence the clip plays video-only, so keep it
         self._insert_pair(2.112)

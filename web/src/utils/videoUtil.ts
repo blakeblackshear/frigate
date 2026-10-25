@@ -61,6 +61,12 @@ export function calculateSeekPosition(
       return false;
     }
 
+    // skipped clips have no playlist media, so a seek inside one lands on
+    // the next clip that plays
+    if (segment.duration === 0) {
+      return true;
+    }
+
     // playlist duration exceeds wall length when the clip carries
     // keyframe back-snap lead-in
     const wallLength = segment.end_time - segment.start_time;

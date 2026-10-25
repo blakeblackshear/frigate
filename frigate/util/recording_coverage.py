@@ -341,7 +341,18 @@ class ClipPlan:
     first_key_frame_offset_ms: int = 0
 
 
-def plan_clip(row: Any, start: float, end: float, shared: bool = False) -> ClipPlan:
+def sequence_needs_audio(spans: list[list[Any]]) -> bool:
+    """Whether nginx-vod will require every clip in these spans to carry audio.
+
+    A range mixing audio-bearing and audio-less rows is served video-only,
+    and a single clip has nothing to mismatch against.
+    """
+    return len(spans) > 1 and all(row.has_audio is not False for row, *_ in spans)
+
+
+def plan_clip(
+    row: Any, start: float, end: float, needs_audio: bool = False
+) -> ClipPlan:
     """Plan one nginx-vod clip for a recording row trimmed to [start, end).
 
     The single source of truth for clip realization: the vod mapping
@@ -349,7 +360,7 @@ def plan_clip(row: Any, start: float, end: float, shared: bool = False) -> ClipP
     to the frontend, so the playhead model matches the playlist by
     construction rather than accumulating drift at each hand-off.
 
-    shared marks a clip that sits in a sequence with other clips.
+    needs_audio comes from sequence_needs_audio for the clip's range.
     """
     min_duration_ms = 100  # Minimum 100ms to ensure at least one video frame
     max_duration_ms = MAX_SEGMENT_DURATION * 1000
@@ -404,7 +415,7 @@ def plan_clip(row: Any, start: float, end: float, shared: bool = False) -> ClipP
     # nginx-vod then counts no audio track in this clip and fails the whole
     # sequence on the track count mismatch
     if (
-        shared
+        needs_audio
         and row.has_audio
         and row.audio_duration is not None
         and (clip_from or 0) >= int(row.audio_duration * 1000)
@@ -465,7 +476,7 @@ def realized_timeline(
     clip is skipped reports duration 0.
     """
     spans = build_spans(intervals, stream)
-    shared = len(spans) > 1
+    needs_audio = sequence_needs_audio(spans)
 
     return [
         {
@@ -474,7 +485,7 @@ def realized_timeline(
             "duration": plan.duration_ms,
         }
         for row, span_start, span_end, _ in spans
-        for plan in (plan_clip(row, span_start, span_end, shared),)
+        for plan in (plan_clip(row, span_start, span_end, needs_audio),)
     ]
 
 

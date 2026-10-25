@@ -64,6 +64,7 @@ from frigate.util.recording_coverage import (
     plan_clip,
     recording_overlap,
     resolve_coverage,
+    sequence_needs_audio,
 )
 from frigate.util.time import get_normalized_tz_name
 
@@ -624,14 +625,14 @@ async def recording_clip(
 
 
 def _build_vod_clip(
-    row: Any, start: float, end: float, shared: bool
+    row: Any, start: float, end: float, needs_audio: bool
 ) -> tuple[dict[str, Any], int] | None:
     """Build one nginx-vod clip dict + duration (ms) for a recording row trimmed to [start, end).
 
     Realization comes entirely from the shared plan_clip, so the coverage
     endpoint's realized timelines match this manifest by construction.
     """
-    plan = plan_clip(row, start, end, shared)
+    plan = plan_clip(row, start, end, needs_audio)
 
     if plan.skipped:
         return None
@@ -690,6 +691,7 @@ async def _vod_response(
         null_audio_glitches(resolve_coverage(camera_name, start_ts, end_ts)),
         stream_preference,
     )
+    needs_audio = sequence_needs_audio(spans)
 
     durations: list[int] = []
     clips: list[dict[str, Any]] = []
@@ -707,7 +709,7 @@ async def _vod_response(
             row.end_time,
             row.duration,
         )
-        built = _build_vod_clip(row, span_start, span_end, len(spans) > 1)
+        built = _build_vod_clip(row, span_start, span_end, needs_audio)
 
         if built is None:
             continue
