@@ -114,7 +114,7 @@ export default function ClassificationModelEditDialog({
     const sharedFields = {
       enabled: z.boolean(),
       saveAttempts: z.coerce
-        .number({ message: t("edit.errors.saveAttemptsInvalid") })
+        .number<number>({ message: t("edit.errors.saveAttemptsInvalid") })
         .int(t("edit.errors.saveAttemptsInvalid"))
         .min(0, t("edit.errors.saveAttemptsInvalid")),
     };
@@ -136,7 +136,7 @@ export default function ClassificationModelEditDialog({
           (val) =>
             val === "" || val === null || val === undefined ? undefined : val,
           z.coerce
-            .number({ message: t("edit.errors.intervalInvalid") })
+            .number<number>({ message: t("edit.errors.intervalInvalid") })
             .int(t("edit.errors.intervalInvalid"))
             .positive(t("edit.errors.intervalInvalid"))
             .optional(),
@@ -171,7 +171,6 @@ export default function ClassificationModelEditDialog({
     resolver: zodResolver(
       formSchema as z.ZodType<
         ObjectFormData | StateFormData,
-        z.ZodTypeDef,
         ObjectFormData | StateFormData
       >,
     ),

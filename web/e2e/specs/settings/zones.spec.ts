@@ -248,4 +248,37 @@ test.describe("zone rename and delete @medium @mobile", () => {
       },
     });
   });
+
+  test("inertia below 1 blocks saving and a valid value saves as a number", async ({
+    frigateApp,
+  }) => {
+    const requests = await installRoutes(frigateApp.page);
+    await frigateApp.goto(SETTINGS_URL);
+
+    await openZoneAction(frigateApp.page, frigateApp.isMobile, "Edit");
+    const inertia = frigateApp.page.getByRole("textbox", {
+      name: "Inertia",
+      exact: true,
+    });
+    const save = frigateApp.page.getByRole("button", { name: "Save" });
+
+    await inertia.fill("0");
+    await expect(
+      frigateApp.page.getByText("Inertia must be above 0."),
+    ).toBeVisible();
+    await expect(save).toBeDisabled();
+
+    await inertia.fill("5");
+    await expect(
+      frigateApp.page.getByText("Inertia must be above 0."),
+    ).toBeHidden();
+    await save.click();
+
+    await expect.poll(() => requests.length).toBe(1);
+    expect(requests[0].body).toMatchObject({
+      config_data: {
+        cameras: { front_door: { zones: { driveway: { inertia: 5 } } } },
+      },
+    });
+  });
 });

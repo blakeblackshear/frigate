@@ -200,13 +200,13 @@ export default function ZoneEditPane({
         ),
       enabled: z.boolean().default(true),
       inertia: z.coerce
-        .number()
+        .number<number>()
         .min(1, {
           message: t("masksAndZones.form.inertia.error.mustBeAboveZero"),
         })
         .or(z.literal("")),
       loitering_time: z.coerce
-        .number()
+        .number<number>()
         .min(0, {
           message: t(
             "masksAndZones.form.loiteringTime.error.mustBeGreaterOrEqualZero",
@@ -222,35 +222,35 @@ export default function ZoneEditPane({
       review_detections: z.boolean().default(false).optional(),
       speedEstimation: z.boolean().default(false),
       lineA: z.coerce
-        .number()
+        .number<number>()
         .min(0.1, {
           message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       lineB: z.coerce
-        .number()
+        .number<number>()
         .min(0.1, {
           message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       lineC: z.coerce
-        .number()
+        .number<number>()
         .min(0.1, {
           message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       lineD: z.coerce
-        .number()
+        .number<number>()
         .min(0.1, {
           message: t("masksAndZones.form.distance.error.text"),
         })
         .optional()
         .or(z.literal("")),
       speed_threshold: z.coerce
-        .number()
+        .number<number>()
         .min(0.1, {
           message: t("masksAndZones.form.speed.error.mustBeGreaterOrEqualTo"),
         })
