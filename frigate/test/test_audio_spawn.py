@@ -1,4 +1,4 @@
-"""Tests for audio maintainer spawning on runtime camera adds."""
+"""Tests for audio maintainer spawning on runtime camera updates."""
 
 import threading
 import unittest
@@ -41,6 +41,42 @@ class TestAudioSpawnIfNeeded(unittest.TestCase):
         processor.stop_event = threading.Event()
         processor.logger = MagicMock()
         return processor
+
+    def test_initially_disabled_camera_spawns_after_enabled_update(self):
+        """Consume an enabled update through the manager's real subscriber."""
+        config = _build_config()
+        config.cameras["front_door"].enabled = False
+        stop = MagicMock()
+        stop.wait.side_effect = [False, True]
+        processor = AudioProcessor(
+            config, {"front_door": MagicMock()}, MagicMock(), stop
+        )
+        processor.logger = MagicMock()
+        updates = iter([("config/cameras/front_door/enabled", True), (None, None)])
+        self.addCleanup(
+            setattr, threading.current_thread(), "name", threading.current_thread().name
+        )
+
+        with (
+            patch.object(processor, "pre_run_setup"),
+            patch("frigate.config.camera.updater.ConfigSubscriber") as transport,
+            patch("frigate.events.audio.AudioEventMaintainer") as maintainer,
+        ):
+
+            def receive_update():
+                self.assertEqual(processor.audio_threads, {})
+                maintainer.assert_not_called()
+                return next(updates)
+
+            transport.return_value.check_for_update.side_effect = receive_update
+            maintainer.return_value.is_alive.return_value = False
+            processor.run()
+
+        self.assertEqual(
+            processor.audio_threads, {"front_door": maintainer.return_value}
+        )
+        maintainer.assert_called_once()
+        maintainer.return_value.start.assert_called_once()
 
     def test_skips_camera_whose_metrics_have_not_been_created_yet(self):
         """The camera maintainer creates metrics on its own poll of the add
