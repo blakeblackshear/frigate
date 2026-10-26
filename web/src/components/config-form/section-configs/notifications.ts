@@ -32,8 +32,6 @@ const notifications: SectionConfigOverrides = {
       enabled: { "ui:widget": "hidden" },
       email: { "ui:widget": "hidden" },
       cooldown: { "ui:widget": "hidden" },
-      notify_on: { "ui:widget": "hidden" },
-      min_threat_level: { "ui:widget": "hidden" },
       enabled_in_config: { "ui:widget": "hidden" },
     },
   },

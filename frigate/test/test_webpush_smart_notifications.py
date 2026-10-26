@@ -43,7 +43,7 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         client.suspended_cameras = {"front_porch": 0}
         client.last_camera_notification_time = {"front_porch": 0.0}
         client.last_notification_time = 0.0
-        client.notified_review_ids = {"front_porch": ""}
+        client.notified_review_ids = {"front_porch": {}}
         client.check_registrations = MagicMock()
         client.cleanup_registrations = MagicMock()
         client.send_push_notification = MagicMock()
@@ -125,6 +125,54 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         }
         client.send_alert(promotion_payload)
         self.assertEqual(client.send_push_notification.call_count, 1)
+
+        # Also triggers when notify_on is set to ['update']
+        client_update_only = self._create_client(notify_on=["update"])
+        client_update_only.send_alert(promotion_payload)
+        self.assertEqual(client_update_only.send_push_notification.call_count, 1)
+
+    def test_min_threat_level_suppresses_when_genai_disabled(self):
+        # When min_threat_level is set but GenAI is disabled, alerts lack threat assessment
+        # and must not be sent unassessed.
+        client = self._create_client(min_threat_level=1, genai_enabled=False)
+        start_payload = self._make_payload(event_type="new", review_id="rev_1")
+        client.send_alert(start_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        end_payload = self._make_payload(event_type="end", review_id="rev_1")
+        client.send_alert(end_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+    def test_slow_analysis_retains_cooldown_exemption_across_multiple_reviews(self):
+        # Review A starts at t=0
+        client = self._create_client(cooldown=60)
+        client.last_notification_time = 0.0
+        client.last_camera_notification_time["front_porch"] = 0.0
+
+        payload_a_start = self._make_payload(event_type="new", review_id="rev_a")
+        client.send_alert(payload_a_start)
+        self.assertEqual(client.send_push_notification.call_count, 1)
+
+        # Review B starts at t=61 (outside cooldown)
+        # Advance time by adjusting last notification times to simulate cooldown expiry
+        client.last_notification_time = 0.0
+        client.last_camera_notification_time["front_porch"] = 0.0
+        payload_b_start = self._make_payload(event_type="new", review_id="rev_b")
+        client.send_alert(payload_b_start)
+        self.assertEqual(client.send_push_notification.call_count, 2)
+
+        # Review A's slow GenAI analysis finishes while within cooldown from Review B
+        # Review A should still be exempt from cooldown because it was already notified
+        payload_a_genai = self._make_payload(
+            event_type="genai",
+            review_id="rev_a",
+            potential_threat_level=1,
+            title="Review A evaluated",
+        )
+        client.send_alert(payload_a_genai)
+        self.assertEqual(client.send_push_notification.call_count, 3)
+        last_call_kwargs = client.send_push_notification.call_args.kwargs
+        self.assertIn("Needs Review: Review A evaluated", last_call_kwargs["title"])
 
     def test_min_threat_level_defers_all_unevaluated_states(self):
         client = self._create_client(min_threat_level=1, genai_enabled=True)

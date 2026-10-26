@@ -188,8 +188,8 @@ class WebPushClient(Communicator):
             c.name: 0  # type: ignore[misc]
             for c in self.config.cameras.values()
         }
-        self.notified_review_ids: dict[str, str] = {
-            c.name: ""  # type: ignore[misc]
+        self.notified_review_ids: dict[str, dict[str, float]] = {
+            c.name: {}  # type: ignore[misc]
             for c in self.config.cameras.values()
         }
         self.last_notification_time: float = 0
@@ -348,7 +348,7 @@ class WebPushClient(Communicator):
                 for camera in updates["add"]:
                     self.suspended_cameras[camera] = 0
                     self.last_camera_notification_time[camera] = 0
-                    self.notified_review_ids[camera] = ""
+                    self.notified_review_ids[camera] = {}
 
                 self._refresh_user_cameras()
 
@@ -581,9 +581,17 @@ class WebPushClient(Communicator):
         )
 
         # Threat-level deferral:
-        # If minimum threat level is configured and GenAI descriptions are enabled,
-        # defer notification for all unevaluated states until GenAI evaluation produces the threat level.
-        if min_threat_level is not None and genai_alerts_enabled:
+        # If minimum threat level is configured:
+        # - If GenAI review alerts are disabled, unevaluated alerts cannot satisfy the minimum threat level.
+        # - If GenAI review alerts are enabled, defer all unevaluated review states until GenAI evaluation.
+        if min_threat_level is not None:
+            if not genai_alerts_enabled:
+                logger.debug(
+                    "Skipping notification for %s - min_threat_level is %s but GenAI review alerts are disabled",
+                    camera,
+                    min_threat_level,
+                )
+                return
             if state != "genai":
                 logger.debug(
                     "Deferring notification for %s (%s) until GenAI analysis (min_threat_level=%s)",
@@ -596,7 +604,9 @@ class WebPushClient(Communicator):
         # Trigger filtering:
         trigger_matched = False
         if is_start:
-            trigger_matched = "start" in notify_on or "new" in notify_on
+            trigger_matched = (
+                "start" in notify_on or "new" in notify_on or state in notify_on
+            )
         elif state == "update":
             trigger_matched = "update" in notify_on
         elif state == "end":
@@ -619,9 +629,10 @@ class WebPushClient(Communicator):
             return
 
         # Cooldown check:
-        # If this is a GenAI update for the same review item that was already notified,
+        # If this is a GenAI update for a review item that was already notified,
         # allow it to bypass camera cooldown so the smart title and summary enrich the alert.
-        is_same_review = self.notified_review_ids.get(camera) == reviewId
+        camera_notified = self.notified_review_ids.setdefault(camera, {})
+        is_same_review = reviewId in camera_notified
         if not (is_same_review and state == "genai"):
             if self._within_cooldown(camera):
                 return
@@ -652,7 +663,20 @@ class WebPushClient(Communicator):
         )
         current_time = datetime.datetime.now().timestamp()
 
-        self.notified_review_ids[camera] = reviewId
+        # Prune old notified reviews (older than 1 hour) and track this review
+        cutoff = current_time - 3600
+        camera_notified = {
+            rid: ts
+            for rid, ts in self.notified_review_ids.get(camera, {}).items()
+            if ts > cutoff
+        }
+        if state == "genai":
+            # GenAI notification delivered, clean up pending review tracking
+            camera_notified.pop(reviewId, None)
+        else:
+            camera_notified[reviewId] = current_time
+        self.notified_review_ids[camera] = camera_notified
+
         self.last_camera_notification_time[camera] = current_time
         self.last_notification_time = current_time
 
