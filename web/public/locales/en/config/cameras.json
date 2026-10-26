@@ -860,7 +860,7 @@
     },
     "notify_on": {
       "label": "Notification triggers",
-      "description": "List of review event states that trigger notifications ('start', 'end', 'genai'). Set to ['genai'] to receive smart notifications only after GenAI analysis."
+      "description": "List of review event states that trigger notifications ('start', 'new', 'update', 'end', 'genai'). Set to ['genai'] to receive smart notifications only after GenAI analysis."
     },
     "min_threat_level": {
       "label": "Minimum threat level",

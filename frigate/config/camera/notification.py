@@ -8,7 +8,7 @@ from ..base import FrigateBaseModel
 
 __all__ = ["NotificationConfig"]
 
-VALID_NOTIFY_ON_STATES = {"start", "end", "genai"}
+VALID_NOTIFY_ON_STATES = {"start", "new", "update", "end", "genai"}
 
 
 class NotificationConfig(FrigateBaseModel):
@@ -31,7 +31,7 @@ class NotificationConfig(FrigateBaseModel):
     notify_on: list[str] = Field(
         default_factory=lambda: ["start", "genai"],
         title="Notification triggers",
-        description="List of review event states that trigger notifications ('start', 'end', 'genai'). Set to ['genai'] to receive smart notifications only after GenAI analysis.",
+        description="List of review event states that trigger notifications ('start', 'new', 'update', 'end', 'genai'). Set to ['genai'] to receive smart notifications only after GenAI analysis.",
     )
     min_threat_level: int | None = Field(
         default=None,
@@ -53,6 +53,9 @@ class NotificationConfig(FrigateBaseModel):
             v = [item.strip() for item in v.split(",") if item.strip()]
         if not isinstance(v, list):
             raise ValueError("notify_on must be a list of strings")
+        for item in v:
+            if not isinstance(item, str):
+                raise ValueError("All items in notify_on must be strings")
         invalid = [item for item in v if item not in VALID_NOTIFY_ON_STATES]
         if invalid:
             raise ValueError(

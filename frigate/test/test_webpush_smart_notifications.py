@@ -83,10 +83,11 @@ class TestWebPushSmartNotifications(unittest.TestCase):
             },
         }
 
-    def test_default_settings_send_on_start_and_genai(self):
+    def test_default_settings_send_on_new_and_genai(self):
         client = self._create_client()
-        start_payload = self._make_payload(event_type="start", review_id="rev_1")
-        client.send_alert(start_payload)
+        # "new" is what Frigate review producer actually emits
+        new_payload = self._make_payload(event_type="new", review_id="rev_1")
+        client.send_alert(new_payload)
         self.assertEqual(client.send_push_notification.call_count, 1)
 
         genai_payload = self._make_payload(
@@ -99,6 +100,85 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         self.assertEqual(client.send_push_notification.call_count, 2)
         last_call_kwargs = client.send_push_notification.call_args.kwargs
         self.assertIn("Needs Review: Person loitering", last_call_kwargs["title"])
+
+    def test_alert_promotion_from_detection_triggers_start_notification(self):
+        client = self._create_client()
+        promotion_payload = {
+            "type": "update",
+            "before": {
+                "severity": "detection",
+                "camera": "front_porch",
+                "data": {"objects": ["person"], "zones": []},
+            },
+            "after": {
+                "id": "rev_promo",
+                "severity": "alert",
+                "camera": "front_porch",
+                "thumb_path": "/media/frigate/clips/thumb.jpg",
+                "data": {
+                    "objects": ["person"],
+                    "sub_labels": [],
+                    "zones": ["porch_zone"],
+                    "metadata": {},
+                },
+            },
+        }
+        client.send_alert(promotion_payload)
+        self.assertEqual(client.send_push_notification.call_count, 1)
+
+    def test_min_threat_level_defers_all_unevaluated_states(self):
+        client = self._create_client(min_threat_level=1, genai_enabled=True)
+        # All unevaluated states (new, update, end) must be deferred until GenAI evaluation
+        new_payload = self._make_payload(event_type="new", review_id="rev_1")
+        client.send_alert(new_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        update_payload = self._make_payload(event_type="update", review_id="rev_1")
+        # Ensure update has a new object so it wouldn't be skipped by the deduplication check
+        update_payload["after"]["data"]["objects"].append("car")
+        client.send_alert(update_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        end_payload = self._make_payload(event_type="end", review_id="rev_1")
+        client.send_alert(end_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        # GenAI analysis below threshold should be suppressed
+        genai_low = self._make_payload(
+            event_type="genai",
+            review_id="rev_1",
+            potential_threat_level=0,
+            title="Normal activity",
+        )
+        client.send_alert(genai_low)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        # GenAI analysis meeting threshold triggers the notification
+        genai_high = self._make_payload(
+            event_type="genai",
+            review_id="rev_1",
+            potential_threat_level=1,
+            title="Suspicious activity",
+        )
+        client.send_alert(genai_high)
+        self.assertEqual(client.send_push_notification.call_count, 1)
+
+    def test_invalid_threat_scores_handled_safely(self):
+        client = self._create_client(min_threat_level=1, genai_enabled=True)
+        # null or non-numeric threat score must not throw TypeError
+        genai_payload = self._make_payload(
+            event_type="genai",
+            review_id="rev_null",
+            title="Unknown assessment",
+        )
+        genai_payload["after"]["data"]["metadata"]["potential_threat_level"] = None
+        client.send_alert(genai_payload)
+        # Treated as threat_level = 0, below min_threat_level 1
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        genai_payload["after"]["data"]["metadata"]["potential_threat_level"] = "invalid"
+        client.send_alert(genai_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
 
     def test_cooldown_allows_genai_update_for_same_review(self):
         client = self._create_client(cooldown=60)
@@ -197,6 +277,10 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         config1 = NotificationConfig(notify_on=["start", "genai"])
         self.assertEqual(config1.notify_on, ["start", "genai"])
 
+        # "new" and "update" are also valid triggers
+        config_triggers = NotificationConfig(notify_on=["new", "update", "end"])
+        self.assertEqual(config_triggers.notify_on, ["new", "update", "end"])
+
         # Comma-separated string coerced into list
         config2 = NotificationConfig(notify_on="start, end")
         self.assertEqual(config2.notify_on, ["start", "end"])
@@ -204,6 +288,13 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         # Invalid trigger name rejected
         with self.assertRaises(ValueError):
             NotificationConfig(notify_on=["invalid_trigger"])
+
+        # Non-string list items safely rejected with ValueError (not TypeError)
+        with self.assertRaises(ValueError):
+            NotificationConfig(notify_on=[1])
+
+        with self.assertRaises(ValueError):
+            NotificationConfig(notify_on=[["nested"]])
 
         # Valid threat levels
         config3 = NotificationConfig(min_threat_level=2)

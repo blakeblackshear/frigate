@@ -354,7 +354,9 @@ class WebPushClient(Communicator):
 
         if topic == "reviews":
             decoded = json.loads(payload)
-            camera = decoded["before"]["camera"]
+            camera = decoded.get("after", {}).get("camera") or decoded.get(
+                "before", {}
+            ).get("camera")
             camera_config = self.config.cameras.get(camera)
 
             if camera_config is None or not camera_config.notifications.enabled:
@@ -572,30 +574,49 @@ class WebPushClient(Communicator):
             )
             return
 
-        # Threat-level and trigger filtering:
+        is_start = state in ("new", "start") or (
+            state == "update"
+            and payload["before"]["severity"] != "alert"
+            and payload["after"]["severity"] == "alert"
+        )
+
+        # Threat-level deferral:
         # If minimum threat level is configured and GenAI descriptions are enabled,
-        # defer notification until GenAI evaluation produces the threat level.
+        # defer notification for all unevaluated states until GenAI evaluation produces the threat level.
         if min_threat_level is not None and genai_alerts_enabled:
-            if state == "start":
+            if state != "genai":
                 logger.debug(
-                    "Deferring notification for %s until GenAI analysis (min_threat_level=%s)",
+                    "Deferring notification for %s (%s) until GenAI analysis (min_threat_level=%s)",
                     camera,
+                    state,
                     min_threat_level,
                 )
                 return
-        elif state not in notify_on:
-            # Fallback: if 'genai' is configured as trigger but GenAI is disabled,
-            # send on 'end' so notifications are not lost.
-            if state == "end" and "genai" in notify_on and not genai_alerts_enabled:
-                pass
-            else:
-                logger.debug(
-                    "Skipping notification for %s - state '%s' not in notify_on %s",
-                    camera,
-                    state,
-                    notify_on,
-                )
-                return
+
+        # Trigger filtering:
+        trigger_matched = False
+        if is_start:
+            trigger_matched = "start" in notify_on or "new" in notify_on
+        elif state == "update":
+            trigger_matched = "update" in notify_on
+        elif state == "end":
+            if "end" in notify_on:
+                trigger_matched = True
+            elif "genai" in notify_on and not genai_alerts_enabled:
+                # Fallback: if 'genai' is configured as trigger but GenAI is disabled,
+                # send on 'end' so notifications are not lost.
+                trigger_matched = True
+        elif state == "genai":
+            trigger_matched = "genai" in notify_on or min_threat_level is not None
+
+        if not trigger_matched:
+            logger.debug(
+                "Skipping notification for %s - state '%s' not in notify_on %s",
+                camera,
+                state,
+                notify_on,
+            )
+            return
 
         # Cooldown check:
         # If this is a GenAI update for the same review item that was already notified,
@@ -609,7 +630,12 @@ class WebPushClient(Communicator):
 
         # Threat level filtering on GenAI results:
         if state == "genai" and min_threat_level is not None:
-            threat_level = metadata.get("potential_threat_level", 0)
+            raw_threat = metadata.get("potential_threat_level")
+            try:
+                threat_level = int(raw_threat) if raw_threat is not None else 0
+            except (ValueError, TypeError):
+                threat_level = 0
+
             if threat_level < min_threat_level:
                 logger.debug(
                     "Skipping notification for %s - threat level %s is below minimum %s",
@@ -643,7 +669,11 @@ class WebPushClient(Communicator):
 
         if state == "genai" and metadata:
             base_title = metadata.get("title", "")
-            threat_level = metadata.get("potential_threat_level", 0)
+            raw_threat = metadata.get("potential_threat_level")
+            try:
+                threat_level = int(raw_threat) if raw_threat is not None else 0
+            except (ValueError, TypeError):
+                threat_level = 0
 
             # Add prefix for threat levels 1 and 2
             if threat_level == 1:
