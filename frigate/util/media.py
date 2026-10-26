@@ -938,21 +938,22 @@ def sync_all_media(
     return results
 
 
-async def get_keyframe_offsets(path: str) -> list[int] | None:
-    """Get every video keyframe offset (ms from segment start) in an mp4.
+async def get_playback_index(path: str) -> tuple[list[int] | None, float | None]:
+    """Get the video keyframe offsets (ms from segment start) and audio length of an mp4.
 
-    Runs at record time so playback never needs to probe. Returns None if
-    ffprobe fails, so the caller stores NULL and playback falls back to
-    serving whole files.
+    Runs at record time so playback never needs to probe. The audio length
+    is the summed duration of the audio samples. nginx-vod ignores edit
+    lists, so it plays late-starting audio from zero and also counts the
+    AAC priming frame ffprobe drops, which puts this sum at or one frame
+    below its measure. Returns (None, None) if ffprobe fails, so the caller
+    stores NULL and playback falls back to serving whole files.
     """
     proc = None
     try:
         proc = await asyncio.create_subprocess_exec(
             FFPROBE_PATH,
-            "-select_streams",
-            "v:0",
             "-show_entries",
-            "packet=pts_time,flags",
+            "packet=codec_type,stream_index,pts_time,duration_time,flags",
             "-of",
             "csv=p=0",
             "-loglevel",
@@ -968,22 +969,39 @@ async def get_keyframe_offsets(path: str) -> list[int] | None:
                 proc.kill()
             with contextlib.suppress(TimeoutError):
                 await asyncio.wait_for(proc.communicate(), timeout=2)
-        return None
+        return None, None
 
     if proc.returncode != 0:
-        return None
+        return None, None
 
-    offsets: list[int] = []
-    for line in stdout.decode().strip().splitlines():
+    return parse_playback_index(stdout.decode())
+
+
+def parse_playback_index(output: str) -> tuple[list[int], float]:
+    """Parse ffprobe packet CSV (codec_type,stream_index,pts_time,duration_time,flags).
+
+    Only the first video and first audio stream count, matching the tracks
+    nginx-vod serves.
+    """
+    keyframes: dict[int, list[int]] = {}
+    audio: dict[int, float] = {}
+    for line in output.strip().splitlines():
         parts = line.strip().split(",")
-        if len(parts) != 2:
+        if len(parts) != 5:
             continue
-        ts_str, flags = parts
-        if "K" not in flags:
-            continue
+        codec_type, index_str, ts_str, dur_str, flags = parts
         try:
-            offsets.append(int(float(ts_str) * 1000))
+            index = int(index_str)
+            if codec_type == "video":
+                stream = keyframes.setdefault(index, [])
+                if "K" in flags:
+                    stream.append(int(float(ts_str) * 1000))
+            elif codec_type == "audio":
+                audio[index] = audio.get(index, 0.0) + float(dur_str)
         except ValueError:
             continue
 
-    return offsets
+    return (
+        keyframes[min(keyframes)] if keyframes else [],
+        audio[min(audio)] if audio else 0.0,
+    )

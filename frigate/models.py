@@ -85,6 +85,7 @@ class Recordings(Model):
     audio_rate = IntegerField(null=True)  # Hz; NULL = unknown (legacy rows)
     audio_codec = CharField(null=True, max_length=20)  # NULL = unknown (legacy rows)
     video_codec = CharField(null=True, max_length=20)  # NULL = unknown (legacy rows)
+    audio_duration = FloatField(null=True)  # seconds of audio samples; NULL = unknown
 
 
 class ExportCase(Model):

@@ -155,7 +155,7 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
         maintainer.end_time_cache = {
-            cache_path: (end_time, 10.0, None, None, None, None, None)
+            cache_path: (end_time, 10.0, None, None, None, None, None, None)
         }
         # Single processed frame well past end_time with no motion/objects.
         maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
@@ -199,7 +199,7 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
         maintainer.end_time_cache = {
-            cache_path: (end_time, 10.0, False, None, None, None, [])
+            cache_path: (end_time, 10.0, False, None, None, None, [], None)
         }
         maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
         maintainer.audio_recordings_info["test_cam"] = []
@@ -255,7 +255,7 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
         maintainer.end_time_cache = {
-            cache_path: (end_time, 10.0, False, None, None, None, [])
+            cache_path: (end_time, 10.0, False, None, None, None, [], None)
         }
         maintainer.object_recordings_info["test_cam"] = [(now.timestamp(), [], [], [])]
         maintainer.audio_recordings_info["test_cam"] = []
@@ -313,7 +313,7 @@ class TestMaintainer(unittest.IsolatedAsyncioTestCase):
         cache_path = "/tmp/cache/test_cam@20260417150000+0000.mp4"
 
         maintainer.end_time_cache = {
-            cache_path: (end_time, 10.0, False, None, None, None, [])
+            cache_path: (end_time, 10.0, False, None, None, None, [], None)
         }
         # Metadata has only reached partway into the segment.
         maintainer.object_recordings_info["test_cam"] = [
