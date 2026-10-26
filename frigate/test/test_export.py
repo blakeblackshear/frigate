@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from frigate.api.export import _unique_archive_name
+from frigate.api.export import _archive_entry, _unique_archive_name
 from frigate.const import MAX_PLAYLIST_SECONDS
 from frigate.models import Export
 from frigate.record.export import (
@@ -217,6 +217,38 @@ class TestUniqueArchiveName(unittest.TestCase):
         self.assertEqual(_unique_archive_name(export, used), "Package thief_abc123.mp4")
         self.assertEqual(
             _unique_archive_name(export, used), "Package thief_abc123_1.mp4"
+        )
+
+
+class TestArchiveEntry(unittest.TestCase):
+    """Tests for the modified time stamped on case download zip entries."""
+
+    def build_export(self) -> Export:
+        return Export(
+            id="front_door_abc123",
+            camera="front_door",
+            name="front door",
+            date=1756000000.0,
+            video_path="/media/frigate/exports/front_door_abc123.mp4",
+            thumb_path="/media/frigate/exports/front_door_abc123.webp",
+            in_progress=False,
+        )
+
+    def test_uses_start_time_in_ui_timezone(self):
+        zinfo = _archive_entry(self.build_export(), "a.mp4", "America/New_York")
+        self.assertEqual(zinfo.date_time, (2025, 8, 23, 21, 46, 40))
+
+    def test_clamps_dates_before_1980(self):
+        export = self.build_export()
+        export.date = 100
+        zinfo = _archive_entry(export, "a.mp4", "UTC")
+        self.assertEqual(zinfo.date_time, (1980, 1, 1, 0, 0, 0))
+
+    def test_invalid_timezone_falls_back_to_local_time(self):
+        zinfo = _archive_entry(self.build_export(), "a.mp4", "Not/A_Real_Zone")
+        self.assertEqual(
+            zinfo.date_time,
+            _archive_entry(self.build_export(), "a.mp4", None).date_time,
         )
 
 
