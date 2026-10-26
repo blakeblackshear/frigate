@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { getPostLoginUrl } from "@/api/auth-redirect";
 import { UserAuthForm } from "@/components/auth/AuthForm";
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import Logo from "@/components/Logo";
 import { ThemeProvider } from "@/context/theme-provider";
 import "@/utils/i18n";
 import { LanguageProvider } from "@/context/language-provider";
+
+// show the login form if the session check stalls instead of a blank page
+const SESSION_CHECK_TIMEOUT_MS = 5000;
 
 function LoginPage() {
   const [checkingSession, setCheckingSession] = useState(true);
@@ -13,7 +17,10 @@ function LoginPage() {
   // skip the login form when the user already has a valid session
   useEffect(() => {
     axios
-      .get("/profile", { withCredentials: true })
+      .get("/profile", {
+        withCredentials: true,
+        timeout: SESSION_CHECK_TIMEOUT_MS,
+      })
       .then(() => {
         window.location.replace(getPostLoginUrl());
       })
@@ -21,10 +28,6 @@ function LoginPage() {
         setCheckingSession(false);
       });
   }, []);
-
-  if (checkingSession) {
-    return null;
-  }
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
@@ -35,7 +38,7 @@ function LoginPage() {
               <div className="flex flex-col items-center space-y-2">
                 <Logo className="mb-6 h-8 w-8" />
               </div>
-              <UserAuthForm />
+              {checkingSession ? <ActivityIndicator /> : <UserAuthForm />}
             </div>
           </div>
         </div>

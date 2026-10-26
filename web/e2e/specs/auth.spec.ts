@@ -205,3 +205,25 @@ test.describe("Auth: login page with an existing session @high", () => {
     await expect(frigateApp.page).toHaveURL("/");
   });
 });
+
+test.describe("Auth: login page with a stalled session check @high", () => {
+  // the aborted /profile request surfaces as a network error
+  test.use({ expectedErrors: [/profile/] });
+
+  test("shows a loading indicator, then the login form", async ({
+    frigateApp,
+  }) => {
+    // never answer /profile so the session check has to time out
+    await frigateApp.page.route("**/api/profile", () => new Promise(() => {}));
+    await frigateApp.page.route("**/api/auth/first_time_login", (route) =>
+      route.fulfill({ json: { admin_first_time_login: false } }),
+    );
+
+    await frigateApp.page.goto("/login");
+    await expect(frigateApp.page.getByLabel("Loading…")).toBeVisible();
+    await expect(frigateApp.page.getByLabel("Username")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(frigateApp.page).toHaveURL("/login");
+  });
+});
