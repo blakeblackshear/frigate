@@ -177,3 +177,31 @@ test.describe("Auth: login redirect @high", () => {
     });
   }
 });
+
+test.describe("Auth: login page with an existing session @high", () => {
+  // the default mocks answer /profile with an admin, so the user is logged in
+
+  test("redirects home instead of showing the login form", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.goto("/login");
+    await expect(frigateApp.page).toHaveURL("/");
+    await expect(frigateApp.page.locator("#pageRoot")).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
+  test("redirects to the requested url", async ({ frigateApp }) => {
+    await frigateApp.page.goto(
+      `/login?redirect=${encodeURIComponent("/explore?labels=person")}`,
+    );
+    await expect(frigateApp.page).toHaveURL("/explore?labels=person");
+  });
+
+  test("ignores a redirect to another site", async ({ frigateApp }) => {
+    await frigateApp.page.goto(
+      `/login?redirect=${encodeURIComponent("https://example.com/")}`,
+    );
+    await expect(frigateApp.page).toHaveURL("/");
+  });
+});
