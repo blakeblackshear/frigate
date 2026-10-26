@@ -238,6 +238,12 @@ class TestArchiveEntry(unittest.TestCase):
         zinfo = _archive_entry(self.build_export(), "a.mp4", "America/New_York")
         self.assertEqual(zinfo.date_time, (2025, 8, 23, 21, 46, 40))
 
+    def test_clamps_dates_before_1980(self):
+        export = self.build_export()
+        export.date = 100
+        zinfo = _archive_entry(export, "a.mp4", "UTC")
+        self.assertEqual(zinfo.date_time, (1980, 1, 1, 0, 0, 0))
+
     def test_invalid_timezone_falls_back_to_local_time(self):
         zinfo = _archive_entry(self.build_export(), "a.mp4", "Not/A_Real_Zone")
         self.assertEqual(

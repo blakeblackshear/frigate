@@ -459,7 +459,10 @@ def _archive_entry(
             pass
 
     start = datetime.datetime.fromtimestamp(float(export.date), tz=tz)
-    return zipfile.ZipInfo(arcname, date_time=start.timetuple()[:6])
+
+    # zip can't represent dates before 1980
+    date_time = max(start.timetuple()[:6], (1980, 1, 1, 0, 0, 0))
+    return zipfile.ZipInfo(arcname, date_time=date_time)
 
 
 def _stream_case_archive(exports: list[Export], tz_name: str | None) -> Iterator[bytes]:
