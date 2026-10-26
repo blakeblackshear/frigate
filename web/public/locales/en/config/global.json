@@ -154,6 +154,14 @@
       "label": "Cooldown period",
       "description": "Cooldown (seconds) between notifications to avoid spamming recipients."
     },
+    "notify_on": {
+      "label": "Notification triggers",
+      "description": "List of review event states that trigger notifications ('start', 'end', 'genai'). Set to ['genai'] to receive smart notifications only after GenAI analysis."
+    },
+    "min_threat_level": {
+      "label": "Minimum threat level",
+      "description": "Minimum potential threat level (0=normal, 1=suspicious, 2=critical) required to send a notification. If set, notifications for review events with a lower threat level will be suppressed."
+    },
     "enabled_in_config": {
       "label": "Original notifications state",
       "description": "Indicates whether notifications were enabled in the original static configuration."

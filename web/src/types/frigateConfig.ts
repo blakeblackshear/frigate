@@ -160,6 +160,9 @@ export interface CameraConfig {
   notifications: {
     enabled: boolean;
     email?: string;
+    cooldown?: number;
+    notify_on?: string[];
+    min_threat_level?: number | null;
     enabled_in_config: boolean;
   };
   objects: {
@@ -580,6 +583,9 @@ export interface FrigateConfig {
   notifications: {
     enabled: boolean;
     email?: string;
+    cooldown?: number;
+    notify_on?: string[];
+    min_threat_level?: number | null;
     enabled_in_config: boolean;
   };
 

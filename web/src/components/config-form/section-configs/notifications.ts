@@ -4,7 +4,7 @@ const notifications: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/notifications",
     restartRequired: [],
-    fieldOrder: ["enabled", "email"],
+    fieldOrder: ["enabled", "email", "cooldown", "notify_on", "min_threat_level"],
     fieldGroups: {},
     hiddenFields: ["enabled_in_config"],
     advancedFields: [],
@@ -32,6 +32,8 @@ const notifications: SectionConfigOverrides = {
       enabled: { "ui:widget": "hidden" },
       email: { "ui:widget": "hidden" },
       cooldown: { "ui:widget": "hidden" },
+      notify_on: { "ui:widget": "hidden" },
+      min_threat_level: { "ui:widget": "hidden" },
       enabled_in_config: { "ui:widget": "hidden" },
     },
   },
