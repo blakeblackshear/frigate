@@ -17,6 +17,7 @@ from frigate.events.audio import AudioEventMaintainer, AudioProcessor
 
 @patch("frigate.detectors.detector_config.load_labels", return_value={0: "person"})
 def build_config(_labels, enabled=True, audio=True):
+    """Build a single-camera config with explicit dimensions and mocked labels."""
     return FrigateConfig(
         mqtt={"enabled": False},
         ffmpeg={"hwaccel_args": []},
@@ -43,20 +44,29 @@ class UpdateTransport:
     """Replace only ZMQ delivery; retain production topic filtering and updates."""
 
     def __init__(self):
+        """Initialize an empty queue for camera configuration updates."""
         self.pending = deque()
 
     def publish(self, kind, value):
+        """Queue a copied update for the test camera, matching process isolation."""
         self.pending.append((f"config/cameras/test/{kind}", copy.deepcopy(value)))
 
     def check_for_update(self):
+        """Return the oldest queued update, or the subscriber's empty sentinel."""
         return self.pending.popleft() if self.pending else (None, None)
 
     def stop(self):
+        """Match subscriber cleanup without owning any transport resources."""
         pass
 
 
 class TestAudioManagerLifecycle(unittest.TestCase):
     def run_manager(self, config, steps):
+        """Run the manager with fake transport and workers, returning created workers.
+
+        Execute one action before each update poll, passing the processor,
+        transport, and workers. Stop once all actions have run.
+        """
         transport = UpdateTransport()
         stop = MagicMock()
         processor = AudioProcessor(config, {"test": MagicMock()}, MagicMock(), stop)
@@ -98,9 +108,12 @@ class TestAudioManagerLifecycle(unittest.TestCase):
         return workers
 
     def assert_workers(self, processor, count):
+        """Assert the number of camera workers registered with the manager."""
         self.assertEqual(len(processor.audio_threads), count)
 
     def test_initially_disabled_then_enabled_spawns_once(self):
+        """Start one worker after enablement despite repeated ON updates."""
+
         def enable(processor, transport, workers):
             self.assert_workers(processor, 0)
             transport.publish("enabled", True)
@@ -116,6 +129,7 @@ class TestAudioManagerLifecycle(unittest.TestCase):
         workers[0].start.assert_called_once()
 
     def test_persisted_disabled_startup_then_dispatcher_enable(self):
+        """Restore persisted OFF state and start a worker through dispatcher ON."""
         with tempfile.TemporaryDirectory() as directory:
             with patch(
                 "frigate.comms.runtime_state.find_config_file",
@@ -152,6 +166,7 @@ class TestAudioManagerLifecycle(unittest.TestCase):
             self.assertEqual(len(workers), 1)
 
     def test_audio_disabled_waits_for_audio_enable(self):
+        """Defer worker creation until audio detection is enabled."""
         config = build_config(audio=False)
 
         def enable_camera(processor, transport, workers):
@@ -168,6 +183,7 @@ class TestAudioManagerLifecycle(unittest.TestCase):
         self.run_manager(config, [enable_camera, enable_audio, check])
 
     def test_enabled_camera_remove_and_add(self):
+        """Stop a removed camera's worker and create a new one when re-added."""
         config = build_config()
         camera = copy.deepcopy(config.cameras["test"])
 
@@ -188,6 +204,7 @@ class TestAudioManagerLifecycle(unittest.TestCase):
         self.run_manager(config, [remove, add, check])
 
     def test_missing_audio_role_does_not_spawn(self):
+        """Skip worker creation when no input provides the audio role."""
         config = build_config()
         config.cameras["test"].ffmpeg.inputs[0].roles = ["detect"]
         self.assertEqual(self.run_manager(config, []), [])
@@ -195,6 +212,7 @@ class TestAudioManagerLifecycle(unittest.TestCase):
 
 class TestAudioWorkerLifecycle(unittest.TestCase):
     def test_disable_closes_ffmpeg_and_reenable_resumes_reads(self):
+        """Close FFmpeg on camera disablement and resume reads after re-enabling."""
         config = build_config()
         transport = UpdateTransport()
         stop = threading.Event()
