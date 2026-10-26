@@ -178,6 +178,7 @@ class AudioProcessor(FrigateProcess):
             [
                 CameraConfigUpdateEnum.add,
                 CameraConfigUpdateEnum.audio,
+                CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.ffmpeg,
                 CameraConfigUpdateEnum.remove,
             ],
