@@ -661,6 +661,10 @@
         "label": "Enable GenAI for detections",
         "description": "Use GenAI to generate descriptions for detection items."
       },
+      "notification_threat_level": {
+        "label": "Notification threat level",
+        "description": "Minimum potential threat level (0=normal, 1=needs review, 2=security concern) required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level."
+      },
       "image_source": {
         "label": "Review image source",
         "description": "Source of images sent to GenAI ('preview' or 'recordings'); 'recordings' uses higher quality frames but more tokens."
@@ -857,14 +861,6 @@
     "cooldown": {
       "label": "Cooldown period",
       "description": "Cooldown (seconds) between notifications to avoid spamming recipients."
-    },
-    "notify_on": {
-      "label": "Notification triggers",
-      "description": "List of review event states that trigger notifications ('start', 'new', 'update', 'end', 'genai'). Set to ['genai'] to receive smart notifications only after GenAI analysis."
-    },
-    "min_threat_level": {
-      "label": "Minimum threat level",
-      "description": "Minimum potential threat level (0=normal, 1=suspicious, 2=critical) required to send a notification. If set, notifications for review events with a lower threat level will be suppressed."
     },
     "enabled_in_config": {
       "label": "Original notifications state",

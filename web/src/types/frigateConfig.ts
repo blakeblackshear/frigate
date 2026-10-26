@@ -161,8 +161,6 @@ export interface CameraConfig {
     enabled: boolean;
     email?: string;
     cooldown?: number;
-    notify_on?: string[];
-    min_threat_level?: number | null;
     enabled_in_config: boolean;
   };
   objects: {
@@ -279,6 +277,7 @@ export interface CameraConfig {
       enabled_in_config: boolean;
       alerts: boolean;
       detections: boolean;
+      notification_threat_level?: number | null;
     };
   };
   rtmp: {
@@ -584,8 +583,6 @@ export interface FrigateConfig {
     enabled: boolean;
     email?: string;
     cooldown?: number;
-    notify_on?: string[];
-    min_threat_level?: number | null;
     enabled_in_config: boolean;
   };
 

@@ -506,6 +506,10 @@ review:
     response_style: default
     # Optional: Save thumbnails sent to the GenAI provider for review/debugging purposes (default: shown below)
     debug_save_thumbnails: False
+    # Optional: Minimum threat level required to send notifications for review alerts (default: shown below)
+    # Options: 0 (normal), 1 (needs review), 2 (security concern), or null (no minimum)
+    # When set, notifications are deferred until GenAI evaluation completes and suppressed if below this level.
+    notification_threat_level: null
 
 # Optional: Motion configuration
 # NOTE: Can be overridden at the camera level
@@ -578,14 +582,6 @@ notifications:
   email: "admin@example.com"
   # Optional: Cooldown time for notifications in seconds (default: shown below)
   cooldown: 0
-  # Optional: List of review event states that trigger notifications (default: shown below)
-  # Possible values: 'start', 'new', 'update', 'end', 'genai'
-  notify_on:
-    - start
-    - genai
-  # Optional: Minimum threat level required to send a notification (default: shown below)
-  # Possible values: 0 (normal), 1 (suspicious), 2 (critical), or null (no minimum)
-  min_threat_level: null
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level
@@ -1192,12 +1188,6 @@ cameras:
           enabled: true
           # Optional: Cooldown time in seconds
           cooldown: 0
-          # Optional: Notification triggers ('start', 'new', 'update', 'end', 'genai')
-          notify_on:
-            - start
-            - genai
-          # Optional: Minimum threat level (0, 1, 2)
-          min_threat_level: null
         # Optional: Override objects settings
         objects:
           track:

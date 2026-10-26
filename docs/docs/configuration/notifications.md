@@ -98,27 +98,6 @@ Each registration is attached to the Frigate user account you are signed in as, 
 
 Currently notifications are only supported for review alerts. More notifications will be supported in the future.
 
-### Smart GenAI Notifications and Triggers
-
-By default, Frigate notifies when an alert starts (`start`) and again when GenAI produces a description (`genai`). You can configure which review events trigger notifications with `notify_on`, and optionally set a minimum GenAI threat level with `min_threat_level`:
-
-- `notify_on`: List of review event states that trigger notifications (`start`, `new`, `update`, `end`, `genai`).
-  - Set to `['genai']` to receive notifications only after GenAI analysis is complete.
-  - If GenAI is not enabled for the camera and `notify_on` is set to `['genai']`, notifications fall back to `end`.
-- `min_threat_level`: Minimum potential threat level (`0` = normal, `1` = suspicious, `2` = critical) required to send a notification.
-  - When configured, initial notifications are deferred until GenAI finishes analyzing the review item. If the evaluated threat level is below `min_threat_level`, the notification is suppressed.
-
-```yaml
-notifications:
-  enabled: True
-  email: "johndoe@gmail.com"
-  # Optional: only notify on GenAI evaluation
-  notify_on:
-    - genai
-  # Optional: only notify for suspicious (1) or critical (2) threats
-  min_threat_level: 1
-```
-
 :::note
 
 Currently, only Chrome supports images in notifications. Safari and Firefox will only show a title and message in the notification.

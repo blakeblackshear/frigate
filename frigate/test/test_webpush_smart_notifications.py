@@ -1,4 +1,4 @@
-"""Tests for smart GenAI notification filtering and threat level controls."""
+"""Tests for GenAI review notification threat level filtering and controls."""
 
 import unittest
 from types import SimpleNamespace
@@ -8,14 +8,14 @@ from pydantic import ValidationError
 
 from frigate.comms.webpush import WebPushClient
 from frigate.config.camera.notification import NotificationConfig
+from frigate.config.camera.review import GenAIReviewConfig
 
 
 class TestWebPushSmartNotifications(unittest.TestCase):
     def _create_client(
         self,
         cooldown: int = 0,
-        notify_on: list[str] | None = None,
-        min_threat_level: int | None = None,
+        notification_threat_level: int | None = None,
         genai_enabled: bool = True,
         genai_alerts: bool = True,
     ) -> WebPushClient:
@@ -23,16 +23,17 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         notification_config = NotificationConfig(
             enabled=True,
             cooldown=cooldown,
-            notify_on=notify_on if notify_on is not None else ["start", "genai"],
-            min_threat_level=min_threat_level,
+        )
+        genai_config = GenAIReviewConfig(
+            enabled=genai_enabled,
+            alerts=genai_alerts,
+            notification_threat_level=notification_threat_level,
         )
         camera_config = SimpleNamespace(
             friendly_name="Front Porch",
             notifications=notification_config,
             zones={},
-            review=SimpleNamespace(
-                genai=SimpleNamespace(enabled=genai_enabled, alerts=genai_alerts)
-            ),
+            review=SimpleNamespace(genai=genai_config),
         )
         client.config = SimpleNamespace(
             notifications=SimpleNamespace(email="test@example.com", cooldown=0),
@@ -51,7 +52,7 @@ class TestWebPushSmartNotifications(unittest.TestCase):
 
     def _make_payload(
         self,
-        event_type: str = "start",
+        event_type: str = "new",
         review_id: str = "rev_123",
         severity: str = "alert",
         potential_threat_level: int = 0,
@@ -83,13 +84,14 @@ class TestWebPushSmartNotifications(unittest.TestCase):
             },
         }
 
-    def test_default_settings_send_on_new_and_genai(self):
+    def test_default_behavior_sends_immediate_alert_and_genai_update(self):
         client = self._create_client()
-        # "new" is what Frigate review producer actually emits
+        # Default behavior sends on new alert immediately
         new_payload = self._make_payload(event_type="new", review_id="rev_1")
         client.send_alert(new_payload)
         self.assertEqual(client.send_push_notification.call_count, 1)
 
+        # Later, GenAI finishes and enriches the alert
         genai_payload = self._make_payload(
             event_type="genai",
             review_id="rev_1",
@@ -101,47 +103,26 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         last_call_kwargs = client.send_push_notification.call_args.kwargs
         self.assertIn("Needs Review: Person loitering", last_call_kwargs["title"])
 
-    def test_alert_promotion_from_detection_triggers_start_notification(self):
-        client = self._create_client()
-        promotion_payload = {
-            "type": "update",
-            "before": {
-                "severity": "detection",
-                "camera": "front_porch",
-                "data": {"objects": ["person"], "zones": []},
-            },
-            "after": {
-                "id": "rev_promo",
-                "severity": "alert",
-                "camera": "front_porch",
-                "thumb_path": "/media/frigate/clips/thumb.jpg",
-                "data": {
-                    "objects": ["person"],
-                    "sub_labels": [],
-                    "zones": ["porch_zone"],
-                    "metadata": {},
-                },
-            },
-        }
-        client.send_alert(promotion_payload)
-        self.assertEqual(client.send_push_notification.call_count, 1)
-
-        # Also triggers when notify_on is set to ['update']
-        client_update_only = self._create_client(notify_on=["update"])
-        client_update_only.send_alert(promotion_payload)
-        self.assertEqual(client_update_only.send_push_notification.call_count, 1)
-
-    def test_min_threat_level_suppresses_when_genai_disabled(self):
-        # When min_threat_level is set but GenAI is disabled, alerts lack threat assessment
-        # and must not be sent unassessed.
-        client = self._create_client(min_threat_level=1, genai_enabled=False)
+    def test_cooldown_allows_genai_update_for_same_review(self):
+        client = self._create_client(cooldown=60)
         start_payload = self._make_payload(event_type="new", review_id="rev_1")
         client.send_alert(start_payload)
-        self.assertEqual(client.send_push_notification.call_count, 0)
+        self.assertEqual(client.send_push_notification.call_count, 1)
 
-        end_payload = self._make_payload(event_type="end", review_id="rev_1")
-        client.send_alert(end_payload)
-        self.assertEqual(client.send_push_notification.call_count, 0)
+        # Same review sending genai update within cooldown window must not be blocked
+        genai_payload = self._make_payload(
+            event_type="genai",
+            review_id="rev_1",
+            potential_threat_level=0,
+            title="Person left package",
+        )
+        client.send_alert(genai_payload)
+        self.assertEqual(client.send_push_notification.call_count, 2)
+
+        # Different review within cooldown window must be blocked
+        different_payload = self._make_payload(event_type="new", review_id="rev_2")
+        client.send_alert(different_payload)
+        self.assertEqual(client.send_push_notification.call_count, 2)
 
     def test_slow_analysis_retains_cooldown_exemption_across_multiple_reviews(self):
         # Review A starts at t=0
@@ -154,7 +135,6 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         self.assertEqual(client.send_push_notification.call_count, 1)
 
         # Review B starts at t=61 (outside cooldown)
-        # Advance time by adjusting last notification times to simulate cooldown expiry
         client.last_notification_time = 0.0
         client.last_camera_notification_time["front_porch"] = 0.0
         payload_b_start = self._make_payload(event_type="new", review_id="rev_b")
@@ -162,7 +142,7 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         self.assertEqual(client.send_push_notification.call_count, 2)
 
         # Review A's slow GenAI analysis finishes while within cooldown from Review B
-        # Review A should still be exempt from cooldown because it was already notified
+        # Review A must still be exempt from cooldown because it was already notified
         payload_a_genai = self._make_payload(
             event_type="genai",
             review_id="rev_a",
@@ -174,15 +154,16 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         last_call_kwargs = client.send_push_notification.call_args.kwargs
         self.assertIn("Needs Review: Review A evaluated", last_call_kwargs["title"])
 
-    def test_min_threat_level_defers_all_unevaluated_states(self):
-        client = self._create_client(min_threat_level=1, genai_enabled=True)
+    def test_notification_threat_level_defers_and_filters_lower_threat(self):
+        client = self._create_client(
+            notification_threat_level=1, genai_enabled=True, genai_alerts=True
+        )
         # All unevaluated states (new, update, end) must be deferred until GenAI evaluation
         new_payload = self._make_payload(event_type="new", review_id="rev_1")
         client.send_alert(new_payload)
         self.assertEqual(client.send_push_notification.call_count, 0)
 
         update_payload = self._make_payload(event_type="update", review_id="rev_1")
-        # Ensure update has a new object so it wouldn't be skipped by the deduplication check
         update_payload["after"]["data"]["objects"].append("car")
         client.send_alert(update_payload)
         self.assertEqual(client.send_push_notification.call_count, 0)
@@ -211,8 +192,50 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         client.send_alert(genai_high)
         self.assertEqual(client.send_push_notification.call_count, 1)
 
+    def test_notification_threat_level_allows_critical_threat(self):
+        client = self._create_client(
+            notification_threat_level=2, genai_enabled=True, genai_alerts=True
+        )
+        # Threat level 1 should be suppressed when threshold is 2
+        genai_1 = self._make_payload(
+            event_type="genai",
+            review_id="rev_1",
+            potential_threat_level=1,
+            title="Checking window handles",
+        )
+        client.send_alert(genai_1)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        # Threat level 2 should be sent
+        genai_2 = self._make_payload(
+            event_type="genai",
+            review_id="rev_2",
+            potential_threat_level=2,
+            title="Crowbar visible at door",
+        )
+        client.send_alert(genai_2)
+        self.assertEqual(client.send_push_notification.call_count, 1)
+        self.assertIn(
+            "Security Concern: Crowbar visible at door",
+            client.send_push_notification.call_args.kwargs["title"],
+        )
+
+    def test_notification_threat_level_suppresses_when_genai_disabled(self):
+        # When notification_threat_level is set but GenAI is disabled, alerts lack threat assessment
+        # and must not be sent unassessed.
+        client = self._create_client(notification_threat_level=1, genai_enabled=False)
+        start_payload = self._make_payload(event_type="new", review_id="rev_1")
+        client.send_alert(start_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
+        end_payload = self._make_payload(event_type="end", review_id="rev_1")
+        client.send_alert(end_payload)
+        self.assertEqual(client.send_push_notification.call_count, 0)
+
     def test_invalid_threat_scores_handled_safely(self):
-        client = self._create_client(min_threat_level=1, genai_enabled=True)
+        client = self._create_client(
+            notification_threat_level=1, genai_enabled=True, genai_alerts=True
+        )
         # null or non-numeric threat score must not throw TypeError
         genai_payload = self._make_payload(
             event_type="genai",
@@ -221,136 +244,26 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         )
         genai_payload["after"]["data"]["metadata"]["potential_threat_level"] = None
         client.send_alert(genai_payload)
-        # Treated as threat_level = 0, below min_threat_level 1
         self.assertEqual(client.send_push_notification.call_count, 0)
 
         genai_payload["after"]["data"]["metadata"]["potential_threat_level"] = "invalid"
         client.send_alert(genai_payload)
         self.assertEqual(client.send_push_notification.call_count, 0)
 
-    def test_cooldown_allows_genai_update_for_same_review(self):
-        client = self._create_client(cooldown=60)
-        start_payload = self._make_payload(event_type="start", review_id="rev_1")
-        client.send_alert(start_payload)
-        self.assertEqual(client.send_push_notification.call_count, 1)
-
-        # Same review sending genai update within cooldown window must not be blocked
-        genai_payload = self._make_payload(
-            event_type="genai",
-            review_id="rev_1",
-            potential_threat_level=0,
-            title="Person left package",
-        )
-        client.send_alert(genai_payload)
-        self.assertEqual(client.send_push_notification.call_count, 2)
-
-        # Different review within cooldown window must be blocked
-        different_payload = self._make_payload(event_type="start", review_id="rev_2")
-        client.send_alert(different_payload)
-        self.assertEqual(client.send_push_notification.call_count, 2)
-
-    def test_notify_on_genai_only_suppresses_start(self):
-        client = self._create_client(notify_on=["genai"])
-        start_payload = self._make_payload(event_type="start", review_id="rev_1")
-        client.send_alert(start_payload)
-        self.assertEqual(client.send_push_notification.call_count, 0)
-
-        genai_payload = self._make_payload(
-            event_type="genai",
-            review_id="rev_1",
-            title="Delivery completed",
-        )
-        client.send_alert(genai_payload)
-        self.assertEqual(client.send_push_notification.call_count, 1)
-
-    def test_notify_on_genai_fallback_on_end_when_genai_disabled(self):
-        client = self._create_client(notify_on=["genai"], genai_enabled=False)
-        start_payload = self._make_payload(event_type="start", review_id="rev_1")
-        client.send_alert(start_payload)
-        self.assertEqual(client.send_push_notification.call_count, 0)
-
-        end_payload = self._make_payload(event_type="end", review_id="rev_1")
-        client.send_alert(end_payload)
-        self.assertEqual(client.send_push_notification.call_count, 1)
-
-    def test_min_threat_level_suppresses_lower_threat(self):
-        client = self._create_client(min_threat_level=1, genai_enabled=True)
-        # Start notification is deferred awaiting GenAI threat assessment
-        start_payload = self._make_payload(event_type="start", review_id="rev_1")
-        client.send_alert(start_payload)
-        self.assertEqual(client.send_push_notification.call_count, 0)
-
-        # Threat level 0 (Normal) should be suppressed
-        genai_payload = self._make_payload(
-            event_type="genai",
-            review_id="rev_1",
-            potential_threat_level=0,
-            title="Dog walking by",
-        )
-        client.send_alert(genai_payload)
-        self.assertEqual(client.send_push_notification.call_count, 0)
-
-    def test_min_threat_level_allows_matching_or_higher_threat(self):
-        client = self._create_client(min_threat_level=1, genai_enabled=True)
-        # Level 1 (Suspicious) is delivered
-        genai_payload_1 = self._make_payload(
-            event_type="genai",
-            review_id="rev_1",
-            potential_threat_level=1,
-            title="Checking window handles",
-        )
-        client.send_alert(genai_payload_1)
-        self.assertEqual(client.send_push_notification.call_count, 1)
-        self.assertIn(
-            "Needs Review: Checking window handles",
-            client.send_push_notification.call_args.kwargs["title"],
-        )
-
-        # Level 2 (Critical Security Concern) is delivered
-        genai_payload_2 = self._make_payload(
-            event_type="genai",
-            review_id="rev_2",
-            potential_threat_level=2,
-            title="Crowbar visible at door",
-        )
-        client.send_alert(genai_payload_2)
-        self.assertEqual(client.send_push_notification.call_count, 2)
-        self.assertIn(
-            "Security Concern: Crowbar visible at door",
-            client.send_push_notification.call_args.kwargs["title"],
-        )
-
-    def test_notification_config_validation(self):
-        # Valid notify_on configurations
-        config1 = NotificationConfig(notify_on=["start", "genai"])
-        self.assertEqual(config1.notify_on, ["start", "genai"])
-
-        # "new" and "update" are also valid triggers
-        config_triggers = NotificationConfig(notify_on=["new", "update", "end"])
-        self.assertEqual(config_triggers.notify_on, ["new", "update", "end"])
-
-        # Comma-separated string coerced into list
-        config2 = NotificationConfig(notify_on="start, end")
-        self.assertEqual(config2.notify_on, ["start", "end"])
-
-        # Invalid trigger name rejected
-        with self.assertRaises(ValueError):
-            NotificationConfig(notify_on=["invalid_trigger"])
-
-        # Non-string list items safely rejected with ValueError (not TypeError)
-        with self.assertRaises(ValueError):
-            NotificationConfig(notify_on=[1])
-
-        with self.assertRaises(ValueError):
-            NotificationConfig(notify_on=[["nested"]])
-
+    def test_genai_review_config_validation(self):
         # Valid threat levels
-        config3 = NotificationConfig(min_threat_level=2)
-        self.assertEqual(config3.min_threat_level, 2)
+        config1 = GenAIReviewConfig(notification_threat_level=1)
+        self.assertEqual(config1.notification_threat_level, 1)
+
+        config2 = GenAIReviewConfig(notification_threat_level=2)
+        self.assertEqual(config2.notification_threat_level, 2)
+
+        config_none = GenAIReviewConfig(notification_threat_level=None)
+        self.assertIsNone(config_none.notification_threat_level)
 
         # Out-of-range threat levels rejected
         with self.assertRaises(ValidationError):
-            NotificationConfig(min_threat_level=3)
+            GenAIReviewConfig(notification_threat_level=3)
 
         with self.assertRaises(ValidationError):
-            NotificationConfig(min_threat_level=-1)
+            GenAIReviewConfig(notification_threat_level=-1)

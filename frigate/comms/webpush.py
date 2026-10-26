@@ -553,11 +553,9 @@ class WebPushClient(Communicator):
 
         state = payload["type"]
         reviewId = payload["after"]["id"]
-        notify_on = camera_config.notifications.notify_on
-        min_threat_level = camera_config.notifications.min_threat_level
-        genai_alerts_enabled = bool(
-            camera_config.review.genai.enabled and camera_config.review.genai.alerts
-        )
+        genai_config = camera_config.review.genai
+        genai_alerts_enabled = bool(genai_config.enabled and genai_config.alerts)
+        notification_threat_level = genai_config.notification_threat_level
 
         # Don't notify if message is an update and important fields don't have an update
         if (
@@ -574,59 +572,25 @@ class WebPushClient(Communicator):
             )
             return
 
-        is_start = state in ("new", "start") or (
-            state == "update"
-            and payload["before"]["severity"] != "alert"
-            and payload["after"]["severity"] == "alert"
-        )
-
         # Threat-level deferral:
-        # If minimum threat level is configured:
-        # - If GenAI review alerts are disabled, unevaluated alerts cannot satisfy the minimum threat level.
-        # - If GenAI review alerts are enabled, defer all unevaluated review states until GenAI evaluation.
-        if min_threat_level is not None:
+        # If notification_threat_level is configured and GenAI review alerts are enabled,
+        # defer notification for all unevaluated review states until GenAI evaluation produces the threat level.
+        if notification_threat_level is not None:
             if not genai_alerts_enabled:
                 logger.debug(
-                    "Skipping notification for %s - min_threat_level is %s but GenAI review alerts are disabled",
+                    "Skipping notification for %s - notification_threat_level is %s but GenAI review alerts are disabled",
                     camera,
-                    min_threat_level,
+                    notification_threat_level,
                 )
                 return
             if state != "genai":
                 logger.debug(
-                    "Deferring notification for %s (%s) until GenAI analysis (min_threat_level=%s)",
+                    "Deferring notification for %s (%s) until GenAI analysis (notification_threat_level=%s)",
                     camera,
                     state,
-                    min_threat_level,
+                    notification_threat_level,
                 )
                 return
-
-        # Trigger filtering:
-        trigger_matched = False
-        if is_start:
-            trigger_matched = (
-                "start" in notify_on or "new" in notify_on or state in notify_on
-            )
-        elif state == "update":
-            trigger_matched = "update" in notify_on
-        elif state == "end":
-            if "end" in notify_on:
-                trigger_matched = True
-            elif "genai" in notify_on and not genai_alerts_enabled:
-                # Fallback: if 'genai' is configured as trigger but GenAI is disabled,
-                # send on 'end' so notifications are not lost.
-                trigger_matched = True
-        elif state == "genai":
-            trigger_matched = "genai" in notify_on or min_threat_level is not None
-
-        if not trigger_matched:
-            logger.debug(
-                "Skipping notification for %s - state '%s' not in notify_on %s",
-                camera,
-                state,
-                notify_on,
-            )
-            return
 
         # Cooldown check:
         # If this is a GenAI update for a review item that was already notified,
@@ -640,19 +604,19 @@ class WebPushClient(Communicator):
         metadata = payload["after"]["data"].get("metadata") or {}
 
         # Threat level filtering on GenAI results:
-        if state == "genai" and min_threat_level is not None:
+        if state == "genai" and notification_threat_level is not None:
             raw_threat = metadata.get("potential_threat_level")
             try:
                 threat_level = int(raw_threat) if raw_threat is not None else 0
             except (ValueError, TypeError):
                 threat_level = 0
 
-            if threat_level < min_threat_level:
+            if threat_level < notification_threat_level:
                 logger.debug(
                     "Skipping notification for %s - threat level %s is below minimum %s",
                     camera,
                     threat_level,
-                    min_threat_level,
+                    notification_threat_level,
                 )
                 return
 

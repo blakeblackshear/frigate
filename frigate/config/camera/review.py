@@ -136,6 +136,13 @@ class GenAIReviewConfig(FrigateBaseModel):
         title="Enable GenAI for detections",
         description="Use GenAI to generate descriptions for detection items.",
     )
+    notification_threat_level: int | None = Field(
+        default=None,
+        ge=0,
+        le=2,
+        title="Notification threat level",
+        description="Minimum potential threat level (0=normal, 1=needs review, 2=security concern) required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level.",
+    )
     image_source: ImageSourceEnum = Field(
         default=ImageSourceEnum.preview,
         title="Review image source",
