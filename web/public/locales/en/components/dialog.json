@@ -66,8 +66,8 @@
       "newCaseNamePlaceholder": "New case name",
       "newCaseDescriptionPlaceholder": "Case description",
       "label": "Case",
-      "nonAdminHelp": "A new case will be created for these exports.",
-      "placeholder": "Select a case"
+      "placeholder": "Select a case",
+      "nameRequired": "Case name is required"
     },
     "select": "Select",
     "export": "Export",
@@ -91,9 +91,11 @@
       "selectedCount": "{{selected}} / {{total}} selected",
       "checkingActivity": "Checking camera activity...",
       "noCameras": "No cameras available",
+      "noCamerasSelected": "Select at least one camera",
       "detectionCount_one": "1 tracked object",
       "detectionCount_other": "{{count}} tracked objects",
       "nameLabel": "Export name",
+      "caseNameDefault": "Multi-camera export - {{date}}",
       "namePlaceholder": "Optional base name for these exports",
       "queueingButton": "Queueing Exports...",
       "exportButton_one": "Export 1 Camera",

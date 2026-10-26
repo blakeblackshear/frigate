@@ -65,6 +65,8 @@ import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import { isValidIconName } from "@/utils/iconUtil";
 
@@ -441,6 +443,7 @@ export function ExportContent({
 }: ExportContentProps) {
   const { t } = useTranslation(["components/dialog"]);
   const isAdmin = useIsAdmin();
+  const locale = useDateLocale();
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
   const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -663,12 +666,25 @@ export function ExportContent({
   ]);
 
   const selectedCameraCount = selectedCameraIds.length;
+
+  const batchRangeError = !range
+    ? t("export.toast.error.noValidTimeSelected")
+    : range.before <= range.after
+      ? t("export.toast.error.endTimeMustAfterStartTime")
+      : undefined;
+  const batchCameraError =
+    !isEventsLoading && selectedCameraCount === 0
+      ? t("export.multiCamera.noCamerasSelected")
+      : undefined;
+  const batchCaseNameError =
+    isAdmin && batchCaseSelection === "new" && newCaseName.trim().length === 0
+      ? t("export.case.nameRequired")
+      : undefined;
   const canStartBatchExport =
-    Boolean(range && range.before > range.after) &&
+    !batchRangeError &&
+    !batchCaseNameError &&
     selectedCameraCount > 0 &&
-    !isStartingBatchExport &&
-    (batchCaseSelection !== "new" || newCaseName.trim().length > 0) &&
-    batchCaseSelection.length > 0;
+    !isStartingBatchExport;
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
@@ -965,6 +981,17 @@ export function ExportContent({
           if (tab === "multi") {
             setRange(buildRangeAroundCurrentTime(MULTI_CAMERA_RANGE_SECONDS));
             setBatchCaseSelection(selectedCaseId ?? "new");
+            if (newCaseName.trim().length === 0) {
+              setNewCaseName(
+                t("export.multiCamera.caseNameDefault", {
+                  date: formatUnixTimestampToDateTime(Date.now() / 1000, {
+                    date_style: "medium",
+                    time_style: "short",
+                    locale,
+                  }),
+                }),
+              );
+            }
           } else {
             onSelectTime(selectedOption);
           }
@@ -1132,6 +1159,11 @@ export function ExportContent({
                 </TooltipPortal>
               </Tooltip>
             </div>
+            {batchRangeError && (
+              <p className="text-sm font-medium text-destructive">
+                {batchRangeError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -1315,6 +1347,11 @@ export function ExportContent({
                 );
               })}
             </div>
+            {batchCameraError && (
+              <p className="text-sm font-medium text-destructive">
+                {batchCameraError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -1367,6 +1404,11 @@ export function ExportContent({
                     value={newCaseName}
                     onChange={(event) => setNewCaseName(event.target.value)}
                   />
+                  {batchCaseNameError && (
+                    <p className="text-sm font-medium text-destructive">
+                      {batchCaseNameError}
+                    </p>
+                  )}
                   <Textarea
                     placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                     value={newCaseDescription}
