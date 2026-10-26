@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { getPostLoginUrl } from "@/api/auth-redirect";
 import { UserAuthForm } from "@/components/auth/AuthForm";
 import Logo from "@/components/Logo";
 import { ThemeProvider } from "@/context/theme-provider";
@@ -5,6 +8,24 @@ import "@/utils/i18n";
 import { LanguageProvider } from "@/context/language-provider";
 
 function LoginPage() {
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  // skip the login form when the user already has a valid session
+  useEffect(() => {
+    axios
+      .get("/profile", { withCredentials: true })
+      .then(() => {
+        window.location.replace(getPostLoginUrl());
+      })
+      .catch(() => {
+        setCheckingSession(false);
+      });
+  }, []);
+
+  if (checkingSession) {
+    return null;
+  }
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="frigate-ui-theme">
       <LanguageProvider>
