@@ -1034,7 +1034,7 @@
       },
       "notification_threat_level": {
         "label": "Notification threat level",
-        "description": "Minimum potential threat level (0=normal, 1=needs review, 2=security concern) required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level."
+        "description": "Minimum potential threat level required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level."
       },
       "image_source": {
         "label": "Review image source",

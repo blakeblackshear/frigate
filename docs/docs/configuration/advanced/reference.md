@@ -507,7 +507,7 @@ review:
     # Optional: Save thumbnails sent to the GenAI provider for review/debugging purposes (default: shown below)
     debug_save_thumbnails: False
     # Optional: Minimum threat level required to send notifications for review alerts (default: shown below)
-    # Options: 0 (normal), 1 (needs review), 2 (security concern), or null (no minimum)
+    # Options: normal, needs_review, security_concern, or null (no minimum)
     # When set, notifications are deferred until GenAI evaluation completes and suppressed if below this level.
     notification_threat_level: null
 
@@ -1186,8 +1186,6 @@ cameras:
         # Optional: Override notification settings
         notifications:
           enabled: true
-          # Optional: Cooldown time in seconds
-          cooldown: 0
         # Optional: Override objects settings
         objects:
           track:

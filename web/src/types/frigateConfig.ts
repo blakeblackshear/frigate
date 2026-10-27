@@ -277,7 +277,12 @@ export interface CameraConfig {
       enabled_in_config: boolean;
       alerts: boolean;
       detections: boolean;
-      notification_threat_level?: number | null;
+      notification_threat_level?:
+        | "normal"
+        | "needs_review"
+        | "security_concern"
+        | number
+        | null;
     };
   };
   rtmp: {

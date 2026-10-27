@@ -32,9 +32,9 @@ This will show in multiple places in the UI to give additional context about eac
 
 When using GenAI review summaries, you can configure `notification_threat_level` under `review.genai` to suppress notifications for routine activity:
 
-- `0` (normal): notifications are sent for all alerts.
-- `1` (needs review): notifications are only sent if GenAI evaluates the scene as suspicious or higher.
-- `2` (security concern): notifications are only sent for critical security concerns.
+- `normal` (or `0`): notifications are sent for all alerts.
+- `needs_review` (or `1`): notifications are only sent if GenAI evaluates the scene as suspicious or higher.
+- `security_concern` (or `2`): notifications are only sent for critical security concerns.
 
 When `notification_threat_level` is set, initial notifications are deferred until GenAI evaluation completes. If the evaluated threat level is below the configured threshold, the notification is suppressed:
 
@@ -45,7 +45,7 @@ cameras:
       genai:
         enabled: True
         alerts: True
-        notification_threat_level: 1 # only notify for suspicious (1) or critical (2) threats
+        notification_threat_level: needs_review # only notify for suspicious or critical threats
 ```
 
 ### Defining Typical Activity

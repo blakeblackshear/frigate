@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Any
 
 from pydantic import Field, field_validator
 
@@ -11,7 +12,30 @@ __all__ = [
     "ImageSourceEnum",
     "ReviewFrameModeEnum",
     "ReviewResponseStyleEnum",
+    "ReviewThreatLevelEnum",
+    "THREAT_LEVEL_NUMERIC_MAP",
 ]
+
+
+class ReviewThreatLevelEnum(str, Enum):
+    """Potential threat levels for review notifications."""
+
+    normal = "normal"
+    needs_review = "needs_review"
+    security_concern = "security_concern"
+
+
+THREAT_LEVEL_NUMERIC_MAP: dict[ReviewThreatLevelEnum | str | int, int] = {
+    ReviewThreatLevelEnum.normal: 0,
+    ReviewThreatLevelEnum.needs_review: 1,
+    ReviewThreatLevelEnum.security_concern: 2,
+    "normal": 0,
+    "needs_review": 1,
+    "security_concern": 2,
+    0: 0,
+    1: 1,
+    2: 2,
+}
 
 
 class ImageSourceEnum(str, Enum):
@@ -136,13 +160,27 @@ class GenAIReviewConfig(FrigateBaseModel):
         title="Enable GenAI for detections",
         description="Use GenAI to generate descriptions for detection items.",
     )
-    notification_threat_level: int | None = Field(
+    notification_threat_level: ReviewThreatLevelEnum | None = Field(
         default=None,
-        ge=0,
-        le=2,
         title="Notification threat level",
-        description="Minimum potential threat level (0=normal, 1=needs review, 2=security concern) required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level.",
+        description="Minimum potential threat level required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level.",
     )
+
+    @field_validator("notification_threat_level", mode="before")
+    @classmethod
+    def coerce_threat_level(cls, v: Any) -> Any:
+        if v is None:
+            return None
+        if isinstance(v, int):
+            int_map = {
+                0: ReviewThreatLevelEnum.normal,
+                1: ReviewThreatLevelEnum.needs_review,
+                2: ReviewThreatLevelEnum.security_concern,
+            }
+            if v in int_map:
+                return int_map[v]
+        return v
+
     image_source: ImageSourceEnum = Field(
         default=ImageSourceEnum.preview,
         title="Review image source",

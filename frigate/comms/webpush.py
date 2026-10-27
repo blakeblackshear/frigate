@@ -22,6 +22,7 @@ from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import FrigateConfig
 from frigate.config.auth import AuthConfig
+from frigate.config.camera.review import THREAT_LEVEL_NUMERIC_MAP
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -188,10 +189,6 @@ class WebPushClient(Communicator):
             c.name: 0  # type: ignore[misc]
             for c in self.config.cameras.values()
         }
-        self.notified_review_ids: dict[str, dict[str, float]] = {
-            c.name: {}  # type: ignore[misc]
-            for c in self.config.cameras.values()
-        }
         self.last_notification_time: float = 0
         self.user_cameras: dict[str, set[str]] = {}
         self.notification_queue: queue.Queue[PushNotification] = queue.Queue()
@@ -348,15 +345,12 @@ class WebPushClient(Communicator):
                 for camera in updates["add"]:
                     self.suspended_cameras[camera] = 0
                     self.last_camera_notification_time[camera] = 0
-                    self.notified_review_ids[camera] = {}
 
                 self._refresh_user_cameras()
 
         if topic == "reviews":
             decoded = json.loads(payload)
-            camera = decoded.get("after", {}).get("camera") or decoded.get(
-                "before", {}
-            ).get("camera")
+            camera = decoded["before"]["camera"]
             camera_config = self.config.cameras.get(camera)
 
             if camera_config is None or not camera_config.notifications.enabled:
@@ -547,15 +541,54 @@ class WebPushClient(Communicator):
             return
 
         camera: str = payload["after"]["camera"]
-        camera_config = self.config.cameras.get(camera)
-        if camera_config is None or not camera_config.notifications.enabled:
-            return
+        camera_name: str = getattr(
+            self.config.cameras[camera], "friendly_name", None
+        ) or titlecase(camera.replace("_", " "))
+        current_time = datetime.datetime.now().timestamp()
+
+        camera_config = self.config.cameras[camera]
+        notification_threat_level = camera_config.review.genai.notification_threat_level
+        genai_alerts_enabled = bool(
+            camera_config.review.genai.enabled and camera_config.review.genai.alerts
+        )
 
         state = payload["type"]
-        reviewId = payload["after"]["id"]
-        genai_config = camera_config.review.genai
-        genai_alerts_enabled = bool(genai_config.enabled and genai_config.alerts)
-        notification_threat_level = genai_config.notification_threat_level
+
+        # Defer and filter notifications if a minimum threat level is configured
+        if notification_threat_level is not None:
+            if not genai_alerts_enabled:
+                logger.debug(
+                    f"Skipping notification for {camera} - notification_threat_level is set but GenAI review alerts are disabled"
+                )
+                return
+
+            if state != "genai":
+                logger.debug(
+                    f"Deferring notification for {camera} ({state}) until GenAI analysis (notification_threat_level={notification_threat_level.value})"
+                )
+                return
+
+            threat_level = (
+                payload["after"]["data"]["metadata"].get("potential_threat_level", 0)
+                if payload["after"]["data"].get("metadata")
+                else 0
+            )
+            try:
+                threat_level = int(threat_level) if threat_level is not None else 0
+            except (ValueError, TypeError):
+                threat_level = 0
+
+            min_threat = THREAT_LEVEL_NUMERIC_MAP.get(notification_threat_level, 0)
+            if threat_level < min_threat:
+                logger.debug(
+                    f"Skipping notification for {camera} - threat level {threat_level} is below {min_threat}"
+                )
+                return
+
+        if self._within_cooldown(camera):
+            return
+
+        self.check_registrations()
 
         # Don't notify if message is an update and important fields don't have an update
         if (
@@ -567,83 +600,14 @@ class WebPushClient(Communicator):
             == len(payload["after"]["data"]["zones"])
         ):
             logger.debug(
-                "Skipping notification for %s - message is an update and important fields don't have an update",
-                camera,
+                f"Skipping notification for {camera} - message is an update and important fields don't have an update"
             )
             return
-
-        # Threat-level deferral:
-        # If notification_threat_level is configured and GenAI review alerts are enabled,
-        # defer notification for all unevaluated review states until GenAI evaluation produces the threat level.
-        if notification_threat_level is not None:
-            if not genai_alerts_enabled:
-                logger.debug(
-                    "Skipping notification for %s - notification_threat_level is %s but GenAI review alerts are disabled",
-                    camera,
-                    notification_threat_level,
-                )
-                return
-            if state != "genai":
-                logger.debug(
-                    "Deferring notification for %s (%s) until GenAI analysis (notification_threat_level=%s)",
-                    camera,
-                    state,
-                    notification_threat_level,
-                )
-                return
-
-        # Cooldown check:
-        # If this is a GenAI update for a review item that was already notified,
-        # allow it to bypass camera cooldown so the smart title and summary enrich the alert.
-        camera_notified = self.notified_review_ids.setdefault(camera, {})
-        is_same_review = reviewId in camera_notified
-        if not (is_same_review and state == "genai"):
-            if self._within_cooldown(camera):
-                return
-
-        metadata = payload["after"]["data"].get("metadata") or {}
-
-        # Threat level filtering on GenAI results:
-        if state == "genai" and notification_threat_level is not None:
-            raw_threat = metadata.get("potential_threat_level")
-            try:
-                threat_level = int(raw_threat) if raw_threat is not None else 0
-            except (ValueError, TypeError):
-                threat_level = 0
-
-            if threat_level < notification_threat_level:
-                logger.debug(
-                    "Skipping notification for %s - threat level %s is below minimum %s",
-                    camera,
-                    threat_level,
-                    notification_threat_level,
-                )
-                return
-
-        self.check_registrations()
-
-        camera_name: str = getattr(camera_config, "friendly_name", None) or titlecase(
-            camera.replace("_", " ")
-        )
-        current_time = datetime.datetime.now().timestamp()
-
-        # Prune old notified reviews (older than 1 hour) and track this review
-        cutoff = current_time - 3600
-        camera_notified = {
-            rid: ts
-            for rid, ts in self.notified_review_ids.get(camera, {}).items()
-            if ts > cutoff
-        }
-        if state == "genai":
-            # GenAI notification delivered, clean up pending review tracking
-            camera_notified.pop(reviewId, None)
-        else:
-            camera_notified[reviewId] = current_time
-        self.notified_review_ids[camera] = camera_notified
 
         self.last_camera_notification_time[camera] = current_time
         self.last_notification_time = current_time
 
+        reviewId = payload["after"]["id"]
         sorted_objects: set[str] = set()
 
         for obj in payload["after"]["data"]["objects"]:
@@ -655,13 +619,11 @@ class WebPushClient(Communicator):
         image = f"{payload['after']['thumb_path'].replace(BASE_DIR, '')}"
         ended = state == "end" or state == "genai"
 
-        if state == "genai" and metadata:
-            base_title = metadata.get("title", "")
-            raw_threat = metadata.get("potential_threat_level")
-            try:
-                threat_level = int(raw_threat) if raw_threat is not None else 0
-            except (ValueError, TypeError):
-                threat_level = 0
+        if state == "genai" and payload["after"]["data"]["metadata"]:
+            base_title = payload["after"]["data"]["metadata"]["title"]
+            threat_level = payload["after"]["data"]["metadata"].get(
+                "potential_threat_level", 0
+            )
 
             # Add prefix for threat levels 1 and 2
             if threat_level == 1:
@@ -671,8 +633,8 @@ class WebPushClient(Communicator):
             else:
                 title = base_title
 
-            if metadata.get("shortSummary"):
-                message = metadata["shortSummary"]
+            if payload["after"]["data"]["metadata"].get("shortSummary"):
+                message = payload["after"]["data"]["metadata"]["shortSummary"]
             else:
                 message = f"Detected on {camera_name}"
         else:
@@ -680,9 +642,11 @@ class WebPushClient(Communicator):
             formatted_zone_names = []
 
             for zone_name in zone_names:
-                if zone_name in camera_config.zones:
+                if zone_name in self.config.cameras[camera].zones:
                     formatted_zone_names.append(
-                        camera_config.zones[zone_name].get_formatted_name(zone_name)
+                        self.config.cameras[camera]
+                        .zones[zone_name]
+                        .get_formatted_name(zone_name)
                     )
                 else:
                     formatted_zone_names.append(titlecase(zone_name.replace("_", " ")))
@@ -692,16 +656,14 @@ class WebPushClient(Communicator):
 
         if ended:
             logger.debug(
-                "Sending a notification with state %s and message %s",
-                state,
-                message,
+                f"Sending a notification with state {state} and message {message}"
             )
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
         ttl = 3600 if ended else 0
 
-        logger.debug("Sending push notification for %s, review ID %s", camera, reviewId)
+        logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
 
         for user in self.web_pushers:
             if not self._user_has_camera_access(user, camera):

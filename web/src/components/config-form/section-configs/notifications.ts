@@ -4,7 +4,7 @@ const notifications: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/notifications",
     restartRequired: [],
-    fieldOrder: ["enabled", "email", "cooldown"],
+    fieldOrder: ["enabled", "email"],
     fieldGroups: {},
     hiddenFields: ["enabled_in_config"],
     advancedFields: [],
