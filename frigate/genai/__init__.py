@@ -7,6 +7,7 @@ import os
 import re
 import time
 from collections.abc import AsyncGenerator, Callable
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -33,12 +34,25 @@ __all__ = [
     "GenAIClientManager",
     "GenAIConfig",
     "GenAIProviderEnum",
+    "GenAIResponse",
     "PROVIDERS",
     "load_providers",
     "register_genai_provider",
 ]
 
 PROVIDERS: dict[GenAIProviderEnum, type["GenAIClient"]] = {}
+
+
+@dataclass
+class GenAIResponse:
+    """A provider's answer to a single request.
+
+    The reasoning trace is kept apart from the content so callers can save it
+    for debugging without it ending up in the parsed answer.
+    """
+
+    content: str
+    reasoning: str | None = None
 
 
 def register_genai_provider(key: GenAIProviderEnum) -> Callable:
@@ -109,11 +123,14 @@ class GenAIClient:
         activity_context_prompt: str,
         response_style: str = "default",
         frame_captions: list[str] | None = None,
+        enable_thinking: bool = False,
     ) -> ReviewMetadata | None:
         """Generate a description for the review item activity.
 
         `frame_captions` holds one caption per thumbnail for the annotated
-        frame mode; each is sent directly before its frame.
+        frame mode; each is sent directly before its frame. `enable_thinking`
+        lets the model reason before answering, when the provider exposes a
+        per-request toggle.
         """
         if frame_captions and len(frame_captions) != len(thumbnails):
             logger.warning(
@@ -136,6 +153,13 @@ class GenAIClient:
         logger.debug(
             f"Sending {len(thumbnails)} images to create review description on {review_data['camera']}"
         )
+
+        if enable_thinking and not self.supports_toggleable_thinking:
+            logger.debug(
+                "Thinking requested for review description but model %s does not "
+                "expose a per-request thinking toggle, using its default behavior",
+                self.genai_config.model,
+            )
 
         if debug_save:
             with open(
@@ -164,12 +188,14 @@ class GenAIClient:
 
         response_format = build_review_description_response_format(concerns)
 
-        response = self._send(
+        result = self._send(
             context_prompt,
             thumbnails,
             response_format,
+            enable_thinking=enable_thinking,
             image_captions=frame_captions,
         )
+        response = result.content if result else None
 
         if debug_save and response:
             with open(
@@ -179,6 +205,17 @@ class GenAIClient:
                 "w",
             ) as f:
                 f.write(response)
+
+        # Saved even when the content is blank, since a model that spends its
+        # whole output budget thinking returns a trace but no answer.
+        if debug_save and result and result.reasoning:
+            with open(
+                os.path.join(
+                    CLIPS_DIR, "genai-requests", review_data["id"], "reasoning.txt"
+                ),
+                "w",
+            ) as f:
+                f.write(result.reasoning)
 
         if response:
             clean_json = re.sub(
@@ -268,7 +305,8 @@ class GenAIClient:
             ) as f:
                 f.write(timeline_summary_prompt)
 
-        response = self._send(timeline_summary_prompt, [])
+        result = self._send(timeline_summary_prompt, [])
+        response = result.content if result else None
 
         if debug_save and response:
             with open(
@@ -295,7 +333,8 @@ class GenAIClient:
             return None
 
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
-        return self._send(prompt, thumbnails)
+        result = self._send(prompt, thumbnails)
+        return result.content if result else None
 
     def _init_provider(self) -> Any:
         """Initialize the client."""
@@ -308,13 +347,16 @@ class GenAIClient:
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
-    ) -> str | None:
+    ) -> GenAIResponse | None:
         """Submit a request to the provider.
 
         ``enable_thinking`` is honored only by providers that report
         ``supports_toggleable_thinking``. Description-style callers leave it
-        at the default (off) since synthesis tasks don't benefit from
-        reasoning traces.
+        at the default (off) unless the user opts in, since most models write
+        better descriptions without spending tokens on a reasoning trace.
+
+        Returns None when the request fails. Providers that surface a
+        reasoning trace separately return it in ``reasoning``.
 
         ``image_captions`` carries one caption per image, to be placed
         immediately before its image so the model can tell the frames apart.

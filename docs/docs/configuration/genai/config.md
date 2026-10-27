@@ -119,7 +119,7 @@ Vision-language models come in **instruct** variants (fine-tuned to follow instr
 
 Frigate manages reasoning per task automatically:
 
-- **Description tasks** (object descriptions, review descriptions, review summaries) are synthesis-only and benefit from concise, direct output, so Frigate disables thinking for these calls when the model exposes a per-request toggle.
+- **Description tasks** (object descriptions, review descriptions, review summaries) are synthesis-only and benefit from concise, direct output, so Frigate disables thinking for these calls when the model exposes a per-request toggle. Review descriptions can opt back in with [`enable_thinking`](/configuration/genai/genai_review#thinking) for models trained to reason over video.
 - **Chat** lets you toggle thinking on or off from the composer when the configured model supports it.
 
 You can use a pure instruct, hybrid, or thinking-capable model with Frigate. No extra configuration is required to disable thinking for descriptions.
@@ -510,7 +510,7 @@ Frigate's Generative AI features are configured and enabled separately. [Review 
 
 5. Save the exact images and prompts that were sent to your provider.
    - Turn on **Save thumbnails** for the feature you are debugging (`review.genai.debug_save_thumbnails` or `objects.genai.debug_save_thumbnails`). Both features write to `/media/frigate/clips/genai-requests/`, and these files are admin-only.
-   - Review descriptions write `genai-requests/<review_id>/` containing the numbered frames that were sent, plus `prompt.txt` and `response.txt` with the exact prompt and the raw, unparsed model response.
+   - Review descriptions write `genai-requests/<review_id>/` containing the numbered frames that were sent, plus `prompt.txt` and `response.txt` with the exact prompt and the raw, unparsed model response. When the provider returns a reasoning trace (for example with [thinking](/configuration/genai/genai_review#thinking) enabled), it is saved to `reasoning.txt`.
    - Review summary reports write `genai-requests/<start_ts>-<end_ts>/prompt.txt` and `response.txt`. No images are involved, since a report summarizes existing review descriptions.
    - Object descriptions write `genai-requests/<event_id>/` containing the numbered thumbnails. The prompt for object descriptions is not written to a file, it is only visible in the debug logs from step 4.
    - Look at the saved images before blaming the model. If the object is small, blurry, or out of frame, no prompt will fix the result. For object descriptions, consider turning on **Use snapshots** (`objects.genai.use_snapshot`) to send a higher quality image. For review items, consider setting **Review image source** (`review.genai.image_source`) to `recordings` for 480p frames instead of the lower resolution preview frames.

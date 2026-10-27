@@ -171,6 +171,11 @@ class GenAIReviewConfig(FrigateBaseModel):
         title="Response style",
         description="Writing style preset for generated review descriptions. Presets adjust the tone and level of detail of the user-facing title, summary, and scene description; 'default' leaves the built-in prompt unchanged.",
     )
+    enable_thinking: bool = Field(
+        default=False,
+        title="Enable thinking",
+        description="Let the model reason before writing the review description. Only applies to models with a per-request thinking toggle (Ollama and llama.cpp providers); other models keep their default behavior. Thinking increases response time and token usage. When thumbnail saving is enabled, the reasoning is saved alongside the response.",
+    )
     activity_context_prompt: str = Field(
         default="""### Normal Activity Indicators (Level 0)
 - Known/verified people in any zone at any time

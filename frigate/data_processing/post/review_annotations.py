@@ -12,6 +12,8 @@ import math
 from collections.abc import Sequence
 from typing import Any
 
+from titlecase import titlecase
+
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
@@ -78,7 +80,13 @@ def describe_heading(dx: float, dy: float) -> str:
 
 
 def event_name(event: dict[str, Any]) -> str:
-    """Name an object for the notes, e.g. 'a person' or 'waste bin "Compost"'.
+    """Name an object for the notes, e.g. 'a person' or 'Nick'.
+
+    A recognized sub_label is used on its own, in the same title case as
+    "Objects in Scene", so the notes name the subject the way the response
+    should. The object type is left out: leading with it makes models copy
+    "person" and drop the name from titles. An unrecognized face is stored as
+    "unknown" and stays unnamed.
 
     Objects are never numbered or given track identifiers. Frigate opens a new
     tracked object whenever a subject is re-detected, so the tracking data
@@ -86,10 +94,10 @@ def event_name(event: dict[str, Any]) -> str:
     ambiguous rather than implying either answer.
     """
     label = str(event["label"]).replace("_", " ").replace("-verified", "")
-    sub_label = event.get("sub_label")
+    sub_label = str(event.get("sub_label") or "").strip()
 
-    if sub_label:
-        return f'{label} "{sub_label}"'
+    if sub_label and sub_label.lower() != "unknown":
+        return titlecase(sub_label.replace("_", " "))
 
     article = "an" if label[:1].lower() in "aeiou" else "a"
     return f"{article} {label}"

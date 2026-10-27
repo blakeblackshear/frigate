@@ -504,6 +504,9 @@ review:
     # Presets adjust the tone and level of detail of the user-facing title,
     # summary, and scene description; "default" leaves the built-in prompt unchanged.
     response_style: default
+    # Optional: Let the model think before writing the description (default: shown below)
+    # Only applies to models with a per-request thinking toggle (ollama and llamacpp providers).
+    enable_thinking: False
     # Optional: Save thumbnails sent to the GenAI provider for review/debugging purposes (default: shown below)
     debug_save_thumbnails: False
 

@@ -1,4 +1,18 @@
+import type { HiddenFieldContext } from "@/types/configForm";
 import type { SectionConfigOverrides } from "./types";
+
+// Only these providers expose a per-request thinking toggle, so the option
+// has no effect when any other provider holds the descriptions role
+const THINKING_TOGGLE_PROVIDERS = new Set(["ollama", "llamacpp"]);
+
+const hideThinkingWithoutToggle = (ctx: HiddenFieldContext): string[] => {
+  const provider = Object.values(ctx.fullConfig.genai ?? {}).find((agent) =>
+    agent.roles?.includes("descriptions"),
+  )?.provider;
+  return provider && THINKING_TOGGLE_PROVIDERS.has(provider)
+    ? []
+    : ["genai.enable_thinking"];
+};
 
 const review: SectionConfigOverrides = {
   base: {
@@ -98,6 +112,7 @@ const review: SectionConfigOverrides = {
       "genai.frame_mode": "/configuration/genai/genai_review#frame-mode",
       "genai.additional_concerns":
         "/configuration/genai/genai_review#additional-concerns",
+      "genai.enable_thinking": "/configuration/genai/genai_review#thinking",
     },
     restartRequired: [],
     fieldOrder: ["alerts", "detections", "genai", "genai.enabled"],
@@ -107,6 +122,7 @@ const review: SectionConfigOverrides = {
       "alerts.enabled_in_config",
       "detections.enabled_in_config",
       "genai.enabled_in_config",
+      hideThinkingWithoutToggle,
     ],
     advancedFields: [],
     uiSchema: {

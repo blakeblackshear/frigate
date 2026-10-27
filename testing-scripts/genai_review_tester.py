@@ -15,8 +15,10 @@ Setup:
 The script presents a menu to edit provider settings (provider, base URL,
 optional API key, model) or run an example. Examples are selected with the
 up/down arrow keys and launched with Enter. A writing style preset can be
-applied on top of the saved prompt to compare tone between runs, and after a
-response the model can be asked follow-up questions about the same frames.
+applied on top of the saved prompt to compare tone between runs, thinking can
+be turned on for models with a per-request toggle (the reasoning trace is
+printed before the response), and after a response the model can be asked
+follow-up questions about the same frames.
 
 Provider settings are stored in
 testing-scripts/genai-review-examples/.settings.json (gitignored).
@@ -311,11 +313,12 @@ def followup_loop(client: Any, base_prompt: str, frames: list[bytes]) -> None:
             f"Question: {question}"
         )
         start = time.monotonic()
-        answer = client._send(prompt, frames)
+        result = client._send(prompt, frames)
         elapsed = time.monotonic() - start
-        if answer is None:
+        if result is None:
             print("No response from provider (see logs above).")
             continue
+        answer = result.content
         print(f"\n{answer}\n({elapsed:.1f}s)")
         transcript = f"{prompt}\n\nYour answer:\n{answer}"
 
@@ -343,6 +346,11 @@ def run_example(settings: TesterSettings) -> None:
         return
     style = styles[style_index]
 
+    thinking_index = select_option("Thinking:", ["off", "on"])
+    if thinking_index is None:
+        return
+    enable_thinking = thinking_index == 1
+
     prompt_file = example / "prompt.txt"
     if not prompt_file.is_file():
         print(f"{example.name} has no prompt.txt, cannot run")
@@ -363,18 +371,26 @@ def run_example(settings: TesterSettings) -> None:
     concerns = ["_"] if "other_concerns" in prompt else []
     response_format = build_review_description_response_format(concerns)
 
+    if enable_thinking and not client.supports_toggleable_thinking:
+        print("  Warning: model has no per-request thinking toggle, sending anyway")
+
     print(
         f"\nSending {len(frames)} frames to {settings.provider} "
-        f"(model={settings.model or '(none)'}, style={style})..."
+        f"(model={settings.model or '(none)'}, style={style}, "
+        f"thinking={'on' if enable_thinking else 'off'})..."
     )
     start = time.monotonic()
-    response = client._send(prompt, frames, response_format)
+    result = client._send(prompt, frames, response_format, enable_thinking)
     elapsed = time.monotonic() - start
 
-    if response is None:
+    if result is None:
         print("No response from provider (see logs above).")
         return
 
+    if result.reasoning:
+        print(f"\nReasoning:\n\n{result.reasoning}")
+
+    response = result.content
     print(f"\nResponse ({elapsed:.1f}s):\n")
     pretty_print_response(response)
     followup_loop(client, f"{prompt}\n\nYour analysis:\n{response}", frames)

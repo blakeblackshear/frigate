@@ -10,7 +10,7 @@ from httpx import TimeoutException
 from openai import OpenAI
 
 from frigate.config import GenAIProviderEnum
-from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai import GenAIClient, GenAIResponse, register_genai_provider
 from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
@@ -71,8 +71,14 @@ class OpenAIClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
-    ) -> str | None:
-        """Submit a request to OpenAI."""
+    ) -> GenAIResponse | None:
+        """Submit a request to OpenAI.
+
+        The chat completions API has no per-request thinking toggle, so
+        ``enable_thinking`` is ignored here. Reasoning is controlled through
+        ``runtime_options`` (e.g. ``reasoning_effort``), and any trace the
+        server returns separately is passed back as ``reasoning``.
+        """
         messages_content: list[dict] = []
         for part in interleave_images(prompt, images, image_captions):
             if isinstance(part, str):
@@ -120,6 +126,10 @@ class OpenAIClient(GenAIClient):
             ):
                 message = result.choices[0].message
                 content = message.content
+                raw_reasoning = getattr(message, "reasoning_content", None) or getattr(
+                    message, "reasoning", None
+                )
+                reasoning = raw_reasoning.strip() if raw_reasoning else None
 
                 if not content:
                     # When reasoning is enabled for some OpenAI backends the actual response
@@ -134,7 +144,9 @@ class OpenAIClient(GenAIClient):
                         )
                         content = reasoning_content
 
-                return str(content.strip()) if content else None
+                return (
+                    GenAIResponse(str(content.strip()), reasoning) if content else None
+                )
             return None
         except (TimeoutException, Exception) as e:
             logger.warning("OpenAI returned an error: %s", str(e))

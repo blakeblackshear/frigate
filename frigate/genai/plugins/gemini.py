@@ -12,7 +12,7 @@ from google.genai import errors, types
 from google.genai.types import FunctionCallingConfigMode
 
 from frigate.config import GenAIProviderEnum
-from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai import GenAIClient, GenAIResponse, register_genai_provider
 from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
@@ -124,8 +124,13 @@ class GeminiClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
-    ) -> str | None:
-        """Submit a request to Gemini."""
+    ) -> GenAIResponse | None:
+        """Submit a request to Gemini.
+
+        Thinking is configured at the model level for Gemini (or through
+        ``thinking_config`` in ``runtime_options``), so ``enable_thinking`` is
+        ignored here.
+        """
         contents: list[Any] = [
             part
             if isinstance(part, str)
@@ -165,7 +170,7 @@ class GeminiClient(GenAIClient):
         except (ValueError, AttributeError):
             # No description was generated
             return None
-        return description
+        return GenAIResponse(description)
 
     @property
     def supports_transcription(self) -> bool:

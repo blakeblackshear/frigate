@@ -264,6 +264,36 @@ review:
 </TabItem>
 </ConfigTabs>
 
+### Thinking
+
+By default, Frigate turns thinking off for review descriptions, since most models write better descriptions without spending tokens on a reasoning trace. Some models are trained to reason over video, and may follow complex scenes more accurately when allowed to think first. The `enable_thinking` option lets you turn thinking on for review descriptions to evaluate this with your model.
+
+`enable_thinking` only applies to models that expose a per-request thinking toggle with the `ollama` or `llamacpp` providers. For llama.cpp, the model's chat template must use the `enable_thinking` variable. Other models keep their default behavior. With `openai`, use `runtime_options` (for example `reasoning_effort`) to control reasoning instead.
+
+Thinking makes each review description take longer and use more tokens. If responses come back empty, the model may be using its whole output budget on reasoning.
+
+When **Save thumbnails** (`debug_save_thumbnails`) is enabled, the reasoning trace is saved to `reasoning.txt` alongside `prompt.txt` and `response.txt`, so you can see what the model considered before answering. The trace is saved even when the model returns no answer. To compare a saved example with thinking on and off, use `testing-scripts/genai_review_tester.py` in the Frigate repository.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+Navigate to <NavPath path="Settings > Global configuration > Review" />.
+
+- Enable **GenAI config > Enable thinking**. This option is only shown when the provider assigned the descriptions role is `ollama` or `llamacpp`.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml {4}
+review:
+  genai:
+    enabled: true
+    enable_thinking: true
+```
+
+</TabItem>
+</ConfigTabs>
+
 ## Review Reports
 
 Along with individual review item summaries, Generative AI can also produce a single report of review items from all cameras marked "suspicious" over a specified time period (for example, a daily summary of suspicious activity while you're on vacation).

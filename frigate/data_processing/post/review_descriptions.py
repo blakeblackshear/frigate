@@ -813,6 +813,7 @@ def run_analysis(
         genai_config.activity_context_prompt,
         genai_config.response_style,
         frame_captions,
+        genai_config.enable_thinking,
     )
     review_inference_speed.update(datetime.datetime.now().timestamp() - start)
 

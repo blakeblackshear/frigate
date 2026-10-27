@@ -79,8 +79,24 @@ class TestEventNames(unittest.TestCase):
         self.assertEqual(event_name({"label": "animal"}), "an animal")
 
     def test_sub_labeled_objects_use_their_name(self):
-        event = {"label": "waste_bin", "sub_label": "Compost"}
-        self.assertEqual(event_name(event), 'waste bin "Compost"')
+        self.assertEqual(
+            event_name({"label": "waste_bin", "sub_label": "Compost"}),
+            "Compost",
+        )
+        self.assertEqual(
+            event_name({"label": "person", "sub_label": "nick"}),
+            "Nick",
+        )
+        self.assertEqual(
+            event_name({"label": "person", "sub_label": "nick_smith"}),
+            "Nick Smith",
+        )
+
+    def test_unknown_face_stays_unnamed(self):
+        self.assertEqual(
+            event_name({"label": "person", "sub_label": "unknown"}),
+            "a person",
+        )
 
     def test_repeated_objects_are_never_numbered(self):
         # Whether these are the same subject is unknown, so the notes must not
@@ -184,8 +200,7 @@ class TestArrival(unittest.TestCase):
             phrases,
             [
                 "a person first detected at the right of the frame, moving up and left",
-                'waste bin "Compost" first detected at the right of the frame, '
-                "moving up and left",
+                "Compost first detected at the right of the frame, moving up and left",
             ],
         )
 
@@ -201,12 +216,12 @@ class TestArrival(unittest.TestCase):
         timeline = build_timeline([bin_], 100.0)
         self.assertEqual(
             timeline[0],
-            (0.3, 'waste bin "Compost" first detected at the right of the frame'),
+            (0.3, "Compost first detected at the right of the frame"),
         )
         self.assertAlmostEqual(timeline[1][0], 21.4)
         self.assertEqual(
             timeline[1][1],
-            'waste bin "Compost" starts moving up and left from the right of the frame',
+            "Compost starts moving up and left from the right of the frame",
         )
 
 
@@ -233,8 +248,8 @@ class TestStateChanges(unittest.TestCase):
         self.assertEqual(
             timeline[1:],
             [
-                (20.0, 'waste bin "Compost" has stopped moving'),
-                (30.0, 'waste bin "Compost" starts moving again'),
+                (20.0, "Compost has stopped moving"),
+                (30.0, "Compost starts moving again"),
             ],
         )
 

@@ -14,7 +14,7 @@ from ollama import Client as ApiClient
 from ollama import ResponseError
 
 from frigate.config import GenAIProviderEnum
-from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai import GenAIClient, GenAIResponse, register_genai_provider
 from frigate.genai.utils import (
     interleave_images,
     parse_tool_calls_from_message,
@@ -243,7 +243,7 @@ class OllamaClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
-    ) -> str | None:
+    ) -> GenAIResponse | None:
         """Submit a request to Ollama through the chat API, the same path the
         tool-calling chat uses, with image placeholders keeping any captions
         next to their frames."""
@@ -299,7 +299,8 @@ class OllamaClient(GenAIClient):
             response.get("eval_count"),
             response.get("prompt_eval_count"),
         )
-        response_text = self._message_from_response(response)["content"] or ""
+        message_result = self._message_from_response(response)
+        response_text = message_result["content"] or ""
 
         if not response_text:
             logger.warning(
@@ -310,7 +311,7 @@ class OllamaClient(GenAIClient):
                 response.get("eval_count"),
             )
 
-        return response_text
+        return GenAIResponse(response_text, message_result["reasoning"])
 
     def list_models(self) -> list[str]:
         """Return available model names from the Ollama server."""

@@ -15,6 +15,8 @@ crashing message conversion.
 import asyncio
 import base64
 import json
+import os
+import tempfile
 import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -22,7 +24,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import requests
 
 from frigate.config import GenAIConfig, GenAIProviderEnum
-from frigate.genai import PROVIDERS, load_providers
+from frigate.genai import PROVIDERS, GenAIClient, GenAIResponse, load_providers
 
 load_providers()
 
@@ -193,6 +195,19 @@ class TestOpenAIProvider(unittest.TestCase):
         # Passing the OpenAI-native multimodal list through must not raise.
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
+
+    def test_send_returns_reasoning_content(self):
+        client = self._client()
+        message = SimpleNamespace(
+            content=" ok ", reasoning_content=" thought ", reasoning=None
+        )
+        client.provider.chat.completions.create = MagicMock(
+            return_value=SimpleNamespace(choices=[SimpleNamespace(message=message)])
+        )
+
+        result = client._send("prompt", [b"a"], enable_thinking=True)
+
+        self.assertEqual(result, GenAIResponse("ok", "thought"))
 
 
 # ---------------------------------------------------------------------------
@@ -399,7 +414,7 @@ class TestOllamaProvider(unittest.TestCase):
             image_captions=["Frame 1 of 2", "Frame 2 of 2"],
         )
 
-        self.assertEqual(result, '{"ok": true}')
+        self.assertEqual(result, GenAIResponse('{"ok": true}'))
         client.provider.generate.assert_not_called()
         params = client.provider.chat.call_args.kwargs
         self.assertEqual(
@@ -426,6 +441,30 @@ class TestOllamaProvider(unittest.TestCase):
         message = client.provider.chat.call_args.kwargs["messages"][0]
         self.assertEqual(message["content"], "prompt\n[img]")
         self.assertEqual(message["images"], [b"a"])
+
+    def test_send_with_thinking_returns_reasoning(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.return_value = {
+            "message": {"content": "ok", "thinking": " looked at each frame "},
+            "done": True,
+        }
+        client._supports_thinking_cache = True
+
+        result = client._send("prompt", [b"a"], enable_thinking=True)
+
+        self.assertTrue(client.provider.chat.call_args.kwargs["think"])
+        self.assertEqual(result, GenAIResponse("ok", "looked at each frame"))
+
+    def test_send_disables_thinking_by_default(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.return_value = {"message": {"content": "ok"}, "done": True}
+        client._supports_thinking_cache = True
+
+        client._send("prompt", [b"a"])
+
+        self.assertFalse(client.provider.chat.call_args.kwargs["think"])
 
     def test_capabilities_drive_embeddings_and_thinking(self):
         client = self._client()
@@ -695,6 +734,42 @@ class TestLlamaCppProvider(unittest.TestCase):
         client = self._client()
         final = _final_message(self._run_with_lines(client, lines, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
+
+    @staticmethod
+    def _chat_response(message):
+        response = MagicMock()
+        response.json.return_value = {"choices": [{"message": message}]}
+        return response
+
+    def test_send_with_thinking_returns_reasoning(self):
+        client = self._client()
+        client._supports_reasoning = True
+        response = self._chat_response(
+            {"content": " ok ", "reasoning_content": " looked at each frame "}
+        )
+
+        with patch.object(client, "_post", return_value=response) as post:
+            result = client._send("prompt", [b"a"], enable_thinking=True)
+
+        self.assertEqual(
+            post.call_args.kwargs["json"]["chat_template_kwargs"],
+            {"enable_thinking": True},
+        )
+        self.assertEqual(result, GenAIResponse("ok", "looked at each frame"))
+
+    def test_send_keeps_reasoning_when_content_is_null(self):
+        # A model that exhausts its output budget while thinking returns a
+        # trace with no content; the trace is what explains the blank answer.
+        client = self._client()
+        client._supports_reasoning = True
+        response = self._chat_response(
+            {"content": None, "reasoning_content": "still thinking"}
+        )
+
+        with patch.object(client, "_post", return_value=response):
+            result = client._send("prompt", [b"a"], enable_thinking=True)
+
+        self.assertEqual(result, GenAIResponse("", "still thinking"))
 
     def _validated_client(self, server_context_size, provider_options=None):
         """Build a client as if the server reported the given context size."""
@@ -1091,6 +1166,98 @@ class TestImageTokenEstimate(unittest.TestCase):
 
         self.assertEqual(client.estimate_image_tokens(250, 100), 20)
         self.assertEqual(client._image_token_cache, {})
+
+
+class _StubThinkingClient(GenAIClient):
+    def __init__(self, response: GenAIResponse | None) -> None:
+        super().__init__(GenAIConfig(provider="ollama", model="m"))
+        self.response = response
+        self.send_kwargs: dict = {}
+
+    @property
+    def supports_toggleable_thinking(self) -> bool:
+        return True
+
+    def _send(self, prompt, images, response_format=None, **kwargs):
+        self.send_kwargs = kwargs
+        return self.response
+
+
+class TestReviewDescriptionThinking(unittest.TestCase):
+    REVIEW_ID = "1700000000.0-abc"
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.clips_dir = tmp.name
+        self.request_dir = os.path.join(
+            self.clips_dir, "genai-requests", self.REVIEW_ID
+        )
+        os.makedirs(self.request_dir)
+        patcher = patch("frigate.genai.CLIPS_DIR", self.clips_dir)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def _generate(self, client, enable_thinking):
+        review_data = {
+            "id": self.REVIEW_ID,
+            "camera": "front",
+            "start": "Monday, 09:30 AM",
+            "duration": 10,
+            "zones": [],
+            "unified_objects": ["person"],
+        }
+        return client.generate_review_description(
+            review_data,
+            [b"a"],
+            [],
+            None,
+            True,
+            "activity context",
+            enable_thinking=enable_thinking,
+        )
+
+    def _saved(self, name):
+        path = os.path.join(self.request_dir, name)
+        if not os.path.exists(path):
+            return None
+        with open(path) as f:
+            return f.read()
+
+    def test_thinking_flag_reaches_provider_and_trace_is_saved(self):
+        answer = json.dumps(
+            {
+                "observations": [],
+                "scene": "A person walks up to the door.",
+                "title": "person at the door",
+                "shortSummary": "A person walks up to the door.",
+                "confidence": 0.9,
+                "potential_threat_level": 0,
+            }
+        )
+        client = _StubThinkingClient(GenAIResponse(answer, "frame 1 shows a person"))
+
+        metadata = self._generate(client, enable_thinking=True)
+
+        self.assertTrue(client.send_kwargs["enable_thinking"])
+        self.assertEqual(metadata.title, "Person at the door")
+        self.assertEqual(self._saved("response.txt"), answer)
+        self.assertEqual(self._saved("reasoning.txt"), "frame 1 shows a person")
+
+    def test_trace_is_saved_when_answer_is_blank(self):
+        client = _StubThinkingClient(GenAIResponse("", "ran out of tokens"))
+
+        self.assertIsNone(self._generate(client, enable_thinking=True))
+        self.assertIsNone(self._saved("response.txt"))
+        self.assertEqual(self._saved("reasoning.txt"), "ran out of tokens")
+
+    def test_thinking_off_by_default(self):
+        client = _StubThinkingClient(None)
+
+        self._generate(client, enable_thinking=False)
+
+        self.assertFalse(client.send_kwargs["enable_thinking"])
+        self.assertIsNone(self._saved("reasoning.txt"))
 
 
 class TestBaseClientTranscribe(unittest.TestCase):

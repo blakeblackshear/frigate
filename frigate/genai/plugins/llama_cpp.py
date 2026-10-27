@@ -11,7 +11,7 @@ import numpy as np
 import requests
 
 from frigate.config import GenAIProviderEnum
-from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai import GenAIClient, GenAIResponse, register_genai_provider
 from frigate.genai.utils import (
     interleave_images,
     parse_tool_calls_from_message,
@@ -304,7 +304,7 @@ class LlamaCppClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
-    ) -> str | None:
+    ) -> GenAIResponse | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
             logger.warning(
@@ -362,7 +362,8 @@ class LlamaCppClient(GenAIClient):
             ):
                 choice = result["choices"][0]
                 if "message" in choice and "content" in choice["message"]:
-                    return str(choice["message"]["content"].strip())
+                    message = self._message_from_choice(choice)
+                    return GenAIResponse(message["content"] or "", message["reasoning"])
             return None
         except Exception as e:
             logger.warning("llama.cpp returned an error: %s", str(e))
