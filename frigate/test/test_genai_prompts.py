@@ -83,6 +83,11 @@ class TestReviewResponseStyle(unittest.TestCase):
             prompt,
         )
 
+    def test_named_subject_is_the_title_subject(self):
+        prompt = self._build_prompt()
+        self.assertIn("Every name in Objects in Scene belongs in the title.", prompt)
+        self.assertIn("recognized, known subject", prompt)
+
 
 class TestClassificationStateChanges(unittest.TestCase):
     def _build_prompt(self, **extra) -> str:

@@ -395,11 +395,10 @@ def build_frame_captions(
 
     # audio and manual review items can have state changes but no tracked objects
     if events:
+        # No source prefix. A tag placed before the name is read as the
+        # subject's identity.
         timeline.extend(
-            (timestamp, f"[tracker] {note}")
-            for timestamp, note in build_timeline(
-                events, span_end, get_state_changes(detection_ids)
-            )
+            build_timeline(events, span_end, get_state_changes(detection_ids))
         )
 
     timeline.extend(

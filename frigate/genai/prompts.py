@@ -19,10 +19,10 @@ from frigate.models import Event
 # Base guidance per response field. `observations` is a reasoning scaffold,
 # not user-facing, so style presets never override it.
 REVIEW_DESCRIPTION_FIELD_GUIDELINES: dict[str, str] = {
-    "observations": "Include the very start of the activity — for example, a vehicle entering the frame or pulling into the driveway — even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence.",
-    "scene": 'Describe how the sequence begins, then the progression of events — all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name — do not replace them with generic terms. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.',
-    "title": "Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For named subjects, always use their name. For unnamed objects, refer to them naturally with articles.",
-    "shortSummary": "Briefly summarize the primary activity across the observations.",
+    "observations": "Include the very start of the activity, for example a vehicle entering the frame or pulling into the driveway, even if it lasts only a few frames and the rest of the clip is dominated by a longer activity. Include each arrival, departure, object handled, and notable change in position or state. Each item is a single concrete fact written as a complete sentence. Use every name from Objects in Scene.",
+    "scene": 'Describe how the sequence begins, then the progression of events, all significant movements and actions in order. For example, if a vehicle arrives and then a person exits, describe both sequentially. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name. For unnamed objects (e.g., "person", "car"), refer to them naturally with articles (e.g., "a person", "the car"). Your description should align with and support the threat level you assign.',
+    "title": "Every name in Objects in Scene belongs in the title. Name the primary activity across the observations, together with the location. An activity is what is being done with objects, tools, or surfaces; locomotion through the scene qualifies as the activity only when no other interaction is observed. For an unnamed object, refer to it naturally with an article.",
+    "shortSummary": "Briefly summarize the primary activity across the observations. Use every name from Objects in Scene.",
     "potential_threat_level": "Must be consistent with your scene description and the activity patterns above.",
 }
 
@@ -31,19 +31,19 @@ REVIEW_DESCRIPTION_FIELD_GUIDELINES: dict[str, str] = {
 # competing style instructions.
 REVIEW_RESPONSE_STYLES: dict[str, dict[str, str]] = {
     "natural": {
-        "scene": 'Recount what happened the way a person would describe it to a neighbor, in plain everyday language: how the sequence begins, then each significant movement and action in the order it happens. Use flowing sentences that connect related actions, written the way people actually talk rather than like a surveillance report. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name rather than a generic term. Refer to unnamed objects naturally with articles. Stay factual, and keep the description consistent with the threat level you assign.',
-        "title": 'Write the title as a short, sentence-case headline in present tense: the subject, then what they do, phrased the way you would text it to the homeowner. Describe only the action you see; do not assign the person a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens. For named subjects, always use their name.',
-        "shortSummary": "Sum up the primary activity in one short, natural sentence, as if mentioning it to someone in passing.",
+        "scene": 'Recount what happened the way a person would describe it to a neighbor, in plain everyday language: how the sequence begins, then each significant movement and action in the order it happens. Use flowing sentences that connect related actions, written the way people actually talk rather than like a surveillance report. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name. Refer to unnamed objects naturally with articles. Stay factual, and keep the description consistent with the threat level you assign.',
+        "title": 'Every name in Objects in Scene belongs in the title. Write the title as a short, sentence-case headline in present tense: the subject, then what they do, phrased the way you would text it to the homeowner. Describe only the action you see; do not assign the person a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens.',
+        "shortSummary": "Sum up the primary activity in one short, natural sentence, as if mentioning it to someone in passing. Use every name from Objects in Scene.",
     },
     "concise": {
         "scene": 'Cover each significant movement and action in order using as few short, direct sentences as possible, omitting environmental and cosmetic detail unless it affects the assessment. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
-        "title": 'Write the title as a terse label of two to four words naming the specific activity observed and where it happened. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. For named subjects, always use their name.',
-        "shortSummary": "Summarize the primary activity in one short sentence.",
+        "title": 'Every name in Objects in Scene belongs in the title. Write the title as a terse label of two to four words naming the specific activity observed and where it happened, apart from those names. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene.',
+        "shortSummary": "Summarize the primary activity in one short sentence. Use every name from Objects in Scene.",
     },
     "detailed": {
-        "scene": 'Describe how the sequence begins, then the progression of events — all significant movements and actions in order, including the specifics that best identify the subjects: colors, clothing, carried items, positions, and paths of movement, plus environmental details like lighting changes when they stand out. Favor the most identifying details over exhaustive coverage, and keep every added detail observational rather than speculative. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name rather than a generic term. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
-        "title": 'Write the title as a specific description of who did what and where, in under roughly twelve words, including the most distinguishing visible detail of the subject, such as clothing or vehicle color. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens. For named subjects, always use their name.',
-        "shortSummary": "Briefly summarize the primary activity across the observations, including the most identifying visible detail, such as vehicle color or clothing.",
+        "scene": 'Describe how the sequence begins, then the progression of events, all significant movements and actions in order, including the specifics that best identify the subjects: colors, clothing, carried items, positions, and paths of movement, plus environmental details like lighting changes when they stand out. Favor the most identifying details over exhaustive coverage, and keep every added detail observational rather than speculative. For named subjects (those with a `←` separator in "Objects in Scene"), always use their name. For unnamed objects, refer to them naturally with articles. Your description should align with and support the threat level you assign.',
+        "title": 'Every name in Objects in Scene belongs in the title. Write the title as a specific description of who did what and where, in under roughly twelve words, including the most distinguishing visible detail of the subject, such as clothing or vehicle color. Do not assign a role or purpose that is not visibly indicated by a uniform, a marked vehicle, or a "(delivery/service)" tag in Objects in Scene. Name the main thing done, not just movement through the scene, unless movement is all that happens.',
+        "shortSummary": "Briefly summarize the primary activity across the observations, including the most identifying visible detail, such as vehicle color or clothing. Use every name from Objects in Scene.",
     },
 }
 
@@ -63,7 +63,7 @@ def get_review_field_guidelines(response_style: str = "default") -> dict[str, st
 # mode. Neither the notes nor this guidance say whether repeated detections are
 # the same subject, since the tracking data cannot tell.
 FRAME_ANNOTATION_GUIDANCE = """- Each image below is immediately preceded by a text label giving its frame number and how many seconds into the sequence it was captured. Use these labels to track the order of events and the time between them.
-- Some images below are preceded by notes from the camera's object tracker recording what changed at that point: an object being first detected, starting to move, reversing direction, stopping, or no longer being detected. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
+- Some images below are preceded by a note of what changed at that moment: a subject being first detected, starting to move, reversing direction, stopping, or no longer being detected. When the note names the subject, use that name. These notes come from tracking data rather than from the images, and they are reliable. Use them to establish how many distinct activities occur and in what order, and describe every one of them."""
 
 
 def build_review_description_prompt(
@@ -164,9 +164,9 @@ Respond with a JSON object matching the provided schema. Field-specific guidance
 
 ## Objects in Scene
 
-Each line represents a detection state, not necessarily unique individuals. The `←` symbol separates a recognized subject's name from their object type — use only the name (before the `←`) in your response, not the type after it. The same subject may appear across multiple lines if detected multiple times.
+The `←` symbol separates a recognized, known subject's name from their object type. Use each of these names. The same subject may appear on more than one line. A line with no `←` has no name; refer to it naturally with an article.
 
-**Note: Unidentified objects (without names) are NOT indicators of suspicious activity—they simply mean the system hasn't identified that object.**
+An object with no name is not suspicious just because it is unnamed.
 {get_objects_list()}
 
 {get_language_prompt()}

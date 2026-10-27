@@ -370,7 +370,10 @@ class TestClassificationChangeCaptions(unittest.TestCase):
             captions[2],
             "Frame 3 of 3 (+20.0s):\n[state] front gate changed from closed to open",
         )
-        self.assertTrue(captions[0].splitlines()[1].startswith("[tracker] "))
+        self.assertTrue(
+            captions[0].splitlines()[1].startswith("a person first detected")
+        )
+        self.assertNotIn("[tracker]", captions[0])
 
     def test_change_is_noted_without_tracked_objects(self):
         with patch(
