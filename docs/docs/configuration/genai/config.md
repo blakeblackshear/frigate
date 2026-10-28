@@ -75,11 +75,12 @@ Running Generative AI models on CPU is not recommended, as high inference times 
 
 You must use a vision-capable model with Frigate. The following models are recommended for local deployment of the `descriptions` and `chat` roles:
 
-| Model               | Review [frame mode](/configuration/genai/genai_review#frame-mode) | Notes                                                                                                                                                                |
-| ------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `qwen3-vl`          | `frames`                                                              | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object. Follows a sequence of frames on its own.     |
-| `qwen3.6`/`qwen3.8` | `frames`                                                              | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details. |
-| `gemma4`            | `annotated_frames`                                                    | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action. Loses track of activity that repeats or reverses, so it benefits from annotated frames. |
+| Model               | Review [frame mode](/configuration/genai/genai_review#frame-mode) | Review [response style](/configuration/genai/genai_review#response-style) | Notes                                                                                                                                                                                                                    |
+| ------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `qwen3-vl`          | `frames`                                                          | `natural`                                                                 | Strong visual and situational understanding, enhanced ability to identify smaller objects and interactions with object. Follows a sequence of frames on its own.                                                         |
+| `qwen3.6`/`qwen3.8` | `frames`                                                          | `natural`                                                                 | Strong situational understanding, but missing DeepStack from qwen3-vl leading to worse performance for identifying objects in people's hand and other small details.                                                     |
+| `gemma4`            | `annotated_frames`                                                | `default`                                                                 | Strong situational understanding, sometimes resorts to more vague terms like 'interacts' instead of assigning a specific action. Loses track of activity that repeats or reverses, so it benefits from annotated frames. |
+| `lfm3-vl`           | `annotated_frames`                                                | `concise`                                                                 | Very efficient with fast inference, making it a good choice for less powerful hardware or high volumes of review items.                                                                                                  |
 
 #### Embedding models
 
@@ -95,7 +96,7 @@ The `embeddings` role needs a different kind of model. Text queries are matched 
 The `transcribe` role needs a model that accepts audio input. A text-only or vision-only model cannot serve this role. The following are recommended for local deployment of the `transcribe` role:
 
 | Model       | Notes                                                                                                                                                                                                      |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `qwen3-asr` | Dedicated speech recognition model covering 30 languages, and the better choice for transcription quality. It only transcribes, so it cannot be shared with the `descriptions` or `chat` roles.            |
 | `gemma4`    | General multimodal model that accepts audio as well as images, so one served model can cover `transcribe` alongside the other roles. Transcript quality is below `qwen3-asr`, particularly on noisy audio. |
 
