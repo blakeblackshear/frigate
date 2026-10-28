@@ -68,6 +68,11 @@ export function isValidIconName(value: string): value is IconName {
   return Object.keys(LuIcons).includes(value as IconName);
 }
 
+export function normalizeIconLabel(label: string): string {
+  // Manual-event review summaries encode both parts as "label: sub_label".
+  return label.includes(": ") ? `${label.split(": ", 1)[0]}-verified` : label;
+}
+
 export function getIconForLabel(
   label: string,
   type: EventType = "object",
@@ -75,6 +80,7 @@ export function getIconForLabel(
   key?: string,
 ) {
   const iconKey = key || label;
+  label = normalizeIconLabel(label);
 
   if (label.endsWith("-verified")) {
     return getVerifiedIcon(label, className, type, iconKey);

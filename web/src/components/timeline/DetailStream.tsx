@@ -16,7 +16,7 @@ import useSWR from "swr";
 import ActivityIndicator from "../indicators/activity-indicator";
 import { Event } from "@/types/event";
 import { EventType } from "@/types/search";
-import { getIconForLabel } from "@/utils/iconUtil";
+import { getIconForLabel, normalizeIconLabel } from "@/utils/iconUtil";
 import { REVIEW_PADDING, ReviewSegment } from "@/types/review";
 import { LuChevronDown, LuCircle, LuChevronRight } from "react-icons/lu";
 import { getTranslatedLabel } from "@/utils/i18n";
@@ -431,7 +431,7 @@ function ReviewGroup({
           type: e.data.type,
         }))
       : (review.data?.objects ?? []).map((obj) => ({
-          label: obj,
+          label: normalizeIconLabel(obj),
           type: "object" as EventType,
         }))),
     ...(review.data?.audio ?? []).map((audio) => ({
@@ -443,7 +443,9 @@ function ReviewGroup({
   // limit to 5 icons
   const seen = new Set<string>();
   const iconLabels: Array<{ label: string; type: EventType }> = [];
-  for (const item of rawIconLabels) {
+  for (const item of rawIconLabels.sort((a, b) =>
+    a.label.localeCompare(b.label),
+  )) {
     if (!seen.has(item.label)) {
       seen.add(item.label);
       iconLabels.push(item);
