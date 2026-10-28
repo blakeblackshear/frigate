@@ -28,26 +28,6 @@ Review summaries provide structured JSON responses that are saved for each revie
 
 This will show in multiple places in the UI to give additional context about each activity, and allow viewing more details when extra attention is required. Frigate's built in notifications will automatically show the title and `shortSummary` when the data is available, while the full `scene` description is available in the UI for detailed review.
 
-### Filtering Notifications by Threat Level
-
-When using GenAI review summaries, you can configure `notification_threat_level` under `review.genai` to suppress notifications for routine activity:
-
-- `normal` (or `0`): notifications are sent for all alerts.
-- `needs_review` (or `1`): notifications are only sent if GenAI evaluates the scene as suspicious or higher.
-- `security_concern` (or `2`): notifications are only sent for critical security concerns.
-
-When `notification_threat_level` is set, initial notifications are deferred until GenAI evaluation completes. If the evaluated threat level is below the configured threshold, the notification is suppressed:
-
-```yaml
-cameras:
-  front_door:
-    review:
-      genai:
-        enabled: True
-        alerts: True
-        notification_threat_level: needs_review # only notify for suspicious or critical threats
-```
-
 ### Defining Typical Activity
 
 Each installation and even camera can have different parameters for what is considered suspicious activity. Frigate allows the `activity_context_prompt` to be defined globally and at the camera level, which allows you to define more specifically what should be considered normal activity. It is important that this is not overly specific as it can sway the output of the response.

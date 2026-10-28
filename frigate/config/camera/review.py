@@ -163,12 +163,13 @@ class GenAIReviewConfig(FrigateBaseModel):
     notification_threat_level: ReviewThreatLevelEnum | None = Field(
         default=None,
         title="Notification threat level",
-        description="Minimum potential threat level required to send notifications for review alerts. If set, notifications are deferred until GenAI evaluation and suppressed if below this level.",
+        description="Minimum potential threat level required to send notifications for review alerts. If set, notifications will only be sent when GenAI runs and the evaluated threat level meets or exceeds this threshold.",
     )
 
     @field_validator("notification_threat_level", mode="before")
     @classmethod
     def coerce_threat_level(cls, v: Any) -> Any:
+        """Coerce integer or string threat levels to ReviewThreatLevelEnum."""
         if v is None:
             return None
         if isinstance(v, int):

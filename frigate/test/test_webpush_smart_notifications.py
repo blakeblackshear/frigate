@@ -57,7 +57,7 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         event_type: str = "new",
         review_id: str = "rev_123",
         severity: str = "alert",
-        potential_threat_level: int = 0,
+        potential_threat_level: int | str | None = 0,
         title: str = "Person detected",
         summary: str = "A person walked by",
     ) -> dict:
@@ -87,13 +87,14 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         }
 
     def test_default_behavior_sends_immediate_alert(self):
+        """Verify default behavior sends push notification on new alert without delay."""
         client = self._create_client()
-        # Default behavior sends on new alert immediately
         new_payload = self._make_payload(event_type="new", review_id="rev_1")
         client.send_alert(new_payload)
         self.assertEqual(client.send_push_notification.call_count, 1)
 
     def test_notification_threat_level_defers_and_filters_lower_threat(self):
+        """Verify notification_threat_level defers unevaluated alerts and filters low threat."""
         client = self._create_client(
             notification_threat_level=ReviewThreatLevelEnum.needs_review,
             genai_enabled=True,
@@ -136,6 +137,7 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         self.assertIn("Needs Review: Suspicious activity", last_call_kwargs["title"])
 
     def test_notification_threat_level_allows_critical_threat(self):
+        """Verify notifications configured with security_concern only trigger on critical threats."""
         client = self._create_client(
             notification_threat_level=ReviewThreatLevelEnum.security_concern,
             genai_enabled=True,
@@ -166,8 +168,7 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         )
 
     def test_notification_threat_level_suppresses_when_genai_disabled(self):
-        # When notification_threat_level is set but GenAI is disabled, alerts lack threat assessment
-        # and must not be sent unassessed.
+        """Verify alerts are not sent unassessed when GenAI review is disabled."""
         client = self._create_client(
             notification_threat_level=ReviewThreatLevelEnum.needs_review,
             genai_enabled=False,
@@ -181,12 +182,12 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         self.assertEqual(client.send_push_notification.call_count, 0)
 
     def test_invalid_threat_scores_handled_safely(self):
+        """Verify null or non-numeric threat scores do not throw exceptions."""
         client = self._create_client(
             notification_threat_level=ReviewThreatLevelEnum.needs_review,
             genai_enabled=True,
             genai_alerts=True,
         )
-        # null or non-numeric threat score must not throw TypeError
         genai_payload = self._make_payload(
             event_type="genai",
             review_id="rev_null",
@@ -200,7 +201,28 @@ class TestWebPushSmartNotifications(unittest.TestCase):
         client.send_alert(genai_payload)
         self.assertEqual(client.send_push_notification.call_count, 0)
 
+    def test_string_threat_level_normalizes_for_title_prefix(self):
+        """Verify string threat levels correctly produce title prefix."""
+        client = self._create_client(
+            notification_threat_level=ReviewThreatLevelEnum.needs_review,
+            genai_enabled=True,
+            genai_alerts=True,
+        )
+        genai_payload = self._make_payload(
+            event_type="genai",
+            review_id="rev_str",
+            potential_threat_level="1",
+            title="Unfamiliar visitor",
+        )
+        client.send_alert(genai_payload)
+        self.assertEqual(client.send_push_notification.call_count, 1)
+        self.assertIn(
+            "Needs Review: Unfamiliar visitor",
+            client.send_push_notification.call_args.kwargs["title"],
+        )
+
     def test_genai_review_config_validation(self):
+        """Verify validation and type coercion for GenAIReviewConfig notification_threat_level."""
         # Valid threat levels via enum
         config_enum = GenAIReviewConfig(
             notification_threat_level=ReviewThreatLevelEnum.needs_review

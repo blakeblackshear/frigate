@@ -84,6 +84,38 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
+#### Filtering Notifications with GenAI
+
+When [GenAI review summaries](/configuration/genai/review_summaries) are enabled, you can configure `notification_threat_level` under `review.genai` so notifications are only sent when GenAI evaluates the event at or above a minimum threat level:
+
+- `normal` (or `0`): notifications are sent for all evaluated alerts.
+- `needs_review` (or `1`): notifications are only sent if GenAI evaluates the scene as suspicious or higher.
+- `security_concern` (or `2`): notifications are only sent for critical security concerns.
+
+When configured, notifications will only be sent when GenAI runs and the evaluated threat level meets or exceeds this threshold.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Review > GenAI" /> and select the desired camera.
+   - Set **Notification threat level** to `needs_review` or `security_concern`.
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+cameras:
+  front_door:
+    review:
+      genai:
+        enabled: True
+        alerts: True
+        notification_threat_level: needs_review # only notify for suspicious or critical threats
+```
+
+</TabItem>
+</ConfigTabs>
+
 ### Registration
 
 Once notifications are enabled, press the `Register This Device` button on all devices that you would like to receive notifications on. This will register the background worker. After this Frigate must be restarted and then notifications will begin to be sent.

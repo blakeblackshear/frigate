@@ -624,6 +624,10 @@ class WebPushClient(Communicator):
             threat_level = payload["after"]["data"]["metadata"].get(
                 "potential_threat_level", 0
             )
+            try:
+                threat_level = int(threat_level) if threat_level is not None else 0
+            except (ValueError, TypeError):
+                threat_level = 0
 
             # Add prefix for threat levels 1 and 2
             if threat_level == 1:
