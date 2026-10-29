@@ -320,7 +320,9 @@
       "showAllTitle": "숨겨진 알림을 모두 다시 표시하시겠습니까?",
       "showAllDesc": "확인 및 음소거된 모든 알림(설정 및 스트림 점검 항목 포함)이 알림 목록으로 다시 복원됩니다.",
       "acknowledgedAt": "확인됨: {{time}}",
-      "mutedAt": "음소거됨: {{time}}"
+      "mutedAt": "음소거됨: {{time}}",
+      "occurred_one": "발생 시각: {{time}}",
+      "occurred_other": "최근 발생: {{lastTime}} · {{time}} 이후 {{count}}회 발생"
     },
     "hardware": {
       "title": "하드웨어",
