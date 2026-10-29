@@ -19,6 +19,7 @@ import numpy as np
 from frigate.comms.detections_updater import DetectionTypeEnum
 from frigate.config import FrigateConfig
 from frigate.review.maintainer import ReviewSegmentMaintainer
+from frigate.track.object_processing import ManualEventState
 
 CAMERA = "front_door"
 
@@ -122,13 +123,19 @@ class ReviewFlowTestCase(unittest.TestCase):
 
     def feed(self, *frames: tuple[float, list[dict[str, Any]]]) -> None:
         """Run the maintainer loop over the given (frame_time, objects) frames."""
-        queue = [
-            (
-                DetectionTypeEnum.video.value,
-                (CAMERA, f"{CAMERA}_{frame_time}", frame_time, objects, [], []),
-            )
-            for frame_time, objects in frames
-        ]
+        self.feed_messages(
+            *[
+                (
+                    DetectionTypeEnum.video.value,
+                    (CAMERA, f"{CAMERA}_{frame_time}", frame_time, objects, [], []),
+                )
+                for frame_time, objects in frames
+            ]
+        )
+
+    def feed_messages(self, *messages: tuple[str, tuple[Any, ...]]) -> None:
+        """Run the maintainer loop over the given (topic, data) messages."""
+        queue = list(messages)
         self.maintainer.stop_event = threading.Event()
 
         def next_update(timeout: float) -> Any:
@@ -851,6 +858,47 @@ class TestSplitDetectionLabels(ReviewFlowTestCase):
         self.assertEqual(detection["data"]["verified_objects"], ["dog-verified"])
         self.assertEqual(detection["data"]["sub_labels"], ["Rex"])
         self.assertCountEqual(detection["data"]["zones"], ["yard", "driveway"])
+
+
+class TestManualEvents(ReviewFlowTestCase):
+    def manual_event(
+        self, event_id: str, frame_time: float, sub_label: str | None = None
+    ) -> tuple[str, tuple[Any, ...]]:
+        """Build a completed manual event as published by the object processor."""
+        return (
+            DetectionTypeEnum.api.value,
+            (
+                CAMERA,
+                frame_time,
+                {
+                    "state": ManualEventState.complete,
+                    "label": "person",
+                    "sub_label": sub_label,
+                    "event_id": event_id,
+                    "end_time": frame_time + 5,
+                },
+            ),
+        )
+
+    def test_sub_label_is_verified_on_new_segment(self) -> None:
+        self.feed_messages(self.manual_event("m1", 1, "Bob"))
+
+        data = self.maintainer.active_review_segments[CAMERA].get_data(False)["data"]
+        self.assertEqual(data["objects"], ["person-verified"])
+        self.assertEqual(data["verified_objects"], ["person-verified"])
+        self.assertEqual(data["sub_labels"], ["Bob"])
+
+    def test_sub_label_is_verified_on_active_segment(self) -> None:
+        self.feed(
+            (1, [self.tracked("dog1", "dog", 1)]),
+        )
+        self.feed_messages(
+            self.manual_event("m1", 2, "Bob"), self.manual_event("m2", 2)
+        )
+
+        data = self.maintainer.active_review_segments[CAMERA].get_data(False)["data"]
+        self.assertCountEqual(data["objects"], ["dog", "person-verified", "person"])
+        self.assertEqual(data["sub_labels"], ["Bob"])
 
 
 if __name__ == "__main__":
