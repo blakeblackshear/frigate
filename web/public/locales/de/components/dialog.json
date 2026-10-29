@@ -84,8 +84,7 @@
       "placeholder": "Einen Fall auswählen",
       "newCaseOption": "Einen neuen Fall erstellen",
       "newCaseNamePlaceholder": "Neuer Fallname",
-      "newCaseDescriptionPlaceholder": "Fall Beschreibung",
-      "nonAdminHelp": "Für diese Exporte wird ein neuer Fall angelegt."
+      "newCaseDescriptionPlaceholder": "Fall Beschreibung"
     },
     "queueing": "Export wird in die Warteschlange gestellt...",
     "tabs": {
