@@ -1,19 +1,16 @@
 """Handle sending notifications for Frigate via Firebase."""
 
 import datetime
-import ipaddress
 import json
 import logging
 import os
 import queue
 import threading
-from collections.abc import Callable, Iterator
+from collections.abc import Callable
 from dataclasses import dataclass
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
-from urllib.parse import urlparse
 
-import requests
 from py_vapid import Vapid01
 from pywebpush import WebPusher
 from titlecase import titlecase
@@ -30,6 +27,7 @@ from frigate.const import BASE_DIR, CONFIG_DIR
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
+FRIGATE_BASE_PATH = os.getenv("FRIGATE_BASE_PATH", "").rstrip("/")
 
 
 @dataclass
@@ -44,124 +42,14 @@ class PushNotification:
     ttl: int = 0
 
 
-# Push endpoints are opaque URLs but stay well under this in practice
-MAX_ENDPOINT_LENGTH = 2048
-
-# Suffixes that only ever resolve on the local network
-INTERNAL_HOST_SUFFIXES = (".local", ".localdomain", ".internal", ".home.arpa")
-
-
-def validate_push_endpoint(endpoint: Any) -> str | None:
-    """Return a reason the endpoint is unusable, or None when it is valid.
-
-    Subscriptions are issued by the browser vendor's push service, so a valid
-    endpoint is always a public https URL. Anything else is either a broken
-    registration or an attempt to aim the notification sender somewhere it
-    should not reach.
-    """
-    if not isinstance(endpoint, str) or not endpoint:
-        return "endpoint must be a url"
-
-    if len(endpoint) > MAX_ENDPOINT_LENGTH:
-        return "endpoint is too long"
-
-    try:
-        parsed = urlparse(endpoint)
-        port = parsed.port
-    except ValueError:
-        return "endpoint is not a valid url"
-
-    if parsed.scheme != "https":
-        return "endpoint must use https"
-
-    if parsed.username or parsed.password:
-        return "endpoint must not include credentials"
-
-    if port is not None and port != 443:
-        return "endpoint must use the default https port"
-
-    hostname = parsed.hostname
-
-    if not hostname:
-        return "endpoint must include a hostname"
-
-    try:
-        address = ipaddress.ip_address(hostname)
-    except ValueError:
-        address = None
-
-    if address is not None:
-        # A push service is never reachable at an address only this network can
-        # route, so anything non-global is a misconfiguration at best
-        if not address.is_global:
-            return "endpoint must not use a private address"
-    elif hostname == "localhost" or "." not in hostname:
-        return "endpoint must use a fully qualified hostname"
-    elif "" in hostname.split("."):
-        return "endpoint hostname must not contain empty labels"
-    elif hostname.endswith(INTERNAL_HOST_SUFFIXES):
-        return "endpoint must not use an internal hostname"
-
-    # The subscription token lives in the path
-    if len(parsed.path) <= 1:
-        return "endpoint must include a subscription path"
-
-    return None
-
-
-class _NoRedirectSession(requests.Session):
-    """Session that never follows redirects.
-
-    A push endpoint could otherwise redirect the send to an internal URL.
-    """
-
-    def request(self, *args: Any, **kwargs: Any) -> requests.Response:
-        kwargs["allow_redirects"] = False
-        return super().request(*args, **kwargs)
-
-
-_push_session = _NoRedirectSession()
-
-
-def _vapid_audience(endpoint: str) -> str:
-    parsed = urlparse(endpoint)
-    return f"{parsed.scheme}://{parsed.netloc}"
-
-
 def _build_web_pushers(user: str, subs: list[dict[str, Any]]) -> list[WebPusher]:
     """Build pushers for a user's stored subscriptions, skipping unusable ones."""
     pushers: list[WebPusher] = []
 
     for sub in subs:
-        # Stored rows may predate registration validation, so only skip the
-        # endpoints that would break building the VAPID audience
-        endpoint = sub.get("endpoint") if isinstance(sub, dict) else None
-
-        if not isinstance(endpoint, str):
-            logger.warning(
-                "Skipping notification subscription for %s: no endpoint", user
-            )
-            continue
-
-        try:
-            hostname = urlparse(endpoint).hostname or ""
-        except ValueError:
-            logger.warning(
-                "Skipping notification subscription for %s: unparsable endpoint", user
-            )
-            continue
-
-        if "" in hostname.split("."):
-            logger.warning(
-                "Skipping notification subscription for %s: invalid endpoint host %r",
-                user,
-                hostname,
-            )
-            continue
-
         # WebPusher decodes the stored keys and raises on malformed ones
         try:
-            pushers.append(WebPusher(sub, requests_session=_push_session))
+            pushers.append(WebPusher(sub))
         except Exception:
             logger.warning("Skipping invalid notification subscription for %s", user)
 
@@ -191,8 +79,14 @@ class WebPushClient(Communicator):
         self.last_notification_time: float = 0
         self.user_cameras: dict[str, set[str]] = {}
         self.notification_queue: queue.Queue[PushNotification] = queue.Queue()
-        self.notification_thread: threading.Thread | None = None
-        self.suspension_thread: threading.Thread | None = None
+        self.notification_thread = threading.Thread(
+            target=self._process_notifications, daemon=True
+        )
+        self.notification_thread.start()
+        self.suspension_thread = threading.Thread(
+            target=self._process_suspensions, daemon=True
+        )
+        self.suspension_thread.start()
 
         if not self.config.notifications.email:
             logger.warning("Email must be provided for push notifications to be sent.")
@@ -200,7 +94,7 @@ class WebPushClient(Communicator):
         # Pull keys from PEM or generate if they do not exist
         self.vapid = Vapid01.from_file(os.path.join(CONFIG_DIR, "notifications.pem"))
 
-        users: Iterator[dict[str, Any]] = (
+        users: list[dict[str, Any]] = (
             User.select(User.username, User.notification_tokens).dicts().iterator()
         )
         for user in users:
@@ -221,16 +115,6 @@ class WebPushClient(Communicator):
         """Wrapper for allowing dispatcher to subscribe."""
         pass
 
-    def start(self) -> None:
-        self.notification_thread = threading.Thread(
-            target=self._process_notifications, daemon=True
-        )
-        self.notification_thread.start()
-        self.suspension_thread = threading.Thread(
-            target=self._process_suspensions, daemon=True
-        )
-        self.suspension_thread.start()
-
     def check_registrations(self) -> None:
         # check for valid claim or create new one
         now = datetime.datetime.now().timestamp()
@@ -244,7 +128,7 @@ class WebPushClient(Communicator):
             for pushers in self.web_pushers.values():
                 for push in pushers:
                     endpoint: str = push.subscription_info["endpoint"]
-                    endpoints.add(_vapid_audience(endpoint))
+                    endpoints.add(endpoint[0 : endpoint.index("/", 10)])
 
             # create new claim
             for endpoint in endpoints:
@@ -350,9 +234,7 @@ class WebPushClient(Communicator):
         if topic == "reviews":
             decoded = json.loads(payload)
             camera = decoded["before"]["camera"]
-            camera_config = self.config.cameras.get(camera)
-
-            if camera_config is None or not camera_config.notifications.enabled:
+            if not self.config.cameras[camera].notifications.enabled:
                 return
             if self.is_camera_suspended(camera):
                 logger.debug(f"Notifications for {camera} are currently suspended.")
@@ -366,14 +248,13 @@ class WebPushClient(Communicator):
 
             # ensure notifications are enabled and the specific trigger has
             # notification action enabled
-            camera_config = self.config.cameras.get(camera)
-
             if (
-                camera_config is None
-                or not camera_config.notifications.enabled
-                or name not in camera_config.semantic_search.triggers
+                not self.config.cameras[camera].notifications.enabled
+                or name not in self.config.cameras[camera].semantic_search.triggers
                 or "notification"
-                not in camera_config.semantic_search.triggers[name].actions
+                not in self.config.cameras[camera]
+                .semantic_search.triggers[name]
+                .actions
             ):
                 return
 
@@ -384,9 +265,7 @@ class WebPushClient(Communicator):
         elif topic == "camera_monitoring":
             decoded = json.loads(payload)
             camera = decoded["camera"]
-            camera_config = self.config.cameras.get(camera)
-
-            if camera_config is None or not camera_config.notifications.enabled:
+            if not self.config.cameras[camera].notifications.enabled:
                 return
             if self.is_camera_suspended(camera):
                 logger.debug(f"Notifications for {camera} are currently suspended.")
@@ -433,8 +312,9 @@ class WebPushClient(Communicator):
 
                 for pusher in self.web_pushers[notification.user]:
                     endpoint = pusher.subscription_info["endpoint"]
-
-                    headers = self.claim_headers[_vapid_audience(endpoint)].copy()
+                    headers = self.claim_headers[
+                        endpoint[: endpoint.index("/", 10)]
+                    ].copy()
                     headers["urgency"] = "high"
 
                     resp = pusher.send(
@@ -528,7 +408,7 @@ class WebPushClient(Communicator):
                 payload={},
                 title="Test Notification",
                 message="This is a test notification from Frigate.",
-                direct_url="/",
+                direct_url=f"{FRIGATE_BASE_PATH}/",
                 notification_type="test",
             )
 
@@ -622,7 +502,11 @@ class WebPushClient(Communicator):
             )
 
         # if event is ongoing open to live view otherwise open to recordings view
-        direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
+        direct_url = (
+            f"{FRIGATE_BASE_PATH}/review?id={reviewId}"
+            if ended
+            else f"{FRIGATE_BASE_PATH}/#{camera}"
+        )
         ttl = 3600 if ended else 0
 
         logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
@@ -675,7 +559,7 @@ class WebPushClient(Communicator):
         message = f"{titlecase(trigger_type)} trigger fired for {camera_name} with score {score:.2f}"
         image = f"clips/triggers/{camera}/{event_id}.webp"
 
-        direct_url = f"/explore?event_id={event_id}"
+        direct_url = f"{FRIGATE_BASE_PATH}/explore?event_id={event_id}"
         ttl = 0
 
         logger.debug(
@@ -737,5 +621,4 @@ class WebPushClient(Communicator):
 
     def stop(self) -> None:
         logger.info("Closing notification queue")
-        if self.notification_thread is not None:
-            self.notification_thread.join()
+        self.notification_thread.join()
