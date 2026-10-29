@@ -88,7 +88,7 @@
       "newCaseOption": "Criar novo caso de uso",
       "newCaseNamePlaceholder": "Novo caso de uso",
       "newCaseDescriptionPlaceholder": "Descrição do caso de uso",
-      "nonAdminHelp": "Um novo caso de uso será criado para estas exportações."
+      "nameRequired": "Nome do caso é obrigatório"
     },
     "queueing": "Exportação na fila...",
     "tabs": {
