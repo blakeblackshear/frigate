@@ -12,7 +12,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.models import Notice, NoticeStats
 from frigate.notices.registry import NoticeRegistry
 from frigate.notices.types import NOTICE_KINDS, NoticeKind, NoticeSeverity, notice_id
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
 # kinds that switch on the lifecycle knobs, so the tests do not depend on the
 # values the real catalog picks
@@ -49,12 +49,12 @@ class TestNoticeKinds(unittest.TestCase):
 
 class RegistryTestCase(unittest.TestCase):
     def setUp(self):
-        migrate_db = SqliteDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         self.db.bind([Notice, NoticeStats])
         self.registry = NoticeRegistry()
         self.listener = MagicMock()

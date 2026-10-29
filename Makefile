@@ -54,7 +54,7 @@ run: local
 
 run_tests: local
 	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest \
-		python3 -u -m unittest
+		python3 -u -m frigate.test
 	docker run --rm --workdir=/opt/frigate --entrypoint= frigate:latest \
 		python3 -u -m mypy --config-file frigate/mypy.ini frigate
 

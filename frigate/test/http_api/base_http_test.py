@@ -18,7 +18,7 @@ from frigate.debug_replay import DebugReplayManager
 from frigate.jobs.export import JobStatePublisher
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
 
 class AuthTestClient(TestClient):
@@ -38,12 +38,12 @@ class AuthTestClient(TestClient):
 class BaseTestHttp(unittest.TestCase):
     def setUp(self, models):
         # setup clean database for each test run
-        migrate_db = SqliteDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         self.db.bind(models)
 
         # The export job manager broadcasts via JobStatePublisher on

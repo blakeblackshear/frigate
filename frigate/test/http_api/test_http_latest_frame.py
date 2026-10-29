@@ -1,11 +1,12 @@
 import os
 import shutil
-from unittest.mock import MagicMock
+import tempfile
+from unittest.mock import MagicMock, patch
 
 import cv2
 import numpy as np
 
-from frigate.output.preview import PREVIEW_CACHE_DIR, PREVIEW_FRAME_TYPE
+from frigate.output.preview import PREVIEW_FRAME_TYPE
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
 
@@ -15,14 +16,15 @@ class TestHttpLatestFrame(BaseTestHttp):
         self.app = super().create_app()
         self.app.detected_frames_processor = MagicMock()
 
-        if os.path.exists(PREVIEW_CACHE_DIR):
-            shutil.rmtree(PREVIEW_CACHE_DIR)
-        os.makedirs(PREVIEW_CACHE_DIR)
-
-    def tearDown(self):
-        if os.path.exists(PREVIEW_CACHE_DIR):
-            shutil.rmtree(PREVIEW_CACHE_DIR)
-        super().tearDown()
+        # a directory of its own so test groups running in parallel can't
+        # delete each other's preview frames
+        self.preview_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.preview_dir, ignore_errors=True)
+        cache_dir_patch = patch(
+            "frigate.output.preview.PREVIEW_CACHE_DIR", self.preview_dir
+        )
+        cache_dir_patch.start()
+        self.addCleanup(cache_dir_patch.stop)
 
     def test_latest_frame_fallback_to_preview(self):
         camera = "front_door"
@@ -45,7 +47,7 @@ class TestHttpLatestFrame(BaseTestHttp):
             2,
         )
         preview_path = os.path.join(
-            PREVIEW_CACHE_DIR, f"preview_{camera}-1234567890.0.{PREVIEW_FRAME_TYPE}"
+            self.preview_dir, f"preview_{camera}-1234567890.0.{PREVIEW_FRAME_TYPE}"
         )
         cv2.imwrite(preview_path, dummy_frame)
 
@@ -80,7 +82,7 @@ class TestHttpLatestFrame(BaseTestHttp):
 
         # 2. Create a dummy preview file
         preview_path = os.path.join(
-            PREVIEW_CACHE_DIR, f"preview_{camera}-999.0.{PREVIEW_FRAME_TYPE}"
+            self.preview_dir, f"preview_{camera}-999.0.{PREVIEW_FRAME_TYPE}"
         )
         cv2.imwrite(preview_path, dummy_frame)
 

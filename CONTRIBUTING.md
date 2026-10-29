@@ -64,7 +64,7 @@ Pull requests that appear to be unreviewed AI output will be closed without revi
 - **Python** — use modern language features (type hints, pattern matching, f-strings, dataclasses)
 - **Formatting**: Ruff (configured in `pyproject.toml`)
 - **Linting**: Ruff
-- **Testing**: `python3 -u -m unittest`
+- **Testing**: `python3 -u -m frigate.test` (runs the suite in parallel groups)
 - **Logging**: Use module-level `logger = logging.getLogger(__name__)` with lazy formatting
 - **Async**: All external I/O must be async. No blocking calls in async functions.
 - **Error handling**: Use specific exception types. Keep try blocks minimal.
@@ -82,7 +82,7 @@ Pull requests that appear to be unreviewed AI output will be closed without revi
 
 ```bash
 # Python
-python3 -u -m unittest                              # Run all tests
+python3 -u -m frigate.test                           # Run all tests in parallel groups
 python3 -u -m unittest frigate.test.test_ffmpeg_presets  # Run specific test
 ruff format frigate                                  # Format
 ruff check frigate                                   # Lint

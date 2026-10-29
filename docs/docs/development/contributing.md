@@ -94,7 +94,7 @@ After closing VS Code, you may still have containers running. To close everythin
 GitHub will execute unit tests on new PRs. You must ensure that all tests pass.
 
 ```shell
-python3 -u -m unittest
+python3 -u -m frigate.test
 ```
 
 #### FFMPEG Hardware Acceleration
@@ -207,7 +207,7 @@ npm run lint
 - Ensure the backend [unit tests](#unit-tests) pass. Your PR cannot be merged unless tests pass.
 
 ```shell
-python3 -u -m unittest
+python3 -u -m frigate.test
 ```
 
 - Ensure the end-to-end tests pass. They run in Playwright against a production build with mocked API data, so they don't need a running Frigate instance. Add or update tests in `web/e2e/specs/` when you change UI behavior.
