@@ -121,7 +121,7 @@
       "newCaseOption": "Creează un caz nou",
       "newCaseNamePlaceholder": "Nume caz nou",
       "newCaseDescriptionPlaceholder": "Descrierea cazului",
-      "nonAdminHelp": "Un caz nou va fi creat pentru aceste exporturi."
+      "nameRequired": "Numele cazului este obligatoriu"
     },
     "queueing": "Se adaugă exportul la coadă...",
     "tabs": {
@@ -150,7 +150,9 @@
       "selectWithActivity": "Camere cu obiecte urmărite",
       "selectGroup": "Selectează grupul",
       "noMatchingCameras": "Nicio cameră nu corespunde căutării tale",
-      "selectedCount": "{{selected}} / {{total}} selectate"
+      "selectedCount": "{{selected}} / {{total}} selectate",
+      "noCamerasSelected": "Selectează cel puțin o cameră",
+      "caseNameDefault": "Export multi-cameră - {{date}}"
     },
     "multi": {
       "title_one": "Exportă o revizuire",
