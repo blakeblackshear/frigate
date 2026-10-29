@@ -7,8 +7,7 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 
 from ..detector_utils import (
-    tflite_detect_raw,
-    tflite_init,
+    TFLiteDetectionModel,
     tflite_load_delegate_interpreter,
 )
 
@@ -30,6 +29,7 @@ class TeflonDetectorConfig(BaseDetectorConfig):
 
 class TeflonTfl(DetectionApi):
     type_key = DETECTOR_KEY
+    supported_models = TFLiteDetectionModel.supported_models
 
     def __init__(self, detector_config: TeflonDetectorConfig):
         # Location in Debian's mesa-teflon-delegate
@@ -39,7 +39,9 @@ class TeflonTfl(DetectionApi):
         interpreter = tflite_load_delegate_interpreter(
             delegate_library, detector_config, device_config
         )
-        tflite_init(self, interpreter)
+        self.tflite_model = TFLiteDetectionModel(
+            interpreter, detector_config.model, DETECTOR_KEY
+        )
 
     def detect_raw(self, tensor_input):
-        return tflite_detect_raw(self, tensor_input)
+        return self.tflite_model.detect_raw(tensor_input)

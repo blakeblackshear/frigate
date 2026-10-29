@@ -7,7 +7,7 @@ from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig
 from frigate.log import suppress_stderr_during
 
-from ..detector_utils import tflite_detect_raw, tflite_init
+from ..detector_utils import TFLiteDetectionModel
 
 try:
     from tflite_runtime.interpreter import Interpreter
@@ -40,6 +40,7 @@ class CpuDetectorConfig(BaseDetectorConfig):
 
 class CpuTfl(DetectionApi):
     type_key = DETECTOR_KEY
+    supported_models = TFLiteDetectionModel.supported_models
 
     def __init__(self, detector_config: CpuDetectorConfig):
         # Suppress TFLite delegate creation messages that bypass Python logging
@@ -49,7 +50,9 @@ class CpuTfl(DetectionApi):
                 num_threads=detector_config.num_threads or 3,
             )
 
-        tflite_init(self, interpreter)
+        self.tflite_model = TFLiteDetectionModel(
+            interpreter, detector_config.model, DETECTOR_KEY
+        )
 
     def detect_raw(self, tensor_input):
-        return tflite_detect_raw(self, tensor_input)
+        return self.tflite_model.detect_raw(tensor_input)
