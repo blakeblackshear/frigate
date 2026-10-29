@@ -2051,7 +2051,8 @@
       "profileBaseDisabled": "Recording is disabled in this camera's base config, so enabling it in a profile has no effect. Enable recording in the base config and use a profile to disable it instead."
     },
     "notifications": {
-      "profileBaseDisabled": "No cameras have notifications enabled in their base config, so enabling them in a profile has no effect. Enable notifications in the base config of at least one camera."
+      "profileBaseDisabled": "No cameras have notifications enabled in their base config, so enabling them in a profile has no effect. Enable notifications in the base config of at least one camera.",
+      "ttlDelay": "If your device can't be reached when an alert is active, its notifications can arrive up to this many seconds late. It will still say an object is detected and open the live view, even if the object has already left."
     },
     "birdseye": {
       "objectTrackingDetectDisabled": "Birdseye includes tracked objects, but object detection is disabled for this camera. The camera will not appear in Birdseye.",

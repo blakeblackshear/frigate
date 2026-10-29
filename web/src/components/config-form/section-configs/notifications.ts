@@ -24,6 +24,15 @@ const notifications: SectionConfigOverrides = {
               camera.notifications.enabled_in_config,
           ),
       },
+      {
+        key: "notifications-ttl-delay",
+        field: "ttl",
+        messageKey: "configMessages.notifications.ttlDelay",
+        severity: "warning",
+        position: "after",
+        condition: (ctx) =>
+          typeof ctx.formData?.ttl === "number" && ctx.formData.ttl > 0,
+      },
     ],
   },
   global: {
@@ -32,6 +41,7 @@ const notifications: SectionConfigOverrides = {
       enabled: { "ui:widget": "hidden" },
       email: { "ui:widget": "hidden" },
       cooldown: { "ui:widget": "hidden" },
+      ttl: { "ui:widget": "hidden" },
       enabled_in_config: { "ui:widget": "hidden" },
     },
   },

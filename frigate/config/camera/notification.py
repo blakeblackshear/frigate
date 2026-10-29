@@ -24,6 +24,12 @@ class NotificationConfig(FrigateBaseModel):
         title="Cooldown period",
         description="Cooldown (seconds) between notifications to avoid spamming recipients.",
     )
+    ttl: int = Field(
+        default=0,
+        ge=0,
+        title="Notification TTL",
+        description="Seconds the push service keeps retrying a notification sent while an alert is active if your device can't be reached. 0 delivers immediately or drops it. The notification sent when an alert ends is always kept for up to an hour.",
+    )
     enabled_in_config: bool | None = Field(
         default=None,
         title="Original notifications state",

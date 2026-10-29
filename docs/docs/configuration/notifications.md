@@ -108,6 +108,29 @@ Currently, only Chrome supports images in notifications. Safari and Firefox will
 
 Different platforms handle notifications differently, some settings changes may be required to get optimal notification delivery.
 
+### Notification TTL
+
+By default, Frigate sends notifications for an active alert with a TTL of `0`, so the push service either delivers them immediately or drops them. If your device is briefly unreachable (asleep, switching from Wi-Fi to cellular, or on a weak signal), those notifications are lost and you only receive the notification sent when the alert ends, which is always kept for up to an hour.
+
+Setting `ttl` tells the push service to keep retrying notifications sent while an alert is active for that many seconds. This makes delivery more reliable, but a notification delivered late will still say an object is detected, even if the object has already left. Keep the value small.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Camera configuration > Notifications" /> and select the desired camera.
+   - Set **Notification TTL** to the number of seconds to keep retrying (e.g. `10`)
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+notifications:
+  ttl: 10 # retry an undelivered notification for up to 10 seconds
+```
+
+</TabItem>
+</ConfigTabs>
+
 ### Android
 
 Most Android phones have battery optimization settings. To get reliable Notification delivery the browser (Chrome, Firefox) should have battery optimizations disabled. If Frigate is running as a PWA then the Frigate app should have battery optimizations disabled as well.
