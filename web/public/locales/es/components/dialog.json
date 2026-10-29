@@ -87,7 +87,6 @@
       "newCaseDescriptionPlaceholder": "Descripción de caso",
       "newCaseOption": "Crear nuevo caso",
       "newCaseNamePlaceholder": "Nombre del nuevo caso",
-      "nonAdminHelp": "Se creará un nuevo caso para estas exportaciones.",
       "placeholder": "Selecciona un caso"
     },
     "queueing": "Poniendo la exportación en cola…",
