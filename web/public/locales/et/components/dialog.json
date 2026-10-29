@@ -99,7 +99,7 @@
       "newCaseOption": "Ava uus juhtum",
       "newCaseNamePlaceholder": "Uue juhtumi nimi",
       "newCaseDescriptionPlaceholder": "Juhtumi kirjeldus",
-      "nonAdminHelp": "Uus juhtum avatakse järnevatele eksportidele."
+      "nameRequired": "Juhtumi nimi on vajalik"
     },
     "queueing": "Ekspordi järjekorda lisamine...",
     "tabs": {
@@ -126,7 +126,9 @@
       "namePlaceholder": "Valikuline baasnimi nendele eksportidele",
       "queueingButton": "Ekspordi järjekorda lisamine...",
       "exportButton_one": "Ekspordi 1 kaamera",
-      "exportButton_other": "Ekspordi {{count}} kaamerat"
+      "exportButton_other": "Ekspordi {{count}} kaamerat",
+      "noCamerasSelected": "Vali vähemalt üks kaamera",
+      "caseNameDefault": "Eksport mitmest kaamerast - {{date}}"
     },
     "multi": {
       "title_one": "Ekspordi 1 ülevaade",

@@ -23,7 +23,8 @@
     "birdseye": {
         "order": {
             "label": "Positsioon"
-        }
+        },
+        "label": "Vaade linnulennult"
     },
     "label": "Kaameraseadistus",
     "semantic_search": {
@@ -57,7 +58,7 @@
         }
     },
     "audio_transcription": {
-        "label": "Audio transkriptsioon",
+        "label": "Heli üleskirjutus",
         "live_enabled": {
             "label": "Reaalajas transkriptsioon"
         },
@@ -66,7 +67,7 @@
         }
     },
     "detect": {
-        "label": "Objekti tuvastus",
+        "label": "Objektituvastus",
         "enabled": {
             "label": "Luba objektituvastus"
         },
@@ -97,7 +98,8 @@
             "global_args": {
                 "label": "FFmpeg globaalsed argumendid"
             }
-        }
+        },
+        "label": "Vood (FFmpeg)"
     },
     "live": {
         "label": "Reaalajas mahamängimine",
@@ -196,7 +198,8 @@
         "effect": {
             "label": "Ajatempli efekt",
             "description": "Ajatempli teksti visuaalne efekt (puudub, ühtlane, vari)."
-        }
+        },
+        "label": "Ajatempli stiil"
     },
     "onvif": {
         "user": {
@@ -215,5 +218,8 @@
     },
     "profiles": {
         "label": "Profiilid"
+    },
+    "zones": {
+        "label": "Tsoonid"
     }
 }
