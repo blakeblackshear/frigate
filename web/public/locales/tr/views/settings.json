@@ -503,7 +503,8 @@
     "title": "Kullanıcılar",
     "management": {
       "title": "Kullanıcı Yönetimi",
-      "desc": "Bu Frigate kurulumundaki kullanıcı hesaplarını yönetin."
+      "desc": "Bu Frigate kurulumundaki kullanıcı hesaplarını yönetin.",
+      "authDisabled": "Yerleşik kimlik doğrulama devre dışı bırakılmış. Bu hesaplarla giriş yapılabilmesi için etkinleştirilmesi gerekir."
     },
     "addUser": "Kullanıcı Ekle",
     "toast": {
@@ -707,7 +708,8 @@
         "ariaLabel": "Modelleri türe göre filtrele",
         "baseModels": "Temel Modeller",
         "fineTunedModels": "İnce Ayarlanmış Modeller"
-      }
+      },
+      "showIncompatible": "Uyumsuz modelleri göster"
     },
     "toast": {
       "success": "Frigate+ ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",
@@ -957,7 +959,8 @@
         "invalidCharacters": "Kamera adı geçersiz karakterler içeriyor",
         "nameExists": "Kamera adı zaten mevcut",
         "customUrlRtspRequired": "Özelleştirilmiş URL'ler \"rtsp://\" veya \"rtsps://\" ile başlamalıdır. RTSP olmayan kamera yayınları için manuel yapılandırma gereklidir.",
-        "brandOrCustomUrlRequired": "Bir kamera markası seçip sunucu(host)/IP adresi girin ya da özel bir URL kullanmak için 'Diğer' seçeneğini tercih edin"
+        "brandOrCustomUrlRequired": "Bir kamera markası seçip sunucu(host)/IP adresi girin ya da özel bir URL kullanmak için 'Diğer' seçeneğini tercih edin",
+        "onvifPortInvalid": "ONVIF portu 1 ile 65535 arasında bir tam sayı olmalıdır"
       },
       "useDigestAuthDescription": "ONVIF için HTTP özet (digest) kimlik doğrulamasını kullan. Bazı kameralar, standart yönetici kullanıcısı yerine ONVIF'e özgü bir kullanıcı adı/parola kullanılmasını gerektirebilir."
     },
