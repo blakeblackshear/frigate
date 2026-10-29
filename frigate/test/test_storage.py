@@ -13,21 +13,27 @@ from frigate.config import FrigateConfig
 from frigate.const import STREAM_TYPE_MAIN, STREAM_TYPE_SUB
 from frigate.models import Event, Recordings
 from frigate.storage import MAX_CALCULATED_BANDWIDTH, StorageMaintainer
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
 
 class TestHttp(unittest.TestCase):
     def setUp(self):
         # setup clean database for each test run
-        migrate_db = SqliteDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         models = [Event, Recordings]
         self.db.bind(models)
         self.test_dir = tempfile.mkdtemp()
+
+        # The maintainers are never stopped, so a real subscriber leaks a zmq
+        # context whose garbage collection can hang a later test in term()
+        subscriber_patch = patch("frigate.storage.CameraConfigUpdateSubscriber")
+        subscriber_patch.start()
+        self.addCleanup(subscriber_patch.stop)
 
         self.minimal_config = {
             "mqtt": {"host": "mqtt"},

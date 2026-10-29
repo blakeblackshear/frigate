@@ -125,4 +125,4 @@ jobs:
       - name: Check API spec is up to date
         run: devcontainer exec --workspace-folder . bash -lc "python3 generate_api_auth_spec.py --check"
       - name: Run unit tests in devcontainer
-        run: devcontainer exec --workspace-folder . bash -lc "python3 -u -m unittest"
+        run: devcontainer exec --workspace-folder . bash -lc "python3 -u -m frigate.test"
