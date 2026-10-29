@@ -100,6 +100,14 @@ class PendingReviewSegment:
             if zone not in self.zones:
                 self.zones.append(zone)
 
+    def add_manual_detection(self, info: dict[str, Any]) -> None:
+        """Add a manual event's label and sub label to the segment."""
+        if info.get("sub_label"):
+            self.detections[info["event_id"]] = f"{info['label']}-verified"
+            self.sub_labels[info["event_id"]] = info["sub_label"]
+        else:
+            self.detections[info["event_id"]] = info["label"]
+
     def update_frame(
         self,
         camera_config: CameraConfig,
@@ -483,8 +491,6 @@ class ReviewSegmentMaintainer(threading.Thread):
         alerts so manual events keep their historical severity.
         """
         review_config = self.config.cameras[camera].review
-        # label contains 'label: sub_label', only the label is categorized
-        label = label.split(": ")[0]
 
         if review_config.alerts.enabled and label in review_config.alerts.labels:
             return SeverityEnum.alert
@@ -894,9 +900,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                             current_segment.last_detection_time = frame_time
                 elif topic == DetectionTypeEnum.api or topic == DetectionTypeEnum.lpr:
                     if manual_info["state"] == ManualEventState.complete:
-                        current_segment.detections[manual_info["event_id"]] = (
-                            manual_info["label"]
-                        )
+                        current_segment.add_manual_detection(manual_info)
                         if topic == DetectionTypeEnum.api:
                             severity = self.get_manual_event_severity(
                                 camera, manual_info["label"]
@@ -921,9 +925,7 @@ class ReviewSegmentMaintainer(threading.Thread):
                         self.indefinite_events[camera][manual_info["event_id"]] = (
                             manual_info["label"]
                         )
-                        current_segment.detections[manual_info["event_id"]] = (
-                            manual_info["label"]
-                        )
+                        current_segment.add_manual_detection(manual_info)
                         if topic == DetectionTypeEnum.api:
                             if (
                                 self.get_manual_event_severity(
@@ -1014,11 +1016,12 @@ class ReviewSegmentMaintainer(threading.Thread):
                             camera,
                             frame_time,
                             severity,
-                            {manual_info["event_id"]: manual_info["label"]},
+                            {},
                             {},
                             [],
                             set(),
                         )
+                        api_segment.add_manual_detection(manual_info)
                         self._activate_segment(api_segment)
 
                         if manual_info["state"] == ManualEventState.start:
@@ -1041,11 +1044,12 @@ class ReviewSegmentMaintainer(threading.Thread):
                             camera,
                             frame_time,
                             SeverityEnum.detection,
-                            {manual_info["event_id"]: manual_info["label"]},
+                            {},
                             {},
                             [],
                             set(),
                         )
+                        lpr_segment.add_manual_detection(manual_info)
                         self._activate_segment(lpr_segment)
 
                         if manual_info["state"] == ManualEventState.start:

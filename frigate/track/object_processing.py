@@ -635,7 +635,8 @@ class TrackedObjectProcessor(threading.Thread):
                             if end_time
                             else ManualEventState.start
                         ),
-                        "label": f"{label}: {sub_label}" if sub_label else label,
+                        "label": label,
+                        "sub_label": sub_label,
                         "event_id": event_id,
                         "end_time": end_time,
                     },
@@ -696,7 +697,8 @@ class TrackedObjectProcessor(threading.Thread):
                 frame_time,
                 {
                     "state": ManualEventState.start,
-                    "label": f"{label}: {sub_label}" if sub_label else label,
+                    "label": label,
+                    "sub_label": sub_label,
                     "event_id": event_id,
                     "end_time": None,
                 },
