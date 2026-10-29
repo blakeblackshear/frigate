@@ -105,7 +105,6 @@
       "newCaseNamePlaceholder": "Ім'я для нового випадку",
       "newCaseDescriptionPlaceholder": "Опис випадку",
       "label": "Випадок",
-      "nonAdminHelp": "Новий випадок буде створено для цих експортів.",
       "placeholder": "Оберіть випадок"
     },
     "queueing": "Додаю експорт у чергу...",
