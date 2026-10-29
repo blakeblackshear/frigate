@@ -45,7 +45,8 @@
         "ariaLabel": "Filtrovat modely podle typu",
         "baseModels": "Základní modely",
         "fineTunedModels": "Doladěné modely"
-      }
+      },
+      "showIncompatible": "Zobrazit nekompatibilní modely"
     },
     "snapshotConfig": {
       "desc": "Odesílání do Frigate+ vyžaduje povolené snímky v konfiguraci.",
@@ -704,7 +705,8 @@
     },
     "management": {
       "desc": "Spravujte uživatelské účty této instance Frigate.",
-      "title": "Správa uživatelů"
+      "title": "Správa uživatelů",
+      "authDisabled": "Vestavěné ověřování uživatelů je vypnuté. Tyto účty lze použít k přihlášení až po jeho zapnutí."
     },
     "addUser": "Přidat uživatele",
     "title": "Uživatelé"
@@ -1177,7 +1179,8 @@
         "nameLength": "Název kamery smí mít nejvýše 64 znaků",
         "invalidCharacters": "Název kamery obsahuje neplatné znaky",
         "nameExists": "Název kamery již existuje",
-        "customUrlRtspRequired": "Vlastní URL musí začínat \"rtsp://\" nebo \"rtsps://\". Streamy kamer mimo RTSP je nutné nastavit ručně."
+        "customUrlRtspRequired": "Vlastní URL musí začínat \"rtsp://\" nebo \"rtsps://\". Streamy kamer mimo RTSP je nutné nastavit ručně.",
+        "onvifPortInvalid": "Port ONVIF musí být celé číslo od 1 do 65535"
       }
     }
   },
