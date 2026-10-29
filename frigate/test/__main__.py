@@ -15,6 +15,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -27,6 +28,11 @@ RAN_TESTS = re.compile(r"^Ran (\d+) tests? in", re.MULTILINE)
 # Each group pays for its own interpreter and imports, so smaller groups only
 # help when there are more cores than groups
 TESTS_PER_GROUP = 250
+
+# Each group runs in its own process group, which ctrl+c in the terminal does
+# not reach, so the runner passes the interrupt on to these
+interrupted = threading.Event()
+running_groups: set[int] = set()
 
 
 @dataclass
@@ -45,6 +51,7 @@ class GroupResult:
 
     @property
     def tests_run(self) -> int:
+        """Number of tests unittest reported running, 0 if it never finished."""
         match = RAN_TESTS.search(self.output)
         return int(match.group(1)) if match else 0
 
@@ -89,7 +96,42 @@ def split_groups(modules: dict[str, int], count: int) -> list[TestGroup]:
     return [group for group in groups if group.modules]
 
 
+def signal_group(pgid: int, sig: signal.Signals) -> bool:
+    """Send a signal to every process in a process group.
+
+    Returns:
+        False if no process is left in the group
+    """
+    try:
+        os.killpg(pgid, sig)
+    except ProcessLookupError:
+        return False
+
+    return True
+
+
+def stop_group(pgid: int) -> None:
+    """Stop the processes a group's tests left running.
+
+    They get a moment to exit before being killed, so the multiprocessing
+    resource tracker, which ignores SIGTERM, can remove leaked shared memory
+    once the processes holding it have exited.
+    """
+    if signal_group(pgid, signal.SIGTERM):
+        time.sleep(2)
+        signal_group(pgid, signal.SIGKILL)
+
+
 def run_group(group: TestGroup, timeout: float) -> GroupResult:
+    """Run a group's modules in a unittest process of its own.
+
+    Args:
+        group: The modules to run
+        timeout: Seconds before the group is stopped
+
+    Returns:
+        The exit code and combined output of the unittest process
+    """
     start = time.monotonic()
 
     # a file instead of a pipe so a process left behind by a test can't keep
@@ -99,9 +141,21 @@ def run_group(group: TestGroup, timeout: float) -> GroupResult:
             [sys.executable, "-u", "-X", "faulthandler", "-m", "unittest"]
             + group.modules,
             cwd=REPO_ROOT,
+            # a group in the background that read the terminal would be
+            # stopped, and a stopped process doesn't act on SIGABRT
+            stdin=subprocess.DEVNULL,
             stdout=output,
             stderr=subprocess.STDOUT,
+            # a process group of its own so the processes its tests start can
+            # be stopped with it
+            process_group=0,
         )
+        running_groups.add(proc.pid)
+
+        # the runner may have been interrupted while this group was starting
+        if interrupted.is_set():
+            signal_group(proc.pid, signal.SIGINT)
+
         timed_out = False
 
         try:
@@ -113,6 +167,11 @@ def run_group(group: TestGroup, timeout: float) -> GroupResult:
             proc.send_signal(signal.SIGABRT)
             proc.wait()
 
+            # aborting skips the cleanup of the running test, which would
+            # have stopped the processes it started
+            stop_group(proc.pid)
+
+        running_groups.discard(proc.pid)
         output.seek(0)
         text = output.read()
 
@@ -123,6 +182,11 @@ def run_group(group: TestGroup, timeout: float) -> GroupResult:
 
 
 def main() -> int:
+    """Split the tests into groups, run them in parallel, and report the results.
+
+    Returns:
+        The exit code, 1 if any group failed
+    """
     cpus = os.cpu_count() or 1
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -168,21 +232,30 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = [executor.submit(run_group, group, args.timeout) for group in groups]
 
-        for future in as_completed(futures):
-            result = future.result()
-            total_tests += result.tests_run
-            status = "OK" if result.returncode == 0 else "FAILED"
-            print(
-                f"Group {result.group.index}/{len(groups)}: {status}, "
-                f"{result.tests_run} tests in {result.duration:.1f}s",
-                flush=True,
-            )
+        try:
+            for future in as_completed(futures):
+                result = future.result()
+                total_tests += result.tests_run
+                status = "OK" if result.returncode == 0 else "FAILED"
+                print(
+                    f"Group {result.group.index}/{len(groups)}: {status}, "
+                    f"{result.tests_run} tests in {result.duration:.1f}s",
+                    flush=True,
+                )
 
-            if result.returncode != 0:
-                failed.append(result)
+                if result.returncode != 0:
+                    failed.append(result)
 
-            if result.returncode != 0 or args.verbose:
-                print(result.output, flush=True)
+                if result.returncode != 0 or args.verbose:
+                    print(result.output, flush=True)
+        except KeyboardInterrupt:
+            interrupted.set()
+            executor.shutdown(wait=False, cancel_futures=True)
+
+            for pgid in list(running_groups):
+                signal_group(pgid, signal.SIGINT)
+
+            raise
 
     print(f"\nRan {total_tests} tests in {time.monotonic() - start:.1f}s")
 

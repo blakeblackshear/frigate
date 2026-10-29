@@ -1,23 +1,23 @@
 import os
 import shutil
+import tempfile
 import unittest
+from unittest.mock import patch
 
-from frigate.output.preview import (
-    PREVIEW_CACHE_DIR,
-    PREVIEW_FRAME_TYPE,
-    get_most_recent_preview_frame,
-)
+from frigate.output.preview import PREVIEW_FRAME_TYPE, get_most_recent_preview_frame
 
 
 class TestPreviewLoader(unittest.TestCase):
     def setUp(self):
-        if os.path.exists(PREVIEW_CACHE_DIR):
-            shutil.rmtree(PREVIEW_CACHE_DIR)
-        os.makedirs(PREVIEW_CACHE_DIR)
-
-    def tearDown(self):
-        if os.path.exists(PREVIEW_CACHE_DIR):
-            shutil.rmtree(PREVIEW_CACHE_DIR)
+        # a directory of its own so test groups running in parallel can't
+        # delete each other's preview frames
+        self.preview_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.preview_dir, ignore_errors=True)
+        cache_dir_patch = patch(
+            "frigate.output.preview.PREVIEW_CACHE_DIR", self.preview_dir
+        )
+        cache_dir_patch.start()
+        self.addCleanup(cache_dir_patch.stop)
 
     def test_get_most_recent_preview_frame_missing(self):
         self.assertIsNone(get_most_recent_preview_frame("test_camera"))
@@ -28,14 +28,14 @@ class TestPreviewLoader(unittest.TestCase):
         for ts in ["1000.0", "2000.0", "1500.0"]:
             with open(
                 os.path.join(
-                    PREVIEW_CACHE_DIR, f"preview_{camera}-{ts}.{PREVIEW_FRAME_TYPE}"
+                    self.preview_dir, f"preview_{camera}-{ts}.{PREVIEW_FRAME_TYPE}"
                 ),
                 "w",
             ) as f:
                 f.write(f"test_{ts}")
 
         expected_path = os.path.join(
-            PREVIEW_CACHE_DIR, f"preview_{camera}-2000.0.{PREVIEW_FRAME_TYPE}"
+            self.preview_dir, f"preview_{camera}-2000.0.{PREVIEW_FRAME_TYPE}"
         )
         self.assertEqual(get_most_recent_preview_frame(camera), expected_path)
 
@@ -45,7 +45,7 @@ class TestPreviewLoader(unittest.TestCase):
         for ts in ["1000.0", "2000.0"]:
             with open(
                 os.path.join(
-                    PREVIEW_CACHE_DIR, f"preview_{camera}-{ts}.{PREVIEW_FRAME_TYPE}"
+                    self.preview_dir, f"preview_{camera}-{ts}.{PREVIEW_FRAME_TYPE}"
                 ),
                 "w",
             ) as f:
@@ -53,7 +53,7 @@ class TestPreviewLoader(unittest.TestCase):
 
         # Test finding frame before or at 1500
         expected_path = os.path.join(
-            PREVIEW_CACHE_DIR, f"preview_{camera}-1000.0.{PREVIEW_FRAME_TYPE}"
+            self.preview_dir, f"preview_{camera}-1000.0.{PREVIEW_FRAME_TYPE}"
         )
         self.assertEqual(
             get_most_recent_preview_frame(camera, before=1500.0), expected_path
@@ -67,7 +67,7 @@ class TestPreviewLoader(unittest.TestCase):
         other_camera = "other_camera"
         with open(
             os.path.join(
-                PREVIEW_CACHE_DIR, f"preview_{other_camera}-3000.0.{PREVIEW_FRAME_TYPE}"
+                self.preview_dir, f"preview_{other_camera}-3000.0.{PREVIEW_FRAME_TYPE}"
             ),
             "w",
         ) as f:
@@ -78,12 +78,12 @@ class TestPreviewLoader(unittest.TestCase):
     def test_get_most_recent_preview_frame_hyphenated_camera(self):
         for name in ("preview_front-2000.0", "preview_front-door-3000.0"):
             with open(
-                os.path.join(PREVIEW_CACHE_DIR, f"{name}.{PREVIEW_FRAME_TYPE}"), "w"
+                os.path.join(self.preview_dir, f"{name}.{PREVIEW_FRAME_TYPE}"), "w"
             ) as f:
                 f.write("test")
 
         expected_path = os.path.join(
-            PREVIEW_CACHE_DIR, f"preview_front-2000.0.{PREVIEW_FRAME_TYPE}"
+            self.preview_dir, f"preview_front-2000.0.{PREVIEW_FRAME_TYPE}"
         )
         self.assertEqual(get_most_recent_preview_frame("front"), expected_path)
         self.assertEqual(
@@ -91,5 +91,5 @@ class TestPreviewLoader(unittest.TestCase):
         )
 
     def test_get_most_recent_preview_frame_no_directory(self):
-        shutil.rmtree(PREVIEW_CACHE_DIR)
+        shutil.rmtree(self.preview_dir)
         self.assertIsNone(get_most_recent_preview_frame("test_camera"))
