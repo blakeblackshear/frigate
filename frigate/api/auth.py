@@ -934,7 +934,8 @@ def profile(request: Request):
 )
 def logout(request: Request):
     auth_config: AuthConfig = request.app.frigate_config.auth
-    response = RedirectResponse("/login", status_code=303)
+    base_path = request.headers.get("x-ingress-path", "").rstrip("/")
+    response = RedirectResponse(f"{base_path}/login", status_code=303)
     response.delete_cookie(auth_config.cookie_name)
     return response
 
