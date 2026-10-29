@@ -58,7 +58,6 @@
       "newCaseNamePlaceholder": "Назва новай справы",
       "newCaseDescriptionPlaceholder": "Апісанне справы",
       "label": "Справа",
-      "nonAdminHelp": "Для гэтых экспартаў будзе створана новая справа.",
       "placeholder": "Выберыце справу"
     },
     "select": "Выбраць",
