@@ -7,7 +7,6 @@ from unittest.mock import patch
 
 from frigate.analytics.collectors import detection
 from frigate.analytics.schema import ModelSource
-from frigate.detectors.detector_config import SceneEnum
 from frigate.test.analytics_helpers import make_config, make_context
 
 
@@ -25,7 +24,8 @@ class TestDetectionCollector(unittest.TestCase):
 
         section = detection.collect(make_context(config, stats))
 
-        model = section.models[SceneEnum.all]
+        [model] = section.models
+        self.assertTrue(model.default)
         self.assertEqual(model.detector, "cpu")
         self.assertEqual(model.devices, 2)
         self.assertEqual(model.model_type, "ssd")
@@ -35,10 +35,29 @@ class TestDetectionCollector(unittest.TestCase):
         self.assertEqual(section.detection_fps, 12.35)
         self.assertEqual(section.skipped_fps, 0.0)
 
+    def test_named_scene_reports_no_name(self):
+        config = make_config(
+            {
+                "models": [
+                    {"devices": ["cpu"]},
+                    {
+                        "scene": "backyard_thermal",
+                        "devices": ["cpu"],
+                        "path": "/thermal.tflite",
+                    },
+                ]
+            }
+        )
+
+        section = detection.collect(make_context(config))
+
+        self.assertEqual([m.default for m in section.models], [True, False])
+        self.assertNotIn("backyard_thermal", section.model_dump_json())
+
     def test_inference_is_null_before_the_first_stats(self):
         section = detection.collect(make_context())
 
-        self.assertIsNone(section.models[SceneEnum.all].inference_ms)
+        self.assertIsNone(section.models[0].inference_ms)
 
     def test_model_source(self):
         with tempfile.TemporaryDirectory() as cache:

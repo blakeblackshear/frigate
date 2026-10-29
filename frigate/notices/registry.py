@@ -395,7 +395,8 @@ class NoticeRegistry:
             for row in snapshot:
                 NoticeStats.update(
                     reported_occurrences=row["occurrences"],
-                    reported_dismissals=row["dismissals"],
+                    reported_acknowledgements=row["acknowledgements"],
+                    reported_mutes=row["mutes"],
                 ).where(NoticeStats.kind == row["kind"]).execute()
 
     def _write_repeats(

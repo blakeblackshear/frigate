@@ -4,8 +4,8 @@ import logging
 import os
 import unittest
 
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.analytics.collectors import features
@@ -49,7 +49,7 @@ CONFIG = {
 
 class TestFeaturesCollector(unittest.TestCase):
     def setUp(self):
-        migrate_db = SqliteExtDatabase(TEST_DB)
+        migrate_db = SqliteDatabase(TEST_DB)
         del logging.getLogger("peewee_migrate").handlers[:]
         Router(migrate_db).run()
         migrate_db.close()

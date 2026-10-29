@@ -24,9 +24,11 @@ SNAPSHOT = [
     {
         "kind": "detector_stuck",
         "occurrences": 3,
-        "dismissals": 0,
+        "acknowledgements": 0,
+        "mutes": 0,
         "reported_occurrences": 1,
-        "reported_dismissals": 0,
+        "reported_acknowledgements": 0,
+        "reported_mutes": 0,
     }
 ]
 

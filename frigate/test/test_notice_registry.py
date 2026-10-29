@@ -372,7 +372,8 @@ class TestMarkReported(RegistryTestCase):
         row = self.registry.stats()[0]
         self.assertEqual(row["occurrences"], 2)
         self.assertEqual(row["reported_occurrences"], 1)
-        self.assertEqual(row["reported_dismissals"], 0)
+        self.assertEqual(row["reported_acknowledgements"], 0)
+        self.assertEqual(row["reported_mutes"], 0)
 
 
 class TestApply(RegistryTestCase):

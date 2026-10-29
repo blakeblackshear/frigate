@@ -32,11 +32,14 @@ def notice_deltas(notice_stats: list[dict[str, Any]]) -> dict[Any, NoticeCounts]
             continue
 
         occurrences = max(row["occurrences"] - row["reported_occurrences"], 0)
-        dismissals = max(row["dismissals"] - row["reported_dismissals"], 0)
+        acknowledgements = max(
+            row["acknowledgements"] - row["reported_acknowledgements"], 0
+        )
+        mutes = max(row["mutes"] - row["reported_mutes"], 0)
 
-        if occurrences or dismissals:
+        if occurrences or acknowledgements or mutes:
             deltas[NoticeKindKey(row["kind"])] = NoticeCounts(
-                occurrences=occurrences, dismissals=dismissals
+                occurrences=occurrences, acknowledgements=acknowledgements, mutes=mutes
             )
 
     return deltas

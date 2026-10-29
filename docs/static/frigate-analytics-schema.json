@@ -373,6 +373,7 @@
         "intel-qsv",
         "jetson",
         "rpi",
+        "apple-silicon",
         "other"
       ],
       "title": "DecodeFamily",
@@ -381,6 +382,12 @@
     "DetectionModel": {
       "additionalProperties": false,
       "properties": {
+        "default": {
+          "description": "Whether the model serves cameras that set no scene",
+          "title": "Default",
+          "type": "boolean",
+          "x-public": true
+        },
         "detector": {
           "$ref": "#/$defs/DetectorTypeEnum",
           "description": "Detector type the model runs on",
@@ -396,7 +403,7 @@
         "inference_ms": {
           "anyOf": [
             {
-              "minimum": 0.0,
+              "minimum": 0,
               "type": "number"
             },
             {
@@ -426,6 +433,7 @@
         }
       },
       "required": [
+        "default",
         "detector",
         "devices",
         "model_type",
@@ -441,26 +449,23 @@
       "properties": {
         "detection_fps": {
           "description": "Detections per second across cameras",
-          "minimum": 0.0,
+          "minimum": 0,
           "title": "Detection Fps",
           "type": "number",
           "x-public": true
         },
         "models": {
-          "additionalProperties": {
+          "description": "Detection models",
+          "items": {
             "$ref": "#/$defs/DetectionModel"
           },
-          "description": "Detection models keyed by scene",
-          "propertyNames": {
-            "$ref": "#/$defs/SceneEnum"
-          },
           "title": "Models",
-          "type": "object",
+          "type": "array",
           "x-public": true
         },
         "skipped_fps": {
           "description": "Frames per second skipped across cameras",
-          "minimum": 0.0,
+          "minimum": 0,
           "title": "Skipped Fps",
           "type": "number",
           "x-public": true
@@ -476,6 +481,7 @@
     },
     "DetectorTypeEnum": {
       "enum": [
+        "axelera",
         "axengine",
         "cpu",
         "deepx",
@@ -772,6 +778,7 @@
         "nvidia",
         "rockchip",
         "rpi",
+        "apple-silicon",
         "other"
       ],
       "title": "GpuVendor",
@@ -785,12 +792,14 @@
         "openvino:NPU",
         "onnx:amd",
         "onnx:nvidia",
+        "onnx:lighter",
         "tensorrt",
         "hailo",
         "memryx",
         "deepx",
         "rknn",
         "axengine",
+        "axelera",
         "synaptics",
         "cpu",
         "other"
@@ -945,6 +954,8 @@
       "enum": [
         "rpi-64-h264",
         "rpi-64-h265",
+        "apple-silicon-h264",
+        "apple-silicon-h265",
         "vaapi",
         "intel-qsv-h264",
         "intel-qsv-h265",
@@ -1091,10 +1102,17 @@
     "NoticeCounts": {
       "additionalProperties": false,
       "properties": {
-        "dismissals": {
-          "description": "Dismissals since the last accepted report",
+        "acknowledgements": {
+          "description": "Acknowledgements since the last accepted report",
           "minimum": 0,
-          "title": "Dismissals",
+          "title": "Acknowledgements",
+          "type": "integer",
+          "x-public": true
+        },
+        "mutes": {
+          "description": "Mutes since the last accepted report",
+          "minimum": 0,
+          "title": "Mutes",
           "type": "integer",
           "x-public": true
         },
@@ -1108,7 +1126,8 @@
       },
       "required": [
         "occurrences",
-        "dismissals"
+        "acknowledgements",
+        "mutes"
       ],
       "title": "NoticeCounts",
       "type": "object"
@@ -1118,7 +1137,10 @@
         "detector_stuck",
         "model_download_failed",
         "skipped_detections",
+        "ffmpeg_high_cpu",
+        "detect_high_cpu",
         "shm_too_low",
+        "object_processing_behind",
         "failed_login"
       ],
       "title": "NoticeKindKey",
@@ -1194,18 +1216,6 @@
       ],
       "title": "RetainDays",
       "type": "object"
-    },
-    "SceneEnum": {
-      "description": "The camera environment a detection model is intended for.",
-      "enum": [
-        "all",
-        "indoor",
-        "outdoor",
-        "indoor_thermal",
-        "outdoor_thermal"
-      ],
-      "title": "SceneEnum",
-      "type": "string"
     },
     "SemanticSearchModel": {
       "enum": [

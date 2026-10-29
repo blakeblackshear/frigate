@@ -21,23 +21,29 @@ class TestHealthCollector(unittest.TestCase):
             {
                 "kind": "detector_stuck",
                 "occurrences": 5,
-                "dismissals": 1,
+                "acknowledgements": 1,
+                "mutes": 0,
                 "reported_occurrences": 3,
-                "reported_dismissals": 1,
+                "reported_acknowledgements": 1,
+                "reported_mutes": 0,
             },
             {
                 "kind": "shm_too_low",
                 "occurrences": 2,
-                "dismissals": 0,
+                "acknowledgements": 0,
+                "mutes": 0,
                 "reported_occurrences": 2,
-                "reported_dismissals": 0,
+                "reported_acknowledgements": 0,
+                "reported_mutes": 0,
             },
             {
                 "kind": "update_available",
                 "occurrences": 4,
-                "dismissals": 0,
+                "acknowledgements": 0,
+                "mutes": 0,
                 "reported_occurrences": 0,
-                "reported_dismissals": 0,
+                "reported_acknowledgements": 0,
+                "reported_mutes": 0,
             },
         ]
 
@@ -49,10 +55,10 @@ class TestHealthCollector(unittest.TestCase):
         self.assertTrue(section.retention_unmet)
         self.assertEqual(
             {
-                kind: (c.occurrences, c.dismissals)
+                kind: (c.occurrences, c.acknowledgements, c.mutes)
                 for kind, c in section.notices.items()
             },
-            {"detector_stuck": (2, 0)},
+            {"detector_stuck": (2, 0, 0)},
         )
 
     def test_missing_stats_give_zeros(self):

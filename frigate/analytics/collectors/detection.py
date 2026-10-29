@@ -7,7 +7,7 @@ from frigate.analytics.context import ReportContext
 from frigate.analytics.schema import DetectionModel, DetectionSection, ModelSource
 from frigate.config.config import DEFAULT_MODEL
 from frigate.const import MODEL_CACHE_DIR
-from frigate.detectors.detector_config import SceneEnum
+from frigate.detectors.detector_config import DEFAULT_SCENE
 from frigate.detectors.detector_types import DetectorTypeEnum
 from frigate.detectors.device import runner_names
 
@@ -38,7 +38,7 @@ def collect(ctx: ReportContext) -> DetectionSection:
 
     # FrigateApp.start_detectors names the processes in this same order
     names = iter(runner_names([spec for _, specs in model_specs for spec in specs]))
-    models: dict[SceneEnum, DetectionModel] = {}
+    models: list[DetectionModel] = []
 
     for model, specs in model_specs:
         speeds: list[float] = []
@@ -49,13 +49,16 @@ def collect(ctx: ReportContext) -> DetectionSection:
             if isinstance(speed, int | float) and speed > 0:
                 speeds.append(float(speed))
 
-        models[model.scene] = DetectionModel(
-            detector=DetectorTypeEnum(specs[0].detector),
-            devices=len(specs),
-            model_type=model.model_type,
-            input=f"{model.width}x{model.height}",
-            source=model_source(model.path),
-            inference_ms=rate(sum(speeds) / len(speeds)) if speeds else None,
+        models.append(
+            DetectionModel(
+                default=model.scene == DEFAULT_SCENE,
+                detector=DetectorTypeEnum(specs[0].detector),
+                devices=len(specs),
+                model_type=model.model_type,
+                input=f"{model.width}x{model.height}",
+                source=model_source(model.path),
+                inference_ms=rate(sum(speeds) / len(speeds)) if speeds else None,
+            )
         )
 
     return DetectionSection(

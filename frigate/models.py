@@ -209,7 +209,7 @@ class NoticeStats(Model):
     mutes = IntegerField(default=0)
     first_seen = DateTimeField()
     last_seen = DateTimeField()
-    # watermarks for a future analytics reporter; unused until then
+    # counts the last accepted analytics report covered
     reported_occurrences = IntegerField(default=0)
     reported_acknowledgements = IntegerField(default=0)
     reported_mutes = IntegerField(default=0)

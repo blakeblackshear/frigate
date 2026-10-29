@@ -13,7 +13,7 @@ from frigate.config.camera.birdseye import BirdseyeModeEnum
 from frigate.config.camera.camera import CameraTypeEnum
 from frigate.config.camera.genai import GenAIProviderEnum, GenAIRoleEnum
 from frigate.config.classification import ModelSizeEnum
-from frigate.detectors.detector_config import ModelTypeEnum, SceneEnum
+from frigate.detectors.detector_config import ModelTypeEnum
 from frigate.detectors.detector_types import DetectorTypeEnum
 from frigate.ffmpeg_presets import PRESETS_HW_ACCEL_DECODE, PRESETS_INPUT
 from frigate.notices.types import NOTICE_KINDS
@@ -53,6 +53,7 @@ class GpuVendor(StrEnum):
     nvidia = "nvidia"
     rockchip = "rockchip"
     rpi = "rpi"
+    apple_silicon = "apple-silicon"
     other = "other"
 
 
@@ -63,6 +64,7 @@ class DecodeFamily(StrEnum):
     intel_qsv = "intel-qsv"
     jetson = "jetson"
     rpi = "rpi"
+    apple_silicon = "apple-silicon"
     other = "other"
 
 
@@ -73,12 +75,14 @@ class HardwareKey(StrEnum):
     openvino_npu = "openvino:NPU"
     onnx_amd = "onnx:amd"
     onnx_nvidia = "onnx:nvidia"
+    onnx_lighter = "onnx:lighter"
     tensorrt = "tensorrt"
     hailo = "hailo"
     memryx = "memryx"
     deepx = "deepx"
     rknn = "rknn"
     axengine = "axengine"
+    axelera = "axelera"
     synaptics = "synaptics"
     cpu = "cpu"
     other = "other"
@@ -228,6 +232,7 @@ class HardwareSection(AnalyticsModel):
 
 
 class DetectionModel(AnalyticsModel):
+    default: bool = metric("Whether the model serves cameras that set no scene")
     detector: DetectorTypeEnum = metric("Detector type the model runs on")
     devices: int = count("Devices the model runs on")
     model_type: ModelTypeEnum = metric("Model architecture")
@@ -240,7 +245,7 @@ class DetectionModel(AnalyticsModel):
 
 
 class DetectionSection(AnalyticsModel):
-    models: dict[SceneEnum, DetectionModel] = metric("Detection models keyed by scene")
+    models: list[DetectionModel] = metric("Detection models")
     detection_fps: float = metric("Detections per second across cameras", ge=0)
     skipped_fps: float = metric("Frames per second skipped across cameras", ge=0)
 
@@ -369,7 +374,8 @@ class FeaturesSection(AnalyticsModel):
 
 class NoticeCounts(AnalyticsModel):
     occurrences: int = count("Occurrences since the last accepted report")
-    dismissals: int = count("Dismissals since the last accepted report")
+    acknowledgements: int = count("Acknowledgements since the last accepted report")
+    mutes: int = count("Mutes since the last accepted report")
 
 
 class HealthSection(AnalyticsModel):
