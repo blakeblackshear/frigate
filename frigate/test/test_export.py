@@ -617,9 +617,13 @@ class TestExportTimelineAlignment(unittest.TestCase):
         ):
             windows = exporter._staged_chapter_windows()
 
-        path = exporter._build_recording_segment_chapter_metadata_file(windows)
-        self.addCleanup(os.remove, path)
-        content = Path(path).read_text()
+        # the real cache dir only exists once the container has started
+        with tempfile.TemporaryDirectory() as tmpdir:
+            chapter_path = os.path.join(tmpdir, "chapters.txt")
+            exporter._chapter_metadata_path = lambda: chapter_path  # type: ignore[method-assign]
+            path = exporter._build_recording_segment_chapter_metadata_file(windows)
+            self.assertEqual(path, chapter_path)
+            content = Path(chapter_path).read_text()
 
         self.assertIn("START=0\nEND=21500", content)
         self.assertIn("START=21500\nEND=43000", content)
