@@ -36,10 +36,16 @@ logger = logging.getLogger(__name__)
 
 
 def restart_frigate():
-    proc = psutil.Process(1)
+    try:
+        proc = psutil.Process(1)
+        is_s6 = proc.name() == "s6-svscan"
+    except (psutil.NoSuchProcess, psutil.AccessDenied):
+        # pid 1 is not visible outside the container, e.g. under systemd
+        # with ProtectProc=invisible
+        is_s6 = False
 
     # if this is running via s6, sigterm pid 1
-    if proc.name() == "s6-svscan":
+    if is_s6:
         try:
             proc.terminate()
             return

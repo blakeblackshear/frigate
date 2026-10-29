@@ -53,3 +53,16 @@ class TestRestartFrigate(unittest.TestCase):
 
         proc.terminate.assert_not_called()
         mock_kill.assert_called_once_with(99, signal.SIGINT)
+
+    @patch("frigate.util.services.os.getpid", return_value=99)
+    @patch("frigate.util.services.os.kill")
+    @patch("frigate.util.services.psutil.Process")
+    def test_exits_self_when_pid1_is_not_visible(
+        self, mock_process, mock_kill, _mock_getpid
+    ):
+        """Under systemd with ProtectProc=invisible, pid 1 cannot be looked up."""
+        mock_process.side_effect = psutil.NoSuchProcess(pid=1)
+
+        restart_frigate()
+
+        mock_kill.assert_called_once_with(99, signal.SIGINT)
