@@ -578,9 +578,10 @@ notifications:
   email: "admin@example.com"
   # Optional: Cooldown time for notifications in seconds (default: shown below)
   cooldown: 0
-  # Optional: Seconds the push service keeps retrying a notification sent while an alert is active (default: shown below)
-  # NOTE: A non-zero value can deliver late notifications that still link to the live view
-  ttl: 0
+  # Optional: Delivery of notifications sent while an alert is active (default: shown below)
+  # Options are immediate (deliver right away or drop) and reliable (retry for up to 30 seconds)
+  # NOTE: reliable can deliver late notifications that still link to the live view
+  ttl: immediate
 
 # Optional: Record configuration
 # NOTE: Can be overridden at the camera level

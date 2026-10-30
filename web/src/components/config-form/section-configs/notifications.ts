@@ -30,8 +30,7 @@ const notifications: SectionConfigOverrides = {
         messageKey: "configMessages.notifications.ttlDelay",
         severity: "warning",
         position: "after",
-        condition: (ctx) =>
-          typeof ctx.formData?.ttl === "number" && ctx.formData.ttl > 0,
+        condition: (ctx) => ctx.formData?.ttl === "reliable",
       },
     ],
   },
@@ -40,6 +39,7 @@ const notifications: SectionConfigOverrides = {
       "ui:before": { render: "NotificationsSettingsExtras" },
       enabled: { "ui:widget": "hidden" },
       email: { "ui:widget": "hidden" },
+      ttl: { "ui:options": { enumI18nPrefix: "notificationTtl" } },
       cooldown: { "ui:widget": "hidden" },
       enabled_in_config: { "ui:widget": "hidden" },
     },

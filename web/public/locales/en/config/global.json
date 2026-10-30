@@ -156,7 +156,7 @@
     },
     "ttl": {
       "label": "Notification TTL",
-      "description": "Seconds the push service keeps retrying a notification sent while an alert is active if your device can't be reached. 0 delivers immediately or drops it. The notification sent when an alert ends is always kept for up to an hour."
+      "description": "How the push service handles a notification sent while an alert is active if your device can't be reached. Immediate delivers it right away or drops it. Reliable keeps retrying for up to 30 seconds. The notification sent when an alert ends is always kept for up to an hour."
     },
     "enabled_in_config": {
       "label": "Original notifications state",
