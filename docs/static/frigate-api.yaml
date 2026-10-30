@@ -5504,8 +5504,14 @@ paths:
       description: |-
         **Access:** Admin role required.
 
-        Deletes a list of events from the database.
-            Returns a success message or an error if the events are not found.
+        Deletes events from the database.
+
+            Either provide a list of event IDs, or use the after/before unix
+            timestamp filters (optionally scoped to a single camera) to delete all
+            events in a time range, for example everything older than a given time.
+            When event IDs are provided, the filters are ignored.
+
+            Returns a success message or an error if no events are found.
       operationId: delete_events_events__delete
       requestBody:
         required: true
@@ -8527,9 +8533,25 @@ components:
             type: string
           type: array
           title: The event IDs to delete
+        camera:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Only delete events from this camera. Used with the after/before
+            filters.
+        after:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: Delete events that started after this unix timestamp. At least 
+            one of event_ids, after, or before is required.
+        before:
+          anyOf:
+            - type: number
+            - type: 'null'
+          title: Delete events that started before this unix timestamp. Useful 
+            for deleting all events older than a given time.
       type: object
-      required:
-        - event_ids
       title: EventsDeleteBody
     EventsDescriptionBody:
       properties:
