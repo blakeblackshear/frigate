@@ -629,7 +629,8 @@
     "addUser": "Adaugă utilizator",
     "management": {
       "desc": "Gestionează conturile de utilizator ale acestei instanțe Frigate.",
-      "title": "Administrare utilizatori"
+      "title": "Administrare utilizatori",
+      "authDisabled": "Autentificarea integrată este dezactivată. Aceste conturi sunt folosite doar pentru a te conecta odată ce este activată."
     },
     "toast": {
       "success": {
@@ -750,7 +751,8 @@
         "ariaLabel": "Filtrează modelele după tip",
         "baseModels": "Modele de bază",
         "fineTunedModels": "Modele optimizate"
-      }
+      },
+      "showIncompatible": "Afișează modelele incompatibile"
     },
     "toast": {
       "error": "Eroare la salvarea modificărilor de config: {{errorMessage}}",
@@ -1022,7 +1024,8 @@
         "nameLength": "Numele camerei trebuie să aibă maxim 64 de caractere",
         "invalidCharacters": "Numele camerei conține caractere nepermise",
         "nameExists": "Numele camerei există deja",
-        "customUrlRtspRequired": "URL-urile personalizate trebuie să înceapă cu „rtsp://” sau „rtsps://”. Configurarea manuală este necesară pentru stream-urile care nu sunt RTSP."
+        "customUrlRtspRequired": "URL-urile personalizate trebuie să înceapă cu „rtsp://” sau „rtsps://”. Configurarea manuală este necesară pentru stream-urile care nu sunt RTSP.",
+        "onvifPortInvalid": "Portul ONVIF trebuie să fie un număr întreg de la 1 la 65535"
       },
       "connectionSettings": "Setări Conexiune",
       "detectionMethod": "Metodă Detecție Stream",

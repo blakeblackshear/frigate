@@ -843,7 +843,7 @@
         },
         "cookie_secure": {
             "label": "Atribut de segura de la cookie",
-            "description": "Establiu l'indicador segur a l'auth cookie; hauria de ser cert quan s'utilitza TLS."
+            "description": "Estableix sempre l'indicador segur a la galeta d'autenticació. La fragata ho estableix automàticament en servir TLS; habiliteu-ho quan un servidor intermediari invers finalitza TLS davant de la fragata. Un servidor intermediari que es connecta al port TLS ha de servir fragata als navegadors a través d'HTTPS."
         },
         "session_length": {
             "label": "Longitud de la sessió",

@@ -81,8 +81,7 @@
       "placeholder": "케이스 선택",
       "newCaseOption": "새 케이스 생성",
       "newCaseNamePlaceholder": "새 케이스 이름",
-      "newCaseDescriptionPlaceholder": "케이스 설명",
-      "nonAdminHelp": "이 내보내기를 위한 새 케이스가 생성됩니다."
+      "newCaseDescriptionPlaceholder": "케이스 설명"
     },
     "queueing": "내보내기 대기열 추가 중...",
     "tabs": {

@@ -84,8 +84,7 @@
       "placeholder": "Selecteer een dossier",
       "newCaseOption": "Maak nieuwe case",
       "newCaseNamePlaceholder": "Nieuwe case naam",
-      "newCaseDescriptionPlaceholder": "Case beschrijving",
-      "nonAdminHelp": "Een nieuwe case wordt gemaakt voor deze exports."
+      "newCaseDescriptionPlaceholder": "Case beschrijving"
     },
     "queueing": "Export in wachtrij zetten...",
     "tabs": {

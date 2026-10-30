@@ -87,8 +87,7 @@
       "placeholder": "Выберите случай",
       "newCaseOption": "Создайте новый случай",
       "newCaseNamePlaceholder": "Имя нового случая",
-      "newCaseDescriptionPlaceholder": "Описание случая",
-      "nonAdminHelp": "Для этих экспортов будет создан новый случай."
+      "newCaseDescriptionPlaceholder": "Описание случая"
     },
     "queueing": "Помещаем Экспорт в очередь...",
     "tabs": {
@@ -114,7 +113,10 @@
       "detectionCount_many": "{{count}} отслеживаемых объектов",
       "nameLabel": "экспортируемое имя",
       "namePlaceholder": "Необязательное базовое имя для экспорта",
-      "queueingButton": "Экспорт в очередь..."
+      "queueingButton": "Экспорт в очередь...",
+      "exportButton_one": "Экспортировать {{count}} камеру",
+      "exportButton_few": "Экспортировать {{count}} камеры",
+      "exportButton_many": "Экспортировать {{count}} камер"
     },
     "stream": {
       "label": "Качество",
@@ -132,8 +134,17 @@
       "exportingButton": "Экспортируется...",
       "toast": {
         "partial": "Начато {{successful}} из {{total}} экспортов. Неудачных: {{failedItems}}",
-        "failed": "Не удалось запустить {{total}} экспортов. Ошибка: {{failedItems}}"
-      }
+        "failed": "Не удалось запустить {{total}} экспортов. Ошибка: {{failedItems}}",
+        "started_one": "Запущен {{count}} экспорт.",
+        "started_few": "Запущено {{count}} экспорта.",
+        "started_many": "Запущено {{count}} экспортов."
+      },
+      "title_one": "Экспорт {{count}} обзора событий",
+      "title_few": "Экспорт {{count}} обзоров событий",
+      "title_many": "Экспорт {{count}} обзоров событий",
+      "exportButton_one": "Экспортировать {{count}} обзор событий",
+      "exportButton_few": "Экспортировать {{count}} обзора событий",
+      "exportButton_many": "Экспортировать {{count}} обзоров событий"
     }
   },
   "streaming": {

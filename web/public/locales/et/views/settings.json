@@ -293,16 +293,65 @@
       "enabled": "Kasutusel",
       "ffmpeg": {
         "pathPlaceholder": "rtsp://...",
-        "roles": "Rollid"
+        "roles": "Rollid",
+        "rolesRequired": "Vajalik on vähemalt üks roll"
       }
     },
     "clone": {
       "categories": {
         "items": {
           "lpr": "Sõidukite numbrimärkide tuvastus",
-          "genai": "Generatiivne tehisaru"
-        }
-      }
+          "genai": "Generatiivne tehisaru",
+          "zones": "Tsoonid",
+          "face_recognition": "Näotuvastus",
+          "semantic_search": "Semantiline otsing",
+          "birdseye": "Vaade linnulennult",
+          "audio_transcription": "Heli üleskirjutus",
+          "profiles": "Profiilid",
+          "notifications": "Teavitused",
+          "mqtt": "MQTT",
+          "timestamp_style": "Ajatempli stiil",
+          "onvif": "ONVIF",
+          "audio": "Heli tuvastus"
+        },
+        "legend": "Kloonitavad seadistused",
+        "description": "Vali seadistused, mida tahad lähtekaamerast kopeerida.",
+        "selectAll": "Vali kõik",
+        "selectNone": "Vali mitte midagi",
+        "resetDefaults": "Lähtesta vaikimisi seadistusteks"
+      },
+      "target": {
+        "existingCamerasRadio": "Olemasolevad kaamerad",
+        "allCameras": "Kõik kaamerad",
+        "existingPlaceholder": "Vali vähemalt üks kaamera",
+        "existingDisabled": "Pole muid kaameraid, kuhu seda kopeerida",
+        "legend": "Sihtkaamera",
+        "newRadio": "Uus kaamera",
+        "newNameLabel": "Kaamera nimi",
+        "newNamePlaceholder": "nt. tagauks või hoovipoolne_uks",
+        "newNameRequired": "Kaamera nim on vajalik",
+        "newNameInvalid": "Vigane kaamera nimi",
+        "newNameCollision": "Sellise nimega kaamera on juba olemas",
+        "newStreamsForced": "Uue kaamera jaoks kopeeritakse alati voogedastused."
+      },
+      "button": "Klooni seadistused",
+      "sectionDescription": "Kopeeri seadistused ühest kaamerast teise või sootuks uude kaamerasse.",
+      "title": "Sulge kaamera seadistused",
+      "source": {
+        "label": "Lähtekaamera",
+        "placeholder": "Vali lähtekaamera",
+        "required": "Vali lähtekaamera"
+      },
+      "description": "Kopeeri kaamera seadistused ühete või mitmesse teisese kaamerasse või uuede kaamerasse. Tuvastusandmeid (nimi, lühinimi, veebiliidese võrguaadress, kuvamisjärjekord) ei kuulu iialgi kopeerimisele."
+    },
+    "profiles": {
+      "on": "Sees",
+      "off": "Väljas"
+    },
+    "cameraType": {
+      "title": "Kaameratüüp",
+      "label": "Kaameratüüp",
+      "normal": "Tavaline"
     }
   },
   "notification": {
@@ -427,7 +476,7 @@
     "integrationLpr": "Sõidukite numbrimärkide tuvastus",
     "cameraLpr": "Sõidukite numbrimärkide tuvastus",
     "uiSettings": "Kasutajaliidese seadistused",
-    "globalDetect": "Objektide tuvastamine",
+    "globalDetect": "Objektituvastus",
     "globalRecording": "Salvestamine",
     "globalSnapshots": "Hetkvõtted",
     "globalFfmpeg": "FFmpeg",
@@ -458,7 +507,7 @@
     "system": "Süsteem",
     "integrations": "Integratsioonid",
     "cameras": "Kaamera seaded",
-    "integrationFaceRecognition": "Nöotuvastus",
+    "integrationFaceRecognition": "Näotuvastus",
     "cameraDetect": "Objektituvastus",
     "cameraFfmpeg": "Vood (FFmpeg)",
     "cameraRecording": "Salvestus",
@@ -466,11 +515,11 @@
     "cameraMotion": "Liikumistuvastus",
     "cameraObjects": "Objektid",
     "cameraConfigReview": "Ülevaade",
-    "cameraAudioEvents": "audiotuvastus",
-    "cameraAudioTranscription": "Audio transkriptsioon",
-    "cameraNotifications": "Teated",
+    "cameraAudioEvents": "Heli tuvastus",
+    "cameraAudioTranscription": "Heli üleskirjutus",
+    "cameraNotifications": "Teavitused",
     "cameraLivePlayback": "Otseülekanne",
-    "integrationAudioTranscription": "Audio transkriptsioon",
+    "integrationAudioTranscription": "Heli üleskirjutus",
     "integrationObjectClassification": "Objektide klassifitseerimine",
     "cameraFaceRecognition": "Näotuvastus",
     "cameraMqttConfig": "MQTT",
@@ -482,7 +531,8 @@
     "mediaSync": "Meedia sünkroonimine",
     "regionGrid": "Regioonide ruudustik",
     "enrichments": "Andmete rikastamine",
-    "motionTuner": "Liikumistuvastuse seadistaja"
+    "motionTuner": "Liikumistuvastuse seadistaja",
+    "cameraBirdseye": "Vaade linnulennult"
   },
   "dialog": {
     "unsavedChanges": {
@@ -602,7 +652,9 @@
     }
   },
   "profiles": {
-    "nameInvalid": "Lubatud on vaid väiketähed, numbrid ja alakriipsud"
+    "nameInvalid": "Lubatud on vaid väiketähed, numbrid ja alakriipsud",
+    "title": "Profiilid",
+    "activeProfile": "Aktiivne profiil"
   },
   "go2rtcStreams": {
     "validation": {
@@ -611,7 +663,66 @@
   },
   "configForm": {
     "sections": {
-      "lpr": "Sõidukite numbrimärkide tuvastus"
+      "lpr": "Sõidukite numbrimärkide tuvastus",
+      "face_recognition": "Näotuvastus",
+      "birdseye": "Vaade linnulennult",
+      "notifications": "Teavitused",
+      "live": "Reaalajas vaade",
+      "timestamp_style": "Ajatemplid",
+      "mqtt": "MQTT",
+      "database": "Andmebaas",
+      "telemetry": "Telemeetria",
+      "auth": "Autentimine",
+      "tls": "TLS",
+      "proxy": "Proksiserver",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg"
+    },
+    "zoneNames": {
+      "summary": "Valitud on {{count}}",
+      "empty": "Ühtegi tsooni pole saadaval"
+    },
+    "birdseyeModes": {
+      "summary": "Valitud on {{count}}"
+    },
+    "review": {
+      "title": "Ülevaatamise seadistused"
+    },
+    "audio": {
+      "title": "Heliseadistused"
+    },
+    "notifications": {
+      "title": "Teavituste seadistused"
+    },
+    "live": {
+      "title": "Reaalajas vaate seadistused"
+    },
+    "timestamp_style": {
+      "title": "Ajatempli seadistused"
+    },
+    "searchPlaceholder": "Otsi…",
+    "addCustomLabel": "Lisa sinu määratud silt…",
+    "genaiModel": {
+      "placeholder": "Vali või sisesta mudel…",
+      "search": "Otsi mudelit või sisesta see…",
+      "noModels": "Ühtegi mudelit pole saadaval",
+      "available": "Saadaval mudelid",
+      "useCustom": "Kasuta mudelit „{{value}}“",
+      "refresh": "Laadi mudelid uuesti"
+    },
+    "ptzPresets": {
+      "noPresets": "Ühtegi eelseadistust pole saadaval",
+      "available": "Kaamera eelseadistused",
+      "useCustom": "Kasuta väärtust „{{value}}“"
+    },
+    "defaultRole": {
+      "admin": "Peakasutaja",
+      "viewer": "Vaataja",
+      "none": "Puudub (ligipääs on keelatud)"
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Vali mudel…",
+      "builtIn": "Rakendusega kaasaolevad mudelid"
     }
   },
   "configMessages": {

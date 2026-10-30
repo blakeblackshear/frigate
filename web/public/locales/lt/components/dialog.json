@@ -101,7 +101,6 @@
       "newCaseNamePlaceholder": "Naujos kolekcijos pavadinimas",
       "newCaseDescriptionPlaceholder": "Kolekcijos aprašymas",
       "label": "Kolekcija",
-      "nonAdminHelp": "Nauja kolekcija bus sukurta šiems išrašams.",
       "placeholder": "Pasirinkti kolekciją"
     },
     "queueing": "Sudaroma išrašų eilė....",
