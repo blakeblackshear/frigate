@@ -43,7 +43,7 @@ Notifications will be prevented if either:
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Notifications > Notifications" />.
+1. Navigate to <NavPath path="Settings > Notifications" />.
    - Set **Email** to your email address
    - Enable notifications for the desired cameras
 
@@ -117,7 +117,7 @@ Setting `ttl` tells the push service to keep retrying notifications sent while a
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Notifications > Notifications" />.
+1. Navigate to <NavPath path="Settings > Notifications" />.
    - Expand **Advanced Settings** and set **Notification TTL** to the number of seconds to keep retrying (e.g. `10`)
 
 </TabItem>
