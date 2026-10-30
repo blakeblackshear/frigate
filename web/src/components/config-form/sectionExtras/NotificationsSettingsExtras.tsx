@@ -340,7 +340,7 @@ export default function NotificationsSettingsExtras({
       set(nextNotifications, "enabled", desiredEnabled);
       const sanitizedNotifications = sanitizeSectionData(
         nextNotifications as ConfigSectionData,
-        ["enabled_in_config", "email"],
+        ["enabled_in_config", "email", "ttl"],
       );
       onPendingDataChange("notifications", camera.name, sanitizedNotifications);
       pendingCameraOverridesRef.current.add(camera.name);
@@ -490,7 +490,7 @@ export default function NotificationsSettingsExtras({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
+      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto md:order-none">
         <div className={cn("w-full max-w-5xl space-y-6")}>
           {isAdmin && (
             <SettingsGroupCard

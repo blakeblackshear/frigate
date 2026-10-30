@@ -43,7 +43,7 @@ Notifications will be prevented if either:
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Notifications > Notifications" />.
+1. Navigate to <NavPath path="Settings > Notifications" />.
    - Set **Email** to your email address
    - Enable notifications for the desired cameras
 
@@ -107,6 +107,29 @@ Currently, only Chrome supports images in notifications. Safari and Firefox will
 ## Reduce Notification Latency
 
 Different platforms handle notifications differently, some settings changes may be required to get optimal notification delivery.
+
+### Notification TTL
+
+By default, Frigate sends notifications for an active alert with a `ttl` of `immediate`, so the push service either delivers them immediately or drops them. If your device is briefly unreachable (asleep, switching from Wi-Fi to cellular, or on a weak signal), those notifications are lost and you only receive the notification sent when the alert ends, which is always kept for up to an hour.
+
+Setting `ttl` to `reliable` tells the push service to keep retrying these notifications for up to 30 seconds. This makes delivery more reliable, but a notification delivered late will still say an object is detected, even if the object has already left.
+
+<ConfigTabs>
+<TabItem value="ui">
+
+1. Navigate to <NavPath path="Settings > Notifications" />.
+   - Expand **Advanced Settings** and set **Notification TTL** to **Reliable**
+
+</TabItem>
+<TabItem value="yaml">
+
+```yaml
+notifications:
+  ttl: reliable # retry an undelivered notification for up to 30 seconds
+```
+
+</TabItem>
+</ConfigTabs>
 
 ### Android
 

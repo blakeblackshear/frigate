@@ -22,6 +22,7 @@ from frigate.comms.base_communicator import Communicator
 from frigate.comms.config_updater import ConfigSubscriber
 from frigate.config import FrigateConfig
 from frigate.config.auth import AuthConfig
+from frigate.config.camera.notification import NOTIFICATION_TTL_SECONDS
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
@@ -623,7 +624,7 @@ class WebPushClient(Communicator):
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
-        ttl = 3600 if ended else 0
+        ttl = 3600 if ended else NOTIFICATION_TTL_SECONDS[self.config.notifications.ttl]
 
         logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
 
