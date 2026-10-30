@@ -117,8 +117,8 @@ Setting `ttl` tells the push service to keep retrying notifications sent while a
 <ConfigTabs>
 <TabItem value="ui">
 
-1. Navigate to <NavPath path="Settings > Camera configuration > Notifications" /> and select the desired camera.
-   - Set **Notification TTL** to the number of seconds to keep retrying (e.g. `10`)
+1. Navigate to <NavPath path="Settings > Notifications > Notifications" />.
+   - Expand **Advanced Settings** and set **Notification TTL** to the number of seconds to keep retrying (e.g. `10`)
 
 </TabItem>
 <TabItem value="yaml">

@@ -7,7 +7,7 @@ const notifications: SectionConfigOverrides = {
     fieldOrder: ["enabled", "email"],
     fieldGroups: {},
     hiddenFields: ["enabled_in_config"],
-    advancedFields: [],
+    advancedFields: ["ttl"],
     fieldMessages: [
       {
         key: "profile-base-notifications-disabled",
@@ -41,12 +41,11 @@ const notifications: SectionConfigOverrides = {
       enabled: { "ui:widget": "hidden" },
       email: { "ui:widget": "hidden" },
       cooldown: { "ui:widget": "hidden" },
-      ttl: { "ui:widget": "hidden" },
       enabled_in_config: { "ui:widget": "hidden" },
     },
   },
   camera: {
-    hiddenFields: ["enabled_in_config", "email"],
+    hiddenFields: ["enabled_in_config", "email", "ttl"],
   },
 };
 

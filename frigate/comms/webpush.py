@@ -623,7 +623,7 @@ class WebPushClient(Communicator):
 
         # if event is ongoing open to live view otherwise open to recordings view
         direct_url = f"/review?id={reviewId}" if ended else f"/#{camera}"
-        ttl = 3600 if ended else self.config.cameras[camera].notifications.ttl
+        ttl = 3600 if ended else self.config.notifications.ttl
 
         logger.debug(f"Sending push notification for {camera}, review ID {reviewId}")
 
