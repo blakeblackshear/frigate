@@ -188,6 +188,7 @@ def metric(description: str, *, public: bool = True, **kwargs: Any) -> Any:
 
 
 def count(description: str) -> Any:
+    """Declare a non-negative count field."""
     return metric(description, ge=0)
 
 

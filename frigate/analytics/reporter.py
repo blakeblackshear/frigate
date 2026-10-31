@@ -75,6 +75,7 @@ class AnalyticsReporter(threading.Thread):
         return INTERVAL_S + self.rng.uniform(-JITTER_S, JITTER_S)
 
     def run(self) -> None:
+        """Tick every wake until stopped; a failed tick never ends the thread."""
         while True:
             try:
                 self.tick()

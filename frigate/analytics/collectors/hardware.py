@@ -49,6 +49,7 @@ def cpu_model() -> str:
 
 
 def gpus(stats: dict[str, Any]) -> list[GpuInfo]:
+    """GPUs with a stats entry, by vendor and capped name."""
     found: list[GpuInfo] = []
 
     for name, entry in stats.get("gpu_usages", {}).items():
@@ -64,6 +65,7 @@ def gpus(stats: dict[str, Any]) -> list[GpuInfo]:
 
 
 def decode_families() -> list[DecodeFamily]:
+    """Hardware decode families the host supports."""
     _, available = hwaccel_options()
     families = [
         closed(DecodeFamily, family.key, DecodeFamily.other) for family in available
@@ -72,6 +74,7 @@ def decode_families() -> list[DecodeFamily]:
 
 
 def detection_hardware() -> dict[HardwareKey, int]:
+    """Detection accelerators found by the hardware probe, by unit count."""
     units: Counter[HardwareKey] = Counter()
 
     for found in hardware_prober.probe():
@@ -81,7 +84,10 @@ def detection_hardware() -> dict[HardwareKey, int]:
 
 
 def storage(stats: dict[str, Any]) -> StorageInfo:
-    # stats report sizes in MB
+    """Filesystem, size, and usage of the recordings volume.
+
+    Stats report sizes in MB.
+    """
     entry = stats.get("service", {}).get("storage", {}).get(RECORD_DIR) or {}
     total_mb = float(entry.get("total") or 0)
     used_mb = float(entry.get("used") or 0)

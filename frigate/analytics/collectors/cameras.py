@@ -35,6 +35,7 @@ QUALITIES = frozenset(ConnectionQuality)
 
 
 def height_bucket(height: int) -> HeightBucket:
+    """The nearest standard resolution bucket for a detect height."""
     for limit, bucket in HEIGHT_BUCKETS:
         if height <= limit:
             return bucket
@@ -43,6 +44,7 @@ def height_bucket(height: int) -> HeightBucket:
 
 
 def fps_bucket(fps: int) -> FpsBucket:
+    """The bucket for a detect fps."""
     if fps <= 5:
         return FpsBucket.le_5
 
@@ -53,6 +55,7 @@ def fps_bucket(fps: int) -> FpsBucket:
 
 
 def retain_bucket(days: float) -> RetainBucket:
+    """The bucket for a retention period in days."""
     if days <= 0:
         return RetainBucket.zero
 
@@ -77,6 +80,7 @@ def preset_key(args: str | list[str], enum: Any) -> Any:
 
 
 def is_restream(path: str) -> bool:
+    """Whether an input reads from the local go2rtc restream."""
     try:
         url = urlsplit(path)
         return url.hostname in RESTREAM_HOSTS and url.port == RESTREAM_PORT
@@ -85,11 +89,12 @@ def is_restream(path: str) -> bool:
 
 
 def role_input(camera: CameraConfig, role: CameraRoleEnum) -> CameraInput | None:
+    """The camera's first input with the given role."""
     return next((i for i in camera.ffmpeg.inputs if role in i.roles), None)
 
 
 def object_masks(camera: CameraConfig) -> int:
-    # parsing copies camera-wide masks into every filter as global_<id>
+    """Camera and per-label object masks, minus the global_<id> filter copies."""
     own = sum(1 for mask in camera.objects.mask.values() if mask is not None)
     per_label = sum(
         1

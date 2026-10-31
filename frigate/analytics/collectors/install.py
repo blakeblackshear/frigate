@@ -21,7 +21,7 @@ def image_variant(value: str | None) -> ImageVariant:
 
 
 def install_type() -> InstallType:
-    # the add-on is a container too, so it has to be checked first
+    """How Frigate runs; the add-on is a container too, so it's checked first."""
     if os.path.isfile("/data/options.json"):
         return InstallType.ha_addon
 
@@ -38,6 +38,7 @@ def install_type() -> InstallType:
 
 
 def arch(machine: str) -> Arch:
+    """The CPU architecture for a platform.machine() value."""
     match machine.lower():
         case "x86_64" | "amd64":
             return Arch.x86_64
@@ -48,6 +49,7 @@ def arch(machine: str) -> Arch:
 
 
 def kernel(release: str) -> str:
+    """The major.minor of a kernel release string, or unknown."""
     match = KERNEL_PATTERN.match(release)
     return f"{match.group(1)}.{match.group(2)}" if match else "unknown"
 

@@ -50,6 +50,7 @@ def enrichment_device(label: object) -> EnrichmentDevice | None:
 
 
 def model_name(model: object) -> str | None:
+    """The model's config value as a string."""
     if model is None:
         return None
 
@@ -57,7 +58,7 @@ def model_name(model: object) -> str | None:
 
 
 def semantic_model(model: object) -> SemanticSearchModel | None:
-    # any string that isn't a built-in model names a GenAI provider
+    """A built-in Jina model, or genai for any GenAI provider name."""
     name = model_name(model)
 
     if name is None:
@@ -70,6 +71,7 @@ def semantic_model(model: object) -> SemanticSearchModel | None:
 
 
 def transcription_model(model: object) -> TranscriptionModel | None:
+    """Whisper, or genai for any GenAI provider name."""
     name = model_name(model)
 
     if name is None:
@@ -79,6 +81,7 @@ def transcription_model(model: object) -> TranscriptionModel | None:
 
 
 def users() -> dict[UserRole, int]:
+    """Count users by role, with any custom role counted as custom."""
     roles: Counter[UserRole] = Counter(
         closed(UserRole, user.role, UserRole.custom) for user in User.select(User.role)
     )

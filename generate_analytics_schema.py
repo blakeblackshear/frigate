@@ -22,6 +22,7 @@ OUTPUT = Path(__file__).parent / "docs" / "static" / "frigate-analytics-schema.j
 
 
 def render() -> str:
+    """The JSON Schema for the current report models."""
     schema = AnalyticsReport.model_json_schema()
     schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
     schema["$id"] = "https://docs.frigate.video/frigate-analytics-schema.json"
