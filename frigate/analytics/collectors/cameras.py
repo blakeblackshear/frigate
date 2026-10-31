@@ -108,6 +108,11 @@ def collect(ctx: ReportContext) -> CamerasSection:
     }
     camera_stats = ctx.stats.get("cameras", {})
 
+    # cameras disabled in config are parked, so they'd skew feature adoption
+    active = [
+        (name, camera) for name, camera in cameras.items() if camera.enabled_in_config
+    ]
+
     flags: Counter[str] = Counter()
     types: Counter[CameraTypeEnum] = Counter()
     heights: Counter[HeightBucket] = Counter()
@@ -119,7 +124,7 @@ def collect(ctx: ReportContext) -> CamerasSection:
         period: Counter() for period in ("continuous", "motion", "alerts", "detections")
     }
 
-    for name, camera in cameras.items():
+    for name, camera in active:
         detect_input = role_input(camera, CameraRoleEnum.detect)
         record_input = role_input(camera, CameraRoleEnum.record)
 
@@ -145,7 +150,8 @@ def collect(ctx: ReportContext) -> CamerasSection:
 
         state = camera_stats.get(name, {}).get("connection_quality")
 
-        if state in QUALITIES:
+        # a camera turned off at runtime reports unusable
+        if camera.enabled and state in QUALITIES:
             quality[ConnectionQuality(state)] += 1
 
         if camera.record.enabled:
@@ -157,7 +163,6 @@ def collect(ctx: ReportContext) -> CamerasSection:
             ] += 1
 
         zones = len(camera.zones)
-        flags["enabled"] += camera.enabled
         flags["go2rtc_restream"] += any(
             is_restream(i.path) for i in camera.ffmpeg.inputs
         )
@@ -169,7 +174,9 @@ def collect(ctx: ReportContext) -> CamerasSection:
         flags["sub_stream_record"] += camera.record.sub.enabled
         flags["snapshots"] += camera.snapshots.enabled
         flags["audio"] += camera.audio.enabled
-        flags["audio_transcription"] += camera.audio_transcription.enabled
+        flags["audio_transcription"] += (
+            camera.audio.enabled and camera.audio_transcription.enabled
+        )
         flags["birdseye"] += camera.birdseye.enabled
         flags["onvif"] += bool(camera.onvif.host)
         flags["autotracking"] += camera.onvif.autotracking.enabled
@@ -187,7 +194,7 @@ def collect(ctx: ReportContext) -> CamerasSection:
 
     return CamerasSection(
         total=len(cameras),
-        enabled=flags["enabled"],
+        enabled=len(active),
         types=histogram(types),
         detect_height=histogram(heights),
         detect_fps=histogram(fps),

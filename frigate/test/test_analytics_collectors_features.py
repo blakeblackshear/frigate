@@ -109,6 +109,7 @@ class TestFeatureMappings(unittest.TestCase):
             "MIGraphX": EnrichmentDevice.migraphx,
             "OpenVINO NPU": EnrichmentDevice.openvino_npu,
             "OpenVINO GPU.0,CPU": EnrichmentDevice.openvino_gpu,
+            "OpenVINO (CPU)": EnrichmentDevice.openvino_cpu,
             "OpenVINO": EnrichmentDevice.other,
             "CoreML": EnrichmentDevice.other,
         }

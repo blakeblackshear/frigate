@@ -35,6 +35,13 @@ class TestDetectionCollector(unittest.TestCase):
         self.assertEqual(section.detection_fps, 12.35)
         self.assertEqual(section.skipped_fps, 0.0)
 
+    def test_idle_detector_reports_no_speed(self):
+        config = make_config({"models": [{"devices": ["cpu"]}]})
+        stats = {"detectors": {"cpu": {"inference_speed": 0.0}}}
+
+        [model] = detection.collect(make_context(config, stats)).models
+        self.assertIsNone(model.inference_ms)
+
     def test_named_scene_reports_no_name(self):
         config = make_config(
             {

@@ -267,7 +267,9 @@ class RetainDays(AnalyticsModel):
 
 class CamerasSection(AnalyticsModel):
     total: int = count("Configured cameras")
-    enabled: int = count("Enabled cameras")
+    enabled: int = count(
+        "Cameras enabled in config; every count below covers only these"
+    )
     types: dict[CameraTypeEnum, int] = metric("Cameras by type")
     detect_height: dict[HeightBucket, int] = metric(
         "Cameras by detect resolution height"
@@ -288,7 +290,9 @@ class CamerasSection(AnalyticsModel):
     sub_stream_record: int = count("Cameras with sub stream recording on")
     snapshots: int = count("Cameras with snapshots on")
     audio: int = count("Cameras with audio detection on")
-    audio_transcription: int = count("Cameras with audio transcription on")
+    audio_transcription: int = count(
+        "Cameras with audio detection and transcription on"
+    )
     birdseye: int = count("Cameras in birdseye")
     onvif: int = count("Cameras with an ONVIF host")
     autotracking: int = count("Cameras with PTZ autotracking on")

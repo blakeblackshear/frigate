@@ -9,6 +9,7 @@ from frigate.test.analytics_helpers import make_config, make_context
 MASK = {"coordinates": "0,0,1,0,1,1"}
 
 CONFIG = {
+    "audio_transcription": {"enabled": True},
     "record": {
         "enabled": True,
         "continuous": {"days": 3},
@@ -38,16 +39,26 @@ CONFIG = {
             "onvif": {"host": "10.0.0.9"},
         },
         "garage": {
-            "enabled": False,
             "type": "lpr",
             "ffmpeg": {
                 "hwaccel_args": ["-hwaccel", "vaapi"],
                 "inputs": [
-                    {"path": "rtsp://10.0.0.5/stream", "roles": ["detect", "record"]}
+                    {
+                        "path": "rtsp://10.0.0.5/stream",
+                        "roles": ["detect", "record", "audio"],
+                    }
                 ],
             },
+            "audio": {"enabled": True},
             "detect": {"height": 2160, "width": 3840, "fps": 15},
             "record": {"enabled": False},
+        },
+        "attic": {
+            "enabled": False,
+            "ffmpeg": {
+                "inputs": [{"path": "rtsp://10.0.0.6/stream", "roles": ["detect"]}]
+            },
+            "detect": {"enabled": True, "height": 480, "width": 640, "fps": 5},
         },
         "_replay_front": {
             "ffmpeg": {
@@ -62,16 +73,17 @@ STATS = {
     "cameras": {
         "front": {"connection_quality": "excellent"},
         "garage": {"connection_quality": "offline"},
+        "attic": {"connection_quality": "unusable"},
         "_replay_front": {"connection_quality": "fair"},
     }
 }
 
 
 class TestCamerasCollector(unittest.TestCase):
-    def test_aggregates_cameras_and_skips_replays(self):
+    def test_aggregates_enabled_cameras_and_skips_replays(self):
         section = cameras.collect(make_context(make_config(CONFIG), STATS))
 
-        self.assertEqual((section.total, section.enabled), (2, 1))
+        self.assertEqual((section.total, section.enabled), (3, 2))
         self.assertEqual(section.types, {"generic": 1, "lpr": 1})
         self.assertEqual(section.detect_height, {"720": 1, "ge_2160": 1})
         self.assertEqual(section.detect_fps, {"le_5": 1, "gt_10": 1})
@@ -82,7 +94,15 @@ class TestCamerasCollector(unittest.TestCase):
         self.assertEqual((section.detect, section.record, section.onvif), (1, 1, 1))
         self.assertEqual((section.zones, section.cameras_with_zones), (2, 1))
         self.assertEqual((section.motion_masks, section.object_masks), (1, 2))
+        self.assertEqual((section.audio, section.audio_transcription), (1, 1))
         self.assertEqual(section.connection_quality, {"excellent": 1})
+
+    def test_runtime_disabled_camera_skips_connection_quality(self):
+        config = make_config(CONFIG)
+        config.cameras["front"].enabled = False
+        section = cameras.collect(make_context(config, STATS))
+
+        self.assertEqual(section.connection_quality, {})
         self.assertEqual(section.retain_days.continuous, {"1_7": 1})
         self.assertEqual(section.retain_days.motion, {"0": 1})
         self.assertEqual(section.retain_days.alerts, {"8_30": 1})

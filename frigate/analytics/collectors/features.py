@@ -42,7 +42,8 @@ def enrichment_device(label: object) -> EnrichmentDevice | None:
     runtime, _, target = label.partition(" ")
 
     if runtime == "OpenVINO":
-        first = target.split(",")[0].split(".")[0].strip().lower()
+        # AUTO reports "(CPU)" while it warms up on the CPU
+        first = target.split(",")[0].split(".")[0].strip("() ").lower()
         return OPENVINO_DEVICES.get(first, EnrichmentDevice.other)
 
     return RUNTIME_DEVICES.get(label.lower(), EnrichmentDevice.other)

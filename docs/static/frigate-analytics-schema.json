@@ -72,7 +72,7 @@
           "x-public": true
         },
         "audio_transcription": {
-          "description": "Cameras with audio transcription on",
+          "description": "Cameras with audio detection and transcription on",
           "minimum": 0,
           "title": "Audio Transcription",
           "type": "integer",
@@ -143,7 +143,7 @@
           "x-public": true
         },
         "enabled": {
-          "description": "Enabled cameras",
+          "description": "Cameras enabled in config; every count below covers only these",
           "minimum": 0,
           "title": "Enabled",
           "type": "integer",
