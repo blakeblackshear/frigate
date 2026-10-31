@@ -328,7 +328,8 @@ class ObjectDetectProcess:
         self.name = name
         self.cameras = cameras
         self.detection_queue = detection_queue
-        self.avg_inference_speed = Value("d", 0.01)
+        # stays 0 until the first inference, so stats can tell an idle detector
+        self.avg_inference_speed = Value("d", 0.0)
         self.detection_start = Value("d", 0.0)
         self.detect_process: FrigateProcess | None = None
         self.config = config

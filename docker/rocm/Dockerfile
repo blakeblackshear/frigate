@@ -37,6 +37,7 @@ RUN --mount=type=bind,source=docker/rocm/prune_rocm.sh,target=/deps/prune_rocm.s
 
 WORKDIR /opt/frigate
 COPY --from=rootfs / /
+ENV FRIGATE_IMAGE_VARIANT=rocm
 
 #######################################################################
 FROM deps-prelim AS rocm-prelim-hsa-override0
