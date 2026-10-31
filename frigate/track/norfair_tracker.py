@@ -286,6 +286,25 @@ class NorfairTracker(ObjectTracker):
             ),
         }
 
+    def clear(self) -> None:
+        """Drop every active track so the next frame starts clean.
+
+        Used when a directory import file ends, and when the camera is disabled.
+        Event end callbacks are the caller's responsibility.
+        """
+        self.tracked_objects.clear()
+        self.disappeared.clear()
+        self.stationary_box_history.clear()
+        self.positions.clear()
+        self.track_id_map.clear()
+        self.untracked_object_boxes.clear()
+
+        for trackers_by_type in self.trackers.values():
+            for tracker in trackers_by_type.values():
+                tracker.tracked_objects = []
+        for tracker in self.default_tracker.values():
+            tracker.tracked_objects = []
+
     def _default_mode(self) -> str:
         """Pick the default tracker from saved config, not the runtime toggle."""
         return (

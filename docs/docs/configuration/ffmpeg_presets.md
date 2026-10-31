@@ -61,6 +61,7 @@ See [the camera-specific docs](/configuration/camera_specific.md) for more on no
 
 | Preset (config)                  | UI Label                                  | Usage                       | Notes                                                                           |
 | -------------------------------- | ----------------------------------------- | --------------------------- | ------------------------------------------------------------------------------- |
+| preset-directory                 | Directory import                          | MP4 files from a folder     | Default for a `directory:` input. Plays in real time and uses the wall clock    |
 | preset-http-jpeg-generic         | HTTP JPEG (Generic)                       | HTTP live JPEG              | Restreaming the live JPEG is recommended instead                                |
 | preset-http-mjpeg-generic        | HTTP MJPEG (Generic)                      | HTTP MJPEG stream           | Restreaming the MJPEG stream is recommended instead                             |
 | preset-http-reolink              | HTTP - Reolink Cameras                    | Reolink HTTP-FLV stream     | Only for Reolink HTTP, not when restreaming as RTSP                             |

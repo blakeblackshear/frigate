@@ -133,6 +133,29 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
+### Importing video from a directory
+
+A camera can import MP4 files from a folder instead of reading a live stream. Set the input path to `directory:` followed by the folder:
+
+```yaml
+cameras:
+  back_camera:
+    ffmpeg:
+      inputs:
+        - path: directory:/media/frigate/imports/back_camera
+    detect:
+      width: 1280
+      height: 720
+    record:
+      enabled: true
+```
+
+Frigate plays one file at a time, in real time, and timestamps events and recordings as if the video were happening now. The file's own timestamps and modification time are not used. Files are played oldest first. A file is picked up only after its size has stayed the same for 5 seconds, so a copy that is still being written is left alone.
+
+When a file plays through to the end, Frigate deletes it and starts the next one. A file that fails to play is moved into a `failed` folder inside the import directory. Each file is its own review item: objects and recordings from the next file are not added to the previous file.
+
+The directory input has to be the camera's only input, and only one camera can use a given folder. The audio role is not supported. Set `detect.width` and `detect.height` to the resolution detection should use. Turn recording on when the imported video should be kept.
+
 Additional cameras are simply added under the camera configuration section.
 
 <ConfigTabs>

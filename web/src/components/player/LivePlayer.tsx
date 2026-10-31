@@ -132,6 +132,16 @@ export default function LivePlayer({
     offline,
   } = useCameraActivity(cameraConfig);
 
+  const directoryCamera = cameraConfig.ffmpeg.inputs.some((input) =>
+    input.path.startsWith("directory:"),
+  );
+  const offlineTitle = directoryCamera
+    ? t("waitingForVideoFile.title")
+    : t("streamOffline.title");
+  const offlineDescKey = directoryCamera
+    ? "waitingForVideoFile.desc"
+    : "streamOffline.desc";
+
   const cameraActive = useMemo(
     () =>
       !showStillWithoutActivity ||
@@ -503,18 +513,17 @@ export default function LivePlayer({
           <div className="absolute inset-0 bg-black/50" />
           <div className="absolute inset-0 left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-2 rounded-lg bg-background/50 p-3 text-center">
-              <div>{t("streamOffline.title")}</div>
+              <div>{offlineTitle}</div>
               <TbExclamationCircle className="size-6" />
               {!isCompact && (
                 <p className="text-center text-sm">
                   <Trans
                     ns="components/player"
+                    i18nKey={offlineDescKey}
                     values={{
                       cameraName: cameraName,
                     }}
-                  >
-                    streamOffline.desc
-                  </Trans>
+                  />
                 </p>
               )}
             </div>
@@ -525,18 +534,17 @@ export default function LivePlayer({
       {offline && !showStillWithoutActivity && cameraEnabled && (
         <div className="absolute inset-0 left-1/2 top-1/2 flex h-96 w-96 -translate-x-1/2 -translate-y-1/2">
           <div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-5">
-            <p className="my-5 text-lg">{t("streamOffline.title")}</p>
+            <p className="my-5 text-lg">{offlineTitle}</p>
             <TbExclamationCircle className="mb-3 size-10" />
             {!isCompact && (
               <p className="max-w-96 text-center">
                 <Trans
                   ns="components/player"
+                  i18nKey={offlineDescKey}
                   values={{
                     cameraName: cameraName,
                   }}
-                >
-                  streamOffline.desc
-                </Trans>
+                />
               </p>
             )}
           </div>

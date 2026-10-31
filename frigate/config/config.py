@@ -17,6 +17,11 @@ from pydantic import (
 )
 from ruamel.yaml import YAML
 
+from frigate.camera.directory_input import (
+    parse_directory_input,
+    verify_camera_directory_input,
+    verify_unique_directory_inputs,
+)
 from frigate.const import REGEX_JSON
 from frigate.detectors import ModelConfig
 from frigate.detectors.detector_config import DEFAULT_SCENE
@@ -1171,7 +1176,16 @@ class FrigateConfig(FrigateBaseModel):
                     or camera_config.detect.width is None
                 )
 
-                if need_detect_dimensions:
+                if (
+                    need_detect_dimensions
+                    and parse_directory_input(input.path) is not None
+                ):
+                    logger.info(
+                        "Using default detect dimensions for directory input on %s",
+                        camera_config.name,
+                    )
+                    stream_info = {"width": 0, "height": 0, "fourcc": None}
+                elif need_detect_dimensions:
                     logger.info(
                         f"detect.width and detect.height not set for {camera_config.name}, probing detect stream to determine resolution."
                     )
@@ -1365,6 +1379,7 @@ class FrigateConfig(FrigateBaseModel):
             apply_live_transcode_streams(self, camera_config)
 
             # generate the ffmpeg commands
+            verify_camera_directory_input(name, camera_config.ffmpeg.inputs)
             camera_config.create_ffmpeg_cmds()
             self.cameras[name] = camera_config
 
@@ -1378,6 +1393,8 @@ class FrigateConfig(FrigateBaseModel):
             verify_motion_and_detect(camera_config)
             verify_objects_track(camera_config, camera_model.merged_labelmap.values())
             verify_lpr_and_face(self, camera_config)
+
+        verify_unique_directory_inputs(self.cameras)
 
         # Validate camera profiles reference top-level profile definitions
         for cam_name, cam_config in self.cameras.items():

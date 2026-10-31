@@ -156,6 +156,10 @@ class LogPipe(threading.Thread):
         while len(self.deque) > 0:
             self.logger.log(self.level, self.deque.popleft())
 
+    def clear(self) -> None:
+        """Drop buffered lines without logging them."""
+        self.deque.clear()
+
     def close(self) -> None:
         """Close the write end of the pipe."""
         os.close(self.fdWrite)

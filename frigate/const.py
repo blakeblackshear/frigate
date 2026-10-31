@@ -199,3 +199,7 @@ PASSWORD_HASH_ALGORITHM = "pbkdf2_sha256"
 # Queues
 
 FAST_QUEUE_TIMEOUT = 0.00001  # seconds
+
+# Frame-queue sentinel. The capture process sends this when a directory import
+# file ends so the tracker can close events before the next file starts.
+DIRECTORY_SEGMENT_END = "directory_segment_end"

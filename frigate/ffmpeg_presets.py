@@ -297,6 +297,13 @@ def parse_preset_hardware_acceleration_encode(
 
 
 PRESETS_INPUT = {
+    "preset-directory": [
+        "-re",
+        "-avoid_negative_ts",
+        "make_zero",
+        "-fflags",
+        "+genpts+discardcorrupt",
+    ],
     "preset-http-jpeg-generic": [
         "-r",
         "{}",

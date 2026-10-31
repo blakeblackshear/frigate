@@ -12,6 +12,10 @@
     "title": "Stream Offline",
     "desc": "No frames have been received on the {{cameraName}} <code>detect</code> stream, check error logs"
   },
+  "waitingForVideoFile": {
+    "title": "Waiting for Video File",
+    "desc": "{{cameraName}} will play when the next MP4 file added to its directory"
+  },
   "cameraOff": "Camera is off",
   "quality": {
     "auto": "Auto",

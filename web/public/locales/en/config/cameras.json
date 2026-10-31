@@ -211,7 +211,7 @@
       "description": "List of input stream definitions (paths and roles) for this camera.",
       "path": {
         "label": "Input path",
-        "description": "Camera input stream URL or path."
+        "description": "Camera input stream URL or path. Use directory:/path/to/folder to import MP4 files from a folder one at a time."
       },
       "roles": {
         "label": "Input roles",

@@ -18,6 +18,7 @@ import numpy as np
 
 from frigate.comms.detections_updater import DetectionTypeEnum
 from frigate.config import FrigateConfig
+from frigate.const import DIRECTORY_SEGMENT_END
 from frigate.review.maintainer import ReviewSegmentMaintainer
 from frigate.track.object_processing import ManualEventState
 
@@ -451,6 +452,60 @@ class TestReviewLifecycle(ReviewFlowTestCase):
 
         self.assertNotIn("end", [t for t, _ in self.review_summary()])
         self.assertIsNotNone(self.maintainer.active_review_segments.get(CAMERA))
+
+    def test_directory_file_boundary_starts_a_new_review(self) -> None:
+        boundary = 10.0
+        self.feed_messages(
+            (
+                DetectionTypeEnum.video.value,
+                (
+                    CAMERA,
+                    f"{CAMERA}_1",
+                    1.0,
+                    [self.tracked("p1", "person", 1.0)],
+                    [],
+                    [],
+                ),
+            ),
+            (
+                DetectionTypeEnum.video.value,
+                (CAMERA, DIRECTORY_SEGMENT_END, boundary, [], [], []),
+            ),
+            (
+                DetectionTypeEnum.video.value,
+                (
+                    CAMERA,
+                    f"{CAMERA}_11",
+                    11.0,
+                    [self.tracked("p2", "person", 11.0)],
+                    [],
+                    [],
+                ),
+            ),
+        )
+
+        news = [review for review in self.reviews() if review["type"] == "new"]
+        ends = [review for review in self.reviews() if review["type"] == "end"]
+        self.assertEqual(len(news), 2)
+        self.assertEqual(len(ends), 1)
+        self.assertNotEqual(news[0]["after"]["id"], news[1]["after"]["id"])
+        self.assertEqual(ends[0]["after"]["end_time"], boundary)
+        self.assertEqual(ends[0]["after"]["data"]["detections"], ["p1"])
+        self.assertEqual(news[1]["after"]["data"]["detections"], ["p2"])
+        self.assertEqual(
+            self.maintainer.active_review_segments[CAMERA].id,
+            news[1]["after"]["id"],
+        )
+
+    def test_directory_file_boundary_without_activity_creates_nothing(self) -> None:
+        self.feed_messages(
+            (
+                DetectionTypeEnum.video.value,
+                (CAMERA, DIRECTORY_SEGMENT_END, 10.0, [], [], []),
+            )
+        )
+
+        self.assert_no_review()
 
     def test_alert_ends_after_cutoff_at_last_alert_activity(self) -> None:
         self.feed(

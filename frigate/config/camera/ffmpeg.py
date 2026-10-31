@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypedDict
 
 from pydantic import Field, field_validator
 
@@ -8,6 +9,7 @@ from frigate.util.env import EnvString
 from ..base import FrigateBaseModel
 
 __all__ = [
+    "CameraFfmpegCommand",
     "CameraFfmpegConfig",
     "CameraInput",
     "CameraRoleEnum",
@@ -117,10 +119,18 @@ class CameraRoleEnum(str, Enum):
     detect = "detect"
 
 
+class CameraFfmpegCommand(TypedDict):
+    """One ffmpeg process built for a camera input."""
+
+    roles: list[CameraRoleEnum]
+    cmd: list[str]
+    directory: str | None
+
+
 class CameraInput(FrigateBaseModel):
     path: EnvString = Field(
         title="Input path",
-        description="Camera input stream URL or path.",
+        description="Camera input stream URL or path. Use directory:/path/to/folder to import MP4 files from a folder one at a time.",
     )
     roles: list[CameraRoleEnum] = Field(
         title="Input roles",

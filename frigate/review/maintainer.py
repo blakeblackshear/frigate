@@ -27,6 +27,7 @@ from frigate.config.camera.updater import (
 from frigate.const import (
     CLEAR_ONGOING_REVIEW_SEGMENTS,
     CLIPS_DIR,
+    DIRECTORY_SEGMENT_END,
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import ReviewSegment
@@ -445,6 +446,31 @@ class ReviewSegmentMaintainer(threading.Thread):
             segment, self.config.cameras[camera], None, [], prev_data
         )
 
+    def _end_segment_at_directory_boundary(
+        self, camera: str, frame_time: float
+    ) -> None:
+        """End the open review when an imported file finishes.
+
+        A review item normally stays open until the cutoff after the last
+        object. The next file starts immediately, so its objects and
+        recordings would extend the same item. Closing at the file boundary
+        makes each file its own capture.
+        """
+        segment = self.active_review_segments.get(camera)
+        if segment is not None:
+            if (
+                segment.last_alert_time is not None
+                and segment.last_alert_time != sys.maxsize
+            ):
+                segment.last_alert_time = frame_time
+            if segment.last_detection_time != sys.maxsize:
+                segment.last_detection_time = frame_time
+            for pending in segment.pending_detections:
+                if pending.last_detection_time != sys.maxsize:
+                    pending.last_detection_time = frame_time
+
+        self.forcibly_end_segment(camera)
+
     def forcibly_end_segment(self, camera: str) -> Any:
         """Forcibly end the pending segment for a camera."""
         segment = self.active_review_segments.get(camera)
@@ -856,6 +882,13 @@ class ReviewSegmentMaintainer(threading.Thread):
 
             if topic == DetectionTypeEnum.classification_state:
                 self.handle_classification_state_change(camera, classification_change)
+                continue
+
+            if (
+                topic == DetectionTypeEnum.video.value
+                and frame_name == DIRECTORY_SEGMENT_END
+            ):
+                self._end_segment_at_directory_boundary(camera, frame_time)
                 continue
 
             current_segment = self.active_review_segments.get(camera)

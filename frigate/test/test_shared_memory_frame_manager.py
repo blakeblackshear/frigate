@@ -397,6 +397,63 @@ class TestCaptureFrames(unittest.TestCase):
         self.assertEqual([name for name, _ in puts], ["cam_frame0", "cam_frame0"])
         self.assertEqual(self.times_during_read[1][0], 0)
 
+    def test_directory_eof_is_not_logged_as_an_error(self) -> None:
+        frame_manager = MagicMock()
+        frame_manager.write.return_value = bytearray(4)
+        frame_manager.frame_times.return_value = np.zeros(1, dtype=np.float64)
+        ffmpeg_process = MagicMock()
+        ffmpeg_process.stdout.readinto.return_value = 0
+        ffmpeg_process.poll.return_value = 0
+        config = SimpleNamespace(
+            name="cam",
+            enabled=True,
+            ffmpeg_cmds=[{"directory": "/import"}],
+        )
+
+        with patch("frigate.video.ffmpeg.logger") as log:
+            read = capture_frames(
+                ffmpeg_process,
+                config,
+                1,
+                0,
+                (2, 2),
+                frame_manager,
+                MagicMock(),
+                Value("d", 0.0),
+                Value("d", 0.0),
+                Value("d", 0.0),
+                Event(),
+            )
+
+        self.assertEqual(read, 0)
+        log.error.assert_not_called()
+
+    def test_live_stream_eof_is_logged_as_an_error(self) -> None:
+        frame_manager = MagicMock()
+        frame_manager.write.return_value = bytearray(4)
+        frame_manager.frame_times.return_value = np.zeros(1, dtype=np.float64)
+        ffmpeg_process = MagicMock()
+        ffmpeg_process.stdout.readinto.return_value = 0
+        ffmpeg_process.poll.return_value = 1
+        config = SimpleNamespace(name="cam", enabled=True, ffmpeg_cmds=[])
+
+        with patch("frigate.video.ffmpeg.logger") as log:
+            capture_frames(
+                ffmpeg_process,
+                config,
+                1,
+                0,
+                (2, 2),
+                frame_manager,
+                MagicMock(),
+                Value("d", 0.0),
+                Value("d", 0.0),
+                Value("d", 0.0),
+                Event(),
+            )
+
+        log.error.assert_called()
+
 
 class TestTrackedObjectEventsCarryFrameTime(unittest.TestCase):
     """Tracked object events carry the time of the frame they name, which can

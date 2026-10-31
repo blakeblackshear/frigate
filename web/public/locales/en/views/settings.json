@@ -1612,6 +1612,7 @@
         "preset-jetson-h264": "NVIDIA Jetson (H.264)",
         "preset-jetson-h265": "NVIDIA Jetson (H.265)",
         "preset-rkmpp": "Rockchip RKMPP",
+        "preset-directory": "Directory import",
         "preset-http-jpeg-generic": "HTTP JPEG (Generic)",
         "preset-http-mjpeg-generic": "HTTP MJPEG (Generic)",
         "preset-http-reolink": "HTTP - Reolink Cameras",

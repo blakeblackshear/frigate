@@ -3,6 +3,7 @@ from enum import Enum
 
 from pydantic import Field, PrivateAttr, model_validator
 
+from frigate.camera.directory_input import parse_directory_input
 from frigate.const import (
     CACHE_DIR,
     CACHE_SEGMENT_FORMAT,
@@ -31,7 +32,7 @@ from ..classification import (
 from .audio import AudioConfig
 from .birdseye import BirdseyeCameraConfig
 from .detect import DetectConfig
-from .ffmpeg import CameraFfmpegConfig, CameraInput
+from .ffmpeg import CameraFfmpegCommand, CameraFfmpegConfig, CameraInput
 from .live import CameraLiveConfig
 from .motion import MotionConfig
 from .mqtt import CameraMqttConfig
@@ -206,7 +207,7 @@ class CameraConfig(FrigateBaseModel):
         description="Keep track of original state of camera.",
     )
 
-    _ffmpeg_cmds: list[dict[str, list[str]]] = PrivateAttr()
+    _ffmpeg_cmds: list[CameraFfmpegCommand] = PrivateAttr()
 
     def __init__(self, **config):
         # Set zone colors
@@ -246,7 +247,7 @@ class CameraConfig(FrigateBaseModel):
         return self.detect.height * 3 // 2, self.detect.width
 
     @property
-    def ffmpeg_cmds(self) -> list[dict[str, list[str]]]:
+    def ffmpeg_cmds(self) -> list[CameraFfmpegCommand]:
         return self._ffmpeg_cmds
 
     def get_formatted_name(self) -> str:
@@ -266,13 +267,19 @@ class CameraConfig(FrigateBaseModel):
 
     def _build_ffmpeg_cmds(self):
         """Build ffmpeg commands from the current ffmpeg config."""
-        ffmpeg_cmds = []
+        ffmpeg_cmds: list[CameraFfmpegCommand] = []
         for ffmpeg_input in self.ffmpeg.inputs:
             ffmpeg_cmd = self._get_ffmpeg_cmd(ffmpeg_input)
             if ffmpeg_cmd is None:
                 continue
 
-            ffmpeg_cmds.append({"roles": ffmpeg_input.roles, "cmd": ffmpeg_cmd})
+            ffmpeg_cmds.append(
+                {
+                    "roles": list(ffmpeg_input.roles),
+                    "cmd": ffmpeg_cmd,
+                    "directory": parse_directory_input(ffmpeg_input.path),
+                }
+            )
         self._ffmpeg_cmds = ffmpeg_cmds
 
     def _get_ffmpeg_cmd(self, ffmpeg_input: CameraInput):
@@ -356,11 +363,23 @@ class CameraConfig(FrigateBaseModel):
             or camera_arg
             or []
         )
-        input_args = get_ffmpeg_arg_list(
+        # A directory import must not inherit the RTSP preset. Those flags
+        # target a live stream and would break playback of a local file.
+        if (
+            parse_directory_input(ffmpeg_input.path) is not None
+            and not ffmpeg_input.input_args
+        ):
+            resolved_input_args: str | list[str] = "preset-directory"
+        else:
+            resolved_input_args = (
             parse_preset_input(ffmpeg_input.input_args, self.detect.fps)
             or ffmpeg_input.input_args
             or parse_preset_input(self.ffmpeg.input_args, self.detect.fps)
             or self.ffmpeg.input_args
+            )
+        input_args = get_ffmpeg_arg_list(
+            parse_preset_input(resolved_input_args, self.detect.fps)
+            or resolved_input_args
         )
 
         cmd = (

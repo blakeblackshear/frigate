@@ -496,6 +496,7 @@ def ffmpeg_presets():
         ]
 
     input_presets = [
+        "preset-directory",
         "preset-http-jpeg-generic",
         "preset-http-mjpeg-generic",
         "preset-http-reolink",

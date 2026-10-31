@@ -22,6 +22,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateSubscriber,
 )
 from frigate.const import (
+    DIRECTORY_SEGMENT_END,
     PROCESS_PRIORITY_HIGH,
     REPLAY_CAMERA_PREFIX,
     REQUEST_REGION_GRID,
@@ -197,7 +198,8 @@ class CameraTracker(FrigateProcess):
         logger.info(f"{self.config.name}: emptying frame queue")
         while not frame_queue.empty():
             (frame_name, _) = frame_queue.get(False)
-            frame_manager.delete(frame_name)
+            if frame_name != DIRECTORY_SEGMENT_END:
+                frame_manager.delete(frame_name)
 
         logger.info(f"{self.config.name}: exiting subprocess")
 
@@ -321,20 +323,8 @@ def process_frames(
                 f"Camera {camera_config.name} disabled, clearing tracked objects"
             )
             prev_enabled = camera_enabled
-
-            # Clear norfair's dictionaries
-            object_tracker.tracked_objects.clear()
-            object_tracker.disappeared.clear()
-            object_tracker.stationary_box_history.clear()
-            object_tracker.positions.clear()
-            object_tracker.track_id_map.clear()
-
-            # Clear internal norfair states
-            for trackers_by_type in object_tracker.trackers.values():
-                for tracker in trackers_by_type.values():
-                    tracker.tracked_objects = []
-            for tracker in object_tracker.default_tracker.values():
-                tracker.tracked_objects = []
+            if isinstance(object_tracker, NorfairTracker):
+                object_tracker.clear()
 
         if not camera_enabled:
             time.sleep(0.1)
@@ -358,6 +348,35 @@ def process_frames(
             if exit_on_empty:
                 logger.info("Exiting track_objects...")
                 break
+            continue
+
+        if frame_name == DIRECTORY_SEGMENT_END:
+            # The file is over. Close events at this timestamp before frames
+            # from the next file arrive, and let recording move the tail segment.
+            logger.debug(
+                "Ending tracked objects for %s at directory file boundary",
+                camera_config.name,
+            )
+            camera_metrics.detection_frame.value = frame_time
+            if isinstance(object_tracker, NorfairTracker):
+                object_tracker.clear()
+            try:
+                detected_objects_queue.put(
+                    (
+                        camera_config.name,
+                        frame_name,
+                        frame_time,
+                        {},
+                        [],
+                        [],
+                    ),
+                    timeout=1,
+                )
+            except queue.Full:
+                logger.warning(
+                    "Unable to publish directory file boundary for %s",
+                    camera_config.name,
+                )
             continue
 
         camera_metrics.detection_frame.value = frame_time

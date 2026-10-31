@@ -13,6 +13,11 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
 from frigate.camera import CameraMetrics
+from frigate.camera.directory_input import (
+    DirectoryImporter,
+    apply_directory_playback_time,
+    substitute_directory_file,
+)
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.comms.recordings_updater import (
     RecordingsDataSubscriber,
@@ -25,6 +30,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateSubscriber,
 )
 from frigate.const import (
+    DIRECTORY_SEGMENT_END,
     PROCESS_PRIORITY_HIGH,
     RECORD_STREAM_TYPES,
     ROLE_TO_STREAM_TYPE,
@@ -58,9 +64,15 @@ def capture_frames(
     skipped_fps: Value,
     current_frame: Value,
     stop_event: MpEvent,
-) -> None:
+) -> int:
+    """Read raw frames until ffmpeg stops.
+
+    Returns:
+        Number of complete frames read from ffmpeg.
+    """
     frame_size = frame_shape[0] * frame_shape[1]
     frame_rate = EventsPerSecond()
+    frames_read = 0
     frame_rate.start()
     skipped_eps = EventsPerSecond()
     skipped_eps.start()
@@ -92,6 +104,15 @@ def capture_frames(
             if stop_event.is_set():
                 break
 
+            # A directory file ends by closing the pipe. That is the camera
+            # waiting for the next MP4, not a lost live stream.
+            if ffmpeg_process.poll() is not None and any(
+                command.get("directory")
+                for command in getattr(config, "ffmpeg_cmds", [])
+            ):
+                logger.debug("%s: directory file playback ended", config.name)
+                break
+
             logger.error(f"{config.name}: Unable to read frames from ffmpeg process.")
 
             if ffmpeg_process.poll() is not None:
@@ -102,6 +123,7 @@ def capture_frames(
 
             continue
 
+        frames_read += 1
         frame_times[frame_index] = current_frame.value
         frame_rate.update()
 
@@ -115,6 +137,8 @@ def capture_frames(
             continue
 
         frame_index = 0 if frame_index == shm_frame_count - 1 else frame_index + 1
+
+    return frames_read
 
 
 @dataclass
@@ -221,6 +245,14 @@ class CameraWatchdog(threading.Thread):
             stream_type: self._role_status(role)
             for stream_type, role in STREAM_TYPE_TO_ROLE.items()
         }
+
+        self.directory_importer: DirectoryImporter | None = None
+        self.current_directory_file: str | None = None
+        for cmd in self.config.ffmpeg_cmds:
+            folder = cmd.get("directory")
+            if folder:
+                self.directory_importer = DirectoryImporter(folder)
+                break
 
     def _role_status(self, role: str) -> RoleStatus:
         return RoleStatus(
@@ -471,7 +503,11 @@ class CameraWatchdog(threading.Thread):
             time_since_last_restart = now - last_restart_time
             can_restart = time_since_last_restart >= self.sleeptime
 
-            if not self.capture_thread.is_alive():
+            if self._service_directory_input(now):
+                # Between files, or waiting on an empty folder. This is not a
+                # crashed live stream, so the reconnect path below does not run.
+                pass
+            elif not self.capture_thread.is_alive():
                 self.detect_status.send("offline", now)
                 self.camera_fps.value = 0
                 if can_restart:
@@ -493,7 +529,10 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info(
                         f"{self.config.name} exceeded fps limit. Exiting ffmpeg..."
                     )
-                    self.reset_capture_thread()
+                    if self.directory_importer is not None:
+                        self._abort_directory_playback()
+                    else:
+                        self.reset_capture_thread()
                     last_restart_time = now
             elif now - self.capture_thread.current_frame.value > 20:
                 self.detect_status.send("offline", now)
@@ -502,7 +541,10 @@ class CameraWatchdog(threading.Thread):
                     self.logger.info(
                         f"No frames received from {self.config.name} in 20 seconds. Exiting ffmpeg..."
                     )
-                    self.reset_capture_thread()
+                    if self.directory_importer is not None:
+                        self._abort_directory_playback()
+                    else:
+                        self.reset_capture_thread()
                     last_restart_time = now
             else:
                 # process is running normally
@@ -630,10 +672,151 @@ class CameraWatchdog(threading.Thread):
         self.config_subscriber.stop()
         self.segment_subscriber.stop()
 
+    def _service_directory_input(self, now: float) -> bool:
+        """Advance a directory import when its ffmpeg process is not running.
+
+        A finished file is deleted or moved, then the next file starts. An
+        empty folder leaves the camera offline without counting a reconnect.
+        Disable and shutdown leave the current file in place.
+
+        Args:
+            now: Current timestamp, used for the offline status update.
+
+        Returns:
+            True when this camera imports from a directory and playback is not
+            currently running, so the live-stream crash restart must be skipped.
+        """
+        if self.directory_importer is None:
+            return False
+
+        playing = self.capture_thread is not None and self.capture_thread.is_alive()
+        if playing:
+            return False
+
+        if (
+            self.current_directory_file is not None
+            and self.config.enabled
+            and not self.stop_event.is_set()
+        ):
+            self._finish_directory_file()
+            self.current_directory_file = None
+
+        self.detect_status.send("offline", now)
+        self.camera_fps.value = 0
+        self.fps_overflow_count = 0
+
+        if self.config.enabled and not self.stop_event.is_set():
+            self.start_ffmpeg_detect()
+
+        return True
+
+    def _finish_directory_file(self) -> None:
+        """Delete a file that played, or move it to failed/ when it did not."""
+        path = self.current_directory_file
+        importer = self.directory_importer
+        if path is None or importer is None:
+            return
+
+        thread = self.capture_thread
+        if thread is not None and thread.is_alive():
+            thread.join(timeout=5)
+
+        process = self.ffmpeg_detect_process
+        returncode = None
+        if process is not None:
+            if process.poll() is None:
+                try:
+                    process.wait(timeout=10)
+                except sp.TimeoutExpired:
+                    self.logger.info("FFmpeg did not exit. Force killing...")
+                    process.kill()
+                    process.wait()
+            returncode = process.returncode
+
+        frames_read = thread.frames_read if thread is not None else 0
+        succeeded = returncode == 0 and frames_read > 0
+        if succeeded:
+            # -re logs pacing delays on stderr. A file that played is not
+            # an ffmpeg failure, so those lines are not dumped.
+            self.logpipe.clear()
+        else:
+            self.logpipe.dump()
+
+        if frames_read > 0:
+            self._signal_directory_segment_end()
+
+        if succeeded:
+            self.logger.info("Finished directory file %s", path)
+            importer.mark_success(path)
+            return
+
+        self.logger.warning(
+            "Failed directory file %s for %s (exit %s, frames %s)",
+            path,
+            self.config.name,
+            returncode,
+            frames_read,
+        )
+        importer.mark_failure(path)
+
+    def _abort_directory_playback(self) -> None:
+        """Stop the current file and treat it as a failed import."""
+        process = self.ffmpeg_detect_process
+        if process is not None and process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=30)
+            except sp.TimeoutExpired:
+                self.logger.info("FFmpeg did not exit. Force killing...")
+                process.kill()
+                process.wait()
+
+        if self.capture_thread is not None and self.capture_thread.is_alive():
+            self.capture_thread.join(timeout=5)
+
+        if self.current_directory_file is not None:
+            self._finish_directory_file()
+            self.current_directory_file = None
+
+        self.start_ffmpeg_detect()
+
+    def _signal_directory_segment_end(self) -> None:
+        """Ask the tracker to close events from the file that just ended."""
+        try:
+            self.frame_queue.put(
+                (DIRECTORY_SEGMENT_END, datetime.now().timestamp()),
+                timeout=5,
+            )
+        except queue.Full:
+            self.logger.warning(
+                "Unable to close events for %s because the frame queue is full",
+                self.config.name,
+            )
+
     def start_ffmpeg_detect(self):
         detect_cmd = [c for c in self.config.ffmpeg_cmds if "detect" in c["roles"]][0]
         ffmpeg_cmd = detect_cmd["cmd"]
         self.detect_process_records_sub = "record_sub" in detect_cmd["roles"]
+        if detect_cmd.get("directory"):
+            if self.directory_importer is None:
+                self.directory_importer = DirectoryImporter(detect_cmd["directory"])
+            next_file = self.directory_importer.next_file()
+            if next_file is None:
+                self.current_directory_file = None
+                self.ffmpeg_detect_process = None
+                self.capture_thread = None
+                self.ffmpeg_pid.value = 0
+                return
+
+            self.current_directory_file = next_file
+            ffmpeg_cmd = apply_directory_playback_time(
+                substitute_directory_file(ffmpeg_cmd, next_file),
+                datetime.now().timestamp(),
+            )
+            self.logger.info(
+                "Playing directory file %s for %s", next_file, self.config.name
+            )
+
         self.ffmpeg_detect_process = start_or_restart_ffmpeg(
             ffmpeg_cmd, self.logger, self.logpipe, self.frame_size
         )
@@ -687,6 +870,9 @@ class CameraWatchdog(threading.Thread):
                 stop_ffmpeg(p["process"], self.logger)
             p["logpipe"].close()
         self.ffmpeg_other_processes.clear()
+        # Leaving the file in place lets the next start try it again. A stop
+        # is not a failed import.
+        self.current_directory_file = None
 
 
 class CameraCaptureRunner(threading.Thread):
@@ -716,9 +902,10 @@ class CameraCaptureRunner(threading.Thread):
         self.ffmpeg_process = ffmpeg_process
         self.current_frame = Value("d", 0.0)
         self.last_frame = 0
+        self.frames_read = 0
 
     def run(self):
-        capture_frames(
+        self.frames_read = capture_frames(
             self.ffmpeg_process,
             self.config,
             self.shm_frame_count,
