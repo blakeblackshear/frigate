@@ -33,7 +33,7 @@ def load_state(path: str = STATE_PATH) -> AnalyticsState | None:
     except FileNotFoundError:
         return None
     except (OSError, ValueError):
-        logger.warning("Ignoring unreadable analytics state at %s", path)
+        logger.debug("Ignoring unreadable analytics state at %s", path)
         return None
 
     if not isinstance(data, dict):
@@ -48,7 +48,7 @@ def load_state(path: str = STATE_PATH) -> AnalyticsState | None:
         or isinstance(last_attempt_at, bool)
         or not isinstance(last_attempt_at, int | float)
     ):
-        logger.warning("Ignoring invalid analytics state at %s", path)
+        logger.debug("Ignoring invalid analytics state at %s", path)
         return None
 
     return AnalyticsState(install_id=install_id, last_attempt_at=float(last_attempt_at))

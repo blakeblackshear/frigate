@@ -49,12 +49,16 @@ class TestSendReport(unittest.TestCase):
     def test_logs_the_rejection_reason(self):
         with (
             post(400, "install_id: bad"),
-            self.assertLogs("frigate.analytics.transport", "WARNING") as logs,
+            self.assertLogs("frigate.analytics.transport", "DEBUG") as logs,
         ):
             send_report(URL, "{}")
 
         self.assertIn("install_id: bad", logs.output[0])
 
     def test_a_network_error_fails_without_raising(self):
-        with post(side_effect=requests.ConnectionError("down")):
+        # the user can't act on a failed send, so it stays out of warnings
+        with (
+            post(side_effect=requests.ConnectionError("down")),
+            self.assertNoLogs("frigate.analytics.transport", "WARNING"),
+        ):
             self.assertIs(send_report(URL, "{}"), SendOutcome.failed)

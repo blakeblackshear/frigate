@@ -51,7 +51,7 @@ def build_report(
             sections[name] = collect(ctx)
         except Exception:
             # a collector bug must cost one section, never the whole report
-            logger.warning("Analytics %s section failed", name, exc_info=True)
+            logger.debug("Analytics %s section failed", name, exc_info=True)
             sections[name] = None
 
     return AnalyticsReport.model_validate(

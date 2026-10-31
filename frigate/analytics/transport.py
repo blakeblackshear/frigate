@@ -34,7 +34,7 @@ def send_report(url: str, body: str) -> SendOutcome:
             allow_redirects=False,
         )
     except requests.RequestException as err:
-        logger.warning("Unable to send the analytics report: %s", err)
+        logger.debug("Unable to send the analytics report: %s", err)
         return SendOutcome.failed
 
     status = response.status_code
@@ -43,12 +43,12 @@ def send_report(url: str, body: str) -> SendOutcome:
         return SendOutcome.accepted
 
     if status == 400:
-        logger.warning("The analytics report was rejected: %s", response.text[:200])
+        logger.debug("The analytics report was rejected: %s", response.text[:200])
         return SendOutcome.rejected
 
     if status == 429:
         logger.debug("The analytics endpoint is rate limiting this install")
         return SendOutcome.rate_limited
 
-    logger.warning("The analytics endpoint returned %s", status)
+    logger.debug("The analytics endpoint returned %s", status)
     return SendOutcome.failed
