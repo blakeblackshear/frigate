@@ -195,6 +195,15 @@ class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
                     )
                 )
 
+    async def test_failed_move_does_not_raise(self) -> None:
+        # an exception here ends the autotracker's move queue consumer for good
+        controller = _make_move_controller(autotracking_enabled=True)
+        controller.cams[CAMERA]["ptz"].RelativeMove.side_effect = TimeoutError
+
+        await controller._move_relative(CAMERA, 0.25, -0.25, 0, 1)
+
+        self.assertFalse(controller.cams[CAMERA]["active"])
+
     async def test_metrics_written_when_autotracking_enabled(self) -> None:
         # get_camera_status resets stop_time once the camera reports IDLE, so the
         # autotracking path keeps its motion estimation timestamps
