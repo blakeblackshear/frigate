@@ -105,6 +105,7 @@ class AnalyticsReporter(threading.Thread):
             delete_state(self.state_path)
 
     def tick(self) -> None:
+        """Apply consent and send a report when one is due."""
         with self._lock:
             config = self.config_holder.config
 

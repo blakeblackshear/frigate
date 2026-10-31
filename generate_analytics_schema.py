@@ -30,6 +30,7 @@ def render() -> str:
 
 
 def main() -> int:
+    """Write or check the schema file; returns the process exit code."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument(
         "--check", action="store_true", help="fail if the committed schema is stale"

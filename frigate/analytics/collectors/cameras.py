@@ -101,6 +101,7 @@ def object_masks(camera: CameraConfig) -> int:
 
 
 def collect(ctx: ReportContext) -> CamerasSection:
+    """Count camera settings across the cameras enabled in config."""
     cameras = {
         name: camera
         for name, camera in ctx.config.cameras.items()
@@ -171,7 +172,9 @@ def collect(ctx: ReportContext) -> CamerasSection:
         )
         flags["detect"] += camera.detect.enabled
         flags["record"] += camera.record.enabled
-        flags["sub_stream_record"] += camera.record.sub.enabled
+        flags["sub_stream_record"] += (
+            camera.record.enabled and camera.record.sub.enabled
+        )
         flags["snapshots"] += camera.snapshots.enabled
         flags["audio"] += camera.audio.enabled
         flags["audio_transcription"] += (

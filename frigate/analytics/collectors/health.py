@@ -46,6 +46,7 @@ def notice_deltas(notice_stats: list[dict[str, Any]]) -> dict[Any, NoticeCounts]
 
 
 def collect(ctx: ReportContext) -> HealthSection:
+    """Read health figures from the latest stats and notice counts."""
     service = ctx.stats.get("service", {})
     embeddings = ctx.stats.get("embeddings", {})
     cpu = ctx.stats.get("cpu_usages", {}).get("frigate.full_system", {}).get("cpu")

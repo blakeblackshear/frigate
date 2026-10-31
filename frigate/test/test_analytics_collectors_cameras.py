@@ -51,7 +51,7 @@ CONFIG = {
             },
             "audio": {"enabled": True},
             "detect": {"height": 2160, "width": 3840, "fps": 15},
-            "record": {"enabled": False},
+            "record": {"enabled": False, "sub": {"enabled": True}},
         },
         "attic": {
             "enabled": False,
@@ -95,6 +95,7 @@ class TestCamerasCollector(unittest.TestCase):
         self.assertEqual((section.zones, section.cameras_with_zones), (2, 1))
         self.assertEqual((section.motion_masks, section.object_masks), (1, 2))
         self.assertEqual((section.audio, section.audio_transcription), (1, 1))
+        self.assertEqual(section.sub_stream_record, 0)
         self.assertEqual(section.connection_quality, {"excellent": 1})
 
     def test_runtime_disabled_camera_skips_connection_quality(self):

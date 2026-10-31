@@ -53,6 +53,7 @@ def kernel(release: str) -> str:
 
 
 def collect(ctx: ReportContext) -> InstallSection:
+    """Describe the Frigate version, image, install method, and platform."""
     return InstallSection(
         version=VERSION[:32],
         image_variant=image_variant(os.environ.get("FRIGATE_IMAGE_VARIANT")),

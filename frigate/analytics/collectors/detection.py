@@ -32,6 +32,7 @@ def model_source(path: str | None) -> ModelSource:
 
 
 def collect(ctx: ReportContext) -> DetectionSection:
+    """Describe each configured model and its measured inference speed."""
     config = ctx.config
     detectors = ctx.stats.get("detectors", {})
     model_specs = [(model, config.devices_for_model(model)) for model in config.models]

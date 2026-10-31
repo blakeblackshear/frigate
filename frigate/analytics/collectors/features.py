@@ -86,6 +86,7 @@ def users() -> dict[UserRole, int]:
 
 
 def collect(ctx: ReportContext) -> FeaturesSection:
+    """Report which enrichments and integrations are configured."""
     config = ctx.config
     devices = ctx.stats.get("embeddings", {}).get("devices", {})
     cameras = [

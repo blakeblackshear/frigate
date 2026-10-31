@@ -96,6 +96,7 @@ def storage(stats: dict[str, Any]) -> StorageInfo:
 
 
 def collect(ctx: ReportContext) -> HardwareSection:
+    """Describe the host: CPU, memory, GPUs, decoders, detectors, storage."""
     return HardwareSection(
         cpu_model=cpu_model(),
         cpu_cores=os.cpu_count() or 0,

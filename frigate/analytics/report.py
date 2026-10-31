@@ -70,6 +70,7 @@ def gather_context(
     stats_emitter: "StatsEmitter | None",
     notice_registry: "NoticeRegistry | None",
 ) -> ReportContext:
+    """Snapshot the config, latest stats, and notice counts for one report."""
     return ReportContext(
         config=config,
         stats=stats_emitter.get_latest_stats() if stats_emitter is not None else {},

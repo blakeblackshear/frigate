@@ -22,6 +22,7 @@ class AnalyticsState:
 
 
 def new_state() -> AnalyticsState:
+    """A fresh install ID that has never attempted a report."""
     return AnalyticsState(install_id=uuid4().hex, last_attempt_at=0.0)
 
 
