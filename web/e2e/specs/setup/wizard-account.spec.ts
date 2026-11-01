@@ -97,12 +97,13 @@ test.describe("setup wizard account @high @mobile", () => {
       .fill("a-long-enough-password");
     await page.getByRole("button", { name: "Save" }).click();
 
-    const createCall = sent.find((call) => call.method === "POST");
-    expect(createCall?.body).toEqual({
-      username: "family",
-      password: "a-long-enough-password",
-      role: "viewer",
-    });
+    await expect
+      .poll(() => sent.find((call) => call.method === "POST")?.body)
+      .toEqual({
+        username: "family",
+        password: "a-long-enough-password",
+        role: "viewer",
+      });
   });
 
   test("shows anonymous copy when nobody is signed in", async ({
