@@ -629,7 +629,8 @@
     "addUser": "Adaugă utilizator",
     "management": {
       "desc": "Gestionează conturile de utilizator ale acestei instanțe Frigate.",
-      "title": "Administrare utilizatori"
+      "title": "Administrare utilizatori",
+      "authDisabled": "Autentificarea integrată este dezactivată. Aceste conturi sunt folosite doar pentru a te conecta odată ce este activată."
     },
     "toast": {
       "success": {
@@ -750,7 +751,8 @@
         "ariaLabel": "Filtrează modelele după tip",
         "baseModels": "Modele de bază",
         "fineTunedModels": "Modele optimizate"
-      }
+      },
+      "showIncompatible": "Afișează modelele incompatibile"
     },
     "toast": {
       "error": "Eroare la salvarea modificărilor de config: {{errorMessage}}",
@@ -1022,7 +1024,8 @@
         "nameLength": "Numele camerei trebuie să aibă maxim 64 de caractere",
         "invalidCharacters": "Numele camerei conține caractere nepermise",
         "nameExists": "Numele camerei există deja",
-        "customUrlRtspRequired": "URL-urile personalizate trebuie să înceapă cu „rtsp://” sau „rtsps://”. Configurarea manuală este necesară pentru stream-urile care nu sunt RTSP."
+        "customUrlRtspRequired": "URL-urile personalizate trebuie să înceapă cu „rtsp://” sau „rtsps://”. Configurarea manuală este necesară pentru stream-urile care nu sunt RTSP.",
+        "onvifPortInvalid": "Portul ONVIF trebuie să fie un număr întreg de la 1 la 65535"
       },
       "connectionSettings": "Setări Conexiune",
       "detectionMethod": "Metodă Detecție Stream",
@@ -2022,7 +2025,8 @@
       "objectTrackingDetectRuntimeDisabled": "Birdseye include obiecte urmărite, dar detecția obiectelor este dezactivată în prezent pentru această cameră, deși este activată în configurația ta. Camera nu va apărea în Birdseye până când nu este pornită din nou din vizualizarea live a camerei sau până când profilul activ nu o mai dezactivează."
     },
     "notifications": {
-      "profileBaseDisabled": "Nicio cameră nu are notificările activate în configurația de bază, așa că activarea lor într-un profil nu are niciun efect. Activează notificările în configurația de bază a cel puțin unei camere."
+      "profileBaseDisabled": "Nicio cameră nu are notificările activate în configurația de bază, așa că activarea lor într-un profil nu are niciun efect. Activează notificările în configurația de bază a cel puțin unei camere.",
+      "ttlDelay": "Notificările pot ajunge cu până la 30 de secunde întârziere și tot să trimită la vizualizarea live după ce elementul de review s-a încheiat."
     },
     "live": {
       "noGo2rtcStream": "Vizualizarea live pentru această cameră folosește un player de bază, cu o rată de cadre mai mică și fără audio. Configurează un stream go2rtc pentru această cameră pentru a obține video și audio mai fluide."
@@ -2125,5 +2129,9 @@
     "scenes": {
       "default": "Implicit"
     }
+  },
+  "notificationTtl": {
+    "immediate": "Imediat",
+    "reliable": "Fiabil"
   }
 }

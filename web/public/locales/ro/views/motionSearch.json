@@ -59,7 +59,9 @@
         "invalidTimeRange": "Timpul de sfârșit trebuie să fie după timpul de început",
         "searchFailed": "Căutarea a eșuat: {{message}}",
         "polygonTooSmall": "Poligonul trebuie să aibă cel puțin 3 puncte",
-        "unknown": "Eroare necunoscută"
+        "unknown": "Eroare necunoscută",
+        "alreadyRunning": "Ai deja o căutare de mișcare în desfășurare. Așteaptă să se termine sau anuleaz-o.",
+        "tooManySearches": "Prea multe căutări de mișcare rulează. Încearcă din nou când se termină una."
     },
     "changePercentage": "{{percentage}}% schimbat",
     "metrics": {
