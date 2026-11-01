@@ -80,7 +80,7 @@
         },
         "cookie_secure": {
             "label": "보안 쿠키 플래그",
-            "description": "인증 쿠키에 보안 플래그를 설정합니다. TLS 사용 시 true여야 합니다."
+            "description": "인증 쿠키에 항상 보안(secure) 플래그를 설정합니다. Frigate는 TLS를 직접 제공할 때 이를 자동으로 설정하지만, 역방향 프록시(Reverse Proxy)가 Frigate 앞단에서 TLS를 종료(SSL 오프로딩)할 때는 이 옵션을 활성화해야 합니다. Frigate의 TLS 포트에 연결되는 프록시는 반드시 브라우저에 HTTPS를 통해 Frigate를 제공해야 합니다."
         },
         "session_length": {
             "label": "세션 유지 시간",

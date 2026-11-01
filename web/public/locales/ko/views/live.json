@@ -181,11 +181,12 @@
       },
       "unavailable": {
         "browser": "사용 중인 브라우저가 WebRTC를 지원하지 않습니다.",
-        "not-configured": "WebRTC가 구성되지 않았습니다. go2rtc webrtc 후보 또는 ice_servers를 설정하세요.",
+        "not-configured": "활성화하려면 go2rtc → webrtc → candidates 항목 아래에 이 서버의 IP:8555를 추가하세요.",
         "unreachable": "WebRTC에 연결할 수 없습니다. 8555 포트에 접근 가능한지, STUN/TURN 서버 설정이 올바른지 확인하세요.",
         "video-codec": "이 스트림의 비디오 코덱은 이 브라우저의 WebRTC에서 지원되지 않습니다.",
         "audio-codec": "이 스트림의 오디오 코덱은 WebRTC에서 지원되지 않습니다. go2rtc를 사용하여 opus 또는 G.711로 트랜스코딩하세요.",
-        "checking": "WebRTC 사용 가능 여부 확인 중…"
+        "checking": "WebRTC 사용 가능 여부 확인 중…",
+        "notConfiguredOptional": "선택 사항: 이 설정 없이도 라이브 뷰는 정상 작동합니다. WebRTC는 주로 양방향 대화 기능에 필요합니다."
       }
     }
   },
