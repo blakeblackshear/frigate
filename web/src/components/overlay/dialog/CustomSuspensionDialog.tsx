@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isDesktop } from "react-device-detect";
 import { FaCalendarAlt } from "react-icons/fa";
@@ -21,6 +21,7 @@ import { Label } from "@/components/ui/label";
 import { TimezoneAwareCalendar } from "@/components/overlay/ReviewActivityCalendar";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { useFormattedTimestamp } from "@/hooks/use-date-utils";
+import { getUTCOffset } from "@/utils/dateUtil";
 
 type CustomSuspensionDialogProps = {
   open: boolean;
@@ -38,6 +39,31 @@ function isValidDate(d: Date): boolean {
   return !Number.isNaN(d.getTime());
 }
 
+// TimezoneAwareCalendar and the time input work with dates whose local clock
+// reads the configured ui.timezone, so instants are shifted in and out of it
+function wallClockShiftMs(date: Date, timezone?: string): number {
+  if (!timezone) return 0;
+  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return (
+    (Math.round(getUTCOffset(date, timezone)) -
+      Math.round(getUTCOffset(date, localTimezone))) *
+    60_000
+  );
+}
+
+function toWallClock(instant: Date, timezone?: string): Date {
+  return new Date(instant.getTime() + wallClockShiftMs(instant, timezone));
+}
+
+function fromWallClock(wallClock: Date, timezone?: string): Date {
+  // offsets are measured at an estimate first, since the wall clock itself can
+  // sit on the other side of a DST change from the instant it represents
+  const estimate = new Date(
+    wallClock.getTime() - wallClockShiftMs(wallClock, timezone),
+  );
+  return new Date(wallClock.getTime() - wallClockShiftMs(estimate, timezone));
+}
+
 export default function CustomSuspensionDialog({
   open,
   onOpenChange,
@@ -45,6 +71,7 @@ export default function CustomSuspensionDialog({
 }: CustomSuspensionDialogProps) {
   const { t } = useTranslation(["views/settings"]);
   const { data: config } = useSWR<FrigateConfig>("config");
+  const timezone = config?.ui.timezone;
 
   const [until, setUntil] = useState<Date>(
     () => new Date(Date.now() + ONE_HOUR_MS),
@@ -58,14 +85,26 @@ export default function CustomSuspensionDialog({
   const formattedDate = useFormattedTimestamp(
     isValidDate(until) ? Math.floor(until.getTime() / 1000) : 0,
     t("time.formattedTimestampMonthDayYear.24hour", { ns: "common" }),
-    config?.ui.timezone,
+    timezone,
   );
+
+  const untilWallClock = useMemo(
+    () => (isValidDate(until) ? toWallClock(until, timezone) : undefined),
+    [until, timezone],
+  );
+
+  const startOfTodayWallClock = toWallClock(new Date(), timezone);
+  startOfTodayWallClock.setHours(0, 0, 0, 0);
 
   const isFuture = isValidDate(until) && until.getTime() > Date.now();
 
   const handleApply = () => {
-    if (!isFuture) return;
-    onConfirm(Math.ceil((until.getTime() - Date.now()) / 60_000));
+    const remainingMs = until.getTime() - Date.now();
+    if (!Number.isFinite(remainingMs) || remainingMs <= 0) {
+      setUntil(new Date(until));
+      return;
+    }
+    onConfirm(Math.ceil(remainingMs / 60_000));
     onOpenChange(false);
   };
 
@@ -98,22 +137,21 @@ export default function CustomSuspensionDialog({
                 disablePortal
               >
                 <TimezoneAwareCalendar
-                  timezone={config?.ui.timezone}
-                  selectedDay={isValidDate(until) ? until : undefined}
-                  disabled={{
-                    before: new Date(new Date().setHours(0, 0, 0, 0)),
-                  }}
+                  timezone={timezone}
+                  selectedDay={untilWallClock}
+                  disabled={{ before: startOfTodayWallClock }}
                   onSelect={(day) => {
                     if (!day) return;
                     const next = new Date(day);
-                    const carry = isValidDate(until) ? until : new Date();
+                    const carry =
+                      untilWallClock ?? toWallClock(new Date(), timezone);
                     next.setHours(
                       carry.getHours(),
                       carry.getMinutes(),
                       carry.getSeconds(),
                       0,
                     );
-                    setUntil(next);
+                    setUntil(fromWallClock(next, timezone));
                     setCalendarOpen(false);
                   }}
                 />
@@ -124,8 +162,8 @@ export default function CustomSuspensionDialog({
               aria-label={t("notification.customSuspension.untilLabel")}
               type="time"
               value={
-                isValidDate(until)
-                  ? `${pad(until.getHours())}:${pad(until.getMinutes())}`
+                untilWallClock
+                  ? `${pad(untilWallClock.getHours())}:${pad(untilWallClock.getMinutes())}`
                   : ""
               }
               step="60"
@@ -134,10 +172,11 @@ export default function CustomSuspensionDialog({
                 const hh = Number.parseInt(h ?? "", 10);
                 const mm = Number.parseInt(m ?? "", 10);
                 if (Number.isNaN(hh) || Number.isNaN(mm)) return;
-                const base = isValidDate(until) ? until : new Date();
-                const next = new Date(base);
+                const next = new Date(
+                  untilWallClock ?? toWallClock(new Date(), timezone),
+                );
                 next.setHours(hh, mm, 0, 0);
-                setUntil(next);
+                setUntil(fromWallClock(next, timezone));
               }}
             />
           </div>
