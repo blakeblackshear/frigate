@@ -746,7 +746,7 @@
                 "description": "Die Erstellung von Beschreibungen für verfolgte Objekte durch GenAI standardmäßig aktivieren."
             },
             "use_snapshot": {
-                "label": "Verwenden Sie Momentaufnahmen",
+                "label": "Verwende Schnappschüsse",
                 "description": "Verwenden Sie für die Erstellung von Beschreibungen durch GenAI Objektsnapshots anstelle von Miniaturansichten."
             },
             "prompt": {
@@ -1171,7 +1171,7 @@
             "description": "Bereiche, die ein Objekt betreten muss, damit ein Schnappschuss gespeichert wird."
         },
         "height": {
-            "label": "Höhe der Momentaufnahme",
+            "label": "Schnappschuss Höhe",
             "description": "Höhe (Pixel), auf die Schnappschüsse über die API skaliert werden sollen; leer lassen, um die Originalgröße beizubehalten."
         },
         "retain": {
