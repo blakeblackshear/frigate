@@ -379,6 +379,18 @@ class TestAnalyticsBaseline(RegistryTestCase):
         )
         self.assertEqual(rows["skipped_detections"]["reported_occurrences"], 0)
 
+    @patch.dict(NOTICE_KINDS, TEST_KINDS)
+    def test_reset_puts_held_repeats_in_the_baseline(self):
+        for _ in range(3):
+            self.registry.raise_notice("batched")
+
+        self.registry.reset_analytics_baseline()
+        self.registry.flush()
+
+        [row] = self.registry.stats()
+        self.assertEqual((row["occurrences"], row["reported_occurrences"]), (3, 3))
+        self.assertEqual(self.registry.active()[0]["count"], 3)
+
 
 class TestApply(RegistryTestCase):
     def test_each_action_reaches_its_method(self):

@@ -132,24 +132,7 @@ class NoticeRegistry:
     def flush(self) -> None:
         """Write the repeats that batch_repeats kinds held back."""
         with self._lock:
-            held, self._held = self._held, {}
-            written = False
-
-            for row_id, repeats in held.items():
-                row = Notice.get_or_none(Notice.id == row_id)
-
-                # resolved while its repeats waited
-                if row is None:
-                    continue
-
-                self._write_repeats(
-                    row,
-                    repeats.kind,
-                    repeats.count,
-                    repeats.last_seen,
-                    repeats.params,
-                )
-                written = True
+            written = self._write_held()
 
         if written:
             self._notify()
@@ -388,11 +371,39 @@ class NoticeRegistry:
     def reset_analytics_baseline(self) -> None:
         """Count analytics notices from now on, for a new analytics install ID."""
         with self._lock:
+            # held repeats were raised before the reset, so they join the baseline
+            written = self._write_held()
             NoticeStats.update(
                 reported_occurrences=NoticeStats.occurrences,
                 reported_acknowledgements=NoticeStats.acknowledgements,
                 reported_mutes=NoticeStats.mutes,
             ).execute()
+
+        if written:
+            self._notify()
+
+    def _write_held(self) -> bool:
+        # called with the lock held
+        held, self._held = self._held, {}
+        written = False
+
+        for row_id, repeats in held.items():
+            row = Notice.get_or_none(Notice.id == row_id)
+
+            # resolved while its repeats waited
+            if row is None:
+                continue
+
+            self._write_repeats(
+                row,
+                repeats.kind,
+                repeats.count,
+                repeats.last_seen,
+                repeats.params,
+            )
+            written = True
+
+        return written
 
     def _write_repeats(
         self,
