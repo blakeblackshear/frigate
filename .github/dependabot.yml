@@ -55,6 +55,9 @@ updates:
       # Needs Python 3.12 and numpy 2
       - dependency-name: "librosa"
         versions: [">=1.0"]
+      # pandas 3.1 requires numpy 2
+      - dependency-name: "pandas"
+        versions: [">=3.1"]
       # Needs Python 3.12
       - dependency-name: "scipy"
         versions: [">=1.18"]
