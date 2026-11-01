@@ -57,7 +57,6 @@
       "newCaseNamePlaceholder": "Nyt sagsnavn",
       "newCaseDescriptionPlaceholder": "Sagsbeskrivelse",
       "label": "Sag",
-      "nonAdminHelp": "En ny sag oprettes til disse eksporter.",
       "placeholder": "Vælg en sag"
     },
     "select": "Vælg",
