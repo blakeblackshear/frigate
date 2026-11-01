@@ -148,13 +148,13 @@ export default function TriggerView({
       return current;
     });
 
-    const timeout = setTimeout(() => {
+    // not cleared on the next payload, or a second trigger firing within
+    // 3s would leave this one highlighted
+    setTimeout(() => {
       setTriggeredTrigger((prev) =>
         (prev || []).filter((name) => name !== triggers_status_ws.name),
       );
     }, 3000);
-
-    return () => clearTimeout(timeout);
   }, [triggers_status_ws, selectedCamera, mutate]);
 
   useEffect(() => {
