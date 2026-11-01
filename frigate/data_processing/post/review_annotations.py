@@ -12,6 +12,8 @@ import math
 from collections.abc import Sequence
 from typing import Any
 
+from titlecase import titlecase
+
 from frigate.models import Event, Timeline
 
 logger = logging.getLogger(__name__)
@@ -84,12 +86,16 @@ def event_name(event: dict[str, Any]) -> str:
     tracked object whenever a subject is re-detected, so the tracking data
     cannot say whether two entries are the same subject, and the notes stay
     ambiguous rather than implying either answer.
+
+    Names are formatted the same way as in the prompt's "Objects in Scene"
+    list. Small models otherwise copy the raw lowercase sub label into their
+    response instead of the name they were told to use.
     """
     label = str(event["label"]).replace("_", " ").replace("-verified", "")
     sub_label = event.get("sub_label")
 
     if sub_label:
-        return f'{label} "{sub_label}"'
+        return f'{label} "{titlecase(str(sub_label).replace("_", " "))}"'
 
     article = "an" if label[:1].lower() in "aeiou" else "a"
     return f"{article} {label}"
@@ -213,6 +219,7 @@ def build_timeline(
     events: list[dict[str, Any]],
     span_end: float,
     state_changes: Sequence[dict[str, Any]] = (),
+    span_start: float | None = None,
 ) -> list[tuple[float, str]]:
     """All annotated moments across every event, in time order.
 
@@ -221,6 +228,12 @@ def build_timeline(
     `span_end` is the timestamp of the last sampled frame, and moments past it
     describe nothing the model can see. A track ending means the object
     stopped being detected, which may or may not mean it left the frame.
+
+    `span_start` is the timestamp of the first sampled frame. An object
+    tracked since before it gets a single "already in view" note instead of
+    its earlier history: those moments would otherwise land on the first
+    frame and read as happening during the clip, turning a car that parked
+    minutes ago into one pulling in.
 
     `state_changes` are timeline rows (timestamp, source_id, class_type); the
     stationary and active ones become "has stopped moving" / "starts moving
@@ -249,6 +262,13 @@ def build_timeline(
         if event["start_time"] > span_end:
             continue
 
+        if (
+            span_start is not None
+            and event["end_time"]
+            and event["end_time"] < span_start
+        ):
+            continue
+
         points = path_points(event.get("path_data") or [])
         legs = path_legs(points) if len(points) >= 2 else []
         name = event_name(event)
@@ -259,8 +279,33 @@ def build_timeline(
         )
         remaining = list(enumerate(legs))
         moments: list[tuple[float, str]] = []
+        event_changes = sorted(
+            (timestamp, phrase)
+            for timestamp, phrase in changes_by_event.get(event["id"], [])
+            if timestamp >= detected_at
+        )
 
-        if merges:
+        if span_start is not None and detected_at < span_start:
+            # Only whether it had come to rest is noted; where it is and which
+            # way it is heading are visible in the first frame.
+            earlier = [phrase for t, phrase in event_changes if t < span_start]
+            not_moving = (
+                bool(earlier) and earlier[-1] == STATE_CHANGE_PHRASES["stationary"]
+            )
+            timeline.append(
+                (
+                    span_start,
+                    f"{name} already in view when the sequence begins"
+                    + (", not moving" if not_moving else ""),
+                )
+            )
+            remaining = [
+                (index, leg)
+                for index, leg in remaining
+                if leg_start_time(points, leg) >= span_start
+            ]
+            event_changes = [(t, p) for t, p in event_changes if t >= span_start]
+        elif merges:
             heading = leg_heading(points, legs[0])
             timeline.append(
                 (detected_at, f"{name} first detected at {where}, moving {heading}")
@@ -277,11 +322,7 @@ def build_timeline(
                 )
             )
 
-        moments.extend(
-            (timestamp, phrase)
-            for timestamp, phrase in changes_by_event.get(event["id"], [])
-            if timestamp >= detected_at
-        )
+        moments.extend(event_changes)
 
         for timestamp, phrase in moments:
             if timestamp <= span_end:
@@ -390,7 +431,10 @@ def build_frame_captions(
         timeline.extend(
             (timestamp, f"[tracker] {note}")
             for timestamp, note in build_timeline(
-                events, span_end, get_state_changes(detection_ids)
+                events,
+                span_end,
+                get_state_changes(detection_ids),
+                span_start=frame_times[0],
             )
         )
 

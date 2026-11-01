@@ -82,6 +82,10 @@ class TestEventNames(unittest.TestCase):
         event = {"label": "waste_bin", "sub_label": "Compost"}
         self.assertEqual(event_name(event), 'waste bin "Compost"')
 
+    def test_names_match_the_objects_in_scene_list(self):
+        event = {"label": "person", "sub_label": "known_subject"}
+        self.assertEqual(event_name(event), 'person "Known Subject"')
+
     def test_repeated_objects_are_never_numbered(self):
         # Whether these are the same subject is unknown, so the notes must not
         # imply either answer.
@@ -294,6 +298,57 @@ class TestLateEvents(unittest.TestCase):
         self.assertEqual(build_timeline([late], span_end=40.0), [])
         self.assertEqual(
             annotations_by_frame(build_timeline([late], 40.0), [0.0, 40.0]), {}
+        )
+
+
+class TestEarlyEvents(unittest.TestCase):
+    def setUp(self):
+        # A car that pulled in and parked well before the first sampled frame,
+        # then leaves during the clip.
+        self.car = track(
+            "1789481990.000000-parked",
+            "car",
+            0.0,
+            straight_path((0.1, 0.9), (0.4, 0.6), 6, 1.0),
+        )
+        self.changes = [
+            {
+                "timestamp": 12.0,
+                "source_id": self.car["id"],
+                "class_type": "stationary",
+            },
+            {"timestamp": 70.0, "source_id": self.car["id"], "class_type": "active"},
+        ]
+
+    def test_history_before_the_first_frame_is_summarized(self):
+        # Arrival notes on the first frame were read as the car pulling in
+        # during the clip.
+        timeline = build_timeline(
+            [self.car], 90.0, state_changes=self.changes, span_start=50.0
+        )
+        self.assertEqual(
+            timeline,
+            [
+                (50.0, "a car already in view when the sequence begins, not moving"),
+                (70.0, "a car starts moving again"),
+            ],
+        )
+
+    def test_object_still_moving_at_the_first_frame_is_not_called_stationary(self):
+        timeline = build_timeline([self.car], 90.0, span_start=3.0)
+        self.assertEqual(
+            timeline[0], (3.0, "a car already in view when the sequence begins")
+        )
+        self.assertFalse(any("first detected" in p for _, p in timeline))
+
+    def test_objects_gone_before_the_first_frame_are_skipped(self):
+        gone = dict(self.car, end_time=20.0)
+        self.assertEqual(build_timeline([gone], 90.0, span_start=50.0), [])
+
+    def test_objects_detected_inside_the_clip_are_unchanged(self):
+        self.assertEqual(
+            build_timeline([self.car], 90.0, self.changes, span_start=0.0),
+            build_timeline([self.car], 90.0, self.changes),
         )
 
 

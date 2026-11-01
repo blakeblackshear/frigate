@@ -72,6 +72,19 @@ class TestReviewResponseStyle(unittest.TestCase):
                 f"unexpected override fields: {set(overrides)}",
             )
 
+    def test_every_style_states_length_and_name_rules(self):
+        # The schema caps these fields and grammar-constrained providers cut
+        # text off at the cap, and models only reliably use names when each
+        # field asks for them.
+        for style in ["default", *REVIEW_RESPONSE_STYLES]:
+            fields = get_review_field_guidelines(style)
+            self.assertIn("no more than five sentences", fields["scene"])
+            self.assertIn("one", fields["shortSummary"])
+            self.assertIn("sentence", fields["shortSummary"])
+
+            for field_name in ("scene", "title", "shortSummary"):
+                self.assertIn("always use their name", fields[field_name])
+
     def test_config_enum_matches_style_presets(self):
         enum_styles = {e.value for e in ReviewResponseStyleEnum}
         self.assertEqual(enum_styles, {"default", *REVIEW_RESPONSE_STYLES})

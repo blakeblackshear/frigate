@@ -42,6 +42,7 @@ from frigate.config.camera.genai import GenAIConfig, GenAIProviderEnum  # noqa: 
 from frigate.genai.prompts import (  # noqa: E402
     REVIEW_RESPONSE_STYLES,
     build_review_description_response_format,
+    get_review_field_guidelines,
 )
 
 EXAMPLES_DIR = Path(__file__).resolve().parent / "genai-review-examples"
@@ -227,11 +228,14 @@ def list_examples() -> list[Path]:
     )
 
 
-def load_frames(example: Path) -> list[bytes]:
-    """Load the example's frames as JPEG bytes in frame order.
+def load_frames(example: Path) -> tuple[list[bytes], list[str] | None]:
+    """Load the example's frames as JPEG bytes in frame order, with captions.
 
     Frames are saved by Frigate as <index>.jpg or <index>.webp. Non-JPEG
     images are re-encoded to JPEG to match what Frigate sends to providers.
+    In annotated frame mode Frigate also saves <index>.txt, the caption sent
+    directly before that frame; captions are returned only when every frame
+    has one, matching Frigate's fallback to plain frames.
     """
     import cv2
 
@@ -242,34 +246,42 @@ def load_frames(example: Path) -> list[bytes]:
             return (1 << 30, path.name)
 
     frames: list[bytes] = []
+    captions: list[str] = []
     files = sorted(
         (f for f in example.iterdir() if f.suffix.lower() in IMAGE_EXTENSIONS),
         key=frame_order,
     )
     for file in files:
         if file.suffix.lower() in (".jpg", ".jpeg"):
-            frames.append(file.read_bytes())
-            continue
+            frame = file.read_bytes()
+        else:
+            image = cv2.imread(str(file))
+            if image is None:
+                print(f"  Skipping unreadable image {file.name}")
+                continue
+            ok, jpg = cv2.imencode(".jpg", image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+            if not ok:
+                continue
+            frame = jpg.tobytes()
 
-        image = cv2.imread(str(file))
-        if image is None:
-            print(f"  Skipping unreadable image {file.name}")
-            continue
-        ok, jpg = cv2.imencode(".jpg", image, [int(cv2.IMWRITE_JPEG_QUALITY), 100])
-        if ok:
-            frames.append(jpg.tobytes())
-    return frames
+        frames.append(frame)
+        caption_file = file.with_suffix(".txt")
+        if caption_file.is_file():
+            captions.append(caption_file.read_text())
+
+    return frames, captions if captions and len(captions) == len(frames) else None
 
 
 def apply_style(prompt: str, style: str) -> str:
-    """Apply a style preset to a saved prompt.
+    """Apply the current field guidance for a style preset to a saved prompt.
 
-    Presets replace the per-field response guidance lines, matching what
-    Frigate builds at runtime. Handles both the current guidance format
+    Every per-field response guidance line is replaced with what Frigate
+    builds at runtime for that style, so "default" restores the default
+    guidance on a prompt saved with another style, and older saves pick up
+    current guidance. Handles both the current guidance format
     ("- `scene`: ...") and the 0.17 format ("- `scene` (string): ...").
     """
-    overrides = REVIEW_RESPONSE_STYLES.get(style, {})
-    for field_name, guidance in overrides.items():
+    for field_name, guidance in get_review_field_guidelines(style).items():
         pattern = rf"^- `{field_name}`(?: \(string\))?: .*$"
         prompt, count = re.subn(
             pattern,
@@ -292,7 +304,9 @@ def pretty_print_response(response: str) -> None:
     print(json.dumps(parsed, indent=2, ensure_ascii=False))
 
 
-def followup_loop(client: Any, base_prompt: str, frames: list[bytes]) -> None:
+def followup_loop(
+    client: Any, base_prompt: str, frames: list[bytes], captions: list[str] | None
+) -> None:
     """Let the user ask the model follow-up questions about the same frames."""
     transcript = base_prompt
     print("\nAsk follow-up questions about this sequence (blank line to finish).")
@@ -311,7 +325,7 @@ def followup_loop(client: Any, base_prompt: str, frames: list[bytes]) -> None:
             f"Question: {question}"
         )
         start = time.monotonic()
-        answer = client._send(prompt, frames)
+        answer = client._send(prompt, frames, image_captions=captions)
         elapsed = time.monotonic() - start
         if answer is None:
             print("No response from provider (see logs above).")
@@ -349,7 +363,7 @@ def run_example(settings: TesterSettings) -> None:
         return
     prompt = apply_style(prompt_file.read_text(), style)
 
-    frames = load_frames(example)
+    frames, captions = load_frames(example)
     if not frames:
         print(f"{example.name} contains no frame images, cannot run")
         return
@@ -365,10 +379,11 @@ def run_example(settings: TesterSettings) -> None:
 
     print(
         f"\nSending {len(frames)} frames to {settings.provider} "
-        f"(model={settings.model or '(none)'}, style={style})..."
+        f"(model={settings.model or '(none)'}, style={style}, "
+        f"captions={'yes' if captions else 'no'})..."
     )
     start = time.monotonic()
-    response = client._send(prompt, frames, response_format)
+    response = client._send(prompt, frames, response_format, image_captions=captions)
     elapsed = time.monotonic() - start
 
     if response is None:
@@ -377,7 +392,7 @@ def run_example(settings: TesterSettings) -> None:
 
     print(f"\nResponse ({elapsed:.1f}s):\n")
     pretty_print_response(response)
-    followup_loop(client, f"{prompt}\n\nYour analysis:\n{response}", frames)
+    followup_loop(client, f"{prompt}\n\nYour analysis:\n{response}", frames, captions)
 
 
 def main() -> None:
