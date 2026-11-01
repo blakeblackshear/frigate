@@ -86,17 +86,21 @@ export default function MediaSyncSettingsView() {
           position: "top-center",
           closeButton: true,
         });
-      } else if (response.status === 409) {
-        toast.error(t("maintenance.sync.alreadyRunning"), {
+      }
+    } catch (error) {
+      const alreadyRunning =
+        axios.isAxiosError(error) && error.response?.status === 409;
+      toast.error(
+        t(
+          alreadyRunning
+            ? "maintenance.sync.alreadyRunning"
+            : "maintenance.sync.error",
+        ),
+        {
           position: "top-center",
           closeButton: true,
-        });
-      }
-    } catch {
-      toast.error(t("maintenance.sync.error"), {
-        position: "top-center",
-        closeButton: true,
-      });
+        },
+      );
     } finally {
       setIsSubmitting(false);
     }
