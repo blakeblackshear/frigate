@@ -291,12 +291,12 @@ def events(
             clauses.append(
                 reduce(
                     operator.or_,
-                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    [(start_hour_fun >= time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            clauses.append(start_hour_fun > time_after)
+            clauses.append(start_hour_fun >= time_after)
             clauses.append(start_hour_fun < time_before)
 
     if has_clip is not None:
@@ -749,12 +749,12 @@ def events_search(
             event_filters.append(
                 reduce(
                     operator.or_,
-                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    [(start_hour_fun >= time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            event_filters.append(start_hour_fun > time_after)
+            event_filters.append(start_hour_fun >= time_after)
             event_filters.append(start_hour_fun < time_before)
 
     # Perform semantic search

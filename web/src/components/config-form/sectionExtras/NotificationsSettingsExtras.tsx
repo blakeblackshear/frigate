@@ -416,6 +416,13 @@ export default function NotificationsSettingsExtras({
               workerRegistration.unregister();
               setRegistration(null);
             });
+        })
+        .catch(() => {
+          toast.error(t("notification.toast.error.registerFailed"), {
+            position: "top-center",
+          });
+          workerRegistration.unregister();
+          setRegistration(null);
         });
     },
     [addMessage, publicKey, t],

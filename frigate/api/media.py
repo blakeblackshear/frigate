@@ -862,7 +862,7 @@ async def vod_hour(
 async def vod_event(
     request: Request,
     event_id: str,
-    padding: int = Query(0, description="Padding to apply to the vod."),
+    padding: int = Query(0, ge=0, description="Padding to apply to the vod."),
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -1530,7 +1530,7 @@ async def preview_gif(
                 status_code=404,
             )
 
-        diff = start_ts - preview.start_time
+        diff = max(start_ts - preview.start_time, 0)
         minutes = int(diff / 60)
         seconds = int(diff % 60)
         config: FrigateConfig = request.app.frigate_config
@@ -1721,7 +1721,7 @@ async def preview_mp4(
                 status_code=404,
             )
 
-        diff = start_ts - preview.start_time
+        diff = max(start_ts - preview.start_time, 0)
         minutes = int(diff / 60)
         seconds = int(diff % 60)
         config: FrigateConfig = request.app.frigate_config

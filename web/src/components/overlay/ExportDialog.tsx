@@ -690,36 +690,8 @@ export function ExportContent({
     (option: ExportOption) => {
       setSelectedOption(option);
 
-      const now = new Date(latestTime * 1000);
-      let start: number;
-
-      switch (option) {
-        case "1":
-          now.setHours(now.getHours() - 1);
-          start = now.getTime() / 1000;
-          break;
-        case "4":
-          now.setHours(now.getHours() - 4);
-          start = now.getTime() / 1000;
-          break;
-        case "8":
-          now.setHours(now.getHours() - 8);
-          start = now.getTime() / 1000;
-          break;
-        case "12":
-          now.setHours(now.getHours() - 12);
-          start = now.getTime() / 1000;
-          break;
-        case "24":
-          now.setHours(now.getHours() - 24);
-          start = now.getTime() / 1000;
-          break;
-        case "custom":
-          start = latestTime - 3600;
-          break;
-        default:
-          start = latestTime - 3600;
-      }
+      const hours = Number(option);
+      const start = latestTime - (Number.isNaN(hours) ? 1 : hours) * 3600;
 
       setRange({
         before: latestTime,
