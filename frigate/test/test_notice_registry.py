@@ -357,23 +357,27 @@ class TestNoticeRegistry(RegistryTestCase):
         self.assertEqual(stats["skipped_detections"]["mutes"], 1)
 
 
-class TestMarkReported(RegistryTestCase):
-    def test_moves_watermarks_to_the_snapshot_not_the_current_count(self):
+class TestAnalyticsBaseline(RegistryTestCase):
+    def test_reset_counts_from_now_and_new_kinds_start_at_zero(self):
+        stuck = {"scope": "ov", "params": {"detector": "ov"}}
+        self.registry.raise_notice("detector_stuck", **stuck)
+        self.registry.raise_notice("detector_stuck", **stuck)
+
+        self.registry.reset_analytics_baseline()
+        self.registry.raise_notice("detector_stuck", **stuck)
         self.registry.raise_notice(
-            "detector_stuck", scope="ov", params={"detector": "ov"}
-        )
-        snapshot = self.registry.stats()
-        self.registry.raise_notice(
-            "detector_stuck", scope="ov", params={"detector": "ov"}
+            "skipped_detections", scope="front_door", params={"pct": 12.5}
         )
 
-        self.registry.mark_reported(snapshot)
-
-        row = self.registry.stats()[0]
-        self.assertEqual(row["occurrences"], 2)
-        self.assertEqual(row["reported_occurrences"], 1)
-        self.assertEqual(row["reported_acknowledgements"], 0)
-        self.assertEqual(row["reported_mutes"], 0)
+        rows = {row["kind"]: row for row in self.registry.stats()}
+        self.assertEqual(
+            (
+                rows["detector_stuck"]["occurrences"],
+                rows["detector_stuck"]["reported_occurrences"],
+            ),
+            (3, 2),
+        )
+        self.assertEqual(rows["skipped_detections"]["reported_occurrences"], 0)
 
 
 class TestApply(RegistryTestCase):

@@ -378,9 +378,9 @@ class FeaturesSection(AnalyticsModel):
 
 
 class NoticeCounts(AnalyticsModel):
-    occurrences: int = count("Occurrences since the last accepted report")
-    acknowledgements: int = count("Acknowledgements since the last accepted report")
-    mutes: int = count("Mutes since the last accepted report")
+    occurrences: int = count("Occurrences since the install ID was created")
+    acknowledgements: int = count("Acknowledgements since the install ID was created")
+    mutes: int = count("Mutes since the install ID was created")
 
 
 class HealthSection(AnalyticsModel):
@@ -393,7 +393,8 @@ class HealthSection(AnalyticsModel):
         "Whether storage can't keep the configured retention"
     )
     notices: dict[NoticeKindKey, NoticeCounts] = metric(
-        "Notice counts by kind since the last accepted report", public=False
+        "Cumulative notice counts by kind since the install ID was created",
+        public=False,
     )
 
 

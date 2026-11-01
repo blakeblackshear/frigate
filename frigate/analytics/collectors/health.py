@@ -23,9 +23,9 @@ TIMING_STATS = {
 REPORTABLE_KINDS = frozenset(key.value for key in NoticeKindKey)
 
 
-def notice_deltas(notice_stats: list[dict[str, Any]]) -> dict[Any, NoticeCounts]:
-    """What changed since the last accepted report, per reportable kind."""
-    deltas: dict[Any, NoticeCounts] = {}
+def notice_counts(notice_stats: list[dict[str, Any]]) -> dict[Any, NoticeCounts]:
+    """Counts since the install ID was created, per reportable kind."""
+    counts: dict[Any, NoticeCounts] = {}
 
     for row in notice_stats:
         if row["kind"] not in REPORTABLE_KINDS:
@@ -38,11 +38,11 @@ def notice_deltas(notice_stats: list[dict[str, Any]]) -> dict[Any, NoticeCounts]
         mutes = max(row["mutes"] - row["reported_mutes"], 0)
 
         if occurrences or acknowledgements or mutes:
-            deltas[NoticeKindKey(row["kind"])] = NoticeCounts(
+            counts[NoticeKindKey(row["kind"])] = NoticeCounts(
                 occurrences=occurrences, acknowledgements=acknowledgements, mutes=mutes
             )
 
-    return deltas
+    return counts
 
 
 def collect(ctx: ReportContext) -> HealthSection:
@@ -59,5 +59,5 @@ def collect(ctx: ReportContext) -> HealthSection:
         cpu_percent=min(round(rate(cpu)), 100),
         enrichment_ms={timing: value for timing, value in timings.items() if value > 0},
         retention_unmet=bool(service.get("retention_unmet", False)),
-        notices=notice_deltas(ctx.notice_stats),
+        notices=notice_counts(ctx.notice_stats),
     )

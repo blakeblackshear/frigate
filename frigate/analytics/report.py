@@ -85,5 +85,7 @@ def preview_report(
 ) -> AnalyticsReport:
     """The report the next send would carry, without sending it."""
     state = load_state()
-    ctx = gather_context(config, stats_emitter, notice_registry)
+
+    # an opt-in resets the baseline, so before one there are no notices to show
+    ctx = gather_context(config, stats_emitter, notice_registry if state else None)
     return build_report(ctx, state.install_id if state else PREVIEW_INSTALL_ID)

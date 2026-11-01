@@ -906,7 +906,7 @@
           "additionalProperties": {
             "$ref": "#/$defs/NoticeCounts"
           },
-          "description": "Notice counts by kind since the last accepted report",
+          "description": "Cumulative notice counts by kind since the install ID was created",
           "propertyNames": {
             "$ref": "#/$defs/NoticeKindKey"
           },
@@ -1103,21 +1103,21 @@
       "additionalProperties": false,
       "properties": {
         "acknowledgements": {
-          "description": "Acknowledgements since the last accepted report",
+          "description": "Acknowledgements since the install ID was created",
           "minimum": 0,
           "title": "Acknowledgements",
           "type": "integer",
           "x-public": true
         },
         "mutes": {
-          "description": "Mutes since the last accepted report",
+          "description": "Mutes since the install ID was created",
           "minimum": 0,
           "title": "Mutes",
           "type": "integer",
           "x-public": true
         },
         "occurrences": {
-          "description": "Occurrences since the last accepted report",
+          "description": "Occurrences since the install ID was created",
           "minimum": 0,
           "title": "Occurrences",
           "type": "integer",

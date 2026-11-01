@@ -12,8 +12,7 @@ from pydantic import ValidationError
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
 
-from frigate.analytics.context import ReportContext
-from frigate.analytics.report import build_report
+from frigate.analytics.report import build_report, gather_context
 from frigate.analytics.state import (
     STATE_PATH,
     AnalyticsState,
@@ -128,15 +127,19 @@ class AnalyticsReporter(threading.Thread):
         if opted_in:
             resolve_notice(PROMPT_KIND)
 
-            # a new install ID counts notices from the opt-in, so nothing
-            # raised before consent is sent and nothing raised after is lost
-            if load_state(self.state_path) is None and save_state(
-                new_state(), self.state_path
-            ):
-                self.notice_registry.mark_reported(self.notice_registry.stats())
+            # the opt-in sets the notice baseline, so only notices raised with
+            # consent are counted; tick() retries a failed write
+            if load_state(self.state_path) is None:
+                save_state(self._new_identity(), self.state_path)
         else:
             raise_notice(PROMPT_KIND)
             delete_state(self.state_path)
+
+    def _new_identity(self) -> AnalyticsState:
+        # called with the lock held; the baseline resets before the state file
+        # names the new ID, so a failed write only means another reset
+        self.notice_registry.reset_analytics_baseline()
+        return new_state()
 
     def tick(self) -> None:
         """Apply consent and send a report when one is due."""
@@ -158,9 +161,9 @@ class AnalyticsReporter(threading.Thread):
             if now < self.first_due:
                 return
 
-            state = load_state(self.state_path) or new_state()
+            state = load_state(self.state_path)
 
-            if not self._due(state.last_attempt_at, now):
+            if state is not None and not self._due(state.last_attempt_at, now):
                 return
 
             # a YAML editor save or a hand edit reaches the live config only on
@@ -169,10 +172,14 @@ class AnalyticsReporter(threading.Thread):
                 delete_state(self.state_path)
                 return
 
+            state = AnalyticsState(
+                (state or self._new_identity()).install_id, last_attempt_at=now
+            )
+
             # saved before sending, so a failing endpoint or a crash mid-send
             # still waits a full interval; without saved state every boot would
             # send under a new install ID
-            if not save_state(AnalyticsState(state.install_id, now), self.state_path):
+            if not save_state(state, self.state_path):
                 if not self.warned_unwritable:
                     logger.warning(
                         "Analytics is on, but %s isn't writable, so no report is sent",
@@ -194,11 +201,8 @@ class AnalyticsReporter(threading.Thread):
         )
 
     def _send(self, install_id: str, now: float) -> None:
-        notice_stats = self.notice_registry.stats()
-        ctx = ReportContext(
-            config=self.config_holder.config,
-            stats=self.stats_emitter.get_latest_stats(),
-            notice_stats=notice_stats,
+        ctx = gather_context(
+            self.config_holder.config, self.stats_emitter, self.notice_registry
         )
         report = build_report(ctx, install_id, sent_at=int(now))
         body = report.model_dump_json()
@@ -209,10 +213,6 @@ class AnalyticsReporter(threading.Thread):
 
         if self.send(self.url, body) is not SendOutcome.accepted:
             return
-
-        # a failed health section sent no notice counts, so they stay pending
-        if report.health is not None:
-            self.notice_registry.mark_reported(notice_stats)
 
         logger.info("Sent the daily analytics report")
         logger.debug("Analytics report: %s", body)

@@ -7,7 +7,7 @@ from frigate.test.analytics_helpers import make_context
 
 
 class TestHealthCollector(unittest.TestCase):
-    def test_collects_uptime_cpu_timings_and_notice_deltas(self):
+    def test_collects_uptime_cpu_timings_and_notices_since_the_baseline(self):
         stats = {
             "service": {"uptime": 7300, "retention_unmet": True},
             "cpu_usages": {"frigate.full_system": {"cpu": "23.6", "mem": "40"}},

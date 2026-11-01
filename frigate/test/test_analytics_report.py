@@ -13,6 +13,7 @@ from playhouse.sqliteq import SqliteQueueDatabase
 from frigate.analytics import report
 from frigate.analytics.collectors import hardware
 from frigate.analytics.schema import AnalyticsReport, InstallSection
+from frigate.analytics.state import AnalyticsState
 from frigate.models import User
 from frigate.test.analytics_helpers import make_context
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
@@ -105,3 +106,38 @@ class TestRealCollectors(unittest.TestCase):
             built = report.preview_report(make_context().config, stats_emitter, None)
 
         self.assertEqual(built.install_id, report.PREVIEW_INSTALL_ID)
+
+    def test_preview_counts_notices_only_once_opted_in(self):
+        stats_emitter = Mock()
+        stats_emitter.get_latest_stats.return_value = {}
+        registry = Mock()
+        registry.stats.return_value = [
+            {
+                "kind": "detector_stuck",
+                "occurrences": 3,
+                "acknowledgements": 0,
+                "mutes": 0,
+                "reported_occurrences": 1,
+                "reported_acknowledgements": 0,
+                "reported_mutes": 0,
+            }
+        ]
+
+        for state, expected in (
+            (None, {}),
+            (AnalyticsState("a" * 32, 0.0), {"detector_stuck": 2}),
+        ):
+            with (
+                self.subTest(opted_in=state is not None),
+                patch.object(report, "load_state", return_value=state),
+                patch.object(hardware.hardware_prober, "probe", return_value=[]),
+                patch.object(hardware, "hwaccel_options", return_value=("", [])),
+            ):
+                built = report.preview_report(
+                    make_context().config, stats_emitter, registry
+                )
+
+            self.assertEqual(
+                {kind: c.occurrences for kind, c in built.health.notices.items()},
+                expected,
+            )

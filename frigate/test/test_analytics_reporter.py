@@ -4,7 +4,7 @@ import os
 import tempfile
 import threading
 import unittest
-from unittest.mock import Mock, call, patch
+from unittest.mock import Mock, patch
 
 from frigate.analytics import reporter as reporter_module
 from frigate.analytics.reporter import (
@@ -20,18 +20,6 @@ from frigate.analytics.transport import SendOutcome
 from frigate.config.holder import ConfigHolder
 from frigate.test.analytics_helpers import make_config
 
-SNAPSHOT = [
-    {
-        "kind": "detector_stuck",
-        "occurrences": 3,
-        "acknowledgements": 0,
-        "mutes": 0,
-        "reported_occurrences": 1,
-        "reported_acknowledgements": 0,
-        "reported_mutes": 0,
-    }
-]
-
 
 class TestAnalyticsReporter(unittest.TestCase):
     def setUp(self):
@@ -43,7 +31,6 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.now = 1_790_000_000.0
         self.send = Mock(return_value=SendOutcome.accepted)
         self.registry = Mock()
-        self.registry.stats.return_value = SNAPSHOT
         self.stats = Mock()
         self.stats.get_latest_stats.return_value = {}
         self.holder = ConfigHolder(make_config({"telemetry": {"analytics": True}}))
@@ -63,9 +50,8 @@ class TestAnalyticsReporter(unittest.TestCase):
         with open(self.config_path, "w") as f:
             f.write(text)
 
-    def seed_state(self) -> None:
-        # an install that has reported before, so no fresh-ID reset runs
-        save_state(AnalyticsState("a" * 32, 0.0), self.path)
+    def seed_state(self, last_attempt_at: float = 0.0) -> None:
+        save_state(AnalyticsState("a" * 32, last_attempt_at), self.path)
 
     def reporter(self, path: str | None = None) -> AnalyticsReporter:
         # uniform(a, b) returns a: the shortest startup delay and interval
@@ -101,7 +87,6 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.send.assert_called_once_with(
             "https://example.test/report", '{"report": 1}'
         )
-        self.registry.mark_reported.assert_called_once_with(SNAPSHOT)
         self.assertEqual(load_state(self.path).last_attempt_at, self.now)
 
     def test_sends_once_per_interval(self):
@@ -118,7 +103,7 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.assertEqual(self.send.call_count, 2)
 
     def test_a_restart_inside_the_interval_does_not_send(self):
-        save_state(AnalyticsState("a" * 32, self.now), self.path)
+        self.seed_state(self.now)
         reporter = self.reporter()
 
         self.advance(FIRST_DELAY_S[0])
@@ -126,7 +111,7 @@ class TestAnalyticsReporter(unittest.TestCase):
 
         self.send.assert_not_called()
 
-    def test_a_failed_send_keeps_watermarks_and_waits_a_full_interval(self):
+    def test_a_failed_send_waits_a_full_interval(self):
         self.send.return_value = SendOutcome.failed
         self.seed_state()
         reporter = self.reporter()
@@ -137,10 +122,31 @@ class TestAnalyticsReporter(unittest.TestCase):
         reporter.tick()
 
         self.assertEqual(self.send.call_count, 1)
-        self.registry.mark_reported.assert_not_called()
 
-    def test_an_accepted_report_without_health_keeps_the_watermarks(self):
-        self.built.health = None
+    def assert_reset_before_the_state_file(self) -> None:
+        # the baseline must be in place before the file names the new ID
+        self.registry.reset_analytics_baseline.side_effect = lambda: self.assertIsNone(
+            load_state(self.path)
+        )
+
+    def test_the_opt_in_resets_the_baseline_and_writes_the_identity(self):
+        self.assert_reset_before_the_state_file()
+        reporter = self.reporter()
+
+        # consent is seen on the first wake, well before the first send
+        reporter.tick()
+        self.registry.reset_analytics_baseline.assert_called_once()
+        self.assertIsNotNone(load_state(self.path))
+        self.send.assert_not_called()
+
+        # the first report counts from that reset, so nothing resets again
+        self.advance(FIRST_DELAY_S[0])
+        reporter.tick()
+
+        self.send.assert_called_once()
+        self.registry.reset_analytics_baseline.assert_called_once()
+
+    def test_a_restart_with_saved_state_keeps_the_baseline(self):
         self.seed_state()
         reporter = self.reporter()
         self.advance(FIRST_DELAY_S[0])
@@ -148,28 +154,55 @@ class TestAnalyticsReporter(unittest.TestCase):
         reporter.tick()
 
         self.send.assert_called_once()
-        self.registry.mark_reported.assert_not_called()
+        self.registry.reset_analytics_baseline.assert_not_called()
 
-    def test_a_new_install_id_counts_notices_from_the_opt_in(self):
-        before = [{**SNAPSHOT[0], "occurrences": 2}]
-        self.registry.stats.return_value = before
+    def test_a_settings_opt_in_resets_the_baseline_when_saved(self):
+        self.holder.set(make_config())
         reporter = self.reporter()
-
-        # consent is seen on the first wake, well before the first send
         reporter.tick()
-        self.registry.mark_reported.assert_called_once_with(before)
+
+        self.holder.set(make_config({"telemetry": {"analytics": True}}))
+
+        self.registry.reset_analytics_baseline.assert_called_once()
         self.assertIsNotNone(load_state(self.path))
-        self.send.assert_not_called()
 
-        # a notice raised during the startup delay goes out with the first report
-        self.registry.stats.return_value = SNAPSHOT
+    def test_a_re_opt_in_during_the_request_keeps_its_new_identity(self):
+        self.seed_state()
+        reporter = self.reporter()
         self.advance(FIRST_DELAY_S[0])
+        created = []
+
+        def flip_consent(*args):
+            self.holder.set(make_config())
+            self.holder.set(make_config({"telemetry": {"analytics": True}}))
+            created.append(load_state(self.path))
+            return SendOutcome.accepted
+
+        self.send.side_effect = flip_consent
         reporter.tick()
 
-        self.assertIs(self.build_report.call_args.args[0].notice_stats, SNAPSHOT)
-        self.assertEqual(
-            self.registry.mark_reported.call_args_list, [call(before), call(SNAPSHOT)]
-        )
+        # nothing after the send touches the new identity or its baseline
+        self.assertNotEqual(created[0].install_id, "a" * 32)
+        self.assertEqual(load_state(self.path), created[0])
+        self.registry.reset_analytics_baseline.assert_called_once()
+
+    def test_an_opt_in_without_a_writable_state_file_resets_again_later(self):
+        state_dir = os.path.join(self.dir.name, "missing")
+        reporter = self.reporter(os.path.join(state_dir, ".analytics.json"))
+
+        with self.assertLogs("frigate.analytics.reporter", "WARNING"):
+            reporter.tick()
+            self.advance(FIRST_DELAY_S[0])
+            reporter.tick()
+
+        self.send.assert_not_called()
+        os.mkdir(state_dir)
+        self.registry.reset_analytics_baseline.reset_mock()
+        self.advance(WAKE_S)
+        reporter.tick()
+
+        self.send.assert_called_once()
+        self.registry.reset_analytics_baseline.assert_called_once()
 
     def test_an_opt_out_saved_only_to_the_file_stops_the_send(self):
         self.seed_state()
@@ -182,6 +215,22 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.send.assert_not_called()
         self.assertFalse(os.path.exists(self.path))
         self.raise_notice.assert_not_called()
+
+    def test_reversing_a_file_only_opt_out_resets_the_baseline(self):
+        self.seed_state()
+        self.save_config("telemetry:\n  analytics: false\n")
+        reporter = self.reporter()
+        self.advance(FIRST_DELAY_S[0])
+        reporter.tick()
+
+        self.save_config("telemetry:\n  analytics: true\n")
+        self.assert_reset_before_the_state_file()
+        self.advance(WAKE_S)
+        reporter.tick()
+
+        self.assertNotEqual(load_state(self.path).install_id, "a" * 32)
+        self.registry.reset_analytics_baseline.assert_called_once()
+        self.send.assert_called_once()
 
     def test_yaml_truthy_spellings_in_the_file_count_as_consent(self):
         for value in ("yes", "on", "1", "'true'"):
@@ -222,7 +271,7 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.assertFalse(os.path.exists(self.path))
 
     def test_turning_sharing_off_and_on_between_wakes_starts_a_fresh_identity(self):
-        save_state(AnalyticsState("a" * 32, 0.0), self.path)
+        self.seed_state()
         reporter = self.reporter()
         reporter.tick()
 
@@ -236,7 +285,7 @@ class TestAnalyticsReporter(unittest.TestCase):
 
     def test_opting_out_raises_the_prompt_once_and_deletes_the_state(self):
         self.holder.set(make_config())
-        save_state(AnalyticsState("a" * 32, 0.0), self.path)
+        self.seed_state()
         reporter = self.reporter()
 
         reporter.tick()
@@ -258,7 +307,7 @@ class TestAnalyticsReporter(unittest.TestCase):
 
     def test_safe_mode_touches_nothing(self):
         self.holder.set(make_config({"safe_mode": True}))
-        save_state(AnalyticsState("a" * 32, 0.0), self.path)
+        self.seed_state()
         reporter = self.reporter()
 
         self.advance(FIRST_DELAY_S[0])
@@ -281,7 +330,7 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.assertEqual(len(logs.output), 1)
 
     def test_a_last_attempt_in_the_future_is_ignored(self):
-        save_state(AnalyticsState("a" * 32, self.now + 10 * INTERVAL_S), self.path)
+        self.seed_state(self.now + 10 * INTERVAL_S)
         reporter = self.reporter()
 
         self.advance(FIRST_DELAY_S[0])
