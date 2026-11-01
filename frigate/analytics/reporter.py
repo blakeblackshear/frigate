@@ -127,6 +127,13 @@ class AnalyticsReporter(threading.Thread):
 
         if opted_in:
             resolve_notice(PROMPT_KIND)
+
+            # a new install ID counts notices from the opt-in, so nothing
+            # raised before consent is sent and nothing raised after is lost
+            if load_state(self.state_path) is None and save_state(
+                new_state(), self.state_path
+            ):
+                self.notice_registry.mark_reported(self.notice_registry.stats())
         else:
             raise_notice(PROMPT_KIND)
             delete_state(self.state_path)
@@ -151,8 +158,7 @@ class AnalyticsReporter(threading.Thread):
             if now < self.first_due:
                 return
 
-            loaded = load_state(self.state_path)
-            state = loaded or new_state()
+            state = load_state(self.state_path) or new_state()
 
             if not self._due(state.last_attempt_at, now):
                 return
@@ -179,7 +185,7 @@ class AnalyticsReporter(threading.Thread):
             self.interval = self._next_interval()
 
         # the lock stays free during the request, so a save never waits on it
-        self._send(state.install_id, now, fresh=loaded is None)
+        self._send(state.install_id, now)
 
     def _due(self, last_attempt_at: float, now: float) -> bool:
         # a last attempt stamped in the future came from a wrong clock
@@ -187,12 +193,7 @@ class AnalyticsReporter(threading.Thread):
             now >= last_attempt_at + self.interval or last_attempt_at > now + INTERVAL_S
         )
 
-    def _send(self, install_id: str, now: float, fresh: bool) -> None:
-        # a new install ID counts notices from the opt-in, so nothing raised
-        # before consent is sent
-        if fresh:
-            self.notice_registry.mark_reported(self.notice_registry.stats())
-
+    def _send(self, install_id: str, now: float) -> None:
         notice_stats = self.notice_registry.stats()
         ctx = ReportContext(
             config=self.config_holder.config,

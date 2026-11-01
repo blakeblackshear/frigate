@@ -150,19 +150,26 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.send.assert_called_once()
         self.registry.mark_reported.assert_not_called()
 
-    def test_a_new_install_id_skips_notices_from_before_the_opt_in(self):
+    def test_a_new_install_id_counts_notices_from_the_opt_in(self):
         before = [{**SNAPSHOT[0], "occurrences": 2}]
-        self.registry.stats.side_effect = [before, SNAPSHOT]
+        self.registry.stats.return_value = before
         reporter = self.reporter()
-        self.advance(FIRST_DELAY_S[0])
 
+        # consent is seen on the first wake, well before the first send
+        reporter.tick()
+        self.registry.mark_reported.assert_called_once_with(before)
+        self.assertIsNotNone(load_state(self.path))
+        self.send.assert_not_called()
+
+        # a notice raised during the startup delay goes out with the first report
+        self.registry.stats.return_value = SNAPSHOT
+        self.advance(FIRST_DELAY_S[0])
         reporter.tick()
 
-        # the reset runs before the report's snapshot, which the 204 then marks
+        self.assertIs(self.build_report.call_args.args[0].notice_stats, SNAPSHOT)
         self.assertEqual(
             self.registry.mark_reported.call_args_list, [call(before), call(SNAPSHOT)]
         )
-        self.assertIs(self.build_report.call_args.args[0].notice_stats, SNAPSHOT)
 
     def test_an_opt_out_saved_only_to_the_file_stops_the_send(self):
         self.seed_state()
