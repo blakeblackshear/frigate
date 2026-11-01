@@ -81,8 +81,7 @@
       "placeholder": "选择合集",
       "newCaseOption": "创建新合集",
       "newCaseNamePlaceholder": "新合集名称",
-      "newCaseDescriptionPlaceholder": "合集描述",
-      "nonAdminHelp": "将为这些导出文件创建一个新的合集。"
+      "newCaseDescriptionPlaceholder": "合集描述"
     },
     "queueing": "正在加入导出队列…",
     "tabs": {

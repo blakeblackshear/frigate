@@ -79,7 +79,7 @@
   "bulkRemoveFromCase": {
     "title": "Uit case verwijderen",
     "desc_one": "{{count}} export uit deze case verwijderen?",
-    "desc_other": "Remove {{count}} exports from this case?",
+    "desc_other": "{{count}} export(s) verwijderen?",
     "deleteExports": "Toch verwijderen",
     "descDeleteExports": "Exports worden permanent verwijderd."
   },

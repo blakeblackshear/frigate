@@ -150,7 +150,8 @@
     "title": "사용자",
     "management": {
       "title": "사용자 관리",
-      "desc": "이 Frigate 인스턴스의 사용자 계정을 관리합니다."
+      "desc": "이 Frigate 인스턴스의 사용자 계정을 관리합니다.",
+      "authDisabled": "내장 인증 기능이 비활성화되어 있습니다. 여기에 등록된 계정은 인증 기능이 활성화된 후에만 로그인에 사용됩니다."
     },
     "addUser": "사용자 추가",
     "updatePassword": "비밀번호 재설정",
@@ -216,7 +217,8 @@
         "title": "새 사용자 생성",
         "desc": "새 사용자 계정을 추가하고 Frigate UI 접근 권한을 위한 역할을 지정합니다.",
         "usernameOnlyInclude": "사용자 이름은 영문자, 숫자, 마침표(.), 밑줄(_)만 포함할 수 있습니다",
-        "confirmPassword": "비밀번호를 확인해 주세요"
+        "confirmPassword": "비밀번호를 확인해 주세요",
+        "usernameOnlyDots": "사용자 이름은 마침표(.)로만 구성될 수 없습니다"
       },
       "deleteUser": {
         "title": "사용자 삭제",
@@ -1415,7 +1417,8 @@
         "baseModels": "기본 모델",
         "fineTunedModels": "파인 튜닝 모델"
       },
-      "modelSelect": "Frigate+에서 사용 가능한 모델을 여기에서 선택할 수 있습니다. 현재 감지기 구성과 호환되는 모델만 선택할 수 있습니다."
+      "modelSelect": "Frigate+에서 사용 가능한 모델을 여기에서 선택할 수 있습니다. 현재 감지기 구성과 호환되는 모델만 선택할 수 있습니다.",
+      "showIncompatible": "호환되지 않는 모델 표시"
     },
     "changeInDetectorsAndModel": "모델 변경",
     "unsavedChanges": "저장되지 않은 Frigate+ 설정 변경 사항",

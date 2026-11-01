@@ -503,7 +503,8 @@
     "title": "Kullanıcılar",
     "management": {
       "title": "Kullanıcı Yönetimi",
-      "desc": "Bu Frigate kurulumundaki kullanıcı hesaplarını yönetin."
+      "desc": "Bu Frigate kurulumundaki kullanıcı hesaplarını yönetin.",
+      "authDisabled": "Yerleşik kimlik doğrulama devre dışı bırakılmış. Bu hesaplarla giriş yapılabilmesi için etkinleştirilmesi gerekir."
     },
     "addUser": "Kullanıcı Ekle",
     "toast": {
@@ -707,7 +708,8 @@
         "ariaLabel": "Modelleri türe göre filtrele",
         "baseModels": "Temel Modeller",
         "fineTunedModels": "İnce Ayarlanmış Modeller"
-      }
+      },
+      "showIncompatible": "Uyumsuz modelleri göster"
     },
     "toast": {
       "success": "Frigate+ ayarları kaydedildi. Değişiklikleri uygulamak için Frigate'i yeniden başlatın.",
@@ -957,7 +959,8 @@
         "invalidCharacters": "Kamera adı geçersiz karakterler içeriyor",
         "nameExists": "Kamera adı zaten mevcut",
         "customUrlRtspRequired": "Özelleştirilmiş URL'ler \"rtsp://\" veya \"rtsps://\" ile başlamalıdır. RTSP olmayan kamera yayınları için manuel yapılandırma gereklidir.",
-        "brandOrCustomUrlRequired": "Bir kamera markası seçip sunucu(host)/IP adresi girin ya da özel bir URL kullanmak için 'Diğer' seçeneğini tercih edin"
+        "brandOrCustomUrlRequired": "Bir kamera markası seçip sunucu(host)/IP adresi girin ya da özel bir URL kullanmak için 'Diğer' seçeneğini tercih edin",
+        "onvifPortInvalid": "ONVIF portu 1 ile 65535 arasında bir tam sayı olmalıdır"
       },
       "useDigestAuthDescription": "ONVIF için HTTP özet (digest) kimlik doğrulamasını kullan. Bazı kameralar, standart yönetici kullanıcısı yerine ONVIF'e özgü bir kullanıcı adı/parola kullanılmasını gerektirebilir."
     },
@@ -2059,7 +2062,8 @@
       "autotrackingNoZones": "Otomatik takip için en az bir bölge gerekir. Maskeler / Bölgeler'den bu kamera için bir bölge tanımlayın, sonra da aşağıda zorunlu bölge olarak ayarlayın."
     },
     "notifications": {
-      "profileBaseDisabled": "Hiçbir kameranın temel yapılandırmasında bildirimler etkinleştirilmemiş. Bu nedenle bildirimleri bir profilde etkinleştirmenin de etkisi olmayacaktır. En az bir kameranın temel yapılandırmasında bildirimleri etkinleştirin."
+      "profileBaseDisabled": "Hiçbir kameranın temel yapılandırmasında bildirimler etkinleştirilmemiş. Bu nedenle bildirimleri bir profilde etkinleştirmenin de etkisi olmayacaktır. En az bir kameranın temel yapılandırmasında bildirimleri etkinleştirin.",
+      "ttlDelay": "Bildirimlerin ulaşması 30 saniye kadar gecikebilir ve incelenen öğe sona ermiş olsa dahi canlı görünüme bağlantı verebilir."
     },
     "live": {
       "noGo2rtcStream": "Bu kameranın canlı görüntüsü düşük kare hızında çalışan ve ses içermeyen basit bir oynatıcı kullanıyor. Daha akıcı görüntü ve ses almak için bir go2rtc yayını yapılandırın."
@@ -2100,5 +2104,9 @@
     "scenes": {
       "default": "Varsayılan"
     }
+  },
+  "notificationTtl": {
+    "immediate": "Hemen",
+    "reliable": "Sağlam"
   }
 }

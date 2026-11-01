@@ -662,14 +662,16 @@
         "title": "Crear un nou usuari",
         "confirmPassword": "Siusplau, confirma la contrasenya",
         "usernameOnlyInclude": "El nom d'usuari només pot contenir lletres, números, . o _",
-        "desc": "Afegeix un compte d'usuari nou i especifica un rol per a l'accés a les àrees de la interfície d'usuari de Frigate."
+        "desc": "Afegeix un compte d'usuari nou i especifica un rol per a l'accés a les àrees de la interfície d'usuari de Frigate.",
+        "usernameOnlyDots": "El nom d'usuari no pot contenir només punts"
       }
     },
     "title": "Usuaris",
     "addUser": "Afegir usuari",
     "management": {
       "title": "Gestió d'usuaris",
-      "desc": "Gestioneu els comptes d'usuari d'aquesta instància de Frigate."
+      "desc": "Gestioneu els comptes d'usuari d'aquesta instància de Frigate.",
+      "authDisabled": "L'autenticació integrada està desactivada. Aquests comptes només s'utilitzen per iniciar sessió una vegada que està habilitat."
     },
     "updatePassword": "Restableix la contrasenya"
   },
@@ -706,7 +708,8 @@
         "ariaLabel": "Filtra els models per tipus",
         "baseModels": "Models de base",
         "fineTunedModels": "Models ajustats"
-      }
+      },
+      "showIncompatible": "Mostra models incompatibles"
     },
     "apiKey": {
       "plusLink": "Llegeix més sobre Frigate+",
@@ -1005,7 +1008,8 @@
         "nameLength": "El nom de la càmera ha de tenir 64 caràcters o menys",
         "invalidCharacters": "El nom de la càmera conté caràcters no vàlids",
         "nameExists": "El nom de la càmera ja existeix",
-        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\" o \"rtsps://\". Es requereix configuració manual per a fluxos de càmera no RTSP."
+        "customUrlRtspRequired": "Els URL personalitzats han de començar amb \"rtsp://\" o \"rtsps://\". Es requereix configuració manual per a fluxos de càmera no RTSP.",
+        "onvifPortInvalid": "El port ONVIF ha de ser un número sencer de l'1 al 65535"
       },
       "selectBrand": "Seleccioneu la marca de la càmera per a la plantilla d'URL",
       "customUrl": "URL de flux personalitzat",
@@ -2021,7 +2025,8 @@
       "objectTrackingDetectRuntimeDisabled": "La detecció d'objectes està activada a la configuració, però actualment està desactivada per a aquesta càmera. Instantànies, articles de revisió i enriquiments com el reconeixement de rostres, el reconeixement de matrícules i la IA Generativa no funcionaran fins que no s'encengui des de la vista en viu de la càmera, o fins que el perfil actiu deixi d'inhabilitar-lo."
     },
     "notifications": {
-      "profileBaseDisabled": "Cap càmera té les notificacions habilitades a la seva configuració base, de manera que habilitar-les en un perfil no té cap efecte. Habilita les notificacions a la configuració base d'almenys una càmera."
+      "profileBaseDisabled": "Cap càmera té les notificacions habilitades a la seva configuració base, de manera que habilitar-les en un perfil no té cap efecte. Habilita les notificacions a la configuració base d'almenys una càmera.",
+      "ttlDelay": "Les notificacions poden arribar fins a 30 segons tard i encara enllaçar a la vista en directe després que l'element de revisió hagi acabat."
     },
     "live": {
       "noGo2rtcStream": "Vista en viu per a aquesta càmera està utilitzant un reproductor bàsic amb una velocitat de fotogrames més baixa i sense àudio. Configura un flux go2rtc per a aquesta càmera per obtenir un vídeo i un àudio més suaus."
@@ -2124,5 +2129,9 @@
     "scenes": {
       "default": "Per defecte"
     }
+  },
+  "notificationTtl": {
+    "immediate": "Immediat",
+    "reliable": "Fiable"
   }
 }

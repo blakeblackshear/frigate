@@ -84,8 +84,7 @@
       "placeholder": "Velg en sak",
       "newCaseOption": "Opprett ny sak",
       "newCaseNamePlaceholder": "Navn på ny sak",
-      "newCaseDescriptionPlaceholder": "Saksbeskrivelse",
-      "nonAdminHelp": "En ny sak vil bli opprettet for disse eksportene."
+      "newCaseDescriptionPlaceholder": "Saksbeskrivelse"
     },
     "queueing": "Legger eksport i kø...",
     "tabs": {

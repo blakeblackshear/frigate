@@ -45,8 +45,8 @@
     "aria": "Vali sündmused",
     "noFoundForTimePeriod": "Selle ajavahemiku kohta ei leidu sündmusi."
   },
-  "selected_one": "{{count}} valitud",
-  "selected_other": "{{count}} valitud",
+  "selected_one": "Valitud on {{count}}",
+  "selected_other": "Valitud on {{count}}",
   "markAsReviewed": "Märgi ülevaadatuks",
   "markTheseItemsAsReviewed": "Märgi need kirjed ülevaadatuks",
   "newReviewItems": {

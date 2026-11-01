@@ -9,7 +9,8 @@
       "nginx": "Nginx logid - Frigate",
       "websocket": "Sõnumite logid - Frigate"
     },
-    "enrichments": "Rikastus statistika - Frigate"
+    "enrichments": "Rikastus statistika - Frigate",
+    "health": "Süsteemi korrasolek - Frigate"
   },
   "logs": {
     "download": {
@@ -222,5 +223,34 @@
       "inferenceSpeed": "Detektori järelduskiirus",
       "cpuUsageInformation": "Protsessori võimsus, mida kasutatakse tuvastusmudelite sisend- ja väljundandmete ettevalmistamisel. See väärtus ei mõõda järelduste kasutamist isegi siis, kui kasutatakse graafikaprotsessorit või kiirendit."
     }
-  }
+  },
+  "health": {
+    "hardware": {
+      "enrichments": {
+        "face_recognition": "Näotuvastus",
+        "lpr": "Sõidukite numbrimärkide tuvastus",
+        "audio_transcription": "Heli üleskirjutus"
+      },
+      "objectDetection": "Objektituvastus",
+      "title": "Riistvara",
+      "hardwareAcceleration": "Raudvaraline kiirendus",
+      "allCameras": "Kõik kaamerad",
+      "probeUnavailable": "Riistvara tuvastamine pole saadaval",
+      "justStarted": "Frigate on just käivitunud",
+      "deviceNotFound": "{{devices}} polnud siit süsteemist leitav",
+      "detectorNotRunning": "Tuvastusprotsess pole töös",
+      "inferenceVerySlow": "Järeldamine on väga aeglane ({{speed}} msek)",
+      "inferenceSlow": "Järeldamine on aeglane ({{speed}} msek)",
+      "inferenceMs": "{{speed}} msek",
+      "customArgs": "Sinu lisatavad ffmpeg-i argumendid",
+      "customArgsNotVerified": "Sinu lisatavad ffmpeg-i argumendid, mida ei kontrollita"
+    },
+    "title": "Korrasolek",
+    "notices": {
+      "title": "Teated",
+      "empty": "Sinu Frigate'i paigaldus on korras"
+    }
+  },
+  "showAllTabs": "Näita kõiki vahekaarte",
+  "showLessTabs": "Näita vähem"
 }

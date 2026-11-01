@@ -843,7 +843,7 @@
         },
         "cookie_secure": {
             "label": "Atribut de segura de la cookie",
-            "description": "Establiu l'indicador segur a l'auth cookie; hauria de ser cert quan s'utilitza TLS."
+            "description": "Estableix sempre l'indicador segur a la galeta d'autenticació. La fragata ho estableix automàticament en servir TLS; habiliteu-ho quan un servidor intermediari invers finalitza TLS davant de la fragata. Un servidor intermediari que es connecta al port TLS ha de servir fragata als navegadors a través d'HTTPS."
         },
         "session_length": {
             "label": "Longitud de la sessió",
@@ -1004,6 +1004,10 @@
         "enabled_in_config": {
             "label": "Estat de les notificacions originals",
             "description": "Indica si les notificacions s'han activat en la configuració estàtica original."
+        },
+        "ttl": {
+            "label": "Notificació TTL",
+            "description": "Com gestiona el servei push una notificació enviada mentre s'activa una alerta si no es pot arribar al vostre dispositiu. Immediatament el lliura o el deixa anar. Reliable continua intentant-ho fins a 30 segons. La notificació enviada quan acaba una alerta es manté sempre fins a una hora."
         }
     },
     "networking": {

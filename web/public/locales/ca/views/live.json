@@ -155,11 +155,12 @@
       },
       "unavailable": {
         "browser": "El teu navegador no suporta WebRTC.",
-        "not-configured": "WebRTC no està configurat. Estableix candidats go2rtc webrtc o ice_servers.",
+        "not-configured": "Per activar-ho, afegiu IP:8555 d'aquest servidor sota go2rtc . webrtc . candidats.",
         "unreachable": "WebRTC no s'ha pogut connectar. Comproveu que el port 8555 és accessible i qualsevol servidor STUN/TURN és correcte.",
         "video-codec": "El còdec de vídeo d'aquest flux no és compatible amb WebRTC en aquest navegador.",
         "audio-codec": "El còdec d'àudio d'aquest flux no és compatible amb WebRTC. Transcodifica a opus o G.711 amb go2rtc.",
-        "checking": "S'està comprovant la disponibilitat de WebRTC…"
+        "checking": "S'està comprovant la disponibilitat de WebRTC…",
+        "notConfiguredOptional": "Opcional: la vista en viu funciona sense ella. WebRTC es necessita principalment per a la xerrada en dues direccions."
       },
       "name": {
         "mse": "MSE",

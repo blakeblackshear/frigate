@@ -81,7 +81,6 @@
       "newCaseNamePlaceholder": "新案件名稱",
       "newCaseDescriptionPlaceholder": "案件描述",
       "label": "案件",
-      "nonAdminHelp": "將為這些匯出檔案建立一個新的案件。",
       "placeholder": "選擇案件"
     },
     "queueing": "正在加入匯出佇列…",
