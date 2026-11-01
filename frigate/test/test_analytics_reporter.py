@@ -4,7 +4,7 @@ import os
 import tempfile
 import threading
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, call, patch
 
 from frigate.analytics import reporter as reporter_module
 from frigate.analytics.reporter import (
@@ -38,6 +38,8 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
         self.path = os.path.join(self.dir.name, ".analytics.json")
+        self.config_path = os.path.join(self.dir.name, "config.yml")
+        self.save_config("telemetry:\n  analytics: true\n")
         self.now = 1_790_000_000.0
         self.send = Mock(return_value=SendOutcome.accepted)
         self.registry = Mock()
@@ -57,6 +59,14 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.build_report = patcher.start()
         self.addCleanup(patcher.stop)
 
+    def save_config(self, text: str) -> None:
+        with open(self.config_path, "w") as f:
+            f.write(text)
+
+    def seed_state(self) -> None:
+        # an install that has reported before, so no fresh-ID reset runs
+        save_state(AnalyticsState("a" * 32, 0.0), self.path)
+
     def reporter(self, path: str | None = None) -> AnalyticsReporter:
         # uniform(a, b) returns a: the shortest startup delay and interval
         rng = Mock()
@@ -68,6 +78,7 @@ class TestAnalyticsReporter(unittest.TestCase):
             self.registry,
             threading.Event(),
             state_path=path or self.path,
+            config_path=self.config_path,
             url="https://example.test/report",
             send=self.send,
             clock=lambda: self.now,
@@ -78,6 +89,7 @@ class TestAnalyticsReporter(unittest.TestCase):
         self.now += seconds
 
     def test_waits_for_the_startup_delay_then_sends(self):
+        self.seed_state()
         reporter = self.reporter()
 
         reporter.tick()
@@ -116,6 +128,7 @@ class TestAnalyticsReporter(unittest.TestCase):
 
     def test_a_failed_send_keeps_watermarks_and_waits_a_full_interval(self):
         self.send.return_value = SendOutcome.failed
+        self.seed_state()
         reporter = self.reporter()
         self.advance(FIRST_DELAY_S[0])
 
@@ -128,6 +141,7 @@ class TestAnalyticsReporter(unittest.TestCase):
 
     def test_an_accepted_report_without_health_keeps_the_watermarks(self):
         self.built.health = None
+        self.seed_state()
         reporter = self.reporter()
         self.advance(FIRST_DELAY_S[0])
 
@@ -135,6 +149,56 @@ class TestAnalyticsReporter(unittest.TestCase):
 
         self.send.assert_called_once()
         self.registry.mark_reported.assert_not_called()
+
+    def test_a_new_install_id_skips_notices_from_before_the_opt_in(self):
+        before = [{**SNAPSHOT[0], "occurrences": 2}]
+        self.registry.stats.side_effect = [before, SNAPSHOT]
+        reporter = self.reporter()
+        self.advance(FIRST_DELAY_S[0])
+
+        reporter.tick()
+
+        # the reset runs before the report's snapshot, which the 204 then marks
+        self.assertEqual(
+            self.registry.mark_reported.call_args_list, [call(before), call(SNAPSHOT)]
+        )
+        self.assertIs(self.build_report.call_args.args[0].notice_stats, SNAPSHOT)
+
+    def test_an_opt_out_saved_only_to_the_file_stops_the_send(self):
+        self.seed_state()
+        self.save_config("telemetry:\n  analytics: false\n")
+        reporter = self.reporter()
+        self.advance(FIRST_DELAY_S[0])
+
+        reporter.tick()
+
+        self.send.assert_not_called()
+        self.assertFalse(os.path.exists(self.path))
+        self.raise_notice.assert_not_called()
+
+    def test_yaml_truthy_spellings_in_the_file_count_as_consent(self):
+        for value in ("yes", "on", "1", "'true'"):
+            with self.subTest(value=value):
+                self.seed_state()
+                self.send.reset_mock()
+                self.save_config(f"telemetry:\n  analytics: {value}\n")
+                reporter = self.reporter()
+                self.advance(FIRST_DELAY_S[0])
+
+                reporter.tick()
+
+                self.send.assert_called_once()
+                self.assertTrue(os.path.exists(self.path))
+
+    def test_an_unreadable_config_file_falls_back_to_the_live_config(self):
+        self.seed_state()
+        self.save_config("telemetry: [unclosed\n")
+        reporter = self.reporter()
+        self.advance(FIRST_DELAY_S[0])
+
+        reporter.tick()
+
+        self.send.assert_called_once()
 
     def test_consent_withdrawn_while_the_report_builds_stops_the_send(self):
         reporter = self.reporter()

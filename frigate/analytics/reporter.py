@@ -8,6 +8,10 @@ from collections.abc import Callable
 from multiprocessing.synchronize import Event as MpEvent
 from typing import TYPE_CHECKING
 
+from pydantic import ValidationError
+from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
+
 from frigate.analytics.context import ReportContext
 from frigate.analytics.report import build_report
 from frigate.analytics.state import (
@@ -21,8 +25,10 @@ from frigate.analytics.state import (
 from frigate.analytics.transport import SendOutcome, send_report
 from frigate.config import FrigateConfig
 from frigate.config.holder import ConfigHolder
+from frigate.config.telemetry import TelemetryConfig
 from frigate.const import ANALYTICS_URL
 from frigate.notices import raise_notice, resolve_notice
+from frigate.util.config import find_config_file
 
 if TYPE_CHECKING:
     from frigate.notices.registry import NoticeRegistry
@@ -37,6 +43,24 @@ FIRST_DELAY_S = (15 * 60, 45 * 60)
 PROMPT_KIND = "analytics_prompt"
 
 
+def saved_consent(path: str) -> bool | None:
+    """telemetry.analytics as saved in the config file, or None if unreadable."""
+    try:
+        with open(path) as f:
+            raw = YAML(typ="safe").load(f)
+    except (OSError, ValueError, YAMLError):
+        return None
+
+    if not isinstance(raw, dict):
+        return None
+
+    # the live config's model, so yes, on, and 1 read as consent there too
+    try:
+        return TelemetryConfig.model_validate(raw.get("telemetry") or {}).analytics
+    except ValidationError:
+        return None
+
+
 class AnalyticsReporter(threading.Thread):
     """Follows the live config, so a settings save needs no restart."""
 
@@ -48,6 +72,7 @@ class AnalyticsReporter(threading.Thread):
         stop_event: MpEvent | threading.Event,
         *,
         state_path: str = STATE_PATH,
+        config_path: str | None = None,
         url: str = ANALYTICS_URL,
         send: Callable[[str, str], SendOutcome] = send_report,
         clock: Callable[[], float] = time.time,
@@ -59,6 +84,7 @@ class AnalyticsReporter(threading.Thread):
         self.notice_registry = notice_registry
         self.stop_event = stop_event
         self.state_path = state_path
+        self.config_path = config_path or find_config_file()
         self.url = url
         self.send = send
         self.clock = clock
@@ -125,9 +151,16 @@ class AnalyticsReporter(threading.Thread):
             if now < self.first_due:
                 return
 
-            state = load_state(self.state_path) or new_state()
+            loaded = load_state(self.state_path)
+            state = loaded or new_state()
 
             if not self._due(state.last_attempt_at, now):
+                return
+
+            # a YAML editor save or a hand edit reaches the live config only on
+            # restart, so an opt-out saved that way is read from the file
+            if saved_consent(self.config_path) is False:
+                delete_state(self.state_path)
                 return
 
             # saved before sending, so a failing endpoint or a crash mid-send
@@ -146,7 +179,7 @@ class AnalyticsReporter(threading.Thread):
             self.interval = self._next_interval()
 
         # the lock stays free during the request, so a save never waits on it
-        self._send(state.install_id, now)
+        self._send(state.install_id, now, fresh=loaded is None)
 
     def _due(self, last_attempt_at: float, now: float) -> bool:
         # a last attempt stamped in the future came from a wrong clock
@@ -154,7 +187,12 @@ class AnalyticsReporter(threading.Thread):
             now >= last_attempt_at + self.interval or last_attempt_at > now + INTERVAL_S
         )
 
-    def _send(self, install_id: str, now: float) -> None:
+    def _send(self, install_id: str, now: float, fresh: bool) -> None:
+        # a new install ID counts notices from the opt-in, so nothing raised
+        # before consent is sent
+        if fresh:
+            self.notice_registry.mark_reported(self.notice_registry.stats())
+
         notice_stats = self.notice_registry.stats()
         ctx = ReportContext(
             config=self.config_holder.config,
