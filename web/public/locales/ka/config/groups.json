@@ -1,1 +1,18 @@
-{}
+{
+    "motion": {
+        "global": {
+            "sensitivity": "გლობალური მგრძნობელობა"
+        },
+        "cameras": {
+            "algorithm": "ალგორითმი"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "გლობალური გამოსახულება"
+        },
+        "cameras": {
+            "display": "დისპლეი"
+        }
+    }
+}
