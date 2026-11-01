@@ -23,7 +23,8 @@
             "scaling_factor": {
                 "label": "Skaleerimistegur"
             }
-        }
+        },
+        "label": "Vaade linnulennult"
     },
     "version": {
         "label": "Praegune seadistuse versioon",
@@ -50,7 +51,9 @@
             "save_attempts": {
                 "label": "Salvestamiskatsed"
             }
-        }
+        },
+        "label": "Objektide klassifitseerimine",
+        "description": "Objektide märgistuste täpsustamiseks või seisundite klassifitseerimiseks kasutatavate klassifitseerimismudelite seadistused."
     },
     "semantic_search": {
         "triggers": {
@@ -126,7 +129,7 @@
         }
     },
     "audio_transcription": {
-        "label": "Audio transkriptsioon",
+        "label": "Heli üleskirjutus",
         "live_enabled": {
             "label": "Reaalajas transkriptsioon"
         },
@@ -146,7 +149,7 @@
         }
     },
     "detect": {
-        "label": "Objekti tuvastus",
+        "label": "Objektituvastus",
         "enabled": {
             "label": "Luba objektituvastus"
         },
@@ -395,7 +398,8 @@
         "effect": {
             "label": "Ajatempli efekt",
             "description": "Ajatempli teksti visuaalne efekt (puudub, ühtlane, vari)."
-        }
+        },
+        "label": "Ajatempli stiil"
     },
     "onvif": {
         "user": {
@@ -424,5 +428,8 @@
     },
     "profiles": {
         "label": "Profiilid"
+    },
+    "active_profile": {
+        "label": "Aktiivne profiil"
     }
 }
