@@ -84,8 +84,8 @@
       "newCaseNamePlaceholder": "Yeni vaka ismi",
       "newCaseDescriptionPlaceholder": "Vaka açıklaması",
       "label": "Vaka",
-      "nonAdminHelp": "Bu dışa aktarımlar için yeni bir vaka oluşturulacak.",
-      "placeholder": "Bir vaka seç"
+      "placeholder": "Bir vaka seç",
+      "nameRequired": "Vaka adı zorunludur"
     },
     "queueing": "Dışa aktarım sıraya alınıyor...",
     "tabs": {
@@ -112,7 +112,9 @@
       "selectWithActivity": "Nesne takibi yapmış kameralar",
       "selectGroup": "Grup seç",
       "noMatchingCameras": "Arama kriterlerinize uyan kamera bulunamadı",
-      "selectedCount": "{{selected}} / {{total}} seçili"
+      "selectedCount": "{{selected}} / {{total}} seçili",
+      "noCamerasSelected": "En az bir kamera seçin",
+      "caseNameDefault": "Çok kameralı dışa aktarım - {{date}}"
     },
     "multi": {
       "title_one": "1 incelemeyi dışa aktar",
