@@ -390,6 +390,105 @@ class TestHttpApp(BaseTestHttp):
             assert event["id"] == id
             assert event["retain_indefinitely"] is False
 
+    ####################################################################################################################
+    ###################################  DELETE /events/ (multi) Endpoint  #############################################
+    ####################################################################################################################
+    def test_delete_events_by_ids(self):
+        id1 = "111111.random"
+        id2 = "222222.random"
+        missing = "333333.random"
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event(id1)
+            super().insert_mock_event(id2)
+            response = client.request(
+                "DELETE", "/events/", json={"event_ids": [id1, id2, missing]}
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["success"] is True
+        assert sorted(body["deleted_events"]) == sorted([id1, id2])
+        assert body["not_found_events"] == [missing]
+        assert len(Event.select()) == 0
+
+    def test_delete_events_before_timestamp(self):
+        old_id = "old.event"
+        new_id = "new.event"
+        now = int(datetime.now().timestamp())
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event(old_id, start_time=now - 1000)
+            super().insert_mock_event(new_id, start_time=now)
+            response = client.request("DELETE", "/events/", json={"before": now - 500})
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["success"] is True
+        assert body["deleted_events"] == [old_id]
+        assert body["not_found_events"] == []
+        assert [event.id for event in Event.select()] == [new_id]
+
+    def test_delete_events_after_timestamp(self):
+        old_id = "old.event"
+        new_id = "new.event"
+        now = int(datetime.now().timestamp())
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event(old_id, start_time=now - 1000)
+            super().insert_mock_event(new_id, start_time=now)
+            response = client.request("DELETE", "/events/", json={"after": now - 500})
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["success"] is True
+        assert body["deleted_events"] == [new_id]
+        assert [event.id for event in Event.select()] == [old_id]
+
+    def test_delete_events_time_range_with_camera(self):
+        front_old = "front.old"
+        front_new = "front.new"
+        back_old = "back.old"
+        now = int(datetime.now().timestamp())
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event(front_old, start_time=now - 1000)
+            super().insert_mock_event(front_new, start_time=now)
+            super().insert_mock_event(
+                back_old, camera="back_door", start_time=now - 1000
+            )
+            response = client.request(
+                "DELETE",
+                "/events/",
+                json={"before": now - 500, "camera": "front_door"},
+            )
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["success"] is True
+        assert body["deleted_events"] == [front_old]
+        assert sorted(event.id for event in Event.select()) == sorted(
+            [front_new, back_old]
+        )
+
+    def test_delete_events_no_ids_or_filters(self):
+        with AuthTestClient(self.app) as client:
+            response = client.request("DELETE", "/events/", json={})
+
+        assert response.status_code == 400
+        assert response.json()["success"] is False
+
+    def test_delete_events_filters_match_nothing(self):
+        now = int(datetime.now().timestamp())
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_event("123456.random", start_time=now)
+            response = client.request("DELETE", "/events/", json={"before": now - 1000})
+
+        assert response.status_code == 404
+        assert response.json()["success"] is False
+        assert len(Event.select()) == 1
+
     def test_event_time_filtering(self):
         morning_id = "123456.random"
         evening_id = "654321.random"
