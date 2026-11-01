@@ -75,7 +75,6 @@
       "newCaseNamePlaceholder": "Nama Kasus Baru",
       "newCaseDescriptionPlaceholder": "Deskripsi Kasus",
       "label": "Kasus",
-      "nonAdminHelp": "Kasus Baru akan Dibuat untuk Ekspor ini.",
       "placeholder": "Pilih Kasus"
     },
     "tabs": {
