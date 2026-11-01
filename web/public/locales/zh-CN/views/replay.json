@@ -22,7 +22,8 @@
             "error": "调试回放启动失败：{{error}}",
             "alreadyActive": "已有回放会话正在运行",
             "stopError": "调试回放停止失败：{{error}}",
-            "goToReplay": "进入回放"
+            "goToReplay": "进入回放",
+            "noRecordings": "在所选时间范围内未找到任何录制"
         }
     },
     "page": {

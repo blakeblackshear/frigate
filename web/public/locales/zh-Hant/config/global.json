@@ -36,8 +36,8 @@
         }
     },
     "version": {
-        "label": "當前配置版本",
-        "description": "用於標識當前生效配置的版本號（數字或字串均可），幫助辨識配置遷移或格式是否發生變更。"
+        "label": "目前設定檔版本",
+        "description": "用於標識目前生效配置的版本號（數字或字串均可），幫助辨識配置遷移或格式是否發生變更。"
     },
     "safe_mode": {
         "label": "安全模式",
@@ -92,7 +92,7 @@
         },
         "trusted_proxies": {
             "label": "受信任的代理",
-            "description": "用於確定客戶端 IP 以進行速率限制的受信任代理 IP 清單。"
+            "description": "用於確定用戶端 IP 以進行速率限制的受信任代理 IP 清單。"
         },
         "hash_iterations": {
             "label": "雜湊迭代次數",
@@ -109,7 +109,7 @@
     },
     "database": {
         "label": "資料庫",
-        "description": "Frigate 用於儲存追蹤目標和錄影元資料的 SQLite 資料庫設定。",
+        "description": "Frigate 用於儲存追蹤目標和錄影中繼資料的 SQLite 資料庫設定。",
         "path": {
             "label": "資料庫路徑",
             "description": "Frigate SQLite 資料庫檔案的儲存路徑。"
@@ -117,7 +117,7 @@
     },
     "go2rtc": {
         "label": "go2rtc",
-        "description": "整合的 go2rtc 轉發服務設定，用於即時監控流轉發和轉碼。"
+        "description": "整合的 go2rtc 轉發服務設定，用於即時監控流轉發和轉檔。"
     },
     "mqtt": {
         "label": "MQTT",
@@ -128,7 +128,7 @@
         },
         "host": {
             "label": "MQTT 主機",
-            "description": "MQTT 代理的主機名或 IP 地址。"
+            "description": "MQTT 代理的主機名稱或 IP 位址。"
         },
         "port": {
             "label": "MQTT 埠",
@@ -139,8 +139,8 @@
             "description": "所有 Frigate 主題的 MQTT 主題字首；如果執行多個例項，必須唯一。"
         },
         "client_id": {
-            "label": "客戶端 ID",
-            "description": "連線到 MQTT 代理時使用的客戶端辨識符號；每個例項應該唯一。"
+            "label": "用戶端 ID",
+            "description": "連線到 MQTT 代理時使用的用戶端辨識符號；每個例項應該唯一。"
         },
         "stats_interval": {
             "label": "統計資訊間隔",
@@ -159,12 +159,12 @@
             "description": "用於 TLS 連線到代理的 CA 證書路徑（用於自簽名證書）。"
         },
         "tls_client_cert": {
-            "label": "客戶端證書",
-            "description": "TLS 雙向認證的客戶端證書路徑；使用客戶端證書時不要設定使用者名稱/密碼。"
+            "label": "用戶端憑證",
+            "description": "TLS 雙向認證的用戶端憑證路徑；使用用戶端憑證時不要設定使用者名稱/密碼。"
         },
         "tls_client_key": {
-            "label": "客戶端金鑰",
-            "description": "客戶端證書的私鑰路徑。"
+            "label": "用戶端金鑰",
+            "description": "用戶端憑證的私鑰路徑。"
         },
         "tls_insecure": {
             "label": "TLS 不安全連線",
@@ -183,8 +183,8 @@
             "description": "為所有攝影機啟用或停用通知；可按攝影機覆蓋。"
         },
         "email": {
-            "label": "通知郵箱",
-            "description": "用於推送通知或某些通知提供商要求的郵箱地址。"
+            "label": "通知電子信箱",
+            "description": "用於推送通知或某些通知提供商要求的電子信箱位址。"
         },
         "cooldown": {
             "label": "冷卻時間",
@@ -251,7 +251,7 @@
             "description": "當沒有權限組對映適用時分配給代理認證使用者的預設權限組（admin 或 viewer）。"
         },
         "separator": {
-            "label": "分隔符",
+            "label": "分隔符號",
             "description": "用於分割代理請求頭中多個值的字元。"
         }
     },
@@ -279,7 +279,7 @@
             },
             "intel_gpu_device": {
                 "label": "Intel GPU 裝置",
-                "description": "當系統存在多個 Intel 顯示卡時，用於將顯示卡執行資料繫結到指定裝置的 PCI 匯流排地址或 DRM 裝置路徑（示例：/dev/dri/card1）。"
+                "description": "當系統存在多個 Intel 顯示卡時，用於將顯示卡執行資料繫結到指定裝置的 PCI 匯流排位址或 DRM 裝置路徑（範例：/dev/dri/card1）。"
             }
         },
         "version_check": {
@@ -300,246 +300,15 @@
         "description": "使用者介面偏好設定，如時區、時間/日期格式和單位。",
         "timezone": {
             "label": "時區",
-            "description": "UI 中顯示的可選時區（如果未設定，則預設為瀏覽器本地時間）。"
+            "description": "UI 中顯示的可選時區（如果未設定，則預設為瀏覽器本機時間）。"
         },
         "time_format": {
             "label": "時間格式",
             "description": "UI 中使用的時間格式（browser、12hour 或 24hour）。"
         },
-        "date_style": {
-            "label": "日期樣式",
-            "description": "UI 中使用的日期樣式（full、long、medium、short）。"
-        },
-        "time_style": {
-            "label": "時間樣式",
-            "description": "UI 中使用的時間樣式（full、long、medium、short）。"
-        },
         "unit_system": {
             "label": "單位系統",
             "description": "UI 和 MQTT 中使用的顯示單位系統（公制或英制）。"
-        }
-    },
-    "detectors": {
-        "label": "偵測器硬體",
-        "description": "目標偵測器（CPU、GPU、ONNX 後端）的配置以及任何偵測器特定的模型設定。",
-        "type": {
-            "label": "型別"
-        },
-        "model": {
-            "label": "偵測器特定的模型配置",
-            "description": "偵測器特定的模型配置選項（路徑、輸入尺寸等）。",
-            "path": {
-                "label": "自訂目標偵測模型路徑",
-                "description": "自訂偵測模型檔案的路徑（或使用 plus://<model_id> 指定 Frigate+ 模型）。"
-            },
-            "labelmap_path": {
-                "label": "自訂目標偵測器的標籤對映（labelmap）",
-                "description": "偵測器標籤對映檔案（labelmap）路徑，用於將數字類別對映為文字標籤。"
-            },
-            "width": {
-                "label": "目標偵測模型輸入寬度",
-                "description": "模型輸入張量（input tensor）的寬度（以像素為單位）。"
-            },
-            "height": {
-                "label": "目標偵測模型輸入高度",
-                "description": "模型輸入張量（input tensor）的高度（以像素為單位）。"
-            },
-            "labelmap": {
-                "label": "標籤對映（labelmap）自訂",
-                "description": "合併到標準標籤對映表中的覆蓋 / 重對映規則。"
-            },
-            "attributes_map": {
-                "label": "目標標籤到其屬性標籤的對映",
-                "description": "用於繫結元資料的目標標籤 → 屬性標籤對映關係（例如：'car'→ ['license_plate'] 為將車牌屬性繫結到車輛上）。"
-            },
-            "input_tensor": {
-                "label": "模型輸入張量形狀",
-                "description": "模型期望的張量格式（Tensor format）：'nhwc' 或 'nchw'。"
-            },
-            "input_pixel_format": {
-                "label": "模型輸入像素顏色格式",
-                "description": "模型期望的像素顏色空間：'rgb'、'bgr' 或 'yuv'。"
-            },
-            "input_dtype": {
-                "label": "模型輸入資料型別",
-                "description": "模型輸入張量的資料型別（例如 'float32'）。"
-            },
-            "model_type": {
-                "label": "目標偵測模型型別",
-                "description": "某些偵測器用於最佳化的偵測器模型架構型別（ssd、yolox、yolonas）。"
-            }
-        },
-        "model_path": {
-            "label": "偵測器專用模型路徑",
-            "description": "所選偵測器需要時，需填寫其模型檔案的路徑。"
-        },
-        "axengine": {
-            "label": "愛芯元智 NPU",
-            "description": "AXERA AX650N/AX8850N NPU 偵測器，透過 AXEngine 執行庫載入並執行編譯後的 .axmodel 模型檔案。"
-        },
-        "cpu": {
-            "label": "CPU",
-            "description": "在主機 CPU 上執行 TensorFlow Lite 模型的 CPU TFLite 偵測器，無硬體加速。不推薦使用。",
-            "num_threads": {
-                "label": "偵測執行緒數",
-                "description": "用於基於 CPU 的推理的執行緒數。"
-            }
-        },
-        "deepstack": {
-            "label": "DeepStack",
-            "description": "將影像傳送到遠端 DeepStack HTTP API 進行推理的 DeepStack/CodeProject.AI 偵測器。不推薦使用。",
-            "api_url": {
-                "label": "DeepStack API 網址",
-                "description": "DeepStack API 的 URL。"
-            },
-            "api_timeout": {
-                "label": "DeepStack API 超時時間（秒）",
-                "description": "DeepStack API 請求允許的最長時間。"
-            },
-            "api_key": {
-                "label": "DeepStack API 金鑰（如需要）",
-                "description": "用於認證 DeepStack 服務的可選 API 金鑰。"
-            }
-        },
-        "degirum": {
-            "label": "DeGirum",
-            "description": "透過 DeGirum 雲或本地推理服務執行模型的 DeGirum 偵測器。",
-            "location": {
-                "label": "推理位置",
-                "description": "DeGirum 推理引擎的位置（例如 '@cloud'、'127.0.0.1'）。"
-            },
-            "zoo": {
-                "label": "模型庫",
-                "description": "DeGirum 模型庫的路徑或 URL。"
-            },
-            "token": {
-                "label": "DeGirum 雲令牌",
-                "description": "用於 DeGirum 雲存取的令牌。"
-            }
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "使用 EdgeTPU 委託執行為 Coral EdgeTPU 編譯的 TensorFlow Lite 模型的 EdgeTPU 偵測器。",
-            "device": {
-                "label": "裝置型別",
-                "description": "用於 EdgeTPU 推理的裝置（例如 'usb'、'pci'）。"
-            }
-        },
-        "hailo8l": {
-            "label": "Hailo-8/Hailo-8L",
-            "description": "使用 HEF 模型和 HailoRT SDK 在 Hailo 硬體上進行推理的 Hailo-8/Hailo-8L 偵測器。",
-            "device": {
-                "label": "裝置型別",
-                "description": "用於 Hailo 推理的裝置（例如 'PCIe'、'M.2'）。"
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "在 MemryX 加速器上執行編譯的 DFP 模型的 MemryX MX3 偵測器。",
-            "device": {
-                "label": "裝置路徑",
-                "description": "用於 MemryX 推理的裝置（例如 'PCIe'）。"
-            }
-        },
-        "onnx": {
-            "label": "ONNX",
-            "description": "執行 ONNX 模型的 ONNX 偵測器；當可用時將使用可用的加速後端（CUDA/ROCm/OpenVINO）。",
-            "device": {
-                "label": "裝置型別",
-                "description": "用於 ONNX 推理的裝置（例如 'AUTO'、'CPU'、'GPU'）。"
-            }
-        },
-        "openvino": {
-            "label": "OpenVINO",
-            "description": "適用於 AMD 和 Intel CPU、Intel GPU 和 Intel VPU 硬體的 OpenVINO 偵測器。",
-            "device": {
-                "label": "裝置型別",
-                "description": "用於 OpenVINO 推理的裝置（例如 'CPU'、'GPU'、'NPU'）。"
-            }
-        },
-        "rknn": {
-            "label": "RKNN",
-            "description": "用於 Rockchip NPU 的 RKNN 偵測器；在 Rockchip 硬體上執行編譯的 RKNN 模型。",
-            "num_cores": {
-                "label": "使用的 NPU 核心數。",
-                "description": "要使用的 NPU 核心數（0 表示自動）。"
-            }
-        },
-        "synaptics": {
-            "label": "Synaptics",
-            "description": "使用 Synap SDK 在 Synaptics 硬體上執行 .synap 格式模型的 Synaptics NPU 偵測器。"
-        },
-        "teflon_tfl": {
-            "label": "Teflon",
-            "description": "使用 Mesa Teflon 委託庫在支援的 GPU 上加速推理的 TFLite Teflon 委託偵測器。"
-        },
-        "tensorrt": {
-            "label": "TensorRT",
-            "description": "使用序列化的 TensorRT 引擎進行加速推理的 Nvidia Jetson 裝置 TensorRT 偵測器。",
-            "device": {
-                "label": "GPU 裝置索引",
-                "description": "要使用的 GPU 裝置索引。"
-            }
-        },
-        "zmq": {
-            "label": "ZMQ IPC",
-            "description": "透過 ZeroMQ IPC 端點將推理解除安裝到外部程序的 ZMQ IPC 偵測器。",
-            "endpoint": {
-                "label": "ZMQ IPC 端點",
-                "description": "要連線的 ZMQ 端點。"
-            },
-            "request_timeout_ms": {
-                "label": "ZMQ 請求超時（毫秒）",
-                "description": "ZMQ 請求的超時時間（毫秒）。"
-            },
-            "linger_ms": {
-                "label": "ZMQ 套接字逗留時間（毫秒）",
-                "description": "套接字逗留時間（毫秒）。"
-            }
-        }
-    },
-    "model": {
-        "label": "偵測模型",
-        "description": "用於配置自訂目標偵測模型及其輸入形狀的設定。",
-        "path": {
-            "label": "自訂目標偵測模型路徑",
-            "description": "自訂偵測模型檔案的路徑（或 Frigate+ 模型的 plus://<model_id>）。"
-        },
-        "labelmap_path": {
-            "label": "自訂目標偵測器的標籤對映",
-            "description": "將數字類別對映到偵測器字串標籤的標籤對映檔案路徑。"
-        },
-        "width": {
-            "label": "目標偵測模型輸入寬度",
-            "description": "模型輸入張量的寬度（像素）。"
-        },
-        "height": {
-            "label": "目標偵測模型輸入高度",
-            "description": "模型輸入張量的高度（像素）。"
-        },
-        "labelmap": {
-            "label": "標籤對映自訂",
-            "description": "要合併到標準標籤對映中的覆蓋或重對映條目。"
-        },
-        "attributes_map": {
-            "label": "目標標籤到屬性標籤的對映",
-            "description": "從目標標籤到屬性標籤的對映，用於附加元資料（例如 'car' -> ['license_plate']）。"
-        },
-        "input_tensor": {
-            "label": "模型輸入張量形狀",
-            "description": "模型期望的張量格式：'nhwc' 或 'nchw'。"
-        },
-        "input_pixel_format": {
-            "label": "模型輸入像素顏色格式",
-            "description": "模型期望的像素色彩空間：'rgb'、'bgr' 或 'yuv'。"
-        },
-        "input_dtype": {
-            "label": "模型輸入資料型別",
-            "description": "模型輸入張量的資料型別（例如 'float32'）。"
-        },
-        "model_type": {
-            "label": "目標偵測模型型別",
-            "description": "某些偵測器用於最佳化的偵測器模型架構型別（ssd、yolox、yolonas）。"
         }
     },
     "genai": {
@@ -567,7 +336,7 @@
         },
         "provider_options": {
             "label": "提供商選項",
-            "description": "要傳遞給生成式 AI 客戶端的、與服務提供商相關的額外配置項。"
+            "description": "要傳遞給生成式 AI 用戶端的、與服務提供商相關的額外配置選項。"
         },
         "runtime_options": {
             "label": "執行時選項",
@@ -580,10 +349,6 @@
         "enabled": {
             "label": "開啟鳥瞰圖",
             "description": "開啟或關閉鳥瞰圖功能。"
-        },
-        "mode": {
-            "label": "追蹤模式",
-            "description": "在鳥瞰檢視中包含攝影機的模式：'objects'（目標）、'motion'（動作）或 'continuous'（持續）。"
         },
         "restream": {
             "label": "轉發 RTSP",
@@ -734,7 +499,7 @@
             "description": "該攝影機的所有輸入流配置清單（包含路徑和功能）。",
             "path": {
                 "label": "輸入路徑",
-                "description": "攝影機輸入影片流的地址或路徑。"
+                "description": "攝影機輸入影片串流的 URL 或路徑。"
             },
             "roles": {
                 "label": "輸入流功能",
@@ -891,7 +656,7 @@
             },
             "object_prompts": {
                 "label": "目標提示",
-                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行定製。"
+                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行自訂。"
             },
             "objects": {
                 "label": "生成式 AI 目標",
@@ -1043,6 +808,9 @@
             "max_concurrent": {
                 "label": "最大併發匯出數",
                 "description": "同時可處理的最大匯出任務數量。"
+            },
+            "chapters": {
+                "label": "匯出錄影時要嵌入的章節資訊"
             }
         },
         "preview": {
@@ -1183,10 +951,6 @@
             "default": {
                 "label": "預設保留",
                 "description": "保留快照的預設天數。"
-            },
-            "mode": {
-                "label": "保留模式",
-                "description": "保留模式：all（儲存所有片段）、motion（儲存有動作的片段）或 active_objects（儲存有活動目標的片段）。"
             },
             "objects": {
                 "label": "目標保留",
@@ -1447,7 +1211,7 @@
         },
         "format": {
             "label": "車牌格式正則",
-            "description": "用於驗證辨識的車牌字串是否符合預期格式的可選正則表示式。"
+            "description": "用於驗證辨識的車牌字串是否符合預期格式的可選正規表示式。"
         },
         "match_distance": {
             "label": "匹配距離",
@@ -1455,7 +1219,7 @@
         },
         "known_plates": {
             "label": "已知車牌",
-            "description": "要特別追蹤或報警的車牌或正則表示式清單。"
+            "description": "要特別追蹤或報警的車牌或正規表示式清單。"
         },
         "enhancement": {
             "label": "增強級別",
@@ -1470,13 +1234,13 @@
             "description": "這是一個覆蓋選項，用於指定特定裝置。請參閱 https://onnxruntime.ai/docs/execution-providers/ 瞭解更多資訊"
         },
         "replace_rules": {
-            "label": "替換規則",
-            "description": "用於在匹配之前規範化偵測到的車牌字串的正則替換規則。",
+            "label": "取代規則",
+            "description": "用於在符合之前規範化偵測到的車牌字串的正規表示式。",
             "pattern": {
-                "label": "正則模式"
+                "label": "正規模式"
             },
             "replacement": {
-                "label": "替換字串"
+                "label": "取代字串"
             }
         },
         "expire_time": {
@@ -1510,7 +1274,7 @@
     },
     "active_profile": {
         "label": "啟用設定檔",
-        "description": "當前啟用的設定檔名稱。僅在執行時使用，不會寫入 YAML 設定檔中。"
+        "description": "目前啟用的設定檔名稱。僅在執行時使用，不會寫入 YAML 設定檔中。"
     },
     "camera_mqtt": {
         "label": "MQTT",
@@ -1546,13 +1310,13 @@
     },
     "camera_ui": {
         "label": "攝影機頁面",
-        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用“攝影機組”。",
+        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用「攝影機群組」。",
         "order": {
             "label": "UI 順序",
             "description": "用於在頁面中排序攝影機的順序（只會影響預設儀表板和清單）；數值越大則在越後面。"
         },
         "dashboard": {
-            "label": "在 UI 中顯示",
+            "label": "在即時儀表板上顯示",
             "description": "切換此攝影機在 Frigate 頁面中是否可見。停用後需要手動編輯配置才能再次在頁面中檢視此攝影機。"
         },
         "review": {
@@ -1604,7 +1368,7 @@
             },
             "zoom_factor": {
                 "label": "變焦因子",
-                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能丟失追蹤。數值範圍 0.1 到 0.75。"
+                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能失去追蹤。數值範圍 0.1 到 0.75。"
             },
             "track": {
                 "label": "追蹤目標",

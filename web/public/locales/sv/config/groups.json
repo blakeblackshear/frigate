@@ -1,7 +1,7 @@
 {
     "audio": {
         "global": {
-            "sensitivity": "Global känslighet"
+            "sensitivity": "Global ljudkänslighet"
         }
     }
 }

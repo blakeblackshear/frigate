@@ -18,12 +18,15 @@
       "review": {
         "question": {
           "label": "Konfirmasi label ini untuk Frigate Plus",
-          "ask_a": "Apakah objek ini adalah sebuah<code>{{label}}</code>?",
+          "ask_a": "Apakah objek ini adalah sebuah <code>{{label}}</code>?",
           "ask_an": "Apakah objek ini <code>{{label}}</code>?",
           "ask_full": "Apakah ini object <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Terkirim"
+        },
+        "toast": {
+          "error": "Gagal submit ke Frigate+. Harap periksa koneksi jaringan Anda dan coba lagi."
         }
       }
     },
@@ -57,7 +60,15 @@
       "view": "Melihat",
       "batchSuccess_other": "{{count}} Ekspor dimulai. Membuka kasusnya sekarang.",
       "batchPartial": "Ekspor berhasil dimulai sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
-      "batchFailed": "Gagal memulai ekspor sebanyak {{total}}. Kamera yang gagal: {{failedCameras}}"
+      "batchFailed": "Gagal memulai ekspor sebanyak {{total}}. Kamera yang gagal: {{failedCameras}}",
+      "batchQueuedPartial": "Antrian ekspor berhasil sebanyak {{successful}} dari total {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
+      "batchQueuedSuccess_other": "{{count}} ekspor antrian.",
+      "batchQueueFailed": "Gagal mengantrekan {{total}} ekspor. Kamera yang gagal: {{failedCameras}}",
+      "error": {
+        "failed": "Gagal mengantrekan ekspor: {{error}}",
+        "noValidTimeSelected": "Rentang waktu yang dipilih tidak valid",
+        "endTimeMustAfterStartTime": "Waktu selesai harus setelah waktu mulai"
+      }
     },
     "case": {
       "newCaseOption": "Membuat Kasus Baru",
@@ -86,14 +97,15 @@
       "selectWithActivity": "Kamera dengan objek yang dilacak",
       "selectGroup": "Pilih grup",
       "noMatchingCameras": "Tidak ada kamera yang sesuai dengan pencarian Anda",
-      "selectedCount": "{{terpilih}} / {{total}} terpilih",
-      "namePlaceholder": "Nama dasar opsional untuk ekspor ini"
+      "selectedCount": "{{selected}} / {{total}} terpilih",
+      "namePlaceholder": "Nama dasar opsional untuk ekspor ini",
+      "searchOrSelectGroup": "Cari, atau pilih grup kamera...",
+      "selectAll": "Pilih semua kamera"
     },
     "multi": {
       "title_other": "Ekspor {{count}} Ulasan",
       "toast": {
-        "startedNoCase_other": "{{count}} Ekspor Dimulai.",
-        "started_other": "{{count}} ekspor dimulai. Membuka kasusnya sekarang.",
+        "started_other": "{{count}} ekspor dimulai.",
         "partial": "Memulai {{successful}} dari {{total}} ekspor. Gagal: {{failedItems}}",
         "failed": "Gagal memulai {{total}} ekspor. Gagal: {{failedItems}}"
       },
@@ -101,13 +113,37 @@
       "descriptionNoCase": "Ekspor setiap ulasan yang dipilih.",
       "exportButton_other": "Ekspor {{count}} ulasan",
       "exportingButton": "Mengekspor...",
-      "caseNamePlaceholder": "Ekspor tinjauan - {{tanggal}}"
+      "caseNamePlaceholder": "Ekspor tinjauan - {{date}}"
     },
-    "queueing": "Mengantrekan Ekspor..."
+    "queueing": "Mengantrekan Ekspor...",
+    "fromTimeline": {
+      "saveExport": "Simpan ektraksi",
+      "queueingExport": "Antrean Ekspor...",
+      "previewExport": "Pratinjau Ekspor",
+      "useThisRange": "Gunakan Rentang Ini"
+    },
+    "stream": {
+      "label": "Kualitas",
+      "auto": "Otomatis",
+      "main": "Asli",
+      "sub": "Rendah",
+      "autoDesc": "Menggunakan streaming utama dan beralih ke sub-stream berkualitas lebih rendah jika streaming utama tidak tersedia.",
+      "mainDesc": "Mengekspor streaming utama dengan kualitas asli saja. Rentang waktu di mana streaming utama tidak tersedia akan terpotong.",
+      "subDesc": "Mengekspor sub-stream berkualitas lebih rendah saja. Rentang waktu di mana sub-stream tidak tersedia akan terpotong."
+    }
   },
   "search": {
     "saveSearch": {
-      "overwrite": "{{searchName}} sudah ada. Menyimpan akan menimpa file yang sudah ada."
+      "overwrite": "{{searchName}} sudah ada. Menyimpannya akan menimpa file yang sudah ada.",
+      "label": "Simpan Pencarian",
+      "desc": "Berikan nama untuk pencarian tersimpan ini.",
+      "placeholder": "Masukkan nama untuk pencarian Anda",
+      "success": "Pencarian ({{searchName}}) sudah tersimpan.",
+      "button": {
+        "save": {
+          "label": "Simpan pencarian ini"
+        }
+      }
     }
   },
   "streaming": {
@@ -118,7 +154,51 @@
       }
     },
     "showStats": {
-      "label": "Tampilkan statistik streaming"
+      "label": "Tampilkan statistik streaming",
+      "desc": "Aktifkan opsi ini untuk menampilkan statistik streaming sebagai overlay pada tampilan kamera."
+    },
+    "debugView": "Tampilan Debug",
+    "label": "Streaming"
+  },
+  "recording": {
+    "shareTimestamp": {
+      "label": "Bagikan Cap Waktu",
+      "title": "Bagikan Cap Waktu",
+      "custom": "Cap Waktu Kustom",
+      "button": "Bagikan URL Stempel Waktu",
+      "description": "Bagikan URL bertanda waktu sesuai posisi pemutar saat ini atau pilih tanda waktu kustom. Perlu dicatat bahwa ini bukan URL bagikan publik dan hanya dapat diakses oleh pengguna yang memiliki akses ke Frigate dan kamera ini.",
+      "shareTitle": "Pratinjau Penunjuk Waktu Frigate : {{camera}}"
+    },
+    "confirmDelete": {
+      "title": "Konfirmasi Penghapusan",
+      "desc": {
+        "selected": "Anda yakin ingin menghapus semua video yang direkam terkait dengan item ulasan ini?<br /><br />Tekan terus tombol <em>Shift</em> untuk melewati dialog ini di masa mendatang."
+      },
+      "toast": {
+        "success": "Rekaman video terkait dengan item ulasan yang dipilih telah berhasil dihapus.",
+        "error": "Gagal untuk menghapus: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Ekspor",
+      "markAsReviewed": "Tandai sebagai sudah ditinjau",
+      "markAsUnreviewed": "Tandai sebagai belum ditinjau",
+      "deleteNow": "Hapus Sekarang",
+      "generateDescription": "Buat deskripsi"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Deskripsi AI Generatif telah diminta untuk item tinjauan ini.",
+        "error": "Gagal meminta deskripsi: {{error}}"
+      }
     }
+  },
+  "imagePicker": {
+    "selectImage": "Pilih miniatur objek yang dilacak",
+    "unknownLabel": "Gambar Pemicu Tersimpan",
+    "search": {
+      "placeholder": "Cari berdasarkan label atau sub-label..."
+    },
+    "noImages": "Tidak ada gambar kecil ditemukan untuk kamera ini"
   }
 }

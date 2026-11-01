@@ -54,6 +54,11 @@ class TrackedObject:
         self.obj_data = obj_data
         self.colormap = model_config.colormap
         self.logos = model_config.all_attribute_logos
+        self.thumbnail_attributes = [
+            attr
+            for attr in model_config.attributes_map.get(obj_data["label"], [])
+            if attr in model_config.non_logo_attributes
+        ]
         self.camera_config = camera_config
         self.ui_config = ui_config
         self.frame_cache = frame_cache
@@ -149,7 +154,7 @@ class TrackedObject:
         if not self.false_positive and has_valid_frame:
             # determine if this frame is a better thumbnail
             if self.thumbnail_data is None or is_better_thumbnail(
-                self.obj_data["label"],
+                self.thumbnail_attributes,
                 self.thumbnail_data,
                 obj_data,
                 self.camera_config.frame_shape,
@@ -164,7 +169,6 @@ class TrackedObject:
                         "attributes": obj_data["attributes"],
                         "current_estimated_speed": self.current_estimated_speed,
                         "velocity_angle": self.velocity_angle,
-                        "path_data": self.path_data.copy(),
                         "recognized_license_plate": obj_data.get(
                             "recognized_license_plate"
                         ),
@@ -181,6 +185,7 @@ class TrackedObject:
         # check zones
         current_zones = []
         bottom_center = (obj_data["centroid"][0], obj_data["box"][3])
+        detected = obj_data["frame_time"] == current_frame_time
         in_loitering_zone = False
         in_speed_zone = False
 
@@ -270,11 +275,13 @@ class TrackedObject:
 
                         loitering_score = self.zone_loitering.get(name, 0) + 1
 
-                        # loitering time is configured as seconds, convert to count of frames
+                        # loitering time is configured as seconds, convert to count of frames.
+                        # a lost object keeps counting but can't newly enter a zone
+                        # until it is detected again
                         if loitering_score >= (
                             self.camera_config.zones[name].loitering_time
                             * self.camera_config.detect.fps
-                        ):
+                        ) and (detected or name in self.current_zones):
                             current_zones.append(name)
 
                             if name not in self.entered_zones:

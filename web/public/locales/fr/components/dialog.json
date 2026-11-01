@@ -16,18 +16,6 @@
         "desc": "Les objets situés dans des zones à ignorer ne doivent pas être signalés comme de faux positifs, car cela nuirait à la précision du modèle."
       },
       "review": {
-        "true": {
-          "label": "Confirmez cette étiquette pour Frigate Plus",
-          "true_one": "C'est un {{label}}",
-          "true_many": "Ce sont des {{label}}",
-          "true_other": "Ce sont des {{label}}"
-        },
-        "false": {
-          "false_one": "Ceci n'est pas un {{label}}",
-          "false_many": "Ceux-ci ne sont pas des {{label}}",
-          "false_other": "Ceux-ci ne sont pas des {{label}}",
-          "label": "Ne pas confirmer cette étiquette pour Frigate Plus"
-        },
         "state": {
           "submitted": "Soumis"
         },
@@ -65,9 +53,9 @@
     "selectOrExport": "Sélectionner ou exporter",
     "toast": {
       "error": {
-        "failed": "Échec du démarrage de l'exportation : {{error}}",
+        "failed": "Échec de la mis en attente de l'exportation : {{error}}",
         "endTimeMustAfterStartTime": "L'heure de fin doit être postérieure à l'heure de début.",
-        "noVaildTimeSelected": "La plage horaire sélectionnée n'est pas valide."
+        "noValidTimeSelected": "Interval de temps invalide"
       },
       "success": "Exportation démarrée avec succès. Consultez le fichier sur la page des exportations.",
       "view": "Vue",
@@ -77,9 +65,11 @@
       "batchSuccess_other": "{{count}} exports démarrés. Ouverture du dossier en cours.",
       "batchPartial": "{{successful}} exports ont démarré sur un total de : {{total}}. Échecs : {{failedCameras}}",
       "batchFailed": "Échec du démarrage de {{total}} exports. Échecs : {{failedCameras}}",
-      "batchQueuedSuccess_one": "Un export rajouté au traitement. Ouverture du dossier en cours.",
-      "batchQueuedSuccess_many": "{{count}} exports rajoutés au traitement. Ouverture du dossier en cours.",
-      "batchQueuedSuccess_other": "{{count}} exports rajoutés au traitement. Ouverture du dossier en cours."
+      "batchQueuedSuccess_one": "Un export ajouté au traitement. Ouverture du dossier en cours.",
+      "batchQueuedSuccess_many": "{{count}} exports ajoutés au traitement. Ouverture du dossier en cours.",
+      "batchQueuedSuccess_other": "{{count}} exports rajoutés au traitement. Ouverture du dossier en cours.",
+      "batchQueuedPartial": "{{successful}} export(s) sur {{total}} mis en file d'attente. Caméra(s) en échec : {{failedCameras}}",
+      "batchQueueFailed": "Échec de mis en file d'attente de {{total}} export(s). Caméras en échec : {{failedCameras}}"
     },
     "select": "Sélectionner",
     "name": {
@@ -88,7 +78,9 @@
     "export": "Exporter",
     "fromTimeline": {
       "saveExport": "Enregistrer l'exportation",
-      "previewExport": "Aperçu de l'exportation"
+      "previewExport": "Aperçu de l'exportation",
+      "queueingExport": "Traitement de l'export...",
+      "useThisRange": "Utiliser cet interval"
     },
     "case": {
       "label": "Dossier",
@@ -142,12 +134,18 @@
         "started_one": "Un export a démarré. Ouverture du dossier en cours.",
         "started_many": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
         "started_other": "{{count}} exports ont démarré. Ouverture du dossier en cours.",
-        "startedNoCase_one": "Un export a démarré.",
-        "startedNoCase_many": "{{count}} exports ont démarré.",
-        "startedNoCase_other": "{{count}} exports ont démarré.",
         "partial": "{{successful}} exportations sur {{total}} lancées. Échecs : {{failedItems}}",
         "failed": "Échec du démarrage des exports {{total}}. Échec : {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Qualité",
+      "auto": "Automatique",
+      "main": "Originale",
+      "sub": "Basse",
+      "autoDesc": "Utilise le flux principal et bascule vers le flux secondaire de moindre qualité lorsque le flux principal n'est pas disponible.",
+      "mainDesc": "Exporte uniquement le flux principal dans sa qualité d'origine. Les plages temporelles durant lesquelles le flux principal n'est pas disponible seront absentes.",
+      "subDesc": "Exporte uniquement le sous-flux de qualité inférieure. Les plages horaires durant lesquelles le sous-flux n'est pas disponible seront absentes."
     }
   },
   "search": {
@@ -169,7 +167,6 @@
     "restreaming": {
       "disabled": "La rediffusion n'est pas activée pour cette caméra.",
       "desc": {
-        "readTheDocumentation": "Lire la documentation",
         "title": "Configurez go2rtc pour bénéficier d'options de visualisation en direct supplémentaires et de l'audio pour cette caméra."
       }
     },
@@ -194,7 +191,22 @@
       "export": "Exporter",
       "markAsReviewed": "Marquer comme traité",
       "deleteNow": "Supprimer maintenant",
-      "markAsUnreviewed": "Marquer comme non traité"
+      "markAsUnreviewed": "Marquer comme non traité",
+      "generateDescription": "Générer une description"
+    },
+    "shareTimestamp": {
+      "label": "Partager cette date",
+      "title": "Partager cette date",
+      "description": "Partager une URL horodatée correspondant à la position actuelle du lecteur, ou choisir un horodatage personnalisé. Notez qu’il ne s’agit pas d’un lien de partage public et qu’il est uniquement accessible aux utilisateurs ayant accès à Frigate et à cette caméra.",
+      "custom": "Horodatage personnalisé",
+      "button": "Partager le lien de l'horodatage",
+      "shareTitle": "Horodatage de la revue Frigate : {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Une description générée par IA a été demandée pour cet élément à examiner.",
+        "error": "Échec de la demande de description : {{error}}"
+      }
     }
   },
   "imagePicker": {

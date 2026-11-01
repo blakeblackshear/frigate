@@ -7,19 +7,45 @@ const notifications: SectionConfigOverrides = {
     fieldOrder: ["enabled", "email"],
     fieldGroups: {},
     hiddenFields: ["enabled_in_config"],
-    advancedFields: [],
+    advancedFields: ["ttl"],
+    fieldMessages: [
+      {
+        key: "profile-base-notifications-disabled",
+        field: "enabled",
+        messageKey: "configMessages.notifications.profileBaseDisabled",
+        severity: "warning",
+        position: "after",
+        condition: (ctx) =>
+          !!ctx.profileName &&
+          ctx.formData?.enabled === true &&
+          !Object.values(ctx.fullConfig.cameras).some(
+            (camera) =>
+              camera.enabled_in_config &&
+              camera.notifications.enabled_in_config,
+          ),
+      },
+      {
+        key: "notifications-ttl-delay",
+        field: "ttl",
+        messageKey: "configMessages.notifications.ttlDelay",
+        severity: "warning",
+        position: "after",
+        condition: (ctx) => ctx.formData?.ttl === "reliable",
+      },
+    ],
   },
   global: {
     uiSchema: {
       "ui:before": { render: "NotificationsSettingsExtras" },
       enabled: { "ui:widget": "hidden" },
       email: { "ui:widget": "hidden" },
+      ttl: { "ui:options": { enumI18nPrefix: "notificationTtl" } },
       cooldown: { "ui:widget": "hidden" },
       enabled_in_config: { "ui:widget": "hidden" },
     },
   },
   camera: {
-    hiddenFields: ["enabled_in_config", "email"],
+    hiddenFields: ["enabled_in_config", "email", "ttl"],
   },
 };
 

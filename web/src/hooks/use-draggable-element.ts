@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isIOS } from "react-device-detect";
 import { useTimelineUtils } from "./use-timeline-utils";
 import { FrigateConfig } from "@/types/frigateConfig";
 import useSWR from "swr";
@@ -7,6 +8,13 @@ import { useDateLocale } from "./use-date-locale";
 import { useTimeFormat } from "./use-date-utils";
 import { useTranslation } from "react-i18next";
 import useUserInteraction from "./use-user-interaction";
+
+const DRAG_STATE_COMMIT_MS = 100;
+
+// iOS Safari synthesizes a click shortly after a drag's touchend even
+// though the touchend handler calls preventDefault; clicks observed in
+// traces arrive ~50ms after release
+const GHOST_CLICK_WINDOW_MS = 400;
 
 type DraggableElementProps = {
   contentRef: React.RefObject<HTMLElement | null>;
@@ -61,6 +69,8 @@ function useDraggableElement({
 
   const [clientYPosition, setClientYPosition] = useState<number | null>(null);
   const [initialClickAdjustment, setInitialClickAdjustment] = useState(0);
+  const lastDragTimeCommitRef = useRef(0);
+  const pendingDragTimeRef = useRef<number | null>(null);
   const [elementScrollIntoView, setElementScrollIntoView] = useState(true);
   const [scrollEdgeSize, setScrollEdgeSize] = useState<number>();
   const [fullTimelineHeight, setFullTimelineHeight] = useState<number>();
@@ -126,6 +136,7 @@ function useDraggableElement({
       }
       e.stopPropagation();
       setIsDragging(true);
+      pendingDragTimeRef.current = null;
 
       let clientY;
       if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
@@ -154,9 +165,33 @@ function useDraggableElement({
       if (isDragging) {
         setIsDragging(false);
         setInitialClickAdjustment(0);
+
+        if (pendingDragTimeRef.current !== null && setDraggableElementTime) {
+          setDraggableElementTime(pendingDragTimeRef.current);
+          pendingDragTimeRef.current = null;
+        }
+
+        // iOS Safari synthesizes a click after touchend despite the
+        // preventDefault, hit-tested at the drag origin where a segment
+        // now sits; its onClick would yank the handlebar back
+        if (isIOS && "TouchEvent" in window && e instanceof TouchEvent) {
+          const swallow = (clickEvent: MouseEvent) => {
+            cleanup();
+            if (timelineRef.current?.contains(clickEvent.target as Node)) {
+              clickEvent.preventDefault();
+              clickEvent.stopPropagation();
+            }
+          };
+          const cleanup = () => {
+            document.removeEventListener("click", swallow, true);
+            window.clearTimeout(timer);
+          };
+          const timer = window.setTimeout(cleanup, GHOST_CLICK_WINDOW_MS);
+          document.addEventListener("click", swallow, true);
+        }
       }
     },
-    [isDragging, setIsDragging],
+    [isDragging, setIsDragging, setDraggableElementTime, timelineRef],
   );
 
   const timestampToPixels = useCallback(
@@ -346,9 +381,21 @@ function useDraggableElement({
         );
 
         if (setDraggableElementTime) {
-          setDraggableElementTime(
-            targetSegmentTime + segmentDuration * (offset / segmentHeight),
-          );
+          const newTime =
+            targetSegmentTime + segmentDuration * (offset / segmentHeight);
+          const now = performance.now();
+
+          // don't commit on every animation frame, only commit it at a
+          // set interval to avoid React's nested update limit
+          if (now - lastDragTimeCommitRef.current >= DRAG_STATE_COMMIT_MS) {
+            lastDragTimeCommitRef.current = now;
+            pendingDragTimeRef.current = null;
+            setDraggableElementTime(newTime);
+          } else {
+            // Hold the newest value; handleMouseUp flushes it so the
+            // release still lands exactly where the handle was dropped.
+            pendingDragTimeRef.current = newTime;
+          }
         }
 
         if (draggingAtTopEdge || draggingAtBottomEdge) {

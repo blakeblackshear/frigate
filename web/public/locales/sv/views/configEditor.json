@@ -1,18 +1,18 @@
 {
   "copyConfig": "Kopiera konfiguration",
-  "saveAndRestart": "Spara & Starta om",
+  "saveAndRestart": "Spara och starta om",
   "saveOnly": "Spara",
   "toast": {
     "success": {
-      "copyToClipboard": "Konfiguration kopierad till urklipp."
+      "copyToClipboard": "Konfigurationen har kopierats till urklipp."
     },
     "error": {
-      "savingError": "Problem att spara konfiguration"
+      "savingError": "Det gick inte att spara konfigurationen"
     }
   },
-  "documentTitle": "Ändra konfiguration - Frigate",
-  "configEditor": "Ändra konfiguration",
+  "documentTitle": "Redigera konfiguration – Frigate",
+  "configEditor": "Redigera konfiguration",
   "confirm": "Avsluta utan att spara?",
-  "safeConfigEditor": "Konfigurationsredigeraren (felsäkert läge)",
+  "safeConfigEditor": "Konfigurationsredigerare (felsäkert läge)",
   "safeModeDescription": "Frigate är i felsäkert läge på grund av ett konfigurationsvalideringsfel."
 }

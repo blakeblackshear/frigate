@@ -1,1 +1,72 @@
-{}
+{
+    "documentTitle": "گفتگو - فریگیت",
+    "title": "گفتگوی فریگیت",
+    "subtitle": "دستیار هوش مصنوعی شما برای مدیریت دوربین و دریافت بینش",
+    "placeholder": "هر چیزی بپرسید...",
+    "error": "خطایی رخ داد. لطفاً دوباره تلاش کنید.",
+    "processing": "در حال پردازش...",
+    "toolsUsed": "استفاده‌شده: {{tools}}",
+    "showTools": "نمایش ابزارها ({{count}})",
+    "hideTools": "پنهان کردن ابزارها",
+    "call": "فراخوانی",
+    "result": "نتیجه",
+    "arguments": "آرگومان‌ها:",
+    "response": "پاسخ:",
+    "attachment_chip_label": "{{label}} در {{camera}}",
+    "attachment_chip_remove": "حذف پیوست",
+    "open_in_explore": "باز کردن در کاوش",
+    "attach_event_aria": "پیوست رویداد {{eventId}}",
+    "attachment_picker_paste_label": "یا شناسه رویداد را جای‌گذاری کنید",
+    "attachment_picker_attach": "پیوست",
+    "attachment_picker_placeholder": "پیوست یک رویداد",
+    "quick_reply_find_similar": "یافتن مشاهدات مشابه",
+    "quick_reply_tell_me_more": "بیشتر درباره این به من بگو",
+    "quick_reply_when_else": "چه زمان‌های دیگری دیده شده؟",
+    "quick_reply_find_similar_text": "مشاهدات مشابه این را پیدا کن.",
+    "quick_reply_tell_me_more_text": "بیشتر درباره این یکی به من بگو.",
+    "quick_reply_when_else_text": "چه زمان‌های دیگری این دیده شده است؟",
+    "anchor": "ارجاع",
+    "similarity_score": "شباهت",
+    "no_similar_objects_found": "شیء مشابهی یافت نشد.",
+    "semantic_search_required": "برای یافتن اشیای مشابه، جست‌وجوی معنایی باید فعال باشد.",
+    "send": "ارسال",
+    "suggested_requests": "این موارد را امتحان کنید:",
+    "starting_requests": {
+        "show_recent_events": "نمایش رویدادهای اخیر",
+        "show_camera_status": "نمایش وضعیت دوربین",
+        "recap": "وقتی من نبودم چه اتفاقی افتاد؟",
+        "watch_camera": "تماشای دوربین برای فعالیت"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "رویدادهای اخیر در یک ساعت گذشته را نشان بده",
+        "show_camera_status": "وضعیت فعلی دوربین‌های من چیست؟",
+        "recap": "وقتی من نبودم چه اتفاقی افتاد؟",
+        "watch_camera": "درب جلویی را تماشا کن و اگر کسی ظاهر شد به من اطلاع بده"
+    },
+    "new_chat": "گفتگوی جدید",
+    "settings": {
+        "title": "تنظیمات گفتگو",
+        "show_stats": {
+            "title": "نمایش آمار",
+            "desc": "نرخ تولید و اندازه زمینه برای پاسخ‌های گفتگو را نشان بده.",
+            "while_generating": "هنگام تولید",
+            "always": "همیشه"
+        },
+        "auto_scroll": {
+            "title": "پیمایش خودکار",
+            "desc": "پیام‌های جدید را هنگام رسیدن دنبال کن."
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} توکن",
+        "tokens_per_second": "{{rate}} ت/ث"
+    },
+    "reasoning": {
+        "active": "در حال استدلال…",
+        "show": "نمایش استدلال",
+        "hide": "پنهان کردن استدلال"
+    },
+    "thinking": {
+        "toggle": "فعال/غیرفعال کردن تفکر"
+    }
+}

@@ -1,0 +1,61 @@
+{
+  "noRecordingsFoundForThisTime": "На гэты час запісаў не знойдзена",
+  "noPreviewFound": "Перадпрагляд не знойдзены",
+  "noPreviewFoundFor": "Перадпрагляд для {{cameraName}} не знойдзены",
+  "submitFrigatePlus": {
+    "title": "Адправіць гэты кадр у Frigate+?",
+    "submit": "Адправіць",
+    "previewError": "Не ўдалося загрузіць перадпрагляд здымка. Магчыма, запіс зараз недаступны."
+  },
+  "livePlayerRequiredIOSVersion": "Для гэтага тыпу жывой плыні патрэбна iOS 17.1 або навейшая.",
+  "streamOffline": {
+    "title": "Плынь па-за сеткай",
+    "desc": "На плыні <code>detect</code> камеры {{cameraName}} не атрымана ніводнага кадра, праверце журналы памылак"
+  },
+  "cameraOff": "Камера выключана",
+  "stats": {
+    "streamType": {
+      "title": "Тып плыні:",
+      "short": "Тып"
+    },
+    "bandwidth": {
+      "title": "Паласа прапускання:",
+      "short": "Паласа"
+    },
+    "totalFrames": "Усяго кадраў:",
+    "droppedFrames": {
+      "title": "Страчаныя кадры:",
+      "short": {
+        "title": "Страчана",
+        "value": "кадраў: {{droppedFrames}}"
+      }
+    },
+    "decodedFrames": "Дэкадаваныя кадры:",
+    "droppedFrameRate": "Частата страты кадраў:",
+    "stream": "Плынь:",
+    "streamAuto": "{{stream}} (аўта)"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Кадр паспяхова адпраўлены ў Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Не ўдалося адправіць кадр у Frigate+",
+      "playRecordingsFailed": "Не ўдалося прайграць запісы (памылка {{code}}): {{message}}"
+    }
+  },
+  "quality": {
+    "auto": "Аўта",
+    "autoLow": "Прайграецца нізкая якасць (абмежаваная паласа прапускання)",
+    "autoLowCodec": "Прайграецца нізкая якасць (зыходная не падтрымліваецца гэтым браўзерам)",
+    "autoLowSaveData": "Прайграецца нізкая якасць (эканомія трафіку)",
+    "main": "Зыходная",
+    "sub": "Нізкая",
+    "notSupportedBrowser": "Не падтрымліваецца гэтым браўзерам",
+    "label": "Якасць",
+    "noAudio": "Без гуку",
+    "audioRate": "Гук {{rate}} кГц",
+    "audioCodecRate": "{{codec}} {{rate}} кГц",
+    "noRecordings": "Няма запісаў у гэтым прамежку часу"
+  }
+}

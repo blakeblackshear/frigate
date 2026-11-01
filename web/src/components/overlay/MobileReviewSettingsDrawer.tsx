@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { baseUrl } from "@/api/baseUrl";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui/drawer";
 import { Button } from "../ui/button";
@@ -10,7 +10,12 @@ import {
   DebugReplayContent,
   SaveDebugReplayOverlay,
 } from "./DebugReplayDialog";
-import { ExportMode, GeneralFilter } from "@/types/filter";
+import {
+  DEFAULT_DRAWER_FEATURES,
+  DrawerFeatures,
+  ExportMode,
+  GeneralFilter,
+} from "@/types/filter";
 import ReviewActivityCalendar from "./ReviewActivityCalendar";
 import { SelectSeparator } from "../ui/select";
 import {
@@ -27,9 +32,18 @@ import SaveExportOverlay from "./SaveExportOverlay";
 import { isMobile } from "react-device-detect";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { StartExportResponse } from "@/types/export";
+import { ExportStreamSelection, StartExportResponse } from "@/types/export";
 import { ShareTimestampContent } from "./ShareTimestampDialog";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { cn } from "@/lib/utils";
+import { FaTriangleExclamation } from "react-icons/fa6";
+import { MdHighQuality } from "react-icons/md";
+import { QualitySelectorContent } from "../player/QualitySelector";
+import {
+  AutoQualityReason,
+  PlaybackQuality,
+  RecordingCoverage,
+} from "@/types/record";
 
 type DrawerMode =
   | "none"
@@ -38,25 +52,8 @@ type DrawerMode =
   | "calendar"
   | "filter"
   | "debug-replay"
-  | "share-timestamp";
-
-const DRAWER_FEATURES = [
-  "export",
-  "calendar",
-  "filter",
-  "debug-replay",
-  "share-timestamp",
-  "motion-search",
-] as const;
-export type DrawerFeatures = (typeof DRAWER_FEATURES)[number];
-const DEFAULT_DRAWER_FEATURES: DrawerFeatures[] = [
-  "export",
-  "calendar",
-  "filter",
-  "debug-replay",
-  "share-timestamp",
-  "motion-search",
-];
+  | "share-timestamp"
+  | "quality";
 
 type MobileReviewSettingsDrawerProps = {
   features?: DrawerFeatures[];
@@ -64,6 +61,7 @@ type MobileReviewSettingsDrawerProps = {
   filter?: ReviewFilter;
   currentSeverity?: ReviewSeverity;
   latestTime: number;
+  earliestTime: number;
   currentTime: number;
   range?: TimeRange;
   mode: ExportMode;
@@ -82,6 +80,12 @@ type MobileReviewSettingsDrawerProps = {
   setRange: (range: TimeRange | undefined) => void;
   setMode: (mode: ExportMode) => void;
   setShowExportPreview: (showPreview: boolean) => void;
+  quality?: PlaybackQuality;
+  onSetQuality?: (quality: PlaybackQuality) => void;
+  qualityStreams?: RecordingCoverage["streams"];
+  qualityAutoLow?: boolean;
+  qualityAutoLowReason?: AutoQualityReason;
+  qualityMainUnsupported?: boolean;
 };
 export default function MobileReviewSettingsDrawer({
   features = DEFAULT_DRAWER_FEATURES,
@@ -89,6 +93,7 @@ export default function MobileReviewSettingsDrawer({
   filter,
   currentSeverity,
   latestTime,
+  earliestTime,
   currentTime,
   range,
   mode,
@@ -107,12 +112,19 @@ export default function MobileReviewSettingsDrawer({
   setRange,
   setMode,
   setShowExportPreview,
+  quality,
+  onSetQuality,
+  qualityStreams,
+  qualityAutoLow,
+  qualityAutoLowReason,
+  qualityMainUnsupported,
 }: MobileReviewSettingsDrawerProps) {
   const { t } = useTranslation([
     "views/recording",
     "components/dialog",
     "views/replay",
     "views/events",
+    "components/player",
     "common",
   ]);
   const isAdmin = useIsAdmin();
@@ -141,7 +153,23 @@ export default function MobileReviewSettingsDrawer({
   );
   const [singleNewCaseName, setSingleNewCaseName] = useState("");
   const [singleNewCaseDescription, setSingleNewCaseDescription] = useState("");
+  const [batchCaseSelection, setBatchCaseSelection] = useState("new");
+  const [newCaseName, setNewCaseName] = useState("");
+  const [newCaseDescription, setNewCaseDescription] = useState("");
+  const [stream, setStream] = useState<ExportStreamSelection>("auto");
   const [isStartingExport, setIsStartingExport] = useState(false);
+  const preTimelineRangeRef = useRef<TimeRange | undefined>(undefined);
+
+  const onSelectFromTimeline = useCallback(
+    (initialRange: TimeRange) => {
+      preTimelineRangeRef.current = range;
+      setRange(initialRange);
+      setMode("timeline_multi");
+      setDrawerMode("none");
+    },
+    [range, setMode, setRange],
+  );
+
   const onStartExport = useCallback(async () => {
     if (isStartingExport) {
       return false;
@@ -192,6 +220,7 @@ export default function MobileReviewSettingsDrawer({
           source: "recordings",
           name,
           export_case_id: exportCaseId,
+          stream,
         },
       );
 
@@ -213,6 +242,10 @@ export default function MobileReviewSettingsDrawer({
       setSelectedCaseId(undefined);
       setSingleNewCaseName("");
       setSingleNewCaseDescription("");
+      setBatchCaseSelection("new");
+      setNewCaseName("");
+      setNewCaseDescription("");
+      setStream("auto");
       setRange(undefined);
       setMode("none");
       return true;
@@ -245,6 +278,7 @@ export default function MobileReviewSettingsDrawer({
     selectedCaseId,
     singleNewCaseDescription,
     singleNewCaseName,
+    stream,
     setRange,
     setMode,
     t,
@@ -374,6 +408,21 @@ export default function MobileReviewSettingsDrawer({
             {t("filter")}
           </Button>
         )}
+        {features.includes("quality") && onSetQuality && (
+          <Button
+            className="flex w-full items-center justify-center gap-2"
+            aria-label={t("quality.label", { ns: "components/player" })}
+            onClick={() => setDrawerMode("quality")}
+          >
+            <div className="relative">
+              <MdHighQuality className="size-5 rounded-md bg-secondary-foreground fill-secondary p-1" />
+              {qualityAutoLow && (
+                <FaTriangleExclamation className="absolute -bottom-1 -right-1 size-2.5 text-danger" />
+              )}
+            </div>
+            {t("quality.label", { ns: "components/player" })}
+          </Button>
+        )}
         {features.includes("share-timestamp") && (
           <Button
             className="flex w-full items-center justify-center gap-2"
@@ -431,21 +480,31 @@ export default function MobileReviewSettingsDrawer({
   } else if (drawerMode == "export") {
     content = (
       <ExportContent
+        camera={camera}
         latestTime={latestTime}
+        earliestTime={earliestTime}
         currentTime={currentTime}
         range={range}
         name={name}
         selectedCaseId={selectedCaseId}
         singleNewCaseName={singleNewCaseName}
         singleNewCaseDescription={singleNewCaseDescription}
+        batchCaseSelection={batchCaseSelection}
+        newCaseName={newCaseName}
+        newCaseDescription={newCaseDescription}
         activeTab={exportTab}
+        stream={stream}
         isStartingExport={isStartingExport}
         onStartExport={onStartExport}
         setActiveTab={setExportTab}
+        setStream={setStream}
         setName={setName}
         setSelectedCaseId={setSelectedCaseId}
         setSingleNewCaseName={setSingleNewCaseName}
         setSingleNewCaseDescription={setSingleNewCaseDescription}
+        setBatchCaseSelection={setBatchCaseSelection}
+        setNewCaseName={setNewCaseName}
+        setNewCaseDescription={setNewCaseDescription}
         setRange={setRange}
         setMode={(mode) => {
           setMode(mode);
@@ -454,12 +513,17 @@ export default function MobileReviewSettingsDrawer({
             setDrawerMode("none");
           }
         }}
+        onSelectFromTimeline={onSelectFromTimeline}
         onCancel={() => {
           setMode("none");
           setRange(undefined);
           setSelectedCaseId(undefined);
           setSingleNewCaseName("");
           setSingleNewCaseDescription("");
+          setBatchCaseSelection("new");
+          setNewCaseName("");
+          setNewCaseDescription("");
+          setStream("auto");
           setExportTab("export");
           setDrawerMode("select");
         }}
@@ -518,9 +582,9 @@ export default function MobileReviewSettingsDrawer({
   } else if (drawerMode == "filter") {
     content = (
       <div className="scrollbar-container flex h-auto w-full flex-col overflow-y-auto overflow-x-hidden">
-        <div className="relative mb-2 h-8 w-full">
+        <div className="relative mb-4 h-8 w-full">
           <div
-            className="absolute left-0 text-selected"
+            className="absolute left-4 text-selected"
             onClick={() => setDrawerMode("select")}
           >
             {t("button.back", { ns: "common" })}
@@ -548,6 +612,7 @@ export default function MobileReviewSettingsDrawer({
             onUpdateFilter(resetFilter);
           }}
           onClose={() => setDrawerMode("select")}
+          contentClassName="px-4"
         />
       </div>
     );
@@ -589,6 +654,33 @@ export default function MobileReviewSettingsDrawer({
           }
         }}
       />
+    );
+  } else if (drawerMode == "quality") {
+    content = (
+      <div className="flex w-full flex-col">
+        <div className="relative mb-2 h-8 w-full">
+          <div
+            className="absolute left-0 text-selected"
+            onClick={() => setDrawerMode("select")}
+          >
+            {t("button.back", { ns: "common" })}
+          </div>
+          <div className="absolute left-1/2 -translate-x-1/2 text-muted-foreground">
+            {t("quality.label", { ns: "components/player" })}
+          </div>
+        </div>
+        <QualitySelectorContent
+          quality={quality ?? "auto"}
+          onSetQuality={(newQuality) => {
+            onSetQuality?.(newQuality);
+            setDrawerMode("none");
+          }}
+          streams={qualityStreams}
+          autoLow={qualityAutoLow}
+          autoLowReason={qualityAutoLowReason}
+          mainUnsupported={qualityMainUnsupported}
+        />
+      </div>
     );
   } else if (drawerMode == "share-timestamp") {
     content = (
@@ -637,6 +729,14 @@ export default function MobileReviewSettingsDrawer({
           void onStartExport();
         }}
         onCancel={() => {
+          if (mode == "timeline_multi") {
+            setRange(preTimelineRangeRef.current);
+            setExportTab("multi");
+            setMode("select");
+            setDrawerMode("export");
+            return;
+          }
+
           setExportTab("export");
           setRange(undefined);
           setMode("none");
@@ -685,7 +785,14 @@ export default function MobileReviewSettingsDrawer({
           </Button>
         </DrawerTrigger>
         <DrawerContent
-          className={`mx-1 flex max-h-[80dvh] flex-col items-center gap-2 rounded-t-2xl px-4 pb-4 ${drawerMode == "export" || drawerMode == "debug-replay" ? "overflow-visible" : "overflow-hidden"}`}
+          className={cn(
+            "mx-1 flex max-h-[80dvh] flex-col items-center gap-2 rounded-t-2xl pb-4",
+            // the filter content pads itself so its scrollbar reaches the drawer edge
+            drawerMode != "filter" && "px-4",
+            drawerMode == "export" || drawerMode == "debug-replay"
+              ? "overflow-visible"
+              : "overflow-hidden",
+          )}
         >
           {content}
         </DrawerContent>

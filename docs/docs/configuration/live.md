@@ -28,13 +28,31 @@ WebRTC may use an external STUN server for NAT traversal. MSE and HLS streaming 
 
 :::
 
+### Selecting a streaming technology
+
+Frigate [defaults to MSE](#why-does-frigate-prefer-mse-over-webrtc-for-live-view) for restreamed cameras by design. To use WebRTC, select it explicitly from a camera's single-camera Live view settings (the settings menu in the camera's Live view header on desktop, or the settings drawer on mobile). Three related controls work together:
+
+- **Stream**: _what_ to play. This lists the [streams you've configured](#setting-streams-for-live-ui) (for example `Main Stream` and `Sub Stream`).
+- **Force low-bandwidth mode**: a switch that always plays Frigate's built-in low-bandwidth feed (the stream assigned the `detect` role, using JSMpeg) instead of the selected stream. It works anywhere without go2rtc and is useful on slow or metered connections. While it is enabled, the stream and streaming technology selectors are disabled; your stream and technology choices are restored when you turn it off.
+- **Streaming Technology**: _how_ to play the selected stream, listing **MSE** and **WebRTC**. It is only shown for a restreamed stream.
+
+- The choices are saved **per device, per camera** in your browser's local storage.
+- **WebRTC is only selectable when it can actually work for that stream.** When it can't, the option is shown disabled with the reason inline, and a more detailed reason (the failing codecs, or why the connectivity check failed) is logged to your browser's console. Common reasons:
+  - **Not configured**: no `candidates` or `ice_servers` are set under `go2rtc.webrtc`, and the connectivity check failed with go2rtc's default candidates (see [WebRTC extra configuration](#webrtc-extra-configuration)). This is a setup note rather than an error, since live view works without WebRTC.
+  - **Could not connect**: e.g. port `8555` isn't reachable, or a STUN/TURN server is misconfigured. Frigate runs a one-time WebRTC connectivity check when the Live view opens; the option may briefly show as "checking" while it runs.
+  - **Unsupported video codec**: the stream's video codec can't be played over WebRTC in your browser, most commonly H.265/HEVC in Firefox or Edge.
+  - **Unsupported audio codec**: WebRTC needs opus or G.711 audio, so a stream whose playback audio is only AAC (without an added opus/G.711 track) can't carry audio over WebRTC. See [Audio Support](#audio-support) for how to add one.
+  - **Unsupported browser**: the browser doesn't support WebRTC.
+
+When WebRTC isn't available, Frigate automatically uses MSE (or falls back to JSMpeg), so live view keeps working regardless of the selection.
+
 ### Camera Settings Recommendations
 
 If you are using go2rtc, you should adjust the following settings in your camera's firmware for the best experience with Live view:
 
 - Video codec: **H.264** - provides the most compatible video codec with all Live view technologies and browsers. Avoid any kind of "smart codec" or "+" codec like _H.264+_ or _H.265+_. as these non-standard codecs remove keyframes (see below).
 - Audio codec: **AAC** - provides the most compatible audio codec with all Live view technologies and browsers that support audio.
-- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to begin playback. See [this page](https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes. For many users this may not be an issue, but it should be noted that a 1x i-frame interval will cause more storage utilization if you are using the stream for the `record` role as well.
+- I-frame interval (sometimes called the keyframe interval, the interframe space, or the GOP length): match your camera's frame rate, or choose "1x" (for interframe space on Reolink cameras). For example, if your stream outputs 20fps, your i-frame interval should be 20 (or 1x on Reolink). Values higher than the frame rate will cause the stream to take longer to begin playback. See [this page](https://web.archive.org/web/20251213190836/https://gardinal.net/understanding-the-keyframe-interval/) for more on keyframes. For many users this may not be an issue, but it should be noted that a 1x i-frame interval will cause more storage utilization if you are using the stream for the `record` role as well.
 
 The default video and audio codec on your camera may not always be compatible with your browser, which is why setting them to H.264 and AAC is recommended. See the [go2rtc docs](https://github.com/AlexxIT/go2rtc?tab=readme-ov-file#codecs-madness) for codec support information.
 
@@ -74,7 +92,7 @@ go2rtc:
 
 ### Setting Streams For Live UI
 
-You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage.
+You can configure Frigate to allow manual selection of the stream you want to view in the Live UI. For example, you may want to view your camera's substream on mobile devices, but the full resolution stream on desktop devices. Setting the streams list will populate a dropdown in the UI's Live view that allows you to choose between the streams. This stream setting is _per device_ and is saved in your browser's local storage. When a camera has more than one stream, the dropdown also offers **Auto**, which is used until you pick a specific stream. Auto starts on the first stream, steps down the list when your connection can't keep up, and steps back up when it recovers. To retry the top stream right away, select **Try highest quality** under the stream picker. List streams from highest to lowest quality, and avoid names that are plain numbers (such as `720`), which the browser sorts ahead of the others. In the UI, drag streams to reorder them, or use **Auto order** to sort them by measured bitrate.
 
 Additionally, when creating and editing camera groups in the UI, you can choose the stream you want to use for your camera group's Live dashboard.
 
@@ -140,6 +158,26 @@ cameras:
 </TabItem>
 </ConfigTabs>
 
+### Transcoded streams
+
+When a camera has no suitable sub stream, Frigate can add lower-quality streams that go2rtc transcodes to H.264 while someone is watching. They appear in the stream list like any other stream, so Auto mode can step down to them. Enable them under <NavPath path="Settings > Camera configuration > Live playback" />, or in YAML:
+
+```yaml
+cameras:
+  test_cam:
+    live:
+      transcode:
+        enabled: true
+        source: test_cam # optional, defaults to the first live stream
+        qualities:
+          - height: 720
+            bitrate: 1200 # kbps
+          - height: 480
+            bitrate: 500
+```
+
+Each quality becomes a go2rtc stream named `<camera>_transcode_<height>p`. go2rtc picks a hardware encoder automatically and falls back to the CPU, which costs CPU for each transcode while it is being watched. Check go2rtc's `api/ffmpeg/hardware` page to see which encoder it found. Using a sub stream as the `source` lowers the cost.
+
 ### WebRTC extra configuration:
 
 WebRTC works by creating a TCP or UDP connection on port `8555`. However, it requires additional configuration:
@@ -155,6 +193,17 @@ WebRTC works by creating a TCP or UDP connection on port `8555`. However, it req
       candidates:
         - 192.168.1.10:8555
         - stun:8555
+  ```
+
+- The web UI uses the STUN and TURN servers in `ice_servers` and falls back to Google's public STUN server when none are set:
+
+  ```yaml title="config.yml"
+  go2rtc:
+    webrtc:
+      ice_servers:
+        - urls: [turn:turn.example.com:3478]
+          username: frigate
+          credential: password
   ```
 
 - For access through Tailscale, the Frigate system's Tailscale IP must be added as a WebRTC candidate. Tailscale IPs all start with `100.`, and are reserved within the `100.64.0.0/10` CIDR block.
@@ -196,7 +245,7 @@ services:
 
 :::
 
-See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.8.3#module-webrtc) for more information about this.
+See [go2rtc WebRTC docs](https://github.com/AlexxIT/go2rtc/tree/v1.9.14#module-webrtc) for more information about this.
 
 ### Two way talk
 
@@ -205,6 +254,8 @@ For devices that support two way talk, Frigate can be configured to use the feat
 - Set up go2rtc with [WebRTC](#webrtc-extra-configuration).
 - Ensure you access Frigate via https (may require [opening port 8971](/frigate/installation/#ports)).
 - For the Home Assistant Frigate card, [follow the docs](http://card.camera/#/usage/2-way-audio) for the correct source.
+
+The two-way talk control in the single-camera Live view is only enabled when WebRTC is available; if WebRTC isn't configured or can't connect, the control is shown disabled.
 
 To use the Reolink Doorbell with two way talk, you should use the [recommended Reolink configuration](/configuration/camera_specific#reolink-cameras)
 
@@ -332,9 +383,16 @@ When your browser runs into problems playing back your camera streams, it will l
     - `Safari reported InvalidStateError.`
     - `Safari reported decoding errors.`
 
+- **mse-codec**
+  - What it means: go2rtc has no codec for this stream that the browser can play.
+  - What to try: Pick a stream with a codec the browser supports (H.264 is the most compatible), or use a browser that supports the stream's codec. In Auto, Frigate skips this stream for the rest of the session.
+
+  - Possible console messages from the player code:
+    - `mse: streams: codecs not matched: ...`
+
 - **stalled**
   - What it means: Playback has stalled because the player has fallen too far behind live (extended buffering or no data arriving).
-  - What to try: This is usually indicative of the browser struggling to decode too many high-resolution streams at once. Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution. Also check your camera's keyframe (I-frame) interval: shorter intervals make playback start and recover faster. You can also try increasing the timeout value in the UI pane of Frigate's settings.
+  - What to try: This is usually indicative of the browser struggling to decode too many high-resolution streams at once. Try selecting a lower-bandwidth stream (substream), reduce the number of live streams open, improve the network connection, or lower the camera resolution. Also check your camera's keyframe (I-frame) interval: shorter intervals make playback start and recover faster. You can also try increasing the timeout value in <NavPath path="Settings > UI" /> .
 
   - Possible console messages from the player code:
     - `Buffer time (10 seconds) exceeded, browser may not be playing media correctly.`

@@ -1,80 +1,93 @@
-// Build a config/set query fragment that removes `name` from a
-// required_zones list on the given camera section (e.g. "snapshots",
-// "mqtt", "objects.genai", "onvif.autotracking"), rebuilding the
-// remaining entries. When removing the name empties the list, the
-// required_zones key itself is deleted so the field reverts to its
-// default instead of retaining the now-stale zone name. Returns an empty
-// string when `name` is not present so unrelated sections are untouched.
-export const removeRequiredZoneQuery = (
+import get from "lodash/get";
+import setWith from "lodash/setWith";
+import { CameraConfig } from "@/types/frigateConfig";
+
+// Camera sections whose required_zones lists name zones
+const REQUIRED_ZONES_SECTIONS = [
+  "review.alerts",
+  "review.detections",
+  "objects.genai",
+  "snapshots",
+  "mqtt",
+  "onvif.autotracking",
+];
+
+// The subset a profile can override
+const PROFILE_REQUIRED_ZONES_SECTIONS = [
+  "review.alerts",
+  "review.detections",
+  "objects.genai",
+  "snapshots",
+];
+
+/**
+ * Build the camera-level config_data that follows a zone rename or delete.
+ *
+ * With newName, every required_zones list and profile zone override moves to
+ * the new name. Without it, they drop the zone. Lists are written whole, so a
+ * list the camera inherits from the global config gets a camera-level copy.
+ * An empty result means nothing else names the zone.
+ */
+export const zoneReferenceUpdates = (
+  camera: CameraConfig,
   name: string,
-  camera: string,
-  section: string,
-  zones: string[],
-) => {
-  const remaining = new Set<string>(zones || []);
+  newName?: string,
+): Record<string, unknown> => {
+  const updates: Record<string, unknown> = {};
 
-  if (!remaining.has(name)) {
-    return "";
+  // Object paths keep a numeric profile name from becoming an array index
+  const put = (path: string[], value: unknown) =>
+    setWith(updates, path, value, Object);
+
+  const moveInLists = (
+    source: unknown,
+    prefix: string[],
+    sections: string[],
+  ) => {
+    for (const section of sections) {
+      const path = section.split(".");
+      const zones: string[] | undefined = get(source, [
+        ...path,
+        "required_zones",
+      ]);
+
+      if (!zones?.includes(name)) {
+        continue;
+      }
+
+      const renamed = zones.flatMap((zone) =>
+        zone !== name ? [zone] : newName ? [newName] : [],
+      );
+      put([...prefix, ...path, "required_zones"], [...new Set(renamed)]);
+    }
+  };
+
+  // An active profile merges into the top-level sections, so read the base
+  moveInLists(
+    { ...camera, ...camera.base_config },
+    [],
+    REQUIRED_ZONES_SECTIONS,
+  );
+
+  for (const [profile, override] of Object.entries(camera.profiles ?? {})) {
+    moveInLists(
+      override,
+      ["profiles", profile],
+      PROFILE_REQUIRED_ZONES_SECTIONS,
+    );
+
+    const zone = override?.zones?.[name];
+
+    if (zone === undefined) {
+      continue;
+    }
+
+    put(["profiles", profile, "zones", name], null);
+
+    if (newName) {
+      put(["profiles", profile, "zones", newName], zone);
+    }
   }
 
-  remaining.delete(name);
-
-  const key = `cameras.${camera}.${section}.required_zones`;
-
-  if (remaining.size === 0) {
-    return `&${key}`;
-  }
-
-  return [...remaining].map((zone) => `&${key}=${zone}`).join("");
-};
-
-export const reviewQueries = (
-  name: string,
-  review_alerts: boolean,
-  review_detections: boolean,
-  camera: string,
-  alertsZones: string[],
-  detectionsZones: string[],
-) => {
-  let alertQueries = "";
-  let detectionQueries = "";
-  let same_alerts = false;
-  let same_detections = false;
-
-  const alerts = new Set<string>(alertsZones || []);
-
-  if (review_alerts) {
-    alerts.add(name);
-  } else {
-    same_alerts = !alerts.has(name);
-    alerts.delete(name);
-  }
-
-  alertQueries = [...alerts]
-    .map((zone) => `&cameras.${camera}.review.alerts.required_zones=${zone}`)
-    .join("");
-
-  const detections = new Set<string>(detectionsZones || []);
-
-  if (review_detections) {
-    detections.add(name);
-  } else {
-    same_detections = !detections.has(name);
-    detections.delete(name);
-  }
-
-  detectionQueries = [...detections]
-    .map(
-      (zone) => `&cameras.${camera}.review.detections.required_zones=${zone}`,
-    )
-    .join("");
-
-  if (!alertQueries && !same_alerts) {
-    alertQueries = `&cameras.${camera}.review.alerts`;
-  }
-  if (!detectionQueries && !same_detections) {
-    detectionQueries = `&cameras.${camera}.review.detections`;
-  }
-
-  return { alertQueries, detectionQueries };
+  return updates;
 };

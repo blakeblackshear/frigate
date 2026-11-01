@@ -11,12 +11,18 @@ MQTT requires a network connection to your broker. This is typically local, but 
 
 :::
 
+:::note
+
+Wherever a topic below includes a camera, mask, or zone name, use its `ID` from the config, not its `friendly_name`. For example, a camera with `friendly_name: "Back Yard"` and ID `back_yard` publishes to `frigate/back_yard/...`, not `frigate/Back Yard/...`.
+
+:::
+
 ## General Frigate Topics
 
 ### `frigate/available`
 
 Designed to be used as an availability topic with Home Assistant. Possible message are:
-"online": published when Frigate is running (on startup)
+"online": published once Frigate is running and has published its initial state. Note that this is published on every connection to the broker, so it is republished if the broker restarts or the connection drops and recovers, without Frigate itself restarting.
 "stopped": published when Frigate is stopped normally
 "offline": published automatically by the MQTT broker if Frigate disconnects unexpectedly (via MQTT Will Message)
 
@@ -212,6 +218,7 @@ An `update` with the same ID will be published when:
 - The severity changes from `detection` to `alert`
 - Additional objects are detected
 - An object is recognized via face, lpr, etc.
+- A [state classification](/configuration/custom_classification/state_classification#review-items) model changes state
 
 When the review activity has ended a final `end` message is published.
 
@@ -235,7 +242,8 @@ When the review activity has ended a final `end` message is published.
       "objects": ["person", "car"],
       "sub_labels": [],
       "zones": [],
-      "audio": []
+      "audio": [],
+      "classification_state_changes": []
     }
   },
   "after": {
@@ -254,7 +262,16 @@ When the review activity has ended a final `end` message is published.
       "objects": ["person", "car"],
       "sub_labels": ["Bob"],
       "zones": ["front_yard"],
-      "audio": []
+      "audio": [],
+      "classification_state_changes": [
+        // verified changes of state classification models on this camera
+        {
+          "model": "front_gate",
+          "from": "closed",
+          "to": "open",
+          "timestamp": 1718987131.52
+        }
+      ]
     }
   }
 }
@@ -292,7 +309,9 @@ Topic with the currently active profile name. Published value is the profile nam
 
 ### `frigate/notifications/set`
 
-Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+Topic to turn notifications on and off for all cameras. Expected values are `ON` and `OFF`.
+
+Only available when notifications are enabled in the config. Not persisted across Frigate restarts.
 
 ### `frigate/notifications/state`
 
@@ -302,11 +321,13 @@ Topic with current state of notifications. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/status/<role>`
 
-Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`). Possible values are:
+Publishes the current health status of each role that is enabled (`audio`, `detect`, `record`, `record_sub`). `record_sub` is only published for cameras with [sub stream recording](/configuration/record#sub-stream-recording) enabled, and is tracked separately from `record` so a healthy main stream can't hide a stalled sub stream. Possible values are:
 
 - `online`: Stream is running and being processed
 - `offline`: Stream is offline and is being restarted
 - `disabled`: Camera is currently turned off (either at runtime via the `enabled/set` topic, or persistently via the configuration file). See [Camera state](/configuration/live#camera-state) for the distinction.
+
+These reflect the state of Frigate's process for that role, not the camera's reachability, so an unreachable camera alternates between `offline` and `online` as the watchdog restarts ffmpeg. Wait for the status to hold steady (for example with Home Assistant's `for:`) rather than acting on a single message.
 
 ### `frigate/<camera_name>/<object_name>`
 
@@ -389,6 +410,18 @@ Topic to turn audio detection for a camera on and off. Expected values are `ON` 
 ### `frigate/<camera_name>/audio/state`
 
 Topic with current state of audio detection for a camera. Published values are `ON` and `OFF`.
+
+### `frigate/<camera_name>/audio_transcription/set`
+
+Topic to turn [live audio transcription](/configuration/audio_detectors#live-transcription) for a camera on and off. Expected values are `ON` and `OFF`. Transcribed text is published to `frigate/<camera_name>/audio/transcription`.
+
+`ON` is ignored unless audio transcription is enabled in the config for the camera. Unlike the other camera toggles, this one is not persisted across Frigate restarts.
+
+**NOTE:** Requires audio detection and transcription to be enabled
+
+### `frigate/<camera_name>/audio_transcription/state`
+
+Topic with current state of live audio transcription for a camera. Published values are `ON` and `OFF`.
 
 ### `frigate/<camera_name>/recordings/set`
 
@@ -537,35 +570,42 @@ must be enabled in the configuration.
 
 Topic with current state of Birdseye for a camera. Published values are `ON` and `OFF`.
 
-### `frigate/<camera_name>/birdseye_mode/set`
+### `frigate/<camera_name>/birdseye_modes/set`
 
-Topic to set Birdseye mode for a camera. Birdseye offers different modes to customize under which circumstances the camera is shown.
+Topic to set the Birdseye activity types for a camera. Send one uppercase activity type or combine multiple types with commas, for example `MOTION,ALERTS`.
 
-_Note: Changing the value from `CONTINUOUS` -> `MOTION | OBJECTS` will take up to 30 seconds for
+_Note: Changing the value from `CONTINUOUS` to non-continuous activity types will take up to 30 seconds for
 the camera to be removed from the view._
 
-| Command      | Description                                                       |
-| ------------ | ----------------------------------------------------------------- |
-| `CONTINUOUS` | Always included                                                   |
-| `MOTION`     | Show when detected motion within the last 30 seconds are included |
-| `OBJECTS`    | Shown if an active object tracked within the last 30 seconds      |
+| Command       | Description                                                      |
+| ------------- | ---------------------------------------------------------------- |
+| `CONTINUOUS`  | Always included                                                  |
+| `MOTION`      | Shown if motion was detected within the last 30 seconds          |
+| `ALL_OBJECTS` | Shown if a tracked object was present within the last 30 seconds |
+| `ALERTS`      | Shown while an alert review item is in progress                  |
+| `DETECTIONS`  | Shown while a detection review item is in progress               |
+| `NONE`        | Never included                                                   |
 
-### `frigate/<camera_name>/birdseye_mode/state`
+### `frigate/<camera_name>/birdseye_modes/state`
 
-Topic with current state of the Birdseye mode for a camera. Published values are `CONTINUOUS`, `MOTION`, `OBJECTS`.
+Topic with the current Birdseye activity types for a camera. Multiple enabled types are published as a comma-separated value in the order `CONTINUOUS`, `MOTION`, `ALL_OBJECTS`, `ALERTS`, `DETECTIONS`. `NONE` is published when no activity types are enabled.
 
 ### `frigate/<camera_name>/notifications/set`
 
-Topic to turn notifications on and off. Expected values are `ON` and `OFF`.
+Topic to turn notifications for a camera on and off. Expected values are `ON` and `OFF`.
+
+`ON` is ignored unless notifications are enabled in the config for the camera. This is not persisted across Frigate restarts. It is the same control the UI labels **Suspend until restart**.
 
 ### `frigate/<camera_name>/notifications/state`
 
-Topic with current state of notifications. Published values are `ON` and `OFF`.
+Topic with current state of notifications. Published values are `ON` and `OFF`. This is the authoritative topic for whether a camera will notify.
 
 ### `frigate/<camera_name>/notifications/suspend`
 
-Topic to suspend notifications for a certain number of minutes. Expected value is an integer.
+Topic to suspend notifications for a certain number of minutes. Expected value is an integer. Separate from `notifications/set`: it does not change `notifications/state`, and is ignored while notifications are off.
 
 ### `frigate/<camera_name>/notifications/suspended`
 
-Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if notifications are not suspended.
+Topic with timestamp that notifications are suspended until. Published value is a UNIX timestamp, or 0 if there is no timed suspension.
+
+`0` does not mean notifications are enabled: `notifications/set` `OFF` clears the timed suspension, so this publishes `0` while `notifications/state` is `OFF`.

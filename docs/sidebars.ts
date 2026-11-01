@@ -30,6 +30,7 @@ const sidebars: SidebarsConfig = {
     ],
     Configuration: [
       "configuration/config",
+      "configuration/config_overrides",
       {
         type: "category",
         label: "Detectors",
@@ -121,6 +122,7 @@ const sidebars: SidebarsConfig = {
           "configuration/ffmpeg_presets",
           "configuration/pwa",
           "configuration/tls",
+          "configuration/non_root",
         ],
       },
       {
@@ -165,6 +167,7 @@ const sidebars: SidebarsConfig = {
     ],
     Troubleshooting: [
       "troubleshooting/faqs",
+      "troubleshooting/common_errors",
       "troubleshooting/go2rtc",
       "troubleshooting/recordings",
       "troubleshooting/dummy-camera",

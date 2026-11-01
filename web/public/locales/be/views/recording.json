@@ -1,0 +1,12 @@
+{
+  "filter": "Фільтр",
+  "export": "Экспарт",
+  "calendar": "Каляндар",
+  "filters": "Фільтры",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Не выбраны сапраўдны прамежак часу",
+      "endTimeMustAfterStartTime": "Час заканчэння мусіць быць пазней за час пачатку"
+    }
+  }
+}

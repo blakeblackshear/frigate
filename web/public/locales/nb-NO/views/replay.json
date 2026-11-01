@@ -22,7 +22,8 @@
             "error": "Kunne ikke starte feilsøkingsavspilling: {{error}}",
             "alreadyActive": "En avspillingsøkt er allerede aktiv",
             "stopError": "Kunne ikke stoppe feilsøkingsavspilling: {{error}}",
-            "goToReplay": "Gå til avspilling"
+            "goToReplay": "Gå til avspilling",
+            "noRecordings": "Ingen opptak funnet for det valgte tidsrommet"
         }
     },
     "page": {

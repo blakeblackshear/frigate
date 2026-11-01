@@ -2,7 +2,9 @@
   "search": "جستجو",
   "documentTitle": "گرفتن خروجی - فریگیت",
   "noExports": "هیچ خروجی یافت نشد",
-  "deleteExport": "حذف خروجی",
+  "deleteExport": {
+    "label": "حذف خروجی"
+  },
   "deleteExport.desc": "آیا مطمئن هستید که می‌خواهید {{exportName}} را حذف کنید؟",
   "editExport": {
     "title": "تغییر نام خروجی",
@@ -14,15 +16,113 @@
     "downloadVideo": "دانلود ویدئو",
     "editName": "ویرایش نام",
     "deleteExport": "حذف خروجی",
-    "assignToCase": "به مورد اضافه کنید"
+    "assignToCase": "اضافه کردن به مورد",
+    "removeFromCase": "حذف از مورد"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "تغییر نام خروجی ناموفق بود: {{errorMessage}}"
+      "renameExportFailed": "تغییر نام خروجی ناموفق بود: {{errorMessage}}",
+      "assignCaseFailed": "به‌روزرسانی انتساب مورد ناموفق بود: {{errorMessage}}",
+      "caseSaveFailed": "ذخیرهٔ مورد ناموفق بود: {{errorMessage}}",
+      "caseDeleteFailed": "حذف مورد ناموفق بود: {{errorMessage}}"
     }
   },
   "headings": {
     "cases": "موارد",
-    "uncategorizedExports": "خروجی دسته‌بندی نشده"
+    "uncategorizedExports": "خروجی های دسته بندی نشده"
+  },
+  "toolbar": {
+    "newCase": "مورد جدید",
+    "addExport": "افزودن خروجی",
+    "editCase": "ویرایش مورد",
+    "deleteCase": "حذف مورد"
+  },
+  "deleteCase": {
+    "label": "حذف مورد",
+    "desc": "آیا مطمئن هستید که می‌خواهید {{caseName}} را حذف کنید؟",
+    "descKeepExports": "خروجی‌ها به‌عنوان خروجی‌های دسته‌بندی‌نشده در دسترس باقی خواهند ماند.",
+    "descDeleteExports": "همهٔ خروجی‌های این مورد به‌طور دائمی حذف خواهند شد.",
+    "deleteExports": "حذف خروجی‌ها نیز"
+  },
+  "caseDialog": {
+    "title": "افزودن به مورد",
+    "description": "یک مورد موجود انتخاب کنید یا مورد جدیدی ایجاد کنید.",
+    "selectLabel": "مورد",
+    "newCaseOption": "ایجاد مورد جدید",
+    "nameLabel": "نام مورد",
+    "descriptionLabel": "توضیحات"
+  },
+  "caseCard": {
+    "emptyCase": "هنوز خروجی‌ای وجود ندارد"
+  },
+  "jobCard": {
+    "defaultName": "خروجی {{camera}}",
+    "queued": "در صف",
+    "running": "در حال اجرا",
+    "preparing": "در حال آماده‌سازی",
+    "copying": "در حال کپی",
+    "encoding": "در حال رمزگذاری",
+    "encodingRetry": "رمزگذاری (تلاش مجدد)",
+    "finalizing": "در حال نهایی‌سازی"
+  },
+  "caseView": {
+    "noDescription": "بدون توضیحات",
+    "createdAt": "ایجاد شده {{value}}",
+    "exportCount_one": "۱ خروجی",
+    "exportCount_other": "{{count}} خروجی",
+    "cameraCount_one": "۱ دوربین",
+    "cameraCount_other": "{{count}} دوربین",
+    "showMore": "نمایش بیشتر",
+    "showLess": "نمایش کمتر",
+    "emptyTitle": "این مورد خالی است",
+    "emptyDescription": "برای سازماندهی مورد، خروجی‌های دسته‌بندی‌نشده موجود را اضافه کنید.",
+    "emptyDescriptionNoExports": "هنوز خروجی دسته‌بندی‌نشده‌ای برای افزودن وجود ندارد."
+  },
+  "caseEditor": {
+    "createTitle": "ایجاد مورد",
+    "editTitle": "ویرایش مورد",
+    "namePlaceholder": "نام مورد",
+    "descriptionPlaceholder": "یادداشت یا زمینه برای این مورد اضافه کنید"
+  },
+  "addExportDialog": {
+    "title": "افزودن خروجی به {{caseName}}",
+    "searchPlaceholder": "جست‌وجوی خروجی‌های دسته‌بندی‌نشده",
+    "empty": "هیچ خروجی دسته‌بندی‌نشده‌ای با این جست‌وجو مطابقت ندارد.",
+    "addButton_one": "افزودن ۱ خروجی",
+    "addButton_other": "افزودن {{count}} خروجی",
+    "adding": "در حال افزودن..."
+  },
+  "selected_one": "{{count}} انتخاب شد",
+  "selected_other": "{{count}} انتخاب شد",
+  "bulkActions": {
+    "addToCase": "افزودن به مورد",
+    "moveToCase": "انتقال به مورد",
+    "removeFromCase": "حذف از مورد",
+    "delete": "حذف",
+    "deleteNow": "حذف فوری"
+  },
+  "bulkDelete": {
+    "title": "حذف خروجی‌ها",
+    "desc_one": "آیا مطمئن هستید که می‌خواهید {{count}} خروجی را حذف کنید؟",
+    "desc_other": "آیا مطمئن هستید که می‌خواهید {{count}} خروجی را حذف کنید؟"
+  },
+  "bulkRemoveFromCase": {
+    "title": "حذف از مورد",
+    "desc_one": "حذف {{count}} خروجی از این مورد؟",
+    "desc_other": "حذف {{count}} خروجی از این مورد؟",
+    "descKeepExports": "خروجی‌ها به دسته‌بندی‌نشده منتقل خواهند شد.",
+    "descDeleteExports": "خروجی‌ها به‌طور دائمی حذف خواهند شد.",
+    "deleteExports": "حذف خروجی‌ها به‌جای آن"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "خروجی‌ها با موفقیت حذف شدند",
+      "reassign": "انتساب مورد با موفقیت به‌روزرسانی شد",
+      "remove": "خروجی‌ها با موفقیت از مورد حذف شدند"
+    },
+    "error": {
+      "deleteFailed": "حذف خروجی‌ها ناموفق بود: {{errorMessage}}",
+      "reassignFailed": "به‌روزرسانی انتساب مورد ناموفق بود: {{errorMessage}}"
+    }
   }
 }

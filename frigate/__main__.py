@@ -15,7 +15,9 @@ from frigate.util.config import find_config_file
 
 
 def main() -> None:
-    manager = mp.Manager()
+    # Fork this manager so the forkserver does not start until the first
+    # worker process, after the config has applied environment_vars.
+    manager = mp.get_context("fork").Manager()
     faulthandler.enable()
 
     # Setup the logging thread
@@ -98,6 +100,10 @@ def main() -> None:
         print("*************************************************************")
         print("***    End Config Validation Errors                       ***")
         print("*************************************************************")
+
+        # force a non-zero exit code for config failures
+        if args.validate_config:
+            sys.exit(1)
 
         # attempt to start Frigate in recovery mode
         try:

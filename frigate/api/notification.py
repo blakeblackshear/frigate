@@ -7,17 +7,43 @@ from typing import Any
 from cryptography.hazmat.primitives import serialization
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
-from peewee import DoesNotExist
 from py_vapid import Vapid01, utils
 
 from frigate.api.auth import allow_any_authenticated
 from frigate.api.defs.tags import Tags
+from frigate.comms.webpush import validate_push_endpoint
 from frigate.const import CONFIG_DIR
 from frigate.models import User
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.notifications])
+
+
+def _validate_subscription(sub: Any) -> str | None:
+    """Return a reason the subscription is unusable, or None when it is valid."""
+    if not isinstance(sub, dict):
+        return "subscription must be an object"
+
+    reason = validate_push_endpoint(sub.get("endpoint"))
+
+    if reason:
+        return reason
+
+    keys = sub.get("keys")
+
+    if not isinstance(keys, dict):
+        return "subscription must include keys"
+
+    # WebPusher raises on a missing key, which would break every send for the
+    # user rather than just this registration
+    for name in ("p256dh", "auth"):
+        value = keys.get(name)
+
+        if not isinstance(value, str) or not value:
+            return f"subscription keys must include {name}"
+
+    return None
 
 
 @router.get(
@@ -71,16 +97,33 @@ def register_notifications(request: Request, body: dict = None):
             status_code=400,
         )
 
-    try:
-        User.update(notification_tokens=User.notification_tokens.append(sub)).where(
-            User.username == username
-        ).execute()
-        return JSONResponse(
-            content=({"success": True, "message": "Successfully saved token."}),
-            status_code=200,
+    reason = _validate_subscription(sub)
+
+    if reason:
+        logger.warning(
+            "Rejected notification registration for %s: %s", username, reason
         )
-    except DoesNotExist:
+        return JSONResponse(
+            content={"success": False, "message": f"Invalid subscription: {reason}"},
+            status_code=400,
+        )
+
+    updated = (
+        User.update(notification_tokens=User.notification_tokens.append(sub))
+        .where(User.username == username)
+        .execute()
+    )
+
+    if not updated:
+        logger.warning(
+            "Rejected notification registration for unknown user %s", username
+        )
         return JSONResponse(
             content=({"success": False, "message": "Could not find user."}),
             status_code=404,
         )
+
+    return JSONResponse(
+        content=({"success": True, "message": "Successfully saved token."}),
+        status_code=200,
+    )

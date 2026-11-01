@@ -13,6 +13,7 @@ from frigate.api.auth import require_role
 from frigate.api.defs.tags import Tags
 from frigate.jobs.debug_replay import (
     ExportDebugReplaySource,
+    NoRecordingsError,
     RecordingDebugReplaySource,
     start_debug_replay_job,
 )
@@ -74,7 +75,8 @@ class DebugReplayStopResponse(BaseModel):
     response_model=DebugReplayStartResponse,
     status_code=202,
     responses={
-        400: {"description": "Invalid camera, time range, or no recordings"},
+        400: {"description": "Invalid camera or time range"},
+        404: {"description": "No recordings in the requested time range"},
         409: {"description": "A replay session is already active"},
     },
     dependencies=[Depends(require_role(["admin"]))],
@@ -112,6 +114,14 @@ async def start_debug_replay(request: Request, body: DebugReplayStartBody):
                 "message": "A replay session is already active",
             },
             status_code=409,
+        )
+    except NoRecordingsError:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "No recordings found in the selected time range",
+            },
+            status_code=404,
         )
     except ValueError:
         logger.exception("Rejected debug replay start request")

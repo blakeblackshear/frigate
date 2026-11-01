@@ -78,9 +78,9 @@ Users of the Snapcraft build of Docker cannot use storage locations outside your
 
 Frigate utilizes shared memory to store frames during processing. The default `shm-size` provided by Docker is **64MB**.
 
-The default shm size of **128MB** is fine for setups with **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose). If raising the shm size does not help, check your [process and file limits](#process-and-file-limits) as well.
+Frigate needs about **210MB** for **2 cameras** detecting at **720p**. If Frigate is exiting with "Bus error" messages, it is likely because you have too many high resolution cameras and you need to specify a higher shm size, using [`--shm-size`](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources) (or [`service.shm_size`](https://docs.docker.com/compose/compose-file/compose-file-v2/#shm_size) in Docker Compose). If raising the shm size does not help, check your [process and file limits](#process-and-file-limits) as well.
 
-The Frigate container also stores logs in shm, which can take up to **40MB**, so make sure to take this into account in your math as well.
+The Frigate container also stores logs and an nginx cache in shm, which can take up to **50MB**. The calculator below includes this, along with room for 2 cameras added while Frigate is running. Its result holds about 25 frames per camera, a little above the 20 frame minimum Frigate warns below. Frigate keeps up to 50 when there is room, which gives slow processes more time to read each frame.
 
 <ShmCalculator/>
 
@@ -122,7 +122,9 @@ Additionally, the USB Coral draws a considerable amount of power. If using any o
 
 ### Hailo-8
 
-The Hailo-8 and Hailo-8L AI accelerators are available in both M.2 and HAT form factors for the Raspberry Pi. The M.2 version typically connects to a carrier board for PCIe, which then interfaces with the Raspberry Pi 5 as part of the AI Kit. The HAT version can be mounted directly onto compatible Raspberry Pi models. Both form factors have been successfully tested on x86 platforms as well, making them versatile options for various computing environments.
+The Hailo-8, Hailo-8L and Hailo-8R AI accelerators are available in both M.2 and HAT form factors for the Raspberry Pi. The M.2 version typically connects to a carrier board for PCIe, which then interfaces with the Raspberry Pi 5 as part of the AI Kit. The HAT version can be mounted directly onto compatible Raspberry Pi models. Both form factors have been successfully tested on x86 platforms as well, making them versatile options for various computing environments.
+
+The HailoRT runtime is not part of the Frigate image; Frigate downloads and installs it at first start once a Hailo detector is configured. Containers without internet access can provide the files themselves, see [Detector runtimes](/frigate/network_requirements#detector-runtimes).
 
 #### Installation
 
@@ -298,7 +300,7 @@ If you are using `docker run`, add this option to your command `--device /dev/ha
 
 #### Configuration
 
-Finally, configure [hardware object detection](/configuration/object_detectors#hailo-8) to complete the setup.
+Finally, configure [hardware object detection](/configuration/object_detectors#hailo) to complete the setup.
 
 ### MemryX MX3
 
@@ -314,6 +316,8 @@ The MemryX MX3 Accelerator is available in the M.2 2280 form factor (like an NVM
 #### Installation
 
 To get started with MX3 hardware setup for your system, refer to the [Hardware Setup Guide](https://developer.memryx.com/2p1/get_started/install_hardware.html).
+
+The MemryX SDK used inside the container is not part of the Frigate image; Frigate downloads and installs it at first start once a MemryX detector is configured. Containers without internet access can provide the file themselves, see [Detector runtimes](/frigate/network_requirements#detector-runtimes). The host side driver still has to be installed as described below.
 
 Then follow these steps for installing the correct driver/runtime configuration:
 
@@ -376,6 +380,99 @@ If you can't use Docker Compose, you can run the container with something simila
 #### Configuration
 
 Finally, configure [hardware object detection](/configuration/object_detectors#memryx-mx3) to complete the setup.
+
+### DEEPX NPU
+
+The DEEPX NPU is available in two form factors, and Frigate supports both:
+
+- **DX-M1** in the M.2 2280 form factor (like an NVMe SSD), for x86 (Intel/AMD) PCs, the Raspberry Pi 5, and other ARM SBCs with an exposed PCIe M.2 slot.
+- **DX-M1M** on the [Sixfab AI HAT+](https://docs.sixfab.com/docs/ai-hat-plus-raspberry-pi-5-quickstart), a HAT+ board that connects to the Raspberry Pi 5 over PCIe Gen 3 x1.
+
+Both present the NPU through the same PCIe driver and DX-RT runtime, so the setup below and the detector configuration are identical for either one. Nothing needs to change when moving between them.
+
+DEEPX NPU support in Frigate is developed and maintained by [Sixfab](https://sixfab.com).
+
+#### Versions
+
+A DEEPX install has several separately versioned pieces, and they all have to agree. The driver, the runtime, and the daemon live on the Docker host; Frigate itself carries only the Python bindings, which it downloads on first start:
+
+| Component      | Version  | Installed on | Installed by              |
+| -------------- | -------- | ------------ | ------------------------- |
+| Kernel driver  | `v2.6.0` | Host  | `user_installation.sh`    |
+| DX-RT runtime  | `v3.4.0` | Host  | `user_installation.sh`    |
+| NPU firmware   | `v2.7.4` | The module   | Flashed from the host     |
+| DX-RT bindings | `v3.4.0` | Frigate      | Downloaded at first start |
+
+:::warning
+
+A version mismatch does not produce a startup error. It typically shows up as inference requests that are accepted but never return a result, so detections simply stop appearing while Frigate looks healthy. If that happens after a Frigate upgrade, check every version in the table before anything else.
+
+:::
+
+The installation script installs the DX-RT runtime on the host and enables `dxrt.service`, so the daemon starts at boot and any other program on the host can share the NPU with Frigate. Check the firmware version with `dxrt-cli --status` and update the module if it does not match the table above.
+
+#### Installation
+
+The DEEPX kernel driver must be installed on the host rather than in the container, because containers share the host kernel and cannot load kernel modules. Installing it creates the `/dev/dxrt*` device nodes that are passed through to Frigate. The same script installs the DX-RT runtime and enables `dxrt.service`, the daemon that owns the NPU and hands work to it on behalf of Frigate and anything else on the host.
+
+1. Copy or download [this script](https://github.com/blakeblackshear/frigate/blob/dev/docker/deepx/user_installation.sh).
+2. Ensure it has execution permissions with `sudo chmod +x user_installation.sh`
+3. Run the script with `./user_installation.sh`
+4. **Restart your computer** to complete driver installation.
+
+Confirm the NPU is visible before continuing:
+
+```bash
+ls /dev/dxrt*
+```
+
+Then confirm the daemon is running and listening in `/run/dxrt`:
+
+```bash
+systemctl is-active dxrt.service
+ls /run/dxrt/
+```
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+#### Docker configuration
+
+Frigate needs the NPU device node and the directory holding the daemon's socket:
+
+```yaml
+services:
+  frigate:
+    devices:
+      - /dev/dxrt0:/dev/dxrt0
+    volumes:
+      - /run/dxrt:/run/dxrt
+```
+
+If you can't use Docker Compose, add `--device /dev/dxrt0:/dev/dxrt0 -v /run/dxrt:/run/dxrt` to your `docker run` command.
+
+Add one `--device` per NPU, contiguously from `/dev/dxrt0`, since the client stops enumerating at the first gap.
+
+The installation script configures `dxrt.service` to place its socket in `/run/dxrt` through a systemd drop-in. Mounting the directory rather than the socket file means the container sees the new socket after `dxrt.service` is restarted, rather than holding on to a deleted one.
+
+`dxrtd` listens on an abstract socket as well, but that one does not cross into a container, so Frigate names the filesystem socket through `DXRT_DYNAMIC_IPC_ENDPOINT` on your behalf. Set that variable on the container yourself only if the daemon listens somewhere else, which means you also set it for `dxrtd` through its own systemd drop-in. The script writes `/etc/systemd/system/dxrt.service.d/frigate.conf` for exactly that, and has `dxrt.service` link the socket to `/tmp/dxrt_dynamic_ipc.sock` when it starts, so the host's own `dxrt-cli` and `dxtop` keep finding it at the default path they fall back to.
+
+:::note
+
+The DX-RT client exits when `dxrt.service` stops, so restart the Frigate container after restarting `dxrt.service`.
+
+:::
+
+The device node is needed as well as the socket, because the client opens the NPU directly even though the daemon arbitrates access. Without it, inference fails with `Device not found`.
+
+`/dev/shm` does not need sharing.
+
+The DX-RT python bindings are not shipped in the Frigate image. Frigate downloads them on first start when a DEEPX detector is configured, and caches them under `/config`.
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#deepx-npu) to complete the setup.
 
 ### Rockchip platform
 
@@ -479,6 +576,8 @@ Follow these steps for installation:
 
 To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
 
+The AXEngine python package is not part of the Frigate image; Frigate downloads and installs it at first start once an AXEngine detector is configured. Containers without internet access can provide the file themselves, see [Detector runtimes](/frigate/network_requirements#detector-runtimes).
+
 Next, grant Docker permissions to access your hardware by adding the following lines to your `docker-compose.yml` file:
 
 ```yaml
@@ -497,6 +596,60 @@ If you are using `docker run`, add this option to your command `--device /dev/ax
 
 Finally, configure [hardware object detection](/configuration/object_detectors#axera) to complete the setup.
 
+### Axelera Metis
+
+The Axelera Metis AI Accelerator is available in the M.2 and PCIe card form factors and is supported on x86 (Intel/AMD) PCs and Rock 5B class arm64 boards.
+
+The Axelera runtime used inside the container is not part of the Frigate image; Frigate downloads and installs it at first start once an Axelera detector is configured. Containers without internet access can provide the files themselves, see [Detector runtimes](/frigate/network_requirements#detector-runtimes). The host side kernel driver still has to be installed as described below.
+
+#### Installation
+
+Install the Metis PCIe kernel driver and firmware on the **host** following [Axelera's driver installation guide](https://developer.axelera.ai/axelera-documentation/Getting-Started/GettingStartedWithMetis/InstallingAxeleraMetisDriver). The driver creates the `/dev/metis*` device nodes. Reboot after installing it.
+
+#### Setup
+
+To set up Frigate, follow the default installation instructions, for example: `ghcr.io/blakeblackshear/frigate:stable`
+
+The runtime enumerates the card by the colon-separated name the host udev rules create as a symlink (for example `/dev/metis-0:1:0`). Docker cannot pass that name as a `--device` argument, and a bind mount resolves the symlink to the raw node, which the runtime does not enumerate. A CDI device spec defines the container path and host path as separate fields, and a `startContainer` hook recreates the symlink inside the container.
+
+Create `/etc/cdi/axelera.yaml` on the host, matching the node `ls /dev/metis*` prints:
+
+```yaml
+cdiVersion: "0.6.0"
+kind: axelera.ai/metis
+devices:
+  - name: "0"
+    containerEdits:
+      deviceNodes:
+        - path: /dev/metis-0-1-0
+          hostPath: /dev/metis-0-1-0
+        - path: /dev/dma_heap/system
+      hooks:
+        - hookName: startContainer
+          path: /bin/ln
+          args: ["/bin/ln", "-sf", "metis-0-1-0", "/dev/metis-0:1:0"]
+          timeout: 5
+```
+
+Then grant the device in your `docker-compose.yml` file:
+
+```yaml
+devices:
+  - axelera.ai/metis=0
+```
+
+If you are using `docker run`, add `--device axelera.ai/metis=0` to your command. CDI is enabled by default in Docker 28 and later; older versions need `"features": {"cdi": true}` in `daemon.json`. The hook runs as the container user, so this setup needs the container to start as root and does not work under Docker's `user:` mode.
+
+:::warning
+
+DMA-BUF must be available on the host kernel. On Debian/Ubuntu this is provided by the default kernel; on other systems it may need enabling (`CONFIG_DMABUF_HEAPS_SYSTEM`). If Frigate's log reports that no DMA heap can be allocated, check that `/dev/dma_heap/system` exists on the host and is passed into the container.
+
+:::
+
+#### Configuration
+
+Finally, configure [hardware object detection](/configuration/object_detectors#axelera-metis) to complete the setup.
+
 ## Docker
 
 Running through Docker with Docker Compose is the recommended install method.
@@ -514,7 +667,7 @@ Generate a Frigate Docker Compose configuration based on your hardware and requi
 services:
   frigate:
     container_name: frigate
-    privileged: true # this may not be necessary for all setups
+    # privileged: true # ONLY enable if your hardware requires it (see hardware-specific docs); prefer the device mappings below
     restart: unless-stopped
     stop_grace_period: 30s # allow enough time to shut down the various services
     image: ghcr.io/blakeblackshear/frigate:stable
@@ -545,6 +698,30 @@ services:
 ```
   </TabItem>
 </Tabs>
+
+### Recommended security options
+
+Frigate does not need elevated container privileges for most setups. The following hardens the container; add the `devices`/`group_add` entries your hardware requires (see the hardware acceleration docs):
+
+```yaml
+services:
+  frigate:
+    ...
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+```
+
+:::note
+
+`telemetry.stats.network_bandwidth` uses nethogs, which requires root with NET_ADMIN/NET_RAW capabilities. If you enable that stat, omit `cap_drop: [ALL]` or add `cap_add: [NET_ADMIN, NET_RAW]`.
+
+Platforms that genuinely require `privileged: true` (MemryX, some QNAP setups) are called out in their own sections and are unaffected by this guidance.
+
+:::
+
+Frigate's services run as an unprivileged user inside the container. See [Running as a non-root user](../configuration/non_root.md) for the run modes, the one time volume ownership migration, what each accelerator needs on the host, and the [hardened deployment](../configuration/non_root.md#hardened-deployment) layout with a read-only root filesystem.
 
 **Docker CLI**
 
@@ -611,6 +788,8 @@ Home Assistant OS users can install via the App repository.
 4. Setup your network configuration in the `Configuration` tab
 5. Start the App
 6. Use the _Open Web UI_ button to access the Frigate UI, then click in the _cog icon_ > _Configuration editor_ and configure Frigate to your liking
+
+App users who can't set container environment variables can put `FRIGATE_` values in a `secrets.yaml` next to `config.yml` in `/addon_configs/<addon_directory>` instead. See [`secrets.yaml`](../configuration/advanced/system.md#secretsyaml).
 
 There are several variants of the App available:
 

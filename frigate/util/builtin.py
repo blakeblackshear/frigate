@@ -20,7 +20,15 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from ruamel.yaml import YAML
 
-from frigate.const import REGEX_HTTP_CAMERA_USER_PASS, REGEX_RTSP_CAMERA_USER_PASS
+from frigate.const import (
+    REGEX_CREDENTIAL_QUERY_KEY,
+    REGEX_CREDENTIAL_QUERY_PARAM,
+    REGEX_MASKED_CREDENTIAL,
+    REGEX_RTSP_CAMERA_USER_PASS,
+    REGEX_URL_USERINFO,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 
 if TYPE_CHECKING:
     from frigate.config import CameraConfig
@@ -51,10 +59,13 @@ class EventsPerSecond:
             self._start = now
         # compute the (approximate) events in the last n seconds
         self.expire_timestamps(now)
-        seconds = min(now - self._start, self._last_n_seconds)
-        # avoid divide by zero
-        if seconds == 0:
-            seconds = 1
+        # rate over at least one second (or the whole window, if shorter),
+        # so a burst of events right after start() is not divided by a
+        # tiny window
+        seconds = max(
+            min(now - self._start, self._last_n_seconds),
+            min(1.0, self._last_n_seconds),
+        )
         return len(self._timestamps) / seconds
 
     # remove aged out timestamps
@@ -109,9 +120,24 @@ def deep_merge(dct1: dict, dct2: dict, override=False, merge_lists=False) -> dic
 
 
 def clean_camera_user_pass(line: str) -> str:
-    """Removes user and password from line."""
-    rtsp_cleaned = re.sub(REGEX_RTSP_CAMERA_USER_PASS, "://*:*@", line)
-    return re.sub(REGEX_HTTP_CAMERA_USER_PASS, "user=*&password=*", rtsp_cleaned)
+    """Mask URL userinfo and credential query parameters in line."""
+
+    line = re.sub(REGEX_URL_USERINFO, _mask_userinfo, line)
+    return re.sub(REGEX_CREDENTIAL_QUERY_PARAM, r"\1*", line)
+
+
+def _mask_userinfo(match: re.Match[str]) -> str:
+    # A credential key in the userinfo means a query password holds "@" or a
+    # password holds a query key. Neither split is safe, so mask the whole URL.
+    if re.search(REGEX_CREDENTIAL_QUERY_KEY, match.group(1)):
+        return "://*:*@"
+
+    return f"://*:*@{match.group(2)}"
+
+
+def is_masked_camera_path(path: str) -> bool:
+    """Return True if path holds credentials masked by clean_camera_user_pass."""
+    return re.search(REGEX_MASKED_CREDENTIAL, path) is not None
 
 
 def escape_special_characters(path: str) -> str:
@@ -137,9 +163,16 @@ def get_ffmpeg_arg_list(arg: Any) -> list:
 DEFAULT_RECORD_SEGMENT_TIME = 10
 
 
-def get_record_segment_time(config: "CameraConfig") -> int:
-    """Extract -segment_time from the camera's record output args."""
-    record_args = get_ffmpeg_arg_list(config.ffmpeg.output_args.record)
+def get_record_segment_time(
+    config: "CameraConfig", stream_type: str = STREAM_TYPE_MAIN
+) -> int:
+    """Extract -segment_time from the camera's record output args for a stream."""
+    output_args = (
+        config.ffmpeg.output_args.effective_record_sub
+        if stream_type == STREAM_TYPE_SUB
+        else config.ffmpeg.output_args.record
+    )
+    record_args = get_ffmpeg_arg_list(output_args)
 
     if record_args and record_args[0].startswith("preset"):
         return DEFAULT_RECORD_SEGMENT_TIME
@@ -152,12 +185,19 @@ def get_record_segment_time(config: "CameraConfig") -> int:
 
 
 def load_labels(
-    path: str | None, encoding="utf-8", prefill=91, indexed: bool | None = None
+    path: str | None, encoding="utf-8", prefill=0, indexed: bool | None = None
 ):
     """Loads labels from file (with or without index numbers).
+
+    Only the indices the file defines are returned, so the result describes
+    exactly the classes a model can name. Callers must treat a missing index
+    as an unnamed class rather than assuming a contiguous range.
+
     Args:
       path: path to label file.
       encoding: label file encoding.
+      prefill: pad indices below this with "unknown" before reading the file.
+      indexed: whether lines start with an index; auto-detected when None.
     Returns:
       Dictionary mapping indices to labels.
     """
@@ -470,6 +510,18 @@ def sanitize_float(value):
     if isinstance(value, (int, float)) and not math.isfinite(value):
         return 0.0
     return value
+
+
+def has_non_finite_number(value: Any) -> bool:
+    """Return True if any number in a parsed JSON value is NaN or infinite."""
+    if isinstance(value, float):
+        return not math.isfinite(value)
+    if isinstance(value, dict):
+        return any(has_non_finite_number(v) for v in value.values())
+    if isinstance(value, list):
+        return any(has_non_finite_number(v) for v in value)
+
+    return False
 
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:

@@ -22,7 +22,8 @@
             "error": "Fehler beim Starten der Debug-Wiedergabe: {{error}}",
             "alreadyActive": "Eine Wiederholungssitzung ist bereits aktiv",
             "stopError": "Die Wiedergabe der Debug-Daten konnte nicht beendet werden: {{error}}",
-            "goToReplay": "Zur Aufzeichnung"
+            "goToReplay": "Zur Aufzeichnung",
+            "noRecordings": "Keine Aufnahmen im ausgewählten Zeitraum gefunden"
         }
     },
     "page": {

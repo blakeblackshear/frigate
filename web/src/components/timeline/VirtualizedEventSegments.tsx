@@ -73,7 +73,9 @@ export const VirtualizedEventSegments = forwardRef<
           Math.ceil((scrollTop + clientHeight) / SEGMENT_HEIGHT) +
             OVERSCAN_COUNT,
         );
-        setVisibleRange({ start, end });
+        setVisibleRange((prev) =>
+          prev.start === start && prev.end === end ? prev : { start, end },
+        );
       }
     }, [segments.length, timelineRef]);
 

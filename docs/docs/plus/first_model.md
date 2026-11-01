@@ -30,16 +30,15 @@ Models available in Frigate+ can be used with a special model path. No other inf
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > System > Detectors and model" />. In the **Detection Model** section, choose the **Frigate+** tab. Select your new Frigate+ model from the **Available Frigate+ models** dropdown, then click **Save**. Restart Frigate to apply the change.
+Navigate to <NavPath path="Settings > System > Detection models" />. On the model you want to change, choose the **Frigate+** tab and select your new Frigate+ model from the **Available Frigate+ models** dropdown, then click **Save**. Restart Frigate to apply the change.
 
 </TabItem>
 <TabItem value="yaml">
 
 ```yaml
-detectors: ...
-
-model:
-  path: plus://<your_model_id>
+models:
+  - devices: ...
+    path: plus://<your_model_id>
 ```
 
 :::tip
@@ -64,20 +63,20 @@ Frigate+ models generally have much higher scores than the default model provide
 <ConfigTabs>
 <TabItem value="ui">
 
-Navigate to <NavPath path="Settings > Global configuration > Objects" />. Under **Object filters**, set **Min Score** and **Threshold** for each object type, then click **Save**.
+Navigate to <NavPath path="Settings > Global configuration > Objects" />. Under **Object filters**, set **Minimum confidence** and **Confidence threshold** for each object type, then click **Save**.
 
-| Object            | Min Score | Threshold |
-| ----------------- | --------- | --------- |
-| **dog**           | .7        | .9        |
-| **cat**           | .65       | .8        |
-| **face**          | .7        |           |
-| **package**       | .65       | .9        |
-| **license_plate** | .6        |           |
-| **amazon**        | .75       |           |
-| **ups**           | .75       |           |
-| **fedex**         | .75       |           |
-| **person**        | .65       | .85       |
-| **car**           | .65       | .85       |
+| Object            | Minimum confidence | Confidence threshold |
+| ----------------- | ------------------ | -------------------- |
+| **dog**           | .7                 | .9                   |
+| **cat**           | .65                | .8                   |
+| **face**          | .7                 |                      |
+| **package**       | .65                | .9                   |
+| **license_plate** | .6                 |                      |
+| **amazon**        | .75                |                      |
+| **ups**           | .75                |                      |
+| **fedex**         | .75                |                      |
+| **person**        | .65                | .85                  |
+| **car**           | .65                | .85                  |
 
 </TabItem>
 <TabItem value="yaml">

@@ -75,5 +75,10 @@
         "enabled": {
             "label": "Hangról szövegre alakítás engedélyezése"
         }
+    },
+    "zones": {
+        "speed_threshold": {
+            "label": "Minimum sebesség"
+        }
     }
 }

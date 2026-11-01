@@ -35,8 +35,7 @@
         "audioIsUnavailable": "Šiai transliacijai nėra garso takelio",
         "audio": {
           "tips": {
-            "title": "Šiai transliacijai garsas turi būti teikiamas iš kameros ir konfiguruojamas naudojant go2rtc.",
-            "document": "Skaityti dokumentaciją "
+            "title": "Šiai transliacijai garsas turi būti teikiamas iš kameros ir konfiguruojamas naudojant go2rtc."
           }
         },
         "stream": "Transliacija",
@@ -68,7 +67,10 @@
         }
       },
       "birdseye": "Birdseye"
-    }
+    },
+    "showAll": "Rodyti visas kamerų grupes",
+    "showLess": "Rodyti mažiau",
+    "editGroups": "Koreguoti Kameru Grupes"
   },
   "debug": {
     "options": {
@@ -82,6 +84,7 @@
     "zones": "Zonos",
     "mask": "Maskuotė",
     "motion": "Judesys",
-    "regions": "Regionas"
+    "regions": "Regionas",
+    "paths": "Keliai"
   }
 }

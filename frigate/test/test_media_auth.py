@@ -9,8 +9,8 @@ import logging
 import os
 import unittest
 
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.media_auth import (
@@ -21,7 +21,7 @@ from frigate.api.media_auth import (
 )
 from frigate.config import FrigateConfig
 from frigate.models import Event, Export, Recordings, ReviewSegment
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
 _CONFIG = {
     "mqtt": {"host": "mqtt"},
@@ -75,6 +75,20 @@ class TestExtractPath(unittest.TestCase):
     def test_empty(self):
         self.assertIsNone(extract_path(None))
         self.assertIsNone(extract_path(""))
+
+    def test_leading_double_slash_is_path(self):
+        self.assertEqual(
+            extract_path("//clips/front_door-1.jpg"), "/clips/front_door-1.jpg"
+        )
+
+    def test_repeated_slashes_merged(self):
+        self.assertEqual(
+            extract_path("/recordings//2026-05-11/14//front_door/00.00.mp4"),
+            "/recordings/2026-05-11/14/front_door/00.00.mp4",
+        )
+        self.assertEqual(
+            extract_path("/%2Fclips/front_door-1.jpg"), "/clips/front_door-1.jpg"
+        )
 
 
 class TestResolveMediaUri(unittest.TestCase):
@@ -208,11 +222,11 @@ class TestExportResolution(unittest.TestCase):
     """Export resolution requires a DB lookup."""
 
     def setUp(self):
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         Router(migrate_db).run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         self.db.bind([Event, ReviewSegment, Recordings, Export])
         self.config = FrigateConfig(**_CONFIG)
 
@@ -375,6 +389,34 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         # don't want a stale DB to lock out admins.
         self.assertIsNone(self._deny("/clips/nonexistent-1.jpg", "admin"))
         self.assertIsNone(self._deny("/clips/nonexistent-1.jpg", "viewer"))
+
+    def test_repeated_slashes_resolve_to_owning_camera(self):
+        # nginx merges repeated slashes before matching the media locations
+        for url in (
+            "//clips/back_door-1.jpg",
+            "/clips//back_door-1.jpg",
+            "//recordings/2026-05-11/14/back_door/00.00.mp4",
+            "/recordings//2026-05-11/14/back_door/00.00.mp4",
+        ):
+            self.assertEqual(self._deny(url, "limited_user"), 403, url)
+        self.assertIsNone(self._deny("//clips/front_door-1.jpg", "limited_user"))
+
+    def test_traversal_with_leading_double_slash_denied(self):
+        self.assertEqual(
+            self._deny("//clips/front_door/../back_door-1.jpg", "admin"), 403
+        )
+
+    def test_traversal_from_non_media_prefix_denied(self):
+        # nginx resolves these into a media root before serving
+        for url in (
+            "/x/../clips/back_door-1.jpg",
+            "/x/%2E%2E/clips/back_door-1.jpg",
+            "/./clips/front_door/../back_door-1.jpg",
+            "/api/../recordings/2026-05-11/14/back_door/00.00.mp4",
+            "/clips/back_door-1.jpg#/../../x",
+        ):
+            self.assertEqual(self._deny(url, "limited_user"), 403, url)
+        self.assertIsNone(self._deny("/x/../api/events", "limited_user"))
 
 
 if __name__ == "__main__":

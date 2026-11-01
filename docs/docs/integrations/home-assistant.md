@@ -55,6 +55,10 @@ To install the optional companion Lovelace card, please see the [separate
 installation instructions](https://github.com/dermotduffy/frigate-hass-card) for
 that card.
 
+Frigate rejects browser connections to its live streams that come from another
+origin, such as a Home Assistant dashboard. Configure cards to stream through the
+integration's proxy rather than pointing them directly at Frigate's port.
+
 ## Configuration
 
 When configuring the integration, you will be asked for the `URL` of your Frigate instance which can be pointed at the internal unauthenticated port (`5000`) or the authenticated port (`8971`) for your instance. This may look like `http://<host>:5000/`.
@@ -281,7 +285,7 @@ For advanced usecases, this behavior can be changed with the [RTSP URL
 template](#options) option. When set, this string will override the default stream
 address that is derived from the default behavior described above. This option supports
 [jinja2 templates](https://jinja.palletsprojects.com/) and has the `camera` dict
-variables from [Frigate API](../integrations/api)
+variables from [Frigate API](/integrations/api/frigate-http-api)
 available for the template. Note that no Home Assistant state is available to the
 template, only the camera dict from Frigate.
 

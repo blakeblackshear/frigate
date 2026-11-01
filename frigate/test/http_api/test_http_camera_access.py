@@ -390,7 +390,7 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
         intent and forward the request to go2rtc instead of short-circuiting with 400."""
         app = self._make_app(_MULTI_CAMERA_CONFIG)
         mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
-        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+        with patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", "true"):
             with patch(
                 "frigate.api.camera.requests.put", return_value=mock_response
             ) as mock_put:
@@ -402,6 +402,91 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
                 mock_put.assert_called_once()
                 forwarded_src = mock_put.call_args.kwargs["params"]["src"]
                 assert forwarded_src == "exec:/tmp/something"
+
+    def test_add_stream_ignores_override_written_after_import(self):
+        """The override is read once at import. A value written into os.environ
+        later, which is what the config's environment_vars block does, must not
+        unlock restricted sources."""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+            with patch("frigate.api.camera.requests.put") as mock_put:
+                with AuthTestClient(app) as client:
+                    resp = client.put("/go2rtc/streams/legit?src=exec:/tmp/something")
+        # A live go2rtc would also answer 400, so assert on the forward.
+        mock_put.assert_not_called()
+        assert resp.status_code == 400
+        assert resp.json().get("success") is False
+
+    def test_add_stream_rejects_ffmpeg_argument_injection(self):
+        """PUT /go2rtc/streams must reject ffmpeg: sources whose parameters can
+        inject arbitrary ffmpeg arguments, since go2rtc expands them to exec:"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        with patch("frigate.api.camera.requests.put") as mock_put:
+            with AuthTestClient(app) as client:
+                for src in (
+                    # shape of the source in GHSA-qjjw-3v66-279f
+                    "ffmpeg:#input='-f''h264''-i''data:placeholder''-c''copy'",
+                    "ffmpeg:#input=-re",
+                    "ffmpeg:front_door#raw=-vn",
+                    "ffmpeg:front_door#video=-vn",
+                    "ffmpeg:front_door#video=out.mp4",
+                    "ffmpeg:front_door#drawtext=x",
+                    "ffmpeg:front_door#width=1x",
+                    "ffmpeg:front_door#audio=/16000",
+                    "ffmpeg:front_door#audio=opus/",
+                    "ffmpeg:front_door#audio=opus/16000/1",
+                    "ffmpeg:'front_door'",
+                    "  ffmpeg:#input=-re",
+                ):
+                    resp = client.put("/go2rtc/streams/injected", params={"src": src})
+                    assert resp.status_code == 400, (
+                        f"Expected 400 for ffmpeg src {src!r}; got {resp.status_code}"
+                    )
+                    assert resp.json().get("success") is False
+            mock_put.assert_not_called()
+
+    def test_add_stream_allows_standard_ffmpeg_sources(self):
+        """ffmpeg: sources built by the UI and shown in the docs must still be
+        forwarded to go2rtc"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
+        with patch(
+            "frigate.api.camera.requests.put", return_value=mock_response
+        ) as mock_put:
+            with AuthTestClient(app) as client:
+                for src in (
+                    "ffmpeg:rtsp://10.0.0.1:554/video",
+                    "ffmpeg:rtsp://10.0.0.1:554/video#video=copy#audio=copy",
+                    "ffmpeg:rtsp://10.0.0.1:554/video#video=h264#hardware",
+                    "ffmpeg:front_door#audio=opus",
+                    "ffmpeg:front_door#video=h264#hardware=vaapi",
+                    "ffmpeg:front_door#video=h264#width=1280#rotate=-90",
+                    # documented HomeKit source
+                    "ffmpeg:front_door#video=h264#width=1280#height=720#audio=opus/16000",
+                    "ffmpeg:http://10.0.0.1/flv?port=1935&app=bcs#video=copy",
+                ):
+                    resp = client.put("/go2rtc/streams/legit", params={"src": src})
+                    assert resp.status_code == 200, (
+                        f"Expected 200 for ffmpeg src {src!r}; got {resp.status_code}"
+                    )
+                    forwarded_src = mock_put.call_args.kwargs["params"]["src"]
+                    assert forwarded_src == src
+
+    def test_add_stream_allows_ffmpeg_injection_when_override_set(self):
+        """GO2RTC_ALLOW_ARBITRARY_EXEC also lifts the ffmpeg: parameter check"""
+        app = self._make_app(_MULTI_CAMERA_CONFIG)
+        mock_response = type("R", (), {"ok": True, "status_code": 200, "text": "ok"})()
+        with patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", "true"):
+            with patch(
+                "frigate.api.camera.requests.put", return_value=mock_response
+            ) as mock_put:
+                with AuthTestClient(app) as client:
+                    resp = client.put(
+                        "/go2rtc/streams/legit",
+                        params={"src": "ffmpeg:front_door#raw=-vn"},
+                    )
+                assert resp.status_code == 200
+                mock_put.assert_called_once()
 
     def test_stream_alias_blocked_when_owning_camera_disallowed(self):
         """limited_user cannot access a stream alias that belongs to a camera they
@@ -440,3 +525,68 @@ class TestGo2rtcStreamAccess(BaseTestHttp):
             f"limited_user should be denied on alias back_door_main; "
             f"got {resp.status_code}"
         )
+
+
+class TestReviewSummaryAccess(BaseTestHttp):
+    """Tests for POST /review/summarize/start/{start_ts}/end/{end_ts}.
+
+    The summary correlates each flagged event with overlapping activity on
+    other cameras, so it is gated on full camera access rather than scoped to
+    the caller's cameras. These tests pin that decision so the dependency is
+    not loosened without first scoping the query.
+
+    GenAI is not configured in unit tests, so an authorized request returns 400
+    while an unauthorized one is rejected with 403 before the handler runs.
+    """
+
+    def setUp(self):
+        super().setUp([Event, ReviewSegment, Recordings])
+        self.minimal_config = _MULTI_CAMERA_CONFIG
+        self.app = super().create_app()
+
+    def tearDown(self):
+        self.app.dependency_overrides.clear()
+        super().tearDown()
+
+    def _summarize(self, allowed_cameras: list[str]):
+        async def mock_cameras(request: Request):
+            return allowed_cameras
+
+        self.app.dependency_overrides[get_allowed_cameras_for_filter] = mock_cameras
+        with AuthTestClient(self.app) as client:
+            return client.post("/review/summarize/start/0/end/9999999999")
+
+    def _assert_allowed(self, resp):
+        assert resp.status_code not in (401, 403), (
+            f"Caller should not be blocked; got {resp.status_code}"
+        )
+
+    def test_partial_camera_access_blocked(self):
+        assert self._summarize(["front_door"]).status_code == 403
+
+    def test_no_camera_access_blocked(self):
+        assert self._summarize([]).status_code == 403
+
+    def test_full_camera_access_allowed(self):
+        # Covers admin and viewer, which always resolve to every camera, and a
+        # custom role whose list happens to name them all.
+        self._assert_allowed(self._summarize(["front_door", "back_door"]))
+
+    def _summarize_as_role(self, role: str):
+        """Summarize using the real role to allowed-cameras resolution."""
+        self.app.dependency_overrides.pop(get_allowed_cameras_for_filter, None)
+        with AuthTestClient(self.app) as client:
+            return client.post(
+                "/review/summarize/start/0/end/9999999999",
+                headers={"remote-user": "test", "remote-role": role},
+            )
+
+    def test_viewer_role_allowed(self):
+        # viewer is never camera restricted, so it resolves to every camera.
+        self._assert_allowed(self._summarize_as_role("viewer"))
+
+    def test_admin_role_allowed(self):
+        self._assert_allowed(self._summarize_as_role("admin"))
+
+    def test_restricted_role_blocked(self):
+        assert self._summarize_as_role("limited_user").status_code == 403

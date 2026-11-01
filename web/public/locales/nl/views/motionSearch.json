@@ -36,12 +36,11 @@
     "settings": {
         "title": "Zoekinstellingen",
         "parallelMode": "Parallelle modus",
-        "parallelModeDesc": "Scan meerdere video segmenten tegelijk (sneller, maar significant meer CPU gebruik)",
+        "parallelModeDesc": "Meerdere opnamebereiken tegelijk scannen (sneller; vereist meer decoderingsbronnen)",
         "threshold": "Gevoeligheid drempel",
         "thresholdDesc": "Lagere waardes detecteren eerder veranderingen (1-255)",
         "minArea": "Minimaal wijzigings gebied",
         "minAreaDesc": "Minimale percentage van gebied welke moet wijzigen om als significante wijziging aan te merken",
-        "frameSkip": "Frame overlaan",
         "maxResults": "Maximaal aantal resultaten",
         "maxResultsDesc": "Stop na dit aantal overeenkomende tijdstempels"
     },

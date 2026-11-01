@@ -8,8 +8,9 @@
       "frigate": "Logi Frigate - Frigate",
       "go2rtc": "Logi Go2RTC - Frigate",
       "nginx": "Logi Nginx - Frigate",
-      "websocket": "Logi Websocket - Frigate"
-    }
+      "websocket": "Logi komunikatów - Frigate"
+    },
+    "health": "Zdrowie – Frigate"
   },
   "general": {
     "hardwareInfo": {
@@ -44,11 +45,9 @@
       "gpuUsage": "Użycie GPU",
       "npuUsage": "Użycie NPU",
       "npuMemory": "Pamięć NPU",
-      "intelGpuWarning": {
-        "message": "Statystyki układu graficznego niedostępne",
-        "description": "W narzędziach telemetrii i statystyki układów graficznych firmy Intel (intel_gpu_top) znajduje się znany błąd powodujący raportowanie użycia układu graficznego wynoszące 0%, nawet gdy akceleracja sprzętowa i wykrywanie obiektów działa prawidłowo korzystając ze zintegrowanego układu graficznego. To nie jest błąd oprogramowania Frigate. Restart hosta może chwilowo rozwiązać problem i pozwolić na weryfikację działania układu graficznego. Ten bład nie wpływa na wydajność systemu.",
-        "title": "Ostrzeżenie dotyczące statystyk Intel GPU"
-      }
+      "gpuCompute": "Obliczenia GPU / Kodowanie",
+      "gpuTemperature": "Temperatura GPU",
+      "npuTemperature": "Temperatura NPU"
     },
     "title": "Ogólne",
     "detector": {
@@ -88,7 +87,20 @@
         "title": "Informacje o sondowaniu kamery"
       },
       "fetching": "Pobieranie danych kamery",
-      "aspectRatio": "proporcje"
+      "aspectRatio": "proporcje",
+      "keyframes": {
+        "title": "Analiza klatek kluczowych",
+        "analyzing": "Analizowanie klatek kluczowych... Pozostało {{seconds}} s",
+        "stillAnalyzing": "Trwa analizowanie klatek kluczowych...",
+        "recordStream": "Strumień nagrywania:",
+        "keyframeCount": "Zaobserwowane klatki kluczowe:",
+        "observedDuration": "Obserwowany czas trwania:",
+        "gap": "Odstęp klatek kluczowych (min / śr / maks):",
+        "segmentLength": "Długość segmentu nagrywania:",
+        "ok": "Klatki kluczowe co ~{{seconds}} s, optymalnie dla nagrywania i odtwarzania.",
+        "unknown": "Nie udało się określić odstępu klatek kluczowych.",
+        "recordDisabled": "Nagrywanie jest wyłączone dla tej kamery."
+      }
     },
     "toast": {
       "success": {
@@ -115,7 +127,22 @@
       "cameraDetect": "{{camName}} detekcja",
       "cameraFramesPerSecond": "{{camName}} liczba klatek na sekundę",
       "cameraDetectionsPerSecond": "{{camName}} liczba detekcji na sekundę",
-      "cameraFfmpeg": "{{camName}} FFmpeg"
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraGpu": "{{camName}} GPU"
+    },
+    "noCameras": {
+      "title": "Nie znaleziono kamer"
+    },
+    "connectionQuality": {
+      "title": "Jakość połączenia",
+      "excellent": "Doskonała",
+      "fair": "Dostateczna",
+      "poor": "Słaba",
+      "unusable": "Bezużyteczna",
+      "fps": "FPS",
+      "expectedFps": "Oczekiwany FPS",
+      "reconnectsLastHour": "Ponowne połączenia (ostatnia godzina)",
+      "stallsLastHour": "Zacięcia (ostatnia godzina)"
     }
   },
   "storage": {
@@ -140,7 +167,11 @@
     },
     "shm": {
       "title": "Wykorzystanie pamięci współdzielonej SHM",
-      "warning": "Obecny rozmiar pamięci współdzielonej SHM {{total}}MB jest za mały. Zwiększ shm_size do co najmniej {{min_shm}}MB."
+      "warning": "Obecny rozmiar pamięci współdzielonej SHM {{total}}MB jest za mały. Zwiększ shm_size do co najmniej {{min_shm}}MB.",
+      "frameLifetime": {
+        "title": "Czas życia klatki",
+        "description": "Każda kamera ma {{frames}} slotów na klatki w pamięci współdzielonej. Przy częstotliwości klatek najszybszej kamery każda klatka jest dostępna przez około {{lifetime}} s przed nadpisaniem."
+      }
     }
   },
   "logs": {
@@ -166,13 +197,30 @@
       }
     },
     "websocket": {
-      "label": "Wiadomości",
-      "pause": "Pauza",
+      "label": "Komunikaty",
+      "pause": "Wstrzymaj",
       "resume": "Wznów",
       "clear": "Wyczyść",
       "filter": {
         "all": "Wszystkie tematy",
-        "topics": "Tematy"
+        "topics": "Tematy",
+        "events": "Zdarzenia",
+        "reviews": "Przeglądy",
+        "classification": "Klasyfikacja",
+        "face_recognition": "Rozpoznawanie twarzy",
+        "lpr": "LPR (tablice rejestracyjne)",
+        "camera_activity": "Aktywność kamery",
+        "system": "System",
+        "camera": "Kamera",
+        "all_cameras": "Wszystkie kamery",
+        "cameras_count_one": "{{count}} kamera",
+        "cameras_count_other": "{{count}} kamer"
+      },
+      "empty": "Nie zarejestrowano jeszcze żadnych komunikatów",
+      "count_one": "{{count}} komunikat",
+      "count_other": "{{count}} komunikatów",
+      "expanded": {
+        "payload": "Ładunek (Payload)"
       }
     }
   },
@@ -180,14 +228,12 @@
   "metrics": "Metryki systemowe",
   "lastRefreshed": "Ostatnie odświeżenie: ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} ma wysokie użycie CPU przez FFmpeg ({{ffmpegAvg}}%)",
-    "detectHighCpuUsage": "{{camera}} ma wysokie użycie CPU przez detekcję ({{detectAvg}}%)",
     "healthy": "System jest sprawny",
     "reindexingEmbeddings": "Ponowne indeksowanie osadzeń ({{processed}}% ukończone)",
     "detectIsSlow": "{{detect}} jest wolne ({{speed}} ms)",
     "detectIsVerySlow": "{{detect}} jest bardzo wolne ({{speed}} ms)",
     "cameraIsOffline": "{{camera}} jest niedostępna",
-    "shmTooLow": "przydział {{total}} MB dla /dev/shm powinien zostać zwiększony do przynajmniej {{min}} MB."
+    "debugReplayActive": "Sesja odtwarzania debugowania jest aktywna"
   },
   "enrichments": {
     "title": "Wzbogacenia",
@@ -215,5 +261,38 @@
       "object_description_events_per_second": "Opis obiektu"
     },
     "averageInf": "Średni czas wnioskowania"
+  },
+  "showAllTabs": "Pokaż wszystkie zakładki",
+  "showLessTabs": "Pokaż mniej",
+  "health": {
+    "title": "Zdrowie",
+    "notices": {
+      "title": "Ogłoszenia",
+      "empty": "Instalacja programu Frigate działa poprawnie",
+      "acknowledge": "Potwierdzić",
+      "acknowledgeHint": "Ukryj, dopóki to się nie powtórzy",
+      "mute": "Wycisz",
+      "muteHint": "Nigdy nie pokazuj tego więcej",
+      "unmute": "Włącz dźwięk",
+      "showAgain": "Pokaż ponownie",
+      "openSettings": "Otwórz ustawienia",
+      "openLink": "Otwórz link",
+      "hiddenTitle": "Ukryte",
+      "noneHidden": "Zero ukrytych ogłoszeń",
+      "showAll": "Pokaż ponownie wszystko",
+      "showAllTitle": "Wyświetlić wszystkie ukryte ogłoszenia?",
+      "acknowledgedAt": "Potwierdzono o {{time}}",
+      "mutedAt": "Wyciszone {{time}}",
+      "filter": {
+        "showHidden": "Pokaż ukryte",
+        "severity": "Intensywność",
+        "error": "Błąd",
+        "warning": "Ostrzeżenie",
+        "info": "Informacje"
+      },
+      "kinds": {
+        "detector_stuck": "Detektor {{detector}} został ponownie uruchomiony po tym, jak przestał odpowiadać"
+      }
+    }
   }
 }

@@ -52,13 +52,22 @@
     "name": {
       "placeholder": "Name the Export"
     },
+    "stream": {
+      "label": "Quality",
+      "auto": "Auto",
+      "main": "Original",
+      "sub": "Low",
+      "autoDesc": "Uses the main stream and falls back to the lower quality sub stream where main is not available.",
+      "mainDesc": "Exports only the original quality main stream. Time ranges where the main stream is not available will be missing.",
+      "subDesc": "Exports only the lower quality sub stream. Time ranges where the sub stream is not available will be missing."
+    },
     "case": {
       "newCaseOption": "Create new case",
       "newCaseNamePlaceholder": "New case name",
       "newCaseDescriptionPlaceholder": "Case description",
       "label": "Case",
-      "nonAdminHelp": "A new case will be created for these exports.",
-      "placeholder": "Select a case"
+      "placeholder": "Select a case",
+      "nameRequired": "Case name is required"
     },
     "select": "Select",
     "export": "Export",
@@ -82,9 +91,11 @@
       "selectedCount": "{{selected}} / {{total}} selected",
       "checkingActivity": "Checking camera activity...",
       "noCameras": "No cameras available",
+      "noCamerasSelected": "Select at least one camera",
       "detectionCount_one": "1 tracked object",
       "detectionCount_other": "{{count}} tracked objects",
       "nameLabel": "Export name",
+      "caseNameDefault": "Multi-camera export - {{date}}",
       "namePlaceholder": "Optional base name for these exports",
       "queueingButton": "Queueing Exports...",
       "exportButton_one": "Export 1 Camera",
@@ -100,10 +111,8 @@
       "exportButton_other": "Export {{count}} reviews",
       "exportingButton": "Exporting...",
       "toast": {
-        "started_one": "Started 1 export. Opening the case now.",
-        "started_other": "Started {{count}} exports. Opening the case now.",
-        "startedNoCase_one": "Started 1 export.",
-        "startedNoCase_other": "Started {{count}} exports.",
+        "started_one": "Started 1 export.",
+        "started_other": "Started {{count}} exports.",
         "partial": "Started {{successful}} of {{total}} exports. Failed: {{failedItems}}",
         "failed": "Failed to start {{total}} exports. Failed: {{failedItems}}"
       }
@@ -116,8 +125,8 @@
       "batchSuccess_other": "Started {{count}} exports. Opening the case now.",
       "batchPartial": "Started {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
       "batchFailed": "Failed to start {{total}} exports. Failed cameras: {{failedCameras}}",
-      "batchQueuedSuccess_one": "Queued 1 export. Opening the case now.",
-      "batchQueuedSuccess_other": "Queued {{count}} exports. Opening the case now.",
+      "batchQueuedSuccess_one": "Queued 1 export.",
+      "batchQueuedSuccess_other": "Queued {{count}} exports.",
       "batchQueuedPartial": "Queued {{successful}} of {{total}} exports. Failed cameras: {{failedCameras}}",
       "batchQueueFailed": "Failed to queue {{total}} exports. Failed cameras: {{failedCameras}}",
       "error": {
@@ -184,7 +193,14 @@
       "export": "Export",
       "markAsReviewed": "Mark as reviewed",
       "markAsUnreviewed": "Mark as unreviewed",
-      "deleteNow": "Delete Now"
+      "deleteNow": "Delete Now",
+      "generateDescription": "Generate description"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "A GenAI description has been requested for this review item.",
+        "error": "Failed to request description: {{error}}"
+      }
     }
   },
   "imagePicker": {

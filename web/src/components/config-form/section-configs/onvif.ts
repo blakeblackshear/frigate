@@ -28,6 +28,8 @@ const onvif: SectionConfigOverrides = {
     fieldMessages: [
       {
         key: "autotracking-no-zones",
+        health: (ctx) =>
+          ctx.fullCameraConfig?.onvif?.autotracking?.enabled === true,
         field: "autotracking.required_zones",
         messageKey: "configMessages.onvif.autotrackingNoZones",
         severity: "error",

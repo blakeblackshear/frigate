@@ -5,8 +5,11 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
+from frigate.app import FrigateApp
 from frigate.comms.dispatcher import Dispatcher
+from frigate.comms.mqtt import MqttClient
 from frigate.comms.runtime_state import RuntimeStatePersistence
+from frigate.config import BirdseyeModeEnum
 
 
 def _make_camera_mock(
@@ -48,6 +51,60 @@ def _build_dispatcher(cameras: dict[str, MagicMock]) -> Dispatcher:
         patch("frigate.comms.dispatcher.AudioActivityManager"),
     ):
         return Dispatcher(config, config_updater, onvif, ptz_metrics, communicators)
+
+
+class TestBirdseyeModeCommands(unittest.TestCase):
+    """Verify Birdseye mode commands use the activity list contract."""
+
+    def setUp(self) -> None:
+        self.camera = _make_camera_mock()
+        self.camera.birdseye.enabled = True
+        self.dispatcher = _build_dispatcher({"front_door": self.camera})
+        self.dispatcher.publish = MagicMock()
+
+    def test_combined_modes_are_accepted(self) -> None:
+        self.dispatcher._on_birdseye_modes_command("front_door", "ALERTS,MOTION")
+
+        self.assertEqual(
+            self.camera.birdseye.modes,
+            [BirdseyeModeEnum.alerts, BirdseyeModeEnum.motion],
+        )
+        self.dispatcher.config_updater.publish_update.assert_called_once()
+        self.dispatcher.publish.assert_called_once_with(
+            "front_door/birdseye_modes/state",
+            "MOTION,ALERTS",
+            retain=True,
+        )
+
+    def test_single_activity_type_is_accepted(self) -> None:
+        self.dispatcher._on_birdseye_modes_command("front_door", "ALL_OBJECTS")
+
+        self.assertEqual(self.camera.birdseye.modes, [BirdseyeModeEnum.all_objects])
+        self.dispatcher.publish.assert_called_once_with(
+            "front_door/birdseye_modes/state", "ALL_OBJECTS", retain=True
+        )
+
+    def test_none_clears_every_activity_type(self) -> None:
+        self.dispatcher._on_birdseye_modes_command("front_door", "NONE")
+
+        self.assertEqual(self.camera.birdseye.modes, [])
+        self.dispatcher.publish.assert_called_once_with(
+            "front_door/birdseye_modes/state", "NONE", retain=True
+        )
+
+    def test_unknown_mode_is_rejected(self) -> None:
+        for payload in (
+            "UNKNOWN",
+            "motion",
+            "MOTION_OBJECTS",
+            "NONE,MOTION",
+            "MOTION,MOTION",
+            "MOTION,",
+        ):
+            with self.subTest(payload=payload):
+                self.dispatcher._on_birdseye_modes_command("front_door", payload)
+
+        self.dispatcher.config_updater.publish_update.assert_not_called()
 
 
 class TestRestoreRuntimeState(unittest.TestCase):
@@ -363,5 +420,174 @@ class TestReapplyRuntimeStateToConfig(unittest.TestCase):
         dispatcher.reapply_runtime_state_to_config()
 
 
+class TestStartupAppliesConfigLayersBeforeWorkersStart(unittest.TestCase):
+    """Both layers must reach the config before config-carrying workers start.
+
+    A worker started before a layer is applied keeps the yaml value for the
+    rest of the session: the config_updater broadcast sent later is dropped
+    for subscribers that have not connected yet, and nothing re-sends it.
+    """
+
+    CONFIG_LAYERS = (
+        "profile_manager.restore_persisted_profile_to_config",
+        "dispatcher.reapply_runtime_state_to_config",
+    )
+
+    # started with a copy of the camera config
+    CONFIG_CARRYING_WORKERS = (
+        "start_video_output_processor",
+        "start_ptz_autotracker",
+        "start_detected_frames_processor",
+        "start_camera_processor",
+        "start_audio_processor",
+    )
+
+    def _start_call_order(self) -> list[str]:
+        """Return the names FrigateApp.start() calls, in order."""
+        app = MagicMock()
+
+        with (
+            patch("frigate.app.set_file_limit"),
+            patch("frigate.app.cleanup_replay_cameras"),
+            patch("frigate.app.reap_stale_exports"),
+            patch("frigate.app.create_fastapi_app"),
+            patch("frigate.app.uvicorn"),
+        ):
+            FrigateApp.start(app)
+
+        return [name for name, _, _ in app.mock_calls]
+
+    def test_applied_before_any_config_carrying_worker(self) -> None:
+        order = self._start_call_order()
+
+        for layer in self.CONFIG_LAYERS:
+            for worker in self.CONFIG_CARRYING_WORKERS:
+                self.assertLess(order.index(layer), order.index(worker))
+
+    def test_applied_after_the_dispatcher_exists(self) -> None:
+        order = self._start_call_order()
+
+        for layer in self.CONFIG_LAYERS:
+            self.assertLess(order.index("init_dispatcher"), order.index(layer))
+
+    def test_applied_after_the_profile_base_is_snapshotted(self) -> None:
+        # ProfileManager snapshots the config as the "no profile" base that
+        # deactivation resets to, so neither layer may be in the config yet
+        order = self._start_call_order()
+
+        for layer in self.CONFIG_LAYERS:
+            self.assertLess(order.index("init_profile_manager"), order.index(layer))
+
+    def test_layers_applied_in_order(self) -> None:
+        # a runtime toggle is the layer the user set last, so it goes on top
+        order = self._start_call_order()
+
+        self.assertLess(
+            order.index("profile_manager.restore_persisted_profile_to_config"),
+            order.index("dispatcher.reapply_runtime_state_to_config"),
+        )
+
+    def test_overrides_still_re_applied_after_the_profile_is_restored(self) -> None:
+        # activation resets the sections it owns to the base first, so the
+        # overrides have to land on top again
+        order = self._start_call_order()
+
+        self.assertLess(
+            order.index("profile_manager.restore_persisted_profile"),
+            order.index("dispatcher.restore_runtime_state"),
+        )
+
+    def test_broadcast_replay_still_runs_at_the_end(self) -> None:
+        # the broadcast is the only channel for the recording, review, and
+        # embeddings processes, which start before the config can be corrected
+        order = self._start_call_order()
+
+        for replay in (
+            "profile_manager.restore_persisted_profile",
+            "dispatcher.restore_runtime_state",
+        ):
+            self.assertLess(order.index("start_audio_processor"), order.index(replay))
+
+
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNoticeWiring(unittest.TestCase):
+    """The dispatcher forwards update_notice requests and publishes the list."""
+
+    def setUp(self) -> None:
+        self.registry = MagicMock()
+        self.registry.active.return_value = [{"id": "detector_stuck:ov"}]
+        config = MagicMock()
+        config.cameras = {}
+
+        with (
+            patch("frigate.comms.dispatcher.CameraActivityManager"),
+            patch("frigate.comms.dispatcher.AudioActivityManager"),
+        ):
+            self.dispatcher = Dispatcher(
+                config,
+                MagicMock(),
+                MagicMock(),
+                {},
+                [],
+                notice_registry=self.registry,
+            )
+
+    def test_registry_listener_is_subscribed(self) -> None:
+        self.registry.subscribe.assert_called_once_with(
+            self.dispatcher._publish_notices
+        )
+
+    def test_update_request_reaches_registry(self) -> None:
+        update = {
+            "action": "raise",
+            "kind": "model_download_failed",
+            "scope": "yolo/model.onnx",
+            "params": {"file": "model.onnx", "error": "timeout"},
+        }
+
+        self.dispatcher._receive("update_notice", update)
+
+        self.registry.apply.assert_called_once_with(update)
+
+    def test_malformed_request_does_not_raise(self) -> None:
+        self.registry.apply.side_effect = RuntimeError("boom")
+
+        self.dispatcher._receive("update_notice", "not a dict")
+        self.dispatcher._receive(
+            "update_notice", {"action": "raise", "kind": "x", "params": {}}
+        )
+
+        self.registry.apply.assert_called_once()
+
+    def test_publish_local_skips_mqtt(self) -> None:
+        mqtt = MagicMock(spec=MqttClient)
+        other = MagicMock()
+        self.dispatcher.comms = [mqtt, other]
+
+        self.dispatcher.publish_local("notices", "[]")
+
+        mqtt.publish.assert_not_called()
+        other.publish.assert_called_once_with("notices", "[]", False)
+
+    def test_listener_publishes_active_list(self) -> None:
+        self.dispatcher.publish_local = MagicMock()
+
+        self.dispatcher._publish_notices()
+
+        self.dispatcher.publish_local.assert_called_once_with(
+            "notices", '[{"id": "detector_stuck:ov"}]'
+        )
+
+    def test_snapshot_includes_notices(self) -> None:
+        publisher = MagicMock()
+        self.dispatcher._build_camera_activity_snapshot = MagicMock(
+            return_value=({}, {})
+        )
+        self.dispatcher.web_push_client = None
+
+        self.dispatcher.publish_runtime_snapshot(publisher)
+
+        publisher.assert_any_call("notices", '[{"id": "detector_stuck:ov"}]', False)

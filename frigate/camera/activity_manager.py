@@ -18,6 +18,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateSubscriber,
 )
+from frigate.detectors.detector_config import NON_LOGO_ATTRIBUTES
 
 logger = logging.getLogger(__name__)
 
@@ -103,12 +104,13 @@ class CameraActivityManager:
         all_objects: list[dict[str, Any]] = []
 
         for camera in new_activity.keys():
-            if camera not in self.config.cameras:
+            camera_config = self.config.cameras.get(camera)
+            if camera_config is None:
                 continue
 
             # handle cameras that were added dynamically
             if camera not in self.camera_all_object_counts:
-                self.__init_camera(self.config.cameras[camera])
+                self.__init_camera(camera_config)
 
             new_objects = new_activity[camera].get("objects", [])
             all_objects.extend(new_objects)
@@ -178,7 +180,7 @@ class CameraActivityManager:
             return
 
         for label in camera_config.objects.track:
-            if label in self.config.model.non_logo_attributes:
+            if label in NON_LOGO_ATTRIBUTES:
                 continue
 
             new_count = all_objects[label]
@@ -233,12 +235,13 @@ class AudioActivityManager:
         now = datetime.datetime.now().timestamp()
 
         for camera in new_activity.keys():
-            if camera not in self.config.cameras:
+            camera_config = self.config.cameras.get(camera)
+            if camera_config is None:
                 continue
 
             # handle cameras that were added dynamically
             if camera not in self.current_audio_detections:
-                self.__init_camera(self.config.cameras[camera])
+                self.__init_camera(camera_config)
 
             new_detections = new_activity[camera].get("detections", [])
             if self.compare_audio_activity(camera, new_detections, now):

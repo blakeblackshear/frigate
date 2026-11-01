@@ -23,8 +23,7 @@
         "textTokenizer": "Tokenizer text"
       },
       "tips": {
-        "context": "S-ar putea să dorești să reindexezi înglobările obiectelor urmărite odată ce modelele sunt descărcate.",
-        "documentation": "Citește documentația"
+        "context": "S-ar putea să dorești să reindexezi înglobările obiectelor urmărite odată ce modelele sunt descărcate."
       },
       "error": "A apărut o eroare. Verifică jurnalele Frigate."
     }
@@ -33,58 +32,11 @@
     "details": "detalii",
     "snapshot": "snapshot",
     "video": "video",
-    "object_lifecycle": "ciclul de viață al obiectului",
     "thumbnail": "miniatură",
     "tracking_details": "detalii de urmărire"
   },
   "objectLifecycle": {
-    "lifecycleItemDesc": {
-      "visible": "S-a detectat {{label}}",
-      "active": "{{label}} a devenit activ",
-      "entered_zone": "{{label}} a intrat în {{zones}}",
-      "stationary": "{{label}} a devenit staționar",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} detectat pentru {{label}}",
-        "other": "{{label}} recunoscut ca {{attribute}}"
-      },
-      "header": {
-        "zones": "Zone",
-        "ratio": "Raport",
-        "area": "Suprafață"
-      },
-      "gone": "{{label}} a părasit cadrul",
-      "heard": "{{label}} auzit(ă)",
-      "external": "{{label}} detectat(ă)"
-    },
-    "title": "Ciclul de viață al obiectului",
-    "count": "{{first}} din {{second}}",
-    "trackedPoint": "Punct urmărit",
-    "noImageFound": "Nicio imagine găsită pentru această marcă temporală.",
-    "createObjectMask": "Creează mască de obiecte",
-    "adjustAnnotationSettings": "Ajustează setările de adnotare",
-    "scrollViewTips": "Derulează pentru a vizualiza momentele semnificative din ciclul de viață al acestui obiect.",
-    "autoTrackingTips": "Pozițiile casetelor de delimitare vor fi inexacte pentru camerele cu urmărire automată.",
-    "annotationSettings": {
-      "showAllZones": {
-        "title": "Afișează toate zonele",
-        "desc": "Afișează întotdeauna zonele pe cadrele în care obiectele au intrat într-o zonă."
-      },
-      "offset": {
-        "label": "Compensare adnotare",
-        "documentation": "Citește documentația ",
-        "desc": "Aceste date provin din stream-ul de detecție al camerei tale, dar sunt suprapuse pe imaginile din stream-ul de înregistrare. Este puțin probabil ca cele două stream-uri să fie perfect sincronizate. Ca urmare, caseta de delimitare și materialul video nu se vor potrivi perfect. Totuși, câmpul <code>annotation_offset</code> poate fi folosit pentru a ajusta acest lucru.",
-        "millisecondsToOffset": "Millisecondele cu care să compensezi adnotările de detecție. <em>Implicit: 0</em>",
-        "tips": "SFAT: Imaginează-ți că există un clip de eveniment cu o persoană care merge de la stânga la dreapta. Dacă caseta de delimitare de pe linia temporală a evenimentului este constant în partea stângă a persoanei, atunci valoarea ar trebui să fie scăzută. În mod similar, dacă persoana merge de la stânga la dreapta și caseta de delimitare este constant înaintea persoanei, atunci valoarea ar trebui să fie crescută.",
-        "toast": {
-          "success": "Compensarea adnotării pentru {{camera}} a fost salvată în fișierul de configurație. Repornește Frigate pentru a aplica modificările."
-        }
-      },
-      "title": "Setări adnotare"
-    },
-    "carousel": {
-      "previous": "Slide-ul anterior",
-      "next": "Slide-ul următor"
-    }
+    "noImageFound": "Nicio imagine găsită pentru această marcă temporală."
   },
   "details": {
     "timestamp": "Marcaj timp",
@@ -120,7 +72,7 @@
     },
     "editSubLabel": {
       "title": "Editează subeticheta",
-      "desc": "Introdu o sub-etichetă nouă pentru acest {{label}}",
+      "desc": "Introdu o sub-etichetă nouă pentru acest/această {{label}}",
       "descNoLabel": "Introduceți o nouă subetichetă pentru acest obiect urmărit"
     },
     "editLPR": {
@@ -182,10 +134,6 @@
     "downloadSnapshot": {
       "aria": "Descarcă snapshot-ul",
       "label": "Descarcă snapshot-ul"
-    },
-    "viewObjectLifecycle": {
-      "label": "Afișează ciclul de viață al obiectului",
-      "aria": "Arată ciclul de viață al obiectului"
     },
     "findSimilar": {
       "label": "Găsește similare",

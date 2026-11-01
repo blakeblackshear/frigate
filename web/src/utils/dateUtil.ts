@@ -97,7 +97,7 @@ const formatMap: {
 const getResolvedTimeZone = () => {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch (error) {
+  } catch {
     const offsetMinutes = new Date().getTimezoneOffset();
     return `UTC${offsetMinutes < 0 ? "+" : "-"}${Math.abs(offsetMinutes / 60)
       .toString()
@@ -224,7 +224,7 @@ export const formatUnixTimestampToDateTime = (
     }
 
     return formattedDateTime;
-  } catch (error) {
+  } catch {
     return "Invalid time";
   }
 };
@@ -318,12 +318,12 @@ export const formatSecondsToDuration = (
  * @param timezone string representation of the timezone the user is requesting
  * @returns number of minutes offset from UTC
  */
-export const getUTCOffset = (
-  date: Date,
-  timezone: string = getResolvedTimeZone(),
-): number => {
+export const getUTCOffset = (date: Date, timezone?: string | null): number => {
+  // ui.timezone comes back as null until the user sets one
+  const resolvedTimezone = timezone || getResolvedTimeZone();
+
   // If timezone is in UTC±HH:MM format, parse it to get offset
-  const utcOffsetMatch = timezone.match(/^UTC([+-])(\d{2}):(\d{2})$/);
+  const utcOffsetMatch = resolvedTimezone.match(/^UTC([+-])(\d{2}):(\d{2})$/);
   if (utcOffsetMatch) {
     const hours = parseInt(utcOffsetMatch[2], 10);
     const minutes = parseInt(utcOffsetMatch[3], 10);
@@ -334,7 +334,7 @@ export const getUTCOffset = (
   const utcDate = new Date(date.getTime());
   // locale of en-CA is required for proper locale format
   let iso = utcDate
-    .toLocaleString("en-CA", { timeZone: timezone, hour12: false })
+    .toLocaleString("en-CA", { timeZone: resolvedTimezone, hour12: false })
     .replace(", ", "T");
   iso += `.${utcDate.getMilliseconds().toString().padStart(3, "0")}`;
   let target = new Date(`${iso}Z`);
@@ -383,6 +383,16 @@ export function isCurrentHour(timestamp: number) {
   now.setUTCMinutes(0, 0, 0);
 
   return timestamp > now.getTime() / 1000;
+}
+
+// a just-ended hour has no mp4 yet but may still have cached frames, so it
+// stays eligible for the frame-based players
+export function isCurrentOrPreviousHour(timestamp: number) {
+  const previousHour = new Date();
+  previousHour.setUTCMinutes(0, 0, 0);
+  previousHour.setUTCHours(previousHour.getUTCHours() - 1);
+
+  return timestamp > previousHour.getTime() / 1000;
 }
 
 export const convertLocalDateToTimestamp = (dateString: string): number => {

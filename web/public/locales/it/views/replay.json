@@ -19,30 +19,31 @@
         "startLabel": "Inizio",
         "endLabel": "Fine",
         "toast": {
-            "error": "Impossibile avviare la riproduzione di correzioni: {{error}}",
+            "error": "Impossibile avviare la riproduzione correzioni: {{error}}",
             "alreadyActive": "È già attiva una sessione di riproduzione",
-            "stopError": "Impossibile interrompere la riproduzione di correzioni: {{error}}",
-            "goToReplay": "Vai alla riproduzione"
+            "stopError": "Impossibile interrompere la riproduzione correzioni: {{error}}",
+            "goToReplay": "Vai alla riproduzione",
+            "noRecordings": "Nessuna registrazione trovata nell'intervallo di tempo selezionato"
         }
     },
     "page": {
-        "noSession": "Nessuna sessione di riproduzione di correzioni attiva",
-        "noSessionDesc": "Avvia una riproduzione di correzioni dalla visualizzazione Cronologia facendo clic sul pulsante Azioni nella barra degli strumenti e scegliendo Riproduzione di correzioni.",
+        "noSession": "Nessuna sessione di riproduzione correzioni attiva",
+        "noSessionDesc": "Avvia una riproduzione correzioni dalla visualizzazione Cronologia facendo clic sul pulsante Azioni nella barra degli strumenti e scegliendo Riproduzione correzioni.",
         "goToRecordings": "Vai alla Cronologia",
         "preparingClip": "Preparazione video…",
         "preparingClipDesc": "Frigate sta unendo le registrazioni relative all'intervallo di tempo selezionato. Questa operazione può richiedere un minuto per intervalli più lunghi.",
-        "startingCamera": "Avvio della riproduzione di correzioni…",
+        "startingCamera": "Avvio della riproduzione correzioni…",
         "startError": {
-            "title": "Impossibile avviare la riproduzione di correzioni",
+            "title": "Impossibile avviare la riproduzione correzioni",
             "back": "Torna alla Cronologia"
         },
         "sourceCamera": "Telecamera sorgente",
         "replayCamera": "Telecamera di riproduzione",
-        "initializingReplay": "Inizializzazione riproduzione di correzioni...",
-        "stoppingReplay": "Interruzione riproduzione di correzioni...",
+        "initializingReplay": "Inizializzazione riproduzione correzioni...",
+        "stoppingReplay": "Interruzione riproduzione correzioni...",
         "stopReplay": "Ferma riproduzione",
         "confirmStop": {
-            "title": "Interrompere la riproduzione di correzioni?",
+            "title": "Interrompere la riproduzione correzioni?",
             "description": "In questo modo la sessione verrà interrotta e tutti i dati temporanei verranno eliminati. Sei sicuro?",
             "confirm": "Ferma riproduzione",
             "cancel": "Annulla"
@@ -54,6 +55,6 @@
         "activeTracking": "Tracciamento attivo",
         "noActiveTracking": "Nessun tracciamento attivo",
         "configuration": "Configurazione",
-        "configurationDesc": "Regola con precisione le impostazioni di rilevamento del movimento e tracciamento degli oggetti per la telecamera Riproduzione di correzioni. Nessuna modifica verrà salvata nel file di configurazione di Frigate."
+        "configurationDesc": "Regola con precisione le impostazioni di rilevamento del movimento e tracciamento degli oggetti per la telecamera riproduzione correzioni. Nessuna modifica verrà salvata nel file di configurazione di Frigate."
     }
 }

@@ -27,6 +27,7 @@ import useSWR from "swr";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { isAttributeLabel } from "@/utils/modelUtil";
 import {
   Popover,
   PopoverContent,
@@ -72,7 +73,7 @@ export default function Step1NameAndDefine({
       }
 
       cameraConfig.objects.track.forEach((label) => {
-        if (!config.model.all_attributes.includes(label)) {
+        if (!isAttributeLabel(config, label)) {
           labels.add(label);
         }
       });

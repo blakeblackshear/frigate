@@ -1,19 +1,23 @@
 from enum import Enum
-from typing import TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from frigate.camera import CameraMetrics
 from frigate.data_processing.types import DataProcessorMetrics
 from frigate.object_detection.base import ObjectDetectProcess
 
+if TYPE_CHECKING:
+    from frigate.storage import StorageMaintainer
+
 
 class StatsTrackingTypes(TypedDict):
     camera_metrics: dict[str, CameraMetrics]
-    embeddings_metrics: DataProcessorMetrics | None
+    embeddings_metrics: DataProcessorMetrics
     detectors: dict[str, ObjectDetectProcess]
     started: int
     latest_frigate_version: str
     last_updated: int
     processes: dict[str, int]
+    storage_maintainer: "StorageMaintainer | None"
 
 
 class ModelStatusTypesEnum(str, Enum):

@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Predložené"
+        },
+        "toast": {
+          "error": "Odoslanie do Frigate+ zlyhalo. Skontrolujte sieťové pripojenie a skúste znova."
         }
       }
     },
@@ -43,9 +46,9 @@
         "title": "Čas ukončenia",
         "label": "Vybrat čas ukončenia"
       },
-      "lastHour_one": "Minulu hodinu",
-      "lastHour_few": "Minule{{count}}hodiny",
-      "lastHour_other": "Minulych{{count}}hodin"
+      "lastHour_one": "Posledná hodina",
+      "lastHour_few": "Posledné {{count}} hodiny",
+      "lastHour_other": "Posledných {{count}} hodín"
     },
     "name": {
       "placeholder": "Pomenujte Export"
@@ -58,13 +61,16 @@
       "error": {
         "failed": "Chyba spustenia exportu: {{error}}",
         "endTimeMustAfterStartTime": "Čas konca musí byť po čase začiatku",
-        "noVaildTimeSelected": "Nie je vybrané žiadne platné časové obdobie"
+        "noValidTimeSelected": "Nie je vybraný žiadny časový úsek."
       },
-      "view": "Zobraziť"
+      "view": "Zobraziť",
+      "queued": "Export zaradený do poradia. Aktuálny stav exportov nájdete na stránke exportov."
     },
     "fromTimeline": {
       "saveExport": "Uložiť Export",
-      "previewExport": "Export ukážky"
+      "previewExport": "Export ukážky",
+      "queueingExport": "Zaraďujem do zoznamu exportov...",
+      "useThisRange": "Použi tento rozsah"
     },
     "case": {
       "newCaseOption": "Vytvoriť nový prípad",
@@ -83,7 +89,49 @@
       "cameraSelection": "Kamery",
       "cameraSelectionHelp": "Kamery so sledovanými objektmi v tomto časovom rozsahu sú vopred vybrané",
       "checkingActivity": "Kontrola aktivity kamery...",
-      "noCameras": "Nie sú k dispozícii žiadne kamery"
+      "noCameras": "Nie sú k dispozícii žiadne kamery",
+      "timeRange": "Časový rámec",
+      "selectFromTimeline": "Vybrať na časovej osi",
+      "searchOrSelectGroup": "Vyhľadať, alebo vybrať skupinu kamier",
+      "selectAll": "Vybrať všetky kamery",
+      "clearSelection": "Zrušiť výber",
+      "selectWithActivity": "Kamery so sledovanými objektami",
+      "selectGroup": "Vybrať skupinu",
+      "noMatchingCameras": "Žiadne kamery nevyhovujú vyhľadávaniu",
+      "selectedCount": "{{selected}} / {{total}} vybraných",
+      "detectionCount_one": "{{count}} sledovaný objekt",
+      "detectionCount_few": "{{count}} sledované objekty",
+      "detectionCount_other": "{{count}} sledovaných objektov",
+      "nameLabel": "Názov exportu",
+      "namePlaceholder": "Nepovinné spoločné meno pre tieto exporty",
+      "exportButton_one": "Exportuj 1 kameru",
+      "exportButton_few": "Exportuj {{count}} kamery",
+      "exportButton_other": "Exportuj {{count}} kamier",
+      "queueingButton": "Pridať do poradia pre export..."
+    },
+    "stream": {
+      "label": "Kvalita",
+      "auto": "Automaticky",
+      "main": "Pôvodný",
+      "sub": "Nízky",
+      "autoDesc": "Používa hlavný stream, alebo v prípade nedostupnosti prejde na nižšiu kvalitu streamu.",
+      "mainDesc": "Vyexportuje iba hlavný stream v pôvodnej kvalite. Časové úseky, kde nie je k dispozícii hlavný stream, budú vynechané.",
+      "subDesc": "Vyexportuje iba sub stream v nižšej kvalite. Časové úseky, kde nie je k dispozícii sub stream, budú vynechané."
+    },
+    "multi": {
+      "title_one": "Exportuj prehľad",
+      "title_few": "Exportuj {{count}} prehľady",
+      "title_other": "Exportuj {{count}} prehľadov",
+      "description": "Exportuj vybrané prehľady. Všetky exporty budú zoskupené pod jeden záznam.",
+      "descriptionNoCase": "Exportuj všetky vybrané prehľady.",
+      "caseNamePlaceholder": "Prehľad export - {{date}}",
+      "exportingButton": "Exportujem...",
+      "toast": {
+        "started_one": "Spúšťam jeden export",
+        "started_few": "Spúšťam {{count}} exporty.",
+        "started_other": "Spúšťam {{count}} exportov.",
+        "partial": "Spustených {{successful}} exportov z celkovo {{total}}. Zlyhalo: {{failedItems}}"
+      }
     }
   },
   "streaming": {
@@ -91,8 +139,7 @@
     "restreaming": {
       "disabled": "Opätovné streamovanie nie je pre túto kameru povolené.",
       "desc": {
-        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc.",
-        "readTheDocumentation": "Prečítajte si dokumentáciu"
+        "title": "Pre ďalšie možnosti živého náhľadu a zvuku pre túto kameru nastavte go2rtc."
       }
     },
     "showStats": {
@@ -131,6 +178,10 @@
       "markAsReviewed": "Označiť ako skontrolované",
       "deleteNow": "Odstrániť teraz",
       "markAsUnreviewed": "Označiť ako neskontrolované"
+    },
+    "shareTimestamp": {
+      "label": "Zdieľať časovú značku",
+      "title": "Zdieľať časovú značku"
     }
   },
   "imagePicker": {

@@ -13,8 +13,8 @@ class CameraUiConfig(FrigateBaseModel):
     )
     dashboard: bool = Field(
         default=True,
-        title="Show in UI",
-        description="Toggle whether this camera is visible everywhere in the Frigate UI. Disabling this will require manually editing the config to view this camera in the UI again.",
+        title="Show on Live dashboard",
+        description="Toggle whether this camera is visible on the default All Cameras live dashboard. The camera remains available everywhere else in the UI, including camera groups and settings.",
     )
     review: bool = Field(
         default=True,

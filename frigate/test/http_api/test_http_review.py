@@ -240,9 +240,101 @@ class TestHttpReview(BaseTestHttp):
             assert len(response_json) == 1
             assert response_json[0]["id"] == id_reviewed
 
+    def test_get_review_with_label_filter_matches_verified(self):
+        """Test that a label filter also matches the `-verified` variant."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.person", now, now + 2, data={"objects": ["person"]}
+            )
+            super().insert_mock_review_segment(
+                "123456.verified", now, now + 2, data={"objects": ["person-verified"]}
+            )
+            super().insert_mock_review_segment(
+                "123456.car", now, now + 2, data={"objects": ["car"]}
+            )
+
+            params = {
+                "labels": "person",
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert {r["id"] for r in response_json} == {
+                "123456.person",
+                "123456.verified",
+            }
+
+    def test_get_review_with_label_filter_does_not_match_prefix(self):
+        """Test that a label filter does not match labels that only share a prefix."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.carrot", now, now + 2, data={"objects": ["carrot"]}
+            )
+
+            params = {
+                "labels": "car",
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            assert len(response.json()) == 0
+
+    def test_get_review_with_audio_label_filter(self):
+        """Test that a label filter still matches audio labels."""
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.audio", now, now + 2, data={"audio": ["speech"]}
+            )
+
+            params = {
+                "labels": "speech",
+                "after": now - 1,
+                "before": now + 3,
+            }
+            response = client.get("/review", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert len(response_json) == 1
+            assert response_json[0]["id"] == "123456.audio"
+
     ####################################################################################################################
     ###################################  GET /review/summary Endpoint   #################################################
     ####################################################################################################################
+    def test_get_review_summary_label_filter_matches_verified(self):
+        """Test that the summary label filter also matches the `-verified` variant."""
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.verified", data={"objects": ["person-verified"]}
+            )
+            super().insert_mock_review_segment(
+                "123456.car", data={"objects": ["car"]}, severity=SeverityEnum.detection
+            )
+
+            params = {
+                "cameras": "front_door",
+                "labels": "person",
+                "zones": "all",
+                "timezone": "utc",
+            }
+            response = client.get("/review/summary", params=params)
+            assert response.status_code == 200
+            response_json = response.json()
+            assert response_json["last24Hours"]["total_alert"] == 1
+            assert response_json["last24Hours"]["total_detection"] == 0
+
+            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            assert response_json[today_formatted]["total_alert"] == 1
+            assert response_json[today_formatted]["total_detection"] == 0
+
     def test_get_review_summary_all_filters(self):
         with AuthTestClient(self.app) as client:
             super().insert_mock_review_segment("123456.random")
@@ -250,7 +342,7 @@ class TestHttpReview(BaseTestHttp):
                 "cameras": "front_door",
                 "labels": "all",
                 "zones": "all",
-                "timezone": "utc",
+                "timezone": "UTC",
             }
             response = client.get("/review/summary", params=params)
             assert response.status_code == 200
@@ -496,6 +588,43 @@ class TestHttpReview(BaseTestHttp):
                 UserReviewStatus.review_segment == id,
             )
             assert user_review.has_been_reviewed == True
+
+    def test_reviews_concurrent_insert_peewee_ignore(self):
+        """Validates that on_conflict_ignore() silently skips a duplicate insert
+
+        Two requests can both SELECT and find no existing status, then both try
+        to INSERT, hitting the unique (user_id, review_segment) constraint.
+        on_conflict_ignore() must silently skip the duplicate instead of raising
+        an IntegrityError (which was previously caught with try/except).
+        """
+        id = "123456.random"
+        with AuthTestClient(self.app):
+            super().insert_mock_review_segment(id)
+
+            # Simulate the first request having already committed its insert.
+            self._insert_user_review_status(id, reviewed=True)
+
+            # Simulate the second concurrent request attempting the same insert.
+            UserReviewStatus.insert_many(
+                [
+                    {
+                        "user_id": self.user_id,
+                        "review_segment_id": id,
+                        "has_been_reviewed": True,
+                    }
+                ]
+            ).on_conflict_ignore().execute()
+
+            # Exactly one row should exist; no exception should have been raised.
+            count = (
+                UserReviewStatus.select()
+                .where(
+                    (UserReviewStatus.user_id == self.user_id)
+                    & (UserReviewStatus.review_segment == id)
+                )
+                .count()
+            )
+            assert count == 1
 
     ####################################################################################################################
     ###################################  POST reviews/delete Endpoint   ################################################

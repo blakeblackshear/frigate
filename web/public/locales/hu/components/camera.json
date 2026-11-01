@@ -32,7 +32,6 @@
         "audioIsUnavailable": "Nem elérhető hang ehhez az adáshoz",
         "audio": {
           "tips": {
-            "document": "Olvassa el a leírást ",
             "title": "A hangnak a kamerából kell jönnie és be kell állítva legyen a go2rtc-ben ehhez az adáshoz."
           }
         },
@@ -68,7 +67,10 @@
         "desc": "Változtassa meg az élő adás beállításait ezen kamera csoport kijelzőjén. <em> Ezek a beállítások eszköz/böngésző-specifikusak.</em>"
       },
       "birdseye": "Madártávlat"
-    }
+    },
+    "showAll": "Mutasd az összes kamera csoportot",
+    "showLess": "Mutass kevesebbet",
+    "editGroups": "Kamera Csoportok Módosítása"
   },
   "debug": {
     "options": {
@@ -82,6 +84,7 @@
     "mask": "Maszk",
     "motion": "Mozgás",
     "regions": "Régiók",
-    "boundingBox": "Doboz"
+    "boundingBox": "Doboz",
+    "paths": "Útvonalak"
   }
 }

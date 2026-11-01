@@ -3,7 +3,31 @@ id: cpu
 title: High CPU Usage
 ---
 
-High CPU usage can impact Frigate's performance and responsiveness. This guide outlines the most effective configuration changes to help reduce CPU consumption and optimize resource usage.
+High CPU usage can impact Frigate's performance and responsiveness. This guide explains how to interpret the CPU values Frigate reports and outlines the most effective configuration changes to help reduce CPU consumption and optimize resource usage.
+
+## Understanding Frigate's Reported CPU Usage
+
+Frigate's CPU percentages often look much higher than what the host reports. Usually both numbers are correct and are simply measured against different denominators, so confirm you actually have a problem before tuning anything.
+
+### Per-process values are relative to a single core
+
+The values Frigate reports for FFmpeg, capture, detect, detector, and other processes follow the same convention as `top`: 100% means one CPU core is fully saturated, not that the whole system is saturated. A multithreaded process such as FFmpeg can legitimately report well over 100%.
+
+Host and hypervisor tools instead report a percentage of the machine's total capacity across all cores. This includes `docker stats`, the `htop` summary, the Proxmox summary graph, the Unraid dashboard, Synology Resource Monitor, and Home Assistant's system monitor sensors. To reconcile the two:
+
+```
+host percentage ≈ (sum of Frigate's process percentages) / (number of cores)
+```
+
+On a 4 core system, an FFmpeg process reporting 100% is consuming one quarter of the machine, so the host will show roughly 25 to 30% once the remaining Frigate processes are included. That same 100% on a 16 core system is about 6%. Frigate's own warning thresholds use the per-core convention as well, so an FFmpeg process is flagged at 20% of a single core, not 20% of the system.
+
+### Instantaneous samples and averages measure different things
+
+Frigate collects stats every 15 seconds, and the `cpu` value covers only the interval since the previous collection. The `cpu_average` value in the stats API and MQTT payload is the average across the entire life of the process, and it is what the high CPU usage warnings are based on. Host dashboards generally plot data averaged over a longer window, so a single Frigate sample can show a peak that a host graph never displays. A process that has just started, such as FFmpeg after a camera reconnect, reports 0 until it has been sampled twice.
+
+### The system-wide value depends on what the container can see
+
+The system CPU value is read from `/proc/stat`. Under Docker that file belongs to the host, so the value covers the entire machine including workloads unrelated to Frigate, and it will not match `docker stats` for the Frigate container. Under an LXC container, lxcfs virtualizes `/proc/stat` and the value reflects only the cores assigned to the container. In a virtual machine, the guest sees only its assigned vCPUs while the hypervisor divides by every physical thread on the node, so guest and host percentages will not agree even when both are accurate.
 
 ## 1. Hardware Acceleration for Video Decoding
 
@@ -72,3 +96,19 @@ The model you use significantly impacts detector performance. Frigate provides d
 - Larger models (640x640): Slower inference, can sometimes have higher accuracy on very large objects that take up a majority of the frame.
 
 For more detail on picking the right size, see [Choosing a model size](../configuration/object_detectors.md#choosing-a-model-size).
+
+## 3. Reducing Detector CPU Usage
+
+**Priority: High**
+
+The **Detector CPU Usage** metric measures the CPU spent converting frames into the tensor format the model expects and post-processing the model's output. It does not include inference, so this value can be high even when you've configured a GPU, NPU, or Coral for object detection.
+
+This metric scales with how many detections per second Frigate runs and how expensive each one is to prepare. Tuning [motion detection](../configuration/motion_detection) is usually the first recommendation to reduce the number of detections. Additionally, you can:
+
+- **Lower `detect -> fps`.** 5 is the recommended value for nearly all cameras. Running at 10 doubles the frames eligible for detection and is one of the largest contributors to this metric.
+- **Use a 320x320 model.** A 640x640 model has 4 times as many pixels to transpose, convert, and copy on every inference.
+- **Prefer a model that takes integer input.** Models configured with `input_dtype: float` require each frame to be converted to float32 and normalized on the CPU first. Models taking `int` input, such as the tflite models used by the Edge TPU, skip that step.
+- **Do not match the detect resolution to the model resolution.** The detect stream should match your camera's aspect ratio, for example `1280x720`, not the model's input size. Frigate crops and scales regions of motion itself, so an oversized detect stream only adds work.
+- **Tune stationary object behavior.** Objects that never settle into a stationary state are re-detected continuously. Raising `detect -> stationary -> interval` reduces how often detection runs on objects that are already parked. See [stationary objects](../configuration/stationary_objects).
+
+Adding [more detector instances](#multiple-detector-instances) spreads this work across more CPU cores, but does not reduce the total CPU used.

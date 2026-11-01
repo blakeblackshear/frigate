@@ -1,16 +1,20 @@
 import { baseUrl } from "@/api/baseUrl";
-import { useCallback, useRef } from "react";
+import { CameraConfig } from "@/types/frigateConfig";
+import { useCallback, useMemo, useRef } from "react";
 
 const GRID_SIZE = 16;
+const DEFAULT_ASPECT_RATIO = 16 / 9;
+// Cap how tall the grid can get for portrait and 4:3 cameras
+const MAX_GRID_HEIGHT = "65dvh";
 
 type MotionRegionFilterGridProps = {
-  cameraName: string;
+  camera: CameraConfig;
   selectedCells: Set<number>;
   onCellsChange: (cells: Set<number>) => void;
 };
 
 export default function MotionRegionFilterGrid({
-  cameraName,
+  camera,
   selectedCells,
   onCellsChange,
 }: MotionRegionFilterGridProps) {
@@ -20,6 +24,18 @@ export default function MotionRegionFilterGrid({
   });
   const lastCellRef = useRef<number>(-1);
   const gridRef = useRef<HTMLDivElement>(null);
+
+  // Cells are indexed against the detect frame, so the grid has to match the
+  // frame's aspect ratio or painted cells land on the wrong part of the image
+  const aspectRatio = useMemo(() => {
+    if (!camera.detect.width || !camera.detect.height) {
+      return DEFAULT_ASPECT_RATIO;
+    }
+
+    const ratio = camera.detect.width / camera.detect.height;
+
+    return Number.isFinite(ratio) && ratio > 0 ? ratio : DEFAULT_ASPECT_RATIO;
+  }, [camera.detect.height, camera.detect.width]);
 
   const toggleCell = useCallback(
     (index: number, forceAdd?: boolean) => {
@@ -109,13 +125,17 @@ export default function MotionRegionFilterGrid({
   return (
     <div className="space-y-2">
       <div
-        className="relative aspect-video w-full select-none overflow-hidden rounded-lg"
-        style={{ touchAction: "none" }}
+        className="relative mx-auto select-none overflow-hidden rounded-lg"
+        style={{
+          aspectRatio,
+          width: `min(100%, calc(${MAX_GRID_HEIGHT} * ${aspectRatio}))`,
+          touchAction: "none",
+        }}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
         <img
-          src={`${baseUrl}api/${cameraName}/latest.jpg?h=500`}
+          src={`${baseUrl}api/${camera.name}/latest.jpg?h=500`}
           className="absolute inset-0 size-full object-contain"
           draggable={false}
           alt=""

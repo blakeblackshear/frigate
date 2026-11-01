@@ -1,1 +1,26 @@
-{}
+{
+    "record": {
+        "export": {
+            "label": "Išrašo konfiguracija",
+            "description": "Nustatymai naudojami kuriant įrašų išrašus tokie kaip timelaps ir hardware acceleration.",
+            "hwaccel_args": {
+                "label": "Išrašų hwaccel args",
+                "description": "Hardware acceleration argumentai naudojami išrašų/transkodavimo operacijoms."
+            },
+            "max_concurrent": {
+                "label": "Maksimumas lygiagrečiai kuriamų išrašų",
+                "description": "Maksimalus kiekis išrašų kūrimo užduočių galimų vykdyti vienu metu."
+            },
+            "chapters": {
+                "label": "Epizodo metaduomenys bus įterpti į išsaugotuose įrašuose"
+            }
+        }
+    },
+    "lpr": {
+        "label": "Registracijos Numerių Atpažinimas",
+        "description": "Registracijos numerių atpažinimo nustatymai įskaitant aptikimo ribas, formatavima ir žinomus numerius.",
+        "enabled": {
+            "label": "Įjungti RNA"
+        }
+    }
+}

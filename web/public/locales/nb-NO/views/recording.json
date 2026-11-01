@@ -5,7 +5,7 @@
   "filters": "Filtre",
   "toast": {
     "error": {
-      "noValidTimeSelected": "Ingen gyldig tidsperiode valgt",
+      "noValidTimeSelected": "Ingen gyldig tidsrom valgt",
       "endTimeMustAfterStartTime": "Sluttid må være etter starttid"
     }
   }

@@ -87,8 +87,8 @@
             "description": "為此攝影機啟用或停用通知。"
         },
         "email": {
-            "label": "通知郵箱",
-            "description": "用於推送通知或某些通知提供商要求的郵箱地址。"
+            "label": "通知電子信箱",
+            "description": "用於推送通知或某些通知提供商要求的電子信箱位址。"
         },
         "cooldown": {
             "label": "冷卻時間",
@@ -106,10 +106,6 @@
         "enabled": {
             "label": "開啟鳥瞰圖",
             "description": "開啟或關閉鳥瞰圖功能。"
-        },
-        "mode": {
-            "label": "追蹤模式",
-            "description": "在鳥瞰檢視中包含攝影機的模式：'objects'（目標）、'motion'（動作）或 'continuous'（持續）。"
         },
         "order": {
             "label": "排序位置",
@@ -224,7 +220,7 @@
             "description": "該攝影機的所有輸入流配置清單（包含路徑和功能）。",
             "path": {
                 "label": "輸入路徑",
-                "description": "攝影機輸入影片流的地址或路徑。"
+                "description": "攝影機輸入影片串流的 URL 或路徑。"
             },
             "roles": {
                 "label": "輸入流功能",
@@ -381,7 +377,7 @@
             },
             "object_prompts": {
                 "label": "目標提示",
-                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行定製。"
+                "description": "按目標設定提示詞，讓生成式 AI 對不同標籤的輸出進行自訂。"
             },
             "objects": {
                 "label": "生成式 AI 目標",
@@ -497,6 +493,9 @@
             "max_concurrent": {
                 "label": "最大併發匯出數",
                 "description": "同時可處理的最大匯出任務數量。"
+            },
+            "chapters": {
+                "label": "匯出錄影時要嵌入的章節資訊"
             }
         },
         "preview": {
@@ -637,10 +636,6 @@
             "default": {
                 "label": "預設保留",
                 "description": "保留快照的預設天數。"
-            },
-            "mode": {
-                "label": "保留模式",
-                "description": "保留模式：all（儲存所有片段）、motion（儲存有動作的片段）或 active_objects（儲存有活動目標的片段）。"
             },
             "objects": {
                 "label": "目標保留",
@@ -816,7 +811,7 @@
             },
             "zoom_factor": {
                 "label": "變焦因子",
-                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能丟失追蹤。數值範圍 0.1 到 0.75。"
+                "description": "控制追蹤目標的變焦級別。數值越低保持更多場景可見；數值越高放大更近但可能失去追蹤。數值範圍 0.1 到 0.75。"
             },
             "track": {
                 "label": "追蹤目標",
@@ -858,13 +853,13 @@
     },
     "ui": {
         "label": "攝影機介面",
-        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用“攝影機組”。",
+        "description": "此攝影機在頁面中的顯示順序和可見性。顯示順序僅影響預設儀表板。如需更精細的控制，請使用「攝影機組」。",
         "order": {
             "label": "UI 順序",
             "description": "用於在頁面中排序攝影機的順序（只會影響預設儀表板和清單）；數值越大則在越後面。"
         },
         "dashboard": {
-            "label": "在 UI 中顯示",
+            "label": "在即時儀表板上顯示",
             "description": "切換此攝影機在 Frigate 頁面的所有位置是否可見。停用此項將需要手動編輯配置才能在頁面中再次檢視此攝影機。"
         },
         "review": {

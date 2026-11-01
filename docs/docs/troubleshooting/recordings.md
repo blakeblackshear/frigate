@@ -209,6 +209,50 @@ If the record stream uses a "Smart Codec"/H.264+ mode or changes encoding parame
 
 </FaqItem>
 
+<FaqItem id="invalid-or-missing-video-stream-in-segment" question="I see the message: WARNING : Invalid or missing video stream in segment ... Discarding.">
+
+Every recording segment is validated before it leaves the cache. Frigate probes each finished `.mp4` in `/tmp/cache` and requires a readable video stream and a valid duration before moving to storage. A segment that fails is deleted, so those ~10 seconds of footage are lost. Three messages come from this check:
+
+- `Invalid or missing video stream in segment <path>. Discarding.` The segment holds no video, or could not be read at all.
+- `Failed to probe corrupt segment <path>` followed by `Discarding a corrupt recording segment: <path>`. The segment was read, but its length could not be determined.
+- `Discarding a corrupt recording segment: <path>` on its own. The segment's length is impossible (empty, or longer than ten minutes), which points at broken timestamps coming from the camera.
+
+For each one, the camera watchdog also logs `Invalid recording segment detected for <camera> at <timestamp>`.
+
+:::warning
+
+This is almost always a **camera or network problem**, not a Frigate one. A segment is only complete once ffmpeg has finished writing it, so anything that interrupts the stream partway through leaves behind a file that cannot be saved. Frigate is reporting the interruption, not causing it.
+
+:::
+
+#### Start with the camera and the network
+
+- **The camera dropped the connection.** Cameras reboot, reinitialize their stream when switching to night mode, and cut clients off when they are overloaded or out of simultaneous connections. Count everything pulling from the camera at once: Frigate's detect and record streams, go2rtc, a phone app, and any other NVR each use one. Routing all roles through a single [RTSP restream](/configuration/restream#reduce-connections-to-camera) so the camera only ever sees one connection often resolves this by itself.
+- **The link to the camera is unreliable.** WiFi cameras, powerline adapters, a saturated uplink, a failing switch port, or a marginal cable all produce this pattern, and usually only on one camera at a time. WiFi cameras are [not recommended](https://ipcamtalk.com/threads/multiple-cameras-high-bandwidth.77100/#post-861110).
+- **The camera cannot reliably send what it is being asked for.** A high bitrate 4K stream can be more than the camera's own hardware can encode and push out under load. Lower the bitrate, or record a lower-resolution profile.
+- **The camera is using a "Smart Codec", H.264+, or H.265+ mode.** These change encoding parameters mid-stream and produce the broken timestamps behind the corrupt-segment variant. Turn the mode off and set the camera's keyframe interval equal to its frame rate. See [Segments are only ~1 second long](#segments-are-only-1-second-long).
+
+Read the rest of the Frigate and/or go2rtc log around the **first** occurrence. When the camera or the network is at fault, other messages show up with it, such as `No frames received from <camera> in 20 seconds`, `Non-monotonic DTS`, `RTP: PT=xx: bad cseq`, `error while decoding MB`, or a connection timeout. Each of those is explained in [Common error messages](/troubleshooting/common_errors). To confirm the camera is the source, open its stream in the [go2rtc web interface](/troubleshooting/go2rtc) on port `1984` or play the same URL in VLC, and leave it running long enough for the failures to happen again.
+
+#### If the camera and network check out
+
+- **Audio the recording cannot store.** Some cameras send G.711 audio, which cannot be saved in an MP4 and stops segments from finalizing. See [Incompatible audio codec](#incompatible-audio-codec-recordings-silently-fail-to-save).
+- **Frigate itself was stopped or restarted.** A single warning per camera around a restart is expected and needs no action.
+- **The system ran out of room or memory.** A full `/tmp/cache`, or the host killing Frigate for using too much memory, cuts off the segment being written. Both leave other errors in the log alongside this one. See [No space left on device](#errno-28-no-space-left-on-device).
+
+</FaqItem>
+
+<FaqItem id="no-new-recording-segments-were-created" question="I see the message: ERROR : No new recording segments were created for <camera> in the last 120s. Restarting the ffmpeg record process...">
+
+When a camera stops producing usable recordings for two minutes, Frigate restarts that camera's record process to try to recover. The wording tells you how far the recordings got:
+
+- **`No new recording segments were created`**: no new segment file showed up in the cache at all, so ffmpeg isn't getting video out of the record stream. The camera is unreachable or refusing the connection, the stream URL, path, or credentials are wrong, or the camera accepted the connection and then sent nothing. See [The record stream isn't connecting](#the-record-stream-isnt-connecting).
+- **`No new valid recording segments were created`** and **`No valid segments created since last invalid segment`**: recordings are arriving, but they keep failing validation, so the camera is sending video that cannot be saved. See [Invalid or missing video stream in segment](#invalid-or-missing-video-stream-in-segment) above.
+
+The restart is Frigate recovering from a problem, not causing one. One of these after a camera reboot or a brief network drop is normal. Seeing them repeat every couple of minutes means the camera or the network is still failing, and the restarts can extend the damage, because each one cuts off the segment that was being written. Work from the earliest failure in that camera's log rather than from the restarts.
+
+</FaqItem>
+
 <FaqItem id="i-see-the-message-warning--unable-to-keep-up-with-recording-segments-in-cache-for-camera-keeping-the-5-most-recent-segments-out-of-6-and-discarding-the-rest" question="I see the message: WARNING : Unable to keep up with recording segments in cache for camera. Keeping the 5 most recent segments out of 6 and discarding the rest...">
 
 This warning means the recording maintainer cannot move recording segments from the RAM cache to disk fast enough. When the cache fills up, Frigate discards the oldest segments to avoid running out of memory and crashing, so you lose recorded footage. This is almost always a storage throughput or system resource problem. Work through the steps below to identify which.
@@ -330,7 +374,7 @@ If segments are only ~1 second instead of ~10 seconds, the camera is sending cor
 
 :::tip
 
-You don't have to run `ffprobe` by hand to catch this. Open a camera's **Camera Probe Info** dialog (the info icon on the System → Metrics → Cameras page) and check the **Keyframe analysis** section. It probes the record stream and flags sparse or variable keyframes, which is what smart/"+" codecs (H.264+/H.265+) and long keyframe intervals produce.
+You don't have to run `ffprobe` by hand to catch this. Open a camera's **Camera Probe Info** dialog (the info icon on the Health and Metrics → Cameras page) and check the **Keyframe analysis** section. It probes the record stream and flags sparse or variable keyframes, which is what smart/"+" codecs (H.264+/H.265+) and long keyframe intervals produce.
 
 :::
 
@@ -353,19 +397,11 @@ dmesg | grep -i -E "gpu|drm|reset|hang"
 
 Messages like `trying reset from guc_exec_queue_timedout_job` or similar GPU reset/hang messages indicate a driver or hardware issue. Ensure your kernel and GPU drivers (especially Intel) are up to date.
 
-#### Step 6: Verify hardware acceleration configuration
-
-An incorrect `hwaccel_args` preset can cause ffmpeg to fail silently or consume excessive CPU, starving the detector of resources.
-
-- After upgrading Frigate, verify your preset matches your hardware (e.g., `preset-intel-qsv-h264` instead of the deprecated `preset-vaapi`).
-- For h265 cameras, use the corresponding h265 preset (e.g., `preset-intel-qsv-h265`).
-- Note that `hwaccel_args` are only relevant for the detect stream. Frigate does not decode the record stream.
-
-#### Step 7: Verify go2rtc stream configuration
+#### Step 6: Verify go2rtc stream configuration
 
 Ensure that the ffmpeg source names in your go2rtc configuration match the correct camera stream. A misconfigured stream name (e.g., copying a config from one camera to another without updating the stream reference) will cause the wrong stream to be used or the stream to fail entirely.
 
-#### Step 8: Check system resources
+#### Step 7: Check system resources
 
 If none of the above apply, the issue may be a general resource constraint. Monitor the following on your host:
 

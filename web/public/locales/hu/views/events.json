@@ -41,8 +41,6 @@
   "markAsReviewed": "Megjelölés Áttekintettként",
   "selected_one": "{{count}} kiválasztva",
   "selected_other": "{{count}} kiválasztva",
-  "suspiciousActivity": "Gyanús Tevékenység",
-  "threateningActivity": "Fenyegető Tevékenység",
   "zoomIn": "Nagyítás",
   "zoomOut": "Kicsinyítés",
   "detail": {

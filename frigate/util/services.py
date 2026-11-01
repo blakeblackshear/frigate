@@ -1,6 +1,8 @@
 """Utilities for services."""
 
 import asyncio
+import contextlib
+import glob
 import json
 import logging
 import os
@@ -12,6 +14,7 @@ import subprocess as sp
 import time
 import traceback
 from datetime import datetime
+from enum import Enum
 from typing import Any
 
 import cv2
@@ -27,18 +30,26 @@ from frigate.const import (
     SHM_FRAMES_VAR,
 )
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
+from frigate.util.env import UnknownVariableError, substitute_frigate_vars
 
 logger = logging.getLogger(__name__)
 
 
 def restart_frigate():
     proc = psutil.Process(1)
+
     # if this is running via s6, sigterm pid 1
     if proc.name() == "s6-svscan":
-        proc.terminate()
+        try:
+            proc.terminate()
+            return
+        except psutil.AccessDenied:
+            # frigate runs unprivileged, so it cannot signal root's s6-svscan.
+            # exiting this process instead runs frigate/finish, which halts s6
+            logger.debug("Not permitted to signal s6-svscan, exiting instead")
+
     # otherwise, just try and exit frigate
-    else:
-        os.kill(os.getpid(), signal.SIGINT)
+    os.kill(os.getpid(), signal.SIGINT)
 
 
 def print_stack(sig, frame):
@@ -185,8 +196,23 @@ def get_physical_interfaces(interfaces) -> list:
     return physical_interfaces
 
 
+_bandwidth_warning_logged = False
+
+
 def get_bandwidth_stats(config) -> dict[str, dict]:
     """Get bandwidth usages for each ffmpeg process id"""
+    global _bandwidth_warning_logged
+
+    if os.geteuid() != 0:
+        if not _bandwidth_warning_logged:
+            logger.warning(
+                "Network bandwidth stats require root (nethogs needs CAP_NET_ADMIN/CAP_NET_RAW) "
+                "and are disabled; set FRIGATE_ROOT_SERVICES=frigate (or FRIGATE_RUN_AS_ROOT=true) "
+                "or disable telemetry.stats.network_bandwidth to silence this warning"
+            )
+            _bandwidth_warning_logged = True
+        return {}
+
     usages = {}
     top_command = ["nethogs", "-t", "-v0", "-c5", "-d1"] + get_physical_interfaces(
         config.telemetry.network_interfaces
@@ -235,7 +261,7 @@ def is_vaapi_amd_driver() -> bool:
         output = p.stdout.decode("unicode_escape").split("\n")
 
         # VA Info will print out the friendly name of the driver
-        return any("AMD Radeon Graphics" in line for line in output)
+        return any(" for AMD " in line for line in output)
 
 
 def get_amd_gpu_stats() -> dict[str, str] | None:
@@ -313,7 +339,7 @@ def _resolve_intel_gpu_pdev(device: str | None) -> str | None:
     return pdev if _PCI_ADDRESS_RE.match(pdev) else None
 
 
-def _enumerate_drm_devices() -> dict[str, str]:
+def enumerate_drm_devices() -> dict[str, str]:
     """Map each PCI-attached DRM device to its bound kernel driver.
 
     Reads /sys/class/drm, which reflects every GPU on the host even when only
@@ -487,8 +513,9 @@ def get_intel_gpu_stats(
     Each DRM client FD exposes monotonic per-engine busy counters via
     /proc/<pid>/fdinfo/<fd>. For i915 this requires kernel 6.5 or newer:
     earlier kernels omit the per-engine counters whenever GuC submission is
-    active, which is the default on 12th gen and newer. Xe has exposed them
-    since its first release. We sample twice and divide busy-time deltas by
+    active, which is the default on 12th gen and newer. i915 never exposes
+    them on GPUs older than Broadwell (Gen8). Xe has exposed them since its
+    first release. We sample twice and divide busy-time deltas by
     wall-clock to derive utilization. Render/3D and Compute are pooled into
     "compute"; Video and VideoEnhance into "dec". Overall "gpu" is the sum of
     those pools (clamped to 100%).
@@ -515,7 +542,7 @@ def get_intel_gpu_stats(
         )
         return None
 
-    drm_devices = _enumerate_drm_devices()
+    drm_devices = enumerate_drm_devices()
     intel_pdevs = {
         pdev: driver
         for pdev, driver in drm_devices.items()
@@ -557,10 +584,11 @@ def get_intel_gpu_stats(
         # i915 suppresses per-client engine counters while GuC submission is
         # active on kernels older than 6.5 (kernel commit 1324680a80eb lifted
         # this), which covers stock Debian 12 and Ubuntu 22.04 on 12th gen
-        # and newer.
+        # and newer. It never publishes them for pre-Broadwell GPUs.
         logger.warning(
             "Unable to collect Intel GPU stats: found %d DRM client(s) for %s but "
-            "no per-engine counters. Kernel 6.5 or newer is required.",
+            "the kernel reports no usage for them. GPUs older than Broadwell "
+            "(5th gen) are not supported. 12th gen and newer need kernel 6.5+",
             len(snapshot_a),
             "/".join(sorted({client["driver"] for client in snapshot_a.values()})),
         )
@@ -670,19 +698,33 @@ def get_intel_gpu_stats(
 
 def get_openvino_npu_stats() -> dict[str, str] | None:
     """Get NPU stats using openvino."""
-    NPU_RUNTIME_PATH = "/sys/devices/pci0000:00/0000:00:0b.0/power/runtime_active_time"
+    for accel_path in sorted(glob.glob("/sys/class/accel/accel*")):
+        try:
+            driver = os.path.basename(os.readlink(f"{accel_path}/device/driver"))
+        except OSError:
+            continue
+
+        if driver != "intel_vpu":
+            continue
+
+        try:
+            runtime_path = f"{accel_path}/device/power/runtime_active_time"
+            with open(runtime_path) as f:
+                initial_runtime = float(f.read().strip())
+            break
+        except (FileNotFoundError, PermissionError, ValueError):
+            continue
+    else:
+        return None
 
     try:
-        with open(NPU_RUNTIME_PATH) as f:
-            initial_runtime = float(f.read().strip())
-
         initial_time = time.time()
 
         # Sleep for 1 second to get an accurate reading
         time.sleep(1.0)
 
         # Read runtime value again
-        with open(NPU_RUNTIME_PATH) as f:
+        with open(runtime_path) as f:
             current_runtime = float(f.read().strip())
 
         current_time = time.time()
@@ -800,6 +842,83 @@ def get_axcl_npu_stats() -> dict[str, str | float] | None:
     return None
 
 
+_axelera_board_temp_cache: tuple[float, float] | None = None
+_axelera_board_temp_error_until = 0.0
+_AXELERA_BOARD_TEMP_TTL = 5.0
+_AXELERA_BOARD_TEMP_ERROR_COOLDOWN = 60.0
+
+
+def get_axelera_board_temp() -> float | None:
+    """Get the Axelera Metis board temperature through the SDK's axcmd tool.
+
+    The read goes through the board controller and does not open an inference
+    stream, so it is safe to call while a detector is running. ``axcmd`` ships
+    with the runtime wheel; ``find_tool`` prefers the runtime-installed copy
+    under the user base. Results are cached for a few seconds so one stats tick
+    spawns axcmd at most once, and a failed read starts a cooldown so an
+    unresponsive board does not delay every stats update.
+
+    NOTE: this function is blocking (up to ~5s on a hung board).
+    """
+    global _axelera_board_temp_cache
+    global _axelera_board_temp_error_until
+
+    now = time.monotonic()
+    if (
+        _axelera_board_temp_cache is not None
+        and now - _axelera_board_temp_cache[0] < _AXELERA_BOARD_TEMP_TTL
+    ):
+        return _axelera_board_temp_cache[1]
+
+    if now < _axelera_board_temp_error_until:
+        # the last read already cost up to 5s; back off instead of paying
+        # that cost again on every stats update while the board is down
+        return None
+
+    try:
+        from frigate.util.runtime_deps import find_tool
+
+        axcmd_path = find_tool("axcmd")
+    except Exception:  # noqa: BLE001
+        axcmd_path = shutil.which("axcmd")
+
+    if axcmd_path is None or not os.path.exists(axcmd_path):
+        return None
+
+    try:
+        result = sp.run(
+            [axcmd_path, "--board-temp"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, sp.TimeoutExpired):
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
+        return None
+
+    if result.returncode != 0:
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
+        return None
+
+    # anchor on the board-controller line ("N: temp_sensorX@YY = <value>") so
+    # unrelated "= <number>" output (firmware/version preambles) is not picked up
+    match = re.search(r"temp_sensor[^=\n]*=\s*([\d.]+)", result.stdout)
+
+    if match is None:
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
+        return None
+
+    try:
+        temp = round(float(match.group(1)), 1)
+    except ValueError:
+        _axelera_board_temp_error_until = now + _AXELERA_BOARD_TEMP_ERROR_COOLDOWN
+        return None
+
+    _axelera_board_temp_cache = (now, temp)
+    return temp
+
+
 def try_get_info(f, h, default="N/A", sensor=None):
     try:
         if h:
@@ -880,8 +999,8 @@ def get_nvidia_gpu_stats() -> dict[int, dict]:
         return results
 
 
-def get_jetson_stats() -> dict[int, dict] | None:
-    results = {}
+def get_jetson_stats() -> dict[str, str] | None:
+    results: dict[str, str] = {}
 
     try:
         results["mem"] = "-"  # no discrete gpu memory
@@ -949,12 +1068,17 @@ def get_hailo_temps() -> dict[str, float]:
     return temps
 
 
+# Snapshot: environment_vars lands in os.environ after import and must not
+# be able to enable this.
+_GO2RTC_ARBITRARY_EXEC_ENV = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
+
+
 def is_go2rtc_arbitrary_exec_allowed() -> bool:
     """Read the GO2RTC_ALLOW_ARBITRARY_EXEC override from env, docker
     secrets, or the Home Assistant add-on options file."""
     raw: str | None = None
-    if "GO2RTC_ALLOW_ARBITRARY_EXEC" in os.environ:
-        raw = os.environ.get("GO2RTC_ALLOW_ARBITRARY_EXEC")
+    if _GO2RTC_ARBITRARY_EXEC_ENV is not None:
+        raw = _GO2RTC_ARBITRARY_EXEC_ENV
     elif (
         os.path.isdir("/run/secrets")
         and os.access("/run/secrets", os.R_OK)
@@ -982,6 +1106,119 @@ def is_restricted_go2rtc_source(stream_source: str) -> bool:
     if not stream_source.strip().startswith(("echo:", "expr:", "exec:")):
         return False
     return not is_go2rtc_arbitrary_exec_allowed()
+
+
+# go2rtc expands an `ffmpeg:` source into an `exec:` command line built from its
+# `#key=value` parameters, so only parameters that map to fixed presets or plain
+# numbers are accepted from the API
+_GO2RTC_FFMPEG_NAME_PARAMS = frozenset({"video", "audio", "hardware"})
+_GO2RTC_FFMPEG_NUMERIC_PARAMS = frozenset(
+    {"width", "height", "rotate", "bitrate", "timeout"}
+)
+_GO2RTC_FFMPEG_FLAG_PARAMS = frozenset({"async"})
+# a preset or codec name, optionally with a sample rate (e.g. opus/16000)
+_GO2RTC_FFMPEG_NAME_VALUE = re.compile(r"^([A-Za-z0-9_]*|[A-Za-z0-9_]+/[0-9]{1,6})$")
+_GO2RTC_FFMPEG_NUMERIC_VALUE = re.compile(r"^-?[0-9]+[kKmM]?$")
+
+
+def _is_safe_go2rtc_ffmpeg_source(stream_source: str) -> bool:
+    """Check that an `ffmpeg:` source only uses allowlisted parameters."""
+    if any(c in stream_source for c in "'\"") or re.search(r"\s", stream_source):
+        return False
+
+    _, *params = stream_source.split("#")
+    for param in params:
+        key, has_value, value = param.partition("=")
+        if key in _GO2RTC_FFMPEG_NAME_PARAMS:
+            if not _GO2RTC_FFMPEG_NAME_VALUE.match(value):
+                return False
+        elif key in _GO2RTC_FFMPEG_NUMERIC_PARAMS:
+            if not _GO2RTC_FFMPEG_NUMERIC_VALUE.match(value):
+                return False
+        elif key in _GO2RTC_FFMPEG_FLAG_PARAMS:
+            if has_value:
+                return False
+        else:
+            return False
+
+    return True
+
+
+def is_restricted_go2rtc_api_source(stream_source: str) -> bool:
+    """Check if a stream source submitted through the API is restricted.
+
+    In addition to the echo/expr/exec sources, this restricts `ffmpeg:` sources
+    whose parameters could inject arbitrary ffmpeg arguments. The
+    GO2RTC_ALLOW_ARBITRARY_EXEC override lifts both restrictions.
+    """
+    source = stream_source.strip()
+    if is_restricted_go2rtc_source(source):
+        return True
+    if not source.startswith("ffmpeg:"):
+        return False
+    if _is_safe_go2rtc_ffmpeg_source(source[len("ffmpeg:") :]):
+        return False
+    return not is_go2rtc_arbitrary_exec_allowed()
+
+
+def _go2rtc_stream_sources(stream: Any) -> list[Any]:
+    return stream if isinstance(stream, list) else [stream]
+
+
+class Go2rtcStreamIssue(str, Enum):
+    """Why a go2rtc stream source was rejected."""
+
+    restricted = "restricted"
+    unknown_variable = "unknown_variable"
+    invalid_placeholder = "invalid_placeholder"
+
+
+def find_restricted_go2rtc_stream_changes(
+    old_streams: dict[str, Any] | None, new_streams: dict[str, Any] | None
+) -> dict[str, Go2rtcStreamIssue]:
+    """Return the go2rtc streams with new sources that must be rejected.
+
+    Used when the config is changed through the API. A source that is already
+    in the saved config for the same stream is left alone, so streams the
+    operator configured on disk keep working; any other source must resolve
+    its {FRIGATE_*} placeholders and pass `is_restricted_go2rtc_api_source`.
+    """
+    old_streams = old_streams if isinstance(old_streams, dict) else {}
+    new_streams = new_streams if isinstance(new_streams, dict) else {}
+    issues: dict[str, Go2rtcStreamIssue] = {}
+
+    for name, stream in new_streams.items():
+        existing = _go2rtc_stream_sources(old_streams.get(name))
+
+        for source in _go2rtc_stream_sources(stream):
+            if source in existing:
+                continue
+
+            if not isinstance(source, str):
+                # the map form is only usable with arbitrary exec enabled
+                if is_go2rtc_arbitrary_exec_allowed():
+                    continue
+                issues[name] = Go2rtcStreamIssue.restricted
+                break
+
+            # only sources whose placeholders resolve here are accepted, so the
+            # resolved value checked below is what go2rtc loads at startup
+            try:
+                resolved_source = substitute_frigate_vars(source)
+            except UnknownVariableError:
+                issues[name] = Go2rtcStreamIssue.unknown_variable
+                break
+            except ValueError:
+                issues[name] = Go2rtcStreamIssue.invalid_placeholder
+                break
+
+            if is_restricted_go2rtc_api_source(
+                source
+            ) or is_restricted_go2rtc_api_source(resolved_source):
+                issues[name] = Go2rtcStreamIssue.restricted
+                break
+
+    return issues
 
 
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:
@@ -1040,6 +1277,7 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
 
 KEYFRAME_PROBE_WINDOW_SECONDS = 20
 KEYFRAME_GAP_WARNING_SECONDS = 4.0
+KEYFRAME_GAP_JITTER_SECONDS = 0.5
 
 
 def parse_keyframe_packets(output: str) -> tuple[list[float], float | None]:
@@ -1079,6 +1317,10 @@ def classify_keyframe_gaps(
       - "error" when the longest gap exceeds the record segment length
       - "warning" when the longest gap exceeds the warning threshold
       - "ok" otherwise
+
+    The "pattern" key separates the two causes so callers can give accurate
+    advice: "fixed" is a regular GOP that is simply too long, "variable" is
+    the irregular spacing a smart/+ codec produces.
     """
     thresholds = {
         "warning": KEYFRAME_GAP_WARNING_SECONDS,
@@ -1091,6 +1333,7 @@ def classify_keyframe_gaps(
             "max_gap": None,
             "mean_gap": None,
             "min_gap": None,
+            "pattern": None,
             "segment_time": segment_time,
             "severity": "unknown",
             "thresholds": thresholds,
@@ -1098,6 +1341,7 @@ def classify_keyframe_gaps(
 
     gaps = [b - a for a, b in zip(keyframe_pts, keyframe_pts[1:])]
     max_gap = max(gaps)
+    min_gap = min(gaps)
 
     if max_gap > segment_time:
         severity = "error"
@@ -1106,11 +1350,16 @@ def classify_keyframe_gaps(
     else:
         severity = "ok"
 
+    # allow for encoder jitter and probe rounding before calling a GOP variable
+    tolerance = max(KEYFRAME_GAP_JITTER_SECONDS, min_gap * 0.25)
+    pattern = "variable" if (max_gap - min_gap) > tolerance else "fixed"
+
     return {
         "keyframe_count": len(keyframe_pts),
         "max_gap": round(max_gap, 2),
         "mean_gap": round(sum(gaps) / len(gaps), 2),
-        "min_gap": round(min(gaps), 2),
+        "min_gap": round(min_gap, 2),
+        "pattern": pattern,
         "segment_time": segment_time,
         "severity": severity,
         "thresholds": thresholds,
@@ -1241,8 +1490,22 @@ async def get_video_properties(
     async def probe_with_ffprobe(
         url: str,
         rtsp_transport: str | None = None,
-    ) -> tuple[bool, int, int, str | None, float]:
-        """Fallback using ffprobe: returns (valid, width, height, codec, duration)."""
+    ) -> tuple[
+        bool,
+        int,
+        int,
+        str | None,
+        str | None,
+        float,
+        bool | None,
+        int | None,
+        str | None,
+    ]:
+        """Probe using ffprobe: returns (valid, width, height, fourcc, video_codec, duration, has_audio, audio_rate, audio_codec).
+
+        ffprobe reports the codec name directly, so fourcc and
+        video_codec are the same value on this path.
+        """
         cmd = [ffmpeg.ffprobe_path]
         if rtsp_transport:
             cmd += ["-rtsp_transport", rtsp_transport]
@@ -1270,19 +1533,17 @@ async def get_video_properties(
                     clean_camera_user_pass(url),
                     rtsp_transport or "default",
                 )
-                proc.kill()
-                await proc.wait()
-                return False, 0, 0, None, -1
+                return False, 0, 0, None, None, -1, None, None, None
 
             if proc.returncode != 0:
-                return False, 0, 0, None, -1
+                return False, 0, 0, None, None, -1, None, None, None
 
             data = json.loads(stdout.decode())
             video_streams = [
                 s for s in data.get("streams", []) if s.get("codec_type") == "video"
             ]
             if not video_streams:
-                return False, 0, 0, None, -1
+                return False, 0, 0, None, None, -1, None, None, None
 
             v = video_streams[0]
             width = int(v.get("width", 0))
@@ -1292,16 +1553,70 @@ async def get_video_properties(
             duration_str = data.get("format", {}).get("duration")
             duration = float(duration_str) if duration_str else -1.0
 
-            return True, width, height, codec, duration
-        except (json.JSONDecodeError, ValueError, KeyError, sp.SubprocessError):
-            return False, 0, 0, None, -1
+            audio_streams = [
+                s for s in data.get("streams", []) if s.get("codec_type") == "audio"
+            ]
+            has_audio = bool(audio_streams)
 
-    def probe_with_cv2(url: str) -> tuple[bool, int, int, str | None, float]:
-        """Primary attempt using cv2: returns (valid, width, height, fourcc, duration)."""
+            # codec and sample rate distinguish audio tracks whose decoder
+            # configs cannot share an HLS sequence
+            audio_rate: int | None = None
+            audio_codec: str | None = None
+            if audio_streams:
+                try:
+                    audio_rate = int(audio_streams[0]["sample_rate"])
+                except (KeyError, TypeError, ValueError):
+                    audio_rate = None
+                audio_codec = audio_streams[0].get("codec_name")
+
+            return (
+                True,
+                width,
+                height,
+                codec,
+                codec,
+                duration,
+                has_audio,
+                audio_rate,
+                audio_codec,
+            )
+        except (json.JSONDecodeError, ValueError, KeyError, sp.SubprocessError):
+            return False, 0, 0, None, None, -1, None, None, None
+        finally:
+            # callers run in a per-cycle event loop, and an ffprobe still
+            # running when that loop closes is finalized against a dead loop
+            # ("Event loop is closed"). Draining after the kill is what
+            # closes the pipes and their transports
+            if proc is not None and proc.returncode is None:
+                with contextlib.suppress(ProcessLookupError):
+                    proc.kill()
+
+                with contextlib.suppress(TimeoutError):
+                    await asyncio.wait_for(proc.communicate(), timeout=2)
+
+    def probe_with_cv2(
+        url: str,
+    ) -> tuple[
+        bool,
+        int,
+        int,
+        str | None,
+        str | None,
+        float,
+        bool | None,
+        int | None,
+        str | None,
+    ]:
+        """Probe using cv2: returns (valid, width, height, fourcc, video_codec, duration, has_audio, audio_rate, audio_codec).
+
+        cv2 cannot report audio streams or a normalized codec name, so
+        has_audio, audio_rate, audio_codec, and video_codec are always
+        None (unknown) on this path.
+        """
         cap = cv2.VideoCapture(url)
         if not cap.isOpened():
             cap.release()
-            return False, 0, 0, None, -1
+            return False, 0, 0, None, None, -1, None, None, None
 
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -1320,7 +1635,7 @@ async def get_video_properties(
                     duration = total_frames / fps
 
         cap.release()
-        return valid, width, height, fourcc, duration
+        return valid, width, height, fourcc, None, duration, None, None, None
 
     is_rtsp = url.startswith("rtsp://")
 
@@ -1328,24 +1643,99 @@ async def get_video_properties(
         # skip cv2 for RTSP: its FFmpeg backend has a hardcoded ~30s internal
         # timeout that cannot be shortened per-call, and ffprobe bounded by
         # -rw_timeout handles RTSP probing reliably
-        has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+        (
+            has_video,
+            width,
+            height,
+            fourcc,
+            video_codec,
+            duration,
+            has_audio,
+            audio_rate,
+            audio_codec,
+        ) = await probe_with_ffprobe(url)
+    elif get_duration:
+        # ffprobe first: segment validation also needs audio presence,
+        # which cv2 cannot report
+        (
+            has_video,
+            width,
+            height,
+            fourcc,
+            video_codec,
+            duration,
+            has_audio,
+            audio_rate,
+            audio_codec,
+        ) = await probe_with_ffprobe(url)
+
+        # fallback to cv2 if needed; audio stays unknown there
+        if not has_video or duration < 0:
+            (
+                has_video,
+                width,
+                height,
+                fourcc,
+                video_codec,
+                duration,
+                has_audio,
+                audio_rate,
+                audio_codec,
+            ) = probe_with_cv2(url)
     else:
         # try cv2 first for local files, HTTP, RTMP
-        has_video, width, height, fourcc, duration = probe_with_cv2(url)
+        (
+            has_video,
+            width,
+            height,
+            fourcc,
+            video_codec,
+            duration,
+            has_audio,
+            audio_rate,
+            audio_codec,
+        ) = probe_with_cv2(url)
 
         # fallback to ffprobe if needed
-        if not has_video or (get_duration and duration < 0):
-            has_video, width, height, fourcc, duration = await probe_with_ffprobe(url)
+        if not has_video:
+            (
+                has_video,
+                width,
+                height,
+                fourcc,
+                video_codec,
+                duration,
+                has_audio,
+                audio_rate,
+                audio_codec,
+            ) = await probe_with_ffprobe(url)
 
     # last resort for RTSP: try TCP transport, since default UDP may be blocked
     if (not has_video or (get_duration and duration < 0)) and is_rtsp:
-        has_video, width, height, fourcc, duration = await probe_with_ffprobe(
-            url, rtsp_transport="tcp"
-        )
+        (
+            has_video,
+            width,
+            height,
+            fourcc,
+            video_codec,
+            duration,
+            has_audio,
+            audio_rate,
+            audio_codec,
+        ) = await probe_with_ffprobe(url, rtsp_transport="tcp")
 
     result: dict[str, Any] = {"has_valid_video": has_video}
     if has_video:
-        result.update({"width": width, "height": height})
+        result.update(
+            {
+                "width": width,
+                "height": height,
+                "has_audio": has_audio,
+                "audio_rate": audio_rate,
+                "audio_codec": audio_codec,
+                "video_codec": video_codec,
+            }
+        )
         if fourcc:
             result["fourcc"] = fourcc
     if get_duration:

@@ -1,1 +1,35 @@
-{}
+{
+    "minimum": "Privalo būti bent {{limit}}",
+    "maximum": "Privalo būti daugiausiai {{limit}}",
+    "exclusiveMinimum": "Privalo būti daugiau nei {{limit}}",
+    "exclusiveMaximum": "Privalo būti mažiau nei {{limit}}",
+    "minLength": "Privalo būti bent {{limit}} simbolis(ių)",
+    "maxLength": "Privalo būti daugiausiai {{limit}} simbolis(ių)",
+    "minItems": "Privalo būti bent {{limit}} elementų",
+    "maxItems": "Privalų būti daugiausiai {{limit}} elementų",
+    "pattern": "Netinkamas formatas",
+    "required": "Šis laukas yra privalomas",
+    "type": "Netinkamas reikšmės tipas",
+    "enum": "Privalo būti viena iš leidžiamų reikšmių",
+    "const": "Reikšmės neatitinka reikiamos konstatos",
+    "uniqueItems": "Visi elementai privalo būti unikalūs",
+    "format": "Netinkamas formatas",
+    "additionalProperties": "Nežinoma savybė neleistina",
+    "oneOf": "Privalo atitikti tiksliai vien iš leistinų schemų",
+    "anyOf": "Privalo atitikti bent vieną iš leistinų schemų",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Rolės antraštį (header) yra privaloma kai rolių priskyrimai yra sukonfiguruoti."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Kiekviena rolė gali būti priskirta tik vienam įvesties srautui.",
+            "detectRequired": "Bent vienas įvesties srautas privalo turėti priskirtą 'detect' rolę.",
+            "hwaccelDetectOnly": "Tik įvesties srautas su aptikimo role gali nustatyti hardware acceleration argumentus."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Privalo būti lygini numeris."
+    }
+}

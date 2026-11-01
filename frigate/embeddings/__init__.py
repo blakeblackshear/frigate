@@ -10,6 +10,7 @@ from json.decoder import JSONDecodeError
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
+import cv2
 import regex
 from pathvalidate import ValidationError, sanitize_filename
 
@@ -21,9 +22,9 @@ from frigate.db.sqlitevecq import SqliteVecQueueDatabase
 from frigate.models import Event
 from frigate.util.builtin import serialize
 from frigate.util.classification import kickoff_model_training
+from frigate.util.path import safe_join
 from frigate.util.process import FrigateProcess
 
-from .maintainer import EmbeddingMaintainer
 from .util import ZScoreNormalization
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ class EmbeddingProcess(FrigateProcess):
     def __init__(
         self,
         config: FrigateConfig,
-        metrics: DataProcessorMetrics | None,
+        metrics: DataProcessorMetrics,
         stop_event: MpEvent,
     ) -> None:
         super().__init__(
@@ -46,7 +47,16 @@ class EmbeddingProcess(FrigateProcess):
         self.metrics = metrics
 
     def run(self) -> None:
+        # imported here so that importing this package does not pull in the
+        # processors, which import back into it and form a cycle
+        from .maintainer import EmbeddingMaintainer
+
         self.pre_run_setup(self.config.logger)
+
+        # frame conversions and crops here are one-off calls, and OpenCV's
+        # per-core thread pool burns ~8x the CPU of running them inline
+        cv2.setNumThreads(1)
+
         maintainer = EmbeddingMaintainer(
             self.config,
             self.metrics,
@@ -234,11 +244,16 @@ class EmbeddingsContext:
         )
 
     def delete_face_ids(self, face: str, ids: list[str]) -> None:
-        folder = os.path.join(FACE_DIR, face)
-        for id in ids:
-            file_path = os.path.join(folder, id)
+        folder = safe_join(FACE_DIR, face)
 
-            if os.path.isfile(file_path):
+        if folder is None:
+            logger.warning("Not deleting faces for invalid name %s", face)
+            return
+
+        for id in ids:
+            file_path = safe_join(folder, id)
+
+            if file_path and os.path.isfile(file_path):
                 os.unlink(file_path)
 
         if face != "train" and len(os.listdir(folder)) == 0:
@@ -327,4 +342,10 @@ class EmbeddingsContext:
         return self.requestor.send_data(
             EmbeddingsRequestEnum.summarize_review.value,
             {"start_ts": start_ts, "end_ts": end_ts},
+        )
+
+    def regenerate_review_description(self, review_id: str) -> None:
+        self.requestor.send_data(
+            EmbeddingsRequestEnum.regenerate_review_description.value,
+            {"review_id": review_id},
         )

@@ -12,18 +12,6 @@
   "explore": {
     "plus": {
       "review": {
-        "true": {
-          "label": "Confirma aceasta eticheta pentru Frigate Plus",
-          "true_one": "Asta e o {{label}}",
-          "true_few": "Astea sunt {{label}}",
-          "true_other": "Astea sunt {{label}}"
-        },
-        "false": {
-          "label": "Nu confirma aceasta eticheta pentru Frigate Plus",
-          "false_one": "Asta nu este  {{label}}",
-          "false_few": "Astea nu sunt {{label}}",
-          "false_other": "Astea nu sunt {{label}}"
-        },
         "state": {
           "submitted": "Trimis"
         },
@@ -32,6 +20,9 @@
           "ask_a": "Este acest obiect un <code>{{label}}</code>?",
           "ask_an": "Este acest obiect un <code>{{label}}</code>?",
           "ask_full": "Este acest obiect un <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
+        },
+        "toast": {
+          "error": "Trimiterea către Frigate+ a eșuat. Te rog să verifici conexiunea la rețea și să încerci din nou."
         }
       },
       "submitToPlus": {
@@ -48,7 +39,8 @@
       "deleteNow": "Șterge acum",
       "export": "Exportă",
       "markAsReviewed": "Marchează ca revizuit",
-      "markAsUnreviewed": "Marchează ca nerevizuit"
+      "markAsUnreviewed": "Marchează ca nerevizuit",
+      "generateDescription": "Generează descriere"
     },
     "confirmDelete": {
       "toast": {
@@ -67,6 +59,12 @@
       "custom": "Timestamp personalizat",
       "button": "Partajează URL-ul cu timestamp",
       "shareTitle": "Timestamp review Frigate: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "A fost solicitată o descriere GenAI pentru acest element de revizuire.",
+        "error": "Nu s-a putut solicita descrierea: {{error}}"
+      }
     }
   },
   "export": {
@@ -96,7 +94,7 @@
       "error": {
         "failed": "Nu s-a putut adăuga exportul în coadă: {{error}}",
         "endTimeMustAfterStartTime": "Ora de sfârșit trebuie să fie după ora de început",
-        "noVaildTimeSelected": "Nu a fost selectat un interval de timp valid"
+        "noValidTimeSelected": "Niciun interval de timp valid selectat"
       },
       "view": "Vizualizează",
       "queued": "Export pus la coadă. Vezi progresul pe pagina de exporturi.",
@@ -105,9 +103,9 @@
       "batchSuccess_other": "Au început {{count}} de exporturi. Se deschide cazul acum.",
       "batchPartial": "Au început {{successful}} din {{total}} exporturi. Camere eșuate: {{failedCameras}}",
       "batchFailed": "Eșec la pornirea a {{total}} exporturi. Camere eșuate: {{failedCameras}}",
-      "batchQueuedSuccess_one": "1 export pus la coadă. Se deschide cazul acum.",
-      "batchQueuedSuccess_few": "{{count}} exporturi puse la coadă. Se deschide cazul acum.",
-      "batchQueuedSuccess_other": "{{count}} de exporturi puse la coadă. Se deschide cazul acum.",
+      "batchQueuedSuccess_one": "S-a adăugat 1 export în coadă.",
+      "batchQueuedSuccess_few": "S-au adăugat {{count}} exporturi în coadă.",
+      "batchQueuedSuccess_other": "S-au adăugat {{count}} de exporturi în coadă.",
       "batchQueuedPartial": "S-au pus la coadă {{successful}} din {{total}} exporturi. Camere eșuate: {{failedCameras}}",
       "batchQueueFailed": "Eșec la punerea la coadă a {{total}} exporturi. Camere eșuate: {{failedCameras}}"
     },
@@ -145,7 +143,14 @@
       "queueingButton": "Se adaugă exporturile la coadă...",
       "exportButton_one": "Exportă 1 cameră",
       "exportButton_few": "Exportă {{count}} camere",
-      "exportButton_other": "Exportă {{count}} de camere"
+      "exportButton_other": "Exportă {{count}} de camere",
+      "searchOrSelectGroup": "Caută sau selectează un grup de camere...",
+      "selectAll": "Selectează toate camerele",
+      "clearSelection": "Șterge selecția",
+      "selectWithActivity": "Camere cu obiecte urmărite",
+      "selectGroup": "Selectează grupul",
+      "noMatchingCameras": "Nicio cameră nu corespunde căutării tale",
+      "selectedCount": "{{selected}} / {{total}} selectate"
     },
     "multi": {
       "title_one": "Exportă o revizuire",
@@ -159,15 +164,21 @@
       "exportButton_other": "Exportă {{count}} de revizuiri",
       "exportingButton": "Se exportă...",
       "toast": {
-        "started_one": "A început 1 export. Se deschide cazul acum.",
-        "started_few": "Au început {{count}} exporturi. Se deschide cazul acum.",
-        "started_other": "Au început {{count}} de exporturi. Se deschide cazul acum.",
-        "startedNoCase_one": "A început 1 export.",
-        "startedNoCase_few": "Au început {{count}} exporturi.",
-        "startedNoCase_other": "Au început {{count}} de exporturi.",
+        "started_one": "A început 1 export.",
+        "started_few": "Au început {{count}} exporturi.",
+        "started_other": "Au început {{count}} de exporturi.",
         "partial": "Au început {{successful}} din {{total}} exporturi. Au eșuat: {{failedItems}}",
         "failed": "Eșec la pornirea a {{total}} exporturi. Au eșuat: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Calitate",
+      "auto": "Auto",
+      "main": "Originală",
+      "sub": "Scăzută",
+      "autoDesc": "Folosește stream-ul principal și trece la sub-stream-ul de calitate mai scăzută acolo unde cel principal nu este disponibil.",
+      "mainDesc": "Exportă doar stream-ul principal de calitate originală. Intervalele de timp în care stream-ul principal nu este disponibil vor lipsi.",
+      "subDesc": "Exportă doar sub-stream-ul de calitate mai scăzută. Intervalele de timp în care sub-stream-ul nu este disponibil vor lipsi."
     }
   },
   "streaming": {
@@ -175,8 +186,7 @@
     "restreaming": {
       "disabled": "Restreaming-ul nu este activat pentru această cameră.",
       "desc": {
-        "title": "Configurează go2rtc pentru opțiuni suplimentare de vizualizare live și audio pentru această cameră.",
-        "readTheDocumentation": "Citește documentația"
+        "title": "Configurează go2rtc pentru opțiuni suplimentare de vizualizare live și audio pentru această cameră."
       }
     },
     "showStats": {

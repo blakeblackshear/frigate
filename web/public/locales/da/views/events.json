@@ -6,7 +6,6 @@
     "only": "Kun bevægelse"
   },
   "allCameras": "Alle kameraer",
-  "timeline": "Tidslinje",
   "camera": "Kamera",
   "empty": {
     "alert": "Der er ingen advarsler at gennemgå",
@@ -28,5 +27,8 @@
   "detail": {
     "aria": "Skift til detaljevisning"
   },
-  "timeline.aria": "Vælg tidslinje"
+  "timeline.aria": "Vælg tidslinje",
+  "motionPreviews": {
+    "crop": "Beskær til filter"
+  }
 }

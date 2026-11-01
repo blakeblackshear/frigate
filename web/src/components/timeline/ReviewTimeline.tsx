@@ -41,7 +41,6 @@ export type ReviewTimelineProps = {
   scrollToSegment: (segmentTime: number, ifNeeded?: boolean) => void;
   isZooming: boolean;
   zoomDirection: TimelineZoomDirection;
-  getRecordingAvailability?: (time: number) => boolean | undefined;
   onZoomChange?: (newZoomLevel: number) => void;
   possibleZoomLevels?: ZoomLevel[];
   currentZoomLevel?: number;
@@ -70,7 +69,6 @@ export function ReviewTimeline({
   scrollToSegment,
   isZooming,
   zoomDirection,
-  getRecordingAvailability,
   onZoomChange,
   possibleZoomLevels,
   currentZoomLevel,
@@ -327,17 +325,20 @@ export function ReviewTimeline({
       documentInstance?.addEventListener("touchmove", handleMouseMove);
       documentInstance?.addEventListener("mouseup", handleMouseUp);
       documentInstance?.addEventListener("touchend", handleMouseUp);
+      documentInstance?.addEventListener("touchcancel", handleMouseUp);
     } else {
       documentInstance?.removeEventListener("mousemove", handleMouseMove);
       documentInstance?.removeEventListener("touchmove", handleMouseMove);
       documentInstance?.removeEventListener("mouseup", handleMouseUp);
       documentInstance?.removeEventListener("touchend", handleMouseUp);
+      documentInstance?.removeEventListener("touchcancel", handleMouseUp);
     }
     return () => {
       documentInstance?.removeEventListener("mousemove", handleMouseMove);
       documentInstance?.removeEventListener("touchmove", handleMouseMove);
       documentInstance?.removeEventListener("mouseup", handleMouseUp);
       documentInstance?.removeEventListener("touchend", handleMouseUp);
+      documentInstance?.removeEventListener("touchcancel", handleMouseUp);
     };
   }, [handleMouseMove, handleMouseUp, isDragging]);
 
@@ -349,25 +350,6 @@ export function ReviewTimeline({
       onHandlebarDraggingChange(isDragging);
     }
   }, [isDragging, onHandlebarDraggingChange]);
-
-  const isHandlebarInNoRecordingPeriod = useMemo(() => {
-    if (!getRecordingAvailability || handlebarTime === undefined) return false;
-
-    // Check current segment
-    const currentAvailability = getRecordingAvailability(handlebarTime);
-    if (currentAvailability !== false) return false;
-
-    // Check if at least one adjacent segment also has no recordings
-    const beforeAvailability = getRecordingAvailability(
-      handlebarTime - segmentDuration,
-    );
-    const afterAvailability = getRecordingAvailability(
-      handlebarTime + segmentDuration,
-    );
-
-    // If current segment has no recordings AND at least one adjacent segment also has no recordings
-    return beforeAvailability === false || afterAvailability === false;
-  }, [getRecordingAvailability, handlebarTime, segmentDuration]);
 
   return (
     <>
@@ -387,6 +369,9 @@ export function ReviewTimeline({
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[30px] w-full bg-gradient-to-t from-secondary to-transparent"></div>
           {children}
         </div>
+        {onZoomChange && currentZoomLevelIndex !== -1 && !isMobile && (
+          <div className="h-14" />
+        )}
         {children && (
           <>
             {showHandlebar && (
@@ -424,12 +409,6 @@ export function ReviewTimeline({
                     ></div>
                   </div>
                 </div>
-                {/* TODO: determine if we should keep this tooltip */}
-                {false && isHandlebarInNoRecordingPeriod && (
-                  <div className="absolute left-1/2 top-full z-50 mt-2 -translate-x-1/2 rounded-md bg-destructive/80 px-4 py-1 text-center text-xs text-white shadow-lg">
-                    No recordings
-                  </div>
-                )}
               </div>
             )}
             {showExportHandles && (

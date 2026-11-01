@@ -3,7 +3,12 @@ from enum import Enum
 
 from pydantic import Field, PrivateAttr, model_validator
 
-from frigate.const import CACHE_DIR, CACHE_SEGMENT_FORMAT, REGEX_CAMERA_NAME
+from frigate.const import (
+    CACHE_DIR,
+    CACHE_SEGMENT_FORMAT,
+    REGEX_CAMERA_NAME,
+    SUB_CACHE_TAG,
+)
 from frigate.ffmpeg_presets import (
     parse_preset_hardware_acceleration_decode,
     parse_preset_hardware_acceleration_scale,
@@ -215,15 +220,20 @@ class CameraConfig(FrigateBaseModel):
 
         # add roles to the input if there is only one
         if len(config["ffmpeg"]["inputs"]) == 1:
-            has_audio = "audio" in config["ffmpeg"]["inputs"][0].get("roles", [])
+            existing_roles = config["ffmpeg"]["inputs"][0].get("roles", [])
 
             config["ffmpeg"]["inputs"][0]["roles"] = [
                 "record",
                 "detect",
             ]
 
-            if has_audio:
+            if "audio" in existing_roles:
                 config["ffmpeg"]["inputs"][0]["roles"].append("audio")
+
+            # kept so role validation can report the real problem rather than
+            # claiming the role was never assigned
+            if "record_sub" in existing_roles:
+                config["ffmpeg"]["inputs"][0]["roles"].append("record_sub")
 
         super().__init__(**config)
 
@@ -291,6 +301,28 @@ class CameraConfig(FrigateBaseModel):
             ffmpeg_output_args = (
                 record_args
                 + [f"{os.path.join(CACHE_DIR, self.name)}@{CACHE_SEGMENT_FORMAT}.mp4"]
+                + ffmpeg_output_args
+            )
+
+        if (
+            "record_sub" in ffmpeg_input.roles
+            and self.record.enabled
+            and self.record.sub.enabled
+        ):
+            sub_output_args = self.ffmpeg.output_args.effective_record_sub
+            record_args = get_ffmpeg_arg_list(
+                parse_preset_output_record(
+                    sub_output_args,
+                    self.ffmpeg.apple_compatibility,
+                )
+                or sub_output_args
+            )
+
+            ffmpeg_output_args = (
+                record_args
+                + [
+                    f"{os.path.join(CACHE_DIR, self.name)}{SUB_CACHE_TAG}@{CACHE_SEGMENT_FORMAT}.mp4"
+                ]
                 + ffmpeg_output_args
             )
 

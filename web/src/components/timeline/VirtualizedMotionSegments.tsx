@@ -25,6 +25,7 @@ type VirtualizedMotionSegmentsProps = {
   motionOnly: boolean;
   getMotionSegmentValue: (timestamp: number) => number;
   getRecordingAvailability: (timestamp: number) => boolean | undefined;
+  getIsSubOnly: (timestamp: number) => boolean;
   alwaysShowMotionLine: boolean;
 };
 
@@ -58,6 +59,7 @@ export const VirtualizedMotionSegments = forwardRef<
       motionOnly,
       getMotionSegmentValue,
       getRecordingAvailability,
+      getIsSubOnly,
       alwaysShowMotionLine,
     },
     ref,
@@ -77,7 +79,9 @@ export const VirtualizedMotionSegments = forwardRef<
           Math.ceil((scrollTop + clientHeight) / SEGMENT_HEIGHT) +
             OVERSCAN_COUNT,
         );
-        setVisibleRange({ start, end });
+        setVisibleRange((prev) =>
+          prev.start === start && prev.end === end ? prev : { start, end },
+        );
       }
     }, [segments.length, timelineRef]);
 
@@ -159,6 +163,7 @@ export const VirtualizedMotionSegments = forwardRef<
         );
 
         const hasRecording = getRecordingAvailability(segmentTime);
+        const isSubOnly = getIsSubOnly(segmentTime);
 
         // Check if previous and next segments have recordings
         // This is important because in motionOnly mode, the segments array is filtered
@@ -193,6 +198,7 @@ export const VirtualizedMotionSegments = forwardRef<
               firstHalfMotionValue={firstHalfMotionValue}
               secondHalfMotionValue={secondHalfMotionValue}
               hasRecording={hasRecording}
+              isSubOnly={isSubOnly}
               prevIsNoRecording={prevIsNoRecording}
               nextIsNoRecording={nextIsNoRecording}
               segmentDuration={segmentDuration}
@@ -214,6 +220,7 @@ export const VirtualizedMotionSegments = forwardRef<
         events,
         getMotionSegmentValue,
         getRecordingAvailability,
+        getIsSubOnly,
         motionOnly,
         segmentDuration,
         showMinimap,

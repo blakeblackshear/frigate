@@ -12,8 +12,8 @@ from pathlib import Path
 
 import psutil
 import uvicorn
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 
 from frigate.api.auth import hash_password
 from frigate.api.fastapi_app import create_fastapi_app
@@ -30,6 +30,7 @@ from frigate.comms.ws import WebSocketClient
 from frigate.comms.zmq_proxy import ZmqProxy
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.config.config import FrigateConfig
+from frigate.config.holder import ConfigHolder
 from frigate.config.profile_manager import ProfileManager
 from frigate.const import (
     CACHE_DIR,
@@ -48,6 +49,8 @@ from frigate.debug_replay import (
     DebugReplayManager,
     cleanup_replay_cameras,
 )
+from frigate.detectors.detector_types import api_types
+from frigate.detectors.device import build_detector_config, runner_names
 from frigate.embeddings import EmbeddingProcess, EmbeddingsContext
 from frigate.events.audio import AudioProcessor
 from frigate.events.cleanup import EventCleanup
@@ -58,6 +61,8 @@ from frigate.log import _stop_logging
 from frigate.models import (
     Event,
     Export,
+    Notice,
+    NoticeStats,
     Previews,
     Recordings,
     RecordingsToDelete,
@@ -67,9 +72,12 @@ from frigate.models import (
     Trigger,
     User,
 )
+from frigate.notices import install_registry
+from frigate.notices.registry import NoticeRegistry
 from frigate.object_detection.base import ObjectDetectProcess
+from frigate.object_detection.util import detection_frame_size
 from frigate.output.output import OutputProcess
-from frigate.ptz.autotrack import PtzAutoTrackerThread
+from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.ptz.onvif import OnvifController
 from frigate.record.cleanup import RecordingCleanup
 from frigate.record.export import migrate_exports
@@ -82,7 +90,9 @@ from frigate.timeline import TimelineProcessor
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.builtin import empty_and_close_queue
 from frigate.util.image import UntrackedSharedMemory
+from frigate.util.ownership import chown_to_runtime
 from frigate.util.process import FrigateProcess
+from frigate.util.runtime_deps import RuntimeDependencyError
 from frigate.util.services import set_file_limit
 from frigate.version import VERSION
 from frigate.watchdog import FrigateWatchdog
@@ -97,32 +107,32 @@ class FrigateApp:
         self.metrics_manager = manager
         self.audio_process: mp.Process | None = None
         self.stop_event = stop_event
-        self.detection_queue: Queue = mp.Queue()
+        self.detection_queues: dict[str, Queue] = {
+            model.scene: mp.Queue() for model in config.models
+        }
         self.detectors: dict[str, ObjectDetectProcess] = {}
         self.detection_shms: list[mp.shared_memory.SharedMemory] = []
         self.log_queue: Queue = mp.Queue()
         self.camera_metrics: DictProxy = self.metrics_manager.dict()
-        self.embeddings_metrics: DataProcessorMetrics | None = (
-            DataProcessorMetrics(
-                self.metrics_manager, list(config.classification.custom.keys())
-            )
-            if (
-                config.semantic_search.enabled
-                or any(
-                    c.objects.genai.enabled or c.review.genai.enabled
-                    for c in config.cameras.values()
-                )
-                or config.lpr.enabled
-                or config.face_recognition.enabled
-                or len(config.classification.custom) > 0
-            )
-            else None
+
+        self.embeddings_metrics = DataProcessorMetrics(
+            self.metrics_manager, list(config.classification.custom.keys())
         )
         self.ptz_metrics: dict[str, PTZMetrics] = {}
         self.processes: dict[str, int] = {}
         self.embeddings: EmbeddingsContext | None = None
-        self.profile_manager: ProfileManager | None = None
-        self.config = config
+        self.config_holder = ConfigHolder(config)
+
+    @property
+    def config(self) -> FrigateConfig:
+        """The current config, not the one Frigate booted with.
+
+        Read through the holder so the deferred watchdog factories below build
+        a replacement process from the config as it is now. There is no setter
+        on purpose: a plain attribute would let a caller pin this back to a
+        single object and reintroduce the staleness.
+        """
+        return self.config_holder.config
 
     def ensure_dirs(self) -> None:
         dirs = [
@@ -145,6 +155,7 @@ class FrigateApp:
             if not os.path.exists(d) and not os.path.islink(d):
                 logger.info(f"Creating directory: {d}")
                 os.makedirs(d, exist_ok=True)
+                chown_to_runtime(d)
             else:
                 logger.debug(f"Skipping directory: {d}")
 
@@ -155,11 +166,7 @@ class FrigateApp:
         # create camera_metrics
         for camera_name in self.config.cameras.keys():
             self.camera_metrics[camera_name] = CameraMetrics(self.metrics_manager)
-            self.ptz_metrics[camera_name] = PTZMetrics(
-                autotracker_enabled=self.config.cameras[
-                    camera_name
-                ].onvif.autotracking.enabled
-            )
+            self.ptz_metrics[camera_name] = PTZMetrics()
 
     def init_queues(self) -> None:
         # Queue for cameras to push tracked objects to
@@ -179,7 +186,7 @@ class FrigateApp:
         self.timeline_queue: Queue = mp.Queue()
 
     def init_database(self) -> None:
-        def vacuum_db(db: SqliteExtDatabase) -> None:
+        def vacuum_db(db: SqliteDatabase) -> None:
             logger.info("Running database vacuum")
             db.execute_sql("VACUUM;")
 
@@ -190,7 +197,7 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save DB state")
 
         # Migrate DB schema
-        migrate_db = SqliteExtDatabase(self.config.database.path)
+        migrate_db = SqliteDatabase(self.config.database.path)
 
         # Run migrations
         del logging.getLogger("peewee_migrate").handlers[:]
@@ -224,6 +231,17 @@ class FrigateApp:
             vacuum_db(migrate_db)
 
         migrate_db.close()
+
+        # a root frigate service creates these as root; wal and shm recreated
+        # later in the run are realigned by the per-boot /config sweep
+        for db_file in (
+            self.config.database.path,
+            f"{self.config.database.path}-wal",
+            f"{self.config.database.path}-shm",
+            self.config.database.path.replace("frigate.db", "backup.db"),
+        ):
+            if os.path.exists(db_file):
+                chown_to_runtime(db_file)
 
     def init_go2rtc(self) -> None:
         for proc in psutil.process_iter(["pid", "name"]):
@@ -275,6 +293,8 @@ class FrigateApp:
         models = [
             Event,
             Export,
+            Notice,
+            NoticeStats,
             Previews,
             Recordings,
             RecordingsToDelete,
@@ -296,6 +316,10 @@ class FrigateApp:
                 logger.error("Unable to write to /config to save export state")
 
             migrate_exports(self.config.ffmpeg, list(self.config.cameras.keys()))
+
+    def install_notice_registry(self) -> None:
+        self.notice_registry = NoticeRegistry()
+        install_registry(self.notice_registry)
 
     def init_embeddings_client(self) -> None:
         # Create a client for other processes to use
@@ -335,7 +359,9 @@ class FrigateApp:
             self.onvif_controller,
             self.ptz_metrics,
             comms,
+            notice_registry=self.notice_registry,
         )
+        self.dispatcher.start_communicators()
 
     def init_profile_manager(self) -> None:
         self.profile_manager = ProfileManager(
@@ -343,40 +369,40 @@ class FrigateApp:
         )
         self.dispatcher.profile_manager = self.profile_manager
 
-    def restore_active_profile(self) -> None:
-        """Re-activate the persisted profile after subscribers are connected.
+    def ensure_detector_dependencies(self) -> None:
+        """Install runtimes for the configured detector types.
 
-        ZMQ PUB/SUB drops messages with no subscribers, so activation must
-        run after every config_updater subscriber is up.
+        Runs before any detector process starts so one install serves them
+        all and the user site is on sys.path before the forkserver copies it.
+        A failure is logged and startup continues; the detector process then
+        fails on its own with a clear import error.
         """
-        if self.profile_manager is None:
-            return
+        detector_types = {
+            spec.detector
+            for model in self.config.models
+            for spec in self.config.devices_for_model(model)
+        }
 
-        persisted = ProfileManager.load_persisted_profile()
-        if persisted and any(
-            persisted in cam.profiles for cam in self.config.cameras.values()
-        ):
-            logger.info("Restoring persisted profile '%s'", persisted)
-            # runtime overrides are layered on top via restore_runtime_state()
-            self.profile_manager.activate_profile(
-                persisted, clear_runtime_overrides=False
-            )
+        for detector_type in sorted(detector_types):
+            try:
+                api_types[detector_type].ensure_dependencies()
+            except RuntimeDependencyError as err:
+                logger.error("Unable to prepare the %s runtime: %s", detector_type, err)
 
     def start_detectors(self) -> None:
+        model_cameras: dict[str, list[str]] = {
+            model.scene: [] for model in self.config.models
+        }
+
         for name in self.config.cameras.keys():
+            model = self.config.model_for_camera(name)
+            model_cameras[model.scene].append(name)
+
             try:
-                largest_frame = max(
-                    [
-                        det.model.height * det.model.width * 3
-                        if det.model is not None
-                        else 320
-                        for det in self.config.detectors.values()
-                    ]
-                )
                 shm_in = UntrackedSharedMemory(
                     name=name,
                     create=True,
-                    size=largest_frame,
+                    size=detection_frame_size(model),
                 )
             except FileExistsError:
                 shm_in = UntrackedSharedMemory(name=name)
@@ -391,18 +417,29 @@ class FrigateApp:
             self.detection_shms.append(shm_in)
             self.detection_shms.append(shm_out)
 
-        for name, detector_config in self.config.detectors.items():
-            self.detectors[name] = ObjectDetectProcess(
-                name,
-                self.detection_queue,
-                list(self.config.cameras.keys()),
-                self.config,
-                detector_config,
-                self.stop_event,
-            )
+        # a device may be listed more than once to run additional inference
+        # processes on it, so names are only unique once de-duplicated
+        all_devices = [
+            device
+            for model in self.config.models
+            for device in self.config.devices_for_model(model)
+        ]
+        names = iter(runner_names(all_devices))
+
+        for model in self.config.models:
+            for device in self.config.devices_for_model(model):
+                name = next(names)
+                self.detectors[name] = ObjectDetectProcess(
+                    name,
+                    self.detection_queues[model.scene],
+                    model_cameras[model.scene],
+                    self.config,
+                    build_detector_config(device, model),
+                    self.stop_event,
+                )
 
     def start_ptz_autotracker(self) -> None:
-        self.ptz_autotracker_thread = PtzAutoTrackerThread(
+        self.ptz_autotracker_thread = PtzAutoTracker(
             self.config,
             self.onvif_controller,
             self.ptz_metrics,
@@ -430,7 +467,7 @@ class FrigateApp:
     def start_camera_processor(self) -> None:
         self.camera_maintainer = CameraMaintainer(
             self.config,
-            self.detection_queue,
+            self.detection_queues,
             self.detected_frames_queue,
             self.camera_metrics,
             self.ptz_metrics,
@@ -441,7 +478,7 @@ class FrigateApp:
 
     def start_audio_processor(self) -> None:
         self.audio_process = AudioProcessor(
-            self.config, self.camera_metrics, self.stop_event
+            self.config, self.camera_metrics, self.embeddings_metrics, self.stop_event
         )
         self.audio_process.start()
         self.processes["audio_detector"] = self.audio_process.pid or 0
@@ -481,6 +518,7 @@ class FrigateApp:
                 self.embeddings_metrics,
                 self.detectors,
                 self.processes,
+                self.storage_maintainer,
             ),
             self.stop_event,
         )
@@ -513,10 +551,20 @@ class FrigateApp:
                 "output",
                 lambda: OutputProcess(self.config, self.stop_event),
             ),
+            (
+                "audio_process",
+                "audio_detector",
+                lambda: AudioProcessor(
+                    self.config,
+                    self.camera_metrics,
+                    self.embeddings_metrics,
+                    self.stop_event,
+                ),
+            ),
         ]
 
         for attr, key, factory in specs:
-            if not hasattr(self, attr):
+            if getattr(self, attr, None) is None:
                 continue
 
             def on_restart(
@@ -533,7 +581,12 @@ class FrigateApp:
 
     def init_auth(self) -> None:
         if self.config.auth.enabled:
-            if User.select().count() == 0:
+            if (
+                User.select().count() == 0
+                or User.select()
+                .where((User.username == "admin") & (User.password_hash == ""))
+                .exists()
+            ):
                 password = secrets.token_hex(16)
                 password_hash = hash_password(
                     password, iterations=self.config.auth.hash_iterations
@@ -545,6 +598,9 @@ class FrigateApp:
                         User.password_hash: password_hash,
                         User.notification_tokens: [],
                     }
+                ).on_conflict(
+                    conflict_target=[User.username],
+                    update={User.password_hash: password_hash},
                 ).execute()
 
                 self.config.auth.admin_first_time_login = True
@@ -566,6 +622,7 @@ class FrigateApp:
                     username="admin",
                     role="admin",
                     password_hash=password_hash,
+                    password_changed_at=datetime.datetime.now(),
                     notification_tokens=[],
                 ).execute()
 
@@ -575,12 +632,26 @@ class FrigateApp:
                 logger.info(f"***    Password: {password}   ***")
                 logger.info("********************************************************")
                 logger.info("********************************************************")
+        else:
+            # Notification registrations store tokens on the admin row. Its
+            # empty password hash marks it for a generated password if auth
+            # is enabled later.
+            if User.select().count() == 0:
+                User.insert(
+                    {
+                        User.username: "admin",
+                        User.role: "admin",
+                        User.password_hash: "",
+                        User.notification_tokens: [],
+                    }
+                ).execute()
 
     def start(self) -> None:
         logger.info(f"Starting Frigate ({VERSION})")
 
         # Ensure global state.
         self.ensure_dirs()
+        self.ensure_detector_dependencies()
 
         # Set soft file limits.
         set_file_limit()
@@ -597,6 +668,7 @@ class FrigateApp:
         self.init_embeddings_manager()
         self.bind_database()
         self.check_db_data_migrations()
+        self.install_notice_registry()
 
         # Clean up any stale replay camera artifacts (filesystem + DB)
         cleanup_replay_cameras()
@@ -610,6 +682,13 @@ class FrigateApp:
         self.start_detectors()
         self.init_dispatcher()
         self.init_profile_manager()
+
+        # workers get a copy of the config and can miss the broadcast below, so
+        # apply both layers here. must stay after init_profile_manager(), which
+        # snapshots the base config that profile deactivation resets to
+        self.profile_manager.restore_persisted_profile_to_config()
+        self.dispatcher.reapply_runtime_state_to_config()
+
         self.init_embeddings_client()
         self.start_video_output_processor()
         self.start_ptz_autotracker()
@@ -624,8 +703,9 @@ class FrigateApp:
         self.start_record_cleanup()
         self.start_watchdog()
 
-        # restore persisted runtime overrides on top of config
-        self.restore_active_profile()
+        # publish for the recording/review/embeddings processes, which start
+        # before the config can be corrected, and for the retained MQTT states
+        self.profile_manager.restore_persisted_profile()
         self.dispatcher.restore_runtime_state()
 
         self.init_auth()
@@ -645,10 +725,14 @@ class FrigateApp:
                     self.replay_manager,
                     self.dispatcher,
                     self.profile_manager,
+                    config_holder=self.config_holder,
+                    notice_registry=self.notice_registry,
                 ),
                 host="127.0.0.1",
                 port=5001,
                 log_level="error",
+                # outlive nginx's 60s upstream keepalive so nginx closes idle connections first
+                timeout_keep_alive=75,
             )
         finally:
             self.stop()
@@ -685,8 +769,10 @@ class FrigateApp:
         for detector in self.detectors.values():
             detector.stop()
 
-        empty_and_close_queue(self.detection_queue)
-        logger.info("Detection queue closed")
+        for detection_queue in self.detection_queues.values():
+            empty_and_close_queue(detection_queue)
+
+        logger.info("Detection queues closed")
 
         self.detected_frames_processor.join()
         empty_and_close_queue(self.detected_frames_queue)

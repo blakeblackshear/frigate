@@ -9,7 +9,7 @@ import pandas as pd
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from peewee import Case, DoesNotExist, IntegrityError, fn, operator
+from peewee import Case, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
@@ -17,6 +17,7 @@ from frigate.api.auth import (
     get_allowed_cameras_for_filter,
     get_current_user,
     require_camera_access,
+    require_full_camera_access,
     require_role,
 )
 from frigate.api.defs.query.review_query_parameters import (
@@ -32,14 +33,32 @@ from frigate.api.defs.response.review_response import (
     ReviewSummaryResponse,
 )
 from frigate.api.defs.tags import Tags
+from frigate.const import STREAM_TYPE_MAIN
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
+from frigate.util.recording_coverage import recording_overlap
 from frigate.util.time import get_dst_transitions
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.review])
+
+
+def get_label_clause(label: str, include_audio: bool = True):
+    """Build a clause matching a label within a review segment's data.
+
+    Verified objects are stored with a `-verified` suffix (eg. `person-verified`)
+    so that variant is matched as well.
+    """
+    clause = (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*') | (
+        ReviewSegment.data["objects"].cast("text") % f'*"{label}-verified"*'
+    )
+
+    if include_audio:
+        clause |= ReviewSegment.data["audio"].cast("text") % f'*"{label}"*'
+
+    return clause
 
 
 @router.get(
@@ -91,10 +110,7 @@ async def review(
         filtered_labels = labels.split(",")
 
         for label in filtered_labels:
-            label_clauses.append(
-                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
-                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
-            )
+            label_clauses.append(get_label_clause(label))
         clauses.append(reduce(operator.or_, label_clauses))
 
     if zones != "all":
@@ -171,11 +187,19 @@ async def review_ids(request: Request, ids: str):
             status_code=400,
         )
 
+    try:
+        reviews = list(
+            ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
+        )
+    except Exception:
+        return JSONResponse(
+            content=({"success": False, "message": "Review segments not found"}),
+            status_code=400,
+        )
+
+    found_ids = {r["id"] for r in reviews}
     for review_id in ids:
-        try:
-            review = ReviewSegment.get(ReviewSegment.id == review_id)
-            await require_camera_access(review.camera, request=request)
-        except DoesNotExist:
+        if review_id not in found_ids:
             return JSONResponse(
                 content=(
                     {"success": False, "message": f"Review {review_id} not found"}
@@ -183,16 +207,10 @@ async def review_ids(request: Request, ids: str):
                 status_code=404,
             )
 
-    try:
-        reviews = (
-            ReviewSegment.select().where(ReviewSegment.id << ids).dicts().iterator()
-        )
-        return JSONResponse(list(reviews))
-    except Exception:
-        return JSONResponse(
-            content=({"success": False, "message": "Review segments not found"}),
-            status_code=400,
-        )
+    for review in reviews:
+        await require_camera_access(review["camera"], request=request)
+
+    return JSONResponse(reviews)
 
 
 @router.get(
@@ -235,10 +253,7 @@ async def review_summary(
         filtered_labels = labels.split(",")
 
         for label in filtered_labels:
-            label_clauses.append(
-                (ReviewSegment.data["objects"].cast("text") % f'*"{label}"*')
-                | (ReviewSegment.data["audio"].cast("text") % f'*"{label}"*')
-            )
+            label_clauses.append(get_label_clause(label))
         clauses.append(reduce(operator.or_, label_clauses))
     if zones != "all":
         # use matching so segments with multiple zones
@@ -336,9 +351,8 @@ async def review_summary(
         filtered_labels = labels.split(",")
 
         for label in filtered_labels:
-            label_clauses.append(
-                ReviewSegment.data["objects"].cast("text") % f'*"{label}"*'
-            )
+            label_clauses.append(get_label_clause(label, include_audio=False))
+
         clauses.append(reduce(operator.or_, label_clauses))
 
     # Find the time range of available data
@@ -489,27 +503,52 @@ async def set_multiple_reviewed(
 
     user_id = current_user["username"]
 
-    for review_id in body.ids:
-        try:
-            review = ReviewSegment.get(ReviewSegment.id == review_id)
-            await require_camera_access(review.camera, request=request)
-            review_status = UserReviewStatus.get(
-                UserReviewStatus.user_id == user_id,
-                UserReviewStatus.review_segment == review_id,
+    reviews = list(
+        ReviewSegment.select(ReviewSegment.id, ReviewSegment.camera).where(
+            ReviewSegment.id << body.ids
+        )
+    )
+
+    for review in reviews:
+        await require_camera_access(review.camera, request=request)
+
+    found_ids = [r.id for r in reviews]
+
+    if found_ids:
+        existing_statuses = list(
+            UserReviewStatus.select().where(
+                (UserReviewStatus.user_id == user_id)
+                & (UserReviewStatus.review_segment << found_ids)
             )
-            # Update based on the reviewed parameter
-            if review_status.has_been_reviewed != body.reviewed:
-                review_status.has_been_reviewed = body.reviewed
-                review_status.save()
-        except DoesNotExist:
-            try:
-                UserReviewStatus.create(
-                    user_id=user_id,
-                    review_segment=ReviewSegment.get(id=review_id),
-                    has_been_reviewed=body.reviewed,
+        )
+
+        status_by_review = {s.review_segment_id: s for s in existing_statuses}
+
+        to_update = []
+        to_create = []
+
+        for review_id in found_ids:
+            if review_id in status_by_review:
+                status = status_by_review[review_id]
+                if status.has_been_reviewed != body.reviewed:
+                    status.has_been_reviewed = body.reviewed
+                    to_update.append(status)
+            else:
+                to_create.append(
+                    {
+                        "user_id": user_id,
+                        "review_segment_id": review_id,
+                        "has_been_reviewed": body.reviewed,
+                    }
                 )
-            except (DoesNotExist, IntegrityError):
-                pass
+
+        if to_update:
+            UserReviewStatus.bulk_update(
+                to_update, fields=[UserReviewStatus.has_been_reviewed], batch_size=100
+            )
+
+        if to_create:
+            UserReviewStatus.insert_many(to_create).on_conflict_ignore().execute()
 
     return JSONResponse(
         content=(
@@ -547,14 +586,7 @@ def delete_reviews(body: ReviewModifyMultipleBody):
         camera_name = review["camera"]
         recordings = (
             Recordings.select(Recordings.id, Recordings.path)
-            .where(
-                Recordings.start_time.between(start_time, end_time)
-                | Recordings.end_time.between(start_time, end_time)
-                | (
-                    (start_time > Recordings.start_time)
-                    & (end_time < Recordings.end_time)
-                )
-            )
+            .where(recording_overlap(start_time, end_time))
             .where(Recordings.camera == camera_name)
             .dicts()
             .iterator()
@@ -597,6 +629,8 @@ def motion_activity(
 
     clauses = [(Recordings.start_time > after) & (Recordings.end_time < before)]
     clauses.append(Recordings.motion > 0)
+    # sub rows duplicate the camera's motion stats, so only count main rows
+    clauses.append(Recordings.stream_type == STREAM_TYPE_MAIN)
 
     if cameras != "all":
         requested = set(cameras.split(","))
@@ -662,7 +696,7 @@ def motion_activity(
     df = df[df["camera"] != ""]
 
     # change types for output
-    df.index = df.index.astype(int) // (10**9)
+    df.index = df.index.as_unit("s").astype(int)
     normalized = df.reset_index().to_dict("records")
     return JSONResponse(content=normalized)
 
@@ -703,12 +737,80 @@ async def get_review(request: Request, review_id: str):
         )
 
 
+@router.put(
+    "/review/{review_id}/regenerate_description",
+    response_model=GenericResponse,
+    dependencies=[Depends(require_role(["admin"]))],
+    summary="Generate a review item description",
+    description="""Re-runs a review item through the GenAI descriptions process.
+    Frames are always taken from recordings, and both alerts and detections are
+    accepted regardless of the camera's GenAI alerts/detections toggles.
+    """,
+)
+async def regenerate_review_description(request: Request, review_id: str):
+    try:
+        review: ReviewSegment = ReviewSegment.get(ReviewSegment.id == review_id)
+    except DoesNotExist:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Review " + review_id + " not found",
+            },
+            status_code=404,
+        )
+
+    await require_camera_access(review.camera, request=request)
+
+    if review.end_time is None:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Review " + review_id + " has not ended yet",
+            },
+            status_code=400,
+        )
+
+    camera_config = request.app.frigate_config.cameras.get(review.camera)
+
+    if camera_config is None or not camera_config.review.genai.enabled:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "GenAI descriptions must be enabled for this camera",
+            },
+            status_code=400,
+        )
+
+    if request.app.genai_manager.description_client is None:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "A GenAI provider with the descriptions role must be configured",
+            },
+            status_code=400,
+        )
+
+    context: EmbeddingsContext = request.app.embeddings
+    context.regenerate_review_description(review_id)
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "message": "Review "
+            + review_id
+            + " description generation has been requested",
+        },
+        status_code=202,
+    )
+
+
 @router.delete(
     "/review/{review_id}/viewed",
     response_model=GenericResponse,
     dependencies=[Depends(allow_any_authenticated())],
 )
 async def set_not_reviewed(
+    request: Request,
     review_id: str,
     current_user: dict = Depends(get_current_user),
 ):
@@ -727,6 +829,8 @@ async def set_not_reviewed(
             status_code=404,
         )
 
+    await require_camera_access(review.camera, request=request)
+
     try:
         user_review = UserReviewStatus.get(
             UserReviewStatus.user_id == user_id,
@@ -743,9 +847,12 @@ async def set_not_reviewed(
     )
 
 
+# Intentionally not camera scoped, as the summary correlates each flagged event
+# with overlapping activity on other cameras. Restricted to callers who can
+# already see every camera, so the unscoped query discloses nothing.
 @router.post(
     "/review/summarize/start/{start_ts}/end/{end_ts}",
-    dependencies=[Depends(require_role(["admin"]))],
+    dependencies=[Depends(require_full_camera_access)],
     description="Use GenAI to summarize review items over a period of time.",
 )
 def generate_review_summary(request: Request, start_ts: float, end_ts: float):

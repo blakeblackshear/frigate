@@ -11,17 +11,18 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "کلاس حذف شده",
-      "deletedCategory_other": "",
-      "deletedImage_one": "عکس های حذف شده",
-      "deletedImage_other": "",
+      "deletedCategory_one": "{{count}} کلاس حذف شد",
+      "deletedCategory_other": "{{count}} کلاس حذف شدند",
+      "deletedImage_one": "{{count}} تصویر حذف شد",
+      "deletedImage_other": "{{count}} تصویر حذف شدند",
       "categorizedImage": "تصویر طبقه بندی شده",
       "trainedModel": "مدل آموزش دیده شده.",
       "trainingModel": "آموزش دادن مدل با موفقیت شروع شد.",
       "deletedModel_one": "{{count}} مدل با موفقیت حذف شد",
       "deletedModel_other": "{{count}} مدل با موفقیت حذف شدند",
       "updatedModel": "پیکربندی مدل با موفقیت به‌روزرسانی شد",
-      "renamedCategory": "نام کلاس با موفقیت به {{name}} تغییر یافت"
+      "renamedCategory": "نام کلاس با موفقیت به {{name}} تغییر یافت",
+      "reclassifiedImage": "طبقه‌بندی مجدد تصویر با موفقیت انجام شد"
     },
     "error": {
       "deleteImageFailed": "حذف نشد: {{errorMessage}}",
@@ -31,7 +32,8 @@
       "trainingFailed": "آموزش مدل ناموفق بود. برای جزئیات، گزارش‌های Frigate را بررسی کنید.",
       "trainingFailedToStart": "شروع آموزش مدل ناموفق بود: {{errorMessage}}",
       "updateModelFailed": "به‌روزرسانی مدل ناموفق بود: {{errorMessage}}",
-      "renameCategoryFailed": "تغییر نام کلاس ناموفق بود: {{errorMessage}}"
+      "renameCategoryFailed": "تغییر نام کلاس ناموفق بود: {{errorMessage}}",
+      "reclassifyFailed": "طبقه‌بندی مجدد تصویر ناموفق بود: {{errorMessage}}"
     }
   },
   "documentTitle": "دسته بندی مدل ها - فریگیت",
@@ -158,14 +160,32 @@
       "noImages": "هیچ تصویر نمونه‌ای تولید نشد",
       "modelCreated": "مدل با موفقیت ایجاد شد. از نمای «طبقه‌بندی‌های اخیر» برای افزودن تصاویرِ وضعیت‌هایِ جاافتاده استفاده کنید، سپس مدل را آموزش دهید.",
       "generateSuccess": "تصاویر نمونه با موفقیت تولید شد",
-      "selectImagesPrompt": "همهٔ تصاویر با {{className}} را انتخاب کنید"
+      "selectImagesPrompt": "همهٔ تصاویر با {{className}} را انتخاب کنید",
+      "refreshExamples": "تولید نمونه‌های جدید",
+      "refreshConfirm": {
+        "title": "تولید نمونه‌های جدید؟",
+        "description": "این کار یک مجموعهٔ جدید از تصاویر تولید می‌کند و همهٔ انتخاب‌ها را پاک می‌کند، از جمله کلاس‌های قبلی. باید نمونه‌ها را برای همهٔ کلاس‌ها دوباره انتخاب کنید."
+      }
     }
   },
   "edit": {
     "title": "ویرایش مدل طبقه‌بندی",
     "descriptionState": "کلاس‌های این مدل طبقه‌بندی حالت را ویرایش کنید. اعمال تغییرات نیاز به بازآموزی مدل دارد.",
     "descriptionObject": "نوع شیء و نوع طبقه‌بندی را برای این مدل طبقه‌بندی شیء ویرایش کنید.",
-    "stateClassesInfo": "توجه: تغییر کلاس‌های وضعیت نیازمند بازآموزی مدل با کلاس‌های به‌روزرسانی‌شده است."
+    "stateClassesInfo": "توجه: تغییر کلاس‌های وضعیت نیازمند بازآموزی مدل با کلاس‌های به‌روزرسانی‌شده است.",
+    "enabled": "فعال شده",
+    "enabledDesc": "اجرای این مدل. هنگام غیرفعال بودن، اجرا متوقف می‌شود و دیگر طبقه‌بندی نمی‌کند.",
+    "saveAttempts": "تلاش‌های ذخیره",
+    "saveAttemptsDesc": "تعداد تصاویر تلاش طبقه‌بندی که برای رابط کاربری طبقه‌بندی‌های اخیر نگه‌داری می‌شوند.",
+    "motion": "اجرای هنگام حرکت",
+    "motionDesc": "اجرای طبقه‌بندی هنگام تشخیص حرکت در ناحیهٔ برش‌خوردهٔ پیکربندی‌شده.",
+    "interval": "بازه",
+    "intervalDesc": "ثانیه بین اجراهای دوره‌ای طبقه‌بندی. برای اجرای فقط هنگام حرکت، خالی بگذارید.",
+    "intervalPlaceholder": "بدون بازه",
+    "errors": {
+      "saveAttemptsInvalid": "تلاش‌های ذخیره باید یک عدد صحیح ۰ یا بزرگ‌تر باشد",
+      "intervalInvalid": "بازه باید یک عدد صحیح بزرگ‌تر از ۰ باشد"
+    }
   },
   "deleteDatasetImages": {
     "title": "حذف تصاویر مجموعه‌داده",
@@ -185,5 +205,8 @@
   "createCategory": {
     "new": "ایجاد کلاس جدید"
   },
-  "categorizeImageAs": "طبقه‌بندی تصویر به‌عنوان:"
+  "categorizeImageAs": "طبقه‌بندی تصویر به‌عنوان:",
+  "disabled": "غیرفعال",
+  "reclassifyImageAs": "طبقه‌بندی مجدد تصویر به‌عنوان:",
+  "reclassifyImage": "طبقه‌بندی مجدد تصویر"
 }

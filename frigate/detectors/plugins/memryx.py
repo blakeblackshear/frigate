@@ -5,7 +5,7 @@ import shutil
 import urllib.request
 import zipfile
 from queue import Queue
-from typing import Literal
+from typing import ClassVar, Literal
 
 import cv2
 import numpy as np
@@ -17,10 +17,58 @@ from frigate.detectors.detector_config import (
     ModelTypeEnum,
 )
 from frigate.util.file import FileLock
+from frigate.util.model import xyxy_to_xywh_for_nms
+from frigate.util.runtime_deps import (
+    ArchiveDest,
+    ArchiveMapping,
+    Artifact,
+    ArtifactKind,
+    RuntimeManifest,
+)
 
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "memryx"
+
+# The MemryX SDK is installed at first start rather than shipped in the image.
+# The release archive holds the python package with its compiled extensions
+# and, per architecture, the shared libraries they link against. libmemx has
+# no SONAME, so the libraries are resolved through LD_LIBRARY_PATH.
+MEMRYX_VERSION = "2.1.0"
+MEMRYX_ARCHIVE_ROOT = f"mx_accl_frigate-{MEMRYX_VERSION}/memryx/"
+MEMRYX_LIBS = ("libmemx.so*", "libmx_accl.so*")
+MEMRYX_MANIFEST = RuntimeManifest(
+    name=DETECTOR_KEY,
+    version=MEMRYX_VERSION,
+    artifacts=(
+        Artifact(
+            url=f"https://github.com/memryx/mx_accl_frigate/archive/refs/tags/v{MEMRYX_VERSION}.zip",
+            sha256="54d1971dee54688541561b7bd9136342be51707b68c11a2a5e575fa19e69bc51",
+            kind=ArtifactKind.archive,
+            filename=f"mx_accl_frigate-{MEMRYX_VERSION}.zip",
+            mappings=(
+                ArchiveMapping(
+                    MEMRYX_ARCHIVE_ROOT, ArchiveDest.site_packages, subdir="memryx"
+                ),
+                ArchiveMapping(
+                    f"{MEMRYX_ARCHIVE_ROOT}x86/",
+                    ArchiveDest.lib,
+                    include=MEMRYX_LIBS,
+                    machines=("x86_64",),
+                ),
+                ArchiveMapping(
+                    f"{MEMRYX_ARCHIVE_ROOT}arm/",
+                    ArchiveDest.lib,
+                    include=MEMRYX_LIBS,
+                    machines=("aarch64",),
+                ),
+            ),
+        ),
+    ),
+    preload=("libmemx.so", "libmx_accl.so.2"),
+    import_check="memryx",
+    needs_ld_library_path=True,
+)
 
 
 # Configuration class for model settings
@@ -35,6 +83,9 @@ class MemryXDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="MemryX",
     )
+
+    # an accelerator can only be opened by one process
+    shareable: ClassVar[bool] = False
 
     type: Literal[DETECTOR_KEY]
     device: str = Field(
@@ -52,17 +103,20 @@ class MemryXDetector(DetectionApi):
         ModelTypeEnum.yologeneric,  # Treated as yolov9 in MemryX implementation
         ModelTypeEnum.yolox,
     ]
+    runtime_manifest = MEMRYX_MANIFEST
 
     def __init__(self, detector_config):
         """Initialize MemryX detector with the provided configuration."""
+        self.activate_dependencies()
+
         try:
             # Import MemryX SDK
             from memryx import AsyncAccl
         except ModuleNotFoundError:
             raise ImportError(
-                "MemryX SDK is not installed. Install it and set up MIX environment."
+                "MemryX SDK is not installed. Frigate installs it at startup when "
+                "a MemryX detector is configured; check the startup log for errors."
             ) from None
-            return
 
         # Initialize stop_event as None, will be set later by set_stop_event()
         self.stop_event = None
@@ -74,7 +128,7 @@ class MemryXDetector(DetectionApi):
             detector_config.model.model_type = model_cfg.model_type
         else:
             logger.info(
-                "model_type not set in config — defaulting to yolonas for MemryX."
+                "model_type not set in config, defaulting to yolonas for MemryX"
             )
             detector_config.model.model_type = ModelTypeEnum.yolonas
 
@@ -581,7 +635,7 @@ class MemryXDetector(DetectionApi):
             # Convert coordinates to integers
             x_min, y_min, x_max, y_max = map(int, [x_min, y_min, x_max, y_max])
 
-            # Append valid detections [class_id, confidence, x, y, width, height]
+            # Append valid detections [class_id, confidence, x_min, y_min, x_max, y_max]
             detections.append([class_id, confidence, x_min, y_min, x_max, y_max])
 
         final_detections = np.zeros((20, 6), np.float32)
@@ -595,7 +649,7 @@ class MemryXDetector(DetectionApi):
         detections = np.array(detections, dtype=np.float32)
 
         # Apply Non-Maximum Suppression (NMS)
-        bboxes = detections[:, 2:6].tolist()  # (x_min, y_min, width, height)
+        bboxes = xyxy_to_xywh_for_nms(detections[:, 2:6])
         scores = detections[:, 1].tolist()  # Confidence scores
 
         indices = cv2.dnn.NMSBoxes(bboxes, scores, 0.45, 0.5)

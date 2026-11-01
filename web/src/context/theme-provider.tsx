@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
+type ActiveTheme = Exclude<Theme, "system">;
 type ColorScheme =
   | "theme-blue"
   | "theme-green"
@@ -51,6 +52,32 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
+function updateThemeMetaTags(theme: ActiveTheme): void {
+  const isDark = theme === "dark";
+  const metaDefinitions = [
+    { name: "theme-color", content: isDark ? "#000000" : "#ffffff" },
+    {
+      name: "apple-mobile-web-app-status-bar-style",
+      content: isDark ? "black" : "default",
+    },
+  ];
+
+  for (const { name, content } of metaDefinitions) {
+    const tags = document.head.querySelectorAll<HTMLMetaElement>(
+      `meta[name="${name}"]`,
+    );
+    const matchingTags =
+      tags.length > 0
+        ? Array.from(tags)
+        : [document.head.appendChild(document.createElement("meta"))];
+
+    for (const tag of matchingTags) {
+      tag.name = name;
+      tag.content = content;
+    }
+  }
+}
+
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -82,15 +109,21 @@ export function ThemeProvider({
     }
   });
 
-  const systemTheme = useMemo<Theme | undefined>(() => {
-    if (theme != "system") {
-      return undefined;
-    }
+  const [systemPrefersDark, setSystemPrefersDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches,
+  );
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  }, [theme]);
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = () => setSystemPrefersDark(mediaQuery.matches);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  const systemTheme = useMemo<ActiveTheme | undefined>(() => {
+    if (theme !== "system") return undefined;
+    return systemPrefersDark ? "dark" : "light";
+  }, [theme, systemPrefersDark]);
 
   useEffect(() => {
     //localStorage.removeItem(storageKey);
@@ -100,6 +133,8 @@ export function ThemeProvider({
     root.classList.remove("light", "dark", "system", ...colorSchemes);
 
     root.classList.add(theme, colorScheme);
+
+    updateThemeMetaTags(systemTheme ?? (theme === "system" ? "light" : theme));
 
     if (systemTheme) {
       root.classList.add(systemTheme);

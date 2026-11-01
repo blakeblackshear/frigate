@@ -2,7 +2,6 @@
 
 import asyncio
 import copy
-import json
 import logging
 import os
 import platform
@@ -11,7 +10,6 @@ import urllib
 from datetime import datetime, timedelta
 from functools import reduce
 from io import StringIO
-from pathlib import Path as FilePath
 from typing import Any
 
 import aiofiles
@@ -31,7 +29,10 @@ from frigate.api.auth import (
     get_allowed_cameras_for_filter,
     require_role,
 )
-from frigate.api.config_util import swap_runtime_config
+from frigate.api.config_util import (
+    publish_camera_section_updates,
+    swap_runtime_config,
+)
 from frigate.api.defs.query.app_query_parameters import AppTimelineHourlyQueryParameters
 from frigate.api.defs.request.app_body import (
     AppConfigSetBody,
@@ -53,14 +54,17 @@ from frigate.jobs.media_sync import (
     start_media_sync_job,
 )
 from frigate.models import Event, Timeline
+from frigate.plus import load_plus_model_info
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
     clean_camera_user_pass,
     deep_merge,
     flatten_config_data,
+    is_masked_camera_path,
     load_labels,
     process_config_query_string,
+    split_config_key_path,
     update_yaml_file_bulk,
 )
 from frigate.util.config import (
@@ -68,8 +72,16 @@ from frigate.util.config import (
     find_config_file,
     redact_credential,
 )
+from frigate.util.env import substitute_frigate_vars
+from frigate.util.live_streams import (
+    generated_transcode_streams,
+    sync_transcode_streams,
+)
+from frigate.util.object_names import get_categorized_object_names
 from frigate.util.schema import get_config_schema
 from frigate.util.services import (
+    Go2rtcStreamIssue,
+    find_restricted_go2rtc_stream_changes,
     get_nvidia_driver_info,
     process_logs,
     restart_frigate,
@@ -165,7 +177,9 @@ def metrics(request: Request):
     # Retrieve the latest statistics and update the Prometheus metrics
     stats = request.app.stats_emitter.get_latest_stats()
     # query DB for count of events by camera, label
-    event_counts: list[dict[str, Any]] = (
+    # Materialize the rows; the collector is shared across request threads and a
+    # lazy query would step one sqlite cursor from two threads.
+    event_counts: list[dict[str, Any]] = list(
         Event.select(Event.camera, Event.label, fn.Count())
         .group_by(Event.camera, Event.label)
         .dicts()
@@ -184,6 +198,20 @@ def metrics(request: Request):
 )
 def genai_models(request: Request):
     return JSONResponse(content=request.app.genai_manager.list_models())
+
+
+@router.get(
+    "/genai/roles",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get the model assigned to each GenAI role",
+    description=(
+        "Returns the selected model and its context size for each configured "
+        "GenAI role. Reads only what the client saved when it initialized, so "
+        "the provider is not queried for its model list."
+    ),
+)
+def genai_roles(request: Request):
+    return JSONResponse(content=request.app.genai_manager.role_info())
 
 
 @router.post(
@@ -288,14 +316,13 @@ def config(request: Request):
     config: dict[str, dict[str, Any]] = config_obj.model_dump(
         mode="json", warnings="none", exclude_none=True
     )
-    config["detectors"] = {
-        name: detector.model_dump(mode="json", warnings="none", exclude_none=True)
-        for name, detector in config_obj.detectors.items()
-    }
 
-    # remove environment_vars for non-admin users
-    if request.headers.get("remote-role") != "admin":
+    is_admin = request.headers.get("remote-role") == "admin"
+
+    # hide environment_vars and the notification email from non-admin users
+    if not is_admin:
         config.pop("environment_vars", None)
+        redact_credential(config["notifications"], "email")
 
     # redact mqtt credentials
     redact_credential(config["mqtt"], "password")
@@ -352,7 +379,15 @@ def config(request: Request):
                 camera_name
             )
             if base_sections:
-                camera_dict["base_config"] = base_sections
+                # copy so redaction below can't alter the profile manager's cache
+                camera_dict["base_config"] = copy.deepcopy(base_sections)
+
+        # cameras inherit the global notification email
+        if not is_admin:
+            redact_credential(camera_dict["notifications"], "email")
+            redact_credential(
+                camera_dict.get("base_config", {}).get("notifications", {}), "email"
+            )
 
     # remove go2rtc stream passwords
     go2rtc: dict[str, Any] = config_obj.go2rtc.model_dump(
@@ -371,34 +406,54 @@ def config(request: Request):
 
         config["go2rtc"]["streams"][stream_name] = cleaned
 
+    _redact_go2rtc_credentials(config["go2rtc"])
+
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
-    config["model"]["colormap"] = config_obj.model.colormap
-    config["model"]["all_attributes"] = config_obj.model.all_attributes
-    config["model"]["non_logo_attributes"] = config_obj.model.non_logo_attributes
 
-    # Add model plus data if plus is enabled
-    if config["plus"]["enabled"]:
-        model_path = config.get("model", {}).get("path")
-        if model_path:
-            model_json_path = FilePath(model_path).with_suffix(".json")
-            try:
-                with open(model_json_path) as f:
-                    model_plus_data = json.load(f)
-                config["model"]["plus"] = model_plus_data
-            except FileNotFoundError:
-                config["model"]["plus"] = None
-            except json.JSONDecodeError:
-                config["model"]["plus"] = None
-        else:
-            config["model"]["plus"] = None
+    for index, model in enumerate(config_obj.models):
+        model_dict = config["models"][index]
+        model_dict["colormap"] = model.colormap
+        model_dict["all_attributes"] = model.all_attributes
+        model_dict["non_logo_attributes"] = model.non_logo_attributes
+        model_dict["labelmap"] = model.merged_labelmap
 
-    # use merged labelamp
-    for detector_config in config["detectors"].values():
-        detector_config["model"]["labelmap"] = (
-            request.app.frigate_config.model.merged_labelmap
-        )
+        # report the configured reference rather than the resolved cache path,
+        # so saving the config back doesn't lose the Frigate+ model
+        if model.plus_id:
+            model_dict["path"] = f"plus://{model.plus_id}"
+
+        if not config["plus"]["enabled"]:
+            continue
+
+        # Add model plus data if plus is enabled
+        model_dict["plus"] = None
+
+        if model.path:
+            model_dict["plus"] = load_plus_model_info(os.path.basename(model.path))
 
     return JSONResponse(content=config)
+
+
+def _redact_go2rtc_credentials(go2rtc: dict[str, Any]) -> None:
+    """Redact go2rtc secrets outside of stream URLs, in place."""
+    for section in ("rtsp", "api", "mqtt"):
+        if isinstance(go2rtc.get(section), dict):
+            redact_credential(go2rtc[section], "username")
+            redact_credential(go2rtc[section], "password")
+
+    if isinstance(go2rtc.get("ngrok"), dict):
+        redact_credential(go2rtc["ngrok"], "command")
+
+    if isinstance(go2rtc.get("homekit"), dict):
+        for accessory in go2rtc["homekit"].values():
+            if isinstance(accessory, dict):
+                for key in ("pin", "device_private", "pairings"):
+                    redact_credential(accessory, key)
+
+    # publish destinations carry stream keys in the URL path
+    if isinstance(go2rtc.get("publish"), dict):
+        for name in list(go2rtc["publish"]):
+            redact_credential(go2rtc["publish"], name)
 
 
 @router.get("/profiles", dependencies=[Depends(allow_any_authenticated())])
@@ -425,6 +480,8 @@ def ffmpeg_presets():
         hwaccel_presets = [
             "preset-rpi-64-h264",
             "preset-rpi-64-h265",
+            "preset-apple-silicon-h264",
+            "preset-apple-silicon-h265",
             "preset-jetson-h264",
             "preset-jetson-h265",
             "preset-rkmpp",
@@ -519,6 +576,63 @@ def config_raw():
         )
 
 
+def _go2rtc_streams(raw_config: str) -> Any:
+    """Load go2rtc.streams with the same loader Frigate and go2rtc startup use.
+
+    Raises ruamel.yaml.YAMLError when the config cannot be parsed.
+    """
+    loaded = ruamel.yaml.YAML().load(raw_config)
+    go2rtc = loaded.get("go2rtc") if isinstance(loaded, dict) else None
+    return go2rtc.get("streams") if isinstance(go2rtc, dict) else None
+
+
+def _restricted_go2rtc_streams_response(
+    old_raw_config: str, new_raw_config: str
+) -> JSONResponse | None:
+    """Reject config changes that add restricted go2rtc stream sources.
+
+    The same sources are rejected by PUT /go2rtc/streams, and go2rtc would
+    otherwise load them from the saved config on the next restart.
+    """
+    try:
+        new_streams = _go2rtc_streams(new_raw_config)
+    except ruamel.yaml.YAMLError:
+        logger.warning("Rejected config change that could not be parsed")
+        return JSONResponse(
+            content={"success": False, "message": "Unable to parse config"},
+            status_code=400,
+        )
+
+    try:
+        old_streams = _go2rtc_streams(old_raw_config)
+    except ruamel.yaml.YAMLError:
+        # with no readable saved config, every source is treated as new
+        old_streams = None
+
+    issues = find_restricted_go2rtc_stream_changes(old_streams, new_streams)
+    if not issues:
+        return None
+
+    messages = []
+    for issue, label in (
+        (Go2rtcStreamIssue.restricted, "Restricted go2rtc stream source in"),
+        (Go2rtcStreamIssue.unknown_variable, "Unknown variable in go2rtc stream"),
+        (
+            Go2rtcStreamIssue.invalid_placeholder,
+            "Invalid variable placeholder in go2rtc stream",
+        ),
+    ):
+        names = [name for name, found in issues.items() if found == issue]
+        if names:
+            messages.append(f"{label}: {', '.join(names)}")
+
+    logger.warning("Rejected config change: %s", "; ".join(messages))
+    return JSONResponse(
+        content={"success": False, "message": "; ".join(messages)},
+        status_code=400,
+    )
+
+
 @router.post("/config/save", dependencies=[Depends(require_role(["admin"]))])
 def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
     new_config = body.decode()
@@ -595,10 +709,22 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
             status_code=400,
         )
 
+    config_file = find_config_file()
+
+    try:
+        with open(config_file) as f:
+            old_raw_config = f.read()
+    except OSError:
+        old_raw_config = ""
+
+    restricted_response = _restricted_go2rtc_streams_response(
+        old_raw_config, new_config
+    )
+    if restricted_response is not None:
+        return restricted_response
+
     # Save the config to file
     try:
-        config_file = find_config_file()
-
         with open(config_file, "w") as f:
             f.write(new_config)
             f.close()
@@ -644,17 +770,24 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> None:
-    """Substitute incoming `*:*` masked credentials with the in-memory ones.
+def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
+    """Substitute incoming masked camera paths with the saved ones.
 
     The /config response masks ffmpeg input credentials, so the settings UI
     sends the masked path back when sibling fields (e.g. hwaccel_args) are
-    edited.  Without this we'd write `rtsp://*:*@host` into YAML and lose
-    the real credentials.  Mutates `config_data` in place.
+    edited. Each masked path is matched to the saved input that masks to the
+    same value, with roles breaking a tie, so deleting or reordering inputs
+    keeps each path's own credentials. The saved path is restored as written,
+    keeping any {FRIGATE_*} placeholder. Mutates `config_data` in place and
+    returns an error message when a masked path has no single match.
     """
     cameras = config_data.get("cameras")
     if not isinstance(cameras, dict):
-        return
+        return None
+
+    saved_cameras = saved.get("cameras")
+    if not isinstance(saved_cameras, dict):
+        saved_cameras = {}
 
     for camera_name, camera_data in cameras.items():
         if not isinstance(camera_data, dict):
@@ -662,20 +795,122 @@ def _restore_masked_camera_paths(config_data: dict, config: FrigateConfig) -> No
         inputs = camera_data.get("ffmpeg", {}).get("inputs")
         if not isinstance(inputs, list):
             continue
-        existing = config.cameras.get(camera_name)
-        if existing is None:
-            continue
-        existing_paths = [inp.path for inp in existing.ffmpeg.inputs]
+
+        saved_camera = saved_cameras.get(camera_name)
+        saved_ffmpeg = (
+            saved_camera.get("ffmpeg") if isinstance(saved_camera, dict) else None
+        )
+        saved_inputs = [
+            inp
+            for inp in (
+                saved_ffmpeg.get("inputs") if isinstance(saved_ffmpeg, dict) else None
+            )
+            or []
+            if isinstance(inp, dict) and isinstance(inp.get("path"), str)
+        ]
+
         for index, input_obj in enumerate(inputs):
             if not isinstance(input_obj, dict):
                 continue
             path = input_obj.get("path")
-            if not isinstance(path, str):
+            if not isinstance(path, str) or not is_masked_camera_path(path):
                 continue
-            if ("://*:*@" in path or "user=*&password=*" in path) and index < len(
-                existing_paths
-            ):
-                input_obj["path"] = existing_paths[index]
+            candidates = [
+                inp
+                for inp in saved_inputs
+                if clean_camera_user_pass(_resolve_frigate_vars(inp["path"])) == path
+            ]
+            if len({inp["path"] for inp in candidates}) > 1:
+                candidates = [
+                    inp
+                    for inp in candidates
+                    if inp.get("roles") == input_obj.get("roles")
+                ]
+            real_paths = {inp["path"] for inp in candidates}
+            if len(real_paths) != 1:
+                return (
+                    f"Input {index} of camera {camera_name} has masked credentials "
+                    "that could not be matched; resend it with real credentials"
+                )
+            input_obj["path"] = real_paths.pop()
+
+    return None
+
+
+def _resolve_frigate_vars(value: str) -> str:
+    """Resolve {FRIGATE_*} placeholders the way /config shows them."""
+    try:
+        return substitute_frigate_vars(value)
+    except ValueError:
+        return value
+
+
+def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
+    """Shape the in-memory camera inputs like the saved YAML."""
+    return {
+        "cameras": {
+            name: {
+                "ffmpeg": {
+                    "inputs": [
+                        {"path": inp.path, "roles": [role.value for role in inp.roles]}
+                        for inp in camera.ffmpeg.inputs
+                    ]
+                }
+            }
+            for name, camera in config.cameras.items()
+        },
+    }
+
+
+def _config_data_to_updates(
+    config_data: dict, saved: dict[str, Any]
+) -> tuple[dict[str, Any], str | None]:
+    """Flatten a /config/set payload after restoring masked credentials.
+
+    `saved` is the config the masked values were taken from. Returns the flat
+    updates, or an error message when a masked value can't be restored.
+    """
+    error = _restore_masked_camera_paths(config_data, saved)
+    if error:
+        return {}, error
+
+    updates = flatten_config_data(config_data)
+    # Convert None values to empty strings for deletion (e.g., when deleting masks)
+    updates = {k: ("" if v is None else v) for k, v in updates.items()}
+    # Drop sentinel-valued fields so untouched credential placeholders don't
+    # clobber the saved YAML value.
+    updates = {k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL}
+
+    error = _find_masked_update(updates)
+    if error:
+        return {}, error
+
+    return updates, None
+
+
+def _holds_masked_value(value: Any) -> bool:
+    if isinstance(value, str):
+        return REDACTED_CREDENTIAL_SENTINEL in value or is_masked_camera_path(value)
+    if isinstance(value, dict):
+        return any(_holds_masked_value(v) for v in value.values())
+    if isinstance(value, list):
+        return any(_holds_masked_value(v) for v in value)
+    return False
+
+
+def _find_masked_update(updates: dict[str, Any]) -> str | None:
+    """Return an error naming the first update that still holds a masked value.
+
+    Runs after the restores so a masked path or redaction sentinel that could
+    not be restored is never written over the real credential.
+    """
+    for key, value in updates.items():
+        if _holds_masked_value(value):
+            return (
+                f"{key} contains masked or saved credentials; "
+                "resend it with real values"
+            )
+    return None
 
 
 def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONResponse:
@@ -688,13 +923,13 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
     try:
         updates = {}
         if body.config_data:
-            _restore_masked_camera_paths(body.config_data, request.app.frigate_config)
-            updates = flatten_config_data(body.config_data)
-            updates = {k: ("" if v is None else v) for k, v in updates.items()}
-            # Drop any field whose value is still the redaction sentinel
-            updates = {
-                k: v for k, v in updates.items() if v != REDACTED_CREDENTIAL_SENTINEL
-            }
+            updates, error = _config_data_to_updates(
+                body.config_data, _saved_config_from_memory(request.app.frigate_config)
+            )
+            if error:
+                return JSONResponse(
+                    content={"success": False, "message": error}, status_code=400
+                )
 
         if not updates:
             return JSONResponse(
@@ -804,6 +1039,17 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
         )
 
 
+def _config_path_exists(data: Any, key_path: str) -> bool:
+    """Return whether a dotted config path is present in parsed yaml."""
+    for key in split_config_key_path(key_path):
+        if not isinstance(data, dict) or key not in data:
+            return False
+
+        data = data[key]
+
+    return True
+
+
 @router.put("/config/set", dependencies=[Depends(require_role(["admin"]))])
 def config_set(request: Request, body: AppConfigSetBody):
     config_file = find_config_file()
@@ -830,22 +1076,26 @@ def config_set(request: Request, body: AppConfigSetBody):
                 # Filter out empty keys but keep blank values for non-empty keys
                 query_string = {k: v for k, v in query_string.items() if k}
 
+                error = None
+
                 if query_string:
                     updates = process_config_query_string(query_string)
+                    error = _find_masked_update(updates)
                 elif body.config_data:
-                    _restore_masked_camera_paths(
-                        body.config_data, request.app.frigate_config
+                    try:
+                        saved_config = ruamel.yaml.YAML(typ="safe").load(old_raw_config)
+                    except ruamel.yaml.YAMLError:
+                        saved_config = None
+                    updates, error = _config_data_to_updates(
+                        body.config_data,
+                        saved_config if isinstance(saved_config, dict) else {},
                     )
-                    updates = flatten_config_data(body.config_data)
-                    # Convert None values to empty strings for deletion (e.g., when deleting masks)
-                    updates = {k: ("" if v is None else v) for k, v in updates.items()}
-                    # Drop sentinel-valued fields so untouched credential
-                    # placeholders don't clobber the saved YAML value.
-                    updates = {
-                        k: v
-                        for k, v in updates.items()
-                        if v != REDACTED_CREDENTIAL_SENTINEL
-                    }
+
+                if error:
+                    return JSONResponse(
+                        content={"success": False, "message": error},
+                        status_code=400,
+                    )
 
                 if not updates:
                     return JSONResponse(
@@ -857,6 +1107,19 @@ def config_set(request: Request, body: AppConfigSetBody):
                         ),
                         status_code=400,
                     )
+
+                # delete replaced paths first so their maps are rewritten in
+                # the order sent; update_yaml would otherwise keep old order
+                if body.replace_paths:
+                    old_yaml = ruamel.yaml.YAML(typ="safe").load(old_raw_config) or {}
+                    updates = {
+                        **{
+                            path: ""
+                            for path in body.replace_paths
+                            if _config_path_exists(old_yaml, path)
+                        },
+                        **updates,
+                    }
 
                 # apply all updates in a single operation
                 update_yaml_file_bulk(config_file, updates)
@@ -909,6 +1172,13 @@ def config_set(request: Request, body: AppConfigSetBody):
                         ),
                         status_code=400,
                     )
+                restricted_response = _restricted_go2rtc_streams_response(
+                    old_raw_config, new_raw_config
+                )
+                if restricted_response is not None:
+                    with open(config_file, "w") as f:
+                        f.write(old_raw_config)
+                    return restricted_response
             except Exception as e:
                 logging.error(f"Error updating config: {e}")
                 return JSONResponse(
@@ -921,9 +1191,15 @@ def config_set(request: Request, body: AppConfigSetBody):
             if request.app.dispatcher is not None:
                 request.app.dispatcher.clear_runtime_state_for_yaml_keys(updates.keys())
 
+            go2rtc_synced = True
+
             if body.requires_restart == 0 or body.update_topic:
                 old_config: FrigateConfig = request.app.frigate_config
                 swap_runtime_config(request.app, config)
+                go2rtc_synced = sync_transcode_streams(
+                    generated_transcode_streams(old_config),
+                    generated_transcode_streams(config),
+                )
 
                 if body.update_topic:
                     if body.update_topic.startswith("config/cameras/"):
@@ -963,6 +1239,17 @@ def config_set(request: Request, body: AppConfigSetBody):
                             body.update_topic, settings
                         )
 
+                        # a config/cameras/* topic publishes camera copies, a
+                        # global topic the global object. FrigateConfig.parse
+                        # folds some global sections down into every camera,
+                        # and workers read both objects, so any such section
+                        # needs its camera copies sent alongside the global
+                        # publish above.
+                        if body.update_topic == "config/birdseye":
+                            publish_camera_section_updates(
+                                request.app, config, CameraConfigUpdateEnum.birdseye
+                            )
+
             return JSONResponse(
                 content=(
                     {
@@ -972,6 +1259,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                             if body.requires_restart == 0
                             else "Config successfully updated, restart to apply"
                         ),
+                        "go2rtc_synced": go2rtc_synced,
                     }
                 ),
                 status_code=200,
@@ -1027,7 +1315,7 @@ def nvinfo():
     dependencies=[Depends(require_role(["admin"]))],
 )
 async def logs(
-    service: str = Path(enum=["frigate", "nginx", "go2rtc"]),
+    service: str = Path(json_schema_extra={"enum": ["frigate", "nginx", "go2rtc"]}),
     download: str | None = None,
     stream: bool | None = False,
     start: int | None = 0,
@@ -1299,9 +1587,41 @@ def get_sub_labels(
     return JSONResponse(content=sub_labels)
 
 
+@router.get(
+    "/categorized_object_names",
+    dependencies=[Depends(allow_any_authenticated())],
+    summary="Get known object names by object type",
+    description="""Returns the sub labels and attributes this install can attach,
+    grouped by object type. Unlike /sub_labels, which reflects what has already been
+    detected, this reads the config and model files, so it covers recognized face
+    names, named license plates, custom object classification categories, and the
+    detector attributes of tracked objects.""",
+)
+def categorized_object_names(
+    request: Request,
+    object_type: str | None = None,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
+    return JSONResponse(
+        content=get_categorized_object_names(
+            request.app.frigate_config, allowed_cameras, object_type
+        )
+    )
+
+
 @router.get("/audio_labels", dependencies=[Depends(allow_any_authenticated())])
-def get_audio_labels():
+def get_audio_labels(request: Request):
     labels = load_labels("/audio-labelmap.txt", prefill=521)
+
+    # configured overrides group several audio classes under one label, and the
+    # detector merges them over the defaults at runtime. Offer them here too, or
+    # a grouped label could never be picked in the UI.
+    config: FrigateConfig = request.app.frigate_config
+    labels.update(config.audio.labelmap)
+
+    for camera in config.cameras.values():
+        labels.update(camera.audio.labelmap)
+
     return JSONResponse(content=labels)
 
 
@@ -1323,11 +1643,14 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 
     modelList = models["list"]
 
+    config: FrigateConfig = request.app.frigate_config
+    primary_model = config.primary_model
+
     # current model type
-    modelType = request.app.frigate_config.model.model_type
+    modelType = primary_model.model_type
 
     # current detectorType for comparing to supportedDetectors
-    detectorType = list(request.app.frigate_config.detectors.values())[0].type
+    detectorType = config.devices_for_model(primary_model)[0].detector
 
     validModels = []
 

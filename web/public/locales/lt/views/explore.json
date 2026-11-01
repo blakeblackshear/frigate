@@ -113,63 +113,22 @@
     "attributes": "Klasifikavimo Atributai",
     "title": {
       "label": "Antraštė"
-    }
+    },
+    "scoreInfo": "Balo Informacija"
   },
   "trackedObjectsCount_one": "{{count}} sekamas objektas ",
   "trackedObjectsCount_few": "{{count}} sekami objektai ",
   "trackedObjectsCount_other": "{{count}} sekamų objektų ",
   "objectLifecycle": {
-    "lifecycleItemDesc": {
-      "visible": "{{label}} aptikta",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} aptiktas etiketei {{label}}",
-        "other": "{{label}} atpažintas kaip {{attribute}}"
-      },
-      "external": "{{label}} aptiktas",
-      "entered_zone": "{{label}} pateko į {{zones}}",
-      "active": "{{label}} tapo aktyvus",
-      "stationary": "{{label}} nebejuda",
-      "gone": "{{label}} paliko",
-      "heard": "{{label}} girdėta",
-      "header": {
-        "zones": "Zonos",
-        "ratio": "Santykis",
-        "area": "Plotas"
-      }
-    },
-    "annotationSettings": {
-      "offset": {
-        "desc": "Šie duomenys gaunami iš jūsų kameros aptikimo srauto bet yra užkeliami ant vaizdo gaunamo iš įrašymo srauto. Mažai tikėtina kad abeji srautais bus tobulai sinchronizuoti. Rezultate, apibrėžimo dėžutė ir įrašas nesilygiuos tobulai. Tačiau, <code>annotation_offset</code> reikšmė gali būti naudojama tai koreguoti.",
-        "millisecondsToOffset": "Praslinkti aptikimų anotacijas per mili-sekundes. <em>Bazinis: 0</em>",
-        "label": "Anotacijos Perstūmimas",
-        "tips": "Patarimas: Įsivaizduokite kad yra įvykio klipas kur žmogus eina iš kairės į dešinę. Jei apibrėžimo dėžutė nuolatos yra žmogui iš kairės tuomet reikšmę sumažinkite. Analogiškai, jei dėžutė piešiama priekyje žmogaus tuomet reikšmę padidinkite.",
-        "toast": {
-          "success": "Anotacijos perslinkimas kamerai {{camera}} buvo išsaugota konfiguracijoje. Perkraukite Frigate, kad pritaikytumėte pokyčius."
-        }
-      },
-      "title": "Anotacijų Nustatymai",
-      "showAllZones": {
-        "title": "Rodyti Visas Zonas",
-        "desc": "Visada rodyti zonas tuose kadruose, kuriuose objektas pateko į zoną."
-      }
-    },
-    "title": "Objekto Gyvavimo Ciklas",
-    "noImageFound": "Šiam laikotarpiui vaizdų nerasta.",
-    "createObjectMask": "Sukurta Objekto Maskuotė",
-    "adjustAnnotationSettings": "Koreguoti anotacijų nustatymus",
-    "scrollViewTips": "Peržiūrėti šio objekto gyvavimo cikle esančius reikšmingus momentus.",
-    "autoTrackingTips": "Automatiškai sekančių kamerų apibrėžiančios dėžutės pozicija bus netiksli.",
-    "count": "{{first}} iš {{second}}",
-    "trackedPoint": "Sekamas Taškas",
-    "carousel": {
-      "previous": "Ankstesnė skaidrė",
-      "next": "Sekanti skaidrė"
-    }
+    "noImageFound": "Šiam laikotarpiui vaizdų nerasta."
   },
   "dialog": {
     "confirmDelete": {
       "desc": "Trinant šį sekamą objektą taip pat bus pašalintos momentinės iškarpos, išsaugoti įterpiai ir kitos susios sekimo detalės. Šių sekamų objektų įrašyta filmuota medžiaga Istorijos vaizde ištrinta <em>NEBUS</em>.<br /><br />Ar esate įsitikinę, kad norite tęsti?",
       "title": "Patvirtinti Ištrynimą"
+    },
+    "toast": {
+      "error": "Klaida trinant šį susektą objektą: {{errorMessage}}"
     }
   },
   "trackedObjectDetails": "Sekamų Objektų Detalės",
@@ -177,7 +136,6 @@
     "details": "detalės",
     "snapshot": "momentinės nuotraukos",
     "video": "vaizdas",
-    "object_lifecycle": "objekto gyvavimo ciklas",
     "thumbnail": "miniatiūra",
     "tracking_details": "sekimo detalės"
   },
@@ -189,10 +147,6 @@
     "downloadSnapshot": {
       "label": "Atsisiųsti momentinę nuotrauką",
       "aria": "Atsisiųsti momentinę nuotrauką"
-    },
-    "viewObjectLifecycle": {
-      "label": "Peržiūrėti objekto gyvavimo ciklą",
-      "aria": "Rodyti objekto gyvavimo ciklą"
     },
     "findSimilar": {
       "label": "Rasti panašų",
@@ -224,12 +178,19 @@
       "label": "Slėpti objektų kelią"
     },
     "downloadCleanSnapshot": {
-      "label": "Atsisiųsti švarią nuotrauką",
-      "aria": "Atsisiųsti švarią nuotrauką"
+      "label": "Atsisiųsti nuotrauką",
+      "aria": "Atsisiųsti nuotrauką"
     },
     "viewTrackingDetails": {
       "label": "Žiūrėti sekimo detales",
       "aria": "Rodyti sekimo detales"
+    },
+    "debugReplay": {
+      "label": "Derinimo Peržiūra",
+      "aria": "Peržiūrėti šį susektą objektą derinimo peržiūros vaizde"
+    },
+    "more": {
+      "aria": "Daugiau"
     }
   },
   "noTrackedObjects": "Sekamų Objektų Nerasta",
@@ -276,7 +237,10 @@
         "zones": "Zonos",
         "ratio": "Santykis",
         "area": "Plotas",
-        "score": "Balas"
+        "score": "Balas",
+        "computedScore": "Apskaičiuotas Balas",
+        "topScore": "Aukščiausias Balas",
+        "toggleAdvancedScores": "Perjungti išplėstinius įverčius"
       }
     },
     "annotationSettings": {

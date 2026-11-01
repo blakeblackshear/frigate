@@ -56,3 +56,14 @@ export async function waitForErrorMarker(
     .poll(() => hasErrorMarkers(page), { timeout: timeoutMs })
     .toBe(true);
 }
+
+/**
+ * Append a trailing comment so the editor content differs from the
+ * loaded config. The save buttons are disabled until then.
+ */
+export async function makeMonacoEdit(page: Page): Promise<void> {
+  const editor = page.locator(".monaco-editor").first();
+  await editor.click();
+  await page.keyboard.press("ControlOrMeta+End");
+  await page.keyboard.type("# edited by e2e", { delay: 0 });
+}

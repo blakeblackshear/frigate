@@ -217,7 +217,11 @@ export default function DebugReplayDialog({
           error.response?.data?.detail ||
           "Unknown error";
 
-        if (error.response?.status === 409) {
+        if (error.response?.status === 404) {
+          toast.error(t("dialog.toast.noRecordings"), {
+            position: "top-center",
+          });
+        } else if (error.response?.status === 409) {
           toast.error(t("dialog.toast.alreadyActive"), {
             position: "top-center",
             closeButton: true,

@@ -16,7 +16,6 @@ import numpy as np
 from fastapi import APIRouter, Request
 from fastapi.params import Depends
 from fastapi.responses import JSONResponse
-from pathvalidate import sanitize_filename
 from peewee import JOIN, DoesNotExist, fn, operator
 from playhouse.shortcuts import model_to_dict
 
@@ -56,11 +55,12 @@ from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.config.classification import ObjectClassificationType
-from frigate.const import CLIPS_DIR, TRIGGER_DIR
+from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
 from frigate.track.object_processing import TrackedObject
 from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
+from frigate.util.path import get_trigger_thumbnail_path, safe_join
 from frigate.util.time import get_dst_transitions, get_tz_modifiers
 
 logger = logging.getLogger(__name__)
@@ -129,6 +129,7 @@ def events(
         zones = zone
 
     limit = params.limit
+    offset = params.offset
     after = params.after
     before = params.before
     time_range = params.time_range
@@ -361,11 +362,15 @@ def events(
     else:
         order_by = Event.start_time.desc()
 
+    # offset paging needs a stable order when scores or speeds tie
+    tiebreaker = [Event.id] if sort and sort.startswith(("score", "speed")) else []
+
     events = (
         Event.select(*selected_columns)
         .where(reduce(operator.and_, clauses))
-        .order_by(order_by)
+        .order_by(order_by, *tiebreaker)
         .limit(limit)
+        .offset(offset)
         .dicts()
         .iterator()
     )
@@ -386,7 +391,9 @@ def events_explore(
     limit: int = 10,
     allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
-    # get distinct labels for all events
+    if not allowed_cameras:
+        return JSONResponse(content=[])
+
     distinct_labels = (
         Event.select(Event.label)
         .where(Event.camera << allowed_cameras)
@@ -396,13 +403,31 @@ def events_explore(
 
     label_counts = {}
 
+    explore_columns = (
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.sub_label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.top_score,
+        Event.false_positive,
+        Event.box,
+        Event.data,
+    )
+
     def event_generator():
         for label_obj in distinct_labels.iterator():
             label = label_obj.label
 
             # get most recent events for this label
             label_events = (
-                Event.select()
+                Event.select(*explore_columns)
                 .where((Event.label == label) & (Event.camera << allowed_cameras))
                 .order_by(Event.start_time.desc())
                 .limit(limit)
@@ -484,21 +509,17 @@ async def event_ids(ids: str, request: Request):
             status_code=400,
         )
 
-    for event_id in ids:
-        try:
-            event = Event.get(Event.id == event_id)
-            await require_camera_access(event.camera, request=request)
-        except DoesNotExist:
-            # we should not fail the entire request if an event is not found
-            continue
-
     try:
-        events = Event.select().where(Event.id << ids).dicts().iterator()
-        return JSONResponse(list(events))
+        events = list(Event.select().where(Event.id << ids).dicts().iterator())
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Events not found"}), status_code=400
         )
+
+    for event in events:
+        await require_camera_access(event["camera"], request=request)
+
+    return JSONResponse(events)
 
 
 @router.get(
@@ -518,6 +539,7 @@ def events_search(
     search_type = params.search_type
     include_thumbnails = params.include_thumbnails
     limit = params.limit
+    offset = params.offset
     sort = params.sort
 
     # Filters
@@ -824,6 +846,9 @@ def events_search(
     if search_results:
         events_query = events_query.where(Event.id << list(search_results.keys()))
 
+    # sorts below are stable, so this orders ties for offset paging
+    events_query = events_query.order_by(Event.id)
+
     # Fetch events and process them in a single pass
     processed_events = []
     for event in events_query.dicts():
@@ -881,7 +906,7 @@ def events_search(
         processed_events.sort(key=lambda x: x["start_time"], reverse=True)
 
     # Limit the number of events returned
-    processed_events = processed_events[:limit]
+    processed_events = processed_events[offset:][:limit]
 
     return JSONResponse(content=processed_events)
 
@@ -1313,7 +1338,7 @@ async def set_sub_label(
     if request.app.detected_frames_processor:
         tracked_obj: TrackedObject = None
 
-        for state in request.app.detected_frames_processor.camera_states.values():
+        for state in request.app.detected_frames_processor.get_camera_states():
             tracked_obj = state.tracked_objects.get(event_id)
 
             if tracked_obj is not None:
@@ -1372,7 +1397,7 @@ async def set_plate(
     if request.app.detected_frames_processor:
         tracked_obj: TrackedObject = None
 
-        for state in request.app.detected_frames_processor.camera_states.values():
+        for state in request.app.detected_frames_processor.get_camera_states():
             tracked_obj = state.tracked_objects.get(event_id)
 
             if tracked_obj is not None:
@@ -1452,10 +1477,10 @@ async def set_attributes(
             continue
 
         # Get available labels from dataset directory
-        dataset_dir = os.path.join(CLIPS_DIR, sanitize_filename(model_key), "dataset")
+        dataset_dir = safe_join(CLIPS_DIR, model_key, "dataset")
         available_labels = set()
 
-        if os.path.exists(dataset_dir):
+        if dataset_dir and os.path.exists(dataset_dir):
             for category_name in os.listdir(dataset_dir):
                 category_dir = os.path.join(dataset_dir, category_name)
                 if os.path.isdir(category_dir):
@@ -1748,6 +1773,7 @@ async def delete_events(request: Request, body: EventsDeleteBody):
     NOTES:
     - Creating a manual event does not trigger an update to /events MQTT topic.
     - If a duration is set to null, the event will need to be ended manually by calling /events/{event_id}/end.
+    - The review item is an alert unless the label is listed in the camera's review -> detections -> labels config.
     """,
 )
 def create_event(
@@ -1958,18 +1984,13 @@ def create_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                os.makedirs(
-                    os.path.join(TRIGGER_DIR, sanitize_filename(camera_name)),
-                    exist_ok=True,
-                )
-                with open(
-                    os.path.join(
-                        TRIGGER_DIR,
-                        sanitize_filename(camera_name),
-                        f"{sanitize_filename(body.data)}.webp",
-                    ),
-                    "wb",
-                ) as f:
+                webp_path = get_trigger_thumbnail_path(camera_name, body.data)
+
+                if webp_path is None:
+                    raise ValueError(f"Invalid trigger thumbnail path for {body.data}")
+
+                os.makedirs(os.path.dirname(webp_path), exist_ok=True)
+                with open(webp_path, "wb") as f:
                     f.write(thumbnail)
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
@@ -2041,10 +2062,16 @@ def update_trigger_embedding(
         if body.type == "description":
             embedding = context.generate_description_embedding(body.data)
         elif body.type == "thumbnail":
-            webp_file = sanitize_filename(body.data) + ".webp"
-            webp_path = os.path.join(
-                TRIGGER_DIR, sanitize_filename(camera_name), webp_file
-            )
+            webp_path = get_trigger_thumbnail_path(camera_name, body.data)
+
+            if webp_path is None:
+                return JSONResponse(
+                    content={
+                        "success": False,
+                        "message": f"Invalid data for {body.type} trigger",
+                    },
+                    status_code=400,
+                )
 
             try:
                 event: Event = Event.get(Event.id == body.data)
@@ -2101,13 +2128,14 @@ def update_trigger_embedding(
             # Update existing trigger
             if trigger.data != body.data:  # Delete old thumbnail only if data changes
                 try:
-                    os.remove(
-                        os.path.join(
-                            TRIGGER_DIR,
-                            sanitize_filename(camera_name),
-                            f"{trigger.data}.webp",
+                    old_path = get_trigger_thumbnail_path(camera_name, trigger.data)
+
+                    if old_path is None:
+                        raise ValueError(
+                            f"Invalid trigger thumbnail path for {trigger.data}"
                         )
-                    )
+
+                    os.remove(old_path)
                     logger.debug(
                         f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
                     )
@@ -2141,12 +2169,13 @@ def update_trigger_embedding(
         if body.type == "thumbnail":
             # Save image to the triggers directory
             try:
-                camera_path = os.path.join(TRIGGER_DIR, sanitize_filename(camera_name))
-                os.makedirs(camera_path, exist_ok=True)
-                with open(
-                    os.path.join(camera_path, f"{sanitize_filename(body.data)}.webp"),
-                    "wb",
-                ) as f:
+                thumbnail_path = get_trigger_thumbnail_path(camera_name, body.data)
+
+                if thumbnail_path is None:
+                    raise ValueError(f"Invalid trigger thumbnail path for {body.data}")
+
+                os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
+                with open(thumbnail_path, "wb") as f:
                     f.write(thumbnail)
                 logger.debug(
                     f"Writing thumbnail for trigger with data {body.data} in {camera_name}."
@@ -2217,11 +2246,12 @@ def delete_trigger_embedding(
             )
 
         try:
-            os.remove(
-                os.path.join(
-                    TRIGGER_DIR, sanitize_filename(camera_name), f"{trigger.data}.webp"
-                )
-            )
+            thumbnail_path = get_trigger_thumbnail_path(camera_name, trigger.data)
+
+            if thumbnail_path is None:
+                raise ValueError(f"Invalid trigger thumbnail path for {trigger.data}")
+
+            os.remove(thumbnail_path)
             logger.debug(
                 f"Deleted thumbnail for trigger with data {trigger.data} in {camera_name}."
             )

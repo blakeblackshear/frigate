@@ -22,6 +22,7 @@ import {
   type ApiMockOverrides,
 } from "../helpers/api-mocker";
 import { WsMocker } from "../helpers/ws-mocker";
+import { statsFactory } from "./mock-data/stats";
 import { installErrorCollector, type ErrorCollector } from "./error-collector";
 import { GLOBAL_ALLOWLIST } from "./error-allowlist";
 
@@ -53,9 +54,12 @@ export class FrigateApp {
       return route.fallback();
     });
 
-    await this.ws.install(this.page);
-    await this.media.install();
+    await this.ws.install(this.page, statsFactory(overrides?.stats));
     await this.api.install(overrides);
+    // media goes last so its per-event routes win over the broader
+    // `**/api/events**` list route, which otherwise answers thumbnail and
+    // snapshot requests with the events JSON
+    await this.media.install();
   }
 
   /** Navigate to a page. Always call installDefaults() first. */

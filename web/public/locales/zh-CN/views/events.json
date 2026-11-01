@@ -40,12 +40,9 @@
     "button": "核查新项目"
   },
   "camera": "摄像头",
-  "selected": "已选择 {{count}} 个",
   "selected_one": "已选择 {{count}} 个",
   "selected_other": "已选择 {{count}} 个",
   "detected": "已检测",
-  "suspiciousActivity": "可疑活动",
-  "threateningActivity": "风险类活动",
   "detail": {
     "noDataFound": "没有可供核查的详细数据",
     "aria": "切换详细视图",
@@ -77,7 +74,7 @@
     "menuItem": "查看画面变动预览",
     "title": "画面变动预览：{{camera}}",
     "mobileSettingsTitle": "画面变动预览设置",
-    "mobileSettingsDesc": "调整播放速度和变暗程度，并选择日期以仅查看画面变动的片段。",
+    "mobileSettingsDesc": "调整播放速度，亮度以及画面裁剪，并选择日期以仅查看画面变动的片段。",
     "dim": "变暗",
     "dimAria": "调整变暗强度",
     "dimDesc": "增加变暗程度可以提高画面变动区域的可见性。",
@@ -90,6 +87,9 @@
     "seekAria": "将 {{camera}} 播放器定位到 {{time}}",
     "filter": "筛选",
     "filterDesc": "选择区域以仅显示在这些区域中有画面变动的片段。",
-    "filterClear": "清除"
+    "filterClear": "清除",
+    "crop": "裁剪至筛选区域",
+    "cropAria": "切换预览画面裁剪到筛选区域",
+    "cropDesc": "只预览筛选区域，而不是显示整个画面。"
   }
 }

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { StatusBarMessagesProvider } from "@/context/statusbar-provider";
 import { LanguageProvider } from "./language-provider";
 import { StreamingSettingsProvider } from "./streaming-settings-provider";
-import { AuthProvider } from "./auth-context";
+import { AuthProvider } from "./auth-provider";
 
 type TProvidersProps = {
   children: ReactNode;

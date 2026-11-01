@@ -70,14 +70,14 @@ Object filters help reduce false positives by constraining the size, shape, and 
 
 Navigate to <NavPath path="Settings > Global configuration > Objects" />.
 
-| Field                                   | Description                                                              |
-| --------------------------------------- | ------------------------------------------------------------------------ |
-| **Object filters > Person > Min Area**  | Minimum bounding box area in pixels (or decimal for percentage of frame) |
-| **Object filters > Person > Max Area**  | Maximum bounding box area in pixels (or decimal for percentage of frame) |
-| **Object filters > Person > Min Ratio** | Minimum width/height ratio of the bounding box                           |
-| **Object filters > Person > Max Ratio** | Maximum width/height ratio of the bounding box                           |
-| **Object filters > Person > Min Score** | Minimum score for the object to initiate tracking                        |
-| **Object filters > Person > Threshold** | Minimum computed score to be considered a true positive                  |
+| Field                                              | Description                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------ |
+| **Object filters > Person > Minimum object area**  | Minimum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Maximum object area**  | Maximum bounding box area in pixels (or decimal for percentage of frame) |
+| **Object filters > Person > Minimum aspect ratio** | Minimum width/height ratio of the bounding box                           |
+| **Object filters > Person > Maximum aspect ratio** | Maximum width/height ratio of the bounding box                           |
+| **Object filters > Person > Minimum confidence**   | Minimum score for the object to initiate tracking                        |
+| **Object filters > Person > Confidence threshold** | Minimum computed score to be considered a true positive                  |
 
 To override filters for a specific camera, navigate to <NavPath path="Settings > Camera configuration > Objects" />.
 

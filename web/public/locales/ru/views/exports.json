@@ -14,7 +14,9 @@
   "toast": {
     "error": {
       "renameExportFailed": "Не удалось переименовать экспорт: {{errorMessage}}",
-      "assignCaseFailed": "Не удалось обновить назначение случая: {{errorMessage}}"
+      "assignCaseFailed": "Не удалось обновить назначение случая: {{errorMessage}}",
+      "caseSaveFailed": "Не удалось сохранить случай: {{errorMessage}}",
+      "caseDeleteFailed": "Не удалось удалить случай: {{errorMessage}}"
     }
   },
   "tooltip": {
@@ -22,7 +24,8 @@
     "downloadVideo": "Скачать видео",
     "editName": "Изменить название",
     "deleteExport": "Удалить экспорт",
-    "assignToCase": "Добавить в случай"
+    "assignToCase": "Добавить в случай",
+    "removeFromCase": "Убрать из случая"
   },
   "headings": {
     "cases": "Случаи",
@@ -35,5 +38,91 @@
     "newCaseOption": "Создать новый случай",
     "nameLabel": "Название случая",
     "descriptionLabel": "Описание"
+  },
+  "toolbar": {
+    "newCase": "Новый случай",
+    "addExport": "Добавить экспорт",
+    "editCase": "Редактировать случай",
+    "deleteCase": "Удалить случай"
+  },
+  "deleteCase": {
+    "label": "Удалить случай",
+    "desc": "Вы уверены, что хотите удалить {{caseName}}?",
+    "descKeepExports": "Экспорты останутся доступны без категории.",
+    "descDeleteExports": "Все экспорты в этом случае будут удалены безвозвратно.",
+    "deleteExports": "Также удалить экспорты"
+  },
+  "caseCard": {
+    "emptyCase": "Пока нет экспортов"
+  },
+  "jobCard": {
+    "defaultName": "Экспорт {{camera}}",
+    "queued": "В очереди",
+    "running": "Выполняется",
+    "preparing": "Подготовка",
+    "copying": "Копирование",
+    "encoding": "Кодирование",
+    "encodingRetry": "Кодирование (повтор)",
+    "finalizing": "Завершение"
+  },
+  "caseView": {
+    "noDescription": "Без описания",
+    "createdAt": "Создан {{value}}",
+    "exportCount_one": "1 экспорт",
+    "exportCount_other": "{{count}} экспорта",
+    "cameraCount_one": "1 камера",
+    "cameraCount_other": "{{count}} камеры",
+    "showMore": "Показать больше",
+    "showLess": "Свернуть",
+    "emptyTitle": "Этот случай пуст",
+    "emptyDescription": "Добавьте существующие экспорты без категории, чтобы упорядочить случай.",
+    "emptyDescriptionNoExports": "Пока нет экспортов без категории, которые можно добавить."
+  },
+  "caseEditor": {
+    "createTitle": "Создать случай",
+    "editTitle": "Редактировать случай",
+    "namePlaceholder": "Название случая",
+    "descriptionPlaceholder": "Добавьте заметки или контекст для этого случая"
+  },
+  "addExportDialog": {
+    "title": "Добавить экспорт в {{caseName}}",
+    "searchPlaceholder": "Поиск экспортов без категории",
+    "empty": "Нет экспортов без категории, подходящих под этот поиск.",
+    "addButton_one": "Добавить 1 экспорт",
+    "addButton_other": "Добавить {{count}} экспорта",
+    "adding": "Добавление…"
+  },
+  "selected_one": "{{count}} выбран",
+  "selected_other": "{{count}} выбрано",
+  "bulkActions": {
+    "addToCase": "Добавить в случай",
+    "moveToCase": "Переместить в случай",
+    "removeFromCase": "Убрать из случая",
+    "delete": "Удалить",
+    "deleteNow": "Удалить сейчас"
+  },
+  "bulkDelete": {
+    "title": "Удалить экспорты",
+    "desc_one": "Вы уверены, что хотите удалить {{count}} экспорт?",
+    "desc_other": "Вы уверены, что хотите удалить {{count}} экспорта?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Убрать из случая",
+    "desc_one": "Убрать {{count}} экспорт из этого случая?",
+    "desc_other": "Убрать {{count}} экспорта из этого случая?",
+    "descKeepExports": "Экспорты будут перемещены в раздел без категории.",
+    "descDeleteExports": "Экспорты будут удалены безвозвратно.",
+    "deleteExports": "Вместо этого удалить экспорты"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Экспорты успешно удалены",
+      "reassign": "Назначение случая успешно обновлено",
+      "remove": "Экспорты успешно убраны из случая"
+    },
+    "error": {
+      "deleteFailed": "Не удалось удалить экспорты: {{errorMessage}}",
+      "reassignFailed": "Не удалось обновить назначение случая: {{errorMessage}}"
+    }
   }
 }

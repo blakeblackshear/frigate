@@ -15,7 +15,7 @@ Frigate uses the bundled go2rtc to power a number of key features:
 
 :::tip[Most users no longer need to configure go2rtc by hand]
 
-The **camera setup wizard** is the recommended way to add cameras. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, and the wizard probes your camera and writes its configuration for you, including the go2rtc restream and the live stream mapping, so go2rtc is set up automatically.
+The [**camera setup wizard**](cameras.md#adding-a-camera-with-the-add-camera-wizard) is the recommended way to add cameras. Click **Add Camera** in <NavPath path="Settings > Global configuration > Camera management" />, and the wizard probes your camera and writes its configuration for you, including the go2rtc restream and the live stream mapping, so go2rtc is set up automatically.
 
 This guide is mainly useful if you are **upgrading from an older version and have existing cameras that don't yet use go2rtc**, or if you want to fine-tune a stream by hand (for example, to transcode a codec your browser can't play). The [go2rtc troubleshooting guide](/troubleshooting/go2rtc) applies regardless of how your cameras were added.
 
@@ -67,4 +67,6 @@ If your stream won't play, has no audio, uses excessive CPU, or otherwise misbeh
 
 ## Homekit Configuration
 
-To add camera streams to Homekit Frigate must be configured in docker to use `host` networking mode. Once that is done, you can use the go2rtc WebUI (accessed via port 1984, which is disabled by default) to export a camera to Homekit. Any changes made will automatically be saved to `/config/go2rtc_homekit.yml`.
+To export camera streams to HomeKit, Frigate must be configured in docker to use `host` networking mode. HomeKit settings are stored in `/config/go2rtc_homekit.yml` rather than in your Frigate config, and are edited through the go2rtc config editor at `http://<frigate_host>:1984/editor.html`. Pairings are saved back to that file automatically.
+
+See the [HomeKit integration docs](/integrations/homekit) for the full setup, including the video and audio requirements HomeKit places on the stream.

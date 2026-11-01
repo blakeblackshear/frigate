@@ -1,8 +1,8 @@
 {
     "audio": {
         "global": {
-            "detection": "전체 감지",
-            "sensitivity": "전체 민감도"
+            "detection": "전역 감지",
+            "sensitivity": "전역 민감도"
         },
         "cameras": {
             "detection": "감지",
@@ -51,7 +51,23 @@
             "filtering": "전역 필터링"
         },
         "cameras": {
-            "tracking": "추적"
+            "tracking": "추적",
+            "filtering": "필터링"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "전역 보관",
+            "events": "전역 이벤트"
+        },
+        "cameras": {
+            "retention": "보관",
+            "events": "이벤트"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "카메라별 FFmpeg 인수"
         }
     }
 }

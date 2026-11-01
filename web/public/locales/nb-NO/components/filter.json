@@ -6,7 +6,6 @@
       "title": "Alle etiketter",
       "short": "Etiketter"
     },
-    "count": "{{count}} merkelapper",
     "count_other": "{{count}} Etiketter",
     "count_one": "{{count}} Etikett"
   },

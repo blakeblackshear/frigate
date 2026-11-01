@@ -31,6 +31,7 @@ export const supportedLanguageKeys = [
   "zh-CN",
   "zh-Hant",
   "yue-Hant",
+  "ko",
   "ja",
   "vi",
   "th",
@@ -45,6 +46,7 @@ export const supportedLanguageKeys = [
   "sl",
   "lt",
   "uk",
+  "be",
   "cs",
   "hu",
 ];

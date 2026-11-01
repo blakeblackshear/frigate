@@ -1,1 +1,80 @@
-{}
+{
+    "documentTitle": "Поиск по движению - Frigate",
+    "title": "Поиск по движению",
+    "description": "Нарисуйте полигон области интереса и укажите диапазон времени, чтобы найти изменения движения в этой области.",
+    "selectCamera": "Поиск по движению загружается",
+    "startSearch": "Начать поиск",
+    "searchStarted": "Поиск запущен",
+    "searchCancelled": "Поиск отменён",
+    "cancelSearch": "Отменить",
+    "searching": "Идёт поиск.",
+    "scanning": "Сканирование {{time}}",
+    "searchComplete": "Поиск завершён",
+    "noResultsYet": "Запустите поиск, чтобы найти изменения движения в выбранной области",
+    "noChangesFound": "В выбранной области не обнаружено изменений пикселей",
+    "changesFound_one": "Найдено {{count}} изменение движения",
+    "changesFound_few": "Найдено {{count}} изменения движения",
+    "changesFound_many": "Найдено {{count}} изменений движения",
+    "framesProcessed": "{{count}} кадров обработано",
+    "jumpToTime": "Перейти к этому времени",
+    "results": "Результаты",
+    "showSegmentHeatmap": "Тепловая карта",
+    "newSearch": "Новый поиск",
+    "clearResults": "Очистить результаты",
+    "clearROI": "Очистить полигон",
+    "polygonControls": {
+        "points_one": "{{count}} точка",
+        "points_few": "{{count}} точки",
+        "points_many": "{{count}} точек",
+        "undo": "Отменить последнюю точку",
+        "reset": "Сбросить полигон",
+        "drawMode": "Рисовать",
+        "moveMode": "Перемещать"
+    },
+    "motionHeatmapLabel": "Тепловая карта движения",
+    "dialog": {
+        "title": "Поиск по движению",
+        "cameraLabel": "Камера",
+        "previewAlt": "Превью камеры {{camera}}"
+    },
+    "timeRange": {
+        "title": "Диапазон поиска",
+        "start": "Время начала",
+        "end": "Время окончания"
+    },
+    "settings": {
+        "title": "Настройки поиска",
+        "parallelMode": "Параллельный режим",
+        "parallelModeDesc": "Сканировать несколько диапазонов записи одновременно (быстрее, больше нагрузка на декодирование)",
+        "threshold": "Порог чувствительности",
+        "thresholdDesc": "Меньшие значения обнаруживают более слабые изменения (1–255)",
+        "minArea": "Минимальная площадь изменения",
+        "minAreaDesc": "Минимальный размер одной движущейся области в процентах от области интереса",
+        "maxResults": "Максимум результатов",
+        "maxResultsDesc": "Остановить поиск после этого числа совпавших меток времени"
+    },
+    "errors": {
+        "noCamera": "Выберите камеру",
+        "noROI": "Нарисуйте область интереса",
+        "noTimeRange": "Выберите диапазон времени",
+        "invalidTimeRange": "Время окончания должно быть позже времени начала",
+        "searchFailed": "Поиск не удался: {{message}}",
+        "polygonTooSmall": "В полигоне должно быть не менее 3 точек",
+        "unknown": "Неизвестная ошибка"
+    },
+    "changePercentage": "{{percentage}}% изменено",
+    "metrics": {
+        "title": "Метрики поиска",
+        "segmentsScanned": "Просканировано сегментов",
+        "segmentsProcessed": "Обработано",
+        "segmentsSkippedInactive": "Пропущено (нет активности)",
+        "segmentsSkippedHeatmap": "Пропущено (нет пересечения с областью)",
+        "fallbackFullRange": "Резервное сканирование всего диапазона",
+        "framesDecoded": "Декодировано кадров",
+        "wallTime": "Время поиска",
+        "segmentErrors": "Ошибки сегментов",
+        "seconds": "{{seconds}} с",
+        "minutesSeconds": "{{minutes}}м {{seconds}}с",
+        "scanSummary": "{{segments}} сегм. · {{time}}"
+    }
+}

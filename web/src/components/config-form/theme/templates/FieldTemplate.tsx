@@ -19,6 +19,8 @@ import { LuExternalLink } from "react-icons/lu";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { requiresRestartForFieldPath } from "@/utils/configUtil";
 import RestartRequiredIndicator from "@/components/indicators/RestartRequiredIndicator";
+import RuntimeOverrideIndicator from "@/components/indicators/RuntimeOverrideIndicator";
+import { getRuntimeOverride } from "@/utils/runtimeOverrides";
 import {
   buildTranslationPath,
   resolveConfigTranslation,
@@ -86,8 +88,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
   const formContext = registry?.formContext as ConfigFormContext | undefined;
   const i18nNamespace = formContext?.i18nNamespace as string | undefined;
   const sectionI18nPrefix = formContext?.sectionI18nPrefix as
-    | string
-    | undefined;
+    string | undefined;
   const isCameraLevel = formContext?.level === "camera";
   const effectiveNamespace = isCameraLevel ? "config/cameras" : i18nNamespace;
   const { t, i18n } = useTranslation([
@@ -168,11 +169,7 @@ export function FieldTemplate(props: FieldTemplateProps) {
     (!isArrayItemInAdditionalProp || showArrayItemDescription) &&
     !suppressDescription;
 
-  const translationPath = buildTranslationPath(
-    pathSegments,
-    sectionI18nPrefix,
-    formContext,
-  );
+  const translationPath = buildTranslationPath(pathSegments, formContext);
   const fieldPath = fieldPathId.path;
   const overrides = formContext?.overrides;
   const baselineFormData = formContext?.baselineFormData;
@@ -215,6 +212,18 @@ export function FieldTemplate(props: FieldTemplateProps) {
     restartRequired,
     defaultRequiresRestart,
   );
+
+  // The form shows saved config values, so flag any field the running camera
+  // currently disagrees with. Profile editing shows that profile's overrides
+  // instead, where the comparison does not apply.
+  const runtimeOverride =
+    isCameraLevel && !formContext?.isProfile
+      ? getRuntimeOverride(
+          formContext?.fullCameraConfig,
+          formContext?.sectionPath,
+          pathSegments.join("."),
+        )
+      : undefined;
 
   // Use schema title/description as primary source (from JSON Schema)
   const schemaTitle = schema.title;
@@ -507,6 +516,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
         {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+        {runtimeOverride && (
+          <RuntimeOverrideIndicator
+            runtimeValue={runtimeOverride.runtime}
+            className="ml-2"
+          />
+        )}
       </Label>
     );
   };
@@ -524,6 +539,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
         {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+        {runtimeOverride && (
+          <RuntimeOverrideIndicator
+            runtimeValue={runtimeOverride.runtime}
+            className="ml-2"
+          />
+        )}
       </Label>
     );
   };
@@ -545,6 +566,12 @@ export function FieldTemplate(props: FieldTemplateProps) {
         {finalLabel}
         {required && <span className="ml-1 text-destructive">*</span>}
         {fieldRequiresRestart && <RestartRequiredIndicator className="ml-2" />}
+        {runtimeOverride && (
+          <RuntimeOverrideIndicator
+            runtimeValue={runtimeOverride.runtime}
+            className="ml-2"
+          />
+        )}
       </Label>
     );
   };

@@ -1,5 +1,6 @@
 import { IconName } from "@/components/icons/IconPicker";
 import { TriggerAction, TriggerType } from "./trigger";
+import { LivePlayerMode } from "./live";
 
 export interface UiConfig {
   timezone?: string;
@@ -13,22 +14,38 @@ export interface UiConfig {
 export interface BirdseyeConfig {
   enabled: boolean;
   height: number;
-  mode: "objects" | "continuous" | "motion";
+  modes: BirdseyeMode[];
   quality: number;
   restream: boolean;
   width: number;
 }
 
+export type BirdseyeMode =
+  "continuous" | "motion" | "all_objects" | "alerts" | "detections";
+
 export interface FaceRecognitionConfig {
   enabled: boolean;
+  device?: string | null;
   model_size: SearchModelSize;
   unknown_score: number;
   detection_threshold: number;
   recognition_threshold: number;
 }
 
-export type SearchModel = "jinav1" | "jinav2";
+// a GenAI provider name is also accepted by the backend
+export type SearchModel = "jinav1" | "jinav2" | (string & NonNullable<unknown>);
 export type SearchModelSize = "small" | "large";
+
+export type LiveTranscodeQuality = {
+  height: number;
+  bitrate: number;
+};
+
+export type LiveTranscodeConfig = {
+  enabled: boolean;
+  source?: string | null;
+  qualities: LiveTranscodeQuality[];
+};
 
 export interface CameraConfig {
   friendly_name: string;
@@ -49,7 +66,7 @@ export interface CameraConfig {
   best_image_timeout: number;
   birdseye: {
     enabled: boolean;
-    mode: "objects" | "continuous" | "motion";
+    modes: BirdseyeMode[];
     order: number;
   };
   detect: {
@@ -59,6 +76,7 @@ export interface CameraConfig {
     height: number;
     max_disappeared: number;
     min_initialized: number;
+    scene: string;
     stationary: {
       interval: number;
       max_frames: {
@@ -77,11 +95,11 @@ export interface CameraConfig {
   };
   ffmpeg: {
     global_args: string[];
-    hwaccel_args: string;
+    hwaccel_args: string | string[];
     input_args: string;
     inputs: {
       global_args: string[];
-      hwaccel_args: string[];
+      hwaccel_args: string | string[];
       input_args: string;
       path: string;
       roles: string[];
@@ -89,6 +107,7 @@ export interface CameraConfig {
     output_args: {
       detect: string[];
       record: string;
+      record_sub: string | string[];
       rtmp: string;
     };
     retry_interval: number;
@@ -101,6 +120,7 @@ export interface CameraConfig {
     height: number;
     quality: number;
     streams: { [key: string]: string };
+    transcode: LiveTranscodeConfig;
   };
   lpr: {
     enabled: boolean;
@@ -228,6 +248,9 @@ export interface CameraConfig {
       days: number;
       mode: string;
     };
+    sub: {
+      enabled: boolean;
+    };
   };
   review: {
     alerts: {
@@ -349,6 +372,7 @@ export type StreamType = "no-streaming" | "smart" | "continuous";
 export type CameraStreamingSettings = {
   streamName: string;
   streamType: StreamType;
+  playerMode?: LivePlayerMode;
   compatibilityMode: boolean;
   playAudio: boolean;
   volume: number;
@@ -382,7 +406,7 @@ export type AllGroupsStreamingSettings = {
   [groupName: string]: GroupStreamingSettings;
 };
 
-export type GenAIRole = "chat" | "descriptions" | "embeddings";
+export type GenAIRole = "chat" | "descriptions" | "embeddings" | "transcribe";
 
 export type GenAIAgentConfig = {
   api_key?: string;
@@ -392,6 +416,34 @@ export type GenAIAgentConfig = {
   roles: GenAIRole[];
   provider_options?: Record<string, unknown>;
   runtime_options?: Record<string, unknown>;
+};
+
+export type DetectionModelConfig = {
+  scene: string;
+  devices: string[];
+  height: number;
+  input_pixel_format: string;
+  input_tensor: string;
+  labelmap: Record<string, unknown>;
+  labelmap_path: string | null;
+  model_type: string;
+  path: string | null;
+  width: number;
+  colormap: { [key: string]: [number, number, number] };
+  attributes_map: { [key: string]: string[] };
+  all_attributes: string[];
+  plus?: {
+    name: string;
+    id: string;
+    trainDate: string;
+    baseModel: string;
+    isBaseModel: boolean;
+    supportedDetectors: string[];
+    // which Hailo device a Hailo model was built for, absent on every other model
+    hailoDevice?: string;
+    width: number;
+    height: number;
+  } | null;
 };
 
 export interface FrigateConfig {
@@ -410,6 +462,10 @@ export interface FrigateConfig {
 
   audio_transcription: {
     enabled: boolean;
+    device: "GPU" | "CPU";
+    model: "whisper" | string;
+    model_size: "small" | "large" | null;
+    language: string | null;
   };
 
   auth: {
@@ -446,6 +502,7 @@ export interface FrigateConfig {
     height: number | null;
     max_disappeared: number | null;
     min_initialized: number | null;
+    scene: string;
     stationary: {
       interval: number | null;
       max_frames: {
@@ -457,34 +514,18 @@ export interface FrigateConfig {
     width: number | null;
   };
 
-  detectors: {
-    coral: {
-      device: string;
-      model: {
-        height: number;
-        input_pixel_format: string;
-        input_tensor: string;
-        labelmap: Record<string, string>;
-        labelmap_path: string | null;
-        model_type: string;
-        path: string;
-        width: number;
-      };
-      type: string;
-    };
-  };
-
   environment_vars: Record<string, unknown>;
 
   face_recognition: FaceRecognitionConfig;
 
   ffmpeg: {
     global_args: string[];
-    hwaccel_args: string;
+    hwaccel_args: string | string[];
     input_args: string;
     output_args: {
       detect: string[];
       record: string;
+      record_sub: string | string[];
       rtmp: string;
     };
     retry_interval: number;
@@ -496,6 +537,11 @@ export interface FrigateConfig {
     streams: Record<string, string | string[]>;
     webrtc: {
       candidates: string[];
+      ice_servers?: {
+        urls: string | string[];
+        username?: string;
+        credential?: string;
+      }[];
     };
   };
 
@@ -505,6 +551,7 @@ export interface FrigateConfig {
 
   lpr: {
     enabled: boolean;
+    device?: string | null;
   };
 
   logger: {
@@ -512,29 +559,7 @@ export interface FrigateConfig {
     logs: Record<string, string>;
   };
 
-  model: {
-    height: number;
-    input_pixel_format: string;
-    input_tensor: string;
-    labelmap: Record<string, unknown>;
-    labelmap_path: string | null;
-    model_type: string;
-    path: string | null;
-    width: number;
-    colormap: { [key: string]: [number, number, number] };
-    attributes_map: { [key: string]: string[] };
-    all_attributes: string[];
-    plus?: {
-      name: string;
-      id: string;
-      trainDate: string;
-      baseModel: string;
-      isBaseModel: boolean;
-      supportedDetectors: string[];
-      width: number;
-      height: number;
-    } | null;
-  };
+  models: DetectionModelConfig[];
 
   motion: Record<string, unknown> | null;
 
@@ -615,6 +640,7 @@ export interface FrigateConfig {
 
   semantic_search: {
     enabled: boolean;
+    device?: string | null;
     reindex: boolean;
     model: SearchModel;
     model_size: SearchModelSize;

@@ -133,13 +133,12 @@ Switching between V1 and V2 requires reindexing your embeddings. The embeddings 
 
 ### GenAI Provider
 
-Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. Currently, only **llama.cpp** supports multimodal embeddings (both text and images).
+Frigate can use a GenAI provider for semantic search embeddings when that provider has the `embeddings` role. See [Provider support](/configuration/genai/genai_config#provider-support) for which providers can serve this role.
 
-To use llama.cpp for semantic search:
+To use a GenAI provider for semantic search:
 
-1. Configure a GenAI provider with `embeddings` in its `roles`.
+1. Configure a GenAI provider with `embeddings` in its `roles`, using a multimodal embedding model (both text and images). See [Embedding models](/configuration/genai/genai_config#embedding-models) for recommendations, and your provider's section of the [GenAI docs](/configuration/genai/genai_config) for any extra setup it needs.
 2. Set the semantic search model to the GenAI config key (e.g. `default`).
-3. Start the llama.cpp server with `--embeddings` and `--mmproj` for image support.
 
 <ConfigTabs>
 <TabItem value="ui">
@@ -163,8 +162,8 @@ genai:
     model: your-model-name
     roles:
       - embeddings
-      - vision
-      - tools
+      - descriptions
+      - chat
 
 semantic_search:
   enabled: True
@@ -173,8 +172,6 @@ semantic_search:
 
 </TabItem>
 </ConfigTabs>
-
-The llama.cpp server must be started with `--embeddings` for the embeddings API, and a multi-modal embeddings model. See the [llama.cpp server documentation](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md) for details.
 
 :::note
 
@@ -245,8 +242,8 @@ Triggers are best configured through the Frigate UI.
 1. Navigate to <NavPath path="Settings > Enrichments > Triggers" /> and select a camera from the dropdown menu.
 2. Click **Add Trigger** to create a new trigger or use the pencil icon to edit an existing one.
 3. In the **Create Trigger** wizard:
-   - Enter a **Name** for the trigger (e.g., "Red Car Alert").
-   - Enter a descriptive **Friendly Name** for the trigger (e.g., "Red car on the driveway camera").
+   - Enter a **Name** for the trigger (e.g., "Red Car Alert"). Frigate derives the trigger's
+     internal **ID** from this name, which can be revealed and edited with the show/hide toggle.
    - Select the **Type** (`Thumbnail` or `Description`).
    - For `Thumbnail`, select an image to trigger this action when a similar thumbnail image is detected, based on the threshold.
    - For `Description`, enter text to trigger this action when a similar tracked object description is detected.

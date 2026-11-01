@@ -1,12 +1,15 @@
+import json
+import os
 from unittest.mock import Mock, patch
 
 import frigate.genai
 from frigate.config import GenAIProviderEnum
-from frigate.const import REDACTED_CREDENTIAL_SENTINEL
+from frigate.const import MODEL_CACHE_DIR, REDACTED_CREDENTIAL_SENTINEL
 from frigate.genai import GenAIClient
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.stats.emitter import StatsEmitter
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
+from frigate.util.env import FRIGATE_ENV_VARS
 
 
 class TestHttpApp(BaseTestHttp):
@@ -46,6 +49,25 @@ class TestHttpApp(BaseTestHttp):
             response = client.get("/recordings/storage")
             assert response.status_code == 200
             assert response.json()["front_door"]["usage_percent"] == 25.0
+
+    def test_camera_name_collision_keeps_admin_default(self):
+        self.minimal_config["cameras"]["faces"] = self.minimal_config["cameras"].pop(
+            "front_door"
+        )
+        app = super().create_app(enforce_default_admin=True)
+        viewer = {"remote-user": "viewer", "remote-role": "viewer"}
+
+        with AuthTestClient(app) as client:
+            assert client.get("/faces", headers=viewer).status_code == 403
+            assert client.get("/faces").status_code == 200
+            assert (
+                client.post("/faces/train/person/classify", headers=viewer).status_code
+                == 403
+            )
+
+            # Camera routes for the same name stay reachable by viewers
+            response = client.get("/faces/recordings/summary", headers=viewer)
+            assert response.status_code == 200
 
     def test_config_set_in_memory_replaces_objects_track_list(self):
         self.minimal_config["cameras"]["front_door"]["objects"] = {
@@ -89,6 +111,68 @@ class TestHttpApp(BaseTestHttp):
             assert response.status_code == 200
             mqtt = response.json()["mqtt"]
             assert mqtt["password"] == REDACTED_CREDENTIAL_SENTINEL
+
+    def test_config_response_hides_notification_email_from_viewers(self):
+        self.minimal_config["notifications"] = {"email": "{FRIGATE_TEST_EMAIL}"}
+
+        with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_TEST_EMAIL": "me@example.com"}):
+            app = super().create_app()
+
+        assert app.frigate_config.notifications.email == "me@example.com"
+
+        with AuthTestClient(app) as client:
+            response = client.get(
+                "/config",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.status_code == 200
+            config = response.json()
+            assert config["notifications"]["email"] == REDACTED_CREDENTIAL_SENTINEL
+            assert (
+                config["cameras"]["front_door"]["notifications"]["email"]
+                == REDACTED_CREDENTIAL_SENTINEL
+            )
+
+            response = client.get("/config")
+            assert response.json()["notifications"]["email"] == "me@example.com"
+
+    def test_config_response_keeps_plus_model_reference(self):
+        model_id = "test_plus_reference"
+        model_path = os.path.join(MODEL_CACHE_DIR, model_id)
+        os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
+
+        with open(model_path, "w") as f:
+            f.write("model")
+
+        with open(f"{model_path}.json", "w") as f:
+            json.dump(
+                {
+                    "id": model_id,
+                    "type": "ssd",
+                    "supportedDetectors": ["cpu"],
+                    "width": 320,
+                    "height": 320,
+                    "inputShape": "nhwc",
+                    "pixelFormat": "rgb",
+                    "labelMap": {"0": "person"},
+                },
+                f,
+            )
+
+        self.addCleanup(os.remove, model_path)
+        self.addCleanup(os.remove, f"{model_path}.json")
+        self.minimal_config["models"] = [
+            {"path": f"plus://{model_id}", "devices": ["cpu"]}
+        ]
+        app = super().create_app()
+
+        with AuthTestClient(app) as client:
+            response = client.get("/config")
+            assert response.status_code == 200
+            assert response.json()["models"][0]["path"] == f"plus://{model_id}"
+
+        # detection still loads the resolved cache file
+        assert app.frigate_config.models[0].path == model_path
 
     ####################################################################################################################
     ###################################  POST /genai/probe Endpoint   ##################################################

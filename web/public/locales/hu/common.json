@@ -155,7 +155,9 @@
       "gl": "Galego (Galíciai)",
       "id": "Bahasa Indonesia (Indonéz)",
       "ur": "اردو (Urdu)",
-      "hr": "Horvát"
+      "hr": "Horvát",
+      "zhHant": "Hagyományos kínai",
+      "bs": "Bosnyák"
     },
     "uiPlayground": "UI játszótér",
     "faceLibrary": "Arc Könyvtár",
@@ -179,7 +181,10 @@
     "systemLogs": "Rendszer naplók",
     "settings": "Beállítások",
     "classification": "Osztályozás",
-    "profiles": "Profilok"
+    "profiles": "Profilok",
+    "actions": "Műveletek",
+    "features": "Jellemzők",
+    "chat": "Csevegés"
   },
   "role": {
     "viewer": "Néző",
@@ -216,7 +221,8 @@
       "error": {
         "title": "Sikertelen konfiguráció mentés: {{errorMessage}}",
         "noMessage": "Konfigurációs változtatások mentése sikertelen"
-      }
+      },
+      "success": "Kunfigurációs változtatások sikeresen mentve."
     }
   },
   "selectItem": "Kiválasztani {{item}}-et",
@@ -275,7 +281,18 @@
     "deleteNow": "Törlés Most",
     "next": "Következő",
     "continue": "Tovább",
-    "add": "Hozzáad"
+    "add": "Hozzáad",
+    "applying": "Alkalmazás…",
+    "undo": "Vissza",
+    "copiedToClipboard": "Vágólapra kimásolva",
+    "modified": "Módosítva",
+    "overridden": "Felülírva",
+    "resetToDefault": "Visszatérés az alapbeállításhoz",
+    "saveAll": "Minden mentésa",
+    "savingAll": "Mentés…",
+    "undoAll": "Mindent visszavonni",
+    "retry": "Újra",
+    "resetToGlobal": "Visszaállítás Globális helyzetbe"
   },
   "label": {
     "back": "Vissza",
@@ -298,5 +315,10 @@
   "field": {
     "optional": "Opcionális",
     "internalID": "A belső ID, amelyet a Frigate használ a konfigurációban és az adatbázisban"
+  },
+  "no_items": "Nincsenek elemek",
+  "validation_errors": "Érvényesítési Hibák",
+  "credentialField": {
+    "savedPlaceholder": "Mentve - hagyd üresen a jelenlegi megtartásáért"
   }
 }

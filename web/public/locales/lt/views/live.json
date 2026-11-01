@@ -1,5 +1,7 @@
 {
-  "documentTitle": "Gyvai - Frigate",
+  "documentTitle": {
+    "default": "Tiesiogiai - Frigate"
+  },
   "documentTitle.withCamera": "{{camera}} - Tiesiogiai - Frigate",
   "lowBandwidthMode": "Mažo-pralaidumo Rėžimas",
   "cameraAudio": {
@@ -22,18 +24,19 @@
     "objectDetection": "Objektų Aptikimai",
     "audioDetection": "Garso Aptikimas",
     "title": "{{camera}} Nustatymai",
-    "cameraEnabled": "Kamera įjungta",
     "recording": "Įrašinėjimas",
     "snapshots": "Momentinės Nuotraukos",
     "transcription": "Garso Transkripcija",
-    "autotracking": "Automatinis sekimas"
+    "autotracking": "Automatinis sekimas",
+    "camera": "Kamera"
   },
   "ptz": {
     "move": {
       "clickMove": {
         "label": "Norint išcentruoti kamerą, spragtelti kadre",
         "enable": "Įjungti paspaudimą, kad judinti",
-        "disable": "Išjungti paspaudimą kad judinti"
+        "disable": "Išjungti paspaudimą kad judinti",
+        "enableWithZoom": "Įgalinti valdymą spustelėjimu ir mastelio keitimą vilkimu"
       },
       "left": {
         "label": "Pasukti PTZ kamerą į kairę"
@@ -72,8 +75,8 @@
     "presets": "PTZ kameros nustatytos pozicijos"
   },
   "camera": {
-    "enable": "Įjungti Kamerą",
-    "disable": "Išjungti Kamerą"
+    "turnOn": "Įjungti Kamerą",
+    "turnOff": "Išjungti Kamerą"
   },
   "muteCameras": {
     "enable": "Užtildyti Visas Kameras",
@@ -81,7 +84,8 @@
   },
   "recording": {
     "enable": "Įjungti Įrašymus",
-    "disable": "Įšjungti Įrašymus"
+    "disable": "Įšjungti Įrašymus",
+    "disabledInConfig": "Išpradžių šiai kamerai nustatymuose turi būti įjungtas įrašinėjimas."
   },
   "snapshots": {
     "enable": "Įjungti Momentines Nuotraukas",
@@ -159,8 +163,7 @@
       "all": "Visi",
       "motion": "Judesys",
       "active_objects": "Aktyvūs Objektai"
-    },
-    "notAllTips": "Jūsų {{source}} įrašų saugojimo pasirinkimas nustatytas <code>rėžime: {{effectiveRetainMode}}</code>, taigi įrašai pagal poreikį irgi bus saugomi pritaikant {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Redaguoti Išdėstymą",

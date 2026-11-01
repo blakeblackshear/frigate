@@ -28,7 +28,7 @@ During testing, enable the Zones option for the [Debug view](/usage/live#the-sin
 1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
 2. Under the **Zones** section, click the plus icon to add a new zone.
 3. Click on the camera's latest image to create the points for the zone boundary. Click the first point again to close the polygon.
-4. Configure zone options such as **Friendly name**, **Objects**, **Loitering time**, and **Inertia** in the zone editor.
+4. Configure zone options such as **Name**, **Objects**, **Loitering Time**, and **Inertia** in the zone editor.
 5. Press **Save** when finished.
 
 </TabItem>
@@ -200,7 +200,7 @@ When using loitering zones, a review item will behave in the following way:
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
 2. Edit or create the zone (e.g., `sidewalk`).
-   - Set **Loitering time** to the desired number of seconds (e.g., `4`)
+   - Set **Loitering Time** to the desired number of seconds (e.g., `4`)
    - Under **Objects**, add the relevant object types (e.g., `person`)
 
 </TabItem>
@@ -291,7 +291,7 @@ Accurate real-world distance measurements are required to estimate speeds. These
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
 2. Create or edit a zone with exactly 4 points aligned to the ground plane.
-3. In the zone editor, enter the real-world **Distances** between each pair of consecutive points.
+3. In the zone editor, enable **Speed Estimation** and enter the real-world **Line A distance**, **Line B distance**, **Line C distance**, and **Line D distance** between each pair of consecutive points.
    - For example, if the distance between the first and second points is 10 meters, between the second and third is 12 meters, etc.
 4. Distances are measured in meters (metric) or feet (imperial), depending on the **Unit system** setting.
 
@@ -358,7 +358,7 @@ Zones can be configured with a minimum speed requirement, meaning an object must
 
 1. Navigate to <NavPath path="Settings > Camera configuration > Masks / Zones" /> and select the desired camera.
 2. Edit or create the zone with distances configured.
-   - Set **Speed threshold** to the desired minimum speed (e.g., `20`)
+   - Set **Speed Threshold** to the desired minimum speed (e.g., `20`)
    - The unit is kph or mph, depending on the **Unit system** setting
 
 </TabItem>

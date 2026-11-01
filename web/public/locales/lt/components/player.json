@@ -4,14 +4,14 @@
   "noPreviewFoundFor": "Peržiūrų nerasta {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Pateikti šį kadrą į Frigate+?",
-    "submit": "Pateikti"
+    "submit": "Pateikti",
+    "previewError": "Nepavyko užkrauti momentinės nuotraukos peržiūros. Irašas gali būti nepasikiamas šiuo momentu."
   },
   "livePlayerRequiredIOSVersion": "iOS 17.1 ar naujesni yra privalomi šiam tiesioginės transliacijos tipui.",
   "streamOffline": {
     "title": "Transliacija nepasiekiama",
     "desc": "Jokių transliacijos kadrų negauta iš {{cameraName}}<code>detect</code>, patikrinkite klaidų sąrašus"
   },
-  "cameraDisabled": "Kamera yra išjungta",
   "stats": {
     "streamType": {
       "title": "Transliacijos Tipas:",
@@ -20,14 +20,6 @@
     "bandwidth": {
       "title": "Pralaidumas:",
       "short": "Pralaidumas"
-    },
-    "latency": {
-      "title": "Vėlavimas:",
-      "value": "{{seconds}} sekundžių",
-      "short": {
-        "title": "Vėlavimas",
-        "value": "{{seconds}} sek"
-      }
     },
     "totalFrames": "Iš viso Kadrų:",
     "droppedFrames": {
@@ -47,5 +39,6 @@
     "error": {
       "submitFrigatePlusFailed": "Nepavyko pateikti kadro į Frigate+"
     }
-  }
+  },
+  "cameraOff": "Kamera yra išjungta"
 }

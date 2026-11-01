@@ -1,7 +1,9 @@
 """Export apis."""
 
+import contextlib
 import datetime
 import logging
+import os
 import random
 import string
 import time
@@ -9,12 +11,14 @@ import zipfile
 from collections import deque
 from collections.abc import Iterator
 from pathlib import Path
+from urllib.parse import quote
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import psutil
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import JSONResponse, StreamingResponse
-from pathvalidate import sanitize_filename, sanitize_filepath
-from peewee import DoesNotExist
+from pathvalidate import sanitize_filename
+from peewee import DatabaseError, DoesNotExist, IntegrityError
 from playhouse.shortcuts import model_to_dict
 
 from frigate.api.auth import (
@@ -55,6 +59,7 @@ from frigate.api.defs.response.export_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
+from frigate.api.media_auth import deny_response_for_media_uri
 from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.jobs.export import (
     ExportJob,
@@ -68,11 +73,16 @@ from frigate.jobs.export import (
 from frigate.models import Export, ExportCase, Previews, Recordings
 from frigate.record.export import (
     DEFAULT_TIME_LAPSE_FFMPEG_ARGS,
+    DEFAULT_TIME_LAPSE_FFMPEG_INPUT_ARGS,
     ChaptersEnum,
+    ExportStreamEnum,
     PlaybackSourceEnum,
+    export_video_path,
     validate_ffmpeg_args,
 )
-from frigate.util.time import is_current_hour
+from frigate.util.path import sanitize_contained_path
+from frigate.util.recording_coverage import recording_overlap
+from frigate.util.time import get_normalized_tz_name, is_current_hour
 
 logger = logging.getLogger(__name__)
 
@@ -127,20 +137,24 @@ def _validate_export_case(export_case_id: str | None) -> JSONResponse | None:
 
 
 def _sanitize_existing_image(
+    request: Request,
     image_path: str | None,
 ) -> tuple[str | None, JSONResponse | None]:
-    # sanitize_filepath normalizes "\" to "/" but leaves ".." intact, so a path
-    # like "clips\..\..\etc/passwd" passes the CLIPS_DIR prefix check yet still
-    # escapes the directory once resolved. A valid snapshot path never uses "..".
-    if image_path and ".." in image_path:
-        return None, JSONResponse(
-            content={"success": False, "message": "Invalid image path"},
-            status_code=400,
-        )
+    if not image_path:
+        return None, None
 
-    existing_image = sanitize_filepath(image_path) if image_path else None
+    existing_image = sanitize_contained_path(image_path, CLIPS_DIR)
 
-    if existing_image and not existing_image.startswith(CLIPS_DIR):
+    # CLIPS_DIR is shared by every camera, so the caller must also be allowed
+    # to read the image.
+    if existing_image is not None and deny_response_for_media_uri(
+        f"/clips/{quote(os.path.relpath(existing_image, CLIPS_DIR))}",
+        request.headers.get("remote-role"),
+        request.app.frigate_config,
+    ):
+        existing_image = None
+
+    if existing_image is None:
         return None, JSONResponse(
             content={"success": False, "message": "Invalid image path"},
             status_code=400,
@@ -149,29 +163,32 @@ def _sanitize_existing_image(
     return existing_image, None
 
 
+def _no_recordings_message(stream: ExportStreamEnum) -> str:
+    if stream == ExportStreamEnum.auto:
+        return "No recordings found for time range"
+
+    return f"No {stream.value} stream recordings found for time range"
+
+
 def _validate_export_source(
     camera_name: str,
     start_time: float,
     end_time: float,
     playback_source: PlaybackSourceEnum,
+    stream: ExportStreamEnum = ExportStreamEnum.auto,
 ) -> str | None:
     if playback_source == PlaybackSourceEnum.recordings:
-        recordings_count = (
-            Recordings.select()
-            .where(
-                Recordings.start_time.between(start_time, end_time)
-                | Recordings.end_time.between(start_time, end_time)
-                | (
-                    (start_time > Recordings.start_time)
-                    & (end_time < Recordings.end_time)
-                )
-            )
-            .where(Recordings.camera == camera_name)
-            .count()
+        query = Recordings.select().where(
+            recording_overlap(start_time, end_time) & (Recordings.camera == camera_name)
         )
 
-        if recordings_count <= 0:
-            return "No recordings found for time range"
+        # a pinned export reads only that stream, so the other stream's
+        # coverage must not make the range look exportable
+        if stream != ExportStreamEnum.auto:
+            query = query.where(Recordings.stream_type == stream.value)
+
+        if query.count() <= 0:
+            return _no_recordings_message(stream)
 
         return None
 
@@ -195,6 +212,7 @@ def _validate_export_source(
 def _get_item_recording_export_errors(
     request: Request,
     items: list[BatchExportItem],
+    stream: ExportStreamEnum = ExportStreamEnum.auto,
 ) -> dict[int, str]:
     """Return {item_index: error message} for items with invalid state.
 
@@ -224,19 +242,17 @@ def _get_item_recording_export_errors(
         min_start = min(r[1] for r in indexed_ranges)
         max_end = max(r[2] for r in indexed_ranges)
 
-        recording_ranges = list(
-            Recordings.select(Recordings.start_time, Recordings.end_time)
-            .where(
-                Recordings.camera == camera_name,
-                Recordings.start_time.between(min_start, max_end)
-                | Recordings.end_time.between(min_start, max_end)
-                | (
-                    (min_start > Recordings.start_time)
-                    & (max_end < Recordings.end_time)
-                ),
-            )
-            .iterator()
+        query = Recordings.select(Recordings.start_time, Recordings.end_time).where(
+            Recordings.camera == camera_name,
+            recording_overlap(min_start, max_end),
         )
+
+        # a pinned batch reads only that stream, so the other stream's
+        # coverage must not make an item look exportable
+        if stream != ExportStreamEnum.auto:
+            query = query.where(Recordings.stream_type == stream.value)
+
+        recording_ranges = list(query.iterator())
 
         for index, start_time, end_time in indexed_ranges:
             has_recording = any(
@@ -248,7 +264,7 @@ def _get_item_recording_export_errors(
                 for rec in recording_ranges
             )
             if not has_recording:
-                errors[index] = "No recordings found for time range"
+                errors[index] = _no_recordings_message(stream)
 
     return errors
 
@@ -265,6 +281,7 @@ def _build_export_job(
     ffmpeg_output_args: str | None = None,
     cpu_fallback: bool = False,
     chapters: ChaptersEnum | None = None,
+    stream: ExportStreamEnum = ExportStreamEnum.auto,
 ) -> ExportJob:
     return ExportJob(
         id=_generate_export_id(camera_name),
@@ -279,6 +296,7 @@ def _build_export_job(
         ffmpeg_output_args=ffmpeg_output_args,
         cpu_fallback=cpu_fallback,
         chapters=chapters,
+        stream=stream,
     )
 
 
@@ -408,21 +426,46 @@ class _StreamingZipBuffer:
 
 
 def _unique_archive_name(export: Export, used: set[str]) -> str:
-    base = sanitize_filename(export.name) if export.name else None
-    if not base:
-        base = f"{export.camera}_{int(export.date)}"
+    """Zip entry name for an export, de-duplicated within the archive.
 
-    candidate = f"{base}.mp4"
+    The on-disk name is the one the user sees either way: renaming an export
+    renames its file, so a zip entry and an individual download can't drift.
+    """
+    source = Path(export.video_path)
+    candidate = source.name
+
     counter = 1
     while candidate in used:
-        candidate = f"{base}_{counter}.mp4"
+        candidate = f"{source.stem}_{counter}{source.suffix}"
         counter += 1
 
     used.add(candidate)
     return candidate
 
 
-def _stream_case_archive(exports: list[Export]) -> Iterator[bytes]:
+def _archive_entry(
+    export: Export, arcname: str, tz_name: str | None
+) -> zipfile.ZipInfo:
+    """Zip entry stamped with the export's recording start time.
+
+    Zip times carry no zone and extractors read them as local time, so the
+    timestamp is converted with the UI timezone rather than the container's.
+    """
+    tz = None
+    if tz_name:
+        try:
+            tz = ZoneInfo(get_normalized_tz_name(tz_name))
+        except (ValueError, ZoneInfoNotFoundError):
+            pass
+
+    start = datetime.datetime.fromtimestamp(float(export.date), tz=tz)
+
+    # zip can't represent dates before 1980
+    date_time = max(start.timetuple()[:6], (1980, 1, 1, 0, 0, 0))
+    return zipfile.ZipInfo(arcname, date_time=date_time)
+
+
+def _stream_case_archive(exports: list[Export], tz_name: str | None) -> Iterator[bytes]:
     """Yield bytes of a zip archive built from the given exports' mp4 files."""
     buffer = _StreamingZipBuffer()
     used_names: set[str] = set()
@@ -440,9 +483,10 @@ def _stream_case_archive(exports: list[Export]) -> Iterator[bytes]:
                 continue
 
             arcname = _unique_archive_name(export, used_names)
+            zinfo = _archive_entry(export, arcname, tz_name)
 
             with (
-                archive.open(arcname, mode="w", force_zip64=True) as entry,
+                archive.open(zinfo, mode="w", force_zip64=True) as entry,
                 source.open("rb") as src,
             ):
                 while True:
@@ -458,6 +502,22 @@ def _stream_case_archive(exports: list[Export]) -> Iterator[bytes]:
     yield from buffer.drain()
 
 
+def _content_disposition(filename: str, ascii_fallback: str) -> str:
+    """Build an attachment Content-Disposition that survives non-ASCII names.
+
+    Header values are encoded as latin-1, so a name outside that range cannot
+    go in filename at all. RFC 6266 handles this with a pair: a plain ASCII
+    filename for old clients, plus a percent-encoded UTF-8 filename* that
+    every current browser prefers.
+    """
+    ascii_name = filename if filename.isascii() else ascii_fallback
+
+    return (
+        f'attachment; filename="{ascii_name}"; '
+        f"filename*=UTF-8''{quote(filename, safe='')}"
+    )
+
+
 @router.get(
     "/cases/{case_id}/download",
     dependencies=[Depends(allow_any_authenticated())],
@@ -465,6 +525,7 @@ def _stream_case_archive(exports: list[Export]) -> Iterator[bytes]:
     description="Streams a zip archive containing every completed export's mp4 for the given case.",
 )
 def download_export_case(
+    request: Request,
     case_id: str,
     allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
@@ -497,10 +558,12 @@ def download_export_case(
         archive_base = case_id
 
     return StreamingResponse(
-        _stream_case_archive(exports),
+        _stream_case_archive(exports, request.app.frigate_config.ui.timezone),
         media_type="application/zip",
         headers={
-            "Content-Disposition": f'attachment; filename="{archive_base}.zip"',
+            "Content-Disposition": _content_disposition(
+                f"{archive_base}.zip", f"{case_id}.zip"
+            ),
         },
     )
 
@@ -665,13 +728,13 @@ def export_recordings_batch(
     sanitized_images: list[str | None] = []
     for item in body.items:
         existing_image, image_validation_error = _sanitize_existing_image(
-            item.image_path
+            request, item.image_path
         )
         if image_validation_error is not None:
             return image_validation_error
         sanitized_images.append(existing_image)
 
-    item_errors = _get_item_recording_export_errors(request, body.items)
+    item_errors = _get_item_recording_export_errors(request, body.items, body.stream)
 
     queueable_indexes = [
         index for index in range(len(body.items)) if index not in item_errors
@@ -740,6 +803,7 @@ def export_recordings_batch(
             chapters=request.app.frigate_config.cameras[
                 item.camera
             ].record.export.chapters,
+            stream=body.stream,
         )
         try:
             start_export_job(request.app.frigate_config, export_job)
@@ -812,7 +876,9 @@ def export_recording(
 
     playback_source = body.source
     friendly_name = body.name
-    existing_image, image_validation_error = _sanitize_existing_image(body.image_path)
+    existing_image, image_validation_error = _sanitize_existing_image(
+        request, body.image_path
+    )
     if image_validation_error is not None:
         return image_validation_error
 
@@ -847,6 +913,7 @@ def export_recording(
         start_time,
         end_time,
         playback_source,
+        body.stream,
     )
     if source_error is not None:
         return JSONResponse(
@@ -863,6 +930,7 @@ def export_recording(
         playback_source,
         export_case_id,
         chapters=chapters,
+        stream=body.stream,
     )
     try:
         start_export_job(request.app.frigate_config, export_job)
@@ -913,8 +981,59 @@ async def export_rename(event_id: str, body: ExportRenameBody, request: Request)
             status_code=404,
         )
 
+    if export.in_progress:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Export is still being written and can't be renamed yet.",
+            },
+            status_code=400,
+        )
+
+    new_path = export_video_path(body.name, export.id)
+    old_path = export.video_path
+    moved = new_path != old_path
+
+    # move the file first so a rename that can't happen leaves the row alone
+    if moved:
+        try:
+            os.rename(old_path, new_path)
+        except OSError:
+            logger.exception("Failed to rename export file for %s", event_id)
+            return JSONResponse(
+                content={"success": False, "message": "Failed to rename export."},
+                status_code=500,
+            )
+
     export.name = body.name
-    export.save()
+    export.video_path = new_path
+
+    try:
+        export.save()
+    except DatabaseError as err:
+        # the queue database has no transactions, so undo the move by hand
+        if moved:
+            with contextlib.suppress(OSError):
+                os.rename(new_path, old_path)
+
+        if isinstance(err, IntegrityError):
+            logger.warning(
+                "Export %s cannot be renamed, %s is taken", event_id, new_path
+            )
+            return JSONResponse(
+                content={
+                    "success": False,
+                    "message": "Another export already uses that name.",
+                },
+                status_code=409,
+            )
+
+        logger.exception("Failed to save renamed export %s", event_id)
+        return JSONResponse(
+            content={"success": False, "message": "Failed to rename export."},
+            status_code=500,
+        )
+
     return JSONResponse(
         content=(
             {
@@ -948,9 +1067,15 @@ def export_recording_custom(
     if camera_validation_error is not None:
         return camera_validation_error
 
+    # Validate user-provided ffmpeg args to prevent injection and add to cases.
+    # Admin users are trusted and skip validation.
+    is_admin = request.headers.get("remote-role", "") == "admin"
+
     playback_source = body.source
     friendly_name = body.name
-    existing_image, image_validation_error = _sanitize_existing_image(body.image_path)
+    existing_image, image_validation_error = _sanitize_existing_image(
+        request, body.image_path
+    )
     if image_validation_error is not None:
         return image_validation_error
     ffmpeg_input_args = body.ffmpeg_input_args
@@ -958,6 +1083,16 @@ def export_recording_custom(
     cpu_fallback = body.cpu_fallback
 
     export_case_id = body.export_case_id
+
+    if export_case_id is not None and not is_admin:
+        return JSONResponse(
+            content={
+                "success": False,
+                "message": "Only admins can attach exports to an existing case.",
+            },
+            status_code=403,
+        )
+
     case_validation_error = _validate_export_case(export_case_id)
     if case_validation_error is not None:
         return case_validation_error
@@ -973,10 +1108,6 @@ def export_recording_custom(
             content={"success": False, "message": source_error},
             status_code=400,
         )
-
-    # Validate user-provided ffmpeg args to prevent injection.
-    # Admin users are trusted and skip validation.
-    is_admin = request.headers.get("remote-role", "") == "admin"
 
     if not is_admin:
         for args_label, args_value in [
@@ -998,7 +1129,7 @@ def export_recording_custom(
 
     # Set default values if not provided (timelapse defaults)
     if ffmpeg_input_args is None:
-        ffmpeg_input_args = ""
+        ffmpeg_input_args = DEFAULT_TIME_LAPSE_FFMPEG_INPUT_ARGS
 
     if ffmpeg_output_args is None:
         ffmpeg_output_args = DEFAULT_TIME_LAPSE_FFMPEG_ARGS

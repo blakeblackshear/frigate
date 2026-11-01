@@ -27,6 +27,7 @@ from frigate.jobs.manager import job_is_running, set_current_job
 from frigate.models import Export, Recordings
 from frigate.types import JobStatusTypesEnum
 from frigate.util.ffmpeg import run_ffmpeg_with_progress
+from frigate.util.recording_coverage import recording_overlap
 
 if TYPE_CHECKING:
     from frigate.debug_replay import DebugReplayManager
@@ -104,15 +105,15 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> Mode
             Recordings.start_time,
             Recordings.end_time,
         )
-        .where(
-            Recordings.start_time.between(start_ts, end_ts)
-            | Recordings.end_time.between(start_ts, end_ts)
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
+        .where(recording_overlap(start_ts, end_ts))
         .where(Recordings.camera == source_camera)
         .order_by(Recordings.start_time.asc())
     )
     return cast(ModelSelect, query)
+
+
+class NoRecordingsError(ValueError):
+    """Raised when no recordings exist in the requested time range."""
 
 
 class DebugReplaySource(ABC):
@@ -187,7 +188,7 @@ class RecordingDebugReplaySource(DebugReplaySource):
             raise ValueError("End time must be after start time")
 
         if not query_recordings(self._camera, self._start_ts, self._end_ts).count():
-            raise ValueError(
+            raise NoRecordingsError(
                 f"No recordings found for camera '{self._camera}' in the specified time range"
             )
 
@@ -212,11 +213,11 @@ class ExportDebugReplaySource(DebugReplaySource):
     """
 
     def __init__(self, export: Export, duration: float) -> None:
-        self._camera = cast(str, export.camera)
+        self._camera = export.camera
         # Export.date is declared DateTimeField but Frigate writes raw unix
         # timestamps to the column.
         self._start_ts = float(cast(Any, export.date))
-        self._video_path = cast(str, export.video_path)
+        self._video_path = export.video_path
         self._duration = duration
 
     @property

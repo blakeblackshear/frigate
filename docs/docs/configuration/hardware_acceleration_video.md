@@ -43,6 +43,10 @@ Frigate supports presets for optimal hardware accelerated video decoding:
 
 - [RKNN](#rockchip-platform): Frigate can utilize the media engine in RockChip SOCs to accelerate video decoding.
 
+**Apple Silicon Mac** <CommunityBadge />
+
+- [lighter](#apple-silicon-mac-lighter): Frigate can utilize the media engine in Apple Silicon Macs to accelerate video decoding, when running under the lighter container runtime.
+
 **Other Hardware**
 
 Depending on your system, these presets may not be compatible, and you may need to use manual hwaccel args to take advantage of your hardware. More information on hardware accelerated decoding for ffmpeg can be found here: https://trac.ffmpeg.org/wiki/HWAccelIntro
@@ -132,7 +136,8 @@ ffmpeg:
 
 Frigate reads Intel GPU utilization directly from the kernel's per-client DRM usage counters exposed at `/proc/<pid>/fdinfo/<fd>`. This requires:
 
-- Linux kernel **5.19 or newer** for the `i915` driver, or any release of the `xe` driver.
+- An Intel GPU from Broadwell (5th gen) or newer. Older GPUs do not expose these counters on any kernel.
+- Linux kernel **5.19 or newer** for the `i915` driver (**6.5 or newer** on 12th gen and newer), or any release of the `xe` driver.
 - Frigate running with permission to read other processes' fdinfo. Running as root inside the container (the default) satisfies this; non-root setups may need `CAP_SYS_PTRACE`.
 
 No `intel_gpu_top` binary, `CAP_PERFMON`, privileged mode, or `perf_event_paranoid` tuning is required.
@@ -312,8 +317,9 @@ ffmpeg:
 
 :::note
 
-If running Frigate through Docker, you either need to run in privileged mode or
-map the `/dev/video*` devices to Frigate. With Docker Compose add:
+If running Frigate through Docker, map the relevant `/dev/video*` devices into
+the container. Running in privileged mode also works but grants far more access
+than needed. With Docker Compose add:
 
 ```yaml {4-5}
 services:
@@ -498,7 +504,7 @@ cameras:
 
 ## Synaptics
 
-Hardware accelerated video de-/encoding is supported on Synpatics SL-series SoC.
+Hardware accelerated video de-/encoding is supported on Synaptics SL-series SoC.
 
 ### Prerequisites
 
@@ -532,3 +538,35 @@ output_args:
 Make sure that your SoC supports hardware acceleration for your input stream and your input stream is h264 encoding. For example, if your camera streams with h264 encoding, your SoC must be able to de- and encode with it. If you are unsure whether your SoC meets the requirements, take a look at the datasheet.
 
 :::
+
+## Apple Silicon Mac (lighter)
+
+[lighter](https://github.com/fieldwork-ai/lighter) is an open-source container runtime for macOS. It gives a container the Mac's media engine as a standard V4L2 decoder, backed by VideoToolbox, so Frigate decodes H.264 and H.265 streams in hardware with the ffmpeg it already ships. It works on M1 and newer Macs with lighter 0.9.2 or newer.
+
+Give the container the video device. With Docker Compose:
+
+```yaml {4-5}
+services:
+  frigate:
+    ...
+    devices:
+      - lighter.sh/video=all
+```
+
+Or with `docker run`, add `--device lighter.sh/video=all`.
+
+Then set the preset for the codec your cameras stream. The decoder is specific to the codec, so if your cameras mix H.264 and H.265, set the preset for the most common codec globally and override it on the other cameras:
+
+```yaml
+ffmpeg:
+  hwaccel_args: preset-apple-silicon-h264
+
+cameras:
+  garage: # an H.265 camera
+    ffmpeg:
+      hwaccel_args: preset-apple-silicon-h265
+```
+
+The presets decode on the media engine and encode the Birdseye restream and timelapses there too. Scaling to the detect resolution runs on the CPU, as ffmpeg's V4L2 decoders cannot scale.
+
+lighter can also run object detection on the Mac's Neural Engine; see [Apple Neural Engine (lighter)](object_detectors.md#apple-neural-engine-lighter).

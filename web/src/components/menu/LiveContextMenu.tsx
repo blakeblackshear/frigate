@@ -180,6 +180,9 @@ export default function LiveContextMenu({
     ],
   );
 
+  const isForcedLowBandwidth =
+    groupStreamingSettings?.[camera]?.playerMode === "jsmpeg";
+
   // ui
 
   const audioControlsUsed = useRef(false);
@@ -194,8 +197,6 @@ export default function LiveContextMenu({
     } else {
       return MdVolumeUp;
     }
-    // only update when specific fields change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volumeState, audioState]);
 
   const handleVolumeIconClick = (e: React.MouseEvent) => {
@@ -229,15 +230,8 @@ export default function LiveContextMenu({
     useNotifications(camera);
   const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =
     useNotificationSuspend(camera);
-  const [isSuspended, setIsSuspended] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (notificationSuspendUntil) {
-      setIsSuspended(
-        notificationSuspendUntil !== "0" || notificationState === "OFF",
-      );
-    }
-  }, [notificationSuspendUntil, notificationState]);
+  const isSuspended =
+    notificationSuspendUntil !== "0" || notificationState === "OFF";
 
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
 
@@ -282,12 +276,14 @@ export default function LiveContextMenu({
             <div className="text-primary-variant smart-capitalize">
               <CameraNameLabel camera={camera} />
             </div>
-            {preferredLiveMode == "jsmpeg" && isRestreamed && (
-              <div className="flex flex-row items-center gap-1">
-                <IoIosWarning className="mr-1 size-4 text-danger" />
-                <p className="mr-2 text-xs">{t("lowBandwidthMode")}</p>
-              </div>
-            )}
+            {preferredLiveMode == "jsmpeg" &&
+              isRestreamed &&
+              !isForcedLowBandwidth && (
+                <div className="flex flex-row items-center gap-1">
+                  <IoIosWarning className="mr-1 size-4 text-danger" />
+                  <p className="mr-2 text-xs">{t("lowBandwidthMode")}</p>
+                </div>
+              )}
           </div>
           {preferredLiveMode != "jsmpeg" && isRestreamed && supportsAudio && (
             <>
@@ -386,21 +382,23 @@ export default function LiveContextMenu({
               </ContextMenuItem>
             </>
           )}
-          {preferredLiveMode == "jsmpeg" && isRestreamed && (
-            <>
-              <ContextMenuSeparator />
-              <ContextMenuItem disabled={!isEnabled}>
-                <div
-                  className="flex w-full cursor-pointer items-center justify-start gap-2"
-                  onClick={isEnabled ? resetPreferredLiveMode : undefined}
-                >
-                  <div className="text-primary">
-                    {t("button.reset", { ns: "common" })}
+          {preferredLiveMode == "jsmpeg" &&
+            isRestreamed &&
+            !isForcedLowBandwidth && (
+              <>
+                <ContextMenuSeparator />
+                <ContextMenuItem disabled={!isEnabled}>
+                  <div
+                    className="flex w-full cursor-pointer items-center justify-start gap-2"
+                    onClick={isEnabled ? resetPreferredLiveMode : undefined}
+                  >
+                    <div className="text-primary">
+                      {t("button.reset", { ns: "common" })}
+                    </div>
                   </div>
-                </div>
-              </ContextMenuItem>
-            </>
-          )}
+                </ContextMenuItem>
+              </>
+            )}
           {notificationsEnabledInConfig && isEnabled && (
             <>
               <ContextMenuSeparator />
@@ -570,14 +568,16 @@ export default function LiveContextMenu({
       </ContextMenu>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <CameraStreamingDialog
-          camera={camera}
-          groupStreamingSettings={groupStreamingSettings}
-          setGroupStreamingSettings={setGroupStreamingSettings}
-          setIsDialogOpen={setShowSettings}
-          onSave={onSave}
-          streamMetadata={streamMetadata}
-        />
+        {showSettings && (
+          <CameraStreamingDialog
+            camera={camera}
+            groupStreamingSettings={groupStreamingSettings}
+            setGroupStreamingSettings={setGroupStreamingSettings}
+            setIsDialogOpen={setShowSettings}
+            onSave={onSave}
+            streamMetadata={streamMetadata}
+          />
+        )}
       </Dialog>
 
       <CustomSuspensionDialog

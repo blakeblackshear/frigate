@@ -24,6 +24,94 @@ import { FrigateConfig } from "@/types/frigateConfig";
 
 const MOTION_HEATMAP_GRID_SIZE = 16;
 const MIN_MOTION_CELL_ALPHA = 0.06;
+const DEFAULT_TILE_ASPECT_RATIO = 16 / 9;
+// Keep cropped tiles from collapsing into unusable slivers when the selection
+// is a single row or column
+const MIN_CROP_TILE_ASPECT_RATIO = 0.75;
+const MAX_CROP_TILE_ASPECT_RATIO = 4;
+
+type CropRegion = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+type MediaRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
+function getCropRegionForCells(cells?: Set<number>): CropRegion | undefined {
+  if (!cells || cells.size === 0) {
+    return undefined;
+  }
+
+  let minRow = MOTION_HEATMAP_GRID_SIZE;
+  let maxRow = -1;
+  let minCol = MOTION_HEATMAP_GRID_SIZE;
+  let maxCol = -1;
+
+  cells.forEach((cellIndex) => {
+    if (
+      !Number.isInteger(cellIndex) ||
+      cellIndex < 0 ||
+      cellIndex >= MOTION_HEATMAP_GRID_SIZE ** 2
+    ) {
+      return;
+    }
+
+    const row = Math.floor(cellIndex / MOTION_HEATMAP_GRID_SIZE);
+    const col = cellIndex % MOTION_HEATMAP_GRID_SIZE;
+
+    minRow = Math.min(minRow, row);
+    maxRow = Math.max(maxRow, row);
+    minCol = Math.min(minCol, col);
+    maxCol = Math.max(maxCol, col);
+  });
+
+  if (maxRow < 0 || maxCol < 0) {
+    return undefined;
+  }
+
+  return {
+    x: minCol / MOTION_HEATMAP_GRID_SIZE,
+    y: minRow / MOTION_HEATMAP_GRID_SIZE,
+    width: (maxCol - minCol + 1) / MOTION_HEATMAP_GRID_SIZE,
+    height: (maxRow - minRow + 1) / MOTION_HEATMAP_GRID_SIZE,
+  };
+}
+
+// Rendered area of object-contain media inside its container, accounting for
+// letterboxing on whichever axis has slack
+function getContainedMediaRect(
+  width: number,
+  height: number,
+  mediaDimensions: { width: number; height: number } | null,
+): MediaRect {
+  if (
+    !mediaDimensions ||
+    mediaDimensions.width <= 0 ||
+    mediaDimensions.height <= 0
+  ) {
+    return { x: 0, y: 0, width, height };
+  }
+
+  const containerAspect = width / height;
+  const mediaAspect = mediaDimensions.width / mediaDimensions.height;
+
+  if (mediaAspect < containerAspect) {
+    // Portrait / tall: constrained by height, bars on left and right
+    const drawWidth = height * mediaAspect;
+    return { x: (width - drawWidth) / 2, y: 0, width: drawWidth, height };
+  }
+
+  // Wide / landscape: constrained by width, bars on top and bottom
+  const drawHeight = width / mediaAspect;
+  return { x: 0, y: (height - drawHeight) / 2, width, height: drawHeight };
+}
 
 function getPreviewForMotionRange(
   cameraPreviews: Preview[],
@@ -132,6 +220,8 @@ type MotionPreviewClipProps = {
   fallbackFrameTimes?: number[];
   motionHeatmap?: Record<string, number> | null;
   nonMotionAlpha: number;
+  cropRegion?: CropRegion;
+  aspectRatio: number;
   isVisible: boolean;
   onSeek: (timestamp: number) => void;
 };
@@ -144,6 +234,8 @@ function MotionPreviewClip({
   fallbackFrameTimes,
   motionHeatmap,
   nonMotionAlpha,
+  cropRegion,
+  aspectRatio,
   isVisible,
   onSeek,
 }: MotionPreviewClipProps) {
@@ -398,34 +490,12 @@ function MotionPreviewClip({
       return;
     }
 
-    // Calculate the actual rendered media area (object-contain letterboxing)
-    let drawX = 0;
-    let drawY = 0;
-    let drawWidth = width;
-    let drawHeight = height;
-
-    if (
-      mediaDimensions &&
-      mediaDimensions.width > 0 &&
-      mediaDimensions.height > 0
-    ) {
-      const containerAspect = width / height;
-      const mediaAspect = mediaDimensions.width / mediaDimensions.height;
-
-      if (mediaAspect < containerAspect) {
-        // Portrait / tall: constrained by height, bars on left and right
-        drawHeight = height;
-        drawWidth = height * mediaAspect;
-        drawX = (width - drawWidth) / 2;
-        drawY = 0;
-      } else {
-        // Wide / landscape: constrained by width, bars on top and bottom
-        drawWidth = width;
-        drawHeight = width / mediaAspect;
-        drawX = 0;
-        drawY = (height - drawHeight) / 2;
-      }
-    }
+    const {
+      x: drawX,
+      y: drawY,
+      width: drawWidth,
+      height: drawHeight,
+    } = getContainedMediaRect(width, height, mediaDimensions);
 
     const heatmapLevels = Object.values(motionHeatmap)
       .map((value) => Number(value))
@@ -484,17 +554,53 @@ function MotionPreviewClip({
     drawDimOverlay();
   }, [drawDimOverlay]);
 
+  // Zoom the media (and its dim overlay) so the filtered region fills the tile
+  const mediaCropStyle = useMemo(() => {
+    if (!cropRegion || overlayWidth <= 0 || overlayHeight <= 0) {
+      return undefined;
+    }
+
+    const mediaRect = getContainedMediaRect(
+      overlayWidth,
+      overlayHeight,
+      mediaDimensions,
+    );
+    const cropWidth = cropRegion.width * mediaRect.width;
+    const cropHeight = cropRegion.height * mediaRect.height;
+
+    if (cropWidth <= 0 || cropHeight <= 0) {
+      return undefined;
+    }
+
+    const cropCenterX =
+      mediaRect.x + (cropRegion.x + cropRegion.width / 2) * mediaRect.width;
+    const cropCenterY =
+      mediaRect.y + (cropRegion.y + cropRegion.height / 2) * mediaRect.height;
+    const scale = Math.min(
+      overlayWidth / cropWidth,
+      overlayHeight / cropHeight,
+    );
+    const translateX = overlayWidth / 2 - scale * cropCenterX;
+    const translateY = overlayHeight / 2 - scale * cropCenterY;
+
+    return {
+      transform: `translate(${translateX}px, ${translateY}px) scale(${scale})`,
+      transformOrigin: "0 0",
+    };
+  }, [cropRegion, mediaDimensions, overlayHeight, overlayWidth]);
+
   return (
     <div
       ref={overlayContainerRef}
-      className="relative aspect-video size-full cursor-pointer overflow-hidden rounded-lg bg-black md:rounded-2xl"
+      className="relative size-full cursor-pointer overflow-hidden rounded-lg bg-black md:rounded-2xl"
+      style={{ aspectRatio }}
       onClick={() => onSeek(range.start_time)}
     >
       {showLoadingIndicator && (
         <Skeleton className="absolute inset-0 z-10 rounded-lg md:rounded-2xl" />
       )}
       {preview && isVisible ? (
-        <>
+        <div className="absolute inset-0" style={mediaCropStyle}>
           <video
             ref={videoRef}
             className="size-full bg-black object-contain"
@@ -548,9 +654,9 @@ function MotionPreviewClip({
               aria-hidden="true"
             />
           )}
-        </>
+        </div>
       ) : fallbackFrameSrc ? (
-        <>
+        <div className="absolute inset-0" style={mediaCropStyle}>
           <img
             src={fallbackFrameSrc}
             className="size-full bg-black object-contain"
@@ -575,7 +681,7 @@ function MotionPreviewClip({
               aria-hidden="true"
             />
           )}
-        </>
+        </div>
       ) : (
         <div className="flex size-full items-center justify-center text-sm text-muted-foreground">
           {t("motionPreviews.noPreview")}
@@ -605,6 +711,7 @@ type MotionPreviewsPaneProps = {
   playbackRate: number;
   nonMotionAlpha: number;
   motionFilterCells?: Set<number>;
+  cropToFilter?: boolean;
   onSeek: (timestamp: number) => void;
 };
 
@@ -617,6 +724,7 @@ export default function MotionPreviewsPane({
   playbackRate,
   nonMotionAlpha,
   motionFilterCells,
+  cropToFilter = true,
   onSeek,
 }: MotionPreviewsPaneProps) {
   const { t } = useTranslation(["views/events"]);
@@ -916,6 +1024,35 @@ export default function MotionPreviewsPane({
     });
   }, [clipData, motionFilterCells]);
 
+  const cropRegion = useMemo(
+    () => (cropToFilter ? getCropRegionForCells(motionFilterCells) : undefined),
+    [cropToFilter, motionFilterCells],
+  );
+
+  // Every clip shares the same crop, so tiles stay uniform while matching the
+  // shape of the selected region instead of letterboxing it into 16:9
+  const tileAspectRatio = useMemo(() => {
+    if (!cropRegion) {
+      return DEFAULT_TILE_ASPECT_RATIO;
+    }
+
+    const cameraAspect =
+      camera.detect.width && camera.detect.height
+        ? camera.detect.width / camera.detect.height
+        : DEFAULT_TILE_ASPECT_RATIO;
+
+    const croppedAspect = cameraAspect * (cropRegion.width / cropRegion.height);
+
+    if (!Number.isFinite(croppedAspect) || croppedAspect <= 0) {
+      return DEFAULT_TILE_ASPECT_RATIO;
+    }
+
+    return Math.min(
+      MAX_CROP_TILE_ASPECT_RATIO,
+      Math.max(MIN_CROP_TILE_ASPECT_RATIO, croppedAspect),
+    );
+  }, [camera.detect.height, camera.detect.width, cropRegion]);
+
   const hasCurrentHourRanges = useMemo(
     () => motionRanges.some((range) => isCurrentHour(range.end_time)),
     [motionRanges],
@@ -964,6 +1101,8 @@ export default function MotionPreviewsPane({
                         fallbackFrameTimes={fallbackFrameTimes}
                         motionHeatmap={motionHeatmap}
                         nonMotionAlpha={nonMotionAlpha}
+                        cropRegion={cropRegion}
+                        aspectRatio={tileAspectRatio}
                         isVisible={
                           windowVisible &&
                           (visibleClips.includes(clipId) ||
@@ -972,7 +1111,10 @@ export default function MotionPreviewsPane({
                         onSeek={onSeek}
                       />
                     ) : (
-                      <div className="aspect-video rounded-lg bg-black md:rounded-2xl" />
+                      <div
+                        className="rounded-lg bg-black md:rounded-2xl"
+                        style={{ aspectRatio: tileAspectRatio }}
+                      />
                     )}
                   </div>
                 );

@@ -22,7 +22,8 @@
             "error": "デバッグリプレイの開始に失敗しました: {{error}}",
             "alreadyActive": "リプレイセッションはすでに実行中です",
             "stopError": "デバッグリプレイの停止に失敗しました: {{error}}",
-            "goToReplay": "リプレイへ移動"
+            "goToReplay": "リプレイへ移動",
+            "noRecordings": "選択された期間内に録画は見つかりませんでした"
         }
     },
     "page": {

@@ -599,7 +599,6 @@ export function TrackingDetails({
       playlist,
       startPosition: 0,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event]);
 
   // Determine camera aspect ratio category
@@ -845,6 +844,7 @@ export function TrackingDetails({
                       <div className="text-sm text-secondary-foreground">
                         <Link
                           to={`/explore?recognized_license_plate=${event.data.recognized_license_plate}`}
+                          state={{ canGoBack: true }}
                           className="text-sm"
                         >
                           {event.data.recognized_license_plate}

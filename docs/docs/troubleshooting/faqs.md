@@ -39,6 +39,28 @@ To do this efficiently the following setup is required:
 
 When this is done correctly, the GPU will do the decoding and scaling which will result in a small increase in CPU usage but with better results.
 
+### How can I rotate my camera's video feed?
+
+Rotation is best done in the camera's firmware settings (usually called rotate, flip, or corridor mode) so the video arrives already rotated and no extra processing is needed. Check there first.
+
+If your camera does not support rotation, go2rtc's ffmpeg module can rotate the stream with the `#rotate` parameter (`90`, `180`, `270`, or `-90`), but this is not recommended: rotation requires transcoding (re-encoding) the video, which significantly increases CPU usage, especially for high resolution streams.
+
+```yaml
+go2rtc:
+  streams:
+    my_camera: "ffmpeg:rtsp://user:password@192.168.1.10:554/stream#video=h264#hardware#rotate=90"
+```
+
+Point the camera's inputs at the restream as described in the [restream docs](/configuration/restream.md), and swap `detect -> width` and `detect -> height` to match the rotated resolution.
+
+### Can I add a privacy mask to hide part of my camera's view?
+
+Frigate does not have privacy masks. [Motion masks and object filter masks](../configuration/masks.md) only affect detection, they don't hide anything in live view, recordings, or snapshots.
+
+Privacy masks are best configured in the camera's firmware settings so the area is blacked out before the video ever leaves the camera and no extra processing is needed. Check there first.
+
+If your camera does not support privacy masks, there is no efficient alternative. Frigate copies the camera's video into recordings and live view without decoding it, so part of the image can't be hidden without transcoding (re-encoding) the stream. This can be done with a custom ffmpeg filter in go2rtc, but it is not recommended. Every masked camera needs a continuous re-encode, which significantly increases CPU usage, especially for high resolution streams.
+
 ### My mjpeg stream or snapshots look green and crazy
 
 This almost always means that the width/height defined for your camera are not correct. Double check the resolution with VLC or another player. Also make sure you don't have the width and height values backwards.
@@ -65,9 +87,17 @@ This is because Frigate does not run in host mode so localhost points to the Fri
 
 ### How do I know if my camera is offline
 
-A camera being offline can be detected via MQTT or /api/stats, the camera_fps for any offline camera will be 0.
+Frigate publishes a per-role health status to [`frigate/<camera_name>/status/<role>`](/integrations/mqtt#frigatecamera_namestatusrole), where `<role>` is each enabled role on the camera (`detect`, `record`, and `audio`). The published value is one of:
 
-Also, Home Assistant will mark any offline camera as being unavailable when the camera is offline.
+- `online`: Frigate's process for that role is running normally
+- `offline`: the process is down and Frigate is restarting it
+- `disabled`: the camera is turned off, either at runtime or in the configuration file
+
+These reflect the state of Frigate's process for that role, not the camera's reachability, so an unreachable camera alternates between `offline` and `online` as the watchdog restarts ffmpeg. Wait for the status to hold steady (for example with Home Assistant's `for:`) rather than acting on a single message.
+
+Because the status is per role, a camera whose substream is fine but whose recording stream has dropped will report `online` for `detect` and `offline` for `record`. The status is republished whenever it changes.
+
+You can also detect an offline camera through `/api/stats`, where `camera_fps` will be 0.
 
 ### How can I view the Frigate log files without using the Web UI?
 
@@ -113,7 +143,7 @@ You can still configure Frigate to use UDP by using ffmpeg input args or the pre
 
 ### Frigate is slow to start up with a "probing detect stream" message in the logs
 
-When `detect.width` and `detect.height` are not set, Frigate probes each camera's detect stream on startup (and when saving the config) to auto-detect its resolution. For RTSP streams Frigate probes with ffprobe and automatically retries over TCP if UDP doesn't respond, with a 5 second timeout per attempt. A camera that cannot be reached over either transport will add up to ~10 seconds to startup before Frigate falls through with default dimensions, which may show up as width `0` and height `0` in Camera Probe Info under System Metrics.
+When `detect.width` and `detect.height` are not set, Frigate probes each camera's detect stream on startup (and when saving the config) to auto-detect its resolution. For RTSP streams Frigate probes with ffprobe and automatically retries over TCP if UDP doesn't respond, with a 5 second timeout per attempt. A camera that cannot be reached over either transport will add up to ~10 seconds to startup before Frigate falls through with default dimensions, which may show up as width `0` and height `0` in Camera Probe Info under Health and Metrics.
 
 To skip the probe entirely and make startup instant, set `detect.width` and `detect.height` explicitly in your camera config:
 
@@ -124,6 +154,12 @@ cameras:
       width: 1280
       height: 720
 ```
+
+### What is the `version` key in my config file?
+
+`version` records the config format that your config was last migrated to. On startup Frigate compares it against the format the running version expects, and if it is older it copies your config to `/config/backup_config.yaml`, rewrites it to the new format, and updates `version` as the final step. A config with no `version` key is assumed to predate 0.14 and is migrated from there.
+
+Frigate manages this key for you, so do not set or edit it. Raising it makes Frigate skip migrations your config still needs, and lowering it re-runs migrations against config that has already been converted. Either can leave you with a config that no longer validates.
 
 ### Why does Frigate keep creating new tracked objects for my parked car?
 
@@ -153,3 +189,9 @@ Frigate's object detection relies on a machine learning [model](../frigate/gloss
 - If the false positive is always in the same fixed spot (like a statue or mailbox that reads as a person), add an [object filter mask](../configuration/masks.md#object-filter-masks) over that location.
 
 Filters and masks only hide the incorrect result - they don't teach Frigate what the object actually is. For that, fine-tune your own model or use Frigate+.
+
+### Where do I see problems Frigate has detected?
+
+Open System > Health. The Notices list keeps a record of problems Frigate has found. Acknowledge an entry to hide it until the problem happens again, or mute it to hide it for good. Hidden entries stay listed under Show hidden in the filter. Ongoing conditions, such as an offline camera or recordings deleted before their retention period, appear in the status bar for admins until they clear, and the status bar links to the Notices list while it has entries showing. On mobile, tap the warning icon in the bottom navigation bar to see them.
+
+The Hardware section below the notices shows whether the detection hardware, hardware acceleration, and enrichment devices in your config were found and are being used, so a GPU that silently fell back to the CPU shows up as a warning. Run stream checks to probe every camera's streams for the same problems the camera wizard reports.

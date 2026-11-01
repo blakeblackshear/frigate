@@ -31,7 +31,7 @@
         },
         "listen": {
             "label": "リスニングタイプ",
-            "description": "検知対象の音声イベントの種類一覧（例：吠え声、火災報知器、悲鳴、会話、叫び声）。"
+            "description": "検出対象の音声イベントの種類の一覧（例：吠え声、火災報知器、会話、叫び声）。"
         },
         "enabled_in_config": {
             "label": "元の音声状態",
@@ -137,10 +137,6 @@
         "enabled": {
             "label": "バードアイを有効にする",
             "description": "バードアイビュー機能を有効または無効にします。"
-        },
-        "mode": {
-            "label": "トラッキングモード",
-            "description": "バードアイにカメラを含めるモード：「オブジェクト」「モーション」または「連続」。"
         },
         "order": {
             "label": "位置",
@@ -442,240 +438,9 @@
             "label": "時刻表記",
             "description": "UI で使用する時刻表記（browser、12hour、または 24hour）。"
         },
-        "date_style": {
-            "label": "日付スタイル",
-            "description": "UI で使用する日付スタイル（full、long、medium、short）。"
-        },
-        "time_style": {
-            "label": "時刻スタイル",
-            "description": "UI で使用する時刻スタイル（full、long、medium、short）。"
-        },
         "unit_system": {
             "label": "単位系",
             "description": "UI と MQTT で使用する表示単位系（metric または imperial）。"
-        }
-    },
-    "detectors": {
-        "label": "検出器ハードウェア",
-        "description": "物体検出器（CPU、GPU、ONNX バックエンド）と検出器固有のモデル設定。",
-        "type": {
-            "label": "タイプ"
-        },
-        "model": {
-            "label": "検出器固有モデル設定",
-            "description": "検出器固有のモデル設定オプション（パス、入力サイズなど）。",
-            "path": {
-                "label": "カスタム物体検知モデルパス",
-                "description": "カスタム検知モデルファイルへのパス（または Frigate+ モデルの場合は plus://<model_id>）。"
-            },
-            "labelmap_path": {
-                "label": "カスタム検出器のラベルマップ",
-                "description": "検出器で数値クラスを文字列ラベルに対応付けるラベルマップファイルのパス。"
-            },
-            "width": {
-                "label": "物体検知モデル入力幅",
-                "description": "モデル入力テンソルの幅（ピクセル）。"
-            },
-            "height": {
-                "label": "物体検知モデル入力高さ",
-                "description": "モデル入力テンソルの高さ（ピクセル）。"
-            },
-            "labelmap": {
-                "label": "ラベルマップカスタマイズ",
-                "description": "標準ラベルマップに統合する上書きや再マッピングのエントリ。"
-            },
-            "attributes_map": {
-                "label": "オブジェクトラベル→属性ラベルのマップ",
-                "description": "メタデータを付与するためのオブジェクトラベル→属性ラベルのマッピング（例: 'car' -> ['license_plate']）。"
-            },
-            "input_tensor": {
-                "label": "モデル入力テンソル形状",
-                "description": "モデルが期待するテンソル形式: 'nhwc' または 'nchw'。"
-            },
-            "input_pixel_format": {
-                "label": "モデル入力ピクセルカラー形式",
-                "description": "モデルが期待するピクセルカラースペース: 'rgb'、'bgr'、または 'yuv'。"
-            },
-            "input_dtype": {
-                "label": "モデル入力データ型",
-                "description": "モデル入力テンソルのデータ型（例: 'float32'）。"
-            },
-            "model_type": {
-                "label": "物体検知モデル種別",
-                "description": "一部の検出器が最適化に使用する検知モデルのアーキテクチャ種別（ssd, yolox, yolonas）。"
-            }
-        },
-        "model_path": {
-            "label": "検出器固有モデルパス",
-            "description": "選択した検出器が必要とする検出器モデルバイナリのファイルパス。"
-        },
-        "axengine": {
-            "label": "AXEngine NPU",
-            "description": "AXEngine ランタイム経由でコンパイル済み .axmodel ファイルを実行する AXERA AX650N/AX8850N NPU 検出器。"
-        },
-        "cpu": {
-            "label": "CPU",
-            "description": "ハードウェアアクセラレーションなしにホスト CPU で TensorFlow Lite モデルを実行する CPU TFLite 検出器。非推奨。",
-            "num_threads": {
-                "label": "検知スレッド数",
-                "description": "CPU ベースの推論に使用するスレッド数。"
-            }
-        },
-        "deepstack": {
-            "label": "DeepStack",
-            "description": "リモートの DeepStack HTTP API に画像を送信して推論する DeepStack/CodeProject.AI 検出器。非推奨。",
-            "api_url": {
-                "label": "DeepStack API URL",
-                "description": "DeepStack API の URL。"
-            },
-            "api_timeout": {
-                "label": "DeepStack API タイムアウト（秒）",
-                "description": "DeepStack API リクエストの最大許容時間。"
-            },
-            "api_key": {
-                "label": "DeepStack API キー（必要な場合）",
-                "description": "認証付き DeepStack サービス用の任意の API キー。"
-            }
-        },
-        "degirum": {
-            "label": "DeGirum",
-            "description": "DeGirum クラウドまたはローカル推論サービス経由でモデルを実行する DeGirum 検出器。",
-            "location": {
-                "label": "推論ロケーション",
-                "description": "DeGirum 推論エンジンのロケーション（例: '@cloud'、'127.0.0.1'）。"
-            },
-            "zoo": {
-                "label": "モデル Zoo",
-                "description": "DeGirum モデル zoo のパスまたは URL。"
-            },
-            "token": {
-                "label": "DeGirum クラウドトークン",
-                "description": "DeGirum クラウドアクセス用のトークン。"
-            }
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "EdgeTPU デリゲートを使用して Coral EdgeTPU 用にコンパイルされた TensorFlow Lite モデルを実行する EdgeTPU 検出器。",
-            "device": {
-                "label": "デバイス種別",
-                "description": "EdgeTPU 推論に使用するデバイス（例: 'usb'、'pci'）。"
-            }
-        },
-        "hailo8l": {
-            "label": "Hailo-8/Hailo-8L",
-            "description": "HEF モデルと HailoRT SDK を使用して Hailo ハードウェア上で推論する Hailo-8/Hailo-8L 検出器。",
-            "device": {
-                "label": "デバイス種別",
-                "description": "Hailo 推論に使用するデバイス（例: 'PCIe'、'M.2'）。"
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "MemryX アクセラレータ上でコンパイル済み DFP モデルを実行する MemryX MX3 検出器。",
-            "device": {
-                "label": "デバイスパス",
-                "description": "MemryX 推論に使用するデバイス（例: 'PCIe'）。"
-            }
-        },
-        "onnx": {
-            "label": "ONNX",
-            "description": "ONNX モデルを実行する ONNX 検出器。利用可能な場合は CUDA/ROCm/OpenVINO などのアクセラレーションバックエンドを使用します。",
-            "device": {
-                "label": "デバイス種別",
-                "description": "ONNX 推論に使用するデバイス（例: 'AUTO'、'CPU'、'GPU'）。"
-            }
-        },
-        "openvino": {
-            "label": "OpenVINO",
-            "description": "AMD・Intel CPU、Intel GPU、Intel VPU ハードウェア用の OpenVINO 検出器。",
-            "device": {
-                "label": "デバイス種別",
-                "description": "OpenVINO 推論に使用するデバイス（例: 'CPU'、'GPU'、'NPU'）。"
-            }
-        },
-        "rknn": {
-            "label": "RKNN",
-            "description": "Rockchip NPU 用の RKNN 検出器。Rockchip ハードウェア上でコンパイル済み RKNN モデルを実行します。",
-            "num_cores": {
-                "label": "使用するNPUコア数。",
-                "description": "使用する NPU コア数（0 で自動）。"
-            }
-        },
-        "synaptics": {
-            "label": "Synaptics",
-            "description": "Synaptics ハードウェア上で Synap SDK を使い .synap 形式のモデルを実行する Synaptics NPU 検出器。"
-        },
-        "teflon_tfl": {
-            "label": "Teflon",
-            "description": "対応 GPU での推論を高速化するため Mesa Teflon delegate ライブラリを使用する TFLite 用の Teflon delegate 検出器。"
-        },
-        "tensorrt": {
-            "label": "TensorRT",
-            "description": "シリアライズ済み TensorRT エンジンを使用して Nvidia Jetson デバイス上で推論を高速化する TensorRT 検出器。",
-            "device": {
-                "label": "GPU デバイスインデックス",
-                "description": "使用する GPU デバイスインデックス。"
-            }
-        },
-        "zmq": {
-            "label": "ZMQ IPC",
-            "description": "ZeroMQ IPC エンドポイント経由で外部プロセスに推論をオフロードする ZMQ IPC 検出器。",
-            "endpoint": {
-                "label": "ZMQ IPC エンドポイント",
-                "description": "接続する ZMQ エンドポイント。"
-            },
-            "request_timeout_ms": {
-                "label": "ZMQ リクエストタイムアウト（ミリ秒）",
-                "description": "ZMQ リクエストのタイムアウト（ミリ秒）。"
-            },
-            "linger_ms": {
-                "label": "ZMQ ソケット linger（ミリ秒）",
-                "description": "ソケットの linger 期間（ミリ秒）。"
-            }
-        }
-    },
-    "model": {
-        "label": "検知モデル",
-        "description": "カスタム物体検知モデルとその入力形状を設定します。",
-        "path": {
-            "label": "カスタム物体検知モデルパス",
-            "description": "カスタム検知モデルファイルへのパス（または Frigate+ モデルの場合は plus://<model_id>）。"
-        },
-        "labelmap_path": {
-            "label": "カスタム検出器のラベルマップ",
-            "description": "検出器で数値クラスを文字列ラベルに対応付けるラベルマップファイルのパス。"
-        },
-        "width": {
-            "label": "物体検知モデル入力幅",
-            "description": "モデル入力テンソルの幅（ピクセル）。"
-        },
-        "height": {
-            "label": "物体検知モデル入力高さ",
-            "description": "モデル入力テンソルの高さ（ピクセル）。"
-        },
-        "labelmap": {
-            "label": "ラベルマップカスタマイズ",
-            "description": "標準ラベルマップに統合する上書きや再マッピングのエントリ。"
-        },
-        "attributes_map": {
-            "label": "オブジェクトラベル→属性ラベルのマップ",
-            "description": "メタデータを付与するためのオブジェクトラベル→属性ラベルのマッピング（例: 'car' -> ['license_plate']）。"
-        },
-        "input_tensor": {
-            "label": "モデル入力テンソル形状",
-            "description": "モデルが期待するテンソル形式: 'nhwc' または 'nchw'。"
-        },
-        "input_pixel_format": {
-            "label": "モデル入力ピクセルカラー形式",
-            "description": "モデルが期待するピクセルカラースペース: 'rgb'、'bgr'、または 'yuv'。"
-        },
-        "input_dtype": {
-            "label": "モデル入力データ型",
-            "description": "モデル入力テンソルのデータ型（例: 'float32'）。"
-        },
-        "model_type": {
-            "label": "物体検知モデル種別",
-            "description": "一部の検出器が最適化に使用する検知モデルのアーキテクチャ種別（ssd, yolox, yolonas）。"
         }
     },
     "genai": {
@@ -715,7 +480,7 @@
         "description": "FFmpeg の設定。バイナリパス、引数、ハードウェアアクセラレーション、ロール別の出力引数を含みます。",
         "path": {
             "label": "FFmpeg パス",
-            "description": "使用する FFmpeg バイナリのパス、またはバージョンエイリアス（「5.0」または「7.0」）。"
+            "description": "使用する FFmpeg バイナリへのパス、またはバージョンのエイリアス（「7.0」または「8.0」）。"
         },
         "global_args": {
             "label": "FFmpeg グローバル引数",
@@ -1067,6 +832,9 @@
             "max_concurrent": {
                 "label": "同時エクスポート数の上限",
                 "description": "同時に処理するエクスポートジョブの最大数。"
+            },
+            "chapters": {
+                "label": "エクスポートされた録画に埋め込むチャプターメタデータ"
             }
         },
         "preview": {
@@ -1207,10 +975,6 @@
             "default": {
                 "label": "デフォルト保持期間",
                 "description": "スナップショットを保持するデフォルト日数。"
-            },
-            "mode": {
-                "label": "保持モード",
-                "description": "保持モード: all（全セグメントを保存）、motion（モーションがあるセグメントを保存）、active_objects（アクティブなオブジェクトを含むセグメントを保存）。"
             },
             "objects": {
                 "label": "オブジェクト別保持",
@@ -1552,8 +1316,12 @@
             "description": "UI 内でのカメラの並び順に使用される数値（デフォルトダッシュボードとリスト）。値が大きいほど後ろに表示されます。"
         },
         "dashboard": {
-            "label": "UI に表示",
-            "description": "このカメラを Frigate UI 全体に表示するかを切り替えます。無効化した場合、再表示するには設定ファイルを手動編集する必要があります。"
+            "label": "ライブダッシュボードに表示",
+            "description": "デフォルトの「すべてのカメラ」ライブダッシュボードにこのカメラを表示するかどうかを切り替えます。カメラグループや設定など、UI上の他の場所では引き続きこのカメラを利用できます。"
+        },
+        "review": {
+            "label": "再生画面に表示",
+            "description": "このカメラを再生画面（再生ページおよびそのカメラフィルター、モーション再生、履歴表示）に表示するかどうかを切り替えます。"
         }
     },
     "onvif": {

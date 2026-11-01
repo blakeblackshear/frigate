@@ -16,18 +16,6 @@
         "desc": "Obiekty w miejscach, których chcesz unikać, nie są fałszywymi alarmami. Zgłaszanie ich jako fałszywe alarmy zdezorientuje model."
       },
       "review": {
-        "true": {
-          "label": "Potwierdź tę etykietę dla Frigate Plus",
-          "true_one": "To jest {{label}}",
-          "true_few": "To są {{label}}",
-          "true_many": "To są {{label}}"
-        },
-        "false": {
-          "label": "Nie potwierdzaj tej etykiety dla Frigate Plus",
-          "false_one": "To nie jest {{label}}",
-          "false_few": "To nie są {{label}}",
-          "false_many": "To nie są {{label}}"
-        },
         "state": {
           "submitted": "Przesłano"
         },
@@ -36,6 +24,9 @@
           "ask_an": "Czy ten obiekt to <code>{{label}}</code>?",
           "ask_full": "Czy ten obiekt to <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?",
           "label": "Potwierdź tę etykietę dla Frigate Plus"
+        },
+        "toast": {
+          "error": "Nie udało się przesłać do Frigate+. Sprawdź połączenie sieciowe i spróbuj ponownie."
         }
       }
     },
@@ -70,7 +61,7 @@
       "error": {
         "failed": "Nie udało się zakolejkować eksportu: {{error}}",
         "endTimeMustAfterStartTime": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia",
-        "noVaildTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
+        "noValidTimeSelected": "Nie wybrano prawidłowego zakresu czasu"
       },
       "view": "Widok",
       "queued": "Eksport dodany do kolejki. Postęp można sprawdzić na stronie eksportów.",
@@ -79,9 +70,9 @@
       "batchSuccess_many": "Rozpoczęto {{count}} eksportów. Otwieranie przypadku.",
       "batchPartial": "Rozpoczęto {{successful}} z {{total}} eksportów. Nieudane kamery: {{failedCameras}}",
       "batchFailed": "Nie udało się uruchomić {{total}} eksportów. Nieudane kamery: {{failedCameras}}",
-      "batchQueuedSuccess_one": "Eksport dodany do kolejki. Otwieranie przypadku.",
-      "batchQueuedSuccess_few": "Dodano {{count}} eksportydo kolejki. Otwieranie przypadku.",
-      "batchQueuedSuccess_many": "Dodano {{count}} eksportów do kolejki. Otwieranie przypadku.",
+      "batchQueuedSuccess_one": "Dodano 1 eksport do kolejki.",
+      "batchQueuedSuccess_few": "Dodano {{count}} eksporty do kolejki.",
+      "batchQueuedSuccess_many": "Dodano {{count}} eksportów do kolejki.",
       "batchQueuedPartial": "Dodano do kolejki {{successful}} z {{total}} eksportów. Nieudane kamery: {{failedCameras}}",
       "batchQueueFailed": "Nie udało się dodać do kolejki {{total}} eksportów. Nieudane kamery: {{failedCameras}}"
     },
@@ -140,12 +131,9 @@
       "exportButton_many": "Eksport {{count}} recenzji",
       "exportingButton": "Eksportowanie...",
       "toast": {
-        "started_one": "Rozpoczęto 1 eksport. Otwieranie przypadku.",
-        "started_few": "Rozpoczęto {{count}} eksportów. Otwieranie przypadku.",
-        "started_many": "Rozpoczęto {{count}} eksportów. Otwieranie przypadku.",
-        "startedNoCase_one": "Rozpoczęto 1 eksport.",
-        "startedNoCase_few": "Rozpoczęto {{count}} eksportów.",
-        "startedNoCase_many": "Rozpoczęto {{count}} eksportów.",
+        "started_one": "Rozpoczęto 1 eksport.",
+        "started_few": "Rozpoczęto {{count}} eksporty.",
+        "started_many": "Rozpoczęto {{count}} eksportów.",
         "partial": "Rozpoczęto {{successful}} z {{total}} eksportów. Niepowodzenia: {{failedItems}}",
         "failed": "Nie udało się uruchomić {{total}} eksportów. Niepowodzenia: {{failedItems}}"
       }
@@ -182,8 +170,7 @@
     "restreaming": {
       "disabled": "Restreaming nie jest włączony dla tej kamery.",
       "desc": {
-        "title": "Skonfiguruj go2rtc dla dodatkowych opcji podglądu na żywo i dźwięku dla tej kamery.",
-        "readTheDocumentation": "Przeczytaj dokumentację"
+        "title": "Skonfiguruj go2rtc dla dodatkowych opcji podglądu na żywo i dźwięku dla tej kamery."
       }
     },
     "showStats": {

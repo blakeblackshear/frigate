@@ -6,7 +6,7 @@ import os
 import unittest
 from unittest.mock import MagicMock, patch
 
-from frigate.config import FrigateConfig
+from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.config.camera.profile import CameraProfileConfig
 from frigate.config.profile import ProfileDefinitionConfig
 from frigate.config.profile_manager import PERSISTENCE_FILE, ProfileManager
@@ -561,6 +561,24 @@ class TestProfileManager(unittest.TestCase):
         assert self.config.cameras["front"].enabled is False
 
     @patch.object(ProfileManager, "_persist_active_profile")
+    def test_profile_replaces_birdseye_activity_modes(self, mock_persist):
+        """A profile mode list replaces the base list rather than merging into it."""
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
+        self.config.cameras["front"].birdseye.modes = [
+            BirdseyeModeEnum.motion,
+            BirdseyeModeEnum.all_objects,
+        ]
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            birdseye={"modes": ["alerts"]}
+        )
+        self.manager = ProfileManager(self.config, self.mock_updater)
+
+        err = self.manager.activate_profile("away")
+
+        assert err is None
+        assert self.config.cameras["front"].birdseye.modes == [BirdseyeModeEnum.alerts]
+
+    @patch.object(ProfileManager, "_persist_active_profile")
     def test_deactivate_restores_enabled(self, mock_persist):
         """Deactivating a profile restores the camera's base enabled state."""
         self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
@@ -720,6 +738,53 @@ class TestProfileManager(unittest.TestCase):
         assert "objects" in api_base
         assert api_base["objects"]["track"] == ["person"]
 
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_reapplies_active_profile(self, mock_persist):
+        """Replacing the config preserves the active profile overrides."""
+        self.manager.activate_profile("armed")
+
+        new_config = FrigateConfig(**self.config_data)
+        self.manager.update_config(new_config)
+
+        assert self.manager.config.active_profile == "armed"
+        assert self.manager.config.cameras["front"].notifications.enabled is True
+        assert self.manager.config.cameras["front"].objects.track == [
+            "person",
+            "car",
+            "package",
+        ]
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_update_config_deactivates_removed_profile(self, mock_persist):
+        """Replacing the config clears the active profile if it no longer exists."""
+        self.manager.activate_profile("armed")
+
+        new_config_data = json.loads(json.dumps(self.config_data))
+        del new_config_data["profiles"]["armed"]
+        del new_config_data["cameras"]["front"]["profiles"]["armed"]
+        del new_config_data["cameras"]["back"]["profiles"]["armed"]
+
+        new_config = FrigateConfig(**new_config_data)
+        self.manager.update_config(new_config)
+
+        assert self.manager.config.active_profile is None
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_enabled_state_is_published_via_dispatcher_when_profile_changes(
+        self, mock_persist
+    ):
+        """Enabled state updates are published through the dispatcher when present."""
+        self.config.profiles["away"] = ProfileDefinitionConfig(friendly_name="Away")
+        self.config.cameras["front"].profiles["away"] = CameraProfileConfig(
+            enabled=False
+        )
+        dispatcher = MagicMock()
+        self.manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+
+        self.manager.activate_profile("away")
+
+        dispatcher.publish.assert_any_call("front/enabled/state", "OFF", retain=True)
+
     def test_base_configs_for_api_are_json_serializable(self):
         """API base configs are JSON-serializable (mode='json')."""
         import json
@@ -784,6 +849,98 @@ class TestProfileManager(unittest.TestCase):
         manager = ProfileManager(self.config, self.mock_updater, dispatcher)
         manager.activate_profile("armed", clear_runtime_overrides=False)
         dispatcher.clear_runtime_state.assert_not_called()
+
+    def test_apply_profile_to_config_mutates_the_config(self):
+        """The config-only half applies the same overrides as activation."""
+        err = self.manager.apply_profile_to_config("armed")
+        assert err is None
+
+        front = self.config.cameras["front"]
+        assert front.notifications.enabled is True
+        assert front.objects.track == ["person", "car", "package"]
+
+    def test_apply_profile_to_config_makes_no_zmq_mqtt_or_disk_writes(self):
+        """Workers are started with the values, so nothing is published yet."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+
+        with patch.object(ProfileManager, "_persist_active_profile") as mock_persist:
+            manager.apply_profile_to_config("armed")
+
+        self.mock_updater.publish_update.assert_not_called()
+        dispatcher.publish.assert_not_called()
+        mock_persist.assert_not_called()
+        # bookkeeping stays with activate_profile
+        assert self.config.active_profile is None
+
+    def test_apply_profile_to_config_rejects_an_unknown_profile(self):
+        err = self.manager.apply_profile_to_config("nonexistent")
+        assert err is not None
+        assert "not defined" in err
+
+    def test_restore_persisted_profile_to_config_applies_it(self):
+        """The startup config pass restores what was persisted."""
+        with patch.object(
+            ProfileManager, "load_persisted_profile", return_value="armed"
+        ):
+            self.manager.restore_persisted_profile_to_config()
+
+        assert self.config.cameras["front"].notifications.enabled is True
+        # still the config-only half, so nothing is published or persisted
+        self.mock_updater.publish_update.assert_not_called()
+        assert self.config.active_profile is None
+
+    def test_restore_persisted_profile_to_config_no_op_when_none_persisted(self):
+        with patch.object(ProfileManager, "load_persisted_profile", return_value=None):
+            self.manager.restore_persisted_profile_to_config()
+
+        assert self.config.cameras["front"].notifications.enabled is False
+
+    def test_restore_persisted_profile_to_config_ignores_a_stale_name(self):
+        """A profile no longer offered by any camera must not be applied."""
+        with patch.object(
+            ProfileManager, "load_persisted_profile", return_value="ghost"
+        ):
+            self.manager.restore_persisted_profile_to_config()
+
+        assert self.config.cameras["front"].notifications.enabled is False
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_restore_persisted_profile_activates_and_publishes(self, mock_persist):
+        """The startup publish pass runs a full activation."""
+        dispatcher = MagicMock()
+        manager = ProfileManager(self.config, self.mock_updater, dispatcher)
+
+        with patch.object(
+            ProfileManager, "load_persisted_profile", return_value="armed"
+        ):
+            manager.restore_persisted_profile()
+
+        assert self.config.active_profile == "armed"
+        self.mock_updater.publish_update.assert_called()
+        # a startup replay must not wipe the runtime overrides layered on top
+        dispatcher.clear_runtime_state.assert_not_called()
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_activation_after_apply_still_publishes_every_section(self, mock_persist):
+        """Re-deriving the same state must not skip the broadcast.
+
+        The processes that started before the config was corrected have no
+        other channel.
+        """
+        self.manager.apply_profile_to_config("armed")
+        self.mock_updater.publish_update.reset_mock()
+
+        err = self.manager.activate_profile("armed", clear_runtime_overrides=False)
+        assert err is None
+
+        published = {
+            call.args[0].update_type.name
+            for call in self.mock_updater.publish_update.call_args_list
+        }
+        assert "notifications" in published
+        assert "objects" in published
+        assert self.config.active_profile == "armed"
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_update_config_preserves_runtime_state_with_active_profile(

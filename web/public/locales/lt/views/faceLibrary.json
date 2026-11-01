@@ -6,15 +6,10 @@
     "nameCannotContainHash": "Pavadinime negali būti #."
   },
   "details": {
-    "person": "Žmogus",
-    "face": "Veido detelės",
     "timestamp": "Laiko žyma",
     "unknown": "Nežinoma",
-    "subLabelScore": "Sub Etiketės Balas",
-    "scoreInfo": "Sub etiketės balas yra pasvertas balas pagal visų atpažintų veidų užtikrintumą, taigi gali skirtis nuo balo rodomo momentinėje nuotraukoje.",
-    "faceDesc": "Papildoma informacija sekamo objekto, kuris sugeneravo šį veidą"
+    "scoreInfo": "Sub etiketės balas yra pasvertas balas pagal visų atpažintų veidų užtikrintumą, taigi gali skirtis nuo balo rodomo momentinėje nuotraukoje."
   },
-  "selectItem": "Pasirinkti {{item}}",
   "deleteFaceAttempts": {
     "desc_one": "Esate įsitikine, kad norite ištrinti {{count}} veidą? Šio veiksmo sugrąžinimas negalimas.",
     "desc_few": "Esate įsitikine, kad norite ištrinti {{count}} veidus? Šio veiksmo sugrąžinimas negalimas.",
@@ -33,7 +28,8 @@
       "addFaceLibrary": "{{name}} vardas buvo sėkmingai pridėtas į Veidų Katalogą!",
       "renamedFace": "Sėkmingai veidas pervadintas į {{name}}",
       "trainedFace": "Veidas apmokytas sėkmingai.",
-      "updatedFaceScore": "Veido balas atnaujintas sėkmingai į {{name}} {{score}}."
+      "updatedFaceScore": "Veido balas atnaujintas sėkmingai į {{name}} {{score}}.",
+      "reclassifiedFace": "Sėkmingai perklasifikuotas veidas."
     },
     "error": {
       "uploadingImageFailed": "Nepavyko įkelti nuotraukos: {{errorMessage}}",
@@ -42,13 +38,12 @@
       "deleteNameFailed": "Vardo ištrinti nepavyko: {{errorMessage}}",
       "renameFaceFailed": "Nepavyko pervardinti veido: {{errorMessage}}",
       "trainFailed": "Nepavyko apmokinti: {{errorMessage}}",
-      "updateFaceScoreFailed": "Veido balų atnaujinti nepavyko: {{errorMessage}}"
+      "updateFaceScoreFailed": "Veido balų atnaujinti nepavyko: {{errorMessage}}",
+      "reclassifyFailed": "Veido perklasifikuoti nepavyko: {{errorMessage}}"
     }
   },
   "createFaceLibrary": {
     "nextSteps": "Kad sukurtumėte stiprų pagrindą:<li>Naudokite Pastarieji Atpažinimai skirtuką pasirinkti ir paveikslėliais apmokyti kiekvieną aptiktą asmenį.</li><li>Norint pasiekti geriausią režultatą, susitelkite prie nuotraukų iš priekio; Venkite naudoti veidų nuotraukas kampu pasuktu veidu.</li></ul>",
-    "title": "Sukurti Kolekciją",
-    "desc": "Sukurti naują kolekciją",
     "new": "Sukurti Naują Veidą"
   },
   "deleteFaceLibrary": {
@@ -73,9 +68,12 @@
     "title": "Pastarieji Atpažinimai",
     "aria": "Pasirinkti pastaruosius atpažinimus",
     "empty": "Pastaruoju metu nebuvo atliktas veidų atpažinimas",
-    "titleShort": "Paskutiniai"
+    "titleShort": "Paskutiniai",
+    "emptyNoLibrary": {
+      "title": "Įkelti veido nuotrauką",
+      "description": "Privalote pridėti bent vieną nuotrauką į kolekciją kad veiktų veidų atpažinimas."
+    }
   },
-  "selectFace": "Pasirinkti Veidą",
   "renameFace": {
     "title": "Pervadinti Veidą",
     "desc": "Įveskite {{name}} naują vardą"
@@ -97,7 +95,8 @@
     "maxSize": "Max dydis: {{size}}MB"
   },
   "nofaces": "Nėra veidų",
-  "pixels": "{{area}}px",
   "trainFaceAs": "Apmokyti Veidą kaip:",
-  "trainFace": "Apmokyti Veidą"
+  "trainFace": "Apmokyti Veidą",
+  "reclassifyFaceAs": "Perklasifikuoti Veidą kaip:",
+  "reclassifyFace": "Perklasifikuoti Veidą"
 }

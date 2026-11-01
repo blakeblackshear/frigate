@@ -12,12 +12,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Ištrinta Klasę",
-      "deletedCategory_few": "",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Ištrinti Nuotraukas",
-      "deletedImage_few": "",
-      "deletedImage_other": "",
+      "deletedCategory_one": "Ištrinta {{count}} klasė",
+      "deletedCategory_few": "Ištrinta {{count}} klasės",
+      "deletedCategory_other": "Ištrinta {{count}} klasių",
+      "deletedImage_one": "Ištrintas {{count}} paveikslėlis",
+      "deletedImage_few": "Ištrinti {{count}} paveikslėliai",
+      "deletedImage_other": "Ištrinta {{count}} paveikslėlių",
       "categorizedImage": "Sekmingai Klasifikuotas Nuotrauka",
       "trainedModel": "Modelis sėkmingai apmokytas.",
       "trainingModel": "Sėkmingai pradėtas modelio apmokymas.",
@@ -25,7 +25,8 @@
       "deletedModel_few": "Sėkmingai ištrinti {{count}} modeliai",
       "deletedModel_other": "Sėkmingai ištrinta {{count}} modelių",
       "updatedModel": "Modelio nustatymai atnaujinti sėkmingai",
-      "renamedCategory": "Klasifikatorius sėkmingai pervadintas į {{name}}"
+      "renamedCategory": "Klasifikatorius sėkmingai pervadintas į {{name}}",
+      "reclassifiedImage": "Paveikslėlis sėkmingai perklasifikuotas"
     },
     "error": {
       "deleteImageFailed": "Nepavyko ištrinti:{{errorMessage}}",
@@ -35,7 +36,8 @@
       "deleteModelFailed": "Nepavyko ištrinti modelio: {{errorMessage}}",
       "trainingFailedToStart": "Nepavyko pradėti modelio treniravimo: {{errorMessage}}",
       "updateModelFailed": "Nepavyko atnaujinti modelio: {{errorMessage}}",
-      "renameCategoryFailed": "Nepavyko pervadinti klasifikatoriaus: {{errorMessage}}"
+      "renameCategoryFailed": "Nepavyko pervadinti klasifikatoriaus: {{errorMessage}}",
+      "reclassifyFailed": "Nepavyko perklasifikuoti paveikslėlio: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -108,7 +110,20 @@
     "title": "Koreguoti Klasifikavimo Modelį",
     "descriptionState": "Koreguoti klasifikatorius šiam būklės klasifikavimo modeliui. Pokyčiams reikės išnaujo apmokinti modelį.",
     "descriptionObject": "Koreguoti objekto tipą ir klasifikavimo tipą šiam objektų klasifikavimo modeliui.",
-    "stateClassesInfo": "Pastaba: Keičiant statuso klasifikatorius privaloma iš naujo apmokinti modelį."
+    "stateClassesInfo": "Modelis atnaujintas. iš naujo apmokinkite modelį, kad pokyčiai įsigaliotų.",
+    "enabled": "Įjungta",
+    "enabledDesc": "Paleisti šį modelį. Kai išjungta, jis nustos veikęs ir daugiau neklasifikuos.",
+    "saveAttempts": "Bandymai išsaugoti",
+    "saveAttemptsDesc": "Kiekis paveikslėlių klasifikavimui kurį saugoti pastarūjų klasifikavimų puslapyje.",
+    "motion": "Leisti esant Judesiui",
+    "motionDesc": "Leist klasifikavimą kai aptinkamas judesys sukonfiguruotoje zonoje.",
+    "interval": "Intervalas",
+    "intervalDesc": "Sekundžių tarp periodinių klasifikavimo užduočių. Palikite tuščią kad suveiktų tik esant judesiui.",
+    "intervalPlaceholder": "Nėra intervalo",
+    "errors": {
+      "saveAttemptsInvalid": "Išsaugomų bandymų privalo buti sveikas skaičius arba daugiau už 0",
+      "intervalInvalid": "Intervalas privalo būti sveikas skaičius didesnis už 0"
+    }
   },
   "wizard": {
     "step3": {
@@ -139,8 +154,13 @@
       },
       "generateSuccess": "Sėkmingai sugeneruoti pavyzdiniai paveikslėliai",
       "missingStatesWarning": {
-        "title": "Trūksta Būklių Pavyzdžių",
-        "description": "Geriausiam rezultatui rekomenduojama parinkti pavyzdžių visoms būklėms. Jūs galite tęsti ir nepasirinkdami visų būklių, tačiau modelis nebus apmokytas kol visos būklės turės pavyzdinius paveikslėlius. Tęsiant naudokite Pastarųjų Klasifikavimų meniu, kad klasifikuoti paveikslėlius trūkstamoms būklėms, tada apmokykite modelį."
+        "title": "Trūksta Klasių Pavyzdžių",
+        "description": "Ne visos būklės turės pavyzdinius paveikslėlius. Bandykite sugeneruoti naujų pavyzdžių kad surastumėte trukstamas klases, arba tęskite naudodami pastarūjų klasifikavimų meniu kad pridėtumėte paveikslėlius vėliau."
+      },
+      "refreshExamples": "Generuoti naujus pavyzdžius",
+      "refreshConfirm": {
+        "title": "Generuoti Naujus Pavyzdžius?",
+        "description": "Tai sugeneruos naują atvaizdų imtį ir panaikins pažymetus, įskaitant ir buvusias klases. Jums reikės iš naujo pažymėti pavyzdžius visoms klasėms."
       }
     },
     "title": "Sukurti Naują Klasifikavimą",
@@ -192,5 +212,8 @@
   "menu": {
     "objects": "Objektai",
     "states": "Būsenos"
-  }
+  },
+  "disabled": "Išjungta",
+  "reclassifyImageAs": "Perklasifikuoti Atvaizdą Kaip:",
+  "reclassifyImage": "Perklasifikuoti Atvaizdą"
 }

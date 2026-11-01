@@ -1,7 +1,10 @@
+import io
 import os
 import tempfile
+import zipfile
 from unittest.mock import patch
 
+from frigate.const import CLIPS_DIR
 from frigate.jobs.export import (
     ExportJob,
     get_export_job_manager,
@@ -365,6 +368,108 @@ class TestHttpExport(BaseTestHttp):
 
         assert response.status_code == 200
         assert response.json() == [queued_job.to_dict()]
+
+    def test_rename_export_moves_the_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_20260823_020615_abc123.mp4")
+            thumb = os.path.join(tmpdir, "front_door_abc123.webp")
+            for path, data in ((video, b"video"), (thumb, b"thumb")):
+                with open(path, "wb") as handle:
+                    handle.write(data)
+
+            Export.create(
+                id="front_door_abc123",
+                camera="front_door",
+                name="front door 2026-08-23 02:06:15 2026-08-23 02:07:34",
+                date=100,
+                video_path=video,
+                thumb_path=thumb,
+                in_progress=False,
+            )
+
+            with patch("frigate.record.export.EXPORT_DIR", tmpdir):
+                with AuthTestClient(self.app) as client:
+                    response = client.patch(
+                        "/export/front_door_abc123/rename",
+                        json={"name": "Package thief"},
+                    )
+
+            assert response.status_code == 200
+
+            renamed = Export.get(Export.id == "front_door_abc123")
+            assert renamed.name == "Package thief"
+            assert os.path.basename(renamed.video_path) == "Package thief_abc123.mp4"
+            assert os.path.exists(renamed.video_path)
+            assert not os.path.exists(video)
+
+    def test_rename_export_rejected_while_in_progress(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_abc123.mp4")
+            with open(video, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="front_door_running",
+                camera="front_door",
+                name="front door export",
+                date=100,
+                video_path=video,
+                thumb_path=os.path.join(tmpdir, "t.webp"),
+                in_progress=True,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.patch(
+                    "/export/front_door_running/rename",
+                    json={"name": "Package thief"},
+                )
+
+            assert response.status_code == 400
+            assert Export.get(Export.id == "front_door_running").video_path == video
+
+    def test_rename_export_missing_file_leaves_the_row_alone(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_gone_abc123.mp4")
+
+            Export.create(
+                id="front_door_gone",
+                camera="front_door",
+                name="front door export",
+                date=100,
+                video_path=video,
+                thumb_path=os.path.join(tmpdir, "t.webp"),
+                in_progress=False,
+            )
+
+            with patch("frigate.record.export.EXPORT_DIR", tmpdir):
+                with AuthTestClient(self.app) as client:
+                    response = client.patch(
+                        "/export/front_door_gone/rename",
+                        json={"name": "Package thief"},
+                    )
+
+            assert response.status_code == 500
+
+            unchanged = Export.get(Export.id == "front_door_gone")
+            assert unchanged.name == "front door export"
+            assert unchanged.video_path == video
+
+    def test_reap_stale_exports_removes_staged_runs(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            staging_dir = os.path.join(tmpdir, "staging")
+            os.makedirs(staging_dir)
+            staged = os.path.join(staging_dir, "front_door_abc_0.mp4")
+            finished = os.path.join(tmpdir, "export_stage_saved_abc.mp4")
+
+            for path in (staged, finished):
+                with open(path, "w") as handle:
+                    handle.write("video")
+
+            with patch("frigate.jobs.export.EXPORT_STAGING_DIR", staging_dir):
+                reap_stale_exports()
+
+            assert not os.path.exists(staging_dir)
+            assert os.path.exists(finished)
 
     def test_reap_stale_exports_deletes_rows_with_no_file(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -947,6 +1052,65 @@ class TestHttpExport(BaseTestHttp):
         assert response.status_code == 400
         assert ExportCase.select().count() == 0
 
+    def _batch_export_with_image(self, image_path: str, role: str):
+        with patch(
+            "frigate.api.export.start_export_job",
+            side_effect=lambda _config, job: job.id,
+        ) as start_export_job:
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/batch",
+                    headers={"remote-user": role, "remote-role": role},
+                    json={
+                        "items": [
+                            {
+                                "camera": "front_door",
+                                "start_time": 110,
+                                "end_time": 150,
+                                "image_path": image_path,
+                            }
+                        ],
+                    },
+                )
+
+        return response, start_export_job
+
+    def test_batch_export_restricted_role_rejects_unreadable_image_path(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        self.app.frigate_config.auth.roles["limited_user"] = ["front_door"]
+
+        for image_path in (
+            f"{CLIPS_DIR}/review/thumb-backyard-123.456-abc.webp",
+            f"{CLIPS_DIR}/thumbs/backyard/123.webp",
+            f"{CLIPS_DIR}/faces/someone/1.webp",
+            f"{CLIPS_DIR}/custom/thumb.jpg",
+        ):
+            response, _ = self._batch_export_with_image(image_path, "limited_user")
+
+            assert response.status_code == 400, image_path
+
+    def test_batch_export_restricted_role_accepts_own_camera_image_path(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        self.app.frigate_config.auth.roles["limited_user"] = ["front_door"]
+        image_path = f"{CLIPS_DIR}/review/thumb-front_door-123.456-abc.webp"
+
+        response, start_export_job = self._batch_export_with_image(
+            image_path, "limited_user"
+        )
+
+        assert response.status_code == 202
+        assert start_export_job.call_args.args[1].image_path == image_path
+
+    def test_batch_export_unrestricted_roles_accept_custom_image_path(self):
+        self._insert_recording("rec-front", "front_door", 100, 400)
+        image_path = f"{CLIPS_DIR}/custom/thumb.jpg"
+
+        for role in ("admin", "viewer"):
+            response, start_export_job = self._batch_export_with_image(image_path, role)
+
+            assert response.status_code == 202, role
+            assert start_export_job.call_args.args[1].image_path == image_path
+
     def test_batch_export_non_admin_can_queue(self):
         self._insert_recording("rec-front", "front_door", 100, 400)
 
@@ -1431,3 +1595,79 @@ class TestHttpExport(BaseTestHttp):
             )
 
         assert response.status_code == 403
+
+    def test_download_export_case_with_multibyte_name(self):
+        """A case name outside latin-1 must not break the response headers."""
+        case = ExportCase.create(
+            id="case_multibyte",
+            name="テスト事案",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video_path = os.path.join(tmpdir, "現場カメラ.mp4")
+            with open(video_path, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="export_multibyte",
+                camera="front_door",
+                name="現場カメラ",
+                date=100,
+                video_path=video_path,
+                thumb_path=os.path.join(tmpdir, "multibyte_export.webp"),
+                in_progress=False,
+                export_case=case,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.get(f"/cases/{case.id}/download")
+
+        assert response.status_code == 200
+        # RFC 5987/6266: the UTF-8 name rides in filename*, and a latin-1 safe
+        # fallback stays in filename for old clients.
+        assert response.headers["content-disposition"] == (
+            'attachment; filename="case_multibyte.zip"; '
+            "filename*=UTF-8''%E3%83%86%E3%82%B9%E3%83%88%E4%BA%8B%E6%A1%88.zip"
+        )
+
+        archive = zipfile.ZipFile(io.BytesIO(response.content))
+        assert archive.namelist() == ["現場カメラ.mp4"]
+
+    def test_download_export_case_with_ascii_name(self):
+        """An ASCII case name still gets a plain, readable filename."""
+        case = ExportCase.create(
+            id="case_ascii",
+            name="Burglary 2026-08",
+            description="",
+            created_at=10,
+            updated_at=10,
+        )
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video_path = os.path.join(tmpdir, "ascii_export.mp4")
+            with open(video_path, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="export_ascii",
+                camera="front_door",
+                name="Front door",
+                date=100,
+                video_path=video_path,
+                thumb_path=os.path.join(tmpdir, "ascii_export.webp"),
+                in_progress=False,
+                export_case=case,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.get(f"/cases/{case.id}/download")
+
+        assert response.status_code == 200
+        assert (
+            response.headers["content-disposition"]
+            == 'attachment; filename="Burglary 2026-08.zip"; '
+            "filename*=UTF-8''Burglary%202026-08.zip"
+        )

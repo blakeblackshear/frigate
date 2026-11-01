@@ -1,6 +1,60 @@
 {
     "page": {
-        "preparingClip": "Przygotuje urywek…"
+        "preparingClip": "Przygotowywanie klipu…",
+        "noSession": "Brak aktywnej sesji odtwarzania debugowania",
+        "noSessionDesc": "Rozpocznij odtwarzanie debugowania z widoku Historii, klikając przycisk Akcje na pasku narzędzi i wybierając Odtwarzanie debugowania.",
+        "goToRecordings": "Przejdź do Historii",
+        "preparingClipDesc": "Frigate łączy nagrania dla wybranego zakresu czasu. W przypadku dłuższych zakresów może to potrwać chwilę.",
+        "startingCamera": "Uruchamianie odtwarzania debugowania…",
+        "startError": {
+            "title": "Nie udało się uruchomić odtwarzania debugowania",
+            "back": "Wróć do Historii"
+        },
+        "sourceCamera": "Kamera źródłowa",
+        "replayCamera": "Kamera odtwarzania",
+        "initializingReplay": "Inicjalizacja odtwarzania debugowania...",
+        "stoppingReplay": "Zatrzymywanie odtwarzania debugowania...",
+        "stopReplay": "Zatrzymaj odtwarzanie",
+        "confirmStop": {
+            "title": "Zatrzymać odtwarzanie debugowania?",
+            "description": "Spowoduje to zatrzymanie sesji i usunięcie wszystkich danych tymczasowych. Czy na pewno chcesz kontynuować?",
+            "confirm": "Zatrzymaj odtwarzanie",
+            "cancel": "Anuluj"
+        },
+        "activity": "Aktywność",
+        "objects": "Lista obiektów",
+        "audioDetections": "Wykrycia dźwięku",
+        "noActivity": "Nie wykryto aktywności",
+        "activeTracking": "Aktywne śledzenie",
+        "noActiveTracking": "Brak aktywnego śledzenia",
+        "configuration": "Konfiguracja",
+        "configurationDesc": "Dostosuj ustawienia detekcji ruchu i śledzenia obiektów dla kamery odtwarzania debugowania. Żadne zmiany nie zostaną zapisane w głównym pliku konfiguracyjnym Frigate."
     },
-    "title": "Debugowanie nagrań"
+    "title": "Odtwarzanie debugowania",
+    "description": "Odtwarzaj nagrania z kamer w celu debugowania. Lista obiektów wyświetla opóźnione w czasie podsumowanie wykrytych obiektów, a karta Komunikaty pokazuje strumień wewnętrznych komunikatów Frigate z odtwarzanego materiału.",
+    "websocket_messages": "Komunikaty",
+    "dialog": {
+        "title": "Rozpocznij odtwarzanie debugowania",
+        "description": "Utwórz tymczasową kamerę odtwarzania, która zapętla materiał archiwalny w celu diagnozowania problemów z detekcją i śledzeniem obiektów. Kamera odtwarzania będzie miała taką samą konfigurację detekcji jak kamera źródłowa. Wybierz zakres czasu, aby rozpocząć.",
+        "camera": "Kamera źródłowa",
+        "timeRange": "Zakres czasu",
+        "preset": {
+            "1m": "Ostatnia 1 minuta",
+            "5m": "Ostatnie 5 minut",
+            "timeline": "Z osi czasu",
+            "custom": "Niestandardowy"
+        },
+        "startButton": "Rozpocznij odtwarzanie",
+        "selectFromTimeline": "Wybierz",
+        "starting": "Uruchamianie odtwarzania...",
+        "startLabel": "Początek",
+        "endLabel": "Koniec",
+        "toast": {
+            "error": "Nie udało się rozpocząć odtwarzania debugowania: {{error}}",
+            "alreadyActive": "Sesja odtwarzania jest już aktywna",
+            "noRecordings": "Nie znaleziono nagrań w wybranym przedziale czasowym",
+            "stopError": "Nie udało się zatrzymać odtwarzania debugowania: {{error}}",
+            "goToReplay": "Przejdź do odtwarzania"
+        }
+    }
 }

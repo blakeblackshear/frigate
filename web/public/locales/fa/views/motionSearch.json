@@ -1,1 +1,78 @@
-{}
+{
+    "documentTitle": "جست‌وجوی حرکت - فریگیت",
+    "title": "جست‌وجوی حرکت",
+    "description": "یک چندضلعی رسم کنید تا منطقه مورد نظر را تعریف کنید، و یک بازه زمانی برای جست‌وجوی تغییرات حرکت در آن منطقه مشخص کنید.",
+    "selectCamera": "جست‌وجوی حرکت در حال بارگذاری است",
+    "startSearch": "شروع جست‌وجو",
+    "searchStarted": "جست‌وجو شروع شد",
+    "searchCancelled": "جست‌وجو لغو شد",
+    "cancelSearch": "لغو",
+    "searching": "جست‌وجو در حال انجام است.",
+    "scanning": "در حال اسکن {{time}}",
+    "searchComplete": "جست‌وجو کامل شد",
+    "noResultsYet": "برای یافتن تغییرات حرکت در منطقه انتخاب‌شده، یک جست‌وجو اجرا کنید",
+    "noChangesFound": "هیچ تغییر پیکسلی در منطقه انتخاب‌شده شناسایی نشد",
+    "changesFound_one": "{{count}} تغییر حرکت یافت شد",
+    "changesFound_other": "{{count}} تغییر حرکت یافت شدند",
+    "framesProcessed": "{{count}} فریم پردازش شد",
+    "jumpToTime": "پرش به این زمان",
+    "results": "نتایج",
+    "showSegmentHeatmap": "نقشه حرارتی",
+    "newSearch": "جست‌وجوی جدید",
+    "clearResults": "پاک کردن نتایج",
+    "clearROI": "پاک کردن چندضلعی",
+    "polygonControls": {
+        "points_one": "{{count}} نقطه",
+        "points_other": "{{count}} نقطه‌ها",
+        "undo": "برگرداندن آخرین نقطه",
+        "reset": "بازنشانی چندضلعی",
+        "drawMode": "رسم",
+        "moveMode": "جابه‌جایی"
+    },
+    "motionHeatmapLabel": "نقشه حرارتی حرکت",
+    "dialog": {
+        "title": "جست‌وجوی حرکت",
+        "cameraLabel": "دوربین",
+        "previewAlt": "پیش‌نمایش دوربین برای {{camera}}"
+    },
+    "timeRange": {
+        "title": "بازه جست‌وجو",
+        "start": "زمان شروع",
+        "end": "زمان پایان"
+    },
+    "settings": {
+        "title": "تنظیمات جست‌وجو",
+        "parallelMode": "حالت موازی",
+        "parallelModeDesc": "اسکن همزمان چندین بازه ضبط (سریع‌تر؛ منابع رمزگشایی بیشتری مصرف می‌کند)",
+        "threshold": "آستانه حساسیت",
+        "thresholdDesc": "مقادیر پایین‌تر تغییرات کوچک‌تری را شناسایی می‌کنند (۱-۲۵۵)",
+        "minArea": "حداقل مساحت تغییر",
+        "minAreaDesc": "حداقل اندازه یک منطقه متحرک، به درصد از منطقه مورد نظر",
+        "maxResults": "حداکثر نتایج",
+        "maxResultsDesc": "پس از این تعداد مهر زمانی منطبق، متوقف شود"
+    },
+    "errors": {
+        "noCamera": "لطفاً یک دوربین انتخاب کنید",
+        "noROI": "لطفاً یک منطقه مورد نظر رسم کنید",
+        "noTimeRange": "لطفاً یک بازه زمانی انتخاب کنید",
+        "invalidTimeRange": "زمان پایان باید بعد از زمان شروع باشد",
+        "searchFailed": "جست‌وجو ناموفق بود: {{message}}",
+        "polygonTooSmall": "چندضلعی باید حداقل ۳ نقطه داشته باشد",
+        "unknown": "خطای ناشناخته"
+    },
+    "changePercentage": "{{percentage}}٪ تغییر",
+    "metrics": {
+        "title": "معیارهای جست‌وجو",
+        "segmentsScanned": "بخش‌های اسکن‌شده",
+        "segmentsProcessed": "پردازش‌شده",
+        "segmentsSkippedInactive": "رد شده (بدون فعالیت)",
+        "segmentsSkippedHeatmap": "رد شده (بدون همپوشانی منطقه)",
+        "fallbackFullRange": "اسکن کامل بازه (پشتیبان)",
+        "framesDecoded": "فریم‌های رمزگشایی‌شده",
+        "wallTime": "زمان جست‌وجو",
+        "segmentErrors": "خطاهای بخش",
+        "seconds": "{{seconds}}ث",
+        "minutesSeconds": "{{minutes}}د {{seconds}}ث",
+        "scanSummary": "{{segments}} بخش · {{time}}"
+    }
+}

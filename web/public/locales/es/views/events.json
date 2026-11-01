@@ -40,12 +40,9 @@
     "last24Hours": "Últimas 24 horas"
   },
   "markTheseItemsAsReviewed": "Marcar estos elementos como revisados",
-  "selected": "{{count}} seleccionados",
   "selected_one": "{{count}} seleccionados",
   "selected_other": "{{count}} seleccionados",
   "detected": "detectado",
-  "suspiciousActivity": "Actividad Sospechosa",
-  "threateningActivity": "Actividad Amenzadora",
   "zoomIn": "Agrandar",
   "zoomOut": "Alejar",
   "detail": {
@@ -77,7 +74,7 @@
     "menuItem": "Ver vistas previas de movimiento",
     "title": "Vistas previas de movimiento: {{camera}}",
     "mobileSettingsTitle": "Ajustes de vistas previas de movimiento",
-    "mobileSettingsDesc": "Ajusta la velocidad de reproducción y el atenuado, y elige una fecha para revisar clips solo de movimiento.",
+    "mobileSettingsDesc": "Ajusta la velocidad de reproducción, el brillo y el recorte, y elige una fecha para revisar los clips que solo contienen movimiento.",
     "dim": "Atenuar",
     "dimAria": "Ajustar intensidad de atenuado",
     "dimDesc": "Aumenta el atenuado para mejorar la visibilidad de las áreas con movimiento.",
@@ -90,6 +87,9 @@
     "seekAria": "Mover el reproductor de {{camera}} a {{time}}",
     "filter": "Filtrar",
     "filterDesc": "Selecciona áreas para mostrar solo clips con movimiento en esas regiones.",
-    "filterClear": "Limpiar"
+    "filterClear": "Limpiar",
+    "crop": "Recortar para filtrar",
+    "cropAria": "Alternar las vistas previas de recorte a las áreas filtradas",
+    "cropDesc": "La vista previa con zoom se centra en las áreas de filtro seleccionadas en lugar de mostrar el fotograma completo."
   }
 }

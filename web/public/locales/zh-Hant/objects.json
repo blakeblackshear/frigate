@@ -9,7 +9,7 @@
   "stop_sign": "停止標示",
   "parking_meter": "停車柱",
   "bench": "長椅",
-  "motorcycle": "摩托車",
+  "motorcycle": "機車",
   "airplane": "飛機",
   "bus": "巴士",
   "train": "火車",
@@ -125,5 +125,7 @@
   "baby": "嬰兒",
   "baby_stroller": "嬰兒推車",
   "rickshaw": "人力車",
-  "rodent": "齧齒動物"
+  "rodent": "齧齒動物",
+  "possum": "負鼠",
+  "garbage_truck": "垃圾車"
 }

@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 from frigate.debug_replay import DebugReplayManager
 from frigate.jobs.debug_replay import (
     DebugReplayJob,
+    NoRecordingsError,
     RecordingDebugReplaySource,
     cancel_debug_replay_job,
     get_active_runner,
@@ -129,7 +130,7 @@ class TestStartDebugReplayJob(unittest.TestCase):
         empty_qs = MagicMock()
         empty_qs.count.return_value = 0
         with patch("frigate.jobs.debug_replay.query_recordings", return_value=empty_qs):
-            with self.assertRaises(ValueError):
+            with self.assertRaises(NoRecordingsError):
                 start_debug_replay_job(
                     source=RecordingDebugReplaySource(
                         source_camera="front",

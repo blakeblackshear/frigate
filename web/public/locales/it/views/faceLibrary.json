@@ -1,5 +1,4 @@
 {
-  "selectItem": "Seleziona {{item}}",
   "description": {
     "addFace": "Aggiungi una nuova raccolta alla Libreria dei Volti caricando la tua prima immagine.",
     "placeholder": "Inserisci un nome per questa raccolta",
@@ -7,12 +6,7 @@
     "nameCannotContainHash": "Il nome non può contenere #."
   },
   "details": {
-    "confidence": "Fiducia",
-    "person": "Persona",
-    "face": "Dettagli del volto",
-    "faceDesc": "Dettagli dell'oggetto tracciato che ha generato questo volto",
     "timestamp": "Orario",
-    "subLabelScore": "Punteggio dell'etichetta secondaria",
     "scoreInfo": "Il punteggio dell'etichetta secondaria è il punteggio ponderato per tutte le confidenze dei volti riconosciuti, quindi potrebbe differire dal punteggio mostrato nell'istantanea.",
     "unknown": "Sconosciuto"
   },
@@ -70,13 +64,9 @@
     }
   },
   "createFaceLibrary": {
-    "title": "Crea raccolta",
     "nextSteps": "Per costruire una base solida:<li>Usa la scheda \"Riconoscimenti recenti\" per selezionare e addestrare le immagini per ogni persona rilevata.</li><li>Concentrati sulle immagini dritte per ottenere risultati migliori; evita di addestrare immagini che catturano i volti da un'angolazione.</li></ul>",
-    "desc": "Crea una nuova raccolta",
     "new": "Crea nuovo volto"
   },
-  "readTheDocs": "Leggi la documentazione",
-  "selectFace": "Seleziona volto",
   "documentTitle": "Libreria dei Volti - Frigate",
   "uploadFaceImage": {
     "desc": "Carica un'immagine per scansionare i volti e includerla in {{pageToggle}}",
@@ -107,7 +97,6 @@
     "desc_other": "Vuoi davvero eliminare {{count}} volti? Questa azione non può essere annullata."
   },
   "nofaces": "Nessun volto disponibile",
-  "pixels": "{{area}}px",
   "reclassifyFaceAs": "Riclassifica il volto come:",
   "reclassifyFace": "Riclassifica il volto"
 }

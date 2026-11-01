@@ -88,7 +88,7 @@
   "squirrel": "Esquirol",
   "deer": "Cérvol",
   "animal": "Animal",
-  "bark": "Escorça",
+  "bark": "Lladruc",
   "fox": "Guineu",
   "goat": "Cabra",
   "rabbit": "Conill",
@@ -125,6 +125,7 @@
   "baby": "Nadó",
   "baby_stroller": "Cotxet",
   "rickshaw": "Ricksaw",
-  "Rodent": "Rosegador",
-  "rodent": "Rosegador"
+  "rodent": "Rosegador",
+  "possum": "Possum",
+  "garbage_truck": "Camió de brossa"
 }

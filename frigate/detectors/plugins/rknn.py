@@ -2,7 +2,7 @@ import logging
 import os.path
 import re
 import urllib.request
-from typing import Literal
+from typing import ClassVar, Literal
 
 import cv2
 import numpy as np
@@ -12,7 +12,7 @@ from frigate.const import MODEL_CACHE_DIR, SUPPORTED_RK_SOCS
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detection_runners import RKNNModelRunner
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
-from frigate.util.model import post_process_yolo
+from frigate.util.model import post_process_yolo, xyxy_to_xywh_for_nms
 from frigate.util.rknn_converter import auto_convert_model
 
 logger = logging.getLogger(__name__)
@@ -34,6 +34,9 @@ class RknnDetectorConfig(BaseDetectorConfig):
     model_config = ConfigDict(
         title="RKNN",
     )
+
+    device_spec_field: ClassVar[str] = "num_cores"
+    device_spec_type: ClassVar[type] = int
 
     type: Literal[DETECTOR_KEY]
     num_cores: int = Field(
@@ -285,7 +288,7 @@ class Rknn(DetectionApi):
 
         # run nms
         indices = cv2.dnn.NMSBoxes(
-            bboxes=boxes,
+            bboxes=xyxy_to_xywh_for_nms(boxes),
             scores=scores,
             score_threshold=0.4,
             nms_threshold=0.4,

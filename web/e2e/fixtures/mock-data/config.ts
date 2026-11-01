@@ -19,7 +19,7 @@ export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
 
-function deepMerge<T extends Record<string, unknown>>(
+export function deepMerge<T extends Record<string, unknown>>(
   base: T,
   overrides?: DeepPartial<T>,
 ): T {
@@ -52,6 +52,9 @@ function deepMerge<T extends Record<string, unknown>>(
 export const BASE_CONFIG = {
   ...configSnapshot,
   version: "0.15.0-test",
+  // injected by the /config endpoint rather than the Pydantic model, so it
+  // is absent from the snapshot
+  plus: { enabled: false },
   cameras: {
     ...configSnapshot.cameras,
     front_door: {

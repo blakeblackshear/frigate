@@ -54,15 +54,6 @@
       "12hour": "MM/dd h:mm:ssa",
       "24hour": "d MMM HH:mm:ss"
     },
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "%b %-d, %I:%M %p",
-      "24hour": "%b %-d, %H:%M"
-    },
-    "formattedTimestampWithYear": {
-      "12hour": "%b %-d %Y, %I:%M %p",
-      "24hour": "%b %-d %Y, %H:%M"
-    },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
       "24hour": "HH:mm"
@@ -111,7 +102,7 @@
     "enable": "Abilita",
     "saving": "Salvataggio…",
     "copy": "Copia",
-    "history": "Storico",
+    "history": "Cronologia",
     "exitFullscreen": "Esci da schermo intero",
     "on": "ACCESO",
     "copyCoordinates": "Copia coordinate",
@@ -141,7 +132,11 @@
     "savingAll": "Salvataggio di tutto…",
     "undoAll": "Annulla tutto",
     "applying": "Applica…",
-    "retry": "Riprova"
+    "retry": "Riprova",
+    "expand": "Espandi",
+    "collapse": "Riduci",
+    "clear": "Pulisci",
+    "reload": "Ricarica"
   },
   "unit": {
     "speed": {
@@ -174,8 +169,8 @@
     "configuration": "Configurazione",
     "languages": "Lingue",
     "appearance": "Aspetto",
-    "systemMetrics": "Metriche di sistema",
-    "systemLogs": "Registri di sistema",
+    "systemMetrics": "Salute e metriche",
+    "systemLogs": "Registri",
     "settings": "Impostazioni",
     "configurationEditor": "Editor di configurazione",
     "language": {
@@ -223,7 +218,8 @@
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Croato)",
       "bs": "Bosanski (Bosniaco)",
-      "zhHant": "繁體中文 (Cinese Tradizionale)"
+      "zhHant": "繁體中文 (Cinese Tradizionale)",
+      "be": "Беларуская (Bielorusso)"
     },
     "darkMode": {
       "label": "Modalità scura",
@@ -237,7 +233,6 @@
     "theme": {
       "label": "Tema",
       "blue": "Blu",
-      "contrast": "Alto contrasto",
       "green": "Verde",
       "default": "Predefinito",
       "red": "Rosso",
@@ -337,5 +332,36 @@
   "validation_errors": "Errori di convalida",
   "credentialField": {
     "savedPlaceholder": "Salvato — lascia vuoto per mantenere aggiornato"
+  },
+  "error": {
+    "title": "Questa pagina ha smesso di funzionare",
+    "desc": "Si è verificato un errore imprevisto nella pagina. Di solito, ricaricare la pagina risolve il problema. Se l'errore persiste, copia i dettagli e allegali a una discussione su GitHub.",
+    "staleTitle": "È necessario ricaricare la pagina",
+    "staleDesc": "Non è stato possibile caricare parte dell'interfaccia; di solito ciò indica che Frigate è stato aggiornato mentre questa scheda era aperta. Ricarica la pagina per passare alla nuova versione.",
+    "partial": "Una parte dell'interfaccia ha smesso di funzionare.",
+    "copyDetails": "Copia dettagli",
+    "copyFailed": "Impossibile copiare i dettagli negli appunti"
+  },
+  "commandMenu": {
+    "title": "Menu comandi",
+    "description": "Cerca pagine, fotocamere, impostazioni e azioni",
+    "placeholder": "Cerca pagine, fotocamere, impostazioni e azioni",
+    "empty": "Nessun risultato",
+    "hint": "{{key}} o / per aprire, Invio per eseguire",
+    "section": {
+      "recent": "Recente",
+      "pages": "Pagine",
+      "cameras": "Telecamere",
+      "cameraGroups": "Gruppi di telecamere",
+      "settings": "Impostazioni",
+      "actions": "Azioni"
+    },
+    "camera": {
+      "live": "Diretta",
+      "review": "Rivedi"
+    },
+    "action": {
+      "toggleTheme": "Attiva/disattiva la modalità chiara e scura"
+    }
   }
 }

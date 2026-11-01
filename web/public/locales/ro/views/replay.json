@@ -22,7 +22,8 @@
             "error": "Pornirea reluării de depanare a eșuat: {{error}}",
             "alreadyActive": "O sesiune de reluare este deja activă",
             "stopError": "Oprirea reluării de depanare a eșuat: {{error}}",
-            "goToReplay": "Mergi la reluare"
+            "goToReplay": "Mergi la reluare",
+            "noRecordings": "Nu s-au găsit înregistrări în intervalul de timp selectat"
         }
     },
     "page": {

@@ -8,6 +8,7 @@ import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { DropdownMenuSeparator } from "../ui/dropdown-menu";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
 type ZoneMaskFilterButtonProps = {
   selectedZoneMask?: PolygonType[];
@@ -46,8 +47,12 @@ export function ZoneMaskFilterButton({
     return (
       <Drawer>
         <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-        <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden p-3">
-          {content}
+        <DrawerContent className="mx-1 max-h-[75dvh] overflow-hidden">
+          <GeneralFilterContent
+            selectedZoneMask={selectedZoneMask}
+            updateZoneMaskFilter={updateZoneMaskFilter}
+            contentClassName="p-3"
+          />
         </DrawerContent>
       </Drawer>
     );
@@ -64,15 +69,22 @@ export function ZoneMaskFilterButton({
 type GeneralFilterContentProps = {
   selectedZoneMask: PolygonType[] | undefined;
   updateZoneMaskFilter: (labels: PolygonType[] | undefined) => void;
+  contentClassName?: string;
 };
 export function GeneralFilterContent({
   selectedZoneMask,
   updateZoneMaskFilter,
+  contentClassName,
 }: GeneralFilterContentProps) {
   const { t } = useTranslation(["components/filter"]);
   return (
     <>
-      <div className="h-auto overflow-y-auto overflow-x-hidden">
+      <div
+        className={cn(
+          "h-auto overflow-y-auto overflow-x-hidden",
+          contentClassName,
+        )}
+      >
         <div className="my-2.5 flex items-center justify-between">
           <Label
             className="mx-2 cursor-pointer text-primary"

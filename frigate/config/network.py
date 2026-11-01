@@ -1,4 +1,6 @@
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
+
+from frigate.util.config import parse_listen_address
 
 from .base import FrigateBaseModel
 
@@ -24,6 +26,28 @@ class ListenConfig(FrigateBaseModel):
         title="External port",
         description="External listening port for Frigate (default 8971).",
     )
+
+    # Runs before pydantic coerces a bool to an int port, which
+    # get_nginx_settings.py rejects when it reads the raw YAML
+    @field_validator("internal", "external", mode="before")
+    @classmethod
+    def validate_listen(cls, value: int | str) -> int | str:
+        return parse_listen_address(value)[0]
+
+    @property
+    def internal_port(self) -> int:
+        return parse_listen_address(self.internal)[1]
+
+    @property
+    def external_port(self) -> int:
+        return parse_listen_address(self.external)[1]
+
+    @model_validator(mode="after")
+    def validate_distinct_ports(self) -> "ListenConfig":
+        if self.internal_port == self.external_port:
+            raise ValueError("internal and external must listen on different ports")
+
+        return self
 
 
 class NetworkingConfig(FrigateBaseModel):

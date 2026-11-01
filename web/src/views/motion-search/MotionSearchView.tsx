@@ -51,7 +51,12 @@ import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import { useCameraPreviews } from "@/hooks/use-camera-previews";
 import { getChunkedTimeDay } from "@/utils/timelineUtil";
 
-import { MotionData, REVIEW_PADDING, ZoomLevel } from "@/types/review";
+import {
+  MotionData,
+  REVIEW_PADDING,
+  ReviewSegment,
+  ZoomLevel,
+} from "@/types/review";
 import {
   ASPECT_VERTICAL_LAYOUT,
   ASPECT_WIDE_LAYOUT,
@@ -85,6 +90,7 @@ type MotionSearchViewProps = {
 };
 
 const DEFAULT_EXPORT_WINDOW_SECONDS = 60;
+const NO_REVIEW_EVENTS: ReviewSegment[] = [];
 
 export default function MotionSearchView({
   config,
@@ -147,6 +153,7 @@ export default function MotionSearchView({
   const allPreviews = useCameraPreviews(timeRange, {
     camera: selectedCamera ?? undefined,
     fetchPreviews: !isSearchDialogOpen,
+    refreshOnHourRollover: true,
   });
 
   // ROI state
@@ -514,6 +521,12 @@ export default function MotionSearchView({
       : null,
   );
 
+  const timelineMotionEvents = useMemo(() => motionData ?? [], [motionData]);
+  const timelineNoRecordings = useMemo(
+    () => noRecordings ?? [],
+    [noRecordings],
+  );
+
   const recordingParams = useMemo(
     () => ({
       before: currentTimeRange.before,
@@ -603,16 +616,16 @@ export default function MotionSearchView({
   }, [selectedRangeIdx, chunkedTimeRange]);
 
   const updateSelectedSegment = useCallback(
-    (nextTime: number, updateStartTime: boolean) => {
+    (nextTime: number) => {
       const index = chunkedTimeRange.findIndex(
         (segment) => segment.after <= nextTime && segment.before >= nextTime,
       );
 
       if (index != -1) {
-        if (updateStartTime) {
-          setPlaybackStart(nextTime);
-        }
-
+        setPlaybackStart(nextTime);
+        // the outgoing chunk's player runs until the new source replaces
+        // it, reporting old positions while the new chunk loads
+        mainControllerRef.current?.pause();
         setSelectedRangeIdx(index);
       }
     },
@@ -626,7 +639,10 @@ export default function MotionSearchView({
         currentTime > currentTimeRange.before + 60 ||
         currentTime < currentTimeRange.after - 60
       ) {
-        updateSelectedSegment(currentTime, false);
+        // the player rebuilds its source against playbackStart, and a
+        // stale anchor resolves to no startPosition, dropping playback
+        // at the start of the hour instead of the drag target
+        updateSelectedSegment(currentTime);
         return;
       }
 
@@ -666,9 +682,12 @@ export default function MotionSearchView({
           currentTimeRange.after <= currentTime &&
           currentTimeRange.before >= currentTime
         ) {
+          // a source reload mid-seek resumes from playbackStart, so the
+          // anchor has to follow explicit seeks
+          setPlaybackStart(currentTime);
           mainControllerRef.current?.seekToTimestamp(currentTime, true);
         } else {
-          updateSelectedSegment(currentTime, true);
+          updateSelectedSegment(currentTime);
         }
       } else if (playerTime != currentTime) {
         mainControllerRef.current?.play();
@@ -688,9 +707,12 @@ export default function MotionSearchView({
       setCurrentTime(time);
 
       if (currentTimeRange.after <= time && currentTimeRange.before >= time) {
+        // a source reload mid-seek resumes from playbackStart, so the
+        // anchor has to follow explicit seeks
+        setPlaybackStart(time);
         mainControllerRef.current?.seekToTimestamp(time, play);
       } else {
-        updateSelectedSegment(time, true);
+        updateSelectedSegment(time);
       }
     },
     [currentTimeRange, updateSelectedSegment],
@@ -698,10 +720,10 @@ export default function MotionSearchView({
 
   const canStartSearch = Boolean(
     selectedCamera &&
-      searchRange &&
-      searchRange.before >= searchRange.after &&
-      polygonPoints.length >= 3 &&
-      !isDrawingROI,
+    searchRange &&
+    searchRange.before >= searchRange.after &&
+    polygonPoints.length >= 3 &&
+    !isDrawingROI,
   );
 
   const cancelMotionSearchJob = useCallback(
@@ -870,6 +892,20 @@ export default function MotionSearchView({
         setIsSearching(false);
       }
     } catch (error) {
+      const status = axios.isAxiosError(error)
+        ? error.response?.status
+        : undefined;
+
+      if (status === 409 || status === 429) {
+        toast.error(
+          t(
+            status === 409 ? "errors.alreadyRunning" : "errors.tooManySearches",
+          ),
+        );
+        setIsSearching(false);
+        return;
+      }
+
       let errorMessage = t("errors.unknown");
 
       if (axios.isAxiosError<{ message?: string; detail?: string }>(error)) {
@@ -1054,11 +1090,11 @@ export default function MotionSearchView({
           showHandlebar={true}
           handlebarTime={currentTime}
           setHandlebarTime={setCurrentTime}
-          events={[]}
-          motion_events={motionData ?? []}
-          noRecordingRanges={noRecordings ?? []}
+          events={NO_REVIEW_EVENTS}
+          motion_events={timelineMotionEvents}
+          noRecordingRanges={timelineNoRecordings}
           contentRef={contentRef}
-          onHandlebarDraggingChange={(dragging) => setScrubbing(dragging)}
+          onHandlebarDraggingChange={setScrubbing}
           showExportHandles={
             (exportMode === "timeline" || exportMode === "timeline_multi") &&
             Boolean(exportRange)
@@ -1344,6 +1380,7 @@ export default function MotionSearchView({
                   camera={selectedCamera}
                   currentTime={currentTime}
                   latestTime={timeRange.before}
+                  earliestTime={timeRange.after}
                   mode={exportMode}
                   range={exportRange}
                   showPreview={showExportPreview}
@@ -1464,6 +1501,7 @@ export default function MotionSearchView({
               camera={selectedCamera}
               currentTime={currentTime}
               latestTime={timeRange.before}
+              earliestTime={timeRange.after}
               mode={exportMode}
               range={exportRange}
               showPreview={showExportPreview}
@@ -1489,7 +1527,7 @@ export default function MotionSearchView({
               isDesktop
                 ? mainCameraAspect === "tall"
                   ? "mr-2 h-full min-h-0 min-w-0 flex-1 items-center"
-                  : "mr-2 h-full min-h-0 min-w-0 flex-1"
+                  : "mx-2 h-full min-h-0 min-w-0 flex-1"
                 : mainCameraAspect === "tall"
                   ? "flex-1 portrait:h-[40dvh] portrait:max-h-[40dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto portrait:items-center portrait:justify-center"
                   : "flex-1 portrait:max-h-[40dvh] portrait:flex-shrink-0 portrait:flex-grow-0 portrait:basis-auto landscape:items-center landscape:justify-center",

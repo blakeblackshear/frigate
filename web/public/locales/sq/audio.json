@@ -1,1 +1,27 @@
-{}
+{
+  "speech": "Fjalim",
+  "babbling": "Grumbullim",
+  "yell": "Bërtas",
+  "whispering": "Pëshpëritje",
+  "laughter": "E qeshur",
+  "snicker": "Qeshje e lehtë",
+  "crying": "Qarje",
+  "sigh": "Psherëtimë",
+  "singing": "Këndim",
+  "choir": "Kor",
+  "child_singing": "Fëmijët këndojnë",
+  "synthetic_singing": "Këndim sintetik",
+  "rapping": "Rap",
+  "humming": "Gumëzhimë",
+  "groan": "Rënkim",
+  "grunt": "Përgjërim",
+  "whistling": "Fishkëllima",
+  "breathing": "Frymëmarrja",
+  "wheeze": "Fryme me fishkëllimë",
+  "snoring": "Gërhitje",
+  "whoop": "Klithmë",
+  "chant": "Këndim ritmik",
+  "mantra": "Është një fjalë, tingull ose frazë e shenjtë që përsëritet gjatë meditimit apo lutjes për të ndihmuar përqendrimin",
+  "yodeling": "Këndim me jodlim",
+  "bellow": "Ulërimë, rrahje zëri"
+}

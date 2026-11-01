@@ -8,6 +8,7 @@ amdgpu
 analyzeduration
 Annke
 apexcharts
+Aqara
 arange
 argmax
 argmin
@@ -54,7 +55,6 @@ Dahua
 datasheet
 debconf
 deci
-deepstack
 defragment
 devcontainer
 DEVICEMAP
@@ -64,6 +64,7 @@ dsize
 dtype
 ECONNRESET
 edgetpu
+Eufy
 facenet
 fastapi
 faststart
@@ -82,6 +83,7 @@ frontdoor
 fstype
 fullchain
 fullscreen
+gatekeep
 genai
 generativeai
 genpts

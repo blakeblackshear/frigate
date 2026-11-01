@@ -55,10 +55,6 @@
       }
     }
   },
-  "camera": {
-    "enable": "Ota kamera käyttöön",
-    "disable": "Poista kamera käytöstä"
-  },
   "muteCameras": {
     "enable": "Mykistä kaikki kamerat",
     "disable": "Poista kaikkien kameroiden mykistys"
@@ -117,15 +113,13 @@
     "title": "Suoratoisto",
     "audio": {
       "tips": {
-        "title": "Äänen on oltava kytkettynä kameraan ja määritettynä go2rtc:ssä tätä suoratoistoa varten.",
-        "documentation": "Lue dokumentaatio "
+        "title": "Äänen on oltava kytkettynä kameraan ja määritettynä go2rtc:ssä tätä suoratoistoa varten."
       },
       "available": "Ääni on saatavilla tälle suoratoistolle",
       "unavailable": "Ääni ei ole saatavilla tälle suoratoistolle"
     },
     "twoWayTalk": {
       "tips": "Laitteesi on tuettava ominaisuutta ja WebRTC:n on oltava määritetty kaksisuuntaista ääntä varten.",
-      "tips.documentation": "Lue dokumentaatio ",
       "available": "Kaksisuuntainen ääni on saatavilla tässä suoratoistossa",
       "unavailable": "Kaksisuuntainen ääni ei ole käytettävissä tässä suoratoistossa"
     },
@@ -140,7 +134,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Asetukset",
-    "cameraEnabled": "Kamera käytössä",
     "objectDetection": "Kohteen tunnistus",
     "recording": "Nauhoitus",
     "snapshots": "Tilannekuvat",
@@ -156,8 +149,7 @@
       "all": "Kaikki",
       "motion": "Liike",
       "active_objects": "Aktiiviset kohteet"
-    },
-    "notAllTips": "{{source}}-tallenteiden säilytysmäärityksesi on asetettu <code>tila: {{effectiveRetainMode}}</code>, joten tämä tilattu tallenne säilyttää vain ne osat joiden tyyppi on {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Muokkaa asettelua",

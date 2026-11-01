@@ -132,8 +132,7 @@ export default function Events() {
     setMotionSearchDay(normalizedDay);
   }, []);
 
-  const [notificationTab, setNotificationTab] =
-    useState<TimelineType>("timeline");
+  const [notificationTab, setNotificationTab] = useState<TimelineType>();
 
   const getReviewDayBounds = useCallback((date: Date) => {
     const now = Date.now() / 1000;
@@ -197,6 +196,19 @@ export default function Events() {
     });
     return true;
   });
+
+  const reviewCamerasParam = useMemo(() => {
+    const selected: string | undefined = reviewSearchParams["cameras"];
+
+    if (!selected) {
+      return reviewCameras.join(",");
+    }
+
+    const selectedCameras = new Set(selected.split(","));
+    return reviewCameras
+      .filter((camera) => selectedCameras.has(camera))
+      .join(",");
+  }, [reviewCameras, reviewSearchParams]);
 
   useSearchEffect("labels", (labels: string) => {
     setReviewFilter({
@@ -330,8 +342,12 @@ export default function Events() {
   }, []);
 
   const getKey = useCallback(() => {
+    if (!timezone) {
+      return null;
+    }
+
     const params = {
-      cameras: reviewSearchParams["cameras"],
+      cameras: reviewCamerasParam,
       labels: reviewSearchParams["labels"],
       zones: reviewSearchParams["zones"],
       reviewed: null, // We want both reviewed and unreviewed items as we filter in the UI
@@ -339,7 +355,7 @@ export default function Events() {
       after: reviewSearchParams["after"] || last24Hours.after,
     };
     return ["review", params];
-  }, [reviewSearchParams, last24Hours]);
+  }, [reviewSearchParams, reviewCamerasParam, last24Hours, timezone]);
 
   const { data: reviews, mutate: updateSegments } = useSWR<ReviewSegment[]>(
     getKey,
@@ -361,10 +377,6 @@ export default function Events() {
     const motion: ReviewSegment[] = [];
 
     reviews?.forEach((segment) => {
-      if (config?.cameras[segment.camera]?.ui?.review === false) {
-        return;
-      }
-
       all.push(segment);
 
       switch (segment.severity) {
@@ -386,7 +398,7 @@ export default function Events() {
       detection: detections,
       significant_motion: motion,
     };
-  }, [reviews, config?.cameras]);
+  }, [reviews]);
 
   // update review items in place when a review segment ends
   const reviewUpdate = useFrigateReviews();
@@ -450,15 +462,17 @@ export default function Events() {
   // review summary
 
   const { data: reviewSummary, mutate: updateSummary } = useSWR<ReviewSummary>(
-    [
-      "review/summary",
-      {
-        timezone: timezone,
-        cameras: reviewSearchParams["cameras"] ?? null,
-        labels: reviewSearchParams["labels"] ?? null,
-        zones: reviewSearchParams["zones"] ?? null,
-      },
-    ],
+    timezone
+      ? [
+          "review/summary",
+          {
+            timezone: timezone,
+            cameras: reviewCamerasParam,
+            labels: reviewSearchParams["labels"] ?? null,
+            zones: reviewSearchParams["zones"] ?? null,
+          },
+        ]
+      : null,
     {
       revalidateOnFocus: true,
       refreshInterval: 30000,
@@ -473,13 +487,17 @@ export default function Events() {
 
   // recordings summary
 
-  const { data: recordingsSummary } = useSWR<RecordingsSummary>([
-    "recordings/summary",
-    {
-      timezone: timezone,
-      cameras: reviewSearchParams["cameras"] ?? null,
-    },
-  ]);
+  const { data: recordingsSummary } = useSWR<RecordingsSummary>(
+    timezone
+      ? [
+          "recordings/summary",
+          {
+            timezone: timezone,
+            cameras: reviewCamerasParam,
+          },
+        ]
+      : null,
+  );
 
   // preview videos
   const previewTimes = useMemo(() => {
@@ -499,6 +517,7 @@ export default function Events() {
     previewTimes ?? { after: 0, before: 0 },
     {
       fetchPreviews: previewTimes != undefined,
+      refreshOnHourRollover: true,
     },
   );
 

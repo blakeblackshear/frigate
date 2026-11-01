@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import useSWR from "swr";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Heading from "@/components/ui/heading";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -42,7 +41,7 @@ import { use24HourTime } from "@/hooks/use-date-utils";
 import { Link } from "react-router-dom";
 import { useTriggers } from "@/api/ws";
 import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
-import { CiCircleAlert } from "react-icons/ci";
+import { ConfigFieldMessage } from "@/components/config-form/ConfigFieldMessage";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { isDesktop } from "react-device-detect";
 
@@ -459,26 +458,11 @@ export default function TriggerView({
                   camera: cameraName,
                 })}
               </p>
-              <Alert variant="destructive">
-                <CiCircleAlert className="size-5" />
-                <AlertTitle>{t("triggers.semanticSearch.title")}</AlertTitle>
-                <AlertDescription>
-                  <Trans ns="views/settings">
-                    triggers.semanticSearch.desc
-                  </Trans>
-                  <div className="mt-3 flex items-center">
-                    <Link
-                      to={getLocaleDocUrl("configuration/semantic_search")}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline"
-                    >
-                      {t("readTheDocumentation", { ns: "common" })}{" "}
-                      <LuExternalLink className="ml-2 inline-flex size-3" />
-                    </Link>
-                  </div>
-                </AlertDescription>
-              </Alert>
+              <ConfigFieldMessage
+                messageKey="triggers.semanticSearch.desc"
+                severity="warning"
+                docLink="configuration/semantic_search"
+              />
             </div>
           </div>
         ) : (
@@ -574,6 +558,7 @@ export default function TriggerView({
                               </Badge>
                               <Link
                                 to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
+                                state={{ canGoBack: true }}
                                 className={cn(
                                   "flex items-center gap-1.5 text-xs text-muted-foreground",
                                   !trigger_status?.triggers[trigger.name]
@@ -735,6 +720,7 @@ export default function TriggerView({
                             <TableCell>
                               <Link
                                 to={`/explore?event_id=${trigger_status?.triggers[trigger.name]?.triggering_event_id || ""}`}
+                                state={{ canGoBack: true }}
                                 className={cn(
                                   "flex items-center gap-1.5 text-sm",
                                   !trigger_status?.triggers[trigger.name]

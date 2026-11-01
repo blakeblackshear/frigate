@@ -11,7 +11,7 @@ State classification allows you to train a custom MobileNetV2 classification mod
 
 :::info
 
-Training a custom state classification model requires a one-time internet connection to download MobileNetV2 base weights. Once trained, the model runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
+Training a custom state classification model requires an internet connection to download MobileNetV2 base weights. By default these weights are not cached in `/config/`, so they are downloaded again after the container is recreated. Once trained, the model runs fully offline. See [Network Requirements](/frigate/network_requirements#one-time-model-downloads) for details.
 
 :::
 
@@ -73,13 +73,25 @@ classification:
         interval: 10 # also run every N seconds (optional)
         cameras:
           front:
-            crop: [0, 180, 220, 400]
+            # [x1, y1, x2, y2] as decimals between 0 and 1, relative to the
+            # camera's detect resolution
+            crop: [0.0, 0.25, 0.3, 0.85]
 ```
+
+Crop coordinates are normalized: each value is a fraction of the camera's `detect` width or height, not a pixel value. Drawing the crop in the UI wizard writes these values for you.
 
 An optional config, `save_attempts`, can be set as a key under the model name. This defines the number of classification attempts to save in the Recent Classifications tab. For state classification models, the default is 100.
 
 </TabItem>
 </ConfigTabs>
+
+## Review items
+
+When a model's state changes while its camera has an active review item, the change is recorded on that review item. This includes changes in the few seconds before the item starts, such as a garage door opening just before the car is detected. State changes never create or extend review items on their own, and the first state reported after Frigate starts is not recorded as a change.
+
+Recorded changes appear in the review item's data as `classification_state_changes` (see the [`frigate/reviews`](/integrations/mqtt#frigatereviews) MQTT topic) and are passed to [GenAI review summaries](/configuration/genai/genai_review) as facts, so a description can note that a gate was opened during the activity.
+
+Change times are most accurate with `motion: true`. A model that only runs on an `interval` notices a change at its next run, so the change may be recorded late or attached to a later review item.
 
 ## Training the model
 

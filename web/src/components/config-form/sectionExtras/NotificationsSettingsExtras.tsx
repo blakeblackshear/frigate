@@ -10,7 +10,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 import { FrigateConfig } from "@/types/frigateConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -24,7 +24,7 @@ import {
 } from "react";
 import { useForm } from "react-hook-form";
 import { LuCheck, LuChevronDown, LuExternalLink, LuX } from "react-icons/lu";
-import { CiCircleAlert } from "react-icons/ci";
+import { ConfigFieldMessage } from "../ConfigFieldMessage";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -44,8 +44,7 @@ import {
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { use24HourTime } from "@/hooks/use-date-utils";
 import FilterSwitch from "@/components/filter/FilterSwitch";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Trans, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { isPWA } from "@/utils/isPWA";
@@ -342,7 +341,7 @@ export default function NotificationsSettingsExtras({
       set(nextNotifications, "enabled", desiredEnabled);
       const sanitizedNotifications = sanitizeSectionData(
         nextNotifications as ConfigSectionData,
-        ["enabled_in_config", "email"],
+        ["enabled_in_config", "email", "ttl"],
       );
       onPendingDataChange("notifications", camera.name, sanitizedNotifications);
       pendingCameraOverridesRef.current.add(camera.name);
@@ -372,9 +371,9 @@ export default function NotificationsSettingsExtras({
 
   const shouldFetchPubKey = Boolean(
     config &&
-      (config.notifications?.enabled || anyCameraNotificationsEnabled) &&
-      (watchAllEnabled ||
-        (Array.isArray(watchCameras) && watchCameras.length > 0)),
+    (config.notifications?.enabled || anyCameraNotificationsEnabled) &&
+    (watchAllEnabled ||
+      (Array.isArray(watchCameras) && watchCameras.length > 0)),
   );
 
   const { data: publicKey } = useSWR(
@@ -405,6 +404,11 @@ export default function NotificationsSettingsExtras({
             .post("notifications/register", {
               sub: pushSubscription,
             })
+            .then(() => {
+              toast.success(t("notification.toast.success.registered"), {
+                position: "top-center",
+              });
+            })
             .catch(() => {
               toast.error(t("notification.toast.error.registerFailed"), {
                 position: "top-center",
@@ -413,9 +417,6 @@ export default function NotificationsSettingsExtras({
               workerRegistration.unregister();
               setRegistration(null);
             });
-          toast.success(t("notification.toast.success.registered"), {
-            position: "top-center",
-          });
         });
     },
     [addMessage, publicKey, t],
@@ -468,37 +469,19 @@ export default function NotificationsSettingsExtras({
                 </div>
               </div>
 
-              <Alert variant="destructive">
-                <CiCircleAlert className="size-5" />
-                <AlertTitle>
-                  {t("notification.notificationUnavailable.title")}
-                </AlertTitle>
-                <AlertDescription>
-                  <Trans
-                    ns="views/settings"
-                    i18nKey={
-                      requiresPwaInstall
-                        ? "notification.notificationUnavailable.descPwa"
-                        : "notification.notificationUnavailable.desc"
-                    }
-                  />
-                  <div className="mt-3 flex items-center">
-                    <Link
-                      to={getLocaleDocUrl(
-                        requiresPwaInstall
-                          ? "configuration/notifications"
-                          : "configuration/authentication",
-                      )}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline"
-                    >
-                      {t("readTheDocumentation", { ns: "common" })}{" "}
-                      <LuExternalLink className="ml-2 inline-flex size-3" />
-                    </Link>
-                  </div>
-                </AlertDescription>
-              </Alert>
+              <ConfigFieldMessage
+                messageKey={
+                  requiresPwaInstall
+                    ? "notification.notificationUnavailable.descPwa"
+                    : "notification.notificationUnavailable.desc"
+                }
+                severity="warning"
+                docLink={
+                  requiresPwaInstall
+                    ? "configuration/notifications"
+                    : "configuration/authentication"
+                }
+              />
             </div>
           </SettingsGroupCard>
         </div>
@@ -508,7 +491,7 @@ export default function NotificationsSettingsExtras({
 
   return (
     <div className="flex size-full flex-col md:flex-row">
-      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto px-2 md:order-none">
+      <div className="scrollbar-container order-last mb-2 mt-2 flex h-full w-full flex-col overflow-y-auto md:order-none">
         <div className={cn("w-full max-w-5xl space-y-6")}>
           {isAdmin && (
             <SettingsGroupCard
@@ -647,7 +630,11 @@ export default function NotificationsSettingsExtras({
             <SettingsGroupCard title={t("notification.deviceSpecific")}>
               <div className={cn("space-y-2", isAdmin && "md:max-w-[50%]")}>
                 <Button
-                  aria-label={t("notification.registerDevice")}
+                  aria-label={
+                    registration != null
+                      ? t("notification.unregisterDevice")
+                      : t("notification.registerDevice")
+                  }
                   className="w-full md:w-auto"
                   disabled={!shouldFetchPubKey || publicKey == undefined}
                   onClick={() => {
@@ -747,20 +734,12 @@ export function CameraNotificationSwitch({
     useNotifications(camera);
   const { payload: notificationSuspendUntil, send: sendNotificationSuspend } =
     useNotificationSuspend(camera);
-  const [isSuspended, setIsSuspended] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (notificationSuspendUntil) {
-      setIsSuspended(
-        notificationSuspendUntil !== "0" || notificationState === "OFF",
-      );
-    }
-  }, [notificationSuspendUntil, notificationState]);
+  const isSuspended =
+    notificationSuspendUntil !== "0" || notificationState === "OFF";
 
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
 
   const handleSuspend = (duration: string) => {
-    setIsSuspended(true);
     if (duration == "off") {
       sendNotification("OFF");
     } else {

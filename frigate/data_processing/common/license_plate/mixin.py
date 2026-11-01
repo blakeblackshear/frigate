@@ -72,7 +72,7 @@ class LicensePlateProcessingMixin:
         # Object config
         self.lp_objects: list[str] = []
 
-        for obj, attributes in self.config.model.attributes_map.items():
+        for obj, attributes in self.config.all_attributes_map.items():
             if "license_plate" in attributes:
                 self.lp_objects.append(obj)
 
@@ -176,6 +176,7 @@ class LicensePlateProcessingMixin:
         """
         input_shape = [3, 48, 320]
         num_images = len(images)
+        outputs: list[np.ndarray] = []
 
         for index in range(0, num_images, self.batch_size):
             input_h, input_w = input_shape[1], input_shape[2]
@@ -195,11 +196,11 @@ class LicensePlateProcessingMixin:
                 norm_image = norm_image[np.newaxis, :]
                 norm_images.append(norm_image)
 
-        try:
-            outputs = self.model_runner.recognition_model(norm_images)  # type: ignore[arg-type]
-        except Exception as e:
-            logger.warning(f"Error running LPR recognition model: {e}")
-            return [], []
+            try:
+                outputs.extend(self.model_runner.recognition_model(norm_images))  # type: ignore[arg-type]
+            except Exception as e:
+                logger.warning(f"Error running LPR recognition model: {e}")
+                return [], []
 
         return self.ctc_decoder(outputs)
 
@@ -579,8 +580,8 @@ class LicensePlateProcessingMixin:
         boxes = []
         scores = []
 
-        for index in range(len(contours)):  # type: ignore[arg-type]
-            contour = contours[index]  # type: ignore[index]
+        for index in range(len(contours)):
+            contour = contours[index]
 
             # get minimum bounding box (rotated rectangle) around the contour and the smallest side length.
             points, sside = self._get_min_boxes(contour)
@@ -1172,6 +1173,28 @@ class LicensePlateProcessingMixin:
 
         return rep["plate"], rep["conf"], rep["char_confidences"], rep["area"]
 
+    def _passes_plate_filters(self, camera: str, plate: str) -> bool:
+        """Check a plate against the configured length and format filters."""
+        if len(plate) < self.lpr_config.min_plate_length:
+            logger.debug(
+                f"{camera}: Filtered out plate '{plate}' due to length ({len(plate)} < {self.lpr_config.min_plate_length})"
+            )
+            return False
+
+        if self.lpr_config.format:
+            try:
+                if not re.fullmatch(self.lpr_config.format, plate):
+                    logger.debug(
+                        f"{camera}: Filtered out plate '{plate}' due to format mismatch"
+                    )
+                    return False
+            except re.error:
+                logger.error(
+                    f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
+                )
+
+        return True
+
     def _generate_plate_event(self, camera: str, plate: str, plate_score: float) -> str:
         """Generate a unique ID for a plate event based on camera and text."""
         now = datetime.datetime.now().timestamp()
@@ -1199,7 +1222,7 @@ class LicensePlateProcessingMixin:
         """Look for license plates in image."""
         self.metrics.alpr_pps.value = self.plates_rec_second.eps()
         self.metrics.yolov9_lpr_pps.value = self.plates_det_second.eps()
-        camera = obj_data if dedicated_lpr else obj_data["camera"]
+        camera: str = obj_data if dedicated_lpr else obj_data["camera"]  # type: ignore[assignment]
         current_time = int(datetime.datetime.now().timestamp())
         debug_frame_id = int(datetime.datetime.now().timestamp() * 1000)
 
@@ -1268,7 +1291,7 @@ class LicensePlateProcessingMixin:
                 and obj_data.get("label") != "license_plate"
             ):
                 logger.debug(
-                    f"{camera}: Not a processing license plate for non car/motorcycle object."
+                    f"{camera}: Not a processing license plate for {obj_data.get('label', 'unknown')}."
                 )
                 return
 
@@ -1345,7 +1368,7 @@ class LicensePlateProcessingMixin:
 
                 if not license_plate:
                     logger.debug(
-                        f"{camera}: Detected no license plates for car/motorcycle object."
+                        f"{camera}: Detected no license plates for {obj_data.get('label', 'unknown')} object."
                     )
                     return
 
@@ -1511,10 +1534,14 @@ class LicensePlateProcessingMixin:
             plate_id = None
 
             for existing_id, data in self.detected_license_plates.items():
+                # entries from the object pipeline on this camera have no
+                # last_seen until they pass the filters below
+                last_seen = data.get("last_seen")
+
                 if (
                     data["camera"] == camera
-                    and data["last_seen"] is not None
-                    and current_time - data["last_seen"]
+                    and last_seen is not None
+                    and current_time - last_seen
                     <= self.config.cameras[camera].lpr.expire_time
                 ):
                     similarity = JaroWinkler.similarity(data["plate"], top_plate)
@@ -1525,6 +1552,11 @@ class LicensePlateProcessingMixin:
                         )
                         break
             if plate_id is None:
+                # the event id doubles as the cluster key, so a plate rejected
+                # after this point would leave an entry that never expires
+                if not self._passes_plate_filters(camera, top_plate):
+                    return
+
                 plate_id = self._generate_plate_event(camera, top_plate, avg_confidence)
                 logger.debug(
                     f"{camera}: New plate event for dedicated LPR camera {plate_id}: {top_plate}"
@@ -1569,26 +1601,11 @@ class LicensePlateProcessingMixin:
                 f"{camera}: Clustering changed top plate '{top_plate}' (conf: {avg_confidence:.3f}) to rep '{rep_plate}' (conf: {rep_conf:.3f})"
             )
 
-        # Apply length and format filters to the clustered representative
-        # rather than individual OCR readings, so noisy variants still
-        # contribute to clustering even when they don't pass on their own.
-        if len(rep_plate) < self.lpr_config.min_plate_length:
-            logger.debug(
-                f"{camera}: Filtered out clustered plate '{rep_plate}' due to length ({len(rep_plate)} < {self.lpr_config.min_plate_length})"
-            )
+        # filter the clustered representative rather than individual OCR
+        # readings, so noisy variants still contribute to clustering even
+        # when they don't pass on their own
+        if not self._passes_plate_filters(camera, rep_plate):
             return
-
-        if self.lpr_config.format:
-            try:
-                if not re.fullmatch(self.lpr_config.format, rep_plate):
-                    logger.debug(
-                        f"{camera}: Filtered out clustered plate '{rep_plate}' due to format mismatch"
-                    )
-                    return
-            except re.error:
-                logger.error(
-                    f"{camera}: Invalid regex in LPR format configuration: {self.lpr_config.format}"
-                )
 
         # Update stored rep
         self.detected_license_plates[id].update(
