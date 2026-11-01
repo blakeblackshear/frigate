@@ -415,6 +415,7 @@ export default function NotificationsSettingsExtras({
               pushSubscription.unsubscribe();
               workerRegistration.unregister();
               setRegistration(null);
+              removeMessage("notification_settings", "registration");
             });
         })
         .catch(() => {
@@ -423,9 +424,10 @@ export default function NotificationsSettingsExtras({
           });
           workerRegistration.unregister();
           setRegistration(null);
+          removeMessage("notification_settings", "registration");
         });
     },
-    [addMessage, publicKey, t],
+    [addMessage, removeMessage, publicKey, t],
   );
 
   useEffect(() => {

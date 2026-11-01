@@ -629,7 +629,7 @@ export default function LiveDashboardView({
                           resetPreferredLiveMode(camera.name)
                         }
                         playAudio={audioStates[camera.name] ?? false}
-                        volume={volumeStates[camera.name]}
+                        volume={volumeStates[camera.name] ?? 1}
                       />
                     </LiveContextMenu>
                   );

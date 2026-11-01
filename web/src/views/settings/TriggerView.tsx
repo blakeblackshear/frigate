@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -133,6 +133,9 @@ export default function TriggerView({
 
   // watch websocket for updates
   const { payload: triggers_status_ws } = useTriggers();
+  const highlightTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>(
+    {},
+  );
 
   useEffect(() => {
     if (!triggers_status_ws) return;
@@ -148,11 +151,11 @@ export default function TriggerView({
       return current;
     });
 
-    // not cleared on the next payload, or a second trigger firing within
-    // 3s would leave this one highlighted
-    setTimeout(() => {
+    const name = triggers_status_ws.name;
+    clearTimeout(highlightTimers.current[name]);
+    highlightTimers.current[name] = setTimeout(() => {
       setTriggeredTrigger((prev) =>
-        (prev || []).filter((name) => name !== triggers_status_ws.name),
+        (prev || []).filter((triggered) => triggered !== name),
       );
     }, 3000);
   }, [triggers_status_ws, selectedCamera, mutate]);

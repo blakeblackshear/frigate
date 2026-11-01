@@ -794,7 +794,7 @@ export default function DraggableGridLayout({
                   toggleAudio={() => toggleAudio(camera.name)}
                   statsState={statsStates[camera.name]}
                   toggleStats={() => toggleStats(camera.name)}
-                  volumeState={volumeStates[camera.name]}
+                  volumeState={volumeStates[camera.name] ?? 1}
                   setVolumeState={(value) =>
                     setVolumeStates((prev) => ({
                       ...prev,
@@ -839,7 +839,7 @@ export default function DraggableGridLayout({
                     onError={(e) => handleError(camera.name, e)}
                     onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                     playAudio={audioStates[camera.name]}
-                    volume={volumeStates[camera.name]}
+                    volume={volumeStates[camera.name] ?? 1}
                     onLiveAspectChange={liveAspectHandlers[camera.name]}
                   />
                 </GridLiveContextMenu>
