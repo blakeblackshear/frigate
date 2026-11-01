@@ -511,7 +511,7 @@ export default function LiveCameraView({
     }
   }, [webRTCVerdictPending]);
 
-  useKeyboardListener(["m", "Escape"], (key, modifiers) => {
+  useKeyboardListener(["m", "t", "Escape"], (key, modifiers) => {
     if (!modifiers.down) {
       return true;
     }
