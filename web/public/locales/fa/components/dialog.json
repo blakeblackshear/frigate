@@ -122,7 +122,6 @@
       "newCaseNamePlaceholder": "نام پرونده جدید",
       "newCaseDescriptionPlaceholder": "توضیحات مورد",
       "label": "مورد",
-      "nonAdminHelp": "یک مورد جدید برای این خروجی‌ها ایجاد خواهد شد.",
       "placeholder": "انتخاب یک مورد"
     },
     "queueing": "در حال قرار دادن خروجی در صف...",
