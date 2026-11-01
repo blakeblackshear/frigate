@@ -748,7 +748,6 @@ export function CameraNotificationSwitch({
   };
 
   const handleCustomSuspend = (totalMinutes: number) => {
-    setIsSuspended(true);
     sendNotificationSuspend(totalMinutes);
   };
 
