@@ -24,7 +24,7 @@ from frigate.detectors.detector_config import (
     InputDTypeEnum,
     ModelConfig,
 )
-from frigate.util.builtin import EventsPerSecond, load_labels
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
 from frigate.util.image import SharedMemoryFrameManager, UntrackedSharedMemory
 from frigate.util.process import FrigateProcess
 
@@ -129,7 +129,7 @@ class DetectorRunner(FrigateProcess):
         super().__init__(stop_event, PROCESS_PRIORITY_HIGH, name=name, daemon=True)
         self.detection_queue = detection_queue
         self.cameras = cameras
-        self.avg_speed = avg_speed
+        self.avg_speed = InferenceSpeed(avg_speed)
         self.start_time = start_time
         self.config = config
         self.detector_config = detector_config
@@ -182,7 +182,7 @@ class DetectorRunner(FrigateProcess):
             detector_publisher.publish(connection_id)
             self.start_time.value = 0.0
 
-            self.avg_speed.value = (self.avg_speed.value * 9 + duration) / 10
+            self.avg_speed.update(duration)
 
         detector_publisher.stop()
         logger.info("Exited detection process...")
@@ -203,7 +203,7 @@ class AsyncDetectorRunner(FrigateProcess):
         super().__init__(stop_event, PROCESS_PRIORITY_HIGH, name=name, daemon=True)
         self.detection_queue = detection_queue
         self.cameras = cameras
-        self.avg_speed = avg_speed
+        self.avg_speed = InferenceSpeed(avg_speed)
         self.start_time = start_time
         self.config = config
         self.detector_config = detector_config
@@ -272,7 +272,7 @@ class AsyncDetectorRunner(FrigateProcess):
             self._publisher.publish(connection_id)
 
             # update timers
-            self.avg_speed.value = (self.avg_speed.value * 9 + duration) / 10
+            self.avg_speed.update(duration)
             self.start_time.value = 0.0
 
     def run(self) -> None:
