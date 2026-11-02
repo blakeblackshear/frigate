@@ -1,4 +1,3 @@
-import datetime
 import logging
 import threading
 import time
@@ -86,7 +85,7 @@ class FrigateWatchdog(threading.Thread):
             exitcode,
         )
 
-        now = datetime.datetime.now().timestamp()
+        now = time.monotonic()
 
         if entry.is_restarting_too_fast(now):
             logger.error(
@@ -113,7 +112,8 @@ class FrigateWatchdog(threading.Thread):
             logger.exception("Failed to restart %s", entry.name)
 
     def _check_detectors(self) -> None:
-        now = datetime.datetime.now().timestamp()
+        # detection_start is set from the monotonic clock
+        now = time.monotonic()
 
         for name, detector in self.detectors.items():
             detection_start = detector.detection_start.value

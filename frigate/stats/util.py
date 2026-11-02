@@ -106,6 +106,14 @@ def stats_init(
     return stats_tracking
 
 
+def _monotonic_to_wall(timestamp: float) -> float:
+    """Convert a monotonic timestamp to wall clock time, keeping 0 as unset."""
+    if timestamp <= 0:
+        return 0.0
+
+    return time.time() - (time.monotonic() - timestamp)
+
+
 def get_detector_stats(
     stats_tracking: StatsTrackingTypes,
 ) -> dict[str, dict[str, Any]]:
@@ -128,7 +136,7 @@ def get_detector_stats(
             "inference_speed": round(detector.avg_inference_speed.value * 1000, 2),  # type: ignore[attr-defined]
             # issue https://github.com/python/typeshed/issues/8799
             # from mypy 0.981 onwards
-            "detection_start": detector.detection_start.value,  # type: ignore[attr-defined]
+            "detection_start": _monotonic_to_wall(detector.detection_start.value),  # type: ignore[attr-defined]
             # issue https://github.com/python/typeshed/issues/8799
             # from mypy 0.981 onwards
             "pid": pid,
