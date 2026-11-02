@@ -6371,6 +6371,7 @@ paths:
           required: false
           schema:
             type: integer
+            minimum: 0
             description: Padding to apply to the vod.
             default: 0
             title: Padding
@@ -7576,6 +7577,7 @@ paths:
           required: false
           schema:
             type: integer
+            minimum: 1
             default: 30
             title: Scale
       responses:

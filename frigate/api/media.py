@@ -862,7 +862,7 @@ async def vod_hour(
 async def vod_event(
     request: Request,
     event_id: str,
-    padding: int = Query(0, description="Padding to apply to the vod."),
+    padding: int = Query(0, ge=0, description="Padding to apply to the vod."),
 ):
     try:
         event: Event = Event.get(Event.id == event_id)
@@ -1521,6 +1521,7 @@ async def preview_gif(
                     | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
                 )
                 .where(Previews.camera == camera_name)
+                .order_by(Previews.start_time.asc())
                 .limit(1)
                 .get()
             )
@@ -1530,7 +1531,8 @@ async def preview_gif(
                 status_code=404,
             )
 
-        diff = start_ts - preview.start_time
+        clip_start = max(start_ts, preview.start_time)
+        diff = clip_start - preview.start_time
         minutes = int(diff / 60)
         seconds = int(diff % 60)
         config: FrigateConfig = request.app.frigate_config
@@ -1542,7 +1544,7 @@ async def preview_gif(
             "-ss",
             f"00:{minutes}:{seconds}",
             "-t",
-            f"{end_ts - start_ts}",
+            f"{end_ts - clip_start}",
             "-i",
             preview.path,
             "-r",
@@ -1709,6 +1711,7 @@ async def preview_mp4(
                     | ((start_ts > Previews.start_time) & (end_ts < Previews.end_time))
                 )
                 .where(Previews.camera == camera_name)
+                .order_by(Previews.start_time.asc())
                 .limit(1)
                 .get()
             )
@@ -1721,7 +1724,8 @@ async def preview_mp4(
                 status_code=404,
             )
 
-        diff = start_ts - preview.start_time
+        clip_start = max(start_ts, preview.start_time)
+        diff = clip_start - preview.start_time
         minutes = int(diff / 60)
         seconds = int(diff % 60)
         config: FrigateConfig = request.app.frigate_config
@@ -1734,7 +1738,7 @@ async def preview_mp4(
             "-ss",
             f"00:{minutes}:{seconds}",
             "-t",
-            f"{end_ts - start_ts}",
+            f"{end_ts - clip_start}",
             "-i",
             preview.path,
             "-r",

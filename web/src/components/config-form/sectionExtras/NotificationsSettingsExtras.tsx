@@ -415,10 +415,19 @@ export default function NotificationsSettingsExtras({
               pushSubscription.unsubscribe();
               workerRegistration.unregister();
               setRegistration(null);
+              removeMessage("notification_settings", "registration");
             });
+        })
+        .catch(() => {
+          toast.error(t("notification.toast.error.registerFailed"), {
+            position: "top-center",
+          });
+          workerRegistration.unregister();
+          setRegistration(null);
+          removeMessage("notification_settings", "registration");
         });
     },
-    [addMessage, publicKey, t],
+    [addMessage, removeMessage, publicKey, t],
   );
 
   useEffect(() => {
