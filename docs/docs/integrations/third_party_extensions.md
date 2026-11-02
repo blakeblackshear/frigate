@@ -47,6 +47,10 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.
 
+## [FrigatePiP](https://github.com/maciejgornicz/frigate-pip)
+
+[FrigatePiP](https://github.com/maciejgornicz/frigate-pip) pops up a small picture-in-picture window with a camera's live video in a corner of the screen when Frigate detects an object, and closes it when the activity ends. It runs as a Windows tray app and on Linux (desktop windows, a console framebuffer, a terminal or tmux popups), receives events over Frigate's WebSocket or MQTT and plays the go2rtc RTSP stream with hardware decoding and camera audio.
+
 ## [kiosk-monitor](https://github.com/extremeshok/kiosk-monitor)
 
 [kiosk-monitor](https://github.com/extremeshok/kiosk-monitor) is a Raspberry Pi watchdog that runs Chromium fullscreen on a Frigate dashboard (optionally with VLC on a second monitor for an RTSP camera stream), auto-restarts on frozen screens or unreachable URLs, and ships a Birdseye-aware Chromium helper that auto-sizes the grid to the display.
