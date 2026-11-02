@@ -361,7 +361,7 @@ The NPU firmware is loaded by the host kernel and is not part of the Frigate ima
 
 Frigate bundles a specific version of Intel's [linux-npu-driver](https://github.com/intel/linux-npu-driver/releases), and the host firmware must come from that release or a newer one. Firmware older than the bundled driver may fail with `MAPPED_INFERENCE_VERSION is NOT compatible with the ELF`, where `Expected` is the version the firmware supports and `received` is the version the bundled compiler produced. Distributions often package older firmware than the driver Frigate ships, so check the build date on the host with `sudo dmesg | grep -i vpu` and update it there if needed.
 
-Intel NPUs cannot be used under Home Assistant OS, which does not include the NPU firmware.
+Intel NPUs can be used under Home Assistant OS 18.4 or newer.
 
 ### Configuration {#configuration-openvino}
 
