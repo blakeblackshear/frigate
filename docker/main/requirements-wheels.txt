@@ -45,7 +45,7 @@ scipy == 1.17.*
 openvino == 2026.4.*
 onnxruntime == 1.31.*
 # Embeddings
-transformers == 5.21.*
+transformers == 5.22.*
 # Generative AI
 google-genai == 2.34.*
 ollama == 0.6.*
