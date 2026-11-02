@@ -1086,13 +1086,6 @@
             "title": "Confirm Password",
             "placeholder": "Confirm Password"
           },
-          "strength": {
-            "title": "Password strength: ",
-            "weak": "Weak",
-            "medium": "Medium",
-            "strong": "Strong",
-            "veryStrong": "Very Strong"
-          },
           "requirements": {
             "title": "Password requirements:",
             "length": "At least 12 characters"

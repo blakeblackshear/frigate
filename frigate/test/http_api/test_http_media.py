@@ -584,6 +584,10 @@ class TestHttpMedia(BaseTestHttp):
                 {"start_time": 1160, "end_time": 1300},
             ]
 
+            # a non-positive scale would never advance the gap scan
+            response = client.get("/recordings/unavailable", params={"scale": 0})
+            assert response.status_code == 422
+
     def test_recordings_summary_day_attribution_by_start_time(self):
         """
         A recording spanning midnight marks only its start day.

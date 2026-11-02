@@ -575,25 +575,19 @@ export default function DraggableGridLayout({
   };
 
   useEffect(() => {
-    if (!allGroupsStreamingSettings) {
-      return;
-    }
-
     const initialAudioStates: AudioState = {};
     const initialVolumeStates: VolumeState = {};
 
-    Object.entries(allGroupsStreamingSettings).forEach(([_, groupSettings]) => {
-      if (groupSettings) {
-        Object.entries(groupSettings).forEach(([camera, cameraSettings]) => {
-          initialAudioStates[camera] = cameraSettings.playAudio ?? false;
-          initialVolumeStates[camera] = cameraSettings.volume ?? 1;
-        });
-      }
-    });
+    Object.entries(currentGroupStreamingSettings ?? {}).forEach(
+      ([camera, cameraSettings]) => {
+        initialAudioStates[camera] = cameraSettings.playAudio ?? false;
+        initialVolumeStates[camera] = cameraSettings.volume ?? 1;
+      },
+    );
 
     setAudioStates(initialAudioStates);
     setVolumeStates(initialVolumeStates);
-  }, [allGroupsStreamingSettings]);
+  }, [currentGroupStreamingSettings, cameraGroup]);
 
   const toggleAudio = (cameraName: string) => {
     setAudioStates((prev) => ({
@@ -800,7 +794,7 @@ export default function DraggableGridLayout({
                   toggleAudio={() => toggleAudio(camera.name)}
                   statsState={statsStates[camera.name]}
                   toggleStats={() => toggleStats(camera.name)}
-                  volumeState={volumeStates[camera.name]}
+                  volumeState={volumeStates[camera.name] ?? 1}
                   setVolumeState={(value) =>
                     setVolumeStates((prev) => ({
                       ...prev,
@@ -845,7 +839,7 @@ export default function DraggableGridLayout({
                     onError={(e) => handleError(camera.name, e)}
                     onResetLiveMode={() => resetPreferredLiveMode(camera.name)}
                     playAudio={audioStates[camera.name]}
-                    volume={volumeStates[camera.name]}
+                    volume={volumeStates[camera.name] ?? 1}
                     onLiveAspectChange={liveAspectHandlers[camera.name]}
                   />
                 </GridLiveContextMenu>

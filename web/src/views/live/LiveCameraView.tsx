@@ -511,7 +511,14 @@ export default function LiveCameraView({
     }
   }, [webRTCVerdictPending]);
 
-  useKeyboardListener(["m", "Escape"], (key, modifiers) => {
+  const toggleMic = () => {
+    setMic(!mic);
+    if (!mic && !audio) {
+      setAudio(true);
+    }
+  };
+
+  useKeyboardListener(["m", "t", "Escape"], (key, modifiers) => {
     if (!modifiers.down) {
       return true;
     }
@@ -525,7 +532,7 @@ export default function LiveCameraView({
         break;
       case "t":
         if (supports2WayTalk && talkAvailable) {
-          setMic(!mic);
+          toggleMic();
           return true;
         }
         break;
@@ -792,12 +799,7 @@ export default function LiveCameraView({
                         ? t("twoWayTalk.disable", { ns: "views/live" })
                         : t("twoWayTalk.enable", { ns: "views/live" })
                 }
-                onClick={() => {
-                  setMic(!mic);
-                  if (!mic && !audio) {
-                    setAudio(true);
-                  }
-                }}
+                onClick={toggleMic}
                 disabled={!cameraEnabled || debug || !talkAvailable}
               />
             )}

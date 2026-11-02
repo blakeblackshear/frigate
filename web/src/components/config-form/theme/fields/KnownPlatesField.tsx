@@ -307,6 +307,9 @@ export function KnownPlatesField(props: FieldProps) {
   );
 
   const handleAddEntry = useCallback(() => {
+    if ("" in data) {
+      return;
+    }
     const next = { ...data, "": [""] };
     onChange(next, fieldPath);
   }, [data, fieldPath, onChange]);

@@ -393,8 +393,8 @@ class TestHttpApp(BaseTestHttp):
     def test_event_time_filtering(self):
         morning_id = "123456.random"
         evening_id = "654321.random"
-        morning = 1656590400  # 06/30/2022 6 am (GMT)
-        evening = 1656633600  # 06/30/2022 6 pm (GMT)
+        morning = 1656568800  # 06/30/2022 6 am (GMT)
+        evening = 1656612000  # 06/30/2022 6 pm (GMT)
 
         with AuthTestClient(self.app) as client:
             super().insert_mock_event(morning_id, morning)
@@ -417,6 +417,12 @@ class TestHttpApp(BaseTestHttp):
             ).json()
             assert events
             assert len(events) == 1
+            # an event in the first minute of the range is included
+            events = client.get(
+                "/events",
+                params={"time_range": "06:00,24:00"},
+            ).json()
+            assert len(events) == 2
 
     def test_set_delete_sub_label(self):
         mock_event_updater = Mock(spec=EventMetadataPublisher)

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.json_schema import SkipJsonSchema
 
 
@@ -11,7 +11,7 @@ class MediaRecordingsAvailabilityQueryParams(BaseModel):
     cameras: str = "all"
     before: float | SkipJsonSchema[None] = None
     after: float | SkipJsonSchema[None] = None
-    scale: int = 30
+    scale: int = Field(default=30, ge=1)
 
 
 class RecordingsDeleteQueryParams(BaseModel):

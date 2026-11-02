@@ -163,8 +163,7 @@ async def review(
 
     # Apply ordering and limit
     review_query = (
-        review_query.order_by(ReviewSegment.severity.asc())
-        .order_by(ReviewSegment.start_time.desc())
+        review_query.order_by(ReviewSegment.start_time.desc())
         .limit(limit)
         .dicts()
         .iterator()

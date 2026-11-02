@@ -1470,6 +1470,9 @@ class RecordingExporter(threading.Thread):
 
         try:
             self._run_export(video_path, thumb_path)
+        except Exception:
+            self._discard_failed_export(video_path, thumb_path)
+            raise
         finally:
             # staged runs hold a full copy of the export, so they must not
             # survive a failure the way the small chapter file could
@@ -1479,7 +1482,8 @@ class RecordingExporter(threading.Thread):
         """Drop the partial output and the row that promised it."""
         Path(video_path).unlink(missing_ok=True)
         Export.delete().where(Export.id == self.export_id).execute()
-        Path(thumb_path).unlink(missing_ok=True)
+        if thumb_path:
+            Path(thumb_path).unlink(missing_ok=True)
 
     def _run_export(self, video_path: str, thumb_path: str) -> None:
         try:
@@ -1498,6 +1502,7 @@ class RecordingExporter(threading.Thread):
             else:
                 ffmpeg_cmd, playlist_lines = self.get_preview_export_command(video_path)
         except DoesNotExist:
+            self._discard_failed_export(video_path, thumb_path)
             return
 
         # When neither custom ffmpeg arg is set the default path uses
