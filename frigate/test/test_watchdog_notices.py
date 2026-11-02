@@ -18,10 +18,10 @@ class TestDetectorStuckNotice(unittest.TestCase):
         watchdog = FrigateWatchdog({"ov": detector}, MagicMock())
 
         with (
-            patch("frigate.watchdog.datetime") as mock_datetime,
+            patch("frigate.watchdog.time") as mock_time,
             patch("frigate.watchdog.raise_notice") as raise_notice,
         ):
-            mock_datetime.datetime.now.return_value.timestamp.return_value = 100.0
+            mock_time.monotonic.return_value = 100.0
             watchdog._check_detectors()
 
         detector.start_or_restart.assert_called_once()

@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import time
 from typing import Any
 
 import cv2
@@ -67,7 +68,8 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         else:
             self.inference_speed = None
 
-        self.last_run = datetime.datetime.now().timestamp()
+        # monotonic so a backward wall clock step can't pause classification
+        self.last_run = time.monotonic()
         self.__build_detector()
 
     def __build_detector(self) -> None:
@@ -215,11 +217,12 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         should_run = False
 
         now = datetime.datetime.now().timestamp()
+        mono_now = time.monotonic()
         if (
             self.model_config.state_config.interval
-            and now > self.last_run + self.model_config.state_config.interval
+            and mono_now > self.last_run + self.model_config.state_config.interval
         ):
-            self.last_run = now
+            self.last_run = mono_now
             should_run = True
 
         if (
@@ -228,8 +231,8 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             and any([box_overlaps(crop, mb) for mb in frame_data.get("motion", [])])
         ):
             # classification should run at most once per second
-            if now > self.last_run + 1:
-                self.last_run = now
+            if mono_now > self.last_run + 1:
+                self.last_run = mono_now
                 should_run = True
 
         # Shortcut: always run if we have a pending state verification to complete
@@ -237,9 +240,9 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             not should_run
             and camera in self.state_history
             and self.state_history[camera]["pending_state"] is not None
-            and now > self.last_run + 0.5
+            and mono_now > self.last_run + 0.5
         ):
-            self.last_run = now
+            self.last_run = mono_now
             should_run = True
             logger.debug(
                 f"Running verification check for pending state: {self.state_history[camera]['pending_state']} ({self.state_history[camera]['consecutive_count']}/3)"

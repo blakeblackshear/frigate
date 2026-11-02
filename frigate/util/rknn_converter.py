@@ -292,10 +292,10 @@ def wait_for_conversion_completion(
     Returns:
         True if RKNN model appears, False if timeout
     """
-    start_time = time.time()
+    start_time = time.monotonic()
     lock = FileLock(lock_file_path, stale_timeout=600)
 
-    while time.time() - start_time < timeout:
+    while time.monotonic() - start_time < timeout:
         # Check if RKNN model appeared
         if rknn_path.exists():
             logger.info(f"RKNN model appeared: {rknn_path}")

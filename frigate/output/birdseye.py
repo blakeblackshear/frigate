@@ -1,6 +1,5 @@
 """Handle outputting birdseye frames via jsmpeg and go2rtc."""
 
-import datetime
 import glob
 import logging
 import math
@@ -8,6 +7,7 @@ import os
 import queue
 import subprocess as sp
 import threading
+import time
 import traceback
 from dataclasses import dataclass
 from multiprocessing.synchronize import Event as MpEvent
@@ -492,7 +492,7 @@ class BirdsEyeFrameManager:
         max_cameras = self.config.birdseye.layout.max_cameras
         max_camera_refresh = False
         if max_cameras:
-            now = datetime.datetime.now().timestamp()
+            now = time.monotonic()
 
             if (
                 len(self.active_cameras) == max_cameras
@@ -800,7 +800,8 @@ class BirdsEyeFrameManager:
 
         camera_state["live_active"] = self.camera_live_active(modes, activity)
 
-        now = datetime.datetime.now().timestamp()
+        # monotonic so a backward wall clock step can't freeze the output
+        now = time.monotonic()
 
         # limit output to 10 fps
         if not force_update and (now - self.last_output_time) < 1 / 10:
@@ -945,7 +946,7 @@ class Birdseye:
                 coordinates = self.birdseye_manager.get_camera_coordinates()
                 self.requestor.send_data(UPDATE_BIRDSEYE_LAYOUT, coordinates)
         if self._idle_interval:
-            now = datetime.datetime.now().timestamp()
+            now = time.monotonic()
             is_idle = len(self.birdseye_manager.camera_layout) == 0
             if (
                 is_idle

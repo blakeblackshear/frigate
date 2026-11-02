@@ -1,4 +1,3 @@
-import datetime
 import logging
 import queue
 import threading
@@ -169,9 +168,10 @@ class DetectorRunner(FrigateProcess):
                 logger.warning(f"Failed to get frame {connection_id} from SHM")
                 continue
 
-            # detect and send the output
-            self.start_time.value = datetime.datetime.now().timestamp()
+            # detect and send the output. start_time is monotonic so the watchdog
+            # doesn't mistake a wall clock step for a stuck detector
             mono_start = time.monotonic()
+            self.start_time.value = mono_start
             detections = object_detector.detect_raw(input_frame)
             duration = time.monotonic() - mono_start
 
