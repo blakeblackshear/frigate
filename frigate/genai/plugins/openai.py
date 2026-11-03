@@ -1,9 +1,10 @@
 """OpenAI Provider for Frigate AI."""
 
+import asyncio
 import base64
 import json
 import logging
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, AsyncIterator, Iterable
 from typing import Any
 
 from httpx import TimeoutException
@@ -14,6 +15,29 @@ from frigate.genai import GenAIClient, register_genai_provider
 from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
+
+_STREAM_END = object()
+
+
+async def _iterate_in_thread(iterable: Iterable[Any]) -> AsyncIterator[Any]:
+    """Iterate a blocking iterable without blocking the event loop.
+
+    The synchronous OpenAI client's stream performs blocking network reads on
+    every ``next()``; running each read in a worker thread keeps the API
+    responsive while a chat response is streaming.
+    """
+    iterator = iter(iterable)
+    try:
+        while True:
+            item = await asyncio.to_thread(next, iterator, _STREAM_END)
+            if item is _STREAM_END:
+                return
+            yield item
+    finally:
+        close = getattr(iterable, "close", None)
+        if callable(close):
+            close()
+
 
 # gpt-transcribe replaced the singular `language` field with a `languages` array
 # and rejects a request that sends both. Older transcription models
@@ -412,9 +436,11 @@ class OpenAIClient(GenAIClient):
             finish_reason = "stop"
             usage_stats: dict[str, Any] | None = None
 
-            stream = self.provider.chat.completions.create(**request_params)
+            stream = await asyncio.to_thread(
+                self.provider.chat.completions.create, **request_params
+            )
 
-            for chunk in stream:
+            async for chunk in _iterate_in_thread(stream):
                 chunk_usage = getattr(chunk, "usage", None)
                 if chunk_usage is not None:
                     usage_stats = _stats_from_openai_usage(chunk_usage)

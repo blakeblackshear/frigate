@@ -1,5 +1,6 @@
 """Chat and LLM tool calling APIs."""
 
+import asyncio
 import base64
 import json
 import logging
@@ -1653,7 +1654,9 @@ async def chat_completion(
                     f"Calling LLM (iteration {tool_iterations + 1}/{max_iterations}) "
                     f"with {len(conversation)} message(s) in conversation"
                 )
-                response = genai_client.chat_with_tools(
+                # chat_with_tools is synchronous (blocking HTTP); keep the event loop free
+                response = await asyncio.to_thread(
+                    genai_client.chat_with_tools,
                     messages=conversation,
                     tools=llm_tools if llm_tools else None,
                     tool_choice="auto",

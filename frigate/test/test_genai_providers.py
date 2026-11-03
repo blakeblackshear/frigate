@@ -15,6 +15,7 @@ crashing message conversion.
 import asyncio
 import base64
 import json
+import time
 import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -193,6 +194,43 @@ class TestOpenAIProvider(unittest.TestCase):
         # Passing the OpenAI-native multimodal list through must not raise.
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
+
+    def test_stream_does_not_block_event_loop(self):
+        # The sync OpenAI stream blocks on every chunk; other coroutines must
+        # keep running while the provider waits for the next one.
+        def slow_chunks():
+            for content in ("a", "b", "c"):
+                time.sleep(0.1)
+                yield _openai_chunk(content=content)
+            yield _openai_chunk(finish_reason="stop")
+
+        client = self._client()
+        client.provider.chat.completions.create = MagicMock(return_value=slow_chunks())
+
+        async def _run():
+            ticks = 0
+            done = asyncio.Event()
+
+            async def ticker():
+                nonlocal ticks
+                while not done.is_set():
+                    ticks += 1
+                    await asyncio.sleep(0.01)
+
+            ticker_task = asyncio.create_task(ticker())
+            events = [
+                event
+                async for event in client.chat_with_tools_stream(
+                    messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
+                )
+            ]
+            done.set()
+            await ticker_task
+            return events, ticks
+
+        events, ticks = asyncio.run(_run())
+        self.assertEqual(_final_message(events)["content"], "abc")
+        self.assertGreater(ticks, 10)
 
 
 # ---------------------------------------------------------------------------
