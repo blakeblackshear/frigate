@@ -39,16 +39,18 @@ function isValidDate(d: Date): boolean {
   return !Number.isNaN(d.getTime());
 }
 
-// TimezoneAwareCalendar and the time input work with dates whose local clock
-// reads the configured ui.timezone, so instants are shifted in and out of it
 function wallClockShiftMs(date: Date, timezone?: string): number {
   if (!timezone) return 0;
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  return (
-    (Math.round(getUTCOffset(date, timezone)) -
-      Math.round(getUTCOffset(date, localTimezone))) *
-    60_000
-  );
+  try {
+    const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return (
+      (Math.round(getUTCOffset(date, timezone)) -
+        Math.round(getUTCOffset(date, localTimezone))) *
+      60_000
+    );
+  } catch {
+    return 0;
+  }
 }
 
 function toWallClock(instant: Date, timezone?: string): Date {
