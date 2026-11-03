@@ -232,6 +232,32 @@ class TestOpenAIProvider(unittest.TestCase):
         self.assertEqual(_final_message(events)["content"], "abc")
         self.assertGreater(ticks, 10)
 
+    def test_stream_closed_when_caller_leaves_while_opening(self):
+        # If the client disconnects while the stream is still being opened,
+        # the stream the worker returns later must still be closed.
+        stream = MagicMock()
+
+        def slow_create(**kwargs):
+            time.sleep(0.2)
+            return stream
+
+        client = self._client()
+        client.provider.chat.completions.create = slow_create
+
+        async def _run():
+            gen = client.chat_with_tools_stream(
+                messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
+            )
+            task = asyncio.create_task(gen.__anext__())
+            await asyncio.sleep(0.05)
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+            await asyncio.sleep(0.3)
+
+        asyncio.run(_run())
+        stream.close.assert_called_once()
+
 
 # ---------------------------------------------------------------------------
 # Gemini

@@ -4,7 +4,7 @@ import asyncio
 import base64
 import json
 import logging
-from collections.abc import AsyncGenerator, AsyncIterator, Iterable
+from collections.abc import AsyncGenerator, AsyncIterator, Callable, Iterable
 from typing import Any
 
 from httpx import TimeoutException
@@ -37,6 +37,22 @@ async def _iterate_in_thread(iterable: Iterable[Any]) -> AsyncIterator[Any]:
         close = getattr(iterable, "close", None)
         if callable(close):
             close()
+
+
+async def _open_stream(create: Callable[..., Any], **kwargs: Any) -> Any:
+    """Open a stream in a worker thread, closing it if the caller goes away.
+
+    Cancelling the await does not stop the worker, so a stream it opens after
+    the client disconnected would otherwise be left open.
+    """
+    task = asyncio.ensure_future(asyncio.to_thread(create, **kwargs))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        task.add_done_callback(
+            lambda t: t.cancelled() or t.exception() or t.result().close()
+        )
+        raise
 
 
 # gpt-transcribe replaced the singular `language` field with a `languages` array
@@ -436,7 +452,7 @@ class OpenAIClient(GenAIClient):
             finish_reason = "stop"
             usage_stats: dict[str, Any] | None = None
 
-            stream = await asyncio.to_thread(
+            stream = await _open_stream(
                 self.provider.chat.completions.create, **request_params
             )
 
