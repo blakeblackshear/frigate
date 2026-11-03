@@ -780,6 +780,13 @@ def run_analysis(
 
     for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
         object_type = verified_label.replace("-verified", "").replace("_", " ")
+
+        # editing a sub label after the review item ended rebuilds sub_labels
+        # without verified_objects, so a stored item can have fewer sub labels
+        if i >= len(sub_labels_list):
+            unified_objects.append(object_type)
+            continue
+
         name = titlecase(sub_labels_list[i].replace("_", " "))
         unified_objects.append(f"{name} ← {object_type}")
 
