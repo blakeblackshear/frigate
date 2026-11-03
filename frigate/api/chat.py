@@ -1,6 +1,5 @@
 """Chat and LLM tool calling APIs."""
 
-import asyncio
 import base64
 import json
 import logging
@@ -50,6 +49,7 @@ from frigate.genai.prompts import (
     get_write_tool_names,
     strip_tool_access,
 )
+from frigate.genai.threads import run_in_thread
 from frigate.genai.utils import (
     build_assistant_message_for_conversation,
     parse_tool_calls_from_message,
@@ -1654,8 +1654,7 @@ async def chat_completion(
                     f"Calling LLM (iteration {tool_iterations + 1}/{max_iterations}) "
                     f"with {len(conversation)} message(s) in conversation"
                 )
-                # chat_with_tools is synchronous (blocking HTTP); keep the event loop free
-                response = await asyncio.to_thread(
+                response = await run_in_thread(
                     genai_client.chat_with_tools,
                     messages=conversation,
                     tools=llm_tools if llm_tools else None,

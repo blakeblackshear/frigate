@@ -24,6 +24,7 @@ import requests
 
 from frigate.config import GenAIConfig, GenAIProviderEnum
 from frigate.genai import PROVIDERS, load_providers
+from frigate.genai.threads import thread_stats
 
 load_providers()
 
@@ -196,8 +197,7 @@ class TestOpenAIProvider(unittest.TestCase):
         self.assertEqual(final["content"], "ok")
 
     def test_stream_does_not_block_event_loop(self):
-        # The sync OpenAI stream blocks on every chunk; other coroutines must
-        # keep running while the provider waits for the next one.
+        # Other coroutines must keep running while the stream blocks.
         def slow_chunks():
             for content in ("a", "b", "c"):
                 time.sleep(0.1)
@@ -233,8 +233,7 @@ class TestOpenAIProvider(unittest.TestCase):
         self.assertGreater(ticks, 10)
 
     def test_stream_closed_when_caller_leaves_while_opening(self):
-        # If the client disconnects while the stream is still being opened,
-        # the stream the worker returns later must still be closed.
+        # A stream opened after the caller left must still be closed.
         stream = MagicMock()
 
         def slow_create(**kwargs):
@@ -257,6 +256,21 @@ class TestOpenAIProvider(unittest.TestCase):
 
         asyncio.run(_run())
         stream.close.assert_called_once()
+
+    def test_stream_thread_reported_in_stats(self):
+        in_use = []
+
+        def chunks():
+            in_use.append(thread_stats()["threads_in_use"])
+            yield _openai_chunk(content="a")
+            yield _openai_chunk(finish_reason="stop")
+
+        client = self._client()
+        client.provider.chat.completions.create = MagicMock(return_value=chunks())
+
+        _collect(client, SIMPLE_MESSAGES)
+        self.assertEqual(in_use, [1])
+        self.assertEqual(thread_stats()["threads_in_use"], 0)
 
 
 # ---------------------------------------------------------------------------
