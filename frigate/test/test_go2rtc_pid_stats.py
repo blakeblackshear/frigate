@@ -41,7 +41,6 @@ class TestGo2rtcPidInSnapshot(unittest.TestCase):
 
         config = SimpleNamespace(
             cameras={},
-            genai={},
             telemetry=SimpleNamespace(stats=SimpleNamespace(network_bandwidth=False)),
         )
         hardware_stats = Mock()

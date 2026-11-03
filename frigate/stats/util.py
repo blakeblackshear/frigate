@@ -14,7 +14,6 @@ from requests.exceptions import RequestException
 from frigate.config import FrigateConfig
 from frigate.const import CACHE_DIR, CLIPS_DIR, RECORD_DIR
 from frigate.data_processing.types import DataProcessorMetrics
-from frigate.genai.threads import thread_stats
 from frigate.object_detection.base import ObjectDetectProcess
 from frigate.stats.hardware import HardwareStats, get_hardware_temperatures
 from frigate.types import StatsTrackingTypes
@@ -336,9 +335,6 @@ def stats_snapshot(
     stats["embeddings"] = embeddings_stats(
         config, stats_tracking.get("embeddings_metrics")
     )
-
-    if config.genai:
-        stats["genai"] = thread_stats()
 
     hardware_stats.update_stats(stats)
 

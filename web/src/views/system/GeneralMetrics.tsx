@@ -43,7 +43,7 @@ export default function GeneralMetrics({
     [
       "stats/history",
       {
-        keys: "detectors.inference_speed,detectors.temperature,detectors.cpu,detectors.mem,gpu_usages,npu_usages,processes.cpu,processes.mem,genai,service.last_updated",
+        keys: "detectors.inference_speed,detectors.temperature,detectors.cpu,detectors.mem,gpu_usages,npu_usages,processes.cpu,processes.mem,service.last_updated",
       },
     ],
     {
@@ -650,22 +650,6 @@ export default function GeneralMetrics({
     return Object.values(series);
   }, [statsHistory, t]);
 
-  // genai stats
-
-  const genaiThreadsTotal =
-    statsHistory[statsHistory.length - 1]?.genai?.threads_total;
-
-  const genaiThreadSeries = useMemo(
-    () => ({
-      name: t("general.genai.threadsInUse"),
-      data: statsHistory.map((stats, statsIdx) => ({
-        x: statsIdx + 1,
-        y: stats?.genai?.threads_in_use ?? 0,
-      })),
-    }),
-    [statsHistory, t],
-  );
-
   return (
     <>
       <GPUInfoDialog
@@ -1063,30 +1047,6 @@ export default function GeneralMetrics({
             <Skeleton className="aspect-tall w-full" />
           )}
         </div>
-
-        {genaiThreadsTotal != undefined && (
-          <>
-            <div className="mt-4 text-sm font-medium text-muted-foreground">
-              {t("general.genai.title")}
-            </div>
-            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-              <div className="rounded-lg bg-background_alt p-2.5 md:rounded-2xl">
-                <div className="mb-5">{t("general.genai.workerThreads")}</div>
-                <ThresholdBarGraph
-                  graphId="genai-threads"
-                  unit={`/${genaiThreadsTotal}`}
-                  threshold={{
-                    warning: genaiThreadsTotal * 0.75,
-                    error: genaiThreadsTotal,
-                  }}
-                  updateTimes={updateTimes}
-                  data={[genaiThreadSeries]}
-                  isActive={isActive}
-                />
-              </div>
-            </div>
-          </>
-        )}
       </div>
     </>
   );

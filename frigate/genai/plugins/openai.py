@@ -12,7 +12,6 @@ from openai import OpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.threads import run_in_thread
 from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
@@ -25,7 +24,7 @@ async def _iterate_in_thread(iterable: Iterable[Any]) -> AsyncIterator[Any]:
     iterator = iter(iterable)
     try:
         while True:
-            item = await run_in_thread(next, iterator, _STREAM_END)
+            item = await asyncio.to_thread(next, iterator, _STREAM_END)
             if item is _STREAM_END:
                 return
             yield item
@@ -37,7 +36,7 @@ async def _iterate_in_thread(iterable: Iterable[Any]) -> AsyncIterator[Any]:
 
 async def _open_stream(create: Callable[..., Any], **kwargs: Any) -> Any:
     """Open a stream in a worker thread, closing it if the caller goes away."""
-    task = asyncio.ensure_future(run_in_thread(create, **kwargs))
+    task = asyncio.ensure_future(asyncio.to_thread(create, **kwargs))
     try:
         return await asyncio.shield(task)
     except asyncio.CancelledError:

@@ -3,7 +3,6 @@ export interface FrigateStats {
   cpu_usages: { [pid: string]: CpuStats };
   detectors: { [detectorKey: string]: DetectorStats };
   embeddings?: EmbeddingsStats;
-  genai?: GenAIStats;
   gpu_usages?: { [gpuKey: string]: GpuStats };
   npu_usages?: { [npuKey: string]: NpuStats };
   processes: { [processKey: string]: ExtraProcessStats };
@@ -59,11 +58,6 @@ export type EmbeddingsStats = {
   face_recognition_speed?: number;
   yolov9_plate_detection_speed?: number;
   devices?: Record<string, string>;
-};
-
-export type GenAIStats = {
-  threads_in_use: number;
-  threads_total: number;
 };
 
 export type ExtraProcessStats = {

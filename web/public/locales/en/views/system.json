@@ -220,11 +220,6 @@
         "embeddings": "embeddings",
         "audio_detector": "audio detector"
       }
-    },
-    "genai": {
-      "title": "Generative AI",
-      "workerThreads": "Worker Threads",
-      "threadsInUse": "Threads in use"
     }
   },
   "storage": {
