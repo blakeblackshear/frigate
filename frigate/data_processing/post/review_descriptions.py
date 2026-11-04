@@ -34,7 +34,7 @@ from frigate.const import (
 from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
 from frigate.genai.manager import GenAIClientManager
-from frigate.models import Recordings, ReviewSegment
+from frigate.models import Event, Recordings, ReviewSegment
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import get_image_from_recording
 from frigate.util.recording_coverage import recording_overlap
@@ -439,13 +439,22 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         if camera_config.review.genai.debug_save_thumbnails:
             self.save_debug_recording_frames(review_id, frames)
 
-        self.start_analysis(camera_config, final_data, frames)
+        self.start_analysis(
+            camera_config,
+            final_data,
+            frames,
+            get_named_objects(
+                final_data["data"].get("detections") or [],
+                self.config.all_attributes,
+            ),
+        )
 
     def start_analysis(
         self,
         camera_config: CameraConfig,
         final_data: dict[str, Any],
         frames: list[tuple[bytes, float]],
+        named_objects: list[tuple[str, str]] | None = None,
     ) -> None:
         """Kick off description generation for a review item in the background."""
         thumbs = [frame for frame, _ in frames]
@@ -481,6 +490,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
                 camera_config.review.genai,
                 sorted(self.config.all_labels),
                 self.config.all_attributes,
+                named_objects,
             ),
         ).start()
 
@@ -741,6 +751,29 @@ def format_classification_state_changes(
     return lines
 
 
+def get_named_objects(
+    detection_ids: list[str], attribute_labels: list[str]
+) -> list[tuple[str, str]]:
+    """Get the label and sub label of each named tracked object in a review item.
+
+    Editing a sub label after a review item ends rebuilds the stored sub_labels
+    without verified_objects, so the stored lists can't be paired by position.
+    """
+    events = (
+        Event.select(Event.label, Event.sub_label)
+        .where(Event.id.in_(detection_ids), Event.sub_label.is_null(False))
+        .order_by(Event.start_time)
+    )
+
+    # attribute sub labels (eg, delivery logos) are not names, which matches
+    # how the review maintainer records them
+    return [
+        (event.label, event.sub_label)
+        for event in events
+        if event.sub_label and event.sub_label not in attribute_labels
+    ]
+
+
 def run_analysis(
     requestor: InterProcessRequestor,
     genai_client: GenAIClient,
@@ -752,6 +785,7 @@ def run_analysis(
     genai_config: GenAIReviewConfig,
     labelmap_objects: list[str],
     attribute_labels: list[str],
+    named_objects: list[tuple[str, str]] | None,
 ) -> None:
     start = datetime.datetime.now().timestamp()
 
@@ -776,11 +810,20 @@ def run_analysis(
     unified_objects = []
 
     objects_list = final_data["data"]["objects"]
-    sub_labels_list = final_data["data"]["sub_labels"]
 
-    for i, verified_label in enumerate(final_data["data"]["verified_objects"]):
-        object_type = verified_label.replace("-verified", "").replace("_", " ")
-        name = titlecase(sub_labels_list[i].replace("_", " "))
+    if named_objects is None:
+        # live review items record a sub label for every verified object
+        named_objects = [
+            (verified_label.replace("-verified", ""), sub_label)
+            for verified_label, sub_label in zip(
+                final_data["data"]["verified_objects"],
+                final_data["data"]["sub_labels"],
+            )
+        ]
+
+    for label, sub_label in named_objects:
+        object_type = label.replace("_", " ")
+        name = titlecase(sub_label.replace("_", " "))
         unified_objects.append(f"{name} ← {object_type}")
 
     for label in objects_list:
