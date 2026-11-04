@@ -53,6 +53,7 @@ const audio: SectionConfigOverrides = {
   },
   global: {
     restartRequired: ["num_threads"],
+    runtimeFields: ["filters"],
   },
   camera: {
     restartRequired: ["num_threads"],

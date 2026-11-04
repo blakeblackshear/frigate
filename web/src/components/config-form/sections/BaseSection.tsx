@@ -37,6 +37,7 @@ import { LuChevronDown, LuChevronRight } from "react-icons/lu";
 import Heading from "@/components/ui/heading";
 import get from "lodash/get";
 import cloneDeep from "lodash/cloneDeep";
+import omit from "lodash/omit";
 import isEqual from "lodash/isEqual";
 import {
   Collapsible,
@@ -54,7 +55,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { applySchemaDefaults } from "@/lib/config-schema";
-import { cn } from "@/lib/utils";
+import { cn, isJsonObject } from "@/lib/utils";
 import {
   ConfigSectionData,
   HiddenFieldEntry,
@@ -125,6 +126,10 @@ export interface SectionConfig {
   fieldMessages?: FieldConditionalMessage[];
   /** Maps whose key order is saved (e.g. live stream ladder order) */
   orderedMaps?: string[];
+  /** Fields the backend resolves at runtime, ignored when checking for reset */
+  runtimeFields?: string[];
+  /** Hide the Reset to Global / Reset to Default button */
+  hideReset?: boolean;
 }
 
 export interface BaseSectionProps {
@@ -194,6 +199,17 @@ export interface CreateSectionOptions {
 }
 
 export type ConfigSectionProps = BaseSectionProps & CreateSectionOptions;
+
+// applySchemaDefaults only descends into objects present in the data, and
+// default_factory objects carry no schema default, so keep the nesting.
+function objectShape(value: unknown): Record<string, unknown> {
+  if (!isJsonObject(value)) return {};
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, v]) => isJsonObject(v))
+      .map(([k, v]) => [k, objectShape(v)]),
+  );
+}
 
 export function ConfigSection({
   sectionPath,
@@ -491,6 +507,15 @@ export function ConfigSection({
     () => sanitizeSectionData(rawFormData as ConfigSectionData),
     [rawFormData, sanitizeSectionData],
   );
+
+  // A section at its schema defaults may be absent from the YAML, and
+  // deleting an absent key fails. Non-default values must come from the YAML.
+  const globalDiffersFromDefaults = useMemo(() => {
+    if (!modifiedSchema) return true;
+    const current = omit(compareBaseData, sectionConfig.runtimeFields ?? []);
+    const defaults = applySchemaDefaults(modifiedSchema, objectShape(current));
+    return buildOverrides(current, undefined, defaults) !== undefined;
+  }, [compareBaseData, modifiedSchema, sectionConfig.runtimeFields]);
 
   const orderedMaps = sectionConfig.orderedMaps;
   const buildSectionOverrides = useCallback(
@@ -1133,7 +1158,8 @@ export function ConfigSection({
             )}
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center md:w-auto">
               {((effectiveLevel === "camera" && isOverridden) ||
-                effectiveLevel === "global") &&
+                (effectiveLevel === "global" && globalDiffersFromDefaults)) &&
+                !sectionConfig.hideReset &&
                 !hasChanges &&
                 !skipSave &&
                 !profileName && (

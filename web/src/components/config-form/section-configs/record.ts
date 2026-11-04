@@ -116,6 +116,7 @@ const record: SectionConfigOverrides = {
   },
   global: {
     restartRequired: [],
+    runtimeFields: ["export.hwaccel_args"],
   },
   camera: {
     restartRequired: [],
