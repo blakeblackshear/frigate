@@ -24,6 +24,7 @@ const live: SectionConfigOverrides = {
     fieldGroups: {},
     hiddenFields: ["enabled_in_config"],
     advancedFields: ["height", "quality"],
+    overrideFields: ["transcode", "height", "quality"],
   },
   global: {
     restartRequired: ["streams", "height", "quality"],

@@ -57,11 +57,6 @@ def birdseye_modes_to_mqtt_payload(modes: list[BirdseyeModeEnum]) -> str:
     return payload or MQTT_NO_MODES
 
 
-def default_birdseye_modes() -> list[BirdseyeModeEnum]:
-    """Return the default Birdseye activity modes."""
-    return [BirdseyeModeEnum.all_objects]
-
-
 class BirdseyeLayoutConfig(FrigateBaseModel):
     scaling_factor: float = Field(
         default=2.0,
@@ -84,7 +79,7 @@ class BirdseyeConfig(FrigateBaseModel):
         description="Enable or disable the Birdseye view feature.",
     )
     modes: list[BirdseyeModeEnum] = Field(
-        default_factory=default_birdseye_modes,
+        default=[BirdseyeModeEnum.all_objects],
         title="Activity types",
         description="Activity types that include cameras in Birdseye.",
     )
@@ -139,7 +134,7 @@ class BirdseyeCameraConfig(BaseModel):
         description="Enable or disable the Birdseye view feature.",
     )
     modes: list[BirdseyeModeEnum] = Field(
-        default_factory=default_birdseye_modes,
+        default=[BirdseyeModeEnum.all_objects],
         title="Activity types",
         description="Activity types that include cameras in Birdseye.",
     )
