@@ -3,8 +3,14 @@
 import unittest
 from unittest.mock import MagicMock
 
+from peewee import SqliteDatabase
+
 from frigate.config import FrigateConfig
-from frigate.data_processing.post.review_descriptions import run_analysis
+from frigate.data_processing.post.review_descriptions import (
+    get_named_objects,
+    run_analysis,
+)
+from frigate.models import Event
 
 CONFIG = """
 mqtt:
@@ -23,7 +29,9 @@ cameras:
 """
 
 
-def unified_objects(review_data: dict) -> list[str]:
+def unified_objects(
+    review_data: dict, named_objects: list[tuple[str, str]] | None = None
+) -> list[str]:
     """Run the review analysis and return the objects sent to the GenAI client."""
     camera_config = FrigateConfig.parse_yaml(CONFIG).cameras["front_door"]
     client = MagicMock()
@@ -38,7 +46,8 @@ def unified_objects(review_data: dict) -> list[str]:
         [],
         camera_config.review.genai,
         ["car", "person"],
-        [],
+        ["amazon"],
+        named_objects,
     )
     return client.generate_review_description.call_args.args[0]["unified_objects"]
 
@@ -57,20 +66,93 @@ class TestRunAnalysisSubLabels(unittest.TestCase):
 
         self.assertEqual(objects, ["Nick M ← person", "car"])
 
-    def test_missing_sub_label_falls_back_to_object_type(self):
-        # clearing a sub label on an ended review item leaves verified_objects
-        # stale, which previously raised an IndexError on regenerate
+
+class TestRegeneratedSubLabels(unittest.TestCase):
+    """Review items whose stored lists were rebuilt after a sub label edit."""
+
+    def setUp(self):
+        self.db = SqliteDatabase(":memory:")
+        self.db.bind([Event])
+        self.db.create_tables([Event])
+
+    def tearDown(self):
+        self.db.close()
+
+    def _insert_event(
+        self, id: str, label: str, sub_label: str | None, start_time: float
+    ) -> None:
+        Event.create(
+            id=id,
+            label=label,
+            sub_label=sub_label,
+            camera="front_door",
+            start_time=start_time,
+            end_time=start_time + 10,
+            top_score=0.9,
+            score=0.9,
+            false_positive=False,
+            zones=[],
+            thumbnail="",
+            has_clip=True,
+            has_snapshot=True,
+            region=[],
+            box=[],
+            area=0,
+            retain_indefinitely=False,
+            plus_id="",
+            model_hash="",
+            detector_type="cpu",
+            model_type="ssd",
+            data={},
+        )
+
+    def test_cleared_sub_label_does_not_move_to_another_object(self):
+        self._insert_event("car1", "car", None, 1)
+        self._insert_event("person1", "person", "Nick", 2)
+
+        named = get_named_objects(["car1", "person1"], ["amazon"])
         objects = unified_objects(
             {
                 "zones": [],
-                "objects": ["person-verified"],
+                "objects": ["car", "person-verified"],
+                "verified_objects": ["car-verified", "person-verified"],
+                "sub_labels": ["Nick"],
+                "classification_state_changes": [],
+            },
+            named,
+        )
+
+        self.assertEqual(objects, ["Nick ← person", "car"])
+
+    def test_repeated_name_is_kept_for_each_object(self):
+        # sub_labels are deduplicated when rebuilt, which previously raised an
+        # IndexError when the verified objects outnumbered them
+        self._insert_event("person1", "person", "Nick", 1)
+        self._insert_event("person2", "person", "Nick", 2)
+
+        named = get_named_objects(["person1", "person2"], ["amazon"])
+        objects = unified_objects(
+            {
+                "zones": [],
+                "objects": ["person-verified", "person-verified"],
                 "verified_objects": ["person-verified", "person-verified"],
                 "sub_labels": ["Nick"],
                 "classification_state_changes": [],
-            }
+            },
+            named,
         )
 
-        self.assertEqual(objects, ["Nick ← person", "person"])
+        self.assertEqual(objects, ["Nick ← person", "Nick ← person"])
+
+    def test_attribute_sub_labels_are_not_names(self):
+        self._insert_event("car1", "car", "amazon", 1)
+        self._insert_event("person1", "person", "Nick", 2)
+        self._insert_event("other", "person", "Bob", 3)
+
+        self.assertEqual(
+            get_named_objects(["car1", "person1"], ["amazon"]),
+            [("person", "Nick")],
+        )
 
 
 if __name__ == "__main__":
