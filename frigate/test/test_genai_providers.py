@@ -146,6 +146,23 @@ def _openai_chunk(content=None, tool_calls=None, finish_reason=None, usage=None)
     return SimpleNamespace(choices=[choice], usage=usage)
 
 
+class _FakeOpenAIStream:
+    """Mimics openai.Stream: iterable, closable, and a context manager."""
+
+    def __init__(self, chunks):
+        self._chunks = iter(chunks)
+        self.close = MagicMock()
+
+    def __iter__(self):
+        return self._chunks
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+
 class TestOpenAIProvider(unittest.TestCase):
     def _client(self):
         return _make_client(
@@ -164,7 +181,9 @@ class TestOpenAIProvider(unittest.TestCase):
             _openai_chunk(finish_reason="tool_calls"),
         ]
         client = self._client()
-        client.provider.chat.completions.create = MagicMock(return_value=iter(chunks))
+        client.provider.chat.completions.create = MagicMock(
+            return_value=_FakeOpenAIStream(chunks)
+        )
 
         final = _final_message(_collect(client, SIMPLE_MESSAGES))
         self.assertEqual(final["finish_reason"], "tool_calls")
@@ -179,7 +198,9 @@ class TestOpenAIProvider(unittest.TestCase):
             _openai_chunk(finish_reason="stop"),
         ]
         client = self._client()
-        client.provider.chat.completions.create = MagicMock(return_value=iter(chunks))
+        client.provider.chat.completions.create = MagicMock(
+            return_value=_FakeOpenAIStream(chunks)
+        )
 
         events = _collect(client, SIMPLE_MESSAGES)
         deltas = [v for (k, v) in events if k == "content_delta"]
@@ -189,7 +210,9 @@ class TestOpenAIProvider(unittest.TestCase):
     def test_multimodal_message_does_not_crash(self):
         client = self._client()
         client.provider.chat.completions.create = MagicMock(
-            return_value=iter([_openai_chunk(content="ok", finish_reason="stop")])
+            return_value=_FakeOpenAIStream(
+                [_openai_chunk(content="ok", finish_reason="stop")]
+            )
         )
         # Passing the OpenAI-native multimodal list through must not raise.
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
@@ -204,7 +227,9 @@ class TestOpenAIProvider(unittest.TestCase):
             yield _openai_chunk(finish_reason="stop")
 
         client = self._client()
-        client.provider.chat.completions.create = MagicMock(return_value=slow_chunks())
+        client.provider.chat.completions.create = MagicMock(
+            return_value=_FakeOpenAIStream(slow_chunks())
+        )
 
         async def _run():
             ticks = 0
@@ -254,6 +279,33 @@ class TestOpenAIProvider(unittest.TestCase):
             await asyncio.sleep(0.3)
 
         asyncio.run(_run())
+        stream.close.assert_called_once()
+
+    def test_stream_closed_when_caller_leaves_mid_stream(self):
+        # A stream abandoned after the first chunk must be closed once.
+        def chunks_then_block():
+            yield _openai_chunk(content="a")
+            time.sleep(0.5)
+            yield _openai_chunk(finish_reason="stop")
+
+        stream = _FakeOpenAIStream(chunks_then_block())
+        client = self._client()
+        client.provider.chat.completions.create = MagicMock(return_value=stream)
+
+        async def _run():
+            gen = client.chat_with_tools_stream(
+                messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
+            )
+            first = await gen.__anext__()
+            task = asyncio.create_task(gen.__anext__())
+            await asyncio.sleep(0.05)
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await task
+            await gen.aclose()
+            return first
+
+        self.assertEqual(asyncio.run(_run()), ("content_delta", "a"))
         stream.close.assert_called_once()
 
 
