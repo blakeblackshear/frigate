@@ -15,7 +15,6 @@ crashing message conversion.
 import asyncio
 import base64
 import json
-import time
 import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -146,21 +145,45 @@ def _openai_chunk(content=None, tool_calls=None, finish_reason=None, usage=None)
     return SimpleNamespace(choices=[choice], usage=usage)
 
 
-class _FakeOpenAIStream:
-    """Mimics openai.Stream: iterable, closable, and a context manager."""
+class _FakeAsyncOpenAIStream:
+    """Mimics openai.AsyncStream: async iterable and async context manager.
 
-    def __init__(self, chunks):
-        self._chunks = iter(chunks)
-        self.close = MagicMock()
+    With ``stall_after`` set, the stream stops producing after that many
+    chunks, like a model that stops sending tokens, and sets ``stalled``.
+    """
 
-    def __iter__(self):
-        return self._chunks
+    def __init__(self, chunks, stall_after=None):
+        self._chunks = chunks
+        self._stall_after = stall_after
+        self.stalled = asyncio.Event()
+        self.close = AsyncMock()
 
-    def __enter__(self):
+    async def __aiter__(self):
+        for i, chunk in enumerate(self._chunks):
+            if i == self._stall_after:
+                self.stalled.set()
+                await asyncio.Event().wait()
+            yield chunk
+
+    async def __aenter__(self):
         return self
 
-    def __exit__(self, *exc):
-        self.close()
+    async def __aexit__(self, *exc):
+        await self.close()
+
+
+class _FakeAsyncOpenAI:
+    """Mimics openai.AsyncOpenAI: async context manager with a completions API."""
+
+    def __init__(self, create):
+        self.chat = SimpleNamespace(completions=SimpleNamespace(create=create))
+        self.close = AsyncMock()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        await self.close()
 
 
 class TestOpenAIProvider(unittest.TestCase):
@@ -168,6 +191,25 @@ class TestOpenAIProvider(unittest.TestCase):
         return _make_client(
             "openai", model="gpt-4o", api_key="k", base_url="http://localhost:9999/v1"
         )
+
+    def _streaming_client(self, create):
+        """Build a client whose async completions call is ``create``."""
+        client = self._client()
+        async_client = _FakeAsyncOpenAI(create)
+        client._init_async_provider = MagicMock(return_value=async_client)
+        return client, async_client
+
+    def test_async_client_uses_configured_options(self):
+        from openai import AsyncOpenAI
+
+        client = self._client()
+        async_client = client._init_async_provider()
+        try:
+            self.assertIsInstance(async_client, AsyncOpenAI)
+            self.assertEqual(async_client.base_url, client.provider.base_url)
+            self.assertEqual(async_client.api_key, "k")
+        finally:
+            asyncio.run(async_client.close())
 
     def test_stream_tool_call_arguments_are_dict(self):
         # Arguments arrive split across chunks, as the real API streams them.
@@ -180,9 +222,8 @@ class TestOpenAIProvider(unittest.TestCase):
             _openai_chunk(tool_calls=[_openai_tc(0, arguments=' "person"}')]),
             _openai_chunk(finish_reason="tool_calls"),
         ]
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(
-            return_value=_FakeOpenAIStream(chunks)
+        client, _ = self._streaming_client(
+            AsyncMock(return_value=_FakeAsyncOpenAIStream(chunks))
         )
 
         final = _final_message(_collect(client, SIMPLE_MESSAGES))
@@ -197,9 +238,8 @@ class TestOpenAIProvider(unittest.TestCase):
             _openai_chunk(content="lo"),
             _openai_chunk(finish_reason="stop"),
         ]
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(
-            return_value=_FakeOpenAIStream(chunks)
+        client, _ = self._streaming_client(
+            AsyncMock(return_value=_FakeAsyncOpenAIStream(chunks))
         )
 
         events = _collect(client, SIMPLE_MESSAGES)
@@ -208,105 +248,83 @@ class TestOpenAIProvider(unittest.TestCase):
         self.assertEqual(_final_message(events)["content"], "hello")
 
     def test_multimodal_message_does_not_crash(self):
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(
-            return_value=_FakeOpenAIStream(
-                [_openai_chunk(content="ok", finish_reason="stop")]
+        client, _ = self._streaming_client(
+            AsyncMock(
+                return_value=_FakeAsyncOpenAIStream(
+                    [_openai_chunk(content="ok", finish_reason="stop")]
+                )
             )
         )
         # Passing the OpenAI-native multimodal list through must not raise.
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
 
-    def test_stream_does_not_block_event_loop(self):
-        # Other coroutines must keep running while the stream blocks.
-        def slow_chunks():
-            for content in ("a", "b", "c"):
-                time.sleep(0.1)
-                yield _openai_chunk(content=content)
-            yield _openai_chunk(finish_reason="stop")
-
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(
-            return_value=_FakeOpenAIStream(slow_chunks())
+    def test_stream_uses_async_client_and_closes_it(self):
+        # The blocking sync client must never be used on the event loop.
+        stream = _FakeAsyncOpenAIStream(
+            [_openai_chunk(content="ok", finish_reason="stop")]
         )
+        create = AsyncMock(return_value=stream)
+        client, async_client = self._streaming_client(create)
+        client.provider.chat.completions.create = MagicMock()
 
+        final = _final_message(_collect(client, SIMPLE_MESSAGES))
+
+        self.assertEqual(final["content"], "ok")
+        self.assertTrue(create.await_args.kwargs["stream"])
+        client.provider.chat.completions.create.assert_not_called()
+        stream.close.assert_awaited_once()
+        async_client.close.assert_awaited_once()
+
+    def test_client_closed_when_caller_leaves_while_opening(self):
+        # Cancelling before the response arrives must still close the client.
         async def _run():
-            ticks = 0
-            done = asyncio.Event()
+            opening = asyncio.Event()
 
-            async def ticker():
-                nonlocal ticks
-                while not done.is_set():
-                    ticks += 1
-                    await asyncio.sleep(0.01)
+            async def hang(**kwargs):
+                opening.set()
+                await asyncio.Event().wait()
 
-            ticker_task = asyncio.create_task(ticker())
-            events = [
-                event
-                async for event in client.chat_with_tools_stream(
-                    messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
-                )
-            ]
-            done.set()
-            await ticker_task
-            return events, ticks
-
-        events, ticks = asyncio.run(_run())
-        self.assertEqual(_final_message(events)["content"], "abc")
-        self.assertGreater(ticks, 10)
-
-    def test_stream_closed_when_caller_leaves_while_opening(self):
-        # A stream opened after the caller left must still be closed.
-        stream = MagicMock()
-
-        def slow_create(**kwargs):
-            time.sleep(0.2)
-            return stream
-
-        client = self._client()
-        client.provider.chat.completions.create = slow_create
-
-        async def _run():
+            client, async_client = self._streaming_client(hang)
             gen = client.chat_with_tools_stream(
                 messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
             )
             task = asyncio.create_task(gen.__anext__())
-            await asyncio.sleep(0.05)
+            await opening.wait()
             task.cancel()
             with self.assertRaises(asyncio.CancelledError):
-                await task
-            await asyncio.sleep(0.3)
+                await asyncio.wait_for(task, timeout=1)
+            return async_client
 
-        asyncio.run(_run())
-        stream.close.assert_called_once()
+        async_client = asyncio.run(_run())
+        async_client.close.assert_awaited_once()
 
     def test_stream_closed_when_caller_leaves_mid_stream(self):
-        # A stream abandoned after the first chunk must be closed once.
-        def chunks_then_block():
-            yield _openai_chunk(content="a")
-            time.sleep(0.5)
-            yield _openai_chunk(finish_reason="stop")
-
-        stream = _FakeOpenAIStream(chunks_then_block())
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(return_value=stream)
-
+        # Cancelling while waiting on a stalled model must close the stream
+        # right away instead of waiting for the next chunk.
         async def _run():
+            stream = _FakeAsyncOpenAIStream(
+                [_openai_chunk(content="a"), _openai_chunk(finish_reason="stop")],
+                stall_after=1,
+            )
+            client, async_client = self._streaming_client(
+                AsyncMock(return_value=stream)
+            )
             gen = client.chat_with_tools_stream(
                 messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
             )
             first = await gen.__anext__()
             task = asyncio.create_task(gen.__anext__())
-            await asyncio.sleep(0.05)
+            await stream.stalled.wait()
             task.cancel()
             with self.assertRaises(asyncio.CancelledError):
-                await task
-            await gen.aclose()
-            return first
+                await asyncio.wait_for(task, timeout=1)
+            return first, stream, async_client
 
-        self.assertEqual(asyncio.run(_run()), ("content_delta", "a"))
-        stream.close.assert_called_once()
+        first, stream, async_client = asyncio.run(_run())
+        self.assertEqual(first, ("content_delta", "a"))
+        stream.close.assert_awaited_once()
+        async_client.close.assert_awaited_once()
 
 
 # ---------------------------------------------------------------------------
@@ -1053,6 +1071,17 @@ class TestAzureOpenAITranscribe(unittest.TestCase):
         client = self._client()
         self.assertIsInstance(client.provider, AzureOpenAI)
         self.assertTrue(client.supports_transcription)
+
+    def test_streaming_routes_through_async_azure_client(self):
+        from openai import AsyncAzureOpenAI
+
+        client = self._client()
+        async_client = client._init_async_provider()
+        try:
+            self.assertIsInstance(async_client, AsyncAzureOpenAI)
+            self.assertEqual(async_client.base_url, client.provider.base_url)
+        finally:
+            asyncio.run(async_client.close())
 
     def test_transcribe_inherited(self):
         client = self._client()

@@ -1,33 +1,19 @@
 """OpenAI Provider for Frigate AI."""
 
-import asyncio
 import base64
 import json
 import logging
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import AsyncGenerator
 from typing import Any
 
 from httpx import TimeoutException
-from openai import OpenAI
-from starlette.concurrency import iterate_in_threadpool
+from openai import AsyncOpenAI, OpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
 from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
-
-
-async def _open_stream(create: Callable[..., Any], **kwargs: Any) -> Any:
-    """Open a stream in a worker thread, closing it if the caller goes away."""
-    task = asyncio.ensure_future(asyncio.to_thread(create, **kwargs))
-    try:
-        return await asyncio.shield(task)
-    except asyncio.CancelledError:
-        task.add_done_callback(
-            lambda t: t.cancelled() or t.exception() or t.result().close()
-        )
-        raise
 
 
 # gpt-transcribe replaced the singular `language` field with a `languages` array
@@ -60,8 +46,8 @@ class OpenAIClient(GenAIClient):
     provider: OpenAI
     context_size: int | None = None
 
-    def _init_provider(self) -> OpenAI:
-        """Initialize the client.
+    def _client_options(self) -> dict[str, Any]:
+        """Build the constructor options shared by the sync and async clients.
 
         Subclasses (e.g. Azure) should raise on configuration errors; the
         manager catches construction failures and disables the provider.
@@ -77,7 +63,19 @@ class OpenAIClient(GenAIClient):
         if self.genai_config.base_url:
             provider_opts["base_url"] = self.genai_config.base_url
 
-        return OpenAI(api_key=self.genai_config.api_key, **provider_opts)
+        return {"api_key": self.genai_config.api_key, **provider_opts}
+
+    def _init_provider(self) -> OpenAI:
+        """Initialize the client."""
+        return OpenAI(**self._client_options())
+
+    def _init_async_provider(self) -> AsyncOpenAI:
+        """Create an async client for streaming chat.
+
+        A new client is created per stream because its connection pool binds
+        to the event loop that first uses it.
+        """
+        return AsyncOpenAI(**self._client_options())
 
     def _send(
         self,
@@ -427,12 +425,13 @@ class OpenAIClient(GenAIClient):
             finish_reason = "stop"
             usage_stats: dict[str, Any] | None = None
 
-            stream = await _open_stream(
-                self.provider.chat.completions.create, **request_params
-            )
-
-            with stream:
-                async for chunk in iterate_in_threadpool(stream):
+            # Exiting these blocks, including when the caller disconnects and
+            # the generator is cancelled, closes the response and its connection
+            async with (
+                self._init_async_provider() as client,
+                await client.chat.completions.create(**request_params) as stream,
+            ):
+                async for chunk in stream:
                     chunk_usage = getattr(chunk, "usage", None)
                     if chunk_usage is not None:
                         usage_stats = _stats_from_openai_usage(chunk_usage)

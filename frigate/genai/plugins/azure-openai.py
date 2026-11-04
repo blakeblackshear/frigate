@@ -7,7 +7,8 @@ overrides what is genuinely Azure-specific:
 
 - Client construction: parses ``api-version`` out of the configured
   ``base_url`` query string and instantiates :class:`openai.AzureOpenAI`
-  with ``azure_endpoint`` instead of ``base_url``. Raises if the URL is
+  (or :class:`openai.AsyncAzureOpenAI` for streaming chat) with
+  ``azure_endpoint`` instead of ``base_url``. Raises if the URL is
   malformed; :class:`GenAIClientManager` catches the exception and
   disables the provider.
 - Context size: Azure does not expose a per-model ``max_model_len`` field
@@ -29,9 +30,10 @@ the ``transcribe`` role:
 """
 
 import logging
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from openai import AzureOpenAI
+from openai import AsyncAzureOpenAI, AzureOpenAI
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import register_genai_provider
@@ -44,8 +46,8 @@ logger = logging.getLogger(__name__)
 class AzureOpenAIClient(OpenAIClient):
     """Generative AI client for Frigate using Azure OpenAI."""
 
-    def _init_provider(self) -> AzureOpenAI:
-        """Initialize the AzureOpenAI client from the configured base_url."""
+    def _client_options(self) -> dict[str, Any]:
+        """Build the Azure client options from the configured base_url."""
         parsed_url = urlparse(self.genai_config.base_url or "")
         query_params = parse_qs(parsed_url.query)
         api_version = query_params.get("api-version", [None])[0]
@@ -53,13 +55,19 @@ class AzureOpenAIClient(OpenAIClient):
         if not api_version:
             raise ValueError("Azure OpenAI base_url is missing api-version.")
 
-        azure_endpoint = f"{parsed_url.scheme}://{parsed_url.netloc}/"
+        return {
+            "api_key": self.genai_config.api_key,
+            "api_version": api_version,
+            "azure_endpoint": f"{parsed_url.scheme}://{parsed_url.netloc}/",
+        }
 
-        return AzureOpenAI(
-            api_key=self.genai_config.api_key,
-            api_version=api_version,
-            azure_endpoint=azure_endpoint,
-        )
+    def _init_provider(self) -> AzureOpenAI:
+        """Initialize the AzureOpenAI client from the configured base_url."""
+        return AzureOpenAI(**self._client_options())
+
+    def _init_async_provider(self) -> AsyncAzureOpenAI:
+        """Create an async Azure client for streaming chat."""
+        return AsyncAzureOpenAI(**self._client_options())
 
     def get_context_size(self) -> int:
         """Azure does not reliably surface per-model context size; use 128K."""
