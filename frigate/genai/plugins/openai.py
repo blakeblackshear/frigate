@@ -1,19 +1,34 @@
 """OpenAI Provider for Frigate AI."""
 
+import asyncio
 import base64
 import json
 import logging
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from typing import Any
 
 from httpx import TimeoutException
 from openai import OpenAI
+from starlette.concurrency import iterate_in_threadpool
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
 from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
+
+
+async def _open_stream(create: Callable[..., Any], **kwargs: Any) -> Any:
+    """Open a stream in a worker thread, closing it if the caller goes away."""
+    task = asyncio.ensure_future(asyncio.to_thread(create, **kwargs))
+    try:
+        return await asyncio.shield(task)
+    except asyncio.CancelledError:
+        task.add_done_callback(
+            lambda t: t.cancelled() or t.exception() or t.result().close()
+        )
+        raise
+
 
 # gpt-transcribe replaced the singular `language` field with a `languages` array
 # and rejects a request that sends both. Older transcription models
@@ -412,57 +427,60 @@ class OpenAIClient(GenAIClient):
             finish_reason = "stop"
             usage_stats: dict[str, Any] | None = None
 
-            stream = self.provider.chat.completions.create(**request_params)
+            stream = await _open_stream(
+                self.provider.chat.completions.create, **request_params
+            )
 
-            for chunk in stream:
-                chunk_usage = getattr(chunk, "usage", None)
-                if chunk_usage is not None:
-                    usage_stats = _stats_from_openai_usage(chunk_usage)
+            with stream:
+                async for chunk in iterate_in_threadpool(stream):
+                    chunk_usage = getattr(chunk, "usage", None)
+                    if chunk_usage is not None:
+                        usage_stats = _stats_from_openai_usage(chunk_usage)
 
-                if not chunk or not chunk.choices:
-                    continue
+                    if not chunk or not chunk.choices:
+                        continue
 
-                choice = chunk.choices[0]
-                delta = choice.delta
+                    choice = chunk.choices[0]
+                    delta = choice.delta
 
-                # Check for finish reason
-                if choice.finish_reason:
-                    finish_reason = choice.finish_reason
+                    # Check for finish reason
+                    if choice.finish_reason:
+                        finish_reason = choice.finish_reason
 
-                # Extract reasoning deltas (reasoning_content or reasoning,
-                # depending on the server)
-                reasoning_delta = getattr(delta, "reasoning_content", None) or getattr(
-                    delta, "reasoning", None
-                )
-                if reasoning_delta:
-                    reasoning_parts.append(reasoning_delta)
-                    yield ("reasoning_delta", reasoning_delta)
+                    # Extract reasoning deltas (reasoning_content or reasoning,
+                    # depending on the server)
+                    reasoning_delta = getattr(
+                        delta, "reasoning_content", None
+                    ) or getattr(delta, "reasoning", None)
+                    if reasoning_delta:
+                        reasoning_parts.append(reasoning_delta)
+                        yield ("reasoning_delta", reasoning_delta)
 
-                # Extract content deltas
-                if delta.content:
-                    content_parts.append(delta.content)
-                    yield ("content_delta", delta.content)
+                    # Extract content deltas
+                    if delta.content:
+                        content_parts.append(delta.content)
+                        yield ("content_delta", delta.content)
 
-                # Extract tool calls
-                if delta.tool_calls:
-                    for tc in delta.tool_calls:
-                        idx = tc.index
-                        fn = tc.function
+                    # Extract tool calls
+                    if delta.tool_calls:
+                        for tc in delta.tool_calls:
+                            idx = tc.index
+                            fn = tc.function
 
-                        if idx not in tool_calls_by_index:
-                            tool_calls_by_index[idx] = {
-                                "id": tc.id or "",
-                                "name": fn.name if fn and fn.name else "",
-                                "arguments": "",
-                            }
+                            if idx not in tool_calls_by_index:
+                                tool_calls_by_index[idx] = {
+                                    "id": tc.id or "",
+                                    "name": fn.name if fn and fn.name else "",
+                                    "arguments": "",
+                                }
 
-                        t = tool_calls_by_index[idx]
-                        if tc.id:
-                            t["id"] = tc.id
-                        if fn and fn.name:
-                            t["name"] = fn.name
-                        if fn and fn.arguments:
-                            t["arguments"] += fn.arguments
+                            t = tool_calls_by_index[idx]
+                            if tc.id:
+                                t["id"] = tc.id
+                            if fn and fn.name:
+                                t["name"] = fn.name
+                            if fn and fn.arguments:
+                                t["arguments"] += fn.arguments
 
             # Build final message
             full_content = "".join(content_parts).strip() or None
