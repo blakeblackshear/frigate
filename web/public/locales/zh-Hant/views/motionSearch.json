@@ -69,7 +69,7 @@
         "wallTime": "搜尋時間",
         "segmentErrors": "片段異常",
         "seconds": "{{seconds}} 秒",
-        "minutesSeconds": "{{minutes}}分 {{seconds}}秒",
+        "minutesSeconds": "{{minutes}} 分 {{seconds}} 秒",
         "scanSummary": "{{segments}} 個片段 · {{time}}"
     },
     "scanning": "掃描中 {{time}}"
