@@ -46,6 +46,16 @@ class TestNoticeKinds(unittest.TestCase):
 
         self.assertIsNone(kind.link_for({"version": "0.19.1"}))
 
+    def test_analytics_prompt_links_to_telemetry_settings(self):
+        kind = NOTICE_KINDS["analytics_prompt"]
+
+        self.assertEqual(kind.link_for({}), "/settings?page=systemTelemetry")
+        self.assertFalse(kind.counts_repeats)
+        self.assertFalse(kind.reportable)
+
+    def test_update_available_is_not_reported(self):
+        self.assertFalse(NOTICE_KINDS["update_available"].reportable)
+
 
 class RegistryTestCase(unittest.TestCase):
     def setUp(self):
@@ -345,6 +355,41 @@ class TestNoticeRegistry(RegistryTestCase):
         stats = {s["kind"]: s for s in self.registry.stats()}
         self.assertEqual(stats["detector_stuck"]["acknowledgements"], 1)
         self.assertEqual(stats["skipped_detections"]["mutes"], 1)
+
+
+class TestAnalyticsBaseline(RegistryTestCase):
+    def test_reset_counts_from_now_and_new_kinds_start_at_zero(self):
+        stuck = {"scope": "ov", "params": {"detector": "ov"}}
+        self.registry.raise_notice("detector_stuck", **stuck)
+        self.registry.raise_notice("detector_stuck", **stuck)
+
+        self.registry.reset_analytics_baseline()
+        self.registry.raise_notice("detector_stuck", **stuck)
+        self.registry.raise_notice(
+            "skipped_detections", scope="front_door", params={"pct": 12.5}
+        )
+
+        rows = {row["kind"]: row for row in self.registry.stats()}
+        self.assertEqual(
+            (
+                rows["detector_stuck"]["occurrences"],
+                rows["detector_stuck"]["reported_occurrences"],
+            ),
+            (3, 2),
+        )
+        self.assertEqual(rows["skipped_detections"]["reported_occurrences"], 0)
+
+    @patch.dict(NOTICE_KINDS, TEST_KINDS)
+    def test_reset_puts_held_repeats_in_the_baseline(self):
+        for _ in range(3):
+            self.registry.raise_notice("batched")
+
+        self.registry.reset_analytics_baseline()
+        self.registry.flush()
+
+        [row] = self.registry.stats()
+        self.assertEqual((row["occurrences"], row["reported_occurrences"]), (3, 3))
+        self.assertEqual(self.registry.active()[0]["count"], 3)
 
 
 class TestApply(RegistryTestCase):

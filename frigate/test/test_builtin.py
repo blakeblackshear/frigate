@@ -1,9 +1,10 @@
 """Tests for frigate.util.builtin helpers."""
 
 import unittest
+from multiprocessing import Value
 from unittest.mock import patch
 
-from frigate.util.builtin import EventsPerSecond
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 
 
 class TestEventsPerSecond(unittest.TestCase):
@@ -60,6 +61,18 @@ class TestEventsPerSecond(unittest.TestCase):
             # read between events, so none sits exactly on the window edge
             clock[0] += 0.01
             self.assertAlmostEqual(eps.eps(), 20.0)
+
+
+class TestInferenceSpeed(unittest.TestCase):
+    def test_first_inference_seeds_the_average(self) -> None:
+        metric = Value("d", 0.0)
+        speed = InferenceSpeed(metric)
+
+        speed.update(0.02)
+        self.assertEqual(metric.value, 0.02)
+
+        speed.update(0.12)
+        self.assertAlmostEqual(metric.value, 0.03)
 
 
 if __name__ == "__main__":

@@ -130,6 +130,7 @@ const sidebars: SidebarsConfig = {
         label: "Advanced Configuration",
         items: [
           "configuration/advanced/system",
+          "configuration/advanced/analytics",
           "configuration/advanced/reference",
           {
             type: "link",
