@@ -466,13 +466,6 @@
         },
         "password": {
           "title": "Lösenord",
-          "strength": {
-            "title": "Lösenordsstyrka: ",
-            "weak": "Svag",
-            "medium": "Mellanstark",
-            "strong": "Stark",
-            "veryStrong": "Mycket stark"
-          },
           "match": "Lösenorden matchar",
           "notMatch": "Lösenorden matchar inte",
           "placeholder": "Ange lösenord",

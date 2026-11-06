@@ -372,13 +372,6 @@
     "dialog": {
       "form": {
         "password": {
-          "strength": {
-            "strong": "Mạnh",
-            "title": "Độ mạnh mật khẩu: ",
-            "medium": "Trung bình",
-            "veryStrong": "Rất mạnh",
-            "weak": "Yếu"
-          },
           "title": "Mật khẩu",
           "placeholder": "Nhập mật khẩu",
           "confirm": {

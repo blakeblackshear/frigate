@@ -522,13 +522,6 @@
           "placeholder": "Digite o nome de utilizador"
         },
         "password": {
-          "strength": {
-            "weak": "Fraco",
-            "medium": "Médio",
-            "strong": "Forte",
-            "title": "Força da senha: ",
-            "veryStrong": "Muito forte"
-          },
           "notMatch": "As senhas não correspondem",
           "title": "Senha",
           "placeholder": "Digite a senha",

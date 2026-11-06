@@ -320,7 +320,9 @@
       "showAllTitle": "Afișează toate notificările ascunse?",
       "showAllDesc": "Fiecare notificare confirmată și silențiată revine în lista de notificări, inclusiv verificările de configurație și de flux.",
       "acknowledgedAt": "Confirmat {{time}}",
-      "mutedAt": "Fără sunet {{time}}"
+      "mutedAt": "Fără sunet {{time}}",
+      "occurred_one": "A avut loc {{time}}",
+      "occurred_other": "Ultima dată a avut loc {{lastTime}} · de {{count}} ori de la {{time}}"
     },
     "hardware": {
       "title": "Hardware",

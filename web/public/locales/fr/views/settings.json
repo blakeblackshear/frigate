@@ -563,13 +563,6 @@
           "desc": "Seules les lettres, les chiffres, les points et les traits de soulignement sont autorisés."
         },
         "password": {
-          "strength": {
-            "weak": "Faible",
-            "title": "Niveau de sécurité du mot de passe : ",
-            "medium": "Moyen",
-            "strong": "Fort",
-            "veryStrong": "Très fort"
-          },
           "match": "Les mots de passe correspondent",
           "notMatch": "Les mots de passe ne correspondent pas.",
           "placeholder": "Saisir le mot de passe",

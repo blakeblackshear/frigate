@@ -492,13 +492,6 @@
           "placeholder": "Wprowadź nazwę użytkownika"
         },
         "password": {
-          "strength": {
-            "strong": "Silne",
-            "title": "Siła hasła: ",
-            "weak": "Słabe",
-            "medium": "Średnie",
-            "veryStrong": "Bardzo silne"
-          },
           "match": "Hasła pasują",
           "confirm": {
             "placeholder": "Potwierdź hasło",

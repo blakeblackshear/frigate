@@ -7,7 +7,7 @@
       "content": "Tämä sivu latautuu uudelleen {{countdown}} sekunnin kuluttua.",
       "button": "Pakota uudelleenlataus nyt"
     },
-    "description": "Tämä sammuttaa Frigaten lyhyeksi aikaa uudelleenkäynnistyksen ajaksi."
+    "description": "Tämä pysäyttää Frigaten uudelleenkäynnistyksen ajaksi."
   },
   "explore": {
     "plus": {
@@ -24,6 +24,9 @@
         },
         "state": {
           "submitted": "Lähetetty"
+        },
+        "toast": {
+          "error": "Frigate+ toimitus epäonnistui. Tarkista verkkoyhteys ja yritä uudelleen."
         }
       }
     },
@@ -54,30 +57,101 @@
     "selectOrExport": "Valitse tai Vie",
     "toast": {
       "error": {
-        "failed": "Viennin aloitus epäonnistui: {{error}}",
-        "endTimeMustAfterStartTime": "Lopetusajan pitää olla aloitusajan jälkeen"
+        "failed": "Viennin jonotus epäonnistui: {{error}}",
+        "endTimeMustAfterStartTime": "Lopetusajan pitää olla aloitusajan jälkeen",
+        "noValidTimeSelected": "Kelvollista aikajanaa ei valittuna"
       },
-      "success": "Vienti käynnistettiin onnistuneesti. Katso tiedosto /export kansiossa."
+      "success": "Vienti käynnistettiin onnistuneesti. Katso tiedosto viennit sivulla.",
+      "queued": "Vienti jonossa. Näytä edistyminen viennit sivulta.",
+      "view": "Näytä",
+      "batchSuccess_one": "1 vienti aloitettu. Avataan tapahtuma.",
+      "batchSuccess_other": "{{count}} vientiä aloitettu. Avataan tapahtuma.",
+      "batchPartial": "{{successful}} {{total}}:sta viennistä aloitettu. Epäonnistuneet kamerat: {{failedCameras}}",
+      "batchFailed": "{{total}} viennin aloitus epäonnistui. Epäonnistuneet kamerat: {{failedCameras}}",
+      "batchQueuedSuccess_one": "1 vienti jonossa.",
+      "batchQueuedSuccess_other": "{{count}} vientiä jonossa.",
+      "batchQueuedPartial": "{{successful}} {{total}}:sta viennistä siirretty jonoon. Epäonnistuneet kamerat: {{failedCameras}}",
+      "batchQueueFailed": "Jonotus epäonnistui {{total}}:sta viennistä. Epäonnistuneet kamerat: {{failedCameras}}"
     },
     "fromTimeline": {
       "saveExport": "Tallenna vienti",
-      "previewExport": "Esikatsele vientiä"
+      "previewExport": "Esikatsele vientiä",
+      "queueingExport": "Jonotetaan vientiä...",
+      "useThisRange": "Käytä tätä aikaväliä"
     },
     "multiCamera": {
       "noCameras": "Ei kameroita saatavilla",
       "cameraSelection": "Kamerat",
       "selectAll": "Valitse kaikki kamerat",
-      "selectGroup": "Valitse ryhmä"
+      "selectGroup": "Valitse ryhmä",
+      "timeRange": "Aikajakso",
+      "selectFromTimeline": "Valitse aikajanalta",
+      "cameraSelectionHelp": "Esivalittuna tältä ajanjaksolta kamerat joilla seurattuja kohteita",
+      "searchOrSelectGroup": "Etsi, tai valitse kameraryhmä...",
+      "clearSelection": "Tyhjennä valinta",
+      "selectWithActivity": "Kamerat joilla seurattuja kohteita",
+      "noMatchingCameras": "Hakusi ei vastannut yhtään kameraa",
+      "selectedCount": "{{selected}} / {{total}} valittuna",
+      "checkingActivity": "Tarkistetaan kameran toimintaa...",
+      "detectionCount_one": "1 seurattu kohde",
+      "detectionCount_other": "{{count}} seurattua kohdetta",
+      "nameLabel": "Viennin nimi",
+      "namePlaceholder": "Valinnainen perusnimi näille vienneille",
+      "queueingButton": "Vientejä jonossa...",
+      "exportButton_one": "Vie 1 kamera",
+      "exportButton_other": "Vie {{count}} kameraa"
+    },
+    "multi": {
+      "exportingButton": "Viedään...",
+      "title_one": "Vie 1 tarkastelu",
+      "title_other": "Vie {{count}} tarkastelua",
+      "description": "Vie jokainen valittu tarkastelu. Kaikki viennit ryhmitetään yhden tapahtuman alle.",
+      "descriptionNoCase": "Vie valitut tarkastelut.",
+      "caseNamePlaceholder": "Tarkastelun vienti - {{date}}",
+      "exportButton_one": "Vie 1 tarkastelu",
+      "exportButton_other": "Vie {{count}} tarkastelua",
+      "toast": {
+        "started_one": "1 vienti aloitettu.{{count}}.",
+        "started_other": "{{count}} vientiä aloitettu.",
+        "partial": "Aloitettu {{successful}} {{total}}:sta viennistä. Epäonnistui:{{failedItems}}",
+        "failed": "{{total}} vientiä epäonnistui. Epäonnistui: {{failedItems}}"
+      }
+    },
+    "stream": {
+      "label": "Laatu",
+      "auto": "Automaattinen",
+      "main": "Alkuperäinen",
+      "sub": "Matala",
+      "autoDesc": "Käyttää päästriimiä ja palautuu huonompilaatuiseen alistriimiin mikäli päästriimiä ei ole saatavissa.",
+      "mainDesc": "Vie ainoastaan alkuperäislaatuisen päästriimin. Poislukien aikajaksot joilta ei ole päästriimiä.",
+      "subDesc": "Vie ainoastaan alempilaatuisen alistriimin. Poislukien ajanjaksot joilta ei ole alistriimiä."
+    },
+    "case": {
+      "newCaseOption": "Luo uusi tapahtuma",
+      "newCaseNamePlaceholder": "Uuden tapahtuman nimi",
+      "newCaseDescriptionPlaceholder": "Tapahtuman kuvaus",
+      "label": "Tapahtuma",
+      "placeholder": "Valitse tapahtuma"
+    },
+    "queueing": "Vienti jonossa...",
+    "tabs": {
+      "export": "Yksi kamera",
+      "multiCamera": "Useampi kamera"
     }
   },
   "streaming": {
-    "label": "Kuvavirta",
+    "label": "Kuvastriimi",
     "restreaming": {
-      "disabled": "Uudelleentoisto ei ole käytettävissä tällä kameralla.",
+      "disabled": "Uudelleenstriimaus ei ole käytössä tässä kamerassa.",
       "desc": {
         "title": "Määritä go2rtc saadaksesi lisäreaaliaikanäkymän vaihtoehtoja ja ääntä tälle kameralle."
       }
-    }
+    },
+    "showStats": {
+      "label": "Näytä striimistatistiikka",
+      "desc": "Valitse tämä vaihtoehto striimistatistiikan näyttämiseksi kamerasyötön päällä."
+    },
+    "debugView": "Vianetsintänäkymä"
   },
   "search": {
     "saveSearch": {
@@ -87,12 +161,51 @@
           "label": "Tallenna tämä haku"
         }
       },
-      "placeholder": "Nimeä haku"
+      "placeholder": "Nimeä haku",
+      "desc": "Anna tallennetulle haulle nimi.",
+      "overwrite": "{{searchName}} löytyy jo. Tallennus ylikirjoittaa olemassaolevan nimen.",
+      "success": "Hakusi ({{searchName}}) on tallennettu."
     }
   },
   "imagePicker": {
     "search": {
       "placeholder": "Hae nimikkeen tai alinimikkeen mukaan..."
+    },
+    "selectImage": "Valitse seurattujen kohteiden pikkukuva",
+    "unknownLabel": "Laukaisukuva tallennettu",
+    "noImages": "Tälle kameralle ei löytynyt pikkukuvia"
+  },
+  "recording": {
+    "shareTimestamp": {
+      "label": "Jaa aikaleima",
+      "title": "Jaa aikaleima",
+      "description": "Jaa aikaleimattu URL soittimen nykyisestä kohdasta tai valitse oma aikaleima. Huomaa, että tämä ei ole julkinen URL, vaan saatavilla ainoastaan Frigaten ja kameran käyttäjille.",
+      "custom": "Oma aikaleima",
+      "button": "Jaa aikaleima URL",
+      "shareTitle": "Frigate tarkastelun aikaleima: {{camera}}"
+    },
+    "confirmDelete": {
+      "title": "Vahvista poisto",
+      "desc": {
+        "selected": "Haluatko varmasti poistaa tämän tapahtuman kaikki videot?<br /><br />Pidä <em>Shift</em> näppäintä pohjassa ohittaaksesi tämän kysymyksen jatkossa."
+      },
+      "toast": {
+        "success": "Valittujen tarkasteluiden videot on poistettu onnistuneesti.",
+        "error": "Poisto epäonnistui: {{error}}"
+      }
+    },
+    "button": {
+      "export": "Vie",
+      "markAsReviewed": "Merkitse tarkastetuksi",
+      "markAsUnreviewed": "Merkitse tarkastamattomaksi",
+      "deleteNow": "Poista nyt",
+      "generateDescription": "Luo kuvaus"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Tekoälykuvausta pyydetty tälle tarkastelulle.",
+        "error": "Kuvauksen pyyntö epäonnistui: {{error}}"
+      }
     }
   }
 }

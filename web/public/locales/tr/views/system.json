@@ -320,7 +320,9 @@
       "showAllTitle": "Tüm gizlenmiş bilgilendirmeleri göster?",
       "showAllDesc": "Anlaşılanların ve sessize alınanların her biri Bilgilendirmeler listesine geri döner; yapılandırma ve yayın kontrolleri dahil.",
       "acknowledgedAt": "Anlaşıldı: {{time}}",
-      "mutedAt": "Sessize alındı: {{time}}"
+      "mutedAt": "Sessize alındı: {{time}}",
+      "occurred_other": "En son: {{lastTime}} · {{time}} tarihinden beri {{count}} kere",
+      "occurred_one": "{{time}} tarihinde"
     },
     "hardware": {
       "title": "Donanım",

@@ -1364,7 +1364,7 @@
             },
             "zooming": {
                 "label": "ズームモード",
-                "description": "ズーム動作の制御: disabled (パン／チルトのみ)、absolute (互換性が最も高い)、relative (パン／チルト／ズーム同時)。"
+                "description": "ズーム動作の制御: 無効 (パン／チルトのみ)、絶対的 (互換性が最も高い)、相対的 (パン／チルト／ズーム同時)。"
             },
             "zoom_factor": {
                 "label": "ズーム倍率",

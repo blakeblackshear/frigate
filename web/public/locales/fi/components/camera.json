@@ -63,7 +63,7 @@
           "label": "Yhteensopivuustila",
           "desc": "Ota tämä vaihtoehto käyttöön vain, jos kamerasi live-suoratoistossa näkyy väriartefakteja ja kuvan oikealla puolella on vinoviiva."
         },
-        "stream": "Kuvavirta",
+        "stream": "Kuvastriimi",
         "placeholder": "Valitse kuvavirta"
       },
       "birdseye": "Linnun silmä"

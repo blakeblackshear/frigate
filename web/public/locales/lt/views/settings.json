@@ -433,13 +433,6 @@
             "title": "Patvirtinti Slaptažodį",
             "placeholder": "Patvirtinti Slaptažodį"
           },
-          "strength": {
-            "title": "Slaptažodžio sudėtingumas: ",
-            "weak": "Silpnas",
-            "medium": "Vidutinis",
-            "strong": "Stiprus",
-            "veryStrong": "Labai Stiprus"
-          },
           "match": "Slaptažodžiai sutampa",
           "notMatch": "Slaptažodžiai nesutampa"
         },

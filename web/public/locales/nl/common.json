@@ -129,7 +129,8 @@
     "retry": "Opnieuw proberen",
     "expand": "Uitklappen",
     "collapse": "Inklappen",
-    "reload": "Herladen"
+    "reload": "Herladen",
+    "clear": "Legen"
   },
   "unit": {
     "speed": {

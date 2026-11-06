@@ -782,13 +782,6 @@
             "title": "Potvrdi lozinku",
             "placeholder": "Potvrdi lozinku"
           },
-          "strength": {
-            "title": "Snaga lozinke: ",
-            "weak": "Slaba",
-            "medium": "Srednje jaka",
-            "strong": "Snažna",
-            "veryStrong": "Vrlo snažna"
-          },
           "requirements": {
             "title": "Zahtjevi za lozinku:",
             "length": "Najmanje 8 znakova"

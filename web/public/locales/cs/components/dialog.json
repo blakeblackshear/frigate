@@ -120,8 +120,8 @@
       "newCaseNamePlaceholder": "Název nového případu",
       "newCaseDescriptionPlaceholder": "Popis případu",
       "label": "Případ",
-      "nonAdminHelp": "Pro tyto exporty bude vytvořen nový případ.",
-      "placeholder": "Vyberte případ"
+      "placeholder": "Vyberte případ",
+      "nameRequired": "Název případu je povinný"
     },
     "queueing": "Zařazování exportu do fronty…",
     "tabs": {
@@ -150,7 +150,8 @@
       "queueingButton": "Příprava exportů…",
       "exportButton_one": "Exportovat 1 kameru",
       "exportButton_few": "Exportovat {{count}} kamery",
-      "exportButton_other": "Exportovat {{count}} kamer"
+      "exportButton_other": "Exportovat {{count}} kamer",
+      "noCamerasSelected": "Vyberte alespoň jednu kameru"
     },
     "multi": {
       "title_one": "Exportovat 1 položku revize",

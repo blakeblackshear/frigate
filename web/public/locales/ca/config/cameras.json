@@ -861,6 +861,10 @@
         "enabled_in_config": {
             "label": "Estat de les notificacions originals",
             "description": "Indica si les notificacions s'han activat en la configuració estàtica original."
+        },
+        "ttl": {
+            "label": "Notificació TTL",
+            "description": "Com gestiona el servei push una notificació enviada mentre s'activa una alerta si no es pot arribar al vostre dispositiu. Immediatament el lliura o el deixa anar. Reliable continua intentant-ho fins a 30 segons. La notificació enviada quan acaba una alerta es manté sempre fins a una hora."
         }
     },
     "onvif": {

@@ -13,7 +13,7 @@
         }
     },
     "audio": {
-        "label": "Ääni tapahtumat",
+        "label": "Äänitunnistus",
         "enabled": {
             "label": "Ota ääni havainnointi käyttöön"
         }

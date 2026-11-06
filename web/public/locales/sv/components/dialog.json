@@ -84,7 +84,6 @@
       "newCaseNamePlaceholder": "Namn på nytt ärende",
       "newCaseDescriptionPlaceholder": "Ärendebeskrivning",
       "label": "Ärende",
-      "nonAdminHelp": "Ett nytt ärende kommer att skapas för dessa exporter.",
       "placeholder": "Välj ett ärende"
     },
     "queueing": "Köar export…",

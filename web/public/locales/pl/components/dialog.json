@@ -111,7 +111,6 @@
       "newCaseNamePlaceholder": "Nazwa nowego przypadku",
       "newCaseDescriptionPlaceholder": "Opis przypadku",
       "label": "Przypadek",
-      "nonAdminHelp": "Dla tych eksportów zostanie utworzony nowy przypadek.",
       "placeholder": "Wybierz przypadek"
     },
     "queueing": "Dodawanie eksportu do kolejki...",
@@ -137,6 +136,9 @@
         "partial": "Rozpoczęto {{successful}} z {{total}} eksportów. Niepowodzenia: {{failedItems}}",
         "failed": "Nie udało się uruchomić {{total}} eksportów. Niepowodzenia: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Jakość"
     }
   },
   "recording": {

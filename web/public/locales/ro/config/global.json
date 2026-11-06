@@ -1050,7 +1050,11 @@
             "label": "Stare originală notificări",
             "description": "Indică dacă notificările au fost activate în configurația statică originală."
         },
-        "description": "Setări pentru a activa și controla notificările pentru toate camerele; pot fi suprascrise per cameră."
+        "description": "Setări pentru a activa și controla notificările pentru toate camerele; pot fi suprascrise per cameră.",
+        "ttl": {
+            "label": "TTL notificare",
+            "description": "Cum gestionează serviciul push o notificare trimisă în timp ce o alertă este activă dacă dispozitivul tău nu poate fi contactat. Imediat o livrează pe loc sau o abandonează. Fiabil continuă să reîncerce timp de până la 30 de secunde. Notificarea trimisă când o alertă se încheie este întotdeauna păstrată timp de până la o oră."
+        }
     },
     "onvif": {
         "label": "ONVIF",
@@ -1169,7 +1173,7 @@
         },
         "cookie_secure": {
             "label": "Flag de cookie securizat",
-            "description": "Setează flag-ul secure pe cookie-ul de autentificare; ar trebui să fie true când se folosește TLS."
+            "description": "Setează întotdeauna flag-ul secure pe cookie-ul de autentificare. Frigate îl setează automat când servește TLS; activează această opțiune când un reverse proxy termină conexiunea TLS în fața Frigate. Un proxy care se conectează la portul TLS trebuie să servească Frigate către browsere prin HTTPS."
         },
         "session_length": {
             "label": "Durata sesiunii",

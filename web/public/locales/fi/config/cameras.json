@@ -6,13 +6,14 @@
     },
     "friendly_name": {
         "label": "Kutsumanimi",
-        "description": "Kameran kutsumanimeä käytetään Frigaten käyttöliittymässä"
+        "description": "Kutsumanimi jota käytetään Frigaten käyttöliittymässä"
     },
     "enabled": {
-        "description": "Käytössä"
+        "description": "Käytössä",
+        "label": "Käytössä"
     },
     "audio": {
-        "label": "Ääni tapahtumat",
+        "label": "Äänitunnistus",
         "description": "Äänipohjaisen havaitsemisen asetukset tälle kameralle.",
         "enabled": {
             "label": "Ota ääni havainnointi käyttöön",
