@@ -82,7 +82,7 @@ _user_agent_args = [
 # Presets for FFMPEG Stream Decoding (detect role)
 
 PRESETS_HW_ACCEL_DECODE = {
-    "preset-rpi-64-h264": "-c:v:1 h264_v4l2m2m",
+    "preset-rpi-64-h264": "-c:v h264_v4l2m2m",
     "preset-rpi-64-h265": "-c:v:1 hevc_v4l2m2m",
     "preset-apple-silicon-h264": "-c:v h264_v4l2m2m",
     "preset-apple-silicon-h265": "-c:v hevc_v4l2m2m",

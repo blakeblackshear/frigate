@@ -103,8 +103,8 @@ devices:
     imageTag: "stable"
     imageTagSuffix: "-standard-arm64"
     autoHardware:
-      - "video11"
-    helpText: "Raspberry Pi automatically configures the video11 device (RPi 4) and uses the arm64 image."
+      - "video10"
+    helpText: "Raspberry Pi automatically configures the video10 device (RPi 4) and uses the arm64 image."
     helpType: "info"
 
   - id: "stable-rk"
@@ -243,9 +243,9 @@ hardware:
         container: "/usr/lib/axcl"
         comment: "AXERA libraries"
 
-  - id: "video11"
-    label: "Raspberry Pi (/dev/video11)"
-    description: "Pass through /dev/video11 for Raspberry Pi 4B hardware acceleration."
+  - id: "video10"
+    label: "Raspberry Pi (/dev/video10)"
+    description: "Pass through /dev/video10 for Raspberry Pi 4B h264 hardware acceleration."
     disabledWhen:
       - "stable-tensorrt"
       - "stable-tensorrt-jp6"
@@ -256,8 +256,8 @@ hardware:
       - "apple-silicon"
       - "stable"
     devices:
-      - host: "/dev/video11"
-        container: "/dev/video11"
+      - host: "/dev/video10"
+        container: "/dev/video10"
         comment: "Raspberry Pi 4B"
 
 ports:
