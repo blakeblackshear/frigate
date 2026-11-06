@@ -51,7 +51,9 @@
         "invalidTimeRange": "Lõppaeg peab olema pärast algusaega",
         "searchFailed": "Otsing ebaõnnestus: {{message}}",
         "polygonTooSmall": "Hulknurgal peab olema vähemalt 3 punkti",
-        "unknown": "Tundmatu viga"
+        "unknown": "Tundmatu viga",
+        "alreadyRunning": "Sul juba on liikumise tuvastuse otsing töös. Oota, et see lõppeks või katkesta otsing.",
+        "tooManySearches": "Liiga palju liikumise tuvastuse otsinguid on töös. Proovi uuesti, kui mõni neist on lõppenud."
     },
     "changePercentage": "{{percentage}}% muutus",
     "metrics": {
