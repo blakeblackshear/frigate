@@ -87,8 +87,7 @@
       "placeholder": "Seleziona un caso",
       "newCaseOption": "Crea un nuovo caso",
       "newCaseNamePlaceholder": "Nuovo nome del caso",
-      "newCaseDescriptionPlaceholder": "Descrizione del caso",
-      "nonAdminHelp": "Per queste esportazioni verrà creato un nuovo caso."
+      "newCaseDescriptionPlaceholder": "Descrizione del caso"
     },
     "queueing": "Accodamento per l'esportazione...",
     "tabs": {

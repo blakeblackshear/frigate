@@ -460,13 +460,6 @@
             "title": "Conferma password",
             "placeholder": "Conferma password"
           },
-          "strength": {
-            "title": "Complessità della password: ",
-            "weak": "Debole",
-            "medium": "Media",
-            "strong": "Forte",
-            "veryStrong": "Molto forte"
-          },
           "title": "Password",
           "placeholder": "Inserisci la password",
           "match": "Le password corrispondono",
