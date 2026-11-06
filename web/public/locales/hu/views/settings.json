@@ -290,13 +290,6 @@
         },
         "password": {
           "match": "A jelszavak egyeznek",
-          "strength": {
-            "weak": "Gyenge",
-            "veryStrong": "Nagyon Erős",
-            "strong": "Erős",
-            "medium": "Közepes",
-            "title": "Jelszó erőssége: "
-          },
           "placeholder": "Adja meg a jelszót",
           "title": "Jelszó",
           "confirm": {
