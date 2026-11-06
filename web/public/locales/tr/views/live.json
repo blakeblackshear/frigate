@@ -75,11 +75,12 @@
       },
       "unavailable": {
         "browser": "Tarayıcınız WebRTC desteklemiyor.",
-        "not-configured": "WebRTC yapılandırılmamış. go2rtc webrtc adaylarını veya ice_servers'ı ayarlayın.",
+        "not-configured": "Etkinleştirmek için, bu sunucuyu IP:8555 biçiminde \"go2rtc → webrtc → adaylar\" altından ekleyin.",
         "unreachable": "WebRTC bağlanamadı. 8555 portunun ulaşılabilir ve STUN/TURN sunucu ayarlarının doğru olduğunu kontrol edin.",
         "video-codec": "Bu yayının video kodeği bu tarayıcıda WebRTC ile desteklenmiyor.",
         "audio-codec": "Bu yayının ses kodeği WebRTC tarafından desteklenmiyor. go2rtc ile opus veya G.711'e dönüştürün.",
-        "checking": "WebRTC uygunluğu kontrol ediliyor…"
+        "checking": "WebRTC uygunluğu kontrol ediliyor…",
+        "notConfiguredOptional": "İsteğe bağlı: Canlı görünüm bu olmadan da çalışır. WebRTC aslen çift yönlü konuşma için gereklidir."
       }
     },
     "auto": {

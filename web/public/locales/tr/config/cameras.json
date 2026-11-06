@@ -943,6 +943,10 @@
         "enabled_in_config": {
             "label": "Orijinal bildirim durumu",
             "description": "Bildirimlerin statik yapılandırmadaki orijinal etkinleştirilme durumunu belirtir."
+        },
+        "ttl": {
+            "label": "Bildirim ömrü (TTL)",
+            "description": "Anlık bildirim servisinin bir uyarı etkinken cihaza ulaşamaması durumunda ne yapacağı. \"Hemen\" bildirimi derhal iletir veya kaybeder. \"Sağlam\" 30 saniye kadar denemeye devam eder. Bir uyarı sona erdiğinde gönderilen bildirim ise her zaman bir saate kadar saklanır."
         }
     },
     "onvif": {

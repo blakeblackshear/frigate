@@ -58,7 +58,9 @@
         "invalidTimeRange": "Bitiş zamanı başlangıç zamanından sonra olmalıdır",
         "searchFailed": "Arama başarısız oldu: {{message}}",
         "polygonTooSmall": "Çokgenin en az 3 noktası olmalıdır",
-        "unknown": "Bilinmeyen hata"
+        "unknown": "Bilinmeyen hata",
+        "alreadyRunning": "Halen devam eden bir hareket aramanız var. Tamamlanmasını bekleyin veya iptal edin.",
+        "tooManySearches": "Çok sayıda hareket araması yapılmakta. Biri bittiğinde tekrar deneyin."
     },
     "changePercentage": "%{{percentage}} değişti",
     "metrics": {
