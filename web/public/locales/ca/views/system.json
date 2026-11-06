@@ -320,7 +320,9 @@
       "showAllTitle": "Voleu mostrar tots els avisos ocults?",
       "showAllDesc": "Cada avís reconegut i silenciat torna a la llista d'avisos, incloent-hi les comprovacions de configuració i flux.",
       "acknowledgedAt": "Reconegut {{time}}",
-      "mutedAt": "Mutat {{time}}"
+      "mutedAt": "Mutat {{time}}",
+      "occurred_one": "Ocurrit {{time}}",
+      "occurred_other": "Darrera hora {{lastTime}} · {{count}} vegades des de {{time}}"
     },
     "hardware": {
       "title": "Maquinari",
