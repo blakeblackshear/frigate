@@ -495,13 +495,6 @@
         },
         "password": {
           "title": "Wachtwoord",
-          "strength": {
-            "medium": "Matig",
-            "strong": "Sterk",
-            "veryStrong": "Zeer sterk",
-            "title": "Wachtwoordsterkte: ",
-            "weak": "Zwak"
-          },
           "match": "Wachtwoorden komen overeen",
           "confirm": {
             "title": "Wachtwoord bevestigen",
