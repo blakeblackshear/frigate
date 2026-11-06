@@ -56,7 +56,9 @@
         "invalidTimeRange": "종료 시간은 시작 시간 이후여야 합니다",
         "searchFailed": "검색 실패: {{message}}",
         "polygonTooSmall": "다각형은 최소 3개 이상의 점이 필요합니다",
-        "unknown": "알 수 없는 오류"
+        "unknown": "알 수 없는 오류",
+        "alreadyRunning": "이미 실행 중인 움직임 검색 작업이 있습니다. 완료될 때까지 기다리거나 취소하세요.",
+        "tooManySearches": "너무 많은 움직임 검색이 실행 중입니다. 진행 중인 검색이 끝나면 다시 시도하세요."
     },
     "changePercentage": "{{percentage}}% 변화됨",
     "metrics": {
