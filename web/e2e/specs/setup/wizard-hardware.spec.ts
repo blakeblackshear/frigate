@@ -101,10 +101,14 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await expect(page.getByText("Will use VAAPI (Intel/AMD)")).toBeVisible();
     await page.getByRole("button", { name: "Next" }).click();
 
-    const hwaccelSave = saves.find((save) => save.config_data?.ffmpeg);
-    expect(hwaccelSave?.config_data?.ffmpeg).toEqual({
-      hwaccel_args: "preset-vaapi",
-    });
+    await expect
+      .poll(
+        () =>
+          saves.find((save) => save.config_data?.ffmpeg)?.config_data?.ffmpeg,
+      )
+      .toEqual({
+        hwaccel_args: "preset-vaapi",
+      });
 
     // the saved steps only take effect after a restart
     const restarts = await captureRestarts(page);
@@ -117,7 +121,7 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await page.getByRole("button", { name: "Apply & Restart" }).click();
 
     await expect(page.getByText("Starting Frigate...")).toBeVisible();
-    expect(restarts).toHaveLength(1);
+    await expect.poll(() => restarts).toHaveLength(1);
   });
 
   test("defers model setup for onnx hardware without Frigate+", async ({
@@ -228,10 +232,14 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await page.getByRole("button", { name: "Next" }).click();
 
     // no camera was added, so there is no codec to match
-    const hwaccelSave = saves.find((save) => save.config_data?.ffmpeg);
-    expect(hwaccelSave?.config_data?.ffmpeg).toEqual({
-      hwaccel_args: "preset-jetson-h264",
-    });
+    await expect
+      .poll(
+        () =>
+          saves.find((save) => save.config_data?.ffmpeg)?.config_data?.ffmpeg,
+      )
+      .toEqual({
+        hwaccel_args: "preset-jetson-h264",
+      });
   });
 
   test("None writes an explicit empty hwaccel list", async ({
@@ -249,7 +257,11 @@ test.describe("setup wizard hardware @high @mobile", () => {
     await page.getByRole("radio", { name: "None (software decoding)" }).click();
     await page.getByRole("button", { name: "Next" }).click();
 
-    const hwaccelSave = saves.find((save) => save.config_data?.ffmpeg);
-    expect(hwaccelSave?.config_data?.ffmpeg).toEqual({ hwaccel_args: [] });
+    await expect
+      .poll(
+        () =>
+          saves.find((save) => save.config_data?.ffmpeg)?.config_data?.ffmpeg,
+      )
+      .toEqual({ hwaccel_args: [] });
   });
 });

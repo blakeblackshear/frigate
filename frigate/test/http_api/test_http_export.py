@@ -427,6 +427,30 @@ class TestHttpExport(BaseTestHttp):
             assert response.status_code == 400
             assert Export.get(Export.id == "front_door_running").video_path == video
 
+    def test_delete_export_rejected_while_in_progress(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            video = os.path.join(tmpdir, "front_door_abc123.mp4")
+            with open(video, "wb") as handle:
+                handle.write(b"video")
+
+            Export.create(
+                id="front_door_running",
+                camera="front_door",
+                name="front door export",
+                date=100,
+                video_path=video,
+                thumb_path=os.path.join(tmpdir, "t.webp"),
+                in_progress=True,
+            )
+
+            with AuthTestClient(self.app) as client:
+                response = client.post(
+                    "/exports/delete", json={"ids": ["front_door_running"]}
+                )
+
+            assert response.status_code == 400
+            assert os.path.exists(video)
+
     def test_rename_export_missing_file_leaves_the_row_alone(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             video = os.path.join(tmpdir, "front_door_gone_abc123.mp4")

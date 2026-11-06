@@ -625,7 +625,12 @@ class OnvifController:
 
         move_request.Speed = move_speed
 
-        await cam["ptz"].RelativeMove(move_request)
+        try:
+            await cam["ptz"].RelativeMove(move_request)
+        except Exception as e:
+            logger.warning(
+                f"Onvif sending relative move request to {camera_name} failed: {e}"
+            )
 
         # reset after the move request
         move_request.Translation.PanTilt.x = 0

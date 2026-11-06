@@ -2,9 +2,9 @@ aiofiles == 25.1.*
 click == 8.5.*
 # FastAPI
 aiohttp == 3.14.*
-starlette == 1.9.*
+starlette == 1.10.*
 starlette-context == 0.5.*
-fastapi[standard-no-fastapi-cloud-cli] == 0.159.*
+fastapi[standard-no-fastapi-cloud-cli] == 0.162.*
 uvicorn == 0.54.*
 slowapi == 0.1.*
 joserfc == 1.7.*
@@ -16,7 +16,7 @@ python-multipart == 0.0.32
 tensorflow == 2.19.* ; platform_machine == 'aarch64'
 tensorflow-cpu == 2.21.* ; platform_machine == 'x86_64'
 # General
-mypy == 2.4.0
+mypy == 2.4.1
 onvif-zeep-async == 4.3.*
 paho-mqtt == 2.1.*
 pandas == 3.0.*
@@ -25,7 +25,7 @@ peewee_migrate == 2.3.*
 psutil == 7.2.*
 pydantic == 2.14.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
-tzdata == 2026.5
+tzdata == 2026.6
 pyzmq == 27.2.*
 ruamel.yaml == 0.19.*
 tzlocal == 5.4.5
@@ -45,11 +45,11 @@ scipy == 1.17.*
 openvino == 2026.4.*
 onnxruntime == 1.31.*
 # Embeddings
-transformers == 5.20.*
+transformers == 5.22.*
 # Generative AI
-google-genai == 2.32.*
+google-genai == 2.34.*
 ollama == 0.6.*
-openai == 3.36.*
+openai == 3.41.*
 # push notifications
 py-vapid == 1.9.6
 pywebpush == 2.5.*
@@ -68,7 +68,7 @@ prometheus-client == 0.26.*
 tflite_runtime @ https://github.com/frigate-nvr/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_x86_64.whl; platform_machine == 'x86_64'
 tflite_runtime @ https://github.com/feranick/TFlite-builds/releases/download/v2.17.1/tflite_runtime-2.17.1-cp311-cp311-linux_aarch64.whl; platform_machine == 'aarch64'
 # audio transcription
-sherpa-onnx==1.13.*
+sherpa-onnx==2.0.*
 faster-whisper==1.2.*
 librosa==0.11.*
 soundfile==0.14.*

@@ -386,7 +386,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=gemini_messages,  # type: ignore[arg-type]
+                contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 
@@ -648,7 +648,7 @@ class GeminiClient(GenAIClient):
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
-                contents=gemini_messages,  # type: ignore[arg-type]
+                contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 

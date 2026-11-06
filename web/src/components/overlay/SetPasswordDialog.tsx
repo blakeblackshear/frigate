@@ -28,12 +28,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useIsAdmin } from "@/hooks/use-is-admin";
-import {
-  calculatePasswordStrength,
-  getPasswordRequirements,
-  getPasswordStrengthLabel,
-  getPasswordStrengthColor,
-} from "@/utils/passwordUtil";
+import { getPasswordRequirements } from "@/utils/passwordUtil";
 
 type SetPasswordProps = {
   show: boolean;
@@ -123,12 +118,6 @@ export default function SetPasswordDialog({
 
   const password = form.watch("password");
   const confirmPassword = form.watch("confirmPassword");
-
-  // Password strength calculation
-  const passwordStrength = useMemo(
-    () => calculatePasswordStrength(password),
-    [password],
-  );
 
   const requirements = useMemo(
     () => getPasswordRequirements(password),
@@ -303,6 +292,12 @@ export default function SetPasswordDialog({
                         )}
                         className="h-10 pr-10"
                         autoFocus
+                        onChange={(e) => {
+                          field.onChange(e);
+                          if (form.getValues("confirmPassword")) {
+                            form.trigger("confirmPassword");
+                          }
+                        }}
                       />
                       <Button
                         type="button"
@@ -334,21 +329,6 @@ export default function SetPasswordDialog({
 
                   {password && (
                     <div className="mt-2 space-y-2">
-                      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-secondary-foreground">
-                        <div
-                          className={`${getPasswordStrengthColor(
-                            password,
-                          )} transition-all duration-300`}
-                          style={{ width: `${passwordStrength * 100}%` }}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {t("users.dialog.form.password.strength.title")}
-                        <span className="font-medium">
-                          {getPasswordStrengthLabel(password, t)}
-                        </span>
-                      </p>
-
                       <div className="space-y-1 rounded-md bg-muted/50 p-2">
                         <p className="text-xs font-medium text-muted-foreground">
                           {t("users.dialog.form.password.requirements.title")}
@@ -376,8 +356,6 @@ export default function SetPasswordDialog({
                       </div>
                     </div>
                   )}
-
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -428,18 +406,25 @@ export default function SetPasswordDialog({
                     </div>
                   </FormControl>
 
-                  {password &&
-                    confirmPassword &&
-                    password === confirmPassword && (
-                      <div className="mt-1 flex items-center gap-1.5 text-xs">
-                        <LuCheck className="size-3.5 text-green-500" />
-                        <span className="text-green-600">
-                          {t("users.dialog.form.password.match")}
-                        </span>
-                      </div>
-                    )}
-
-                  <FormMessage />
+                  {password && confirmPassword && (
+                    <div className="mt-1 flex items-center gap-1.5 text-xs">
+                      {password === confirmPassword ? (
+                        <>
+                          <LuCheck className="size-3.5 text-green-500" />
+                          <span className="text-green-600">
+                            {t("users.dialog.form.password.match")}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <LuX className="size-3.5 text-red-500" />
+                          <span className="text-red-600">
+                            {t("users.dialog.form.password.notMatch")}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </FormItem>
               )}
             />

@@ -763,20 +763,17 @@ The community supported docker image tags for the current stable version are:
 
 :::warning
 
-As of Home Assistant Operating System 10.2 and Home Assistant 2023.6 defining separate network storage for media is supported.
-
 There are important limitations in HA OS to be aware of:
 
-- Separate local storage for media is not yet supported by Home Assistant
 - AMD GPUs are not supported because HA OS does not include the mesa driver.
-- Intel NPUs are not supported because HA OS does not include the NPU firmware.
+- Intel NPUs require Home Assistant OS 18.4 or newer. Earlier releases do not include the NPU firmware.
 - Nvidia GPUs are not supported because HA Apps do not support the Nvidia runtime.
 
 :::
 
 :::tip
 
-See [the network storage guide](/guides/ha_network_storage.md) for instructions to setup network storage for frigate.
+Frigate's media can be kept on separate storage, either a network share (Home Assistant 2023.6 or newer) or a local disk such as a second internal drive or a USB drive (Home Assistant 2026.11 or newer). See [the storage guide](/guides/ha_network_storage.md) for setup instructions.
 
 :::
 

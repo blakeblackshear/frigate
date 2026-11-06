@@ -103,7 +103,6 @@ const ffmpeg: SectionConfigOverrides = {
     hiddenFields: ["retry_interval"],
     advancedFields: ["path", "global_args", "gpu"],
     overrideFields: [
-      "inputs",
       "path",
       "global_args",
       "input_args",
@@ -169,6 +168,7 @@ const ffmpeg: SectionConfigOverrides = {
   },
   global: {
     restartRequired: [],
+    runtimeFields: ["hwaccel_args"],
     fieldOrder: [
       "hwaccel_args",
       "path",
@@ -194,6 +194,8 @@ const ffmpeg: SectionConfigOverrides = {
     },
   },
   camera: {
+    // reset would delete the camera's inputs along with its overrides
+    hideReset: true,
     fieldGroups: {
       cameraFfmpeg: ["input_args", "hwaccel_args", "output_args"],
     },

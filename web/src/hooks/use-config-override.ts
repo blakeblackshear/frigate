@@ -473,7 +473,7 @@ export const OVERRIDABLE_SECTIONS: ReadonlyArray<{
   { key: "review" },
   { key: "audio" },
   { key: "notifications" },
-  { key: "live" },
+  { key: "live", compareFields: ["transcode", "height", "quality"] },
   { key: "timestamp_style" },
   {
     key: "audio_transcription",
