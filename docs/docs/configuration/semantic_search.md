@@ -179,6 +179,12 @@ Switching between Jina models and a GenAI provider requires reindexing. Embeddin
 
 :::
 
+:::warning
+
+A cloud embeddings provider receives every thumbnail when you reindex, and the text of each search. llama.cpp and Ollama can keep that data on your own hardware. See [Network Requirements](/frigate/network_requirements#generative-ai).
+
+:::
+
 ### GPU Acceleration
 
 The CLIP models are downloaded in ONNX format, and the `large` model can be accelerated using GPU hardware, when available. This depends on the Docker build that is used. You can also target a specific device in a multi-GPU installation.

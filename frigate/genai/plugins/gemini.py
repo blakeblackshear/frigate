@@ -7,19 +7,23 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import numpy as np
 from google import genai
 from google.genai import errors, types
 from google.genai.types import FunctionCallingConfigMode
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import interleave_images
+from frigate.genai.utils import interleave_images, to_jpeg
 
 logger = logging.getLogger(__name__)
 
 # Gemini requests carrying inline data are capped at ~20 MB total; stay well
 # under it so the request fails as a log line rather than a 400.
 GEMINI_MAX_INLINE_BYTES = 15 * 1024 * 1024
+
+# sqlite-vec stores thumbnail and description embeddings as FLOAT[768].
+GEMINI_EMBEDDING_DIM = 768
 
 
 def _decode_thought_signature(value: Any) -> bytes | None:
@@ -231,6 +235,115 @@ class GeminiClient(GenAIClient):
         """Get the context window size for Gemini."""
         # Gemini Pro Vision has a 1M token context window
         return 1000000
+
+    @property
+    def supports_embeddings(self) -> bool:
+        """Gemini exposes embed_content for embedding models.
+
+        True for every Gemini provider. The embeddings role still has to
+        use an embedding model such as gemini-embedding-2. A chat model
+        does not return retrieval vectors.
+        """
+        return True
+
+    def _embedding_model_name(self) -> str:
+        """Model id for embed_content, without a ``models/`` prefix."""
+        model = self.genai_config.model or "gemini-embedding-2"
+        if model.startswith("models/"):
+            model = model[len("models/") :]
+        return model
+
+    def _vector_from_embed(self, result: Any) -> np.ndarray:
+        """Read the single embedding vector from an embed_content response."""
+        embeddings = getattr(result, "embeddings", None) or []
+        values = embeddings[0].values if embeddings else None
+        if not values:
+            raise ValueError("Gemini embeddings response had no vector")
+        return np.asarray(values, dtype=np.float32)
+
+    def _embed_one(self, model: str, contents: Any) -> np.ndarray:
+        """One embed_content call. API failures become ValueError.
+
+        ``_embed_thumbnail`` only catches ValueError. Returning an empty
+        list makes the caller index ``[0]`` and can stop the embeddings
+        process.
+        """
+        try:
+            result = self.provider.models.embed_content(
+                model=model,
+                contents=contents,
+                config=types.EmbedContentConfig(
+                    output_dimensionality=GEMINI_EMBEDDING_DIM
+                ),
+            )
+        except Exception as e:
+            logger.warning("Gemini embeddings request failed: %s", e)
+            raise ValueError("Gemini embeddings request failed") from e
+
+        return self._vector_from_embed(result)
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Embed each text or image on its own.
+
+        gemini-embedding-2 returns one vector per request. Several parts
+        in one contents list are aggregated into that single vector, so
+        each description, search query, and thumbnail is its own call.
+
+        Stored descriptions and search queries share this text path, so
+        both get the search-query prefix and stay in one format. A text
+        that already starts with ``task:`` is sent unchanged. Images are
+        not prefixed. The API accepts PNG and JPEG only, and Frigate
+        stores thumbnails as WebP, so each image is transcoded first.
+        Requested length is 768, matching the semantic search tables.
+
+        Args:
+            texts: Strings to embed.
+            images: Encoded images, typically WebP thumbnails.
+
+        Returns:
+            One float32 vector per input, length 768.
+
+        Raises:
+            ValueError: The provider is missing, an image cannot be
+                converted, the response has no vector, or the request
+                fails.
+        """
+        if self.provider is None:
+            logger.warning("Gemini provider has not been initialized")
+            raise ValueError("Gemini provider has not been initialized")
+
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        model = self._embedding_model_name()
+        vectors: list[np.ndarray] = []
+
+        for text in texts:
+            content = (
+                text
+                if text.startswith("task:")
+                else f"task: search result | query: {text}"
+            )
+            vectors.append(self._embed_one(model, content))
+
+        for image in images:
+            jpeg = to_jpeg(image)
+            if jpeg is None:
+                raise ValueError("thumbnail could not be converted to JPEG")
+            vectors.append(
+                self._embed_one(
+                    model,
+                    [types.Part.from_bytes(data=jpeg, mime_type="image/jpeg")],
+                )
+            )
+
+        return vectors
 
     def chat_with_tools(
         self,
