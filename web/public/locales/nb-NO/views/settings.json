@@ -491,13 +491,6 @@
             "placeholder": "Bekreft passord",
             "title": "Bekreft passord"
           },
-          "strength": {
-            "title": "Passordstyrke: ",
-            "veryStrong": "Veldig sterkt",
-            "weak": "Svakt",
-            "medium": "Medium",
-            "strong": "Sterkt"
-          },
           "match": "Passordene samsvarer",
           "notMatch": "Passordene samsvarer ikke",
           "show": "Vis passord",
