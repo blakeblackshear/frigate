@@ -121,12 +121,16 @@
     "copiedToClipboard": "In die Zwischenablage kopiert",
     "modified": "Verändert",
     "overridden": "Überschrieben",
-    "resetToGlobal": "Auf Global zurückgesetzen",
+    "resetToGlobal": "Auf Global zurücksetzen",
     "resetToDefault": "Auf Werkseinstellungen zurücksetzten",
     "saveAll": "Alle speichern",
     "savingAll": "Alle werden gespeichert…",
     "undoAll": "Alle rückgängig",
-    "retry": "Wiederholen"
+    "retry": "Wiederholen",
+    "expand": "Maximieren",
+    "collapse": "Minimieren",
+    "clear": "Löschen",
+    "reload": "Neu laden"
   },
   "label": {
     "back": "Zurück",
@@ -226,7 +230,7 @@
     "configuration": "Konfigurieren",
     "withSystem": "System",
     "settings": "Einstellungen",
-    "systemLogs": "Systemprotokoll",
+    "systemLogs": "Protokoll",
     "systemMetrics": "Systemstatistiken",
     "explore": "Erkunden",
     "faceLibrary": "Gesichterbibliothek",
@@ -321,5 +325,33 @@
   "validation_errors": "Validierungsfehler",
   "credentialField": {
     "savedPlaceholder": "Gespeichert – leer lassen, um den aktuellen Stand beizubehalten"
+  },
+  "error": {
+    "title": "Seite arbeitet nicht mehr",
+    "desc": "Die Seite erzeugt einen unerwarteten Fehler. Ein Reload löst das Problem meist. Wenn der Fehler weiter besteht, dann kopiere die Details und füge diese in einen Github-Diskussions-Eintrag hinzu.",
+    "staleTitle": "Neuladen erforderlich",
+    "staleDesc": "Ein Teil des Interface konnte nicht geladen werden, welches meist die Ursache hat, das Frigate eine Aktualisierung durchgeführt hat während das Tab offen war. Bitte neuladen.",
+    "partial": "Teil des Interfaces arbeitet nicht",
+    "copyDetails": "Kopiere Details",
+    "copyFailed": "Kann die Details nicht in die Zwischenablage kopieren"
+  },
+  "commandMenu": {
+    "title": "Befehlsmenu",
+    "empty": "Keine Treffer",
+    "section": {
+      "recent": "aktuell",
+      "pages": "Seiten",
+      "cameras": "Kameras",
+      "cameraGroups": "Kameragruppen",
+      "settings": "Einstellungen",
+      "actions": "Aktionen"
+    },
+    "camera": {
+      "live": "Live",
+      "review": "Review"
+    },
+    "action": {
+      "toggleTheme": "hell/dunkel umschalten"
+    }
   }
 }
