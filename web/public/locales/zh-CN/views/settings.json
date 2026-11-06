@@ -497,13 +497,6 @@
             "title": "确认密码",
             "placeholder": "请再次输入密码"
           },
-          "strength": {
-            "title": "密码强度： ",
-            "weak": "弱",
-            "medium": "中等",
-            "strong": "强",
-            "veryStrong": "非常强"
-          },
           "match": "密码匹配",
           "notMatch": "密码不匹配",
           "show": "显示密码",
