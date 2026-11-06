@@ -963,13 +963,6 @@
             "title": "تأیید گذرواژه",
             "placeholder": "تأیید گذرواژه"
           },
-          "strength": {
-            "title": "قدرت گذرواژه: · ",
-            "weak": "ضعیف",
-            "medium": "متوسط",
-            "strong": "قوی",
-            "veryStrong": "خیلی قوی"
-          },
           "requirements": {
             "title": "الزامات رمز عبور:",
             "length": "حداقل ۸ کاراکتر"
