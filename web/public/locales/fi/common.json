@@ -41,9 +41,42 @@
     "second_one": "{{time}} sekunti",
     "second_other": "{{time}} sekuntia",
     "formattedTimestampHourMinute": {
-      "24hour": "HH:mm"
+      "24hour": "HH:mm",
+      "12hour": "h:mm aaa"
     },
-    "never": "Ei koskaan"
+    "never": "Ei koskaan",
+    "formattedTimestamp": {
+      "12hour": "d MMM, h:mm:ss aaa",
+      "24hour": "d MMM, HH:mm:ss"
+    },
+    "formattedTimestamp2": {
+      "12hour": "dd/MM h:mm:ssa",
+      "24hour": "d MMM HH:mm:ss"
+    },
+    "formattedTimestampHourMinuteSecond": {
+      "12hour": "h:mm:ss aaa",
+      "24hour": "HH:mm:ss"
+    },
+    "formattedTimestampMonthDayHourMinute": {
+      "12hour": "d MMM, h:mm aaa",
+      "24hour": "d MMM, HH:mm"
+    },
+    "formattedTimestampMonthDayYear": {
+      "12hour": "d MMM, yyyy",
+      "24hour": "d MMM, yyyy"
+    },
+    "formattedTimestampMonthDayYearHourMinute": {
+      "12hour": "d MMM yyyy, h:mm aaa",
+      "24hour": "d MMM yyyy, HH:mm"
+    },
+    "formattedTimestampMonthDay": "d MMM",
+    "formattedTimestampFilename": {
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "inProgress": "Käynnissä",
+    "invalidStartTime": "Epäkelpo aloitusaika",
+    "invalidEndTime": "Epäkelpo lopetusaika"
   },
   "pagination": {
     "next": {
@@ -86,7 +119,7 @@
     },
     "explore": "Selaa",
     "export": "Vienti",
-    "uiPlayground": "UI-leikkikenttä",
+    "uiPlayground": "Käyttöliittymäleikkikenttä",
     "user": {
       "account": "Tili",
       "current": "Nykyinen käyttäjä: {{user}}",
@@ -109,7 +142,49 @@
       "ca": "Katalaani",
       "withSystem": {
         "label": "Käytä järjestelmän asetuksia kielelle"
-      }
+      },
+      "en": "Englanti (Englanti)",
+      "es": "Espanja (Espanja)",
+      "zhCN": "简体中文 (Yksinkertaistettu Kiina)",
+      "zhHant": "繁體中文 (Perinteinen Kiina)",
+      "hi": "हिन्दी (Hindi)",
+      "fr": "Ranska (Ranska)",
+      "ar": "العربية (Arabia)",
+      "pt": "Portugali (Portugali)",
+      "ptBR": "Brasilian portugali (Brasilian portugali)",
+      "ru": "Русский (Venäjä)",
+      "de": "Saksa (Saksa)",
+      "ja": "日本語 (Japani)",
+      "tr": "Turkki (Turkki)",
+      "it": "Italia (Italia)",
+      "nl": "Hollanti (Hollanti)",
+      "sv": "Ruotsi (Ruotsi)",
+      "cs": "Tsekki (Tsekki)",
+      "nb": "Norja (Norja)",
+      "ko": "한국어 (Korea)",
+      "vi": "Vietnam (Vietnam)",
+      "fa": "فارسی (Persia)",
+      "pl": "Puola (Puola)",
+      "uk": "Українська (Ukraina)",
+      "be": "Беларуская (Valkovenäjä)",
+      "he": "עברית (Heprea)",
+      "el": "Ελληνικά (Kreikka)",
+      "ro": "Romania (Romania)",
+      "hu": "Unkari (Unkari)",
+      "fi": "Suomi (Suomi)",
+      "da": "Tanska (Tanska)",
+      "sk": "Slovakia (Slovakia)",
+      "yue": "粵語 (Kantonin kiina)",
+      "th": "ไทย (Thaimaa)",
+      "hr": "Kroatia (Kroatia)",
+      "bs": "Bosnia (Bosnia)",
+      "sr": "Serbia (Serbia)",
+      "sl": "Slovenia (Slovenia)",
+      "lt": "Liettua (Liettua)",
+      "bg": "Bulgaria (Bulgaria)",
+      "gl": "Galego (Galicia)",
+      "id": "Indonesia (Indonesia)",
+      "ur": "اردو (Urdu)"
     },
     "review": "Esikatselu",
     "theme": {
@@ -131,16 +206,25 @@
     "languages": "Kielet",
     "system": "Järjestelmä",
     "settings": "Asetukset",
-    "configuration": "Konfiguraatio"
+    "configuration": "Asetukset",
+    "actions": "Toiminnot",
+    "features": "Ominaisuudet",
+    "classification": "Luokittelu",
+    "chat": "Chat",
+    "systemMetrics": "Tila ja mittarit",
+    "systemLogs": "Lokit",
+    "profiles": "Profiilit",
+    "configurationEditor": "Asetuseditori"
   },
   "toast": {
     "copyUrlToClipboard": "URL kopioitu leikepöydälle.",
     "save": {
       "title": "Tallenna",
       "error": {
-        "title": "Konfiguraatiomuutosten tallennus epäonnistui: {{errorMessage}}",
-        "noMessage": "Konfiguraatiomuutosten tallennus epäonnistui"
-      }
+        "title": "Asetusten tallennus epäonnistui: {{errorMessage}}",
+        "noMessage": "Asetusten tallennus epäonnistui"
+      },
+      "success": "Asetusmuutokset tallennettu onnistuneesti."
     }
   },
   "button": {
@@ -180,11 +264,39 @@
     "twoWayTalk": "Kahdensuuntainen puhe",
     "cameraAudio": "Kameran ääni",
     "exitFullscreen": "Poistu koko näytöstä",
-    "copyCoordinates": "Kopioi koordinaatit"
+    "copyCoordinates": "Kopioi koordinaatit",
+    "suspended": "Keskeytetty",
+    "unsuspended": "Jatka",
+    "unselect": "Poista valinta",
+    "export": "Vie",
+    "deleteNow": "Poista nyt",
+    "continue": "Jatka",
+    "modified": "Muutettu",
+    "resetToGlobal": "Palauta yleisiin asetuksiin",
+    "resetToDefault": "Palauta oletusasetuksiin",
+    "saveAll": "Tallenna kaikki",
+    "savingAll": "Tallennetaan kaikkia…",
+    "undoAll": "Peruuta kaikki",
+    "retry": "Yritä uudelleen",
+    "reload": "Päivitä",
+    "overridden": "Syrjäytetty"
   },
   "unit": {
     "length": {
-      "feet": "jalka"
+      "feet": "jalka",
+      "meters": "metriä"
+    },
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/tunti",
+      "mbph": "MB/tunti",
+      "gbph": "GB/tunti"
     }
   },
   "readTheDocumentation": "Lue dokumentaatio",
@@ -194,7 +306,8 @@
     "ID": "ID",
     "none": "Ei mitään",
     "all": "Kaikki",
-    "other": "Muu"
+    "other": "Muu",
+    "back": "Palaa"
   },
   "list": {
     "two": "{{0}} ja {{1}}",
@@ -204,5 +317,44 @@
   "field": {
     "optional": "Vaihtoehtoinen",
     "internalID": "Frigaten sisäisesti käyttämä ID asetuksissa ja tietokannassa"
-  }
+  },
+  "error": {
+    "title": "Tämä sivu lakkasi toimimasta",
+    "desc": "Sivulla tapahtui odottamaton virhe. Uudelleenlataus yleensä auttaa. Mikäli virhe toistuu, kopioi tiedot ja liitä ne GitHubin keskusteluun.",
+    "staleTitle": "Lataa uudelleen",
+    "staleDesc": "Osaa käyttöliittymästä ei voitu ladata, johtuu yleensä Frigaten päivittymisestä välilehden ollessa auki. Lataa uusi versio päivittämällä sivu.",
+    "partial": "Osa käyttöliittymästä lopetti toimintansa.",
+    "copyDetails": "Kopioi lisätiedot",
+    "copyFailed": "Lisätietoja ei voitu kopioida leikepöydälle"
+  },
+  "credentialField": {
+    "savedPlaceholder": "Tallennettu — Jätä tyhjäksi pitääksesi nykyisen"
+  },
+  "commandMenu": {
+    "title": "Komentovalikko",
+    "description": "Hakusivut, kamerat, asetukset ja toiminnot",
+    "placeholder": "Hakusivut, kamerat, asetukset ja toiminnot",
+    "empty": "Ei osumia",
+    "hint": "{{key}} tai / avataksesi, Enter käynnistää",
+    "section": {
+      "recent": "Viimeisin",
+      "pages": "Sivut",
+      "cameras": "Kamerat",
+      "cameraGroups": "Kameraryhmät",
+      "settings": "Asetukset",
+      "actions": "Toiminnot"
+    },
+    "camera": {
+      "live": "Live",
+      "review": "Tarkastele"
+    },
+    "action": {
+      "toggleTheme": "Kytke vaalea ja tumma tila"
+    }
+  },
+  "information": {
+    "pixels": "{{area}}px"
+  },
+  "no_items": "Ei tuloksia",
+  "validation_errors": "Tarkistusvirheet"
 }

@@ -84,8 +84,8 @@
     "disable": "Piilota suoratoiston tilastot"
   },
   "manualRecording": {
-    "title": "Tallennus pyynnöstä",
-    "tips": "Aloita manuaalinen tapahtuma tämän kameran tallenteen tallennusasetusten perusteella.",
+    "title": "Tarvittaessa",
+    "tips": "Lataa tilannekuva tai aloita manuaalinen tapahtuma tämän kameran tallenteiden säilytysasetusten perusteella.",
     "playInBackground": {
       "label": "Toista taustalla",
       "desc": "Ota tämä asetus käyttöön, jos haluat jatkaa suoratoistoa kun soitin on piilotettu."
