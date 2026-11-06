@@ -556,13 +556,6 @@
             "title": "パスワードの確認",
             "placeholder": "パスワードを再入力"
           },
-          "strength": {
-            "title": "パスワード強度: ",
-            "weak": "弱い",
-            "medium": "普通",
-            "strong": "強い",
-            "veryStrong": "非常に強い"
-          },
           "match": "パスワードが一致しています",
           "notMatch": "パスワードが一致しません",
           "show": "パスワードを表示",
@@ -1839,8 +1832,8 @@
     "autotracking": {
       "zooming": {
         "disabled": "無効",
-        "absolute": "絶対値",
-        "relative": "相対値"
+        "absolute": "絶対的",
+        "relative": "相対的"
       }
     }
   },
