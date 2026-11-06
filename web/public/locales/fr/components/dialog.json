@@ -87,8 +87,7 @@
       "placeholder": "Sélectionner un dossier",
       "newCaseOption": "Créer un nouveau cas",
       "newCaseNamePlaceholder": "Nouveau nom de cas",
-      "newCaseDescriptionPlaceholder": "Description de cas",
-      "nonAdminHelp": "Un nouveau cas sera créé pour ces exports."
+      "newCaseDescriptionPlaceholder": "Description de cas"
     },
     "queueing": "Mise en file d'attente de l'export...",
     "tabs": {

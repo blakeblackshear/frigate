@@ -45,6 +45,10 @@
         "num_threads": {
             "label": "Fils d'exécution pour la détection",
             "description": "Nombre de fils d'éxécution à utiliser pour le traitement de la détection audio."
+        },
+        "labelmap": {
+            "label": "Customisation Audio",
+            "description": "Remplacements ou entrées de remappage à fusionner avec la table standard des libellés audio."
         }
     },
     "audio_transcription": {
@@ -72,6 +76,10 @@
         "order": {
             "label": "Emplacement",
             "description": "Emplacement numérique contrôlant l'ordre de la caméra dans la disposition en vue à vol d'oiseau."
+        },
+        "modes": {
+            "label": "Types d'activité",
+            "description": "Types d’activité qui incluent des caméras dans Birdseye."
         }
     },
     "detect": {
@@ -132,6 +140,10 @@
         "annotation_offset": {
             "label": "Décalage de l'annotation",
             "description": "Millisecondes pour le décalage des annotations afin de mieux aligner les boîtes englobantes de la ligne du temps avec les enregistrements ; peut être positif ou négatif."
+        },
+        "scene": {
+            "label": "Détecter la scène",
+            "description": "L'environnement filmé par cette caméra, utilisé pour déterminer lequel des modèles configurés doit être exécuté sur celle-ci. Les caméras laissées sur « default » utilisent le modèle configuré avec une scène définie sur « default »."
         }
     },
     "face_recognition": {
