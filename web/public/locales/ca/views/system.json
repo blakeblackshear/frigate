@@ -302,7 +302,8 @@
         "update_available": "Frigate {{version}} està disponible",
         "ffmpeg_high_cpu": "L'ús de la CPU FFmpeg és alt ({{cpu}}% mitjana)",
         "detect_high_cpu": "L'ús de la CPU de detecció és alt ({{cpu}}% mitjana)",
-        "object_processing_behind": "No s'ha pogut mantenir el processament d'objectes rastrejat, de manera que s'han deixat anar els fotogrames de la càmera. Comprova la utilització de la CPU, i si els límits de la CPU o la fixació al contenidor o VM estan deixant la Frigate massa poca CPU"
+        "object_processing_behind": "No s'ha pogut mantenir el processament d'objectes rastrejat, de manera que s'han deixat anar els fotogrames de la càmera. Comprova la utilització de la CPU, i si els límits de la CPU o la fixació al contenidor o VM estan deixant la Frigate massa poca CPU",
+        "analytics_prompt": "Considereu compartir estadístiques d'ús anònimes per ajudar els desenvolupadors a millorar Frigate"
       },
       "streamPrefix": "Flux {{index}}: {{message}}",
       "streamPrefixRestream": "Flux {{index}} (via go2rtc): {{message}}",
@@ -320,7 +321,9 @@
       "showAllTitle": "Voleu mostrar tots els avisos ocults?",
       "showAllDesc": "Cada avís reconegut i silenciat torna a la llista d'avisos, incloent-hi les comprovacions de configuració i flux.",
       "acknowledgedAt": "Reconegut {{time}}",
-      "mutedAt": "Mutat {{time}}"
+      "mutedAt": "Mutat {{time}}",
+      "occurred_one": "Ocurrit {{time}}",
+      "occurred_other": "Darrera hora {{lastTime}} · {{count}} vegades des de {{time}}"
     },
     "hardware": {
       "title": "Maquinari",

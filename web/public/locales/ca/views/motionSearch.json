@@ -59,7 +59,9 @@
         "invalidTimeRange": "L'hora de finalització ha de ser posterior a l'hora d'inici",
         "searchFailed": "Ha fallat la cerca: {{message}}",
         "polygonTooSmall": "El polígon ha de tenir almenys 3 punts",
-        "unknown": "Error desconegut"
+        "unknown": "Error desconegut",
+        "alreadyRunning": "Ja teniu una cerca de moviment en execució. Espera que acabi o cancel·li.",
+        "tooManySearches": "S'estan executant massa cerques en moviment. Torneu-ho a provar quan s'acabi."
     },
     "changePercentage": "{{percentage}}% canviat",
     "metrics": {
