@@ -11,7 +11,7 @@
     "object": "除錯 - Frigate",
     "cameraManagement": "管理鏡頭 - Frigate",
     "cameraReview": "攝影機預覽設定 - Frigate",
-    "globalConfig": "全域性配置 - Frigate",
+    "globalConfig": "全域性組態設定 - Frigate",
     "cameraConfig": "攝影機配置 - Frigate",
     "detectorsAndModel": "偵測器與模型 - Frigate",
     "maintenance": "維護 - Frigate",
@@ -20,7 +20,7 @@
   "menu": {
     "ui": "使用者介面",
     "enrichments": "進階功能",
-    "cameras": "鏡頭設定",
+    "cameras": "攝影機組態設定",
     "masksAndZones": "遮罩 / 區域",
     "motionTuner": "移動偵測調教器",
     "debug": "除錯",
@@ -32,7 +32,7 @@
     "cameraReview": "預覽",
     "roles": "角色",
     "general": "一般",
-    "globalConfig": "全域性配置",
+    "globalConfig": "全域性組態設定",
     "system": "系統",
     "integrations": "整合",
     "uiSettings": "介面設定",
@@ -48,7 +48,7 @@
     "globalLivePlayback": "即時監控觀看",
     "globalTimestampStyle": "時間戳樣式",
     "systemDatabase": "資料庫",
-    "systemTls": "TLS加密連結",
+    "systemTls": "TLS",
     "systemAuthentication": "驗證",
     "systemNetworking": "網路",
     "systemProxy": "代理",
@@ -180,7 +180,7 @@
         "label": "立即重新索引",
         "desc": "重新索引會為所有追蹤物件重新產生嵌入向量。此過程在背景運行，可能會佔用大量 CPU 資源，並且耗時較長，具體取決於追蹤物件的數量。",
         "confirmTitle": "確認重建索引",
-        "confirmDesc": "確定要為所有追蹤目標重建特徵向量索引資訊嗎？此過程將在後臺進行，但可能會導致CPU滿載並耗費較長時間。您可以在 瀏覽 頁面檢視進度。",
+        "confirmDesc": "您確定要重新索引所有已追蹤物件的特徵向量嗎？此過程將在背景執行，但可能會佔滿您的 CPU 資源，並耗費較長時間。您可以在「探索」頁面上查看進度。",
         "confirmButton": "重建索引",
         "success": "重建索引已成功啟動。",
         "alreadyInProgress": "重建索引已在執行中。",
@@ -205,16 +205,16 @@
     },
     "birdClassification": {
       "title": "鳥類分類",
-      "desc": "鳥類分類功能使用量化的 TensorFlow 模型識別已知鳥類。識別出已知鳥類後，其通用名稱將作為子標籤添加。此資訊會顯示在使用者介面、篩選器以及通知中。"
+      "desc": "鳥類分類功能使用量化的 TensorFlow 模型識別已知鳥類。識別出已知鳥類後，其通用名稱將作為子標籤新增。此資訊會顯示在使用者介面、篩選器以及通知中。"
     },
     "licensePlateRecognition": {
       "title": "車牌辨識",
       "desc": "Frigate 可以辨識車輛的車牌，並自動將偵測到的字元新增到 辨識的車牌（recognized_license_plate）欄位中，或將已知車牌對應的名稱作為子標籤新增到該車輛目標中。該功能常用於辨識駛入車道的車輛車牌或經過街道的車輛車牌。"
     },
-    "restart_required": "需要重啟（增強功能設定已儲存）",
+    "restart_required": "需要重新啟動（已變更增強功能設定）",
     "toast": {
-      "success": "增強功能設定已儲存。請重啟 Frigate 以應用更改。",
-      "error": "配置更改儲存失敗：{{errorMessage}}"
+      "success": "已儲存增強功能設定。請重新啟動 Frigate 以套用變更。",
+      "error": "無法儲存變更設定：{{errorMessage}}"
     }
   },
   "cameraWizard": {
@@ -232,7 +232,7 @@
     "step1": {
       "description": "輸入攝影機詳細資訊並選擇探測或手動選擇攝影機品牌。",
       "cameraName": "攝影機名稱",
-      "cameraNamePlaceholder": "例: 前門 / 後院",
+      "cameraNamePlaceholder": "例如：前門／後院",
       "host": "主機/IP 位置",
       "port": "埠",
       "username": "使用者名稱",
@@ -486,7 +486,7 @@
           "title": "內容",
           "imagePlaceholder": "選擇圖片",
           "textPlaceholder": "輸入文字內容",
-          "imageDesc": "僅顯示最近的 100 張縮圖。如果找不到需要的圖片，請前往“瀏覽”頁面檢視更早的目標，並從選單中設定觸發器。",
+          "imageDesc": "僅顯示最近的 100 張縮圖。如果找不到需要的圖片，請前往「瀏覽」頁面檢視更早的目標，並從選單中設定觸發器。",
           "textDesc": "輸入文字，當偵測到相似的追蹤目標描述時觸發此操作。",
           "error": {
             "required": "內容為必填項。"
@@ -545,9 +545,9 @@
     }
   },
   "saveAllPreview": {
-    "title": "未儲存的更改",
-    "triggerLabel": "檢視待處理的更改",
-    "empty": "沒有待處理的更改。",
+    "title": "未儲存的變更",
+    "triggerLabel": "檢視待處理的變更",
+    "empty": "沒有待處理的變更。",
     "scope": {
       "label": "作用範圍",
       "global": "全域性",
@@ -585,9 +585,9 @@
     "backToSettings": "返回攝影機設定",
     "streams": {
       "title": "開啟或關閉攝影機",
-      "enableSuccess": "已在配置中啟用 {{cameraName}}。請重啟 Frigate 以應用更改。",
+      "enableSuccess": "已啟用 {{cameraName}}。請重新啟動 Frigate 以套用變更。",
       "label": "攝影機狀態",
-      "description": "設定各攝影機的運作狀態。<br /><br /><strong>開啟</strong>：正常處理串流。<br /><strong>關閉</strong>：暫時暫停處理。重啟 Frigate 後不會保留此狀態。<br /><strong>停用</strong>：停止處理並將變更儲存至您的設定中。需要重新啟動才能重新啟用已停用的攝影機。<br /><br /><em>備註：停用不會影響 go2rtc 的轉流功能。</em><br /><br />拖曳控制鍵可調整現用攝影機在整個 UI 中顯示的順序，包括即時儀表板和攝影機選擇下拉選單。",
+      "description": "設定各攝影機的運作狀態。<br /><br /><strong>開啟</strong>：正常處理串流。<br /><strong>關閉</strong>：暫時停止處理。重新啟動 Frigate 後不會保留此狀態。<br /><strong>停用</strong>：停止處理並將變更儲存至您的設定中。需要重新啟動才能重新啟用已停用的攝影機。<br /><br /><em>備註：停用不會影響 go2rtc 的轉流功能。</em><br /><br />拖曳控制鍵可調整現用攝影機在整個 UI 中顯示的順序，包括即時儀錶板和攝影機選擇下拉選單。",
       "disabledSubheading": "在設定中禁用",
       "status": {
         "on": "開啟",
@@ -656,7 +656,7 @@
       "description": "為每路攝影機設定型別。專用車牌辨識（LPR）攝影機為單用途裝置，配備高倍光學變焦，可抓拍遠處車輛的車牌。絕大多數攝影機應選用通用型別；只有專為車牌辨識部署、且畫面聚焦對準車牌的攝影機，才需選擇專用 LPR 型別。",
       "normal": "通用",
       "dedicatedLpr": "車牌辨識專用",
-      "saveSuccess": "已更新 {{cameraName}} 的攝影機型別，請重啟 Frigate 以使更改生效。"
+      "saveSuccess": "已更新 {{cameraName}} 的攝影機類型，請重新啟動 Frigate 以套用變更。"
     },
     "clone": {
       "sectionTitle": "複製設定",
@@ -745,15 +745,15 @@
     "title": "攝影機審閱設定",
     "object_descriptions": {
       "title": "生成式AI目標描述",
-      "desc": "臨時啟用或停用此攝影機的 生成式AI目標描述 功能，直到 Frigate 重啟。停用後，系統將不再請求該攝影機追蹤目標和物體的AI生成描述。"
+      "desc": "在此攝影機上臨時啟用／停用生成式 AI 目標描述（設定在 Frigate 重新啟動前有效）。若停用，系統將不再針對該攝影機所追蹤的目標請求生成式 AI 描述。"
     },
     "review_descriptions": {
       "title": "生成式 AI 審閱總結",
-      "desc": "臨時開關該攝影機的 生成式 AI 審閱總結 功能，直到 Frigate 重啟。停用後，系統將不再請求 AI 生成該攝影機審閱項目的總結。"
+      "desc": "在此攝影機上臨時啟用／停用生成式 AI 審閱描述（設定在 Frigate 重新啟動前有效）。若停用，系統將不再針對該攝影機所審閱的目標請求生成式 AI 描述。"
     },
     "review": {
       "title": "審閱",
-      "desc": "臨時開關該攝影機的警報與偵測項生成功能，直到 Frigate 重啟後恢復。停用期間，系統將不再生成新的審閱項目。 ",
+      "desc": "臨時開關該攝影機的警報與偵測項生成功能，直到 Frigate 重新啟動後復原。停用期間，系統將不再生成新的審閱項目。 ",
       "alerts": "警報 ",
       "detections": "偵測 "
     },
@@ -774,7 +774,7 @@
       "selectDetectionsZones": "選擇偵測區",
       "limitDetections": "限制僅在特定區域內進行偵測",
       "toast": {
-        "success": "審閱分類設定已儲存，重啟後生效。"
+        "success": "已儲存審閱分類設定，重新啟動後生效。"
       }
     }
   },
@@ -782,7 +782,7 @@
     "filter": {
       "all": "所有遮罩和區域"
     },
-    "restart_required": "需要重啟（遮罩與區域已修改）",
+    "restart_required": "需要重新啟動（已變更遮罩／區域）",
     "disabledInConfig": "該項目已在設定檔中被停用",
     "addDisabledProfile": "先新增到基礎配置中，然後在設定檔中進行覆蓋",
     "profileBase": "（基礎）",
@@ -1105,7 +1105,7 @@
       "actions": "操作",
       "role": "權限組",
       "noUsers": "未找到使用者。",
-      "changeRole": "更改使用者權限組",
+      "changeRole": "變更使用者權限組",
       "password": "修改密碼",
       "deleteUser": "刪除使用者"
     },
@@ -1124,13 +1124,6 @@
           "confirm": {
             "title": "確認密碼",
             "placeholder": "請再次輸入密碼"
-          },
-          "strength": {
-            "title": "密碼強度： ",
-            "weak": "弱",
-            "medium": "中等",
-            "strong": "強",
-            "veryStrong": "非常強"
           },
           "requirements": {
             "title": "密碼要求：",
@@ -1177,7 +1170,7 @@
         "multiDeviceAdmin": "你也可以透過輪換你的 JWT 金鑰，強制所有使用者立即重新登入驗證。"
       },
       "changeRole": {
-        "title": "更改使用者權限組",
+        "title": "變更使用者權限組",
         "select": "選擇權限組",
         "desc": "更新 <strong>{{username}}</strong> 的權限",
         "roleInfo": {
@@ -1280,7 +1273,7 @@
     "unregisterDevice": "取消註冊該裝置",
     "sendTestNotification": "傳送測試通知",
     "unsavedRegistrations": "未儲存通知註冊",
-    "unsavedChanges": "未儲存通知設定更改",
+    "unsavedChanges": "未儲存通知設定變更",
     "active": "通知已啟用",
     "suspended": "通知已暫停 {{time}}",
     "suspendTime": {
@@ -1291,12 +1284,12 @@
       "1hour": "暫停 1 小時",
       "12hours": "暫停 12 小時",
       "24hours": "暫停 24 小時",
-      "untilRestart": "暫停直到重啟"
+      "untilRestart": "暫停直到重新啟動"
     },
     "cancelSuspension": "取消暫停",
     "toast": {
       "success": {
-        "registered": "已成功註冊通知。需要重啟 Frigate 才能傳送任何通知（包括測試通知）。",
+        "registered": "已成功註冊通知。需要重新啟動 Frigate 才能傳送任何通知（包括測試通知）。",
         "settingSaved": "通知設定已儲存。"
       },
       "error": {
@@ -1356,10 +1349,10 @@
     },
     "changeInDetectorsAndModel": "變更模型",
     "unsavedChanges": "未儲存Frigate+變更設定",
-    "restart_required": "需要重啟（Frigate+模型已修改）",
+    "restart_required": "需要重新啟動（已變更 Frigate+ 模型）",
     "toast": {
-      "success": "Frigate+ 設定已儲存。請重啟 Frigate 以應用更改。",
-      "error": "配置更改儲存失敗：{{errorMessage}}"
+      "success": "已儲存 Frigate+ 設定。請重新啟動 Frigate 以套用變更。",
+      "error": "無法儲存變更設定：{{errorMessage}}"
     }
   },
   "maintenance": {
@@ -1416,10 +1409,10 @@
       "desc": "區域網格是一種最佳化功能，它會學習不同大小的目標通常出現在每個攝影機視野中的位置。Frigate 利用這些資料來高效地確定偵測區域的大小。該網格會根據追蹤目標資料自動構建。",
       "clear": "清除區域網格",
       "clearConfirmTitle": "清除區域網格",
-      "clearConfirmDesc": "除非你最近更改了偵測器模型大小或攝影機的物理位置，並且遇到了目標追蹤問題，否則不建議清除區域網格。網格會隨著目標的追蹤自動重建。更改需要重啟 Frigate 才能生效。",
+      "clearConfirmDesc": "除非您最近變更了偵測器模型大小或攝影機的物理位置，並且遇到了目標追蹤問題，否則不建議清除區域網格。網格會隨著目標的追蹤自動重建。變更需要重新啟動 Frigate 才能生效。",
       "clearSuccess": "區域網格清除成功",
       "clearError": "清除區域網格失敗",
-      "restartRequired": "需要重啟以使區域網格更改生效"
+      "restartRequired": "需要重新啟動以使區域網格變更生效"
     }
   },
   "configForm": {
@@ -1432,9 +1425,9 @@
       "description": "這些設定僅適用於此攝影機，並會覆蓋全域性設定。",
       "noCameras": "沒有可用的攝影機"
     },
-    "advancedSettingsCount": "高階設定 ({{count}})",
-    "advancedCount": "高階選項 ({{count}})",
-    "showAdvanced": "顯示高階設定",
+    "advancedSettingsCount": "進階設定 ({{count}})",
+    "advancedCount": "進階選項 ({{count}})",
+    "showAdvanced": "顯示進階設定",
     "tabs": {
       "sharedDefaults": "共享預設值",
       "system": "系統",
@@ -1492,7 +1485,7 @@
         "preset-rtsp-generic": "RTSP（通用）",
         "preset-rtsp-restream": "RTSP - 從 go2rtc 轉流",
         "preset-rtsp-restream-low-latency": "RTSP - 從 go2rtc 轉流（低延遲）",
-        "preset-rtsp-udp": "RTSP - UDP協議",
+        "preset-rtsp-udp": "RTSP - UDP",
         "preset-rtsp-blue-iris": "RTSP - Blue Iris",
         "preset-record-generic": "錄製（通用，無音訊）",
         "preset-record-generic-audio-copy": "錄製（通用，不轉檔音訊）",
@@ -1515,8 +1508,8 @@
         "noMatchingStreams": "沒有符合的串流"
       }
     },
-    "restartRequiredField": "需要重啟",
-    "restartRequiredFooter": "配置已更改 - 需要重啟",
+    "restartRequiredField": "需要重新啟動",
+    "restartRequiredFooter": "已變更設定 - 需要重新啟動",
     "sections": {
       "detect": "偵測",
       "record": "錄製",
@@ -1654,7 +1647,7 @@
     }
   },
   "globalConfig": {
-    "title": "全域性配置",
+    "title": "全域性組態設定",
     "description": "配置適用於所有攝影機的全域性設定，除非被單獨覆蓋。",
     "toast": {
       "success": "全域性設定儲存成功",
@@ -1675,7 +1668,7 @@
   "toast": {
     "success": "設定儲存成功",
     "applied": "設定應用成功",
-    "successRestartRequired": "設定儲存成功。請重啟 Frigate 以應用更改。",
+    "successRestartRequired": "設定儲存成功。請重新啟動 Frigate 以套用變更。",
     "error": "儲存設定失敗",
     "validationError": "驗證失敗：{{message}}",
     "resetSuccess": "已重設為全域性預設值",
@@ -1726,7 +1719,7 @@
     "enabledDescription": "設定檔功能已啟用。請在下方建立新的設定檔，進入攝影機配置頁面進行修改並儲存，修改即可生效。",
     "disabledDescription": "設定檔功能可以讓你建立一組帶名稱的攝影機自訂引數（比如佈防、離家、夜間模式），並隨時切換啟用。"
   },
-  "unsavedChanges": "您有未儲存的更改",
+  "unsavedChanges": "您有未儲存的變更",
   "confirmReset": "確認重設",
   "resetToDefaultDescription": "這將把此部分的所有設定重設為預設值。此操作無法復原。",
   "resetToGlobalDescription": "這將把此部分的設定重設為全域性預設值。此操作無法復原。",

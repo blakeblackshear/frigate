@@ -35,14 +35,14 @@
     "deleteCategory": "刪除分類",
     "deleteImages": "刪除圖片",
     "trainModel": "訓練模型",
-    "addClassification": "添加分類",
+    "addClassification": "新增分類",
     "deleteModels": "刪除模型",
     "editModel": "編輯模型"
   },
   "tooltip": {
     "trainingInProgress": "模型正在訓練中",
     "noNewImages": "沒有新的圖片可用於訓練。請先對資料集中的更多圖片進行分類。",
-    "noChanges": "自上次訓練以來，資料集未作任何更改。",
+    "noChanges": "自上次訓練以來，資料集未作任何變更。",
     "modelNotReady": "模型尚未準備好進行訓練"
   },
   "deleteCategory": {
