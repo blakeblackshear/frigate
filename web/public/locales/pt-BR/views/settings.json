@@ -589,13 +589,6 @@
             "title": "Confirmar Senha",
             "placeholder": "Confirmar Senha"
           },
-          "strength": {
-            "title": "Nível de segurança da senha: ",
-            "weak": "Fraca",
-            "medium": "Mediana",
-            "strong": "Forte",
-            "veryStrong": "Muito Forte"
-          },
           "requirements": {
             "title": "Requisitos da senha:",
             "length": "Pelo menos 12 caracteres"
