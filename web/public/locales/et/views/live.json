@@ -6,7 +6,7 @@
   "streamingSettings": "Voogedastuse seadistused",
   "cameraSettings": {
     "title": "Seadistused: {{camera}}",
-    "objectDetection": "Objektide tuvastamine",
+    "objectDetection": "Objektituvastus",
     "audioDetection": "Heli tuvastus",
     "transcription": "Heli üleskirjutus",
     "snapshots": "Hetkvõtted",
@@ -141,11 +141,12 @@
       },
       "unavailable": {
         "browser": "Sinu veebibrauseris puudub WebRTC tugi.",
-        "not-configured": "WebRTC pole seadistatud. Seadista go2rtc webrtc kandidaadid või ice_server teenused.",
+        "not-configured": "Sisselülitamiseks lisa selle serveri IP-aadress:8555 valikust go2rtc → webrtc → kandidaadid.",
         "unreachable": "WebRTC ühendamine ei õnnestunud. Kontrolli, et port 8555 on kättesaadav ja STUN/TURN-serveri seadistus on õige.",
         "video-codec": "Selles veebibrauseris puudub WebRTC jaoks antud voogedastuse videokoodeki tugi.",
         "audio-codec": "WebRTC ei toeta selle voogedastuse helikoodekit. Kodeeri go2rtc abil opus või G.711 vormingusse.",
-        "checking": "Kontrollin WebRTC saadavust…"
+        "checking": "Kontrollin WebRTC saadavust…",
+        "notConfiguredOptional": "Valikuline: reaalajas vaade toimib ilma selleta. WebRTC on eelkõige vajalik kahepoolse suhtluse jaoks."
       }
     },
     "auto": {

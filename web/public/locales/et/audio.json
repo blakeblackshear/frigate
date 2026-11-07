@@ -412,5 +412,15 @@
   "cap_gun": "Mängupüstol",
   "firecracker": "Ilutulestikurakett",
   "eruption": "Purse/purskamine",
-  "burst": "Lõhkemine/plahvatmine"
+  "burst": "Lõhkemine/plahvatmine",
+  "toot": "Pasunahääl",
+  "mechanical_fan": "Mehaaniline ventilaator",
+  "wood": "Puit",
+  "chop": "Puuraiumine",
+  "silence": "Vaikus",
+  "shatter": "Kildudeks purunemine",
+  "chink": "Pragunemine",
+  "crack": "Raksatamine",
+  "sound_effect": "Heliefekt",
+  "environmental_noise": "Ümbruskonna müra"
 }
