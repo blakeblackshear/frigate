@@ -1101,9 +1101,15 @@ def is_go2rtc_arbitrary_exec_allowed() -> bool:
 
 
 def is_restricted_go2rtc_source(stream_source: str) -> bool:
-    """Check if a stream source is a restricted type (echo, expr, or exec)
-    and the GO2RTC_ALLOW_ARBITRARY_EXEC override is not set."""
-    if not stream_source.strip().startswith(("echo:", "expr:", "exec:")):
+    """Check if a stream source is restricted and the
+    GO2RTC_ALLOW_ARBITRARY_EXEC override is not set.
+
+    Restricted sources are the echo, expr and exec schemes, and any source
+    using go2rtc's `${VAR:default}` expansion, which go2rtc runs over the raw
+    config before parsing and whose default can name an exec source.
+    """
+    source = stream_source.strip()
+    if not source.startswith(("echo:", "expr:", "exec:")) and "${" not in source:
         return False
     return not is_go2rtc_arbitrary_exec_allowed()
 
@@ -1219,6 +1225,74 @@ def find_restricted_go2rtc_stream_changes(
                 break
 
     return issues
+
+
+# go2rtc runs `ffmpeg.bin` and `ngrok.command`, and every other `ffmpeg` key is a
+# template of ffmpeg arguments that `#video=<name>` and friends can reference
+_GO2RTC_EXEC_SECTIONS = ("ffmpeg", "ngrok")
+
+
+def find_restricted_go2rtc_exec_changes(
+    old_go2rtc: dict[str, Any] | None, new_go2rtc: dict[str, Any] | None
+) -> list[str]:
+    """Return the go2rtc ffmpeg and ngrok keys added or changed through the API.
+
+    These are only accepted with arbitrary exec enabled. Keys already in the
+    saved config are left alone, the same as stream sources.
+    """
+    if is_go2rtc_arbitrary_exec_allowed():
+        return []
+
+    old_go2rtc = old_go2rtc if isinstance(old_go2rtc, dict) else {}
+    new_go2rtc = new_go2rtc if isinstance(new_go2rtc, dict) else {}
+    changed: list[str] = []
+
+    for section in _GO2RTC_EXEC_SECTIONS:
+        old = old_go2rtc.get(section)
+        new = new_go2rtc.get(section)
+
+        if not isinstance(new, dict):
+            if new is not None and new != old:
+                changed.append(section)
+            continue
+
+        old = old if isinstance(old, dict) else {}
+        changed.extend(
+            f"{section}.{key}" for key, value in new.items() if old.get(key) != value
+        )
+
+    return changed
+
+
+def apply_go2rtc_ffmpeg_config(
+    go2rtc_config: dict[str, Any], ffmpeg_path: str
+) -> list[str]:
+    """Set go2rtc's ffmpeg binary for startup.
+
+    Unless arbitrary exec is enabled, `ffmpeg.bin` is forced to Frigate's ffmpeg
+    and `ngrok` is removed. Templates in the saved config are kept.
+
+    Returns:
+        The keys that were overridden or removed
+    """
+    allowed = is_go2rtc_arbitrary_exec_allowed()
+    restricted: list[str] = []
+
+    ffmpeg = go2rtc_config.get("ffmpeg")
+    if not isinstance(ffmpeg, dict):
+        ffmpeg = go2rtc_config["ffmpeg"] = {}
+
+    if ffmpeg.get("bin") is None:
+        ffmpeg["bin"] = ffmpeg_path
+    elif ffmpeg["bin"] != ffmpeg_path and not allowed:
+        restricted.append("ffmpeg.bin")
+        ffmpeg["bin"] = ffmpeg_path
+
+    if "ngrok" in go2rtc_config and not allowed:
+        restricted.append("ngrok")
+        del go2rtc_config["ngrok"]
+
+    return restricted
 
 
 def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedProcess:

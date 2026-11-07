@@ -25,6 +25,12 @@ If you have an active Frigate+ subscription, new uploads will be scanned for the
 
 Suggestions are converted to labels when saving, so you should remove any errant suggestions. There is already some logic designed to avoid duplicate labels, but you may still occasionally see some duplicate suggestions. You should keep the most accurate bounding box and delete any duplicates so that you have just one label per object remaining.
 
+## Reviewing annotations with Patches
+
+The Patches tab on the Images page shows a cropped view of every annotation for a label in a grid. Scanning the crops makes it much easier to spot a mislabeled object than paging through full images one at a time. Pick a label to get started, and optionally narrow the results to a single camera. Clicking a patch opens that image in the editor so you can fix the annotation.
+
+Patches only include annotations from images you have already verified.
+
 ## False positive labels
 
 False positives will be shown with a red box and the label will have a strike through. These can't be adjusted, but they can be deleted if you accidentally submit a true positive as a false positive from Frigate.
@@ -51,3 +57,12 @@ Misidentified objects should have a correct label added. For example, if a perso
 | `scrollwheel`     | Zoom in/out                   |
 | `f`               | Hide/show all but current box |
 | `spacebar`        | Verify and save               |
+
+## Deleting images
+
+In most cases, you should keep your existing images. Removing training data usually makes accuracy worse, not better, so you shouldn't delete images just because you think you made some annotation mistakes. Deleting images makes sense when you move to a new location, or significantly upgrade or reposition your cameras.
+
+- To delete all images for a camera, use the **Delete Images** button for that camera on the Cameras page.
+- To delete all images in your account, use **Delete All Images** on the Settings page.
+
+Deletions run in the background, and their progress is shown in the bulk operations panel. Deleted images cannot be recovered and are no longer used to train your models.

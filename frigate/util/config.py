@@ -87,18 +87,31 @@ def _warn_ignored_ffmpeg_path(path: str) -> None:
     )
 
 
+# ffmpeg commands are built as strings and split on whitespace, so a custom path
+# must stay a single plain token
+_CUSTOM_FFMPEG_PATH = re.compile(r"/[\w.+@/-]+")
+
+
+def is_valid_ffmpeg_path(path: str) -> bool:
+    """Check that a custom ffmpeg path has no whitespace, quotes or shell syntax."""
+    return not path.startswith("/") or _CUSTOM_FFMPEG_PATH.fullmatch(path) is not None
+
+
 def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
     """Resolve an ffmpeg version alias or custom path to a binary path.
 
     A bare version alias that is no longer bundled (for example one that was
     dropped when the default version changed) falls back to the default
     bundled version so existing configs keep working across an upgrade or a
-    revert. Custom install paths (anything absolute) are used as-is, except
-    one in a runtime-user-writable tree while FRIGATE_ROOT_SERVICES makes
-    frigate root; see RUNTIME_USER_WRITABLE_DIRS.
+    revert. Custom install paths (anything absolute) are used as-is, unless
+    they fail `is_valid_ffmpeg_path` (which falls back to the default), or
+    they are in a runtime-user-writable tree while FRIGATE_ROOT_SERVICES
+    makes frigate root; see RUNTIME_USER_WRITABLE_DIRS.
     """
-    if path == "default" or (
-        not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS
+    if (
+        path == "default"
+        or not is_valid_ffmpeg_path(path)
+        or (not path.startswith("/") and path not in INCLUDED_FFMPEG_VERSIONS)
     ):
         version = DEFAULT_FFMPEG_VERSION
     elif path in INCLUDED_FFMPEG_VERSIONS:
