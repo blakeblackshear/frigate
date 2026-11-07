@@ -1127,13 +1127,6 @@
             "title": "Konfirmasi Kata Sandi",
             "placeholder": "Konfirmasi Kata Sandi"
           },
-          "strength": {
-            "title": "Kekuatan kata sandi: ",
-            "weak": "Lemah",
-            "medium": "Sedang",
-            "strong": "Kuat",
-            "veryStrong": "Sangat Kuat"
-          },
           "requirements": {
             "title": "Persyaratan kata sandi:",
             "length": "Setidaknya 12 karakter"
