@@ -83,8 +83,8 @@
         "vainfoOutput": {
           "title": "Vainfo 輸出",
           "returnCode": "返回代碼：{{code}}",
-          "processOutput": "行程輸出：",
-          "processError": "行程錯誤："
+          "processOutput": "處理程序輸出：",
+          "processError": "處理程序錯誤："
         },
         "nvidiaSMIOutput": {
           "title": "Nvidia SMI 輸出",
@@ -110,9 +110,9 @@
       "npuTemperature": "NPU 溫度"
     },
     "otherProcesses": {
-      "title": "其他行程",
-      "processCpuUsage": "行程 CPU 使用率",
-      "processMemoryUsage": "行程記憶體使用量",
+      "title": "其他處理程序",
+      "processCpuUsage": "處理程序 CPU 使用率",
+      "processMemoryUsage": "處理程序記憶體使用量",
       "series": {
         "recording": "記錄",
         "review_segment": "審核部分",
@@ -260,5 +260,12 @@
       "classification_events_per_second": "{{name}} 分類每秒事件數"
     },
     "averageInf": "平均推論時間"
+  },
+  "health": {
+    "notices": {
+      "kinds": {
+        "shm_too_low": "/dev/shm 配置 ({{total}} MB) 應該增加至至少 {{min}} MB"
+      }
+    }
   }
 }

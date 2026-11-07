@@ -7,7 +7,7 @@
       "content": "此頁面將在 {{countdown}} 秒後重新載入。",
       "button": "立即重新載入"
     },
-    "description": "Frigate 在重啟期間將短暫停止執行。"
+    "description": "Frigate 在重新啟動期間將短暫停止執行。"
   },
   "explore": {
     "plus": {
@@ -81,7 +81,6 @@
       "newCaseNamePlaceholder": "新案件名稱",
       "newCaseDescriptionPlaceholder": "案件描述",
       "label": "案件",
-      "nonAdminHelp": "將為這些匯出檔案建立一個新的案件。",
       "placeholder": "選擇案件"
     },
     "queueing": "正在加入匯出佇列…",

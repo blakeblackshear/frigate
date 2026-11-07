@@ -3,7 +3,7 @@
     "untilForTime": "直到 {{time}}",
     "untilForRestart": "直到 Frigate 重新啟動。",
     "untilRestart": "直到重新啟動",
-    "ago": "{{timeAgo}} 前",
+    "ago": "{{timeAgo}}前",
     "last14": "過去 14 天",
     "last30": "過去 30 天",
     "thisWeek": "這週",
@@ -24,16 +24,16 @@
     "am": "上午",
     "yr": "{{time}} 年",
     "year_other": "{{time}} 年",
-    "mo": "{{time}} 月",
-    "month_other": "{{time}} 月",
-    "d": "{{time}} 日",
-    "day_other": "{{time}}天",
-    "h": "{{time}}時",
-    "hour_other": "{{time}}小時",
-    "m": "{{time}}分",
-    "minute_other": "{{time}}分鐘",
-    "s": "{{time}}秒",
-    "second_other": "{{time}}秒鐘",
+    "mo": "{{time}} 個月",
+    "month_other": "{{time}} 個月",
+    "d": "{{time}} 天",
+    "day_other": "{{time}} 天",
+    "h": "{{time}} 小時",
+    "hour_other": "{{time}} 小時",
+    "m": "{{time}} 分鐘",
+    "minute_other": "{{time}} 分鐘",
+    "s": "{{time}} 秒",
+    "second_other": "{{time}} 秒",
     "formattedTimestamp": {
       "12hour": "M 月 d 日 ah:mm:ss",
       "24hour": "M 月 d 日 HH:mm:ss"
@@ -56,7 +56,7 @@
     },
     "formattedTimestampMonthDayYear": {
       "12hour": "yy 年 MM 月 dd 日",
-      "24hour": "yy 年 MM 月 dd 日"
+      "24hour": "yyyy 年 MM 月 dd 日"
     },
     "formattedTimestampMonthDayYearHourMinute": {
       "12hour": "yyyy 年 M 月 d 日 ah:mm",
@@ -64,8 +64,8 @@
     },
     "formattedTimestampMonthDay": "M 月 d 日",
     "formattedTimestampFilename": {
-      "12hour": "yy年MM月dd日 h時mm分ss秒",
-      "24hour": "yy年MM月dd日 HH時mm分ss秒"
+      "12hour": "yy 年 MM 月 dd 日 h 時 mm 分 ss 秒",
+      "24hour": "yy 年 MM 月 dd 日 HH 時 mm 分 ss 秒"
     },
     "inProgress": "處理中",
     "invalidStartTime": "無效的起始時間",

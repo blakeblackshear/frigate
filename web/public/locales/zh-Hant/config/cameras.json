@@ -13,7 +13,7 @@
         "description": "已啟用"
     },
     "audio": {
-        "label": "音訊事件",
+        "label": "音訊偵測",
         "description": "此攝影機的音訊事件偵測設定。",
         "enabled": {
             "label": "啟用音訊偵測",
@@ -703,7 +703,7 @@
         "label": "語意搜尋",
         "triggers": {
             "label": "觸發器",
-            "description": "攝影機特定語意搜尋觸發器的操作和匹配條件。",
+            "description": "攝影機特定語意搜尋觸發器的操作和相符條件。",
             "friendly_name": {
                 "label": "友好名稱",
                 "description": "在 UI 中為此觸發器顯示的可選友好名稱。"
@@ -714,11 +714,11 @@
             },
             "type": {
                 "label": "觸發器型別",
-                "description": "觸發器型別：'thumbnail'（與影像匹配）或 'description'（與文字匹配）。"
+                "description": "觸發器類型：「thumbnail」（與影像相符）或「description」（與文字相符）。"
             },
             "data": {
                 "label": "觸發器內容",
-                "description": "要與追蹤目標匹配的文字短語或縮圖 ID。"
+                "description": "要與追蹤目標相符的文字片語或縮圖 ID。"
             },
             "threshold": {
                 "label": "觸發器閾值",
@@ -726,7 +726,7 @@
             },
             "actions": {
                 "label": "觸發器操作",
-                "description": "觸發器匹配時要執行的操作清單（通知、sub_label、屬性）。"
+                "description": "觸發器相符時要執行的操作清單（通知、sub_label、屬性）。"
             }
         },
         "description": "語意搜尋設定，用於構建和查詢目標嵌入以查詢相似項目。"
@@ -792,7 +792,7 @@
         },
         "profile": {
             "label": "ONVIF 設定檔",
-            "description": "用於 PTZ 控制的指定 ONVIF 媒體配置，將透過 Token 或名稱匹配。如果未手動指定，將自動選擇第一個包含有效 PTZ 配置的媒體配置。"
+            "description": "用於 PTZ 控制的特定 ONVIF 媒體設定檔，可透過 Token 或名稱進行比對。若未設定，系統將自動選擇第一個包含有效 PTZ 設定的媒體設定檔。"
         },
         "autotracking": {
             "label": "自動追蹤",
