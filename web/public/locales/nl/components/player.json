@@ -18,7 +18,9 @@
       "short": "Type",
       "title": "Stream Type:"
     },
-    "decodedFrames": "Gedecodeerde frames:"
+    "decodedFrames": "Gedecodeerde frames:",
+    "stream": "Stream:",
+    "streamAuto": "{{stream}} (automatisch)"
   },
   "submitFrigatePlus": {
     "title": "Dit frame indienen bij Frigate+?",
@@ -53,6 +55,7 @@
     "noAudio": "Geen audio",
     "audioRate": "{{rate}} kHz audio",
     "audioCodecRate": "{{codec}} {{rate}} kHz",
-    "noRecordings": "Geen opnames in dit tijdsframe"
+    "noRecordings": "Geen opnames in dit tijdsframe",
+    "auto": "Automatisch"
   }
 }

@@ -581,6 +581,30 @@
         "quality": {
             "label": "Live kwaliteit",
             "description": "Coderingskwaliteit voor de jsmpeg-stream (1 hoogste, 31 laagste)."
+        },
+        "transcode": {
+            "label": "Getranscodeerde streams",
+            "description": "Lagekwaliteit-livestreams on-demand getranscodeerd door go2rtc.",
+            "enabled": {
+                "label": "Getranscodeerde streams activeren",
+                "description": "Voeg lagekwaliteit-livestreams toe die go2rtc realtime transcodeert tijdens het kijken."
+            },
+            "source": {
+                "label": "Bronstream",
+                "description": "go2rtc-stream om te transcoderen. Standaard de eerste livestream."
+            },
+            "qualities": {
+                "label": "Kwaliteit",
+                "description": "Er wordt één getranscodeerde stream per kwaliteit toegevoegd.",
+                "height": {
+                    "label": "Hoogte",
+                    "description": "Uitvoerhoogte in pixels; breedte volgt de bronverhouding."
+                },
+                "bitrate": {
+                    "label": "Bitrate",
+                    "description": "Doelbitrate en maximale videobitrate in kbps."
+                }
+            }
         }
     },
     "motion": {
@@ -734,6 +758,9 @@
                 "label": "Originele GenAI-status",
                 "description": "Geeft aan of GenAI was ingeschakeld in de originele statische configuratie."
             }
+        },
+        "filters_attribute": {
+            "label": "Attribuutfilters"
         }
     },
     "record": {
@@ -1431,6 +1458,58 @@
         "ignore_time_mismatch": {
             "label": "Tijdsverschil negeren",
             "description": "Tijdsynchronisatieverschillen tussen camera en Frigate-server negeren voor ONVIF-communicatie."
+        }
+    },
+    "models": {
+        "label": "Detectie model",
+        "description": "Objectdetectiemodellen en de hardware waarop elk model wordt uitgevoerd. Camera's kiezen een model door hun detect.scene te vergelijken met de scene van een model, waarbij wordt teruggevallen op het 'default'-model.",
+        "scene": {
+            "label": "Scènemodel",
+            "description": "Een naam voor de camera-omgeving waarvoor dit model wordt gebruikt, zoals 'thermal'. Camera's selecteren een model door detect.scene op een overeenkomende waarde in te stellen, en het 'default'-model wordt gebruikt door elke camera die er geen instelt."
+        },
+        "devices": {
+            "label": "Detectiehardware",
+            "description": "Hardware waarop dit model draait, als '<detector>' of '<detector>:<device>' (bijvoorbeeld 'edgetpu:pci:0' of 'openvino:GPU'). Hetzelfde apparaat meer dan eens opgeven start extra inferentieprocessen erop."
+        },
+        "path": {
+            "label": "Pad naar aangepast objectdetectiemodel",
+            "description": "Pad naar een aangepast detectiemodelbestand (of plus://<model_id> voor Frigate+-modellen)."
+        },
+        "labelmap_path": {
+            "label": "Labelmap voor aangepaste objectdetector",
+            "description": "Pad naar een labelmapbestand dat numerieke klassen koppelt aan tekstlabels voor de detector."
+        },
+        "width": {
+            "label": "Invoerbreedte objectdetectiemodel",
+            "description": "Breedte van de invoertensor van het model in pixels."
+        },
+        "height": {
+            "label": "Invoerhoogte objectdetectiemodel",
+            "description": "Hoogte van de invoertensor van het model in pixels."
+        },
+        "labelmap": {
+            "label": "Labelmap aanpassen",
+            "description": "Overschrijvingen of hertoewijzingen die worden samengevoegd met de standaard labelmap."
+        },
+        "attributes_map": {
+            "label": "Koppeling van objectlabels aan hun attribuutlabels",
+            "description": "Koppeling van objectlabels aan attribuutlabels, gebruikt om metadata toe te voegen (bijvoorbeeld 'car' -> ['license_plate'])."
+        },
+        "input_tensor": {
+            "label": "Vorm invoertensor model",
+            "description": "Tensorformaat dat het model verwacht: 'nhwc' of 'nchw'."
+        },
+        "input_pixel_format": {
+            "label": "Pixelkleurformaat modelinvoer",
+            "description": "Pixelkleurruimte die het model verwacht: 'rgb', 'bgr' of 'yuv'."
+        },
+        "input_dtype": {
+            "label": "Datatype modelinvoer",
+            "description": "Datatype van de invoertensor van het model (bijvoorbeeld 'float32')."
+        },
+        "model_type": {
+            "label": "Type objectdetectiemodel",
+            "description": "Architectuurtype van het detectormodel (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine), door sommige detectors gebruikt voor optimalisatie."
         }
     }
 }
