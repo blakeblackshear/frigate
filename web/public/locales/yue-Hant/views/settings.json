@@ -394,13 +394,6 @@
             "placeholder": "確認密碼",
             "title": "確認密碼"
           },
-          "strength": {
-            "title": "密碼強度： ",
-            "weak": "弱",
-            "medium": "中等",
-            "strong": "強",
-            "veryStrong": "非常強"
-          },
           "match": "密碼相符",
           "notMatch": "密碼不相符",
           "show": "顯示密碼",
