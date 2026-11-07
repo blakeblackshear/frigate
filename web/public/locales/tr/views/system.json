@@ -302,7 +302,8 @@
         "update_available": "Frigate {{version}} sürümü çıkmış",
         "ffmpeg_high_cpu": "FFmpeg CPU kullanımı yüksek (ortalama %{{cpu}})",
         "detect_high_cpu": "Algılama CPU kullanımı yüksek (ortalama %{{cpu}})",
-        "object_processing_behind": "Takipli nesneler eş zamanlı işlenemediği için kamera kareleri atlandı. CPU kullanımını kontrol edin. Konteyner ya da sanal makine (VM) üzerindeki CPU limitleri veya sabitlemeleri (pinning) de Frigate'e çok az CPU bırakıyor olabilir"
+        "object_processing_behind": "Takipli nesneler eş zamanlı işlenemediği için kamera kareleri atlandı. CPU kullanımını kontrol edin. Konteyner ya da sanal makine (VM) üzerindeki CPU limitleri veya sabitlemeleri (pinning) de Frigate'e çok az CPU bırakıyor olabilir",
+        "analytics_prompt": "Geliştiricilerin Frigate'i iyileştirmesine yardımcı olmak için anonim kullanım istatistiklerini paylaşmayı düşünebilirsiniz"
       },
       "streamPrefix": "{{index}}. yayın: {{message}}",
       "streamPrefixRestream": "{{index}}. Yayın (go2rtc üzerinden): {{message}}",
@@ -320,7 +321,9 @@
       "showAllTitle": "Tüm gizlenmiş bilgilendirmeleri göster?",
       "showAllDesc": "Anlaşılanların ve sessize alınanların her biri Bilgilendirmeler listesine geri döner; yapılandırma ve yayın kontrolleri dahil.",
       "acknowledgedAt": "Anlaşıldı: {{time}}",
-      "mutedAt": "Sessize alındı: {{time}}"
+      "mutedAt": "Sessize alındı: {{time}}",
+      "occurred_other": "En son: {{lastTime}} · {{time}} tarihinden beri {{count}} kere",
+      "occurred_one": "{{time}} tarihinde"
     },
     "hardware": {
       "title": "Donanım",
