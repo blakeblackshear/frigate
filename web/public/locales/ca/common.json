@@ -210,7 +210,8 @@
     "inProgress": "En curs",
     "invalidStartTime": "Hora d'inici no vàlida",
     "invalidEndTime": "Hora de finalització no vàlida",
-    "never": "Mai"
+    "never": "Mai",
+    "custom": "Personalitzat..."
   },
   "unit": {
     "speed": {

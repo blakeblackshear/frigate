@@ -88,7 +88,7 @@
       "newCaseOption": "Crea un cas no",
       "newCaseNamePlaceholder": "Nom de cas nou",
       "newCaseDescriptionPlaceholder": "Descripció del cas",
-      "nonAdminHelp": "Es crearà un nou cas per a aquestes exportacions."
+      "nameRequired": "Es requereix el nom del cas"
     },
     "queueing": "S'està fent la cua de l'exportació...",
     "tabs": {
@@ -117,7 +117,9 @@
       "selectWithActivity": "Càmeres amb objectes rastrejats",
       "selectGroup": "Selecciona un grup",
       "noMatchingCameras": "No hi ha càmeres que coincideixin amb la cerca",
-      "selectedCount": "{{selected}} / {{total}} seleccionats"
+      "selectedCount": "{{selected}} / {{total}} seleccionats",
+      "noCamerasSelected": "Selecciona almenys una càmera",
+      "caseNameDefault": "Exportació multicàmera - {{date}}"
     },
     "multi": {
       "title_one": "Exporta {{count}} ressenyes",
