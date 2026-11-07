@@ -169,11 +169,12 @@
       },
       "unavailable": {
         "browser": "Váš prohlížeč nepodporuje WebRTC.",
-        "not-configured": "WebRTC není nastaveno. Nastavte webrtc candidates nebo ice_servers v go2rtc.",
+        "not-configured": "Pro povolení WebRTC přidejte IP adresu tohoto serveru ve tvaru IP:8555 do go2rtc → webrtc → candidates.",
         "unreachable": "WebRTC se nemohlo připojit. Ověřte dostupnost portu 8555 a správné nastavení serveru STUN/TURN.",
         "video-codec": "Videokodek tohoto streamu není v tomto prohlížeči podporován přes WebRTC.",
         "audio-codec": "Zvukový kodek tohoto streamu není podporován přes WebRTC. Pomocí go2rtc jej překódujte na opus nebo G.711.",
-        "checking": "Ověřování dostupnosti WebRTC…"
+        "checking": "Ověřování dostupnosti WebRTC…",
+        "notConfiguredOptional": "Volitelné: živé zobrazení funguje i bez WebRTC. WebRTC je potřeba hlavně pro obousměrnou komunikaci."
       }
     }
   },
