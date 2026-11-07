@@ -23,12 +23,12 @@
   },
   "toast": {
     "success": {
-      "deletedCategory_one": "Обрисана класа",
-      "deletedCategory_few": "",
-      "deletedCategory_other": "",
-      "deletedImage_one": "Обрисане слике",
-      "deletedImage_few": "",
-      "deletedImage_other": "",
+      "deletedCategory_one": "Обрисана {{count}} класа",
+      "deletedCategory_few": "Обрисане {{count}} класе",
+      "deletedCategory_other": "Обрисано {{count}} класа",
+      "deletedImage_one": "Обрисана {{count}} слика",
+      "deletedImage_few": "Обрисане {{count}} слике",
+      "deletedImage_other": "Обрисано {{count}} слика",
       "deletedModel_one": "Успешно је обрисан {{count}} модел",
       "deletedModel_few": "Успешно су обрисана {{count}} модела",
       "deletedModel_other": "Успешно је обрисано {{count}} модела",
