@@ -72,7 +72,6 @@
       "newCaseNamePlaceholder": "Nome do novo caso",
       "newCaseDescriptionPlaceholder": "Descrição do caso",
       "label": "Caso",
-      "nonAdminHelp": "Será criado um novo caso para estas exportações.",
       "placeholder": "Selecionar um caso"
     },
     "multiCamera": {
