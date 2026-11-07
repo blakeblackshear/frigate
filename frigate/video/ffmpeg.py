@@ -690,14 +690,26 @@ class CameraWatchdog(threading.Thread):
     def stop_all_ffmpeg(self):
         """Stop all ffmpeg processes (detection and others)."""
         logger.debug(f"Stopping all ffmpeg processes for {self.config.name}")
+        capture_reading = False
         if self.capture_thread is not None and self.capture_thread.is_alive():
             self.capture_thread.join(timeout=5)
             if self.capture_thread.is_alive():
+                capture_reading = True
                 self.logger.warning(
                     f"Capture thread for {self.config.name} did not stop gracefully."
                 )
         if self.ffmpeg_detect_process is not None:
-            stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
+            # A live capture thread drains stdout, so communicate() would race it
+            # for the pipe. Without a reader, ffmpeg needs communicate() to exit.
+            if capture_reading:
+                self.ffmpeg_detect_process.terminate()
+                try:
+                    self.ffmpeg_detect_process.wait(timeout=30)
+                except sp.TimeoutExpired:
+                    self.ffmpeg_detect_process.kill()
+                    self.ffmpeg_detect_process.wait()
+            else:
+                stop_ffmpeg(self.ffmpeg_detect_process, self.logger)
             self.ffmpeg_detect_process = None
         for p in self.ffmpeg_other_processes[:]:
             if p["process"] is not None:
