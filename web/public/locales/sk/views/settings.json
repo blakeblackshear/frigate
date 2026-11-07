@@ -719,13 +719,6 @@
             "title": "Potvrdiť heslo",
             "placeholder": "Potvrdiť heslo"
           },
-          "strength": {
-            "title": "Sila hesla: ",
-            "weak": "Slabý",
-            "medium": "Stredná",
-            "strong": "Silný",
-            "veryStrong": "Veľmi silný"
-          },
           "match": "Heslá sa zhodujú",
           "notMatch": "Heslá sa nezhodujú"
         },

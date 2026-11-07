@@ -77,7 +77,6 @@
       "newCaseNamePlaceholder": "Názov nového prípadu",
       "newCaseDescriptionPlaceholder": "Popis prípadu",
       "label": "Prípad",
-      "nonAdminHelp": "Pre tieto exporty bude vytvorený nový prípad.",
       "placeholder": "Vyberte prípad"
     },
     "queueing": "Zaradenie exportu do frontu...",
