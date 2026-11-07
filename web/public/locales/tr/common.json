@@ -76,7 +76,8 @@
     "inProgress": "Devam ediyor",
     "invalidStartTime": "Geçersiz başlangıç zamanı",
     "invalidEndTime": "Geçersiz bitiş zamanı",
-    "never": "Asla"
+    "never": "Asla",
+    "custom": "Özelleştir..."
   },
   "button": {
     "off": "KAPALI",
