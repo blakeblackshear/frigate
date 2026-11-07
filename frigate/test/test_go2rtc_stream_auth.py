@@ -23,7 +23,12 @@ _CONFIG = {
             "dual_user": ["front_door", "back_door"],
         }
     },
-    "go2rtc": {"streams": {"doorbell_audio": ["rtsp://10.0.0.4:554/audio"]}},
+    "go2rtc": {
+        "streams": {
+            "doorbell_audio": ["rtsp://10.0.0.4:554/audio"],
+            "front_door_sub": ["rtsp://10.0.0.1:554/sub"],
+        }
+    },
     "cameras": {
         "front_door": {
             "ffmpeg": {

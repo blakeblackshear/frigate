@@ -280,6 +280,27 @@ class TestAuthInternalPort(BaseTestHttp):
                 )
                 self.assertEqual(resp.status_code, 202, url)
 
+    @patch(
+        "frigate.api.auth.requests.get",
+        side_effect=requests.ConnectionError("go2rtc unavailable"),
+    )
+    def test_live_stream_value_is_not_trusted_as_a_go2rtc_stream(self, _mock_get):
+        src = "ffmpeg:x#raw=-f"
+        self.minimal_config["cameras"]["front_door"]["live"] = {
+            "streams": {"Main": src}
+        }
+        app = self._create_app()
+
+        with AuthTestClient(app) as client:
+            resp = client.get(
+                "/auth",
+                headers={
+                    "x-server-port": "5000",
+                    "x-original-url": "/live/mse/api/ws?src=ffmpeg:x%23raw=-f",
+                },
+            )
+            self.assertEqual(resp.status_code, 403)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
