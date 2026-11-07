@@ -55,7 +55,6 @@
       "newCaseNamePlaceholder": "Novo ime slučaja",
       "newCaseDescriptionPlaceholder": "Opis slučaja",
       "label": "Slučaj",
-      "nonAdminHelp": "Za ove izvoze će se stvoriti novi slučaj.",
       "placeholder": "Odaberite slučaj"
     },
     "select": "Odaberite",

@@ -902,13 +902,6 @@
             "title": "Potvrdite lozinku",
             "placeholder": "Potvrdite lozinku"
           },
-          "strength": {
-            "title": "Jakoća lozinke: ",
-            "weak": "Slaba",
-            "medium": "Srednja",
-            "strong": "Jaka",
-            "veryStrong": "Veoma jaka"
-          },
           "requirements": {
             "title": "Zahtjevi za lozinku:",
             "length": "Bar 12 karaktera"
