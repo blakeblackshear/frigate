@@ -102,7 +102,6 @@
       "newCaseNamePlaceholder": "新しいケース名",
       "newCaseDescriptionPlaceholder": "ケースの説明",
       "label": "ケース",
-      "nonAdminHelp": "これらのエクスポートに対して新しいケースが作成されます。",
       "placeholder": "ケースを選択"
     },
     "tabs": {
