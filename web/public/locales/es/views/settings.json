@@ -502,13 +502,6 @@
             "title": "Confirma la contraseña",
             "placeholder": "Confirma la contraseña"
           },
-          "strength": {
-            "title": "Fortaleza de la contraseña: ",
-            "weak": "Débil",
-            "medium": "Media",
-            "strong": "Fuerte",
-            "veryStrong": "Muy fuerte"
-          },
           "match": "Las contraseñas coinciden",
           "notMatch": "Las contraseñas no coinciden",
           "show": "Mostrar contraseña",
