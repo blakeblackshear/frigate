@@ -861,6 +861,10 @@
         "enabled_in_config": {
             "label": "Stare originală notificări",
             "description": "Indică dacă notificările au fost activate în configurația statică originală."
+        },
+        "ttl": {
+            "label": "TTL notificare",
+            "description": "Cum gestionează serviciul push o notificare trimisă în timp ce o alertă este activă dacă dispozitivul tău nu poate fi contactat. Imediat o livrează pe loc sau o abandonează. Fiabil continuă să reîncerce timp de până la 30 de secunde. Notificarea trimisă când o alertă se încheie este întotdeauna păstrată timp de până la o oră."
         }
     },
     "onvif": {

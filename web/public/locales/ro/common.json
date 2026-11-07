@@ -82,7 +82,8 @@
     "inProgress": "În desfășurare",
     "invalidStartTime": "Oră de început invalidă",
     "invalidEndTime": "Oră de sfârșit invalidă",
-    "never": "Niciodată"
+    "never": "Niciodată",
+    "custom": "Personalizat..."
   },
   "menu": {
     "documentation": {
