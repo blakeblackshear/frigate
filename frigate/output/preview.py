@@ -248,6 +248,7 @@ class PreviewRecorder:
 
         # create communication for finished previews
         self.requestor = InterProcessRequestor()
+        self._converters: list[FFMpegConverter] = []
 
         y, u1, u2, v1, v2 = get_yuv_crop(
             self.config.frame_shape_yuv,
@@ -417,11 +418,7 @@ class PreviewRecorder:
                     self.write_frame_to_cache(frame_time, frame)
 
                 # write the preview if any frames exist for this hour
-                FFMpegConverter(
-                    self.config,
-                    self.output_frames,
-                    self.requestor,
-                ).start()
+                self._start_converter()
             else:
                 logger.debug(
                     f"Not saving preview for {self.camera_name} because there are no saved frames."
@@ -464,15 +461,23 @@ class PreviewRecorder:
 
             # save last frame to ensure consistent duration
             self.output_frames.append(frame_time)
-            FFMpegConverter(
-                self.config,
-                self.output_frames,
-                self.requestor,
-            ).start()
+            self._start_converter()
 
             self.reset_frame_cache(frame_time)
 
+    def _start_converter(self) -> None:
+        self._converters = [
+            converter for converter in self._converters if converter.is_alive()
+        ]
+        converter = FFMpegConverter(self.config, self.output_frames, self.requestor)
+        converter.start()
+        self._converters.append(converter)
+
     def stop(self) -> None:
+        """Finish pending preview conversions before closing their request channel."""
+        for converter in self._converters:
+            converter.join()
+        self._converters.clear()
         self.requestor.stop()
 
 

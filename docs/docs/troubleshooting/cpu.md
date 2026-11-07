@@ -35,6 +35,8 @@ Frigate assembles cached preview frames into per-camera video clips at the top o
 
 This limit applies only to preview conversion. Camera capture, detection, and recording continue independently.
 
+During a graceful shutdown, Frigate waits for running and queued preview conversions to finish before moving cached frames for the next startup. A pending conversion backlog can therefore extend shutdown time.
+
 ## 1. Hardware Acceleration for Video Decoding
 
 **Priority: Critical**

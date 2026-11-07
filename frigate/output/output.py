@@ -321,6 +321,9 @@ class OutputProcess(FrigateProcess):
                     frame,
                 )
 
+        for preview in preview_recorders.values():
+            preview.stop()
+
         move_preview_frames("clips")
 
         while True:
@@ -336,9 +339,6 @@ class OutputProcess(FrigateProcess):
 
         for jsmpeg in jsmpeg_cameras.values():
             jsmpeg.stop()
-
-        for preview in preview_recorders.values():
-            preview.stop()
 
         if birdseye is not None:
             birdseye.stop()
