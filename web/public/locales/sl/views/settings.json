@@ -1020,13 +1020,6 @@
             "title": "Potrdi geslo",
             "placeholder": "Ponovno vnesi geslo"
           },
-          "strength": {
-            "title": "Moč gesla: ",
-            "weak": "Šibko",
-            "medium": "Srednje",
-            "strong": "Močno",
-            "veryStrong": "Zelo močno"
-          },
           "requirements": {
             "title": "Zahteve za geslo:",
             "length": "Vsaj 12 znakov"
