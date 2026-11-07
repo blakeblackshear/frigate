@@ -31,6 +31,10 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 
 [frigate-abr](https://github.com/007hacky007/frigate-abr) is a drop-in Docker image of Frigate that adds adaptive bitrate (ABR) playback for recordings: a sidecar transcodes footage to lower quality tiers on demand, for reviewing over slow remote connections. Segments are transcoded when played and cached, so no additional stream is recorded. Frigate itself is not modified.
 
+## [Frigate Decisions](https://github.com/nat-e/frigate-decisions)
+
+[Frigate Decisions](https://github.com/nat-e/frigate-decisions) lets you call AI Decision Models (Jev, OpenAI Decisions, etc.) to ask your cameras yes/no questions in plain language (e.g. "Is a dog on the sofa?", "Is the garage door open?") and turns the answers into Frigate alerts or detections, with their recordings.
+
 ## [Frigate Notify](https://github.com/0x2142/frigate-notify)
 
 [Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
