@@ -125,9 +125,9 @@ def resolve_ffmpeg_path(
     else:
         # return the resolved form so a link in the path cannot be retargeted
         # after the check
-        real = os.path.realpath(path)
+        real = os.path.realpath(f"{path}/bin/{binary}")
         if is_valid_ffmpeg_path(real) and not is_runtime_user_writable(real):
-            return f"{real}/bin/{binary}"
+            return real
 
         _warn_ignored_ffmpeg_path(path, service)
         version = DEFAULT_FFMPEG_VERSION

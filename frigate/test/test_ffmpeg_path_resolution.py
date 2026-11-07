@@ -216,6 +216,13 @@ class TestConfigFfmpegRootGuardSymlinks(unittest.TestCase):
         os.symlink(evil, self.link)
         self.assertEqual(self._resolve({"FRIGATE_ROOT_SERVICES": "frigate"}), BUNDLED)
 
+    def test_bin_linked_into_a_writable_tree_is_refused(self) -> None:
+        evil = os.path.join(self.writable, "evil")
+        os.makedirs(evil)
+        os.symlink(evil, os.path.join(self.root_owned, "bin"))
+        os.symlink(self.root_owned, self.link)
+        self.assertEqual(self._resolve({"FRIGATE_ROOT_SERVICES": "frigate"}), BUNDLED)
+
     def test_unprivileged_service_keeps_the_path_as_written(self) -> None:
         os.symlink(self.root_owned, self.link)
         self.assertEqual(self._resolve({}), f"{self.link}/bin/ffmpeg")
