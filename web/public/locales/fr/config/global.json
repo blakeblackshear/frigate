@@ -86,11 +86,19 @@
     "birdseye": {
         "quality": {
             "label": "Qualité d'encodage"
+        },
+        "modes": {
+            "label": "Types d'activité",
+            "description": "Types d’activité qui incluent des caméras dans Birdseye."
         }
     },
     "detect": {
         "enabled": {
             "label": "Activer la détection d'objet"
+        },
+        "scene": {
+            "label": "Détecter la scène",
+            "description": "L'environnement filmé par cette caméra, utilisé pour déterminer lequel des modèles configurés doit être exécuté sur celle-ci. Les caméras laissées sur « default » utilisent le modèle configuré avec une scène définie sur « default »."
         }
     },
     "motion": {
@@ -211,6 +219,10 @@
                 "label": "Minimum de confiance audio",
                 "description": "Seuil de confiance minimum pour que l'événement audio soit pris en compte."
             }
+        },
+        "labelmap": {
+            "label": "Customisation Audio",
+            "description": "Remplacements ou entrées de remappage à fusionner avec la table standard des libellés audio."
         }
     },
     "ffmpeg": {
