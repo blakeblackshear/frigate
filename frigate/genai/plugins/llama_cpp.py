@@ -304,6 +304,7 @@ class LlamaCppClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:

@@ -137,6 +137,7 @@ class GeminiClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
         contents: list[Any] = [

@@ -243,6 +243,7 @@ class OllamaClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to Ollama through the chat API, the same path the
         tool-calling chat uses, with image placeholders keeping any captions

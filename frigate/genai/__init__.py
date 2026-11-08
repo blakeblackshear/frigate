@@ -295,7 +295,11 @@ class GenAIClient:
             return None
 
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
-        return self._send(prompt, thumbnails)
+        return self._send(
+            prompt,
+            thumbnails,
+            extra_headers={"X-Frigate-Event-ID": str(event.id)},
+        )
 
     def _init_provider(self) -> Any:
         """Initialize the client."""
@@ -308,6 +312,7 @@ class GenAIClient:
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to the provider.
 

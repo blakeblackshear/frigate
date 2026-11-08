@@ -6,7 +6,7 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from httpx import TimeoutException
+from httpx import Headers, TimeoutException
 from openai import AsyncOpenAI, OpenAI
 
 from frigate.config import GenAIProviderEnum
@@ -84,6 +84,7 @@ class OpenAIClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to OpenAI."""
         messages_content: list[dict] = []
@@ -123,6 +124,11 @@ class OpenAIClient(GenAIClient):
                     if isinstance(schema, dict):
                         schema["additionalProperties"] = False
                 request_params["response_format"] = response_format
+
+            if extra_headers:
+                headers = Headers(request_params.get("extra_headers") or {})
+                headers.update(extra_headers)
+                request_params["extra_headers"] = dict(headers)
 
             result = self.provider.chat.completions.create(**request_params)
 
