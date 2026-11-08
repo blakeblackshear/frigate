@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@cycjimmy/jsmpeg-player": "^7.0.0",
-    "@hookform/resolvers": "^6.0.2",
+    "@hookform/resolvers": "^7.0.3",
     "@radix-ui/react-alert-dialog": "^1.2.1",
     "@radix-ui/react-aspect-ratio": "^1.2.0",
     "@radix-ui/react-checkbox": "^1.4.1",
