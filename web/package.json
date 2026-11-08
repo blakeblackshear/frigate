@@ -21,7 +21,7 @@
     "i18n:status": "i18next-cli status"
   },
   "dependencies": {
-    "@cycjimmy/jsmpeg-player": "^6.1.8",
+    "@cycjimmy/jsmpeg-player": "^7.0.0",
     "@hookform/resolvers": "^6.0.2",
     "@radix-ui/react-alert-dialog": "^1.2.1",
     "@radix-ui/react-aspect-ratio": "^1.2.0",
