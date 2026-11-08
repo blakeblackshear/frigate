@@ -57,10 +57,19 @@ function get_ip_and_port_from_supervisor() {
     export FRIGATE_GO2RTC_WEBRTC_CANDIDATE_INTERNAL="${ip_address}:${webrtc_port}"
 }
 
+# The probe runs as the service user when the service drops privileges; a root
+# probe relies on resolve_ffmpeg_path refusing runtime-user-writable paths
 function set_libva_version() {
     local ffmpeg_path
-    ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py)
-    LIBAVFORMAT_VERSION_MAJOR=$("$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+")
+    local probe_as=()
+    if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
+        probe_as=(s6-setuidgid go2rtc)
+    fi
+    ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py go2rtc)
+    if ! LIBAVFORMAT_VERSION_MAJOR=$("${probe_as[@]}" "$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+"); then
+        echo "[WARN] Could not read the libavformat version from ${ffmpeg_path} as the go2rtc user; using the bundled build's version"
+        LIBAVFORMAT_VERSION_MAJOR=$("${probe_as[@]}" "/usr/lib/ffmpeg/${DEFAULT_FFMPEG_VERSION}/bin/ffmpeg" -version | grep -Po "libavformat\W+\K\d+")
+    fi
     export LIBAVFORMAT_VERSION_MAJOR
 }
 

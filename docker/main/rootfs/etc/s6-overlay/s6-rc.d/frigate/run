@@ -14,11 +14,17 @@ fi
 # Tell S6-Overlay not to restart this service
 s6-svc -O .
 
-# Runs as root with root's HOME and LD_LIBRARY_PATH; -I skips user site-packages
+# The helper runs as root (-I skips user site-packages). The probe runs as the
+# service user when the service drops privileges; a root probe relies on
+# resolve_ffmpeg_path refusing runtime-user-writable paths.
 function set_libva_version() {
     local ffmpeg_path
-    ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py)
-    LIBAVFORMAT_VERSION_MAJOR=$("$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+")
+    local probe_as=()
+    if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
+        probe_as=(s6-setuidgid frigate)
+    fi
+    ffmpeg_path=$(python3 -I /usr/local/ffmpeg/get_ffmpeg_path.py frigate)
+    LIBAVFORMAT_VERSION_MAJOR=$("${probe_as[@]}" "$ffmpeg_path" -version | grep -Po "libavformat\W+\K\d+")
     export LIBAVFORMAT_VERSION_MAJOR
 }
 

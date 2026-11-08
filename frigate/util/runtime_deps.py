@@ -32,8 +32,8 @@ from pathlib import Path
 
 from frigate.const import MODEL_CACHE_DIR
 from frigate.util.config import (
-    frigate_service_is_granular_root,
     is_runtime_user_writable,
+    service_is_granular_root,
 )
 from frigate.util.file import FileLock
 
@@ -163,7 +163,7 @@ def _usable_reason() -> str | None:
 
     base = user_base()
 
-    if frigate_service_is_granular_root() and is_runtime_user_writable(str(base)):
+    if service_is_granular_root("frigate") and is_runtime_user_writable(str(base)):
         return (
             f"{base} is writable by the unprivileged user while "
             "FRIGATE_ROOT_SERVICES runs frigate as root"

@@ -25,4 +25,5 @@ except FileNotFoundError:
     config: dict[str, Any] = {}
 
 path = config.get("ffmpeg", {}).get("path", "default")
-print(resolve_ffmpeg_path(path, "ffmpeg"))
+service = sys.argv[1] if len(sys.argv) > 1 else "frigate"
+print(resolve_ffmpeg_path(path, "ffmpeg", service))
