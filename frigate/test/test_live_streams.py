@@ -12,6 +12,7 @@ from frigate.util.live_streams import (
     default_transcode_source,
     generated_transcode_streams,
     is_transcode_stream_name,
+    is_valid_go2rtc_stream_name,
     measure_stream_bitrate,
     raw_transcode_streams,
     sync_transcode_streams,
@@ -36,6 +37,13 @@ class TestTranscodeNaming(unittest.TestCase):
             "ffmpeg:front#video=h264#height=480#hardware#audio=copy"
             "#raw=-b:v#raw=500k#raw=-maxrate#raw=500k#raw=-bufsize#raw=1000k",
         )
+
+    def test_valid_go2rtc_stream_names(self):
+        for name in ("front", "front_sub", "back-yard.main_2", "Haustür"):
+            self.assertTrue(is_valid_go2rtc_stream_name(name), name)
+
+        for name in ("x#raw=-f", "front door", "front\tdoor", "a'b", 'a"b', "a${X}"):
+            self.assertFalse(is_valid_go2rtc_stream_name(name), name)
 
     def test_default_source_skips_transcoded_streams(self):
         streams = {"Low": "front_transcode_360p", "Main": "front_main"}
@@ -120,6 +128,22 @@ class TestRawTranscodeStreams(unittest.TestCase):
         }
 
         self.assertEqual(list(raw_transcode_streams(config)), ["front_transcode_360p"])
+
+    def test_unsafe_source_name_is_skipped(self):
+        config = {
+            "cameras": {
+                "front": {
+                    "live": {
+                        "transcode": {"enabled": True, "source": "x#raw=-f#raw=null"}
+                    }
+                }
+            }
+        }
+
+        self.assertEqual(raw_transcode_streams(config), {})
+
+        config["cameras"]["front"]["live"]["transcode"]["source"] = "front_main"
+        self.assertEqual(len(raw_transcode_streams(config)), 3)
 
     def test_disabled_or_missing_generates_nothing(self):
         self.assertEqual(raw_transcode_streams({}), {})
@@ -285,6 +309,17 @@ class TestLiveTranscodeConfig(unittest.TestCase):
     def test_source_must_be_a_go2rtc_stream(self):
         with self.assertRaises(ValidationError):
             self.streams({"transcode": {"enabled": True, "source": "missing"}})
+
+    def test_source_name_with_ffmpeg_params_fails(self):
+        name = "x#raw=-f#raw=null"
+        with self.assertRaisesRegex(ValidationError, "contains '#'"):
+            self.streams(
+                {"transcode": {"enabled": True, "source": name}},
+                go2rtc={
+                    "front": ["rtsp://10.0.0.1:554/main"],
+                    name: ["rtsp://10.0.0.1:554/main"],
+                },
+            )
 
     def test_duplicate_heights_fail(self):
         with self.assertRaises(ValidationError):

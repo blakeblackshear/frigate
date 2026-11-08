@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
+import requests
 import ruamel.yaml
 from fastapi import Request
 
@@ -233,6 +234,72 @@ class TestAuthInternalPort(BaseTestHttp):
                 self.assertNotIn("8971", f.read().split("external")[0])
         finally:
             os.unlink(config_path)
+
+    @patch(
+        "frigate.api.auth.requests.get",
+        side_effect=requests.ConnectionError("go2rtc unavailable"),
+    )
+    def test_internal_port_rejects_unknown_go2rtc_src(self, _mock_get):
+        app = self._create_app()
+
+        with AuthTestClient(app) as client:
+            for url in (
+                "/live/mse/api/ws?src=exec:id",
+                "/live/webrtc/api/ws?src=ffmpeg:x%23raw=-f",
+                "/api/go2rtc/webrtc?src=front_door&src=unknown",
+            ):
+                resp = client.get(
+                    "/auth",
+                    headers={"x-server-port": "5000", "x-original-url": url},
+                )
+                self.assertEqual(resp.status_code, 403, url)
+
+    def test_internal_port_allows_existing_go2rtc_stream(self):
+        app = self._create_app()
+
+        with AuthTestClient(app) as client:
+            resp = client.get(
+                "/auth",
+                headers={
+                    "x-server-port": "5000",
+                    "x-original-url": "/live/mse/api/ws?src=front_door",
+                },
+            )
+
+            self.assertEqual(resp.status_code, 202)
+            self.assertEqual(resp.headers["remote-role"], "admin")
+
+    def test_internal_port_skips_go2rtc_check_for_other_paths(self):
+        app = self._create_app()
+
+        with AuthTestClient(app) as client:
+            for url in ("/api/stats", "/api/go2rtc/streams?src=unknown"):
+                resp = client.get(
+                    "/auth",
+                    headers={"x-server-port": "5000", "x-original-url": url},
+                )
+                self.assertEqual(resp.status_code, 202, url)
+
+    @patch(
+        "frigate.api.auth.requests.get",
+        side_effect=requests.ConnectionError("go2rtc unavailable"),
+    )
+    def test_live_stream_value_is_not_trusted_as_a_go2rtc_stream(self, _mock_get):
+        src = "ffmpeg:x#raw=-f"
+        self.minimal_config["cameras"]["front_door"]["live"] = {
+            "streams": {"Main": src}
+        }
+        app = self._create_app()
+
+        with AuthTestClient(app) as client:
+            resp = client.get(
+                "/auth",
+                headers={
+                    "x-server-port": "5000",
+                    "x-original-url": "/live/mse/api/ws?src=ffmpeg:x%23raw=-f",
+                },
+            )
+            self.assertEqual(resp.status_code, 403)
 
 
 if __name__ == "__main__":

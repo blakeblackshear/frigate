@@ -39,6 +39,7 @@ from frigate.config import AuthConfig, ProxyConfig
 from frigate.const import CONFIG_DIR, JWT_SECRET_ENV_VAR, PASSWORD_HASH_ALGORITHM
 from frigate.models import User
 from frigate.notices import raise_notice
+from frigate.util.live_streams import is_transcode_stream_name
 from frigate.util.origin import origin_allowed
 
 logger = logging.getLogger(__name__)
@@ -739,6 +740,13 @@ def auth(request: Request):
         int(request.headers.get("x-server-port", default=0))
         == request.app.auth_internal_port
     ):
+        # go2rtc runs the producer an unknown src describes for any caller
+        deny_status = deny_response_for_go2rtc_stream(
+            request.headers.get("x-original-url"), None, request
+        )
+        if deny_status is not None:
+            return Response("", status_code=deny_status)
+
         success_response.headers["remote-user"] = "anonymous"
         success_response.headers["remote-role"] = "admin"
         return success_response
@@ -1275,7 +1283,12 @@ def _is_existing_go2rtc_stream(request: Request, stream_name: str) -> bool:
     """
     frigate_config = request.app.frigate_config
 
-    if _get_stream_owner_cameras(request, stream_name):
+    # live.streams values are free-form config, so only names Frigate controls
+    # skip the lookup
+    if any(
+        stream_name == camera or is_transcode_stream_name(camera, stream_name)
+        for camera in frigate_config.cameras
+    ):
         return True
 
     config_streams = getattr(frigate_config.go2rtc, "streams", None) or {}

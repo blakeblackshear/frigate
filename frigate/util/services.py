@@ -31,6 +31,7 @@ from frigate.const import (
 )
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
 from frigate.util.env import UnknownVariableError, substitute_frigate_vars
+from frigate.util.live_streams import is_valid_go2rtc_stream_name
 
 logger = logging.getLogger(__name__)
 
@@ -1177,6 +1178,7 @@ class Go2rtcStreamIssue(str, Enum):
     restricted = "restricted"
     unknown_variable = "unknown_variable"
     invalid_placeholder = "invalid_placeholder"
+    invalid_name = "invalid_name"
 
 
 def find_restricted_go2rtc_stream_changes(
@@ -1188,12 +1190,17 @@ def find_restricted_go2rtc_stream_changes(
     in the saved config for the same stream is left alone, so streams the
     operator configured on disk keep working; any other source must resolve
     its {FRIGATE_*} placeholders and pass `is_restricted_go2rtc_api_source`.
+    New stream names must pass `is_valid_go2rtc_stream_name`.
     """
     old_streams = old_streams if isinstance(old_streams, dict) else {}
     new_streams = new_streams if isinstance(new_streams, dict) else {}
     issues: dict[str, Go2rtcStreamIssue] = {}
 
     for name, stream in new_streams.items():
+        if name not in old_streams and not is_valid_go2rtc_stream_name(str(name)):
+            issues[name] = Go2rtcStreamIssue.invalid_name
+            continue
+
         existing = _go2rtc_stream_sources(old_streams.get(name))
 
         for source in _go2rtc_stream_sources(stream):

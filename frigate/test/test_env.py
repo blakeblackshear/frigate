@@ -194,15 +194,16 @@ class TestEnvVars(unittest.TestCase):
     def setUp(self):
         self._original_env_vars = dict(FRIGATE_ENV_VARS)
         self._original_environ = os.environ.copy()
+        names_patch = patch.object(env, "_CONTAINER_ENV_NAMES", frozenset())
+        names_patch.start()
+        self.addCleanup(names_patch.stop)
 
     def tearDown(self):
         FRIGATE_ENV_VARS.clear()
         FRIGATE_ENV_VARS.update(self._original_env_vars)
         env._CONFIG_ENV_VARS.clear()
-        # Clean up any env vars we set
-        for key in list(os.environ.keys()):
-            if key not in self._original_environ:
-                del os.environ[key]
+        os.environ.clear()
+        os.environ.update(self._original_environ)
 
     def _make_context(self, install: bool):
         """Create a mock ValidationInfo with the given install flag."""
@@ -215,10 +216,10 @@ class TestEnvVars(unittest.TestCase):
         return mock
 
     def test_install_sets_os_environ(self):
-        """validate_env_vars with install=True sets os.environ."""
+        """validate_env_vars with install=True sets allowed names in os.environ."""
         ctx = self._make_context(install=True)
-        validate_env_vars({"MY_CUSTOM_VAR": "value123"}, ctx)
-        self.assertEqual(os.environ.get("MY_CUSTOM_VAR"), "value123")
+        validate_env_vars({"SHM_MAX_FRAMES": "75"}, ctx)
+        self.assertEqual(os.environ.get("SHM_MAX_FRAMES"), "75")
 
     def test_install_updates_frigate_env_vars(self):
         """validate_env_vars with install=True updates FRIGATE_ENV_VARS for FRIGATE_ keys."""
@@ -229,9 +230,9 @@ class TestEnvVars(unittest.TestCase):
     def test_install_skips_non_frigate_in_env_vars_dict(self):
         """Non-FRIGATE_ keys are set in os.environ but not in FRIGATE_ENV_VARS."""
         ctx = self._make_context(install=True)
-        validate_env_vars({"OTHER_VAR": "value"}, ctx)
-        self.assertEqual(os.environ.get("OTHER_VAR"), "value")
-        self.assertNotIn("OTHER_VAR", FRIGATE_ENV_VARS)
+        validate_env_vars({"USE_FP16": "False"}, ctx)
+        self.assertEqual(os.environ.get("USE_FP16"), "False")
+        self.assertNotIn("USE_FP16", FRIGATE_ENV_VARS)
 
     def test_no_install_does_not_set(self):
         """validate_env_vars without install=True does not modify state."""
@@ -258,10 +259,10 @@ class TestEnvVars(unittest.TestCase):
         ctx = self._make_context(install=True)
         with patch("frigate.util.services.os.path.isfile", return_value=False):
             for key in ("GO2RTC_ALLOW_ARBITRARY_EXEC", "go2rtc_allow_arbitrary_exec"):
-                validate_env_vars({key: "true", "OTHER_VAR": "value"}, ctx)
+                validate_env_vars({key: "true", "USE_FP16": "False"}, ctx)
                 self.assertNotIn(key, os.environ)
                 self.assertFalse(is_go2rtc_arbitrary_exec_allowed())
-        self.assertEqual(os.environ.get("OTHER_VAR"), "value")
+        self.assertEqual(os.environ.get("USE_FP16"), "False")
 
     def test_install_keeps_container_go2rtc_exec_override(self):
         """An override set in the container environment is left untouched."""
@@ -307,16 +308,81 @@ class TestVariableSources(unittest.TestCase):
         self.assertEqual(env.FRIGATE_ENV_VARS["FRIGATE_CAM_PASS"], "hunter2")
 
     def test_config_env_vars_do_not_become_container_env(self):
-        """environment_vars writes os.environ but must not gain env precedence."""
+        """environment_vars FRIGATE_ keys stay out of os.environ and env precedence."""
         env.apply_config_env_vars({"FRIGATE_CAM_PASS": "from_config"})
-        self.assertEqual(os.environ["FRIGATE_CAM_PASS"], "from_config")
+        self.assertNotIn("FRIGATE_CAM_PASS", os.environ)
         self.assertNotIn("FRIGATE_CAM_PASS", env._CONTAINER_ENV)
 
     def test_non_frigate_config_env_vars_only_set_os_environ(self):
         """Unprefixed environment_vars keys reach os.environ but not substitution."""
-        env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "i965"})
+        with patch.object(env, "_CONTAINER_ENV_NAMES", frozenset()):
+            env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "i965"})
         self.assertEqual(os.environ["LIBVA_DRIVER_NAME"], "i965")
         self.assertNotIn("LIBVA_DRIVER_NAME", env.FRIGATE_ENV_VARS)
+
+    def test_rejected_names_warn_and_are_not_exported(self):
+        """Names off the allowlist log a warning without the value."""
+        for key in ("MY_CUSTOM_VAR", "LD_PRELOAD", "LIGHTER_ANE_EP", "PATH"):
+            with self.subTest(key=key):
+                original = os.environ.get(key)
+                with self.assertLogs("frigate.util.env", level="WARNING") as logs:
+                    env.apply_config_env_vars({key: "/config/evil.so"})
+                self.assertEqual(os.environ.get(key), original)
+                self.assertEqual(len(logs.output), 1)
+                self.assertIn(key, logs.output[0])
+                self.assertIn("container environment", logs.output[0])
+                self.assertNotIn("evil", logs.output[0])
+
+    def test_allowed_name_with_bad_value_is_rejected(self):
+        """LIBVA_DRIVER_NAME cannot carry a path."""
+        with patch.object(env, "_CONTAINER_ENV_NAMES", frozenset()):
+            with self.assertLogs("frigate.util.env", level="WARNING"):
+                env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "../x"})
+        self.assertNotEqual(os.environ.get("LIBVA_DRIVER_NAME"), "../x")
+
+    def test_unsupported_values_are_rejected_without_crashing(self):
+        """Non-ASCII digits and NUL bytes never reach os.environ."""
+        os.environ.pop("SHM_MAX_FRAMES", None)
+        os.environ.pop("HF_ENDPOINT", None)
+        with patch.object(env, "_CONTAINER_ENV_NAMES", frozenset()):
+            with self.assertLogs("frigate.util.env", level="WARNING") as logs:
+                env.apply_config_env_vars(
+                    {"SHM_MAX_FRAMES": "\u0663\u0664", "HF_ENDPOINT": "https://x\x00"}
+                )
+        self.assertEqual(len(logs.output), 2)
+        self.assertNotIn("SHM_MAX_FRAMES", os.environ)
+        self.assertNotIn("HF_ENDPOINT", os.environ)
+
+    def test_container_env_wins_over_allowed_name(self):
+        """A name the container set is left as the container set it."""
+        os.environ["LIBVA_DRIVER_NAME"] = "iHD"
+        with patch.object(
+            env, "_CONTAINER_ENV_NAMES", frozenset({"LIBVA_DRIVER_NAME"})
+        ):
+            env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "i965"})
+        self.assertEqual(os.environ["LIBVA_DRIVER_NAME"], "iHD")
+
+    def test_second_apply_is_not_blocked_by_first(self):
+        """A safe-mode reload can change a value the first load exported."""
+        with patch.object(env, "_CONTAINER_ENV_NAMES", frozenset()):
+            env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "i965"})
+            env.apply_config_env_vars({"LIBVA_DRIVER_NAME": "radeonsi"})
+        self.assertEqual(os.environ["LIBVA_DRIVER_NAME"], "radeonsi")
+
+    def test_run_as_root_is_substitutable_but_not_exported(self):
+        """FRIGATE_RUN_AS_ROOT from the config never reaches os.environ."""
+        os.environ.pop("FRIGATE_RUN_AS_ROOT", None)
+        with patch.object(env, "_CONTAINER_ENV_NAMES", frozenset()):
+            env.apply_config_env_vars({"FRIGATE_RUN_AS_ROOT": "true"})
+        self.assertNotIn("FRIGATE_RUN_AS_ROOT", os.environ)
+        self.assertEqual(env.substitute_frigate_vars("{FRIGATE_RUN_AS_ROOT}"), "true")
+
+    def test_jwt_secret_is_exported(self):
+        """Auth reads FRIGATE_JWT_SECRET from os.environ."""
+        os.environ.pop("FRIGATE_JWT_SECRET", None)
+        with patch.object(env, "_CONTAINER_ENV_NAMES", frozenset()):
+            env.apply_config_env_vars({"FRIGATE_JWT_SECRET": "s3cret"})
+        self.assertEqual(os.environ["FRIGATE_JWT_SECRET"], "s3cret")
 
     def test_collision_warns_once_naming_the_winner(self):
         """A key from two sources logs one warning naming the source that won."""
