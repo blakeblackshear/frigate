@@ -26,7 +26,7 @@ psutil == 7.2.*
 pydantic == 2.14.*
 git+https://github.com/fbcotter/py3nvml#egg=py3nvml
 tzdata == 2026.6
-pyzmq == 27.2.*
+pyzmq == 27.3.*
 ruamel.yaml == 0.19.*
 tzlocal == 5.4.5
 requests == 2.34.*
