@@ -45,4 +45,4 @@ cmake -S /tmp/media-driver -B /tmp/media-driver/build \
 make -C /tmp/media-driver/build -j"$(nproc)"
 
 # Install driver to rootfs for COPY --from
-make -C /tmp/media-driver/build install DESTDIR=/rootfs
+make -C /tmp/media-driver/build install/strip DESTDIR=/rootfs
