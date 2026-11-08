@@ -169,7 +169,7 @@ export function GenAIModelWidget(props: WidgetProps) {
 
     if (previous === formProvider) return;
     if (formProvider === savedProvider && value === savedModel) return;
-    if (typeof value === "string" && value) onChange("");
+    if (typeof value === "string" && value) onChange(undefined);
   }, [formProvider, savedProvider, savedModel, value, onChange]);
 
   const probe = async () => {
