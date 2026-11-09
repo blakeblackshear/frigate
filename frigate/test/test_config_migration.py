@@ -1,5 +1,6 @@
 """Tests for migrating detectors and model into the models list."""
 
+import errno
 import logging
 import os
 import tempfile
@@ -239,6 +240,30 @@ class TestMigrateConfigFile(unittest.TestCase):
 
         with open(self.config_file) as f:
             return YAML().load(f)
+
+    def test_a_failed_write_leaves_the_original_config(self):
+        original = "mqtt:\n  enabled: false\ncameras: {}\n"
+        with open(self.config_file, "w") as f:
+            f.write(original)
+
+        with (
+            patch.object(YAML, "dump", side_effect=RuntimeError),
+            self.assertRaises(RuntimeError),
+        ):
+            migrate_frigate_config(self.config_file)
+
+        with open(self.config_file) as f:
+            self.assertEqual(f.read(), original)
+
+    def test_a_file_bind_mount_is_written_in_place(self):
+        with patch(
+            "frigate.util.config.os.replace",
+            side_effect=OSError(errno.EBUSY, "Device or resource busy"),
+        ):
+            migrated = self._migrate("mqtt:\n  enabled: false\ncameras: {}\n")
+
+        self.assertEqual(migrated["version"], CURRENT_CONFIG_VERSION)
+        self.assertFalse(os.path.exists(f"{self.config_file}.tmp"))
 
     def test_migrates_a_config_already_stamped_with_the_current_version(self):
         # 0.19 is unreleased, so a dev config can be current and still use

@@ -1,6 +1,8 @@
 """configuration utils."""
 
 import asyncio
+import contextlib
+import errno
 import ipaddress
 import logging
 import os
@@ -213,11 +215,24 @@ def find_config_file() -> str:
 
 
 def _write_config(config_file: str, yaml: YAML, config: dict[str, Any]) -> None:
+    st = os.stat(config_file)
     tmp_file = f"{config_file}.tmp"
     with open(tmp_file, "w") as f:
         yaml.dump(config, f)
-    shutil.copymode(config_file, tmp_file)
-    os.replace(tmp_file, config_file)
+    os.chmod(tmp_file, st.st_mode)
+
+    with contextlib.suppress(PermissionError):
+        os.chown(tmp_file, st.st_uid, st.st_gid)
+
+    try:
+        os.replace(tmp_file, config_file)
+    except OSError as e:
+        if e.errno != errno.EBUSY:
+            raise
+
+        # a file bind mount can't be renamed over, so write it in place
+        shutil.copyfile(tmp_file, config_file)
+        os.remove(tmp_file)
 
 
 def migrate_frigate_config(config_file: str):
