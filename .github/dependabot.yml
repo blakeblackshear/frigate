@@ -136,9 +136,6 @@ updates:
       # Later versions need Node 22 and extract false keys
       - dependency-name: "i18next-cli"
         versions: [">1.5.11"]
-      # 6.11.0 refills the saved model in the GenAI settings form
-      - dependency-name: "@rjsf/*"
-        versions: ["6.11.0"]
 
   - package-ecosystem: "npm"
     directory: "/docs"

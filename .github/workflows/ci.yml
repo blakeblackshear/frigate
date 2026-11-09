@@ -423,6 +423,11 @@ jobs:
         run: docker rm -f frigate || true
   arm64_build:
     runs-on: ubuntu-22.04-arm
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     name: ARM Build
     steps:
       - name: Check out code
@@ -435,6 +440,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push arm64 standard build
+        id: standard-arm64
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -445,6 +451,13 @@ jobs:
           tags: |
             ${{ steps.setup.outputs.image-name }}-standard-arm64
           cache-from: type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64
+      - name: Attest arm64 standard build
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.setup.outputs.image-repo }}
+          subject-digest: ${{ steps.standard-arm64.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false
       - name: Build and push RPi build
         uses: docker/bake-action@v7
         with:
@@ -458,6 +471,11 @@ jobs:
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-arm64,mode=max
   jetson_jp6_build:
     runs-on: ubuntu-22.04-arm
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     name: Jetson Jetpack 6
     steps:
       - name: Check out code
@@ -470,6 +488,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push TensorRT (Jetson, Jetpack 6)
+        id: tensorrt-jp6
         env:
           ARCH: arm64
           BASE_IMAGE: nvcr.io/nvidia/tensorrt:23.12-py3-igpu
@@ -485,8 +504,20 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt-jp6
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-jp6,mode=max
+      - name: Attest TensorRT (Jetson, Jetpack 6)
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.setup.outputs.image-repo }}
+          subject-digest: ${{ fromJSON(steps.tensorrt-jp6.outputs.metadata)['tensorrt']['containerimage.digest'] }}
+          push-to-registry: true
+          create-storage-record: false
   amd64_extra_builds:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     name: AMD64 Extra Build
     needs:
       - amd64_build
@@ -501,6 +532,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push TensorRT (x86 GPU)
+        id: tensorrt
         env:
           COMPUTE_LEVEL: "50 60 70 80 90"
         uses: docker/bake-action@v7
@@ -513,7 +545,15 @@ jobs:
             tensorrt.tags=${{ steps.setup.outputs.image-name }}-tensorrt
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-tensorrt,mode=max
+      - name: Attest TensorRT (x86 GPU)
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.setup.outputs.image-repo }}
+          subject-digest: ${{ fromJSON(steps.tensorrt.outputs.metadata)['tensorrt']['containerimage.digest'] }}
+          push-to-registry: true
+          create-storage-record: false
       - name: AMD/ROCm general build
+        id: rocm
         env:
           HSA_OVERRIDE: 0
         uses: docker/bake-action@v7
@@ -526,8 +566,20 @@ jobs:
             rocm.tags=${{ steps.setup.outputs.image-name }}-rocm
             *.cache-to=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm,mode=max
             *.cache-from=type=registry,ref=${{ steps.setup.outputs.cache-name }}-rocm
+      - name: Attest AMD/ROCm general build
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.setup.outputs.image-repo }}
+          subject-digest: ${{ fromJSON(steps.rocm.outputs.metadata)['rocm']['containerimage.digest'] }}
+          push-to-registry: true
+          create-storage-record: false
   arm64_extra_builds:
     runs-on: ubuntu-22.04-arm
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     name: ARM Extra Build
     needs:
       - arm64_build
@@ -542,6 +594,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Rockchip build
+        id: rk
         uses: docker/bake-action@v7
         with:
           source: .
@@ -551,8 +604,20 @@ jobs:
           set: |
             rk.tags=${{ steps.setup.outputs.image-name }}-rk
             *.cache-from=type=gha
+      - name: Attest Rockchip build
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.setup.outputs.image-repo }}
+          subject-digest: ${{ fromJSON(steps.rk.outputs.metadata)['rk']['containerimage.digest'] }}
+          push-to-registry: true
+          create-storage-record: false
   synaptics_build:
     runs-on: ubuntu-22.04-arm
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     name: Synaptics Build
     needs:
       - arm64_build
@@ -567,6 +632,7 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Synaptics build
+        id: synaptics
         uses: docker/bake-action@v7
         with:
           source: .
@@ -576,10 +642,22 @@ jobs:
           set: |
             synaptics.tags=${{ steps.setup.outputs.image-name }}-synaptics
             *.cache-from=type=gha
+      - name: Attest Synaptics build
+        uses: actions/attest@v4
+        with:
+          subject-name: ${{ steps.setup.outputs.image-repo }}
+          subject-digest: ${{ fromJSON(steps.synaptics.outputs.metadata)['synaptics']['containerimage.digest'] }}
+          push-to-registry: true
+          create-storage-record: false
   # The majority of users running arm64 are rpi users, so the rpi
   # build should be the primary arm64 image
   assemble_default_build:
     runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
     name: Assemble and push default build
     needs:
       - amd64_build
@@ -598,8 +676,16 @@ jobs:
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
       - uses: int128/docker-manifest-create-action@v2
+        id: manifest
         with:
           tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}
           sources: |
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}-amd64
             ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}-rpi
+      - name: Attest default build
+        uses: actions/attest@v4
+        with:
+          subject-name: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}
+          subject-digest: ${{ steps.manifest.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false

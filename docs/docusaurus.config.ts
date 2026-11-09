@@ -4,7 +4,7 @@ import type { Config, PluginConfig } from "@docusaurus/types";
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 
 // Bump when a new stable release ships
-const STABLE_VERSION = "0.18";
+const STABLE_VERSION = "0.19";
 
 const config: Config = {
   title: "Frigate",
