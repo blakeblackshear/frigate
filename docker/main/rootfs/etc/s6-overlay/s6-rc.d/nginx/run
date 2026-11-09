@@ -80,6 +80,11 @@ cp -r /usr/local/nginx/conf/. /tmp/nginx/conf/
 
 set_worker_processes
 
+# A non-root master ignores `user` and warns on every start
+if [[ "$runs_as_root" -eq 0 ]]; then
+    sed -i '/^user root;$/d' /tmp/nginx/conf/nginx.conf
+fi
+
 # TLS certs: user-mounted certs at /etc/letsencrypt/live/frigate (documented
 # contract) always win; otherwise fall back to a self-signed cert persisted in
 # /config/tls, which stays writable under a read-only root filesystem.
