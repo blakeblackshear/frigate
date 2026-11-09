@@ -12,6 +12,7 @@ from frigate.analytics.collectors.common import closed, histogram, rate
 from frigate.analytics.schema import (
     Arch,
     DecodeFamily,
+    FfmpegSource,
     GpuVendor,
     HardwareKey,
     ImageVariant,
@@ -56,6 +57,36 @@ class TestInstallCollector(unittest.TestCase):
         self.assertEqual(section.arch, Arch.aarch64)
         self.assertEqual(section.kernel, "6.8")
         self.assertFalse(section.run_as_root)
+        self.assertEqual(section.ffmpeg, FfmpegSource.default)
+
+    def test_ffmpeg_source_follows_path_resolution(self):
+        with (
+            patch.object(install, "DEFAULT_FFMPEG_VERSION", "8.0"),
+            patch.object(install, "INCLUDED_FFMPEG_VERSIONS", ["8.0", "7.0"]),
+        ):
+            self.assertEqual(install.ffmpeg_source("default"), FfmpegSource.default)
+            self.assertEqual(install.ffmpeg_source("8.0"), FfmpegSource.default)
+            self.assertEqual(install.ffmpeg_source("4.4"), FfmpegSource.default)
+            self.assertEqual(install.ffmpeg_source("7.0"), FfmpegSource.bundled)
+            self.assertEqual(
+                install.ffmpeg_source("/config/custom-ffmpeg"), FfmpegSource.custom
+            )
+            self.assertEqual(
+                install.ffmpeg_source("/config/a b; rm"), FfmpegSource.default
+            )
+
+    def test_custom_go2rtc_needs_an_executable_binary(self):
+        with tempfile.TemporaryDirectory() as config_dir:
+            binary = os.path.join(config_dir, "go2rtc")
+
+            with patch.object(install, "CONFIG_DIR", config_dir):
+                self.assertFalse(install.collect(make_context()).custom_go2rtc)
+
+                open(binary, "w").close()
+                self.assertFalse(install.collect(make_context()).custom_go2rtc)
+
+                os.chmod(binary, 0o755)
+                self.assertTrue(install.collect(make_context()).custom_go2rtc)
 
     def test_image_variant_is_dev_when_unset_and_other_when_unknown(self):
         self.assertEqual(install.image_variant(None), ImageVariant.dev)
