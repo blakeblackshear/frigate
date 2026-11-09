@@ -179,6 +179,26 @@ class TestValidateKey(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(status, PlusKeyStatus.unreachable)
 
+    async def test_the_request_goes_through_a_configured_proxy(self):
+        # installs that reach Frigate+ through a proxy must validate the same way
+        token = {"accessToken": "proxied", "expires": 2000000000}
+        proxied = []
+
+        async def proxy(request: web.Request) -> web.Response:
+            proxied.append(str(request.url))
+            return web.json_response(token)
+
+        proxy_url = await self._serve(proxy)
+        api = self._api("http://plus.invalid")
+
+        with patch.dict(
+            os.environ, {"HTTP_PROXY": proxy_url, "NO_PROXY": ""}, clear=False
+        ):
+            status = await api.validate_key()
+
+        self.assertEqual(status, PlusKeyStatus.valid)
+        self.assertEqual(proxied, ["http://plus.invalid/v1/auth/token"])
+
     async def test_no_key_is_not_sent_to_the_server(self):
         requests_seen = []
 

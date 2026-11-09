@@ -195,10 +195,12 @@ class PlusApi:
         key_id, _, secret = self.key.partition(":")
 
         # Use a single request with a timeout instead of the retrying session,
-        # since this is user initiated and should fail fast when unreachable
+        # since this is user initiated and should fail fast when unreachable.
+        # trust_env honors proxy settings, matching the other Frigate+ requests.
         try:
             async with aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=PLUS_VALIDATE_TIMEOUT)
+                timeout=aiohttp.ClientTimeout(total=PLUS_VALIDATE_TIMEOUT),
+                trust_env=True,
             ) as session:
                 async with session.get(
                     f"{self.host}/v1/auth/token",
