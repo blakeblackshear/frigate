@@ -231,6 +231,8 @@ When your config fails validation at startup, Frigate prints the validation erro
 
 `Unable to start Frigate in safe mode` means even the minimal config failed, which points at an error in your `auth`, `proxy`, or `database` section, or a config file that is not valid YAML at all. Safe mode is not sticky; fix the config and restart and Frigate returns to normal.
 
+If the config cannot be edited at runtime (read-only mounts, Kubernetes), set [`FRIGATE_ALLOW_SAFE_MODE=false`](/configuration/advanced/system#disabling-safe-mode) so Frigate exits with a non-zero code instead of starting in safe mode.
+
 </FaqItem>
 
 <FaqItem id="502-bad-gateway" question="502 Bad Gateway / connection refused to 127.0.0.1:5001">
