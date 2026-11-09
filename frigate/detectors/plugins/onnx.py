@@ -52,7 +52,6 @@ class ONNXDetector(DetectionApi):
             path,
             detector_config.device,
             model_type=detector_config.model.model_type,
-            requires_fp16=detector_config.device == "Tensorrt",
         )
 
         self.onnx_model_type = detector_config.model.model_type

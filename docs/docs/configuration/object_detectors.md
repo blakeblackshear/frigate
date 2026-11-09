@@ -516,6 +516,7 @@ If the correct build is used for your GPU then the GPU will be detected and used
 
 - **Nvidia**
   - Nvidia GPUs will automatically be detected and used with the ONNX detector in the `-tensorrt` Frigate image.
+  - To run the model through TensorRT instead of CUDA, set `device: Tensorrt` on the ONNX detector. TensorRT engines are built in FP32 by default; set the environment variable `USE_FP16=true` to build FP16 engines, which are faster on GPUs with FP16 support.
   - Jetson devices will automatically be detected and used with the ONNX detector in the `-tensorrt-jp6` Frigate image.
 
 - **Apple Silicon Mac** <CommunityBadge />

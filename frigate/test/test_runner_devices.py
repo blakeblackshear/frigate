@@ -321,6 +321,36 @@ class TestLighterANE(unittest.TestCase):
         ane.assert_not_called()
 
 
+class TestTensorRTProvider(unittest.TestCase):
+    def _trt_options(self, env):
+        with (
+            patch.object(
+                model_util.ort,
+                "get_available_providers",
+                return_value=["TensorrtExecutionProvider", "CPUExecutionProvider"],
+            ),
+            patch.object(model_util.os, "makedirs"),
+            patch.dict(os.environ, env, clear=False),
+        ):
+            if "USE_FP16" not in env:
+                os.environ.pop("USE_FP16", None)
+            providers, options = model_util.get_ort_providers(device="Tensorrt")
+
+        return options[providers.index("TensorrtExecutionProvider")]
+
+    def test_fp16_is_disabled_by_default(self):
+        self.assertFalse(self._trt_options({})["trt_fp16_enable"])
+
+    def test_use_fp16_enables_fp16(self):
+        for value in ("true", "True", "TRUE"):
+            with self.subTest(value=value):
+                options = self._trt_options({"USE_FP16": value})
+                self.assertTrue(options["trt_fp16_enable"])
+
+    def test_use_fp16_false_keeps_fp16_disabled(self):
+        self.assertFalse(self._trt_options({"USE_FP16": "False"})["trt_fp16_enable"])
+
+
 class TestMIGraphX(unittest.TestCase):
     """AMD's MIGraphX plugin provider, selected through its devices in the ROCm image."""
 
