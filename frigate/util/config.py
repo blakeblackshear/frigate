@@ -215,6 +215,7 @@ def find_config_file() -> str:
 
 
 def _write_config(config_file: str, yaml: YAML, config: dict[str, Any]) -> None:
+    config_file = os.path.realpath(config_file)
     st = os.stat(config_file)
     tmp_file = f"{config_file}.tmp"
     with open(tmp_file, "w") as f:

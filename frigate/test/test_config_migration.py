@@ -265,6 +265,18 @@ class TestMigrateConfigFile(unittest.TestCase):
         self.assertEqual(migrated["version"], CURRENT_CONFIG_VERSION)
         self.assertFalse(os.path.exists(f"{self.config_file}.tmp"))
 
+    def test_a_symlinked_config_migrates_its_target(self):
+        target = os.path.join(self.temp_dir.name, "frigate.yml")
+        with open(target, "w") as f:
+            f.write("mqtt:\n  enabled: false\ncameras: {}\n")
+        os.symlink(target, self.config_file)
+
+        migrate_frigate_config(self.config_file)
+
+        self.assertTrue(os.path.islink(self.config_file))
+        with open(target) as f:
+            self.assertEqual(YAML().load(f)["version"], CURRENT_CONFIG_VERSION)
+
     def test_migrates_a_config_already_stamped_with_the_current_version(self):
         # 0.19 is unreleased, so a dev config can be current and still use
         # the pre-models keys
