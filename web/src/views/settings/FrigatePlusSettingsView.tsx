@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import useSWR from "swr";
-import { CheckCircle2, XCircle } from "lucide-react";
+import axios from "axios";
+import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
 import { LuExternalLink } from "react-icons/lu";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
@@ -18,12 +19,34 @@ import { FrigateConfig } from "@/types/frigateConfig";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
 import { getPrimaryModel } from "@/utils/modelUtil";
+import { useIsAdmin } from "@/hooks/use-is-admin";
+
+type PlusKeyStatus = "valid" | "invalid" | "unreachable" | "not_set";
+
+type PlusValidateResponse = { success: boolean; status: PlusKeyStatus };
 
 export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
   const { t } = useTranslation("views/settings");
   const { getLocaleDocUrl } = useDocDomain();
   const { data: config } = useSWR<FrigateConfig>("config");
   const navigate = useNavigate();
+  const isAdmin = useIsAdmin();
+
+  const [isValidating, setIsValidating] = useState(false);
+  const [keyStatus, setKeyStatus] = useState<PlusKeyStatus>();
+
+  const validateKey = useCallback(async () => {
+    setIsValidating(true);
+
+    try {
+      const response = await axios.post<PlusValidateResponse>("plus/validate");
+      setKeyStatus(response.data.status);
+    } catch {
+      setKeyStatus("unreachable");
+    } finally {
+      setIsValidating(false);
+    }
+  }, []);
 
   useEffect(() => {
     document.title = t("documentTitle.frigatePlus");
@@ -68,17 +91,55 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
                 </>
               }
               content={
-                <div className="flex items-center gap-2">
-                  {config?.plus?.enabled ? (
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <XCircle className="h-5 w-5 text-red-500" />
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2">
+                    {config?.plus?.enabled ? (
+                      <CheckCircle2 className="size-5 shrink-0 text-green-500" />
+                    ) : (
+                      <XCircle className="size-5 shrink-0 text-red-500" />
+                    )}
+                    <span className="text-sm">
+                      {config?.plus?.enabled
+                        ? t("frigatePlus.apiKey.formatValid")
+                        : t("frigatePlus.apiKey.formatInvalid")}
+                    </span>
+                  </div>
+                  {config?.plus?.enabled && isAdmin && (
+                    <div className="flex flex-col items-start gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={isValidating}
+                        onClick={validateKey}
+                        aria-label={t("frigatePlus.apiKey.validate")}
+                      >
+                        {isValidating && (
+                          <ActivityIndicator className="mr-2" size={16} />
+                        )}
+                        {isValidating
+                          ? t("frigatePlus.apiKey.validating")
+                          : t("frigatePlus.apiKey.validate")}
+                      </Button>
+                      {keyStatus && !isValidating && (
+                        <div className="flex items-center gap-2">
+                          {keyStatus === "valid" ? (
+                            <CheckCircle2 className="size-5 shrink-0 text-green-500" />
+                          ) : keyStatus === "unreachable" ? (
+                            <AlertTriangle className="size-5 shrink-0 text-yellow-500" />
+                          ) : (
+                            <XCircle className="size-5 shrink-0 text-red-500" />
+                          )}
+                          <span className="text-sm">
+                            {keyStatus === "valid"
+                              ? t("frigatePlus.apiKey.serverValid")
+                              : keyStatus === "unreachable"
+                                ? t("frigatePlus.apiKey.serverUnreachable")
+                                : t("frigatePlus.apiKey.serverInvalid")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   )}
-                  <span className="text-sm">
-                    {config?.plus?.enabled
-                      ? t("frigatePlus.apiKey.validated")
-                      : t("frigatePlus.apiKey.notValidated")}
-                  </span>
                 </div>
               }
             />
