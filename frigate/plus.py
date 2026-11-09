@@ -5,8 +5,9 @@ import os
 import re
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeGuard
 
+import aiohttp
 import cv2
 import requests
 from numpy import ndarray
@@ -82,6 +83,19 @@ def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
     ret, jpg = cv2.imencode(".jpg", original, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
     jpg_bytes = jpg.tobytes()
     return jpg_bytes if isinstance(jpg_bytes, bytes) else b""
+
+
+def _is_usable_token(token_data: Any) -> TypeGuard[dict[str, Any]]:
+    """Whether a Frigate+ token response has a usable token and expiry."""
+    if not isinstance(token_data, dict):
+        return False
+
+    expires = token_data.get("expires")
+    return (
+        isinstance(token_data.get("accessToken"), str)
+        and isinstance(expires, (int, float))
+        and not isinstance(expires, bool)
+    )
 
 
 class PlusApi:
@@ -165,7 +179,7 @@ class PlusApi:
     def is_active(self) -> bool:
         return self._is_active
 
-    def validate_key(self) -> PlusKeyStatus:
+    async def validate_key(self) -> PlusKeyStatus:
         """Check the configured API key against the Frigate+ server.
 
         The key format is checked at startup, but only the server can tell
@@ -180,33 +194,41 @@ class PlusApi:
 
         key_id, _, secret = self.key.partition(":")
 
-        # Use a plain request with a timeout instead of the retrying session,
+        # Use a single request with a timeout instead of the retrying session,
         # since this is user initiated and should fail fast when unreachable
         try:
-            r = requests.get(
-                f"{self.host}/v1/auth/token",
-                auth=(key_id, secret),
-                timeout=PLUS_VALIDATE_TIMEOUT,
-            )
-        except requests.RequestException as err:
+            async with aiohttp.ClientSession(
+                timeout=aiohttp.ClientTimeout(total=PLUS_VALIDATE_TIMEOUT)
+            ) as session:
+                async with session.get(
+                    f"{self.host}/v1/auth/token",
+                    auth=aiohttp.BasicAuth(key_id, secret),
+                ) as r:
+                    status = r.status
+                    token_data = await r.json(content_type=None) if r.ok else None
+        except (aiohttp.ClientError, TimeoutError) as err:
             logger.warning("Unable to reach Frigate+ to validate API key: %s", err)
             return PlusKeyStatus.unreachable
-
-        if r.status_code in (401, 403):
-            return PlusKeyStatus.invalid
-
-        if not r.ok:
-            logger.warning(
-                "Unexpected response validating Frigate+ API key: %s", r.status_code
-            )
-            return PlusKeyStatus.unreachable
-
-        try:
-            self._token_data = r.json()
         except ValueError:
             logger.warning("Invalid response validating Frigate+ API key")
             return PlusKeyStatus.unreachable
 
+        if status in (401, 403):
+            return PlusKeyStatus.invalid
+
+        if status >= 400:
+            logger.warning(
+                "Unexpected response validating Frigate+ API key: %s", status
+            )
+            return PlusKeyStatus.unreachable
+
+        # Keep the cached token unless the reply is a usable one, so an
+        # unexpected response can't break later Frigate+ requests
+        if not _is_usable_token(token_data):
+            logger.warning("Invalid response validating Frigate+ API key")
+            return PlusKeyStatus.unreachable
+
+        self._token_data = token_data
         return PlusKeyStatus.valid
 
     def upload_image(self, image: ndarray, camera: str) -> str:
