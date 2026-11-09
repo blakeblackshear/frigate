@@ -54,7 +54,7 @@ from frigate.jobs.media_sync import (
     start_media_sync_job,
 )
 from frigate.models import Event, Timeline
-from frigate.plus import load_plus_model_info
+from frigate.plus import PlusKeyStatus, load_plus_model_info
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
@@ -1673,6 +1673,16 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
         validModels.append(model)
 
     return JSONResponse(content=validModels)
+
+
+@router.post("/plus/validate", dependencies=[Depends(require_role(["admin"]))])
+def validate_plus_key(request: Request):
+    """Validate the configured Frigate+ API key with the Frigate+ server."""
+    status = request.app.frigate_config.plus_api.validate_key()
+
+    return JSONResponse(
+        content={"success": status == PlusKeyStatus.valid, "status": status.value}
+    )
 
 
 @router.get(

@@ -3148,6 +3148,25 @@ paths:
         - frigateUserAuth: []
       x-required-role: any
       description: '**Access:** Any authenticated user.'
+  /plus/validate:
+    post:
+      tags:
+        - App
+      summary: Validate Plus Key
+      description: |-
+        **Access:** Admin role required.
+
+        Validate the configured Frigate+ API key with the Frigate+ server.
+      operationId: validate_plus_key_plus_validate_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      security:
+        - frigateAdminAuth: []
+      x-required-role: admin
   /recognized_license_plates:
     get:
       tags:

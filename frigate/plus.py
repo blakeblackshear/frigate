@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import re
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,17 @@ from urllib3.util.retry import Retry
 from frigate.const import MODEL_CACHE_DIR, PLUS_API_HOST, PLUS_ENV_VAR
 
 logger = logging.getLogger(__name__)
+
+PLUS_VALIDATE_TIMEOUT = 10
+
+
+class PlusKeyStatus(str, Enum):
+    """Result of validating a Frigate+ API key with the server."""
+
+    valid = "valid"
+    invalid = "invalid"
+    unreachable = "unreachable"
+    not_set = "not_set"
 
 
 def add_hailo_alias(model_info: dict[str, Any]) -> dict[str, Any]:
@@ -152,6 +164,50 @@ class PlusApi:
 
     def is_active(self) -> bool:
         return self._is_active
+
+    def validate_key(self) -> PlusKeyStatus:
+        """Check the configured API key against the Frigate+ server.
+
+        The key format is checked at startup, but only the server can tell
+        whether the key is actually valid. This requests a fresh token so the
+        result reflects the key's current state rather than a cached token.
+
+        Returns:
+            The key's status as reported by the Frigate+ server
+        """
+        if self.key is None:
+            return PlusKeyStatus.not_set
+
+        key_id, _, secret = self.key.partition(":")
+
+        # Use a plain request with a timeout instead of the retrying session,
+        # since this is user initiated and should fail fast when unreachable
+        try:
+            r = requests.get(
+                f"{self.host}/v1/auth/token",
+                auth=(key_id, secret),
+                timeout=PLUS_VALIDATE_TIMEOUT,
+            )
+        except requests.RequestException as err:
+            logger.warning("Unable to reach Frigate+ to validate API key: %s", err)
+            return PlusKeyStatus.unreachable
+
+        if r.status_code in (401, 403):
+            return PlusKeyStatus.invalid
+
+        if not r.ok:
+            logger.warning(
+                "Unexpected response validating Frigate+ API key: %s", r.status_code
+            )
+            return PlusKeyStatus.unreachable
+
+        try:
+            self._token_data = r.json()
+        except ValueError:
+            logger.warning("Invalid response validating Frigate+ API key")
+            return PlusKeyStatus.unreachable
+
+        return PlusKeyStatus.valid
 
     def upload_image(self, image: ndarray, camera: str) -> str:
         r = self._get("image/signed_urls")

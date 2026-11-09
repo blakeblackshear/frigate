@@ -1285,8 +1285,13 @@
     },
     "apiKey": {
       "title": "Frigate+ API Key",
-      "validated": "Frigate+ API key is detected and validated",
-      "notValidated": "Frigate+ API key is not detected or not validated",
+      "formatValid": "Frigate+ API key is detected and matches the expected format",
+      "formatInvalid": "Frigate+ API key is not detected or does not match the expected format",
+      "validate": "Validate with Frigate+",
+      "validating": "Validating…",
+      "serverValid": "Frigate+ accepted this API key",
+      "serverInvalid": "Frigate+ rejected this API key",
+      "serverUnreachable": "Unable to reach Frigate+ to validate this API key",
       "desc": "The Frigate+ API key enables integration with the Frigate+ service.",
       "plusLink": "Read more about Frigate+"
     },
