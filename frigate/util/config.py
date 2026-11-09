@@ -1,6 +1,8 @@
 """configuration utils."""
 
 import asyncio
+import contextlib
+import errno
 import ipaddress
 import logging
 import os
@@ -212,6 +214,28 @@ def find_config_file() -> str:
     return config_path
 
 
+def _write_config(config_file: str, yaml: YAML, config: dict[str, Any]) -> None:
+    config_file = os.path.realpath(config_file)
+    st = os.stat(config_file)
+    tmp_file = f"{config_file}.tmp"
+    with open(tmp_file, "w") as f:
+        yaml.dump(config, f)
+    os.chmod(tmp_file, st.st_mode)
+
+    with contextlib.suppress(PermissionError):
+        os.chown(tmp_file, st.st_uid, st.st_gid)
+
+    try:
+        os.replace(tmp_file, config_file)
+    except OSError as e:
+        if e.errno != errno.EBUSY:
+            raise
+
+        # a file bind mount can't be renamed over, so write it in place
+        shutil.copyfile(tmp_file, config_file)
+        os.remove(tmp_file)
+
+
 def migrate_frigate_config(config_file: str):
     """handle migrating the frigate config."""
     logger.info("Checking if frigate config needs migration...")
@@ -259,8 +283,7 @@ def migrate_frigate_config(config_file: str):
     if previous_version < "0.14":
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
         new_config = migrate_014(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.14"
 
         logger.info("Migrating export file names...")
@@ -277,56 +300,48 @@ def migrate_frigate_config(config_file: str):
     if previous_version < "0.15-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-0...")
         new_config = migrate_015_0(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.15-0"
 
     if previous_version < "0.15-1":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-1...")
         new_config = migrate_015_1(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.15-1"
 
     if previous_version < "0.16-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.16-0...")
         new_config = migrate_016_0(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.16-0"
 
     if previous_version < "0.17-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.17-0...")
         new_config = migrate_017_0(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.17-0"
 
     if previous_version < "0.18-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.18-0...")
         new_config = migrate_018_0(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.18-0"
 
     if previous_version < "0.19-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.19-0...")
         new_config = migrate_019_0(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.19-0"
 
     if needs_models:
         logger.info("Migrating frigate detectors and model to models...")
         new_config = migrate_models(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
 
     if needs_detector_rename:
         logger.info("Migrating renamed frigate detectors...")
         new_config = rename_hailo_detector(new_config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        _write_config(config_file, yaml, new_config)
 
     logger.info("Finished frigate config migration...")
 
