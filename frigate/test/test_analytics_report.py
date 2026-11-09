@@ -25,6 +25,8 @@ INSTALL = InstallSection(
     arch="x86_64",
     kernel="6.8",
     run_as_root=False,
+    custom_go2rtc=False,
+    ffmpeg="default",
 )
 
 

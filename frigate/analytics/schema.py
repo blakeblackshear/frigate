@@ -47,6 +47,12 @@ class Arch(StrEnum):
     other = "other"
 
 
+class FfmpegSource(StrEnum):
+    default = "default"
+    bundled = "bundled"
+    custom = "custom"
+
+
 class GpuVendor(StrEnum):
     intel = "intel"
     amd = "amd"
@@ -201,6 +207,10 @@ class InstallSection(AnalyticsModel):
         "Host kernel as major.minor", pattern=r"^(\d{1,3}\.\d{1,3}|unknown)$"
     )
     run_as_root: bool = metric("Whether the main process runs as root")
+    custom_go2rtc: bool = metric("Whether an executable /config/go2rtc build exists")
+    ffmpeg: FfmpegSource = metric(
+        "Configured global ffmpeg.path: the default build, another bundled version, or a custom path"
+    )
 
 
 class GpuInfo(AnalyticsModel):

@@ -6,7 +6,15 @@ import re
 
 from frigate.analytics.collectors.common import closed
 from frigate.analytics.context import ReportContext
-from frigate.analytics.schema import Arch, ImageVariant, InstallSection, InstallType
+from frigate.analytics.schema import (
+    Arch,
+    FfmpegSource,
+    ImageVariant,
+    InstallSection,
+    InstallType,
+)
+from frigate.const import CONFIG_DIR, DEFAULT_FFMPEG_VERSION, INCLUDED_FFMPEG_VERSIONS
+from frigate.util.config import is_valid_ffmpeg_path
 from frigate.version import VERSION
 
 KERNEL_PATTERN = re.compile(r"^(\d{1,3})\.(\d{1,3})")
@@ -54,6 +62,17 @@ def kernel(release: str) -> str:
     return f"{match.group(1)}.{match.group(2)}" if match else "unknown"
 
 
+def ffmpeg_source(path: str) -> FfmpegSource:
+    """Classify the configured ffmpeg.path, applying resolve_ffmpeg_path's alias fallbacks."""
+    if path.startswith("/") and is_valid_ffmpeg_path(path):
+        return FfmpegSource.custom
+
+    if path != DEFAULT_FFMPEG_VERSION and path in INCLUDED_FFMPEG_VERSIONS:
+        return FfmpegSource.bundled
+
+    return FfmpegSource.default
+
+
 def collect(ctx: ReportContext) -> InstallSection:
     """Describe the Frigate version, image, install method, and platform."""
     return InstallSection(
@@ -63,4 +82,6 @@ def collect(ctx: ReportContext) -> InstallSection:
         arch=arch(platform.machine()),
         kernel=kernel(platform.release()),
         run_as_root=os.geteuid() == 0,
+        custom_go2rtc=os.access(os.path.join(CONFIG_DIR, "go2rtc"), os.X_OK),
+        ffmpeg=ffmpeg_source(ctx.config.ffmpeg.path),
     )

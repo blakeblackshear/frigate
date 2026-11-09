@@ -683,6 +683,15 @@
       "title": "FeaturesSection",
       "type": "object"
     },
+    "FfmpegSource": {
+      "enum": [
+        "default",
+        "bundled",
+        "custom"
+      ],
+      "title": "FfmpegSource",
+      "type": "string"
+    },
     "FpsBucket": {
       "enum": [
         "le_5",
@@ -1017,6 +1026,17 @@
           "description": "CPU architecture",
           "x-public": true
         },
+        "custom_go2rtc": {
+          "description": "Whether an executable /config/go2rtc build exists",
+          "title": "Custom Go2Rtc",
+          "type": "boolean",
+          "x-public": true
+        },
+        "ffmpeg": {
+          "$ref": "#/$defs/FfmpegSource",
+          "description": "Configured global ffmpeg.path: the default build, another bundled version, or a custom path",
+          "x-public": true
+        },
         "image_variant": {
           "$ref": "#/$defs/ImageVariant",
           "description": "Published image the install runs",
@@ -1054,7 +1074,9 @@
         "install_type",
         "arch",
         "kernel",
-        "run_as_root"
+        "run_as_root",
+        "custom_go2rtc",
+        "ffmpeg"
       ],
       "title": "InstallSection",
       "type": "object"
