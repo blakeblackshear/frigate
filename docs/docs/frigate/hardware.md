@@ -9,7 +9,7 @@ import CommunityBadge from '@site/src/components/CommunityBadge';
 
 Cameras that output H.264 video and AAC audio will offer the most compatibility with all features of Frigate and Home Assistant. It is also helpful if your camera supports multiple substreams to allow different resolutions to be used for detection, streaming, and recordings without re-encoding.
 
-I recommend Dahua, Hikvision, and Amcrest in that order. Dahua edges out Hikvision because they are easier to find and order, not because they are better cameras. I personally use Dahua cameras because they are easier to purchase directly. In my experience Dahua and Hikvision both have multiple streams with configurable resolutions and frame rates and rock solid streams. They also both have models with large sensors well known for excellent image quality at night. Not all the models are equal. Larger sensors are better than higher resolutions; especially at night. Amcrest is the fallback recommendation because they are rebranded Dahuas. They are rebranding the lower end models with smaller sensors or less configuration options.
+I recommend Dahua and Hikvision. Dahua edges out Hikvision because they are easier to find and order, not because they are better cameras. I personally use Dahua cameras because they are easier to purchase directly. In my experience Dahua and Hikvision both have multiple streams with configurable resolutions and frame rates and rock solid streams. They also both have models with large sensors well known for excellent image quality at night. Not all the models are equal. Larger sensors are better than higher resolutions; especially at night.
 
 WiFi cameras are not recommended as [their streams are less reliable and cause connection loss and/or lost video data](https://ipcamtalk.com/threads/camera-conflicts.68142/#post-738821), especially when more than a few WiFi cameras will be used at the same time.
 
@@ -17,10 +17,9 @@ Many users have reported various issues with 4K-plus Reolink cameras, it is best
 
 Here are some of the cameras I recommend:
 
-- <a href="https://amzn.to/4fwoNWA" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T549M-ALED-S3</a> (affiliate link)
-- <a href="https://amzn.to/3YXpcMw" target="_blank" rel="nofollow noopener sponsored">Loryta(Dahua) IPC-T54IR-AS</a> (affiliate link)
-- <a href="https://amzn.to/3AvBHoY" target="_blank" rel="nofollow noopener sponsored">Amcrest IP5M-T1179EW-AI-V3</a> (affiliate link)
-- <a href="https://www.bhphotovideo.com/c/product/1705511-REG/hikvision_colorvu_ds_2cd2387g2p_lsu_sl_8mp_network.html" target="_blank" rel="nofollow noopener">HIKVISION DS-2CD2387G2P-LSU/SL ColorVu 8MP Panoramic Turret IP Camera</a> (affiliate link)
+- <a href="https://link.amazon/B0hnw1JEZ" target="_blank" rel="nofollow noopener sponsored">GemaVision(Dahua) IPC-T549M-ALED-S3</a> (affiliate link)
+- <a href="https://link.amazon/B06naLGqL" target="_blank" rel="nofollow noopener sponsored">GemaVision(Dahua) IPC-T54IR-AS</a> (affiliate link)
+- <a href="https://link.amazon/B0iD97zC7" target="_blank" rel="nofollow noopener sponsored">HIKVISION DS-2CD2387G2P-LSU/SL ColorVu 8MP Panoramic Turret IP Camera</a> (affiliate link)
 
 I may earn a small commission for my endorsement, recommendation, testimonial, or link to any products or services from this website.
 
