@@ -318,7 +318,6 @@ def post_process_yolox(
 def get_ort_providers(
     force_cpu: bool = False,
     device: str | None = "AUTO",
-    requires_fp16: bool = False,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
         return (
@@ -357,8 +356,8 @@ def get_ort_providers(
                 options.append(
                     {
                         "device_id": device_id,
-                        "trt_fp16_enable": requires_fp16
-                        and os.environ.get("USE_FP16", "True") != "False",
+                        "trt_fp16_enable": os.environ.get("USE_FP16", "False").lower()
+                        == "true",
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
                         "trt_timing_cache_path": os.path.join(
