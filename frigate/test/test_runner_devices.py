@@ -141,6 +141,54 @@ class TestLoadRegistry(unittest.TestCase):
 
                 self.assertEqual(spinning, expected)
 
+    def test_only_gpu_sessions_enable_cuda_blocking_sync(self):
+        for provider, model_type, expected in [
+            ("CUDAExecutionProvider", "yolo-generic", True),
+            ("CUDAExecutionProvider", "paddleocr", True),
+            ("TensorrtExecutionProvider", "yolo-generic", True),
+            ("CPUExecutionProvider", "yolo-generic", False),
+        ]:
+            with (
+                self.subTest(provider=provider, model_type=model_type),
+                patch.object(
+                    detection_runners, "is_rknn_compatible", return_value=False
+                ),
+                patch.object(
+                    detection_runners, "get_lighter_ane_devices", return_value=[]
+                ),
+                patch.object(
+                    detection_runners, "get_migraphx_devices", return_value=[]
+                ),
+                patch.object(
+                    detection_runners,
+                    "get_ort_providers",
+                    return_value=([provider], [{"device_id": 1}]),
+                ),
+                patch.object(
+                    detection_runners,
+                    "is_openvino_gpu_npu_available",
+                    return_value=False,
+                ),
+                patch.object(detection_runners.ort, "InferenceSession") as session,
+                patch.object(
+                    detection_runners, "enable_cuda_blocking_sync"
+                ) as blocking_sync,
+            ):
+                session.return_value.get_providers.return_value = [provider]
+                manager = MagicMock()
+                manager.attach_mock(blocking_sync, "blocking_sync")
+                manager.attach_mock(session, "session")
+
+                get_optimized_runner(f"/models/{model_type}.onnx", "GPU", model_type)
+
+                if expected:
+                    blocking_sync.assert_called_once_with(1)
+                    # the primary context flags only apply if set before the
+                    # session creates the context
+                    self.assertEqual(manager.mock_calls[0][0], "blocking_sync")
+                else:
+                    blocking_sync.assert_not_called()
+
 
 class TestLoadedDeviceSnapshot(unittest.TestCase):
     def setUp(self):
