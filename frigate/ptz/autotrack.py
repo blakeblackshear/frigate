@@ -585,7 +585,7 @@ class PtzAutoTracker(threading.Thread):
 
     def _predict_movement_time(self, camera, pan, tilt):
         combined_movement = abs(pan) + abs(tilt)
-        input_data = np.array([self.intercept[camera], combined_movement])
+        input_data = np.array([1, combined_movement])
 
         return np.dot(self.move_coefficients[camera], input_data)
 
@@ -744,6 +744,8 @@ class PtzAutoTracker(threading.Thread):
                     continue
 
                 else:
+                    pan_tilt_times = None
+
                     if (
                         camera_config.onvif.autotracking.zooming
                         == ZoomingModeEnum.relative
@@ -755,17 +757,28 @@ class PtzAutoTracker(threading.Thread):
 
                             await self._wait_until_stopped(camera, metrics)
 
+                            # _zoom_absolute resets the metrics timestamps
+                            pan_tilt_times = (
+                                metrics.start_time.value,
+                                metrics.stop_time.value,
+                            )
+
                         if zoom > 0 and metrics.zoom_level.value != zoom:
                             await self.onvif._zoom_absolute(camera, zoom, 1)
 
                     await self._wait_until_stopped(camera, metrics)
+
+                    start_time, stop_time = pan_tilt_times or (
+                        metrics.start_time.value,
+                        metrics.stop_time.value,
+                    )
 
                     if camera_config.onvif.autotracking.movement_weights:
                         logger.debug(
                             f"{camera}: Predicted movement time: {self._predict_movement_time(camera, pan, tilt)}"
                         )
                         logger.debug(
-                            f"{camera}: Actual movement time: {metrics.stop_time.value - metrics.start_time.value}"
+                            f"{camera}: Actual movement time: {stop_time - start_time}"
                         )
 
                     # save metrics for better estimate calculations
@@ -781,8 +794,8 @@ class PtzAutoTracker(threading.Thread):
                             {
                                 "pan": pan,
                                 "tilt": tilt,
-                                "start_timestamp": metrics.start_time.value,
-                                "end_timestamp": metrics.stop_time.value,
+                                "start_timestamp": start_time,
+                                "end_timestamp": stop_time,
                             }
                         )
 
