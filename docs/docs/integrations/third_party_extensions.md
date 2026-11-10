@@ -70,3 +70,7 @@ This is a fork (with fixed errors and new features) of [original Double Take](ht
 ## [Strix](https://github.com/eduard256/Strix)
 
 [Strix](https://github.com/eduard256/Strix) auto-discovers working stream URLs for IP cameras and generates ready-to-use Frigate configs. It tests thousands of URL patterns against your camera and supports cameras without RTSP or ONVIF. 67K+ camera models from 3.6K+ brands.
+
+## [yuFriEye](https://apps.apple.com/app/id6832456692)
+
+[yuFriEye](https://apps.apple.com/app/id6832456692) is a free native iOS, iPadOS and macOS client for Frigate. It shows the live camera grid with low-latency go2rtc streams, alerts and detections with clip playback and motion boxes, recordings by day with continuous playback, Frigate and go2rtc logs, and supports multiple servers with local and remote addresses. Works with or without Frigate authentication; no account or data collection.
