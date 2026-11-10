@@ -609,7 +609,7 @@ class PtzAutoTracker(threading.Thread):
         predicted_size = max(
             right - left + frames * (velocity[2] - velocity[0]),
             bottom - top + frames * (velocity[3] - velocity[1]),
-            0,
+            1,
         )
 
         # target_box is the squared size raised to the zoom factor
