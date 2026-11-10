@@ -14,6 +14,8 @@ KeyError on the autotracker thread or silently keep the wrong state:
 import unittest
 from unittest.mock import MagicMock
 
+import numpy as np
+
 from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdateEnum
@@ -121,6 +123,51 @@ class TestAutotrackerDisable(unittest.TestCase):
         self.assertEqual(topic.update_type, CameraConfigUpdateEnum.autotracking)
         self.assertEqual(topic.camera, CAMERA)
         self.assertIs(payload, autotracking)
+
+
+class TestAutotrackerPrediction(unittest.TestCase):
+    def test_approaching_object_keeps_its_velocity(self) -> None:
+        # the box grows, so the corners move in opposite directions
+        tracker = _make_tracker()
+        obj = MagicMock()
+        obj.obj_data = {"estimate_velocity": np.array([[-3.0, -4.0], [3.0, 1.0]])}
+
+        valid, velocity = tracker._get_valid_velocity(CAMERA, obj)
+
+        self.assertTrue(valid)
+        self.assertEqual(list(velocity), [-3, -4, 3, 1])
+
+    def test_corners_that_disagree_too_much_are_rejected(self) -> None:
+        tracker = _make_tracker()
+        obj = MagicMock()
+        obj.obj_data = {"estimate_velocity": np.array([[-15.0, 0.0], [15.0, 0.0]])}
+
+        valid, velocity = tracker._get_valid_velocity(CAMERA, obj)
+
+        self.assertFalse(valid)
+        self.assertFalse(np.any(velocity))
+
+    def _target_box(self, velocity: list[float], predicted_time: float) -> float:
+        tracker = _make_tracker()
+        tracker.tracked_object_history = {CAMERA: [{"box": (900, 400, 1000, 600)}]}
+        tracker.tracked_object_metrics = {
+            CAMERA: {"target_box": 0.2, "velocity": np.array(velocity)}
+        }
+
+        return tracker._predict_target_box(CAMERA, predicted_time)
+
+    def test_target_box_grows_with_an_approaching_object(self) -> None:
+        # the 200px height gains 4px per frame at 5 fps for 1 second
+        zoom_factor = 0.3
+
+        self.assertAlmostEqual(
+            self._target_box([-1, -2, 1, 2], 1.0),
+            0.2 * (220 / 200) ** (2 * zoom_factor),
+        )
+
+    def test_target_box_is_unchanged_without_growth_or_time(self) -> None:
+        self.assertAlmostEqual(self._target_box([5, 0, 5, 0], 1.0), 0.2)
+        self.assertEqual(self._target_box([-1, -2, 1, 2], 0), 0.2)
 
 
 class TestMaxTargetBox(unittest.TestCase):

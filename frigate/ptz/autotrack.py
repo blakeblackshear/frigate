@@ -589,22 +589,32 @@ class PtzAutoTracker(threading.Thread):
 
         return np.dot(self.move_coefficients[camera], input_data)
 
-    def _predict_area_after_time(self, camera, time):
-        return np.dot(
-            self.tracked_object_metrics[camera]["area_coefficients"],
-            [self.tracked_object_history[camera][-1]["frame_time"] + time],
-        )
-
     def _predict_target_box(self, camera, predicted_time):
-        target_box = self.tracked_object_metrics[camera]["target_box"]
+        tom = self.tracked_object_metrics[camera]
+        target_box = tom["target_box"]
 
         if not predicted_time:
             return target_box
 
-        frame_shape = self.config.cameras[camera].frame_shape
+        camera_config = self.config.cameras[camera]
+        left, top, right, bottom = self.tracked_object_history[camera][-1]["box"]
+        size = max(right - left, bottom - top)
 
-        return target_box + self._predict_area_after_time(camera, predicted_time) / (
-            frame_shape[0] * frame_shape[1]
+        if size <= 0:
+            return target_box
+
+        # the corner velocities diverge as the object approaches the camera
+        frames = camera_config.detect.fps * predicted_time
+        velocity = tom["velocity"]
+        predicted_size = max(
+            right - left + frames * (velocity[2] - velocity[0]),
+            bottom - top + frames * (velocity[3] - velocity[1]),
+            0,
+        )
+
+        # target_box is the squared size raised to the zoom factor
+        return target_box * (predicted_size / size) ** (
+            2 * camera_config.onvif.autotracking.zoom_factor
         )
 
     def _calculate_tracked_object_metrics(self, camera, obj):
@@ -659,26 +669,6 @@ class PtzAutoTracker(threading.Thread):
         ]
 
         filtered_areas = remove_outliers(areas) if len(areas) > 3 else areas
-
-        # Filter entries that are not touching the frame edge
-        filtered_areas_not_touching_edge = [
-            entry
-            for entry in filtered_areas
-            if self._touching_frame_edges(camera, entry["box"]) == 0
-        ]
-
-        # Calculate regression for area change predictions
-        if len(filtered_areas_not_touching_edge):
-            X = np.array(
-                [item["frame_time"] for item in filtered_areas_not_touching_edge]
-            )
-            y = np.array([item["area"] for item in filtered_areas_not_touching_edge])
-
-            tom["area_coefficients"] = np.linalg.lstsq(X.reshape(-1, 1), y, rcond=None)[
-                0
-            ]
-        else:
-            tom["area_coefficients"] = np.array([0])
 
         weights = np.arange(1, len(filtered_areas) + 1)
         weighted_area = np.average(
@@ -858,7 +848,6 @@ class PtzAutoTracker(threading.Thread):
         # Thresholds
         x_mags_thresh = camera_width / camera_fps / 2
         y_mags_thresh = camera_height / camera_fps / 2
-        dir_thresh = 0.93
         delta_thresh = 20
         var_thresh = 10
 
@@ -876,24 +865,12 @@ class PtzAutoTracker(threading.Thread):
         stdev_list = np.std(velocities, axis=0)
         high_variances = np.any(stdev_list > var_thresh)
 
-        # Check direction difference
+        # the corners of an object moving toward or away from the camera move
+        # in different directions, so the delta bounds how far they may differ
         velocities = np.round(velocities)
-        invalid_dirs = False
-        if np.all(np.linalg.norm(velocities, axis=1)):
-            cosine_sim = np.dot(velocities[0], velocities[1]) / (
-                np.linalg.norm(velocities[0]) * np.linalg.norm(velocities[1])
-            )
-            dir_thresh = 0.6 if np.all(delta < delta_thresh / 2) else dir_thresh
-            invalid_dirs = cosine_sim < dir_thresh
 
         # Combine
-        invalid = (
-            invalid_x_mags
-            or invalid_y_mags
-            or invalid_dirs
-            or invalid_delta
-            or high_variances
-        )
+        invalid = invalid_x_mags or invalid_y_mags or invalid_delta or high_variances
 
         if invalid:
             logger.debug(
@@ -904,7 +881,6 @@ class PtzAutoTracker(threading.Thread):
                         for var_name, is_invalid in [
                             ("invalid_x_mags", invalid_x_mags),
                             ("invalid_y_mags", invalid_y_mags),
-                            ("invalid_dirs", invalid_dirs),
                             ("invalid_delta", invalid_delta),
                             ("high_variances", high_variances),
                         ]
