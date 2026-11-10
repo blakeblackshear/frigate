@@ -252,8 +252,12 @@ class TensorRtDetector(DetectionApi):
         assert detector_config.device < dev_count, (
             f"Invalid TensorRT Device Config. Device {detector_config.device} Invalid."
         )
+        # blocking sync sleeps the thread in cuStreamSynchronize rather than
+        # spinning a CPU core for the whole inference
         err, self.cu_ctx = cuda.cuCtxCreate(
-            cuda.CUctx_flags.CU_CTX_MAP_HOST, detector_config.device
+            cuda.CUctx_flags.CU_CTX_MAP_HOST
+            | cuda.CUctx_flags.CU_CTX_SCHED_BLOCKING_SYNC,
+            detector_config.device,
         )
 
         self.conf_th = 0.4  ##TODO: model config parameter
