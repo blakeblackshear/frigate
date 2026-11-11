@@ -105,6 +105,8 @@ if [[ -n "$sentinel" ]]; then
     mismatch_expr+=(-a ! -path "$sentinel")
 fi
 
+exec 3>&1
+
 for path in "$@"; do
     # An absent root is an incomplete sweep, not a finished one: /media/frigate
     # is not in the image, so a boot before the volume is mounted would
@@ -121,7 +123,18 @@ for path in "$@"; do
     # stale mount. Tolerate it rather than aborting under errexit, but never
     # read a failed scan as "nothing to do": that would record the sweep as
     # complete without having looked.
-    if ! count=$(find "$path" -name lost+found -prune -o "${mismatch_expr[@]}" -printf '.' 2>/dev/null | wc -c); then
+    # The walk prints nothing until it ends, so report every 30s through fd 3
+    # (stdout) while the count itself comes back through the substitution.
+    if ! count=$(find "$path" -name lost+found -prune -o "(" "${mismatch_expr[@]}" ")" -printf 'm\n' -o -printf '.\n' 2>/dev/null \
+        | awk -v path="$path" '
+            BEGIN { next_report = systime() + 30 }
+            $0 == "m" { mismatched++ }
+            NR % 1000 == 0 && systime() >= next_report {
+                printf "[INFO] fix-ownership: still scanning %s, %d entries checked, %d need changes\n", path, NR, mismatched > "/dev/fd/3"
+                fflush("/dev/fd/3")
+                next_report = systime() + 30
+            }
+            END { print mismatched + 0 }'); then
         swept_clean=0
         echo "[WARN] fix-ownership: could not scan ${path}; will retry on next boot"
         continue

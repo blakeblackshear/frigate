@@ -71,13 +71,14 @@ Both the script and the boot sweep report progress, so you can tell a slow sweep
 
 ```
 [INFO] fix-ownership: scanning /media/frigate for ownership mismatches; this may take a while on large filesystems
+[INFO] fix-ownership: still scanning /media/frigate, 2481000 entries checked, 2390112 need changes
 [WARN] fix-ownership: adjusting ownership of 4823941 entries under /media/frigate
 [INFO] fix-ownership: /media/frigate 5% (241197/4823941 entries)
 [INFO] fix-ownership: /media/frigate 10% (482394/4823941 entries)
 [INFO] fix-ownership: finished /media/frigate in 12m 4s
 ```
 
-The scan has no percentage because the total isn't known until it finishes. Watch the boot sweep with `docker logs -f frigate`.
+The scan has no percentage because the total isn't known until it finishes, so it reports a running count every 30 seconds instead. Watch the boot sweep with `docker logs -f frigate`.
 
 Once the volumes are aligned, start Frigate normally. A file at `/config/.permissions_version` records what was done, so later boots skip the sweep unless you change `PUID`/`PGID`.
 
