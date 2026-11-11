@@ -129,7 +129,7 @@ for path in "$@"; do
         | awk -v path="$path" '
             BEGIN { next_report = systime() + 30 }
             $0 == "m" { mismatched++ }
-            NR % 1000 == 0 && systime() >= next_report {
+            systime() >= next_report {
                 printf "[INFO] fix-ownership: still scanning %s, %d entries checked, %d need changes\n", path, NR, mismatched > "/dev/fd/3"
                 fflush("/dev/fd/3")
                 next_report = systime() + 30
