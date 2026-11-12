@@ -734,8 +734,6 @@
     "title": "Frigate+ 設定",
     "apiKey": {
       "title": "Frigate+ API キー",
-      "validated": "Frigate+ API キーが検出され、検証されました",
-      "notValidated": "Frigate+ API キーが検出されないか、検証されていません",
       "desc": "Frigate+ API キーは Frigate+ サービスとの統合を有効にします。",
       "plusLink": "Frigate+ の詳細を読む"
     },
