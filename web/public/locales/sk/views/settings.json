@@ -883,8 +883,6 @@
     "title": "Nastavenie Frigate+",
     "apiKey": {
       "title": "Frigate + API kľúč",
-      "validated": "Frigate + API kľúč je detekovaný a overený",
-      "notValidated": "Frigate + API kľúč nie je detekovaný alebo nie je overený",
       "desc": "Frigate+ API kľúč umožňuje integráciu s Frigate+ služby.",
       "plusLink": "Prečítajte si viac o Frigate+"
     },
