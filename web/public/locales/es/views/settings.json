@@ -621,10 +621,8 @@
     "title": "Configuración de Frigate+",
     "apiKey": {
       "title": "Clave API de Frigate+",
-      "notValidated": "La clave API de Frigate+ no ha sido detectada o no ha sido validada",
       "plusLink": "Lee más sobre Frigate+",
-      "desc": "La clave API de Frigate+ permite la integración con el servicio Frigate+.",
-      "validated": "La clave API de Frigate+ ha sido detectada y validada"
+      "desc": "La clave API de Frigate+ permite la integración con el servicio Frigate+."
     },
     "snapshotConfig": {
       "title": "Configuración de instantáneas",
