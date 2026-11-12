@@ -20,7 +20,13 @@ from frigate.models import User
 
 
 class TestMqttSafeMode(unittest.TestCase):
-    def test_invalid_mqtt_recovers_with_authentication_available(self) -> None:
+    def test_tls_insecure_true_recovers_with_authentication_available(self) -> None:
+        self.assert_recovers_with_authentication(True)
+
+    def test_tls_insecure_false_recovers_with_authentication_available(self) -> None:
+        self.assert_recovers_with_authentication(False)
+
+    def assert_recovers_with_authentication(self, insecure: bool) -> None:
         thread = threading.current_thread()
         self.addCleanup(setattr, thread, "name", thread.name)
         with tempfile.TemporaryDirectory() as directory:
@@ -30,7 +36,7 @@ class TestMqttSafeMode(unittest.TestCase):
                 "mqtt:\n"
                 "  enabled: true\n"
                 "  host: 10.10.10.146\n"
-                "  tls_insecure: true\n"
+                f"  tls_insecure: {str(insecure).lower()}\n"
                 "cameras: {}\n"
                 "auth:\n"
                 "  enabled: true\n"
