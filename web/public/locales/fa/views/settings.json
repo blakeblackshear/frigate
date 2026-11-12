@@ -1143,11 +1143,9 @@
   },
   "frigatePlus": {
     "apiKey": {
-      "notValidated": "کلید API ‏Frigate+ شناسایی نشده یا معتبرسازی نشده است",
       "desc": "کلید API ‏Frigate+ امکان یکپارچه‌سازی با سرویس Frigate+ را فراهم می‌کند.",
       "plusLink": "دربارهٔ Frigate+ بیشتر بخوانید",
-      "title": "کلید API فرigate+",
-      "validated": "کلید API فرigate+ شناسایی و تأیید شد"
+      "title": "کلید API فرigate+"
     },
     "snapshotConfig": {
       "title": "پیکربندی عکس فوری",
