@@ -180,6 +180,8 @@ _ALLOWED_ENV_VARS: dict[str, re.Pattern[str]] = {
     "TF_DATASET_THREAD_POOL_SIZE": _INT,
     "SHM_MAX_FRAMES": _INT,
     "USE_FP16": _WORD,
+    "CUDA_BLOCKING_SYNC": _WORD,
+    "USE_CUDA_BLOCKING_SYNC": _WORD,
     "HF_HUB_OFFLINE": _WORD,
     "TRANSFORMERS_OFFLINE": _WORD,
     "HSA_OVERRIDE_GFX_VERSION": re.compile(r"[0-9.]+"),

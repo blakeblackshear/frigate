@@ -189,6 +189,30 @@ class TestLoadRegistry(unittest.TestCase):
                 else:
                     blocking_sync.assert_not_called()
 
+    def test_cuda_blocking_sync_disabled_via_env(self):
+        with (
+            patch.dict(os.environ, {"CUDA_BLOCKING_SYNC": "false"}),
+            patch.object(detection_runners, "is_rknn_compatible", return_value=False),
+            patch.object(detection_runners, "get_lighter_ane_devices", return_value=[]),
+            patch.object(detection_runners, "get_migraphx_devices", return_value=[]),
+            patch.object(
+                detection_runners,
+                "get_ort_providers",
+                return_value=(["CUDAExecutionProvider"], [{"device_id": 1}]),
+            ),
+            patch.object(
+                detection_runners,
+                "is_openvino_gpu_npu_available",
+                return_value=False,
+            ),
+            patch.object(detection_runners.ort, "InferenceSession"),
+            patch.object(
+                detection_runners, "enable_cuda_blocking_sync"
+            ) as blocking_sync,
+        ):
+            get_optimized_runner("/models/yolo-generic.onnx", "GPU", "yolo-generic")
+            blocking_sync.assert_not_called()
+
 
 class TestLoadedDeviceSnapshot(unittest.TestCase):
     def setUp(self):

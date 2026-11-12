@@ -182,6 +182,19 @@ CU_CTX_SCHED_BLOCKING_SYNC = 0x04
 _cuda_blocking_sync_devices: set[tuple[int, int]] = set()
 
 
+def is_cuda_blocking_sync_enabled() -> bool:
+    """Return whether CUDA blocking sync is enabled via environment variable.
+
+    Defaults to True. Can be disabled by setting CUDA_BLOCKING_SYNC=false.
+    """
+    raw = os.environ.get("CUDA_BLOCKING_SYNC")
+    if raw is None:
+        raw = os.environ.get("USE_CUDA_BLOCKING_SYNC")
+    if raw is None:
+        return True
+    return raw.strip().lower() in ("true", "1", "yes", "on")
+
+
 def enable_cuda_blocking_sync(device_id: int) -> bool:
     """Make host threads sleep instead of spin while they wait on the GPU.
 
@@ -201,6 +214,9 @@ def enable_cuda_blocking_sync(device_id: int) -> bool:
     Returns:
         True if blocking sync is enabled for the device, False otherwise.
     """
+    if not is_cuda_blocking_sync_enabled():
+        return False
+
     key = (os.getpid(), device_id)
 
     if key in _cuda_blocking_sync_devices:
@@ -899,7 +915,10 @@ def get_optimized_runner(
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 
-    if providers[0] in ("CUDAExecutionProvider", "TensorrtExecutionProvider"):
+    if (
+        providers[0] in ("CUDAExecutionProvider", "TensorrtExecutionProvider")
+        and is_cuda_blocking_sync_enabled()
+    ):
         enable_cuda_blocking_sync(options[0]["device_id"])
 
     if providers[0] == "CPUExecutionProvider":

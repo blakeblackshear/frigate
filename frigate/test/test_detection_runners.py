@@ -193,3 +193,44 @@ class TestEnableCudaBlockingSync(unittest.TestCase):
 
         with patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda):
             self.assertTrue(enable_cuda_blocking_sync(0))
+
+    def test_disabled_by_env_var(self):
+        libcuda = self._libcuda()
+
+        for value in ("false", "False", "0", "no", "off"):
+            with (
+                self.subTest(value=value),
+                patch.dict(detection_runners.os.environ, {"CUDA_BLOCKING_SYNC": value}),
+                patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+            ):
+                self.assertFalse(enable_cuda_blocking_sync(0))
+
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.assert_not_called()
+
+    def test_disabled_by_use_cuda_blocking_sync(self):
+        libcuda = self._libcuda()
+
+        with (
+            patch.dict(
+                detection_runners.os.environ,
+                {"USE_CUDA_BLOCKING_SYNC": "false"},
+                clear=False,
+            ),
+            patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+        ):
+            detection_runners.os.environ.pop("CUDA_BLOCKING_SYNC", None)
+            self.assertFalse(enable_cuda_blocking_sync(0))
+
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.assert_not_called()
+
+    def test_enabled_by_env_var(self):
+        libcuda = self._libcuda()
+
+        for value in ("true", "True", "1", "yes", "on"):
+            with (
+                self.subTest(value=value),
+                patch.dict(detection_runners.os.environ, {"CUDA_BLOCKING_SYNC": value}),
+                patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+            ):
+                self.assertTrue(enable_cuda_blocking_sync(0))
+                detection_runners._cuda_blocking_sync_devices.clear()

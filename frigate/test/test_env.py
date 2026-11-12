@@ -234,6 +234,13 @@ class TestEnvVars(unittest.TestCase):
         self.assertEqual(os.environ.get("USE_FP16"), "False")
         self.assertNotIn("USE_FP16", FRIGATE_ENV_VARS)
 
+    def test_install_allows_cuda_blocking_sync(self):
+        """CUDA_BLOCKING_SYNC can be set in environment_vars block."""
+        ctx = self._make_context(install=True)
+        validate_env_vars({"CUDA_BLOCKING_SYNC": "false"}, ctx)
+        self.assertEqual(os.environ.get("CUDA_BLOCKING_SYNC"), "false")
+        self.assertNotIn("CUDA_BLOCKING_SYNC", FRIGATE_ENV_VARS)
+
     def test_no_install_does_not_set(self):
         """validate_env_vars without install=True does not modify state."""
         ctx = self._make_context(install=False)
