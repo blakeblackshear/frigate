@@ -639,8 +639,6 @@
     "apiKey": {
       "title": "Frigate+ API Key",
       "desc": "Der Frigate+ API Key aktiviert die Integration des Frigate+ Dienstes.",
-      "validated": "Frigate+ API Key erkannt und validiert",
-      "notValidated": "Frigate+ API Key nicht erkannt und validiert",
       "plusLink": "Lese mehr zu Frigate+"
     },
     "snapshotConfig": {
