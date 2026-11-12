@@ -897,8 +897,6 @@
     "title": "Frigate+ postavke",
     "apiKey": {
       "title": "Frigate+ API ključ",
-      "validated": "Frigate+ API ključ je detektiran i validiran",
-      "notValidated": "Frigate+ API ključ nije detektiran ili nije validiran",
       "desc": "Frigate+ API ključ omogućuje integraciju s Frigate+ uslugom.",
       "plusLink": "Pročitajte više o Frigate+"
     },
