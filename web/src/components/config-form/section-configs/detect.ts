@@ -240,14 +240,14 @@ const detect: SectionConfigOverrides = {
   },
   replay: {
     restartRequired: [],
-    fieldOrder: ["width", "height", "fps"],
+    fieldOrder: ["scene", "width", "height", "fps"],
     fieldGroups: {
       resolution: ["width", "height", "fps"],
     },
     hiddenFields: [
       "enabled",
       "enabled_in_config",
-      "scene",
+      hideSceneWithoutChoice,
       "min_initialized",
       "max_disappeared",
       "annotation_offset",

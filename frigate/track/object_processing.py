@@ -91,6 +91,7 @@ class TrackedObjectProcessor(threading.Thread):
                 CameraConfigUpdateEnum.enabled,
                 CameraConfigUpdateEnum.motion,
                 CameraConfigUpdateEnum.objects,
+                CameraConfigUpdateEnum.refresh,
                 CameraConfigUpdateEnum.remove,
                 CameraConfigUpdateEnum.timestamp_style,
                 CameraConfigUpdateEnum.zones,
@@ -783,6 +784,20 @@ class TrackedObjectProcessor(threading.Thread):
                     self.last_motion_detected.pop(camera, None)
 
                 self.requestor.send_data(UPDATE_CAMERA_ACTIVITY, self.camera_activity)
+
+            # a replay camera recycled onto another scene's model needs new state
+            for camera in updated_topics.get("refresh", []):
+                camera_state = self.camera_states.get(camera)
+
+                if (
+                    camera_state is None
+                    or camera_state.model is self.config.model_for_camera(camera)
+                ):
+                    continue
+
+                camera_state.shutdown()
+                self.frame_manager.close_camera(camera)
+                self.create_camera_state(camera)
 
             # manage camera disabled state
             for camera, config in self.config.cameras.items():

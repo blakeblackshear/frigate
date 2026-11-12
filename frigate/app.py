@@ -76,7 +76,7 @@ from frigate.models import (
 from frigate.notices import install_registry
 from frigate.notices.registry import NoticeRegistry
 from frigate.object_detection.base import ObjectDetectProcess
-from frigate.object_detection.util import detection_frame_size
+from frigate.object_detection.util import create_detection_input_shm
 from frigate.output.output import OutputProcess
 from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.ptz.onvif import OnvifController
@@ -399,14 +399,7 @@ class FrigateApp:
             model = self.config.model_for_camera(name)
             model_cameras[model.scene].append(name)
 
-            try:
-                shm_in = UntrackedSharedMemory(
-                    name=name,
-                    create=True,
-                    size=detection_frame_size(model),
-                )
-            except FileExistsError:
-                shm_in = UntrackedSharedMemory(name=name)
+            shm_in = create_detection_input_shm(name, self.config.models)
 
             try:
                 shm_out = UntrackedSharedMemory(

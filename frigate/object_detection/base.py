@@ -113,6 +113,23 @@ class AsyncLocalObjectDetector(BaseLocalDetector):
         return self.detect_api.receive_output()
 
 
+def map_input_frame(
+    frame_manager: SharedMemoryFrameManager, camera: str, model: ModelConfig
+) -> np.ndarray | None:
+    """Map a camera's detection input segment as this model's input tensor.
+
+    The segment is sized for the largest configured model, so it can be larger
+    than this model's input.
+    """
+    buf = frame_manager.write(camera)
+    shape = (1, model.height, model.width, 3)
+
+    if buf is None or len(buf) < model.height * model.width * 3:
+        return None
+
+    return np.ndarray(shape, dtype=np.uint8, buffer=buf)
+
+
 class DetectorRunner(FrigateProcess):
     def __init__(
         self,
@@ -154,14 +171,10 @@ class DetectorRunner(FrigateProcess):
                 connection_id = self.detection_queue.get(timeout=1)
             except queue.Empty:
                 continue
-            input_frame = frame_manager.get(
+            input_frame = map_input_frame(
+                frame_manager,
                 connection_id,
-                (
-                    1,
-                    self.detector_config.model.height,  # type: ignore[union-attr]
-                    self.detector_config.model.width,  # type: ignore[union-attr]
-                    3,
-                ),
+                self.detector_config.model,  # type: ignore[arg-type]
             )
 
             if input_frame is None:
@@ -227,14 +240,10 @@ class AsyncDetectorRunner(FrigateProcess):
                 continue
 
             assert self._frame_manager is not None
-            input_frame = self._frame_manager.get(
+            input_frame = map_input_frame(
+                self._frame_manager,
                 connection_id,
-                (
-                    1,
-                    self.detector_config.model.height,  # type: ignore[union-attr]
-                    self.detector_config.model.width,  # type: ignore[union-attr]
-                    3,
-                ),
+                self.detector_config.model,  # type: ignore[arg-type]
             )
 
             if input_frame is None:
