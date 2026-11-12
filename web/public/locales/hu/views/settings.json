@@ -246,8 +246,6 @@
     "apiKey": {
       "plusLink": "Tudjon meg többet a Frigate+-ról",
       "title": "Frigate+ API kulcs",
-      "validated": "Frigate+ API kulcs észlelve és ellenőrizve",
-      "notValidated": "Frigate+ API kulcs nem található vagy nem ellenőrzött",
       "desc": "A Frigate+ API kulcs lehetővé teszi az integrációt a Frigate+ szolgáltatással."
     },
     "snapshotConfig": {
