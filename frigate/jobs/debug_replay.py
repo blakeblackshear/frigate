@@ -20,7 +20,12 @@ from peewee import ModelSelect
 
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
-from frigate.const import REPLAY_CAMERA_PREFIX, REPLAY_DIR
+from frigate.const import (
+    REPLAY_CAMERA_PREFIX,
+    REPLAY_DIR,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.jobs.export import JobStatePublisher
 from frigate.jobs.job import Job
 from frigate.jobs.manager import job_is_running, set_current_job
@@ -94,7 +99,9 @@ class DebugReplayJob(Job):
         }
 
 
-def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> ModelSelect:
+def query_recordings(
+    source_camera: str, start_ts: float, end_ts: float, stream_type: str
+) -> ModelSelect:
     """Return the Recordings query for the time range.
 
     Module-level so tests can patch it without instantiating a runner.
@@ -107,6 +114,7 @@ def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> Mode
         )
         .where(recording_overlap(start_ts, end_ts))
         .where(Recordings.camera == source_camera)
+        .where(Recordings.stream_type == stream_type)
         .order_by(Recordings.start_time.asc())
     )
     return cast(ModelSelect, query)
@@ -156,7 +164,8 @@ class RecordingDebugReplaySource(DebugReplaySource):
 
     Feeds ffmpeg the internal VOD endpoint so segments with mismatched
     SPS/PPS (e.g. across day/night transitions) stitch cleanly via HLS
-    discontinuities.
+    discontinuities. The playlist is pinned to one stream because the
+    stream-copied clip cannot change codec or resolution mid-file.
     """
 
     def __init__(
@@ -170,6 +179,7 @@ class RecordingDebugReplaySource(DebugReplaySource):
         self._start_ts = start_ts
         self._end_ts = end_ts
         self._internal_port = internal_port
+        self._stream_type = STREAM_TYPE_MAIN
 
     @property
     def source_camera(self) -> str:
@@ -187,15 +197,22 @@ class RecordingDebugReplaySource(DebugReplaySource):
         if self._end_ts <= self._start_ts:
             raise ValueError("End time must be after start time")
 
-        if not query_recordings(self._camera, self._start_ts, self._end_ts).count():
-            raise NoRecordingsError(
-                f"No recordings found for camera '{self._camera}' in the specified time range"
-            )
+        for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
+            if query_recordings(
+                self._camera, self._start_ts, self._end_ts, stream_type
+            ).count():
+                self._stream_type = stream_type
+                return
+
+        raise NoRecordingsError(
+            f"No recordings found for camera '{self._camera}' in the specified time range"
+        )
 
     def ffmpeg_input_args(self, working_dir: str) -> list[str]:
         playlist_url = (
             f"http://127.0.0.1:{self._internal_port}/vod/{self._camera}"
-            f"/start/{self._start_ts}/end/{self._end_ts}/index.m3u8"
+            f"/{self._stream_type}/start/{self._start_ts}/end/{self._end_ts}"
+            "/index.m3u8"
         )
         return [
             "-protocol_whitelist",

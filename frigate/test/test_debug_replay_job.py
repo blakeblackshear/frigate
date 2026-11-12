@@ -77,6 +77,29 @@ class TestDebugReplayJob(unittest.TestCase):
         self.assertEqual(results["end_ts"], 200.0)
 
 
+class TestRecordingDebugReplaySource(unittest.TestCase):
+    def _source_url(self, counts: dict[str, int]) -> str:
+        def query(camera, start_ts, end_ts, stream_type):
+            qs = MagicMock()
+            qs.count.return_value = counts.get(stream_type, 0)
+            return qs
+
+        source = RecordingDebugReplaySource(
+            source_camera="front", start_ts=100.0, end_ts=200.0, internal_port=5000
+        )
+        with patch("frigate.jobs.debug_replay.query_recordings", side_effect=query):
+            source.validate()
+        return source.ffmpeg_input_args("/tmp")[-1]
+
+    def test_pins_main_when_main_has_recordings(self) -> None:
+        url = self._source_url({"main": 3, "sub": 5})
+        self.assertIn("/vod/front/main/start/100.0/end/200.0/", url)
+
+    def test_falls_back_to_sub_without_main_recordings(self) -> None:
+        url = self._source_url({"sub": 5})
+        self.assertIn("/vod/front/sub/start/100.0/end/200.0/", url)
+
+
 class TestStartDebugReplayJob(unittest.TestCase):
     def setUp(self) -> None:
         _reset_job_manager()
