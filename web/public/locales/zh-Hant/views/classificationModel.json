@@ -25,7 +25,7 @@
   },
   "documentTitle": "分類模型",
   "details": {
-    "scoreInfo": "分數表示該目標所有偵測結果的平均分類置信度。",
+    "scoreInfo": "分數表示該物件所有偵測結果的平均分類信心度。",
     "none": "沒有",
     "unknown": "未知"
   },
@@ -49,7 +49,7 @@
     "title": "刪除類別",
     "desc": "你確定要刪除類別{{name}}嗎? 這將刪除所有有關的圖片並需要重新訓練模型。",
     "minClassesTitle": "無法刪除此類別",
-    "minClassesDesc": "分類模型必須至少擁有2個類別，新增一個新的類別已刪除這個。"
+    "minClassesDesc": "分類模型必須至少包含 2 個類別。請先新增另一個類別，再刪除此類別。"
   },
   "deleteModel": {
     "title": "刪除分類模型",
@@ -65,10 +65,10 @@
     "enabledDesc": "執行此模型。停用時，它將停止運行且不再進行分類。",
     "saveAttempts": "儲存嘗試次數",
     "saveAttemptsDesc": "要在近期分類使用者介面中保留的分類嘗試圖片數量。",
-    "motion": "在動作時執行",
-    "motionDesc": "當在設定的裁切範圍內偵測到動作時執行分類。",
+    "motion": "在移動時執行",
+    "motionDesc": "當在設定的裁切範圍內偵測到移動時執行分類。",
     "interval": "間隔",
-    "intervalDesc": "定期執行分類之間的秒數。若要僅在動作時執行，請保持空白。",
+    "intervalDesc": "定期執行分類之間的秒數。若要僅在移動時執行，請保持空白。",
     "intervalPlaceholder": "無間隔",
     "errors": {
       "saveAttemptsInvalid": "儲存嘗試次數必須是大於或等於 0 的整數",
@@ -88,7 +88,7 @@
     "desc": "輸入 {{name}} 的新名稱。您需要在名稱變更後重新訓練模型以套用變更。"
   },
   "description": {
-    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。"
+    "invalidName": "名稱只能包含英數字、空格、單引號（'）、底線（_）以及連字號（-）。"
   },
   "train": {
     "title": "最近的分類紀錄",
@@ -111,14 +111,14 @@
       "type": "類別",
       "typeState": "狀態",
       "typeObject": "物件",
-      "classificationTypeDesc": "子標籤會為目標標籤新增附加文字（例如：「人員：UPS」）。屬性是可搜尋的中繼資料，獨立儲存在目標的中繼資料中。",
+      "classificationTypeDesc": "子標籤會為物件標籤新增附加文字（例如：「人員：UPS」）。屬性是可搜尋的中繼資料，獨立儲存在物件的中繼資料中。",
       "classificationSubLabel": "子標籤",
       "classificationAttribute": "屬性",
       "classes": "類別",
       "states": "狀態",
       "classesTip": "瞭解類別",
       "classesStateDesc": "定義攝影機區域內可能出現的不同狀態。例如：車庫門的「開啟」和「關閉」。",
-      "classesObjectDesc": "定義用於分類偵測目標的不同類別。例如：人員分類中的「送貨員」、「鄰居」、「陌生人」。",
+      "classesObjectDesc": "定義用於分類偵測物件的不同類別。例如：人員分類中的「送貨員」、「鄰居」、「陌生人」。",
       "classPlaceholder": "請輸入分類名稱……",
       "errors": {
         "nameRequired": "模型名稱為必填項",
@@ -126,10 +126,10 @@
         "nameOnlyNumbers": "模型名稱不能僅包含數字",
         "classRequired": "至少需要一個類別",
         "classesUnique": "類別名稱必須唯一",
-        "noneNotAllowed": "不能建立“none”（無標籤）類別",
+        "noneNotAllowed": "不允許使用「none」作為類別名稱",
         "stateRequiresTwoClasses": "狀態模型至少需要兩個類別",
-        "objectLabelRequired": "請選擇一個目標標籤",
-        "objectTypeRequired": "請選擇一個目標標籤"
+        "objectLabelRequired": "請選擇一個物件標籤",
+        "objectTypeRequired": "請選擇分類類型"
       }
     },
     "steps": {
@@ -155,16 +155,16 @@
       },
       "training": {
         "title": "正在訓練模型",
-        "description": "系統正在後臺訓練模型。你可以關閉此對話方塊，訓練完成後模型將自動開始執行。"
+        "description": "系統正在背景訓練模型。你可以關閉此對話方塊，訓練完成後模型將自動開始執行。"
       },
       "retryGenerate": "重新生成",
       "noImages": "未生成樣本影像",
       "classifying": "正在分類與訓練……",
       "trainingStarted": "已開始模型訓練",
-      "modelCreated": "模型建立成功。請在最近分類頁面為缺失的狀態新增圖片，然後訓練模型。",
+      "modelCreated": "模型建立成功。請在最近分類頁面為缺少的狀態新增圖片，然後訓練模型。",
       "errors": {
         "noCameras": "未配置攝影機",
-        "noObjectLabel": "未選擇目標標籤",
+        "noObjectLabel": "未選擇物件標籤",
         "generateFailed": "範例生成失敗：{{error}}",
         "generationFailed": "生成失敗，請重試。",
         "classifyFailed": "圖片分類失敗：{{error}}"
@@ -176,18 +176,18 @@
         "description": "此操作將生成一組新的圖片，並清除所有選擇內容（包括之前的所有類別）。你需要為所有類別重新選擇範例。"
       },
       "missingStatesWarning": {
-        "title": "分類範例遺失",
-        "description": "並非所有類別都有範例。可嘗試生成新範例以查詢遺失的類別，或繼續該步驟，之後透過「最近分類」頁面新增圖片。"
+        "title": "缺少分類範例",
+        "description": "並非所有類別都有範例。可嘗試生成新範例以查詢缺少的類別，或繼續該步驟，之後透過「最近分類」頁面新增圖片。"
       }
     }
   },
   "menu": {
     "states": "狀態",
-    "objects": "目標"
+    "objects": "物件"
   },
   "noModels": {
     "object": {
-      "title": "沒有物件檢測模型",
+      "title": "沒有物件分類模型",
       "description": "建立自訂模型以對偵測到的物件進行分類。",
       "buttonText": "建立物件模型"
     },

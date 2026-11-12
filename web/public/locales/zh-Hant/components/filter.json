@@ -36,11 +36,11 @@
   "estimatedSpeed": "估計速度({{unit}})",
   "features": {
     "label": "特徵",
-    "hasSnapshot": "包含截圖",
+    "hasSnapshot": "包含快照",
     "hasVideoClip": "包含影片片段",
     "submittedToFrigatePlus": {
       "label": "已提交至 Frigate+",
-      "tips": "你必須先過濾出包含截圖的追蹤物件。<br /><br />無法提交不包含截圖的追蹤物件至 Frigate+。"
+      "tips": "你必須先過濾出包含快照的追蹤物件。<br /><br />無法提交不包含快照的追蹤物件至 Frigate+。"
     }
   },
   "sort": {
@@ -54,14 +54,14 @@
     "relevance": "相關性"
   },
   "cameras": {
-    "label": "鏡頭過濾",
+    "label": "攝影機過濾",
     "all": {
-      "title": "所有鏡頭",
-      "short": "鏡頭"
+      "title": "所有攝影機",
+      "short": "攝影機"
     }
   },
   "review": {
-    "showReviewed": "顯示已審核的內容"
+    "showReviewed": "顯示已審閱的內容"
   },
   "motion": {
     "showMotionOnly": "僅顯示有移動的內容"
@@ -81,9 +81,9 @@
       },
       "searchSource": {
         "label": "搜尋來源",
-        "desc": "選擇搜尋追蹤物件的截圖或是說明。",
+        "desc": "選擇搜尋追蹤物件的縮圖或是說明。",
         "options": {
-          "thumbnailImage": "截圖",
+          "thumbnailImage": "縮圖",
           "description": "說明"
         }
       }

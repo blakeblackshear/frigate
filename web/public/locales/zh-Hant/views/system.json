@@ -1,9 +1,9 @@
 {
   "documentTitle": {
-    "cameras": "鏡頭統計 - Frigate",
+    "cameras": "攝影機統計 - Frigate",
     "storage": "儲存裝置統計 - Frigate",
     "general": "一般統計 - Frigate",
-    "enrichments": "進階功能統計 - Frigate",
+    "enrichments": "增強功能統計 - Frigate",
     "logs": {
       "frigate": "Frigate 日誌 - Frigate",
       "go2rtc": "Go2RTC 日誌 - Frigate",
@@ -115,7 +115,7 @@
       "processMemoryUsage": "處理程序記憶體使用量",
       "series": {
         "recording": "記錄",
-        "review_segment": "審核部分",
+        "review_segment": "審閱片段",
         "embeddings": "嵌入",
         "audio_detector": "音訊偵測器",
         "go2rtc": "go2rtc"
@@ -131,8 +131,8 @@
       "earliestRecording": "最早的錄影檔案："
     },
     "cameraStorage": {
-      "title": "鏡頭儲存",
-      "camera": "鏡頭",
+      "title": "攝影機儲存",
+      "camera": "攝影機",
       "unusedStorageInformation": "未使用的儲存空間資訊",
       "storageUsed": "已使用的儲存空間",
       "percentageOfTotalUsed": "佔總量百分比",
@@ -152,13 +152,13 @@
     }
   },
   "cameras": {
-    "title": "鏡頭",
+    "title": "攝影機",
     "overview": "總覽",
     "info": {
       "aspectRatio": "長寬比",
       "cameraProbeInfo": "{{camera}} 的攝影機探測詳細資訊",
       "streamDataFromFFPROBE": "串流資料是透過 <code>ffprobe</code> 取得。",
-      "fetching": "正在讀取鏡頭資訊",
+      "fetching": "正在讀取攝影機資訊",
       "stream": "串流 {{idx}}",
       "video": "影片：",
       "codec": "編解碼器：",
@@ -186,20 +186,20 @@
     },
     "framesAndDetections": "幀數 / 偵測數",
     "label": {
-      "camera": "鏡頭",
+      "camera": "攝影機",
       "detect": "偵測",
       "skipped": "跳過",
       "ffmpeg": "FFmpeg",
       "capture": "抓取",
       "overallFramesPerSecond": "總體幀率",
-      "overallDetectionsPerSecond": "總體每秒偵測幀數",
-      "overallSkippedDetectionsPerSecond": "總體每秒跳過偵測幀率",
+      "overallDetectionsPerSecond": "總體每秒偵測次數",
+      "overallSkippedDetectionsPerSecond": "總體每秒跳過偵測次數",
       "cameraFfmpeg": "{{camName}} FFmpeg",
       "cameraCapture": "{{camName}} 抓取",
       "cameraDetect": "{{camName}} 偵測",
       "cameraFramesPerSecond": "{{camName}} 幀率",
-      "cameraDetectionsPerSecond": "{{camName}} 每秒偵測幀率",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒跳過偵測幀率",
+      "cameraDetectionsPerSecond": "{{camName}} 每秒偵測次數",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} 每秒跳過偵測次數",
       "cameraGpu": "{{camName}} GPU"
     },
     "toast": {
@@ -235,23 +235,23 @@
     "debugReplayActive": "除錯重播工作階段正在進行"
   },
   "enrichments": {
-    "title": "進階功能",
+    "title": "增強功能",
     "infPerSecond": "每秒推理次數",
     "embeddings": {
       "image_embedding": "圖片特徵提取",
-      "text_embedding": "文字提取",
+      "text_embedding": "文字特徵提取",
       "face_recognition": "人臉辨識",
       "plate_recognition": "車牌辨識",
       "image_embedding_speed": "圖片特徵提取速度",
       "face_embedding_speed": "人臉特徵提取速度",
       "face_recognition_speed": "人臉辨識速度",
       "plate_recognition_speed": "車牌辨識速度",
-      "text_embedding_speed": "文字提取速度",
+      "text_embedding_speed": "文字特徵提取速度",
       "yolov9_plate_detection_speed": "YOLOv9 車牌偵測速度",
-      "yolov9_plate_detection": "YOLOv9 車牌辨識",
-      "review_description": "審查說明",
-      "review_description_speed": "審查描述速度",
-      "review_description_events_per_second": "審查說明",
+      "yolov9_plate_detection": "YOLOv9 車牌偵測",
+      "review_description": "審閱說明",
+      "review_description_speed": "審閱描述速度",
+      "review_description_events_per_second": "審閱說明",
       "object_description": "物件說明",
       "object_description_speed": "物件說明速度",
       "object_description_events_per_second": "物件說明",

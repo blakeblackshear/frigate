@@ -67,7 +67,7 @@
   },
   "caseView": {
     "noDescription": "沒有描述",
-    "createdAt": "已建立 {{value}}",
+    "createdAt": "建立於 {{value}}",
     "exportCount_one": "1 個匯出",
     "exportCount_other": "{{count}} 個匯出",
     "cameraCount_one": "1 個攝影機",
@@ -87,7 +87,7 @@
   "addExportDialog": {
     "title": "將匯出新增到 {{caseName}}",
     "searchPlaceholder": "搜尋未分類的匯出項",
-    "empty": "未找到匹配的未分類匯出。",
+    "empty": "未找到相符的未分類匯出。",
     "addButton_one": "新增 1 個匯出",
     "addButton_other": "新增 {{count}} 個匯出",
     "adding": "新增中…"
