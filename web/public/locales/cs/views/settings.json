@@ -58,9 +58,7 @@
       "cleanCopyWarning": "Některé kamery mají snímky zakázané"
     },
     "apiKey": {
-      "notValidated": "API klíč Frigate+ nebyl rozpoznán nebo nebyl ověřen",
       "plusLink": "Přečtěte si více o Frigate+",
-      "validated": "API klíč Frigate+ byl rozpoznán a ověřen",
       "desc": "API klíč Frigate+ umožňuje integraci se službou Frigate+.",
       "title": "Frigate+ API Klíč"
     },
