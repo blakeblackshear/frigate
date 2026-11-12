@@ -1154,8 +1154,6 @@
     },
     "apiKey": {
       "title": "Frigate+ API кључ",
-      "validated": "Frigate+ API кључ је детектован и валидиран",
-      "notValidated": "Frigate+ API кључ није детектован или није валидиран",
       "desc": "Frigate+ API кључ омогућава интеграцију са Frigate+ сервисом.",
       "plusLink": "Прочитајте више о Frigate+"
     },
