@@ -485,6 +485,29 @@ class TestHttpApp(BaseTestHttp):
             assert sub_labels
             assert sub_labels == [sub_label]
 
+    def test_get_event_list_filter_sub_labels(self):
+        sub_labels = {
+            "1.cyrillic": "Кузнецова Ира",
+            "2.joined": "Ира, Bob",
+            "3.ascii": "Alice",
+            "4.none": None,
+        }
+
+        with AuthTestClient(self.app) as client:
+            for id, sub_label in sub_labels.items():
+                super().insert_mock_event(id)
+                Event.update(sub_label=sub_label).where(Event.id == id).execute()
+
+            def ids(query: str) -> set[str]:
+                events = client.get("/events", params={"sub_labels": query}).json()
+                return {event["id"] for event in events}
+
+            assert ids("Кузнецова Ира") == {"1.cyrillic"}
+            assert ids("Ира") == {"2.joined"}
+            assert ids("bob") == {"2.joined"}
+            assert ids("ALICE") == {"3.ascii"}
+            assert ids("None") == {"4.none"}
+
     ####################################################################################################################
     ###################################  GET /metrics Endpoint   #########################################################
     ####################################################################################################################
