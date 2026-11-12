@@ -51,6 +51,20 @@ class TestMqttTls(unittest.TestCase):
             self.assertIn("Remove tls_insecure for plaintext", str(error.exception))
             self.assertIn("CA certificate path to enable TLS", str(error.exception))
 
+    def test_transport_reports_tls_setup_failure_if_validation_is_bypassed(
+        self,
+    ) -> None:
+        config = MqttConfig.model_construct(host="mqtt", tls_insecure=True)
+        transport = MqttClient(SimpleNamespace(mqtt=config))
+        self.addCleanup(transport._wake_recv.close)
+        self.addCleanup(transport._wake_send.close)
+
+        with self.assertLogs("frigate.comms.mqtt", level="ERROR") as logs:
+            self.assertFalse(transport._connect_client())
+
+        self.assertIsNone(transport.client)
+        self.assertIn("Must configure SSL context", "\n".join(logs.output))
+
     def test_tls_with_ca_certs_verifies_certificates_by_default(self) -> None:
         client = self.create_client(tls_ca_certs=self.ca_bundle())
 
