@@ -18,6 +18,7 @@ from frigate.jobs.debug_replay import (
 from frigate.jobs.export import JobStatePublisher
 from frigate.jobs.manager import _completed_jobs, _current_jobs
 from frigate.types import JobStatusTypesEnum
+from frigate.util.recording_coverage import CoverageInterval
 
 
 def _reset_job_manager() -> None:
@@ -78,25 +79,27 @@ class TestDebugReplayJob(unittest.TestCase):
 
 
 class TestRecordingDebugReplaySource(unittest.TestCase):
-    def _source_url(self, counts: dict[str, int]) -> str:
-        def query(camera, start_ts, end_ts, stream_type):
-            qs = MagicMock()
-            qs.count.return_value = counts.get(stream_type, 0)
-            return qs
-
+    def _source_url(self, intervals: list[CoverageInterval]) -> str:
         source = RecordingDebugReplaySource(
             source_camera="front", start_ts=100.0, end_ts=200.0, internal_port=5000
         )
-        with patch("frigate.jobs.debug_replay.query_recordings", side_effect=query):
+        with patch(
+            "frigate.jobs.debug_replay.resolve_coverage", return_value=intervals
+        ):
             source.validate()
         return source.ffmpeg_input_args("/tmp")[-1]
 
     def test_pins_main_when_main_has_recordings(self) -> None:
-        url = self._source_url({"main": 3, "sub": 5})
+        url = self._source_url(
+            [
+                CoverageInterval(100.0, 150.0, None, MagicMock()),
+                CoverageInterval(150.0, 200.0, MagicMock(), MagicMock()),
+            ]
+        )
         self.assertIn("/vod/front/main/start/100.0/end/200.0/", url)
 
     def test_falls_back_to_sub_without_main_recordings(self) -> None:
-        url = self._source_url({"sub": 5})
+        url = self._source_url([CoverageInterval(100.0, 200.0, None, MagicMock())])
         self.assertIn("/vod/front/sub/start/100.0/end/200.0/", url)
 
 
@@ -110,9 +113,7 @@ class TestStartDebugReplayJob(unittest.TestCase):
         self.frigate_config.ffmpeg.ffmpeg_path = "/bin/true"
         self.publisher = MagicMock()
 
-        self.recordings_qs = MagicMock()
-        self.recordings_qs.count.return_value = 1
-        self.recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
+        self.coverage = [CoverageInterval(100.0, 200.0, MagicMock(), None)]
 
     def tearDown(self) -> None:
         runner = get_active_runner()
@@ -150,9 +151,7 @@ class TestStartDebugReplayJob(unittest.TestCase):
             )
 
     def test_rejects_when_no_recordings(self) -> None:
-        empty_qs = MagicMock()
-        empty_qs.count.return_value = 0
-        with patch("frigate.jobs.debug_replay.query_recordings", return_value=empty_qs):
+        with patch("frigate.jobs.debug_replay.resolve_coverage", return_value=[]):
             with self.assertRaises(NoRecordingsError):
                 start_debug_replay_job(
                     source=RecordingDebugReplaySource(
@@ -175,8 +174,8 @@ class TestStartDebugReplayJob(unittest.TestCase):
 
         with (
             patch(
-                "frigate.jobs.debug_replay.query_recordings",
-                return_value=self.recordings_qs,
+                "frigate.jobs.debug_replay.resolve_coverage",
+                return_value=self.coverage,
             ),
             patch(
                 "frigate.jobs.debug_replay.run_ffmpeg_with_progress",
@@ -215,8 +214,8 @@ class TestStartDebugReplayJob(unittest.TestCase):
 
         with (
             patch(
-                "frigate.jobs.debug_replay.query_recordings",
-                return_value=self.recordings_qs,
+                "frigate.jobs.debug_replay.resolve_coverage",
+                return_value=self.coverage,
             ),
             patch(
                 "frigate.jobs.debug_replay.run_ffmpeg_with_progress",
@@ -265,9 +264,7 @@ class TestRunnerHappyPath(unittest.TestCase):
         self.frigate_config.ffmpeg.ffmpeg_path = "/bin/true"
         self.publisher = MagicMock()
 
-        self.recordings_qs = MagicMock()
-        self.recordings_qs.count.return_value = 1
-        self.recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
+        self.coverage = [CoverageInterval(100.0, 200.0, MagicMock(), None)]
 
     def tearDown(self) -> None:
         runner = get_active_runner()
@@ -295,8 +292,8 @@ class TestRunnerHappyPath(unittest.TestCase):
 
         with (
             patch(
-                "frigate.jobs.debug_replay.query_recordings",
-                return_value=self.recordings_qs,
+                "frigate.jobs.debug_replay.resolve_coverage",
+                return_value=self.coverage,
             ),
             patch(
                 "frigate.jobs.debug_replay.run_ffmpeg_with_progress",
@@ -348,9 +345,7 @@ class TestRunnerFailurePath(unittest.TestCase):
         self.frigate_config.cameras = {"front": MagicMock()}
         self.frigate_config.ffmpeg.ffmpeg_path = "/bin/true"
         self.publisher = MagicMock()
-        self.recordings_qs = MagicMock()
-        self.recordings_qs.count.return_value = 1
-        self.recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
+        self.coverage = [CoverageInterval(100.0, 200.0, MagicMock(), None)]
 
     def tearDown(self) -> None:
         runner = get_active_runner()
@@ -373,8 +368,8 @@ class TestRunnerFailurePath(unittest.TestCase):
 
         with (
             patch(
-                "frigate.jobs.debug_replay.query_recordings",
-                return_value=self.recordings_qs,
+                "frigate.jobs.debug_replay.resolve_coverage",
+                return_value=self.coverage,
             ),
             patch(
                 "frigate.jobs.debug_replay.run_ffmpeg_with_progress",
@@ -422,9 +417,7 @@ class TestRunnerCancellation(unittest.TestCase):
         self.frigate_config.cameras = {"front": MagicMock()}
         self.frigate_config.ffmpeg.ffmpeg_path = "/bin/true"
         self.publisher = MagicMock()
-        self.recordings_qs = MagicMock()
-        self.recordings_qs.count.return_value = 1
-        self.recordings_qs.__iter__.return_value = iter([MagicMock(path="/tmp/r1.mp4")])
+        self.coverage = [CoverageInterval(100.0, 200.0, MagicMock(), None)]
 
     def tearDown(self) -> None:
         runner = get_active_runner()
@@ -454,8 +447,8 @@ class TestRunnerCancellation(unittest.TestCase):
 
         with (
             patch(
-                "frigate.jobs.debug_replay.query_recordings",
-                return_value=self.recordings_qs,
+                "frigate.jobs.debug_replay.resolve_coverage",
+                return_value=self.coverage,
             ),
             patch(
                 "frigate.jobs.debug_replay.run_ffmpeg_with_progress",

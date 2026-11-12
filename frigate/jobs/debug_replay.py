@@ -16,8 +16,6 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional, cast
 
-from peewee import ModelSelect
-
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
 from frigate.const import (
@@ -29,10 +27,10 @@ from frigate.const import (
 from frigate.jobs.export import JobStatePublisher
 from frigate.jobs.job import Job
 from frigate.jobs.manager import job_is_running, set_current_job
-from frigate.models import Export, Recordings
+from frigate.models import Export
 from frigate.types import JobStatusTypesEnum
 from frigate.util.ffmpeg import run_ffmpeg_with_progress
-from frigate.util.recording_coverage import recording_overlap
+from frigate.util.recording_coverage import resolve_coverage
 
 if TYPE_CHECKING:
     from frigate.debug_replay import DebugReplayManager
@@ -97,27 +95,6 @@ class DebugReplayJob(Job):
                 "end_ts": self.end_ts,
             },
         }
-
-
-def query_recordings(
-    source_camera: str, start_ts: float, end_ts: float, stream_type: str
-) -> ModelSelect:
-    """Return the Recordings query for the time range.
-
-    Module-level so tests can patch it without instantiating a runner.
-    """
-    query = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-            Recordings.end_time,
-        )
-        .where(recording_overlap(start_ts, end_ts))
-        .where(Recordings.camera == source_camera)
-        .where(Recordings.stream_type == stream_type)
-        .order_by(Recordings.start_time.asc())
-    )
-    return cast(ModelSelect, query)
 
 
 class NoRecordingsError(ValueError):
@@ -197,12 +174,18 @@ class RecordingDebugReplaySource(DebugReplaySource):
         if self._end_ts <= self._start_ts:
             raise ValueError("End time must be after start time")
 
-        for stream_type in (STREAM_TYPE_MAIN, STREAM_TYPE_SUB):
-            if query_recordings(
-                self._camera, self._start_ts, self._end_ts, stream_type
-            ).count():
-                self._stream_type = stream_type
-                return
+        # the VOD resolver decides what the pinned playlist serves, so it
+        # also decides the stream; a row merely touching the range has no
+        # interval and must not win
+        intervals = resolve_coverage(self._camera, self._start_ts, self._end_ts)
+
+        if any(interval.main for interval in intervals):
+            self._stream_type = STREAM_TYPE_MAIN
+            return
+
+        if any(interval.sub for interval in intervals):
+            self._stream_type = STREAM_TYPE_SUB
+            return
 
         raise NoRecordingsError(
             f"No recordings found for camera '{self._camera}' in the specified time range"
