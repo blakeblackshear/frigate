@@ -657,8 +657,6 @@
     "title": "Frigate+ Nustatymai",
     "apiKey": {
       "title": "Frigate+ API raktas",
-      "validated": "Frigate+ API raktas aptiktas ir patvirtintas",
-      "notValidated": "Frigate+ API raktas neaptiktas ir nepatvirtintas",
       "desc": "Frigate+ API raktas įgalina integraciją su Frigate+ paslauga.",
       "plusLink": "Skaityti daugiau apie Frigate+"
     },
