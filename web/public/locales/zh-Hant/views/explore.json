@@ -32,14 +32,14 @@
   "details": {
     "timestamp": "時間戳",
     "item": {
-      "title": "審核項目詳情",
-      "desc": "審核項目詳情",
+      "title": "審閱項目詳情",
+      "desc": "審閱項目詳情",
       "button": {
-        "share": "分享此審核項目",
+        "share": "分享此審閱項目",
         "viewInExplore": "在瀏覽中查看"
       },
       "tips": {
-        "mismatch_other": "在此審核項目中偵測到 {{count}} 個不可用物件。這些物件可能不符合警示或偵測標準，或者已被清除/刪除。",
+        "mismatch_other": "在此審閱項目中偵測到 {{count}} 個不可用物件。這些物件可能不符合警示或偵測標準，或者已被清除/刪除。",
         "hasMissingObjects": "如果你想要 Frigate 儲存以下標籤的追蹤物件：<em>{{objects}}</em>，請調整設定"
       },
       "toast": {
@@ -71,16 +71,16 @@
       "descNoLabel": "輸入此追蹤物件的新車牌號碼"
     },
     "snapshotScore": {
-      "label": "截圖分數"
+      "label": "快照分數"
     },
     "topScore": {
       "label": "最高分數",
-      "info": "最高分數是追蹤物件的最高中位數，因此可能會與搜尋結果的截圖顯示的分數有所不同。"
+      "info": "最高分數是追蹤物件的最高中位數，因此可能會與搜尋結果的縮圖顯示的分數有所不同。"
     },
     "recognizedLicensePlate": "已辨識車牌",
     "estimatedSpeed": "估計速度",
     "objects": "物件",
-    "camera": "鏡頭",
+    "camera": "攝影機",
     "zones": "區域",
     "button": {
       "findSimilar": "尋找相似項目",
@@ -95,7 +95,7 @@
       "aiTips": "在追蹤物件的生命週期結束前，Frigate 不會向你設定的生成式 AI 提供者請求說明。"
     },
     "expandRegenerationMenu": "展開重新生成選單",
-    "regenerateFromSnapshot": "從截圖重新生成",
+    "regenerateFromSnapshot": "從快照重新生成",
     "regenerateFromThumbnails": "從縮圖重新生成",
     "tips": {
       "descriptionSaved": "成功儲存說明",
@@ -117,7 +117,7 @@
   "trackedObjectDetails": "追蹤物件詳情",
   "type": {
     "details": "詳情",
-    "snapshot": "截圖",
+    "snapshot": "快照",
     "video": "影片",
     "thumbnail": "預覽圖",
     "tracking_details": "追蹤詳情"
@@ -131,8 +131,8 @@
       "aria": "下載影片"
     },
     "downloadSnapshot": {
-      "label": "下載截圖",
-      "aria": "下載截圖"
+      "label": "下載快照",
+      "aria": "下載快照"
     },
     "findSimilar": {
       "label": "尋找相似項目",
@@ -185,7 +185,7 @@
       "desc": "刪除此追蹤物件將會移除快照、已儲存的嵌入向量資料（embeddings），以及相關的追蹤詳情紀錄。歷史檢視中的錄影檔案 <em>不會</em> 被刪除。<br /><br />確定要刪除嗎？"
     },
     "toast": {
-      "error": "刪除該追蹤目標時出錯：{{errorMessage}}"
+      "error": "刪除該追蹤物件時出錯：{{errorMessage}}"
     }
   },
   "noTrackedObjects": "找不到追蹤物件",
@@ -195,7 +195,7 @@
     "tooltip": "與 {{type}} 相似的程度為 {{confidence}}%",
     "deleteTrackedObject": {
       "toast": {
-        "success": "成功刪除蹤物件。",
+        "success": "成功刪除追蹤物件。",
         "error": "刪除追蹤物件失敗：{{errorMessage}}"
       }
     },
@@ -208,8 +208,8 @@
     "createObjectMask": "建立物件遮罩",
     "adjustAnnotationSettings": "調整標記設定",
     "scrollViewTips": "點擊查看物件週期的關鍵時間。",
-    "autoTrackingTips": "自動追蹤鏡頭的邊框位置可能不準確。",
-    "count": "{{second}}之{{first}}",
+    "autoTrackingTips": "自動追蹤攝影機的邊界框位置可能不準確。",
+    "count": "第 {{first}} 項，共 {{second}} 項",
     "trackedPoint": "追蹤點",
     "lifecycleItemDesc": {
       "visible": "偵測到 {{label}}",
@@ -241,7 +241,7 @@
       },
       "offset": {
         "label": "標記偏移量",
-        "desc": "這個資料來自您的鏡頭的偵測串流源，但是被疊加在錄影串流源的畫面上，兩個串流源不太可能完美的同步，因此邊框與畫面無法完美的對齊。您可以用這項設定調整標記在時間上前後偏移的補償量來更好的將其與錄影畫面對齊。",
+        "desc": "這個資料來自您的攝影機的偵測串流源，但是被疊加在錄影串流源的畫面上，兩個串流源不太可能完美的同步，因此邊界框與畫面無法完美的對齊。您可以用這項設定調整標記在時間上前後偏移的補償量來更好的將其與錄影畫面對齊。",
         "millisecondsToOffset": "偵測標記偏移補償的毫秒數。<em>預設值: 0</em>",
         "tips": "如果影片播放進度超前於方框和路徑點，則降低該值；如果影片播放進度落後於方框和路徑點，則增加該數值。該值可以為負數。",
         "toast": {

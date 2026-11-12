@@ -31,7 +31,7 @@
     "decodedFrames": "已解碼幀數：",
     "droppedFrameRate": "掉幀率："
   },
-  "livePlayerRequiredIOSVersion": "此串流類型需要 IOS 17.1 或以上版本。",
+  "livePlayerRequiredIOSVersion": "此串流類型需要 iOS 17.1 或以上版本。",
   "toast": {
     "success": {
       "submittedFrigatePlus": "成功提交畫面至 Frigate+"

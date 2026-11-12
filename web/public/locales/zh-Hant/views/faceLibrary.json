@@ -2,13 +2,13 @@
   "description": {
     "addFace": "上傳您的第一張照片至臉部資料庫以新增一個新的集合。",
     "placeholder": "輸入此集合的名稱",
-    "invalidName": "無效的名稱。名稱只能包涵英數字、空格、撇（'）、底線（_）及連字號（-）。",
+    "invalidName": "名稱只能包含英數字、空格、單引號（'）、底線（_）以及連字號（-）。",
     "nameCannotContainHash": "名稱中不允許包含「#」符號。"
   },
   "details": {
     "timestamp": "時間戳",
     "unknown": "未知",
-    "scoreInfo": "子標籤分數是所有已辨識的人臉信心值的加權平均，因此可能與截圖上顯示的分數不同。"
+    "scoreInfo": "分數是所有人臉分數的加權平均值，並依每張圖片中的人臉大小進行加權。"
   },
   "documentTitle": "人臉資料庫 - Frigate",
   "uploadFaceImage": {

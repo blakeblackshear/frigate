@@ -1,15 +1,15 @@
 {
     "documentTitle": "變動搜尋 - Frigate",
-    "title": "畫面變動搜尋",
-    "description": "繪製一個多邊形以劃定感興趣區域，並指定時間範圍，檢索該區域內的動態變化。",
-    "selectCamera": "畫面變動搜尋正在載入中",
+    "title": "移動搜尋",
+    "description": "繪製一個多邊形以劃定感興趣區域，並指定時間範圍，檢索該區域內的移動變化。",
+    "selectCamera": "移動搜尋正在載入中",
     "startSearch": "開始搜尋",
     "searchStarted": "搜尋已開始",
     "searchCancelled": "搜尋已取消",
     "cancelSearch": "取消",
     "searching": "搜尋進行中。",
     "searchComplete": "搜尋完成",
-    "noResultsYet": "在所選區域內執行搜尋，查詢異常變化",
+    "noResultsYet": "執行搜尋以尋找所選區域內的移動變化",
     "noChangesFound": "所選區域未偵測到像素變化",
     "changesFound_other": "偵測到 {{count}} 處畫面變化",
     "framesProcessed": "已處理 {{count}} 幀畫面",
@@ -26,9 +26,9 @@
         "drawMode": "繪製",
         "moveMode": "移動"
     },
-    "motionHeatmapLabel": "畫面變動熱力圖",
+    "motionHeatmapLabel": "移動熱力圖",
     "dialog": {
-        "title": "畫面變動搜尋",
+        "title": "移動搜尋",
         "cameraLabel": "攝影機",
         "previewAlt": "{{camera}} 攝影機即時預覽"
     },
@@ -41,12 +41,12 @@
         "title": "搜尋設定",
         "parallelMode": "並行模式",
         "parallelModeDesc": "同時掃描多個錄影片段（速度更快，但會消耗更多解碼資源）",
-        "threshold": "靈敏度閾值",
+        "threshold": "靈敏度臨界值",
         "thresholdDesc": "數值越低，可偵測到越小的變化（取值範圍 1-255）",
         "minArea": "最小變化區域",
         "minAreaDesc": "最小感興趣區域變化佔比，達到該比例才會判定為有效變動",
         "maxResults": "最大結果數",
-        "maxResultsDesc": "匹配到設定條數的錄影事件後，就自動停止檢索"
+        "maxResultsDesc": "符合設定條數的錄影事件後，就自動停止"
     },
     "errors": {
         "noCamera": "請選擇攝影機",
