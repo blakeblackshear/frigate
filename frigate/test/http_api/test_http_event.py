@@ -492,21 +492,32 @@ class TestHttpApp(BaseTestHttp):
             "3.ascii": "Alice",
             "4.none": None,
         }
+        mock_embeddings = Mock()
+        mock_embeddings.search_thumbnail.return_value = [(id, 0.1) for id in sub_labels]
+
+        self.app.frigate_config.semantic_search.enabled = True
+        self.app.embeddings = mock_embeddings
 
         with AuthTestClient(self.app) as client:
             for id, sub_label in sub_labels.items():
                 super().insert_mock_event(id)
                 Event.update(sub_label=sub_label).where(Event.id == id).execute()
 
-            def ids(query: str) -> set[str]:
-                events = client.get("/events", params={"sub_labels": query}).json()
-                return {event["id"] for event in events}
+            search_params = {"search_type": "similarity", "event_id": "1.cyrillic"}
 
-            assert ids("Кузнецова Ира") == {"1.cyrillic"}
-            assert ids("Ира") == {"2.joined"}
-            assert ids("bob") == {"2.joined"}
-            assert ids("ALICE") == {"3.ascii"}
-            assert ids("None") == {"4.none"}
+            for path, params in (("/events", {}), ("/events/search", search_params)):
+
+                def ids(query: str) -> set[str]:
+                    events = client.get(
+                        path, params={**params, "sub_labels": query}
+                    ).json()
+                    return {event["id"] for event in events}
+
+                assert ids("Кузнецова Ира") == {"1.cyrillic"}
+                assert ids("Ира") == {"2.joined"}
+                assert ids("bob") == {"2.joined"}
+                assert ids("ALICE") == {"3.ascii"}
+                assert ids("None") == {"4.none"}
 
     ####################################################################################################################
     ###################################  GET /metrics Endpoint   #########################################################
