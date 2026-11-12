@@ -68,8 +68,6 @@
     "title": "Cài đặt Frigate+",
     "apiKey": {
       "title": "Khóa API Frigate+",
-      "validated": "Khóa API Frigate+ đã được phát hiện và xác thực",
-      "notValidated": "Khóa API Frigate+ không được phát hiện hoặc chưa được xác thực",
       "desc": "Khóa API Frigate+ cho phép tích hợp với dịch vụ Frigate+.",
       "plusLink": "Đọc thêm về Frigate+"
     },
