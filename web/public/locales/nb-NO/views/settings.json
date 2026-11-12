@@ -616,9 +616,7 @@
   },
   "frigatePlus": {
     "apiKey": {
-      "notValidated": "Frigate+ API-nøkkel er ikke detektert eller validert",
       "title": "Frigate+ API-nøkkel",
-      "validated": "Frigate+ API-nøkkel er detektert og validert",
       "desc": "Frigate+ API-nøkkelen muliggjør integrasjon med Frigate+ tjenesten.",
       "plusLink": "Les mer om Frigate+"
     },
