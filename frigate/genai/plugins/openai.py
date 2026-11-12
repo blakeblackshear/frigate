@@ -84,6 +84,7 @@ class OpenAIClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to OpenAI."""
         messages_content: list[dict] = []
@@ -123,6 +124,20 @@ class OpenAIClient(GenAIClient):
                     if isinstance(schema, dict):
                         schema["additionalProperties"] = False
                 request_params["response_format"] = response_format
+            if extra_headers:
+                # Header names are case-insensitive: a per-request header
+                # replaces a configured one of the same name.
+                names = {name.lower() for name in extra_headers}
+                request_params["extra_headers"] = {
+                    **{
+                        name: value
+                        for name, value in (
+                            request_params.get("extra_headers") or {}
+                        ).items()
+                        if name.lower() not in names
+                    },
+                    **extra_headers,
+                }
 
             result = self.provider.chat.completions.create(**request_params)
 
