@@ -55,7 +55,9 @@
         "invalidTimeRange": "结束时间必须在开始时间之后",
         "searchFailed": "搜索失败：{{message}}",
         "polygonTooSmall": "多边形至少需要 3 个顶点",
-        "unknown": "未知错误"
+        "unknown": "未知错误",
+        "alreadyRunning": "你已有一个画面变动搜索正在进行中，请等待其完成或取消它。",
+        "tooManySearches": "正在进行的画面变动搜索较多，请等待其中一个完成后再试。"
     },
     "changePercentage": "{{percentage}}% 已变化",
     "metrics": {

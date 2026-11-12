@@ -5,8 +5,13 @@
   "documentTitle.withCamera": "{{camera}} - 实时监控 - Frigate",
   "lowBandwidthMode": "低带宽模式",
   "twoWayTalk": {
-    "enable": "开启实时对话",
-    "disable": "关闭实时通话"
+    "enable": "开启双向对讲",
+    "disable": "关闭双向对讲",
+    "requiresWebRTC": "双向对讲需要 WebRTC，但当前不可用",
+    "error": {
+      "microphone": "双向对讲无法访问你的麦克风",
+      "refused": "双向对讲启动失败。详情请查看浏览器控制台。"
+    }
   },
   "cameraAudio": {
     "enable": "开启音频输出",
@@ -17,7 +22,7 @@
       "clickMove": {
         "label": "点击画面以使摄像头居中",
         "enable": "开启点击移动",
-        "disable": "禁用点击移动",
+        "disable": "关闭点击移动",
         "enableWithZoom": "开启点击移动 / 拖动缩放功能"
       },
       "left": {
@@ -82,7 +87,7 @@
     "disable": "关闭音频检测"
   },
   "autotracking": {
-    "enable": "启用自动追踪",
+    "enable": "开启自动追踪",
     "disable": "关闭自动追踪"
   },
   "streamStats": {
@@ -94,17 +99,17 @@
     "tips": "根据此摄像头的录像存储设置，可以下载即时快照或手动触发事件记录。",
     "playInBackground": {
       "label": "后台播放",
-      "desc": "启用此选项可在播放器隐藏时继续视频流播放。"
+      "desc": "开启此选项可在播放器隐藏时继续视频流播放。"
     },
     "showStats": {
       "label": "显示统计信息",
-      "desc": "启用此选项可在摄像头画面上叠加显示视频流统计信息。"
+      "desc": "开启此选项可在摄像头画面上叠加显示视频流统计信息。"
     },
     "debugView": "调试视图",
     "start": "开始手动按需录制",
-    "started": "已启用手动按需录制。",
+    "started": "已开启手动按需录制。",
     "failedToStart": "启动手动录制失败。",
-    "recordDisabledTips": "由于此摄像头的配置中禁用了录制或对其进行了限制，将只会保存快照。",
+    "recordDisabledTips": "由于此摄像头的配置中关闭了录制或对其进行了限制，将只会保存快照。",
     "end": "停止手动按需录制",
     "ended": "已完成手动按需录制。",
     "failedToEnd": "停止手动录制失败。"
@@ -125,20 +130,60 @@
       "unavailable": "此视频流不支持音频传输"
     },
     "twoWayTalk": {
-      "tips": "您的设备必须支持此功能，并且必须配置 WebRTC 以支持双向对讲。",
+      "tips": "你的设备必须支持此功能，并且必须配置 WebRTC 以支持双向对讲。",
       "available": "此视频流支持双向对讲",
       "unavailable": "此视频流不支持双向对讲"
     },
     "lowBandwidth": {
-      "tips": "由于缓冲或视频流错误，实时视图处于低带宽模式。",
-      "resetStream": "重置视频流"
+      "tips": "由于缓冲或视频流错误，实时监控处于低带宽模式。",
+      "resetStream": "重置视频流",
+      "force": {
+        "label": "强制使用低带宽模式",
+        "desc": "始终播放 Frigate 内置的低带宽视频流，而不是选定的视频流。任何网络下都能用，但画质较低且没有声音。"
+      }
     },
     "playInBackground": {
       "label": "后台播放",
-      "tips": "启用此选项可在播放器隐藏时继续视频流播放。"
+      "tips": "开启此选项可在播放器隐藏时继续视频流播放。"
     },
     "debug": {
-      "picker": "调试模式下无法切换视频流。调试将始终使用检测（detect）功能的视频流。"
+      "picker": "调试模式下无法切换视频流。调试将始终使用检测（detect）功能的视频流。",
+      "technology": "调试模式下无法选择视频流传输技术。"
+    },
+    "auto": {
+      "label": "自动",
+      "tips": "根据网络状况自动切换视频流",
+      "selected": "自动 · {{stream}}",
+      "floorLabel": "低带宽",
+      "retry": "尝试最高画质",
+      "reason": {
+        "bandwidth": "当前网络跟不上更高画质的视频流，正在播放 {{stream}}",
+        "codec": "当前浏览器无法播放更高画质的视频流，正在播放 {{stream}}",
+        "saveData": "因为开启了省流量模式，正在播放 {{stream}}",
+        "floor": "所有视频流都跟不上，正在播放低带宽画面"
+      }
+    },
+    "mode": "视频流传输技术",
+    "technology": {
+      "description": "选择你偏好的视频流传输技术。播放或网络出错时，Frigate 仍可能回退到低带宽模式。",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "推荐的默认选项，兼容性好，播放流畅",
+        "webrtc": "需要额外配置，而且并非所有设备都支持"
+      },
+      "unavailable": {
+        "browser": "你的浏览器不支持 WebRTC。",
+        "not-configured": "要开启此功能，请在 go2rtc → webrtc → candidates 中添加本服务器的 IP:8555。",
+        "notConfiguredOptional": "可选：不配置也能正常查看实时监控。WebRTC 主要用于双向对讲。",
+        "unreachable": "WebRTC 无法连接。请检查 8555 端口是否可访问，以及 STUN/TURN 服务器配置是否正确。",
+        "video-codec": "此视频流的视频编码格式在当前浏览器中不受 WebRTC 支持。",
+        "audio-codec": "此视频流的音频编码格式不受 WebRTC 支持。请使用 go2rtc 转码为 opus 或 G.711。",
+        "checking": "正在检查 WebRTC 是否可用…"
+      }
     }
   },
   "cameraSettings": {
@@ -169,7 +214,7 @@
     "exitEdit": "退出编辑"
   },
   "transcription": {
-    "enable": "启用实时音频转录",
+    "enable": "开启实时音频转录",
     "disable": "关闭实时音频转录"
   },
   "noCameras": {

@@ -70,7 +70,8 @@
     "inProgress": "进行中",
     "invalidStartTime": "无效的开始时间",
     "invalidEndTime": "无效的结束时间",
-    "never": "从不"
+    "never": "从不",
+    "custom": "自定义…"
   },
   "unit": {
     "speed": {
@@ -115,10 +116,10 @@
     "apply": "应用",
     "reset": "重置",
     "done": "完成",
-    "enabled": "启用",
-    "enable": "启用",
-    "disabled": "禁用",
-    "disable": "禁用",
+    "enabled": "开启",
+    "enable": "开启",
+    "disabled": "关闭",
+    "disable": "关闭",
     "save": "保存",
     "saving": "保存中…",
     "cancel": "取消",
@@ -146,7 +147,7 @@
     "deleteNow": "立即删除",
     "next": "下一个",
     "cameraAudio": "摄像头音频",
-    "twoWayTalk": "双向对话",
+    "twoWayTalk": "双向对讲",
     "continue": "继续",
     "add": "添加",
     "applying": "应用中…",
@@ -293,7 +294,7 @@
   "accessDenied": {
     "documentTitle": "没有权限 - Frigate",
     "title": "没有权限",
-    "desc": "您没有权限查看此页面。"
+    "desc": "你没有权限查看此页面。"
   },
   "notFound": {
     "documentTitle": "没有找到页面 - Frigate",
@@ -329,6 +330,25 @@
     "copyFailed": "无法复制详情到剪切板"
   },
   "commandMenu": {
-    "title": "命令菜单"
+    "title": "命令菜单",
+    "description": "搜索页面、摄像头、设置项和操作",
+    "placeholder": "搜索页面、摄像头、设置项和操作",
+    "empty": "未匹配",
+    "section": {
+      "recent": "最近",
+      "pages": "页面",
+      "cameras": "摄像头",
+      "cameraGroups": "摄像头组",
+      "settings": "设置",
+      "actions": "行为"
+    },
+    "camera": {
+      "live": "实时监控",
+      "review": "核查"
+    },
+    "action": {
+      "toggleTheme": "切换浅色或深色模式"
+    },
+    "hint": "按 {{key}} 或 / 打开，按回车运行"
   }
 }
