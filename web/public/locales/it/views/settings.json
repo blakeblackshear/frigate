@@ -29,8 +29,6 @@
     },
     "apiKey": {
       "title": "Chiave API Frigate+",
-      "validated": "La chiave API Frigate+ è stata rilevata e convalidata",
-      "notValidated": "La chiave API Frigate+ non è stata rilevata o non è stata convalidata",
       "desc": "La chiave API Frigate+ consente l'integrazione con il servizio Frigate+.",
       "plusLink": "Scopri di più su Frigate+"
     },
