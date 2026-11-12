@@ -98,14 +98,22 @@ class TestHttpApp(BaseTestHttp):
             assert response.status_code == 200
             assert app.frigate_config.cameras["front_door"].objects.track == ["person"]
 
-    def test_config_set_in_memory_rebinds_replay_model_on_scene_change(self):
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_config_set_in_memory_rebinds_replay_model_on_scene_change(
+        self, mock_labels
+    ):
+        mock_labels.return_value = {}
         replay = "_replay_front_door"
+        self.minimal_config["models"] = [
+            {"devices": ["cpu"]},
+            {"scene": "thermal", "devices": ["openvino:CPU"], "width": 300},
+        ]
         self.minimal_config["cameras"][replay] = self.minimal_config["cameras"].pop(
             "front_door"
         )
         app = super().create_app()
         app.config_publisher = Mock()
-        app.frigate_config.model_for_camera(replay)
+        assert app.frigate_config.model_for_camera(replay).scene == "default"
 
         with AuthTestClient(app) as client:
             response = client.put(
@@ -122,7 +130,7 @@ class TestHttpApp(BaseTestHttp):
 
         assert response.status_code == 200
         assert app.frigate_config.cameras[replay].detect.scene == "thermal"
-        assert replay not in app.frigate_config._camera_models
+        assert app.frigate_config.model_for_camera(replay).scene == "thermal"
         topics = [
             call.args[0].update_type.name
             for call in app.config_publisher.publish_update.call_args_list

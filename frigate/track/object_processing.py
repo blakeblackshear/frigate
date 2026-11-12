@@ -795,6 +795,7 @@ class TrackedObjectProcessor(threading.Thread):
                 ):
                     continue
 
+                self.force_end_all_events(camera, camera_state)
                 camera_state.shutdown()
                 self.frame_manager.close_camera(camera)
                 self.create_camera_state(camera)
