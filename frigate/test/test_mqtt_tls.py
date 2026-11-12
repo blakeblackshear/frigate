@@ -46,7 +46,7 @@ class TestMqttTls(unittest.TestCase):
                 self.subTest(tls_insecure=insecure),
                 self.assertRaisesRegex(ValidationError, "tls_ca_certs") as error,
             ):
-                MqttConfig(host="10.10.10.146", tls_insecure=insecure)
+                MqttConfig(host="192.0.2.1", tls_insecure=insecure)
 
             self.assertIn("Remove tls_insecure for plaintext", str(error.exception))
             self.assertIn("CA certificate path to enable TLS", str(error.exception))

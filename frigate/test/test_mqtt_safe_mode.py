@@ -35,7 +35,7 @@ class TestMqttSafeMode(unittest.TestCase):
             config_path.write_text(
                 "mqtt:\n"
                 "  enabled: true\n"
-                "  host: 10.10.10.146\n"
+                "  host: 192.0.2.1\n"
                 f"  tls_insecure: {str(insecure).lower()}\n"
                 "cameras: {}\n"
                 "auth:\n"
