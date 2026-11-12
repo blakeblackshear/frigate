@@ -512,8 +512,6 @@
     "title": "Frigate+設定",
     "apiKey": {
       "title": "Frigate+ API金鑰",
-      "validated": "已偵測並驗證Frigate+ API金鑰",
-      "notValidated": "未偵測到Frigate+ API金鑰或驗證失敗",
       "desc": "Frigate+ API金鑰可啟用與Frigate+服務的整合功能。",
       "plusLink": "了解更多Frigate+資料"
     },
