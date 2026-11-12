@@ -715,9 +715,14 @@
     "apiKey": {
       "plusLink": "Citește mai multe despre Frigate+",
       "desc": "Cheia API Frigate+ permite integrarea cu serviciul Frigate+.",
-      "validated": "Cheia API Frigate+ a fost detectată și validată",
       "title": "Cheie API Frigate+",
-      "notValidated": "Cheia API Frigate+ nu este detectată sau validată"
+      "formatValid": "Cheia API Frigate+ este detectată și corespunde formatului așteptat",
+      "formatInvalid": "Cheia API Frigate+ nu este detectată sau nu corespunde formatului așteptat",
+      "validate": "Validează cu Frigate+",
+      "validating": "Se validează…",
+      "serverValid": "Frigate+ a acceptat această cheie API",
+      "serverInvalid": "Frigate+ a respins această cheie API",
+      "serverUnreachable": "Nu s-a putut contacta Frigate+ pentru a valida această cheie API"
     },
     "snapshotConfig": {
       "title": "Configurare snapshot-uri",
