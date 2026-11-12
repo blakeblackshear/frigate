@@ -1086,8 +1086,6 @@
     },
     "apiKey": {
       "title": "Frigate+ API ključ",
-      "validated": "Frigate+ API ključ je detektovan i validiran",
-      "notValidated": "Frigate+ API ključ nije detektovan ili nije validiran",
       "desc": "Frigate+ API ključ omogućava integraciju sa uslugom Frigate+.",
       "plusLink": "Pročitajte više o Frigate+"
     },
