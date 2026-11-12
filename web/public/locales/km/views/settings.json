@@ -1193,8 +1193,6 @@
     },
     "apiKey": {
       "title": "Frigate+ API Key",
-      "validated": "Frigate+ API key ត្រូវបានរកឃើញ និងផ្ទៀងផ្ទាត់",
-      "notValidated": "Frigate+ API key មិនត្រូវបានរកឃើញ ឬមិនបានផ្ទៀងផ្ទាត់",
       "desc": "Frigate+ API key អនុញ្ញាតឱ្យមានការរួមបញ្ចូលជាមួយសេវាកម្ម Frigate+។",
       "plusLink": "អានបន្ថែមអំពី Frigate+"
     },
