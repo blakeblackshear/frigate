@@ -157,5 +157,26 @@ class TestObjectDescriptionEventHeader(unittest.TestCase):
         self.assertEqual(client._send.call_args.kwargs["extra_headers"], EVENT_HEADER)
 
 
+class TestReviewDescriptionReviewHeader(unittest.TestCase):
+    def test_review_description_sends_the_review_id_header(self):
+        client = _make_client("openai", model="gpt-4o", api_key="k")
+        client._send = MagicMock(return_value=None)
+        with patch(
+            "frigate.genai.build_review_description_prompt", return_value="prompt"
+        ):
+            client.generate_review_description(
+                {"id": "1700000000.0-rev123", "camera": "front"},
+                [b"a"],
+                [],
+                None,
+                False,
+                "",
+            )
+        self.assertEqual(
+            client._send.call_args.kwargs["extra_headers"],
+            {"X-Frigate-Review-ID": "1700000000.0-rev123"},
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
