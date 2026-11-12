@@ -7,11 +7,11 @@
       "label": "Supprimer le groupe de caméras",
       "confirm": {
         "title": "Confirmez la suppression",
-        "desc": "Êtes-vous sûr de vouloir supprimer le groupe de caméras <em>{{name}}</em> ?"
+        "desc": "Êtes-vous sûr de vouloir supprimer le groupe de caméras <em>{{name}}</em>?"
       }
     },
     "name": {
-      "placeholder": "Saisissez un nom.",
+      "placeholder": "Saisissez un nom…",
       "label": "Nom",
       "errorMessage": {
         "mustLeastCharacters": "Le nom du groupe de caméras doit comporter au moins 2 caractères.",
