@@ -631,8 +631,6 @@
     "title": "Настройки Frigate+",
     "apiKey": {
       "title": "Ключ API Frigate+",
-      "validated": "Ключ API Frigate+ найден и проверен",
-      "notValidated": "Ключ API Frigate+ не найден или не проверен",
       "desc": "Ключ API Frigate+ включает интеграцию с сервисом Frigate+.",
       "plusLink": "Подробнее про Frigate+"
     },
