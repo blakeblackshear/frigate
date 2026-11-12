@@ -671,10 +671,15 @@
     "title": "Frigate+ Ayarları",
     "apiKey": {
       "title": "Frigate+ API Anahtarı",
-      "validated": "Frigate+ API anahtarınız algılandı ve doğrulandı",
       "plusLink": "Frigate+ hakkında daha fazla bilgi edinin",
-      "notValidated": "Frigate+ API anahtarı algılanmadı veya doğrulanmadı",
-      "desc": "Frigate+ API anahtarı, Frigate+ hizmetiyle entegrasyonu sağlar."
+      "desc": "Frigate+ API anahtarı, Frigate+ hizmetiyle entegrasyonu sağlar.",
+      "formatValid": "Frigate+ API anahtarı algılandı ve beklenen biçime uyuyor",
+      "formatInvalid": "Frigate+ API anahtarı algılanmadı veya beklenen biçime uymuyor",
+      "validate": "Frigate+ ile doğrula",
+      "validating": "Doğrulanıyor…",
+      "serverValid": "Frigate+ bu API anahtarını kabul etti",
+      "serverInvalid": "Frigate+ bu API anahtarını reddetti",
+      "serverUnreachable": "Bu API anahtarını doğrulamak için Frigate+'ya ulaşılamadı"
     },
     "snapshotConfig": {
       "title": "Anlık Fotoğraf Yapılandırması",
