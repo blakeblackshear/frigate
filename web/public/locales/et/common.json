@@ -76,7 +76,8 @@
       "24hour": "dd. MMM yyyy, HH:mm"
     },
     "formattedTimestampMonthDay": "dd. MMM",
-    "never": "Mitte kunagi"
+    "never": "Mitte kunagi",
+    "custom": "Kohanadatud…"
   },
   "menu": {
     "user": {
