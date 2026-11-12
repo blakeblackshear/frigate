@@ -9,6 +9,7 @@ import queue
 import re
 import shlex
 import struct
+import threading
 import time
 import urllib.parse
 from collections import deque
@@ -42,6 +43,7 @@ class EventsPerSecond:
         self._max_events = max_events
         self._last_n_seconds = last_n_seconds
         self._timestamps: deque[float] = deque(maxlen=max_events)
+        self._lock = threading.Lock()
 
     def start(self) -> None:
         self._start = time.monotonic()
@@ -71,8 +73,11 @@ class EventsPerSecond:
     # remove aged out timestamps
     def expire_timestamps(self, now: float) -> None:
         threshold = now - self._last_n_seconds
-        while self._timestamps and self._timestamps[0] < threshold:
-            self._timestamps.popleft()
+
+        # update() and eps() can run on different threads
+        with self._lock:
+            while self._timestamps and self._timestamps[0] < threshold:
+                self._timestamps.popleft()
 
 
 class InferenceSpeed:

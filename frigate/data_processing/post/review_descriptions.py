@@ -179,53 +179,71 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             ):
                 return
 
-            image_source = camera_config.review.genai.image_source
-            frame_mode = camera_config.review.genai.frame_mode
+            threading.Thread(
+                target=self._describe_finished_review,
+                name=f"review_description_{id}",
+                daemon=True,
+                args=(
+                    camera_config,
+                    final_data,
+                    camera_config.review.genai.image_source,
+                ),
+            ).start()
 
-            if image_source == ImageSourceEnum.recordings:
-                buffer_extension = get_recording_buffer_extension(
-                    final_data["end_time"] - final_data["start_time"]
-                )
-                final_data["start_time"] -= buffer_extension
-                final_data["end_time"] += buffer_extension
+    def _describe_finished_review(
+        self,
+        camera_config: CameraConfig,
+        final_data: dict[str, Any],
+        image_source: ImageSourceEnum,
+        preview_fallback: bool = True,
+        named_objects: list[tuple[str, str]] | None = None,
+    ) -> None:
+        """Gather frames for a finished review item and start its description.
 
-                frames = self.get_recording_frames(
-                    camera,
-                    final_data["start_time"],
-                    final_data["end_time"],
-                    height=480,  # Use 480p for good balance between quality and token usage
-                    frame_mode=frame_mode,
-                )
+        Runs off the maintainer loop since recording frames shell out to ffmpeg
+        once per frame.
+        """
+        camera = final_data["camera"]
+        id = final_data["id"]
+        genai_config = camera_config.review.genai
+        frames: list[tuple[bytes, float]] = []
 
-                if not frames:
-                    # Fallback to preview frames if no recordings available
-                    logger.warning(
-                        f"No recording frames found for {camera}, falling back to preview frames"
-                    )
-                    frames = self.get_preview_frames_as_bytes(
-                        camera,
-                        final_data["start_time"],
-                        final_data["end_time"],
-                        final_data["thumb_path"],
-                        id,
-                        camera_config.review.genai.debug_save_thumbnails,
-                        frame_mode,
-                    )
-                elif camera_config.review.genai.debug_save_thumbnails:
+        if image_source == ImageSourceEnum.recordings:
+            buffer_extension = get_recording_buffer_extension(
+                final_data["end_time"] - final_data["start_time"]
+            )
+            frames = self.get_recording_frames(
+                camera,
+                final_data["start_time"] - buffer_extension,
+                final_data["end_time"] + buffer_extension,
+                height=480,  # Use 480p for good balance between quality and token usage
+                frame_mode=genai_config.frame_mode,
+            )
+
+            if frames:
+                if genai_config.debug_save_thumbnails:
                     self.save_debug_recording_frames(id, frames)
+            elif not preview_fallback:
+                logger.error("No recording frames are available for review item %s", id)
+                return
             else:
-                # Use preview frames
-                frames = self.get_preview_frames_as_bytes(
+                logger.warning(
+                    "No recording frames found for %s, falling back to preview frames",
                     camera,
-                    final_data["start_time"],
-                    final_data["end_time"],
-                    final_data["thumb_path"],
-                    id,
-                    camera_config.review.genai.debug_save_thumbnails,
-                    frame_mode,
                 )
 
-            self.start_analysis(camera_config, final_data, frames)
+        if not frames:
+            frames = self.get_preview_frames_as_bytes(
+                camera,
+                final_data["start_time"],
+                final_data["end_time"],
+                final_data["thumb_path"],
+                id,
+                genai_config.debug_save_thumbnails,
+                genai_config.frame_mode,
+            )
+
+        self.start_analysis(camera_config, final_data, frames, named_objects)
 
     def handle_request(self, topic: str, request_data: dict[str, Any]) -> str | None:
         if topic == EmbeddingsRequestEnum.regenerate_review_description.value:
@@ -419,31 +437,12 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             logger.error("Review item %s has not ended yet", review_id)
             return
 
-        buffer_extension = get_recording_buffer_extension(
-            final_data["end_time"] - final_data["start_time"]
-        )
-        frames = self.get_recording_frames(
-            str(review.camera),
-            final_data["start_time"] - buffer_extension,
-            final_data["end_time"] + buffer_extension,
-            height=480,
-            frame_mode=camera_config.review.genai.frame_mode,
-        )
-
-        if not frames:
-            logger.error(
-                "No recording frames are available for review item %s", review_id
-            )
-            return
-
-        if camera_config.review.genai.debug_save_thumbnails:
-            self.save_debug_recording_frames(review_id, frames)
-
-        self.start_analysis(
+        self._describe_finished_review(
             camera_config,
             final_data,
-            frames,
-            get_named_objects(
+            ImageSourceEnum.recordings,
+            preview_fallback=False,
+            named_objects=get_named_objects(
                 final_data["data"].get("detections") or [],
                 self.config.all_attributes,
             ),
