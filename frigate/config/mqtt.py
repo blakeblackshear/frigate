@@ -87,7 +87,8 @@ class MqttConfig(FrigateBaseModel):
 
     @model_validator(mode="after")
     def tls_insecure_requires_tls(self) -> Self:
-        if self.tls_insecure is not None and self.tls_ca_certs is None:
+        """Reject TLS verification settings without TLS when MQTT is enabled."""
+        if self.enabled and self.tls_insecure is not None and self.tls_ca_certs is None:
             raise ValueError(
                 "tls_insecure requires tls_ca_certs. Remove tls_insecure for plaintext "
                 "MQTT, or set tls_ca_certs to a CA certificate path to enable TLS."
