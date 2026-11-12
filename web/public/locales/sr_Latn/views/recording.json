@@ -1,1 +1,12 @@
-{}
+{
+  "filter": "Filtriraj",
+  "export": "Izvezi",
+  "calendar": "Kalendar",
+  "filters": "Filteri",
+  "toast": {
+    "error": {
+      "noValidTimeSelected": "Nije izabran važeći vremenski raspon",
+      "endTimeMustAfterStartTime": "Vreme završetka mora biti nakon vremena početka"
+    }
+  }
+}

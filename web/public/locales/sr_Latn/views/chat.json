@@ -1,1 +1,88 @@
-{}
+{
+    "documentTitle": "Ćaskanje - Frigate",
+    "title": "Frigate ćaskanje",
+    "subtitle": "Vaš AI asistent za upravljanje kamerama i uvođenje u detalje",
+    "placeholder": "Pitajte bilo šta...",
+    "error": "Nešto je pošlo po zlu. Pokušajte ponovo.",
+    "processing": "Obrada...",
+    "toolsUsed": "Korišćeno: {{tools}}",
+    "showTools": "Prikaži alate ({{count}})",
+    "hideTools": "Sakrij alate",
+    "call": "Poziv",
+    "result": "Rezultat",
+    "arguments": "Argumenti:",
+    "response": "Odgovor:",
+    "attachment_chip_label": "{{label}} na kameri {{camera}}",
+    "attachment_chip_remove": "Ukloni prilog",
+    "open_in_explore": "Otvori u pretraživaču",
+    "attach_event_aria": "Priloži događaj {{eventId}}",
+    "attachment_picker_paste_label": "Ili nalepite ID događaja",
+    "attachment_picker_attach": "Priloži",
+    "attachment_picker_placeholder": "Priloži događaj",
+    "quick_reply_find_similar": "Pronađi slična uočavanja",
+    "quick_reply_tell_me_more": "Reci mi nešto više o ovome",
+    "quick_reply_when_else": "Kada je još viđeno?",
+    "quick_reply_find_similar_text": "Pronađi slična uočavanja za ovo.",
+    "quick_reply_tell_me_more_text": "Reci mi nešto više o ovome.",
+    "quick_reply_when_else_text": "Kada je još ovo viđeno?",
+    "anchor": "Referenca",
+    "similarity_score": "Sličnost",
+    "no_similar_objects_found": "Nisu pronađeni slični objekti.",
+    "semantic_search_required": "Semantička pretraga mora biti omogućena da bi se pronašli slični objekti.",
+    "send": "Pošalji",
+    "suggested_requests": "Pokušajte da pitate:",
+    "starting_requests": {
+        "show_recent_events": "Prikaži nedavne događaje",
+        "show_camera_status": "Prikaži status kamera",
+        "recap": "Šta se desilo u odsustvu?",
+        "watch_camera": "Prati kameru za aktivnosti"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Prikaži mi nedavne događaje iz poslednjeg sata",
+        "show_camera_status": "Kakav je trenutni status kamera?",
+        "recap": "Šta se desilo u odsustvu?",
+        "watch_camera": "Prati ulazna vrata i javi mi ako se neko pojavi"
+    },
+    "new_chat": "Novo ćaskanje",
+    "settings": {
+        "title": "Podešavanja ćaskanja",
+        "show_stats": {
+            "title": "Prikaži statistiku",
+            "desc": "Prikaži brzinu generisanja i veličinu konteksta za odgovore u ćaskanju.",
+            "while_generating": "Tokom generisanja",
+            "always": "Uvek"
+        },
+        "auto_scroll": {
+            "title": "Automatsko pomeranje ekrana",
+            "desc": "Prati nove poruke kako pristižu."
+        },
+        "always_allow": {
+            "title": "Uvek dozvoljene akcije",
+            "desc": "Akcije koje asistent može da pokrene bez prethodnog traženja dozvole.",
+            "none": "Nijedna",
+            "reset": "Resetuj"
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} tokena",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Razmišljanje…",
+        "show": "Prikaži tok razmišljanja",
+        "hide": "Sakrij tok razmišljanja"
+    },
+    "thinking": {
+        "toggle": "Prebaci prikaz razmišljanja"
+    },
+    "approval": {
+        "title": "Odobriti {{tool}}?",
+        "desc": "Ova akcija menja nešto u Frigate-u. Pregledajte detalje pre odobravanja.",
+        "approve": "Odobri",
+        "always_allow": "Uvek dozvoli",
+        "reject": "Odbij",
+        "approved": "Odobreno",
+        "rejected": "Odbijeno",
+        "placeholder": "Odobrite ili odbijte akciju na čekanju da biste nastavili"
+    }
+}
