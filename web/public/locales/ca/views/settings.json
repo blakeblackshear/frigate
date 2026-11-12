@@ -714,9 +714,14 @@
     "apiKey": {
       "plusLink": "Llegeix més sobre Frigate+",
       "title": "Clau API de Frigate+",
-      "validated": "La clau API de Frigate+ ha estat detectada i validada",
-      "notValidated": "La clau API de Frigate+ no ha estat detectada o no ha estat validada",
-      "desc": "La clau API de Frigate+ habilita la integració amb el servei Frigate+."
+      "desc": "La clau API de Frigate+ habilita la integració amb el servei Frigate+.",
+      "formatValid": "S'ha detectat la clau API Frigate+ i coincideix amb el format esperat",
+      "formatInvalid": "La clau API Frigate+ no es detecta o no coincideix amb el format esperat",
+      "validate": "Valida amb Frigate+",
+      "validating": "S'està validant…",
+      "serverValid": "Frigate+ ha acceptat aquesta clau API",
+      "serverInvalid": "Frigate+ ha rebutjat aquesta clau API",
+      "serverUnreachable": "No s'ha pogut arribar a Frigate+ per validar aquesta clau API"
     },
     "unsavedChanges": "Canvis dels paràmetres de Frigate+ sense desar",
     "title": "Paràmetres de Frigate+",
