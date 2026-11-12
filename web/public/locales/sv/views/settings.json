@@ -648,11 +648,9 @@
   "frigatePlus": {
     "title": "Frigate+-inställningar",
     "apiKey": {
-      "notValidated": "Frigate+-API-nyckeln kunde inte identifieras eller valideras",
       "desc": "Frigate+ API-nyckeln möjliggör integration med Frigate+-tjänsten.",
       "plusLink": "Läs mer om Frigate+",
-      "title": "Frigate+ API-nyckel",
-      "validated": "Frigate+-API-nyckeln har identifierats och validerats"
+      "title": "Frigate+ API-nyckel"
     },
     "snapshotConfig": {
       "title": "Konfiguration av ögonblicksbilder",
