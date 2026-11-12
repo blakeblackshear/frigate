@@ -1310,8 +1310,6 @@
     },
     "apiKey": {
       "title": "Kunci API Frigate+",
-      "validated": "Kunci API Frigate+ terdeteksi dan tervalidasi",
-      "notValidated": "Kunci API Frigate+ tidak terdeteksi atau tidak tervalidasi",
       "desc": "Kunci API Frigate+ memungkinkan integrasi dengan layanan Frigate+.",
       "plusLink": "Baca lebih lanjut tentang Frigate+"
     },
