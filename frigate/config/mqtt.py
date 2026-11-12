@@ -84,3 +84,13 @@ class MqttConfig(FrigateBaseModel):
         if (self.user is None) != (self.password is None):
             raise ValueError("Password must be provided with username.")
         return self
+
+    @model_validator(mode="after")
+    def tls_insecure_requires_tls(self) -> Self:
+        """Reject TLS verification settings without TLS when MQTT is enabled."""
+        if self.enabled and self.tls_insecure is not None and self.tls_ca_certs is None:
+            raise ValueError(
+                "tls_insecure requires tls_ca_certs. Remove tls_insecure for plaintext "
+                "MQTT, or set tls_ca_certs to a CA certificate path to enable TLS."
+            )
+        return self
