@@ -74,7 +74,19 @@ def _resolve_cache_age(max_cache_age: int) -> int:
     return max_cache_age.default
 
 
-@router.get("/{camera_name}", dependencies=[Depends(require_camera_access)])
+@router.get(
+    "/{camera_name}",
+    dependencies=[Depends(require_camera_access)],
+    description=(
+        "An MJPEG stream of the camera's latest processed frame, intended for debugging only. "
+        "Every frame of every open stream is color converted, annotated, resized, and JPEG "
+        "encoded in Frigate's main process, which adds load to the system and can slow down "
+        "Frigate's processing. It is strictly not recommended to view this stream "
+        "continuously, such as on a dashboard. For live viewing, use a go2rtc restream "
+        "instead. The frame rate and resolution can be raised with the fps and height "
+        "parameters, for example ?fps=10&height=1080, at the cost of additional load."
+    ),
+)
 async def mjpeg_feed(
     request: Request,
     camera_name: str,

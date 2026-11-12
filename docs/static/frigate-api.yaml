@@ -5374,6 +5374,10 @@ paths:
       tags:
         - Media
       summary: Mjpeg Feed
+      description: |-
+        **Access:** Authenticated user with access to the referenced camera.
+
+        An MJPEG stream of the camera's latest processed frame, intended for debugging only. Every frame of every open stream is color converted, annotated, resized, and JPEG encoded in Frigate's main process, which adds load to the system and can slow down Frigate's processing. It is strictly not recommended to view this stream continuously, such as on a dashboard. For live viewing, use a go2rtc restream instead. The frame rate and resolution can be raised with the fps and height parameters, for example ?fps=10&height=1080, at the cost of additional load.
       operationId: mjpeg_feed__camera_name__get
       parameters:
         - name: camera_name
@@ -5461,7 +5465,6 @@ paths:
       security:
         - frigateUserAuth: []
       x-required-role: camera
-      description: '**Access:** Authenticated user with access to the referenced camera.'
   /{camera_name}/ptz/info:
     get:
       tags:
