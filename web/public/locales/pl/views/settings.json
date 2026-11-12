@@ -621,9 +621,7 @@
     "title": "Ustawienia Frigate+",
     "apiKey": {
       "title": "Klucz API Frigate+",
-      "validated": "Klucz API Frigate+ został wykryty i zweryfikowany",
       "plusLink": "Dowiedz się więcej o Frigate+",
-      "notValidated": "Klucz API Frigate+ nie został wykryty lub nie został zweryfikowany",
       "desc": "Klucz API Frigate+ umożliwia integrację z usługą Frigate+."
     },
     "snapshotConfig": {
