@@ -87,7 +87,8 @@
       "placeholder": "Sélectionner un dossier",
       "newCaseOption": "Créer un nouveau cas",
       "newCaseNamePlaceholder": "Nouveau nom de cas",
-      "newCaseDescriptionPlaceholder": "Description de cas"
+      "newCaseDescriptionPlaceholder": "Description de cas",
+      "nameRequired": "Nom du dossier requis"
     },
     "queueing": "Mise en file d'attente de l'export...",
     "tabs": {
@@ -116,7 +117,9 @@
       "selectWithActivity": "Caméras avec des objets suivis",
       "selectGroup": "Sélectionner un groupe",
       "noMatchingCameras": "Aucune caméra ne correspond à votre recherche",
-      "selectedCount": "{{selected}} / {{total}} sélectionnées"
+      "selectedCount": "{{selected}} / {{total}} sélectionnées",
+      "noCamerasSelected": "Sélectionner au moins une caméra",
+      "caseNameDefault": "Export Caméra multiple - {{date}}"
     },
     "multi": {
       "title_one": "Export {{count}} revue",

@@ -48,7 +48,7 @@
         },
         "labelmap": {
             "label": "Customisation Audio",
-            "description": "Remplacements ou entrées de remappage à fusionner avec la table standard des libellés audio."
+            "description": "Remplacements ou réassignations à fusionner aux étiquettes audio standard."
         }
     },
     "audio_transcription": {
@@ -78,8 +78,8 @@
             "description": "Emplacement numérique contrôlant l'ordre de la caméra dans la disposition en vue à vol d'oiseau."
         },
         "modes": {
-            "label": "Types d'activité",
-            "description": "Types d’activité qui incluent des caméras dans Birdseye."
+            "label": "Types d'événements",
+            "description": "Types d'activité qui incluent les caméras dans Birdseye."
         }
     },
     "detect": {
@@ -143,7 +143,7 @@
         },
         "scene": {
             "label": "Détecter la scène",
-            "description": "L'environnement filmé par cette caméra, utilisé pour déterminer lequel des modèles configurés doit être exécuté sur celle-ci. Les caméras laissées sur « default » utilisent le modèle configuré avec une scène définie sur « default »."
+            "description": "L'environnement filmé par cette caméra, utilisé pour choisir le modèle configuré à exécuter. Les caméras laissées sur « default » exécutent le modèle configuré avec la scène « default »."
         }
     },
     "face_recognition": {
@@ -240,6 +240,30 @@
         "quality": {
             "label": "Qualité de la diffusion en direct",
             "description": "Qualité de l'encodage pour le flux jsmpeg (1 étant la plus élevée, 31 la plus faible)."
+        },
+        "transcode": {
+            "label": "Flux transcodés",
+            "description": "Flux en direct transcodé en qualité inférieur à la demande de go2rtc.",
+            "enabled": {
+                "label": "Activé les flux transcodés",
+                "description": "ajouter un flux en direct de qualité inférieur que go2rtc transcode en temps réel pendant que quelqu'un regarde."
+            },
+            "source": {
+                "label": "Flux source",
+                "description": "flux à décoder par go2rtc. Par défaut le premier flux en direct."
+            },
+            "qualities": {
+                "label": "Qualités",
+                "description": "Un flux transcodé est ajouté par qualité.",
+                "height": {
+                    "label": "Taille",
+                    "description": "Taille de sortie en pixels; le forma respect le ratio de la source."
+                },
+                "bitrate": {
+                    "label": "Bitrate",
+                    "description": "Cible et bitrate maximum de la vidéo en kbps."
+                }
+            }
         }
     },
     "lpr": {
@@ -517,6 +541,41 @@
         "enabled_in_config": {
             "label": "État original de l'enregistrement",
             "description": "Indique si l'enregistrement était activé dans la configuration statique originale."
+        },
+        "sub": {
+            "label": "Enregistrement flux secondaire",
+            "description": "Paramètres pour enregistrer un second flux, de qualité moindre.",
+            "enabled": {
+                "label": "Activer l'enregistrement des flux secondaires",
+                "description": "Activer l'enregistrement d'un flux secondaire, de qualité moindre pour une qualité adaptative et une rétention étendue."
+            },
+            "continuous": {
+                "label": "Rétention continue des flux secondaires",
+                "description": "Nombre de jour de rétention des enregistrements des flux secondaire sans prise en compte d'objet traqué ou de mouvement.",
+                "days": {
+                    "label": "Jour de rétention",
+                    "description": "Combien de jour conserver les enregistrements."
+                }
+            },
+            "motion": {
+                "label": "Rétention des flux secondaires liés au mouvement",
+                "description": "Nombre de jours de conservation des enregistrements des flux secondaires déclenchés par un mouvement.",
+                "days": {
+                    "label": "Jours de rétention",
+                    "description": "Combien de jours conserver les enregistrements."
+                }
+            },
+            "alerts": {
+                "label": "Alerte rétention flux secondaires",
+                "description": "Paramètres de conservation pour les flux secondaires liés aux alertes.",
+                "days": {
+                    "label": "Jours de rétention",
+                    "description": "Nombre de jour de conservation des enregistrements lié à la détection d'événements."
+                },
+                "mode": {
+                    "label": "Mode de rétention"
+                }
+            }
         }
     },
     "review": {
@@ -534,7 +593,7 @@
             },
             "required_zones": {
                 "label": "Zones requises",
-                "description": "Zones qu'un objet doit entrer pour être considéré comme une alerte. (Laisser vide afin d'autoriser n'importe quelle zone.)"
+                "description": "Zones dans lesquelles un objet doit entrer pour être considéré comme une alarme; laisser vide pour définir l'entièreté de la zone"
             },
             "enabled_in_config": {
                 "label": "État des alertes originales",
@@ -544,13 +603,13 @@
                 "label": "Temps de coupure des alertes",
                 "description": "Délai en secondes après l'absence d'activité déclenchant une alerte avant de la couper."
             },
-            "description": "Paramètres pour lesquels les objets suivis génèrent des alertes et comment ces alertes sont conservées."
+            "description": "Paramètres définissant quels objets suivis génèrent des alertes et comment ces alertes sont conservées."
         },
         "detections": {
             "label": "Configuration des détections",
             "description": "Paramètres pour lesquels les objets suivis génèrent des détections (hors alerte) et comment les détections sont conservées.",
             "enabled": {
-                "label": "Activer les détections",
+                "label": "Activation des détections",
                 "description": "Activer ou désactiver les événements de détection pour cette caméra."
             },
             "labels": {

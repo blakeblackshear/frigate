@@ -82,7 +82,8 @@
     "inProgress": "En cours",
     "invalidStartTime": "Heure de début invalide",
     "invalidEndTime": "Heure de fin invalide",
-    "never": "Jamais"
+    "never": "Jamais",
+    "custom": "Personnalisé…"
   },
   "button": {
     "apply": "Appliquer",
