@@ -1373,8 +1373,6 @@
     },
     "apiKey": {
       "title": "Frigate+ API 키",
-      "validated": "Frigate+ API 키가 확인 및 검증되었습니다",
-      "notValidated": "Frigate+ API 키가 감지되지 않았거나 유효하지 않습니다",
       "desc": "Frigate+ API 키를 통해 Frigate+ 서비스와의 연동을 활성화합니다.",
       "plusLink": "Frigate+ 자세히 알아보기"
     },
