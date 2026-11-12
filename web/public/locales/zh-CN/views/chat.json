@@ -34,7 +34,7 @@
     "anchor": "来源",
     "similarity_score": "相似度",
     "no_similar_objects_found": "未找到相似目标。",
-    "semantic_search_required": "必须启用语义搜索才能查找相似目标。",
+    "semantic_search_required": "必须开启语义搜索才能查找相似目标。",
     "send": "发送",
     "suggested_requests": "尝试问问：",
     "starting_requests_prompts": {
@@ -55,6 +55,12 @@
         "auto_scroll": {
             "title": "自动滚动",
             "desc": "自动滚动到最新消息。"
+        },
+        "always_allow": {
+            "title": "始终允许的操作",
+            "desc": "助手无需询问即可执行的操作。",
+            "none": "无",
+            "reset": "重置"
         }
     },
     "stats": {
@@ -68,5 +74,15 @@
     },
     "thinking": {
         "toggle": "切换思考"
+    },
+    "approval": {
+        "title": "允许 {{tool}} 吗？",
+        "desc": "此操作会更改 Frigate 中的内容。请先查看详情，再决定是否允许。",
+        "approve": "允许",
+        "always_allow": "始终允许",
+        "reject": "拒绝",
+        "approved": "已允许",
+        "rejected": "已拒绝",
+        "placeholder": "允许或拒绝待处理的操作后才能继续"
     }
 }

@@ -30,15 +30,32 @@
       }
     },
     "decodedFrames": "解码帧数：",
-    "droppedFrameRate": "丢帧率："
+    "droppedFrameRate": "丢帧率：",
+    "stream": "视频流：",
+    "streamAuto": "{{stream}} （自动）"
   },
   "toast": {
     "success": {
       "submittedFrigatePlus": "已成功提交帧到 Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败"
+      "submitFrigatePlusFailed": "提交帧到 Frigate+ 失败",
+      "playRecordingsFailed": "播放录制失败（错误代码 {{code}}）：{{message}}"
     }
   },
-  "cameraOff": "摄像头已关闭"
+  "cameraOff": "摄像头已关闭",
+  "quality": {
+    "auto": "自动",
+    "autoLow": "播放低质量画面（带宽受限）",
+    "autoLowCodec": "播放低质量画面（该浏览器不支持原画）",
+    "autoLowSaveData": "播放低质量画面（节省带宽）",
+    "main": "原画",
+    "sub": "低画质",
+    "notSupportedBrowser": "不支持该浏览器",
+    "label": "画质",
+    "noAudio": "无音频",
+    "audioRate": "{{rate}} kHz 音频",
+    "audioCodecRate": "{{codec}}{{rate}} kHz",
+    "noRecordings": "该时间段内无录制"
+  }
 }

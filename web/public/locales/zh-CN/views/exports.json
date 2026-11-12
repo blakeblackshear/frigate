@@ -63,7 +63,8 @@
     "copying": "复制中",
     "encoding": "编码中",
     "encodingRetry": "重试编码中",
-    "finalizing": "正在完成"
+    "finalizing": "正在完成",
+    "merging": "合并"
   },
   "caseView": {
     "noDescription": "没有描述",

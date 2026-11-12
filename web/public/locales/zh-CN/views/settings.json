@@ -106,11 +106,11 @@
       "title": "实时监控面板",
       "automaticLiveView": {
         "label": "自动实时预览",
-        "desc": "检测到画面活动时将自动切换至该摄像头实时画面。禁用此选项会导致实时监控页面的摄像头图像每分钟只更新一次。"
+        "desc": "检测到画面活动时将自动切换至该摄像头实时画面。关闭此选项会导致实时监控页面的摄像头图像每分钟只更新一次。"
       },
       "playAlertVideos": {
         "label": "播放警报视频",
-        "desc": "默认情况下，实时监控页面上的最新警报会以一小段循环视频的形式进行播放。禁用此选项将仅显示浏览器本地缓存的静态图片。"
+        "desc": "默认情况下，实时监控页面上的最新警报会以一小段循环视频的形式进行播放。关闭此选项将仅显示浏览器本地缓存的静态图片。"
       },
       "displayCameraNames": {
         "label": "始终显示摄像头名称",
@@ -119,17 +119,24 @@
       "liveFallbackTimeout": {
         "label": "实时监控播放器回退超时",
         "desc": "当摄像头的高清实时监控流不可用时，将在此时间后回退到低带宽模式。默认值：3秒。"
+      },
+      "naturalAspectLayout": {
+        "label": "使用原始画面比例",
+        "desc": "在摄像头组实时监控面板中，按每个摄像头自身的原始画面比例调整卡片大小。关闭后，摄像头会统一使用标准的宽屏、横屏或竖屏卡片形状。",
+        "descNote": "开启或关闭此设置会清除所有摄像头组实时监控面板中保存的布局，之后需要重新手动调整。"
       }
     },
     "storedLayouts": {
       "title": "存储监控面板布局",
       "desc": "可以在监控面板调整或拖动摄像头的布局。这些设置将保存在浏览器的本地存储中。",
-      "clearAll": "清除所有布局"
+      "clearAll": "清除所有布局",
+      "clearConfirm": "这会清除当前浏览器中所有摄像头组保存的布局。此操作无法撤销。"
     },
     "cameraGroupStreaming": {
       "title": "摄像头组视频流设置",
       "desc": "每个摄像头组的视频流设置将保存在浏览器的本地存储中。",
-      "clearAll": "清除所有视频流设置"
+      "clearAll": "清除所有视频流设置",
+      "clearConfirm": "这会清除当前浏览器中所有摄像头组的视频流设置。此操作无法撤销。"
     },
     "recordingsViewer": {
       "title": "回放查看",
@@ -150,11 +157,43 @@
     "toast": {
       "success": {
         "clearStoredLayout": "已清除 {{cameraName}} 的存储布局",
-        "clearStreamingSettings": "已清除所有摄像头组的视频流设置。"
+        "clearStreamingSettings": "已清除所有摄像头组的视频流设置。",
+        "exportUiSettings": "设置已导出",
+        "importUiSettings": "设置已导入"
       },
       "error": {
         "clearStoredLayoutFailed": "清除存储布局失败：{{errorMessage}}",
-        "clearStreamingSettingsFailed": "清除视频流设置失败：{{errorMessage}}"
+        "clearStreamingSettingsFailed": "清除视频流设置失败：{{errorMessage}}",
+        "exportUiSettingsFailed": "导出设置失败",
+        "importNothingToApply": "导入设置失败：文件中没有可应用的设置",
+        "importInvalidJson": "导入设置失败：文件不是有效的 JSON",
+        "importWrongType": "导入设置失败：文件不是 Frigate 导出的设置",
+        "importUnsupportedVersion": "导入设置失败：此文件需要更新版本的 Frigate",
+        "importInvalidSchema": "导入设置失败：文件格式不正确",
+        "importUiSettingsFailed": "导入设置失败"
+      }
+    },
+    "backupRestore": {
+      "title": "备份与恢复",
+      "transfer": {
+        "label": "设备设置文件",
+        "desc": "摄像头组布局、视频流设置和界面偏好设置保存在浏览器中。将它们导出为文件，即可备份或迁移到其他设备。",
+        "export": "导出设置",
+        "import": "导入设置"
+      },
+      "importDialog": {
+        "title": "导入设置",
+        "desc": "选择要从此文件应用的内容。导入完成后，Frigate 会重新加载。",
+        "exportedFrom": "由 Frigate 配置版本 {{version}} 于 {{date}} 导出",
+        "layouts_other": "摄像头组布局（{{count}} 个组）",
+        "layoutsPhone": "手机上不会导入摄像头组布局，手机始终使用标准网格。",
+        "layoutsModeOn": "这些布局按摄像头画面比例设置卡片尺寸，因此导入后也会开启“使用原始画面比例”。",
+        "layoutsModeOff": "这些布局使用标准卡片尺寸，因此导入后也会关闭“使用原始画面比例”。",
+        "streaming_other": "视频流设置（{{count}} 个摄像头）",
+        "preferences_other": "界面偏好设置（{{count}} 项）",
+        "unknownGroups_other": "摄像头组 {{groups}} 不在当前服务器上，其设置会保存但不会使用。",
+        "unknownCameras_other": "摄像头 {{cameras}} 不在当前服务器上，其视频流设置将被忽略。",
+        "confirm": "导入"
       }
     }
   },
@@ -203,8 +242,8 @@
           "label": "清除所有点"
         },
         "snapPoints": {
-          "true": "启用点对齐",
-          "false": "禁用点对齐"
+          "true": "开启点对齐",
+          "false": "关闭点对齐"
         },
         "delete": {
           "title": "确认删除",
@@ -272,7 +311,7 @@
       "allObjects": "所有目标/物体",
       "speedEstimation": {
         "title": "速度估算",
-        "desc": "启用此区域内物体的速度估算。该区域必须恰好包含 4 个点。",
+        "desc": "开启此区域内物体的速度估算。该区域必须恰好包含 4 个点。",
         "lineBDistance": "B线距离（{{unit}}）",
         "lineCDistance": "C线距离（{{unit}}）",
         "lineDDistance": "D线距离（{{unit}}）",
@@ -283,7 +322,7 @@
         "desc": "指定物体在此区域内被视为有效的最低速度。",
         "toast": {
           "error": {
-            "pointLengthError": "此区域的速度估算已禁用。启用速度估算的区域必须恰好包含 4 个点。",
+            "pointLengthError": "此区域的速度估算已关闭。开启速度估算的区域必须恰好包含 4 个点。",
             "loiteringTimeError": "徘徊时间大于 0 的区域不应与速度估算一起使用。"
           }
         }
@@ -293,7 +332,7 @@
       },
       "enabled": {
         "title": "开启",
-        "description": "指示该区域在配置文件中是否处于激活并启用的状态。若被停用，则无法通过 MQTT 启用。禁用的区域在运行时会被忽略。"
+        "description": "指示该区域在配置文件中是否处于激活并开启的状态。若被关闭，则无法通过 MQTT 开启。已关闭的区域在运行时会被忽略。"
       }
     },
     "motionMasks": {
@@ -359,11 +398,11 @@
     "restart_required": "需要重启（遮罩与区域已修改）",
     "motionMaskLabel": "画面变动遮罩 {{number}}",
     "objectMaskLabel": "目标/物体遮罩 {{number}}",
-    "disabledInConfig": "该项目已在配置文件中被禁用",
+    "disabledInConfig": "该项目已在配置文件中关闭",
     "masks": {
       "enabled": {
         "title": "开启",
-        "description": "指示该遮罩在配置文件中是否处于激活并启用的状态。若被禁用，则无法通过 MQTT 启用。禁用的遮罩在运行时会被忽略。"
+        "description": "指示该遮罩在配置文件中是否处于激活并开启的状态。若被关闭，则无法通过 MQTT 开启。已关闭的遮罩在运行时会被忽略。"
       }
     },
     "profileBase": "（基础）",
@@ -386,7 +425,7 @@
     },
     "improveContrast": {
       "title": "提高对比度",
-      "desc": "提高较暗场景的对比度。<em>默认值：启用</em>"
+      "desc": "提高较暗场景的对比度。<em>默认值：开启</em>"
     },
     "toast": {
       "success": "画面变动设置已保存。"
@@ -405,7 +444,7 @@
       "desc": "将在被追踪的目标周围显示边界框",
       "colors": {
         "label": "目标边界框颜色定义",
-        "info": "<li>启用后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示在启动自动追踪时，该目标为自动追踪的主体</li>"
+        "info": "<li>开启后，将会为每个目标的标签分配不同的颜色</li><li>深蓝色细线代表该目标或物体在当前时间点未被检测到</li><li>灰色细线代表检测到的目标或物体静止不动</li><li>粗线表示在启动自动追踪时，该目标为自动追踪的主体</li>"
       }
     },
     "timestamp": {
@@ -433,7 +472,7 @@
     "objectShapeFilterDrawing": {
       "title": "允许绘制“目标形状过滤器”",
       "desc": "在图像上绘制矩形，以查看区域和比例详细信息",
-      "tips": "启用此选项，能够在摄像头画面上绘制矩形，将显示其区域和比例。你可以通过使用这些值在配置中设置目标形状过滤器的参数。",
+      "tips": "开启此选项，能够在摄像头画面上绘制矩形，将显示其区域和比例。你可以通过使用这些值在配置中设置目标形状过滤器的参数。",
       "score": "分数",
       "ratio": "比例",
       "area": "区域"
@@ -456,7 +495,8 @@
     "title": "用户",
     "management": {
       "title": "用户管理",
-      "desc": "管理此 Frigate 实例的用户账户。"
+      "desc": "管理此 Frigate 实例的用户账户。",
+      "authDisabled": "内置身份验证已关闭。这些账户只在开启身份验证后用于登录。"
     },
     "addUser": "添加用户",
     "updatePassword": "修改密码",
@@ -524,7 +564,8 @@
         "title": "创建新用户",
         "desc": "创建一个新用户账户，并指定一个权限组以控制访问 Frigate 页面的权限。",
         "usernameOnlyInclude": "用户名只能包含字母、数字和 _",
-        "confirmPassword": "请确认你的密码"
+        "confirmPassword": "请确认你的密码",
+        "usernameOnlyDots": "用户名不能只由句点组成"
       },
       "deleteUser": {
         "title": "删除该用户",
@@ -562,7 +603,7 @@
     "title": "通知",
     "notificationSettings": {
       "title": "通知设置",
-      "desc": "Frigate 在浏览器中运行或作为 PWA 安装时，可以原生向您的设备发送推送通知。"
+      "desc": "Frigate 在浏览器中运行或作为 PWA 安装时，可以原生向你的设备发送推送通知。"
     },
     "globalSettings": {
       "title": "全局设置",
@@ -580,13 +621,13 @@
     "cameras": {
       "title": "摄像头",
       "noCameras": "没有可用的摄像头",
-      "desc": "选择要启用通知的摄像头。"
+      "desc": "选择要开启通知的摄像头。"
     },
     "deviceSpecific": "设备专用设置",
     "registerDevice": "注册该设备",
     "unregisterDevice": "取消注册该设备",
     "sendTestNotification": "发送测试通知",
-    "active": "通知已启用",
+    "active": "通知已开启",
     "suspended": "通知已暂停 {{time}}",
     "suspendTime": {
       "5minutes": "暂停 5 分钟",
@@ -596,7 +637,8 @@
       "12hours": "暂停 12 小时",
       "24hours": "暂停 24 小时",
       "untilRestart": "暂停直到重启",
-      "suspend": "暂停"
+      "suspend": "暂停",
+      "custom": "暂停至…"
     },
     "cancelSuspension": "取消暂停",
     "toast": {
@@ -609,16 +651,27 @@
       }
     },
     "unsavedRegistrations": "未保存通知注册",
-    "unsavedChanges": "未保存通知设置更改"
+    "unsavedChanges": "未保存通知设置更改",
+    "customSuspension": {
+      "title": "自定义暂停时间",
+      "description": "暂停此摄像头的通知，直到所选时间。",
+      "untilLabel": "暂停至",
+      "invalidTime": "请选择未来的时间。"
+    }
   },
   "frigatePlus": {
     "title": "Frigate+ 设置",
     "apiKey": {
       "title": "Frigate+ API 密钥",
-      "validated": "Frigate+ API 密钥已检测并验证通过",
-      "notValidated": "未检测到 Frigate+ API 密钥或验证未通过",
-      "desc": "Frigate+ API 密钥用于启用与 Frigate+ 服务的集成。",
-      "plusLink": "了解更多关于 Frigate+"
+      "desc": "Frigate+ API 密钥用于连接 Frigate+ 服务。",
+      "plusLink": "了解更多关于 Frigate+",
+      "formatValid": "已检测到 Frigate+ API 密钥，且格式符合要求",
+      "formatInvalid": "未检测到 Frigate+ API 密钥，或格式不符合要求",
+      "validate": "向 Frigate+ 验证",
+      "validating": "验证中…",
+      "serverValid": "Frigate+ 已接受此 API 密钥",
+      "serverInvalid": "Frigate+ 拒绝了这个 API 密钥",
+      "serverUnreachable": "无法连接 Frigate+ 来验证此 API 密钥"
     },
     "snapshotConfig": {
       "title": "快照配置",
@@ -640,7 +693,7 @@
       "error": "加载模型信息失败",
       "availableModels": "可用 Frigate+ 模型",
       "loadingAvailableModels": "正在加载可用模型…",
-      "modelSelect": "您可以在Frigate+上选择可用的模型。请注意，只能选择与当前检测器配置兼容的模型。",
+      "modelSelect": "你可以在Frigate+上选择可用的模型。请注意，只能选择与当前检测器配置兼容的模型。",
       "plusModelType": {
         "baseModel": "基础模型",
         "userModel": "定向调优"
@@ -652,7 +705,8 @@
         "ariaLabel": "按类型筛选模型",
         "baseModels": "基础模型",
         "fineTunedModels": "微调过的模型"
-      }
+      },
+      "showIncompatible": "显示不兼容的模型"
     },
     "toast": {
       "success": "Frigate+ 设置已保存。请重启 Frigate 以应用更改。",
@@ -680,7 +734,7 @@
         "desc": "重建索引将为所有追踪的目标重新生成特征向量信息。该过程将在后台进行，期间可能会使 CPU 满载，所需时间取决于追踪目标的数量。",
         "label": "立即重建索引",
         "confirmTitle": "确认重建索引",
-        "confirmDesc": "确定要为所有追踪目标重建特征向量索引信息吗？此过程将在后台进行，但可能会导致CPU满载并耗费较长时间。您可以在 浏览 页面查看进度。",
+        "confirmDesc": "确定要为所有追踪目标重建特征向量索引信息吗？此过程将在后台进行，但可能会导致CPU满载并耗费较长时间。你可以在 浏览 页面查看进度。",
         "confirmButton": "重建索引",
         "success": "重建索引已成功启动。",
         "alreadyInProgress": "重建索引已在执行中。",
@@ -699,7 +753,7 @@
         }
       },
       "title": "语义搜索",
-      "desc": "Frigate 中的语义搜索功能将能够让你通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项目中查找目标/物体。"
+      "desc": "Frigate 中的语义搜索功能将能够让你通过图片、用户自定义的文本描述，或自动生成的文本描述等方式在核查项中查找目标/物体。"
     },
     "licensePlateRecognition": {
       "desc": "Frigate 可以识别车辆的车牌，并自动将检测到的字符添加到 识别的车牌（recognized_license_plate）字段中，或将已知车牌对应的名称作为子标签添加到该车辆目标中。该功能常用于识别驶入车道的车辆车牌或经过街道的车辆车牌。",
@@ -828,7 +882,7 @@
       }
     },
     "semanticSearch": {
-      "desc": "必须启用语义搜索功能才能使用触发器。"
+      "desc": "必须开启语义搜索功能才能使用触发器。"
     },
     "wizard": {
       "title": "创建触发器",
@@ -860,7 +914,8 @@
       "actions": "操作",
       "noRoles": "没有找到自定义权限组。",
       "editCameras": "编辑摄像头",
-      "deleteRole": "删除权限组"
+      "deleteRole": "删除权限组",
+      "cameraCount_other": "{{count}} 个摄像头"
     },
     "toast": {
       "success": {
@@ -954,7 +1009,8 @@
         "nameLength": "摄像头名称要少于64个字符",
         "invalidCharacters": "摄像头名称内有不允许使用的字符",
         "nameExists": "该摄像头名称已存在",
-        "customUrlRtspRequired": "自定义 URL 必须以“rtsp://”或“rtsps://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。"
+        "customUrlRtspRequired": "自定义 URL 必须以“rtsp://”或“rtsps://”开头；对于非 RTSP 协议的摄像头流，需手动添加至配置文件。",
+        "onvifPortInvalid": "ONVIF 端口必须是 1 到 65535 之间的整数"
       },
       "connectionSettings": "连接设置",
       "detectionMethod": "视频流检测方法",
@@ -964,12 +1020,12 @@
       "detectionMethodDescription": "如果摄像头支持 ONVIF 协议，将使用该协议探测摄像头，以自动获取摄像头视频流地址；若不支持，也可手动选择摄像头品牌来使用预设地址。如需输入自定义RTSP地址，请选择“手动选择”并选择“其他”选项。",
       "onvifPortDescription": "对于支持ONVIF协议的摄像头，该端口通常为80或8080。",
       "useDigestAuth": "使用摘要认证",
-      "useDigestAuthDescription": "为 ONVIF 协议启用 HTTP 摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的 admin 账户。"
+      "useDigestAuthDescription": "为 ONVIF 协议开启 HTTP 摘要认证。部分摄像头可能需要专用的 ONVIF 用户名/密码，而非默认的 admin 账户。"
     },
     "step2": {
       "description": "将根据你选择的检测方式，将会自动查找摄像头可用流配置，或进行手动配置。",
       "testSuccess": "视频流测试成功！",
-      "testFailed": "连接测试失败，请检查您的输入后重试。",
+      "testFailed": "连接测试失败，请检查你的输入后重试。",
       "testFailedTitle": "测试失败",
       "connected": "已连接",
       "notConnected": "未连接",
@@ -989,7 +1045,7 @@
       "manufacturer": "制造商",
       "model": "型号",
       "firmware": "固件",
-      "profiles": "配置文件",
+      "profiles": "配置模板",
       "ptzSupport": "支持 PTZ",
       "autotrackingSupport": "支持自动追踪",
       "presets": "预设配置",
@@ -1041,11 +1097,26 @@
         "title": "视频流功能",
         "detect": "用于目标检测的主码流。",
         "record": "根据配置设置保存视频流片段。",
-        "audio": "用于音频检测的音视频流。"
+        "audio": "用于音频检测的音视频流。",
+        "record_sub": "用于自适应播放和延长保留时间的低画质录像（通常是摄像头的子视频流）。"
       },
       "featuresPopover": {
         "title": "视频流功能特性",
         "description": "使用 go2rtc 中继转流功能，减少与摄像头的网络连接数，提升效率。"
+      },
+      "appleCompatibility": {
+        "title": "改善 Apple 设备上的播放效果",
+        "description": "如果你会在 Safari 或 iPhone、iPad、Mac 上查看录像，请开启此选项。"
+      },
+      "ptz": {
+        "title": "开启 PTZ 控制",
+        "detectedNote": "已通过 ONVIF 检测到 PTZ 支持。如果这是一台 PTZ 摄像头，开启此选项后即可在页面上控制摄像头的平移、俯仰和变焦。",
+        "connectionDetails": "ONVIF 连接信息",
+        "host": "ONVIF 主机",
+        "port": "ONVIF 端口",
+        "username": "ONVIF 用户名",
+        "password": "ONVIF 密码",
+        "hostRequiredWarning": "开启 PTZ 控制后，必须填写 ONVIF 主机和端口。"
       }
     },
     "step4": {
@@ -1067,13 +1138,13 @@
       "estimatedBandwidth": "预估带宽",
       "roles": "功能",
       "ffmpegModule": "使用视频流兼容模式",
-      "ffmpegModuleDescription": "若多次尝试后仍无法加载视频流，可尝试启用此功能。启用后，Frigate 将通过 go2rtc 调用 ffmpeg 模块。这可能会提升与部分摄像头视频流的兼容性。",
+      "ffmpegModuleDescription": "若多次尝试后仍无法加载视频流，可尝试开启此功能。开启后，Frigate 将通过 go2rtc 调用 ffmpeg 模块。这可能会提升与部分摄像头视频流的兼容性。",
       "none": "无",
       "error": "错误",
       "streamValidated": "视频流 {{number}} 验证成功",
       "streamValidationFailed": "视频流 {{number}} 验证失败",
       "saveAndApply": "保存新摄像头",
-      "saveError": "配置无效，请检查您的设置。",
+      "saveError": "配置无效，请检查你的设置。",
       "issues": {
         "title": "视频流验证",
         "videoCodecGood": "视频编解码器为 {{codec}}。",
@@ -1085,14 +1156,14 @@
         "audioCodecRequired": "要实现音频检测功能，必须要有音频流。",
         "restreamingWarning": "为录制流开启“减少与摄像头的连接数”可能会略微增加 CPU 使用率。",
         "brands": {
-          "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中启用 HTTP协议，并重新启动向导。",
-          "reolink-http": "Reolink HTTP 视频流应该使用 FFmpeg 以获得更好的兼容性，为此视频流启用“使用流兼容模式”。"
+          "reolink-rtsp": "不建议使用 Reolink 的 RTSP 协议。请在摄像头后台设置中开启 HTTP协议，并重新启动向导。",
+          "reolink-http": "Reolink HTTP 视频流应该使用 FFmpeg 以获得更好的兼容性，为此视频流开启“使用流兼容模式”。"
         },
         "dahua": {
-          "substreamWarning": "子码流1当前被锁定为低分辨率。多数大华、安讯士、EmpireTech品牌的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
+          "substreamWarning": "子码流1当前被锁定为低分辨率。多数大华、安讯士、EmpireTech品牌的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动开启。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
         },
         "hikvision": {
-          "substreamWarning": "子码流1当前被锁定为低分辨率。多数海康威视的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动启用。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
+          "substreamWarning": "子码流1当前被锁定为低分辨率。多数海康威视的摄像头都支持额外的子码流，这些子码流需要在摄像头设置中手动开启。如果你的设备支持，建议你检查并使用这些高分辨率子码流。"
         },
         "resolutionUnknown": "无法检测此视频流的分辨率。你需要在设置或配置文件中手动指定检测分辨率。"
       }
@@ -1106,7 +1177,7 @@
     "backToSettings": "返回摄像头设置",
     "streams": {
       "title": "摄像头状态和详细信息",
-      "enableSuccess": "已启用 {{cameraName}}。请重启 Frigate 以应用。",
+      "enableSuccess": "已开启 {{cameraName}}。请重启 Frigate 以应用。",
       "reorderHandle": "拖动以重新排序",
       "saving": "保存中…",
       "saved": "已保存",
@@ -1117,7 +1188,7 @@
         "friendlyNameLabel": "显示名称",
         "friendlyNameHelp": "在 Frigate 页面中显示此摄像头的友好名称。留空以使用摄像头 ID。",
         "webuiUrlLabel": "摄像头管理后台 URL",
-        "webuiUrlHelp": "从调试页面中直接访问摄像头管理网页界面。留空以禁用链接。",
+        "webuiUrlHelp": "从调试页面中直接访问摄像头管理网页界面。留空则不显示链接。",
         "webuiUrlInvalid": "必须是有效的 URL（例如：https://example.com）。",
         "dashboardLabel": "在实时监控面板上显示",
         "dashboardHelp": "在实时监控面板显示该摄像头，在分组等其他位置仍可见。",
@@ -1125,8 +1196,8 @@
         "reviewHelp": "在核查页面展示该摄像头，包括在筛选列表、画面变动核查以及历史视图。"
       },
       "label": "摄像头状态",
-      "description": "设置各摄像头运行状态<br /><br /><strong>开启</strong>：正常处理视频流<br /><strong>关闭</strong>：临时暂停处理，重启后状态不保留<br /><strong>停用</strong>：停止处理并保存配置，重新启用需重启程序<br /><br /><em>备注：停用操作不会影响 go2rtc 转流功能</em><br /><br />拖动控件调整摄像头界面显示顺序，排序效果同步应用于实时面板及摄像头选择下拉栏。",
-      "disabledSubheading": "配置中禁用",
+      "description": "设置各摄像头运行状态<br /><br /><strong>开启</strong>：正常处理视频流<br /><strong>关闭</strong>：临时暂停处理，重启后状态不保留<br /><strong>停用</strong>：停止处理并保存配置，重新开启需重启程序<br /><br /><em>备注：停用操作不会影响 go2rtc 转流功能</em><br /><br />拖动控件调整摄像头界面显示顺序，排序效果同步应用于实时面板及摄像头选择下拉栏。",
+      "disabledSubheading": "配置中已关闭",
       "status": {
         "on": "开",
         "off": "关",
@@ -1166,7 +1237,7 @@
     "deleteCamera": "删除摄像头",
     "deleteCameraDialog": {
       "title": "删除摄像头",
-      "description": "删除摄像头将永久移除该摄像头的所有录像、跟踪目标以及配置。任何与该摄像头关联的 go2rtc 流可能仍需手动删除。",
+      "description": "删除摄像头将永久移除该摄像头的所有录像、追踪目标以及配置。任何与该摄像头关联的 go2rtc 流可能仍需手动删除。",
       "selectPlaceholder": "选择摄像头…",
       "confirmTitle": "你确定吗？",
       "confirmWarning": "删除 <strong>{{cameraName}}</strong> 后将无法撤销。",
@@ -1178,7 +1249,7 @@
     "profiles": {
       "title": "配置模板的摄像头覆盖项",
       "selectLabel": "选择配置模板",
-      "description": "配置启用配置文件时开启或关闭的摄像头。设置为“继承”的摄像头会沿用它原本的默认状态。",
+      "description": "设置切换配置模板时开启或关闭的摄像头。设置为“继承”的摄像头会保持原本的默认状态。",
       "inherit": "继承",
       "on": "开",
       "off": "关"
@@ -1191,7 +1262,7 @@
       "dedicatedLpr": "车牌识别专用",
       "saveSuccess": "已更新 {{cameraName}} 的摄像头类型，请重启 Frigate 以使更改生效。"
     },
-    "description": "添加、编辑和删除摄像头，控制每个摄像头的状态，并配置每个配置文件和摄像头类型的覆盖设置。要配置视频流、检测、画面变动和其他特定于摄像头的设置，请在“摄像头配置”下选择相关功能。",
+    "description": "添加、编辑和删除摄像头，控制每个摄像头的状态，并配置每个配置模板和摄像头类型的覆盖设置。要配置视频流、检测、画面变动和其他特定于摄像头的设置，请在“摄像头配置”下选择相关功能。",
     "clone": {
       "sectionTitle": "复制设置",
       "sectionDescription": "将摄像头的配置复制到另一台摄像头或新摄像头上。",
@@ -1227,7 +1298,7 @@
         "spatial": "空间设置",
         "streams": "视频流",
         "spatialWarningTitle": "分辨率不一致",
-        "spatialWarning": "源摄像头 {{srcCamera}} 的检测分辨率 ({{srcWidth}}×{{srcHeight}}) 与以下摄像头存在差异：{{cameras}}。在这些摄像头上，多边形（检测区域）可能无法准确对齐。这些默认选项当前处于关闭状态；如果启用，将按原样进行复制。",
+        "spatialWarning": "源摄像头 {{srcCamera}} 的检测分辨率 ({{srcWidth}}×{{srcHeight}}) 与以下摄像头存在差异：{{cameras}}。在这些摄像头上，多边形（检测区域）可能无法准确对齐。这些默认选项当前处于关闭状态；如果开启，将按原样进行复制。",
         "restartHint": "需要重启",
         "items": {
           "record": "录制",
@@ -1278,23 +1349,23 @@
   "cameraReview": {
     "title": "摄像头核查设置",
     "object_descriptions": {
-      "title": "生成式AI目标描述",
-      "desc": "临时启用或禁用此摄像头的 生成式AI目标描述 功能，直到 Frigate 重启。禁用后，系统将不再请求该摄像头追踪目标和物体的AI生成描述。"
+      "title": "生成式 AI 目标描述",
+      "desc": "临时开启或关闭此摄像头的“生成式 AI 目标描述”功能，直到 Frigate 重启。关闭后，系统将不再为该摄像头的追踪目标请求 AI 生成的描述。"
     },
     "review_descriptions": {
-      "title": "生成式 AI 核查总结",
-      "desc": "临时开关该摄像头的 生成式 AI 核查总结 功能，直到 Frigate 重启。禁用后，系统将不再请求 AI 生成该摄像头核查项目的总结。"
+      "title": "生成式 AI 核查描述",
+      "desc": "临时开启或关闭此摄像头的“生成式 AI 核查描述”功能，直到 Frigate 重启。关闭后，系统将不再为该摄像头的核查项请求 AI 生成的描述。"
     },
     "review": {
       "title": "核查",
-      "desc": "临时开关该摄像头的警报与检测项生成功能，直到 Frigate 重启后恢复。禁用期间，系统将不再生成新的核查项目。 ",
+      "desc": "临时开启或关闭此摄像头的警报和检测，直到 Frigate 重启。关闭期间，系统将不再生成新的核查项。 ",
       "alerts": "警报 ",
       "detections": "检测 "
     },
     "reviewClassification": {
       "title": "核查分类",
-      "desc": "Frigate 将核查项的严重程度分为“警报”和“检测”两个等级。默认情况下，所有的<strong>人</strong>、<strong>汽车</strong> 目标都将视为警报。你可以通过修改配置文件配置区域来细分。",
-      "noDefinedZones": "此摄像头未设置任何监控区。",
+      "desc": "Frigate 将核查项的严重程度分为“警报”和“检测”两个等级。默认情况下，所有的 <em>人</em>、<em>汽车</em> 目标都将视为警报。你可以通过修改配置文件中的区域设置来细分。",
+      "noDefinedZones": "此摄像头未定义任何区域。",
       "objectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下都将视为警报。",
       "zoneObjectAlertsTips": "所有 {{alertsLabels}} 类目标或物体在 {{cameraName}} 下的 {{zone}} 区域内都将视为警报。",
       "objectDetectionsTips": "所有在摄像头 {{cameraName}} 上，检测到的 {{detectionsLabels}} 目标或物体，无论它位于哪个区，都将显示为检测。",
@@ -1329,7 +1400,7 @@
       "reset": "重置"
     },
     "profile": {
-      "label": "配置"
+      "label": "配置模板"
     }
   },
   "configForm": {
@@ -1424,8 +1495,11 @@
         "preset-record-generic-audio-aac": "录制（通用并将音频转码为 AAC）",
         "preset-record-mjpeg": "录制 - MJPEG 流摄像头",
         "preset-record-jpeg": "录制 - JPEG 流摄像头",
-        "preset-record-ubiquiti": "录制 - 优必飞摄像头"
-      }
+        "preset-record-ubiquiti": "录制 - 优必飞摄像头",
+        "preset-apple-silicon-h264": "Apple Silicon（H.264）",
+        "preset-apple-silicon-h265": "Apple Silicon（H.265）"
+      },
+      "sameAsRecord": "与录制输出参数相同"
     },
     "cameraInputs": {
       "itemTitle": "视频流 {{index}}",
@@ -1474,8 +1548,11 @@
       "options": {
         "detect": "检测",
         "record": "录制",
-        "audio": "音频"
-      }
+        "audio": "音频",
+        "record_sub": "录制（子视频流）"
+      },
+      "roleInUse": "已分配给其他视频流",
+      "recordSubConflict": "同一路视频流不能同时拥有 record 和 record_sub 功能"
     },
     "review": {
       "title": "核查设置"
@@ -1510,7 +1587,8 @@
       "options": {
         "embeddings": "嵌入（Embedding）",
         "descriptions": "描述生成",
-        "chat": "聊天对话"
+        "chat": "聊天对话",
+        "transcribe": "音频转录"
       }
     },
     "semanticSearchModel": {
@@ -1535,7 +1613,12 @@
     },
     "knownPlates": {
       "namePlaceholder": "例如：老婆的车",
-      "platePlaceholder": "车牌号或正则表达式"
+      "platePlaceholder": "车牌号或正则表达式",
+      "assignedTo": "已分配给 {{name}}",
+      "detected": "已检测到的车牌",
+      "noneDetected": "尚未检测到车牌",
+      "search": "搜索或输入车牌",
+      "useCustom": "使用“{{value}}”"
     },
     "semanticSearchModelSize": {
       "notApplicable": "不适用于生成式 AI 提供者"
@@ -1549,7 +1632,15 @@
       "noGo2rtcStreams": "没有 go2rtc 视频流配置",
       "availableStreams": "可用的视频流",
       "useCustom": "使用“{{value}}”",
-      "addStream": "添加视频流"
+      "addStream": "添加视频流",
+      "reorderHandle": "拖动调整顺序",
+      "transcodedBadge": "已转码",
+      "autoOrder": "自动排序",
+      "autoOrderTips": "测量每路视频流的码率，并按从高到低排序",
+      "measuring": "测量中…",
+      "rate": "{{kbps}} kbps",
+      "rateSet": "{{kbps}} kbps（已设置）",
+      "rateFailed": "无法测量"
     },
     "ptzPresets": {
       "placeholder": "选择或输入预设…",
@@ -1560,7 +1651,38 @@
     },
     "defaultRole": {
       "admin": "管理员",
-      "viewer": "成员"
+      "viewer": "成员",
+      "none": "无（拒绝访问）"
+    },
+    "liveTranscode": {
+      "title": "转码视频流",
+      "description": "添加画质较低的视频流，有人观看时由 go2rtc 实时转码。",
+      "unavailable": "转码视频流需要有一路 go2rtc 视频流作为来源。请先在 go2rtc 视频流中添加一路。",
+      "enable": "开启转码视频流",
+      "source": "源视频流",
+      "height": "高度",
+      "heightOption": "{{height}}p",
+      "bitrate": "码率（kbps）",
+      "addQuality": "添加画质",
+      "removeQuality": "删除画质"
+    },
+    "birdseyeModes": {
+      "summary": "已选择 {{count}} 项",
+      "options": {
+        "continuous": "持续",
+        "motion": "画面变动",
+        "all_objects": "所有目标",
+        "alerts": "警报",
+        "detections": "检测"
+      }
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "选择模型…",
+      "builtIn": "内置模型",
+      "genaiProviders": "生成式 AI 服务商"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "生成式 AI 服务商不适用"
     }
   },
   "cameraConfig": {
@@ -1577,7 +1699,7 @@
     "title": "维护",
     "sync": {
       "title": "媒体同步",
-      "desc": "Frigate 会根据您的保留配置定期清理媒体文件。出现少量孤立文件是正常现象。使用此功能可以删除磁盘上不再被数据库引用的孤立媒体文件。",
+      "desc": "Frigate 会根据你的保留配置定期清理媒体文件。出现少量孤立文件是正常现象。使用此功能可以删除磁盘上不再被数据库引用的孤立媒体文件。",
       "started": "媒体同步已启动。",
       "alreadyRunning": "同步任务已在运行中",
       "error": "启动同步失败",
@@ -1597,7 +1719,7 @@
       "forceDesc": "绕过安全阈值，即使删除超过 50% 的文件也完成同步。",
       "running": "同步运行中…",
       "start": "开始同步",
-      "inProgress": "同步正在进行中。此页面已禁用。",
+      "inProgress": "同步正在进行中。此页面暂不可用。",
       "status": {
         "queued": "已排队",
         "running": "运行中",
@@ -1611,7 +1733,9 @@
         "orphansDeleted": "已删除孤立文件",
         "aborted": "已中止。删除操作将超过安全阈值。",
         "error": "错误",
-        "totals": "总计"
+        "totals": "总计",
+        "spaceToReclaim": "可释放空间",
+        "spaceReclaimed": "已释放空间"
       },
       "event_snapshots": "追踪目标快照",
       "event_thumbnails": "追踪目标缩略图",
@@ -1653,9 +1777,10 @@
     "saveAllSuccess_other": "所有 {{count}} 个部分保存成功。",
     "saveAllPartial_other": "已保存 {{successCount}} / {{totalCount}} 个部分。{{failCount}} 个失败。",
     "saveAllFailure": "保存所有部分失败。",
-    "saveAllSuccessRestartRequired_other": "成功保存 {{count}} 个部分。重启 Frigate 以生效。"
+    "saveAllSuccessRestartRequired_other": "成功保存 {{count}} 个部分。重启 Frigate 以生效。",
+    "go2rtcSyncFailed": "已保存，但无法更新 go2rtc。请重启 Frigate 以应用更改。"
   },
-  "unsavedChanges": "您有未保存的更改",
+  "unsavedChanges": "你有未保存的更改",
   "confirmReset": "确认重置",
   "resetToDefaultDescription": "这将把此部分的所有设置重置为默认值。此操作无法撤销。",
   "resetToGlobalDescription": "这将把此部分的设置重置为全局默认值。此操作无法撤销。",
@@ -1669,21 +1794,24 @@
       "tooltip_other": "{{count}} 个摄像头在此项中存在单独配置，点击查看详情。",
       "heading_other": "此全局设置项下有 {{count}} 个摄像头存在自定义单独配置。",
       "othersField_other": "其余 {{count}} 个",
-      "profilePrefix": "{{profile}} 配置方案：{{fields}}"
+      "profilePrefix": "{{profile}} 配置模板：{{fields}}"
     },
     "overriddenGlobalHeading_other": "该摄像头已覆盖全局配置中的 {{count}} 项设置：",
     "overriddenGlobalNoDeltas": "该摄像头已覆盖全局配置，但所有配置项数值均无差异。",
     "overriddenBaseConfigHeading_other": "{{profile}} 配置模板已覆盖基础配置中的 {{count}} 项设置：",
-    "overriddenBaseConfigNoDeltas": "{{profile}} 配置模板已覆盖该板块，但各项参数与基础配置完全一致无差异。"
+    "overriddenBaseConfigNoDeltas": "{{profile}} 配置模板已覆盖该板块，但各项参数与基础配置完全一致无差异。",
+    "overriddenLive": "已覆盖（实时）",
+    "overriddenLiveTooltip": "此摄像头实际运行的值与配置中保存的值不同，这里显示的是配置中保存的值。实时监控、MQTT 或正在使用的配置模板都可能在 Frigate 运行期间改变它。",
+    "overriddenLiveValue": "当前运行值：{{value}}"
   },
   "profiles": {
     "title": "配置模板",
-    "activeProfile": "激活配置模板",
-    "noActiveProfile": "无激活的配置模板",
+    "activeProfile": "当前配置模板",
+    "noActiveProfile": "没有开启的配置模板",
     "active": "激活",
-    "activated": "配置模板 {{profile}} 已激活",
-    "activateFailed": "配置模板设置失败",
-    "deactivated": "配置模板已停用",
+    "activated": "配置模板 {{profile}} 已开启",
+    "activateFailed": "配置模板切换失败",
+    "deactivated": "配置模板已关闭",
     "noProfiles": "未定义任何配置模板。",
     "noOverrides": "无覆盖项",
     "cameraCount_other": "{{count}} 个摄像头",
@@ -1697,25 +1825,25 @@
     "nameInvalid": "仅允许使用小写字母、数字和下划线",
     "nameDuplicate": "已存在同名配置模板",
     "columnCamera": "摄像头",
-    "columnOverrides": "配置文件覆盖",
+    "columnOverrides": "配置模板覆盖",
     "error": {
       "mustBeAtLeastTwoCharacters": "至少需要 2 个字符",
       "mustNotContainPeriod": "不得包含英文句号（\".\"）",
-      "alreadyExists": "已存在使用此 ID 的配置文件"
+      "alreadyExists": "已存在使用此 ID 的配置模板"
     },
-    "renameProfile": "重命名配置文件",
-    "renameSuccess": "已将配置文件重命名为 “{{profile}}”",
-    "deleteProfile": "删除配置文件",
-    "deleteProfileConfirm": "确定要为所有摄像头删除配置文件“{{profile}}”吗？该步骤无法撤销。",
-    "deleteSuccess": "配置文件“{{profile}}”已删除",
-    "createSuccess": "配置文件“{{profile}}”已创建",
-    "removeOverride": "移除配置文件覆盖",
+    "renameProfile": "重命名配置模板",
+    "renameSuccess": "已将配置模板重命名为“{{profile}}”",
+    "deleteProfile": "删除配置模板",
+    "deleteProfileConfirm": "确定要为所有摄像头删除配置模板“{{profile}}”吗？该步骤无法撤销。",
+    "deleteSuccess": "配置模板“{{profile}}”已删除",
+    "createSuccess": "配置模板“{{profile}}”已创建",
+    "removeOverride": "移除配置模板覆盖",
     "deleteSection": "删除节点覆盖",
-    "deleteSectionConfirm": "是否要移除摄像机 {{camera}} 上针对配置文件 {{profile}} 的 {{section}} 覆盖设置？",
+    "deleteSectionConfirm": "是否要移除摄像头 {{camera}} 上针对配置模板 {{profile}} 的 {{section}} 覆盖设置？",
     "deleteSectionSuccess": "已移除 {{profile}} 的 {{section}} 覆盖设置",
     "enableSwitch": "开启配置模板",
-    "enabledDescription": "配置文件功能已启用。请在下方创建新的配置文件，进入摄像头配置页面进行修改并保存，修改即可生效。",
-    "disabledDescription": "配置文件功能可以让你创建一组带名称的摄像头自定义参数（比如布防、离家、夜间模式），并随时切换启用。"
+    "enabledDescription": "配置模板功能已开启。请在下方创建新的配置模板，进入摄像头配置页面进行修改并保存，修改即可生效。",
+    "disabledDescription": "配置模板功能可以让你创建一组带名称的摄像头自定义参数（比如布防、离家、夜间模式），并随时开启或关闭。"
   },
   "timestampPosition": {
     "tl": "左上角",
@@ -1787,10 +1915,13 @@
   },
   "configMessages": {
     "review": {
-      "recordDisabled": "录制已禁用，不会生成核查记录项。",
-      "detectDisabled": "目标检测已禁用。核查记录需要依靠检测到的目标来对警报和检测事件进行分类。",
+      "recordDisabled": "录制已关闭，不会生成核查项。",
+      "detectDisabled": "目标检测已关闭。核查项需要检测到的目标来区分警报和检测事件。",
       "allNonAlertDetections": "所有非警报类活动都将被记录为检测事件。",
-      "genaiImageSourceRecordingsRecordDisabled": "图像源虽然设置为“录制”，但录制功能已关闭。Frigate 将自动降级使用预览图片。"
+      "genaiImageSourceRecordingsRecordDisabled": "图像源设置为“录制”，但录制功能已关闭。Frigate 将回退使用预览图片。",
+      "recordRuntimeDisabled": "配置中已开启录制，但此摄像头当前关闭了录制，因此不会生成核查项。请到摄像头的实时监控页面重新开启，或检查是否有正在使用的配置模板把它关闭了。",
+      "detectRuntimeDisabled": "配置中已开启目标检测，但此摄像头当前关闭了目标检测。核查项需要检测到的目标来区分警报和检测事件。请到摄像头的实时监控页面重新开启，或检查是否有正在使用的配置模板把它关闭了。",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "图像源设置为“录制”，但此摄像头当前关闭了录制，尽管配置中已开启录制。Frigate 将回退使用预览图片。"
     },
     "lpr": {
       "vehicleNotTracked": "车牌识别需要先追踪到车辆才能工作。请在该摄像头的检测目标中添加“汽车”或其他类型的车辆目标。",
@@ -1798,20 +1929,24 @@
       "modelSizeLarge": "大型模型针对多行格式车牌做了优化。小型模型的性能优于大型模型，而且只有小型模型才能支持中文车牌。除非你所在地区使用多行车牌格式，否则建议使用小型模型。"
     },
     "audio": {
-      "noAudioRole": "暂无任何流已开启音频（audio）功能（role）。必须在视频流上启用音频功能，音频检测才能正常工作。"
+      "noAudioRole": "没有任何视频流开启音频（audio）功能（role）。必须在视频流上开启音频功能，音频检测才能正常工作。"
     },
     "audioTranscription": {
-      "audioDetectionDisabled": "该摄像头未开启音频检测功能。音频转录需要先开启音频检测。"
+      "audioDetectionDisabled": "该摄像头未开启音频检测功能。音频转录需要先开启音频检测。",
+      "audioDetectionRuntimeDisabled": "配置中已开启音频检测，但此摄像头当前关闭了音频检测，因此音频转录不会运行。请到摄像头的实时监控页面重新开启，或检查是否有正在使用的配置模板把它关闭了。",
+      "genaiProviderSelected": "已选择生成式 AI 服务商，因此设备和模型大小设置会被忽略。"
     },
     "detect": {
       "fpsGreaterThanFive": "不建议设置检测帧率高于 5，数值设置过高可能引发性能问题，且不会带来任何增益。",
-      "disabled": "目标检测已禁用。快照、回放条目以及人脸识别、车牌识别、生成式 AI 等增强功能都将无法使用。",
+      "disabled": "目标检测已关闭。快照、核查项以及人脸识别、车牌识别、生成式 AI 等增强功能都将无法使用。",
       "resolutionShouldBeMultipleOfFour": "为了获得最佳效果，检测的宽度和高度应该是4的倍数。其他偶数值可能会在检测流中产生视觉伪影或轻微失真。",
       "aspectRatioMismatch": "你输入的宽度和高度与当前检测分辨率的不匹配，这可能会导致图像被拉伸或变形。",
-      "maxFramesSet": "设置最大帧数将会覆盖默认行为，并且禁用静态物体追踪。只有很少的情况下需要这个功能，请谨慎使用。",
+      "maxFramesSet": "设置最大帧数将会覆盖默认行为，并且关闭静态物体追踪。只有很少的情况下需要这个功能，请谨慎使用。",
       "squareResolution": "方形的检测分辨率比较少见。检测宽度和高度应该与你摄像头的画面比例一致（例如 16:9），而不是跟目标检测模型的输入尺寸一致。画面比例不匹配可能会拉伸图像，从而降低检测准确率。",
       "resolutionHigh": "这个检测分辨率高于推荐值，可能会增加资源占用，但不一定提升检测准确率。对于大多数摄像头，建议使用 1080p 或更低的检测分辨率。",
-      "globalResolutionMultipleCameras": "在配置了多个摄像头同时还设置了全局检测分辨率。除非所有摄像头都使用相同的分辨率和画面比例，否则应该为每个摄像头单独设置检测宽度和高度，使其匹配各自摄像头的原生画面比例。"
+      "globalResolutionMultipleCameras": "在配置了多个摄像头同时还设置了全局检测分辨率。除非所有摄像头都使用相同的分辨率和画面比例，否则应该为每个摄像头单独设置检测宽度和高度，使其匹配各自摄像头的原生画面比例。",
+      "runtimeDisabled": "配置中已开启目标检测，但此摄像头当前关闭了目标检测。在从摄像头的实时监控页面重新开启之前，或在正在使用的配置模板不再关闭它之前，快照、核查项以及人脸识别、车牌识别和生成式 AI 等增强功能都不会工作。",
+      "sceneWithoutModel": "此场景没有配置检测模型，因此此摄像头会回退到默认模型。为此场景添加一个模型，就能让摄像头使用自己的模型。"
     },
     "faceRecognition": {
       "globalDisabled": "必须开启人脸识别增强功能，此摄像头的人脸识别相关功能才能正常使用。",
@@ -1819,10 +1954,13 @@
       "modelSizeLarge": "大型模型需要 GPU 或 NPU 才能运行正常。仅使用 CPU 的设备请选用小型模型。"
     },
     "record": {
-      "noRecordRole": "暂无任何视频流已配置录制功能，录制功能将无法正常工作。"
+      "noRecordRole": "暂无任何视频流已配置录制功能，录制功能将无法正常工作。",
+      "noRecordSubRole": "没有任何视频流配置 record_sub 功能，子视频流录制将无法工作。",
+      "profileBaseDisabled": "此摄像头的基础配置已关闭录制，因此在配置模板中开启录制不会生效。请在基础配置中开启录制，改用配置模板来关闭录制。"
     },
     "snapshots": {
-      "detectDisabled": "目标检测已禁用。快照是根据追踪到的目标生成的，因此将不会创建快照。"
+      "detectDisabled": "目标检测已关闭。快照是根据追踪到的目标生成的，因此将不会创建快照。",
+      "detectRuntimeDisabled": "配置中已开启目标检测，但此摄像头当前关闭了目标检测，因此不会创建快照。请到摄像头的实时监控页面重新开启，或检查是否有正在使用的配置模板把它关闭了。"
     },
     "objects": {
       "genaiNoDescriptionsProvider": "必须配置具备“描述”功能的生成式 AI 服务商，才能自动生成事件描述。"
@@ -1840,6 +1978,17 @@
     "model": {
       "optimizedFor320": "Frigate 针对了 320x320 的模型进行优化，这是大多数设置的最佳选择。640x640 模型速度较慢，仅在特定场景下有帮助。",
       "inputDimensionsNotDetectResolution": "模型输入的宽度和高度是目标检测模型的输入尺寸，而不是你摄像头的检测分辨率。它们应该与你正在使用的模型的尺寸相匹配，通常是一个方形尺寸，如320x320或640x640。"
+    },
+    "live": {
+      "noGo2rtcStream": "此摄像头的实时监控正在使用基础播放器，帧率较低且没有声音。为此摄像头设置一路 go2rtc 视频流，可以获得更流畅的画面和声音。"
+    },
+    "notifications": {
+      "profileBaseDisabled": "没有任何摄像头在基础配置中开启通知，因此在配置模板中开启通知不会生效。请至少为一个摄像头的基础配置开启通知。",
+      "ttlDelay": "通知最多可能延迟 30 秒到达，并且即使核查项已经结束，仍会链接到实时监控。"
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "鸟瞰图包含追踪目标，但此摄像头已关闭目标检测。此摄像头不会出现在鸟瞰图中。",
+      "objectTrackingDetectRuntimeDisabled": "鸟瞰图包含追踪目标，但此摄像头当前关闭了目标检测，尽管配置中已开启目标检测。在从摄像头的实时监控页面重新开启之前，或在正在使用的配置模板不再关闭它之前，此摄像头不会出现在鸟瞰图中。"
     }
   },
   "birdseye": {
@@ -1866,6 +2015,10 @@
     "imageSource": {
       "recordings": "录制",
       "previews": "预览"
+    },
+    "frameMode": {
+      "frames": "画面帧",
+      "annotated_frames": "带标注的画面帧"
     }
   },
   "logger": {
@@ -1895,7 +2048,50 @@
   },
   "menuDot": {
     "overrideGlobal": "这一部分覆盖了全局配置",
-    "overrideProfile": "本节被 {{profile}} 配置文件覆盖",
+    "overrideProfile": "本节被配置模板 {{profile}} 覆盖",
     "unsaved": "这一部分有未保存的更改"
+  },
+  "analyticsPreview": {
+    "show": "预览报告",
+    "desc": "Frigate 在开启分享期间每天发送一次此报告。报告中绝不会包含摄像头名称、区域、标签或地址。",
+    "error": "无法生成预览"
+  },
+  "notificationTtl": {
+    "immediate": "立即",
+    "reliable": "可靠"
+  },
+  "detectionModels": {
+    "title": "检测模型",
+    "description": "配置目标检测模型以及每个模型运行的硬件。只有当部分摄像头需要单独训练的模型（例如热成像摄像头）时，才需要为某个场景添加模型。摄像头会在自己的检测设置中按场景选择模型。",
+    "addModel": "添加模型",
+    "cameras_other": "{{count}} 个摄像头",
+    "scene": {
+      "label": "场景",
+      "placeholder": "例如：热成像",
+      "description": "此模型适用的摄像头环境名称。摄像头会在检测设置中把场景设为相同的值来选择模型；未设置场景的摄像头会使用默认模型。场景用于运行不同的模型，而不是把一个模型拆到多块硬件上，因为使用同一个模型文件的模型会合并。"
+    },
+    "scenes": {
+      "default": "默认"
+    },
+    "hardware": {
+      "label": "硬件",
+      "placeholder": "选择硬件",
+      "loading": "正在查找检测硬件…",
+      "none": "未选择硬件",
+      "claimedBy": "被 {{scene}} 使用",
+      "detectorCount": "检测器数量",
+      "countRecommended_other": "推荐用于 {{count}} 个摄像头",
+      "unrecognized": "此模型配置的硬件在当前系统中未找到：{{devices}}",
+      "description": "此模型运行检测所使用的硬件。",
+      "detectorCountDescription": "在此硬件上运行多少个检测进程。检测器越多，能同时处理的摄像头越多，但会占用更多设备内存。",
+      "unitsDescription": "每个单元都会运行自己的检测进程。无法共享的单元（例如 Coral）只能供一个模型使用。"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "自定义模型"
+    },
+    "plusModel": {
+      "noModelSelected": "选择 Frigate+ 模型"
+    }
   }
 }

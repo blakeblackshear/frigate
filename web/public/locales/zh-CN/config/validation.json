@@ -31,5 +31,10 @@
     },
     "detect": {
         "dimensionMustBeEven": "必须是偶数。"
+    },
+    "models": {
+        "defaultRequired": "必须有一个模型使用默认场景。否则，未选择场景的摄像头将没有可回退的模型。",
+        "sceneDuplicate": "每个模型都必须使用不同的场景。",
+        "sameModel": "{{scene}} 和 {{other}} 模型使用同一个模型文件。让一个模型在多个场景下运行，只会把检测任务拆到多个检测器上，比一个模型列出全部硬件更慢。"
     }
 }

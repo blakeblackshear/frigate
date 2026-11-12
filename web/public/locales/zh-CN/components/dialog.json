@@ -81,7 +81,8 @@
       "placeholder": "选择合集",
       "newCaseOption": "创建新合集",
       "newCaseNamePlaceholder": "新合集名称",
-      "newCaseDescriptionPlaceholder": "合集描述"
+      "newCaseDescriptionPlaceholder": "合集描述",
+      "nameRequired": "合集名称为必填项"
     },
     "queueing": "正在加入导出队列…",
     "tabs": {
@@ -106,7 +107,9 @@
       "selectWithActivity": "包含追踪目标的摄像头",
       "selectGroup": "选择组",
       "noMatchingCameras": "没有匹配搜索的摄像头",
-      "selectedCount": "{{selected}} / {{total}} 个"
+      "selectedCount": "{{selected}} / {{total}} 个",
+      "noCamerasSelected": "选择至少一个摄像头",
+      "caseNameDefault": "多个摄像头导出 - {{date}}"
     },
     "multi": {
       "title_other": "导出 {{count}} 个核查",
@@ -120,6 +123,15 @@
         "partial": "已启动 {{total}} 个导出，其中 {{successful}} 个成功。失败项：{{failedItems}}",
         "failed": "启动导出失败（共 {{total}} 个）。失败项：{{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "质量",
+      "auto": "自动",
+      "main": "原画",
+      "sub": "低",
+      "autoDesc": "使用主流，在主流不可用时回退到较低质量的子流。",
+      "mainDesc": "仅导出原画画质的主流。主流不可用时的时间范围将缺失。",
+      "subDesc": "仅导出低画质子流。子流不可用时的时间范围将缺失。"
     }
   },
   "streaming": {
@@ -165,7 +177,8 @@
       "export": "导出",
       "markAsReviewed": "标记为已核查",
       "deleteNow": "立即删除",
-      "markAsUnreviewed": "标记为未核查"
+      "markAsUnreviewed": "标记为未核查",
+      "generateDescription": "生成描述"
     },
     "shareTimestamp": {
       "label": "分享该时间片段",
@@ -174,6 +187,12 @@
       "custom": "自定义时间",
       "button": "分享时间片段地址",
       "shareTitle": "Frigate 核查时间：{{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "已为该核查项请求生成式 AI 描述。",
+        "error": "请求描述失败：{{error}}"
+      }
     }
   },
   "imagePicker": {
