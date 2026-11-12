@@ -312,9 +312,7 @@
     },
     "apiKey": {
       "desc": "Ключ API Frigate+ забезпечує інтеграцію з сервісом Frigate+.",
-      "notValidated": "Ключ API Frigate+ не виявлено або не перевірено",
       "title": "Ключ API Фрегат+",
-      "validated": "Ключ API Frigate+ виявлено та перевірено",
       "plusLink": "Дізнайтеся більше про Фрегат+"
     },
     "restart_required": "Потрібно перезавантаження (модель Frigate+ змінена)",
