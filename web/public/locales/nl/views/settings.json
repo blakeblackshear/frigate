@@ -618,9 +618,7 @@
     "apiKey": {
       "title": "Frigate+ API-sleutel",
       "plusLink": "Lees meer over Frigate+",
-      "validated": "Frigate+ API-sleutel is gedetecteerd en gevalideerd",
-      "desc": "Met de Frigate+ API-sleutel is integratie met de Frigate+ service mogelijk.",
-      "notValidated": "Frigate+ API-sleutel wordt niet gedetecteerd of niet gevalideerd"
+      "desc": "Met de Frigate+ API-sleutel is integratie met de Frigate+ service mogelijk."
     },
     "snapshotConfig": {
       "title": "Snapshot-configuratie",
