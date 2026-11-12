@@ -573,8 +573,6 @@
     "title": "הגדרות +Frigate",
     "apiKey": {
       "title": "Frigate+ API מפתח",
-      "validated": "מפתח ה-API של Frigate+ זוהה ואושר",
-      "notValidated": "מפתח ה-API של Frigate+ לא זוהה או לא אומת",
       "desc": "מפתח ה-API של Frigate+ מאפשר אינטגרציה עם שירות Frigate+.",
       "plusLink": "קרא עוד על Frigate+"
     },
