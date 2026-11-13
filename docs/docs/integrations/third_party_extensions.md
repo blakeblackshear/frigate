@@ -17,6 +17,14 @@ Please use your own knowledge to assess and vet them before you install anything
 
 The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant dashboard card with deep Frigate integration.
 
+## [Auto Arm](https://autoarm.rhizomatics.org.uk)
+
+Home Assistant Marketplace integration to automatically manage alarm state based on time of day, occupancy, sun state, physical buttons etc. Can synchronize Frigate profiles to alarm state, so for example use `disarmed` profile to reduce noisy notifications when occupied during the day.
+
+## [Camera AutoNotify](https://camera-autonotify.rhizomatics.org.uk)
+
+Home Assistant Marketplace integration to set up notifications for Frigate cameras without use of blueprints or automations. Triggered by camera events and optionally by GenAI reviews, with option for daily/periodic GenAI Review Report emailed, and alerts if Frigate or any cameras are unavailable. Integration with [Supernotify](https://supernotify.rhizomatics.org.uk/) to auto configure mobile devices and customize notifications for alarm state, occupancy etc.
+
 ## [cctvQL](https://github.com/arunrajiah/cctvql)
 
 [cctvQL](https://github.com/arunrajiah/cctvql) is a natural language query layer for Frigate and other CCTV systems. It connects to Frigate's REST API and MQTT broker to let you ask conversational questions about cameras and events (e.g. "Was there motion at the front door last night?"), with support for real-time event streaming, anomaly detection, PTZ control, alert rules, and a Home Assistant custom component.
