@@ -1,1 +1,245 @@
-{}
+{
+  "documentTitle": {
+    "default": "Uživo - Frigate",
+    "withCamera": "{{camera}} - Uživo - Frigate"
+  },
+  "lowBandwidthMode": "Režim niskog opsega",
+  "twoWayTalk": {
+    "enable": "Omogući dvosmerni govor",
+    "disable": "Onemogući dvosmerni govor",
+    "requiresWebRTC": "Dvosmerni govor zahteva WebRTC, koji nije dostupan",
+    "error": {
+      "microphone": "Dvosmerni govor nije mogao da pristupi vašem mikrofonu",
+      "refused": "Pokretanje dvosmernog govora nije uspelo. Pogledajte konzolu pregledača za detalje."
+    }
+  },
+  "cameraAudio": {
+    "enable": "Omogući zvuk kamere",
+    "disable": "Onemogući zvuk kamere"
+  },
+  "ptz": {
+    "move": {
+      "clickMove": {
+        "label": "Kliknite u kadar da biste centrirali kameru",
+        "enable": "Omogući pomeranje klikom",
+        "enableWithZoom": "Omogući pomeranje klikom / zumiranje prevlačenjem",
+        "disable": "Onemogući pomeranje klikom"
+      },
+      "left": {
+        "label": "Pomeri PTZ kameru ulevo"
+      },
+      "up": {
+        "label": "Pomeri PTZ kameru nagore"
+      },
+      "down": {
+        "label": "Pomeri PTZ kameru nadole"
+      },
+      "right": {
+        "label": "Pomeri PTZ kameru udesno"
+      }
+    },
+    "zoom": {
+      "in": {
+        "label": "Uvećaj prikaz PTZ kamere"
+      },
+      "out": {
+        "label": "Umanji prikaz PTZ kamere"
+      }
+    },
+    "focus": {
+      "in": {
+        "label": "Fokusiraj PTZ kameru bliže"
+      },
+      "out": {
+        "label": "Fokusiraj PTZ kameru dalje"
+      }
+    },
+    "frame": {
+      "center": {
+        "label": "Kliknite u kadar da biste centrirali PTZ kameru"
+      }
+    },
+    "presets": "Unapred podešene pozicije PTZ kamere"
+  },
+  "camera": {
+    "turnOn": "Uključi kameru",
+    "turnOff": "Isključi kameru"
+  },
+  "muteCameras": {
+    "enable": "Isključi zvuk na svim kamerama",
+    "disable": "Uključi zvuk na svim kamerama"
+  },
+  "detect": {
+    "enable": "Omogući detekciju",
+    "disable": "Onemogući detekciju"
+  },
+  "recording": {
+    "enable": "Omogući snimanje",
+    "disable": "Onemogući snimanje",
+    "disabledInConfig": "Snimanje prvo mora biti omogućeno u Podešavanjima za ovu kameru."
+  },
+  "snapshots": {
+    "enable": "Omogući snimke",
+    "disable": "Onemogući snimke"
+  },
+  "snapshot": {
+    "takeSnapshot": "Preuzmi trenutni snimak",
+    "noVideoSource": "Nije dostupan video-izvor za snimak.",
+    "captureFailed": "Neuspelo hvatanje snimka.",
+    "downloadStarted": "Preuzimanje snimka je započeto."
+  },
+  "audioDetect": {
+    "enable": "Omogući detekciju zvuka",
+    "disable": "Onemogući detekciju zvuka"
+  },
+  "transcription": {
+    "enable": "Omogući transkripciju zvuka uživo",
+    "disable": "Onemogući transkripciju zvuka uživo"
+  },
+  "autotracking": {
+    "enable": "Omogući automatsko praćenje",
+    "disable": "Onemogući automatsko praćenje"
+  },
+  "streamStats": {
+    "enable": "Prikaži statistiku strima",
+    "disable": "Sakrij statistiku strima"
+  },
+  "manualRecording": {
+    "title": "Na zahtev",
+    "tips": "Preuzmite trenutni snimak ili započnite ručni događaj na osnovu podešavanja zadržavanja snimaka ove kamere.",
+    "playInBackground": {
+      "label": "Reprodukuj u pozadini",
+      "desc": "Omogućite ovu opciju da biste nastavili strimovanje kada je plejer sakriven."
+    },
+    "showStats": {
+      "label": "Prikaži statistiku",
+      "desc": "Omogućite ovu opciju da biste prikazali statistiku strima kao preklapanje preko prikaza kamere."
+    },
+    "debugView": "Prikaz za otklanjanje grešaka",
+    "start": "Započni snimanje na zahtev",
+    "started": "Započeto je ručno snimanje na zahtev.",
+    "failedToStart": "Neuspelo pokretanje ručnog snimanja na zahtev.",
+    "recordDisabledTips": "Pošto je snimanje onemogućeno ili ograničeno u konfiguraciji za ovu kameru, biće sačuvan samo snimak.",
+    "end": "Završi snimanje na zahtev",
+    "ended": "Završeno je ručno snimanje na zahtev.",
+    "failedToEnd": "Neuspelo završavanje ručnog snimanja na zahtev."
+  },
+  "streamingSettings": "Podešavanja striminga",
+  "notifications": "Obaveštenja",
+  "audio": "Zvuk",
+  "suspend": {
+    "forTime": "Pauziraj na "
+  },
+  "stream": {
+    "title": "Strim",
+    "auto": {
+      "label": "Automatski",
+      "tips": "Menja strimove u skladu sa vašom vezom",
+      "selected": "Automatski · {{stream}}",
+      "floorLabel": "Nizak protok",
+      "retry": "Pokušaj najviši kvalitet",
+      "reason": {
+        "bandwidth": "Reprodukuje se {{stream}} jer veza nije mogla da isprati strim višeg kvaliteta",
+        "codec": "Reprodukuje se {{stream}} jer ovaj pregledač ne može da reprodukuje strim višeg kvaliteta",
+        "saveData": "Reprodukuje se {{stream}} jer je uključena ušteda podataka",
+        "floor": "Reprodukuje se prikaz niskog protoka jer nijedan strim nije mogao da održi vezu"
+      }
+    },
+    "audio": {
+      "tips": {
+        "title": "Zvuk mora dolaziti sa vaše kamere i biti podešen u go2rtc za ovaj strim."
+      },
+      "available": "Zvuk je dostupan za ovaj strim",
+      "unavailable": "Zvuk nije dostupan za ovaj strim"
+    },
+    "debug": {
+      "picker": "Izbor strima nije dostupan u režimu za otklanjanje grešaka. Debug prikaz uvek koristi strim kojem je dodeljena uloga detekcije.",
+      "technology": "Izbor tehnologije strimovanja nije dostupan u režimu za otklanjanje grešaka."
+    },
+    "twoWayTalk": {
+      "tips": "Vaš uređaj mora podržavati ovu funkciju, a WebRTC mora biti podešen za dvosmerni govor.",
+      "available": "Dvosmerni govor je dostupan za ovaj strim",
+      "unavailable": "Dvosmerni govor nije dostupan za ovaj strim"
+    },
+    "lowBandwidth": {
+      "tips": "Prikaz uživo je u režimu niskog protoka zbog baferovanja ili grešaka u strimu.",
+      "resetStream": "Resetuj strim",
+      "force": {
+        "label": "Primoraj režim niskog protoka",
+        "desc": "Uvek reprodukuj Frigate-ov ugrađeni prikaz niskog protoka umesto izabranog strima. Radi na svakoj vezi, ali ima niži kvalitet i nema zvuk."
+      }
+    },
+    "playInBackground": {
+      "label": "Reprodukuj u pozadini",
+      "tips": "Omogućite ovu opciju da biste nastavili strimovanje kada je plejer sakriven."
+    },
+    "mode": "Tehnologija strimovanja",
+    "technology": {
+      "description": "Izaberite željenu tehnologiju strimovanja. Frigate se i dalje može prebaciti na režim niskog protoka u slučaju grešaka pri reprodukciji ili na mreži.",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "Preporučeno podrazumevano podešavanje, široka kompatibilnost i glatka reprodukcija",
+        "webrtc": "Zahteva dodatno podešavanje i nije podržano na svakom uređaju"
+      },
+      "unavailable": {
+        "browser": "Vaš pregledač ne podržava WebRTC.",
+        "not-configured": "Da biste omogućili, dodajte IP:8555 ovog servera pod go2rtc → webrtc → candidates.",
+        "notConfiguredOptional": "Opciono: prikaz uživo radi i bez ovoga. WebRTC je uglavnom potreban za dvosmerni govor.",
+        "unreachable": "WebRTC nije mogao da se poveže. Proverite da li je port 8555 dostupan i da li je STUN/TURN server ispravno podešen.",
+        "video-codec": "Video-kodek ovog strima nije podržan od strane WebRTC-a u ovom pregledaču.",
+        "audio-codec": "Audio-kodek ovog strima nije podržan od strane WebRTC-a. Transkodirajte u opus ili G.711 pomoću go2rtc.",
+        "checking": "Provera dostupnosti WebRTC-a…"
+      }
+    }
+  },
+  "cameraSettings": {
+    "title": "Podešavanja kamere {{camera}}",
+    "camera": "Kamera",
+    "objectDetection": "Detekcija objekata",
+    "recording": "Snimanje",
+    "snapshots": "Snimci",
+    "audioDetection": "Detekcija zvuka",
+    "transcription": "Transkripcija zvuka",
+    "autotracking": "Automatsko praćenje"
+  },
+  "history": {
+    "label": "Prikaži istorijske snimke"
+  },
+  "effectiveRetainMode": {
+    "modes": {
+      "all": "Sve",
+      "motion": "Kretaje",
+      "active_objects": "Aktivni objekti"
+    }
+  },
+  "editLayout": {
+    "label": "Izmeni raspored",
+    "group": {
+      "label": "Izmeni grupu kamera"
+    },
+    "exitEdit": "Izađi iz uređivanja"
+  },
+  "noCameras": {
+    "title": "Nema podešenih kamera",
+    "description": "Započnite povezivanjem kamere sa Frigate-om.",
+    "buttonText": "Dodaj kameru",
+    "restricted": {
+      "title": "Nema dostupnih kamera",
+      "description": "Nemate dozvolu za pregled kamera u ovoj grupi."
+    },
+    "default": {
+      "title": "Nema podešenih kamera",
+      "description": "Započnite povezivanjem kamere sa Frigate-om.",
+      "buttonText": "Dodaj kameru"
+    },
+    "group": {
+      "title": "Nema kamera u grupi",
+      "description": "Ova grupa kamera nema dodeljene ili omogućene kamere.",
+      "buttonText": "Upravljaj grupama"
+    }
+  }
+}
