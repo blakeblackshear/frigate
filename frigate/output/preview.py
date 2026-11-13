@@ -33,6 +33,8 @@ PREVIEW_SEGMENT_DURATION = 3600  # one hour
 # important to have lower keyframe to maintain scrubbing performance
 PREVIEW_KEYFRAME_INTERVAL = 40
 PREVIEW_HEIGHT = 180
+PREVIEW_MAX_CONCURRENT_ENCODERS = 2
+_preview_encoder_slots = threading.BoundedSemaphore(PREVIEW_MAX_CONCURRENT_ENCODERS)
 PREVIEW_QUALITY_WEBP = {
     RecordQualityEnum.very_low: 70,
     RecordQualityEnum.low: 80,
@@ -147,6 +149,11 @@ class FFMpegConverter(threading.Thread):
         )
 
     def run(self) -> None:
+        """Encode the preview when a shared encoder slot is available."""
+        with _preview_encoder_slots:
+            self._convert()
+
+    def _convert(self) -> None:
         # generate input list
         item_count = len(self.frame_times)
         playlist = []
