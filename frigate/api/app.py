@@ -45,7 +45,7 @@ from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdateTopic,
 )
-from frigate.const import REDACTED_CREDENTIAL_SENTINEL
+from frigate.const import REDACTED_CREDENTIAL_SENTINEL, REPLAY_CAMERA_PREFIX
 from frigate.ffmpeg_presets import FFMPEG_HWACCEL_VAAPI, _gpu_selector
 from frigate.genai import PROVIDERS, load_providers
 from frigate.jobs.media_sync import (
@@ -979,6 +979,17 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                     status_code=400,
                 )
 
+            # an unresolvable scene would crash the threads that look up the model
+            detect_update = sections.get("detect")
+            if isinstance(detect_update, dict) and "scene" in detect_update:
+                try:
+                    config._resolve_camera_model(cam_name, detect_update["scene"])
+                except (TypeError, ValueError):
+                    return JSONResponse(
+                        content={"success": False, "message": "Invalid detect scene"},
+                        status_code=400,
+                    )
+
             for section_name, update in sections.items():
                 err = apply_section_update(camera_config, section_name, update)
                 if err is not None:
@@ -986,6 +997,11 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
                         content={"success": False, "message": err},
                         status_code=400,
                     )
+
+            # the model is resolved again from the scene when the replay
+            # camera is recycled by the refresh below
+            if "detect" in sections and cam_name.startswith(REPLAY_CAMERA_PREFIX):
+                config.drop_camera_model(cam_name)
 
         # Publish ZMQ updates so processing threads pick up changes
         if body.update_topic and body.update_topic.startswith("config/cameras/"):

@@ -98,6 +98,46 @@ class TestHttpApp(BaseTestHttp):
             assert response.status_code == 200
             assert app.frigate_config.cameras["front_door"].objects.track == ["person"]
 
+    @patch("frigate.detectors.detector_config.load_labels")
+    def test_config_set_in_memory_rebinds_replay_model_on_scene_change(
+        self, mock_labels
+    ):
+        mock_labels.return_value = {}
+        replay = "_replay_front_door"
+        self.minimal_config["models"] = [
+            {"devices": ["cpu"]},
+            {"scene": "thermal", "devices": ["openvino:CPU"], "width": 300},
+        ]
+        self.minimal_config["cameras"][replay] = self.minimal_config["cameras"].pop(
+            "front_door"
+        )
+        app = super().create_app()
+        app.config_publisher = Mock()
+        assert app.frigate_config.model_for_camera(replay).scene == "default"
+
+        with AuthTestClient(app) as client:
+            response = client.put(
+                "/config/set",
+                json={
+                    "requires_restart": 0,
+                    "skip_save": True,
+                    "update_topic": f"config/cameras/{replay}/detect",
+                    "config_data": {
+                        "cameras": {replay: {"detect": {"scene": "thermal"}}}
+                    },
+                },
+            )
+
+        assert response.status_code == 200
+        assert app.frigate_config.cameras[replay].detect.scene == "thermal"
+        assert app.frigate_config.model_for_camera(replay).scene == "thermal"
+        topics = [
+            call.args[0].update_type.name
+            for call in app.config_publisher.publish_update.call_args_list
+        ]
+        assert topics[0] == "detect"
+        assert topics[-1] == "refresh"
+
     ####################################################################################################################
     ###################################  Credential redaction sentinel  ################################################
     ####################################################################################################################
