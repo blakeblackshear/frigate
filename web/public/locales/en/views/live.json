@@ -173,6 +173,9 @@
       "label": "Play in background",
       "tips": "Enable this option to continue streaming when the player is hidden."
     },
+    "metadata": {
+      "loading": "Fetching stream metadata…"
+    },
     "mode": "Streaming Technology",
     "technology": {
       "description": "Choose your preferred streaming technology. Frigate may still fall back to low bandwidth mode on playback or network errors.",
