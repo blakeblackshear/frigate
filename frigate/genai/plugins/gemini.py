@@ -137,6 +137,7 @@ class GeminiClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
         contents: list[Any] = [
@@ -162,6 +163,11 @@ class GeminiClient(GenAIClient):
                 contents=contents,
                 config=types.GenerateContentConfig(
                     **generation_config_dict,
+                    http_options=(
+                        types.HttpOptions(headers=extra_headers)
+                        if extra_headers
+                        else None
+                    ),
                 ),
             )
         except errors.APIError as e:

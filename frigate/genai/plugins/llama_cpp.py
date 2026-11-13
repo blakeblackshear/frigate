@@ -106,9 +106,17 @@ class LlamaCppClient(GenAIClient):
         """GET with the configured auth headers injected."""
         return requests.get(url, headers=self._auth_headers(), **kwargs)
 
-    def _post(self, url: str, **kwargs: Any) -> requests.Response:
-        """POST with the configured auth headers injected."""
-        return requests.post(url, headers=self._auth_headers(), **kwargs)
+    def _post(
+        self,
+        url: str,
+        extra_headers: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> requests.Response:
+        """POST with the configured auth headers, plus any per-request headers."""
+        headers = self._auth_headers()
+        if extra_headers:
+            headers = {**(headers or {}), **extra_headers}
+        return requests.post(url, headers=headers, **kwargs)
 
     def _fetch_llama_props(self, base_url: str, model: str) -> dict[str, Any]:
         """Fetch /props from a llama.cpp server, with llama-swap fallback.
@@ -304,6 +312,7 @@ class LlamaCppClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to llama.cpp server."""
         if self.provider is None:
@@ -349,6 +358,7 @@ class LlamaCppClient(GenAIClient):
 
             response = self._post(
                 f"{self.provider}/v1/chat/completions",
+                extra_headers=extra_headers,
                 json=payload,
                 timeout=self.timeout,
             )
