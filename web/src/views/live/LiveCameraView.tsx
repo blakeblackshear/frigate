@@ -873,9 +873,12 @@ export default function LiveCameraView({
                   growClassName,
                 )}
                 ref={clickOverlayRef}
-                style={{
-                  aspectRatio: constrainedAspectRatio,
-                }}
+                style={
+                  {
+                    aspectRatio: constrainedAspectRatio,
+                    "--camera-aspect": cameraAspectRatio,
+                  } as React.CSSProperties
+                }
               >
                 {clickOverlay && overlaySize.width > 0 && (
                   <div
@@ -914,7 +917,10 @@ export default function LiveCameraView({
                 )}
                 <LivePlayer
                   key={camera.name}
-                  className={fullscreen ? "rounded-none" : ""}
+                  className={cn(
+                    "aspect-[var(--camera-aspect)]",
+                    fullscreen && "rounded-none",
+                  )}
                   windowVisible
                   showStillWithoutActivity={false}
                   alwaysShowCameraName={false}
