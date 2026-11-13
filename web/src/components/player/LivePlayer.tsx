@@ -255,10 +255,13 @@ export default function LivePlayer({
       setLiveReady(false);
 
       // the old video is still in the DOM until this render commits, so its
-      // last frame can cover the gap until the new stream plays
-      const frame = captureVideoFrame(overlayRef.current);
-      if (frame) {
-        setSwitchFrame(frame);
+      // last frame can cover the gap until the new stream plays. Tiles that
+      // show the camera still already cover it
+      if (!showStillWithoutActivity) {
+        const frame = captureVideoFrame(overlayRef.current);
+        if (frame) {
+          setSwitchFrame(frame);
+        }
       }
     }
   }
