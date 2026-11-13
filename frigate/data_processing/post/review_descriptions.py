@@ -68,6 +68,9 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         self.review_desc_dps = EventsPerSecond()
         self.review_desc_dps.start()
 
+        # one review's ffmpeg extraction at a time, as on the maintainer loop
+        self._frame_extraction_lock = threading.Lock()
+
     def calculate_frame_count(
         self,
         camera: str,
@@ -212,13 +215,14 @@ class ReviewDescriptionProcessor(PostProcessorApi):
             buffer_extension = get_recording_buffer_extension(
                 final_data["end_time"] - final_data["start_time"]
             )
-            frames = self.get_recording_frames(
-                camera,
-                final_data["start_time"] - buffer_extension,
-                final_data["end_time"] + buffer_extension,
-                height=480,  # Use 480p for good balance between quality and token usage
-                frame_mode=genai_config.frame_mode,
-            )
+            with self._frame_extraction_lock:
+                frames = self.get_recording_frames(
+                    camera,
+                    final_data["start_time"] - buffer_extension,
+                    final_data["end_time"] + buffer_extension,
+                    height=480,  # Use 480p for good balance between quality and token usage
+                    frame_mode=genai_config.frame_mode,
+                )
 
             if frames:
                 if genai_config.debug_save_thumbnails:
