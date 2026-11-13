@@ -6,8 +6,11 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import onnxruntime as ort
 
+from frigate.detectors import detection_runners
 from frigate.detectors.detection_runners import (
+    CU_CTX_SCHED_BLOCKING_SYNC,
     CudaGraphRunner,
+    enable_cuda_blocking_sync,
     get_ort_session_options,
 )
 from frigate.detectors.detector_config import ModelTypeEnum
@@ -105,3 +108,129 @@ class TestCudaGraphRunner(unittest.TestCase):
 
         self.assertEqual(self._annotations(), [None])
         runner._input_ortvalue.update_inplace.assert_called_once()
+
+
+class TestEnableCudaBlockingSync(unittest.TestCase):
+    """The CUDA driver spins a CPU core while waiting on the GPU unless the
+    primary context is switched to blocking sync before the session uses it."""
+
+    def setUp(self):
+        detection_runners._cuda_blocking_sync_devices.clear()
+        self.addCleanup(detection_runners._cuda_blocking_sync_devices.clear)
+
+    def _libcuda(self, current_flags: int = 0, set_flags_result: int = 0):
+        libcuda = MagicMock()
+        libcuda.cuInit.return_value = 0
+        libcuda.cuDeviceGet.return_value = 0
+
+        def get_state(device, flags, active):
+            flags._obj.value = current_flags
+            active._obj.value = 0
+            return 0
+
+        libcuda.cuDevicePrimaryCtxGetState.side_effect = get_state
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.return_value = set_flags_result
+        return libcuda
+
+    def _set_flags(self, libcuda: MagicMock) -> int:
+        return libcuda.cuDevicePrimaryCtxSetFlags_v2.call_args.args[1]
+
+    def test_sets_blocking_sync_on_the_device(self):
+        libcuda = self._libcuda()
+
+        with patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda):
+            self.assertTrue(enable_cuda_blocking_sync(1))
+
+        self.assertEqual(libcuda.cuDeviceGet.call_args.args[1], 1)
+        self.assertEqual(self._set_flags(libcuda), CU_CTX_SCHED_BLOCKING_SYNC)
+
+    def test_replaces_scheduling_but_keeps_other_flags(self):
+        # CU_CTX_SCHED_SPIN | CU_CTX_LMEM_RESIZE_TO_MAX
+        libcuda = self._libcuda(current_flags=0x01 | 0x10)
+
+        with patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda):
+            enable_cuda_blocking_sync(0)
+
+        self.assertEqual(self._set_flags(libcuda), CU_CTX_SCHED_BLOCKING_SYNC | 0x10)
+
+    def test_only_applies_once_per_device(self):
+        libcuda = self._libcuda()
+
+        with patch.object(
+            detection_runners.ctypes, "CDLL", return_value=libcuda
+        ) as cdll:
+            enable_cuda_blocking_sync(0)
+            enable_cuda_blocking_sync(0)
+            enable_cuda_blocking_sync(1)
+
+        self.assertEqual(cdll.call_count, 2)
+
+    def test_missing_driver_is_ignored(self):
+        with patch.object(
+            detection_runners.ctypes, "CDLL", side_effect=OSError("not found")
+        ):
+            self.assertFalse(enable_cuda_blocking_sync(0))
+
+    def test_driver_errors_skip_setting_flags(self):
+        libcuda = self._libcuda()
+        libcuda.cuInit.return_value = 100  # CUDA_ERROR_NO_DEVICE
+
+        with patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda):
+            self.assertFalse(enable_cuda_blocking_sync(0))
+
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.assert_not_called()
+
+    def test_failure_warns_and_retries_next_time(self):
+        libcuda = self._libcuda(set_flags_result=1)
+
+        with (
+            patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+            self.assertLogs(detection_runners.logger, level="WARNING"),
+        ):
+            self.assertFalse(enable_cuda_blocking_sync(0))
+
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.return_value = 0
+
+        with patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda):
+            self.assertTrue(enable_cuda_blocking_sync(0))
+
+    def test_disabled_by_env_var(self):
+        libcuda = self._libcuda()
+
+        for value in ("false", "False", "0", "no", "off"):
+            with (
+                self.subTest(value=value),
+                patch.dict(detection_runners.os.environ, {"CUDA_BLOCKING_SYNC": value}),
+                patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+            ):
+                self.assertFalse(enable_cuda_blocking_sync(0))
+
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.assert_not_called()
+
+    def test_disabled_by_use_cuda_blocking_sync(self):
+        libcuda = self._libcuda()
+
+        with (
+            patch.dict(
+                detection_runners.os.environ,
+                {"USE_CUDA_BLOCKING_SYNC": "false"},
+                clear=False,
+            ),
+            patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+        ):
+            detection_runners.os.environ.pop("CUDA_BLOCKING_SYNC", None)
+            self.assertFalse(enable_cuda_blocking_sync(0))
+
+        libcuda.cuDevicePrimaryCtxSetFlags_v2.assert_not_called()
+
+    def test_enabled_by_env_var(self):
+        libcuda = self._libcuda()
+
+        for value in ("true", "True", "1", "yes", "on"):
+            with (
+                self.subTest(value=value),
+                patch.dict(detection_runners.os.environ, {"CUDA_BLOCKING_SYNC": value}),
+                patch.object(detection_runners.ctypes, "CDLL", return_value=libcuda),
+            ):
+                self.assertTrue(enable_cuda_blocking_sync(0))
+                detection_runners._cuda_blocking_sync_devices.clear()

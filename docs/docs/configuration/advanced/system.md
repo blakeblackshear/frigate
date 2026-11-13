@@ -69,7 +69,7 @@ Besides `FRIGATE_` names, only these are accepted, and a variable already set in
 
 - `LIBVA_DRIVER_NAME` and `HSA_OVERRIDE_GFX_VERSION`
 - `TF_INTRA_OP_PARALLELISM_THREADS`, `TF_INTER_OP_PARALLELISM_THREADS`, `TF_DATASET_THREAD_POOL_SIZE`, and `SHM_MAX_FRAMES`
-- `USE_FP16`, `HF_HUB_OFFLINE`, and `TRANSFORMERS_OFFLINE`
+- `USE_FP16`, `CUDA_BLOCKING_SYNC`, `HF_HUB_OFFLINE`, and `TRANSFORMERS_OFFLINE`
 - `HF_ENDPOINT`, `GITHUB_ENDPOINT`, `GITHUB_RAW_ENDPOINT`, and `TF_KERAS_MOBILENET_V2_WEIGHTS_URL` (an `http://` or `https://` URL)
 
 Any other name is ignored with a warning and must be set in the container environment.

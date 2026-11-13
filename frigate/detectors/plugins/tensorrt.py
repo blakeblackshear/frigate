@@ -19,6 +19,7 @@ from typing import ClassVar, Literal
 from pydantic import ConfigDict, Field
 
 from frigate.detectors.detection_api import DetectionApi
+from frigate.detectors.detection_runners import is_cuda_blocking_sync_enabled
 from frigate.detectors.detector_config import BaseDetectorConfig
 
 logger = logging.getLogger(__name__)
@@ -252,8 +253,15 @@ class TensorRtDetector(DetectionApi):
         assert detector_config.device < dev_count, (
             f"Invalid TensorRT Device Config. Device {detector_config.device} Invalid."
         )
+        flags = cuda.CUctx_flags.CU_CTX_MAP_HOST
+        if is_cuda_blocking_sync_enabled():
+            # blocking sync sleeps the thread in cuStreamSynchronize rather than
+            # spinning a CPU core for the whole inference
+            flags |= cuda.CUctx_flags.CU_CTX_SCHED_BLOCKING_SYNC
+
         err, self.cu_ctx = cuda.cuCtxCreate(
-            cuda.CUctx_flags.CU_CTX_MAP_HOST, detector_config.device
+            flags,
+            detector_config.device,
         )
 
         self.conf_th = 0.4  ##TODO: model config parameter

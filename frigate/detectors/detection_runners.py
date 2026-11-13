@@ -1,5 +1,6 @@
 """Base runner implementation for ONNX models."""
 
+import ctypes
 import logging
 import os
 import platform
@@ -170,6 +171,94 @@ def get_ort_session_options(
         )
 
     return sess_options
+
+
+# CUDA driver API context scheduling flags (cuda.h CUctx_flags)
+CU_CTX_SCHED_MASK = 0x07
+CU_CTX_SCHED_BLOCKING_SYNC = 0x04
+
+# (pid, device id) pairs already switched to blocking sync, keyed by pid so a
+# forked child doesn't inherit the parent's state
+_cuda_blocking_sync_devices: set[tuple[int, int]] = set()
+
+
+def is_cuda_blocking_sync_enabled() -> bool:
+    """Return whether CUDA blocking sync is enabled via environment variable.
+
+    Defaults to True. Can be disabled by setting CUDA_BLOCKING_SYNC=false.
+    """
+    raw = os.environ.get("CUDA_BLOCKING_SYNC")
+    if raw is None:
+        raw = os.environ.get("USE_CUDA_BLOCKING_SYNC")
+    if raw is None:
+        return True
+    return raw.strip().lower() in ("true", "1", "yes", "on")
+
+
+def enable_cuda_blocking_sync(device_id: int) -> bool:
+    """Make host threads sleep instead of spin while they wait on the GPU.
+
+    With the default CU_CTX_SCHED_AUTO scheduling, the CUDA driver spins a CPU
+    core for the whole of every synchronize, so a detector waiting about 10 ms
+    per inference keeps a core about as busy as the GPU. Blocking sync puts the
+    thread to sleep until the GPU signals completion instead, at the cost of a
+    small amount of added latency per synchronize.
+
+    ONNX Runtime's CUDA and TensorRT providers use the device's primary
+    context, so this must run before the session is created. It initializes
+    CUDA, so only call it in the process that is about to use the GPU.
+
+    Args:
+        device_id: CUDA device ordinal the session will run on.
+
+    Returns:
+        True if blocking sync is enabled for the device, False otherwise.
+    """
+    if not is_cuda_blocking_sync_enabled():
+        return False
+
+    key = (os.getpid(), device_id)
+
+    if key in _cuda_blocking_sync_devices:
+        return True
+
+    try:
+        libcuda = ctypes.CDLL("libcuda.so.1")
+    except OSError:
+        logger.debug("CUDA driver not found, leaving GPU sync scheduling unchanged")
+        return False
+
+    device = ctypes.c_int()
+    flags = ctypes.c_uint()
+    active = ctypes.c_int()
+
+    if (
+        libcuda.cuInit(0) != 0
+        or libcuda.cuDeviceGet(ctypes.byref(device), device_id) != 0
+        or libcuda.cuDevicePrimaryCtxGetState(
+            device, ctypes.byref(flags), ctypes.byref(active)
+        )
+        != 0
+    ):
+        logger.debug("Unable to query CUDA device %s for sync scheduling", device_id)
+        return False
+
+    # keep any other flags already set on the primary context
+    new_flags = (flags.value & ~CU_CTX_SCHED_MASK) | CU_CTX_SCHED_BLOCKING_SYNC
+    result = libcuda.cuDevicePrimaryCtxSetFlags_v2(device, new_flags)
+
+    if result != 0:
+        logger.warning(
+            "Unable to enable blocking sync on CUDA device %s (error %s), "
+            "waiting on the GPU will keep a CPU core busy",
+            device_id,
+            result,
+        )
+        return False
+
+    _cuda_blocking_sync_devices.add(key)
+    logger.debug("Enabled blocking sync on CUDA device %s", device_id)
+    return True
 
 
 # Import OpenVINO only when needed to avoid circular dependencies
@@ -825,6 +914,12 @@ def get_optimized_runner(
             )
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
+
+    if (
+        providers[0] in ("CUDAExecutionProvider", "TensorrtExecutionProvider")
+        and is_cuda_blocking_sync_enabled()
+    ):
+        enable_cuda_blocking_sync(options[0]["device_id"])
 
     if providers[0] == "CPUExecutionProvider":
         # In the default image, ONNXRuntime is used so we will only get CPUExecutionProvider
