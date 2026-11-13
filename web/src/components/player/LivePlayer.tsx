@@ -248,10 +248,21 @@ export default function LivePlayer({
   // remounts them in the same render and the new player is hidden until it
   // plays. jsmpeg plays the camera, not the stream, and keeps playing
   const [renderedStream, setRenderedStream] = useState(streamName);
+  const [switchFrame, setSwitchFrame] = useState<HTMLCanvasElement>();
   if (renderedStream !== streamName) {
     setRenderedStream(streamName);
     if (preferredLiveMode !== "jsmpeg") {
       setLiveReady(false);
+
+      // the old video is still in the DOM until this render commits, so its
+      // last frame can cover the gap until the new stream plays. Tiles that
+      // show the camera still already cover it
+      if (!showStillWithoutActivity) {
+        const frame = captureVideoFrame(overlayRef.current);
+        if (frame) {
+          setSwitchFrame(frame);
+        }
+      }
     }
   }
 
@@ -263,6 +274,7 @@ export default function LivePlayer({
 
   const playerIsPlaying = useCallback(() => {
     setLiveReady(true);
+    setSwitchFrame(undefined);
   }, []);
 
   // enabled states
@@ -416,6 +428,12 @@ export default function LivePlayer({
           </div>
         )}
       {player}
+      {switchFrame && !liveReady && (
+        <div
+          className="absolute inset-0"
+          ref={(node) => node?.replaceChildren(switchFrame)}
+        />
+      )}
       {cameraEnabled &&
         !offline &&
         (!showStillWithoutActivity || isReEnabling) &&
@@ -581,4 +599,20 @@ export default function LivePlayer({
       )}
     </div>
   );
+}
+
+function captureVideoFrame(
+  container: HTMLElement | null,
+): HTMLCanvasElement | undefined {
+  const video = container?.querySelector("video");
+  if (!video || video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+    return undefined;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.className = "size-full object-contain";
+  canvas.getContext("2d")?.drawImage(video, 0, 0);
+  return canvas;
 }
