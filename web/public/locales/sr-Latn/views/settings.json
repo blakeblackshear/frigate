@@ -69,7 +69,8 @@
     "frigateplus": "Frigate+",
     "maintenance": "Održavanje",
     "mediaSync": "Sinhronizacija medija",
-    "regionGrid": "Mreža regiona"
+    "regionGrid": "Mreža regiona",
+    "enrichments": "Obogaćivanja"
   },
   "analyticsPreview": {
     "show": "Pregledaj izveštaj",
@@ -610,7 +611,47 @@
         "newNameRequired": "Naziv kamere je obavezan",
         "newNameInvalid": "Neispravan naziv kamere",
         "newNameCollision": "Kamera sa ovim nazivom već postoji",
-        "newStreamsForced": "Strimovi se uvek kopiraju za novu kameru."
+        "newStreamsForced": "Strimovi se uvek kopiraju za novu kameru.",
+        "allCameras": "Sve kamere",
+        "existingCamerasRadio": "Postojeće kamere",
+        "existingPlaceholder": "Izaberite najmanje jednu kameru",
+        "existingDisabled": "Nema drugih kamera za kopiranje"
+      },
+      "categories": {
+        "legend": "Podešavanja za kloniranje",
+        "description": "Izaberite koja podešavanja želite da kopirate sa izvorne kamere.",
+        "selectAll": "Izaberi sve",
+        "selectNone": "Poništi izbor",
+        "resetDefaults": "Vrati na podrazumevano",
+        "general": "Opšte",
+        "spatial": "Prostorna podešavanja",
+        "streams": "Strimovi",
+        "spatialWarningTitle": "Neusklađenost rezolucije",
+        "spatialWarning": "Rezolucija detekcije izvorne kamere {{srcCamera}} ({{srcWidth}}×{{srcHeight}}) razlikuje se od: {{cameras}}. Poligoni se možda neće poklapati na tim kamerama. Ova podešavanja su podrazumevano isključena; omogućite ih da biste ih kopirali kakva jesu.",
+        "restartHint": "Potrebno je ponovno pokretanje",
+        "items": {
+          "record": "Snimanje",
+          "snapshots": "Snimci",
+          "review": "Pregled",
+          "motion": "Detekcija pokreta",
+          "objects": "Objekti",
+          "audio": "Detekcija zvuka",
+          "audio_transcription": "Transkripcija zvuka",
+          "notifications": "Obaveštenja",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Stil vremenske oznake",
+          "onvif": "ONVIF",
+          "lpr": "Prepoznavanje registarskih tablica",
+          "face_recognition": "Prepoznavanje lica",
+          "semantic_search": "Semantička pretraga",
+          "genai": "Generativna AI",
+          "type": "Tip kamere (obična / namenska LPR)",
+          "profiles": "Profili",
+          "detect": "Dimenzije detekcije",
+          "zones": "Zone",
+          "motion_mask": "Maske pokreta"
+        }
       }
     },
     "addCamera": "Dodaj novu kameru",

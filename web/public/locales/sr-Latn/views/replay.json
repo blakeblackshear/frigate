@@ -1,1 +1,60 @@
-{}
+{
+    "title": "Ponovna reprodukcija za otklanjanje grešaka",
+    "description": "Ponovo reprodukujte snimke kamere radi otklanjanja grešaka. Lista objekata prikazuje vremenski odložen rezime otkrivenih objekata, dok kartica Poruke prikazuje tok internih Frigate poruka iz reprodukovanog snimka.",
+    "websocket_messages": "Poruke",
+    "dialog": {
+        "title": "Pokreni ponovnu reprodukciju za otklanjanje grešaka",
+        "description": "Kreirajte privremenu kameru za ponovnu reprodukciju koja neprekidno vrti istorijske snimke radi otklanjanja problema sa detekcijom i praćenjem objekata. Kamera za ponovnu reprodukciju imaće istu konfiguraciju detekcije kao i izvorna kamera. Izaberite vremenski opseg za početak.",
+        "camera": "Izvorna kamera",
+        "timeRange": "Vremenski opseg",
+        "preset": {
+            "1m": "Poslednji 1 minut",
+            "5m": "Poslednjih 5 minuta",
+            "timeline": "Sa vremenske linije",
+            "custom": "Prilagođeno"
+        },
+        "startButton": "Pokreni ponovnu reprodukciju",
+        "selectFromTimeline": "Izaberi",
+        "starting": "Pokretanje ponovne reprodukcije...",
+        "startLabel": "Početak",
+        "endLabel": "Kraj",
+        "toast": {
+            "error": "Neuspelo pokretanje ponovne reprodukcije za otklanjanje grešaka: {{error}}",
+            "alreadyActive": "Sesija ponovne reprodukcije je već aktivna",
+            "noRecordings": "3. Nisu pronađeni snimci u izabranom vremenskom opsegu",
+            "stopError": "Neuspelo zaustavljanje ponovne reprodukcije za otklanjanje grešaka: {{error}}",
+            "goToReplay": "Idi na ponovnu reprodukciju"
+        }
+    },
+    "page": {
+        "noSession": "Nema aktivne sesije ponovne reprodukcije za otklanjanje grešaka",
+        "noSessionDesc": "Pokrenite ponovnu reprodukciju za otklanjanje grešaka iz prikaza Istorija klikom na dugme Radnje na traci sa alatkama i izborom opcije Ponovna reprodukcija za otklanjanje grešaka.",
+        "goToRecordings": "Idi na istoriju",
+        "preparingClip": "Priprema isečka…",
+        "preparingClipDesc": "Frigate spaja snimke za izabrani vremenski opseg. Ovo može potrajati minut za duže opsege.",
+        "startingCamera": "Pokretanje ponovne reprodukcije za otklanjanje grešaka…",
+        "startError": {
+            "title": "12. Neuspelo pokretanje ponovne reprodukcije za otklanjanje grešaka",
+            "back": "Nazad na istoriju"
+        },
+        "sourceCamera": "Izvorna kamera",
+        "replayCamera": "Kamera za ponovnu reprodukciju",
+        "initializingReplay": "Inicijalizacija ponovne reprodukcije za otklanjanje grešaka...",
+        "stoppingReplay": "Zaustavljanje ponovne reprodukcije za otklanjanje grešaka...",
+        "stopReplay": "Zaustavi ponovnu reprodukciju",
+        "confirmStop": {
+            "title": "Zaustaviti ponovnu reprodukciju za otklanjanje grešaka?",
+            "description": "Ovo će zaustaviti sesiju i obrisati sve privremene podatke. Da li ste sigurni?",
+            "confirm": "Zaustavi ponovnu reprodukciju",
+            "cancel": "Otkaži"
+        },
+        "activity": "Aktivnost",
+        "objects": "Lista objekata",
+        "audioDetections": "Detekcije zvuka",
+        "noActivity": "Nije otkrivena nikakva aktivnost",
+        "activeTracking": "Aktivno praćenje",
+        "noActiveTracking": "Nema aktivnog praćenja",
+        "configuration": "Konfiguracija",
+        "configurationDesc": "Fino podesite parametre detekcije pokreta i praćenja objekata za kameru za ponovnu reprodukciju radi otklanjanja grešaka. Nikakve izmene se ne čuvaju u vašoj Frigate konfiguracionoj datoteci."
+    }
+}
