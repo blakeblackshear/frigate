@@ -100,6 +100,17 @@ class TestFeaturesCollector(unittest.TestCase):
         self.assertEqual(section.users, {"admin": 1, "viewer": 1, "custom": 1})
         self.assertEqual((section.camera_groups, section.profiles), (1, 0))
         self.assertFalse(section.plus_api_key)
+        self.assertFalse(section.notifications)
+
+    def test_camera_notifications_count_as_on(self):
+        config = {
+            **CONFIG,
+            "cameras": {"front": {**FRONT_CAMERA, "notifications": {"enabled": True}}},
+        }
+
+        section = features.collect(make_context(make_config(config), {}))
+
+        self.assertTrue(section.notifications)
 
 
 class TestFeatureMappings(unittest.TestCase):

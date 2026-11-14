@@ -139,7 +139,8 @@ def collect(ctx: ReportContext) -> FeaturesSection:
             restream=config.birdseye.restream,
         ),
         mqtt=config.mqtt.enabled,
-        notifications=config.notifications.enabled,
+        notifications=config.notifications.enabled
+        or any(camera.notifications.enabled for camera in cameras),
         auth=config.auth.enabled,
         proxy_auth=config.proxy.header_map.user is not None,
         tls=config.tls.enabled,
