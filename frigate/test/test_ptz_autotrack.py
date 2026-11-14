@@ -193,6 +193,35 @@ class TestAutotrackerPrediction(unittest.TestCase):
         self.assertEqual(self._target_box([-1, -2, 1, 2], 0), 0.2)
 
 
+class TestAutotrackerCalibrationFailure(unittest.IsolatedAsyncioTestCase):
+    async def test_calibration_failure_disables_autotracking(self) -> None:
+        tracker = _make_tracker()
+        camera_config = tracker.config.cameras[CAMERA]
+        camera_config.onvif.autotracking.calibrate_on_startup = True
+        tracker.tracked_object_history = {}
+        tracker.tracked_object_metrics = {}
+        tracker.move_metrics = {}
+        tracker.intercept = {}
+        tracker.move_coefficients = {}
+        tracker.zoom_time = {}
+        tracker.move_queues = {}
+        tracker.move_queue_locks = {}
+        tracker.onvif.loop = asyncio.get_running_loop()
+        tracker.onvif.cams = {CAMERA: {"init": True, "features": ["pt-r-fov"]}}
+        tracker.onvif.get_service_capabilities = AsyncMock(return_value=True)
+        tracker.onvif.get_camera_status = AsyncMock()
+        tracker._process_move_queue = AsyncMock()
+        tracker._calibrate_camera = AsyncMock(side_effect=RuntimeError("disconnected"))
+        tracker.autotracker_init[CAMERA] = False
+
+        with self.assertLogs("frigate.ptz.autotrack", level="ERROR"):
+            await tracker._autotracker_setup(camera_config, CAMERA, startup=True)
+
+        self.assertFalse(camera_config.onvif.autotracking.enabled)
+        self.assertFalse(tracker.autotracker_init[CAMERA])
+        self.assertFalse(tracker.calibrating[CAMERA])
+
+
 class TestAutotrackerMoveQueue(unittest.IsolatedAsyncioTestCase):
     async def test_absolute_zoom_does_not_overwrite_the_pan_tilt_sample(self) -> None:
         tracker = _make_tracker()
