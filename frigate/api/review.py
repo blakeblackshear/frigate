@@ -82,11 +82,18 @@ async def review(
     reviewed = params.reviewed
     limit = params.limit
     severity = params.severity
-    before = params.before or datetime.datetime.now().timestamp()
-    after = (
-        params.after
-        or (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
+    before = (
+        params.before
+        if params.before is not None
+        else datetime.datetime.now().timestamp()
     )
+
+    if params.after is not None:
+        after = params.after
+    elif params.before is not None:
+        after = 0
+    else:
+        after = (datetime.datetime.now() - datetime.timedelta(hours=24)).timestamp()
 
     clauses = [
         (ReviewSegment.start_time < before)

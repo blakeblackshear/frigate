@@ -89,6 +89,37 @@ class TestHttpReview(BaseTestHttp):
             assert response_json[0]["id"] == id
             assert response_json[0]["has_been_reviewed"] == False
 
+    def test_get_review_before_only_has_no_lower_bound(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 72 * 3600, now - 71 * 3600)
+            response = client.get("/review", params={"before": now - 48 * 3600})
+            assert response.status_code == 200
+            assert [r["id"] for r in response.json()] == [id]
+
+    def test_get_review_after_zero_is_not_defaulted(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 72 * 3600, now - 71 * 3600)
+            response = client.get("/review", params={"after": 0})
+            assert response.status_code == 200
+            assert [r["id"] for r in response.json()] == [id]
+
+    def test_get_review_no_bounds_defaults_to_last_24_hours(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.random", now - 72 * 3600, now - 71 * 3600
+            )
+            response = client.get("/review", params={"limit": 10})
+            assert response.status_code == 200
+            assert response.json() == []
+
     def test_get_review_with_time_filter_no_matches(self):
         """Test that review items outside the range are not returned."""
         now = datetime.now().timestamp()
