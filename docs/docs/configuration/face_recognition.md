@@ -28,6 +28,8 @@ When running a default COCO model or another model that does not include `face` 
 
 Frigate needs to first detect a `person` before it can detect and recognize a face.
 
+For models that natively detect faces, Frigate uses a usable face attribute first. If the attribute is missing or below `min_area`, Frigate also tries its local face detector within the tracked person’s box, at most once per second per person. This fallback adds CPU work and uses `detection_threshold`; it does not change recognition thresholds or upscale the face crop.
+
 :::
 
 ### Face Recognition
@@ -84,7 +86,7 @@ Fine-tune face recognition with these optional parameters. The only optional par
 
 Navigate to <NavPath path="Settings > Enrichments > Face recognition" />.
 
-- **Detection threshold**: Face detection confidence score required before recognition runs. This field only applies to the standalone face detection model; `min_score` should be used to filter for models that have face detection built in.
+- **Detection threshold**: Face detection confidence score required before recognition runs. This field applies to the local face detector, including fallback attempts when a native face attribute is missing or too small. Use `min_score` to filter native face attributes.
   - Default: `0.7`
 - **Minimum face area**: Minimum size (in pixels) a face must be before recognition runs. Depending on the resolution of your camera's `detect` stream, you can increase this value to ignore small or distant faces.
   - Default: `750` pixels
