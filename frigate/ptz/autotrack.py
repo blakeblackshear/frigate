@@ -318,7 +318,13 @@ class PtzAutoTracker(threading.Thread):
             ) = map(float, camera_config.onvif.autotracking.movement_weights)
 
         if startup and camera_config.onvif.autotracking.calibrate_on_startup:
-            await self._calibrate_camera(camera)
+            try:
+                await self._calibrate_camera(camera)
+            except Exception:
+                logger.exception(f"{camera}: Autotracker calibration failed")
+                self.calibrating[camera] = False
+                self._disable(camera, "calibration failed")
+                return
 
         self.dispatcher.publish(f"{camera}/ptz_autotracker/active", "OFF", retain=False)
         self.autotracker_init[camera] = True

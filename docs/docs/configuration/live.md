@@ -98,7 +98,7 @@ Additionally, when creating and editing camera groups in the UI, you can choose 
 
 :::note
 
-Frigate's default dashboard ("All Cameras") will always use the first entry you've defined in streams when playing live streams from your cameras.
+Frigate's default dashboard ("All Cameras") always uses the first entry in `streams`. That should be your highest quality stream, because Auto starts on the first stream and only steps down from there. To show a lower quality stream on a dashboard, create a camera group and choose the stream in each camera's [streaming settings](#streaming-options-on-camera-group-dashboards) for that group.
 
 :::
 
