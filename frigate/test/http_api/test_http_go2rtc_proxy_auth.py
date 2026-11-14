@@ -33,6 +33,7 @@ class TestGo2rtcProxyAuth(BaseTestHttp):
         self.minimal_config = _CONFIG
         self.app = super().create_app()
         self.app.jwt_token = OctKey.import_key(b"0" * 32)
+        self.app.user_sessions = {"admin": ("admin", None), "viewer": ("viewer", None)}
 
         get_patch = patch(
             "frigate.api.auth.requests.get",

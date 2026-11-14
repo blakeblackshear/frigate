@@ -150,17 +150,18 @@ export function TrackingDetails({
 
   // Fetch the VOD manifest JSON to get the actual clipFrom after keyframe
   // snapping. The backend may snap clipFrom backwards to a keyframe, making
-  // the video start earlier than the requested time.
+  // the video start earlier than the requested time. Uses sourceOffsetRef so
+  // the manifest describes the same clip as videoSource.
   const vodManifestUrl = useMemo(() => {
     if (!event.camera) return null;
-    const startTime =
-      event.start_time + annotationOffset / 1000 - REVIEW_PADDING;
+    const sourceOffset = sourceOffsetRef.current;
+    const startTime = event.start_time + sourceOffset / 1000 - REVIEW_PADDING;
     const endTime =
       (event.end_time ?? Date.now() / 1000) +
-      annotationOffset / 1000 +
+      sourceOffset / 1000 +
       REVIEW_PADDING;
     return `vod/clip/${event.camera}/start/${startTime}/end/${endTime}`;
-  }, [event, annotationOffset]);
+  }, [event]);
 
   const { data: vodManifest } = useSWR<VodManifest>(vodManifestUrl, null, {
     revalidateOnFocus: false,
@@ -599,7 +600,6 @@ export function TrackingDetails({
       playlist,
       startPosition: 0,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event]);
 
   // Determine camera aspect ratio category

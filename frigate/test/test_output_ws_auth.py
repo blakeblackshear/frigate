@@ -3,7 +3,7 @@
 import unittest
 from types import SimpleNamespace
 
-from frigate.config import FrigateConfig
+from frigate.config import AuthConfig, FrigateConfig
 from frigate.output.ws_auth import ws_has_camera_access
 
 
@@ -55,3 +55,11 @@ class TestWsHasCameraAccess(unittest.TestCase):
         self.assertFalse(
             ws_has_camera_access(self._make_ws("limited_user"), "birdseye", self.config)
         )
+
+    def test_replaced_auth_config_revokes_camera(self):
+        ws = self._make_ws("limited_user")
+        self.assertTrue(ws_has_camera_access(ws, "front_door", self.config))
+
+        self.config.auth = AuthConfig(roles={"limited_user": ["back_door"]})
+        self.assertFalse(ws_has_camera_access(ws, "front_door", self.config))
+        self.assertTrue(ws_has_camera_access(ws, "back_door", self.config))

@@ -31,5 +31,8 @@
     },
     "detect": {
         "dimensionMustBeEven": "Deve ser um número par."
+    },
+    "models": {
+        "defaultRequired": "Um modelo deve usar a cena 'Todas câmeras'. Sem isso, qualquer câmera que não escolher uma cena, não terá um modelo para servir de padrão."
     }
 }

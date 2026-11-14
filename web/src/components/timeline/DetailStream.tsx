@@ -147,7 +147,18 @@ export default function DetailStream({
   // away instead of waiting for a future effectiveTime change.
   useEffect(() => {
     if (!reviewItems || reviewItems.length === 0) return;
-    if (activeReviewId) return;
+
+    // an id left over from another camera's items counts as unset
+    if (
+      activeReviewId &&
+      reviewItems.some(
+        (r) =>
+          `review-${r.id ?? r.start_time ?? Math.floor(r.start_time ?? 0)}` ===
+          activeReviewId,
+      )
+    ) {
+      return;
+    }
 
     let target: ReviewSegment | undefined;
     let closest: { r: ReviewSegment; diff: number } | undefined;

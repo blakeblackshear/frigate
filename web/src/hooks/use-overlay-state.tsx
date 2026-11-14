@@ -39,7 +39,6 @@ export function useOverlayState<S>(
       });
     },
     // locationRef is stable so we don't need it in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [key, navigate, preserveSearch],
   );
 
@@ -93,7 +92,6 @@ export function usePersistedOverlayState<S extends string>(
       navigate(loc.pathname, { state: newLocationState, replace });
     },
     // locationRef is stable so we don't need it in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [key, navigate, setPersistedValue],
   );
 
@@ -151,7 +149,6 @@ export function useUserPersistedOverlayState<S extends string>(
       navigate(loc.pathname, { state: newLocationState, replace });
     },
     // locationRef is stable so we don't need it in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [key, navigate, setPersistedValue],
   );
 
@@ -188,7 +185,6 @@ export function useHashState<S extends string>(): [
       }
     },
     // locationRef is stable so we don't need it in deps
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [navigate],
   );
 

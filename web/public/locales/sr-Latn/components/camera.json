@@ -1,0 +1,90 @@
+{
+  "group": {
+    "label": "Grupe kamera",
+    "add": "Dodaj grupu kamera",
+    "showAll": "Prikaži sve grupe kamera",
+    "showLess": "Prikaži manje",
+    "edit": "Izmeni grupu kamera",
+    "editGroups": "Izmeni grupe kamera",
+    "delete": {
+      "label": "Obriši grupu kamera",
+      "confirm": {
+        "title": "Potvrdite brisanje",
+        "desc": "Da li ste sigurni da želite da obrišete grupu kamera <em>{{name}}</em>?"
+      }
+    },
+    "name": {
+      "label": "Naziv",
+      "placeholder": "Unesite naziv…",
+      "errorMessage": {
+        "mustLeastCharacters": "Naziv grupe kamera mora imati najmanje 2 karaktera.",
+        "exists": "Naziv grupe kamera već postoji.",
+        "nameMustNotPeriod": "Naziv grupe kamera ne sme da sadrži tačku.",
+        "invalid": "Nevažeći naziv grupe kamera."
+      }
+    },
+    "cameras": {
+      "label": "Kamere",
+      "desc": "Izaberite kamere za ovu grupu."
+    },
+    "icon": "Ikona",
+    "success": "Grupa kamera ({{name}}) je sačuvana.",
+    "camera": {
+      "birdseye": "Birdseye",
+      "setting": {
+        "label": "Podešavanja strimovanja kamere",
+        "title": "Podešavanja strimovanja za kameru {{cameraName}}",
+        "desc": "Promenite opcije strimovanja uživo za kontrolnu tablu ove grupe kamera. <em>Ova podešavanja su specifična za uređaj/veb-pregledač.</em>",
+        "audioIsAvailable": "Zvuk je dostupan za ovaj strim",
+        "audioIsUnavailable": "Zvuk je nedostupan za ovaj strim",
+        "audio": {
+          "tips": {
+            "title": "Zvuk mora biti poslat sa vaše kamere i konfigurisan u go2rtc-u za ovaj strim."
+          }
+        },
+        "stream": "Strim",
+        "placeholder": "Izaberite strim",
+        "streamMethod": {
+          "label": "Metod strimovanja",
+          "placeholder": "Izaberite metod strimovanja",
+          "method": {
+            "noStreaming": {
+              "label": "Bez strimovanja",
+              "desc": "Slike sa kamere će se osvežavati samo jednom u minuti i neće biti strimovanja uživo."
+            },
+            "smartStreaming": {
+              "label": "Pametno strimovanje (preporučeno)",
+              "desc": "Pametno strimovanje će osvežavati sliku sa vaše kamere jednom u minuti kada nema uočljivih aktivnosti, kako bi se uštedeo protok podataka i resursi. Kada se detektuje aktivnost, prikaz se neprimetno prebacuje na strim uživo."
+            },
+            "continuousStreaming": {
+              "label": "Neprekidno strimovanje",
+              "desc": {
+                "title": "Slika sa kamere će uvek biti strim uživo kada je vidljiva na kontrolnoj tabli, čak i ako se ne detektuje nikakva aktivnost.",
+                "warning": "Neprekidno strimovanje može izazvati visoku potrošnju protoka podataka i probleme sa performansama. Koristite oprezno."
+              }
+            }
+          }
+        },
+        "compatibilityMode": {
+          "label": "Režim kompatibilnosti",
+          "desc": "Omogućite ovu opciju samo ako strim uživo sa vaše kamere prikazuje izobličenja boja (artefakte) i ima dijagonalnu liniju na desnoj strani slike."
+        }
+      }
+    }
+  },
+  "debug": {
+    "options": {
+      "label": "Podešavanja",
+      "title": "Opcije",
+      "showOptions": "Prikaži opcije",
+      "hideOptions": "Sakrij opcije"
+    },
+    "boundingBox": "Uokvireni prostor",
+    "timestamp": "Vremenska oznaka",
+    "zones": "Zone",
+    "mask": "Maska",
+    "motion": "Pokret",
+    "regions": "Regioni",
+    "paths": "Putanje"
+  }
+}

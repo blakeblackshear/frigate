@@ -57,8 +57,7 @@
       "view": "Skatīt",
       "error": {
         "failed": "Neizdevās sākt eksportēšanu: {{error}}",
-        "endTimeMustAfterStartTime": "Beigu laikam ir jābūt pēc sākuma laika",
-        "noVaildTimeSelected": "Nav izvēlēts derīgs laika diapazons"
+        "endTimeMustAfterStartTime": "Beigu laikam ir jābūt pēc sākuma laika"
       }
     },
     "fromTimeline": {

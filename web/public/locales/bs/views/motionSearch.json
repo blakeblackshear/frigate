@@ -47,8 +47,6 @@
         "thresholdDesc": "Niže vrijednosti detektiraju manje promjene (1-255)",
         "minArea": "Minimalna površina promjene",
         "minAreaDesc": "Minimalni postotak područja interesa koji mora promijeniti da bi se smatrao značajnim",
-        "frameSkip": "Preskoči okvir",
-        "frameSkipDesc": "Obrađujte svaki N-ti okvir. Postavite ovo na brzinu okvira vaše kamere da biste obradili jedan okvir po sekundi (npr. 5 za 5 FPS kameru, 30 za 30 FPS kameru). Više vrijednosti će biti brže, ali mogu propustiti kratke događaje pokreta.",
         "maxResults": "Maksimalni rezultati",
         "maxResultsDesc": "Zaustavi nakon ovog broja odgovarajućih vremenskih oznaka"
     },

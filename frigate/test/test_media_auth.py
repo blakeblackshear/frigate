@@ -9,8 +9,8 @@ import logging
 import os
 import unittest
 
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.media_auth import (
@@ -20,8 +20,9 @@ from frigate.api.media_auth import (
     resolve_media_uri,
 )
 from frigate.config import FrigateConfig
+from frigate.const import EXPORT_DIR
 from frigate.models import Event, Export, Recordings, ReviewSegment
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
 _CONFIG = {
     "mqtt": {"host": "mqtt"},
@@ -222,11 +223,11 @@ class TestExportResolution(unittest.TestCase):
     """Export resolution requires a DB lookup."""
 
     def setUp(self):
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         Router(migrate_db).run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         self.db.bind([Event, ReviewSegment, Recordings, Export])
         self.config = FrigateConfig(**_CONFIG)
 
@@ -245,8 +246,8 @@ class TestExportResolution(unittest.TestCase):
             camera=camera,
             name=f"export-{export_id}",
             date=int(datetime.datetime.now().timestamp()),
-            video_path=f"/media/frigate/exports/{filename}",
-            thumb_path=f"/media/frigate/exports/{filename}.jpg",
+            video_path=os.path.join(EXPORT_DIR, filename),
+            thumb_path=os.path.join(EXPORT_DIR, f"{filename}.jpg"),
             in_progress=False,
         ).execute()
 

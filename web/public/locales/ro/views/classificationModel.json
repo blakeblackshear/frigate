@@ -213,7 +213,6 @@
     "modelNotReady": "Modelul nu este pregătit pentru antrenare",
     "noChanges": "Nicio modificare a setului de date de la ultima antrenare."
   },
-  "none": "Niciuna",
   "reclassifyImageAs": "Reclasifică imaginea ca:",
   "reclassifyImage": "Reclasifică imaginea",
   "disabled": "Dezactivat"

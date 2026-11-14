@@ -393,8 +393,8 @@ class TestHttpApp(BaseTestHttp):
     def test_event_time_filtering(self):
         morning_id = "123456.random"
         evening_id = "654321.random"
-        morning = 1656590400  # 06/30/2022 6 am (GMT)
-        evening = 1656633600  # 06/30/2022 6 pm (GMT)
+        morning = 1656568800  # 06/30/2022 6 am (GMT)
+        evening = 1656612000  # 06/30/2022 6 pm (GMT)
 
         with AuthTestClient(self.app) as client:
             super().insert_mock_event(morning_id, morning)
@@ -417,6 +417,12 @@ class TestHttpApp(BaseTestHttp):
             ).json()
             assert events
             assert len(events) == 1
+            # an event in the first minute of the range is included
+            events = client.get(
+                "/events",
+                params={"time_range": "06:00,24:00"},
+            ).json()
+            assert len(events) == 2
 
     def test_set_delete_sub_label(self):
         mock_event_updater = Mock(spec=EventMetadataPublisher)
@@ -478,6 +484,40 @@ class TestHttpApp(BaseTestHttp):
             sub_labels = client.get("/sub_labels").json()
             assert sub_labels
             assert sub_labels == [sub_label]
+
+    def test_get_event_list_filter_sub_labels(self):
+        sub_labels = {
+            "1.cyrillic": "Кузнецова Ира",
+            "2.joined": "Ира, Bob",
+            "3.ascii": "Alice",
+            "4.none": None,
+        }
+        mock_embeddings = Mock()
+        mock_embeddings.search_thumbnail.return_value = [(id, 0.1) for id in sub_labels]
+
+        self.app.frigate_config.semantic_search.enabled = True
+        self.app.embeddings = mock_embeddings
+
+        with AuthTestClient(self.app) as client:
+            for id, sub_label in sub_labels.items():
+                super().insert_mock_event(id)
+                Event.update(sub_label=sub_label).where(Event.id == id).execute()
+
+            search_params = {"search_type": "similarity", "event_id": "1.cyrillic"}
+
+            for path, params in (("/events", {}), ("/events/search", search_params)):
+
+                def ids(query: str) -> set[str]:
+                    events = client.get(
+                        path, params={**params, "sub_labels": query}
+                    ).json()
+                    return {event["id"] for event in events}
+
+                assert ids("Кузнецова Ира") == {"1.cyrillic"}
+                assert ids("Ира") == {"2.joined"}
+                assert ids("bob") == {"2.joined"}
+                assert ids("ALICE") == {"3.ascii"}
+                assert ids("None") == {"4.none"}
 
     ####################################################################################################################
     ###################################  GET /metrics Endpoint   #########################################################
@@ -563,23 +603,20 @@ class TestHttpApp(BaseTestHttp):
         assert "# TYPE frigate_detection_total_fps gauge" in event.text
         assert "frigate_detection_total_fps 13.7" in event.text
         assert (
-            "# HELP frigate_camera_events_total Count of camera events since exporter started"
+            "# HELP frigate_camera_events Current number of events stored in the database per camera and label"
             in event.text
         )
-        assert "# TYPE frigate_camera_events_total counter" in event.text
+        assert "# TYPE frigate_camera_events gauge" in event.text
         assert (
-            'frigate_camera_events_total{camera="front_door",label="Mock"} 3.0'
-            in event.text
+            'frigate_camera_events{camera="front_door",label="Mock"} 3.0' in event.text
         )
         assert (
-            'frigate_camera_events_total{camera="front_door",label="inside"} 2.0'
-            in event.text
-        )
-        assert (
-            'frigate_camera_events_total{camera="front_door",label="outside"} 2.0'
+            'frigate_camera_events{camera="front_door",label="inside"} 2.0'
             in event.text
         )
         assert (
-            'frigate_camera_events_total{camera="porch",label="Mock"} 2.0' in event.text
+            'frigate_camera_events{camera="front_door",label="outside"} 2.0'
+            in event.text
         )
-        assert 'frigate_camera_events_total{camera="porch",label="inside"} 2.0'
+        assert 'frigate_camera_events{camera="porch",label="Mock"} 2.0' in event.text
+        assert 'frigate_camera_events{camera="porch",label="inside"} 2.0' in event.text

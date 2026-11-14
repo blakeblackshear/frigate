@@ -22,5 +22,30 @@
                 "description": "Predvolené výstupné argumenty pre streamy rolí záznamov."
             }
         }
+    },
+    "zones": {
+        "coordinates": {
+            "label": "Súradnice",
+            "description": "Polygónové súradnice, ktoré definujú plochu zóny. Môžu byt ako reťarec so súradnicami oddelenými bodkou, alebo zoznam jednotlivých súradníc. Súradnice musia byť relatívne (0-1) alebo absolútne (pôvodne)."
+        },
+        "distances": {
+            "label": "Skutočné vzdialenosti"
+        }
+    },
+    "label": "Nastavenie kamery",
+    "name": {
+        "label": "Názov kamery",
+        "description": "Názov kamery je povinný"
+    },
+    "friendly_name": {
+        "label": "Prezývka",
+        "description": "V užívateľskom rozhraní používame prezývky kamier"
+    },
+    "enabled": {
+        "label": "Zapnuté",
+        "description": "Zapnutý"
+    },
+    "audio": {
+        "label": "Detekcia zvuku"
     }
 }

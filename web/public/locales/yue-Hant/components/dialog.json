@@ -54,7 +54,6 @@
     "toast": {
       "error": {
         "failed": "無法開始匯出：{{error}}",
-        "noVaildTimeSelected": "沒有選取有效的時間範圍",
         "endTimeMustAfterStartTime": "結束時間必須在開始時間之後"
       },
       "success": "成功開始匯出。請到匯出頁面看檔案。",
@@ -74,8 +73,7 @@
     "restreaming": {
       "disabled": "此鏡頭未啟用重串流。",
       "desc": {
-        "title": "設定 go2rtc 以啟用此鏡頭的更多即時預覽選項及音訊。",
-        "readTheDocumentation": "閱讀文件"
+        "title": "設定 go2rtc 以啟用此鏡頭的更多即時預覽選項及音訊。"
       }
     },
     "showStats": {

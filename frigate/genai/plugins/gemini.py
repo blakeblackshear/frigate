@@ -2,19 +2,32 @@
 
 import base64
 import binascii
+import io
 import json
 import logging
+import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
 from google import genai
 from google.genai import errors, types
 from google.genai.types import FunctionCallingConfigMode
+from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.utils import interleave_images
 
 logger = logging.getLogger(__name__)
+
+# Gemini requests carrying inline data are capped at ~20 MB total; stay well
+# under it so the request fails as a log line rather than a 400.
+GEMINI_MAX_INLINE_BYTES = 15 * 1024 * 1024
+
+# Image-token probes run on the enrichment thread, so they get a short timeout,
+# no retries, and a cooldown after failure instead of the client's defaults.
+COUNT_TOKENS_TIMEOUT_MS = 5000
+COUNT_TOKENS_RETRY_INTERVAL = 300
 
 
 def _decode_thought_signature(value: Any) -> bytes | None:
@@ -88,9 +101,14 @@ class GeminiClient(GenAIClient):
     """Generative AI client for Frigate using Gemini."""
 
     provider: genai.Client
+    _image_token_cache: dict[tuple[int, int], int]
+    _image_token_retry_at: float
 
     def _init_provider(self) -> genai.Client:
         """Initialize the client."""
+        self._image_token_cache = {}
+        self._image_token_retry_at = 0.0
+
         # Merge provider_options into HttpOptions
         http_options_dict: dict[str, Any] = {
             "timeout": int(self.timeout * 1000),  # requires milliseconds
@@ -118,11 +136,16 @@ class GeminiClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
-        contents = [prompt] + [
-            types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
+        contents: list[Any] = [
+            part
+            if isinstance(part, str)
+            else types.Part.from_bytes(data=part, mime_type="image/jpeg")
+            for part in interleave_images(prompt, images, image_captions)
         ]
+
         try:
             # Merge runtime_options into generation_config if provided
             generation_config_dict: dict[str, Any] = {"candidate_count": 1}
@@ -136,7 +159,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=contents,  # type: ignore[arg-type]
+                contents=contents,
                 config=types.GenerateContentConfig(
                     **generation_config_dict,
                 ),
@@ -157,6 +180,58 @@ class GeminiClient(GenAIClient):
             return None
         return description
 
+    @property
+    def supports_transcription(self) -> bool:
+        """Gemini models accept inline audio parts."""
+        return True
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio by sending it as an inline part alongside a prompt."""
+        if len(audio) > GEMINI_MAX_INLINE_BYTES:
+            logger.warning(
+                "Audio payload of %d bytes exceeds the Gemini inline limit; skipping transcription",
+                len(audio),
+            )
+            return None
+
+        prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
+
+        if language:
+            prompt += f" The speech is in language '{language}'."
+
+        try:
+            contents: list[Any] = [
+                prompt,
+                types.Part.from_bytes(data=audio, mime_type=mime_type),
+            ]
+            response = self.provider.models.generate_content(
+                model=self.genai_config.model,
+                contents=contents,
+                config=types.GenerateContentConfig(candidate_count=1),
+            )
+        except errors.APIError as e:
+            logger.warning("Gemini returned an error: %s", str(e))
+            return None
+        except Exception as e:
+            logger.warning("An unexpected error occurred with Gemini: %s", str(e))
+            return None
+
+        try:
+            if response.text is None:
+                return None
+
+            transcript = response.text.strip()
+        except (ValueError, AttributeError):
+            # No transcript was generated
+            return None
+
+        return transcript or None
+
     def list_models(self) -> list[str]:
         """Return available model names from Gemini."""
         try:
@@ -169,6 +244,71 @@ class GeminiClient(GenAIClient):
         """Get the context window size for Gemini."""
         # Gemini Pro Vision has a 1M token context window
         return 1000000
+
+    def estimate_image_tokens(self, width: int, height: int) -> float:
+        """Ask Gemini how many prompt tokens an image of these dimensions costs.
+
+        Gemini bills images far above the base pixel heuristic (Gemini 3 models
+        charge ~1100 tokens for a 320x180 frame, not ~46), and the cost differs
+        between model generations, so it is measured with the free count_tokens
+        endpoint and cached per (width, height). Falls back to the base heuristic
+        if the request fails, and does not probe again for
+        COUNT_TOKENS_RETRY_INTERVAL seconds.
+        """
+        cached = self._image_token_cache.get((width, height))
+
+        if cached is not None:
+            return cached
+
+        if time.monotonic() < self._image_token_retry_at:
+            return super().estimate_image_tokens(width, height)
+
+        img = Image.new("RGB", (width, height), (128, 128, 128))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=60)
+        image = types.Part.from_bytes(data=buf.getvalue(), mime_type="image/jpeg")
+
+        try:
+            baseline = self._count_tokens(["."])
+            with_image = self._count_tokens([".", image])
+            tokens = max(1, with_image - baseline)
+        except Exception as e:
+            self._image_token_retry_at = time.monotonic() + COUNT_TOKENS_RETRY_INTERVAL
+            logger.debug(
+                "Gemini image-token count failed for %dx%d (%s); using heuristic",
+                width,
+                height,
+                e,
+            )
+            return super().estimate_image_tokens(width, height)
+
+        self._image_token_cache[(width, height)] = tokens
+        logger.debug(
+            "Gemini model '%s' uses %d tokens for %dx%d images",
+            self.genai_config.model,
+            tokens,
+            width,
+            height,
+        )
+        return tokens
+
+    def _count_tokens(self, contents: list[Any]) -> int:
+        """Return Gemini's prompt-token count for contents, without generating."""
+        total = self.provider.models.count_tokens(
+            model=self.genai_config.model,
+            contents=contents,
+            config=types.CountTokensConfig(
+                http_options=types.HttpOptions(
+                    timeout=COUNT_TOKENS_TIMEOUT_MS,
+                    retry_options=types.HttpRetryOptions(attempts=1),
+                )
+            ),
+        ).total_tokens
+
+        if total is None:
+            raise ValueError("count_tokens returned no total")
+
+        return total
 
     def chat_with_tools(
         self,
@@ -324,7 +464,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=gemini_messages,  # type: ignore[arg-type]
+                contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 
@@ -586,7 +726,7 @@ class GeminiClient(GenAIClient):
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
-                contents=gemini_messages,  # type: ignore[arg-type]
+                contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 

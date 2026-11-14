@@ -1,0 +1,41 @@
+{
+  "selected_one": "Izabrano: {{count}}",
+  "selected_other": "Izabrano: {{count}}",
+  "documentTitle": "Izvoz - Frigate",
+  "search": "Pretraga",
+  "noExports": "Nije pronađen nijedan izvoz",
+  "headings": {
+    "cases": "Slučajevi",
+    "uncategorizedExports": "Nekategorizovani izvozi"
+  },
+  "deleteExport": {
+    "label": "Obriši izvoz",
+    "desc": "Da li ste sigurni da želite da obrišete izvoz {{exportName}}?"
+  },
+  "editExport": {
+    "title": "Preimenuj izvoz",
+    "desc": "Unesite novi naziv za ovaj izvoz.",
+    "saveExport": "Sačuvaj izvoz"
+  },
+  "tooltip": {
+    "shareExport": "Podeli izvoz",
+    "downloadVideo": "Preuzmi video",
+    "editName": "Izmeni naziv",
+    "deleteExport": "Obriši izvoz",
+    "assignToCase": "Dodaj u slučaj",
+    "removeFromCase": "Ukloni iz slučaja"
+  },
+  "toolbar": {
+    "newCase": "Novi slučaj",
+    "addExport": "Dodaj izvoz",
+    "editCase": "Izmeni slučaj",
+    "deleteCase": "Obriši slučaj"
+  },
+  "toast": {
+    "error": {
+      "renameExportFailed": "Neuspelo preimenovanje izvoza: {{errorMessage}}",
+      "assignCaseFailed": "Neuspelo ažuriranje dodele slučaju: {{errorMessage}}",
+      "caseSaveFailed": "Neuspelo čuvanje slučaja: {{errorMessage}}"
+    }
+  }
+}

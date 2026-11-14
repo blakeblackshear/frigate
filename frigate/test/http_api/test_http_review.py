@@ -89,6 +89,37 @@ class TestHttpReview(BaseTestHttp):
             assert response_json[0]["id"] == id
             assert response_json[0]["has_been_reviewed"] == False
 
+    def test_get_review_before_only_has_no_lower_bound(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 72 * 3600, now - 71 * 3600)
+            response = client.get("/review", params={"before": now - 48 * 3600})
+            assert response.status_code == 200
+            assert [r["id"] for r in response.json()] == [id]
+
+    def test_get_review_after_zero_is_not_defaulted(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 72 * 3600, now - 71 * 3600)
+            response = client.get("/review", params={"after": 0})
+            assert response.status_code == 200
+            assert [r["id"] for r in response.json()] == [id]
+
+    def test_get_review_no_bounds_defaults_to_last_24_hours(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.random", now - 72 * 3600, now - 71 * 3600
+            )
+            response = client.get("/review", params={"limit": 10})
+            assert response.status_code == 200
+            assert response.json() == []
+
     def test_get_review_with_time_filter_no_matches(self):
         """Test that review items outside the range are not returned."""
         now = datetime.now().timestamp()
@@ -342,7 +373,7 @@ class TestHttpReview(BaseTestHttp):
                 "cameras": "front_door",
                 "labels": "all",
                 "zones": "all",
-                "timezone": "utc",
+                "timezone": "UTC",
             }
             response = client.get("/review/summary", params=params)
             assert response.status_code == 200
@@ -588,6 +619,43 @@ class TestHttpReview(BaseTestHttp):
                 UserReviewStatus.review_segment == id,
             )
             assert user_review.has_been_reviewed == True
+
+    def test_reviews_concurrent_insert_peewee_ignore(self):
+        """Validates that on_conflict_ignore() silently skips a duplicate insert
+
+        Two requests can both SELECT and find no existing status, then both try
+        to INSERT, hitting the unique (user_id, review_segment) constraint.
+        on_conflict_ignore() must silently skip the duplicate instead of raising
+        an IntegrityError (which was previously caught with try/except).
+        """
+        id = "123456.random"
+        with AuthTestClient(self.app):
+            super().insert_mock_review_segment(id)
+
+            # Simulate the first request having already committed its insert.
+            self._insert_user_review_status(id, reviewed=True)
+
+            # Simulate the second concurrent request attempting the same insert.
+            UserReviewStatus.insert_many(
+                [
+                    {
+                        "user_id": self.user_id,
+                        "review_segment_id": id,
+                        "has_been_reviewed": True,
+                    }
+                ]
+            ).on_conflict_ignore().execute()
+
+            # Exactly one row should exist; no exception should have been raised.
+            count = (
+                UserReviewStatus.select()
+                .where(
+                    (UserReviewStatus.user_id == self.user_id)
+                    & (UserReviewStatus.review_segment == id)
+                )
+                .count()
+            )
+            assert count == 1
 
     ####################################################################################################################
     ###################################  POST reviews/delete Endpoint   ################################################

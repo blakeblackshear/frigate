@@ -23,60 +23,13 @@
       },
       "context": "Frigate laster ned de nødvendige vektorrepresentasjonsmodellene for å støtte funksjonen for semantisk søk. Dette kan ta flere minutter, avhengig av hastigheten på nettverksforbindelsen din.",
       "tips": {
-        "context": "Du bør vurdere å reindeksere vektorrepresentasjoner for de sporede objektene dine når modellene er lastet ned.",
-        "documentation": "Se dokumentasjonen"
+        "context": "Du bør vurdere å reindeksere vektorrepresentasjoner for de sporede objektene dine når modellene er lastet ned."
       },
       "error": "En feil har oppstått. Sjekk Frigate-loggene."
     }
   },
   "objectLifecycle": {
-    "createObjectMask": "Lag objektmaske",
-    "adjustAnnotationSettings": "Juster annoteringsinnstillinger",
-    "scrollViewTips": "Sveip for å se de viktigste hendelsene i dette objektets livssyklus.",
-    "autoTrackingTips": "Posisjoner for omsluttende boks vil være unøyaktige for kameraer med automatisk sporing.",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} oppdaget",
-      "attribute": {
-        "other": "{{label}} gjenkjent som {{attribute}}",
-        "faceOrLicense_plate": "{{attribute}} oppdaget for {{label}}"
-      },
-      "gone": "{{label}} forlot",
-      "heard": "{{label}} hørt",
-      "external": "{{label}} oppdaget",
-      "entered_zone": "{{label}} gikk inn i {{zones}}",
-      "active": "{{label}} ble aktiv",
-      "stationary": "{{label}} ble stasjonær",
-      "header": {
-        "zones": "Soner",
-        "ratio": "Forhold",
-        "area": "Areal"
-      }
-    },
-    "annotationSettings": {
-      "title": "Annoteringsinnstillinger",
-      "showAllZones": {
-        "title": "Vis alle soner",
-        "desc": "Vis alltid soner på bilder der objekter har gått inn i en sone."
-      },
-      "offset": {
-        "documentation": "Se dokumentasjonen ",
-        "label": "Annoteringsforskyvning",
-        "desc": "Disse dataene kommer fra kameraets deteksjonsstrøm, men legges over bilder fra opptaksstrømmen. Det er usannsynlig at de to strømmene er perfekt synkronisert. Som et resultat vil ikke den omsluttende boksen og opptakene stemme perfekt overens. Imidlertid kan feltet <code>annotation_offset</code> brukes til å justere dette.",
-        "millisecondsToOffset": "Millisekunder å forskyve annoteringsdata. <em>Standard: 0</em>",
-        "tips": "TIPS: Tenk deg et hendelsesklipp med en person som går fra venstre til høyre. Hvis den omsluttende boksen i hendelsestidslinjen konsekvent er til venstre for personen, bør verdien reduseres. Tilsvarende, hvis en person går fra venstre til høyre og den omsluttende boksen konsekvent er foran personen, bør verdien økes.",
-        "toast": {
-          "success": "Annoteringsforskyvning for {{camera}} er lagret i konfigurasjonsfilen. Start Frigate på nytt for å aktivere endringene dine."
-        }
-      }
-    },
-    "carousel": {
-      "previous": "Forrige lysbilde",
-      "next": "Neste lysbilde"
-    },
-    "title": "Objektets livssyklus",
-    "noImageFound": "Ingen bilder funnet for dette tidsstempelet.",
-    "count": "{{first}} av {{second}}",
-    "trackedPoint": "Sporet punkt"
+    "noImageFound": "Ingen bilder funnet for dette tidsstempelet."
   },
   "details": {
     "item": {
@@ -177,10 +130,6 @@
       "label": "Last ned stillbilde",
       "aria": "Last ned stillbilde"
     },
-    "viewObjectLifecycle": {
-      "label": "Vis objektets livssyklus",
-      "aria": "Vis objektets livssyklus"
-    },
     "findSimilar": {
       "label": "Finn lignende",
       "aria": "Finn lignende sporede objekter"
@@ -238,7 +187,6 @@
     "details": "detaljer",
     "snapshot": "stillbilde",
     "video": "video",
-    "object_lifecycle": "objektets livssyklus",
     "thumbnail": "miniatyrbilde",
     "tracking_details": "sporingsdetaljer"
   },

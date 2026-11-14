@@ -46,14 +46,6 @@
     "second_one": "{{time}} секунда",
     "second_few": "{{time}} секунды",
     "second_many": "{{time}} секунд",
-    "formattedTimestampExcludeSeconds": {
-      "24hour": "%b %-d, %H:%M",
-      "12hour": "%b %-d, %I:%M %p"
-    },
-    "formattedTimestampWithYear": {
-      "24hour": "%b %-d %Y, %H:%M",
-      "12hour": "%b %-d %Y, %I:%M %p"
-    },
     "formattedTimestamp2": {
       "24hour": "d MMM HH:mm:ss",
       "12hour": "dd/MM h:mm:ssa"
@@ -62,7 +54,6 @@
       "12hour": "d MMM, h:mm:ss aaa",
       "24hour": "d MMM, HH:mm:ss"
     },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "formattedTimestampHourMinuteSecond": {
       "12hour": "h:mm:ss aaa",
       "24hour": "HH:mm:ss"
@@ -142,7 +133,11 @@
     "modified": "Изменено",
     "overridden": "Переопределено",
     "resetToGlobal": "Сброс к Глобальному значению",
-    "resetToDefault": "Сброс к значению по умолчанию"
+    "resetToDefault": "Сброс к значению по умолчанию",
+    "expand": "Развернуть",
+    "collapse": "Свернуть",
+    "reload": "Перезагрузка",
+    "clear": "Очистить"
   },
   "label": {
     "back": "Вернуться",
@@ -224,7 +219,8 @@
       "ur": "اردو (Урду)",
       "zhHant": "繁體中文 (Традиционный Китайский)",
       "hr": "Hrvatski (Хорватский)",
-      "bs": "Bosanski (Боснийский)"
+      "bs": "Bosanski (Боснийский)",
+      "be": "Белорусский"
     },
     "darkMode": {
       "withSystem": {
@@ -242,7 +238,6 @@
       "green": "Зелёная",
       "nord": "Северная",
       "red": "Красная",
-      "contrast": "Высокий контраст",
       "highcontrast": "Контрастная"
     },
     "help": "Помощь",
@@ -337,5 +332,36 @@
   "no_items": "Нет элементов",
   "credentialField": {
     "savedPlaceholder": "Сохранено — оставьте пустым, чтобы сохранить текущее значение"
+  },
+  "error": {
+    "title": "Эта страница остановила работу",
+    "desc": "На странице произошла непредвиденная ошибка. Обычно она устраняется перезагрузкой. Если проблема повторяется, скопируйте сведения об ошибке и приложите их к обсуждению на GitHub.",
+    "staleTitle": "Требуется перезагрузка",
+    "staleDesc": "Часть интерфейса не удалось загрузить; обычно это означает, что Frigate был обновлен, пока эта вкладка была открыта. Перезагрузите страницу, чтобы загрузить новую версию.",
+    "partial": "Часть интерфейса перестала работать.",
+    "copyDetails": "Скопировать сведения",
+    "copyFailed": "Не удалось скопировать сведения в буфер обмена"
+  },
+  "commandMenu": {
+    "title": "Меню команд",
+    "description": "Поиск по страницам, камерам, настройкам и действиям",
+    "placeholder": "Поиск по страницам, камерам, настройкам и действиям",
+    "empty": "Совпадений не найдено",
+    "hint": "{{key}} или / для открытия, Enter для запуска",
+    "section": {
+      "recent": "Недавние",
+      "pages": "Страницы",
+      "cameras": "Камеры",
+      "cameraGroups": "Группы камер",
+      "settings": "Настройки",
+      "actions": "Действия"
+    },
+    "camera": {
+      "live": "Прямой эфир",
+      "review": "Обзор"
+    },
+    "action": {
+      "toggleTheme": "Переключить светлый и тёмный режимы"
+    }
   }
 }

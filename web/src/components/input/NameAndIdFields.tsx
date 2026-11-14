@@ -27,6 +27,8 @@ type NameAndIdFieldsProps<T extends FieldValues = FieldValues> = {
   placeholderId?: string;
   idVisible?: boolean;
   idDisabled?: boolean;
+  // Derive the id from the name as the user types
+  autoFillId?: boolean;
 };
 
 export default function NameAndIdFields<T extends FieldValues = FieldValues>({
@@ -43,6 +45,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   placeholderId,
   idVisible,
   idDisabled,
+  autoFillId = true,
 }: NameAndIdFieldsProps<T>) {
   const { t } = useTranslation(["common"]);
   const { watch, setValue, trigger, formState } = useFormContext<T>();
@@ -61,7 +64,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
   const effectiveProcessId = processId || defaultProcessId;
 
   useEffect(() => {
-    if (idDisabled) {
+    if (idDisabled || !autoFillId) {
       return;
     }
     const subscription = watch((value, { name }) => {
@@ -81,6 +84,7 @@ export default function NameAndIdFields<T extends FieldValues = FieldValues>({
     idField,
     effectiveProcessId,
     idDisabled,
+    autoFillId,
   ]);
 
   // Auto-expand if there's an error on the ID field after user has typed

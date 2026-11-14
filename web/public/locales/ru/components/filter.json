@@ -6,7 +6,6 @@
       "title": "Все метки",
       "short": "Метки"
     },
-    "count": "{{count}} меток",
     "count_one": "{{count}} Метка",
     "count_other": "{{count}} меток"
   },

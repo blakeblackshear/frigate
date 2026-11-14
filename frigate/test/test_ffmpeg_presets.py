@@ -51,6 +51,16 @@ class TestFfmpegPresets(unittest.TestCase):
             " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
         )
 
+    def test_ffmpeg_hwaccel_apple_preset_decodes_every_stream(self):
+        self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["hwaccel_args"] = (
+            "preset-apple-silicon-h265"
+        )
+        frigate_config = FrigateConfig(**self.default_ffmpeg)
+        cmd = " ".join(frigate_config.cameras["back"].ffmpeg_cmds[0]["cmd"])
+        assert "-c:v hevc_v4l2m2m" in cmd
+        assert "-c:v:1" not in cmd
+        assert "scale=1920:1080" in cmd
+
     def test_ffmpeg_hwaccel_not_preset(self):
         self.default_ffmpeg["cameras"]["back"]["ffmpeg"]["hwaccel_args"] = (
             "-other-hwaccel args"

@@ -45,6 +45,11 @@ export class LivePage extends BasePage {
     );
   }
 
+  /** Edit-layout toggle on the draggable grid (desktop, custom groups). */
+  get editLayoutButton(): Locator {
+    return this.page.getByTestId("toggle-edit-layout");
+  }
+
   /** Open the right-click context menu on a camera card (desktop only). */
   async openContextMenuOn(cameraName: string): Promise<Locator> {
     await this.cameraCard(cameraName).first().click({ button: "right" });

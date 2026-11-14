@@ -14,8 +14,7 @@
         "stream": "Trực tiếp",
         "audio": {
           "tips": {
-            "title": "Âm thanh phải được xuất từ camera của bạn và được định cấu hình trong go2rtc cho luồng này.",
-            "document": "Đọc tài liệu "
+            "title": "Âm thanh phải được xuất từ camera của bạn và được định cấu hình trong go2rtc cho luồng này."
           }
         },
         "desc": "Thay đổi các tùy chọn truyền phát trực tiếp cho bảng điều khiển của nhóm camera này.<em>Các cài đặt này dành riêng cho thiết bị/trình duyệt..</em>",

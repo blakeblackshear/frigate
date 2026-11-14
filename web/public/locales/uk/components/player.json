@@ -19,14 +19,6 @@
       "title": "Пропускна здатність:",
       "short": "Пропускна здатність"
     },
-    "latency": {
-      "title": "Затримка:",
-      "short": {
-        "title": "Затримка",
-        "value": "{{seconds}} сек"
-      },
-      "value": "{{seconds}} секунд"
-    },
     "totalFrames": "Всього кадрiв:",
     "decodedFrames": "Декодовані кадри:"
   },
@@ -40,14 +32,28 @@
     "title": "Струм офлайн",
     "desc": "Потік <code>detect</code > камери {{cameraName}} не отримував ніяких кадрів, перевірте журнал помилок"
   },
-  "cameraDisabled": "Камера вимкнена",
   "toast": {
     "success": {
       "submittedFrigatePlus": "Зображення успішно завантажено до Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Не вдалося надіслати фрейм Frigate+"
+      "submitFrigatePlusFailed": "Не вдалося надіслати фрейм Frigate+",
+      "playRecordingsFailed": "Не вдалося відтворити записи (помилка {{code}}): {{message}}"
     }
   },
-  "cameraOff": "Камера вимкнена"
+  "cameraOff": "Камера вимкнена",
+  "quality": {
+    "auto": "Авто",
+    "autoLow": "Відтворення у низькій якості (обмежена пропускна здатність)",
+    "autoLowCodec": "Відтворення низької якості (Оригінал не підтримується цим браузером)",
+    "autoLowSaveData": "Відтворення у низькій якості (режим економії даних)",
+    "main": "Оригінал",
+    "sub": "Низька",
+    "notSupportedBrowser": "Не підтримується цим браузером",
+    "label": "Якість",
+    "noAudio": "Без звуку",
+    "audioRate": "{{rate}} кГц аудіо",
+    "audioCodecRate": "{{codec}} {{rate}} кГц",
+    "noRecordings": "Запис у цьому часовому діапазоні відсутній"
+  }
 }

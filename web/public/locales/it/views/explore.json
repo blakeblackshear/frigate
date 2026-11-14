@@ -22,7 +22,6 @@
         "textTokenizer": "Tokenizzatore di testo"
       },
       "tips": {
-        "documentation": "Leggi la documentazione",
         "context": "Una volta scaricati i modelli, potrebbe essere necessario reindicizzare gli incorporamenti degli oggetti tracciati."
       },
       "error": "Si è verificato un errore. Controlla i registri di Frigate.",
@@ -117,57 +116,10 @@
     "scoreInfo": "Informazioni sul punteggio"
   },
   "objectLifecycle": {
-    "annotationSettings": {
-      "offset": {
-        "tips": "SUGGERIMENTO: immagina un filmato evento con una persona che cammina da sinistra verso destra. Se il riquadro di delimitazione della cronologia dell'evento si trova costantemente a sinistra della persona, il valore dovrebbe essere diminuito. Analogamente, se una persona cammina da sinistra verso destra e il riquadro di delimitazione si trova costantemente davanti alla persona, il valore dovrebbe essere aumentato.",
-        "desc": "Questi dati provengono dal flusso di rilevamento della telecamera, ma vengono sovrapposti alle immagini del flusso di registrazione. È improbabile che i due flussi siano perfettamente sincronizzati. Di conseguenza, il riquadro di delimitazione e il filmato non saranno perfettamente allineati. Tuttavia, è possibile utilizzare il campo <code>annotation_offset</code> per correggere questo problema.",
-        "label": "Compensazione di annotazione",
-        "documentation": "Leggi la documentazione ",
-        "millisecondsToOffset": "Millisecondi per compensare il rilevamento delle annotazioni. <em>Predefinito: 0</em>",
-        "toast": {
-          "success": "La compensazione di annotazione per {{camera}} è stato salvato nel file di configurazione. Riavvia Frigate per applicare le modifiche."
-        }
-      },
-      "showAllZones": {
-        "title": "Mostra tutte le zone",
-        "desc": "Mostra sempre le zone nei fotogrammi in cui gli oggetti sono entrati in una zona."
-      },
-      "title": "Impostazioni di annotazione"
-    },
-    "lifecycleItemDesc": {
-      "heard": "{{label}} sentito",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} rilevato per {{label}}",
-        "other": "{{label}} riconosciuto come {{attribute}}"
-      },
-      "gone": "{{label}} lasciato",
-      "external": "{{label}} rilevato",
-      "visible": "{{label}} rilevato",
-      "entered_zone": "{{label}} è entrato in {{zones}}",
-      "active": "{{label}} è diventato attivo",
-      "stationary": "{{label}} è diventato stazionario",
-      "header": {
-        "ratio": "Rapporto",
-        "area": "Area",
-        "zones": "Zone"
-      }
-    },
-    "title": "Ciclo di vita dell'oggetto",
-    "createObjectMask": "Crea maschera oggetto",
-    "noImageFound": "Nessuna immagine trovata per questo orario.",
-    "adjustAnnotationSettings": "Regola le impostazioni di annotazione",
-    "scrollViewTips": "Scorri per visualizzare i momenti più significativi del ciclo di vita di questo oggetto.",
-    "autoTrackingTips": "Le posizioni dei riquadri di delimitazione non saranno precise per le telecamere con tracciamento automatico.",
-    "carousel": {
-      "previous": "Diapositiva precedente",
-      "next": "Diapositiva successiva"
-    },
-    "count": "{{first}} di {{second}}",
-    "trackedPoint": "Punto tracciato"
+    "noImageFound": "Nessuna immagine trovata per questo orario."
   },
   "type": {
     "snapshot": "istantanea",
-    "object_lifecycle": "ciclo di vita dell'oggetto",
     "details": "dettagli",
     "video": "video",
     "thumbnail": "miniatura",
@@ -188,10 +140,6 @@
     "downloadVideo": {
       "label": "Scarica video",
       "aria": "Scarica video"
-    },
-    "viewObjectLifecycle": {
-      "label": "Visualizza il ciclo di vita dell'oggetto",
-      "aria": "Mostra il ciclo di vita dell'oggetto"
     },
     "findSimilar": {
       "label": "Trova simili",

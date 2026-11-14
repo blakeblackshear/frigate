@@ -41,6 +41,11 @@ class AudioConfig(FrigateBaseModel):
         title="Listen types",
         description="List of audio event types to detect (for example: bark, fire_alarm, speech, yell).",
     )
+    labelmap: dict[int, str] = Field(
+        default_factory=dict,
+        title="Audio labelmap customization",
+        description="Overrides or remapping entries to merge into the standard audio labelmap.",
+    )
     filters: dict[str, AudioFilterConfig] | None = Field(
         None,
         title="Audio filters",

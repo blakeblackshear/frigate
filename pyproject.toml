@@ -2,5 +2,6 @@
 target-version = "py311"
 
 [tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
 ignore = ["E501","E711","E712","UP031","UP032","UP042","G004"]
 extend-select = ["I", "UP", "G", "ASYNC210", "B904"]

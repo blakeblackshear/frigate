@@ -40,12 +40,9 @@
     "last24Hours": "Ultime 24 ore"
   },
   "camera": "Telecamera",
-  "selected": "{{count}} selezionati",
   "selected_one": "{{count}} selezionati",
   "selected_other": "{{count}} selezionati",
   "detected": "rilevato",
-  "suspiciousActivity": "Attività sospetta",
-  "threateningActivity": "Attività minacciosa",
   "detail": {
     "noDataFound": "Nessun dato dettagliato da rivedere",
     "aria": "Abilita/disabilita la visualizzazione dettagliata",

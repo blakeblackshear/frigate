@@ -12,12 +12,16 @@ import { cameraActivityPayload } from "../fixtures/mock-data/camera-activity";
 export class WsMocker {
   private mockWs: WebSocketRoute | null = null;
   private cameras: string[];
+  // the live stats payload wins over the REST one in useAutoFrigateStats, so
+  // both come from the same factory or a test's `stats` override is ignored
+  private stats: unknown;
 
   constructor(cameras: string[] = ["front_door", "backyard", "garage"]) {
     this.cameras = cameras;
   }
 
-  async install(page: Page) {
+  async install(page: Page, stats?: unknown) {
+    this.stats = stats;
     await page.routeWebSocket("**/ws", (ws) => {
       this.mockWs = ws;
 
@@ -42,35 +46,37 @@ export class WsMocker {
       // Send initial stats
       this.send(
         "stats",
-        JSON.stringify({
-          cameras: Object.fromEntries(
-            this.cameras.map((c) => [
-              c,
-              {
-                camera_fps: 5,
-                detection_fps: 5,
-                process_fps: 5,
-                skipped_fps: 0,
-                detection_enabled: 1,
-                connection_quality: "excellent",
-              },
-            ]),
-          ),
-          service: {
-            last_updated: Date.now() / 1000,
-            uptime: 86400,
-            version: "0.15.0-test",
-            latest_version: "0.15.0",
-            storage: {},
+        JSON.stringify(
+          this.stats ?? {
+            cameras: Object.fromEntries(
+              this.cameras.map((c) => [
+                c,
+                {
+                  camera_fps: 5,
+                  detection_fps: 5,
+                  process_fps: 5,
+                  skipped_fps: 0,
+                  detection_enabled: 1,
+                  connection_quality: "excellent",
+                },
+              ]),
+            ),
+            service: {
+              last_updated: Date.now() / 1000,
+              uptime: 86400,
+              version: "0.15.0-test",
+              latest_version: "0.15.0",
+              storage: {},
+            },
+            detectors: {},
+            cpu_usages: {},
+            gpu_usages: {},
+            camera_fps: 15,
+            process_fps: 15,
+            skipped_fps: 0,
+            detection_fps: 15,
           },
-          detectors: {},
-          cpu_usages: {},
-          gpu_usages: {},
-          camera_fps: 15,
-          process_fps: 15,
-          skipped_fps: 0,
-          detection_fps: 15,
-        }),
+        ),
       );
     }
 

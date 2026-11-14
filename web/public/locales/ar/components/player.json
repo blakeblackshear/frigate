@@ -7,7 +7,6 @@
     "submit": "تقديم"
   },
   "livePlayerRequiredIOSVersion": "مطلوب نظام iOS 17.1 أو أكبر لهذا النوع من البث المباشر.",
-  "cameraDisabled": "الكاميرا معطلة",
   "stats": {
     "streamType": {
       "title": "نوع الدفق:",
@@ -16,10 +15,6 @@
     "bandwidth": {
       "title": "العرض الترددي:",
       "short": "العرض الترددي"
-    },
-    "latency": {
-      "title": "التأخير:",
-      "value": "{{seconds}} ثانية"
     }
   },
   "streamOffline": {

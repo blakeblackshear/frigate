@@ -57,8 +57,6 @@
     "presets": "PTZ カメラのプリセット"
   },
   "camera": {
-    "enable": "カメラを有効化",
-    "disable": "カメラを無効化",
     "turnOn": "カメラをオンにする",
     "turnOff": "カメラをオフにする"
   },
@@ -149,7 +147,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} の設定",
-    "cameraEnabled": "カメラ有効",
     "objectDetection": "物体検知",
     "recording": "録画",
     "snapshots": "スナップショット",
@@ -166,8 +163,7 @@
       "all": "すべて",
       "motion": "モーション",
       "active_objects": "アクティブなオブジェクト"
-    },
-    "notAllTips": "{{source}} の録画保持設定は <code>mode: {{effectiveRetainMode}}</code> になっているため、このオンデマンド録画では {{effectiveRetainModeName}} を含むセグメントのみが保持されます。"
+    }
   },
   "editLayout": {
     "label": "レイアウトを編集",

@@ -64,7 +64,7 @@ export function GenAISummaryDialog({
     const threatLevel = aiAnalysis.potential_threat_level ?? 0;
 
     if (threatLevel > 0) {
-      let label = "";
+      let label: string;
 
       switch (threatLevel) {
         case ThreatLevel.NEEDS_REVIEW:

@@ -1,4 +1,5 @@
 import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
+import { viewerProfile } from "../fixtures/mock-data/profile";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -867,6 +868,31 @@ test.describe("Multi-Camera Export from History @high", () => {
     await frigateApp.page.route("**/api/recordings/unavailable**", (route) =>
       route.fulfill({ json: [] }),
     );
+    // registered after the broad recordings route so it wins the match;
+    // coverage is an object, and the array above crashes the player
+    await frigateApp.page.route("**/api/*/recordings/coverage**", (route) =>
+      route.fulfill({
+        json: {
+          spans: [
+            {
+              start_time: playbackTime - 3600,
+              end_time: playbackTime + 600,
+              streams: ["main"],
+            },
+          ],
+          codecs_compatible: true,
+          streams: {
+            main: {
+              video_codec: "h264",
+              audio_rate: null,
+              audio_codec: null,
+              has_audio: false,
+              bitrate: 2_000_000,
+            },
+          },
+        },
+      }),
+    );
 
     await frigateApp.goto(`/review?timestamp=front_door_${playbackTime}`);
   }
@@ -962,6 +988,97 @@ test.describe("Multi-Camera Export from History @high", () => {
     await expect(form.getByPlaceholder(/case description/i)).toHaveValue(
       "Front gate follow-up",
     );
+  });
+
+  test("a blank case name shows an error and disables export", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    const caseName = form.getByPlaceholder(/new case name/i);
+    await expect(caseName).toHaveValue(/^Multi-camera export - /, {
+      timeout: 5_000,
+    });
+    await expect(form.getByText("Case name is required")).toBeHidden();
+
+    await caseName.fill("");
+
+    await expect(form.getByText("Case name is required")).toBeVisible();
+    await expect(
+      form.getByRole("button", { name: /^export \d+ cameras?$/i }),
+    ).toBeDisabled();
+  });
+
+  test("clearing a time field keeps the previous valid range", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+
+    let capturedPayload: { items: { end_time: number }[] } | null = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: { export_case_id: null, export_ids: [], results: [] },
+      });
+    });
+
+    const form = await openMultiCameraTab(frigateApp);
+
+    const firstCamera = form.locator("button[aria-pressed]").first();
+    await expect(firstCamera).toBeVisible({ timeout: 5_000 });
+    if ((await firstCamera.getAttribute("aria-pressed")) === "false") {
+      await firstCamera.click();
+    }
+
+    // the seeded end can equal the picker's fallback, so move it off that
+    // value before clearing
+    await form.getByRole("button", { name: /^end time$/i }).click();
+    const endInput = frigateApp.page.locator("#endTime");
+    const [hour, minute, second] = (await endInput.inputValue()).split(":");
+    const chosen = `${hour}:${minute}:${String((Number(second) + 30) % 60).padStart(2, "0")}`;
+    await endInput.fill(chosen);
+    await endInput.fill("");
+    await expect(endInput).toHaveValue(chosen);
+    await frigateApp.page.keyboard.press("Escape");
+
+    await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
+
+    await expect.poll(() => capturedPayload).not.toBeNull();
+    const submittedClock = await frigateApp.page.evaluate(
+      (endTime) => new Date(endTime * 1000).toTimeString().slice(0, 8),
+      capturedPayload!.items[0].end_time,
+    );
+    expect(submittedClock).toBe(chosen);
+  });
+
+  test("viewers can export without a case", async ({ frigateApp }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+
+    let capturedPayload: Record<string, unknown> | null = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: { export_case_id: null, export_ids: [], results: [] },
+      });
+    });
+
+    const form = await openMultiCameraTab(frigateApp);
+
+    const firstCamera = form.locator("button[aria-pressed]").first();
+    await expect(firstCamera).toBeVisible({ timeout: 5_000 });
+    if ((await firstCamera.getAttribute("aria-pressed")) === "false") {
+      await firstCamera.click();
+    }
+
+    await expect(form.getByPlaceholder(/new case name/i)).toBeHidden();
+    await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
+
+    await expect.poll(() => capturedPayload).not.toBeNull();
+    expect(capturedPayload).not.toHaveProperty("new_case_name");
+    expect(capturedPayload).not.toHaveProperty("export_case_id");
   });
 });
 

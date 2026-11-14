@@ -122,6 +122,7 @@ const sidebars: SidebarsConfig = {
           "configuration/ffmpeg_presets",
           "configuration/pwa",
           "configuration/tls",
+          "configuration/non_root",
         ],
       },
       {
@@ -129,6 +130,7 @@ const sidebars: SidebarsConfig = {
         label: "Advanced Configuration",
         items: [
           "configuration/advanced/system",
+          "configuration/advanced/analytics",
           "configuration/advanced/reference",
           {
             type: "link",

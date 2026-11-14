@@ -3,6 +3,7 @@
 import datetime
 import logging
 import os
+import time
 from typing import Any
 
 import cv2
@@ -16,6 +17,7 @@ from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import suppress_stderr_during
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
+from frigate.util.file import trim_oldest_files
 from frigate.util.image import calculate_region
 from frigate.util.object import box_overlaps
 
@@ -66,7 +68,8 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         else:
             self.inference_speed = None
 
-        self.last_run = datetime.datetime.now().timestamp()
+        # monotonic so a backward wall clock step can't pause classification
+        self.last_run = time.monotonic()
         self.__build_detector()
 
     def __build_detector(self) -> None:
@@ -90,7 +93,22 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         self.tensor_input_details = self.interpreter.get_input_details()
         self.tensor_output_details = self.interpreter.get_output_details()
         self.labelmap = load_labels(labelmap_path, prefill=0, indexed=False)
+        self._forget_unknown_states()
         self.classifications_per_second.start()
+
+    def _forget_unknown_states(self) -> None:
+        """Drop verified states that are not labels of the loaded model.
+
+        A retrained model can rename or remove labels. Keeping a state it can
+        no longer produce would report its first verified state as a change
+        from that obsolete label.
+        """
+        labels = set(self.labelmap.values())
+        self.state_history = {
+            camera: history
+            for camera, history in self.state_history.items()
+            if history["current_state"] in labels
+        }
 
     def __update_metrics(self, duration: float) -> None:
         self.classifications_per_second.update()
@@ -133,15 +151,20 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         # Don't save if state is stable (detected_state == current_state) AND score is 100%
         return False
 
-    def verify_state_change(self, camera: str, detected_state: str) -> str | None:
+    def verify_state_change(
+        self, camera: str, detected_state: str, timestamp: float
+    ) -> tuple[str | None, float] | None:
         """
         Verify state change requires 3 consecutive identical states before publishing.
-        Returns state to publish or None if verification not complete.
+        Returns (previous state, time the new state was first seen) once verified,
+        or None if verification not complete. The previous state is None for the
+        first state verified on a camera.
         """
         if camera not in self.state_history:
             self.state_history[camera] = {
                 "current_state": None,
                 "pending_state": None,
+                "pending_since": 0.0,
                 "consecutive_count": 0,
             }
 
@@ -156,12 +179,14 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             verification["consecutive_count"] += 1
 
             if verification["consecutive_count"] >= 3:
+                previous_state = verification["current_state"]
                 verification["current_state"] = detected_state
                 verification["pending_state"] = None
                 verification["consecutive_count"] = 0
-                return detected_state
+                return previous_state, verification["pending_since"]
         else:
             verification["pending_state"] = detected_state
+            verification["pending_since"] = timestamp
             verification["consecutive_count"] = 1
             logger.debug(
                 f"New state '{detected_state}' detected for {camera}, need {3 - verification['consecutive_count']} more consecutive detections"
@@ -192,11 +217,12 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         should_run = False
 
         now = datetime.datetime.now().timestamp()
+        mono_now = time.monotonic()
         if (
             self.model_config.state_config.interval
-            and now > self.last_run + self.model_config.state_config.interval
+            and mono_now > self.last_run + self.model_config.state_config.interval
         ):
-            self.last_run = now
+            self.last_run = mono_now
             should_run = True
 
         if (
@@ -205,8 +231,8 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             and any([box_overlaps(crop, mb) for mb in frame_data.get("motion", [])])
         ):
             # classification should run at most once per second
-            if now > self.last_run + 1:
-                self.last_run = now
+            if mono_now > self.last_run + 1:
+                self.last_run = mono_now
                 should_run = True
 
         # Shortcut: always run if we have a pending state verification to complete
@@ -214,9 +240,9 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             not should_run
             and camera in self.state_history
             and self.state_history[camera]["pending_state"] is not None
-            and now > self.last_run + 0.5
+            and mono_now > self.last_run + 0.5
         ):
-            self.last_run = now
+            self.last_run = mono_now
             should_run = True
             logger.debug(
                 f"Running verification check for pending state: {self.state_history[camera]['pending_state']} ({self.state_history[camera]['consecutive_count']}/3)"
@@ -334,16 +360,19 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
             )
             return
 
-        verified_state = self.verify_state_change(camera, detected_state)
+        verified = self.verify_state_change(camera, detected_state, timestamp)
 
-        if verified_state is not None:
+        if verified is not None:
+            previous_state, changed_at = verified
             self._emit_result(
                 {
                     "type": "classification",
                     "processor": "state",
                     "model_name": self.model_config.name,
                     "camera": camera,
-                    "state": verified_state,
+                    "state": detected_state,
+                    "previous_state": previous_state,
+                    "timestamp": changed_at,
                 }
             )
 
@@ -719,16 +748,4 @@ def write_classification_attempt(
     file = os.path.join(folder, f"{event_id}-{timestamp}-{label}-{score}.webp")
     os.makedirs(folder, exist_ok=True)
     cv2.imwrite(file, frame)
-
-    # delete oldest face image if maximum is reached
-    try:
-        files = sorted(
-            filter(lambda f: f.endswith(".webp"), os.listdir(folder)),
-            key=lambda f: os.path.getctime(os.path.join(folder, f)),
-            reverse=True,
-        )
-
-        if len(files) > max_files:
-            os.unlink(os.path.join(folder, files[-1]))
-    except (FileNotFoundError, OSError):
-        pass
+    trim_oldest_files(folder, max_files)

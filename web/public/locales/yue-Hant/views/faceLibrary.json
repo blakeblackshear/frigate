@@ -1,13 +1,7 @@
 {
-  "selectItem": "選擇 {{item}}",
   "details": {
     "timestamp": "時間戳記",
-    "person": "人",
-    "confidence": "信心指數",
-    "face": "人臉詳細資料",
-    "faceDesc": "產生這個人臉的追蹤物件的詳細資料",
     "scoreInfo": "子標籤分數是所有已識別人臉的信心值加權分數，因此可能與快照上顯示的分數不同。",
-    "subLabelScore": "子標籤分數",
     "unknown": "未知"
   },
   "description": {
@@ -22,8 +16,6 @@
     "desc": "上傳圖片以掃描人臉並納入 {{pageToggle}}"
   },
   "createFaceLibrary": {
-    "title": "建立集合",
-    "desc": "建立新集合",
     "new": "建立新的人臉",
     "nextSteps": "建立穩固基礎：<li>使用最近識別分頁，為每位偵測到的人物選擇並訓練圖片。</li><li>以正面照片為主，避免用側面或傾斜角度的人臉作訓練。</li></ul>"
   },
@@ -41,7 +33,6 @@
     "empty": "最近沒有人臉識別嘗試",
     "titleShort": "最近"
   },
-  "selectFace": "選擇人臉",
   "deleteFaceLibrary": {
     "title": "刪除名稱",
     "desc": "你確定要刪除集合 {{name}} 嗎？這將永久刪除所有相關的人臉資料。"
@@ -66,7 +57,6 @@
     "dropInstructions": "拖放圖片或貼上到此處，或點擊選取",
     "maxSize": "最大檔案大小：{{size}}MB"
   },
-  "readTheDocs": "閱讀文件",
   "trainFaceAs": "將人臉訓練為：",
   "trainFace": "訓練人臉",
   "toast": {
@@ -94,6 +84,5 @@
     "desc_other": "你確定要刪除{{count}}個人臉嗎？這個動作無法還原。",
     "title": "刪除人臉"
   },
-  "nofaces": "沒有可用人臉",
-  "pixels": "{{area}} 像素"
+  "nofaces": "沒有可用人臉"
 }

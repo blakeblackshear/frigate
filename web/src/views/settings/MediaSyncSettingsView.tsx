@@ -15,6 +15,7 @@ import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { MediaSyncResults, MediaSyncStats } from "@/types/ws";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import { Link } from "react-router-dom";
+import { getUnitSizeFromBytes } from "@/utils/storageUtil";
 
 export default function MediaSyncSettingsView() {
   const { t } = useTranslation("views/settings");
@@ -42,7 +43,7 @@ export default function MediaSyncSettingsView() {
 
   const isJobRunning = Boolean(
     currentJob &&
-      (currentJob.status === "queued" || currentJob.status === "running"),
+    (currentJob.status === "queued" || currentJob.status === "running"),
   );
 
   const handleMediaTypeChange = useCallback((id: string, checked: boolean) => {
@@ -85,17 +86,21 @@ export default function MediaSyncSettingsView() {
           position: "top-center",
           closeButton: true,
         });
-      } else if (response.status === 409) {
-        toast.error(t("maintenance.sync.alreadyRunning"), {
+      }
+    } catch (error) {
+      const alreadyRunning =
+        axios.isAxiosError(error) && error.response?.status === 409;
+      toast.error(
+        t(
+          alreadyRunning
+            ? "maintenance.sync.alreadyRunning"
+            : "maintenance.sync.error",
+        ),
+        {
           position: "top-center",
           closeButton: true,
-        });
-      }
-    } catch {
-      toast.error(t("maintenance.sync.error"), {
-        position: "top-center",
-        closeButton: true,
-      });
+        },
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -376,6 +381,22 @@ export default function MediaSyncSettingsView() {
                                         {mediaStats.orphans_deleted}
                                       </span>
                                     </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-muted-foreground">
+                                        {currentJob?.dry_run
+                                          ? t(
+                                              "maintenance.sync.resultsFields.spaceToReclaim",
+                                            )
+                                          : t(
+                                              "maintenance.sync.resultsFields.spaceReclaimed",
+                                            )}
+                                      </span>
+                                      <span>
+                                        {getUnitSizeFromBytes(
+                                          mediaStats.bytes_reclaimed,
+                                        )}
+                                      </span>
+                                    </div>
                                     {mediaStats.aborted && (
                                       <div className="flex items-center gap-2 text-destructive">
                                         <LuX className="size-4" />
@@ -447,6 +468,22 @@ export default function MediaSyncSettingsView() {
                                   )}
                                 >
                                   {mediaSyncResults.totals.orphans_deleted}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">
+                                  {currentJob?.dry_run
+                                    ? t(
+                                        "maintenance.sync.resultsFields.spaceToReclaim",
+                                      )
+                                    : t(
+                                        "maintenance.sync.resultsFields.spaceReclaimed",
+                                      )}
+                                </span>
+                                <span className="font-medium">
+                                  {getUnitSizeFromBytes(
+                                    mediaSyncResults.totals.bytes_reclaimed,
+                                  )}
                                 </span>
                               </div>
                             </div>

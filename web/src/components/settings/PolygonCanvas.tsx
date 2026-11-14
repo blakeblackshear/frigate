@@ -203,7 +203,8 @@ export function PolygonCanvas({
     if (stage) {
       // we add an unfilled line for adding points when finished
       const index = e.target.index - (activePolygon.isFinished ? 2 : 1);
-      let pos = [e.target._lastPos!.x, e.target._lastPos!.y];
+      const dragged = e.target.getAbsolutePosition();
+      let pos = [dragged.x, dragged.y];
 
       if (snapPoints) {
         // Snap to other polygons' edges

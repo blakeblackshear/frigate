@@ -55,6 +55,10 @@ To install the optional companion Lovelace card, please see the [separate
 installation instructions](https://github.com/dermotduffy/frigate-hass-card) for
 that card.
 
+Frigate rejects browser connections to its live streams that come from another
+origin, such as a Home Assistant dashboard. Configure cards to stream through the
+integration's proxy rather than pointing them directly at Frigate's port.
+
 ## Configuration
 
 When configuring the integration, you will be asked for the `URL` of your Frigate instance which can be pointed at the internal unauthenticated port (`5000`) or the authenticated port (`8971`) for your instance. This may look like `http://<host>:5000/`.

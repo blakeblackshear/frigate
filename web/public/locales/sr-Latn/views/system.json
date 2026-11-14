@@ -1,0 +1,380 @@
+{
+  "documentTitle": {
+    "cameras": "Statistika kamera - Frigate",
+    "storage": "Statistika skladišta - Frigate",
+    "general": "Opšta statistika - Frigate",
+    "enrichments": "Statistika poboljšanja - Frigate",
+    "logs": {
+      "frigate": "Dnevnik Frigate sistema - Frigate",
+      "go2rtc": "Go2RTC dnevnik - Frigate",
+      "nginx": "Nginx dnevnik - Frigate",
+      "websocket": "Dnevnik poruka - Frigate"
+    },
+    "health": "Stanje sistema - Frigate"
+  },
+  "title": "Sistem",
+  "metrics": "Sistemska metrika",
+  "showAllTabs": "Prikaži sve kartice",
+  "showLessTabs": "Prikaži manje",
+  "health": {
+    "title": "Stanje",
+    "notices": {
+      "title": "Obaveštenja",
+      "empty": "Vaš Frigate sistem radi ispravno",
+      "acknowledge": "Uvaži",
+      "acknowledgeHint": "Sakrij dok se ne ponovi",
+      "mute": "Utišaj",
+      "muteHint": "Nikada više ne prikazuj ovo",
+      "unmute": "Uključi zvuk",
+      "showAgain": "Prikaži ponovo",
+      "openSettings": "Otvori podešavanja",
+      "openLink": "Otvori vezu / Otvori link",
+      "noMatches": "Nema obaveštenja koja odgovaraju filteru",
+      "hiddenTitle": "Skriveno",
+      "noneHidden": "Nema skrivenih obaveštenja",
+      "showAll": "Prikaži sve ponovo",
+      "showAllTitle": "Prikaži sva skrivena obaveštenja?",
+      "showAllDesc": "Svako potvrđeno i utišano obaveštenje se vraća na listu obaveštenja, uključujući provere konfiguracije i strimova.",
+      "occurred_one": "Dogodilo se {{time}}",
+      "occurred_other": "Poslednji put se dogodilo {{lastTime}} · {{count}} puta od {{time}}",
+      "acknowledgedAt": "Uvaženo {{time}}",
+      "mutedAt": "Utišano {{time}}",
+      "filter": {
+        "showHidden": "Prikaži skriveno",
+        "severity": "Ozbiljnost",
+        "error": "Greška",
+        "warning": "Upozorenje",
+        "info": "Informacija"
+      },
+      "kinds": {
+        "detector_stuck": "Detektor {{detector}} je ponovo pokrenut nakon što je prestao da odgovara",
+        "model_download_failed": "Preuzimanje datoteke {{file}} za model {{model}} nije uspelo: {{error}}",
+        "skipped_detections": "Sistem za detekciju nije uspevao da isprati brzinu i preskočio je {{pct}}% kadrova tokom perioda dužeg od jednog minuta",
+        "ffmpeg_high_cpu": "Zauzeće procesora od strane FFmpeg-a je visoko (prosečno {{cpu}}%)",
+        "detect_high_cpu": "Zauzeće procesora od strane sistema za detekciju je visoko (prosečno {{cpu}}%)",
+        "shm_too_low": "/dev/shm dodeljena memorija (trenutno {{total}} MB) bi trebalo da se poveća na najmanje {{min}} MB",
+        "object_processing_behind": "Obrada praćenih objekata nije uspevala da isprati brzinu, pa su kadrovi sa kamere odbačeni. Proverite iskorišćenost procesora i da li ograničenja procesora ili dodeljivanje jezgara na kontejneru ili virtuelnoj mašini ostavljaju premalo procesorske snage za Frigate",
+        "failed_login_one": "Neuspešan pokušaj prijave za korisnika {{user}}",
+        "failed_login_other": "Neuspešni pokušaji prijave za korisnika {{user}}",
+        "update_available": "Dostupna je verzija Frigate {{version}}",
+        "analytics_prompt": "Razmislite o deljenju anonimne statistike korišćenja kako biste pomogli programerima da unaprede Frigate"
+      },
+      "streamPrefix": "Strim {{index}}: {{message}}",
+      "streamPrefixRestream": "Strim {{index}} (putem go2rtc): {{message}}",
+      "streamProbeFailed": "Analiza strima {{index}} nije uspela: {{error}}",
+      "cameraProbeFailed": "Analiza strimova nije uspela: {{error}}"
+    },
+    "hardware": {
+      "title": "Hardver",
+      "objectDetection": "Detekcija objekata",
+      "hardwareAcceleration": "Hardversko ubrzanje",
+      "enrichments": {
+        "title": "Poboljšanja",
+        "semantic_search": "Semantička pretraga",
+        "face_recognition": "Prepoznavanje lica",
+        "lpr": "Prepoznavanje registarskih tablica",
+        "audio_transcription": "Audio transkripcija"
+      },
+      "cameraConnections": "Veze sa kamerama",
+      "allCamerasExcellent": "Sve kamere imaju odličnu vezu.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "Ništa nije konfigurisano",
+      "allCameras": "Sve kamere",
+      "probeUnavailable": "Hardverska detekcija je nedostupna",
+      "justStarted": "Frigate je upravo pokrenut",
+      "deviceNotFound": "Uređaj {{devices}} nije pronađen na ovom sistemu",
+      "detectorNotRunning": "Proces detektora nije pokrenut",
+      "inferenceVerySlow": "Obrada (inferencija) je veoma spora ({{speed}} ms)",
+      "inferenceSlow": "Obrada (inferencija) je spora ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Prilagođeni ffmpeg argumenti",
+      "customArgsNotVerified": "Prilagođeni ffmpeg argumenti, neverifikovani",
+      "hwaccelNotConfigured": "Hardversko dekodiranje se ne koristi, ali je {{family}} dostupan. Izaberite ga u ffmpeg podešavanjima",
+      "hwaccelHardwareMissing": "{{family}} je konfigurisan, ali ga hardverska analiza nije prijavila",
+      "unrecognizedDevice": "Nepoznat uređaj za nadjačavanje, neverifikovan",
+      "decoderUsage": "Dekoder: {{usage}}",
+      "remoteProvider": "Udaljeni provajder",
+      "acceleratorMissing": "Konfigurisano za {{device}}, ali nije pronađen kompatibilan akcelerator",
+      "modelNotRunYet": "Model još uvek nije pokrenut; uređaj se verifikuje nakon prve upotrebe",
+      "fellBackToCpu": "Konfigurisano za {{device}}, ali se izvršava na procesoru",
+      "cpuDespiteAccelerator": "Izvršava se na procesoru iako je akcelerator dostupan",
+      "probed": "Analizirano",
+      "probing": "Analiza u toku...",
+      "recheck": "Ponovo proveri hardver",
+      "cameraStreams": "Strimovi kamere",
+      "streamsNotChecked": "Još uvek nije provereno",
+      "streamsChecking": "Provera: {{done}} od {{total}}",
+      "streamsClean": "Nema problema sa strimom",
+      "checked": "Provereno",
+      "runAgain": "Pokreni ponovo",
+      "runStreamChecks": "Pokreni provere strimova",
+      "streamsChecked_one": "Proverena {{count}} kamera",
+      "streamsChecked_other": "Provereno {{count}} kamera",
+      "streamsFlagged_one": "{{count}} sa problemima, navedena pod Obaveštenja",
+      "streamsFlagged_other": "{{count}} sa problemima, navedene pod Obaveštenja"
+    }
+  },
+  "logs": {
+    "websocket": {
+      "label": "Poruke",
+      "pause": "Pauziraj",
+      "resume": "Nastavi",
+      "clear": "Očisti",
+      "filter": {
+        "all": "Sve teme",
+        "topics": "Teme",
+        "events": "Događaji",
+        "reviews": "Pregledi",
+        "classification": "Klasifikacija",
+        "face_recognition": "Prepoznavanje lica",
+        "lpr": "LPR",
+        "camera_activity": "Aktivnost kamere",
+        "system": "Sistem",
+        "camera": "Kamera",
+        "all_cameras": "Sve kamere",
+        "cameras_count_one": "{{count}} kamera",
+        "cameras_count_other": "{{count}} kamere"
+      },
+      "empty": "Još uvek nema zabeleženih poruka",
+      "count_one": "{{count}} poruka",
+      "count_other": "{{count}} poruke",
+      "expanded": {
+        "payload": "Sadržaj poruke"
+      }
+    },
+    "download": {
+      "label": "Preuzmi dnevnik"
+    },
+    "copy": {
+      "label": "Kopiraj u privremenu memoriju",
+      "success": "Dnevnik je kopiran u privremenu memoriju",
+      "error": "Neuspešno kopiranje dnevnika u privremenu memoriju"
+    },
+    "type": {
+      "label": "Tip",
+      "timestamp": "Vremenska oznaka",
+      "tag": "Oznaka",
+      "message": "Poruka"
+    },
+    "tips": "Dnevnik se strimuje sa servera",
+    "toast": {
+      "error": {
+        "fetchingLogsFailed": "Greška pri preuzimanju dnevnika: {{errorMessage}}",
+        "whileStreamingLogs": "Greška tokom strimovanja dnevnika: {{errorMessage}}"
+      }
+    }
+  },
+  "general": {
+    "title": "Opšte",
+    "detector": {
+      "title": "Detektori",
+      "inferenceSpeed": "Brzina obrade detektora",
+      "temperature": "Temperatura detektora",
+      "cpuUsage": "Zauzeće procesora od strane detektora",
+      "cpuUsageInformation": "Procesor koji se koristi za pripremu ulaznih i izlaznih podataka za modele detekcije i iz njih. Ova vrednost ne meri iskorišćenost same obrade, čak i ako se koristi grafički procesor ili akcelerator.",
+      "memoryUsage": "Zauzeće memorije od strane detektora"
+    },
+    "hardwareInfo": {
+      "title": "Informacije o hardveru",
+      "gpuUsage": "GPU zauzeće",
+      "gpuMemory": "GPU memorija",
+      "gpuEncoder": "GPU enkoder",
+      "gpuCompute": "GPU obrada / enkodiranje",
+      "gpuDecoder": "GPU dekoder",
+      "gpuTemperature": "GPU temperatura",
+      "gpuInfo": {
+        "vainfoOutput": {
+          "title": "Vainfo izlazni podaci",
+          "returnCode": "Izlazni kod: {{code}}",
+          "processOutput": "Izlazni podaci procesa:",
+          "processError": "Greška u procesu:"
+        },
+        "nvidiaSMIOutput": {
+          "title": "Nvidia SMI izlazni podaci",
+          "name": "Naziv: {{name}}",
+          "driver": "Drajver: {{driver}}",
+          "cudaComputerCapability": "CUDA računarska sposobnost: {{cuda_compute}}",
+          "vbios": "VBios informacije: {{vbios}}"
+        },
+        "closeInfo": {
+          "label": "Zatvori informacije o GPU"
+        },
+        "copyInfo": {
+          "label": "Kopiraj informacije o GPU"
+        },
+        "toast": {
+          "success": "Informacije o GPU su kopirane u privremenu memoriju"
+        }
+      },
+      "npuUsage": "NPU zauzeće",
+      "npuMemory": "NPU memorija",
+      "npuTemperature": "NPU temperatura"
+    },
+    "otherProcesses": {
+      "title": "Ostali procesi",
+      "series": {
+        "audio_detector": "audio detektor",
+        "embeddings": "vektorski prikazi",
+        "review_segment": "segment pregleda",
+        "recording": "snimanje",
+        "go2rtc": "go2rtc"
+      },
+      "processMemoryUsage": "Zauzeće memorije",
+      "processCpuUsage": "Zauzeće CPU"
+    }
+  },
+  "storage": {
+    "recordings": {
+      "title": "Snimci",
+      "tips": "Ova vrednost predstavlja ukupno skladište koje zauzimaju snimci u Frigate bazi podataka. Frigate ne prati zauzeće skladišta za sve datoteke na vašem disku.",
+      "earliestRecording": "Najraniji dostupni snimak:"
+    },
+    "overview": "Pregled",
+    "title": "Skladište",
+    "shm": {
+      "title": "Dodeljena SHM (deljena) memorija",
+      "warning": "Trenutna veličina SHM-a od {{total}} MB je previše mala. Povećajte je na najmanje {{min_shm}} MB.",
+      "frameLifetime": {
+        "title": "Vreme čuvanja kadra",
+        "description": "Svaka kamera ima {{frames}} mesta za kadrove u deljenoj memoriji. Pri najvećem broju kadrova u sekundi (frame rate) te kamere, svaki kadar je dostupan približno {{lifetime}} sekundi pre nego što bude prepisan."
+      }
+    },
+    "cameraStorage": {
+      "title": "Skladište kamera",
+      "camera": "Kamera",
+      "unusedStorageInformation": "Informacije o neiskorišćenom prostoru",
+      "storageUsed": "Skladište",
+      "percentageOfTotalUsed": "Procenat od ukupnog",
+      "bandwidth": "Propusni opseg",
+      "unused": {
+        "title": "Neiskorišćeno",
+        "tips": "Ova vrednost možda neće tačno prikazati slobodan prostor dostupan Frigate-u ako na vašem disku imate sačuvane druge datoteke pored Frigate snimaka. Frigate ne prati zauzeće skladišta izvan svojih snimaka."
+      },
+      "subStream": {
+        "information": "Informacije o skladištu sporednog strima",
+        "tips": "Kamere koje snimaju sporedni strim (sub stream) odvojeno prikazuju zauzeće za izvorni i nizak kvalitet, koristeći iste nazive kao i opcije kvaliteta pri reprodukciji snimaka. Niski kvalitet snimaka ostaje na disku sve dok ne istekne period čuvanja, tako da se ovaj prikaz može i dalje pojavljivati za kameru nakon što je snimanje sporednog strima isključeno."
+      }
+    }
+  },
+  "cameras": {
+    "title": "Kamere",
+    "overview": "Pregled",
+    "info": {
+      "aspectRatio": "Odnos stranica",
+      "cameraProbeInfo": "Informacije o analizi kamere {{camera}}",
+      "streamDataFromFFPROBE": "Podaci o strimu su dobijeni pomoću <code>ffprobe</code>.",
+      "fetching": "Preuzimanje podataka o kameri",
+      "stream": "Strim {{idx}}",
+      "video": "Video:",
+      "codec": "Kodek:",
+      "resolution": "Rezolucija:",
+      "fps": "FPS:",
+      "unknown": "Nepoznato",
+      "audio": "Audio:",
+      "error": "Greška: {{error}}",
+      "tips": {
+        "title": "Informacije o analizi kamere"
+      },
+      "keyframes": {
+        "title": "Analiza ključnih kadrova",
+        "analyzing": "Analiza ključnih kadrova je u toku... preostalo je {{seconds}} sekundi",
+        "stillAnalyzing": "Analiza ključnih kadrova je i dalje u toku...",
+        "recordStream": "Strim za snimanje:",
+        "keyframeCount": "Uočeni ključni kadrovi:",
+        "observedDuration": "Uočeno trajanje:",
+        "gap": "Razmak između ključnih kadrova (min / prosek / maks):",
+        "segmentLength": "Dužina segmenta snimanja:",
+        "ok": "Ključni kadrovi na svakih ~{{seconds}} s, što je dobro za snimanje i reprodukciju.",
+        "warningFixed": "Ključni kadrovi su ravnomerno raspoređeni ali su retki (na svakih ~{{seconds}} s). Snimanje i dalje radi, ali će reprodukcija uživo i premotavanje započinjati sporije. Podesite interval ključnih kadrova (I-frame / keyframe) na kameri tako da odgovara broju kadrova u sekundi.",
+        "warningVariable": "Razmak između ključnih kadrova je neujednačen (od {{minSeconds}} s do {{maxSeconds}} s), što obično znači da je uključen pametni kodek (H.264+/H.265+). Ovo se ne preporučuje.",
+        "errorFixed": "Ključni kadrovi na svakih ~{{seconds}} s su duži od dužine segmenta snimanja ({{segmentTime}} s), pa pojedini segmenti nemaju ključni kadar i neće moći da se reprodukuju. Skratite interval ključnih kadrova (I-frame / keyframe) na kameri tako da odgovara broju kadrova u sekundi (frame rate).",
+        "errorVariable": "Razmaci između ključnih kadrova dostižu ~{{seconds}} s, što je duže od dužine segmenta snimanja ({{segmentTime}} s). Pojedini segmenti neće imati ključni kadar, što prekida reprodukciju. Onemogućite pametni/+ kodek na kameri ili skratite interval ključnih kadrova.",
+        "unknown": "Nije moguće utvrditi razmak između ključnih kadrova.",
+        "recordDisabled": "Snimanje je onemogućeno za ovu kameru."
+      }
+    },
+    "framesAndDetections": "Kadrovi / Detekcije",
+    "noCameras": {
+      "title": "Nema pronađenih kamera"
+    },
+    "label": {
+      "camera": "kamera",
+      "detect": "detekcija",
+      "skipped": "preskočeno",
+      "ffmpeg": "FFmpeg",
+      "capture": "snimanje",
+      "overallFramesPerSecond": "ukupno kadrova u sekundi",
+      "overallDetectionsPerSecond": "ukupno detekcija u sekundi",
+      "overallSkippedDetectionsPerSecond": "ukupno preskočenih detekcija u sekundi",
+      "cameraFfmpeg": "{{camName}} FFmpeg",
+      "cameraCapture": "{{camName}} snimanje",
+      "cameraDetect": "{{camName}} detekcija",
+      "cameraGpu": "{{camName}} GPU",
+      "cameraFramesPerSecond": "{{camName}} kadrova u sekundi",
+      "cameraDetectionsPerSecond": "{{camName}} detekcija u sekundi",
+      "cameraSkippedDetectionsPerSecond": "{{camName}} preskočenih detekcija u sekundi"
+    },
+    "connectionQuality": {
+      "title": "Kvalitet veze",
+      "excellent": "Odličan",
+      "fair": "Zadovoljavajući",
+      "poor": "Loš",
+      "unusable": "Neupotrebljiv",
+      "fps": "FPS",
+      "expectedFps": "Očekivani FPS",
+      "reconnectsLastHour": "Ponovna povezivanja (poslednji sat)",
+      "stallsLastHour": "Zastoji (poslednji sat)"
+    },
+    "toast": {
+      "success": {
+        "copyToClipboard": "Podaci o analizi su kopirani u privremenu memoriju."
+      },
+      "error": {
+        "unableToProbeCamera": "Nije moguće analizirati kameru: {{errorMessage}}"
+      }
+    }
+  },
+  "lastRefreshed": "Poslednji put osveženo: ",
+  "stats": {
+    "cameraSkippedDetections": "Kamera {{camera}} preskače detekciju na {{pct}}% kadrova",
+    "healthy": "Sistem ispravn",
+    "systemNotices_one": "{{count}} sistemsko obaveštenje",
+    "systemNotices_other": "{{count}} sistemska obaveštenja",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}",
+    "reindexingEmbeddings": "Ponovno indeksiranje vektorskih prikaza (završeno {{processed}}%)",
+    "reindexEmbeddingsFailed": "Ponovno indeksiranje vektorskih prikaza nije uspelo, proverite dnevnik",
+    "cameraIsOffline": "Kamera {{camera}} je van mreže",
+    "detectIsSlow": "Detekcija na {{detect}} je spora ({{speed}} ms)",
+    "detectIsVerySlow": "Detekcija na {{detect}} je veoma spora ({{speed}} ms)",
+    "retentionUnmet": "Snimci se brišu pre isteka perioda čuvanja kako bi se oslobodio prostor",
+    "debugReplayActive": "Sesija otklanjanja grešaka i ponovnog puštanja je aktivna"
+  },
+  "enrichments": {
+    "title": "Poboljšanja",
+    "infPerSecond": "Broj obrada u sekundi",
+    "averageInf": "Prosečno vreme obrade",
+    "embeddings": {
+      "image_embedding": "Vektorski prikaz slike",
+      "text_embedding": "Vektorski prikaz teksta",
+      "face_recognition": "Prepoznavanje lica",
+      "plate_recognition": "Prepoznavanje tablica",
+      "image_embedding_speed": "Brzina vektorskog prikaza slike",
+      "face_embedding_speed": "Brzina vektorskog prikaza lica",
+      "face_recognition_speed": "Brzina prepoznavanja lica",
+      "plate_recognition_speed": "Brzina prepoznavanja tablica",
+      "text_embedding_speed": "Brzina vektorskog prikaza teksta",
+      "yolov9_plate_detection_speed": "YOLOv9 brzina detekcije tablica",
+      "yolov9_plate_detection": "YOLOv9 detekcija tablica",
+      "review_description": "Opis stavke pregleda",
+      "review_description_speed": "Brzina opisivanja stavke pregleda",
+      "review_description_events_per_second": "Opis stavke pregleda",
+      "object_description": "Opis objekta",
+      "object_description_speed": "Brzina opisivanja objekta",
+      "object_description_events_per_second": "Opis objekta",
+      "classification": "{{name}} klasifikacija",
+      "classification_speed": "{{name}} brzina klasifikacije",
+      "classification_events_per_second": "{{name}} događaja klasifikacije u sekundi"
+    }
+  }
+}

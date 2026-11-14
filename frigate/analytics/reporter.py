@@ -1,0 +1,218 @@
+"""Send one analytics report a day while the admin has opted in."""
+
+import logging
+import random
+import threading
+import time
+from collections.abc import Callable
+from multiprocessing.synchronize import Event as MpEvent
+from typing import TYPE_CHECKING
+
+from pydantic import ValidationError
+from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
+
+from frigate.analytics.report import build_report, gather_context
+from frigate.analytics.state import (
+    STATE_PATH,
+    AnalyticsState,
+    delete_state,
+    load_state,
+    new_state,
+    save_state,
+)
+from frigate.analytics.transport import SendOutcome, send_report
+from frigate.config import FrigateConfig
+from frigate.config.holder import ConfigHolder
+from frigate.config.telemetry import TelemetryConfig
+from frigate.const import ANALYTICS_URL
+from frigate.notices import raise_notice, resolve_notice
+from frigate.util.config import find_config_file
+
+if TYPE_CHECKING:
+    from frigate.notices.registry import NoticeRegistry
+    from frigate.stats.emitter import StatsEmitter
+
+logger = logging.getLogger(__name__)
+
+WAKE_S = 10 * 60
+INTERVAL_S = 24 * 60 * 60
+JITTER_S = 60 * 60
+FIRST_DELAY_S = (15 * 60, 45 * 60)
+PROMPT_KIND = "analytics_prompt"
+
+
+def saved_consent(path: str) -> bool | None:
+    """telemetry.analytics as saved in the config file, or None if unreadable."""
+    try:
+        with open(path) as f:
+            raw = YAML(typ="safe").load(f)
+    except (OSError, ValueError, YAMLError):
+        return None
+
+    if not isinstance(raw, dict):
+        return None
+
+    # the live config's model, so yes, on, and 1 read as consent there too
+    try:
+        return TelemetryConfig.model_validate(raw.get("telemetry") or {}).analytics
+    except ValidationError:
+        return None
+
+
+class AnalyticsReporter(threading.Thread):
+    """Follows the live config, so a settings save needs no restart."""
+
+    def __init__(
+        self,
+        config_holder: ConfigHolder,
+        stats_emitter: "StatsEmitter",
+        notice_registry: "NoticeRegistry",
+        stop_event: MpEvent | threading.Event,
+        *,
+        state_path: str = STATE_PATH,
+        config_path: str | None = None,
+        url: str = ANALYTICS_URL,
+        send: Callable[[str, str], SendOutcome] = send_report,
+        clock: Callable[[], float] = time.time,
+        rng: random.Random | None = None,
+    ) -> None:
+        super().__init__(name="analytics_reporter", daemon=True)
+        self.config_holder = config_holder
+        self.stats_emitter = stats_emitter
+        self.notice_registry = notice_registry
+        self.stop_event = stop_event
+        self.state_path = state_path
+        self.config_path = config_path or find_config_file()
+        self.url = url
+        self.send = send
+        self.clock = clock
+        self.rng = rng or random.Random()
+        self.first_due = clock() + self.rng.uniform(*FIRST_DELAY_S)
+        self.interval = self._next_interval()
+        self.opted_in: bool | None = None
+        self.warned_unwritable = False
+        # a settings save runs on an API thread while a wake may be mid-attempt
+        self._lock = threading.Lock()
+        config_holder.subscribe(self._on_config)
+
+    def _next_interval(self) -> float:
+        return INTERVAL_S + self.rng.uniform(-JITTER_S, JITTER_S)
+
+    def run(self) -> None:
+        """Tick every wake until stopped; a failed tick never ends the thread."""
+        while True:
+            try:
+                self.tick()
+            except Exception:
+                logger.exception("Analytics reporter failed")
+
+            if self.stop_event.wait(WAKE_S):
+                break
+
+    def _on_config(self, config: FrigateConfig) -> None:
+        # a save can turn sharing off and back on between two wakes, so an
+        # opt-out is handled when it's saved rather than at the next wake
+        with self._lock:
+            if not config.safe_mode:
+                self._apply_consent(config.telemetry.analytics)
+
+    def _apply_consent(self, opted_in: bool) -> None:
+        # called with the lock held
+        if opted_in == self.opted_in:
+            return
+
+        self.opted_in = opted_in
+
+        if opted_in:
+            resolve_notice(PROMPT_KIND)
+
+            # the opt-in sets the notice baseline, so only notices raised with
+            # consent are counted; tick() retries a failed write
+            if load_state(self.state_path) is None:
+                save_state(self._new_identity(), self.state_path)
+        else:
+            raise_notice(PROMPT_KIND)
+            delete_state(self.state_path)
+
+    def _new_identity(self) -> AnalyticsState:
+        # called with the lock held; the baseline resets before the state file
+        # names the new ID, so a failed write only means another reset
+        self.notice_registry.reset_analytics_baseline()
+        return new_state()
+
+    def tick(self) -> None:
+        """Apply consent and send a report when one is due."""
+        with self._lock:
+            config = self.config_holder.config
+
+            # safe mode parses a default config where analytics reads as off,
+            # and handling that as an opt-out would delete the install ID
+            if config.safe_mode:
+                return
+
+            self._apply_consent(config.telemetry.analytics)
+
+            if not config.telemetry.analytics:
+                return
+
+            now = self.clock()
+
+            if now < self.first_due:
+                return
+
+            state = load_state(self.state_path)
+
+            if state is not None and not self._due(state.last_attempt_at, now):
+                return
+
+            # a YAML editor save or a hand edit reaches the live config only on
+            # restart, so an opt-out saved that way is read from the file
+            if saved_consent(self.config_path) is False:
+                delete_state(self.state_path)
+                return
+
+            state = AnalyticsState(
+                (state or self._new_identity()).install_id, last_attempt_at=now
+            )
+
+            # saved before sending, so a failing endpoint or a crash mid-send
+            # still waits a full interval; without saved state every boot would
+            # send under a new install ID
+            if not save_state(state, self.state_path):
+                if not self.warned_unwritable:
+                    logger.warning(
+                        "Analytics is on, but %s isn't writable, so no report is sent",
+                        self.state_path,
+                    )
+                    self.warned_unwritable = True
+
+                return
+
+            self.interval = self._next_interval()
+
+        # the lock stays free during the request, so a save never waits on it
+        self._send(state.install_id, now)
+
+    def _due(self, last_attempt_at: float, now: float) -> bool:
+        # a last attempt stamped in the future came from a wrong clock
+        return (
+            now >= last_attempt_at + self.interval or last_attempt_at > now + INTERVAL_S
+        )
+
+    def _send(self, install_id: str, now: float) -> None:
+        ctx = gather_context(
+            self.config_holder.config, self.stats_emitter, self.notice_registry
+        )
+        report = build_report(ctx, install_id, sent_at=int(now))
+        body = report.model_dump_json()
+
+        # consent can be withdrawn while the report builds
+        if not self.config_holder.config.telemetry.analytics:
+            return
+
+        if self.send(self.url, body) is not SendOutcome.accepted:
+            return
+
+        logger.info("Sent the daily analytics report")
+        logger.debug("Analytics report: %s", body)

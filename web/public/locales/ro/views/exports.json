@@ -63,7 +63,8 @@
     "copying": "Copiere",
     "encoding": "Codare",
     "encodingRetry": "Codare (reîncercare)",
-    "finalizing": "Finalizare"
+    "finalizing": "Finalizare",
+    "merging": "Îmbinare"
   },
   "caseView": {
     "noDescription": "Fără descriere",

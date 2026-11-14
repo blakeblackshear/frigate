@@ -1,1 +1,60 @@
-{}
+{
+    "title": "Vianmäärityksen toisto",
+    "websocket_messages": "Viestit",
+    "dialog": {
+        "title": "Aloita vianmäärityksen toisto",
+        "camera": "Lähdekamera",
+        "timeRange": "Aikaväli",
+        "preset": {
+            "1m": "Viimeinen minuutti",
+            "5m": "Viimeiset 5 minuuttia",
+            "timeline": "Aikajanalta",
+            "custom": "Määritelty"
+        },
+        "startButton": "Aloita toisto",
+        "selectFromTimeline": "Valitse",
+        "starting": "Toisto alkaa...",
+        "startLabel": "Alku",
+        "endLabel": "Loppu",
+        "toast": {
+            "error": "Vianmäärityksen toisto epäonnistui: {{error}}",
+            "alreadyActive": "Vianmäärityksen toisto on jo aktiivinen",
+            "noRecordings": "Tallenteita ei löytynyt valitulla aikajaksolla",
+            "stopError": "Vianmääritystoiston pysäytys epäonnistui: {{error}}",
+            "goToReplay": "Siirry toistoon"
+        },
+        "description": "Luo väliaikainen toistokamera, joka toistaa historiallista videomateriaalia silmukkana kohdetunnistuksen ja seurantaongelmien vianmääritystä varten. Toistokameralla on sama tunnistusmääritys kuin lähdekameralla. Aloita valitsemalla aikaväli."
+    },
+    "page": {
+        "noSession": "Ei aktiivisia vianmääritystoistoja",
+        "noSessionDesc": "Aloita vianmääritystoisto Historia näkymästä klikkaamalla Toiminnot-nappia työkaluriltä ja valitse Vianmääritystoisto.",
+        "goToRecordings": "Siirry historiaan",
+        "preparingClip": "Valmistellaan klippiä…",
+        "preparingClipDesc": "Frigate liittää tallennuksia yhteen valitulta aikaväliltä. Tämä saattaa kestää hetken pidemmillä aikaväleillä.",
+        "startingCamera": "Vianmääritystoisto alkaa…",
+        "startError": {
+            "title": "Vianmääritystoiston aloitus epäonnistui",
+            "back": "Takaisin historiaan"
+        },
+        "sourceCamera": "Lähdekamera",
+        "replayCamera": "Toistokamera",
+        "initializingReplay": "Aloitetaan vianmääritystoistoa...",
+        "stoppingReplay": "Pysäytetään vianmääritystoistoa...",
+        "stopReplay": "Pysäytä toisto",
+        "confirmStop": {
+            "title": "Pysäytä vianmääritystoisto?",
+            "description": "Tämä pysäyttää istunnon ja poistaa väliaikaiset tiedot. Oletko varma?",
+            "confirm": "Pysäytä toisto",
+            "cancel": "Peruuta"
+        },
+        "activity": "Aktiivisuus",
+        "objects": "Kohdelista",
+        "audioDetections": "Äänihavainnot",
+        "noActivity": "Ei havaittua aktiivisuutta",
+        "activeTracking": "Aktiivinen seuranta",
+        "noActiveTracking": "Ei aktiivista seurantaan",
+        "configuration": "Määrittelyt",
+        "configurationDesc": "Hienosäädä liiketunnistuksen ja kohdeseurannan määrityksiä vianmääritystoistolle. Muutoksia ei tallenneta Frigaten määritystiedostoon."
+    },
+    "description": "Toista kameratallenteita vianmääritystä varten. Kohdelista näyttää viivästetyn yhteenvedon havaituista kohteista, ja Viestit-välilehti näyttää toistetun materiaalin sisäisen viestivirran."
+}

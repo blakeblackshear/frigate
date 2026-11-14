@@ -22,8 +22,7 @@
       "error": "Er is iets misgegaan. Raadpleeg de Frigate-logs.",
       "context": "Frigate downloadt de vereiste inbedmodellen om de functie Semantisch zoeken te ondersteunen. Dit kan enkele minuten duren, afhankelijk van de snelheid van je netwerkverbinding.",
       "tips": {
-        "context": "Je wilt misschien de embeddings van je gevolgde objecten opnieuw indexeren zodra de modellen zijn gedownload.",
-        "documentation": "Lees de documentatie"
+        "context": "Je wilt misschien de embeddings van je gevolgde objecten opnieuw indexeren zodra de modellen zijn gedownload."
       }
     },
     "title": "Verkennen is niet beschikbaar"
@@ -33,58 +32,11 @@
     "details": "Details",
     "video": "video",
     "snapshot": "snapshot",
-    "object_lifecycle": "objectlevenscyclus",
     "thumbnail": "thumbnail",
     "tracking_details": "trackinggegevens"
   },
   "objectLifecycle": {
-    "createObjectMask": "Objectmasker maken",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} Gedetecteerd",
-      "entered_zone": "{{label}} in zone {{zones}}",
-      "attribute": {
-        "other": "{{label}} Herkend als {{attribute}}",
-        "faceOrLicense_plate": "{{attribute}} Gedetecteerd voor {{label}}"
-      },
-      "heard": "{{label}} gehoord",
-      "gone": "{{label}} is vertrokken",
-      "active": "{{label}} Werd actief",
-      "stationary": "{{label}} werd stationair",
-      "external": "{{label}} gedetecteerd",
-      "header": {
-        "zones": "Zones",
-        "ratio": "Verhouding",
-        "area": "Gebied"
-      }
-    },
-    "annotationSettings": {
-      "title": "Annotatie-instellingen",
-      "offset": {
-        "millisecondsToOffset": "Aantal milliseconden om objectkader mee te verschuiven. <em>Standaard: 0</em>",
-        "desc": "Deze gegevens zijn afkomstig van de detectiestroom van je camera, maar worden weergegeven op beelden uit de opnamestroom. Het is onwaarschijnlijk dat deze twee streams perfect gesynchroniseerd zijn. Hierdoor zullen het objectkader en het beeld niet exact op elkaar aansluiten. Het veld <code>annotation_offset</code> kan echter worden gebruikt om deze annotatie-afwijking te corrigeren.",
-        "documentation": "Lees de documentatie ",
-        "label": "Annotatie-afwijking",
-        "tips": "TIP: Stel je voor dat er een clip is waarin een persoon van links naar rechts loopt. Als het objectkader in de tijdlijn van het object steeds links van de persoon ligt, dan moet de waarde verlaagd worden. Op dezelfde manier als het objectkader consequent vóór de persoon ligt dus vooruitloopt, moet de waarde verhoogd worden.",
-        "toast": {
-          "success": "Annotatieverschuiving voor {{camera}} is opgeslagen in het configuratiebestand. Herstart Frigate om je wijzigingen toe te passen."
-        }
-      },
-      "showAllZones": {
-        "title": "Toon alle zones",
-        "desc": "Toon altijd zones op frames waar objecten een zone zijn binnengegaan."
-      }
-    },
-    "noImageFound": "Er is geen afbeelding beschikbaar voor dit tijdstip.",
-    "title": "Objectlevenscyclus",
-    "adjustAnnotationSettings": "Annotatie-instellingen aanpassen",
-    "scrollViewTips": "Scroll om de belangrijke momenten uit de levenscyclus van dit object te bekijken.",
-    "autoTrackingTips": "Als u een automatische objectvolgende camera gebruikt, zal het objectkader onnauwkeurig zijn.",
-    "carousel": {
-      "previous": "Vorige dia",
-      "next": "Volgende dia"
-    },
-    "count": "{{first}} van {{second}}",
-    "trackedPoint": "Volgpunt"
+    "noImageFound": "Er is geen afbeelding beschikbaar voor dit tijdstip."
   },
   "documentTitle": "Verken - Frigate",
   "details": {
@@ -177,10 +129,6 @@
     "downloadVideo": {
       "label": "Download video",
       "aria": "Download video"
-    },
-    "viewObjectLifecycle": {
-      "aria": "Toon de levenscyclus van het object",
-      "label": "Levenscyclus van object bekijken"
     },
     "submitToPlus": {
       "label": "Verzenden naar Frigate+",

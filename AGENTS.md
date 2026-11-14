@@ -36,7 +36,7 @@ When reviewing code, do NOT comment on:
 - **Formatting**: Ruff (configured in `pyproject.toml`)
 - **Linting**: Ruff with rules defined in project config
 - **Type Checking**: Use type hints consistently
-- **Testing**: unittest framework - use `python3 -u -m unittest` to run tests
+- **Testing**: unittest framework - use `python3 -u -m frigate.test` to run the suite in parallel groups
 - **Language**: American English for all code, comments, and documentation
 - **Punctuation**: Do not use em dashes in documentation, comments, or strings; reword with standard punctuation (commas, colons, parentheses, or separate sentences)
 
@@ -160,7 +160,7 @@ When reviewing code, do NOT comment on:
 
 ### Code Quality
 
-- **Linting**: ESLint (see `web/.eslintrc.cjs`)
+- **Linting**: ESLint (see `web/eslint.config.js`)
 - **Formatting**: Prettier with Tailwind CSS plugin
 - **Type Safety**: TypeScript strict mode enabled
 
@@ -196,7 +196,7 @@ Key rules enforced:
 ### Backend Testing
 
 - **Framework**: Python unittest
-- **Run Command**: `python3 -u -m unittest`
+- **Run Command**: `python3 -u -m frigate.test` (parallel groups; plain `python3 -u -m unittest` runs serially)
 - **Location**: `frigate/test/`
 - **Coverage**: Aim for comprehensive test coverage of core functionality
 - **Pattern**: Use `TestCase` classes with descriptive test method names
@@ -219,8 +219,8 @@ Key rules enforced:
 ### Python Backend
 
 ```bash
-# Run all tests
-python3 -u -m unittest
+# Run all tests in parallel groups (-j to set the number of jobs)
+python3 -u -m frigate.test
 
 # Run specific test file
 python3 -u -m unittest frigate.test.test_ffmpeg_presets

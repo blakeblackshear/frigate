@@ -52,7 +52,6 @@
         },
         "audio": {
           "tips": {
-            "document": "Leggi la documentazione ",
             "title": "L'audio deve essere trasmesso dalla tua telecamera e configurato in go2rtc per questo flusso."
           }
         },

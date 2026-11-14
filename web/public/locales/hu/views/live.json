@@ -56,10 +56,6 @@
       }
     }
   },
-  "camera": {
-    "enable": "Kamera Engedélyezése",
-    "disable": "Kamera Kikapcsolása"
-  },
   "muteCameras": {
     "enable": "Minden Kamera Némítása",
     "disable": "Minden Kamera Felhangosítása"
@@ -118,14 +114,12 @@
     "title": "Adás",
     "audio": {
       "tips": {
-        "documentation": "Olvassa el a leírást ",
         "title": "A hangot a kamerának kell kibocsátania, és a go2rtc-ben kell konfigurálni ehhez a streamhez."
       },
       "available": "Ehhez az adáshoz hang elérhető",
       "unavailable": "Nem elérhető hang ehhez az adáshoz"
     },
     "twoWayTalk": {
-      "tips.documentation": "Olvassa el a leírást ",
       "available": "Kétirányú kommunikáció elérhető ehhez az adáshoz",
       "unavailable": "Nem elérhető a kétirányú kommunikáció ehhez az adáshoz",
       "tips": "Az eszközének támogatnia kell ezt a funkciót, és a WebRTC-nek kétirányú beszélgetésre kell lennie konfigurálva."
@@ -144,7 +138,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Beállítások",
-    "cameraEnabled": "Kamera Engedélyezve",
     "objectDetection": "Tárgy Észlelés",
     "recording": "Felvétel",
     "audioDetection": "Hang Észlelés",
@@ -160,8 +153,7 @@
       "all": "Mind",
       "motion": "Mozgás",
       "active_objects": "Aktív objektumok"
-    },
-    "notAllTips": "Az Ön {{source}} felvételmegőrzési beállítása akövetkezőre van állítva <code>mode: {{effectiveRetainMode}}</code>, így ez az igény szerinti felvétel csak a {{effectiveRetainModeName}} szegmenseket őrzi meg."
+    }
   },
   "editLayout": {
     "label": "Elrendezés szerkesztése",

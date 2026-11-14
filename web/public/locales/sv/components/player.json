@@ -21,14 +21,6 @@
       "title": "Bandbredd:",
       "short": "Bandbredd"
     },
-    "latency": {
-      "title": "Latens:",
-      "short": {
-        "title": "Latens",
-        "value": "{{seconds}} s"
-      },
-      "value": "{{seconds}} sekunder"
-    },
     "totalFrames": "Totalt antal bildrutor:",
     "droppedFrames": {
       "title": "Förlorade bildrutor:",
@@ -40,7 +32,6 @@
     "decodedFrames": "Avkodade bildrutor:",
     "droppedFrameRate": "Andel förlorade bildrutor:"
   },
-  "cameraDisabled": "Kameran är inaktiverad",
   "toast": {
     "error": {
       "submitFrigatePlusFailed": "Det gick inte att skicka bildrutan till Frigate+"

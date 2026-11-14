@@ -1,5 +1,4 @@
 {
-  "documentTitle": "即時畫面 - Frigate",
   "cameraAudio": {
     "disable": "停用鏡頭音訊",
     "enable": "啟用鏡頭音訊"
@@ -93,10 +92,6 @@
     "failedToStart": "無法開始手動按需錄影。",
     "recordDisabledTips": "由於此鏡頭的設定已停用或限制錄影，因此只會儲存快照。"
   },
-  "camera": {
-    "enable": "啟用鏡頭",
-    "disable": "停用鏡頭"
-  },
   "muteCameras": {
     "enable": "所有鏡頭靜音",
     "disable": "所有鏡頭取消靜音"
@@ -115,14 +110,12 @@
     "title": "串流",
     "audio": {
       "tips": {
-        "documentation": "閱讀文件 ",
         "title": "音訊必須從你的鏡頭輸出，並在 go2rtc 中正確設定此串流。"
       },
       "available": "此串流支援音訊",
       "unavailable": "此串流不支援音訊"
     },
     "twoWayTalk": {
-      "tips.documentation": "閱讀文件 ",
       "available": "此串流支援雙向通話",
       "unavailable": "此串流不支援雙向通話",
       "tips": "你的裝置必須支援此功能，且需設定 WebRTC 才能使用雙向通話。"
@@ -140,7 +133,6 @@
     }
   },
   "cameraSettings": {
-    "cameraEnabled": "鏡頭已啟用",
     "objectDetection": "物件偵測",
     "recording": "錄影",
     "snapshots": "快照",
@@ -157,8 +149,7 @@
       "all": "全部",
       "motion": "移動",
       "active_objects": "活躍物件"
-    },
-    "notAllTips": "你的 {{source}} 錄影保留設定為 <code>mode: {{effectiveRetainMode}}</code>，因此此按需錄影只會保留{{effectiveRetainModeName}}的片段。"
+    }
   },
   "editLayout": {
     "label": "編輯版面配置",

@@ -3,6 +3,7 @@
 import io
 import logging
 import os
+import shutil
 import threading
 
 import numpy as np
@@ -60,6 +61,14 @@ class JinaV2Embedding(BaseEmbedding):
 
         # download the model and tokenizer
         files_names = list(self.download_urls.keys()) + [self.tokenizer_file]
+
+        # an interrupted download leaves the hub cache without the saved tokenizer
+        tokenizer_path = os.path.join(self.download_path, self.tokenizer_file)
+        if os.path.isdir(tokenizer_path) and not os.path.exists(
+            os.path.join(tokenizer_path, "tokenizer_config.json")
+        ):
+            shutil.rmtree(tokenizer_path)
+
         if not all(
             os.path.exists(os.path.join(self.download_path, n)) for n in files_names
         ):
@@ -97,7 +106,7 @@ class JinaV2Embedding(BaseEmbedding):
 
                 tokenizer = AutoTokenizer.from_pretrained(
                     self.model_name,
-                    trust_remote_code=True,
+                    trust_remote_code=False,
                     cache_dir=os.path.join(
                         MODEL_CACHE_DIR, self.model_name, "tokenizer"
                     ),
@@ -129,9 +138,8 @@ class JinaV2Embedding(BaseEmbedding):
                 f"{MODEL_CACHE_DIR}/{self.model_name}/tokenizer"
             )
             self.tokenizer = AutoTokenizer.from_pretrained(
-                self.model_name,
-                cache_dir=tokenizer_path,
-                trust_remote_code=True,
+                tokenizer_path,
+                trust_remote_code=False,
                 clean_up_tokenization_spaces=True,
             )
 

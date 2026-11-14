@@ -55,10 +55,6 @@
     "presets": "Unaprijed postavljene pozicije PTZ kamere"
   },
   "lowBandwidthMode": "Način niskog bandwidtha",
-  "camera": {
-    "enable": "Omogući Kameru",
-    "disable": "Onemogući Kameru"
-  },
   "muteCameras": {
     "enable": "Isključi zvuk svih kamera",
     "disable": "Uključi zvuk svih kamera"
@@ -151,7 +147,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} Postavke",
-    "cameraEnabled": "Kamera omogućena",
     "objectDetection": "Detekcija objekata",
     "recording": "Snimanje",
     "snapshots": "Snimke",

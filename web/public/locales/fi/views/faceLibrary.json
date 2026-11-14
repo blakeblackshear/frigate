@@ -3,7 +3,7 @@
     "addFace": "Opastus: Uuden kokoelman lisääminen Kasvokirjastoon.",
     "invalidName": "Virheellinen nimi. Nimi voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja.",
     "placeholder": "Anna nimi kokoelmalle",
-    "nameCannotContainHash": "Nimi ei voi sisältää \"#\"."
+    "nameCannotContainHash": "Nimi ei voi sisältää merkkiä #."
   },
   "uploadFaceImage": {
     "desc": "Lähetä kuva kasvojen tunnistukseen ja lisää se sivulle {{pageToggle}}",
@@ -11,11 +11,7 @@
   },
   "details": {
     "unknown": "Tuntematon",
-    "faceDesc": "Lisätiedot kohteesta, josta tämä kasvokuva tallennettiin",
-    "person": "Henkilö",
     "timestamp": "Aikaleima",
-    "subLabelScore": "Alinimikkeen pisteet",
-    "face": "Kasvojen yksityiskohdat",
     "scoreInfo": "Alatunnisteen pistemäärä on kaikkien tunnistettujen kasvojen varmuustasojen painotettu keskiarvo, joten se voi poiketa tilannekuvassa näkyvästä pistemäärästä."
   },
   "documentTitle": "Kasvokirjasto - Frigate",
@@ -31,11 +27,10 @@
       "uploadedImage": "Kuva ladattu onnistuneesti."
     }
   },
-  "selectItem": "Valitse {{item}}",
   "train": {
     "empty": "Ei viimeaikaisia kasvojentunnistusyrityksiä",
     "title": "Koulutus",
-    "aria": "Valitse kouluta"
+    "aria": "Valitse viimeisimmät tunnistukset"
   },
   "collections": "Kokoelmat",
   "steps": {
@@ -47,12 +42,9 @@
     }
   },
   "createFaceLibrary": {
-    "title": "Luo kokoelma",
-    "desc": "Luo uusi kokoelma",
     "new": "Luo uusi kasvo",
     "nextSteps": "Hyvän perustan luomiseksi huomioitavaa:<li>Käytä koulutus-välilehteä valitaksesi opetukseen kuvia kustakin tunnistetusta henkilöstä</li><li>Panosta mahdollisimman suoraan otettuihin kuviin; vältä kouluttamista kulmassa kuvatuilla kuvilla.</li></ul>"
   },
-  "selectFace": "Valitse kasvo",
   "deleteFaceLibrary": {
     "title": "Poista nimi",
     "desc": "Haluatko varmasti poistaa kokoelman {{name}}? Tämä poistaa pysyvästi kaikki liitetyt kasvot."
@@ -74,10 +66,9 @@
       "selectImage": "Valitse kuvatiedosto."
     },
     "dropActive": "Pudota kuva tähän…",
-    "dropInstructions": "Vedä ja pudota kuva tähän tai valitse se napsauttamalla",
+    "dropInstructions": "Vedä ja pudota tai liitä kuva tähän tai valitse se klikkaamalla",
     "maxSize": "Maksimikoko: {{size}}MB"
   },
   "nofaces": "Kasvoja ei ole saatavilla",
-  "pixels": "{{area}}px",
   "trainFace": "Kouluta kasvot"
 }

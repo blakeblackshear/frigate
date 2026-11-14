@@ -114,6 +114,11 @@ export default function EnrichmentMetrics({
       }
 
       Object.entries(stats.embeddings).forEach(([rawKey, stat]) => {
+        // embeddings.devices is a label map, not a metric series
+        if (typeof stat !== "number") {
+          return;
+        }
+
         const key = rawKey.replaceAll("_", " ");
         if (!(key in series)) {
           const classificationIndex = rawKey.indexOf("_classification_");
@@ -173,7 +178,7 @@ export default function EnrichmentMetrics({
         isSpeed = false;
       }
 
-      let categoryName = "";
+      let categoryName: string;
       // Get translated category name
       if (categoryKey.endsWith("_classification")) {
         const name = categoryKey.replace("_classification", "");

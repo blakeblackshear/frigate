@@ -1,0 +1,140 @@
+{
+  "filter": "Filtriraj",
+  "classes": {
+    "label": "Klase",
+    "all": {
+      "title": "Sve klase"
+    },
+    "count_one": "{{count}} klasa",
+    "count_other": "{{count}} klase"
+  },
+  "labels": {
+    "label": "Oznake",
+    "all": {
+      "title": "Sve oznake",
+      "short": "Oznake"
+    },
+    "count_one": "{{count}} oznaka",
+    "count_other": "{{count}} oznake"
+  },
+  "zones": {
+    "label": "Zone",
+    "all": {
+      "title": "Sve zone",
+      "short": "Zone"
+    }
+  },
+  "dates": {
+    "selectPreset": "Izaberite unapred podešenu poziciju…",
+    "all": {
+      "title": "Svi datumi",
+      "short": "Datumi"
+    }
+  },
+  "more": "Više filtera",
+  "reset": {
+    "label": "Vrati filtere na podrazumevane vrednosti"
+  },
+  "timeRange": "Vremenski raspon",
+  "subLabels": {
+    "label": "Podoznake",
+    "all": "Sve podoznake"
+  },
+  "attributes": {
+    "label": "Atributi klasifikacije",
+    "all": "Svi atributi"
+  },
+  "score": "Rezultat",
+  "estimatedSpeed": "Procenjena brzina ({{unit}})",
+  "features": {
+    "label": "Funkcije",
+    "hasSnapshot": "Ima snimak",
+    "hasVideoClip": "Ima video-snimak",
+    "submittedToFrigatePlus": {
+      "label": "Poslato na Frigate+",
+      "tips": "Morate prvo filtrirati praćene objekte koji imaju snimak.<br /><br />Praćeni objekti bez snimka ne mogu se poslati na Frigate+."
+    }
+  },
+  "sort": {
+    "label": "Sortiranje",
+    "dateAsc": "Datum (Rastuće)",
+    "dateDesc": "Datum (Opadajuće)",
+    "scoreAsc": "Rezultat objekta (Rastuće)",
+    "scoreDesc": "Rezultat objekta (Opadajuće)",
+    "speedAsc": "Procenjena brzina (Rastuće)",
+    "speedDesc": "Procenjena brzina (Opadajuće)",
+    "relevance": "Relevantnost"
+  },
+  "cameras": {
+    "label": "Filter kamera",
+    "all": {
+      "title": "Sve kamere",
+      "short": "Kamere"
+    }
+  },
+  "review": {
+    "showReviewed": "Prikaži pregledano"
+  },
+  "motion": {
+    "showMotionOnly": "Prikaži samo kretanje"
+  },
+  "explore": {
+    "settings": {
+      "title": "Podešavanja",
+      "defaultView": {
+        "title": "Podrazumevani prikaz",
+        "desc": "Kada nijedan filter nije izabran, prikaži sažetak najnovijih praćenih objekata po oznaci ili prikaži nefiltriranu mrežu.",
+        "summary": "Sažetak",
+        "unfilteredGrid": "Nefiltrirana mreža"
+      },
+      "gridColumns": {
+        "title": "Kolone u mreži",
+        "desc": "Izaberite broj kolona u prikazu mreže."
+      },
+      "searchSource": {
+        "label": "Izvor pretrage",
+        "desc": "Izaberite da li želite da pretražujete sličice (umanjene prikaze) ili opise vaših praćenih objekata.",
+        "options": {
+          "thumbnailImage": "Sličica",
+          "description": "Opis"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Izaberite datum za filtriranje"
+      }
+    }
+  },
+  "logSettings": {
+    "label": "Filtriraj nivo dnevnika",
+    "filterBySeverity": "Filtriraj dnevnik prema ozbiljnosti",
+    "loading": {
+      "title": "Učitavanje",
+      "desc": "Kada se panel dnevnika pomeri do samog dna, novi zapisi se automatski strimuju čim se dodaju."
+    },
+    "disableLogStreaming": "Onemogući strimovanje dnevnika",
+    "allLogs": "Ceo dnevnik"
+  },
+  "trackedObjectDelete": {
+    "title": "Potvrdite brisanje",
+    "desc": "Brisanjem ovih {{objectLength}} praćenih objekata uklanja se snimak, svi sačuvani vektorski prikazi i svi povezani unosi o životnom ciklusu objekta. Snimljeni materijal ovih praćenih objekata u prikazu istorije <em>NEĆE</em> biti obrisan.<br /><br />Da li ste sigurni da želite da nastavite?<br /><br />Držite taster <em>Shift</em> da biste ubuduće zaobišli ovaj prozor.",
+    "toast": {
+      "success": "Praćeni objekti su uspešno obrisani.",
+      "error": "Neuspešno brisanje praćenih objekata: {{errorMessage}}"
+    }
+  },
+  "zoneMask": {
+    "filterBy": "Filtriraj prema maski zone"
+  },
+  "recognizedLicensePlates": {
+    "title": "Prepoznate registarske tablice",
+    "loadFailed": "Učitavanje prepoznatih registarskih tablica nije uspelo.",
+    "loading": "Učitavanje prepoznatih registarskih tablica…",
+    "placeholder": "Unesite tekst za pretragu tablica…",
+    "noLicensePlatesFound": "Nema pronađenih registarskih tablica.",
+    "selectPlatesFromList": "Izaberite jednu ili više tablica sa liste.",
+    "selectAll": "Izaberi sve",
+    "clearAll": "Poništi sve"
+  }
+}

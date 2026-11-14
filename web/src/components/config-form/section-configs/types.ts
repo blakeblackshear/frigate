@@ -29,6 +29,24 @@ export type ConditionalMessage = {
   values?: Record<string, unknown>;
   /** Optional documentation path (e.g. "/configuration/object_detectors#model"). */
   docLink?: string;
+  /**
+   * Alternate wording for when the section this message depends on is enabled
+   * in the config but turned off on the running camera. Without it the message
+   * reads as a contradiction, since the form shows the saved config value.
+   */
+  runtimeOverride?: {
+    /** Camera section whose runtime state explains the message, e.g. "audio". */
+    section: string;
+    /** Translation key used in place of `messageKey`. */
+    messageKey: string;
+  };
+  /**
+   * Whether the Health tab evaluates this message against the saved config.
+   * Absent or false: form only. true: shown whenever condition() holds. A
+   * function: shown when both condition(ctx) and health(ctx) hold, for
+   * messages the form deliberately shows even when the feature is off.
+   */
+  health?: boolean | ((ctx: MessageConditionContext) => boolean);
 };
 
 /** Field-level conditional message, adds field targeting */

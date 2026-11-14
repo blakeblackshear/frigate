@@ -1,6 +1,5 @@
 """Tests for the go2rtc ffmpeg and ngrok options applied at startup."""
 
-import os
 import unittest
 from unittest.mock import patch
 
@@ -15,10 +14,10 @@ FFMPEG_PATH = "/usr/lib/ffmpeg/7.0/bin/ffmpeg"
 
 class TestApplyGo2rtcFfmpegConfig(unittest.TestCase):
     def setUp(self):
-        env_patch = patch.dict(os.environ)
-        env_patch.start()
-        self.addCleanup(env_patch.stop)
-        os.environ.pop("GO2RTC_ALLOW_ARBITRARY_EXEC", None)
+        # the override is snapshotted from the environment at import time
+        exec_patch = patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", None)
+        exec_patch.start()
+        self.addCleanup(exec_patch.stop)
 
     def test_sets_bin_when_missing(self):
         config = {}
@@ -45,7 +44,7 @@ class TestApplyGo2rtcFfmpegConfig(unittest.TestCase):
             "ffmpeg": {"bin": "/usr/bin/ffmpeg"},
             "ngrok": {"command": "ngrok tcp 8555"},
         }
-        with patch.dict(os.environ, {"GO2RTC_ALLOW_ARBITRARY_EXEC": "true"}):
+        with patch("frigate.util.services._GO2RTC_ARBITRARY_EXEC_ENV", "true"):
             assert apply_go2rtc_ffmpeg_config(config, FFMPEG_PATH) == []
         assert config["ffmpeg"]["bin"] == "/usr/bin/ffmpeg"
         assert config["ngrok"] == {"command": "ngrok tcp 8555"}

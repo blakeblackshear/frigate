@@ -26,6 +26,26 @@ class TestClassifyKeyframeGaps(unittest.TestCase):
         self.assertEqual(result["severity"], "warning")
         self.assertEqual(result["max_gap"], 5.5)
 
+    def test_fixed_pattern_for_regular_gop(self):
+        # a 5s GOP with normal encoder jitter is sparse but not variable
+        pts = [0.0, 4.98, 10.01, 15.0]
+        result = classify_keyframe_gaps(pts, segment_time=10)
+        self.assertEqual(result["severity"], "warning")
+        self.assertEqual(result["pattern"], "fixed")
+
+    def test_variable_pattern_for_smart_codec(self):
+        # keyframes bunched up then a long stretch without one
+        pts = [0.0, 1.0, 2.0, 8.0]
+        result = classify_keyframe_gaps(pts, segment_time=10)
+        self.assertEqual(result["severity"], "warning")
+        self.assertEqual(result["pattern"], "variable")
+
+    def test_fixed_pattern_for_short_regular_gop(self):
+        pts = [0.0, 1.0, 2.0, 3.0]
+        result = classify_keyframe_gaps(pts, segment_time=10)
+        self.assertEqual(result["severity"], "ok")
+        self.assertEqual(result["pattern"], "fixed")
+
     def test_error_when_gap_exceeds_segment_time(self):
         pts = [0.0, 12.0]  # 12s gap > 10s segment
         result = classify_keyframe_gaps(pts, segment_time=10)
@@ -40,6 +60,7 @@ class TestClassifyKeyframeGaps(unittest.TestCase):
         result = classify_keyframe_gaps([1.0], segment_time=10)
         self.assertEqual(result["severity"], "unknown")
         self.assertIsNone(result["max_gap"])
+        self.assertIsNone(result["pattern"])
         self.assertEqual(result["keyframe_count"], 1)
 
     def test_unknown_with_no_keyframes(self):

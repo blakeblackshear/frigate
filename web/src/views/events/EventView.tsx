@@ -61,9 +61,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import PreviewPlayer, {
-  PreviewController,
-} from "@/components/player/PreviewPlayer";
+import PreviewPlayer from "@/components/player/PreviewPlayer";
+import { PreviewController } from "@/components/player/PreviewController";
 import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { RecordingStartingPoint } from "@/types/record";
 import VideoControls from "@/components/player/VideoControls";
@@ -722,7 +721,7 @@ function DetectionReview({
 
       try {
         if (node) minimapObserver.current.observe(node);
-      } catch (e) {
+      } catch {
         // no op
       }
     },

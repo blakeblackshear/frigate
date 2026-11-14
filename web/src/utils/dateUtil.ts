@@ -97,7 +97,7 @@ const formatMap: {
 const getResolvedTimeZone = () => {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch (error) {
+  } catch {
     const offsetMinutes = new Date().getTimezoneOffset();
     return `UTC${offsetMinutes < 0 ? "+" : "-"}${Math.abs(offsetMinutes / 60)
       .toString()
@@ -224,7 +224,7 @@ export const formatUnixTimestampToDateTime = (
     }
 
     return formattedDateTime;
-  } catch (error) {
+  } catch {
     return "Invalid time";
   }
 };
@@ -383,6 +383,16 @@ export function isCurrentHour(timestamp: number) {
   now.setUTCMinutes(0, 0, 0);
 
   return timestamp > now.getTime() / 1000;
+}
+
+// a just-ended hour has no mp4 yet but may still have cached frames, so it
+// stays eligible for the frame-based players
+export function isCurrentOrPreviousHour(timestamp: number) {
+  const previousHour = new Date();
+  previousHour.setUTCMinutes(0, 0, 0);
+  previousHour.setUTCHours(previousHour.getUTCHours() - 1);
+
+  return timestamp > previousHour.getTime() / 1000;
 }
 
 export const convertLocalDateToTimestamp = (dateString: string): number => {

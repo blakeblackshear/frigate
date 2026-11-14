@@ -1,5 +1,5 @@
 import type { FieldPathList, FieldProps } from "@rjsf/utils";
-import yaml from "js-yaml";
+import { dump, load, YAMLException } from "js-yaml";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -16,7 +16,7 @@ function formatYaml(value: unknown): string {
     return "";
   }
   try {
-    return yaml.dump(value, { indent: 2, lineWidth: -1 }).trimEnd();
+    return dump(value, { indent: 2, lineWidth: -1 }).trimEnd();
   } catch {
     return "";
   }
@@ -31,7 +31,7 @@ function parseYaml(text: string): {
     return { value: {}, error: undefined };
   }
   try {
-    const parsed = yaml.load(trimmed);
+    const parsed = load(trimmed);
     if (
       typeof parsed !== "object" ||
       parsed === null ||
@@ -41,7 +41,7 @@ function parseYaml(text: string): {
     }
     return { value: parsed as Record<string, unknown>, error: undefined };
   } catch (e) {
-    const msg = e instanceof yaml.YAMLException ? e.reason : "Invalid YAML";
+    const msg = e instanceof YAMLException ? e.reason : "Invalid YAML";
     return { value: undefined, error: msg };
   }
 }

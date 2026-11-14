@@ -21,6 +21,7 @@
   },
   "zoomIn": "Zoom In",
   "zoomOut": "Zoom Out",
+  "subOnlyQuality": "Only low quality recordings are available in this time range",
   "events": {
     "label": "Events",
     "aria": "Select events",

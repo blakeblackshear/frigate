@@ -1,0 +1,61 @@
+{
+  "noRecordingsFoundForThisTime": "Nema pronađenih snimaka za ovaj vremenski period",
+  "noPreviewFound": "Pregled nije pronađen",
+  "noPreviewFoundFor": "Pregled nije pronađen za kameru {{cameraName}}",
+  "submitFrigatePlus": {
+    "title": "Pošalji ovaj kadar na Frigate+?",
+    "submit": "Pošalji",
+    "previewError": "Učitavanje predpregleda snimka nije uspelo. Snimak možda nije dostupan u ovom trenutku."
+  },
+  "livePlayerRequiredIOSVersion": "Za ovaj tip strima uživo potreban je iOS 17.1 ili noviji.",
+  "streamOffline": {
+    "title": "Strim je van mreže",
+    "desc": "Nijedan kadar nije primljen na strimu za detekciju <code>detect</code> kamere {{cameraName}}, proverite dnevnik grešaka"
+  },
+  "cameraOff": "Kamera je isključena",
+  "quality": {
+    "auto": "Automatski",
+    "autoLow": "Reprodukcija u niskom kvalitetu (ograničen protok podataka)",
+    "autoLowCodec": "Reprodukcija u niskom kvalitetu (izvorni kvalitet nije podržan u ovom veb-pregledaču)",
+    "autoLowSaveData": "Reprodukcija u niskom kvalitetu (ušteda podataka)",
+    "main": "Izvorni",
+    "sub": "Nizak",
+    "notSupportedBrowser": "Nije podržano u ovom veb-pregledaču",
+    "label": "Kvalitet",
+    "noAudio": "Nema zvuka",
+    "audioRate": "{{rate}} kHz audio",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Nema snimaka u ovom vremenskom opsegu"
+  },
+  "stats": {
+    "streamType": {
+      "title": "Tip strima:",
+      "short": "Tip"
+    },
+    "bandwidth": {
+      "title": "Propusni opseg:",
+      "short": "Propusni opseg"
+    },
+    "totalFrames": "Ukupno kadrova:",
+    "droppedFrames": {
+      "title": "Odbačeni kadrovi:",
+      "short": {
+        "title": "Odbačeno",
+        "value": "{{droppedFrames}} kadrova"
+      }
+    },
+    "decodedFrames": "Dekodirani kadrovi:",
+    "droppedFrameRate": "Brzina odbacivanja kadrova:",
+    "stream": "Strim:",
+    "streamAuto": "{{stream}} (automatski)"
+  },
+  "toast": {
+    "success": {
+      "submittedFrigatePlus": "Kadar je uspešno poslat na Frigate+"
+    },
+    "error": {
+      "submitFrigatePlusFailed": "Slanje kadra na Frigate+ nije uspelo",
+      "playRecordingsFailed": "Reprodukcija snimaka nije uspela (greška {{code}}): {{message}}"
+    }
+  }
+}

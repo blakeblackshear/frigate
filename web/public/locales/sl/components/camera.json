@@ -36,8 +36,7 @@
         },
         "audio": {
           "tips": {
-            "title": "Za ta tok mora kamera oddajati zvok, ki mora biti konfiguriran v go2rtc.",
-            "document": "Preberite dokumentacijo "
+            "title": "Za ta tok mora kamera oddajati zvok, ki mora biti konfiguriran v go2rtc."
           }
         },
         "label": "Nastavitve pretakanja kamere",

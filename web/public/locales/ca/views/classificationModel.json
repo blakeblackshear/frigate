@@ -213,7 +213,6 @@
     "modelNotReady": "El model no está preparat per entrenar",
     "noChanges": "No hi ha canvis al conjunt de dades des de l'última formació."
   },
-  "none": "Cap",
   "reclassifyImageAs": "Reclassifica la imatge com a:",
   "reclassifyImage": "Reclassifica la imatge",
   "disabled": "Desactivat"

@@ -357,6 +357,9 @@ class Embeddings:
 
         self.requestor.send_data(UPDATE_EMBEDDINGS_REINDEX_PROGRESS, totals)
 
+        # a single batch sends no progress, so the first message shows it nearly done
+        totals["processed_objects"] = 0
+
         events = (
             Event.select()
             .order_by(Event.start_time.desc())

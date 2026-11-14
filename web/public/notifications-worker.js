@@ -52,7 +52,7 @@ self.addEventListener("push", function (event) {
               }
             })
             .then(show)
-        : show(), // eslint-disable-line comma-dangle
+        : show(),
     );
   } else {
     // pass
@@ -77,7 +77,7 @@ self.addEventListener("notificationclick", (event) => {
                 "X-CSRF-TOKEN": 1,
               },
               body: JSON.stringify({ ids: [event.notification.data.id] }),
-            }), // eslint-disable-line comma-dangle
+            }),
           );
         }
         break;

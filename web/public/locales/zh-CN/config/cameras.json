@@ -46,6 +46,10 @@
         "enabled_in_config": {
             "label": "原始音频状态",
             "description": "指示原始静态配置文件中是否开启了音频检测。"
+        },
+        "labelmap": {
+            "label": "自定义音频 labelmap",
+            "description": "覆盖或重新映射条目以合并到标准音频标签映射中。"
         }
     },
     "audio_transcription": {
@@ -59,8 +63,8 @@
             "label": "原始转写状态"
         },
         "live_enabled": {
-            "label": "实时监控转写",
-            "description": "在接收到音频时开启实时监控持续转写。"
+            "label": "实时转录",
+            "description": "在接收到音频时进行实时流式转录。"
         }
     },
     "birdseye": {
@@ -70,13 +74,13 @@
             "label": "开启鸟瞰图",
             "description": "开启或关闭鸟瞰图功能。"
         },
-        "mode": {
-            "label": "追踪模式",
-            "description": "在鸟瞰视图中包含摄像头的模式有：“基于目标”、“基于画面变动”或“连续”。"
-        },
         "order": {
             "label": "排序位置",
             "description": "用于控制摄像头在鸟瞰视图布局中排序位置的数值。"
+        },
+        "modes": {
+            "label": "活动类型",
+            "description": "鸟瞰图中摄像头的活动类型。"
         }
     },
     "detect": {
@@ -96,7 +100,7 @@
         },
         "fps": {
             "label": "检测帧率",
-            "description": "检测时希望使用的帧率；数值越低，CPU 占用越小（推荐值为 5，仅在追踪极高速运动的目标时才设置更高数值，最高不建议超过 10）。"
+            "description": "检测时希望使用的帧率；数值越低，CPU 占用越小（推荐值为 5，仅在追踪移动速度极快的目标时才设置更高数值，最高不建议超过 10）。"
         },
         "min_initialized": {
             "label": "最小初始化帧数",
@@ -137,6 +141,10 @@
         "annotation_offset": {
             "label": "标记偏移量",
             "description": "检测标记的时间偏移量（毫秒），用于让时间轴上的检测框与录像画面更精准对齐；可设置为正数或负数。"
+        },
+        "scene": {
+            "label": "检测场景",
+            "description": "该摄像头所查看的环境，用于选择在其中运行的模型配置。设置为“默认”的摄像头将运行配置为“默认”场景的模型。"
         }
     },
     "face_recognition": {
@@ -180,6 +188,10 @@
             "record": {
                 "label": "录制输出参数",
                 "description": "录制功能视频流的默认输出参数。"
+            },
+            "record_sub": {
+                "label": "子流录制输出参数",
+                "description": "子流录制功能视频流输出参数。如果未设置，将使用录制流输出参数。"
             }
         },
         "retry_interval": {
@@ -188,11 +200,11 @@
         },
         "apple_compatibility": {
             "label": "Apple 兼容性",
-            "description": "录制 H.265 视频时启用 HEVC 标记，以提升对 Apple 设备播放的兼容性。"
+            "description": "录制 H.265 视频时开启 HEVC 标记，以提升对 Apple 设备播放的兼容性。"
         },
         "gpu": {
             "label": "GPU 索引",
-            "description": "在启用硬件加速时，默认使用的 GPU 索引。"
+            "description": "在开启硬件加速时，默认使用的 GPU 索引。"
         },
         "inputs": {
             "label": "摄像头输入视频流",
@@ -267,9 +279,13 @@
         },
         "enabled_in_config": {
             "label": "原始通知状态",
-            "description": "指示原始静态配置中是否启用了通知。"
+            "description": "指示原始静态配置中是否开启了通知。"
         },
-        "description": "为此摄像头启用和控制通知的设置。"
+        "description": "为此摄像头启用和控制通知的设置。",
+        "ttl": {
+            "label": "通知有效期",
+            "description": "设备无法连接时，推送服务会如何处理警报期间发送的通知。“立即”会马上投递，投递失败就放弃；“可靠”会在最长 30 秒内持续重试。警报结束时发送的通知始终会保留最多一小时。"
+        }
     },
     "live": {
         "label": "实时监控观看",
@@ -285,7 +301,31 @@
             "label": "实时监控质量",
             "description": "jsmpeg 流的编码质量（1 最高，31 最低）。"
         },
-        "description": "用于控制实时流选择、分辨率和质量的网页页面设置。"
+        "description": "用于控制实时流选择、分辨率和质量的网页页面设置。",
+        "transcode": {
+            "label": "转码流",
+            "description": "由 go2rtc 按需转码的低画质实时监控流。",
+            "enabled": {
+                "label": "开启转码流",
+                "description": "添加低画质实时监控流，在有人观看实时监控时由 go2rtc 实时转码生成。"
+            },
+            "source": {
+                "label": "源视频流",
+                "description": "go2rtc 流转码。默认为第一个实时监控流。"
+            },
+            "qualities": {
+                "label": "画质",
+                "description": "每个画质都增加一个转码流。",
+                "height": {
+                    "label": "高度",
+                    "description": "画面输出高度像素，宽度将遵循源宽高比自动计算。"
+                },
+                "bitrate": {
+                    "label": "码率",
+                    "description": "目标及最大视频码率（kbps）。"
+                }
+            }
+        }
     },
     "motion": {
         "label": "画面变动检测",
@@ -315,11 +355,11 @@
         },
         "delta_alpha": {
             "label": "变化量权重",
-            "description": "该值用于调节帧间差异计算时的混合比例，影响运动检测的灵敏度。"
+            "description": "该值用于调节帧间差异计算时的混合比例，影响画面变动检测的灵敏度。"
         },
         "frame_alpha": {
             "label": "背景更新速度",
-            "description": "该值在运动检测前对画面进行预处理，控制帧混合程度，影响后续检测的输入质量。"
+            "description": "该值在画面变动检测前对画面进行预处理，控制帧混合程度，影响后续检测的输入质量。"
         },
         "frame_height": {
             "label": "画面高度",
@@ -335,7 +375,7 @@
         },
         "enabled_in_config": {
             "label": "原始画面变动状态",
-            "description": "指示原始静态配置中是否启用了画面变动检测。"
+            "description": "指示原始静态配置中是否开启了画面变动检测。"
         },
         "raw_mask": {
             "label": "原始遮罩"
@@ -436,7 +476,7 @@
             },
             "enabled_in_config": {
                 "label": "原配置生成式 AI 状态",
-                "description": "表示在原始静态配置中是否已启用生成式 AI。"
+                "description": "表示在原始静态配置中是否已开启生成式 AI。"
             }
         }
     },
@@ -539,9 +579,57 @@
         },
         "enabled_in_config": {
             "label": "原始录像状态",
-            "description": "指示原始静态配置中是否启用了录像。"
+            "description": "指示原始静态配置中是否开启了录像。"
         },
-        "description": "此摄像头的录像和保留设置。"
+        "description": "此摄像头的录像和保留设置。",
+        "sub": {
+            "label": "子流录制中",
+            "description": "录制第二条低画质流的设置。",
+            "enabled": {
+                "label": "开启子流录制",
+                "description": "开启第二路低画质视频流的录制，以支持自适应画质回放并延长录像保留时间。"
+            },
+            "continuous": {
+                "label": "子视频流连续保留",
+                "description": "保留子视频流录制的天数，无论是否有追踪目标或画面变动。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留录制的天数。"
+                }
+            },
+            "motion": {
+                "label": "子视频流画面变动保留",
+                "description": "触发画面变动时保留子视频流录制的天数。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留录制的天数。"
+                }
+            },
+            "alerts": {
+                "label": "子视频流警报保留",
+                "description": "警报类子视频流录制的保留设置。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "保留检测事件录制的天数。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：全部（保留所有片段）、画面变动（保留画面变动片段）或 活动目标（保留画面中出现活动目标的片段）。"
+                }
+            },
+            "detections": {
+                "label": "子视频流检测保留",
+                "description": "子视频流中检测事件的录像保留设置。",
+                "days": {
+                    "label": "保留天数",
+                    "description": "检测事件的录像保留天数。"
+                },
+                "mode": {
+                    "label": "保留模式",
+                    "description": "保留模式：全部（保存所有片段）、画面变动（保存有画面变动的片段）或活动目标（保存有活动目标的片段）。"
+                }
+            }
+        }
     },
     "review": {
         "label": "核查",
@@ -562,7 +650,7 @@
             },
             "enabled_in_config": {
                 "label": "原始警报状态",
-                "description": "追踪原始静态配置中是否启用了警报。"
+                "description": "追踪原始静态配置中是否开启了警报。"
             },
             "cutoff_time": {
                 "label": "警报截止时间",
@@ -590,7 +678,7 @@
             },
             "enabled_in_config": {
                 "label": "原始检测状态",
-                "description": "追踪原始静态配置中是否启用了检测。"
+                "description": "追踪原始静态配置中是否开启了检测。"
             }
         },
         "genai": {
@@ -610,7 +698,7 @@
             },
             "image_source": {
                 "label": "核查图像来源",
-                "description": "发送给生成式 AI 的画面来源（“预览” 或 “录制”）；“录制”将使用更高质量的画面帧，但会消耗更多的 token。"
+                "description": "发送给生成式 AI 的画面来源（“预览”或“录制”）；“录制”会使用更高画质的画面帧，但会消耗更多 token。"
             },
             "additional_concerns": {
                 "label": "额外关注事项",
@@ -622,7 +710,7 @@
             },
             "enabled_in_config": {
                 "label": "原配置生成式 AI 状态",
-                "description": "记录在静态配置中最初是否已启用生成式 AI 核查功能。"
+                "description": "记录在静态配置中最初是否已开启生成式 AI 核查功能。"
             },
             "preferred_language": {
                 "label": "首选语言",
@@ -631,6 +719,14 @@
             "activity_context_prompt": {
                 "label": "活动上下文提示",
                 "description": "自定义提示词，用于说明可疑行为与非可疑行为的界定，为生成式 AI 生成摘要提供上下文依据。"
+            },
+            "frame_mode": {
+                "label": "画面帧模式",
+                "description": "向模型呈现画面帧的方式。“画面帧”会先发送提示词，再发送画面帧，适合能自行把握画面顺序的模型。“带标注的画面帧”会为每一帧添加标注，并穿插来自目标追踪的说明，适合容易跟丢重复或反向动作的模型。"
+            },
+            "response_style": {
+                "label": "回复风格",
+                "description": "生成核查描述时使用的写作风格预设。预设会调整面向用户的标题、摘要和场景描述的语气与详细程度；“默认”会保持内置提示词不变。"
             }
         },
         "description": "控制此摄像头的警报、检测和生成式 AI 核查总结的设置，这些设置会被界面与存储功能使用。"
@@ -640,10 +736,6 @@
         "enabled": {
             "label": "开启快照",
             "description": "开启或关闭此摄像头的快照保存。"
-        },
-        "clean_copy": {
-            "label": "保存干净副本",
-            "description": "除了带注释的快照外，还保存一份不带注释的干净快照副本。"
         },
         "timestamp": {
             "label": "时间戳叠加",
@@ -671,10 +763,6 @@
             "default": {
                 "label": "默认保留",
                 "description": "保留快照的默认天数。"
-            },
-            "mode": {
-                "label": "保留模式",
-                "description": "保留模式：all（保存所有片段）、motion（保存有动作的片段）或 active_objects（保存有活动目标的片段）。"
             },
             "objects": {
                 "label": "目标保留",
@@ -734,7 +822,7 @@
             },
             "enabled": {
                 "label": "开启此触发器",
-                "description": "启用或禁用此语义搜索触发器。"
+                "description": "开启或关闭此语义搜索触发器。"
             },
             "type": {
                 "label": "触发器类型",
@@ -795,15 +883,15 @@
             "description": "ONVIF 身份验证的密码。"
         },
         "tls_insecure": {
-            "label": "禁用 TLS 验证",
-            "description": "跳过 TLS 验证并禁用 ONVIF 的摘要认证（不安全；仅用于安全网络）。"
+            "label": "关闭 TLS 验证",
+            "description": "跳过 TLS 验证并关闭 ONVIF 的摘要认证（不安全；仅用于安全网络）。"
         },
         "autotracking": {
             "label": "自动追踪",
             "description": "使用 PTZ 摄像头移动自动追踪移动目标并使其保持在画面中心。",
             "enabled": {
                 "label": "开启自动追踪",
-                "description": "启用或禁用检测目标的自动 PTZ 摄像头追踪。"
+                "description": "开启或关闭检测目标的自动 PTZ 摄像头追踪。"
             },
             "calibrate_on_startup": {
                 "label": "启动时校准",
@@ -839,7 +927,7 @@
             },
             "enabled_in_config": {
                 "label": "原始自动追踪状态",
-                "description": "用于追踪配置中是否启用自动追踪的内部字段。"
+                "description": "用于追踪配置中是否开启自动追踪的内部字段。"
             }
         },
         "ignore_time_mismatch": {

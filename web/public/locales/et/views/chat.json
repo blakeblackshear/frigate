@@ -26,6 +26,12 @@
         "auto_scroll": {
             "title": "Automaatne kerimine",
             "desc": "Jälgi uusi sõnumeid kohe, kui need saabuvad."
+        },
+        "always_allow": {
+            "title": "Alati lubatud tegevused",
+            "desc": "Tegevused, mida Abiline võib käivitada ilma eelnevalt luba küsimata.",
+            "none": "Määramata",
+            "reset": "Lähtesta"
         }
     },
     "stats": {
@@ -68,5 +74,15 @@
     },
     "thinking": {
         "toggle": "Näita mõtlemise olekut või peida see"
+    },
+    "approval": {
+        "title": "Kas lubad „{{tool}}“ tarviku kasutamist?",
+        "desc": "Selle tegevusega muudad Frigate'is midagi. Enne kinnitamist vaata üksikasjad üle.",
+        "approve": "Kiida heaks",
+        "always_allow": "Luba alati",
+        "reject": "Lükka tagasi",
+        "approved": "Heakskiidetud",
+        "rejected": "Tagasilükatud",
+        "placeholder": "Jätkamaks kiida ootel tegevus heaks või lükka ta tagasi"
     }
 }

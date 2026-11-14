@@ -49,8 +49,6 @@
         "thresholdDesc": "Valorile mai mici detectează schimbări mai mici (1-255)",
         "minArea": "Arie minimă de schimbare",
         "minAreaDesc": "Dimensiunea minimă a unei singure regiuni în mișcare, ca procent din regiunea de interes",
-        "frameSkip": "Omitere cadre",
-        "frameSkipDesc": "Procesează fiecare al N-lea cadru. Setează asta la rata de cadre a camerei tale pentru a procesa un cadru pe secundă (ex. 5 pentru o cameră de 5 FPS, 30 pentru o cameră de 30 FPS). Valorile mai mari vor fi mai rapide, dar pot rata evenimente scurte de mișcare.",
         "maxResults": "Rezultate maxime",
         "maxResultsDesc": "Oprește-te după acest număr de marcaje de timp potrivite"
     },
@@ -61,7 +59,9 @@
         "invalidTimeRange": "Timpul de sfârșit trebuie să fie după timpul de început",
         "searchFailed": "Căutarea a eșuat: {{message}}",
         "polygonTooSmall": "Poligonul trebuie să aibă cel puțin 3 puncte",
-        "unknown": "Eroare necunoscută"
+        "unknown": "Eroare necunoscută",
+        "alreadyRunning": "Ai deja o căutare de mișcare în desfășurare. Așteaptă să se termine sau anuleaz-o.",
+        "tooManySearches": "Prea multe căutări de mișcare rulează. Încearcă din nou când se termină una."
     },
     "changePercentage": "{{percentage}}% schimbat",
     "metrics": {

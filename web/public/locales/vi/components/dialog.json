@@ -54,7 +54,6 @@
     "toast": {
       "error": {
         "endTimeMustAfterStartTime": "Thời gian kết thúc phải sau thời gian bắt đầu",
-        "noVaildTimeSelected": "Chưa chọn khoảng thời gian hợp lệ",
         "failed": "Không thể bắt đầu xuất: {{error}}"
       },
       "success": "Đã bắt đầu xuất dữ liệu thành công. Xem tệp trên trang xuất dữ liệu.",
@@ -71,8 +70,7 @@
     "restreaming": {
       "disabled": "Tính năng phát lại luồng không được bật cho camera này.",
       "desc": {
-        "title": "Thiết lập go2rtc để có thêm tùy chọn xem trực tiếp và âm thanh cho camera này.",
-        "readTheDocumentation": "Đọc tài liệu"
+        "title": "Thiết lập go2rtc để có thêm tùy chọn xem trực tiếp và âm thanh cho camera này."
       }
     },
     "showStats": {

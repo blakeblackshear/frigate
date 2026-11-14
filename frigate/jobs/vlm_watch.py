@@ -80,11 +80,12 @@ class VLMWatchRunner(threading.Thread):
         self._broadcast_status()
         self.conversation = [{"role": "system", "content": self._build_system_prompt()}]
 
-        max_end_time = self.job.start_time + self.job.max_duration_minutes * 60
+        # monotonic so a wall clock step can't end the job early or let it overrun
+        max_end_time = time.monotonic() + self.job.max_duration_minutes * 60
 
         try:
             while not self.cancel_event.is_set():
-                if time.time() > max_end_time:
+                if time.monotonic() > max_end_time:
                     logger.debug(
                         "VLM watch job %s timed out after %d minutes",
                         self.job.id,
@@ -236,18 +237,18 @@ class VLMWatchRunner(threading.Thread):
         queue backup, but the loop only exits once a match has been seen
         *and* the cooldown period has elapsed.
         """
-        now = time.time()
+        now = time.monotonic()
         deadline = now + max_wait
         use_cooldown = not self.job.zones
         earliest_wake = now + _DETECTION_COOLDOWN_WITHOUT_ZONE if use_cooldown else 0
         triggered = False
 
         while not self.cancel_event.is_set():
-            remaining = deadline - time.time()
+            remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break
 
-            if triggered and time.time() >= earliest_wake:
+            if triggered and time.monotonic() >= earliest_wake:
                 break
 
             result = self.detection_subscriber.check_for_update(
@@ -287,7 +288,7 @@ class VLMWatchRunner(threading.Thread):
                         "VLM watch job %s: detection match on %s, draining for %.0fs",
                         self.job.id,
                         self.job.camera,
-                        max(0, earliest_wake - time.time()),
+                        max(0, earliest_wake - time.monotonic()),
                     )
                     triggered = True
 

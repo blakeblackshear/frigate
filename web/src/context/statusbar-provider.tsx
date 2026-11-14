@@ -1,41 +1,13 @@
+import { useState, ReactNode, useCallback, useMemo } from "react";
 import {
-  createContext,
-  useState,
-  ReactNode,
-  useCallback,
-  useMemo,
-} from "react";
-
-export type StatusMessage = {
-  id: string;
-  text: string;
-  color?: string;
-  link?: string;
-};
-
-export type StatusMessagesState = {
-  [key: string]: StatusMessage[];
-};
+  StatusBarMessagesContext,
+  StatusMessagesState,
+} from "@/context/statusbar-context";
+import { ProblemSeverity } from "@/types/stats";
 
 type StatusBarMessagesProviderProps = {
   children: ReactNode;
 };
-
-type StatusBarMessagesContextValue = {
-  messages: StatusMessagesState;
-  addMessage: (
-    key: string,
-    message: string,
-    color?: string,
-    messageId?: string,
-    link?: string,
-  ) => string | undefined;
-  removeMessage: (key: string, messageId: string) => void;
-  clearMessages: (key: string) => void;
-};
-
-export const StatusBarMessagesContext =
-  createContext<StatusBarMessagesContextValue | null>(null);
 
 export function StatusBarMessagesProvider({
   children,
@@ -48,21 +20,21 @@ export function StatusBarMessagesProvider({
     (
       key: string,
       message: string,
-      color?: string,
+      severity: ProblemSeverity = "error",
       messageId?: string,
       link?: string,
     ) => {
       if (!key || !message) return;
 
-      const id = messageId ?? Date.now().toString();
-      const msgColor = color ?? "text-danger";
+      // the text is the fallback id, so repeating a message replaces it
+      const id = messageId ?? message;
 
       setMessagesState((prevMessages) => {
         const existingMessages = prevMessages[key] || [];
         // Check if a message with the same ID already exists
         const messageIndex = existingMessages.findIndex((msg) => msg.id === id);
 
-        const newMessage = { id, text: message, color: msgColor, link };
+        const newMessage = { id, text: message, severity, link };
 
         // If the message exists, replace it, otherwise add the new message
         let updatedMessages;

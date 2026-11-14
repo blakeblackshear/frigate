@@ -2,7 +2,6 @@
   "search": "بحث",
   "noExports": "لا يوجد تصديرات",
   "documentTitle": "التصدير - فرايجيت",
-  "deleteExport": "حذف التصدير",
   "deleteExport.desc": "هل أنت متأكد من رغبتك في حذف{{exportName}}؟",
   "editExport": {
     "title": "إعادة تسمية التصدير",

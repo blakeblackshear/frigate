@@ -32,7 +32,11 @@ type CameraInput = {
   input_args?: string;
 };
 
-async function installRoutes(page: Page, frontDoorInputs: CameraInput[]) {
+async function installRoutes(
+  page: Page,
+  frontDoorInputs: CameraInput[],
+  rawInputs: CameraInput[] = frontDoorInputs,
+) {
   const config = configFactory({
     go2rtc: { streams: GO2RTC_STREAMS },
     cameras: {
@@ -56,7 +60,7 @@ async function installRoutes(page: Page, frontDoorInputs: CameraInput[]) {
   await page.route("**/api/config/raw_paths", (route) =>
     route.fulfill({
       json: {
-        cameras: { front_door: { ffmpeg: { inputs: frontDoorInputs } } },
+        cameras: { front_door: { ffmpeg: { inputs: rawInputs } } },
         go2rtc: { streams: GO2RTC_STREAMS },
       },
     }),
@@ -199,5 +203,65 @@ test.describe("camera ffmpeg input source toggle @medium", () => {
     const input =
       payload?.config_data?.cameras?.front_door?.ffmpeg?.inputs?.[0];
     expect(input?.input_args).not.toBe("preset-rtsp-restream");
+  });
+
+  test("a masked path reveals its own saved path after an earlier input is deleted", async ({
+    frigateApp,
+  }) => {
+    const main = "rtsp://admin:mainpw@10.0.0.1:554/main";
+    const sub = "rtsp://admin:subpw@10.0.0.1:554/sub";
+    await installRoutes(
+      frigateApp.page,
+      [
+        { path: "rtsp://*:*@10.0.0.1:554/main", roles: ["record"] },
+        { path: "rtsp://*:*@10.0.0.1:554/sub", roles: ["detect"] },
+      ],
+      [
+        { path: main, roles: ["record"] },
+        { path: sub, roles: ["detect"] },
+      ],
+    );
+    await frigateApp.goto("/settings?page=cameraFfmpeg&camera=front_door");
+
+    const paths = frigateApp.page.getByRole("textbox", { name: "Input path" });
+    await expect(paths).toHaveCount(2);
+
+    await frigateApp.page
+      .getByRole("button", { name: "Delete" })
+      .first()
+      .click();
+    await expect(paths).toHaveCount(1);
+
+    await paths.focus();
+    await expect(paths).toHaveValue(sub);
+  });
+
+  test("inputs with the same masked path each reveal their own path by role", async ({
+    frigateApp,
+  }) => {
+    const record = "rtsp://admin:one@10.0.0.1:554/live";
+    const detect = "rtsp://viewer:two@10.0.0.1:554/live";
+    const masked = "rtsp://*:*@10.0.0.1:554/live";
+    await installRoutes(
+      frigateApp.page,
+      [
+        { path: masked, roles: ["record"] },
+        { path: masked, roles: ["detect"] },
+      ],
+      [
+        { path: record, roles: ["record"] },
+        { path: detect, roles: ["detect"] },
+      ],
+    );
+    await frigateApp.goto("/settings?page=cameraFfmpeg&camera=front_door");
+
+    const paths = frigateApp.page.getByRole("textbox", { name: "Input path" });
+    await expect(paths).toHaveCount(2);
+
+    await paths.nth(0).focus();
+    await expect(paths.nth(0)).toHaveValue(record);
+
+    await paths.nth(1).focus();
+    await expect(paths.nth(1)).toHaveValue(detect);
   });
 });

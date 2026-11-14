@@ -990,11 +990,21 @@ class FrameManager(ABC):
         pass
 
     @abstractmethod
-    def get(self, name: str, timeout_ms: int = 0):
+    def get(
+        self, name: str, shape: tuple[int, ...], frame_time: float | None = None
+    ) -> np.ndarray | None:
+        pass
+
+    @abstractmethod
+    def frame_times(self, camera: str) -> np.ndarray | None:
         pass
 
     @abstractmethod
     def close(self, name: str):
+        pass
+
+    @abstractmethod
+    def close_camera(self, camera: str) -> None:
         pass
 
     @abstractmethod
@@ -1079,7 +1089,56 @@ class SharedMemoryFrameManager(FrameManager):
             logger.info(f"the file {name} not found")
             return None
 
-    def get(self, name: str, shape) -> np.ndarray | None:
+    def frame_times(self, camera: str) -> np.ndarray | None:
+        """Per-slot write times for a camera's frame ring, stamped by capture."""
+        buf = self.write(f"{camera}_frame_times")
+
+        if buf is None:
+            return None
+
+        return np.ndarray((len(buf) // 8,), dtype=np.float64, buffer=buf)
+
+    def _holds(self, name: str, frame_time: float) -> bool:
+        camera, _, index = name.rpartition("_frame")
+        times = self.frame_times(camera)
+        return (
+            times is not None
+            and index.isdigit()
+            and int(index) < len(times)
+            and times[int(index)] == frame_time
+        )
+
+    def get(
+        self, name: str, shape: tuple[int, ...], frame_time: float | None = None
+    ) -> np.ndarray | None:
+        """Map a frame slot as an array without copying it.
+
+        The array points into shared memory, so it is only valid until the next
+        close(), delete(), or get() of the same name, and capture overwrites its
+        pixels once the ring wraps back to this slot. Copy it to keep it longer.
+
+        Args:
+            name: Slot name, such as front_door_frame3
+            shape: Array shape, which must match the slot's size
+            frame_time: Time of the frame the caller was told is in the slot
+
+        Returns:
+            The frame, or None when the slot is missing, the wrong size, or holds
+            a different frame than frame_time
+        """
+        if frame_time is not None and not self._holds(name, frame_time):
+            # a ledger left over from a same-size recreate of the camera looks
+            # the same as a lapped slot, so reopen it by name once
+            camera = name.rpartition("_frame")[0]
+            self.close(f"{camera}_frame_times")
+
+            if not self._holds(name, frame_time):
+                logger.debug("%s no longer holds the frame from %s", name, frame_time)
+                return None
+
+            # the ledger was replaced, so every cached slot maps the old segments
+            self.close_camera(camera)
+
         try:
             required = int(np.prod(shape))
             shm = self.shm_store.get(name)
@@ -1109,6 +1168,14 @@ class SharedMemoryFrameManager(FrameManager):
         if name in self.shm_store:
             self.shm_store[name].close()
             del self.shm_store[name]
+
+    def close_camera(self, camera: str) -> None:
+        """Drop every cached mapping for a camera's frame ring and ledger."""
+        for name in list(self.shm_store):
+            owner, _, suffix = name.rpartition("_frame")
+
+            if owner == camera and (suffix.isdigit() or suffix == "_times"):
+                self.close(name)
 
     def delete(self, name: str):
         if name in self.shm_store:
@@ -1158,7 +1225,7 @@ def add_mask(mask: str, mask_img: np.ndarray):
     # masks and zones are saved as relative coordinates
     # we know if any points are > 1 then it is using the
     # old native resolution coordinates
-    if any(x > "1.0" for x in points):
+    if any(float(x) > 1.0 for x in points):
         raise Exception("add mask expects relative coordinates only")
 
     contour = np.array(
@@ -1241,9 +1308,42 @@ def get_image_from_recording(
     return image_data
 
 
-def get_histogram(image, x_min, y_min, x_max, y_max):
-    image_bgr = cv2.cvtColor(image, cv2.COLOR_YUV2BGR_I420)
-    image_bgr = image_bgr[y_min:y_max, x_min:x_max]
+def get_histogram(
+    image: np.ndarray, x_min: int, y_min: int, x_max: int, y_max: int
+) -> np.ndarray:
+    """Return a normalized 8x8x8 BGR histogram of a box in an I420 frame.
+
+    The box is cropped from each YUV plane before color conversion, so the
+    cost depends on the box size rather than the frame size. Box edges are
+    widened to even coordinates to keep chroma alignment.
+    """
+    height = image.shape[0] * 2 // 3
+    width = image.shape[1]
+    x_min = max(0, x_min // 2 * 2)
+    y_min = max(0, y_min // 2 * 2)
+    x_max = min(width, (x_max + 1) // 2 * 2)
+    y_max = min(height, (y_max + 1) // 2 * 2)
+
+    if x_max - x_min < 2 or y_max - y_min < 2:
+        return np.zeros(512, np.float32)
+
+    flat = image.reshape(-1)
+    y_size = height * width
+    uv_size = y_size // 4
+    y_plane = flat[:y_size].reshape(height, width)
+    u_plane = flat[y_size : y_size + uv_size].reshape(height // 2, width // 2)
+    v_plane = flat[y_size + uv_size : y_size + 2 * uv_size].reshape(
+        height // 2, width // 2
+    )
+
+    crop = np.concatenate(
+        (
+            y_plane[y_min:y_max, x_min:x_max].ravel(),
+            u_plane[y_min // 2 : y_max // 2, x_min // 2 : x_max // 2].ravel(),
+            v_plane[y_min // 2 : y_max // 2, x_min // 2 : x_max // 2].ravel(),
+        )
+    ).reshape((y_max - y_min) * 3 // 2, x_max - x_min)
+    image_bgr = cv2.cvtColor(crop, cv2.COLOR_YUV2BGR_I420)
 
     hist = cv2.calcHist(
         [image_bgr], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256]

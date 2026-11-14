@@ -36,7 +36,7 @@
       "trainingFailed": "El entrenamiento del modelo ha fallado. Revisa los registros de Frigate para más detalles.",
       "updateModelFailed": "Fallo al actualizar modelo: {{errorMessage}}",
       "trainingFailedToStart": "No se pudo iniciar el entrenamiento del modelo: {{errorMessage}}",
-      "renameCategoryFailed": "Fallo al renombrar la clase:{{errorMessage}}",
+      "renameCategoryFailed": "Error al cambiar el nombre de la clase: {{errorMessage}}",
       "reclassifyFailed": "Error al reclasificar la imagen: {{errorMessage}}"
     }
   },
@@ -79,7 +79,7 @@
     "noNewImages": "No hay imágenes nuevas para entrenar. Clasifica antes más imágenes del conjunto de datos."
   },
   "details": {
-    "scoreInfo": "La puntuación representa la confianza promedio de la clasificación en todas las detecciones de este objeto.",
+    "scoreInfo": "La puntuación representa el nivel medio de confianza de la clasificación en todas las detecciones de este objeto.",
     "unknown": "Desconocido",
     "none": "Ninguno"
   },

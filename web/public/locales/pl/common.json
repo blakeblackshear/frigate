@@ -51,15 +51,6 @@
       "12hour": "MM/dd h:mm:ssa",
       "24hour": "d MMM HH:mm:ss"
     },
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "%b %-d, %I:%M %p",
-      "24hour": "%b %-d, %H:%M"
-    },
-    "formattedTimestampWithYear": {
-      "12hour": "%b %-d %Y, %I:%M %p",
-      "24hour": "%b %-d %Y, %H:%M"
-    },
-    "formattedTimestampOnlyMonthAndDay": "%b %-d",
     "second_one": "{{time}} sekunda",
     "second_few": "{{time}} sekundy",
     "second_many": "{{time}} sekund",
@@ -106,7 +97,7 @@
       "kbps": "kB/s",
       "mbps": "MB/s",
       "gbps": "GB/s",
-      "kbph": "kB/godz",
+      "kbph": "kB/h",
       "mbph": "MB/h",
       "gbph": "GB/h"
     }
@@ -168,11 +159,15 @@
     "savingAll": "Zapisywanie wszystkich…",
     "undoAll": "Cofnij wszystko",
     "retry": "Powtórz",
-    "resetToGlobal": "Przywróć ustawienie globalne"
+    "resetToGlobal": "Przywróć ustawienia globalne",
+    "expand": "Rozwiń",
+    "collapse": "Zwiń",
+    "reload": "Odśwież",
+    "clear": "Wyczyść"
   },
   "menu": {
     "system": "System",
-    "systemMetrics": "Metryki systemowe",
+    "systemMetrics": "Stan systemu i statystyki",
     "configuration": "Konfiguracja",
     "systemLogs": "Logi systemowe",
     "languages": "Języki",
@@ -238,7 +233,6 @@
       "label": "Motyw",
       "blue": "Niebieski",
       "green": "Zielony",
-      "contrast": "Wysoki kontrast",
       "default": "Domyślny",
       "red": "Czerwony",
       "nord": "Nordycki",
@@ -338,5 +332,36 @@
   "validation_errors": "Błędy walidacji",
   "credentialField": {
     "savedPlaceholder": "Zapisano — pozostaw puste, aby zachować bieżącą wartość"
+  },
+  "error": {
+    "title": "Strona nie odpowiada",
+    "desc": "Wystąpił nieoczekiwany błąd. Zazwyczaj wystarczy odświeżyć stronę. Jeśli problem będzie się powtarzaċ skopiuj szczegóły błędu i utwórz dyskusję na GitHubie.",
+    "staleTitle": "Wymagane odświeżenie",
+    "copyDetails": "Kopiuj szczegóły",
+    "partial": "Część interfejsu przestała działać.",
+    "copyFailed": "Nie udało się skopiować szczegółów do schowka",
+    "staleDesc": "Nie udało się załadować części interfejsu. Zwykle oznacza to, że Frigate został zaktualizowany, gdy ta karta była otwarta. Odśwież stronę, aby wczytać nową wersję."
+  },
+  "commandMenu": {
+    "action": {
+      "toggleTheme": "Przełącz jasny i ciemny motyw"
+    },
+    "empty": "Brak wyników",
+    "hint": "{{key}} lub / otwórz, Enter — wykonaj",
+    "placeholder": "Szukaj stron, kamer, ustawień i akcji",
+    "section": {
+      "actions": "Akcje",
+      "cameraGroups": "Grupy kamer",
+      "cameras": "Kamery",
+      "settings": "Ustawienia",
+      "pages": "Strony",
+      "recent": "Ostatnie"
+    },
+    "camera": {
+      "live": "Na żywo",
+      "review": "Przegląd"
+    },
+    "title": "Menu poleceń",
+    "description": "Szukaj stron, kamer, ustawień i akcji"
   }
 }

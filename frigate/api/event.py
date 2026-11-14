@@ -199,18 +199,14 @@ def events(
             sub_label_clauses.append(Event.sub_label.is_null())
 
         for label in filtered_sub_labels:
-            lowered = label.lower()
-            sub_label_clauses.append(
-                fn.LOWER(Event.sub_label.cast("text")) == lowered
-            )  # include exact matches (case-insensitive)
+            # SQLite LOWER() only folds ASCII, so lower both sides in SQL to
+            # keep non-ASCII names matching exactly
+            stored = fn.LOWER(Event.sub_label.cast("text"))
+            sub_label_clauses.append(stored == fn.LOWER(label))
 
-            # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
-            sub_label_clauses.append(
-                fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*"
-            )
-            sub_label_clauses.append(
-                fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*"
-            )
+            # include this label when part of a list
+            sub_label_clauses.append(stored % fn.LOWER(f"*{label},*"))
+            sub_label_clauses.append(stored % fn.LOWER(f"*, {label}*"))
 
         sub_label_clause = reduce(operator.or_, sub_label_clauses)
         clauses.append(sub_label_clause)
@@ -291,12 +287,12 @@ def events(
             clauses.append(
                 reduce(
                     operator.or_,
-                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    [(start_hour_fun >= time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            clauses.append(start_hour_fun > time_after)
+            clauses.append(start_hour_fun >= time_after)
             clauses.append(start_hour_fun < time_before)
 
     if has_clip is not None:
@@ -391,7 +387,9 @@ def events_explore(
     limit: int = 10,
     allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
 ):
-    # get distinct labels for all events
+    if not allowed_cameras:
+        return JSONResponse(content=[])
+
     distinct_labels = (
         Event.select(Event.label)
         .where(Event.camera << allowed_cameras)
@@ -401,13 +399,31 @@ def events_explore(
 
     label_counts = {}
 
+    explore_columns = (
+        Event.id,
+        Event.camera,
+        Event.label,
+        Event.sub_label,
+        Event.zones,
+        Event.start_time,
+        Event.end_time,
+        Event.has_clip,
+        Event.has_snapshot,
+        Event.plus_id,
+        Event.retain_indefinitely,
+        Event.top_score,
+        Event.false_positive,
+        Event.box,
+        Event.data,
+    )
+
     def event_generator():
         for label_obj in distinct_labels.iterator():
             label = label_obj.label
 
             # get most recent events for this label
             label_events = (
-                Event.select()
+                Event.select(*explore_columns)
                 .where((Event.label == label) & (Event.camera << allowed_cameras))
                 .order_by(Event.start_time.desc())
                 .limit(limit)
@@ -489,21 +505,17 @@ async def event_ids(ids: str, request: Request):
             status_code=400,
         )
 
-    for event_id in ids:
-        try:
-            event = Event.get(Event.id == event_id)
-            await require_camera_access(event.camera, request=request)
-        except DoesNotExist:
-            # we should not fail the entire request if an event is not found
-            continue
-
     try:
-        events = Event.select().where(Event.id << ids).dicts().iterator()
-        return JSONResponse(list(events))
+        events = list(Event.select().where(Event.id << ids).dicts().iterator())
     except Exception:
         return JSONResponse(
             content=({"success": False, "message": "Events not found"}), status_code=400
         )
+
+    for event in events:
+        await require_camera_access(event["camera"], request=request)
+
+    return JSONResponse(events)
 
 
 @router.get(
@@ -617,18 +629,14 @@ def events_search(
             sub_label_clauses.append(Event.sub_label.is_null())
 
         for label in filtered_sub_labels:
-            lowered = label.lower()
-            sub_label_clauses.append(
-                fn.LOWER(Event.sub_label.cast("text")) == lowered
-            )  # include exact matches (case-insensitive)
+            # SQLite LOWER() only folds ASCII, so lower both sides in SQL to
+            # keep non-ASCII names matching exactly
+            stored = fn.LOWER(Event.sub_label.cast("text"))
+            sub_label_clauses.append(stored == fn.LOWER(label))
 
-            # include this label when part of a list (LIKE is case-insensitive in sqlite for ASCII)
-            sub_label_clauses.append(
-                fn.LOWER(Event.sub_label.cast("text")) % f"*{lowered},*"
-            )
-            sub_label_clauses.append(
-                fn.LOWER(Event.sub_label.cast("text")) % f"*, {lowered}*"
-            )
+            # include this label when part of a list
+            sub_label_clauses.append(stored % fn.LOWER(f"*{label},*"))
+            sub_label_clauses.append(stored % fn.LOWER(f"*, {label}*"))
 
         event_filters.append(reduce(operator.or_, sub_label_clauses))
 
@@ -733,12 +741,12 @@ def events_search(
             event_filters.append(
                 reduce(
                     operator.or_,
-                    [(start_hour_fun > time_after), (start_hour_fun < time_before)],
+                    [(start_hour_fun >= time_after), (start_hour_fun < time_before)],
                 )
             )
         # all other cases should be and operator
         else:
-            event_filters.append(start_hour_fun > time_after)
+            event_filters.append(start_hour_fun >= time_after)
             event_filters.append(start_hour_fun < time_before)
 
     # Perform semantic search
@@ -1322,7 +1330,7 @@ async def set_sub_label(
     if request.app.detected_frames_processor:
         tracked_obj: TrackedObject = None
 
-        for state in request.app.detected_frames_processor.camera_states.values():
+        for state in request.app.detected_frames_processor.get_camera_states():
             tracked_obj = state.tracked_objects.get(event_id)
 
             if tracked_obj is not None:
@@ -1381,7 +1389,7 @@ async def set_plate(
     if request.app.detected_frames_processor:
         tracked_obj: TrackedObject = None
 
-        for state in request.app.detected_frames_processor.camera_states.values():
+        for state in request.app.detected_frames_processor.get_camera_states():
             tracked_obj = state.tracked_objects.get(event_id)
 
             if tracked_obj is not None:

@@ -1,13 +1,8 @@
 {
-  "selectItem": "Selecciona {{item}}",
   "details": {
-    "subLabelScore": "Puntuació de la subetiqueta",
     "scoreInfo": "La puntuació de la subetiqueta és la puntuació ponderada de totes la confidència dels rostres reconeguts, de manera que pot ser diferent de la puntuació que es mostra a la instantània.",
     "unknown": "Desconegut",
-    "person": "Persona",
-    "faceDesc": "Detalls de l'objecte que ha generat aquest rostre",
-    "timestamp": "Marca temporal",
-    "face": "Detalls del rostre"
+    "timestamp": "Marca temporal"
   },
   "collections": "Col·leccions",
   "train": {
@@ -32,8 +27,6 @@
     "desc": "Carregar una imatge per escanejar els rostres i incloure per a {{pageToggle}}"
   },
   "createFaceLibrary": {
-    "title": "Crear Col·lecció",
-    "desc": "Crear una nova col·lecció",
     "new": "Crear un nou rostre",
     "nextSteps": "Per establir una base sòlida:<li>Utilitza la pestanya Entrenament per seleccionar i entrenar imatges de cada persona detectada.</li><li>Centra’t en imatges frontals per obtenir millors resultats; evita imatges d’entrenament amb rostres en angle.</li></ul>"
   },
@@ -45,7 +38,6 @@
       "uploadFace": "Pugeu una imatge de {{name}} que mostra la seva cara des d'un angle frontal. La imatge no necessita ser retallada a la seva cara."
     }
   },
-  "selectFace": "Seleccionar rostre",
   "deleteFaceLibrary": {
     "desc": "Estàs segur que vols eliminar la col·lecció {{name}}? Això eliminarà permanentment tots els rostres associats.",
     "title": "Suprimir nom"
@@ -103,9 +95,7 @@
     "desc_many": "Estàs segur que vols suprimir {{count}} rostres? Aquesta acció no es pot desfer.",
     "desc_other": "Estàs segur que vols suprimir {{count}} rostres? Aquesta acció no es pot desfer."
   },
-  "pixels": "{{area}}px",
   "trainFace": "Entrenar rostre",
-  "readTheDocs": "Llegir la documentació",
   "trainFaceAs": "Entrenar rostre com a:",
   "reclassifyFaceAs": "Reclassifica la cara com a:",
   "reclassifyFace": "Reclassifica la cara"

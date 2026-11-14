@@ -19,7 +19,7 @@ export function useSessionPersistence<S>(
         window.sessionStorage.setItem(key, JSON.stringify(defaultValue));
         return defaultValue;
       }
-    } catch (err) {
+    } catch {
       return defaultValue;
     }
   });
@@ -29,7 +29,7 @@ export function useSessionPersistence<S>(
       try {
         window.sessionStorage.setItem(key, JSON.stringify(newValue));
         // eslint-disable-next-line no-empty
-      } catch (err) {}
+      } catch {}
       setStoredValue(newValue);
     },
     [key],

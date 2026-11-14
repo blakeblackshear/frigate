@@ -6,13 +6,8 @@
     "nameCannotContainHash": "O nome não pode conter #."
   },
   "details": {
-    "person": "Pessoa",
-    "face": "Detalhes do rosto",
-    "faceDesc": "Detalhes do objeto encontrado que gerou esta cara",
     "timestamp": "Carimbo de hora",
-    "confidence": "Confiança",
     "scoreInfo": "A pontuação da subetiqueta é a pontuação ponderada de todas as confianças de rostos reconhecidos, portanto, ela pode ser diferente da pontuação exibida na captura de imagem.",
-    "subLabelScore": "Pontuação da Subetiqueta",
     "unknown": "Desconhecido"
   },
   "documentTitle": "Biblioteca de rostos - Frigate",
@@ -21,8 +16,6 @@
     "desc": "Carregue uma imagem para procurar rostos e incluir em {{pageToggle}}"
   },
   "createFaceLibrary": {
-    "title": "Criar coleção",
-    "desc": "Criar uma nova coleção",
     "new": "Criar novo rosto",
     "nextSteps": "Para construir uma base sólida:<li>Use a aba Treinar para selecionar e treinar em imagens para cada pessoa detectada.</li><li>Concentre-se em imagens diretas para obter melhores resultados; evite imagens de treino que capturem rostos em ângulo.</li></ul>"
   },
@@ -31,8 +24,6 @@
     "title": "Reconhecimentos Recentes",
     "empty": "Não há tentativas recentes de reconhecimento facial"
   },
-  "selectItem": "Selecionar {{item}}",
-  "selectFace": "Selecionar rosto",
   "deleteFaceLibrary": {
     "title": "Excluir nome",
     "desc": "Tem certeza de que deseja excluir a coleção {{name}}? Isso excluirá permanentemente todos os rostos associados."
@@ -78,7 +69,6 @@
       "renameFaceFailed": "Falha ao renomear o rosto: {{errorMessage}}"
     }
   },
-  "readTheDocs": "Leia a documentação",
   "trainFaceAs": "Treinar rosto como:",
   "steps": {
     "faceName": "Digite o Nome do Rosto",
@@ -99,6 +89,5 @@
     "desc_many": "Tem a certeza que pretende apagar {{count}} caras? Esta ação não pode ser revertida.",
     "desc_other": "Tem a certeza que pretende apagar {{count}} caras? Esta ação não pode ser revertida."
   },
-  "nofaces": "Não tem caras disponíveis",
-  "pixels": "{{area}}px"
+  "nofaces": "Não tem caras disponíveis"
 }

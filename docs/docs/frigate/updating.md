@@ -60,7 +60,7 @@ If you’re running Frigate via Docker (recommended method), follow these steps:
      ```bash
      docker logs frigate
      ```
-   - Visit the Frigate Web UI (default: `http://<your-ip>:5000`) to confirm the new version is running. The version number is displayed at the top of the System Metrics page.
+   - Visit the Frigate Web UI (default: `http://<your-ip>:5000`) to confirm the new version is running. The version number is displayed at the top of the Health and Metrics page.
 
 ### Notes
 

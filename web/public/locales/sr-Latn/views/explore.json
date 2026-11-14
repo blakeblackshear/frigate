@@ -1,0 +1,267 @@
+{
+  "documentTitle": "Istraži - Frigate",
+  "generativeAI": "Generativni AI",
+  "exploreMore": "Istražite više objekata tipa {{label}}",
+  "exploreIsUnavailable": {
+    "title": "Opcija „Istraži“ je nedostupna",
+    "embeddingsReindexing": {
+      "context": "Opcija „Istraži“ se može koristiti nakon što se završi ponovno indeksiranje ugnježdenih podataka praćenih objekata.",
+      "startingUp": "Pokretanje…",
+      "estimatedTime": "Procenjeno preostalo vreme:",
+      "finishingShortly": "Uskoro se završava",
+      "step": {
+        "thumbnailsEmbedded": "Sličice su ugnježdeni: ",
+        "descriptionsEmbedded": "Opisi su ugnježdeni: ",
+        "trackedObjectsProcessed": "Praćeni objekti su obrađeni: "
+      }
+    },
+    "downloadingModels": {
+      "context": "Frigate preuzima neophodne modele ugnježdenih podataka kako bi podržao funkciju semantičke pretrage. Ovo može potrajati nekoliko minuta u zavisnosti od brzine vaše mrežne veze.",
+      "setup": {
+        "visionModel": "Vizuelni model",
+        "visionModelFeatureExtractor": "Ekstraktor funkcija vizuelnog modela",
+        "textModel": "Tekstualni model",
+        "textTokenizer": "Tokenizator teksta"
+      },
+      "tips": {
+        "context": "Možda ćete želeti da ponovo indeksirate ugnježdene podatke (embeddings) vaših praćenih objekata kada se modeli preuzmu."
+      },
+      "error": "Došlo je do greške. Proverite Frigate dnevnike."
+    }
+  },
+  "trackedObjectDetails": "Detalji o praćenom objektu",
+  "type": {
+    "details": "detalji",
+    "snapshot": "snimak",
+    "thumbnail": "sličica",
+    "video": "video",
+    "tracking_details": "detalji praćenja"
+  },
+  "trackingDetails": {
+    "title": "Detalji praćenja",
+    "noImageFound": "Nije pronađena slika za ovu vremensku oznaku.",
+    "createObjectMask": "Kreiraj masku objekta",
+    "adjustAnnotationSettings": "Prilagodite podešavanja označavanja",
+    "scrollViewTips": "Kliknite da biste videli značajne trenutke u životnom ciklusu ovog objekta.",
+    "autoTrackingTips": "Pozicije okvira za detekciju biće neprecizne za kamere sa automatskim praćenjem.",
+    "count": "{{first}} od {{second}}",
+    "trackedPoint": "Praćena tačka",
+    "lifecycleItemDesc": {
+      "visible": "detektovano {{label}}",
+      "entered_zone": "{{label}} je ušao u {{zones}}",
+      "active": "{{label}} je postao aktivan",
+      "stationary": "{{label}} je postao stacionaran",
+      "attribute": {
+        "faceOrLicense_plate": "detektovan atribut {{attribute}} za {{label}}",
+        "other": "{{label}} je prepoznat kao {{attribute}}"
+      },
+      "gone": "{{label}} je otišao",
+      "heard": "registrovan zvuk {{label}}",
+      "external": "detektovan {{label}}",
+      "header": {
+        "zones": "Zone",
+        "ratio": "Odnos",
+        "area": "Površina",
+        "score": "Rezultat",
+        "computedScore": "Izračunati rezultat",
+        "topScore": "Najbolji rezultat",
+        "toggleAdvancedScores": "Uključi/isključi napredne rezultate"
+      }
+    },
+    "annotationSettings": {
+      "title": "Podešavanja označavanja",
+      "showAllZones": {
+        "title": "Prikaži sve zone",
+        "desc": "Uvek prikaži zone na kadrovima gde su objekti ušli u zonu."
+      },
+      "offset": {
+        "label": "Pomeraj označavanja",
+        "desc": "Ovi podaci dolaze sa strima za detekciju vaše kamere, ali se prikazuju preko slika sa strima za snimanje. Malo je verovatno da su ova dva strima savršeno sinhronizovana. Kao rezultat toga, okvir za detekciju i video snimak se neće savršeno poklapati. Možete koristiti ovo podešavanje da pomerite anotacije unapred ili unazad u vremenu kako biste ih bolje uskladili sa snimljenim materijalom.",
+        "millisecondsToOffset": "Milisekunde za koje se pomera anotacija detekcije. <em>Podrazumevano: 0</em>",
+        "tips": "Smanjite vrednost ako je reprodukcija videa ispred okvira i tačaka putanje, a povećajte vrednost ako reprodukcija videa kasni za njima. Ova vrednost može biti negativna.",
+        "toast": {
+          "success": "Pomeraj označavanja za {{camera}} je sačuvan u konfiguracionoj datoteci."
+        }
+      }
+    },
+    "carousel": {
+      "previous": "Prethodni slajd",
+      "next": "Sledeći slajd"
+    }
+  },
+  "details": {
+    "item": {
+      "title": "Detalji stavke pregleda",
+      "desc": "Detalji stavke pregleda",
+      "button": {
+        "share": "Podeli ovu stavku pregleda",
+        "viewInExplore": "Prikaži u opciji „Istraži“"
+      },
+      "tips": {
+        "mismatch_one": "{{count}} nedostupan objekat je detektovan i uključen u ovu stavku pregleda. Ti objekti ili nisu ispunili uslove za upozorenje ili detekciju, ili su već očišćeni/obrisani.",
+        "mismatch_few": "{{count}} nedostupana objekta su detektovana i uključena u ovu stavku pregleda. Ti objekti ili nisu ispunili uslove za upozorenje ili detekciju, ili su već očišćeni/obrisani.",
+        "mismatch_other": "{{count}} nedostupanih objekata je detektovano i uključeno u ovu stavku pregleda. Ti objekti ili nisu ispunili uslove za upozorenje ili detekciju, ili su već očišćeni/obrisani.",
+        "hasMissingObjects": "Prilagodite vašu konfiguraciju ako želite da Frigate čuva praćene objekte za sledeće oznake: <em>{{objects}}</em>"
+      },
+      "toast": {
+        "success": {
+          "regenerate": "Zahtevan je novi opis od provajdera {{provider}}. U zavisnosti od brzine vašeg provajdera, ponovno generisanje opisa može potrajati.",
+          "updatedSublabel": "Podoznaka je uspešno ažurirana.",
+          "updatedLPR": "Registarska tablica je uspešno ažurirana.",
+          "updatedAttributes": "Atributi su uspešno ažurirani.",
+          "audioTranscription": "Uspešno je zatražena transkripcija zvuka. U zavisnosti od brzine vašeg Frigate servera, transkripcija može potrajati."
+        },
+        "error": {
+          "regenerate": "Neuspelo pozivanje provajdera {{provider}} za novi opis: {{errorMessage}}",
+          "updatedSublabelFailed": "Neuspelo ažuriranje podoznake: {{errorMessage}}",
+          "updatedLPRFailed": "Neuspelo ažuriranje registarske tablice: {{errorMessage}}",
+          "updatedAttributesFailed": "Neuspelo ažuriranje atributa: {{errorMessage}}",
+          "audioTranscription": "Neuspeli zahtev za transkripciju zvuka: {{errorMessage}}"
+        }
+      }
+    },
+    "label": "Oznaka",
+    "editSubLabel": {
+      "title": "Izmeni podoznaku",
+      "desc": "Unesite novu podoznaku za: {{label}}",
+      "descNoLabel": "Unesite novu podoznaku za ovaj praćeni objekat"
+    },
+    "editLPR": {
+      "title": "Izmeni registarsku tablicu",
+      "desc": "Unesite novu vrednost registarske tablice za: {{label}}",
+      "descNoLabel": "Unesite novu vrednost registarske tablice za ovaj praćeni objekat"
+    },
+    "editAttributes": {
+      "title": "Izmeni atribute",
+      "desc": "Izaberite atribute klasifikacije za: {{label}}"
+    },
+    "snapshotScore": {
+      "label": "Rezultat snimka"
+    },
+    "topScore": {
+      "label": "Najviši rezultat",
+      "info": "Najviši rezultat predstavlja najveću srednju vrednost (medijanu) rezultata za praćeni objekat, pa se može razlikovati od rezultata prikazanog na sličici u rezultatima pretrage."
+    },
+    "score": {
+      "label": "Rezultat"
+    },
+    "recognizedLicensePlate": "Prepoznata registarska tablica",
+    "attributes": "Atributi klasifikacije",
+    "estimatedSpeed": "Procenjena brzina",
+    "objects": "Objekti",
+    "camera": "Kamera",
+    "zones": "Zone",
+    "timestamp": "Vremenska oznaka",
+    "button": {
+      "findSimilar": "Pronađi slično",
+      "regenerate": {
+        "title": "Ponovo generiši",
+        "label": "Ponovo generiši opis praćenog objekta"
+      }
+    },
+    "description": {
+      "label": "Opis",
+      "placeholder": "Opis praćenog objekta",
+      "aiTips": "Frigate neće zatražiti opis od vašeg provajdera generativne veštačke inteligencije dok se životni ciklus praćenog objekta ne završi."
+    },
+    "expandRegenerationMenu": "Proširi meni za ponovno generisanje",
+    "regenerateFromSnapshot": "Ponovo generiši iz snimka",
+    "regenerateFromThumbnails": "Ponovo generiši iz sličica",
+    "tips": {
+      "descriptionSaved": "Opis je uspešno sačuvan",
+      "saveDescriptionFailed": "Neuspelo ažuriranje opisa: {{errorMessage}}"
+    },
+    "title": {
+      "label": "Naslov"
+    },
+    "scoreInfo": "Informacije o rezultatu"
+  },
+  "itemMenu": {
+    "downloadVideo": {
+      "label": "Preuzmi video",
+      "aria": "Preuzmi video"
+    },
+    "downloadSnapshot": {
+      "label": "Preuzmi snimak",
+      "aria": "Preuzmi snimak"
+    },
+    "downloadCleanSnapshot": {
+      "label": "Preuzmi čist snimak",
+      "aria": "Preuzmi čist snimak"
+    },
+    "viewTrackingDetails": {
+      "label": "Prikaži detalje praćenja",
+      "aria": "Prikaži detalje praćenja"
+    },
+    "findSimilar": {
+      "label": "Pronađi slično",
+      "aria": "Pronađi slične praćene objekte"
+    },
+    "addTrigger": {
+      "label": "Dodaj okidač",
+      "aria": "Dodaj okidač za ovaj praćeni objekat"
+    },
+    "audioTranscription": {
+      "label": "Transkribuj",
+      "aria": "Zatraži transkripciju zvuka"
+    },
+    "submitToPlus": {
+      "label": "Pošalji u Frigate+",
+      "aria": "Pošalji u Frigate Plus"
+    },
+    "viewInHistory": {
+      "label": "Prikaži u istoriji",
+      "aria": "Prikaži u istoriji"
+    },
+    "deleteTrackedObject": {
+      "label": "Obriši ovaj praćeni objekat"
+    },
+    "showObjectDetails": {
+      "label": "Prikaži putanju objekta"
+    },
+    "hideObjectDetails": {
+      "label": "Sakrij putanju objekta"
+    },
+    "debugReplay": {
+      "label": "Ponovna reprodukcija za otklanjanje grešaka",
+      "aria": "Prikaži ovaj praćeni objekat u prikazu ponovne reprodukcije za otklanjanje grešaka"
+    },
+    "more": {
+      "aria": "Više"
+    }
+  },
+  "dialog": {
+    "confirmDelete": {
+      "title": "Potvrdi brisanje",
+      "desc": "Brisanjem ovog praćenog objekta uklanjaju se snimak, svi sačuvani vektorski prikazi i svi povezani unosi detalja praćenja. Snimljeni video-zapis ovog praćenog objekta u prikazu Istorija <em>NEĆE</em> biti obrisan.<br/><br/>Da li ste sigurni da želite da nastavite?"
+    },
+    "toast": {
+      "error": "Greška pri brisanju ovog praćenog objekta: {{errorMessage}}"
+    }
+  },
+  "noTrackedObjects": "Nije pronađen nijedan praćeni objekat",
+  "fetchingTrackedObjectsFailed": "Greška pri preuzimanju praćenih objekata: {{errorMessage}}",
+  "trackedObjectsCount_one": "{{count}} praćeni objekat ",
+  "trackedObjectsCount_few": "{{count}} praćena objekta ",
+  "trackedObjectsCount_other": "{{count}} praćenih objekata ",
+  "searchResult": {
+    "tooltip": "Podudaranje: {{type}} ({{confidence}}%",
+    "previousTrackedObject": "Prethodni praćeni objekat",
+    "nextTrackedObject": "Sledeći praćeni objekat",
+    "deleteTrackedObject": {
+      "toast": {
+        "success": "Praćeni objekat je uspešno obrisan.",
+        "error": "Neuspelo brisanje praćenog objekta: {{errorMessage}}"
+      }
+    }
+  },
+  "aiAnalysis": {
+    "title": "AI analiza"
+  },
+  "concerns": {
+    "label": "Upozorenja"
+  },
+  "objectLifecycle": {
+    "noImageFound": "Nije pronađena slika za ovaj praćeni objekat."
+  }
+}

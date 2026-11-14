@@ -8,7 +8,7 @@
       "savingError": "儲存設定檔時出錯"
     },
     "success": {
-      "copyToClipboard": "已複製設定製剪貼簿。"
+      "copyToClipboard": "已複製設定至剪貼簿。"
     }
   },
   "saveOnly": "僅儲存",

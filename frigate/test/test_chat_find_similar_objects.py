@@ -7,7 +7,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-from playhouse.sqlite_ext import SqliteExtDatabase
+from peewee import SqliteDatabase
 
 from frigate.api.chat import (
     _execute_find_similar_objects,
@@ -98,7 +98,7 @@ class TestExecuteFindSimilarObjects(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
         self.tmp.close()
-        self.db = SqliteExtDatabase(self.tmp.name)
+        self.db = SqliteDatabase(self.tmp.name)
         Event.bind(self.db, bind_refs=False, bind_backrefs=False)
         self.db.connect()
         self.db.create_tables([Event])

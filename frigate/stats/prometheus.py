@@ -5,7 +5,6 @@ from typing import Any
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from prometheus_client.core import (
     REGISTRY,
-    CounterMetricFamily,
     GaugeMetricFamily,
     InfoMetricFamily,
 )
@@ -472,9 +471,9 @@ class CustomCollector:
         yield storage_total
         yield storage_used
 
-        camera_events = CounterMetricFamily(
+        camera_events = GaugeMetricFamily(
             "frigate_camera_events",
-            "Count of camera events since exporter started",
+            "Current number of events stored in the database per camera and label",
             labels=["camera", "label"],
         )
 

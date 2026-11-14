@@ -30,6 +30,8 @@ export type HiddenFieldEntry = string | ((ctx: HiddenFieldContext) => string[]);
 export type ConfigFormContext = {
   level?: "global" | "camera";
   cameraName?: string;
+  /** Config section being edited, e.g. "audio" or "review". */
+  sectionPath?: string;
   globalValue?: JsonValue;
   cameraValue?: JsonValue;
   overrides?: JsonValue;
@@ -37,6 +39,8 @@ export type ConfigFormContext = {
   extraHasChanges?: boolean;
   setExtraHasChanges?: (hasChanges: boolean) => void;
   formData?: JsonObject;
+  /** Key order of each ordered map, so reorders re-render fields */
+  orderedMapsKeyOrder?: string[][];
   pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,

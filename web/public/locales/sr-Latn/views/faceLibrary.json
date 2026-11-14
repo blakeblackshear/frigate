@@ -1,0 +1,12 @@
+{
+  "details": {
+    "unknown": "Nepoznato",
+    "timestamp": "Vremenska oznaka"
+  },
+  "description": {
+    "invalidName": "Neispravan naziv. Nazivi mogu sadržati samo slova, brojeve, razmake, apostrofe, donje crte i crtice."
+  },
+  "train": {
+    "titleShort": "Nedavno"
+  }
+}

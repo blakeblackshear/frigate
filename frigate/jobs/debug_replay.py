@@ -16,17 +16,21 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Optional, cast
 
-from peewee import ModelSelect
-
 from frigate.config import FrigateConfig
 from frigate.config.camera.updater import CameraConfigUpdatePublisher
-from frigate.const import REPLAY_CAMERA_PREFIX, REPLAY_DIR
+from frigate.const import (
+    REPLAY_CAMERA_PREFIX,
+    REPLAY_DIR,
+    STREAM_TYPE_MAIN,
+    STREAM_TYPE_SUB,
+)
 from frigate.jobs.export import JobStatePublisher
 from frigate.jobs.job import Job
 from frigate.jobs.manager import job_is_running, set_current_job
-from frigate.models import Export, Recordings
+from frigate.models import Export
 from frigate.types import JobStatusTypesEnum
 from frigate.util.ffmpeg import run_ffmpeg_with_progress
+from frigate.util.recording_coverage import resolve_coverage
 
 if TYPE_CHECKING:
     from frigate.debug_replay import DebugReplayManager
@@ -93,28 +97,6 @@ class DebugReplayJob(Job):
         }
 
 
-def query_recordings(source_camera: str, start_ts: float, end_ts: float) -> ModelSelect:
-    """Return the Recordings query for the time range.
-
-    Module-level so tests can patch it without instantiating a runner.
-    """
-    query = (
-        Recordings.select(
-            Recordings.path,
-            Recordings.start_time,
-            Recordings.end_time,
-        )
-        .where(
-            Recordings.start_time.between(start_ts, end_ts)
-            | Recordings.end_time.between(start_ts, end_ts)
-            | ((start_ts > Recordings.start_time) & (end_ts < Recordings.end_time))
-        )
-        .where(Recordings.camera == source_camera)
-        .order_by(Recordings.start_time.asc())
-    )
-    return cast(ModelSelect, query)
-
-
 class NoRecordingsError(ValueError):
     """Raised when no recordings exist in the requested time range."""
 
@@ -159,7 +141,8 @@ class RecordingDebugReplaySource(DebugReplaySource):
 
     Feeds ffmpeg the internal VOD endpoint so segments with mismatched
     SPS/PPS (e.g. across day/night transitions) stitch cleanly via HLS
-    discontinuities.
+    discontinuities. The playlist is pinned to one stream because the
+    stream-copied clip cannot change codec or resolution mid-file.
     """
 
     def __init__(
@@ -173,6 +156,7 @@ class RecordingDebugReplaySource(DebugReplaySource):
         self._start_ts = start_ts
         self._end_ts = end_ts
         self._internal_port = internal_port
+        self._stream_type = STREAM_TYPE_MAIN
 
     @property
     def source_camera(self) -> str:
@@ -190,15 +174,28 @@ class RecordingDebugReplaySource(DebugReplaySource):
         if self._end_ts <= self._start_ts:
             raise ValueError("End time must be after start time")
 
-        if not query_recordings(self._camera, self._start_ts, self._end_ts).count():
-            raise NoRecordingsError(
-                f"No recordings found for camera '{self._camera}' in the specified time range"
-            )
+        # the VOD resolver decides what the pinned playlist serves, so it
+        # also decides the stream; a row merely touching the range has no
+        # interval and must not win
+        intervals = resolve_coverage(self._camera, self._start_ts, self._end_ts)
+
+        if any(interval.main for interval in intervals):
+            self._stream_type = STREAM_TYPE_MAIN
+            return
+
+        if any(interval.sub for interval in intervals):
+            self._stream_type = STREAM_TYPE_SUB
+            return
+
+        raise NoRecordingsError(
+            f"No recordings found for camera '{self._camera}' in the specified time range"
+        )
 
     def ffmpeg_input_args(self, working_dir: str) -> list[str]:
         playlist_url = (
             f"http://127.0.0.1:{self._internal_port}/vod/{self._camera}"
-            f"/start/{self._start_ts}/end/{self._end_ts}/index.m3u8"
+            f"/{self._stream_type}/start/{self._start_ts}/end/{self._end_ts}"
+            "/index.m3u8"
         )
         return [
             "-protocol_whitelist",
@@ -216,11 +213,11 @@ class ExportDebugReplaySource(DebugReplaySource):
     """
 
     def __init__(self, export: Export, duration: float) -> None:
-        self._camera = cast(str, export.camera)
+        self._camera = export.camera
         # Export.date is declared DateTimeField but Frigate writes raw unix
         # timestamps to the column.
         self._start_ts = float(cast(Any, export.date))
-        self._video_path = cast(str, export.video_path)
+        self._video_path = export.video_path
         self._duration = duration
 
     @property

@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { MinimapBounds, Tick, Timestamp } from "./segment-metadata";
 import { useMotionSegmentUtils } from "@/hooks/use-motion-segment-utils";
 import { isMobile } from "react-device-detect";
+import { useTranslation } from "react-i18next";
 import useTapUtils from "@/hooks/use-tap-utils";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ type MotionSegmentProps = {
   firstHalfMotionValue: number;
   secondHalfMotionValue: number;
   hasRecording?: boolean;
+  isSubOnly?: boolean;
   prevIsNoRecording?: boolean;
   nextIsNoRecording?: boolean;
   motionOnly: boolean;
@@ -36,6 +38,7 @@ export function MotionSegment({
   firstHalfMotionValue,
   secondHalfMotionValue,
   hasRecording,
+  isSubOnly,
   prevIsNoRecording,
   nextIsNoRecording,
   motionOnly,
@@ -47,6 +50,7 @@ export function MotionSegment({
   dense,
   alwaysShowMotionLine = false,
 }: MotionSegmentProps) {
+  const { t } = useTranslation("views/events");
   const severityType = "all";
   const { getSeverity, getReviewed, displaySeverityType } =
     useEventSegmentUtils(segmentDuration, events, severityType);
@@ -194,8 +198,10 @@ export function MotionSegment({
             segmentClasses,
             severity[0] && "bg-gradient-to-r",
             severity[0] && severityColorsBg[severity[0]],
+            isSubOnly && "bg-background/50",
             hasRecording == false && "bg-background",
           )}
+          title={isSubOnly ? t("subOnlyQuality") : undefined}
           onClick={segmentClick}
           onTouchEnd={(event) => handleTouchStart(event, segmentClick)}
         >

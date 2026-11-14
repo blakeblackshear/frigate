@@ -55,9 +55,13 @@
         },
         "num_threads": {
             "label": "Hilos de detección",
-            "description": "Número de hilos a usar para procesamiento de detección de audio."
+            "description": "Número de hilos a usar en el procesamiento de detección de audio."
         },
-        "description": "Ajustes para la detección de eventos basada en audio en todas las cámaras; se pueden sobrescribir por cámara."
+        "description": "Ajustes para la detección de eventos basada en audio en todas las cámaras; se pueden sobrescribir por cámara.",
+        "labelmap": {
+            "label": "Personalización del mapa de etiquetas de audio",
+            "description": "Anula o reasigna entradas para fusionarlas con el mapa de etiquetas de audio estándar."
+        }
     },
     "auth": {
         "label": "Autenticación",
@@ -103,7 +107,7 @@
             "description": "Número de iteraciones PBKDF2-SHA256 que se utilizarán al generar el hash de las contraseñas de los usuarios."
         },
         "roles": {
-            "label": "Asignaciones de roles",
+            "label": "Mapeo de roles",
             "description": "Asigna roles a listas de cámaras. Una lista vacía concede acceso a todas las cámaras para ese rol."
         }
     },
@@ -316,185 +320,6 @@
             }
         }
     },
-    "detectors": {
-        "deepstack": {
-            "description": "Detector DeepStack/CodeProject.AI que envía imágenes a una API HTTP remota de DeepStack para la inferencia. No recomendado.",
-            "api_url": {
-                "description": "La URL de la API de DeepStack.",
-                "label": "URL de la API de DeepStack"
-            },
-            "api_timeout": {
-                "label": "Tiempo de espera de la API de DeepStack (en segundos)",
-                "description": "Tiempo máximo permitido para una solicitud a la API de DeepStack."
-            },
-            "api_key": {
-                "label": "Clave de API de DeepStack (si es necesaria)",
-                "description": "Clave API opcional para servicios autenticados de DeepStack."
-            },
-            "label": "DeepStack"
-        },
-        "type": {
-            "label": "Tipo"
-        },
-        "label": "Detector de hardware",
-        "cpu": {
-            "label": "CPU",
-            "num_threads": {
-                "label": "Número de hilos para detección",
-                "description": "Número de hilos usados para inferencia basada en CPU."
-            },
-            "description": "Detector TFLite de CPU que ejecuta modelos de TensorFlow Lite en la CPU del host sin aceleración por hardware. No recomendado."
-        },
-        "axengine": {
-            "label": "Motor AX NPU",
-            "description": "Detector NPU AXERA AX650N/AX8850N que ejecuta archivos .axmodel compilados mediante el runtime AXEngine."
-        },
-        "teflon_tfl": {
-            "description": "Detector de delegados Teflon para TFLite, que utiliza la biblioteca de delegados Mesa Teflon para acelerar la inferencia en las GPU compatibles.",
-            "label": "Teflon"
-        },
-        "synaptics": {
-            "description": "Detector NPU de Synaptics para modelos en formato .synap, utilizando el Synap SDK en hardware de Synaptics.",
-            "label": "Synaptics"
-        },
-        "zmq": {
-            "description": "Detector ZMQ IPC que descarga la inferencia a un proceso externo a través de un punto de conexión IPC de ZeroMQ.",
-            "label": "IPC de ZMQ",
-            "endpoint": {
-                "label": "Endpoint IPC de ZMQ",
-                "description": "Endpoint ZMQ al que conectarse."
-            },
-            "request_timeout_ms": {
-                "label": "Tiempo de espera de solicitud ZMQ en milisegundos",
-                "description": "Tiempo de espera para solicitudes ZMQ en milisegundos."
-            },
-            "linger_ms": {
-                "label": "Persistencia del socket ZMQ en milisegundos",
-                "description": "Periodo de persistencia del socket en milisegundos."
-            }
-        },
-        "hailo8l": {
-            "description": "Detector Hailo-8/Hailo-8L que utiliza modelos HEF y el SDK HailoRT para la inferencia en hardware Hailo.",
-            "label": "Hailo-8/Hailo-8L",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia Hailo (p. ej., 'PCIe', 'M.2')."
-            }
-        },
-        "onnx": {
-            "description": "Detector ONNX para ejecutar modelos ONNX; utilizará los backends de aceleración disponibles (CUDA/ROCm/OpenVINO) cuando estén disponibles.",
-            "label": "ONNX",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia ONNX (p. ej., 'AUTO', 'CPU', 'GPU')."
-            }
-        },
-        "description": "Configuración para detectores de objetos (backends de CPU, GPU y ONNX) y cualquier ajuste del modelo específico del detector.",
-        "openvino": {
-            "description": "Detector OpenVINO para CPU AMD e Intel, GPU Intel y hardware VPU Intel.",
-            "label": "OpenVINO",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia OpenVINO (p. ej., 'CPU', 'GPU', 'NPU')."
-            }
-        },
-        "tensorrt": {
-            "description": "Detector TensorRT para dispositivos Nvidia Jetson que utiliza motores TensorRT serializados para una inferencia acelerada.",
-            "label": "TensorRT",
-            "device": {
-                "label": "Índice de dispositivo GPU",
-                "description": "Índice del dispositivo GPU que se usará."
-            }
-        },
-        "degirum": {
-            "description": "Detector DeGirum para ejecutar modelos a través de la nube de DeGirum o servicios de inferencia local.",
-            "label": "DeGirum",
-            "location": {
-                "label": "Ubicación de inferencia",
-                "description": "Ubicación del motor de inferencia DeGirum (p. ej., '@cloud', '127.0.0.1')."
-            },
-            "zoo": {
-                "label": "Repositorio de modelos",
-                "description": "Ruta o URL al repositorio de modelos de DeGirum."
-            },
-            "token": {
-                "label": "Token de DeGirum Cloud",
-                "description": "Token para acceder a DeGirum Cloud."
-            }
-        },
-        "rknn": {
-            "description": "Detector RKNN para NPUs de Rockchip; ejecuta modelos compilados para RKNN en hardware de Rockchip.",
-            "label": "RKNN",
-            "num_cores": {
-                "label": "Número de núcleos NPU que se usarán.",
-                "description": "Número de núcleos NPU que se usarán (0 para automático)."
-            }
-        },
-        "model": {
-            "label": "Configuración de modelo específica del detector",
-            "description": "Opciones de configuración de modelo específicas del detector (ruta, tamaño de entrada, etc.).",
-            "path": {
-                "label": "Ruta del modelo de detector de objetos personalizado",
-                "description": "Ruta a un archivo de modelo de detección personalizado (o plus://<model_id> para modelos de Frigate+)."
-            },
-            "labelmap_path": {
-                "label": "Mapa de etiquetas para detector de objetos personalizado",
-                "description": "Ruta a un archivo labelmap que asigna clases numéricas a etiquetas de texto para el detector."
-            },
-            "width": {
-                "label": "Anchura de entrada del modelo de detección de objetos",
-                "description": "Anchura del tensor de entrada del modelo en píxeles."
-            },
-            "height": {
-                "label": "Altura de entrada del modelo de detección de objetos",
-                "description": "Altura del tensor de entrada del modelo en píxeles."
-            },
-            "labelmap": {
-                "label": "Personalización del mapa de etiquetas",
-                "description": "Sobrescrituras o entradas de reasignación que se fusionarán con el mapa de etiquetas estándar."
-            },
-            "attributes_map": {
-                "label": "Mapa de etiquetas de objetos a sus etiquetas de atributos",
-                "description": "Asignación de etiquetas de objetos a etiquetas de atributos usada para adjuntar metadatos (por ejemplo, 'car' -> ['license_plate'])."
-            },
-            "input_tensor": {
-                "label": "Forma del tensor de entrada del modelo",
-                "description": "Formato de tensor esperado por el modelo: 'nhwc' o 'nchw'."
-            },
-            "input_pixel_format": {
-                "label": "Formato de color de píxeles de entrada del modelo",
-                "description": "Espacio de color de píxeles esperado por el modelo: 'rgb', 'bgr' o 'yuv'."
-            },
-            "input_dtype": {
-                "label": "Tipo D de entrada del modelo",
-                "description": "Tipo de datos del tensor de entrada del modelo (por ejemplo, 'float32')."
-            },
-            "model_type": {
-                "label": "Tipo de modelo de detección de objetos",
-                "description": "Tipo de arquitectura del modelo del detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilizado por algunos detectores para su optimización."
-            }
-        },
-        "model_path": {
-            "label": "Ruta de modelo específica del detector",
-            "description": "Ruta del archivo binario del modelo detector si lo requiere el detector elegido."
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "Detector EdgeTPU que ejecuta modelos TensorFlow Lite compilados para Coral EdgeTPU mediante el delegado EdgeTPU.",
-            "device": {
-                "label": "Tipo de dispositivo",
-                "description": "Dispositivo que se usará para la inferencia EdgeTPU (p. ej., 'usb', 'pci')."
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "Detector MemryX MX3 que ejecuta modelos DFP compilados en aceleradores MemryX.",
-            "device": {
-                "label": "Ruta del dispositivo",
-                "description": "Dispositivo que se usará para la inferencia MemryX (p. ej., 'PCIe')."
-            }
-        }
-    },
     "database": {
         "label": "Base de datos",
         "description": "Configuración de la base de datos SQLite utilizada por Frigate para almacenar los metadatos de los objetos rastreados y las grabaciones.",
@@ -610,7 +435,7 @@
             "description": "Carácter usado para separar varios valores proporcionados en las cabeceras del proxy."
         },
         "default_role": {
-            "description": "Rol predeterminado asignado a los usuarios autenticados mediante proxy cuando no se aplica ninguna asignación de roles.",
+            "description": "Rol predeterminado asignado a los usuarios autenticados mediante proxy cuando no se aplica ningún mapeo de roles. Establézcalo en ‘none’ para denegar el acceso a los usuarios sin mapear.",
             "label": "Rol predeterminado"
         },
         "description": "Configuración para integrar Frigate detrás de un proxy inverso que transmite encabezados de usuario autenticados.",
@@ -685,25 +510,17 @@
         "time_format": {
             "label": "Formato de hora",
             "description": "Formato de hora que se usará en la interfaz (browser, 12hour o 24hour)."
-        },
-        "date_style": {
-            "label": "Estilo de fecha",
-            "description": "Estilo de fecha que se usará en la interfaz (full, long, medium, short)."
-        },
-        "time_style": {
-            "label": "Estilo de hora",
-            "description": "Estilo de hora que se usará en la interfaz (full, long, medium, short)."
         }
     },
     "audio_transcription": {
         "description": "Configuración para la transcripción de audio en directo y de voz utilizada para eventos y subtítulos en directo.",
         "language": {
-            "description": "Código de idioma utilizado para la transcripción/traducción (por ejemplo, 'es' para Español). Consulte https://whisper-api.com/docs/languages/ para ver los códigos de idioma compatibles.",
+            "description": "Código de idioma utilizado para la transcripción/traducción (por ejemplo, 'es' para español), o 'auto' para permitir que el modelo lo detecte automáticamente. Consulte https://whisper-api.com/docs/languages/ para ver los códigos de idioma compatibles.",
             "label": "Idioma de transcripción"
         },
         "enabled": {
             "description": "Habilitar o deshabilitar la transcripción automática de audio para todas las cámaras; puede anularse por cámara.",
-            "label": "Habilitar transcripción de audio"
+            "label": "Habilitar la transcripción de audio"
         },
         "label": "Transcripción de audio",
         "live_enabled": {
@@ -846,7 +663,7 @@
             "label": "FPS de detección"
         },
         "min_initialized": {
-            "description": "Número de detecciones consecutivas requeridas antes de crear un objeto rastreado. Auméntelo para reducir las inicializaciones falsas. El valor predeterminado es los FPS divididos por 2.",
+            "description": "Número de detecciones consecutivas necesarias antes de crear un objeto rastreado. Aumente este valor para reducir las inicializaciones falsas. El valor predeterminado es fps dividido entre 2.",
             "label": "Fotogramas mínimos de inicialización"
         },
         "height": {
@@ -898,6 +715,10 @@
         "annotation_offset": {
             "label": "Desplazamiento de anotaciones",
             "description": "Milisegundos para desplazar las anotaciones de detección y alinear mejor los cuadros delimitadores de la línea de tiempo con las grabaciones; puede ser positivo o negativo."
+        },
+        "scene": {
+            "label": "Detectar escena",
+            "description": "El entorno que enfoca esta cámara se utiliza para seleccionar cuál de los modelos configurados se ejecuta en ella. Las cámaras que se dejan en \"predeterminado\" ejecutan el modelo configurado con una escena \"predeterminada\"."
         }
     },
     "record": {
@@ -1001,7 +822,55 @@
             "label": "Estado de grabación original",
             "description": "Indica si la grabación estaba habilitada en la configuración estática original."
         },
-        "description": "Ajustes de grabación y retención aplicados a las cámaras salvo que se sobrescriban por cámara."
+        "description": "Ajustes de grabación y retención aplicados a las cámaras salvo que se sobrescriban por cámara.",
+        "sub": {
+            "continuous": {
+                "days": {
+                    "label": "Días de retención",
+                    "description": "Días a retener las grabaciones."
+                },
+                "label": "Retención continua de subflujo",
+                "description": "Número de días que se conservarán las grabaciones de subflujos independientemente de los objetos rastreados o del movimiento."
+            },
+            "motion": {
+                "days": {
+                    "label": "Días de retención",
+                    "description": "Días de conservación de las grabaciones."
+                },
+                "label": "Retención de movimiento del substream",
+                "description": "Número de días que se conservarán las grabaciones del substream activadas por movimiento."
+            },
+            "label": "Grabación de subflujo",
+            "description": "Configuración para grabar una segunda transmisión de menor calidad.",
+            "enabled": {
+                "label": "Habilitar la grabación de subflujos",
+                "description": "Permite grabar una segunda transmisión de menor calidad para una reproducción con calidad adaptativa y una retención prolongada."
+            },
+            "alerts": {
+                "label": "Retención de alertas del substream",
+                "description": "Configuración de conservación de las grabaciones de alertas del substream.",
+                "days": {
+                    "label": "Días de conservación",
+                    "description": "Número de días que se conservarán las grabaciones de eventos de detección."
+                },
+                "mode": {
+                    "label": "Modo de rentención",
+                    "description": "Modo de conservación: all (guardar todos los segmentos), motion (guardar los segmentos con movimiento) o active_objects (guardar los segmentos con objetos activos)."
+                }
+            },
+            "detections": {
+                "label": "Conservación de detecciones del substream",
+                "description": "Configuración de conservación de las grabaciones de detecciones del substream.",
+                "days": {
+                    "label": "Días de retención",
+                    "description": "Número de días que se conservarán las grabaciones de eventos de detección."
+                },
+                "mode": {
+                    "label": "Modo retención",
+                    "description": "Modo de conservación: all (guardar todos los segmentos), motion (guardar los segmentos con movimiento) o active_objects (guardar los segmentos con objetos activos)."
+                }
+            }
+        }
     },
     "camera_ui": {
         "dashboard": {
@@ -1033,6 +902,30 @@
         "quality": {
             "label": "Calidad en directo",
             "description": "Calidad de codificación para el flujo jsmpeg (1 la más alta, 31 la más baja)."
+        },
+        "transcode": {
+            "label": "Transmisiones transcodificadas",
+            "description": "Transmisiones en directo de menor calidad transcodificadas bajo demanda por go2rtc.",
+            "enabled": {
+                "label": "Habilitar transmisiones transcodificadas",
+                "description": "Agregar transmisiones en vivo de menor calidad que go2rtc transcodifica en tiempo real mientras alguien las está viendo."
+            },
+            "source": {
+                "label": "Flujo de origen",
+                "description": "Transmisión go2rtc para transcodificar. Por defecto, se utiliza la primera transmisión en vivo."
+            },
+            "qualities": {
+                "label": "Cualidad",
+                "description": "Se añade una transmisión transcodificada por cada nivel de calidad.",
+                "height": {
+                    "label": "Altura",
+                    "description": "La altura de salida se muestra en píxeles; el ancho conserva la relación de aspecto de la fuente."
+                },
+                "bitrate": {
+                    "label": "Tasa de bits",
+                    "description": "Tasa de bits de vídeo objetivo y máxima en kbps."
+                }
+            }
         }
     },
     "semantic_search": {
@@ -1174,6 +1067,14 @@
             "preferred_language": {
                 "label": "Idioma preferido",
                 "description": "Idioma preferido que se solicitará al proveedor de GenAI para las respuestas generadas."
+            },
+            "frame_mode": {
+                "label": "Modo de fotogramas",
+                "description": "Cómo se presentan los fotogramas al modelo. ‘frames’ envía primero el prompt y, a continuación, los fotogramas, lo que resulta adecuado para modelos capaces de seguir bien una secuencia por sí mismos. ‘annotated_frames’ etiqueta cada fotograma e intercala notas obtenidas del seguimiento de objetos, lo que ayuda a los modelos que pueden perder el hilo de actividades que se repiten o cambian de dirección."
+            },
+            "response_style": {
+                "label": "Estilo responsivo",
+                "description": "Estilo de redacción predefinido para las descripciones de revisión generadas. Los ajustes predefinidos modifican el tono y el nivel de detalle del título, el resumen y la descripción de la escena que se muestran al usuario; ‘default’ mantiene sin cambios el prompt integrado."
             }
         },
         "label": "Revisión",
@@ -1202,10 +1103,6 @@
             "label": "Habilitar Birdseye",
             "description": "Habilita o deshabilita la función de vista Birdseye."
         },
-        "mode": {
-            "label": "Modo de seguimiento",
-            "description": "Modo para incluir cámaras en Birdseye: 'objects', 'motion' o 'continuous'."
-        },
         "order": {
             "label": "Posición",
             "description": "Posición numérica que controla el orden de la cámara en el diseño de Birdseye."
@@ -1229,6 +1126,10 @@
         "idle_heartbeat_fps": {
             "label": "FPS de latido en reposo",
             "description": "Fotogramas por segundo para reenviar el último fotograma compuesto de Birdseye en reposo; establécelo en 0 para deshabilitarlo."
+        },
+        "modes": {
+            "label": "Tipos de actividad",
+            "description": "Tipos de actividades que incluyen cámaras en Birdseye."
         }
     },
     "ffmpeg": {
@@ -1250,6 +1151,10 @@
             "record": {
                 "label": "Argumentos de salida de grabación",
                 "description": "Argumentos de salida predeterminados para los flujos con rol de grabación."
+            },
+            "record_sub": {
+                "label": "Argumentos de salida del registro de subflujo",
+                "description": "Argumentos de salida para flujos de rol record_sub. Los argumentos de salida de registro se utilizan cuando esto no está configurado."
             }
         },
         "description": "Configuración de FFmpeg, incluyendo la ruta del binario, argumentos, opciones de aceleración por hardware y argumentos de salida por rol.",
@@ -1324,7 +1229,7 @@
         },
         "roles": {
             "label": "Roles",
-            "description": "Roles de GenAI (chat, descriptions, embeddings); un proveedor por rol."
+            "description": "Roles de GenAI (chat, descriptions, embeddings, transcribe); un proveedor por rol. De forma predeterminada, solo se conceden los roles de chat, descriptions y embeddings; el rol de transcribe debe indicarse explícitamente."
         },
         "provider_options": {
             "label": "Opciones del proveedor",
@@ -1444,10 +1349,6 @@
                 "label": "Retención predeterminada",
                 "description": "Número predeterminado de días durante los que conservar instantáneas."
             },
-            "mode": {
-                "label": "Modo de retención",
-                "description": "Modo de retención: all (guarda todos los segmentos), motion (guarda segmentos con movimiento) o active_objects (guarda segmentos con objetos activos)."
-            },
             "objects": {
                 "label": "Retención por objeto",
                 "description": "Sobrescrituras por objeto para los días de retención de instantáneas."
@@ -1509,50 +1410,6 @@
         "enabled": {
             "label": "Habilitar TLS",
             "description": "Habilita TLS para la interfaz web y la API de Frigate en el puerto TLS configurado."
-        }
-    },
-    "model": {
-        "label": "Modelo de detección",
-        "description": "Ajustes para configurar un modelo de detección de objetos personalizado y su forma de entrada.",
-        "path": {
-            "label": "Ruta del modelo de detector de objetos personalizado",
-            "description": "Ruta a un archivo de modelo de detección personalizado (o plus://<model_id> para modelos de Frigate+)."
-        },
-        "labelmap_path": {
-            "label": "Mapa de etiquetas para detector de objetos personalizado",
-            "description": "Ruta a un archivo labelmap que asigna clases numéricas a etiquetas de texto para el detector."
-        },
-        "width": {
-            "label": "Anchura de entrada del modelo de detección de objetos",
-            "description": "Anchura del tensor de entrada del modelo en píxeles."
-        },
-        "height": {
-            "label": "Altura de entrada del modelo de detección de objetos",
-            "description": "Altura del tensor de entrada del modelo en píxeles."
-        },
-        "labelmap": {
-            "label": "Personalización del mapa de etiquetas",
-            "description": "Sobrescrituras o entradas de reasignación que se fusionarán con el mapa de etiquetas estándar."
-        },
-        "attributes_map": {
-            "label": "Mapa de etiquetas de objetos a sus etiquetas de atributos",
-            "description": "Asignación de etiquetas de objetos a etiquetas de atributos usada para adjuntar metadatos (por ejemplo, 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-            "label": "Forma del tensor de entrada del modelo",
-            "description": "Formato de tensor esperado por el modelo: 'nhwc' o 'nchw'."
-        },
-        "input_pixel_format": {
-            "label": "Formato de color de píxeles de entrada del modelo",
-            "description": "Espacio de color de píxeles esperado por el modelo: 'rgb', 'bgr' o 'yuv'."
-        },
-        "input_dtype": {
-            "label": "Tipo D de entrada del modelo",
-            "description": "Tipo de datos del tensor de entrada del modelo (por ejemplo, 'float32')."
-        },
-        "model_type": {
-            "label": "Tipo de modelo de detección de objetos",
-            "description": "Tipo de arquitectura del modelo del detector (ssd, yolox, yolonas, yolo-generic, rfdetr, dfine) utilizada por algunos detectores para su optimización."
         }
     },
     "classification": {

@@ -11,60 +11,58 @@
   "ptz": {
     "move": {
       "clickMove": {
-        "label": "點擊畫面以置中鏡頭",
+        "label": "點擊畫面以置中攝影機",
         "enable": "啟用點擊移動",
         "disable": "停用點擊移動",
         "enableWithZoom": "開啟點選移動 / 拖動縮放功能"
       },
       "left": {
-        "label": "向左移動 PTZ 鏡頭"
+        "label": "向左移動 PTZ 攝影機"
       },
       "up": {
-        "label": "向上移動 PTZ 鏡頭"
+        "label": "向上移動 PTZ 攝影機"
       },
       "down": {
-        "label": "向下移動 PTZ 鏡頭"
+        "label": "向下移動 PTZ 攝影機"
       },
       "right": {
-        "label": "向右移動 PTZ 鏡頭"
+        "label": "向右移動 PTZ 攝影機"
       }
     },
     "zoom": {
       "in": {
-        "label": "放大 PTZ 鏡頭"
+        "label": "放大 PTZ 攝影機"
       },
       "out": {
-        "label": "縮小 PTZ 鏡頭"
+        "label": "縮小 PTZ 攝影機"
       }
     },
     "frame": {
       "center": {
-        "label": "點擊畫面以置中 PTZ 鏡頭"
+        "label": "點擊畫面以置中 PTZ 攝影機"
       }
     },
-    "presets": "PTZ 鏡頭預設",
+    "presets": "PTZ 攝影機預設",
     "focus": {
       "in": {
-        "label": "聚焦 PTZ 鏡頭"
+        "label": "聚焦 PTZ 攝影機"
       },
       "out": {
-        "label": "離焦 PTZ 鏡頭"
+        "label": "離焦 PTZ 攝影機"
       }
     }
   },
   "cameraAudio": {
-    "enable": "啟用鏡頭音訊",
-    "disable": "停用鏡頭音訊"
+    "enable": "啟用攝影機音訊",
+    "disable": "停用攝影機音訊"
   },
   "camera": {
-    "enable": "啟用鏡頭",
-    "disable": "停用鏡頭",
     "turnOn": "開啟攝影機",
     "turnOff": "關閉攝影機"
   },
   "muteCameras": {
-    "enable": "所有鏡頭靜音",
-    "disable": "所有鏡頭取消靜音"
+    "enable": "所有攝影機靜音",
+    "disable": "所有攝影機取消靜音"
   },
   "detect": {
     "enable": "啟用偵測",
@@ -76,8 +74,8 @@
     "disabledInConfig": "必須先在該攝影機的設定中開啟錄製功能。"
   },
   "snapshots": {
-    "enable": "啟用截圖",
-    "disable": "停用截圖"
+    "enable": "啟用快照",
+    "disable": "停用快照"
   },
   "audioDetect": {
     "enable": "啟用音訊偵測",
@@ -92,24 +90,24 @@
     "disable": "隱藏串流統計資料"
   },
   "manualRecording": {
-    "title": "應需",
-    "tips": "根據此鏡頭的錄影保留設定，下載快照或手動啟動事件。",
+    "title": "隨選錄影",
+    "tips": "根據此攝影機的錄影保留設定，下載快照或手動啟動事件。",
     "playInBackground": {
       "label": "背景播放",
       "desc": "啟用此選項以在播放器被隱藏時繼續播放串流。"
     },
     "showStats": {
       "label": "顯示統計資料",
-      "desc": "啟用此選項以在鏡頭畫面上顯示串流的統計資料。"
+      "desc": "啟用此選項以在攝影機畫面上顯示串流的統計資料。"
     },
     "debugView": "除錯畫面",
-    "start": "開始應需錄影",
-    "started": "開始手動應需錄影。",
-    "failedToStart": "手動開始應需錄影失敗。",
-    "recordDisabledTips": "因為此鏡頭的錄影功能被停用或限制，因此僅會儲存截圖。",
-    "end": "結束應需錄影",
-    "ended": "已結束手動應需錄影。",
-    "failedToEnd": "結束手動應需錄影失敗。"
+    "start": "開始隨選錄影",
+    "started": "已開始手動隨選錄影。",
+    "failedToStart": "無法開始手動隨選錄影。",
+    "recordDisabledTips": "因為此攝影機的錄影功能被停用或限制，因此僅會儲存快照。",
+    "end": "結束隨選錄影",
+    "ended": "已結束手動隨選錄影。",
+    "failedToEnd": "無法結束手動隨選錄影。"
   },
   "streamingSettings": "串流設定",
   "notifications": "通知",
@@ -121,15 +119,13 @@
     "title": "串流",
     "audio": {
       "tips": {
-        "title": "此串流的音訊必須要從鏡頭輸出並且在 go2rtc 中被設定。",
-        "documentation": "閱讀文件 "
+        "title": "此串流的音訊必須要從攝影機輸出並且在 go2rtc 中被設定。"
       },
       "available": "此串流支援音訊",
       "unavailable": "此串流不支援音訊"
     },
     "twoWayTalk": {
-      "tips": "你的裝置被需支援此功能，並且需設定 WebRTC 以使用雙向通話。",
-      "tips.documentation": "閱讀文件 ",
+      "tips": "你的裝置必須支援此功能，且必須設定 WebRTC 以進行雙向通話。",
       "available": "此串流支援雙向通話",
       "unavailable": "此串流不支援雙向通話"
     },
@@ -142,15 +138,14 @@
       "tips": "啟用此選項以在播放器被隱藏時繼續播放串流。"
     },
     "debug": {
-      "picker": "除錯模式下無法切換影片流。除錯將始終使用偵測（detect）功能的影片流。"
+      "picker": "除錯模式下無法切換影片串流。除錯將始終使用偵測（detect）功能的影片串流。"
     }
   },
   "cameraSettings": {
     "title": "{{camera}} 設定",
-    "cameraEnabled": "鏡頭已啟用",
     "objectDetection": "物件偵測",
     "recording": "錄影",
-    "snapshots": "截圖",
+    "snapshots": "快照",
     "audioDetection": "音訊偵測",
     "autotracking": "自動追蹤",
     "transcription": "音訊轉錄",
@@ -164,13 +159,12 @@
       "all": "全部",
       "motion": "移動",
       "active_objects": "活躍物件"
-    },
-    "notAllTips": "你的 {{source}} 錄影保留設定為 <code> {{effectiveRetainMode}} 模式</code>，因此此應需錄影僅會保留 {{effectiveRetainModeName}} 片段。"
+    }
   },
   "editLayout": {
     "label": "編輯版面配置",
     "group": {
-      "label": "編輯鏡頭群組"
+      "label": "編輯攝影機群組"
     },
     "exitEdit": "結束編輯"
   },
@@ -199,7 +193,7 @@
     },
     "group": {
       "title": "攝影機組目前為空",
-      "description": "該攝影機組未分配或啟動了攝影機。",
+      "description": "此攝影機群組沒有已指派或已啟用的攝影機。",
       "buttonText": "管理攝影機組"
     }
   }

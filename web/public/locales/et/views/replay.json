@@ -18,7 +18,7 @@
         "toast": {
             "error": "Silumise taasesitus ebaõnnestus: {{error}}",
             "alreadyActive": "Kordusseanss on juba aktiivne",
-            "stopError": "Silumise taasesituse peatamine ebaõnnestus: {{error}}",
+            "stopError": "Silumise taasesituse peatamine ei õnnestunud: {{error}}",
             "goToReplay": "Mine kordusesse",
             "noRecordings": "Valitud ajavahemikust ei leidu ühtegi salvestust"
         }
@@ -34,7 +34,7 @@
         "preparingClipDesc": "Frigate koondab valitud ajavahemiku salvestisi. Pikemate vahemike puhul võib see võtta kauem.",
         "startingCamera": "Silumise taasesituse käivitamine…",
         "startError": {
-            "title": "Silumise taasesituse käivitamine ebaõnnestus",
+            "title": "Silumise taasesituse käivitamine ei õnnestunud",
             "back": "Tagasi ajaloo vaatesse"
         },
         "sourceCamera": "Lähtekaamera",

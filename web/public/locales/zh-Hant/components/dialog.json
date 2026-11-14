@@ -7,7 +7,7 @@
       "content": "此頁面將在 {{countdown}} 秒後重新載入。",
       "button": "立即重新載入"
     },
-    "description": "Frigate 在重啟期間將短暫停止執行。"
+    "description": "Frigate 在重新啟動期間將短暫停止執行。"
   },
   "explore": {
     "plus": {
@@ -55,11 +55,10 @@
     "export": "匯出",
     "selectOrExport": "選擇或匯出",
     "toast": {
-      "success": "成功開始匯出。至 /exports 頁查看匯出資料。",
+      "success": "成功開始匯出。請在匯出頁面檢視檔案。",
       "error": {
         "failed": "匯出失敗：{{error}}",
         "endTimeMustAfterStartTime": "結束時間必須要在開始時間之後",
-        "noVaildTimeSelected": "沒有選取有效的時間範圍",
         "noValidTimeSelected": "未選擇有效的時間範圍"
       },
       "view": "查看",
@@ -67,7 +66,7 @@
       "batchSuccess_other": "已開始 {{count}} 個匯出，正在開啟案件。",
       "batchPartial": "已開始 {{total}} 個匯出中的 {{successful}} 個。失敗的攝影機：{{failedCameras}}",
       "batchFailed": "啟動匯出失敗（共 {{total}} 個）。失敗的攝影機：{{failedCameras}}",
-      "batchQueuedSuccess_other": "已排隊 {{count}} 個匯出，正在開啟案件。",
+      "batchQueuedSuccess_other": "已排隊 {{count}} 個匯出。",
       "batchQueuedPartial": "已將 {{total}} 個匯出中的 {{successful}} 個加入佇列。失敗的攝影機：{{failedCameras}}",
       "batchQueueFailed": "未能將 {{total}} 個匯出加入佇列。失敗的攝影機：{{failedCameras}}"
     },
@@ -82,7 +81,6 @@
       "newCaseNamePlaceholder": "新案件名稱",
       "newCaseDescriptionPlaceholder": "案件描述",
       "label": "案件",
-      "nonAdminHelp": "將為這些匯出檔案建立一個新的案件。",
       "placeholder": "選擇案件"
     },
     "queueing": "正在加入匯出佇列…",
@@ -94,10 +92,10 @@
       "timeRange": "時間範圍",
       "selectFromTimeline": "從時間軸選擇",
       "cameraSelection": "攝影機",
-      "cameraSelectionHelp": "在此時間範圍內具有追蹤目標的攝影機會被預先選中",
+      "cameraSelectionHelp": "在此時間範圍內具有追蹤物件的攝影機會被預先選中",
       "checkingActivity": "正在檢查攝影機活動…",
       "noCameras": "沒有可用的攝影機",
-      "detectionCount_other": "{{count}} 個追蹤目標",
+      "detectionCount_other": "{{count}} 個追蹤物件",
       "nameLabel": "匯出名稱",
       "namePlaceholder": "這些匯出檔案的可選基礎名稱",
       "queueingButton": "正在加入匯出佇列…",
@@ -118,8 +116,7 @@
       "exportButton_other": "匯出 {{count}} 個審閱",
       "exportingButton": "匯出中…",
       "toast": {
-        "started_other": "已開始 {{count}} 個匯出。正在開啟案件。",
-        "startedNoCase_other": "已開始 {{count}} 個匯出。",
+        "started_other": "已開始 {{count}} 個匯出。",
         "partial": "已啟動 {{total}} 個匯出，其中 {{successful}} 個成功。失敗項：{{failedItems}}",
         "failed": "啟動匯出失敗（共 {{total}} 個）。失敗項：{{failedItems}}"
       }
@@ -128,15 +125,14 @@
   "streaming": {
     "label": "串流",
     "restreaming": {
-      "disabled": "此鏡頭並未啟用串流重導向。",
+      "disabled": "此攝影機並未啟用串流重導向。",
       "desc": {
-        "title": "設定 go2rtc 以啟用更多此鏡頭的預覽選項及音訊。",
-        "readTheDocumentation": "閱讀文件"
+        "title": "設定 go2rtc 以啟用更多此攝影機的預覽選項及音訊。"
       }
     },
     "showStats": {
       "label": "顯示串流統計資料",
-      "desc": "啟用此選項以在鏡頭畫面上顯示串流統計資料。"
+      "desc": "啟用此選項以在攝影機畫面上顯示串流統計資料。"
     },
     "debugView": "除錯檢視"
   },
@@ -158,18 +154,18 @@
     "confirmDelete": {
       "title": "確認刪除",
       "desc": {
-        "selected": "您確定要刪除所有與此審查項目相關的錄影檔案嗎？<br /><br />按住 <em>Shift</em> 鍵可在未來跳過此確認步驟。"
+        "selected": "您確定要刪除所有與此審閱項目相關的錄影檔案嗎？<br /><br />按住 <em>Shift</em> 鍵可在未來跳過此確認步驟。"
       },
       "toast": {
-        "success": "已成功刪除與選擇的審核物件有關的影片片段。",
+        "success": "已成功刪除與選擇的審閱項目有關的影片片段。",
         "error": "刪除失敗：{{error}}"
       }
     },
     "button": {
       "export": "匯出",
-      "markAsReviewed": "標記為已審核",
+      "markAsReviewed": "標記為已審閱",
       "deleteNow": "立即刪除",
-      "markAsUnreviewed": "標記為未審核"
+      "markAsUnreviewed": "標記為未審閱"
     },
     "shareTimestamp": {
       "label": "分享該時間片段",

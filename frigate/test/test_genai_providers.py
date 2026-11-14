@@ -19,6 +19,8 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import requests
+
 from frigate.config import GenAIConfig, GenAIProviderEnum
 from frigate.genai import PROVIDERS, load_providers
 
@@ -143,11 +145,71 @@ def _openai_chunk(content=None, tool_calls=None, finish_reason=None, usage=None)
     return SimpleNamespace(choices=[choice], usage=usage)
 
 
+class _FakeAsyncOpenAIStream:
+    """Mimics openai.AsyncStream: async iterable and async context manager.
+
+    With ``stall_after`` set, the stream stops producing after that many
+    chunks, like a model that stops sending tokens, and sets ``stalled``.
+    """
+
+    def __init__(self, chunks, stall_after=None):
+        self._chunks = chunks
+        self._stall_after = stall_after
+        self.stalled = asyncio.Event()
+        self.close = AsyncMock()
+
+    async def __aiter__(self):
+        for i, chunk in enumerate(self._chunks):
+            if i == self._stall_after:
+                self.stalled.set()
+                await asyncio.Event().wait()
+            yield chunk
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        await self.close()
+
+
+class _FakeAsyncOpenAI:
+    """Mimics openai.AsyncOpenAI: async context manager with a completions API."""
+
+    def __init__(self, create):
+        self.chat = SimpleNamespace(completions=SimpleNamespace(create=create))
+        self.close = AsyncMock()
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        await self.close()
+
+
 class TestOpenAIProvider(unittest.TestCase):
     def _client(self):
         return _make_client(
             "openai", model="gpt-4o", api_key="k", base_url="http://localhost:9999/v1"
         )
+
+    def _streaming_client(self, create):
+        """Build a client whose async completions call is ``create``."""
+        client = self._client()
+        async_client = _FakeAsyncOpenAI(create)
+        client._init_async_provider = MagicMock(return_value=async_client)
+        return client, async_client
+
+    def test_async_client_uses_configured_options(self):
+        from openai import AsyncOpenAI
+
+        client = self._client()
+        async_client = client._init_async_provider()
+        try:
+            self.assertIsInstance(async_client, AsyncOpenAI)
+            self.assertEqual(async_client.base_url, client.provider.base_url)
+            self.assertEqual(async_client.api_key, "k")
+        finally:
+            asyncio.run(async_client.close())
 
     def test_stream_tool_call_arguments_are_dict(self):
         # Arguments arrive split across chunks, as the real API streams them.
@@ -160,8 +222,9 @@ class TestOpenAIProvider(unittest.TestCase):
             _openai_chunk(tool_calls=[_openai_tc(0, arguments=' "person"}')]),
             _openai_chunk(finish_reason="tool_calls"),
         ]
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(return_value=iter(chunks))
+        client, _ = self._streaming_client(
+            AsyncMock(return_value=_FakeAsyncOpenAIStream(chunks))
+        )
 
         final = _final_message(_collect(client, SIMPLE_MESSAGES))
         self.assertEqual(final["finish_reason"], "tool_calls")
@@ -175,8 +238,9 @@ class TestOpenAIProvider(unittest.TestCase):
             _openai_chunk(content="lo"),
             _openai_chunk(finish_reason="stop"),
         ]
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(return_value=iter(chunks))
+        client, _ = self._streaming_client(
+            AsyncMock(return_value=_FakeAsyncOpenAIStream(chunks))
+        )
 
         events = _collect(client, SIMPLE_MESSAGES)
         deltas = [v for (k, v) in events if k == "content_delta"]
@@ -184,13 +248,83 @@ class TestOpenAIProvider(unittest.TestCase):
         self.assertEqual(_final_message(events)["content"], "hello")
 
     def test_multimodal_message_does_not_crash(self):
-        client = self._client()
-        client.provider.chat.completions.create = MagicMock(
-            return_value=iter([_openai_chunk(content="ok", finish_reason="stop")])
+        client, _ = self._streaming_client(
+            AsyncMock(
+                return_value=_FakeAsyncOpenAIStream(
+                    [_openai_chunk(content="ok", finish_reason="stop")]
+                )
+            )
         )
         # Passing the OpenAI-native multimodal list through must not raise.
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
+
+    def test_stream_uses_async_client_and_closes_it(self):
+        # The blocking sync client must never be used on the event loop.
+        stream = _FakeAsyncOpenAIStream(
+            [_openai_chunk(content="ok", finish_reason="stop")]
+        )
+        create = AsyncMock(return_value=stream)
+        client, async_client = self._streaming_client(create)
+        client.provider.chat.completions.create = MagicMock()
+
+        final = _final_message(_collect(client, SIMPLE_MESSAGES))
+
+        self.assertEqual(final["content"], "ok")
+        self.assertTrue(create.await_args.kwargs["stream"])
+        client.provider.chat.completions.create.assert_not_called()
+        stream.close.assert_awaited_once()
+        async_client.close.assert_awaited_once()
+
+    def test_client_closed_when_caller_leaves_while_opening(self):
+        # Cancelling before the response arrives must still close the client.
+        async def _run():
+            opening = asyncio.Event()
+
+            async def hang(**kwargs):
+                opening.set()
+                await asyncio.Event().wait()
+
+            client, async_client = self._streaming_client(hang)
+            gen = client.chat_with_tools_stream(
+                messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
+            )
+            task = asyncio.create_task(gen.__anext__())
+            await opening.wait()
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await asyncio.wait_for(task, timeout=1)
+            return async_client
+
+        async_client = asyncio.run(_run())
+        async_client.close.assert_awaited_once()
+
+    def test_stream_closed_when_caller_leaves_mid_stream(self):
+        # Cancelling while waiting on a stalled model must close the stream
+        # right away instead of waiting for the next chunk.
+        async def _run():
+            stream = _FakeAsyncOpenAIStream(
+                [_openai_chunk(content="a"), _openai_chunk(finish_reason="stop")],
+                stall_after=1,
+            )
+            client, async_client = self._streaming_client(
+                AsyncMock(return_value=stream)
+            )
+            gen = client.chat_with_tools_stream(
+                messages=SIMPLE_MESSAGES, tools=None, tool_choice="auto"
+            )
+            first = await gen.__anext__()
+            task = asyncio.create_task(gen.__anext__())
+            await stream.stalled.wait()
+            task.cancel()
+            with self.assertRaises(asyncio.CancelledError):
+                await asyncio.wait_for(task, timeout=1)
+            return first, stream, async_client
+
+        first, stream, async_client = asyncio.run(_run())
+        self.assertEqual(first, ("content_delta", "a"))
+        stream.close.assert_awaited_once()
+        async_client.close.assert_awaited_once()
 
 
 # ---------------------------------------------------------------------------
@@ -297,6 +431,56 @@ class TestGeminiProvider(unittest.TestCase):
         self.assertEqual(final["content"], "ok")
 
 
+class TestGeminiImageTokens(unittest.TestCase):
+    def _client(self, count_tokens):
+        client = _make_client("gemini", model="gemini-3-flash", api_key="k")
+        client.provider = SimpleNamespace(
+            models=SimpleNamespace(count_tokens=count_tokens)
+        )
+        return client
+
+    def test_measures_image_cost_and_caches_per_size(self):
+        count_tokens = MagicMock(
+            side_effect=lambda model, contents, config: SimpleNamespace(
+                total_tokens=2 if len(contents) == 1 else 1102
+            )
+        )
+        client = self._client(count_tokens)
+
+        self.assertEqual(client.estimate_image_tokens(320, 180), 1100)
+        self.assertEqual(client.estimate_image_tokens(320, 180), 1100)
+        self.assertEqual(count_tokens.call_count, 2)
+
+        image = count_tokens.call_args.kwargs["contents"][1]
+        self.assertEqual(image.inline_data.mime_type, "image/jpeg")
+        self.assertEqual(count_tokens.call_args.kwargs["model"], "gemini-3-flash")
+        http_options = count_tokens.call_args.kwargs["config"].http_options
+        self.assertEqual(http_options.timeout, 5000)
+        self.assertEqual(http_options.retry_options.attempts, 1)
+
+        client.estimate_image_tokens(640, 360)
+        self.assertEqual(count_tokens.call_count, 4)
+
+    def test_failure_falls_back_to_heuristic_and_waits_before_retrying(self):
+        count_tokens = MagicMock(side_effect=RuntimeError("offline"))
+        client = self._client(count_tokens)
+
+        with patch("frigate.genai.plugins.gemini.time.monotonic", return_value=1000):
+            self.assertEqual(client.estimate_image_tokens(320, 180), 320 * 180 / 1250)
+            self.assertEqual(client.estimate_image_tokens(640, 360), 640 * 360 / 1250)
+        self.assertEqual(count_tokens.call_count, 1)
+
+        with patch("frigate.genai.plugins.gemini.time.monotonic", return_value=1300):
+            client.estimate_image_tokens(320, 180)
+        self.assertEqual(count_tokens.call_count, 2)
+
+    def test_missing_total_falls_back_to_heuristic(self):
+        client = self._client(
+            MagicMock(return_value=SimpleNamespace(total_tokens=None))
+        )
+        self.assertEqual(client.estimate_image_tokens(320, 180), 320 * 180 / 1250)
+
+
 # ---------------------------------------------------------------------------
 # Ollama
 # ---------------------------------------------------------------------------
@@ -360,9 +544,212 @@ class TestOllamaProvider(unittest.TestCase):
         from frigate.genai.plugins.ollama import _normalize_multimodal_content
 
         text, images = _normalize_multimodal_content(MULTIMODAL_MESSAGES[-1]["content"])
-        self.assertIn("live image", text)
-        self.assertEqual(len(images), 1)
-        self.assertEqual(images[0], b"\xff\xd8\xff\xd9")
+        self.assertEqual(
+            text, "Here is the current live image from camera 'front'.\n[img]"
+        )
+        self.assertEqual(images, [b"\xff\xd8\xff\xd9"])
+
+    def test_normalize_keeps_text_and_image_order(self):
+        from frigate.genai.plugins.ollama import _normalize_multimodal_content
+
+        text, images = _normalize_multimodal_content(
+            [
+                {"type": "text", "text": "intro"},
+                {"type": "text", "text": "Frame 1"},
+                {"type": "image_url", "image_url": {"url": _IMAGE_DATA_URI}},
+                {"type": "text", "text": "Frame 2"},
+                {"type": "image_url", "image_url": {"url": _IMAGE_DATA_URI}},
+            ]
+        )
+        self.assertEqual(text, "intro\nFrame 1\n[img]\nFrame 2\n[img]")
+        self.assertEqual(len(images), 2)
+
+    def test_send_uses_chat_with_captions_before_each_image(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.return_value = {
+            "message": {"content": '{"ok": true}'},
+            "done": True,
+            "done_reason": "stop",
+        }
+        client._supports_thinking_cache = False
+
+        result = client._send(
+            "prompt",
+            [b"a", b"b"],
+            {"type": "json_schema", "json_schema": {"schema": {"type": "object"}}},
+            image_captions=["Frame 1 of 2", "Frame 2 of 2"],
+        )
+
+        self.assertEqual(result, '{"ok": true}')
+        client.provider.generate.assert_not_called()
+        params = client.provider.chat.call_args.kwargs
+        self.assertEqual(
+            params["messages"],
+            [
+                {
+                    "role": "user",
+                    "content": "prompt\nFrame 1 of 2\n[img]\nFrame 2 of 2\n[img]",
+                    "images": [b"a", b"b"],
+                }
+            ],
+        )
+        self.assertEqual(params["format"], {"type": "object"})
+        self.assertNotIn("think", params)
+
+    def test_send_without_captions_puts_images_after_prompt(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.return_value = {"message": {"content": "ok"}, "done": True}
+        client._supports_thinking_cache = False
+
+        client._send("prompt", [b"a"])
+
+        message = client.provider.chat.call_args.kwargs["messages"][0]
+        self.assertEqual(message["content"], "prompt\n[img]")
+        self.assertEqual(message["images"], [b"a"])
+
+    def test_capabilities_drive_embeddings_and_thinking(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.show.return_value = {"capabilities": ["embedding", "vision"]}
+
+        self.assertTrue(client.supports_embeddings)
+        self.assertFalse(client.supports_toggleable_thinking)
+        client.provider.show.assert_called_once()
+
+    def test_capability_lookup_failure_is_not_cached(self):
+        from ollama import ResponseError
+
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.show.side_effect = [
+            ResponseError("unavailable", 503),
+            {"capabilities": ["embedding"]},
+        ]
+
+        self.assertFalse(client.supports_embeddings)
+        self.assertTrue(client.supports_embeddings)
+
+    def test_thinking_rechecked_after_provider_recovers(self):
+        client = self._client()
+        client.provider = None
+
+        self.assertFalse(client.supports_toggleable_thinking)
+
+        client.provider = MagicMock()
+        client.provider.show.return_value = {"capabilities": ["thinking"]}
+
+        self.assertTrue(client.supports_toggleable_thinking)
+        params = client._build_request_params(
+            [{"role": "user", "content": "hi"}], None, None, enable_thinking=True
+        )
+        self.assertTrue(params["think"])
+
+    @staticmethod
+    def _webp_bytes():
+        import io
+
+        from PIL import Image
+
+        buf = io.BytesIO()
+        Image.new("RGB", (8, 8), (200, 10, 10)).save(buf, format="WEBP")
+        return buf.getvalue()
+
+    def test_embed_posts_text_and_image_items(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider._request_raw.return_value.json.return_value = {
+            "embeddings": [[0.1] * 768, [0.2] * 768]
+        }
+
+        result = client.embed(texts=["a person"], images=[self._webp_bytes()])
+
+        args = client.provider._request_raw.call_args
+        self.assertEqual(args.args, ("POST", "/api/embed"))
+        payload = args.kwargs["json"]
+        self.assertEqual(payload["model"], "llama3")
+        self.assertEqual(payload["input"][0], "a person")
+        self.assertEqual(list(payload["input"][1]), ["image"])
+        # WebP thumbnails are converted to JPEG before being sent
+        image = base64.b64decode(payload["input"][1]["image"])
+        self.assertEqual(image[:2], b"\xff\xd8")
+        self.assertEqual(len(result), 2)
+        self.assertAlmostEqual(float(result[1][0]), 0.2, places=5)
+
+    def test_embed_passes_configured_options(self):
+        client = _make_client(
+            "ollama",
+            model="embeddinggemma-2",
+            base_url="http://localhost:9999",
+            provider_options={"options": {"num_ctx": 2048}, "keep_alive": "10m"},
+        )
+        client.provider = MagicMock()
+        client.provider._request_raw.return_value.json.return_value = {
+            "embeddings": [[0.1] * 768]
+        }
+
+        client.embed(texts=["a"])
+
+        payload = client.provider._request_raw.call_args.kwargs["json"]
+        self.assertEqual(payload["options"], {"num_ctx": 2048})
+        self.assertEqual(payload["keep_alive"], "10m")
+
+    @staticmethod
+    def _chat_counting_prompt_tokens(**params):
+        """Fake chat that reports 10 prompt tokens plus 250 per image."""
+        images = params["messages"][0].get("images") or []
+        return {
+            "message": {"content": "."},
+            "prompt_eval_count": 10 + 250 * len(images),
+        }
+
+    def test_image_tokens_probed_with_one_token_requests(self):
+        client = _make_client(
+            "ollama",
+            model="qwen3-vl",
+            base_url="http://localhost:9999",
+            provider_options={"options": {"num_ctx": 16384}},
+        )
+        client.provider = MagicMock()
+        client.provider.chat.side_effect = self._chat_counting_prompt_tokens
+        client._supports_thinking_cache = False
+
+        self.assertEqual(client.estimate_image_tokens(320, 180), 250)
+
+        calls = client.provider.chat.call_args_list
+        self.assertEqual(len(calls), 2)
+        for call in calls:
+            self.assertEqual(
+                call.kwargs["options"], {"num_ctx": 16384, "num_predict": 1}
+            )
+        image = calls[1].kwargs["messages"][0]["images"][0]
+        self.assertEqual(image[:2], b"\xff\xd8")
+
+    def test_image_token_probe_error_uses_heuristic(self):
+        from ollama import ResponseError
+
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider.chat.side_effect = [
+            {"message": {"content": "."}, "prompt_eval_count": 10},
+            ResponseError("model does not support images", 400),
+        ]
+        client._supports_thinking_cache = False
+
+        self.assertEqual(client.estimate_image_tokens(250, 100), 20)
+        self.assertEqual(client._image_token_cache, {})
+
+    def test_embed_server_error_returns_empty(self):
+        from ollama import ResponseError
+
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider._request_raw.side_effect = ResponseError(
+            "model does not support media embeddings", 400
+        )
+
+        self.assertEqual(client.embed(images=[self._webp_bytes()]), [])
 
 
 # ---------------------------------------------------------------------------
@@ -505,7 +892,6 @@ class TestLlamaCppProvider(unittest.TestCase):
             "supports_audio": False,
             "supports_tools": False,
             "supports_reasoning": False,
-            "media_marker": "<__media__>",
         }
         cls = PROVIDERS[GenAIProviderEnum.llamacpp]
         with patch.object(cls, "_get_model_info", return_value=info):
@@ -518,6 +904,395 @@ class TestLlamaCppProvider(unittest.TestCase):
     def test_provider_options_context_size_overrides_server(self):
         client = self._validated_client(4096, {"context_size": 32768})
         self.assertEqual(client.get_context_size(), 32768)
+
+    def test_list_models_dedupes_alias_matching_id(self):
+        client = self._client()
+        models_data = [
+            {"id": "qwen3-asr", "aliases": ["qwen3-asr"]},
+            {"id": "gemma", "aliases": ["gemma", "g4"]},
+        ]
+        with patch.object(client, "_fetch_models_data", return_value=models_data):
+            self.assertEqual(client.list_models(), ["g4", "gemma", "qwen3-asr"])
+
+    @staticmethod
+    def _embeddings_response(vectors):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {
+            "object": "list",
+            "data": [
+                {"object": "embedding", "index": i, "embedding": v}
+                for i, v in enumerate(vectors)
+            ],
+        }
+        return response
+
+    def test_embed_posts_content_arrays_to_v1_embeddings(self):
+        client = self._client()
+        response = self._embeddings_response([[0.1] * 768, [0.2] * 768])
+
+        with patch.object(client, "_post", return_value=response) as post:
+            result = client.embed(texts=["a person"], images=[b"not an image"])
+
+        url = post.call_args.args[0]
+        payload = post.call_args.kwargs["json"]
+        self.assertEqual(url, "http://localhost:9999/v1/embeddings")
+        self.assertEqual(payload["model"], "m")
+        self.assertEqual(payload["encoding_format"], "float")
+        self.assertEqual(
+            payload["input"][0], {"content": [{"type": "text", "text": "a person"}]}
+        )
+        image_parts = payload["input"][1]["content"]
+        self.assertEqual(image_parts[0]["type"], "image_url")
+        self.assertEqual(
+            image_parts[0]["image_url"]["url"],
+            "data:image/jpeg;base64," + base64.b64encode(b"not an image").decode(),
+        )
+        self.assertEqual(image_parts[1], {"type": "text", "text": "\n"})
+        self.assertEqual(len(result), 2)
+        self.assertAlmostEqual(float(result[1][0]), 0.2, places=5)
+
+    def test_embed_normalizes_dimension(self):
+        client = self._client()
+        response = self._embeddings_response([[1.0] * 1024, [1.0] * 512])
+
+        with patch.object(client, "_post", return_value=response):
+            result = client.embed(texts=["long", "short"])
+
+        self.assertEqual([r.shape for r in result], [(768,), (768,)])
+        self.assertEqual(float(result[1][-1]), 0.0)
+
+    @staticmethod
+    def _post_counting_prompt_tokens(url, json=None, timeout=None):
+        """Fake chat completion: 12 prompt tokens plus 300 per image part."""
+        content = json["messages"][0]["content"]
+        images = [p for p in content if p["type"] == "image_url"]
+        response = MagicMock()
+        response.json.return_value = {
+            "usage": {"prompt_tokens": 12 + 300 * len(images)}
+        }
+        return response
+
+    def test_image_tokens_probed_once_per_dimension(self):
+        client = self._client()
+
+        with patch.object(
+            client, "_post", side_effect=self._post_counting_prompt_tokens
+        ) as post:
+            self.assertEqual(client.estimate_image_tokens(320, 180), 300)
+            self.assertEqual(client.estimate_image_tokens(320, 180), 300)
+            self.assertEqual(client.estimate_image_tokens(640, 360), 300)
+
+        # one shared text baseline, then one image request per new dimension
+        self.assertEqual(post.call_count, 3)
+        payload = post.call_args_list[0].kwargs["json"]
+        self.assertEqual(payload["max_tokens"], 1)
+        self.assertEqual(
+            post.call_args_list[0].args[0], "http://localhost:9999/v1/chat/completions"
+        )
+
+    def test_image_token_probe_failure_is_not_cached(self):
+        client = self._client()
+
+        with patch.object(
+            client, "_post", side_effect=requests.exceptions.ConnectionError("down")
+        ):
+            self.assertEqual(client.estimate_image_tokens(250, 100), 20)
+
+        self.assertEqual(client._image_token_cache, {})
+        self.assertIsNone(client._text_baseline_tokens)
+
+    def test_embed_request_error_returns_empty(self):
+        client = self._client()
+        response = MagicMock()
+        response.raise_for_status.side_effect = requests.exceptions.HTTPError("400")
+
+        with patch.object(client, "_post", return_value=response):
+            self.assertEqual(client.embed(texts=["a"]), [])
+
+
+# ---------------------------------------------------------------------------
+# transcribe role
+# ---------------------------------------------------------------------------
+WAV_BYTES = b"RIFF$\x00\x00\x00WAVEfmt "
+
+
+class TestOpenAITranscribe(unittest.TestCase):
+    def _client(self):
+        return _make_client(
+            "openai",
+            model="gpt-4o-transcribe",
+            api_key="k",
+            base_url="http://localhost:9999/v1",
+            runtime_options={"temperature": 0.7},
+        )
+
+    def test_supports_transcription(self):
+        self.assertTrue(self._client().supports_transcription)
+
+    def test_passes_file_tuple_and_language(self):
+        client = self._client()
+        create = MagicMock(return_value="  hello there  ")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "hello there")
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs["model"], "gpt-4o-transcribe")
+        self.assertEqual(kwargs["file"], ("audio.wav", WAV_BYTES, "audio/wav"))
+        self.assertEqual(kwargs["language"], "en")
+        self.assertEqual(kwargs["response_format"], "text")
+
+    def test_does_not_forward_runtime_options(self):
+        """runtime_options are chat parameters; /audio/transcriptions rejects them."""
+        client = self._client()
+        create = MagicMock(return_value="hi")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        client.transcribe(WAV_BYTES)
+
+        self.assertNotIn("temperature", create.call_args.kwargs)
+
+    def test_gpt_transcribe_uses_languages_array(self):
+        """gpt-transcribe replaced `language` with a `languages` array."""
+        client = _make_client("openai", model="gpt-transcribe", api_key="k")
+        create = MagicMock(return_value="hi")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        client.transcribe(WAV_BYTES, language="en")
+
+        kwargs = create.call_args.kwargs
+        self.assertEqual(kwargs["extra_body"], {"languages": ["en"]})
+        # sending both fields is rejected by the API
+        self.assertNotIn("language", kwargs)
+
+    def test_older_models_use_singular_language(self):
+        for model in ("gpt-4o-transcribe", "whisper-1"):
+            with self.subTest(model):
+                client = _make_client("openai", model=model, api_key="k")
+                create = MagicMock(return_value="hi")
+                client.provider = SimpleNamespace(
+                    audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+                )
+
+                client.transcribe(WAV_BYTES, language="en")
+
+                kwargs = create.call_args.kwargs
+                self.assertEqual(kwargs["language"], "en")
+                self.assertNotIn("extra_body", kwargs)
+
+    def test_object_response_form(self):
+        client = self._client()
+        create = MagicMock(return_value=SimpleNamespace(text="hi"))
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES), "hi")
+
+    def test_error_returns_none(self):
+        client = self._client()
+        create = MagicMock(side_effect=RuntimeError("boom"))
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertIsNone(client.transcribe(WAV_BYTES))
+
+
+class TestAzureOpenAITranscribe(unittest.TestCase):
+    def _client(self):
+        return _make_client(
+            "azure_openai",
+            model="my-deployment",
+            api_key="k",
+            base_url="https://example.openai.azure.com/?api-version=2024-06-01",
+        )
+
+    def test_routes_through_azure_client(self):
+        from openai import AzureOpenAI
+
+        client = self._client()
+        self.assertIsInstance(client.provider, AzureOpenAI)
+        self.assertTrue(client.supports_transcription)
+
+    def test_streaming_routes_through_async_azure_client(self):
+        from openai import AsyncAzureOpenAI
+
+        client = self._client()
+        async_client = client._init_async_provider()
+        try:
+            self.assertIsInstance(async_client, AsyncAzureOpenAI)
+            self.assertEqual(async_client.base_url, client.provider.base_url)
+        finally:
+            asyncio.run(async_client.close())
+
+    def test_transcribe_inherited(self):
+        client = self._client()
+        create = MagicMock(return_value="azure text")
+        client.provider = SimpleNamespace(
+            audio=SimpleNamespace(transcriptions=SimpleNamespace(create=create))
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES, language="fr"), "azure text")
+        self.assertEqual(create.call_args.kwargs["model"], "my-deployment")
+
+
+class TestGeminiTranscribe(unittest.TestCase):
+    def _client(self):
+        return _make_client("gemini", model="gemini-2.0-flash", api_key="k")
+
+    def test_supports_transcription(self):
+        self.assertTrue(self._client().supports_transcription)
+
+    def test_sends_audio_part(self):
+        client = self._client()
+        generate = MagicMock(return_value=SimpleNamespace(text=" spoken words "))
+        client.provider = SimpleNamespace(
+            models=SimpleNamespace(generate_content=generate)
+        )
+
+        self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "spoken words")
+
+        contents = generate.call_args.kwargs["contents"]
+        audio_parts = [
+            p for p in contents if getattr(p, "inline_data", None) is not None
+        ]
+        self.assertEqual(len(audio_parts), 1)
+        self.assertEqual(audio_parts[0].inline_data.mime_type, "audio/wav")
+        self.assertEqual(audio_parts[0].inline_data.data, WAV_BYTES)
+
+    def test_oversized_payload_is_skipped(self):
+        from frigate.genai.plugins.gemini import GEMINI_MAX_INLINE_BYTES
+
+        client = self._client()
+        generate = MagicMock()
+        client.provider = SimpleNamespace(
+            models=SimpleNamespace(generate_content=generate)
+        )
+
+        self.assertIsNone(client.transcribe(b"\x00" * (GEMINI_MAX_INLINE_BYTES + 1)))
+        generate.assert_not_called()
+
+
+class TestLlamaCppTranscribe(unittest.TestCase):
+    def _client(self, supports_audio: bool):
+        cfg = GenAIConfig(
+            provider="llamacpp",
+            model="m",
+            base_url="http://localhost:9999",
+        )
+        info = {
+            "context_size": 4096,
+            "supports_vision": False,
+            "supports_audio": supports_audio,
+            "supports_tools": False,
+            "supports_reasoning": False,
+        }
+        cls = PROVIDERS[GenAIProviderEnum.llamacpp]
+        with patch.object(cls, "_get_model_info", return_value=info):
+            return cls(cfg, timeout=5)
+
+    def test_supports_transcription_tracks_supports_audio(self):
+        self.assertTrue(self._client(True).supports_transcription)
+        self.assertFalse(self._client(False).supports_transcription)
+
+    @staticmethod
+    def _transcriptions_response(text: str = " transcript "):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {"text": text}
+        return response
+
+    @staticmethod
+    def _chat_response(content: str = " fallback transcript "):
+        response = MagicMock()
+        response.status_code = 200
+        response.json.return_value = {"choices": [{"message": {"content": content}}]}
+        return response
+
+    def test_posts_multipart_to_transcriptions(self):
+        client = self._client(True)
+
+        with patch.object(
+            client, "_post", return_value=self._transcriptions_response()
+        ) as post:
+            self.assertEqual(client.transcribe(WAV_BYTES, language="en"), "transcript")
+
+        self.assertTrue(post.call_args.args[0].endswith("/v1/audio/transcriptions"))
+        self.assertEqual(
+            post.call_args.kwargs["files"]["file"],
+            ("audio.wav", WAV_BYTES, "audio/wav"),
+        )
+        self.assertEqual(post.call_args.kwargs["data"]["language"], "en")
+
+    def test_omits_language_when_not_set(self):
+        """An unset language is what lets the model detect one itself."""
+        client = self._client(True)
+
+        with patch.object(
+            client, "_post", return_value=self._transcriptions_response()
+        ) as post:
+            client.transcribe(WAV_BYTES)
+
+        self.assertNotIn("language", post.call_args.kwargs["data"])
+
+    def test_falls_back_to_chat_completions_on_404(self):
+        """Servers predating llama.cpp#21863 have no transcriptions route."""
+        client = self._client(True)
+        missing = MagicMock()
+        missing.status_code = 404
+
+        with patch.object(
+            client, "_post", side_effect=[missing, self._chat_response()]
+        ) as post:
+            self.assertEqual(
+                client.transcribe(WAV_BYTES, language="en"), "fallback transcript"
+            )
+
+        urls = [call.args[0] for call in post.call_args_list]
+        self.assertTrue(urls[0].endswith("/v1/audio/transcriptions"))
+        self.assertTrue(urls[1].endswith("/v1/chat/completions"))
+
+        payload = post.call_args_list[1].kwargs["json"]
+        content = payload["messages"][0]["content"]
+        audio_parts = [p for p in content if p["type"] == "input_audio"]
+        self.assertEqual(len(audio_parts), 1)
+        self.assertEqual(audio_parts[0]["input_audio"]["format"], "wav")
+        self.assertEqual(
+            base64.b64decode(audio_parts[0]["input_audio"]["data"]), WAV_BYTES
+        )
+
+    def test_audio_unsupported_returns_none(self):
+        client = self._client(False)
+
+        with patch.object(client, "_post") as post:
+            self.assertIsNone(client.transcribe(WAV_BYTES))
+
+        post.assert_not_called()
+
+
+class TestImageTokenEstimate(unittest.TestCase):
+    def test_provider_without_token_counts_uses_heuristic(self):
+        client = _make_client("gemini", model="m", api_key="k")
+
+        self.assertEqual(client.estimate_image_tokens(250, 100), 20)
+        self.assertEqual(client._image_token_cache, {})
+
+
+class TestBaseClientTranscribe(unittest.TestCase):
+    """Providers that don't implement the role must be inert, not broken."""
+
+    def test_ollama_reports_and_returns_nothing(self):
+        client = _make_client("ollama", model="llava", base_url="http://localhost:9999")
+        self.assertFalse(client.supports_transcription)
+        self.assertIsNone(client.transcribe(WAV_BYTES, language="en"))
 
 
 if __name__ == "__main__":

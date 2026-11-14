@@ -25,6 +25,7 @@ RUN --mount=type=bind,from=rk-wheels,source=/rk-wheels,target=/deps/rk-wheels \
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+ENV FRIGATE_IMAGE_VARIANT=rk
 COPY docker/rockchip/COCO /COCO
 COPY docker/rockchip/conv2rknn.py /opt/conv2rknn.py
 

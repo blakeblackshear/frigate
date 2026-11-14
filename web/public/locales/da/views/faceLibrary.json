@@ -1,5 +1,4 @@
 {
-  "selectItem": "Vælg {{item}}",
   "description": {
     "addFace": "Tilføj en ny samling til ansigtsbiblioteket ved at uploade dit første billede.",
     "placeholder": "Angiv et navn for bibliotek",
@@ -7,7 +6,6 @@
     "nameCannotContainHash": "Navet kan ikke indeholde #."
   },
   "details": {
-    "person": "Person",
     "timestamp": "Tidsstempel",
     "unknown": "Ukendt",
     "scoreInfo": "Scoren er et vægtet gennemsnit af alle ansigtsscorer, vægtet efter ansigtets størrelse på hvert billede."

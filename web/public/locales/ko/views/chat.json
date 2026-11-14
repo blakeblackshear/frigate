@@ -21,7 +21,7 @@
     "attachment_picker_placeholder": "이벤트를 첨부해 주세요",
     "quick_reply_find_similar": "유사한 감지 기록 찾기",
     "quick_reply_tell_me_more": "자세한 설명 요청",
-    "quick_reply_when_else": "다른 시간대 감지 확인",
+    "quick_reply_when_else": "다른 시간대 감지 확인하시겠어요?",
     "quick_reply_find_similar_text": "이와 유사한 감지 기록을 찾아주세요.",
     "quick_reply_tell_me_more_text": "이 내용에 대해 더 자세히 알려주세요.",
     "quick_reply_when_else_text": "이 대상이 다른 때에 또 감지된 적이 있나요?",
@@ -34,7 +34,7 @@
     "starting_requests": {
         "show_recent_events": "최근 이벤트 표시",
         "show_camera_status": "카메라 상태 확인",
-        "recap": "부재 중 발생한 이벤트 요약",
+        "recap": "부재 중 발생한 이벤트를 요약할까요?",
         "watch_camera": "카메라 활동 감시"
     },
     "starting_requests_prompts": {
@@ -55,6 +55,12 @@
         "auto_scroll": {
             "title": "자동 스크롤",
             "desc": "새 메시지가 도착하면 화면을 자동으로 아래로 이동합니다."
+        },
+        "always_allow": {
+            "title": "항상 허용된 작업",
+            "desc": "어시스턴트가 매번 확인하지 않고 바로 실행할 수 있는 작업입니다.",
+            "none": "없음",
+            "reset": "초기화"
         }
     },
     "stats": {
@@ -68,5 +74,15 @@
     },
     "thinking": {
         "toggle": "생각 과정 전환"
+    },
+    "approval": {
+        "title": "{{tool}} 작업을 승인하시겠습니까?",
+        "desc": "이 작업은 Frigate의 설정을 변경합니다. 승인하기 전에 세부 정보를 검토하세요.",
+        "approve": "승인",
+        "always_allow": "항상 허용",
+        "reject": "거부",
+        "approved": "승인됨",
+        "rejected": "거부됨",
+        "placeholder": "계속하려면 대기 중인 작업을 승인하거나 거부하세요"
     }
 }

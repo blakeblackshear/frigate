@@ -42,15 +42,6 @@
       "12hour": "MM月dd日 ah:mm:ss",
       "24hour": "MM月dd日 HH:mm:ss"
     },
-    "formattedTimestampExcludeSeconds": {
-      "12hour": "%m月%-d日 %I:%M %p",
-      "24hour": "%m月%-d日 %H:%M"
-    },
-    "formattedTimestampWithYear": {
-      "12hour": "%Y年%m月%-d日 %I:%M:%S %p",
-      "24hour": "%Y年%m月%-d日 %H:%M"
-    },
-    "formattedTimestampOnlyMonthAndDay": "%m月%-d日",
     "formattedTimestampHourMinute": {
       "12hour": "a h:mm",
       "24hour": "HH:mm"
@@ -79,7 +70,8 @@
     "inProgress": "进行中",
     "invalidStartTime": "无效的开始时间",
     "invalidEndTime": "无效的结束时间",
-    "never": "从不"
+    "never": "从不",
+    "custom": "自定义…"
   },
   "unit": {
     "speed": {
@@ -124,10 +116,10 @@
     "apply": "应用",
     "reset": "重置",
     "done": "完成",
-    "enabled": "启用",
-    "enable": "启用",
-    "disabled": "禁用",
-    "disable": "禁用",
+    "enabled": "开启",
+    "enable": "开启",
+    "disabled": "关闭",
+    "disable": "关闭",
     "save": "保存",
     "saving": "保存中…",
     "cancel": "取消",
@@ -155,7 +147,7 @@
     "deleteNow": "立即删除",
     "next": "下一个",
     "cameraAudio": "摄像头音频",
-    "twoWayTalk": "双向对话",
+    "twoWayTalk": "双向对讲",
     "continue": "继续",
     "add": "添加",
     "applying": "应用中…",
@@ -168,13 +160,17 @@
     "saveAll": "保存全部",
     "savingAll": "保存全部中…",
     "undoAll": "撤销全部",
-    "retry": "重试"
+    "retry": "重试",
+    "expand": "展开",
+    "collapse": "收起",
+    "reload": "刷新",
+    "clear": "清除"
   },
   "menu": {
     "system": "系统",
-    "systemMetrics": "系统信息",
+    "systemMetrics": "运行健康状况",
     "configuration": "配置",
-    "systemLogs": "系统日志",
+    "systemLogs": "日志",
     "settings": "设置",
     "configurationEditor": "配置编辑器",
     "languages": "Languages / 语言",
@@ -242,7 +238,6 @@
       "green": "绿色",
       "nord": "极地蓝",
       "red": "红色",
-      "contrast": "高对比度",
       "default": "默认",
       "highcontrast": "高对比"
     },
@@ -299,7 +294,7 @@
   "accessDenied": {
     "documentTitle": "没有权限 - Frigate",
     "title": "没有权限",
-    "desc": "您没有权限查看此页面。"
+    "desc": "你没有权限查看此页面。"
   },
   "notFound": {
     "documentTitle": "没有找到页面 - Frigate",
@@ -324,5 +319,36 @@
   "validation_errors": "验证错误",
   "credentialField": {
     "savedPlaceholder": "已保存 — 留空则保留当前设置"
+  },
+  "error": {
+    "title": "此页面已停止工作",
+    "desc": "页面发生未知错误。通常刷新就可解决。若反复出现，请复制详情并提交至 GitHub 讨论区。",
+    "staleTitle": "需要重新加载",
+    "staleDesc": "部分界面组件无法加载，出现此情况通常是因为 Frigate 已更新，而你的浏览器标签页仍停留在旧版本。请刷新页面以获取最新版本。",
+    "partial": "部分界面组件已停止运行。",
+    "copyDetails": "复制详情",
+    "copyFailed": "无法复制详情到剪切板"
+  },
+  "commandMenu": {
+    "title": "命令菜单",
+    "description": "搜索页面、摄像头、设置项和操作",
+    "placeholder": "搜索页面、摄像头、设置项和操作",
+    "empty": "未匹配",
+    "section": {
+      "recent": "最近",
+      "pages": "页面",
+      "cameras": "摄像头",
+      "cameraGroups": "摄像头组",
+      "settings": "设置",
+      "actions": "行为"
+    },
+    "camera": {
+      "live": "实时监控",
+      "review": "核查"
+    },
+    "action": {
+      "toggleTheme": "切换浅色或深色模式"
+    },
+    "hint": "按 {{key}} 或 / 打开，按回车运行"
   }
 }

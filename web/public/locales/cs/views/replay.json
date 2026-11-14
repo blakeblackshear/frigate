@@ -1,1 +1,60 @@
-{}
+{
+    "title": "Ladicí přehrávání",
+    "description": "Přehrávejte záznamy kamer pro účely ladění. Seznam objektů zobrazuje časově zpožděný přehled detekovaných objektů a karta Zprávy zobrazuje proud interních zpráv Frigate z přehrávaného záznamu.",
+    "websocket_messages": "Zprávy",
+    "dialog": {
+        "title": "Spustit ladicí přehrávání",
+        "description": "Vytvořte dočasnou kameru, která ve smyčce přehrává dřívější záznamy pro ladění problémů s detekcí a sledováním objektů. Tato kamera bude mít stejné nastavení detekce jako zdrojová kamera. Začněte výběrem časového rozsahu.",
+        "camera": "Zdrojová kamera",
+        "timeRange": "Časový rozsah",
+        "preset": {
+            "1m": "Poslední minuta",
+            "5m": "Posledních 5 minut",
+            "timeline": "Z časové osy",
+            "custom": "Vlastní"
+        },
+        "startButton": "Spustit přehrávání",
+        "selectFromTimeline": "Vybrat",
+        "starting": "Spouštění přehrávání…",
+        "startLabel": "Začátek",
+        "endLabel": "Konec",
+        "toast": {
+            "error": "Nepodařilo se spustit ladicí přehrávání: {{error}}",
+            "alreadyActive": "Relace přehrávání je již aktivní",
+            "noRecordings": "Ve vybraném časovém rozsahu nebyly nalezeny žádné záznamy",
+            "stopError": "Nepodařilo se zastavit ladicí přehrávání: {{error}}",
+            "goToReplay": "Přejít na přehrávání"
+        }
+    },
+    "page": {
+        "noSession": "Žádná aktivní relace ladicího přehrávání",
+        "noSessionDesc": "Spusťte ladicí přehrávání ze zobrazení historie kliknutím na tlačítko Akce na panelu nástrojů a výběrem možnosti Ladicí přehrávání.",
+        "goToRecordings": "Přejít do historie",
+        "preparingClip": "Příprava klipu…",
+        "preparingClipDesc": "Frigate spojuje záznamy z vybraného časového rozsahu. U delších rozsahů to může chvíli trvat.",
+        "startingCamera": "Spouštění ladicího přehrávání…",
+        "startError": {
+            "title": "Nepodařilo se spustit ladicí přehrávání",
+            "back": "Zpět do historie"
+        },
+        "sourceCamera": "Zdrojová kamera",
+        "replayCamera": "Kamera pro přehrávání",
+        "initializingReplay": "Inicializace ladicího přehrávání…",
+        "stoppingReplay": "Zastavování ladicího přehrávání…",
+        "stopReplay": "Zastavit přehrávání",
+        "confirmStop": {
+            "title": "Zastavit ladicí přehrávání?",
+            "description": "Tím se ukončí relace a odstraní všechna dočasná data. Opravdu chcete pokračovat?",
+            "confirm": "Zastavit přehrávání",
+            "cancel": "Zrušit"
+        },
+        "activity": "Aktivita",
+        "objects": "Seznam objektů",
+        "audioDetections": "Detekce zvuku",
+        "noActivity": "Nebyla detekována žádná aktivita",
+        "activeTracking": "Aktivní sledování",
+        "noActiveTracking": "Žádné aktivní sledování",
+        "configuration": "Konfigurace",
+        "configurationDesc": "Dolaďte nastavení detekce pohybu a sledování objektů pro kameru ladicího přehrávání. Žádné změny se neukládají do konfiguračního souboru Frigate."
+    }
+}

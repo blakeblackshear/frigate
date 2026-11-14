@@ -1,0 +1,1052 @@
+{
+    "mqtt": {
+        "label": "MQTT",
+        "bounding_box": {
+            "label": "Dodaj uokvireni prostor",
+            "description": "Iscrtajte uokvirene prostore (bounding boxes) na slikama koje se šalju preko MQTT-a."
+        },
+        "crop": {
+            "label": "Iseci sliku",
+            "description": "Isecite slike koje se šalju na MQTT prema uokvirenom prostoru detektovanog objekta."
+        },
+        "height": {
+            "label": "Visina slike",
+            "description": "Visina (u pikselima) za promenu veličine slika koje se šalju preko MQTT-a."
+        },
+        "required_zones": {
+            "label": "Obavezne zone",
+            "description": "Zone u koje objekat mora da uđe da bi slika bila poslata na MQTT."
+        },
+        "quality": {
+            "label": "JPEG kvalitet",
+            "description": "Kvalitet JPEG slika koje se šalju na MQTT (0-100)."
+        },
+        "description": "Podešavanja za slanje slika preko MQTT-a.",
+        "enabled": {
+            "label": "Pošalji sliku",
+            "description": "Omogućite slanje isečaka slika (snapšotova) za objekte na MQTT teme za ovu kameru."
+        },
+        "timestamp": {
+            "label": "Dodaj vremensku oznaku",
+            "description": "Preklopite vremensku oznaku preko slika koje se šalju na MQTT."
+        }
+    },
+    "notifications": {
+        "label": "Obaveštenja",
+        "enabled": {
+            "label": "Omogući obaveštenja",
+            "description": "Omogućite ili onemogućite obaveštenja za ovu kameru."
+        },
+        "email": {
+            "label": "E-mail adresa za obaveštenja",
+            "description": "E-mail adresa koja se koristi za „push” obaveštenja ili koju zahtevaju određeni provajderi obaveštenja."
+        },
+        "cooldown": {
+            "label": "Period mirovanja",
+            "description": "Vreme mirovanja (u sekundama) između obaveštenja kako bi se izbeglo preplavljivanje primalaca."
+        },
+        "ttl": {
+            "label": "TTL obaveštenja",
+            "description": "Kako „push” usluga rukuje obaveštenjem koje je poslato dok je alarm aktivan ukoliko je vaš uređaj nedostupan. Opcija „Immediate” ga isporučuje odmah ili ga odbacuje. Opcija „Reliable” nastavlja sa pokušajima do 30 sekundi. Obaveštenje poslato kada se alarm završi uvek se čuva do jednog sata."
+        },
+        "enabled_in_config": {
+            "label": "Prvobitno stanje obaveštenja",
+            "description": "Pokazuje da li su obaveštenja bila omogućena u prvobitnoj statičkoj konfiguraciji."
+        },
+        "description": "Podešavanja za omogućavanje i kontrolu obaveštenja za ovu kameru."
+    },
+    "audio": {
+        "label": "Audio detekcija",
+        "enabled": {
+            "label": "Omogući audio detekciju",
+            "description": "Omogućite ili onemogućite detekciju audio događaja za ovu kameru."
+        },
+        "max_not_heard": {
+            "label": "Vreme isteka za kraj",
+            "description": "Broj sekundi bez prisustva podešenog tipa zvuka pre nego što se zvučni događaj završi."
+        },
+        "min_volume": {
+            "label": "Minimalna jačina zvuka",
+            "description": "Minimalni RMS prag jačine zvuka potreban za pokretanje detekcije zvuka; niže vrednosti povećavaju osetljivost (npr. 200 visoka, 500 srednja, 1000 niska osetljivost)."
+        },
+        "listen": {
+            "label": "Tipovi zvuka za slušanje",
+            "description": "Lista tipova zvučnih događaja koje treba detektovati (na primer: lavež, požarni alarm, govor, vika)."
+        },
+        "labelmap": {
+            "label": "Prilagođavanje mape oznaka zvuka",
+            "description": "Izmene ili stavke za ponovno mapiranje koje će se spojiti sa standardnom mapom oznaka zvuka."
+        },
+        "filters": {
+            "label": "Filteri zvuka",
+            "description": "Podešavanja filtera po pojedinačnim tipovima zvuka, kao što su pragovi pouzdanosti koji se koriste za smanjenje lažno pozitivnih rezultata.",
+            "threshold": {
+                "label": "Minimalna pouzdanost zvuka",
+                "description": "Minimalni prag pouzdanosti da bi se zvučni događaj uzeo u obzir."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Prvobitno stanje zvuka",
+            "description": "Pokazuje da li je detekcija zvuka bila prvobitno omogućena u statičkoj konfiguracionoj datoteci."
+        },
+        "num_threads": {
+            "label": "Niti za detekciju",
+            "description": "Broj niti koje se koriste za procesuiranje detekcije zvuka."
+        },
+        "description": "Podešavanja za detekciju događaja na osnovu zvuka za ovu kameru."
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Podešavanja za kombinovani „Birdseye” prikaz koji spaja strimove sa više kamera u jedan jedinstveni raspored.",
+        "enabled": {
+            "label": "Omogući Birdseye",
+            "description": "Omogućava ili onemogućava funkciju „Birdseye” prikaza."
+        },
+        "modes": {
+            "label": "Tipovi aktivnosti",
+            "description": "Tipovi aktivnosti koji uključuju kamere u „Birdseye” prikaz."
+        },
+        "order": {
+            "label": "Pozicija",
+            "description": "Numerička pozicija koja kontroliše redosled kamera u Birdseye rasporedu."
+        }
+    },
+    "detect": {
+        "label": "Detekcija objekata",
+        "description": "Podešavanja za ulogu detekcije (detect) koja se koristi za pokretanje detekcije objekata i pokretanje praćenja.",
+        "enabled": {
+            "label": "Omogući detekciju objekata",
+            "description": "Omogućite ili onemogućite detekciju objekata za ovu kameru."
+        },
+        "height": {
+            "label": "Visina detekcije",
+            "description": "Visina (u pikselima) kadrova koji se koriste za strim detekcije; ostavite prazno kako bi se koristila izvorna rezolucija strima."
+        },
+        "width": {
+            "label": "Širina detekcije",
+            "description": "Širina (u pikselima) kadrova koji se koriste za strim detekcije; ostavite prazno kako bi se koristila izvorna rezolucija strima."
+        },
+        "scene": {
+            "label": "Scena detekcije",
+            "description": "Okruženje koje ova kamera posmatra, a koje služi za izbor modela koji će se na njoj pokretati. Kamere koje ostanu podešene na „default” pokreću model koji je konfigurisan sa scenom „default”."
+        },
+        "fps": {
+            "label": "FPS detekcije",
+            "description": "Željeni broj kadrova u sekundi za pokretanje detekcije; niže vrednosti smanjuju opterećenje procesora (CPU) (preporučena vrednost je 5, a višu – najviše 10 – postavite samo ako pratite izuzetno brze objekte)."
+        },
+        "min_initialized": {
+            "label": "Minimalni broj kadrova za pokretanje",
+            "description": "Broj uzastopnih pogodaka detekcije koji su potrebni pre nego što se kreira praćeni objekat. Povećajte ovu vrednost da biste smanjili lažna pokretanja. Podrazumevana vrednost je FPS podeljen sa 2."
+        },
+        "max_disappeared": {
+            "label": "Maksimalni broj kadrova nestanka",
+            "description": "Broj kadrova bez detekcije nakon kojeg se praćeni objekat smatra nestalim."
+        },
+        "stationary": {
+            "label": "Konfiguracija stacionarnih objekata",
+            "description": "Podešavanja za detekciju i upravljanje objektima koji ostaju nepomični (stacionarni) tokom određenog vremenskog perioda.",
+            "interval": {
+                "label": "Interval za stacionarne objekte",
+                "description": "Koliko često (u kadrovima) treba pokrenuti proveru detekcije radi potvrde da je objekat stacionaran."
+            },
+            "threshold": {
+                "label": "Prag za stacionarne objekte",
+                "description": "Broj kadrova bez promene pozicije koji je potreban da bi se objekat označio kao stacionaran."
+            },
+            "max_frames": {
+                "label": "Maksimalno kadrova",
+                "description": "Ograničava koliko dugo se prate stacionarni objekti pre nego što budu odbačeni.",
+                "default": {
+                    "label": "Podrazumevano maksimalno kadrova",
+                    "description": "Podrazumevani maksimalni broj kadrova za praćenje stacionarnog objekta pre zaustavljanja."
+                },
+                "objects": {
+                    "label": "Maksimalno kadrova po objektu",
+                    "description": "Izmene maksimalnog broja kadrova za praćenje stacionarnih objekata po pojedinačnim objektima."
+                }
+            },
+            "classifier": {
+                "label": "Omogući vizuelni klasifikator",
+                "description": "Koristi vizuelni klasifikator za detekciju istinski stacionarnih objekata čak i kada okvir za detekciju treperi ili podrhtava."
+            }
+        },
+        "annotation_offset": {
+            "label": "Pomak anotacije",
+            "description": "Milisekunde za pomeranje anotacija detekcije kako bi se okviri na vremenskoj liniji bolje uskladili sa snimcima; vrednost može biti pozitivna ili negativna."
+        }
+    },
+    "ffmpeg": {
+        "path": {
+            "label": "FFmpeg putanja",
+            "description": "Putanja do FFmpeg izvršne datoteke koja će se koristiti ili alijas verzije (\"7.0\" ili \"8.0\")."
+        },
+        "global_args": {
+            "label": "FFmpeg globalni argumenti",
+            "description": "Globalni argumenti koji se prosleđuju FFmpeg procesima."
+        },
+        "hwaccel_args": {
+            "label": "Argumenti za hardversko ubrzanje",
+            "description": "Argumenti za hardversko ubrzanje za FFmpeg. Preporučuje se korišćenje unapred podešenih šablona specifičnih za provajdera hardvera."
+        },
+        "input_args": {
+            "label": "Ulazni argumenti",
+            "description": "Ulazni argumenti koji se primenjuju na FFmpeg ulazne strimove."
+        },
+        "output_args": {
+            "label": "Izlazni argumenti",
+            "description": "Podrazumevani izlazni argumenti koji se koriste za različite FFmpeg uloge, kao što su detekcija i snimanje.",
+            "detect": {
+                "label": "Izlazni argumenti za detekciju",
+                "description": "Podrazumevani izlazni argumenti za strimove sa ulogom detekcije."
+            },
+            "record": {
+                "label": "Izlazni argumenti za snimanje",
+                "description": "Podrazumevani izlazni argumenti za strimove sa ulogom snimanja."
+            },
+            "record_sub": {
+                "label": "Izlazni argumenti za snimanje pomoćnog strima",
+                "description": "Izlazni argumenti za strimove sa ulogom pomoćnog snimanja (record_sub). Kada ovo nije podešeno, koriste se glavni izlazni argumenti za snimanje."
+            }
+        },
+        "retry_interval": {
+            "label": "Vreme za ponovni pokušaj FFmpeg-a",
+            "description": "Broj sekundi čekanja pre pokušaja ponovnog povezivanja strima kamere nakon prekida. Podrazumevana vrednost je 10."
+        },
+        "apple_compatibility": {
+            "label": "Kompatibilnost sa Apple uređajima",
+            "description": "Omogućava HEVC označavanje radi bolje kompatibilnosti sa Apple plejerima prilikom snimanja u H.265 formatu."
+        },
+        "gpu": {
+            "label": "Indeks grafičkog procesora",
+            "description": "Podrazumevani indeks grafičkog procesora koji se koristi za hardversko ubrzanje, ukoliko je dostupan."
+        },
+        "inputs": {
+            "label": "Ulazi kamere",
+            "description": "Lista definicija ulaznih strimova (putanje i uloge) za ovu kameru.",
+            "path": {
+                "label": "Ulazna putanja",
+                "description": "URL ili putanja ulaznog strima kamere."
+            },
+            "roles": {
+                "label": "Ulazne uloge",
+                "description": "Uloge za ovaj ulazni strim."
+            },
+            "global_args": {
+                "label": "FFmpeg globalni argumenti",
+                "description": "FFmpeg globalni argumenti za ovaj ulazni strim."
+            },
+            "hwaccel_args": {
+                "label": "Argumenti za hardversko ubrzanje",
+                "description": "Argumenti za hardversko ubrzanje za ovaj ulazni strim."
+            },
+            "input_args": {
+                "label": "Ulazni argumenti",
+                "description": "Ulazni argumenti specifični za ovaj strim."
+            }
+        },
+        "label": "Strimovi (FFmpeg)",
+        "description": "Ulazni strimovi kamere i FFmpeg opcije, uključujući putanju do izvršne datoteke (binary path), argumente, hardversko ubrzanje (hwaccel) i argumente izlaznog strima po ulogama."
+    },
+    "live": {
+        "label": "Prikaz uživo",
+        "streams": {
+            "label": "Nazivi strimova uživo",
+            "description": "Mapiranje konfigurisanih naziva strimova na restream/go2rtc nazive koji se koriste za prikaz uživo."
+        },
+        "transcode": {
+            "label": "Transkodovani strimovi",
+            "description": "Strimovi uživo nižeg kvaliteta koje go2rtc transkoduje na zahtev.",
+            "enabled": {
+                "label": "Omogući transkodovane strimove",
+                "description": "Dodaje strimove uživo nižeg kvaliteta koje go2rtc transkoduje u realnom vremenu dok neko gleda."
+            },
+            "source": {
+                "label": "Izvorni strim",
+                "description": "go2rtc strim koji treba transkodovati. Ako nije podešeno, podrazumeva se prvi strim uživo."
+            },
+            "qualities": {
+                "label": "Kvaliteti",
+                "description": "Dodaje se po jedan transkodovani strim za svaki kvalitet.",
+                "height": {
+                    "label": "Visina",
+                    "description": "Izlazna visina u pikselima; širina prati izvorni odnos stranica."
+                },
+                "bitrate": {
+                    "label": "Bitrate",
+                    "description": "Ciljani i maksimalni protok video podataka u kbps."
+                }
+            }
+        },
+        "height": {
+            "label": "Visina prikaza uživo",
+            "description": "Visina (u pikselima) za prikazivanje jsmpeg strima uživo u veb korisničkom interfejsu; mora biti manja ili jednaka (<=) visini strima detekcije."
+        },
+        "quality": {
+            "label": "Kvalitet prikaza uživo",
+            "description": "Kvalitet kodiranja za jsmpeg strim (1 je najviši kvalitet, 31 najniži)."
+        },
+        "description": "Podešavanja koja se koriste u veb-pregledaču za kontrolu izbora strima uživo, rezolucije i kvaliteta."
+    },
+    "motion": {
+        "label": "Detekcija pokreta",
+        "enabled": {
+            "label": "Omogući detekciju pokreta",
+            "description": "Omogućite ili onemogućite detekciju pokreta za ovu kameru."
+        },
+        "threshold": {
+            "label": "Prag pokreta",
+            "description": "Prag razlike u pikselima koji koristi detektor pokreta; više vrednosti smanjuju osetljivost (opseg 1-255)."
+        },
+        "lightning_threshold": {
+            "label": "Prag za munje",
+            "description": "Prag za detekciju i ignorisanje kratkih bljeskova osvetljenja (niže vrednosti znače veću osetljivost, vrednosti su između 0.3 i 1.0). Ovo ne sprečava u potpunosti detekciju pokreta; samo uzrokuje da detektor prestane sa analizom dodatnih kadrova kada se ovaj prag prekorači. Snimci zasnovani na pokretu se i dalje kreiraju tokom ovih događaja."
+        },
+        "skip_motion_threshold": {
+            "label": "Prag za preskakanje pokreta",
+            "description": "Ako se postavi na vrednost između 0.0 i 1.0, i ako se u jednom kadru promeni procenat slike veći od ovog udela, detektor neće prikazati okvire za pokret i odmah će se rekalibrisati. Ovo može uštedeti resurse CPU i smanjiti lažno pozitivne rezultate tokom grmljavine, oluja itd., ali može propustiti stvarne događaje kao što je PTZ kamera koja automatski prati objekat. Kompromis je između gubitka nekoliko megabajta snimaka i pregledanja nekoliko kratkih video-klipova. Ostavite nepodešeno da biste onemogućili ovu funkciju."
+        },
+        "improve_contrast": {
+            "label": "Poboljšaj kontrast",
+            "description": "Primenjuje poboljšanje kontrasta na kadrove pre analize pokreta kako bi se pomoglo u detekciji."
+        },
+        "contour_area": {
+            "label": "Površina konture",
+            "description": "Minimalna površina konture u pikselima koja je potrebna da bi se kontura pokreta uzela u obzir."
+        },
+        "delta_alpha": {
+            "label": "Delta alfa",
+            "description": "Faktor alfa stapanja koji se koristi pri poređenju razlika među kadrovima za proračun pokreta."
+        },
+        "frame_alpha": {
+            "label": "Alfa kadra",
+            "description": "Alfa vrednost koja se koristi prilikom stapanja kadrova tokom predobrade pokreta."
+        },
+        "frame_height": {
+            "label": "Visina kadra",
+            "description": "Visina u pikselima na koju se kadrovi skaliraju prilikom proračuna pokreta."
+        },
+        "mask": {
+            "label": "Koordinate maske",
+            "description": "Sortirane x,y koordinate koje definišu poligon maske pokreta, a koji služi za uključivanje ili isključivanje određenih oblasti."
+        },
+        "mqtt_off_delay": {
+            "label": "MQTT odlaganje isključivanja",
+            "description": "Broj sekundi čekanja nakon poslednjeg zabeleženog pokreta pre slanja MQTT „off” stanja."
+        },
+        "enabled_in_config": {
+            "label": "Prvobitno stanje pokreta",
+            "description": "Pokazuje da li je detekcija pokreta bila omogućena u prvobitnoj statičkoj konfiguraciji."
+        },
+        "raw_mask": {
+            "label": "Sirova maska"
+        },
+        "description": "Podrazumevana podešavanja detekcije pokreta"
+    },
+    "objects": {
+        "label": "Objekti",
+        "description": "Podrazumevana podešavanja za praćenje objekata, uključujući oznake koje treba pratiti i filtere po pojedinačnim objektima.",
+        "track": {
+            "label": "Objekti za praćenje",
+            "description": "Lista oznaka objekata koje treba pratiti za ovu kameru."
+        },
+        "filters": {
+            "label": "Filteri objekata",
+            "description": "Filteri koji se primenjuju na detektovane objekte radi smanjenja lažno pozitivnih rezultata (površina, odnos stranica, pouzdanost).",
+            "min_area": {
+                "label": "Minimalna površina objekta",
+                "description": "Minimalna površina okvira za detekciju (u pikselima ili procentima) potrebna za ovaj tip objekta. Može biti u pikselima (ceo broj) ili u procentima (decimalni broj između 0.000001 i 0.99)."
+            },
+            "max_area": {
+                "label": "Maksimalna površina objekta",
+                "description": "Maksimalna površina okvira za detekciju (u pikselima ili procentima) dozvoljena za ovaj tip objekta. Može biti u pikselima (ceo bro) ili u procentima (decimalni broj između 0.000001 i 0.99)."
+            },
+            "min_ratio": {
+                "label": "Minimalni odnos stranica",
+                "description": "Minimalni odnos širine i visine koji je potreban da bi okvir za detekciju ispunio uslove."
+            },
+            "max_ratio": {
+                "label": "Maksimalni odnos stranica",
+                "description": "Maksimalni odnos širine i visine koji je dozvoljen da bi okvir za detekciju ispunio uslove."
+            },
+            "threshold": {
+                "label": "Prag pouzdanosti",
+                "description": "Prosečan prag pouzdanosti detekcije koji je potreban da bi se objekat smatrao istinski pozitivnim rezultatom."
+            },
+            "min_score": {
+                "label": "Minimalna pouzdanost",
+                "description": "Minimalna pouzdanost detekcije u jednom kadru koja je potrebna da bi se objekat uzeo u obzir."
+            },
+            "mask": {
+                "label": "Maska filtera",
+                "description": "Koordinate poligona koje definišu gde se ovaj filter primenjuje unutar kadra."
+            },
+            "raw_mask": {
+                "label": "Sirova maska"
+            }
+        },
+        "mask": {
+            "label": "Maska objekta",
+            "description": "Poligon maske koji se koristi za sprečavanje detekcije objekata u određenim oblastima."
+        },
+        "raw_mask": {
+            "label": "Sirova maska"
+        },
+        "genai": {
+            "label": "GenAI konfiguracija objekata",
+            "description": "GenAI opcije za opisivanje praćenih objekata i slanje kadrova za generisanje.",
+            "enabled": {
+                "label": "Omogući GenAI",
+                "description": "Podrazumevano omogućava GenAI generisanje opisa za praćene objekte."
+            },
+            "use_snapshot": {
+                "label": "Koristi snimke ekrana",
+                "description": "Koristi snimke ekrana objekata umesto sličica za GenAI generisanje opisa."
+            },
+            "prompt": {
+                "label": "Upit za opis",
+                "description": "Podrazumevani šablon upita (prompt) koji se koristi prilikom generisanja opisa pomoću GenAI-ja."
+            },
+            "object_prompts": {
+                "label": "Upiti za specifične objekte",
+                "description": "Upiti po pojedinačnim objektima za prilagođavanje GenAI izlaza za specifične oznake."
+            },
+            "objects": {
+                "label": "GenAI objekti",
+                "description": "Lista oznaka objekata koji se podrazumevano šalju GenAI provajderu."
+            },
+            "required_zones": {
+                "label": "Obavezne zone",
+                "description": "Zone u koje objekat mora da uđe kako bi ispunio uslove za GenAI generisanje opisa."
+            },
+            "debug_save_thumbnails": {
+                "label": "Sačuvaj sličice",
+                "description": "Čuva sličice poslate GenAI provajderu radi rešavanja problema i pregleda."
+            },
+            "send_triggers": {
+                "label": "GenAI okidači",
+                "description": "Definiše kada kadrove treba poslati GenAI provajderu (na kraju događaja, nakon ažuriranja, itd.).",
+                "tracked_object_end": {
+                    "label": "Pošalji na kraju",
+                    "description": "Šalje zahtev GenAI provajderu kada se praćenje objekta završi."
+                },
+                "after_significant_updates": {
+                    "label": "Rani GenAI okidač",
+                    "description": "Šalje zahtev GenAI provajderu nakon određenog broja značajnih ažuriranja za praćeni objekat."
+                }
+            },
+            "enabled_in_config": {
+                "label": "Prvobitno GenAI stanje",
+                "description": "Pokazuje da li je GenAI bio omogućen u prvobitnoj statičkoj konfiguraciji."
+            }
+        }
+    },
+    "record": {
+        "label": "Snimanje",
+        "enabled": {
+            "label": "Omogući snimanje",
+            "description": "Omogućite ili onemogućite snimanje za ovu kameru."
+        },
+        "expire_interval": {
+            "label": "Interval čišćenja snimaka",
+            "description": "Broj minuta između ciklusa čišćenja koji uklanjaju istekle segmente snimaka."
+        },
+        "continuous": {
+            "label": "Kontinuirano zadržavanje",
+            "description": "Broj dana tokom kojih se čuvaju snimci bez obzira na praćene objekte ili pokret. Postavite na 0 ako želite da zadržite samo snimke upozorenja i detekcija.",
+            "days": {
+                "label": "Dani zadržavanja",
+                "description": "Broj dana tokom kojih se čuvaju snimci."
+            }
+        },
+        "motion": {
+            "label": "Zadržavanje na osnovu pokreta",
+            "description": "Broj dana tokom kojih se čuvaju snimci pokrenuti pokretom, bez obzira na praćene objekte. Postavite na 0 ako želite da zadržite samo snimke upozorenja i detekcija.",
+            "days": {
+                "label": "Dani zadržavanja",
+                "description": "Broj dana tokom kojih se čuvaju snimci."
+            }
+        },
+        "detections": {
+            "label": "Zadržavanje na osnovu detekcije",
+            "description": "Podešavanja zadržavanja snimaka za događaje detekcije, uključujući trajanje snimanja pre i nakon samog događaja.",
+            "pre_capture": {
+                "label": "Sekunde pre događaja",
+                "description": "Broj sekundi pre samog događaja detekcije koje treba uključiti u snimak."
+            },
+            "post_capture": {
+                "label": "Sekunde nakon događaja",
+                "description": "Broj sekundi nakon samog događaja detekcije koje treba uključiti u snimak."
+            },
+            "retain": {
+                "label": "Zadržavanje događaja",
+                "description": "Podešavanja zadržavanja za snimke događaja detekcije.",
+                "days": {
+                    "label": "Dani zadržavanja",
+                    "description": "Broj dana tokom kojih se čuvaju snimci događaja detekcije."
+                },
+                "mode": {
+                    "label": "Režim zadržavanja",
+                    "description": "Režim za čuvanje snimaka: all (čuvaj sve segmente), motion (čuvaj segmente sa pokretom) ili active_objects (čuvaj segmente sa aktivnim objektima)."
+                }
+            }
+        },
+        "alerts": {
+            "label": "Zadržavanje upozorenja",
+            "description": "Podešavanja zadržavanja snimaka za događaje upozorenja, uključujući trajanje snimanja pre i nakon samog događaja.",
+            "pre_capture": {
+                "label": "Sekunde pre događaja",
+                "description": "Broj sekundi pre samog događaja detekcije koje treba uključiti u snimak."
+            },
+            "post_capture": {
+                "label": "Sekunde nakon događaja",
+                "description": "Broj sekundi nakon samog događaja detekcije koje treba uključiti u snimak."
+            },
+            "retain": {
+                "label": "Zadržavanje događaja",
+                "description": "Podešavanja zadržavanja za snimke događaja detekcije.",
+                "days": {
+                    "label": "Dani zadržavanja",
+                    "description": "Broj dana tokom kojih se čuvaju snimci događaja detekcije."
+                },
+                "mode": {
+                    "label": "Režim zadržavanja",
+                    "description": "Režim za čuvanje snimaka: all (čuvaj sve segmente), motion (čuvaj segmente sa pokretom) ili active_objects (čuvaj segmente sa aktivnim objektima)."
+                }
+            }
+        },
+        "export": {
+            "label": "Konfiguracija izvoza",
+            "description": "Podešavanja koja se koriste prilikom izvoza snimaka, kao što su ubrzani snimak (timelapse) i hardversko ubrzanje.",
+            "hwaccel_args": {
+                "label": "Argumenti za hardversko ubrzanje izvoza",
+                "description": "Argumenti hardverskog ubrzanja koji se koriste za operacije izvoza i transkodovanja videa."
+            },
+            "max_concurrent": {
+                "label": "Maksimalno istovremenih izvoza",
+                "description": "Maksimalan broj zadataka izvoza koji se mogu obrađivati u isto vreme."
+            },
+            "chapters": {
+                "label": "Metapodaci o poglavljima za ugradnju u izvezene snimke"
+            }
+        },
+        "preview": {
+            "label": "Konfiguracija pregleda",
+            "description": "Podešavanja koja kontrolišu kvalitet pregleda snimaka koji se prikazuju u korisničkom interfejsu.",
+            "quality": {
+                "label": "Kvalitet pregleda",
+                "description": "Nivo kvaliteta pregleda (very_low, low, medium, high, very_high)."
+            }
+        },
+        "sub": {
+            "label": "Snimanje pomoćnog strima",
+            "description": "Podešavanja za snimanje drugog strima nižeg kvaliteta.",
+            "enabled": {
+                "label": "Omogući snimanje pomoćnog strima",
+                "description": "Omogućava snimanje drugog strima nižeg kvaliteta radi prilagodljivog (adaptivnog) puštanja videa i produženog čuvanja snimaka."
+            },
+            "continuous": {
+                "label": "Kontinuirano zadržavanje pomoćnog strima",
+                "description": "Broj dana tokom kojih se čuvaju snimci pomoćnog strima, bez obzira na praćene objekte ili pokret.",
+                "days": {
+                    "label": "Dani zadržavanja",
+                    "description": "Broj dana tokom kojih se čuvaju snimci."
+                }
+            },
+            "motion": {
+                "label": "Zadržavanje pomoćnog strima na osnovu pokreta",
+                "description": "Broj dana tokom kojih se čuvaju snimci pomoćnog strima pokrenuti pokretom.",
+                "days": {
+                    "label": "Dani zadržavanja",
+                    "description": "Broj dana tokom kojih se čuvaju snimci."
+                }
+            },
+            "alerts": {
+                "label": "Zadržavanje pomoćnog strima na osnovu upozorenja",
+                "description": "Podešavanja zadržavanja za snimke upozorenja sa pomoćnog strima.",
+                "days": {
+                    "label": "Dani zadržavanja",
+                    "description": "Broj dana tokom kojih se čuvaju snimci događaja detekcije."
+                },
+                "mode": {
+                    "label": "Režim zadržavanja",
+                    "description": "Režim za čuvanje snimaka: all (čuvaj sve segmente), motion (čuvaj segmente sa pokretom) ili active_objects (čuvaj segmente sa aktivnim objektima)."
+                }
+            },
+            "detections": {
+                "label": "Zadržavanje pomoćnog strima na osnovu detekcije",
+                "description": "Podešavanja zadržavanja za snimke detekcija sa pomoćnog strima.",
+                "days": {
+                    "label": "Dani zadržavanja",
+                    "description": "Broj dana tokom kojih se čuvaju snimci događaja detekcije."
+                },
+                "mode": {
+                    "label": "Režim zadržavanja",
+                    "description": "Režim za čuvanje snimaka: all (čuvaj sve segmente), motion (čuvaj segmente sa pokretom) ili active_objects (čuvaj segmente sa aktivnim objektima)."
+                }
+            }
+        },
+        "enabled_in_config": {
+            "label": "Prvobitno stanje snimanja",
+            "description": "Pokazuje da li je snimanje bilo omogućeno u prvobitnoj statičkoj konfiguraciji."
+        },
+        "description": "Podešavanja snimanja i perioda čuvanja snimaka za ovu kameru."
+    },
+    "review": {
+        "label": "Pregled",
+        "alerts": {
+            "label": "Konfiguracija upozorenja",
+            "description": "Podešavanja za koje praćene objekte se generišu upozorenja i kako se ta upozorenja zadržavaju.",
+            "enabled": {
+                "label": "Omogući upozorenja",
+                "description": "Omogućite ili onemogućite generisanje alarma za ovu kameru."
+            },
+            "labels": {
+                "label": "Oznake upozorenja",
+                "description": "Lista oznaka objekata koji ispunjavaju uslove za upozorenje (na primer: automobil, osoba)."
+            },
+            "required_zones": {
+                "label": "Obavezne zone",
+                "description": "Zone u koje objekat mora da uđe da bi se smatrao upozorenjem; ostavite prazno da biste dozvolili bilo koju zonu."
+            },
+            "enabled_in_config": {
+                "label": "Prvobitno stanje upozorenja",
+                "description": "Prati da li su upozorenja bila prvobitno omogućena u statičkoj konfiguraciji."
+            },
+            "cutoff_time": {
+                "label": "Vreme prekida upozorenja",
+                "description": "Broj sekundi čekanja nakon što prestane aktivnost koja izaziva upozorenje pre nego što se upozorenje prekine."
+            }
+        },
+        "detections": {
+            "label": "Konfiguracija detekcija",
+            "description": "Podešavanja za koje praćene objekte se generišu detekcije (koje nisu upozorenja) i kako se te detekcije zadržavaju.",
+            "enabled": {
+                "label": "Omogući detekcije",
+                "description": "Omogućite ili onemogućite događaje detekcije za ovu kameru."
+            },
+            "labels": {
+                "label": "Oznake detekcija",
+                "description": "Lista oznaka objekata koji ispunjavaju uslove za događaje detekcije."
+            },
+            "required_zones": {
+                "label": "Obavezne zone",
+                "description": "Zone u koje objekat mora da uđe da bi se smatrao detekcijom; ostavite prazno da biste dozvolili bilo koju zonu."
+            },
+            "cutoff_time": {
+                "label": "Vreme prekida detekcija",
+                "description": "Broj sekundi čekanja nakon što prestane aktivnost koja izaziva detekciju pre nego što se detekcija prekine."
+            },
+            "enabled_in_config": {
+                "label": "Prvobitno stanje detekcija",
+                "description": "Prati da li su detekcije bile prvobitno omogućene u statičkoj konfiguraciji."
+            }
+        },
+        "genai": {
+            "label": "GenAI konfiguracija",
+            "description": "Kontroliše upotrebu generativne veštačke inteligencije za pravljenje opisa i rezimea stavki pregleda.",
+            "enabled": {
+                "label": "Omogući GenAI opise",
+                "description": "Omogućava ili onemogućava opise i rezimee generisane pomoću GenAI-ja za stavke pregleda."
+            },
+            "alerts": {
+                "label": "Omogući GenAI za upozorenja",
+                "description": "Koristi GenAI za generisanje opisa stavki upozorenja."
+            },
+            "detections": {
+                "label": "Omogući GenAI za detekcije",
+                "description": "Koristi GenAI za generisanje opisa stavki detekcija."
+            },
+            "image_source": {
+                "label": "Izvor slike za pregled",
+                "description": "Izvor slika koje se šalju GenAI provajderu ('preview' [pregled] ili 'recordings' [snimci]); opcija 'recordings' koristi kadrove višeg kvaliteta, ali troši više tokena."
+            },
+            "additional_concerns": {
+                "label": "Dodatne napomene",
+                "description": "Lista dodatnih napomena ili beleški koje GenAI treba da uzme u obzir prilikom procene aktivnosti na ovoj kameri."
+            },
+            "debug_save_thumbnails": {
+                "label": "Sačuvaj sličice",
+                "description": "Čuva sličice poslate GenAI provajderu radi rešavanja problema i pregleda."
+            },
+            "enabled_in_config": {
+                "label": "Prvobitno GenAI stanje",
+                "description": "Prati da li je GenAI pregled bio prvobitno omogućen u statičkoj konfiguraciji."
+            },
+            "preferred_language": {
+                "label": "Željeni jezik",
+                "description": "Željeni jezik koji se zahteva od GenAI provajdera za generisane odgovore."
+            },
+            "frame_mode": {
+                "label": "Režim kadrova",
+                "description": "Način na koji se kadrovi predstavljaju modelu. Opcija 'frames' šalje upit praćen kadrovima, što odgovara modelima koji samostalno dobro prate sekvencu. Opcija 'annotated_frames' označava svaki kadar i umeće beleške izvedene iz praćenja objekata, što pomaže modelima koji gube korak sa aktivnošću koja se ponavlja ili odvija unazad."
+            },
+            "response_style": {
+                "label": "Stil odgovora",
+                "description": "Unapred podešeni stil pisanja za generisane opise pregleda. Šabloni prilagođavaju ton i nivo detalja za naslov prikazan korisniku, rezime i opis scene; opcija 'default' ostavlja ugrađeni upit nepromenjen."
+            },
+            "activity_context_prompt": {
+                "label": "Upit za kontekst aktivnosti",
+                "description": "Prilagođeni upit koji opisuje šta jeste, a šta nije sumnjiva aktivnost, kako bi se pružio kontekst za GenAI rezimee."
+            }
+        },
+        "description": "Podešavanja koja kontrolišu alarme, detekcije i GenAI sažetke pregleda koji se koriste u sistemu i skladištu za ovu kameru."
+    },
+    "snapshots": {
+        "label": "Snimci ekrana",
+        "enabled": {
+            "label": "Omogući snimke ekrana",
+            "description": "Omogućite ili onemogućite čuvanje slika za ovu kameru."
+        },
+        "timestamp": {
+            "label": "Prikaz vremenske oznake",
+            "description": "Ugrađuje vremensku oznaku (datum i vreme) na snimke ekrana dobijene preko API-ja."
+        },
+        "bounding_box": {
+            "label": "Prikaz okvira za detekciju",
+            "description": "Iscrtava okvire oko praćenih objekata na snimcima ekrana dobijenim preko API-ja."
+        },
+        "crop": {
+            "label": "Isecanje snimka ekrana",
+            "description": "Iseca snimke ekrana dobijene preko API-ja na veličinu okvira za detekciju detektovanog objekta."
+        },
+        "required_zones": {
+            "label": "Obavezne zone",
+            "description": "Zone u koje objekat mora da uđe da bi snimak ekrana bio sačuvan."
+        },
+        "height": {
+            "label": "Visina snimka ekrana",
+            "description": "Visina (u pikselima) na koju se menjaju dimenzije snimaka ekrana dobijenih preko API-ja; ostavite prazno da biste zadržali izvornu veličinu."
+        },
+        "retain": {
+            "label": "Zadržavanje snimaka ekrana",
+            "description": "Podešavanja zadržavanja za snimke ekrana, uključujući podrazumevani broj dana i izmene po pojedinačnim objektima.",
+            "default": {
+                "label": "Podrazumevano zadržavanje",
+                "description": "Podrazumevani broj dana tokom kojih se čuvaju snimci ekrana."
+            },
+            "objects": {
+                "label": "Zadržavanje po objektu",
+                "description": "Izmene broja dana zadržavanja snimaka ekrana po pojedinačnim objektima."
+            }
+        },
+        "quality": {
+            "label": "Kvalitet snimka ekrana",
+            "description": "Kvalitet kodiranja za sačuvane snimke ekrana (0-100)."
+        },
+        "description": "Podešavanja za automatski generisane slike praćenih objekata putem API-ja za ovu kameru."
+    },
+    "timestamp_style": {
+        "label": "Stil vremenske oznake",
+        "position": {
+            "label": "Pozicija vremenske oznake",
+            "description": "Pozicija vremenske oznake na slici (tl [gore levo], tr [gore desno], bl [dole levo], br [dole desno])."
+        },
+        "format": {
+            "label": "Format vremenske oznake",
+            "description": "Tekstualni format datuma i vremena koji se koristi za vremenske oznake (Python datetime kodovi za formatiranje)."
+        },
+        "color": {
+            "label": "Boja vremenske oznake",
+            "description": "RGB vrednosti boja za tekst vremenske oznake (sve vrednosti od 0 do 255).",
+            "red": {
+                "label": "Crvena",
+                "description": "Crvena komponenta (0-255) za boju vremenske oznake."
+            },
+            "green": {
+                "label": "Zelena",
+                "description": "Zelena komponenta (0-255) za boju vremenske oznake."
+            },
+            "blue": {
+                "label": "Plava",
+                "description": "Plava komponenta (0-255) za boju vremenske oznake."
+            }
+        },
+        "thickness": {
+            "label": "Debljina vremenske oznake",
+            "description": "Debljina linije teksta vremenske oznake."
+        },
+        "effect": {
+            "label": "Efekat vremenske oznake",
+            "description": "Vizuelni efekat za tekst vremenske oznake (bez efekta, puna pozadina, senka)."
+        },
+        "description": "Opcije stilizovanja vremenskih oznaka koje se primenjuju na sačuvane slike i prikaz otklanjanja grešaka."
+    },
+    "audio_transcription": {
+        "label": "Transkripcija zvuka",
+        "description": "Podešavanja za transkripciju zvuka uživo i govora koja se koristi za događaje i titlove uživo.",
+        "live_enabled": {
+            "label": "Transkripcija uživo",
+            "description": "Omogućava strimovanje transkripcije zvuka uživo čim se on primi."
+        },
+        "enabled_in_config": {
+            "label": "Izvorni status transkripcije"
+        },
+        "enabled": {
+            "description": "Omogućite ili onemogućite ručno pokretanje transkripcije audio događaja.",
+            "label": "Omogući transkripciju"
+        }
+    },
+    "semantic_search": {
+        "label": "Semantička pretraga",
+        "triggers": {
+            "label": "Okidači",
+            "description": "Akcije i kriterijumi podudaranja za okidače semantičke pretrage specifične za kameru.",
+            "friendly_name": {
+                "label": "Uobičajeni naziv",
+                "description": "Opcioni uobičajeni naziv koji se prikazuje u korisničkom interfejsu za ovaj okidač."
+            },
+            "enabled": {
+                "label": "Omogući ovaj okidač",
+                "description": "Omogućava ili onemogućava ovaj okidač semantičke pretrage."
+            },
+            "type": {
+                "label": "Tip okidača",
+                "description": "Tip okidača: 'thumbnail' (podudaranje sa slikom) ili 'description' (podudaranje sa tekstom)."
+            },
+            "data": {
+                "label": "Sadržaj okidača",
+                "description": "Tekstualna fraza ili ID sličice za podudaranje sa praćenim objektima."
+            },
+            "threshold": {
+                "label": "Prag okidača",
+                "description": "Minimalni rezultat sličnosti (0-1) koji je potreban za aktiviranje ovog okidača."
+            },
+            "actions": {
+                "label": "Akcije okidača",
+                "description": "Lista akcija koje treba izvršiti kada se okidač poklopi (obaveštenje, pod-oznaka, atribut)."
+            }
+        },
+        "description": "Podešavanja za semantičku pretragu koja kreira i pretražuje vektorske prikaze objekata radi pronalaženja sličnih stavki."
+    },
+    "face_recognition": {
+        "label": "Prepoznavanje lica",
+        "enabled": {
+            "label": "Omogući prepoznavanje lica",
+            "description": "Omogućite ili onemogućite prepoznavanje lica."
+        },
+        "min_area": {
+            "label": "Minimalna površina lica",
+            "description": "Minimalna površina okvira detektovanog lica (u pikselima) koja je potrebna da bi se pokušalo prepoznavanje."
+        },
+        "description": "Podešavanja za detekciju i prepoznavanje lica za ovu kameru."
+    },
+    "lpr": {
+        "label": "Prepoznavanje registarskih tablica",
+        "description": "Podešavanja za prepoznavanje registarskih tablica, uključujući pragove detekcije, formatiranje i poznate tablice.",
+        "enabled": {
+            "label": "Omogući LPR",
+            "description": "Omogućite ili onemogućite prepoznavanje registarskih tablica na ovoj kameri."
+        },
+        "min_area": {
+            "label": "Minimalna površina tablice",
+            "description": "Minimalna površina tablice (u pikselima) koja je potrebna da bi se pokušalo prepoznavanje."
+        },
+        "enhancement": {
+            "label": "Nivo poboljšanja",
+            "description": "Nivo poboljšanja kvaliteta slike (0–10) koji se primenjuje na isečke tablica pre OCR prepoznavanja; više vrednosti ne moraju uvek poboljšati rezultate, a nivoi iznad 5 mogu funkcionisati samo na noćnim tablicama i treba ih koristiti oprezno."
+        },
+        "expire_time": {
+            "label": "Vreme isteka u sekundama",
+            "description": "Vreme u sekundama nakon kojeg se neaktivna tablica briše iz sistema za praćenje (važi samo za namenske LPR kamere)."
+        }
+    },
+    "profiles": {
+        "label": "Profili",
+        "description": "Imenovani profili konfiguracije sa delimičnim nadjačavanjima koji se mogu aktivirati tokom rada sistema."
+    },
+    "onvif": {
+        "label": "ONVIF",
+        "description": "Podešavanja ONVIF veze i PTZ automatskog praćenja za ovu kameru.",
+        "host": {
+            "label": "ONVIF host",
+            "description": "Host adresa (i opciona šema protokola) za ONVIF uslugu ove kamere."
+        },
+        "port": {
+            "label": "ONVIF port",
+            "description": "Broj porta za ONVIF uslugu."
+        },
+        "user": {
+            "label": "ONVIF korisničko ime",
+            "description": "Korisničko ime za ONVIF autentifikaciju; neki uređaji zahtevaju administratorskog (admin) korisnika za ONVIF."
+        },
+        "password": {
+            "label": "ONVIF lozinka",
+            "description": "Lozinka za ONVIF potvrdu identiteta."
+        },
+        "tls_insecure": {
+            "label": "Onemogući TLS verifikaciju",
+            "description": "Preskoči verifikaciju TLS sertifikata i onemogući \"digest\" potvrdu identiteta za ONVIF (nebezbedno; koristiti isključivo u pouzdanim mrežama)."
+        },
+        "profile": {
+            "label": "ONVIF profil",
+            "description": "Konkretan ONVIF medijski profil koji se koristi za PTZ kontrolu, identifikovan putem tokena ili naziva. Ako nije podešeno, sistem automatski bira prvi profil sa ispravnom PTZ konfiguracijom."
+        },
+        "autotracking": {
+            "label": "Automatsko praćenje",
+            "description": "Automatski prati objekte u pokretu i drži ih u centru kadra pomoću pomeranja PTZ kamere.",
+            "enabled": {
+                "label": "Omogući automatsko praćenje",
+                "description": "Omogući ili onemogući automatsko PTZ praćenje detektovanih objekata."
+            },
+            "calibrate_on_startup": {
+                "label": "Kalibracija pri pokretanju",
+                "description": "Izmeri brzine PTZ motora prilikom pokretanja sistema radi veće preciznosti praćenja. Frigate će nakon kalibracije ažurirati konfiguraciju parametrom movement_weights."
+            },
+            "zooming": {
+                "label": "Režim zumiranja",
+                "description": "Kontrola ponašanja zuma: onemogućeno (samo pomeranje levo-desno/gore-dole), apsolutno (najkompatibilnije) ili relativno (istovremeno pomeranje i zumiranje)."
+            },
+            "zoom_factor": {
+                "label": "Faktor zumiranja",
+                "description": "Kontrola nivoa zuma na objektima koji se prate. Niže vrednosti zadržavaju širi kadar, dok više vrednosti više približavaju sliku, ali mogu dovesti do gubitka praćenja. Vrednosti se kreću između 0.1 i 0.75."
+            },
+            "track": {
+                "label": "Praćeni objekti",
+                "description": "Lista tipova objekata koji treba da pokrenu automatsko praćenje."
+            },
+            "required_zones": {
+                "label": "Obavezne zone",
+                "description": "Objekti moraju da uđu u jednu od ovih zona pre nego što počne automatsko praćenje."
+            },
+            "return_preset": {
+                "label": "Podrazumevana pozicija za povratak",
+                "description": "Naziv ONVIF unapred podešene pozicije koja je konfigurisana u softveru kamere, na koju se kamera vraća nakon završetka praćenja."
+            },
+            "timeout": {
+                "label": "Vreme čekanja na povratak",
+                "description": "Broj sekundi koji kamera čeka nakon gubitka objekta iz vidokruga pre nego što se vrati na svoju podrazumevanu poziciju."
+            },
+            "movement_weights": {
+                "label": "Težinski koeficijenti kretanja",
+                "description": "Vrednosti kalibracije koje sistem automatski generiše tokom kalibracije kamere. Nemojte ih ručno menjati."
+            },
+            "enabled_in_config": {
+                "label": "Izvorno stanje automatskog praćenja",
+                "description": "Interno polje koje prati da li je automatsko praćenje bilo omogućeno u samoj konfiguraciji."
+            }
+        },
+        "ignore_time_mismatch": {
+            "label": "Zanemari vremensko neslaganje",
+            "description": "Zanemari razlike u sinhronizaciji vremena između kamere i Frigate servera za ONVIF komunikaciju."
+        }
+    },
+    "zones": {
+        "label": "Zone",
+        "objects": {
+            "description": "Lista tipova objekata (iz mape oznaka) koji mogu da pokrenu ovu zonu. Može biti tekstualni niz ili lista nizova. Ako je prazno, uzimaju se u obzir svi objekti.",
+            "label": "Objekti pokretači"
+        },
+        "speed_threshold": {
+            "description": "Minimalna brzina (u stvarnim jedinicama ako su udaljenosti podešene) potrebna da bi se objekat smatrao prisutnim u zoni. Koristi se za pokretače zona na osnovu brzine.",
+            "label": "Minimalna brzina"
+        },
+        "loitering_time": {
+            "description": "Broj sekundi koliko objekat mora ostati u zoni da bi se smatralo da se zadržava. Postavite na 0 da biste onemogućili detekciju zadržavanja.",
+            "label": "Sekunde zadržavanja"
+        },
+        "inertia": {
+            "description": "Broj uzastopnih kadrova u kojima objekat mora biti detektovan unutar zone pre nego što se smatra prisutnim. Pomaže u filtriranju prolaznih (lažnih) detekcija.",
+            "label": "Kadrovi inercije"
+        },
+        "distances": {
+            "description": "Opcione stvarne udaljenosti za svaku stranicu četvorougla zone, koje se koriste za izračunavanje brzine ili udaljenosti. Mora imati tačno 4 vrednosti ako je podešeno.",
+            "label": "Stvarne udaljenosti"
+        },
+        "coordinates": {
+            "description": "Koordinate poligona koje definišu površinu zone. Može biti tekstualni niz razdvojen zarezima ili lista nizova koordinata. Koordinate treba da budu relativne (0-1) ili apsolutne (zastarelo).",
+            "label": "Koordinate"
+        },
+        "filters": {
+            "raw_mask": {
+                "label": "Sirova maska"
+            },
+            "mask": {
+                "description": "Koordinate poligona koje definišu gde se ovaj filter primenjuje unutar kadra.",
+                "label": "Maska filtera"
+            },
+            "min_score": {
+                "description": "Minimalna pouzdanost detekcije u jednom kadru potrebna da bi se objekat uzeo u obzir.",
+                "label": "Minimalna pouzdanost"
+            },
+            "threshold": {
+                "description": "Prosečan potreban prag pouzdanosti detekcije da bi se objekat smatrao stvarno pozitivnim rezultatom.",
+                "label": "Prag pouzdanosti"
+            },
+            "max_ratio": {
+                "description": "Maksimalni odnos širine i visine dozvoljen da bi uokvireni prostor ispunio uslove.",
+                "label": "Maksimalni odnos stranica"
+            },
+            "min_ratio": {
+                "description": "Minimalni odnos širine i visine potreban da bi uokvireni prostor ispunio uslove.",
+                "label": "Minimalni odnos stranica"
+            },
+            "max_area": {
+                "description": "Maksimalna površina uokvirenog prostora (u pikselima ili procentima) dozvoljena za ovaj tip objekta. Može biti u pikselima (ceo broj) ili u procentima (decimalni broj između 0.000001 i 0.99).",
+                "label": "Maksimalna površina objekta"
+            },
+            "min_area": {
+                "description": "Minimalna površina uokvirenog prostora (u pikselima ili procentima) potrebna za ovaj tip objekta. Može biti u pikselima (ceo broj) ili u procentima (decimalni broj između 0.000001 i 0.99).",
+                "label": "Minimalna površina objekta"
+            },
+            "description": "Filteri koji se primenjuju na objekte unutar ove zone. Koriste se za smanjenje lažno pozitivnih rezultata ili za ograničavanje objekata koji se smatraju prisutnim u zoni.",
+            "label": "Filteri zone"
+        },
+        "enabled_in_config": {
+            "label": "Prati izvorno stanje zone."
+        },
+        "enabled": {
+            "description": "Omogućite ili onemogućite ovu zonu. Onemogućene zone se ignorišu tokom rada sistema.",
+            "label": "Omogućeno"
+        },
+        "friendly_name": {
+            "description": "Prepoznatljiv naziv za zonu koji se prikazuje u sistemu. Ako nije podešen, koristiće se formatirana verzija naziva zone.",
+            "label": "Naziv zone"
+        },
+        "description": "Zone vam omogućavaju da definišete određenu površinu kadra kako biste mogli da utvrdite da li se objekat nalazi unutar te površine."
+    },
+    "enabled_in_config": {
+        "description": "Prati izvorno stanje kamere.",
+        "label": "Izvorno stanje kamere"
+    },
+    "webui_url": {
+        "description": "URL za direktan pristup kameri sa sistemske stranice",
+        "label": "URL kamere"
+    },
+    "ui": {
+        "review": {
+            "description": "Uključite ili isključite vidljivost ove kamere u pregledu (stranica za pregled i njen filter kamera, pregled kretanja i prikaz istorije).",
+            "label": "Prikaži u pregledu"
+        },
+        "dashboard": {
+            "description": "Uključite ili isključite vidljivost ove kamere na podrazumevanoj kontrolnoj tabli uživo „Sve kamere“. Kamera ostaje dostupna na svim ostalim mestima u sistemu, uključujući grupe kamera i podešavanja.",
+            "label": "Prikaži na kontrolnoj tabli uživo"
+        },
+        "order": {
+            "description": "Numerički redosled koji se koristi za sortiranje kamera u sistemu (podrazumevana kontrolna tabla i liste); veći brojevi se prikazuju kasnije.",
+            "label": "Redosled prikaza"
+        },
+        "description": "Podešavanje redosleda prikaza i vidljivosti za ovu kameru u sistemu. Redosled utiče na podrazumevanu kontrolnu tablu. Za detaljniju kontrolu koristite grupe kamera.",
+        "label": "Prikaz kamere u sistemu"
+    },
+    "type": {
+        "description": "Tip kamere",
+        "label": "Tip kamere"
+    },
+    "best_image_timeout": {
+        "label": "Vremensko ograničenje za najbolju sliku",
+        "description": "Koliko dugo se čeka slika sa najvećim rezultatom pouzdanosti."
+    },
+    "label": "Konfiguracija kamere",
+    "name": {
+        "label": "Naziv kamere",
+        "description": "Naziv kamere je obavezan"
+    },
+    "friendly_name": {
+        "label": "Prepoznatljiv naziv",
+        "description": "Prepoznatljiv naziv kamere koji se koristi u sistemu"
+    },
+    "enabled": {
+        "label": "Omogućeno",
+        "description": "Omogućeno"
+    }
+}

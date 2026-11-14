@@ -82,13 +82,13 @@ objects:
         person_filter1:
           friendly_name: "Roof area"
           enabled: true
-          coordinates: "0.000,0.000,1.000,0.000,1.000,0.400,0.000,0.400"
+          coordinates: "0.000,0.000,1.0,0.000,1.0,0.400,0.000,0.400"
     car:
       mask:
         car_filter1:
           friendly_name: "Sidewalk area"
           enabled: true
-          coordinates: "0.000,0.700,1.000,0.700,1.000,1.000,0.000,1.000"
+          coordinates: "0.000,0.700,1.0,0.700,1.0,1.0,0.000,1.0"
 ```
 
 </TabItem>

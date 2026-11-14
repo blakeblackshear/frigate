@@ -1,5 +1,7 @@
 from pydantic import Field, model_validator
 
+from frigate.detectors.detector_config import DEFAULT_SCENE, SCENE_PATTERN
+
 from ..base import FrigateBaseModel
 
 __all__ = ["DetectConfig", "StationaryConfig", "StationaryMaxFramesConfig"]
@@ -59,6 +61,12 @@ class DetectConfig(FrigateBaseModel):
         default=None,
         title="Detect width",
         description="Width (pixels) of frames used for the detect stream; leave empty to use the native stream resolution.",
+    )
+    scene: str = Field(
+        default=DEFAULT_SCENE,
+        pattern=SCENE_PATTERN,
+        title="Detect scene",
+        description="The environment this camera looks at, used to pick which of the configured models runs on it. Cameras left on 'default' run the model configured with a scene of 'default'.",
     )
     fps: int = Field(
         default=5,

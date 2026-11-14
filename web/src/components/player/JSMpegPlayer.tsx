@@ -174,7 +174,6 @@ export default function JSMpegPlayer({
             streamType: "jsmpeg",
             bandwidth: Math.round(bitrate),
             totalFrames: frameCount,
-            latency: undefined,
             droppedFrames: undefined,
             decodedFrames: undefined,
             droppedFrameRate: undefined,
@@ -203,7 +202,7 @@ export default function JSMpegPlayer({
           try {
             videoElement.player?.destroy();
             // eslint-disable-next-line no-empty
-          } catch (e) {}
+          } catch {}
 
           if (videoWrapper) {
             videoWrapper.innerHTML = "";

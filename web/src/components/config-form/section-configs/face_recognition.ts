@@ -6,6 +6,8 @@ const faceRecognition: SectionConfigOverrides = {
     messages: [
       {
         key: "global-disabled",
+        health: (ctx) =>
+          ctx.fullCameraConfig?.face_recognition?.enabled === true,
         messageKey: "configMessages.faceRecognition.globalDisabled",
         severity: "warning",
         condition: (ctx) => {
@@ -15,6 +17,9 @@ const faceRecognition: SectionConfigOverrides = {
       },
       {
         key: "person-not-tracked",
+        health: (ctx) =>
+          ctx.fullCameraConfig?.face_recognition?.enabled === true &&
+          ctx.fullConfig.face_recognition?.enabled === true,
         messageKey: "configMessages.faceRecognition.personNotTracked",
         severity: "info",
         condition: (ctx) => {

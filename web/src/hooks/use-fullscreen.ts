@@ -153,17 +153,11 @@ export function useFullscreen<T extends HTMLElement = HTMLElement>(
     // @ts-expect-error we need to check that fullscreen exists
     if (document.exitFullscreen) return true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((document as any).msExitFullscreen)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return true;
+    if ((document as any).msExitFullscreen) return true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((document as any).webkitExitFullscreen)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return true;
+    if ((document as any).webkitExitFullscreen) return true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((document as any).mozCancelFullScreen)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return true;
+    if ((document as any).mozCancelFullScreen) return true;
     return false;
   }, []);
 

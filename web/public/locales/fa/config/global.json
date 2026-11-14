@@ -66,10 +66,6 @@
             "label": "فعال کردن چشم پرندگان",
             "description": "ویژگی نمای چشم پرندگان را فعال یا غیرفعال کنید."
         },
-        "mode": {
-            "label": "حالت ردیابی",
-            "description": "حالت گنجاندن دوربین‌ها در چشم پرنده: «اشیاء»، «حرکت» یا «پیوسته»."
-        },
         "order": {
             "label": "موقعیت",
             "description": "موقعیت عددی که ترتیب قرارگیری دوربین را در طرح چشم پرنده کنترل می‌کند."
@@ -806,10 +802,6 @@
             "label": "اسنپ‌شات‌ها فعال شدند",
             "description": "فعال یا غیرفعال کردن ذخیره عکس‌های فوری برای همه دوربین‌ها؛ قابل لغو به ازای هر دوربین."
         },
-        "clean_copy": {
-            "label": "ذخیره نسخه پاک",
-            "description": "علاوه بر عکس‌های فوری دارای حاشیه‌نویسی، یک کپی تمیز بدون حاشیه‌نویسی از عکس‌های فوری ذخیره کنید."
-        },
         "timestamp": {
             "label": "روکش مهر زمانی",
             "description": "یک مهر زمانی روی عکس‌های ذخیره شده قرار دهید."
@@ -836,10 +828,6 @@
             "default": {
                 "label": "نگهداری پیش‌فرض",
                 "description": "تعداد روزهای پیش‌فرض برای نگهداری اسنپ‌شات‌ها."
-            },
-            "mode": {
-                "label": "حالت نگهداری",
-                "description": "حالت نگهداری: همه (ذخیره همه بخش‌ها)، حرکت (ذخیره بخش‌های دارای حرکت) یا active_objects (ذخیره بخش‌های دارای اشیاء فعال)."
             },
             "objects": {
                 "label": "نگهداری شیء",
@@ -1246,213 +1234,6 @@
         "unit_system": {
             "label": "سیستم واحدها",
             "description": "سیستم واحدها for display (metric or imperial) used in the رابط کاربری and MQTT."
-        }
-    },
-    "detectors": {
-        "label": "سخت‌افزار آشکارساز",
-        "description": "پیکربندی آشکارسازهای اشیاء (CPU، GPU، پس‌زمینه‌های ONNX) و تنظیمات مدل خاص آشکارساز.",
-        "type": {
-            "label": "نوع"
-        },
-        "model": {
-            "label": "پیکربندی مدل خاص آشکارساز",
-            "description": "گزینه‌های پیکربندی مدل خاص آشکارساز (مسیر، اندازه ورودی و غیره).",
-            "path": {
-                "label": "مسیر مدل آشکارساز اشیاء سفارشی",
-                "description": "مسیر فایل مدل تشخیص سفارشی (یا plus://<model_id> برای مدل‌های Frigate+)."
-            },
-            "labelmap_path": {
-                "label": "نقشه برچسب برای آشکارساز اشیاء سفارشی",
-                "description": "مسیر فایل نقشه برچسب که کلاس‌های عددی را به برچسب‌های رشته‌ای برای آشکارساز نگاشت می‌کند."
-            },
-            "width": {
-                "label": "عرض ورودی مدل تشخیص اشیاء",
-                "description": "عرض تنسور ورودی مدل بر حسب پیکسل."
-            },
-            "height": {
-                "label": "ارتفاع ورودی مدل تشخیص اشیاء",
-                "description": "ارتفاع of the model input tensor in pixels."
-            },
-            "labelmap": {
-                "label": "سفارشی‌سازی نقشه برچسب",
-                "description": "ورودی‌های لغو یا نگاشت مجدد برای ادغام در نقشه برچسب استاندارد."
-            },
-            "attributes_map": {
-                "label": "نگاشت برچسب‌های اشیاء به برچسب‌های ویژگی‌هایشان",
-                "description": "نگاشت از برچسب‌های اشیاء به برچسب‌های ویژگی برای پیوست فراداده (مثلاً 'car' -> ['license_plate'])."
-            },
-            "input_tensor": {
-                "label": "مدل Input Tensor Shape",
-                "description": "قالب تنسور مورد انتظار مدل: 'nhwc' یا 'nchw'."
-            },
-            "input_pixel_format": {
-                "label": "مدل Input Pixel Color Format",
-                "description": "فضای رنگ پیکسل مورد انتظار مدل: 'rgb'، 'bgr' یا 'yuv'."
-            },
-            "input_dtype": {
-                "label": "مدل Input D نوع",
-                "description": "نوع داده تنسور ورودی مدل (مثلاً 'float32')."
-            },
-            "model_type": {
-                "label": "Object Detection مدل نوع",
-                "description": "نوع معماری مدل آشکارساز (ssd، yolox، yolonas، yolo-generic، rfdetr، dfine) که توسط برخی آشکارسازها برای بهینه‌سازی استفاده می‌شود."
-            }
-        },
-        "model_path": {
-            "label": "مسیر مدل خاص آشکارساز",
-            "description": "مسیر فایل باینری مدل آشکارساز در صورت نیاز توسط آشکارساز انتخاب‌شده."
-        },
-        "axengine": {
-            "label": "NPU با موتور AXEngine",
-            "description": "آشکارساز NPU ایکس‌اِرا AX650N/AX8850N که فایل‌های .axmodel کامپایل‌شده را از طریق زمان اجرای AXEngine اجرا می‌کند."
-        },
-        "cpu": {
-            "label": "CPU",
-            "description": "آشکارساز TFLite پردازنده که مدل‌های TensorFlow Lite را روی CPU میزبان بدون شتاب سخت‌افزاری اجرا می‌کند. توصیه نمی‌شود.",
-            "num_threads": {
-                "label": "تعداد رشته‌های تشخیص",
-                "description": "تعداد رشته‌های مورد استفاده برای استنتاج مبتنی بر CPU."
-            }
-        },
-        "deepstack": {
-            "label": "DeepStack",
-            "description": "آشکارساز DeepStack/CodeProject.AI که تصاویر را به یک API از راه دور DeepStack برای استنتاج ارسال می‌کند. توصیه نمی‌شود.",
-            "api_url": {
-                "label": "آدرس API دیپ‌استک",
-                "description": "آدرس API دیپ‌استک."
-            },
-            "api_timeout": {
-                "label": "زمان انقضای API دیپ‌استک (به ثانیه)",
-                "description": "حداکثر زمان مجاز برای درخواست API دیپ‌استک."
-            },
-            "api_key": {
-                "label": "DeepStack کلید API (if required)",
-                "description": "کلید API اختیاری برای سرویس‌های احراز هویت‌شده DeepStack."
-            }
-        },
-        "edgetpu": {
-            "label": "EdgeTPU",
-            "description": "آشکارساز EdgeTPU که مدل‌های TensorFlow Lite کامپایل‌شده برای Coral EdgeTPU را با استفاده از delegate EdgeTPU اجرا می‌کند.",
-            "device": {
-                "label": "دستگاه نوع",
-                "description": "دستگاه مورد استفاده برای استنتاج EdgeTPU (مثلاً 'usb'، 'pci')."
-            }
-        },
-        "hailo8l": {
-            "label": "Hailo-8/Hailo-8L",
-            "description": "آشکارساز Hailo-8/Hailo-8L که از مدل‌های HEF و SDK هیلو‌آر‌تی برای استنتاج روی سخت‌افزار Hailo استفاده می‌کند.",
-            "device": {
-                "label": "دستگاه نوع",
-                "description": "دستگاه مورد استفاده برای استنتاج Hailo (مثلاً 'PCIe'، 'M.2')."
-            }
-        },
-        "memryx": {
-            "label": "MemryX",
-            "description": "آشکارساز MemryX MX3 که مدل‌های DFP کامپایل‌شده را روی شتاب‌دهنده‌های MemryX اجرا می‌کند.",
-            "device": {
-                "label": "دستگاه Path",
-                "description": "دستگاه مورد استفاده برای استنتاج MemryX (مثلاً 'PCIe')."
-            }
-        },
-        "onnx": {
-            "label": "ONNX",
-            "description": "آشکارساز ONNX برای اجرای مدل‌های ONNX؛ از پس‌زمینه‌های شتاب‌دهی موجود (CUDA/ROCm/OpenVINO) در صورت وجود استفاده می‌کند.",
-            "device": {
-                "label": "دستگاه نوع",
-                "description": "دستگاه مورد استفاده برای استنتاج ONNX (مثلاً 'AUTO'، 'CPU'، 'GPU')."
-            }
-        },
-        "openvino": {
-            "label": "OpenVINO",
-            "description": "آشکارساز OpenVINO برای پردازنده‌های AMD و اینتل، GPUهای اینتل و سخت‌افزار VPU اینتل.",
-            "device": {
-                "label": "دستگاه نوع",
-                "description": "دستگاه مورد استفاده برای استنتاج OpenVINO (مثلاً 'CPU'، 'GPU'، 'NPU')."
-            }
-        },
-        "rknn": {
-            "label": "RKNN",
-            "description": "آشکارساز RKNN برای NPUهای راک‌چیپ؛ مدل‌های RKNN کامپایل‌شده را روی سخت‌افزار راک‌چیپ اجرا می‌کند.",
-            "num_cores": {
-                "label": "تعداد هسته‌های NPU برای استفاده.",
-                "description": "تعداد هسته‌های NPU برای استفاده (0 برای خودکار)."
-            }
-        },
-        "synaptics": {
-            "label": "سیناپتیکس",
-            "description": "سیناپتیکس NPU detector for models in .synap format using the Synap SDK on سیناپتیکس hardware."
-        },
-        "teflon_tfl": {
-            "label": "تفلون",
-            "description": "آشکارساز delegate تفلون برای TFLite با استفاده از کتابخانه delegate تفلون Mesa برای شتاب‌دهی استنتاج روی GPUهای پشتیبانی‌شده."
-        },
-        "tensorrt": {
-            "label": "TensorRT",
-            "description": "آشکارساز TensorRT برای دستگاه‌های Nvidia Jetson با استفاده از موتورهای TensorRT سری‌سازی‌شده برای استنتاج شتاب‌دهی‌شده.",
-            "device": {
-                "label": "GPU دستگاه Index",
-                "description": "شاخص دستگاه GPU برای استفاده."
-            }
-        },
-        "zmq": {
-            "label": "ZMQ IPC",
-            "description": "آشکارساز ZMQ IPC که استنتاج را به یک فرآیند خارجی از طریق یک نقطه پایانی ZeroMQ IPC تخلیه می‌کند.",
-            "endpoint": {
-                "label": "نقطه پایانی ZMQ IPC",
-                "description": "نقطه پایانی ZMQ برای اتصال."
-            },
-            "request_timeout_ms": {
-                "label": "زمان انقضای درخواست ZMQ بر حسب میلی‌ثانیه",
-                "description": "زمان انقضای درخواست‌های ZMQ بر حسب میلی‌ثانیه."
-            },
-            "linger_ms": {
-                "label": "ماندن سوکت ZMQ بر حسب میلی‌ثانیه",
-                "description": "دوره ماندن سوکت بر حسب میلی‌ثانیه."
-            }
-        }
-    },
-    "model": {
-        "label": "مدل تشخیص",
-        "description": "تنظیمات برای پیکربندی یک مدل تشخیص اشیاء سفارشی و شکل ورودی آن.",
-        "path": {
-            "label": "مسیر مدل آشکارساز اشیاء سفارشی",
-            "description": "مسیر فایل مدل تشخیص سفارشی (یا plus://<model_id> برای مدل‌های Frigate+)."
-        },
-        "labelmap_path": {
-            "label": "نقشه برچسب برای آشکارساز اشیاء سفارشی",
-            "description": "مسیر فایل نقشه برچسب که کلاس‌های عددی را به برچسب‌های رشته‌ای برای آشکارساز نگاشت می‌کند."
-        },
-        "width": {
-            "label": "عرض ورودی مدل تشخیص اشیاء",
-            "description": "عرض تنسور ورودی مدل بر حسب پیکسل."
-        },
-        "height": {
-            "label": "ارتفاع ورودی مدل تشخیص اشیاء",
-            "description": "ارتفاع of the model input tensor in pixels."
-        },
-        "labelmap": {
-            "label": "سفارشی‌سازی نقشه برچسب",
-            "description": "ورودی‌های لغو یا نگاشت مجدد برای ادغام در نقشه برچسب استاندارد."
-        },
-        "attributes_map": {
-            "label": "نگاشت برچسب‌های اشیاء به برچسب‌های ویژگی‌هایشان",
-            "description": "نگاشت از برچسب‌های اشیاء به برچسب‌های ویژگی برای پیوست فراداده (مثلاً 'car' -> ['license_plate'])."
-        },
-        "input_tensor": {
-            "label": "مدل Input Tensor Shape",
-            "description": "قالب تنسور مورد انتظار مدل: 'nhwc' یا 'nchw'."
-        },
-        "input_pixel_format": {
-            "label": "مدل Input Pixel Color Format",
-            "description": "فضای رنگ پیکسل مورد انتظار مدل: 'rgb'، 'bgr' یا 'yuv'."
-        },
-        "input_dtype": {
-            "label": "مدل Input D نوع",
-            "description": "نوع داده تنسور ورودی مدل (مثلاً 'float32')."
-        },
-        "model_type": {
-            "label": "Object Detection مدل نوع",
-            "description": "نوع معماری مدل آشکارساز (ssd، yolox، yolonas، yolo-generic، rfdetr، dfine) که توسط برخی آشکارسازها برای بهینه‌سازی استفاده می‌شود."
         }
     },
     "genai": {

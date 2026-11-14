@@ -1,1 +1,80 @@
-{}
+{
+    "title": "Busca de movimento",
+    "documentTitle": "Busca de movimento - Frigate",
+    "description": "Desenhe um polígono para definir a região de interesse e especifique um intervalo de tempo para buscar mudanças de movimento nessa região.",
+    "startSearch": "Iniciar busca",
+    "searchStarted": "Busca iniciada",
+    "searchCancelled": "Busca cancelada",
+    "cancelSearch": "Cancelar",
+    "selectCamera": "A busca de movimento está carregando",
+    "searching": "Busca em andamento.",
+    "noResultsYet": "Execute uma busca para encontrar mudanças de movimento na região selecionada",
+    "noChangesFound": "Nenhuma alteração de pixels detectada na região selecionada",
+    "searchComplete": "Busca concluída",
+    "framesProcessed": "{{count}} quadros processados",
+    "changesFound_one": "Encontrada {{count}} mudança de movimento",
+    "changesFound_many": "Encontradas {{count}} mudanças de movimento",
+    "changesFound_other": "Encontradas {{count}} mudanças de movimento",
+    "jumpToTime": "Ir para este momento",
+    "results": "Resultados",
+    "showSegmentHeatmap": "Mapa de calor",
+    "newSearch": "Nova busca",
+    "clearResults": "Limpar resultados",
+    "clearROI": "Limpar polígono",
+    "polygonControls": {
+        "points_one": "{{count}} ponto",
+        "points_many": "{{count}} pontos",
+        "points_other": "{{count}} pontos",
+        "undo": "Desfazer último ponto",
+        "reset": "Redefinir polígono",
+        "drawMode": "Desenhar",
+        "moveMode": "Mover"
+    },
+    "motionHeatmapLabel": "Mapa de calor de movimento",
+    "dialog": {
+        "title": "Busca de movimento",
+        "cameraLabel": "Câmera",
+        "previewAlt": "Prévia da câmera {{camera}}"
+    },
+    "timeRange": {
+        "title": "Intervalo da busca",
+        "start": "Hora de início",
+        "end": "Hora de término"
+    },
+    "settings": {
+        "title": "Configurações da busca",
+        "parallelMode": "Modo paralelo",
+        "parallelModeDesc": "Verifica vários intervalos de gravação ao mesmo tempo (mais rápido; usa mais recursos de decodificação)",
+        "threshold": "Limite de sensibilidade",
+        "thresholdDesc": "Valores menores detectam mudanças menores (1-255)",
+        "minArea": "Área mínima de mudança",
+        "minAreaDesc": "Tamanho mínimo de uma única região em movimento, como porcentagem da região de interesse",
+        "maxResultsDesc": "Parar após esta quantidade de carimbos de data/hora correspondentes",
+        "maxResults": "Máximo de resultados"
+    },
+    "errors": {
+        "noCamera": "Selecione uma câmera",
+        "noROI": "Desenhe uma região de interesse",
+        "noTimeRange": "Selecione um intervalo de tempo",
+        "invalidTimeRange": "A hora de término deve ser posterior à hora de início",
+        "polygonTooSmall": "O polígono deve ter pelo menos 3 pontos",
+        "searchFailed": "Falha na busca: {{message}}",
+        "unknown": "Erro desconhecido"
+    },
+    "changePercentage": "{{percentage}}% alterado",
+    "metrics": {
+        "title": "Métricas da busca",
+        "segmentsScanned": "Segmentos verificados",
+        "segmentsProcessed": "Processados",
+        "segmentsSkippedInactive": "Ignorados (sem atividade)",
+        "segmentsSkippedHeatmap": "Ignorados (sem sobreposição com a ROI)",
+        "fallbackFullRange": "Varredura completa de contingência",
+        "framesDecoded": "Quadros decodificados",
+        "wallTime": "Tempo de busca",
+        "segmentErrors": "Erros de segmento",
+        "seconds": "{{seconds}}s",
+        "minutesSeconds": "{{minutes}}min {{seconds}}s",
+        "scanSummary": "{{segments}} segmentos · {{time}}"
+    },
+    "scanning": "Verificando {{time}}"
+}
