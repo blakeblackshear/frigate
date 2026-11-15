@@ -44,7 +44,9 @@ export function ConfigMessageBanner({ messages }: ConfigMessageBannerProps) {
           className="flex items-center [&>svg+div]:translate-y-0 [&>svg]:static [&>svg~*]:pl-2"
         >
           <SeverityIcon severity={msg.severity} />
-          <AlertDescription>{t(msg.messageKey, msg.values)}</AlertDescription>
+          <AlertDescription>
+            {t(msg.messageKey, msg.values ?? {})}
+          </AlertDescription>
         </Alert>
       ))}
     </div>

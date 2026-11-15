@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { RendererComponent } from "@/components/config-form/sectionExtras/registry";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 
@@ -58,7 +59,7 @@ export type ConfigFormContext = {
   fieldDocs?: Record<string, string>;
   restartRequired?: string[];
   requiresRestart?: boolean;
-  t?: (key: string, options?: Record<string, unknown>) => string;
+  t?: TFunction;
   renderers?: Record<string, RendererComponent>;
   isProfile?: boolean;
 };

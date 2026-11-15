@@ -5,6 +5,7 @@
  * for RJSF form fields.
  */
 
+import type { TFunction } from "i18next";
 import type { ConfigFormContext } from "@/types/configForm";
 import { getEffectiveAttributeLabels } from "@/utils/configUtil";
 
@@ -70,13 +71,13 @@ export function buildTranslationPath(
  */
 export function resolveConfigTranslation(
   i18n: { exists: (key: string, opts?: Record<string, unknown>) => boolean },
-  t: (key: string, opts?: Record<string, unknown>) => string,
+  t: TFunction,
   translationPath: string,
   suffix: "label" | "description",
   sectionI18nPrefix?: string,
   ns?: string,
 ): string | undefined {
-  const opts = ns ? { ns } : undefined;
+  const opts = ns ? { ns } : {};
 
   if (
     sectionI18nPrefix &&
