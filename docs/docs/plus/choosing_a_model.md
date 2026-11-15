@@ -9,7 +9,7 @@ Frigate+ offers several model types, sizes, and input resolutions. This page com
 
 - **YOLOv9-s at 320** is the balanced default if your hardware runs it well. It detects about twice as many objects as MobileDet, and 15 more per 100 than YOLO-NAS-s at 320, at the same false alarm rate.
 - **Moving up a size at 320** helps more than moving to 640 for most cameras. YOLOv9-m at 320 detects more objects than YOLOv9-s at 640 (60% vs 59%) with lower GPU latency.
-- **640 input** is rarely needed. Frigate doesn't run detection on the full frame. It crops a region around motion and resizes it to the model's input size, so with a 320 model it zooms in on a smaller area of the frame and small objects are no longer small to the model. 640 models detect small objects better within a large region, but not compared to a 320 model looking at a smaller, zoomed-in region. See [object size and input resolution](#object-size-and-input-resolution) for details.
+- **640 input** is rarely needed. Frigate doesn't run detection on the full frame. It crops a region around motion, at least 320 pixels wide for any model, and resizes it to the model's input size. Most regions are small, so a 640 model usually receives an upscaled crop and does worse than a 320 model given the same crop at its native size. 640 models detect small objects better only within a large region. See [object size and input resolution](#object-size-and-input-resolution) for details.
 - **YOLOv9-c** gains little over YOLOv9-m: about 2 points of detection rate at 320 and none at 640, with more latency. On CPU it takes 1.4 to 1.7 times as long as YOLOv9-m.
 - **YOLOv9-t at 640** is no better than YOLOv9-s at 320 (55% vs 54%) and is slower on both GPU and CPU.
 - **YOLO-NAS-s** and **MobileDet** are only worth considering on hardware that can't run YOLOv9. Everywhere else, a YOLOv9 model of similar speed is more accurate.
@@ -77,7 +77,7 @@ In these single-image results, 640 input mostly helps small objects, such as dis
 
 #### Object size and input resolution
 
-Frigate doesn't send the full camera frame to the model. It crops a region around motion or a tracked object and resizes that region to the model's input size. With a 320 model the regions are smaller, so Frigate effectively zooms in on that part of the frame, and an object that is small in the full frame is no longer small to the model. A 640 model detects small objects better than a 320 model when both look at the same large region, but not when compared to a 320 model looking at a smaller, zoomed-in region.
+Frigate doesn't send the full camera frame to the model. It crops a region around motion or a tracked object, at least 320 pixels wide for any model, and resizes it to the model's input size. Most regions are small, so a 640 model usually receives a crop upscaled from 320 pixels, which adds no detail and performs worse than a 320 model given the same crop at its native size. A 640 model detects small objects better only when the region is large.
 
 640 input can still help in scenes with large objects in the foreground and small objects in the background at the same time, such as a doorbell camera that sees a person on the porch and another person across the street. The region has to be large enough to fit the nearby person, so the distant person is small within it. Frigate already handles much of this case: when an object is small relative to the region it was detected in, Frigate runs a separate detection on a smaller region around it.
 
