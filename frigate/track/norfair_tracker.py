@@ -1,4 +1,5 @@
 import logging
+import math
 import random
 import string
 from collections.abc import Sequence
@@ -43,44 +44,54 @@ def distance(detection: np.ndarray, estimate: np.ndarray) -> float:
     # ultimately, this should try and estimate distance in 3-dimensional space
     # consider change in location, width, and height
 
-    estimate_dim = np.diff(estimate, axis=0).flatten()
-    detection_dim = np.diff(detection, axis=0).flatten()
+    # norfair calls this for every detection and tracked object pair on every
+    # frame. The boxes are only 2x2, so plain float math is much cheaper than
+    # a series of small numpy calls.
+    (detection_x1, detection_y1), (detection_x2, detection_y2) = detection.tolist()
+    (estimate_x1, estimate_y1), (estimate_x2, estimate_y2) = estimate.tolist()
 
-    # Guard against degenerate or non-finite boxes
-    if (
-        not np.all(np.isfinite(estimate_dim))
-        or not np.all(np.isfinite(detection_dim))
-        or estimate_dim[0] <= 0
-        or estimate_dim[1] <= 0
-        or detection_dim[0] <= 0
-        or detection_dim[1] <= 0
+    estimate_width = estimate_x2 - estimate_x1
+    estimate_height = estimate_y2 - estimate_y1
+    detection_width = detection_x2 - detection_x1
+    detection_height = detection_y2 - detection_y1
+
+    # Guard against degenerate or non-finite boxes (the comparisons are also
+    # false for nan)
+    if not (
+        0 < estimate_width < math.inf
+        and 0 < estimate_height < math.inf
+        and 0 < detection_width < math.inf
+        and 0 < detection_height < math.inf
     ):
-        return float("inf")
+        return math.inf
 
-    # get bottom center positions
-    detection_position = np.array(
-        [np.average(detection[:, 0]), np.max(detection[:, 1])]
-    )
-    estimate_position = np.array([np.average(estimate[:, 0]), np.max(estimate[:, 1])])
-
-    distance = (detection_position - estimate_position).astype(float)
+    # compare bottom center positions, y2 is the bottom after the guard above
     # change in x relative to w
-    distance[0] /= estimate_dim[0]
+    x_change = (
+        (detection_x1 + detection_x2) / 2 - (estimate_x1 + estimate_x2) / 2
+    ) / estimate_width
     # change in y relative to h
-    distance[1] /= estimate_dim[1]
+    y_change = (detection_y2 - estimate_y2) / estimate_height
 
     # get ratio of widths and heights
     # normalize to 1
-    widths = np.sort([estimate_dim[0], detection_dim[0]])
-    heights = np.sort([estimate_dim[1], detection_dim[1]])
-    width_ratio = widths[1] / widths[0] - 1.0
-    height_ratio = heights[1] / heights[0] - 1.0
-
-    # change vector is relative x,y change and w,h ratio
-    change = np.append(distance, np.array([width_ratio, height_ratio]))
+    width_ratio = (
+        max(estimate_width, detection_width) / min(estimate_width, detection_width)
+        - 1.0
+    )
+    height_ratio = (
+        max(estimate_height, detection_height) / min(estimate_height, detection_height)
+        - 1.0
+    )
 
     # calculate euclidean distance of the change vector
-    return float(np.linalg.norm(change))
+    # (relative x,y change and w,h ratio)
+    return math.sqrt(
+        x_change * x_change
+        + y_change * y_change
+        + width_ratio * width_ratio
+        + height_ratio * height_ratio
+    )
 
 
 def frigate_distance(detection: Detection, tracked_object: TrackedObject) -> float:
