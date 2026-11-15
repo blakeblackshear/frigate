@@ -13,13 +13,13 @@ Information on how to integrate Frigate+ with Frigate can be found in the [integ
 
 There are three model types offered in Frigate+, `yolov9`, `yolonas`, and `mobiledet` (legacy). All of these models are object detection models and are trained to detect the same set of labels [listed below](#available-label-types).
 
-Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models.
+Not all model types are supported by all detectors, so it's important to choose a model type to match your detector as shown in the table under [supported detector types](#supported-detector-types). You can test model types for compatibility and speed on your hardware by using the base models. For accuracy and speed comparisons between model types, sizes, and resolutions, see [choosing a model](./choosing_a_model.md).
 
-| Model Type  | Description                                                                                                                                                    |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `yolov9`    | A leading SOTA (state of the art) object detection model with similar performance to yolonas, but on a wider range of hardware options. Runs on most hardware. |
-| `yolonas`   | A newer architecture that offers slightly higher accuracy and improved detection of small objects. Runs on Intel, NVidia GPUs, and AMD GPUs.                   |
-| `mobiledet` | Legacy. Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                      |
+| Model Type  | Description                                                                                                                                                           |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `yolov9`    | A leading SOTA (state of the art) object detection model. More accurate than yolonas at similar speeds, and runs on a wider range of hardware. Runs on most hardware. |
+| `yolonas`   | An alternative architecture for hardware that can't run yolov9. Runs on Intel, NVidia GPUs, and AMD GPUs.                                                             |
+| `mobiledet` | Legacy. Based on the same architecture as the default model included with Frigate. Runs on Google Coral devices and CPUs.                                             |
 
 :::warning
 
@@ -29,15 +29,15 @@ Not all model types are supported by all detectors, so it's important to choose 
 
 ### YOLOv9 Details
 
-YOLOv9 models are available in `t`, `s`, `c`, and `edgetpu` variants, and an `m` size is coming soon. When requesting a `yolov9` model, you will be prompted to choose a variant. If you want the model to be compatible with a Google Coral, you will need to choose the `edgetpu` variant, which requires Frigate 0.17 or later. If you are unsure what variant to choose, you should perform some tests with the base models to find the performance level that suits you. The `s` size is most similar to the current `yolonas` models in terms of inference times and accuracy, and a good place to start is the `320x320` resolution model for `yolov9s`. The `c` size is larger and offers higher accuracy at the cost of slower inference, so it is best suited to more powerful hardware such as GPUs.
+YOLOv9 models are available in `t`, `s`, `m`, `c`, and `edgetpu` variants. When requesting a `yolov9` model, you will be prompted to choose a variant. If you want the model to be compatible with a Google Coral, you will need to choose the `edgetpu` variant, which requires Frigate 0.17 or later. If you are unsure what variant to choose, you should perform some tests with the base models to find the performance level that suits you. The `s` size has similar inference times to the current `yolonas` models with noticeably higher accuracy, and a good place to start is the `320x320` resolution model for `yolov9s`. The `m` size offers higher accuracy at the cost of slower inference, so it is best suited to more powerful hardware such as GPUs. The `c` size is slower still and offers little accuracy gain over `m`. See [choosing a model](./choosing_a_model.md) for detailed accuracy and speed comparisons.
 
-| Variant   | Size                 | Parameters | Speed and accuracy                                          | Best suited for                                    |
-| --------- | -------------------- | ---------- | ----------------------------------------------------------- | -------------------------------------------------- |
-| `t`       | Tiny                 | ~2.0M      | Fastest inference, lowest accuracy                          | Low power hardware or a large number of cameras    |
-| `s`       | Small                | ~7.1M      | Balanced. Similar inference times and accuracy to `yolonas` | Most users. Start with `320x320`                   |
-| `m`       | Medium (coming soon) | ~20.0M     | Slower than `s` with higher accuracy                        | Mid-range GPUs and NPUs                            |
-| `c`       | Compact              | ~25.3M     | Highest accuracy, slowest inference                         | More powerful hardware such as GPUs                |
-| `edgetpu` | N/A                  | N/A        | Optimized to run on the Coral's Edge TPU                    | Google Coral devices only (requires Frigate 0.17+) |
+| Variant   | Size    | Parameters | Speed and accuracy                                            | Best suited for                                    |
+| --------- | ------- | ---------- | ------------------------------------------------------------- | -------------------------------------------------- |
+| `t`       | Tiny    | ~2.0M      | Fastest inference, lowest accuracy                            | Low power hardware or a large number of cameras    |
+| `s`       | Small   | ~7.1M      | Balanced. Similar inference times to `yolonas`, more accurate | Most users. Start with `320x320`                   |
+| `m`       | Medium  | ~20.0M     | Slower than `s` with higher accuracy                          | Mid-range GPUs and NPUs                            |
+| `c`       | Compact | ~25.3M     | Similar accuracy to `m`, slowest inference                    | More powerful hardware such as GPUs                |
+| `edgetpu` | N/A     | N/A        | Optimized to run on the Coral's Edge TPU                      | Google Coral devices only (requires Frigate 0.17+) |
 
 Parameter counts are for the standard YOLOv9 architectures. Actual inference times depend on your hardware and the input resolution you choose, so test with the base models before requesting a model.
 
@@ -49,7 +49,7 @@ When switching to YOLOv9, you may need to adjust your thresholds for some object
 
 #### Hailo Support
 
-If you have a Hailo device, you will need to specify the hardware you have when submitting a model request because they are not cross compatible. Hailo models are available for the `t`, `s`, and `c` variants on Hailo8, Hailo8L, and Hailo8R devices. Please test using the available base models before submitting your model request.
+If you have a Hailo device, you will need to specify the hardware you have when submitting a model request because they are not cross compatible. Hailo models are available for the `t`, `s`, `m`, and `c` variants on Hailo8, Hailo8L, and Hailo8R devices. Please test using the available base models before submitting your model request.
 
 #### Rockchip (RKNN) Support
 
