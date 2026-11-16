@@ -35,6 +35,7 @@ from frigate.data_processing.types import PostProcessDataEnum
 from frigate.genai import GenAIClient
 from frigate.genai.manager import GenAIClientManager
 from frigate.models import Event, Recordings, ReviewSegment
+from frigate.output.preview import is_camera_preview_frame
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 from frigate.util.image import get_image_from_recording
 from frigate.util.recording_coverage import recording_overlap
@@ -528,7 +529,7 @@ class ReviewDescriptionProcessor(PostProcessorApi):
         camera_files = [
             entry.name
             for entry in os.scandir(preview_dir)
-            if entry.name.startswith(file_start)
+            if is_camera_preview_frame(entry.name, camera)
         ]
         camera_files.sort()
 

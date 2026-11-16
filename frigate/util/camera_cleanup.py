@@ -1,8 +1,8 @@
 """Utilities for cleaning up camera data from database and filesystem."""
 
-import glob
 import logging
 import os
+import re
 import shutil
 
 from frigate.const import CLIPS_DIR, RECORD_DIR, THUMB_DIR
@@ -126,33 +126,39 @@ def cleanup_camera_files(
             except Exception as e:
                 logger.error("Failed to remove %s: %s", dir_path, e)
 
-    # Remove event snapshot files
-    for snapshot in glob.glob(os.path.join(CLIPS_DIR, f"{camera_name}-*.jpg")):
-        try:
-            os.remove(snapshot)
-        except Exception as e:
-            logger.error("Failed to remove snapshot %s: %s", snapshot, e)
+    # Match the whole file name so deleting "front" keeps the files of "front-door"
+    media_id = r"[\d.]+-[a-z0-9]{6}"
+    camera = re.escape(camera_name)
+    media_patterns = [
+        (
+            CLIPS_DIR,
+            re.compile(rf"{camera}-{media_id}(\.jpg|-clean\.webp|-clean\.png)"),
+        ),
+        (
+            os.path.join(CLIPS_DIR, "review"),
+            re.compile(rf"thumb-{camera}-{media_id}\.webp"),
+        ),
+    ]
 
-    for snapshot in glob.glob(os.path.join(CLIPS_DIR, f"{camera_name}-*-clean.webp")):
-        try:
-            os.remove(snapshot)
-        except Exception as e:
-            logger.error("Failed to remove snapshot %s: %s", snapshot, e)
+    for directory, pattern in media_patterns:
+        if not os.path.isdir(directory):
+            continue
 
-    for snapshot in glob.glob(os.path.join(CLIPS_DIR, f"{camera_name}-*-clean.png")):
         try:
-            os.remove(snapshot)
-        except Exception as e:
-            logger.error("Failed to remove snapshot %s: %s", snapshot, e)
+            files = os.listdir(directory)
+        except OSError as e:
+            logger.error("Failed to list %s: %s", directory, e)
+            continue
 
-    # Remove review thumbnail files
-    for thumb in glob.glob(
-        os.path.join(CLIPS_DIR, "review", f"thumb-{camera_name}-*.webp")
-    ):
-        try:
-            os.remove(thumb)
-        except Exception as e:
-            logger.error("Failed to remove review thumbnail %s: %s", thumb, e)
+        for file in files:
+            if not pattern.fullmatch(file):
+                continue
+
+            path = os.path.join(directory, file)
+            try:
+                os.remove(path)
+            except Exception as e:
+                logger.error("Failed to remove media file %s: %s", path, e)
 
     # Remove export files if requested
     if export_paths:

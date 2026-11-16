@@ -1,10 +1,12 @@
 """Regression tests for runtime camera add and delete handling."""
 
 import asyncio
+import os
+import tempfile
 import threading
 import unittest
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 # LicensePlatePostProcessor is imported via the maintainer rather than from
 # data_processing.post.license_plate, which circularly imports back through
@@ -16,6 +18,7 @@ from frigate.embeddings.maintainer import (
 from frigate.ptz.autotrack import PtzAutoTracker
 from frigate.review.maintainer import ReviewSegmentMaintainer
 from frigate.track.object_processing import TrackedObjectProcessor
+from frigate.util import camera_cleanup
 
 
 def _make_processor() -> TrackedObjectProcessor:
@@ -231,3 +234,33 @@ class TestCameraStateAccessors(unittest.TestCase):
         processor = _make_processor()
 
         self.assertEqual(processor.get_current_frame_time("deleted_cam"), 0.0)
+
+
+class TestCameraFileCleanup(unittest.TestCase):
+    def test_delete_keeps_media_of_camera_sharing_name_prefix(self):
+        own = [
+            "front-1700000000.123456-abc123.jpg",
+            "front-1700000000.123456-abc123-clean.webp",
+            "review/thumb-front-1700000000.5-abc123.webp",
+        ]
+        other = [
+            "front-door-1700000000.123456-def456.jpg",
+            "front-door-1700000000.123456-def456-clean.webp",
+            "review/thumb-front-door-1700000000.5-def456.webp",
+        ]
+
+        with tempfile.TemporaryDirectory() as clips:
+            os.makedirs(os.path.join(clips, "review"))
+            for name in own + other:
+                open(os.path.join(clips, name), "w").close()
+
+            with patch.multiple(
+                camera_cleanup, CLIPS_DIR=clips, RECORD_DIR=clips, THUMB_DIR=clips
+            ):
+                camera_cleanup.cleanup_camera_files("front")
+
+            remaining = [
+                n for n in own + other if os.path.exists(os.path.join(clips, n))
+            ]
+
+        self.assertEqual(remaining, other)
