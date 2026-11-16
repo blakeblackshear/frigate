@@ -223,6 +223,26 @@ class TestPrepareTrainingDataset(unittest.TestCase):
             self.assertEqual(os.listdir(output_dir), ["open"])
             self.assertEqual(os.listdir(os.path.join(output_dir, "open")), ["a.png"])
 
+    def test_failed_write_raises_with_path(self):
+        """A full disk must stop training, not silently drop images."""
+        with (
+            tempfile.TemporaryDirectory() as dataset_dir,
+            tempfile.TemporaryDirectory() as output_dir,
+        ):
+            os.makedirs(os.path.join(dataset_dir, "open"))
+            cv2.imwrite(
+                os.path.join(dataset_dir, "open", "a.png"),
+                np.zeros((79, 79, 3), dtype=np.uint8),
+            )
+
+            with patch.object(classification.cv2, "imwrite", return_value=False):
+                with self.assertRaises(OSError) as raised:
+                    classification.prepare_training_dataset(dataset_dir, output_dir)
+
+            self.assertIn(
+                os.path.join(output_dir, "open", "a.png"), str(raised.exception)
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

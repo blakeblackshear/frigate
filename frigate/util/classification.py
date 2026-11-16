@@ -75,9 +75,10 @@ def prepare_training_dataset(dataset_dir: str, output_dir: str) -> None:
             if img is None:
                 continue
 
-            cv2.imwrite(
-                os.path.join(output_class_dir, file), resize_classification_image(img)
-            )
+            output_path = os.path.join(output_class_dir, file)
+
+            if not cv2.imwrite(output_path, resize_classification_image(img)):
+                raise OSError(f"Failed to write training image {output_path}")
 
 
 def write_training_metadata(model_name: str, image_count: int) -> None:
