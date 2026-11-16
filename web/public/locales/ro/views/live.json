@@ -139,7 +139,7 @@
       "resetStream": "Resetează stream-ul",
       "force": {
         "label": "Forțează modul de lățime de bandă redusă",
-        "desc": "Redă întotdeauna fluxul integrat Frigate de lățime de bandă redusă în locul stream-ului selectat. Funcționează pe orice conexiune, dar are calitate mai scăzută și este fără audio."
+        "desc": "Redă întotdeauna stream-ul integrat Frigate de lățime de bandă redusă în locul stream-ului selectat. Funcționează pe orice conexiune, dar are calitate mai scăzută și este fără audio."
       }
     },
     "playInBackground": {
@@ -175,15 +175,18 @@
     "auto": {
       "label": "Auto",
       "selected": "Auto · {{stream}}",
-      "tips": "Comută fluxurile pentru a se adapta conexiunii tale",
+      "tips": "Comută stream-uri pentru a se adapta conexiunii tale",
       "floorLabel": "Lățime de bandă redusă",
       "retry": "Încearcă cea mai înaltă calitate",
       "reason": {
-        "bandwidth": "Se redă {{stream}} deoarece conexiunea nu a putut susține un flux de calitate superioară",
-        "codec": "Se redă {{stream}} deoarece acest browser nu poate reda un flux de calitate superioară",
+        "bandwidth": "Se redă {{stream}} deoarece conexiunea nu a putut susține un stream de calitate superioară",
+        "codec": "Se redă {{stream}} deoarece acest browser nu poate reda un stream de calitate superioară",
         "saveData": "Se redă {{stream}} deoarece funcția Economisire date este activată",
-        "floor": "Se redă fluxul cu lățime de bandă redusă deoarece niciun alt flux nu a făcut față"
+        "floor": "Se redă fluxul cu lățime de bandă redusă deoarece niciun alt stream nu a făcut față"
       }
+    },
+    "metadata": {
+      "loading": "Se preiau metadatele stream-ului…"
     }
   },
   "cameraSettings": {

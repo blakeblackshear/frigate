@@ -1,6 +1,6 @@
 {
     "title": "Reluare de depanare",
-    "description": "Redă înregistrările camerei pentru depanare. Lista de obiecte arată un rezumat decalat în timp al obiectelor detectate, iar tab-ul Mesaje arată un flux de mesaje interne ale Frigate din înregistrarea redată.",
+    "description": "Redă înregistrările camerei pentru depanare. Lista de obiecte arată un rezumat decalat în timp al obiectelor detectate, iar tab-ul Mesaje arată un stream de mesaje interne ale Frigate din înregistrarea redată.",
     "websocket_messages": "Mesaje",
     "dialog": {
         "title": "Pornește reluarea de depanare",
