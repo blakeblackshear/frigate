@@ -1,4 +1,7 @@
 ruff == 0.17.4
 
+# tests
+hypothesis == 6.*
+
 # types
 types-peewee == 4.0.*
