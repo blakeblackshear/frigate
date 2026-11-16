@@ -95,6 +95,9 @@
         "saveData": "Veri Tasarrufu açık olduğu için {{stream}} oynatılıyor",
         "floor": "Hiçbir yayın yetişemediği için düşük bant genişlikli akış oynatılıyor"
       }
+    },
+    "metadata": {
+      "loading": "Yayın meta verileri alınıyor…"
     }
   },
   "cameraSettings": {
