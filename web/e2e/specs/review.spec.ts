@@ -228,3 +228,89 @@ test.describe("Review — mobile @critical @mobile", () => {
     await expect(frigateApp.page).toHaveURL(/\/$/);
   });
 });
+
+test.describe("Review select all @high @mobile", () => {
+  // Three unreviewed alerts so that selecting one item leaves more to select.
+  const now = Date.now() / 1000;
+  const selectAllReviews = Array.from({ length: 3 }, (_, i) => ({
+    id: `select-all-review-${i}`,
+    camera: "front_door",
+    start_time: now - 600 - i * 300,
+    end_time: now - 580 - i * 300,
+    has_been_reviewed: false,
+    severity: "alert",
+    thumb_path: `/clips/front_door/select-all-review-${i}-thumb.jpg`,
+    data: {
+      audio: [],
+      detections: [`person-${i}`],
+      objects: ["person"],
+      sub_labels: [],
+      significant_motion_areas: [],
+      zones: ["front_yard"],
+    },
+  }));
+
+  test.beforeEach(async ({ frigateApp }) => {
+    await frigateApp.page.route(/\/api\/review(\?|$)/, (route) =>
+      route.fulfill({ json: selectAllReviews }),
+    );
+    await frigateApp.page.route(/\/api\/review\/summary/, (route) =>
+      route.fulfill({
+        json: {
+          last24Hours: {
+            reviewed_alert: 0,
+            reviewed_detection: 0,
+            total_alert: selectAllReviews.length,
+            total_detection: 0,
+          },
+        },
+      }),
+    );
+  });
+
+  test("mobile action group selects every review item", async ({
+    frigateApp,
+  }) => {
+    test.skip(!frigateApp.isMobile, "Mobile-only");
+
+    await frigateApp.goto("/review");
+    const review = new ReviewPage(frigateApp.page, false);
+    const thumbnail = review.reviewItems.first().locator("img").first();
+    await expect(thumbnail).toBeVisible({ timeout: 10_000 });
+
+    // The mobile project uses an iOS user agent, where a long press
+    // (touchstart held past the use-contextmenu delay) starts selection.
+    await thumbnail.dispatchEvent("touchstart");
+    await expect(frigateApp.page.getByText(/1.*selected/i)).toBeVisible({
+      timeout: 5_000,
+    });
+
+    const selectAll = frigateApp.page.getByText("All", { exact: true });
+    await expect(selectAll).toBeVisible();
+    await selectAll.click();
+
+    await expect(frigateApp.page.getByText(/3.*selected/i)).toBeVisible();
+    // Nothing is left to select, so the control goes away.
+    await expect(selectAll).toHaveCount(0);
+  });
+
+  test("desktop action group has no select all control", async ({
+    frigateApp,
+  }) => {
+    test.skip(frigateApp.isMobile, "Desktop-only");
+
+    await frigateApp.goto("/review");
+    const review = new ReviewPage(frigateApp.page, true);
+    await expect(review.reviewItems.first()).toBeVisible({ timeout: 10_000 });
+
+    // PreviewThumbnailPlayer reads e.metaKey to start multi-select.
+    await review.reviewItems.first().click({ modifiers: ["Meta"] });
+    await expect(frigateApp.page.getByText(/1.*selected/i)).toBeVisible({
+      timeout: 5_000,
+    });
+
+    await expect(frigateApp.page.getByText("All", { exact: true })).toHaveCount(
+      0,
+    );
+  });
+});

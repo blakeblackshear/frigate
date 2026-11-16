@@ -481,6 +481,8 @@ export default function EventView({
             <ReviewActionGroup
               selectedReviews={selectedReviews}
               setSelectedReviews={setSelectedReviews}
+              totalItems={currentReviewItems?.length ?? 0}
+              onSelectAllReviews={onSelectAllReviews}
               onExport={exportReview}
               pullLatestData={pullLatestData}
             />

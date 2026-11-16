@@ -2,7 +2,7 @@ import { FaCircleCheck, FaCircleXmark } from "react-icons/fa6";
 import { useCallback, useState } from "react";
 import axios from "axios";
 import { Button, buttonVariants } from "../ui/button";
-import { isDesktop } from "react-device-detect";
+import { isDesktop, isMobile } from "react-device-detect";
 import { FaCompactDisc } from "react-icons/fa";
 import { HiTrash } from "react-icons/hi";
 import { ReviewSegment } from "@/types/review";
@@ -28,12 +28,16 @@ import { MdAutoAwesome } from "react-icons/md";
 type ReviewActionGroupProps = {
   selectedReviews: ReviewSegment[];
   setSelectedReviews: (reviews: ReviewSegment[]) => void;
+  totalItems: number;
+  onSelectAllReviews: () => void;
   onExport: (id: string) => void;
   pullLatestData: () => void;
 };
 export default function ReviewActionGroup({
   selectedReviews,
   setSelectedReviews,
+  totalItems,
+  onSelectAllReviews,
   onExport,
   pullLatestData,
 }: ReviewActionGroupProps) {
@@ -155,6 +159,17 @@ export default function ReviewActionGroup({
           >
             {t("button.unselect", { ns: "common" })}
           </div>
+          {isMobile && selectedReviews.length < totalItems && (
+            <>
+              <div className="p-1">{"|"}</div>
+              <div
+                className="cursor-pointer p-2 text-primary hover:rounded-lg hover:bg-secondary"
+                onClick={onSelectAllReviews}
+              >
+                {t("select_all", { ns: "views/events" })}
+              </div>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-1 md:gap-2">
           {selectedReviews.length == 1 && (
