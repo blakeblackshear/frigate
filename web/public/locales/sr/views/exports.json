@@ -18,5 +18,7 @@
     "error": {
       "renameExportFailed": "Промена назива извоза није успела: {{errorMessage}}"
     }
-  }
+  },
+  "selected_one": "Изабрано: {{count}}",
+  "selected_other": "Изабрано: {{count}}"
 }

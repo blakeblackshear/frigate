@@ -1,15 +1,16 @@
 {
-  "noRecordingsFoundForThisTime": "Nije pronađen nijedan snimak za ovo vreme",
-  "noPreviewFound": "Pregled nije pronađen",
-  "noPreviewFoundFor": "Nije pronađen pregled za {{cameraName}}",
+  "noRecordingsFoundForThisTime": "Нема пронађених снимака за овај временски период",
+  "noPreviewFound": "Преглед није пронађен",
+  "noPreviewFoundFor": "Преглед није пронађен за камеру {{cameraName}}",
   "submitFrigatePlus": {
-    "title": "Pošaljite ovaj frejm na Frigate+?",
-    "submit": "Pošalji"
+    "title": "Пошаљи овај кадар на Frigate+?",
+    "submit": "Пошаљи",
+    "previewError": "Није могуће учитати преглед снимка кадра. Снимак можда тренутно није доступан."
   },
-  "livePlayerRequiredIOSVersion": "Za ovaj tip prenosa uživo potreban je iOS 17.1 ili noviji.",
+  "livePlayerRequiredIOSVersion": "За овај тип стрима уживо потребан је iOS 17.1 или новији.",
   "streamOffline": {
-    "title": "Strim je oflajn",
-    "desc": "Ни један фрејм није добијен од {{cameraName}} <code>detect</code>, проверите лог грешака"
+    "title": "Стрим је ван мреже",
+    "desc": "Ниједан кадар није примљен на стриму за детекцију <code>detect</code> камере {{cameraName}}, проверите дневник грешака"
   },
   "stats": {
     "streamType": {
@@ -18,25 +19,43 @@
     },
     "bandwidth": {
       "title": "Пропусни опсег:",
-      "short": "Ширина опсега"
+      "short": "Пропусни опсег"
     },
-    "totalFrames": "Укупно фрејмова:",
+    "totalFrames": "Укупно кадрова:",
     "droppedFrames": {
-      "title": "Изгубљени фрејмови:",
+      "title": "Одбачени кадрови:",
       "short": {
-        "title": "Испуштено",
-        "value": "{{droppedFrames}} фрејмова"
+        "title": "Одбачено",
+        "value": "{{droppedFrames}} кадрова"
       }
     },
-    "decodedFrames": "Декодовани фрејмови:",
-    "droppedFrameRate": "Однос испуштених фрејмова:"
+    "decodedFrames": "Декодирани кадрови:",
+    "droppedFrameRate": "Брзина одбацивања кадрова:",
+    "stream": "Стрим:",
+    "streamAuto": "{{stream}} (аутоматски)"
   },
   "toast": {
     "success": {
-      "submittedFrigatePlus": "Фрејм је успешно послат у Фригејт+"
+      "submittedFrigatePlus": "Кадар је успешно послат на Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Неуспешно слање фрејма у Фригејт+"
+      "submitFrigatePlusFailed": "Слање кадра на Frigate+ није успело",
+      "playRecordingsFailed": "Репродукција снимака није успела (грешка {{code}}): {{message}}"
     }
+  },
+  "cameraOff": "Камера је искључена",
+  "quality": {
+    "auto": "Аутоматски",
+    "autoLow": "Репродукција у ниском квалитету (ограничен проток података)",
+    "autoLowCodec": "Репродукција у ниском квалитету (изворни квалитет није подржан у овом веб-прегледачу)",
+    "autoLowSaveData": "Репродукција у ниском квалитету (уштеда података)",
+    "main": "Изворни",
+    "sub": "Низак",
+    "notSupportedBrowser": "Није подржано у овом веб-прегледачу",
+    "label": "Квалитет",
+    "noAudio": "Нема звука",
+    "audioRate": "Звук од {{rate}} kHz",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Нема снимака у овом временском опсегу"
   }
 }
