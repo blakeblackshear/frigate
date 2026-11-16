@@ -53,7 +53,7 @@ Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings
 | Ollama (`ollama`)             |      ✅      |  ✅  |     ✅     |      ❌       |
 | OpenAI (`openai`)             |      ✅      |  ✅  |     ❌     |      ✅       |
 | Azure OpenAI (`azure_openai`) |      ✅      |  ✅  |     ❌     |      ✅       |
-| Google Gemini (`gemini`)      |      ✅      |  ✅  |     ❌     |      ✅       |
+| Google Gemini (`gemini`)      |      ✅      |  ✅  |     ✅     |      ✅       |
 
 A ✅ means Frigate can use the provider for that feature. The configured model must also support it: a vision model for descriptions and chat, a multimodal embedding model for embeddings (see [Embedding models](#embedding-models)), and an audio-capable model for transcription. Some features also need extra provider setup, covered in each provider's section below. OpenAI-compatible servers use the `openai` provider, so they follow the OpenAI row.
 
@@ -86,10 +86,11 @@ You must use a vision-capable model with Frigate. The following models are recom
 
 The `embeddings` role needs a different kind of model. Text queries are matched against the stored image embeddings, so the model must be trained to place images and text into the same vector space. A chat or description model will still return vectors when asked, but those vectors are not trained for retrieval and text searches will return poor matches with no error to indicate why.
 
-| Model                | Notes                                                                                                                                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `embeddinggemma-2`   | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Strong semantic search accuracy with efficient inference on a small model. |
-| `qwen3-vl-embedding` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Good performance, large model that requires strong hardware for inference. |
+| Model                | Type    | Notes                                                                                                                                                                     |
+| -------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `embeddinggemma-2`   | `local` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Strong semantic search accuracy with efficient inference on a small model.    |
+| `qwen3-vl-embedding` | `local` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider). Good performance, large model that requires strong hardware for inference.    |
+| `gemini-embedding-2` | `cloud` | Multimodal embeddings for [Semantic Search](/configuration/semantic_search#genai-provider) via [Google Gemini](#google-gemini). Sends thumbnails and search text to Google. |
 
 #### Transcription models
 
@@ -382,6 +383,26 @@ genai:
 Other HTTP options are available, see the [python-genai documentation](https://github.com/googleapis/python-genai).
 
 :::
+
+#### Embeddings
+
+Gemini can serve the `embeddings` role for [Semantic Search](/configuration/semantic_search#genai-provider) with a multimodal embedding model such as `gemini-embedding-2`. Give that model its own provider entry.
+
+Reindexing sends every stored thumbnail to Google and uses API quota. See [Network Requirements](/frigate/network_requirements#generative-ai).
+
+```yaml
+genai:
+  gemini_embeddings:
+    provider: gemini
+    api_key: "{FRIGATE_GEMINI_API_KEY}"
+    model: gemini-embedding-2
+    roles:
+      - embeddings
+
+semantic_search:
+  enabled: True
+  model: gemini_embeddings
+```
 
 ### OpenAI
 
