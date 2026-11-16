@@ -161,6 +161,9 @@
         "floor": "Kuna ükski muu lahendus ei toiminud, siis kasutan väikese ribalaiusega voogesitust"
       },
       "tips": "Sinu võrguühendusele sobiliku voogesituse kasutamine"
+    },
+    "metadata": {
+      "loading": "Laadin voogedastuse metateavet…"
     }
   },
   "notifications": "Teavitused",
