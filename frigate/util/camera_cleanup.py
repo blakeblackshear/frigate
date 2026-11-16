@@ -144,7 +144,13 @@ def cleanup_camera_files(
         if not os.path.isdir(directory):
             continue
 
-        for file in os.listdir(directory):
+        try:
+            files = os.listdir(directory)
+        except OSError as e:
+            logger.error("Failed to list %s: %s", directory, e)
+            continue
+
+        for file in files:
             if not pattern.fullmatch(file):
                 continue
 
