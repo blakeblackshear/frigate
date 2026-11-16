@@ -1,3 +1,40 @@
 {
-    "minimum": "Värdet måste vara minst {{limit}}"
+    "minimum": "Värdet måste vara minst {{limit}}",
+    "maximum": "Värdet får vara högst {{limit}}",
+    "exclusiveMinimum": "Värdet måste vara större än {{limit}}",
+    "exclusiveMaximum": "Värdet måste vara mindre än {{limit}}",
+    "minLength": "Värdet måste innehålla minst {{limit}} tecken",
+    "maxLength": "Värdet får innehålla högst {{limit}} tecken",
+    "minItems": "Måste innehålla minst {{limit}} objekt",
+    "maxItems": "Får innehålla högst {{limit}} objekt",
+    "pattern": "Ogiltigt format",
+    "required": "Det här fältet är obligatoriskt",
+    "type": "Ogiltig värdetyp",
+    "enum": "Värdet måste vara ett av de tillåtna värdena",
+    "const": "Värdet matchar inte den förväntade konstanten",
+    "uniqueItems": "Alla objekt måste vara unika",
+    "format": "Ogiltigt format",
+    "additionalProperties": "Okänd egenskap är inte tillåten",
+    "oneOf": "Måste matcha exakt ett av de tillåtna schemana",
+    "anyOf": "Måste matcha minst ett av de tillåtna schemana",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Rollrubrik krävs när rollmappningar är konfigurerade."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Varje roll kan bara tilldelas en indataström.",
+            "detectRequired": "Minst en indataström måste tilldelas rollen 'detect'.",
+            "hwaccelDetectOnly": "Endast indataströmmen med rollen 'detect' kan definiera argument för maskinvaruacceleration."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Värdet måste vara ett jämnt tal."
+    },
+    "models": {
+        "defaultRequired": "En modell måste använda standardscenen. Annars har en kamera som inte väljer en scen ingen modell att falla tillbaka på.",
+        "sceneDuplicate": "Varje modell måste använda en egen scen.",
+        "sameModel": "Modellerna {{scene}} och {{other}} använder samma modellfil. Om en modell körs i flera scener delas bara detekteringsarbetet upp mellan separata detektorer, vilket är långsammare än en modell med all maskinvara listad under sig."
+    }
 }

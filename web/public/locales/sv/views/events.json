@@ -22,7 +22,9 @@
     "label": "Händelse"
   },
   "recordings": {
-    "documentTitle": "Inspelningar - Frigate"
+    "documentTitle": "Inspelningar - Frigate",
+    "invalidSharedLink": "Det går inte att öppna länken till den tidsstämplade inspelningen på grund av ett tolkningsfel.",
+    "invalidSharedCamera": "Det går inte att öppna länken till den tidsstämplade inspelningen eftersom kameran är okänd eller obehörig."
   },
   "newReviewItems": {
     "label": "Visa nya objekt att granska",
@@ -60,5 +62,35 @@
   "normalActivity": "Normal aktivitet",
   "needsReview": "Behöver granskas",
   "securityConcern": "Säkerhetsproblem",
-  "select_all": "Välj alla"
+  "select_all": "Välj alla",
+  "timeline": {
+    "label": "Tidslinje"
+  },
+  "subOnlyQuality": "Endast inspelningar med låg kvalitet är tillgängliga i det här tidsintervallet",
+  "motionSearch": {
+    "menuItem": "Rörelsesökning",
+    "openMenu": "Kameraalternativ"
+  },
+  "motionPreviews": {
+    "menuItem": "Visa rörelseförhandsvisningar",
+    "title": "Rörelseförhandsvisningar: {{camera}}",
+    "mobileSettingsTitle": "Inställningar för rörelseförhandsvisning",
+    "mobileSettingsDesc": "Justera uppspelningshastighet, nedtoning och beskärning och välj ett datum för att granska klipp med bara rörelse.",
+    "dim": "Nedtoning",
+    "dimAria": "Justera nedtoningsintensiteten",
+    "dimDesc": "Öka nedtoningen för att göra rörelseområden mer synliga.",
+    "speed": "Hastighet",
+    "speedAria": "Välj uppspelningshastighet för förhandsvisning",
+    "speedDesc": "Välj hur snabbt förhandsvisningsklippen spelas upp.",
+    "back": "Tillbaka",
+    "empty": "Inga förhandsvisningar tillgängliga",
+    "noPreview": "Förhandsvisning inte tillgänglig",
+    "seekAria": "Spola spelaren för {{camera}} till {{time}}",
+    "filter": "Filter",
+    "filterDesc": "Välj områden för att endast visa klipp med rörelse i dessa områden.",
+    "filterClear": "Rensa",
+    "crop": "Beskär till filtret",
+    "cropAria": "Växla beskärning av förhandsvisningar till filtrerade områden",
+    "cropDesc": "Zooma in förhandsvisningar på de valda filterområdena i stället för att visa hela bildrutan."
+  }
 }

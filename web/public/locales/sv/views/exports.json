@@ -10,14 +10,120 @@
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Det gick inte att byta namn på exporten: {{errorMessage}}"
+      "renameExportFailed": "Det gick inte att byta namn på exporten: {{errorMessage}}",
+      "assignCaseFailed": "Det gick inte att uppdatera ärendetilldelningen: {{errorMessage}}",
+      "caseSaveFailed": "Det gick inte att spara ärendet: {{errorMessage}}",
+      "caseDeleteFailed": "Det gick inte att ta bort ärendet: {{errorMessage}}"
     }
   },
   "tooltip": {
     "shareExport": "Dela export",
     "downloadVideo": "Ladda ned video",
     "editName": "Redigera namn",
-    "deleteExport": "Ta bort export"
+    "deleteExport": "Ta bort export",
+    "assignToCase": "Lägg till i ärende",
+    "removeFromCase": "Ta bort från ärende"
   },
-  "selected_one": "{{count}} valt"
+  "selected_one": "{{count}} valt",
+  "headings": {
+    "cases": "Ärenden",
+    "uncategorizedExports": "Okategoriserade exporter"
+  },
+  "deleteExport": {
+    "label": "Ta bort export"
+  },
+  "toolbar": {
+    "newCase": "Nytt ärende",
+    "addExport": "Lägg till export",
+    "editCase": "Redigera ärende",
+    "deleteCase": "Ta bort ärende"
+  },
+  "deleteCase": {
+    "label": "Ta bort ärende",
+    "desc": "Vill du ta bort {{caseName}}?",
+    "descKeepExports": "Exporterna förblir tillgängliga som okategoriserade exporter.",
+    "descDeleteExports": "Alla exporter i det här ärendet tas bort permanent.",
+    "deleteExports": "Ta även bort exporter"
+  },
+  "caseDialog": {
+    "title": "Lägg till i ärende",
+    "description": "Välj ett befintligt ärende eller skapa ett nytt.",
+    "selectLabel": "Ärende",
+    "newCaseOption": "Skapa nytt ärende",
+    "nameLabel": "Ärendenamn",
+    "descriptionLabel": "Beskrivning"
+  },
+  "caseCard": {
+    "emptyCase": "Inga exporter ännu"
+  },
+  "jobCard": {
+    "defaultName": "Export från {{camera}}",
+    "queued": "Köad",
+    "running": "Körs",
+    "preparing": "Förbereder",
+    "copying": "Kopierar",
+    "encoding": "Kodning",
+    "encodingRetry": "Kodning (försök igen)",
+    "merging": "Sammanfogar",
+    "finalizing": "Slutför"
+  },
+  "caseView": {
+    "noDescription": "Ingen beskrivning",
+    "createdAt": "Skapad {{value}}",
+    "exportCount_one": "1 export",
+    "exportCount_other": "{{count}} exporter",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kameror",
+    "showMore": "Visa mer",
+    "showLess": "Visa mindre",
+    "emptyTitle": "Det här ärendet är tomt",
+    "emptyDescription": "Lägg till befintliga okategoriserade exporter för att hålla ärendet organiserat.",
+    "emptyDescriptionNoExports": "Det finns ännu inga okategoriserade exporter att lägga till."
+  },
+  "caseEditor": {
+    "createTitle": "Skapa ärende",
+    "editTitle": "Redigera ärende",
+    "namePlaceholder": "Ärendenamn",
+    "descriptionPlaceholder": "Lägg till anteckningar eller sammanhang för det här ärendet"
+  },
+  "addExportDialog": {
+    "title": "Lägg till export i {{caseName}}",
+    "searchPlaceholder": "Sök okategoriserade exporter",
+    "empty": "Inga okategoriserade exporter matchar sökningen.",
+    "addButton_one": "Lägg till 1 export",
+    "addButton_other": "Lägg till {{count}} exporter",
+    "adding": "Lägger till..."
+  },
+  "selected_other": "{{count}} valda",
+  "bulkActions": {
+    "addToCase": "Lägg till i ärende",
+    "moveToCase": "Flytta till ärende",
+    "removeFromCase": "Ta bort från ärende",
+    "delete": "Ta bort",
+    "deleteNow": "Ta bort nu"
+  },
+  "bulkDelete": {
+    "title": "Ta bort exporter",
+    "desc_one": "Vill du ta bort {{count}} export?",
+    "desc_other": "Vill du ta bort {{count}} exporter?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Ta bort från ärende",
+    "desc_one": "Ta bort {{count}} export från det här ärendet?",
+    "desc_other": "Ta bort {{count}} exporter från det här ärendet?",
+    "descKeepExports": "Exporterna flyttas till okategoriserade.",
+    "descDeleteExports": "Exporterna tas bort permanent.",
+    "deleteExports": "Ta bort exporter i stället"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Exporterna har tagits bort",
+      "reassign": "Ärendetilldelningen har uppdaterats",
+      "remove": "Exporterna har tagits bort från ärendet"
+    },
+    "error": {
+      "deleteFailed": "Det gick inte att ta bort exporterna: {{errorMessage}}",
+      "reassignFailed": "Det gick inte att uppdatera ärendetilldelningen: {{errorMessage}}"
+    }
+  }
 }

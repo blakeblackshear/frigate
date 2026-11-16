@@ -76,7 +76,8 @@
     "inProgress": "Pågår",
     "invalidStartTime": "Ogiltig starttid",
     "invalidEndTime": "Ogiltig sluttid",
-    "never": "Aldrig"
+    "never": "Aldrig",
+    "custom": "Anpassat..."
   },
   "button": {
     "save": "Spara",
@@ -129,7 +130,8 @@
     "undoAll": "Ångra alla",
     "expand": "Expandera",
     "collapse": "Kollapsa",
-    "reload": "Ladda om"
+    "reload": "Ladda om",
+    "clear": "Rensa"
   },
   "menu": {
     "language": {
@@ -177,7 +179,8 @@
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Kroatiska)",
       "zhHant": "繁體中文 (Traditionell kinesisk)",
-      "bs": "Bosanski (Bosniska)"
+      "bs": "Bosanski (Bosniska)",
+      "be": "Беларуская (belarusiska)"
     },
     "darkMode": {
       "withSystem": {
@@ -206,7 +209,7 @@
       "logout": "Logga ut",
       "setPassword": "Ange lösenord"
     },
-    "systemMetrics": "Systemstatus",
+    "systemMetrics": "Systemhälsa och mätvärden",
     "configuration": "Konfiguration",
     "explore": "Utforska",
     "live": {
@@ -328,7 +331,10 @@
     "title": "Denna sida slutade fungera",
     "partial": "Delar av gränssnittet slutade fungera.",
     "copyDetails": "Kopiera detaljer",
-    "copyFailed": "Kunde inte kopiera detaljer till klippbordet"
+    "copyFailed": "Kunde inte kopiera detaljer till klippbordet",
+    "desc": "Sidan råkade ut för ett oväntat fel. Att läsa om sidan löser det vanligtvis. Om det fortsätter att hända kan du kopiera detaljerna och bifoga dem i en diskussion på GitHub.",
+    "staleTitle": "Omläsning krävs",
+    "staleDesc": "En del av gränssnittet kunde inte läsas in, vilket vanligtvis betyder att Frigate uppdaterades medan den här fliken var öppen. Läs om sidan för att hämta den nya versionen."
   },
   "commandMenu": {
     "description": "Sök sidor, kameror, inställningar och åtgärder",
@@ -337,9 +343,19 @@
     "section": {
       "pages": "Sidor",
       "cameras": "Kameror",
-      "cameraGroups": "",
+      "cameraGroups": "Kameragrupper",
       "settings": "Inställningar",
-      "actions": "Åtgärder"
+      "actions": "Åtgärder",
+      "recent": "Senaste"
+    },
+    "title": "Kommandomeny",
+    "hint": "{{key}} eller / för att öppna, Retur för att köra",
+    "camera": {
+      "live": "Live",
+      "review": "Granska"
+    },
+    "action": {
+      "toggleTheme": "Växla mellan ljust och mörkt läge"
     }
   }
 }

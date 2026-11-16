@@ -46,6 +46,10 @@
         "num_threads": {
             "label": "Trådar för ljuddetektering",
             "description": "Antal trådar som ska användas för bearbetning av ljuddetektering."
+        },
+        "labelmap": {
+            "label": "Anpassning av ljudetikettmappning",
+            "description": "Överskrivningar eller ommappningsposter som ska slås samman med standardljudetikettmappningen."
         }
     },
     "audio_transcription": {
@@ -73,6 +77,10 @@
         "order": {
             "label": "Position",
             "description": "Numerisk position som styr kamerans ordning i fågelperspektivlayouten."
+        },
+        "modes": {
+            "label": "Aktivitetstyper",
+            "description": "Aktivitetstyper som inkluderar kameror i Birdseye."
         }
     },
     "detect": {
@@ -96,7 +104,7 @@
         },
         "min_initialized": {
             "label": "Minsta antal initialiseringsbildrutor",
-            "description": "Antal på varandra följande detekteringsträffar som krävs innan ett spårat objekt skapas. Öka värdet för att minska falska initialiseringar. Standardvärdet är FPS dividerat med 2."
+            "description": "Antal på varandra följande detekteringsträffar som krävs innan ett spårat objekt skapas. Öka värdet för att minska falska initialiseringar. Standardvärdet är fps dividerat med 2."
         },
         "max_disappeared": {
             "label": "Maximalt antal försvunna bildrutor",
@@ -133,6 +141,10 @@
         "annotation_offset": {
             "label": "Annoteringsförskjutning",
             "description": "Förskjutning i millisekunder för detekteringsannoteringar, så att tidslinjens avgränsningsrutor bättre linjerar med inspelningarna. Värdet kan vara positivt eller negativt."
+        },
+        "scene": {
+            "label": "Detekteringsscen",
+            "description": "Miljön som den här kameran visar och som används för att välja vilken av de konfigurerade modellerna som körs på den. Kameror som lämnas med 'default' kör modellen som är konfigurerad med scenen 'default'."
         }
     },
     "face_recognition": {
@@ -176,6 +188,10 @@
             "record": {
                 "label": "Utdataargument för inspelning",
                 "description": "Standardargument för utdata i strömmar med inspelningsrollen."
+            },
+            "record_sub": {
+                "label": "Utdataargument för inspelning från underström",
+                "description": "Utdataargument för strömmar med rollen record_sub. Utdataargumenten för record används när detta inte är angivet."
             }
         },
         "retry_interval": {
@@ -229,6 +245,30 @@
         "quality": {
             "label": "Kvalitet för livevisning",
             "description": "Kodningskvalitet för jsmpeg-strömmen (1 = högst, 31 = lägst)."
+        },
+        "transcode": {
+            "label": "Transkodade strömmar",
+            "description": "Live-strömmar med lägre kvalitet som go2rtc transkodar vid behov.",
+            "enabled": {
+                "label": "Aktivera transkodade strömmar",
+                "description": "Lägg till live-strömmar med lägre kvalitet som go2rtc transkodar i realtid medan någon tittar."
+            },
+            "source": {
+                "label": "Källström",
+                "description": "go2rtc-ström att transkoda. Standard är den första live-strömmen."
+            },
+            "qualities": {
+                "label": "Kvaliteter",
+                "description": "En transkodad ström läggs till per kvalitet.",
+                "height": {
+                    "label": "Höjd",
+                    "description": "Utdatans höjd i bildpunkter, medan bredden följer källans bildförhållande."
+                },
+                "bitrate": {
+                    "label": "Bithastighet",
+                    "description": "Mål- och högsta videobithastighet i kbps."
+                }
+            }
         }
     },
     "lpr": {
@@ -376,7 +416,7 @@
             },
             "objects": {
                 "label": "GenAI-objekt",
-                "description": "Lista över objektetiketter som som standard ska skickas till GenAI."
+                "description": "Lista över objektetiketter som standard ska skickas till GenAI."
             },
             "required_zones": {
                 "label": "Obligatoriska zoner",
@@ -505,6 +545,54 @@
         "enabled_in_config": {
             "label": "Ursprunglig inspelningsinställning",
             "description": "Anger om inspelning var aktiverad i den ursprungliga statiska konfigurationen."
+        },
+        "sub": {
+            "label": "Inspelning från underström",
+            "description": "Inställningar för inspelning av en andra ström med lägre kvalitet.",
+            "enabled": {
+                "label": "Aktivera inspelning från underström",
+                "description": "Aktivera inspelning av en andra ström med lägre kvalitet för adaptiv kvalitetsuppspelning och längre lagringstid."
+            },
+            "continuous": {
+                "label": "Kontinuerlig lagring från underström",
+                "description": "Antal dagar som inspelningar från underströmmen ska behållas oavsett spårade objekt eller rörelse.",
+                "days": {
+                    "label": "Lagringsdagar",
+                    "description": "Antal dagar som inspelningar ska behållas."
+                }
+            },
+            "motion": {
+                "label": "Rörelsebaserad lagring från underström",
+                "description": "Antal dagar som rörelseutlösta inspelningar från underströmmen ska behållas.",
+                "days": {
+                    "label": "Lagringsdagar",
+                    "description": "Antal dagar som inspelningar ska behållas."
+                }
+            },
+            "alerts": {
+                "label": "Lagring av varningar från underström",
+                "description": "Inställningar för lagring av inspelningar av varningar från underströmmen.",
+                "days": {
+                    "label": "Lagringsdagar",
+                    "description": "Antal dagar som inspelningar av detekteringshändelser ska behållas."
+                },
+                "mode": {
+                    "label": "Lagringsläge",
+                    "description": "Läge för lagring: all (spara alla segment), motion (spara segment med rörelse) eller active_objects (spara segment med aktiva objekt)."
+                }
+            },
+            "detections": {
+                "label": "Lagring av detektioner från underström",
+                "description": "Inställningar för lagring av inspelningar av detektioner från underströmmen.",
+                "days": {
+                    "label": "Lagringsdagar",
+                    "description": "Antal dagar som inspelningar av detekteringshändelser ska behållas."
+                },
+                "mode": {
+                    "label": "Lagringsläge",
+                    "description": "Läge för lagring: all (spara alla segment), motion (spara segment med rörelse) eller active_objects (spara segment med aktiva objekt)."
+                }
+            }
         }
     },
     "review": {
@@ -596,6 +684,14 @@
             "activity_context_prompt": {
                 "label": "Prompt för aktivitetskontext",
                 "description": "Anpassad prompt som beskriver vad som ska och inte ska betraktas som misstänkt aktivitet och ger kontext för GenAI-sammanfattningar."
+            },
+            "frame_mode": {
+                "label": "Bildruteläge",
+                "description": "Hur bildrutor presenteras för modellen. 'frames' skickar prompten följd av bildrutorna, vilket passar modeller som själva spårar en sekvens väl. 'annotated_frames' etiketterar varje bildruta och varvar anteckningar från objektspårningen, vilket hjälper modeller som tappar bort aktiviteter som upprepas eller vänds."
+            },
+            "response_style": {
+                "label": "Svarsstil",
+                "description": "Förinställd skrivstil för genererade granskningsbeskrivningar. Förinställningarna justerar ton och detaljnivå för den användarvända titeln, sammanfattningen och scenbeskrivningen. 'default' lämnar den inbyggda prompten oförändrad."
             }
         }
     },
@@ -765,6 +861,10 @@
         "enabled_in_config": {
             "label": "Ursprunglig aviseringsinställning",
             "description": "Anger om aviseringar ursprungligen var aktiverade i den statiska konfigurationen."
+        },
+        "ttl": {
+            "label": "TTL för aviseringar",
+            "description": "Så här hanterar push-tjänsten en avisering som skickas medan en varning är aktiv, om enheten inte går att nå. Immediate levererar den direkt eller släpper den. Reliable fortsätter att försöka i upp till 30 sekunder. Aviseringen som skickas när en varning upphör behålls alltid i upp till en timme."
         }
     },
     "onvif": {

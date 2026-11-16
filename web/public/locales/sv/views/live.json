@@ -2,7 +2,12 @@
   "documentTitle.withCamera": "{{camera}} – livevy - Frigate",
   "twoWayTalk": {
     "enable": "Aktivera tvåvägssamtal",
-    "disable": "Inaktivera tvåvägssamtal"
+    "disable": "Inaktivera tvåvägssamtal",
+    "requiresWebRTC": "Tvåvägsljud kräver WebRTC, som inte är tillgängligt",
+    "error": {
+      "microphone": "Tvåvägsljud kunde inte komma åt mikrofonen",
+      "refused": "Tvåvägsljud kunde inte startas. Se webbläsarkonsolen för detaljer."
+    }
   },
   "cameraAudio": {
     "disable": "Inaktivera kameraljud",
@@ -27,7 +32,8 @@
       "clickMove": {
         "disable": "Inaktivera klick för att flytta",
         "label": "Klicka i bilden för att centrera kameran",
-        "enable": "Aktivera klick för att flytta"
+        "enable": "Aktivera klick för att flytta",
+        "enableWithZoom": "Aktivera klicka för att flytta/dra för att zooma"
       },
       "left": {
         "label": "Flytta PTZ-kameran åt vänster"
@@ -61,7 +67,8 @@
   },
   "recording": {
     "enable": "Aktivera inspelning",
-    "disable": "Inaktivera inspelning"
+    "disable": "Inaktivera inspelning",
+    "disabledInConfig": "Inspelning måste först aktiveras i Inställningar för den här kameran."
   },
   "snapshots": {
     "enable": "Aktivera ögonblicksbilder",
@@ -105,7 +112,8 @@
     "recording": "Inspelning",
     "snapshots": "Ögonblicksbilder",
     "autotracking": "Autospårning",
-    "transcription": "Ljudtranskription"
+    "transcription": "Ljudtranskription",
+    "camera": "Kamera"
   },
   "effectiveRetainMode": {
     "modes": {
@@ -145,14 +153,57 @@
     },
     "lowBandwidth": {
       "tips": "Livevisningen använder lågbandbreddsläge på grund av buffring eller strömningsfel.",
-      "resetStream": "Återställ ström"
+      "resetStream": "Återställ ström",
+      "force": {
+        "label": "Tvinga läge för låg bandbredd",
+        "desc": "Spela alltid Frigates inbyggda flöde för låg bandbredd i stället för den valda strömmen. Det fungerar med alla anslutningar, men har lägre kvalitet och inget ljud."
+      }
     },
     "playInBackground": {
       "label": "Spela i bakgrunden",
       "tips": "Aktivera det här alternativet för att fortsätta strömma när spelaren är dold."
     },
     "debug": {
-      "picker": "Strömval är inte tillgängligt i felsökningsläge. Felsökningsvyn använder alltid den ström som tilldelats detekteringsrollen."
+      "picker": "Strömval är inte tillgängligt i felsökningsläge. Felsökningsvyn använder alltid den ström som tilldelats detekteringsrollen.",
+      "technology": "Val av strömningsteknik är inte tillgängligt i felsökningsläge."
+    },
+    "auto": {
+      "label": "Automatiskt",
+      "tips": "Växlar ström för att passa din anslutning",
+      "selected": "Automatiskt · {{stream}}",
+      "floorLabel": "Låg bandbredd",
+      "retry": "Försök med högsta kvalitet",
+      "reason": {
+        "bandwidth": "Spelar {{stream}} eftersom anslutningen inte klarade av en ström med högre kvalitet",
+        "codec": "Spelar {{stream}} eftersom webbläsaren inte kan spela en ström med högre kvalitet",
+        "saveData": "Spelar {{stream}} eftersom datasparläge är aktiverat",
+        "floor": "Spelar flödet för låg bandbredd eftersom ingen ström kunde hålla jämna steg"
+      }
+    },
+    "metadata": {
+      "loading": "Hämtar strömmetadata…"
+    },
+    "mode": "Strömningsteknik",
+    "technology": {
+      "description": "Välj önskad strömningsteknik. Frigate kan ändå falla tillbaka till läget för låg bandbredd vid uppspelnings- eller nätverksfel.",
+      "name": {
+        "mse": "MSE",
+        "webrtc": "WebRTC",
+        "jsmpeg": "JSMpeg"
+      },
+      "tips": {
+        "mse": "Rekommenderat standardval med bred kompatibilitet och smidig uppspelning",
+        "webrtc": "Kräver extra inställningar och stöds inte på alla enheter"
+      },
+      "unavailable": {
+        "browser": "Webbläsaren har inte stöd för WebRTC.",
+        "not-configured": "Lägg till serverns IP:8555 under go2rtc → webrtc → candidates för att aktivera funktionen.",
+        "notConfiguredOptional": "Valfritt: livevyn fungerar utan detta. WebRTC behövs främst för tvåvägsljud.",
+        "unreachable": "WebRTC kunde inte ansluta. Kontrollera att port 8555 går att nå och att eventuell STUN/TURN-server är korrekt.",
+        "video-codec": "Videocodecen för den här strömmen stöds inte av WebRTC i den här webbläsaren.",
+        "audio-codec": "Ljudcodecen för den här strömmen stöds inte av WebRTC. Transkoda till Opus eller G.711 med go2rtc.",
+        "checking": "Kontrollerar om WebRTC är tillgängligt…"
+      }
     }
   },
   "history": {
@@ -186,5 +237,12 @@
     "noVideoSource": "Ingen videokälla tillgänglig för ögonblicksbilden.",
     "captureFailed": "Misslyckades med att ta en ögonblicksbild.",
     "downloadStarted": "Nedladdning av ögonblicksbild har startat."
+  },
+  "documentTitle": {
+    "default": "Live - Frigate"
+  },
+  "camera": {
+    "turnOn": "Slå på kameran",
+    "turnOff": "Stäng av kameran"
   }
 }

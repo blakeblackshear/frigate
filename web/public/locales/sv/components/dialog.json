@@ -84,7 +84,8 @@
       "newCaseNamePlaceholder": "Namn på nytt ärende",
       "newCaseDescriptionPlaceholder": "Ärendebeskrivning",
       "label": "Ärende",
-      "placeholder": "Välj ett ärende"
+      "placeholder": "Välj ett ärende",
+      "nameRequired": "Ärendenamn krävs"
     },
     "queueing": "Köar export…",
     "tabs": {
@@ -111,7 +112,9 @@
       "noMatchingCameras": "Ingen kamera matchar din sökning",
       "searchOrSelectGroup": "Sök, eller välj kameragrupp...",
       "clearSelection": "Rensa val",
-      "selectedCount": "{{selected}} / {{total}} valda"
+      "selectedCount": "{{selected}} / {{total}} valda",
+      "noCamerasSelected": "Välj minst en kamera",
+      "caseNameDefault": "Export från flera kameror - {{date}}"
     },
     "multi": {
       "title_one": "Exportera 1 granskningsobjekt",
@@ -128,6 +131,15 @@
         "partial": "Startade {{successful}} av {{total}} exporter. Följande misslyckades: {{failedItems}}",
         "failed": "Det gick inte att starta {{total}} exporter. Följande misslyckades: {{failedItems}}"
       }
+    },
+    "stream": {
+      "label": "Kvalitet",
+      "auto": "Automatiskt",
+      "main": "Original",
+      "sub": "Låg",
+      "autoDesc": "Använder huvudströmmen och faller tillbaka till underströmmen med lägre kvalitet när huvudströmmen inte är tillgänglig.",
+      "mainDesc": "Exporterar endast huvudströmmen i originalkvalitet. Tidsintervall där huvudströmmen inte är tillgänglig utelämnas.",
+      "subDesc": "Exporterar endast underströmmen med lägre kvalitet. Tidsintervall där underströmmen inte är tillgänglig utelämnas."
     }
   },
   "streaming": {
@@ -173,7 +185,8 @@
       "export": "Exportera",
       "markAsReviewed": "Markera som granskad",
       "deleteNow": "Ta bort nu",
-      "markAsUnreviewed": "Markera som ogranskad"
+      "markAsUnreviewed": "Markera som ogranskad",
+      "generateDescription": "Generera beskrivning"
     },
     "shareTimestamp": {
       "label": "Dela tidsstämpel",
@@ -182,6 +195,12 @@
       "custom": "Anpassad tidsstämpel",
       "button": "Dela URL med tidsstämpel",
       "shareTitle": "Tidsstämpel för Frigate-granskning: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "En GenAI-beskrivning har begärts för det här granskningsobjektet.",
+        "error": "Det gick inte att begära en beskrivning: {{error}}"
+      }
     }
   },
   "imagePicker": {

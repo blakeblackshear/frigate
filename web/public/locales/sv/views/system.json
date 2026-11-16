@@ -6,9 +6,11 @@
     "logs": {
       "frigate": "Frigate-loggar - Frigate",
       "go2rtc": "go2rtc-loggar - Frigate",
-      "nginx": "Nginx-loggar - Frigate"
+      "nginx": "Nginx-loggar - Frigate",
+      "websocket": "Meddelandeloggar - Frigate"
     },
-    "enrichments": "Berikningsstatistik - Frigate"
+    "enrichments": "Berikningsstatistik - Frigate",
+    "health": "Systemhälsa - Frigate"
   },
   "logs": {
     "copy": {
@@ -30,6 +32,33 @@
       "error": {
         "fetchingLogsFailed": "Fel vid hämtning av loggar: {{errorMessage}}",
         "whileStreamingLogs": "Fel vid strömning av loggar: {{errorMessage}}"
+      }
+    },
+    "websocket": {
+      "label": "Meddelanden",
+      "pause": "Pausa",
+      "resume": "Återuppta",
+      "clear": "Rensa",
+      "filter": {
+        "all": "Alla ämnen",
+        "topics": "Ämnen",
+        "events": "Händelser",
+        "reviews": "Granskningar",
+        "classification": "Klassificering",
+        "face_recognition": "Ansiktsigenkänning",
+        "lpr": "LPR",
+        "camera_activity": "Kameraaktivitet",
+        "system": "System",
+        "camera": "Kamera",
+        "all_cameras": "Alla kameror",
+        "cameras_count_one": "{{count}} kamera",
+        "cameras_count_other": "{{count}} kameror"
+      },
+      "empty": "Inga meddelanden har fångats ännu",
+      "count_one": "{{count}} meddelande",
+      "count_other": "{{count}} meddelanden",
+      "expanded": {
+        "payload": "Nyttolast"
       }
     }
   },
@@ -76,7 +105,10 @@
         }
       },
       "npuUsage": "NPU-användning",
-      "npuMemory": "NPU-minne"
+      "npuMemory": "NPU-minne",
+      "gpuCompute": "GPU-beräkning/kodning",
+      "gpuTemperature": "GPU-temperatur",
+      "npuTemperature": "NPU-temperatur"
     },
     "otherProcesses": {
       "title": "Övriga processer",
@@ -102,7 +134,11 @@
       },
       "title": "Kameralagring",
       "camera": "Kamera",
-      "unusedStorageInformation": "Information om oanvänd lagring"
+      "unusedStorageInformation": "Information om oanvänd lagring",
+      "subStream": {
+        "information": "Lagringsinformation för underström",
+        "tips": "Kameror som spelar in en underström visar användningen för original- och låg kvalitet separat, med samma namn som kvalitetsalternativen vid inspelningsuppspelning. Inspelningar med låg kvalitet ligger kvar på disken tills lagringsperioden löper ut, så denna uppdelning kan fortfarande visas för en kamera efter att inspelning från underström har stängts av."
+      }
     },
     "title": "Lagring",
     "overview": "Översikt",
@@ -113,7 +149,11 @@
     },
     "shm": {
       "title": "SHM-allokering (delat minne)",
-      "warning": "Den nuvarande SHM-storleken på {{total}} MB är för liten. Öka den till minst {{min_shm}} MB."
+      "warning": "Den nuvarande SHM-storleken på {{total}} MB är för liten. Öka den till minst {{min_shm}} MB.",
+      "frameLifetime": {
+        "title": "Bildrutans livslängd",
+        "description": "Varje kamera har {{frames}} platser för bildrutor i delat minne. Vid den snabbaste kamerans bildfrekvens är varje bildruta tillgänglig i ungefär {{lifetime}} s innan den skrivs över."
+      }
     }
   },
   "cameras": {
@@ -134,7 +174,24 @@
       },
       "fetching": "Hämtar kameradata",
       "stream": "Ström {{idx}}",
-      "video": "Video:"
+      "video": "Video:",
+      "keyframes": {
+        "title": "Analys av nyckelrutor",
+        "analyzing": "Analyserar nyckelrutor... {{seconds}} sekunder återstår",
+        "stillAnalyzing": "Analyserar fortfarande nyckelrutor...",
+        "recordStream": "Inspelningsström:",
+        "keyframeCount": "Observerade nyckelrutor:",
+        "observedDuration": "Observerad varaktighet:",
+        "gap": "Avstånd mellan nyckelrutor (min/genomsnitt/max):",
+        "segmentLength": "Längd på inspelningssegment:",
+        "ok": "Nyckelrutor var ~{{seconds}} s, vilket är bra för inspelning och uppspelning.",
+        "unknown": "Det gick inte att fastställa avståndet mellan nyckelrutor.",
+        "recordDisabled": "Inspelning är inaktiverad för den här kameran.",
+        "warningFixed": "Nyckelrutorna är jämnt fördelade men glest placerade (var ~{{seconds}} s). Inspelning fungerar fortfarande, men liveuppspelning och sökning startar långsammare. Ställ in kamerans I-bildruteintervall så att det matchar bildfrekvensen.",
+        "warningVariable": "Avståndet mellan nyckelrutor är inkonsekvent ({{minSeconds}} s till {{maxSeconds}} s), vilket vanligtvis betyder att en smart codec (H.264+/H.265+) är aktiverad. Det rekommenderas inte.",
+        "errorFixed": "Nyckelrutor var ~{{seconds}} s är längre än inspelningssegmentets längd ({{segmentTime}} s), så vissa segment saknar nyckelruta och kan inte spelas upp. Förkorta kamerans I-bildruteintervall så att det matchar bildfrekvensen.",
+        "errorVariable": "Avståndet mellan nyckelrutor når ~{{seconds}} s, längre än inspelningssegmentets längd ({{segmentTime}} s). Vissa segment saknar nyckelruta, vilket bryter uppspelningen. Inaktivera smart/+ codec på kameran eller förkorta nyckelruteintervallet."
+      }
     },
     "label": {
       "detect": "detektering",
@@ -150,7 +207,8 @@
       "cameraDetect": "{{camName}} detektering",
       "cameraFramesPerSecond": "{{camName}} bildrutor per sekund",
       "cameraDetectionsPerSecond": "{{camName}} detekteringar per sekund",
-      "cameraSkippedDetectionsPerSecond": "{{camName}} överhoppade detekteringar per sekund"
+      "cameraSkippedDetectionsPerSecond": "{{camName}} överhoppade detekteringar per sekund",
+      "cameraGpu": "GPU för {{camName}}"
     },
     "framesAndDetections": "Bildrutor/detekteringar",
     "toast": {
@@ -160,6 +218,20 @@
       "error": {
         "unableToProbeCamera": "Det gick inte att analysera kameran: {{errorMessage}}"
       }
+    },
+    "connectionQuality": {
+      "title": "Anslutningskvalitet",
+      "excellent": "Utmärkt",
+      "fair": "Godtagbar",
+      "poor": "Dålig",
+      "unusable": "Oanvändbar",
+      "fps": "fps",
+      "expectedFps": "Förväntat fps",
+      "reconnectsLastHour": "Återanslutningar (senaste timmen)",
+      "stallsLastHour": "Avbrott (senaste timmen)"
+    },
+    "noCameras": {
+      "title": "Inga kameror hittades"
     }
   },
   "lastRefreshed": "Senast uppdaterad: ",
@@ -168,7 +240,15 @@
     "reindexingEmbeddings": "Omindexering av inbäddningar ({{processed}} % klart)",
     "cameraIsOffline": "{{camera}} är frånkopplad",
     "detectIsSlow": "{{detect}} är långsam ({{speed}} ms)",
-    "detectIsVerySlow": "{{detect}} är mycket långsam ({{speed}} ms)"
+    "detectIsVerySlow": "{{detect}} är mycket långsam ({{speed}} ms)",
+    "debugReplayActive": "Felsökningsuppspelning är aktiv",
+    "cameraSkippedDetections": "{{camera}} hoppar över detektering på {{pct}} % av bildrutorna",
+    "systemNotices_one": "{{count}} systemmeddelande",
+    "systemNotices_other": "{{count}} systemmeddelanden",
+    "moreMessages_one": "+{{count}}",
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Det gick inte att omindexera inbäddningar, kontrollera loggarna",
+    "retentionUnmet": "Inspelningar tas bort innan lagringsperioden har löpt ut för att frigöra utrymme"
   },
   "enrichments": {
     "title": "Berikningar",
@@ -196,5 +276,105 @@
       "classification_speed": "Klassificeringshastighet för {{name}}"
     },
     "averageInf": "Genomsnittlig inferenstid"
-  }
+  },
+  "health": {
+    "title": "Systemhälsa",
+    "notices": {
+      "title": "Meddelanden",
+      "empty": "Frigate-installationen fungerar som den ska",
+      "openSettings": "Öppna inställningar",
+      "openLink": "Öppna länk",
+      "noMatches": "Inga meddelanden matchar filtret",
+      "filter": {
+        "severity": "Allvarlighetsgrad",
+        "error": "Fel",
+        "warning": "Varning",
+        "info": "Information",
+        "showHidden": "Visa dolda"
+      },
+      "kinds": {
+        "detector_stuck": "Detektorn {{detector}} startades om efter att den slutade svara",
+        "model_download_failed": "Det gick inte att hämta {{file}} för {{model}}: {{error}}",
+        "skipped_detections": "Detekteringen hann inte med och hoppade över {{pct}} % av bildrutorna i mer än en minut",
+        "shm_too_low": "Tilldelningen för /dev/shm ({{total}} MB) bör ökas till minst {{min}} MB",
+        "failed_login_one": "Misslyckat inloggningsförsök för {{user}}",
+        "failed_login_other": "Misslyckade inloggningsförsök för {{user}}",
+        "update_available": "Frigate {{version}} är tillgänglig",
+        "ffmpeg_high_cpu": "FFmpeg använder mycket CPU ({{cpu}} % i genomsnitt)",
+        "detect_high_cpu": "Detekteringen använder mycket CPU ({{cpu}} % i genomsnitt)",
+        "object_processing_behind": "Bearbetningen av spårade objekt hann inte med, så kamerabildrutor tappades. Kontrollera CPU-användningen och om CPU-gränser eller processorbindning för behållaren eller VM:n ger Frigate för lite CPU",
+        "analytics_prompt": "Överväg att dela anonym användningsstatistik för att hjälpa utvecklarna att förbättra Frigate"
+      },
+      "streamPrefix": "Ström {{index}}: {{message}}",
+      "streamPrefixRestream": "Ström {{index}} (via go2rtc): {{message}}",
+      "streamProbeFailed": "Ström {{index}} kunde inte undersökas: {{error}}",
+      "cameraProbeFailed": "Strömmarna kunde inte undersökas: {{error}}",
+      "acknowledge": "Bekräfta",
+      "acknowledgeHint": "Dölj tills detta händer igen",
+      "mute": "Tysta",
+      "muteHint": "Visa aldrig detta igen",
+      "unmute": "Slå på igen",
+      "showAgain": "Visa igen",
+      "hiddenTitle": "Dolda",
+      "noneHidden": "Inga dolda meddelanden",
+      "showAll": "Visa alla igen",
+      "showAllTitle": "Visa alla dolda meddelanden?",
+      "showAllDesc": "Alla bekräftade och tystade meddelanden återgår till meddelandelistan, även konfigurations- och strömkontroller.",
+      "occurred_one": "Inträffade {{time}}",
+      "occurred_other": "Senast inträffad {{lastTime}} · {{count}} gånger sedan {{time}}",
+      "acknowledgedAt": "Bekräftad {{time}}",
+      "mutedAt": "Tystad {{time}}"
+    },
+    "hardware": {
+      "title": "Maskinvara",
+      "objectDetection": "Objektdetektering",
+      "hardwareAcceleration": "Maskinvaruacceleration",
+      "enrichments": {
+        "title": "Berikningar",
+        "semantic_search": "Semantisk sökning",
+        "face_recognition": "Ansiktsigenkänning",
+        "lpr": "Registreringsskyltigenkänning",
+        "audio_transcription": "Ljudtranskribering"
+      },
+      "cameraConnections": "Kameraanslutningar",
+      "allCamerasExcellent": "Alla kameror har en utmärkt anslutning.",
+      "fps": "{{camera}} / {{expected}} fps",
+      "nothingConfigured": "Ingenting har konfigurerats",
+      "allCameras": "Alla kameror",
+      "probeUnavailable": "Maskinvaruidentifiering är inte tillgänglig",
+      "justStarted": "Frigate har just startat",
+      "deviceNotFound": "{{devices}} hittades inte på det här systemet",
+      "detectorNotRunning": "Detektorprocessen körs inte",
+      "inferenceVerySlow": "Inferens är mycket långsam ({{speed}} ms)",
+      "inferenceSlow": "Inferens är långsam ({{speed}} ms)",
+      "inferenceMs": "{{speed}} ms",
+      "customArgs": "Anpassade ffmpeg-argument",
+      "customArgsNotVerified": "Anpassade ffmpeg-argument, inte verifierade",
+      "hwaccelNotConfigured": "Ingen maskinvaruavkodning används, men {{family}} är tillgänglig. Välj den i ffmpeg-inställningarna",
+      "hwaccelHardwareMissing": "{{family}} är konfigurerad, men maskinvarusonden rapporterade den inte",
+      "unrecognizedDevice": "Okänd enhetsöverskrivning, inte verifierad",
+      "decoderUsage": "avkodare {{usage}}",
+      "remoteProvider": "Fjärrleverantör",
+      "acceleratorMissing": "Konfigurerad för {{device}}, men ingen kompatibel accelerator hittades",
+      "modelNotRunYet": "Modellen har inte körts ännu, enheten verifieras efter första användningen",
+      "fellBackToCpu": "Konfigurerad för {{device}}, men körs på CPU:n",
+      "cpuDespiteAccelerator": "Körs på CPU:n trots att en accelerator är tillgänglig",
+      "probed": "Undersökt",
+      "probing": "Undersöker...",
+      "recheck": "Undersök maskinvaran igen",
+      "cameraStreams": "Kameraströmmar",
+      "streamsNotChecked": "Inte kontrollerade ännu",
+      "streamsChecking": "Kontrollerar {{done}} av {{total}}",
+      "streamsClean": "Inga strömproblem",
+      "checked": "Kontrollerade",
+      "runAgain": "Kör igen",
+      "runStreamChecks": "Kontrollera strömmar",
+      "streamsChecked_one": "{{count}} kamera kontrollerad",
+      "streamsChecked_other": "{{count}} kameror kontrollerade",
+      "streamsFlagged_one": "{{count}} med problem, listad under Meddelanden",
+      "streamsFlagged_other": "{{count}} med problem, listade under Meddelanden"
+    }
+  },
+  "showAllTabs": "Visa alla flikar",
+  "showLessTabs": "Visa färre"
 }

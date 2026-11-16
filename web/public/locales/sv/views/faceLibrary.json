@@ -27,7 +27,11 @@
     "title": "Senaste igenkänningar",
     "aria": "Välj senaste igenkänningar",
     "empty": "Det finns inga nya försök till ansiktsigenkänning",
-    "titleShort": "Ny"
+    "titleShort": "Ny",
+    "emptyNoLibrary": {
+      "title": "Ladda upp ett ansikte",
+      "description": "Du måste lägga till minst ett ansikte i biblioteket för att ansiktsigenkänning ska fungera."
+    }
   },
   "uploadFaceImage": {
     "title": "Ladda upp ansiktsbild",
@@ -64,7 +68,8 @@
       "deletedName_other": "{{count}} samlingar har tagits bort.",
       "renamedFace": "Ansiktet har bytt namn till {{name}}",
       "trainedFace": "Ansiktet har tränats.",
-      "updatedFaceScore": "Ansiktspoängen för {{name}} har uppdaterats till {{score}}."
+      "updatedFaceScore": "Ansiktspoängen för {{name}} har uppdaterats till {{score}}.",
+      "reclassifiedFace": "Ansiktet har omklassificerats."
     },
     "error": {
       "uploadingImageFailed": "Misslyckades med att ladda upp bilden: {{errorMessage}}",
@@ -73,7 +78,8 @@
       "deleteNameFailed": "Misslyckades med att ta bort namnet: {{errorMessage}}",
       "renameFaceFailed": "Det gick inte att byta namn på ansiktet: {{errorMessage}}",
       "trainFailed": "Misslyckades med att träna: {{errorMessage}}",
-      "updateFaceScoreFailed": "Det gick inte att uppdatera ansiktspoängen: {{errorMessage}}"
+      "updateFaceScoreFailed": "Det gick inte att uppdatera ansiktspoängen: {{errorMessage}}",
+      "reclassifyFailed": "Det gick inte att omklassificera ansiktet: {{errorMessage}}"
     }
   },
   "renameFace": {
@@ -87,5 +93,7 @@
     "deleteFace": "Ta bort ansikte",
     "uploadImage": "Ladda upp bild",
     "reprocessFace": "Återbearbeta ansiktet"
-  }
+  },
+  "reclassifyFaceAs": "Omklassificera ansikte som:",
+  "reclassifyFace": "Omklassificera ansikte"
 }

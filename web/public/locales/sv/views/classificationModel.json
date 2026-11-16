@@ -22,7 +22,8 @@
       "deletedModel_one": "{{count}} modell har tagits bort",
       "deletedModel_other": "{{count}} modeller har tagits bort",
       "updatedModel": "Modellkonfigurationen har uppdaterats",
-      "renamedCategory": "Klassen har bytt namn till {{name}}"
+      "renamedCategory": "Klassen har bytt namn till {{name}}",
+      "reclassifiedImage": "Bilden har omklassificerats"
     },
     "error": {
       "deleteImageFailed": "Misslyckades med att ta bort: {{errorMessage}}",
@@ -32,7 +33,8 @@
       "deleteModelFailed": "Misslyckades med att ta bort modellen: {{errorMessage}}",
       "updateModelFailed": "Det gick inte att uppdatera modellen: {{errorMessage}}",
       "trainingFailedToStart": "Misslyckades med att starta modellträning: {{errorMessage}}",
-      "renameCategoryFailed": "Misslyckades med att byta namn på klassen: {{errorMessage}}"
+      "renameCategoryFailed": "Misslyckades med att byta namn på klassen: {{errorMessage}}",
+      "reclassifyFailed": "Det gick inte att omklassificera bilden: {{errorMessage}}"
     }
   },
   "deleteCategory": {
@@ -156,6 +158,11 @@
       "missingStatesWarning": {
         "title": "Exempel på saknade tillstånd",
         "description": "Det rekommenderas att välja exempel för alla tillstånd för bästa resultat. Du kan fortsätta utan att välja alla tillstånd, men modellen kommer inte att tränas förrän alla tillstånd har bilder. När du har fortsatt använder du vyn Senaste klassificeringar för att klassificera bilder för de saknade tillstånden och tränar sedan modellen."
+      },
+      "refreshExamples": "Generera nya exempel",
+      "refreshConfirm": {
+        "title": "Generera nya exempel?",
+        "description": "Detta genererar en ny uppsättning bilder och rensar alla val, inklusive tidigare klasser. Du måste välja exempel igen för alla klasser."
       }
     }
   },
@@ -178,12 +185,28 @@
     "title": "Redigera klassificeringsmodell",
     "descriptionState": "Redigera klasserna för denna tillståndsklassificeringsmodell. Ändringar kräver omträning av modellen.",
     "descriptionObject": "Redigera objekttyp och klassificeringstyp för denna objektklassificeringsmodell.",
-    "stateClassesInfo": "Observera: För att ändra tillståndsklasser måste modellen omtränas med de uppdaterade klasserna."
+    "stateClassesInfo": "Observera: För att ändra tillståndsklasser måste modellen omtränas med de uppdaterade klasserna.",
+    "enabled": "Aktiverad",
+    "enabledDesc": "Kör den här modellen. När den inaktiveras slutar den köras och klassificerar inte längre.",
+    "saveAttempts": "Spara klassificeringsförsök",
+    "saveAttemptsDesc": "Antal bilder från klassificeringsförsök att behålla i gränssnittet för senaste klassificeringar.",
+    "motion": "Kör vid rörelse",
+    "motionDesc": "Kör klassificering när rörelse upptäcks inom den konfigurerade beskärningen.",
+    "interval": "Intervall",
+    "intervalDesc": "Sekunder mellan periodiska klassificeringskörningar. Lämna tomt om den endast ska köras vid rörelse.",
+    "intervalPlaceholder": "Inget intervall",
+    "errors": {
+      "saveAttemptsInvalid": "Antalet sparade försök måste vara ett heltal som är 0 eller större",
+      "intervalInvalid": "Intervallet måste vara ett heltal större än 0"
+    }
   },
   "tooltip": {
     "trainingInProgress": "Modellen tränas för närvarande",
     "noNewImages": "Det finns inga nya bilder att träna med. Klassificera först fler bilder i datamängden.",
     "noChanges": "Inga ändringar i datamängden sedan den senaste träningen.",
     "modelNotReady": "Modellen är inte redo för träning"
-  }
+  },
+  "disabled": "Inaktiverad",
+  "reclassifyImageAs": "Omklassificera bild som:",
+  "reclassifyImage": "Omklassificera bild"
 }
