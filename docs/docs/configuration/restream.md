@@ -223,7 +223,7 @@ For security reasons, the `echo:`, `expr:`, and `exec:` stream sources are disab
 
 go2rtc's `${VAR:default}` variable syntax is also disabled by default in stream sources, since its default can name one of those sources. Use Frigate's [`{FRIGATE_*}` substitution](./config.md#environment-variable-substitution) instead.
 
-If you attempt to use these sources in your configuration, the streams will be removed and an error message will be printed in the logs.
+If you attempt to use these sources in your configuration, the streams will be removed and an error message will be printed in the logs. go2rtc also refuses to run anything but Frigate's ffmpeg from `exec:` and `echo:` sources added through its API or `/config/go2rtc_homekit.yml`.
 
 To enable these sources, you must set the environment variable `GO2RTC_ALLOW_ARBITRARY_EXEC=true`. This can be done in your Docker Compose file or container environment, or for Home Assistant App users with the `go2rtc_allow_arbitrary_exec` option in the App's configuration. The `environment_vars` section of the Frigate config can't enable it:
 

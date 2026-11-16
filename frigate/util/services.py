@@ -1235,14 +1235,15 @@ def find_restricted_go2rtc_stream_changes(
 
 
 # go2rtc runs `ffmpeg.bin` and `ngrok.command`, and every other `ffmpeg` key is a
-# template of ffmpeg arguments that `#video=<name>` and friends can reference
-_GO2RTC_EXEC_SECTIONS = ("ffmpeg", "ngrok")
+# template of ffmpeg arguments that `#video=<name>` and friends can reference.
+# `exec.allow_paths` and `echo.allow_paths` choose the binaries go2rtc may run.
+_GO2RTC_EXEC_SECTIONS = ("ffmpeg", "ngrok", "exec", "echo")
 
 
 def find_restricted_go2rtc_exec_changes(
     old_go2rtc: dict[str, Any] | None, new_go2rtc: dict[str, Any] | None
 ) -> list[str]:
-    """Return the go2rtc ffmpeg and ngrok keys added or changed through the API.
+    """Return the go2rtc exec-related keys added or changed through the API.
 
     These are only accepted with arbitrary exec enabled. Keys already in the
     saved config are left alone, the same as stream sources.
@@ -1274,10 +1275,11 @@ def find_restricted_go2rtc_exec_changes(
 def apply_go2rtc_ffmpeg_config(
     go2rtc_config: dict[str, Any], ffmpeg_path: str
 ) -> list[str]:
-    """Set go2rtc's ffmpeg binary for startup.
+    """Set go2rtc's ffmpeg binary and exec allowlist for startup.
 
-    Unless arbitrary exec is enabled, `ffmpeg.bin` is forced to Frigate's ffmpeg
-    and `ngrok` is removed. Templates in the saved config are kept.
+    Unless arbitrary exec is enabled, `ffmpeg.bin` is forced to Frigate's ffmpeg,
+    `ngrok` is disabled, and go2rtc may only run Frigate's ffmpeg from `exec:` and
+    `echo:` sources. Templates in the saved config are kept.
 
     Returns:
         The keys that were overridden or removed
@@ -1295,9 +1297,18 @@ def apply_go2rtc_ffmpeg_config(
         restricted.append("ffmpeg.bin")
         ffmpeg["bin"] = ffmpeg_path
 
-    if "ngrok" in go2rtc_config and not allowed:
-        restricted.append("ngrok")
-        del go2rtc_config["ngrok"]
+    # go2rtc merges its config files and this one loads last, so setting these
+    # keys also overrides the HomeKit file and anything saved through its API
+    if not allowed:
+        forced = {
+            "ngrok": {"command": ""},
+            "exec": {"allow_paths": [ffmpeg_path]},
+            "echo": {"allow_paths": [ffmpeg_path]},
+        }
+        for key, value in forced.items():
+            if key in go2rtc_config and go2rtc_config[key] != value:
+                restricted.append(key)
+            go2rtc_config[key] = value
 
     return restricted
 
