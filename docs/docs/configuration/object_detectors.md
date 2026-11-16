@@ -682,7 +682,7 @@ To run a model on a DEEPX NPU, list a `deepx` device on that model.
 
 :::info
 
-The DX-RT Python bindings are not part of the Frigate image. The `libdxrt-bin` package is downloaded and its `dx_engine` wheel installed into `/config/.local` the first time a DEEPX device is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. The package is then deleted, leaving only the wheel. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the file yourself.
+The DX-RT Python bindings are not part of the Frigate image. The `libdxrt-bin` package is downloaded and its `dx_engine` wheel installed into `/config/.local` the first time a DEEPX device is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. The package stays in the runtime cache, so a container recreated without internet access reinstalls from it. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the file yourself.
 
 :::
 

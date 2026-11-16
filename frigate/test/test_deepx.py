@@ -20,6 +20,8 @@ from frigate.detectors.device import (
 )
 from frigate.detectors.plugins.deepx import (
     DEEPX_MANIFEST,
+    DXNN_MAX_HEADER_SIZE,
+    DXNN_PRELUDE_SIZE,
     DXRT_VERSION,
     PPU_RECORD_SIZE,
     DeepxDetector,
@@ -346,6 +348,40 @@ class TestDeepxModelFile(unittest.TestCase):
             with self.subTest(graph=graph):
                 self.assertIsNone(self.layout(ppu, layers, **kwargs).centre_boxes)
 
+    def test_a_v9_file_is_read_from_its_variable_length_index(self):
+        cases = {
+            "table": (ANCHOR_BASED_PPU, THREE_SCALE_ANCHORS, {"table": True}),
+            "no table: compile_config sits past the index": (
+                {"num_classes": 80},
+                THREE_SCALE_ANCHORS,
+                {"table": False},
+            ),
+        }
+
+        for kind, (ppu, layers, kwargs) in cases.items():
+            with self.subTest(kind=kind):
+                self.assertEqual(
+                    self.layout(ppu, layers, version=9, **kwargs),
+                    PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
+                )
+
+    def test_a_v9_index_shorter_than_it_claims_is_refused(self):
+        path = write_dxnn(self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3)], version=9)
+
+        with open(path, "r+b") as model:
+            model.truncate(DXNN_PRELUDE_SIZE + 8)
+
+        self.assertIsNone(read_ppu_layout(path))
+
+    def test_a_v9_index_larger_than_the_cap_is_refused(self):
+        path = write_dxnn(self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3)], version=9)
+
+        with open(path, "r+b") as model:
+            model.seek(8)
+            model.write(struct.pack("<Q", DXNN_MAX_HEADER_SIZE + 1))
+
+        self.assertIsNone(read_ppu_layout(path))
+
     def test_nothing_is_read_from_a_model_without_ppu_metadata(self):
         self.assertIsNone(read_ppu_layout(os.path.join(self.tmp.name, "missing")))
 
@@ -631,7 +667,7 @@ class TestDeepxConfig(unittest.TestCase):
 
     def test_the_runtime_manifest_pins_the_package_and_wheel_to_the_version(self):
         """The deb carries the wheel, so bumping DXRT_VERSION has to rewrite
-        the package URL, its digest and the wheel member together."""
+        the package URL, both digests and the wheel member together."""
         self.assertEqual(DEEPX_MANIFEST.version, DXRT_VERSION)
 
         for artifact in DEEPX_MANIFEST.artifacts:
@@ -639,6 +675,7 @@ class TestDeepxConfig(unittest.TestCase):
                 self.assertIs(artifact.kind, ArtifactKind.deb)
                 self.assertIn(f"libdxrt-bin_{DXRT_VERSION}_", artifact.url)
                 self.assertIn(f"dx_engine-{DXRT_VERSION}-cp311-", artifact.member)
+                self.assertEqual(len(artifact.member_sha256), 64)
                 self.assertTrue(artifact.mappings)
 
         self.assertIn("libdxrt.so", DEEPX_MANIFEST.preload)

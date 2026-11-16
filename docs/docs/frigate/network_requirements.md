@@ -76,7 +76,7 @@ If the container cannot reach GitHub, provide the files yourself:
 
 The `GITHUB_ENDPOINT` mirror variable below applies to these downloads as well.
 
-DEEPX pins the runtime package rather than a wheel, so seed the `.deb`. Frigate takes the `dx_engine` wheel and the libraries out of it, then deletes the package, leaving only the wheel in the cache.
+DEEPX pins the runtime package rather than a wheel, so seed the `.deb`. Frigate takes the `dx_engine` wheel and the libraries out of it and keeps the package in the cache, so reinstalling after a container is recreated needs no download.
 
 ### Preventing Model Downloads
 

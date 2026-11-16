@@ -119,8 +119,8 @@ DEEPX_LIBS = ArchiveMapping(
     include=("libdxrt.so*", "libonnxruntime.so*"),
 )
 
-# The deb carries a wheel per CPython ABI; `member` picks this image's. Only
-# the wheel and DEEPX_LIBS are kept out of it.
+# The deb carries a wheel per CPython ABI; `member` picks this image's and
+# `member_sha256` pins it. Only the wheel and DEEPX_LIBS are kept out of it.
 DEEPX_MANIFEST = RuntimeManifest(
     name=DETECTOR_KEY,
     version=DXRT_VERSION,
@@ -135,6 +135,7 @@ DEEPX_MANIFEST = RuntimeManifest(
             machines=("aarch64",),
             mappings=(DEEPX_LIBS,),
             member="dx_engine-3.5.0-cp311-cp311-*.whl",
+            member_sha256="276e1860af91ab3f937047fe8c4f59c169b4a5ed191f1c1cb606f89045c6967a",
         ),
         Artifact(
             url=(
@@ -146,6 +147,7 @@ DEEPX_MANIFEST = RuntimeManifest(
             machines=("x86_64",),
             mappings=(DEEPX_LIBS,),
             member="dx_engine-3.5.0-cp311-cp311-*.whl",
+            member_sha256="ec5b80970271ac6d236fa4bc3277e425d6d8bcb89a977f7c236ac0431dd60558",
         ),
     ),
     preload=("libonnxruntime.so.1", "libdxrt.so"),

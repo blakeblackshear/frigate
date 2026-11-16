@@ -470,7 +470,7 @@ The device node is needed as well as the socket, because the client opens the NP
 
 `/dev/shm` does not need sharing.
 
-The DX-RT python bindings are not shipped in the Frigate image. Frigate downloads the matching `libdxrt-bin` package on first start when a DEEPX detector is configured, takes the `dx_engine` wheel and the libraries it links against out of it, and deletes the package. Only the wheel is kept, under `/config`.
+The DX-RT python bindings are not shipped in the Frigate image. Frigate downloads the matching `libdxrt-bin` package on first start when a DEEPX detector is configured, takes the `dx_engine` wheel and the libraries it links against out of it, and keeps the package under `/config` so later reinstalls need no download.
 
 #### Configuration
 

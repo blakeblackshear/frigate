@@ -87,6 +87,8 @@ class Artifact:
     machines: tuple[str, ...] = ()
     # basename glob for the wheel a `deb` carries
     member: str = ""
+    # sha256 of that wheel, pinning the pip input like a wheel artifact does
+    member_sha256: str = ""
 
     @property
     def name(self) -> str:
@@ -273,13 +275,11 @@ def _deb_contents(path: Path) -> Iterator[tarfile.TarFile]:
         )
 
 
-def _install_deb(
-    path: Path, artifact: Artifact, staging: Path, keep_dir: Path | None = None
-) -> list[str]:
+def _install_deb(path: Path, artifact: Artifact, staging: Path) -> list[str]:
     """Install a Debian package's mapped files and the wheel it carries.
 
-    The rest of the package belongs on the host, not in the image. A copy of
-    the wheel is left in `keep_dir` when one is given.
+    The rest of the package belongs on the host, not in the image. The
+    package itself stays in the cache so later reinstalls need no download.
     """
     machine = platform.machine()
     mappings = [m for m in artifact.mappings if not m.machines or machine in m.machines]
@@ -325,11 +325,12 @@ def _install_deb(
         )
 
     if wheel is not None:
-        _install_wheel(wheel)
+        if artifact.member_sha256 and sha256_of(wheel) != artifact.member_sha256:
+            raise RuntimeDependencyError(
+                f"Checksum mismatch for the wheel carried by {path.name}"
+            )
 
-        if keep_dir is not None:
-            keep_dir.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(wheel, keep_dir / wheel.name)
+        _install_wheel(wheel)
 
     return written
 
@@ -633,7 +634,7 @@ def ensure_installed(manifest: RuntimeManifest) -> None:
                 if artifact.kind is ArtifactKind.wheel:
                     _install_wheel(staged)
                 elif artifact.kind is ArtifactKind.deb:
-                    files.extend(_install_deb(staged, artifact, staging, cache))
+                    files.extend(_install_deb(staged, artifact, staging))
                 else:
                     files.extend(_extract_archive(staged, artifact))
         except (OSError, tarfile.TarError, zipfile.BadZipFile) as err:
@@ -642,12 +643,6 @@ def ensure_installed(manifest: RuntimeManifest) -> None:
             ) from err
         finally:
             shutil.rmtree(staging, ignore_errors=True)
-
-        # the wheel is cached, so the package that carried it is not kept; this
-        # runs before the stamp so a crash here is retried rather than leaked
-        for artifact in artifacts:
-            if artifact.kind is ArtifactKind.deb:
-                (cache / artifact.name).unlink(missing_ok=True)
 
         _write_stamp(manifest, files)
 
