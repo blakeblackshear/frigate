@@ -319,7 +319,7 @@
       "noneHidden": "Nicio notificare ascunsă",
       "showAll": "Afișează totul din nou",
       "showAllTitle": "Afișează toate notificările ascunse?",
-      "showAllDesc": "Fiecare notificare confirmată și silențiată revine în lista de notificări, inclusiv verificările de configurație și de flux.",
+      "showAllDesc": "Fiecare notificare confirmată și silențiată revine în lista de notificări, inclusiv verificările de configurație și de stream.",
       "acknowledgedAt": "Confirmat {{time}}",
       "mutedAt": "Fără sunet {{time}}",
       "occurred_one": "A avut loc {{time}}",
