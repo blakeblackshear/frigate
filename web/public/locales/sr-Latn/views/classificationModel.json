@@ -74,7 +74,7 @@
     "saveAttempts": "Pokušaji čuvanja",
     "saveAttemptsDesc": "Broj slika pokušaja klasifikacije koje treba zadržati za korisnički interfejs nedavnih klasifikacija.",
     "motion": "Pokreni pri kretanju",
-    "motionDesc": "Pokrenite klasifikaciju kada se detektuje kretanje unutar konfigurisanog isecanja kadra.",
+    "motionDesc": "Pokreni klasifikaciju kada se detektuje kretanje unutar podešenog isečka.",
     "interval": "Interval",
     "intervalDesc": "Broj sekundi između periodičnih pokretanja klasifikacije. Ostavite prazno da bi se pokretala samo pri kretanju.",
     "intervalPlaceholder": "Bez intervala",

@@ -32,7 +32,7 @@
   "trackedObjectDetails": "Detalji o praćenom objektu",
   "type": {
     "details": "detalji",
-    "snapshot": "snimak",
+    "snapshot": "snimak kadra",
     "thumbnail": "sličica",
     "video": "video",
     "tracking_details": "detalji praćenja"
@@ -136,7 +136,7 @@
       "desc": "Izaberite atribute klasifikacije za: {{label}}"
     },
     "snapshotScore": {
-      "label": "Rezultat snimka"
+      "label": "Rezultat snimka kadra"
     },
     "topScore": {
       "label": "Najviši rezultat",
@@ -165,7 +165,7 @@
       "aiTips": "Frigate neće zatražiti opis od vašeg provajdera generativne veštačke inteligencije dok se životni ciklus praćenog objekta ne završi."
     },
     "expandRegenerationMenu": "Proširi meni za ponovno generisanje",
-    "regenerateFromSnapshot": "Ponovo generiši iz snimka",
+    "regenerateFromSnapshot": "Ponovo generiši iz snimka kadra",
     "regenerateFromThumbnails": "Ponovo generiši iz sličica",
     "tips": {
       "descriptionSaved": "Opis je uspešno sačuvan",
@@ -182,12 +182,12 @@
       "aria": "Preuzmi video"
     },
     "downloadSnapshot": {
-      "label": "Preuzmi snimak",
-      "aria": "Preuzmi snimak"
+      "label": "Preuzmi snimak kadra",
+      "aria": "Preuzmi snimak kadra"
     },
     "downloadCleanSnapshot": {
-      "label": "Preuzmi čist snimak",
-      "aria": "Preuzmi čist snimak"
+      "label": "Preuzmi čist snimak kadra",
+      "aria": "Preuzmi čist snimak kadra"
     },
     "viewTrackingDetails": {
       "label": "Prikaži detalje praćenja",
@@ -233,7 +233,7 @@
   "dialog": {
     "confirmDelete": {
       "title": "Potvrdi brisanje",
-      "desc": "Brisanjem ovog praćenog objekta uklanjaju se snimak, svi sačuvani vektorski prikazi i svi povezani unosi detalja praćenja. Snimljeni video-zapis ovog praćenog objekta u prikazu Istorija <em>NEĆE</em> biti obrisan.<br/><br/>Da li ste sigurni da želite da nastavite?"
+      "desc": "Brisanjem ovog praćenog objekta uklanjaju se snimak kadra, svi sačuvani vektorski zapisi (embeddings) i svi povezani unosi detalja praćenja. Snimljeni materijal ovog praćenog objekta u prikazu Istorije <em>NEĆE</em> biti obrisan.<br /><br />Da li ste sigurni da želite da nastavite?"
     },
     "toast": {
       "error": "Greška pri brisanju ovog praćenog objekta: {{errorMessage}}"

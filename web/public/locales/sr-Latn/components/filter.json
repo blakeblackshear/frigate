@@ -48,11 +48,11 @@
   "estimatedSpeed": "Procenjena brzina ({{unit}})",
   "features": {
     "label": "Funkcije",
-    "hasSnapshot": "Ima snimak",
-    "hasVideoClip": "Ima video-snimak",
+    "hasSnapshot": "Postoji snimak kadra",
+    "hasVideoClip": "Postoji video-snimak",
     "submittedToFrigatePlus": {
       "label": "Poslato na Frigate+",
-      "tips": "Morate prvo filtrirati praćene objekte koji imaju snimak.<br /><br />Praćeni objekti bez snimka ne mogu se poslati na Frigate+."
+      "tips": "Prvo morate da filtrirate praćene objekte koji imaju snimak kadra.<br /><br />Praćeni objekti bez snimka kadra ne mogu biti poslati u Frigate+."
     }
   },
   "sort": {
@@ -93,9 +93,9 @@
       },
       "searchSource": {
         "label": "Izvor pretrage",
-        "desc": "Izaberite da li želite da pretražujete sličice (umanjene prikaze) ili opise vaših praćenih objekata.",
+        "desc": "Izaberite da li želite da pretražujete sličice ili opise vaših praćenih objekata.",
         "options": {
-          "thumbnailImage": "Sličica",
+          "thumbnailImage": "Umanjena slika",
           "description": "Opis"
         }
       }
@@ -118,7 +118,7 @@
   },
   "trackedObjectDelete": {
     "title": "Potvrdite brisanje",
-    "desc": "Brisanjem ovih {{objectLength}} praćenih objekata uklanja se snimak, svi sačuvani vektorski prikazi i svi povezani unosi o životnom ciklusu objekta. Snimljeni materijal ovih praćenih objekata u prikazu istorije <em>NEĆE</em> biti obrisan.<br /><br />Da li ste sigurni da želite da nastavite?<br /><br />Držite taster <em>Shift</em> da biste ubuduće zaobišli ovaj prozor.",
+    "desc": "Brisanjem ovih {{objectLength}} praćenih objekata uklanjaju se snimak kadra, svi sačuvani vektorski zapisi (embeddings) i svi povezani unosi životnog ciklusa objekta. Snimljeni materijal ovih praćenih objekata u prikazu Istorije <em>NEĆE</em> biti obrisan.<br /><br />Da li ste sigurni da želite da nastavite?<br /><br />Držite taster <em>Shift</em> da biste preskočili ovaj dijalog u budućnosti.",
     "toast": {
       "success": "Praćeni objekti su uspešno obrisani.",
       "error": "Neuspešno brisanje praćenih objekata: {{errorMessage}}"
