@@ -254,8 +254,6 @@ class GeminiClient(GenAIClient):
 
     def list_models(self) -> list[str]:
         """Return available model names from Gemini."""
-        if self.provider is None:
-            return []
         try:
             models = list(self.provider.models.list())
         except Exception as e:
@@ -268,8 +266,6 @@ class GeminiClient(GenAIClient):
         """Report per-model capabilities from Gemini's model list."""
         if self._capabilities_cache is not None:
             return self._capabilities_cache
-        if self.provider is None:
-            return {}
         try:
             models = list(self.provider.models.list())
         except Exception as e:
@@ -413,14 +409,9 @@ class GeminiClient(GenAIClient):
             One float32 vector per input, length 768.
 
         Raises:
-            ValueError: The provider is missing, an image cannot be
-                converted, the response has no vector, or the request
-                fails.
+            ValueError: An image cannot be converted, the response has
+                no vector, or the request fails.
         """
-        if self.provider is None:
-            logger.warning("Gemini provider has not been initialized")
-            raise ValueError("Gemini provider has not been initialized")
-
         texts = texts or []
         images = images or []
         if not texts and not images:

@@ -1433,13 +1433,6 @@ class TestGeminiEmbeddings(unittest.TestCase):
         with self.assertRaises(ValueError):
             client.embed(texts=["hello"])
 
-    def test_uninitialized_provider_raises(self):
-        client = self._client()
-        client.provider = None
-
-        with self.assertRaises(ValueError):
-            client.embed(texts=["hello"])
-
 
 class TestBaseClientTranscribe(unittest.TestCase):
     """Providers that don't implement the role must be inert, not broken."""
