@@ -53,7 +53,7 @@
       "gpuDecoder": "GPU декодер",
       "gpuInfo": {
         "vainfoOutput": {
-          "title": "Vainfo Output",
+          "title": "Vainfo излазни подаци",
           "returnCode": "Повратни код: {{code}}",
           "processOutput": "Обрада излаза:",
           "processError": "Грешка у обради:"
@@ -63,7 +63,7 @@
           "name": "Назив: {{name}}",
           "driver": "Драјвер: {{driver}}",
           "cudaComputerCapability": "Способност CUDA рачунања: {{cuda_compute}}",
-          "vbios": "VBios Info: {{vbios}}"
+          "vbios": "VBios информације: {{vbios}}"
         },
         "closeInfo": {
           "label": "Затварање GPU информација"

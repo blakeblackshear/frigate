@@ -1,33 +1,37 @@
 {
   "restart": {
-    "title": "Da li želite da restartujete Frigate?",
-    "button": "Ponovo pokreni",
+    "title": "Да ли сте сигурни да желите да поново покренете Frigate?",
+    "button": "Поново покрени",
     "restarting": {
-      "title": "Frigate se ponovo pokreće",
-      "content": "Ova stranica će se ponovo učitati za {{countdown}} sekundi.",
-      "button": "Prisilno ponovno učitavanje"
-    }
+      "title": "Frigate се поново покреће",
+      "content": "Ова страница ће се поново учитати за {{countdown}} секунди.",
+      "button": "Освежи одмах"
+    },
+    "description": "Ово ће накратко зауставити Frigate док се поново покреће."
   },
   "explore": {
     "plus": {
       "submitToPlus": {
-        "label": "Pošalji na Frigate+",
-        "desc": "Objekti na lokacijama koje želite da izbegnete nisu lažno pozitivni. Slanje lažno pozitivnih rezultata će zbuniti model."
+        "label": "Пошаљи на Frigate+",
+        "desc": "Објекти на локацијама које желите да избегнете нису лажно позитивни резултати. Њихово слање као лажно позитивних збуниће модел."
       },
       "review": {
         "question": {
-          "ask_a": "Da li je ovaj objekat <code>{{label}}</code>?",
-          "label": "Потврдите ову ознаку за Фригејт+",
+          "ask_a": "Да ли је овај објекат <code>{{label}}</code>?",
+          "label": "Потврдите ову ознаку за Frigate+",
           "ask_an": "Да ли је овај објекат <code>{{label}}</code>?",
           "ask_full": "Да ли је овај објекат <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"
         },
         "state": {
           "submitted": "Послато"
+        },
+        "toast": {
+          "error": "Слање на Frigate+ није успело. Проверите мрежну везу и покушајте поново."
         }
       }
     },
     "video": {
-      "viewInHistory": "Преглед у историји"
+      "viewInHistory": "Прикажи у историји"
     }
   },
   "export": {
@@ -38,57 +42,138 @@
       "lastHour_other": "Последњих {{count}} сати",
       "custom": "Прилагођено",
       "start": {
-        "title": "Почетно време",
-        "label": "Изаберите почетно време"
+        "title": "Време почетка",
+        "label": "Изаберите време почетка"
       },
       "end": {
-        "title": "Коначно време",
-        "label": "Изаберите завршно време"
+        "title": "Време завршетка",
+        "label": "Изаберите време завршетка"
       }
     },
     "name": {
-      "placeholder": "Назив извоза"
+      "placeholder": "Именујте извезени снимак"
     },
-    "select": "Избор",
-    "export": "Извоз",
-    "selectOrExport": "Избор или извоз",
+    "select": "Изабери",
+    "export": "Извези",
+    "selectOrExport": "Изабери или извези",
     "toast": {
-      "success": "Извоз је успешно започет. Прегледајте фајл на страници са извозима.",
-      "view": "Преглед",
+      "success": "Извоз је успешно покренут. Погледајте датотеку на страници са извезеним снимцима.",
+      "view": "Прикажи",
       "error": {
-        "failed": "Неуспешан почетак извоза: {{error}}",
-        "endTimeMustAfterStartTime": "Завршно време мора бити након почетног времена"
-      }
+        "failed": "Додавање извоза у ред није успело: {{error}}",
+        "endTimeMustAfterStartTime": "Време завршетка мора бити након времена почетка",
+        "noValidTimeSelected": "Није изабран важећи временски опсег"
+      },
+      "batchQueueFailed": "Додавање {{total}} извоза у ред није успело. Неуспешне камере: {{failedCameras}}",
+      "batchQueuedPartial": "Додато је {{successful}} од {{total}} извоза у ред. Неуспешне камере: {{failedCameras}}",
+      "batchQueuedSuccess_one": "Додат 1 извоз у ред.",
+      "batchQueuedSuccess_few": "Додато {{count}} извоза у ред.",
+      "batchQueuedSuccess_other": "Додато {{count}} извоза у ред.",
+      "batchFailed": "Покретање {{total}} извоза није успело. Неуспешне камере: {{failedCameras}}",
+      "batchPartial": "Покренуто је {{successful}} од {{total}} извоза. Неуспешне камере: {{failedCameras}}",
+      "batchSuccess_one": "Покренут 1 извоз. Отварање случаја...",
+      "batchSuccess_few": "Покренута {{count}} извоза. Отварање случаја...",
+      "batchSuccess_other": "Покренуто {{count}} извоза. Отварање случаја...",
+      "queued": "Извоз је додат у ред. Пратите напредак на страници са извезеним снимцима."
     },
     "fromTimeline": {
-      "saveExport": "Чување извоза",
-      "previewExport": "Преглед извоза"
+      "saveExport": "Сачувај извезени снимак",
+      "previewExport": "Прегледај извезени снимак",
+      "useThisRange": "Користи овај опсег",
+      "queueingExport": "Додавање извоза у ред..."
+    },
+    "stream": {
+      "label": "Квалитет",
+      "auto": "Аутоматски",
+      "main": "Изворни",
+      "sub": "Низак",
+      "autoDesc": "Користи главни стрим и прелази на помоћни стрим нижег квалитета тамо где главни није доступан.",
+      "mainDesc": "Извози искључиво главни стрим изворног квалитета. Временски периоди у којима главни стрим није био доступан биће изостављени.",
+      "subDesc": "Извози само помоћни стрим нижег квалитета. Временски периоди у којима помоћни стрим није доступан биће изостављени."
+    },
+    "case": {
+      "newCaseOption": "Креирај нови случај",
+      "newCaseNamePlaceholder": "Натив новог случаја",
+      "newCaseDescriptionPlaceholder": "Опис случаја",
+      "label": "Случај",
+      "placeholder": "Изаберите случај",
+      "nameRequired": "Назив случаја је обавезан"
+    },
+    "queueing": "Додавање извоза у ред...",
+    "tabs": {
+      "export": "Једна камера",
+      "multiCamera": "Више камера"
+    },
+    "multiCamera": {
+      "timeRange": "Временски опсег",
+      "selectFromTimeline": "Изаберите са временске линије",
+      "cameraSelection": "Камере",
+      "cameraSelectionHelp": "Камере са праћеним објектима у овом временском распону су унапред изабране",
+      "searchOrSelectGroup": "Претражите или изаберите групу камера...",
+      "selectAll": "Изабери све камере",
+      "clearSelection": "Поништи избор",
+      "selectWithActivity": "Камере са праћеним објектима",
+      "selectGroup": "Изабери групу",
+      "noMatchingCameras": "Нема камера које одговарају претрази",
+      "selectedCount": "Изабрано: {{selected}} од {{total}}",
+      "checkingActivity": "Провера активности камера...",
+      "noCameras": "Нема доступних камера",
+      "noCamerasSelected": "Изаберите најмање једну камеру",
+      "detectionCount_one": "1 праћени објекат",
+      "detectionCount_few": "{{count}} праћена објекта",
+      "detectionCount_other": "{{count}} праћених објеката",
+      "nameLabel": "Назив извоза",
+      "caseNameDefault": "Извоз са више камера - {{date}}",
+      "namePlaceholder": "Опциони основни назив за ове извозе",
+      "queueingButton": "Додавање извоза у ред...",
+      "exportButton_one": "Извези 1 камеру",
+      "exportButton_few": "Извези {{count}} камере",
+      "exportButton_other": "Извези {{count}} камера"
+    },
+    "multi": {
+      "toast": {
+        "failed": "Покретање {{total}} извоза није успело. Неуспешно: {{failedItems}}",
+        "partial": "Покренуто је {{successful}} од {{total}} извоза. Неуспешно: {{failedItems}}",
+        "started_one": "Покренут 1 извоз.",
+        "started_few": "Покренута {{count}} извоза.",
+        "started_other": "Покренуто {{count}} извоза."
+      },
+      "exportingButton": "Извожење...",
+      "exportButton_one": "Извози 1 преглед",
+      "exportButton_few": "Извози {{count}} прегледа",
+      "exportButton_other": "Извози {{count}} прегледа",
+      "caseNamePlaceholder": "Извоз прегледа - {{date}}",
+      "descriptionNoCase": "Извезите сваки изабрани преглед.",
+      "description": "Извезите сваки изабрани преглед. Сви извезени снимци биће груписани под једним случајем.",
+      "title_one": "Извези 1 преглед",
+      "title_few": "Извези {{count}} прегледа",
+      "title_other": "Извези {{count}} прегледа"
     }
   },
   "streaming": {
     "label": "Стрим",
     "restreaming": {
-      "disabled": "Поновни стриминг није омогућен за ову камеру.",
+      "disabled": "Поновно стримовање није омогућено за ову камеру.",
       "desc": {
-        "title": "Подесите go2rtc за додатне опције репродукције слике и звука уживо за ову камеру."
+        "title": "Подесите go2rtc за додатне опције приказа уживо и звук за ову камеру."
       }
     },
     "showStats": {
-      "label": "Приказ статистике стримовања",
-      "desc": "Омогућите ову опцију за приказ статистике стримовања као надслој на преноса са камере."
+      "label": "Прикажи статистику стрима",
+      "desc": "Омогућите ову опцију да бисте приказали статистику стрима као слој преко видео-извора камере."
     },
-    "debugView": "Приказ за дебаговање"
+    "debugView": "Приказ за отклањање грешака"
   },
   "search": {
     "saveSearch": {
-      "label": "Сачувати претрагу",
-      "desc": "Обезбедите назив за ову сачувану претрагу.",
-      "placeholder": "Унесите име за вашу претрагу",
+      "label": "Сачувај претрагу",
+      "desc": "Унесите назив за ову сачувану претрагу.",
+      "placeholder": "Унесите назив за своју претрагу",
       "overwrite": "{{searchName}} већ постоји. Чување ће преписати постојећу вредност.",
       "success": "Претрага ({{searchName}}) је сачувана.",
       "button": {
         "save": {
-          "label": "Чување ове претраге"
+          "label": "Сачувај ову претрагу"
         }
       }
     }
@@ -97,21 +182,41 @@
     "confirmDelete": {
       "title": "Потврдите брисање",
       "desc": {
-        "selected": "Да ли сте сигурни да желите да обришете сав снимљени видео повезан са овом ставком прегледа?<br /><br />Држите тастер <em>Shift</em> да бисте убудуће заобишли овај дијалог."
+        "selected": "Да ли сте сигурни да желите да обришете сав снимљени видео повезан са овом ставком прегледа?<br /><br />Држите тастер <em>Shift</em> да бисте убудуће заобишли овај прозор."
       },
       "toast": {
-        "success": "Видео снимак повезан са изабраним ставкама за преглед успешно је обрисан.",
+        "success": "Видео-снимци повезани са изабраним ставкама прегледа су успешно обрисани.",
         "error": "Неуспешно брисање: {{error}}"
       }
     },
     "button": {
-      "export": "Извоз",
-      "markAsReviewed": "Означити као прегледано",
-      "markAsUnreviewed": "Означити као непрегледано",
-      "deleteNow": "Обрисати сада"
+      "export": "Извези",
+      "markAsReviewed": "Означи као прегледано",
+      "markAsUnreviewed": "Означи као непрегледано",
+      "deleteNow": "Обриши одмах",
+      "generateDescription": "Генериши опис"
+    },
+    "shareTimestamp": {
+      "label": "Дели временску ознаку",
+      "title": "Дели временску ознаку",
+      "description": "Поделите URL са временском ознаком тренутне позиције плејера или изаберите прилагођену временску ознаку. Напомена: овај URL није јавни URL за дељење и доступан је само корисницима који имају приступ Frigate-у и овој камери.",
+      "custom": "Прилагођена временска ознака",
+      "button": "URL за дељење временске ознаке",
+      "shareTitle": "Frigate преглед временске ознаке: {{camera}}"
+    },
+    "genaiDescription": {
+      "toast": {
+        "success": "Затражен је GenAI опис за ову ставку прегледа.",
+        "error": "Слање захтева за опис није успело: {{error}}"
+      }
     }
   },
   "imagePicker": {
-    "selectImage": "Избор сличице за праћени објекат"
+    "selectImage": "Изаберите сличицу праћеног објекта",
+    "unknownLabel": "Сачувана слика покретача",
+    "search": {
+      "placeholder": "Претражите по ознаци или подознаци..."
+    },
+    "noImages": "Нема пронађених сличица за ову камеру"
   }
 }
