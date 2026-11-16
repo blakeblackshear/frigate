@@ -19,7 +19,7 @@
   "health": {
     "title": "Stanje",
     "notices": {
-      "title": "Obaveštenja",
+      "title": "Napomene",
       "empty": "Vaš Frigate sistem radi ispravno",
       "acknowledge": "Uvaži",
       "acknowledgeHint": "Sakrij dok se ne ponovi",
@@ -28,7 +28,7 @@
       "unmute": "Uključi zvuk",
       "showAgain": "Prikaži ponovo",
       "openSettings": "Otvori podešavanja",
-      "openLink": "Otvori vezu / Otvori link",
+      "openLink": "Otvori link",
       "noMatches": "Nema obaveštenja koja odgovaraju filteru",
       "hiddenTitle": "Skriveno",
       "noneHidden": "Nema skrivenih obaveštenja",
@@ -73,7 +73,7 @@
         "semantic_search": "Semantička pretraga",
         "face_recognition": "Prepoznavanje lica",
         "lpr": "Prepoznavanje registarskih tablica",
-        "audio_transcription": "Audio transkripcija"
+        "audio_transcription": "Transkripcija zvuka"
       },
       "cameraConnections": "Veze sa kamerama",
       "allCamerasExcellent": "Sve kamere imaju odličnu vezu.",
@@ -213,7 +213,7 @@
     "otherProcesses": {
       "title": "Ostali procesi",
       "series": {
-        "audio_detector": "audio detektor",
+        "audio_detector": "detektor zvuka",
         "embeddings": "vektorski prikazi",
         "review_segment": "segment pregleda",
         "recording": "snimanje",
@@ -251,8 +251,8 @@
         "tips": "Ova vrednost možda neće tačno prikazati slobodan prostor dostupan Frigate-u ako na vašem disku imate sačuvane druge datoteke pored Frigate snimaka. Frigate ne prati zauzeće skladišta izvan svojih snimaka."
       },
       "subStream": {
-        "information": "Informacije o skladištu sporednog strima",
-        "tips": "Kamere koje snimaju sporedni strim (sub stream) odvojeno prikazuju zauzeće za izvorni i nizak kvalitet, koristeći iste nazive kao i opcije kvaliteta pri reprodukciji snimaka. Niski kvalitet snimaka ostaje na disku sve dok ne istekne period čuvanja, tako da se ovaj prikaz može i dalje pojavljivati za kameru nakon što je snimanje sporednog strima isključeno."
+        "information": "Podaci o skladištu pomoćnog strima",
+        "tips": "Kamere koje snimaju pomoćni strim zasebno prikazuju zauzeće za Originalni i Niski kvalitet, koristeći iste nazive kao opcije kvaliteta pri reprodukciji snimaka. Snimci niskog kvaliteta ostaju na disku dok im ne istekne period čuvanja, tako da ovaj prikaz može i dalje biti vidljiv za kameru nakon što se snimanje pomoćnog strima isključi."
       }
     }
   },
@@ -270,7 +270,7 @@
       "resolution": "Rezolucija:",
       "fps": "FPS:",
       "unknown": "Nepoznato",
-      "audio": "Audio:",
+      "audio": "Zvuk:",
       "error": "Greška: {{error}}",
       "tips": {
         "title": "Informacije o analizi kamere"

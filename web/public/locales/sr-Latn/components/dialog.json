@@ -43,9 +43,9 @@
       "auto": "Automatski",
       "main": "Izvorni",
       "sub": "Nizak",
-      "autoDesc": "Koristi glavni strim, a u slučaju njegove nedostupnosti prebacuje se na sporedni strim nižeg kvaliteta.",
+      "autoDesc": "Koristi glavni strim i prelazi na pomoćni strim nižeg kvaliteta tamo gde glavni nije dostupan.",
       "mainDesc": "Izvozi isključivo glavni strim izvornog kvaliteta. Vremenski periodi u kojima glavni strim nije bio dostupan biće izostavljeni.",
-      "subDesc": "Izvozi isključivo sporedni strim nižeg kvaliteta. Vremenski periodi u kojima sporedni strim nije bio dostupan biće izostavljeni."
+      "subDesc": "Izvozi samo pomoćni strim nižeg kvaliteta. Vremenski opsezi u kojima pomoćni strim nije dostupan će nedostajati."
     },
     "case": {
       "newCaseOption": "Kreiraj novi slučaj",

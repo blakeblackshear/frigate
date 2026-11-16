@@ -53,7 +53,7 @@
             "always": "Uvek"
         },
         "auto_scroll": {
-            "title": "Automatsko pomeranje ekrana",
+            "title": "Automatsko pomeranje",
             "desc": "Prati nove poruke kako pristižu."
         },
         "always_allow": {

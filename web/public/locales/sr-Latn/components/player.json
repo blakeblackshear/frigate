@@ -5,7 +5,7 @@
   "submitFrigatePlus": {
     "title": "Pošalji ovaj kadar na Frigate+?",
     "submit": "Pošalji",
-    "previewError": "Učitavanje predpregleda snimka nije uspelo. Snimak možda nije dostupan u ovom trenutku."
+    "previewError": "Nije moguće učitati pregled snimka kadra. Snimak možda trenutno nije dostupan."
   },
   "livePlayerRequiredIOSVersion": "Za ovaj tip strima uživo potreban je iOS 17.1 ili noviji.",
   "streamOffline": {
@@ -23,7 +23,7 @@
     "notSupportedBrowser": "Nije podržano u ovom veb-pregledaču",
     "label": "Kvalitet",
     "noAudio": "Nema zvuka",
-    "audioRate": "{{rate}} kHz audio",
+    "audioRate": "Zvuk od {{rate}} kHz",
     "audioCodecRate": "{{codec}} {{rate}} kHz",
     "noRecordings": "Nema snimaka u ovom vremenskom opsegu"
   },

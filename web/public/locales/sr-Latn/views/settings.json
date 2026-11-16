@@ -10,7 +10,7 @@
     "uiSettings": "Podešavanja korisničkog interfejsa",
     "globalDetect": "Detekcija objekata",
     "globalRecording": "Snimanje",
-    "globalSnapshots": "Slike",
+    "globalSnapshots": "Snimci kadra",
     "globalFfmpeg": "FFmpeg",
     "globalMotion": "Detekcija kretanja",
     "globalObjects": "Objekti",
@@ -37,16 +37,16 @@
     "integrationFaceRecognition": "Prepoznavanje lica",
     "integrationLpr": "Prepoznavanje registarskih tablica",
     "integrationObjectClassification": "Klasifikacija objekata",
-    "integrationAudioTranscription": "Audio transkripcija",
+    "integrationAudioTranscription": "Transkripcija zvuka",
     "cameraDetect": "Detekcija objekata",
     "cameraFfmpeg": "Strimovi (FFmpeg)",
     "cameraRecording": "Snimanje",
-    "cameraSnapshots": "Slike",
+    "cameraSnapshots": "Snimci kadra",
     "cameraMotion": "Detekcija kretanja",
     "cameraObjects": "Objekti",
     "cameraConfigReview": "Pregled",
-    "cameraAudioEvents": "Audio detekcija",
-    "cameraAudioTranscription": "Audio transkripcija",
+    "cameraAudioEvents": "Detekcija zvuka",
+    "cameraAudioTranscription": "Transkripcija zvuka",
     "cameraNotifications": "Obaveštenja",
     "cameraLivePlayback": "Reprodukcija uživo",
     "cameraBirdseye": "Birdseye",
@@ -60,7 +60,7 @@
     "cameraManagement": "Upravljanje kamerama",
     "cameraReview": "Pregled",
     "masksAndZones": "Maske / Zone",
-    "motionTuner": "Podešavanje detekcije pokreta",
+    "motionTuner": "Podešavanje kretanja",
     "users": "Korisnici",
     "roles": "Uloge",
     "notifications": "Obaveštenja",
@@ -69,7 +69,8 @@
     "frigateplus": "Frigate+",
     "maintenance": "Održavanje",
     "mediaSync": "Sinhronizacija medija",
-    "regionGrid": "Mreža regiona"
+    "regionGrid": "Mreža regiona",
+    "enrichments": "Obogaćivanja"
   },
   "analyticsPreview": {
     "show": "Pregledaj izveštaj",
@@ -83,7 +84,7 @@
     "cameraReview": "Podešavanja pregleda kamera - Frigate",
     "enrichments": "Podešavanja poboljšanja - Frigate",
     "masksAndZones": "Editor maski i zona - Frigate",
-    "motionTuner": "Podešavanje detekcije pokreta - Frigate",
+    "motionTuner": "Podešavanje kretanja - Frigate",
     "object": "Otklanjanje grešaka - Frigate",
     "general": "Podešavanja prikaza - Frigate",
     "globalConfig": "Globalna konfiguracija - Frigate",
@@ -171,7 +172,7 @@
   },
   "configMessages": {
     "record": {
-      "noRecordSubRole": "Nijedan strim nema definisanu ulogu record_sub. Snimanje sporednog strima neće raditi.",
+      "noRecordSubRole": "Nijedan strim nema definisanu ulogu record_sub. Snimanje pomoćnog strima neće raditi.",
       "profileBaseDisabled": "Snimanje je onemogućeno u osnovnoj konfiguraciji ove kamere, tako da njegovo omogućavanje u profilu nema efekta. Omogućite snimanje u osnovnoj konfiguraciji, a profil koristite da biste ga onemogućili.",
       "noRecordRole": "Nijedan strim nema definisanu ulogu record. Snimanje neće raditi."
     },
@@ -184,8 +185,8 @@
       "objectTrackingDetectRuntimeDisabled": "Birdseye uključuje praćene objekte, ali je detekcija objekata trenutno isključena za ovu kameru iako je vaša konfiguracija omogućava. Kamera se neće prikazivati u Birdseye prikazu dok se ponovo ne uključi iz prikaza uživo te kamere, ili dok aktivni profil ne prestane da je onemogućava."
     },
     "snapshots": {
-      "detectDisabled": "Detekcija objekata je onemogućena. Slike (snapšotovi) se generišu na osnovu praćenih objekata i neće biti kreirane.",
-      "detectRuntimeDisabled": "Detekcija objekata je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru, tako da slike (snapšotovi) neće biti kreirane. Uključite je ponovo iz prikaza uživo te kamere, ili proverite da li je aktivni profil onemogućava."
+      "detectDisabled": "Detekcija objekata je onemogućena. Snimci kadra se generišu na osnovu praćenih objekata i neće biti kreirani.",
+      "detectRuntimeDisabled": "Detekcija objekata je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru, pa snimci kadra neće biti kreirani. Ponovo je uključite iz prikaza uživo kamere ili proverite da li je aktivni profil onemogućava."
     },
     "semanticSearch": {
       "jinav2SmallModelSize": "Mala veličina sa Jina V2 modelom ima visoku potrošnju RAM memorije i visoku cenu obrade. Preporučuje se veliki model sa zasebnom grafičkom karticom."
@@ -197,8 +198,8 @@
       "resolutionHigh": "Ova rezolucija za detekciju je viša od preporučene i može izazvati povećanu potrošnju resursa bez poboljšanja tačnosti detekcije. Za većinu kamera preporučuje se rezolucija detekcije od 1080p ili niža.",
       "globalResolutionMultipleCameras": "Podešena je globalna rezolucija detekcije dok je konfigurisano više kamera. Osim ako sve kamere ne dele istu rezoluciju i odnos stranica, širinu i visinu detekcije bi trebalo definisati pojedinačno po kameri kako bi odgovarale izvornom odnosu stranica svake kamere.",
       "fpsGreaterThanFive": "Postavljanje FPS-a detekcije na vrednost veću od 5 se ne preporučuje. Više vrednosti mogu izazvati probleme sa performansama i neće doneti nikakvu korist.",
-      "disabled": "Detekcija objekata je onemogućena. Slike (snapšotovi), stavke pregleda i poboljšanja kao što su prepoznavanje lica, prepoznavanje registarskih tablica i generativna veštačka inteligencija neće raditi.",
-      "runtimeDisabled": "Detekcija objekata je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru. Slike (snapšotovi), stavke pregleda i poboljšanja kao što su prepoznavanje lica, prepoznavanje registarskih tablica i generativna veštačka inteligencija neće raditi dok se ponovo ne uključi iz prikaza uživo te kamere, ili dok aktivni profil ne prestane da je onemogućava.",
+      "disabled": "Detekcija objekata je onemogućena. Snimci kadra, stavke za pregled i obogaćivanja kao što su prepoznavanje lica, prepoznavanje registarskih tablica i generativna veštačka inteligencija neće raditi.",
+      "runtimeDisabled": "Detekcija objekata je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru. Snimci kadra, stavke za pregled i obogaćivanja kao što su prepoznavanje lica, prepoznavanje registarskih tablica i generativna veštačka inteligencija neće raditi dok je ponovo ne uključite iz prikaza uživo kamere ili dok aktivni profil ne prestane da je onemogućava.",
       "sceneWithoutModel": "Nijedan model detekcije nije konfigurisan za ovu scenu, tako da se ova kamera oslanja na podrazumevani model. Dodajte model za ovu scenu da bi kamera imala sopstveni.",
       "resolutionShouldBeMultipleOfFour": "Za najbolje rezultate, širina i visina detekcije bi trebalo da budu umnošci broja 4. Druge parne vrednosti mogu proizvesti vizuelne smetnje (artefakte) ili blago izobličenje u strimu za detekciju.",
       "aspectRatioMismatch": "Širina i visina koje ste uneli ne odgovaraju odnosu stranica vaše trenutne rezolucije detekcije. Ovo može proizvesti razvučenu ili izobličenu sliku.",
@@ -236,14 +237,14 @@
       "detectRuntimeDisabled": "Detekcija objekata je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru. Stavke pregleda zahtevaju detektovane objekte kako bi se kategorizovali alarmi i detekcije. Uključite je ponovo iz prikaza uživo te kamere, ili proverite da li je aktivni profil onemogućava."
     },
     "live": {
-      "noGo2rtcStream": "Prikaz uživo za ovu kameru koristi osnovni plejer sa nižim brojem kadrova u sekundi i bez zvuka. Podesite go2rtc strim za ovu kameru da biste dobili tečniji video i zvuk."
+      "noGo2rtcStream": "Prikaz uživo za ovu kameru koristi osnovni plejer sa manjim brojem kadrova u sekundi i bez zvuka. Podesite go2rtc strim za ovu kameru da biste dobili tečniji video i zvuk."
     },
     "audio": {
-      "noAudioRole": "Nijedan strim nema definisanu ulogu „audio“. Morate omogućiti ulogu „audio“ da bi audio detekcija radila."
+      "noAudioRole": "Nijedan strim nema definisanu ulogu audio. Morate da omogućite ulogu audio da bi detekcija zvuka radila."
     },
     "audioTranscription": {
-      "audioDetectionDisabled": "Audio detekcija nije omogućena za ovu kameru. Audio transkripcija zahteva da audio detekcija bude aktivna.",
-      "audioDetectionRuntimeDisabled": "Audio detekcija je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru, tako da se audio transkripcija neće pokretati. Uključite je ponovo iz prikaza uživo te kamere, ili proverite da li je aktivni profil onemogućava.",
+      "audioDetectionDisabled": "Detekcija zvuka nije omogućena za ovu kameru. Transkripcija zvuka zahteva da detekcija zvuka bude aktivna.",
+      "audioDetectionRuntimeDisabled": "Detekcija zvuka je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru, tako da se transkripcija zvuka neće pokretati. Ponovo je uključite iz prikaza uživo te kamere ili proverite da li je aktivan profil onemogućava.",
       "genaiProviderSelected": "Izabran je GenAI provajder, pa se podešavanja za veličinu uređaja i modela ignorišu."
     }
   },
@@ -323,7 +324,7 @@
       "hardwareV4l2m2m": "V4L2 M2M",
       "useFfmpegModule": "Koristi režim kompatibilnosti (ffmpeg)",
       "video": "Video",
-      "audio": "Audio",
+      "audio": "Zvuk",
       "hardware": "Hardversko ubrzanje",
       "videoCopy": "Kopiraj",
       "videoH264": "Transkoduj u H.264"
@@ -555,12 +556,68 @@
   "maintenance": {
     "title": "Održavanje",
     "sync": {
-      "title": "Sinhronizacija medija"
+      "title": "Sinhronizacija medija",
+      "desc": "Frigate će povremeno čistiti medije po redovnom rasporedu u skladu sa vašom konfiguracijom zadržavanja podataka. Normalno je da se tokom rada Frigate-a pojavi nekoliko nepovezanih datoteka. Koristite ovu funkciju za uklanjanje nepovezanih medijskih datoteka sa diska koje više nisu referencirane u bazi podataka.",
+      "started": "Sinhronizacija medija je pokrenuta.",
+      "alreadyRunning": "Zadatak sinhronizacije je već pokrenut",
+      "error": "Pokretanje sinhronizacije nije uspelo",
+      "currentStatus": "Status",
+      "jobId": "ID zadatka",
+      "startTime": "Vreme početka",
+      "endTime": "Vreme završetka",
+      "statusLabel": "Status",
+      "results": "Rezultati",
+      "errorLabel": "Greška",
+      "mediaTypes": "Tipovi medija",
+      "allMedia": "Svi mediji",
+      "dryRun": "Probno pokretanje",
+      "dryRunEnabled": "Nijedna datoteka neće biti obrisana",
+      "dryRunDisabled": "Datoteke će biti obrisane",
+      "force": "Prinudno",
+      "forceDesc": "Zaobiđi bezbednosni prag i dovrši sinhronizaciju čak i ako bi više od 50% datoteka bilo obrisano.",
+      "verbose": "Detaljno",
+      "verboseDesc": "Zapiši kompletnu listu nepovezanih datoteka na disk radi pregleda.",
+      "running": "Sinhronizacija je u toku...",
+      "start": "Pokreni sinhronizaciju",
+      "inProgress": "Sinhronizacija je u toku. Ova stranica je onemogućena.",
+      "status": {
+        "queued": "Na čekanju",
+        "running": "Pokrenuto",
+        "completed": "Završeno",
+        "failed": "Neuspelo",
+        "notRunning": "Nije pokrenuto"
+      },
+      "resultsFields": {
+        "filesChecked": "Proverene datoteke",
+        "orphansFound": "Pronađene nepovezane datoteke",
+        "orphansDeleted": "Obrisane nepovezane datoteke",
+        "spaceToReclaim": "Prostor za oslobađanje",
+        "spaceReclaimed": "Oslobođeni prostor",
+        "aborted": "Prekinuto. Brisanje bi premašilo bezbednosni prag.",
+        "error": "Greška",
+        "totals": "Ukupno"
+      },
+      "event_snapshots": "Snimci kadra praćenih objekata",
+      "event_thumbnails": "Sličice praćenih objekata",
+      "review_thumbnails": "Pregled sličica",
+      "previews": "Pretpregledi",
+      "exports": "Izvozi",
+      "recordings": "Snimci"
+    },
+    "regionGrid": {
+      "title": "Mreža regiona",
+      "desc": "Mreža regiona je optimizacija koja uči gde se objekti različitih veličina obično pojavljuju u vidnom polju svake kamere. Frigate koristi ove podatke za efikasno određivanje veličine regiona detekcije. Mreža se automatski gradi tokom vremena na osnovu podataka o praćenim objektima.",
+      "clear": "Obriši mrežu regiona",
+      "clearConfirmTitle": "Obriši mrežu regiona",
+      "clearConfirmDesc": "Čišćenje mreže regiona se ne preporučuje osim ako ste nedavno promenili veličinu modela detektora ili ste promenili fizički položaj kamere i imate problema sa praćenjem objekata. Mreža će se automatski ponovo izgraditi tokom vremena kako se objekti budu pratili. Potrebno je ponovno pokretanje Frigate-a da bi izmene stupile na snagu.",
+      "clearSuccess": "Mreža regiona je uspešno obrisana",
+      "clearError": "Brisanje mreže regiona nije uspelo",
+      "restartRequired": "Potrebno je ponovno pokretanje da bi izmene mreže regiona stupile na snagu"
     }
   },
   "cameraManagement": {
     "title": "Upravljanje kamerama",
-    "description": "Dodajte, izmenite i obrišite kamere, kontrolišite stanje svake kamere i konfigurišite izmene po profilu i tipu kamere. Da biste konfigurisali strimove, detekciju, pokret i druga podešavanja specifična za kameru, izaberite odgovarajuću sekciju u meniju Konfiguracija kamere.",
+    "description": "Dodajte, izmenite i obrišite kamere, upravljajte stanjem svake kamere i podesite izmene po profilu i tipu kamere. Da biste podesili strimove, detekciju, kretanje i druga podešavanja specifična za kameru, izaberite odgovarajući odeljak u okviru Podešavanja kamere.",
     "streams": {
       "description": "Podesite radno stanje za svaku kameru.<br /><br /><strong>Uključeno</strong>: strimovi se obrađuju normalno.<br /><strong>Isključeno</strong>: privremeno pauzira obradu. Ne zadržava se nakon ponovnog pokretanja Frigate-a.<br /><strong>Onemogućeno</strong>: zaustavlja obradu i čuva izmenu u vašoj konfiguraciji. Potrebno je ponovno pokretanje da bi se onemogućena kamera ponovo aktivirala.<br /><br /><em>Napomena: Onemogućavanje ne utiče na go2rtc ponovno strimovanje.</em><br /><br />Prevucite ručicu da biste promenili redosled aktivnih kamera onako kako se pojavljuju u korisničkom interfejsu, uključujući kontrolnu tablu uživo i padajuće menije za izbor kamera.",
       "title": "Stanje i detalji kamere",
@@ -587,7 +644,7 @@
         "dashboardLabel": "Prikaži na kontrolnoj tabli uživo",
         "dashboardHelp": "Prikaži ovu kameru na podrazumevanoj kontrolnoj tabli uživo „Sve kamere“. Ostaje dostupna svuda drugde, uključujući grupe kamera.",
         "reviewLabel": "Prikaži u pregledu",
-        "reviewHelp": "Prikaži ovu kameru u Pregledu, uključujući filter kamere, pregled kretanja i pregled istorije."
+        "reviewHelp": "Prikaži ovu kameru u Pregledu, uključujući filter kamera, pregled kretanja i prikaz istorije."
       },
       "label": "Stanje kamere"
     },
@@ -610,7 +667,73 @@
         "newNameRequired": "Naziv kamere je obavezan",
         "newNameInvalid": "Neispravan naziv kamere",
         "newNameCollision": "Kamera sa ovim nazivom već postoji",
-        "newStreamsForced": "Strimovi se uvek kopiraju za novu kameru."
+        "newStreamsForced": "Strimovi se uvek kopiraju za novu kameru.",
+        "allCameras": "Sve kamere",
+        "existingCamerasRadio": "Postojeće kamere",
+        "existingPlaceholder": "Izaberite najmanje jednu kameru",
+        "existingDisabled": "Nema drugih kamera za kopiranje"
+      },
+      "categories": {
+        "legend": "Podešavanja za kloniranje",
+        "description": "Izaberite koja podešavanja želite da kopirate sa izvorne kamere.",
+        "selectAll": "Izaberi sve",
+        "selectNone": "Poništi izbor",
+        "resetDefaults": "Vrati na podrazumevano",
+        "general": "Opšte",
+        "spatial": "Prostorna podešavanja",
+        "streams": "Strimovi",
+        "spatialWarningTitle": "Neusklađenost rezolucije",
+        "spatialWarning": "Rezolucija detekcije izvorne kamere {{srcCamera}} ({{srcWidth}}×{{srcHeight}}) razlikuje se od: {{cameras}}. Poligoni se možda neće poklapati na tim kamerama. Ova podešavanja su podrazumevano isključena; omogućite ih da biste ih kopirali kakva jesu.",
+        "restartHint": "Potrebno je ponovno pokretanje",
+        "items": {
+          "record": "Snimanje",
+          "snapshots": "Snimci kadra",
+          "review": "Pregled",
+          "motion": "Detekcija kretanja",
+          "objects": "Objekti",
+          "audio": "Detekcija zvuka",
+          "audio_transcription": "Transkripcija zvuka",
+          "notifications": "Obaveštenja",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Stil vremenske oznake",
+          "onvif": "ONVIF",
+          "lpr": "Prepoznavanje registarskih tablica",
+          "face_recognition": "Prepoznavanje lica",
+          "semantic_search": "Semantička pretraga",
+          "genai": "Generativna AI",
+          "type": "Tip kamere (obična / namenska LPR)",
+          "profiles": "Profili",
+          "detect": "Dimenzije detekcije",
+          "zones": "Zone",
+          "motion_mask": "Maske pokreta",
+          "object_masks": "Maske objekata",
+          "ffmpeg_live": "URL adrese strimova i uloge"
+        }
+      },
+      "footer": {
+        "changeCount_one": "{{count}} promena će biti primenjena",
+        "changeCount_few": "{{count}} promene će biti primenjene",
+        "changeCount_other": "{{count}} promena će biti primenjeno",
+        "restartNeeded": "Za neke promene biće potrebno ponovno pokretanje.",
+        "liveOnly": "Sve promene će se primeniti odmah, bez ponovnog pokretanja.",
+        "submit": "Kloniraj",
+        "submitting": "Kloniranje…"
+      },
+      "toast": {
+        "success": "Podešavanja su kopirana na {{cameraName}}",
+        "successWithRestart": "Podešavanja su kopirana na {{cameraName}}. Ponovo pokrenite Frigate da biste primenili sve promene.",
+        "successMulti_one": "Podešavanja su kopirana na {{count}} kameru",
+        "successMulti_few": "Podešavanja su kopirana na {{count}} kamere",
+        "successMulti_other": "Podešavanja su kopirana na {{count}} kamera",
+        "successMultiWithRestart_one": "Podešavanja su kopirana na {{count}} kameru. Ponovo pokrenite Frigate da biste primenili sve promene.",
+        "successMultiWithRestart_few": "Podešavanja su kopirana na {{count}} kamere. Ponovo pokrenite Frigate da biste primenili sve promene.",
+        "successMultiWithRestart_other": "Podešavanja su kopirana na {{count}} kamera. Ponovo pokrenite Frigate da biste primenili sve promene.",
+        "partialFailure": "Primenjeno sekcija: {{successCount}}; neuspelo za „{{failedSection}}“: {{errorMessage}}",
+        "partialFailureMulti": "Kopirano na {{successCount}} kamera; neuspelo za {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "Kamera {{cameraName}} je kreirana, ali kopiranje pojedinih podešavanja nije uspelo: {{errorMessage}}",
+        "sourceMissing": "Izvorna kamera više ne postoji",
+        "submitError": "Kloniranje kamere nije uspelo: {{errorMessage}}"
       }
     },
     "addCamera": "Dodaj novu kameru",
@@ -645,7 +768,7 @@
         "pathPlaceholder": "rtsp://...",
         "roles": "Uloge",
         "rolesRequired": "Najmanje jedna uloga je obavezna",
-        "rolesUnique": "Svaka uloga (audio, detekcija, snimanje) može biti dodeljena samo jednom strimu",
+        "rolesUnique": "Svaka uloga (audio, detect, record) može biti dodeljena samo jednom strimu",
         "addInput": "Dodaj ulazni strim",
         "removeInput": "Ukloni ulazni strim",
         "inputsRequired": "Najmanje jedan ulazni strim je obavezan"
@@ -705,7 +828,8 @@
     },
     "defaultRole": {
       "admin": "Administrator",
-      "none": "Ništa"
+      "none": "Ništa",
+      "viewer": "Posmatrač"
     },
     "genaiRoles": {
       "options": {
@@ -758,8 +882,8 @@
       "options": {
         "detect": "Detekcija",
         "record": "Snimanje",
-        "record_sub": "Snimanje - Podstrim",
-        "audio": "Audio"
+        "record_sub": "Snimanje (pomoćni strim)",
+        "audio": "Zvuk"
       }
     },
     "detect": {
@@ -769,7 +893,7 @@
       "title": "Podešavanja snimanja"
     },
     "snapshots": {
-      "title": "Podešavanja snimaka"
+      "title": "Podešavanja snimaka kadra"
     },
     "motion": {
       "title": "Podešavanja kretanja"
@@ -778,8 +902,8 @@
       "title": "Podešavanja objekata"
     },
     "audioLabels": {
-      "summary": "Izabrano audio oznaka: {{count}}",
-      "empty": "Nema dostupnih audio oznaka"
+      "summary": "Izabrano zvučnih oznaka: {{count}}",
+      "empty": "Nema dostupnih zvučnih oznaka"
     },
     "objectLabels": {
       "summary": "Izabrano tipova objekata: {{count}}",
@@ -815,11 +939,11 @@
       "masksAndZones": "Maske / Zone",
       "detect": "Detection",
       "record": "Snimanje",
-      "snapshots": "Snimci",
+      "snapshots": "Snimci kadra",
       "motion": "Kretanje",
       "objects": "Objekti",
       "review": "Pregled",
-      "audio": "Audio",
+      "audio": "Zvuk",
       "notifications": "Obaveštenja",
       "live": "Prikaz uživo",
       "timestamp_style": "Vremenske oznake"
@@ -833,8 +957,34 @@
         "preset-record-generic-audio-aac": "Snimanje (Generičko + konverzija zvuka u AAC)",
         "preset-record-mjpeg": "Snimanje - MJPEG kamere",
         "preset-record-jpeg": "Snimanje - JPEG kamere",
-        "preset-record-ubiquiti": "Snimanje - Ubiquiti kamere"
-      }
+        "preset-record-ubiquiti": "Snimanje - Ubiquiti kamere",
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-apple-silicon-h264": "Apple Silicon (H.264)",
+        "preset-apple-silicon-h265": "Apple Silicon (H.265)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (Generički)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (Generički)",
+        "preset-http-reolink": "HTTP - Reolink kamere",
+        "preset-rtmp-generic": "RTMP (Generički)",
+        "preset-rtsp-generic": "RTSP (Generički)",
+        "preset-rtsp-restream": "RTSP - Ponovni strim iz go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - Ponovni strim iz go2rtc (nisko kašnjenje)"
+      },
+      "preset": "Unapred podešeno",
+      "manual": "Ručni argumenti",
+      "inherit": "Nasledi iz podešavanja kamere",
+      "none": "Nema",
+      "sameAsRecord": "Isto kao izlazni argumenti za snimanje",
+      "useGlobalSetting": "Nasledi iz globalnog podešavanja",
+      "selectPreset": "Izaberite unapred podešeno",
+      "manualPlaceholder": "Unesite FFmpeg argumente"
     },
     "cameraInputs": {
       "itemTitle": "Strim {{index}}",
@@ -850,7 +1000,85 @@
       }
     },
     "restartRequiredField": "Potrebno je ponovno pokretanje",
-    "restartRequiredFooter": "Konfiguracija je izmenjena - Potrebno je ponovno pokretanje"
+    "restartRequiredFooter": "Konfiguracija je izmenjena - Potrebno je ponovno pokretanje",
+    "global": {
+      "title": "Globalna podešavanja",
+      "description": "Ova podešavanja se primenjuju na sve kamere osim ako nisu zamenjena podešavanjima specifičnim za pojedinačnu kameru."
+    },
+    "camera": {
+      "title": "Podešavanja kamere",
+      "description": "Ova podešavanja se primenjuju samo na ovu kameru i zamenjuju globalna podešavanja.",
+      "noCameras": "Nema dostupnih kamera"
+    },
+    "advancedCount": "Napredno ({{count}})",
+    "tabs": {
+      "sharedDefaults": "Deljena podrazumevana podešavanja",
+      "system": "Sistem",
+      "integrations": "Integracije"
+    },
+    "additionalProperties": {
+      "keyLabel": "Ključ",
+      "valueLabel": "Vrednost",
+      "keyPlaceholder": "Novi ključ",
+      "remove": "Ukloni",
+      "providerNameLabel": "Naziv provajdera",
+      "providerNamePlaceholder": "npr. openai",
+      "variableNameLabel": "Naziv promenljive",
+      "variableNamePlaceholder": "npr. MOJA_PROMENLJIVA",
+      "loggerNamePlaceholder": "npr. frigate.record",
+      "keyPatternError": "Koristite samo slova, brojeve, crtice i donje crte (bez razmaka)",
+      "loggerNameLabel": "Naziv dnevnika"
+    },
+    "knownPlates": {
+      "assignedTo": "Dodeljeno: {{name}}",
+      "detected": "Detektovane tablice",
+      "namePlaceholder": "npr. Ženin auto",
+      "noneDetected": "Još uvek nema detektovanih tablica",
+      "platePlaceholder": "Broj tablice ili regularni izraz",
+      "search": "Pretražite ili unesite tablicu",
+      "useCustom": "Koristi „{{value}}“"
+    },
+    "liveStreams": {
+      "streamNameLabel": "Naziv strima",
+      "streamNamePlaceholder": "npr. Glavni HD strim",
+      "go2rtcStreamLabel": "go2rtc strim",
+      "go2rtcStreamPlaceholder": "Izaberite go2rtc strim",
+      "go2rtcStreamSearch": "Pretražite ili unesite naziv strima…",
+      "noGo2rtcStreams": "Nema konfigurisanih go2rtc strimova",
+      "availableStreams": "Dostupni strimovi",
+      "useCustom": "Koristi „{{value}}“",
+      "addStream": "Dodaj strim",
+      "reorderHandle": "Prevucite za promenu redosleda",
+      "transcodedBadge": "Transkodirano",
+      "autoOrder": "Automatsko sortiranje",
+      "autoOrderTips": "Izmeri brzinu prenosa svakog strima i sortiraj od najveće ka najmanjoj",
+      "measuring": "Merenje…",
+      "rate": "{{kbps}} kbps",
+      "rateSet": "{{kbps}} kbps (postavljeno)",
+      "rateFailed": "Merenje nije uspelo"
+    },
+    "liveTranscode": {
+      "title": "Transkodirani strimovi",
+      "description": "Dodaje strimove nižeg kvaliteta koje go2rtc transkodira u realnom vremenu dok neko gleda.",
+      "unavailable": "Transkodiranim strimovima je potreban go2rtc strim sa kog čitaju. Prvo dodajte jedan u odeljku go2rtc strimovi.",
+      "enable": "Omogući transkodirane strimove",
+      "source": "Izvorni strim",
+      "height": "Visina",
+      "heightOption": "{{height}}p",
+      "bitrate": "Brzina prenosa (kbps)",
+      "addQuality": "Dodaj kvalitet",
+      "removeQuality": "Ukloni kvalitet"
+    },
+    "timezone": {
+      "defaultOption": "Koristi vremensku zonu pregledača"
+    },
+    "roleMap": {
+      "empty": "Nema mapiranja uloga",
+      "roleLabel": "Uloga",
+      "groupsLabel": "Grupe",
+      "addMapping": "Dodaj mapiranje uloge",
+      "remove": "Ukloni"
+    }
   },
   "enrichments": {
     "title": "Podešavanja obogaćivanja podataka",
@@ -916,7 +1144,7 @@
     "description": "Pratite korake u nastavku da biste dodali novu kameru u svoju Frigate instalaciju.",
     "steps": {
       "nameAndConnection": "Naziv i veza",
-      "probeOrSnapshot": "Skeniranje ili snimak",
+      "probeOrSnapshot": "Provera ili snimak kadra",
       "streamConfiguration": "Konfiguracija strima",
       "validationAndTesting": "Validacija i testiranje"
     },
@@ -927,7 +1155,7 @@
     "testResultLabels": {
       "resolution": "Rezolucija",
       "video": "Video",
-      "audio": "Audio",
+      "audio": "Zvuk",
       "fps": "FPS"
     },
     "commonErrors": {
@@ -980,7 +1208,7 @@
       "retry": "Pokušaj ponovo",
       "testing": {
         "probingMetadata": "Skeniranje metapodataka kamere...",
-        "fetchingSnapshot": "Preuzimanje snimka kamere..."
+        "fetchingSnapshot": "Preuzimanje snimka kadra kamere..."
       },
       "probeFailed": "Neuspešno skeniranje kamere: {error}",
       "probingDevice": "Skeniranje uređaja...",
@@ -1030,7 +1258,7 @@
       "roleLabels": {
         "detect": "Detekcija objekata",
         "record": "Snimanje",
-        "audio": "Audio"
+        "audio": "Zvuk"
       },
       "testStream": "Testiraj vezu",
       "testSuccess": "Testiranje strima uspešno!",
@@ -1049,8 +1277,8 @@
         "title": "Uloge strima",
         "detect": "Glavni izvor za detekciju objekata.",
         "record": "Čuva segmente video izvora na osnovu podešavanja konfiguracije.",
-        "record_sub": "Snimci nižeg kvaliteta za prilagodljivu reprodukciju i produženo čuvanje (obično podstrim kamere).",
-        "audio": "Izvor za detekciju na osnovu zvuka."
+        "record_sub": "Snimci nižeg kvaliteta za prilagodljivu reprodukciju i duže čuvanje (obično pomoćni strim kamere).",
+        "audio": "Strim za detekciju zasnovanu na zvuku."
       },
       "featuresPopover": {
         "title": "Funkcije strima",
@@ -1100,19 +1328,19 @@
         "resolutionHigh": "Rezolucija {{resolution}} može izazvati povećanu potrošnju resursa.",
         "resolutionLow": "Rezolucija {{resolution}} može biti preniska za pouzdanu detekciju malih objekata.",
         "resolutionUnknown": "Rezolucija ovog strima nije mogla biti automatski očitana. Trebalo bi da ručno podesite rezoluciju za detekciju u Podešavanjima ili u vašoj konfiguraciji.",
-        "noAudioWarning": "Zvuk nije detektovan na ovom strimu, snimci neće imati audio zapis.",
+        "noAudioWarning": "Za ovaj strim nije detektovan zvuk, snimci neće imati zvuk.",
         "audioCodecRecordError": "AAC audio kodek je neophodan da bi zvuk bio podržan u snimcima.",
-        "audioCodecRequired": "Audio strim je neophodan da bi detekcija zvuka bila podržana.",
+        "audioCodecRequired": "Potreban je zvučni strim da bi detekcija zvuka bila podržana.",
         "restreamingWarning": "Smanjenje broja veza sa kamerom za strim snimanja može blago povećati zauzeće procesora.",
         "brands": {
           "reolink-rtsp": "Reolink RTSP se ne preporučuje. Omogućite HTTP u podešavanjima firmvera kamere i ponovo pokrenite čarobnjak.",
           "reolink-http": "Reolink HTTP strimovi bi trebalo da koriste FFmpeg radi bolje kompatibilnosti. Omogućite „Koristi režim kompatibilnosti strima“ za ovaj strim."
         },
         "dahua": {
-          "substreamWarning": "Podstrim 1 je zaključan na nisku rezoluciju. Mnoge Dahua / Amcrest / EmpireTech kamere podržavaju dodatne podstrimove koje je potrebno omogućiti u podešavanjima same kamere. Preporučuje se da proverite i iskoristite te strimove ako su dostupni."
+          "substreamWarning": "Pomoćni strim 1 je zaključan na nisku rezoluciju. Mnoge Dahua / Amcrest / EmpireTech kamere podržavaju dodatne pomoćne strimove koje je potrebno omogućiti u podešavanjima kamere. Preporučuje se da proverite i iskoristite te strimove ako su dostupni."
         },
         "hikvision": {
-          "substreamWarning": "Podstrim 1 je zaključan na nisku rezoluciju. Mnoge Hikvision kamere podržavaju dodatne podstrimove koje je potrebno omogućiti u podešavanjima same kamere. Preporučuje se da proverite i iskoristite te strimove ako su dostupni."
+          "substreamWarning": "Pomoćni strim 1 je zaključan na nisku rezoluciju. Mnoge Hikvision kamere podržavaju dodatne pomoćne strimove koje je potrebno omogućiti u podešavanjima kamere. Preporučuje se da proverite i iskoristite te strimove ako su dostupni."
         }
       }
     }
@@ -1155,5 +1383,765 @@
     "saveAllPartial_few": "{{successCount}} od {{totalCount}} sekcije je sačuvano. {{failCount}} nije uspelo.",
     "saveAllPartial_other": "{{successCount}} od {{totalCount}} sekcija je sačuvano. {{failCount}} nije uspelo.",
     "saveAllFailure": "Čuvanje svih sekcija nije uspelo."
+  },
+  "cameraReview": {
+    "title": "Podešavanja pregleda kamere",
+    "object_descriptions": {
+      "title": "Generativni AI opisi objekata",
+      "desc": "Privremeno uključite ili isključite generativne AI opise objekata za ovu kameru dok se Frigate ponovo ne pokrene. Kada je isključeno, AI generisani opisi se neće zahtevati za praćene objekte na ovoj kameri."
+    },
+    "review_descriptions": {
+      "title": "Generativni AI opisi pregleda",
+      "desc": "Privremeno uključite ili isključite generativne AI opise pregleda za ovu kameru dok se Frigate ponovo ne pokrene. Kada je isključeno, AI generisani opisi se neće zahtevati za stavke pregleda na ovoj kameri."
+    },
+    "review": {
+      "title": "Pregled",
+      "desc": "Privremeno uključite ili isključite upozorenja i detekcije za ovu kameru dok se Frigate ponovo ne pokrene. Kada je isključeno, neće se generisati nove stavke za pregled. ",
+      "alerts": "Upozorenja ",
+      "detections": "Detekcije "
+    },
+    "reviewClassification": {
+      "title": "Klasifikacija pregleda",
+      "desc": "Frigate razvrstava stavke pregleda u Upozorenja i Detekcije. Podrazumevano se svi objekti tipa <em>osoba</em> i <em>automobil</em> smatraju upozorenjima. Kategorizaciju stavki pregleda možete preciznije podesiti definisanjem obaveznih zona za njih.",
+      "noDefinedZones": "Za ovu kameru nisu definisane zone.",
+      "objectAlertsTips": "Svi objekti ({{alertsLabels}}) na kameri {{cameraName}} biće prikazani kao Upozorenja.",
+      "zoneObjectAlertsTips": "Svi objekti ({{alertsLabels}}) otkriveni u zoni {{zone}} na kameri {{cameraName}} biće prikazani kao Upozorenja.",
+      "objectDetectionsTips": "Svi nekategorisani objekti ({{detectionsLabels}}) na kameri {{cameraName}} biće prikazani kao Detekcije, bez obzira na to u kojoj se zoni nalaze.",
+      "zoneObjectDetectionsTips": {
+        "text": "Svi nekategorisani objekti ({{detectionsLabels}}) u zoni {{zone}} na kameri {{cameraName}} biće prikazani kao Detekcije.",
+        "notSelectDetections": "Svi objekti ({{detectionsLabels}}) otkriveni u zoni {{zone}} na kameri {{cameraName}} koji nisu kategorisani kao Upozorenja biće prikazani kao Detekcije, bez obzira na to u kojoj se zoni nalaze.",
+        "regardlessOfZoneObjectDetectionsTips": "Svi nekategorisani objekti ({{detectionsLabels}}) na kameri {{cameraName}} biće prikazani kao Detekcije, bez obzira na to u kojoj se zoni nalaze."
+      },
+      "unsavedChanges": "Nesačuvana podešavanja klasifikacije pregleda za kameru {{camera}}",
+      "selectAlertsZones": "Izaberite zone za Upozorenja",
+      "selectDetectionsZones": "Izaberite zone za Detekcije",
+      "limitDetections": "Ograniči detekcije na određene zone",
+      "toast": {
+        "success": "Konfiguracija klasifikacije pregleda je sačuvana. Ponovo pokrenite Frigate da biste primenili promene."
+      }
+    }
+  },
+  "masksAndZones": {
+    "filter": {
+      "all": "Sve maske i zone"
+    },
+    "restart_required": "• Potrebno ponovno pokretanje (maske/zone su izmenjene)",
+    "disabledInConfig": "Stavka je onemogućena u konfiguracionoj datoteci",
+    "addDisabledProfile": "Prvo dodajte u osnovnu konfiguraciju, a zatim zamenite u profilu",
+    "profileBase": "(osnovno)",
+    "profileOverride": "(zamena)",
+    "toast": {
+      "success": {
+        "copyCoordinates": "Koordinate za {{polyName}} su kopirane u privremenu memoriju."
+      },
+      "error": {
+        "copyCoordinatesFailed": "Nije moguće kopirati koordinate u privremenu memoriju."
+      }
+    },
+    "motionMaskLabel": "Maska pokreta {{number}}",
+    "objectMaskLabel": "Maska objekata {{number}}",
+    "form": {
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID ne sme biti prazan.",
+          "alreadyExists": "Maska sa ovim ID-jem već postoji za ovu kameru."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Naziv ne sme biti prazan."
+        }
+      },
+      "zoneName": {
+        "error": {
+          "mustBeAtLeastTwoCharacters": "Naziv zone mora imati najmanje 2 karaktera.",
+          "mustNotBeSameWithCamera": "Naziv zone ne sme biti isti kao naziv kamere.",
+          "alreadyExists": "Zona sa ovim nazivom već postoji za ovu kameru.",
+          "mustNotContainPeriod": "Naziv zone ne sme sadržati tačke.",
+          "hasIllegalCharacter": "Naziv zone sadrži nedozvoljene karaktere.",
+          "mustHaveAtLeastOneLetter": "Naziv zone mora sadržati najmanje jedno slovo."
+        }
+      },
+      "distance": {
+        "error": {
+          "text": "Rastojanje mora biti veće ili jednako 0.1.",
+          "mustBeFilled": "Sva polja za rastojanje moraju biti popunjena da bi se koristila procena brzine."
+        }
+      },
+      "inertia": {
+        "error": {
+          "mustBeAboveZero": "Inercija mora biti veća od 0."
+        }
+      },
+      "loiteringTime": {
+        "error": {
+          "mustBeGreaterOrEqualZero": "Vreme zadržavanja mora biti veće ili jednako 0."
+        }
+      },
+      "speed": {
+        "error": {
+          "mustBeGreaterOrEqualTo": "Prag brzine mora biti veći ili jednak 0.1."
+        }
+      },
+      "polygonDrawing": {
+        "type": {
+          "zone": "zona",
+          "motion_mask": "maska pokreta",
+          "object_mask": "maska objekata"
+        },
+        "removeLastPoint": "Ukloni poslednju tačku",
+        "reset": {
+          "label": "Obriši sve tačke"
+        },
+        "snapPoints": {
+          "true": "Poravnaj tačke",
+          "false": "Ne poravnavaj tačke"
+        },
+        "delete": {
+          "title": "Potvrdi brisanje",
+          "desc": "Da li ste sigurni da želite da obrišete {{type}} <em>{{name}}</em>?",
+          "success": "{{name}} je obrisano."
+        },
+        "revertOverride": {
+          "title": "Vrati na osnovnu konfiguraciju",
+          "desc": "Ovo će ukloniti zamenu u profilu za {{type}} <em>{{name}}</em> i vratiti osnovnu konfiguraciju."
+        },
+        "error": {
+          "mustBeFinished": "Crtanje poligona mora biti završeno pre čuvanja."
+        }
+      }
+    },
+    "zones": {
+      "label": "Zone",
+      "documentTitle": "Izmeni zonu - Frigate",
+      "desc": {
+        "title": "Zone vam omogućavaju da definišete određeno područje kadra kako biste utvrdili da li se objekat nalazi unutar tog područja.",
+        "documentation": "Dokumentacija"
+      },
+      "add": "Dodaj zonu",
+      "edit": "Izmeni zonu",
+      "point_one": "{{count}} tačka",
+      "point_few": "{{count}} tačke",
+      "point_other": "{{count}} tačaka",
+      "clickDrawPolygon": "Kliknite da biste nacrtali poligon na slici.",
+      "name": {
+        "title": "Naziv",
+        "inputPlaceHolder": "Unesite naziv…",
+        "tips": "Naziv mora imati najmanje 2 karaktera, mora sadržati najmanje jedno slovo i ne sme biti isti kao naziv kamere ili druge zone na ovoj kameri."
+      },
+      "enabled": {
+        "title": "Omogućeno",
+        "description": "Određuje da li je ova zona aktivna i omogućena u konfiguracionom fajlu. Ako je onemogućena, ne može se uključiti putem MQTT-a. Onemogućene zone se ignorišu tokom rada."
+      },
+      "inertia": {
+        "title": "Inercija",
+        "desc": "Određuje koliko kadrova objekat mora biti u zoni pre nego što se smatra da se nalazi u njoj. <em>Podrazumevano: 3</em>"
+      },
+      "loiteringTime": {
+        "title": "Vreme zadržavanja",
+        "desc": "Postavlja minimalno vreme u sekundama koje objekat mora provesti u zoni da bi se ona aktivirala. <em>Podrazumevano: 0</em>"
+      },
+      "objects": {
+        "title": "Objekti",
+        "desc": "Lista objekata koji se odnose na ovu zonu."
+      },
+      "allObjects": "Svi objekti",
+      "speedEstimation": {
+        "title": "Procena brzine",
+        "desc": "Omogućite procenu brzine za objekte u ovoj zoni. Zona mora imati tačno 4 tačke.",
+        "lineADistance": "Rastojanje linije A ({{unit}})",
+        "lineBDistance": "Rastojanje linije B ({{unit}})",
+        "lineCDistance": "Rastojanje linije C ({{unit}})",
+        "lineDDistance": "Rastojanje linije D ({{unit}})"
+      },
+      "speedThreshold": {
+        "title": "Prag brzine ({{unit}})",
+        "desc": "Određuje minimalnu brzinu da bi se objekti uzeli u obzir u ovoj zoni.",
+        "toast": {
+          "error": {
+            "pointLengthError": "Procena brzine je onemogućena za ovu zonu. Zone sa procenom brzine moraju imati tačno 4 tačke.",
+            "loiteringTimeError": "Zone sa vremenom zadržavanja većim od 0 ne bi trebalo koristiti uz procenu brzine."
+          }
+        }
+      },
+      "toast": {
+        "success": "Zona ({{zoneName}}) je sačuvana."
+      }
+    },
+    "motionMasks": {
+      "label": "Maska pokreta",
+      "documentTitle": "Izmeni masku pokreta - Frigate",
+      "desc": {
+        "title": "Maske pokreta se koriste da spreče neželjene vrste pokreta da pokrenu detekciju. Preterano maskiranje će otežati praćenje objekata.",
+        "documentation": "Dokumentacija"
+      },
+      "add": "Nova maska pokreta",
+      "edit": "Izmeni masku pokreta",
+      "defaultName": "Maska pokreta {{number}}",
+      "context": {
+        "title": "Maske pokreta se koriste da spreče neželjene vrste pokreta da pokrenu detekciju (primer: grane drveća, vremenske oznake na kameri). Maske pokreta treba koristiti <em>veoma štedljivo</em>, jer će preterano maskiranje otežati praćenje objekata."
+      },
+      "point_one": "{{count}} tačka",
+      "point_few": "{{count}} tačke",
+      "point_other": "{{count}} tačaka",
+      "clickDrawPolygon": "Kliknite da biste nacrtali poligon na slici.",
+      "name": {
+        "title": "Naziv",
+        "placeholder": "Unesite naziv...",
+        "description": "Opcioni čitljiv naziv za ovu masku pokreta."
+      },
+      "polygonAreaTooLarge": {
+        "title": "Maska pokreta pokriva {{polygonArea}}% kadra kamere. Velike maske pokreta se ne preporučuju.",
+        "tips": "Maske pokreta ne sprečavaju detekciju objekata. Umesto toga, trebalo bi da koristite obaveznu zonu."
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} je sačuvano.",
+          "noName": "Maska pokreta je sačuvana."
+        }
+      }
+    },
+    "objectMasks": {
+      "label": "Maske objekata",
+      "documentTitle": "Izmeni masku objekta - Frigate",
+      "desc": {
+        "title": "Maske za filtriranje objekata se koriste za uklanjanje lažnih detekcija za određeni tip objekta na osnovu lokacije.",
+        "documentation": "Dokumentacija"
+      },
+      "add": "Dodaj masku objekta",
+      "edit": "Izmeni masku objekta",
+      "context": "Maske za filtriranje objekata se koriste za uklanjanje lažnih detekcija za određeni tip objekta na osnovu lokacije.",
+      "point_one": "{{count}} tačka",
+      "point_few": "{{count}} tačke",
+      "point_other": "{{count}} tačaka",
+      "clickDrawPolygon": "Kliknite da biste nacrtali poligon na slici.",
+      "name": {
+        "title": "Naziv",
+        "description": "Opcioni čitljiv naziv za ovu masku objekta.",
+        "placeholder": "Unesite naziv..."
+      },
+      "objects": {
+        "title": "Objekti",
+        "desc": "Tip objekta na koji se odnosi ova maska objekta.",
+        "allObjectTypes": "Svi tipovi objekata"
+      },
+      "toast": {
+        "success": {
+          "title": "{{polygonName}} je sačuvano.",
+          "noName": "Maska objekta je sačuvana."
+        }
+      }
+    },
+    "masks": {
+      "enabled": {
+        "title": "Omogućeno",
+        "description": "Da li je ova maska omogućena u konfiguracionoj datoteci. Ako je onemogućena, ne može se uključiti putem MQTT-a. Onemogućene maske se ignorišu tokom rada."
+      }
+    }
+  },
+  "motionDetectionTuner": {
+    "title": "Podešavanje detekcije pokreta",
+    "unsavedChanges": "Nesačuvane izmene podešavanja detekcije pokreta ({{camera}})",
+    "desc": {
+      "title": "Frigate koristi detekciju pokreta kao prvu liniju provere kako bi utvrdio da li se u kadru dešava nešto što vredi proveriti detekcijom objekata.",
+      "documentation": "Pročitajte vodič za podešavanje detekcije pokreta"
+    },
+    "Threshold": {
+      "title": "Prag",
+      "desc": "Vrednost praga određuje kolika promena osvetljenosti piksela je potrebna da bi se smatrala pokretom. <em>Podrazumevano: 30</em>"
+    },
+    "contourArea": {
+      "title": "Površina konture",
+      "desc": "Vrednost površine konture se koristi za određivanje koje grupe promenjenih piksela se smatraju pokretom. <em>Podrazumevano: 10</em>"
+    },
+    "improveContrast": {
+      "title": "Poboljšaj kontrast",
+      "desc": "Poboljšava kontrast za tamnije scene. <em>Podrazumevano: UKLJUČENO</em>"
+    },
+    "toast": {
+      "success": "Podešavanja pokreta su sačuvana."
+    }
+  },
+  "debug": {
+    "title": "Otklanjanje grešaka",
+    "detectorDesc": "Frigate koristi vaše detektore ({{detectors}}) za detekciju objekata u video toku vaše kamere.",
+    "desc": "Prikaz za otklanjanje grešaka pokazuje prikaz praćenih objekata i njihovu statistiku u realnom vremenu. Lista objekata pokazuje vremenski odložen pregled detektovanih objekata.",
+    "openCameraWebUI": "Otvori veb interfejs kamere {{camera}}",
+    "debugging": "Otklanjanje grešaka",
+    "objectList": "Lista objekata",
+    "noObjects": "Nema objekata",
+    "audio": {
+      "title": "Zvuk",
+      "noAudioDetections": "Nema detekcija zvuka",
+      "score": "rezultat",
+      "currentRMS": "Trenutni RMS",
+      "currentdbFS": "Trenutni dbFS"
+    },
+    "boundingBoxes": {
+      "title": "Granični okviri",
+      "desc": "Prikaži granične okvire oko praćenih objekata",
+      "colors": {
+        "label": "Boje graničnih okvira objekata",
+        "info": "<li>Pri pokretanju, svakoj oznaci objekta biće dodeljene različite boje</li><li>Tanka tamnoplava linija označava da objekat nije detektovan u ovom trenutku</li><li>Tanka siva linija označava da je objekat detektovan kao nepomičan</li><li>Debela linija označava da je objekat predmet automatskog praćenja (kada je omogućeno)</li>"
+      }
+    },
+    "timestamp": {
+      "title": "Vremenska oznaka",
+      "desc": "Prikaži vremensku oznaku preko slike"
+    },
+    "zones": {
+      "title": "Zone",
+      "desc": "Prikaži konture svih definisanih zona"
+    },
+    "mask": {
+      "title": "Maske pokreta",
+      "desc": "Prikaži poligone maski pokreta"
+    },
+    "motion": {
+      "title": "Okviri pokreta",
+      "desc": "Prikaži okvire oko oblasti gde je detektovan pokret",
+      "tips": "<p><strong>Okviri pokreta</strong></p><br><p>Crveni okviri će biti prikazani preko oblasti kadra u kojima je trenutno detektovan pokret</p>"
+    },
+    "regions": {
+      "title": "Regioni",
+      "desc": "Prikaži okvir regiona od interesa koji se šalje detektoru objekata",
+      "tips": "<p><strong>Okviri regiona</strong></p><br><p>Svetlozeleni okviri će biti prikazani preko oblasti od interesa u kadru koje se šalju detektoru objekata.</p>"
+    },
+    "paths": {
+      "title": "Putanje",
+      "desc": "Prikaži značajne tačke putanje praćenog objekta",
+      "tips": "<p><strong>Putanje</strong></p><br><p>Linije i krugovi će označavati značajne tačke kojima se praćeni objekat kretao tokom svog životnog ciklusa.</p>"
+    },
+    "objectShapeFilterDrawing": {
+      "title": "Crtanje filtera oblika objekta",
+      "desc": "Nacrtajte pravougaonik na slici da biste videli detalje o površini i odnosu stranica",
+      "tips": "Omogućite ovu opciju da biste nacrtali pravougaonik na slici kamere i prikazali njegovu površinu i odnos stranica. Ove vrednosti se zatim mogu koristiti za podešavanje parametara filtera oblika objekta u vašoj konfiguraciji.",
+      "score": "Rezultat",
+      "ratio": "Odnos",
+      "area": "Površina"
+    }
+  },
+  "timestampPosition": {
+    "tl": "Gore levo",
+    "tr": "Gore desno",
+    "bl": "Dole levo",
+    "br": "Dole desno"
+  },
+  "users": {
+    "title": "Korisnici",
+    "management": {
+      "title": "Upravljanje korisnicima",
+      "desc": "Upravljajte korisničkim nalozima ove Frigate instance.",
+      "authDisabled": "Ugrađena autentifikacija je onemogućena. Ovi nalozi se koriste za prijavu tek kada se ona omogući."
+    },
+    "addUser": "Dodaj korisnika",
+    "updatePassword": "Resetuj lozinku",
+    "toast": {
+      "success": {
+        "createUser": "Korisnik {{user}} je uspešno kreiran",
+        "deleteUser": "Korisnik {{user}} je uspešno obrisan",
+        "updatePassword": "Lozinka je uspešno ažurirana.",
+        "roleUpdated": "Uloga za korisnika {{user}} je ažurirana"
+      },
+      "error": {
+        "setPasswordFailed": "Čuvanje lozinke nije uspelo: {{errorMessage}}",
+        "createUserFailed": "Kreiranje korisnika nije uspelo: {{errorMessage}}",
+        "deleteUserFailed": "Brisanje korisnika nije uspelo: {{errorMessage}}",
+        "roleUpdateFailed": "Ažuriranje uloge nije uspelo: {{errorMessage}}"
+      }
+    },
+    "table": {
+      "username": "Korisničko ime",
+      "actions": "Akcije",
+      "role": "Uloga",
+      "noUsers": "Nema pronađenih korisnika.",
+      "changeRole": "Promeni ulogu korisnika",
+      "password": "Resetuj lozinku",
+      "deleteUser": "Obriši korisnika"
+    },
+    "dialog": {
+      "form": {
+        "user": {
+          "title": "Korisničko ime",
+          "desc": "Dozvoljena su samo slova, brojevi, tačke i donje crte.",
+          "placeholder": "Unesite korisničko ime"
+        },
+        "password": {
+          "title": "Lozinka",
+          "placeholder": "Unesite lozinku",
+          "show": "Prikaži lozinku",
+          "hide": "Sakrij lozinku",
+          "confirm": {
+            "title": "Potvrdi lozinku",
+            "placeholder": "Potvrdi lozinku"
+          },
+          "requirements": {
+            "title": "Zahtevi za lozinku:",
+            "length": "Najmanje 12 karaktera"
+          },
+          "match": "Lozinke se poklapaju",
+          "notMatch": "Lozinke se ne poklapaju"
+        },
+        "newPassword": {
+          "title": "Nova lozinka",
+          "placeholder": "Unesite novu lozinku",
+          "confirm": {
+            "placeholder": "Ponovo unesite novu lozinku"
+          }
+        },
+        "currentPassword": {
+          "title": "Trenutna lozinka",
+          "placeholder": "Unesite svoju trenutnu lozinku"
+        },
+        "usernameIsRequired": "Korisničko ime je obavezno",
+        "passwordIsRequired": "Lozinka je obavezna"
+      },
+      "createUser": {
+        "title": "Kreiraj novog korisnika",
+        "desc": "Dodajte novi korisnički nalog i odredite ulogu za pristup delovima Frigate korisničkog interfejsa.",
+        "usernameOnlyInclude": "Korisničko ime može sadržati samo slova, brojeve, . ili _",
+        "usernameOnlyDots": "Korisničko ime ne može sadržati samo tačke",
+        "confirmPassword": "Molimo potvrdite svoju lozinku"
+      },
+      "deleteUser": {
+        "title": "Obriši korisnika",
+        "desc": "Ova akcija se ne može opozvati. Ovo će trajno obrisati korisnički nalog i ukloniti sve povezane podatke.",
+        "warn": "Da li ste sigurni da želite da obrišete korisnika <strong>{{username}}</strong>?"
+      },
+      "passwordSetting": {
+        "cannotBeEmpty": "Lozinka ne može biti prazna",
+        "doNotMatch": "Lozinke se ne poklapaju",
+        "currentPasswordRequired": "Trenutna lozinka je obavezna",
+        "incorrectCurrentPassword": "Trenutna lozinka je netačna",
+        "passwordVerificationFailed": "Provera lozinke nije uspela",
+        "updatePassword": "Ažuriraj lozinku za korisnika {{username}}",
+        "setPassword": "Postavi lozinku",
+        "desc": "Kreirajte jaku lozinku da biste zaštitili ovaj nalog.",
+        "multiDeviceWarning": "Svi ostali uređaji na kojima ste prijavljeni moraće ponovo da se prijave u roku od {{refresh_time}}.",
+        "multiDeviceAdmin": "Takođe možete primorati sve korisnike da se odmah ponovo autentifikuju rotiranjem vašeg JWT ključa."
+      },
+      "changeRole": {
+        "title": "Promeni ulogu korisnika",
+        "select": "Izaberite ulogu",
+        "desc": "Ažuriraj dozvole za korisnika <strong>{{username}}</strong>",
+        "roleInfo": {
+          "intro": "Izaberite odgovarajuću ulogu za ovog korisnika:",
+          "admin": "Administrator",
+          "adminDesc": "Potpun pristup svim funkcijama.",
+          "viewer": "Posmatrač",
+          "viewerDesc": "Ograničeno samo na kontrolne table uživo, Pregled, Istraživanje i Izvoze.",
+          "customDesc": "Prilagođena uloga sa pristupom određenim kamerama."
+        }
+      }
+    }
+  },
+  "roles": {
+    "management": {
+      "title": "Upravljanje ulogama posmatrača",
+      "desc": "Upravljajte prilagođenim ulogama posmatrača i njihovim dozvolama pristupa kamerama za ovu Frigate instancu."
+    },
+    "addRole": "Dodaj ulogu",
+    "table": {
+      "role": "Uloga",
+      "cameras": "Kamere",
+      "actions": "Akcije",
+      "noRoles": "Nema pronađenih prilagođenih uloga.",
+      "editCameras": "Izmeni kamere",
+      "deleteRole": "Obriši ulogu",
+      "cameraCount_one": "{{count}} kamera",
+      "cameraCount_few": "{{count}} kamere",
+      "cameraCount_other": "{{count}} kamera"
+    },
+    "toast": {
+      "success": {
+        "createRole": "Uloga {{role}} je uspešno kreirana",
+        "updateCameras": "Kamere za ulogu {{role}} su ažurirane",
+        "deleteRole": "Uloga {{role}} je uspešno obrisana",
+        "userRolesUpdated_one": "{{count}} korisnik dodeljen ovoj ulozi je prebačen na ulogu „posmatrač“, koja ima pristup svim kamerama.",
+        "userRolesUpdated_few": "{{count}} korisnika dodeljena ovoj ulozi su prebačena na ulogu „posmatrač“, koja ima pristup svim kamerama.",
+        "userRolesUpdated_other": "{{count}} korisnika dodeljenih ovoj ulozi je prebačeno na ulogu „posmatrač“, koja ima pristup svim kamerama."
+      },
+      "error": {
+        "createRoleFailed": "Kreiranje uloge nije uspelo: {{errorMessage}}",
+        "updateCamerasFailed": "Ažuriranje kamera nije uspelo: {{errorMessage}}",
+        "deleteRoleFailed": "Brisanje uloge nije uspelo: {{errorMessage}}",
+        "userUpdateFailed": "Ažuriranje korisničkih uloga nije uspelo: {{errorMessage}}"
+      }
+    },
+    "dialog": {
+      "createRole": {
+        "title": "Kreiraj novu ulogu",
+        "desc": "Dodajte novu ulogu i odredite dozvole za pristup kamerama."
+      },
+      "editCameras": {
+        "title": "Izmeni kamere za ulogu",
+        "desc": "Ažurirajte pristup kamerama za ulogu <strong>{{role}}</strong>."
+      },
+      "deleteRole": {
+        "title": "Obriši ulogu",
+        "desc": "Ova radnja se ne može opozvati. Ovo će trajno obrisati ulogu i dodeliti sve korisnike sa ovom ulogom ulozi „posmatrač“, što će im dati pristup za gledanje svih kamera.",
+        "warn": "Da li ste sigurni da želite da obrišete ulogu <strong>{{role}}</strong>?",
+        "deleting": "Brisanje..."
+      },
+      "form": {
+        "role": {
+          "title": "Naziv uloge",
+          "placeholder": "Unesite naziv uloge",
+          "desc": "Dozvoljena su samo slova, brojevi, tačke i donje crte.",
+          "roleIsRequired": "Naziv uloge je obavezan",
+          "roleOnlyInclude": "Naziv uloge može sadržati samo slova, brojeve, . ili _",
+          "roleExists": "Uloga sa ovim nazivom već postoji."
+        },
+        "cameras": {
+          "title": "Kamere",
+          "desc": "Izaberite kamere kojima ova uloga ima pristup. Potrebna je najmanje jedna kamera.",
+          "required": "Mora biti izabrana najmanje jedna kamera."
+        }
+      }
+    }
+  },
+  "notification": {
+    "title": "Obaveštenja",
+    "notificationSettings": {
+      "title": "Podešavanja obaveštenja",
+      "desc": "Frigate može izvorno da šalje push obaveštenja na vaš uređaj kada radi u pregledaču ili je instaliran kao PWA."
+    },
+    "notificationUnavailable": {
+      "desc": "Veb push obaveštenja zahtevaju bezbedan kontekst (https://...). Ovo je ograničenje pregledača. Pristupite Frigate-u na bezbedan način da biste koristili obaveštenja.",
+      "descPwa": "Na iOS-u su veb push obaveštenja dostupna samo kada je Frigate instaliran na vaš početni ekran. Otvorite meni za deljenje, izaberite Dodaj na početni ekran, a zatim otvorite Frigate sa nove ikonice da biste registrovali ovaj uređaj za obaveštenja."
+    },
+    "globalSettings": {
+      "title": "Globalna podešavanja",
+      "desc": "Privremeno obustavite obaveštenja za određene kamere na svim registrovanim uređajima."
+    },
+    "email": {
+      "title": "E-pošta",
+      "placeholder": "npr. primer@email.com",
+      "desc": "Potrebna je važeća adresa e-pošte i koristiće se da vas obavesti ako bude bilo kakvih problema sa push uslugom."
+    },
+    "cameras": {
+      "title": "Kamere",
+      "noCameras": "Nema dostupnih kamera",
+      "desc": "Izaberite kamere za koje želite da omogućite obaveštenja."
+    },
+    "deviceSpecific": "Podešavanja specifična za uređaj",
+    "registerDevice": "Registruj ovaj uređaj",
+    "unregisterDevice": "Ukloni registraciju ovog uređaja",
+    "sendTestNotification": "Pošalji probno obaveštenje",
+    "unsavedRegistrations": "Nesačuvane registracije obaveštenja",
+    "unsavedChanges": "Nesačuvane izmene obaveštenja",
+    "active": "Obaveštenja su aktivna",
+    "suspended": "Obaveštenja su obustavljena {{time}}",
+    "suspendTime": {
+      "suspend": "Obustavi",
+      "5minutes": "Obustavi na 5 minuta",
+      "10minutes": "Obustavi na 10 minuta",
+      "30minutes": "Obustavi na 30 minuta",
+      "1hour": "Obustavi na 1 sat",
+      "12hours": "Obustavi na 12 sati",
+      "24hours": "Obustavi na 24 sata",
+      "custom": "Obustavi do...",
+      "untilRestart": "Obustavi do ponovnog pokretanja"
+    },
+    "customSuspension": {
+      "title": "Prilagođeno vreme obustave",
+      "description": "Obustavite obaveštenja za ovu kameru do izabranog vremena.",
+      "untilLabel": "Obustavi do",
+      "invalidTime": "Izaberite vreme u budućnosti."
+    },
+    "cancelSuspension": "Otkaži obustavu",
+    "toast": {
+      "success": {
+        "registered": "Uspešno ste registrovani za obaveštenja. Potrebno je ponovo pokrenuti Frigate pre nego što bilo koje obaveštenje (uključujući probno obaveštenje) može biti poslato.",
+        "settingSaved": "Podešavanja obaveštenja su sačuvana."
+      },
+      "error": {
+        "registerFailed": "Čuvanje registracije obaveštenja nije uspelo."
+      }
+    }
+  },
+  "frigatePlus": {
+    "title": "Frigate+ podešavanja",
+    "description": "Frigate+ je usluga zasnovana na pretplati koja pruža pristup dodatnim funkcijama i mogućnostima za vašu Frigate instancu, uključujući mogućnost korišćenja prilagođenih modela za detekciju objekata obučenih na vašim sopstvenim podacima. Ovde možete upravljati podešavanjima vaših Frigate+ modela.",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "Trenutni model",
+      "otherModels": "Ostali modeli",
+      "configuration": "Konfiguracija"
+    },
+    "apiKey": {
+      "title": "Frigate+ API ključ",
+      "formatValid": "Frigate+ API ključ je detektovan i odgovara očekivanom formatu",
+      "formatInvalid": "Frigate+ API ključ nije detektovan ili ne odgovara očekivanom formatu",
+      "validate": "Proveri putem Frigate+",
+      "validating": "Provera u toku…",
+      "serverValid": "Frigate+ je prihvatio ovaj API ključ",
+      "serverInvalid": "Frigate+ je odbio ovaj API ključ",
+      "serverUnreachable": "Nije moguće povezati se sa Frigate+ radi provere ovog API ključa",
+      "desc": "Frigate+ API ključ omogućava integraciju sa uslugom Frigate+.",
+      "plusLink": "Pročitajte više o Frigate+"
+    },
+    "snapshotConfig": {
+      "title": "Konfiguracija snimaka kadra",
+      "desc": "Slanje u Frigate+ zahteva da snimci kadra budu omogućeni u vašoj konfiguraciji.",
+      "cleanCopyWarning": "Neke kamere imaju onemogućene snimke kadra",
+      "table": {
+        "camera": "Kamera",
+        "snapshots": "Snimci kadra"
+      }
+    },
+    "modelInfo": {
+      "title": "Informacije o modelu",
+      "modelType": "Tip modela",
+      "trainDate": "Datum obuke",
+      "baseModel": "Osnovni model",
+      "plusModelType": {
+        "baseModel": "Osnovni model",
+        "userModel": "Fino podešen"
+      },
+      "supportedDetectors": "Podržani detektori",
+      "cameras": "Kamere",
+      "loading": "Učitavanje informacija o modelu…",
+      "error": "Učitavanje informacija o modelu nije uspelo",
+      "noModelLoaded": "Trenutno nije učitan nijedan Frigate+ model.",
+      "availableModels": "Dostupni Frigate+ modeli",
+      "loadingAvailableModels": "Učitavanje dostupnih modela…",
+      "selectModel": "Izaberite model",
+      "noModelsAvailable": "Nema dostupnih modela",
+      "showIncompatible": "Prikaži nekompatibilne modele",
+      "filter": {
+        "ariaLabel": "Filtriraj modele po tipu",
+        "baseModels": "Osnovni modeli",
+        "fineTunedModels": "Fino podešeni modeli"
+      },
+      "modelSelect": "Ovde možete izabrati svoje dostupne modele na Frigate+. Imajte na umu da se mogu izabrati samo modeli kompatibilni sa vašom trenutnom konfiguracijom detektora."
+    },
+    "changeInDetectorsAndModel": "Promeni model",
+    "unsavedChanges": "Nesačuvane izmene Frigate+ podešavanja",
+    "restart_required": "Potrebno je ponovno pokretanje (Frigate+ model je promenjen)",
+    "toast": {
+      "success": "Frigate+ podešavanja su sačuvana. Ponovo pokrenite Frigate da biste primenili izmene.",
+      "error": "Čuvanje izmena konfiguracije nije uspelo: {{errorMessage}}"
+    }
+  },
+  "triggers": {
+    "documentTitle": "Okidači",
+    "semanticSearch": {
+      "desc": "Semantička pretraga mora biti omogućena da biste koristili okidače."
+    },
+    "management": {
+      "title": "Okidači",
+      "desc": "Upravljajte okidačima za kameru {{camera}}. Koristite tip sličice za okidanje na sličice slične vašem izabranom praćenom objektu, a tip opisa za okidanje na opise slične tekstu koji navedete."
+    },
+    "addTrigger": "Dodaj okidač",
+    "table": {
+      "name": "Naziv",
+      "type": "Tip",
+      "content": "Sadržaj",
+      "threshold": "Prag",
+      "actions": "Akcije",
+      "noTriggers": "Nema konfigurisanih okidača za ovu kameru.",
+      "edit": "Izmeni",
+      "deleteTrigger": "Obriši okidač",
+      "lastTriggered": "Poslednji put aktiviran"
+    },
+    "type": {
+      "thumbnail": "Sličica",
+      "description": "Opis"
+    },
+    "actions": {
+      "notification": "Pošalji obaveštenje",
+      "sub_label": "Dodaj podoznaku",
+      "attribute": "Dodaj atribut"
+    },
+    "dialog": {
+      "createTrigger": {
+        "title": "Kreiraj okidač",
+        "desc": "Kreirajte okidač za kameru {{camera}}"
+      },
+      "editTrigger": {
+        "title": "Izmeni okidač",
+        "desc": "Izmenite podešavanja za okidač na kameri {{camera}}"
+      },
+      "deleteTrigger": {
+        "title": "Obriši okidač",
+        "desc": "Da li ste sigurni da želite da obrišete okidač <strong>{{triggerName}}</strong>? Ova radnja se ne može opozvati."
+      },
+      "form": {
+        "name": {
+          "title": "Naziv",
+          "placeholder": "Imenujte ovaj okidač",
+          "description": "Unesite jedinstven naziv ili opis za identifikaciju ovog okidača",
+          "error": {
+            "minLength": "Polje mora imati najmanje 2 znaka.",
+            "invalidCharacters": "Polje može sadržati samo slova, brojeve, donje crte i crtice.",
+            "alreadyExists": "Okidač sa ovim nazivom već postoji za ovu kameru."
+          }
+        },
+        "enabled": {
+          "description": "Omogući ili onemogući ovaj okidač"
+        },
+        "type": {
+          "title": "Tip",
+          "placeholder": "Izaberite tip okidača",
+          "description": "Pokreni okidač kada se detektuje sličan opis praćenog objekta",
+          "thumbnail": "Pokreni okidač kada se detektuje slična sličica praćenog objekta"
+        },
+        "content": {
+          "title": "Sadržaj",
+          "imagePlaceholder": "Izaberite sličicu",
+          "textPlaceholder": "Unesite tekstualni sadržaj",
+          "imageDesc": "Prikazano je samo 100 najnovijih sličica. Ako ne možete da pronađete željenu sličicu, pregledajte ranije objekte u sekciji Istraživanje i podesite okidač iz tamošnjeg menija.",
+          "textDesc": "Unesite tekst za pokretanje ove radnje kada se detektuje sličan opis praćenog objekta.",
+          "error": {
+            "required": "Sadržaj je obavezan."
+          }
+        },
+        "threshold": {
+          "title": "Prag",
+          "desc": "Postavite prag sličnosti za ovaj okidač. Viši prag znači da je potrebno bliže poklapanje da bi se okidač aktivirao.",
+          "error": {
+            "min": "Prag mora biti najmanje 0",
+            "max": "Prag može biti najviše 1"
+          }
+        },
+        "actions": {
+          "title": "Akcije",
+          "desc": "Podrazumevano, Frigate šalje MQTT poruku za sve okidače. Podoznake dodaju naziv okidača oznaci objekta. Atributi su pretraživi metapodaci koji se čuvaju zasebno u metapodacima praćenog objekta.",
+          "error": {
+            "min": "Mora biti izabrana najmanje jedna akcija."
+          }
+        }
+      }
+    },
+    "wizard": {
+      "title": "Kreiraj okidač",
+      "step1": {
+        "description": "Konfigurišite osnovna podešavanja za vaš okidač."
+      },
+      "step2": {
+        "description": "Podesite sadržaj koji će pokrenuti ovu akciju."
+      },
+      "step3": {
+        "description": "Konfigurišite prag i akcije za ovaj okidač."
+      },
+      "steps": {
+        "nameAndType": "Naziv i tip",
+        "configureData": "Konfiguriši podatke",
+        "thresholdAndActions": "Prag i akcije"
+      }
+    },
+    "toast": {
+      "success": {
+        "createTrigger": "Okidač {{name}} je uspešno kreiran.",
+        "updateTrigger": "Okidač {{name}} je uspešno ažuriran.",
+        "deleteTrigger": "Okidač {{name}} je uspešno obrisan."
+      },
+      "error": {
+        "createTriggerFailed": "Kreiranje okidača nije uspelo: {{errorMessage}}",
+        "updateTriggerFailed": "Ažuriranje okidača nije uspelo: {{errorMessage}}",
+        "deleteTriggerFailed": "Brisanje okidača nije uspelo: {{errorMessage}}"
+      }
+    }
   }
 }
