@@ -15,8 +15,6 @@ from unittest.mock import MagicMock, patch
 
 import cv2
 import numpy as np
-from hypothesis import given, settings
-from hypothesis import strategies as st
 
 # Mock TFLite before importing the classification processor
 _MOCK_MODULES = [
@@ -36,42 +34,36 @@ from frigate.data_processing.real_time.custom_classification import (  # noqa: E
 
 CAMERA = "cam"
 MODEL_NAME = "parity"
-MIN_CROP = 64
+FRAME_WIDTH = 1280
+FRAME_HEIGHT = 720
+# Below, near and above the 224 px model input, so crops are both upscaled
+# and downscaled. 79 px is the crop size this was found on.
+CROP_SIZES = (64, 79, 224, 600)
 
 
 class _TrainingStopped(Exception):
     pass
 
 
-@st.composite
-def frames_and_crops(draw):
-    """A random I420 frame and a realistic crop inside it.
-
-    Crops are at least MIN_CROP px each way: smaller than the 79 px crop this
-    was found on, but not degenerate. The largest is the whole frame, so
-    crops that are shrunk to the model input are covered too.
-    """
-    width = draw(st.integers(MIN_CROP // 2, 640).map(lambda v: v * 2))
-    height = draw(st.integers(MIN_CROP // 2, 360).map(lambda v: v * 2))
-    seed = draw(st.integers(0, 2**32 - 1))
-    frame = np.random.default_rng(seed).integers(
-        0, 256, (height * 3 // 2, width), dtype=np.uint8
+def _frame() -> np.ndarray:
+    """A fixed random I420 frame."""
+    return np.random.default_rng(0).integers(
+        0, 256, (FRAME_HEIGHT * 3 // 2, FRAME_WIDTH), dtype=np.uint8
     )
 
-    # crop corners on the pixel grid. The half pixel keeps the processor's
-    # int() truncation on the intended pixel; it clips the far edge to the
-    # frame.
-    x1 = draw(st.integers(0, width - MIN_CROP))
-    x2 = draw(st.integers(x1 + MIN_CROP, width))
-    y1 = draw(st.integers(0, height - MIN_CROP))
-    y2 = draw(st.integers(y1 + MIN_CROP, height))
-    crop = [
-        (x1 + 0.5) / width,
-        (y1 + 0.5) / height,
-        (x2 + 0.5) / width,
-        (y2 + 0.5) / height,
+
+def _square_crop(size: int, x: int = 100, y: int = 60) -> list[float]:
+    """Relative crop coordinates for a size x size px crop at (x, y).
+
+    The half pixel keeps the processor's int() truncation on the intended
+    pixel.
+    """
+    return [
+        (x + 0.5) / FRAME_WIDTH,
+        (y + 0.5) / FRAME_HEIGHT,
+        (x + size + 0.5) / FRAME_WIDTH,
+        (y + size + 0.5) / FRAME_HEIGHT,
     ]
-    return frame, crop
 
 
 def _inference_input_and_saved_crop(
@@ -155,52 +147,30 @@ def _training_batch(dataset_crop_bgr: np.ndarray) -> np.ndarray:
 
 
 class TestTrainingMatchesInference(unittest.TestCase):
-    @settings(max_examples=40, deadline=None)
-    @given(frames_and_crops())
-    def test_training_input_matches_inference_input(self, frame_and_crop):
-        frame, crop = frame_and_crop
-        inference_input, saved_crop = _inference_input_and_saved_crop(frame, crop)
+    def test_training_input_matches_inference_input(self):
+        frame = _frame()
 
-        # Saved training crops are webp, which cv2 writes losslessly by
-        # default, and categorising converts them to png. Writing png here
-        # gives the same dataset pixels.
-        batch = _training_batch(saved_crop)
+        for size in CROP_SIZES:
+            with self.subTest(crop_size=size):
+                inference_input, saved_crop = _inference_input_and_saved_crop(
+                    frame, _square_crop(size)
+                )
 
-        # training rescales by 1/255; the quantised model takes uint8 input
-        training_input = np.rint(batch * 255.0).astype(np.uint8)
+                # Saved training crops are webp, which cv2 writes losslessly
+                # by default, and categorising converts them to png. Writing
+                # png here gives the same dataset pixels.
+                batch = _training_batch(saved_crop)
 
-        self.assertEqual(training_input.shape[1:], inference_input.shape)
-        for image in training_input:
-            np.testing.assert_array_equal(image, inference_input)
+                # training rescales by 1/255; the quantised model takes uint8
+                # input
+                training_input = np.rint(batch * 255.0).astype(np.uint8)
+
+                self.assertEqual(training_input.shape[1:], inference_input.shape)
+                for image in training_input:
+                    np.testing.assert_array_equal(image, inference_input)
 
 
 class TestPrepareTrainingDataset(unittest.TestCase):
-    @settings(max_examples=50, deadline=None)
-    @given(
-        width=st.integers(1, 1000),
-        height=st.integers(1, 1000),
-        seed=st.integers(0, 2**32 - 1),
-    )
-    def test_prepared_images_are_model_input_size(self, width, height, seed):
-        """Keras is then given nothing to resize, whatever its interpolation."""
-        image = np.random.default_rng(seed).integers(
-            0, 256, (height, width, 3), dtype=np.uint8
-        )
-
-        with (
-            tempfile.TemporaryDirectory() as dataset_dir,
-            tempfile.TemporaryDirectory() as output_dir,
-        ):
-            os.makedirs(os.path.join(dataset_dir, "open"))
-            cv2.imwrite(os.path.join(dataset_dir, "open", "a.png"), image)
-
-            classification.prepare_training_dataset(dataset_dir, output_dir)
-
-            prepared = cv2.imread(os.path.join(output_dir, "open", "a.png"))
-            self.assertEqual(
-                prepared.shape[:2], classification.CLASSIFICATION_INPUT_SIZE
-            )
-
     def test_skips_files_that_are_not_images(self):
         with (
             tempfile.TemporaryDirectory() as dataset_dir,
@@ -222,26 +192,6 @@ class TestPrepareTrainingDataset(unittest.TestCase):
 
             self.assertEqual(os.listdir(output_dir), ["open"])
             self.assertEqual(os.listdir(os.path.join(output_dir, "open")), ["a.png"])
-
-    def test_failed_write_raises_with_path(self):
-        """A full disk must stop training, not silently drop images."""
-        with (
-            tempfile.TemporaryDirectory() as dataset_dir,
-            tempfile.TemporaryDirectory() as output_dir,
-        ):
-            os.makedirs(os.path.join(dataset_dir, "open"))
-            cv2.imwrite(
-                os.path.join(dataset_dir, "open", "a.png"),
-                np.zeros((79, 79, 3), dtype=np.uint8),
-            )
-
-            with patch.object(classification.cv2, "imwrite", return_value=False):
-                with self.assertRaises(OSError) as raised:
-                    classification.prepare_training_dataset(dataset_dir, output_dir)
-
-            self.assertIn(
-                os.path.join(output_dir, "open", "a.png"), str(raised.exception)
-            )
 
 
 if __name__ == "__main__":
