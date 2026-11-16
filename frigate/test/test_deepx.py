@@ -6,6 +6,7 @@ import struct
 import sys
 import tempfile
 import unittest
+import zlib
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -19,6 +20,8 @@ from frigate.detectors.device import (
 )
 from frigate.detectors.plugins.deepx import (
     DEEPX_MANIFEST,
+    DXNN_MAX_HEADER_SIZE,
+    DXNN_PRELUDE_SIZE,
     DXRT_VERSION,
     PPU_RECORD_SIZE,
     DeepxDetector,
@@ -33,6 +36,7 @@ from frigate.detectors.plugins.deepx import (
     resolve_device,
     validate_yolox_outputs,
 )
+from frigate.util.runtime_deps import ArtifactKind
 
 
 def model_with_type(model_type) -> ModelConfig:
@@ -135,7 +139,13 @@ def onnx_box_graph(box_format: str) -> bytes:
 
 
 def write_dxnn(
-    directory, ppu, layers, name="model.dxnn", table=True, box_format=None
+    directory,
+    ppu,
+    layers,
+    name="model.dxnn",
+    table=True,
+    box_format=None,
+    version=None,
 ) -> str:
     """A minimal .dxnn as DX-RT's parsers read it: the container header, a
     compile_config carrying `ppu`, and either the PPU tensor table with one
@@ -145,7 +155,9 @@ def write_dxnn(
     anchor-free scale has one entry, and grid_h 1 means a flattened
     (1, cells, channels) tensor. `box_format`, "centre" or "corner", adds
     the compiled graph that says how the head writes its boxes, along with
-    the compile_config layer naming the node the PPU reads them from."""
+    the compile_config layer naming the node the PPU reads them from.
+    `version` overrides the format, 9 replacing the padded index with a
+    length-prefixed one."""
     if box_format is not None and "layer" not in ppu:
         ppu = dict(ppu, layer=[{"bbox": PPU_BBOX_NODE, "cls_conf": "/head/Sigmoid"}])
 
@@ -209,9 +221,12 @@ def write_dxnn(
             }
         }
 
+    if version is None:
+        version = 8 if table else 7
+
     index = json.dumps(
         {
-            "version": 8 if table else 7,
+            "version": version,
             "signature": "DXNN",
             "size": 8192,
             "data": data,
@@ -220,8 +235,17 @@ def write_dxnn(
 
     path = os.path.join(directory, name)
     with open(path, "wb") as model:
-        model.write(b"DXNN" + struct.pack("<I", 8))
-        model.write(index.ljust(8192 - 8, b"\0"))
+        if version >= 9:
+            model.write(b"DXNN")
+            model.write(struct.pack("<I", version))
+            model.write(struct.pack("<Q", len(index)))
+            model.write(struct.pack("<I", zlib.crc32(index)))
+            model.write(b"\0" * 12)  # flags and reserved bytes
+            model.write(index)
+        else:
+            model.write(b"DXNN" + struct.pack("<I", version))
+            model.write(index.ljust(8192 - 8, b"\0"))
+
         model.write(compile_config + part + graph)
 
     return path
@@ -323,6 +347,40 @@ class TestDeepxModelFile(unittest.TestCase):
         for graph, (ppu, layers, kwargs) in cases.items():
             with self.subTest(graph=graph):
                 self.assertIsNone(self.layout(ppu, layers, **kwargs).centre_boxes)
+
+    def test_a_v9_file_is_read_from_its_variable_length_index(self):
+        cases = {
+            "table": (ANCHOR_BASED_PPU, THREE_SCALE_ANCHORS, {"table": True}),
+            "no table: compile_config sits past the index": (
+                {"num_classes": 80},
+                THREE_SCALE_ANCHORS,
+                {"table": False},
+            ),
+        }
+
+        for kind, (ppu, layers, kwargs) in cases.items():
+            with self.subTest(kind=kind):
+                self.assertEqual(
+                    self.layout(ppu, layers, version=9, **kwargs),
+                    PpuLayout(anchor_based=True, grids=((80, 80), (40, 40), (20, 20))),
+                )
+
+    def test_a_v9_index_shorter_than_it_claims_is_refused(self):
+        path = write_dxnn(self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3)], version=9)
+
+        with open(path, "r+b") as model:
+            model.truncate(DXNN_PRELUDE_SIZE + 8)
+
+        self.assertIsNone(read_ppu_layout(path))
+
+    def test_a_v9_index_larger_than_the_cap_is_refused(self):
+        path = write_dxnn(self.tmp.name, ANCHOR_BASED_PPU, [(80, 80, 3)], version=9)
+
+        with open(path, "r+b") as model:
+            model.seek(8)
+            model.write(struct.pack("<Q", DXNN_MAX_HEADER_SIZE + 1))
+
+        self.assertIsNone(read_ppu_layout(path))
 
     def test_nothing_is_read_from_a_model_without_ppu_metadata(self):
         self.assertIsNone(read_ppu_layout(os.path.join(self.tmp.name, "missing")))
@@ -607,15 +665,20 @@ class TestDeepxConfig(unittest.TestCase):
         self.assertEqual(config.device, "PCIe:0")
         self.assertEqual(config.model.model_type, ModelTypeEnum.yologeneric)
 
-    def test_the_runtime_manifest_pins_its_wheels_to_the_version(self):
-        """A PyPI path carries a per-file digest, so bumping DXRT_VERSION has
-        to rewrite the whole URL; a stale one installs the old wheel and fails
-        the sha256 on every user's first start."""
+    def test_the_runtime_manifest_pins_the_package_and_wheel_to_the_version(self):
+        """The deb carries the wheel, so bumping DXRT_VERSION has to rewrite
+        the package URL, both digests and the wheel member together."""
         self.assertEqual(DEEPX_MANIFEST.version, DXRT_VERSION)
 
         for artifact in DEEPX_MANIFEST.artifacts:
             with self.subTest(url=artifact.url):
-                self.assertIn(f"dx_engine-{DXRT_VERSION}-", artifact.url)
+                self.assertIs(artifact.kind, ArtifactKind.deb)
+                self.assertIn(f"libdxrt-bin_{DXRT_VERSION}_", artifact.url)
+                self.assertIn(f"dx_engine-{DXRT_VERSION}-cp311-", artifact.member)
+                self.assertEqual(len(artifact.member_sha256), 64)
+                self.assertTrue(artifact.mappings)
+
+        self.assertIn("libdxrt.so", DEEPX_MANIFEST.preload)
 
     def test_a_model_less_config_still_validates(self):
         config = DeepxDetectorConfig(type="deepx")

@@ -16,14 +16,20 @@ from pydantic import ConfigDict, Field, field_validator
 from frigate.detectors.detection_api import DetectionApi
 from frigate.detectors.detector_config import BaseDetectorConfig, ModelTypeEnum
 from frigate.util.model import post_process_yolo, post_process_yolox
-from frigate.util.runtime_deps import Artifact, ArtifactKind, RuntimeManifest
+from frigate.util.runtime_deps import (
+    ArchiveDest,
+    ArchiveMapping,
+    Artifact,
+    ArtifactKind,
+    RuntimeManifest,
+)
 
 logger = logging.getLogger(__name__)
 
 DETECTOR_KEY = "deepx"
 
-# Installed at first start; DEEPX's PyPI wheels match the libdxrt-bin build.
-DXRT_VERSION = "3.4.0"
+# Installed at first start; the wheel ships inside the libdxrt-bin package.
+DXRT_VERSION = "3.5.0"
 
 # Where the host dxrtd accepts clients; a container cannot reach its abstract
 # socket, and a mounted socket file pins a stale inode after a daemon restart.
@@ -70,10 +76,13 @@ PPU_ANCHORS_BY_SCALES = {
     ),
 }
 
-# .dxnn: "DXNN", a 4-byte LE version, then a JSON index padded to
-# DXNN_HEADER_SIZE; every offset in the index counts from there.
+# .dxnn v7/v8: "DXNN", a 4-byte LE version, then a JSON index padded to
+# DXNN_HEADER_SIZE, offsets relative to it. v9 prefixes the index length.
 DXNN_MAGIC = b"DXNN"
 DXNN_HEADER_SIZE = 8192
+DXNN_PRELUDE_SIZE = 32
+DXNN_V9_VERSION = 9
+DXNN_MAX_HEADER_SIZE = 16 * 1024 * 1024
 # The graph DX-COM keeps for visualisation, an ONNX ModelProto beside the
 # encrypted model; only its nodes are read, for how the box tensor was built.
 DXNN_GRAPH_SECTION = "vis_npu_models"
@@ -103,32 +112,45 @@ MULTIPART_CLASSES = 80
 MULTIPART_CHANNELS = 3 * (5 + MULTIPART_CLASSES)
 
 
-# PyPI URLs carry a per-file digest, so a version bump rewrites them whole.
+# The wheel links against the runtime libraries the package ships.
+DEEPX_LIBS = ArchiveMapping(
+    "./usr/local/lib/",
+    ArchiveDest.lib,
+    include=("libdxrt.so*", "libonnxruntime.so*"),
+)
+
+# The deb carries a wheel per CPython ABI; `member` picks this image's and
+# `member_sha256` pins it. Only the wheel and DEEPX_LIBS are kept out of it.
 DEEPX_MANIFEST = RuntimeManifest(
     name=DETECTOR_KEY,
     version=DXRT_VERSION,
     artifacts=(
         Artifact(
             url=(
-                "https://files.pythonhosted.org/packages/de/45/"
-                "1ca593e1c4ed868618658e07adeffc1fb44b92655d1ba48a6c76942616ee/"
-                "dx_engine-3.4.0-cp311-cp311-manylinux_2_27_aarch64.whl"
+                "https://github.com/DEEPX-AI/dx_rt/raw/refs/tags/v3.5.0/"
+                "release/3.5.0/libdxrt-bin_3.5.0_arm64.deb"
             ),
-            sha256="ec4188e0a598a164bc04312482f70159be1a3d888284dcf52746054138101ec7",
-            kind=ArtifactKind.wheel,
+            sha256="f7c942ddfa325f435de3ab9a42b32b322f97dacff7f3468a37e32a6386a03681",
+            kind=ArtifactKind.deb,
             machines=("aarch64",),
+            mappings=(DEEPX_LIBS,),
+            member="dx_engine-3.5.0-cp311-cp311-*.whl",
+            member_sha256="276e1860af91ab3f937047fe8c4f59c169b4a5ed191f1c1cb606f89045c6967a",
         ),
         Artifact(
             url=(
-                "https://files.pythonhosted.org/packages/b0/32/"
-                "d52b33d5b85f7d8565e3e2d153f19db6d506cd5504339f31c6553eae06c6/"
-                "dx_engine-3.4.0-cp311-cp311-manylinux_2_27_x86_64.whl"
+                "https://github.com/DEEPX-AI/dx_rt/raw/refs/tags/v3.5.0/"
+                "release/3.5.0/libdxrt-bin_3.5.0_amd64.deb"
             ),
-            sha256="161fde8428fc8aea95c560d878bc68e8d1c657c18a0eb04840de4bd212f3477f",
-            kind=ArtifactKind.wheel,
+            sha256="c1993416e43059fb4751b2fd093d4232ab2ae8e67a5ec4156c79889e66260f64",
+            kind=ArtifactKind.deb,
             machines=("x86_64",),
+            mappings=(DEEPX_LIBS,),
+            member="dx_engine-3.5.0-cp311-cp311-*.whl",
+            member_sha256="ec5b80970271ac6d236fa4bc3277e425d6d8bcb89a977f7c236ac0431dd60558",
         ),
     ),
+    preload=("libonnxruntime.so.1", "libdxrt.so"),
     import_check="dx_engine",
 )
 
@@ -408,17 +430,32 @@ def read_ppu_layout(path: str) -> PpuLayout | None:
     is none to read."""
     try:
         with open(path, "rb") as model:
-            header = model.read(DXNN_HEADER_SIZE)
-            if header[:4] != DXNN_MAGIC:
+            prelude = model.read(DXNN_PRELUDE_SIZE)
+            if prelude[:4] != DXNN_MAGIC:
                 return None
 
-            index = json.JSONDecoder().raw_decode(
-                header[8:].decode("utf-8", "replace")
-            )[0]
+            version = struct.unpack_from("<I", prelude, 4)[0]
+
+            if version >= DXNN_V9_VERSION:
+                header_length = struct.unpack_from("<Q", prelude, 8)[0]
+
+                if header_length > DXNN_MAX_HEADER_SIZE:
+                    return None
+
+                raw_index = model.read(header_length)
+                data_offset = DXNN_PRELUDE_SIZE + header_length
+            else:
+                model.seek(8)
+                raw_index = model.read(DXNN_HEADER_SIZE - 8)
+                data_offset = DXNN_HEADER_SIZE
+
+            decoder = json.JSONDecoder()
+            index = decoder.raw_decode(raw_index.decode("utf-8", "replace"))[0]
+
             data = index["data"]
 
             def section(entry: dict) -> bytes:
-                model.seek(DXNN_HEADER_SIZE + int(entry["offset"]))
+                model.seek(data_offset + int(entry["offset"]))
                 return model.read(int(entry["size"]))
 
             anchor_based = None

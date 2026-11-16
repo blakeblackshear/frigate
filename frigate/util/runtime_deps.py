@@ -26,6 +26,8 @@ import sys
 import tarfile
 import tempfile
 import zipfile
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
@@ -50,6 +52,7 @@ class RuntimeDependencyError(RuntimeError):
 class ArtifactKind(StrEnum):
     wheel = "wheel"
     archive = "archive"
+    deb = "deb"  # a Debian package that carries a wheel
 
 
 class ArchiveDest(StrEnum):
@@ -82,6 +85,10 @@ class Artifact:
     filename: str | None = None
     mappings: tuple[ArchiveMapping, ...] = ()
     machines: tuple[str, ...] = ()
+    # basename glob for the wheel a `deb` carries
+    member: str = ""
+    # sha256 of that wheel, pinning the pip input like a wheel artifact does
+    member_sha256: str = ""
 
     @property
     def name(self) -> str:
@@ -226,6 +233,106 @@ def _stage(path: Path, artifact: Artifact, staging: Path) -> Path:
         raise RuntimeDependencyError(f"{path} changed while being installed")
 
     return staged
+
+
+@contextmanager
+def _deb_contents(path: Path) -> Iterator[tarfile.TarFile]:
+    """Stream the filesystem tarball inside a Debian package.
+
+    dpkg-deb decompresses data.tar to stdout, so no archive hits the disk.
+    """
+    stderr = tempfile.TemporaryFile()
+
+    try:
+        process = subprocess.Popen(
+            ["dpkg-deb", "--fsys-tarfile", str(path)],
+            stdout=subprocess.PIPE,
+            stderr=stderr,
+        )
+    except FileNotFoundError as err:
+        stderr.close()
+        raise RuntimeDependencyError(
+            f"dpkg-deb is required to unpack {path.name}; the Frigate image "
+            "ships it as part of dpkg"
+        ) from err
+
+    try:
+        assert process.stdout is not None
+        with tarfile.open(fileobj=process.stdout, mode="r|") as archive:
+            yield archive
+    finally:
+        if process.stdout is not None:
+            process.stdout.close()
+
+        returncode = process.wait()
+        stderr.seek(0)
+        message = stderr.read().decode("utf-8", "replace").strip()
+        stderr.close()
+
+    if returncode != 0:
+        raise RuntimeDependencyError(
+            f"Unable to unpack {path.name}: {message[-2000:] or 'dpkg-deb failed'}"
+        )
+
+
+def _install_deb(path: Path, artifact: Artifact, staging: Path) -> list[str]:
+    """Install a Debian package's mapped files and the wheel it carries.
+
+    The rest of the package belongs on the host, not in the image. The
+    package itself stays in the cache so later reinstalls need no download.
+    """
+    machine = platform.machine()
+    mappings = [m for m in artifact.mappings if not m.machines or machine in m.machines]
+    written: list[str] = []
+    wheel: Path | None = None
+
+    with _deb_contents(path) as archive:
+        for member in archive:
+            if not (member.isfile() or member.issym()):
+                continue
+
+            for mapping, relative in _mappings_for(member.name, mappings):
+                dest = _safe_dest(_dest_root(mapping), relative)
+
+                if member.issym():
+                    _write_symlink(dest, member.linkname)
+                else:
+                    source = archive.extractfile(member)
+                    assert source is not None
+                    with source:
+                        _write_member(dest, source, member.mode)
+
+                written.append(str(dest))
+
+            if not artifact.member or wheel is not None or not member.isfile():
+                continue
+
+            name = os.path.basename(member.name)
+
+            if not fnmatch.fnmatch(name, artifact.member):
+                continue
+
+            source = archive.extractfile(member)
+            assert source is not None
+            wheel = staging / name
+
+            with source, open(wheel, "wb") as f:
+                shutil.copyfileobj(source, f)
+
+    if artifact.member and wheel is None:
+        raise RuntimeDependencyError(
+            f"{path.name} does not contain a file matching {artifact.member}"
+        )
+
+    if wheel is not None:
+        if artifact.member_sha256 and sha256_of(wheel) != artifact.member_sha256:
+            raise RuntimeDependencyError(
+                f"Checksum mismatch for the wheel carried by {path.name}"
+            )
+
+        _install_wheel(wheel)
+
+    return written
 
 
 def _install_wheel(path: Path) -> None:
@@ -518,13 +625,16 @@ def ensure_installed(manifest: RuntimeManifest) -> None:
         _remove_stamped_files(stamp)
         staging = Path(tempfile.mkdtemp(prefix=f"frigate-{manifest.name}-"))
         files: list[str] = []
+        artifacts = _artifacts_for_machine(manifest)
 
         try:
-            for artifact in _artifacts_for_machine(manifest):
+            for artifact in artifacts:
                 staged = _stage(_fetch(artifact, cache), artifact, staging)
 
                 if artifact.kind is ArtifactKind.wheel:
                     _install_wheel(staged)
+                elif artifact.kind is ArtifactKind.deb:
+                    files.extend(_install_deb(staged, artifact, staging))
                 else:
                     files.extend(_extract_archive(staged, artifact))
         except (OSError, tarfile.TarError, zipfile.BadZipFile) as err:

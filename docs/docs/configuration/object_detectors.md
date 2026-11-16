@@ -682,7 +682,7 @@ To run a model on a DEEPX NPU, list a `deepx` device on that model.
 
 :::info
 
-The DX-RT Python bindings are not part of the Frigate image. They are downloaded and installed into `/config/.local` the first time a DEEPX device is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the files yourself.
+The DX-RT Python bindings are not part of the Frigate image. The `libdxrt-bin` package is downloaded and its `dx_engine` wheel installed into `/config/.local` the first time a DEEPX device is configured, verified against pinned checksums, and updated automatically when a Frigate release pins a new version. The package stays in the runtime cache, so a container recreated without internet access reinstalls from it. If the container has no internet access, see [Detector runtimes](/frigate/network_requirements#detector-runtimes) for how to provide the file yourself.
 
 :::
 
@@ -708,7 +708,7 @@ models:
     height: 640
 ```
 
-For PPU models, use a `.dxnn` compiled with DX-COM 2.4.0 or later. Frigate reads the PPU head layout the compiler writes into the file and refuses to load a PPU model without it.
+For PPU models, use a `.dxnn` compiled with DX-COM 2.4.0 or later. Frigate reads the PPU head layout the compiler writes into the file and refuses to load a PPU model without it. Both the older padded header and the v9 format DX-COM 2.5.0 writes are read, so models from either compiler work with DX-RT 3.5.0.
 
 `model_type` must be set to `yolo-generic` or `yolox` to match the model; `yolo-generic` is the recommended default unless the model is a raw YOLOX export. Frigate defaults it to `ssd`, which this detector does not support, so the detector refuses to start on a model that leaves it unset.
 
