@@ -1050,7 +1050,11 @@
             "label": "Původní stav oznámení",
             "description": "Udává, zda byla oznámení povolena v původní statické konfiguraci."
         },
-        "description": "Nastavení povolení a řízení oznámení pro všechny kamery; lze přepsat pro jednotlivé kamery."
+        "description": "Nastavení povolení a řízení oznámení pro všechny kamery; lze přepsat pro jednotlivé kamery.",
+        "ttl": {
+            "label": "Doba platnosti oznámení (TTL)",
+            "description": "Způsob, jakým služba push oznámení naloží s oznámením odeslaným během aktivní výstrahy, pokud vaše zařízení není dostupné. Režim Okamžité doručení oznámení ihned doručí, nebo je zahodí. Režim Spolehlivé doručení opakuje pokusy o doručení po dobu až 30 sekund. Oznámení o ukončení výstrahy se vždy uchovává po dobu až jedné hodiny."
+        }
     },
     "onvif": {
         "label": "ONVIF",
@@ -1177,7 +1181,7 @@
         },
         "cookie_secure": {
             "label": "Příznak Secure u cookie",
-            "description": "Nastavit příznak Secure u ověřovací cookie; při použití TLS by měl být zapnutý."
+            "description": "Vždy nastavit příznak Secure u ověřovací cookie. Frigate jej nastavuje automaticky, pokud poskytuje připojení přes TLS; tuto volbu zapněte, pokud TLS ukončuje reverzní proxy před Frigate. Proxy připojená k portu TLS musí prohlížečům zpřístupňovat Frigate přes HTTPS."
         },
         "session_length": {
             "label": "Délka relace",
@@ -1310,6 +1314,10 @@
         "version_check": {
             "label": "Kontrola verze",
             "description": "Povolit odchozí kontrolu dostupnosti novější verze Frigate."
+        },
+        "analytics": {
+            "label": "Sdílet anonymní statistiky používání",
+            "description": "Jednou denně odesílat anonymní zprávu o používání, která pomůže správcům projektu Frigate rozhodnout, co podporovat. Dokud tuto volbu nezapnete, nic se neodesílá."
         }
     },
     "tls": {

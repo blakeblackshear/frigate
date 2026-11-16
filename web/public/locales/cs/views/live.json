@@ -176,6 +176,9 @@
         "checking": "Ověřování dostupnosti WebRTC…",
         "notConfiguredOptional": "Volitelné: živé zobrazení funguje i bez WebRTC. WebRTC je potřeba hlavně pro obousměrnou komunikaci."
       }
+    },
+    "metadata": {
+      "loading": "Získávání metadat streamu…"
     }
   },
   "cameraSettings": {

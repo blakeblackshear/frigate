@@ -60,7 +60,9 @@
         "invalidTimeRange": "Čas konce musí být po čase začátku",
         "searchFailed": "Vyhledávání selhalo: {{message}}",
         "polygonTooSmall": "Polygon musí mít alespoň 3 body",
-        "unknown": "Neznámá chyba"
+        "unknown": "Neznámá chyba",
+        "alreadyRunning": "Vyhledávání pohybu už máte spuštěné. Počkejte na jeho dokončení, nebo je zrušte.",
+        "tooManySearches": "Probíhá příliš mnoho vyhledávání pohybu. Zkuste to znovu, až některé skončí."
     },
     "changePercentage": "Změněno {{percentage}} %",
     "metrics": {

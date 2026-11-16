@@ -82,7 +82,8 @@
     "never": "Nikdy",
     "inProgress": "Zpracovává se",
     "invalidStartTime": "Neplatný čas začátku",
-    "invalidEndTime": "Neplatný čas konce"
+    "invalidEndTime": "Neplatný čas konce",
+    "custom": "Vlastní…"
   },
   "button": {
     "twoWayTalk": "Obousměrná komunikace",
