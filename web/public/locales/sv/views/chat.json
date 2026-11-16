@@ -1,1 +1,88 @@
-{}
+{
+    "documentTitle": "Chatt - Frigate",
+    "title": "Frigate-chatt",
+    "subtitle": "Din AI-assistent för kamerahantering och insikter",
+    "placeholder": "Fråga vad du vill...",
+    "error": "Något gick fel. Försök igen.",
+    "processing": "Bearbetar...",
+    "toolsUsed": "Använt: {{tools}}",
+    "showTools": "Visa verktyg ({{count}})",
+    "hideTools": "Dölj verktyg",
+    "call": "Anrop",
+    "result": "Resultat",
+    "arguments": "Argument:",
+    "response": "Svar:",
+    "attachment_chip_label": "{{label}} på {{camera}}",
+    "attachment_chip_remove": "Ta bort bilaga",
+    "open_in_explore": "Öppna i Utforska",
+    "attach_event_aria": "Bifoga händelse {{eventId}}",
+    "attachment_picker_paste_label": "Eller klistra in händelse-ID",
+    "attachment_picker_attach": "Bifoga",
+    "attachment_picker_placeholder": "Bifoga en händelse",
+    "quick_reply_find_similar": "Hitta liknande observationer",
+    "quick_reply_tell_me_more": "Berätta mer om detta",
+    "quick_reply_when_else": "När sågs den annars?",
+    "quick_reply_find_similar_text": "Hitta liknande observationer som denna.",
+    "quick_reply_tell_me_more_text": "Berätta mer om denna.",
+    "quick_reply_when_else_text": "När sågs denna annars?",
+    "anchor": "Referens",
+    "similarity_score": "Likhet",
+    "no_similar_objects_found": "Inga liknande objekt hittades.",
+    "semantic_search_required": "Semantisk sökning måste vara aktiverad för att hitta liknande objekt.",
+    "send": "Skicka",
+    "suggested_requests": "Prova att fråga:",
+    "starting_requests": {
+        "show_recent_events": "Visa senaste händelser",
+        "show_camera_status": "Visa kamerastatus",
+        "recap": "Vad hände medan jag var borta?",
+        "watch_camera": "Övervaka aktivitet på en kamera"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Visa mig händelserna från den senaste timmen",
+        "show_camera_status": "Vilken är den aktuella statusen för mina kameror?",
+        "recap": "Vad hände medan jag var borta?",
+        "watch_camera": "Övervaka ytterdörren och meddela mig om någon dyker upp"
+    },
+    "new_chat": "Ny chatt",
+    "settings": {
+        "title": "Chattinställningar",
+        "show_stats": {
+            "title": "Visa statistik",
+            "desc": "Visa genereringshastighet och kontextstorlek för chattsvar.",
+            "while_generating": "Under generering",
+            "always": "Alltid"
+        },
+        "auto_scroll": {
+            "title": "Automatisk rullning",
+            "desc": "Följ nya meddelanden när de kommer."
+        },
+        "always_allow": {
+            "title": "Alltid tillåtna åtgärder",
+            "desc": "Åtgärder som assistenten får utföra utan att fråga först.",
+            "none": "Inga",
+            "reset": "Återställ"
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} token",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Resonerar…",
+        "show": "Visa resonemang",
+        "hide": "Dölj resonemang"
+    },
+    "thinking": {
+        "toggle": "Växla tänkande"
+    },
+    "approval": {
+        "title": "Godkänn {{tool}}?",
+        "desc": "Den här åtgärden ändrar något i Frigate. Granska detaljerna innan du godkänner den.",
+        "approve": "Godkänn",
+        "always_allow": "Tillåt alltid",
+        "reject": "Avvisa",
+        "approved": "Godkänd",
+        "rejected": "Avvisad",
+        "placeholder": "Godkänn eller avvisa den väntande åtgärden för att fortsätta"
+    }
+}

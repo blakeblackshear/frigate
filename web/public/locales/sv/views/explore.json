@@ -111,7 +111,8 @@
     "attributes": "Klassificeringsattribut",
     "title": {
       "label": "Titel"
-    }
+    },
+    "scoreInfo": "Poänginformation"
   },
   "exploreMore": "Utforska fler {{label}}-objekt",
   "type": {
@@ -170,12 +171,22 @@
     "downloadCleanSnapshot": {
       "label": "Ladda ned ren ögonblicksbild",
       "aria": "Ladda ned ren ögonblicksbild"
+    },
+    "debugReplay": {
+      "label": "Felsökningsuppspelning",
+      "aria": "Visa det här spårade objektet i vyn för felsökningsuppspelning"
+    },
+    "more": {
+      "aria": "Fler"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Bekräfta radering",
       "desc": "Om du tar bort det här spårade objektet tas ögonblicksbilden, alla sparade inbäddningar och alla tillhörande spårningsdetaljer bort. Inspelat material med det här spårade objektet i historikvyn tas <em>inte</em> bort.<br /><br />Är du säker på att du vill fortsätta?"
+    },
+    "toast": {
+      "error": "Fel vid borttagning av det här spårade objektet: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Inga spårade objekt hittades",
@@ -224,7 +235,10 @@
         "zones": "Zoner",
         "ratio": "Förhållande",
         "area": "Area",
-        "score": "Poäng"
+        "score": "Poäng",
+        "computedScore": "Beräknad poäng",
+        "topScore": "Högsta poäng",
+        "toggleAdvancedScores": "Visa eller dölj avancerade poäng"
       }
     },
     "annotationSettings": {

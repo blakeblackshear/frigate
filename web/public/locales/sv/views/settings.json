@@ -11,7 +11,11 @@
     "object": "Felsökning - Frigate",
     "cameraManagement": "Hantera kameror - Frigate",
     "cameraReview": "Kameragranskningsinställningar - Frigate",
-    "profiles": "Profiler - Frigate"
+    "profiles": "Profiler - Frigate",
+    "globalConfig": "Global konfiguration - Frigate",
+    "cameraConfig": "Kamerakonfiguration - Frigate",
+    "maintenance": "Underhåll - Frigate",
+    "detectorsAndModel": "Detektorer och modell - Frigate"
   },
   "general": {
     "title": "Inställningar för användargränssnittet",
@@ -32,17 +36,24 @@
       "liveFallbackTimeout": {
         "label": "Reservtimeout för livespelare",
         "desc": "När en kameras högkvalitativa liveström inte är tillgänglig, återgå till lågbandbreddsläge efter så här många sekunder. Standard: 3."
+      },
+      "naturalAspectLayout": {
+        "label": "Använd naturliga bildförhållanden",
+        "desc": "På kameragruppers instrumentpaneler för livevyn anpassas varje ruta efter kamerans eget naturliga bildförhållande. När funktionen är inaktiverad fästs kameror vid en standardform för breda, liggande eller höga rutor.",
+        "descNote": "Om du aktiverar eller inaktiverar den här inställningen rensas den sparade layouten för alla kameragruppers liveinstrumentpaneler. Manuell omkonfigurering krävs."
       }
     },
     "storedLayouts": {
       "title": "Sparade layouter",
       "desc": "Du kan dra i kamerorna i en grupp för att ändra deras storlek och placering. Layouten lagras lokalt i webbläsaren.",
-      "clearAll": "Rensa alla layouter"
+      "clearAll": "Rensa alla layouter",
+      "clearConfirm": "Detta rensar den sparade layouten för varje kameragrupp i den här webbläsaren. Det går inte att ångra."
     },
     "cameraGroupStreaming": {
       "desc": "Strömningsinställningarna för varje kameragrupp lagras lokalt i webbläsaren.",
       "clearAll": "Rensa alla strömningsinställningar",
-      "title": "Strömningsinställningar för kameragrupper"
+      "title": "Strömningsinställningar för kameragrupper",
+      "clearConfirm": "Detta rensar strömningsinställningarna för varje kameragrupp i den här webbläsaren. Det går inte att ångra."
     },
     "recordingsViewer": {
       "title": "Inspelningsvisare",
@@ -63,11 +74,48 @@
     "toast": {
       "success": {
         "clearStoredLayout": "Den lagrade layouten för {{cameraName}} har rensats",
-        "clearStreamingSettings": "Strömningsinställningarna för alla kameragrupper har rensats."
+        "clearStreamingSettings": "Strömningsinställningarna för alla kameragrupper har rensats.",
+        "exportUiSettings": "Inställningarna har exporterats",
+        "importUiSettings": "Inställningarna har importerats"
       },
       "error": {
         "clearStoredLayoutFailed": "Det gick inte att rensa den lagrade layouten: {{errorMessage}}",
-        "clearStreamingSettingsFailed": "Det gick inte att rensa strömningsinställningarna: {{errorMessage}}"
+        "clearStreamingSettingsFailed": "Det gick inte att rensa strömningsinställningarna: {{errorMessage}}",
+        "exportUiSettingsFailed": "Det gick inte att exportera inställningarna",
+        "importNothingToApply": "Det gick inte att importera inställningarna: filen innehåller inga inställningar",
+        "importInvalidJson": "Det gick inte att importera inställningarna: filen är inte giltig JSON",
+        "importWrongType": "Det gick inte att importera inställningarna: filen är inte en export av Frigate-inställningar",
+        "importUnsupportedVersion": "Det gick inte att importera inställningarna: filen kräver en nyare version av Frigate",
+        "importInvalidSchema": "Det gick inte att importera inställningarna: filen är felaktigt formaterad",
+        "importUiSettingsFailed": "Det gick inte att importera inställningarna"
+      }
+    },
+    "backupRestore": {
+      "title": "Säkerhetskopiering och återställning",
+      "transfer": {
+        "label": "Inställningsfil för enheten",
+        "desc": "Kameragruppslayouter, strömningsinställningar och gränssnittsinställningar lagras i webbläsaren. Exportera dem till en fil för att säkerhetskopiera dem eller flytta dem till en annan enhet.",
+        "export": "Exportera inställningar",
+        "import": "Importera inställningar"
+      },
+      "importDialog": {
+        "title": "Importera inställningar",
+        "desc": "Välj vad som ska tillämpas från den här filen. Frigate läses in på nytt när importen är klar.",
+        "exportedFrom": "Exporterades {{date}} från Frigate-konfiguration version {{version}}",
+        "confirm": "Importera",
+        "layoutsPhone": "Kameragruppslayouter importeras inte på telefoner, som alltid använder standardrutnätet.",
+        "layoutsModeOn": "Dessa layouter använder rutor med kamerans bildförhållande, så importen aktiverar även ”Använd naturliga bildförhållanden”.",
+        "layoutsModeOff": "Dessa layouter använder standardstorlek på rutor, så importen inaktiverar även ”Använd naturliga bildförhållanden”.",
+        "layouts_one": "Kameragruppslayout ({{count}} grupp)",
+        "layouts_other": "Kameragruppslayouter ({{count}} grupper)",
+        "streaming_one": "Strömningsinställningar ({{count}} kamera)",
+        "streaming_other": "Strömningsinställningar ({{count}} kameror)",
+        "preferences_one": "Gränssnittsinställningar ({{count}} inställning)",
+        "preferences_other": "Gränssnittsinställningar ({{count}} inställningar)",
+        "unknownGroups_one": "Kameragruppen {{groups}} finns inte på den här servern. Dess inställningar sparas men används inte.",
+        "unknownGroups_other": "Kameragrupperna {{groups}} finns inte på den här servern. Deras inställningar sparas men används inte.",
+        "unknownCameras_one": "Kameran {{cameras}} finns inte på den här servern. Dess strömningsinställningar ignoreras.",
+        "unknownCameras_other": "Kamerorna {{cameras}} finns inte på den här servern. Deras strömningsinställningar ignoreras."
       }
     }
   },
@@ -161,7 +209,51 @@
     "cameraOnvif": "ONVIF",
     "cameraTimestampStyle": "Tidsstämpelstil",
     "systemEnvironmentVariables": "Miljövariabler",
-    "systemTelemetry": "Telemetri"
+    "systemTelemetry": "Telemetri",
+    "general": "Allmänt",
+    "globalConfig": "Global konfiguration",
+    "system": "System",
+    "integrations": "Integreringar",
+    "globalDetect": "Objektdetektering",
+    "globalRecording": "Inspelning",
+    "globalSnapshots": "Ögonblicksbilder",
+    "globalFfmpeg": "FFmpeg",
+    "globalMotion": "Rörelsedetektering",
+    "globalObjects": "Objekt",
+    "globalReview": "Granskning",
+    "globalAudioEvents": "Ljuddetektering",
+    "globalLivePlayback": "Liveuppspelning",
+    "globalTimestampStyle": "Tidsstämpelsformat",
+    "systemDatabase": "Databas",
+    "systemTls": "TLS",
+    "systemAuthentication": "Autentisering",
+    "systemNetworking": "Nätverk",
+    "systemProxy": "Proxy",
+    "systemUi": "Gränssnitt",
+    "systemLogging": "Loggning",
+    "systemBirdseye": "Birdseye",
+    "systemFfmpeg": "FFmpeg",
+    "systemMqtt": "MQTT",
+    "integrationSemanticSearch": "Semantisk sökning",
+    "integrationGenerativeAi": "Generativ AI",
+    "integrationFaceRecognition": "Ansiktsigenkänning",
+    "integrationLpr": "Registreringsskyltigenkänning",
+    "integrationObjectClassification": "Objektklassificering",
+    "integrationAudioTranscription": "Ljudtranskribering",
+    "cameraDetect": "Objektdetektering",
+    "cameraFfmpeg": "Strömmar (FFmpeg)",
+    "cameraSnapshots": "Ögonblicksbilder",
+    "cameraMotion": "Rörelsedetektering",
+    "cameraConfigReview": "Granskning",
+    "cameraAudioEvents": "Ljuddetektering",
+    "cameraLivePlayback": "Liveuppspelning",
+    "cameraLpr": "Registreringsskyltigenkänning",
+    "cameraMqtt": "Kamera-MQTT",
+    "systemGo2rtcStreams": "go2rtc-strömmar",
+    "mediaSync": "Mediesynkronisering",
+    "regionGrid": "Regionsrutnät",
+    "uiSettings": "Gränssnittsinställningar",
+    "systemDetectorsAndModel": "Detekteringsmodeller"
   },
   "dialog": {
     "unsavedChanges": {
@@ -237,6 +329,21 @@
           "zone": "zon",
           "motion_mask": "rörelsemask",
           "object_mask": "objektmask"
+        },
+        "revertOverride": {
+          "title": "Återställ till baskonfiguration",
+          "desc": "Detta tar bort profilåsidosättningen för {{type}} <em>{{name}}</em> och återställer baskonfigurationen."
+        }
+      },
+      "id": {
+        "error": {
+          "mustNotBeEmpty": "ID får inte vara tomt.",
+          "alreadyExists": "Det finns redan en mask med detta ID för den här kameran."
+        }
+      },
+      "name": {
+        "error": {
+          "mustNotBeEmpty": "Namn får inte vara tomt."
         }
       }
     },
@@ -290,6 +397,10 @@
       },
       "toast": {
         "success": "Zonen ({{zoneName}}) har sparats."
+      },
+      "enabled": {
+        "title": "Aktiverad",
+        "description": "Anger om zonen är aktiv och aktiverad i konfigurationsfilen. Om den är inaktiverad kan den inte aktiveras via MQTT. Inaktiverade zoner ignoreras vid körning."
       }
     },
     "motionMasks": {
@@ -316,6 +427,12 @@
           "title": "{{polygonName}} har sparats.",
           "noName": "Rörelsemasken har sparats."
         }
+      },
+      "defaultName": "Rörelsemask {{number}}",
+      "name": {
+        "title": "Namn",
+        "description": "Ett valfritt lättbegripligt namn på den här rörelsemasken.",
+        "placeholder": "Ange ett namn..."
       }
     },
     "objectMasks": {
@@ -341,8 +458,23 @@
           "title": "{{polygonName}} har sparats.",
           "noName": "Objektmasken har sparats."
         }
+      },
+      "name": {
+        "title": "Namn",
+        "description": "Ett valfritt lättbegripligt namn på den här objektmasken.",
+        "placeholder": "Ange ett namn..."
       }
-    }
+    },
+    "profileBase": "(bas)",
+    "profileOverride": "(åsidosättning)",
+    "disabledInConfig": "Objektet är inaktiverat i konfigurationsfilen",
+    "masks": {
+      "enabled": {
+        "title": "Aktiverad",
+        "description": "Anger om masken är aktiverad i konfigurationsfilen. Om den är inaktiverad kan den inte aktiveras via MQTT. Inaktiverade masker ignoreras vid körning."
+      }
+    },
+    "addDisabledProfile": "Lägg först till i baskonfigurationen och åsidosätt sedan i profilen"
   },
   "motionDetectionTuner": {
     "title": "Rörelsejustering",
@@ -430,7 +562,8 @@
     "title": "Användare",
     "management": {
       "title": "Användarhantering",
-      "desc": "Hantera användarkonton för denna Frigate-instans."
+      "desc": "Hantera användarkonton för denna Frigate-instans.",
+      "authDisabled": "Inbyggd autentisering är inaktiverad. Dessa konton används bara för att logga in när den aktiveras."
     },
     "addUser": "Lägg till användare",
     "updatePassword": "Uppdatera lösenord",
@@ -498,7 +631,8 @@
         "title": "Skapa ny användare",
         "desc": "Lägg till ett nytt användarkonto och ange en roll för åtkomst till områden i Frigate-gränssnittet.",
         "usernameOnlyInclude": "Användarnamnet får endast innehålla bokstäver, siffror, . eller _",
-        "confirmPassword": "Bekräfta lösenordet"
+        "confirmPassword": "Bekräfta lösenordet",
+        "usernameOnlyDots": "Användarnamnet kan inte bara innehålla punkter"
       },
       "deleteUser": {
         "title": "Ta bort användare",
@@ -556,7 +690,8 @@
     "sendTestNotification": "Skicka testavisering",
     "active": "Aviseringar är aktiva",
     "notificationUnavailable": {
-      "desc": "Web Push-aviseringar kräver en säker anslutning (<code>https://…</code>). Det är en begränsning i webbläsaren. Använd en säker anslutning till Frigate för att aktivera aviseringar."
+      "desc": "Web push-aviseringar kräver ett säkert sammanhang (https://…). Detta begränsas av webbläsaren. Använd Frigate via en säker anslutning för att använda aviseringar.",
+      "descPwa": "På iOS är webbpushnotiser bara tillgängliga när Frigate är installerat på hemskärmen. Öppna delningsmenyn, välj Lägg till på hemskärmen och öppna sedan Frigate från den nya ikonen för att registrera den här enheten för notiser."
     },
     "deviceSpecific": "Enhetsspecifika inställningar",
     "registerDevice": "Registrera den här enheten",
@@ -571,7 +706,8 @@
       "1hour": "Pausa i 1 timme",
       "12hours": "Pausa i 12 timmar",
       "24hours": "Pausa i 24 timmar",
-      "untilRestart": "Pausa tills omstart"
+      "untilRestart": "Pausa tills omstart",
+      "custom": "Pausa till..."
     },
     "cancelSuspension": "Avsluta pausen",
     "toast": {
@@ -582,6 +718,12 @@
       "error": {
         "registerFailed": "Det gick inte att spara aviseringsregistreringen."
       }
+    },
+    "customSuspension": {
+      "title": "Anpassad paustid",
+      "description": "Pausa notiser för den här kameran fram till den valda tiden.",
+      "untilLabel": "Pausa till",
+      "invalidTime": "Välj en tid i framtiden."
     }
   },
   "roles": {
@@ -592,7 +734,9 @@
       "noRoles": "Inga anpassade roller hittades.",
       "editCameras": "Redigera kameror",
       "deleteRole": "Ta bort roll",
-      "actions": "Åtgärder"
+      "actions": "Åtgärder",
+      "cameraCount_one": "{{count}} kamera",
+      "cameraCount_other": "{{count}} kameror"
     },
     "toast": {
       "success": {
@@ -650,7 +794,14 @@
     "apiKey": {
       "desc": "Frigate+ API-nyckeln möjliggör integration med Frigate+-tjänsten.",
       "plusLink": "Läs mer om Frigate+",
-      "title": "Frigate+ API-nyckel"
+      "title": "Frigate+ API-nyckel",
+      "formatValid": "Frigate+-API-nyckeln har identifierats och matchar det förväntade formatet",
+      "formatInvalid": "Frigate+-API-nyckeln har inte identifierats eller matchar inte det förväntade formatet",
+      "validate": "Validera med Frigate+",
+      "validating": "Validerar…",
+      "serverValid": "Frigate+ godkände den här API-nyckeln",
+      "serverInvalid": "Frigate+ avvisade den här API-nyckeln",
+      "serverUnreachable": "Det går inte att nå Frigate+ för att validera den här API-nyckeln"
     },
     "snapshotConfig": {
       "title": "Konfiguration av ögonblicksbilder",
@@ -676,14 +827,31 @@
       "error": "Misslyckades med att ladda modellinformationen",
       "availableModels": "Tillgängliga modeller",
       "loadingAvailableModels": "Laddar tillgängliga modeller…",
-      "modelSelect": "Dina tillgängliga modeller på Frigate+ kan väljas här. Observera att endast modeller som är kompatibla med din nuvarande detektorkonfiguration kan väljas."
+      "modelSelect": "Dina tillgängliga modeller på Frigate+ kan väljas här. Observera att endast modeller som är kompatibla med din nuvarande detektorkonfiguration kan väljas.",
+      "noModelLoaded": "Ingen Frigate+-modell är inläst just nu.",
+      "selectModel": "Välj en modell",
+      "noModelsAvailable": "Inga modeller är tillgängliga",
+      "filter": {
+        "ariaLabel": "Filtrera modeller efter typ",
+        "baseModels": "Basmodeller",
+        "fineTunedModels": "Finjusterade modeller"
+      },
+      "showIncompatible": "Visa inkompatibla modeller"
     },
     "unsavedChanges": "Osparade ändringar av inställningar för Frigate+",
     "restart_required": "Omstart krävs eftersom Frigate+-modellen har ändrats",
     "toast": {
       "success": "Inställningarna för Frigate+ har sparats. Starta om Frigate för att tillämpa ändringarna.",
       "error": "Kunde inte spara konfigurationsändringarna: {{errorMessage}}"
-    }
+    },
+    "description": "Frigate+ är en prenumerationstjänst som ger åtkomst till ytterligare funktioner för din Frigate-instans, bland annat möjligheten att använda egna objektdetekteringsmodeller som tränats på dina egna data. Du kan hantera inställningarna för dina Frigate+-modeller här.",
+    "cardTitles": {
+      "api": "API",
+      "currentModel": "Aktuell modell",
+      "otherModels": "Övriga modeller",
+      "configuration": "Konfiguration"
+    },
+    "changeInDetectorsAndModel": "Byt modell"
   },
   "triggers": {
     "documentTitle": "Utlösare",
@@ -851,7 +1019,8 @@
         "nameLength": "Kameranamnet måste vara högst 64 tecken långt",
         "invalidCharacters": "Kameranamnet innehåller ogiltiga tecken",
         "nameExists": "Kameranamnet finns redan",
-        "customUrlRtspRequired": "Anpassade URL:er måste börja med <code>rtsp://</code>. Manuell konfiguration krävs för kameraströmmar som inte använder RTSP."
+        "customUrlRtspRequired": "Anpassade URL:er måste börja med <code>rtsp://</code>. Manuell konfiguration krävs för kameraströmmar som inte använder RTSP.",
+        "onvifPortInvalid": "ONVIF-porten måste vara ett heltal från 1 till 65535"
       },
       "connectionSettings": "Anslutningsinställningar",
       "detectionMethod": "Strömdetekteringsmetod",
@@ -904,7 +1073,7 @@
       }
     },
     "step3": {
-      "description": "Konfigurera strömningsroller och lägg till ytterligare strömmar för din kamera.",
+      "description": "Konfigurera funktioner, strömningsroller och lägg till ytterligare strömmar för kameran.",
       "streamTitle": "Ström {{number}}",
       "roles": "Roller",
       "streamsTitle": "Kameraströmmar",
@@ -938,11 +1107,26 @@
         "title": "Strömroller",
         "detect": "Kamerans huvudström för objektdetektering.",
         "record": "Sparar segment av videoströmmen enligt konfigurationsinställningarna.",
-        "audio": "Ström för ljudbaserad detektering."
+        "audio": "Ström för ljudbaserad detektering.",
+        "record_sub": "Inspelningar med lägre kvalitet för adaptiv uppspelning och längre lagringstid, vanligtvis kamerans underström."
       },
       "featuresPopover": {
         "title": "Strömfunktioner",
         "description": "Använd återströmning via go2rtc för att minska antalet anslutningar till kameran."
+      },
+      "appleCompatibility": {
+        "title": "Förbättra uppspelningen på Apple-enheter",
+        "description": "Aktivera detta om du tittar på inspelningar i Safari eller på en iPhone, iPad eller Mac."
+      },
+      "ptz": {
+        "title": "Aktivera PTZ-kontroller",
+        "detectedNote": "PTZ-stöd har identifierats via ONVIF. Om detta är en PTZ-kamera kan du med detta alternativ styra kamerans panorering, lutning och zoomning från gränssnittet.",
+        "connectionDetails": "ONVIF-anslutningsinformation",
+        "host": "ONVIF-värd",
+        "port": "ONVIF-port",
+        "username": "ONVIF-användarnamn",
+        "password": "ONVIF-lösenord",
+        "hostRequiredWarning": "En ONVIF-värd och -port krävs när PTZ-kontroller är aktiverade."
       }
     },
     "step4": {
@@ -990,7 +1174,8 @@
         },
         "hikvision": {
           "substreamWarning": "Delström 1 är låst till en låg upplösning. Många Hikvision-kameror stöder ytterligare delströmmar som måste aktiveras i kamerans inställningar. Det rekommenderas att kontrollera och använda dessa strömmar om de är tillgängliga."
-        }
+        },
+        "resolutionUnknown": "Det gick inte att avsöka upplösningen för den här strömmen. Ange detekteringsupplösningen manuellt i Inställningar eller i konfigurationen."
       }
     }
   },
@@ -1001,7 +1186,34 @@
     "selectCamera": "Välj en kamera",
     "backToSettings": "Tillbaka till kamerainställningar",
     "streams": {
-      "title": "Aktivera eller inaktivera kameror"
+      "title": "Aktivera eller inaktivera kameror",
+      "enableSuccess": "{{cameraName}} har aktiverats. Starta om Frigate för att tillämpa ändringen.",
+      "reorderHandle": "Dra för att ändra ordning",
+      "saving": "Sparar…",
+      "saved": "Sparad",
+      "label": "Kamerastatus",
+      "description": "Ange driftläget för varje kamera.<br /><br /><strong>På</strong>: strömmar behandlas normalt.<br /><strong>Av</strong>: behandlingen pausas tillfälligt. Det kvarstår inte efter omstart av Frigate.<br /><strong>Inaktiverad</strong>: behandlingen stoppas och ändringen sparas i konfigurationen. Omstart krävs för att återaktivera en inaktiverad kamera.<br /><br /><em>Obs! Inaktivering påverkar inte återströmningar från go2rtc.</em><br /><br />Dra handtaget för att ändra ordningen på aktiva kameror så som de visas i gränssnittet, inklusive Live-panelen och kameraväljarna.",
+      "disabledSubheading": "Inaktiverad i konfigurationen",
+      "status": {
+        "on": "På",
+        "off": "Av",
+        "disabled": "Inaktiverad"
+      },
+      "disableSuccess": "{{cameraName}} har inaktiverats och sparats i konfigurationen.",
+      "details": {
+        "webuiUrlInvalid": "Måste vara en giltig URL (t.ex. https://example.com).",
+        "dashboardLabel": "Visa på Live-panelen",
+        "dashboardHelp": "Visa den här kameran på standardpanelen Live med alla kameror. Den är fortfarande tillgänglig överallt annars, inklusive kameragrupper.",
+        "reviewLabel": "Visa i granskning",
+        "reviewHelp": "Visa den här kameran i granskningen, inklusive kamerafiltret, rörelsegranskning och historikvyn.",
+        "edit": "Redigera kamerainformation",
+        "title": "Redigera kamerainformation",
+        "description": "Uppdatera visningsnamnet, den externa URL:en och synligheten som används för den här kameran i Frigates gränssnitt.",
+        "friendlyNameLabel": "Visningsnamn",
+        "friendlyNameHelp": "Användarvänligt namn som visas för den här kameran i Frigates gränssnitt. Lämna tomt för att använda kamera-ID:t.",
+        "webuiUrlLabel": "URL till kamerans webbgränssnitt",
+        "webuiUrlHelp": "URL som öppnar kamerans webbgränssnitt direkt från felsökningsvyn. Lämna tomt för att inaktivera länken."
+      }
     },
     "cameraConfig": {
       "add": "Lägg till kamera",
@@ -1031,7 +1243,121 @@
       "toast": {
         "success": "Kamera {{cameraName}} sparades"
       }
-    }
+    },
+    "profiles": {
+      "inherit": "Ärv",
+      "title": "Profilåsidosättningar för kamera",
+      "selectLabel": "Välj profil",
+      "description": "Konfigurera vilka kameror som slås på eller av när en profil aktiveras. Kameror som är inställda på \"Ärv\" behåller sitt standardläge.",
+      "on": "På",
+      "off": "Av"
+    },
+    "deleteCamera": "Ta bort kamera",
+    "deleteCameraDialog": {
+      "title": "Ta bort kamera",
+      "description": "Om en kamera tas bort raderas alla inspelningar, spårade objekt och konfigurationen för kameran permanent. Eventuella go2rtc-strömmar som är kopplade till kameran kan fortfarande behöva tas bort manuellt.",
+      "selectPlaceholder": "Välj kamera…",
+      "confirmTitle": "Är du säker?",
+      "confirmWarning": "Det går inte att ångra borttagningen av <strong>{{cameraName}}</strong>.",
+      "deleteExports": "Ta även bort exporter för den här kameran",
+      "confirmButton": "Ta bort permanent",
+      "success": "Kameran {{cameraName}} har tagits bort",
+      "error": "Det gick inte att ta bort kameran {{cameraName}}"
+    },
+    "cameraType": {
+      "title": "Kameratyp",
+      "label": "Kameratyp",
+      "description": "Ange typen för varje kamera. Dedikerade LPR-kameror är kameror för ett enda ändamål med kraftig optisk zoom för att fånga registreringsskyltar på avlägsna fordon. De flesta kameror bör använda den normala kameratypen, om kameran inte är avsedd särskilt för LPR och har en snävt fokuserad vy över registreringsskyltar.",
+      "normal": "Normal",
+      "dedicatedLpr": "Dedikerad LPR",
+      "saveSuccess": "Kameratypen för {{cameraName}} har uppdaterats. Starta om Frigate för att tillämpa ändringarna."
+    },
+    "clone": {
+      "target": {
+        "newStreamsForced": "Strömmar kopieras alltid för en ny kamera.",
+        "existingCamerasRadio": "Befintliga kameror",
+        "allCameras": "Alla kameror",
+        "existingPlaceholder": "Välj minst en kamera",
+        "existingDisabled": "Inga andra kameror att kopiera till",
+        "legend": "Mål",
+        "newRadio": "Ny kamera",
+        "newNameLabel": "Kameranamn",
+        "newNamePlaceholder": "t.ex. back_door eller Bakdörr",
+        "newNameRequired": "Kameranamn krävs",
+        "newNameInvalid": "Ogiltigt kameranamn",
+        "newNameCollision": "Det finns redan en kamera med det här namnet"
+      },
+      "categories": {
+        "legend": "Inställningar att klona",
+        "description": "Välj vilka inställningar som ska kopieras från källkameran.",
+        "selectAll": "Välj alla",
+        "selectNone": "Välj inga",
+        "resetDefaults": "Återställ standardvärden",
+        "general": "Allmänt",
+        "spatial": "Rumsliga inställningar",
+        "streams": "Strömmar",
+        "spatialWarningTitle": "Upplösningen matchar inte",
+        "spatialWarning": "Källkamerans detekteringsupplösning ({{srcWidth}}×{{srcHeight}}) skiljer sig från {{cameras}}. Polygoner kanske inte passar för dessa kameror. Dessa standardvärden är avstängda, aktivera dem för att kopiera som de är.",
+        "restartHint": "Omstart krävs",
+        "items": {
+          "record": "Inspelning",
+          "snapshots": "Ögonblicksbilder",
+          "review": "Granskning",
+          "motion": "Rörelsedetektering",
+          "objects": "Objekt",
+          "audio": "Ljuddetektering",
+          "audio_transcription": "Ljudtranskribering",
+          "notifications": "Aviseringar",
+          "genai": "Generativ AI",
+          "type": "Kameratyp (normal / dedikerad LPR)",
+          "profiles": "Profiler",
+          "detect": "Detekteringsdimensioner",
+          "zones": "Zoner",
+          "motion_mask": "Rörelsemasker",
+          "object_masks": "Objektmasker",
+          "ffmpeg_live": "Ström-URL:er och roller",
+          "birdseye": "Birdseye",
+          "mqtt": "MQTT",
+          "timestamp_style": "Tidsstämpelstil",
+          "onvif": "ONVIF",
+          "lpr": "Registreringsskyltigenkänning",
+          "face_recognition": "Ansiktsigenkänning",
+          "semantic_search": "Semantisk sökning"
+        }
+      },
+      "sectionTitle": "Kopiera inställningar",
+      "sectionDescription": "Kopiera konfiguration från en kamera till en annan kamera eller en ny kamera.",
+      "button": "Kopiera inställningar",
+      "title": "Kopiera kamerainställningar",
+      "description": "Kopiera en kameras konfiguration till en eller flera andra kameror eller en ny kamera. Identitet (namn, lättbegripligt namn, URL till webbgränssnitt och visningsordning) kopieras aldrig.",
+      "source": {
+        "label": "Källkamera",
+        "placeholder": "Välj en källkamera",
+        "required": "Välj en källkamera"
+      },
+      "footer": {
+        "changeCount_one": "{{count}} ändring tillämpas",
+        "changeCount_other": "{{count}} ändringar tillämpas",
+        "restartNeeded": "Omstart krävs för vissa ändringar.",
+        "liveOnly": "Alla ändringar tillämpas direkt utan omstart.",
+        "submit": "Kopiera",
+        "submitting": "Kopierar…"
+      },
+      "toast": {
+        "success": "Inställningarna har kopierats till {{cameraName}}",
+        "successWithRestart": "Inställningarna har kopierats till {{cameraName}}. Starta om Frigate för att tillämpa alla ändringar.",
+        "successMulti_one": "Inställningarna har kopierats till {{count}} kamera",
+        "successMulti_other": "Inställningarna har kopierats till {{count}} kameror",
+        "successMultiWithRestart_one": "Inställningarna har kopierats till {{count}} kamera. Starta om Frigate för att tillämpa alla ändringar.",
+        "successMultiWithRestart_other": "Inställningarna har kopierats till {{count}} kameror. Starta om Frigate för att tillämpa alla ändringar.",
+        "partialFailure": "{{successCount}} avsnitt tillämpades, '{{failedSection}}' misslyckades: {{errorMessage}}",
+        "partialFailureMulti": "Kopierat till {{successCount}} kamera/kameror, misslyckades för {{failed}}: {{errorMessage}}",
+        "newCameraPartialFailure": "Kameran {{cameraName}} skapades, men vissa inställningar kunde inte kopieras: {{errorMessage}}",
+        "sourceMissing": "Källkameran finns inte längre",
+        "submitError": "Det gick inte att kopiera kameran: {{errorMessage}}"
+      }
+    },
+    "description": "Lägg till, redigera och ta bort kameror, styr varje kameras status och konfigurera åsidosättningar per profil och kameratyp. Om du vill konfigurera strömmar, detektering, rörelse och andra kameraspecifika inställningar väljer du lämpligt avsnitt under Kamerakonfiguration."
   },
   "cameraReview": {
     "title": "Inställningar för kameragranskning",
@@ -1072,10 +1398,725 @@
   },
   "saveAllPreview": {
     "value": {
-      "reset": "Återställ"
+      "reset": "Återställ",
+      "label": "Nytt värde"
     },
     "field": {
       "label": "Fält"
+    },
+    "title": "Ändringar som ska sparas",
+    "triggerLabel": "Granska väntande ändringar",
+    "empty": "Inga väntande ändringar.",
+    "scope": {
+      "label": "Omfattning",
+      "global": "Global",
+      "camera": "Kamera: {{cameraName}}"
+    },
+    "profile": {
+      "label": "Profil"
     }
+  },
+  "maintenance": {
+    "title": "Underhåll",
+    "sync": {
+      "title": "Mediesynkronisering",
+      "desc": "Frigate rensar mediefiler regelbundet enligt dina lagringsinställningar. Det är normalt att några överblivna filer kan visas medan Frigate körs. Använd den här funktionen för att ta bort överblivna mediefiler från disken som inte längre refereras i databasen.",
+      "started": "Mediesynkronisering startad.",
+      "alreadyRunning": "Ett synkroniseringsjobb körs redan",
+      "error": "Det gick inte att starta synkroniseringen",
+      "currentStatus": "Status",
+      "jobId": "Jobb-ID",
+      "startTime": "Starttid",
+      "endTime": "Sluttid",
+      "statusLabel": "Status",
+      "results": "Resultat",
+      "errorLabel": "Fel",
+      "mediaTypes": "Medietyper",
+      "allMedia": "Alla mediefiler",
+      "dryRun": "Testkörning",
+      "dryRunEnabled": "Inga filer kommer att tas bort",
+      "dryRunDisabled": "Filer kommer att tas bort",
+      "force": "Tvinga",
+      "forceDesc": "Kringgå säkerhetströskeln och slutför synkroniseringen även om fler än 50 % av filerna skulle tas bort.",
+      "running": "Synkronisering körs...",
+      "start": "Starta synkronisering",
+      "inProgress": "Synkronisering pågår. Den här sidan är inaktiverad.",
+      "status": {
+        "queued": "Köad",
+        "running": "Körs",
+        "completed": "Slutförd",
+        "failed": "Misslyckades",
+        "notRunning": "Körs inte"
+      },
+      "resultsFields": {
+        "filesChecked": "Kontrollerade filer",
+        "orphansFound": "Överblivna filer hittades",
+        "orphansDeleted": "Överblivna filer borttagna",
+        "aborted": "Avbruten. Borttagningen skulle överskrida säkerhetströskeln.",
+        "error": "Fel",
+        "totals": "Totalt",
+        "spaceToReclaim": "Utrymme att frigöra",
+        "spaceReclaimed": "Frigjort utrymme"
+      },
+      "event_snapshots": "Ögonblicksbilder av spårade objekt",
+      "event_thumbnails": "Miniatyrbilder av spårade objekt",
+      "review_thumbnails": "Miniatyrbilder för granskning",
+      "previews": "Förhandsvisningar",
+      "exports": "Exporter",
+      "recordings": "Inspelningar",
+      "verbose": "Utförlig",
+      "verboseDesc": "Skriv en fullständig lista med överblivna filer till disken för granskning."
+    },
+    "regionGrid": {
+      "title": "Regionsrutnät",
+      "desc": "Regionsrutnätet är en optimering som lär sig var objekt av olika storlekar vanligtvis visas i varje kameras synfält. Frigate använder dessa data för att effektivt dimensionera detekteringsregioner. Rutnätet byggs automatiskt över tid från data om spårade objekt.",
+      "clear": "Rensa regionsrutnät",
+      "clearConfirmTitle": "Rensa regionsrutnät",
+      "clearConfirmDesc": "Att rensa regionsrutnätet rekommenderas inte om du inte nyligen har ändrat storleken på detektormodellen eller kamerans fysiska position och har problem med objektspårning. Rutnätet byggs automatiskt upp igen över tid när objekt spåras. Frigate måste startas om för att ändringarna ska börja gälla.",
+      "clearSuccess": "Regionsrutnätet har rensats",
+      "clearError": "Det gick inte att rensa regionsrutnätet",
+      "restartRequired": "Omstart krävs för att ändringar av regionsrutnätet ska börja gälla"
+    }
+  },
+  "configForm": {
+    "global": {
+      "title": "Globala inställningar",
+      "description": "Dessa inställningar gäller för alla kameror om de inte åsidosätts i de kameraspecifika inställningarna."
+    },
+    "camera": {
+      "title": "Kamerainställningar",
+      "description": "Dessa inställningar gäller endast den här kameran och åsidosätter de globala inställningarna.",
+      "noCameras": "Inga kameror tillgängliga"
+    },
+    "advancedSettingsCount": "Avancerade inställningar ({{count}})",
+    "advancedCount": "Avancerat ({{count}})",
+    "showAdvanced": "Visa avancerade inställningar",
+    "objectLabels": {
+      "empty": "Inga objektetiketter tillgängliga",
+      "summary": "{{count}} objekttyper valda"
+    },
+    "filters": {
+      "objectFieldLabel": "{{field}} för {{label}}"
+    },
+    "zoneNames": {
+      "summary": "{{count}} valda",
+      "empty": "Inga zoner tillgängliga"
+    },
+    "inputRoles": {
+      "summary": "{{count}} roller valda",
+      "empty": "Inga roller tillgängliga",
+      "options": {
+        "detect": "Detektera",
+        "record": "Spela in",
+        "audio": "Ljud",
+        "record_sub": "Spela in (underström)"
+      },
+      "roleInUse": "Redan tilldelad till en annan ström",
+      "recordSubConflict": "En ström kan inte ha både rollerna record och record_sub"
+    },
+    "review": {
+      "title": "Granskningsinställningar"
+    },
+    "audio": {
+      "title": "Ljudinställningar"
+    },
+    "notifications": {
+      "title": "Aviseringsinställningar"
+    },
+    "live": {
+      "title": "Inställningar för livevy"
+    },
+    "timestamp_style": {
+      "title": "Inställningar för tidsstämplar"
+    },
+    "searchPlaceholder": "Sök...",
+    "tabs": {
+      "sharedDefaults": "Delade standardvärden",
+      "system": "System",
+      "integrations": "Integreringar"
+    },
+    "additionalProperties": {
+      "keyLabel": "Nyckel",
+      "valueLabel": "Värde",
+      "keyPlaceholder": "Ny nyckel",
+      "remove": "Ta bort",
+      "providerNameLabel": "Leverantörsnamn",
+      "providerNamePlaceholder": "t.ex. openai",
+      "variableNameLabel": "Variabelnamn",
+      "variableNamePlaceholder": "t.ex. MY_VARIABLE",
+      "loggerNameLabel": "Loggnamn",
+      "loggerNamePlaceholder": "t.ex. frigate.record",
+      "keyPatternError": "Använd endast bokstäver, siffror, bindestreck och understreck (inga blanksteg)"
+    },
+    "timezone": {
+      "defaultOption": "Använd webbläsarens tidszon"
+    },
+    "roleMap": {
+      "empty": "Inga rollmappningar",
+      "roleLabel": "Roll",
+      "groupsLabel": "Grupper",
+      "addMapping": "Lägg till rollmappning",
+      "remove": "Ta bort"
+    },
+    "ffmpegArgs": {
+      "preset": "Förinställning",
+      "manual": "Manuella argument",
+      "inherit": "Ärv från kamerainställning",
+      "selectPreset": "Välj förinställning",
+      "manualPlaceholder": "Ange FFmpeg-argument",
+      "none": "Ingen",
+      "useGlobalSetting": "Ärv från global inställning",
+      "presetLabels": {
+        "preset-rpi-64-h264": "Raspberry Pi (H.264)",
+        "preset-rpi-64-h265": "Raspberry Pi (H.265)",
+        "preset-vaapi": "VAAPI (Intel/AMD GPU)",
+        "preset-intel-qsv-h264": "Intel QuickSync (H.264)",
+        "preset-intel-qsv-h265": "Intel QuickSync (H.265)",
+        "preset-nvidia": "NVIDIA GPU",
+        "preset-jetson-h264": "NVIDIA Jetson (H.264)",
+        "preset-jetson-h265": "NVIDIA Jetson (H.265)",
+        "preset-rkmpp": "Rockchip RKMPP",
+        "preset-http-jpeg-generic": "HTTP JPEG (generisk)",
+        "preset-http-mjpeg-generic": "HTTP MJPEG (generisk)",
+        "preset-http-reolink": "HTTP - Reolink-kameror",
+        "preset-rtmp-generic": "RTMP (generisk)",
+        "preset-rtsp-generic": "RTSP (generisk)",
+        "preset-rtsp-restream": "RTSP - återströmning från go2rtc",
+        "preset-rtsp-restream-low-latency": "RTSP - återströmning från go2rtc (låg fördröjning)",
+        "preset-rtsp-udp": "RTSP - UDP",
+        "preset-rtsp-blue-iris": "RTSP - Blue Iris",
+        "preset-record-generic": "Spela in (generisk, utan ljud)",
+        "preset-record-generic-audio-copy": "Spela in (generisk + kopiera ljud)",
+        "preset-record-generic-audio-aac": "Spela in (generisk + ljud till AAC)",
+        "preset-record-mjpeg": "Spela in - MJPEG-kameror",
+        "preset-record-jpeg": "Spela in - JPEG-kameror",
+        "preset-record-ubiquiti": "Spela in - Ubiquiti-kameror",
+        "preset-apple-silicon-h264": "Apple Silicon (H.264)",
+        "preset-apple-silicon-h265": "Apple Silicon (H.265)"
+      },
+      "sameAsRecord": "Samma som argument för inspelningsutdata"
+    },
+    "cameraInputs": {
+      "itemTitle": "Ström {{index}}",
+      "sourceMode": {
+        "restream": "Återströmning (go2rtc)",
+        "manual": "Manuell inmatningssökväg",
+        "go2rtcStreamLabel": "go2rtc-ström",
+        "go2rtcStreamPlaceholder": "Välj en go2rtc-ström",
+        "noGo2rtcStreams": "Inga go2rtc-strömmar har konfigurerats",
+        "go2rtcStreamSearch": "Sök strömmar...",
+        "availableStreams": "Tillgängliga strömmar",
+        "noMatchingStreams": "Inga matchande strömmar"
+      }
+    },
+    "restartRequiredField": "Omstart krävs",
+    "restartRequiredFooter": "Konfigurationen har ändrats - omstart krävs",
+    "sections": {
+      "detect": "Detektering",
+      "record": "Inspelning",
+      "snapshots": "Ögonblicksbilder",
+      "motion": "Rörelse",
+      "objects": "Objekt",
+      "review": "Granskning",
+      "audio": "Ljud",
+      "notifications": "Aviseringar",
+      "live": "Livevy",
+      "timestamp_style": "Tidsstämplar",
+      "mqtt": "MQTT",
+      "database": "Databas",
+      "telemetry": "Telemetri",
+      "auth": "Autentisering",
+      "tls": "TLS",
+      "proxy": "Proxy",
+      "go2rtc": "go2rtc",
+      "ffmpeg": "FFmpeg",
+      "detectors": "Detektorer",
+      "model": "Modell",
+      "semantic_search": "Semantisk sökning",
+      "genai": "GenAI",
+      "face_recognition": "Ansiktsigenkänning",
+      "lpr": "Registreringsskyltigenkänning",
+      "birdseye": "Birdseye",
+      "masksAndZones": "Masker / zoner"
+    },
+    "detect": {
+      "title": "Inställningar för detektering"
+    },
+    "record": {
+      "title": "Inspelningsinställningar"
+    },
+    "snapshots": {
+      "title": "Inställningar för ögonblicksbilder"
+    },
+    "motion": {
+      "title": "Rörelseinställningar"
+    },
+    "objects": {
+      "title": "Objektinställningar"
+    },
+    "audioLabels": {
+      "summary": "{{count}} ljudetiketter valda",
+      "empty": "Inga ljudetiketter tillgängliga"
+    },
+    "genaiRoles": {
+      "options": {
+        "embeddings": "Inbäddningar",
+        "descriptions": "Beskrivningar",
+        "chat": "Chatt",
+        "transcribe": "Transkribering"
+      }
+    },
+    "semanticSearchModel": {
+      "placeholder": "Välj modell…",
+      "builtIn": "Inbyggda modeller",
+      "genaiProviders": "GenAI-leverantörer"
+    },
+    "reviewLabels": {
+      "summary": "{{count}} etiketter valda",
+      "empty": "Inga etiketter tillgängliga"
+    },
+    "addCustomLabel": "Lägg till egen etikett...",
+    "knownPlates": {
+      "namePlaceholder": "t.ex. makans bil",
+      "platePlaceholder": "Registreringsnummer eller regex",
+      "assignedTo": "Tilldelad {{name}}",
+      "detected": "Identifierade skyltar",
+      "noneDetected": "Inga skyltar har identifierats ännu",
+      "search": "Sök eller ange en skylt",
+      "useCustom": "Använd ”{{value}}”"
+    },
+    "genaiModel": {
+      "noModels": "Inga modeller tillgängliga",
+      "placeholder": "Välj eller ange en modell…",
+      "search": "Sök efter eller ange en modell…",
+      "available": "Tillgängliga modeller",
+      "useCustom": "Använd ”{{value}}”",
+      "refresh": "Uppdatera modeller",
+      "probeFailed": "Det gick inte att avsöka modeller",
+      "fetchedModels": "Modellistan har hämtats"
+    },
+    "liveStreams": {
+      "streamNameLabel": "Strömnamn",
+      "streamNamePlaceholder": "t.ex. HD-huvudström",
+      "go2rtcStreamLabel": "go2rtc-ström",
+      "go2rtcStreamPlaceholder": "Välj en go2rtc-ström",
+      "go2rtcStreamSearch": "Sök efter eller ange ett strömnamn…",
+      "noGo2rtcStreams": "Inga go2rtc-strömmar har konfigurerats",
+      "availableStreams": "Tillgängliga strömmar",
+      "useCustom": "Använd \"{{value}}\"",
+      "addStream": "Lägg till ström",
+      "reorderHandle": "Dra för att ändra ordning",
+      "transcodedBadge": "Omkodad",
+      "autoOrder": "Automatisk ordning",
+      "autoOrderTips": "Mät varje ströms bithastighet och sortera den högsta först",
+      "measuring": "Mäter…",
+      "rate": "{{kbps}} kbit/s",
+      "rateSet": "{{kbps}} kbit/s (inställd)",
+      "rateFailed": "Det gick inte att mäta"
+    },
+    "semanticSearchModelSize": {
+      "notApplicable": "Gäller inte GenAI-leverantörer"
+    },
+    "ptzPresets": {
+      "noPresets": "Inga förinställningar tillgängliga",
+      "available": "Kameraförinställningar",
+      "useCustom": "Använd \"{{value}}\"",
+      "placeholder": "Välj eller ange en förinställning...",
+      "search": "Sök eller ange en förinställning..."
+    },
+    "defaultRole": {
+      "admin": "Administratör",
+      "viewer": "Visare",
+      "none": "Ingen (neka åtkomst)"
+    },
+    "birdseyeModes": {
+      "summary": "{{count}} valda",
+      "options": {
+        "continuous": "Kontinuerlig",
+        "motion": "Rörelse",
+        "all_objects": "Alla objekt",
+        "alerts": "Varningar",
+        "detections": "Detekteringar"
+      }
+    },
+    "audioTranscriptionModel": {
+      "placeholder": "Välj modell…",
+      "builtIn": "Inbyggda modeller",
+      "genaiProviders": "GenAI-leverantörer"
+    },
+    "audioTranscriptionModelSize": {
+      "notApplicable": "Gäller inte för GenAI-leverantörer"
+    },
+    "liveTranscode": {
+      "title": "Omkodade strömmar",
+      "description": "Lägger till strömmar med lägre kvalitet som go2rtc omkodar i realtid medan någon tittar.",
+      "unavailable": "Omkodade strömmar behöver en go2rtc-ström att läsa från. Lägg först till en under go2rtc-strömmar.",
+      "enable": "Aktivera omkodade strömmar",
+      "source": "Källström",
+      "height": "Höjd",
+      "heightOption": "{{height}}p",
+      "bitrate": "Bithastighet (kbit/s)",
+      "addQuality": "Lägg till kvalitet",
+      "removeQuality": "Ta bort kvalitet"
+    }
+  },
+  "globalConfig": {
+    "title": "Global konfiguration",
+    "description": "Konfigurera globala inställningar som gäller alla kameror om de inte åsidosätts.",
+    "toast": {
+      "success": "De globala inställningarna har sparats",
+      "error": "Det gick inte att spara de globala inställningarna",
+      "validationError": "Valideringen misslyckades"
+    }
+  },
+  "cameraConfig": {
+    "title": "Kamerakonfiguration",
+    "description": "Konfigurera inställningar för enskilda kameror. Inställningarna åsidosätter de globala standardvärdena.",
+    "overriddenBadge": "Åsidosatt",
+    "resetToGlobal": "Återställ till global",
+    "toast": {
+      "success": "Kamerainställningarna har sparats",
+      "error": "Det gick inte att spara kamerainställningarna"
+    }
+  },
+  "toast": {
+    "success": "Inställningarna har sparats",
+    "applied": "Inställningarna har tillämpats",
+    "successRestartRequired": "Inställningarna har sparats. Starta om Frigate för att tillämpa ändringarna.",
+    "error": "Det gick inte att spara inställningarna",
+    "validationError": "Valideringen misslyckades: {{message}}",
+    "resetSuccess": "Återställt till globala standardvärden",
+    "resetError": "Det gick inte att återställa inställningarna",
+    "saveAllSuccessRestartRequired_one": "{{count}} avsnitt har sparats. Starta om Frigate för att tillämpa ändringarna.",
+    "saveAllSuccessRestartRequired_other": "Alla {{count}} avsnitt har sparats. Starta om Frigate för att tillämpa ändringarna.",
+    "go2rtcSyncFailed": "Sparat, men go2rtc kunde inte uppdateras. Starta om Frigate för att tillämpa ändringarna.",
+    "saveAllSuccess_one": "{{count}} avsnitt har sparats.",
+    "saveAllSuccess_other": "Alla {{count}} avsnitt har sparats.",
+    "saveAllPartial_one": "{{successCount}} av {{totalCount}} avsnitt har sparats. {{failCount}} misslyckades.",
+    "saveAllPartial_other": "{{successCount}} av {{totalCount}} avsnitt har sparats. {{failCount}} misslyckades.",
+    "saveAllFailure": "Det gick inte att spara alla avsnitt."
+  },
+  "unsavedChanges": "Du har osparade ändringar",
+  "confirmReset": "Bekräfta återställning",
+  "resetToDefaultDescription": "Detta återställer alla inställningar i det här avsnittet till standardvärdena. Åtgärden kan inte ångras.",
+  "resetToGlobalDescription": "Detta återställer inställningarna i det här avsnittet till de globala standardvärdena. Åtgärden kan inte ångras.",
+  "profiles": {
+    "title": "Profiler",
+    "activeProfile": "Aktiv profil",
+    "noActiveProfile": "Ingen aktiv profil",
+    "active": "Aktiv",
+    "activated": "Profilen '{{profile}}' har aktiverats",
+    "activateFailed": "Det gick inte att ange profil",
+    "deactivated": "Profilen har inaktiverats",
+    "noProfiles": "Inga profiler har definierats.",
+    "noOverrides": "Inga åsidosättningar",
+    "baseConfig": "Baskonfiguration",
+    "addProfile": "Lägg till profil",
+    "newProfile": "Ny profil",
+    "profileNamePlaceholder": "t.ex. beväpnad, borta, nattläge",
+    "friendlyNameLabel": "Profilnamn",
+    "profileIdLabel": "Profil-ID",
+    "profileIdDescription": "Intern identifierare som används i konfiguration och automatiseringar",
+    "nameInvalid": "Endast gemener, siffror och understreck tillåts",
+    "nameDuplicate": "Det finns redan en profil med det här namnet",
+    "error": {
+      "mustBeAtLeastTwoCharacters": "Måste innehålla minst 2 tecken",
+      "mustNotContainPeriod": "Får inte innehålla punkter",
+      "alreadyExists": "Det finns redan en profil med detta ID"
+    },
+    "renameProfile": "Byt namn på profil",
+    "renameSuccess": "Profilen har bytt namn till '{{profile}}'",
+    "deleteProfile": "Ta bort profil",
+    "deleteProfileConfirm": "Ta bort profilen \"{{profile}}\" från alla kameror? Detta kan inte ångras.",
+    "deleteSuccess": "Profilen '{{profile}}' har tagits bort",
+    "createSuccess": "Profilen '{{profile}}' har skapats",
+    "removeOverride": "Ta bort profilåsidosättning",
+    "deleteSection": "Ta bort avsnittsåsidosättningar",
+    "deleteSectionConfirm": "Ta bort åsidosättningarna för {{section}} för profilen {{profile}} på {{camera}}?",
+    "deleteSectionSuccess": "Åsidosättningarna för {{section}} för {{profile}} har tagits bort",
+    "enableSwitch": "Aktivera profiler",
+    "enabledDescription": "Profiler är aktiverade. Skapa en ny profil nedan, gå till en kamerakonfigurationsdel, gör dina ändringar och spara dem för att tillämpa ändringarna.",
+    "disabledDescription": "Med profiler kan du definiera namngivna uppsättningar av åsidosättningar för kamerakonfiguration (t.ex. beväpnad, borta, natt) som kan aktiveras vid behov.",
+    "columnCamera": "Kamera",
+    "columnOverrides": "Profilåsidosättningar",
+    "cameraCount_one": "{{count}} kamera",
+    "cameraCount_other": "{{count}} kameror"
+  },
+  "go2rtcStreams": {
+    "title": "go2rtc-strömmar",
+    "description": "Hantera go2rtc-strömkonfigurationer för att återströmma kameror. Varje ström har ett namn och en eller flera käll-URL:er.",
+    "addStream": "Lägg till ström",
+    "addStreamDesc": "Ange ett namn för den nya strömmen. Namnet används för att hänvisa till strömmen i kamerakonfigurationen.",
+    "addUrl": "Lägg till URL",
+    "streamName": "Strömnamn",
+    "streamNamePlaceholder": "t.ex. front_door",
+    "streamUrlPlaceholder": "t.ex. rtsp://user:pass@192.168.1.100/stream",
+    "deleteStream": "Ta bort ström",
+    "deleteStreamConfirm": "Vill du verkligen ta bort strömmen \"{{streamName}}\"? Kameror som hänvisar till strömmen kan sluta fungera.",
+    "noStreams": "Inga go2rtc-strömmar har konfigurerats. Lägg till en ström för att komma igång.",
+    "validation": {
+      "nameRequired": "Strömnamn krävs",
+      "nameDuplicate": "Det finns redan en ström med det här namnet",
+      "nameInvalid": "Strömnamnet får endast innehålla bokstäver, siffror, understreck och bindestreck",
+      "urlRequired": "Minst en URL krävs"
+    },
+    "renameStream": "Byt namn på ström",
+    "renameStreamDesc": "Ange ett nytt namn för den här strömmen. Att byta namn på en ström kan göra att kameror eller andra strömmar som hänvisar till den slutar fungera.",
+    "newStreamName": "Nytt strömnamn",
+    "ffmpeg": {
+      "useFfmpegModule": "Använd kompatibilitetsläge (ffmpeg)",
+      "video": "Video",
+      "audio": "Ljud",
+      "hardware": "Maskinvaruacceleration",
+      "videoCopy": "Kopiera",
+      "videoH264": "Omkoda till H.264",
+      "videoH265": "Omkoda till H.265",
+      "videoExclude": "Uteslut",
+      "audioCopy": "Kopiera",
+      "audioAac": "Omkoda till AAC",
+      "audioOpus": "Omkoda till Opus",
+      "audioPcmu": "Omkoda till PCM μ-law",
+      "audioPcma": "Omkoda till PCM A-law",
+      "audioPcm": "Omkoda till PCM",
+      "audioMp3": "Omkoda till MP3",
+      "audioExclude": "Uteslut",
+      "hardwareNone": "Ingen maskinvaruacceleration",
+      "hardwareAuto": "Automatisk (rekommenderas)",
+      "hardwareVaapi": "VAAPI",
+      "hardwareCuda": "CUDA",
+      "hardwareV4l2m2m": "V4L2 M2M",
+      "hardwareDxva2": "DXVA2",
+      "hardwareVideotoolbox": "VideoToolbox",
+      "addVideoCodec": "Lägg till videokodek",
+      "addAudioCodec": "Lägg till ljudkodek",
+      "removeCodec": "Ta bort kodek"
+    },
+    "sourceNumber": "Källa {{index}}"
+  },
+  "button": {
+    "overriddenGlobal": "Åsidosatt (global)",
+    "overriddenGlobalTooltip": "Den här kameran åsidosätter globala konfigurationsinställningar i det här avsnittet",
+    "overriddenBaseConfig": "Åsidosatt (baskonfiguration)",
+    "overriddenBaseConfigTooltip": "Profilen {{profile}} åsidosätter konfigurationsinställningar i det här avsnittet",
+    "overriddenInCameras": {
+      "label_one": "Åsidosätts i {{count}} kamera",
+      "label_other": "Åsidosätts i {{count}} kameror",
+      "tooltip_one": "{{count}} kamera åsidosätter värden i det här avsnittet. Klicka för att se information.",
+      "tooltip_other": "{{count}} kameror åsidosätter värden i det här avsnittet. Klicka för att se information.",
+      "heading_one": "Det här globala avsnittet har fält som åsidosätts i {{count}} kamera.",
+      "heading_other": "Det här globala avsnittet har fält som åsidosätts i {{count}} kameror.",
+      "othersField_one": "{{count}} annan",
+      "othersField_other": "{{count}} andra",
+      "profilePrefix": "Profilen {{profile}}: {{fields}}"
+    },
+    "overriddenGlobalHeading_one": "Den här kameran åsidosätter {{count}} fält från den globala konfigurationen:",
+    "overriddenGlobalHeading_other": "Den här kameran åsidosätter {{count}} fält från den globala konfigurationen:",
+    "overriddenBaseConfigHeading_one": "Profilen {{profile}} åsidosätter {{count}} fält från baskonfigurationen:",
+    "overriddenBaseConfigHeading_other": "Profilen {{profile}} åsidosätter {{count}} fält från baskonfigurationen:",
+    "overriddenGlobalNoDeltas": "Den här kameran åsidosätter den globala konfigurationen, men inga fältvärden skiljer sig.",
+    "overriddenBaseConfigNoDeltas": "Profilen {{profile}} åsidosätter det här avsnittet, men inga fältvärden skiljer sig från baskonfigurationen.",
+    "overriddenLive": "Åsidosatt (live)",
+    "overriddenLiveTooltip": "Den här kameran körs med ett annat värde än det som sparats i konfigurationen, vilket visas här. Livevyn, MQTT eller en aktiv profil kan ändra värdet medan Frigate körs.",
+    "overriddenLiveValue": "Aktuellt värde: {{value}}"
+  },
+  "timestampPosition": {
+    "tl": "Uppe till vänster",
+    "tr": "Uppe till höger",
+    "bl": "Nere till vänster",
+    "br": "Nere till höger"
+  },
+  "onvif": {
+    "profileAuto": "Automatiskt",
+    "profileLoading": "Läser in profiler...",
+    "autotracking": {
+      "zooming": {
+        "disabled": "Inaktiverad",
+        "absolute": "Absolut",
+        "relative": "Relativ"
+      }
+    }
+  },
+  "configMessages": {
+    "review": {
+      "genaiImageSourceRecordingsRecordDisabled": "Bildkällan är inställd på 'recordings', men inspelning är inaktiverad. Frigate använder i stället förhandsvisningsbilder.",
+      "recordDisabled": "Inspelning är inaktiverad, granskningsobjekt skapas inte.",
+      "detectDisabled": "Objektdetektering är inaktiverad. Granskningsobjekt kräver identifierade objekt för att kategorisera varningar och detekteringar.",
+      "allNonAlertDetections": "All aktivitet som inte är en varning inkluderas som detekteringar.",
+      "recordRuntimeDisabled": "Inspelning är aktiverad i konfigurationen, men är just nu avstängd för den här kameran, så granskningsobjekt skapas inte. Aktivera den igen från kamerans livevy, eller kontrollera om en aktiv profil inaktiverar den.",
+      "detectRuntimeDisabled": "Objektdetektering är aktiverad i konfigurationen, men är just nu avstängd för den här kameran. Granskningsobjekt kräver identifierade objekt för att kategorisera varningar och detekteringar. Aktivera den igen från kamerans livevy, eller kontrollera om en aktiv profil inaktiverar den.",
+      "genaiImageSourceRecordingsRecordRuntimeDisabled": "Bildkällan är inställd på ”inspelningar”, men inspelning är just nu avstängd för den här kameran trots att den är aktiverad i konfigurationen. Frigate använder i stället förhandsvisningsbilder."
+    },
+    "detect": {
+      "disabled": "Objektdetektering är inaktiverad. Ögonblicksbilder, granskningsobjekt och berikningar som ansiktsigenkänning, registreringsskyltigenkänning och generativ AI fungerar inte.",
+      "resolutionShouldBeMultipleOfFour": "För bästa resultat bör detekteringsbredd och -höjd vara multiplar av 4. Andra jämna värden kan ge visuella artefakter eller lätt förvrängning i detekteringsströmmen.",
+      "aspectRatioMismatch": "Bredden och höjden du har angett matchar inte bildförhållandet för den aktuella detekteringsupplösningen. Det kan ge en utdragen eller förvrängd bild.",
+      "fpsGreaterThanFive": "Det rekommenderas inte att ange detekterings-FPS högre än 5. Högre värden kan ge prestandaproblem och ger ingen fördel.",
+      "maxFramesSet": "Inställningen för högsta antal bildrutor åsidosätter standardbeteendet och inaktiverar spårning av stationära objekt. Detta behövs mycket sällan, så använd den med försiktighet.",
+      "squareResolution": "En kvadratisk detekteringsupplösning är ovanlig. Detekteringsbredden och -höjden bör matcha kamerans bildförhållande, till exempel 16:9, inte dimensionerna för objektdetekteringsmodellen. Ett felaktigt bildförhållande kan sträcka ut bilden och minska detekteringsnoggrannheten.",
+      "resolutionHigh": "Den här detekteringsupplösningen är högre än rekommenderat och kan öka resursanvändningen utan att förbättra detekteringsnoggrannheten. En detekteringsupplösning på högst 1080p rekommenderas för de flesta kameror.",
+      "globalResolutionMultipleCameras": "En global detekteringsupplösning är inställd samtidigt som flera kameror är konfigurerade. Om inte alla kameror har samma upplösning och bildförhållande bör detekteringsbredd och -höjd definieras per kamera för att matcha varje kameras ursprungliga bildförhållande.",
+      "sceneWithoutModel": "Ingen detekteringsmodell är konfigurerad för den här scenen, så kameran använder i stället standardmodellen. Lägg till en modell för den här scenen så att kameran får en egen.",
+      "runtimeDisabled": "Objektdetektering är aktiverad i konfigurationen, men är just nu avstängd för den här kameran. Ögonblicksbilder, granskningsobjekt och berikningar som ansiktsigenkänning, registreringsskyltigenkänning och generativ AI fungerar inte förrän den aktiveras igen från kamerans livevy eller den aktiva profilen slutar inaktivera den."
+    },
+    "objects": {
+      "genaiNoDescriptionsProvider": "Du måste konfigurera en GenAI-leverantör med rollen 'descriptions' för att beskrivningar ska kunna skapas."
+    },
+    "faceRecognition": {
+      "modelSizeLarge": "Modellen 'large' kräver GPU eller NPU för rimlig prestanda. Använd 'small' på system som endast har CPU.",
+      "globalDisabled": "Berikning med ansiktsigenkänning måste vara aktiverad för att ansiktsigenkänning ska fungera för den här kameran.",
+      "personNotTracked": "Ansiktsigenkänning kräver att objektet 'person' spåras. Aktivera 'person' under Objekt för den här kameran."
+    },
+    "lpr": {
+      "modelSizeLarge": "Modellen 'large' är optimerad för registreringsskyltar med flera rader. Modellen 'small' ger bättre prestanda än 'large' och bör användas om din region inte använder skyltformat med flera rader.",
+      "globalDisabled": "Berikning med registreringsskyltigenkänning måste vara aktiverad för att LPR-funktionerna ska fungera för den här kameran.",
+      "vehicleNotTracked": "Registreringsskyltigenkänning kräver att ett fordon spåras. Aktivera 'car' eller en annan fordonstyp under Objekt för den här kameran."
+    },
+    "semanticSearch": {
+      "jinav2SmallModelSize": "Storleken 'small' med modellen Jina V2 har hög RAM- och inferenskostnad. Modellen 'large' med ett separat GPU rekommenderas."
+    },
+    "audio": {
+      "noAudioRole": "Ingen ström har ljudrollen definierad. Aktivera ljudrollen för att ljuddetekteringen ska fungera."
+    },
+    "audioTranscription": {
+      "audioDetectionDisabled": "Ljuddetektering är inte aktiverad för den här kameran. Ljudtranskribering kräver aktiv ljuddetektering.",
+      "genaiProviderSelected": "En GenAI-leverantör har valts, så inställningarna för enhet och modellstorlek ignoreras.",
+      "audioDetectionRuntimeDisabled": "Ljuddetektering är aktiverad i konfigurationen, men är just nu avstängd för den här kameran, så ljudtranskribering körs inte. Aktivera den igen från kamerans livevy, eller kontrollera om en aktiv profil inaktiverar den."
+    },
+    "record": {
+      "noRecordRole": "Ingen ström har inspelningsrollen definierad. Inspelning fungerar inte.",
+      "noRecordSubRole": "Inga strömmar har rollen record_sub definierad. Inspelning av underström fungerar inte.",
+      "profileBaseDisabled": "Inspelning är inaktiverad i den här kamerans baskonfiguration, så att aktivera den i en profil har ingen effekt. Aktivera inspelning i baskonfigurationen och använd i stället en profil för att inaktivera den."
+    },
+    "snapshots": {
+      "detectDisabled": "Objektdetektering är inaktiverad. Ögonblicksbilder skapas från spårade objekt och kommer inte att skapas.",
+      "detectRuntimeDisabled": "Objektdetektering är aktiverad i konfigurationen, men är just nu avstängd för den här kameran, så ögonblicksbilder skapas inte. Aktivera den igen från kamerans livevy, eller kontrollera om en aktiv profil inaktiverar den."
+    },
+    "onvif": {
+      "autotrackingNoZones": "Autospårning kräver minst en zon. Definiera en zon för den här kameran under Masker / zoner och ange sedan zonen som en obligatorisk zon nedan."
+    },
+    "model": {
+      "optimizedFor320": "Frigate är optimerat för en 320x320-modell, vilket är det bästa valet för de flesta konfigurationer. En 640x640-modell är långsammare och hjälper bara i vissa scenarier.",
+      "inputDimensionsNotDetectResolution": "Modellens inmatningsbredd och -höjd är objektdetekteringsmodellens indatadimensioner, inte kamerans detekteringsupplösning. De bör matcha dimensionerna för modellen du använder, vanligtvis en kvadratisk storlek som 320x320 eller 640x640."
+    },
+    "ffmpeg": {
+      "hwaccelManualNotRecommended": "Manuella argument för maskinvaruacceleration rekommenderas inte. Om det inte finns ett särskilt krav väljer du den förinställning som matchar maskinvaran.",
+      "inputsMissingGo2rtcStream": "En inmatning nedan pekar på en go2rtc-återströmning som inte längre finns. Välj en befintlig återströmning eller ange kamerans URL manuellt, annars kan kameran inte ansluta."
+    },
+    "birdseye": {
+      "objectTrackingDetectDisabled": "Birdseye innehåller spårade objekt, men objektdetektering är inaktiverad för den här kameran. Kameran visas inte i Birdseye.",
+      "objectTrackingDetectRuntimeDisabled": "Birdseye innehåller spårade objekt, men objektdetektering är just nu avstängd för den här kameran trots att den är aktiverad i konfigurationen. Kameran visas inte i Birdseye förrän den aktiveras igen från kamerans livevy eller den aktiva profilen slutar inaktivera den."
+    },
+    "live": {
+      "noGo2rtcStream": "Livevyn för den här kameran använder en enkel spelare med lägre bildfrekvens och utan ljud. Konfigurera en go2rtc-ström för den här kameran för att få jämnare video och ljud."
+    },
+    "notifications": {
+      "profileBaseDisabled": "Inga kameror har notiser aktiverade i sin baskonfiguration, så att aktivera dem i en profil har ingen effekt. Aktivera notiser i baskonfigurationen för minst en kamera.",
+      "ttlDelay": "Notiser kan komma upp till 30 sekunder sent och fortfarande länka till livevyn efter att granskningsobjektet har avslutats."
+    }
+  },
+  "menuDot": {
+    "overrideGlobal": "Det här avsnittet åsidosätter den globala konfigurationen",
+    "overrideProfile": "Det här avsnittet åsidosätts av profilen {{profile}}",
+    "unsaved": "Det här avsnittet har osparade ändringar"
+  },
+  "birdseye": {
+    "cameraOrder": {
+      "label": "Kameraordning",
+      "description": "Dra kameror för att ange deras ordning i Birdseye-layouten.",
+      "reorderHandle": "Dra för att ändra ordning",
+      "saving": "Sparar…",
+      "saved": "Sparad"
+    }
+  },
+  "retainMode": {
+    "motion": "Rörelse",
+    "active_objects": "Aktiva objekt",
+    "all": "Alla"
+  },
+  "previewQuality": {
+    "very_high": "Mycket hög",
+    "high": "Hög",
+    "medium": "Medel",
+    "low": "Låg",
+    "very_low": "Mycket låg"
+  },
+  "ui": {
+    "timeFormat": {
+      "browser": "Webbläsare",
+      "12hour": "12-timmarsformat",
+      "24hour": "24-timmarsformat"
+    },
+    "unitSystem": {
+      "metric": "Metriskt",
+      "imperial": "Imperiskt"
+    }
+  },
+  "review": {
+    "imageSource": {
+      "recordings": "Inspelningar",
+      "previews": "Förhandsvisningar"
+    },
+    "frameMode": {
+      "frames": "Bildrutor",
+      "annotated_frames": "Kommenterade bildrutor"
+    }
+  },
+  "logger": {
+    "logLevel": {
+      "debug": "Felsökning",
+      "info": "Information",
+      "warning": "Varning",
+      "error": "Fel",
+      "critical": "Kritisk"
+    }
+  },
+  "modelSize": {
+    "small": "Liten",
+    "large": "Stor"
+  },
+  "detectionModels": {
+    "title": "Detekteringsmodeller",
+    "description": "Konfigurera objektdetekteringsmodellerna och maskinvaran som var och en körs på. Lägg bara till en modell för en scen när vissa kameror behöver en annorlunda tränad modell, till exempel värmekameror. Kameror väljer modell efter scen i kamerans detekteringsinställningar.",
+    "addModel": "Lägg till modell",
+    "scene": {
+      "label": "Scen",
+      "description": "Ett namn för kamerorna som den här modellen är avsedd för. Kameror väljer en modell genom att ställa in samma scen i sina detekteringsinställningar, och standardmodellen används av kameror som inte anger någon. Använd scener för att köra olika modeller, inte för att dela upp en modell mellan maskinvara, eftersom modeller som använder samma modellfil kombineras.",
+      "placeholder": "värme"
+    },
+    "hardware": {
+      "label": "Maskinvara",
+      "placeholder": "Välj maskinvara",
+      "loading": "Söker efter detekteringsmaskinvara...",
+      "none": "Ingen maskinvara har valts",
+      "claimedBy": "används av {{scene}}",
+      "detectorCount": "Detektorer",
+      "unrecognized": "Den här modellen är konfigurerad för maskinvara som inte hittades på systemet: {{devices}}",
+      "description": "Maskinvaran som den här modellen kör sin detektering på.",
+      "detectorCountDescription": "Hur många detekteringsprocesser som ska köras på den här maskinvaran. Fler detektorer hinner med fler kameror, på bekostnad av extra enhetsminne.",
+      "unitsDescription": "Varje enhet kör sin egen detekteringsprocess. En enhet som inte kan delas, till exempel en Coral, kan endast användas av en modell.",
+      "countRecommended_one": "Rekommenderas för {{count}} kamera",
+      "countRecommended_other": "Rekommenderas för {{count}} kameror"
+    },
+    "tabs": {
+      "plus": "Frigate+",
+      "custom": "Anpassad modell"
+    },
+    "plusModel": {
+      "noModelSelected": "Välj en Frigate+-modell"
+    },
+    "scenes": {
+      "default": "Standard"
+    },
+    "cameras_one": "{{count}} kamera",
+    "cameras_other": "{{count}} kameror"
+  },
+  "analyticsPreview": {
+    "show": "Förhandsvisa rapporten",
+    "desc": "Frigate skickar den här rapporten en gång om dagen medan delning är aktiverad. Den innehåller aldrig kameranamnen, zoner, etiketter eller adresser.",
+    "error": "Det gick inte att skapa förhandsvisningen"
+  },
+  "notificationTtl": {
+    "immediate": "Omedelbar",
+    "reliable": "Tillförlitlig"
   }
 }

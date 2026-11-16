@@ -30,15 +30,32 @@
       }
     },
     "decodedFrames": "Avkodade bildrutor:",
-    "droppedFrameRate": "Andel förlorade bildrutor:"
+    "droppedFrameRate": "Andel förlorade bildrutor:",
+    "stream": "Ström:",
+    "streamAuto": "{{stream}} (automatiskt)"
   },
   "toast": {
     "error": {
-      "submitFrigatePlusFailed": "Det gick inte att skicka bildrutan till Frigate+"
+      "submitFrigatePlusFailed": "Det gick inte att skicka bildrutan till Frigate+",
+      "playRecordingsFailed": "Det gick inte att spela upp inspelningarna (fel {{code}}): {{message}}"
     },
     "success": {
       "submittedFrigatePlus": "Bildrutan har skickats till Frigate+"
     }
   },
-  "cameraOff": "Kameran är avstängd"
+  "cameraOff": "Kameran är avstängd",
+  "quality": {
+    "auto": "Automatiskt",
+    "autoLow": "Spelar med låg kvalitet (begränsad bandbredd)",
+    "autoLowCodec": "Spelar med låg kvalitet (originalet stöds inte av den här webbläsaren)",
+    "autoLowSaveData": "Spelar med låg kvalitet (datasparläge)",
+    "main": "Original",
+    "sub": "Låg",
+    "notSupportedBrowser": "Stöds inte av den här webbläsaren",
+    "label": "Kvalitet",
+    "noAudio": "Inget ljud",
+    "audioRate": "{{rate}} kHz ljud",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Inga inspelningar i det här tidsintervallet"
+  }
 }
