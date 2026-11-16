@@ -245,6 +245,9 @@ ENV PYTHONWARNINGS="ignore:::numpy.core.getlimits"
 # Set HailoRT to disable logging
 ENV HAILORT_LOGGER_PATH=NONE
 
+# Disable ONNX Runtime's usage telemetry to Microsoft
+ENV ORT_DISABLE_TELEMETRY=1
+
 # TensorFlow C++ logging suppression (must be set before import)
 # TF_CPP_MIN_LOG_LEVEL: 0=all, 1=INFO+, 2=WARNING+, 3=ERROR+ (we use 3 for errors only)
 ENV TF_CPP_MIN_LOG_LEVEL=3
