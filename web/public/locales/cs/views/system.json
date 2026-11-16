@@ -317,7 +317,8 @@
         "object_processing_behind": "Zpracování sledovaných objektů nestíhalo, proto byly snímky kamer vynechány. Zkontrolujte využití CPU a zda limity CPU nebo přiřazení jader kontejneru či virtuálního stroje neposkytují Frigate příliš málo výkonu CPU",
         "failed_login_one": "Neúspěšný pokus o přihlášení uživatele {{user}}",
         "failed_login_other": "Neúspěšné pokusy o přihlášení uživatele {{user}}",
-        "update_available": "Je dostupný Frigate {{version}}"
+        "update_available": "Je dostupný Frigate {{version}}",
+        "analytics_prompt": "Zvažte sdílení anonymních statistik používání, které pomohou vývojářům zlepšovat Frigate"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (přes go2rtc): {{message}}",

@@ -151,7 +151,8 @@
       "exportButton_one": "Exportovat 1 kameru",
       "exportButton_few": "Exportovat {{count}} kamery",
       "exportButton_other": "Exportovat {{count}} kamer",
-      "noCamerasSelected": "Vyberte alespoň jednu kameru"
+      "noCamerasSelected": "Vyberte alespoň jednu kameru",
+      "caseNameDefault": "Export z více kamer – {{date}}"
     },
     "multi": {
       "title_one": "Exportovat 1 položku revize",

@@ -60,7 +60,14 @@
     "apiKey": {
       "plusLink": "Přečtěte si více o Frigate+",
       "desc": "API klíč Frigate+ umožňuje integraci se službou Frigate+.",
-      "title": "Frigate+ API Klíč"
+      "title": "Frigate+ API Klíč",
+      "formatValid": "Klíč API Frigate+ byl nalezen a má očekávaný formát",
+      "formatInvalid": "Klíč API Frigate+ nebyl nalezen nebo nemá očekávaný formát",
+      "validate": "Ověřit u Frigate+",
+      "validating": "Ověřování…",
+      "serverValid": "Frigate+ tento klíč API přijal",
+      "serverInvalid": "Frigate+ tento klíč API odmítl",
+      "serverUnreachable": "Nelze se připojit k Frigate+ a ověřit tento klíč API"
     },
     "unsavedChanges": "Neuložené změny nastavení Frigate+",
     "title": "Nastavení Frigate+",
@@ -580,7 +587,8 @@
       "5minutes": "Pozastavit na 5 minut",
       "10minutes": "Pozastavit na 10 minut",
       "30minutes": "Pozastavit na 30 minut",
-      "1hour": "Pozastavit na 1 hodinu"
+      "1hour": "Pozastavit na 1 hodinu",
+      "custom": "Pozastavit do…"
     },
     "toast": {
       "error": {
@@ -592,7 +600,13 @@
       }
     },
     "cancelSuspension": "Zrušit Pozastavení",
-    "suspended": "Oznámení pozastaveny {{time}}"
+    "suspended": "Oznámení pozastaveny {{time}}",
+    "customSuspension": {
+      "title": "Vlastní doba pozastavení",
+      "description": "Pozastavit oznámení pro tuto kameru do zvoleného času.",
+      "untilLabel": "Pozastavit do",
+      "invalidTime": "Vyberte čas v budoucnosti."
+    }
   },
   "users": {
     "dialog": {
@@ -2065,7 +2079,8 @@
       "profileBaseDisabled": "Záznam je zakázán v základní konfiguraci kamery, takže jeho povolení v profilu nemá účinek. Povolte záznam v základní konfiguraci a profilem jej případně vypínejte."
     },
     "notifications": {
-      "profileBaseDisabled": "Žádná kamera nemá oznámení povolena v základní konfiguraci, takže jejich povolení v profilu nemá účinek. Povolte oznámení v základní konfiguraci alespoň jedné kamery."
+      "profileBaseDisabled": "Žádná kamera nemá oznámení povolena v základní konfiguraci, takže jejich povolení v profilu nemá účinek. Povolte oznámení v základní konfiguraci alespoň jedné kamery.",
+      "ttlDelay": "Oznámení mohou přijít se zpožděním až 30 sekund a odkazovat na živé zobrazení i po skončení položky revize."
     },
     "birdseye": {
       "objectTrackingDetectDisabled": "Birdseye zahrnuje sledované objekty, ale detekce objektů je na této kameře zakázána. Kamera se v Birdseye neobjeví.",
@@ -2119,5 +2134,14 @@
     "plusModel": {
       "noModelSelected": "Vyberte model Frigate+"
     }
+  },
+  "notificationTtl": {
+    "immediate": "Okamžité doručení",
+    "reliable": "Spolehlivé doručení"
+  },
+  "analyticsPreview": {
+    "show": "Zobrazit náhled zprávy",
+    "desc": "Pokud je sdílení zapnuté, Frigate tuto zprávu odesílá jednou denně. Nikdy neobsahuje názvy kamer, zóny, štítky ani adresy.",
+    "error": "Náhled se nepodařilo vytvořit"
   }
 }

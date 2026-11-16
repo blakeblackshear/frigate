@@ -861,6 +861,10 @@
         "enabled_in_config": {
             "label": "Původní stav oznámení",
             "description": "Udává, zda byla oznámení povolena v původní statické konfiguraci."
+        },
+        "ttl": {
+            "label": "Doba platnosti oznámení (TTL)",
+            "description": "Způsob, jakým služba push oznámení naloží s oznámením odeslaným během aktivní výstrahy, pokud vaše zařízení není dostupné. Režim Okamžité doručení oznámení ihned doručí, nebo je zahodí. Režim Spolehlivé doručení opakuje pokusy o doručení po dobu až 30 sekund. Oznámení o ukončení výstrahy se vždy uchovává po dobu až jedné hodiny."
         }
     },
     "onvif": {
