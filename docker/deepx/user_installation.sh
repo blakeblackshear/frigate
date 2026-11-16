@@ -14,11 +14,11 @@
 
 set -euo pipefail
 
-driver_version="v2.6.0"
+driver_version="v2.7.0"
 # the commit the tag resolves to, since DEEPX signs neither tags nor releases
 # and this is compiled and installed as root. Update both together
-driver_commit="7074748e7104f470b02f517583abba652b3f05fa"
-firmware_version="v2.7.4"
+driver_commit="8455be625439e005d7b3a375cc79087f4b570404"
+firmware_version="v2.7.6"
 
 sudo apt-get update
 sudo apt-get install -y git build-essential "linux-headers-$(uname -r)" pciutils wget
@@ -69,10 +69,10 @@ if ! compgen -G "/dev/dxrt*" > /dev/null; then
     exit 1
 fi
 
-runtime_version="v3.4.0"
+runtime_version="v3.5.0"
 declare -A runtime_sha256=(
-    [amd64]="736cfef009ce9e974ab1ab610d867239d19d72a426a53e367ddcbd53297b6e20"
-    [arm64]="eb6107f5f02f2ad76ae89f414e8b5f346f34fbc6f0888236136853a26be6f6a0"
+    [amd64]="c1993416e43059fb4751b2fd093d4232ab2ae8e67a5ec4156c79889e66260f64"
+    [arm64]="f7c942ddfa325f435de3ab9a42b32b322f97dacff7f3468a37e32a6386a03681"
 )
 
 runtime_release="${runtime_version#v}"
@@ -127,5 +127,5 @@ echo "Runtime version:  ${runtime_release}"
 echo "Device node(s):   $(echo /dev/dxrt*)"
 echo
 echo "This driver expects NPU firmware ${firmware_version}. Check it with:"
-echo "  dxrt-cli --status"
+echo "  dxcli -s"
 echo "Update the module if it does not match before starting Frigate."
