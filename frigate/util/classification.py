@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import shutil
+import tempfile
 from collections import defaultdict
 
 import cv2
@@ -38,8 +39,46 @@ BATCH_SIZE = 16
 EPOCHS = 50
 LEARNING_RATE = 0.001
 TRAINING_METADATA_FILE = ".training_metadata.json"
+CLASSIFICATION_INPUT_SIZE = (224, 224)
 
 logger = logging.getLogger(__name__)
+
+
+def resize_classification_image(image: np.ndarray) -> np.ndarray:
+    """Resize an image to the classification model input size.
+
+    Training and inference both need to use this, otherwise the model is
+    trained on different pixels than the ones it is later run on.
+    """
+    return cv2.resize(image, CLASSIFICATION_INPUT_SIZE)
+
+
+def prepare_training_dataset(dataset_dir: str, output_dir: str) -> None:
+    """Write a copy of the dataset that is resized the same way as inference.
+
+    The dataset holds crops at their original size. Keras would resize them
+    with nearest neighbor while inference uses cv2, so the images are resized
+    here and Keras is given images that are already the model input size.
+    """
+    for class_name in os.listdir(dataset_dir):
+        class_dir = os.path.join(dataset_dir, class_name)
+
+        if not os.path.isdir(class_dir):
+            continue
+
+        output_class_dir = os.path.join(output_dir, class_name)
+        os.makedirs(output_class_dir, exist_ok=True)
+
+        for file in os.listdir(class_dir):
+            img = cv2.imread(os.path.join(class_dir, file))
+
+            if img is None:
+                continue
+
+            output_path = os.path.join(output_class_dir, file)
+
+            if not cv2.imwrite(output_path, resize_classification_image(img)):
+                raise OSError(f"Failed to write training image {output_path}")
 
 
 def write_training_metadata(model_name: str, image_count: int) -> None:
@@ -160,7 +199,7 @@ class ClassificationTrainingProcess(FrigateProcess):
             for path in image_paths[:300]:
                 img = cv2.imread(path)
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                img = cv2.resize(img, (224, 224))
+                img = resize_classification_image(img)
                 img_array = np.array(img, dtype=np.float32) / 255.0
                 img_array = img_array[None, ...]
                 yield [img_array]
@@ -232,32 +271,35 @@ class ClassificationTrainingProcess(FrigateProcess):
                 metrics=["accuracy"],
             )
 
-            # create training set
-            datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
-            train_gen = datagen.flow_from_directory(
-                dataset_dir,
-                target_size=(224, 224),
-                batch_size=BATCH_SIZE,
-                class_mode="categorical",
-                subset="training",
-            )
+            # create training set, resized the same way as inference
+            with tempfile.TemporaryDirectory() as training_dir:
+                prepare_training_dataset(dataset_dir, training_dir)
+                datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
+                train_gen = datagen.flow_from_directory(
+                    training_dir,
+                    target_size=CLASSIFICATION_INPUT_SIZE,
+                    batch_size=BATCH_SIZE,
+                    class_mode="categorical",
+                    subset="training",
+                )
 
-            total_images = train_gen.samples
-            logger.debug(
-                f"Training {self.model_name}: {total_images} images across {num_classes} classes"
-            )
+                total_images = train_gen.samples
+                logger.debug(
+                    f"Training {self.model_name}: {total_images} images across {num_classes} classes"
+                )
 
-            # write labelmap
-            class_indices = train_gen.class_indices
-            index_to_class = {v: k for k, v in class_indices.items()}
-            sorted_classes = [index_to_class[i] for i in range(len(index_to_class))]
-            with open(os.path.join(model_dir, "labelmap.txt"), "w") as f:
-                for class_name in sorted_classes:
-                    f.write(f"{class_name}\n")
+                # write labelmap
+                class_indices = train_gen.class_indices
+                index_to_class = {v: k for k, v in class_indices.items()}
+                sorted_classes = [index_to_class[i] for i in range(len(index_to_class))]
+                with open(os.path.join(model_dir, "labelmap.txt"), "w") as f:
+                    for class_name in sorted_classes:
+                        f.write(f"{class_name}\n")
 
-            # train the model
-            logger.debug(f"Training {self.model_name} for {EPOCHS} epochs...")
-            model.fit(train_gen, epochs=EPOCHS, verbose=0)
+                # train the model
+                logger.debug(f"Training {self.model_name} for {EPOCHS} epochs...")
+                model.fit(train_gen, epochs=EPOCHS, verbose=0)
+
             logger.debug(f"Converting {self.model_name} to TFLite...")
 
             # convert model to tflite
@@ -602,7 +644,7 @@ def _extract_keyframes(
                 return idx, None
 
             cropped = img[y1_clipped:y2_clipped, x1_clipped:x2_clipped]
-            resized = cv2.resize(cropped, (224, 224))
+            resized = resize_classification_image(cropped)
 
             output_path = os.path.join(output_dir, f"frame_{idx:04d}.jpg")
             cv2.imwrite(output_path, resized)
@@ -880,7 +922,7 @@ def _extract_event_thumbnails(
             if img is None:
                 continue
 
-            resized = cv2.resize(img, (224, 224))
+            resized = resize_classification_image(img)
             output_path = os.path.join(output_dir, f"thumbnail_{idx:04d}.jpg")
             cv2.imwrite(output_path, resized)
             image_paths.append(output_path)

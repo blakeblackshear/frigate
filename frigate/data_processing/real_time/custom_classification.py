@@ -17,6 +17,7 @@ from frigate.config.classification import CustomClassificationConfig
 from frigate.const import CLIPS_DIR, MODEL_CACHE_DIR
 from frigate.log import suppress_stderr_during
 from frigate.util.builtin import EventsPerSecond, InferenceSpeed, load_labels
+from frigate.util.classification import resize_classification_image
 from frigate.util.file import trim_oldest_files
 from frigate.util.image import calculate_region
 from frigate.util.object import box_overlaps
@@ -275,7 +276,7 @@ class CustomStateClassificationProcessor(DeferredRealtimeProcessorApi):
         cropped_frame = rgb[y1:y2, x1:x2]
 
         try:
-            resized_frame = cv2.resize(cropped_frame, (224, 224))
+            resized_frame = resize_classification_image(cropped_frame)
         except Exception:
             logger.warning("Failed to resize image for state classification")
             return
@@ -583,7 +584,7 @@ class CustomObjectClassificationProcessor(DeferredRealtimeProcessorApi):
         crop = rgb[y:y2, x:x2]
 
         try:
-            resized_crop = cv2.resize(crop, (224, 224))
+            resized_crop = resize_classification_image(crop)
         except Exception:
             logger.warning("Failed to resize image for object classification")
             return
