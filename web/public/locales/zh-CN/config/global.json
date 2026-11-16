@@ -738,7 +738,7 @@
             },
             "threshold": {
                 "label": "置信度阈值",
-                "description": "目标被视为真正阳性所需的平均检测置信度阈值。"
+                "description": "目标被视为有效检测所需的平均检测置信度阈值。"
             },
             "min_score": {
                 "label": "最小置信度",

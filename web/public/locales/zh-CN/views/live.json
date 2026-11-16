@@ -184,6 +184,9 @@
         "audio-codec": "此视频流的音频编码格式不受 WebRTC 支持。请使用 go2rtc 转码为 opus 或 G.711。",
         "checking": "正在检查 WebRTC 是否可用…"
       }
+    },
+    "metadata": {
+      "loading": "正在获取视频流元数据…"
     }
   },
   "cameraSettings": {
