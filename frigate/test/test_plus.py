@@ -1,9 +1,14 @@
 """Tests for Frigate+ model metadata."""
 
 import asyncio
+import datetime
+import email.utils
+import http.server
 import json
 import os
 import tempfile
+import threading
+import time
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -11,7 +16,16 @@ import aiohttp
 from aiohttp import web
 from aiohttp.test_utils import TestServer
 
-from frigate.plus import PlusApi, PlusKeyStatus, load_plus_model_info
+from frigate.const import PLUS_ENV_VAR
+from frigate.plus import (
+    PlusApi,
+    PlusKeyStatus,
+    PlusRateLimitError,
+    load_plus_model_info,
+    parse_retry_after,
+)
+
+TEST_PLUS_KEY = f"{'a' * 8}-{'b' * 4}-{'c' * 4}-{'d' * 4}-{'e' * 12}:{'f' * 40}"
 
 
 class TestHailoAlias(unittest.TestCase):
@@ -210,6 +224,139 @@ class TestValidateKey(unittest.IsolatedAsyncioTestCase):
 
         self.assertEqual(await api.validate_key(), PlusKeyStatus.not_set)
         self.assertEqual(requests_seen, [])
+
+
+class TestParseRetryAfter(unittest.TestCase):
+    def test_delay_seconds(self):
+        self.assertEqual(parse_retry_after("120"), 120)
+        self.assertEqual(parse_retry_after(" 0 "), 0)
+
+    def test_an_http_date(self):
+        retry_at = datetime.datetime.now(datetime.UTC) + datetime.timedelta(seconds=90)
+        header = email.utils.format_datetime(retry_at, usegmt=True)
+
+        self.assertAlmostEqual(parse_retry_after(header), 90, delta=2)
+
+    def test_a_date_in_the_past_is_no_wait(self):
+        self.assertEqual(parse_retry_after("Wed, 21 Oct 2015 07:28:00 GMT"), 0)
+
+    def test_missing_or_invalid_values(self):
+        for value in (None, "", "soon", "-5", "1.5"):
+            with self.subTest(value=value):
+                self.assertIsNone(parse_retry_after(value))
+
+
+class TestRateLimit(unittest.TestCase):
+    """A 429 from Frigate+ is raised at once instead of blocking on Retry-After."""
+
+    def setUp(self):
+        self.hits: list[str] = []
+        self.status = 429
+        self.headers: dict[str, str] = {"Retry-After": "30"}
+        test = self
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def _reply(self):
+                test.hits.append(f"{self.command} {self.path}")
+                length = int(self.headers.get("Content-Length") or 0)
+                self.rfile.read(length)
+
+                if self.path == "/v1/auth/token":
+                    status, body = (
+                        200,
+                        json.dumps({"accessToken": "t", "expires": time.time() + 3600}),
+                    )
+                    headers = {}
+                else:
+                    status, body, headers = test.status, "{}", test.headers
+
+                self.send_response(status)
+                for name, value in headers.items():
+                    self.send_header(name, value)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body.encode())
+
+            do_GET = do_PUT = do_POST = _reply
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+
+        host = f"http://127.0.0.1:{server.server_port}"
+        with (
+            patch("frigate.plus.PLUS_API_HOST", host),
+            patch.dict(os.environ, {PLUS_ENV_VAR: TEST_PLUS_KEY}),
+        ):
+            self.api = PlusApi()
+
+    def _api_hits(self) -> list[str]:
+        return [hit for hit in self.hits if hit != "GET /v1/auth/token"]
+
+    def test_a_429_is_raised_without_retrying(self):
+        for call in (
+            lambda: self.api.get_models(),
+            lambda: self.api.add_annotation("img", [0, 0, 1, 1], "person"),
+            lambda: self.api._post("image/create", {}),
+        ):
+            with self.subTest(call=call):
+                self.hits.clear()
+                self.api._rate_limited_until = None
+                start = time.monotonic()
+
+                with self.assertRaises(PlusRateLimitError) as ctx:
+                    call()
+
+                self.assertEqual(ctx.exception.retry_after, 30)
+                self.assertEqual(len(self._api_hits()), 1)
+                self.assertLess(time.monotonic() - start, 5)
+
+    def test_requests_are_refused_locally_until_retry_after_passes(self):
+        with self.assertRaises(PlusRateLimitError):
+            self.api.get_models()
+
+        self.assertAlmostEqual(self.api.rate_limit_remaining(), 30, delta=1)
+        self.hits.clear()
+
+        with self.assertRaises(PlusRateLimitError) as ctx:
+            self.api.get_model_info("abc")
+
+        self.assertAlmostEqual(ctx.exception.retry_after, 30, delta=1)
+        self.assertEqual(self.hits, [])
+
+        # once the wait has passed, requests go to the server again
+        self.api._rate_limited_until = time.time() - 1
+        self.status = 200
+
+        self.assertEqual(self.api.get_model_info("abc"), {})
+        self.assertIsNone(self.api.rate_limit_remaining())
+
+    def test_a_429_without_retry_after_is_not_remembered(self):
+        self.headers = {}
+
+        with self.assertRaises(PlusRateLimitError) as ctx:
+            self.api.get_models()
+
+        self.assertIsNone(ctx.exception.retry_after)
+        self.assertIsNone(self.api.rate_limit_remaining())
+
+    def test_a_rate_limited_token_refresh(self):
+        self.api._token_data = {}
+
+        with patch.object(
+            self.api._session,
+            "get",
+            return_value=MagicMock(status_code=429, headers={"Retry-After": "60"}),
+        ):
+            with self.assertRaises(PlusRateLimitError) as ctx:
+                self.api.get_models()
+
+        self.assertEqual(ctx.exception.retry_after, 60)
+        self.assertAlmostEqual(self.api.rate_limit_remaining(), 60, delta=1)
 
 
 if __name__ == "__main__":
