@@ -525,6 +525,27 @@ or add these options to your `docker run` command:
 --volume /sys/:/sys/:ro
 ```
 
+Frigate reads NPU and GPU (RGA) usage from `/sys/kernel/debug`, which the kernel makes readable only by root. Frigate's services don't run as root, so to show these stats on the System page, bind the two load files into the container. This works with or without `privileged: true`:
+
+```yaml
+volumes:
+  - /sys/kernel/debug/rknpu/load:/rockchip/rknpu/load:ro
+  - /sys/kernel/debug/rkrga/load:/rockchip/rkrga/load:ro
+```
+
+or for `docker run`:
+
+```
+--volume /sys/kernel/debug/rknpu/load:/rockchip/rknpu/load:ro \
+--volume /sys/kernel/debug/rkrga/load:/rockchip/rkrga/load:ro
+```
+
+These lines are optional, and everything else works without them. Only add a line for a file that exists on your host, because Docker won't start the container if one is missing. Check with:
+
+```
+$ sudo ls /sys/kernel/debug/rknpu/load /sys/kernel/debug/rkrga/load
+```
+
 #### Configuration
 
 Next, you should configure [hardware object detection](/configuration/object_detectors#rockchip-platform) and [hardware video processing](/configuration/hardware_acceleration_video#rockchip-platform).

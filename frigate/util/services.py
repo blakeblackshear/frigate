@@ -744,12 +744,60 @@ def get_openvino_npu_stats() -> dict[str, str] | None:
         return None
 
 
+ROCKCHIP_DEBUGFS_DIR = "/sys/kernel/debug"
+# debugfs is root-only, so a non-root install binds the driver load files here
+ROCKCHIP_LOAD_DIR = "/rockchip"
+
+_rockchip_load_warning_logged = False
+
+
+def _read_rockchip_load(driver: str) -> str | None:
+    """Read a Rockchip driver's load file.
+
+    The kernel makes debugfs readable only by root, so when Frigate isn't
+    root the file is read from where the compose file binds it instead.
+
+    Args:
+        driver: The driver's debugfs directory, rknpu or rkrga
+
+    Returns:
+        The file's contents, or None if neither location could be read
+    """
+    global _rockchip_load_warning_logged
+
+    denied = False
+    for base in (ROCKCHIP_DEBUGFS_DIR, ROCKCHIP_LOAD_DIR):
+        try:
+            with open(os.path.join(base, driver, "load")) as f:
+                return f.read()
+        except PermissionError:
+            denied = True
+        except OSError:
+            continue
+
+    # a board without one of the drivers binds only the file it has, so
+    # warn only when nothing is bound at all
+    if (
+        denied
+        and not _rockchip_load_warning_logged
+        and not os.path.isdir(ROCKCHIP_LOAD_DIR)
+    ):
+        logger.warning(
+            "Rockchip GPU and NPU usage stats are unavailable because %s is only "
+            "readable by root; bind the load files into the container to enable "
+            "them, see https://docs.frigate.video/frigate/installation#rockchip-platform",
+            ROCKCHIP_DEBUGFS_DIR,
+        )
+        _rockchip_load_warning_logged = True
+
+    return None
+
+
 def get_rockchip_gpu_stats() -> dict[str, str | float] | None:
     """Get GPU stats using rk."""
-    try:
-        with open("/sys/kernel/debug/rkrga/load") as f:
-            content = f.read()
-    except FileNotFoundError:
+    content = _read_rockchip_load("rkrga")
+
+    if content is None:
         return None
 
     load_values = []
@@ -776,18 +824,17 @@ def get_rockchip_gpu_stats() -> dict[str, str | float] | None:
 
 def get_rockchip_npu_stats() -> dict[str, float | str] | None:
     """Get NPU stats using rk."""
-    try:
-        with open("/sys/kernel/debug/rknpu/load") as f:
-            npu_output = f.read()
+    npu_output = _read_rockchip_load("rknpu")
 
-            if "Core0:" in npu_output:
-                # multi core NPU
-                core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
-            else:
-                # single core NPU
-                core_loads = re.findall(r"NPU load:\s+(\d+)%", npu_output)
-    except FileNotFoundError:
-        core_loads = None
+    if npu_output is None:
+        return None
+
+    if "Core0:" in npu_output:
+        # multi core NPU
+        core_loads = re.findall(r"Core\d+:\s*(\d+)%", npu_output)
+    else:
+        # single core NPU
+        core_loads = re.findall(r"NPU load:\s+(\d+)%", npu_output)
 
     if not core_loads:
         return None
