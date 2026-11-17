@@ -5,6 +5,7 @@ import {
   CaseCard,
   ExportCard,
 } from "@/components/card/ExportCard";
+import { isCaseDownloadReady } from "@/utils/exportUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
   AlertDialog,
@@ -452,6 +453,29 @@ function Exports() {
     [cases, selectedCaseId],
   );
 
+  const selectedCaseExports = selectedCaseId
+    ? exportsByCase[selectedCaseId] || []
+    : [];
+  const selectedCaseJobs = selectedCaseId
+    ? activeJobsByCase[selectedCaseId] || []
+    : [];
+  const selectedCaseHasContent =
+    selectedCaseExports.length > 0 || selectedCaseJobs.length > 0;
+  const selectedCaseDownloadReady = isCaseDownloadReady(
+    selectedCaseExports,
+    selectedCaseJobs,
+  );
+  const downloadButtonContent = (
+    <>
+      <LuDownload className="text-secondary-foreground" />
+      {!isMobile && (
+        <div className="text-primary">
+          {t("button.download", { ns: "common" })}
+        </div>
+      )}
+    </>
+  );
+
   const uncategorizedExports = useMemo(
     () => exportsByCase["none"] || [],
     [exportsByCase],
@@ -772,26 +796,31 @@ function Exports() {
                   onUpdateFilter={setExportFilter}
                 />
                 <div className="flex items-center gap-1 md:gap-2">
-                  {(exportsByCase[selectedCase.id]?.length ?? 0) > 0 && (
-                    <Button
-                      asChild
-                      className="flex items-center gap-2 p-2"
-                      size="sm"
-                      aria-label={t("button.download", { ns: "common" })}
-                    >
-                      <a
-                        download
-                        href={`${baseUrl}api/cases/${selectedCase.id}/download`}
+                  {selectedCaseHasContent &&
+                    (selectedCaseDownloadReady ? (
+                      <Button
+                        asChild
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("button.download", { ns: "common" })}
                       >
-                        <LuDownload className="text-secondary-foreground" />
-                        {!isMobile && (
-                          <div className="text-primary">
-                            {t("button.download", { ns: "common" })}
-                          </div>
-                        )}
-                      </a>
-                    </Button>
-                  )}
+                        <a
+                          download
+                          href={`${baseUrl}api/cases/${selectedCase.id}/download`}
+                        >
+                          {downloadButtonContent}
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("button.download", { ns: "common" })}
+                        disabled
+                      >
+                        {downloadButtonContent}
+                      </Button>
+                    ))}
                   {isAdmin && (
                     <>
                       <Button
@@ -873,7 +902,7 @@ function Exports() {
           cases={filteredCases}
           exports={exports}
           exportsByCase={exportsByCase}
-          activeJobs={activeJobsByCase["none"] || []}
+          activeJobsByCase={activeJobsByCase}
           selectedExports={selectedExports}
           selectionMode={selectionMode}
           isLoading={cases === undefined || rawExports === undefined}
@@ -899,7 +928,7 @@ type AllExportsViewProps = {
   cases?: ExportCase[];
   exports: Export[];
   exportsByCase: { [caseId: string]: Export[] };
-  activeJobs: ExportJob[];
+  activeJobsByCase: { [caseId: string]: ExportJob[] };
   selectedExports: Export[];
   selectionMode: boolean;
   isLoading: boolean;
@@ -918,7 +947,7 @@ function AllExportsView({
   cases,
   exports,
   exportsByCase,
-  activeJobs,
+  activeJobsByCase,
   selectedExports,
   selectionMode,
   isLoading,
@@ -962,6 +991,8 @@ function AllExportsView({
   }, [exports, search]);
 
   const filteredActiveJobs = useMemo<ExportJob[]>(() => {
+    const activeJobs = activeJobsByCase["none"] || [];
+
     if (!search) {
       return activeJobs;
     }
@@ -972,7 +1003,7 @@ function AllExportsView({
         .replaceAll("_", " ")
         .includes(search.toLowerCase()),
     );
-  }, [activeJobs, search]);
+  }, [activeJobsByCase, search]);
 
   return (
     <div className="w-full overflow-hidden">
@@ -993,6 +1024,7 @@ function AllExportsView({
                     className=""
                     exportCase={item}
                     exports={exportsByCase[item.id] || []}
+                    activeJobs={activeJobsByCase[item.id] || []}
                     onSelect={() => {
                       setSelectedCaseId(item.id);
                     }}

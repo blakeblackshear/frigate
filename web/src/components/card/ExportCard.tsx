@@ -18,6 +18,7 @@ import { DeleteClipType, Export, ExportCase, ExportJob } from "@/types/export";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
+import { isCaseDownloadReady } from "@/utils/exportUtil";
 import { useTranslation } from "react-i18next";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import BlurredIconButton from "../button/BlurredIconButton";
@@ -40,6 +41,7 @@ type CaseCardProps = {
   className: string;
   exportCase: ExportCase;
   exports: Export[];
+  activeJobs: ExportJob[];
   onSelect: () => void;
   onEdit: (exportCase: ExportCase) => void;
   onDelete: (exportCase: ExportCase) => void;
@@ -48,12 +50,14 @@ export function CaseCard({
   className,
   exportCase,
   exports,
+  activeJobs,
   onSelect,
   onEdit,
   onDelete,
 }: CaseCardProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
+  const downloadReady = isCaseDownloadReady(exports, activeJobs);
   const firstExport = useMemo(
     () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
     [exports],
@@ -116,15 +120,20 @@ export function CaseCard({
             >
               {t("tooltip.shareCase")}
             </DropdownMenuItem>
-            {exports.length > 0 && (
+            {(exports.length > 0 || activeJobs.length > 0) && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 aria-label={t("tooltip.downloadCase")}
+                disabled={!downloadReady}
                 asChild
               >
                 <a
                   download
-                  href={`${baseUrl}api/cases/${exportCase.id}/download`}
+                  href={
+                    downloadReady
+                      ? `${baseUrl}api/cases/${exportCase.id}/download`
+                      : undefined
+                  }
                   onClick={(e) => e.stopPropagation()}
                 >
                   {t("tooltip.downloadCase")}

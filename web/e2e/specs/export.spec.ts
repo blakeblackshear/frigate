@@ -291,6 +291,80 @@ test.describe("Export Page - Case Card Menu @high", () => {
     await expectBodyInteractive(frigateApp.page);
   });
 
+  test("download is disabled while a case export is still encoding", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/export**", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "export-done",
+            camera: "front_door",
+            name: "Finished",
+            date: 1775490731,
+            video_path: "/exports/export-done.mp4",
+            thumb_path: "/exports/export-done-thumb.jpg",
+            in_progress: false,
+            export_case_id: "case-001",
+          },
+          {
+            id: "export-encoding",
+            camera: "backyard",
+            name: "Still Encoding",
+            date: 1775490732,
+            video_path: "/exports/export-encoding.mp4",
+            thumb_path: "",
+            in_progress: true,
+            export_case_id: "case-001",
+          },
+        ],
+      }),
+    );
+
+    const menu = await openCaseMenu(frigateApp);
+    const download = menu.getByRole("menuitem", { name: "Download case" });
+    await expect(download).toHaveAttribute("data-disabled", "");
+    await expect(download).not.toHaveAttribute("href");
+
+    await frigateApp.page.keyboard.press("Escape");
+    await frigateApp.goto("/export?caseId=case-001");
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Download" }),
+    ).toBeDisabled();
+  });
+
+  test("download is disabled while a case export job is queued", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-queued",
+            job_type: "export",
+            status: "queued",
+            camera: "front_door",
+            name: "Queued Sample",
+            export_case_id: "case-001",
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: null,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: null,
+            progress_percent: 0,
+          },
+        ],
+      }),
+    );
+
+    const menu = await openCaseMenu(frigateApp);
+    await expect(
+      menu.getByRole("menuitem", { name: "Download case" }),
+    ).toHaveAttribute("data-disabled", "");
+  });
+
   test("viewers only see share and download", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ profile: viewerProfile() });
     const menu = await openCaseMenu(frigateApp);
