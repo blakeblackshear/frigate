@@ -158,17 +158,24 @@ class GeminiClient(GenAIClient):
                 if schema:
                     generation_config_dict["response_schema"] = schema
 
+            generation_config = types.GenerateContentConfig(**generation_config_dict)
+            if extra_headers:
+                http_options = generation_config.http_options or types.HttpOptions()
+                request_header_names = {key.lower() for key in extra_headers}
+                headers = {
+                    key: value
+                    for key, value in (http_options.headers or {}).items()
+                    if key.lower() not in request_header_names
+                }
+                headers.update(extra_headers)
+                generation_config.http_options = http_options.model_copy(
+                    update={"headers": headers}
+                )
+
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
                 contents=contents,
-                config=types.GenerateContentConfig(
-                    **generation_config_dict,
-                    http_options=(
-                        types.HttpOptions(headers=extra_headers)
-                        if extra_headers
-                        else None
-                    ),
-                ),
+                config=generation_config,
             )
         except errors.APIError as e:
             logger.warning("Gemini returned an error: %s", str(e))

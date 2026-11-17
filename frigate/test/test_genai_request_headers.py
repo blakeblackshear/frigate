@@ -4,6 +4,7 @@ Frigate's own ids go in request headers so a proxy in front of the model can
 correlate a request without reading or rewriting its body.
 """
 
+import copy
 import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
@@ -143,6 +144,41 @@ class TestGeminiRequestHeaders(unittest.TestCase):
         client._send("prompt", [b"a"])
         config = client.provider.models.generate_content.call_args.kwargs["config"]
         self.assertIsNone(config.http_options)
+
+    def test_runtime_http_options_and_headers_are_preserved(self):
+        for extra_headers in [None, EVENT_HEADER]:
+            with self.subTest(extra_headers=extra_headers):
+                options = {
+                    "http_options": {
+                        "timeout": 5000,
+                        "headers": {"X-Custom": "kept", "x-frigate-event-id": "old"},
+                    }
+                }
+                original = copy.deepcopy(options)
+                client = _make_client(
+                    "gemini",
+                    model="gemini-2.5-flash",
+                    api_key="k",
+                    runtime_options=options,
+                )
+                client.provider = MagicMock()
+                client.provider.models.generate_content.return_value = SimpleNamespace(
+                    text="ok"
+                )
+                self.assertEqual(
+                    client._send("prompt", [b"a"], extra_headers=extra_headers), "ok"
+                )
+                config = client.provider.models.generate_content.call_args.kwargs[
+                    "config"
+                ]
+                self.assertEqual(config.http_options.timeout, 5000)
+                expected = (
+                    {"X-Custom": "kept", **EVENT_HEADER}
+                    if extra_headers
+                    else original["http_options"]["headers"]
+                )
+                self.assertEqual(config.http_options.headers, expected)
+                self.assertEqual(client.genai_config.runtime_options, original)
 
 
 class TestObjectDescriptionEventHeader(unittest.TestCase):
