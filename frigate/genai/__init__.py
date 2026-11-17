@@ -169,6 +169,11 @@ class GenAIClient:
             thumbnails,
             response_format,
             image_captions=frame_captions,
+            extra_headers=(
+                {"X-Frigate-Review-ID": str(review_data["id"])}
+                if self.genai_config.send_request_ids
+                else None
+            ),
         )
 
         if debug_save and response:

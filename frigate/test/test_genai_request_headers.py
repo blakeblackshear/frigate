@@ -209,5 +209,47 @@ class TestObjectDescriptionEventHeader(unittest.TestCase):
                 self.assertIsNone(client._send.call_args.kwargs["extra_headers"])
 
 
+class TestReviewDescriptionReviewHeader(unittest.TestCase):
+    def test_review_description_sends_the_review_id_header(self):
+        client = _make_client(
+            "openai", model="gpt-4o", api_key="k", send_request_ids=True
+        )
+        client._send = MagicMock(return_value=None)
+        with patch(
+            "frigate.genai.build_review_description_prompt", return_value="prompt"
+        ):
+            client.generate_review_description(
+                {"id": "1700000000.0-rev123", "camera": "front"},
+                [b"a"],
+                [],
+                None,
+                False,
+                "",
+            )
+        self.assertEqual(
+            client._send.call_args.kwargs["extra_headers"],
+            {"X-Frigate-Review-ID": "1700000000.0-rev123"},
+        )
+
+    def test_review_header_is_disabled_by_default_or_explicitly(self):
+        for options in [{}, {"send_request_ids": False}]:
+            with self.subTest(options=options):
+                client = _make_client("openai", model="gpt-4o", api_key="k", **options)
+                client._send = MagicMock(return_value=None)
+                with patch(
+                    "frigate.genai.build_review_description_prompt",
+                    return_value="prompt",
+                ):
+                    client.generate_review_description(
+                        {"id": "review-id", "camera": "front"},
+                        [b"a"],
+                        [],
+                        None,
+                        False,
+                        "",
+                    )
+                self.assertIsNone(client._send.call_args.kwargs["extra_headers"])
+
+
 if __name__ == "__main__":
     unittest.main()

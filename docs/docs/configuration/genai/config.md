@@ -48,8 +48,9 @@ Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings
 ### Request correlation
 
 Set `send_request_ids: true` on a named provider to send the existing object's
-`X-Frigate-Event-ID` header with object-description requests. This is disabled
-by default. It lets an external proxy correlate a request with its event without
+`X-Frigate-Event-ID` header with object-description requests, and the review
+segment's `X-Frigate-Review-ID` header with review-description requests. This is disabled
+by default. It lets an external proxy correlate a request with its event or review item without
 reading the image payload. Review summaries, chat and embeddings are unchanged.
 
 ```yaml

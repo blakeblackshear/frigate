@@ -69,7 +69,7 @@ class GenAIConfig(FrigateBaseModel):
     send_request_ids: bool = Field(
         default=False,
         title="Send request IDs",
-        description="Send existing event IDs in HTTP headers on object description requests for external correlation.",
+        description="Send existing event or review IDs in HTTP headers on description requests for external correlation.",
     )
     provider_options: dict[str, Any] = Field(
         default={},
