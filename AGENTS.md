@@ -6,7 +6,7 @@ This document provides coding guidelines and best practices for contributing to 
 
 Frigate NVR is a realtime object detection system for IP cameras that uses:
 
-- **Backend**: Python 3.13+ with FastAPI, OpenCV, TensorFlow/ONNX
+- **Backend**: Python 3.11 with FastAPI, OpenCV, TensorFlow/ONNX
 - **Frontend**: React with TypeScript, Vite, TailwindCSS
 - **Architecture**: Multiprocessing design with ZMQ and MQTT communication
 - **Focus**: Minimal resource usage with maximum performance
@@ -23,7 +23,7 @@ When reviewing code, do NOT comment on:
 
 ### Python Requirements
 
-- **Compatibility**: Python 3.13+
+- **Compatibility**: Python 3.11 (the version in the Docker image)
 - **Language Features**: Use modern Python features:
   - Pattern matching
   - Type hints (comprehensive typing preferred)
@@ -97,11 +97,12 @@ When reviewing code, do NOT comment on:
 
 ### Async Programming
 
-- **External I/O**: All external I/O operations must be async
-- **Best Practices**:
-  - Avoid sleeping in loops - use `asyncio.sleep()` not `time.sleep()`
+- **Scope**: Frigate is mostly synchronous multiprocess code, and most API handlers are plain `def` running in FastAPI's threadpool. These rules apply to code that is already `async def`.
+- **Blocking I/O**: A handler that does blocking work (peewee queries, `requests`, subprocess) should be a plain `def`, not an `async def` that blocks the event loop
+- **Best Practices** (inside `async def`):
+  - Use `asyncio.sleep()`, not `time.sleep()`
   - Avoid awaiting in loops - use `asyncio.gather()` instead
-  - No blocking calls in async functions
+  - No blocking calls
   - Use `asyncio.create_task()` for background operations
 - **Thread Safety**: Use proper synchronization for shared state
 
