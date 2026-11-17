@@ -18,6 +18,7 @@ import { DeleteClipType, Export, ExportCase, ExportJob } from "@/types/export";
 import { baseUrl } from "@/api/baseUrl";
 import { cn } from "@/lib/utils";
 import { shareOrCopy } from "@/utils/browserUtil";
+import { isCaseDownloadReady } from "@/utils/exportUtil";
 import { useTranslation } from "react-i18next";
 import { ImageShadowOverlay } from "../overlay/ImageShadowOverlay";
 import BlurredIconButton from "../button/BlurredIconButton";
@@ -40,15 +41,23 @@ type CaseCardProps = {
   className: string;
   exportCase: ExportCase;
   exports: Export[];
+  hasPendingJobs: boolean;
   onSelect: () => void;
+  onEdit: (exportCase: ExportCase) => void;
+  onDelete: (exportCase: ExportCase) => void;
 };
 export function CaseCard({
   className,
   exportCase,
   exports,
+  hasPendingJobs,
   onSelect,
+  onEdit,
+  onDelete,
 }: CaseCardProps) {
   const { t } = useTranslation(["views/exports"]);
+  const isAdmin = useIsAdmin();
+  const downloadReady = isCaseDownloadReady(exports, hasPendingJobs);
   const firstExport = useMemo(
     () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
     [exports],
@@ -87,7 +96,70 @@ export function CaseCard({
           <div>{cameraCount}</div>
         </div>
       </div>
-      <div className="absolute inset-x-2 bottom-2 z-20 text-white">
+      <div className="absolute bottom-2 right-3 z-40">
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <BlurredIconButton
+              aria-label={t("tooltip.caseOptions")}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <FiMoreVertical className="size-5" />
+            </BlurredIconButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem
+              className="cursor-pointer"
+              aria-label={t("tooltip.shareCase")}
+              onClick={() =>
+                shareOrCopy(
+                  `${baseUrl}export?caseId=${exportCase.id}`,
+                  exportCase.name,
+                )
+              }
+            >
+              {t("tooltip.shareCase")}
+            </DropdownMenuItem>
+            {(exports.length > 0 || hasPendingJobs) && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                aria-label={t("tooltip.downloadCase")}
+                disabled={!downloadReady}
+                asChild
+              >
+                <a
+                  download
+                  href={
+                    downloadReady
+                      ? `${baseUrl}api/cases/${exportCase.id}/download`
+                      : undefined
+                  }
+                >
+                  {t("tooltip.downloadCase")}
+                </a>
+              </DropdownMenuItem>
+            )}
+            {isAdmin && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                aria-label={t("tooltip.editCase")}
+                onClick={() => onEdit(exportCase)}
+              >
+                {t("tooltip.editCase")}
+              </DropdownMenuItem>
+            )}
+            {isAdmin && (
+              <DropdownMenuItem
+                className="cursor-pointer"
+                aria-label={t("tooltip.deleteCase")}
+                onClick={() => onDelete(exportCase)}
+              >
+                {t("tooltip.deleteCase")}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      <div className="absolute bottom-2 left-2 right-12 z-20 text-white">
         <div className="flex items-center justify-start gap-2">
           <FaFolder />
           <div className="truncate smart-capitalize">{exportCase.name}</div>

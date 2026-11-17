@@ -21,7 +21,12 @@
     "editName": "Edit name",
     "deleteExport": "Delete export",
     "assignToCase": "Add to case",
-    "removeFromCase": "Remove from case"
+    "removeFromCase": "Remove from case",
+    "caseOptions": "Case options",
+    "shareCase": "Share case",
+    "downloadCase": "Download case",
+    "editCase": "Edit case",
+    "deleteCase": "Delete case"
   },
   "toolbar": {
     "newCase": "New Case",
