@@ -59,10 +59,27 @@ class TestGetOrtSessionOptions(unittest.TestCase):
             ort.GraphOptimizationLevel.ORT_ENABLE_ALL,
         )
 
-    def test_detector_models_use_defaults(self):
+    def test_enrichment_models_disable_the_cpu_arena(self):
+        for model_type in EnrichmentModelTypeEnum:
+            for cpu in [False, True]:
+                with self.subTest(model_type=model_type, cpu=cpu):
+                    options = get_ort_session_options(model_type.value, cpu=cpu)
+                    self.assertFalse(options.enable_cpu_mem_arena)
+
+    def test_detector_models_keep_defaults_except_the_cpu_arena(self):
         for model_type in [None, ModelTypeEnum.rfdetr.value]:
-            with self.subTest(model_type=model_type):
-                self.assertIsNone(get_ort_session_options(model_type, cpu=True))
+            for cpu in [False, True]:
+                with self.subTest(model_type=model_type, cpu=cpu):
+                    options = get_ort_session_options(model_type, cpu=cpu)
+                    self.assertFalse(options.enable_cpu_mem_arena)
+                    self.assertEqual(
+                        options.graph_optimization_level,
+                        ort.GraphOptimizationLevel.ORT_ENABLE_ALL,
+                    )
+                    with self.assertRaises(RuntimeError):
+                        options.get_session_config_entry(
+                            "session.intra_op.allow_spinning"
+                        )
 
 
 class TestCudaGraphRunner(unittest.TestCase):
