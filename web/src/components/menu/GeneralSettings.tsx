@@ -115,6 +115,7 @@ export default function GeneralSettings({
       "zh-CN": "zhCN",
       "zh-Hant": "zhHant",
       "pt-BR": "ptBR",
+      "sr-Latn": "srLatn",
     };
 
     return supportedLanguageKeys.map((key) => {
