@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import requests
@@ -14,6 +14,7 @@ from frigate.config import BirdseyeModeEnum, FrigateConfig, RetainModeEnum
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.detectors.device import build_detector_config, runner_names
+from frigate.plus import PlusRateLimitError
 from frigate.util.builtin import deep_merge
 from frigate.util.config import resolve_ffmpeg_path
 
@@ -1636,6 +1637,51 @@ class TestConfig(unittest.TestCase):
 
         with self.assertRaisesRegex(ValidationError, "Unable to connect to Frigate+"):
             FrigateConfig(**config)
+
+    def _plus_model_config(self, model_id: str) -> dict:
+        return {
+            "mqtt": {"host": "mqtt"},
+            "models": [{"path": f"plus://{model_id}", "devices": ["cpu"]}],
+            "cameras": {
+                "back": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {
+                                "path": "rtsp://10.0.0.1:554/video",
+                                "roles": ["detect"],
+                            },
+                        ]
+                    },
+                }
+            },
+        }
+
+    @patch("frigate.detectors.detector_config.requests.get")
+    @patch(
+        "frigate.plus.PlusApi.get_model_download_url",
+        return_value="https://download.invalid/model",
+    )
+    def test_plus_model_error_response_is_not_saved(self, _, download):
+        model_id = "error_response_model"
+        model_path = os.path.join(MODEL_CACHE_DIR, model_id)
+        download.return_value = MagicMock(ok=False, status_code=429, content=b"busy")
+
+        with self.assertRaisesRegex(ValidationError, r"HTTP 429"):
+            FrigateConfig(**self._plus_model_config(model_id))
+
+        self.assertFalse(os.path.exists(model_path))
+
+    def test_plus_rate_limit_is_validation_error(self):
+        for retry_after, message in ((45, "Try again in 45 seconds"), (None, "later")):
+            with (
+                self.subTest(retry_after=retry_after),
+                patch(
+                    "frigate.plus.PlusApi.get_model_download_url",
+                    side_effect=PlusRateLimitError(retry_after),
+                ),
+                self.assertRaisesRegex(ValidationError, f"rate limiting.*{message}"),
+            ):
+                FrigateConfig(**self._plus_model_config("rate_limited_model"))
 
     def test_fails_on_invalid_role(self):
         config = {
