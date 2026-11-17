@@ -173,6 +173,17 @@ function Exports() {
     });
   }, [activeExportJobs, exportFilter?.cameras]);
 
+  // Download readiness ignores the camera filter because the zip includes every camera
+  const pendingCaseIds = useMemo(
+    () =>
+      new Set(
+        activeExportJobs.flatMap((job) =>
+          job.export_case_id ? [job.export_case_id] : [],
+        ),
+      ),
+    [activeExportJobs],
+  );
+
   const activeJobsByCase = useMemo<{ [caseId: string]: ExportJob[] }>(() => {
     const grouped: { [caseId: string]: ExportJob[] } = {};
 
@@ -456,14 +467,13 @@ function Exports() {
   const selectedCaseExports = selectedCaseId
     ? exportsByCase[selectedCaseId] || []
     : [];
-  const selectedCaseJobs = selectedCaseId
-    ? activeJobsByCase[selectedCaseId] || []
-    : [];
+  const selectedCasePending =
+    selectedCaseId !== undefined && pendingCaseIds.has(selectedCaseId);
   const selectedCaseHasContent =
-    selectedCaseExports.length > 0 || selectedCaseJobs.length > 0;
+    selectedCaseExports.length > 0 || selectedCasePending;
   const selectedCaseDownloadReady = isCaseDownloadReady(
     selectedCaseExports,
-    selectedCaseJobs,
+    selectedCasePending,
   );
   const downloadButtonContent = (
     <>
@@ -902,7 +912,8 @@ function Exports() {
           cases={filteredCases}
           exports={exports}
           exportsByCase={exportsByCase}
-          activeJobsByCase={activeJobsByCase}
+          activeJobs={activeJobsByCase["none"] || []}
+          pendingCaseIds={pendingCaseIds}
           selectedExports={selectedExports}
           selectionMode={selectionMode}
           isLoading={cases === undefined || rawExports === undefined}
@@ -928,7 +939,8 @@ type AllExportsViewProps = {
   cases?: ExportCase[];
   exports: Export[];
   exportsByCase: { [caseId: string]: Export[] };
-  activeJobsByCase: { [caseId: string]: ExportJob[] };
+  activeJobs: ExportJob[];
+  pendingCaseIds: Set<string>;
   selectedExports: Export[];
   selectionMode: boolean;
   isLoading: boolean;
@@ -947,7 +959,8 @@ function AllExportsView({
   cases,
   exports,
   exportsByCase,
-  activeJobsByCase,
+  activeJobs,
+  pendingCaseIds,
   selectedExports,
   selectionMode,
   isLoading,
@@ -991,8 +1004,6 @@ function AllExportsView({
   }, [exports, search]);
 
   const filteredActiveJobs = useMemo<ExportJob[]>(() => {
-    const activeJobs = activeJobsByCase["none"] || [];
-
     if (!search) {
       return activeJobs;
     }
@@ -1003,7 +1014,7 @@ function AllExportsView({
         .replaceAll("_", " ")
         .includes(search.toLowerCase()),
     );
-  }, [activeJobsByCase, search]);
+  }, [activeJobs, search]);
 
   return (
     <div className="w-full overflow-hidden">
@@ -1024,7 +1035,7 @@ function AllExportsView({
                     className=""
                     exportCase={item}
                     exports={exportsByCase[item.id] || []}
-                    activeJobs={activeJobsByCase[item.id] || []}
+                    hasPendingJobs={pendingCaseIds.has(item.id)}
                     onSelect={() => {
                       setSelectedCaseId(item.id);
                     }}

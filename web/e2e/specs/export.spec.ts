@@ -377,6 +377,58 @@ test.describe("Export Page - Case Card Menu @high", () => {
     ).toHaveAttribute("data-disabled", "");
   });
 
+  test("download stays disabled for a running job on a filtered-out camera", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/export**", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "export-front",
+            camera: "front_door",
+            name: "Front Finished",
+            date: 1775490731,
+            video_path: "/exports/export-front.mp4",
+            thumb_path: "",
+            in_progress: false,
+            export_case_id: "case-001",
+          },
+        ],
+      }),
+    );
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-backyard",
+            job_type: "export",
+            status: "running",
+            camera: "backyard",
+            name: "Backyard Running",
+            export_case_id: "case-001",
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding",
+            progress_percent: 10,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export?cameras=front_door");
+    await frigateApp.page
+      .getByRole("button", { name: "Case options" })
+      .first()
+      .click();
+    await expect(
+      frigateApp.page.getByRole("menuitem", { name: "Download case" }),
+    ).toHaveAttribute("data-disabled", "");
+  });
+
   test("viewers only see share and download", async ({ frigateApp }) => {
     await frigateApp.installDefaults({ profile: viewerProfile() });
     const menu = await openCaseMenu(frigateApp);

@@ -41,7 +41,7 @@ type CaseCardProps = {
   className: string;
   exportCase: ExportCase;
   exports: Export[];
-  activeJobs: ExportJob[];
+  hasPendingJobs: boolean;
   onSelect: () => void;
   onEdit: (exportCase: ExportCase) => void;
   onDelete: (exportCase: ExportCase) => void;
@@ -50,14 +50,14 @@ export function CaseCard({
   className,
   exportCase,
   exports,
-  activeJobs,
+  hasPendingJobs,
   onSelect,
   onEdit,
   onDelete,
 }: CaseCardProps) {
   const { t } = useTranslation(["views/exports"]);
   const isAdmin = useIsAdmin();
-  const downloadReady = isCaseDownloadReady(exports, activeJobs);
+  const downloadReady = isCaseDownloadReady(exports, hasPendingJobs);
   const firstExport = useMemo(
     () => exports.find((exp) => exp.thumb_path && exp.thumb_path.length > 0),
     [exports],
@@ -119,7 +119,7 @@ export function CaseCard({
             >
               {t("tooltip.shareCase")}
             </DropdownMenuItem>
-            {(exports.length > 0 || activeJobs.length > 0) && (
+            {(exports.length > 0 || hasPendingJobs) && (
               <DropdownMenuItem
                 className="cursor-pointer"
                 aria-label={t("tooltip.downloadCase")}

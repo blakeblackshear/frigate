@@ -1,12 +1,12 @@
-import { Export, ExportJob } from "@/types/export";
+import { Export } from "@/types/export";
 
 export function isCaseDownloadReady(
   exports: Export[],
-  activeJobs: ExportJob[],
+  hasPendingJobs: boolean,
 ): boolean {
   return (
     exports.length > 0 &&
-    activeJobs.length === 0 &&
+    !hasPendingJobs &&
     !exports.some((exp) => exp.in_progress)
   );
 }
