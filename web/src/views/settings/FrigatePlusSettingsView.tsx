@@ -20,10 +20,17 @@ import { isReplayCamera } from "@/utils/cameraUtil";
 import type { SettingsPageProps } from "@/views/settings/SingleSectionPage";
 import { getPrimaryModel } from "@/utils/modelUtil";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 
-type PlusKeyStatus = "valid" | "invalid" | "unreachable" | "not_set";
+type PlusKeyStatus =
+  "valid" | "invalid" | "unreachable" | "rate_limited" | "not_set";
 
-type PlusValidateResponse = { success: boolean; status: PlusKeyStatus };
+type PlusValidateResponse = {
+  success: boolean;
+  status: PlusKeyStatus;
+  // seconds until Frigate+ accepts requests again, when rate limited
+  retry_after?: number | null;
+};
 
 export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
   const { t } = useTranslation("views/settings");
@@ -34,6 +41,8 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
 
   const [isValidating, setIsValidating] = useState(false);
   const [keyStatus, setKeyStatus] = useState<PlusKeyStatus>();
+  const [retryAfter, setRetryAfter] = useState<number | null>(null);
+  const { formatRateLimit } = usePlusRateLimit();
 
   const validateKey = useCallback(async () => {
     setIsValidating(true);
@@ -41,6 +50,7 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
     try {
       const response = await axios.post<PlusValidateResponse>("plus/validate");
       setKeyStatus(response.data.status);
+      setRetryAfter(response.data.retry_after ?? null);
     } catch {
       setKeyStatus("unreachable");
     } finally {
@@ -124,7 +134,8 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
                         <div className="flex items-center gap-2">
                           {keyStatus === "valid" ? (
                             <CheckCircle2 className="size-5 shrink-0 text-green-500" />
-                          ) : keyStatus === "unreachable" ? (
+                          ) : keyStatus === "unreachable" ||
+                            keyStatus === "rate_limited" ? (
                             <AlertTriangle className="size-5 shrink-0 text-yellow-500" />
                           ) : (
                             <XCircle className="size-5 shrink-0 text-red-500" />
@@ -134,7 +145,9 @@ export default function FrigatePlusSettingsView(_props: SettingsPageProps) {
                               ? t("frigatePlus.apiKey.serverValid")
                               : keyStatus === "unreachable"
                                 ? t("frigatePlus.apiKey.serverUnreachable")
-                                : t("frigatePlus.apiKey.serverInvalid")}
+                                : keyStatus === "rate_limited"
+                                  ? formatRateLimit(retryAfter)
+                                  : t("frigatePlus.apiKey.serverInvalid")}
                           </span>
                         </div>
                       )}

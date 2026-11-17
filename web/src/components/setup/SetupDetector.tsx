@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDocDomain } from "@/hooks/use-doc-domain";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import type { DetectionHardware } from "@/types/hardware";
 import { recommendedDetectorCount } from "@/utils/detectionHardware";
@@ -79,15 +80,16 @@ export default function SetupDetector({
 
   const needsModel = MODEL_REQUIRED_DETECTORS.includes(selected.detector);
 
-  const { data: plusModels } = useSWR<FrigatePlusModel[]>(
-    plusEnabled && needsModel ? "/plus/models" : null,
-    {
-      fetcher: async (url) => {
-        const res = await axios.get(url, { withCredentials: true });
-        return res.data;
-      },
+  const { getRateLimitMessage } = usePlusRateLimit();
+  const { data: plusModels, error: plusModelsError } = useSWR<
+    FrigatePlusModel[]
+  >(plusEnabled && needsModel ? "/plus/models" : null, {
+    fetcher: async (url) => {
+      const res = await axios.get(url, { withCredentials: true });
+      return res.data;
     },
-  );
+  });
+  const plusRateLimitMessage = getRateLimitMessage(plusModelsError);
   const [plusModelId, setPlusModelId] = useState("");
 
   const compatiblePlusModels = useMemo(
@@ -217,6 +219,9 @@ export default function SetupDetector({
           <p>
             {t("setupWizard.detector.modelRequired", { name: selected.name })}
           </p>
+          {plusEnabled && plusRateLimitMessage && (
+            <p className="text-danger">{plusRateLimitMessage}</p>
+          )}
           {plusEnabled ? (
             <Select value={plusModelId} onValueChange={setPlusModelId}>
               <SelectTrigger className="max-w-xs">

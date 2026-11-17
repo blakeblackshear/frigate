@@ -22,6 +22,7 @@ import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
 import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 
 // Android native hls does not seek correctly
 const USE_NATIVE_HLS = false;
@@ -109,6 +110,7 @@ export default function HlsVideoPlayer({
   transformedOverlay,
 }: HlsVideoPlayerProps) {
   const { t } = useTranslation("components/player");
+  const { getRateLimitMessage } = usePlusRateLimit();
   const { data: config } = useSWR<FrigateConfig>("config");
   const isAdmin = useIsAdmin();
 
@@ -525,18 +527,26 @@ export default function HlsVideoPlayer({
           onUploadFrame={async () => {
             const frameTime = getVideoTime();
 
-            if (frameTime && onUploadFrame) {
+            if (!frameTime || !onUploadFrame) {
+              return;
+            }
+
+            try {
               const resp = await onUploadFrame(frameTime);
 
-              if (resp && resp.status == 200) {
-                toast.success(t("toast.success.submittedFrigatePlus"), {
-                  position: "top-center",
-                });
-              } else {
-                toast.success(t("toast.error.submitFrigatePlusFailed"), {
-                  position: "top-center",
-                });
+              if (resp?.status !== 200) {
+                throw new Error();
               }
+
+              toast.success(t("toast.success.submittedFrigatePlus"), {
+                position: "top-center",
+              });
+            } catch (error) {
+              toast.error(
+                getRateLimitMessage(error) ??
+                  t("toast.error.submitFrigatePlusFailed"),
+                { position: "top-center" },
+              );
             }
           }}
           onSnapshot={onSnapshot ? handleSnapshot : undefined}
