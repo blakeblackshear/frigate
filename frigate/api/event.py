@@ -53,11 +53,13 @@ from frigate.api.defs.response.event_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
+from frigate.api.plus_util import plus_rate_limited_response
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.config.classification import ObjectClassificationType
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
+from frigate.plus import PlusRateLimitError
 from frigate.track.object_processing import TrackedObject
 from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
 from frigate.util.path import get_trigger_thumbnail_path, safe_join
@@ -1139,6 +1141,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         plus_id = await asyncio.to_thread(
             request.app.frigate_config.plus_api.upload_image, image, event.camera
         )
+    except PlusRateLimitError as err:
+        return plus_rate_limited_response(err)
     except Exception as ex:
         logger.exception(ex)
         return JSONResponse(
@@ -1160,6 +1164,8 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
                 box,
                 event.label,
             )
+        except PlusRateLimitError as err:
+            return plus_rate_limited_response(err)
         except ValueError:
             message = "Error uploading annotation, unsupported label provided."
             logger.error(message)
@@ -1256,6 +1262,8 @@ async def false_positive(request: Request, event_id: str):
             event.model_type,
             event.detector_type,
         )
+    except PlusRateLimitError as err:
+        return plus_rate_limited_response(err)
     except ValueError:
         message = "Error uploading false positive, unsupported label provided."
         logger.error(message)

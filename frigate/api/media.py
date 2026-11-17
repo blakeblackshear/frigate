@@ -36,6 +36,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaMjpegFeedQueryParams,
 )
 from frigate.api.defs.tags import Tags
+from frigate.api.plus_util import plus_rate_limited_response
 from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
 from frigate.config.camera.snapshots import SnapshotsConfig
@@ -51,6 +52,7 @@ from frigate.output.preview import (
     get_most_recent_preview_frame,
     is_camera_preview_frame,
 )
+from frigate.plus import PlusRateLimitError
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.file import (
@@ -479,9 +481,12 @@ async def submit_recording_snapshot_to_plus(
             )
 
         nd = cv2.imdecode(np.frombuffer(image_data, dtype=np.int8), cv2.IMREAD_COLOR)
-        await asyncio.to_thread(
-            request.app.frigate_config.plus_api.upload_image, nd, camera_name
-        )
+        try:
+            await asyncio.to_thread(
+                request.app.frigate_config.plus_api.upload_image, nd, camera_name
+            )
+        except PlusRateLimitError as err:
+            return plus_rate_limited_response(err)
 
         return JSONResponse(
             content={

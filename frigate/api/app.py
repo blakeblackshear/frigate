@@ -40,6 +40,7 @@ from frigate.api.defs.request.app_body import (
     MediaSyncBody,
 )
 from frigate.api.defs.tags import Tags
+from frigate.api.plus_util import plus_rate_limited_response
 from frigate.config import FrigateConfig, GenAIConfig, GenAIProviderEnum
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
@@ -54,7 +55,7 @@ from frigate.jobs.media_sync import (
     start_media_sync_job,
 )
 from frigate.models import Event, Timeline
-from frigate.plus import PlusKeyStatus, load_plus_model_info
+from frigate.plus import PlusKeyStatus, PlusRateLimitError, load_plus_model_info
 from frigate.stats.prometheus import get_metrics, update_metrics
 from frigate.types import JobStatusTypesEnum
 from frigate.util.builtin import (
@@ -1665,7 +1666,10 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
             status_code=400,
         )
 
-    models: dict[Any, Any] = request.app.frigate_config.plus_api.get_models()
+    try:
+        models: dict[Any, Any] = request.app.frigate_config.plus_api.get_models()
+    except PlusRateLimitError as err:
+        return plus_rate_limited_response(err)
 
     if not models["list"]:
         return JSONResponse(

@@ -14,6 +14,7 @@ from fastapi import Request
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.const import MAX_SEGMENT_DURATION
 from frigate.models import Event, Recordings
+from frigate.plus import PlusRateLimitError
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
 
 
@@ -2144,3 +2145,22 @@ class TestHttpMedia(BaseTestHttp):
 
         self.assertEqual(response.status_code, 200)
         upload.assert_called_once_with("frame", "front_door")
+
+    def test_plus_snapshot_rate_limited(self):
+        self._insert_recording("snapshot", 1000, 1010)
+
+        with (
+            AuthTestClient(self.app) as client,
+            patch("frigate.api.media.get_image_from_recording", return_value=b"png"),
+            patch("frigate.api.media.cv2.imdecode", return_value="frame"),
+            patch.object(
+                self.app.frigate_config.plus_api,
+                "upload_image",
+                side_effect=PlusRateLimitError(60),
+            ),
+        ):
+            response = client.post("/front_door/plus/1005")
+
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response.json()["retry_after"], 60)
+        self.assertEqual(response.headers["Retry-After"], "60")
