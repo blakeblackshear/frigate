@@ -159,6 +159,154 @@ test.describe("Export Page - Overview @high", () => {
   });
 });
 
+test.describe("Export Page - Case Card Menu @high", () => {
+  async function openCaseMenu(frigateApp: FrigateApp) {
+    await frigateApp.goto("/export");
+    await frigateApp.page
+      .getByRole("button", { name: "Case options" })
+      .first()
+      .click();
+    const menu = frigateApp.page.getByRole("menu");
+    await expect(menu).toBeVisible();
+    return menu;
+  }
+
+  test("menu offers share, download, edit, and delete", async ({
+    frigateApp,
+  }) => {
+    const menu = await openCaseMenu(frigateApp);
+
+    await expect(
+      menu.getByRole("menuitem", { name: "Share case" }),
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("menuitem", { name: "Download case" }),
+    ).toHaveAttribute("href", /api\/cases\/case-001\/download$/);
+    await expect(
+      menu.getByRole("menuitem", { name: "Edit case" }),
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("menuitem", { name: "Delete case" }),
+    ).toBeVisible();
+  });
+
+  test("edit opens a prefilled dialog without opening the case", async ({
+    frigateApp,
+  }) => {
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Edit case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: "Edit Case" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator("input")).toHaveValue(
+      "Package Theft Investigation",
+    );
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeHidden();
+  });
+
+  test("delete opens the confirmation dialog", async ({ frigateApp }) => {
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Delete case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("alertdialog")
+      .filter({ hasText: "Delete Case" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(/Package Theft Investigation/)).toBeVisible();
+  });
+
+  test("share sends a link that opens the case", async ({ frigateApp }) => {
+    await frigateApp.page.addInitScript(() => {
+      Object.defineProperty(navigator, "share", {
+        configurable: true,
+        value: (data: ShareData) => {
+          (window as unknown as { sharedUrl?: string }).sharedUrl = data.url;
+          return Promise.resolve();
+        },
+      });
+    });
+
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Share case" }).click();
+
+    const sharedUrl = await frigateApp.page.evaluate(
+      () => (window as unknown as { sharedUrl?: string }).sharedUrl,
+    );
+    expect(sharedUrl).toMatch(/\/export\?caseId=case-001$/);
+
+    await frigateApp.goto("/export?caseId=case-001");
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeVisible();
+  });
+
+  test("deleting via the card menu leaves body interactive", async ({
+    frigateApp,
+  }) => {
+    const initialCases = [
+      {
+        id: "case-001",
+        name: "Package Theft Investigation",
+        description: "",
+        created_at: 1775407931.3863528,
+        updated_at: 1775483531.3863528,
+      },
+    ];
+    let deleted = false;
+
+    await frigateApp.page.route(/\/api\/cases(?:$|\?|\/)/, async (route) => {
+      const method = route.request().method();
+
+      if (method === "DELETE") {
+        deleted = true;
+        return route.fulfill({ json: { success: true } });
+      }
+
+      if (method === "GET") {
+        return route.fulfill({ json: deleted ? [] : initialCases });
+      }
+
+      return route.fallback();
+    });
+
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Delete case" }).click();
+
+    const dialog = frigateApp.page.getByRole("alertdialog");
+    await dialog.getByRole("button", { name: /^delete$/i }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Package Theft Investigation", { exact: true }),
+    ).toBeHidden();
+    await waitForBodyInteractive(frigateApp.page, 5_000);
+    await expectBodyInteractive(frigateApp.page);
+  });
+
+  test("viewers only see share and download", async ({ frigateApp }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+    const menu = await openCaseMenu(frigateApp);
+
+    await expect(
+      menu.getByRole("menuitem", { name: "Share case" }),
+    ).toBeVisible();
+    await expect(menu.getByRole("menuitem", { name: "Edit case" })).toHaveCount(
+      0,
+    );
+    await expect(
+      menu.getByRole("menuitem", { name: "Delete case" }),
+    ).toHaveCount(0);
+  });
+});
+
 test.describe("Export Page - Case Detail @high", () => {
   test("opening a case shows its detail view and associated export", async ({
     frigateApp,

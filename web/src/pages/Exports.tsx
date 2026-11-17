@@ -463,17 +463,11 @@ function Exports() {
       exportCaseId?: string,
     ) => {
       try {
-        let savedCaseId = exportCaseId;
-
         if (exportCaseId) {
           await axios.patch(`cases/${exportCaseId}`, payload);
         } else {
           const response = await axios.post("cases", payload);
-          savedCaseId = response.data.id;
-        }
-
-        if (savedCaseId) {
-          setSelectedCaseId(savedCaseId);
+          setSelectedCaseId(response.data.id);
         }
 
         mutate();
@@ -885,6 +879,10 @@ function Exports() {
           isLoading={cases === undefined || rawExports === undefined}
           onSelectExport={onSelectExport}
           setSelectedCaseId={setSelectedCaseId}
+          onEditCase={(exportCase) =>
+            setCaseDialog({ mode: "edit", exportCase })
+          }
+          onDeleteCase={setCaseToDelete}
           setSelected={setSelected}
           renameClip={onHandleRename}
           setDeleteClip={setDeleteClip}
@@ -907,6 +905,8 @@ type AllExportsViewProps = {
   isLoading: boolean;
   onSelectExport: (e: Export) => void;
   setSelectedCaseId: (id: string) => void;
+  onEditCase: (exportCase: ExportCase) => void;
+  onDeleteCase: (exportCase: ExportCase) => void;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
   setDeleteClip: (d: DeleteClipType | undefined) => void;
@@ -924,6 +924,8 @@ function AllExportsView({
   isLoading,
   onSelectExport,
   setSelectedCaseId,
+  onEditCase,
+  onDeleteCase,
   setSelected,
   renameClip,
   setDeleteClip,
@@ -994,6 +996,8 @@ function AllExportsView({
                     onSelect={() => {
                       setSelectedCaseId(item.id);
                     }}
+                    onEdit={onEditCase}
+                    onDelete={onDeleteCase}
                   />
                 ))}
               </div>
