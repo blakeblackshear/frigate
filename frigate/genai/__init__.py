@@ -296,7 +296,13 @@ class GenAIClient:
 
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
         return self._send(
-            prompt, thumbnails, extra_headers={"X-Frigate-Event-ID": str(event.id)}
+            prompt,
+            thumbnails,
+            extra_headers=(
+                {"X-Frigate-Event-ID": str(event.id)}
+                if self.genai_config.send_request_ids
+                else None
+            ),
         )
 
     def _init_provider(self) -> Any:

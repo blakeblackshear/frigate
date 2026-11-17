@@ -147,7 +147,9 @@ class TestGeminiRequestHeaders(unittest.TestCase):
 
 class TestObjectDescriptionEventHeader(unittest.TestCase):
     def test_object_description_sends_the_event_id_header(self):
-        client = _make_client("openai", model="gpt-4o", api_key="k")
+        client = _make_client(
+            "openai", model="gpt-4o", api_key="k", send_request_ids=True
+        )
         client._send = MagicMock(return_value="A person walks by.")
         event = SimpleNamespace(id="1700000000.0-abc123")
         with patch(
@@ -155,6 +157,20 @@ class TestObjectDescriptionEventHeader(unittest.TestCase):
         ):
             client.generate_object_description(SimpleNamespace(), [b"a"], event)
         self.assertEqual(client._send.call_args.kwargs["extra_headers"], EVENT_HEADER)
+
+    def test_object_header_is_disabled_by_default_or_explicitly(self):
+        for options in [{}, {"send_request_ids": False}]:
+            with self.subTest(options=options):
+                client = _make_client("openai", model="gpt-4o", api_key="k", **options)
+                client._send = MagicMock(return_value="A person walks by.")
+                with patch(
+                    "frigate.genai.build_object_description_prompt",
+                    return_value="prompt",
+                ):
+                    client.generate_object_description(
+                        SimpleNamespace(), [b"a"], SimpleNamespace(id="event-id")
+                    )
+                self.assertIsNone(client._send.call_args.kwargs["extra_headers"])
 
 
 if __name__ == "__main__":
