@@ -106,17 +106,16 @@ export function CaseCard({
               <FiMoreVertical className="size-5" />
             </BlurredIconButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
             <DropdownMenuItem
               className="cursor-pointer"
               aria-label={t("tooltip.shareCase")}
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() =>
                 shareOrCopy(
                   `${baseUrl}export?caseId=${exportCase.id}`,
                   exportCase.name,
-                );
-              }}
+                )
+              }
             >
               {t("tooltip.shareCase")}
             </DropdownMenuItem>
@@ -134,7 +133,6 @@ export function CaseCard({
                       ? `${baseUrl}api/cases/${exportCase.id}/download`
                       : undefined
                   }
-                  onClick={(e) => e.stopPropagation()}
                 >
                   {t("tooltip.downloadCase")}
                 </a>
@@ -144,10 +142,7 @@ export function CaseCard({
               <DropdownMenuItem
                 className="cursor-pointer"
                 aria-label={t("tooltip.editCase")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit(exportCase);
-                }}
+                onClick={() => onEdit(exportCase)}
               >
                 {t("tooltip.editCase")}
               </DropdownMenuItem>
@@ -156,10 +151,7 @@ export function CaseCard({
               <DropdownMenuItem
                 className="cursor-pointer"
                 aria-label={t("tooltip.deleteCase")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(exportCase);
-                }}
+                onClick={() => onDelete(exportCase)}
               >
                 {t("tooltip.deleteCase")}
               </DropdownMenuItem>

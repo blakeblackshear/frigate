@@ -326,6 +326,18 @@ test.describe("Export Page - Case Card Menu @high", () => {
     await expect(download).toHaveAttribute("data-disabled", "");
     await expect(download).not.toHaveAttribute("href");
 
+    const box = await download.boundingBox();
+    expect(box).not.toBeNull();
+    await frigateApp.page.mouse.click(
+      box!.x + box!.width / 2,
+      box!.y + box!.height / 2,
+    );
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeHidden();
+
     await frigateApp.page.keyboard.press("Escape");
     await frigateApp.goto("/export?caseId=case-001");
     await expect(
