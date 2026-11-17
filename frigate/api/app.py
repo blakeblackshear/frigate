@@ -1705,11 +1705,17 @@ def plusModels(request: Request, filterByCurrentModelDetector: bool = False):
 @router.post("/plus/validate", dependencies=[Depends(require_role(["admin"]))])
 async def validate_plus_key(request: Request):
     """Validate the configured Frigate+ API key with the Frigate+ server."""
-    status = await request.app.frigate_config.plus_api.validate_key()
+    plus_api = request.app.frigate_config.plus_api
+    status = await plus_api.validate_key()
+    content: dict[str, Any] = {
+        "success": status == PlusKeyStatus.valid,
+        "status": status.value,
+    }
 
-    return JSONResponse(
-        content={"success": status == PlusKeyStatus.valid, "status": status.value}
-    )
+    if status == PlusKeyStatus.rate_limited:
+        content["retry_after"] = plus_api.rate_limit_remaining()
+
+    return JSONResponse(content=content)
 
 
 @router.get(

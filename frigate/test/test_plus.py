@@ -113,18 +113,26 @@ class TestValidateKey(unittest.IsolatedAsyncioTestCase):
         api.host = host
         api.key = key
         api._token_data = dict(self.CACHED_TOKEN)
+        api._rate_limited_until = None
         return api
 
     async def _validate(self, handler) -> tuple[PlusKeyStatus, PlusApi]:
         api = self._api(await self._serve(handler))
         return await api.validate_key(), api
 
-    def _replies(self, status: int = 200, body: object = None, text: str | None = None):
+    def _replies(
+        self,
+        status: int = 200,
+        body: object = None,
+        text: str | None = None,
+        headers: dict[str, str] | None = None,
+    ):
         async def handler(request: web.Request) -> web.Response:
             self.auth = request.headers.get("Authorization")
+            self.requests_seen = getattr(self, "requests_seen", 0) + 1
             if text is not None:
-                return web.Response(status=status, text=text)
-            return web.json_response(body, status=status)
+                return web.Response(status=status, text=text, headers=headers)
+            return web.json_response(body, status=status, headers=headers)
 
         return handler
 
@@ -147,6 +155,25 @@ class TestValidateKey(unittest.IsolatedAsyncioTestCase):
         status, _ = await self._validate(self._replies(500, {"error": "down"}))
 
         self.assertEqual(status, PlusKeyStatus.unreachable)
+
+    async def test_a_rate_limited_key_is_not_reported_as_invalid(self):
+        api = self._api(
+            await self._serve(self._replies(429, {}, headers={"Retry-After": "120"}))
+        )
+
+        self.assertEqual(await api.validate_key(), PlusKeyStatus.rate_limited)
+        self.assertAlmostEqual(api.rate_limit_remaining(), 120, delta=1)
+        self.assertEqual(api._token_data, self.CACHED_TOKEN)
+
+        # validating again during the wait doesn't ask the server
+        self.assertEqual(await api.validate_key(), PlusKeyStatus.rate_limited)
+        self.assertEqual(self.requests_seen, 1)
+
+    async def test_a_rate_limit_without_retry_after(self):
+        status, api = await self._validate(self._replies(429, {}))
+
+        self.assertEqual(status, PlusKeyStatus.rate_limited)
+        self.assertIsNone(api.rate_limit_remaining())
 
     async def test_unusable_replies_keep_the_cached_token(self):
         # a successful reply without a usable token must not replace one that

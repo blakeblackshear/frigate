@@ -31,6 +31,7 @@ class PlusKeyStatus(str, Enum):
     valid = "valid"
     invalid = "invalid"
     unreachable = "unreachable"
+    rate_limited = "rate_limited"
     not_set = "not_set"
 
 
@@ -283,10 +284,15 @@ class PlusApi:
         result reflects the key's current state rather than a cached token.
 
         Returns:
-            The key's status as reported by the Frigate+ server
+            The key's status as reported by the Frigate+ server. When it is
+            rate_limited, rate_limit_remaining() gives the wait if known.
         """
         if self.key is None:
             return PlusKeyStatus.not_set
+
+        # asking again before the wait is over would only be refused again
+        if self.rate_limit_remaining() is not None:
+            return PlusKeyStatus.rate_limited
 
         key_id, _, secret = self.key.partition(":")
 
@@ -303,6 +309,7 @@ class PlusApi:
                     auth=aiohttp.BasicAuth(key_id, secret),
                 ) as r:
                     status = r.status
+                    retry_after = parse_retry_after(r.headers.get("Retry-After"))
                     token_data = await r.json(content_type=None) if r.ok else None
         except (aiohttp.ClientError, TimeoutError) as err:
             logger.warning("Unable to reach Frigate+ to validate API key: %s", err)
@@ -313,6 +320,10 @@ class PlusApi:
 
         if status in (401, 403):
             return PlusKeyStatus.invalid
+
+        if status == 429:
+            self._note_rate_limit(retry_after)
+            return PlusKeyStatus.rate_limited
 
         if status >= 400:
             logger.warning(
