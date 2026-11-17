@@ -26,4 +26,4 @@ ENV FRIGATE_IMAGE_VARIANT=synaptics
 
 COPY --from=synap1680-wheels /rootfs/usr/local/lib/*.so /usr/lib
 
-ADD https://raw.githubusercontent.com/synaptics-astra/synap-release/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80/model.synap /synaptics/mobilenet.synap
+ADD --chmod=644 https://raw.githubusercontent.com/synaptics-astra/synap-release/v1.5.0/models/dolphin/object_detection/coco/model/mobilenet224_full80/model.synap /synaptics/mobilenet.synap

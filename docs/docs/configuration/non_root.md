@@ -385,6 +385,8 @@ One Docker specific trap: published ports are inserted ahead of the host firewal
 
 `telemetry.stats.network_bandwidth` uses nethogs, which needs `CAP_NET_ADMIN` and `CAP_NET_RAW` and therefore root. The stat is turned off automatically when Frigate isn't running as root, with one warning in the log. Use `FRIGATE_ROOT_SERVICES=frigate` (or `FRIGATE_RUN_AS_ROOT=true`) if you need it.
 
+Rockchip NPU and GPU usage come from `/sys/kernel/debug`, which the kernel makes readable only by root. To keep these stats, bind the two load files into the container as shown in the [Rockchip installation steps](/frigate/installation#rockchip-platform). Without them, Frigate logs one warning and leaves the stats out.
+
 go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per-process GPU usage from `/proc/<pid>/fdinfo`, which the kernel won't let one user read for another user's processes, so anything go2rtc spawns is invisible to it. Overall GPU utilization is unaffected.
 
 If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user, which runs nginx. Frigate hands the key to that user at startup if the mount is writable; on a read-only mount, make the key readable by uid 1000 (or your `PUID`) yourself.
