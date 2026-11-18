@@ -140,7 +140,9 @@ class TestLoadRegistry(unittest.TestCase):
                     spinning = None
 
                 self.assertEqual(spinning, expected)
-                self.assertFalse(options.enable_cpu_mem_arena)
+                self.assertEqual(
+                    options.enable_cpu_mem_arena, provider != "CPUExecutionProvider"
+                )
 
 
 class TestLoadedDeviceSnapshot(unittest.TestCase):
