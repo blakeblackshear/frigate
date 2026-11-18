@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from fastapi import Request
 from peewee import DoesNotExist
@@ -7,6 +7,11 @@ from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.models import Event, Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
+
+
+def utc_day(dt: datetime) -> str:
+    """Return the UTC calendar day the summary endpoint buckets dt into."""
+    return dt.astimezone(UTC).strftime("%Y-%m-%d")
 
 
 class TestHttpReview(BaseTestHttp):
@@ -362,7 +367,7 @@ class TestHttpReview(BaseTestHttp):
             assert response_json["last24Hours"]["total_alert"] == 1
             assert response_json["last24Hours"]["total_detection"] == 0
 
-            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            today_formatted = utc_day(datetime.now())
             assert response_json[today_formatted]["total_alert"] == 1
             assert response_json[today_formatted]["total_detection"] == 0
 
@@ -379,7 +384,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            today_formatted = utc_day(datetime.now())
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -404,7 +409,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            today_formatted = utc_day(datetime.now())
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -439,9 +444,9 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = now.strftime("%Y-%m-%d")
+            today_formatted = utc_day(now)
             # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            five_days_ago_formatted = utc_day(five_days_ago)
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -491,9 +496,9 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = now.strftime("%Y-%m-%d")
+            today_formatted = utc_day(now)
             # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            five_days_ago_formatted = utc_day(five_days_ago)
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -549,7 +554,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            five_days_ago_formatted = utc_day(five_days_ago)
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": None,
