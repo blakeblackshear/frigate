@@ -327,6 +327,76 @@ class TestOpenAIProvider(unittest.TestCase):
         async_client.close.assert_awaited_once()
 
 
+class TestOpenAIContextSize(unittest.TestCase):
+    """Context size lookup from an OpenAI-compatible /models endpoint."""
+
+    # Neither model name contains "gpt", so the name-based default is 8192 and
+    # any other value must have come from the /models response.
+    MODEL = "google/gemini-2.5-flash"
+
+    def _client_with_models(self, *entries, provider_options=None):
+        client = _make_client(
+            "openai",
+            model=self.MODEL,
+            api_key="k",
+            base_url="https://openrouter.ai/api/v1",
+            provider_options=provider_options or {},
+        )
+        client.provider.models.list = MagicMock(
+            return_value=SimpleNamespace(data=list(entries))
+        )
+        return client
+
+    def test_vllm_max_model_len(self):
+        client = self._client_with_models(
+            SimpleNamespace(id=self.MODEL, max_model_len=32768)
+        )
+        self.assertEqual(client.get_context_size(), 32768)
+
+    def test_openrouter_prefers_top_provider_context_length(self):
+        # The top-level value is the largest any provider offers; the routed
+        # provider's smaller window is the one requests must fit in.
+        client = self._client_with_models(
+            SimpleNamespace(id="other/model", context_length=4096),
+            SimpleNamespace(
+                id=self.MODEL,
+                context_length=1048576,
+                top_provider={"context_length": 262144},
+            ),
+        )
+        self.assertEqual(client.get_context_size(), 262144)
+
+    def test_openrouter_falls_back_to_context_length(self):
+        client = self._client_with_models(
+            SimpleNamespace(
+                id=self.MODEL,
+                context_length=1048576,
+                top_provider={"context_length": None},
+            )
+        )
+        self.assertEqual(client.get_context_size(), 1048576)
+
+    def test_default_when_model_reports_no_context(self):
+        client = self._client_with_models(SimpleNamespace(id=self.MODEL))
+        self.assertEqual(client.get_context_size(), 8192)
+
+    def test_provider_options_override_api(self):
+        client = self._client_with_models(
+            SimpleNamespace(id=self.MODEL, context_length=1048576),
+            provider_options={"context_size": 16000},
+        )
+        self.assertEqual(client.get_context_size(), 16000)
+        client.provider.models.list.assert_not_called()
+
+    def test_result_is_cached(self):
+        client = self._client_with_models(
+            SimpleNamespace(id=self.MODEL, context_length=1048576)
+        )
+        client.get_context_size()
+        client.get_context_size()
+        client.provider.models.list.assert_called_once()
+
+
 # ---------------------------------------------------------------------------
 # Gemini
 # ---------------------------------------------------------------------------
