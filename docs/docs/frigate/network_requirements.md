@@ -117,7 +117,7 @@ See [Frigate+](/integrations/plus) for details.
 
 ### Generative AI
 
-When a Generative AI provider is configured, Frigate sends images and prompts to the configured provider for event descriptions, chat, and camera monitoring. Available providers:
+When a Generative AI provider is configured, Frigate sends images and prompts to the configured provider for the various features that are enabled. Available providers:
 
 | Provider      | Internet Required                                               |
 | ------------- | --------------------------------------------------------------- |

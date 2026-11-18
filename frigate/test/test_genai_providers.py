@@ -1286,6 +1286,154 @@ class TestImageTokenEstimate(unittest.TestCase):
         self.assertEqual(client._image_token_cache, {})
 
 
+class TestGeminiEmbeddings(unittest.TestCase):
+    """gemini-embedding-2 via embed_content. No network, no real images."""
+
+    @staticmethod
+    def _webp_bytes():
+        import io
+
+        from PIL import Image
+
+        buf = io.BytesIO()
+        Image.new("RGB", (8, 8), (10, 20, 30)).save(buf, format="WEBP")
+        return buf.getvalue()
+
+    @staticmethod
+    def _vector(value: float):
+        return SimpleNamespace(embeddings=[SimpleNamespace(values=[value] * 768)])
+
+    def _client(self, model="models/gemini-embedding-2"):
+        client = _make_client("gemini", model=model, api_key="k")
+        client.provider = MagicMock()
+        return client
+
+    def test_supports_embeddings_checks_supported_actions(self):
+        models = [
+            SimpleNamespace(
+                name="models/gemini-2.5-flash",
+                supported_actions=["generateContent"],
+            ),
+            SimpleNamespace(
+                name="models/gemini-embedding-2",
+                supported_actions=["embedContent", "countTokens"],
+            ),
+        ]
+
+        client = self._client(model="models/gemini-embedding-2")
+        client.provider.models.list.return_value = models
+        self.assertTrue(client.supports_embeddings)
+        self.assertEqual(
+            client.list_model_capabilities(),
+            {
+                "models/gemini-2.5-flash": {"supports_embeddings": False},
+                "gemini-2.5-flash": {"supports_embeddings": False},
+                "models/gemini-embedding-2": {"supports_embeddings": True},
+                "gemini-embedding-2": {"supports_embeddings": True},
+            },
+        )
+        client.provider.models.list.assert_called_once()
+
+        unprefixed = self._client(model="gemini-embedding-2")
+        unprefixed.provider.models.list.return_value = models
+        self.assertTrue(unprefixed.supports_embeddings)
+
+        chat_client = self._client(model="models/gemini-2.5-flash")
+        chat_client.provider.models.list.return_value = models
+        self.assertFalse(chat_client.supports_embeddings)
+
+    def test_capability_lookup_failure_is_not_cached(self):
+        client = self._client()
+        client.provider.models.list.side_effect = [
+            RuntimeError("offline"),
+            [
+                SimpleNamespace(
+                    name="models/gemini-embedding-2",
+                    supported_actions=["embedContent"],
+                )
+            ],
+        ]
+
+        self.assertFalse(client.supports_embeddings)
+        self.assertTrue(client.supports_embeddings)
+
+    def test_one_request_per_text_and_image(self):
+        client = self._client()
+        client.provider.models.embed_content.side_effect = [
+            self._vector(0.1),
+            self._vector(0.2),
+        ]
+
+        result = client.embed(texts=["a person walking"], images=[self._webp_bytes()])
+
+        calls = client.provider.models.embed_content.call_args_list
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(calls[0].kwargs["model"], "gemini-embedding-2")
+        self.assertEqual(
+            calls[0].kwargs["contents"],
+            "task: search result | query: a person walking",
+        )
+        self.assertEqual(calls[0].kwargs["config"].output_dimensionality, 768)
+        parts = calls[1].kwargs["contents"]
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(parts[0].inline_data.mime_type, "image/jpeg")
+        self.assertTrue(parts[0].inline_data.data.startswith(b"\xff\xd8\xff"))
+        self.assertEqual(calls[1].kwargs["model"], "gemini-embedding-2")
+        self.assertEqual(len(result), 2)
+        self.assertEqual(len(result[0]), 768)
+        self.assertEqual(result[0].dtype.name, "float32")
+        self.assertAlmostEqual(float(result[1][0]), 0.2, places=5)
+
+    def test_prepared_task_prefix_is_kept(self):
+        client = self._client(model="gemini-embedding-2")
+        client.provider.models.embed_content.return_value = self._vector(0.3)
+        prepared = "task: search result | query: already prepared"
+
+        client.embed(texts=[prepared])
+
+        contents = client.provider.models.embed_content.call_args.kwargs["contents"]
+        self.assertEqual(contents, prepared)
+        self.assertEqual(
+            client.provider.models.embed_content.call_args.kwargs["model"],
+            "gemini-embedding-2",
+        )
+
+    def test_empty_input_makes_no_request(self):
+        client = self._client()
+
+        self.assertEqual(client.embed(), [])
+        client.provider.models.embed_content.assert_not_called()
+
+    def test_api_error_raises_value_error(self):
+        client = self._client()
+        client.provider.models.embed_content.side_effect = RuntimeError("rejected")
+
+        with self.assertRaises(ValueError) as caught:
+            client.embed(texts=["hello"])
+
+        self.assertEqual(str(caught.exception), "Gemini embeddings request failed")
+
+    def test_bad_image_is_not_sent(self):
+        client = self._client()
+
+        with self.assertRaises(ValueError) as caught:
+            client.embed(images=[b"this is not an image"])
+
+        self.assertEqual(
+            str(caught.exception), "thumbnail could not be converted to JPEG"
+        )
+        client.provider.models.embed_content.assert_not_called()
+
+    def test_missing_vector_raises(self):
+        client = self._client()
+        client.provider.models.embed_content.return_value = SimpleNamespace(
+            embeddings=[]
+        )
+
+        with self.assertRaises(ValueError):
+            client.embed(texts=["hello"])
+
+
 class TestBaseClientTranscribe(unittest.TestCase):
     """Providers that don't implement the role must be inert, not broken."""
 

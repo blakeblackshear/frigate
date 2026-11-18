@@ -9,6 +9,7 @@ import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import numpy as np
 from google import genai
 from google.genai import errors, types
 from google.genai.types import FunctionCallingConfigMode
@@ -16,7 +17,7 @@ from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
-from frigate.genai.utils import interleave_images
+from frigate.genai.utils import interleave_images, to_jpeg
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,9 @@ GEMINI_MAX_INLINE_BYTES = 15 * 1024 * 1024
 # no retries, and a cooldown after failure instead of the client's defaults.
 COUNT_TOKENS_TIMEOUT_MS = 5000
 COUNT_TOKENS_RETRY_INTERVAL = 300
+
+# sqlite-vec stores thumbnail and description embeddings as FLOAT[768].
+GEMINI_EMBEDDING_DIM = 768
 
 
 def _decode_thought_signature(value: Any) -> bytes | None:
@@ -103,11 +107,13 @@ class GeminiClient(GenAIClient):
     provider: genai.Client
     _image_token_cache: dict[tuple[int, int], int]
     _image_token_retry_at: float
+    _capabilities_cache: dict[str, dict[str, bool]] | None = None
 
     def _init_provider(self) -> genai.Client:
         """Initialize the client."""
         self._image_token_cache = {}
         self._image_token_retry_at = 0.0
+        self._capabilities_cache = None
 
         # Merge provider_options into HttpOptions
         http_options_dict: dict[str, Any] = {
@@ -232,13 +238,41 @@ class GeminiClient(GenAIClient):
 
         return transcript or None
 
+    @staticmethod
+    def _capabilities_from_models(models: Any) -> dict[str, dict[str, bool]]:
+        """Build a per-model capability map from Gemini's models.list() entries."""
+        capabilities: dict[str, dict[str, bool]] = {}
+        for m in models:
+            name = getattr(m, "name", None) or ""
+            if not name:
+                continue
+            actions = getattr(m, "supported_actions", None) or []
+            flags = {"supports_embeddings": "embedContent" in actions}
+            capabilities[name] = flags
+            capabilities[name.removeprefix("models/")] = flags
+        return capabilities
+
     def list_models(self) -> list[str]:
         """Return available model names from Gemini."""
         try:
-            return sorted(m.name or "" for m in self.provider.models.list())
+            models = list(self.provider.models.list())
         except Exception as e:
             logger.warning("Failed to list Gemini models: %s", e)
             return []
+        self._capabilities_cache = self._capabilities_from_models(models)
+        return sorted(m.name or "" for m in models)
+
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Report per-model capabilities from Gemini's model list."""
+        if self._capabilities_cache is not None:
+            return self._capabilities_cache
+        try:
+            models = list(self.provider.models.list())
+        except Exception as e:
+            logger.debug("Failed to query Gemini model capabilities: %s", e)
+            return {}
+        self._capabilities_cache = self._capabilities_from_models(models)
+        return self._capabilities_cache
 
     def get_context_size(self) -> int:
         """Get the context window size for Gemini."""
@@ -309,6 +343,103 @@ class GeminiClient(GenAIClient):
             raise ValueError("count_tokens returned no total")
 
         return total
+
+    @property
+    def supports_embeddings(self) -> bool:
+        """Whether Gemini reports embedContent support for the configured model."""
+        capabilities = self.list_model_capabilities().get(self._embedding_model_name())
+        return bool(capabilities and capabilities.get("supports_embeddings"))
+
+    def _embedding_model_name(self) -> str:
+        """Model id for embed_content, without a ``models/`` prefix."""
+        return self.genai_config.model.removeprefix("models/")
+
+    def _vector_from_embed(self, result: Any) -> np.ndarray:
+        """Read the single embedding vector from an embed_content response."""
+        embeddings = getattr(result, "embeddings", None) or []
+        values = embeddings[0].values if embeddings else None
+        if not values:
+            raise ValueError("Gemini embeddings response had no vector")
+        return np.asarray(values, dtype=np.float32)
+
+    def _embed_one(self, model: str, contents: Any) -> np.ndarray:
+        """One embed_content call. API failures become ValueError.
+
+        ``_embed_thumbnail`` only catches ValueError. Returning an empty
+        list makes the caller index ``[0]`` and can stop the embeddings
+        process.
+        """
+        try:
+            result = self.provider.models.embed_content(
+                model=model,
+                contents=contents,
+                config=types.EmbedContentConfig(
+                    output_dimensionality=GEMINI_EMBEDDING_DIM
+                ),
+            )
+        except Exception as e:
+            logger.warning("Gemini embeddings request failed: %s", e)
+            raise ValueError("Gemini embeddings request failed") from e
+
+        return self._vector_from_embed(result)
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Embed each text or image on its own.
+
+        gemini-embedding-2 returns one vector per request. Several parts
+        in one contents list are aggregated into that single vector, so
+        each description, search query, and thumbnail is its own call.
+
+        Stored descriptions and search queries share this text path, so
+        both get the search-query prefix and stay in one format. A text
+        that already starts with ``task:`` is sent unchanged. Images are
+        not prefixed. The API accepts PNG and JPEG only, and Frigate
+        stores thumbnails as WebP, so each image is transcoded first.
+        Requested length is 768, matching the semantic search tables.
+
+        Args:
+            texts: Strings to embed.
+            images: Encoded images, typically WebP thumbnails.
+
+        Returns:
+            One float32 vector per input, length 768.
+
+        Raises:
+            ValueError: An image cannot be converted, the response has
+                no vector, or the request fails.
+        """
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        model = self._embedding_model_name()
+        vectors: list[np.ndarray] = []
+
+        for text in texts:
+            content = (
+                text
+                if text.startswith("task:")
+                else f"task: search result | query: {text}"
+            )
+            vectors.append(self._embed_one(model, content))
+
+        for image in images:
+            jpeg = to_jpeg(image)
+            if jpeg is None:
+                raise ValueError("thumbnail could not be converted to JPEG")
+            vectors.append(
+                self._embed_one(
+                    model,
+                    [types.Part.from_bytes(data=jpeg, mime_type="image/jpeg")],
+                )
+            )
+
+        return vectors
 
     def chat_with_tools(
         self,
