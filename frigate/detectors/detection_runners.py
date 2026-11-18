@@ -153,6 +153,8 @@ def get_ort_session_options(
     sess_options = ort.SessionOptions()
 
     if cpu:
+        # ORT reads the CPU arena flag from session options, not provider options.
+        sess_options.enable_cpu_mem_arena = False
         # idle intra-op threads otherwise spin for ~1s after every run, keeping
         # most cores busy while an enrichment runs even once a second
         sess_options.add_session_config_entry("session.intra_op.allow_spinning", "0")

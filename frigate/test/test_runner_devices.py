@@ -140,6 +140,9 @@ class TestLoadRegistry(unittest.TestCase):
                     spinning = None
 
                 self.assertEqual(spinning, expected)
+                self.assertEqual(
+                    options.enable_cpu_mem_arena, provider != "CPUExecutionProvider"
+                )
 
 
 class TestLoadedDeviceSnapshot(unittest.TestCase):
@@ -560,4 +563,4 @@ class TestMIGraphX(unittest.TestCase):
             providers, options = model_util.get_ort_providers()
 
         self.assertEqual(providers, ["CPUExecutionProvider"])
-        self.assertEqual(options, [{"enable_cpu_mem_arena": False}])
+        self.assertEqual(options, [{}])

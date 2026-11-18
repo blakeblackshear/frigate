@@ -320,14 +320,7 @@ def get_ort_providers(
     device: str | None = "AUTO",
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
-        return (
-            ["CPUExecutionProvider"],
-            [
-                {
-                    "enable_cpu_mem_arena": False,
-                }
-            ],
-        )
+        return ["CPUExecutionProvider"], [{}]
 
     providers = []
     options = []
@@ -389,11 +382,7 @@ def get_ort_providers(
             continue
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
-            options.append(
-                {
-                    "enable_cpu_mem_arena": False,
-                }
-            )
+            options.append({})
         elif provider == "AzureExecutionProvider":
             # Skip Azure provider - not typically available on local hardware
             # and prevents fallback to OpenVINO when it's the first provider

@@ -59,10 +59,18 @@ class TestGetOrtSessionOptions(unittest.TestCase):
             ort.GraphOptimizationLevel.ORT_ENABLE_ALL,
         )
 
+    def test_only_cpu_enrichment_models_disable_the_cpu_arena(self):
+        for model_type in EnrichmentModelTypeEnum:
+            for cpu in [False, True]:
+                with self.subTest(model_type=model_type, cpu=cpu):
+                    options = get_ort_session_options(model_type.value, cpu=cpu)
+                    self.assertEqual(options.enable_cpu_mem_arena, not cpu)
+
     def test_detector_models_use_defaults(self):
         for model_type in [None, ModelTypeEnum.rfdetr.value]:
-            with self.subTest(model_type=model_type):
-                self.assertIsNone(get_ort_session_options(model_type, cpu=True))
+            for cpu in [False, True]:
+                with self.subTest(model_type=model_type, cpu=cpu):
+                    self.assertIsNone(get_ort_session_options(model_type, cpu=cpu))
 
 
 class TestCudaGraphRunner(unittest.TestCase):
