@@ -306,7 +306,7 @@ async def _execute_search_objects_semantic(
     visual_distances: dict[str, float] = {}
     description_distances: dict[str, float] = {}
     try:
-        rows = context.search_thumbnail(semantic_query)
+        rows = await asyncio.to_thread(context.search_thumbnail, semantic_query)
         visual_distances = {row[0]: row[1] for row in rows}
     except Exception:
         logger.exception(
@@ -314,7 +314,7 @@ async def _execute_search_objects_semantic(
         )
 
     try:
-        rows = context.search_description(semantic_query)
+        rows = await asyncio.to_thread(context.search_description, semantic_query)
         description_distances = {row[0]: row[1] for row in rows}
     except Exception:
         logger.exception(
@@ -448,7 +448,7 @@ async def _execute_find_similar_objects(
 
     try:
         if similarity_mode in ("visual", "fused"):
-            rows = context.search_thumbnail(anchor)
+            rows = await asyncio.to_thread(context.search_thumbnail, anchor)
             visual_distances = {row[0]: row[1] for row in rows}
 
         if similarity_mode in ("semantic", "fused"):
@@ -457,7 +457,7 @@ async def _execute_find_similar_objects(
                 or anchor.sub_label
                 or anchor.label
             )
-            rows = context.search_description(query_text)
+            rows = await asyncio.to_thread(context.search_description, query_text)
             description_distances = {row[0]: row[1] for row in rows}
     except Exception:
         logger.exception("Similarity search failed")

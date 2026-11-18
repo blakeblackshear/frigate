@@ -1561,9 +1561,8 @@ async def set_description(
         if len(new_description) > 0:
             # If semantic search is enabled, update the index
             if request.app.frigate_config.semantic_search.enabled:
-                context.update_description(
-                    event_id,
-                    new_description,
+                await asyncio.to_thread(
+                    context.update_description, event_id, new_description
                 )
         else:
             # embeddings are always cleaned up so they don't outlive their description
