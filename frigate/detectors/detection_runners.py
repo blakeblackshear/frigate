@@ -139,7 +139,7 @@ def get_ort_session_options(
         cpu: Whether the session runs on the CPU execution provider.
 
     Returns:
-        SessionOptions with the CPU arena disabled and model-specific settings.
+        SessionOptions with model-specific and CPU-enrichment settings.
     """
     # Import here to avoid circular imports
     from frigate.embeddings.types import (
@@ -148,14 +148,12 @@ def get_ort_session_options(
     )
 
     sess_options = ort.SessionOptions()
-    # ORT reads the CPU arena flag from session options, not provider options.
-    # This also applies when a normal GPU session falls back to the CPU provider.
-    sess_options.enable_cpu_mem_arena = False
-
     if model_type not in ENRICHMENT_FOR_MODEL_TYPE:
         return sess_options
 
     if cpu:
+        # ORT reads the CPU arena flag from session options, not provider options.
+        sess_options.enable_cpu_mem_arena = False
         # idle intra-op threads otherwise spin for ~1s after every run, keeping
         # most cores busy while an enrichment runs even once a second
         sess_options.add_session_config_entry("session.intra_op.allow_spinning", "0")
