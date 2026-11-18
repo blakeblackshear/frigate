@@ -1,11 +1,13 @@
-"""Tests for credential scrubbing in the ffprobe API."""
+"""Tests for the ffprobe API."""
 
+import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
+from frigate.util.services import ffprobe_stream
 
 
 class TestHttpFfprobe(BaseTestHttp):
@@ -35,3 +37,17 @@ class TestHttpFfprobe(BaseTestHttp):
         self.assertEqual(len(lines), 2)
         self.assertNotIn("hunter2", " ".join(lines))
         self.assertEqual(lines[1], "rtsp://*:*@10.0.0.1:554/video: Connection refused")
+
+
+class TestFfprobeStream(unittest.TestCase):
+    def test_requests_codec_type(self):
+        ffmpeg = SimpleNamespace(ffprobe_path="ffprobe")
+        done = SimpleNamespace(returncode=0, stdout=b"{}", stderr=b"")
+
+        for detailed in (False, True):
+            with patch("frigate.util.services.sp.run", return_value=done) as run:
+                ffprobe_stream(ffmpeg, "rtsp://10.0.0.1/live", detailed=detailed)
+
+            cmd = run.call_args.args[0]
+            entries = cmd[cmd.index("-show_entries") + 1]
+            self.assertIn("codec_type", entries.removeprefix("stream=").split(","))
