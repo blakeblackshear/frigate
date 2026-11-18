@@ -131,7 +131,7 @@ def is_arm64_platform() -> bool:
 
 def get_ort_session_options(
     model_type: str | None = None, cpu: bool = False
-) -> ort.SessionOptions:
+) -> ort.SessionOptions | None:
     """Get ONNX Runtime session options with appropriate settings.
 
     Args:
@@ -139,7 +139,7 @@ def get_ort_session_options(
         cpu: Whether the session runs on the CPU execution provider.
 
     Returns:
-        SessionOptions with model-specific and CPU-enrichment settings.
+        SessionOptions for enrichment models, or None for default settings.
     """
     # Import here to avoid circular imports
     from frigate.embeddings.types import (
@@ -147,9 +147,10 @@ def get_ort_session_options(
         EnrichmentModelTypeEnum,
     )
 
-    sess_options = ort.SessionOptions()
     if model_type not in ENRICHMENT_FOR_MODEL_TYPE:
-        return sess_options
+        return None
+
+    sess_options = ort.SessionOptions()
 
     if cpu:
         # ORT reads the CPU arena flag from session options, not provider options.
