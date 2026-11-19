@@ -20,7 +20,7 @@ from frigate.api.media_auth import (
     resolve_media_uri,
 )
 from frigate.config import FrigateConfig
-from frigate.const import EXPORT_DIR
+from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Event, Export, Recordings, ReviewSegment
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
@@ -247,7 +247,7 @@ class TestExportResolution(unittest.TestCase):
             name=f"export-{export_id}",
             date=int(datetime.datetime.now().timestamp()),
             video_path=os.path.join(EXPORT_DIR, filename),
-            thumb_path=os.path.join(EXPORT_DIR, f"{filename}.jpg"),
+            thumb_path=os.path.join(CLIPS_DIR, "export", f"{export_id}.webp"),
             in_progress=False,
         ).execute()
 
@@ -279,6 +279,34 @@ class TestExportResolution(unittest.TestCase):
         self._insert_export("exp_fd", "front_door", "front_door_clip.mp4")
         resolution, _ = resolve_media_uri("/exports/clip.mp4", self.config)
         self.assertEqual(resolution, MediaAuthResolution.UNRESOLVED_MEDIA)
+
+    def test_export_thumbnail_resolves_camera(self):
+        self._insert_export("back_door_abc123", "back_door", "back_door_clip.mp4")
+        resolution, camera = resolve_media_uri(
+            "/clips/export/back_door_abc123.webp", self.config
+        )
+        self.assertEqual(resolution, MediaAuthResolution.CAMERA)
+        self.assertEqual(camera, "back_door")
+
+    def test_unknown_export_thumbnail_is_unresolved(self):
+        resolution, _ = resolve_media_uri("/clips/export/missing.webp", self.config)
+        self.assertEqual(resolution, MediaAuthResolution.UNRESOLVED_MEDIA)
+
+    def test_export_thumbnail_gated_by_camera_access(self):
+        self._insert_export("back_door_abc123", "back_door", "back_door_clip.mp4")
+        self._insert_export("front_door_def456", "front_door", "front_door_clip.mp4")
+        url = "/clips/export/{}.webp"
+        self.assertIsNone(
+            deny_response_for_media_uri(
+                url.format("front_door_def456"), "limited_user", self.config
+            )
+        )
+        self.assertEqual(
+            deny_response_for_media_uri(
+                url.format("back_door_abc123"), "limited_user", self.config
+            ),
+            403,
+        )
 
 
 class TestDenyResponseForMediaUri(unittest.TestCase):
