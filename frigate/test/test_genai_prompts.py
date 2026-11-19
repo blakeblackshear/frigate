@@ -7,9 +7,45 @@ from frigate.genai.prompts import (
     REVIEW_DESCRIPTION_FIELD_GUIDELINES,
     REVIEW_RESPONSE_STYLES,
     build_review_description_prompt,
+    build_review_description_response_format,
     build_review_summary_prompt,
     get_review_field_guidelines,
 )
+
+
+class TestReviewDescriptionResponseFormat(unittest.TestCase):
+    def _schema(self, concerns: list[str]) -> dict:
+        response_format = build_review_description_response_format(concerns)
+        self.assertTrue(response_format["json_schema"]["strict"])
+        return response_format["json_schema"]["schema"]
+
+    def test_every_property_is_required_for_strict_mode(self):
+        for concerns in ([], ["a person loitering near the gate"]):
+            with self.subTest(concerns=concerns):
+                schema = self._schema(concerns)
+                self.assertEqual(set(schema["properties"]), set(schema["required"]))
+
+    def test_time_is_never_requested(self):
+        schema = self._schema(["a person loitering near the gate"])
+        self.assertNotIn("time", schema["properties"])
+        self.assertNotIn("time", schema["required"])
+
+    def test_concerns_omitted_when_not_configured(self):
+        schema = self._schema([])
+        self.assertNotIn("other_concerns", schema["properties"])
+        self.assertNotIn("other_concerns", schema["required"])
+
+    def test_concerns_requested_as_plain_list_when_configured(self):
+        schema = self._schema(["a person loitering near the gate"])
+        concerns = schema["properties"]["other_concerns"]
+        self.assertEqual(concerns["type"], "array")
+        self.assertEqual(concerns["items"], {"type": "string"})
+        self.assertNotIn("anyOf", concerns)
+        self.assertNotIn("default", concerns)
+
+    def test_schema_is_not_shared_between_calls(self):
+        self._schema(["a person loitering near the gate"])
+        self.assertNotIn("other_concerns", self._schema([])["properties"])
 
 
 class TestReviewResponseStyle(unittest.TestCase):
