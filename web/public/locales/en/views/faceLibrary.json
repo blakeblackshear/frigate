@@ -61,8 +61,10 @@
   },
   "imageEntry": {
     "validation": {
-      "selectImage": "Please select an image file."
+      "selectImage": "Please select an image file.",
+      "heicConversionFailed": "Unable to convert this HEIC image. Try exporting it as a JPEG instead."
     },
+    "converting": "Converting image…",
     "dropActive": "Drop the image here…",
     "dropInstructions": "Drag and drop or paste an image here, or click to select",
     "maxSize": "Max size: {{size}}MB"
