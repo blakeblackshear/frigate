@@ -75,8 +75,13 @@ export function DebugReplayContent({
 
     axios
       .post("debug_replay/stop")
-      .then(() => refreshReplayStatus())
       .catch((error) => {
+        // 400 means no session is active, e.g. startup failed and the
+        // server already cleaned it up, so there is nothing to stop
+        if (error.response?.status === 400) {
+          return;
+        }
+
         const errorMessage =
           error.response?.data?.message ||
           error.response?.data?.detail ||
@@ -85,6 +90,9 @@ export function DebugReplayContent({
           position: "top-center",
         });
       })
+      // refresh on failure too, otherwise a session that ended on its own
+      // leaves the banner up and Start disabled until the dialog reopens
+      .then(() => refreshReplayStatus())
       .finally(() => {
         setIsStopping(false);
       });

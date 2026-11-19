@@ -229,6 +229,43 @@ test.describe("Debug Replay form with an active session @high", () => {
     await expect(startButton).toBeEnabled();
   });
 
+  test("clears the banner when the session already ended", async ({
+    frigateApp,
+  }) => {
+    let active = true;
+
+    await frigateApp.installDefaults();
+    await frigateApp.page.route("**/api/debug_replay/status", (route) =>
+      route.fulfill({
+        json: active ? activeSessionStatus() : noSessionStatus(),
+      }),
+    );
+    // the server tore the session down after the form loaded its status,
+    // e.g. because startup failed
+    await frigateApp.page.route("**/api/debug_replay/stop", (route) => {
+      active = false;
+      return route.fulfill({
+        status: 400,
+        json: { success: false, message: "No active replay session" },
+      });
+    });
+    await openRecordingView(frigateApp);
+
+    const form = await openDebugReplayForm(frigateApp);
+    const banner = form.getByRole("alert");
+
+    await expect(banner).toBeVisible({ timeout: 5_000 });
+    await banner.getByRole("button", { name: "Stop Replay" }).click();
+
+    await expect(banner).toBeHidden({ timeout: 5_000 });
+    await expect(
+      form.getByRole("button", { name: "Start Replay" }),
+    ).toBeEnabled();
+    await expect(
+      frigateApp.page.getByText(/Failed to stop debug replay/),
+    ).toHaveCount(0);
+  });
+
   test("shows no banner when nothing is running", async ({ frigateApp }) => {
     await frigateApp.installDefaults();
     await frigateApp.page.route("**/api/debug_replay/status", (route) =>
