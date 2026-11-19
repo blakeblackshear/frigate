@@ -1,5 +1,6 @@
 """Review apis."""
 
+import asyncio
 import datetime
 import logging
 from functools import reduce
@@ -797,7 +798,7 @@ async def regenerate_review_description(request: Request, review_id: str):
         )
 
     context: EmbeddingsContext = request.app.embeddings
-    context.regenerate_review_description(review_id)
+    await asyncio.to_thread(context.regenerate_review_description, review_id)
 
     return JSONResponse(
         content={

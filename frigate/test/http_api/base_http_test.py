@@ -1,7 +1,10 @@
 import datetime
 import logging
 import os
+import struct
+import tempfile
 import unittest
+import zoneinfo
 from unittest.mock import patch
 
 from fastapi import Request
@@ -20,6 +23,13 @@ from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
 from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
+# Minimal TZif file for a zone fixed at UTC+0 named "UTC".
+UTC_TZIF = (
+    struct.pack(">4s16x6l", b"TZif", 0, 0, 0, 0, 1, 4)
+    + struct.pack(">lBB", 0, 0, 0)
+    + b"UTC\0"
+)
+
 
 class AuthTestClient(TestClient):
     """TestClient that automatically adds auth headers to all requests."""
@@ -36,6 +46,23 @@ class AuthTestClient(TestClient):
 
 
 class BaseTestHttp(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Docker mounts of the host's /etc/localtime can overwrite the system
+        # zoneinfo/Etc/UTC file with a local zone. Shadow "UTC" with a known
+        # good file so the API's ZoneInfo("UTC") is real UTC.
+        tz_dir = tempfile.TemporaryDirectory()
+        with open(os.path.join(tz_dir.name, "UTC"), "wb") as f:
+            f.write(UTC_TZIF)
+
+        zoneinfo.reset_tzpath(to=[tz_dir.name, *zoneinfo.TZPATH])
+        zoneinfo.ZoneInfo.clear_cache()
+        cls.addClassCleanup(tz_dir.cleanup)
+        cls.addClassCleanup(zoneinfo.ZoneInfo.clear_cache)
+        cls.addClassCleanup(zoneinfo.reset_tzpath)
+
     def setUp(self, models):
         # setup clean database for each test run
         migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)

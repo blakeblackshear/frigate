@@ -1007,6 +1007,13 @@ class ReviewSegmentMaintainer(threading.Thread):
                             )
                         )
                 elif topic == DetectionTypeEnum.api:
+                    # the event's segment has already ended
+                    if manual_info["state"] == ManualEventState.end:
+                        self.indefinite_events[camera].pop(
+                            manual_info["event_id"], None
+                        )
+                        continue
+
                     severity = self.get_manual_event_severity(
                         camera, manual_info["label"]
                     )

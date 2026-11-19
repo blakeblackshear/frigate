@@ -862,20 +862,41 @@ class TestSplitDetectionLabels(ReviewFlowTestCase):
 
 class TestManualEvents(ReviewFlowTestCase):
     def manual_event(
-        self, event_id: str, frame_time: float, sub_label: str | None = None
+        self,
+        event_id: str,
+        frame_time: float,
+        sub_label: str | None = None,
+        state: ManualEventState = ManualEventState.complete,
     ) -> tuple[str, tuple[Any, ...]]:
-        """Build a completed manual event as published by the object processor."""
+        """Build a manual event as published by the object processor."""
         return (
             DetectionTypeEnum.api.value,
             (
                 CAMERA,
                 frame_time,
                 {
-                    "state": ManualEventState.complete,
+                    "state": state,
                     "label": "person",
                     "sub_label": sub_label,
                     "event_id": event_id,
-                    "end_time": frame_time + 5,
+                    "end_time": (
+                        frame_time + 5 if state == ManualEventState.complete else None
+                    ),
+                },
+            ),
+        )
+
+    def end_event(self, event_id: str, end_time: float) -> tuple[str, tuple[Any, ...]]:
+        """Build the end message the events API publishes, which has no label."""
+        return (
+            DetectionTypeEnum.api.value,
+            (
+                CAMERA,
+                end_time,
+                {
+                    "state": ManualEventState.end,
+                    "event_id": event_id,
+                    "end_time": end_time,
                 },
             ),
         )
@@ -899,6 +920,41 @@ class TestManualEvents(ReviewFlowTestCase):
         data = self.maintainer.active_review_segments[CAMERA].get_data(False)["data"]
         self.assertCountEqual(data["objects"], ["dog", "person-verified", "person"])
         self.assertEqual(data["sub_labels"], ["Bob"])
+
+    def test_ending_event_after_its_segment_closed_is_ignored(self) -> None:
+        self.feed_messages(self.manual_event("m1", 1, state=ManualEventState.start))
+        self.maintainer.config_subscriber.check_for_updates.side_effect = [
+            {"record": [CAMERA]}
+        ]
+        self.feed()
+        self.maintainer.config_subscriber.check_for_updates.side_effect = None
+        self.feed_messages(self.end_event("m1", 20), self.manual_event("m2", 30))
+
+        self.assertEqual(self.non_update_summary(), [("end", "alert")])
+        segment = self.maintainer.active_review_segments[CAMERA]
+        self.assertEqual(segment.detections, {"m2": "person"})
+
+    def test_ending_event_after_its_segment_ended_early_clears_it(self) -> None:
+        # a completed event ends the indefinite event's segment early
+        self.feed_messages(
+            self.manual_event("m1", 1, state=ManualEventState.start),
+            self.manual_event("m2", 2),
+        )
+        self.feed((8, []), (8 + self.alert_cutoff, []))
+        self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+
+        self.feed_messages(
+            self.end_event("m1", 100),
+            self.manual_event("m3", 200, state=ManualEventState.start),
+            self.end_event("m3", 210),
+        )
+        self.feed((210 + self.alert_cutoff + 1, []))
+
+        self.assertEqual(self.maintainer.indefinite_events[CAMERA], {})
+        self.assertIsNone(self.maintainer.active_review_segments.get(CAMERA))
+        self.assertEqual(
+            self.non_update_summary(), [("end", "alert"), ("end", "alert")]
+        )
 
 
 if __name__ == "__main__":

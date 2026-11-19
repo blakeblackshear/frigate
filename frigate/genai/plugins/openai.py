@@ -39,6 +39,28 @@ def _stats_from_openai_usage(usage: Any) -> dict[str, Any] | None:
     return stats or None
 
 
+def _context_size_from_model(model: Any) -> int | None:
+    """Read the context window from an OpenAI-compatible /models entry.
+
+    vLLM reports ``max_model_len``. OpenRouter reports ``context_length`` as the
+    largest window any of its providers offers, and ``top_provider.context_length``
+    for the provider it routes to first. The latter can be smaller, so it is
+    preferred to avoid sending more than the serving provider accepts.
+    """
+    top_provider = getattr(model, "top_provider", None)
+    candidates = (
+        getattr(model, "max_model_len", None),
+        top_provider.get("context_length") if isinstance(top_provider, dict) else None,
+        getattr(model, "context_length", None),
+    )
+
+    for value in candidates:
+        if isinstance(value, int) and value > 0:
+            return value
+
+    return None
+
+
 @register_genai_provider(GenAIProviderEnum.openai)
 class OpenAIClient(GenAIClient):
     """Generative AI client for Frigate using OpenAI."""
@@ -225,8 +247,9 @@ class OpenAIClient(GenAIClient):
             models = self.provider.models.list()
             for model in models.data:
                 if model.id == self.genai_config.model:
-                    if hasattr(model, "max_model_len") and model.max_model_len:
-                        self.context_size = model.max_model_len
+                    context_size = _context_size_from_model(model)
+                    if context_size:
+                        self.context_size = context_size
                         logger.debug(
                             f"Retrieved context size {self.context_size} for model {self.genai_config.model}"
                         )

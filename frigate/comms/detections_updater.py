@@ -3,6 +3,8 @@
 from enum import Enum
 from typing import Any
 
+from frigate.const import FAST_QUEUE_TIMEOUT
+
 from .zmq_proxy import Publisher, Subscriber
 
 
@@ -33,7 +35,7 @@ class DetectionSubscriber(Subscriber):
         super().__init__(topic)
 
     def check_for_update(
-        self, timeout: float | None = None
+        self, timeout: float | None = FAST_QUEUE_TIMEOUT
     ) -> tuple[str, Any] | tuple[None, None] | None:
         return super().check_for_update(timeout)
 

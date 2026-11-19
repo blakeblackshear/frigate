@@ -1365,7 +1365,7 @@ def ffprobe_stream(ffmpeg, path: str, detailed: bool = False) -> sp.CompletedPro
     clean_path = escape_special_characters(path)
 
     # Base entries that are always included
-    stream_entries = "codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate"
+    stream_entries = "codec_type,codec_long_name,width,height,bit_rate,duration,display_aspect_ratio,avg_frame_rate"
 
     # Additional detailed entries
     if detailed:

@@ -57,18 +57,8 @@ export function ffprobeToTestResult(
   }
 
   const streams = entry.stdout?.streams ?? [];
-  const videoStream = streams.find(
-    (s) =>
-      s.codec_type === "video" ||
-      s.codec_name?.includes("h264") ||
-      s.codec_name?.includes("h265"),
-  );
-  const audioStream = streams.find(
-    (s) =>
-      s.codec_type === "audio" ||
-      s.codec_name?.includes("aac") ||
-      s.codec_name?.includes("mp3"),
-  );
+  const videoStream = streams.find((s) => s.codec_type === "video");
+  const audioStream = streams.find((s) => s.codec_type === "audio");
 
   const resolution = videoStream
     ? `${videoStream.width}x${videoStream.height}`

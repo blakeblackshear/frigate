@@ -226,7 +226,7 @@ Frigate supports any provider that implements the OpenAI API standard. This incl
 
 :::tip
 
-For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
+Frigate reads the model's context size from the server when it is reported (such as by vLLM or OpenRouter). For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
 
 ```yaml
 genai:
@@ -448,7 +448,7 @@ To use a different OpenAI-compatible API endpoint, set the `OPENAI_BASE_URL` env
 
 :::tip
 
-For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
+Frigate reads the model's context size from the server when it is reported (such as by vLLM or OpenRouter). For OpenAI-compatible servers (such as llama.cpp) that don't expose the configured context size in the API response, you can manually specify the context size in `provider_options`:
 
 ```yaml {6,7}
 genai:
