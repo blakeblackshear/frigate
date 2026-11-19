@@ -7,6 +7,10 @@
  */
 
 import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
+import {
+  activeSessionStatus,
+  noSessionStatus,
+} from "../fixtures/mock-data/debug-replay";
 
 // the selection is seeded around the playback position, so land near the
 // live edge
@@ -180,6 +184,68 @@ test.describe("Debug Replay from History @high", () => {
     await frigateApp.page.mouse.up();
 
     await expect(start).not.toHaveText(before, { timeout: 5_000 });
+  });
+});
+
+// both layouts render the same form, so these run on desktop and mobile
+test.describe("Debug Replay form with an active session @high", () => {
+  test("shows a banner that stops the running session", async ({
+    frigateApp,
+  }) => {
+    let active = true;
+    let stopCalled = false;
+
+    await frigateApp.installDefaults();
+    await frigateApp.page.route("**/api/debug_replay/status", (route) =>
+      route.fulfill({
+        json: active
+          ? activeSessionStatus({ sourceCamera: "front_door" })
+          : noSessionStatus(),
+      }),
+    );
+    await frigateApp.page.route("**/api/debug_replay/stop", (route) => {
+      if (route.request().method() === "POST") {
+        stopCalled = true;
+        active = false;
+      }
+      return route.fulfill({ json: { success: true } });
+    });
+    await openRecordingView(frigateApp);
+
+    const form = await openDebugReplayForm(frigateApp);
+    const banner = form.getByRole("alert");
+    const startButton = form.getByRole("button", { name: "Start Replay" });
+
+    await expect(banner).toContainText(
+      "A debug replay session is already running for Front Door",
+      { timeout: 5_000 },
+    );
+    await expect(startButton).toBeDisabled();
+
+    await banner.getByRole("button", { name: "Stop Replay" }).click();
+
+    await expect.poll(() => stopCalled, { timeout: 5_000 }).toBe(true);
+    await expect(banner).toBeHidden({ timeout: 5_000 });
+    await expect(startButton).toBeEnabled();
+  });
+
+  test("shows no banner when nothing is running", async ({ frigateApp }) => {
+    await frigateApp.installDefaults();
+    await frigateApp.page.route("**/api/debug_replay/status", (route) =>
+      route.fulfill({ json: noSessionStatus() }),
+    );
+    await openRecordingView(frigateApp);
+
+    const statusLoaded = frigateApp.page.waitForResponse(
+      "**/api/debug_replay/status",
+    );
+    const form = await openDebugReplayForm(frigateApp);
+    await statusLoaded;
+
+    await expect(
+      form.getByRole("button", { name: "Start Replay" }),
+    ).toBeEnabled();
+    await expect(form.getByRole("alert")).toHaveCount(0);
   });
 });
 
