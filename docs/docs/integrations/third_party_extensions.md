@@ -13,60 +13,92 @@ Please use your own knowledge to assess and vet them before you install anything
 
 :::
 
-## [Advanced Camera Card (formerly known as Frigate Card](https://card.camera/#/README)
+## Cameras and Streaming
 
-The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant dashboard card with deep Frigate integration.
+Tools that help get video from your cameras into Frigate, or change how Frigate's video is delivered.
 
-## [cctvQL](https://github.com/arunrajiah/cctvql)
+### [frigate-abr](https://github.com/007hacky007/frigate-abr)
+
+[frigate-abr](https://github.com/007hacky007/frigate-abr) is a drop-in Docker image of Frigate that adds adaptive bitrate (ABR) playback for recordings: a sidecar transcodes footage to lower quality tiers on demand, for reviewing over slow remote connections. Segments are transcoded when played and cached, so no additional stream is recorded. Frigate itself is not modified.
+
+### [reostream](https://github.com/VoltTech21/reostream)
+
+[reostream](https://github.com/VoltTech21/reostream) is a proxy for Reolink cameras that pulls video over Reolink's own protocol (the one the Reolink app and NVR use) instead of the camera's RTSP server, and serves it back as RTSP for go2rtc and Frigate. It helps models whose RTSP stream smears, drops frames or loses full resolution, and supports two-way talk.
+
+### [Scrypted - Frigate bridge plugin](https://github.com/apocaliss92/scrypted-frigate-bridge)
+
+[Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is a plugin that allows you to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
+
+### [Strix](https://github.com/eduard256/Strix)
+
+[Strix](https://github.com/eduard256/Strix) auto-discovers working stream URLs for IP cameras and generates ready-to-use Frigate configs. It tests thousands of URL patterns against your camera and supports cameras without RTSP or ONVIF. 67K+ camera models from 3.6K+ brands.
+
+## Events and Media
+
+Tools that enrich, query, or back up the events, snapshots, and reviews Frigate produces.
+
+### [cctvQL](https://github.com/arunrajiah/cctvql)
 
 [cctvQL](https://github.com/arunrajiah/cctvql) is a natural language query layer for Frigate and other CCTV systems. It connects to Frigate's REST API and MQTT broker to let you ask conversational questions about cameras and events (e.g. "Was there motion at the front door last night?"), with support for real-time event streaming, anomaly detection, PTZ control, alert rules, and a Home Assistant custom component.
 
-## [Double Take](https://github.com/skrashevich/double-take)
+### [Double Take](https://github.com/skrashevich/double-take)
 
 [Double Take](https://github.com/skrashevich/double-take) provides a unified UI and API for processing and training images for facial recognition.
 It supports automatically setting the sub labels in Frigate for person objects that are detected and recognized.
 This is a fork (with fixed errors and new features) of [original Double Take](https://github.com/jakowenko/double-take) project which, unfortunately, isn't being maintained by author.
 
-## [frigate-abr](https://github.com/007hacky007/frigate-abr)
-
-[frigate-abr](https://github.com/007hacky007/frigate-abr) is a drop-in Docker image of Frigate that adds adaptive bitrate (ABR) playback for recordings: a sidecar transcodes footage to lower quality tiers on demand, for reviewing over slow remote connections. Segments are transcoded when played and cached, so no additional stream is recorded. Frigate itself is not modified.
-
-## [Frigate Notify](https://github.com/0x2142/frigate-notify)
-
-[Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
-
-## [Frigate Notify Alert](https://github.com/Sysoev86/frigate-notify-alert)
-
-[Frigate Notify Alert](https://github.com/Sysoev86/frigate-notify-alert) sends Frigate events to Telegram as a photo + video media group. It supports multiple camera groups (each notifying its own chat), optional zone filtering (notify only when an object enters a chosen zone), and in-chat buttons to pause notifications for a set time. Works with standalone Frigate over MQTT; Home Assistant not required.
-
-## [Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/)
+### [Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/)
 
 [Frigate Snap-Sync](https://github.com/thequantumphysicist/frigate-snap-sync/) is a program that works in tandem with Frigate. It responds to Frigate when a snapshot or a review is made (and more can be added), and uploads them to one or more remote server(s) of your choice.
 
-## [Frigate telegram](https://github.com/OldTyT/frigate-telegram)
+## Notifications
+
+Standalone apps that send Frigate events to messaging platforms without requiring Home Assistant. For notifications through Home Assistant, see [Camera AutoNotify](#camera-autonotify).
+
+### [Frigate Notify](https://github.com/0x2142/frigate-notify)
+
+[Frigate Notify](https://github.com/0x2142/frigate-notify) is a simple app designed to send notifications from Frigate to your favorite platforms. Intended to be used with standalone Frigate installations - Home Assistant not required, MQTT is optional but recommended.
+
+### [Frigate Notify Alert](https://github.com/Sysoev86/frigate-notify-alert)
+
+[Frigate Notify Alert](https://github.com/Sysoev86/frigate-notify-alert) sends Frigate events to Telegram as a photo + video media group. It supports multiple camera groups (each notifying its own chat), optional zone filtering (notify only when an object enters a chosen zone), and in-chat buttons to pause notifications for a set time. Works with standalone Frigate over MQTT; Home Assistant not required.
+
+### [Frigate telegram](https://github.com/OldTyT/frigate-telegram)
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.
 
-## [FrigatePiP](https://github.com/maciejgornicz/frigate-pip)
+## Clients and Viewers
+
+Apps and displays for viewing Frigate outside of its built-in web UI.
+
+### [FrigatePiP](https://github.com/maciejgornicz/frigate-pip)
 
 [FrigatePiP](https://github.com/maciejgornicz/frigate-pip) pops up a small picture-in-picture window with a camera's live video in a corner of the screen when Frigate detects an object, and closes it when the activity ends. It runs as a Windows tray app and on Linux (desktop windows, a console framebuffer, a terminal or tmux popups), receives events over Frigate's WebSocket or MQTT and plays the go2rtc RTSP stream with hardware decoding and camera audio.
 
-## [kiosk-monitor](https://github.com/extremeshok/kiosk-monitor)
+### [kiosk-monitor](https://github.com/extremeshok/kiosk-monitor)
 
 [kiosk-monitor](https://github.com/extremeshok/kiosk-monitor) is a Raspberry Pi watchdog that runs Chromium fullscreen on a Frigate dashboard (optionally with VLC on a second monitor for an RTSP camera stream), auto-restarts on frozen screens or unreachable URLs, and ships a Birdseye-aware Chromium helper that auto-sizes the grid to the display.
 
-## [Periscope](https://github.com/maksz42/periscope)
+### [Periscope](https://github.com/maksz42/periscope)
 
 [Periscope](https://github.com/maksz42/periscope) is a lightweight Android app that turns old devices into live viewers for Frigate. It works on Android 2.2 and above, including Android TV. It supports authentication and HTTPS.
 
-## [reostream](https://github.com/VoltTech21/reostream)
+### [yuFriEye](https://apps.apple.com/app/id6832456692)
 
-[reostream](https://github.com/VoltTech21/reostream) is a proxy for Reolink cameras that pulls video over Reolink's own protocol (the one the Reolink app and NVR use) instead of the camera's RTSP server, and serves it back as RTSP for go2rtc and Frigate. It helps models whose RTSP stream smears, drops frames or loses full resolution, and supports two-way talk.
+[yuFriEye](https://apps.apple.com/app/id6832456692) is a free native iOS, iPadOS and macOS client for Frigate. It shows the live camera grid with low-latency go2rtc streams, alerts and detections with clip playback and motion boxes, recordings by day with continuous playback, Frigate and go2rtc logs, and supports multiple servers with local and remote addresses. Works with or without Frigate authentication; no account or data collection.
 
-## [Scrypted - Frigate bridge plugin](https://github.com/apocaliss92/scrypted-frigate-bridge)
+## Home Assistant
 
-[Scrypted - Frigate bridge](https://github.com/apocaliss92/scrypted-frigate-bridge) is a plugin that allows you to ingest Frigate detections, motion, videoclips on Scrypted as well as provide templates to export rebroadcast configurations on Frigate.
+Cards and Home Assistant Marketplace integrations that build on the [Frigate Home Assistant integration](/integrations/home-assistant).
 
-## [Strix](https://github.com/eduard256/Strix)
+### [Advanced Camera Card (formerly known as Frigate Card)](https://card.camera/#/README)
 
-[Strix](https://github.com/eduard256/Strix) auto-discovers working stream URLs for IP cameras and generates ready-to-use Frigate configs. It tests thousands of URL patterns against your camera and supports cameras without RTSP or ONVIF. 67K+ camera models from 3.6K+ brands.
+The [Advanced Camera Card](https://card.camera/#/README) is a Home Assistant dashboard card with deep Frigate integration.
+
+### [Auto Arm](https://autoarm.rhizomatics.org.uk)
+
+Home Assistant Marketplace integration to automatically manage alarm state based on time of day, occupancy, sun state, physical buttons etc. Can synchronize Frigate profiles to alarm state, so for example use `disarmed` profile to reduce noisy notifications when occupied during the day.
+
+### [Camera AutoNotify](https://camera-autonotify.rhizomatics.org.uk)
+
+Home Assistant Marketplace integration to set up notifications for Frigate cameras without use of blueprints or automations. Triggered by camera events and optionally by GenAI reviews, with option for daily/periodic GenAI Review Report emailed, and alerts if Frigate or any cameras are unavailable. Integration with [Supernotify](https://supernotify.rhizomatics.org.uk/) to auto configure mobile devices and customize notifications for alarm state, occupancy etc.

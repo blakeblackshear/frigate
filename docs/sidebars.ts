@@ -162,6 +162,7 @@ const sidebars: SidebarsConfig = {
     ],
     "Frigate+": [
       "plus/index",
+      "plus/choosing_a_model",
       "plus/annotating",
       "plus/first_model",
       "plus/faq",
