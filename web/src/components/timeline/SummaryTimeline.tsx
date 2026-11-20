@@ -8,18 +8,22 @@ import React, {
 import { SummarySegment } from "./SummarySegment";
 import {
   ConsolidatedSegmentData,
+  MotionData,
   ReviewSegment,
   ReviewSeverity,
 } from "@/types/review";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
+import { cn } from "@/lib/utils";
 
 export type SummaryTimelineProps = {
   reviewTimelineRef: React.RefObject<HTMLDivElement | null>;
   timelineStart: number;
   timelineEnd: number;
   segmentDuration: number;
-  events: ReviewSegment[];
-  severityType: ReviewSeverity;
+  events?: ReviewSegment[];
+  severityType?: ReviewSeverity;
+  motionData?: MotionData[];
+  motionScale?: number;
 };
 
 export function SummaryTimeline({
@@ -27,11 +31,14 @@ export function SummaryTimeline({
   timelineStart,
   timelineEnd,
   segmentDuration,
-  events,
+  events = [],
   severityType,
+  motionData,
+  motionScale,
 }: SummaryTimelineProps) {
   const summaryTimelineRef = useRef<HTMLDivElement>(null);
   const visibleSectionRef = useRef<HTMLDivElement>(null);
+  const motionCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [isDragging, setIsDragging] = useState(false);
   const [scrollStartPosition, setScrollStartPosition] = useState<number>(0);
@@ -129,6 +136,79 @@ export function SummaryTimeline({
     segmentDuration,
   ]);
 
+  // Each motion sample covers motionScale seconds with a 0-100 value, and
+  // bins without motion are absent. Opacity is the bucket's mean value.
+
+  const drawMotion = useCallback(() => {
+    const canvas = motionCanvasRef.current;
+    const ctx = canvas?.getContext("2d");
+
+    if (!canvas || !ctx || !motionData || !motionScale) {
+      return;
+    }
+
+    const { clientWidth: width, clientHeight: height } = canvas;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const duration = timelineStart - timelineEnd;
+
+    if (duration <= 0 || height <= 0) {
+      return;
+    }
+
+    const rows = Math.max(
+      1,
+      Math.min(Math.floor(height), Math.ceil(duration / motionScale)),
+    );
+    const rowHeight = height / rows;
+    const rowSeconds = duration / rows;
+    const sums = new Array<number>(rows).fill(0);
+
+    motionData.forEach((item) => {
+      const row = Math.floor(
+        ((timelineStart - item.start_time) / duration) * rows,
+      );
+
+      if (row >= 0 && row < rows) {
+        sums[row] += item.motion ?? 0;
+      }
+    });
+
+    const color = getComputedStyle(document.documentElement)
+      .getPropertyValue("--severity_significant_motion")
+      .trim();
+
+    const samplesPerRow = rowSeconds / motionScale;
+
+    sums.forEach((sum, row) => {
+      if (sum == 0) {
+        return;
+      }
+
+      const intensity = Math.min(1, sum / (100 * samplesPerRow));
+      ctx.fillStyle = `hsl(${color} / ${intensity})`;
+      ctx.fillRect(0, row * rowHeight, width, Math.ceil(rowHeight));
+    });
+  }, [motionData, motionScale, timelineStart, timelineEnd]);
+
+  useEffect(() => {
+    const canvas = motionCanvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    drawMotion();
+    const resizeObserver = new ResizeObserver(drawMotion);
+    resizeObserver.observe(canvas);
+
+    return () => resizeObserver.disconnect();
+  }, [drawMotion]);
+
   const setVisibleSectionStyles = useCallback(() => {
     if (
       reviewTimelineRef.current &&
@@ -216,7 +296,7 @@ export function SummaryTimeline({
         const { scrollHeight: reviewTimelineHeight } =
           reviewTimelineRef.current;
 
-        const { clientHeight: visibleSectionHeight } =
+        const { offsetHeight: visibleSectionHeight } =
           visibleSectionRef.current;
 
         const visibleSectionOffset = -(visibleSectionHeight / 2);
@@ -299,12 +379,9 @@ export function SummaryTimeline({
             clientHeight: reviewTimelineVisibleHeight,
           } = reviewTimelineRef.current;
 
-          const { clientHeight: visibleSectionHeight } =
-            visibleSectionRef.current;
-
           const deltaY =
             (clientY - scrollStartPosition) *
-            (summaryTimelineVisibleHeight / visibleSectionHeight);
+            (reviewTimelineHeight / summaryTimelineVisibleHeight);
 
           const newScrollTop = Math.min(
             initialReviewTimelineScrollTop + deltaY,
@@ -351,6 +428,12 @@ export function SummaryTimeline({
       className={`no-scrollbar relative h-full select-none overflow-hidden border-l-[1px] border-neutral-700 bg-secondary`}
       role="scrollbar"
     >
+      {motionData && (
+        <canvas
+          ref={motionCanvasRef}
+          className="pointer-events-none absolute inset-0 size-full"
+        />
+      )}
       <div
         ref={summaryTimelineRef}
         className="relative z-10 flex h-full flex-col-reverse"
@@ -369,9 +452,10 @@ export function SummaryTimeline({
         ref={visibleSectionRef}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
-        className={`absolute z-20 w-full touch-none bg-primary/30 ${
-          isDragging ? "cursor-grabbing" : "cursor-grab"
-        }`}
+        className={cn(
+          "absolute z-20 w-full touch-none border-y border-primary/60 bg-primary/30 shadow-[0_0_0_1px_hsl(var(--background))]",
+          isDragging ? "cursor-grabbing" : "cursor-grab",
+        )}
       ></div>
     </div>
   );

@@ -70,6 +70,7 @@ import { cn } from "@/lib/utils";
 import { useFullscreen } from "@/hooks/use-fullscreen";
 import { useTimezone } from "@/hooks/use-date-utils";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import SummaryTimeline from "@/components/timeline/SummaryTimeline";
 import { useTranslation } from "react-i18next";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
 import {
@@ -1317,14 +1318,14 @@ function Timeline({
         isDesktop
           ? cn(
               timelineType == "timeline"
-                ? "w-[100px] flex-shrink-0"
+                ? "w-[110px] flex-shrink-0"
                 : timelineType == "detail"
                   ? "min-w-[20rem] max-w-[30%] flex-shrink-0 flex-grow-0 basis-[30rem] md:min-w-[20rem] md:max-w-[25%] lg:min-w-[30rem] lg:max-w-[33%]"
                   : "w-80 flex-shrink-0",
             )
           : cn(
               timelineType == "timeline"
-                ? "portrait:flex-grow landscape:w-[100px] landscape:flex-shrink-0"
+                ? "portrait:flex-grow landscape:w-[128px] landscape:flex-shrink-0"
                 : timelineType == "detail"
                   ? "portrait:flex-grow landscape:w-[19rem] landscape:flex-shrink-0"
                   : "portrait:flex-grow landscape:w-[19rem] landscape:flex-shrink-0",
@@ -1345,32 +1346,51 @@ function Timeline({
       )}
       {timelineType == "timeline" ? (
         !isLoading ? (
-          <MotionReviewTimeline
-            timelineRef={selectedTimelineRef}
-            segmentDuration={zoomSettings.segmentDuration}
-            timestampSpread={zoomSettings.timestampSpread}
-            timelineStart={timeRange.before}
-            timelineEnd={timeRange.after}
-            showHandlebar={exportRange == undefined}
-            showExportHandles={exportRange != undefined}
-            exportStartTime={exportRange?.after}
-            exportEndTime={exportRange?.before}
-            setExportStartTime={setExportStartTime}
-            setExportEndTime={setExportEndTime}
-            handlebarTime={currentTime}
-            setHandlebarTime={setCurrentTime}
-            events={mainCameraReviewItems}
-            motion_events={motionData ?? []}
-            noRecordingRanges={noRecordings ?? []}
-            subOnlyRanges={subOnlyRanges}
-            contentRef={contentRef}
-            onHandlebarDraggingChange={setScrubbing}
-            isZooming={isZooming}
-            zoomDirection={zoomDirection}
-            onZoomChange={handleZoomChange}
-            possibleZoomLevels={possibleZoomLevels}
-            currentZoomLevel={currentZoomLevel}
-          />
+          <div className="flex size-full flex-row">
+            <div className="relative h-full min-w-0 flex-1">
+              <MotionReviewTimeline
+                timelineRef={selectedTimelineRef}
+                segmentDuration={zoomSettings.segmentDuration}
+                timestampSpread={zoomSettings.timestampSpread}
+                timelineStart={timeRange.before}
+                timelineEnd={timeRange.after}
+                showHandlebar={exportRange == undefined}
+                showExportHandles={exportRange != undefined}
+                exportStartTime={exportRange?.after}
+                exportEndTime={exportRange?.before}
+                setExportStartTime={setExportStartTime}
+                setExportEndTime={setExportEndTime}
+                handlebarTime={currentTime}
+                setHandlebarTime={setCurrentTime}
+                events={mainCameraReviewItems}
+                motion_events={motionData ?? []}
+                noRecordingRanges={noRecordings ?? []}
+                subOnlyRanges={subOnlyRanges}
+                contentRef={contentRef}
+                onHandlebarDraggingChange={setScrubbing}
+                isZooming={isZooming}
+                zoomDirection={zoomDirection}
+                onZoomChange={handleZoomChange}
+                possibleZoomLevels={possibleZoomLevels}
+                currentZoomLevel={currentZoomLevel}
+              />
+            </div>
+            <div
+              className={cn(
+                "flex-shrink-0",
+                isDesktop ? "w-[10px]" : "w-[28px]",
+              )}
+            >
+              <SummaryTimeline
+                reviewTimelineRef={selectedTimelineRef}
+                timelineStart={timeRange.before}
+                timelineEnd={timeRange.after}
+                segmentDuration={zoomSettings.segmentDuration}
+                motionData={motionData}
+                motionScale={Math.round(zoomSettings.segmentDuration / 2)}
+              />
+            </div>
+          </div>
         ) : (
           <Skeleton className="size-full" />
         )
