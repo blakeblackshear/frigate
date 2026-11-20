@@ -130,7 +130,7 @@
     }
   },
   "label": {
-    "back": "Idi nazad",
+    "back": "Povratak",
     "hide": "Sakrij {{item}}",
     "show": "Prikaži {{item}}",
     "ID": "ID",
@@ -256,7 +256,8 @@
       "ur": "Urdu (اردو)",
       "withSystem": {
         "label": "Koristi sistemska podešavanja za jezik"
-      }
+      },
+      "srLatn": "Srpski (Latinica)"
     },
     "appearance": "Izgled",
     "darkMode": {

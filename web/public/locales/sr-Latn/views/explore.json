@@ -61,7 +61,7 @@
       "header": {
         "zones": "Zone",
         "ratio": "Odnos",
-        "area": "Površina",
+        "area": "Područje",
         "score": "Rezultat",
         "computedScore": "Izračunati rezultat",
         "topScore": "Najbolji rezultat",
@@ -139,8 +139,8 @@
       "label": "Rezultat snimka kadra"
     },
     "topScore": {
-      "label": "Najviši rezultat",
-      "info": "Najviši rezultat predstavlja najveću srednju vrednost (medijanu) rezultata za praćeni objekat, pa se može razlikovati od rezultata prikazanog na sličici u rezultatima pretrage."
+      "label": "Najbolji rezultat",
+      "info": "Najbolji rezultat predstavlja najveću srednju vrednost (medijanu) rezultata za praćeni objekat, pa se može razlikovati od rezultata prikazanog na sličici u rezultatima pretrage."
     },
     "score": {
       "label": "Rezultat"
@@ -259,7 +259,7 @@
     "title": "AI analiza"
   },
   "concerns": {
-    "label": "Upozorenja"
+    "label": "Sumnjive aktivnosti"
   },
   "objectLifecycle": {
     "noImageFound": "Nije pronađena slika za ovaj praćeni objekat."

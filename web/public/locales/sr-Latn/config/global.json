@@ -336,7 +336,7 @@
         }
     },
     "genai": {
-        "label": "Konfiguracija generativne veštačke inteligencije",
+        "label": "Konfiguracija generativne AI",
         "description": "Podešavanja za integrisane provajdere generativne veštačke inteligencije (AI) koji se koriste za generisanje opisa objekata i rezimea pregleda.",
         "api_key": {
             "label": "API ključ",
@@ -356,7 +356,7 @@
         },
         "roles": {
             "label": "Uloge",
-            "description": "GenAI uloge (ćaskanje/chat, opisi, ugnježdavanja/embeddings, transkripcija); jedan provajder po ulozi. Podrazumevano su odobrene samo uloge ćaskanja, opisa i ugnježdavanja; transkripcija mora biti eksplicitno navedena."
+            "description": "GenAI uloge (ćaskanje, opisi, ugnježdavanja, transkripcija); jedan provajder po ulozi. Podrazumevano su odobrene samo uloge ćaskanja, opisa i ugnježdavanja; transkripcija mora biti eksplicitno navedena."
         },
         "provider_options": {
             "label": "Opcije provajdera",
