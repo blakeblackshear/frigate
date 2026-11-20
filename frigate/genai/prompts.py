@@ -187,16 +187,35 @@ def build_review_description_response_format(concerns: list[str]) -> dict[str, A
 
     Strips the `time` field (populated server-side) and drops
     `other_concerns` when no concerns are configured.
+
+    Every remaining property must be listed in `required` because strict
+    providers (OpenAI) reject a schema with any optional property.
     """
     schema = ReviewMetadata.model_json_schema()
-    schema.get("properties", {}).pop("time", None)
+    properties = schema.setdefault("properties", {})
+    required = schema.setdefault("required", [])
+    properties.pop("time", None)
 
-    if "time" in schema.get("required", []):
-        schema["required"].remove("time")
-    if not concerns:
-        schema.get("properties", {}).pop("other_concerns", None)
-        if "other_concerns" in schema.get("required", []):
-            schema["required"].remove("other_concerns")
+    if "time" in required:
+        required.remove("time")
+
+    if concerns:
+        # The model field is nullable with a default so stored metadata
+        # without concerns still parses. For generation, require a plain list
+        # instead; the model returns an empty list when no concern applies.
+        properties["other_concerns"] = {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": properties["other_concerns"]["description"],
+        }
+
+        if "other_concerns" not in required:
+            required.append("other_concerns")
+    else:
+        properties.pop("other_concerns", None)
+
+        if "other_concerns" in required:
+            required.remove("other_concerns")
 
     return {
         "type": "json_schema",
