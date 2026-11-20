@@ -16,11 +16,16 @@
         "title": "Alusta silumise taasesitust",
         "description": "Looge ajutine taasesituskaamera, mis kordab ajaloolist salvestist objektide tuvastamise ja jälgimise probleemide silumiseks. Taasesituskaameral on sama tuvastusseadistus mis lähtekaameral. Valige algusaeg.",
         "toast": {
-            "error": "Silumise taasesitus ebaõnnestus: {{error}}",
+            "error": "Silumise kordusesitus ei õnnestunud: {{error}}",
             "alreadyActive": "Kordusseanss on juba aktiivne",
             "stopError": "Silumise taasesituse peatamine ei õnnestunud: {{error}}",
             "goToReplay": "Mine kordusesse",
             "noRecordings": "Valitud ajavahemikust ei leidu ühtegi salvestust"
+        },
+        "activeSession": {
+            "stop": "Alusta kordusesitust",
+            "description": "Silumiseks/veaotsinguks mõeldud kordusesituse sessioon on juba „{{camera}}“ kaamera jaoks töös. Uue sessiooni käivitamiseks lõpeta selle töö.",
+            "stopping": "Lõpetan…"
         }
     },
     "title": "Kordus veaotsinguks",

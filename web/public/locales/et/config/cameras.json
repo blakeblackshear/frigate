@@ -221,5 +221,9 @@
     },
     "zones": {
         "label": "Tsoonid"
+    },
+    "enabled_in_config": {
+        "label": "Kaamera algne olek",
+        "description": "Pea arvet kaamera algse oleku üle."
     }
 }

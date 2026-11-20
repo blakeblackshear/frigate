@@ -85,11 +85,13 @@
   },
   "imageEntry": {
     "validation": {
-      "selectImage": "Palun vali pildifail."
+      "selectImage": "Palun vali pildifail.",
+      "heicConversionFailed": "Selle HEIC-vormingus pildi teisendamine ei õnnestu. Proovi selle asemel eksportida JPEG-vormingus."
     },
     "dropActive": "Lohista pilt siia…",
     "dropInstructions": "Lohistage või kleepige pilt siia või klõpsake valimiseks",
-    "maxSize": "Maksimum suurus: {{size}}MB"
+    "maxSize": "Maksimum suurus: {{size}}MB",
+    "converting": "Teisendan pildi vormingut…"
   },
   "nofaces": "Nägusid pole saadaval",
   "trainFaceAs": "Treeni nägu kui:",
