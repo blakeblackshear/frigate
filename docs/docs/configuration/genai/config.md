@@ -45,6 +45,22 @@ The examples on this page all use `my_provider`, but the name is arbitrary and i
 
 Each provider handles one or more **roles**: `chat`, `descriptions`, `embeddings`, and `transcribe`. A provider handles the first three by default; `transcribe` must always be listed explicitly. Each role may be assigned to exactly one provider. Define a single provider if you want it to do everything, or split the roles across several providers using the `roles` option. Not every provider supports every role; see [Provider support](#provider-support).
 
+### Request correlation
+
+Set `send_request_ids: true` on a named provider to send the existing object's
+`X-Frigate-Event-ID` header with object-description requests, and the review
+segment's `X-Frigate-Review-ID` header with review-description requests. This is disabled
+by default. It lets an external proxy correlate a request with its event or review item without
+reading the image payload. Review summaries, chat and embeddings are unchanged.
+
+```yaml
+genai:
+  my_provider:
+    provider: openai
+    model: your-model-name
+    send_request_ids: true
+```
+
 ### Provider support
 
 | Provider                      | Descriptions | Chat | Embeddings | Transcription |

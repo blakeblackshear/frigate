@@ -169,6 +169,11 @@ class GenAIClient:
             thumbnails,
             response_format,
             image_captions=frame_captions,
+            extra_headers=(
+                {"X-Frigate-Review-ID": str(review_data["id"])}
+                if self.genai_config.send_request_ids
+                else None
+            ),
         )
 
         if debug_save and response:
@@ -295,7 +300,15 @@ class GenAIClient:
             return None
 
         logger.debug(f"Sending images to genai provider with prompt: {prompt}")
-        return self._send(prompt, thumbnails)
+        return self._send(
+            prompt,
+            thumbnails,
+            extra_headers=(
+                {"X-Frigate-Event-ID": str(event.id)}
+                if self.genai_config.send_request_ids
+                else None
+            ),
+        )
 
     def _init_provider(self) -> Any:
         """Initialize the client."""
@@ -308,6 +321,7 @@ class GenAIClient:
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to the provider.
 
@@ -319,6 +333,10 @@ class GenAIClient:
         ``image_captions`` carries one caption per image, to be placed
         immediately before its image so the model can tell the frames apart.
         Providers build their request order with ``interleave_images``.
+
+        ``extra_headers`` are HTTP headers added to this request only, e.g.
+        Frigate's own ids so a proxy can correlate the request without
+        reading the body. Providers merge them over any configured headers.
         """
         return None
 
