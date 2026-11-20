@@ -168,11 +168,11 @@
     "title": "Opšte",
     "detector": {
       "title": "Detektori",
-      "inferenceSpeed": "Brzina obrade detektora",
-      "temperature": "Temperatura detektora",
-      "cpuUsage": "Zauzeće procesora od strane detektora",
+      "inferenceSpeed": "Brzina inferencije detektora",
+      "temperature": "Detektor temperature",
+      "cpuUsage": "Zauzeće CPU-a detektora",
       "cpuUsageInformation": "Procesor koji se koristi za pripremu ulaznih i izlaznih podataka za modele detekcije i iz njih. Ova vrednost ne meri iskorišćenost same obrade, čak i ako se koristi grafički procesor ili akcelerator.",
-      "memoryUsage": "Zauzeće memorije od strane detektora"
+      "memoryUsage": "Zauzeće memorije detektora"
     },
     "hardwareInfo": {
       "title": "Informacije o hardveru",
@@ -193,7 +193,7 @@
           "title": "Nvidia SMI izlazni podaci",
           "name": "Naziv: {{name}}",
           "driver": "Drajver: {{driver}}",
-          "cudaComputerCapability": "CUDA računarska sposobnost: {{cuda_compute}}",
+          "cudaComputerCapability": "CUDA sposobnost računanja: {{cuda_compute}}",
           "vbios": "VBios informacije: {{vbios}}"
         },
         "closeInfo": {
@@ -219,8 +219,8 @@
         "recording": "snimanje",
         "go2rtc": "go2rtc"
       },
-      "processMemoryUsage": "Zauzeće memorije",
-      "processCpuUsage": "Zauzeće CPU"
+      "processMemoryUsage": "Zauzeće memorije procesa",
+      "processCpuUsage": "Zauzeće CPU-a procesa"
     }
   },
   "storage": {
@@ -334,7 +334,7 @@
       }
     }
   },
-  "lastRefreshed": "Poslednji put osveženo: ",
+  "lastRefreshed": "Poslednje osvežavanje: ",
   "stats": {
     "cameraSkippedDetections": "Kamera {{camera}} preskače detekciju na {{pct}}% kadrova",
     "healthy": "Sistem ispravn",

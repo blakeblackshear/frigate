@@ -24,6 +24,11 @@
             "noRecordings": "Nisu pronađeni snimci u izabranom vremenskom opsegu",
             "stopError": "Neuspelo zaustavljanje ponovne reprodukcije za otklanjanje grešaka: {{error}}",
             "goToReplay": "Idi na ponovnu reprodukciju"
+        },
+        "activeSession": {
+            "description": "Sesija ponovnog prikazivanja za otklanjanje grešaka je već pokrenuta za {{camera}}. Zaustavite je da biste pokrenuli novu.",
+            "stop": "Zaustavi ponovno prikazivanje",
+            "stopping": "Zaustavljanje..."
         }
     },
     "page": {

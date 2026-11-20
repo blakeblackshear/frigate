@@ -25,7 +25,12 @@
     "editName": "Edita el nom",
     "deleteExport": "Suprimeix l'exportació",
     "assignToCase": "Afegeix al cas",
-    "removeFromCase": "Elimina del cas"
+    "removeFromCase": "Elimina del cas",
+    "caseOptions": "Opcions del cas",
+    "shareCase": "Comparteix el cas",
+    "downloadCase": "Baixa el cas",
+    "editCase": "Edita el cas",
+    "deleteCase": "Suprimeix el cas"
   },
   "headings": {
     "cases": "Casos",

@@ -25,7 +25,12 @@
     "editName": "İsmi Düzenle",
     "deleteExport": "Dışa aktarımı sil",
     "assignToCase": "Vakaya ekle",
-    "removeFromCase": "Vakadan çıkart"
+    "removeFromCase": "Vakadan çıkart",
+    "caseOptions": "Vaka seçenekleri",
+    "shareCase": "Vakayı paylaş",
+    "downloadCase": "Vakayı indir",
+    "editCase": "Vakayı düzenle",
+    "deleteCase": "Vakayı sil"
   },
   "headings": {
     "uncategorizedExports": "Kategorisiz Aktarımlar",

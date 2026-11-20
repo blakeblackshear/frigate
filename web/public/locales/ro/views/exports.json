@@ -25,7 +25,12 @@
     "editName": "Editează numele",
     "deleteExport": "Șterge exportul",
     "assignToCase": "Adaugă la un caz",
-    "removeFromCase": "Elimină din caz"
+    "removeFromCase": "Elimină din caz",
+    "caseOptions": "Opțiuni pentru caz",
+    "shareCase": "Partajează cazul",
+    "downloadCase": "Descarcă cazul",
+    "editCase": "Editează cazul",
+    "deleteCase": "Șterge cazul"
   },
   "headings": {
     "cases": "Cazuri",

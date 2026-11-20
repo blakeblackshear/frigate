@@ -140,7 +140,8 @@
       "hr": "Hrvatski (Croată)",
       "bs": "Bosanski (Bosniacă)",
       "zhHant": "繁體中文 (Chineză tradițională)",
-      "be": "Беларуская (Bielorusă)"
+      "be": "Беларуская (Bielorusă)",
+      "srLatn": "Srpski (Sârbă, Llatină)"
     },
     "theme": {
       "default": "Implicit",

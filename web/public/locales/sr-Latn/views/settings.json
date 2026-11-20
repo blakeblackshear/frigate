@@ -70,7 +70,7 @@
     "maintenance": "Održavanje",
     "mediaSync": "Sinhronizacija medija",
     "regionGrid": "Mreža regiona",
-    "enrichments": "Obogaćivanja"
+    "enrichments": "Napredne funkcije"
   },
   "analyticsPreview": {
     "show": "Pregledaj izveštaj",
@@ -82,7 +82,7 @@
     "authentication": "Podešavanja autentifikacije - Frigate",
     "cameraManagement": "Upravljanje kamerama - Frigate",
     "cameraReview": "Podešavanja pregleda kamera - Frigate",
-    "enrichments": "Podešavanja poboljšanja - Frigate",
+    "enrichments": "Podešavanja naprednih funkcija - Frigate",
     "masksAndZones": "Editor maski i zona - Frigate",
     "motionTuner": "Podešavanje kretanja - Frigate",
     "object": "Otklanjanje grešaka - Frigate",
@@ -293,7 +293,7 @@
   "review": {
     "imageSource": {
       "recordings": "Snimci",
-      "previews": "Predpregledi"
+      "previews": "Pregledi"
     },
     "frameMode": {
       "frames": "Kadrovi",
@@ -511,7 +511,7 @@
         "unknownGroups_one": "Grupa kamera {{groups}} se ne nalazi na ovom serveru. Njena podešavanja će biti sačuvana, ali se neće koristiti.",
         "unknownGroups_few": "",
         "unknownGroups_other": "Grupe kamera {{groups}} se ne nalaze na ovom serveru. Njihova podešavanja će biti sačuvana, ali se neće koristiti.",
-        "confirm": "Importuj",
+        "confirm": "Uvezi",
         "unknownCameras_one": "Kamera {cameras} nije na ovom serveru. Njeno podešavanje strimovanja će biti ignorisano.",
         "unknownCameras_few": "Kamere {cameras} nisu na ovom serveru. Njihova podešavanja strimovanja će biti ignorisana.",
         "unknownCameras_other": "Kamere {cameras} nisu na ovom serveru. Njihova podešavanja strimovanja će biti ignorisana."
@@ -538,7 +538,7 @@
         "clearStoredLayout": "Obrisan je sačuvan rasporeda za {cameraName}",
         "clearStreamingSettings": "Obrisana su podešavanja strimovanja za sve grupe kamera.",
         "exportUiSettings": "Izvežena podešavanja",
-        "importUiSettings": "Uveyena podešavanja"
+        "importUiSettings": "Uvežena podešavanja"
       },
       "error": {
         "clearStoredLayoutFailed": "Neuspešno brisanje sačuvanog rasporeda: {errorMessage}",
@@ -828,7 +828,7 @@
     },
     "defaultRole": {
       "admin": "Administrator",
-      "none": "Ništa",
+      "none": "Ništa (zabrani pristup)",
       "viewer": "Posmatrač"
     },
     "genaiRoles": {
@@ -1081,8 +1081,8 @@
     }
   },
   "enrichments": {
-    "title": "Podešavanja obogaćivanja podataka",
-    "unsavedChanges": "Nesačuvane izmene podešavanja obogaćivanja podataka",
+    "title": "Podešavanja naprednih funkcija",
+    "unsavedChanges": "Nesačuvane promene podešavanja naprednih funkcija",
     "birdClassification": {
       "title": "Klasifikacija ptica",
       "desc": "Klasifikacija ptica identifikuje poznate ptice koristeći kvantizovani Tensorflow model. Kada se prepozna poznata ptica, njen uobičajeni naziv će biti dodat kao podoznaka (sub_label). Ove informacije su uključene u korisnički interfejs, filtere, kao i u obaveštenja."
