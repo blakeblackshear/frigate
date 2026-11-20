@@ -1701,7 +1701,12 @@ function MotionReview({
         </div>
       </div>
       {!selectedMotionPreviewCamera && (
-        <div className="flex w-[73px] flex-row md:w-[110px]">
+        <div
+          className={cn(
+            "flex flex-row",
+            motionOnly ? "w-[55px] md:w-[100px]" : "w-[73px] md:w-[110px]",
+          )}
+        >
           <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
             {motionData ? (
               <MotionReviewTimeline
@@ -1733,20 +1738,22 @@ function MotionReview({
               <Skeleton className="size-full" />
             )}
           </div>
-          <div className="w-[18px] md:w-[10px]">
-            {motionData ? (
-              <SummaryTimeline
-                reviewTimelineRef={motionTimelineRef}
-                timelineStart={timeRangeSegments.end}
-                timelineEnd={timeRangeSegments.start}
-                segmentDuration={segmentDuration}
-                motionData={motionData}
-                motionScale={segmentDuration / 2}
-              />
-            ) : (
-              <Skeleton className="w-full" />
-            )}
-          </div>
+          {!motionOnly && (
+            <div className="w-[18px] md:w-[10px]">
+              {motionData ? (
+                <SummaryTimeline
+                  reviewTimelineRef={motionTimelineRef}
+                  timelineStart={timeRangeSegments.end}
+                  timelineEnd={timeRangeSegments.start}
+                  segmentDuration={segmentDuration}
+                  motionData={motionData}
+                  motionScale={segmentDuration / 2}
+                />
+              ) : (
+                <Skeleton className="w-full" />
+              )}
+            </div>
+          )}
         </div>
       )}
 
