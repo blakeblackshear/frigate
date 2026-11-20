@@ -24,8 +24,7 @@
         "visionModelFeatureExtractor": "Extrator de características do modelo de visão"
       },
       "tips": {
-        "context": "Você pode querer reindexar os embeddings de seus objetos rastreados uma vez que os modelos forem baixados.",
-        "documentation": "Leia a documentação"
+        "context": "Você pode querer reindexar os embeddings de seus objetos rastreados uma vez que os modelos forem baixados."
       },
       "error": "Um erro ocorreu. Verifique os registos do Frigate."
     }
@@ -50,13 +49,15 @@
           "regenerate": "Uma nova descrição foi solicitada do {{provider}}. Dependendo da velocidade do seu fornecedor, a nova descrição pode levar algum tempo para regenerar.",
           "updatedSublabel": "Sub-rótulo atualizado com sucesso.",
           "updatedLPR": "Placa de identificação atualizada com sucesso.",
-          "audioTranscription": "Transcrição de áudio requisitada com sucesso. Dependendo da velocidade de seu servidor Frigate, a transcrição pode demorar um tempo para completar."
+          "audioTranscription": "Transcrição de áudio requisitada com sucesso. Dependendo da velocidade de seu servidor Frigate, a transcrição pode demorar um tempo para completar.",
+          "updatedAttributes": "Atributos atualizados com sucesso."
         },
         "error": {
           "regenerate": "Falha ao ligar para {{provider}} para uma descrição nova: {{errorMessage}}",
           "updatedSublabelFailed": "Falha ao atualizar sub-rótulo: {{errorMessage}}",
           "updatedLPRFailed": "Falha ao atualizar placa de identificação: {{errorMessage}}",
-          "audioTranscription": "Falha ao requisitar transcrição de áudio: {{errorMessage}}"
+          "audioTranscription": "Falha ao requisitar transcrição de áudio: {{errorMessage}}",
+          "updatedAttributesFailed": "Falha ao atualizar os atributos: {{errorMessage}}"
         }
       }
     },
@@ -104,65 +105,27 @@
     },
     "score": {
       "label": "Pontuação"
-    }
+    },
+    "editAttributes": {
+      "title": "Editar atributos",
+      "desc": "Selecione os atributos de classificação para este(a) {{label}}"
+    },
+    "title": {
+      "label": "Título"
+    },
+    "attributes": "Atributos de classificação",
+    "scoreInfo": "Informações da pontuação"
   },
   "trackedObjectDetails": "Detalhes do Objeto Rastreado",
   "type": {
     "details": "detalhes",
     "snapshot": "captura de imagem",
     "video": "vídeo",
-    "object_lifecycle": "ciclo de vida do objeto",
     "thumbnail": "thumbnail",
     "tracking_details": "detalhes de rastreamento"
   },
   "objectLifecycle": {
-    "title": "Ciclo de Vida do Objeto",
-    "noImageFound": "Nenhuma imagem encontrada nessa marcação de horário.",
-    "createObjectMask": "Criar Máscara de Objeto",
-    "adjustAnnotationSettings": "Ajustar configurações de anotação",
-    "scrollViewTips": "Role a tela para ver momentos significantes do ciclo de vida desse objeto.",
-    "autoTrackingTips": "As posições da caixa delimitadora será inacurada para cameras com rastreamento automático.",
-    "count": "{{first}} de {{second}}",
-    "trackedPoint": "Ponto Rastreado",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} detectado",
-      "entered_zone": "{{label}} entrou em {{zones}}",
-      "active": "{{label}} se tornou ativo",
-      "stationary": "{{label}} se tornou estacionário",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} detectado para {{label}}",
-        "other": "{{label}} reconhecido como {{attribute}}"
-      },
-      "gone": "{{label}} esquerda",
-      "heard": "{{label}} escutado(a)",
-      "header": {
-        "zones": "Zonas",
-        "area": "Área",
-        "ratio": "Proporção"
-      },
-      "external": "{{label}} detectado(a)"
-    },
-    "annotationSettings": {
-      "title": "Configurações de anotação",
-      "showAllZones": {
-        "title": "Mostrar todas as zonas",
-        "desc": "Sempre exibir zonas nos quadros em que objetos entraram em uma zona."
-      },
-      "offset": {
-        "label": "Deslocamento da Anotação",
-        "desc": "Esses dados vem do feed de detecção da sua câmera, porém estão sobrepondo imagens da gravação. É improvável que duas transmissões estejam perfeitamente sincronizadas. Como resultado, as caixas delimitadoras e a gravação não se alinharam perfeitamente. Porém, o campo <code>annotation_offset</code> pode ser utilizado para ajustar isso.",
-        "documentation": "Leia a documentação. ",
-        "millisecondsToOffset": "Milisegundos para separar detecções de anotações.<em>Default: 0</em>",
-        "tips": "DICA: Imagine que haja um clipe de evento com uma pessoa caminhando da esquerda para a direita. Se a caixa delimitadora da linha do tempo do evento está consistentemente à esquerda da pessoa, então o valor deve ser reduzido. Similarmente, se a pessoa está caminhando da esquerda para a direita e a caixa delimitadora está consistentemente à frente da pessoa, então o valor deve ser aumentado.",
-        "toast": {
-          "success": "O deslocamento de anotação para a câmera {{camera}} foi salvo no arquivo de configuração. Reinicie o Frigate para aplicar as alterações."
-        }
-      }
-    },
-    "carousel": {
-      "previous": "Slide anterior",
-      "next": "Próximo slide"
-    }
+    "noImageFound": "Nenhuma imagem encontrada nessa marcação de horário."
   },
   "itemMenu": {
     "findSimilar": {
@@ -181,10 +144,6 @@
       "label": "Baixar captura de imagem",
       "aria": "Baixar captura de imagem"
     },
-    "viewObjectLifecycle": {
-      "label": "Ver ciclo de vida do objeto",
-      "aria": "Exibir o ciclo de vida do objeto"
-    },
     "viewInHistory": {
       "label": "Ver no Histórico",
       "aria": "Ver no Histórico"
@@ -199,12 +158,36 @@
     "audioTranscription": {
       "label": "Transcrever",
       "aria": "Solicitar transcrição de áudio"
+    },
+    "showObjectDetails": {
+      "label": "Mostrar trajeto do objeto"
+    },
+    "hideObjectDetails": {
+      "label": "Ocultar trajeto do objeto"
+    },
+    "viewTrackingDetails": {
+      "label": "Ver detalhes do rastreamento",
+      "aria": "Mostrar os detalhes do rastreamento"
+    },
+    "downloadCleanSnapshot": {
+      "aria": "Baixar snapshot limpo",
+      "label": "Baixar snapshot limpo"
+    },
+    "debugReplay": {
+      "label": "Replay de depuração",
+      "aria": "Ver este objeto rastreado na visualização de replay de depuração"
+    },
+    "more": {
+      "aria": "Mais"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Confirmar Exclusão",
       "desc": "Deletar esse objeto rastreado remove a captura de imagem, os embeddings salvos, e os detalhes de rastreamento associados. Gravações desse objeto rastreado na visualização de Histórico <em>NÃO</em> serão deletadas.<br /><br />Tem certeza que deseja prosseguir?"
+    },
+    "toast": {
+      "error": "Erro ao excluir este objeto rastreado: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Nenhum Objeto Rastreado Encontrado",
@@ -219,7 +202,9 @@
         "success": "Objeto rastreado deletado com sucesso.",
         "error": "Falha ao detectar objeto rastreado {{errorMessage}}"
       }
-    }
+    },
+    "previousTrackedObject": "Objeto rastreado anterior",
+    "nextTrackedObject": "Próximo objeto rastreado"
   },
   "aiAnalysis": {
     "title": "Análise de IA"
@@ -243,14 +228,29 @@
       "header": {
         "zones": "Zonas",
         "area": "Área",
-        "ratio": "Proporção"
+        "ratio": "Proporção",
+        "score": "Pontuação",
+        "computedScore": "Pontuação calculada",
+        "topScore": "Maior pontuação",
+        "toggleAdvancedScores": "Alternar pontuações avançadas"
       }
     },
     "title": "Detalhes de Rastreamento",
     "createObjectMask": "Criar máscara de objeto",
     "annotationSettings": {
       "showAllZones": {
-        "title": "Mostrar todas as Zonas"
+        "title": "Mostrar todas as Zonas",
+        "desc": "Sempre mostrar zonas nos quadros em que os objetos entraram em uma zona."
+      },
+      "title": "Configurações de anotação",
+      "offset": {
+        "label": "Deslocamento de anotação",
+        "desc": "Esses dados vêm do feed de detecção da sua câmera, mas são sobrepostos às imagens do feed de gravação. É improvável que os dois streams estejam perfeitamente sincronizados. Como resultado, a caixa delimitadora e a filmagem não se alinharão perfeitamente. Você pode usar esta configuração para deslocar as anotações para frente ou para trás no tempo, alinhando-as melhor com a filmagem gravada.",
+        "millisecondsToOffset": "Milissegundos para deslocar as anotações de detecção. <em>Padrão: 0</em>",
+        "tips": "Diminua o valor se a reprodução do vídeo estiver adiantada em relação às caixas e aos pontos do trajeto, e aumente o valor se a reprodução estiver atrasada em relação a eles. Este valor pode ser negativo.",
+        "toast": {
+          "success": "O deslocamento de anotação de {{camera}} foi salvo no arquivo de configuração."
+        }
       }
     },
     "carousel": {

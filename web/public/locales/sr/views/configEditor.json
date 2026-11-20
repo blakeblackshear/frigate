@@ -1,18 +1,18 @@
 {
-  "documentTitle": "Editor Konfiguracije - Frigate",
-  "configEditor": "Editor konfiguracije",
-  "copyConfig": "Kopiraj konfiguraciju",
-  "saveAndRestart": "Sačuvaj & Ponovo pokreni",
-  "saveOnly": "Samo sačuvaj",
-  "confirm": "Izađi bez čuvanja?",
+  "documentTitle": "Едитор конфигурације - Frigate",
+  "configEditor": "Едитор конфигурације",
+  "copyConfig": "Копирај конфигурацију",
+  "saveAndRestart": "Сачувај и поново покрени",
+  "saveOnly": "Само сачувај",
+  "confirm": "Изаћи без чувања?",
   "toast": {
     "success": {
-      "copyToClipboard": "Konfiguracija je kopirana u clipboard."
+      "copyToClipboard": "Конфигурација је копирана у привремену меморију."
     },
     "error": {
       "savingError": "Грешка при чувању конфигурације"
     }
   },
-  "safeConfigEditor": "Уређивач конфигурације (безбедан режим)",
+  "safeConfigEditor": "Уређивач конфигурације (Безбедан режим)",
   "safeModeDescription": "Фригејт је у безбедном режиму због грешке при провери исправности конфигурације."
 }

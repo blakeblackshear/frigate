@@ -6,6 +6,7 @@ import type {
 } from "@rjsf/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { LuCircleAlert } from "react-icons/lu";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import {
   buildTranslationPath,
@@ -93,7 +94,7 @@ const resolveErrorFieldLabel = ({
   error: RJSFValidationError;
   schema: RJSFSchema | undefined;
   formContext?: ConfigFormContext;
-  t: (key: string, options?: Record<string, unknown>) => string;
+  t: TFunction;
   i18n: ReturnType<typeof useTranslation>["i18n"];
 }): string | undefined => {
   const segments = parsePropertyPath(error.property || "");
@@ -111,11 +112,7 @@ const resolveErrorFieldLabel = ({
       ? "config/cameras"
       : formContext?.i18nNamespace;
 
-  const translationPath = buildTranslationPath(
-    stringSegments,
-    sectionI18nPrefix,
-    formContext,
-  );
+  const translationPath = buildTranslationPath(stringSegments, formContext);
 
   if (effectiveNamespace && translationPath) {
     const translated = resolveConfigTranslation(

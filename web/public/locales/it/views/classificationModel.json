@@ -213,7 +213,6 @@
     "noNewImages": "Nessuna nuova immagine da addestrare. Classifica prima più immagini nel database.",
     "noChanges": "Nessuna modifica al database dall'ultimo addestramento."
   },
-  "none": "Nessuno",
   "reclassifyImageAs": "Riclassifica immagine come:",
   "reclassifyImage": "Riclassifica immagine",
   "disabled": "Disabilitato"

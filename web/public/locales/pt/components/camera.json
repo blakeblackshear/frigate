@@ -32,7 +32,6 @@
         "audioIsUnavailable": "O áudio não está disponível para esta transmissão",
         "audio": {
           "tips": {
-            "document": "Leia a documentação ",
             "title": "O áudio deve ser emitido pela sua câmara e configurado no go2rtc para esta transmissão."
           }
         },

@@ -3,7 +3,7 @@
     "untilForTime": "直到 {{time}}",
     "untilForRestart": "直到 Frigate 重新啟動。",
     "untilRestart": "直到重新啟動",
-    "ago": "{{timeAgo}} 前",
+    "ago": "{{timeAgo}}前",
     "last14": "過去 14 天",
     "last30": "過去 30 天",
     "thisWeek": "這週",
@@ -24,18 +24,18 @@
     "am": "上午",
     "yr": "{{time}} 年",
     "year_other": "{{time}} 年",
-    "mo": "{{time}} 月",
-    "month_other": "{{time}} 月",
-    "d": "{{time}} 日",
-    "day_other": "{{time}}天",
-    "h": "{{time}}時",
-    "hour_other": "{{time}}小時",
-    "m": "{{time}}分",
-    "minute_other": "{{time}}分鐘",
-    "s": "{{time}}秒",
-    "second_other": "{{time}}秒鐘",
+    "mo": "{{time}} 個月",
+    "month_other": "{{time}} 個月",
+    "d": "{{time}} 天",
+    "day_other": "{{time}} 天",
+    "h": "{{time}} 小時",
+    "hour_other": "{{time}} 小時",
+    "m": "{{time}} 分鐘",
+    "minute_other": "{{time}} 分鐘",
+    "s": "{{time}} 秒",
+    "second_other": "{{time}} 秒",
     "formattedTimestamp": {
-      "12hour": "M 月 d 日 ah:mm:ss",
+      "12hour": "M 月 d 日 a h:mm:ss",
       "24hour": "M 月 d 日 HH:mm:ss"
     },
     "formattedTimestamp2": {
@@ -51,21 +51,21 @@
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "M 月 d 日 ah:mm",
+      "12hour": "M 月 d 日 a h:mm",
       "24hour": "M 月 d 日 HH:mm"
     },
     "formattedTimestampMonthDayYear": {
-      "12hour": "yy 年 MM 月 dd 日",
-      "24hour": "yy 年 MM 月 dd 日"
+      "12hour": "yyyy 年 MM 月 dd 日",
+      "24hour": "yyyy 年 MM 月 dd 日"
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "yyyy 年 M 月 d 日 ah:mm",
+      "12hour": "yyyy 年 M 月 d 日 a h:mm",
       "24hour": "yyyy 年 M 月 d 日 HH:mm"
     },
     "formattedTimestampMonthDay": "M 月 d 日",
     "formattedTimestampFilename": {
-      "12hour": "yy年MM月dd日 h時mm分ss秒",
-      "24hour": "yy年MM月dd日 HH時mm分ss秒"
+      "12hour": "yy-MM-dd-h-mm-ss-a",
+      "24hour": "yy-MM-dd-HH-mm-ss"
     },
     "inProgress": "處理中",
     "invalidStartTime": "無效的起始時間",
@@ -118,7 +118,7 @@
     "exitFullscreen": "退出全螢幕",
     "pictureInPicture": "子母畫面",
     "twoWayTalk": "雙向通話",
-    "cameraAudio": "鏡頭音訊",
+    "cameraAudio": "攝影機音訊",
     "on": "開",
     "off": "關",
     "edit": "編輯",
@@ -134,7 +134,7 @@
     "unselect": "取消選取",
     "export": "匯出",
     "deleteNow": "立即刪除",
-    "next": "繼續",
+    "next": "下一步",
     "continue": "繼續",
     "add": "新增",
     "applying": "應用中…",
@@ -142,7 +142,7 @@
     "copiedToClipboard": "已複製到剪貼簿",
     "modified": "已修改",
     "overridden": "已覆蓋",
-    "resetToGlobal": "重設為全域性",
+    "resetToGlobal": "重設為全域設定",
     "resetToDefault": "重設為預設",
     "saveAll": "儲存全部",
     "savingAll": "儲存全部中…",
@@ -232,13 +232,13 @@
     "restart": "重新啟動 Frigate",
     "live": {
       "title": "即時影像",
-      "allCameras": "所有鏡頭",
+      "allCameras": "所有攝影機",
       "cameras": {
-        "title": "鏡頭",
-        "count_other": "{{count}} 個鏡頭"
+        "title": "攝影機",
+        "count_other": "{{count}} 個攝影機"
       }
     },
-    "review": "審核",
+    "review": "審閱",
     "explore": "瀏覽",
     "export": "匯出",
     "uiPlayground": "UI 測試區",
@@ -272,7 +272,7 @@
     "title": "角色",
     "admin": "管理員",
     "viewer": "檢視者",
-    "desc": "管理員可以存取 Frigate UI 的全部功能。檢視者僅能查看鏡頭影像、審核物件及歷史紀錄。"
+    "desc": "管理員可以存取 Frigate UI 的全部功能。檢視者僅能查看攝影機影像、審閱項目及歷史紀錄。"
   },
   "pagination": {
     "label": "分頁",

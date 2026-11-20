@@ -1,7 +1,8 @@
 from pydantic import Field, field_validator
 
+from frigate.util.env import EnvString
+
 from .base import FrigateBaseModel
-from .env import EnvString
 
 __all__ = ["ProxyConfig", "HeaderMappingConfig"]
 
@@ -43,13 +44,23 @@ class ProxyConfig(FrigateBaseModel):
     default_role: str | None = Field(
         default="viewer",
         title="Default role",
-        description="Default role assigned to proxy-authenticated users when no role mapping applies.",
+        description="Default role assigned to proxy-authenticated users when no role mapping applies. Set to 'none' to deny access to unmapped users.",
     )
     separator: str | None = Field(
         default=",",
         title="Separator character",
         description="Character used to split multiple values provided in proxy headers.",
     )
+
+    @field_validator("default_role", mode="before")
+    @classmethod
+    def normalize_deny_sentinel(cls, v):
+        # Fail closed on capitalization: an unnormalized "None" would miss the
+        # sentinel and fall back to viewer, granting the access it was meant to
+        # deny. Other role names stay case-sensitive.
+        if isinstance(v, str) and v.strip().lower() == "none":
+            return "none"
+        return v
 
     @field_validator("separator", mode="before")
     @classmethod

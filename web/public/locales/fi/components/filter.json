@@ -51,10 +51,10 @@
     "scoreDesc": "Kohteen pisteet (Laskeva)",
     "speedAsc": "Arvioitu nopeus (Nouseva)",
     "speedDesc": "Arvioitu nopeus (Laskeva)",
-    "relevance": "Olennaisuus"
+    "relevance": "Vastaavuus"
   },
   "cameras": {
-    "label": "Kameran suodattimet",
+    "label": "Kamerasuodatin",
     "all": {
       "title": "Kaikki kamerat",
       "short": "Kamerat"
@@ -86,6 +86,25 @@
     "title": "Vahvista poisto",
     "toast": {
       "error": "Seurattujen kohteiden poistaminen epäonnistui: {{errorMessage}}"
+    }
+  },
+  "attributes": {
+    "label": "Luokitusominaisuudet",
+    "all": "Kaikki ominaisuudet"
+  },
+  "review": {
+    "showReviewed": "Näytä tarkastetut"
+  },
+  "motion": {
+    "showMotionOnly": "Näytä ainoastaan liike"
+  },
+  "explore": {
+    "settings": {
+      "title": "Asetukset",
+      "defaultView": {
+        "title": "Oletusnäkymä",
+        "summary": "Yhteenveto"
+      }
     }
   }
 }

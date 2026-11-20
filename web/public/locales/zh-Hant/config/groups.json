@@ -1,8 +1,8 @@
 {
     "audio": {
         "global": {
-            "detection": "全域性偵測",
-            "sensitivity": "全域性靈敏度"
+            "detection": "全域偵測",
+            "sensitivity": "全域靈敏度"
         },
         "cameras": {
             "detection": "偵測",
@@ -11,7 +11,7 @@
     },
     "timestamp_style": {
         "global": {
-            "appearance": "全域性外觀"
+            "appearance": "全域外觀"
         },
         "cameras": {
             "appearance": "外觀"
@@ -19,8 +19,8 @@
     },
     "motion": {
         "global": {
-            "sensitivity": "全域性靈敏度",
-            "algorithm": "全域性演算法"
+            "sensitivity": "全域靈敏度",
+            "algorithm": "全域演算法"
         },
         "cameras": {
             "sensitivity": "靈敏度",
@@ -29,7 +29,7 @@
     },
     "snapshots": {
         "global": {
-            "display": "全域性顯示"
+            "display": "全域顯示"
         },
         "cameras": {
             "display": "顯示"
@@ -37,8 +37,8 @@
     },
     "detect": {
         "global": {
-            "resolution": "全域性解析度",
-            "tracking": "全域性追蹤"
+            "resolution": "全域解析度",
+            "tracking": "全域追蹤"
         },
         "cameras": {
             "resolution": "解析度",
@@ -47,8 +47,8 @@
     },
     "objects": {
         "global": {
-            "tracking": "全域性追蹤",
-            "filtering": "全域性篩選"
+            "tracking": "全域追蹤",
+            "filtering": "全域篩選"
         },
         "cameras": {
             "tracking": "追蹤",
@@ -57,8 +57,8 @@
     },
     "record": {
         "global": {
-            "retention": "全域性保留",
-            "events": "全域性事件"
+            "retention": "全域保留",
+            "events": "全域事件"
         },
         "cameras": {
             "retention": "保留",

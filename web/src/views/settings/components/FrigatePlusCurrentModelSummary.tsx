@@ -3,11 +3,12 @@ import {
   SettingsGroupCard,
   SplitCardRow,
 } from "@/components/card/SettingsGroupCard";
-import type { FrigateConfig } from "@/types/frigateConfig";
+import type { DetectionModelConfig } from "@/types/frigateConfig";
 import { useTranslation } from "react-i18next";
+import { describeSupportedDetectors } from "@/utils/plusModels";
 
 type FrigatePlusCurrentModelSummaryProps = {
-  plusModel: FrigateConfig["model"]["plus"];
+  plusModel: DetectionModelConfig["plus"];
   action?: ReactNode;
 };
 
@@ -61,7 +62,7 @@ export default function FrigatePlusCurrentModelSummary({
           />
           <SplitCardRow
             label={t("frigatePlus.modelInfo.supportedDetectors")}
-            content={<p>{plusModel.supportedDetectors.join(", ")}</p>}
+            content={<p>{describeSupportedDetectors(plusModel)}</p>}
           />
         </div>
       )}

@@ -53,8 +53,6 @@
     }
   },
   "camera": {
-    "enable": "Camera inschakelen",
-    "disable": "Camera uitschakelen",
     "turnOn": "Camera inschakelen",
     "turnOff": "Camera uitschakelen"
   },
@@ -119,7 +117,6 @@
   "streamingSettings": "Streaming-instellingen",
   "stream": {
     "twoWayTalk": {
-      "tips.documentation": "Lees de documenten ",
       "tips": "Uw apparaat moet deze functie ondersteunen en WebRTC moet geconfigureerd zijn voor tweerichtingsgesprekken.",
       "unavailable": "Tweerichtingsgesprek is niet beschikbaar voor deze stream",
       "available": "Voor deze stream is tweerichtingsgesprek beschikbaar"
@@ -131,7 +128,6 @@
     "title": "Stream",
     "audio": {
       "tips": {
-        "documentation": "Lees de documentatie ",
         "title": "Audio moet via je camera komen en in go2rtc geconfigureerd zijn voor deze stream."
       },
       "unavailable": "Audio is niet beschikbaar voor deze stream",
@@ -152,7 +148,6 @@
     "audioDetection": "Audiodetectie",
     "autotracking": "Automatisch volgen",
     "snapshots": "Momentopnames",
-    "cameraEnabled": "Camera ingeschakeld",
     "transcription": "Audiotranscriptie",
     "camera": "Camera"
   },
@@ -164,8 +159,7 @@
       "all": "Alle",
       "active_objects": "Actieve objecten",
       "motion": "Beweging"
-    },
-    "notAllTips": "De bewaarbeleid-configuratie voor {{source}} is ingesteld op <code>modus: {{effectiveRetainMode}}</code>, dus deze opname op aanvraag bewaart alleen segmenten met {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Lay-out bewerken",

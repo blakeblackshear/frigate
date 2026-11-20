@@ -28,7 +28,7 @@ export function SummarySegment({
       <div className="absolute inset-0 flex h-full cursor-pointer justify-end">
         <div
           className={cn(
-            "w-[10px]",
+            "w-full",
             severityColors[severity],
             height < 0.5 && "min-h-[0.5px]",
           )}

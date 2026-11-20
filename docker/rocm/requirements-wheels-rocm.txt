@@ -1,1 +1,19 @@
-onnxruntime-migraphx @ https://github.com/NickM-27/frigate-onnxruntime-rocm/releases/download/v7.2.3-1/onnxruntime_migraphx-1.24.4-cp311-cp311-linux_x86_64.whl
+# ROCm 10.1.0, MIGraphX, and its ONNX Runtime plugin provider from AMD's wheels.
+onnxruntime == 1.29.*
+onnxruntime-ep-migraphx @ https://stable.repo.amd.com/rocm/onnxruntime/whl-next/onnxruntime-ep-migraphx/onnxruntime_ep_migraphx-1.0.0%2Brocm10.1.0-cp311-cp311-manylinux_2_28_x86_64.whl
+migraphx-libs @ https://stable.repo.amd.com/rocm/migraphx/whl-next/migraphx-libs/migraphx_libs-2.18.0%2Brocm10.1.0-py3-none-manylinux_2_28_x86_64.whl
+rocm-sdk-core @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-core/rocm_sdk_core-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-libraries @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-libraries/rocm_sdk_libraries-10.1.0-py3-none-linux_x86_64.whl
+# Kernels for each supported GPU target. MIGraphX has no gfx1031-gfx1036 kernels,
+# so those GPUs run as gfx1030 with HSA_OVERRIDE_GFX_VERSION=10.3.0
+rocm-sdk-device-gfx1030 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1030/rocm_sdk_device_gfx1030-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1100 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1100/rocm_sdk_device_gfx1100-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1101 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1101/rocm_sdk_device_gfx1101-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1102 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1102/rocm_sdk_device_gfx1102-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1103 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1103/rocm_sdk_device_gfx1103-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1150 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1150/rocm_sdk_device_gfx1150-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1151 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1151/rocm_sdk_device_gfx1151-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1152 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1152/rocm_sdk_device_gfx1152-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1153 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1153/rocm_sdk_device_gfx1153-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1200 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1200/rocm_sdk_device_gfx1200-10.1.0-py3-none-linux_x86_64.whl
+rocm-sdk-device-gfx1201 @ https://stable.repo.amd.com/rocm/whl-next/rocm-sdk-device-gfx1201/rocm_sdk_device_gfx1201-10.1.0-py3-none-linux_x86_64.whl

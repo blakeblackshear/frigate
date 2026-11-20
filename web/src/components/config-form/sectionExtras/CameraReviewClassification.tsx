@@ -38,8 +38,7 @@ export default function CameraReviewClassification({
   const cameraName = formContext?.cameraName ?? selectedCamera;
   const fullFormData = formContext?.formData as JsonObject | undefined;
   const baselineFormData = formContext?.baselineFormData as
-    | JsonObject
-    | undefined;
+    JsonObject | undefined;
   const cameraConfig = formContext?.fullCameraConfig;
 
   const alertsZones = useMemo(

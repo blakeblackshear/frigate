@@ -10,8 +10,7 @@
       },
       "context": "Frigate prenaša potrebne modele vdelav za podporo funkcije semantičnega iskanja. To lahko traja nekaj minut, odvisno od hitrosti tvoje omrežne povezave.",
       "tips": {
-        "context": "Morda boš želel ponovno indeksirati vdelave sledenih objektov, ko bodo modeli preneseni.",
-        "documentation": "Preberi dokumentacijo"
+        "context": "Morda boš želel ponovno indeksirati vdelave sledenih objektov, ko bodo modeli preneseni."
       },
       "error": "Prišlo je do napake. Preveri Frigate dnevnike (logs)."
     },
@@ -133,10 +132,6 @@
     "deleteTrackedObject": {
       "label": "Izbriši ta sledeni objekt"
     },
-    "viewObjectLifecycle": {
-      "aria": "Pokaži življenjski cikel predmeta",
-      "label": "Poglej življenjski cikel predmeta"
-    },
     "downloadVideo": {
       "label": "Prenesi video",
       "aria": "Prenesi video"
@@ -183,57 +178,11 @@
     "details": "podrobnosti",
     "snapshot": "posnetek",
     "video": "video",
-    "object_lifecycle": "življenjski cikel objekta",
     "thumbnail": "sličica",
     "tracking_details": "podrobnosti sledenja"
   },
   "objectLifecycle": {
-    "title": "Življenjski Cikel Objekta",
-    "noImageFound": "Za ta čas ni bila najdena nobena slika.",
-    "createObjectMask": "Ustvarite Masko Objekta",
-    "adjustAnnotationSettings": "Prilagodi nastavitve opomb",
-    "scrollViewTips": "Pomaknite se, da si ogledate pomembne trenutke življenjskega cikla tega predmeta.",
-    "count": "{{first}} od {{second}}",
-    "trackedPoint": "Sledena točka",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} zaznan",
-      "entered_zone": "{{label}} je vstopil/a v {{zones}}",
-      "active": "{{label}} je postal aktiven",
-      "stationary": "{{label}} je postal nepremičen",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} je bil zaznan za {{label}}",
-        "other": "{{label}} zaznan kot {{attribute}}"
-      },
-      "gone": "{{label}} levo",
-      "heard": "{{label}} slišano",
-      "external": "{{label}} zaznan",
-      "header": {
-        "zones": "Cone",
-        "ratio": "Razmerje",
-        "area": "Območje"
-      }
-    },
-    "annotationSettings": {
-      "title": "Nastavitve Anotacij",
-      "showAllZones": {
-        "title": "Prikaži Vse Cone",
-        "desc": "Vedno prikaži območja na okvirjih, kjer so predmeti vstopili v območje."
-      },
-      "offset": {
-        "label": "Anotacijski Odmik",
-        "documentation": "Preberi dokumentacijo ",
-        "millisecondsToOffset": "Odmik zaznanih anotacij v milisekundah. <em>Privzeto: 0</em>",
-        "tips": "NASVET: Predstavljajte si posnetek dogodka, v katerem oseba hodi od leve proti desni. Če je okvir dogodka na časovnici preveč levo od osebe, je treba vrednost zmanjšati. Podobno je treba vrednost povečati, če oseba hodi od leve proti desni in je okvir preveč pred njo.",
-        "toast": {
-          "success": "Odmik anotacij za {{camera}} je bil shranjen v konfiguracijsko datoteko. Znova zaženite Frigate, da uveljavite spremembe."
-        }
-      }
-    },
-    "carousel": {
-      "previous": "Prejšnji diapozitiv",
-      "next": "Naslednji diapozitiv"
-    },
-    "autoTrackingTips": "Položaji okvirjev bodo za kamere s samodejnim sledenjem netočni."
+    "noImageFound": "Za ta čas ni bila najdena nobena slika."
   },
   "noTrackedObjects": "Ni najdenih sledenih objektov",
   "fetchingTrackedObjectsFailed": "Napaka pri pridobivanju sledenih objektov: {{errorMessage}}",

@@ -2,17 +2,16 @@
   "documentTitle": {
     "default": "設定 - Frigate",
     "authentication": "認證設定 - Frigate",
-    "camera": "鏡頭設定 - Frigate",
-    "enrichments": "進階功能設定 - Frigate",
+    "enrichments": "增強功能設定 - Frigate",
     "general": "使用者介面設定 - Frigate",
     "frigatePlus": "Frigate+ 設定 - Frigate",
     "notifications": "通知設定 - Frigate",
     "masksAndZones": "遮罩與區域編輯器 - Frigate",
     "motionTuner": "移動偵測調教器 - Frigate",
     "object": "除錯 - Frigate",
-    "cameraManagement": "管理鏡頭 - Frigate",
-    "cameraReview": "攝影機預覽設定 - Frigate",
-    "globalConfig": "全域性配置 - Frigate",
+    "cameraManagement": "管理攝影機 - Frigate",
+    "cameraReview": "攝影機審閱設定 - Frigate",
+    "globalConfig": "全域組態設定 - Frigate",
     "cameraConfig": "攝影機配置 - Frigate",
     "detectorsAndModel": "偵測器與模型 - Frigate",
     "maintenance": "維護 - Frigate",
@@ -20,8 +19,8 @@
   },
   "menu": {
     "ui": "使用者介面",
-    "enrichments": "進階功能",
-    "cameras": "鏡頭設定",
+    "enrichments": "增強功能",
+    "cameras": "攝影機組態設定",
     "masksAndZones": "遮罩 / 區域",
     "motionTuner": "移動偵測調教器",
     "debug": "除錯",
@@ -30,26 +29,26 @@
     "frigateplus": "Frigate+",
     "triggers": "觸發",
     "cameraManagement": "管理",
-    "cameraReview": "預覽",
+    "cameraReview": "審閱",
     "roles": "角色",
     "general": "一般",
-    "globalConfig": "全域性配置",
+    "globalConfig": "全域組態設定",
     "system": "系統",
     "integrations": "整合",
     "uiSettings": "介面設定",
     "profiles": "設定檔",
-    "globalDetect": "目標偵測",
+    "globalDetect": "物件偵測",
     "globalRecording": "錄製",
     "globalSnapshots": "快照",
     "globalFfmpeg": "FFmpeg",
-    "globalMotion": "畫面變動偵測",
-    "globalObjects": "目標",
+    "globalMotion": "移動偵測",
+    "globalObjects": "物件",
     "globalReview": "審閱",
     "globalAudioEvents": "音訊偵測",
     "globalLivePlayback": "即時監控觀看",
     "globalTimestampStyle": "時間戳樣式",
     "systemDatabase": "資料庫",
-    "systemTls": "TLS加密連結",
+    "systemTls": "TLS",
     "systemAuthentication": "驗證",
     "systemNetworking": "網路",
     "systemProxy": "代理",
@@ -61,19 +60,19 @@
     "systemFfmpeg": "FFmpeg",
     "systemDetectorsAndModel": "偵測器與模型",
     "systemMqtt": "MQTT",
-    "systemGo2rtcStreams": "go2rtc 影片流",
+    "systemGo2rtcStreams": "go2rtc 影片串流",
     "integrationSemanticSearch": "語意搜尋",
     "integrationGenerativeAi": "生成式 AI",
     "integrationFaceRecognition": "人臉辨識",
     "integrationLpr": "車牌辨識",
-    "integrationObjectClassification": "目標分類",
+    "integrationObjectClassification": "物件分類",
     "integrationAudioTranscription": "音訊轉錄",
-    "cameraDetect": "目標偵測",
+    "cameraDetect": "物件偵測",
     "cameraFfmpeg": "FFmpeg",
     "cameraRecording": "錄製",
     "cameraSnapshots": "快照",
-    "cameraMotion": "畫面變動偵測",
-    "cameraObjects": "目標",
+    "cameraMotion": "移動偵測",
+    "cameraObjects": "物件",
     "cameraConfigReview": "審閱",
     "cameraAudioEvents": "音訊偵測",
     "cameraAudioTranscription": "音訊轉錄",
@@ -94,12 +93,12 @@
   "dialog": {
     "unsavedChanges": {
       "title": "你有未儲存的變更。",
-      "desc": "再繼續之前，你想先儲存你的變更嗎？"
+      "desc": "在繼續之前，你想先儲存你的變更嗎？"
     }
   },
   "cameraSetting": {
-    "camera": "鏡頭",
-    "noCamera": "沒有鏡頭"
+    "camera": "攝影機",
+    "noCamera": "沒有攝影機"
   },
   "general": {
     "title": "使用者介面設定",
@@ -111,11 +110,11 @@
       },
       "playAlertVideos": {
         "label": "播放警報影片",
-        "desc": "最近的警報影片預設會在即時監控面板中連續循環播放。取消這個選項，可以只顯示靜態的最近警報擷圖（僅套用於該裝置/瀏覽器）。"
+        "desc": "最近的警報影片預設會在即時監控面板中連續循環播放。取消這個選項，可以只顯示靜態的最近警報快照（僅套用於該裝置/瀏覽器）。"
       },
       "displayCameraNames": {
-        "label": "總是顯示鏡頭名稱",
-        "desc": "總是在多鏡頭直播頁面顯示鏡頭的名稱標籤。"
+        "label": "總是顯示攝影機名稱",
+        "desc": "總是在多攝影機直播頁面顯示攝影機的名稱標籤。"
       },
       "liveFallbackTimeout": {
         "label": "直播播放器回退逾時",
@@ -124,12 +123,12 @@
     },
     "storedLayouts": {
       "title": "儲存的排版",
-      "desc": "在鏡頭群組內的鏡頭排版可以拖拉或縮放調整。這個排版設定儲存於目前瀏覽器的本機儲存空間。",
+      "desc": "在攝影機群組內的攝影機排版可以拖拉或縮放調整。這個排版設定儲存於目前瀏覽器的本機儲存空間。",
       "clearAll": "清除所有排版"
     },
     "cameraGroupStreaming": {
-      "title": "鏡頭群組串流播放設定",
-      "desc": "每個鏡頭群組的串流播放設定都儲存在目前瀏覽器的本機儲存空間。",
+      "title": "攝影機群組串流播放設定",
+      "desc": "每個攝影機群組的串流播放設定都儲存在目前瀏覽器的本機儲存空間。",
       "clearAll": "清除所有串流播放設定"
     },
     "recordingsViewer": {
@@ -151,7 +150,7 @@
     "toast": {
       "success": {
         "clearStoredLayout": "清除 {{cameraName}} 儲存的排版",
-        "clearStreamingSettings": "清除所有鏡頭群組的串流播放設定。"
+        "clearStreamingSettings": "清除所有攝影機群組的串流播放設定。"
       },
       "error": {
         "clearStoredLayoutFailed": "清除儲存的排版設定失敗: {{errorMessage}}",
@@ -160,8 +159,8 @@
     }
   },
   "enrichments": {
-    "title": "進階功能設定",
-    "unsavedChanges": "尚未儲存的強化設定變更",
+    "title": "增強功能設定",
+    "unsavedChanges": "尚未儲存的增強功能變更",
     "semanticSearch": {
       "modelSize": {
         "label": "模型大小",
@@ -176,12 +175,12 @@
         }
       },
       "title": "語意搜尋",
-      "desc": "Frigate 中的語意搜尋功能可讓您使用圖像本身、使用者定義的文字描述或自動產生的描述，在審核專案中尋找追蹤物件。",
+      "desc": "Frigate 中的語意搜尋功能可讓您使用影像本身、使用者定義的文字描述或自動產生的描述，在審閱項目中尋找追蹤物件。",
       "reindexNow": {
         "label": "立即重新索引",
         "desc": "重新索引會為所有追蹤物件重新產生嵌入向量。此過程在背景運行，可能會佔用大量 CPU 資源，並且耗時較長，具體取決於追蹤物件的數量。",
         "confirmTitle": "確認重建索引",
-        "confirmDesc": "確定要為所有追蹤目標重建特徵向量索引資訊嗎？此過程將在後臺進行，但可能會導致CPU滿載並耗費較長時間。您可以在 瀏覽 頁面檢視進度。",
+        "confirmDesc": "您確定要重新索引所有已追蹤物件的特徵向量嗎？此過程將在背景執行，但可能會佔滿您的 CPU 資源，並耗費較長時間。您可以在「瀏覽」頁面上查看進度。",
         "confirmButton": "重建索引",
         "success": "重建索引已成功啟動。",
         "alreadyInProgress": "重建索引已在執行中。",
@@ -196,26 +195,26 @@
         "desc": "用於人臉辨識的模型大小。",
         "small": {
           "title": "小",
-          "desc": "使用 <em>小</em> 模型將採用 FaceNet 臉部嵌入模型，可在大多數 CPU 上高效執行。"
+          "desc": "使用 <em>small</em> 模型將採用專為 CPU 推論最佳化的輕量級 FaceNet 架構人臉特徵提取模型。"
         },
         "large": {
           "title": "大",
-          "desc": "使用 <em>大</em> 模型將採用 ArcFace 臉部嵌入模型，並在適用情況下自動於 GPU 上執行。"
+          "desc": "使用 <em>large</em> 模型將採用更高精度的 ArcFace 架構人臉特徵提取模型，會在可用時自動在 GPU 上執行。"
         }
       }
     },
     "birdClassification": {
       "title": "鳥類分類",
-      "desc": "鳥類分類功能使用量化的 TensorFlow 模型識別已知鳥類。識別出已知鳥類後，其通用名稱將作為子標籤添加。此資訊會顯示在使用者介面、篩選器以及通知中。"
+      "desc": "鳥類分類功能使用量化的 TensorFlow 模型識別已知鳥類。識別出已知鳥類後，其通用名稱將作為子標籤新增。此資訊會顯示在使用者介面、篩選器以及通知中。"
     },
     "licensePlateRecognition": {
       "title": "車牌辨識",
-      "desc": "Frigate 可以辨識車輛的車牌，並自動將偵測到的字元新增到 辨識的車牌（recognized_license_plate）欄位中，或將已知車牌對應的名稱作為子標籤新增到該車輛目標中。該功能常用於辨識駛入車道的車輛車牌或經過街道的車輛車牌。"
+      "desc": "Frigate 可以辨識車輛的車牌，並自動將偵測到的字元新增到 辨識的車牌（recognized_license_plate）欄位中，或將已知車牌對應的名稱作為子標籤新增到該車輛物件中。該功能常用於辨識駛入車道的車輛車牌或經過街道的車輛車牌。"
     },
-    "restart_required": "需要重啟（增強功能設定已儲存）",
+    "restart_required": "需要重新啟動（已變更增強功能設定）",
     "toast": {
-      "success": "增強功能設定已儲存。請重啟 Frigate 以應用更改。",
-      "error": "配置更改儲存失敗：{{errorMessage}}"
+      "success": "已儲存增強功能設定。請重新啟動 Frigate 以套用變更。",
+      "error": "無法儲存變更設定：{{errorMessage}}"
     }
   },
   "cameraWizard": {
@@ -233,14 +232,14 @@
     "step1": {
       "description": "輸入攝影機詳細資訊並選擇探測或手動選擇攝影機品牌。",
       "cameraName": "攝影機名稱",
-      "cameraNamePlaceholder": "例: 前門 / 後院",
+      "cameraNamePlaceholder": "例如：前門／後院",
       "host": "主機/IP 位置",
       "port": "埠",
       "username": "使用者名稱",
       "usernamePlaceholder": "選填",
       "password": "密碼",
       "passwordPlaceholder": "選填",
-      "selectTransport": "選擇協議",
+      "selectTransport": "選擇傳輸協定",
       "cameraBrand": "攝影機品牌",
       "selectBrand": "選擇攝影機品牌用於生成 URL 模板",
       "customUrl": "自訂影片串流 URL",
@@ -248,28 +247,28 @@
       "brandUrlFormat": "對於採用RTSP URL格式的攝影機，其格式為：{{exampleUrl}}",
       "customUrlPlaceholder": "rtsp://使用者名稱:密碼@主機或ip位址:通訊埠/路徑",
       "connectionSettings": "連線設定",
-      "detectionMethod": "影片流偵測方法",
+      "detectionMethod": "影片串流偵測方法",
       "onvifPort": "ONVIF 埠",
       "probeMode": "探測攝影機",
       "manualMode": "手動選擇",
-      "detectionMethodDescription": "如果攝影機支援 ONVIF 協議，將使用該協議探測攝影機，以自動獲取攝影機影片串流 URL；若不支援，也可手動選擇攝影機品牌來使用預設 URL。如需輸入自訂 RTSP URL，請選擇「手動選擇」並選擇「其他」選項。",
-      "onvifPortDescription": "對於支援ONVIF協議的攝影機，該埠通常為80或8080。",
+      "detectionMethodDescription": "如果攝影機支援 ONVIF 協定，將使用該協定探測攝影機，以自動獲取攝影機影片串流 URL；若不支援，也可手動選擇攝影機品牌來使用預設 URL。如需輸入自訂 RTSP URL，請選擇「手動選擇」並選擇「其他」選項。",
+      "onvifPortDescription": "對於支援 ONVIF 協定的攝影機，該埠通常為 80 或 8080。",
       "useDigestAuth": "使用摘要認證",
-      "useDigestAuthDescription": "為 ONVIF 協議啟用 HTTP 摘要認證。部分攝影機可能需要專用的 ONVIF 使用者名稱/密碼，而非預設的 admin 帳戶。",
+      "useDigestAuthDescription": "為 ONVIF 協定啟用 HTTP 摘要認證。部分攝影機可能需要專用的 ONVIF 使用者名稱／密碼，而非預設的 admin 帳戶。",
       "errors": {
         "brandOrCustomUrlRequired": "請選擇攝影機品牌並配置主機/IP 位址，或選擇「其他」後自訂 URL",
         "nameRequired": "攝影機名稱為必填項",
         "nameLength": "攝影機名稱要少於64個字元",
         "invalidCharacters": "攝影機名稱內有不允許使用的字元",
         "nameExists": "該攝影機名稱已存在",
-        "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」開頭；對於非 RTSP 協議的攝影機串流，需手動新增至設定檔。"
+        "customUrlRtspRequired": "自訂 URL 必須以「rtsp://」或「rtsps://」開頭。如需其他串流格式，請先使用 RTSP 完成設定，然後在設定中修改攝影機配置。"
       }
     },
     "description": "請按照以下步驟新增攝影機至 Frigate 中。",
     "steps": {
       "nameAndConnection": "名稱與連線",
       "probeOrSnapshot": "探測或快照",
-      "streamConfiguration": "影片流配置",
+      "streamConfiguration": "影片串流配置",
       "validationAndTesting": "驗證與測試"
     },
     "save": {
@@ -278,10 +277,10 @@
     },
     "step2": {
       "description": "將根據你選擇的偵測方式，將會自動查詢攝影機可用流配置，或進行手動配置。",
-      "testSuccess": "影片流測試成功！",
+      "testSuccess": "影片串流測試成功！",
       "testFailed": "連線測試失敗，請檢查您的輸入後重試。",
       "testFailedTitle": "測試失敗",
-      "streamDetails": "影片流詳情",
+      "streamDetails": "影片串流詳情",
       "probing": "正在偵測攝影機中……",
       "retry": "重試",
       "testing": {
@@ -303,7 +302,7 @@
       "presets": "預設配置",
       "rtspCandidates": "RTSP 候選位址",
       "rtspCandidatesDescription": "透過攝影機探測發現了以下 RTSP 位址。測試連線以檢視影片串流中繼資料。",
-      "noRtspCandidates": "未從攝影機偵測到任何 RTSP 位址。可能是你的帳號密碼錯誤，或者攝影機不支援 ONVIF 協議，亦或是當前採用的 RTSP 位址獲取方式無效。請返回上一步，嘗試手動輸入 RTSP 位址。",
+      "noRtspCandidates": "未從攝影機偵測到任何 RTSP URL。可能是你的帳號密碼錯誤，或者攝影機不支援 ONVIF 協定，亦或是目前採用的 RTSP 位址取得方式無效。請返回上一步，嘗試手動輸入 RTSP URL。",
       "candidateStreamTitle": "候選{{number}}",
       "useCandidate": "使用",
       "uriCopy": "複製",
@@ -317,16 +316,16 @@
       }
     },
     "step3": {
-      "description": "為你的攝影機配置影片流功能並新增額外影片流。",
-      "streamsTitle": "攝影機影片流",
-      "addStream": "新增影片流",
-      "addAnotherStream": "新增其他影片流",
-      "streamTitle": "{{number}} 號影片流",
+      "description": "為你的攝影機配置影片串流功能並新增額外影片串流。",
+      "streamsTitle": "攝影機影片串流",
+      "addStream": "新增影片串流",
+      "addAnotherStream": "新增其他影片串流",
+      "streamTitle": "{{number}} 號影片串流",
       "streamUrl": "影片串流 URL",
       "streamUrlPlaceholder": "rtsp://使用者名稱:密碼@主機:埠/路徑",
-      "selectStream": "選擇一個影片流",
+      "selectStream": "選擇一個影片串流",
       "searchCandidates": "搜尋候選項……",
-      "noStreamFound": "沒有找到影片流",
+      "noStreamFound": "沒有找到影片串流",
       "url": "URL",
       "resolution": "解析度",
       "selectResolution": "選擇解析度",
@@ -334,41 +333,41 @@
       "selectQuality": "選擇品質",
       "roles": "功能",
       "roleLabels": {
-        "detect": "目標偵測",
+        "detect": "物件偵測",
         "record": "錄製",
         "audio": "音訊偵測"
       },
       "testStream": "測試連線",
-      "testSuccess": "影片流測試成功！",
-      "testFailed": "影片流測試失敗",
+      "testSuccess": "影片串流測試成功！",
+      "testFailed": "影片串流測試失敗",
       "testFailedTitle": "測試失敗",
       "connected": "已連線",
       "notConnected": "未連線",
       "featuresTitle": "功能特性",
       "go2rtc": "減少與攝影機的連線數",
-      "detectRoleWarning": "必須得有一個影片流設定了“偵測”功能才能繼續操作。",
+      "detectRoleWarning": "必須得有一個影片串流設定了「偵測」功能才能繼續操作。",
       "rolesPopover": {
-        "title": "影片流功能",
-        "detect": "用於目標偵測的主碼流。",
-        "record": "根據配置設定儲存影片流片段。",
-        "audio": "用於音訊偵測的音影片流。"
+        "title": "影片串流功能",
+        "detect": "用於物件偵測的主要串流。",
+        "record": "根據配置設定儲存影片串流片段。",
+        "audio": "用於音訊偵測的音影片串流。"
       },
       "featuresPopover": {
-        "title": "影片流功能特性",
+        "title": "影片串流功能特性",
         "description": "使用 go2rtc 中繼轉流功能，減少與攝影機的網路連線數，提升效率。"
       }
     },
     "step4": {
-      "description": "將進行儲存新攝影機配置前的最終驗證與分析，請在儲存前確保所有影片流均已連線。",
-      "validationTitle": "影片流驗證",
-      "connectAllStreams": "連線所有影片流",
+      "description": "將進行儲存新攝影機配置前的最終驗證與分析，請在儲存前確保所有影片串流均已連線。",
+      "validationTitle": "影片串流驗證",
+      "connectAllStreams": "連線所有影片串流",
       "reconnectionSuccess": "重新連線成功。",
-      "reconnectionPartial": "部分影片流重新連線失敗。",
-      "streamUnavailable": "影片流預覽不可用",
+      "reconnectionPartial": "部分影片串流重新連線失敗。",
+      "streamUnavailable": "影片串流預覽不可用",
       "reload": "重新載入",
       "connecting": "連線中……",
-      "streamTitle": "影片流 {{number}}",
-      "valid": "透過",
+      "streamTitle": "影片串流 {{number}}",
+      "valid": "有效",
       "failed": "失敗",
       "notTested": "未測試",
       "connectStream": "連線",
@@ -377,33 +376,33 @@
       "estimatedBandwidth": "預估頻寬",
       "roles": "功能",
       "ffmpegModule": "使用影片串流相容模式",
-      "ffmpegModuleDescription": "若多次嘗試後仍無法載入影片流，可嘗試啟用此功能。啟用後，Frigate 將透過 go2rtc 呼叫 ffmpeg 模組。這可能會提升與部分攝影機影片流的相容性。",
+      "ffmpegModuleDescription": "若多次嘗試後仍無法載入影片串流，可嘗試啟用此功能。啟用後，Frigate 將透過 go2rtc 呼叫 ffmpeg 模組。這可能會提升與部分攝影機影片串流的相容性。",
       "none": "無",
       "error": "錯誤",
-      "streamValidated": "影片流 {{number}} 驗證成功",
-      "streamValidationFailed": "影片流 {{number}} 驗證失敗",
+      "streamValidated": "影片串流 {{number}} 驗證成功",
+      "streamValidationFailed": "影片串流 {{number}} 驗證失敗",
       "saveAndApply": "儲存新攝影機",
       "saveError": "配置無效，請檢查您的設定。",
       "issues": {
-        "title": "影片流驗證",
+        "title": "影片串流驗證",
         "videoCodecGood": "影片編解碼器為 {{codec}}。",
         "audioCodecGood": "音訊編解碼器為 {{codec}}。",
         "resolutionHigh": "使用 {{resolution}} 解析度可能導致資源使用率增加。",
-        "resolutionLow": "{{resolution}} 解析度可能過低，難以可靠偵測小型目標或物體。",
-        "resolutionUnknown": "無法探測此影片流的解析度。你需要在設定或設定檔中手動指定偵測解析度。",
-        "noAudioWarning": "偵測到該影片流無音訊訊號，錄製影片將沒有聲音。",
+        "resolutionLow": "{{resolution}} 解析度可能過低，難以可靠偵測小型物件。",
+        "resolutionUnknown": "無法探測此影片串流的解析度。你需要在設定或設定檔中手動指定偵測解析度。",
+        "noAudioWarning": "偵測到該影片串流無音訊訊號，錄製影片將沒有聲音。",
         "audioCodecRecordError": "錄製功能需要 AAC 音訊編解碼器以實現音訊支援。",
         "audioCodecRequired": "要實現音訊偵測功能，必須要有音訊流。",
         "restreamingWarning": "為錄製流開啟“減少與攝影機的連線數”可能會略微增加 CPU 使用率。",
         "brands": {
-          "reolink-rtsp": "不建議使用 Reolink 的 RTSP 協議。請在攝影機後臺設定中啟用 HTTP 協議，並重新啟動嚮導。",
-          "reolink-http": "Reolink HTTP 影片流應該使用 FFmpeg 以獲得更好的相容性，為此影片流啟用「使用影片串流相容模式」。"
+          "reolink-rtsp": "不建議使用 Reolink 的 RTSP 協定。請在攝影機韌體設定中啟用 HTTP 協定，並重新啟動設定精靈。",
+          "reolink-http": "Reolink HTTP 影片串流應該使用 FFmpeg 以獲得更好的相容性，為此影片串流啟用「使用影片串流相容模式」。"
         },
         "dahua": {
-          "substreamWarning": "子碼流1當前被鎖定為低解析度。多數大華、安訊士、EmpireTech品牌的攝影機都支援額外的子碼流，這些子碼流需要在攝影機設定中手動啟用。如果你的裝置支援，建議你檢查並使用這些高解析度子碼流。"
+          "substreamWarning": "子串流 1 目前被鎖定為低解析度。大部分大華、Amcrest、EmpireTech 品牌的攝影機都支援額外的子串流，這些子串流需要在攝影機設定中手動啟用。如果你的裝置支援，建議你檢查並使用這些高解析度子串流。"
         },
         "hikvision": {
-          "substreamWarning": "子碼流1當前被鎖定為低解析度。多數海康威視的攝影機都支援額外的子碼流，這些子碼流需要在攝影機設定中手動啟用。如果你的裝置支援，建議你檢查並使用這些高解析度子碼流。"
+          "substreamWarning": "子串流 1 目前被鎖定為低解析度。大部分海康威視的攝影機都支援額外的子串流，這些子串流需要在攝影機設定中手動啟用。如果你的裝置支援，建議你檢查並使用這些高解析度子串流。"
         }
       }
     }
@@ -423,19 +422,18 @@
     },
     "documentTitle": "觸發器",
     "semanticSearch": {
-      "title": "語意搜尋已關閉",
       "desc": "必須啟用語意搜尋功能才能使用觸發器。"
     },
     "management": {
       "title": "觸發器",
-      "desc": "管理 {{camera}} 的觸發器。你可以選擇“縮圖”型別，將透過與追蹤目標相似的縮圖來觸發；也可以透過“描述”型別，與你描述的文字相似來觸發（中文描述需要使用 jina v2模型，對配置要求更高）。"
+      "desc": "管理 {{camera}} 的觸發器。你可以選擇「縮圖」類型，將透過與追蹤物件相似的縮圖來觸發；也可以透過「描述」類型，與你描述的文字相似來觸發（中文描述需要使用 jina v2模型，對配置要求更高）。"
     },
     "addTrigger": "新增觸發器",
     "table": {
       "name": "名稱",
-      "type": "型別",
+      "type": "類型",
       "content": "觸發內容",
-      "threshold": "閾值",
+      "threshold": "臨界值",
       "actions": "動作",
       "noTriggers": "此攝影機未配置任何觸發器。",
       "edit": "編輯",
@@ -471,7 +469,7 @@
           "description": "請輸入用於辨識此觸發器的唯一名稱或描述",
           "error": {
             "minLength": "該欄位至少需要兩個字元。",
-            "invalidCharacters": "該欄位只能包含字母、數字、下劃線和連字元。",
+            "invalidCharacters": "該欄位只能包含字母、數字、底線和連字號。",
             "alreadyExists": "此攝影機已存在同名觸發器。"
           }
         },
@@ -479,32 +477,32 @@
           "description": "開啟/關閉此觸發器"
         },
         "type": {
-          "title": "型別",
-          "placeholder": "選擇觸發型別",
-          "description": "當偵測到相似的追蹤目標描述時觸發",
-          "thumbnail": "當偵測到相似的追蹤目標縮圖時觸發"
+          "title": "類型",
+          "placeholder": "選擇觸發類型",
+          "description": "當偵測到相似的追蹤物件描述時觸發",
+          "thumbnail": "當偵測到相似的追蹤物件縮圖時觸發"
         },
         "content": {
           "title": "內容",
           "imagePlaceholder": "選擇圖片",
           "textPlaceholder": "輸入文字內容",
-          "imageDesc": "僅顯示最近的 100 張縮圖。如果找不到需要的圖片，請前往“瀏覽”頁面檢視更早的目標，並從選單中設定觸發器。",
-          "textDesc": "輸入文字，當偵測到相似的追蹤目標描述時觸發此操作。",
+          "imageDesc": "僅顯示最近的 100 張縮圖。如果找不到需要的圖片，請前往「瀏覽」頁面檢視更早的物件，並從選單中設定觸發器。",
+          "textDesc": "輸入文字，當偵測到相似的追蹤物件描述時觸發此操作。",
           "error": {
             "required": "內容為必填項。"
           }
         },
         "threshold": {
-          "title": "閾值",
-          "desc": "設定此觸發器的相似度閾值。閾值越高，觸發所需的匹配就越精確。",
+          "title": "臨界值",
+          "desc": "設定此觸發器的相似度臨界值。臨界值越高，觸發所需的相符程度就越嚴格。",
           "error": {
-            "min": "閾值必須大於 0",
-            "max": "閾值必須小於 1"
+            "min": "臨界值必須大於或等於 0",
+            "max": "臨界值必須小於或等於 1"
           }
         },
         "actions": {
           "title": "動作",
-          "desc": "預設情況下，Frigate 會為所有觸發器傳送 MQTT 訊息。子標籤會將觸發器名稱新增到目標標籤中。屬性是可搜尋的中繼資料，獨立儲存在追蹤目標的中繼資料中。",
+          "desc": "預設情況下，Frigate 會為所有觸發器傳送 MQTT 訊息。子標籤會將觸發器名稱新增到物件標籤中。屬性是可搜尋的中繼資料，獨立儲存在追蹤物件的中繼資料中。",
           "error": {
             "min": "必須至少選擇一項動作。"
           }
@@ -520,39 +518,39 @@
         "description": "設定觸發此操作的內容。"
       },
       "step3": {
-        "description": "配置此觸發器的相似度閾值與執行動作。"
+        "description": "配置此觸發器的相似度臨界值與執行動作。"
       },
       "steps": {
-        "nameAndType": "名稱與型別",
+        "nameAndType": "名稱與類型",
         "configureData": "配置資料",
-        "thresholdAndActions": "閾值與動作"
+        "thresholdAndActions": "臨界值與動作"
       }
     }
   },
   "button": {
-    "overriddenGlobal": "已覆蓋全域性通用配置",
-    "overriddenGlobalTooltip": "當前攝影機配置，將優先覆蓋全域性通用設定",
-    "overriddenGlobalHeading_other": "此攝影機覆蓋了全域性設定中的 {{count}} 個欄位：",
-    "overriddenGlobalNoDeltas": "此攝影機覆蓋了全域性設定，但所有欄位值都相同。",
+    "overriddenGlobal": "已覆蓋全域通用配置",
+    "overriddenGlobalTooltip": "此區段攝影機覆蓋了全域設定",
+    "overriddenGlobalHeading_other": "此攝影機覆蓋了全域設定中的 {{count}} 個欄位：",
+    "overriddenGlobalNoDeltas": "此攝影機覆蓋了全域設定，但所有欄位值都相同。",
     "overriddenBaseConfig": "已覆蓋預設配置",
-    "overriddenBaseConfigTooltip": "當前 {{profile}} 設定檔會覆蓋本節所有設定",
+    "overriddenBaseConfigTooltip": "目前 {{profile}} 設定檔會覆蓋此區段所有的設定",
     "overriddenBaseConfigHeading_other": "{{profile}} 設定檔覆蓋了基礎設定中的 {{count}} 個欄位：",
     "overriddenBaseConfigNoDeltas": "{{profile}} 設定檔覆蓋了此區段，但所有欄位值與基礎設定相同。",
     "overriddenInCameras": {
       "label_other": "已在 {{count}} 個攝影機中單獨配置",
       "tooltip_other": "{{count}} 個攝影機在此項中存在單獨配置，點選檢視詳情。",
-      "heading_other": "此全域性設定項下有 {{count}} 個攝影機存在自訂單獨配置。",
+      "heading_other": "此全域設定項下有 {{count}} 個攝影機存在自訂單獨配置。",
       "othersField_other": "其餘 {{count}} 個",
       "profilePrefix": "{{profile}} 配置方案：{{fields}}"
     }
   },
   "saveAllPreview": {
-    "title": "未儲存的更改",
-    "triggerLabel": "檢視待處理的更改",
-    "empty": "沒有待處理的更改。",
+    "title": "未儲存的變更",
+    "triggerLabel": "檢視待處理的變更",
+    "empty": "沒有待處理的變更。",
     "scope": {
       "label": "作用範圍",
-      "global": "全域性",
+      "global": "全域",
       "camera": "攝影機：{{cameraName}}"
     },
     "profile": {
@@ -568,12 +566,12 @@
   },
   "cameraManagement": {
     "title": "管理攝影機",
-    "description": "新增、編輯和刪除攝影機，控制哪些攝影機已啟用，並設定按設定檔與攝影機類型的覆蓋。若要設定串流、偵測、動作及其他攝影機特定設定，請在「攝影機設定」下選擇對應的區段。",
+    "description": "新增、編輯和刪除攝影機，控制哪些攝影機已啟用，並設定按設定檔與攝影機類型的覆蓋。若要設定串流、偵測、移動及其他攝影機特定設定，請在「攝影機設定」下選擇對應的區段。",
     "addCamera": "新增新攝影機",
     "deleteCamera": "刪除攝影機",
     "deleteCameraDialog": {
       "title": "刪除攝影機",
-      "description": "刪除攝影機將永久移除該攝影機的所有錄影、跟蹤目標以及配置。任何與該攝影機關聯的 go2rtc 流可能仍需手動刪除。",
+      "description": "刪除攝影機將永久移除該攝影機的所有錄影、追蹤物件以及配置。任何與該攝影機關聯的 go2rtc 流可能仍需手動刪除。",
       "selectPlaceholder": "選擇攝影機…",
       "confirmTitle": "你確定嗎？",
       "confirmWarning": "刪除 <strong>{{cameraName}}</strong> 後將無法復原。",
@@ -587,19 +585,9 @@
     "backToSettings": "返回攝影機設定",
     "streams": {
       "title": "開啟或關閉攝影機",
-      "enableLabel": "開啟攝影機",
-      "enableDesc": "暫時停用已開啟的攝影機，直到 Frigate 重啟。停用攝影機會完全停止 Frigate 對該攝影機影片流的處理。偵測、錄影和除錯功能將不可用。<br /> <em>注意：這不會停用 go2rtc 的轉推流。</em>",
-      "disableLabel": "關閉攝影機",
-      "disableDesc": "開啟在當前在介面中不可見且在配置中被停用的攝影機。啟用後需要重啟 Frigate 才能生效。",
-      "enableSuccess": "已在配置中啟用 {{cameraName}}。請重啟 Frigate 以應用更改。",
-      "friendlyName": {
-        "edit": "修改攝影機顯示名稱",
-        "title": "修改顯示名稱",
-        "description": "設定該攝像機在 Frigate 使用者介面中顯示的名稱。若留空，則使用攝像機 ID。",
-        "rename": "重新命名"
-      },
+      "enableSuccess": "已啟用 {{cameraName}}。請重新啟動 Frigate 以套用變更。",
       "label": "攝影機狀態",
-      "description": "設定各攝影機的運作狀態。<br /><br /><strong>開啟</strong>：正常處理串流。<br /><strong>關閉</strong>：暫時暫停處理。重啟 Frigate 後不會保留此狀態。<br /><strong>停用</strong>：停止處理並將變更儲存至您的設定中。需要重新啟動才能重新啟用已停用的攝影機。<br /><br /><em>備註：停用不會影響 go2rtc 的轉流功能。</em><br /><br />拖曳控制鍵可調整現用攝影機在整個 UI 中顯示的順序，包括即時儀表板和攝影機選擇下拉選單。",
+      "description": "設定各攝影機的運作狀態。<br /><br /><strong>開啟</strong>：正常處理串流。<br /><strong>關閉</strong>：暫時停止處理。重新啟動 Frigate 後不會保留此狀態。<br /><strong>停用</strong>：停止處理並將變更儲存至您的設定中。需要重新啟動才能重新啟用已停用的攝影機。<br /><br /><em>備註：停用不會影響 go2rtc 的轉流功能。</em><br /><br />拖曳控制鍵可調整現用攝影機在整個 UI 中顯示的順序，包括即時儀錶板和攝影機選擇下拉選單。",
       "disabledSubheading": "在設定中禁用",
       "status": {
         "on": "開啟",
@@ -613,43 +601,43 @@
       "details": {
         "edit": "編輯攝影機詳細資料",
         "title": "編輯攝影機詳細資料",
-        "description": "更新此攝影機在整個 Frigate UI 中使用的顯示名稱、外部 URL 和可見性。",
+        "description": "更新此攝影機在整個 Frigate UI 中使用的顯示名稱、外部 URL 和可見度。",
         "friendlyNameLabel": "顯示名稱",
         "friendlyNameHelp": "在整個 Frigate UI 中顯示此攝影機的顯示名稱。留空則會使用攝影機 ID。",
         "webuiUrlLabel": "攝影機網頁介面網址",
         "webuiUrlHelp": "可從「偵錯」檢視中直接造訪攝影機網頁介面的網址。留空以停用此連結。",
         "webuiUrlInvalid": "必須是有效的網址（例如：https://example.com）。",
-        "dashboardLabel": "在即時儀表板上顯示",
-        "dashboardHelp": "將此攝影機顯示在預設的「所有攝影機」直播儀表板上。它仍會保留在其他位置（包含攝影機群組）的可用狀態。",
-        "reviewLabel": "在審查中顯示",
-        "reviewHelp": "在「審查」中顯示此攝影機，包括攝影機篩選器、移動審查以及歷史檢視。"
+        "dashboardLabel": "在即時儀錶板上顯示",
+        "dashboardHelp": "將此攝影機顯示在預設的「所有攝影機」直播儀錶板上。它仍會保留在其他位置（包含攝影機群組）的可用狀態。",
+        "reviewLabel": "在審閱中顯示",
+        "reviewHelp": "在「審閱」中顯示此攝影機，包括攝影機篩選器、移動審閱以及歷史檢視。"
       }
     },
     "cameraConfig": {
       "add": "新增攝影機",
       "edit": "編輯攝影機",
-      "description": "配置攝影機設定，包括影片流輸入和功能選擇。",
+      "description": "配置攝影機設定，包括影片串流輸入和功能選擇。",
       "name": "攝影機名稱",
       "nameRequired": "攝影機名稱為必填項",
       "nameLength": "攝影機名稱必須少於64個字元。",
       "namePlaceholder": "例如：大門、後院等",
       "enabled": "開啟",
       "ffmpeg": {
-        "inputs": "影片流輸入",
+        "inputs": "影片串流輸入",
         "path": "影片串流路徑",
         "pathRequired": "影片串流路徑為必填",
         "pathPlaceholder": "rtsp://...",
         "roles": "功能",
         "rolesRequired": "至少選擇一個功能",
-        "rolesUnique": "每個功能（音訊audio、偵測detect、錄製record）只能分配給一個影片流",
-        "addInput": "新增輸入影片流",
-        "removeInput": "移除輸入影片流",
-        "inputsRequired": "至少需要一個輸入影片流"
+        "rolesUnique": "每個功能（音訊audio、偵測detect、錄製record）只能分配給一個影片串流",
+        "addInput": "新增輸入影片串流",
+        "removeInput": "移除輸入影片串流",
+        "inputsRequired": "至少需要一個輸入影片串流"
       },
-      "go2rtcStreams": "go2rtc 影片流",
+      "go2rtcStreams": "go2rtc 影片串流",
       "streamUrls": "影片串流 URL",
       "addUrl": "新增 URL",
-      "addGo2rtcStream": "新增 go2rtc 影片流",
+      "addGo2rtcStream": "新增 go2rtc 影片串流",
       "toast": {
         "success": "攝影機 {{cameraName}} 已儲存"
       }
@@ -659,18 +647,16 @@
       "selectLabel": "選擇設定檔",
       "description": "配置在啟用某個設定檔時，哪些攝影機應被開啟或關閉。設定為「繼承」的攝影機會沿用它原本的啟用/停用狀態。",
       "inherit": "繼承",
-      "enabled": "開啟",
-      "disabled": "關閉",
       "on": "開啟",
       "off": "關閉"
     },
     "cameraType": {
-      "title": "攝影機型別",
-      "label": "攝影機型別",
-      "description": "為每路攝影機設定型別。專用車牌辨識（LPR）攝影機為單用途裝置，配備高倍光學變焦，可抓拍遠處車輛的車牌。絕大多數攝影機應選用通用型別；只有專為車牌辨識部署、且畫面聚焦對準車牌的攝影機，才需選擇專用 LPR 型別。",
+      "title": "攝影機類型",
+      "label": "攝影機類型",
+      "description": "為每個攝影機設定類型。專用車牌辨識 (LPR) 攝影機為單用途裝置，配備高倍光學變焦，可捕捉遠處車輛的車牌。絕大部分攝影機應選用通用類型；只有專為車牌辨識部署、且畫面聚焦對準車牌的攝影機，才需選擇專用 LPR 類型。",
       "normal": "通用",
       "dedicatedLpr": "車牌辨識專用",
-      "saveSuccess": "已更新 {{cameraName}} 的攝影機型別，請重啟 Frigate 以使更改生效。"
+      "saveSuccess": "已更新 {{cameraName}} 的攝影機類型，請重新啟動 Frigate 以套用變更。"
     },
     "clone": {
       "sectionTitle": "複製設定",
@@ -712,7 +698,7 @@
         "items": {
           "record": "錄影",
           "snapshots": "快照",
-          "review": "審核",
+          "review": "審閱",
           "motion": "移動偵測",
           "objects": "物件",
           "audio": "聲音偵測",
@@ -758,37 +744,37 @@
   "cameraReview": {
     "title": "攝影機審閱設定",
     "object_descriptions": {
-      "title": "生成式AI目標描述",
-      "desc": "臨時啟用或停用此攝影機的 生成式AI目標描述 功能，直到 Frigate 重啟。停用後，系統將不再請求該攝影機追蹤目標和物體的AI生成描述。"
+      "title": "生成式AI物件描述",
+      "desc": "在此攝影機上臨時啟用／停用生成式 AI 物件描述（設定在 Frigate 重新啟動前有效）。若停用，系統將不再針對該攝影機所追蹤的物件請求生成式 AI 描述。"
     },
     "review_descriptions": {
       "title": "生成式 AI 審閱總結",
-      "desc": "臨時開關該攝影機的 生成式 AI 審閱總結 功能，直到 Frigate 重啟。停用後，系統將不再請求 AI 生成該攝影機審閱項目的總結。"
+      "desc": "在此攝影機上臨時啟用／停用生成式 AI 審閱描述（設定在 Frigate 重新啟動前有效）。若停用，系統將不再針對該攝影機的審閱項目請求生成式 AI 描述。"
     },
     "review": {
       "title": "審閱",
-      "desc": "臨時開關該攝影機的警報與偵測項生成功能，直到 Frigate 重啟後恢復。停用期間，系統將不再生成新的審閱項目。 ",
+      "desc": "臨時開關該攝影機的警報與偵測項生成功能，直到 Frigate 重新啟動後復原。停用期間，系統將不再生成新的審閱項目。 ",
       "alerts": "警報 ",
       "detections": "偵測 "
     },
     "reviewClassification": {
       "title": "審閱分類",
-      "desc": "Frigate 將審查項目分類為警報與偵測。預設情況下，所有 <em>人</em> 與 <em>汽車</em> 物件都會被視為警報。您可以透過為其設定所需的區域，來進一步精確分類您的審查項目。",
+      "desc": "Frigate 將審閱項目分類為警報與偵測。預設情況下，所有 <em>人</em> 與 <em>汽車</em> 物件都會被視為警報。您可以透過為其設定所需的區域，來進一步精確分類您的審閱項目。",
       "noDefinedZones": "此攝影機未設定任何監控區。",
-      "objectAlertsTips": "所有 {{alertsLabels}} 類目標或物體在 {{cameraName}} 下都將視為警報。",
-      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 類目標或物體在 {{cameraName}} 下的 {{zone}} 區域內都將視為警報。",
-      "objectDetectionsTips": "所有在攝影機 {{cameraName}} 上，偵測到的 {{detectionsLabels}} 目標或物體，無論它位於哪個區，都將顯示為偵測。",
+      "objectAlertsTips": "所有 {{alertsLabels}} 類物件在 {{cameraName}} 下都將視為警報。",
+      "zoneObjectAlertsTips": "所有 {{alertsLabels}} 類物件在 {{cameraName}} 下的 {{zone}} 區域內都將視為警報。",
+      "objectDetectionsTips": "所有在攝影機 {{cameraName}} 上，偵測到的 {{detectionsLabels}} 物件，無論它位於哪個區，都將顯示為偵測。",
       "zoneObjectDetectionsTips": {
-        "text": "所有在攝影機 {{cameraName}} 下的 {{zone}} 區域內偵測到未分類的 {{detectionsLabels}} 目標或物體，都將顯示為偵測。",
-        "notSelectDetections": "所有在攝影機 {{cameraName}}下的 {{zone}} 區域內偵測到的 {{detectionsLabels}} 目標或物體，如果它未歸類為警報，無論它位於哪個區，都將顯示為偵測。",
-        "regardlessOfZoneObjectDetectionsTips": "在攝影機 {{cameraName}} 上，所有未分類的 {{detectionsLabels}} 偵測目標或物體，無論出現在哪個區域，都將顯示為偵測。"
+        "text": "所有在攝影機 {{cameraName}} 下的 {{zone}} 區域內偵測到未分類的 {{detectionsLabels}} 物件，都將顯示為偵測。",
+        "notSelectDetections": "所有在攝影機 {{cameraName}}下的 {{zone}} 區域內偵測到的 {{detectionsLabels}} 物件，如果它未歸類為警報，無論它位於哪個區，都將顯示為偵測。",
+        "regardlessOfZoneObjectDetectionsTips": "在攝影機 {{cameraName}} 上，所有未分類的 {{detectionsLabels}} 偵測物件，無論出現在哪個區域，都將顯示為偵測。"
       },
       "unsavedChanges": "攝影機 {{camera}} 的審閱分類設定尚未儲存",
       "selectAlertsZones": "選擇警報區",
       "selectDetectionsZones": "選擇偵測區",
       "limitDetections": "限制僅在特定區域內進行偵測",
       "toast": {
-        "success": "審閱分類設定已儲存，重啟後生效。"
+        "success": "已儲存審閱分類設定，重新啟動後生效。"
       }
     }
   },
@@ -796,7 +782,7 @@
     "filter": {
       "all": "所有遮罩和區域"
     },
-    "restart_required": "需要重啟（遮罩與區域已修改）",
+    "restart_required": "需要重新啟動（已變更遮罩／區域）",
     "disabledInConfig": "該項目已在設定檔中被停用",
     "addDisabledProfile": "先新增到基礎配置中，然後在設定檔中進行覆蓋",
     "profileBase": "（基礎）",
@@ -809,8 +795,8 @@
         "copyCoordinatesFailed": "無法複製座標到剪貼簿。"
       }
     },
-    "motionMaskLabel": "畫面變動遮罩 {{number}}",
-    "objectMaskLabel": "目標/物體遮罩 {{number}}",
+    "motionMaskLabel": "移動遮罩 {{number}}",
+    "objectMaskLabel": "物件遮罩 {{number}}",
     "form": {
       "id": {
         "error": {
@@ -851,14 +837,14 @@
       },
       "speed": {
         "error": {
-          "mustBeGreaterOrEqualTo": "速度閾值必須大於或等於0.1。"
+          "mustBeGreaterOrEqualTo": "速度臨界值必須大於或等於0.1。"
         }
       },
       "polygonDrawing": {
         "type": {
           "zone": "區域",
-          "motion_mask": "畫面變動遮罩",
-          "object_mask": "目標遮罩"
+          "motion_mask": "移動遮罩",
+          "object_mask": "物件遮罩"
         },
         "removeLastPoint": "刪除最後一個點",
         "reset": {
@@ -886,7 +872,7 @@
       "label": "區域",
       "documentTitle": "編輯區域 - Frigate",
       "desc": {
-        "title": "該功能允許你定義特定區域，以便你可以確定特定目標或物體是否在該區域內。",
+        "title": "該功能允許你定義特定區域，以便你可以確定特定物件是否在該區域內。",
         "documentation": "文件"
       },
       "add": "新增區域",
@@ -900,32 +886,32 @@
       },
       "enabled": {
         "title": "開啟",
-        "description": "指示該區域在設定檔中是否處於啟用並啟用的狀態。若被停用，則無法透過 MQTT 啟用。停用的區域在執行時會被忽略。"
+        "description": "指示該區域在設定檔中是否處於作用中且已啟用的狀態。若被停用，則無法透過 MQTT 啟用。停用的區域在執行時會被忽略。"
       },
       "inertia": {
         "title": "慣性",
-        "desc": "辨識指定目標前該目標必須在這個區域內出現了多少幀。<em>預設值：3</em>"
+        "desc": "辨識指定物件前該物件必須在這個區域內出現了多少幀。<em>預設值：3</em>"
       },
       "loiteringTime": {
         "title": "停留時間",
-        "desc": "設定目標必須在區域中至少要活動多少時間（單位為秒）。<em>預設值：0</em>"
+        "desc": "設定物件必須在區域中至少要活動多少時間（單位為秒）。<em>預設值：0</em>"
       },
       "objects": {
-        "title": "目標/物體",
-        "desc": "將在此區域應用的目標/物體類別清單。"
+        "title": "物件",
+        "desc": "將在此區域應用的物件類別清單。"
       },
-      "allObjects": "所有目標/物體",
+      "allObjects": "所有物件",
       "speedEstimation": {
         "title": "速度估算",
-        "desc": "啟用此區域內物體的速度估算。該區域必須恰好包含 4 個點。",
+        "desc": "啟用此區域內物件的速度估算。該區域必須恰好包含 4 個點。",
         "lineADistance": "A線距離（{{unit}}）",
         "lineBDistance": "B線距離（{{unit}}）",
         "lineCDistance": "C線距離（{{unit}}）",
         "lineDDistance": "D線距離（{{unit}}）"
       },
       "speedThreshold": {
-        "title": "速度閾值 ({{unit}})",
-        "desc": "指定物體在此區域內被視為有效的最低速度。",
+        "title": "速度臨界值 ({{unit}})",
+        "desc": "指定物件在此區域內被視為有效的最低速度。",
         "toast": {
           "error": {
             "pointLengthError": "此區域的速度估算已停用。啟用速度估算的區域必須恰好包含 4 個點。",
@@ -938,15 +924,15 @@
       }
     },
     "motionMasks": {
-      "label": "畫面變動遮罩",
-      "documentTitle": "編輯畫面變動遮罩 - Frigate",
+      "label": "移動遮罩",
+      "documentTitle": "編輯移動遮罩 - Frigate",
       "desc": {
-        "title": "畫面變動遮罩用於防止觸發不必要的畫面變動偵測。過度的設定遮罩將使目標更加難以被追蹤。",
+        "title": "移動遮罩用於防止觸發不必要的移動偵測。過度的設定遮罩將使物件更加難以被追蹤。",
         "documentation": "文件"
       },
-      "add": "新增畫面變動遮罩",
-      "edit": "編輯畫面變動遮罩",
-      "defaultName": "畫面變動遮罩 {{number}}",
+      "add": "新增移動遮罩",
+      "edit": "編輯移動遮罩",
+      "defaultName": "移動遮罩 {{number}}",
       "context": {
         "title": "移動遮罩用於防止不需要的移動觸發偵測（例如：樹枝搖晃、攝影機時間戳記等）。移動遮罩應 <em>非常謹慎地使用</em>，過度的遮罩會導致物件追蹤變得更加困難。"
       },
@@ -954,99 +940,99 @@
       "clickDrawPolygon": "在影像上點選新增點繪製多邊形區域。",
       "name": {
         "title": "名稱",
-        "description": "為該畫面變動遮罩設定別名（可選）。",
+        "description": "為該移動遮罩設定別名（可選）。",
         "placeholder": "輸入名稱…"
       },
       "polygonAreaTooLarge": {
-        "title": "畫面變動遮罩的大小達到了攝影機畫面的{{polygonArea}}%。不建議設定太大的畫面變動遮罩。",
-        "tips": "畫面變動遮罩並不會使該區域無法偵測到指定目標/物體，如有需要，你應該使用 區域 來限制偵測的目標/物體型別。"
+        "title": "移動遮罩的大小達到了攝影機畫面的{{polygonArea}}%。不建議設定太大的移動遮罩。",
+        "tips": "移動遮罩並不會使該區域無法偵測到指定物件，如有需要，你應該使用 區域 來限制偵測的物件類型。"
       },
       "toast": {
         "success": {
           "title": "{{polygonName}} 已儲存。",
-          "noName": "畫面變動遮罩已儲存。"
+          "noName": "移動遮罩已儲存。"
         }
       }
     },
     "objectMasks": {
-      "label": "目標遮罩",
-      "documentTitle": "編輯目標遮罩 - Frigate",
+      "label": "物件遮罩",
+      "documentTitle": "編輯物件遮罩 - Frigate",
       "desc": {
-        "title": "目標過濾器用於防止特定位置出現對某個目標/物體的誤報。",
+        "title": "物件過濾器用於防止特定位置出現對某個物件的誤報。",
         "documentation": "文件"
       },
-      "add": "新增目標遮罩",
-      "edit": "編輯目標遮罩",
-      "context": "目標過濾器用於防止特定位置的指定目標會誤報。",
+      "add": "新增物件遮罩",
+      "edit": "編輯物件遮罩",
+      "context": "物件過濾器用於防止特定位置的指定物件會誤報。",
       "point_other": "{{count}} 點",
       "clickDrawPolygon": "在影像上點選新增點繪製多邊形區域。",
       "name": {
         "title": "名稱",
-        "description": "為該目標遮罩設定別名（可選）。",
+        "description": "為該物件遮罩設定別名（可選）。",
         "placeholder": "輸入名稱…"
       },
       "objects": {
-        "title": "目標/物體",
-        "desc": "將應用於此目標遮罩的目標或物體型別。",
-        "allObjectTypes": "所有目標或物體型別"
+        "title": "物件",
+        "desc": "將應用於此物件遮罩的物件類型。",
+        "allObjectTypes": "所有物件類型"
       },
       "toast": {
         "success": {
           "title": "{{polygonName}} 已儲存。",
-          "noName": "目標遮罩已儲存。"
+          "noName": "物件遮罩已儲存。"
         }
       }
     },
     "masks": {
       "enabled": {
         "title": "開啟",
-        "description": "指示該遮罩在設定檔中是否處於啟用並啟用的狀態。若被停用，則無法透過 MQTT 啟用。停用的遮罩在執行時會被忽略。"
+        "description": "指示該遮罩在設定檔中是否已啟用。若被停用，則無法透過 MQTT 啟用。停用的遮罩在執行時會被忽略。"
       }
     }
   },
   "motionDetectionTuner": {
-    "title": "畫面變動偵測調整",
-    "unsavedChanges": "{{camera}} 的畫面變動調整設定未儲存",
+    "title": "移動偵測調整",
+    "unsavedChanges": "{{camera}} 的移動調整設定未儲存",
     "desc": {
-      "title": "Frigate 將首先使用畫面變動偵測來確認每一幀畫面中是否有變動的區域，然後再對該區域使用目標偵測。",
-      "documentation": "閱讀有關畫面變動偵測的文件"
+      "title": "Frigate 將首先使用移動偵測來確認每一幀畫面中是否有變動的區域，然後再對該區域使用物件偵測。",
+      "documentation": "閱讀有關移動偵測的文件"
     },
     "Threshold": {
-      "title": "閾值",
-      "desc": "閾值決定像素亮度變化達到多少時會被認為是畫面變動。<em>預設值：30</em>"
+      "title": "臨界值",
+      "desc": "臨界值決定像素亮度變化達到多少時會被認為是移動。<em>預設值：30</em>"
     },
     "contourArea": {
       "title": "輪廓面積",
-      "desc": "輪廓面積值用於判斷產生了多大的變化區域可被認定為畫面變動。<em>預設值：10</em>"
+      "desc": "輪廓面積值用於判斷產生了多大的變化區域可被認定為移動。<em>預設值：10</em>"
     },
     "improveContrast": {
       "title": "提高對比度",
       "desc": "提高較暗場景的對比度。<em>預設值：啟用</em>"
     },
     "toast": {
-      "success": "畫面變動設定已儲存。"
+      "success": "移動設定已儲存。"
     }
   },
   "debug": {
     "title": "除錯",
-    "detectorDesc": "Frigate 將使用偵測器（{{detectors}}）來偵測攝影機影片流中的目標或物體。",
-    "desc": "除錯介面將即時顯示被追蹤的目標以及統計資訊，目標清單將顯示偵測到的目標和延遲顯示的概覽。",
+    "detectorDesc": "Frigate 將使用偵測器（{{detectors}}）來偵測攝影機影片串流中的物件。",
+    "desc": "除錯介面將即時顯示被追蹤的物件以及統計資訊，物件清單將顯示偵測到的物件和延遲顯示的概覽。",
     "openCameraWebUI": "開啟 {{camera}} 的管理頁面",
     "debugging": "除錯選項",
-    "objectList": "目標清單",
-    "noObjects": "沒有目標",
+    "objectList": "物件清單",
+    "noObjects": "沒有物件",
     "audio": {
       "title": "音訊",
       "noAudioDetections": "未偵測到音訊事件",
       "score": "分值",
-      "currentRMS": "當前均方根值（RMS）",
-      "currentdbFS": "當前滿量程相對分貝值（dbFS）"
+      "currentRMS": "目前均方根值 (RMS)",
+      "currentdbFS": "目前滿量程相對分貝值 (dbFS)"
     },
     "boundingBoxes": {
       "title": "邊界框",
-      "desc": "將在被追蹤的目標周圍顯示邊界框",
+      "desc": "將在被追蹤的物件周圍顯示邊界框",
       "colors": {
-        "label": "目標邊界框顏色定義",
+        "label": "物件邊界框顏色定義",
         "info": "<li>啟動時，系統會為每個物件標籤指派不同的顏色</li><li>深藍色細線代表該物件目前未被偵測到</li><li>灰色細線代表該物件被偵測為靜止狀態</li><li>粗線代表該物件正被自動追蹤（若已啟用）</li>"
       }
     },
@@ -1059,36 +1045,36 @@
       "desc": "顯示已定義的區域圖層"
     },
     "mask": {
-      "title": "畫面變動遮罩",
-      "desc": "顯示畫面變動遮罩圖層"
+      "title": "移動遮罩",
+      "desc": "顯示移動遮罩圖層"
     },
     "motion": {
-      "title": "畫面變動區域框",
-      "desc": "在偵測到畫面變動的區域顯示區域框",
-      "tips": "<p><strong>畫面變動區域框</strong></p><br><p>將在當前偵測到畫面變動的區域內顯示紅色區域框。</p>"
+      "title": "移動區域框",
+      "desc": "在偵測到移動的區域顯示區域框",
+      "tips": "<p><strong>移動區域框</strong></p><br><p>將在目前偵測到移動的區域內顯示紅色區域框。</p>"
     },
     "regions": {
       "title": "範圍",
-      "desc": "顯示傳送給目標偵測器感興趣的區域框",
-      "tips": "<p><strong>範圍框</strong></p><br><p>將在幀中傳送到目標偵測器的感興趣範圍上疊加綠色框。</p>"
+      "desc": "顯示傳送給物件偵測器感興趣的區域框",
+      "tips": "<p><strong>範圍框</strong></p><br><p>將在幀中傳送到物件偵測器的感興趣範圍上疊加綠色框。</p>"
     },
     "paths": {
       "title": "行動軌跡",
-      "desc": "顯示被追蹤目標的行動軌跡關鍵點",
-      "tips": "<p><strong>行動軌跡</strong></p><p>將使用<strong>線條</strong>和<strong>點</strong>來標示被追蹤目標在其活動週期內移動的關鍵位置點。</p>"
+      "desc": "顯示被追蹤物件的行動軌跡關鍵點",
+      "tips": "<p><strong>行動軌跡</strong></p><p>將使用<strong>線條</strong>和<strong>點</strong>來標示被追蹤物件在其活動週期內移動的關鍵位置點。</p>"
     },
     "objectShapeFilterDrawing": {
-      "title": "允許繪製“目標形狀過濾器”",
+      "title": "允許繪製“物件形狀過濾器”",
       "desc": "在影像上繪製矩形，以檢視區域和比例詳細資訊",
-      "tips": "啟用此選項，能夠在攝影機畫面上繪製矩形，將顯示其區域和比例。你可以透過使用這些值在配置中設定目標形狀過濾器的引數。",
+      "tips": "啟用此選項，能夠在攝影機畫面上繪製矩形，將顯示其區域和比例。你可以透過使用這些值在配置中設定物件形狀過濾器的引數。",
       "score": "分數",
       "ratio": "比例",
       "area": "區域"
     }
   },
   "timestampPosition": {
-    "tl": "左上角",
-    "tr": "右上角",
+    "tl": "左上方",
+    "tr": "右上方",
     "bl": "左下角",
     "br": "右下角"
   },
@@ -1096,7 +1082,7 @@
     "title": "使用者",
     "management": {
       "title": "使用者管理",
-      "desc": "管理此 Frigate 例項的使用者帳戶。"
+      "desc": "管理此 Frigate 實例的使用者帳戶。"
     },
     "addUser": "新增使用者",
     "updatePassword": "修改密碼",
@@ -1105,21 +1091,21 @@
         "createUser": "使用者 {{user}} 建立成功",
         "deleteUser": "使用者 {{user}} 刪除成功",
         "updatePassword": "已成功修改密碼。",
-        "roleUpdated": "已更新 {{user}} 的權限組"
+        "roleUpdated": "已更新 {{user}} 的角色"
       },
       "error": {
         "setPasswordFailed": "儲存密碼出現錯誤：{{errorMessage}}",
         "createUserFailed": "建立使用者失敗：{{errorMessage}}",
         "deleteUserFailed": "刪除使用者失敗：{{errorMessage}}",
-        "roleUpdateFailed": "更新權限組失敗：{{errorMessage}}"
+        "roleUpdateFailed": "更新角色失敗：{{errorMessage}}"
       }
     },
     "table": {
       "username": "使用者名稱",
       "actions": "操作",
-      "role": "權限組",
+      "role": "角色",
       "noUsers": "未找到使用者。",
-      "changeRole": "更改使用者權限組",
+      "changeRole": "變更使用者角色",
       "password": "修改密碼",
       "deleteUser": "刪除使用者"
     },
@@ -1127,7 +1113,7 @@
       "form": {
         "user": {
           "title": "使用者名稱",
-          "desc": "僅允許使用字母、數字、句點和下劃線。",
+          "desc": "僅允許使用字母、數字、句點和底線。",
           "placeholder": "請輸入使用者名稱"
         },
         "password": {
@@ -1139,19 +1125,12 @@
             "title": "確認密碼",
             "placeholder": "請再次輸入密碼"
           },
-          "strength": {
-            "title": "密碼強度： ",
-            "weak": "弱",
-            "medium": "中等",
-            "strong": "強",
-            "veryStrong": "非常強"
-          },
           "requirements": {
             "title": "密碼要求：",
             "length": "至少需要 12 位字元"
           },
-          "match": "密碼匹配",
-          "notMatch": "密碼不匹配"
+          "match": "密碼相符",
+          "notMatch": "密碼不相符"
         },
         "newPassword": {
           "title": "新密碼",
@@ -1161,7 +1140,7 @@
           }
         },
         "currentPassword": {
-          "title": "當前密碼",
+          "title": "目前密碼",
           "placeholder": "請輸入目前密碼"
         },
         "usernameIsRequired": "使用者名稱為必填項",
@@ -1169,8 +1148,8 @@
       },
       "createUser": {
         "title": "建立新使用者",
-        "desc": "建立一個新使用者帳戶，並指定一個權限組以控制存取 Frigate 頁面的權限。",
-        "usernameOnlyInclude": "使用者名稱只能包含字母、數字和 _",
+        "desc": "建立一個新使用者帳戶，並指定一個角色以控制存取 Frigate 頁面的權限。",
+        "usernameOnlyInclude": "使用者名稱只能包含字母、數字、. 或 _",
         "confirmPassword": "請確認你的密碼"
       },
       "deleteUser": {
@@ -1180,7 +1159,7 @@
       },
       "passwordSetting": {
         "cannotBeEmpty": "密碼不能為空",
-        "doNotMatch": "兩次輸入密碼不匹配",
+        "doNotMatch": "兩次輸入密碼不相符",
         "currentPasswordRequired": "目前密碼為必填",
         "incorrectCurrentPassword": "目前密碼錯誤",
         "passwordVerificationFailed": "驗證密碼失敗",
@@ -1191,11 +1170,11 @@
         "multiDeviceAdmin": "你也可以透過輪換你的 JWT 金鑰，強制所有使用者立即重新登入驗證。"
       },
       "changeRole": {
-        "title": "更改使用者權限組",
-        "select": "選擇權限組",
+        "title": "變更使用者角色",
+        "select": "選擇角色",
         "desc": "更新 <strong>{{username}}</strong> 的權限",
         "roleInfo": {
-          "intro": "為該使用者選擇一個合適的權限組：",
+          "intro": "為該使用者選擇一個合適的角色：",
           "admin": "管理員",
           "adminDesc": "完全功能與存取權限。",
           "viewer": "檢視者",
@@ -1207,59 +1186,59 @@
   },
   "roles": {
     "management": {
-      "title": "檢視者權限組管理",
-      "desc": "管理此 Frigate 例項的自訂權限組及其攝影機存取權限。"
+      "title": "檢視者角色管理",
+      "desc": "管理此 Frigate 實例的自訂角色及其攝影機存取權限。"
     },
-    "addRole": "新增權限組",
+    "addRole": "新增角色",
     "table": {
-      "role": "權限組",
+      "role": "角色",
       "cameras": "攝影機",
       "actions": "操作",
-      "noRoles": "沒有找到自訂權限組。",
+      "noRoles": "沒有找到自訂角色。",
       "editCameras": "編輯攝影機",
-      "deleteRole": "刪除權限組"
+      "deleteRole": "刪除角色"
     },
     "toast": {
       "success": {
-        "createRole": "權限組 {{role}} 建立成功",
-        "updateCameras": "已更新攝影機至 {{role}} 權限組",
-        "deleteRole": "已刪除 {{role}} 權限組",
-        "userRolesUpdated_other": "已將分配到此權限組的 {{count}} 位使用者更新為「檢視者」，該權限組可存取所有攝影機。"
+        "createRole": "角色 {{role}} 建立成功",
+        "updateCameras": "已更新攝影機至 {{role}} 角色",
+        "deleteRole": "已刪除 {{role}} 角色",
+        "userRolesUpdated_other": "已將分配到此角色的 {{count}} 位使用者更新為「檢視者」，該角色可存取所有攝影機。"
       },
       "error": {
-        "createRoleFailed": "建立權限組失敗：{{errorMessage}}",
+        "createRoleFailed": "建立角色失敗：{{errorMessage}}",
         "updateCamerasFailed": "更新攝影機失敗：{{errorMessage}}",
-        "deleteRoleFailed": "刪除權限組失敗：{{errorMessage}}",
-        "userUpdateFailed": "更新使用者權限組失敗：{{errorMessage}}"
+        "deleteRoleFailed": "刪除角色失敗：{{errorMessage}}",
+        "userUpdateFailed": "更新使用者角色失敗：{{errorMessage}}"
       }
     },
     "dialog": {
       "createRole": {
-        "title": "建立新權限組",
-        "desc": "新增新權限組並分配攝影機存取權限。"
+        "title": "建立新角色",
+        "desc": "新增新角色並分配攝影機存取權限。"
       },
       "editCameras": {
-        "title": "編輯權限組的攝影機",
-        "desc": "為權限組 <strong>{{role}}</strong> 更新攝影機存取權限。"
+        "title": "編輯角色的攝影機",
+        "desc": "為角色 <strong>{{role}}</strong> 更新攝影機存取權限。"
       },
       "deleteRole": {
-        "title": "刪除權限組",
-        "desc": "此操作無法復原。這將永久刪除該權限組，並將所有擁有此權限組的使用者分配到「檢視者」權限組，該權限組將賦予使用者檢視所有攝影機的權限。",
-        "warn": "你確定要刪除權限組 <strong>{{role}}</strong> 嗎？",
+        "title": "刪除角色",
+        "desc": "此操作無法復原。這將永久刪除該角色，並將所有擁有此角色的使用者分配到「檢視者」角色，該角色將賦予使用者檢視所有攝影機的權限。",
+        "warn": "你確定要刪除角色 <strong>{{role}}</strong> 嗎？",
         "deleting": "刪除中…"
       },
       "form": {
         "role": {
-          "title": "權限組名稱",
-          "placeholder": "輸入權限組名稱",
-          "desc": "僅允許使用字母、數字、句點和下劃線。",
-          "roleIsRequired": "必須輸入權限組名稱",
-          "roleOnlyInclude": "權限組名稱僅支援字母、數字、英文句號和下劃線",
-          "roleExists": "該權限組名稱已存在。"
+          "title": "角色名稱",
+          "placeholder": "輸入角色名稱",
+          "desc": "僅允許使用字母、數字、句點和底線。",
+          "roleIsRequired": "必須輸入角色名稱",
+          "roleOnlyInclude": "角色名稱僅支援字母、數字、英文句號和底線",
+          "roleExists": "該角色名稱已存在。"
         },
         "cameras": {
           "title": "攝影機",
-          "desc": "請選擇該權限組能夠存取的攝影機。至少需要選擇一個攝影機。",
+          "desc": "請選擇該角色能夠存取的攝影機。至少需要選擇一個攝影機。",
           "required": "至少要選擇一個攝影機。"
         }
       }
@@ -1272,12 +1251,11 @@
       "desc": "Frigate 在瀏覽器中執行或作為 PWA 安裝時，可以原生向您的裝置傳送推送通知。"
     },
     "notificationUnavailable": {
-      "title": "通知功能不可用",
-      "desc": "網頁推送通知需要安全連線（<code>https://…</code>）。這是瀏覽器的限制。請透過安全方式存取 Frigate 以使用通知功能。",
-      "descPwa": "在 iOS 上，只有將 Frigate 加到主畫面後，才能使用網頁推播通知。請開啟 <strong>分享</strong> 選單，選擇 <strong>加入主畫面</strong>，然後從新圖示開啟 Frigate，即可為此裝置註冊通知功能。"
+      "desc": "網頁推送通知需要安全連線（https://…）。這是瀏覽器的限制。請透過安全方式存取 Frigate 以使用通知功能。",
+      "descPwa": "在 iOS 上，只有將 Frigate 加到主畫面後，才能使用網頁推播通知。請開啟「分享」選單，選擇「加入主畫面」，然後從新圖示開啟 Frigate，即可為此裝置註冊通知功能。"
     },
     "globalSettings": {
-      "title": "全域性設定",
+      "title": "全域設定",
       "desc": "臨時暫停所有已註冊裝置上特定攝影機的通知。"
     },
     "email": {
@@ -1295,7 +1273,7 @@
     "unregisterDevice": "取消註冊該裝置",
     "sendTestNotification": "傳送測試通知",
     "unsavedRegistrations": "未儲存通知註冊",
-    "unsavedChanges": "未儲存通知設定更改",
+    "unsavedChanges": "未儲存通知設定變更",
     "active": "通知已啟用",
     "suspended": "通知已暫停 {{time}}",
     "suspendTime": {
@@ -1306,12 +1284,12 @@
       "1hour": "暫停 1 小時",
       "12hours": "暫停 12 小時",
       "24hours": "暫停 24 小時",
-      "untilRestart": "暫停直到重啟"
+      "untilRestart": "暫停直到重新啟動"
     },
     "cancelSuspension": "取消暫停",
     "toast": {
       "success": {
-        "registered": "已成功註冊通知。需要重啟 Frigate 才能傳送任何通知（包括測試通知）。",
+        "registered": "已成功註冊通知。需要重新啟動 Frigate 才能傳送任何通知（包括測試通知）。",
         "settingSaved": "通知設定已儲存。"
       },
       "error": {
@@ -1321,7 +1299,7 @@
   },
   "frigatePlus": {
     "title": "Frigate+ 設定",
-    "description": "Frigate+ 是一項訂閱服務，可為你的 Frigate 例項提供額外的功能和能力，包括使用基於你自己的資料訓練的自訂目標偵測模型。你可以在此管理 Frigate+ 的模型設定。",
+    "description": "Frigate+ 是一項訂閱服務，可為你的 Frigate 實例提供額外的功能和能力，包括使用基於你自己的資料訓練的自訂物件偵測模型。你可以在此管理 Frigate+ 的模型設定。",
     "cardTitles": {
       "api": "API",
       "currentModel": "目前模型",
@@ -1330,8 +1308,6 @@
     },
     "apiKey": {
       "title": "Frigate+ API 金鑰",
-      "validated": "Frigate+ API 金鑰已偵測並驗證透過",
-      "notValidated": "未偵測到 Frigate+ API 金鑰或驗證未透過",
       "desc": "Frigate+ API 金鑰用於啟用與 Frigate+ 服務的整合。",
       "plusLink": "瞭解更多關於 Frigate+"
     },
@@ -1346,7 +1322,7 @@
     },
     "modelInfo": {
       "title": "模型資訊",
-      "modelType": "模型型別",
+      "modelType": "模型類型",
       "trainDate": "訓練日期",
       "baseModel": "基礎模型",
       "plusModelType": {
@@ -1371,36 +1347,11 @@
     },
     "changeInDetectorsAndModel": "變更模型",
     "unsavedChanges": "未儲存Frigate+變更設定",
-    "restart_required": "需要重啟（Frigate+模型已修改）",
+    "restart_required": "需要重新啟動（已變更 Frigate+ 模型）",
     "toast": {
-      "success": "Frigate+ 設定已儲存。請重啟 Frigate 以應用更改。",
-      "error": "配置更改儲存失敗：{{errorMessage}}"
+      "success": "已儲存 Frigate+ 設定。請重新啟動 Frigate 以套用變更。",
+      "error": "無法儲存變更設定：{{errorMessage}}"
     }
-  },
-  "detectorsAndModel": {
-    "title": "偵測器與模型",
-    "description": "設定執行物件偵測的偵測器後端及其使用的模型。變更會一起儲存以確保偵測器與模型保持同步。",
-    "cardTitles": {
-      "detector": "偵測器硬體",
-      "model": "偵測模型"
-    },
-    "tabs": {
-      "plus": "Frigate+",
-      "custom": "自訂模型"
-    },
-    "mismatch": {
-      "warning": "目前的 Frigate+ 模型「{{model}}」需要 {{required}} 偵測器。請在下方選擇相容的模型，或在儲存前切換到「自訂模型」。"
-    },
-    "plusModel": {
-      "requiresDetector": "需要：{{detector}}",
-      "noModelSelected": "選擇 Frigate+ 模型"
-    },
-    "toast": {
-      "saveSuccess": "偵測器與模型設定已儲存。請重新啟動 Frigate 以套用變更。",
-      "saveError": "儲存偵測器與模型設定失敗"
-    },
-    "unsavedChanges": "偵測器與模型有未儲存的變更",
-    "restartRequired": "需要重新啟動（偵測器或模型已變更）"
   },
   "maintenance": {
     "title": "維護",
@@ -1417,13 +1368,13 @@
       "statusLabel": "狀態",
       "results": "結果",
       "errorLabel": "錯誤",
-      "mediaTypes": "媒體型別",
+      "mediaTypes": "媒體類型",
       "allMedia": "所有媒體",
       "dryRun": "試執行",
       "dryRunEnabled": "不會刪除任何檔案",
       "dryRunDisabled": "將刪除檔案",
       "force": "強制執行",
-      "forceDesc": "繞過安全閾值，即使刪除超過 50% 的檔案也完成同步。",
+      "forceDesc": "繞過安全臨界值，即使刪除超過 50% 的檔案也完成同步。",
       "verbose": "詳細模式",
       "verboseDesc": "將所有孤立檔案的完整清單寫入硬碟以供審閱。",
       "running": "同步執行中…",
@@ -1440,12 +1391,12 @@
         "filesChecked": "已檢查檔案",
         "orphansFound": "發現孤立檔案",
         "orphansDeleted": "已刪除孤立檔案",
-        "aborted": "已中止。刪除操作將超過安全閾值。",
+        "aborted": "已中止。刪除操作將超過安全臨界值。",
         "error": "錯誤",
         "totals": "總計"
       },
-      "event_snapshots": "追蹤目標快照",
-      "event_thumbnails": "追蹤目標縮圖",
+      "event_snapshots": "追蹤物件快照",
+      "event_thumbnails": "追蹤物件縮圖",
       "review_thumbnails": "審閱縮圖",
       "previews": "預覽",
       "exports": "匯出",
@@ -1453,28 +1404,28 @@
     },
     "regionGrid": {
       "title": "區域網格",
-      "desc": "區域網格是一種最佳化功能，它會學習不同大小的目標通常出現在每個攝影機視野中的位置。Frigate 利用這些資料來高效地確定偵測區域的大小。該網格會根據追蹤目標資料自動構建。",
+      "desc": "區域網格是一種最佳化功能，它會學習不同大小的物件通常出現在每個攝影機視野中的位置。Frigate 利用這些資料來高效地確定偵測區域的大小。該網格會根據追蹤物件資料自動構建。",
       "clear": "清除區域網格",
       "clearConfirmTitle": "清除區域網格",
-      "clearConfirmDesc": "除非你最近更改了偵測器模型大小或攝影機的物理位置，並且遇到了目標追蹤問題，否則不建議清除區域網格。網格會隨著目標的追蹤自動重建。更改需要重啟 Frigate 才能生效。",
+      "clearConfirmDesc": "除非您最近變更了偵測器模型大小或攝影機的物理位置，並且遇到了物件追蹤問題，否則不建議清除區域網格。網格會隨著物件的追蹤自動重建。變更需要重新啟動 Frigate 才能生效。",
       "clearSuccess": "區域網格清除成功",
       "clearError": "清除區域網格失敗",
-      "restartRequired": "需要重啟以使區域網格更改生效"
+      "restartRequired": "需要重新啟動以使區域網格變更生效"
     }
   },
   "configForm": {
     "global": {
-      "title": "全域性設定",
+      "title": "全域設定",
       "description": "這些設定適用於所有攝影機，除非在攝影機特定設定中被覆蓋。"
     },
     "camera": {
       "title": "攝影機設定",
-      "description": "這些設定僅適用於此攝影機，並會覆蓋全域性設定。",
+      "description": "這些設定僅適用於此攝影機，並會覆蓋全域設定。",
       "noCameras": "沒有可用的攝影機"
     },
-    "advancedSettingsCount": "高階設定 ({{count}})",
-    "advancedCount": "高階選項 ({{count}})",
-    "showAdvanced": "顯示高階設定",
+    "advancedSettingsCount": "進階設定 ({{count}})",
+    "advancedCount": "進階選項 ({{count}})",
+    "showAdvanced": "顯示進階設定",
     "tabs": {
       "sharedDefaults": "共享預設值",
       "system": "系統",
@@ -1501,10 +1452,10 @@
       "defaultOption": "使用瀏覽器時區"
     },
     "roleMap": {
-      "empty": "未配置權限組對映",
+      "empty": "未配置角色對應",
       "roleLabel": "角色",
       "groupsLabel": "使用者組",
-      "addMapping": "新增角色對映",
+      "addMapping": "新增角色對應",
       "remove": "移除"
     },
     "ffmpegArgs": {
@@ -1512,7 +1463,7 @@
       "manual": "手動引數",
       "inherit": "繼承攝影機設定",
       "none": "無",
-      "useGlobalSetting": "繼承全域性設定",
+      "useGlobalSetting": "繼承全域設定",
       "selectPreset": "選擇預設",
       "manualPlaceholder": "輸入 FFmpeg 引數",
       "presetLabels": {
@@ -1532,7 +1483,7 @@
         "preset-rtsp-generic": "RTSP（通用）",
         "preset-rtsp-restream": "RTSP - 從 go2rtc 轉流",
         "preset-rtsp-restream-low-latency": "RTSP - 從 go2rtc 轉流（低延遲）",
-        "preset-rtsp-udp": "RTSP - UDP協議",
+        "preset-rtsp-udp": "RTSP - UDP",
         "preset-rtsp-blue-iris": "RTSP - Blue Iris",
         "preset-record-generic": "錄製（通用，無音訊）",
         "preset-record-generic-audio-copy": "錄製（通用，不轉檔音訊）",
@@ -1543,7 +1494,7 @@
       }
     },
     "cameraInputs": {
-      "itemTitle": "影片流 {{index}}",
+      "itemTitle": "影片串流 {{index}}",
       "sourceMode": {
         "restream": "重新串流 (go2rtc)",
         "manual": "手動輸入路徑",
@@ -1555,14 +1506,14 @@
         "noMatchingStreams": "沒有符合的串流"
       }
     },
-    "restartRequiredField": "需要重啟",
-    "restartRequiredFooter": "配置已更改 - 需要重啟",
+    "restartRequiredField": "需要重新啟動",
+    "restartRequiredFooter": "已變更設定 - 需要重新啟動",
     "sections": {
       "detect": "偵測",
       "record": "錄製",
       "snapshots": "快照",
-      "motion": "畫面變動",
-      "objects": "目標",
+      "motion": "移動",
+      "objects": "物件",
       "review": "審閱",
       "audio": "音訊",
       "notifications": "通知",
@@ -1588,16 +1539,6 @@
     "detect": {
       "title": "偵測設定"
     },
-    "detectors": {
-      "title": "偵測器設定",
-      "singleType": "只允許一個 {{type}} 偵測器。",
-      "keyRequired": "偵測器名稱為必填項。",
-      "keyDuplicate": "偵測器名稱已存在。",
-      "noSchema": "沒有可用的偵測器架構。",
-      "none": "未配置偵測器例項。",
-      "add": "新增偵測器",
-      "addCustomKey": "新增自訂鍵（Key）"
-    },
     "record": {
       "title": "錄製設定"
     },
@@ -1605,18 +1546,18 @@
       "title": "快照設定"
     },
     "motion": {
-      "title": "畫面變動設定"
+      "title": "移動設定"
     },
     "objects": {
-      "title": "目標設定"
+      "title": "物件設定"
     },
     "audioLabels": {
       "summary": "已選擇 {{count}} 個音訊標籤",
       "empty": "無可用音訊標籤"
     },
     "objectLabels": {
-      "summary": "已選擇 {{count}} 個目標型別",
-      "empty": "無可用目標標籤"
+      "summary": "已選擇 {{count}} 個物件類型",
+      "empty": "無可用物件標籤"
     },
     "reviewLabels": {
       "summary": "已選擇 {{count}} 個標籤",
@@ -1704,19 +1645,19 @@
     }
   },
   "globalConfig": {
-    "title": "全域性配置",
-    "description": "配置適用於所有攝影機的全域性設定，除非被單獨覆蓋。",
+    "title": "全域組態設定",
+    "description": "配置適用於所有攝影機的全域設定，除非被單獨覆蓋。",
     "toast": {
-      "success": "全域性設定儲存成功",
-      "error": "儲存全域性設定失敗",
+      "success": "全域設定儲存成功",
+      "error": "儲存全域設定失敗",
       "validationError": "驗證失敗"
     }
   },
   "cameraConfig": {
     "title": "攝影機配置",
-    "description": "配置單個攝影機的設定。這些設定會覆蓋全域性預設值。",
+    "description": "配置單個攝影機的設定。這些設定會覆蓋全域預設值。",
     "overriddenBadge": "已覆蓋",
-    "resetToGlobal": "重設為全域性設定",
+    "resetToGlobal": "重設為全域設定",
     "toast": {
       "success": "攝影機設定儲存成功",
       "error": "儲存攝影機設定失敗"
@@ -1725,10 +1666,10 @@
   "toast": {
     "success": "設定儲存成功",
     "applied": "設定應用成功",
-    "successRestartRequired": "設定儲存成功。請重啟 Frigate 以應用更改。",
+    "successRestartRequired": "設定儲存成功。請重新啟動 Frigate 以套用變更。",
     "error": "儲存設定失敗",
     "validationError": "驗證失敗：{{message}}",
-    "resetSuccess": "已重設為全域性預設值",
+    "resetSuccess": "已重設為全域預設值",
     "resetError": "重設設定失敗",
     "saveAllSuccess_other": "所有 {{count}} 個部分儲存成功。",
     "saveAllPartial_other": "已儲存 {{successCount}} / {{totalCount}} 個部分。{{failCount}} 個失敗。",
@@ -1754,8 +1695,8 @@
     "profileNamePlaceholder": "例如：佈防、外出、夜間模式",
     "friendlyNameLabel": "設定檔名稱",
     "profileIdLabel": "設定檔 ID",
-    "profileIdDescription": "用於配置和自動化的內部辨識符號",
-    "nameInvalid": "僅允許使用小寫字母、數字和下劃線",
+    "profileIdDescription": "用於配置和自動化的內部識別碼",
+    "nameInvalid": "僅允許使用小寫字母、數字和底線",
     "nameDuplicate": "已存在同名設定檔",
     "error": {
       "mustBeAtLeastTwoCharacters": "至少需要 2 個字元",
@@ -1769,38 +1710,38 @@
     "deleteSuccess": "設定檔「{{profile}}」已刪除",
     "createSuccess": "設定檔「{{profile}}」已建立",
     "removeOverride": "移除設定檔覆蓋",
-    "deleteSection": "刪除節點覆蓋",
+    "deleteSection": "刪除區段覆蓋",
     "deleteSectionConfirm": "是否要移除攝影機 {{camera}} 上針對設定檔 {{profile}} 的 {{section}} 覆蓋設定？",
     "deleteSectionSuccess": "已移除 {{profile}} 的 {{section}} 覆蓋設定",
     "enableSwitch": "開啟設定檔",
     "enabledDescription": "設定檔功能已啟用。請在下方建立新的設定檔，進入攝影機配置頁面進行修改並儲存，修改即可生效。",
     "disabledDescription": "設定檔功能可以讓你建立一組帶名稱的攝影機自訂引數（比如佈防、離家、夜間模式），並隨時切換啟用。"
   },
-  "unsavedChanges": "您有未儲存的更改",
+  "unsavedChanges": "您有未儲存的變更",
   "confirmReset": "確認重設",
   "resetToDefaultDescription": "這將把此部分的所有設定重設為預設值。此操作無法復原。",
-  "resetToGlobalDescription": "這將把此部分的設定重設為全域性預設值。此操作無法復原。",
+  "resetToGlobalDescription": "這將把此部分的設定重設為全域預設值。此操作無法復原。",
   "go2rtcStreams": {
-    "title": "go2rtc 影片流",
+    "title": "go2rtc 影片串流",
     "description": "管理用於攝影機轉流的 go2rtc 串流配置。每個影片串流包含一個名稱以及一個或多個來源 URL。",
-    "addStream": "新增影片流",
-    "addStreamDesc": "為新的影片流輸入一個名稱，該名稱將用於在攝影機配置中引用該影片流。",
+    "addStream": "新增影片串流",
+    "addStreamDesc": "為新的影片串流輸入一個名稱，該名稱將用於在攝影機配置中引用該影片串流。",
     "addUrl": "新增 URL",
-    "streamName": "影片流名稱",
+    "streamName": "影片串流名稱",
     "streamNamePlaceholder": "例如：front_door，此處只能使用英文",
     "streamUrlPlaceholder": "例如：rtsp://user:pass@192.168.1.100/stream",
-    "deleteStream": "刪除影片流",
+    "deleteStream": "刪除影片串流",
     "deleteStreamConfirm": "確定要刪除影片串流「{{streamName}}」嗎？引用該影片串流的攝影機可能會停止運作。",
-    "noStreams": "未配置任何 go2rtc 流。請新增一個影片流以開始使用。",
+    "noStreams": "未配置任何 go2rtc 流。請新增一個影片串流以開始使用。",
     "validation": {
-      "nameRequired": "影片流名稱為必填",
-      "nameDuplicate": "已存在同名的影片流",
-      "nameInvalid": "影片流名稱只能使用字母、數字、下劃線和連字元",
+      "nameRequired": "影片串流名稱為必填",
+      "nameDuplicate": "已存在同名的影片串流",
+      "nameInvalid": "串流名稱只能使用字母、數字、底線和連字號",
       "urlRequired": "至少需要填寫一個 URL"
     },
-    "renameStream": "重新命名影片流",
-    "renameStreamDesc": "為此影片流輸入新名稱。重新命名影片流可能會導致透過名稱引用它的攝影機或其他流無法正常工作。",
-    "newStreamName": "新影片流名稱",
+    "renameStream": "重新命名影片串流",
+    "renameStreamDesc": "為此影片串流輸入新名稱。重新命名影片串流可能會導致透過名稱引用它的攝影機或其他流無法正常工作。",
+    "newStreamName": "新影片串流名稱",
     "ffmpeg": {
       "useFfmpegModule": "使用相容模式（ffmpeg）",
       "video": "影片",
@@ -1832,11 +1773,6 @@
     "sourceNumber": "來源 {{index}}"
   },
   "birdseye": {
-    "trackingMode": {
-      "objects": "目標",
-      "motion": "動作",
-      "continuous": "持續"
-    },
     "cameraOrder": {
       "label": "攝影機排序",
       "description": "拖曳攝影機以設定它們在鳥瞰佈局中的順序。",
@@ -1847,8 +1783,8 @@
   },
   "retainMode": {
     "all": "全部",
-    "motion": "動作",
-    "active_objects": "活動目標"
+    "motion": "移動",
+    "active_objects": "活動物件"
   },
   "previewQuality": {
     "very_high": "極高",
@@ -1862,12 +1798,6 @@
       "browser": "瀏覽器",
       "12hour": "12 小時",
       "24hour": "24 小時"
-    },
-    "TimeOrDateStyle": {
-      "full": "完整",
-      "long": "長",
-      "medium": "中",
-      "short": "短"
     },
     "unitSystem": {
       "metric": "公制",
@@ -1895,8 +1825,8 @@
     "autotracking": {
       "zooming": {
         "disabled": "停用",
-        "absolute": "絕對",
-        "relative": "相對"
+        "absolute": "絕對位置",
+        "relative": "相對位置"
       }
     }
   },
@@ -1907,7 +1837,7 @@
   "configMessages": {
     "review": {
       "recordDisabled": "錄製已停用，不會生成審閱記錄項。",
-      "detectDisabled": "目標偵測已停用。審閱記錄需要依靠偵測到的目標來對警報和偵測事件進行分類。",
+      "detectDisabled": "物件偵測已停用。審閱記錄需要依靠偵測到的物件來對警報和偵測事件進行分類。",
       "allNonAlertDetections": "所有非警報類活動都將被記錄為偵測事件。",
       "genaiImageSourceRecordingsRecordDisabled": "影像來源雖然設定為「錄製」，但錄製功能已關閉。Frigate 將自動降級使用預覽圖片。"
     },
@@ -1919,45 +1849,38 @@
     },
     "detect": {
       "fpsGreaterThanFive": "不建議設定偵測幀率高於 5，數值設定過高可能引發效能問題，且不會帶來任何增益。",
-      "disabled": "目標偵測已停用。快照、重播項目以及人臉辨識、車牌辨識、生成式 AI 等增強功能都將無法使用。",
+      "disabled": "物件偵測已停用。快照、審閱項目以及人臉辨識、車牌辨識、生成式 AI 等增強功能都將無法使用。",
       "resolutionShouldBeMultipleOfFour": "為了獲得最佳效果，偵測的寬度與高度應為 4 的倍數。其他偶數值可能會在偵測串流中產生畫面殘影或輕微失真。",
       "aspectRatioMismatch": "您輸入的寬度與高度與目前的偵測解析度長寬比不符。這可能會導致影像被拉伸或失真。",
       "maxFramesSet": "設定最大影格數將會覆蓋預設行為，並停用靜態物件追蹤。極少有情況需要使用此功能，請謹慎使用。",
-      "squareResolution": "正方形的偵測解析度並不常見。偵測的寬度與高度應符合攝影機的長寬比（例如 16:9），而不是物件偵測模型的尺寸。不相符的長寬比可能會拉伸影像並降低偵測準確率度。",
-      "resolutionHigh": "此偵測解析度高於建議值，可能會增加資源消耗，但不會提高偵測準確度。對於大多數攝影機，建議使用 1080p 或更低的偵測解析度。",
+      "squareResolution": "正方形的偵測解析度並不常見。偵測的寬度與高度應符合攝影機的長寬比（例如 16:9），而不是物件偵測模型的尺寸。不相符的長寬比可能會拉伸影像並降低偵測準確度。",
+      "resolutionHigh": "此偵測解析度高於建議值，可能會增加資源消耗，但不會提高偵測準確度。對於大部分攝影機，建議使用 1080p 或更低的偵測解析度。",
       "globalResolutionMultipleCameras": "在設定多台攝影機的情況下設定了全域偵測解析度。除非所有攝影機都具有相同的解析度和長寬比，否則應針對每台攝影機單獨定義偵測寬度與高度，以符合各台攝影機的原生長寬比。"
     },
     "objects": {
-      "genaiNoDescriptionsProvider": "必須配置具備“描述”功能的生成式 AI 服務商，才能自動生成事件描述。"
+      "genaiNoDescriptionsProvider": "必須配置具備「描述」功能的生成式 AI 提供商，才能自動生成事件描述。"
     },
     "faceRecognition": {
       "globalDisabled": "必須開啟人臉辨識增強功能，此攝影機的人臉辨識相關功能才能正常使用。",
-      "personNotTracked": "人臉辨識需要偵測到「人」後才能運作。請在該攝影機的偵測目標設定中新增「人」。",
+      "personNotTracked": "人臉辨識需要偵測到「人」後才能運作。請在該攝影機的偵測物件設定中新增「人」。",
       "modelSizeLarge": "大型模型需要 GPU 或 NPU 才能執行正常。僅使用 CPU 的裝置請選用小型模型。"
     },
     "lpr": {
       "globalDisabled": "要讓該攝影機的車牌辨識功能正常使用，必須先開啟車牌辨識增強功能。",
-      "vehicleNotTracked": "車牌辨識需要先開啟對「汽車」或「機車」的目標追蹤。請在該攝影機的偵測目標中新增「汽車」或「機車」。",
+      "vehicleNotTracked": "車牌辨識需要先追蹤車輛。請在此攝影機的「物件」設定中啟用「car」（汽車）或其他車輛類型。",
       "modelSizeLarge": "大型模型針對多行格式車牌做了最佳化。小型模型的效能優於大型模型，而且只有小型模型才能支援中文車牌。除非你所在地區使用多行車牌格式，否則建議使用小型模型。"
     },
     "record": {
       "noRecordRole": "暫無任何影片串流已定義錄製功能，錄製功能將無法正常運作。"
     },
-    "birdseye": {
-      "objectsModeDetectDisabled": "鳥瞰圖已設定為「目標」模式，但此攝影機未開啟目標偵測。攝影機將不會顯示在鳥瞰畫面中。"
-    },
     "snapshots": {
-      "detectDisabled": "目標偵測已停用。快照是根據追蹤到的目標生成的，因此將不會建立快照。"
-    },
-    "detectors": {
-      "mixedTypes": "所有偵測器必須為同一型別。若要更換為其他型別，請先移除現有的偵測器。",
-      "mixedTypesSuggestion": "所有偵測器必須使用相同型別。請移除現有偵測器，或選擇 {{type}}。"
+      "detectDisabled": "物件偵測已停用。快照是根據追蹤到的物件生成的，因此將不會建立快照。"
     },
     "semanticSearch": {
-      "jinav2SmallModelSize": "Jina V2 的大型模型版本記憶體佔用與推理開銷較高，建議搭配獨立顯示卡使用大型模型。"
+      "jinav2SmallModelSize": "Jina V2 的小型模型版本記憶體佔用與推論開銷較高，建議搭配獨立顯示卡使用大型模型。"
     },
     "model": {
-      "optimizedFor320": "Frigate 已針對 320x320 模型進行最佳化，這是大多數環境下的最佳選擇。640x640 模型速度較慢，且僅在特定情境下有所幫助。",
+      "optimizedFor320": "Frigate 已針對 320x320 模型進行最佳化，這是大部分環境下的最佳選擇。640x640 模型速度較慢，且僅在特定情境下有所幫助。",
       "inputDimensionsNotDetectResolution": "模型輸入的寬度與高度是物件偵測模型的輸入尺寸，而不是攝影機的偵測解析度。它們應該與您使用的模型尺寸相符 — 通常是像 320x320 或 640x640 這樣的正方形尺寸。"
     },
     "ffmpeg": {

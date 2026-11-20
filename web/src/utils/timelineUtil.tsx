@@ -13,7 +13,6 @@ export function getChunkedTimeDay(timeRange: TimeRange): TimeRange[] {
   const startDay = new Date(timeRange.after * 1000);
   startDay.setUTCMinutes(0, 0, 0);
   let start = startDay.getTime() / 1000;
-  let end = 0;
 
   for (let i = 0; i < 24; i++) {
     startDay.setHours(startDay.getHours() + 1);
@@ -22,7 +21,7 @@ export function getChunkedTimeDay(timeRange: TimeRange): TimeRange[] {
       break;
     }
 
-    end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
+    const end = endOfHourOrCurrentTime(startDay.getTime() / 1000);
     data.push({
       after: start,
       before: end,

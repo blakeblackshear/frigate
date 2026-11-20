@@ -50,6 +50,7 @@ import { use24HourTime } from "@/hooks/use-date-utils";
 import { useIsAdmin } from "@/hooks/use-is-admin";
 import { CameraNameLabel } from "../camera/FriendlyNameLabel";
 import { LiveStreamMetadata } from "@/types/live";
+import CustomSuspensionDialog from "@/components/overlay/dialog/CustomSuspensionDialog";
 
 type LiveContextMenuProps = {
   className?: string;
@@ -179,6 +180,9 @@ export default function LiveContextMenu({
     ],
   );
 
+  const isForcedLowBandwidth =
+    groupStreamingSettings?.[camera]?.playerMode === "jsmpeg";
+
   // ui
 
   const audioControlsUsed = useRef(false);
@@ -193,8 +197,6 @@ export default function LiveContextMenu({
     } else {
       return MdVolumeUp;
     }
-    // only update when specific fields change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [volumeState, audioState]);
 
   const handleVolumeIconClick = (e: React.MouseEvent) => {
@@ -230,6 +232,8 @@ export default function LiveContextMenu({
     useNotificationSuspend(camera);
   const isSuspended =
     notificationSuspendUntil !== "0" || notificationState === "OFF";
+
+  const [customDialogOpen, setCustomDialogOpen] = useState(false);
 
   const handleSuspend = (duration: string) => {
     if (duration === "off") {
@@ -272,12 +276,14 @@ export default function LiveContextMenu({
             <div className="text-primary-variant smart-capitalize">
               <CameraNameLabel camera={camera} />
             </div>
-            {preferredLiveMode == "jsmpeg" && isRestreamed && (
-              <div className="flex flex-row items-center gap-1">
-                <IoIosWarning className="mr-1 size-4 text-danger" />
-                <p className="mr-2 text-xs">{t("lowBandwidthMode")}</p>
-              </div>
-            )}
+            {preferredLiveMode == "jsmpeg" &&
+              isRestreamed &&
+              !isForcedLowBandwidth && (
+                <div className="flex flex-row items-center gap-1">
+                  <IoIosWarning className="mr-1 size-4 text-danger" />
+                  <p className="mr-2 text-xs">{t("lowBandwidthMode")}</p>
+                </div>
+              )}
           </div>
           {preferredLiveMode != "jsmpeg" && isRestreamed && supportsAudio && (
             <>
@@ -376,21 +382,23 @@ export default function LiveContextMenu({
               </ContextMenuItem>
             </>
           )}
-          {preferredLiveMode == "jsmpeg" && isRestreamed && (
-            <>
-              <ContextMenuSeparator />
-              <ContextMenuItem disabled={!isEnabled}>
-                <div
-                  className="flex w-full cursor-pointer items-center justify-start gap-2"
-                  onClick={isEnabled ? resetPreferredLiveMode : undefined}
-                >
-                  <div className="text-primary">
-                    {t("button.reset", { ns: "common" })}
+          {preferredLiveMode == "jsmpeg" &&
+            isRestreamed &&
+            !isForcedLowBandwidth && (
+              <>
+                <ContextMenuSeparator />
+                <ContextMenuItem disabled={!isEnabled}>
+                  <div
+                    className="flex w-full cursor-pointer items-center justify-start gap-2"
+                    onClick={isEnabled ? resetPreferredLiveMode : undefined}
+                  >
+                    <div className="text-primary">
+                      {t("button.reset", { ns: "common" })}
+                    </div>
                   </div>
-                </div>
-              </ContextMenuItem>
-            </>
-          )}
+                </ContextMenuItem>
+              </>
+            )}
           {notificationsEnabledInConfig && isEnabled && (
             <>
               <ContextMenuSeparator />
@@ -531,6 +539,16 @@ export default function LiveContextMenu({
                               disabled={!isEnabled}
                               onClick={
                                 isEnabled
+                                  ? () => setCustomDialogOpen(true)
+                                  : undefined
+                              }
+                            >
+                              {t("time.custom", { ns: "common" })}
+                            </ContextMenuItem>
+                            <ContextMenuItem
+                              disabled={!isEnabled}
+                              onClick={
+                                isEnabled
                                   ? () => handleSuspend("off")
                                   : undefined
                               }
@@ -550,15 +568,23 @@ export default function LiveContextMenu({
       </ContextMenu>
 
       <Dialog open={showSettings} onOpenChange={setShowSettings}>
-        <CameraStreamingDialog
-          camera={camera}
-          groupStreamingSettings={groupStreamingSettings}
-          setGroupStreamingSettings={setGroupStreamingSettings}
-          setIsDialogOpen={setShowSettings}
-          onSave={onSave}
-          streamMetadata={streamMetadata}
-        />
+        {showSettings && (
+          <CameraStreamingDialog
+            camera={camera}
+            groupStreamingSettings={groupStreamingSettings}
+            setGroupStreamingSettings={setGroupStreamingSettings}
+            setIsDialogOpen={setShowSettings}
+            onSave={onSave}
+            streamMetadata={streamMetadata}
+          />
+        )}
       </Dialog>
+
+      <CustomSuspensionDialog
+        open={customDialogOpen}
+        onOpenChange={setCustomDialogOpen}
+        onConfirm={(minutes) => sendNotificationSuspend(minutes)}
+      />
     </div>
   );
 }

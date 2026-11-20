@@ -57,10 +57,14 @@
       "newCaseNamePlaceholder": "Nyt sagsnavn",
       "newCaseDescriptionPlaceholder": "Sagsbeskrivelse",
       "label": "Sag",
-      "nonAdminHelp": "En ny sag oprettes til disse eksporter.",
-      "placeholder": "Vælg en sag"
+      "placeholder": "Vælg en sag",
+      "nameRequired": "Sagsnavn er påkrævet"
     },
     "select": "Vælg",
-    "export": "Eksporter"
+    "export": "Eksporter",
+    "selectOrExport": "Vælg eller eksporter",
+    "multiCamera": {
+      "selectFromTimeline": "Vælg fra tidslinje"
+    }
   }
 }

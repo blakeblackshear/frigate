@@ -1,3 +1,4 @@
+import ActivityIndicator from "@/components/indicators/activity-indicator";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -7,6 +8,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import {
+  convertHeicToJpeg,
+  HEIC_EXTENSIONS,
+  isHeicFile,
+} from "@/utils/heicUtil";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -26,11 +32,25 @@ export default function ImageEntry({
   onSave,
   children,
   maxSize = 20 * 1024 * 1024, // 20MB default
-  accept = { "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp"] },
+  accept = {
+    "image/*": [".jpeg", ".jpg", ".png", ".gif", ".webp", ...HEIC_EXTENSIONS],
+  },
 }: ImageEntryProps) {
   const { t } = useTranslation(["views/faceLibrary"]);
   const [preview, setPreview] = useState<string | null>(null);
+  const [converting, setConverting] = useState(false);
   const dropzoneRef = useRef<HTMLDivElement>(null);
+  // Bumped on every selection and clear, so a HEIC conversion that finishes
+  // after the selection changed is discarded instead of applied
+  const selectionId = useRef(0);
+
+  // Discard conversions that finish after the component unmounts
+  useEffect(() => {
+    const id = selectionId;
+    return () => {
+      id.current += 1;
+    };
+  }, []);
 
   // Auto focus the dropzone
   useEffect(() => {
@@ -60,18 +80,48 @@ export default function ImageEntry({
     resolver: zodResolver(formSchema),
   });
 
+  const selectFile = useCallback(
+    async (file: File) => {
+      const id = ++selectionId.current;
+      let selected = file;
+
+      if (isHeicFile(file)) {
+        setConverting(true);
+        const converted = await convertHeicToJpeg(file).catch(() => null);
+
+        // the selection was cleared or replaced while converting
+        if (id !== selectionId.current) {
+          return;
+        }
+
+        setConverting(false);
+
+        if (!converted) {
+          form.setError("file", {
+            message: t("imageEntry.validation.heicConversionFailed"),
+          });
+          return;
+        }
+
+        selected = converted;
+      }
+
+      form.setValue("file", selected, { shouldValidate: true });
+
+      // Create preview
+      const objectUrl = URL.createObjectURL(selected);
+      setPreview(objectUrl);
+    },
+    [form, t],
+  );
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0];
-        form.setValue("file", file, { shouldValidate: true });
-
-        // Create preview
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
+        selectFile(acceptedFiles[0]);
       }
     },
-    [form],
+    [selectFile],
   );
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } =
@@ -80,11 +130,17 @@ export default function ImageEntry({
       maxSize,
       accept,
       multiple: false,
+      disabled: converting,
     });
 
   const handlePaste = useCallback(
     (event: React.ClipboardEvent<HTMLDivElement>) => {
       event.preventDefault();
+
+      if (converting) {
+        return;
+      }
+
       const clipboardItems = Array.from(event.clipboardData.items);
       for (const item of clipboardItems) {
         if (item.type.startsWith("image/")) {
@@ -95,27 +151,30 @@ export default function ImageEntry({
             if (accept["image/*"].includes(extension)) {
               const fileName = blob.name || `pasted-image.${mimeType}`;
               const file = new File([blob], fileName, { type: blob.type });
-              form.setValue("file", file, { shouldValidate: true });
-              const objectUrl = URL.createObjectURL(file);
-              setPreview(objectUrl);
+              selectFile(file);
               return; // Take the first valid image
             }
           }
         }
       }
     },
-    [form, maxSize, accept],
+    [converting, maxSize, accept, selectFile],
   );
 
   const onSubmit = useCallback(
     (data: z.infer<typeof formSchema>) => {
-      if (!data.file) return;
+      // the form still holds the previous image until a replacement
+      // finishes converting, so saving now would upload the wrong one
+      if (!data.file || converting) return;
       onSave(data.file);
     },
-    [onSave],
+    [converting, onSave],
   );
 
   const clearSelection = () => {
+    // drop any running conversion so it can't restore the selection
+    selectionId.current += 1;
+    setConverting(false);
     form.reset();
     setPreview(null);
   };
@@ -142,21 +201,34 @@ export default function ImageEntry({
                         "flex h-40 flex-col items-center justify-center rounded-lg border-2 border-dashed p-6 transition-colors",
                         isDragActive && "border-primary bg-primary/5",
                         isDragReject && "border-destructive bg-destructive/5",
-                        "cursor-pointer hover:border-primary hover:bg-primary/5",
+                        converting
+                          ? "cursor-wait"
+                          : "cursor-pointer hover:border-primary hover:bg-primary/5",
                       )}
                     >
                       <input {...getInputProps()} />
-                      <LuUpload className="mb-2 h-10 w-10 text-muted-foreground" />
-                      <p className="text-center text-sm text-muted-foreground">
-                        {isDragActive
-                          ? t("imageEntry.dropActive")
-                          : t("imageEntry.dropInstructions")}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {t("imageEntry.maxSize", {
-                          size: Math.round(maxSize / (1024 * 1024)),
-                        })}
-                      </p>
+                      {converting ? (
+                        <>
+                          <ActivityIndicator className="mb-2" />
+                          <p className="text-center text-sm text-muted-foreground">
+                            {t("imageEntry.converting")}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <LuUpload className="mb-2 h-10 w-10 text-muted-foreground" />
+                          <p className="text-center text-sm text-muted-foreground">
+                            {isDragActive
+                              ? t("imageEntry.dropActive")
+                              : t("imageEntry.dropInstructions")}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t("imageEntry.maxSize", {
+                              size: Math.round(maxSize / (1024 * 1024)),
+                            })}
+                          </p>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="relative h-40 w-full">
@@ -165,6 +237,14 @@ export default function ImageEntry({
                         alt="Preview"
                         className="h-full w-full rounded-lg border object-contain"
                       />
+                      {converting && (
+                        <div className="absolute inset-0 flex cursor-wait flex-col items-center justify-center rounded-lg bg-background/80">
+                          <ActivityIndicator className="mb-2" />
+                          <p className="text-center text-sm text-muted-foreground">
+                            {t("imageEntry.converting")}
+                          </p>
+                        </div>
+                      )}
                       <Button
                         type="button"
                         variant="destructive"

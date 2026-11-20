@@ -193,7 +193,6 @@
     "modelNotReady": "Model is niet klaar voor training",
     "noChanges": "Geen wijzigingen in de dataset sinds de laatste training."
   },
-  "none": "Geen overeenkomst",
   "reclassifyImageAs": "Afbeelding opnieuw classificeren als:",
   "reclassifyImage": "Afbeelding opnieuw classificeren"
 }

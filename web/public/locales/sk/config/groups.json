@@ -1,1 +1,26 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Globálna detekcia",
+            "sensitivity": "Globálna citlivosť"
+        },
+        "cameras": {
+            "detection": "Detekcia",
+            "sensitivity": "Citlivosť"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globálny vzhľad"
+        },
+        "cameras": {
+            "appearance": "Vzhľad"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Globálna citlivosť",
+            "algorithm": "Globálny algoritmus"
+        }
+    }
+}

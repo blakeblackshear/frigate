@@ -43,6 +43,7 @@ import { cn } from "@/lib/utils";
 import {
   AudioState,
   LivePlayerError,
+  LivePlayerMode,
   StatsState,
   VolumeState,
 } from "@/types/live";
@@ -243,7 +244,7 @@ export default function LiveDashboardView({
 
       try {
         if (node) visibleCameraObserver.current.observe(node);
-      } catch (e) {
+      } catch {
         // no op
       }
     },
@@ -271,6 +272,16 @@ export default function LiveDashboardView({
     return streams;
   }, [cameras, currentGroupStreamingSettings]);
 
+  // Per-camera streaming-technology choice from the camera group settings.
+  const preferredModes = useMemo(() => {
+    const modes: { [cameraName: string]: LivePlayerMode | undefined } = {};
+    cameras.forEach((camera) => {
+      modes[camera.name] =
+        currentGroupStreamingSettings?.[camera.name]?.playerMode;
+    });
+    return modes;
+  }, [cameras, currentGroupStreamingSettings]);
+
   const {
     preferredLiveModes,
     setPreferredLiveModes,
@@ -278,7 +289,8 @@ export default function LiveDashboardView({
     isRestreamedStates,
     supportsAudioOutputStates,
     streamMetadata,
-  } = useCameraLiveMode(cameras, windowVisible, activeStreams);
+    webRTCUsableStates,
+  } = useCameraLiveMode(cameras, windowVisible, activeStreams, preferredModes);
 
   const birdseyeConfig = useMemo(() => config?.birdseye, [config]);
 
@@ -286,7 +298,10 @@ export default function LiveDashboardView({
     (cameraName: string, error: LivePlayerError) => {
       setPreferredLiveModes((prevModes) => {
         const newModes = { ...prevModes };
-        if (error === "mse-decode") {
+        if (
+          (error === "mse-decode" || error === "mse-codec") &&
+          webRTCUsableStates[cameraName]
+        ) {
           newModes[cameraName] = "webrtc";
         } else {
           newModes[cameraName] = "jsmpeg";
@@ -294,7 +309,7 @@ export default function LiveDashboardView({
         return newModes;
       });
     },
-    [setPreferredLiveModes],
+    [setPreferredLiveModes, webRTCUsableStates],
   );
 
   // audio states
@@ -311,25 +326,19 @@ export default function LiveDashboardView({
   };
 
   useEffect(() => {
-    if (!allGroupsStreamingSettings) {
-      return;
-    }
-
     const initialAudioStates: AudioState = {};
     const initialVolumeStates: VolumeState = {};
 
-    Object.entries(allGroupsStreamingSettings).forEach(([_, groupSettings]) => {
-      if (groupSettings) {
-        Object.entries(groupSettings).forEach(([camera, cameraSettings]) => {
-          initialAudioStates[camera] = cameraSettings.playAudio ?? false;
-          initialVolumeStates[camera] = cameraSettings.volume ?? 1;
-        });
-      }
-    });
+    Object.entries(currentGroupStreamingSettings ?? {}).forEach(
+      ([camera, cameraSettings]) => {
+        initialAudioStates[camera] = cameraSettings.playAudio ?? false;
+        initialVolumeStates[camera] = cameraSettings.volume ?? 1;
+      },
+    );
 
     setAudioStates(initialAudioStates);
     setVolumeStates(initialVolumeStates);
-  }, [allGroupsStreamingSettings]);
+  }, [currentGroupStreamingSettings, cameraGroup]);
 
   const toggleAudio = (cameraName: string): void => {
     setAudioStates((prev) => ({
@@ -398,13 +407,13 @@ export default function LiveDashboardView({
 
   return (
     <div
-      className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 md:p-2"
+      className="scrollbar-container size-full select-none overflow-y-auto px-1 pt-2 [scrollbar-gutter:stable] md:p-2"
       ref={containerRef}
     >
       {isMobile && (
         <div className="relative flex h-11 items-center justify-between">
           <Logo className="absolute inset-x-1/2 h-8 -translate-x-1/2" />
-          <div className="w-[45%]">
+          <div className="w-[calc(50%-1rem)]">
             <CameraGroupSelector />
           </div>
           {(!cameraGroup || cameraGroup == "default" || isMobileOnly) && (
@@ -597,7 +606,7 @@ export default function LiveDashboardView({
                       <LivePlayer
                         cameraRef={cameraRef}
                         key={camera.name}
-                        className={`${grow} rounded-lg bg-black md:rounded-2xl`}
+                        className={`${grow} bg-black`}
                         windowVisible={
                           windowVisible && visibleCameras.includes(camera.name)
                         }
@@ -620,7 +629,7 @@ export default function LiveDashboardView({
                           resetPreferredLiveMode(camera.name)
                         }
                         playAudio={audioStates[camera.name] ?? false}
-                        volume={volumeStates[camera.name]}
+                        volume={volumeStates[camera.name] ?? 1}
                       />
                     </LiveContextMenu>
                   );
@@ -673,7 +682,7 @@ export default function LiveDashboardView({
               fullscreen={fullscreen}
               toggleFullscreen={toggleFullscreen}
               preferredLiveModes={preferredLiveModes}
-              setPreferredLiveModes={setPreferredLiveModes}
+              handleError={handleError}
               resetPreferredLiveMode={resetPreferredLiveMode}
               isRestreamedStates={isRestreamedStates}
               supportsAudioOutputStates={supportsAudioOutputStates}

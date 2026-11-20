@@ -1,0 +1,18 @@
+{
+  "documentTitle": "Editor konfiguracije - Frigate",
+  "configEditor": "Editor konfiguracije",
+  "safeConfigEditor": "Editor konfiguracije (Bezbedan režim)",
+  "safeModeDescription": "Frigate je u bezbednom režimu zbog greške u validaciji konfiguracije.",
+  "copyConfig": "Kopiraj konfiguraciju",
+  "saveAndRestart": "Sačuvaj i ponovo pokreni",
+  "saveOnly": "Samo sačuvaj",
+  "confirm": "Izaći bez čuvanja?",
+  "toast": {
+    "success": {
+      "copyToClipboard": "Konfiguracija je kopirana u privremenu memoriju."
+    },
+    "error": {
+      "savingError": "Greška pri čuvanju konfiguracije"
+    }
+  }
+}

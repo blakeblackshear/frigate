@@ -26,10 +26,6 @@ export interface Event {
     path_data: [number[], number][];
     // Allow arbitrary keys for attributes (e.g., model_name, model_name_score)
     [key: string]:
-      | number
-      | number[]
-      | string
-      | [number[], number][]
-      | undefined;
+      number | number[] | string | [number[], number][] | undefined;
   };
 }

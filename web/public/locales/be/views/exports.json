@@ -63,7 +63,8 @@
     "copying": "Капіяванне",
     "encoding": "Кадаванне",
     "encodingRetry": "Кадаванне (паўтор)",
-    "finalizing": "Завяршэнне"
+    "finalizing": "Завяршэнне",
+    "merging": "Аб'яднанне"
   },
   "caseView": {
     "noDescription": "Без апісання",

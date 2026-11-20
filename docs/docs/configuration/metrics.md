@@ -69,7 +69,7 @@ These gauges report the operating system's figures for the whole filesystem (the
 
 ### Event Metrics
 
-- `frigate_camera_events{camera="", label=""}` - Count of camera events since exporter started
+- `frigate_camera_events{camera="", label=""}` - Current number of events stored in the database for each camera and label
 
 ## Configuring Prometheus
 
@@ -101,8 +101,8 @@ rate(frigate_detection_fps{camera_name="front_door"}[5m])
 # Storage usage percentage
 (frigate_storage_used_bytes / frigate_storage_total_bytes) * 100
 
-# Event count by camera in last hour
-increase(frigate_camera_events[1h])
+# Number of events currently stored in the database by camera
+sum by (camera) (frigate_camera_events)
 ```
 
 ## Grafana Dashboard
@@ -121,8 +121,7 @@ A sample Grafana dashboard JSON will be provided in a future update.
 
 The metrics exposed by Frigate use the following Prometheus metric types:
 
-- **Counter**: Cumulative values that only increase (e.g., `frigate_camera_events`)
-- **Gauge**: Values that can go up and down (e.g., `frigate_cpu_usage_percent`)
+- **Gauge**: Values that can go up and down (e.g., `frigate_cpu_usage_percent`, `frigate_camera_events`)
 - **Info**: Key-value pairs for metadata (e.g., `frigate_storage_mount_type`)
 
 For more information about Prometheus metric types, see the [Prometheus documentation](https://prometheus.io/docs/concepts/metric_types/).

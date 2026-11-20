@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from typing import Any
 
 from frigate.comms.ws import (
+    _WS_BLOCKED_TOPICS,
     WebSocketClient,
     _classify_outbound,
     _collect_zone_names,
@@ -105,6 +106,12 @@ class TestClassifyOutbound(unittest.TestCase):
 
     def test_birdseye_layout_is_unrestricted_only(self):
         self.assertEqual(self._classify("birdseye_layout"), ("unrestricted_only", None))
+
+    def test_notices_is_admin_only(self):
+        self.assertEqual(self._classify("notices"), ("admin_only", None))
+
+    def test_update_notice_is_blocked_inbound(self):
+        self.assertIn("update_notice", _WS_BLOCKED_TOPICS)
 
     # --- Camera-prefixed ---
 
@@ -294,6 +301,19 @@ class TestMaterializeForWs(unittest.TestCase):
         )
         full = json.dumps({"topic": topic, "payload": payload})
         return _materialize_for_ws(ws, topic, full, scope, parsed, self.config)
+
+    def test_admin_only_topic_reaches_admin_not_viewer(self):
+        admin = SimpleNamespace(environ={"HTTP_REMOTE_ROLE": "admin"})
+        viewer = SimpleNamespace(environ={"HTTP_REMOTE_ROLE": "viewer"})
+        scope = ("admin_only", None)
+
+        self.assertEqual(
+            _materialize_for_ws(admin, "notices", "msg", scope, None, self.config),
+            "msg",
+        )
+        self.assertIsNone(
+            _materialize_for_ws(viewer, "notices", "msg", scope, None, self.config)
+        )
 
     # --- Globals: every authenticated client sees them ---
 

@@ -45,8 +45,7 @@ export function createRecordingReviewUrl(
   pathname: string,
   state: RecordingReviewLinkState,
 ): string {
-  const url = new URL(baseUrl);
-  url.pathname = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const url = new URL(pathname.replace(/^\//, ""), baseUrl);
   url.searchParams.set(
     RECORDING_REVIEW_LINK_PARAM,
     `${state.camera}_${Math.floor(state.timestamp)}`,

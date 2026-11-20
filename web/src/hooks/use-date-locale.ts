@@ -42,6 +42,8 @@ const localeMap: Record<string, () => Promise<Locale>> = {
   ca: () => import("date-fns/locale/ca").then((module) => module.ca),
   hr: () => import("date-fns/locale/hr").then((module) => module.hr),
   bs: () => import("date-fns/locale/bs").then((module) => module.bs),
+  "sr-Latn": () =>
+    import("date-fns/locale/sr-Latn").then((module) => module.srLatn),
   sl: () => import("date-fns/locale/sl").then((module) => module.sl),
 };
 
@@ -61,7 +63,7 @@ export function useDateLocale(): Locale {
         try {
           const loadedLocale = await localeLoader();
           setLocale(loadedLocale);
-        } catch (error) {
+        } catch {
           setLocale(enUS);
         }
       } else {

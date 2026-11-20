@@ -1,9 +1,10 @@
 import { useTheme } from "@/context/theme-provider";
 import { useDateLocale } from "@/hooks/use-date-locale";
 import { FrigateConfig } from "@/types/frigateConfig";
-import { Threshold } from "@/types/graph";
+import { ApexAxisChartSeries, Threshold } from "@/types/graph";
 import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import ApexCharts from "apexcharts";
 import Chart from "react-apexcharts";
 import { isMobileOnly } from "react-device-detect";
 import { useTranslation } from "react-i18next";

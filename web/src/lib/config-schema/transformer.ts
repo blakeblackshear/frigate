@@ -131,8 +131,7 @@ function normalizeNullableSchema(schema: RJSFSchema): RJSFSchema {
       anyOf.length === stringBranches.length + (hasNull ? 1 : 0)
     ) {
       const enumValues = (enumBranch as Record<string, unknown>).enum as
-        | unknown[]
-        | undefined;
+        unknown[] | undefined;
       const { anyOf: _anyOf, oneOf: _oneOf, ...rest } = schemaObj;
       return {
         ...rest,
@@ -736,6 +735,13 @@ export function applySchemaDefaults(
   schema: RJSFSchema,
   formData: Record<string, unknown> = {},
 ): Record<string, unknown> {
+  // An array section (models) carries its defaults on the item schema, not
+  // here. Spreading an array below would turn it into an object keyed by
+  // index, so hand it back untouched.
+  if (Array.isArray(formData)) {
+    return formData as unknown as Record<string, unknown>;
+  }
+
   const result = { ...formData };
   const schemaObj = schema as Record<string, unknown>;
 
@@ -744,8 +750,7 @@ export function applySchemaDefaults(
   let properties = schemaObj.properties;
   if (!isSchemaObject(properties)) {
     const branches = (schemaObj.anyOf ?? schemaObj.oneOf) as
-      | unknown[]
-      | undefined;
+      unknown[] | undefined;
     if (Array.isArray(branches)) {
       const objectBranch = branches.find(
         (s) =>

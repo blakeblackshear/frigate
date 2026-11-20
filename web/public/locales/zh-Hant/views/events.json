@@ -7,11 +7,11 @@
   },
   "empty": {
     "motion": "未找到移動資料",
-    "alert": "沒有警告需要審核",
-    "detection": "沒有偵測到的內容需要審核",
+    "alert": "沒有警告需要審閱",
+    "detection": "沒有偵測到的內容需要審閱",
     "recordingsDisabled": {
       "title": "必須啟用錄製功能",
-      "description": "僅當該攝影機啟用錄製功能時，才能為該攝影機建立審查項目。"
+      "description": "僅當該攝影機啟用錄製功能時，才能為該攝影機建立審閱項目。"
     }
   },
   "timeline": {
@@ -23,8 +23,8 @@
     "aria": "選擇事件",
     "noFoundForTimePeriod": "此時間段內沒有找到事件。"
   },
-  "documentTitle": "審核 - Frigate",
-  "allCameras": "所有鏡頭",
+  "documentTitle": "審閱 - Frigate",
+  "allCameras": "所有攝影機",
   "recordings": {
     "documentTitle": "錄影 - Frigate",
     "invalidSharedLink": "由於解析錯誤，無法開啟帶時間戳的錄製連結。",
@@ -33,18 +33,16 @@
   "calendarFilter": {
     "last24Hours": "過去 24 小時"
   },
-  "markAsReviewed": "標示為已審核",
-  "markTheseItemsAsReviewed": "將這些內容標記為已審核",
+  "markAsReviewed": "標示為已審閱",
+  "markTheseItemsAsReviewed": "將這些內容標記為已審閱",
   "newReviewItems": {
-    "label": "查看新的審核項目",
-    "button": "有新的審核項目"
+    "label": "查看新的審閱項目",
+    "button": "有新的審閱項目"
   },
   "selected_one": "已選擇 {{count}} 個",
   "selected_other": "已選擇 {{count}} 個",
-  "camera": "鏡頭",
+  "camera": "攝影機",
   "detected": "已偵測",
-  "suspiciousActivity": "可疑的活動",
-  "threateningActivity": "有威脅性的活動",
   "zoomIn": "放大",
   "zoomOut": "縮小",
   "detail": {
@@ -65,21 +63,21 @@
     "clickToSeek": "點擊從此時間點尋找"
   },
   "normalActivity": "正常",
-  "needsReview": "待審核",
+  "needsReview": "待審閱",
   "securityConcern": "安全隱憂",
   "select_all": "全選",
   "motionSearch": {
-    "menuItem": "畫面變動搜尋",
+    "menuItem": "移動搜尋",
     "openMenu": "攝影機選項"
   },
   "motionPreviews": {
-    "menuItem": "檢視畫面變動預覽",
-    "title": "畫面變動預覽：{{camera}}",
-    "mobileSettingsTitle": "畫面變動預覽設定",
-    "mobileSettingsDesc": "調整播放速度和變暗程度，並選擇日期以僅檢視畫面變動的片段。",
+    "menuItem": "檢視移動預覽",
+    "title": "移動預覽：{{camera}}",
+    "mobileSettingsTitle": "移動預覽設定",
+    "mobileSettingsDesc": "調整播放速度和變暗程度，並選擇日期以僅檢視移動的片段。",
     "dim": "變暗",
     "dimAria": "調整變暗強度",
-    "dimDesc": "增加變暗程度可以提高畫面變動區域的可見性。",
+    "dimDesc": "增加變暗程度可以提高移動區域的可見度。",
     "speed": "速度",
     "speedAria": "選擇預覽播放速度",
     "speedDesc": "選擇預覽片段的播放速度。",
@@ -88,7 +86,7 @@
     "noPreview": "預覽不可用",
     "seekAria": "將 {{camera}} 播放器定位到 {{time}}",
     "filter": "篩選",
-    "filterDesc": "選擇區域以僅顯示在這些區域中有畫面變動的片段。",
+    "filterDesc": "選擇區域以僅顯示在這些區域中有移動的片段。",
     "filterClear": "清除",
     "crop": "裁剪過濾",
     "cropAria": "切換裁切預覽至已過濾區域",

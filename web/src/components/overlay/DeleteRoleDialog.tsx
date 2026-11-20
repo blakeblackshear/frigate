@@ -32,7 +32,7 @@ export default function DeleteRoleDialog({
     setIsLoading(true);
     try {
       await onDelete();
-    } catch (error) {
+    } catch {
       // Error handled in parent
     } finally {
       setIsLoading(false);

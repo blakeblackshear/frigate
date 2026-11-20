@@ -2,7 +2,6 @@
   "documentTitle": "Експорта - Frigate",
   "search": "Пошук",
   "noExports": "Не знайдено експортованих файлів",
-  "deleteExport": "Видалити експортування",
   "deleteExport.desc": "Ви справді бажаєте вилучити {{exportName}}?",
   "editExport": {
     "title": "Перейменувати експорт",

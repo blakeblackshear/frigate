@@ -631,7 +631,7 @@ export function SpeedFilterContent({
             const value = e.target.value;
 
             if (value) {
-              setSpeedRange(parseInt(value), maxSpeed ?? 1.0);
+              setSpeedRange(parseInt(value), maxSpeed ?? 150);
             }
           }}
         />

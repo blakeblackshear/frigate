@@ -16,14 +16,6 @@
       "title": "רוחב-פס:",
       "short": "רוחב-פס"
     },
-    "latency": {
-      "title": "השהיה:",
-      "value": "{{seconds}} שניות",
-      "short": {
-        "title": "השהיה",
-        "value": "{{seconds}} שניה"
-      }
-    },
     "decodedFrames": "פריימים מפוענחים:",
     "droppedFrameRate": "קצב פריימים מופחת:",
     "totalFrames": "סך כל המסגרות:"
@@ -46,6 +38,5 @@
   "streamOffline": {
     "title": "זרם מצלמה לא זמין",
     "desc": "לא התקבלו פריימים בזרם <code>detect</code> של {{cameraName}}, בדקו את יומני השגיאות"
-  },
-  "cameraDisabled": "המצלמה מושבתת"
+  }
 }

@@ -1,1 +1,88 @@
-{}
+{
+    "documentTitle": "Sohbet - Frigate",
+    "title": "Frigate Sohbet",
+    "subtitle": "Kamera yönetimi ve içgörüler için yapay zeka yardımcınız",
+    "placeholder": "İstediğinizi sorun...",
+    "error": "Bir hata oluştu. Lütfen yeniden deneyin.",
+    "processing": "İşleniyor...",
+    "toolsUsed": "Kullanımda: {{tools}}",
+    "showTools": "Araçları göster ({{count}})",
+    "hideTools": "Araçları gizle",
+    "call": "Ara",
+    "result": "Sonuç",
+    "arguments": "Parametreler:",
+    "response": "Yanıt:",
+    "attachment_chip_label": "{{label}} ({{camera}})",
+    "attachment_chip_remove": "İlişiği kaldır",
+    "open_in_explore": "Keşfet'te Aç",
+    "attach_event_aria": "Olayı ({{eventId}}) iliştir",
+    "attachment_picker_paste_label": "Veya olay kimliğini yapıştır",
+    "attachment_picker_attach": "İliştir",
+    "attachment_picker_placeholder": "Bir olay iliştir",
+    "quick_reply_find_similar": "Benzer gözlemleri bul",
+    "quick_reply_tell_me_more": "Bunu biraz daha anlat",
+    "quick_reply_when_else": "Başka ne zaman görülmüş?",
+    "quick_reply_find_similar_text": "Buna benzer gözlemleri bul.",
+    "quick_reply_tell_me_more_text": "Bunu biraz daha anlat.",
+    "quick_reply_when_else_text": "Bu başka ne zaman görülmüş?",
+    "anchor": "Referans",
+    "similarity_score": "Benzerlik",
+    "no_similar_objects_found": "Başka benzer nesne bulunamadı.",
+    "semantic_search_required": "Benzer nesnelerin bulunabilmesi için anlamsal arama etkinleştirilmelidir.",
+    "send": "Gönder",
+    "suggested_requests": "Sormayı deneyin:",
+    "starting_requests": {
+        "show_recent_events": "Son olayları göster",
+        "show_camera_status": "Kamera durumunu göster",
+        "recap": "Ben yokken ne oldu?",
+        "watch_camera": "Kameradaki faaliyeti izle"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Bana son bir saatteki son olayları göster",
+        "show_camera_status": "Kameralarımın şu anki durumu ne?",
+        "recap": "Ben yokken ne oldu?",
+        "watch_camera": "Ön kapıyı izle ve biri gelirse haber ver"
+    },
+    "new_chat": "Yeni sohbet",
+    "settings": {
+        "title": "Sohbet ayarları",
+        "show_stats": {
+            "title": "İstatistikleri göster",
+            "desc": "Sohbet yanıtları için üretim miktarını ve bağlam büyüklüğünü göster.",
+            "while_generating": "Üretim esnasında",
+            "always": "Her zaman"
+        },
+        "auto_scroll": {
+            "title": "Otomatik kaydır",
+            "desc": "Yeni mesajlar geldikçe takip et."
+        },
+        "always_allow": {
+            "title": "Her zaman izin verilen eylemler",
+            "desc": "Asistanın sorup izin almadan çalıştırabileceği eylemler.",
+            "none": "Hiçbiri",
+            "reset": "Sıfırla"
+        }
+    },
+    "stats": {
+        "context": "{{tokens}} jeton (token)",
+        "tokens_per_second": "{{rate}} j/sn"
+    },
+    "reasoning": {
+        "active": "Akıl yürütüyor…",
+        "show": "Akıl yürütmeyi göster",
+        "hide": "Akıl yürütmeyi gizle"
+    },
+    "thinking": {
+        "toggle": "Düşünmeyi aç/kapat"
+    },
+    "approval": {
+        "title": "{{tool}} onaylansın mı?",
+        "desc": "Bu eylem Frigate'te bir şeyi değiştiriyor. Onaylamadan önce ayrıntıları inceleyin.",
+        "approve": "Onayla",
+        "always_allow": "Her zaman izin ver",
+        "reject": "Reddet",
+        "approved": "Onaylandı",
+        "rejected": "Reddedildi",
+        "placeholder": "Devam etmek için bekleyen eylemi onaylayın veya reddedin"
+    }
+}

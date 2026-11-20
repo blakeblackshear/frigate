@@ -5,7 +5,6 @@
       "short": "Etiquetas",
       "title": "Todas as etiquetas"
     },
-    "count": "{{count}} etiquetas",
     "count_one": "{{count}} Etiqueta",
     "count_other": "{{count}} Etiquetas"
   },

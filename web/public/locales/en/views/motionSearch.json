@@ -56,6 +56,8 @@
     "noROI": "Please draw a region of interest",
     "noTimeRange": "Please select a time range",
     "invalidTimeRange": "End time must be after start time",
+    "alreadyRunning": "You already have a motion search running. Wait for it to finish or cancel it.",
+    "tooManySearches": "Too many motion searches are running. Try again when one finishes.",
     "searchFailed": "Search failed: {{message}}",
     "polygonTooSmall": "Polygon must have at least 3 points",
     "unknown": "Unknown error"

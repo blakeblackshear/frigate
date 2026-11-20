@@ -29,6 +29,11 @@ class StatsConfig(FrigateBaseModel):
 
 
 class TelemetryConfig(FrigateBaseModel):
+    analytics: bool = Field(
+        default=False,
+        title="Share anonymous analytics",
+        description="Send one anonymous usage report a day to help the Frigate maintainers decide what to support. Nothing is sent until this is on.",
+    )
     network_interfaces: list[str] = Field(
         default=[],
         title="Network interfaces",

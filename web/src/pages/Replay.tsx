@@ -49,16 +49,9 @@ import Logo from "@/components/Logo";
 import { Separator } from "@/components/ui/separator";
 import { useDocDomain } from "@/hooks/use-doc-domain";
 import DebugDrawingLayer from "@/components/overlay/DebugDrawingLayer";
+import { getPrimaryModel } from "@/utils/modelUtil";
 import { IoMdArrowRoundBack } from "react-icons/io";
-
-type DebugReplayStatus = {
-  active: boolean;
-  replay_camera: string | null;
-  source_camera: string | null;
-  start_time: number | null;
-  end_time: number | null;
-  live_ready: boolean;
-};
+import { DebugReplayStatus } from "@/types/replay";
 
 type DebugReplayJobResults = {
   current_step: "preparing_clip" | "starting_camera" | null;
@@ -642,7 +635,7 @@ function ObjectList({ cameraConfig, objects, config }: ObjectListProps) {
     if (!config) {
       return;
     }
-    return config.model?.colormap;
+    return getPrimaryModel(config)?.colormap;
   }, [config]);
 
   const getColorForObjectName = useCallback(

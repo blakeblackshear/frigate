@@ -115,6 +115,7 @@ export default function GeneralSettings({
       "zh-CN": "zhCN",
       "zh-Hant": "zhHant",
       "pt-BR": "ptBR",
+      "sr-Latn": "srLatn",
     };
 
     return supportedLanguageKeys.map((key) => {
@@ -326,7 +327,7 @@ export default function GeneralSettings({
                 <DropdownMenuLabel>{t("menu.system")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup className={isDesktop ? "" : "flex flex-col"}>
-                  <Link to="/system#general">
+                  <Link to="/system">
                     <MenuItem
                       className={
                         isDesktop

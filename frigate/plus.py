@@ -3,17 +3,71 @@ import json
 import logging
 import os
 import re
+from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeGuard
 
+import aiohttp
 import cv2
 import requests
 from numpy import ndarray
+from requests.adapters import HTTPAdapter
 from requests.models import Response
+from urllib3.util.retry import Retry
 
-from frigate.const import PLUS_API_HOST, PLUS_ENV_VAR
+from frigate.const import MODEL_CACHE_DIR, PLUS_API_HOST, PLUS_ENV_VAR
 
 logger = logging.getLogger(__name__)
+
+PLUS_VALIDATE_TIMEOUT = 10
+
+
+class PlusKeyStatus(str, Enum):
+    """Result of validating a Frigate+ API key with the server."""
+
+    valid = "valid"
+    invalid = "invalid"
+    unreachable = "unreachable"
+    not_set = "not_set"
+
+
+def add_hailo_alias(model_info: dict[str, Any]) -> dict[str, Any]:
+    """Name the hailo detector by its current key as well as its old one.
+
+    Frigate+ reports every Hailo model as supporting hailo8l, which this
+    detector was called before it was renamed to cover every Hailo device.
+    The old key is kept so an older Frigate still matches the model.
+
+    Args:
+        model_info: A Frigate+ model's metadata, edited in place
+
+    Returns:
+        The same metadata
+    """
+    supported = model_info.get("supportedDetectors")
+
+    if supported and "hailo8l" in supported and "hailo" not in supported:
+        supported.append("hailo")
+
+    return model_info
+
+
+def load_plus_model_info(model_id: str) -> dict[str, Any] | None:
+    """Read a Frigate+ model's cached info file.
+
+    Args:
+        model_id: The Frigate+ model id
+
+    Returns:
+        The model info, or None when it has not been cached or cannot be read
+    """
+    try:
+        with open(os.path.join(MODEL_CACHE_DIR, f"{model_id}.json")) as f:
+            model_info: dict[str, Any] = json.load(f)
+    except (OSError, ValueError):
+        return None
+
+    return add_hailo_alias(model_info)
 
 
 def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
@@ -29,6 +83,19 @@ def get_jpg_bytes(image: ndarray, max_dim: int, quality: int) -> bytes:
     ret, jpg = cv2.imencode(".jpg", original, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
     jpg_bytes = jpg.tobytes()
     return jpg_bytes if isinstance(jpg_bytes, bytes) else b""
+
+
+def _is_usable_token(token_data: Any) -> TypeGuard[dict[str, Any]]:
+    """Whether a Frigate+ token response has a usable token and expiry."""
+    if not isinstance(token_data, dict):
+        return False
+
+    expires = token_data.get("expires")
+    return (
+        isinstance(token_data.get("accessToken"), str)
+        and isinstance(expires, (int, float))
+        and not isinstance(expires, bool)
+    )
 
 
 class PlusApi:
@@ -62,6 +129,13 @@ class PlusApi:
         self._is_active: bool = self.key is not None
         self._token_data: dict = {}
 
+        # Retry connection failures so a network that comes up late at startup
+        # doesn't fail the Frigate+ model download
+        self._session = requests.Session()
+        self._session.mount(
+            self.host, HTTPAdapter(max_retries=Retry(connect=5, backoff_factor=1))
+        )
+
     def _refresh_token_if_needed(self) -> None:
         if (
             self._token_data.get("expires") is None
@@ -72,7 +146,9 @@ class PlusApi:
                     "Plus API key not set. See https://docs.frigate.video/integrations/plus#set-your-api-key"
                 )
             parts = self.key.split(":")
-            r = requests.get(f"{self.host}/v1/auth/token", auth=(parts[0], parts[1]))
+            r = self._session.get(
+                f"{self.host}/v1/auth/token", auth=(parts[0], parts[1])
+            )
             if not r.ok:
                 raise Exception(f"Unable to refresh API token: {r.text}")
             self._token_data = r.json()
@@ -82,19 +158,19 @@ class PlusApi:
         return {"authorization": f"Bearer {self._token_data.get('accessToken')}"}
 
     def _get(self, path: str) -> Response:
-        return requests.get(
+        return self._session.get(
             f"{self.host}/v1/{path}", headers=self._get_authorization_header()
         )
 
     def _post(self, path: str, data: dict) -> Response:
-        return requests.post(
+        return self._session.post(
             f"{self.host}/v1/{path}",
             headers=self._get_authorization_header(),
             json=data,
         )
 
     def _put(self, path: str, data: dict) -> Response:
-        return requests.put(
+        return self._session.put(
             f"{self.host}/v1/{path}",
             headers=self._get_authorization_header(),
             json=data,
@@ -102,6 +178,60 @@ class PlusApi:
 
     def is_active(self) -> bool:
         return self._is_active
+
+    async def validate_key(self) -> PlusKeyStatus:
+        """Check the configured API key against the Frigate+ server.
+
+        The key format is checked at startup, but only the server can tell
+        whether the key is actually valid. This requests a fresh token so the
+        result reflects the key's current state rather than a cached token.
+
+        Returns:
+            The key's status as reported by the Frigate+ server
+        """
+        if self.key is None:
+            return PlusKeyStatus.not_set
+
+        key_id, _, secret = self.key.partition(":")
+
+        # Use a single request with a timeout instead of the retrying session,
+        # since this is user initiated and should fail fast when unreachable.
+        # trust_env honors proxy settings, matching the other Frigate+ requests.
+        try:
+            async with aiohttp.ClientSession(
+                timeout=aiohttp.ClientTimeout(total=PLUS_VALIDATE_TIMEOUT),
+                trust_env=True,
+            ) as session:
+                async with session.get(
+                    f"{self.host}/v1/auth/token",
+                    auth=aiohttp.BasicAuth(key_id, secret),
+                ) as r:
+                    status = r.status
+                    token_data = await r.json(content_type=None) if r.ok else None
+        except (aiohttp.ClientError, TimeoutError) as err:
+            logger.warning("Unable to reach Frigate+ to validate API key: %s", err)
+            return PlusKeyStatus.unreachable
+        except ValueError:
+            logger.warning("Invalid response validating Frigate+ API key")
+            return PlusKeyStatus.unreachable
+
+        if status in (401, 403):
+            return PlusKeyStatus.invalid
+
+        if status >= 400:
+            logger.warning(
+                "Unexpected response validating Frigate+ API key: %s", status
+            )
+            return PlusKeyStatus.unreachable
+
+        # Keep the cached token unless the reply is a usable one, so an
+        # unexpected response can't break later Frigate+ requests
+        if not _is_usable_token(token_data):
+            logger.warning("Invalid response validating Frigate+ API key")
+            return PlusKeyStatus.unreachable
+
+        self._token_data = token_data
+        return PlusKeyStatus.valid
 
     def upload_image(self, image: ndarray, camera: str) -> str:
         r = self._get("image/signed_urls")
@@ -241,4 +371,9 @@ class PlusApi:
         if not r.ok:
             raise Exception(r.text)
 
-        return r.json()
+        models = r.json()
+
+        for model in models.get("list") or []:
+            add_hailo_alias(model)
+
+        return models

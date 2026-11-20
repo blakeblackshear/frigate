@@ -20,10 +20,14 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { SelectSeparator } from "../ui/select";
 import ActivityIndicator from "../indicators/activity-indicator";
-import { LuBug, LuPlay, LuX } from "react-icons/lu";
+import { LuBug, LuPlay, LuTriangleAlert, LuX } from "react-icons/lu";
+import useSWR from "swr";
 import { ExportMode } from "@/types/filter";
 import { TimeRange } from "@/types/timeline";
+import { DebugReplayStatus } from "@/types/replay";
 import { cn } from "@/lib/utils";
+import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
+import { Alert, AlertDescription } from "../ui/alert";
 import { CustomTimeSelector } from "./CustomTimeSelector";
 
 const REPLAY_TIME_OPTIONS = ["1", "5", "timeline", "custom"] as const;
@@ -56,6 +60,44 @@ export function DebugReplayContent({
 }: DebugReplayContentProps) {
   const { t } = useTranslation(["views/replay"]);
 
+  // Only one replay session can run at a time, so check on open rather than
+  // letting the user configure a range only to hit a 409 on start
+  const { data: replayStatus, mutate: refreshReplayStatus } =
+    useSWR<DebugReplayStatus>("debug_replay/status");
+  const replayActive = replayStatus?.active ?? false;
+  const activeSourceCamera = useCameraFriendlyName(
+    replayStatus?.source_camera ?? undefined,
+  );
+  const [isStopping, setIsStopping] = useState(false);
+
+  const handleStopActive = useCallback(() => {
+    setIsStopping(true);
+
+    axios
+      .post("debug_replay/stop")
+      .catch((error) => {
+        // 400 means no session is active, e.g. startup failed and the
+        // server already cleaned it up, so there is nothing to stop
+        if (error.response?.status === 400) {
+          return;
+        }
+
+        const errorMessage =
+          error.response?.data?.message ||
+          error.response?.data?.detail ||
+          "Unknown error";
+        toast.error(t("dialog.toast.stopError", { error: errorMessage }), {
+          position: "top-center",
+        });
+      })
+      // refresh on failure too, otherwise a session that ended on its own
+      // leaves the banner up and Start disabled until the dialog reopens
+      .then(() => refreshReplayStatus())
+      .finally(() => {
+        setIsStopping(false);
+      });
+  }, [refreshReplayStatus, t]);
+
   return (
     <div className="w-full">
       {isDesktop && (
@@ -66,6 +108,34 @@ export function DebugReplayContent({
           </DialogHeader>
           <SelectSeparator className="my-4 bg-secondary" />
         </>
+      )}
+
+      {replayActive && (
+        <Alert
+          variant="warning"
+          className="mt-4 flex items-start gap-2 [&>svg+div]:translate-y-0 [&>svg]:static [&>svg~*]:pl-0"
+        >
+          <LuTriangleAlert className="mt-0.5 size-5 shrink-0" />
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <AlertDescription>
+              {t("dialog.activeSession.description", {
+                camera: activeSourceCamera,
+              })}
+            </AlertDescription>
+            <Button
+              className="flex shrink-0 items-center gap-2 self-start sm:self-auto"
+              variant="destructive"
+              size="sm"
+              disabled={isStopping}
+              onClick={handleStopActive}
+            >
+              {isStopping && <ActivityIndicator className="size-4" />}
+              {isStopping
+                ? t("dialog.activeSession.stopping")
+                : t("dialog.activeSession.stop")}
+            </Button>
+          </div>
+        </Alert>
       )}
 
       {/* Time range */}
@@ -122,7 +192,7 @@ export function DebugReplayContent({
         </Button>
         <Button
           variant="select"
-          disabled={isStarting}
+          disabled={isStarting || isStopping || replayActive}
           onClick={() => {
             if (selectedOption === "timeline") {
               setRange({

@@ -1,15 +1,21 @@
 """configuration utils."""
 
 import asyncio
+import contextlib
+import errno
+import ipaddress
 import logging
 import os
 import re
 import shutil
+from functools import cache
 from typing import Any
 
 from ruamel.yaml import YAML
 
 from frigate.const import (
+    BASE_DIR,
+    CACHE_DIR,
     CONFIG_DIR,
     DEFAULT_FFMPEG_VERSION,
     EXPORT_DIR,
@@ -21,8 +27,68 @@ from frigate.util.services import get_video_properties
 
 logger = logging.getLogger(__name__)
 
-CURRENT_CONFIG_VERSION = "0.18-0"
+CURRENT_CONFIG_VERSION = "0.19-0"
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "config.yml")
+
+# the detector field that used to hold the device, for detectors that named it
+# something other than "device"
+DETECTOR_DEVICE_FIELDS = {
+    "cpu": "num_threads",
+    "rknn": "num_cores",
+    "degirum": "location",
+    "zmq": "endpoint",
+}
+
+# detector options that have no equivalent in a device string. The remote
+# detectors that use them are being reworked, so they are dropped rather than
+# carried over.
+DROPPED_DETECTOR_OPTIONS = {
+    "degirum": ["zoo", "token"],
+    "zmq": ["request_timeout_ms", "linger_ms"],
+}
+
+
+# Trees the unprivileged runtime user can write. A root service must not
+# execute a binary from any of them; a compromised uid-1000 process could
+# plant one and be root after the next restart.
+RUNTIME_USER_WRITABLE_DIRS = (CONFIG_DIR, BASE_DIR, CACHE_DIR, "/dev/shm", "/tmp")
+
+
+def service_is_granular_root(service: str) -> bool:
+    """Report whether FRIGATE_ROOT_SERVICES runs the given service as root.
+
+    The escape hatch is excluded: it never sweeps /config and leaves no
+    unprivileged service running, so custom binaries stay as safe as they
+    were before the privilege drop.
+    """
+    if os.geteuid() != 0:
+        return False
+
+    if os.environ.get("FRIGATE_RUN_AS_ROOT", "false") == "true":
+        return False
+
+    entries = os.environ.get("FRIGATE_ROOT_SERVICES", "").split(",")
+    return any("".join(entry.split()) == service for entry in entries)
+
+
+def is_runtime_user_writable(path: str) -> bool:
+    """Report whether a path resolves inside a runtime-user-writable tree."""
+    resolved = os.path.realpath(path)
+    return any(
+        resolved == root or resolved.startswith(f"{root}{os.sep}")
+        for root in RUNTIME_USER_WRITABLE_DIRS
+    )
+
+
+@cache
+def _warn_ignored_ffmpeg_path(path: str, service: str) -> None:
+    """Warn once per path; resolution runs per camera and per binary."""
+    logger.warning(
+        "Ignoring ffmpeg.path %s because FRIGATE_ROOT_SERVICES runs %s as root and that location is writable by the unprivileged user; using the bundled build",
+        path,
+        service,
+    )
+
 
 # ffmpeg commands are built as strings and split on whitespace, so a custom path
 # must stay a single plain token
@@ -34,14 +100,19 @@ def is_valid_ffmpeg_path(path: str) -> bool:
     return not path.startswith("/") or _CUSTOM_FFMPEG_PATH.fullmatch(path) is not None
 
 
-def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
+def resolve_ffmpeg_path(
+    path: str, binary: str = "ffmpeg", service: str = "frigate"
+) -> str:
     """Resolve an ffmpeg version alias or custom path to a binary path.
 
     A bare version alias that is no longer bundled (for example one that was
     dropped when the default version changed) falls back to the default
     bundled version so existing configs keep working across an upgrade or a
-    revert. Custom install paths (anything absolute) are used as-is, unless
-    they fail `is_valid_ffmpeg_path`, which also falls back to the default.
+    revert. Custom install paths (anything absolute) are used as-is. While
+    FRIGATE_ROOT_SERVICES makes the service that execs it root, a custom path
+    is resolved to its real location and refused inside a runtime-user-writable
+    tree; see RUNTIME_USER_WRITABLE_DIRS. Paths that fail
+    `is_valid_ffmpeg_path` also fall back to the default.
     """
     if (
         path == "default"
@@ -51,8 +122,17 @@ def resolve_ffmpeg_path(path: str, binary: str = "ffmpeg") -> str:
         version = DEFAULT_FFMPEG_VERSION
     elif path in INCLUDED_FFMPEG_VERSIONS:
         version = path
-    else:
+    elif not service_is_granular_root(service):
         return f"{path}/bin/{binary}"
+    else:
+        # return the resolved form so a link in the path cannot be retargeted
+        # after the check
+        real = os.path.realpath(f"{path}/bin/{binary}")
+        if is_valid_ffmpeg_path(real) and not is_runtime_user_writable(real):
+            return real
+
+        _warn_ignored_ffmpeg_path(path, service)
+        version = DEFAULT_FFMPEG_VERSION
 
     return f"/usr/lib/ffmpeg/{version}/bin/{binary}"
 
@@ -72,13 +152,88 @@ def redact_credential(obj: dict[str, Any], key: str) -> None:
         obj.pop(key, None)
 
 
+LISTEN_HOSTNAME = re.compile(
+    r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*"
+)
+
+
+def parse_listen_address(value: int | str) -> tuple[int | str, int]:
+    """Validate a networking.listen value and rebuild it from its parsed parts.
+
+    Accepts a port, "host:port", "*:port", or "[IPv6]:port", where host is an
+    IPv4 address or an RFC 1123 hostname. nginx receives the rebuilt value
+    verbatim, so anything else raises ValueError.
+
+    Returns:
+        The normalized value (an int for a bare port) and the port
+    """
+    if isinstance(value, bool) or not isinstance(value, int | str):
+        raise ValueError(f"invalid listen value: {value!r}")
+
+    host, sep, port_text = str(value).strip().rpartition(":")
+
+    if not re.fullmatch(r"[0-9]{1,5}", port_text) or not (1 <= int(port_text) <= 65535):
+        raise ValueError(f"invalid listen port: {value!r}")
+
+    port = int(port_text)
+
+    if not sep:
+        return port, port
+
+    if host.startswith("[") and host.endswith("]"):
+        address = ipaddress.IPv6Address(host[1:-1])
+
+        if address.scope_id:
+            raise ValueError(f"listen address must not have a scope ID: {value!r}")
+
+        return f"[{address}]:{port}", port
+
+    if host != "*" and not LISTEN_HOSTNAME.fullmatch(host):
+        raise ValueError(f"invalid listen address: {value!r}")
+
+    return f"{host}:{port}", port
+
+
 def find_config_file() -> str:
+    """Return the path of the config file to use.
+
+    Both .yml and .yaml are supported, so fall back to the other extension when
+    the configured path does not exist. If neither exists the configured path is
+    returned so a new config is created with the default .yml extension.
+    """
     config_path = os.environ.get("CONFIG_FILE", DEFAULT_CONFIG_FILE)
 
     if not os.path.isfile(config_path):
-        config_path = config_path.replace("yml", "yaml")
+        base, ext = os.path.splitext(config_path)
+        alternate = f"{base}.yaml" if ext == ".yml" else f"{base}.yml"
+
+        if os.path.isfile(alternate):
+            return alternate
 
     return config_path
+
+
+def _write_config(config_file: str, yaml: YAML, config: dict[str, Any]) -> None:
+    config_file = os.path.realpath(config_file)
+    st = os.stat(config_file)
+    tmp_file = f"{config_file}.tmp"
+    with open(tmp_file, "w") as f:
+        yaml.dump(config, f)
+    os.chmod(tmp_file, st.st_mode)
+
+    with contextlib.suppress(PermissionError):
+        os.chown(tmp_file, st.st_uid, st.st_gid)
+
+    try:
+        os.replace(tmp_file, config_file)
+    except OSError as e:
+        if e.errno != errno.EBUSY:
+            raise
+
+        # a file bind mount can't be renamed over, so write it in place
+        shutil.copyfile(tmp_file, config_file)
+        os.remove(tmp_file)
 
 
 def migrate_frigate_config(config_file: str):
@@ -100,18 +255,35 @@ def migrate_frigate_config(config_file: str):
 
     previous_version = str(config.get("version", "0.13"))
 
-    if previous_version == CURRENT_CONFIG_VERSION:
+    # 0.19 is unreleased, so a config may already be stamped with the current
+    # version and still use the pre-models detectors and model keys
+    needs_models = "detectors" in config or "model" in config
+
+    # likewise, it may already be on the models list and still name the hailo
+    # detector by its old key
+    needs_detector_rename = any(
+        isinstance(device, str) and device.partition(":")[0] == "hailo8l"
+        for model in (config.get("models") or [])
+        if isinstance(model, dict)
+        for device in (model.get("devices") or [])
+    )
+
+    if (
+        previous_version == CURRENT_CONFIG_VERSION
+        and not needs_models
+        and not needs_detector_rename
+    ):
         logger.info("frigate config does not need migration...")
         return
 
     logger.info("copying config as backup...")
     shutil.copy(config_file, os.path.join(CONFIG_DIR, "backup_config.yaml"))
+    new_config = config
 
     if previous_version < "0.14":
         logger.info(f"Migrating frigate config from {previous_version} to 0.14...")
-        new_config = migrate_014(config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        new_config = migrate_014(new_config)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.14"
 
         logger.info("Migrating export file names...")
@@ -127,38 +299,49 @@ def migrate_frigate_config(config_file: str):
 
     if previous_version < "0.15-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-0...")
-        new_config = migrate_015_0(config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        new_config = migrate_015_0(new_config)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.15-0"
 
     if previous_version < "0.15-1":
         logger.info(f"Migrating frigate config from {previous_version} to 0.15-1...")
-        new_config = migrate_015_1(config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        new_config = migrate_015_1(new_config)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.15-1"
 
     if previous_version < "0.16-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.16-0...")
-        new_config = migrate_016_0(config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        new_config = migrate_016_0(new_config)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.16-0"
 
     if previous_version < "0.17-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.17-0...")
-        new_config = migrate_017_0(config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        new_config = migrate_017_0(new_config)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.17-0"
 
     if previous_version < "0.18-0":
         logger.info(f"Migrating frigate config from {previous_version} to 0.18-0...")
-        new_config = migrate_018_0(config)
-        with open(config_file, "w") as f:
-            yaml.dump(new_config, f)
+        new_config = migrate_018_0(new_config)
+        _write_config(config_file, yaml, new_config)
         previous_version = "0.18-0"
+
+    if previous_version < "0.19-0":
+        logger.info(f"Migrating frigate config from {previous_version} to 0.19-0...")
+        new_config = migrate_019_0(new_config)
+        _write_config(config_file, yaml, new_config)
+        previous_version = "0.19-0"
+
+    if needs_models:
+        logger.info("Migrating frigate detectors and model to models...")
+        new_config = migrate_models(new_config)
+        _write_config(config_file, yaml, new_config)
+
+    if needs_detector_rename:
+        logger.info("Migrating renamed frigate detectors...")
+        new_config = rename_hailo_detector(new_config)
+        _write_config(config_file, yaml, new_config)
 
     logger.info("Finished frigate config migration...")
 
@@ -538,6 +721,28 @@ def _convert_legacy_mask_to_dict(
     return result
 
 
+# the 0.18 scalar Birdseye modes, mapped to their activity mode names
+_LEGACY_BIRDSEYE_MODES = {
+    "continuous": "continuous",
+    "motion": "motion",
+    "objects": "all_objects",
+}
+
+
+def _migrate_birdseye_mode(birdseye: dict[str, Any] | None) -> None:
+    """Convert a scalar Birdseye mode to an activity mode list."""
+    if not birdseye or not isinstance(birdseye.get("mode"), str):
+        return
+
+    legacy_mode = birdseye["mode"]
+
+    if legacy_mode not in _LEGACY_BIRDSEYE_MODES:
+        return
+
+    del birdseye["mode"]
+    birdseye["modes"] = [_LEGACY_BIRDSEYE_MODES[legacy_mode]]
+
+
 def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
     """Handle migrating frigate config to 0.18-0"""
     new_config = config.copy()
@@ -671,6 +876,202 @@ def migrate_018_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]
     return new_config
 
 
+def rename_hailo_detector(
+    config: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """Rename the hailo8l detector, which drives every Hailo device.
+
+    Args:
+        config: The loaded config
+
+    Returns:
+        The config with every models entry naming the detector 'hailo'
+    """
+    new_config = config.copy()
+
+    for model in new_config.get("models") or []:
+        if not isinstance(model, dict):
+            continue
+
+        devices = model.get("devices")
+
+        if not isinstance(devices, list):
+            continue
+
+        # assigned per index so ruamel keeps the comments on the list
+        for index, device in enumerate(devices):
+            if not isinstance(device, str):
+                continue
+
+            detector, separator, rest = device.partition(":")
+
+            if detector == "hailo8l":
+                devices[index] = f"hailo{separator}{rest}"
+
+    return new_config
+
+
+def _camera_enables_transcription(camera: dict[str, Any]) -> bool:
+    """Whether a camera or one of its profiles turns audio transcription on."""
+    sections = [camera.get("audio_transcription")]
+    profiles = camera.get("profiles")
+
+    if isinstance(profiles, dict):
+        for profile in profiles.values():
+            if isinstance(profile, dict):
+                sections.append(profile.get("audio_transcription"))
+
+    return any(
+        isinstance(section, dict) and section.get("enabled") for section in sections
+    )
+
+
+def _migrate_transcription_language(config: dict[str, Any]) -> None:
+    """Pin English for configs written before the language default became auto.
+
+    audio_transcription.language used to default to "en", so a config that
+    turned transcription on without naming a language was transcribing English.
+    The default is now "auto" (let the model detect), which is better for new
+    users but would silently change behavior for existing ones, so write the old
+    value explicitly for anyone actually using the feature.
+    """
+    transcription = config.get("audio_transcription")
+
+    if isinstance(transcription, dict) and "language" in transcription:
+        # named a language already, so nothing was relying on the default
+        return
+
+    enabled = isinstance(transcription, dict) and bool(transcription.get("enabled"))
+
+    if not enabled:
+        enabled = any(
+            _camera_enables_transcription(camera)
+            for camera in config.get("cameras", {}).values()
+            if isinstance(camera, dict)
+        )
+
+    if not enabled:
+        return
+
+    if not isinstance(transcription, dict):
+        # a camera enabled it without a global section, which still picked up
+        # the global default
+        transcription = {}
+        config["audio_transcription"] = transcription
+
+    transcription["language"] = "en"
+
+
+def migrate_019_0(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Handle migrating Frigate config to 0.19-0."""
+    new_config = rename_hailo_detector(config)
+
+    _migrate_birdseye_mode(new_config.get("birdseye"))
+
+    for name, camera in new_config.get("cameras", {}).items():
+        camera_config: dict[str, dict[str, Any]] = camera.copy()
+        _migrate_birdseye_mode(camera_config.get("birdseye"))
+
+        for profile in camera_config.get("profiles", {}).values():
+            if isinstance(profile, dict):
+                _migrate_birdseye_mode(profile.get("birdseye"))
+
+        new_config["cameras"][name] = camera_config
+
+    _migrate_transcription_language(new_config)
+
+    new_config["version"] = "0.19-0"
+    return new_config
+
+
+def migrate_models(config: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Merge the detectors and model keys into a single models list.
+
+    Every config before this change ran one model across all of its detectors,
+    so this always produces exactly one model.
+
+    Args:
+        config: The loaded config
+
+    Returns:
+        The config with a models list in place of detectors and model
+    """
+    # imported lazily so loading the detector plugins is not a cost of importing
+    # this module
+    from frigate.detectors.detector_types import config_types
+
+    new_config = config.copy()
+    detectors: dict[str, Any] = new_config.pop("detectors", None) or {}
+    model: dict[str, Any] = new_config.pop("model", None) or {}
+
+    devices: list[str] = []
+    model_path: str | None = None
+
+    for name, detector in detectors.items():
+        detector = detector or {}
+        detector_type = detector.get("type", "cpu")
+        device = detector.get(DETECTOR_DEVICE_FIELDS.get(detector_type, "device"))
+
+        # hailo8l named one device, but the detector drives every Hailo device
+        if detector_type == "hailo8l":
+            detector_type = "hailo"
+
+        device_string = detector_type if device is None else f"{detector_type}:{device}"
+
+        # repeating a device now means running an extra inference process on it,
+        # which is what several detectors on one device used to mean. Only
+        # collapse repeats of hardware that can serve a single process.
+        config_class = config_types.get(detector_type)
+        shareable = config_class.shareable if config_class else True
+
+        if shareable or device_string not in devices:
+            devices.append(device_string)
+
+        dropped = [
+            option
+            for option in DROPPED_DETECTOR_OPTIONS.get(detector_type, [])
+            if option in detector
+        ]
+
+        if dropped:
+            logger.error(
+                "Detector '%s' had the %s options set, which are no longer supported and have been removed",
+                name,
+                ", ".join(dropped),
+            )
+
+        detector_model_path = detector.get("model_path")
+
+        if detector_model_path:
+            if model_path is None:
+                model_path = detector_model_path
+            elif model_path != detector_model_path:
+                logger.warning(
+                    "Detector '%s' set a different model_path than an earlier detector, using '%s' for the migrated model",
+                    name,
+                    model_path,
+                )
+
+    detector_types = {device.partition(":")[0] for device in devices}
+
+    if len(detector_types) > 1:
+        logger.error(
+            "Detectors of more than one type (%s) were configured. A model now runs on one detector type, so the migrated config will need to be corrected by hand",
+            ", ".join(sorted(detector_types)),
+        )
+
+    entry: dict[str, Any] = {"scene": "default", **model}
+
+    if model_path:
+        entry["path"] = model_path
+
+    # a config with no detectors ran a single cpu detector
+    entry["devices"] = devices or ["cpu"]
+
+    new_config["models"] = [entry]
+    return new_config
+
+
 def get_relative_coordinates(
     mask: str | list | None,
     frame_shape: tuple[int, int],
@@ -681,12 +1082,12 @@ def get_relative_coordinates(
     # old native resolution coordinates
     where = f" for camera {camera_name}" if camera_name else ""
     if mask:
-        if isinstance(mask, list) and any(x > "1.0" for x in mask[0].split(",")):
+        if isinstance(mask, list) and any(float(x) > 1.0 for x in mask[0].split(",")):
             relative_masks = []
             for m in mask:
                 points = m.split(",")
 
-                if any(x > "1.0" for x in points):
+                if any(float(x) > 1.0 for x in points):
                     rel_points = []
                     for i in range(0, len(points), 2):
                         x = int(points[i])
@@ -707,7 +1108,7 @@ def get_relative_coordinates(
                     relative_masks.append(m)
 
             mask = relative_masks
-        elif isinstance(mask, str) and any(x > "1.0" for x in mask.split(",")):
+        elif isinstance(mask, str) and any(float(x) > 1.0 for x in mask.split(",")):
             points = mask.split(",")
             rel_points = []
 

@@ -1,1 +1,88 @@
-{}
+{
+    "documentTitle": "Chat – Frigate",
+    "title": "Chat Frigate",
+    "subtitle": "Váš AI asistent pro správu kamer a přehled o dění",
+    "placeholder": "Zeptejte se na cokoli…",
+    "error": "Něco se pokazilo. Zkuste to prosím znovu.",
+    "processing": "Zpracování…",
+    "toolsUsed": "Použito: {{tools}}",
+    "showTools": "Zobrazit nástroje ({{count}})",
+    "hideTools": "Skrýt nástroje",
+    "call": "Volání",
+    "result": "Výsledek",
+    "arguments": "Argumenty:",
+    "response": "Odpověď:",
+    "attachment_chip_label": "{{label}} na kameře {{camera}}",
+    "attachment_chip_remove": "Odebrat přílohu",
+    "open_in_explore": "Otevřít na stránce Prozkoumat",
+    "attach_event_aria": "Připojit událost {{eventId}}",
+    "attachment_picker_paste_label": "Nebo vložte ID události",
+    "attachment_picker_attach": "Připojit",
+    "attachment_picker_placeholder": "Připojit událost",
+    "quick_reply_find_similar": "Najít podobné výskyty",
+    "quick_reply_tell_me_more": "Řekni mi o tom více",
+    "quick_reply_when_else": "Kdy jindy byl objekt viděn?",
+    "quick_reply_find_similar_text": "Najdi podobné výskyty.",
+    "quick_reply_tell_me_more_text": "Řekni mi o tomto objektu více.",
+    "quick_reply_when_else_text": "Kdy jindy byl tento objekt viděn?",
+    "anchor": "Reference",
+    "similarity_score": "Podobnost",
+    "no_similar_objects_found": "Nebyly nalezeny žádné podobné objekty.",
+    "semantic_search_required": "Pro vyhledání podobných objektů musí být povoleno sémantické vyhledávání.",
+    "send": "Odeslat",
+    "suggested_requests": "Zkuste se zeptat:",
+    "starting_requests": {
+        "show_recent_events": "Zobraz nedávné události",
+        "show_camera_status": "Zobraz stav kamer",
+        "recap": "Co se stalo během mé nepřítomnosti?",
+        "watch_camera": "Sleduj aktivitu na kameře"
+    },
+    "starting_requests_prompts": {
+        "show_recent_events": "Ukaž mi nedávné události za poslední hodinu",
+        "show_camera_status": "Jaký je aktuální stav mých kamer?",
+        "recap": "Co se stalo během mé nepřítomnosti?",
+        "watch_camera": "Sleduj hlavní vchod a dej mi vědět, pokud se někdo objeví"
+    },
+    "new_chat": "Nový chat",
+    "settings": {
+        "title": "Nastavení chatu",
+        "show_stats": {
+            "title": "Zobrazovat statistiky",
+            "desc": "Zobrazovat rychlost generování a velikost kontextu u odpovědí v chatu.",
+            "while_generating": "Během generování",
+            "always": "Vždy"
+        },
+        "auto_scroll": {
+            "title": "Automatické posouvání",
+            "desc": "Posouvat zobrazení k nově příchozím zprávám."
+        },
+        "always_allow": {
+            "title": "Vždy povolené akce",
+            "desc": "Akce, které smí asistent spustit bez předchozího dotazu.",
+            "none": "Žádné",
+            "reset": "Obnovit"
+        }
+    },
+    "stats": {
+        "context": "Počet tokenů: {{tokens}}",
+        "tokens_per_second": "{{rate}} t/s"
+    },
+    "reasoning": {
+        "active": "Uvažování…",
+        "show": "Zobrazit uvažování",
+        "hide": "Skrýt uvažování"
+    },
+    "thinking": {
+        "toggle": "Přepnout uvažování"
+    },
+    "approval": {
+        "title": "Schválit {{tool}}?",
+        "desc": "Tato akce provede změnu ve Frigate. Před schválením zkontrolujte podrobnosti.",
+        "approve": "Schválit",
+        "always_allow": "Vždy povolit",
+        "reject": "Zamítnout",
+        "approved": "Schváleno",
+        "rejected": "Zamítnuto",
+        "placeholder": "Pro pokračování schvalte nebo zamítněte čekající akci"
+    }
+}

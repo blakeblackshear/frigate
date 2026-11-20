@@ -30,7 +30,6 @@
       "setting": {
         "audio": {
           "tips": {
-            "document": "Czytaj dokumentację ",
             "title": "Dźwięk musi być wysyłany z kamery i skonfigurowany w go2rtc dla tego strumienia."
           }
         },

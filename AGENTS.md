@@ -6,7 +6,7 @@ This document provides coding guidelines and best practices for contributing to 
 
 Frigate NVR is a realtime object detection system for IP cameras that uses:
 
-- **Backend**: Python 3.13+ with FastAPI, OpenCV, TensorFlow/ONNX
+- **Backend**: Python 3.11 with FastAPI, OpenCV, TensorFlow/ONNX
 - **Frontend**: React with TypeScript, Vite, TailwindCSS
 - **Architecture**: Multiprocessing design with ZMQ and MQTT communication
 - **Focus**: Minimal resource usage with maximum performance
@@ -23,7 +23,7 @@ When reviewing code, do NOT comment on:
 
 ### Python Requirements
 
-- **Compatibility**: Python 3.13+
+- **Compatibility**: Python 3.11 (the version in the Docker image)
 - **Language Features**: Use modern Python features:
   - Pattern matching
   - Type hints (comprehensive typing preferred)
@@ -36,7 +36,7 @@ When reviewing code, do NOT comment on:
 - **Formatting**: Ruff (configured in `pyproject.toml`)
 - **Linting**: Ruff with rules defined in project config
 - **Type Checking**: Use type hints consistently
-- **Testing**: unittest framework - use `python3 -u -m unittest` to run tests
+- **Testing**: unittest framework - use `python3 -u -m frigate.test` to run the suite in parallel groups
 - **Language**: American English for all code, comments, and documentation
 - **Punctuation**: Do not use em dashes in documentation, comments, or strings; reword with standard punctuation (commas, colons, parentheses, or separate sentences)
 
@@ -97,11 +97,12 @@ When reviewing code, do NOT comment on:
 
 ### Async Programming
 
-- **External I/O**: All external I/O operations must be async
-- **Best Practices**:
-  - Avoid sleeping in loops - use `asyncio.sleep()` not `time.sleep()`
+- **Scope**: Frigate is mostly synchronous multiprocess code, and most API handlers are plain `def` running in FastAPI's threadpool. These rules apply to code that is already `async def`.
+- **Blocking I/O**: A handler that does blocking work (peewee queries, `requests`, subprocess) should be a plain `def`, not an `async def` that blocks the event loop
+- **Best Practices** (inside `async def`):
+  - Use `asyncio.sleep()`, not `time.sleep()`
   - Avoid awaiting in loops - use `asyncio.gather()` instead
-  - No blocking calls in async functions
+  - No blocking calls
   - Use `asyncio.create_task()` for background operations
 - **Thread Safety**: Use proper synchronization for shared state
 
@@ -160,7 +161,7 @@ When reviewing code, do NOT comment on:
 
 ### Code Quality
 
-- **Linting**: ESLint (see `web/.eslintrc.cjs`)
+- **Linting**: ESLint (see `web/eslint.config.js`)
 - **Formatting**: Prettier with Tailwind CSS plugin
 - **Type Safety**: TypeScript strict mode enabled
 
@@ -196,7 +197,7 @@ Key rules enforced:
 ### Backend Testing
 
 - **Framework**: Python unittest
-- **Run Command**: `python3 -u -m unittest`
+- **Run Command**: `python3 -u -m frigate.test` (parallel groups; plain `python3 -u -m unittest` runs serially)
 - **Location**: `frigate/test/`
 - **Coverage**: Aim for comprehensive test coverage of core functionality
 - **Pattern**: Use `TestCase` classes with descriptive test method names
@@ -219,8 +220,8 @@ Key rules enforced:
 ### Python Backend
 
 ```bash
-# Run all tests
-python3 -u -m unittest
+# Run all tests in parallel groups (-j to set the number of jobs)
+python3 -u -m frigate.test
 
 # Run specific test file
 python3 -u -m unittest frigate.test.test_ffmpeg_presets

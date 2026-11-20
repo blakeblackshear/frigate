@@ -12,7 +12,6 @@
     "title": "Transliacija nepasiekiama",
     "desc": "Jokių transliacijos kadrų negauta iš {{cameraName}}<code>detect</code>, patikrinkite klaidų sąrašus"
   },
-  "cameraDisabled": "Kamera yra išjungta",
   "stats": {
     "streamType": {
       "title": "Transliacijos Tipas:",
@@ -21,14 +20,6 @@
     "bandwidth": {
       "title": "Pralaidumas:",
       "short": "Pralaidumas"
-    },
-    "latency": {
-      "title": "Vėlavimas:",
-      "value": "{{seconds}} sekundžių",
-      "short": {
-        "title": "Vėlavimas",
-        "value": "{{seconds}} sek"
-      }
     },
     "totalFrames": "Iš viso Kadrų:",
     "droppedFrames": {

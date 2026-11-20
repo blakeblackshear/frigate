@@ -2,19 +2,36 @@
 
 import base64
 import binascii
+import io
 import json
 import logging
+import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
+import numpy as np
 from google import genai
 from google.genai import errors, types
 from google.genai.types import FunctionCallingConfigMode
+from PIL import Image
 
 from frigate.config import GenAIProviderEnum
 from frigate.genai import GenAIClient, register_genai_provider
+from frigate.genai.utils import interleave_images, to_jpeg
 
 logger = logging.getLogger(__name__)
+
+# Gemini requests carrying inline data are capped at ~20 MB total; stay well
+# under it so the request fails as a log line rather than a 400.
+GEMINI_MAX_INLINE_BYTES = 15 * 1024 * 1024
+
+# Image-token probes run on the enrichment thread, so they get a short timeout,
+# no retries, and a cooldown after failure instead of the client's defaults.
+COUNT_TOKENS_TIMEOUT_MS = 5000
+COUNT_TOKENS_RETRY_INTERVAL = 300
+
+# sqlite-vec stores thumbnail and description embeddings as FLOAT[768].
+GEMINI_EMBEDDING_DIM = 768
 
 
 def _decode_thought_signature(value: Any) -> bytes | None:
@@ -88,9 +105,16 @@ class GeminiClient(GenAIClient):
     """Generative AI client for Frigate using Gemini."""
 
     provider: genai.Client
+    _image_token_cache: dict[tuple[int, int], int]
+    _image_token_retry_at: float
+    _capabilities_cache: dict[str, dict[str, bool]] | None = None
 
     def _init_provider(self) -> genai.Client:
         """Initialize the client."""
+        self._image_token_cache = {}
+        self._image_token_retry_at = 0.0
+        self._capabilities_cache = None
+
         # Merge provider_options into HttpOptions
         http_options_dict: dict[str, Any] = {
             "timeout": int(self.timeout * 1000),  # requires milliseconds
@@ -118,11 +142,16 @@ class GeminiClient(GenAIClient):
         images: list[bytes],
         response_format: dict | None = None,
         enable_thinking: bool = False,
+        image_captions: list[str] | None = None,
     ) -> str | None:
         """Submit a request to Gemini."""
-        contents = [prompt] + [
-            types.Part.from_bytes(data=img, mime_type="image/jpeg") for img in images
+        contents: list[Any] = [
+            part
+            if isinstance(part, str)
+            else types.Part.from_bytes(data=part, mime_type="image/jpeg")
+            for part in interleave_images(prompt, images, image_captions)
         ]
+
         try:
             # Merge runtime_options into generation_config if provided
             generation_config_dict: dict[str, Any] = {"candidate_count": 1}
@@ -136,7 +165,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=contents,  # type: ignore[arg-type]
+                contents=contents,
                 config=types.GenerateContentConfig(
                     **generation_config_dict,
                 ),
@@ -157,18 +186,260 @@ class GeminiClient(GenAIClient):
             return None
         return description
 
+    @property
+    def supports_transcription(self) -> bool:
+        """Gemini models accept inline audio parts."""
+        return True
+
+    def transcribe(
+        self,
+        audio: bytes,
+        language: str | None = None,
+        mime_type: str = "audio/wav",
+    ) -> str | None:
+        """Transcribe audio by sending it as an inline part alongside a prompt."""
+        if len(audio) > GEMINI_MAX_INLINE_BYTES:
+            logger.warning(
+                "Audio payload of %d bytes exceeds the Gemini inline limit; skipping transcription",
+                len(audio),
+            )
+            return None
+
+        prompt = "Transcribe the speech in this audio verbatim. Respond with the transcript only, and with nothing at all if there is no speech."
+
+        if language:
+            prompt += f" The speech is in language '{language}'."
+
+        try:
+            contents: list[Any] = [
+                prompt,
+                types.Part.from_bytes(data=audio, mime_type=mime_type),
+            ]
+            response = self.provider.models.generate_content(
+                model=self.genai_config.model,
+                contents=contents,
+                config=types.GenerateContentConfig(candidate_count=1),
+            )
+        except errors.APIError as e:
+            logger.warning("Gemini returned an error: %s", str(e))
+            return None
+        except Exception as e:
+            logger.warning("An unexpected error occurred with Gemini: %s", str(e))
+            return None
+
+        try:
+            if response.text is None:
+                return None
+
+            transcript = response.text.strip()
+        except (ValueError, AttributeError):
+            # No transcript was generated
+            return None
+
+        return transcript or None
+
+    @staticmethod
+    def _capabilities_from_models(models: Any) -> dict[str, dict[str, bool]]:
+        """Build a per-model capability map from Gemini's models.list() entries."""
+        capabilities: dict[str, dict[str, bool]] = {}
+        for m in models:
+            name = getattr(m, "name", None) or ""
+            if not name:
+                continue
+            actions = getattr(m, "supported_actions", None) or []
+            flags = {"supports_embeddings": "embedContent" in actions}
+            capabilities[name] = flags
+            capabilities[name.removeprefix("models/")] = flags
+        return capabilities
+
     def list_models(self) -> list[str]:
         """Return available model names from Gemini."""
         try:
-            return sorted(m.name or "" for m in self.provider.models.list())
+            models = list(self.provider.models.list())
         except Exception as e:
             logger.warning("Failed to list Gemini models: %s", e)
             return []
+        self._capabilities_cache = self._capabilities_from_models(models)
+        return sorted(m.name or "" for m in models)
+
+    def list_model_capabilities(self) -> dict[str, dict[str, bool]]:
+        """Report per-model capabilities from Gemini's model list."""
+        if self._capabilities_cache is not None:
+            return self._capabilities_cache
+        try:
+            models = list(self.provider.models.list())
+        except Exception as e:
+            logger.debug("Failed to query Gemini model capabilities: %s", e)
+            return {}
+        self._capabilities_cache = self._capabilities_from_models(models)
+        return self._capabilities_cache
 
     def get_context_size(self) -> int:
         """Get the context window size for Gemini."""
         # Gemini Pro Vision has a 1M token context window
         return 1000000
+
+    def estimate_image_tokens(self, width: int, height: int) -> float:
+        """Ask Gemini how many prompt tokens an image of these dimensions costs.
+
+        Gemini bills images far above the base pixel heuristic (Gemini 3 models
+        charge ~1100 tokens for a 320x180 frame, not ~46), and the cost differs
+        between model generations, so it is measured with the free count_tokens
+        endpoint and cached per (width, height). Falls back to the base heuristic
+        if the request fails, and does not probe again for
+        COUNT_TOKENS_RETRY_INTERVAL seconds.
+        """
+        cached = self._image_token_cache.get((width, height))
+
+        if cached is not None:
+            return cached
+
+        if time.monotonic() < self._image_token_retry_at:
+            return super().estimate_image_tokens(width, height)
+
+        img = Image.new("RGB", (width, height), (128, 128, 128))
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=60)
+        image = types.Part.from_bytes(data=buf.getvalue(), mime_type="image/jpeg")
+
+        try:
+            baseline = self._count_tokens(["."])
+            with_image = self._count_tokens([".", image])
+            tokens = max(1, with_image - baseline)
+        except Exception as e:
+            self._image_token_retry_at = time.monotonic() + COUNT_TOKENS_RETRY_INTERVAL
+            logger.debug(
+                "Gemini image-token count failed for %dx%d (%s); using heuristic",
+                width,
+                height,
+                e,
+            )
+            return super().estimate_image_tokens(width, height)
+
+        self._image_token_cache[(width, height)] = tokens
+        logger.debug(
+            "Gemini model '%s' uses %d tokens for %dx%d images",
+            self.genai_config.model,
+            tokens,
+            width,
+            height,
+        )
+        return tokens
+
+    def _count_tokens(self, contents: list[Any]) -> int:
+        """Return Gemini's prompt-token count for contents, without generating."""
+        total = self.provider.models.count_tokens(
+            model=self.genai_config.model,
+            contents=contents,
+            config=types.CountTokensConfig(
+                http_options=types.HttpOptions(
+                    timeout=COUNT_TOKENS_TIMEOUT_MS,
+                    retry_options=types.HttpRetryOptions(attempts=1),
+                )
+            ),
+        ).total_tokens
+
+        if total is None:
+            raise ValueError("count_tokens returned no total")
+
+        return total
+
+    @property
+    def supports_embeddings(self) -> bool:
+        """Whether Gemini reports embedContent support for the configured model."""
+        capabilities = self.list_model_capabilities().get(self._embedding_model_name())
+        return bool(capabilities and capabilities.get("supports_embeddings"))
+
+    def _embedding_model_name(self) -> str:
+        """Model id for embed_content, without a ``models/`` prefix."""
+        return self.genai_config.model.removeprefix("models/")
+
+    def _vector_from_embed(self, result: Any) -> np.ndarray:
+        """Read the single embedding vector from an embed_content response."""
+        embeddings = getattr(result, "embeddings", None) or []
+        values = embeddings[0].values if embeddings else None
+        if not values:
+            raise ValueError("Gemini embeddings response had no vector")
+        return np.asarray(values, dtype=np.float32)
+
+    def _embed_one(self, model: str, contents: Any) -> np.ndarray:
+        """One embed_content call. API failures become ValueError.
+
+        ``_embed_thumbnail`` only catches ValueError. Returning an empty
+        list makes the caller index ``[0]`` and can stop the embeddings
+        process.
+        """
+        try:
+            result = self.provider.models.embed_content(
+                model=model,
+                contents=contents,
+                config=types.EmbedContentConfig(
+                    output_dimensionality=GEMINI_EMBEDDING_DIM
+                ),
+            )
+        except Exception as e:
+            logger.warning("Gemini embeddings request failed: %s", e)
+            raise ValueError("Gemini embeddings request failed") from e
+
+        return self._vector_from_embed(result)
+
+    def embed(
+        self,
+        texts: list[str] | None = None,
+        images: list[bytes] | None = None,
+    ) -> list[np.ndarray]:
+        """Embed each text or image on its own.
+
+        gemini-embedding-2 returns one vector per request. Several parts
+        in one contents list are aggregated into that single vector, so
+        each description, search query, and thumbnail is its own call.
+
+        Stored descriptions and search queries share this text path, so
+        both get the search-query prefix and stay in one format. A text
+        that already starts with ``task:`` is sent unchanged. Images are
+        not prefixed. The API accepts PNG and JPEG only, and Frigate
+        stores thumbnails as WebP, so each image is transcoded first.
+        Requested length is 768, matching the semantic search tables.
+
+        Args:
+            texts: Strings to embed.
+            images: Encoded images, typically WebP thumbnails.
+
+        Returns:
+            One float32 vector per input, length 768.
+
+        Raises:
+            ValueError: An image cannot be converted, the response has
+                no vector, or the request fails.
+        """
+        texts = texts or []
+        images = images or []
+        if not texts and not images:
+            return []
+
+        model = self._embedding_model_name()
+        vectors: list[np.ndarray] = []
+
+        for text in texts:
+            content = (
+                text
+                if text.startswith("task:")
+                else f"task: search result | query: {text}"
+            )
+            vectors.append(self._embed_one(model, content))
+
+        for image in images:
+            jpeg = to_jpeg(image)
+            if jpeg is None:
+                raise ValueError("thumbnail could not be converted to JPEG")
+            vectors.append(
+                self._embed_one(
+                    model,
+                    [types.Part.from_bytes(data=jpeg, mime_type="image/jpeg")],
+                )
+            )
+
+        return vectors
 
     def chat_with_tools(
         self,
@@ -324,7 +595,7 @@ class GeminiClient(GenAIClient):
 
             response = self.provider.models.generate_content(
                 model=self.genai_config.model,
-                contents=gemini_messages,  # type: ignore[arg-type]
+                contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 
@@ -586,7 +857,7 @@ class GeminiClient(GenAIClient):
 
             stream = await self.provider.aio.models.generate_content_stream(
                 model=self.genai_config.model,
-                contents=gemini_messages,  # type: ignore[arg-type]
+                contents=gemini_messages,
                 config=types.GenerateContentConfig(**config_params),
             )
 

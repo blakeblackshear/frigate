@@ -1,14 +1,9 @@
 {
   "details": {
-    "person": "Pessoa",
     "unknown": "Desconhecido",
-    "face": "Detalhes do Rosto",
-    "subLabelScore": "Pontuação do Sub-Rótulo",
     "scoreInfo": "A pontuação do sub-rótulo é a pontuação ponderada de todas as confidências faciais reconhecidas, então a pontuação pode ser diferente da mostrada na foto instantânea.",
-    "faceDesc": "Detalhes do objeto rastreado que gerou este rosto",
     "timestamp": "Estampa de Tempo"
   },
-  "selectItem": "Selecione {{item}}",
   "imageEntry": {
     "validation": {
       "selectImage": "Por favor selecione um arquivo de imagem."
@@ -31,8 +26,6 @@
   },
   "createFaceLibrary": {
     "new": "Criar Novo Rosto",
-    "title": "Criar Coleção",
-    "desc": "Criar uma nova coleção",
     "nextSteps": "Para construir uma base forte:<li> Use a aba Reconhecimentos Recentes para selecionar e treinar em imagens para cada pessoa detectada.</li><li> Foque em imagens retas para melhores resultados; evite treinar imagens que capturam rostos em um ângulo.</li></ul>"
   },
   "deleteFaceAttempts": {
@@ -46,8 +39,6 @@
     "desc": "Entre com o novo nome para {{name}}"
   },
   "nofaces": "Nenhum rosto disponível",
-  "pixels": "{{area}}px",
-  "readTheDocs": "Leia a documentação",
   "steps": {
     "nextSteps": "Próximos Passos",
     "faceName": "Digite o Nome do Rosto",
@@ -78,7 +69,6 @@
       "description": "Você deve adicionar pelo menos um rosto à biblioteca para que o reconhecimento facial funcione."
     }
   },
-  "selectFace": "Selecionar Rosto",
   "trainFaceAs": "Treinar Rosto como:",
   "trainFace": "Treinar Rosto",
   "toast": {

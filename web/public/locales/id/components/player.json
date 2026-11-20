@@ -3,7 +3,8 @@
   "noPreviewFoundFor": "Tidak ada Pratinjau untuk {{cameraName}}",
   "submitFrigatePlus": {
     "submit": "Kirim",
-    "title": "Kirim frame ini ke Frigate+?"
+    "title": "Kirim frame ini ke Frigate+?",
+    "previewError": "Gagal memuat pratinjau snapshot. Rekaman mungkin tidak tersedia saat ini."
   },
   "noRecordingsFoundForThisTime": "Tidak ada rekaman ditemukan pada waktu ini",
   "livePlayerRequiredIOSVersion": "iOS 17.1 atau yang lebih tinggi diperlukan untuk tipe siaran langsung ini.",
@@ -11,7 +12,6 @@
     "title": "Stream Tidak Aktif",
     "desc": "Tidak ada gambar yang diterima dari strim <code>detect</code> {{cameraName}}, mohon lihat log error"
   },
-  "cameraDisabled": "Kamera dinonaktifkan",
   "stats": {
     "streamType": {
       "title": "Tipe stream:",
@@ -21,14 +21,6 @@
       "title": "Bandwith:",
       "short": "Bandwith"
     },
-    "latency": {
-      "title": "Latensi:",
-      "value": "{{seconds}} detik",
-      "short": {
-        "title": "Latensi",
-        "value": "{{seconds}} detik"
-      }
-    },
     "totalFrames": "Total Frame:",
     "droppedFrames": {
       "title": "Frame Terbuang:",
@@ -37,7 +29,7 @@
         "value": "{{droppedFrames}} frame"
       }
     },
-    "decodedFrames": "Decoded Frames:",
+    "decodedFrames": "Bingkai yang Didekode:",
     "droppedFrameRate": "Frame Rate Terbuang:"
   },
   "toast": {
@@ -45,7 +37,23 @@
       "submittedFrigatePlus": "Berhasil mengirim frame ke Frigate+"
     },
     "error": {
-      "submitFrigatePlusFailed": "Gagal mengirim frame ke Frigate+"
+      "submitFrigatePlusFailed": "Gagal mengirim frame ke Frigate+",
+      "playRecordingsFailed": "Gagal memutar rekaman (galat {{code}}): {{message}}"
     }
+  },
+  "cameraOff": "Kamera mati",
+  "quality": {
+    "auto": "Otomatis",
+    "autoLow": "Memutar kualitas rendah (bandwidth terbatas)",
+    "autoLowCodec": "Memutar kualitas rendah (Versi asli tidak didukung oleh browser ini)",
+    "autoLowSaveData": "Memutar kualitas rendah (penghemat data)",
+    "main": "Asli",
+    "sub": "Rendah",
+    "notSupportedBrowser": "Tidak didukung oleh browser ini",
+    "label": "Kualitas",
+    "noAudio": "Tanpa suara",
+    "audioRate": "Audio {{rate}} kHz",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Tidak ada rekaman dalam rentang waktu ini"
   }
 }

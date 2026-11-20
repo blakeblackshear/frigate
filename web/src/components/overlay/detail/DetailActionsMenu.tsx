@@ -55,6 +55,10 @@ export default function DetailActionsMenu({
   // currently, audio event ids are not saved in review items
   const { data: reviewItem } = useSWR<ReviewSegment>(
     search.data?.type === "audio" ? null : [`review/event/${search.id}`],
+    {
+      shouldRetryOnError: (err) =>
+        !(axios.isAxiosError(err) && err.response?.status === 404),
+    },
   );
 
   const handleDebugReplay = useCallback(() => {

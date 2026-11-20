@@ -151,6 +151,7 @@ RUN --mount=type=bind,from=trt-wheels,source=/trt-wheels,target=/deps/trt-wheels
 
 WORKDIR /opt/frigate/
 COPY --from=rootfs / /
+ENV FRIGATE_IMAGE_VARIANT=tensorrt-jp6
 
 # Fixes "Error importing detector runtime: /usr/lib/aarch64-linux-gnu/libstdc++.so.6: cannot allocate memory in static TLS block"
 ENV LD_PRELOAD /usr/lib/aarch64-linux-gnu/libstdc++.so.6

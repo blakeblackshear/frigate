@@ -1,13 +1,16 @@
 import datetime
 import logging
 import os
+import struct
+import tempfile
 import unittest
+import zoneinfo
 from unittest.mock import patch
 
 from fastapi import Request
 from fastapi.testclient import TestClient
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 from pydantic import Json
 
@@ -18,7 +21,14 @@ from frigate.debug_replay import DebugReplayManager
 from frigate.jobs.export import JobStatePublisher
 from frigate.models import Event, Recordings, ReviewSegment
 from frigate.review.types import SeverityEnum
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
+
+# Minimal TZif file for a zone fixed at UTC+0 named "UTC".
+UTC_TZIF = (
+    struct.pack(">4s16x6l", b"TZif", 0, 0, 0, 0, 1, 4)
+    + struct.pack(">lBB", 0, 0, 0)
+    + b"UTC\0"
+)
 
 
 class AuthTestClient(TestClient):
@@ -36,14 +46,31 @@ class AuthTestClient(TestClient):
 
 
 class BaseTestHttp(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        # Docker mounts of the host's /etc/localtime can overwrite the system
+        # zoneinfo/Etc/UTC file with a local zone. Shadow "UTC" with a known
+        # good file so the API's ZoneInfo("UTC") is real UTC.
+        tz_dir = tempfile.TemporaryDirectory()
+        with open(os.path.join(tz_dir.name, "UTC"), "wb") as f:
+            f.write(UTC_TZIF)
+
+        zoneinfo.reset_tzpath(to=[tz_dir.name, *zoneinfo.TZPATH])
+        zoneinfo.ZoneInfo.clear_cache()
+        cls.addClassCleanup(tz_dir.cleanup)
+        cls.addClassCleanup(zoneinfo.ZoneInfo.clear_cache)
+        cls.addClassCleanup(zoneinfo.reset_tzpath)
+
     def setUp(self, models):
         # setup clean database for each test run
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         router = Router(migrate_db)
         router.run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         self.db.bind(models)
 
         # The export job manager broadcasts via JobStatePublisher on
@@ -145,7 +172,11 @@ class BaseTestHttp(unittest.TestCase):
             pass
 
     def create_app(
-        self, stats=None, event_metadata_publisher=None, enforce_default_admin=False
+        self,
+        stats=None,
+        event_metadata_publisher=None,
+        notice_registry=None,
+        enforce_default_admin=False,
     ):
         from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 
@@ -161,6 +192,7 @@ class BaseTestHttp(unittest.TestCase):
             None,
             DebugReplayManager(),
             enforce_default_admin=enforce_default_admin,
+            notice_registry=notice_registry,
         )
 
         # Default test mocks for authentication

@@ -5,7 +5,40 @@ import threading
 
 from numpy import ndarray
 
-from frigate.detectors.detector_config import InputTensorEnum
+from frigate.detectors.detector_config import InputTensorEnum, ModelConfig
+from frigate.util.image import UntrackedSharedMemory
+
+
+def create_detection_input_shm(
+    camera: str, models: list[ModelConfig]
+) -> UntrackedSharedMemory:
+    """Create the shared memory a camera hands detection frames through.
+
+    It is sized for the largest model so a camera re-added under the same name
+    with another scene can reuse it. Detectors keep mappings of it, so it is
+    never unlinked while they run.
+
+    Args:
+        camera: Name of the camera
+        models: Every configured model
+
+    Returns:
+        The camera's detection input segment
+    """
+    size = max(model.height * model.width * 3 for model in models)
+
+    try:
+        return UntrackedSharedMemory(name=camera, create=True, size=size)
+    except FileExistsError:
+        shm = UntrackedSharedMemory(name=camera)
+
+    if shm.size >= size:
+        return shm
+
+    # left by an earlier run with smaller models, so no detector maps it yet
+    shm.close()
+    shm.unlink()
+    return UntrackedSharedMemory(name=camera, create=True, size=size)
 
 
 class RequestStore:

@@ -87,13 +87,18 @@
         "quality": {
             "label": "Qualité d'encodage"
         },
-        "mode": {
-            "description": "Mode pour l'inclusion des caméras dans la vue à vol d'oiseau : 'objects', 'motion', ou 'continuous'."
+        "modes": {
+            "label": "Types d'événements",
+            "description": "Types d'activité qui incluent les caméras dans Birdseye."
         }
     },
     "detect": {
         "enabled": {
             "label": "Activer la détection d'objet"
+        },
+        "scene": {
+            "label": "Détecter la scène",
+            "description": "L'environnement filmé par cette caméra, utilisé pour choisir le modèle configuré à exécuter. Les caméras laissées sur « default » exécutent le modèle configuré avec la scène « default »."
         }
     },
     "motion": {
@@ -214,6 +219,10 @@
                 "label": "Minimum de confiance audio",
                 "description": "Seuil de confiance minimum pour que l'événement audio soit pris en compte."
             }
+        },
+        "labelmap": {
+            "label": "Customisation Audio",
+            "description": "Remplacements ou réassignations à fusionner aux étiquettes audio standard."
         }
     },
     "ffmpeg": {
@@ -332,6 +341,41 @@
         "enabled_in_config": {
             "label": "État original de l'enregistrement",
             "description": "Indique si l'enregistrement était activé dans la configuration statique originale."
+        },
+        "sub": {
+            "label": "Enregistrement flux secondaire",
+            "description": "Paramètres pour enregistrer un second flux, de qualité moindre.",
+            "enabled": {
+                "label": "Activer l'enregistrement des flux secondaires",
+                "description": "Activer l'enregistrement d'un flux secondaire, de qualité moindre pour une qualité adaptative et une rétention étendue."
+            },
+            "continuous": {
+                "label": "Rétention continue des flux secondaires",
+                "description": "Nombre de jour de rétention des enregistrements des flux secondaire sans prise en compte d'objet traqué ou de mouvement.",
+                "days": {
+                    "label": "Jour de rétention",
+                    "description": "Combien de jour conserver les enregistrements."
+                }
+            },
+            "motion": {
+                "label": "Rétention des flux secondaires liés au mouvement",
+                "description": "Nombre de jours de conservation des enregistrements des flux secondaires déclenchés par un mouvement.",
+                "days": {
+                    "label": "Jours de rétention",
+                    "description": "Combien de jours conserver les enregistrements."
+                }
+            },
+            "alerts": {
+                "label": "Alerte rétention flux secondaires",
+                "description": "Paramètres de conservation pour les flux secondaires liés aux alertes.",
+                "days": {
+                    "label": "Jours de rétention",
+                    "description": "Nombre de jour de conservation des enregistrements lié à la détection d'événements."
+                },
+                "mode": {
+                    "label": "Mode de rétention"
+                }
+            }
         }
     },
     "review": {
@@ -346,7 +390,8 @@
                 "description": "Liste d'étiquettes d'objets considérés comme des alertes (par exemple : voiture, personne)."
             },
             "required_zones": {
-                "label": "Zones requises"
+                "label": "Zones requises",
+                "description": "Zones dans lesquelles un objet doit entrer pour être considéré comme une alarme; laisser vide pour définir l'entièreté de la zone"
             },
             "enabled_in_config": {
                 "label": "État des alertes originales",
@@ -355,13 +400,14 @@
             "cutoff_time": {
                 "label": "Temps de coupure des alertes",
                 "description": "Délai en secondes après l'absence d'activité déclenchant une alerte avant de la couper."
-            }
+            },
+            "description": "Paramètres définissant quels objets suivis génèrent des alertes et comment ces alertes sont conservées."
         },
         "detections": {
             "label": "Configuration des détections",
             "description": "Paramètres pour lesquels les objets suivis génèrent des détections (hors alerte) et comment les détections sont conservées.",
             "enabled": {
-                "label": "Activer les détections"
+                "label": "Activation des détections"
             },
             "labels": {
                 "label": "Étiquettes de détection",
@@ -400,7 +446,34 @@
                 "description": "Source des images envoyées à l'IA générative (« aperçu » ou « enregistrements ») ; « enregistrements » utilise des images de meilleure qualité mais plus de jetons d'IA."
             },
             "additional_concerns": {
-                "label": "Autres préoccupations"
+                "label": "Autres préoccupations",
+                "description": "Une liste de préoccupations ou de notes supplémentaires que la GenAI devrait prendre en compte lors de l'évaluation de l'activité sur cette caméra."
+            }
+        }
+    },
+    "live": {
+        "transcode": {
+            "label": "Flux transcodés",
+            "description": "Flux en direct transcodé en qualité inférieur à la demande de go2rtc.",
+            "enabled": {
+                "label": "Activé les flux transcodés",
+                "description": "ajouter un flux en direct de qualité inférieur que go2rtc transcode en temps réel pendant que quelqu'un regarde."
+            },
+            "source": {
+                "label": "Flux source",
+                "description": "flux à décoder par go2rtc. Par défaut le premier flux en direct."
+            },
+            "qualities": {
+                "label": "Qualités",
+                "description": "Un flux transcodé est ajouté par qualité.",
+                "height": {
+                    "label": "Taille",
+                    "description": "Taille de sortie en pixels; le forma respect le ratio de la source."
+                },
+                "bitrate": {
+                    "label": "Bitrate",
+                    "description": "Cible et bitrate maximum de la vidéo en kbps."
+                }
             }
         }
     }

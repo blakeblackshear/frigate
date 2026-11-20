@@ -374,7 +374,7 @@ If segments are only ~1 second instead of ~10 seconds, the camera is sending cor
 
 :::tip
 
-You don't have to run `ffprobe` by hand to catch this. Open a camera's **Camera Probe Info** dialog (the info icon on the System → Metrics → Cameras page) and check the **Keyframe analysis** section. It probes the record stream and flags sparse or variable keyframes, which is what smart/"+" codecs (H.264+/H.265+) and long keyframe intervals produce.
+You don't have to run `ffprobe` by hand to catch this. Open a camera's **Camera Probe Info** dialog (the info icon on the Health and Metrics → Cameras page) and check the **Keyframe analysis** section. It probes the record stream and flags sparse or variable keyframes, which is what smart/"+" codecs (H.264+/H.265+) and long keyframe intervals produce.
 
 :::
 

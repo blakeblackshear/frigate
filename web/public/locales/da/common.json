@@ -320,5 +320,18 @@
   "validation_errors": "Valideringsfejl",
   "credentialField": {
     "savedPlaceholder": "Gemt - efterlad blank for at bevare nuværende"
+  },
+  "commandMenu": {
+    "section": {
+      "cameraGroups": "Kameragrupper",
+      "settings": "Indstillinger",
+      "actions": "Handlinger"
+    },
+    "camera": {
+      "live": "Live"
+    },
+    "action": {
+      "toggleTheme": "Skift mellem lys og mørk tilstand"
+    }
   }
 }

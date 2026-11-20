@@ -318,17 +318,9 @@ def post_process_yolox(
 def get_ort_providers(
     force_cpu: bool = False,
     device: str | None = "AUTO",
-    requires_fp16: bool = False,
 ) -> tuple[list[str], list[dict[str, Any]]]:
     if force_cpu:
-        return (
-            ["CPUExecutionProvider"],
-            [
-                {
-                    "enable_cpu_mem_arena": False,
-                }
-            ],
-        )
+        return ["CPUExecutionProvider"], [{}]
 
     providers = []
     options = []
@@ -357,8 +349,8 @@ def get_ort_providers(
                 options.append(
                     {
                         "device_id": device_id,
-                        "trt_fp16_enable": requires_fp16
-                        and os.environ.get("USE_FP16", "True") != "False",
+                        "trt_fp16_enable": os.environ.get("USE_FP16", "False").lower()
+                        == "true",
                         "trt_timing_cache_enable": True,
                         "trt_engine_cache_enable": True,
                         "trt_timing_cache_path": os.path.join(
@@ -385,22 +377,12 @@ def get_ort_providers(
                     }
                 )
         elif provider == "MIGraphXExecutionProvider":
-            migraphx_cache_dir = os.path.join(MODEL_CACHE_DIR, "migraphx")
-            os.makedirs(migraphx_cache_dir, exist_ok=True)
-
-            providers.append(provider)
-            options.append(
-                {
-                    "migraphx_model_cache_dir": migraphx_cache_dir,
-                }
-            )
+            # MIGraphX is a plugin provider, which ONNX Runtime can't create by
+            # name, so get_optimized_runner selects it through its devices
+            continue
         elif provider == "CPUExecutionProvider":
             providers.append(provider)
-            options.append(
-                {
-                    "enable_cpu_mem_arena": False,
-                }
-            )
+            options.append({})
         elif provider == "AzureExecutionProvider":
             # Skip Azure provider - not typically available on local hardware
             # and prevents fallback to OpenVINO when it's the first provider

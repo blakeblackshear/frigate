@@ -18,6 +18,18 @@ import { cn } from "@/lib/utils";
 import { ChatAttachmentChip } from "@/components/chat/ChatAttachmentChip";
 import { parseAttachedEvent } from "@/utils/chatUtil";
 import type { ChatStats, ShowStatsMode } from "@/types/chat";
+import { baseUrl } from "@/api/baseUrl";
+
+// Assistant output can carry prompt-injected URLs, and the browser fetches
+// images without a click, so only same-origin images render.
+function isSameOrigin(url: string | undefined): boolean {
+  if (!url) return false;
+  try {
+    return new URL(url, baseUrl).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
 
 type MessageBubbleProps = {
   role: "user" | "assistant";
@@ -71,10 +83,10 @@ export function MessageBubble({
 
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     const text = content?.trim() || "";
     if (!text) return;
-    if (copy(text)) {
+    if (await copy(text)) {
       setCopied(true);
       toast.success(t("button.copiedToClipboard", { ns: "common" }));
       setTimeout(() => setCopied(false), 2000);
@@ -133,7 +145,7 @@ export function MessageBubble({
             variant="select"
             size="icon"
             className="size-9 rounded-full"
-            disabled={!draftContent.trim()}
+            disabled={!draftContent.trim() || onEditSubmit == null}
             onClick={handleEditSubmit}
             aria-label={t("send")}
           >
@@ -223,6 +235,23 @@ export function MessageBubble({
                     {...props}
                   />
                 ),
+                img: ({ node: _n, src, alt, ...props }) =>
+                  typeof src === "string" && isSameOrigin(src) ? (
+                    <img src={src} alt={alt} {...props} />
+                  ) : (
+                    <>{alt}</>
+                  ),
+                a: ({ node: _n, href, ...props }) =>
+                  isSameOrigin(href) ? (
+                    <a href={href} {...props} />
+                  ) : (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      {...props}
+                    />
+                  ),
               }}
             >
               {content}

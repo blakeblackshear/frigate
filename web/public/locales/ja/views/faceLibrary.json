@@ -6,13 +6,9 @@
     "nameCannotContainHash": "名前に # は使用できません。"
   },
   "details": {
-    "person": "人物",
-    "face": "顔の詳細",
     "timestamp": "タイムスタンプ",
     "unknown": "不明",
-    "subLabelScore": "サブラベルスコア",
-    "scoreInfo": "サブラベルスコアは、認識された顔の信頼度の加重スコアです。スナップショットに表示されるスコアとは異なる場合があります。",
-    "faceDesc": "この顔を生成した追跡オブジェクトの詳細"
+    "scoreInfo": "サブラベルスコアは、認識された顔の信頼度の加重スコアです。スナップショットに表示されるスコアとは異なる場合があります。"
   },
   "documentTitle": "顔データベース - Frigate",
   "uploadFaceImage": {
@@ -21,12 +17,9 @@
   },
   "collections": "コレクション",
   "createFaceLibrary": {
-    "title": "コレクションを作成",
-    "desc": "新しいコレクションを作成",
     "new": "新しい顔を作成",
     "nextSteps": "強固な基盤を作るために:<li>［過去の学習］タブで各人物に対して画像を選択し学習させてください。</li><li>最良の結果のため、正面を向いた画像に集中し、斜めからの顔画像は学習に使わないでください。</li></ul>"
   },
-  "selectItem": "{{item}} を選択",
   "steps": {
     "faceName": "顔の名前を入力",
     "uploadFace": "顔画像をアップロード",
@@ -45,7 +38,6 @@
       "description": "顔認識を機能させるには、ライブラリに少なくとも 1 つの顔を追加する必要があります。"
     }
   },
-  "selectFace": "顔を選択",
   "deleteFaceLibrary": {
     "title": "名前を削除",
     "desc": "コレクション {{name}} を削除してもよろしいですか？関連する顔はすべて完全に削除されます。"
@@ -75,7 +67,6 @@
     "maxSize": "最大サイズ: {{size}}MB"
   },
   "nofaces": "顔はありません",
-  "pixels": "{{area}}px",
   "trainFaceAs": "顔を次として学習:",
   "trainFace": "顔を学習",
   "toast": {

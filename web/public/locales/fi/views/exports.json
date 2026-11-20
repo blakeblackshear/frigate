@@ -1,10 +1,13 @@
 {
-  "search": "Etsi",
-  "documentTitle": "Vie",
-  "deleteExport.desc": "Oletko varma että haluat poistaa kohteen {{exportName}}?",
+  "search": "Haku",
+  "documentTitle": "Vienti - Frigate",
+  "deleteExport.desc": "Oletko varma että haluat poistaa viennin {{exportName}}?",
   "toast": {
     "error": {
-      "renameExportFailed": "Viedyn kohteen uudelleennimeäminen epäonnistui: {{errorMessage}}"
+      "renameExportFailed": "Viennin uudelleennimeäminen epäonnistui: {{errorMessage}}",
+      "assignCaseFailed": "Tapahtuman osoitus epäonnistui: {{errorMessage}}",
+      "caseSaveFailed": "Tapahtuman tallennus epäonnistui: {{errorMessage}}",
+      "caseDeleteFailed": "Tapahtuman poisto epäonnistui: {{errorMessage}}"
     }
   },
   "noExports": "Ei vietyjä kohteita",
@@ -19,10 +22,108 @@
   "tooltip": {
     "editName": "Muokkaa nimeä",
     "shareExport": "Jaa vienti",
-    "downloadVideo": "Lataa video"
+    "downloadVideo": "Lataa video",
+    "deleteExport": "Viennin poisto",
+    "assignToCase": "Tapahtuman lisäys",
+    "removeFromCase": "Tapahtumasta poisto"
   },
   "headings": {
-    "cases": "Tapaukset",
-    "uncategorizedExports": "Kategorisoimattomat viennit"
+    "cases": "Tapahtumat",
+    "uncategorizedExports": "Luokittelemattomat viennit"
+  },
+  "bulkActions": {
+    "delete": "Poista",
+    "deleteNow": "Poista nyt",
+    "addToCase": "Lisää tapahtumaan",
+    "moveToCase": "Siirrä tapahtumaan",
+    "removeFromCase": "Poista tapahtumasta"
+  },
+  "selected_one": "{{count}} valittu",
+  "toolbar": {
+    "newCase": "Uusi tapahtuma",
+    "addExport": "Lisää vienti",
+    "editCase": "Muokkaa tapahtumaa",
+    "deleteCase": "Poista tapahtuma"
+  },
+  "deleteCase": {
+    "label": "Poista tapahtuma",
+    "desc": "Haluatko varmasti poistaa {{caseName}}?",
+    "descKeepExports": "Viennit ovat saatavissa luokittelemattomina vienteinä.",
+    "descDeleteExports": "Kaikki viennit tästä tapahtumasta poistetaan lopullisesti.",
+    "deleteExports": "Poista myös viennit"
+  },
+  "caseDialog": {
+    "title": "Lisää tapahtumaan",
+    "description": "Valitse olemassaoleva tapahtuma tai luo uusi.",
+    "selectLabel": "Tapahtuma",
+    "newCaseOption": "Luo uusi tapahtuma",
+    "nameLabel": "Tapahtuman nimi",
+    "descriptionLabel": "Kuvaus"
+  },
+  "caseCard": {
+    "emptyCase": "Ei vielä vientejä"
+  },
+  "jobCard": {
+    "defaultName": "{{camera}} vienti",
+    "queued": "Jonossa",
+    "running": "Suorittaa",
+    "preparing": "Valmistelee",
+    "copying": "Kopioi",
+    "encoding": "Koodaus",
+    "encodingRetry": "Koodaus (uudelleen)",
+    "merging": "Liittäminen",
+    "finalizing": "Viimeistely"
+  },
+  "caseView": {
+    "noDescription": "Ei kuvausta",
+    "createdAt": "Luotu {{value}}",
+    "exportCount_one": "1 vienti",
+    "exportCount_other": "{{count}} vientiä",
+    "cameraCount_one": "1 kamera",
+    "cameraCount_other": "{{count}} kameraa",
+    "showMore": "Näytä lisää",
+    "showLess": "Näytä vähemmän",
+    "emptyTitle": "Tämä tapahtuma on tyhjä",
+    "emptyDescription": "Lisää olemassaolevia luokittelemattomia vientejä pitääksesi tapahtuman järjestyksessä.",
+    "emptyDescriptionNoExports": "Luokittelemattomia vientejä ei vielä saatavilla lisäystä varten."
+  },
+  "addExportDialog": {
+    "searchPlaceholder": "Etsi luokittelemattomia vientejä",
+    "empty": "Ei hakua vastaavia luokittelemattomia vientejä.",
+    "title": "Lisää vienti tapahtumaan {{caseName}}",
+    "addButton_one": "Lisää 1 vienti",
+    "addButton_other": "Lisää {{count}} vientiä",
+    "adding": "Lisätään..."
+  },
+  "bulkRemoveFromCase": {
+    "descKeepExports": "Viennit siirretään luokittelemattomiksi.",
+    "title": "Poista tapahtumasta",
+    "desc_one": "Poista {{count}} vienti tästä tapahtumasta?",
+    "desc_other": "Poista {{count}} vientiä tästä tapahtumasta?",
+    "descDeleteExports": "Viennit poistetaan lopullisesti.",
+    "deleteExports": "Poista sen sijaan viennit"
+  },
+  "caseEditor": {
+    "createTitle": "Luo tapahtuma",
+    "editTitle": "Muokkaa tapahtumaa",
+    "namePlaceholder": "Tapahtuman nimi",
+    "descriptionPlaceholder": "Lisää muistiinpanoja tai taustatietoja tapahtumalle"
+  },
+  "selected_other": "{{count}} valittuna",
+  "bulkDelete": {
+    "title": "Poista viennit",
+    "desc_one": "Haluatko varmasti poistaa {{count}} viennin?",
+    "desc_other": "Haluatko varmasti poistaa {{count}} vientiä?"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Vientien poisto onnistui",
+      "reassign": "Tapauksen osoitus päivitetty",
+      "remove": "Viennit poistettu tapahtumasta"
+    },
+    "error": {
+      "deleteFailed": "Vientien poisto epäonnistui: {{errorMessage}}",
+      "reassignFailed": "Tapahtuman osoitus epäonnistui: {{errorMessage}}"
+    }
   }
 }

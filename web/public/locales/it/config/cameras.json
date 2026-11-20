@@ -544,10 +544,6 @@
                 "label": "Conservazione predefinita",
                 "description": "Numero predefinito di giorni per cui conservare le istantanee."
             },
-            "mode": {
-                "label": "Modalità di conservazione",
-                "description": "Modalità di conservazione: tutti (salva tutti i segmenti), movimento (salva i segmenti con movimento) o oggetti_attivi (salva i segmenti con oggetti attivi)."
-            },
             "objects": {
                 "label": "Conservazione oggetti",
                 "description": "Eccezioni per singolo oggetto relativi ai giorni di conservazione delle istantanee."
@@ -789,10 +785,6 @@
         "enabled": {
             "label": "Abilita Birdseye",
             "description": "Abilita o disabilita la funzione di visualizzazione Birdseye."
-        },
-        "mode": {
-            "label": "Modalità di tracciamento",
-            "description": "Modalità per includere le telecamere in Birdseye: 'oggetti', 'movimento' o 'continuo'."
         },
         "order": {
             "label": "Posizione",

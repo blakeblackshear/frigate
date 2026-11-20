@@ -18,6 +18,11 @@
     "starting": "Starting replay...",
     "startLabel": "Start",
     "endLabel": "End",
+    "activeSession": {
+      "description": "A debug replay session is already running for {{camera}}. Stop it to start a new one.",
+      "stop": "Stop Replay",
+      "stopping": "Stopping..."
+    },
     "toast": {
       "error": "Failed to start debug replay: {{error}}",
       "alreadyActive": "A replay session is already active",

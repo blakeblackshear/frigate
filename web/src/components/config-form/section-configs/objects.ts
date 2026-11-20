@@ -63,6 +63,10 @@ const objects: SectionConfigOverrides = {
       {
         key: "detect-disabled",
         messageKey: "configMessages.detect.disabled",
+        runtimeOverride: {
+          section: "detect",
+          messageKey: "configMessages.detect.runtimeDisabled",
+        },
         severity: "info",
         condition: (ctx) =>
           ctx.level === "camera" &&
@@ -72,6 +76,9 @@ const objects: SectionConfigOverrides = {
     fieldMessages: [
       {
         key: "genai-no-descriptions-provider",
+        health: (ctx) =>
+          (ctx.formData as { genai?: { enabled?: boolean } })?.genai
+            ?.enabled === true,
         field: "genai.enabled",
         messageKey: "configMessages.objects.genaiNoDescriptionsProvider",
         severity: "warning",

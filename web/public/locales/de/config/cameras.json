@@ -70,10 +70,6 @@
             "label": "Birdseye aktivieren",
             "description": "Aktivieren oder deaktivieren der Birdseye-Funktion."
         },
-        "mode": {
-            "label": "Verfolgungsmodus",
-            "description": "Modus zum Einbeziehen von Kameras in Birdseye: „Objekte“, „Bewegung“ oder „kontinuierlich“."
-        },
         "order": {
             "label": "Position",
             "description": "Numerische Position, die Reihenfolge der Kamera im Birdseye-Layout steuert."
@@ -416,7 +412,7 @@
                 "description": "Die Erstellung von Beschreibungen für verfolgte Objekte durch GenAI standardmäßig aktivieren."
             },
             "use_snapshot": {
-                "label": "Verwenden Sie Momentaufnahmen",
+                "label": "Verwende Schnappschüsse",
                 "description": "Verwenden Sie für die Erstellung von Beschreibungen durch GenAI Objektsnapshots anstelle von Miniaturansichten."
             },
             "prompt": {
@@ -786,10 +782,6 @@
             "label": "Schnappschüsse aktivieren",
             "description": "Das Speichern von Momentaufnahmen für diese Kamera aktivieren oder deaktivieren."
         },
-        "clean_copy": {
-            "label": "Saubere Kopie speichern",
-            "description": "Save an unannotated clean copy of snapshots in addition to annotated ones."
-        },
         "timestamp": {
             "label": "Zeitstempel-Einblendung",
             "description": "Füge einen Zeitstempel auf die von der API abgerufenen Momentaufnahmen ein."
@@ -807,7 +799,7 @@
             "description": "Bereiche, die ein Objekt betreten muss, damit ein Schnappschuss gespeichert wird."
         },
         "height": {
-            "label": "Höhe der Momentaufnahme",
+            "label": "Schnappschuss Höhe",
             "description": "Höhe (Pixel), auf die Schnappschüsse über die API skaliert werden sollen; leer lassen, um die Originalgröße beizubehalten."
         },
         "retain": {
@@ -816,10 +808,6 @@
             "default": {
                 "label": "Standard-Aufbewahrungsfrist",
                 "description": "Standardmäßige Anzahl von Tagen, für die Snapshots aufbewahrt werden."
-            },
-            "mode": {
-                "label": "Speichermodus",
-                "description": "Speichermodus: „all“ (alle Segmente speichern), „motion“ (Segmente mit Bewegung speichern) oder „active_objects“ (Segmente mit aktiven Objekten speichern)."
             },
             "objects": {
                 "label": "Objektaufbewahrung",

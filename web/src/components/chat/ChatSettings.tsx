@@ -16,12 +16,15 @@ import { Label } from "@/components/ui/label";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useTranslation } from "react-i18next";
 import type { ShowStatsMode } from "@/types/chat";
+import { formatToolName } from "@/utils/chatUtil";
 
 type ChatSettingsProps = {
   showStats: ShowStatsMode;
   setShowStats: (mode: ShowStatsMode) => void;
   autoScroll: boolean;
   setAutoScroll: (enabled: boolean) => void;
+  alwaysAllowTools: string[];
+  clearAlwaysAllowTools: () => void;
 };
 
 export default function ChatSettings({
@@ -29,6 +32,8 @@ export default function ChatSettings({
   setShowStats,
   autoScroll,
   setAutoScroll,
+  alwaysAllowTools,
+  clearAlwaysAllowTools,
 }: ChatSettingsProps) {
   const { t } = useTranslation(["views/chat"]);
   const [open, setOpen] = useState(false);
@@ -89,6 +94,40 @@ export default function ChatSettings({
           checked={autoScroll}
           onCheckedChange={setAutoScroll}
         />
+      </div>
+      <DropdownMenuSeparator />
+      <div className="space-y-3">
+        <div className="space-y-0.5">
+          <div>{t("settings.always_allow.title")}</div>
+          <div className="text-xs text-muted-foreground">
+            {t("settings.always_allow.desc")}
+          </div>
+        </div>
+        {alwaysAllowTools.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {alwaysAllowTools.map((name) => (
+              <span
+                key={name}
+                className="rounded-md bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+              >
+                {formatToolName(name)}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-muted-foreground">
+            {t("settings.always_allow.none")}
+          </div>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full"
+          disabled={alwaysAllowTools.length === 0}
+          onClick={clearAlwaysAllowTools}
+        >
+          {t("settings.always_allow.reset")}
+        </Button>
       </div>
     </div>
   );

@@ -203,7 +203,6 @@
       "intervalInvalid": "Intervall må være et heltall større enn 0"
     }
   },
-  "none": "Ingen",
   "reclassifyImageAs": "Reklassifiser bilde som:",
   "reclassifyImage": "Reklassifiser bilde",
   "disabled": "Deaktivert"

@@ -1,6 +1,6 @@
 import { CombinedStorageGraph } from "@/components/graph/CombinedStorageGraph";
 import { StorageGraph } from "@/components/graph/StorageGraph";
-import { FrigateStats } from "@/types/stats";
+import { CameraStorage, FrigateStats } from "@/types/stats";
 import { useEffect, useMemo } from "react";
 import {
   Popover,
@@ -23,14 +23,6 @@ import { useDocDomain } from "@/hooks/use-doc-domain";
 import { LuExternalLink } from "react-icons/lu";
 import { FaExclamationTriangle } from "react-icons/fa";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
-
-type CameraStorage = {
-  [key: string]: {
-    bandwidth: number;
-    usage: number;
-    usage_percent: number;
-  };
-};
 
 type StorageMetricsProps = {
   setLastUpdated: (last: number) => void;

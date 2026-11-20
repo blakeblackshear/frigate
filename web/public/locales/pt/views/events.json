@@ -10,7 +10,6 @@
     "alert": "Não há alertas para análise",
     "detection": "Não há detecções para análise"
   },
-  "timeline": "Linha do tempo",
   "events": {
     "aria": "Selecionar eventos",
     "label": "Eventos",
@@ -34,7 +33,5 @@
   "camera": "Câmara",
   "detected": "detetado",
   "selected_one": "{{count}} selecionado",
-  "selected_other": "{{count}} selecionados",
-  "suspiciousActivity": "Atividade Suspeita",
-  "threateningActivity": "Atividade Ameaçadora"
+  "selected_other": "{{count}} selecionados"
 }

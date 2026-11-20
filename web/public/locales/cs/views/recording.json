@@ -6,7 +6,7 @@
   "toast": {
     "error": {
       "endTimeMustAfterStartTime": "Čas konce musí být po čase začátku",
-      "noValidTimeSelected": "Nebylo zvoleno platné časové období"
+      "noValidTimeSelected": "Není vybrán platný časový rozsah"
     }
   }
 }

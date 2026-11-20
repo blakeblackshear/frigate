@@ -5,65 +5,24 @@
  * for RJSF form fields.
  */
 
+import type { TFunction } from "i18next";
 import type { ConfigFormContext } from "@/types/configForm";
 import { getEffectiveAttributeLabels } from "@/utils/configUtil";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
-
-const resolveDetectorType = (
-  detectorConfig: unknown,
-  detectorKey?: string,
-): string | undefined => {
-  if (!detectorKey || !isRecord(detectorConfig)) {
-    return undefined;
-  }
-
-  const entry = detectorConfig[detectorKey];
-  if (!isRecord(entry)) {
-    return undefined;
-  }
-
-  const typeValue = entry.type;
-  return typeof typeValue === "string" && typeValue.length > 0
-    ? typeValue
-    : undefined;
-};
-
-const resolveDetectorTypeFromContext = (
-  formContext: ConfigFormContext | undefined,
-  detectorKey?: string,
-): string | undefined => {
-  const formData = formContext?.formData;
-  if (!detectorKey || !isRecord(formData)) {
-    return undefined;
-  }
-
-  const detectorConfig = isRecord(formData.detectors)
-    ? formData.detectors
-    : formData;
-
-  return resolveDetectorType(detectorConfig, detectorKey);
-};
 
 /**
  * Build the i18n translation key path for nested fields using the field path
  * provided by RJSF. This avoids ambiguity with underscores in field names and
- * normalizes dynamic segments like filter object names or detector names.
+ * normalizes dynamic segments like filter object names.
  *
  * @param segments Array of path segments (strings and/or numbers)
- * @param sectionI18nPrefix Optional section prefix for specialized sections
- * @param formContext Optional form context for resolving detector types
+ * @param formContext Optional form context for resolving attribute labels
  * @returns Normalized translation key path as a dot-separated string
  *
  * @example
  * buildTranslationPath(["filters", "person", "threshold"]) => "filters.threshold"
- * buildTranslationPath(["detectors", "ov1", "type"]) => "detectors.openvino.type"
- * buildTranslationPath(["ov1", "type"], "detectors") => "openvino.type"
  */
 export function buildTranslationPath(
   segments: Array<string | number>,
-  sectionI18nPrefix?: string,
   formContext?: ConfigFormContext,
 ): string {
   // Filter out numeric indices to get string segments only
@@ -97,46 +56,6 @@ export function buildTranslationPath(
     return normalized.join(".");
   }
 
-  // Handle detectors section - resolve the detector type when available
-  // Example: detectors.ov1.type -> detectors.openvino.type
-  const detectorsIndex = stringSegments.indexOf("detectors");
-  if (detectorsIndex !== -1 && stringSegments.length > detectorsIndex + 2) {
-    const detectorKey = stringSegments[detectorsIndex + 1];
-    const detectorType = resolveDetectorTypeFromContext(
-      formContext,
-      detectorKey,
-    );
-    if (detectorType) {
-      const normalized = [
-        ...stringSegments.slice(0, detectorsIndex + 1),
-        detectorType,
-        ...stringSegments.slice(detectorsIndex + 2),
-      ];
-      return normalized.join(".");
-    }
-
-    const normalized = [
-      ...stringSegments.slice(0, detectorsIndex + 1),
-      ...stringSegments.slice(detectorsIndex + 2),
-    ];
-    return normalized.join(".");
-  }
-
-  // Handle specialized sections like detectors where the first segment is dynamic
-  // Example: (sectionI18nPrefix="detectors") "ov1.type" -> "openvino.type"
-  if (sectionI18nPrefix === "detectors" && stringSegments.length > 1) {
-    const detectorKey = stringSegments[0];
-    const detectorType = resolveDetectorTypeFromContext(
-      formContext,
-      detectorKey,
-    );
-    if (detectorType) {
-      return [detectorType, ...stringSegments.slice(1)].join(".");
-    }
-
-    return stringSegments.slice(1).join(".");
-  }
-
   return stringSegments.join(".");
 }
 
@@ -152,13 +71,13 @@ export function buildTranslationPath(
  */
 export function resolveConfigTranslation(
   i18n: { exists: (key: string, opts?: Record<string, unknown>) => boolean },
-  t: (key: string, opts?: Record<string, unknown>) => string,
+  t: TFunction,
   translationPath: string,
   suffix: "label" | "description",
   sectionI18nPrefix?: string,
   ns?: string,
 ): string | undefined {
-  const opts = ns ? { ns } : undefined;
+  const opts = ns ? { ns } : {};
 
   if (
     sectionI18nPrefix &&
