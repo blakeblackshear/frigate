@@ -91,6 +91,16 @@ if go2rtc_config.get("rtsp", {}).get("password") is not None:
         go2rtc_config["rtsp"]["password"]
     )
 
+if go2rtc_config["api"].get("username") is not None:
+    go2rtc_config["api"]["username"] = substitute_frigate_vars(
+        go2rtc_config["api"]["username"]
+    )
+
+if go2rtc_config["api"].get("password") is not None:
+    go2rtc_config["api"]["password"] = substitute_frigate_vars(
+        go2rtc_config["api"]["password"]
+    )
+
 # ensure ffmpeg path is set correctly
 path = config.get("ffmpeg", {}).get("path", "default")
 if not is_valid_ffmpeg_path(path):
