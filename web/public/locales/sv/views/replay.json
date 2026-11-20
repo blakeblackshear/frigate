@@ -24,6 +24,11 @@
             "noRecordings": "Inga inspelningar hittades i det valda tidsintervallet",
             "stopError": "Det gick inte att stoppa felsökningsuppspelningen: {{error}}",
             "goToReplay": "Gå till uppspelning"
+        },
+        "activeSession": {
+            "description": "En felsökningsomspelningssession körs redan för {{camera}}. Stoppa den för att starta en ny.",
+            "stop": "Stoppa omspelning",
+            "stopping": "Stoppar..."
         }
     },
     "page": {
