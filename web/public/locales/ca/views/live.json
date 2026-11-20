@@ -180,6 +180,9 @@
         "saveData": "S'està reproduint {{stream}} perquè l'estalvi de dades està activat",
         "floor": "S'està reproduint el canal d'amplada de banda baixa perquè cap flux no podria mantenir-se"
       }
+    },
+    "metadata": {
+      "loading": "S'estan recuperant les metadades del flux…"
     }
   },
   "streamingSettings": "Paràmetres de transmissió",
