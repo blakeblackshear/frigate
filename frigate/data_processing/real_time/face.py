@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import shutil
+import time
 from typing import Any
 
 import cv2
@@ -56,6 +57,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         self.requires_face_detection = "face" not in self.config.objects.all_objects
         self.person_face_history: dict[str, list[tuple[str, float, int]]] = {}
         self.camera_current_people: dict[str, list[str]] = {}
+        self.last_face_detection: dict[str, float] = {}
         self.recognizer: FaceRecognizer
         self.faces_per_second = EventsPerSecond()
         self.inference_speed = InferenceSpeed(self.metrics.face_rec_speed)
@@ -134,80 +136,74 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
                 logger.debug("Not processing due to hitting max rec attempts.")
                 return
 
-        face: dict[str, Any] | None = None
-        face_box: tuple[int, int, int, int]
+        height, width = frame.shape[0] * 2 // 3, frame.shape[1]
+        min_area = self.config.cameras[camera].face_recognition.min_area
+        face_box: tuple[int, int, int, int] | None = None
+        if not self.requires_face_detection:
+            faces = [
+                attr
+                for attr in (obj_data.get("current_attributes") or [])
+                if attr.get("label") == "face" and attr.get("box")
+            ]
+            if faces:
+                face_box = max(faces, key=lambda attr: attr.get("score", 0.0))["box"]
+                left, top, right, bottom = face_box
+                face_box = (
+                    max(0, int(left)),
+                    max(0, int(top)),
+                    min(width, int(right)),
+                    min(height, int(bottom)),
+                )
+                if (
+                    face_box[2] <= face_box[0]
+                    or face_box[3] <= face_box[1]
+                    or area(face_box) < min_area
+                ):
+                    face_box = None
 
-        if self.requires_face_detection:
-            logger.debug("Running manual face detection.")
+        bgr = None
+        if face_box is None:
             person_box = obj_data.get("box")
-
             if not person_box:
-                logger.debug(f"No person box available for {id}")
                 return
-
-            # YuNet (cv2.FaceDetectorYN) is trained on BGR
+            if not self.requires_face_detection:
+                now = time.monotonic()
+                if now - self.last_face_detection.get(id, float("-inf")) < 1.0:
+                    return
+                self.last_face_detection[id] = now
+            left, top, right, bottom = map(int, person_box)
+            left, top = max(0, left), max(0, top)
+            right, bottom = min(width, right), min(height, bottom)
+            if right <= left or bottom <= top:
+                return
             bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-            left, top, right, bottom = person_box
             person = bgr[top:bottom, left:right]
-            detection = self.face_detector.detect(
+            # Missing native attributes need not mean that no face is visible.
+            logger.debug("Running local face detection for %s", id)
+            detected = self.face_detector.detect(
                 person, self.face_config.detection_threshold
             )
-
-            if detection is None:
-                logger.debug("Detected no faces for person object.")
+            if detected is None:
+                logger.debug("Detected no faces for person object %s", id)
                 return
-
-            face_box = detection.face
-            face_frame = person[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
-                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
-            ]
-
-            # check that face is correct size
-            if area(face_box) < self.config.cameras[camera].face_recognition.min_area:
-                logger.debug(
-                    f"Detected face that is smaller than the min_area {face} < {self.config.cameras[camera].face_recognition.min_area}"
-                )
-                return
-
-        else:
-            # don't run for object without attributes
-            if not obj_data.get("current_attributes"):
-                logger.debug("No attributes to parse.")
-                return
-
-            attributes: list[dict[str, Any]] = obj_data.get("current_attributes", [])
-            for attr in attributes:
-                if attr.get("label") != "face":
-                    continue
-
-                if face is None or attr.get("score", 0.0) > face.get("score", 0.0):
-                    face = attr
-
-            # no faces detected in this frame
-            if not face:
-                logger.debug(f"No face attributes found for {id}")
-                return
-
-            attr_box = face.get("box")
-
-            # check that face is valid
+            x1, y1, x2, y2 = detected.face
+            face_box = (
+                left + max(0, x1),
+                top + max(0, y1),
+                left + min(person.shape[1], x2),
+                top + min(person.shape[0], y2),
+            )
             if (
-                not attr_box
-                or area(attr_box)
-                < self.config.cameras[camera].face_recognition.min_area
+                face_box[2] <= face_box[0]
+                or face_box[3] <= face_box[1]
+                or area(face_box) < min_area
             ):
-                logger.debug(f"Invalid face box {face}")
                 return
 
-            face_box = attr_box
-
-            face_frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
-
-            face_frame = face_frame[
-                max(0, face_box[1]) : min(frame.shape[0], face_box[3]),
-                max(0, face_box[0]) : min(frame.shape[1], face_box[2]),
-            ]
+        if bgr is None:
+            bgr = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
+        left, top, right, bottom = face_box
+        face_frame = bgr[top:bottom, left:right]
 
         if face_frame.size == 0:
             logger.debug(f"Empty face crop for {id}")
@@ -405,6 +401,7 @@ class FaceRealTimeProcessor(RealTimeProcessorApi):
         return None
 
     def expire_object(self, object_id: str, camera: str) -> None:
+        self.last_face_detection.pop(object_id, None)
         if object_id in self.person_face_history:
             self.person_face_history.pop(object_id)
 
