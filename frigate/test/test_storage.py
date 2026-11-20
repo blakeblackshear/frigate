@@ -511,55 +511,33 @@ class TestHttp(unittest.TestCase):
             Recordings.get(Recordings.id == rec_d3_id)
 
     def test_storage_cleanup_keeps_retained(self):
-        """Ensure that all recordings are cleaned up when necessary."""
+        """Ensure cleanup steps over retained segments to reach newer ones."""
         config = FrigateConfig(**self.minimal_config)
         storage = StorageMaintainer(config, MagicMock())
 
-        id = "123456.keep"
-        time_keep = datetime.datetime.now().timestamp()
-        _insert_mock_event(
-            id,
-            time_keep,
-            time_keep + 30,
-            True,
-        )
-        rec_k_id = "1234567.keep"
-        rec_k2_id = "1234568.keep"
-        rec_k3_id = "1234569.keep"
-        _insert_mock_recording(
-            rec_k_id,
-            os.path.join(self.test_dir, f"{rec_k_id}.tmp"),
-            time_keep,
-            time_keep + 10,
-        )
-        _insert_mock_recording(
-            rec_k2_id,
-            os.path.join(self.test_dir, f"{rec_k2_id}.tmp"),
-            time_keep + 10,
-            time_keep + 20,
-        )
-        _insert_mock_recording(
-            rec_k3_id,
-            os.path.join(self.test_dir, f"{rec_k3_id}.tmp"),
-            time_keep + 20,
-            time_keep + 30,
-        )
+        seg_len = 600
+        base = datetime.datetime.now().timestamp() - 7200
+        _insert_mock_event("123456.keep", base, base + 2.5 * seg_len, True)
 
-        time_delete = datetime.datetime.now().timestamp() - 7200
-        for i in range(0, 59):
-            id = f"{123456 + i}.delete"
+        paths = {}
+        for i in range(10):
+            rec_id = f"segment-{i}"
+            paths[rec_id] = os.path.join(self.test_dir, f"{rec_id}.tmp")
             _insert_mock_recording(
-                id,
-                os.path.join(self.test_dir, f"{id}.tmp"),
-                time_delete,
-                time_delete + 600,
+                rec_id, paths[rec_id], base + i * seg_len, base + (i + 1) * seg_len
             )
 
+        # Hourly bandwidth is 48 MB, so cleanup needs all 56 MB of unretained
+        # segments and must pass the older retained ones to get there.
         storage.calculate_camera_bandwidth()
         storage.reduce_storage_consumption()
-        assert Recordings.get(Recordings.id == rec_k_id)
-        assert Recordings.get(Recordings.id == rec_k2_id)
-        assert Recordings.get(Recordings.id == rec_k3_id)
+
+        retained = {"segment-0", "segment-1", "segment-2"}
+        remaining = {r.id for r in Recordings.select(Recordings.id)}
+        on_disk = {rec_id for rec_id, path in paths.items() if os.path.exists(path)}
+        self.assertEqual(remaining, retained)
+        self.assertEqual(on_disk, retained)
+        self.assertFalse(storage.retention_unmet)
 
     def test_unmet_retention_sets_the_live_flag(self):
         config = FrigateConfig(**self.minimal_config)
