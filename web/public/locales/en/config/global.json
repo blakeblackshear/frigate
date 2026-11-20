@@ -358,6 +358,10 @@
       "label": "Roles",
       "description": "GenAI roles (chat, descriptions, embeddings, transcribe); one provider per role. Only chat, descriptions, and embeddings are granted by default; transcribe must be listed explicitly."
     },
+    "send_request_ids": {
+      "label": "Send request IDs",
+      "description": "Send existing event IDs in HTTP headers on object description requests for external correlation."
+    },
     "provider_options": {
       "label": "Provider options",
       "description": "Additional provider-specific options to pass to the GenAI client."

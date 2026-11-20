@@ -829,6 +829,8 @@ genai:
       - descriptions
       - embeddings
       - transcribe
+    # Optional: Send existing IDs in description request headers (default: shown below)
+    send_request_ids: false
     # Optional additional args to pass to the GenAI Provider (default: None)
     provider_options:
       keep_alive: -1
