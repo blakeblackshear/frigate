@@ -923,7 +923,7 @@ function DetectionReview({
             )}
         </div>
       </div>
-      <div className="flex w-[65px] flex-row md:w-[110px]">
+      <div className="flex w-[73px] flex-row md:w-[110px]">
         <div className="no-scrollbar relative w-[55px] md:w-[100px]">
           {loading ? (
             <Skeleton className="size-full" />
@@ -951,7 +951,7 @@ function DetectionReview({
             />
           )}
         </div>
-        <div className="w-[10px]">
+        <div className="w-[18px] md:w-[10px]">
           {loading ? (
             <Skeleton className="w-full" />
           ) : (
@@ -1013,6 +1013,7 @@ function MotionReview({
   const segmentDuration = 30;
   const { data: config } = useSWR<FrigateConfig>("config");
   const allowedCameras = useAllowedCameras();
+  const motionTimelineRef = useRef<HTMLDivElement>(null);
 
   const reviewCameras = useMemo(() => {
     if (!config) {
@@ -1700,34 +1701,58 @@ function MotionReview({
         </div>
       </div>
       {!selectedMotionPreviewCamera && (
-        <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
-          {motionData ? (
-            <MotionReviewTimeline
-              segmentDuration={segmentDuration}
-              timestampSpread={15}
-              timelineStart={timeRangeSegments.end}
-              timelineEnd={timeRangeSegments.start}
-              motionOnly={motionOnly}
-              showHandlebar
-              handlebarTime={currentTime}
-              setHandlebarTime={setCurrentTime}
-              events={reviewItems?.all ?? []}
-              motion_events={motionData ?? []}
-              contentRef={contentRef}
-              onHandlebarDraggingChange={(scrubbing) => {
-                if (playing && scrubbing) {
-                  setPlaying(false);
-                }
+        <div
+          className={cn(
+            "flex flex-row",
+            motionOnly ? "w-[55px] md:w-[100px]" : "w-[73px] md:w-[110px]",
+          )}
+        >
+          <div className="no-scrollbar w-[55px] overflow-y-auto md:w-[100px]">
+            {motionData ? (
+              <MotionReviewTimeline
+                timelineRef={motionTimelineRef}
+                segmentDuration={segmentDuration}
+                timestampSpread={15}
+                timelineStart={timeRangeSegments.end}
+                timelineEnd={timeRangeSegments.start}
+                motionOnly={motionOnly}
+                showHandlebar
+                handlebarTime={currentTime}
+                setHandlebarTime={setCurrentTime}
+                events={reviewItems?.all ?? []}
+                motion_events={motionData ?? []}
+                contentRef={contentRef}
+                onHandlebarDraggingChange={(scrubbing) => {
+                  if (playing && scrubbing) {
+                    setPlaying(false);
+                  }
 
-                setScrubbing(scrubbing);
-              }}
-              dense={isMobileOnly}
-              isZooming={false}
-              zoomDirection={null}
-              alwaysShowMotionLine={true}
-            />
-          ) : (
-            <Skeleton className="size-full" />
+                  setScrubbing(scrubbing);
+                }}
+                dense={isMobileOnly}
+                isZooming={false}
+                zoomDirection={null}
+                alwaysShowMotionLine={true}
+              />
+            ) : (
+              <Skeleton className="size-full" />
+            )}
+          </div>
+          {!motionOnly && (
+            <div className="w-[18px] md:w-[10px]">
+              {motionData ? (
+                <SummaryTimeline
+                  reviewTimelineRef={motionTimelineRef}
+                  timelineStart={timeRangeSegments.end}
+                  timelineEnd={timeRangeSegments.start}
+                  segmentDuration={segmentDuration}
+                  motionData={motionData}
+                  motionScale={segmentDuration / 2}
+                />
+              ) : (
+                <Skeleton className="w-full" />
+              )}
+            </div>
           )}
         </div>
       )}
