@@ -189,8 +189,6 @@ def is_cuda_blocking_sync_enabled() -> bool:
     """
     raw = os.environ.get("CUDA_BLOCKING_SYNC")
     if raw is None:
-        raw = os.environ.get("USE_CUDA_BLOCKING_SYNC")
-    if raw is None:
         return True
     return raw.strip().lower() in ("true", "1", "yes", "on")
 
@@ -915,10 +913,7 @@ def get_optimized_runner(
 
     providers, options = get_ort_providers(device == "CPU", device, **kwargs)
 
-    if (
-        providers[0] in ("CUDAExecutionProvider", "TensorrtExecutionProvider")
-        and is_cuda_blocking_sync_enabled()
-    ):
+    if providers[0] in ("CUDAExecutionProvider", "TensorrtExecutionProvider"):
         enable_cuda_blocking_sync(options[0]["device_id"])
 
     if providers[0] == "CPUExecutionProvider":

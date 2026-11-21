@@ -55,8 +55,6 @@ class TestTensorRtDetectorContext(unittest.TestCase):
         ):
             if "CUDA_BLOCKING_SYNC" not in env:
                 os.environ.pop("CUDA_BLOCKING_SYNC", None)
-            if "USE_CUDA_BLOCKING_SYNC" not in env:
-                os.environ.pop("USE_CUDA_BLOCKING_SYNC", None)
 
             detector = TensorRtDetector(config)
 
@@ -74,10 +72,6 @@ class TestTensorRtDetectorContext(unittest.TestCase):
             with self.subTest(value=value):
                 flags, _, _ = self._create_detector({"CUDA_BLOCKING_SYNC": value})
                 self.assertEqual(flags, 0x08)
-
-    def test_use_cuda_blocking_sync_disables_blocking_sync(self):
-        flags, _, _ = self._create_detector({"USE_CUDA_BLOCKING_SYNC": "false"})
-        self.assertEqual(flags, 0x08)
 
     def test_env_var_enables_blocking_sync(self):
         for value in ("true", "True", "1", "yes", "on"):
