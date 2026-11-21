@@ -1191,7 +1191,11 @@ def apply_section_update(camera_config, section: str, update: dict) -> str | Non
     Returns:
         None on success, or an error message string on failure.
     """
-    from frigate.config.config import RuntimeFilterConfig, RuntimeMotionConfig
+    from frigate.config.config import (
+        FilterConfig,
+        RuntimeFilterConfig,
+        RuntimeMotionConfig,
+    )
 
     current = getattr(camera_config, section, None)
     if current is None:
@@ -1223,6 +1227,9 @@ def apply_section_update(camera_config, section: str, update: dict) -> str | Non
                 new_objects._all_objects = current._all_objects
             except AttributeError:
                 pass
+
+            for label in new_objects.track:
+                new_objects.filters.setdefault(label, FilterConfig())
 
             # Rebuild RuntimeFilterConfig with merged global + per-object masks
             for obj_name, filt in new_objects.filters.items():
