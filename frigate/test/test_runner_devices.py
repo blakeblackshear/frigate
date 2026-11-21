@@ -211,7 +211,7 @@ class TestLoadRegistry(unittest.TestCase):
             ) as blocking_sync,
         ):
             get_optimized_runner("/models/yolo-generic.onnx", "GPU", "yolo-generic")
-            blocking_sync.assert_not_called()
+            blocking_sync.assert_called_once_with(1)
 
 
 class TestLoadedDeviceSnapshot(unittest.TestCase):
