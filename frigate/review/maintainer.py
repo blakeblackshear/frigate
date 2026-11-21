@@ -30,6 +30,7 @@ from frigate.const import (
     UPSERT_REVIEW_SEGMENT,
 )
 from frigate.models import ReviewSegment
+from frigate.review.severity import get_review_severity
 from frigate.review.types import SeverityEnum
 from frigate.track.object_processing import ManualEventState
 from frigate.util.image import SharedMemoryFrameManager, calculate_16_9_crop
@@ -217,57 +218,21 @@ class ActiveObjects:
         }
 
         for o in all_objects:
-            if (
-                o["motionless_count"] >= camera_config.detect.stationary.threshold
-                and not o["pending_loitering"]
-            ):
-                # no stationary objects unless loitering
-                continue
+            severity = get_review_severity(
+                camera_config,
+                label=o["label"],
+                current_zones=o["current_zones"],
+                false_positive=o["false_positive"],
+                detected=o["frame_time"] == frame_time,
+                position_changes=o["position_changes"],
+                motionless_count=o["motionless_count"],
+                pending_loitering=o["pending_loitering"],
+            )
 
-            if o["position_changes"] == 0:
-                # object must have moved at least once
-                continue
-
-            if o["frame_time"] != frame_time:
-                # object must be detected in this frame
-                continue
-
-            if o["false_positive"]:
-                # object must not be a false positive
-                continue
-
-            if (
-                o["label"] in camera_config.review.alerts.labels
-                and (
-                    not camera_config.review.alerts.required_zones
-                    or (
-                        len(o["current_zones"]) > 0
-                        and set(o["current_zones"])
-                        & set(camera_config.review.alerts.required_zones)
-                    )
-                )
-                and camera_config.review.alerts.enabled
-            ):
+            if severity == SeverityEnum.alert:
                 self.categorized_objects["alerts"].append(o)
-                continue
-
-            if (
-                (
-                    camera_config.review.detections.labels is None
-                    or o["label"] in camera_config.review.detections.labels
-                )
-                and (
-                    not camera_config.review.detections.required_zones
-                    or (
-                        len(o["current_zones"]) > 0
-                        and set(o["current_zones"])
-                        & set(camera_config.review.detections.required_zones)
-                    )
-                )
-                and camera_config.review.detections.enabled
-            ):
+            elif severity == SeverityEnum.detection:
                 self.categorized_objects["detections"].append(o)
-                continue
 
     def has_active_objects(self) -> bool:
         return (
