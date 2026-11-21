@@ -69,6 +69,14 @@ export interface CameraConfig {
     modes: BirdseyeMode[];
     order: number;
   };
+  dewarp: {
+    center_x: number;
+    center_y: number;
+    radius: number;
+    fov: number;
+    pan: number;
+    tilt: number;
+  };
   detect: {
     annotation_offset: number;
     enabled: boolean;

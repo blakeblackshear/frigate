@@ -72,6 +72,39 @@ class TestConfig(unittest.TestCase):
         if not os.path.exists(MODEL_CACHE_DIR) and not os.path.islink(MODEL_CACHE_DIR):
             os.makedirs(MODEL_CACHE_DIR)
 
+    def test_dewarp_defaults(self):
+        frigate_config = FrigateConfig(**self.minimal)
+        dewarp = frigate_config.cameras["back"].dewarp
+
+        self.assertEqual(dewarp.center_x, 0.5)
+        self.assertEqual(dewarp.center_y, 0.5)
+        self.assertEqual(dewarp.radius, 0.5)
+        self.assertEqual(dewarp.fov, 180)
+
+    def test_dewarp_custom_values(self):
+        config = deepcopy(self.minimal)
+        config["cameras"]["back"]["dewarp"] = {
+            "center_x": 0.52,
+            "center_y": 0.47,
+            "radius": 0.48,
+            "fov": 190,
+        }
+
+        dewarp = FrigateConfig(**config).cameras["back"].dewarp
+
+        self.assertEqual(dewarp.center_x, 0.52)
+        self.assertEqual(dewarp.center_y, 0.47)
+        self.assertEqual(dewarp.radius, 0.48)
+        self.assertEqual(dewarp.fov, 190)
+
+    def test_dewarp_rejects_out_of_range_values(self):
+        for field, value in (("center_x", 1.5), ("radius", 0), ("fov", 400)):
+            config = deepcopy(self.minimal)
+            config["cameras"]["back"]["dewarp"] = {field: value}
+
+            with self.subTest(field=field), self.assertRaises(ValidationError):
+                FrigateConfig(**config)
+
     def test_config_class(self):
         frigate_config = FrigateConfig(**self.minimal)
         model = frigate_config.primary_model

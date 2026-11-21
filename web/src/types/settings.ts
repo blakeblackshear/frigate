@@ -37,6 +37,7 @@ export const settingsViewGroups = [
       "cameraObjects",
       "cameraMotion",
       "motionTuner",
+      "fisheyeDewarp",
       "cameraFfmpeg",
       "cameraRecording",
       "cameraSnapshots",

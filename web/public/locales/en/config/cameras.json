@@ -811,6 +811,34 @@
     "label": "Best image timeout",
     "description": "How long to wait for the image with the highest confidence score."
   },
+  "dewarp": {
+    "label": "Fisheye dewarp",
+    "description": "Lens calibration used to dewarp a fisheye camera image into a 360 view in the UI.",
+    "center_x": {
+      "label": "Center X",
+      "description": "Horizontal center of the fisheye circle as a fraction of the image width (0.0 is the left edge, 1.0 is the right edge)."
+    },
+    "center_y": {
+      "label": "Center Y",
+      "description": "Vertical center of the fisheye circle as a fraction of the image height (0.0 is the top edge, 1.0 is the bottom edge)."
+    },
+    "radius": {
+      "label": "Radius",
+      "description": "Radius of the fisheye circle as a fraction of the image height."
+    },
+    "fov": {
+      "label": "Lens field of view",
+      "description": "Field of view covered by the fisheye circle in degrees."
+    },
+    "pan": {
+      "label": "Pan",
+      "description": "Rotation of the lens around the vertical axis in degrees, used to align the dewarped view."
+    },
+    "tilt": {
+      "label": "Tilt",
+      "description": "Angle of the lens away from pointing straight down in degrees (0 for a ceiling mount, 90 for a wall mount)."
+    }
+  },
   "mqtt": {
     "label": "MQTT",
     "description": "MQTT image publishing settings.",
