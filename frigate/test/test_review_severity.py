@@ -152,7 +152,9 @@ class TestTrackedObjectMaxSeverity(unittest.TestCase):
 
             self.last_detection = self._obj_data(x, score, frame_time)
 
-        self.obj.update(frame_time, dict(self.last_detection), False)
+        _, self.last_significant, _, _ = self.obj.update(
+            frame_time, dict(self.last_detection), False
+        )
         activity = ActiveObjects(frame_time, self.camera_config, [self.obj.to_dict()])
 
         if activity.has_activity_category(SeverityEnum.alert):
@@ -191,6 +193,27 @@ class TestTrackedObjectMaxSeverity(unittest.TestCase):
         self.assertEqual(set(review_severities), {None})
         self.assertIsNone(self.obj.max_severity)
         self.assertIsNone(self.obj.to_dict()["max_severity"])
+
+    def test_severity_change_is_significant(self):
+        """Confirming an object already moving in the zone changes nothing else
+        that is watched, but the new severity still has to be published."""
+        for i in range(10):
+            self._step(OUTSIDE_X + i * 40, 0.6, moved=True)
+
+        self.assertEqual(self.obj.current_zones, [ZONE])
+        self.assertIsNone(self.obj.max_severity)
+
+        for i in range(10):
+            self._step(INSIDE_X + (i % 2) * 10, 0.9, moved=True)
+
+            if self.obj.max_severity is not None:
+                break
+
+        self.assertEqual(self.obj.max_severity, SeverityEnum.alert)
+        self.assertTrue(self.last_significant)
+
+        self._step(INSIDE_X, 0.9, moved=True)
+        self.assertFalse(self.last_significant)
 
     def test_alert_is_kept_after_object_stops_qualifying(self):
         for i in range(10):

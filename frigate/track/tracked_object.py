@@ -373,10 +373,13 @@ class TrackedObject:
             pending_loitering=self.pending_loitering,
         )
 
-        if severity == SeverityEnum.alert or (
-            severity == SeverityEnum.detection and self.max_severity is None
+        if severity != self.max_severity and (
+            severity == SeverityEnum.alert
+            or (severity == SeverityEnum.detection and self.max_severity is None)
         ):
             self.max_severity = severity
+            # max_severity is saved with the event, so publish the change
+            significant_change = True
 
         logger.debug(
             f"{self.camera_config.name}: Updating {obj_data['id']}: thumb update? {thumb_update}, significant change? {significant_change}, path update? {path_update}, autotracker update? {autotracker_update} "

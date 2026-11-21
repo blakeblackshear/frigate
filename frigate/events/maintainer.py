@@ -42,6 +42,7 @@ def should_update_db(prev_event: dict[str, Any], current_event: dict[str, Any]) 
             or prev_event["recognized_license_plate"]
             != current_event["recognized_license_plate"]
             or prev_event["path_data"] != current_event["path_data"]
+            or prev_event["max_severity"] != current_event["max_severity"]
         ):
             return True
     return False
