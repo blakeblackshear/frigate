@@ -124,6 +124,76 @@ class TestTrackedObjectDiskErrors(unittest.TestCase):
                 any("Failed to write snapshot" in line for line in cm.output)
             )
 
+    def _make_failing_open(self, target_suffix: str, *, fail_on: str) -> Any:
+        orig_open = builtins.open
+
+        class _FailingFile:
+            def __enter__(self) -> "_FailingFile":
+                return self
+
+            def write(self, data: bytes) -> int:
+                if fail_on == "write":
+                    raise TimeoutError(
+                        errno.ETIMEDOUT, "Connection timed out", target_suffix
+                    )
+                return len(data)
+
+            def __exit__(self, *args: Any) -> bool:
+                if fail_on == "close":
+                    raise OSError(errno.EIO, "I/O error on close", target_suffix)
+                return False
+
+        def wrapped_open(file: Any, *args: Any, **kwargs: Any) -> Any:
+            if str(file).endswith(target_suffix):
+                return _FailingFile()
+            return orig_open(file, *args, **kwargs)
+
+        return wrapped_open
+
+    def test_write_thumbnail_logs_warning_on_write_and_close_oserror(self):
+        for fail_on in ("write", "close"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                with (
+                    patch("frigate.track.tracked_object.THUMB_DIR", tmpdir),
+                    patch.object(self.obj, "get_thumbnail", return_value=b"webp"),
+                    patch(
+                        "builtins.open",
+                        side_effect=self._make_failing_open(
+                            "1000.0-abcdef.webp", fail_on=fail_on
+                        ),
+                    ),
+                    self.assertLogs(
+                        "frigate.track.tracked_object", level="WARNING"
+                    ) as cm,
+                ):
+                    self.obj.write_thumbnail_to_disk()
+
+                self.assertTrue(
+                    any("Failed to write thumbnail" in line for line in cm.output)
+                )
+
+    def test_write_snapshot_logs_warning_on_write_and_close_oserror(self):
+        for fail_on in ("write", "close"):
+            with tempfile.TemporaryDirectory() as tmpdir:
+                with (
+                    patch("frigate.track.tracked_object.CLIPS_DIR", tmpdir),
+                    patch.object(self.obj, "get_clean_webp", return_value=b"webp"),
+                    patch(
+                        "builtins.open",
+                        side_effect=self._make_failing_open(
+                            "cam-1000.0-abcdef-clean.webp", fail_on=fail_on
+                        ),
+                    ),
+                    self.assertLogs(
+                        "frigate.track.tracked_object", level="WARNING"
+                    ) as cm,
+                ):
+                    self.obj.write_snapshot_to_disk()
+
+                self.assertTrue(
+                    any("Failed to write snapshot" in line for line in cm.output)
+                )
+
 
 if __name__ == "__main__":
     unittest.main()
