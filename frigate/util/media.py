@@ -96,7 +96,8 @@ def remove_empty_directories(root: Path, paths: Iterable[Path]) -> None:
             except OSError as e:
                 if e.errno == errno.ENOTEMPTY:
                     continue
-                raise
+                logger.warning("Failed to remove empty directory %s: %s", path, e)
+                continue
 
             parents.add(path.parent)
 
