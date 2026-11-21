@@ -11,6 +11,8 @@ export type Camera360ViewerHandle = {
 type Camera360ViewerProps = {
   className?: string;
   settings?: FisheyeSettings;
+  /** Outline the edge of the fisheye circle on the sphere, for calibration. */
+  showEdge?: boolean;
   ref?: Ref<Camera360ViewerHandle>;
 };
 
@@ -21,6 +23,8 @@ const MAX_FOV = 100;
 const DEFAULT_LAT = -45;
 const MAX_LAT = 85;
 const DRAG_SENSITIVITY = 0.15;
+const EDGE_COLOR = 0xff3333;
+const EDGE_WIDTH_PX = 3;
 
 const vertexShader = /* glsl */ `
   varying vec3 vDir;
@@ -42,12 +46,21 @@ const fragmentShader = /* glsl */ `
   uniform float radius;
   uniform float imageAspect;
   uniform float halfLensFov;
+  uniform bool showEdge;
+  uniform vec3 edgeColor;
+  uniform float edgeWidth;
 
   varying vec3 vDir;
 
   void main() {
     vec3 dir = lensRotation * normalize(vDir);
     float theta = acos(clamp(-dir.y, -1.0, 1.0));
+
+    // fwidth keeps the outline a constant width on screen at any zoom
+    if (showEdge && abs(theta - halfLensFov) < 0.5 * edgeWidth * fwidth(theta)) {
+      gl_FragColor = vec4(edgeColor, 1.0);
+      return;
+    }
 
     if (!hasMap || theta > halfLensFov) {
       gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -60,6 +73,12 @@ const fragmentShader = /* glsl */ `
 
     // radius is relative to image height, so scale x by the aspect ratio
     vec2 imageCoord = center + vec2(offset.x * r / imageAspect, offset.y * r);
+
+    // the circle extends past the frame, show black instead of smeared pixels
+    if (any(lessThan(imageCoord, vec2(0.0))) || any(greaterThan(imageCoord, vec2(1.0)))) {
+      gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+      return;
+    }
 
     // image coordinates start at the top left, texture uvs at the bottom left
     gl_FragColor = texture2D(map, vec2(imageCoord.x, 1.0 - imageCoord.y));
@@ -75,6 +94,7 @@ const fragmentShader = /* glsl */ `
 export default function Camera360Viewer({
   className,
   settings = DEFAULT_FISHEYE_SETTINGS,
+  showEdge = false,
   ref,
 }: Camera360ViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,6 +103,13 @@ export default function Camera360Viewer({
     () => {},
   );
   const settingsRef = useRef(settings);
+  const showEdgeRef = useRef(showEdge);
+  const applyShowEdgeRef = useRef<(showEdge: boolean) => void>(() => {});
+
+  useEffect(() => {
+    showEdgeRef.current = showEdge;
+    applyShowEdgeRef.current(showEdge);
+  }, [showEdge]);
 
   useImperativeHandle(
     ref,
@@ -126,6 +153,9 @@ export default function Camera360Viewer({
         imageAspect: { value: 1 },
         lensRotation: { value: new THREE.Matrix3() },
         halfLensFov: { value: Math.PI / 2 },
+        showEdge: { value: false },
+        edgeColor: { value: new THREE.Color(EDGE_COLOR) },
+        edgeWidth: { value: EDGE_WIDTH_PX * window.devicePixelRatio },
       },
     });
     const mesh = new THREE.Mesh(geometry, material);
@@ -184,6 +214,12 @@ export default function Camera360Viewer({
     };
 
     applySettingsRef.current(settingsRef.current);
+
+    applyShowEdgeRef.current = (value) => {
+      material.uniforms.showEdge.value = value;
+      requestRender();
+    };
+    applyShowEdgeRef.current(showEdgeRef.current);
 
     updateFrameRef.current = (image) => {
       // the frame size can change with the container size, and three.js
@@ -278,6 +314,7 @@ export default function Camera360Viewer({
     return () => {
       updateFrameRef.current = () => {};
       applySettingsRef.current = () => {};
+      applyShowEdgeRef.current = () => {};
       if (frameRequest !== null) {
         cancelAnimationFrame(frameRequest);
       }

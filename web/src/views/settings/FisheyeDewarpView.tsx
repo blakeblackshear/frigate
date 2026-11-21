@@ -236,6 +236,7 @@ export default function FisheyeDewarpView({
               ref={viewerRef}
               className="absolute inset-0"
               settings={settings}
+              showEdge
             />
           </div>
         </div>
