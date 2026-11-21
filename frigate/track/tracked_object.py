@@ -520,14 +520,15 @@ class TrackedObject:
         if webp_bytes is None:
             logger.warning(f"Unable to save snapshot for {self.obj_data['id']}.")
         else:
-            with open(
-                os.path.join(
-                    CLIPS_DIR,
-                    f"{self.camera_config.name}-{self.obj_data['id']}-clean.webp",
-                ),
-                "wb",
-            ) as p:
-                p.write(webp_bytes)
+            snapshot_path = os.path.join(
+                CLIPS_DIR,
+                f"{self.camera_config.name}-{self.obj_data['id']}-clean.webp",
+            )
+            try:
+                with open(snapshot_path, "wb") as p:
+                    p.write(webp_bytes)
+            except OSError as e:
+                logger.warning("Failed to write snapshot %s: %s", snapshot_path, e)
 
     def write_thumbnail_to_disk(self) -> None:
         if not self.camera_config.name:
@@ -537,16 +538,16 @@ class TrackedObject:
             return
 
         directory = os.path.join(THUMB_DIR, self.camera_config.name)
+        thumb_path = os.path.join(directory, f"{self.obj_data['id']}.webp")
 
-        os.makedirs(directory, exist_ok=True)
-
-        thumb_bytes = self.get_thumbnail("webp")
-
-        if thumb_bytes:
-            with open(
-                os.path.join(directory, f"{self.obj_data['id']}.webp"), "wb"
-            ) as f:
-                f.write(thumb_bytes)
+        try:
+            os.makedirs(directory, exist_ok=True)
+            thumb_bytes = self.get_thumbnail("webp")
+            if thumb_bytes:
+                with open(thumb_path, "wb") as f:
+                    f.write(thumb_bytes)
+        except OSError as e:
+            logger.warning("Failed to write thumbnail %s: %s", thumb_path, e)
 
 
 def zone_filtered(obj: TrackedObject, object_config: dict[str, FilterConfig]) -> bool:
