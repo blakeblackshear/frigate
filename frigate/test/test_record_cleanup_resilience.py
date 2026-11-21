@@ -341,6 +341,56 @@ class TestRecordingCleanupResilience(unittest.TestCase):
             self.assertEqual(len(cm.output), 1)
             self.assertIn("cam1", cm.output[0])
 
+    def test_failed_recording_unlink_keeps_overlapping_preview(self):
+        cleanup = self._build_cleanup()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            r_fail = root / "r_fail.mp4"
+            p_overlap = root / "p_overlap.mp4"
+            p_other = root / "p_other.mp4"
+            p_overlap.touch()
+            p_other.touch()
+
+            self._insert_recording("r_fail", r_fail, age_days=10, offset_s=10)
+            rec = Recordings.get(Recordings.id == "r_fail")
+            Previews.create(
+                id="p_overlap",
+                camera="front_door",
+                path=str(p_overlap),
+                start_time=rec.start_time,
+                end_time=rec.end_time,
+                duration=10,
+            )
+            Previews.create(
+                id="p_other",
+                camera="front_door",
+                path=str(p_other),
+                start_time=rec.end_time + 90,
+                end_time=rec.end_time + 100,
+                duration=10,
+            )
+
+            orig_unlink = Path.unlink
+
+            def flaky_unlink(path_self: Path, missing_ok: bool = False) -> None:
+                if path_self == r_fail:
+                    raise TimeoutError(
+                        errno.ETIMEDOUT, "Connection timed out", str(path_self)
+                    )
+                orig_unlink(path_self, missing_ok=missing_ok)
+
+            with (
+                patch.object(Path, "unlink", autospec=True, side_effect=flaky_unlink),
+                self.assertLogs("frigate.record.cleanup", level="WARNING"),
+            ):
+                cleanup.expire_recordings()
+
+            self.assertIsNotNone(Recordings.get_or_none(Recordings.id == "r_fail"))
+            self.assertIsNotNone(Previews.get_or_none(Previews.id == "p_overlap"))
+            self.assertIsNone(Previews.get_or_none(Previews.id == "p_other"))
+            self.assertTrue(p_overlap.exists())
+            self.assertFalse(p_other.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

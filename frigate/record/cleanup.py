@@ -285,6 +285,8 @@ class RecordingCleanup(threading.Thread):
                         total_deleted_recordings += self._flush_deleted_recordings(
                             deleted_recordings
                         )
+                else:
+                    kept_recordings.append((recording.start_time, recording.end_time))
             else:
                 kept_recordings.append((recording.start_time, recording.end_time))
 
