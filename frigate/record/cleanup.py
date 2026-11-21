@@ -27,6 +27,8 @@ from frigate.util.media import remove_empty_directories
 
 logger = logging.getLogger(__name__)
 
+DB_DELETE_BATCH_SIZE = 500
+
 
 def _filter_reviews_for_pass(
     reviews: Iterable[Any],
@@ -58,6 +60,29 @@ class RecordingCleanup(threading.Thread):
         super().__init__(name="recording_cleanup")
         self.config = config
         self.stop_event = stop_event
+
+    def _unlink_path(self, path: Path) -> bool:
+        """Unlink a file, logging and skipping transient filesystem errors."""
+        try:
+            path.unlink(missing_ok=True)
+            return True
+        except OSError as e:
+            logger.warning("Failed to delete %s: %s", path, e)
+            return False
+
+    def _flush_deleted_recordings(self, deleted_recordings: set[Any]) -> int:
+        """Delete queued recording IDs from the DB and clear the pending set."""
+        if not deleted_recordings:
+            return 0
+        deleted_list = list(deleted_recordings)
+        max_deletes = 100000
+        for i in range(0, len(deleted_list), max_deletes):
+            Recordings.delete().where(
+                Recordings.id << deleted_list[i : i + max_deletes]
+            ).execute()
+        count = len(deleted_list)
+        deleted_recordings.clear()
+        return count
 
     def clean_tmp_previews(self) -> None:
         """delete any previews in the cache that are more than 1 hour old."""
@@ -122,14 +147,16 @@ class RecordingCleanup(threading.Thread):
         )
 
         maybe_empty_dirs = set()
-        thumbs_to_delete = list(map(lambda x: x.thumb_path, expired_reviews))
-        for thumb in thumbs_to_delete:
-            thumb_path = Path(thumb)
-            thumb_path.unlink(missing_ok=True)
-            maybe_empty_dirs.add(thumb_path.parent)
+        deleted_reviews_list: list[Any] = []
+        for review in expired_reviews:
+            if review.thumb_path:
+                thumb_path = Path(review.thumb_path)
+                if not self._unlink_path(thumb_path):
+                    continue
+                maybe_empty_dirs.add(thumb_path.parent)
+            deleted_reviews_list.append(review.id)
 
         max_deletes = 100000
-        deleted_reviews_list = list(map(lambda x: x.id, expired_reviews))
         for i in range(0, len(deleted_reviews_list), max_deletes):
             ReviewSegment.delete().where(
                 ReviewSegment.id << deleted_reviews_list[i : i + max_deletes]
@@ -195,7 +222,8 @@ class RecordingCleanup(threading.Thread):
         # loop over recordings and see if they overlap with any non-expired reviews
         # TODO: expire segments based on segment stats according to config
         review_start = 0
-        deleted_recordings = set()
+        deleted_recordings: set[Any] = set()
+        total_deleted_recordings = 0
         kept_recordings: list[tuple[float, float]] = []
         for recording in recordings:
             modes: set[RetainModeEnum] = set()
@@ -250,21 +278,19 @@ class RecordingCleanup(threading.Thread):
                 for mode in modes
             ):
                 recording_path = Path(recording.path)
-                recording_path.unlink(missing_ok=True)
-                deleted_recordings.add(recording.id)
-                maybe_empty_dirs.add(recording_path.parent)
+                if self._unlink_path(recording_path):
+                    deleted_recordings.add(recording.id)
+                    maybe_empty_dirs.add(recording_path.parent)
+                    if len(deleted_recordings) >= DB_DELETE_BATCH_SIZE:
+                        total_deleted_recordings += self._flush_deleted_recordings(
+                            deleted_recordings
+                        )
             else:
                 kept_recordings.append((recording.start_time, recording.end_time))
 
         # expire recordings
-        logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-        # delete up to 100,000 at a time
-        max_deletes = 100000
-        deleted_recordings_list = list(deleted_recordings)
-        for i in range(0, len(deleted_recordings_list), max_deletes):
-            Recordings.delete().where(
-                Recordings.id << deleted_recordings_list[i : i + max_deletes]
-            ).execute()
+        total_deleted_recordings += self._flush_deleted_recordings(deleted_recordings)
+        logger.debug("Expiring %s recordings", total_deleted_recordings)
 
         return maybe_empty_dirs, kept_recordings
 
@@ -332,9 +358,9 @@ class RecordingCleanup(threading.Thread):
             # Delete previews without any relevant recordings
             if not keep:
                 preview_path = Path(preview.path)
-                preview_path.unlink(missing_ok=True)
-                deleted_previews.add(preview.id)
-                maybe_empty_dirs.add(preview_path.parent)
+                if self._unlink_path(preview_path):
+                    deleted_previews.add(preview.id)
+                    maybe_empty_dirs.add(preview_path.parent)
 
         # expire previews
         logger.debug(f"Expiring {len(deleted_previews)} previews")
@@ -376,7 +402,8 @@ class RecordingCleanup(threading.Thread):
 
         maybe_empty_dirs = set()
 
-        deleted_recordings = set()
+        deleted_recordings: set[Any] = set()
+        total_deleted_recordings = 0
         for camera in db_cameras:
             if camera in self.config.cameras:
                 continue
@@ -396,18 +423,16 @@ class RecordingCleanup(threading.Thread):
 
             for recording in no_camera_recordings:
                 recording_path = Path(recording.path)
-                recording_path.unlink(missing_ok=True)
-                deleted_recordings.add(recording.id)
-                maybe_empty_dirs.add(recording_path.parent)
+                if self._unlink_path(recording_path):
+                    deleted_recordings.add(recording.id)
+                    maybe_empty_dirs.add(recording_path.parent)
+                    if len(deleted_recordings) >= DB_DELETE_BATCH_SIZE:
+                        total_deleted_recordings += self._flush_deleted_recordings(
+                            deleted_recordings
+                        )
 
-        logger.debug(f"Expiring {len(deleted_recordings)} recordings")
-        # delete up to 100,000 at a time
-        max_deletes = 100000
-        deleted_recordings_list = list(deleted_recordings)
-        for i in range(0, len(deleted_recordings_list), max_deletes):
-            Recordings.delete().where(
-                Recordings.id << deleted_recordings_list[i : i + max_deletes]
-            ).execute()
+        total_deleted_recordings += self._flush_deleted_recordings(deleted_recordings)
+        logger.debug("Expiring %s recordings", total_deleted_recordings)
         logger.debug("End deleted cameras.")
 
         logger.debug("Start all cameras.")
