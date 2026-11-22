@@ -47,7 +47,7 @@ onnxruntime == 1.31.*
 # Embeddings
 transformers == 5.22.*
 # Generative AI
-google-genai == 3.2.*
+google-genai == 3.6.*
 ollama == 0.6.*
 openai == 3.49.*
 # push notifications
