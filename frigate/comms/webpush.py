@@ -617,7 +617,14 @@ class WebPushClient(Communicator):
                 else:
                     formatted_zone_names.append(titlecase(zone_name.replace("_", " ")))
 
-            title = f"{titlecase(', '.join(sorted_objects).replace('_', ' '))}{' was' if state == 'end' else ''} detected in {', '.join(formatted_zone_names)}"
+            object_names = titlecase(
+                ", ".join(sorted(sorted_objects)).replace("_", " ")
+            )
+            title = f"{object_names}{' was' if state == 'end' else ''} detected"
+
+            if formatted_zone_names:
+                title += f" in {', '.join(formatted_zone_names)}"
+
             message = f"Detected on {camera_name}"
 
         if ended:
