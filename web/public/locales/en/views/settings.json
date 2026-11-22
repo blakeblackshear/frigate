@@ -1043,6 +1043,15 @@
     "title": "Fisheye Dewarp",
     "desc": "Calibrate the lens of a fisheye camera so its image can be dewarped into a 360 view. Adjust the values until straight lines in the preview look straight.",
     "previewTip": "Drag the preview to look around and scroll to zoom.",
+    "mount": {
+      "title": "Mount",
+      "desc": "How the camera is mounted, which sets the direction the lens faces.",
+      "options": {
+        "ceiling": "Ceiling (looks down)",
+        "desktop": "Desktop (looks up)",
+        "wall": "Wall (looks sideways)"
+      }
+    },
     "center_x": {
       "title": "Center X",
       "desc": "Horizontal center of the fisheye circle, as a fraction of the image width."
@@ -1058,14 +1067,6 @@
     "fov": {
       "title": "Lens field of view",
       "desc": "Field of view covered by the fisheye circle, in degrees."
-    },
-    "pan": {
-      "title": "Pan",
-      "desc": "Rotation of the lens around the vertical axis, in degrees."
-    },
-    "tilt": {
-      "title": "Tilt",
-      "desc": "Angle of the lens away from pointing straight down, in degrees. Use 0 for a ceiling mount and 90 for a wall mount."
     },
     "toast": {
       "success": "Fisheye dewarp settings have been saved."

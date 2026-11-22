@@ -10,7 +10,12 @@ import requests
 from pydantic import ValidationError
 from ruamel.yaml.constructor import DuplicateKeyError
 
-from frigate.config import BirdseyeModeEnum, FrigateConfig, RetainModeEnum
+from frigate.config import (
+    BirdseyeModeEnum,
+    DewarpMountEnum,
+    FrigateConfig,
+    RetainModeEnum,
+)
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.detectors.device import build_detector_config, runner_names
@@ -83,6 +88,7 @@ class TestConfig(unittest.TestCase):
 
         dewarp = FrigateConfig(**config).cameras["back"].dewarp
 
+        self.assertEqual(dewarp.mount, DewarpMountEnum.ceiling)
         self.assertEqual(dewarp.center_x, 0.5)
         self.assertEqual(dewarp.center_y, 0.5)
         self.assertEqual(dewarp.radius, 0.5)
@@ -91,6 +97,7 @@ class TestConfig(unittest.TestCase):
     def test_dewarp_custom_values(self):
         config = deepcopy(self.minimal)
         config["cameras"]["back"]["dewarp"] = {
+            "mount": "wall",
             "center_x": 0.52,
             "center_y": 0.47,
             "radius": 0.48,
@@ -99,13 +106,19 @@ class TestConfig(unittest.TestCase):
 
         dewarp = FrigateConfig(**config).cameras["back"].dewarp
 
+        self.assertEqual(dewarp.mount, DewarpMountEnum.wall)
         self.assertEqual(dewarp.center_x, 0.52)
         self.assertEqual(dewarp.center_y, 0.47)
         self.assertEqual(dewarp.radius, 0.48)
         self.assertEqual(dewarp.fov, 190)
 
     def test_dewarp_rejects_out_of_range_values(self):
-        for field, value in (("center_x", 1.5), ("radius", 0), ("fov", 400)):
+        for field, value in (
+            ("mount", "floor"),
+            ("center_x", 1.5),
+            ("radius", 0),
+            ("fov", 400),
+        ):
             config = deepcopy(self.minimal)
             config["cameras"]["back"]["dewarp"] = {field: value}
 

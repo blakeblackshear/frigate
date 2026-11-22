@@ -17,7 +17,19 @@ import { Separator } from "@/components/ui/separator";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isDesktop } from "react-device-detect";
-import { DEFAULT_FISHEYE_SETTINGS, FisheyeSettings } from "@/types/fisheye";
+import {
+  DEFAULT_FISHEYE_SETTINGS,
+  FISHEYE_MOUNTS,
+  FisheyeMount,
+  FisheyeSettings,
+} from "@/types/fisheye";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type FisheyeDewarpViewProps = {
   selectedCamera: string;
@@ -25,7 +37,7 @@ type FisheyeDewarpViewProps = {
 };
 
 type FisheyeField = {
-  key: keyof FisheyeSettings;
+  key: Exclude<keyof FisheyeSettings, "mount">;
   min: number;
   max: number;
   step: number;
@@ -38,8 +50,6 @@ const FISHEYE_FIELDS: FisheyeField[] = [
   { key: "center_y", min: 0, max: 1, step: 0.001, decimals: 3 },
   { key: "radius", min: 0.05, max: 1, step: 0.001, decimals: 3 },
   { key: "fov", min: 90, max: 360, step: 1, decimals: 0 },
-  { key: "pan", min: -180, max: 180, step: 0.5, decimals: 1 },
-  { key: "tilt", min: -90, max: 90, step: 0.5, decimals: 1 },
 ];
 
 export default function FisheyeDewarpView({
@@ -91,9 +101,12 @@ export default function FisheyeDewarpView({
   const saveToConfig = useCallback(async () => {
     setIsLoading(true);
 
-    const params = FISHEYE_FIELDS.map(
-      ({ key }) => `cameras.${selectedCamera}.dewarp.${key}=${settings[key]}`,
-    ).join("&");
+    const params = [
+      `cameras.${selectedCamera}.dewarp.mount=${settings.mount}`,
+      ...FISHEYE_FIELDS.map(
+        ({ key }) => `cameras.${selectedCamera}.dewarp.${key}=${settings[key]}`,
+      ),
+    ].join("&");
 
     axios
       .put(`config/set?${params}`, { requires_restart: 0 })
@@ -158,6 +171,33 @@ export default function FisheyeDewarpView({
         </div>
         <Separator className="my-2 flex bg-secondary" />
         <div className="flex w-full flex-col space-y-6">
+          <div className="mt-2 space-y-3">
+            <div className="space-y-0.5">
+              <Label htmlFor="fisheye-mount">
+                {t("fisheyeDewarp.mount.title")}
+              </Label>
+              <div className="my-2 text-sm text-muted-foreground">
+                {t("fisheyeDewarp.mount.desc")}
+              </div>
+            </div>
+            <Select
+              value={settings.mount}
+              onValueChange={(value) =>
+                handleSettingsChange({ mount: value as FisheyeMount })
+              }
+            >
+              <SelectTrigger id="fisheye-mount" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FISHEYE_MOUNTS.map((mount) => (
+                  <SelectItem key={mount} value={mount}>
+                    {t(`fisheyeDewarp.mount.options.${mount}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           {FISHEYE_FIELDS.map(({ key, min, max, step, decimals }) => (
             <div key={key} className="mt-2 space-y-3">
               <div className="space-y-0.5">

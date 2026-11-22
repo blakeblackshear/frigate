@@ -1,5 +1,14 @@
+export const FISHEYE_MOUNTS = ["ceiling", "desktop", "wall"] as const;
+
+/**
+ * How the camera is mounted, which sets the direction the lens faces:
+ * ceiling looks straight down, desktop straight up and wall horizontally.
+ */
+export type FisheyeMount = (typeof FISHEYE_MOUNTS)[number];
+
 /** Fisheye lens calibration, mirrors the camera `dewarp` config section. */
 export type FisheyeSettings = {
+  mount: FisheyeMount;
   /** Horizontal center of the fisheye circle, as a fraction of image width. */
   center_x: number;
   /** Vertical center of the fisheye circle, as a fraction of image height. */
@@ -8,20 +17,12 @@ export type FisheyeSettings = {
   radius: number;
   /** Field of view covered by the fisheye circle, in degrees. */
   fov: number;
-  /** Rotation of the lens around the vertical axis of the sphere, in degrees. */
-  pan: number;
-  /**
-   * Angle of the lens axis away from straight down, in degrees.
-   * 0 is a ceiling mount and 90 is a wall mount facing the horizon.
-   */
-  tilt: number;
 };
 
 export const DEFAULT_FISHEYE_SETTINGS: FisheyeSettings = Object.freeze({
+  mount: "ceiling",
   center_x: 0.5,
   center_y: 0.5,
   radius: 0.5,
   fov: 180,
-  pan: 0,
-  tilt: 0,
 });

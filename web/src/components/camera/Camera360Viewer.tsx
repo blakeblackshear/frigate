@@ -1,7 +1,11 @@
 import { Ref, useEffect, useImperativeHandle, useRef } from "react";
 import * as THREE from "three";
 import { cn } from "@/lib/utils";
-import { DEFAULT_FISHEYE_SETTINGS, FisheyeSettings } from "@/types/fisheye";
+import {
+  DEFAULT_FISHEYE_SETTINGS,
+  FisheyeMount,
+  FisheyeSettings,
+} from "@/types/fisheye";
 
 export type Camera360ViewerHandle = {
   /** Upload the latest decoded frame to the fisheye texture. */
@@ -27,7 +31,6 @@ const SPHERE_RADIUS = 500;
 const DEFAULT_FOV = 75;
 const MIN_FOV = 30;
 const MAX_FOV = 100;
-const DEFAULT_LAT = -45;
 const MAX_LAT = 85;
 const DRAG_SENSITIVITY = 0.15;
 const EDGE_COLOR = 0xff3333;
@@ -42,9 +45,33 @@ const vertexShader = /* glsl */ `
   }
 `;
 
-// Assumes an equidistant fisheye lens. In the lens frame the optical axis points down (-Y), image +x maps to +X
-// and image +y (down) maps to +Z. lensRotation takes sphere directions into
-// the lens frame, which applies the pan and tilt calibration.
+// In the lens frame the optical axis points down (-Y), image +x maps to +X
+// and image +y (down) maps to +Z. On the sphere +Y is up and the viewer
+// starts out facing +X. Each mount orients the lens frame on the sphere, the
+// matrices are written row by row and map lens directions to sphere directions.
+const MOUNT_ORIENTATIONS: Record<
+  FisheyeMount,
+  { lensToSphere: THREE.Matrix3; defaultLat: number }
+> = {
+  // lens looks straight down
+  ceiling: {
+    lensToSphere: new THREE.Matrix3().set(1, 0, 0, 0, 1, 0, 0, 0, 1),
+    defaultLat: -45,
+  },
+  // lens looks straight up
+  desktop: {
+    lensToSphere: new THREE.Matrix3().set(1, 0, 0, 0, -1, 0, 0, 0, -1),
+    defaultLat: 45,
+  },
+  // lens looks at the horizon along +X, with image down pointing down
+  wall: {
+    lensToSphere: new THREE.Matrix3().set(0, -1, 0, 0, 0, -1, 1, 0, 0),
+    defaultLat: 0,
+  },
+};
+
+// Assumes an equidistant fisheye lens. lensRotation takes sphere directions
+// into the lens frame, which applies the mount orientation.
 const fragmentShader = /* glsl */ `
   uniform sampler2D map;
   uniform mat3 lensRotation;
@@ -184,7 +211,7 @@ export default function Camera360Viewer({
     let textureWidth = 0;
     let textureHeight = 0;
     let lon = 0;
-    let lat = DEFAULT_LAT;
+    let lat = 0;
     let frameRequest: number | null = null;
 
     const render = () => {
@@ -205,32 +232,26 @@ export default function Camera360Viewer({
       }
     };
 
-    const lensToSphere = new THREE.Matrix4();
-    applySettingsRef.current = ({
-      center_x,
-      center_y,
-      radius,
-      fov,
-      pan,
-      tilt,
-    }) => {
-      material.uniforms.center.value.set(center_x, center_y);
-      material.uniforms.radius.value = radius;
-      material.uniforms.halfLensFov.value = THREE.MathUtils.degToRad(fov / 2);
-      // tilt swings the lens axis from straight down toward +X, then pan
-      // rotates it around the vertical axis. The shader needs the inverse
-      // (sphere to lens), which for a rotation is the transpose.
-      lensToSphere.makeRotationFromEuler(
-        new THREE.Euler(
-          0,
-          THREE.MathUtils.degToRad(pan),
-          THREE.MathUtils.degToRad(tilt),
-          "YZX",
-        ),
+    let mount: FisheyeMount | null = null;
+    applySettingsRef.current = (settings) => {
+      material.uniforms.center.value.set(settings.center_x, settings.center_y);
+      material.uniforms.radius.value = settings.radius;
+      material.uniforms.halfLensFov.value = THREE.MathUtils.degToRad(
+        settings.fov / 2,
       );
-      material.uniforms.lensRotation.value
-        .setFromMatrix4(lensToSphere)
-        .transpose();
+
+      if (settings.mount !== mount) {
+        mount = settings.mount;
+        // the shader needs the inverse (sphere to lens) of the mount
+        // orientation, which for a rotation is the transpose
+        material.uniforms.lensRotation.value
+          .copy(MOUNT_ORIENTATIONS[mount].lensToSphere)
+          .transpose();
+        // start out looking at the part of the sphere the lens covers
+        lon = 0;
+        lat = MOUNT_ORIENTATIONS[mount].defaultLat;
+      }
+
       requestRender();
     };
 

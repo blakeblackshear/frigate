@@ -1,11 +1,24 @@
+from enum import Enum
+
 from pydantic import Field
 
 from ..base import FrigateBaseModel
 
-__all__ = ["DewarpConfig"]
+__all__ = ["DewarpConfig", "DewarpMountEnum"]
+
+
+class DewarpMountEnum(str, Enum):
+    ceiling = "ceiling"
+    desktop = "desktop"
+    wall = "wall"
 
 
 class DewarpConfig(FrigateBaseModel):
+    mount: DewarpMountEnum = Field(
+        default=DewarpMountEnum.ceiling,
+        title="Mount",
+        description="How the camera is mounted: 'ceiling' looks straight down, 'desktop' looks straight up, and 'wall' looks horizontally.",
+    )
     center_x: float = Field(
         default=0.5,
         title="Center X",
@@ -33,18 +46,4 @@ class DewarpConfig(FrigateBaseModel):
         description="Field of view covered by the fisheye circle in degrees.",
         gt=0.0,
         le=360.0,
-    )
-    pan: float = Field(
-        default=0.0,
-        title="Pan",
-        description="Rotation of the lens around the vertical axis in degrees, used to align the dewarped view.",
-        ge=-180.0,
-        le=180.0,
-    )
-    tilt: float = Field(
-        default=0.0,
-        title="Tilt",
-        description="Angle of the lens away from pointing straight down in degrees (0 for a ceiling mount, 90 for a wall mount).",
-        ge=-90.0,
-        le=90.0,
     )

@@ -1,6 +1,7 @@
 import { IconName } from "@/components/icons/IconPicker";
 import { TriggerAction, TriggerType } from "./trigger";
 import { LivePlayerMode } from "./live";
+import { FisheyeSettings } from "./fisheye";
 
 export interface UiConfig {
   timezone?: string;
@@ -69,14 +70,7 @@ export interface CameraConfig {
     modes: BirdseyeMode[];
     order: number;
   };
-  dewarp: {
-    center_x: number;
-    center_y: number;
-    radius: number;
-    fov: number;
-    pan: number;
-    tilt: number;
-  } | null;
+  dewarp: FisheyeSettings | null;
   detect: {
     annotation_offset: number;
     enabled: boolean;
