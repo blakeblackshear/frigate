@@ -14,6 +14,8 @@ type JSMpegPlayerProps = {
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   playbackEnabled: boolean;
   useWebGL: boolean;
+  // keeps the WebGL canvas readable so its frames can be copied elsewhere
+  preserveDrawingBuffer?: boolean;
   setStats?: (stats: PlayerStatsType) => void;
   onPlaying?: () => void;
 };
@@ -26,6 +28,7 @@ export default function JSMpegPlayer({
   containerRef,
   playbackEnabled,
   useWebGL = false,
+  preserveDrawingBuffer = false,
   setStats,
   onPlaying,
 }: JSMpegPlayerProps) {
@@ -137,6 +140,7 @@ export default function JSMpegPlayer({
             audio: false,
             disableGl: !useWebGL,
             disableWebAssembly: !useWebGL,
+            preserveDrawingBuffer,
             videoBufferSize: 1024 * 1024 * 4,
             onVideoDecode: () => {
               if (!hasDataRef.current) {

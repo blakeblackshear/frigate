@@ -160,10 +160,10 @@ class CameraConfig(FrigateBaseModel):
         title="Best image timeout",
         description="How long to wait for the image with the highest confidence score.",
     )
-    dewarp: DewarpConfig = Field(
-        default_factory=DewarpConfig,
+    dewarp: DewarpConfig | None = Field(
+        default=None,
         title="Fisheye dewarp",
-        description="Lens calibration used to dewarp a fisheye camera image into a 360 view in the UI.",
+        description="Lens calibration used to dewarp a fisheye camera image into a 360 view in the UI. The 360 view is only offered for cameras where this is set.",
     )
     mqtt: CameraMqttConfig = Field(
         default_factory=CameraMqttConfig,

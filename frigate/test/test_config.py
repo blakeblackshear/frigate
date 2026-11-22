@@ -72,9 +72,16 @@ class TestConfig(unittest.TestCase):
         if not os.path.exists(MODEL_CACHE_DIR) and not os.path.islink(MODEL_CACHE_DIR):
             os.makedirs(MODEL_CACHE_DIR)
 
-    def test_dewarp_defaults(self):
+    def test_dewarp_is_unset_by_default(self):
         frigate_config = FrigateConfig(**self.minimal)
-        dewarp = frigate_config.cameras["back"].dewarp
+
+        self.assertIsNone(frigate_config.cameras["back"].dewarp)
+
+    def test_dewarp_defaults(self):
+        config = deepcopy(self.minimal)
+        config["cameras"]["back"]["dewarp"] = {}
+
+        dewarp = FrigateConfig(**config).cameras["back"].dewarp
 
         self.assertEqual(dewarp.center_x, 0.5)
         self.assertEqual(dewarp.center_y, 0.5)

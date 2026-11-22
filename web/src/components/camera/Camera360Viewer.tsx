@@ -8,11 +8,18 @@ export type Camera360ViewerHandle = {
   updateFrame: (image: HTMLImageElement) => void;
 };
 
+export type Camera360Source = HTMLVideoElement | HTMLCanvasElement;
+
 type Camera360ViewerProps = {
   className?: string;
   settings?: FisheyeSettings;
   /** Outline the edge of the fisheye circle on the sphere, for calibration. */
   showEdge?: boolean;
+  /**
+   * Play this live source on the sphere, instead of frames from updateFrame.
+   * A WebGL canvas must be created with preserveDrawingBuffer to be readable.
+   */
+  source?: Camera360Source | null;
   ref?: Ref<Camera360ViewerHandle>;
 };
 
@@ -95,6 +102,7 @@ export default function Camera360Viewer({
   className,
   settings = DEFAULT_FISHEYE_SETTINGS,
   showEdge = false,
+  source = null,
   ref,
 }: Camera360ViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -110,6 +118,16 @@ export default function Camera360Viewer({
     showEdgeRef.current = showEdge;
     applyShowEdgeRef.current(showEdge);
   }, [showEdge]);
+
+  const sourceRef = useRef(source);
+  const applySourceRef = useRef<(source: Camera360Source | null) => void>(
+    () => {},
+  );
+
+  useEffect(() => {
+    sourceRef.current = source;
+    applySourceRef.current(source);
+  }, [source]);
 
   useImperativeHandle(
     ref,
@@ -161,7 +179,10 @@ export default function Camera360Viewer({
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    let texture: THREE.Texture<HTMLImageElement> | null = null;
+    let texture: THREE.Texture<HTMLImageElement | Camera360Source> | null =
+      null;
+    let textureWidth = 0;
+    let textureHeight = 0;
     let lon = 0;
     let lat = DEFAULT_LAT;
     let frameRequest: number | null = null;
@@ -221,32 +242,89 @@ export default function Camera360Viewer({
     };
     applyShowEdgeRef.current(showEdgeRef.current);
 
-    updateFrameRef.current = (image) => {
-      // the frame size can change with the container size, and three.js
-      // allocates immutable texture storage, so recreate on size changes
+    // the frame size can change (image requests follow the container size,
+    // streams can switch resolution), and three.js allocates immutable
+    // texture storage, so the texture is recreated when the size changes
+    const uploadFrame = (
+      source: HTMLImageElement | Camera360Source,
+      width: number,
+      height: number,
+    ) => {
       if (
         texture &&
-        (texture.image.naturalWidth !== image.naturalWidth ||
-          texture.image.naturalHeight !== image.naturalHeight)
+        (texture.image !== source ||
+          textureWidth !== width ||
+          textureHeight !== height)
       ) {
         texture.dispose();
         texture = null;
       }
 
       if (!texture) {
-        texture = new THREE.Texture<HTMLImageElement>(image);
+        texture = new THREE.Texture(source);
         texture.colorSpace = THREE.SRGBColorSpace;
         texture.minFilter = THREE.LinearFilter;
         texture.generateMipmaps = false;
+        textureWidth = width;
+        textureHeight = height;
         material.uniforms.map.value = texture;
         material.uniforms.hasMap.value = true;
-        material.uniforms.imageAspect.value =
-          image.naturalWidth / image.naturalHeight;
+        material.uniforms.imageAspect.value = width / height;
       }
 
       texture.needsUpdate = true;
       requestRender();
     };
+
+    updateFrameRef.current = (image) => {
+      uploadFrame(image, image.naturalWidth, image.naturalHeight);
+    };
+
+    let stopSource = () => {};
+
+    applySourceRef.current = (source) => {
+      stopSource();
+
+      if (!source) {
+        return;
+      }
+
+      let stopped = false;
+      stopSource = () => {
+        stopped = true;
+      };
+
+      const onSourceFrame = () => {
+        if (stopped) {
+          return;
+        }
+
+        if (source instanceof HTMLVideoElement) {
+          if (
+            source.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+            source.videoWidth > 0
+          ) {
+            uploadFrame(source, source.videoWidth, source.videoHeight);
+          }
+        } else if (source.width > 0 && source.height > 0) {
+          uploadFrame(source, source.width, source.height);
+        }
+
+        // only wakes up when a video presents a new frame, where supported.
+        // A canvas has no such signal, so it is copied on every repaint.
+        if (
+          source instanceof HTMLVideoElement &&
+          "requestVideoFrameCallback" in source
+        ) {
+          source.requestVideoFrameCallback(onSourceFrame);
+        } else {
+          requestAnimationFrame(onSourceFrame);
+        }
+      };
+
+      onSourceFrame();
+    };
+    applySourceRef.current(sourceRef.current);
 
     const resize = () => {
       const { clientWidth, clientHeight } = container;
@@ -315,6 +393,8 @@ export default function Camera360Viewer({
       updateFrameRef.current = () => {};
       applySettingsRef.current = () => {};
       applyShowEdgeRef.current = () => {};
+      applySourceRef.current = () => {};
+      stopSource();
       if (frameRequest !== null) {
         cancelAnimationFrame(frameRequest);
       }

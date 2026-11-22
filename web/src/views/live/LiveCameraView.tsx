@@ -91,6 +91,10 @@ import {
 } from "react-icons/md";
 import { Link, useNavigate } from "react-router-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import { TbView360 } from "react-icons/tb";
+import Camera360Viewer, {
+  Camera360Source,
+} from "@/components/camera/Camera360Viewer";
 import useSWR from "swr";
 import { cn } from "@/lib/utils";
 import { useSessionPersistence } from "@/hooks/use-session-persistence";
@@ -626,6 +630,36 @@ export default function LiveCameraView({
     return () => screenOrientation.unlock();
   }, [fullscreen, cameraAspectRatio]);
 
+  // fisheye dewarp, only offered when the camera has a dewarp config
+
+  const [dewarp, setDewarp] = useState(false);
+  const [dewarpSource, setDewarpSource] = useState<Camera360Source | null>(
+    null,
+  );
+  const dewarpActive = dewarp && !debug && !!camera.dewarp;
+
+  useEffect(() => {
+    const playerContainer = clickOverlayRef.current;
+
+    if (!dewarpActive || !playerContainer) {
+      setDewarpSource(null);
+      return;
+    }
+
+    // the player swaps its video element (or jsmpeg canvas) when the stream
+    // or live mode changes, so keep following whichever one is mounted
+    const findSource = () =>
+      setDewarpSource(
+        playerContainer.querySelector<Camera360Source>("video, .jsmpeg canvas"),
+      );
+    findSource();
+
+    const observer = new MutationObserver(findSource);
+    observer.observe(playerContainer, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, [dewarpActive]);
+
   const handleError = useCallback(
     (e: LivePlayerError) => {
       if (e) {
@@ -664,7 +698,7 @@ export default function LiveCameraView({
     <TransformWrapper
       minScale={1.0}
       wheel={{ smoothStep: 0.005 }}
-      disabled={debug || clickOverlay}
+      disabled={debug || clickOverlay || dewarpActive}
       panning={{ disabled: clickOverlay }}
     >
       <Toaster position="top-center" closeButton={true} />
@@ -759,6 +793,21 @@ export default function LiveCameraView({
                     : t("button.fullscreen", { ns: "common" })
                 }
                 onClick={toggleFullscreen}
+              />
+            )}
+            {camera.dewarp && (
+              <CameraFeatureToggle
+                className="p-2 md:p-0"
+                variant={fullscreen ? "overlay" : "primary"}
+                Icon={TbView360}
+                isActive={dewarpActive}
+                title={
+                  dewarpActive
+                    ? t("dewarp.disable", { ns: "views/live" })
+                    : t("dewarp.enable", { ns: "views/live" })
+                }
+                onClick={() => setDewarp(!dewarpActive)}
+                disabled={!cameraEnabled || debug}
               />
             )}
             {!isIOS && !isFirefox && preferredLiveMode != "jsmpeg" && (
@@ -856,7 +905,18 @@ export default function LiveCameraView({
           </div>
         </div>
         {!debug ? (
-          <div id="player-container" className="size-full" ref={containerRef}>
+          <div
+            id="player-container"
+            className="relative size-full"
+            ref={containerRef}
+          >
+            {dewarpActive && camera.dewarp && (
+              <Camera360Viewer
+                className="absolute inset-0 z-30 bg-black"
+                settings={camera.dewarp}
+                source={dewarpSource}
+              />
+            )}
             <TransformComponent
               wrapperStyle={{
                 width: "100%",
@@ -935,6 +995,7 @@ export default function LiveCameraView({
                   preferredLiveMode={preferredLiveMode}
                   autoLive={preferencesLoaded}
                   useWebGL={true}
+                  preserveDrawingBuffer={!!camera.dewarp}
                   streamName={streamName ?? ""}
                   pip={pip}
                   containerRef={containerRef}

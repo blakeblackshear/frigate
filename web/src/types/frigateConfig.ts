@@ -76,7 +76,7 @@ export interface CameraConfig {
     fov: number;
     pan: number;
     tilt: number;
-  };
+  } | null;
   detect: {
     annotation_offset: number;
     enabled: boolean;

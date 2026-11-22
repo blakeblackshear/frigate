@@ -1009,6 +1009,7 @@ cameras:
     webui_url: ""
 
     # Optional: Lens calibration used to dewarp a fisheye camera image into a 360 view in the UI
+    # NOTE: The 360 view is only offered in the live view when this section is set
     dewarp:
       # Optional: Horizontal center of the fisheye circle as a fraction of the image width (default: shown below)
       center_x: 0.5

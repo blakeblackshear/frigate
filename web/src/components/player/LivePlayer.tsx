@@ -41,6 +41,7 @@ type LivePlayerProps = {
   showStillWithoutActivity?: boolean;
   alwaysShowCameraName?: boolean;
   useWebGL: boolean;
+  preserveDrawingBuffer?: boolean; // only used by jsmpeg
   windowVisible?: boolean;
   playAudio?: boolean;
   volume?: number;
@@ -70,6 +71,7 @@ export default function LivePlayer({
   showStillWithoutActivity = true,
   alwaysShowCameraName = false,
   useWebGL = false,
+  preserveDrawingBuffer = false,
   windowVisible = true,
   playAudio = false,
   volume,
@@ -373,6 +375,7 @@ export default function LivePlayer({
             cameraActive || !showStillWithoutActivity || liveReady
           }
           useWebGL={useWebGL}
+          preserveDrawingBuffer={preserveDrawingBuffer}
           setStats={setStats}
           containerRef={containerRef ?? internalContainerRef}
           onPlaying={playerIsPlaying}
