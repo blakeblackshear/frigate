@@ -581,6 +581,7 @@ class WebPushClient(Communicator):
                 sorted_objects.add(obj)
 
         sorted_objects.update(payload["after"]["data"]["sub_labels"])
+        sorted_objects.update(payload["after"]["data"]["audio"])
 
         image = f"{payload['after']['thumb_path'].replace(BASE_DIR, '')}"
         ended = state == "end" or state == "genai"
