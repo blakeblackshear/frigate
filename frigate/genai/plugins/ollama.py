@@ -243,6 +243,7 @@ class OllamaClient(GenAIClient):
         response_format: dict | None = None,
         enable_thinking: bool = False,
         image_captions: list[str] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> str | None:
         """Submit a request to Ollama through the chat API, the same path the
         tool-calling chat uses, with image placeholders keeping any captions
@@ -280,8 +281,18 @@ class OllamaClient(GenAIClient):
             request_params.get("think"),
         )
 
+        own_client = None
+        if extra_headers:
+            # The Ollama client takes headers only at construction, so a
+            # request with its own headers gets a client of its own.
+            own_client = ApiClient(
+                host=self.genai_config.base_url,
+                timeout=self.timeout,
+                headers={**(self._auth_headers() or {}), **extra_headers},
+            )
+
         try:
-            response = self.provider.chat(**request_params)
+            response = (own_client or self.provider).chat(**request_params)
         except (
             TimeoutException,
             ResponseError,
@@ -290,6 +301,9 @@ class OllamaClient(GenAIClient):
         ) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
+        finally:
+            if own_client is not None:
+                own_client.close()
 
         logger.debug(
             "Ollama chat response: done=%s, done_reason=%s, eval_count=%s, "
