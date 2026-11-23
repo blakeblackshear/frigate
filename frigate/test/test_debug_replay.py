@@ -101,6 +101,7 @@ class TestDebugReplayManagerStop(unittest.TestCase):
         manager.mark_session_ready("/tmp/replay/_replay_front.mp4")
 
         camera_config = MagicMock()
+        manager._published_camera = camera_config
         frigate_config = MagicMock()
         frigate_config.cameras = {"_replay_front": camera_config}
         publisher = MagicMock()
@@ -169,6 +170,7 @@ class TestDebugReplayManagerPublishCamera(unittest.TestCase):
         from frigate.debug_replay import DebugReplayManager
 
         manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
 
         source_config = MagicMock()
         new_camera_config = MagicMock()
@@ -244,6 +246,104 @@ class TestDebugReplayManagerPublishCamera(unittest.TestCase):
         self.assertIn("replay camera config", str(ctx.exception))
         self.assertIn("invalid coordinates", str(ctx.exception))
         publisher.publish_update.assert_not_called()
+
+
+class TestDebugReplayManagerLifecycle(unittest.TestCase):
+    def setUp(self) -> None:
+        patcher = patch("frigate.debug_replay.JobStatePublisher")
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def _publish(self, manager, frigate_config, publisher) -> bool:
+        from frigate.debug_replay import DebugReplayManager
+
+        parsed = MagicMock()
+        parsed.cameras = {"_replay_front": MagicMock(name="replay_camera")}
+
+        with (
+            patch.object(
+                DebugReplayManager,
+                "_build_camera_config_dict",
+                return_value={"enabled": True},
+            ),
+            patch("frigate.debug_replay.find_config_file", return_value="/cfg.yml"),
+            patch("frigate.debug_replay.YAML") as yaml_cls,
+            patch(
+                "frigate.debug_replay.FrigateConfig.parse_object",
+                return_value=parsed,
+            ),
+            patch("builtins.open", unittest.mock.mock_open(read_data="cameras:\n")),
+        ):
+            yaml_cls.return_value.load.return_value = {"cameras": {}}
+            return manager.publish_camera(
+                source_camera="front",
+                replay_name="_replay_front",
+                clip_path="/tmp/clip.mp4",
+                frigate_config=frigate_config,
+                config_publisher=publisher,
+            )
+
+    def _config(self, name: str) -> MagicMock:
+        config = MagicMock(name=name)
+        config.cameras = {"front": MagicMock()}
+        return config
+
+    def _stop(self, manager, frigate_config, publisher) -> None:
+        with (
+            patch.object(manager, "_cleanup_db"),
+            patch.object(manager, "_cleanup_files"),
+            patch("frigate.debug_replay.cancel_debug_replay_job", return_value=False),
+        ):
+            manager.stop(frigate_config=frigate_config, config_publisher=publisher)
+
+    def test_publish_after_stop_is_skipped(self) -> None:
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+        config = self._config("live")
+        publisher = MagicMock()
+
+        self._stop(manager, config, publisher)
+
+        self.assertFalse(self._publish(manager, config, publisher))
+        self.assertNotIn("_replay_front", config.cameras)
+        publisher.publish_update.assert_not_called()
+
+    def test_config_swap_keeps_replay_camera_and_stop_removes_it(self) -> None:
+        from frigate.config.camera.updater import CameraConfigUpdateEnum
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+        boot = self._config("boot")
+        publisher = MagicMock()
+        self.assertTrue(self._publish(manager, boot, publisher))
+
+        swapped = self._config("swapped")
+        manager.update_config(swapped)
+        self.assertIn("_replay_front", swapped.cameras)
+
+        self._stop(manager, swapped, publisher)
+
+        topic = publisher.publish_update.call_args.args[0]
+        self.assertEqual(topic.update_type, CameraConfigUpdateEnum.remove)
+        self.assertNotIn("_replay_front", swapped.cameras)
+
+    def test_stop_with_stale_config_still_publishes_remove(self) -> None:
+        from frigate.config.camera.updater import CameraConfigUpdateEnum
+        from frigate.debug_replay import DebugReplayManager
+
+        manager = DebugReplayManager()
+        manager.mark_starting("front", "_replay_front", 100.0, 200.0)
+        live = self._config("live")
+        publisher = MagicMock()
+        self.assertTrue(self._publish(manager, live, publisher))
+
+        self._stop(manager, self._config("stale"), publisher)
+
+        topic = publisher.publish_update.call_args.args[0]
+        self.assertEqual(topic.update_type, CameraConfigUpdateEnum.remove)
 
 
 if __name__ == "__main__":

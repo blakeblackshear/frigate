@@ -789,16 +789,16 @@ class BirdsEyeFrameManager:
                 force_update = True
             else:
                 return False, False
+        else:
+            # update the last active frame for the camera
+            camera_state["current_frame"] = frame.copy()
+            camera_state["current_frame_time"] = frame_time
+            modes = camera_config.birdseye.modes
 
-        # update the last active frame for the camera
-        camera_state["current_frame"] = frame.copy()
-        camera_state["current_frame_time"] = frame_time
-        modes = camera_config.birdseye.modes
+            if self.camera_threshold_active(modes, activity):
+                camera_state["last_active_frame"] = frame_time
 
-        if self.camera_threshold_active(modes, activity):
-            camera_state["last_active_frame"] = frame_time
-
-        camera_state["live_active"] = self.camera_live_active(modes, activity)
+            camera_state["live_active"] = self.camera_live_active(modes, activity)
 
         # monotonic so a backward wall clock step can't freeze the output
         now = time.monotonic()
@@ -865,7 +865,10 @@ class Birdseye:
             (1.0 / self.idle_fps) if self.idle_fps > 0 else None
         )
 
-        if config.birdseye.restream:
+        # restream changes need a restart, so the buffer exists only if it did at init
+        self.restream = config.birdseye.restream
+
+        if self.restream:
             self.birdseye_buffer: Any = self.frame_manager.create(
                 "birdseye",
                 self.birdseye_manager.yuv_shape[0] * self.birdseye_manager.yuv_shape[1],
@@ -877,7 +880,7 @@ class Birdseye:
     def __send_new_frame(self) -> None:
         frame_bytes = self.birdseye_manager.frame.tobytes()
 
-        if self.config.birdseye.restream:
+        if self.restream:
             self.birdseye_buffer[:] = frame_bytes
 
         try:
@@ -954,6 +957,7 @@ class Birdseye:
                 >= self._idle_interval
             ):
                 self.__send_new_frame()
+                self.birdseye_manager.last_output_time = now
 
     def stop(self) -> None:
         self.review_subscriber.stop()

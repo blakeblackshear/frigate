@@ -302,7 +302,7 @@ class TestRunnerHappyPath(unittest.TestCase):
             patch.object(
                 self.manager,
                 "publish_camera",
-                side_effect=lambda *a, **kw: captured.append("published"),
+                side_effect=lambda *a, **kw: captured.append("published") or True,
             ),
             patch("os.path.exists", return_value=True),
             patch("os.makedirs"),

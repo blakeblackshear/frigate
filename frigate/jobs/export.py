@@ -487,6 +487,9 @@ def get_export_job_manager(config: FrigateConfig) -> ExportJobManager:
     with _job_manager_lock:
         if _job_manager is None:
             _job_manager = ExportJobManager(config, _get_max_concurrent(config))
+
+        # callers pass the live config, which a save replaces
+        _job_manager.config = config
         _job_manager.ensure_started()
         return _job_manager
 
