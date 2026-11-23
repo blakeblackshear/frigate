@@ -517,6 +517,8 @@ class TestMaterializeForWs(unittest.TestCase):
                     "garage": {"camera_fps": 5.0, "pid": 1236},
                 },
                 "detectors": {"cpu": {"detection_start": 0.0, "inference_speed": 10}},
+                "cpu_usages": {"1234": {"cpu": "1.0", "cmdline": "ffmpeg -i rtsp://"}},
+                "bandwidth_usages": {"1234": {"bandwidth": 1.0}},
                 "service": {"uptime": 12345, "version": "0.16.0"},
                 "camera_fps": 15.0,
                 "detection_fps": 6.0,
@@ -539,6 +541,17 @@ class TestMaterializeForWs(unittest.TestCase):
         self.assertEqual(inner["detection_fps"], 6.0)
         self.assertIn("detectors", inner)
         self.assertIn("service", inner)
+
+    def test_stats_non_admin_gets_no_cmdline(self):
+        for role in ("viewer", "house_only"):
+            message = self._materialize(_ws(role), "stats", self._stats_payload())
+            inner = json.loads(json.loads(message)["payload"])  # type: ignore[arg-type]
+            self.assertEqual(inner["cpu_usages"], {"1234": {"cpu": "1.0"}})
+            self.assertNotIn("bandwidth_usages", inner)
+
+        message = self._materialize(_ws("viewer"), "stats", self._stats_payload())
+        inner = json.loads(json.loads(message)["payload"])  # type: ignore[arg-type]
+        self.assertIn("garage", inner["cameras"])
 
     def test_stats_restricted_with_no_allowed_cameras_still_sends_aggregates(self):
         """A restricted role whose allow-list contains only nonexistent cameras

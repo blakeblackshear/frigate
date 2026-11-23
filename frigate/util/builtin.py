@@ -131,6 +131,34 @@ def clean_camera_user_pass(line: str) -> str:
     return re.sub(REGEX_CREDENTIAL_QUERY_PARAM, r"\1*", line)
 
 
+def scope_stats_for_non_admin(
+    stats: dict[str, Any], allowed_cameras: set[str]
+) -> dict[str, Any]:
+    """Return a copy of stats limited to allowed_cameras, without process cmdlines.
+
+    cmdline can leak camera URLs and paths. cpu and mem stay so client-side
+    problem heuristics still work. bandwidth_usages is keyed by pid and can't
+    be scoped to cameras.
+    """
+    scoped = {**stats}
+    scoped.pop("bandwidth_usages", None)
+
+    if stats.get("cameras") is not None:
+        scoped["cameras"] = {
+            name: data
+            for name, data in stats["cameras"].items()
+            if name in allowed_cameras
+        }
+
+    if stats.get("cpu_usages") is not None:
+        scoped["cpu_usages"] = {
+            pid: {k: v for k, v in usage.items() if k != "cmdline"}
+            for pid, usage in stats["cpu_usages"].items()
+        }
+
+    return scoped
+
+
 def _mask_userinfo(match: re.Match[str]) -> str:
     # A credential key in the userinfo means a query password holds "@" or a
     # password holds a query key. Neither split is safe, so mask the whole URL.

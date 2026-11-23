@@ -2546,7 +2546,7 @@ paths:
         - App
       summary: Metrics
       description: |-
-        **Access:** Any authenticated user.
+        **Access:** Admin role required.
 
         Expose Prometheus metrics endpoint and update metrics with latest stats
       operationId: metrics_metrics_get
@@ -2557,8 +2557,8 @@ paths:
             application/json:
               schema: {}
       security:
-        - frigateUserAuth: []
-      x-required-role: any
+        - frigateAdminAuth: []
+      x-required-role: admin
   /genai/models:
     get:
       tags:

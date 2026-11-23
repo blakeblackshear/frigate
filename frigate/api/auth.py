@@ -81,10 +81,11 @@ def require_admin_by_default():
         "/",
         "/version",
         "/config/schema.json",
-        # Authenticated user endpoints (allow_any_authenticated)
+        # Admin endpoints that enforce require_role on the route
         "/metrics",
-        "/stats",
         "/stats/history",
+        # Authenticated user endpoints (allow_any_authenticated)
+        "/stats",
         "/config",
         "/vainfo",
         "/nvinfo",

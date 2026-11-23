@@ -64,6 +64,7 @@ from frigate.util.builtin import (
     is_masked_camera_path,
     load_labels,
     process_config_query_string,
+    scope_stats_for_non_admin,
     split_config_key_path,
     update_yaml_file_bulk,
 )
@@ -131,37 +132,12 @@ def stats(
 ):
     stats_data = request.app.stats_emitter.get_latest_stats()
 
-    # Admins see the full snapshot
     if request.headers.get("remote-role") == "admin":
         return JSONResponse(content=stats_data)
 
-    allowed_set = set(allowed_cameras)
-
-    # Shallow-copy so we don't mutate the cached stats history entry.
-    filtered = {**stats_data}
-
-    cameras = stats_data.get("cameras")
-    if cameras is not None:
-        filtered["cameras"] = {
-            name: data for name, data in cameras.items() if name in allowed_set
-        }
-
-    bandwidth = stats_data.get("bandwidth_usages")
-    if bandwidth is not None:
-        filtered["bandwidth_usages"] = {
-            name: data for name, data in bandwidth.items() if name in allowed_set
-        }
-
-    # cmdline can leak camera URLs/paths; strip but keep cpu/mem so
-    # client-side problem heuristics still work.
-    cpu_usages = stats_data.get("cpu_usages")
-    if cpu_usages is not None:
-        filtered["cpu_usages"] = {
-            pid: {k: v for k, v in usage.items() if k != "cmdline"}
-            for pid, usage in cpu_usages.items()
-        }
-
-    return JSONResponse(content=filtered)
+    return JSONResponse(
+        content=scope_stats_for_non_admin(stats_data, set(allowed_cameras))
+    )
 
 
 @router.get("/stats/history", dependencies=[Depends(require_role(["admin"]))])
@@ -172,7 +148,7 @@ def stats_history(request: Request, keys: str = None):
     return JSONResponse(content=request.app.stats_emitter.get_stats_history(keys))
 
 
-@router.get("/metrics", dependencies=[Depends(allow_any_authenticated())])
+@router.get("/metrics", dependencies=[Depends(require_role(["admin"]))])
 def metrics(request: Request):
     """Expose Prometheus metrics endpoint and update metrics with latest stats"""
     # Retrieve the latest statistics and update the Prometheus metrics
@@ -320,10 +296,12 @@ def config(request: Request):
 
     is_admin = request.headers.get("remote-role") == "admin"
 
-    # hide environment_vars and the notification email from non-admin users
+    # hide environment_vars, the notification email and ffmpeg args (which
+    # can carry auth headers) from non-admin users
     if not is_admin:
         config.pop("environment_vars", None)
         redact_credential(config["notifications"], "email")
+        _drop_ffmpeg_args(config.get("ffmpeg", {}))
 
     # redact mqtt credentials
     redact_credential(config["mqtt"], "password")
@@ -331,10 +309,14 @@ def config(request: Request):
     # redact proxy secret
     redact_credential(config["proxy"], "auth_secret")
 
-    # redact genai api keys
+    # redact genai api keys; base_url and provider_options can carry proxy auth
     for _genai_name, genai_cfg in config.get("genai", {}).items():
         if isinstance(genai_cfg, dict):
             redact_credential(genai_cfg, "api_key")
+
+            if not is_admin:
+                genai_cfg.pop("base_url", None)
+                genai_cfg.pop("provider_options", None)
 
     for camera_name, camera in request.app.frigate_config.cameras.items():
         camera_dict = config["cameras"][camera_name]
@@ -353,6 +335,19 @@ def config(request: Request):
         for cmd in camera_dict["ffmpeg_cmds"]:
             cmd["cmd"] = clean_camera_user_pass(" ".join(cmd["cmd"]))
 
+        # masking misses vendor-specific credentials in paths and args, and the
+        # non-admin UI never reads them
+        if not is_admin:
+            ffmpeg = camera_dict.get("ffmpeg", {})
+            _drop_ffmpeg_args(ffmpeg)
+
+            for input in ffmpeg.get("inputs", []):
+                input["path"] = ""
+                _drop_ffmpeg_args(input)
+
+            camera_dict["ffmpeg_cmds"] = []
+            camera_dict.pop("webui_url", None)
+
         # ensure that zones are relative
         for zone_name, zone in config_obj.cameras[camera_name].zones.items():
             camera_dict["zones"][zone_name]["color"] = zone.color
@@ -363,11 +358,13 @@ def config(request: Request):
         # over the camera's actual base values (e.g. threshold=20).
         if camera.profiles:
             for profile_name, profile_config in camera.profiles.items():
-                camera_dict.setdefault("profiles", {})[profile_name] = (
-                    profile_config.model_dump(
-                        mode="json", warnings="none", exclude_unset=True
-                    )
+                profile_dict = profile_config.model_dump(
+                    mode="json", warnings="none", exclude_unset=True
                 )
+                camera_dict.setdefault("profiles", {})[profile_name] = profile_dict
+
+                if not is_admin:
+                    redact_credential(profile_dict.get("notifications") or {}, "email")
 
         # When a profile is active, the top-level camera sections contain
         # profile-merged (effective) values.  Include the original base
@@ -409,6 +406,15 @@ def config(request: Request):
 
     _redact_go2rtc_credentials(config["go2rtc"])
 
+    if not is_admin:
+        # go2rtc allows arbitrary extra keys, so non-admins get only what the
+        # UI reads: stream names, and webrtc, whose ice_servers credentials
+        # the browser needs
+        config["go2rtc"] = {
+            "streams": {name: [] for name in config["go2rtc"].get("streams", {})},
+            "webrtc": config["go2rtc"].get("webrtc", {}),
+        }
+
     config["plus"] = {"enabled": request.app.frigate_config.plus_api.is_active()}
 
     for index, model in enumerate(config_obj.models):
@@ -433,6 +439,11 @@ def config(request: Request):
             model_dict["plus"] = load_plus_model_info(os.path.basename(model.path))
 
     return JSONResponse(content=config)
+
+
+def _drop_ffmpeg_args(ffmpeg: dict[str, Any]) -> None:
+    for key in ("global_args", "input_args", "output_args"):
+        ffmpeg.pop(key, None)
 
 
 def _redact_go2rtc_credentials(go2rtc: dict[str, Any]) -> None:
