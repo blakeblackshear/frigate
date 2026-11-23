@@ -166,10 +166,13 @@ def imagestream(
         time.sleep(1 / fps)
         frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
-            frame = np.zeros((height, int(height * 16 / 9), 3), np.uint8)
+            frame = np.zeros((360, 640, 3), np.uint8)
 
-        width = int(height * frame.shape[1] / frame.shape[0])
-        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
+        frame_height = min(height, frame.shape[0])
+        width = int(frame_height * frame.shape[1] / frame.shape[0])
+        frame = cv2.resize(
+            frame, dsize=(width, frame_height), interpolation=cv2.INTER_LINEAR
+        )
 
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         yield (
@@ -278,7 +281,7 @@ async def latest_frame(
                 status_code=500,
             )
 
-        height = int(params.height or str(frame.shape[0]))
+        height = min(params.height or frame.shape[0], frame.shape[0])
         width = int(height * frame.shape[1] / frame.shape[0])
 
         if height < 1 or width < 1:
@@ -320,7 +323,7 @@ async def latest_frame(
 
         frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
-        height = int(params.height or str(frame.shape[0]))
+        height = min(params.height or frame.shape[0], frame.shape[0])
         width = int(height * frame.shape[1] / frame.shape[0])
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)

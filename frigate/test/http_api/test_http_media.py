@@ -4,9 +4,11 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from zoneinfo import ZoneInfo
 
+import cv2
+import numpy as np
 from fastapi import Request
 
 from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
@@ -587,6 +589,47 @@ class TestHttpMedia(BaseTestHttp):
             # a non-positive scale would never advance the gap scan
             response = client.get("/recordings/unavailable", params={"scale": 0})
             assert response.status_code == 422
+
+    def test_recordings_unavailable_large_span(self):
+        """A wide span at a fine scale returns its gaps without stepping per bucket."""
+        with AuthTestClient(self.app) as client:
+            self._insert_recording("only", 1000, 1100)
+
+            response = client.get(
+                "/recordings/unavailable",
+                params={"after": 1, "before": 10**12, "scale": 1},
+            )
+            assert response.status_code == 200
+            assert response.json() == [
+                {"start_time": 1, "end_time": 1000},
+                {"start_time": 1100, "end_time": 10**12},
+            ]
+
+            for param in ("before", "after"):
+                for bound in ("inf", "-inf", "nan"):
+                    response = client.get(
+                        "/recordings/unavailable", params={param: bound}
+                    )
+                    assert response.status_code == 422
+
+    def test_latest_frame_height_capped_at_source(self):
+        """A requested height above the frame height returns the frame unscaled."""
+        frame = np.zeros((90, 160, 3), np.uint8)
+        processor = MagicMock()
+        processor.get_current_frame.return_value = frame
+        processor.get_current_frame_time.return_value = datetime.now().timestamp()
+        self.app.detected_frames_processor = processor
+
+        with AuthTestClient(self.app) as client:
+            for height, expected in ((45, (45, 80)), (5000, (90, 160))):
+                response = client.get(
+                    "/front_door/latest.jpg", params={"height": height}
+                )
+                assert response.status_code == 200
+                image = cv2.imdecode(
+                    np.frombuffer(response.content, np.uint8), cv2.IMREAD_COLOR
+                )
+                assert image.shape[:2] == expected
 
     def test_recordings_summary_day_attribution_by_start_time(self):
         """

@@ -6,8 +6,10 @@ import threading
 import time
 from collections.abc import Callable, Generator, Iterable
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
+from contextlib import closing
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
+from itertools import islice
 from typing import Any
 
 import cv2
@@ -611,23 +613,48 @@ class MotionSearchRunner(threading.Thread):
 
     def _detect_with_progress(
         self,
-        indexed_frames: list[tuple[int, np.ndarray]],
+        frames: Iterable[np.ndarray],
         timestamp_fn: Callable[[int], float],
-    ) -> list[MotionSearchResult]:
-        """Run detection while firing throttled progress as frames are scanned."""
+    ) -> tuple[list[MotionSearchResult], int]:
+        """Run detection while firing throttled progress as frames are scanned.
+
+        Returns ``(results, frame_count)``.
+        """
+        frame_count = 0
 
         def _gen() -> Generator[tuple[int, np.ndarray], None, None]:
-            for i, frame in indexed_frames:
+            nonlocal frame_count
+            for i, frame in enumerate(frames):
+                frame_count = i + 1
                 if not self._should_stop():
                     self._emit_progress(timestamp_fn(i))
                 yield i, frame
 
-        return detect_motion_scaled(
+        results = detect_motion_scaled(
             _gen(),
             self.scaled_mask,
             self.job.threshold,
             self.job.min_area,
             timestamp_fn,
+        )
+        return results, frame_count
+
+    def _decode_vod(
+        self, vod_url: str, keyframes: bool
+    ) -> Generator[np.ndarray, None, None]:
+        return iter_vod_frames(
+            self.ffmpeg_path,
+            vod_url,
+            self.scaled[0],
+            self.scaled[1],
+            self.channels,
+            self.decode_args,
+            self.crop,
+            self.scaled,
+            True,
+            self._should_stop,
+            skip_nonkey=keyframes,
+            fps_rate=None if keyframes else self.fps_rate,
         )
 
     def _process_run(
@@ -639,7 +666,8 @@ class MotionSearchRunner(threading.Thread):
         are all decoded anyway) paired with its probed PTS; if the decoded and
         probed counts disagree (the decoder ignored ``-skip_frame nokey`` or the
         stream is corrupt) this run re-runs in the fixed-cadence fallback.
-        Returns ``(results, frame_count)``.
+        Frames stream through detection, so a run never holds more than the
+        current and previous frame. Returns ``(results, frame_count)``.
         """
         run_start: float = run[0].start_time  # type: ignore[assignment]
         run_end: float = run[-1].end_time  # type: ignore[assignment]
@@ -650,35 +678,21 @@ class MotionSearchRunner(threading.Thread):
             kf_pts = probe_vod_keyframe_pts(
                 self.ffprobe_path, vod_url, self._should_stop
             )
-            frames = list(
-                iter_vod_frames(
-                    self.ffmpeg_path,
-                    vod_url,
-                    self.scaled[0],
-                    self.scaled[1],
-                    self.channels,
-                    self.decode_args,
-                    self.crop,
-                    self.scaled,
-                    True,
-                    self._should_stop,
-                    skip_nonkey=True,
-                    fps_rate=None,
-                )
-            )
-            if kf_pts and len(frames) == len(kf_pts):
+
+            if kf_pts:
                 abs_times = [stream_time_to_absolute(time_map, p) for p in kf_pts]
-                indexed = list(enumerate(frames))
 
-                def _ts_kf(i: int) -> float:
-                    return abs_times[i]
+                with closing(self._decode_vod(vod_url, keyframes=True)) as frames:
+                    results, frame_count = self._detect_with_progress(
+                        islice(frames, len(abs_times)), abs_times.__getitem__
+                    )
+                    extra_frames = next(frames, None) is not None
 
-                results = self._detect_with_progress(indexed, _ts_kf)
-                return results, len(frames)
+                if frame_count == len(abs_times) and not extra_frames:
+                    return results, frame_count
 
             logger.debug(
-                "Keyframe count mismatch (%d decoded vs %d probed), using cadence",
-                len(frames),
+                "Keyframe decode did not match %d probed keyframes, using cadence",
                 len(kf_pts),
             )
 
@@ -688,29 +702,12 @@ class MotionSearchRunner(threading.Thread):
         self, vod_url: str, time_map: list[tuple[float, float, float]]
     ) -> tuple[list[MotionSearchResult], int]:
         """Fixed-cadence fallback: fps-filtered VOD decode, evenly spaced times."""
-        frames = list(
-            iter_vod_frames(
-                self.ffmpeg_path,
-                vod_url,
-                self.scaled[0],
-                self.scaled[1],
-                self.channels,
-                self.decode_args,
-                self.crop,
-                self.scaled,
-                True,
-                self._should_stop,
-                skip_nonkey=False,
-                fps_rate=self.fps_rate,
-            )
-        )
-        indexed = list(enumerate(frames))
 
         def _ts_fps(i: int) -> float:
             return stream_time_to_absolute(time_map, i / self.fps_rate)
 
-        results = self._detect_with_progress(indexed, _ts_fps)
-        return results, len(frames)
+        with closing(self._decode_vod(vod_url, keyframes=False)) as frames:
+            return self._detect_with_progress(frames, _ts_fps)
 
     def _merge_run(
         self,

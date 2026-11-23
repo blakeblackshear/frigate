@@ -2,6 +2,7 @@
 
 import datetime as dt
 import logging
+import math
 from datetime import datetime, timedelta
 from functools import reduce
 from pathlib import Path
@@ -443,45 +444,38 @@ async def no_recordings(
         else:
             covered.append((rec_start, rec_end))
 
-    # Iterate through time segments and check if each has any recording
-    no_recording_segments = []
-    current = after
-    current_gap_start = None
-    idx = 0
-    covered_count = len(covered)
+    # A scale-sized bucket counts as empty when it fits inside a gap between
+    # covered intervals. Walking the gaps keeps the work proportional to the
+    # recordings found rather than to the requested span.
+    bucket_count = math.ceil((before - after) / scale)
+    gaps: list[list[float]] = []
+    free_start = -math.inf
 
-    while current < before:
-        segment_end = min(current + scale, before)
+    for rec_start, rec_end in covered + [(math.inf, math.inf)]:
+        first = 0 if free_start <= after else math.ceil((free_start - after) / scale)
 
-        # Advance past covered intervals that end before this segment begins;
-        # they cannot overlap this or any later segment.
-        while idx < covered_count and covered[idx][1] <= current:
-            idx += 1
-
-        # A covered interval overlaps the segment when it starts before the
-        # segment ends (its end is already known to be > current).
-        has_recording = idx < covered_count and covered[idx][0] < segment_end
-
-        if not has_recording:
-            # This segment has no recordings
-            if current_gap_start is None:
-                current_gap_start = current  # Start a new gap
+        if rec_start >= before:
+            last = bucket_count - 1
         else:
-            # This segment has recordings
-            if current_gap_start is not None:
-                # End the current gap and append it
-                no_recording_segments.append(
-                    {"start_time": int(current_gap_start), "end_time": int(current)}
-                )
-                current_gap_start = None
+            last = min(math.floor((rec_start - after) / scale), bucket_count) - 1
 
-        current = segment_end
+        if first <= last:
+            gap_start = after + first * scale
+            gap_end = before if last == bucket_count - 1 else after + (last + 1) * scale
 
-    # Append the last gap if it exists
-    if current_gap_start is not None:
-        no_recording_segments.append(
-            {"start_time": int(current_gap_start), "end_time": int(before)}
-        )
+            if gaps and gaps[-1][1] == gap_start:
+                gaps[-1][1] = gap_end
+            else:
+                gaps.append([gap_start, gap_end])
+
+        free_start = rec_end
+        if free_start >= before:
+            break
+
+    no_recording_segments = [
+        {"start_time": int(gap_start), "end_time": int(gap_end)}
+        for gap_start, gap_end in gaps
+    ]
 
     return JSONResponse(content=no_recording_segments)
 
@@ -495,7 +489,7 @@ async def no_recordings(
     Recordings can be filtered by cameras and kept based on motion, objects, or audio attributes.
     """,
 )
-async def delete_recordings(
+def delete_recordings(
     start: float = PathParam(..., description="Start timestamp (unix)"),
     end: float = PathParam(..., description="End timestamp (unix)"),
     params: RecordingsDeleteQueryParams = Depends(),

@@ -9,8 +9,8 @@ class MediaRecordingsSummaryQueryParams(BaseModel):
 
 class MediaRecordingsAvailabilityQueryParams(BaseModel):
     cameras: str = "all"
-    before: float | SkipJsonSchema[None] = None
-    after: float | SkipJsonSchema[None] = None
+    before: float | SkipJsonSchema[None] = Field(default=None, allow_inf_nan=False)
+    after: float | SkipJsonSchema[None] = Field(default=None, allow_inf_nan=False)
     scale: int = Field(default=30, ge=1)
 
 
