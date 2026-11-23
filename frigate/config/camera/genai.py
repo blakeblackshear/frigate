@@ -66,6 +66,11 @@ class GenAIConfig(FrigateBaseModel):
         title="Roles",
         description="GenAI roles (chat, descriptions, embeddings, transcribe); one provider per role. Only chat, descriptions, and embeddings are granted by default; transcribe must be listed explicitly.",
     )
+    send_request_ids: bool = Field(
+        default=False,
+        title="Send request IDs",
+        description="Send existing event IDs in HTTP headers on object description requests for external correlation.",
+    )
     provider_options: dict[str, Any] = Field(
         default={},
         title="Provider options",
