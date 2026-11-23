@@ -313,6 +313,7 @@ class EventCleanup(threading.Thread):
             self.removed_camera_labels = None
 
     def expire_events(self) -> None:
+        """Run one cleanup cycle: expire clips and snapshots, then drop dead events."""
         self.refresh_camera_keys()
         events_with_expired_clips = self.expire_clips()
 
