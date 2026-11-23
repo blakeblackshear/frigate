@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/popover";
 import { getUnitSize } from "@/utils/storageUtil";
 import { CameraStorage, StreamStorage } from "@/types/stats";
+import { FrigateConfig } from "@/types/frigateConfig";
+import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
+import useSWR from "swr";
 
 import { CiCircleAlert } from "react-icons/ci";
 import { useTranslation } from "react-i18next";
@@ -51,6 +54,7 @@ export function CombinedStorageGraph({
 }: CombinedStorageGraphProps) {
   const { t } = useTranslation(["views/system", "components/player"]);
 
+  const { data: config } = useSWR<FrigateConfig>("config");
   const { theme, systemTheme } = useTheme();
   const isDark = (systemTheme || theme) == "dark";
 
@@ -197,10 +201,10 @@ export function CombinedStorageGraph({
       } else if (name == "Other") {
         return t("label.other", { ns: "common" });
       } else {
-        return name.replaceAll("_", " ");
+        return resolveCameraName(config, name);
       }
     },
-    [t],
+    [t, config],
   );
 
   const getStreamSplit = useCallback(
