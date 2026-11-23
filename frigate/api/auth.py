@@ -1,5 +1,6 @@
 """Auth apis."""
 
+import asyncio
 import base64
 import hashlib
 import ipaddress
@@ -1138,7 +1139,9 @@ async def update_password(
                 content={"message": "Current password is required"},
                 status_code=400,
             )
-        if not verify_password(body.old_password, user.password_hash):
+        if not await asyncio.to_thread(
+            verify_password, body.old_password, user.password_hash
+        ):
             return JSONResponse(
                 content={"message": "Current password is incorrect"},
                 status_code=401,
@@ -1152,7 +1155,9 @@ async def update_password(
             status_code=400,
         )
 
-    password_hash = hash_password(body.password, iterations=HASH_ITERATIONS)
+    password_hash = await asyncio.to_thread(
+        hash_password, body.password, iterations=HASH_ITERATIONS
+    )
     User.update(
         {
             User.password_hash: password_hash,
