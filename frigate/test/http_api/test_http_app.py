@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 import frigate.genai
 from frigate.config import GenAIProviderEnum
+from frigate.config.config import RuntimeFilterConfig
 from frigate.const import MODEL_CACHE_DIR, REDACTED_CREDENTIAL_SENTINEL
 from frigate.genai import GenAIClient
 from frigate.models import Event, Recordings, ReviewSegment
@@ -97,6 +98,32 @@ class TestHttpApp(BaseTestHttp):
 
             assert response.status_code == 200
             assert app.frigate_config.cameras["front_door"].objects.track == ["person"]
+
+    def test_config_set_in_memory_adds_filters_for_new_tracked_labels(self):
+        self.minimal_config["cameras"]["front_door"]["objects"] = {
+            "track": ["person"],
+        }
+        app = super().create_app()
+        app.config_publisher = Mock()
+
+        with AuthTestClient(app) as client:
+            response = client.put(
+                "/config/set",
+                json={
+                    "requires_restart": 0,
+                    "skip_save": True,
+                    "update_topic": "config/cameras/front_door/objects",
+                    "config_data": {
+                        "cameras": {
+                            "front_door": {"objects": {"track": ["person", "cat"]}}
+                        }
+                    },
+                },
+            )
+
+        assert response.status_code == 200
+        filters = app.frigate_config.cameras["front_door"].objects.filters
+        assert isinstance(filters["cat"], RuntimeFilterConfig)
 
     @patch("frigate.detectors.detector_config.load_labels")
     def test_config_set_in_memory_rebinds_replay_model_on_scene_change(

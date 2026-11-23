@@ -8,6 +8,7 @@ from unittest.mock import MagicMock, patch
 
 from frigate.config import BirdseyeModeEnum, FrigateConfig
 from frigate.config.camera.profile import CameraProfileConfig
+from frigate.config.config import RuntimeFilterConfig
 from frigate.config.profile import ProfileDefinitionConfig
 from frigate.config.profile_manager import PERSISTENCE_FILE, ProfileManager
 from frigate.const import MODEL_CACHE_DIR
@@ -501,6 +502,16 @@ class TestProfileManager(unittest.TestCase):
         # Back camera should have armed overrides
         back = self.config.cameras["back"]
         assert back.notifications.enabled is True
+
+    @patch.object(ProfileManager, "_persist_active_profile")
+    def test_activate_profile_adds_filters_for_new_tracked_labels(self, mock_persist):
+        """Labels a profile adds to objects.track get default filters."""
+        err = self.manager.activate_profile("armed")
+        assert err is None
+
+        filters = self.config.cameras["front"].objects.filters
+        for label in ["person", "car", "package"]:
+            assert isinstance(filters[label], RuntimeFilterConfig)
 
     @patch.object(ProfileManager, "_persist_active_profile")
     def test_deactivate_profile(self, mock_persist):
