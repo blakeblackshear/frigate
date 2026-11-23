@@ -1283,27 +1283,6 @@ def _with_server_ids(tool_calls: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [{**tc, "id": uuid.uuid4().hex[:9]} for tc in tool_calls]
 
 
-def _client_content(content: Any) -> Any:
-    """Keep only text parts and inline images from client message content.
-
-    Some model servers fetch remote image URLs themselves.
-    """
-    if not isinstance(content, list):
-        return content
-    kept = []
-    for part in content:
-        if not isinstance(part, dict):
-            continue
-        if part.get("type") == "text":
-            kept.append(part)
-        elif part.get("type") == "image_url":
-            image = part.get("image_url")
-            url = image.get("url") if isinstance(image, dict) else None
-            if isinstance(url, str) and url.startswith("data:image/"):
-                kept.append(part)
-    return kept
-
-
 def _tool_calls_awaiting_approval(
     pending_tool_calls: list[dict[str, Any]],
     body: ChatCompletionRequest,
@@ -1549,7 +1528,7 @@ async def chat_completion(
     for msg in body.messages:
         msg_dict = {
             "role": msg.role,
-            "content": _client_content(msg.content),
+            "content": msg.content,
         }
         if msg.tool_call_id:
             msg_dict["tool_call_id"] = msg.tool_call_id
