@@ -89,7 +89,6 @@ class EventCleanup(threading.Thread):
                     Event.camera.not_in(self.camera_keys),
                     Event.start_time < expire_after,
                     Event.label == event.label,
-                    Event.retain_indefinitely == False,
                     Event.has_snapshot == True,
                 )
                 .namedtuples()
@@ -111,7 +110,6 @@ class EventCleanup(threading.Thread):
                 Event.camera.not_in(self.camera_keys),
                 Event.start_time < expire_after,
                 Event.label == event.label,
-                Event.retain_indefinitely == False,
                 Event.has_snapshot == True,
             )
 
@@ -167,7 +165,6 @@ class EventCleanup(threading.Thread):
                         Event.camera == name,
                         Event.start_time < expire_after,
                         Event.label == event.label,
-                        Event.retain_indefinitely == False,
                         Event.has_snapshot == True,
                     )
                     .namedtuples()
@@ -212,7 +209,6 @@ class EventCleanup(threading.Thread):
         query = Event.select(Event.id).where(
             Event.camera.not_in(self.camera_keys),
             Event.start_time < expire_after,
-            Event.retain_indefinitely == False,
             Event.has_clip == True,
         )
 
@@ -258,7 +254,6 @@ class EventCleanup(threading.Thread):
                 )
                 .where(
                     Event.camera == name,
-                    Event.retain_indefinitely == False,
                     Event.has_clip == True,
                     (
                         (

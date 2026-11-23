@@ -40,7 +40,6 @@ class Event(Model):
     area = (
         IntegerField()
     )  # TODO remove when columns can be dropped without rebuilding table
-    retain_indefinitely = BooleanField(default=False)
     ratio = FloatField(
         default=1.0
     )  # TODO remove when columns can be dropped without rebuilding table

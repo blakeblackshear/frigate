@@ -98,7 +98,6 @@ class TestRegeneratedSubLabels(unittest.TestCase):
             region=[],
             box=[],
             area=0,
-            retain_indefinitely=False,
             plus_id="",
             model_hash="",
             detector_type="cpu",
