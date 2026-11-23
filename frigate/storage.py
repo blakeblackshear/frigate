@@ -137,7 +137,7 @@ class StorageMaintainer(threading.Thread):
 
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
-        for camera in self.config.cameras.keys():
+        for camera in list(self.config.cameras):
             # Skip replay cameras
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
@@ -186,7 +186,7 @@ class StorageMaintainer(threading.Thread):
         """Calculate the storage usage of each camera."""
         usages: dict[str, dict] = {}
 
-        for camera in self.config.cameras.keys():
+        for camera in list(self.config.cameras):
             # Skip replay cameras
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
@@ -208,10 +208,7 @@ class StorageMaintainer(threading.Thread):
                 "bandwidth_by_stream", {}
             )
 
-            camera_key = (
-                getattr(self.config.cameras[camera], "friendly_name", None) or camera
-            )
-            usages[camera_key] = {
+            usages[camera] = {
                 "usage": sum(stream_usages.values()),
                 "bandwidth": self.camera_storage_stats.get(camera, {}).get(
                     "bandwidth", 0
