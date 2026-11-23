@@ -1,11 +1,12 @@
 """Utilities for cleaning up camera data from database and filesystem."""
 
+import glob
 import logging
 import os
 import re
 import shutil
 
-from frigate.const import CLIPS_DIR, RECORD_DIR, THUMB_DIR
+from frigate.const import CLIPS_DIR, RECORD_DIR, SUB_CACHE_TAG, THUMB_DIR
 from frigate.models import (
     Event,
     Export,
@@ -112,11 +113,17 @@ def cleanup_camera_files(
         export_paths: Optional list of export file paths to remove
     """
     dirs_to_clean = [
-        os.path.join(RECORD_DIR, camera_name),
-        os.path.join(CLIPS_DIR, camera_name),
         os.path.join(THUMB_DIR, camera_name),
         os.path.join(CLIPS_DIR, "previews", camera_name),
+        os.path.join(CLIPS_DIR, "lpr", camera_name),
+        os.path.join(CLIPS_DIR, "triggers", camera_name),
     ]
+
+    # recordings live at RECORD_DIR/<date>/<hour>/<camera>
+    for name in (camera_name, f"{camera_name}{SUB_CACHE_TAG}"):
+        dirs_to_clean.extend(
+            glob.glob(os.path.join(glob.escape(RECORD_DIR), "*", "*", name))
+        )
 
     for dir_path in dirs_to_clean:
         if os.path.exists(dir_path):

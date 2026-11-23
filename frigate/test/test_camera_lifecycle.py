@@ -264,3 +264,41 @@ class TestCameraFileCleanup(unittest.TestCase):
             ]
 
         self.assertEqual(remaining, other)
+
+    def test_delete_removes_recordings_and_keeps_colliding_dirs(self):
+        own = [
+            "recordings/2026-11-22/10/front/00.00.mp4",
+            "recordings/2026-11-22/10/front@sub/00.00.mp4",
+            "recordings/2026-11-23/03/front/10.00.mp4",
+            "clips/thumbs/front/a.webp",
+            "clips/previews/front/1.mp4",
+            "clips/lpr/front/a/1.jpg",
+            "clips/triggers/front/t.webp",
+        ]
+        other = [
+            "recordings/2026-11-22/10/front_door/00.00.mp4",
+            "recordings/front/keep.mp4",
+            "clips/front/dataset/a.jpg",
+            "clips/thumbs/front_door/b.webp",
+        ]
+
+        with tempfile.TemporaryDirectory() as root:
+            for name in own + other:
+                path = os.path.join(root, name)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                open(path, "w").close()
+
+            clips = os.path.join(root, "clips")
+            with patch.multiple(
+                camera_cleanup,
+                CLIPS_DIR=clips,
+                RECORD_DIR=os.path.join(root, "recordings"),
+                THUMB_DIR=os.path.join(clips, "thumbs"),
+            ):
+                camera_cleanup.cleanup_camera_files("front")
+
+            remaining = [
+                n for n in own + other if os.path.exists(os.path.join(root, n))
+            ]
+
+        self.assertEqual(remaining, other)
