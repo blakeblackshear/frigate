@@ -379,7 +379,7 @@ def move_preview_frames(loc: str) -> None:
             src,
             dst,
         )
-    except shutil.Error:
+    except OSError:
         logger.error(
             "Failed to move preview restart cache from %s to %s",
             src,
