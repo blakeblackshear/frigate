@@ -29,13 +29,7 @@ export function DefaultRoleWidget(props: WidgetProps) {
     return [...BUILT_IN_ROLES, ...custom, NONE_ROLE];
   }, [formContext]);
 
-  // A null default denies access, so it displays as none
-  const selectedValue =
-    value === null
-      ? NONE_ROLE
-      : typeof value === "string" && value
-        ? value
-        : "viewer";
+  const selectedValue = typeof value === "string" && value ? value : "viewer";
 
   const getLabel = (role: string) =>
     BUILT_IN_ROLES.includes(role) || role === NONE_ROLE

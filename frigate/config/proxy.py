@@ -55,10 +55,9 @@ class ProxyConfig(FrigateBaseModel):
     @field_validator("default_role", mode="before")
     @classmethod
     def normalize_deny_sentinel(cls, v):
-        # Fail closed on capitalization: an unnormalized "None" would miss the
-        # sentinel and fall back to viewer, granting the access it was meant to
-        # deny. Other role names stay case-sensitive.
-        if isinstance(v, str) and v.strip().lower() == "none":
+        # Fail closed: "none" in any casing and a null default both deny.
+        # Normalizing null keeps the value through /config, which drops nulls
+        if v is None or (isinstance(v, str) and v.strip().lower() == "none"):
             return "none"
         return v
 

@@ -226,6 +226,9 @@ class TestDefaultRoleNone(unittest.TestCase):
                 )
                 self.assertEqual(role, "none")
 
+    def test_null_default_role_normalizes_to_none(self):
+        self.assertEqual(ProxyConfig(default_role=None).default_role, "none")
+
     def test_other_role_names_stay_case_sensitive(self):
         """Only the deny sentinel is normalized; role names are untouched."""
         config = ProxyConfig(default_role="Operator")
