@@ -34,7 +34,9 @@ class TestHttpPreviewFrames(BaseTestHttp):
             patcher.start()
             self.addCleanup(patcher.stop)
 
-        self.start_ts = time.time()
+        # ahead of now so the media routes never fall back to stored previews
+
+        self.start_ts = time.time() + 60
         self._write_frame(CAMERA, self.start_ts - 10)
         self.own_frames = [self._write_frame(CAMERA, self.start_ts + 1)]
 
