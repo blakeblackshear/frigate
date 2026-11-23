@@ -16,12 +16,14 @@ from peewee import SqliteDatabase
 
 from frigate.api.chat import (
     TOOL_REJECTED_RESULT,
+    _client_content,
     _execute_create_export,
     _execute_get_event_image,
     _execute_get_export_cases,
     _execute_pending_tools,
     _pending_tool_calls_from_tail,
     _tool_calls_awaiting_approval,
+    _with_server_ids,
 )
 from frigate.api.defs.request.chat_body import ChatCompletionRequest
 from frigate.genai.prompts import (
@@ -151,6 +153,44 @@ class TestApprovalHelpers(unittest.TestCase):
         ]
         body = _body(tool_decisions={"c2": "approve", "c3": "reject"})
         self.assertEqual(_tool_calls_awaiting_approval(pending, body, WRITE_TOOLS), [])
+
+    def test_repeated_provider_ids_get_unique_server_ids(self):
+        calls = [
+            {"id": "set_camera_state", "name": "set_camera_state", "arguments": {}},
+            {"id": "set_camera_state", "name": "set_camera_state", "arguments": {}},
+        ]
+        renamed = _with_server_ids(calls)
+        self.assertEqual(len({tc["id"] for tc in renamed}), 2)
+        self.assertNotIn("set_camera_state", {tc["id"] for tc in renamed})
+
+        # A later call to the same tool is not covered by an earlier decision.
+        body = _body(tool_decisions={renamed[0]["id"]: "approve"})
+        later = _with_server_ids(calls[:1])
+        self.assertEqual(
+            len(_tool_calls_awaiting_approval(later, body, WRITE_TOOLS)), 1
+        )
+
+
+class TestClientContent(unittest.TestCase):
+    def test_string_content_is_unchanged(self):
+        self.assertEqual(_client_content("hi"), "hi")
+        self.assertIsNone(_client_content(None))
+
+    def test_only_text_and_inline_images_are_kept(self):
+        text = {"type": "text", "text": "look"}
+        inline = {
+            "type": "image_url",
+            "image_url": {"url": "data:image/jpeg;base64,AAAA"},
+        }
+        content = [
+            text,
+            inline,
+            {"type": "image_url", "image_url": {"url": "http://frigate:5000/x.jpg"}},
+            {"type": "image_url", "image_url": "data:image/jpeg;base64,AAAA"},
+            {"type": "input_audio", "input_audio": {"data": "AAAA"}},
+            "stray",
+        ]
+        self.assertEqual(_client_content(content), [text, inline])
 
 
 class TestExecutePendingTools(unittest.TestCase):
