@@ -489,7 +489,7 @@ async def no_recordings(
     Recordings can be filtered by cameras and kept based on motion, objects, or audio attributes.
     """,
 )
-async def delete_recordings(
+def delete_recordings(
     start: float = PathParam(..., description="Start timestamp (unix)"),
     end: float = PathParam(..., description="End timestamp (unix)"),
     params: RecordingsDeleteQueryParams = Depends(),
