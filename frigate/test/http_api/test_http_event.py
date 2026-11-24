@@ -374,22 +374,6 @@ class TestHttpApp(BaseTestHttp):
             event_after_delete = client.get(f"/events/{id}")
             assert event_after_delete.status_code == 404
 
-    def test_event_retention(self):
-        id = "123456.random"
-
-        with AuthTestClient(self.app) as client:
-            super().insert_mock_event(id)
-            client.post(f"/events/{id}/retain", headers={"remote-role": "admin"})
-            event = client.get(f"/events/{id}").json()
-            assert event
-            assert event["id"] == id
-            assert event["retain_indefinitely"] is True
-            client.delete(f"/events/{id}/retain", headers={"remote-role": "admin"})
-            event = client.get(f"/events/{id}").json()
-            assert event
-            assert event["id"] == id
-            assert event["retain_indefinitely"] is False
-
     def test_event_time_filtering(self):
         morning_id = "123456.random"
         evening_id = "654321.random"
@@ -527,42 +511,32 @@ class TestHttpApp(BaseTestHttp):
         with AuthTestClient(self.app) as client:
             ts_start = datetime.now().timestamp()
             ts_end = ts_start + 30
-            _insert_mock_event(
-                id="abcde.random", start=ts_start, end=ts_end, retain=True
-            )
-            _insert_mock_event(
-                id="01234.random", start=ts_start, end=ts_end, retain=True
-            )
-            _insert_mock_event(
-                id="56789.random", start=ts_start, end=ts_end, retain=True
-            )
+            _insert_mock_event(id="abcde.random", start=ts_start, end=ts_end)
+            _insert_mock_event(id="01234.random", start=ts_start, end=ts_end)
+            _insert_mock_event(id="56789.random", start=ts_start, end=ts_end)
             _insert_mock_event(
                 id="101112.random",
                 label="outside",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="131415.random",
                 label="outside",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="161718.random",
                 camera="porch",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="192021.random",
                 camera="porch",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="222324.random",
@@ -570,7 +544,6 @@ class TestHttpApp(BaseTestHttp):
                 label="inside",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="252627.random",
@@ -578,21 +551,18 @@ class TestHttpApp(BaseTestHttp):
                 label="inside",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="282930.random",
                 label="inside",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
             _insert_mock_event(
                 id="313233.random",
                 label="inside",
                 start=ts_start,
                 end=ts_end,
-                retain=True,
             )
 
             stats_emitter = Mock(spec=StatsEmitter)

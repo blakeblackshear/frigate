@@ -29,7 +29,6 @@ class EventsQueryParams(BaseModel):
         ),
         deprecated=True,
     )
-    favorites: int | None = None
     min_score: float | None = None
     max_score: float | None = None
     min_speed: float | None = None

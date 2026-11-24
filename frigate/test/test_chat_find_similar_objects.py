@@ -122,7 +122,6 @@ class TestExecuteFindSimilarObjects(unittest.TestCase):
                 region=[0, 0, 1, 1],
                 box=[0, 0, 1, 1],
                 area=1,
-                retain_indefinitely=False,
                 ratio=1.0,
                 plus_id="",
                 model_hash="",

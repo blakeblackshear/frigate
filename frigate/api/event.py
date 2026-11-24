@@ -142,7 +142,6 @@ def events(
     has_snapshot = params.has_snapshot
     in_progress = params.in_progress
     include_thumbnails = params.include_thumbnails
-    favorites = params.favorites
     min_score = params.min_score
     max_score = params.max_score
     min_speed = params.min_speed
@@ -167,7 +166,6 @@ def events(
         Event.has_clip,
         Event.has_snapshot,
         Event.plus_id,
-        Event.retain_indefinitely,
         Event.sub_label,
         Event.top_score,
         Event.false_positive,
@@ -312,9 +310,6 @@ def events(
     if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
-    if favorites:
-        clauses.append(Event.retain_indefinitely == favorites)
-
     if max_score is not None:
         clauses.append(Event.data["score"] <= max_score)
 
@@ -415,7 +410,6 @@ def events_explore(
         Event.has_clip,
         Event.has_snapshot,
         Event.plus_id,
-        Event.retain_indefinitely,
         Event.top_score,
         Event.false_positive,
         Event.box,
@@ -456,7 +450,6 @@ def events_explore(
                 "has_clip": event.has_clip,
                 "has_snapshot": event.has_snapshot,
                 "plus_id": event.plus_id,
-                "retain_indefinitely": event.retain_indefinitely,
                 "sub_label": event.sub_label,
                 "top_score": event.top_score,
                 "false_positive": event.false_positive,
@@ -1032,34 +1025,6 @@ async def event(event_id: str, request: Request):
 
 
 @router.post(
-    "/events/{event_id}/retain",
-    response_model=GenericResponse,
-    dependencies=[Depends(require_role(["admin"]))],
-    summary="Set event retain indefinitely.",
-    description="""Sets an event to retain indefinitely.
-    Returns a success message or an error if the event is not found.
-    NOTE: This is a legacy endpoint and is not supported in the frontend.
-    """,
-)
-def set_retain(event_id: str):
-    try:
-        event = Event.get(Event.id == event_id)
-    except DoesNotExist:
-        return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
-            status_code=404,
-        )
-
-    event.retain_indefinitely = True
-    event.save()
-
-    return JSONResponse(
-        content=({"success": True, "message": "Event " + event_id + " retained"}),
-        status_code=200,
-    )
-
-
-@router.post(
     "/events/{event_id}/plus",
     response_model=EventUploadPlusResponse,
     dependencies=[Depends(require_role(["admin"]))],
@@ -1301,35 +1266,6 @@ async def false_positive(request: Request, event_id: str):
 
     return JSONResponse(
         content=({"success": True, "plus_id": event.plus_id}), status_code=200
-    )
-
-
-@router.delete(
-    "/events/{event_id}/retain",
-    response_model=GenericResponse,
-    dependencies=[Depends(require_role(["admin"]))],
-    summary="Stop event from being retained indefinitely",
-    description="""Stops an event from being retained indefinitely.
-    Returns a success message or an error if the event is not found.
-    NOTE: This is a legacy endpoint and is not supported in the frontend.
-    """,
-)
-async def delete_retain(event_id: str, request: Request):
-    try:
-        event = Event.get(Event.id == event_id)
-        await require_camera_access(event.camera, request=request)
-    except DoesNotExist:
-        return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
-            status_code=404,
-        )
-
-    event.retain_indefinitely = False
-    event.save()
-
-    return JSONResponse(
-        content=({"success": True, "message": "Event " + event_id + " un-retained"}),
-        status_code=200,
     )
 
 

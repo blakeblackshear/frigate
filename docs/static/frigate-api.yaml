@@ -4608,14 +4608,6 @@ paths:
               - type: 'null'
             default: 1
             title: Include Thumbnails
-        - name: favorites
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
-            title: Favorites
         - name: min_score
           in: query
           required: false
@@ -5123,75 +5115,6 @@ paths:
         Deletes an event from the database.
             Returns a success message or an error if the event is not found.
       operationId: delete_event_events__event_id__delete
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Event Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      security:
-        - frigateAdminAuth: []
-      x-required-role: admin
-  /events/{event_id}/retain:
-    post:
-      tags:
-        - Events
-      summary: Set event retain indefinitely.
-      description: |-
-        **Access:** Admin role required.
-
-        Sets an event to retain indefinitely.
-            Returns a success message or an error if the event is not found.
-            NOTE: This is a legacy endpoint and is not supported in the frontend.
-      operationId: set_retain_events__event_id__retain_post
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Event Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      security:
-        - frigateAdminAuth: []
-      x-required-role: admin
-    delete:
-      tags:
-        - Events
-      summary: Stop event from being retained indefinitely
-      description: |-
-        **Access:** Admin role required.
-
-        Stops an event from being retained indefinitely.
-            Returns a success message or an error if the event is not found.
-            NOTE: This is a legacy endpoint and is not supported in the frontend.
-      operationId: delete_retain_events__event_id__retain_delete
       parameters:
         - name: event_id
           in: path
@@ -8455,9 +8378,6 @@ components:
         has_snapshot:
           type: boolean
           title: Has Snapshot
-        retain_indefinitely:
-          type: boolean
-          title: Retain Indefinitely
         plus_id:
           anyOf:
             - type: string
@@ -8495,7 +8415,6 @@ components:
         - thumbnail
         - has_clip
         - has_snapshot
-        - retain_indefinitely
         - plus_id
         - model_hash
         - detector_type
