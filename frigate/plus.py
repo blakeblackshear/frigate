@@ -5,6 +5,7 @@ import logging
 import math
 import os
 import re
+import threading
 import time
 from enum import Enum
 from pathlib import Path
@@ -180,6 +181,9 @@ class PlusApi:
         # when Frigate+ last asked us to back off, requests are refused locally
         # until this time instead of being sent to the server again
         self._rate_limited_until: float | None = None
+        # requests run on several threads, and a reply that arrives late must
+        # not shorten a wait recorded from another one
+        self._rate_limit_lock = threading.Lock()
 
         # Retry connection failures so a network that comes up late at startup
         # doesn't fail the Frigate+ model download. Retry-After is not honored
@@ -197,10 +201,12 @@ class PlusApi:
 
     def rate_limit_remaining(self) -> int | None:
         """Seconds until Frigate+ accepts requests again, or None if not limited."""
-        if self._rate_limited_until is None:
+        rate_limited_until = self._rate_limited_until
+
+        if rate_limited_until is None:
             return None
 
-        remaining = math.ceil(self._rate_limited_until - time.time())
+        remaining = math.ceil(rate_limited_until - time.time())
         return remaining if remaining > 0 else None
 
     def _note_rate_limit(self, retry_after: int | None) -> None:
@@ -210,8 +216,14 @@ class PlusApi:
             retry_after if retry_after is not None else "unknown",
         )
 
-        if retry_after is not None:
-            self._rate_limited_until = time.time() + retry_after
+        if retry_after is None:
+            return
+
+        until = time.time() + retry_after
+
+        with self._rate_limit_lock:
+            if self._rate_limited_until is None or until > self._rate_limited_until:
+                self._rate_limited_until = until
 
     def _raise_if_rate_limited(self) -> None:
         remaining = self.rate_limit_remaining()

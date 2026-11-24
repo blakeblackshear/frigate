@@ -114,6 +114,7 @@ class TestValidateKey(unittest.IsolatedAsyncioTestCase):
         api.key = key
         api._token_data = dict(self.CACHED_TOKEN)
         api._rate_limited_until = None
+        api._rate_limit_lock = threading.Lock()
         return api
 
     async def _validate(self, handler) -> tuple[PlusKeyStatus, PlusApi]:
@@ -361,6 +362,34 @@ class TestRateLimit(unittest.TestCase):
 
         self.assertEqual(self.api.get_model_info("abc"), {})
         self.assertIsNone(self.api.rate_limit_remaining())
+
+    def test_a_shorter_wait_arriving_later_keeps_the_longer_one(self):
+        # two requests in flight are both refused, and the reply with the
+        # longer wait is handled first
+        self.api._note_rate_limit(120)
+        self.api._note_rate_limit(10)
+
+        self.assertAlmostEqual(self.api.rate_limit_remaining(), 120, delta=1)
+
+        # a longer wait still extends it
+        self.api._note_rate_limit(300)
+
+        self.assertAlmostEqual(self.api.rate_limit_remaining(), 300, delta=1)
+
+    def test_concurrent_replies_keep_the_longest_wait(self):
+        waits = list(range(1, 201))
+        threads = [
+            threading.Thread(target=self.api._note_rate_limit, args=(wait,))
+            for wait in waits
+        ]
+
+        with patch("frigate.plus.logger"):
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join()
+
+        self.assertAlmostEqual(self.api.rate_limit_remaining(), max(waits), delta=1)
 
     def test_a_429_without_retry_after_is_not_remembered(self):
         self.headers = {}
