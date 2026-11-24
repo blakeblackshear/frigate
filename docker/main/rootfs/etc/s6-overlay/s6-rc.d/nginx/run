@@ -164,10 +164,12 @@ if [[ "$cert_path" == "$letsencrypt_path" && "$runs_as_root" -eq 0 ]] &&
         as_runtime=(s6-setuidgid frigate)
     fi
 
-    if ! "${as_runtime[@]}" test -r "$cert_path/privkey.pem"; then
-        runtime_gid=$("${as_runtime[@]}" id -g)
-        echo "[ERROR] The mounted TLS key is not readable by the runtime user; on the host, give privkey.pem group ${runtime_gid} with group read" >&2
-    fi
+    for file in privkey.pem fullchain.pem; do
+        if ! "${as_runtime[@]}" test -r "$cert_path/$file"; then
+            runtime_gid=$("${as_runtime[@]}" id -g)
+            echo "[ERROR] The mounted ${file} is not readable by the runtime user; on the host, give it group ${runtime_gid} with read access and let that group enter the folders above it" >&2
+        fi
+    done
 fi
 
 # Replace the bash process with the NGINX process, redirecting stderr to stdout
