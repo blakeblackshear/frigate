@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 from unittest.mock import Mock, patch
@@ -30,6 +31,23 @@ class TestHttpApp(BaseTestHttp):
             response = client.get("/stats")
             response_json = response.json()
             assert response_json == self.test_stats
+
+    def test_stats_endpoint_strips_cmdline_for_viewers(self):
+        stats = Mock(spec=StatsEmitter)
+        stats.get_latest_stats.return_value = {
+            **self.test_stats,
+            "cpu_usages": {"52": {"cpu": "1.0", "cmdline": "ffmpeg -i rtsp://"}},
+            "bandwidth_usages": {"52": {"bandwidth": 1.0}},
+        }
+        app = super().create_app(stats)
+
+        with AuthTestClient(app) as client:
+            response = client.get(
+                "/stats",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.json()["cpu_usages"] == {"52": {"cpu": "1.0"}}
+            assert "bandwidth_usages" not in response.json()
 
     def test_recordings_storage_requires_admin(self):
         stats = Mock(spec=StatsEmitter)
@@ -181,6 +199,10 @@ class TestHttpApp(BaseTestHttp):
 
     def test_config_response_hides_notification_email_from_viewers(self):
         self.minimal_config["notifications"] = {"email": "{FRIGATE_TEST_EMAIL}"}
+        self.minimal_config["profiles"] = {"away": {"friendly_name": "Away"}}
+        self.minimal_config["cameras"]["front_door"]["profiles"] = {
+            "away": {"notifications": {"email": "{FRIGATE_TEST_EMAIL}"}}
+        }
 
         with patch.dict(FRIGATE_ENV_VARS, {"FRIGATE_TEST_EMAIL": "me@example.com"}):
             app = super().create_app()
@@ -199,9 +221,164 @@ class TestHttpApp(BaseTestHttp):
                 config["cameras"]["front_door"]["notifications"]["email"]
                 == REDACTED_CREDENTIAL_SENTINEL
             )
+            assert (
+                config["cameras"]["front_door"]["profiles"]["away"]["notifications"][
+                    "email"
+                ]
+                == REDACTED_CREDENTIAL_SENTINEL
+            )
 
             response = client.get("/config")
             assert response.json()["notifications"]["email"] == "me@example.com"
+
+    def test_config_response_limits_urls_and_go2rtc_for_viewers(self):
+        secret_path = "rtsp://10.0.0.1:554/user=admin_password=hunter2_channel=1"
+        self.minimal_config["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"] = (
+            secret_path
+        )
+        auth_header = "-headers 'Authorization: Basic c2VjcmV0'"
+        args = {
+            "global_args": auth_header,
+            "input_args": auth_header,
+            "output_args": {"detect": auth_header},
+        }
+        self.minimal_config["ffmpeg"] = dict(args)
+        front_door = self.minimal_config["cameras"]["front_door"]
+        front_door["ffmpeg"].update(args)
+        front_door["ffmpeg"]["inputs"][0].update(
+            global_args=auth_header, input_args=auth_header
+        )
+        front_door["webui_url"] = "http://admin:hunter2@10.0.0.1/"
+        self.minimal_config["go2rtc"] = {
+            "streams": {"front_door": [secret_path, "ffmpeg:front_door#audio=opus"]},
+            "webrtc": {"candidates": ["10.0.0.2:8555"]},
+            "webtorrent": {"shares": {"share": {"src": "front_door", "pwd": "x"}}},
+        }
+        app = super().create_app()
+
+        with AuthTestClient(app) as client:
+            response = client.get(
+                "/config",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.status_code == 200
+            config = response.json()
+            camera = config["cameras"]["front_door"]
+            assert camera["ffmpeg"]["inputs"][0]["path"] == ""
+            assert camera["ffmpeg_cmds"] == []
+            assert "webui_url" not in camera
+            assert "hunter2" not in response.text
+            assert "c2VjcmV0" not in response.text
+            assert config["go2rtc"] == {
+                "streams": {"front_door": []},
+                "webrtc": {"candidates": ["10.0.0.2:8555"]},
+            }
+
+            config = client.get("/config").json()
+            camera = config["cameras"]["front_door"]
+            assert camera["ffmpeg"]["inputs"][0]["path"] == secret_path
+            assert camera["ffmpeg"]["inputs"][0]["input_args"] == auth_header
+            assert camera["ffmpeg"]["input_args"] == auth_header
+            assert camera["ffmpeg_cmds"]
+            assert config["go2rtc"]["streams"]["front_door"][0] == secret_path
+            assert "webtorrent" in config["go2rtc"]
+
+    def test_config_response_hides_genai_endpoint_from_viewers(self):
+        self.minimal_config["genai"] = {
+            "local": {
+                "provider": "ollama",
+                "model": "llava",
+                "base_url": "http://user:pass@ollama:11434",
+                "provider_options": {"keep_alive": -1},
+            }
+        }
+        app = super().create_app()
+
+        with AuthTestClient(app) as client:
+            genai = client.get(
+                "/config",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            ).json()["genai"]["local"]
+            assert "base_url" not in genai
+            assert "provider_options" not in genai
+            assert genai["provider"] == "ollama"
+
+            genai = client.get("/config").json()["genai"]["local"]
+            assert genai["base_url"] == "http://user:pass@ollama:11434"
+
+    def test_metrics_requires_admin(self):
+        stats = Mock(spec=StatsEmitter)
+        stats.get_latest_stats.return_value = self.test_stats
+        app = super().create_app(stats)
+
+        with AuthTestClient(app) as client:
+            response = client.get(
+                "/metrics",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.status_code == 403
+
+            assert client.get("/metrics").status_code == 200
+
+    def test_config_response_allows_null_profile_notifications(self):
+        self.minimal_config["profiles"] = {"away": {"friendly_name": "Away"}}
+        self.minimal_config["cameras"]["front_door"]["profiles"] = {
+            "away": {"notifications": None}
+        }
+        app = super().create_app()
+
+        with AuthTestClient(app) as client:
+            response = client.get(
+                "/config",
+                headers={"remote-user": "viewer", "remote-role": "viewer"},
+            )
+            assert response.status_code == 200
+
+    def test_go2rtc_stream_producer_sources_hidden_from_viewers(self):
+        secret_url = "ffmpeg:rtsp://admin:hunter2@10.0.0.1:554/live"
+        stream = {
+            "producers": [
+                {
+                    "url": secret_url,
+                    "source": "ffmpeg -i rtsp://admin:hunter2@10.0.0.1:554/live",
+                    "medias": ["video, recvonly, H264"],
+                }
+            ],
+            "consumers": [{"url": "rtmp://a.rtmp.youtube.com/live2/hunter2"}],
+        }
+        app = super().create_app()
+        viewer = {"remote-user": "viewer", "remote-role": "viewer"}
+
+        with (
+            patch("frigate.api.camera.requests.get") as get,
+            AuthTestClient(app) as client,
+        ):
+            get.return_value.json.side_effect = lambda: copy.deepcopy(stream)
+
+            viewer_stream = {"producers": [{"medias": ["video, recvonly, H264"]}]}
+
+            response = client.get("/go2rtc/streams/front_door", headers=viewer)
+            assert response.json() == viewer_stream
+
+            producer = client.get("/go2rtc/streams/front_door").json()["producers"][0]
+            assert producer["medias"] == ["video, recvonly, H264"]
+            assert "hunter2" not in producer["url"]
+
+            get.return_value.json.side_effect = lambda: {
+                "front_door": copy.deepcopy(stream)
+            }
+            response = client.get("/go2rtc/streams", headers=viewer)
+            assert response.json() == {"front_door": viewer_stream}
+
+            # unconnected streams have url-only producers and null consumers
+            get.return_value.json.side_effect = lambda: {
+                "front_door": {"producers": [{"url": secret_url}], "consumers": None}
+            }
+            response = client.get("/go2rtc/streams")
+            assert response.status_code == 200
+            assert "hunter2" not in response.text
+            response = client.get("/go2rtc/streams", headers=viewer)
+            assert response.json() == {"front_door": {"producers": [{"medias": None}]}}
 
     def test_config_response_keeps_plus_model_reference(self):
         model_id = "test_plus_reference"

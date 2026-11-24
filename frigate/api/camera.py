@@ -6,6 +6,7 @@ import logging
 import re
 from importlib.util import find_spec
 from pathlib import Path
+from typing import Any
 from urllib.parse import quote_plus
 
 import httpx
@@ -82,6 +83,23 @@ def _is_valid_host(host: str) -> bool:
         return False
 
 
+def _clean_stream(request: Request, stream: dict[str, Any]) -> dict[str, Any]:
+    """Mask producer urls for admins; others get only producer medias.
+
+    Producer and consumer urls and sources can carry credentials that masking
+    misses, and the non-admin UI only reads producer medias.
+    """
+    producers = stream.get("producers") or []
+
+    if request.headers.get("remote-role") != "admin":
+        return {"producers": [{"medias": p.get("medias")} for p in producers]}
+
+    for producer in producers:
+        producer["url"] = clean_camera_user_pass(producer.get("url", ""))
+
+    return stream
+
+
 @router.get("/go2rtc/streams", dependencies=[Depends(allow_any_authenticated())])
 async def go2rtc_streams(request: Request):
     try:
@@ -114,10 +132,11 @@ async def go2rtc_streams(request: Request):
                 if _get_stream_owner_cameras(request, name) & allowed_cameras
             }
 
-    for data in stream_data.values():
-        for producer in data.get("producers") or []:
-            producer["url"] = clean_camera_user_pass(producer.get("url", ""))
-    return JSONResponse(content=stream_data)
+    return JSONResponse(
+        content={
+            name: _clean_stream(request, data) for name, data in stream_data.items()
+        }
+    )
 
 
 @router.get(
@@ -155,10 +174,7 @@ def go2rtc_camera_stream(request: Request, stream_name: str):
             content=({"success": False, "message": "Error fetching stream data"}),
             status_code=500,
         )
-    stream_data = r.json()
-    for producer in stream_data.get("producers", []):
-        producer["url"] = clean_camera_user_pass(producer.get("url", ""))
-    return JSONResponse(content=stream_data)
+    return JSONResponse(content=_clean_stream(request, r.json()))
 
 
 @router.put(

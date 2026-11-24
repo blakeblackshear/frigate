@@ -9,7 +9,7 @@ import NavPath from "@site/src/components/NavPath";
 
 # Metrics
 
-Frigate exposes Prometheus metrics at the `/api/metrics` endpoint that can be used to monitor the performance and health of your Frigate instance.
+Frigate exposes Prometheus metrics at the `/api/metrics` endpoint that can be used to monitor the performance and health of your Frigate instance. On the authenticated port (8971), the endpoint requires an admin user, so point scrapers at the internal port (5000) as shown below.
 
 ## Enabling Telemetry
 

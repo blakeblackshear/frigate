@@ -91,7 +91,8 @@ def get_categorized_object_names(
             continue
 
         for label in model_config.object_config.objects:
-            names.setdefault(label, set()).update(categories)
+            if label in tracked_objects:
+                names.setdefault(label, set()).update(categories)
 
     return {
         label: sorted(label_names)
