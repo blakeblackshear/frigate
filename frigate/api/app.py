@@ -74,7 +74,7 @@ from frigate.util.config import (
     find_config_file,
     redact_credential,
 )
-from frigate.util.env import substitute_frigate_vars
+from frigate.util.env import candidate_env_vars, substitute_frigate_vars
 from frigate.util.live_streams import (
     generated_transcode_streams,
     sync_transcode_streams,
@@ -810,6 +810,8 @@ def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
     if not isinstance(saved_cameras, dict):
         saved_cameras = {}
 
+    saved_env_vars = saved.get("environment_vars")
+
     for camera_name, camera_data in cameras.items():
         if not isinstance(camera_data, dict):
             continue
@@ -839,7 +841,7 @@ def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
             candidates = [
                 inp
                 for inp in saved_inputs
-                if clean_camera_user_pass(_resolve_frigate_vars(inp["path"])) == path
+                if path in _masked_saved_paths(inp["path"], saved_env_vars)
             ]
             if len({inp["path"] for inp in candidates}) > 1:
                 candidates = [
@@ -864,6 +866,21 @@ def _resolve_frigate_vars(value: str) -> str:
         return substitute_frigate_vars(value)
     except ValueError:
         return value
+
+
+def _masked_saved_paths(path: str, saved_env_vars: Any) -> set[str]:
+    """Mask a saved camera path the ways /config can show it.
+
+    /config resolves placeholders with the installed environment_vars until a
+    no-restart update swaps in a config parsed with the saved block.
+    """
+    with candidate_env_vars(saved_env_vars):
+        saved_resolved = _resolve_frigate_vars(path)
+
+    return {
+        clean_camera_user_pass(_resolve_frigate_vars(path)),
+        clean_camera_user_pass(saved_resolved),
+    }
 
 
 def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
