@@ -180,6 +180,7 @@ class WebPushClient(Communicator):
         self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
+        self.expired_subs_lock = threading.Lock()
         self.suspended_cameras: dict[str, int] = {
             c.name: 0  # type: ignore[misc]
             for c in self.config.cameras.values()
@@ -261,30 +262,35 @@ class WebPushClient(Communicator):
 
     def cleanup_registrations(self) -> None:
         # delete any expired subs
-        if len(self.expired_subs) > 0:
-            for user, expired in self.expired_subs.items():
-                user_subs = []
+        with self.expired_subs_lock:
+            expired_subs, self.expired_subs = self.expired_subs, {}
 
-                # get all subscriptions, removing ones that are expired
-                stored_user: User = User.get_by_id(user)
-                for token in stored_user.notification_tokens:
-                    if token["endpoint"] in expired:
-                        continue
+        for user, expired in expired_subs.items():
+            user_subs = []
 
-                    user_subs.append(token)
+            # get all subscriptions, removing ones that are expired
+            stored_user: User | None = User.get_or_none(User.username == user)
 
-                # overwrite the database and reset web pushers
-                User.update(notification_tokens=user_subs).where(
-                    User.username == user
-                ).execute()
+            # the user was deleted after the endpoint expired
+            if stored_user is None:
+                continue
 
-                self.web_pushers[user] = _build_web_pushers(user, user_subs)
+            for token in stored_user.notification_tokens:
+                if isinstance(token, dict) and token.get("endpoint") in expired:
+                    continue
 
-                logger.info(
-                    f"Cleaned up {len(expired)} notification subscriptions for {user}"
-                )
+                user_subs.append(token)
 
-        self.expired_subs = {}
+            # overwrite the database and reset web pushers
+            User.update(notification_tokens=user_subs).where(
+                User.username == user
+            ).execute()
+
+            self.web_pushers[user] = _build_web_pushers(user, user_subs)
+
+            logger.info(
+                f"Cleaned up {len(expired)} notification subscriptions for {user}"
+            )
 
     def suspend_notifications(self, camera: str, minutes: int) -> None:
         """Suspend notifications for a specific camera."""
@@ -460,9 +466,10 @@ class WebPushClient(Communicator):
                     )
 
                     if resp.status_code in (404, 410):
-                        self.expired_subs.setdefault(notification.user, []).append(
-                            endpoint
-                        )
+                        with self.expired_subs_lock:
+                            self.expired_subs.setdefault(notification.user, []).append(
+                                endpoint
+                            )
                         logger.debug(
                             f"Notification endpoint expired for {notification.user}, received {resp.status_code}"
                         )
