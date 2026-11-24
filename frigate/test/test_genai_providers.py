@@ -501,6 +501,42 @@ class TestGeminiProvider(unittest.TestCase):
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
 
+    def test_tool_response_name_resolves_from_call_id(self):
+        from google.genai.types import FinishReason
+
+        client = self._client()
+        self._patch_stream(
+            client,
+            [
+                _gemini_chunk(
+                    parts=[_gemini_part(text="ok")], finish_reason=FinishReason.STOP
+                )
+            ],
+        )
+        messages = [
+            {"role": "user", "content": "turn off recordings"},
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_abc",
+                        "type": "function",
+                        "function": {"name": "set_camera_state", "arguments": "{}"},
+                    }
+                ],
+            },
+            {"role": "tool", "tool_call_id": "call_abc", "content": "{}"},
+        ]
+        _collect(client, messages)
+
+        contents = client.provider.aio.models.generate_content_stream.call_args.kwargs[
+            "contents"
+        ]
+        self.assertEqual(
+            contents[-1].parts[0].function_response.name, "set_camera_state"
+        )
+
 
 class TestGeminiImageTokens(unittest.TestCase):
     def _client(self, count_tokens):

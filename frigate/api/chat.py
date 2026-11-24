@@ -6,6 +6,7 @@ import json
 import logging
 import operator
 import time
+import uuid
 from datetime import datetime
 from functools import reduce
 from typing import Any, Literal
@@ -1280,6 +1281,14 @@ def _pending_tool_calls_from_tail(
     return parse_tool_calls_from_message(tail)
 
 
+def _with_server_ids(tool_calls: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Give each model tool call a unique id.
+
+    Approvals are keyed by id, and some providers reuse ids across calls.
+    """
+    return [{**tc, "id": uuid.uuid4().hex[:9]} for tc in tool_calls]
+
+
 def _tool_calls_awaiting_approval(
     pending_tool_calls: list[dict[str, Any]],
     body: ChatCompletionRequest,
@@ -1605,6 +1614,7 @@ async def chat_completion(
                                 return
                             requested = msg.get("tool_calls")
                             if requested:
+                                requested = _with_server_ids(requested)
                                 stream_iterations += 1
                                 conversation.append(
                                     build_assistant_message_for_conversation(
@@ -1690,13 +1700,15 @@ async def chat_completion(
                         status_code=500,
                     )
 
+                pending_tool_calls = response.get("tool_calls")
+                if pending_tool_calls:
+                    pending_tool_calls = _with_server_ids(pending_tool_calls)
                 conversation.append(
                     build_assistant_message_for_conversation(
-                        response.get("content"), response.get("tool_calls")
+                        response.get("content"), pending_tool_calls
                     )
                 )
 
-                pending_tool_calls = response.get("tool_calls")
                 if not pending_tool_calls:
                     logger.debug(
                         f"Chat completion finished with final answer (iterations: {tool_iterations})"
