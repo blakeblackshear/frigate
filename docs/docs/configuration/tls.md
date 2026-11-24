@@ -47,7 +47,7 @@ frigate:
 
 Within the folder, the private key is expected to be named `privkey.pem` and the certificate is expected to be named `fullchain.pem`. Mounted certificates take precedence over the self signed pair in `/config/tls`.
 
-`privkey.pem` must be readable by the runtime user that runs NGINX. Frigate hands it over at startup when the mount is writable; on a `:ro` mount, make it readable by uid 1000 (or your `PUID`) yourself. See [Running as a non-root user](/configuration/non_root).
+`privkey.pem` and `fullchain.pem` must be readable by the runtime user that runs NGINX, and that user must be able to enter the folders above them. Frigate doesn't change ownership of mounted certificates, so give the key to the runtime user's group (gid 1000, your `PGID`, or the group in Docker's `user:`) with group read on the host, for example `chgrp 1000 privkey.pem && chmod g+r privkey.pem`. certbot keeps the key's group and group read on renewal, so this is a one-time step. See [Running as a non-root user](/configuration/non_root).
 
 Note that certbot uses symlinks, and those can't be followed by the container unless it has access to the targets as well, so if using certbot you'll also have to mount the `archive` folder for your domain, e.g.:
 
