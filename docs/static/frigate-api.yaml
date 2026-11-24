@@ -9630,6 +9630,8 @@ components:
           title: Condition
         max_duration_minutes:
           type: integer
+          maximum: 1440.0
+          minimum: 1.0
           title: Max Duration Minutes
           default: 60
         labels:

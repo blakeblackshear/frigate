@@ -414,7 +414,6 @@ def collect_state_classification_examples(
         cameras: Dict mapping camera names to normalized crop coordinates [x1, y1, x2, y2] (0-1)
     """
     model_name = model_name.strip()
-    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
 
     # Step 1: Get review items for the cameras
     camera_names = list(cameras.keys())
@@ -429,29 +428,31 @@ def collect_state_classification_examples(
         logger.warning(f"No review items found for cameras: {camera_names}")
         return
 
-    # The temp directory is only created when there are review_items.
-    temp_dir = os.path.join(dataset_dir, "temp")
-    os.makedirs(temp_dir, exist_ok=True)
-
     # Step 2: Create balanced timestamp selection (100 samples)
     timestamps = _select_balanced_timestamps(review_items, target_count=100)
 
-    # Step 3: Extract keyframes from recordings with crops applied
-    keyframes = _extract_keyframes(
-        "/usr/lib/ffmpeg/8.0/bin/ffmpeg", timestamps, temp_dir, cameras
-    )
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Step 3: Extract keyframes from recordings with crops applied
+        keyframes = _extract_keyframes(
+            "/usr/lib/ffmpeg/8.0/bin/ffmpeg", timestamps, temp_dir, cameras
+        )
 
-    # Step 4: Select 24 most visually distinct images (they're already cropped)
-    distinct_images = _select_distinct_images(keyframes, target_count=24)
+        # Step 4: Select 24 most visually distinct images (they're already cropped)
+        distinct_images = _select_distinct_images(keyframes, target_count=24)
 
-    # Step 5: Save to train directory for later classification
+        # Step 5: Save to train directory for later classification
+        _save_train_examples(model_name, distinct_images)
+
+
+def _save_train_examples(model_name: str, image_paths: list[str]) -> int:
+    """Replace the model's train directory with the given images."""
     train_dir = os.path.join(CLIPS_DIR, model_name, "train")
     if os.path.exists(train_dir):
         shutil.rmtree(train_dir)
     os.makedirs(train_dir, exist_ok=True)
 
     saved_count = 0
-    for idx, image_path in enumerate(distinct_images):
+    for idx, image_path in enumerate(image_paths):
         dest_path = os.path.join(train_dir, f"example_{idx:03d}.jpg")
         try:
             img = cv2.imread(image_path)
@@ -462,10 +463,7 @@ def collect_state_classification_examples(
         except Exception as e:
             logger.error(f"Failed to save image {image_path}: {e}")
 
-    try:
-        shutil.rmtree(temp_dir)
-    except Exception as e:
-        logger.warning(f"Failed to clean up temp directory: {e}")
+    return saved_count
 
 
 def _select_balanced_timestamps(
@@ -524,13 +522,20 @@ def _select_balanced_timestamps(
                 }
             )
 
-    # If we don't have enough, sample more from larger groups
-    while len(timestamps) < target_count and len(timestamps) < len(review_items):
+    # Sample more from larger groups. Zero-length items and timestamps too
+    # close to an existing one never add a sample, so attempts are capped.
+    max_attempts = target_count * 10
+    attempts = 0
+    while (
+        len(timestamps) < target_count
+        and len(timestamps) < len(review_items)
+        and attempts < max_attempts
+    ):
         for group_items in grouped.values():
-            if len(timestamps) >= target_count:
+            if len(timestamps) >= target_count or attempts >= max_attempts:
                 break
 
-            # Pick a random item not already sampled
+            attempts += 1
             item = random.choice(group_items)
             duration = item.end_time - item.start_time
             if duration <= 0:
@@ -770,9 +775,6 @@ def collect_object_classification_examples(
         label: Object label to collect (e.g., "person", "car")
     """
     model_name = model_name.strip()
-    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
-    temp_dir = os.path.join(dataset_dir, "temp")
-    os.makedirs(temp_dir, exist_ok=True)
 
     # Step 1: Query events for the specified label and cameras
     events = list(
@@ -794,41 +796,21 @@ def collect_object_classification_examples(
     selected_ids = {e.id for e in selected_events}
     remaining_events = [e for e in events if e.id not in selected_ids]
     random.shuffle(remaining_events)
-    thumbnails = _extract_event_thumbnails(
-        selected_events + remaining_events, temp_dir, target_count=100
-    )
-    logger.debug(f"Successfully extracted {len(thumbnails)} thumbnails")
 
-    # Step 4: Select 24 most visually distinct thumbnails
-    distinct_images = _select_distinct_images(thumbnails, target_count=24)
-    logger.debug(f"Selected {len(distinct_images)} distinct images")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        thumbnails = _extract_event_thumbnails(
+            selected_events + remaining_events, temp_dir, target_count=100
+        )
+        logger.debug(f"Successfully extracted {len(thumbnails)} thumbnails")
 
-    # Step 5: Save to train directory for later classification
-    train_dir = os.path.join(CLIPS_DIR, model_name, "train")
-    if os.path.exists(train_dir):
-        shutil.rmtree(train_dir)
-    os.makedirs(train_dir, exist_ok=True)
+        # Step 4: Select 24 most visually distinct thumbnails
+        distinct_images = _select_distinct_images(thumbnails, target_count=24)
+        logger.debug(f"Selected {len(distinct_images)} distinct images")
 
-    saved_count = 0
-    for idx, image_path in enumerate(distinct_images):
-        dest_path = os.path.join(train_dir, f"example_{idx:03d}.jpg")
-        try:
-            img = cv2.imread(image_path)
+        # Step 5: Save to train directory for later classification
+        saved_count = _save_train_examples(model_name, distinct_images)
 
-            if img is not None:
-                cv2.imwrite(dest_path, img)
-                saved_count += 1
-        except Exception as e:
-            logger.error(f"Failed to save image {image_path}: {e}")
-
-    try:
-        shutil.rmtree(temp_dir)
-    except Exception as e:
-        logger.warning(f"Failed to clean up temp directory: {e}")
-
-    logger.debug(
-        f"Successfully collected {saved_count} classification examples in {train_dir}"
-    )
+    logger.debug(f"Successfully collected {saved_count} classification examples")
 
 
 def _select_balanced_events(

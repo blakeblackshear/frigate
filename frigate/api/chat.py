@@ -14,7 +14,7 @@ import cv2
 import numpy as np
 from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from frigate.api.auth import (
     allow_any_authenticated,
@@ -56,6 +56,7 @@ from frigate.genai.utils import (
 )
 from frigate.jobs.export import ExportQueueFullError, start_export_job
 from frigate.jobs.vlm_watch import (
+    MAX_WATCH_MINUTES,
     VLMWatchJob,
     get_vlm_watch_job,
     start_vlm_watch_job,
@@ -88,7 +89,7 @@ class VLMMonitorRequest(BaseModel):
 
     camera: str
     condition: str
-    max_duration_minutes: int = 60
+    max_duration_minutes: int = Field(default=60, ge=1, le=MAX_WATCH_MINUTES)
     labels: list[str] = []
     zones: list[str] = []
 
@@ -1030,11 +1031,16 @@ async def _execute_start_camera_watch(
     camera = arguments.get("camera", "").strip()
     condition = arguments.get("condition", "").strip()
     max_duration_minutes = int(arguments.get("max_duration_minutes", 60))
+    max_duration_minutes = max(1, min(MAX_WATCH_MINUTES, max_duration_minutes))
     labels = arguments.get("labels") or []
     zones = arguments.get("zones") or []
 
     if not camera or not condition:
         return {"error": "camera and condition are required."}
+
+    for value in (labels, zones):
+        if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+            return {"error": "labels and zones must be lists of strings."}
 
     config = request.app.frigate_config
     if camera not in config.cameras:
