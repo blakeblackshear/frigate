@@ -1,8 +1,8 @@
 import axios from "axios";
+import { formatDuration, Locale } from "date-fns";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useDateLocale } from "@/hooks/use-date-locale";
-import { formatSecondsToDuration } from "@/utils/dateUtil";
 
 /**
  * The wait Frigate+ asked for when a request failed because of its rate limit.
@@ -19,6 +19,26 @@ export function getPlusRetryAfter(error: unknown): number | null | undefined {
   return typeof retryAfter === "number" ? retryAfter : null;
 }
 
+/**
+ * A wait in seconds as a readable duration, such as "1 day, 1 hour".
+ *
+ * Waits can last days, so the days are kept rather than folded away or
+ * turned into calendar months.
+ */
+export function formatPlusWait(seconds: number, locale?: Locale): string {
+  const total = Math.ceil(seconds);
+
+  return formatDuration(
+    {
+      days: Math.floor(total / 86400),
+      hours: Math.floor((total % 86400) / 3600),
+      minutes: Math.floor((total % 3600) / 60),
+      seconds: total % 60,
+    },
+    { delimiter: ", ", locale },
+  );
+}
+
 /** Messages telling the user Frigate+ is rate limiting requests. */
 export function usePlusRateLimit() {
   const { t } = useTranslation(["common"]);
@@ -29,7 +49,7 @@ export function usePlusRateLimit() {
       retryAfter && retryAfter > 0
         ? t("plusRateLimited.retryIn", {
             ns: "common",
-            duration: formatSecondsToDuration(retryAfter, dateLocale),
+            duration: formatPlusWait(retryAfter, dateLocale),
           })
         : t("plusRateLimited.retryLater", { ns: "common" }),
     [t, dateLocale],

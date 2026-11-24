@@ -459,7 +459,7 @@ test.describe("Detection models settings @high", () => {
     );
   });
 
-  test("a Frigate+ rate limit says how long to wait", async ({
+  test("a Frigate+ rate limit says how long to wait, including days", async ({
     frigateApp,
   }) => {
     await installRoutes(
@@ -478,14 +478,14 @@ test.describe("Detection models settings @high", () => {
     await frigateApp.page.route("**/api/plus/models", (route) =>
       route.fulfill({
         status: 429,
-        headers: { "Retry-After": "120" },
-        json: { success: false, retry_after: 120 },
+        headers: { "Retry-After": "90000" },
+        json: { success: false, retry_after: 90000 },
       }),
     );
     await openPage(frigateApp);
 
     await expect(frigateApp.page.locator("#pageRoot")).toContainText(
-      "Frigate+ is rate limiting requests. Try again in 2 minutes.",
+      "Frigate+ is rate limiting requests. Try again in 1 day, 1 hour.",
     );
   });
 
