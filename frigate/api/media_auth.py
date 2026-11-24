@@ -311,6 +311,9 @@ def deny_response_for_media_uri(
     if not role or role == "admin":
         return None
 
+    if resolution == MediaAuthResolution.ADMIN_ONLY:
+        return 403
+
     if not is_role_restricted(role, frigate_config):
         return None
 
@@ -319,7 +322,6 @@ def deny_response_for_media_uri(
 
     if resolution in (
         MediaAuthResolution.LISTING_MULTI_CAMERA,
-        MediaAuthResolution.ADMIN_ONLY,
         MediaAuthResolution.UNRESOLVED_MEDIA,
     ):
         return 403

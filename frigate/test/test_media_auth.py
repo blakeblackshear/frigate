@@ -332,6 +332,18 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         self.assertIsNone(self._deny("/clips/back_door-1.jpg", "viewer"))
         self.assertIsNone(self._deny("/clips/", "viewer"))
 
+    def test_unrestricted_role_blocked_admin_only(self):
+        for uri in (
+            "/clips/faces/",
+            "/clips/faces/train/foo.webp",
+            "/clips/faces/alice/ref.webp",
+            "/clips/genai-requests/x/0.jpg",
+            "/clips/preview_restart_cache/x.mp4",
+            "/clips/some_model/train/x.jpg",
+            "/clips/some_model/dataset/cat/x.jpg",
+        ):
+            self.assertEqual(self._deny(uri, "viewer"), 403, uri)
+
     def test_restricted_role_allowed_camera(self):
         self.assertIsNone(self._deny("/clips/front_door-1.jpg", "limited_user"))
         self.assertIsNone(
