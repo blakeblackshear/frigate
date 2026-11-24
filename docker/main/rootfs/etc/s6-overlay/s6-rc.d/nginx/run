@@ -157,7 +157,8 @@ fi
 # Mounted certs are never chowned: chown follows symlinks, and the runtime user
 # may control the mounted folder. The key's group and group read survive certbot
 # renewals, so the host grants access once.
-if [[ "$cert_path" == "$letsencrypt_path" && "$runs_as_root" -eq 0 ]]; then
+if [[ "$cert_path" == "$letsencrypt_path" && "$runs_as_root" -eq 0 ]] &&
+    [[ "$(echo "$nginx_settings" | jq -r .tls.enabled)" == "true" ]]; then
     as_runtime=()
     if [[ "$(id -u)" -eq 0 ]]; then
         as_runtime=(s6-setuidgid frigate)
@@ -165,7 +166,7 @@ if [[ "$cert_path" == "$letsencrypt_path" && "$runs_as_root" -eq 0 ]]; then
 
     if ! "${as_runtime[@]}" test -r "$cert_path/privkey.pem"; then
         runtime_gid=$("${as_runtime[@]}" id -g)
-        echo "[ERROR] The mounted TLS key is not readable by the runtime user; on the host, run chgrp ${runtime_gid} and chmod g+r on privkey.pem (and the archive file it links to)" >&2
+        echo "[ERROR] The mounted TLS key is not readable by the runtime user; on the host, give privkey.pem group ${runtime_gid} with group read" >&2
     fi
 fi
 
