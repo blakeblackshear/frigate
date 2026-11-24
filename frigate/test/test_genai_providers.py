@@ -19,6 +19,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import requests
 
 from frigate.config import GenAIConfig, GenAIProviderEnum
@@ -821,6 +822,13 @@ class TestOllamaProvider(unittest.TestCase):
 
         self.assertEqual(client.embed(images=[self._webp_bytes()]), [])
 
+    def test_embed_transport_error_returns_empty(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider._request_raw.side_effect = httpx.ReadError("reset")
+
+        self.assertEqual(client.embed(texts=["a person"]), [])
+
 
 # ---------------------------------------------------------------------------
 # llama.cpp
@@ -974,6 +982,23 @@ class TestLlamaCppProvider(unittest.TestCase):
     def test_provider_options_context_size_overrides_server(self):
         client = self._validated_client(4096, {"context_size": 32768})
         self.assertEqual(client.get_context_size(), 32768)
+
+    def test_base_url_strips_only_trailing_v1(self):
+        client = _make_client(
+            "llamacpp", model="m", base_url="http://v1-gpu.lan:8080/v1/"
+        )
+        self.assertEqual(client.provider, "http://v1-gpu.lan:8080")
+
+    def test_models_url_strips_v1_when_init_failed(self):
+        client = self._client()
+        client.provider = None
+        client.genai_config.base_url = "http://host:8080/v1"
+
+        with patch.object(client, "_get") as get:
+            get.return_value.json.return_value = {"data": []}
+            client._fetch_models_data()
+
+        self.assertEqual(get.call_args.args[0], "http://host:8080/v1/models")
 
     def test_list_models_dedupes_alias_matching_id(self):
         client = self._client()

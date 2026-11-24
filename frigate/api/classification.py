@@ -216,26 +216,28 @@ def train_face(request: Request, name: str, body: dict = None):
                 status_code=404,
             )
 
-        snapshot = get_event_snapshot(event)
-        face_box = event.data["attributes"][0]["box"]
-        detect_config: DetectConfig = request.app.frigate_config.cameras[
-            event.camera
-        ].detect
+        attributes = (event.data or {}).get("attributes") or []
+        snapshot = get_event_snapshot(event) if attributes else None
+        success = False
 
-        # crop onto the face box minus the bounding box itself
-        x1 = int(face_box[0] * detect_config.width) + 2
-        y1 = int(face_box[1] * detect_config.height) + 2
-        x2 = x1 + int(face_box[2] * detect_config.width) - 4
-        y2 = y1 + int(face_box[3] * detect_config.height) - 4
-        face = snapshot[y1:y2, x1:x2]
-        success = True
+        if snapshot is not None:
+            face_box = attributes[0]["box"]
+            detect_config: DetectConfig = request.app.frigate_config.cameras[
+                event.camera
+            ].detect
 
-        if face.size > 0:
-            try:
-                cv2.imwrite(os.path.join(new_file_folder, new_name), face)
-                success = True
-            except Exception:
-                pass
+            # crop onto the face box minus the bounding box itself
+            x1 = int(face_box[0] * detect_config.width) + 2
+            y1 = int(face_box[1] * detect_config.height) + 2
+            x2 = x1 + int(face_box[2] * detect_config.width) - 4
+            y2 = y1 + int(face_box[3] * detect_config.height) - 4
+            face = snapshot[y1:y2, x1:x2]
+
+            if face.size > 0:
+                try:
+                    success = cv2.imwrite(os.path.join(new_file_folder, new_name), face)
+                except cv2.error:
+                    logger.exception("Failed to save face image for %s", event_id)
 
         if not success:
             return JSONResponse(
@@ -1273,7 +1275,10 @@ async def generate_state_examples(request: Request, body: GenerateStateExamplesB
         if camera_name in request.app.frigate_config.cameras
     }
 
-    collect_state_classification_examples(model_name, cameras_normalized)
+    async with example_collection_lock:
+        await asyncio.to_thread(
+            collect_state_classification_examples, model_name, cameras_normalized
+        )
 
     return JSONResponse(
         content={"success": True, "message": "Example generation completed"},
