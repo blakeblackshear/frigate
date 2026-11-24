@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
 
 from fastapi import Request
 from peewee import DoesNotExist
@@ -851,7 +852,7 @@ class TestHttpReview(BaseTestHttp):
 
         with AuthTestClient(self.app) as client:
             for pattern in ["1763812345*", "176381234?.0-abc123", "176381234[0-9]*"]:
-                response = client.get(f"/review/event/{pattern}")
+                response = client.get(f"/review/event/{quote(pattern, safe='')}")
                 assert response.status_code == 404
 
             response = client.get("/review/event/1763812345.0-abc123")
