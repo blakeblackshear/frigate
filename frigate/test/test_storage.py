@@ -440,6 +440,36 @@ class TestHttp(unittest.TestCase):
         assert usages["front_door"]["usage"] == 0
         assert usages["front_door"]["streams"] == {}
 
+    def test_camera_usages_keyed_by_camera_id(self):
+        """Cameras sharing a friendly name keep separate usage entries."""
+        self.double_cam_config["cameras"]["front_door"]["friendly_name"] = "Door"
+        self.double_cam_config["cameras"]["back_door"]["friendly_name"] = "Door"
+        config = FrigateConfig(**self.double_cam_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_recording(
+            "1234567.frontdoor",
+            os.path.join(self.test_dir, "front.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=20,
+        )
+        _insert_mock_recording(
+            "1234568.backdoor",
+            os.path.join(self.test_dir, "back.tmp"),
+            time_keep,
+            time_keep + 10,
+            camera="back_door",
+            seg_size=5,
+        )
+
+        storage.calculate_camera_bandwidth()
+        usages = storage.calculate_camera_usages()
+
+        assert usages["front_door"]["usage"] == 20
+        assert usages["back_door"]["usage"] == 5
+
     def test_storage_cleanup(self):
         """Ensure that all recordings are cleaned up when necessary."""
         config = FrigateConfig(**self.minimal_config)
