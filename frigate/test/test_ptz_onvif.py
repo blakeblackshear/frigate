@@ -18,7 +18,7 @@ from unittest.mock import AsyncMock, MagicMock
 from frigate.camera import PTZMetrics
 from frigate.config import FrigateConfig
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
-from frigate.ptz.onvif import OnvifController
+from frigate.ptz.onvif import OnvifCommandEnum, OnvifController
 
 CAMERA = "ptz_cam"
 
@@ -157,6 +157,14 @@ class TestOnvifInitRequests(unittest.IsolatedAsyncioTestCase):
         ptz.GetServiceCapabilities.assert_not_called()
         ptz.GetStatus.assert_not_called()
 
+    async def test_init_completes_without_video_sources(self) -> None:
+        controller = _make_controller(autotracking_enabled=False)
+        media = await controller.cams[CAMERA]["onvif"].create_media_service()
+        media.GetVideoSources.return_value = []
+
+        self.assertTrue(await controller._init_onvif(CAMERA))
+        self.assertIsNone(controller.cams[CAMERA]["video_source_token"])
+
 
 class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
     """A manual move from the UI (click to move, drag to zoom) sends move_relative
@@ -203,6 +211,39 @@ class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
         await controller._move_relative(CAMERA, 0.25, -0.25, 0, 1)
 
         self.assertFalse(controller.cams[CAMERA]["active"])
+
+    async def test_failed_preset_and_zoom_moves_do_not_raise(self) -> None:
+        # camera_maintenance and the move queue consumer end on an exception
+        controller = _make_move_controller(autotracking_enabled=True)
+        cam = controller.cams[CAMERA]
+        cam["features"] += ["zoom", "zoom-a"]
+        cam["presets"] = {"home": "token_1"}
+        cam["move_request"] = MagicMock()
+        cam["absolute_zoom_range"] = {"XRange": {"Min": 0.0, "Max": 1.0}}
+        cam["ptz"].GotoPreset = AsyncMock(side_effect=TimeoutError)
+        cam["ptz"].ContinuousMove = AsyncMock(side_effect=TimeoutError)
+        cam["ptz"].AbsoluteMove = AsyncMock(side_effect=TimeoutError)
+
+        moves = {
+            "preset": (
+                controller._move_to_preset(CAMERA, "home"),
+                cam["ptz"].GotoPreset,
+            ),
+            "zoom": (
+                controller._zoom(CAMERA, OnvifCommandEnum.zoom_in),
+                cam["ptz"].ContinuousMove,
+            ),
+            "zoom_absolute": (
+                controller._zoom_absolute(CAMERA, 0.5, 1),
+                cam["ptz"].AbsoluteMove,
+            ),
+        }
+
+        for name, (move, request) in moves.items():
+            with self.subTest(move=name):
+                await move
+                request.assert_awaited_once()
+                self.assertFalse(cam["active"])
 
     async def test_metrics_written_when_autotracking_enabled(self) -> None:
         # get_camera_status resets stop_time once the camera reports IDLE, so the
