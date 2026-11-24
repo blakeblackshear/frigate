@@ -376,13 +376,16 @@ class DebugReplayJobRunner(threading.Thread):
                 self._finalize_cancelled(clip_path)
                 return
 
-            self.replay_manager.publish_camera(
+            if not self.replay_manager.publish_camera(
                 source_camera=self.job.source_camera,
                 replay_name=replay_name,
                 clip_path=clip_path,
                 frigate_config=self.frigate_config,
                 config_publisher=self.config_publisher,
-            )
+            ):
+                self._finalize_cancelled(clip_path)
+                return
+
             self.replay_manager.mark_session_ready(clip_path)
 
             self.job.status = JobStatusTypesEnum.success

@@ -221,6 +221,24 @@ class TestFfmpegProgressParsing(unittest.TestCase):
         assert any(abs(p - (30 / 90 * 100)) < 0.01 for p in encoding_percents)
 
 
+class TestExportJobManagerConfig(unittest.TestCase):
+    def test_manager_follows_the_config_passed_by_callers(self) -> None:
+        import frigate.jobs.export as export_jobs
+
+        boot = MagicMock(name="boot")
+        swapped = MagicMock(name="swapped")
+
+        with (
+            patch.object(export_jobs, "_job_manager", None),
+            patch.object(export_jobs.ExportJobManager, "ensure_started"),
+            patch.object(export_jobs, "_get_max_concurrent", return_value=1),
+        ):
+            export_jobs.get_export_job_manager(boot)
+            manager = export_jobs.get_export_job_manager(swapped)
+
+        self.assertIs(manager.config, swapped)
+
+
 class TestBroadcastAggregation(unittest.TestCase):
     """Verify ExportJobManager broadcast payload shape and throttling."""
 

@@ -2,7 +2,9 @@
 
 import multiprocessing as mp
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
+
+import numpy as np
 
 from frigate.config import (
     BirdseyeModeEnum,
@@ -605,6 +607,72 @@ class TestBirdseyeModePayload(unittest.TestCase):
         ):
             with self.subTest(payload=payload):
                 assert birdseye_modes_from_mqtt_payload(payload) is None
+
+
+class TestBirdseyeRuntimeToggles(unittest.TestCase):
+    """Runtime config changes must not crash or overdrive Birdseye."""
+
+    def setUp(self):
+        config = {
+            "mqtt": {"enabled": False},
+            "birdseye": {"enabled": True, "modes": ["continuous"]},
+            "cameras": {
+                "front": {
+                    "ffmpeg": {
+                        "inputs": [
+                            {"path": "rtsp://10.0.0.1:554/video", "roles": ["detect"]}
+                        ]
+                    },
+                    "detect": {"height": 1080, "width": 1920, "fps": 5},
+                }
+            },
+        }
+        self.config = FrigateConfig(**config)
+        self.manager = BirdsEyeFrameManager(self.config, mp.Event())
+        self.frame = np.zeros((1620, 1920), np.uint8)
+        self.activity = BirdseyeActivity(
+            has_object=True, has_motion=True, severity=None
+        )
+
+    def test_disabled_camera_forces_one_update_only(self):
+        self.manager.update("front", self.activity, 1000.0, self.frame)
+        self.config.cameras["front"].birdseye.enabled = False
+
+        changed, _ = self.manager.update("front", self.activity, 1000.2, self.frame)
+        assert changed
+
+        changed, _ = self.manager.update("front", self.activity, 1000.4, self.frame)
+        assert not changed
+
+    def test_enabling_restream_at_runtime_does_not_write_missing_buffer(self):
+        birdseye = Birdseye.__new__(Birdseye)
+        birdseye.restream = False
+        birdseye.config = self.config
+        birdseye.birdseye_manager = self.manager
+        birdseye.input = Mock()
+        self.config.birdseye.restream = True
+
+        birdseye._Birdseye__send_new_frame()
+
+        birdseye.input.put_nowait.assert_called_once()
+
+    def test_idle_heartbeat_waits_a_full_interval_between_sends(self):
+        birdseye = Birdseye.__new__(Birdseye)
+        birdseye.review_severity = {}
+        birdseye.birdseye_manager = Mock()
+        birdseye.birdseye_manager.update.return_value = (False, False)
+        birdseye.birdseye_manager.camera_layout = []
+        birdseye.birdseye_manager.last_output_time = 0.0
+        birdseye._idle_interval = 0.2
+
+        with (
+            patch.object(Birdseye, "_Birdseye__send_new_frame") as send,
+            patch("frigate.output.birdseye.time.monotonic", side_effect=[10.0, 10.1]),
+        ):
+            birdseye.write_data("front", [], [], 1.0, Mock())
+            birdseye.write_data("front", [], [], 1.1, Mock())
+
+        assert send.call_count == 1
 
 
 class TestBirdseyeReviewSeverity(unittest.TestCase):

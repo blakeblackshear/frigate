@@ -41,6 +41,9 @@ def swap_runtime_config(app: FastAPI, config: FrigateConfig) -> None:
     """
     app.frigate_config = config
 
+    if app.replay_manager is not None:
+        app.replay_manager.update_config(config)
+
     if app.config_holder is not None:
         app.config_holder.set(config)
 

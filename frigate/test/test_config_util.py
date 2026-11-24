@@ -24,6 +24,7 @@ class TestSwapRuntimeConfig(unittest.TestCase):
 
         self.assertIs(app.frigate_config, config)
         app.genai_manager.update_config.assert_called_once_with(config)
+        app.replay_manager.update_config.assert_called_once_with(config)
         app.profile_manager.update_config.assert_called_once_with(config)
         self.assertIs(app.stats_emitter.config, config)
         app.stats_emitter.hardware_stats.set_config.assert_called_once_with(config)
