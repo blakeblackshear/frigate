@@ -791,16 +791,20 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
+def _restore_masked_camera_paths(
+    config_data: dict, saved: dict, shown_env_vars: dict[str, str]
+) -> str | None:
     """Substitute incoming masked camera paths with the saved ones.
 
     The /config response masks ffmpeg input credentials, so the settings UI
     sends the masked path back when sibling fields (e.g. hwaccel_args) are
     edited. Each masked path is matched to the saved input that masks to the
     same value, with roles breaking a tie, so deleting or reordering inputs
-    keeps each path's own credentials. The saved path is restored as written,
-    keeping any {FRIGATE_*} placeholder. Mutates `config_data` in place and
-    returns an error message when a masked path has no single match.
+    keeps each path's own credentials. Saved paths resolve with
+    `shown_env_vars`, the block the running config and /config used. The saved
+    path is restored as written, keeping any {FRIGATE_*} placeholder. Mutates
+    `config_data` in place and returns an error message when a masked path has
+    no single match.
     """
     cameras = config_data.get("cameras")
     if not isinstance(cameras, dict):
@@ -809,8 +813,6 @@ def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
     saved_cameras = saved.get("cameras")
     if not isinstance(saved_cameras, dict):
         saved_cameras = {}
-
-    saved_env_vars = saved.get("environment_vars")
 
     for camera_name, camera_data in cameras.items():
         if not isinstance(camera_data, dict):
@@ -838,11 +840,13 @@ def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
             path = input_obj.get("path")
             if not isinstance(path, str) or not is_masked_camera_path(path):
                 continue
-            candidates = [
-                inp
-                for inp in saved_inputs
-                if path in _masked_saved_paths(inp["path"], saved_env_vars)
-            ]
+            with candidate_env_vars(shown_env_vars):
+                candidates = [
+                    inp
+                    for inp in saved_inputs
+                    if clean_camera_user_pass(_resolve_frigate_vars(inp["path"]))
+                    == path
+                ]
             if len({inp["path"] for inp in candidates}) > 1:
                 candidates = [
                     inp
@@ -868,21 +872,6 @@ def _resolve_frigate_vars(value: str) -> str:
         return value
 
 
-def _masked_saved_paths(path: str, saved_env_vars: Any) -> set[str]:
-    """Mask a saved camera path the ways /config can show it.
-
-    /config resolves placeholders with the installed environment_vars until a
-    no-restart update swaps in a config parsed with the saved block.
-    """
-    with candidate_env_vars(saved_env_vars):
-        saved_resolved = _resolve_frigate_vars(path)
-
-    return {
-        clean_camera_user_pass(_resolve_frigate_vars(path)),
-        clean_camera_user_pass(saved_resolved),
-    }
-
-
 def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
     """Shape the in-memory camera inputs like the saved YAML."""
     return {
@@ -901,14 +890,14 @@ def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
 
 
 def _config_data_to_updates(
-    config_data: dict, saved: dict[str, Any]
+    config_data: dict, saved: dict[str, Any], running: FrigateConfig
 ) -> tuple[dict[str, Any], str | None]:
     """Flatten a /config/set payload after restoring masked credentials.
 
     `saved` is the config the masked values were taken from. Returns the flat
     updates, or an error message when a masked value can't be restored.
     """
-    error = _restore_masked_camera_paths(config_data, saved)
+    error = _restore_masked_camera_paths(config_data, saved, running.environment_vars)
     if error:
         return {}, error
 
@@ -962,7 +951,9 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
         updates = {}
         if body.config_data:
             updates, error = _config_data_to_updates(
-                body.config_data, _saved_config_from_memory(request.app.frigate_config)
+                body.config_data,
+                _saved_config_from_memory(request.app.frigate_config),
+                request.app.frigate_config,
             )
             if error:
                 return JSONResponse(
@@ -1143,6 +1134,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                     updates, error = _config_data_to_updates(
                         body.config_data,
                         saved_config if isinstance(saved_config, dict) else {},
+                        request.app.frigate_config,
                     )
 
                 if error:
