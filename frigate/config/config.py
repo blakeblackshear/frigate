@@ -1041,6 +1041,15 @@ class FrigateConfig(FrigateBaseModel):
         # set notifications state
         self.notifications.enabled_in_config = self.notifications.enabled
 
+        default_role = (self.proxy.default_role or "").lower()
+        if default_role != "none" and default_role not in {
+            r.lower() for r in self.auth.roles
+        }:
+            logger.warning(
+                "proxy.default_role '%s' is not a configured role, so proxy users without a matching role are denied",
+                self.proxy.default_role,
+            )
+
         # validate genai: each role (chat, descriptions, embeddings, transcribe) at most once
         role_to_name: dict[GenAIRoleEnum, str] = {}
         for name, genai_cfg in self.genai.items():

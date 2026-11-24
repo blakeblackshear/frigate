@@ -88,15 +88,16 @@ class AuthConfig(FrigateBaseModel):
                     f"Invalid role name '{role}'. Must be alphanumeric with underscores."
                 )
 
-        # 'none' is the deny sentinel for proxy.default_role, where it is matched
-        # case-insensitively, so every casing of it has to be reserved here
-        used_reserved = sorted(
-            r for r in v if r in ("admin", "viewer") or r.lower() == "none"
-        )
+        # Proxy role headers match role names case-insensitively, so reserved
+        # names are reserved in every casing and names must differ beyond case
+        used_reserved = sorted(r for r in v if r.lower() in ("admin", "viewer", "none"))
         if used_reserved:
             raise ValueError(
                 f"Reserved role name(s) {', '.join(used_reserved)} cannot be used as custom roles."
             )
+
+        if len({r.lower() for r in v}) != len(v):
+            raise ValueError("Role names must be unique regardless of letter case.")
 
         # Ensure no role has an empty camera list
         for role, allowed_cameras in v.items():
