@@ -327,6 +327,10 @@
     "copyDetails": "Copy details",
     "copyFailed": "Could not copy details to clipboard"
   },
+  "plusRateLimited": {
+    "retryIn": "Frigate+ is rate limiting requests. Try again in {{duration}}.",
+    "retryLater": "Frigate+ is rate limiting requests. Try again later."
+  },
   "selectItem": "Select {{item}}",
   "readTheDocumentation": "Read the documentation",
   "information": {

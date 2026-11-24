@@ -22,6 +22,7 @@ import { baseUrl } from "@/api/baseUrl";
 import { getTranslatedLabel } from "@/utils/i18n";
 import useImageLoaded from "@/hooks/use-image-loaded";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 
 export type FrigatePlusDialogProps = {
   upload?: Event;
@@ -37,6 +38,7 @@ export function FrigatePlusDialog({
   onEventUploaded,
 }: FrigatePlusDialogProps) {
   const { t, i18n } = useTranslation(["components/dialog"]);
+  const { getRateLimitMessage } = usePlusRateLimit();
 
   type SubmissionState = "reviewing" | "uploading" | "submitted";
   const [state, setState] = useState<SubmissionState>(
@@ -63,14 +65,15 @@ export function FrigatePlusDialog({
 
         setState("submitted");
         onEventUploaded();
-      } catch {
+      } catch (error) {
         setState("reviewing");
-        toast.error(t("explore.plus.review.toast.error"), {
-          position: "top-center",
-        });
+        toast.error(
+          getRateLimitMessage(error) ?? t("explore.plus.review.toast.error"),
+          { position: "top-center" },
+        );
       }
     },
-    [upload, onEventUploaded, t],
+    [upload, onEventUploaded, t, getRateLimitMessage],
   );
 
   const [imgRef, imgLoaded, onImgLoad] = useImageLoaded();

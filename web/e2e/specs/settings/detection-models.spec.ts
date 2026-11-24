@@ -459,6 +459,36 @@ test.describe("Detection models settings @high", () => {
     );
   });
 
+  test("a Frigate+ rate limit says how long to wait, including days", async ({
+    frigateApp,
+  }) => {
+    await installRoutes(
+      frigateApp.page,
+      [
+        {
+          scene: "default",
+          devices: ["openvino:GPU.0"],
+          path: "plus://abc123",
+          plus: PLUS_MODEL,
+        },
+      ],
+      true,
+    );
+    // registered last, so it takes precedence over the models route above
+    await frigateApp.page.route("**/api/plus/models", (route) =>
+      route.fulfill({
+        status: 429,
+        headers: { "Retry-After": "90000" },
+        json: { success: false, retry_after: 90000 },
+      }),
+    );
+    await openPage(frigateApp);
+
+    await expect(frigateApp.page.locator("#pageRoot")).toContainText(
+      "Frigate+ is rate limiting requests. Try again in 1 day, 1 hour.",
+    );
+  });
+
   test("picking a Frigate+ model stays on the tab and saves a plus path", async ({
     frigateApp,
   }) => {

@@ -342,4 +342,37 @@ test.describe("Explore — Frigate+ submission (desktop) @high", () => {
       dialog.getByRole("button", { name: "Yes", exact: true }),
     ).toBeVisible();
   });
+
+  test("a rate limited submission says how long to wait", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults({ config: { plus: { enabled: true } } });
+    const page = frigateApp.page;
+    await page.route("**/api/events/*/plus", (route) =>
+      route.fulfill({
+        status: 429,
+        headers: { "Retry-After": "90" },
+        json: { success: false, retry_after: 90 },
+      }),
+    );
+
+    await frigateApp.goto("/explore?labels=person");
+
+    const firstResult = page.locator("[data-start]").first();
+    await expect(firstResult).toBeVisible({ timeout: 10_000 });
+    await firstResult.click();
+
+    const dialog = page.getByRole("dialog");
+    await dialog.getByRole("button", { name: "Yes", exact: true }).click();
+
+    await expect(
+      page.getByText(
+        "Frigate+ is rate limiting requests. Try again in 1 minute, 30 seconds.",
+      ),
+    ).toBeVisible();
+    // the object can be submitted again once the wait is over
+    await expect(
+      dialog.getByRole("button", { name: "Yes", exact: true }),
+    ).toBeVisible();
+  });
 });
