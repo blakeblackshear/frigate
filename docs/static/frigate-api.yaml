@@ -2311,8 +2311,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
         - frigateUserAuth: []
-      x-required-role: camera
-      description: '**Access:** Authenticated user with access to the referenced camera.'
+      x-required-role: any
+      description: '**Access:** Any authenticated user.'
   /review/{review_id}:
     get:
       tags:
@@ -6152,9 +6152,7 @@ paths:
           in: path
           required: true
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             title: Camera Name
         - name: frame_time
           in: path
@@ -6175,9 +6173,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
-        - frigateUserAuth: []
-      x-required-role: camera
-      description: '**Access:** Authenticated user with access to the referenced camera.'
+        - frigateAdminAuth: []
+      x-required-role: admin
+      description: '**Access:** Admin role required.'
   /{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4:
     get:
       tags:
