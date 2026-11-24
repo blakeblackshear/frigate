@@ -639,7 +639,7 @@ def sync_exports(dry_run: bool = False, force: bool = False) -> SyncResult:
     """Sync export files - delete files not referenced by any export record.
 
     Export videos are stored at: EXPORT_DIR/*.mp4
-    Export thumbnails are stored at: CLIPS_DIR/export/*.jpg
+    Export thumbnails are stored at: CLIPS_DIR/export/*.webp (legacy *.jpg)
     The paths are stored in Export.video_path and Export.thumb_path
     """
     result = SyncResult(media_type="exports")
@@ -667,7 +667,7 @@ def sync_exports(dry_run: bool = False, force: bool = False) -> SyncResult:
         thumb_files: list[str] = []
         if os.path.isdir(export_thumb_dir):
             for file in os.listdir(export_thumb_dir):
-                if file.endswith(".jpg"):
+                if file.endswith((".webp", ".jpg")):
                     file_path = os.path.join(export_thumb_dir, file)
                     thumb_files.append(file_path)
 

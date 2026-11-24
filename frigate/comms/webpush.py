@@ -685,7 +685,7 @@ class WebPushClient(Communicator):
 
         title = f"{name.replace('_', ' ')} triggered on {camera_name}"
         message = f"{titlecase(trigger_type)} trigger fired for {camera_name} with score {score:.2f}"
-        image = f"clips/triggers/{camera}/{event_id}.webp"
+        image = f"api/events/{event_id}/thumbnail.webp"
 
         direct_url = f"/explore?event_id={event_id}"
         ttl = 0
