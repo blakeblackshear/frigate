@@ -108,6 +108,41 @@ class TestHttpPlusRateLimit(BaseTestHttp):
         self._assert_rate_limited(response, 30)
         self.assertIsNone(Event.get(Event.id == "event").plus_id)
 
+    def test_a_rate_limited_annotation_can_be_retried(self):
+        self.insert_mock_event("event", data={"box": [0, 0, 1, 1]})
+        snapshot = patch(
+            "frigate.api.event.load_event_snapshot_image",
+            return_value=(np.ones((10, 10, 3), np.uint8), True),
+        )
+
+        with (
+            snapshot,
+            patch.object(self.plus_api, "upload_image", return_value="img") as upload,
+            patch.object(
+                self.plus_api,
+                "add_annotation",
+                side_effect=[PlusRateLimitError(30), None],
+            ) as annotate,
+            AuthTestClient(self.app) as client,
+        ):
+            first = client.post("/events/event/plus", json={"include_annotation": 1})
+            # the image isn't marked submitted while its annotation is missing
+            self.assertIsNone(Event.get(Event.id == "event").plus_id)
+
+            retry = client.post("/events/event/plus", json={"include_annotation": 1})
+
+        self._assert_rate_limited(first, 30)
+        self.assertEqual(retry.status_code, 200)
+        self.assertEqual(retry.json()["plus_id"], "img")
+        upload.assert_called_once()
+        self.assertEqual(
+            [call.args[0] for call in annotate.call_args_list], ["img", "img"]
+        )
+
+        event = Event.get(Event.id == "event")
+        self.assertEqual(event.plus_id, "img")
+        self.assertNotIn("plus_pending_id", event.data)
+
     def test_submitting_a_false_positive(self):
         self.insert_mock_event(
             "event", data={"box": [0, 0, 1, 1], "region": [0, 0, 1, 1], "score": 0.9}

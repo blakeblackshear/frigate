@@ -69,6 +69,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.events])
 
+# event.data key holding a Frigate+ image id until its annotation is uploaded
+PLUS_PENDING_ID_KEY = "plus_pending_id"
+
 
 def _build_attribute_filter_clause(attributes: str):
     filtered_attributes = [
@@ -1114,45 +1117,55 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             content=({"success": False, "message": message}), status_code=400
         )
 
-    try:
-        image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
-    except Exception:
-        logger.error(f"Unable to load clean snapshot for event: {event.id}")
-        return JSONResponse(
-            content=(
-                {"success": False, "message": "Unable to load clean snapshot for event"}
-            ),
-            status_code=400,
-        )
+    # an image uploaded by an earlier attempt whose annotation failed, so a
+    # retry finishes that submission instead of uploading the image again
+    plus_id = event.data.get(PLUS_PENDING_ID_KEY)
 
-    if not is_clean_snapshot or image is None or image.size == 0:
-        logger.error(f"Unable to find clean snapshot for event: {event.id}")
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "Unable to find clean snapshot for event",
-                }
-            ),
-            status_code=400,
-        )
+    if plus_id is None:
+        try:
+            image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
+        except Exception:
+            logger.error(f"Unable to load clean snapshot for event: {event.id}")
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Unable to load clean snapshot for event",
+                    }
+                ),
+                status_code=400,
+            )
 
-    try:
-        plus_id = await asyncio.to_thread(
-            request.app.frigate_config.plus_api.upload_image, image, event.camera
-        )
-    except PlusRateLimitError as err:
-        return plus_rate_limited_response(err)
-    except Exception as ex:
-        logger.exception(ex)
-        return JSONResponse(
-            content=({"success": False, "message": "Error uploading image"}),
-            status_code=400,
-        )
+        if not is_clean_snapshot or image is None or image.size == 0:
+            logger.error(f"Unable to find clean snapshot for event: {event.id}")
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Unable to find clean snapshot for event",
+                    }
+                ),
+                status_code=400,
+            )
 
-    # store image id in the database
-    event.plus_id = plus_id
-    event.save()
+        try:
+            plus_id = await asyncio.to_thread(
+                request.app.frigate_config.plus_api.upload_image, image, event.camera
+            )
+        except PlusRateLimitError as err:
+            return plus_rate_limited_response(err)
+        except Exception as ex:
+            logger.exception(ex)
+            return JSONResponse(
+                content=({"success": False, "message": "Error uploading image"}),
+                status_code=400,
+            )
+
+        if include_annotation is not None:
+            # the image isn't marked submitted until its annotation is, or a
+            # failed annotation could never be retried
+            event.data[PLUS_PENDING_ID_KEY] = plus_id
+            event.save()
 
     if include_annotation is not None:
         box = event.data["box"]
@@ -1160,7 +1173,7 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         try:
             await asyncio.to_thread(
                 request.app.frigate_config.plus_api.add_annotation,
-                event.plus_id,
+                plus_id,
                 box,
                 event.label,
             )
@@ -1179,6 +1192,11 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
                 content=({"success": False, "message": "Error uploading annotation"}),
                 status_code=400,
             )
+
+    # store image id in the database
+    event.plus_id = plus_id
+    event.data.pop(PLUS_PENDING_ID_KEY, None)
+    event.save()
 
     return JSONResponse(
         content=({"success": True, "plus_id": plus_id}), status_code=200
