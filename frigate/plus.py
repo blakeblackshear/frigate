@@ -25,6 +25,11 @@ logger = logging.getLogger(__name__)
 
 PLUS_VALIDATE_TIMEOUT = 10
 
+# Requests run on several threads, and a reply that arrives late must not
+# shorten a wait recorded from another one. The lock is kept out of PlusApi
+# because the client is pickled with the config to start worker processes.
+_rate_limit_lock = threading.Lock()
+
 
 class PlusKeyStatus(str, Enum):
     """Result of validating a Frigate+ API key with the server."""
@@ -181,9 +186,6 @@ class PlusApi:
         # when Frigate+ last asked us to back off, requests are refused locally
         # until this time instead of being sent to the server again
         self._rate_limited_until: float | None = None
-        # requests run on several threads, and a reply that arrives late must
-        # not shorten a wait recorded from another one
-        self._rate_limit_lock = threading.Lock()
 
         # Retry connection failures so a network that comes up late at startup
         # doesn't fail the Frigate+ model download. Retry-After is not honored
@@ -221,7 +223,7 @@ class PlusApi:
 
         until = time.time() + retry_after
 
-        with self._rate_limit_lock:
+        with _rate_limit_lock:
             if self._rate_limited_until is None or until > self._rate_limited_until:
                 self._rate_limited_until = until
 

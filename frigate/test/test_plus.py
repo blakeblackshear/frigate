@@ -6,6 +6,7 @@ import email.utils
 import http.server
 import json
 import os
+import pickle
 import tempfile
 import threading
 import time
@@ -114,7 +115,6 @@ class TestValidateKey(unittest.IsolatedAsyncioTestCase):
         api.key = key
         api._token_data = dict(self.CACHED_TOKEN)
         api._rate_limited_until = None
-        api._rate_limit_lock = threading.Lock()
         return api
 
     async def _validate(self, handler) -> tuple[PlusKeyStatus, PlusApi]:
@@ -390,6 +390,17 @@ class TestRateLimit(unittest.TestCase):
                 thread.join()
 
         self.assertAlmostEqual(self.api.rate_limit_remaining(), max(waits), delta=1)
+
+    def test_the_client_can_be_sent_to_a_worker_process(self):
+        # worker processes start from the forkserver, which pickles the
+        # config and the Frigate+ client it holds
+        self.api._note_rate_limit(60)
+
+        copy = pickle.loads(pickle.dumps(self.api))
+
+        self.assertAlmostEqual(copy.rate_limit_remaining(), 60, delta=1)
+        copy._note_rate_limit(120)
+        self.assertAlmostEqual(copy.rate_limit_remaining(), 120, delta=1)
 
     def test_a_429_without_retry_after_is_not_remembered(self):
         self.headers = {}

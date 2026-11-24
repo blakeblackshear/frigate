@@ -1,5 +1,6 @@
 import json
 import os
+import pickle
 import tempfile
 import unittest
 from copy import deepcopy
@@ -14,7 +15,7 @@ from frigate.config import BirdseyeModeEnum, FrigateConfig, RetainModeEnum
 from frigate.const import MODEL_CACHE_DIR
 from frigate.detectors import DetectorTypeEnum
 from frigate.detectors.device import build_detector_config, runner_names
-from frigate.plus import PlusRateLimitError
+from frigate.plus import PlusApi, PlusRateLimitError
 from frigate.util.builtin import deep_merge
 from frigate.util.config import resolve_ffmpeg_path
 
@@ -1670,6 +1671,15 @@ class TestConfig(unittest.TestCase):
             FrigateConfig(**self._plus_model_config(model_id))
 
         self.assertFalse(os.path.exists(model_path))
+
+    def test_config_can_be_sent_to_a_worker_process(self):
+        # worker processes start from the forkserver, which pickles the config
+        # along with the Frigate+ client it holds
+        frigate_config = FrigateConfig(**self.minimal)
+
+        copy = pickle.loads(pickle.dumps(frigate_config))
+
+        self.assertIsInstance(copy.plus_api, PlusApi)
 
     def test_plus_rate_limit_is_validation_error(self):
         for retry_after, message in ((45, "Try again in 45 seconds"), (None, "later")):
