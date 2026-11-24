@@ -1,3 +1,5 @@
+"""Tests for trigger push notifications."""
+
 import unittest
 from types import SimpleNamespace
 from unittest.mock import MagicMock

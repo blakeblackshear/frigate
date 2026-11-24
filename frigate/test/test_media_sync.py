@@ -1,3 +1,5 @@
+"""Tests for media sync orphan cleanup."""
+
 import os
 import tempfile
 import unittest
@@ -12,7 +14,7 @@ from frigate.util.media import sync_exports
 class TestSyncExports(unittest.TestCase):
     def setUp(self):
         self.db = SqliteDatabase(":memory:")
-        self.db.bind([Export, ExportCase])
+        self.enterContext(self.db.bind_ctx([Export, ExportCase]))
         self.db.create_tables([Export, ExportCase])
 
         self.tmp = tempfile.TemporaryDirectory()
