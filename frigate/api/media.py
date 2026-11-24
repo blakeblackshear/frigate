@@ -47,7 +47,10 @@ from frigate.const import (
     STREAM_TYPE_SUB,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
-from frigate.output.preview import get_most_recent_preview_frame
+from frigate.output.preview import (
+    get_most_recent_preview_frame,
+    is_camera_preview_frame,
+)
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.file import (
@@ -1606,7 +1609,7 @@ async def preview_gif(
         camera_files = [
             entry.name
             for entry in os.scandir(preview_dir)
-            if entry.name.startswith(file_start)
+            if is_camera_preview_frame(entry.name, camera_name)
         ]
         camera_files.sort()
 
@@ -1797,7 +1800,7 @@ async def preview_mp4(
         camera_files = [
             entry.name
             for entry in os.scandir(preview_dir)
-            if entry.name.startswith(file_start)
+            if is_camera_preview_frame(entry.name, camera_name)
         ]
         camera_files.sort()
 

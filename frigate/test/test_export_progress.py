@@ -1,5 +1,6 @@
 """Tests for export progress tracking, broadcast, and FFmpeg parsing."""
 
+import datetime
 import io
 import os
 import shutil
@@ -7,11 +8,14 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
+from peewee import SqliteDatabase
+
 from frigate.jobs.export import (
     PROGRESS_BROADCAST_MIN_INTERVAL,
     ExportJob,
     ExportJobManager,
 )
+from frigate.models import Previews
 from frigate.record.export import (
     ExportStreamEnum,
     PlaybackSourceEnum,
@@ -573,6 +577,39 @@ class TestChapterMetadataInProgressReview(unittest.TestCase):
         assert "START=100000" in content
         assert "END=150000" in content
         assert "title=Alert: person" in content
+
+
+class TestPreviewExportCommandCameraMatch(unittest.TestCase):
+    def setUp(self) -> None:
+        self.cache_dir = tempfile.mkdtemp(prefix="frigate_preview_export_test_")
+        self.addCleanup(shutil.rmtree, self.cache_dir, ignore_errors=True)
+        self.preview_dir = os.path.join(self.cache_dir, "preview_frames")
+        os.makedirs(self.preview_dir)
+
+    def _write_frame(self, camera: str, frame_time: float) -> str:
+        path = os.path.join(self.preview_dir, f"preview_{camera}-{frame_time}.webp")
+        with open(path, "wb") as f:
+            f.write(b"fake-webp-bytes")
+        return path
+
+    def test_current_hour_playlist_excludes_sibling_camera(self) -> None:
+        exporter = _make_exporter()
+        exporter.playback_source = PlaybackSourceEnum.preview
+        exporter.start_time = datetime.datetime.now(datetime.UTC).timestamp()
+        exporter.end_time = 9_999_999_999
+        own = self._write_frame(exporter.camera, exporter.start_time + 1)
+        self._write_frame(f"{exporter.camera}-2", exporter.start_time + 1)
+
+        db = SqliteDatabase(":memory:")
+        with (
+            patch("frigate.record.export.CACHE_DIR", self.cache_dir),
+            db.bind_ctx([Previews]),
+        ):
+            Previews.create_table()
+            _, playlist_lines = exporter.get_preview_export_command("out.mp4")
+
+        files = {line for line in playlist_lines if line.startswith("file ")}
+        assert files == {f"file '{own}'"}
 
 
 if __name__ == "__main__":

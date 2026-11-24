@@ -1333,7 +1333,7 @@ class RecordingExporter(threading.Thread):
             end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
 
             for file in sorted(os.listdir(preview_dir)):
-                if not file.startswith(file_start):
+                if not is_camera_preview_frame(file, self.camera):
                     continue
 
                 if file < start_file:
