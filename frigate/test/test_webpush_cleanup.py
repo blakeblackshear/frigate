@@ -16,7 +16,7 @@ DEAD = {"endpoint": "https://push.example.com/dead", "keys": {}}
 class TestCleanupRegistrations(unittest.TestCase):
     def setUp(self):
         self.db = SqliteDatabase(":memory:")
-        self.db.bind([User])
+        self.enterContext(self.db.bind_ctx([User]))
         self.db.create_tables([User])
 
         User.create(
@@ -27,6 +27,7 @@ class TestCleanupRegistrations(unittest.TestCase):
         self.client.web_pushers = {}
         self.client.expired_subs = {}
         self.client.expired_subs_lock = threading.Lock()
+        self.client.cleanup_lock = threading.Lock()
 
     def tearDown(self):
         self.db.close()
@@ -43,3 +44,15 @@ class TestCleanupRegistrations(unittest.TestCase):
         self.assertEqual(User.get_by_id("alice").notification_tokens, [LIVE])
         self.assertEqual(self.client.expired_subs, {})
         _build.assert_called_once_with("alice", [LIVE])
+
+    @patch("frigate.comms.webpush._build_web_pushers", return_value=[])
+    def test_keeps_malformed_tokens_and_prunes_expired(self, _build):
+        malformed = [None, {"keys": {}}]
+        User.update(notification_tokens=[LIVE, *malformed, DEAD]).execute()
+        self.client.expired_subs = {"alice": [DEAD["endpoint"]]}
+
+        self.client.cleanup_registrations()
+
+        self.assertEqual(
+            User.get_by_id("alice").notification_tokens, [LIVE, *malformed]
+        )
