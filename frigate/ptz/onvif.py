@@ -301,13 +301,13 @@ class OnvifController:
             logger.debug(f"Imaging service not supported for {camera_name}: {e}")
             imaging = None
         cam["imaging"] = imaging
+        cam["video_source_token"] = None
         try:
             video_sources = await media.GetVideoSources()
             if video_sources and len(video_sources) > 0:
                 cam["video_source_token"] = video_sources[0].token
         except Exception as e:
             logger.debug(f"Unable to get video sources for {camera_name}: {e}")
-            cam["video_source_token"] = None
 
         # setup continuous moving request
         move_request = ptz.create_type("ContinuousMove")
@@ -660,12 +660,15 @@ class OnvifController:
         move_request = cam["move_request"]
         preset_token = cam["presets"][preset]
 
-        await cam["ptz"].GotoPreset(
-            {
-                "ProfileToken": move_request.ProfileToken,
-                "PresetToken": preset_token,
-            }
-        )
+        try:
+            await cam["ptz"].GotoPreset(
+                {
+                    "ProfileToken": move_request.ProfileToken,
+                    "PresetToken": preset_token,
+                }
+            )
+        except Exception as e:
+            logger.warning(f"Onvif sending preset request to {camera_name} failed: {e}")
 
         cam["active"] = False
 
@@ -690,7 +693,11 @@ class OnvifController:
         elif command == OnvifCommandEnum.zoom_out:
             move_request.Velocity = {"Zoom": {"x": -0.5}}
 
-        await cam["ptz"].ContinuousMove(move_request)
+        try:
+            await cam["ptz"].ContinuousMove(move_request)
+        except Exception as e:
+            logger.warning(f"Onvif sending zoom request to {camera_name} failed: {e}")
+            cam["active"] = False
 
     async def _zoom_absolute(self, camera_name: str, zoom, speed) -> None:
         cam = self.cams[camera_name]
@@ -729,13 +736,18 @@ class OnvifController:
 
         logger.debug(f"{camera_name}: Absolute zoom: {zoom}")
 
-        await cam["ptz"].AbsoluteMove(
-            {
-                "ProfileToken": cam["move_request"].ProfileToken,
-                "Position": {"Zoom": zoom},
-                "Speed": {"Zoom": speed},
-            }
-        )
+        try:
+            await cam["ptz"].AbsoluteMove(
+                {
+                    "ProfileToken": cam["move_request"].ProfileToken,
+                    "Position": {"Zoom": zoom},
+                    "Speed": {"Zoom": speed},
+                }
+            )
+        except Exception as e:
+            logger.warning(
+                f"Onvif sending absolute zoom request to {camera_name} failed: {e}"
+            )
 
         cam["active"] = False
 
