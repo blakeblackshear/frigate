@@ -36,14 +36,6 @@ else
     lefile="/config/tls/fullchain.pem"
 fi
 
-# Renewal tools write the new key owned by root, so the non-root nginx needs it
-# handed over again before a reload. Same conditions as the nginx run script.
-handover_key=0
-if [[ "$lefile" == /etc/letsencrypt/* && "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]] &&
-    ! /usr/local/bin/service-runs-as-root nginx; then
-    handover_key=1
-fi
-
 tls_enabled=`python3 -I /usr/local/nginx/get_nginx_settings.py | jq -r .tls.enabled`
 listen_external_port=`python3 -I /usr/local/nginx/get_nginx_settings.py | jq -r .listen.external_port`
 
@@ -83,9 +75,6 @@ do
     then
         echo "[INFO] Reloading nginx to refresh TLS certificate"
         echo "$lefile: $leprint"
-        if [[ "$handover_key" -eq 1 ]]; then
-            chown frigate:frigate /etc/letsencrypt/live/frigate/privkey.pem "$lefile" 2>/dev/null || true
-        fi
         reload_nginx
     fi
 
