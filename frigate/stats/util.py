@@ -232,16 +232,16 @@ def embeddings_stats(
     return stats
 
 
-def skipped_percent(skipped_fps: float, camera_fps: float, enabled: bool) -> float:
-    """Percent of a camera's frames dropped before detection.
+def frame_percent(fps: float, camera_fps: float, enabled: bool) -> float:
+    """Share of a camera's frames, in percent, that a rate such as skipped_fps represents.
 
-    camera_fps counts the dropped frames too. A disabled camera keeps its last
-    readings, so it reports zero.
+    camera_fps counts every frame read from the camera. A disabled camera keeps
+    its last readings, so it reports zero.
     """
     if not enabled or camera_fps <= 0:
         return 0.0
 
-    return round(skipped_fps / camera_fps * 100, 1)
+    return round(fps / camera_fps * 100, 1)
 
 
 def get_go2rtc_pid(cpu_usages: dict[str, dict[str, Any]]) -> int | None:
@@ -262,7 +262,8 @@ def stats_snapshot(
     camera_metrics = stats_tracking["camera_metrics"]
     stats: dict[str, Any] = {}
 
-    total_camera_fps = total_process_fps = total_skipped_fps = total_detection_fps = 0
+    total_camera_fps = total_process_fps = total_skipped_fps = total_dropped_fps = 0
+    total_detection_fps = 0
 
     stats["cameras"] = {}
     for name, camera_stats in list(camera_metrics.items()):
@@ -273,6 +274,7 @@ def stats_snapshot(
         total_camera_fps += camera_stats.camera_fps.value
         total_process_fps += camera_stats.process_fps.value
         total_skipped_fps += camera_stats.skipped_fps.value
+        total_dropped_fps += camera_stats.dropped_fps.value
         total_detection_fps += camera_stats.detection_fps.value
         pid = camera_stats.process_pid.value if camera_stats.process_pid.value else None
         ffmpeg_pid = camera_stats.ffmpeg_pid.value if camera_stats.ffmpeg_pid else None
@@ -311,8 +313,14 @@ def stats_snapshot(
             "camera_fps": round(camera_stats.camera_fps.value, 2),
             "process_fps": round(camera_stats.process_fps.value, 2),
             "skipped_fps": round(camera_stats.skipped_fps.value, 2),
-            "skipped_pct": skipped_percent(
+            "skipped_pct": frame_percent(
                 camera_stats.skipped_fps.value,
+                current_fps,
+                config.cameras[name].enabled,
+            ),
+            "dropped_fps": round(camera_stats.dropped_fps.value, 2),
+            "dropped_pct": frame_percent(
+                camera_stats.dropped_fps.value,
                 current_fps,
                 config.cameras[name].enabled,
             ),
@@ -330,6 +338,7 @@ def stats_snapshot(
     stats["camera_fps"] = round(total_camera_fps, 2)
     stats["process_fps"] = round(total_process_fps, 2)
     stats["skipped_fps"] = round(total_skipped_fps, 2)
+    stats["dropped_fps"] = round(total_dropped_fps, 2)
     stats["detection_fps"] = round(total_detection_fps, 2)
 
     stats["embeddings"] = embeddings_stats(

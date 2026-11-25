@@ -11,6 +11,7 @@ class CameraMetrics:
     detection_frame: ValueProxy[float]
     process_fps: ValueProxy[float]
     skipped_fps: ValueProxy[float]
+    dropped_fps: ValueProxy[float]
     read_start: ValueProxy[float]
     audio_rms: ValueProxy[float]
     audio_dBFS: ValueProxy[float]
@@ -29,6 +30,7 @@ class CameraMetrics:
         self.detection_frame = manager.Value("d", 0)
         self.process_fps = manager.Value("d", 0)
         self.skipped_fps = manager.Value("d", 0)
+        self.dropped_fps = manager.Value("d", 0)
         self.read_start = manager.Value("d", 0)
         self.audio_rms = manager.Value("d", 0)
         self.audio_dBFS = manager.Value("d", 0)
