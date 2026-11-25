@@ -35,7 +35,7 @@ HomeKit settings are stored in `/config/go2rtc_homekit.yml`. This is a separate 
 Edit it using the go2rtc config editor, which writes to that file directly:
 
 ```
-http://<frigate_host>:1984/editor.html
+http://<frigate_host>:1984/config.html
 ```
 
 Replace `<frigate_host>` with the IP address or hostname of your Frigate server. The editor will be empty until you add a HomeKit section, since this file holds only your HomeKit settings and not the rest of your go2rtc config.
