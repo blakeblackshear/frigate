@@ -156,8 +156,16 @@ jobs:
           # the usb tree gets recursive grants plus a default ACL that
           # newly created nodes inherit (the Coral re-enumeration path)
           docker exec frigate sh -c 'mkdir -p /dev/bus/usb/001 && mknod /dev/bus/usb/001/002 c 189 1'
+          docker exec frigate sh -c 'mkdir -p /opt/link-target && ln -s /opt/link-target /dev/bus/usb/001/link'
           docker exec frigate sh -c 'export PATH=/command:$PATH; exec /etc/s6-overlay/s6-rc.d/init-devices/run'
           docker exec frigate getfacl -p /dev/bus/usb/001 | grep -q "user:frigate:rwx"
+          # a symlink in the usb tree is never followed
+          target_acl=$(docker exec frigate getfacl -p /opt/link-target)
+          if grep -q "user:frigate" <<< "$target_acl"; then
+            echo "init-devices followed a symlink under /dev/bus/usb"; exit 1
+          fi
+          # a fifo at the sentinel path is rejected at once instead of hanging the boot
+          docker exec frigate sh -c 'mkfifo /tmp/sentinel-fifo && timeout 5 /usr/local/bin/safe-sentinel read /tmp/sentinel-fifo; test $? -eq 1'
           docker exec frigate sh -c 'mknod /dev/bus/usb/001/099 c 189 98 && chmod 664 /dev/bus/usb/001/099'
           inherited=$(docker exec frigate getfacl -p /dev/bus/usb/001/099)
           echo "$inherited"
@@ -244,6 +252,9 @@ jobs:
           done
           if [ "$up" -ne 1 ]; then echo "granular container never came back after restart"; docker logs frigate-granular; exit 1; fi
           docker exec frigate-granular stat -c %u /media/frigate/clips/straggler.webp | grep -qx 1000
+          # the per-boot /config sweep leaves the sentinel root-owned, so the restart skips the full sweep
+          docker exec frigate-granular stat -c %u /config/.permissions_version | grep -qx 0
+          docker logs frigate-granular 2>&1 | grep -q "already applied, skipping"
           docker rm -f frigate-granular
       - name: Assert unknown root service fails fast
         run: |

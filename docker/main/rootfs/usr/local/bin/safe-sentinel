@@ -20,7 +20,8 @@ MODE = 0o644
 
 def do_read(path: str) -> int:
     try:
-        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW)
+        # O_NONBLOCK so a fifo opens at once and fails the regular-file check
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     except OSError:
         return 1
     try:

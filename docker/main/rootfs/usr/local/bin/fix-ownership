@@ -88,22 +88,19 @@ swept_clean=1
 # Entries another mechanism deliberately owns. Chowning them undoes that work
 # and leaves the same "mismatch" waiting for the next boot, so /config could
 # never report itself clean: /config is chgrp'd to frigate-data below so go2rtc
-# can traverse it, and the HomeKit file is handed to the go2rtc user by the
-# go2rtc service. Only the GROUP on /config is exempt; a root-owned /config
-# must still be chowned or the runtime user cannot write there at all.
+# can traverse it, the HomeKit file is handed to the go2rtc user by the go2rtc
+# service, and safe-sentinel only trusts a root-owned sentinel. The sentinel is
+# excluded on every call, including the granular per-boot /config sweep that
+# runs without --sentinel. Only the GROUP on /config is exempt; a root-owned
+# /config must still be chowned or the runtime user cannot write there at all.
 # Shared by the counting and the chowning walk so the two cannot disagree.
 mismatch_expr=(
     "(" -not -uid "$target_uid"
         -o "(" -not -gid "$target_gid" -a ! -path /config ")"
     ")"
     -a ! -path /config/go2rtc_homekit.yml
+    -a ! -path /config/.permissions_version
 )
-if [[ -n "$sentinel" ]]; then
-    # safe-sentinel keeps the sentinel root-owned on purpose and rejects one
-    # owned by anybody else, so chowning it here would suppress the skip and
-    # make every boot re-sweep. Only the trailing write puts it back today.
-    mismatch_expr+=(-a ! -path "$sentinel")
-fi
 
 exec 3>&1
 
