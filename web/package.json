@@ -115,7 +115,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.8",
     "globals": "^17.14.0",
-    "i18next-cli": "^1.5.11",
+    "i18next-cli": "^1.95.3",
     "monaco-editor": "^0.53.0",
     "patch-package": "^8.0.1",
     "postcss": "^8.5.33",
