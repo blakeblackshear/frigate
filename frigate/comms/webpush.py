@@ -180,6 +180,8 @@ class WebPushClient(Communicator):
         self.refresh: int = 0
         self.web_pushers: dict[str, list[WebPusher]] = {}
         self.expired_subs: dict[str, list[str]] = {}
+        self.expired_subs_lock = threading.Lock()
+        self.cleanup_lock = threading.Lock()
         self.suspended_cameras: dict[str, int] = {
             c.name: 0  # type: ignore[misc]
             for c in self.config.cameras.values()
@@ -260,15 +262,23 @@ class WebPushClient(Communicator):
                 self.claim_headers[endpoint] = self.vapid.sign(claim)
 
     def cleanup_registrations(self) -> None:
-        # delete any expired subs
-        if len(self.expired_subs) > 0:
-            for user, expired in self.expired_subs.items():
+        # concurrent cleanups would each restore what the other removed
+        with self.cleanup_lock:
+            with self.expired_subs_lock:
+                expired_subs, self.expired_subs = self.expired_subs, {}
+
+            for user, expired in expired_subs.items():
                 user_subs = []
 
                 # get all subscriptions, removing ones that are expired
-                stored_user: User = User.get_by_id(user)
+                stored_user: User | None = User.get_or_none(User.username == user)
+
+                # the user was deleted after the endpoint expired
+                if stored_user is None:
+                    continue
+
                 for token in stored_user.notification_tokens:
-                    if token["endpoint"] in expired:
+                    if isinstance(token, dict) and token.get("endpoint") in expired:
                         continue
 
                     user_subs.append(token)
@@ -283,8 +293,6 @@ class WebPushClient(Communicator):
                 logger.info(
                     f"Cleaned up {len(expired)} notification subscriptions for {user}"
                 )
-
-        self.expired_subs = {}
 
     def suspend_notifications(self, camera: str, minutes: int) -> None:
         """Suspend notifications for a specific camera."""
@@ -460,9 +468,10 @@ class WebPushClient(Communicator):
                     )
 
                     if resp.status_code in (404, 410):
-                        self.expired_subs.setdefault(notification.user, []).append(
-                            endpoint
-                        )
+                        with self.expired_subs_lock:
+                            self.expired_subs.setdefault(notification.user, []).append(
+                                endpoint
+                            )
                         logger.debug(
                             f"Notification endpoint expired for {notification.user}, received {resp.status_code}"
                         )
