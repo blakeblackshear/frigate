@@ -112,3 +112,20 @@ This metric scales with how many detections per second Frigate runs and how expe
 - **Tune stationary object behavior.** Objects that never settle into a stationary state are re-detected continuously. Raising `detect -> stationary -> interval` reduces how often detection runs on objects that are already parked. See [stationary objects](../configuration/stationary_objects).
 
 Adding [more detector instances](#multiple-detector-instances) spreads this work across more CPU cores, but does not reduce the total CPU used.
+
+## Tracked object processing could not keep up {#tracked-object-processing-behind}
+
+After detection, Frigate hands each camera's frames to a single tracked object processor in the main Frigate process. It handles zones, loitering, snapshots, and event and MQTT updates for all cameras. When the processor falls more than about a second behind, Frigate drops new frames instead of waiting for it. Frigate raises this notice in the UI's Notices pane when it drops at least 5% of a camera's frames for more than a minute.
+
+This is different from "Detection could not keep up", which means the [object detector](#2-detector-selection-and-configuration) is too slow. Dropped frames mean the system itself is short on CPU or stalling.
+
+The notice stays until you acknowledge or mute it, and is raised again only after drops stop and later start again. `/api/stats` reports each camera's current `dropped_pct`.
+
+Detection, tracking, and recording continue while frames are dropped. Zone [inertia](../configuration/zones.md#zone-inertia) and [loitering time](../configuration/zones.md#zone-loitering) count fewer frames, so a fast object can miss a small zone and loitering triggers late. Snapshots are picked from fewer frames, and events, MQTT messages, and notifications are delayed until the processor catches up.
+
+To reduce dropped frames:
+
+- Check CPU use and any CPU limits on the container or VM (`cpus`, `cpuset`, or the cores assigned to a VM or LXC container). A rising `nr_throttled` in `/sys/fs/cgroup/cpu.stat` means a limit is throttling Frigate.
+- Use a detect fps of 5, and no more than 10. See [choosing a detect frame rate](../frigate/camera_setup.md#choosing-a-detect-frame-rate).
+- Lower the detect resolution. The snapshot saved when an object ends is encoded from the full detect frame.
+- Keep `/media/frigate` on local storage, since the processor writes snapshots and thumbnails itself.

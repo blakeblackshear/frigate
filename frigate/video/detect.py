@@ -3,9 +3,7 @@
 import logging
 import queue
 import random
-import threading
 import time
-from collections import deque
 from datetime import UTC, datetime, timedelta
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
@@ -23,12 +21,10 @@ from frigate.config.camera.updater import (
 )
 from frigate.const import (
     PROCESS_PRIORITY_HIGH,
-    REPLAY_CAMERA_PREFIX,
     REQUEST_REGION_GRID,
 )
 from frigate.motion import MotionDetector
 from frigate.motion.improved_motion import ImprovedMotionDetector
-from frigate.notices import raise_notice
 from frigate.object_detection.base import RemoteObjectDetector
 from frigate.ptz.autotrack import ptz_moving_at_frame_time
 from frigate.track import ObjectTracker
@@ -56,61 +52,6 @@ from frigate.util.process import FrigateProcess
 from frigate.util.time import get_tomorrow_at_time
 
 logger = logging.getLogger(__name__)
-
-# this many frames dropped within the window because the shared detected frames
-# queue was full means tracked object processing is falling behind
-DROPPED_FRAMES_NOTICE_COUNT = 5
-DROPPED_FRAMES_WINDOW_S = 30
-
-DROPPED_FRAMES_NOTICE_INTERVAL_S = 60
-
-
-class DroppedFrameTracker:
-    """Raises a notice when a camera drops frames because object processing is behind."""
-
-    def __init__(self, camera: str) -> None:
-        # a debug replay can feed frames faster than real time
-        self._enabled = not camera.startswith(REPLAY_CAMERA_PREFIX)
-        self._drops: deque[float] = deque()
-        self._last_notice: float | None = None
-
-        # raising a notice waits on the main process, which answers every
-        # process's requests one at a time, so it runs off the frame loop
-        self._sender: threading.Thread | None = None
-
-    def dropped(self, now: float) -> None:
-        """Record a dropped frame and raise the notice if enough were dropped.
-
-        Args:
-            now: Monotonic time of the drop in seconds
-        """
-        if not self._enabled:
-            return
-
-        self._drops.append(now)
-
-        while now - self._drops[0] > DROPPED_FRAMES_WINDOW_S:
-            self._drops.popleft()
-
-        if (
-            len(self._drops) < DROPPED_FRAMES_NOTICE_COUNT
-            or (
-                self._last_notice is not None
-                and now - self._last_notice < DROPPED_FRAMES_NOTICE_INTERVAL_S
-            )
-            or (self._sender is not None and self._sender.is_alive())
-        ):
-            return
-
-        self._drops.clear()
-        self._last_notice = now
-        self._sender = threading.Thread(
-            target=raise_notice,
-            args=("object_processing_behind",),
-            name="dropped_frames_notice",
-            daemon=True,
-        )
-        self._sender.start()
 
 
 class CameraTracker(FrigateProcess):
@@ -274,7 +215,9 @@ def process_frames(
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
-    dropped_frames = DroppedFrameTracker(camera_config.name)
+    dropped_eps = EventsPerSecond()
+    dropped_eps.start()
+    dropped_fps = 0.0
 
     startup_scan = True
     stationary_frame_counter = 0
@@ -297,6 +240,13 @@ def process_frames(
 
     while not stop_event.is_set():
         updated_configs = config_subscriber.check_for_updates()
+
+        # each write is a round trip to the metrics manager, so skip unchanged rates
+        current_dropped_fps = dropped_eps.eps()
+
+        if current_dropped_fps != dropped_fps:
+            dropped_fps = current_dropped_fps
+            camera_metrics.dropped_fps.value = dropped_fps
 
         if "enabled" in updated_configs:
             prev_enabled = camera_enabled
@@ -613,14 +563,9 @@ def process_frames(
                 f"debug/frames/{camera_config.name}-{'{:.6f}'.format(frame_time)}.jpg",
                 bgr_frame,
             )
-        # add to the queue if not full
-        if detected_objects_queue.full():
-            dropped_frames.dropped(time.monotonic())
-            continue
-        else:
-            fps_tracker.update()
-            camera_metrics.process_fps.value = fps_tracker.eps()
-            detected_objects_queue.put(
+        # a full queue means the tracked object processor is behind
+        try:
+            detected_objects_queue.put_nowait(
                 (
                     camera_config.name,
                     frame_name,
@@ -630,7 +575,13 @@ def process_frames(
                     regions,
                 )
             )
-            camera_metrics.detection_fps.value = object_detector.fps.eps()
+        except queue.Full:
+            dropped_eps.update()
+            continue
+
+        fps_tracker.update()
+        camera_metrics.process_fps.value = fps_tracker.eps()
+        camera_metrics.detection_fps.value = object_detector.fps.eps()
 
     motion_detector.stop()
     requestor.stop()
