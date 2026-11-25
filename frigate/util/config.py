@@ -195,6 +195,18 @@ def parse_listen_address(value: int | str) -> tuple[int | str, int]:
     return f"{host}:{port}", port
 
 
+def ipv6_listen_address(value: int | str, port: int) -> str | None:
+    """Return the IPv6 wildcard address to add for a parsed listen value.
+
+    Only an IPv4 wildcard gains the extra IPv6 listener. A specific address
+    binds only that address, and nginx would let a [::] listener override it.
+    """
+    if isinstance(value, int) or value.startswith(("*:", "0.0.0.0:")):
+        return f"[::]:{port}"
+
+    return None
+
+
 def find_config_file() -> str:
     """Return the path of the config file to use.
 
