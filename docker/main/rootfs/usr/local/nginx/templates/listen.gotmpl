@@ -1,12 +1,12 @@
-# Internal (IPv4 always; IPv6 optional)
+# Internal; a wildcard address also listens on [::] when IPv6 is enabled
 listen {{ .listen.internal }};
-{{ if .ipv6.enabled }}listen [::]:{{ .listen.internal_port }};{{ end }}
+{{ if .listen.internal_ipv6 }}listen {{ .listen.internal_ipv6 }};{{ end }}
 
 # intended for external traffic, protected by auth
 {{ if .tls.enabled }}
-    # external HTTPS (IPv4 always; IPv6 optional)
+    # external HTTPS
     listen {{ .listen.external }} ssl;
-    {{ if .ipv6.enabled }}listen [::]:{{ .listen.external_port }} ssl;{{ end }}
+    {{ if .listen.external_ipv6 }}listen {{ .listen.external_ipv6 }} ssl;{{ end }}
 
     ssl_certificate {{ .tls.cert_path }}/fullchain.pem;
     ssl_certificate_key {{ .tls.cert_path }}/privkey.pem;
@@ -30,7 +30,7 @@ listen {{ .listen.internal }};
             root /etc/letsencrypt/www;
     }
 {{ else }}
-    # (No tls) default to HTTP (IPv4 always; IPv6 optional)
+    # (No tls) default to HTTP
     listen {{ .listen.external }};
-    {{ if .ipv6.enabled }}listen [::]:{{ .listen.external_port }};{{ end }}
+    {{ if .listen.external_ipv6 }}listen {{ .listen.external_ipv6 }};{{ end }}
 {{ end }}

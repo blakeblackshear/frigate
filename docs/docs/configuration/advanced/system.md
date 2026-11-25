@@ -287,7 +287,7 @@ Frigate exposes a few networking options. IPv6 and the listen ports are set in t
 
 ### Enabling IPv6
 
-By default Frigate listens on IPv4 only. To also listen on IPv6 (on port `5000`, and on `8971` when TLS is configured), enable it in the `networking` configuration.
+By default Frigate listens on IPv4 only. To also listen on IPv6 (on port `5000`, and on `8971` when TLS is configured), enable it in the `networking` configuration. A listen port bound to a specific address stays on that address only.
 
 <ConfigTabs>
 <TabItem value="ui">
