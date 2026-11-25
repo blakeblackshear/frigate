@@ -4,6 +4,7 @@ import io
 import json
 import logging
 import os
+from collections.abc import Mapping
 from typing import Any, Self
 
 import numpy as np
@@ -34,7 +35,7 @@ from frigate.util.config import (
     get_relative_coordinates,
     migrate_frigate_config,
 )
-from frigate.util.env import EnvVars, reload_sources
+from frigate.util.env import EnvVars, candidate_env_vars, reload_sources
 from frigate.util.image import create_mask
 from frigate.util.live_streams import (
     default_transcode_source,
@@ -1566,6 +1567,12 @@ class FrigateConfig(FrigateBaseModel):
     def parse_object(
         cls, obj: Any, *, plus_api: PlusApi | None = None, install: bool = False
     ):
-        return cls.model_validate(
-            obj, context={"plus_api": plus_api, "install": install}
-        )
+        context = {"plus_api": plus_api, "install": install}
+
+        if install:
+            return cls.model_validate(obj, context=context)
+
+        # a candidate config resolves placeholders against its own block
+        env_vars = obj.get("environment_vars") if isinstance(obj, Mapping) else None
+        with candidate_env_vars(env_vars):
+            return cls.model_validate(obj, context=context)

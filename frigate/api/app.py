@@ -74,7 +74,7 @@ from frigate.util.config import (
     find_config_file,
     redact_credential,
 )
-from frigate.util.env import substitute_frigate_vars
+from frigate.util.env import candidate_env_vars, substitute_frigate_vars
 from frigate.util.live_streams import (
     generated_transcode_streams,
     sync_transcode_streams,
@@ -589,14 +589,18 @@ def config_raw():
         )
 
 
-def _go2rtc_config(raw_config: str) -> dict[str, Any]:
-    """Load the go2rtc section with the same loader Frigate and go2rtc startup use.
+def _go2rtc_config(raw_config: str) -> tuple[dict[str, Any], Any]:
+    """Load the go2rtc section and environment_vars with the same loader Frigate
+    and go2rtc startup use.
 
     Raises ruamel.yaml.YAMLError when the config cannot be parsed.
     """
     loaded = ruamel.yaml.YAML().load(raw_config)
-    go2rtc = loaded.get("go2rtc") if isinstance(loaded, dict) else None
-    return go2rtc if isinstance(go2rtc, dict) else {}
+    if not isinstance(loaded, dict):
+        return {}, None
+
+    go2rtc = loaded.get("go2rtc")
+    return go2rtc if isinstance(go2rtc, dict) else {}, loaded.get("environment_vars")
 
 
 def _restricted_go2rtc_response(
@@ -608,7 +612,7 @@ def _restricted_go2rtc_response(
     otherwise load them from the saved config on the next restart.
     """
     try:
-        new_go2rtc = _go2rtc_config(new_raw_config)
+        new_go2rtc, new_env_vars = _go2rtc_config(new_raw_config)
     except ruamel.yaml.YAMLError:
         logger.warning("Rejected config change that could not be parsed")
         return JSONResponse(
@@ -617,13 +621,13 @@ def _restricted_go2rtc_response(
         )
 
     try:
-        old_go2rtc = _go2rtc_config(old_raw_config)
+        old_go2rtc, _ = _go2rtc_config(old_raw_config)
     except ruamel.yaml.YAMLError:
         # with no readable saved config, every source is treated as new
         old_go2rtc = {}
 
     issues = find_restricted_go2rtc_stream_changes(
-        old_go2rtc.get("streams"), new_go2rtc.get("streams")
+        old_go2rtc.get("streams"), new_go2rtc.get("streams"), new_env_vars
     )
     exec_keys = find_restricted_go2rtc_exec_changes(old_go2rtc, new_go2rtc)
     if not issues and not exec_keys:
@@ -787,16 +791,20 @@ def config_save(save_option: str, body: Any = Body(media_type="text/plain")):
         )
 
 
-def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
+def _restore_masked_camera_paths(
+    config_data: dict, saved: dict, shown_env_vars: dict[str, str]
+) -> str | None:
     """Substitute incoming masked camera paths with the saved ones.
 
     The /config response masks ffmpeg input credentials, so the settings UI
     sends the masked path back when sibling fields (e.g. hwaccel_args) are
     edited. Each masked path is matched to the saved input that masks to the
     same value, with roles breaking a tie, so deleting or reordering inputs
-    keeps each path's own credentials. The saved path is restored as written,
-    keeping any {FRIGATE_*} placeholder. Mutates `config_data` in place and
-    returns an error message when a masked path has no single match.
+    keeps each path's own credentials. Saved paths resolve with
+    `shown_env_vars`, the block the running config and /config used. The saved
+    path is restored as written, keeping any {FRIGATE_*} placeholder. Mutates
+    `config_data` in place and returns an error message when a masked path has
+    no single match.
     """
     cameras = config_data.get("cameras")
     if not isinstance(cameras, dict):
@@ -832,11 +840,13 @@ def _restore_masked_camera_paths(config_data: dict, saved: dict) -> str | None:
             path = input_obj.get("path")
             if not isinstance(path, str) or not is_masked_camera_path(path):
                 continue
-            candidates = [
-                inp
-                for inp in saved_inputs
-                if clean_camera_user_pass(_resolve_frigate_vars(inp["path"])) == path
-            ]
+            with candidate_env_vars(shown_env_vars):
+                candidates = [
+                    inp
+                    for inp in saved_inputs
+                    if clean_camera_user_pass(_resolve_frigate_vars(inp["path"]))
+                    == path
+                ]
             if len({inp["path"] for inp in candidates}) > 1:
                 candidates = [
                     inp
@@ -880,14 +890,14 @@ def _saved_config_from_memory(config: FrigateConfig) -> dict[str, Any]:
 
 
 def _config_data_to_updates(
-    config_data: dict, saved: dict[str, Any]
+    config_data: dict, saved: dict[str, Any], running: FrigateConfig
 ) -> tuple[dict[str, Any], str | None]:
     """Flatten a /config/set payload after restoring masked credentials.
 
     `saved` is the config the masked values were taken from. Returns the flat
     updates, or an error message when a masked value can't be restored.
     """
-    error = _restore_masked_camera_paths(config_data, saved)
+    error = _restore_masked_camera_paths(config_data, saved, running.environment_vars)
     if error:
         return {}, error
 
@@ -941,7 +951,9 @@ def _config_set_in_memory(request: Request, body: AppConfigSetBody) -> JSONRespo
         updates = {}
         if body.config_data:
             updates, error = _config_data_to_updates(
-                body.config_data, _saved_config_from_memory(request.app.frigate_config)
+                body.config_data,
+                _saved_config_from_memory(request.app.frigate_config),
+                request.app.frigate_config,
             )
             if error:
                 return JSONResponse(
@@ -1122,6 +1134,7 @@ def config_set(request: Request, body: AppConfigSetBody):
                     updates, error = _config_data_to_updates(
                         body.config_data,
                         saved_config if isinstance(saved_config, dict) else {},
+                        request.app.frigate_config,
                     )
 
                 if error:

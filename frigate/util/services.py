@@ -30,7 +30,11 @@ from frigate.const import (
     SHM_FRAMES_VAR,
 )
 from frigate.util.builtin import clean_camera_user_pass, escape_special_characters
-from frigate.util.env import UnknownVariableError, substitute_frigate_vars
+from frigate.util.env import (
+    UnknownVariableError,
+    candidate_env_vars,
+    substitute_frigate_vars,
+)
 from frigate.util.live_streams import is_valid_go2rtc_stream_name
 
 logger = logging.getLogger(__name__)
@@ -1228,16 +1232,27 @@ class Go2rtcStreamIssue(str, Enum):
     invalid_name = "invalid_name"
 
 
+def _resolve_running_frigate_vars(source: str) -> str | None:
+    try:
+        return substitute_frigate_vars(source)
+    except ValueError:
+        return None
+
+
 def find_restricted_go2rtc_stream_changes(
-    old_streams: dict[str, Any] | None, new_streams: dict[str, Any] | None
+    old_streams: dict[str, Any] | None,
+    new_streams: dict[str, Any] | None,
+    new_env_vars: object,
 ) -> dict[str, Go2rtcStreamIssue]:
     """Return the go2rtc streams with new sources that must be rejected.
 
-    Used when the config is changed through the API. A source that is already
-    in the saved config for the same stream is left alone, so streams the
-    operator configured on disk keep working; any other source must resolve
-    its {FRIGATE_*} placeholders and pass `is_restricted_go2rtc_api_source`.
-    New stream names must pass `is_valid_go2rtc_stream_name`.
+    Used when the config is changed through the API. Every source must resolve
+    its {FRIGATE_*} placeholders against the new config's environment_vars. A
+    source that is already in the saved config for the same stream and
+    resolves to the same value as it does now is left alone, so streams the
+    operator configured on disk keep working; any other source must pass
+    `is_restricted_go2rtc_api_source`. New stream names must pass
+    `is_valid_go2rtc_stream_name`.
     """
     old_streams = old_streams if isinstance(old_streams, dict) else {}
     new_streams = new_streams if isinstance(new_streams, dict) else {}
@@ -1251,26 +1266,28 @@ def find_restricted_go2rtc_stream_changes(
         existing = _go2rtc_stream_sources(old_streams.get(name))
 
         for source in _go2rtc_stream_sources(stream):
-            if source in existing:
-                continue
-
             if not isinstance(source, str):
                 # the map form is only usable with arbitrary exec enabled
-                if is_go2rtc_arbitrary_exec_allowed():
+                if source in existing or is_go2rtc_arbitrary_exec_allowed():
                     continue
                 issues[name] = Go2rtcStreamIssue.restricted
                 break
 
-            # only sources whose placeholders resolve here are accepted, so the
-            # resolved value checked below is what go2rtc loads at startup
+            # the resolved value checked below is what go2rtc loads at startup
             try:
-                resolved_source = substitute_frigate_vars(source)
+                with candidate_env_vars(new_env_vars):
+                    resolved_source = substitute_frigate_vars(source)
             except UnknownVariableError:
                 issues[name] = Go2rtcStreamIssue.unknown_variable
                 break
             except ValueError:
                 issues[name] = Go2rtcStreamIssue.invalid_placeholder
                 break
+
+            if source in existing and resolved_source == (
+                _resolve_running_frigate_vars(source)
+            ):
+                continue
 
             if is_restricted_go2rtc_api_source(
                 source

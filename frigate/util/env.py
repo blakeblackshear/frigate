@@ -3,7 +3,9 @@
 import logging
 import os
 import re
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -246,6 +248,35 @@ def apply_config_env_vars(values: Mapping[str, object]) -> None:
 reload_sources(warn=False)
 
 
+_CANDIDATE_ENV_VARS: ContextVar[dict[str, str] | None] = ContextVar(
+    "candidate_env_vars", default=None
+)
+
+
+@contextmanager
+def candidate_env_vars(values: object) -> Iterator[None]:
+    """Resolve placeholders against a candidate config's environment_vars.
+
+    Its FRIGATE_ keys replace the installed block at the same lowest
+    precedence. Nothing is installed or exported to os.environ.
+    """
+    merged = {
+        str(key): str(value)
+        for key, value in (values.items() if isinstance(values, Mapping) else ())
+        if str(key).startswith("FRIGATE_")
+    }
+
+    for _, source in _SOURCES:
+        if source is not _CONFIG_ENV_VARS:
+            merged.update(source)
+
+    token = _CANDIDATE_ENV_VARS.set(merged)
+    try:
+        yield
+    finally:
+        _CANDIDATE_ENV_VARS.reset(token)
+
+
 # Matches a FRIGATE_* identifier following an opening brace.
 _FRIGATE_IDENT_RE = re.compile(r"FRIGATE_[A-Za-z0-9_]+")
 
@@ -258,7 +289,8 @@ def substitute_frigate_vars(value: str) -> str:
     (e.g. ffmpeg `%{localtime\\:...}` expressions) untouched:
 
     * `{{` and `}}` collapse to literal `{` / `}` (the documented escape).
-    * `{FRIGATE_NAME}` is replaced from `FRIGATE_ENV_VARS`; an unknown name
+    * `{FRIGATE_NAME}` is replaced from `FRIGATE_ENV_VARS`, or from the
+      sources set by `candidate_env_vars`; an unknown name
       raises `UnknownVariableError` to preserve the existing "Invalid
       substitution" error path.
     * A `{` that begins `{FRIGATE_` but is not a well-formed
@@ -268,6 +300,10 @@ def substitute_frigate_vars(value: str) -> str:
       error.
     * Any other `{` or `}` is treated as a literal and passed through.
     """
+    env_vars = _CANDIDATE_ENV_VARS.get()
+    if env_vars is None:
+        env_vars = FRIGATE_ENV_VARS
+
     out: list[str] = []
     i = 0
     n = len(value)
@@ -288,12 +324,12 @@ def substitute_frigate_vars(value: str) -> str:
                     and value[ident_match.end()] == "}"
                 ):
                     key = ident_match.group(0)
-                    if key not in FRIGATE_ENV_VARS:
+                    if key not in env_vars:
                         raise UnknownVariableError(
                             f"{key} is not defined in the environment, "
                             "secrets.yaml, or the environment_vars config"
                         )
-                    out.append(FRIGATE_ENV_VARS[key])
+                    out.append(env_vars[key])
                     i = ident_match.end() + 1
                     continue
                 # Looks like a FRIGATE placeholder but is malformed
