@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   PYTHON_VERSION: 3.11
 
@@ -21,6 +24,9 @@ jobs:
   amd64_build:
     runs-on: ubuntu-22.04
     name: AMD64 Build
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Check out code
         uses: actions/checkout@v7
@@ -45,6 +51,9 @@ jobs:
   smoke_test:
     runs-on: ubuntu-22.04
     name: AMD64 Smoke Test
+    permissions:
+      contents: read
+      packages: read
     needs:
       - amd64_build
     steps:
@@ -675,9 +684,7 @@ jobs:
       - arm64_build
     steps:
       - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v8
-        with:
-          string: ${{ github.repository }}
+        run: echo "lowercase=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
       - name: Log in to the Container registry
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
         with:
@@ -686,7 +693,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: int128/docker-manifest-create-action@v2
+      - uses: int128/docker-manifest-create-action@d6ac360314337bbfb870747d9616b83118acb330 # v2.30.0
         id: manifest
         with:
           tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}
