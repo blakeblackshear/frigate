@@ -436,7 +436,7 @@ async def get_snapshot_from_recording(
 
 
 @router.post(
-    "/{camera_name}/plus/{frame_time}", dependencies=[Depends(require_camera_access)]
+    "/{camera_name}/plus/{frame_time}", dependencies=[Depends(require_role(["admin"]))]
 )
 async def submit_recording_snapshot_to_plus(
     request: Request, camera_name: str, frame_time: str
