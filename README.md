@@ -31,6 +31,92 @@ Use of a GPU or AI accelerator is highly recommended. AI accelerators will outpe
 
 View the documentation at https://docs.frigate.video
 
+## Local build and verification
+
+### Build the Docker image
+
+Install Docker with Buildx and GNU Make. On macOS, start Docker Desktop first. Run these commands from the repository root:
+
+```bash
+docker info
+make local
+docker image inspect frigate:latest --format 'ID={{.Id}} Size={{.Size}}'
+```
+
+`make local` builds and loads `frigate:latest` for the Docker engine's architecture, including the Python backend and production web frontend. It generates ignored build metadata in `frigate/version.py` and `web/.env`; it does not start the application.
+
+If Docker is unavailable, start the engine before building. If the build fails during image export with an `EOF` or connection error, check the engine's status. On Docker Desktop, restart it with `docker desktop restart`, confirm `docker info` succeeds, then retry `make local`.
+
+### Run an isolated smoke test
+
+Use the same terminal for setup and cleanup so that `FRIGATE_VERIFY_DIR` remains available. Create a temporary configuration without modifying the project's `config/` directory:
+
+```bash
+FRIGATE_VERIFY_DIR=$(mktemp -d /tmp/frigate-verify.XXXXXX)
+cat > "$FRIGATE_VERIFY_DIR/config.yml" <<'YAML'
+mqtt:
+  enabled: false
+auth:
+  enabled: false
+tls:
+  enabled: false
+cameras: {}
+YAML
+
+docker run -d \
+  --name frigate-verify \
+  --shm-size=256m \
+  -p 127.0.0.1:8971:8971 \
+  --mount "type=bind,source=$FRIGATE_VERIFY_DIR,target=/config" \
+  --mount type=tmpfs,destination=/tmp/cache,tmpfs-size=536870912 \
+  frigate:latest
+```
+
+Authentication and TLS are disabled only for this local smoke test. Keep the port bound to `127.0.0.1`; do not use this configuration for deployment. Port 5000 is not published, avoiding conflicts with services such as macOS AirPlay Receiver.
+
+Check startup logs and repeat the status command until health is `healthy`. If the container exits or becomes unhealthy, inspect its logs before proceeding:
+
+```bash
+docker logs --tail 100 frigate-verify
+docker inspect frigate-verify \
+  --format 'Status={{.State.Status}} Health={{.State.Health.Status}} Restarts={{.RestartCount}}'
+```
+
+Expect `Status=running Health=healthy Restarts=0`. Verify that the web UI and API endpoints return HTTP 200:
+
+```bash
+curl --fail --silent --show-error -o /dev/null \
+  -w 'Web UI HTTP %{http_code}\n' http://127.0.0.1:8971/
+curl --fail --silent --show-error http://127.0.0.1:8971/api/
+curl --fail --silent --show-error http://127.0.0.1:8971/api/version
+curl --fail --silent --show-error http://127.0.0.1:8971/api/stats
+```
+
+The health endpoint should report `Frigate is running. Alive and healthy!`, the version should match the build, and stats should contain an empty `cameras` object. Open http://127.0.0.1:8971 to check UI rendering and confirm JavaScript and CSS requests succeed in the browser's network panel.
+
+This smoke test verifies startup and HTTP serving, not camera streaming, object detection, MQTT integration, or recording. A CPU detector warning is expected with the default test configuration.
+
+### Clean up
+
+Stop and remove the test container before deleting its temporary configuration and database:
+
+```bash
+docker stop frigate-verify && docker rm frigate-verify
+```
+
+After the container has been removed, delete the temporary directory:
+
+```bash
+case "${FRIGATE_VERIFY_DIR:-}" in
+  /tmp/frigate-verify.*)
+    rm -r -- "${FRIGATE_VERIFY_DIR:?}"
+    unset FRIGATE_VERIFY_DIR
+    ;;
+esac
+```
+
+The `frigate:latest` image remains available for future use.
+
 ## Donations
 
 If you would like to make a donation to support development, please use [Github Sponsors](https://github.com/sponsors/blakeblackshear).
