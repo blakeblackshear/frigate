@@ -57,6 +57,14 @@ const EVENT_NOTICE = {
   muted_at: null,
 };
 
+// a repeated device gets a '#2' suffix, which a raw URL would cut off as a fragment
+const SUFFIXED_NOTICE = {
+  ...EVENT_NOTICE,
+  id: "detector_stuck:openvino:GPU#2",
+  scope: "openvino:GPU#2",
+  params: { detector: "openvino:GPU#2" },
+};
+
 test.describe("System — Health tab @medium", () => {
   test("Health is the default tab and lists notices by severity", async ({
     frigateApp,
@@ -95,19 +103,20 @@ test.describe("System — Health tab @medium", () => {
 
   for (const action of ["acknowledge", "mute"] as const) {
     test(`${action} posts and removes the row`, async ({ frigateApp }) => {
+      const path = `/api/notices/${encodeURIComponent(SUFFIXED_NOTICE.id)}/${action}`;
       await frigateApp.installDefaults({
         config: RESTREAMED,
         stats: QUIET_STATS,
-        notices: [EVENT_NOTICE],
+        notices: [SUFFIXED_NOTICE],
       });
 
       // the list shrinks after the POST so the refetch shows the row gone
       let hidden = false;
       await frigateApp.page.route("**/api/notices", (route) =>
-        route.fulfill({ json: hidden ? [] : [EVENT_NOTICE] }),
+        route.fulfill({ json: hidden ? [] : [SUFFIXED_NOTICE] }),
       );
       await frigateApp.page.route(
-        `**/api/notices/detector_stuck/${action}`,
+        (url) => url.pathname.endsWith(path),
         (route) => {
           hidden = true;
           return route.fulfill({ json: { success: true } });
@@ -117,11 +126,10 @@ test.describe("System — Health tab @medium", () => {
       await frigateApp.goto("/system#health");
       const request = frigateApp.page.waitForRequest(
         (req) =>
-          req.url().includes(`/api/notices/detector_stuck/${action}`) &&
-          req.method() === "POST",
+          new URL(req.url()).pathname.endsWith(path) && req.method() === "POST",
       );
       await frigateApp.page
-        .getByTestId("health-problem-notice:detector_stuck")
+        .getByTestId(`health-problem-notice:${SUFFIXED_NOTICE.id}`)
         .getByRole("button", {
           name: action === "mute" ? "Mute" : "Acknowledge",
           exact: true,
@@ -264,8 +272,9 @@ test.describe("System — Health tab @medium", () => {
         url.searchParams.get("include_hidden") === "true",
       (route) => route.fulfill({ json: [MUTED_NOTICE] }),
     );
+    const path = `/api/notices/${encodeURIComponent(MUTED_NOTICE.id)}/hidden`;
     await frigateApp.page.route(
-      "**/api/notices/model_download_failed:yolo/model.onnx/hidden",
+      (url) => url.pathname.endsWith(path),
       (route) => route.fulfill({ json: { success: true } }),
     );
     await frigateApp.goto("/system#health");
@@ -276,11 +285,7 @@ test.describe("System — Health tab @medium", () => {
 
     const request = frigateApp.page.waitForRequest(
       (req) =>
-        req
-          .url()
-          .endsWith(
-            "/api/notices/model_download_failed:yolo/model.onnx/hidden",
-          ) && req.method() === "DELETE",
+        new URL(req.url()).pathname.endsWith(path) && req.method() === "DELETE",
     );
     await frigateApp.page
       .getByTestId(
@@ -1281,10 +1286,14 @@ test.describe("System — Health notices sources @medium", () => {
 
     // the list gains the mute after the POST so the refetch hides the row
     let muted = false;
-    await frigateApp.page.route(`**/api/notices/${id}/mute`, (route) => {
-      muted = true;
-      return route.fulfill({ json: { success: true } });
-    });
+    const path = `/api/notices/${encodeURIComponent(id)}/mute`;
+    await frigateApp.page.route(
+      (url) => url.pathname.endsWith(path),
+      (route) => {
+        muted = true;
+        return route.fulfill({ json: { success: true } });
+      },
+    );
     await frigateApp.page.route("**/api/notices/muted_checks", (route) =>
       route.fulfill({ json: muted ? [{ id, muted_at: NOW }] : [] }),
     );
@@ -1297,8 +1306,7 @@ test.describe("System — Health notices sources @medium", () => {
     );
     const request = frigateApp.page.waitForRequest(
       (req) =>
-        req.url().includes(`/api/notices/${id}/mute`) &&
-        req.method() === "POST",
+        new URL(req.url()).pathname.endsWith(path) && req.method() === "POST",
     );
     await row.getByRole("button", { name: "Mute", exact: true }).click();
     await request;
