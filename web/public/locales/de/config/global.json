@@ -76,7 +76,7 @@
         },
         "cookie_secure": {
             "label": "Sicheres Cookie-Flag",
-            "description": "Setzen Sie das Sicherheitsflag im Authentifizierungs-Cookie; sollte bei Verwendung von TLS auf „true“ gesetzt sein."
+            "description": "Setze für das Authentifizierungs-Cookie stets das „Secure“-Flag. Frigate setzt dieses automatisch, wenn TLS direkt von Frigate bereitgestellt wird; aktiviere es zudem, wenn ein Reverse-Proxy vor Frigate die TLS-Terminierung übernimmt. Ein Proxy, der eine Verbindung zum TLS-Port herstellt, muss Frigate den Browsern über HTTPS zur Verfügung stellen."
         },
         "session_length": {
             "label": "Sitzungssdauer",
@@ -120,7 +120,7 @@
         },
         "language": {
             "label": "Transkriptsprache",
-            "description": "Für die Transkription/Übersetzung verwendeter Sprachcode (z. B. „en“ für Englisch). Eine Liste der unterstützten Sprachcodes finden Sie unter https://whisper-api.com/docs/languages/."
+            "description": "Für die Transkription/Übersetzung verwendeter Sprachcode (z. B. „en“ für Englisch), oder 'auto' damit das Modell die Sprache selbst erkennt. Eine Liste der unterstützten Sprachcodes finden Sie unter https://whisper-api.com/docs/languages/."
         },
         "device": {
             "label": "Transkriptionsgerät",
@@ -492,7 +492,7 @@
         },
         "default_role": {
             "label": "Standardrolle",
-            "description": "Standardrolle, die proxy-authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung vorliegt."
+            "description": "Standardrolle, die per Proxy authentifizierten Benutzern zugewiesen wird, wenn keine Rollenzuordnung greift. Auf 'none' setzen, um Benutzern ohne Rollenzuordnung den Zugriff zu verweigern."
         },
         "separator": {
             "label": "Trennzeichen",
@@ -1213,7 +1213,7 @@
         },
         "roles": {
             "label": "Rollen",
-            "description": "GenAI-Rollen (Nachrichten, Beschreibung, Einbettungen); ein Anbieter pro Rolle."
+            "description": "GenAI-Rollen (Nachrichten, Beschreibung, Einbettungen, Transkription); ein Anbieter pro Rolle. Standardmäßig sind nur Chat, Beschreibungen und Einbettungen freigeschaltet; Transkription muss explizit aufgeführt werden."
         },
         "provider_options": {
             "label": "Anbieter Optionen",

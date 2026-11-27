@@ -12,7 +12,7 @@
     "24hours": "24 Stunden",
     "month_one": "{{time}} Monat",
     "month_other": "{{time}} Monate",
-    "d": "{{time}} Tg.",
+    "d": "{{time}}Tg.",
     "day_one": "{{time}} Tag",
     "day_other": "{{time}} Tage",
     "m": "{{time}} Min",
@@ -37,12 +37,12 @@
     "30minutes": "30 Minuten",
     "1hour": "1 Stunde",
     "lastWeek": "Letzte Woche",
-    "h": "{{time}} Std.",
+    "h": "{{time}}Std.",
     "ago": "vor {{timeAgo}}",
     "untilRestart": "Bis zum Neustart",
     "justNow": "Gerade",
     "pm": "nachmittags",
-    "mo": "{{time}} Mon.",
+    "mo": "{{time}}Mon.",
     "formattedTimestamp": {
       "12hour": "d. MMM, hh:mm:ss aaa",
       "24hour": "dd. MMM, hh:mm:ss aaa"
@@ -76,7 +76,8 @@
     "inProgress": "Im Gange",
     "invalidStartTime": "Ungültige Startzeit",
     "invalidEndTime": "Ungültige Endzeit",
-    "never": "Nie"
+    "never": "Nie",
+    "custom": "Individuell…"
   },
   "button": {
     "save": "Speichern",
@@ -190,7 +191,8 @@
       "hr": "Hrvatski (Kroatisch)",
       "bs": "Bosanski (Bosnisch)",
       "zhHant": "Traditional Chinese",
-      "be": "Беларуская (Belarussisch)"
+      "be": "Беларуская (Belarussisch)",
+      "srLatn": "Srpski (Serbisch, Lateinschrift)"
     },
     "appearance": "Erscheinung",
     "theme": {
@@ -329,9 +331,9 @@
   "error": {
     "title": "Seite arbeitet nicht mehr",
     "desc": "Die Seite erzeugt einen unerwarteten Fehler. Ein Reload löst das Problem meist. Wenn der Fehler weiter besteht, dann kopiere die Details und füge diese in einen Github-Diskussions-Eintrag hinzu.",
-    "staleTitle": "Neuladen erforderlich",
+    "staleTitle": "Neu laden erforderlich",
     "staleDesc": "Ein Teil des Interface konnte nicht geladen werden, welches meist die Ursache hat, das Frigate eine Aktualisierung durchgeführt hat während das Tab offen war. Bitte neuladen.",
-    "partial": "Teil des Interfaces arbeitet nicht",
+    "partial": "Ein Teil des Interfaces arbeitet nicht mehr",
     "copyDetails": "Kopiere Details",
     "copyFailed": "Kann die Details nicht in die Zwischenablage kopieren"
   },
@@ -347,11 +349,12 @@
       "actions": "Aktionen"
     },
     "camera": {
-      "live": "Live",
-      "review": "Review"
+      "live": "Liveansicht",
+      "review": "Rückblick"
     },
     "action": {
       "toggleTheme": "hell/dunkel umschalten"
-    }
+    },
+    "description": "Suche Seiten, Kameras, Einstellungen und Aktionen"
   }
 }
