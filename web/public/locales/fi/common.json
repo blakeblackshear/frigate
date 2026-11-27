@@ -76,7 +76,8 @@
     },
     "inProgress": "Käynnissä",
     "invalidStartTime": "Epäkelpo aloitusaika",
-    "invalidEndTime": "Epäkelpo lopetusaika"
+    "invalidEndTime": "Epäkelpo lopetusaika",
+    "custom": "Mukautettu..."
   },
   "pagination": {
     "next": {
@@ -184,7 +185,8 @@
       "bg": "Bulgaria (Bulgaria)",
       "gl": "Galego (Galicia)",
       "id": "Indonesia (Indonesia)",
-      "ur": "اردو (Urdu)"
+      "ur": "اردو (Urdu)",
+      "srLatn": "Srpski (Serbia, Latin)"
     },
     "review": "Esikatselu",
     "theme": {

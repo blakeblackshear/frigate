@@ -80,13 +80,21 @@
   },
   "logSettings": {
     "allLogs": "Kaikki lokit",
-    "filterBySeverity": "Suodata lokit vakavuuden mukaan"
+    "filterBySeverity": "Suodata lokit vakavuuden mukaan",
+    "label": "Suodatuksen lokitaso",
+    "loading": {
+      "title": "Ladataan",
+      "desc": "Kun lokinäkymä on vieritetty alas, uudet lokimerkinnät ilmestyvät siihen automaattisesti sitä mukaa, kun niitä lisätään."
+    },
+    "disableLogStreaming": "Poista lokien suoratoisto käytöstä"
   },
   "trackedObjectDelete": {
     "title": "Vahvista poisto",
     "toast": {
-      "error": "Seurattujen kohteiden poistaminen epäonnistui: {{errorMessage}}"
-    }
+      "error": "Seurattujen kohteiden poistaminen epäonnistui: {{errorMessage}}",
+      "success": "Seurattavat kohteet poistettu onnistuneesti."
+    },
+    "desc": "Näiden {{objectLength}} seurattavan kohteen poistaminen poistaa tilannevedoksen, mahdolliset tallennetut upotukset (embeddings) sekä kaikki kohteiden elinkaareen liittyvät merkinnät. Historianäkymässä (History view) olevia tallenteita näistä seurattavista kohteista <em>EI</em> poisteta.<br /><br />Haluatko varmasti jatkaa?<br /><br />Pidä <em>Vaihto</em>-näppäintä painettuna, jos haluat ohittaa tämän vahvistusikkunan jatkossa."
   },
   "attributes": {
     "label": "Luokitusominaisuudet",
@@ -103,8 +111,30 @@
       "title": "Asetukset",
       "defaultView": {
         "title": "Oletusnäkymä",
-        "summary": "Yhteenveto"
+        "summary": "Yhteenveto",
+        "desc": "Kun suodattimia ei ole valittu, näytä yhteenveto kunkin tunnisteen uusimmista seuratuista kohteista tai näytä suodattamaton taulukko.",
+        "unfilteredGrid": "Suodattamaton taulukko"
+      },
+      "gridColumns": {
+        "title": "Taulukon sarakkeet",
+        "desc": "Valitse sarakkeiden määrä taulukkonäkymässä."
+      },
+      "searchSource": {
+        "label": "Hakulähde",
+        "desc": "Valitse, haluatko etsiä seurattavia kohteita pikkukuvista vai kuvauksista.",
+        "options": {
+          "thumbnailImage": "Pienoiskuva",
+          "description": "Kuvaus"
+        }
+      }
+    },
+    "date": {
+      "selectDateBy": {
+        "label": "Valitse suodatuspäivämäärä"
       }
     }
+  },
+  "zoneMask": {
+    "filterBy": "Suodata vyöhykemaskin perusteella"
   }
 }

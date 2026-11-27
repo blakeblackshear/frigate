@@ -30,14 +30,32 @@
       }
     },
     "decodedFrames": "Dekoodatut kehykset:",
-    "droppedFrameRate": "Pudotettujen kehysten nopeus:"
+    "droppedFrameRate": "Pudotettujen kehysten nopeus:",
+    "stream": "Suoratoisto:",
+    "streamAuto": "{{stream}} (auto)"
   },
   "toast": {
     "success": {
       "submittedFrigatePlus": "Onnistuneesti lähetetty Frigate+:aan"
     },
     "error": {
-      "submitFrigatePlusFailed": "Frigate+:aan lähetys epäonnistui"
+      "submitFrigatePlusFailed": "Frigate+:aan lähetys epäonnistui",
+      "playRecordingsFailed": "Tallenteiden toisto epäonnistui (virhe {{code}}): {{message}}"
     }
+  },
+  "cameraOff": "Kamera on pois päältä",
+  "quality": {
+    "auto": "Auto",
+    "autoLow": "Toistetaan heikkolaatuisena (rajoitettu kaistanleveys)",
+    "autoLowCodec": "Toistetaan heikkolaatuisena (alkuperäistä ei tueta tässä selaimessa)",
+    "autoLowSaveData": "Toistetaan heikkolaatuisena (säästötila)",
+    "main": "Alkuperäinen",
+    "sub": "Matala",
+    "notSupportedBrowser": "Tämä selain ei tue tätä",
+    "label": "Laatu",
+    "noAudio": "Ei ääntä",
+    "audioRate": "{{rate}} kHz:n ääni",
+    "audioCodecRate": "{{codec}} {{rate}} kHz",
+    "noRecordings": "Ei tallenteita tällä aikavälillä"
   }
 }

@@ -99,7 +99,9 @@
       "namePlaceholder": "Valinnainen perusnimi näille vienneille",
       "queueingButton": "Vientejä jonossa...",
       "exportButton_one": "Vie 1 kamera",
-      "exportButton_other": "Vie {{count}} kameraa"
+      "exportButton_other": "Vie {{count}} kameraa",
+      "noCamerasSelected": "Valitse vähintään yksi kamera",
+      "caseNameDefault": "Monikameravienti – {{date}}"
     },
     "multi": {
       "exportingButton": "Viedään...",
@@ -131,7 +133,8 @@
       "newCaseNamePlaceholder": "Uuden tapahtuman nimi",
       "newCaseDescriptionPlaceholder": "Tapahtuman kuvaus",
       "label": "Tapahtuma",
-      "placeholder": "Valitse tapahtuma"
+      "placeholder": "Valitse tapahtuma",
+      "nameRequired": "Tapauksen nimi vaaditaan"
     },
     "queueing": "Vienti jonossa...",
     "tabs": {
