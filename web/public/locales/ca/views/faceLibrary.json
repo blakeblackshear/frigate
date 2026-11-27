@@ -49,10 +49,12 @@
   "imageEntry": {
     "dropActive": "Arrossegueu la imatge aquí…",
     "validation": {
-      "selectImage": "Siusplau, selecciona un fixer d'imatge."
+      "selectImage": "Siusplau, selecciona un fixer d'imatge.",
+      "heicConversionFailed": "No s'ha pogut convertir aquesta imatge HEIC. Proveu d'exportar-lo com a JPEG."
     },
     "maxSize": "Mida màxima: {{size}}MB",
-    "dropInstructions": "Arrossegueu i deixeu anar o enganxeu una imatge aquí, o feu clic per seleccionar"
+    "dropInstructions": "Arrossegueu i deixeu anar o enganxeu una imatge aquí, o feu clic per seleccionar",
+    "converting": "S'està convertint la imatge…"
   },
   "button": {
     "uploadImage": "Pujar imatge",
