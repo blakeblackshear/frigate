@@ -372,15 +372,59 @@ export default function Camera360Viewer({
     resizeObserver.observe(container);
     resize();
 
+    // one pointer drags the view, two pointers pinch to zoom
+    const pointers = new Map<number, { x: number; y: number }>();
     let dragStart: { x: number; y: number; lon: number; lat: number } | null =
       null;
+    let pinchStart: { distance: number; fov: number } | null = null;
+
+    const pinchDistance = () => {
+      const [a, b] = [...pointers.values()];
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    };
+
+    // restart the gesture from the current pointers, so adding or lifting a
+    // finger never makes the view jump
+    const startGesture = () => {
+      dragStart = null;
+      pinchStart = null;
+
+      if (pointers.size === 1) {
+        const [pointer] = [...pointers.values()];
+        dragStart = { x: pointer.x, y: pointer.y, lon, lat };
+      } else if (pointers.size === 2) {
+        pinchStart = { distance: pinchDistance(), fov: camera.fov };
+      }
+    };
 
     const onPointerDown = (e: PointerEvent) => {
       renderer.domElement.setPointerCapture(e.pointerId);
-      dragStart = { x: e.clientX, y: e.clientY, lon, lat };
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      startGesture();
     };
 
     const onPointerMove = (e: PointerEvent) => {
+      if (!pointers.has(e.pointerId)) {
+        return;
+      }
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+      if (pinchStart) {
+        const distance = pinchDistance();
+        if (pinchStart.distance === 0 || distance === 0) {
+          return;
+        }
+        // spreading the fingers narrows the field of view, which zooms in
+        camera.fov = THREE.MathUtils.clamp(
+          (pinchStart.fov * pinchStart.distance) / distance,
+          MIN_FOV,
+          MAX_FOV,
+        );
+        camera.updateProjectionMatrix();
+        requestRender();
+        return;
+      }
+
       if (!dragStart) {
         return;
       }
@@ -405,7 +449,8 @@ export default function Camera360Viewer({
       if (renderer.domElement.hasPointerCapture(e.pointerId)) {
         renderer.domElement.releasePointerCapture(e.pointerId);
       }
-      dragStart = null;
+      pointers.delete(e.pointerId);
+      startGesture();
     };
 
     const onWheel = (e: WheelEvent) => {
