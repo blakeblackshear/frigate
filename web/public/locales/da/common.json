@@ -76,7 +76,8 @@
     "never": "Aldrig",
     "inProgress": "Under behandling",
     "invalidStartTime": "Ugyldig starttid",
-    "invalidEndTime": "Ugyldig sluttid"
+    "invalidEndTime": "Ugyldig sluttid",
+    "custom": "Brugerdefineret..."
   },
   "unit": {
     "speed": {
@@ -153,13 +154,17 @@
     "saveAll": "Gem alle",
     "savingAll": "Gemmer alle…",
     "undoAll": "Fortryd alle",
-    "retry": "Prøv igen"
+    "retry": "Prøv igen",
+    "expand": "Udvid",
+    "collapse": "Skjul",
+    "clear": "Ryd",
+    "reload": "Genindlæs"
   },
   "menu": {
     "system": "System",
     "systemMetrics": "Systemstatistik",
     "configuration": "Konfiguration",
-    "systemLogs": "Systemlogfiler",
+    "systemLogs": "Logfiler",
     "settings": "Indstillinger",
     "configurationEditor": "Konfigurationsværktøj",
     "languages": "Sprog",
@@ -208,7 +213,9 @@
       "ur": "اردو (Urdu)",
       "hr": "Hrvatski (Kroatisk)",
       "zhHant": "繁體中文 (Traditionel Kinesisk)",
-      "bs": "Bosanski (Bosnisk)"
+      "bs": "Bosanski (Bosnisk)",
+      "be": "Беларуская (Hviderussisk)",
+      "srLatn": "Srpski (Serbisk, Latin)"
     },
     "appearance": "Udseende",
     "darkMode": {
@@ -325,13 +332,31 @@
     "section": {
       "cameraGroups": "Kameragrupper",
       "settings": "Indstillinger",
-      "actions": "Handlinger"
+      "actions": "Handlinger",
+      "recent": "Seneste",
+      "pages": "Sider",
+      "cameras": "Kameraer"
     },
     "camera": {
-      "live": "Live"
+      "live": "Live",
+      "review": "Gennemse"
     },
     "action": {
       "toggleTheme": "Skift mellem lys og mørk tilstand"
-    }
+    },
+    "title": "Kommandomenu",
+    "description": "Søg sider, kameraer, indstillinger og handlinger",
+    "placeholder": "Søg sider, kameraer, indstillinger og handlinger",
+    "empty": "Ingen match",
+    "hint": "{{key}} eller / for at åbne, Enter for at køre"
+  },
+  "error": {
+    "title": "Siden holdt op med at virke",
+    "desc": "Siden stødte på en uventet fejl. Det hjælper som regel at genindlæse siden. Hvis fejlen fortsætter, kan du kopiere detaljerne og vedhæfte dem i en diskussion på GitHub.",
+    "staleTitle": "Genindlæsning påkrævet",
+    "staleDesc": "En del af brugerfladen kunne ikke indlæses, hvilket normalt betyder, at Frigate er blevet opdateret, mens denne fane var åben. Genindlæs siden for at hente den nye version.",
+    "partial": "En del af brugerfladen holdt op med at virke.",
+    "copyDetails": "Kopier detaljer",
+    "copyFailed": "Kunne ikke kopiere detaljer til udklipsholderen"
   }
 }
