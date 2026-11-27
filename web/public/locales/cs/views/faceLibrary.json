@@ -4,8 +4,10 @@
     "maxSize": "Maximální velikost: {{size}}MB",
     "dropActive": "Přetáhněte obrázek zde…",
     "validation": {
-      "selectImage": "Vyberte soubor s obrázkem."
-    }
+      "selectImage": "Vyberte soubor s obrázkem.",
+      "heicConversionFailed": "Tento obrázek HEIC se nepodařilo převést. Zkuste jej místo toho exportovat jako JPEG."
+    },
+    "converting": "Převod obrázku…"
   },
   "createFaceLibrary": {
     "new": "Vytvořit nový obličej",
