@@ -70,7 +70,8 @@
     },
     "inProgress": "Sedang berlangsung",
     "invalidStartTime": "Waktu mulai tidak valid",
-    "invalidEndTime": "Waktu selesai tidak valid"
+    "invalidEndTime": "Waktu selesai tidak valid",
+    "custom": "Kustomisasi..."
   },
   "readTheDocumentation": "Baca dokumentasi",
   "menu": {

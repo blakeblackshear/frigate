@@ -75,7 +75,8 @@
       "newCaseNamePlaceholder": "Nama Kasus Baru",
       "newCaseDescriptionPlaceholder": "Deskripsi Kasus",
       "label": "Kasus",
-      "placeholder": "Pilih Kasus"
+      "placeholder": "Pilih Kasus",
+      "nameRequired": "Nama kasus wajib diisi"
     },
     "tabs": {
       "export": "Kamera Tunggal",
@@ -99,7 +100,9 @@
       "selectedCount": "{{selected}} / {{total}} terpilih",
       "namePlaceholder": "Nama dasar opsional untuk ekspor ini",
       "searchOrSelectGroup": "Cari, atau pilih grup kamera...",
-      "selectAll": "Pilih semua kamera"
+      "selectAll": "Pilih semua kamera",
+      "noCamerasSelected": "Pilih setidaknya satu kamera",
+      "caseNameDefault": "Ekspor multi-kamera - {{date}}"
     },
     "multi": {
       "title_other": "Ekspor {{count}} Ulasan",
