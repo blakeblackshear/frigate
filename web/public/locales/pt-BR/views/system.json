@@ -247,7 +247,8 @@
     "systemNotices_other": "{{count}} avisos do sistema",
     "retentionUnmet": "As gravações estão sendo excluídas antes do fim do período de retenção para liberar espaço",
     "moreMessages_one": "+{{count}}",
-    "moreMessages_other": "+{{count}}"
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "Falha na reindexação dos embeddings. Verifique os registros"
   },
   "enrichments": {
     "title": "Enriquecimentos",
@@ -300,7 +301,9 @@
         "failed_login_one": "Tentativa de login malsucedida para {{user}}",
         "update_available": "O Frigate {{version}} está disponível",
         "ffmpeg_high_cpu": "O uso de CPU do FFmpeg está alto ({{cpu}}% em média)",
-        "detect_high_cpu": "O uso de CPU da detecção está alto ({{cpu}}% em média)"
+        "detect_high_cpu": "O uso de CPU da detecção está alto ({{cpu}}% em média)",
+        "object_processing_behind": "O processamento de objetos rastreados não conseguiu acompanhar o ritmo, resultando no descarte de quadros da câmera. Verifique a utilização da CPU e se há limites de CPU ou restrições de alocação de núcleos (pinning) no contêiner ou na máquina virtual que estejam deixando o Frigate com recursos de processamento insuficientes",
+        "analytics_prompt": "Considere compartilhar estatísticas de uso anônimas para ajudar os desenvolvedores a aprimorar o Frigate"
       },
       "streamPrefix": "Stream {{index}}: {{message}}",
       "streamPrefixRestream": "Stream {{index}} (via go2rtc): {{message}}",
@@ -318,7 +321,9 @@
       "showAllTitle": "Mostrar todos os avisos ocultos?",
       "acknowledgedAt": "Confirmado {{time}}",
       "showAllDesc": "Todos os avisos confirmados e silenciados voltam para a lista de Avisos, incluindo as verificações de configuração e de streams.",
-      "mutedAt": "Silenciado {{time}}"
+      "mutedAt": "Silenciado {{time}}",
+      "occurred_one": "Ocorrido às {{time}}",
+      "occurred_other": "Última ocorrência {{lastTime}} · {{count}} vezes desde {{time}}"
     },
     "hardware": {
       "title": "Hardware",
@@ -369,5 +374,7 @@
       "streamsFlagged_other": "{{count}} com problemas, listado(s) em Avisos",
       "streamsChecked_one": "{{count}} câmera verificada"
     }
-  }
+  },
+  "showAllTabs": "Mostrar todas as abas",
+  "showLessTabs": "Mostrar menos"
 }

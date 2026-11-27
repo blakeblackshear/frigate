@@ -6,11 +6,13 @@
   },
   "imageEntry": {
     "validation": {
-      "selectImage": "Por favor selecione um arquivo de imagem."
+      "selectImage": "Por favor selecione um arquivo de imagem.",
+      "heicConversionFailed": "Não é possível converter esta imagem HEIC. Tente exportar como JPEG."
     },
     "maxSize": "Tamanho máximo: {{size}}MB",
     "dropActive": "Solte a imagem aqui…",
-    "dropInstructions": "Arraste e solte ou cole uma imagem aqui ou clique para selecionar"
+    "dropInstructions": "Arraste e solte ou cole uma imagem aqui ou clique para selecionar",
+    "converting": "Convertendo imagem…"
   },
   "deleteFaceLibrary": {
     "title": "Apagar Nome",

@@ -250,15 +250,24 @@
             "description": "Streams ao vivo de baixa qualidade transcodificados sob demanda por go2rtc.",
             "label": "Transmissões transcodificadas",
             "enabled": {
-                "label": "Habilitar Transcodificação de Transmissões"
+                "label": "Habilitar Transcodificação de Transmissões",
+                "description": "Adicione transmissões ao vivo de qualidade inferior, que o go2rtc transcodifica em tempo real enquanto alguém as assiste."
             },
             "qualities": {
                 "bitrate": {
-                    "label": "Taxa de bits"
+                    "label": "Taxa de bits",
+                    "description": "Taxa de bits de vídeo alvo e máxima, em kbps."
                 },
                 "height": {
-                    "label": "Altura"
-                }
+                    "label": "Altura",
+                    "description": "Altura de saída em pixels; a largura segue a proporção da fonte."
+                },
+                "label": "Qualidades",
+                "description": "Um fluxo transcodificado é adicionado por nível de qualidade."
+            },
+            "source": {
+                "label": "Fluxo de origem",
+                "description": "Fluxo do go2rtc para transcodificação. O padrão é o primeiro fluxo ao vivo."
             }
         }
     },
@@ -780,6 +789,10 @@
         "cooldown": {
             "label": "Intervalo de espera",
             "description": "Intervalo (em segundos) entre notificações para evitar o envio excessivo de mensagens aos destinatários."
+        },
+        "ttl": {
+            "label": "Notificação TTL",
+            "description": "Veja como o serviço de notificações (push) lida com uma notificação enviada enquanto um alerta está ativo, caso o seu dispositivo não possa ser contatado: a opção \"imediata\" (immediate) entrega a notificação na hora ou a descarta; a opção \"confiável\" (reliable) continua tentando realizar a entrega por até 30 segundos. A notificação enviada quando um alerta termina é sempre mantida por até uma hora."
         }
     },
     "onvif": {
