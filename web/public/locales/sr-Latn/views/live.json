@@ -165,7 +165,7 @@
       "tips": "Prikaz uživo je u režimu niskog protoka zbog baferovanja ili grešaka u strimu.",
       "resetStream": "Resetuj strim",
       "force": {
-        "label": "Primoraj režim niskog protoka",
+        "label": "Prinudno uključi režim malog protoka",
         "desc": "Uvek reprodukuj Frigate-ov ugrađeni prikaz niskog protoka umesto izabranog strima. Radi na svakoj vezi, ali ima niži kvalitet i nema zvuk."
       }
     },

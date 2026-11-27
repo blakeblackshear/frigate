@@ -7,7 +7,7 @@
     "integrations": "Integracije",
     "cameras": "Konfiguracija kamera",
     "ui": "Korisnički interfejs",
-    "uiSettings": "Podešavanja korisničkog interfejsa",
+    "uiSettings": "Podešavanja interfejsa",
     "globalDetect": "Detekcija objekata",
     "globalRecording": "Snimanje",
     "globalSnapshots": "Snimci kadra",
@@ -70,7 +70,7 @@
     "maintenance": "Održavanje",
     "mediaSync": "Sinhronizacija medija",
     "regionGrid": "Mreža regiona",
-    "enrichments": "Obogaćivanja"
+    "enrichments": "Napredne funkcije"
   },
   "analyticsPreview": {
     "show": "Pregledaj izveštaj",
@@ -82,13 +82,13 @@
     "authentication": "Podešavanja autentifikacije - Frigate",
     "cameraManagement": "Upravljanje kamerama - Frigate",
     "cameraReview": "Podešavanja pregleda kamera - Frigate",
-    "enrichments": "Podešavanja poboljšanja - Frigate",
+    "enrichments": "Podešavanja naprednih funkcija - Frigate",
     "masksAndZones": "Editor maski i zona - Frigate",
     "motionTuner": "Podešavanje kretanja - Frigate",
     "object": "Otklanjanje grešaka - Frigate",
-    "general": "Podešavanja prikaza - Frigate",
+    "general": "Podešavanja interfejsa - Frigate",
     "globalConfig": "Globalna konfiguracija - Frigate",
-    "cameraConfig": "Konfiguracija kamere - Frigate",
+    "cameraConfig": "Konfiguracija kamera - Frigate",
     "frigatePlus": "Frigate+ podešavanja - Frigate",
     "detectorsAndModel": "Detektori i modeli - Frigate",
     "notifications": "Podešavanja obaveštenja - Frigate",
@@ -211,11 +211,11 @@
       "inputDimensionsNotDetectResolution": "Ulazna širina i visina modela su ulazne dimenzije modela za detekciju objekata, a ne rezolucija detekcije vaše kamere. One bi trebalo da odgovaraju dimenzijama modela koji koristite — obično kvadratnog oblika poput 320x320 ili 640x640."
     },
     "ffmpeg": {
-      "hwaccelManualNotRecommended": "Ručni argumenti za hardversko ubrzanje se ne preporučuju. Osim ako ne postoji specifičan zahtev, izaberite unapred podešenu opciju (preset) koja odgovara vašem hardveru.",
+      "hwaccelManualNotRecommended": "Ručni argumenti hardverskog ubrzanja se ne preporučuju. Osim ako ne postoji poseban zahtev, izaberite unapred podešenu vrednost koja odgovara vašem hardveru.",
       "inputsMissingGo2rtcStream": "Ulaz ispod ukazuje na go2rtc ponovno strimovanje (restream) koje više ne postoji. Izaberite postojeći strim ili unesite URL kamere ručno, inače ova kamera neće uspeti da se poveže."
     },
     "objects": {
-      "genaiNoDescriptionsProvider": "Morate konfigurisati GenAI provajdera sa ulogom „descriptions“ da bi opisi mogli da se generišu."
+      "genaiNoDescriptionsProvider": "Morate konfigurisati GenAI provajdera sa ulogom 'descriptions' (opisi) da bi se opisi generisali."
     },
     "faceRecognition": {
       "globalDisabled": "Poboljšanje za prepoznavanje lica mora biti omogućeno da bi funkcije prepoznavanja lica radile na ovoj kameri.",
@@ -228,10 +228,10 @@
       "modelSizeLarge": "Veliki model je optimizovan za registarske tablice u više redova. Mali model pruža bolje performanse u odnosu na veliki i treba ga koristiti osim ako vaš region ne koristi formate tablica sa više redova."
     },
     "review": {
-      "allNonAlertDetections": "Sve aktivnosti koje nisu alarmi biće uključene kao detekcije.",
+      "allNonAlertDetections": "Sve aktivnosti koje nisu upozorenja biće uključene kao detekcije.",
       "genaiImageSourceRecordingsRecordDisabled": "Izvor slike je podešen na „snimku“, ali je snimanje onemogućeno. Frigate će se vratiti na slike predpregleda.",
       "genaiImageSourceRecordingsRecordRuntimeDisabled": "Izvor slike je podešen na „snimku“, ali je snimanje trenutno isključeno za ovu kameru iako ga vaša konfiguracija omogućava. Frigate će se vratiti na slike predpregleda.",
-      "recordDisabled": "Snimanje je onemogućeno, stavke pregleda neće biti generisane.",
+      "recordDisabled": "Snimanje je onemogućeno, stavke za pregled neće biti generisane.",
       "recordRuntimeDisabled": "Snimanje je omogućeno u vašoj konfiguraciji, ali je trenutno isključeno za ovu kameru, tako da stavke pregleda neće biti generisane. Uključite ga ponovo iz prikaza uživo te kamere, ili proverite da li je aktivni profil onemogućava.",
       "detectDisabled": "Detekcija objekata je onemogućena. Stavke pregleda zahtevaju detektovane objekte kako bi se kategorizovali alarmi i detekcije.",
       "detectRuntimeDisabled": "Detekcija objekata je omogućena u vašoj konfiguraciji, ali je trenutno isključena za ovu kameru. Stavke pregleda zahtevaju detektovane objekte kako bi se kategorizovali alarmi i detekcije. Uključite je ponovo iz prikaza uživo te kamere, ili proverite da li je aktivni profil onemogućava."
@@ -293,7 +293,7 @@
   "review": {
     "imageSource": {
       "recordings": "Snimci",
-      "previews": "Predpregledi"
+      "previews": "Pregledi"
     },
     "frameMode": {
       "frames": "Kadrovi",
@@ -370,7 +370,7 @@
     "active_objects": "Aktivni objekti"
   },
   "profiles": {
-    "disabledDescription": "Profili vam omogućavaju da definišete imenovane skupove nadjačavanja konfiguracije kamere (npr. aktiviran alarm, odsutan, noć) koji se mogu aktivirati na zahtev.",
+    "disabledDescription": "Profili vam omogućavaju da definišete imenovane skupove izmena konfiguracije kamera (npr. aktivirano, odsutan, noć) koji se mogu aktivirati na zahtev.",
     "enabledDescription": "Profili su omogućeni. Kreirajte novi profil ispod, idite na sekciju za konfiguraciju kamere da biste uneli izmene, a zatim sačuvajte kako bi izmene stupile na snagu.",
     "error": {
       "mustBeAtLeastTwoCharacters": "Mora imati najmanje 2 karaktera",
@@ -447,20 +447,20 @@
     "noCamera": "Nema kamere"
   },
   "general": {
-    "title": "Podešavanja korisničkog interfejsa",
+    "title": "Podešavanja interfejsa",
     "liveDashboard": {
       "title": "Kontrolna tabla uživo",
       "automaticLiveView": {
         "label": "Automatski prikaz uživo",
-        "desc": "Automatski prebacite na prikaz uživo kamere kada se detektuje aktivnost. Onemogućavanje ove opcije uzrokuje da se statične slike kamera na kontrolnoj tabli uživo osvežavaju samo jednom u minuti."
+        "desc": "Automatski prebaci na prikaz kamere uživo kada se otkrije aktivnost. Onemogućavanjem ove opcije, statične slike kamera na kontrolnoj tabli uživo ažuriraće se samo jednom u minutu."
       },
       "playAlertVideos": {
         "label": "Pusti video zapise upozorenja",
-        "desc": "Podrazumevano, nedavni alarmi na kontrolnoj tabli uživo se reprodukuju kao mali video-snimci koji se ponavljaju. Onemogućite ovu opciju da biste prikazali samo statičnu sliku nedavnih alarma na ovom uređaju/veb-pregledaču."
+        "desc": "Podrazumevano se nedavna upozorenja na kontrolnoj tabli uživo reprodukuju kao mali video-zapisi u petlji. Onemogućite ovu opciju da biste prikazali samo statičnu sliku nedavnih upozorenja na ovom uređaju/pregledaču."
       },
       "displayCameraNames": {
         "label": "Uvek prikaži nazive kamera",
-        "desc": "Uvek prikažite nazive kamera u oznaci (čipu) na kontrolnoj tabli uživo sa više kamera."
+        "desc": "Uvek prikaži nazive kamera u oznaci (čipu) na kontrolnoj tabli za prikaz više kamera uživo."
       },
       "naturalAspectLayout": {
         "label": "Koristi izvorni odnos stranica",
@@ -468,19 +468,19 @@
         "descNote": "Uključivanje ili isključivanje ovog podešavanja obrisće sačuvani raspored za sve kontrolne table uživo grupa kamera. Biće potrebno ručno ponovno konfigurisanje."
       },
       "liveFallbackTimeout": {
-        "label": "Vremensko ograničenje za prelazak na rezervni plejer uživo",
+        "label": "Vreme čekanja za rezervni režim plejera uživo",
         "desc": "Kada strim visokog kvaliteta uživo sa kamere nije dostupan, pređite na režim niskog protoka podataka nakon ovoliko sekundi. Podrazumevano: 3."
       }
     },
     "storedLayouts": {
       "title": "Sačuvani rasporedi",
-      "desc": "Raspored kamera u grupi kamera se može menjati prevlačenjem ili promenom veličine prozora. Pozicije se čuvaju u lokalnom skladištu vašeg veb-pregledača.",
+      "desc": "Raspored kamera u grupi kamera može se prevlačiti i menjati mu se veličina. Pozicije se čuvaju u lokalnoj memoriji vašeg pregledača.",
       "clearAll": "Obriši sve rasporede",
       "clearConfirm": "Ovo će obrisati sačuvani raspored za svaku grupu kamera u ovom veb-pregledaču. Ova akcija se ne može poništiti."
     },
     "cameraGroupStreaming": {
       "title": "Podešavanja strimovanja grupa kamera",
-      "desc": "Podešavanja strimovanja za svaku grupu kamera se čuvaju u lokalnom skladištu vašeg veb-pregledaču.",
+      "desc": "Podešavanja strimovanja za svaku grupu kamera čuvaju se u lokalnoj memoriji vašeg pregledača.",
       "clearAll": "Obriši sva podešavanja strimovanja",
       "clearConfirm": "Ovo će obrisati podešavanja strimovanja za svaku grupu kamera u ovom veb-pregledaču. Ova akcija se ne može poništiti."
     },
@@ -511,7 +511,7 @@
         "unknownGroups_one": "Grupa kamera {{groups}} se ne nalazi na ovom serveru. Njena podešavanja će biti sačuvana, ali se neće koristiti.",
         "unknownGroups_few": "",
         "unknownGroups_other": "Grupe kamera {{groups}} se ne nalaze na ovom serveru. Njihova podešavanja će biti sačuvana, ali se neće koristiti.",
-        "confirm": "Importuj",
+        "confirm": "Uvezi",
         "unknownCameras_one": "Kamera {cameras} nije na ovom serveru. Njeno podešavanje strimovanja će biti ignorisano.",
         "unknownCameras_few": "Kamere {cameras} nisu na ovom serveru. Njihova podešavanja strimovanja će biti ignorisana.",
         "unknownCameras_other": "Kamere {cameras} nisu na ovom serveru. Njihova podešavanja strimovanja će biti ignorisana."
@@ -521,14 +521,14 @@
       "title": "Pregledač snimaka",
       "defaultPlaybackRate": {
         "label": "Podrazumevana brzina reprodukcije",
-        "desc": "Podrazumevana brzina reprodukcije za puštanje snimaka."
+        "desc": "Podrazumevana brzina za reprodukciju snimaka."
       }
     },
     "calendar": {
       "title": "Kalendar",
       "firstWeekday": {
         "label": "Prvi dan u nedelji",
-        "desc": "Dan od kojeg počinju sedmice u kalendaru pregleda.",
+        "desc": "Dan kojim počinju nedelje u kalendaru pregleda.",
         "sunday": "Nedelja",
         "monday": "Ponedeljak"
       }
@@ -538,7 +538,7 @@
         "clearStoredLayout": "Obrisan je sačuvan rasporeda za {cameraName}",
         "clearStreamingSettings": "Obrisana su podešavanja strimovanja za sve grupe kamera.",
         "exportUiSettings": "Izvežena podešavanja",
-        "importUiSettings": "Uveyena podešavanja"
+        "importUiSettings": "Uvežena podešavanja"
       },
       "error": {
         "clearStoredLayoutFailed": "Neuspešno brisanje sačuvanog rasporeda: {errorMessage}",
@@ -557,7 +557,7 @@
     "title": "Održavanje",
     "sync": {
       "title": "Sinhronizacija medija",
-      "desc": "Frigate će povremeno čistiti medije po redovnom rasporedu u skladu sa vašom konfiguracijom zadržavanja podataka. Normalno je da se tokom rada Frigate-a pojavi nekoliko nepovezanih datoteka. Koristite ovu funkciju za uklanjanje nepovezanih medijskih datoteka sa diska koje više nisu referencirane u bazi podataka.",
+      "desc": "Frigate će periodično brisati medije po redovnom rasporedu u skladu sa vašim podešavanjima čuvanja podataka. Normalno je da se tokom rada programa pojave pojedinačne zaostale datoteke. Koristite ovu funkciju da sa diska uklonite zaostale medijske datoteke na koje baza podataka više ne upućuje.",
       "started": "Sinhronizacija medija je pokrenuta.",
       "alreadyRunning": "Zadatak sinhronizacije je već pokrenut",
       "error": "Pokretanje sinhronizacije nije uspelo",
@@ -570,13 +570,13 @@
       "errorLabel": "Greška",
       "mediaTypes": "Tipovi medija",
       "allMedia": "Svi mediji",
-      "dryRun": "Probno pokretanje",
+      "dryRun": "Probni rad",
       "dryRunEnabled": "Nijedna datoteka neće biti obrisana",
       "dryRunDisabled": "Datoteke će biti obrisane",
       "force": "Prinudno",
       "forceDesc": "Zaobiđi bezbednosni prag i dovrši sinhronizaciju čak i ako bi više od 50% datoteka bilo obrisano.",
       "verbose": "Detaljno",
-      "verboseDesc": "Zapiši kompletnu listu nepovezanih datoteka na disk radi pregleda.",
+      "verboseDesc": "Upisuje kompletnu listu zaostalih datoteka na disk radi pregleda.",
       "running": "Sinhronizacija je u toku...",
       "start": "Pokreni sinhronizaciju",
       "inProgress": "Sinhronizacija je u toku. Ova stranica je onemogućena.",
@@ -599,7 +599,7 @@
       },
       "event_snapshots": "Snimci kadra praćenih objekata",
       "event_thumbnails": "Sličice praćenih objekata",
-      "review_thumbnails": "Pregled sličica",
+      "review_thumbnails": "Sličice za pregled",
       "previews": "Pretpregledi",
       "exports": "Izvozi",
       "recordings": "Snimci"
@@ -617,7 +617,7 @@
   },
   "cameraManagement": {
     "title": "Upravljanje kamerama",
-    "description": "Dodajte, izmenite i obrišite kamere, upravljajte stanjem svake kamere i podesite izmene po profilu i tipu kamere. Da biste podesili strimove, detekciju, kretanje i druga podešavanja specifična za kameru, izaberite odgovarajući odeljak u okviru Podešavanja kamere.",
+    "description": "Dodajte, izmenite i obrišite kamere, kontrolišite stanje svake kamere i podesite izmene po profilu i tipu kamere. Da biste podesili strimove, detekciju, pokret i druga podešavanja specifična za kameru, izaberite odgovarajući odeljak u okviru stavke Konfiguracija kamera.",
     "streams": {
       "description": "Podesite radno stanje za svaku kameru.<br /><br /><strong>Uključeno</strong>: strimovi se obrađuju normalno.<br /><strong>Isključeno</strong>: privremeno pauzira obradu. Ne zadržava se nakon ponovnog pokretanja Frigate-a.<br /><strong>Onemogućeno</strong>: zaustavlja obradu i čuva izmenu u vašoj konfiguraciji. Potrebno je ponovno pokretanje da bi se onemogućena kamera ponovo aktivirala.<br /><br /><em>Napomena: Onemogućavanje ne utiče na go2rtc ponovno strimovanje.</em><br /><br />Prevucite ručicu da biste promenili redosled aktivnih kamera onako kako se pojavljuju u korisničkom interfejsu, uključujući kontrolnu tablu uživo i padajuće menije za izbor kamera.",
       "title": "Stanje i detalji kamere",
@@ -828,7 +828,7 @@
     },
     "defaultRole": {
       "admin": "Administrator",
-      "none": "Ništa",
+      "none": "Ništa (zabrani pristup)",
       "viewer": "Posmatrač"
     },
     "genaiRoles": {
@@ -1081,8 +1081,8 @@
     }
   },
   "enrichments": {
-    "title": "Podešavanja obogaćivanja podataka",
-    "unsavedChanges": "Nesačuvane izmene podešavanja obogaćivanja podataka",
+    "title": "Podešavanja naprednih funkcija",
+    "unsavedChanges": "Nesačuvane promene podešavanja naprednih funkcija",
     "birdClassification": {
       "title": "Klasifikacija ptica",
       "desc": "Klasifikacija ptica identifikuje poznate ptice koristeći kvantizovani Tensorflow model. Kada se prepozna poznata ptica, njen uobičajeni naziv će biti dodat kao podoznaka (sub_label). Ove informacije su uključene u korisnički interfejs, filtere, kao i u obaveštenja."
@@ -1640,11 +1640,11 @@
     }
   },
   "motionDetectionTuner": {
-    "title": "Podešavanje detekcije pokreta",
-    "unsavedChanges": "Nesačuvane izmene podešavanja detekcije pokreta ({{camera}})",
+    "title": "Podešavanje detekcije kretanja",
+    "unsavedChanges": "Nesačuvane izmene podešavanja detekcije kretanja ({{camera}})",
     "desc": {
-      "title": "Frigate koristi detekciju pokreta kao prvu liniju provere kako bi utvrdio da li se u kadru dešava nešto što vredi proveriti detekcijom objekata.",
-      "documentation": "Pročitajte vodič za podešavanje detekcije pokreta"
+      "title": "Frigate koristi detekciju kretanja kao prvu liniju provere kako bi utvrdio da li se u kadru dešava nešto što vredi proveriti detekcijom objekata.",
+      "documentation": "Pročitajte vodič za podešavanje detekcije kretanja"
     },
     "Threshold": {
       "title": "Prag",
@@ -1838,7 +1838,7 @@
   "roles": {
     "management": {
       "title": "Upravljanje ulogama posmatrača",
-      "desc": "Upravljajte prilagođenim ulogama posmatrača i njihovim dozvolama pristupa kamerama za ovu Frigate instancu."
+      "desc": "Upravljajte prilagođenim ulogama posmatrača i njihovim dozvolama za pristup kamerama za ovu Frigate instancu."
     },
     "addRole": "Dodaj ulogu",
     "table": {
@@ -1907,7 +1907,7 @@
       "desc": "Frigate može izvorno da šalje push obaveštenja na vaš uređaj kada radi u pregledaču ili je instaliran kao PWA."
     },
     "notificationUnavailable": {
-      "desc": "Veb push obaveštenja zahtevaju bezbedan kontekst (https://...). Ovo je ograničenje pregledača. Pristupite Frigate-u na bezbedan način da biste koristili obaveštenja.",
+      "desc": "Web push obaveštenja zahtevaju bezbedan kontekst (https://…). Ovo je ograničenje pregledača. Pristupite Frigate-u na bezbedan način da biste koristili obaveštenja.",
       "descPwa": "Na iOS-u su veb push obaveštenja dostupna samo kada je Frigate instaliran na vaš početni ekran. Otvorite meni za deljenje, izaberite Dodaj na početni ekran, a zatim otvorite Frigate sa nove ikonice da biste registrovali ovaj uređaj za obaveštenja."
     },
     "globalSettings": {
@@ -1962,7 +1962,7 @@
   },
   "frigatePlus": {
     "title": "Frigate+ podešavanja",
-    "description": "Frigate+ je usluga zasnovana na pretplati koja pruža pristup dodatnim funkcijama i mogućnostima za vašu Frigate instancu, uključujući mogućnost korišćenja prilagođenih modela za detekciju objekata obučenih na vašim sopstvenim podacima. Ovde možete upravljati podešavanjima vaših Frigate+ modela.",
+    "description": "Frigate+ je pretplatnički servis koji pruža pristup dodatnim funkcijama i mogućnostima za vašu Frigate instancu, uključujući mogućnost korišćenja prilagođenih modela za detekciju objekata obučenih na vašim sopstvenim podacima. Ovde možete upravljati podešavanjima vašeg Frigate+ modela.",
     "cardTitles": {
       "api": "API",
       "currentModel": "Trenutni model",
@@ -1978,12 +1978,12 @@
       "serverValid": "Frigate+ je prihvatio ovaj API ključ",
       "serverInvalid": "Frigate+ je odbio ovaj API ključ",
       "serverUnreachable": "Nije moguće povezati se sa Frigate+ radi provere ovog API ključa",
-      "desc": "Frigate+ API ključ omogućava integraciju sa uslugom Frigate+.",
+      "desc": "Frigate+ API ključ omogućava integraciju sa Frigate+ servisom.",
       "plusLink": "Pročitajte više o Frigate+"
     },
     "snapshotConfig": {
       "title": "Konfiguracija snimaka kadra",
-      "desc": "Slanje u Frigate+ zahteva da snimci kadra budu omogućeni u vašoj konfiguraciji.",
+      "desc": "Slanje podataka na Frigate+ zahteva da snimci kadra budu omogućeni u vašoj konfiguraciji.",
       "cleanCopyWarning": "Neke kamere imaju onemogućene snimke kadra",
       "table": {
         "camera": "Kamera",

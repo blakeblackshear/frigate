@@ -62,11 +62,13 @@
   },
   "imageEntry": {
     "validation": {
-      "selectImage": "Izaberite datoteku slike."
+      "selectImage": "Izaberite datoteku slike.",
+      "heicConversionFailed": "Nije moguće konvertovati ovu HEIC sliku. Pokušajte umesto toga da je izvezete kao JPEG."
     },
     "dropActive": "Prevucite sliku ovde…",
     "dropInstructions": "Prevucite i otpustite ili nalepite sliku ovde, ili kliknite za izbor",
-    "maxSize": "Maksimalna veličina: {{size}} MB"
+    "maxSize": "Maksimalna veličina: {{size}} MB",
+    "converting": "Konvertovanje slike…"
   },
   "nofaces": "Nema dostupnih lica",
   "trainFaceAs": "Obuči lice kao:",

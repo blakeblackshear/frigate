@@ -57,7 +57,7 @@
     },
     "record": {
         "global": {
-            "retention": "Globalno čuvanje",
+            "retention": "Globalno čuvanje podataka",
             "events": "Globalni događaji"
         },
         "cameras": {

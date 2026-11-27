@@ -130,11 +130,11 @@
     }
   },
   "label": {
-    "back": "Idi nazad",
+    "back": "Povratak",
     "hide": "Sakrij {{item}}",
     "show": "Prikaži {{item}}",
     "ID": "ID",
-    "none": "Ništa",
+    "none": "Nijedno",
     "all": "Sve",
     "other": "Ostalo"
   },
@@ -256,7 +256,8 @@
       "ur": "Urdu (اردو)",
       "withSystem": {
         "label": "Koristi sistemska podešavanja za jezik"
-      }
+      },
+      "srLatn": "Srpski (Latinica)"
     },
     "appearance": "Izgled",
     "darkMode": {
@@ -360,9 +361,13 @@
     "copyFailed": "Neuspešno kopiranje detalja u privremenu memoriju"
   },
   "selectItem": "Izaberi {{item}}",
-  "readTheDocumentation": "Pročitaj dokumentaciju",
+  "readTheDocumentation": "Pročitajte dokumentaciju",
   "information": {
     "pixels": "{{area}} px"
   },
-  "no_items": "Nema elemenata"
+  "no_items": "Nema elemenata",
+  "plusRateLimited": {
+    "retryIn": "Frigate+ ograničava broj zahteva. Pokušajte ponovo za {{duration}}.",
+    "retryLater": "Frigate+ ograničava broj zahteva. Pokušajte ponovo kasnije."
+  }
 }
