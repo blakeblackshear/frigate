@@ -34,7 +34,7 @@ import {
 } from "../ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { FaCompress, FaExpand } from "react-icons/fa";
-import { TbCameraDown } from "react-icons/tb";
+import { TbCameraDown, TbView360 } from "react-icons/tb";
 import { useTranslation } from "react-i18next";
 
 type VideoControls = {
@@ -43,6 +43,7 @@ type VideoControls = {
   playbackRate?: boolean;
   plusUpload?: boolean;
   snapshot?: boolean;
+  dewarp?: boolean;
   fullscreen?: boolean;
 };
 
@@ -52,6 +53,7 @@ const CONTROLS_DEFAULT: VideoControls = {
   playbackRate: true,
   plusUpload: false,
   snapshot: false,
+  dewarp: false,
   fullscreen: false,
 };
 const PLAYBACK_RATE_DEFAULT = [0.5, 1, 2, 4, 8, 16];
@@ -79,6 +81,8 @@ type VideoControlsProps = {
   onSnapshot?: () => void;
   snapshotLoading?: boolean;
   toggleFullscreen?: () => void;
+  dewarp?: boolean;
+  toggleDewarp?: () => void;
   containerRef?: React.MutableRefObject<HTMLDivElement | null>;
 };
 export default function VideoControls({
@@ -103,8 +107,12 @@ export default function VideoControls({
   onSnapshot,
   snapshotLoading = false,
   toggleFullscreen,
+  dewarp,
+  toggleDewarp,
   containerRef,
 }: VideoControlsProps) {
+  const { t } = useTranslation(["components/player"]);
+
   // layout
 
   const controlsContainerRef = useRef<HTMLDivElement | null>(null);
@@ -316,6 +324,16 @@ export default function VideoControls({
             }
 
             onSnapshot();
+          }}
+        />
+      )}
+      {features.dewarp && toggleDewarp && (
+        <TbView360
+          className={cn("size-5 cursor-pointer", dewarp && "text-selected")}
+          aria-label={dewarp ? t("dewarp.disable") : t("dewarp.enable")}
+          onClick={(e: React.MouseEvent<SVGElement>) => {
+            e.stopPropagation();
+            toggleDewarp();
           }}
         />
       )}

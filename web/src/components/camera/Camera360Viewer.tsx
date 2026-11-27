@@ -32,7 +32,6 @@ const DEFAULT_FOV = 75;
 const MIN_FOV = 30;
 const MAX_FOV = 100;
 const MAX_LAT = 85;
-const DRAG_SENSITIVITY = 0.15;
 const EDGE_COLOR = 0xff3333;
 const EDGE_WIDTH_PX = 3;
 
@@ -116,8 +115,6 @@ const fragmentShader = /* glsl */ `
 
     // image coordinates start at the top left, texture uvs at the bottom left
     gl_FragColor = texture2D(map, vec2(imageCoord.x, 1.0 - imageCoord.y));
-
-    #include <colorspace_fragment>
   }
 `;
 
@@ -199,7 +196,12 @@ export default function Camera360Viewer({
         lensRotation: { value: new THREE.Matrix3() },
         halfLensFov: { value: Math.PI / 2 },
         showEdge: { value: false },
-        edgeColor: { value: new THREE.Color(EDGE_COLOR) },
+        edgeColor: {
+          value: new THREE.Color().setHex(
+            EDGE_COLOR,
+            THREE.LinearSRGBColorSpace,
+          ),
+        },
         edgeWidth: { value: EDGE_WIDTH_PX * window.devicePixelRatio },
       },
     });
@@ -282,8 +284,16 @@ export default function Camera360Viewer({
       }
 
       if (!texture) {
-        texture = new THREE.Texture(source);
-        texture.colorSpace = THREE.SRGBColorSpace;
+        // three.js sizes a plain texture from the element's width and height
+        // attributes, which are 0 for a video, so video needs VideoTexture
+        texture =
+          source instanceof HTMLVideoElement
+            ? new THREE.VideoTexture(source)
+            : new THREE.Texture(source);
+        // The shader writes the source pixels straight to the screen, so
+        // the texture is left without a color space. three.js stores images
+        // and video differently when one is set (it leaves video undecoded),
+        // which made video look washed out after being encoded a second time.
         texture.minFilter = THREE.LinearFilter;
         texture.generateMipmaps = false;
         textureWidth = width;
@@ -374,8 +384,14 @@ export default function Camera360Viewer({
       if (!dragStart) {
         return;
       }
-      // scale drag speed with zoom so panning feels consistent
-      const speed = DRAG_SENSITIVITY * (camera.fov / DEFAULT_FOV);
+      // the vertical field of view spans the height of the canvas on screen,
+      // so this many degrees per pixel keeps the picture under the cursor
+      // at any player size and zoom
+      const screenHeight = renderer.domElement.getBoundingClientRect().height;
+      if (screenHeight === 0) {
+        return;
+      }
+      const speed = camera.fov / screenHeight;
       lon = dragStart.lon - (e.clientX - dragStart.x) * speed;
       lat = THREE.MathUtils.clamp(
         dragStart.lat + (e.clientY - dragStart.y) * speed,
