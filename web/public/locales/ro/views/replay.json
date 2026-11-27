@@ -24,6 +24,11 @@
             "stopError": "Oprirea reluării de depanare a eșuat: {{error}}",
             "goToReplay": "Mergi la reluare",
             "noRecordings": "Nu s-au găsit înregistrări în intervalul de timp selectat"
+        },
+        "activeSession": {
+            "description": "O sesiune de reluare pentru depanare rulează deja pentru {{camera}}. Oprește-o pentru a porni una nouă.",
+            "stop": "Oprește reluarea",
+            "stopping": "Se oprește..."
         }
     },
     "page": {
