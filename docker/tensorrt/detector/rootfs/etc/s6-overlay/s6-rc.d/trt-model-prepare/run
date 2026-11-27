@@ -13,6 +13,16 @@ TRT_VER=${TRT_VER:-$(cat /etc/TENSORRT_VER)}
 OUTPUT_FOLDER="${MODEL_CACHE_DIR}/${TRT_VER}"
 YOLO_MODELS=${YOLO_MODELS:-""}
 
+# This runs as root after prepare's sentinel-guarded sweep, so the dirs and
+# engines it creates below are the runtime user's to fix up, on every exit path
+function hand_off_ownership() {
+    if [[ "$(id -u)" -eq 0 && "${FRIGATE_RUN_AS_ROOT:-false}" != "true" ]]; then
+        /usr/local/bin/fix-ownership "${PUID:-1000}" "${PGID:-1000}" \
+            /config/model_cache "${MODEL_CACHE_DIR}"
+    fi
+}
+trap hand_off_ownership EXIT
+
 # Create output folder
 mkdir -p ${OUTPUT_FOLDER}
 

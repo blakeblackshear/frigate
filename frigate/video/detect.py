@@ -2,8 +2,9 @@
 
 import logging
 import queue
+import random
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from multiprocessing import Queue
 from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
@@ -85,6 +86,11 @@ class CameraTracker(FrigateProcess):
 
     def run(self) -> None:
         self.pre_run_setup(self.log_config)
+
+        # OpenCV only sees small images here, and its default per-core thread
+        # pool burns ~5x the CPU of running them inline
+        cv2.setNumThreads(1)
+
         frame_queue = self.camera_metrics.frame_queue
         frame_shape = self.config.frame_shape
 
@@ -94,6 +100,7 @@ class CameraTracker(FrigateProcess):
             self.config.detect.fps,
             name=self.config.name,
             ptz_metrics=self.ptz_metrics,
+            autotracking_enabled=self.config.onvif.autotracking.enabled,
         )
         object_detector = RemoteObjectDetector(
             self.config.name,
@@ -190,20 +197,27 @@ def process_frames(
     region_grid: list[list[dict[str, Any]]],
     exit_on_empty: bool = False,
 ):
-    next_region_update = get_tomorrow_at_time(2)
+    # cameras share one dispatcher, so stagger the daily grid rebuilds
+    region_update_offset = timedelta(seconds=random.randrange(3600))
+    next_region_update = get_tomorrow_at_time(2) + region_update_offset
     config_subscriber = CameraConfigUpdateSubscriber(
         None,
         {camera_config.name: camera_config},
         [
+            CameraConfigUpdateEnum.autotracking,
             CameraConfigUpdateEnum.detect,
             CameraConfigUpdateEnum.enabled,
             CameraConfigUpdateEnum.motion,
             CameraConfigUpdateEnum.objects,
+            CameraConfigUpdateEnum.onvif,
         ],
     )
 
     fps_tracker = EventsPerSecond()
     fps_tracker.start()
+    dropped_eps = EventsPerSecond()
+    dropped_eps.start()
+    dropped_fps = 0.0
 
     startup_scan = True
     stationary_frame_counter = 0
@@ -227,6 +241,13 @@ def process_frames(
     while not stop_event.is_set():
         updated_configs = config_subscriber.check_for_updates()
 
+        # each write is a round trip to the metrics manager, so skip unchanged rates
+        current_dropped_fps = dropped_eps.eps()
+
+        if current_dropped_fps != dropped_fps:
+            dropped_fps = current_dropped_fps
+            camera_metrics.dropped_fps.value = dropped_fps
+
         if "enabled" in updated_configs:
             prev_enabled = camera_enabled
             camera_enabled = camera_config.enabled
@@ -234,6 +255,12 @@ def process_frames(
         if "motion" in updated_configs:
             motion_detector.config = camera_config.motion
             motion_detector.update_mask()
+
+        if "autotracking" in updated_configs or "onvif" in updated_configs:
+            motion_detector.autotracking_enabled = (
+                camera_config.onvif.autotracking.enabled
+            )
+            object_tracker.sync_trackers()
 
         if (
             not camera_enabled
@@ -264,8 +291,13 @@ def process_frames(
             continue
 
         if datetime.now().astimezone(UTC) > next_region_update:
-            region_grid = requestor.send_data(REQUEST_REGION_GRID, camera_config.name)
-            next_region_update = get_tomorrow_at_time(2)
+            updated_grid = requestor.send_data(REQUEST_REGION_GRID, camera_config.name)
+
+            # A failed request replies empty, so keep the current grid
+            if updated_grid:
+                region_grid = updated_grid
+
+            next_region_update = get_tomorrow_at_time(2) + region_update_offset
 
         try:
             if exit_on_empty:
@@ -349,8 +381,8 @@ def process_frames(
 
             # only add in the motion boxes when not calibrating and a ptz is not moving via autotracking
             # the ptz timestamps are only maintained while autotracking is on, so gate
-            # on the metric rather than trusting them to be reset otherwise
-            ptz_moving = ptz_metrics.autotracker_enabled.value and (
+            # on the config rather than trusting them to be reset otherwise
+            ptz_moving = camera_config.onvif.autotracking.enabled and (
                 ptz_moving_at_frame_time(
                     frame_time,
                     ptz_metrics.start_time.value,
@@ -531,14 +563,9 @@ def process_frames(
                 f"debug/frames/{camera_config.name}-{'{:.6f}'.format(frame_time)}.jpg",
                 bgr_frame,
             )
-        # add to the queue if not full
-        if detected_objects_queue.full():
-            frame_manager.close(frame_name)
-            continue
-        else:
-            fps_tracker.update()
-            camera_metrics.process_fps.value = fps_tracker.eps()
-            detected_objects_queue.put(
+        # a full queue means the tracked object processor is behind
+        try:
+            detected_objects_queue.put_nowait(
                 (
                     camera_config.name,
                     frame_name,
@@ -548,8 +575,13 @@ def process_frames(
                     regions,
                 )
             )
-            camera_metrics.detection_fps.value = object_detector.fps.eps()
-            frame_manager.close(frame_name)
+        except queue.Full:
+            dropped_eps.update()
+            continue
+
+        fps_tracker.update()
+        camera_metrics.process_fps.value = fps_tracker.eps()
+        camera_metrics.detection_fps.value = object_detector.fps.eps()
 
     motion_detector.stop()
     requestor.stop()

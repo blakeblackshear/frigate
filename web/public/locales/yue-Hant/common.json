@@ -146,7 +146,11 @@
     "saveAll": "全部儲存",
     "savingAll": "正在儲存全部…",
     "undoAll": "全部復原",
-    "applying": "套用中…"
+    "applying": "套用中…",
+    "expand": "展開",
+    "collapse": "收起",
+    "retry": "重試",
+    "reload": "重新載入"
   },
   "menu": {
     "system": "系統",
@@ -199,7 +203,8 @@
       "gl": "Galego (加利西亞文)",
       "id": "Bahasa Indonesia (印尼文)",
       "ur": "اردو (烏爾都文)",
-      "hr": "Hrvatski (克羅地亞語)"
+      "hr": "Hrvatski (克羅地亞語)",
+      "zhHant": "繁體中文"
     },
     "appearance": "外觀",
     "darkMode": {
@@ -218,7 +223,6 @@
       "nord": "北歐風",
       "red": "紅色",
       "default": "預設",
-      "contrast": "高對比",
       "highcontrast": "高對比度"
     },
     "documentation": {
@@ -250,7 +254,9 @@
     "help": "幫助",
     "classification": "分類",
     "actions": "行動",
-    "chat": "聊天"
+    "chat": "聊天",
+    "profiles": "設定檔",
+    "features": "功能"
   },
   "role": {
     "admin": "管理員",
@@ -282,7 +288,8 @@
         "noMessage": "儲存設定變更失敗",
         "title": "儲存設定變更失敗：{{errorMessage}}"
       },
-      "title": "儲存"
+      "title": "儲存",
+      "success": "設定變更儲存成功。"
     },
     "copyUrlToClipboard": "已複製 URL 到剪貼簿。"
   },
@@ -303,5 +310,14 @@
   "field": {
     "optional": "選填",
     "internalID": "Frigate 在設定及資料庫中使用的內部編號"
-  }
+  },
+  "error": {
+    "title": "頁面停止運作",
+    "staleTitle": "需要重新載入",
+    "partial": "部分介面停止運作。",
+    "copyDetails": "複製詳細資訊",
+    "copyFailed": "無法將詳細資訊複製到剪貼簿"
+  },
+  "no_items": "沒有項目",
+  "validation_errors": "驗證錯誤"
 }

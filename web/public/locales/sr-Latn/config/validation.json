@@ -1,0 +1,40 @@
+{
+    "minimum": "Mora biti najmanje {{limit}}",
+    "maximum": "Mora biti najviše {{limit}}",
+    "exclusiveMinimum": "Mora biti veće od {{limit}}",
+    "exclusiveMaximum": "Mora biti manje od {{limit}}",
+    "minLength": "Mora imati najmanje {{limit}} karakter(a)",
+    "maxLength": "Mora imati najviše {{limit}} karakter(a)",
+    "minItems": "Mora imati najmanje {{limit}} stavki",
+    "maxItems": "Mora imati najviše {{limit}} stavki",
+    "pattern": "Nevažeći format",
+    "required": "Ovo polje je obavezno",
+    "type": "Nevažeći tip vrednosti",
+    "enum": "Mora biti jedna od dozvoljenih vrednosti",
+    "const": "Vrednost se ne poklapa sa očekivanom konstantom",
+    "uniqueItems": "Sve stavke moraju biti jedinstvene",
+    "format": "Nevažeći format",
+    "additionalProperties": "Nepoznato svojstvo nije dozvoljeno",
+    "oneOf": "Mora se podudarati sa tačno jednom od dozvoljenih šema",
+    "anyOf": "Mora se podudarati sa najmanje jednom od dozvoljenih šema",
+    "proxy": {
+        "header_map": {
+            "roleHeaderRequired": "Zaglavlje uloge je obavezno kada su konfigurisana mapiranja uloga."
+        }
+    },
+    "ffmpeg": {
+        "inputs": {
+            "rolesUnique": "Svaka uloga može biti dodeljena samo jednom ulaznom strimu.",
+            "detectRequired": "Najmanje jednom ulaznom strimu mora biti dodeljena uloga „detect“.",
+            "hwaccelDetectOnly": "Samo ulazni strim sa ulogom „detect“ može definisati argumente za hardversko ubrzanje."
+        }
+    },
+    "detect": {
+        "dimensionMustBeEven": "Mora biti paran broj."
+    },
+    "models": {
+        "defaultRequired": "Jedan model mora koristiti podrazumevanu scenu. Bez nje, svaka kamera koja ne izabere scenu neće imati rezervni model na koji može da se osloni.",
+        "sceneDuplicate": "Svaki model mora koristiti različitu scenu.",
+        "sameModel": "Modeli za scenu {{scene}} i scenu {{other}} koriste istu datoteku modela. Pokretanje jednog modela pod više različitih scena samo deli posao detekcije na zasebne detektore, što je sporije nego pokretanje jednog modela sa svim hardverskim resursima navedenim pod njim."
+    }
+}

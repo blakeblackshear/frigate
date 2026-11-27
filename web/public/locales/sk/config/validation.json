@@ -1,1 +1,10 @@
-{}
+{
+    "minimum": "Musí byť minimálne {{limit}}",
+    "maximum": "Musí byť menšia alebo rovnaká ako {{limit}}",
+    "exclusiveMinimum": "Musí byť väčší ako {{limit}}",
+    "exclusiveMaximum": "Musí byť menšia ako {{limit}}",
+    "minLength": "Musí mať minimálne {{limit}} znakov",
+    "maxLength": "Musí mať najviac {{limit}} znakov",
+    "minItems": "Musí mať minimálne {{limit}} položiek",
+    "maxItems": "Musí mať najviac {{limit}} položiek"
+}

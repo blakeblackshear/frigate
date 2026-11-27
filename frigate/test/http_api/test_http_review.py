@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
 
 from fastapi import Request
 from peewee import DoesNotExist
@@ -7,6 +8,11 @@ from frigate.api.auth import get_allowed_cameras_for_filter, get_current_user
 from frigate.models import Event, Recordings, ReviewSegment, UserReviewStatus
 from frigate.review.types import SeverityEnum
 from frigate.test.http_api.base_http_test import AuthTestClient, BaseTestHttp
+
+
+def utc_day(dt: datetime) -> str:
+    """Return the UTC calendar day the summary endpoint buckets dt into."""
+    return dt.astimezone(UTC).strftime("%Y-%m-%d")
 
 
 class TestHttpReview(BaseTestHttp):
@@ -88,6 +94,37 @@ class TestHttpReview(BaseTestHttp):
             assert len(response_json) == 1
             assert response_json[0]["id"] == id
             assert response_json[0]["has_been_reviewed"] == False
+
+    def test_get_review_before_only_has_no_lower_bound(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 72 * 3600, now - 71 * 3600)
+            response = client.get("/review", params={"before": now - 48 * 3600})
+            assert response.status_code == 200
+            assert [r["id"] for r in response.json()] == [id]
+
+    def test_get_review_after_zero_is_not_defaulted(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            id = "123456.random"
+            super().insert_mock_review_segment(id, now - 72 * 3600, now - 71 * 3600)
+            response = client.get("/review", params={"after": 0})
+            assert response.status_code == 200
+            assert [r["id"] for r in response.json()] == [id]
+
+    def test_get_review_no_bounds_defaults_to_last_24_hours(self):
+        now = datetime.now().timestamp()
+
+        with AuthTestClient(self.app) as client:
+            super().insert_mock_review_segment(
+                "123456.random", now - 72 * 3600, now - 71 * 3600
+            )
+            response = client.get("/review", params={"limit": 10})
+            assert response.status_code == 200
+            assert response.json() == []
 
     def test_get_review_with_time_filter_no_matches(self):
         """Test that review items outside the range are not returned."""
@@ -331,7 +368,7 @@ class TestHttpReview(BaseTestHttp):
             assert response_json["last24Hours"]["total_alert"] == 1
             assert response_json["last24Hours"]["total_detection"] == 0
 
-            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            today_formatted = utc_day(datetime.now())
             assert response_json[today_formatted]["total_alert"] == 1
             assert response_json[today_formatted]["total_detection"] == 0
 
@@ -342,13 +379,13 @@ class TestHttpReview(BaseTestHttp):
                 "cameras": "front_door",
                 "labels": "all",
                 "zones": "all",
-                "timezone": "utc",
+                "timezone": "UTC",
             }
             response = client.get("/review/summary", params=params)
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            today_formatted = utc_day(datetime.now())
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -373,7 +410,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = datetime.today().strftime("%Y-%m-%d")
+            today_formatted = utc_day(datetime.now())
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -408,9 +445,9 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = now.strftime("%Y-%m-%d")
+            today_formatted = utc_day(now)
             # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            five_days_ago_formatted = utc_day(five_days_ago)
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -460,9 +497,9 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-24'
-            today_formatted = now.strftime("%Y-%m-%d")
+            today_formatted = utc_day(now)
             # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            five_days_ago_formatted = utc_day(five_days_ago)
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": 0,
@@ -518,7 +555,7 @@ class TestHttpReview(BaseTestHttp):
             assert response.status_code == 200
             response_json = response.json()
             # e.g. '2024-11-19'
-            five_days_ago_formatted = five_days_ago.strftime("%Y-%m-%d")
+            five_days_ago_formatted = utc_day(five_days_ago)
             expected_response = {
                 "last24Hours": {
                     "reviewed_alert": None,
@@ -588,6 +625,43 @@ class TestHttpReview(BaseTestHttp):
                 UserReviewStatus.review_segment == id,
             )
             assert user_review.has_been_reviewed == True
+
+    def test_reviews_concurrent_insert_peewee_ignore(self):
+        """Validates that on_conflict_ignore() silently skips a duplicate insert
+
+        Two requests can both SELECT and find no existing status, then both try
+        to INSERT, hitting the unique (user_id, review_segment) constraint.
+        on_conflict_ignore() must silently skip the duplicate instead of raising
+        an IntegrityError (which was previously caught with try/except).
+        """
+        id = "123456.random"
+        with AuthTestClient(self.app):
+            super().insert_mock_review_segment(id)
+
+            # Simulate the first request having already committed its insert.
+            self._insert_user_review_status(id, reviewed=True)
+
+            # Simulate the second concurrent request attempting the same insert.
+            UserReviewStatus.insert_many(
+                [
+                    {
+                        "user_id": self.user_id,
+                        "review_segment_id": id,
+                        "has_been_reviewed": True,
+                    }
+                ]
+            ).on_conflict_ignore().execute()
+
+            # Exactly one row should exist; no exception should have been raised.
+            count = (
+                UserReviewStatus.select()
+                .where(
+                    (UserReviewStatus.user_id == self.user_id)
+                    & (UserReviewStatus.review_segment == id)
+                )
+                .count()
+            )
+            assert count == 1
 
     ####################################################################################################################
     ###################################  POST reviews/delete Endpoint   ################################################
@@ -765,6 +839,42 @@ class TestHttpReview(BaseTestHttp):
                     "data": {"detections": {"event_id": event_id}},
                 },
                 response_json,
+            )
+
+    def test_review_event_wildcards_match_literally(self):
+        now = datetime.now().timestamp()
+        super().insert_mock_review_segment(
+            "123456.review.random",
+            now + 1,
+            now + 2,
+            data={"detections": ["1763812345.0-abc123"]},
+        )
+
+        with AuthTestClient(self.app) as client:
+            for pattern in ["1763812345*", "176381234?.0-abc123", "176381234[0-9]*"]:
+                response = client.get(f"/review/event/{quote(pattern, safe='')}")
+                assert response.status_code == 404
+
+            response = client.get("/review/event/1763812345.0-abc123")
+            assert response.status_code == 200
+
+    def test_review_event_on_forbidden_camera_is_not_found(self):
+        now = datetime.now().timestamp()
+        event_id = "1763812345.0-abc123"
+        super().insert_mock_review_segment(
+            "123456.review.random",
+            now + 1,
+            now + 2,
+            data={"detections": [event_id]},
+            camera="back_door",
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.get(f"/review/event/{event_id}")
+            assert response.status_code == 404
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response.json(),
             )
 
     ####################################################################################################################

@@ -22,14 +22,23 @@ export function SelectWidget(props: WidgetProps) {
     schema,
   } = props;
 
-  const { t } = useTranslation(["views/settings"]);
+  const { t, i18n } = useTranslation(["views/settings"]);
   const { enumOptions = [] } = options;
   const enumI18nPrefix = options["enumI18nPrefix"] as string | undefined;
+  const enumI18nOptional = options["enumI18nOptional"] === true;
   const fieldClassName = getSizedFieldClassName(options, "sm");
 
   const getLabel = (option: { value: unknown; label: string }) => {
     if (enumI18nPrefix) {
-      return t(`${enumI18nPrefix}.${option.value}`);
+      const key = `${enumI18nPrefix}.${option.value}`;
+
+      // user-defined values (such as model scenes) are shown as named rather
+      // than humanized by the missing key handler
+      if (enumI18nOptional && !i18n.exists(key, { ns: "views/settings" })) {
+        return String(option.value);
+      }
+
+      return t(key);
     }
     return option.label;
   };

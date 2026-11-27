@@ -54,6 +54,7 @@ import { useApiHost } from "@/api";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 import { VideoResolutionType } from "@/types/live";
 import { VodManifest } from "@/types/playback";
 
@@ -150,17 +151,18 @@ export function TrackingDetails({
 
   // Fetch the VOD manifest JSON to get the actual clipFrom after keyframe
   // snapping. The backend may snap clipFrom backwards to a keyframe, making
-  // the video start earlier than the requested time.
+  // the video start earlier than the requested time. Uses sourceOffsetRef so
+  // the manifest describes the same clip as videoSource.
   const vodManifestUrl = useMemo(() => {
     if (!event.camera) return null;
-    const startTime =
-      event.start_time + annotationOffset / 1000 - REVIEW_PADDING;
+    const sourceOffset = sourceOffsetRef.current;
+    const startTime = event.start_time + sourceOffset / 1000 - REVIEW_PADDING;
     const endTime =
       (event.end_time ?? Date.now() / 1000) +
-      annotationOffset / 1000 +
+      sourceOffset / 1000 +
       REVIEW_PADDING;
     return `vod/clip/${event.camera}/start/${startTime}/end/${endTime}`;
-  }, [event, annotationOffset]);
+  }, [event]);
 
   const { data: vodManifest } = useSWR<VodManifest>(vodManifestUrl, null, {
     revalidateOnFocus: false,
@@ -599,7 +601,6 @@ export function TrackingDetails({
       playlist,
       startPosition: 0,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [event]);
 
   // Determine camera aspect ratio category
@@ -934,6 +935,7 @@ function LifecycleIconRow({
   annotationOffset,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
+  const { getRateLimitMessage } = usePlusRateLimit();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [isOpen, setIsOpen] = useState(false);
   const [showAdvancedScores, setShowAdvancedScores] = useState(false);
@@ -1251,11 +1253,12 @@ function LifecycleIconRow({
                                 position: "top-center",
                               },
                             );
-                          } catch {
+                          } catch (error) {
                             toast.error(
-                              t("toast.error.submitFrigatePlusFailed", {
-                                ns: "components/player",
-                              }),
+                              getRateLimitMessage(error) ??
+                                t("toast.error.submitFrigatePlusFailed", {
+                                  ns: "components/player",
+                                }),
                               {
                                 position: "top-center",
                               },

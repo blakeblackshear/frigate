@@ -2,8 +2,9 @@ from enum import Enum
 
 from pydantic import Field, field_validator
 
+from frigate.util.env import EnvString
+
 from ..base import FrigateBaseModel
-from ..env import EnvString
 from .objects import DEFAULT_TRACKED_OBJECTS
 
 __all__ = ["OnvifConfig", "PtzAutotrackConfig", "ZoomingModeEnum"]

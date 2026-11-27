@@ -87,6 +87,7 @@ import TextEntryDialog from "@/components/overlay/dialog/TextEntryDialog";
 import AttributeSelectDialog from "@/components/overlay/dialog/AttributeSelectDialog";
 import { Trans, useTranslation } from "react-i18next";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 import { getTranslatedLabel } from "@/utils/i18n";
 import { CameraNameLabel } from "@/components/camera/FriendlyNameLabel";
 import { DialogPortal } from "@radix-ui/react-dialog";
@@ -699,6 +700,7 @@ function ObjectDetailsTab({
     "views/faceLibrary",
     "components/dialog",
   ]);
+  const { getRateLimitMessage } = usePlusRateLimit();
 
   const apiHost = useApiHost();
   const hasCustomClassificationModels = useMemo(
@@ -1286,7 +1288,7 @@ function ObjectDetailsTab({
             revalidate: false,
           },
         );
-      } catch {
+      } catch (error) {
         if (displayedIdRef.current === eventId) {
           setState("reviewing");
         }
@@ -1294,12 +1296,13 @@ function ObjectDetailsTab({
         // the toast is not object specific, so it is always shown to avoid
         // silently dropping a failed submission
         toast.error(
-          t("explore.plus.review.toast.error", { ns: "components/dialog" }),
+          getRateLimitMessage(error) ??
+            t("explore.plus.review.toast.error", { ns: "components/dialog" }),
           { position: "top-center" },
         );
       }
     },
-    [search, mutate, mapSearchResults, isEventsKey, t],
+    [search, mutate, mapSearchResults, isEventsKey, t, getRateLimitMessage],
   );
 
   const popoverContainerRef = useRef<HTMLDivElement | null>(null);

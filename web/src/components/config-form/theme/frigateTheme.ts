@@ -22,6 +22,7 @@ import { ObjectLabelSwitchesWidget } from "./widgets/ObjectLabelSwitchesWidget";
 import { AudioLabelSwitchesWidget } from "./widgets/AudioLabelSwitchesWidget";
 import { ReviewLabelSwitchesWidget } from "./widgets/ReviewLabelSwitchesWidget";
 import { ZoneSwitchesWidget } from "./widgets/ZoneSwitchesWidget";
+import { BirdseyeModesWidget } from "./widgets/BirdseyeModesWidget";
 import { ArrayAsTextWidget } from "./widgets/ArrayAsTextWidget";
 import { FfmpegArgsWidget } from "./widgets/FfmpegArgsWidget";
 import { GenAIModelWidget } from "./widgets/GenAIModelWidget";
@@ -32,6 +33,8 @@ import { CameraPathWidget } from "./widgets/CameraPathWidget";
 import { OptionalFieldWidget } from "./widgets/OptionalFieldWidget";
 import { SemanticSearchModelWidget } from "./widgets/SemanticSearchModelWidget";
 import { SemanticSearchModelSizeWidget } from "./widgets/SemanticSearchModelSizeWidget";
+import { AudioTranscriptionModelWidget } from "./widgets/AudioTranscriptionModelWidget";
+import { AudioTranscriptionModelSizeWidget } from "./widgets/AudioTranscriptionModelSizeWidget";
 import { OnvifProfileWidget } from "./widgets/OnvifProfileWidget";
 import { PTZPresetsWidget } from "./widgets/PTZPresetsWidget";
 import { DefaultRoleWidget } from "./widgets/DefaultRoleWidget";
@@ -48,12 +51,13 @@ import { MultiSchemaFieldTemplate } from "./templates/MultiSchemaFieldTemplate";
 import { WrapIfAdditionalTemplate } from "./templates/WrapIfAdditionalTemplate";
 
 import { LayoutGridField } from "./fields/LayoutGridField";
-import { DetectorHardwareField } from "./fields/DetectorHardwareField";
+import { ModelsField } from "./fields/ModelsField";
 import { ReplaceRulesField } from "./fields/ReplaceRulesField";
 import { CameraInputsField } from "./fields/CameraInputsField";
 import { DictAsYamlField } from "./fields/DictAsYamlField";
 import { KnownPlatesField } from "./fields/KnownPlatesField";
 import { LiveStreamsField } from "./fields/LiveStreamsField";
+import { LiveTranscodeField } from "./fields/LiveTranscodeField";
 
 export interface FrigateTheme {
   widgets: RegistryWidgetsType;
@@ -87,10 +91,13 @@ export const frigateTheme: FrigateTheme = {
     audioLabels: AudioLabelSwitchesWidget,
     reviewLabels: ReviewLabelSwitchesWidget,
     zoneNames: ZoneSwitchesWidget,
+    birdseyeModes: BirdseyeModesWidget,
     timezoneSelect: TimezoneSelectWidget,
     optionalField: OptionalFieldWidget,
     semanticSearchModel: SemanticSearchModelWidget,
     semanticSearchModelSize: SemanticSearchModelSizeWidget,
+    audioTranscriptionModel: AudioTranscriptionModelWidget,
+    audioTranscriptionModelSize: AudioTranscriptionModelSizeWidget,
     onvifProfile: OnvifProfileWidget,
     ptzPresets: PTZPresetsWidget,
     defaultRole: DefaultRoleWidget,
@@ -109,11 +116,12 @@ export const frigateTheme: FrigateTheme = {
   },
   fields: {
     LayoutGridField: LayoutGridField,
-    DetectorHardwareField: DetectorHardwareField,
+    ModelsField: ModelsField,
     ReplaceRulesField: ReplaceRulesField,
     CameraInputsField: CameraInputsField,
     DictAsYamlField: DictAsYamlField,
     KnownPlatesField: KnownPlatesField,
     LiveStreamsField: LiveStreamsField,
+    LiveTranscodeField: LiveTranscodeField,
   },
 };

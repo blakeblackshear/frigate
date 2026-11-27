@@ -22,7 +22,6 @@
         "textTokenizer": "Texttokeniserare"
       },
       "tips": {
-        "documentation": "Läs dokumentationen",
         "context": "Du kanske vill omindexera inbäddningarna av dina spårade objekt när modellerna har laddats ner."
       },
       "error": "Ett fel har inträffat. Kontrollera Frigate-loggarna.",
@@ -112,66 +111,20 @@
     "attributes": "Klassificeringsattribut",
     "title": {
       "label": "Titel"
-    }
+    },
+    "scoreInfo": "Poänginformation"
   },
   "exploreMore": "Utforska fler {{label}}-objekt",
   "type": {
     "details": "detaljer",
     "video": "video",
     "snapshot": "ögonblicksbild",
-    "object_lifecycle": "objektets livscykel",
     "thumbnail": "miniatyrbild",
     "tracking_details": "spårningsdetaljer"
   },
   "trackedObjectDetails": "Detaljer om spårade objekt",
   "objectLifecycle": {
-    "title": "Objektets livscykel",
-    "noImageFound": "Ingen bild hittades för denna tidsstämpel.",
-    "createObjectMask": "Skapa objektmask",
-    "adjustAnnotationSettings": "Justera annoteringsinställningar",
-    "scrollViewTips": "Scrolla för att se de viktiga ögonblicken i detta objekts livscykel.",
-    "autoTrackingTips": "Begränsningsrutornas positioner kommer att vara felaktiga för autospårningskameror.",
-    "count": "{{first}} av {{second}}",
-    "lifecycleItemDesc": {
-      "external": "{{label}} upptäckt",
-      "header": {
-        "zones": "Zoner",
-        "ratio": "Proportion",
-        "area": "Område"
-      },
-      "visible": "{{label}} upptäckt",
-      "entered_zone": "{{label}} gick in i {{zones}}",
-      "active": "{{label}} blev aktiv",
-      "stationary": "{{label}} blev stationär",
-      "attribute": {
-        "faceOrLicense_plate": "{{attribute}} upptäckt för {{label}}",
-        "other": "{{label}} igenkänd som {{attribute}}"
-      },
-      "gone": "{{label}} vänster",
-      "heard": "{{label}} hört"
-    },
-    "annotationSettings": {
-      "title": "Annoteringsinställningar",
-      "showAllZones": {
-        "title": "Visa alla zoner",
-        "desc": "Visa alltid zoner på ramar där objekt har kommit in i en zon."
-      },
-      "offset": {
-        "label": "Annoteringsförskjutning",
-        "desc": "Denna data kommer från din kameras detekteringsflöde men läggs ovanpå bilder från inspelningsflödet. Det är osannolikt att de två strömmarna är helt synkroniserade. Som ett resultat kommer avgränsningsramen och filmmaterialet inte att radas upp perfekt. Fältet <code>annotation_offset</code> kan dock användas för att justera detta.",
-        "documentation": "Läs dokumentationen ",
-        "millisecondsToOffset": "Millisekunder för att förskjuta detektera annoteringar med. <em>Standard: 0</em>",
-        "tips": "TIPS: Föreställ dig ett händelseklipp med en person som går från vänster till höger. Om tidslinjens avgränsningsram konsekvent är till vänster om personen bör värdet minskas. På samma sätt, om en person går från vänster till höger och avgränsningsramen konsekvent är framför personen bör värdet ökas.",
-        "toast": {
-          "success": "Annoterings förskjutningen för {{camera}} har sparats i konfigurationsfilen. Starta om Frigate för att tillämpa dina ändringar."
-        }
-      }
-    },
-    "trackedPoint": "Spårad punkt",
-    "carousel": {
-      "previous": "Föregående bild",
-      "next": "Nästa bild"
-    }
+    "noImageFound": "Ingen bild hittades för denna tidsstämpel."
   },
   "itemMenu": {
     "downloadVideo": {
@@ -181,10 +134,6 @@
     "downloadSnapshot": {
       "label": "Ladda ned ögonblicksbild",
       "aria": "Ladda ned ögonblicksbild"
-    },
-    "viewObjectLifecycle": {
-      "label": "Visa objektets livscykel",
-      "aria": "Visa objektets livscykel"
     },
     "findSimilar": {
       "label": "Hitta liknande",
@@ -222,12 +171,22 @@
     "downloadCleanSnapshot": {
       "label": "Ladda ned ren ögonblicksbild",
       "aria": "Ladda ned ren ögonblicksbild"
+    },
+    "debugReplay": {
+      "label": "Felsökningsuppspelning",
+      "aria": "Visa det här spårade objektet i vyn för felsökningsuppspelning"
+    },
+    "more": {
+      "aria": "Fler"
     }
   },
   "dialog": {
     "confirmDelete": {
       "title": "Bekräfta radering",
       "desc": "Om du tar bort det här spårade objektet tas ögonblicksbilden, alla sparade inbäddningar och alla tillhörande spårningsdetaljer bort. Inspelat material med det här spårade objektet i historikvyn tas <em>inte</em> bort.<br /><br />Är du säker på att du vill fortsätta?"
+    },
+    "toast": {
+      "error": "Fel vid borttagning av det här spårade objektet: {{errorMessage}}"
     }
   },
   "noTrackedObjects": "Inga spårade objekt hittades",
@@ -276,7 +235,10 @@
         "zones": "Zoner",
         "ratio": "Förhållande",
         "area": "Area",
-        "score": "Poäng"
+        "score": "Poäng",
+        "computedScore": "Beräknad poäng",
+        "topScore": "Högsta poäng",
+        "toggleAdvancedScores": "Visa eller dölj avancerade poäng"
       }
     },
     "annotationSettings": {

@@ -89,17 +89,29 @@ export default function KeyframeAnalysisSection({
       case "warning":
         summary = (
           <Row icon="warning">
-            {t("cameras.info.keyframes.warning", { seconds: analysis.max_gap })}
+            {analysis.pattern === "fixed"
+              ? t("cameras.info.keyframes.warningFixed", {
+                  seconds: analysis.mean_gap,
+                })
+              : t("cameras.info.keyframes.warningVariable", {
+                  minSeconds: analysis.min_gap,
+                  maxSeconds: analysis.max_gap,
+                })}
           </Row>
         );
         break;
       case "error":
         summary = (
           <Row icon="error">
-            {t("cameras.info.keyframes.error", {
-              seconds: analysis.max_gap,
-              segmentTime: analysis.segment_time,
-            })}
+            {analysis.pattern === "fixed"
+              ? t("cameras.info.keyframes.errorFixed", {
+                  seconds: analysis.mean_gap,
+                  segmentTime: analysis.segment_time,
+                })
+              : t("cameras.info.keyframes.errorVariable", {
+                  seconds: analysis.max_gap,
+                  segmentTime: analysis.segment_time,
+                })}
           </Row>
         );
         break;

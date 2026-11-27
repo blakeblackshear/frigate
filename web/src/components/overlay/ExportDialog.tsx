@@ -24,6 +24,7 @@ import {
   BatchExportResponse,
   CameraActivity,
   ExportCase,
+  ExportStreamSelection,
   StartExportResponse,
 } from "@/types/export";
 import {
@@ -64,6 +65,8 @@ import { resolveCameraName } from "@/hooks/use-camera-friendly-name";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { useDateLocale } from "@/hooks/use-date-locale";
+import { formatUnixTimestampToDateTime } from "@/utils/dateUtil";
 import { isReplayCamera } from "@/utils/cameraUtil";
 import { isValidIconName } from "@/utils/iconUtil";
 
@@ -80,7 +83,7 @@ type ExportOption = (typeof EXPORT_OPTIONS)[number];
 export type ExportTab = "export" | "multi";
 
 // length of a range seeded around the current playback time
-const MULTI_CAMERA_RANGE_SECONDS = 3600;
+const MULTI_CAMERA_RANGE_SECONDS = 1800;
 const TIMELINE_SELECTION_SECONDS = 60;
 
 type ExportDialogProps = {
@@ -117,6 +120,7 @@ export default function ExportDialog({
   const [newCaseName, setNewCaseName] = useState("");
   const [newCaseDescription, setNewCaseDescription] = useState("");
   const [activeTab, setActiveTab] = useState<ExportTab>("export");
+  const [stream, setStream] = useState<ExportStreamSelection>("auto");
   const [isStartingExport, setIsStartingExport] = useState(false);
   const previousModeRef = useRef<ExportMode>(mode);
   const preTimelineRangeRef = useRef<TimeRange | undefined>(undefined);
@@ -179,6 +183,7 @@ export default function ExportDialog({
           source: "recordings",
           name,
           export_case_id: exportCaseId,
+          stream,
         },
       );
 
@@ -201,6 +206,7 @@ export default function ExportDialog({
       setBatchCaseSelection("new");
       setNewCaseName("");
       setNewCaseDescription("");
+      setStream("auto");
       setRange(undefined);
       setMode("none");
       return true;
@@ -230,6 +236,7 @@ export default function ExportDialog({
     selectedCaseId,
     singleNewCaseDescription,
     singleNewCaseName,
+    stream,
     setMode,
     setRange,
     t,
@@ -249,6 +256,7 @@ export default function ExportDialog({
     setBatchCaseSelection("new");
     setNewCaseName("");
     setNewCaseDescription("");
+    setStream("auto");
     setMode("none");
     setRange(undefined);
     setActiveTab("export");
@@ -334,6 +342,7 @@ export default function ExportDialog({
           }
         >
           <ExportContent
+            camera={camera}
             latestTime={latestTime}
             earliestTime={earliestTime}
             currentTime={currentTime}
@@ -346,9 +355,11 @@ export default function ExportDialog({
             newCaseName={newCaseName}
             newCaseDescription={newCaseDescription}
             activeTab={activeTab}
+            stream={stream}
             isStartingExport={isStartingExport}
             onStartExport={onStartExport}
             setActiveTab={setActiveTab}
+            setStream={setStream}
             setName={setName}
             setSelectedCaseId={setSelectedCaseId}
             setSingleNewCaseName={setSingleNewCaseName}
@@ -368,6 +379,7 @@ export default function ExportDialog({
 }
 
 type ExportContentProps = {
+  camera: string;
   latestTime: number;
   earliestTime: number;
   currentTime: number;
@@ -380,9 +392,11 @@ type ExportContentProps = {
   newCaseName: string;
   newCaseDescription: string;
   activeTab: ExportTab;
+  stream: ExportStreamSelection;
   isStartingExport: boolean;
   onStartExport: () => Promise<boolean>;
   setActiveTab: (tab: ExportTab) => void;
+  setStream: (stream: ExportStreamSelection) => void;
   setName: (name: string) => void;
   setSelectedCaseId: (caseId: string | undefined) => void;
   setSingleNewCaseName: (name: string) => void;
@@ -397,6 +411,7 @@ type ExportContentProps = {
 };
 
 export function ExportContent({
+  camera,
   latestTime,
   earliestTime,
   currentTime,
@@ -409,9 +424,11 @@ export function ExportContent({
   newCaseName,
   newCaseDescription,
   activeTab,
+  stream,
   isStartingExport,
   onStartExport,
   setActiveTab,
+  setStream,
   setName,
   setSelectedCaseId,
   setSingleNewCaseName,
@@ -426,6 +443,7 @@ export function ExportContent({
 }: ExportContentProps) {
   const { t } = useTranslation(["components/dialog"]);
   const isAdmin = useIsAdmin();
+  const locale = useDateLocale();
   const [selectedOption, setSelectedOption] = useState<ExportOption>("1");
   const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
   const { data: config } = useSWR<FrigateConfig>("config");
@@ -439,6 +457,64 @@ export function ExportContent({
   const [cameraSearch, setCameraSearch] = useState("");
   const [cameraMenuOpen, setCameraMenuOpen] = useState(false);
   const cameraMenuRef = useRef<HTMLDivElement>(null);
+  // the stream choice is only meaningful where a sub stream is recorded:
+  // this camera on the single tab, any selected camera on the multi tab
+  const streamOptions = useMemo<ExportStreamSelection[]>(() => {
+    if (!config) {
+      return [];
+    }
+
+    const subEnabled = (cameraId: string) =>
+      config.cameras[cameraId]?.record.sub.enabled === true;
+    const cameras = activeTab === "multi" ? selectedCameraIds : [camera];
+
+    // no sub stream anywhere in the selection means there is no choice
+    if (!cameras.some(subEnabled)) {
+      return [];
+    }
+
+    // the pin applies to every item in a batch, so offering "sub" for a
+    // mixed selection would drop the cameras that cannot honor it. Main
+    // and auto are always exportable
+    return cameras.every(subEnabled)
+      ? ["auto", "main", "sub"]
+      : ["auto", "main"];
+  }, [activeTab, camera, config, selectedCameraIds]);
+
+  const showStreamSelect = streamOptions.length > 0;
+
+  // a pin the current selection can no longer honor would silently change
+  // what the next export contains
+  useEffect(() => {
+    if (stream !== "auto" && !streamOptions.includes(stream)) {
+      setStream("auto");
+    }
+  }, [streamOptions, stream, setStream]);
+
+  const streamSelect = (
+    <div className="space-y-2">
+      <Label className="text-sm text-primary">{t("export.stream.label")}</Label>
+      <Select
+        value={stream}
+        onValueChange={(value) => setStream(value as ExportStreamSelection)}
+      >
+        <SelectTrigger>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {streamOptions.map((option) => (
+            <SelectItem key={option} value={option}>
+              {t(`export.stream.${option}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="text-xs text-secondary-foreground">
+        {t(`export.stream.${stream}Desc`)}
+      </p>
+    </div>
+  );
+
   const multiRangeKey = useMemo(() => {
     if (activeTab !== "multi" || !range) {
       return undefined;
@@ -590,47 +666,32 @@ export function ExportContent({
   ]);
 
   const selectedCameraCount = selectedCameraIds.length;
+
+  const batchRangeError = !range
+    ? t("export.toast.error.noValidTimeSelected")
+    : range.before <= range.after
+      ? t("export.toast.error.endTimeMustAfterStartTime")
+      : undefined;
+  const batchCameraError =
+    !isEventsLoading && selectedCameraCount === 0
+      ? t("export.multiCamera.noCamerasSelected")
+      : undefined;
+  const batchCaseNameError =
+    isAdmin && batchCaseSelection === "new" && newCaseName.trim().length === 0
+      ? t("export.case.nameRequired")
+      : undefined;
   const canStartBatchExport =
-    Boolean(range && range.before > range.after) &&
+    !batchRangeError &&
+    !batchCaseNameError &&
     selectedCameraCount > 0 &&
-    !isStartingBatchExport &&
-    (batchCaseSelection !== "new" || newCaseName.trim().length > 0) &&
-    batchCaseSelection.length > 0;
+    !isStartingBatchExport;
 
   const onSelectTime = useCallback(
     (option: ExportOption) => {
       setSelectedOption(option);
 
-      const now = new Date(latestTime * 1000);
-      let start = 0;
-
-      switch (option) {
-        case "1":
-          now.setHours(now.getHours() - 1);
-          start = now.getTime() / 1000;
-          break;
-        case "4":
-          now.setHours(now.getHours() - 4);
-          start = now.getTime() / 1000;
-          break;
-        case "8":
-          now.setHours(now.getHours() - 8);
-          start = now.getTime() / 1000;
-          break;
-        case "12":
-          now.setHours(now.getHours() - 12);
-          start = now.getTime() / 1000;
-          break;
-        case "24":
-          now.setHours(now.getHours() - 24);
-          start = now.getTime() / 1000;
-          break;
-        case "custom":
-          start = latestTime - 3600;
-          break;
-        default:
-          start = latestTime - 3600;
-      }
+      const hours = Number(option);
+      const start = latestTime - (Number.isNaN(hours) ? 1 : hours) * 3600;
 
       setRange({
         before: latestTime,
@@ -746,6 +807,7 @@ export function ExportContent({
           ? `${name} - ${resolveCameraName(config, cameraId)}`
           : undefined,
       })),
+      stream,
     };
 
     if (isAdmin && batchCaseSelection !== "none") {
@@ -859,6 +921,7 @@ export function ExportContent({
     newCaseName,
     range,
     selectedCameraIds,
+    stream,
     setActiveTab,
     setBatchCaseSelection,
     setMode,
@@ -890,6 +953,17 @@ export function ExportContent({
           if (tab === "multi") {
             setRange(buildRangeAroundCurrentTime(MULTI_CAMERA_RANGE_SECONDS));
             setBatchCaseSelection(selectedCaseId ?? "new");
+            if (newCaseName.trim().length === 0) {
+              setNewCaseName(
+                t("export.multiCamera.caseNameDefault", {
+                  date: formatUnixTimestampToDateTime(Date.now() / 1000, {
+                    date_style: "medium",
+                    time_style: "short",
+                    locale,
+                  }),
+                }),
+              );
+            }
           } else {
             onSelectTime(selectedOption);
           }
@@ -960,6 +1034,8 @@ export function ExportContent({
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+
+          {showStreamSelect && streamSelect}
 
           {isAdmin && (
             <div className="space-y-2">
@@ -1055,6 +1131,11 @@ export function ExportContent({
                 </TooltipPortal>
               </Tooltip>
             </div>
+            {batchRangeError && (
+              <p className="text-sm font-medium text-destructive">
+                {batchRangeError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -1238,6 +1319,11 @@ export function ExportContent({
                 );
               })}
             </div>
+            {batchCameraError && (
+              <p className="text-sm font-medium text-destructive">
+                {batchCameraError}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -1251,6 +1337,8 @@ export function ExportContent({
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+
+          {showStreamSelect && streamSelect}
 
           {isAdmin && (
             <div className="space-y-2">
@@ -1288,6 +1376,11 @@ export function ExportContent({
                     value={newCaseName}
                     onChange={(event) => setNewCaseName(event.target.value)}
                   />
+                  {batchCaseNameError && (
+                    <p className="text-sm font-medium text-destructive">
+                      {batchCaseNameError}
+                    </p>
+                  )}
                   <Textarea
                     placeholder={t("export.case.newCaseDescriptionPlaceholder")}
                     value={newCaseDescription}

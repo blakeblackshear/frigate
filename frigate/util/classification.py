@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import shutil
+import tempfile
 from collections import defaultdict
 
 import cv2
@@ -18,6 +19,7 @@ from frigate.const import (
     CLIPS_DIR,
     MODEL_CACHE_DIR,
     PROCESS_PRIORITY_LOW,
+    STREAM_TYPE_MAIN,
     UPDATE_MODEL_STATE,
 )
 from frigate.log import redirect_output_to_logger, suppress_stderr_during
@@ -31,13 +33,52 @@ from frigate.util.image import (
     relative_box_to_absolute,
 )
 from frigate.util.process import FrigateProcess
+from frigate.util.recording_coverage import recording_overlap
 
 BATCH_SIZE = 16
 EPOCHS = 50
 LEARNING_RATE = 0.001
 TRAINING_METADATA_FILE = ".training_metadata.json"
+CLASSIFICATION_INPUT_SIZE = (224, 224)
 
 logger = logging.getLogger(__name__)
+
+
+def resize_classification_image(image: np.ndarray) -> np.ndarray:
+    """Resize an image to the classification model input size.
+
+    Training and inference both need to use this, otherwise the model is
+    trained on different pixels than the ones it is later run on.
+    """
+    return cv2.resize(image, CLASSIFICATION_INPUT_SIZE)
+
+
+def prepare_training_dataset(dataset_dir: str, output_dir: str) -> None:
+    """Write a copy of the dataset that is resized the same way as inference.
+
+    The dataset holds crops at their original size. Keras would resize them
+    with nearest neighbor while inference uses cv2, so the images are resized
+    here and Keras is given images that are already the model input size.
+    """
+    for class_name in os.listdir(dataset_dir):
+        class_dir = os.path.join(dataset_dir, class_name)
+
+        if not os.path.isdir(class_dir):
+            continue
+
+        output_class_dir = os.path.join(output_dir, class_name)
+        os.makedirs(output_class_dir, exist_ok=True)
+
+        for file in os.listdir(class_dir):
+            img = cv2.imread(os.path.join(class_dir, file))
+
+            if img is None:
+                continue
+
+            output_path = os.path.join(output_class_dir, file)
+
+            if not cv2.imwrite(output_path, resize_classification_image(img)):
+                raise OSError(f"Failed to write training image {output_path}")
 
 
 def write_training_metadata(model_name: str, image_count: int) -> None:
@@ -158,7 +199,7 @@ class ClassificationTrainingProcess(FrigateProcess):
             for path in image_paths[:300]:
                 img = cv2.imread(path)
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                img = cv2.resize(img, (224, 224))
+                img = resize_classification_image(img)
                 img_array = np.array(img, dtype=np.float32) / 255.0
                 img_array = img_array[None, ...]
                 yield [img_array]
@@ -230,32 +271,35 @@ class ClassificationTrainingProcess(FrigateProcess):
                 metrics=["accuracy"],
             )
 
-            # create training set
-            datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
-            train_gen = datagen.flow_from_directory(
-                dataset_dir,
-                target_size=(224, 224),
-                batch_size=BATCH_SIZE,
-                class_mode="categorical",
-                subset="training",
-            )
+            # create training set, resized the same way as inference
+            with tempfile.TemporaryDirectory() as training_dir:
+                prepare_training_dataset(dataset_dir, training_dir)
+                datagen = ImageDataGenerator(rescale=1.0 / 255, validation_split=0.2)
+                train_gen = datagen.flow_from_directory(
+                    training_dir,
+                    target_size=CLASSIFICATION_INPUT_SIZE,
+                    batch_size=BATCH_SIZE,
+                    class_mode="categorical",
+                    subset="training",
+                )
 
-            total_images = train_gen.samples
-            logger.debug(
-                f"Training {self.model_name}: {total_images} images across {num_classes} classes"
-            )
+                total_images = train_gen.samples
+                logger.debug(
+                    f"Training {self.model_name}: {total_images} images across {num_classes} classes"
+                )
 
-            # write labelmap
-            class_indices = train_gen.class_indices
-            index_to_class = {v: k for k, v in class_indices.items()}
-            sorted_classes = [index_to_class[i] for i in range(len(index_to_class))]
-            with open(os.path.join(model_dir, "labelmap.txt"), "w") as f:
-                for class_name in sorted_classes:
-                    f.write(f"{class_name}\n")
+                # write labelmap
+                class_indices = train_gen.class_indices
+                index_to_class = {v: k for k, v in class_indices.items()}
+                sorted_classes = [index_to_class[i] for i in range(len(index_to_class))]
+                with open(os.path.join(model_dir, "labelmap.txt"), "w") as f:
+                    for class_name in sorted_classes:
+                        f.write(f"{class_name}\n")
 
-            # train the model
-            logger.debug(f"Training {self.model_name} for {EPOCHS} epochs...")
-            model.fit(train_gen, epochs=EPOCHS, verbose=0)
+                # train the model
+                logger.debug(f"Training {self.model_name} for {EPOCHS} epochs...")
+                model.fit(train_gen, epochs=EPOCHS, verbose=0)
+
             logger.debug(f"Converting {self.model_name} to TFLite...")
 
             # convert model to tflite
@@ -370,7 +414,6 @@ def collect_state_classification_examples(
         cameras: Dict mapping camera names to normalized crop coordinates [x1, y1, x2, y2] (0-1)
     """
     model_name = model_name.strip()
-    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
 
     # Step 1: Get review items for the cameras
     camera_names = list(cameras.keys())
@@ -385,29 +428,31 @@ def collect_state_classification_examples(
         logger.warning(f"No review items found for cameras: {camera_names}")
         return
 
-    # The temp directory is only created when there are review_items.
-    temp_dir = os.path.join(dataset_dir, "temp")
-    os.makedirs(temp_dir, exist_ok=True)
-
     # Step 2: Create balanced timestamp selection (100 samples)
     timestamps = _select_balanced_timestamps(review_items, target_count=100)
 
-    # Step 3: Extract keyframes from recordings with crops applied
-    keyframes = _extract_keyframes(
-        "/usr/lib/ffmpeg/8.0/bin/ffmpeg", timestamps, temp_dir, cameras
-    )
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Step 3: Extract keyframes from recordings with crops applied
+        keyframes = _extract_keyframes(
+            "/usr/lib/ffmpeg/8.0/bin/ffmpeg", timestamps, temp_dir, cameras
+        )
 
-    # Step 4: Select 24 most visually distinct images (they're already cropped)
-    distinct_images = _select_distinct_images(keyframes, target_count=24)
+        # Step 4: Select 24 most visually distinct images (they're already cropped)
+        distinct_images = _select_distinct_images(keyframes, target_count=24)
 
-    # Step 5: Save to train directory for later classification
+        # Step 5: Save to train directory for later classification
+        _save_train_examples(model_name, distinct_images)
+
+
+def _save_train_examples(model_name: str, image_paths: list[str]) -> int:
+    """Replace the model's train directory with the given images."""
     train_dir = os.path.join(CLIPS_DIR, model_name, "train")
     if os.path.exists(train_dir):
         shutil.rmtree(train_dir)
     os.makedirs(train_dir, exist_ok=True)
 
     saved_count = 0
-    for idx, image_path in enumerate(distinct_images):
+    for idx, image_path in enumerate(image_paths):
         dest_path = os.path.join(train_dir, f"example_{idx:03d}.jpg")
         try:
             img = cv2.imread(image_path)
@@ -418,10 +463,7 @@ def collect_state_classification_examples(
         except Exception as e:
             logger.error(f"Failed to save image {image_path}: {e}")
 
-    try:
-        shutil.rmtree(temp_dir)
-    except Exception as e:
-        logger.warning(f"Failed to clean up temp directory: {e}")
+    return saved_count
 
 
 def _select_balanced_timestamps(
@@ -480,13 +522,20 @@ def _select_balanced_timestamps(
                 }
             )
 
-    # If we don't have enough, sample more from larger groups
-    while len(timestamps) < target_count and len(timestamps) < len(review_items):
+    # Sample more from larger groups. Zero-length items and timestamps too
+    # close to an existing one never add a sample, so attempts are capped.
+    max_attempts = target_count * 10
+    attempts = 0
+    while (
+        len(timestamps) < target_count
+        and len(timestamps) < len(review_items)
+        and attempts < max_attempts
+    ):
         for group_items in grouped.values():
-            if len(timestamps) >= target_count:
+            if len(timestamps) >= target_count or attempts >= max_attempts:
                 break
 
-            # Pick a random item not already sampled
+            attempts += 1
             item = random.choice(group_items)
             duration = item.end_time - item.start_time
             if duration <= 0:
@@ -552,9 +601,9 @@ def _extract_keyframes(
             recording = (
                 Recordings.select()
                 .where(
-                    (timestamp >= Recordings.start_time)
-                    & (timestamp <= Recordings.end_time)
+                    recording_overlap(timestamp, timestamp)
                     & (Recordings.camera == camera)
+                    & (Recordings.stream_type == STREAM_TYPE_MAIN)
                 )
                 .order_by(Recordings.start_time.desc())
                 .limit(1)
@@ -600,7 +649,7 @@ def _extract_keyframes(
                 return idx, None
 
             cropped = img[y1_clipped:y2_clipped, x1_clipped:x2_clipped]
-            resized = cv2.resize(cropped, (224, 224))
+            resized = resize_classification_image(cropped)
 
             output_path = os.path.join(output_dir, f"frame_{idx:04d}.jpg")
             cv2.imwrite(output_path, resized)
@@ -726,9 +775,6 @@ def collect_object_classification_examples(
         label: Object label to collect (e.g., "person", "car")
     """
     model_name = model_name.strip()
-    dataset_dir = os.path.join(CLIPS_DIR, model_name, "dataset")
-    temp_dir = os.path.join(dataset_dir, "temp")
-    os.makedirs(temp_dir, exist_ok=True)
 
     # Step 1: Query events for the specified label and cameras
     events = list(
@@ -745,40 +791,26 @@ def collect_object_classification_examples(
     selected_events = _select_balanced_events(events, target_count=100)
     logger.debug(f"Selected {len(selected_events)} events")
 
-    # Step 3: Extract thumbnails from events
-    thumbnails = _extract_event_thumbnails(selected_events, temp_dir)
-    logger.debug(f"Successfully extracted {len(thumbnails)} thumbnails")
+    # Step 3: Extract thumbnails from events, falling back to the remaining
+    # events when the selected ones have no image on disk
+    selected_ids = {e.id for e in selected_events}
+    remaining_events = [e for e in events if e.id not in selected_ids]
+    random.shuffle(remaining_events)
 
-    # Step 4: Select 24 most visually distinct thumbnails
-    distinct_images = _select_distinct_images(thumbnails, target_count=24)
-    logger.debug(f"Selected {len(distinct_images)} distinct images")
+    with tempfile.TemporaryDirectory() as temp_dir:
+        thumbnails = _extract_event_thumbnails(
+            selected_events + remaining_events, temp_dir, target_count=100
+        )
+        logger.debug(f"Successfully extracted {len(thumbnails)} thumbnails")
 
-    # Step 5: Save to train directory for later classification
-    train_dir = os.path.join(CLIPS_DIR, model_name, "train")
-    if os.path.exists(train_dir):
-        shutil.rmtree(train_dir)
-    os.makedirs(train_dir, exist_ok=True)
+        # Step 4: Select 24 most visually distinct thumbnails
+        distinct_images = _select_distinct_images(thumbnails, target_count=24)
+        logger.debug(f"Selected {len(distinct_images)} distinct images")
 
-    saved_count = 0
-    for idx, image_path in enumerate(distinct_images):
-        dest_path = os.path.join(train_dir, f"example_{idx:03d}.jpg")
-        try:
-            img = cv2.imread(image_path)
+        # Step 5: Save to train directory for later classification
+        saved_count = _save_train_examples(model_name, distinct_images)
 
-            if img is not None:
-                cv2.imwrite(dest_path, img)
-                saved_count += 1
-        except Exception as e:
-            logger.error(f"Failed to save image {image_path}: {e}")
-
-    try:
-        shutil.rmtree(temp_dir)
-    except Exception as e:
-        logger.warning(f"Failed to clean up temp directory: {e}")
-
-    logger.debug(
-        f"Successfully collected {saved_count} classification examples in {train_dir}"
-    )
+    logger.debug(f"Successfully collected {saved_count} classification examples")
 
 
 def _select_balanced_events(
@@ -831,10 +863,16 @@ def _select_balanced_events(
         else:
             selected.extend(remaining)
 
+    # groups are ordered oldest first, so truncating unshuffled keeps only the
+    # oldest events, which are the least likely to still have images on disk
+    random.shuffle(selected)
+
     return selected[:target_count]
 
 
-def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]:
+def _extract_event_thumbnails(
+    events: list[Event], output_dir: str, target_count: int = 100
+) -> list[str]:
     """
     Extract a training image for each event.
 
@@ -848,8 +886,9 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
     using a step ladder sized from the box/region area ratio.
 
     Args:
-        events: List of Event objects
+        events: List of Event objects, in order of preference
         output_dir: Directory to save crops
+        target_count: Number of images to extract before stopping
 
     Returns:
         List of paths to successfully extracted images
@@ -857,12 +896,15 @@ def _extract_event_thumbnails(events: list[Event], output_dir: str) -> list[str]
     image_paths = []
 
     for idx, event in enumerate(events):
+        if len(image_paths) >= target_count:
+            break
+
         try:
             img = _load_event_classification_crop(event)
             if img is None:
                 continue
 
-            resized = cv2.resize(img, (224, 224))
+            resized = resize_classification_image(img)
             output_path = os.path.join(output_dir, f"thumbnail_{idx:04d}.jpg")
             cv2.imwrite(output_path, resized)
             image_paths.append(output_path)

@@ -9,14 +9,14 @@
     "maxItems": "最多包含 {{limit}} 項",
     "pattern": "格式無效",
     "required": "此欄位為必填項",
-    "type": "值型別無效",
+    "type": "值類型無效",
     "enum": "必須是允許的值之一",
-    "const": "值與預期的常量不匹配",
+    "const": "值與預期的常量不相符",
     "uniqueItems": "所有項必須唯一",
     "format": "格式無效",
     "additionalProperties": "不允許未知屬性",
-    "oneOf": "必須完全匹配一個允許的模式",
-    "anyOf": "必須至少匹配一個允許的模式",
+    "oneOf": "必須完全相符一個允許的模式",
+    "anyOf": "必須至少相符一個允許的模式",
     "proxy": {
         "header_map": {
             "roleHeaderRequired": "設定角色對應時必須要有 role 標頭。"

@@ -7,16 +7,18 @@
  */
 
 import { RJSFSchema } from "@rjsf/utils";
+import { omit } from "lodash";
 import { applySchemaDefaults } from "@/lib/config-schema";
 import { isJsonObject } from "@/lib/utils";
 import { HiddenFieldContext, JsonObject, JsonValue } from "@/types/configForm";
 import { getEffectiveAttributeLabels } from "@/utils/configUtil";
+import { getSceneChoices } from "@/utils/modelUtil";
 
 /**
  * Sections that require special handling at the global level.
  * Add new section paths here as needed.
  */
-const SPECIAL_CASE_SECTIONS = ["motion", "detectors", "genai"] as const;
+const SPECIAL_CASE_SECTIONS = ["motion", "genai"] as const;
 
 /**
  * Check if a section requires special case handling.
@@ -36,9 +38,9 @@ export function isSpecialCaseSection(
 /**
  * Modify schema for sections that need defaults stripped or other modifications.
  *
- * - detectors: Strip the "default" field to prevent RJSF from merging the
- *   default {"cpu": {"type": "cpu"}} with stored detector keys.
  * - genai: Inject a default provider value on the additionalProperties shape.
+ * - detect: Scenes are free-form names, so offer the configured model scenes
+ *   (and a saved scene no model uses) as the choices for `scene`.
  * - objects: Promote tracked attribute labels (face, license_plate, courier
  *   logos) from `filters.additionalProperties` to explicit
  *   `filters.properties.<attr>` entries with a restricted FilterConfig
@@ -59,14 +61,12 @@ export function modifySchemaForSection(
     return modifyObjectsSchema(schema, ctx);
   }
 
-  if (!isSpecialCaseSection(sectionPath, level)) {
-    return schema;
+  if (sectionPath === "detect") {
+    return modifyDetectSchema(schema, ctx);
   }
 
-  // detectors: Remove default to prevent merging with stored keys
-  if (sectionPath === "detectors" && "default" in schema) {
-    const { default: _, ...schemaWithoutDefault } = schema;
-    return schemaWithoutDefault;
+  if (!isSpecialCaseSection(sectionPath, level)) {
+    return schema;
   }
 
   if (sectionPath === "genai") {
@@ -93,6 +93,24 @@ export function modifySchemaForSection(
   }
 
   return schema;
+}
+
+function modifyDetectSchema(
+  schema: RJSFSchema,
+  ctx: HiddenFieldContext | undefined,
+): RJSFSchema {
+  const properties = (schema as { properties?: Record<string, RJSFSchema> })
+    .properties;
+
+  if (!ctx || !properties?.scene) return schema;
+
+  return {
+    ...schema,
+    properties: {
+      ...properties,
+      scene: { ...properties.scene, enum: getSceneChoices(ctx) },
+    },
+  };
 }
 
 /**
@@ -270,8 +288,6 @@ function modifyObjectsSchema(
  * - motion: Has anyOf schema with [null, MotionConfig]. When stored value is
  *   null, derive defaults from the non-null anyOf branch to avoid showing
  *   changes when navigating to the page.
- * - detectors: Return empty object since the schema default would add unwanted
- *   keys to the stored configuration.
  */
 export function getEffectiveDefaultsForSection(
   sectionPath: string,
@@ -303,11 +319,6 @@ export function getEffectiveDefaultsForSection(
     }
 
     return applySchemaDefaults(motionSchema as RJSFSchema, {});
-  }
-
-  // detectors: Return empty object to avoid adding default keys
-  if (sectionPath === "detectors") {
-    return {};
   }
 
   return schemaDefaults;
@@ -367,6 +378,18 @@ export function synthesizeMissingFilters(
   return { ...(data as JsonObject), filters: newFilters };
 }
 
+// a Frigate+ model's config comes from its model info, so these are either
+// redundant or stale leftovers from a custom model. A missing input_dtype
+// in the model info means the int default.
+const PLUS_SUPPLIED_MODEL_FIELDS = [
+  "width",
+  "height",
+  "input_tensor",
+  "input_pixel_format",
+  "input_dtype",
+  "model_type",
+];
+
 /**
  * Sanitize overrides payloads for section-specific quirks.
  */
@@ -375,6 +398,21 @@ export function sanitizeOverridesForSection(
   level: string,
   overrides: unknown,
 ): unknown {
+  // the models list is saved whole
+  if (sectionPath === "models" && Array.isArray(overrides)) {
+    return overrides.map((model) => {
+      if (
+        !isJsonObject(model) ||
+        typeof model.path !== "string" ||
+        !model.path.startsWith("plus://")
+      ) {
+        return model;
+      }
+
+      return omit(model, PLUS_SUPPLIED_MODEL_FIELDS);
+    });
+  }
+
   if (!overrides || !isJsonObject(overrides)) {
     return overrides;
   }
@@ -423,27 +461,6 @@ export function sanitizeOverridesForSection(
     });
     return flattened;
   };
-
-  // detectors: Strip readonly model fields that are generated on startup
-  // and should never be persisted back to the config file.
-  if (sectionPath === "detectors") {
-    const overridesObj = overrides as JsonObject;
-    const cleaned: JsonObject = {};
-
-    Object.entries(overridesObj).forEach(([key, value]) => {
-      if (!isJsonObject(value)) {
-        cleaned[key] = value;
-        return;
-      }
-
-      const cleanedValue = { ...value } as JsonObject;
-      delete cleanedValue.model;
-      delete cleanedValue.model_path;
-      cleaned[key] = cleanedValue;
-    });
-
-    return cleaned;
-  }
 
   if (sectionPath === "logger") {
     const overridesObj = overrides as JsonObject;

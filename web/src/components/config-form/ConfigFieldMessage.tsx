@@ -56,7 +56,7 @@ export function ConfigFieldMessage({
       <SeverityIcon severity={severity} />
       <AlertDescription>
         <div className="flex flex-col gap-1">
-          <span>{t(messageKey, values)}</span>
+          <span>{t(messageKey, values ?? {})}</span>
           {docLink && (
             <Link
               to={getLocaleDocUrl(docLink)}

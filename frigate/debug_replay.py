@@ -11,10 +11,11 @@ import os
 import shutil
 import threading
 import time
+from collections.abc import Callable
 
 from ruamel.yaml import YAML
 
-from frigate.config import FrigateConfig
+from frigate.config import CameraConfig, FrigateConfig
 from frigate.config.camera.updater import (
     CameraConfigUpdateEnum,
     CameraConfigUpdatePublisher,
@@ -61,6 +62,7 @@ class DebugReplayManager:
         self.start_ts: float | None = None
         self.end_ts: float | None = None
         self.session_started_at: float | None = None
+        self._published_camera: CameraConfig | None = None
         self._job_state_publisher = JobStatePublisher()
 
     @property
@@ -109,6 +111,13 @@ class DebugReplayManager:
         self.start_ts = None
         self.end_ts = None
         self.session_started_at = None
+        self._published_camera = None
+
+    def update_config(self, config: FrigateConfig) -> None:
+        """Carry the published replay camera into a newly swapped-in config."""
+        with self._lock:
+            if self._published_camera is not None and self.replay_camera_name:
+                config.cameras[self.replay_camera_name] = self._published_camera
 
     def publish_camera(
         self,
@@ -117,10 +126,11 @@ class DebugReplayManager:
         clip_path: str,
         frigate_config: FrigateConfig,
         config_publisher: CameraConfigUpdatePublisher,
-    ) -> None:
+    ) -> bool:
         """Build the in-memory replay camera config and publish the add event.
 
-        Called by the job runner during the starting_camera phase.
+        Called by the job runner during the starting_camera phase. Returns
+        False without publishing if the session was stopped meanwhile.
         """
         source_config = frigate_config.cameras[source_camera]
         camera_dict = self._build_camera_config_dict(
@@ -140,12 +150,21 @@ class DebugReplayManager:
             new_config = FrigateConfig.parse_object(config_data)
         except Exception as e:
             raise RuntimeError(f"Failed to validate replay camera config: {e}") from e
-        frigate_config.cameras[replay_name] = new_config.cameras[replay_name]
 
-        config_publisher.publish_update(
-            CameraConfigUpdateTopic(CameraConfigUpdateEnum.add, replay_name),
-            new_config.cameras[replay_name],
-        )
+        camera_config = new_config.cameras[replay_name]
+
+        with self._lock:
+            if self.replay_camera_name != replay_name:
+                return False
+
+            frigate_config.cameras[replay_name] = camera_config
+            self._published_camera = camera_config
+            config_publisher.publish_update(
+                CameraConfigUpdateTopic(CameraConfigUpdateEnum.add, replay_name),
+                camera_config,
+            )
+
+        return True
 
     def stop(
         self,
@@ -167,12 +186,10 @@ class DebugReplayManager:
             replay_name = self.replay_camera_name
             source_camera = self.source_camera
 
-            # Only publish remove if the camera was actually added to the live
-            # config (i.e. the runner reached the starting_camera phase).
-            if replay_name is not None and replay_name in frigate_config.cameras:
+            if replay_name is not None and self._published_camera is not None:
                 config_publisher.publish_update(
                     CameraConfigUpdateTopic(CameraConfigUpdateEnum.remove, replay_name),
-                    frigate_config.cameras[replay_name],
+                    self._published_camera,
                 )
                 frigate_config.cameras.pop(replay_name, None)
 
@@ -362,7 +379,7 @@ def cleanup_replay_cameras() -> None:
 
 async def debug_replay_auto_stop_watchdog(
     manager: DebugReplayManager,
-    frigate_config: FrigateConfig,
+    get_config: Callable[[], FrigateConfig],
     config_publisher: CameraConfigUpdatePublisher,
 ) -> None:
     """Auto-stop debug replay sessions that exceed MAX_SESSION_DURATION_SECONDS.
@@ -384,7 +401,7 @@ async def debug_replay_auto_stop_watchdog(
             replay_name = manager.replay_camera_name
             await asyncio.to_thread(
                 manager.stop,
-                frigate_config=frigate_config,
+                frigate_config=get_config(),
                 config_publisher=config_publisher,
             )
             logger.info(

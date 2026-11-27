@@ -15,7 +15,6 @@ class EventResponse(BaseModel):
     thumbnail: str | None
     has_clip: bool
     has_snapshot: bool
-    retain_indefinitely: bool
     plus_id: str | None
     model_hash: str | None
     detector_type: str | None

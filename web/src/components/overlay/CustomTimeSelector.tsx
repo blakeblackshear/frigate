@@ -151,6 +151,11 @@ export function CustomTimeSelector({
               step={isIOS ? "60" : "1"}
               onChange={(e) => {
                 const clock = e.target.value;
+
+                if (!clock) {
+                  return;
+                }
+
                 const [hour, minute, second] = isIOS
                   ? [...clock.split(":"), "00"]
                   : clock.split(":");
@@ -217,6 +222,11 @@ export function CustomTimeSelector({
               step={isIOS ? "60" : "1"}
               onChange={(e) => {
                 const clock = e.target.value;
+
+                if (!clock) {
+                  return;
+                }
+
                 const [hour, minute, second] = isIOS
                   ? [...clock.split(":"), "00"]
                   : clock.split(":");

@@ -1,1 +1,60 @@
-{}
+{
+    "title": "Felsökningsuppspelning",
+    "description": "Spela upp kamerainspelningar för felsökning. Objektlistan visar en tidsfördröjd sammanfattning av upptäckta objekt och fliken Meddelanden visar en ström av Frigates interna meddelanden från det uppspelade materialet.",
+    "websocket_messages": "Meddelanden",
+    "dialog": {
+        "title": "Starta felsökningsuppspelning",
+        "description": "Skapa en tillfällig uppspelningskamera som spelar upp historiskt material i slinga för att felsöka problem med objektdetektering och spårning. Uppspelningskameran får samma detekteringskonfiguration som källkameran. Välj först ett tidsintervall.",
+        "camera": "Källkamera",
+        "timeRange": "Tidsintervall",
+        "preset": {
+            "1m": "Senaste minuten",
+            "5m": "Senaste 5 minuterna",
+            "timeline": "Från tidslinjen",
+            "custom": "Anpassat"
+        },
+        "startButton": "Starta uppspelning",
+        "selectFromTimeline": "Välj",
+        "starting": "Startar uppspelning...",
+        "startLabel": "Start",
+        "endLabel": "Slut",
+        "toast": {
+            "error": "Det gick inte att starta felsökningsuppspelningen: {{error}}",
+            "alreadyActive": "En uppspelningssession är redan aktiv",
+            "noRecordings": "Inga inspelningar hittades i det valda tidsintervallet",
+            "stopError": "Det gick inte att stoppa felsökningsuppspelningen: {{error}}",
+            "goToReplay": "Gå till uppspelning"
+        }
+    },
+    "page": {
+        "noSession": "Ingen aktiv felsökningsuppspelning",
+        "noSessionDesc": "Starta en felsökningsuppspelning från historikvyn genom att klicka på knappen Åtgärder i verktygsfältet och välja Felsökningsuppspelning.",
+        "goToRecordings": "Gå till historik",
+        "preparingClip": "Förbereder klipp…",
+        "preparingClipDesc": "Frigate sammanfogar inspelningar för det valda tidsintervallet. Det kan ta en minut för längre intervall.",
+        "startingCamera": "Startar felsökningsuppspelning…",
+        "startError": {
+            "title": "Det gick inte att starta felsökningsuppspelning",
+            "back": "Tillbaka till historik"
+        },
+        "sourceCamera": "Källkamera",
+        "replayCamera": "Uppspelningskamera",
+        "initializingReplay": "Initierar felsökningsuppspelning...",
+        "stoppingReplay": "Stoppar felsökningsuppspelning...",
+        "stopReplay": "Stoppa uppspelning",
+        "confirmStop": {
+            "title": "Stoppa felsökningsuppspelning?",
+            "description": "Detta stoppar sessionen och tar bort alla tillfälliga data. Vill du fortsätta?",
+            "confirm": "Stoppa uppspelning",
+            "cancel": "Avbryt"
+        },
+        "activity": "Aktivitet",
+        "objects": "Objektlista",
+        "audioDetections": "Ljuddetektioner",
+        "noActivity": "Ingen aktivitet upptäcktes",
+        "activeTracking": "Aktiv spårning",
+        "noActiveTracking": "Ingen aktiv spårning",
+        "configuration": "Konfiguration",
+        "configurationDesc": "Finjustera inställningarna för rörelsedetektering och objektspårning för felsökningsuppspelningskameran. Inga ändringar sparas i Frigates konfigurationsfil."
+    }
+}

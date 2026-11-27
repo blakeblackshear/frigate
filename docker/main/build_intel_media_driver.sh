@@ -46,3 +46,4 @@ make -C /tmp/media-driver/build -j"$(nproc)"
 
 # Install driver to rootfs for COPY --from
 make -C /tmp/media-driver/build install DESTDIR=/rootfs
+strip --strip-unneeded /rootfs/usr/lib/x86_64-linux-gnu/dri/iHD_drv_video.so

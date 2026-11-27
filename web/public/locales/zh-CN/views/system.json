@@ -9,7 +9,8 @@
       "go2rtc": "Go2RTC 日志 - Frigate",
       "nginx": "Nginx 日志 - Frigate",
       "websocket": "消息日志 - Frigate"
-    }
+    },
+    "health": "运行状况 - Frigate"
   },
   "title": "系统",
   "metrics": "系统指标",
@@ -56,9 +57,8 @@
       "resume": "继续",
       "clear": "清除",
       "empty": "未捕获到消息",
-      "count": "{{count}} 条消息",
       "expanded": {
-        "payload": "Payload"
+        "payload": "消息内容"
       },
       "count_one": "{{count}} 条消息",
       "count_other": "{{count}} 条消息"
@@ -106,11 +106,6 @@
       },
       "npuMemory": "NPU内存",
       "npuUsage": "NPU 使用率",
-      "intelGpuWarning": {
-        "title": "Intel GPU 处于警告状态",
-        "message": "GPU 状态不可用",
-        "description": "这是 Intel 的 GPU 状态报告工具（intel_gpu_top）的已知问题：该工具会失效并反复返回 GPU 使用率为 0%，即使在硬件加速和目标检测已在 (i)GPU 上正常运行的情况下也是如此，这并不是 Frigate 的 bug。你可以通过重启主机来临时修复该问题，并确认 GPU 正常工作。该问题并不会影响性能。"
-      },
       "gpuTemperature": "GPU 温度",
       "npuTemperature": "NPU 温度",
       "gpuCompute": "GPU 计算 / 编码"
@@ -145,7 +140,11 @@
       "bandwidth": "带宽",
       "unused": {
         "title": "未使用",
-        "tips": "如果您的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
+        "tips": "如果你的驱动器上存储了除 Frigate 录制内容之外的其他文件，该值可能无法准确反映 Frigate 可用的剩余空间。Frigate 不会追踪录制内容以外的存储使用情况。"
+      },
+      "subStream": {
+        "information": "子视频流存储信息",
+        "tips": "录制子视频流的摄像头会分别显示“原画”和“低画质”的占用空间，名称与录像回放中的画质选项一致。低画质录像会一直保留在磁盘上，直到超过保留期限，因此即使关闭了子视频流录制，这里仍可能显示这类占用。"
       }
     },
     "shm": {
@@ -186,10 +185,12 @@
         "gap": "关键帧间隔（最小值 / 平均值 / 最大值）：",
         "segmentLength": "录制片段长度：",
         "ok": "每 {{seconds}} 秒取一帧，适用于录制和回放。",
-        "warning": "稀疏或不均匀的关键帧（最长间隔约{{seconds}}秒），可能是使用了智能编码器（例如H.264+/H.265+），不建议开启该功能。",
-        "error": "关键帧间隔（~{{seconds}}秒）超过了录制片段长度（{{segmentTime}}秒）。某些片段可能没有关键帧，这会导致播放中断。请尝试禁用摄像头的智能或 + 编解码器或缩短其关键帧间隔。",
         "unknown": "无法确定关键帧间隔。",
-        "recordDisabled": "此摄像头的录制功能已禁用。"
+        "recordDisabled": "此摄像头的录制功能已关闭。",
+        "warningFixed": "关键帧间隔均匀但过于稀疏（约每 {{seconds}} 秒一次）。录制仍可正常工作，但实时回放和拖动进度会启动得更慢。请将摄像头的 I 帧（关键帧）间隔设置为与帧率匹配。",
+        "warningVariable": "关键帧间隔不一致（{{minSeconds}} 秒到 {{maxSeconds}} 秒），通常说明开启了智能编码（H.264+/H.265+）。不建议这样设置。",
+        "errorFixed": "关键帧间隔约为每 {{seconds}} 秒一次，比录像片段长度（{{segmentTime}} 秒）还长，因此部分片段没有关键帧，无法回放。请缩短摄像头的 I 帧（关键帧）间隔，使其与帧率匹配。",
+        "errorVariable": "关键帧间隔最大可达约 {{seconds}} 秒，比录像片段长度（{{segmentTime}} 秒）还长。部分片段会没有关键帧，导致无法回放。请关闭摄像头上的智能编码（H.264+/H.265+），或缩短关键帧间隔。"
       }
     },
     "framesAndDetections": "帧数/检测次数",
@@ -235,15 +236,19 @@
   },
   "lastRefreshed": "最后刷新时间： ",
   "stats": {
-    "ffmpegHighCpuUsage": "{{camera}} 的 FFmpeg CPU 使用率较高（{{ffmpegAvg}}%）",
-    "detectHighCpuUsage": "{{camera}} 的 检测器 CPU 使用率较高（{{detectAvg}}%）",
     "healthy": "系统运行正常",
     "reindexingEmbeddings": "正在重新索引嵌入（已完成 {{processed}}%）",
     "detectIsSlow": "{{detect}} 运行缓慢（{{speed}}毫秒）",
     "detectIsVerySlow": "{{detect}} 运行非常缓慢（{{speed}}毫秒）",
     "cameraIsOffline": "{{camera}} 已离线",
-    "shmTooLow": "/dev/shm 的分配空间过低（当前 {{total}} MB），应至少增加到 {{min}} MB。",
-    "debugReplayActive": "调试回放会话正在进行"
+    "debugReplayActive": "调试回放会话正在进行",
+    "cameraSkippedDetections": "{{camera}} 有 {{pct}}% 的画面帧没有进行检测",
+    "systemNotices_other": "{{count}} 条系统提示",
+    "moreMessages_other": "+{{count}}",
+    "reindexEmbeddingsFailed": "重新索引嵌入失败，请查看日志",
+    "retentionUnmet": "为了释放空间，录像会在保留期限结束前被删除",
+    "systemNotices_one": "{{count}} 条系统消息",
+    "moreMessages_one": "+ {{count}}"
   },
   "enrichments": {
     "title": "增强功能",
@@ -271,5 +276,105 @@
       "classification_events_per_second": "{{name}} 的每秒分类速度"
     },
     "averageInf": "平均推理时间"
+  },
+  "showAllTabs": "显示全部标签页",
+  "showLessTabs": "收起",
+  "health": {
+    "title": "运行状况",
+    "notices": {
+      "title": "系统提示",
+      "empty": "你的 Frigate 运行正常",
+      "acknowledge": "确认",
+      "acknowledgeHint": "再次出现前不再显示",
+      "mute": "忽略",
+      "muteHint": "不再显示此提示",
+      "unmute": "取消忽略",
+      "showAgain": "重新显示",
+      "openSettings": "打开设置",
+      "openLink": "打开链接",
+      "noMatches": "没有符合筛选条件的系统提示",
+      "hiddenTitle": "已隐藏",
+      "noneHidden": "没有已隐藏的系统提示",
+      "showAll": "全部重新显示",
+      "showAllTitle": "重新显示所有已隐藏的系统提示？",
+      "showAllDesc": "所有已确认和已忽略的系统提示都会重新出现在提示列表中，包括配置和视频流检查。",
+      "occurred_other": "上次出现于 {{lastTime}} · 自 {{time}} 起共 {{count}} 次",
+      "acknowledgedAt": "已于 {{time}} 确认",
+      "mutedAt": "已于 {{time}} 忽略",
+      "filter": {
+        "showHidden": "显示已隐藏",
+        "severity": "级别",
+        "error": "错误",
+        "warning": "警告",
+        "info": "信息"
+      },
+      "kinds": {
+        "detector_stuck": "检测器 {{detector}} 停止响应后已重启",
+        "model_download_failed": "为 {{model}} 下载 {{file}} 失败：{{error}}",
+        "skipped_detections": "检测速度跟不上，超过一分钟跳过了 {{pct}}% 的画面帧",
+        "ffmpeg_high_cpu": "FFmpeg CPU 使用率过高（平均 {{cpu}}%）",
+        "detect_high_cpu": "检测 CPU 使用率过高（平均 {{cpu}}%）",
+        "shm_too_low": "请将 /dev/shm 分配（{{total}} MB）至少增加到 {{min}} MB",
+        "object_processing_behind": "追踪目标处理速度跟不上，导致摄像头画面帧被丢弃。请检查 CPU 使用情况，以及容器或虚拟机的 CPU 限制或绑核是否让 Frigate 可用 CPU 太少",
+        "failed_login_other": "{{user}} 的多次登录尝试失败",
+        "update_available": "Frigate {{version}} 已发布",
+        "analytics_prompt": "考虑分享匿名使用统计，帮助开发者改进 Frigate",
+        "failed_login_one": "尝试登录 {{user}} 失败"
+      },
+      "streamPrefix": "视频流 {{index}}：{{message}}",
+      "streamPrefixRestream": "视频流 {{index}}（通过 go2rtc）：{{message}}",
+      "streamProbeFailed": "无法探测视频流 {{index}}：{{error}}",
+      "cameraProbeFailed": "无法探测视频流：{{error}}",
+      "occurred_one": "发生于 {{time}}"
+    },
+    "hardware": {
+      "title": "硬件",
+      "objectDetection": "目标检测",
+      "hardwareAcceleration": "硬件加速",
+      "enrichments": {
+        "title": "增强功能",
+        "semantic_search": "语义搜索",
+        "face_recognition": "人脸识别",
+        "lpr": "车牌识别",
+        "audio_transcription": "音频转录"
+      },
+      "cameraConnections": "摄像头连接",
+      "allCamerasExcellent": "所有摄像头的连接都很好。",
+      "fps": "{{camera}} / {{expected}} 帧/秒",
+      "nothingConfigured": "未配置",
+      "allCameras": "所有摄像头",
+      "probeUnavailable": "无法检测硬件",
+      "justStarted": "Frigate 刚刚启动",
+      "deviceNotFound": "当前系统中未找到 {{devices}}",
+      "detectorNotRunning": "检测器进程未运行",
+      "inferenceVerySlow": "推理速度非常慢（{{speed}} 毫秒）",
+      "inferenceSlow": "推理速度较慢（{{speed}} 毫秒）",
+      "inferenceMs": "{{speed}} 毫秒",
+      "customArgs": "自定义 FFmpeg 参数",
+      "customArgsNotVerified": "自定义 FFmpeg 参数（未验证）",
+      "hwaccelNotConfigured": "当前没有使用硬件解码，但可以使用 {{family}}。请在 FFmpeg 设置中选择它",
+      "hwaccelHardwareMissing": "已配置 {{family}}，但硬件检测没有报告它",
+      "unrecognizedDevice": "无法识别的设备覆盖项，未验证",
+      "decoderUsage": "解码器 {{usage}}",
+      "remoteProvider": "远程服务商",
+      "acceleratorMissing": "已配置 {{device}}，但未找到兼容的加速器",
+      "modelNotRunYet": "模型尚未运行，首次使用后会验证设备",
+      "fellBackToCpu": "已配置 {{device}}，但正在使用 CPU 运行",
+      "cpuDespiteAccelerator": "有可用的加速器，但正在使用 CPU 运行",
+      "probed": "已检测",
+      "probing": "检测中…",
+      "recheck": "重新检查硬件",
+      "cameraStreams": "摄像头视频流",
+      "streamsNotChecked": "尚未检查",
+      "streamsChecking": "正在检查 {{done}} / {{total}}",
+      "streamsClean": "没有视频流问题",
+      "checked": "已检查",
+      "runAgain": "重新运行",
+      "runStreamChecks": "运行视频流检查",
+      "streamsChecked_other": "已检查 {{count}} 个摄像头",
+      "streamsFlagged_other": "{{count}} 个有问题，已列在“系统提示”中",
+      "streamsChecked_one": "已检查 {{count}} 个摄像头",
+      "streamsFlagged_one": "{{count}} 项存在问题，已列在\"通知\"下方"
+    }
   }
 }

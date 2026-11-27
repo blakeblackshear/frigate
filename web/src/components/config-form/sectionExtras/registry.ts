@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import AnalyticsPreview from "./AnalyticsPreview";
 import SemanticSearchReindex from "./SemanticSearchReindex.tsx";
 import CameraReviewStatusToggles from "./CameraReviewStatusToggles";
 import ProxyRoleMap from "./ProxyRoleMap";
@@ -55,6 +56,9 @@ export const sectionRenderers: SectionRenderers = {
   },
   birdseye: {
     BirdseyeCameraReorder,
+  },
+  telemetry: {
+    AnalyticsPreview,
   },
 };
 

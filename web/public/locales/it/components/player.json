@@ -17,14 +17,6 @@
       "title": "Larghezza di banda:",
       "short": "Larghezza di banda"
     },
-    "latency": {
-      "title": "Latenza:",
-      "value": "{{seconds}} secondi",
-      "short": {
-        "title": "Latenza",
-        "value": "{{seconds}} sec"
-      }
-    },
     "droppedFrames": {
       "title": "Fotogrammi persi:",
       "short": {
@@ -48,6 +40,5 @@
       "submitFrigatePlusFailed": "Impossibile inviare il fotogramma a Frigate+"
     }
   },
-  "cameraDisabled": "La telecamera è disabilita",
   "cameraOff": "La telecamera è spenta"
 }

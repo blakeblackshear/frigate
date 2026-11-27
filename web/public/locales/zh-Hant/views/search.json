@@ -12,7 +12,7 @@
   "trackedObjectId": "追蹤物件編號",
   "filter": {
     "label": {
-      "cameras": "鏡頭",
+      "cameras": "攝影機",
       "labels": "標籤",
       "zones": "區域",
       "sub_labels": "子標籤",
@@ -25,12 +25,12 @@
       "max_speed": "最高速度",
       "recognized_license_plate": "已辨識的車牌",
       "has_clip": "包含片段",
-      "has_snapshot": "包含截圖",
+      "has_snapshot": "包含快照",
       "time_range": "時間範圍",
       "attributes": "屬性"
     },
     "searchType": {
-      "thumbnail": "截圖",
+      "thumbnail": "縮圖",
       "description": "說明"
     },
     "toast": {

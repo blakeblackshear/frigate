@@ -28,6 +28,8 @@ _MAX_INTERVAL = 300
 # Minimum seconds between VLM iterations when woken by detections (no zone filter)
 _DETECTION_COOLDOWN_WITHOUT_ZONE = 10
 
+MAX_WATCH_MINUTES = 1440
+
 # Max user/assistant turn pairs to keep in conversation history
 _MAX_HISTORY = 10
 
@@ -75,16 +77,19 @@ class VLMWatchRunner(threading.Thread):
         self.conversation: list[dict[str, Any]] = []
 
     def run(self) -> None:
-        self.job.status = JobStatusTypesEnum.running
-        self.job.start_time = time.time()
-        self._broadcast_status()
-        self.conversation = [{"role": "system", "content": self._build_system_prompt()}]
-
-        max_end_time = self.job.start_time + self.job.max_duration_minutes * 60
-
         try:
+            self.job.status = JobStatusTypesEnum.running
+            self.job.start_time = time.time()
+            self._broadcast_status()
+            self.conversation = [
+                {"role": "system", "content": self._build_system_prompt()}
+            ]
+
+            # monotonic so a wall clock step can't end the job early or let it overrun
+            max_end_time = time.monotonic() + self.job.max_duration_minutes * 60
+
             while not self.cancel_event.is_set():
-                if time.time() > max_end_time:
+                if time.monotonic() > max_end_time:
                     logger.debug(
                         "VLM watch job %s timed out after %d minutes",
                         self.job.id,
@@ -203,7 +208,13 @@ class VLMWatchRunner(threading.Thread):
             )
             reasoning = str(parsed.get("reasoning", ""))
             notification_message = str(parsed.get("notification_message", ""))
-        except (json.JSONDecodeError, ValueError, TypeError) as e:
+        except (
+            json.JSONDecodeError,
+            ValueError,
+            TypeError,
+            AttributeError,
+            OverflowError,
+        ) as e:
             logger.warning(
                 "VLM watch job %s: failed to parse VLM response: %s", self.job.id, e
             )
@@ -236,18 +247,18 @@ class VLMWatchRunner(threading.Thread):
         queue backup, but the loop only exits once a match has been seen
         *and* the cooldown period has elapsed.
         """
-        now = time.time()
+        now = time.monotonic()
         deadline = now + max_wait
         use_cooldown = not self.job.zones
         earliest_wake = now + _DETECTION_COOLDOWN_WITHOUT_ZONE if use_cooldown else 0
         triggered = False
 
         while not self.cancel_event.is_set():
-            remaining = deadline - time.time()
+            remaining = deadline - time.monotonic()
             if remaining <= 0:
                 break
 
-            if triggered and time.time() >= earliest_wake:
+            if triggered and time.monotonic() >= earliest_wake:
                 break
 
             result = self.detection_subscriber.check_for_update(
@@ -287,7 +298,7 @@ class VLMWatchRunner(threading.Thread):
                         "VLM watch job %s: detection match on %s, draining for %.0fs",
                         self.job.id,
                         self.job.camera,
-                        max(0, earliest_wake - time.time()),
+                        max(0, earliest_wake - time.monotonic()),
                     )
                     triggered = True
 
@@ -402,17 +413,17 @@ def start_vlm_watch_job(
             username=username,
         )
         cancel_ev = threading.Event()
+        runner = VLMWatchRunner(
+            job=job,
+            config=config,
+            cancel_event=cancel_ev,
+            frame_processor=frame_processor,
+            genai_manager=genai_manager,
+            dispatcher=dispatcher,
+        )
         _current_job = job
         _cancel_event = cancel_ev
 
-    runner = VLMWatchRunner(
-        job=job,
-        config=config,
-        cancel_event=cancel_ev,
-        frame_processor=frame_processor,
-        genai_manager=genai_manager,
-        dispatcher=dispatcher,
-    )
     runner.start()
 
     logger.debug(

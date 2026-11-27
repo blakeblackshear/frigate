@@ -35,15 +35,42 @@ class TestGetOrtSessionOptions(unittest.TestCase):
             ort.GraphOptimizationLevel.ORT_ENABLE_BASIC,
         )
 
-    def test_other_models_use_defaults(self):
-        for model_type in [
-            None,
-            EnrichmentModelTypeEnum.paddleocr.value,
-            EnrichmentModelTypeEnum.arcface.value,
-            ModelTypeEnum.rfdetr.value,
-        ]:
+    def test_cpu_enrichment_models_disable_spinning(self):
+        for model_type in EnrichmentModelTypeEnum:
             with self.subTest(model_type=model_type):
-                self.assertIsNone(get_ort_session_options(model_type))
+                options = get_ort_session_options(model_type.value, cpu=True)
+
+                self.assertEqual(
+                    options.get_session_config_entry("session.intra_op.allow_spinning"),
+                    "0",
+                )
+
+    def test_gpu_enrichment_models_keep_spinning(self):
+        options = get_ort_session_options(EnrichmentModelTypeEnum.arcface.value)
+
+        with self.assertRaises(RuntimeError):
+            options.get_session_config_entry("session.intra_op.allow_spinning")
+
+    def test_arcface_keeps_default_optimization(self):
+        options = get_ort_session_options(EnrichmentModelTypeEnum.arcface.value)
+
+        self.assertEqual(
+            options.graph_optimization_level,
+            ort.GraphOptimizationLevel.ORT_ENABLE_ALL,
+        )
+
+    def test_only_cpu_enrichment_models_disable_the_cpu_arena(self):
+        for model_type in EnrichmentModelTypeEnum:
+            for cpu in [False, True]:
+                with self.subTest(model_type=model_type, cpu=cpu):
+                    options = get_ort_session_options(model_type.value, cpu=cpu)
+                    self.assertEqual(options.enable_cpu_mem_arena, not cpu)
+
+    def test_detector_models_use_defaults(self):
+        for model_type in [None, ModelTypeEnum.rfdetr.value]:
+            for cpu in [False, True]:
+                with self.subTest(model_type=model_type, cpu=cpu):
+                    self.assertIsNone(get_ort_session_options(model_type, cpu=cpu))
 
 
 class TestCudaGraphRunner(unittest.TestCase):

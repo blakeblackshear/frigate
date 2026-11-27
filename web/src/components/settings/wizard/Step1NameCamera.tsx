@@ -81,7 +81,14 @@ export default function Step1NameCamera({
       username: z.string().optional(),
       password: z.string().optional(),
       brandTemplate: z.enum(CAMERA_BRAND_VALUES).optional(),
-      onvifPort: z.coerce.number().int().min(1).max(65535).optional(),
+      onvifPort: z.coerce
+        .number<number>({
+          message: t("cameraWizard.step1.errors.onvifPortInvalid"),
+        })
+        .int(t("cameraWizard.step1.errors.onvifPortInvalid"))
+        .min(1, t("cameraWizard.step1.errors.onvifPortInvalid"))
+        .max(65535, t("cameraWizard.step1.errors.onvifPortInvalid"))
+        .optional(),
       useDigestAuth: z.boolean().optional(),
       customUrl: z
         .string()

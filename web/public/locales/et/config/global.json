@@ -9,9 +9,6 @@
         }
     },
     "birdseye": {
-        "mode": {
-            "label": "Jälgimisrežiim"
-        },
         "order": {
             "label": "Positsioon"
         },
@@ -26,7 +23,8 @@
             "scaling_factor": {
                 "label": "Skaleerimistegur"
             }
-        }
+        },
+        "label": "Vaade linnulennult"
     },
     "version": {
         "label": "Praegune seadistuse versioon",
@@ -53,7 +51,9 @@
             "save_attempts": {
                 "label": "Salvestamiskatsed"
             }
-        }
+        },
+        "label": "Objektide klassifitseerimine",
+        "description": "Objektide märgistuste täpsustamiseks või seisundite klassifitseerimiseks kasutatavate klassifitseerimismudelite seadistused."
     },
     "semantic_search": {
         "triggers": {
@@ -118,11 +118,18 @@
             "enabled": {
                 "label": "Luba häired",
                 "description": "Luba või keela kõigi kaamerate häirete genereerimine; seda saab kaamerati eraldi muuta."
+            },
+            "labels": {
+                "label": "Häirete sildid",
+                "description": "Objektide sildid, mille alusel häiret luua (nt: auto, isik)."
+            },
+            "required_zones": {
+                "label": "Nõutavad tsoonid"
             }
         }
     },
     "audio_transcription": {
-        "label": "Audio transkriptsioon",
+        "label": "Heli üleskirjutus",
         "live_enabled": {
             "label": "Reaalajas transkriptsioon"
         },
@@ -132,7 +139,7 @@
         },
         "language": {
             "label": "Üleskirjutuse keel",
-            "description": "Üleskirjutuse/tõlkimise jaoks kasutatav keelekood (näiteks „en” inglise keele puhul). Toetatud keelekoodid leiad lehelt https://whisper-api.com/docs/languages/."
+            "description": "Üleskirjutuse/tõlkimise jaoks kasutatav keelekood (näiteks „en“ inglise keele puhul) või „auto“, kui tahad et keelemudel tuvastaks selle automaatselt. Toetatud keelekoodid leiad lehelt https://whisper-api.com/docs/languages/."
         },
         "device": {
             "label": "Üleskirjutusseade"
@@ -142,7 +149,7 @@
         }
     },
     "detect": {
-        "label": "Objekti tuvastus",
+        "label": "Objektituvastus",
         "enabled": {
             "label": "Luba objektituvastus"
         },
@@ -351,62 +358,8 @@
             "label": "Ühikute süsteem"
         }
     },
-    "detectors": {
-        "label": "Detektori riistvara",
-        "cpu": {
-            "label": "CPU"
-        },
-        "deepstack": {
-            "label": "DeepStack"
-        },
-        "edgetpu": {
-            "label": "EdgeTPU"
-        },
-        "onnx": {
-            "label": "ONNX",
-            "device": {
-                "label": "Seadme tüüp"
-            }
-        },
-        "rknn": {
-            "label": "RKNN"
-        },
-        "openvino": {
-            "label": "OpenVINO"
-        },
-        "tensorrt": {
-            "label": "TensorRT"
-        },
-        "teflon_tfl": {
-            "label": "Teflon"
-        },
-        "synaptics": {
-            "label": "Synaptics"
-        },
-        "memryx": {
-            "device": {
-                "label": "Seadme asukoht"
-            },
-            "label": "MemryX"
-        },
-        "hailo8l": {
-            "label": "Hailo-8/Hailo-8L"
-        },
-        "zmq": {
-            "label": "ZMQ IPC"
-        },
-        "axengine": {
-            "label": "AXEngine NPU"
-        },
-        "degirum": {
-            "label": "DeGirum"
-        }
-    },
     "logger": {
         "label": "Logimine"
-    },
-    "model": {
-        "label": "Tuvastusmudel"
     },
     "record": {
         "label": "Salvestus",
@@ -445,7 +398,8 @@
         "effect": {
             "label": "Ajatempli efekt",
             "description": "Ajatempli teksti visuaalne efekt (puudub, ühtlane, vari)."
-        }
+        },
+        "label": "Ajatempli stiil"
     },
     "onvif": {
         "user": {
@@ -474,5 +428,8 @@
     },
     "profiles": {
         "label": "Profiilid"
+    },
+    "active_profile": {
+        "label": "Aktiivne profiil"
     }
 }

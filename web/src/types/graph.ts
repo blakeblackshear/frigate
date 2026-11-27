@@ -1,3 +1,10 @@
+import type ApexCharts from "apexcharts";
+
+// apexcharts declares this type but does not export it
+export type ApexAxisChartSeries = NonNullable<
+  ApexCharts.ApexDrilldownSeries["series"]
+>;
+
 export type GraphDataPoint = {
   x: Date;
   y: number;

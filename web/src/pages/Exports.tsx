@@ -5,6 +5,7 @@ import {
   CaseCard,
   ExportCard,
 } from "@/components/card/ExportCard";
+import { isCaseDownloadReady } from "@/utils/exportUtil";
 import ActivityIndicator from "@/components/indicators/activity-indicator";
 import {
   AlertDialog,
@@ -171,6 +172,17 @@ function Exports() {
       return true;
     });
   }, [activeExportJobs, exportFilter?.cameras]);
+
+  // Download readiness ignores the camera filter because the zip includes every camera
+  const pendingCaseIds = useMemo(
+    () =>
+      new Set(
+        activeExportJobs.flatMap((job) =>
+          job.export_case_id ? [job.export_case_id] : [],
+        ),
+      ),
+    [activeExportJobs],
+  );
 
   const activeJobsByCase = useMemo<{ [caseId: string]: ExportJob[] }>(() => {
     const grouped: { [caseId: string]: ExportJob[] } = {};
@@ -452,6 +464,28 @@ function Exports() {
     [cases, selectedCaseId],
   );
 
+  const selectedCaseExports = selectedCaseId
+    ? exportsByCase[selectedCaseId] || []
+    : [];
+  const selectedCasePending =
+    selectedCaseId !== undefined && pendingCaseIds.has(selectedCaseId);
+  const selectedCaseHasContent =
+    selectedCaseExports.length > 0 || selectedCasePending;
+  const selectedCaseDownloadReady = isCaseDownloadReady(
+    selectedCaseExports,
+    selectedCasePending,
+  );
+  const downloadButtonContent = (
+    <>
+      <LuDownload className="text-secondary-foreground" />
+      {!isMobile && (
+        <div className="text-primary">
+          {t("button.download", { ns: "common" })}
+        </div>
+      )}
+    </>
+  );
+
   const uncategorizedExports = useMemo(
     () => exportsByCase["none"] || [],
     [exportsByCase],
@@ -463,17 +497,11 @@ function Exports() {
       exportCaseId?: string,
     ) => {
       try {
-        let savedCaseId = exportCaseId;
-
         if (exportCaseId) {
           await axios.patch(`cases/${exportCaseId}`, payload);
         } else {
           const response = await axios.post("cases", payload);
-          savedCaseId = response.data.id;
-        }
-
-        if (savedCaseId) {
-          setSelectedCaseId(savedCaseId);
+          setSelectedCaseId(response.data.id);
         }
 
         mutate();
@@ -778,26 +806,31 @@ function Exports() {
                   onUpdateFilter={setExportFilter}
                 />
                 <div className="flex items-center gap-1 md:gap-2">
-                  {(exportsByCase[selectedCase.id]?.length ?? 0) > 0 && (
-                    <Button
-                      asChild
-                      className="flex items-center gap-2 p-2"
-                      size="sm"
-                      aria-label={t("button.download", { ns: "common" })}
-                    >
-                      <a
-                        download
-                        href={`${baseUrl}api/cases/${selectedCase.id}/download`}
+                  {selectedCaseHasContent &&
+                    (selectedCaseDownloadReady ? (
+                      <Button
+                        asChild
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("button.download", { ns: "common" })}
                       >
-                        <LuDownload className="text-secondary-foreground" />
-                        {!isMobile && (
-                          <div className="text-primary">
-                            {t("button.download", { ns: "common" })}
-                          </div>
-                        )}
-                      </a>
-                    </Button>
-                  )}
+                        <a
+                          download
+                          href={`${baseUrl}api/cases/${selectedCase.id}/download`}
+                        >
+                          {downloadButtonContent}
+                        </a>
+                      </Button>
+                    ) : (
+                      <Button
+                        className="flex items-center gap-2 p-2"
+                        size="sm"
+                        aria-label={t("button.download", { ns: "common" })}
+                        disabled
+                      >
+                        {downloadButtonContent}
+                      </Button>
+                    ))}
                   {isAdmin && (
                     <>
                       <Button
@@ -880,11 +913,16 @@ function Exports() {
           exports={exports}
           exportsByCase={exportsByCase}
           activeJobs={activeJobsByCase["none"] || []}
+          pendingCaseIds={pendingCaseIds}
           selectedExports={selectedExports}
           selectionMode={selectionMode}
           isLoading={cases === undefined || rawExports === undefined}
           onSelectExport={onSelectExport}
           setSelectedCaseId={setSelectedCaseId}
+          onEditCase={(exportCase) =>
+            setCaseDialog({ mode: "edit", exportCase })
+          }
+          onDeleteCase={setCaseToDelete}
           setSelected={setSelected}
           renameClip={onHandleRename}
           setDeleteClip={setDeleteClip}
@@ -902,11 +940,14 @@ type AllExportsViewProps = {
   exports: Export[];
   exportsByCase: { [caseId: string]: Export[] };
   activeJobs: ExportJob[];
+  pendingCaseIds: Set<string>;
   selectedExports: Export[];
   selectionMode: boolean;
   isLoading: boolean;
   onSelectExport: (e: Export) => void;
   setSelectedCaseId: (id: string) => void;
+  onEditCase: (exportCase: ExportCase) => void;
+  onDeleteCase: (exportCase: ExportCase) => void;
   setSelected: (e: Export) => void;
   renameClip: (id: string, update: string) => void;
   setDeleteClip: (d: DeleteClipType | undefined) => void;
@@ -919,11 +960,14 @@ function AllExportsView({
   exports,
   exportsByCase,
   activeJobs,
+  pendingCaseIds,
   selectedExports,
   selectionMode,
   isLoading,
   onSelectExport,
   setSelectedCaseId,
+  onEditCase,
+  onDeleteCase,
   setSelected,
   renameClip,
   setDeleteClip,
@@ -991,9 +1035,12 @@ function AllExportsView({
                     className=""
                     exportCase={item}
                     exports={exportsByCase[item.id] || []}
+                    hasPendingJobs={pendingCaseIds.has(item.id)}
                     onSelect={() => {
                       setSelectedCaseId(item.id);
                     }}
+                    onEdit={onEditCase}
+                    onDelete={onDeleteCase}
                   />
                 ))}
               </div>

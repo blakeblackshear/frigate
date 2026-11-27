@@ -6,14 +6,10 @@
     "nameCannotContainHash": "이름에는 # 기호를 포함할 수 없습니다."
   },
   "details": {
-    "person": "사람",
-    "subLabelScore": "보조 레이블 신뢰도",
-    "face": "얼굴 상세정보",
     "timestamp": "타임스탬프",
     "unknown": "알 수 없음",
     "scoreInfo": "점수는 각 이미지에서 얼굴이 차지하는 크기로 가중치를 부여한 모든 얼굴 점수의 가중 평균입니다."
   },
-  "selectItem": "{{item}} 선택",
   "documentTitle": "얼굴 라이브러리 - Frigate",
   "uploadFaceImage": {
     "title": "얼굴 이미지 업로드",
@@ -21,8 +17,6 @@
   },
   "collections": "컬렉션",
   "createFaceLibrary": {
-    "title": "모음집 만들기",
-    "desc": "새로운 모음집 만들기",
     "new": "새 얼굴 등록",
     "nextSteps": "정확도를 높이기 위한 권장 사항:<li>'최근 인식' 탭을 사용하여 감지된 인물별 이미지를 선택하고 학습시키세요.</li><li>최상의 결과를 위해 정면을 바라보는 사진 위주로 등록하고, 각도가 틀어진 얼굴 이미지는 피하세요.</li></ul>"
   },
@@ -44,7 +38,6 @@
       "description": "얼굴 인식 기능이 작동하려면 라이브러리에 최소 한 개 이상의 얼굴을 등록해야 합니다."
     }
   },
-  "selectFace": "얼굴 선택",
   "deleteFaceLibrary": {
     "title": "이름 삭제",
     "desc": "정말로 '{{name}}' 컬렉션을 삭제하시겠습니까? 연결된 모든 얼굴이 영구적으로 삭제됩니다."
@@ -74,7 +67,6 @@
     "maxSize": "최대 크기: {{size}}MB"
   },
   "nofaces": "사용 가능한 얼굴 없음",
-  "pixels": "{{area}}px",
   "trainFaceAs": "다음으로 얼굴 학습:",
   "trainFace": "얼굴 학습",
   "toast": {

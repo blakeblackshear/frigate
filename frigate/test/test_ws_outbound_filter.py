@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from typing import Any
 
 from frigate.comms.ws import (
+    _WS_BLOCKED_TOPICS,
     WebSocketClient,
     _classify_outbound,
     _collect_zone_names,
@@ -105,6 +106,12 @@ class TestClassifyOutbound(unittest.TestCase):
 
     def test_birdseye_layout_is_unrestricted_only(self):
         self.assertEqual(self._classify("birdseye_layout"), ("unrestricted_only", None))
+
+    def test_notices_is_admin_only(self):
+        self.assertEqual(self._classify("notices"), ("admin_only", None))
+
+    def test_update_notice_is_blocked_inbound(self):
+        self.assertIn("update_notice", _WS_BLOCKED_TOPICS)
 
     # --- Camera-prefixed ---
 
@@ -294,6 +301,19 @@ class TestMaterializeForWs(unittest.TestCase):
         )
         full = json.dumps({"topic": topic, "payload": payload})
         return _materialize_for_ws(ws, topic, full, scope, parsed, self.config)
+
+    def test_admin_only_topic_reaches_admin_not_viewer(self):
+        admin = SimpleNamespace(environ={"HTTP_REMOTE_ROLE": "admin"})
+        viewer = SimpleNamespace(environ={"HTTP_REMOTE_ROLE": "viewer"})
+        scope = ("admin_only", None)
+
+        self.assertEqual(
+            _materialize_for_ws(admin, "notices", "msg", scope, None, self.config),
+            "msg",
+        )
+        self.assertIsNone(
+            _materialize_for_ws(viewer, "notices", "msg", scope, None, self.config)
+        )
 
     # --- Globals: every authenticated client sees them ---
 
@@ -497,6 +517,8 @@ class TestMaterializeForWs(unittest.TestCase):
                     "garage": {"camera_fps": 5.0, "pid": 1236},
                 },
                 "detectors": {"cpu": {"detection_start": 0.0, "inference_speed": 10}},
+                "cpu_usages": {"1234": {"cpu": "1.0", "cmdline": "ffmpeg -i rtsp://"}},
+                "bandwidth_usages": {"1234": {"bandwidth": 1.0}},
                 "service": {"uptime": 12345, "version": "0.16.0"},
                 "camera_fps": 15.0,
                 "detection_fps": 6.0,
@@ -519,6 +541,17 @@ class TestMaterializeForWs(unittest.TestCase):
         self.assertEqual(inner["detection_fps"], 6.0)
         self.assertIn("detectors", inner)
         self.assertIn("service", inner)
+
+    def test_stats_non_admin_gets_no_cmdline(self):
+        for role in ("viewer", "house_only"):
+            message = self._materialize(_ws(role), "stats", self._stats_payload())
+            inner = json.loads(json.loads(message)["payload"])  # type: ignore[arg-type]
+            self.assertEqual(inner["cpu_usages"], {"1234": {"cpu": "1.0"}})
+            self.assertNotIn("bandwidth_usages", inner)
+
+        message = self._materialize(_ws("viewer"), "stats", self._stats_payload())
+        inner = json.loads(json.loads(message)["payload"])  # type: ignore[arg-type]
+        self.assertIn("garage", inner["cameras"])
 
     def test_stats_restricted_with_no_allowed_cameras_still_sends_aggregates(self):
         """A restricted role whose allow-list contains only nonexistent cameras

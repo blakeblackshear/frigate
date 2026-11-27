@@ -6,7 +6,10 @@ import os
 import numpy as np
 
 from frigate.const import MODEL_CACHE_DIR
-from frigate.detectors.detection_runners import get_optimized_runner
+from frigate.detectors.detection_runners import (
+    get_optimized_runner,
+    record_loaded_device,
+)
 from frigate.embeddings.types import EnrichmentModelTypeEnum
 from frigate.log import suppress_stderr_during
 from frigate.util.downloader import ModelDownloader
@@ -62,13 +65,18 @@ class FaceNetEmbedding(BaseEmbedding):
             if self.downloader:
                 self.downloader.wait_for_download()
 
+            model_path = os.path.join(MODEL_CACHE_DIR, "facedet/facenet.tflite")
+
             # Suppress TFLite delegate creation messages that bypass Python logging
             with suppress_stderr_during("tflite_interpreter_init"):
-                self.runner = Interpreter(
-                    model_path=os.path.join(MODEL_CACHE_DIR, "facedet/facenet.tflite"),
-                    num_threads=2,
-                )
+                self.runner = Interpreter(model_path=model_path, num_threads=2)
                 self.runner.allocate_tensors()
+
+            # tflite never goes through get_optimized_runner, so the small face
+            # model would otherwise never report a device
+            record_loaded_device(
+                model_path, EnrichmentModelTypeEnum.facenet.value, "CPU"
+            )
             self.tensor_input_details = self.runner.get_input_details()
             self.tensor_output_details = self.runner.get_output_details()
 

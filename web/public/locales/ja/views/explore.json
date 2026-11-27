@@ -119,57 +119,11 @@
     "details": "詳細",
     "snapshot": "スナップショット",
     "video": "動画",
-    "object_lifecycle": "オブジェクトのライフサイクル",
     "thumbnail": "サムネイル",
     "tracking_details": "追跡詳細"
   },
   "objectLifecycle": {
-    "title": "オブジェクトのライフサイクル",
-    "noImageFound": "このタイムスタンプの画像は見つかりません。",
-    "createObjectMask": "オブジェクトマスクを作成",
-    "adjustAnnotationSettings": "アノテーション設定を調整",
-    "scrollViewTips": "スクロールしてこのオブジェクトのライフサイクルの重要な瞬間を表示します。",
-    "autoTrackingTips": "オートトラッキングカメラではバウンディングボックスの位置が正確でない場合があります。",
-    "count": "{{first}} / {{second}}",
-    "trackedPoint": "追跡ポイント",
-    "lifecycleItemDesc": {
-      "visible": "{{label}} を検出",
-      "entered_zone": "{{label}} が {{zones}} に進入",
-      "active": "{{label}} がアクティブになりました",
-      "stationary": "{{label}} が静止しました",
-      "attribute": {
-        "faceOrLicense_plate": "{{label}} の {{attribute}} を検出",
-        "other": "{{label}} を {{attribute}} として認識"
-      },
-      "gone": "{{label}} が離脱",
-      "heard": "{{label}} を検知（音声）",
-      "external": "{{label}} を検出",
-      "header": {
-        "zones": "ゾーン",
-        "ratio": "比率",
-        "area": "面積"
-      }
-    },
-    "annotationSettings": {
-      "title": "アノテーション設定",
-      "showAllZones": {
-        "title": "すべてのゾーンを表示",
-        "desc": "オブジェクトがゾーンに入ったフレームでは常にゾーンを表示します。"
-      },
-      "offset": {
-        "label": "アノテーションオフセット",
-        "desc": "このデータはカメラの detect フィードから来ていますが、record フィードの画像に重ねて表示されます。2つのストリームが完全に同期していない可能性があるため、バウンディングボックスと映像が完全には一致しないことがあります。<code>annotation_offset</code> フィールドで調整できます。",
-        "millisecondsToOffset": "detect のアノテーションをオフセットするミリ秒数。<em>既定: 0</em>",
-        "tips": "ヒント: 左から右へ歩く人物のイベントクリップを想像してください。タイムラインのバウンディングボックスが人物より常に左側にあるなら値を小さく、常に先行しているなら値を大きくします。",
-        "toast": {
-          "success": "{{camera}} のアノテーションオフセットを設定ファイルに保存しました。変更を適用するには Frigate を再起動してください。"
-        }
-      }
-    },
-    "carousel": {
-      "previous": "前のスライド",
-      "next": "次のスライド"
-    }
+    "noImageFound": "このタイムスタンプの画像は見つかりません。"
   },
   "itemMenu": {
     "downloadVideo": {
@@ -179,10 +133,6 @@
     "downloadSnapshot": {
       "label": "スナップショットをダウンロード",
       "aria": "スナップショットをダウンロード"
-    },
-    "viewObjectLifecycle": {
-      "label": "オブジェクトのライフサイクルを表示",
-      "aria": "オブジェクトのライフサイクルを表示"
     },
     "findSimilar": {
       "label": "類似を検索",

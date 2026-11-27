@@ -425,5 +425,8 @@
   "static": "[ยังไม่แปล: Static]",
   "white_noise": "[ยังไม่แปล: White Noise]",
   "pink_noise": "[ยังไม่แปล: Pink Noise]",
-  "television": "[ยังไม่แปล: Television]"
+  "television": "[ยังไม่แปล: Television]",
+  "change_ringing": "เปลี่ยนเสียงเตือน",
+  "liquid": "ของเหลว",
+  "splash": "สาด"
 }

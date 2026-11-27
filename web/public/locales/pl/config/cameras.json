@@ -357,10 +357,6 @@
         }
     },
     "birdseye": {
-        "mode": {
-            "label": "Tryb Birdseye",
-            "description": "Określa, kiedy kamery pojawiają się w Birdseye: objects (tylko obiekty), motion (ruch) lub continuous (ciągły)."
-        },
         "order": {
             "label": "Kolejność kamer",
             "description": "Pozycja numeryczna kontrolująca kolejność kamery w układzie Birdseye."

@@ -22,5 +22,20 @@
                 "description": "Predvolené výstupné argumenty pre streamy rolí záznamov."
             }
         }
+    },
+    "version": {
+        "label": "Aktuálna verzia"
+    },
+    "safe_mode": {
+        "label": "Bezpečný mód"
+    },
+    "environment_vars": {
+        "label": "Premenné prostredia"
+    },
+    "logger": {
+        "label": "Logujem"
+    },
+    "audio": {
+        "label": "Detekcia zvuku"
     }
 }

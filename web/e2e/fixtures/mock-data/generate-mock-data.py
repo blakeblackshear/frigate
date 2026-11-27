@@ -102,11 +102,12 @@ def generate_config():
         snapshot = config.model_dump()
 
     # Runtime-computed fields not in the Pydantic dump
-    all_attrs = set()
-    for attrs in snapshot.get("model", {}).get("attributes_map", {}).values():
-        all_attrs.update(attrs)
-    snapshot["model"]["all_attributes"] = sorted(all_attrs)
-    snapshot["model"]["colormap"] = {}
+    for model in snapshot.get("models", []):
+        all_attrs = set()
+        for attrs in model.get("attributes_map", {}).values():
+            all_attrs.update(attrs)
+        model["all_attributes"] = sorted(all_attrs)
+        model["colormap"] = {}
 
     return snapshot
 
@@ -233,7 +234,6 @@ def generate_events():
             thumbnail=None,
             has_clip=True,
             has_snapshot=True,
-            retain_indefinitely=False,
             plus_id=None,
             model_hash="abc123",
             detector_type="cpu",
@@ -264,7 +264,6 @@ def generate_events():
             thumbnail=None,
             has_clip=True,
             has_snapshot=True,
-            retain_indefinitely=False,
             plus_id=None,
             model_hash="def456",
             detector_type="cpu",
@@ -295,7 +294,6 @@ def generate_events():
             thumbnail=None,
             has_clip=False,
             has_snapshot=True,
-            retain_indefinitely=False,
             plus_id=None,
             model_hash="ghi789",
             detector_type="cpu",

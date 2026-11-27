@@ -1,9 +1,10 @@
 """Tests for frigate.util.builtin helpers."""
 
 import unittest
+from multiprocessing import Value
 from unittest.mock import patch
 
-from frigate.util.builtin import EventsPerSecond
+from frigate.util.builtin import EventsPerSecond, InferenceSpeed
 
 
 class TestEventsPerSecond(unittest.TestCase):
@@ -35,6 +36,43 @@ class TestEventsPerSecond(unittest.TestCase):
             # jump well past the window so every timestamp ages out
             clock[0] += 100.0
             self.assertEqual(eps.eps(), 0.0)
+
+    def test_burst_after_start_is_not_divided_by_a_tiny_window(self) -> None:
+        eps = EventsPerSecond(last_n_seconds=10)
+        clock = [1000.0]
+        with patch("frigate.util.builtin.time.monotonic", side_effect=lambda: clock[0]):
+            eps.start()
+            # eleven buffered frames arrive within 100 ms of starting
+            for _ in range(11):
+                clock[0] += 0.01
+                eps.update()
+            # 11 events over less than a second is at most 11 per second
+            self.assertLessEqual(eps.eps(), 11.0)
+
+    def test_subsecond_window_keeps_its_rate(self) -> None:
+        eps = EventsPerSecond(last_n_seconds=0.5)
+        clock = [1000.0]
+        with patch("frigate.util.builtin.time.monotonic", side_effect=lambda: clock[0]):
+            eps.start()
+            # twenty events per second for two seconds
+            for _ in range(40):
+                clock[0] += 0.05
+                eps.update()
+            # read between events, so none sits exactly on the window edge
+            clock[0] += 0.01
+            self.assertAlmostEqual(eps.eps(), 20.0)
+
+
+class TestInferenceSpeed(unittest.TestCase):
+    def test_first_inference_seeds_the_average(self) -> None:
+        metric = Value("d", 0.0)
+        speed = InferenceSpeed(metric)
+
+        speed.update(0.02)
+        self.assertEqual(metric.value, 0.02)
+
+        speed.update(0.12)
+        self.assertAlmostEqual(metric.value, 0.03)
 
 
 if __name__ == "__main__":

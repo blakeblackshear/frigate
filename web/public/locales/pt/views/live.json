@@ -1,5 +1,4 @@
 {
-  "documentTitle": "Ao vivo - Frigate",
   "documentTitle.withCamera": "{{camera}} - Ao vivo - Frigate",
   "twoWayTalk": {
     "disable": "Desativar conversa bidirecional",
@@ -53,10 +52,6 @@
     }
   },
   "lowBandwidthMode": "Modo de baixa largura de banda",
-  "camera": {
-    "enable": "Habilitar câmara",
-    "disable": "Desativar câmara"
-  },
   "muteCameras": {
     "disable": "Ativar áudio de todas as câmaras",
     "enable": "Silenciar todas as câmaras"
@@ -110,14 +105,12 @@
     "title": "Transmissão",
     "audio": {
       "tips": {
-        "title": "O áudio deve ser emitido pela sua câmara e configurado no go2rtc para esta transmissão.",
-        "documentation": "Leia a documentação "
+        "title": "O áudio deve ser emitido pela sua câmara e configurado no go2rtc para esta transmissão."
       },
       "available": "O áudio está disponível para esta transmissão",
       "unavailable": "O áudio não está disponível para esta transmissão"
     },
     "twoWayTalk": {
-      "tips.documentation": "Leia a documentação ",
       "unavailable": "Conversa bidirecional não está disponível para esta transmissão",
       "tips": "Seu dispositivo deve suportar o recurso e o WebRTC deve ser configurado para conversa bidirecional.",
       "available": "Conversa bidirecional está disponível para esta transmissão"
@@ -133,7 +126,6 @@
   },
   "cameraSettings": {
     "title": "{{camera}} configurações",
-    "cameraEnabled": "Câmara habilitada",
     "objectDetection": "Detecção de objeto",
     "recording": "Gravando",
     "audioDetection": "Detecção de áudio",
@@ -146,8 +138,7 @@
       "active_objects": "Objetos ativos",
       "motion": "Movimento",
       "all": "Todos"
-    },
-    "notAllTips": "Sua configuração de retenção de gravação {{source}} está definida como <code>modo: {{effectiveRetainMode}}</code>, portanto, esta gravação on-demand manterá apenas segmentos com {{effectiveRetainModeName}}."
+    }
   },
   "editLayout": {
     "label": "Editar layout",

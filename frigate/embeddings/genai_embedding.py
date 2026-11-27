@@ -68,6 +68,10 @@ class GenAIEmbedding:
                 f"Invalid embedding_type '{embedding_type}'. Must be 'text' or 'vision'."
             )
 
+        # Callers index the result, so an empty provider response must raise
+        if not embeddings:
+            raise ValueError(f"Empty {embedding_type} embedding response from provider")
+
         result = []
         for emb in embeddings:
             arr = np.asarray(emb, dtype=np.float32)

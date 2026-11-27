@@ -5,6 +5,7 @@ per-camera gating those processors apply once they exist.
 """
 
 import sys
+import threading
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -18,6 +19,8 @@ _MOCK_MODULES = [
 for mod in _MOCK_MODULES:
     if mod not in sys.modules:
         sys.modules[mod] = MagicMock()
+
+from frigate.config.camera.review import ImageSourceEnum  # noqa: E402
 
 # imported from the maintainer to avoid tripping the circular import between
 # the maintainer and the processor modules
@@ -211,3 +214,58 @@ class TestObjectDescriptionCameraGating(unittest.TestCase):
 
         mock_create_thumbnail.assert_called_once()
         self.assertEqual(len(processor.tracked_events["1234.5-abcdef"]), 1)
+
+
+class TestReviewDescriptionOffLoop(unittest.TestCase):
+    """Frame extraction for a finished review must not block process_data."""
+
+    def test_recording_frames_extracted_off_the_caller_thread(self):
+        camera = MagicMock()
+        camera.review.genai.enabled = True
+        camera.review.genai.alerts = True
+        camera.review.genai.image_source = ImageSourceEnum.recordings
+        camera.review.genai.debug_save_thumbnails = False
+        config = MagicMock()
+        config.cameras = {"front": camera}
+        processor = ReviewDescriptionProcessor(
+            config, MagicMock(), MagicMock(), MagicMock()
+        )
+
+        release = threading.Event()
+        extracted = threading.Event()
+        analyzed = threading.Event()
+
+        def slow_frames(*args, **kwargs):
+            release.wait(5)
+            extracted.set()
+            return [(b"jpg", 1.0)]
+
+        with (
+            patch.object(processor, "get_recording_frames", side_effect=slow_frames),
+            patch.object(
+                processor, "start_analysis", side_effect=lambda *a, **k: analyzed.set()
+            ) as start_analysis,
+        ):
+            processor.process_data(
+                {
+                    "type": "end",
+                    "after": {
+                        "id": "1234.5-abcdef",
+                        "camera": "front",
+                        "severity": "alert",
+                        "start_time": 100.0,
+                        "end_time": 110.0,
+                    },
+                },
+                PostProcessDataEnum.review,
+            )
+
+            self.assertFalse(extracted.is_set())
+            release.set()
+            self.assertTrue(extracted.wait(5))
+
+            self.assertTrue(analyzed.wait(5))
+            start_analysis.assert_called_once()
+            final_data = start_analysis.call_args.args[1]
+            self.assertEqual(final_data["start_time"], 100.0)
+            self.assertEqual(final_data["end_time"], 110.0)

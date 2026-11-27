@@ -9,8 +9,8 @@ import logging
 import os
 import unittest
 
+from peewee import SqliteDatabase
 from peewee_migrate import Router
-from playhouse.sqlite_ext import SqliteExtDatabase
 from playhouse.sqliteq import SqliteQueueDatabase
 
 from frigate.api.media_auth import (
@@ -20,8 +20,9 @@ from frigate.api.media_auth import (
     resolve_media_uri,
 )
 from frigate.config import FrigateConfig
+from frigate.const import CLIPS_DIR, EXPORT_DIR
 from frigate.models import Event, Export, Recordings, ReviewSegment
-from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS
+from frigate.test.const import TEST_DB, TEST_DB_CLEANUPS, TEST_DB_PRAGMAS
 
 _CONFIG = {
     "mqtt": {"host": "mqtt"},
@@ -121,6 +122,11 @@ class TestResolveMediaUri(unittest.TestCase):
             MediaAuthResolution.CAMERA,
             camera="back_door",
         )
+        self._assert(
+            "/recordings/2026-05-11/14/back_door@sub/00.00.mp4",
+            MediaAuthResolution.CAMERA,
+            camera="back_door",
+        )
 
     def test_clip_flat_filename_resolves_camera(self):
         self._assert(
@@ -176,6 +182,14 @@ class TestResolveMediaUri(unittest.TestCase):
             camera="back_door",
         )
 
+    def test_clip_triggers(self):
+        self._assert("/clips/triggers/", MediaAuthResolution.LISTING_MULTI_CAMERA)
+        self._assert(
+            "/clips/triggers/back_door/abc.webp",
+            MediaAuthResolution.CAMERA,
+            camera="back_door",
+        )
+
     def test_clip_review_thumbs(self):
         # Format: /clips/review/thumb-{camera}-{review_id}.webp (frigate/review/maintainer.py).
         self._assert(
@@ -222,11 +236,11 @@ class TestExportResolution(unittest.TestCase):
     """Export resolution requires a DB lookup."""
 
     def setUp(self):
-        migrate_db = SqliteExtDatabase("test.db")
+        migrate_db = SqliteDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         del logging.getLogger("peewee_migrate").handlers[:]
         Router(migrate_db).run()
         migrate_db.close()
-        self.db = SqliteQueueDatabase(TEST_DB)
+        self.db = SqliteQueueDatabase(TEST_DB, pragmas=TEST_DB_PRAGMAS)
         self.db.bind([Event, ReviewSegment, Recordings, Export])
         self.config = FrigateConfig(**_CONFIG)
 
@@ -245,8 +259,8 @@ class TestExportResolution(unittest.TestCase):
             camera=camera,
             name=f"export-{export_id}",
             date=int(datetime.datetime.now().timestamp()),
-            video_path=f"/media/frigate/exports/{filename}",
-            thumb_path=f"/media/frigate/exports/{filename}.jpg",
+            video_path=os.path.join(EXPORT_DIR, filename),
+            thumb_path=os.path.join(CLIPS_DIR, "export", f"{export_id}.webp"),
             in_progress=False,
         ).execute()
 
@@ -279,6 +293,34 @@ class TestExportResolution(unittest.TestCase):
         resolution, _ = resolve_media_uri("/exports/clip.mp4", self.config)
         self.assertEqual(resolution, MediaAuthResolution.UNRESOLVED_MEDIA)
 
+    def test_export_thumbnail_resolves_camera(self):
+        self._insert_export("back_door_abc123", "back_door", "back_door_clip.mp4")
+        resolution, camera = resolve_media_uri(
+            "/clips/export/back_door_abc123.webp", self.config
+        )
+        self.assertEqual(resolution, MediaAuthResolution.CAMERA)
+        self.assertEqual(camera, "back_door")
+
+    def test_unknown_export_thumbnail_is_unresolved(self):
+        resolution, _ = resolve_media_uri("/clips/export/missing.webp", self.config)
+        self.assertEqual(resolution, MediaAuthResolution.UNRESOLVED_MEDIA)
+
+    def test_export_thumbnail_gated_by_camera_access(self):
+        self._insert_export("back_door_abc123", "back_door", "back_door_clip.mp4")
+        self._insert_export("front_door_def456", "front_door", "front_door_clip.mp4")
+        url = "/clips/export/{}.webp"
+        self.assertIsNone(
+            deny_response_for_media_uri(
+                url.format("front_door_def456"), "limited_user", self.config
+            )
+        )
+        self.assertEqual(
+            deny_response_for_media_uri(
+                url.format("back_door_abc123"), "limited_user", self.config
+            ),
+            403,
+        )
+
 
 class TestDenyResponseForMediaUri(unittest.TestCase):
     """End-to-end decision check used by /auth."""
@@ -303,6 +345,18 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         self.assertIsNone(self._deny("/clips/back_door-1.jpg", "viewer"))
         self.assertIsNone(self._deny("/clips/", "viewer"))
 
+    def test_unrestricted_role_blocked_admin_only(self):
+        for uri in (
+            "/clips/faces/",
+            "/clips/faces/train/foo.webp",
+            "/clips/faces/alice/ref.webp",
+            "/clips/genai-requests/x/0.jpg",
+            "/clips/preview_restart_cache/x.mp4",
+            "/clips/some_model/train/x.jpg",
+            "/clips/some_model/dataset/cat/x.jpg",
+        ):
+            self.assertEqual(self._deny(uri, "viewer"), 403, uri)
+
     def test_restricted_role_allowed_camera(self):
         self.assertIsNone(self._deny("/clips/front_door-1.jpg", "limited_user"))
         self.assertIsNone(
@@ -310,6 +364,14 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         )
         self.assertIsNone(
             self._deny("/clips/thumbs/front_door/abc.webp", "limited_user")
+        )
+        self.assertIsNone(
+            self._deny(
+                "/recordings/2026-05-11/14/front_door@sub/00.00.mp4", "limited_user"
+            )
+        )
+        self.assertIsNone(
+            self._deny("/clips/triggers/front_door/abc.webp", "limited_user")
         )
 
     def test_restricted_role_blocked_other_camera(self):
@@ -320,6 +382,15 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         )
         self.assertEqual(
             self._deny("/clips/thumbs/back_door/abc.webp", "limited_user"), 403
+        )
+        self.assertEqual(
+            self._deny(
+                "/recordings/2026-05-11/14/back_door@sub/00.00.mp4", "limited_user"
+            ),
+            403,
+        )
+        self.assertEqual(
+            self._deny("/clips/triggers/back_door/abc.webp", "limited_user"), 403
         )
 
     def test_restricted_role_blocked_admin_only(self):

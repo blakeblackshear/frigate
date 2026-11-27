@@ -1,7 +1,6 @@
 {
   "noRecordingsFoundForThisTime": "Ingen optagelser fundet i det angivne tidsrum",
   "noPreviewFound": "Ingen forhåndsvisning fundet",
-  "cameraDisabled": "Kamera er deaktiveret",
   "noPreviewFoundFor": "Ingen forhåndsvisning fundet for {{cameraName}}",
   "submitFrigatePlus": {
     "title": "Indsend dette billede til Frigate+?",
@@ -20,14 +19,6 @@
     "bandwidth": {
       "title": "Båndbredde:",
       "short": "Båndbredde"
-    },
-    "latency": {
-      "title": "Latenstid:",
-      "value": "{{seconds}} sekunder",
-      "short": {
-        "title": "Latenstid",
-        "value": "{{seconds}} sek"
-      }
     },
     "droppedFrames": {
       "short": {

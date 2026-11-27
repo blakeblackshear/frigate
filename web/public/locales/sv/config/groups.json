@@ -1,7 +1,73 @@
 {
     "audio": {
         "global": {
-            "sensitivity": "Global ljudkänslighet"
+            "sensitivity": "Global ljudkänslighet",
+            "detection": "Global detektering"
+        },
+        "cameras": {
+            "detection": "Detektering",
+            "sensitivity": "Känslighet"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globalt utseende"
+        },
+        "cameras": {
+            "appearance": "Utseende"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Global rörelsekänslighet",
+            "algorithm": "Global rörelsealgoritm"
+        },
+        "cameras": {
+            "sensitivity": "Känslighet",
+            "algorithm": "Algoritm"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Global visning"
+        },
+        "cameras": {
+            "display": "Visning"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Global upplösning",
+            "tracking": "Global spårning"
+        },
+        "cameras": {
+            "resolution": "Upplösning",
+            "tracking": "Spårning"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Global spårning",
+            "filtering": "Global filtrering"
+        },
+        "cameras": {
+            "tracking": "Spårning",
+            "filtering": "Filtrering"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Global lagringstid",
+            "events": "Globala händelser"
+        },
+        "cameras": {
+            "retention": "Lagringstid",
+            "events": "Händelser"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Kameraspecifika FFmpeg-argument"
         }
     }
 }

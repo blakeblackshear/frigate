@@ -47,7 +47,10 @@
   },
   "deleteCase": {
     "label": "Kustuta juhtum",
-    "desc": "Kas oled kindel, et soovid „{{caseName}}“ juhtumi kustutada?"
+    "desc": "Kas oled kindel, et soovid „{{caseName}}“ juhtumi kustutada?",
+    "descKeepExports": "Eksportimised jäävad alles valikus „kategoriseerimata eksportimised“.",
+    "descDeleteExports": "Sel juhul kustutatakse kõik eksportimised lõplikult.",
+    "deleteExports": "Lisaks kustuta kõik eksportimised"
   },
   "caseCard": {
     "emptyCase": "Eksportimise veel pole"
@@ -60,7 +63,8 @@
     "copying": "Kopeerimisel",
     "encoding": "Kodeerimisel",
     "encodingRetry": "Kodeerimisel (uuesti)",
-    "finalizing": "Lõpetamisel"
+    "finalizing": "Lõpetamisel",
+    "merging": "Mestimisel"
   },
   "caseView": {
     "noDescription": "Kirjeldust pole",
@@ -71,11 +75,55 @@
     "cameraCount_other": "{{count}} kaamerat",
     "showMore": "Näita rohkem",
     "showLess": "Näita vähem",
-    "emptyTitle": "See juhtum on tühi"
+    "emptyTitle": "See juhtum on tühi",
+    "emptyDescription": "Lisa olemasolevad kategooriata eksportimised, et hoida asjad korras.",
+    "emptyDescriptionNoExports": "Hetkel pole veel ühtegi kategoriseerimata eksportimist, mida saaks lisada."
   },
   "caseEditor": {
     "namePlaceholder": "Juhtumi nimi",
     "editTitle": "Muuda juhtumit",
-    "createTitle": "Lisa juhtum"
+    "createTitle": "Lisa juhtum",
+    "descriptionPlaceholder": "Lisa sellele juhtumile märkmeid või konteksti"
+  },
+  "selected_one": "Valitud on {{count}}",
+  "selected_other": "Valitud on {{count}}",
+  "bulkActions": {
+    "addToCase": "Lisa juhtumile",
+    "moveToCase": "Tõsta juhtumi juurde",
+    "removeFromCase": "Eemalda juhtumist",
+    "delete": "Kustuta",
+    "deleteNow": "Kustuta kohe"
+  },
+  "bulkDelete": {
+    "title": "Kustuta eksporditud sisu",
+    "desc_one": "Kas sa oled kindel, et soovid {{count}} eksportimise kustutada?",
+    "desc_other": "Kas sa oled kindel, et soovid {{count}} eksportimist kustutada?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Eemalda juhtumist",
+    "desc_one": "Kas eemaldad {{count}} eksportimise sellest juhtumist?",
+    "desc_other": "Kas eemaldad {{count}} eksportimist sellest juhtumist?",
+    "descKeepExports": "Eksportimised tõstetakse kategoriseerimata valikute alla.",
+    "descDeleteExports": "Eksportimised kustutatakse lõplikult.",
+    "deleteExports": "Selle asemel kustuta eksportimised"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Eksportimised on kenasti kustutatud",
+      "reassign": "Juhtumile lisamine õnnestus kenasti",
+      "remove": "Eksportimised on kenasti juhtumist eemaldatud"
+    },
+    "error": {
+      "deleteFailed": "Eksportimiste kustutamine ei õnnestunud: {{errorMessage}}",
+      "reassignFailed": "Lisamine juhtumile ei õnnestunud: {{errorMessage}}"
+    }
+  },
+  "addExportDialog": {
+    "addButton_one": "Lisa 1 eksportimine",
+    "addButton_other": "Lisa {{count}} eksportimist",
+    "adding": "Lisan…",
+    "title": "Lisa eksportimine juhtumile „{{caseName}}“",
+    "searchPlaceholder": "Otsi kategoriseerimata eksportimisi",
+    "empty": "Ükski kategoriseerimata eksportimine ei vasta sellele otsingule."
   }
 }

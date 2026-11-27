@@ -34,6 +34,7 @@ import { useCameraFriendlyName } from "@/hooks/use-camera-friendly-name";
 import { AudioLevelGraph } from "@/components/audio/AudioLevelGraph";
 import { useWs } from "@/api/ws";
 import { cn } from "@/lib/utils";
+import { getPrimaryModel } from "@/utils/modelUtil";
 
 type ObjectSettingsViewProps = {
   selectedCamera?: string;
@@ -172,11 +173,10 @@ export default function ObjectSettingsView({
         <div className="mb-5 space-y-3 text-sm text-muted-foreground">
           <p>
             {t("debug.detectorDesc", {
-              detectors: config
-                ? Object.keys(config?.detectors)
-                    .map((detector) => capitalizeFirstLetter(detector))
-                    .join(",")
-                : "",
+              detectors: (config?.models ?? [])
+                .flatMap((model) => model.devices ?? [])
+                .map((device) => capitalizeFirstLetter(device))
+                .join(","),
             })}
           </p>
           <p>{t("debug.desc")}</p>
@@ -184,8 +184,8 @@ export default function ObjectSettingsView({
         {config?.cameras[cameraConfig.name]?.webui_url && (
           <div className="mb-5 text-sm text-muted-foreground">
             <div className="mt-2 flex flex-row items-center text-primary">
-              <Link
-                to={config?.cameras[cameraConfig.name]?.webui_url ?? ""}
+              <a
+                href={config?.cameras[cameraConfig.name]?.webui_url ?? ""}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline"
@@ -194,7 +194,7 @@ export default function ObjectSettingsView({
                   camera: cameraName,
                 })}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
+              </a>
             </div>
           </div>
         )}
@@ -380,7 +380,7 @@ function ObjectList({ cameraConfig, objects }: ObjectListProps) {
       return;
     }
 
-    return config.model?.colormap;
+    return getPrimaryModel(config)?.colormap;
   }, [config]);
 
   const getColorForObjectName = useCallback(

@@ -6,14 +6,14 @@
       "title": "Frigate מופעל מחדש כעת",
       "content": "דף זה ייטען מחדש בעוד {{countdown}} שניות.",
       "button": "אילוץ טעינה מחדש"
-    }
+    },
+    "description": "המערכת לא תגיב בעת אתחול מחדש"
   },
   "export": {
     "toast": {
       "error": {
         "endTimeMustAfterStartTime": "שעת הסיום חייבת להיות אחרי שעת ההתחלה",
-        "failed": "נכשל בהתחלת הייצוא: {{error}}",
-        "noVaildTimeSelected": "לא נבחר טווח זמן תקף"
+        "failed": "נכשל בהתחלת הייצוא: {{error}}"
       },
       "success": "הייצוא התחיל בהצלחה. ניתן לצפות בקובץ בעמוד הייצוא.",
       "view": "תצוגה"
@@ -42,13 +42,19 @@
     "fromTimeline": {
       "saveExport": "שמירת ייצוא",
       "previewExport": "תצוגה מקדימה של ייצוא"
+    },
+    "case": {
+      "newCaseOption": "צור מקרה חדש",
+      "newCaseNamePlaceholder": "שם מקרה",
+      "newCaseDescriptionPlaceholder": "תיאור המקרה",
+      "label": "מקרה",
+      "placeholder": "בחר מקרה"
     }
   },
   "streaming": {
     "restreaming": {
       "desc": {
-        "title": "הגדר את go2rtc לקבלת אפשרויות נוספות של תצוגה חיה ושמע עבור מצלמה זו.",
-        "readTheDocumentation": "קרא את התיעוד"
+        "title": "הגדר את go2rtc לקבלת אפשרויות נוספות של תצוגה חיה ושמע עבור מצלמה זו."
       },
       "disabled": "הזרמה מחדש אינה פעילה עבור מצלמה זו."
     },

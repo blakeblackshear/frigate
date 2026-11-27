@@ -12,14 +12,6 @@
       "title": "Khung hình bị rớt:"
     },
     "decodedFrames": "Khung hình đã giải mã:",
-    "latency": {
-      "short": {
-        "value": "{{seconds}} giây",
-        "title": "Độ trễ"
-      },
-      "title": "Độ trễ:",
-      "value": "{{seconds}} giây"
-    },
     "totalFrames": "Tổng số khung hình:",
     "streamType": {
       "title": "Loại luồng:",
@@ -46,6 +38,5 @@
   "streamOffline": {
     "title": "Luồng ngoại tuyến",
     "desc": "Không nhận được khung hình nào trên luồng <code>detect</code> của {{cameraName}}, hãy kiểm tra nhật ký lỗi"
-  },
-  "cameraDisabled": "Camera đã bị tắt"
+  }
 }

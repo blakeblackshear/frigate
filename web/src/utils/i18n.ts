@@ -2,6 +2,7 @@ import i18n, { t } from "i18next";
 import { initReactI18next } from "react-i18next";
 import HttpBackend from "i18next-http-backend";
 import { EventType } from "@/types/search";
+import { baseUrl } from "@/api/baseUrl";
 
 export const getTranslatedLabel = (
   label: string,
@@ -33,7 +34,7 @@ i18n
     fallbackLng: "en", // use en if detected lng is not available
 
     backend: {
-      loadPath: `locales/{{lng}}/{{ns}}.json?v=${import.meta.env.VITE_GIT_COMMIT_HASH || "unknown"}`,
+      loadPath: `${baseUrl}locales/{{lng}}/{{ns}}.json?v=${import.meta.env.VITE_GIT_COMMIT_HASH || "unknown"}`,
     },
 
     ns: [

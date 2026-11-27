@@ -1,4 +1,5 @@
 import { test, expect, type FrigateApp } from "../fixtures/frigate-test";
+import { viewerProfile } from "../fixtures/mock-data/profile";
 import {
   expectBodyInteractive,
   waitForBodyInteractive,
@@ -155,6 +156,292 @@ test.describe("Export Page - Overview @high", () => {
       frigateApp.page.getByRole("dialog").filter({ hasText: "Create Case" }),
     ).toBeVisible();
     await expect(frigateApp.page.getByPlaceholder("Case name")).toBeVisible();
+  });
+});
+
+test.describe("Export Page - Case Card Menu @high", () => {
+  async function openCaseMenu(frigateApp: FrigateApp) {
+    await frigateApp.goto("/export");
+    await frigateApp.page
+      .getByRole("button", { name: "Case options" })
+      .first()
+      .click();
+    const menu = frigateApp.page.getByRole("menu");
+    await expect(menu).toBeVisible();
+    return menu;
+  }
+
+  test("menu offers share, download, edit, and delete", async ({
+    frigateApp,
+  }) => {
+    const menu = await openCaseMenu(frigateApp);
+
+    await expect(
+      menu.getByRole("menuitem", { name: "Share case" }),
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("menuitem", { name: "Download case" }),
+    ).toHaveAttribute("href", /api\/cases\/case-001\/download$/);
+    await expect(
+      menu.getByRole("menuitem", { name: "Edit case" }),
+    ).toBeVisible();
+    await expect(
+      menu.getByRole("menuitem", { name: "Delete case" }),
+    ).toBeVisible();
+  });
+
+  test("edit opens a prefilled dialog without opening the case", async ({
+    frigateApp,
+  }) => {
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Edit case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("dialog")
+      .filter({ hasText: "Edit Case" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator("input")).toHaveValue(
+      "Package Theft Investigation",
+    );
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeHidden();
+  });
+
+  test("delete opens the confirmation dialog", async ({ frigateApp }) => {
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Delete case" }).click();
+
+    const dialog = frigateApp.page
+      .getByRole("alertdialog")
+      .filter({ hasText: "Delete Case" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(/Package Theft Investigation/)).toBeVisible();
+  });
+
+  test("share sends a link that opens the case", async ({ frigateApp }) => {
+    await frigateApp.page.addInitScript(() => {
+      Object.defineProperty(navigator, "share", {
+        configurable: true,
+        value: (data: ShareData) => {
+          (window as unknown as { sharedUrl?: string }).sharedUrl = data.url;
+          return Promise.resolve();
+        },
+      });
+    });
+
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Share case" }).click();
+
+    const sharedUrl = await frigateApp.page.evaluate(
+      () => (window as unknown as { sharedUrl?: string }).sharedUrl,
+    );
+    expect(sharedUrl).toMatch(/\/export\?caseId=case-001$/);
+
+    await frigateApp.goto("/export?caseId=case-001");
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeVisible();
+  });
+
+  test("deleting via the card menu leaves body interactive", async ({
+    frigateApp,
+  }) => {
+    const initialCases = [
+      {
+        id: "case-001",
+        name: "Package Theft Investigation",
+        description: "",
+        created_at: 1775407931.3863528,
+        updated_at: 1775483531.3863528,
+      },
+    ];
+    let deleted = false;
+
+    await frigateApp.page.route(/\/api\/cases(?:$|\?|\/)/, async (route) => {
+      const method = route.request().method();
+
+      if (method === "DELETE") {
+        deleted = true;
+        return route.fulfill({ json: { success: true } });
+      }
+
+      if (method === "GET") {
+        return route.fulfill({ json: deleted ? [] : initialCases });
+      }
+
+      return route.fallback();
+    });
+
+    const menu = await openCaseMenu(frigateApp);
+    await menu.getByRole("menuitem", { name: "Delete case" }).click();
+
+    const dialog = frigateApp.page.getByRole("alertdialog");
+    await dialog.getByRole("button", { name: /^delete$/i }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(
+      frigateApp.page.getByText("Package Theft Investigation", { exact: true }),
+    ).toBeHidden();
+    await waitForBodyInteractive(frigateApp.page, 5_000);
+    await expectBodyInteractive(frigateApp.page);
+  });
+
+  test("download is disabled while a case export is still encoding", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/export**", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "export-done",
+            camera: "front_door",
+            name: "Finished",
+            date: 1775490731,
+            video_path: "/exports/export-done.mp4",
+            thumb_path: "/exports/export-done-thumb.jpg",
+            in_progress: false,
+            export_case_id: "case-001",
+          },
+          {
+            id: "export-encoding",
+            camera: "backyard",
+            name: "Still Encoding",
+            date: 1775490732,
+            video_path: "/exports/export-encoding.mp4",
+            thumb_path: "",
+            in_progress: true,
+            export_case_id: "case-001",
+          },
+        ],
+      }),
+    );
+
+    const menu = await openCaseMenu(frigateApp);
+    const download = menu.getByRole("menuitem", { name: "Download case" });
+    await expect(download).toHaveAttribute("data-disabled", "");
+    await expect(download).not.toHaveAttribute("href");
+
+    const box = await download.boundingBox();
+    expect(box).not.toBeNull();
+    await frigateApp.page.mouse.click(
+      box!.x + box!.width / 2,
+      box!.y + box!.height / 2,
+    );
+    await expect(
+      frigateApp.page.getByRole("heading", {
+        name: "Package Theft Investigation",
+      }),
+    ).toBeHidden();
+
+    await frigateApp.page.keyboard.press("Escape");
+    await frigateApp.goto("/export?caseId=case-001");
+    await expect(
+      frigateApp.page.getByRole("button", { name: "Download" }),
+    ).toBeDisabled();
+  });
+
+  test("download is disabled while a case export job is queued", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-queued",
+            job_type: "export",
+            status: "queued",
+            camera: "front_door",
+            name: "Queued Sample",
+            export_case_id: "case-001",
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: null,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: null,
+            progress_percent: 0,
+          },
+        ],
+      }),
+    );
+
+    const menu = await openCaseMenu(frigateApp);
+    await expect(
+      menu.getByRole("menuitem", { name: "Download case" }),
+    ).toHaveAttribute("data-disabled", "");
+  });
+
+  test("download stays disabled for a running job on a filtered-out camera", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.page.route("**/api/export**", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "export-front",
+            camera: "front_door",
+            name: "Front Finished",
+            date: 1775490731,
+            video_path: "/exports/export-front.mp4",
+            thumb_path: "",
+            in_progress: false,
+            export_case_id: "case-001",
+          },
+        ],
+      }),
+    );
+    await frigateApp.page.route("**/api/jobs/export", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "job-backyard",
+            job_type: "export",
+            status: "running",
+            camera: "backyard",
+            name: "Backyard Running",
+            export_case_id: "case-001",
+            request_start_time: 1775407931,
+            request_end_time: 1775408531,
+            start_time: 1775407932,
+            end_time: null,
+            error_message: null,
+            results: null,
+            current_step: "encoding",
+            progress_percent: 10,
+          },
+        ],
+      }),
+    );
+
+    await frigateApp.goto("/export?cameras=front_door");
+    await frigateApp.page
+      .getByRole("button", { name: "Case options" })
+      .first()
+      .click();
+    await expect(
+      frigateApp.page.getByRole("menuitem", { name: "Download case" }),
+    ).toHaveAttribute("data-disabled", "");
+  });
+
+  test("viewers only see share and download", async ({ frigateApp }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+    const menu = await openCaseMenu(frigateApp);
+
+    await expect(
+      menu.getByRole("menuitem", { name: "Share case" }),
+    ).toBeVisible();
+    await expect(menu.getByRole("menuitem", { name: "Edit case" })).toHaveCount(
+      0,
+    );
+    await expect(
+      menu.getByRole("menuitem", { name: "Delete case" }),
+    ).toHaveCount(0);
   });
 });
 
@@ -867,6 +1154,31 @@ test.describe("Multi-Camera Export from History @high", () => {
     await frigateApp.page.route("**/api/recordings/unavailable**", (route) =>
       route.fulfill({ json: [] }),
     );
+    // registered after the broad recordings route so it wins the match;
+    // coverage is an object, and the array above crashes the player
+    await frigateApp.page.route("**/api/*/recordings/coverage**", (route) =>
+      route.fulfill({
+        json: {
+          spans: [
+            {
+              start_time: playbackTime - 3600,
+              end_time: playbackTime + 600,
+              streams: ["main"],
+            },
+          ],
+          codecs_compatible: true,
+          streams: {
+            main: {
+              video_codec: "h264",
+              audio_rate: null,
+              audio_codec: null,
+              has_audio: false,
+              bitrate: 2_000_000,
+            },
+          },
+        },
+      }),
+    );
 
     await frigateApp.goto(`/review?timestamp=front_door_${playbackTime}`);
   }
@@ -962,6 +1274,97 @@ test.describe("Multi-Camera Export from History @high", () => {
     await expect(form.getByPlaceholder(/case description/i)).toHaveValue(
       "Front gate follow-up",
     );
+  });
+
+  test("a blank case name shows an error and disables export", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+    const form = await openMultiCameraTab(frigateApp);
+
+    const caseName = form.getByPlaceholder(/new case name/i);
+    await expect(caseName).toHaveValue(/^Multi-camera export - /, {
+      timeout: 5_000,
+    });
+    await expect(form.getByText("Case name is required")).toBeHidden();
+
+    await caseName.fill("");
+
+    await expect(form.getByText("Case name is required")).toBeVisible();
+    await expect(
+      form.getByRole("button", { name: /^export \d+ cameras?$/i }),
+    ).toBeDisabled();
+  });
+
+  test("clearing a time field keeps the previous valid range", async ({
+    frigateApp,
+  }) => {
+    await frigateApp.installDefaults();
+
+    let capturedPayload: { items: { end_time: number }[] } | null = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: { export_case_id: null, export_ids: [], results: [] },
+      });
+    });
+
+    const form = await openMultiCameraTab(frigateApp);
+
+    const firstCamera = form.locator("button[aria-pressed]").first();
+    await expect(firstCamera).toBeVisible({ timeout: 5_000 });
+    if ((await firstCamera.getAttribute("aria-pressed")) === "false") {
+      await firstCamera.click();
+    }
+
+    // the seeded end can equal the picker's fallback, so move it off that
+    // value before clearing
+    await form.getByRole("button", { name: /^end time$/i }).click();
+    const endInput = frigateApp.page.locator("#endTime");
+    const [hour, minute, second] = (await endInput.inputValue()).split(":");
+    const chosen = `${hour}:${minute}:${String((Number(second) + 30) % 60).padStart(2, "0")}`;
+    await endInput.fill(chosen);
+    await endInput.fill("");
+    await expect(endInput).toHaveValue(chosen);
+    await frigateApp.page.keyboard.press("Escape");
+
+    await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
+
+    await expect.poll(() => capturedPayload).not.toBeNull();
+    const submittedClock = await frigateApp.page.evaluate(
+      (endTime) => new Date(endTime * 1000).toTimeString().slice(0, 8),
+      capturedPayload!.items[0].end_time,
+    );
+    expect(submittedClock).toBe(chosen);
+  });
+
+  test("viewers can export without a case", async ({ frigateApp }) => {
+    await frigateApp.installDefaults({ profile: viewerProfile() });
+
+    let capturedPayload: Record<string, unknown> | null = null;
+    await frigateApp.page.route("**/api/exports/batch", async (route) => {
+      capturedPayload = route.request().postDataJSON();
+      await route.fulfill({
+        status: 202,
+        json: { export_case_id: null, export_ids: [], results: [] },
+      });
+    });
+
+    const form = await openMultiCameraTab(frigateApp);
+
+    const firstCamera = form.locator("button[aria-pressed]").first();
+    await expect(firstCamera).toBeVisible({ timeout: 5_000 });
+    if ((await firstCamera.getAttribute("aria-pressed")) === "false") {
+      await firstCamera.click();
+    }
+
+    await expect(form.getByPlaceholder(/new case name/i)).toBeHidden();
+    await form.getByRole("button", { name: /^export \d+ cameras?$/i }).click();
+
+    await expect.poll(() => capturedPayload).not.toBeNull();
+    expect(capturedPayload).not.toHaveProperty("new_case_name");
+    expect(capturedPayload).not.toHaveProperty("export_case_id");
   });
 });
 

@@ -5,6 +5,7 @@ import unittest
 from pydantic import ValidationError
 
 from frigate.config.network import ListenConfig
+from frigate.util.config import ipv6_listen_address, parse_listen_address
 
 
 class TestListenConfig(unittest.TestCase):
@@ -35,6 +36,87 @@ class TestListenConfig(unittest.TestCase):
 
         self.assertEqual(listen.internal_port, 5001)
         self.assertEqual(listen.external_port, 8971)
+
+    def test_valid_listen_values_are_rebuilt(self):
+        cases = {
+            5000: 5000,
+            "5000": 5000,
+            "127.0.0.1:5000": "127.0.0.1:5000",
+            "0.0.0.0:5000": "0.0.0.0:5000",
+            "[::1]:5000": "[::1]:5000",
+            "[::]:5000": "[::]:5000",
+            "[2001:DB8:0:0::1]:5000": "[2001:db8::1]:5000",
+            " 5000 ": 5000,
+            "5000\n": 5000,
+            " 127.0.0.1:5000 ": "127.0.0.1:5000",
+            "localhost:5000": "localhost:5000",
+            "frigate-host.lan:5000": "frigate-host.lan:5000",
+            "*:5000": "*:5000",
+        }
+
+        for value, expected in cases.items():
+            with self.subTest(value=value):
+                listen = ListenConfig(internal=value)
+
+                self.assertEqual(listen.internal, expected)
+                self.assertEqual(listen.internal_port, 5000)
+
+    def test_invalid_listen_values_rejected(self):
+        cases = [
+            "5000; location /x/ { alias /; autoindex on; } #:5000",
+            "127.0.0.1:5000; include /etc/passwd",
+            "5000 ssl",
+            "5000;",
+            "::1:5000",
+            "[127.0.0.1]:5000",
+            "[fe80::1%eth0]:5000",
+            "local host:5000",
+            "localhost;:5000",
+            "local{host}:5000",
+            "host#:5000",
+            "'localhost':5000",
+            '"localhost":5000',
+            "-host:5000",
+            "host-:5000",
+            "host..lan:5000",
+            "**:5000",
+            "*.lan:5000",
+            "unix:/tmp/sock:5000",
+            "5000 5001",
+            ":5000",
+            "127.0.0.1:",
+            "127.0.0.1:+5000",
+            0,
+            65536,
+            -1,
+        ]
+
+        for value in cases:
+            with self.subTest(value=value):
+                with self.assertRaises(ValidationError):
+                    ListenConfig(internal=value)
+
+    def test_bool_listen_value_rejected(self):
+        # get_nginx_settings.py sees the raw bool and falls back to the default,
+        # so accepting it as port 1 would split nginx and the auth port check
+        for value in (True, False):
+            with self.subTest(value=value):
+                with self.assertRaises(ValidationError):
+                    ListenConfig(internal=value)
+
+
+class TestIPv6ListenAddress(unittest.TestCase):
+    def test_wildcard_adds_ipv6_wildcard(self):
+        for raw in (5000, "*:5000", "0.0.0.0:5000"):
+            with self.subTest(raw=raw):
+                value, port = parse_listen_address(raw)
+                self.assertEqual(ipv6_listen_address(value, port), "[::]:5000")
+
+    def test_specific_address_adds_nothing(self):
+        for raw in ("127.0.0.1:5000", "localhost:5000", "[::1]:5000", "[::]:5000"):
+            with self.subTest(raw=raw):
+                value, port = parse_listen_address(raw)
+                self.assertIsNone(ipv6_listen_address(value, port))
 
 
 if __name__ == "__main__":

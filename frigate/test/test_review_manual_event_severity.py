@@ -100,24 +100,6 @@ class TestManualEventSeverity(unittest.TestCase):
             SeverityEnum.alert,
         )
 
-    def test_sub_label_is_stripped_before_categorizing(self) -> None:
-        maintainer = self._make_maintainer(
-            """
-    review:
-      alerts:
-        labels:
-          - person
-      detections:
-        labels:
-          - person
-"""
-        )
-
-        self.assertEqual(
-            maintainer.get_manual_event_severity("front_door", "person: Bob"),
-            SeverityEnum.alert,
-        )
-
     def test_alert_label_is_detection_when_alerts_disabled(self) -> None:
         maintainer = self._make_maintainer(
             """

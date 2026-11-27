@@ -25,8 +25,7 @@ export function MultiSchemaFieldTemplate<
   const { schema, selector, optionSchemaField, uiSchema } = props;
 
   const uiOptions = uiSchema?.["ui:options"] as
-    | UiSchema["ui:options"]
-    | undefined;
+    UiSchema["ui:options"] | undefined;
   const suppressMultiSchema = uiOptions?.suppressMultiSchema === true;
 
   // Check if this is a simple nullable field that should be handled specially

@@ -61,7 +61,9 @@ export default function CreateRoleDialog({
         (config.cameras[b]?.ui?.order ?? 0),
     );
 
-  const existingRoles = Object.keys(config.auth?.roles || {});
+  const existingRoles = Object.keys(config.auth?.roles || {}).map((role) =>
+    role.toLowerCase(),
+  );
 
   const formSchema = z.object({
     role: z
@@ -70,7 +72,7 @@ export default function CreateRoleDialog({
       .regex(/^[A-Za-z0-9._]+$/, {
         message: t("roles.dialog.form.role.roleOnlyInclude"),
       })
-      .refine((role) => !existingRoles.includes(role), {
+      .refine((role) => !existingRoles.includes(role.toLowerCase()), {
         message: t("roles.dialog.form.role.roleExists"),
       }),
     cameras: z
@@ -92,7 +94,7 @@ export default function CreateRoleDialog({
     try {
       await onCreate(values.role, values.cameras);
       form.reset();
-    } catch (error) {
+    } catch {
       // Error handled in parent
     } finally {
       setIsLoading(false);

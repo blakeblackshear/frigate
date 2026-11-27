@@ -10,6 +10,7 @@ import json
 import logging
 import subprocess as sp
 import tempfile
+import time
 from collections.abc import Callable, Generator
 from typing import IO
 
@@ -17,6 +18,7 @@ import numpy as np
 
 from frigate.config import CameraConfig
 from frigate.ffmpeg_presets import parse_preset_hardware_acceleration_decode
+from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.services import auto_detect_hwaccel
 
 logger = logging.getLogger(__name__)
@@ -86,25 +88,6 @@ def _read_exact(stream: IO[bytes], size: int) -> bytes | None:
             return None
         buf.extend(chunk)
     return bytes(buf)
-
-
-def _terminate(proc: sp.Popen[bytes]) -> None:
-    """Stop an ffmpeg decode process promptly."""
-    # Close the read end first so a blocked ffmpeg write unblocks (ffmpeg then
-    # sees a broken pipe), then signal it. The resulting ffmpeg write error is
-    # harmless and goes to the captured stderr.
-    if proc.stdout is not None:
-        try:
-            proc.stdout.close()
-        except OSError:
-            pass
-    if proc.poll() is None:
-        proc.terminate()
-        try:
-            proc.wait(timeout=5)
-        except sp.TimeoutExpired:
-            proc.kill()
-            proc.wait()
 
 
 KEYFRAME_MAX_GAP_SECONDS = 2.0
@@ -222,7 +205,7 @@ def _run_vod_decode(
             count += 1
             yield frame
     finally:
-        _terminate(proc)
+        terminate_ffmpeg_stream(proc)
         stderr_file.close()
 
     if count == 0 and software_retry and not should_stop():
@@ -282,11 +265,16 @@ def iter_vod_frames(
     )
 
 
-def probe_vod_keyframe_pts(ffprobe_path: str, vod_url: str) -> list[float]:
+KEYFRAME_PROBE_TIMEOUT = 120.0
+
+
+def probe_vod_keyframe_pts(
+    ffprobe_path: str, vod_url: str, should_stop: Callable[[], bool]
+) -> list[float]:
     """Return keyframe presentation timestamps (VOD stream time) in order.
 
     Reads packet flags via ffprobe over the VOD URL (no decode). Returns [] on
-    any failure so the caller can fall back.
+    any failure, timeout, or stop request so the caller can fall back.
     """
     cmd = [
         ffprobe_path,
@@ -304,16 +292,27 @@ def probe_vod_keyframe_pts(ffprobe_path: str, vod_url: str) -> list[float]:
         "json",
     ]
     try:
-        completed = sp.run(cmd, capture_output=True, text=True, timeout=120)
-    except (OSError, sp.SubprocessError):
+        proc = sp.Popen(cmd, stdout=sp.PIPE, stderr=sp.DEVNULL, text=True)
+    except OSError:
         logger.warning("ffprobe failed for VOD keyframe probe")
         return []
 
-    if completed.returncode != 0 or not completed.stdout:
+    deadline = time.monotonic() + KEYFRAME_PROBE_TIMEOUT
+    while True:
+        try:
+            stdout, _ = proc.communicate(timeout=0.5)
+            break
+        except sp.TimeoutExpired:
+            if should_stop() or time.monotonic() > deadline:
+                proc.kill()
+                proc.communicate()
+                return []
+
+    if proc.returncode != 0 or not stdout:
         return []
 
     try:
-        packets = json.loads(completed.stdout).get("packets", [])
+        packets = json.loads(stdout).get("packets", [])
     except json.JSONDecodeError:
         return []
 

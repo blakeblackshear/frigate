@@ -37,8 +37,7 @@
         "audioIsAvailable": "Sunetul este disponibil pentru acest stream",
         "audio": {
           "tips": {
-            "title": "Sunetul trebuie să fie redat de camera ta și configurat în go2rtc pentru acest stream.",
-            "document": "Citește documentația "
+            "title": "Sunetul trebuie să fie redat de camera ta și configurat în go2rtc pentru acest stream."
           }
         },
         "streamMethod": {

@@ -17,10 +17,10 @@ import re
 from enum import Enum
 from urllib.parse import unquote
 
-from peewee import DoesNotExist
+from peewee import DoesNotExist, Field
 
 from frigate.config import FrigateConfig
-from frigate.const import EXPORT_DIR
+from frigate.const import CLIPS_DIR, EXPORT_DIR, SUB_CACHE_TAG
 from frigate.models import Export, User
 
 logger = logging.getLogger(__name__)
@@ -137,11 +137,12 @@ def _resolve_recording(
     # /recordings/{date}                   → neutral
     # /recordings/{date}/{hour}            → multi-camera listing
     # /recordings/{date}/{hour}/{cam}/...  → camera
+    # /recordings/{date}/{hour}/{cam}@sub/... → camera (sub stream)
     if len(parts) <= 2:
         return MediaAuthResolution.LISTING_NEUTRAL, None
     if len(parts) == 3:
         return MediaAuthResolution.LISTING_MULTI_CAMERA, None
-    return MediaAuthResolution.CAMERA, parts[3]
+    return MediaAuthResolution.CAMERA, parts[3].removesuffix(SUB_CACHE_TAG)
 
 
 def _resolve_clip(
@@ -150,7 +151,9 @@ def _resolve_clip(
     # /clips                                          → multi-camera listing
     # /clips/thumbs/{cam}/...                         → camera
     # /clips/previews/{cam}/...                       → camera
+    # /clips/triggers/{cam}/...                       → camera
     # /clips/review/thumb-{cam}-{review_id}.webp      → camera (parsed)
+    # /clips/export/{export_id}.{ext}                 → camera (DB lookup)
     # /clips/faces/...                                → admin-only
     # /clips/genai-requests/...                       → admin-only
     # /clips/preview_restart_cache/...                → admin-only
@@ -162,7 +165,7 @@ def _resolve_clip(
 
     second = parts[1]
 
-    if second in ("thumbs", "previews"):
+    if second in ("thumbs", "previews", "triggers"):
         if len(parts) == 2:
             return MediaAuthResolution.LISTING_MULTI_CAMERA, None
         return MediaAuthResolution.CAMERA, parts[2]
@@ -174,6 +177,11 @@ def _resolve_clip(
         if camera:
             return MediaAuthResolution.CAMERA, camera
         return MediaAuthResolution.UNRESOLVED_MEDIA, None
+
+    if second == "export" and len(parts) == 3:
+        return _export_camera(
+            Export.thumb_path, os.path.join(CLIPS_DIR, "export", parts[2])
+        )
 
     if second in ("faces", "genai-requests", "preview_restart_cache"):
         return MediaAuthResolution.ADMIN_ONLY, None
@@ -234,15 +242,19 @@ def _resolve_export(
     if len(parts) != 2:
         return MediaAuthResolution.UNRESOLVED_MEDIA, None
 
-    filename = parts[1]
-    full_path = os.path.join(EXPORT_DIR, filename)
+    return _export_camera(Export.video_path, os.path.join(EXPORT_DIR, parts[1]))
+
+
+def _export_camera(
+    field: Field, full_path: str
+) -> tuple[MediaAuthResolution, str | None]:
     try:
-        export = Export.get(Export.video_path == full_path)
+        export = Export.get(field == full_path)
         return MediaAuthResolution.CAMERA, export.camera
     except DoesNotExist:
         return MediaAuthResolution.UNRESOLVED_MEDIA, None
     except Exception as e:
-        logger.warning("Export DB lookup failed for %s: %s", filename, e)
+        logger.warning("Export DB lookup failed for %s: %s", full_path, e)
         return MediaAuthResolution.UNRESOLVED_MEDIA, None
 
 
@@ -301,6 +313,9 @@ def deny_response_for_media_uri(
     if not role or role == "admin":
         return None
 
+    if resolution == MediaAuthResolution.ADMIN_ONLY:
+        return 403
+
     if not is_role_restricted(role, frigate_config):
         return None
 
@@ -309,7 +324,6 @@ def deny_response_for_media_uri(
 
     if resolution in (
         MediaAuthResolution.LISTING_MULTI_CAMERA,
-        MediaAuthResolution.ADMIN_ONLY,
         MediaAuthResolution.UNRESOLVED_MEDIA,
     ):
         return 403

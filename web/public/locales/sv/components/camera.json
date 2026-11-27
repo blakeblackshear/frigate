@@ -31,8 +31,7 @@
         "audioIsUnavailable": "Ljud är inte tillgängligt för den här kameraströmmen",
         "audio": {
           "tips": {
-            "title": "Ljud måste sändas från din kamera och konfigureras i go2rtc för den här strömmen.",
-            "document": "Läs dokumentationen. "
+            "title": "Ljud måste sändas från din kamera och konfigureras i go2rtc för den här strömmen."
           }
         },
         "streamMethod": {

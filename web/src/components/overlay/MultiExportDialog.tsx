@@ -68,9 +68,7 @@ export default function MultiExportDialog({
   const isAdmin = useIsAdmin();
 
   const { data: config } = useSWR<FrigateConfig>("config");
-  // Only admins can attach exports to an existing case (enforced server-side
-  // by POST /exports/batch). Skip fetching the case list entirely for
-  // non-admins — they can only ever use the "Create new case" branch.
+  // Only admins can assign exports to a case, so non-admins skip the case list
   const { data: cases } = useSWR<ExportCase[]>(isAdmin ? "cases" : null);
 
   const [open, setOpen] = useState(false);
@@ -284,9 +282,6 @@ export default function MultiExportDialog({
     t,
   ]);
 
-  // New-case inputs: rendered below the Select when caseSelection === "new",
-  // or rendered standalone for non-admins (who never see the Select since
-  // they cannot attach to an existing case).
   const newCaseInputs = (
     <div className="space-y-2 pt-1">
       <Input

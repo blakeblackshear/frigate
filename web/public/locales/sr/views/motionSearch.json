@@ -1,1 +1,82 @@
-{}
+{
+    "documentTitle": "Претрага кретања - Frigate",
+    "title": "Претрага кретања",
+    "description": "Нацртајте полигон да бисте дефинисали област интересовања и наведите временски опсег за претрагу промена кретања унутар те области.",
+    "selectCamera": "Претрага кретања се учитава",
+    "startSearch": "Покрени претрагу",
+    "searchStarted": "Претрага је покренута",
+    "searchCancelled": "Претрага је отказана",
+    "cancelSearch": "Откажи",
+    "searching": "Претрага је у току.",
+    "scanning": "Скенирање {{time}}",
+    "searchComplete": "Претрага је завршена",
+    "noResultsYet": "Покрените претрагу да бисте пронашли промене кретања у изабраној области",
+    "noChangesFound": "Нису откривене промене пиксела у изабраној области",
+    "changesFound_one": "Пронађена је {{count}} промена кретања",
+    "changesFound_few": "Пронађене су {{count}} промене кретања",
+    "changesFound_other": "Пронађено је {{count}} промена кретања",
+    "framesProcessed": "Обрађено кадрова: {{count}}",
+    "jumpToTime": "Пређи на ово време",
+    "results": "Резултати",
+    "showSegmentHeatmap": "Топлотна мапа",
+    "newSearch": "Нова претрага",
+    "clearResults": "Обриши резултате",
+    "clearROI": "Обриши полигон",
+    "polygonControls": {
+        "points_one": "{{count}} тачка",
+        "points_few": "{{count}} тачке",
+        "points_other": "{{count}} тачака",
+        "undo": "Опозови последњу тачку",
+        "reset": "Ресетуј полигон",
+        "drawMode": "Цртај",
+        "moveMode": "Помери"
+    },
+    "motionHeatmapLabel": "Топлотна мапа кретања",
+    "dialog": {
+        "title": "Претрага кретања",
+        "cameraLabel": "Камера",
+        "previewAlt": "Преглед камере за {{camera}}"
+    },
+    "timeRange": {
+        "title": "Опсег претраге",
+        "start": "Време почетка",
+        "end": "Време завршетка"
+    },
+    "settings": {
+        "title": "Подешавања претраге",
+        "parallelMode": "Паралелни режим",
+        "parallelModeDesc": "Скенирај више опсега снимака истовремено (брже; користи више ресурса за декодирање)",
+        "threshold": "Праг осетљивости",
+        "thresholdDesc": "Ниже вредности откривају мање промене (1-255)",
+        "minArea": "Минимална површина промене",
+        "minAreaDesc": "Минимална величина појединачне покретне области, изражена као проценат области интересовања",
+        "maxResults": "Максималан број резултата",
+        "maxResultsDesc": "Заустави након овог броја подударајућих временских ознака"
+    },
+    "errors": {
+        "noCamera": "Изаберите камеру",
+        "noROI": "Нацртајте област интересовања",
+        "noTimeRange": "Изаберите временски опсег",
+        "invalidTimeRange": "Време завршетка мора бити након времена почетка",
+        "alreadyRunning": "Већ је покренута једна претрага кретања. Сачекајте да се заврши или је откажите.",
+        "tooManySearches": "Покренуто је превише претрага кретања. Покушајте поново када се нека заврши.",
+        "searchFailed": "Претрага није успела: {{message}}",
+        "polygonTooSmall": "Полигон мора имати најмање 3 тачке",
+        "unknown": "Непозната грешка"
+    },
+    "changePercentage": "{{percentage}}% промењено",
+    "metrics": {
+        "title": "Метрика претраге",
+        "segmentsScanned": "Скенирани сегменти",
+        "segmentsProcessed": "Обрађено",
+        "segmentsSkippedInactive": "Прескочено (нема активности)",
+        "segmentsSkippedHeatmap": "Прескочено (нема преклапања са ROI)",
+        "fallbackFullRange": "Резервно скенирање целог опсега",
+        "framesDecoded": "Декодирани кадрови",
+        "wallTime": "Време претраге",
+        "segmentErrors": "Грешке у сегментима",
+        "seconds": "{{seconds}}s",
+        "minutesSeconds": "{{minutes}}m {{seconds}}s",
+        "scanSummary": "Сегмената: {{segments}} ({{time}})"
+    }
+}

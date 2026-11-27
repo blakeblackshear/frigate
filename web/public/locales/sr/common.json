@@ -1,44 +1,44 @@
 {
   "time": {
-    "untilForTime": "Do {{time}}",
-    "untilForRestart": "Dok se Frigate ponovo ne pokrene.",
-    "untilRestart": "Do ponovnog pokretanja",
-    "ago": "{{timeAgo}} pre",
-    "justNow": "Upravo sada",
-    "today": "Danas",
-    "yesterday": "Juče",
-    "last7": "Zadnjih 7 dana",
-    "last14": "Zadnjih 14 dana",
-    "last30": "Zadnjih 30 dana",
-    "thisWeek": "Ove nedelje",
-    "lastWeek": "Prošle nedelje",
-    "thisMonth": "Ovog meseca",
-    "lastMonth": "Prošlog meseca",
-    "5minutes": "5 minuta",
-    "10minutes": "10 minuta",
-    "30minutes": "30 minuta",
-    "1hour": "1 sat",
-    "12hours": "12 sati",
-    "24hours": "24 sata",
-    "pm": "pm",
-    "am": "am",
-    "yr": "{{time}}god",
+    "untilForTime": "До {{time}}",
+    "untilForRestart": "Док се Frigate поново не покрене.",
+    "untilRestart": "До поновног покретања",
+    "ago": "Пре {{timeAgo}}",
+    "justNow": "Управо сада",
+    "today": "Данас",
+    "yesterday": "Јуче",
+    "last7": "Последњих 7 дана",
+    "last14": "Последњих 14 дана",
+    "last30": "Последњих 30 дана",
+    "thisWeek": "Ове недеље",
+    "lastWeek": "Прошле недеље",
+    "thisMonth": "Овог месеца",
+    "lastMonth": "Прошлог месеца",
+    "5minutes": "5 минута",
+    "10minutes": "10 минута",
+    "30minutes": "30 минута",
+    "1hour": "1 сат",
+    "12hours": "12 сати",
+    "24hours": "24 сата",
+    "pm": "поподне",
+    "am": "пре подне",
+    "yr": "{{time}} год.",
     "year_one": "{{time}} година",
     "year_few": "{{time}} године",
     "year_other": "{{time}} година",
-    "mo": "{{time}}mes",
+    "mo": "{{time}} мес.",
     "month_one": "{{time}} месец",
     "month_few": "{{time}} месеца",
     "month_other": "{{time}} месеци",
-    "d": "{{time}}d",
+    "d": "{{time}} d.",
     "day_one": "{{time}} дан",
     "day_few": "{{time}} дана",
     "day_other": "{{time}} дана",
-    "h": "{{time}}h",
+    "h": "{{time}} ч.",
     "hour_one": "{{time}} сат",
     "hour_few": "{{time}} сата",
     "hour_other": "{{time}} сати",
-    "m": "{{time}}m",
+    "m": "{{time}} мин.",
     "minute_one": "{{time}} минут",
     "minute_few": "{{time}} минута",
     "minute_other": "{{time}} минута",
@@ -47,37 +47,322 @@
     "second_few": "{{time}} секунде",
     "second_other": "{{time}} секунди",
     "formattedTimestampHourMinute": {
-      "24hour": "HH:mm"
+      "24hour": "HH:mm",
+      "12hour": "h:mm aaa"
     },
     "formattedTimestampHourMinuteSecond": {
       "12hour": "h:mm:ss aaa",
       "24hour": "HH:mm:ss"
     },
     "formattedTimestampMonthDayHourMinute": {
-      "12hour": "MMM d, h:mm aaa",
-      "24hour": "MMM d, HH:mm"
+      "12hour": "d. MMM, h:mm aaa",
+      "24hour": "d. MMM, HH:mm"
     },
     "formattedTimestampMonthDayYear": {
-      "12hour": "MMM d, yyyy",
-      "24hour": "MMM d, yyyy"
+      "12hour": "d. MMM yyyy.",
+      "24hour": "d. MMM yyyy."
     },
     "formattedTimestampMonthDayYearHourMinute": {
-      "12hour": "MMM d yyyy, h:mm aaa",
-      "24hour": "MMM d yyyy, HH:mm"
+      "12hour": "d. MMM yyyy, h:mm aaa",
+      "24hour": "d. MMM yyyy, HH:mm"
     },
     "formattedTimestamp": {
-      "12hour": "MMM d, h:mm:ss aaa",
-      "24hour": "MMM d, HH:mm:ss"
+      "12hour": "d. MMM, h:mm:ss aaa",
+      "24hour": "d. MMM, HH:mm:ss"
     },
-    "formattedTimestampMonthDay": "MMM d",
+    "formattedTimestampMonthDay": "d. MMM",
     "formattedTimestampFilename": {
-      "12hour": "MM-dd-yy-h-mm-ss-a",
-      "24hour": "MM-dd-yy-HH-mm-ss"
-    }
+      "12hour": "dd-MM-yy-h-mm-ss-a",
+      "24hour": "dd-MM-yy-HH-mm-ss"
+    },
+    "never": "Никада",
+    "custom": "Прилагођено...",
+    "formattedTimestamp2": {
+      "12hour": "dd.MM. h:mm:ssa",
+      "24hour": "d. MMM, HH:mm:ss"
+    },
+    "inProgress": "У току",
+    "invalidStartTime": "Неважеће време почетка",
+    "invalidEndTime": "Неважеће време завршетка"
   },
-  "readTheDocumentation": "Прочитајте документацију",
+  "readTheDocumentation": "Прочитај документацију",
   "menu": {
     "system": "Систем",
-    "profiles": "Профили"
+    "profiles": "Профили",
+    "systemMetrics": "Стање и метрике",
+    "configuration": "Конфигурација",
+    "systemLogs": "Дневник",
+    "settings": "Подешавања",
+    "configurationEditor": "Едитор конфигурације",
+    "languages": "Језици",
+    "language": {
+      "en": "Енглески (English)",
+      "es": "Шпански (Español)",
+      "zhCN": "Поједностављени кинески (简体中文)",
+      "zhHant": "Традиционални кинески (繁體中文)",
+      "hi": "Хинди (हिन्दी)",
+      "fr": "Француски (Français)",
+      "ar": "Арапски (العربية)",
+      "pt": "Португалски (Português)",
+      "ptBR": "Бразилски португалски (Português brasileiro)",
+      "ru": "Руски (Русский)",
+      "de": "Немачки (Deutsch)",
+      "ja": "Јапански (日本語)",
+      "tr": "Турски (Türkçe)",
+      "it": "Италијански (Italiano)",
+      "nl": "Холандски (Nederlands)",
+      "sv": "Шведски (Svenska)",
+      "cs": "Чешки (Čeština)",
+      "nb": "Норвешки букмол (Norsk Bokmål)",
+      "ko": "Корејски (한국어)",
+      "vi": "Вијетнамски (Tiếng Việt)",
+      "fa": "Персијски (فارسی)",
+      "pl": "Пољски (Polski)",
+      "uk": "Украјински (Українська)",
+      "be": "Белоруски (Беларуская)",
+      "he": "Хебрејски (עברית)",
+      "el": "Грчки (Ελληνικά)",
+      "ro": "Румунски (Română)",
+      "hu": "Мађарски (Magyar)",
+      "fi": "Фински (Suomi)",
+      "da": "Дански (Dansk)",
+      "sk": "Словачки (Slovenčina)",
+      "yue": "Кантонски (粵語)",
+      "th": "Тајландски (ไทย)",
+      "ca": "Каталонски (Català)",
+      "hr": "Хрватски (Hrvatski)",
+      "bs": "Босански (Bosanski)",
+      "sr": "Српски (Српски)",
+      "sl": "Словеначки (Slovenščina)",
+      "lt": "Литвански (Lietuvių)",
+      "bg": "Бугарски (Български)",
+      "gl": "Галицијски (Galego)",
+      "id": "Индонежански (Bahasa Indonesia)",
+      "ur": "Урду (اردو)",
+      "withSystem": {
+        "label": "Користи системска подешавања за језик"
+      }
+    },
+    "appearance": "Изглед",
+    "darkMode": {
+      "label": "Тамни режим",
+      "light": "Светли",
+      "dark": "Тамни",
+      "withSystem": {
+        "label": "Користи системска подешавања за светли или тамни режим"
+      }
+    },
+    "withSystem": "Систем",
+    "theme": {
+      "label": "Тема",
+      "blue": "Плава",
+      "green": "Зелена",
+      "nord": "Норд",
+      "red": "Црвена",
+      "highcontrast": "Висок контраст",
+      "default": "Подразумевано"
+    },
+    "help": "Помоћ",
+    "documentation": {
+      "title": "Документација",
+      "label": "Frigate документација"
+    },
+    "restart": "Поново покрени Frigate",
+    "live": {
+      "title": "Уживо",
+      "allCameras": "Све камере",
+      "cameras": {
+        "title": "Камере",
+        "count_one": "{{count}} камера",
+        "count_few": "{{count}} камере",
+        "count_other": "{{count}} камера"
+      }
+    },
+    "review": "Преглед",
+    "explore": "Истражи",
+    "export": "Извези",
+    "actions": "Акције",
+    "uiPlayground": "Корисничко окружење за тестирање",
+    "features": "Функције",
+    "faceLibrary": "Библиотека лица",
+    "classification": "Класификација",
+    "chat": "Ћаскање",
+    "user": {
+      "title": "Корисник",
+      "account": "Налог",
+      "current": "Тренутни корисник: {{user}}",
+      "anonymous": "анониман",
+      "logout": "Одјави се",
+      "setPassword": "Постави лозинку"
+    }
+  },
+  "unit": {
+    "length": {
+      "feet": "стопа",
+      "meters": "метри"
+    },
+    "speed": {
+      "mph": "mph",
+      "kph": "km/h"
+    },
+    "data": {
+      "kbps": "kB/s",
+      "mbps": "MB/s",
+      "gbps": "GB/s",
+      "kbph": "kB/сат",
+      "mbph": "MB/сат",
+      "gbph": "GB/сат"
+    }
+  },
+  "label": {
+    "back": "Иди назад",
+    "hide": "Сакриј {{item}}",
+    "show": "Прикажи {{item}}",
+    "ID": "ИД",
+    "none": "Ништа",
+    "all": "Све",
+    "other": "Остало"
+  },
+  "list": {
+    "two": "{{0}} и {{1}}",
+    "many": "{{items}} и {{last}}",
+    "separatorWithSpace": ", "
+  },
+  "field": {
+    "optional": "Опционо",
+    "internalID": "Интерни ИД који Frigate користи у конфигурацији и бази података"
+  },
+  "button": {
+    "add": "Додај",
+    "apply": "Примени",
+    "applying": "Примењује се…",
+    "reset": "Ресетуј",
+    "undo": "Опозови",
+    "done": "Готово",
+    "enabled": "Омогућено",
+    "enable": "Омогући",
+    "disabled": "Онемогућено",
+    "disable": "Онемогући",
+    "save": "Сачувај",
+    "saving": "Чување…",
+    "cancel": "Откажи",
+    "close": "Затвори",
+    "expand": "Прошири",
+    "collapse": "Скупи",
+    "clear": "Очисти",
+    "copy": "Копирај",
+    "copiedToClipboard": "Копирано у привремену меморију",
+    "back": "Назад",
+    "history": "Историја",
+    "fullscreen": "Цео екран",
+    "exitFullscreen": "Изађи из целог екрана",
+    "pictureInPicture": "Слика у слици",
+    "twoWayTalk": "Двосмерна комуникација",
+    "cameraAudio": "Звук камере",
+    "on": "Укључено",
+    "off": "Искључено",
+    "edit": "Измени",
+    "copyCoordinates": "Копирај координате",
+    "delete": "Обриши",
+    "yes": "Да",
+    "no": "Не",
+    "download": "Преузми",
+    "info": "Информације",
+    "suspended": "Суспендовано",
+    "unsuspended": "Активирај поново",
+    "play": "Пусти",
+    "unselect": "Поништи избор",
+    "export": "Извези",
+    "deleteNow": "Обриши одмах",
+    "next": "Следеће",
+    "continue": "Настави",
+    "modified": "Измењено",
+    "overridden": "Надјачано",
+    "resetToGlobal": "Врати на глобална подешавања",
+    "resetToDefault": "Врати на подразумевано",
+    "saveAll": "Сачувај све",
+    "savingAll": "Чување свега…",
+    "undoAll": "Опозови све",
+    "retry": "Покушај поново",
+    "reload": "Освежи"
+  },
+  "toast": {
+    "copyUrlToClipboard": "URL је копиран у привремену меморију.",
+    "save": {
+      "title": "Сачувај",
+      "error": {
+        "title": "Неуспешно чување промена у конфигурацији: {{errorMessage}}",
+        "noMessage": "Неуспешно чување промена у конфигурацији"
+      },
+      "success": "Промене у конфигурацији су успешно сачуване."
+    }
+  },
+  "role": {
+    "title": "Улога",
+    "admin": "Администратор",
+    "viewer": "Посматрач",
+    "desc": "Администратори имају потпун приступ свим функцијама у Frigate корисничком интерфејсу. Посматрачи су ограничени на гледање камера, преглед ставки и историјских снимака у корисничком интерфејсу."
+  },
+  "pagination": {
+    "label": "страничење",
+    "previous": {
+      "title": "Претходна",
+      "label": "Иди на претходну страницу"
+    },
+    "next": {
+      "title": "Следећа",
+      "label": "Иди на следећу страницу"
+    },
+    "more": "Више страница"
+  },
+  "accessDenied": {
+    "documentTitle": "Приступ одбијен - Frigate",
+    "title": "Приступ одбијен",
+    "desc": "Немате дозволу за преглед ове странице."
+  },
+  "notFound": {
+    "documentTitle": "Није пронађено - Frigate",
+    "title": "404",
+    "desc": "Страница није пронађена"
+  },
+  "error": {
+    "title": "Ова страница је престала са радом",
+    "desc": "Дошло је до неочекиване грешке на страници. Освежавање обично решава проблем. Ако се грешка понавља, копирајте детаље и приложите их дискусији на GitHub-у.",
+    "staleTitle": "Потребно је освежавање",
+    "staleDesc": "Део апликације није могао да се учита, што обично значи да је Frigate ажуриран док је ова картица била отворена. Освежите страницу да бисте прешли на нову верзију.",
+    "partial": "Део апликације је престао са радом.",
+    "copyDetails": "Копирај детаље",
+    "copyFailed": "Неуспешно копирање детаља у привремену меморију"
+  },
+  "selectItem": "Изабери {{item}}",
+  "information": {
+    "pixels": "{{area}} px"
+  },
+  "no_items": "Нема елемената",
+  "validation_errors": "Грешке при валидацији",
+  "credentialField": {
+    "savedPlaceholder": "Сачувано — оставите празно да задржите тренутно стање"
+  },
+  "commandMenu": {
+    "title": "Командни мени",
+    "description": "Претражите странице, камере, подешавања и акције",
+    "placeholder": "Претражите странице, камере, подешавања и акције",
+    "empty": "Нема резултата",
+    "hint": "{{key}} или / за отварање, Enter за покретање",
+    "section": {
+      "recent": "Недавно",
+      "pages": "Странице",
+      "cameras": "Камере",
+      "cameraGroups": "Групе камера",
+      "settings": "Подешавања",
+      "actions": "Акције"
+    },
+    "camera": {
+      "live": "Уживо",
+      "review": "Преглед"
+    },
+    "action": {
+      "toggleTheme": "Пребаци на светли или тамни режим"
+    }
   }
 }

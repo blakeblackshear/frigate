@@ -5,8 +5,8 @@ import logging
 import os
 import threading
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
-import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -22,6 +22,8 @@ from frigate.api.defs.response.preview_response import (
 from frigate.api.defs.tags import Tags
 from frigate.const import BASE_DIR, CACHE_DIR, PREVIEW_FRAME_TYPE
 from frigate.models import Previews
+from frigate.output.preview import is_camera_preview_frame
+from frigate.util.time import get_normalized_tz_name
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +128,9 @@ def preview_hour(
     parts = year_month.split("-")
     start_date = (
         datetime(int(parts[0]), int(parts[1]), int(day), int(hour), tzinfo=UTC)
-        - datetime.now(pytz.timezone(tz_name.replace(",", "/"))).utcoffset()
+        - datetime.now(
+            ZoneInfo(get_normalized_tz_name(tz_name.replace(",", "/")))
+        ).utcoffset()
     )
     end_date = start_date + timedelta(hours=1) - timedelta(milliseconds=1)
     start_ts = start_date.timestamp()
@@ -184,7 +188,7 @@ def get_preview_frames_from_cache(camera_name: str, start_ts: float, end_ts: flo
     left = bisect.bisect_left(files, start_file)
     right = bisect.bisect_right(files, end_file)
     selected_previews = [
-        file for file in files[left:right] if file.startswith(file_start)
+        file for file in files[left:right] if is_camera_preview_frame(file, camera_name)
     ]
 
     return JSONResponse(

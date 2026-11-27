@@ -8,10 +8,6 @@
     "s": "{{time}}s",
     "second_one": "{{time}} sekund",
     "second_other": "{{time}} sekunder",
-    "formattedTimestampExcludeSeconds": {
-      "24hour": "%-d. %b, %H:%M",
-      "12hour": "%-d. %b, %I:%M %p"
-    },
     "untilForTime": "Inntil {{time}}",
     "untilForRestart": "Inntil Frigate starter på nytt.",
     "untilRestart": "Inntil omstart",
@@ -52,11 +48,6 @@
       "12hour": "dd/MM h:mm:ssa",
       "24hour": "d. MMM HH:mm:ss"
     },
-    "formattedTimestampWithYear": {
-      "12hour": "%-d. %b %Y, %I:%M %p",
-      "24hour": "%-d. %b %Y, %H:%M"
-    },
-    "formattedTimestampOnlyMonthAndDay": "%-d. %b",
     "formattedTimestampHourMinute": {
       "12hour": "h:mm aaa",
       "24hour": "HH:mm"
@@ -237,7 +228,6 @@
       "green": "Grønn",
       "nord": "Nord",
       "red": "Rød",
-      "contrast": "Høy kontrast",
       "default": "Standard",
       "highcontrast": "Høy kontrast"
     },

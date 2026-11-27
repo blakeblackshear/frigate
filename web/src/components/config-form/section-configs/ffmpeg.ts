@@ -20,6 +20,13 @@ const ffmpegArgsWidget = (
   },
 });
 
+const recordSubArgsWidget = () =>
+  ffmpegArgsWidget("output_args.record_sub", {
+    allowInherit: true,
+    forceSplitLayout: true,
+    unsetLabelKey: "configForm.ffmpegArgs.sameAsRecord",
+  });
+
 const ffmpeg: SectionConfigOverrides = {
   base: {
     sectionDocs: "/configuration/ffmpeg_presets",
@@ -45,6 +52,7 @@ const ffmpeg: SectionConfigOverrides = {
       },
       {
         key: "inputs-missing-go2rtc-stream",
+        health: true,
         field: "inputs",
         position: "before",
         messageKey: "configMessages.ffmpeg.inputsMissingGo2rtcStream",
@@ -75,6 +83,8 @@ const ffmpeg: SectionConfigOverrides = {
       output_args: "/configuration/ffmpeg_presets#output-args-presets",
       "inputs.output_args": "/configuration/ffmpeg_presets#output-args-presets",
       "output_args.record": "/configuration/ffmpeg_presets#output-args-presets",
+      "output_args.record_sub":
+        "/configuration/ffmpeg_presets#output-args-presets",
       "inputs.roles": "/configuration/cameras/#setting-up-camera-inputs",
       apple_compatibility:
         "/configuration/camera_specific#h265-cameras-via-safari",
@@ -93,7 +103,6 @@ const ffmpeg: SectionConfigOverrides = {
     hiddenFields: ["retry_interval"],
     advancedFields: ["path", "global_args", "gpu"],
     overrideFields: [
-      "inputs",
       "path",
       "global_args",
       "input_args",
@@ -112,9 +121,11 @@ const ffmpeg: SectionConfigOverrides = {
       output_args: {
         detect: arrayAsTextWidget,
         record: ffmpegArgsWidget("output_args.record"),
+        record_sub: recordSubArgsWidget(),
         items: {
           detect: arrayAsTextWidget,
           record: ffmpegArgsWidget("output_args.record"),
+          record_sub: recordSubArgsWidget(),
         },
       },
       inputs: {
@@ -148,6 +159,7 @@ const ffmpeg: SectionConfigOverrides = {
             items: {
               detect: arrayAsTextWidget,
               record: ffmpegArgsWidget("output_args.record"),
+              record_sub: recordSubArgsWidget(),
             },
           },
         },
@@ -156,6 +168,7 @@ const ffmpeg: SectionConfigOverrides = {
   },
   global: {
     restartRequired: [],
+    runtimeFields: ["hwaccel_args"],
     fieldOrder: [
       "hwaccel_args",
       "path",
@@ -176,10 +189,13 @@ const ffmpeg: SectionConfigOverrides = {
       output_args: {
         detect: arrayAsTextWidget,
         record: ffmpegArgsWidget("output_args.record"),
+        record_sub: recordSubArgsWidget(),
       },
     },
   },
   camera: {
+    // reset would delete the camera's inputs along with its overrides
+    hideReset: true,
     fieldGroups: {
       cameraFfmpeg: ["input_args", "hwaccel_args", "output_args"],
     },

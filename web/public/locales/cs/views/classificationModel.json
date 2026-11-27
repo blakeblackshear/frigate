@@ -1,68 +1,72 @@
 {
   "documentTitle": "Klasifikační modely - Frigate",
   "button": {
-    "deleteClassificationAttempts": "Odstrániť Klasifikačné obrazy",
+    "deleteClassificationAttempts": "Odstranit klasifikační obrázky",
     "renameCategory": "Přejmenovat třídu",
-    "deleteCategory": "Smazat třídu",
-    "deleteImages": "Smazat obrázek",
+    "deleteCategory": "Odstranit třídu",
+    "deleteImages": "Odstranit obrázky",
     "trainModel": "Trénovat model",
     "addClassification": "Přidat klasifikaci",
     "deleteModels": "Smazat modely",
     "editModel": "Upravit model"
   },
   "details": {
-    "scoreInfo": "Skóre predstavuje priemernú istotu klasifikácie naprieč detekciami tohoto objektu.",
+    "scoreInfo": "Skóre představuje průměrnou spolehlivost klasifikace ze všech detekcí tohoto objektu.",
     "none": "Nic",
     "unknown": "Neznámý"
   },
   "tooltip": {
     "trainingInProgress": "Model se právě trénuje",
-    "noNewImages": "Žádné obrázky pro trénování. Nejdříve klasifikujte obrázky pro dataset.",
+    "noNewImages": "Nejsou k dispozici nové obrázky pro trénování. Nejprve klasifikujte další obrázky v datové sadě.",
     "noChanges": "Od posledního trénování nedošlo k žádné změně.",
     "modelNotReady": "Model není připravený na trénování."
   },
   "toast": {
     "success": {
-      "deletedImage_one": "Smazat obrázky",
-      "deletedImage_few": "",
-      "deletedImage_other": "",
-      "deletedModel_one": "Úspěšně odstraněný {{count}} model",
-      "deletedModel_few": "Úspěšně odstraněné {{count}} modely",
-      "deletedModel_other": "Úspěšně odstraněných {{count}} modelů",
-      "deletedCategory_one": "Smazat třídu",
-      "deletedCategory_few": "",
-      "deletedCategory_other": "",
+      "deletedImage_one": "Odstraněn {{count}} obrázek",
+      "deletedImage_few": "Odstraněny {{count}} obrázky",
+      "deletedImage_other": "Odstraněno {{count}} obrázků",
+      "deletedModel_one": "Úspěšně odstraněn {{count}} model",
+      "deletedModel_few": "Úspěšně odstraněny {{count}} modely",
+      "deletedModel_other": "Úspěšně odstraněno {{count}} modelů",
+      "deletedCategory_one": "Odstraněna {{count}} třída",
+      "deletedCategory_few": "Odstraněny {{count}} třídy",
+      "deletedCategory_other": "Odstraněno {{count}} tříd",
       "categorizedImage": "Obrázek úspěšně klasifikován",
       "trainedModel": "Úspěšně vytrénovaný model.",
       "trainingModel": "Trénování modelu bylo úspěšně zahájeno.",
       "updatedModel": "Konfigurace modelu úspěšně aktualizována.",
-      "renamedCategory": "Třída úspěšně přejmenována na {{name}}"
+      "renamedCategory": "Třída úspěšně přejmenována na {{name}}",
+      "reclassifiedImage": "Obrázek byl úspěšně přeřazen"
     },
     "error": {
       "deleteImageFailed": "Chyba při mazání: {{errorMessage}}",
       "deleteCategoryFailed": "Chyba při mazání třídy: {{errorMessage}}",
       "deleteModelFailed": "Chyba při mazání modelu: {{errorMessage}}",
-      "categorizeFailed": "Chyba při mazání obrázku: {{errorMessage}}",
+      "categorizeFailed": "Nepodařilo se zařadit obrázek: {{errorMessage}}",
       "trainingFailed": "Trénování modelu selhalo. Zkontrolujte logy Frigate pro zjištění detailů.",
       "trainingFailedToStart": "Chyba spuštění trénování modelu: {{errorMessage}}",
       "updateModelFailed": "Chyba aktualizace modelu: {{errorMessage}}",
-      "renameCategoryFailed": "Chyba přejmenování třídy: {{errorMessage}}"
+      "renameCategoryFailed": "Chyba přejmenování třídy: {{errorMessage}}",
+      "reclassifyFailed": "Nepodařilo se přeřadit obrázek: {{errorMessage}}"
     }
   },
   "train": {
     "titleShort": "Nedávný",
-    "title": "Předchozí klasifikace",
-    "aria": "Vybrat předchozí Klasifikace"
+    "title": "Nedávné klasifikace",
+    "aria": "Vybrat nedávné klasifikace"
   },
   "deleteModel": {
-    "desc_one": "Jste si jistí, že chcete odstranit {{count}} model? Tím trvale odstraníte všechny související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
-    "desc_few": "Jste si jistí, že chcete odstranit {{count}} modely? Tím trvale odstraníte všechny související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
-    "desc_other": "Jste si jistí, že chcete odstranit {{count}} modelů? Tím trvale odstraníte všechny související data včetně obrázků a tréninkových dat. Tato akce je nevratná."
+    "desc_one": "Opravdu chcete odstranit {{count}} model? Tím trvale odstraníte všechna související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
+    "desc_few": "Opravdu chcete odstranit {{count}} modely? Tím trvale odstraníte všechna související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
+    "desc_other": "Opravdu chcete odstranit {{count}} modelů? Tím trvale odstraníte všechna související data včetně obrázků a tréninkových dat. Tato akce je nevratná.",
+    "title": "Odstranit klasifikační model",
+    "single": "Opravdu chcete odstranit {{name}}? Trvale se odstraní všechna související data včetně obrázků a trénovacích dat. Tuto akci nelze vrátit zpět."
   },
   "deleteDatasetImages": {
-    "desc_one": "Opravdu chcete odstranit {{count}} obrázek z {{dataset}}? Tato akce je nevratná a vyžaduje přetrénování modelu.",
-    "desc_few": "Opravdu chcete odstranit {{count}} obrázky z {{dataset}}? Tato akce je nevratná a vyžaduje přetrénování modelu.",
-    "desc_other": "Opravdu chcete odstranit {{count}} obrázků z {{dataset}}? Tato akce je nevratná a vyžaduje přetrénování modelu.",
+    "desc_one": "Opravdu chcete odstranit {{count}} obrázek z {{dataset}}? Tato akce je nevratná a bude nutné model znovu natrénovat.",
+    "desc_few": "Opravdu chcete odstranit {{count}} obrázky z {{dataset}}? Tato akce je nevratná a bude nutné model znovu natrénovat.",
+    "desc_other": "Opravdu chcete odstranit {{count}} obrázků z {{dataset}}? Tato akce je nevratná a bude nutné model znovu natrénovat.",
     "title": "Smazat obrázky datové sady"
   },
   "deleteTrainImages": {
@@ -73,34 +77,143 @@
   },
   "wizard": {
     "step3": {
-      "allImagesRequired_one": "Prosím, zařaďte všechny obrázky. Zbývá {{count}} obrázek.",
-      "allImagesRequired_few": "Prosím, zařaďte všechny obrázky. Zbývají {{count}} obrázky.",
-      "allImagesRequired_other": "Prosím, zařaďte všechny obrázky. Zbývá {{count}} obrázků.",
+      "allImagesRequired_one": "Zařaďte prosím všechny obrázky. Zbývá {{count}} obrázek.",
+      "allImagesRequired_few": "Zařaďte prosím všechny obrázky. Zbývají {{count}} obrázky.",
+      "allImagesRequired_other": "Zařaďte prosím všechny obrázky. Zbývá {{count}} obrázků.",
       "trainingStarted": "Trénování úspěšně spuštěno",
-      "generateSuccess": "Vzorové obrázky byly úspěšně vytvořeny"
+      "generateSuccess": "Vzorové obrázky byly úspěšně vytvořeny",
+      "selectImagesPrompt": "Vyberte všechny obrázky s třídou {{className}}",
+      "selectImagesDescription": "Kliknutím vybírejte obrázky. Po dokončení této třídy klikněte na Pokračovat.",
+      "generating": {
+        "title": "Generování ukázkových obrázků",
+        "description": "Frigate získává reprezentativní obrázky ze záznamů. Může to chvíli trvat…"
+      },
+      "training": {
+        "title": "Trénování modelu",
+        "description": "Model se trénuje na pozadí. Zavřete tento dialog; model se spustí po dokončení trénování."
+      },
+      "retryGenerate": "Zkusit generování znovu",
+      "noImages": "Nebyly vygenerovány žádné ukázkové obrázky",
+      "classifying": "Klasifikace a trénování…",
+      "modelCreated": "Model byl úspěšně vytvořen. V zobrazení nedávných klasifikací přidejte obrázky chybějících stavů a poté model natrénujte.",
+      "errors": {
+        "noCameras": "Nejsou nastaveny žádné kamery",
+        "noObjectLabel": "Není vybrán štítek objektu",
+        "generateFailed": "Nepodařilo se vygenerovat příklady: {{error}}",
+        "generationFailed": "Generování selhalo. Zkuste to znovu.",
+        "classifyFailed": "Nepodařilo se klasifikovat obrázky: {{error}}"
+      },
+      "refreshExamples": "Vygenerovat nové příklady",
+      "refreshConfirm": {
+        "title": "Vygenerovat nové příklady?",
+        "description": "Vygeneruje se nová sada obrázků a zruší všechny výběry včetně předchozích tříd. Bude nutné znovu vybrat příklady pro všechny třídy."
+      },
+      "missingStatesWarning": {
+        "title": "Chybějí příklady tříd",
+        "description": "Ne všechny třídy mají příklady. Zkuste vygenerovat nové příklady pro nalezení chybějící třídy nebo pokračujte a později přidejte obrázky v zobrazení nedávných klasifikací."
+      }
+    },
+    "title": "Vytvořit novou klasifikaci",
+    "steps": {
+      "nameAndDefine": "Pojmenovat a definovat",
+      "stateArea": "Oblast pro klasifikaci stavu",
+      "chooseExamples": "Vybrat příklady"
+    },
+    "step1": {
+      "description": "Modely stavu sledují změny v pevných oblastech obrazu kamer (např. otevřené/zavřené dveře). Modely objektů přidávají klasifikaci detekovaným objektům (např. známá zvířata, doručovatelé apod.).",
+      "name": "Název",
+      "namePlaceholder": "Zadejte název modelu…",
+      "type": "Typ",
+      "typeState": "Stav",
+      "typeObject": "Objekt",
+      "objectLabel": "Štítek objektu",
+      "objectLabelPlaceholder": "Vyberte typ objektu…",
+      "classificationType": "Typ klasifikace",
+      "classificationTypeTip": "Další informace o typech klasifikace",
+      "classificationTypeDesc": "Podštítky přidávají text ke štítku objektu (např. 'Osoba: UPS'). Atributy jsou vyhledatelná metadata uložená samostatně v metadatech objektu.",
+      "classificationSubLabel": "Podštítek",
+      "classificationAttribute": "Atribut",
+      "classes": "Třídy",
+      "states": "Stavy",
+      "classesTip": "Další informace o třídách",
+      "classesStateDesc": "Definujte různé stavy sledované oblasti obrazu. Například 'open' a 'closed' pro garážová vrata.",
+      "classesObjectDesc": "Definujte kategorie pro klasifikaci detekovaných objektů. Například 'delivery_person', 'resident', 'stranger' pro klasifikaci osob.",
+      "classPlaceholder": "Zadejte název třídy…",
+      "errors": {
+        "nameRequired": "Název modelu je povinný",
+        "nameLength": "Název modelu smí mít nejvýše 64 znaků",
+        "nameOnlyNumbers": "Název modelu nesmí obsahovat pouze číslice",
+        "classRequired": "Je vyžadována alespoň 1 třída",
+        "classesUnique": "Názvy tříd musí být jedinečné",
+        "noneNotAllowed": "Třída 'none' není povolena",
+        "stateRequiresTwoClasses": "Modely stavu vyžadují alespoň 2 třídy",
+        "objectLabelRequired": "Vyberte štítek objektu",
+        "objectTypeRequired": "Vyberte typ klasifikace"
+      }
+    },
+    "step2": {
+      "description": "Vyberte kamery a u každé vymezte sledovanou oblast. Model bude klasifikovat stav těchto oblastí.",
+      "cameras": "Kamery",
+      "selectCamera": "Vybrat kameru",
+      "noCameras": "Kliknutím na + přidejte kamery",
+      "selectCameraPrompt": "Vyberte kameru ze seznamu pro vymezení sledované oblasti"
     }
   },
   "deleteCategory": {
-    "title": "Smazat Třídu",
+    "title": "Odstranit třídu",
     "desc": "Opravdu chcete odstranit třídu {{name}}? Tím se na trvalo odstraní všechny související obrázky a bude potřeba přetrénovat model.",
     "minClassesTitle": "Nemůžete smazat třídu",
     "minClassesDesc": "Klasifikační model musí mít alespoň 2 třídy. Než tuto třídu odstraníte přidejte další třídu."
   },
   "edit": {
     "descriptionObject": "Upravte typ objektu a typ klasifikace pro tento model klasifikace.",
-    "stateClassesInfo": "Poznámka: Změna tříd stavů vyžaduje přetrénování modelu s aktualizovanými třídami."
+    "stateClassesInfo": "Model byl aktualizován. Znovu jej natrénujte, aby se změny tříd projevily.",
+    "title": "Upravit klasifikační model",
+    "descriptionState": "Upravte třídy tohoto modelu klasifikace stavu. Změny vyžadují nové natrénování modelu.",
+    "enabled": "Povoleno",
+    "enabledDesc": "Spouštět tento model. Při zakázání přestane běžet a klasifikovat.",
+    "saveAttempts": "Ukládat pokusy",
+    "saveAttemptsDesc": "Počet obrázků pokusů o klasifikaci uchovávaných pro zobrazení nedávných klasifikací.",
+    "motion": "Spouštět při pohybu",
+    "motionDesc": "Spouštět klasifikaci při detekci pohybu v nastaveném výřezu.",
+    "interval": "Interval",
+    "intervalDesc": "Počet sekund mezi pravidelnými spuštěními klasifikace. Ponechte prázdné pro spouštění pouze při pohybu.",
+    "intervalPlaceholder": "Bez intervalu",
+    "errors": {
+      "saveAttemptsInvalid": "Počet uložených pokusů musí být celé nezáporné číslo",
+      "intervalInvalid": "Interval musí být celé číslo větší než 0"
+    }
   },
   "renameCategory": {
     "title": "Přejmenovat třídu",
     "desc": "Vložte nové jméno pro {{name}}. Aby se změna názvu projevila, bude nutné model znovu natrénovat."
   },
   "description": {
-    "invalidName": "Neplatné jméno. Jméno můžou obsahovat pouze písmena, čísla, mezery, apostrofy, podtržítka a spojovníky."
+    "invalidName": "Neplatné jméno. Jména smějí obsahovat pouze písmena, číslice, mezery, apostrofy, podtržítka a spojovníky."
   },
   "categories": "Třídy",
   "createCategory": {
     "new": "Vytvořit novou Třídu"
   },
   "categorizeImageAs": "Klasifikovat obrázek jako:",
-  "categorizeImage": "Klasifikovat obrázek"
+  "categorizeImage": "Klasifikovat obrázek",
+  "disabled": "Zakázáno",
+  "reclassifyImageAs": "Přeřadit obrázek jako:",
+  "reclassifyImage": "Přeřadit obrázek",
+  "menu": {
+    "objects": "Objekty",
+    "states": "Stavy"
+  },
+  "noModels": {
+    "object": {
+      "title": "Žádné modely klasifikace objektů",
+      "description": "Vytvořte vlastní model pro klasifikaci detekovaných objektů.",
+      "buttonText": "Vytvořit model objektů"
+    },
+    "state": {
+      "title": "Žádné modely klasifikace stavu",
+      "description": "Vytvořte vlastní model pro sledování a klasifikaci změn stavu v konkrétních oblastech obrazu kamer.",
+      "buttonText": "Vytvořit model stavu"
+    }
+  }
 }

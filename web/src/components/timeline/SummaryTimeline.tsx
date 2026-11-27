@@ -8,18 +8,26 @@ import React, {
 import { SummarySegment } from "./SummarySegment";
 import {
   ConsolidatedSegmentData,
+  MotionData,
   ReviewSegment,
   ReviewSeverity,
 } from "@/types/review";
 import { useTimelineUtils } from "@/hooks/use-timeline-utils";
+import { cn } from "@/lib/utils";
+import { isMobile } from "react-device-detect";
+
+const MIN_BOX_HEIGHT = isMobile ? 20 : 12;
+const DRAG_THRESHOLD = 4;
 
 export type SummaryTimelineProps = {
   reviewTimelineRef: React.RefObject<HTMLDivElement | null>;
   timelineStart: number;
   timelineEnd: number;
   segmentDuration: number;
-  events: ReviewSegment[];
-  severityType: ReviewSeverity;
+  events?: ReviewSegment[];
+  severityType?: ReviewSeverity;
+  motionData?: MotionData[];
+  motionScale?: number;
 };
 
 export function SummaryTimeline({
@@ -27,16 +35,22 @@ export function SummaryTimeline({
   timelineStart,
   timelineEnd,
   segmentDuration,
-  events,
+  events = [],
   severityType,
+  motionData,
+  motionScale,
 }: SummaryTimelineProps) {
   const summaryTimelineRef = useRef<HTMLDivElement>(null);
   const visibleSectionRef = useRef<HTMLDivElement>(null);
+  const motionCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [scrollStartPosition, setScrollStartPosition] = useState<number>(0);
-  const [initialReviewTimelineScrollTop, setInitialReviewTimelineScrollTop] =
-    useState<number>(0);
+  const dragRef = useRef<{
+    startY: number;
+    startScrollTop: number;
+    insideBox: boolean;
+    moved: boolean;
+  } | null>(null);
 
   const observer = useRef<ResizeObserver | null>(null);
 
@@ -129,6 +143,79 @@ export function SummaryTimeline({
     segmentDuration,
   ]);
 
+  // Each motion sample covers motionScale seconds with a 0-100 value, and
+  // bins without motion are absent. Opacity is the bucket's mean value.
+
+  const drawMotion = useCallback(() => {
+    const canvas = motionCanvasRef.current;
+    const ctx = canvas?.getContext("2d");
+
+    if (!canvas || !ctx || !motionData || !motionScale) {
+      return;
+    }
+
+    const { clientWidth: width, clientHeight: height } = canvas;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const duration = timelineStart - timelineEnd;
+
+    if (duration <= 0 || height <= 0) {
+      return;
+    }
+
+    const rows = Math.max(
+      1,
+      Math.min(Math.floor(height), Math.ceil(duration / motionScale)),
+    );
+    const rowHeight = height / rows;
+    const rowSeconds = duration / rows;
+    const sums = new Array<number>(rows).fill(0);
+
+    motionData.forEach((item) => {
+      const row = Math.floor(
+        ((timelineStart - item.start_time) / duration) * rows,
+      );
+
+      if (row >= 0 && row < rows) {
+        sums[row] += item.motion ?? 0;
+      }
+    });
+
+    const color = getComputedStyle(document.documentElement)
+      .getPropertyValue("--severity_significant_motion")
+      .trim();
+
+    const samplesPerRow = rowSeconds / motionScale;
+
+    sums.forEach((sum, row) => {
+      if (sum == 0) {
+        return;
+      }
+
+      const intensity = Math.min(1, sum / (100 * samplesPerRow));
+      ctx.fillStyle = `hsl(${color} / ${intensity})`;
+      ctx.fillRect(0, row * rowHeight, width, Math.ceil(rowHeight));
+    });
+  }, [motionData, motionScale, timelineStart, timelineEnd]);
+
+  useEffect(() => {
+    const canvas = motionCanvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    drawMotion();
+    const resizeObserver = new ResizeObserver(drawMotion);
+    resizeObserver.observe(canvas);
+
+    return () => resizeObserver.disconnect();
+  }, [drawMotion]);
+
   const setVisibleSectionStyles = useCallback(() => {
     if (
       reviewTimelineRef.current &&
@@ -144,13 +231,22 @@ export function SummaryTimeline({
       } = content;
       const { clientHeight: summaryTimelineVisibleHeight } = summary;
 
-      visibleSectionRef.current.style.top = `${
-        summaryTimelineVisibleHeight * (scrolled / reviewTimelineFullHeight)
-      }px`;
-      visibleSectionRef.current.style.height = `${
-        reviewTimelineVisibleHeight *
-        (reviewTimelineVisibleHeight / reviewTimelineFullHeight)
-      }px`;
+      // The box keeps a minimum height so it stays visible when zoomed in,
+      // centered on the true visible range.
+
+      const trueHeight =
+        summaryTimelineVisibleHeight *
+        (reviewTimelineVisibleHeight / reviewTimelineFullHeight);
+      const trueTop =
+        summaryTimelineVisibleHeight * (scrolled / reviewTimelineFullHeight);
+      const height = Math.max(trueHeight, MIN_BOX_HEIGHT);
+      const top = Math.min(
+        Math.max(trueTop - (height - trueHeight) / 2, 0),
+        summaryTimelineVisibleHeight - height,
+      );
+
+      visibleSectionRef.current.style.top = `${top}px`;
+      visibleSectionRef.current.style.height = `${height}px`;
     }
   }, [reviewTimelineRef, summaryTimelineRef, visibleSectionRef]);
 
@@ -184,178 +280,137 @@ export function SummaryTimeline({
     segmentDuration,
   ]);
 
-  const timelineClick = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
-      // prevent default only for mouse events
-      // to avoid chrome/android issues
-      if (e.nativeEvent instanceof MouseEvent) {
-        e.preventDefault();
+  const scrollTopForPosition = useCallback(
+    (clientY: number) => {
+      const timeline = reviewTimelineRef.current;
+      const summary = summaryTimelineRef.current;
+
+      if (!timeline || !summary) {
+        return 0;
       }
-      e.stopPropagation();
 
-      let clientY;
-      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
-        clientY = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        clientY = e.nativeEvent.clientY;
-      }
-      if (
-        clientY &&
-        reviewTimelineRef.current &&
-        summaryTimelineRef.current &&
-        visibleSectionRef.current
-      ) {
-        const { clientHeight: summaryTimelineVisibleHeight } =
-          summaryTimelineRef.current;
+      const rect = summary.getBoundingClientRect();
+      const ratio = (clientY - rect.top) / rect.height;
+      return ratio * timeline.scrollHeight - timeline.clientHeight / 2;
+    },
+    [reviewTimelineRef],
+  );
 
-        const rect = summaryTimelineRef.current.getBoundingClientRect();
-        const summaryTimelineTop = rect.top;
+  const scrollTimelineTo = useCallback(
+    (top: number, behavior: ScrollBehavior = "auto") => {
+      const timeline = reviewTimelineRef.current;
 
-        const { scrollHeight: reviewTimelineHeight } =
-          reviewTimelineRef.current;
-
-        const { clientHeight: visibleSectionHeight } =
-          visibleSectionRef.current;
-
-        const visibleSectionOffset = -(visibleSectionHeight / 2);
-
-        const clickPercentage =
-          (clientY - summaryTimelineTop + visibleSectionOffset) /
-          summaryTimelineVisibleHeight;
-
-        reviewTimelineRef.current.scrollTo({
-          top: Math.floor(reviewTimelineHeight * clickPercentage),
-          behavior: "smooth",
+      if (timeline) {
+        const maxScrollTop = timeline.scrollHeight - timeline.clientHeight;
+        timeline.scrollTo({
+          top: Math.min(Math.max(top, 0), maxScrollTop),
+          behavior,
         });
       }
     },
-    [reviewTimelineRef, summaryTimelineRef, visibleSectionRef],
+    [reviewTimelineRef],
   );
 
-  const handleMouseDown = useCallback(
-    (
-      e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>,
-    ) => {
-      // prevent default only for mouse events
-      // to avoid chrome/android issues
-      if (e.nativeEvent instanceof MouseEvent) {
-        e.preventDefault();
-      }
-      e.stopPropagation();
-      setIsDragging(true);
+  // A press outside the box jumps there on release, or snaps the box under
+  // the pointer once it moves and then drags it.
 
-      let clientY;
-      if ("TouchEvent" in window && e.nativeEvent instanceof TouchEvent) {
-        clientY = e.nativeEvent.touches[0].clientY;
-      } else if (e.nativeEvent instanceof MouseEvent) {
-        clientY = e.nativeEvent.clientY;
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (
+        e.button != 0 ||
+        !reviewTimelineRef.current ||
+        !visibleSectionRef.current
+      ) {
+        return;
       }
-      if (clientY && summaryTimelineRef.current && reviewTimelineRef.current) {
-        setScrollStartPosition(clientY);
-        setInitialReviewTimelineScrollTop(reviewTimelineRef.current.scrollTop);
-      }
-    },
-    [setIsDragging, summaryTimelineRef, reviewTimelineRef],
-  );
 
-  const handleMouseUp = useCallback(
-    (e: MouseEvent | TouchEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (isDragging) {
-        setIsDragging(false);
-      }
+      e.currentTarget.setPointerCapture(e.pointerId);
+
+      const box = visibleSectionRef.current.getBoundingClientRect();
+      dragRef.current = {
+        startY: e.clientY,
+        startScrollTop: reviewTimelineRef.current.scrollTop,
+        insideBox: e.clientY >= box.top && e.clientY <= box.bottom,
+        moved: false,
+      };
     },
-    [isDragging, setIsDragging],
+    [reviewTimelineRef],
   );
 
-  const handleMouseMove = useCallback(
-    (e: MouseEvent | TouchEvent) => {
-      if (
-        summaryTimelineRef.current &&
-        reviewTimelineRef.current &&
-        visibleSectionRef.current
-      ) {
-        // prevent default only for mouse events
-        // to avoid chrome/android issues
-        if (e instanceof MouseEvent) {
-          e.preventDefault();
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      const timeline = reviewTimelineRef.current;
+      const summary = summaryTimelineRef.current;
+
+      if (!drag || !timeline || !summary) {
+        return;
+      }
+
+      const deltaY = e.clientY - drag.startY;
+
+      if (!drag.moved) {
+        if (Math.abs(deltaY) < DRAG_THRESHOLD) {
+          return;
         }
-        e.stopPropagation();
-        let clientY;
-        if ("TouchEvent" in window && e instanceof TouchEvent) {
-          clientY = e.touches[0].clientY;
-        } else if (e instanceof MouseEvent) {
-          clientY = e.clientY;
-        }
-        if (isDragging && clientY) {
-          const { clientHeight: summaryTimelineVisibleHeight } =
-            summaryTimelineRef.current;
 
-          const {
-            scrollHeight: reviewTimelineHeight,
-            clientHeight: reviewTimelineVisibleHeight,
-          } = reviewTimelineRef.current;
+        drag.moved = true;
+        setIsDragging(true);
 
-          const { clientHeight: visibleSectionHeight } =
-            visibleSectionRef.current;
-
-          const deltaY =
-            (clientY - scrollStartPosition) *
-            (summaryTimelineVisibleHeight / visibleSectionHeight);
-
-          const newScrollTop = Math.min(
-            initialReviewTimelineScrollTop + deltaY,
-            reviewTimelineHeight - reviewTimelineVisibleHeight,
-          );
-
-          reviewTimelineRef.current.scrollTop = newScrollTop;
+        if (!drag.insideBox) {
+          drag.startScrollTop = scrollTopForPosition(drag.startY);
         }
       }
+
+      scrollTimelineTo(
+        drag.startScrollTop +
+          deltaY * (timeline.scrollHeight / summary.clientHeight),
+      );
     },
-    [
-      initialReviewTimelineScrollTop,
-      isDragging,
-      reviewTimelineRef,
-      scrollStartPosition,
-    ],
+    [reviewTimelineRef, scrollTopForPosition, scrollTimelineTo],
   );
 
-  const documentRef = useRef<Document | null>(document);
-  useEffect(() => {
-    const documentInstance = documentRef.current;
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      const drag = dragRef.current;
+      dragRef.current = null;
+      setIsDragging(false);
 
-    if (isDragging) {
-      documentInstance?.addEventListener("mousemove", handleMouseMove);
-      documentInstance?.addEventListener("touchmove", handleMouseMove);
-      documentInstance?.addEventListener("mouseup", handleMouseUp);
-      documentInstance?.addEventListener("touchend", handleMouseUp);
-    } else {
-      documentInstance?.removeEventListener("mousemove", handleMouseMove);
-      documentInstance?.removeEventListener("touchmove", handleMouseMove);
-      documentInstance?.removeEventListener("mouseup", handleMouseUp);
-      documentInstance?.removeEventListener("touchend", handleMouseUp);
-    }
-    return () => {
-      documentInstance?.removeEventListener("mousemove", handleMouseMove);
-      documentInstance?.removeEventListener("touchmove", handleMouseMove);
-      documentInstance?.removeEventListener("mouseup", handleMouseUp);
-      documentInstance?.removeEventListener("touchend", handleMouseUp);
-    };
-  }, [handleMouseMove, handleMouseUp, isDragging]);
+      if (drag && !drag.moved && !drag.insideBox) {
+        scrollTimelineTo(scrollTopForPosition(e.clientY), "smooth");
+      }
+    },
+    [scrollTopForPosition, scrollTimelineTo],
+  );
+
+  const handlePointerCancel = useCallback(() => {
+    dragRef.current = null;
+    setIsDragging(false);
+  }, []);
 
   return (
     <div
-      className={`no-scrollbar relative h-full select-none overflow-hidden border-l-[1px] border-neutral-700 bg-secondary`}
+      className={cn(
+        "no-scrollbar relative h-full touch-none select-none overflow-hidden border-l-[1px] border-neutral-700 bg-secondary",
+        isDragging ? "cursor-grabbing" : "cursor-pointer",
+      )}
       role="scrollbar"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUp}
+      onPointerCancel={handlePointerCancel}
     >
+      {motionData && (
+        <canvas
+          ref={motionCanvasRef}
+          className="pointer-events-none absolute inset-0 size-full"
+        />
+      )}
       <div
         ref={summaryTimelineRef}
         className="relative z-10 flex h-full flex-col-reverse"
-        onClick={timelineClick}
-        onTouchEnd={timelineClick}
       >
         {consolidatedSegments.map((segment, index) => (
           <SummarySegment
@@ -367,11 +422,10 @@ export function SummaryTimeline({
       </div>
       <div
         ref={visibleSectionRef}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleMouseDown}
-        className={`absolute z-20 w-full touch-none bg-primary/30 ${
-          isDragging ? "cursor-grabbing" : "cursor-grab"
-        }`}
+        className={cn(
+          "absolute z-20 w-full border-y border-primary/60 bg-primary/30 shadow-[0_0_0_1px_hsl(var(--background))]",
+          !isDragging && "cursor-grab",
+        )}
       ></div>
     </div>
   );

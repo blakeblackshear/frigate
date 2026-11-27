@@ -1,1 +1,1 @@
-scikit-build == 0.18.*
+scikit-build == 0.19.*

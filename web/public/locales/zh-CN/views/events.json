@@ -40,12 +40,9 @@
     "button": "核查新项目"
   },
   "camera": "摄像头",
-  "selected": "已选择 {{count}} 个",
   "selected_one": "已选择 {{count}} 个",
   "selected_other": "已选择 {{count}} 个",
   "detected": "已检测",
-  "suspiciousActivity": "可疑活动",
-  "threateningActivity": "风险类活动",
   "detail": {
     "noDataFound": "没有可供核查的详细数据",
     "aria": "切换详细视图",
@@ -94,5 +91,6 @@
     "crop": "裁剪至筛选区域",
     "cropAria": "切换预览画面裁剪到筛选区域",
     "cropDesc": "只预览筛选区域，而不是显示整个画面。"
-  }
+  },
+  "subOnlyQuality": "在此时间范围内，只有低画质录制可用"
 }

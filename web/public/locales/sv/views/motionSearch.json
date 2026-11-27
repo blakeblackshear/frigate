@@ -1,1 +1,80 @@
-{}
+{
+    "documentTitle": "Rörelsesökning - Frigate",
+    "title": "Rörelsesökning",
+    "description": "Rita en polygon för att definiera intresseområdet och ange ett tidsintervall för att söka efter rörelseförändringar inom området.",
+    "selectCamera": "Rörelsesökning läses in",
+    "startSearch": "Starta sökning",
+    "searchStarted": "Sökning startad",
+    "searchCancelled": "Sökning avbruten",
+    "cancelSearch": "Avbryt",
+    "searching": "Sökning pågår.",
+    "scanning": "Skannar {{time}}",
+    "searchComplete": "Sökning klar",
+    "noResultsYet": "Kör en sökning för att hitta rörelseförändringar i det valda området",
+    "noChangesFound": "Inga pixelförändringar upptäcktes i det valda området",
+    "changesFound_one": "Hittade {{count}} rörelseförändring",
+    "changesFound_other": "Hittade {{count}} rörelseförändringar",
+    "framesProcessed": "{{count}} bildrutor bearbetade",
+    "jumpToTime": "Hoppa till denna tidpunkt",
+    "results": "Resultat",
+    "showSegmentHeatmap": "Värmekarta",
+    "newSearch": "Ny sökning",
+    "clearResults": "Rensa resultat",
+    "clearROI": "Rensa polygon",
+    "polygonControls": {
+        "points_one": "{{count}} punkt",
+        "points_other": "{{count}} punkter",
+        "undo": "Ångra senaste punkten",
+        "reset": "Återställ polygon",
+        "drawMode": "Rita",
+        "moveMode": "Flytta"
+    },
+    "motionHeatmapLabel": "Värmekarta över rörelser",
+    "dialog": {
+        "title": "Rörelsesökning",
+        "cameraLabel": "Kamera",
+        "previewAlt": "Kameraförhandsvisning för {{camera}}"
+    },
+    "timeRange": {
+        "title": "Sökintervall",
+        "start": "Starttid",
+        "end": "Sluttid"
+    },
+    "settings": {
+        "title": "Sökinställningar",
+        "parallelMode": "Parallellt läge",
+        "parallelModeDesc": "Skanna flera inspelningsintervall samtidigt (snabbare, men använder mer avkodningsresurser)",
+        "threshold": "Känslighetströskel",
+        "thresholdDesc": "Lägre värden upptäcker mindre förändringar (1-255)",
+        "minArea": "Minsta förändringsyta",
+        "minAreaDesc": "Minsta storlek för ett enskilt rörligt område, som procent av intresseområdet",
+        "maxResults": "Högsta antal resultat",
+        "maxResultsDesc": "Stoppa efter så här många matchande tidsstämplar"
+    },
+    "errors": {
+        "noCamera": "Välj en kamera",
+        "noROI": "Rita ett intresseområde",
+        "noTimeRange": "Välj ett tidsintervall",
+        "invalidTimeRange": "Sluttiden måste vara efter starttiden",
+        "alreadyRunning": "Du har redan en rörelsesökning som körs. Vänta tills den är klar eller avbryt den.",
+        "tooManySearches": "För många rörelsesökningar körs. Försök igen när en är klar.",
+        "searchFailed": "Sökningen misslyckades: {{message}}",
+        "polygonTooSmall": "Polygonen måste ha minst 3 punkter",
+        "unknown": "Okänt fel"
+    },
+    "changePercentage": "{{percentage}} % ändrat",
+    "metrics": {
+        "title": "Sökstatistik",
+        "segmentsScanned": "Skannade segment",
+        "segmentsProcessed": "Bearbetade",
+        "segmentsSkippedInactive": "Överhoppade (ingen aktivitet)",
+        "segmentsSkippedHeatmap": "Överhoppade (ingen överlappning med intresseområdet)",
+        "fallbackFullRange": "Reservsökning över hela intervallet",
+        "framesDecoded": "Avkodade bildrutor",
+        "wallTime": "Söktid",
+        "segmentErrors": "Segmentfel",
+        "seconds": "{{seconds}} s",
+        "minutesSeconds": "{{minutes}} min {{seconds}} s",
+        "scanSummary": "{{segments}} segment · {{time}}"
+    }
+}

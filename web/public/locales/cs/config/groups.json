@@ -1,1 +1,73 @@
-{}
+{
+    "audio": {
+        "global": {
+            "detection": "Globální detekce",
+            "sensitivity": "Globální citlivost"
+        },
+        "cameras": {
+            "detection": "Detekce",
+            "sensitivity": "Citlivost"
+        }
+    },
+    "timestamp_style": {
+        "global": {
+            "appearance": "Globální vzhled"
+        },
+        "cameras": {
+            "appearance": "Vzhled"
+        }
+    },
+    "motion": {
+        "global": {
+            "sensitivity": "Globální citlivost",
+            "algorithm": "Globální algoritmus"
+        },
+        "cameras": {
+            "sensitivity": "Citlivost",
+            "algorithm": "Algoritmus"
+        }
+    },
+    "snapshots": {
+        "global": {
+            "display": "Globální zobrazení"
+        },
+        "cameras": {
+            "display": "Zobrazení"
+        }
+    },
+    "detect": {
+        "global": {
+            "resolution": "Globální rozlišení",
+            "tracking": "Globální sledování"
+        },
+        "cameras": {
+            "resolution": "Rozlišení",
+            "tracking": "Sledování"
+        }
+    },
+    "objects": {
+        "global": {
+            "tracking": "Globální sledování",
+            "filtering": "Globální filtrování"
+        },
+        "cameras": {
+            "tracking": "Sledování",
+            "filtering": "Filtrování"
+        }
+    },
+    "record": {
+        "global": {
+            "retention": "Globální uchovávání",
+            "events": "Globální události"
+        },
+        "cameras": {
+            "retention": "Uchovávání",
+            "events": "Události"
+        }
+    },
+    "ffmpeg": {
+        "cameras": {
+            "cameraFfmpeg": "Argumenty FFmpeg pro konkrétní kameru"
+        }
+    }
+}

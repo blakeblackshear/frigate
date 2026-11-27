@@ -199,7 +199,6 @@
     "noChanges": "自上次训练以来，数据集未作任何更改。",
     "modelNotReady": "模型尚未准备好进行训练"
   },
-  "none": "无标签",
   "reclassifyImageAs": "重新分类图片为：",
   "reclassifyImage": "重新分类图片",
   "disabled": "关闭"

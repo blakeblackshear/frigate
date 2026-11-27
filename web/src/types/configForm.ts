@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import type { RendererComponent } from "@/components/config-form/sectionExtras/registry";
 import { CameraConfig, FrigateConfig } from "@/types/frigateConfig";
 
@@ -30,6 +31,8 @@ export type HiddenFieldEntry = string | ((ctx: HiddenFieldContext) => string[]);
 export type ConfigFormContext = {
   level?: "global" | "camera";
   cameraName?: string;
+  /** Config section being edited, e.g. "audio" or "review". */
+  sectionPath?: string;
   globalValue?: JsonValue;
   cameraValue?: JsonValue;
   overrides?: JsonValue;
@@ -37,6 +40,8 @@ export type ConfigFormContext = {
   extraHasChanges?: boolean;
   setExtraHasChanges?: (hasChanges: boolean) => void;
   formData?: JsonObject;
+  /** Key order of each ordered map, so reorders re-render fields */
+  orderedMapsKeyOrder?: string[][];
   pendingDataBySection?: Record<string, ConfigSectionData>;
   onPendingDataChange?: (
     sectionKey: string,
@@ -54,7 +59,7 @@ export type ConfigFormContext = {
   fieldDocs?: Record<string, string>;
   restartRequired?: string[];
   requiresRestart?: boolean;
-  t?: (key: string, options?: Record<string, unknown>) => string;
+  t?: TFunction;
   renderers?: Record<string, RendererComponent>;
   isProfile?: boolean;
 };

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { LuExternalLink } from "react-icons/lu";
-import { StatusBarMessagesContext } from "@/context/statusbar-provider";
+import { StatusBarMessagesContext } from "@/context/statusbar-context";
 import {
   Select,
   SelectContent,

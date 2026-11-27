@@ -9,19 +9,10 @@
     "desc": "{{cameraName}} 的 <code>detect</code> 串流未接收到任何畫面，請檢查錯誤日誌",
     "title": "串流已離線"
   },
-  "cameraDisabled": "鏡頭已停用",
   "stats": {
     "bandwidth": {
       "short": "頻寬",
       "title": "頻寬："
-    },
-    "latency": {
-      "value": "{{seconds}} 秒",
-      "short": {
-        "value": "{{seconds}} 秒",
-        "title": "延遲"
-      },
-      "title": "延遲："
     },
     "totalFrames": "總畫面數：",
     "droppedFrames": {
