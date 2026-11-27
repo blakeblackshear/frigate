@@ -70,16 +70,6 @@ if [[ -n "$mode" ]]; then
     sentinel_content="${sentinel_content}:${mode}"
 fi
 
-# safe-sentinel reports only a root-owned regular file, so a forged or
-# symlinked sentinel in the runtime-user-owned /config can't suppress the sweep
-if [[ "$dry_run" -eq 0 && -n "$sentinel" ]]; then
-    if existing=$(/usr/local/bin/safe-sentinel read "$sentinel" 2>/dev/null) && \
-        [[ "$existing" == "$sentinel_content" ]]; then
-        echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
-        exit 0
-    fi
-fi
-
 # A sweep that could not chown everything must not be recorded as complete:
 # the sentinel would make every later boot skip it and the entries would stay
 # unreachable once services run unprivileged.
@@ -101,6 +91,24 @@ mismatch_expr=(
     -a ! -path /config/go2rtc_homekit.yml
     -a ! -path /config/.permissions_version
 )
+
+first_mismatched_root() {
+    find "$@" -maxdepth 0 "${mismatch_expr[@]}" -print -quit 2>/dev/null || true
+}
+
+# safe-sentinel reports only a root-owned regular file, so a forged or
+# symlinked sentinel in the runtime-user-owned /config can't suppress the sweep.
+# A mismatched volume root means the volume was replaced or wiped since the
+# sweep (Docker recreates a missing bind source as root), so it sweeps again,
+# unless the sentinel records a filesystem that ignores chown.
+if [[ "$dry_run" -eq 0 && -n "$sentinel" ]]; then
+    if existing=$(/usr/local/bin/safe-sentinel read "$sentinel" 2>/dev/null) && \
+        { [[ "$existing" == "${sentinel_content}:unmanaged" ]] || \
+            { [[ "$existing" == "$sentinel_content" ]] && [[ -z "$(first_mismatched_root "$@")" ]]; }; }; then
+        echo "[INFO] fix-ownership: ${target_uid}:${target_gid} (schema ${schema}) already applied, skipping"
+        exit 0
+    fi
+fi
 
 exec 3>&1
 
@@ -199,6 +207,13 @@ if [[ "$dry_run" -eq 0 && -d /config ]]; then
 fi
 
 if [[ "$dry_run" -eq 0 && -n "$sentinel" && "$swept_clean" -eq 1 ]]; then
+    # CIFS without the setuids option accepts chown and changes nothing, so
+    # the root can never match. Without this every boot would sweep again.
+    unmanaged_root=$(first_mismatched_root "$@")
+    if [[ -n "$unmanaged_root" ]]; then
+        echo "[WARN] fix-ownership: ${unmanaged_root} kept its owner after chown; its filesystem ignores ownership changes, so set the owner through its mount options"
+        sentinel_content="${sentinel_content}:unmanaged"
+    fi
     /usr/local/bin/safe-sentinel write "$sentinel" "$sentinel_content" || \
         echo "[WARN] fix-ownership: could not write ${sentinel}; the sweep will run again on next boot"
 fi

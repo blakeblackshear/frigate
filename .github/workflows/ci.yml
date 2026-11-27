@@ -314,6 +314,18 @@ jobs:
             sleep 2
           done
           if [ "$ok" -ne 1 ]; then echo "sentinel skip never logged"; docker logs frigate-puid; exit 1; fi
+          # a replaced media volume re-sweeps despite the sentinel
+          docker stop frigate-puid
+          sudo rm -rf /tmp/frigate-media-puid
+          sudo mkdir /tmp/frigate-media-puid
+          docker start frigate-puid
+          up=0
+          for i in $(seq 1 60); do
+            docker exec frigate-puid curl -fs http://127.0.0.1:5000/api/version && up=1 && break
+            sleep 5
+          done
+          if [ "$up" -ne 1 ]; then echo "replaced media volume was not swept"; docker logs frigate-puid; exit 1; fi
+          docker exec frigate-puid stat -c %u:%g /media/frigate | grep -qx 1500:1500
           docker rm -f frigate-puid
       - name: Assert read-only rootfs with --user works
         run: |
