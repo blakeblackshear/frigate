@@ -525,6 +525,12 @@ If the correct build is used for your GPU then the GPU will be detected and used
 
 :::tip
 
+When using Nvidia GPUs, Frigate configures CUDA blocking synchronization by default to reduce CPU overhead. Instead of spinning a CPU core while waiting for the GPU to complete inference, the thread sleeps until the GPU signals completion. If needed (for example, to troubleshoot latency or compatibility on Jetson devices), this can be disabled by setting the environment variable `CUDA_BLOCKING_SYNC=false`.
+
+:::
+
+:::tip
+
 When using many cameras one detector may not be enough to keep up. Multiple detectors can be defined assuming GPU resources are available. An example configuration would be:
 
 ```yaml
@@ -744,6 +750,8 @@ By default, no models will be generated, but this can be overridden by specifyin
 If you have a Jetson device with DLAs (Xavier or Orin), you can generate a model that will run on the DLA by appending `-dla` to your model name, e.g. specify `YOLO_MODELS=yolov7-320-dla`. The model will run on DLA0 (Frigate does not currently support DLA1). DLA-incompatible layers will fall back to running on the GPU.
 
 If your GPU does not support FP16 operations, you can pass the environment variable `USE_FP16=False` to disable it.
+
+By default, the TensorRT detector creates its CUDA context with blocking synchronization enabled to avoid spinning a CPU core during inference. If you encounter issues on your Jetson device, you can pass the environment variable `CUDA_BLOCKING_SYNC=false` to revert to default spin scheduling.
 
 Specific models can be selected by passing an environment variable to the `docker run` command or in your `docker-compose.yml` file. Use the form `-e YOLO_MODELS=yolov4-416,yolov4-tiny-416` to select one or more model names. The models available are shown below.
 
