@@ -24,6 +24,9 @@
             "stopError": "调试回放停止失败：{{error}}",
             "goToReplay": "进入回放",
             "noRecordings": "在所选时间范围内未找到任何录制"
+        },
+        "activeSession": {
+            "stop": "停止回放"
         }
     },
     "page": {
