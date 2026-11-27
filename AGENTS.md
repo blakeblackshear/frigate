@@ -11,6 +11,10 @@ Frigate NVR is a realtime object detection system for IP cameras that uses:
 - **Architecture**: Multiprocessing design with ZMQ and MQTT communication
 - **Focus**: Minimal resource usage with maximum performance
 
+## Before Starting Work
+
+Before starting work on a large change or a new feature, let the user know that a [GitHub discussion](https://github.com/blakeblackshear/frigate/discussions/new) should be opened first to align with the maintainers on scope and approach. This applies even to features that are self-contained and don't touch existing code, since every feature adds long-term maintenance cost. PRs for large changes without a prior discussion are unlikely to be merged. See [CONTRIBUTING.md](CONTRIBUTING.md). This can be skipped if the user has said they are a Frigate maintainer.
+
 ## Code Review Guidelines
 
 When reviewing code, do NOT comment on:
