@@ -180,7 +180,8 @@
       "hr": "Hrvatski (Kroatiska)",
       "zhHant": "繁體中文 (Traditionell kinesisk)",
       "bs": "Bosanski (Bosniska)",
-      "be": "Беларуская (belarusiska)"
+      "be": "Беларуская (belarusiska)",
+      "srLatn": "Srpski (serbiska, latin)"
     },
     "darkMode": {
       "withSystem": {
@@ -357,5 +358,9 @@
     "action": {
       "toggleTheme": "Växla mellan ljust och mörkt läge"
     }
+  },
+  "plusRateLimited": {
+    "retryIn": "Frigate+ hastighetsbegränsansar antalet förfrågningar. Prova igen om {{duration}}.",
+    "retryLater": "Frigate+ hastighetsbegränsar antalet förfrågningar. Försök igen senare."
   }
 }

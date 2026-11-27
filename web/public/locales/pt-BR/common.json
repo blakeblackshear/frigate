@@ -82,7 +82,8 @@
     "never": "Nunca",
     "inProgress": "Em progresso",
     "invalidStartTime": "Horário de início inválido",
-    "invalidEndTime": "Horário de término inválido"
+    "invalidEndTime": "Horário de término inválido",
+    "custom": "Personalizar..."
   },
   "selectItem": "Selecionar {{item}}",
   "unit": {
@@ -216,7 +217,8 @@
       "hr": "Hrvatski (Croata)",
       "bs": "Bosanski (Bósnio)",
       "zhHant": "Chinês Tradicional",
-      "be": "Bielorrusso"
+      "be": "Bielorrusso",
+      "srLatn": "Srpski (Serbian, Latin)"
     },
     "systemLogs": "Logs de sistema",
     "settings": "Configurações",

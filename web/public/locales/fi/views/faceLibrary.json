@@ -1,7 +1,7 @@
 {
   "description": {
     "addFace": "Opastus: Uuden kokoelman lisääminen Kasvokirjastoon.",
-    "invalidName": "Virheellinen nimi. Nimi voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja.",
+    "invalidName": "Virheellinen nimi. Nimet voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja.",
     "placeholder": "Anna nimi kokoelmalle",
     "nameCannotContainHash": "Nimi ei voi sisältää merkkiä #."
   },
@@ -24,13 +24,35 @@
     "success": {
       "deletedFace_one": "{{count}} kasvo poistettu onnistuneesti.",
       "deletedFace_other": "{{count}} kasvoa poistettu onnistuneesti.",
-      "uploadedImage": "Kuva ladattu onnistuneesti."
+      "uploadedImage": "Kuva ladattu onnistuneesti.",
+      "addFaceLibrary": "{{name}} on lisätty onnistuneesti kasvokirjastoon!",
+      "deletedName_one": "{{count}} kasvo on poistettu onnistuneesti.",
+      "deletedName_other": "{{count}} kasvot on poistettu onnistuneesti.",
+      "renamedFace": "Kasvojen uudelleennimeäminen {{name}} onnistui",
+      "trainedFace": "Kasvot on koulutettu onnistuneesti.",
+      "reclassifiedFace": "Kasvot on luokiteltu uudelleen onnistuneesti.",
+      "updatedFaceScore": "Kasvojen pisteytys päivitetty onnistuneesti {{name}} ({{score}})."
+    },
+    "error": {
+      "uploadingImageFailed": "Kuvan lataaminen epäonnistui: {{errorMessage}}",
+      "addFaceLibraryFailed": "Kasvojen nimeäminen epäonnistui: {{errorMessage}}",
+      "deleteFaceFailed": "Poistaminen epäonnistui: {{errorMessage}}",
+      "deleteNameFailed": "Nimen poistaminen epäonnistui: {{errorMessage}}",
+      "renameFaceFailed": "Kasvojen uudelleennimeäminen epäonnistui: {{errorMessage}}",
+      "trainFailed": "Koulutus epäonnistui: {{errorMessage}}",
+      "reclassifyFailed": "Kasvojen uudelleenluokittelu epäonnistui: {{errorMessage}}",
+      "updateFaceScoreFailed": "Kasvojen pisteytyksen päivittäminen epäonnistui: {{errorMessage}}"
     }
   },
   "train": {
     "empty": "Ei viimeaikaisia kasvojentunnistusyrityksiä",
     "title": "Koulutus",
-    "aria": "Valitse viimeisimmät tunnistukset"
+    "aria": "Valitse viimeisimmät tunnistukset",
+    "titleShort": "viimeaikainen",
+    "emptyNoLibrary": {
+      "title": "Lataa kasvot",
+      "description": "Kasvojentunnistuksen toimimiseksi kirjastoon on lisättävä vähintään yksi kasvo."
+    }
   },
   "collections": "Kokoelmat",
   "steps": {
@@ -63,12 +85,17 @@
   },
   "imageEntry": {
     "validation": {
-      "selectImage": "Valitse kuvatiedosto."
+      "selectImage": "Valitse kuvatiedosto.",
+      "heicConversionFailed": "Tätä HEIC-kuvaa ei voitu muuntaa. Kokeile viedä se sen sijaan JPEG-muodossa."
     },
     "dropActive": "Pudota kuva tähän…",
     "dropInstructions": "Vedä ja pudota tai liitä kuva tähän tai valitse se klikkaamalla",
-    "maxSize": "Maksimikoko: {{size}}MB"
+    "maxSize": "Maksimikoko: {{size}}MB",
+    "converting": "Muunnetaan kuvaa…"
   },
   "nofaces": "Kasvoja ei ole saatavilla",
-  "trainFace": "Kouluta kasvot"
+  "trainFace": "Kouluta kasvot",
+  "trainFaceAs": "Kouluta kasvot muodossa:",
+  "reclassifyFaceAs": "Luokittele kasvot uudelleen muodossa:",
+  "reclassifyFace": "Luokittele kasvot uudelleen"
 }

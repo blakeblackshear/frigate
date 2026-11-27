@@ -22,7 +22,12 @@
     "editName": "Redigera namn",
     "deleteExport": "Ta bort export",
     "assignToCase": "Lägg till i ärende",
-    "removeFromCase": "Ta bort från ärende"
+    "removeFromCase": "Ta bort från ärende",
+    "caseOptions": "Alternativ för ärenden",
+    "shareCase": "Dela ärende",
+    "downloadCase": "Ladda ner ärende",
+    "editCase": "Redigera ärende",
+    "deleteCase": "Radera ärende"
   },
   "selected_one": "{{count}} valt",
   "headings": {

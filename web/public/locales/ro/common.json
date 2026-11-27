@@ -140,7 +140,8 @@
       "hr": "Hrvatski (Croată)",
       "bs": "Bosanski (Bosniacă)",
       "zhHant": "繁體中文 (Chineză tradițională)",
-      "be": "Беларуская (Bielorusă)"
+      "be": "Беларуская (Bielorusă)",
+      "srLatn": "Srpski (Sârbă, Llatină)"
     },
     "theme": {
       "default": "Implicit",
@@ -364,5 +365,9 @@
     "action": {
       "toggleTheme": "Comută între modul luminos și întunecat"
     }
+  },
+  "plusRateLimited": {
+    "retryIn": "Frigate+ limitează rata cererilor. Încearcă din nou în {{duration}}.",
+    "retryLater": "Frigate+ limitează rata cererilor. Încearcă din nou mai târziu."
   }
 }

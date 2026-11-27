@@ -18,6 +18,38 @@
         "enabled": {
             "label": "Ota ääni havainnointi käyttöön",
             "description": "Ota tai poista käytöstä ääni tapahtuman havaiseminen tälle kameralle."
+        },
+        "max_not_heard": {
+            "label": "Lopeta aikalisä",
+            "description": "Sekuntien määrä ilman määritettyä äänityyppiä ennenkuin äänitapahtuma päättyy."
+        },
+        "min_volume": {
+            "label": "Vähimmäistilavuus",
+            "description": "Äänentunnistuksen suorittamiseen vaadittava RMS-äänenvoimakkuuden vähimmäiskynnys; pienemmät arvot lisäävät herkkyyttä (esim. 200 = korkea, 500 = keskitaso, 1000 = matala)."
+        },
+        "listen": {
+            "label": "Kuuntelutyypit",
+            "description": "Luettelo tunnistettavista äänitapahtumatyypeistä (esimerkiksi: haukunta, palohälytys, puhe, huuto)."
+        },
+        "labelmap": {
+            "label": "Ääniluokkakartan mukauttaminen",
+            "description": "Ylikirjoitukset tai uudelleenmääritykset, jotka yhdistetään vakioäänimerkintäkarttaan."
+        },
+        "filters": {
+            "label": "Äänisuodattimet",
+            "description": "Äänityyppikohtaiset suodatinasetukset, kuten luottamusrajat, joita käytetään väärien positiivisten tulosten vähentämiseen.",
+            "threshold": {
+                "label": "Äänen vähimmäisluottamus",
+                "description": "Vähimmäisluottamusraja, jolla äänitapahtuma lasketaan mukaan."
+            }
+        },
+        "enabled_in_config": {
+            "label": "Alkuperäinen äänen tila",
+            "description": "Ilmaisee, oliko äänen tunnistus alun perin otettu käyttöön staattisessa asetustiedostossa."
+        },
+        "num_threads": {
+            "label": "Havaitsemisketjut",
+            "description": "Äänentunnistusprosessoinnissa käytettävien säikeiden määrä."
         }
     },
     "semantic_search": {
@@ -25,6 +57,137 @@
             "actions": {
                 "description": "Suoritettavat toiminnot laukaisuehdon täyttyessä (ilmoitus, aliotsikko, ominaisuus)."
             }
+        }
+    },
+    "audio_transcription": {
+        "label": "Äänilitterointi",
+        "description": "Asetukset puheen reaaliaikaiselle litteroinnille, jota käytetään tapahtumissa ja reaaliaikaisessa tekstityksessä.",
+        "enabled": {
+            "label": "Ota tekstitys käyttöön",
+            "description": "Ota käyttöön tai poista käytöstä manuaalisesti käynnistettävä äänitapahtumien litterointi."
+        },
+        "enabled_in_config": {
+            "label": "Alkuperäinen litterointitila"
+        },
+        "live_enabled": {
+            "label": "Reaaliaikainen tekstitys",
+            "description": "Ota käyttöön äänen reaaliaikainen litterointi sitä mukaa, kun ääntä vastaanotetaan."
+        }
+    },
+    "birdseye": {
+        "label": "Birdseye",
+        "description": "Asetukset Birdseye-yhdistelmänäkymälle, joka kokoaa useita kamerasyötteitä yhdeksi asetteluksi.",
+        "enabled": {
+            "label": "Ota Birdseye käyttöön",
+            "description": "Ota Birdseye-näkymätoiminto käyttöön tai poista se käytöstä."
+        },
+        "modes": {
+            "label": "Aktiviteettityypit",
+            "description": "Birdseye-toimintatyypit, jotka sisältävät kameroita."
+        },
+        "order": {
+            "label": "Sijainti",
+            "description": "Numeerinen sijainti, joka määrittää kameroiden järjestyksen Birdseye-asettelussa."
+        }
+    },
+    "detect": {
+        "label": "Kohteiden tunnistus",
+        "description": "Asetukset detection/detect-roolille, jota käytetään kohteiden tunnistamiseen ja seurantaobjektien alustamiseen.",
+        "enabled": {
+            "label": "Ota objektintunnistus käyttöön",
+            "description": "Ota kohteen tunnistus käyttöön tai poista se käytöstä tässä kamerassa."
+        },
+        "height": {
+            "label": "Tunnista korkeus",
+            "description": "Tunnistusvirrassa käytettävien ruutujen korkeus (pikseleinä); jätä tyhjäksi, jos haluat käyttää virran alkuperäistä tarkkuutta."
+        },
+        "width": {
+            "label": "Tunnista leveys",
+            "description": "Tunnistusvirrassa käytettävien ruutujen leveys (pikseleinä); jätä tyhjäksi, jos haluat käyttää virran alkuperäistä tarkkuutta."
+        },
+        "scene": {
+            "label": "Tunnista kohtaus",
+            "description": "Ympäristö, jota kamera tarkkailee, määrittää, mikä määritetyistä malleista siinä suoritetaan. Kamerat, joiden asetuksena on ”default”, käyttävät mallia, joka on määritetty ”default”-näkymälle."
+        },
+        "fps": {
+            "label": "Tunnista FPS",
+            "description": "Tunnistuksessa käytettävä kuvataajuus (ruutua sekunnissa); pienemmät arvot vähentävät suorittimen kuormitusta (suositusarvo on 5; aseta korkeampi arvo – enintään 10 – vain, jos seurattavat kohteet liikkuvat erittäin nopeasti)."
+        },
+        "min_initialized": {
+            "label": "Alustusruutujen vähimmäismäärä",
+            "description": "Peräkkäisten havaintojen määrä, joka vaaditaan ennen seurattavan kohteen luomista. Kasvata arvoa vähentääksesi virheellisiä alustuksia. Oletusarvo on fps jaettuna kahdella."
+        },
+        "max_disappeared": {
+            "label": "Kadonneiden kehysten enimmäismäärä",
+            "description": "Niiden ruutujen määrä, joissa kohdetta ei havaita, ennen kuin seurattavan kohteen katsotaan kadonneen."
+        },
+        "stationary": {
+            "label": "Paikallaan pysyvien kohteiden asetukset",
+            "description": "Asetukset sellaisten kohteiden tunnistamiseen ja hallintaan, jotka pysyvät paikallaan tietyn ajan.",
+            "interval": {
+                "label": "Paikallaan olevan aikaväli",
+                "description": "Kuinka usein (ruutuina) tunnistustarkistus suoritetaan paikallaan olevan kohteen vahvistamiseksi."
+            },
+            "threshold": {
+                "label": "Paikallaan olevan kynnys",
+                "description": "Niiden ruutujen määrä, joiden aikana sijainti ei muutu, jotta kohde voidaan luokitella paikallaan olevaksi."
+            },
+            "max_frames": {
+                "label": "Ruutujen enimmäismäärä",
+                "description": "Rajoittaa sitä, kuinka pitkään paikallaan pysyviä kohteita seurataan, ennen kuin ne poistetaan seurannasta.",
+                "default": {
+                    "label": "Oletusarvoinen kehysten enimmäismäärä",
+                    "description": "Oletusarvoinen enimmäismäärä ruutuja, joiden ajan paikallaan pysyvää kohdetta seurataan ennen lopettamista."
+                },
+                "objects": {
+                    "label": "Objektin enimmäisruudut",
+                    "description": "Objektikohtaiset ohitukset, jotta enimmäismäärä kehyksiä seuraa paikallaan olevia kohteita."
+                }
+            },
+            "classifier": {
+                "label": "Ota visuaalinen luokittelija käyttöön",
+                "description": "Käytä visuaalista luokittelijaa tunnistamaan oikeasti paikallaan pysyvät kohteet, vaikka rajauslaatikot värähtelisivätkin."
+            }
+        },
+        "annotation_offset": {
+            "label": "Merkinnän siirtymä",
+            "description": "Aika (millisekunteina), jonka verran tunnistusmerkintöjä siirretään, jotta aikajanan rajauslaatikot kohdistuvat paremmin tallenteisiin; arvo voi olla positiivinen tai negatiivinen."
+        }
+    },
+    "face_recognition": {
+        "label": "Kasvojentunnistus",
+        "description": "Tämän kameran kasvojentunnistus- ja tunnistamisasetukset.",
+        "enabled": {
+            "label": "Ota kasvojentunnistus käyttöön",
+            "description": "Ota kasvojentunnistus käyttöön tai poista se käytöstä."
+        },
+        "min_area": {
+            "label": "Pienin kasvoala",
+            "description": "Tunnistusyrityksen edellyttämä havaitun kasvolaatikon vähimmäispinta-ala (pikseleinä)."
+        }
+    },
+    "ffmpeg": {
+        "label": "Virrat (FFmpeg)",
+        "description": "Kamerastriimien syötteet ja FFmpeg-valinnat, mukaan lukien binäärin polku, argumentit, laitteistokiihdytys (hwaccel) sekä roolikohtaiset tulostusargumentit.",
+        "path": {
+            "label": "FFmpeg-polku",
+            "description": "Polku käytettävään FFmpeg-binääritiedostoon tai versioalias (”7.0” tai ”8.0”)."
+        },
+        "global_args": {
+            "label": "FFmpeg yleiset asetukset",
+            "description": "FFmpeg-prosesseille välitettävät yleiset asetukset."
+        },
+        "hwaccel_args": {
+            "label": "Laitteistokiihdytysargumentit",
+            "description": "Laitteistokiihdytyksen parametrit FFmpegille. Suositeltavaa on käyttää palveluntarjoajakohtaisia esiasetuksia."
+        },
+        "input_args": {
+            "label": "Syöteargumentit",
+            "description": "FFmpeg-syötevirtoihin sovellettavat syöteargumentit."
+        },
+        "output_args": {
+            "label": "Tulostusargumentit",
+            "description": "Oletusarvoisia tulostusargumentteja, joita käytetään erilaisissa FFmpeg-rooleissa, kuten tunnistamisessa ja tallennuksessa."
         }
     }
 }

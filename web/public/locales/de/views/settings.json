@@ -88,7 +88,7 @@
     "profiles": "Profile",
     "systemGo2rtcStreams": "go2rtc-streams",
     "maintenance": "Wartung",
-    "systemDetectorsAndModel": "Detektoren und Modell"
+    "systemDetectorsAndModel": "Erkennungsmodell"
   },
   "dialog": {
     "unsavedChanges": {
@@ -593,8 +593,8 @@
     },
     "title": "Benachrichtigungen",
     "notificationUnavailable": {
-      "desc": "Web Push Benachrichtigungen erfordern einen sicheren Kontext (<code>https://…</code>). Das ist eine Vorgabe des Browsers. Greife auf Frigate gesichert zu um Benachrichtigungen zu nutzen.",
-      "descPwa": "Unter iOS sind Web-Push-Benachrichtigungen nur verfügbar, wenn Frigate auf Ihrem Startbildschirm installiert ist. Öffnen Sie das Menü <strong>Teilen</strong>, wählen Sie <strong>Zum Startbildschirm hinzufügen</strong> und öffnen Sie Frigate über das neue Symbol, um dieses Gerät für Benachrichtigungen zu registrieren."
+      "desc": "Web Push Benachrichtigungen erfordern einen sicheren Kontext (https://…). Das ist eine Vorgabe des Browsers. Greife auf Frigate gesichert zu um Benachrichtigungen zu nutzen.",
+      "descPwa": "Unter iOS sind Web-Push-Benachrichtigungen nur verfügbar, wenn Frigate auf Ihrem Startbildschirm installiert ist. Öffnen Sie das Menü Teilen, wählen Sie Zum Startbildschirm hinzufügen und öffnen Sie Frigate über das neue Symbol, um dieses Gerät für Benachrichtigungen zu registrieren."
     },
     "cameras": {
       "desc": "Wähle aus für welche Kameras Benachrichtigungen aktiviert werden sollen.",
@@ -1029,7 +1029,7 @@
       }
     },
     "step3": {
-      "description": "Konfigurieren Sie Stream-Rollen und fügen Sie zusätzliche Streams für Ihre Kamera hinzu.",
+      "description": "Konfigurieren Sie Eigenschaften, Stream-Rollen und fügen Sie zusätzliche Streams für Ihre Kamera hinzu.",
       "streamTitle": "Stream {{number}}",
       "roles": "Rollen",
       "streamsTitle": "Kamera Stream",
@@ -1136,7 +1136,7 @@
         "edit": "Kameradaten bearbeiten",
         "title": "Kameradaten bearbeiten",
         "description": "Aktualisieren Sie den Anzeigenamen, die externe URL und die Sichtbarkeit, die für diese Kamera in der gesamten Frigate-Benutzeroberfläche verwendet werden.",
-        "friendlyNameLabel": "Display Name",
+        "friendlyNameLabel": "angezeigter Name",
         "friendlyNameHelp": "Der in der Benutzeroberfläche von „Frigate“ für diese Kamera angezeigte Spitzname. Lassen Sie das Feld leer, um die Kamera-ID zu verwenden.",
         "webuiUrlLabel": "URL der Web-Benutzeroberfläche",
         "webuiUrlHelp": "URL, um die Web-Benutzeroberfläche der Kamera direkt aus der Debug-Ansicht aufzurufen. Lassen Sie das Feld leer, um den Link zu deaktivieren.",
@@ -1380,7 +1380,8 @@
     "overriddenBaseConfigHeading_other": "Das Profil {{profile}} überschreibt di Felder {{count}} aus der Basiskonfiguration:",
     "overriddenBaseConfigNoDeltas": "Das Profil {{profile}} überschreibt diesen Abschnitt, jedoch weichen keine Feldwerte von der Basiskonfiguration ab.",
     "overriddenLiveTooltip": "Diese Kamera verwendet einen anderen Wert als der in der Konfiguration gespeicherte und hier gezeigte Wert. Die Live Anzeige, MQTT, oder ein aktives Profil kann den Wert während des Betriebs ändern.",
-    "overriddenLiveValue": "Laufender Wert: {{value}}"
+    "overriddenLiveValue": "Laufender Wert: {{value}}",
+    "overriddenLive": "Überschrieben (Live)"
   },
   "timestampPosition": {
     "tl": "Oben links",

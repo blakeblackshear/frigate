@@ -39,5 +39,11 @@
   "tooltip": {
     "trainingInProgress": "Malli kouluttautuu parhaillaan",
     "noNewImages": "Ei uusia kuvia koulutusta varten. Luokittele ensin lisää kuvia aineistossa."
+  },
+  "train": {
+    "titleShort": "viimeaikainen"
+  },
+  "description": {
+    "invalidName": "Virheellinen nimi. Nimet voi sisältää vain merkkejä, numeroita, välejä, heittomerkkejä, alaviivoja ja väliviivoja."
   }
 }

@@ -6,7 +6,7 @@
     "restarting": {
       "title": "Frigate se ponovo pokreće",
       "content": "Ova stranica će se ponovo učitati za {{countdown}} sekundi.",
-      "button": "Osveži odmah"
+      "button": "Prinudno ponovo učitaj odmah"
     }
   },
   "explore": {
@@ -17,7 +17,7 @@
       },
       "review": {
         "question": {
-          "label": "Potvrdite ovu oznaku za Frigate Plu",
+          "label": "Potvrdite ovu oznaku za Frigate Plus",
           "ask_a": "Da li je ovaj objekat <code>{{label}}</code>?",
           "ask_an": "Da li je ovaj objekat <code>{{label}}</code>?",
           "ask_full": "Da li je ovaj objekat <code>{{untranslatedLabel}}</code> ({{translatedLabel}})?"

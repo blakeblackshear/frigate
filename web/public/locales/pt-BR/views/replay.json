@@ -24,7 +24,12 @@
             "alreadyActive": "Já existe uma sessão de replay ativa",
             "noRecordings": "Nenhuma gravação encontrada no intervalo de tempo selecionado"
         },
-        "starting": "Iniciando replay..."
+        "starting": "Iniciando replay...",
+        "activeSession": {
+            "description": "Uma sessão de reprodução de depuração já está em execução para {{camera}}. Interrompa-a para iniciar uma nova.",
+            "stop": "Parar Repetição",
+            "stopping": "Parando..."
+        }
     },
     "page": {
         "noSession": "Nenhuma sessão de replay de depuração ativa",

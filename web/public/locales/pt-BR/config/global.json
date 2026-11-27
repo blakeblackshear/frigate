@@ -80,7 +80,7 @@
         },
         "cookie_secure": {
             "label": "Sinalizador de cookie seguro",
-            "description": "Defina o atributo \"secure\" no cookie de autenticação; ele deve ser verdadeiro ao usar TLS."
+            "description": "Sempre defina a flag `secure` no cookie de autenticação. O Frigate a define automaticamente ao utilizar TLS; habilite essa opção quando um proxy reverso realizar o encerramento (terminação) de TLS antes de chegar ao Frigate. Um proxy que se conecta à porta TLS deve disponibilizar o Frigate aos navegadores via HTTPS."
         },
         "session_length": {
             "label": "Duração da sessão",
@@ -390,15 +390,24 @@
             "description": "Streams ao vivo de baixa qualidade transcodificados sob demanda por go2rtc.",
             "label": "Transmissões transcodificadas",
             "enabled": {
-                "label": "Habilitar Transcodificação de Transmissões"
+                "label": "Habilitar Transcodificação de Transmissões",
+                "description": "Adicione transmissões ao vivo de qualidade inferior, que o go2rtc transcodifica em tempo real enquanto alguém as assiste."
             },
             "qualities": {
                 "bitrate": {
-                    "label": "Taxa de bits"
+                    "label": "Taxa de bits",
+                    "description": "Taxa de bits de vídeo alvo e máxima, em kbps."
                 },
                 "height": {
-                    "label": "Altura"
-                }
+                    "label": "Altura",
+                    "description": "Altura de saída em pixels; a largura segue a proporção da fonte."
+                },
+                "label": "Qualidades",
+                "description": "Um fluxo transcodificado é adicionado por nível de qualidade."
+            },
+            "source": {
+                "label": "Fluxo de origem",
+                "description": "Fluxo do go2rtc para transcodificação. O padrão é o primeiro fluxo ao vivo."
             }
         }
     },
@@ -1021,7 +1030,11 @@
             "label": "Intervalo de espera",
             "description": "Intervalo (em segundos) entre notificações para evitar o envio excessivo de mensagens aos destinatários."
         },
-        "description": "Configurações para habilitar e controlar as notificações de todas as câmeras; podem ser substituídas por câmera."
+        "description": "Configurações para habilitar e controlar as notificações de todas as câmeras; podem ser substituídas por câmera.",
+        "ttl": {
+            "label": "Notificação TTL",
+            "description": "Veja como o serviço de notificações (push) lida com uma notificação enviada enquanto um alerta está ativo, caso o seu dispositivo não possa ser contatado: a opção \"imediata\" (immediate) entrega a notificação na hora ou a descarta; a opção \"confiável\" (reliable) continua tentando realizar a entrega por até 30 segundos. A notificação enviada quando um alerta termina é sempre mantida por até uma hora."
+        }
     },
     "onvif": {
         "label": "ONVIF",
@@ -1333,6 +1346,10 @@
         "version_check": {
             "description": "Habilita uma verificação externa para detectar se há uma versão mais recente do Frigate disponível.",
             "label": "Verificação de versão"
+        },
+        "analytics": {
+            "label": "Compartilhar análises anônimas",
+            "description": "Envie um relatório de uso anônimo por dia para ajudar os mantenedores do Frigate a decidir o que oferecer suporte. Nada é enviado enquanto essa opção estiver desativada."
         }
     },
     "tls": {
@@ -1495,9 +1512,9 @@
         "label": "Modelos de detecção",
         "scene": {
             "label": "Cena do modelo",
-            "description": "O ambiente da câmera para o qual este modelo é usado. As câmeras selecionam um modelo definindo detect.scene com um valor correspondente, e 'all' é usado por qualquer câmera que não defina um."
+            "description": "Um nome para o ambiente de câmera no qual este modelo é utilizado, como, por exemplo, 'térmico'. As câmeras selecionam um modelo definindo `detect.scene` com um valor correspondente; o modelo 'padrão' é utilizado por qualquer câmera que não defina um valor específico."
         },
-        "description": "Modelos de detecção de objetos e o hardware em que cada um é executado. As câmeras escolhem um modelo fazendo a correspondência entre o detect.scene delas e o scene do modelo.",
+        "description": "Modelos de detecção de objetos e o hardware no qual cada um deles é executado. As câmeras selecionam um modelo comparando seu parâmetro `detect.scene` com o cenário definido para o modelo; caso não haja correspondência, utiliza-se o modelo \"padrão\".",
         "devices": {
             "label": "Hardware de detecção",
             "description": "Hardware em que este modelo é executado, no formato '<detector>' ou '<detector>:<device>' (por exemplo, 'edgetpu:pci:0' ou 'openvino:GPU'). Listar o mesmo dispositivo mais de uma vez executa processos de inferência adicionais nele."

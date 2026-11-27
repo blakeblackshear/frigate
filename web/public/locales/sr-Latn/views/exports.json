@@ -23,7 +23,12 @@
     "editName": "Izmeni naziv",
     "deleteExport": "Obriši izvoz",
     "assignToCase": "Dodaj u slučaj",
-    "removeFromCase": "Ukloni iz slučaja"
+    "removeFromCase": "Ukloni iz slučaja",
+    "caseOptions": "Opcije slučaja",
+    "shareCase": "Podeli slučaj",
+    "downloadCase": "Preuzmi slučaj",
+    "editCase": "Izmeni slučaj",
+    "deleteCase": "Obriši slučaj"
   },
   "toolbar": {
     "newCase": "Novi slučaj",

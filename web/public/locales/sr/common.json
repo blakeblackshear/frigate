@@ -85,7 +85,7 @@
     "invalidStartTime": "Неважеће време почетка",
     "invalidEndTime": "Неважеће време завршетка"
   },
-  "readTheDocumentation": "Прочитај документацију",
+  "readTheDocumentation": "Прочитајте документацију",
   "menu": {
     "system": "Систем",
     "profiles": "Профили",
@@ -141,7 +141,8 @@
       "ur": "Урду (اردو)",
       "withSystem": {
         "label": "Користи системска подешавања за језик"
-      }
+      },
+      "srLatn": "Српски (Latinica)"
     },
     "appearance": "Изглед",
     "darkMode": {
@@ -215,11 +216,11 @@
     }
   },
   "label": {
-    "back": "Иди назад",
+    "back": "Повратак",
     "hide": "Сакриј {{item}}",
     "show": "Прикажи {{item}}",
     "ID": "ИД",
-    "none": "Ништа",
+    "none": "Ниједно",
     "all": "Све",
     "other": "Остало"
   },
@@ -364,5 +365,9 @@
     "action": {
       "toggleTheme": "Пребаци на светли или тамни режим"
     }
+  },
+  "plusRateLimited": {
+    "retryIn": "Frigate+ ограничава број захтева. Покушајте поново за {{duration}}.",
+    "retryLater": "Frigate+ ограничава број захтева. Покушајте поново касније."
   }
 }

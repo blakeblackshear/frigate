@@ -22,7 +22,12 @@
     "deleteExport": "Smazat export",
     "editName": "Upravit jméno",
     "assignToCase": "Přidat do případu",
-    "removeFromCase": "Odebrat z případu"
+    "removeFromCase": "Odebrat z případu",
+    "caseOptions": "Možnosti případu",
+    "shareCase": "Sdílet případ",
+    "downloadCase": "Stáhnout případ",
+    "editCase": "Upravit případ",
+    "deleteCase": "Smazat případ"
   },
   "headings": {
     "cases": "Případy",

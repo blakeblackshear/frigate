@@ -119,17 +119,24 @@
       "liveFallbackTimeout": {
         "label": "Tempo limite de fallback do reprodutor ao vivo",
         "desc": "Quando o stream ao vivo em alta qualidade de uma câmera não estiver disponível, fazer fallback para o modo de baixa largura de banda após este número de segundos. Padrão: 3."
+      },
+      "naturalAspectLayout": {
+        "label": "Use proporções naturais",
+        "desc": "Nos painéis de visualização ao vivo de grupos de câmeras, ajuste o tamanho de cada bloco de acordo com a proporção nativa da respectiva câmera. Quando essa opção está desativada, as câmeras são ajustadas a um formato de bloco padrão: largo, horizontal ou vertical.",
+        "descNote": "Ativar ou desativar essa configuração removerá o layout salvo de todos os painéis de visualização ao vivo de grupos de câmeras. Será necessária uma reconfiguração manual."
       }
     },
     "storedLayouts": {
       "title": "Layouts Salvos",
       "desc": "O layout das câmeras em um grupo de câmeras pode ser arrastado/redimensionado. As posições são salvas no armazenamento local do seu navegador.",
-      "clearAll": "Apagar Todos os Layouts"
+      "clearAll": "Apagar Todos os Layouts",
+      "clearConfirm": "Isso removerá o layout salvo de todos os grupos de câmeras neste navegador. Essa ação não pode ser desfeita."
     },
     "cameraGroupStreaming": {
       "title": "Opções de Streaming de Grupo de Câmeras",
       "desc": "Os ajustes de streaming para cada grupo de câmera são salvos no armazenamento local do seu navegador.",
-      "clearAll": "Apagar Todos os Ajustes de Streaming"
+      "clearAll": "Apagar Todos os Ajustes de Streaming",
+      "clearConfirm": "Isso limpará as configurações de streaming de cada grupo de câmeras neste navegador. Isto não pode ser desfeito."
     },
     "recordingsViewer": {
       "title": "Visualizador de Gravações",
@@ -193,7 +200,10 @@
         "confirm": "Importar",
         "unknownGroups_one": "O grupo de câmeras {{groups}} não existe neste servidor. Suas configurações serão salvas, mas não serão usadas.",
         "unknownGroups_many": "Os grupos de câmeras {{groups}} não existem neste servidor. Suas configurações serão salvas, mas não serão usadas.",
-        "unknownGroups_other": "Os grupos de câmeras {{groups}} não existem neste servidor. Suas configurações serão salvas, mas não serão usadas."
+        "unknownGroups_other": "Os grupos de câmeras {{groups}} não existem neste servidor. Suas configurações serão salvas, mas não serão usadas.",
+        "layoutsPhone": "Os layouts de grupos de câmeras não são importados em celulares, que utilizam sempre a grade padrão.",
+        "layoutsModeOn": "Estes layouts utilizam um dimensionamento de blocos baseado na proporção de aspecto da câmera; portanto, ao importá-los, a opção \"Usar proporções de aspecto naturais\" também será ativada.",
+        "layoutsModeOff": "Estes layouts utilizam tamanhos de bloco padrão; portanto, ao importá-los, a opção \"Usar proporções naturais\" também será desativada."
       }
     }
   },
@@ -560,7 +570,8 @@
     "title": "Usuários",
     "management": {
       "title": "Gerenciamento de Usuário",
-      "desc": "Gerenciar as contas de usuário dessa instância do Frigate."
+      "desc": "Gerenciar as contas de usuário dessa instância do Frigate.",
+      "authDisabled": "A autenticação integrada está desativada. Essas contas só são usadas para fazer login após a sua ativação."
     },
     "addUser": "Adicionar Usuário",
     "updatePassword": "Resetar Senha",
@@ -619,7 +630,8 @@
         "title": "Criar Novo Usuário",
         "desc": "Adicionar um novo usuário e especificar um papel para acesso às áreas da interface do Frigate.",
         "usernameOnlyInclude": "O nome de usuário pode conter apenas letras, números, . ou _",
-        "confirmPassword": "Por favor confirme a sua senha"
+        "confirmPassword": "Por favor confirme a sua senha",
+        "usernameOnlyDots": "O nome de usuário não pode conter apenas pontos"
       },
       "deleteUser": {
         "title": "Deletar Usuário",
@@ -671,7 +683,8 @@
       "24hours": "Suspender por 24 horas",
       "untilRestart": "Suspender até reiniciar",
       "suspend": "Suspender",
-      "5minutes": "Suspender por 5 minutos"
+      "5minutes": "Suspender por 5 minutos",
+      "custom": "Suspender até..."
     },
     "cancelSuspension": "Cancelar Suspensão",
     "toast": {
@@ -713,14 +726,27 @@
     "unsavedRegistrations": "Registros de Notificações Não Salvos",
     "unsavedChanges": "Alterações de Notificações Não Salvas",
     "active": "Notificações Ativas",
-    "suspended": "Notificações suspensas {{time}}"
+    "suspended": "Notificações suspensas {{time}}",
+    "customSuspension": {
+      "title": "Tempo de suspensão personalizado",
+      "description": "Suspenda as notificações desta câmera até o horário selecionado.",
+      "untilLabel": "Suspender até",
+      "invalidTime": "Selecione um tempo no futuro."
+    }
   },
   "frigatePlus": {
     "title": "Configurações do Frigate+",
     "apiKey": {
       "title": "Chave de API do Frigate+",
       "desc": "A chave de API do Frigate+ habilita a integração com o serviço do Frigate+.",
-      "plusLink": "Leia mais sobre o Frigate+"
+      "plusLink": "Leia mais sobre o Frigate+",
+      "formatValid": "A chave de API do Frigate+ foi detectada e está em conformidade com o formato esperado",
+      "formatInvalid": "A chave de API do Frigate+ não foi detectada ou não corresponde ao formato esperado",
+      "validate": "Valide com Frigate+",
+      "validating": "Validando…",
+      "serverValid": "Frigate+ aceitou essa chave API",
+      "serverInvalid": "Frigate+ rejeitou essa chave API",
+      "serverUnreachable": "Não foi possível contatar o Frigate+ para validar esta chave de API"
     },
     "modelInfo": {
       "plusModelType": {
@@ -745,7 +771,8 @@
         "ariaLabel": "Filtrar modelos por tipo",
         "baseModels": "Modelos base",
         "fineTunedModels": "Modelos ajustados"
-      }
+      },
+      "showIncompatible": "Mostrar modelos incompatíveis"
     },
     "snapshotConfig": {
       "title": "Configuração de Captura de Imagem",
@@ -903,7 +930,10 @@
       "actions": "Ações",
       "noRoles": "Nenhum papel customizado encontrado.",
       "editCameras": "Editar Câmeras",
-      "deleteRole": "Apagar Papel"
+      "deleteRole": "Apagar Papel",
+      "cameraCount_one": "{{count}} câmera",
+      "cameraCount_many": "{{count}} câmeras",
+      "cameraCount_other": "{{count}} câmeras"
     },
     "toast": {
       "success": {
@@ -999,7 +1029,8 @@
         "nameLength": "O nome da câmera deve ter 64 caracteres ou menos",
         "invalidCharacters": "Nome da câmera contém caracteres inválidos",
         "nameExists": "Nome da câmera já existe",
-        "customUrlRtspRequired": "URLs personalizadas devem começar com \"rtsp://\" ou \"rtsps://\". A configuração manual é necessária para streams de câmera que não sejam RTSP."
+        "customUrlRtspRequired": "URLs personalizadas devem começar com \"rtsp://\" ou \"rtsps://\". A configuração manual é necessária para streams de câmera que não sejam RTSP.",
+        "onvifPortInvalid": "A porta ONVIF deve ser um número inteiro de 1 a 65535"
       },
       "connectionSettings": "Configurações de conexão",
       "detectionMethod": "Método de detecção de streams",
@@ -1726,7 +1757,14 @@
       "noGo2rtcStreams": "Nenhum stream do go2rtc configurado",
       "availableStreams": "Streams disponíveis",
       "useCustom": "Usar \"{{value}}\"",
-      "addStream": "Adicionar stream"
+      "addStream": "Adicionar stream",
+      "reorderHandle": "Arraste para reordenar",
+      "transcodedBadge": "Transcodificado",
+      "autoOrder": "Reordenar automaticamente",
+      "autoOrderTips": "Meça a taxa de bits de cada fluxo e ordene, começando pelo maior",
+      "measuring": "Medindo…",
+      "rate": "{{kbps}} kbps",
+      "rateFailed": "Não foi possível medir"
     },
     "ptzPresets": {
       "placeholder": "Selecione ou digite uma predefinição...",
@@ -1757,6 +1795,18 @@
     },
     "audioTranscriptionModelSize": {
       "notApplicable": "Não se aplica a provedores de IA generativa"
+    },
+    "liveTranscode": {
+      "title": "Fluxos transcodificados",
+      "description": "Adiciona fluxos de qualidade inferior que o go2rtc transcodifica em tempo real enquanto alguém está assistindo.",
+      "unavailable": "Fluxos transcodificados precisam de um fluxo do go2rtc como fonte. Adicione um na seção de fluxos do go2rtc primeiro.",
+      "source": "Fluxo de origem",
+      "height": "Altura",
+      "heightOption": "{{height}}p",
+      "bitrate": "Bitrate (kbps)",
+      "addQuality": "Adicionara qualidade",
+      "enable": "Ativar fluxos transcodificados",
+      "removeQuality": "Remover qualidade"
     }
   },
   "globalConfig": {
@@ -1795,7 +1845,8 @@
     "applied": "Configurações aplicadas com sucesso",
     "saveAllSuccessRestartRequired_one": "Salva {{count}} seção com sucesso. Reinicie o Frigate para aplicar as alterações.",
     "saveAllSuccessRestartRequired_many": "Todas as {{count}} seções foram salvas com sucesso. Reinicie o Frigate para aplicar as alterações.",
-    "saveAllSuccessRestartRequired_other": "Todas as {{count}} seções foram salvas com sucesso. Reinicie o Frigate para aplicar as alterações."
+    "saveAllSuccessRestartRequired_other": "Todas as {{count}} seções foram salvas com sucesso. Reinicie o Frigate para aplicar as alterações.",
+    "go2rtcSyncFailed": "Salvo, mas não foi possível atualizar o go2rtc. Reinicie o Frigate para aplicar."
   },
   "unsavedChanges": "Você tem alterações não salvas",
   "confirmReset": "Confirmar redefinição",
@@ -1939,7 +1990,7 @@
       "squareResolution": "Uma resolução de detecção quadrada é incomum. A largura e a altura de detecção devem corresponder à proporção da sua câmera (por exemplo, 16:9), e não às dimensões do modelo de detecção de objetos. Uma proporção incompatível pode esticar a imagem e reduzir a precisão da detecção.",
       "resolutionHigh": "Esta resolução de detecção é maior que a recomendada e pode aumentar o uso de recursos sem melhorar a precisão da detecção. Para a maioria das câmeras, recomenda-se uma resolução de detecção igual ou inferior a 1080p.",
       "globalResolutionMultipleCameras": "Há uma resolução de detecção global definida enquanto várias câmeras estão configuradas. A menos que todas as câmeras tenham a mesma resolução e proporção, a largura e a altura de detecção devem ser definidas por câmera para corresponder à proporção nativa de cada uma.",
-      "sceneWithoutModel": "Nenhum modelo de detecção está configurado para esta cena, então esta câmera usa como alternativa o modelo com a cena 'Todas as câmeras'. Adicione um modelo para esta cena para dar à câmera o seu próprio.",
+      "sceneWithoutModel": "Nenhum modelo de detecção está configurado para esta cena; portanto, esta câmera utiliza o modelo padrão. Adicione um modelo para esta cena a fim de definir um modelo específico para a câmera.",
       "runtimeDisabled": "A detecção de objetos está habilitada na sua configuração, mas está desligada no momento para esta câmera. Snapshots, itens de revisão e enriquecimentos, como reconhecimento facial, reconhecimento de placas de veículos e IA generativa, não funcionarão até que ela seja ligada novamente na visualização ao vivo da câmera ou até que o perfil ativo deixe de desabilitá-la."
     },
     "faceRecognition": {
@@ -1954,7 +2005,8 @@
     },
     "record": {
       "noRecordRole": "Nenhum stream tem a função de gravação definida. A gravação não funcionará.",
-      "noRecordSubRole": "Nenhum stream tem a função record_sub definida. A gravação do substream não funcionará."
+      "noRecordSubRole": "Nenhum stream tem a função record_sub definida. A gravação do substream não funcionará.",
+      "profileBaseDisabled": "A gravação está desativada na configuração base desta câmera; portanto, ativá-la em um perfil não surte efeito. Ative a gravação na configuração base e, em vez disso, utilize um perfil para desativá-la."
     },
     "snapshots": {
       "detectDisabled": "A detecção de objetos está desabilitada. Os snapshots são gerados a partir de objetos rastreados e não serão criados.",
@@ -1980,6 +2032,13 @@
     "birdseye": {
       "objectTrackingDetectDisabled": "O Birdseye inclui objetos rastreados, mas a detecção de objetos está desabilitada para esta câmera. A câmera não aparecerá no Birdseye.",
       "objectTrackingDetectRuntimeDisabled": "O Birdseye inclui objetos rastreados, mas a detecção de objetos está desligada no momento para esta câmera, embora a sua configuração a habilite. A câmera não aparecerá no Birdseye até que ela seja ligada novamente na visualização ao vivo da câmera ou até que o perfil ativo deixe de desabilitá-la."
+    },
+    "live": {
+      "noGo2rtcStream": "A visualização ao vivo desta câmera utiliza um player básico com uma taxa de quadros (frame rate) mais baixa e sem áudio. Configure um fluxo (stream) via go2rtc para esta câmera, a fim de obter um vídeo mais fluido e áudio."
+    },
+    "notifications": {
+      "profileBaseDisabled": "Nenhuma câmera tem notificações habilitadas em sua configuração básica, portanto ativá-las em um perfil não tem efeito. Habilite notificações na configuração básica de pelo menos uma câmera.",
+      "ttlDelay": "As notificações podem chegar com um atraso de até 30 segundos e, ainda assim, direcionar para a visualização ao vivo, mesmo após o término do evento em questão."
     }
   },
   "ui": {
@@ -2039,14 +2098,15 @@
   },
   "detectionModels": {
     "title": "Modelos de detecção",
-    "description": "Configure os modelos de detecção de objetos e o hardware em que cada um é executado. As câmeras escolhem um modelo pela cena definida nas configurações de detecção da câmera.",
+    "description": "Configure os modelos de detecção de objetos e o hardware no qual cada um deles é executado. Adicione um modelo para um cenário apenas quando algumas câmeras precisarem de um modelo treinado de forma diferente, como é o caso de câmeras térmicas. As câmeras selecionam um modelo com base no cenário definido nas configurações de detecção da própria câmera.",
     "addModel": "Adicionar modelo",
     "cameras_one": "{{count}} câmera",
     "cameras_many": "{{count}} câmeras",
     "cameras_other": "{{count}} câmeras",
     "scene": {
       "label": "Cena",
-      "description": "O ambiente para o qual este modelo se destina. As câmeras escolhem um modelo definindo a mesma cena nas suas configurações de detecção, e o modelo com a cena all é usado por qualquer câmera que não defina uma."
+      "description": "Um nome para identificar as câmeras às quais este modelo se destina. As câmeras selecionam um modelo ao definir a mesma \"cena\" (scene) em suas configurações de detecção; o modelo \"padrão\" é utilizado por qualquer câmera que não tenha uma definição específica. Utilize as cenas para executar modelos diferentes, e não para dividir um único modelo entre diferentes hardwares, uma vez que modelos que utilizam o mesmo arquivo de modelo são combinados.",
+      "placeholder": "térmica"
     },
     "hardware": {
       "label": "Hardware",
@@ -2060,7 +2120,7 @@
       "countRecommended_other": "Recomendado para {{count}} câmeras",
       "description": "O hardware no qual este modelo executa a detecção.",
       "unrecognized": "Este modelo está configurado para um hardware que não foi encontrado neste sistema: {{devices}}",
-      "unitsDescription": "Cada unidade executa o seu próprio processo de detecção. Uma unidade já usada por outro modelo não pode ser selecionada.",
+      "unitsDescription": "Cada unidade executa seu próprio processo de detecção. Uma unidade que não pode ser compartilhada, como uma Coral, só pode ser utilizada por um único modelo.",
       "detectorCountDescription": "Quantos processos de detecção executar neste hardware. Mais detectores acompanham mais câmeras, ao custo de memória adicional do dispositivo."
     },
     "tabs": {
@@ -2069,6 +2129,17 @@
     },
     "plusModel": {
       "noModelSelected": "Selecione um modelo do Frigate+"
+    },
+    "scenes": {
+      "default": "Padrão"
     }
+  },
+  "analyticsPreview": {
+    "show": "Visualizar o relatório",
+    "desc": "O Frigate envia este relatório uma vez por dia, enquanto o compartilhamento estiver ativado. Ele nunca inclui nomes de câmeras, zonas, rótulos ou endereços.",
+    "error": "Não foi possível gerar a prévia"
+  },
+  "notificationTtl": {
+    "reliable": "Confiável"
   }
 }

@@ -91,8 +91,10 @@
     "dropInstructions": "Trage și plasează sau lipește o imagine aici sau fă clic pentru a selecta",
     "maxSize": "Dimensiunea maximă: {{size}}MB",
     "validation": {
-      "selectImage": "Te rog să selectezi un fișier imagine."
-    }
+      "selectImage": "Te rog să selectezi un fișier imagine.",
+      "heicConversionFailed": "Nu s-a putut converti această imagine HEIC. Încearcă să o exporți ca JPEG."
+    },
+    "converting": "Se convertește imaginea…"
   },
   "trainFaceAs": "Antrenează fața ca:",
   "trainFace": "Antrenează fața",

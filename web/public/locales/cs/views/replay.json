@@ -24,6 +24,11 @@
             "noRecordings": "Ve vybraném časovém rozsahu nebyly nalezeny žádné záznamy",
             "stopError": "Nepodařilo se zastavit ladicí přehrávání: {{error}}",
             "goToReplay": "Přejít na přehrávání"
+        },
+        "activeSession": {
+            "description": "Pro kameru {{camera}} již běží relace ladicího přehrávání. Chcete-li spustit novou, zastavte ji.",
+            "stop": "Zastavit přehrávání",
+            "stopping": "Zastavování…"
         }
     },
     "page": {

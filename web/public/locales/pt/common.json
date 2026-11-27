@@ -82,7 +82,8 @@
     "inProgress": "Em andamento",
     "invalidStartTime": "Horário de início inválido",
     "invalidEndTime": "Horário de término inválido",
-    "never": "Nunca"
+    "never": "Nunca",
+    "custom": "Personalizado..."
   },
   "unit": {
     "speed": {
@@ -150,7 +151,11 @@
     "saveAll": "Gravar Tudo",
     "savingAll": "A gravar tudo…",
     "undoAll": "Desfazer Tudo",
-    "retry": "Tente novamente"
+    "retry": "Tente novamente",
+    "expand": "Expandir",
+    "collapse": "Ocultar",
+    "clear": "Limpar",
+    "reload": "Recarregar"
   },
   "label": {
     "back": "Voltar",
@@ -182,9 +187,9 @@
       "nord": "Nord"
     },
     "system": "Sistema",
-    "systemMetrics": "Métricas do sistema",
+    "systemMetrics": "Saúde e Métricas",
     "configuration": "Configuração",
-    "systemLogs": "Registos do sistema",
+    "systemLogs": "Registos de eventos",
     "settings": "Definições",
     "configurationEditor": "Editor de Configuração",
     "languages": "Idiomas",
@@ -233,7 +238,9 @@
       "ur": "Urdu",
       "hr": "Hrvatski (Croata)",
       "bs": "Bosanski (Bósnio)",
-      "zhHant": "繁體中文 (Chinês Tradicional)"
+      "zhHant": "繁體中文 (Chinês Tradicional)",
+      "be": "Bielorrusso (Беларуская)",
+      "srLatn": "Sérvio (sérvio, latim)"
     },
     "appearance": "Aparência",
     "darkMode": {
@@ -326,6 +333,41 @@
   "no_items": "Sem elementos",
   "validation_errors": "Erros de validação",
   "credentialField": {
-    "savedPlaceholder": "Gravado - deixar em branco para manter a atual"
+    "savedPlaceholder": "Guardado — deixar em branco para manter a atual"
+  },
+  "error": {
+    "title": "Esta página deixou de funcionar",
+    "staleTitle": "Necessário recarregar",
+    "copyDetails": "Copiar detalhes",
+    "partial": "Parte da interface deixou de funcionar.",
+    "copyFailed": "Não foi possível copiar os detalhes para a área de transferência",
+    "desc": "A página encontrou um erro inesperado. Recarregá-la normalmente resolve o problema. Se continuar a acontecer, copie os detalhes e anexe-os a uma discussão no GitHub.",
+    "staleDesc": "Parte da interface não pôde ser carregada, o que normalmente significa que o Frigate foi atualizado enquanto este separador estava aberto. Recarregue para obter a nova versão."
+  },
+  "plusRateLimited": {
+    "retryIn": "O Frigate+ está a limitar o número de pedidos. Tente novamente em {{duration}}.",
+    "retryLater": "O Frigate+ está a limitar o número de pedidos. Tente novamente mais tarde."
+  },
+  "commandMenu": {
+    "title": "Menu de comandos",
+    "description": "Procurar páginas, câmaras, definições, e ações",
+    "placeholder": "Procurar páginas, câmaras, definições, e ações",
+    "empty": "Sem correspondências",
+    "hint": "{{key}} ou/para abrir, Enter para executar",
+    "section": {
+      "recent": "Recentes",
+      "pages": "Páginas",
+      "cameras": "Câmaras",
+      "cameraGroups": "Grupos de câmara",
+      "settings": "Definições",
+      "actions": "Ações"
+    },
+    "camera": {
+      "live": "Live",
+      "review": "Rever"
+    },
+    "action": {
+      "toggleTheme": "Alternar modo claro e escuro"
+    }
   }
 }

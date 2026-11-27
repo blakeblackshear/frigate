@@ -52,8 +52,10 @@
     "dropInstructions": "Dra och släpp eller klistra in en bild här, eller klicka för att välja",
     "maxSize": "Maximal storlek: {{size}} MB",
     "validation": {
-      "selectImage": "Välj en bildfil."
-    }
+      "selectImage": "Välj en bildfil.",
+      "heicConversionFailed": "Det gick inte att konvertera den här HEIC-bilden. Prova att exportera den som en JPEG istället."
+    },
+    "converting": "Konverterar bild…"
   },
   "nofaces": "Inga ansikten tillgängliga",
   "trainFaceAs": "Träna ansiktet som:",

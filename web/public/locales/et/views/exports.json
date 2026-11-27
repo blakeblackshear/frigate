@@ -17,7 +17,12 @@
     "editName": "Muuda nime",
     "deleteExport": "Kustuta eksporditud sisu",
     "assignToCase": "Lisa juhtumile",
-    "removeFromCase": "Eemalda juhtumist"
+    "removeFromCase": "Eemalda juhtumist",
+    "caseOptions": "Juhtumi valikud",
+    "shareCase": "Jaga juhtumit",
+    "downloadCase": "Laadi juhtum alla",
+    "editCase": "Muuda juhtumit",
+    "deleteCase": "Kustuta juhtum"
   },
   "toast": {
     "error": {
