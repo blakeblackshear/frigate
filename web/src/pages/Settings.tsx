@@ -42,6 +42,7 @@ import { ZoneMaskFilterButton } from "@/components/filter/ZoneMaskFilter";
 import { PolygonType } from "@/types/canvas";
 import CameraManagementView from "@/views/settings/CameraManagementView";
 import MotionTunerView from "@/views/settings/MotionTunerView";
+import FisheyeDewarpView from "@/views/settings/FisheyeDewarpView";
 import MasksAndZonesView from "@/views/settings/MasksAndZonesView";
 import UsersView from "@/views/settings/UsersView";
 import RolesView from "@/views/settings/RolesView";
@@ -261,6 +262,7 @@ const SECTION_VIEWS = {
   cameraObjects: CameraObjectsSettingsPage,
   cameraMotion: CameraMotionSettingsPage,
   motionTuner: MotionTunerView,
+  fisheyeDewarp: FisheyeDewarpView,
   cameraFfmpeg: CameraFfmpegSettingsPage,
   cameraRecording: CameraRecordingSettingsPage,
   cameraSnapshots: CameraSnapshotsSettingsPage,
@@ -333,6 +335,7 @@ const CAMERA_SELECT_BUTTON_PAGES = [
   "cameraTimestampStyle",
   "masksAndZones",
   "motionTuner",
+  "fisheyeDewarp",
   "triggers",
   "regionGrid",
 ];

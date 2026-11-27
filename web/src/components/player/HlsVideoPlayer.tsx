@@ -22,6 +22,7 @@ import { ASPECT_VERTICAL_LAYOUT, RecordingPlayerError } from "@/types/record";
 import { useTranslation } from "react-i18next";
 import ObjectTrackOverlay from "@/components/overlay/ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import Camera360Viewer from "@/components/camera/Camera360Viewer";
 import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 
 // Android native hls does not seek correctly
@@ -464,12 +465,18 @@ export default function HlsVideoPlayer({
     }
   }, [getVideoTime, onSnapshot]);
 
+  // fisheye dewarp, only offered when the camera has a dewarp config
+
+  const dewarpConfig = camera ? config?.cameras[camera]?.dewarp : undefined;
+  const [dewarp, setDewarp] = useState(false);
+  const dewarpActive = dewarp && frigateControls && !!dewarpConfig;
+
   return (
     <TransformWrapper
       minScale={1.0}
       wheel={{ smoothStep: 0.005 }}
       onZoom={(zoom) => setZoomScale(zoom.state.scale)}
-      disabled={!frigateControls}
+      disabled={!frigateControls || dewarpActive}
     >
       {frigateControls && (
         <VideoControls
@@ -488,6 +495,7 @@ export default function HlsVideoPlayer({
             playbackRate: true,
             plusUpload: isAdmin && config?.plus?.enabled == true,
             snapshot: !!onSnapshot,
+            dewarp: !!dewarpConfig,
             fullscreen: supportsFullscreen,
           }}
           setControlsOpen={setControlsOpen}
@@ -553,6 +561,8 @@ export default function HlsVideoPlayer({
           snapshotLoading={isSnapshotLoading}
           fullscreen={fullscreen}
           toggleFullscreen={toggleFullscreen}
+          dewarp={dewarpActive}
+          toggleDewarp={() => setDewarp(!dewarpActive)}
           containerRef={containerRef}
         />
       )}
@@ -571,8 +581,17 @@ export default function HlsVideoPlayer({
         }}
       >
         <div className="relative size-full">
-          {transformedOverlay}
-          {isDetailMode &&
+          {dewarpActive && dewarpConfig && (
+            <Camera360Viewer
+              className="absolute inset-0 z-40"
+              settings={dewarpConfig}
+              source={videoRef.current}
+            />
+          )}
+          {/* overlays are drawn for the flat image, so hide them in 360 view */}
+          {!dewarpActive && transformedOverlay}
+          {!dewarpActive &&
+            isDetailMode &&
             camera &&
             currentTime != null &&
             loadedMetadata &&

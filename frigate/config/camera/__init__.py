@@ -2,6 +2,7 @@ from .audio import *  # noqa: F403
 from .birdseye import *  # noqa: F403
 from .camera import *  # noqa: F403
 from .detect import *  # noqa: F403
+from .dewarp import *  # noqa: F403
 from .ffmpeg import *  # noqa: F403
 from .genai import *  # noqa: F403
 from .live import *  # noqa: F403

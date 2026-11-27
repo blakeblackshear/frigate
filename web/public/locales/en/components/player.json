@@ -49,6 +49,10 @@
     "stream": "Stream:",
     "streamAuto": "{{stream}} (auto)"
   },
+  "dewarp": {
+    "enable": "Switch to 360 view",
+    "disable": "Switch to normal view"
+  },
   "toast": {
     "success": {
       "submittedFrigatePlus": "Successfully submitted frame to Frigate+"

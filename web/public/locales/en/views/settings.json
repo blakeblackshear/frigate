@@ -12,6 +12,7 @@
     "enrichments": "Enrichments Settings - Frigate",
     "masksAndZones": "Mask and Zone Editor - Frigate",
     "motionTuner": "Motion Tuner - Frigate",
+    "fisheyeDewarp": "Fisheye Dewarp - Frigate",
     "object": "Debug - Frigate",
     "general": "UI Settings - Frigate",
     "globalConfig": "Global Configuration - Frigate",
@@ -115,6 +116,7 @@
     "cameraReview": "Review",
     "masksAndZones": "Masks / Zones",
     "motionTuner": "Motion tuner",
+    "fisheyeDewarp": "Fisheye dewarp",
     "enrichments": "Enrichments",
     "users": "Users",
     "roles": "Roles",
@@ -1035,6 +1037,39 @@
       "score": "Score",
       "ratio": "Ratio",
       "area": "Area"
+    }
+  },
+  "fisheyeDewarp": {
+    "title": "Fisheye Dewarp",
+    "desc": "Calibrate the lens of a fisheye camera so its image can be dewarped into a 360 view. Adjust the values until straight lines in the preview look straight.",
+    "previewTip": "Drag the preview to look around and scroll to zoom.",
+    "mount": {
+      "title": "Mount",
+      "desc": "How the camera is mounted, which sets the direction the lens faces.",
+      "options": {
+        "ceiling": "Ceiling (looks down)",
+        "desktop": "Desktop (looks up)",
+        "wall": "Wall (looks sideways)"
+      }
+    },
+    "center_x": {
+      "title": "Center X",
+      "desc": "Horizontal center of the fisheye circle, as a fraction of the image width."
+    },
+    "center_y": {
+      "title": "Center Y",
+      "desc": "Vertical center of the fisheye circle, as a fraction of the image height."
+    },
+    "radius": {
+      "title": "Radius",
+      "desc": "Radius of the fisheye circle, as a fraction of the image height."
+    },
+    "fov": {
+      "title": "Lens field of view",
+      "desc": "Field of view covered by the fisheye circle, in degrees."
+    },
+    "toast": {
+      "success": "Fisheye dewarp settings have been saved."
     }
   },
   "timestampPosition": {

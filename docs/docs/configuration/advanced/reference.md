@@ -1008,6 +1008,21 @@ cameras:
     # Optional: URL to visit the camera web UI directly from the system page. Might not be available on every camera.
     webui_url: ""
 
+    # Optional: Lens calibration used to dewarp a fisheye camera image into a 360 view in the UI
+    # NOTE: The 360 view is only offered in the live view when this section is set
+    dewarp:
+      # Optional: How the camera is mounted (default: shown below)
+      # Options are "ceiling" (looks straight down), "desktop" (looks straight up) and "wall" (looks horizontally)
+      mount: ceiling
+      # Optional: Horizontal center of the fisheye circle as a fraction of the image width (default: shown below)
+      center_x: 0.5
+      # Optional: Vertical center of the fisheye circle as a fraction of the image height (default: shown below)
+      center_y: 0.5
+      # Optional: Radius of the fisheye circle as a fraction of the image height (default: shown below)
+      radius: 0.5
+      # Optional: Field of view covered by the fisheye circle in degrees (default: shown below)
+      fov: 180
+
     # Optional: zones for this camera
     zones:
       # Required: name of the zone

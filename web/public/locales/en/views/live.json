@@ -4,6 +4,10 @@
     "withCamera": "{{camera}} - Live - Frigate"
   },
   "lowBandwidthMode": "Low-bandwidth Mode",
+  "dewarp": {
+    "enable": "Switch to 360 view",
+    "disable": "Switch to normal view"
+  },
   "twoWayTalk": {
     "enable": "Enable Two Way Talk",
     "disable": "Disable Two Way Talk",

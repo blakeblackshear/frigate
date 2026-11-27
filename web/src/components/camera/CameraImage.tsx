@@ -10,7 +10,7 @@ import { useEnabledState } from "@/api/ws";
 type CameraImageProps = {
   className?: string;
   camera: string;
-  onload?: () => void;
+  onload?: (image: HTMLImageElement) => void;
   onerror?: () => void;
   searchParams?: string;
 };
@@ -78,8 +78,8 @@ export default function CameraImage({
 
     setImageLoaded(true);
 
-    if (onload) {
-      onload();
+    if (onload && imgRef.current) {
+      onload(imgRef.current);
     }
   };
 

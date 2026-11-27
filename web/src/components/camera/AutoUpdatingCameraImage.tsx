@@ -9,6 +9,7 @@ type AutoUpdatingCameraImageProps = {
   cameraClasses?: string;
   reloadInterval?: number;
   periodicCache?: boolean;
+  onFrame?: (image: HTMLImageElement) => void;
 };
 
 const MIN_LOAD_TIMEOUT_MS = 200;
@@ -22,10 +23,13 @@ export default function AutoUpdatingCameraImage({
   cameraClasses,
   reloadInterval = MIN_LOAD_TIMEOUT_MS,
   periodicCache = false,
+  onFrame,
 }: AutoUpdatingCameraImageProps) {
   const [key, setKey] = useState(Date.now());
   const [fps, setFps] = useState<string>("0");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const onFrameRef = useRef(onFrame);
+  onFrameRef.current = onFrame;
 
   useEffect(() => {
     if (reloadInterval == -1) {
@@ -42,32 +46,36 @@ export default function AutoUpdatingCameraImage({
     };
   }, [reloadInterval]);
 
-  const handleLoad = useCallback(() => {
-    setIsCached(true);
+  const handleLoad = useCallback(
+    (image: HTMLImageElement) => {
+      setIsCached(true);
+      onFrameRef.current?.(image);
 
-    if (reloadInterval == -1) {
-      return;
-    }
+      if (reloadInterval == -1) {
+        return;
+      }
 
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
 
-    const loadTime = Date.now() - key;
+      const loadTime = Date.now() - key;
 
-    if (showFps) {
-      setFps((1000 / Math.max(loadTime, reloadInterval)).toFixed(1));
-    }
+      if (showFps) {
+        setFps((1000 / Math.max(loadTime, reloadInterval)).toFixed(1));
+      }
 
-    timeoutRef.current = setTimeout(
-      () => {
-        setKey(Date.now());
-      },
-      loadTime > reloadInterval ? 1 : reloadInterval,
-    );
+      timeoutRef.current = setTimeout(
+        () => {
+          setKey(Date.now());
+        },
+        loadTime > reloadInterval ? 1 : reloadInterval,
+      );
+    },
     // we know that these deps are correct
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, setFps]);
+    [key, setFps],
+  );
 
   const handleError = useCallback(() => {
     if (reloadInterval == -1) {
