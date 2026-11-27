@@ -29,6 +29,12 @@ Frigate collects stats every 15 seconds, and the `cpu` value covers only the int
 
 The system CPU value is read from `/proc/stat`. Under Docker that file belongs to the host, so the value covers the entire machine including workloads unrelated to Frigate, and it will not match `docker stats` for the Frigate container. Under an LXC container, lxcfs virtualizes `/proc/stat` and the value reflects only the cores assigned to the container. In a virtual machine, the guest sees only its assigned vCPUs while the hypervisor divides by every physical thread on the node, so guest and host percentages will not agree even when both are accurate.
 
+### Hourly preview encoding
+
+Frigate assembles cached preview frames into per-camera video clips at the top of each hour. At most two previews are converted at a time, with the remaining conversions waiting for capacity. This spreads the encoding workload across time without changing each clip's timestamps or quality. With many cameras, some completed previews become available later than others.
+
+This limit applies only to preview conversion. Camera capture, detection, and recording continue independently.
+
 ## 1. Hardware Acceleration for Video Decoding
 
 **Priority: Critical**
