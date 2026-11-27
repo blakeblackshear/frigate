@@ -67,6 +67,10 @@ Standalone apps that send Frigate events to messaging platforms without requirin
 
 [Frigate telegram](https://github.com/OldTyT/frigate-telegram) makes it possible to send events from Frigate to Telegram. Events are sent as a message with a text description, video, and thumbnail.
 
+### [frigate-telegram-enhanced](https://github.com/Limoniak/frigate-telegram-enhanced)
+
+[frigate-telegram-enhanced](https://github.com/Limoniak/frigate-telegram-enhanced) sends Frigate reviews or events to Telegram: a snapshot as soon as something is detected, then the clip replaces it in the same message. It filters by camera, object, zone, score, severity and sub label, supports quiet hours, presence detection and per-camera routing to several recipients, and adds Frigate's GenAI description to the caption. A web interface sets everything up without editing YAML, and buttons and commands in Telegram pause notifications, mute a camera or fetch a live snapshot. Works with standalone Frigate over MQTT; Home Assistant not required.
+
 ## Clients and Viewers
 
 Apps and displays for viewing Frigate outside of its built-in web UI.
