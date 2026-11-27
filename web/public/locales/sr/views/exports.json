@@ -1,24 +1,134 @@
 {
-  "documentTitle": "Izvoz - Frigate",
-  "search": "Pretraga",
-  "noExports": "Nije pronađen nijedan izvoz",
-  "deleteExport.desc": "Da li zaista želite obrisati {{exportName}}?",
+  "documentTitle": "Извоз - Frigate",
+  "search": "Претрага",
+  "noExports": "Није пронађен ниједан извоз",
+  "deleteExport.desc": "Да ли сте сигурни да желите да обришете извоз {{exportName}}?",
   "editExport": {
-    "title": "Preimenuj izvoz",
-    "desc": "Unesite novo ime za ovaj izvoz.",
-    "saveExport": "Sačuvaj izvoz"
+    "title": "Преименуј извоз",
+    "desc": "Унесите нови назив за овај извоз.",
+    "saveExport": "Сачувај извоз"
   },
   "tooltip": {
-    "shareExport": "Дељење експорта",
-    "downloadVideo": "Преузимање видео-снимка",
-    "editName": "Уређивање имена",
-    "deleteExport": "Брисање извоза"
+    "shareExport": "Подели извоз",
+    "downloadVideo": "Преузми видео",
+    "editName": "Измени назив",
+    "deleteExport": "Обриши извоз",
+    "assignToCase": "Додај у случај",
+    "removeFromCase": "Уклони из случаја",
+    "caseOptions": "Опције случаја",
+    "shareCase": "Подели случај",
+    "downloadCase": "Преузми случај",
+    "editCase": "Измени случај",
+    "deleteCase": "Обриши случај"
   },
   "toast": {
     "error": {
-      "renameExportFailed": "Промена назива извоза није успела: {{errorMessage}}"
+      "renameExportFailed": "Неуспело преименовање извоза: {{errorMessage}}",
+      "assignCaseFailed": "Неуспело ажурирање доделе случају: {{errorMessage}}",
+      "caseSaveFailed": "Неуспело чување случаја: {{errorMessage}}",
+      "caseDeleteFailed": "Неуспело брисање случаја: {{errorMessage}}"
     }
   },
   "selected_one": "Изабрано: {{count}}",
-  "selected_other": "Изабрано: {{count}}"
+  "selected_other": "Изабрано: {{count}}",
+  "headings": {
+    "cases": "Случајеви",
+    "uncategorizedExports": "Некатегоризовани извози"
+  },
+  "deleteExport": {
+    "label": "Обриши извоз"
+  },
+  "toolbar": {
+    "newCase": "Нови случај",
+    "addExport": "Додај извоз",
+    "editCase": "Измени случај",
+    "deleteCase": "Обриши случај"
+  },
+  "deleteCase": {
+    "label": "Обриши случај",
+    "desc": "Да ли сте сигурни да желите да обришете случај {{caseName}}?",
+    "descKeepExports": "Извози ће остати доступни као некатегоризовани извози.",
+    "descDeleteExports": "Сви извози у овом случају биће трајно обрисани.",
+    "deleteExports": "Обриши и извозе"
+  },
+  "caseDialog": {
+    "title": "Додај у случај",
+    "description": "Изаберите постојећи случај или креирајте нови.",
+    "selectLabel": "Случај",
+    "newCaseOption": "Креирај нови случај",
+    "nameLabel": "Назив случаја",
+    "descriptionLabel": "Опис"
+  },
+  "caseCard": {
+    "emptyCase": "Још увек нема извоза"
+  },
+  "jobCard": {
+    "defaultName": "Извоз камере {{camera}}",
+    "queued": "На чекању",
+    "running": "Покренуто",
+    "preparing": "Припрема",
+    "copying": "Копирање",
+    "encoding": "Кодирање",
+    "encodingRetry": "Кодирање (поновни покушај)",
+    "merging": "Спајање",
+    "finalizing": "Завршавање"
+  },
+  "caseView": {
+    "noDescription": "Нема описа",
+    "createdAt": "Креирано {{value}}",
+    "exportCount_one": "1 извоз",
+    "exportCount_other": "{{count}} извоза",
+    "cameraCount_one": "1 камера",
+    "cameraCount_other": "Камера: {{count}}",
+    "showMore": "Прикажи више",
+    "showLess": "Прикажи мање",
+    "emptyTitle": "Овај случај је празан",
+    "emptyDescription": "Додајте постојеће некатегоризоване извозе како би случај био прегледан.",
+    "emptyDescriptionNoExports": "Још увек нема доступних некатегоризованих извоза за додавање."
+  },
+  "caseEditor": {
+    "createTitle": "Креирај случај",
+    "editTitle": "Измени случај",
+    "namePlaceholder": "Назив случаја",
+    "descriptionPlaceholder": "Додајте белешке или контекст за овај случај"
+  },
+  "addExportDialog": {
+    "title": "Додај извоз у случај {{caseName}}",
+    "searchPlaceholder": "Претражи некатегоризоване извозе",
+    "empty": "Ниједан некатегоризовани извоз не одговара овој претрази.",
+    "addButton_one": "Додај 1 извоз",
+    "addButton_other": "Додај {{count}} извоза",
+    "adding": "Додавање..."
+  },
+  "bulkActions": {
+    "addToCase": "Додај у случај",
+    "moveToCase": "Премести у случај",
+    "removeFromCase": "Уклони из случаја",
+    "delete": "Обриши",
+    "deleteNow": "Обриши одмах"
+  },
+  "bulkDelete": {
+    "title": "Обриши извозе",
+    "desc_one": "Да ли сте сигурни да желите да обришете {{count}} извоз?",
+    "desc_other": "Да ли сте сигурни да желите да обришете {{count}} извоза?"
+  },
+  "bulkRemoveFromCase": {
+    "title": "Уклони из случаја",
+    "desc_one": "Уклонити {{count}} извоз из овог случаја?",
+    "desc_other": "Уклонити {{count}} извоза из овог случаја?",
+    "descKeepExports": "Извози ће бити премештени у некатегоризоване.",
+    "descDeleteExports": "Извози ће бити трајно обрисани.",
+    "deleteExports": "Уместо тога обриши извозе"
+  },
+  "bulkToast": {
+    "success": {
+      "delete": "Извози су успешно обрисани",
+      "reassign": "Додела случају је успешно ажурирана",
+      "remove": "Извози су успешно уклоњени из случаја"
+    },
+    "error": {
+      "deleteFailed": "Неуспело брисање извоза: {{errorMessage}}",
+      "reassignFailed": "Неуспело ажурирање доделе случају: {{errorMessage}}"
+    }
+  }
 }
