@@ -1201,7 +1201,7 @@
       },
       "disableSuccess": "{{cameraName}} har inaktiverats och sparats i konfigurationen.",
       "details": {
-        "webuiUrlInvalid": "Måste vara en giltig URL (t.ex. https://example.com).",
+        "webuiUrlInvalid": "Måste vara en giltig URL (t.ex. https://exempel.se).",
         "dashboardLabel": "Visa på Live-panelen",
         "dashboardHelp": "Visa den här kameran på standardpanelen Live med alla kameror. Den är fortfarande tillgänglig överallt annars, inklusive kameragrupper.",
         "reviewLabel": "Visa i granskning",
