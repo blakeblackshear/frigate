@@ -144,7 +144,8 @@
       "hr": "Hrvatski (horvaadi keel)",
       "bs": "Bosanski (bosnia keel)",
       "zhHant": "繁體中文 (hiina keel traditsiooniliste hieroglüüfidega)",
-      "be": "Беларуская (valgevene keel)"
+      "be": "Беларуская (valgevene keel)",
+      "srLatn": "Српски (serbia keel ladina tähestikus)"
     },
     "system": "Süsteem",
     "systemMetrics": "Süsteemi korrasolek ja meetrika",
@@ -357,5 +358,9 @@
     "action": {
       "toggleTheme": "Lülita hele ja tume vaade sisse/välja"
     }
+  },
+  "plusRateLimited": {
+    "retryIn": "Frigate+ piirab päringute arvu. Proovi uuesti {{duration}}.",
+    "retryLater": "Frigate+ piirab päringute arvu. Proovi hiljem uuesti."
   }
 }
