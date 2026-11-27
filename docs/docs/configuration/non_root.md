@@ -389,7 +389,7 @@ Rockchip NPU and GPU usage come from `/sys/kernel/debug`, which the kernel makes
 
 go2rtc's ffmpeg processes no longer appear in Intel GPU stats. Frigate reads per-process GPU usage from `/proc/<pid>/fdinfo`, which the kernel won't let one user read for another user's processes, so anything go2rtc spawns is invisible to it. Overall GPU utilization is unaffected.
 
-If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the private key has to be readable by the runtime user, which runs nginx. Frigate hands the key to that user at startup if the mount is writable; on a read-only mount, make the key readable by uid 1000 (or your `PUID`) yourself.
+If you mount your own TLS certificate at `/etc/letsencrypt/live/frigate`, the key and the certificate have to be readable by the runtime user, which runs nginx, and that user has to be able to enter the folders above them. Frigate doesn't change ownership of mounted certificates, so give the key to the runtime user's group (gid 1000, your `PGID`, or the group in Docker's `user:`) with group read on the host. certbot keeps the key's group and group read on renewal, so this is a one-time step.
 
 If you're debugging nginx, run the config check as the runtime user with stdout discarded:
 

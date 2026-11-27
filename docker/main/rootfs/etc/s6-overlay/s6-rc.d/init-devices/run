@@ -105,12 +105,14 @@ done
 # node), so the directories also get a default ACL new nodes inherit. The
 # inherited grant is clamped by the creating mode's group bits, which is rw on
 # udev hosts (0664) and nothing on raw devtmpfs (0600); hardware-verified.
+# The tree may be a host devtmpfs bind mount the runtime users can write, so
+# only real directories and device nodes are granted and links are never followed
 if [[ -d /dev/bus/usb ]]; then
     while IFS= read -r -d '' node; do
         grant "$node"
-    done < <(find /dev/bus/usb -mindepth 1 -print0)
+    done < <(find /dev/bus/usb -mindepth 1 \( -type c -o -type d \) -print0)
     while IFS= read -r -d '' dir; do
-        setfacl -d -m "u:frigate:rw,u:go2rtc:rw" "$dir" 2>/dev/null || \
+        setfacl -P -d -m "u:frigate:rw,u:go2rtc:rw" "$dir" 2>/dev/null || \
             echo "[WARN] could not set a default ACL on ${dir}; a re-enumerating USB device may lose access"
     done < <(find /dev/bus/usb -type d -print0)
 fi

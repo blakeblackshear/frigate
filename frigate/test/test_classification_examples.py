@@ -7,7 +7,10 @@ from unittest.mock import patch
 
 import numpy as np
 
-from frigate.util.classification import _extract_event_thumbnails
+from frigate.util.classification import (
+    _extract_event_thumbnails,
+    _select_balanced_timestamps,
+)
 
 
 class TestExtractEventThumbnails(unittest.TestCase):
@@ -27,6 +30,18 @@ class TestExtractEventThumbnails(unittest.TestCase):
 
         self.assertEqual(len(paths), 4)
         self.assertEqual(load.call_count, 7)
+
+
+class TestSelectBalancedTimestamps(unittest.TestCase):
+    def test_terminates_when_items_cannot_fill_target(self):
+        items = [
+            SimpleNamespace(camera="front", start_time=1000.0, end_time=1000.0),
+            SimpleNamespace(camera="front", start_time=2000.0, end_time=2001.0),
+        ]
+
+        timestamps = _select_balanced_timestamps(items, target_count=100)
+
+        self.assertEqual(len(timestamps), 1)
 
 
 if __name__ == "__main__":

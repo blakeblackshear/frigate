@@ -10,7 +10,7 @@ from typing import Any
 
 from frigate.comms.inter_process import InterProcessRequestor
 from frigate.config import FrigateConfig
-from frigate.const import FREQUENCY_STATS_POINTS
+from frigate.const import FREQUENCY_STATS_POINTS, REPLAY_CAMERA_PREFIX
 from frigate.notices import flush_notices, raise_notice, resolve_kind, resolve_notice
 from frigate.stats.hardware import HardwareStats
 from frigate.stats.prometheus import update_metrics
@@ -28,6 +28,10 @@ VERSION_REFRESH_S = 24 * 60 * 60
 
 # a camera skipping at least this percent of its frames is falling behind
 SKIPPED_DETECTIONS_PCT = 5
+
+# a camera dropping at least this percent of its frames because the tracked
+# object processor is behind
+DROPPED_FRAMES_PCT = 5
 
 # lifetime CPU averages at or above these are high; they match
 # CameraFfmpegThreshold.error and CameraDetectThreshold.error in the UI
@@ -102,6 +106,7 @@ class StatsEmitter(threading.Thread):
         self.hardware_stats = HardwareStats(config)
         self.stats_history: list[dict[str, Any]] = []
         self.skipped_detections = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
+        self.dropped_frames = EpisodeTracker(DROPPED_FRAMES_PCT)
         self.ffmpeg_cpu = EpisodeTracker(FFMPEG_HIGH_CPU_PCT)
         self.detect_cpu = EpisodeTracker(DETECT_HIGH_CPU_PCT)
 
@@ -268,6 +273,17 @@ class StatsEmitter(threading.Thread):
                     scope=camera,
                     params={"pct": skipped[camera]},
                 )
+
+            # all cameras share one processor, so the episode spans every camera.
+            # a replay camera's own drops are ignored since it can outpace real time
+            dropped = [
+                camera_stats["dropped_pct"]
+                for camera, camera_stats in cameras.items()
+                if not camera.startswith(REPLAY_CAMERA_PREFIX)
+            ]
+
+            if self.dropped_frames.update({"all": max(dropped, default=0.0)}, now):
+                raise_notice("object_processing_behind")
 
             # high ffmpeg and detect CPU
             for tracker, kind, pid_key in (

@@ -23,7 +23,7 @@ runs:
     # from root and temp-reserve-mb is what actually stays free on root. Keep 4G
     # there for setup-qemu/buildx caches in ~/.docker and the tool cache
     - name: Maximize build space
-      uses: easimon/maximize-build-space@master
+      uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c # v10
       with:
         root-reserve-mb: 8192
         temp-reserve-mb: 4096
@@ -36,9 +36,8 @@ runs:
       run: sudo systemctl start docker
       shell: bash
     - id: lowercaseRepo
-      uses: ASzc/change-string-case-action@v8
-      with:
-        string: ${{ github.repository }}
+      run: echo "lowercase=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
+      shell: bash
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v4
     - name: Set up Docker Buildx

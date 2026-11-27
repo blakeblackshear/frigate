@@ -2311,8 +2311,8 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
         - frigateUserAuth: []
-      x-required-role: camera
-      description: '**Access:** Authenticated user with access to the referenced camera.'
+      x-required-role: any
+      description: '**Access:** Any authenticated user.'
   /review/{review_id}:
     get:
       tags:
@@ -2546,7 +2546,7 @@ paths:
         - App
       summary: Metrics
       description: |-
-        **Access:** Any authenticated user.
+        **Access:** Admin role required.
 
         Expose Prometheus metrics endpoint and update metrics with latest stats
       operationId: metrics_metrics_get
@@ -2557,8 +2557,8 @@ paths:
             application/json:
               schema: {}
       security:
-        - frigateUserAuth: []
-      x-required-role: any
+        - frigateAdminAuth: []
+      x-required-role: admin
   /genai/models:
     get:
       tags:
@@ -4608,14 +4608,6 @@ paths:
               - type: 'null'
             default: 1
             title: Include Thumbnails
-        - name: favorites
-          in: query
-          required: false
-          schema:
-            anyOf:
-              - type: integer
-              - type: 'null'
-            title: Favorites
         - name: min_score
           in: query
           required: false
@@ -5123,75 +5115,6 @@ paths:
         Deletes an event from the database.
             Returns a success message or an error if the event is not found.
       operationId: delete_event_events__event_id__delete
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Event Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      security:
-        - frigateAdminAuth: []
-      x-required-role: admin
-  /events/{event_id}/retain:
-    post:
-      tags:
-        - Events
-      summary: Set event retain indefinitely.
-      description: |-
-        **Access:** Admin role required.
-
-        Sets an event to retain indefinitely.
-            Returns a success message or an error if the event is not found.
-            NOTE: This is a legacy endpoint and is not supported in the frontend.
-      operationId: set_retain_events__event_id__retain_post
-      parameters:
-        - name: event_id
-          in: path
-          required: true
-          schema:
-            type: string
-            title: Event Id
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-      security:
-        - frigateAdminAuth: []
-      x-required-role: admin
-    delete:
-      tags:
-        - Events
-      summary: Stop event from being retained indefinitely
-      description: |-
-        **Access:** Admin role required.
-
-        Stops an event from being retained indefinitely.
-            Returns a success message or an error if the event is not found.
-            NOTE: This is a legacy endpoint and is not supported in the frontend.
-      operationId: delete_retain_events__event_id__retain_delete
       parameters:
         - name: event_id
           in: path
@@ -6152,9 +6075,7 @@ paths:
           in: path
           required: true
           schema:
-            anyOf:
-              - type: string
-              - type: 'null'
+            type: string
             title: Camera Name
         - name: frame_time
           in: path
@@ -6175,9 +6096,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
-        - frigateUserAuth: []
-      x-required-role: camera
-      description: '**Access:** Authenticated user with access to the referenced camera.'
+        - frigateAdminAuth: []
+      x-required-role: admin
+      description: '**Access:** Admin role required.'
   /{camera_name}/start/{start_ts}/end/{end_ts}/clip.mp4:
     get:
       tags:
@@ -8455,9 +8376,6 @@ components:
         has_snapshot:
           type: boolean
           title: Has Snapshot
-        retain_indefinitely:
-          type: boolean
-          title: Retain Indefinitely
         plus_id:
           anyOf:
             - type: string
@@ -8495,7 +8413,6 @@ components:
         - thumbnail
         - has_clip
         - has_snapshot
-        - retain_indefinitely
         - plus_id
         - model_hash
         - detector_type
@@ -9630,6 +9547,8 @@ components:
           title: Condition
         max_duration_minutes:
           type: integer
+          maximum: 1440.0
+          minimum: 1.0
           title: Max Duration Minutes
           default: 60
         labels:

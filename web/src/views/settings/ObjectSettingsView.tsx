@@ -184,8 +184,8 @@ export default function ObjectSettingsView({
         {config?.cameras[cameraConfig.name]?.webui_url && (
           <div className="mb-5 text-sm text-muted-foreground">
             <div className="mt-2 flex flex-row items-center text-primary">
-              <Link
-                to={config?.cameras[cameraConfig.name]?.webui_url ?? ""}
+              <a
+                href={config?.cameras[cameraConfig.name]?.webui_url ?? ""}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline"
@@ -194,7 +194,7 @@ export default function ObjectSettingsView({
                   camera: cameraName,
                 })}
                 <LuExternalLink className="ml-2 inline-flex size-3" />
-              </Link>
+              </a>
             </div>
           </div>
         )}

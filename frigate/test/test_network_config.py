@@ -5,6 +5,7 @@ import unittest
 from pydantic import ValidationError
 
 from frigate.config.network import ListenConfig
+from frigate.util.config import ipv6_listen_address, parse_listen_address
 
 
 class TestListenConfig(unittest.TestCase):
@@ -102,6 +103,20 @@ class TestListenConfig(unittest.TestCase):
             with self.subTest(value=value):
                 with self.assertRaises(ValidationError):
                     ListenConfig(internal=value)
+
+
+class TestIPv6ListenAddress(unittest.TestCase):
+    def test_wildcard_adds_ipv6_wildcard(self):
+        for raw in (5000, "*:5000", "0.0.0.0:5000"):
+            with self.subTest(raw=raw):
+                value, port = parse_listen_address(raw)
+                self.assertEqual(ipv6_listen_address(value, port), "[::]:5000")
+
+    def test_specific_address_adds_nothing(self):
+        for raw in ("127.0.0.1:5000", "localhost:5000", "[::1]:5000", "[::]:5000"):
+            with self.subTest(raw=raw):
+                value, port = parse_listen_address(raw)
+                self.assertIsNone(ipv6_listen_address(value, port))
 
 
 if __name__ == "__main__":

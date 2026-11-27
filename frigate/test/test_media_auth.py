@@ -122,6 +122,11 @@ class TestResolveMediaUri(unittest.TestCase):
             MediaAuthResolution.CAMERA,
             camera="back_door",
         )
+        self._assert(
+            "/recordings/2026-05-11/14/back_door@sub/00.00.mp4",
+            MediaAuthResolution.CAMERA,
+            camera="back_door",
+        )
 
     def test_clip_flat_filename_resolves_camera(self):
         self._assert(
@@ -173,6 +178,14 @@ class TestResolveMediaUri(unittest.TestCase):
         )
         self._assert(
             "/clips/previews/back_door/segment.mp4",
+            MediaAuthResolution.CAMERA,
+            camera="back_door",
+        )
+
+    def test_clip_triggers(self):
+        self._assert("/clips/triggers/", MediaAuthResolution.LISTING_MULTI_CAMERA)
+        self._assert(
+            "/clips/triggers/back_door/abc.webp",
             MediaAuthResolution.CAMERA,
             camera="back_door",
         )
@@ -332,6 +345,18 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         self.assertIsNone(self._deny("/clips/back_door-1.jpg", "viewer"))
         self.assertIsNone(self._deny("/clips/", "viewer"))
 
+    def test_unrestricted_role_blocked_admin_only(self):
+        for uri in (
+            "/clips/faces/",
+            "/clips/faces/train/foo.webp",
+            "/clips/faces/alice/ref.webp",
+            "/clips/genai-requests/x/0.jpg",
+            "/clips/preview_restart_cache/x.mp4",
+            "/clips/some_model/train/x.jpg",
+            "/clips/some_model/dataset/cat/x.jpg",
+        ):
+            self.assertEqual(self._deny(uri, "viewer"), 403, uri)
+
     def test_restricted_role_allowed_camera(self):
         self.assertIsNone(self._deny("/clips/front_door-1.jpg", "limited_user"))
         self.assertIsNone(
@@ -339,6 +364,14 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         )
         self.assertIsNone(
             self._deny("/clips/thumbs/front_door/abc.webp", "limited_user")
+        )
+        self.assertIsNone(
+            self._deny(
+                "/recordings/2026-05-11/14/front_door@sub/00.00.mp4", "limited_user"
+            )
+        )
+        self.assertIsNone(
+            self._deny("/clips/triggers/front_door/abc.webp", "limited_user")
         )
 
     def test_restricted_role_blocked_other_camera(self):
@@ -349,6 +382,15 @@ class TestDenyResponseForMediaUri(unittest.TestCase):
         )
         self.assertEqual(
             self._deny("/clips/thumbs/back_door/abc.webp", "limited_user"), 403
+        )
+        self.assertEqual(
+            self._deny(
+                "/recordings/2026-05-11/14/back_door@sub/00.00.mp4", "limited_user"
+            ),
+            403,
+        )
+        self.assertEqual(
+            self._deny("/clips/triggers/back_door/abc.webp", "limited_user"), 403
         )
 
     def test_restricted_role_blocked_admin_only(self):

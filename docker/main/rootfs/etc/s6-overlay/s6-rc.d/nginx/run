@@ -152,13 +152,24 @@ if [[ "$(id -u)" -eq 0 && "$runs_as_root" -eq 0 ]]; then
     # nginx reopens /dev/stdout by path for its logs, and s6 made the pipe
     # root-owned 0600; without this the non-root master exits EACCES
     chown frigate /dev/stdout
-    # Only mounted certs need handing over; the self-signed pair is already
-    # owned by the runtime user that generated it. Never chown the /config copy:
-    # chown follows symlinks, so it would retarget onto any root file the
-    # runtime user pointed it at. Tolerant because mounted certs may be :ro.
-    if [ "$cert_path" = "$letsencrypt_path" ] && [ -f "$cert_path/privkey.pem" ]; then
-        chown frigate:frigate "$cert_path/privkey.pem" "$cert_path/fullchain.pem" 2>/dev/null || true
+fi
+
+# Mounted certs are never chowned: chown follows symlinks, and the runtime user
+# may control the mounted folder. The key's group and group read survive certbot
+# renewals, so the host grants access once.
+if [[ "$cert_path" == "$letsencrypt_path" && "$runs_as_root" -eq 0 ]] &&
+    [[ "$(echo "$nginx_settings" | jq -r .tls.enabled)" == "true" ]]; then
+    as_runtime=()
+    if [[ "$(id -u)" -eq 0 ]]; then
+        as_runtime=(s6-setuidgid frigate)
     fi
+
+    for file in privkey.pem fullchain.pem; do
+        if ! "${as_runtime[@]}" test -r "$cert_path/$file"; then
+            runtime_gid=$("${as_runtime[@]}" id -g)
+            echo "[ERROR] The mounted ${file} is not readable by the runtime user; on the host, give it group ${runtime_gid} with read access and let that group enter the folders above it" >&2
+        fi
+    done
 fi
 
 # Replace the bash process with the NGINX process, redirecting stderr to stdout

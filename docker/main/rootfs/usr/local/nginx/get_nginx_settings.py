@@ -8,7 +8,11 @@ from typing import Any
 from ruamel.yaml import YAML
 
 sys.path.insert(0, "/opt/frigate")
-from frigate.util.config import find_config_file, parse_listen_address
+from frigate.util.config import (
+    find_config_file,
+    ipv6_listen_address,
+    parse_listen_address,
+)
 
 sys.path.remove("/opt/frigate")
 
@@ -51,6 +55,9 @@ for key, default in (("internal", 5000), ("external", 8971)):
 
     listen_config[key] = value
     listen_config[f"{key}_port"] = port
+    listen_config[f"{key}_ipv6"] = (
+        ipv6_listen_address(value, port) if ipv6_config["enabled"] else None
+    )
 
 if listen_config["internal_port"] == listen_config["external_port"]:
     print(

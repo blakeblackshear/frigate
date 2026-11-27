@@ -54,6 +54,7 @@ import { useApiHost } from "@/api";
 import ImageLoadingIndicator from "@/components/indicators/ImageLoadingIndicator";
 import ObjectTrackOverlay from "../ObjectTrackOverlay";
 import { useIsAdmin } from "@/hooks/use-is-admin";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 import { VideoResolutionType } from "@/types/live";
 import { VodManifest } from "@/types/playback";
 
@@ -934,6 +935,7 @@ function LifecycleIconRow({
   annotationOffset,
 }: LifecycleIconRowProps) {
   const { t } = useTranslation(["views/explore", "components/player"]);
+  const { getRateLimitMessage } = usePlusRateLimit();
   const { data: config } = useSWR<FrigateConfig>("config");
   const [isOpen, setIsOpen] = useState(false);
   const [showAdvancedScores, setShowAdvancedScores] = useState(false);
@@ -1251,11 +1253,12 @@ function LifecycleIconRow({
                                 position: "top-center",
                               },
                             );
-                          } catch {
+                          } catch (error) {
                             toast.error(
-                              t("toast.error.submitFrigatePlusFailed", {
-                                ns: "components/player",
-                              }),
+                              getRateLimitMessage(error) ??
+                                t("toast.error.submitFrigatePlusFailed", {
+                                  ns: "components/player",
+                                }),
                               {
                                 position: "top-center",
                               },

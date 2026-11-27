@@ -102,7 +102,7 @@ proxy:
   # Optional: Auth secret that is checked against the X-Proxy-Secret header sent from
   # the proxy. If not set, all requests are trusted regardless of origin.
   auth_secret: None
-  # Optional: The default role to use for proxy auth. Must be "admin" or "viewer"
+  # Optional: The default role to use for proxy auth. Must be "admin", "viewer", a custom role, or "none" to deny
   default_role: viewer
   # Optional: The character used to separate multiple values in the proxy headers. (default: shown below)
   separator: ","

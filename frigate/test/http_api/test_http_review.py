@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
 
 from fastapi import Request
 from peewee import DoesNotExist
@@ -838,6 +839,42 @@ class TestHttpReview(BaseTestHttp):
                     "data": {"detections": {"event_id": event_id}},
                 },
                 response_json,
+            )
+
+    def test_review_event_wildcards_match_literally(self):
+        now = datetime.now().timestamp()
+        super().insert_mock_review_segment(
+            "123456.review.random",
+            now + 1,
+            now + 2,
+            data={"detections": ["1763812345.0-abc123"]},
+        )
+
+        with AuthTestClient(self.app) as client:
+            for pattern in ["1763812345*", "176381234?.0-abc123", "176381234[0-9]*"]:
+                response = client.get(f"/review/event/{quote(pattern, safe='')}")
+                assert response.status_code == 404
+
+            response = client.get("/review/event/1763812345.0-abc123")
+            assert response.status_code == 200
+
+    def test_review_event_on_forbidden_camera_is_not_found(self):
+        now = datetime.now().timestamp()
+        event_id = "1763812345.0-abc123"
+        super().insert_mock_review_segment(
+            "123456.review.random",
+            now + 1,
+            now + 2,
+            data={"detections": [event_id]},
+            camera="back_door",
+        )
+
+        with AuthTestClient(self.app) as client:
+            response = client.get(f"/review/event/{event_id}")
+            assert response.status_code == 404
+            self.assertDictEqual(
+                {"success": False, "message": "Review item not found"},
+                response.json(),
             )
 
     ####################################################################################################################

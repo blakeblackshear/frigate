@@ -624,6 +624,96 @@ class TestConfigSetWildcardPropagation(BaseTestHttp):
         finally:
             os.unlink(config_path)
 
+    @patch.dict("frigate.util.env._CONFIG_ENV_VARS", {"FRIGATE_CAM_HOST": "10.0.0.1"})
+    @patch.dict("frigate.util.env.FRIGATE_ENV_VARS", {"FRIGATE_CAM_HOST": "10.0.0.1"})
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_path_matches_after_saved_env_var_swap(self, mock_find_config):
+        """A no-restart update swaps in a config resolved with the saved
+        environment_vars, so /config shows the saved value until a restart."""
+        path = "rtsp://admin:pw@{FRIGATE_CAM_HOST}:554/live"
+        self._set_inputs([(path, "detect")])
+        self.minimal_config["environment_vars"] = {"FRIGATE_CAM_HOST": "10.0.0.2"}
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            app, _ = self._create_app_with_publisher()
+
+            with AuthTestClient(app) as client:
+                resp = self._save(
+                    client, {"cameras": {"front_door": {"detect": {"fps": 6}}}}
+                )
+                self.assertEqual(resp.status_code, 200, resp.text)
+
+                camera = client.get("/config").json()["cameras"]["front_door"]
+                inputs = camera["ffmpeg"]["inputs"]
+                self.assertIn("10.0.0.2", inputs[0]["path"])
+
+                resp = self._save(
+                    client,
+                    {
+                        "cameras": {
+                            "front_door": {
+                                "ffmpeg": {"inputs": inputs},
+                                "detect": {"fps": 7},
+                            }
+                        }
+                    },
+                )
+                self.assertEqual(resp.status_code, 200, resp.text)
+
+            _, saved = self._read_config_file(config_path)
+            self.assertEqual(
+                saved["cameras"]["front_door"]["ffmpeg"]["inputs"][0]["path"], path
+            )
+        finally:
+            os.unlink(config_path)
+
+    @patch.dict(
+        "frigate.util.env._CONFIG_ENV_VARS",
+        {"FRIGATE_HOST_A": "10.0.0.1", "FRIGATE_HOST_B": "10.0.0.2"},
+    )
+    @patch.dict(
+        "frigate.util.env.FRIGATE_ENV_VARS",
+        {"FRIGATE_HOST_A": "10.0.0.1", "FRIGATE_HOST_B": "10.0.0.2"},
+    )
+    @patch("frigate.api.app.find_config_file")
+    def test_masked_paths_match_running_env_vars(self, mock_find_config):
+        """A saved but not yet applied environment_vars change must not make
+        one input's masked path match another's."""
+        path_a = "rtsp://admin:pw@{FRIGATE_HOST_A}:554/live"
+        path_b = "rtsp://admin:pw@{FRIGATE_HOST_B}:554/live"
+        self._set_inputs([(path_a, "detect"), (path_b, "record")])
+        self.minimal_config["environment_vars"] = {
+            "FRIGATE_HOST_A": "10.0.0.1",
+            "FRIGATE_HOST_B": "10.0.0.2",
+        }
+        app, _ = self._create_app_with_publisher()
+
+        self.minimal_config["environment_vars"]["FRIGATE_HOST_A"] = "10.0.0.2"
+        config_path = self._write_config_file()
+        mock_find_config.return_value = config_path
+
+        try:
+            with AuthTestClient(app) as client:
+                camera = client.get("/config").json()["cameras"]["front_door"]
+                inputs = camera["ffmpeg"]["inputs"]
+                inputs[0]["roles"], inputs[1]["roles"] = ["record"], ["detect"]
+
+                resp = self._save(
+                    client, {"cameras": {"front_door": {"ffmpeg": {"inputs": inputs}}}}
+                )
+                self.assertEqual(resp.status_code, 200, resp.text)
+
+            _, saved = self._read_config_file(config_path)
+            saved_inputs = saved["cameras"]["front_door"]["ffmpeg"]["inputs"]
+            self.assertEqual(
+                [(inp["path"], inp["roles"]) for inp in saved_inputs],
+                [(path_a, ["record"]), (path_b, ["detect"])],
+            )
+        finally:
+            os.unlink(config_path)
+
     @patch("frigate.api.app.find_config_file")
     def test_over_masked_path_round_trips(self, mock_find_config):
         path = "rtsp://10.0.0.1:554/live?x=a@b"

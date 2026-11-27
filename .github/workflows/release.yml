@@ -5,6 +5,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -14,9 +18,7 @@ jobs:
         with:
           persist-credentials: false
       - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v8
-        with:
-          string: ${{ github.repository }}
+        run: echo "lowercase=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
       - name: Log in to the Container registry
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
         with:
@@ -34,19 +36,21 @@ jobs:
           echo "BUILD_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
           echo "CLEAN_VERSION=$(echo ${GITHUB_REF##*/} | tr '[:upper:]' '[:lower:]' | sed 's/^[v]//')" >> $GITHUB_ENV
       - name: Tag and push the main image
+        env:
+          SKOPEO: quay.io/skopeo/stable:v1.24.1-immutable@sha256:81a8d4265c339539cba229459fdc4cb3580e1d2c2cb4285271c75adaa0fcb9b5
         run: |
           VERSION_TAG=${BASE}:${CLEAN_VERSION}
           STABLE_TAG=${BASE}:stable
           PULL_TAG=${BASE}:${BUILD_TAG}
-          docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${VERSION_TAG}
+          docker run --rm -v $HOME/.docker/config.json:/config.json ${SKOPEO} copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${VERSION_TAG}
           for variant in standard-arm64 tensorrt tensorrt-jp6 rk rocm synaptics; do
-            docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${VERSION_TAG}-${variant}
+            docker run --rm -v $HOME/.docker/config.json:/config.json ${SKOPEO} copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${VERSION_TAG}-${variant}
           done
 
           # stable tag
           if [[ "${BUILD_TYPE}" == "stable" ]]; then
-            docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${STABLE_TAG}
+            docker run --rm -v $HOME/.docker/config.json:/config.json ${SKOPEO} copy --authfile /config.json --multi-arch all docker://${PULL_TAG} docker://${STABLE_TAG}
             for variant in standard-arm64 tensorrt tensorrt-jp6 rk rocm synaptics; do
-              docker run --rm -v $HOME/.docker/config.json:/config.json quay.io/skopeo/stable:latest copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${STABLE_TAG}-${variant}
+              docker run --rm -v $HOME/.docker/config.json:/config.json ${SKOPEO} copy --authfile /config.json --multi-arch all docker://${PULL_TAG}-${variant} docker://${STABLE_TAG}-${variant}
             done
           fi

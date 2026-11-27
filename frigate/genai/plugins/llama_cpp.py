@@ -110,6 +110,13 @@ class LlamaCppClient(GenAIClient):
         """POST with the configured auth headers injected."""
         return requests.post(url, headers=self._auth_headers(), **kwargs)
 
+    def _server_url(self) -> str | None:
+        """Return the configured base_url without a trailing slash or /v1."""
+        if not self.genai_config.base_url:
+            return None
+
+        return self.genai_config.base_url.rstrip("/").removesuffix("/v1")
+
     def _fetch_llama_props(self, base_url: str, model: str) -> dict[str, Any]:
         """Fetch /props from a llama.cpp server, with llama-swap fallback.
 
@@ -143,16 +150,10 @@ class LlamaCppClient(GenAIClient):
         self._supports_tools = False
         self._supports_reasoning = False
 
-        base_url = (
-            self.genai_config.base_url.rstrip("/")
-            if self.genai_config.base_url
-            else None
-        )
+        base_url = self._server_url()
 
         if base_url is None:
             return None
-        else:
-            base_url = base_url.replace("/v1", "")  # Strip /v1 if included in base_url
 
         if not self.validate_model:
             # Probe path
@@ -506,11 +507,7 @@ class LlamaCppClient(GenAIClient):
 
     def _fetch_models_data(self) -> list[dict[str, Any]]:
         """Return the raw /v1/models entries, or an empty list if unreachable."""
-        base_url = self.provider or (
-            self.genai_config.base_url.rstrip("/")
-            if self.genai_config.base_url
-            else None
-        )
+        base_url = self.provider or self._server_url()
 
         if base_url is None:
             return []

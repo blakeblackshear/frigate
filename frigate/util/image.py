@@ -458,6 +458,7 @@ def get_snapshot_bytes(
         best_frame = best_frame[region[1] : region[3], region[0] : region[2]]
 
     if height:
+        height = min(height, frame.shape[0])
         width = int(height * best_frame.shape[1] / best_frame.shape[0])
         best_frame = cv2.resize(
             best_frame, dsize=(width, height), interpolation=cv2.INTER_AREA
@@ -1275,7 +1276,7 @@ def run_ffmpeg_snapshot(
 
     if height is not None:
         ffmpeg_cmd.insert(-3, "-vf")
-        ffmpeg_cmd.insert(-3, f"scale=-1:{height}")
+        ffmpeg_cmd.insert(-3, f"scale=-1:'min({height},ih)'")
 
     try:
         process = sp.run(
@@ -1298,11 +1299,17 @@ def get_image_from_recording(
     relative_frame_time: float,
     codec: str,
     height: int | None = None,
+    timeout: int = 30,
 ) -> Any | None:
     """retrieve a frame from given time in recording file."""
 
     image_data, _ = run_ffmpeg_snapshot(
-        ffmpeg, file_path, codec, seek_time=relative_frame_time, height=height
+        ffmpeg,
+        file_path,
+        codec,
+        seek_time=relative_frame_time,
+        height=height,
+        timeout=timeout,
     )
 
     return image_data

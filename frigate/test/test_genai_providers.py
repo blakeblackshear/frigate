@@ -19,6 +19,7 @@ import unittest
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import httpx
 import requests
 
 from frigate.config import GenAIConfig, GenAIProviderEnum
@@ -500,6 +501,42 @@ class TestGeminiProvider(unittest.TestCase):
         final = _final_message(_collect(client, MULTIMODAL_MESSAGES))
         self.assertEqual(final["content"], "ok")
 
+    def test_tool_response_name_resolves_from_call_id(self):
+        from google.genai.types import FinishReason
+
+        client = self._client()
+        self._patch_stream(
+            client,
+            [
+                _gemini_chunk(
+                    parts=[_gemini_part(text="ok")], finish_reason=FinishReason.STOP
+                )
+            ],
+        )
+        messages = [
+            {"role": "user", "content": "turn off recordings"},
+            {
+                "role": "assistant",
+                "content": None,
+                "tool_calls": [
+                    {
+                        "id": "call_abc",
+                        "type": "function",
+                        "function": {"name": "set_camera_state", "arguments": "{}"},
+                    }
+                ],
+            },
+            {"role": "tool", "tool_call_id": "call_abc", "content": "{}"},
+        ]
+        _collect(client, messages)
+
+        contents = client.provider.aio.models.generate_content_stream.call_args.kwargs[
+            "contents"
+        ]
+        self.assertEqual(
+            contents[-1].parts[0].function_response.name, "set_camera_state"
+        )
+
 
 class TestGeminiImageTokens(unittest.TestCase):
     def _client(self, count_tokens):
@@ -821,6 +858,13 @@ class TestOllamaProvider(unittest.TestCase):
 
         self.assertEqual(client.embed(images=[self._webp_bytes()]), [])
 
+    def test_embed_transport_error_returns_empty(self):
+        client = self._client()
+        client.provider = MagicMock()
+        client.provider._request_raw.side_effect = httpx.ReadError("reset")
+
+        self.assertEqual(client.embed(texts=["a person"]), [])
+
 
 # ---------------------------------------------------------------------------
 # llama.cpp
@@ -974,6 +1018,23 @@ class TestLlamaCppProvider(unittest.TestCase):
     def test_provider_options_context_size_overrides_server(self):
         client = self._validated_client(4096, {"context_size": 32768})
         self.assertEqual(client.get_context_size(), 32768)
+
+    def test_base_url_strips_only_trailing_v1(self):
+        client = _make_client(
+            "llamacpp", model="m", base_url="http://v1-gpu.lan:8080/v1/"
+        )
+        self.assertEqual(client.provider, "http://v1-gpu.lan:8080")
+
+    def test_models_url_strips_v1_when_init_failed(self):
+        client = self._client()
+        client.provider = None
+        client.genai_config.base_url = "http://host:8080/v1"
+
+        with patch.object(client, "_get") as get:
+            get.return_value.json.return_value = {"data": []}
+            client._fetch_models_data()
+
+        self.assertEqual(get.call_args.args[0], "http://host:8080/v1/models")
 
     def test_list_models_dedupes_alias_matching_id(self):
         client = self._client()

@@ -16,7 +16,8 @@ export function processCameraName(userInput: string): {
 } {
   const normalizedInput = userInput.replace(/\s+/g, "_").toLowerCase();
 
-  if (isValidId(normalizedInput)) {
+  // debug replay owns this prefix and deletes data for cameras that use it
+  if (isValidId(normalizedInput) && !isReplayCamera(normalizedInput)) {
     return {
       finalCameraName: normalizedInput,
       friendlyName: userInput.includes(" ") ? userInput : undefined,

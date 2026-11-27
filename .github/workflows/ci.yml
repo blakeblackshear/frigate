@@ -14,6 +14,9 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 env:
   PYTHON_VERSION: 3.11
 
@@ -21,6 +24,9 @@ jobs:
   amd64_build:
     runs-on: ubuntu-22.04
     name: AMD64 Build
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Check out code
         uses: actions/checkout@v7
@@ -45,6 +51,9 @@ jobs:
   smoke_test:
     runs-on: ubuntu-22.04
     name: AMD64 Smoke Test
+    permissions:
+      contents: read
+      packages: read
     needs:
       - amd64_build
     steps:
@@ -156,8 +165,16 @@ jobs:
           # the usb tree gets recursive grants plus a default ACL that
           # newly created nodes inherit (the Coral re-enumeration path)
           docker exec frigate sh -c 'mkdir -p /dev/bus/usb/001 && mknod /dev/bus/usb/001/002 c 189 1'
+          docker exec frigate sh -c 'mkdir -p /opt/link-target && ln -s /opt/link-target /dev/bus/usb/001/link'
           docker exec frigate sh -c 'export PATH=/command:$PATH; exec /etc/s6-overlay/s6-rc.d/init-devices/run'
           docker exec frigate getfacl -p /dev/bus/usb/001 | grep -q "user:frigate:rwx"
+          # a symlink in the usb tree is never followed
+          target_acl=$(docker exec frigate getfacl -p /opt/link-target)
+          if grep -q "user:frigate" <<< "$target_acl"; then
+            echo "init-devices followed a symlink under /dev/bus/usb"; exit 1
+          fi
+          # a fifo at the sentinel path is rejected at once instead of hanging the boot
+          docker exec frigate sh -c 'mkfifo /tmp/sentinel-fifo && timeout 5 /usr/local/bin/safe-sentinel read /tmp/sentinel-fifo; test $? -eq 1'
           docker exec frigate sh -c 'mknod /dev/bus/usb/001/099 c 189 98 && chmod 664 /dev/bus/usb/001/099'
           inherited=$(docker exec frigate getfacl -p /dev/bus/usb/001/099)
           echo "$inherited"
@@ -244,6 +261,9 @@ jobs:
           done
           if [ "$up" -ne 1 ]; then echo "granular container never came back after restart"; docker logs frigate-granular; exit 1; fi
           docker exec frigate-granular stat -c %u /media/frigate/clips/straggler.webp | grep -qx 1000
+          # the per-boot /config sweep leaves the sentinel root-owned, so the restart skips the full sweep
+          docker exec frigate-granular stat -c %u /config/.permissions_version | grep -qx 0
+          docker logs frigate-granular 2>&1 | grep -q "already applied, skipping"
           docker rm -f frigate-granular
       - name: Assert unknown root service fails fast
         run: |
@@ -664,9 +684,7 @@ jobs:
       - arm64_build
     steps:
       - id: lowercaseRepo
-        uses: ASzc/change-string-case-action@v8
-        with:
-          string: ${{ github.repository }}
+        run: echo "lowercase=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
       - name: Log in to the Container registry
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550
         with:
@@ -675,7 +693,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create short sha
         run: echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-      - uses: int128/docker-manifest-create-action@v2
+      - uses: int128/docker-manifest-create-action@d6ac360314337bbfb870747d9616b83118acb330 # v2.30.0
         id: manifest
         with:
           tags: ghcr.io/${{ steps.lowercaseRepo.outputs.lowercase }}:${{ env.SHORT_SHA }}

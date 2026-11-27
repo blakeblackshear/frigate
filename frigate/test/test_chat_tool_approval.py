@@ -22,6 +22,7 @@ from frigate.api.chat import (
     _execute_pending_tools,
     _pending_tool_calls_from_tail,
     _tool_calls_awaiting_approval,
+    _with_server_ids,
 )
 from frigate.api.defs.request.chat_body import ChatCompletionRequest
 from frigate.genai.prompts import (
@@ -152,6 +153,22 @@ class TestApprovalHelpers(unittest.TestCase):
         body = _body(tool_decisions={"c2": "approve", "c3": "reject"})
         self.assertEqual(_tool_calls_awaiting_approval(pending, body, WRITE_TOOLS), [])
 
+    def test_repeated_provider_ids_get_unique_server_ids(self):
+        calls = [
+            {"id": "set_camera_state", "name": "set_camera_state", "arguments": {}},
+            {"id": "set_camera_state", "name": "set_camera_state", "arguments": {}},
+        ]
+        renamed = _with_server_ids(calls)
+        self.assertEqual(len({tc["id"] for tc in renamed}), 2)
+        self.assertNotIn("set_camera_state", {tc["id"] for tc in renamed})
+
+        # A later call to the same tool is not covered by an earlier decision.
+        body = _body(tool_decisions={renamed[0]["id"]: "approve"})
+        later = _with_server_ids(calls[:1])
+        self.assertEqual(
+            len(_tool_calls_awaiting_approval(later, body, WRITE_TOOLS)), 1
+        )
+
 
 class TestExecutePendingTools(unittest.TestCase):
     def test_rejected_call_is_not_executed(self):
@@ -242,7 +259,6 @@ class DatabaseTestCase(unittest.TestCase):
             region=[0, 0, 1, 1],
             box=[0, 0, 1, 1],
             area=1,
-            retain_indefinitely=False,
             ratio=1.0,
             plus_id="",
             model_hash="",

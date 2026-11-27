@@ -40,6 +40,7 @@ from frigate.const import (
 )
 from frigate.models import User
 from frigate.output.ws_auth import ws_has_camera_access
+from frigate.util.builtin import scope_stats_for_non_admin
 from frigate.util.origin import origin_allowed
 
 logger = logging.getLogger(__name__)
@@ -210,7 +211,7 @@ _WS_RESHAPE_JOB_STATE_TOPICS = frozenset(
 
 # Topics whose payload mixes global aggregates with a ``cameras`` sub-dict
 # keyed by camera name. Aggregates and detector data stay; per-camera entries
-# are filtered.
+# are filtered and process cmdlines are stripped for non-admins.
 _WS_RESHAPE_STATS_TOPICS = frozenset(
     {
         "stats",
@@ -455,20 +456,14 @@ def _materialize_for_ws(
         return _wrap_envelope(topic, filtered_jobs)
 
     if kind == "reshape_stats":
-        if _ws_is_unrestricted(ws, config):
+        if "admin" in _ws_valid_roles(ws, config):
             return full_message
         if not isinstance(parsed_payload, dict):
             return None
-        allowed = _ws_allowed_cameras(ws, config)
-        cameras_block = parsed_payload.get("cameras")
-        if isinstance(cameras_block, dict):
-            filtered_cameras = {
-                name: data for name, data in cameras_block.items() if name in allowed
-            }
-            reshaped = dict(parsed_payload)
-            reshaped["cameras"] = filtered_cameras
-            return _wrap_envelope(topic, reshaped)
-        return full_message
+        return _wrap_envelope(
+            topic,
+            scope_stats_for_non_admin(parsed_payload, _ws_allowed_cameras(ws, config)),
+        )
 
     return None
 

@@ -95,6 +95,42 @@ class TestProxyRoleResolution(unittest.TestCase):
         role = resolve_role(headers, self.proxy_config, self.config_roles)
         self.assertEqual(role, self.proxy_config.default_role)
 
+    def test_custom_role_direct_header_ignores_case(self):
+        config = self.proxy_config
+        config.header_map.role_map = None
+        headers = {"x-remote-role": "garage"}
+        role = resolve_role(headers, config, ["admin", "viewer", "Garage"])
+        self.assertEqual(role, "Garage")
+
+    def test_role_map_to_missing_role_denies(self):
+        """A group mapped to a deleted role must not widen to default_role."""
+        self.proxy_config.header_map.role_map = {"garage": ["group_garage"]}
+        headers = {"x-remote-role": "group_garage"}
+        role = resolve_role(headers, self.proxy_config, self.config_roles)
+        self.assertEqual(role, "none")
+
+    def test_unknown_default_role_denies(self):
+        for default in ("operatr", None):
+            with self.subTest(default_role=default):
+                config = ProxyConfig(
+                    default_role=default,
+                    header_map=HeaderMappingConfig(role="x-remote-role"),
+                )
+                role = resolve_role({}, config, self.config_roles)
+                self.assertEqual(role, "none")
+
+    def test_default_role_and_role_map_ignore_case(self):
+        roles = ["admin", "viewer", "Garage"]
+        config = ProxyConfig(
+            default_role="garage",
+            header_map=HeaderMappingConfig(
+                role="x-remote-role", role_map={"GARAGE": ["group_garage"]}
+            ),
+        )
+        self.assertEqual(resolve_role({}, config, roles), "Garage")
+        headers = {"x-remote-role": "group_garage"}
+        self.assertEqual(resolve_role(headers, config, roles), "Garage")
+
 
 class TestDefaultRoleNone(unittest.TestCase):
     def setUp(self):
@@ -190,6 +226,9 @@ class TestDefaultRoleNone(unittest.TestCase):
                 )
                 self.assertEqual(role, "none")
 
+    def test_null_default_role_normalizes_to_none(self):
+        self.assertEqual(ProxyConfig(default_role=None).default_role, "none")
+
     def test_other_role_names_stay_case_sensitive(self):
         """Only the deny sentinel is normalized; role names are untouched."""
         config = ProxyConfig(default_role="Operator")
@@ -221,8 +260,18 @@ class TestReservedRoleNames(unittest.TestCase):
                 with self.assertRaises(ValidationError):
                     AuthConfig(roles={name: ["front_door"]})
 
+    def test_admin_and_viewer_reserved_in_every_casing(self):
+        for name in ("Admin", "VIEWER"):
+            with self.subTest(role=name):
+                with self.assertRaises(ValidationError):
+                    AuthConfig(roles={name: ["front_door"]})
+
+    def test_role_names_differing_only_by_case_rejected(self):
+        with self.assertRaises(ValidationError):
+            AuthConfig(roles={"garage": ["front_door"], "Garage": ["back"]})
+
     def test_case_variant_of_a_normal_role_still_allowed(self):
-        """Only 'none' folds case; other role names are untouched."""
+        """A mixed-case custom name is fine when it is not reserved."""
         config = AuthConfig(roles={"Operator": ["front_door"]})
         self.assertEqual(config.roles["Operator"], ["front_door"])
 

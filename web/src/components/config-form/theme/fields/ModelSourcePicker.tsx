@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { FrigateConfig } from "@/types/frigateConfig";
 import { describeSupportedDetectors } from "@/utils/plusModels";
+import { usePlusRateLimit } from "@/hooks/use-plus-rate-limit";
 
 export type FrigatePlusModel = {
   id: string;
@@ -65,20 +66,26 @@ export function ModelSourcePicker({
   // metadata of whatever model was saved before it
   const selectedId = plusModelId(path) ?? plus?.id;
 
-  const { data: availableModels, isLoading } = useSWR<
-    Record<string, FrigatePlusModel>
-  >(plusEnabled ? "/plus/models" : null, {
-    fetcher: async (url) => {
-      const res = await axios.get(url, { withCredentials: true });
-      return res.data.reduce(
-        (obj: Record<string, FrigatePlusModel>, model: FrigatePlusModel) => {
-          obj[model.id] = model;
-          return obj;
-        },
-        {},
-      );
+  const { getRateLimitMessage } = usePlusRateLimit();
+  const {
+    data: availableModels,
+    error: modelsError,
+    isLoading,
+  } = useSWR<Record<string, FrigatePlusModel>>(
+    plusEnabled ? "/plus/models" : null,
+    {
+      fetcher: async (url) => {
+        const res = await axios.get(url, { withCredentials: true });
+        return res.data.reduce(
+          (obj: Record<string, FrigatePlusModel>, model: FrigatePlusModel) => {
+            obj[model.id] = model;
+            return obj;
+          },
+          {},
+        );
+      },
     },
-  });
+  );
 
   const [showIncompatible, setShowIncompatible] = useState(false);
   const showIncompatibleId = useId();
@@ -101,6 +108,7 @@ export function ModelSourcePicker({
   const isCompatible = (model: FrigatePlusModel) =>
     !detector || model.supportedDetectors.includes(detector);
 
+  const rateLimitMessage = getRateLimitMessage(modelsError);
   const allEntries = Object.entries(availableModels ?? {});
   const hasIncompatible = allEntries.some(([, model]) => !isCompatible(model));
 
@@ -163,7 +171,8 @@ export function ModelSourcePicker({
             <SelectGroup>
               {entries.length === 0 ? (
                 <div className="px-4 py-3 text-center text-sm text-muted-foreground">
-                  {t("frigatePlus.modelInfo.noModelsAvailable")}
+                  {rateLimitMessage ??
+                    t("frigatePlus.modelInfo.noModelsAvailable")}
                 </div>
               ) : (
                 entries.map(([id, model]) => (
@@ -184,6 +193,9 @@ export function ModelSourcePicker({
             </SelectGroup>
           </SelectContent>
         </Select>
+        {rateLimitMessage && (
+          <p className="text-xs text-danger">{rateLimitMessage}</p>
+        )}
         <p className="text-xs text-muted-foreground">
           <Trans ns="views/settings">frigatePlus.modelInfo.modelSelect</Trans>
         </p>

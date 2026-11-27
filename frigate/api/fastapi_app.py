@@ -88,7 +88,7 @@ def create_fastapi_app(
         logger.info("FastAPI started")
         asyncio.create_task(
             debug_replay_auto_stop_watchdog(
-                replay_manager, frigate_config, config_publisher
+                replay_manager, lambda: app.frigate_config, config_publisher
             )
         )
         yield

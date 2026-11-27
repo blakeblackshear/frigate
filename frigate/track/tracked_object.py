@@ -17,6 +17,7 @@ from frigate.config import (
 )
 from frigate.const import CLIPS_DIR, REPLAY_CAMERA_PREFIX, THUMB_DIR
 from frigate.detectors.detector_config import ModelConfig
+from frigate.review.severity import get_review_severity
 from frigate.review.types import SeverityEnum
 from frigate.util.builtin import sanitize_float
 from frigate.util.image import (
@@ -69,6 +70,8 @@ class TrackedObject:
         self.new_zone_entered: bool = False
         self.attributes: dict[str, float] = defaultdict(float)
         self.false_positive = True
+        # highest review severity the object qualified for on any frame
+        self.max_severity: SeverityEnum | None = None
         self.has_clip = False
         self.has_snapshot = False
         self.top_score = self.computed_score = 0.0
@@ -84,36 +87,6 @@ class TrackedObject:
         self.velocity_angle = 0
         self.path_data: list[tuple[Any, float]] = []
         self.previous = self.to_dict()
-
-    @property
-    def max_severity(self) -> str | None:
-        review_config = self.camera_config.review
-
-        if (
-            self.camera_config.review.alerts.enabled
-            and self.obj_data["label"] in review_config.alerts.labels
-            and (
-                not review_config.alerts.required_zones
-                or set(self.entered_zones) & set(review_config.alerts.required_zones)
-            )
-        ):
-            return SeverityEnum.alert
-
-        if (
-            self.camera_config.review.detections.enabled
-            and (
-                not review_config.detections.labels
-                or self.obj_data["label"] in review_config.detections.labels
-            )
-            and (
-                not review_config.detections.required_zones
-                or set(self.entered_zones)
-                & set(review_config.detections.required_zones)
-            )
-        ):
-            return SeverityEnum.detection
-
-        return None
 
     def _is_false_positive(self) -> bool:
         # once a true positive, always a true positive
@@ -386,6 +359,28 @@ class TrackedObject:
 
         self.obj_data.update(obj_data)
         self.current_zones = current_zones
+
+        # use the same per-frame rules as review segments, so max_severity is
+        # never alert or detection unless the object could create that review
+        severity = get_review_severity(
+            self.camera_config,
+            label=self.obj_data["label"],
+            current_zones=current_zones,
+            false_positive=self.false_positive,
+            detected=detected,
+            position_changes=self.obj_data["position_changes"],
+            motionless_count=self.obj_data["motionless_count"],
+            pending_loitering=self.pending_loitering,
+        )
+
+        if severity != self.max_severity and (
+            severity == SeverityEnum.alert
+            or (severity == SeverityEnum.detection and self.max_severity is None)
+        ):
+            self.max_severity = severity
+            # max_severity is saved with the event, so publish the change
+            significant_change = True
+
         logger.debug(
             f"{self.camera_config.name}: Updating {obj_data['id']}: thumb update? {thumb_update}, significant change? {significant_change}, path update? {path_update}, autotracker update? {autotracker_update} "
         )

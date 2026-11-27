@@ -20,7 +20,7 @@ from urllib.parse import unquote
 from peewee import DoesNotExist, Field
 
 from frigate.config import FrigateConfig
-from frigate.const import CLIPS_DIR, EXPORT_DIR
+from frigate.const import CLIPS_DIR, EXPORT_DIR, SUB_CACHE_TAG
 from frigate.models import Export, User
 
 logger = logging.getLogger(__name__)
@@ -137,11 +137,12 @@ def _resolve_recording(
     # /recordings/{date}                   → neutral
     # /recordings/{date}/{hour}            → multi-camera listing
     # /recordings/{date}/{hour}/{cam}/...  → camera
+    # /recordings/{date}/{hour}/{cam}@sub/... → camera (sub stream)
     if len(parts) <= 2:
         return MediaAuthResolution.LISTING_NEUTRAL, None
     if len(parts) == 3:
         return MediaAuthResolution.LISTING_MULTI_CAMERA, None
-    return MediaAuthResolution.CAMERA, parts[3]
+    return MediaAuthResolution.CAMERA, parts[3].removesuffix(SUB_CACHE_TAG)
 
 
 def _resolve_clip(
@@ -150,6 +151,7 @@ def _resolve_clip(
     # /clips                                          → multi-camera listing
     # /clips/thumbs/{cam}/...                         → camera
     # /clips/previews/{cam}/...                       → camera
+    # /clips/triggers/{cam}/...                       → camera
     # /clips/review/thumb-{cam}-{review_id}.webp      → camera (parsed)
     # /clips/export/{export_id}.{ext}                 → camera (DB lookup)
     # /clips/faces/...                                → admin-only
@@ -163,7 +165,7 @@ def _resolve_clip(
 
     second = parts[1]
 
-    if second in ("thumbs", "previews"):
+    if second in ("thumbs", "previews", "triggers"):
         if len(parts) == 2:
             return MediaAuthResolution.LISTING_MULTI_CAMERA, None
         return MediaAuthResolution.CAMERA, parts[2]
@@ -311,6 +313,9 @@ def deny_response_for_media_uri(
     if not role or role == "admin":
         return None
 
+    if resolution == MediaAuthResolution.ADMIN_ONLY:
+        return 403
+
     if not is_role_restricted(role, frigate_config):
         return None
 
@@ -319,7 +324,6 @@ def deny_response_for_media_uri(
 
     if resolution in (
         MediaAuthResolution.LISTING_MULTI_CAMERA,
-        MediaAuthResolution.ADMIN_ONLY,
         MediaAuthResolution.UNRESOLVED_MEDIA,
     ):
         return 403

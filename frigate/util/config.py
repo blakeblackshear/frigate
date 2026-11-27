@@ -195,6 +195,18 @@ def parse_listen_address(value: int | str) -> tuple[int | str, int]:
     return f"{host}:{port}", port
 
 
+def ipv6_listen_address(value: int | str, port: int) -> str | None:
+    """Return the IPv6 wildcard address to add for a parsed listen value.
+
+    Only an IPv4 wildcard gains the extra IPv6 listener. A specific address
+    binds only that address, and nginx would let a [::] listener override it.
+    """
+    if isinstance(value, int) or value.startswith(("*:", "0.0.0.0:")):
+        return f"[::]:{port}"
+
+    return None
+
+
 def find_config_file() -> str:
     """Return the path of the config file to use.
 
@@ -1191,7 +1203,11 @@ def apply_section_update(camera_config, section: str, update: dict) -> str | Non
     Returns:
         None on success, or an error message string on failure.
     """
-    from frigate.config.config import RuntimeFilterConfig, RuntimeMotionConfig
+    from frigate.config.config import (
+        FilterConfig,
+        RuntimeFilterConfig,
+        RuntimeMotionConfig,
+    )
 
     current = getattr(camera_config, section, None)
     if current is None:
@@ -1223,6 +1239,9 @@ def apply_section_update(camera_config, section: str, update: dict) -> str | Non
                 new_objects._all_objects = current._all_objects
             except AttributeError:
                 pass
+
+            for label in new_objects.track:
+                new_objects.filters.setdefault(label, FilterConfig())
 
             # Rebuild RuntimeFilterConfig with merged global + per-object masks
             for obj_name, filt in new_objects.filters.items():

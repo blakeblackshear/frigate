@@ -234,6 +234,8 @@ proxy:
 
 Setting `default_role` to `none` denies access instead of falling back to a role. Any proxy-authenticated user whose headers do not match an explicit `role_map` entry receives a 403 response. This is useful when the upstream proxy authenticates a broader set of users than should reach Frigate, so that only mapped groups are allowed in.
 
+A `default_role` that does not name a configured role is treated as `none`.
+
 ```yaml
 proxy:
   ...
@@ -266,7 +268,8 @@ In this example:
 - If the proxy passes a role header containing `camera-viewer`, the user is assigned the `viewer` role.
 - If the proxy passes a role header containing `operators`, the user is assigned the `operator` custom role.
 - If no mapping matches, Frigate falls back to `default_role` if configured, or denies access if `default_role` is `none`.
-- If `role_map` is not defined, Frigate assumes the role header directly contains `admin`, `viewer`, or a custom role name.
+- If a group matches but its mapped role no longer exists (for example, a deleted custom role), access is denied.
+- If `role_map` is not defined, Frigate assumes the role header directly contains `admin`, `viewer`, or a custom role name, matched without regard to case.
 
 **Note on matching semantics:**
 

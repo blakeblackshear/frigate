@@ -1,26 +1,29 @@
-"""Tests for the per-camera episode notices: skipped detections and high CPU."""
+"""Tests for the episode notices: skipped detections, dropped frames, and high CPU."""
 
 import unittest
 from unittest.mock import call, patch
 
+from frigate.const import REPLAY_CAMERA_PREFIX
+from frigate.notices.types import NOTICE_KINDS
 from frigate.stats import emitter
 from frigate.stats.emitter import (
+    DROPPED_FRAMES_PCT,
     SKIPPED_DETECTIONS_PCT,
     EpisodeTracker,
     cpu_average,
 )
-from frigate.stats.util import skipped_percent
+from frigate.stats.util import frame_percent
 
 
-class TestSkippedPercent(unittest.TestCase):
+class TestFramePercent(unittest.TestCase):
     def test_share_of_all_frames(self):
-        self.assertEqual(skipped_percent(0.5, 5.0, True), 10.0)
+        self.assertEqual(frame_percent(0.5, 5.0, True), 10.0)
 
     def test_offline_camera_reports_zero(self):
-        self.assertEqual(skipped_percent(2.0, 0.0, True), 0.0)
+        self.assertEqual(frame_percent(2.0, 0.0, True), 0.0)
 
     def test_disabled_camera_reports_zero(self):
-        self.assertEqual(skipped_percent(2.0, 5.0, False), 0.0)
+        self.assertEqual(frame_percent(2.0, 5.0, False), 0.0)
 
 
 class TestEpisodeTracker(unittest.TestCase):
@@ -116,6 +119,7 @@ class TestEmitterNotices(unittest.TestCase):
     def _emitter(self) -> emitter.StatsEmitter:
         stats_emitter = emitter.StatsEmitter.__new__(emitter.StatsEmitter)
         stats_emitter.skipped_detections = EpisodeTracker(SKIPPED_DETECTIONS_PCT)
+        stats_emitter.dropped_frames = EpisodeTracker(DROPPED_FRAMES_PCT)
         stats_emitter.ffmpeg_cpu = EpisodeTracker(emitter.FFMPEG_HIGH_CPU_PCT)
         stats_emitter.detect_cpu = EpisodeTracker(emitter.DETECT_HIGH_CPU_PCT)
         stats_emitter._shm_checked = False
@@ -123,13 +127,29 @@ class TestEmitterNotices(unittest.TestCase):
         return stats_emitter
 
     def _stats(
-        self, uptime: int, pct: float, ffmpeg_cpu: str = "5.0", detect_cpu: str = "5.0"
+        self,
+        uptime: int,
+        pct: float,
+        ffmpeg_cpu: str = "5.0",
+        detect_cpu: str = "5.0",
+        dropped: dict[str, float] | None = None,
     ) -> dict:
+        cameras = {
+            "front_door": {
+                "skipped_pct": pct,
+                "dropped_pct": 0.0,
+                "ffmpeg_pid": 10,
+                "pid": 11,
+            }
+        }
+
+        for camera, dropped_pct in (dropped or {}).items():
+            cameras.setdefault(camera, {"skipped_pct": 0.0})
+            cameras[camera]["dropped_pct"] = dropped_pct
+
         return {
             "service": {"uptime": uptime, "storage": {"/dev/shm": {}}},
-            "cameras": {
-                "front_door": {"skipped_pct": pct, "ffmpeg_pid": 10, "pid": 11}
-            },
+            "cameras": cameras,
             "cpu_usages": {
                 "10": {"cpu_average": ffmpeg_cpu},
                 "11": {"cpu_average": detect_cpu},
@@ -190,6 +210,96 @@ class TestEmitterNotices(unittest.TestCase):
         stats_emitter._update_notices(self._stats(90, 50.0), 60.0)
 
         self.raise_notice.assert_not_called()
+
+    def test_dropped_frames_raise_one_system_notice(self):
+        stats_emitter = self._emitter()
+        dropped = {"front_door": 12.0, "driveway": 8.0}
+
+        for uptime, now in ((300, 0.0), (360, 60.0)):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped=dropped), now
+            )
+
+        self.raise_notice.assert_called_once_with("object_processing_behind")
+
+    def test_staggered_cameras_raise_one_notice(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now, dropped in (
+            (300, 0.0, {"front_door": 12.0}),
+            (330, 30.0, {"front_door": 12.0, "driveway": 8.0}),
+            (360, 60.0, {"front_door": 12.0, "driveway": 8.0}),
+            (390, 90.0, {"front_door": 12.0, "driveway": 8.0}),
+        ):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped=dropped), now
+            )
+
+        self.raise_notice.assert_called_once_with("object_processing_behind")
+
+    def test_drops_passing_between_cameras_raise_the_notice(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now, dropped in (
+            (300, 0.0, {"front_door": 12.0, "driveway": 0.0}),
+            (330, 30.0, {"front_door": 0.0, "driveway": 8.0}),
+            (360, 60.0, {"front_door": 0.0, "driveway": 8.0}),
+        ):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped=dropped), now
+            )
+
+        self.raise_notice.assert_called_once_with("object_processing_behind")
+
+    def test_drops_return_after_recovery_raise_again(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now, pct in (
+            (300, 0.0, 12.0),
+            (360, 60.0, 12.0),
+            (390, 90.0, 0.0),
+            (420, 120.0, 12.0),
+            (480, 180.0, 12.0),
+        ):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped={"front_door": pct}), now
+            )
+
+        self.assertEqual(self.raise_notice.call_count, 2)
+
+    def test_dropped_frames_during_startup_raise_nothing(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now in ((30, 0.0), (90, 60.0)):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped={"front_door": 50.0}), now
+            )
+
+        self.raise_notice.assert_not_called()
+
+    def test_brief_dropped_frames_raise_nothing(self):
+        stats_emitter = self._emitter()
+
+        for uptime, now, pct in ((300, 0.0, 12.0), (330, 30.0, 0.0), (360, 60.0, 12.0)):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped={"front_door": pct}), now
+            )
+
+        self.raise_notice.assert_not_called()
+
+    def test_replay_camera_dropped_frames_raise_nothing(self):
+        stats_emitter = self._emitter()
+        dropped = {f"{REPLAY_CAMERA_PREFIX}front_door": 50.0}
+
+        for uptime, now in ((300, 0.0), (360, 60.0)):
+            stats_emitter._update_notices(
+                self._stats(uptime, 0.0, dropped=dropped), now
+            )
+
+        self.raise_notice.assert_not_called()
+
+    def test_dropped_frames_kind_is_registered(self):
+        self.assertIn("object_processing_behind", NOTICE_KINDS)
 
     def test_every_tick_flushes_held_repeats(self):
         self._emitter()._update_notices(self._stats(30, 0.0), 0.0)

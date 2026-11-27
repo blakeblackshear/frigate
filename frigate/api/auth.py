@@ -81,10 +81,11 @@ def require_admin_by_default():
         "/",
         "/version",
         "/config/schema.json",
-        # Authenticated user endpoints (allow_any_authenticated)
+        # Admin endpoints that enforce require_role on the route
         "/metrics",
-        "/stats",
         "/stats/history",
+        # Authenticated user endpoints (allow_any_authenticated)
+        "/stats",
         "/config",
         "/vainfo",
         "/nvinfo",
@@ -580,8 +581,9 @@ def resolve_role(
                      (split by proxy_config.separator) and map to roles.
                      Admin matches short-circuit to admin.
                  - If no role_map is configured, treat the header as role names directly.
-      2. If no valid role is found, return proxy_config.default_role if it's valid in config_roles, else 'viewer'.
-         The literal value 'none' is a valid default and means access should be denied.
+      2. If no valid role is found, return proxy_config.default_role if it's valid in config_roles, else 'none'.
+         The literal value 'none' means access should be denied.
+      A role_map match whose mapped roles no longer exist in config_roles also resolves to 'none'.
 
     Args:
         headers (dict): Incoming request headers (case-insensitive).
@@ -594,17 +596,11 @@ def resolve_role(
     default_role = proxy_config.default_role
     role_header = proxy_config.header_map.role
 
-    # Validate default_role against config; fallback to 'viewer' if invalid.
-    # "none" is a sentinel meaning "deny access when no mapping matches"; it is
-    # reserved in AuthConfig.validate_roles so it is never a configured role.
-    validated_default = (
-        default_role
-        if default_role in config_roles or default_role == "none"
-        else "viewer"
-    )
-    if not config_roles:
-        # Edge case: no roles defined
-        validated_default = "none" if default_role == "none" else "viewer"
+    # Role names match case-insensitively, as header values are lowercased.
+    # "none" is the deny sentinel; an unknown or missing default also denies,
+    # since falling back to viewer would grant every camera.
+    roles_by_name = {r.lower(): r for r in config_roles}
+    validated_default = roles_by_name.get((default_role or "").lower(), "none")
 
     if not role_header:
         logger.debug(
@@ -631,7 +627,7 @@ def resolve_role(
         logger.debug("Parsed groups from role header: %s", groups)
 
         matched_roles = {
-            role_name
+            role_name.lower()
             for role_name, required_groups in proxy_config.header_map.role_map.items()
             if any(group in groups for group in required_groups)
         }
@@ -643,9 +639,11 @@ def resolve_role(
             logger.debug("Resolved role (with role_map) to 'admin'.")
             return "admin"
 
+        # A mapped role that was deleted or renamed denies rather than
+        # widening to the default role
         if matched_roles:
             resolved = next(
-                (r for r in config_roles if r in matched_roles), validated_default
+                (r for r in config_roles if r.lower() in matched_roles), "none"
             )
             logger.debug("Resolved role (with role_map) to '%s'.", resolved)
             return resolved
@@ -664,7 +662,7 @@ def resolve_role(
     logger.debug("Parsed roles directly from header: %s", roles_from_header)
 
     resolved = next(
-        (r for r in config_roles if r in roles_from_header),
+        (r for r in config_roles if r.lower() in roles_from_header),
         validated_default,
     )
     if resolved == validated_default and roles_from_header:

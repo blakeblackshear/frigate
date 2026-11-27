@@ -143,6 +143,37 @@ class TestValidateFfmpegArgs(unittest.TestCase):
         self.assertRejected("-metadata comment=x")
 
 
+class TestCustomArgsTokenization(unittest.TestCase):
+    """The built command must contain exactly the tokens the validator checked."""
+
+    def test_irregular_whitespace_does_not_shift_tokens(self) -> None:
+        output_args = "-c:v  libx264\t-crf 23\n -r 25 "
+        self.assertTrue(validate_ffmpeg_args(output_args)[0])
+
+        with patch("frigate.record.export.Path.mkdir"):
+            exporter = RecordingExporter(
+                MagicMock(),
+                "front_abc123",
+                "front",
+                None,
+                None,
+                1_000,
+                2_000,
+                PlaybackSourceEnum.recordings,
+                ffmpeg_input_args=" -an  ",
+                ffmpeg_output_args=output_args,
+            )
+        exporter.config.ffmpeg.ffmpeg_path = "ffmpeg"
+        exporter.staged_runs = ["/cache/stage_0.mp4"]
+
+        cmd, _ = exporter.get_record_export_command("/exports/out.mp4")
+
+        for token in cmd[: cmd.index("-metadata")]:
+            self.assertNotEqual(token, "")
+            self.assertEqual(token.split(), [token])
+        self.assertIn("-c:v libx264 -crf 23 -r 25", " ".join(cmd))
+
+
 class TestExportVideoPath(unittest.TestCase):
     """Tests for the file path an export takes once the user names it."""
 

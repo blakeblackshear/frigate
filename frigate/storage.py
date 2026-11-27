@@ -137,7 +137,7 @@ class StorageMaintainer(threading.Thread):
 
     def calculate_camera_bandwidth(self) -> None:
         """Calculate an average MB/hr for each camera."""
-        for camera in self.config.cameras.keys():
+        for camera in list(self.config.cameras):
             # Skip replay cameras
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
@@ -186,7 +186,7 @@ class StorageMaintainer(threading.Thread):
         """Calculate the storage usage of each camera."""
         usages: dict[str, dict] = {}
 
-        for camera in self.config.cameras.keys():
+        for camera in list(self.config.cameras):
             # Skip replay cameras
             if camera.startswith(REPLAY_CAMERA_PREFIX):
                 continue
@@ -208,10 +208,7 @@ class StorageMaintainer(threading.Thread):
                 "bandwidth_by_stream", {}
             )
 
-            camera_key = (
-                getattr(self.config.cameras[camera], "friendly_name", None) or camera
-            )
-            usages[camera_key] = {
+            usages[camera] = {
                 "usage": sum(stream_usages.values()),
                 "bandwidth": self.camera_storage_stats.get(camera, {}).get(
                     "bandwidth", 0
@@ -263,92 +260,24 @@ class StorageMaintainer(threading.Thread):
             .iterator()
         )
 
-        retained_events = (
-            Event.select(
-                Event.start_time,
-                Event.end_time,
-            )
-            .where(
-                Event.retain_indefinitely == True,
-                Event.has_clip,
-            )
-            .order_by(Event.start_time.asc())
-            .namedtuples()
-        )
-
-        event_start = 0
         deleted_recordings = []
         for recording in recordings:
             # check if 1 hour of storage has been reclaimed
             if deleted_segments_size > hourly_bandwidth:
                 break
 
-            keep = False
+            try:
+                clear_and_unlink(Path(recording.path), missing_ok=False)
+                deleted_recordings.append(recording)
+                deleted_segments_size += recording.segment_size
+            except FileNotFoundError:
+                # this file was not found so we must assume no space was cleaned up
+                pass
 
-            # Now look for a reason to keep this recording segment
-            for idx in range(event_start, len(retained_events)):
-                event = retained_events[idx]
-
-                # if the event starts in the future, stop checking events
-                # and let this recording segment expire
-                if event.start_time > recording.end_time:
-                    keep = False
-                    break
-
-                # if the event is in progress or ends after the recording starts, keep it
-                # and stop looking at events
-                if event.end_time is None or event.end_time >= recording.start_time:
-                    keep = True
-                    break
-
-                # if the event ends before this recording segment starts, skip
-                # this event and check the next event for an overlap.
-                # since the events and recordings are sorted, we can skip events
-                # that end before the previous recording segment started on future segments
-                if event.end_time < recording.start_time:
-                    event_start = idx
-
-            # Delete recordings not retained indefinitely
-            if not keep:
-                try:
-                    clear_and_unlink(Path(recording.path), missing_ok=False)
-                    deleted_recordings.append(recording)
-                    deleted_segments_size += recording.segment_size
-                except FileNotFoundError:
-                    # this file was not found so we must assume no space was cleaned up
-                    pass
-
-        # check if need to delete retained segments
         if deleted_segments_size < hourly_bandwidth:
             logger.error(
-                f"Could not clear {hourly_bandwidth} MB, currently {deleted_segments_size:.2f} MB have been cleared. Retained recordings must be deleted."
+                f"Could not clear {hourly_bandwidth} MB, currently {deleted_segments_size:.2f} MB have been cleared."
             )
-            recordings = (
-                Recordings.select(
-                    Recordings.id,
-                    Recordings.camera,
-                    Recordings.start_time,
-                    Recordings.end_time,
-                    Recordings.path,
-                    Recordings.segment_size,
-                )
-                .order_by(Recordings.start_time.asc())
-                .namedtuples()
-                .iterator()
-            )
-
-            for recording in recordings:
-                if deleted_segments_size > hourly_bandwidth:
-                    break
-
-                try:
-                    clear_and_unlink(Path(recording.path), missing_ok=False)
-                    deleted_segments_size += recording.segment_size
-                    deleted_recordings.append(recording)
-                except FileNotFoundError:
-                    # this file was not found so we must assume no space was cleaned up
-                    pass
-
             self.retention_unmet = True
         else:
             logger.info(f"Cleaned up {deleted_segments_size:.2f} MB of recordings")

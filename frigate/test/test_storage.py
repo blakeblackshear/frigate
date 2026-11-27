@@ -1,4 +1,5 @@
 import datetime
+import gc
 import logging
 import os
 import tempfile
@@ -440,6 +441,36 @@ class TestHttp(unittest.TestCase):
         assert usages["front_door"]["usage"] == 0
         assert usages["front_door"]["streams"] == {}
 
+    def test_camera_usages_keyed_by_camera_id(self):
+        """Cameras sharing a friendly name keep separate usage entries."""
+        self.double_cam_config["cameras"]["front_door"]["friendly_name"] = "Door"
+        self.double_cam_config["cameras"]["back_door"]["friendly_name"] = "Door"
+        config = FrigateConfig(**self.double_cam_config)
+        storage = StorageMaintainer(config, MagicMock())
+
+        time_keep = datetime.datetime.now().timestamp()
+        _insert_mock_recording(
+            "1234567.frontdoor",
+            os.path.join(self.test_dir, "front.tmp"),
+            time_keep,
+            time_keep + 10,
+            seg_size=20,
+        )
+        _insert_mock_recording(
+            "1234568.backdoor",
+            os.path.join(self.test_dir, "back.tmp"),
+            time_keep,
+            time_keep + 10,
+            camera="back_door",
+            seg_size=5,
+        )
+
+        storage.calculate_camera_bandwidth()
+        usages = storage.calculate_camera_usages()
+
+        assert usages["front_door"]["usage"] == 20
+        assert usages["back_door"]["usage"] == 5
+
     def test_storage_cleanup(self):
         """Ensure that all recordings are cleaned up when necessary."""
         config = FrigateConfig(**self.minimal_config)
@@ -447,12 +478,7 @@ class TestHttp(unittest.TestCase):
 
         id = "123456.keep"
         time_keep = datetime.datetime.now().timestamp()
-        _insert_mock_event(
-            id,
-            time_keep,
-            time_keep + 30,
-            True,
-        )
+        _insert_mock_event(id, time_keep, time_keep + 30)
         rec_k_id = "1234567.keep"
         rec_k2_id = "1234568.keep"
         rec_k3_id = "1234569.keep"
@@ -477,7 +503,7 @@ class TestHttp(unittest.TestCase):
 
         id2 = "7890.delete"
         time_delete = datetime.datetime.now().timestamp() - 360
-        _insert_mock_event(id2, time_delete, time_delete + 30, False)
+        _insert_mock_event(id2, time_delete, time_delete + 30)
         rec_d_id = "78901.delete"
         rec_d2_id = "78902.delete"
         rec_d3_id = "78903.delete"
@@ -510,14 +536,15 @@ class TestHttp(unittest.TestCase):
             Recordings.get(Recordings.id == rec_d2_id)
             Recordings.get(Recordings.id == rec_d3_id)
 
-    def test_storage_cleanup_keeps_retained(self):
-        """Ensure cleanup steps over retained segments to reach newer ones."""
+    def test_storage_cleanup_deletes_oldest_first(self):
+        """Ensure cleanup deletes the oldest segments and only expires their events."""
         config = FrigateConfig(**self.minimal_config)
         storage = StorageMaintainer(config, MagicMock())
 
         seg_len = 600
         base = datetime.datetime.now().timestamp() - 7200
-        _insert_mock_event("123456.keep", base, base + 2.5 * seg_len, True)
+        _insert_mock_event("old.event", base, base + 2.5 * seg_len)
+        _insert_mock_event("new.event", base + 8 * seg_len, base + 9.5 * seg_len)
 
         paths = {}
         for i in range(10):
@@ -527,16 +554,23 @@ class TestHttp(unittest.TestCase):
                 rec_id, paths[rec_id], base + i * seg_len, base + (i + 1) * seg_len
             )
 
-        # Hourly bandwidth is 48 MB, so cleanup needs all 56 MB of unretained
-        # segments and must pass the older retained ones to get there.
+        # Hourly bandwidth is 48 MB, so cleanup removes the oldest 56 MB
         storage.calculate_camera_bandwidth()
         storage.reduce_storage_consumption()
 
-        retained = {"segment-0", "segment-1", "segment-2"}
+        # flush the queued writes, and collect the abandoned recordings
+        # cursor so this connection stops reading its stale snapshot
+        self.db.stop()
+        self.db.start()
+        gc.collect()
+
+        kept = {"segment-7", "segment-8", "segment-9"}
         remaining = {r.id for r in Recordings.select(Recordings.id)}
         on_disk = {rec_id for rec_id, path in paths.items() if os.path.exists(path)}
-        self.assertEqual(remaining, retained)
-        self.assertEqual(on_disk, retained)
+        self.assertEqual(remaining, kept)
+        self.assertEqual(on_disk, kept)
+        self.assertFalse(Event.get(Event.id == "old.event").has_clip)
+        self.assertTrue(Event.get(Event.id == "new.event").has_clip)
         self.assertFalse(storage.retention_unmet)
 
     def test_unmet_retention_sets_the_live_flag(self):
@@ -566,7 +600,6 @@ def _insert_mock_event(
     id: str,
     start: int,
     end: int,
-    retain: bool,
     camera: str = "front_door",
     label: str = "Mock",
 ) -> Event:
@@ -586,7 +619,6 @@ def _insert_mock_event(
         area=0,
         has_clip=True,
         has_snapshot=True,
-        retain_indefinitely=retain,
     ).execute()
 
 

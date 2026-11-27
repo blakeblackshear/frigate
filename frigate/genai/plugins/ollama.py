@@ -8,7 +8,7 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 import numpy as np
-from httpx import RemoteProtocolError, TimeoutException
+from httpx import HTTPError
 from ollama import AsyncClient as OllamaAsyncClient
 from ollama import Client as ApiClient
 from ollama import ResponseError
@@ -282,12 +282,7 @@ class OllamaClient(GenAIClient):
 
         try:
             response = self.provider.chat(**request_params)
-        except (
-            TimeoutException,
-            ResponseError,
-            RemoteProtocolError,
-            ConnectionError,
-        ) as e:
+        except (HTTPError, ResponseError, ConnectionError) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return None
 
@@ -406,13 +401,7 @@ class OllamaClient(GenAIClient):
             # image items have to bypass it and post the JSON directly.
             response = self.provider._request_raw("POST", "/api/embed", json=payload)
             body = response.json()
-        except (
-            TimeoutException,
-            ResponseError,
-            RemoteProtocolError,
-            ConnectionError,
-            ValueError,
-        ) as e:
+        except (HTTPError, ResponseError, ConnectionError, ValueError) as e:
             logger.warning("Ollama embeddings error: %s", str(e))
             return []
 
@@ -553,7 +542,7 @@ class OllamaClient(GenAIClient):
             )
             response = self.provider.chat(**request_params)
             return self._message_from_response(response)
-        except (TimeoutException, ResponseError, ConnectionError) as e:
+        except (HTTPError, ResponseError, ConnectionError) as e:
             logger.warning("Ollama returned an error: %s", str(e))
             return {
                 "content": None,
@@ -685,7 +674,7 @@ class OllamaClient(GenAIClient):
                         "finish_reason": "stop",
                     },
                 )
-        except (TimeoutException, ResponseError, ConnectionError) as e:
+        except (HTTPError, ResponseError, ConnectionError) as e:
             logger.warning("Ollama streaming error: %s", str(e))
             yield (
                 "message",

@@ -518,10 +518,46 @@ class TestSecretsReload(unittest.TestCase):
         """
         env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "from_config"})
         config = FrigateConfig.parse_yaml(
+            "environment_vars:\n  FRIGATE_MQTT_HOST: from_config\n"
             'mqtt:\n  host: "{FRIGATE_MQTT_HOST}"\ncameras: {}\n'
         )
         self.assertEqual(config.mqtt.host, "from_config")
         self.assertEqual(env._CONFIG_ENV_VARS["FRIGATE_MQTT_HOST"], "from_config")
+
+    def test_candidate_env_var_resolves_before_install(self):
+        """A non-install parse resolves against the candidate's own block, so
+        an entry can be added and referenced in the same save."""
+        env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "running"})
+        config = FrigateConfig.parse_yaml(
+            "environment_vars:\n  FRIGATE_MQTT_HOST: candidate\n"
+            "  FRIGATE_MQTT_USER: added\n"
+            'mqtt:\n  host: "{FRIGATE_MQTT_HOST}"\n'
+            '  user: "{FRIGATE_MQTT_USER}"\n  password: secret\ncameras: {}\n'
+        )
+        self.assertEqual(config.mqtt.host, "candidate")
+        self.assertEqual(config.mqtt.user, "added")
+        self.assertEqual(env._CONFIG_ENV_VARS, {"FRIGATE_MQTT_HOST": "running"})
+        self.assertNotIn("FRIGATE_MQTT_USER", os.environ)
+
+    def test_removed_candidate_env_var_fails_validation(self):
+        """Removing an entry that is still referenced fails now, not at the
+        next start."""
+        env.apply_config_env_vars({"FRIGATE_MQTT_HOST": "running"})
+        with self.assertRaises(ValidationError):
+            FrigateConfig.parse_yaml(
+                'mqtt:\n  host: "{FRIGATE_MQTT_HOST}"\ncameras: {}\n'
+            )
+
+    def test_candidate_env_var_keeps_lowest_precedence(self):
+        """secrets.yaml still outranks the candidate's block."""
+        with open(os.path.join(self._dir.name, "secrets.yaml"), "w") as f:
+            f.write("FRIGATE_MQTT_HOST: from_secrets\n")
+
+        config = FrigateConfig.parse_yaml(
+            "environment_vars:\n  FRIGATE_MQTT_HOST: candidate\n"
+            'mqtt:\n  host: "{FRIGATE_MQTT_HOST}"\ncameras: {}\n'
+        )
+        self.assertEqual(config.mqtt.host, "from_secrets")
 
 
 class TestSourceRobustness(unittest.TestCase):

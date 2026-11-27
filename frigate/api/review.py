@@ -713,12 +713,18 @@ def motion_activity(
     response_model=ReviewSegmentResponse,
     dependencies=[Depends(allow_any_authenticated())],
 )
-async def get_review_from_event(request: Request, event_id: str):
+async def get_review_from_event(
+    event_id: str,
+    allowed_cameras: list[str] = Depends(get_allowed_cameras_for_filter),
+):
     try:
         review = ReviewSegment.get(
-            ReviewSegment.data["detections"].cast("text") % f'*"{event_id}"*'
+            (ReviewSegment.camera << allowed_cameras)
+            & (
+                fn.instr(ReviewSegment.data["detections"].cast("text"), f'"{event_id}"')
+                > 0
+            )
         )
-        await require_camera_access(review.camera, request=request)
         return JSONResponse(model_to_dict(review))
     except DoesNotExist:
         return JSONResponse(

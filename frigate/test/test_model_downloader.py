@@ -135,6 +135,31 @@ class TestModelDownloadState(unittest.TestCase):
         self.assertEqual(states[-1]["state"], "error")
         self.assertEqual(states[-1]["model"], "facedet-facedet.onnx")
 
+    def test_raising_download_releases_waiters(self):
+        def failing(path: str) -> None:
+            raise RuntimeError("boom")
+
+        model_downloader = self._downloader(failing)
+
+        with self.assertRaises(RuntimeError):
+            model_downloader._download_models()
+
+        self.assertTrue(model_downloader.download_complete.is_set())
+        model_downloader.requestor.stop.assert_called_once()
+
+    def test_lock_timeout_releases_waiters(self):
+        model_downloader = self._downloader(lambda path: None)
+
+        with patch("frigate.util.downloader.FileLock") as file_lock:
+            file_lock.return_value.__enter__.side_effect = TimeoutError("lock")
+
+            with self.assertRaises(TimeoutError):
+                model_downloader._download_models()
+
+        self.assertTrue(model_downloader.download_complete.is_set())
+        states = self._state_calls(model_downloader.requestor)
+        self.assertEqual([s["state"] for s in states], ["error"])
+
     def test_missing_file_marks_error(self):
         def swallowing(path: str) -> None:
             pass

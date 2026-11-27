@@ -261,6 +261,18 @@ def validate_ffmpeg_args(args: str) -> tuple[bool, str]:
     return True, ""
 
 
+def normalize_ffmpeg_args(args: str | None) -> str | None:
+    """Rejoin args with single spaces.
+
+    validate_ffmpeg_args tokenizes on any whitespace, while export commands are
+    built with split(" "). Normalizing keeps the two token lists identical.
+    """
+    if args is None:
+        return None
+
+    return " ".join(args.split())
+
+
 class PlaybackSourceEnum(str, Enum):
     recordings = "recordings"
     preview = "preview"
@@ -327,8 +339,8 @@ class RecordingExporter(threading.Thread):
         self.end_time = end_time
         self.playback_source = playback_source
         self.export_case_id = export_case_id
-        self.ffmpeg_input_args = ffmpeg_input_args
-        self.ffmpeg_output_args = ffmpeg_output_args
+        self.ffmpeg_input_args = normalize_ffmpeg_args(ffmpeg_input_args)
+        self.ffmpeg_output_args = normalize_ffmpeg_args(ffmpeg_output_args)
         self.cpu_fallback = cpu_fallback
         self.chapters = chapters
         self.stream = stream
@@ -1333,7 +1345,7 @@ class RecordingExporter(threading.Thread):
             end_file = f"{file_start}{self.end_time}.{PREVIEW_FRAME_TYPE}"
 
             for file in sorted(os.listdir(preview_dir)):
-                if not file.startswith(file_start):
+                if not is_camera_preview_frame(file, self.camera):
                     continue
 
                 if file < start_file:

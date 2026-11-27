@@ -53,11 +53,13 @@ from frigate.api.defs.response.event_response import (
 )
 from frigate.api.defs.response.generic_response import GenericResponse
 from frigate.api.defs.tags import Tags
+from frigate.api.plus_util import plus_rate_limited_response
 from frigate.comms.event_metadata_updater import EventMetadataTypeEnum
 from frigate.config.classification import ObjectClassificationType
 from frigate.const import CLIPS_DIR
 from frigate.embeddings import EmbeddingsContext
 from frigate.models import Event, ReviewSegment, Timeline, Trigger
+from frigate.plus import PlusRateLimitError
 from frigate.track.object_processing import TrackedObject
 from frigate.util.file import get_event_thumbnail_bytes, load_event_snapshot_image
 from frigate.util.path import get_trigger_thumbnail_path, safe_join
@@ -66,6 +68,9 @@ from frigate.util.time import get_dst_transitions, get_tz_modifiers
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=[Tags.events])
+
+# event.data key holding a Frigate+ image id until its annotation is uploaded
+PLUS_PENDING_ID_KEY = "plus_pending_id"
 
 
 def _build_attribute_filter_clause(attributes: str):
@@ -137,7 +142,6 @@ def events(
     has_snapshot = params.has_snapshot
     in_progress = params.in_progress
     include_thumbnails = params.include_thumbnails
-    favorites = params.favorites
     min_score = params.min_score
     max_score = params.max_score
     min_speed = params.min_speed
@@ -162,7 +166,6 @@ def events(
         Event.has_clip,
         Event.has_snapshot,
         Event.plus_id,
-        Event.retain_indefinitely,
         Event.sub_label,
         Event.top_score,
         Event.false_positive,
@@ -307,9 +310,6 @@ def events(
     if include_thumbnails:
         selected_columns.append(Event.thumbnail)
 
-    if favorites:
-        clauses.append(Event.retain_indefinitely == favorites)
-
     if max_score is not None:
         clauses.append(Event.data["score"] <= max_score)
 
@@ -410,7 +410,6 @@ def events_explore(
         Event.has_clip,
         Event.has_snapshot,
         Event.plus_id,
-        Event.retain_indefinitely,
         Event.top_score,
         Event.false_positive,
         Event.box,
@@ -451,7 +450,6 @@ def events_explore(
                 "has_clip": event.has_clip,
                 "has_snapshot": event.has_snapshot,
                 "plus_id": event.plus_id,
-                "retain_indefinitely": event.retain_indefinitely,
                 "sub_label": event.sub_label,
                 "top_score": event.top_score,
                 "false_positive": event.false_positive,
@@ -1027,34 +1025,6 @@ async def event(event_id: str, request: Request):
 
 
 @router.post(
-    "/events/{event_id}/retain",
-    response_model=GenericResponse,
-    dependencies=[Depends(require_role(["admin"]))],
-    summary="Set event retain indefinitely.",
-    description="""Sets an event to retain indefinitely.
-    Returns a success message or an error if the event is not found.
-    NOTE: This is a legacy endpoint and is not supported in the frontend.
-    """,
-)
-def set_retain(event_id: str):
-    try:
-        event = Event.get(Event.id == event_id)
-    except DoesNotExist:
-        return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
-            status_code=404,
-        )
-
-    event.retain_indefinitely = True
-    event.save()
-
-    return JSONResponse(
-        content=({"success": True, "message": "Event " + event_id + " retained"}),
-        status_code=200,
-    )
-
-
-@router.post(
     "/events/{event_id}/plus",
     response_model=EventUploadPlusResponse,
     dependencies=[Depends(require_role(["admin"]))],
@@ -1112,43 +1082,55 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
             content=({"success": False, "message": message}), status_code=400
         )
 
-    try:
-        image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
-    except Exception:
-        logger.error(f"Unable to load clean snapshot for event: {event.id}")
-        return JSONResponse(
-            content=(
-                {"success": False, "message": "Unable to load clean snapshot for event"}
-            ),
-            status_code=400,
-        )
+    # an image uploaded by an earlier attempt whose annotation failed, so a
+    # retry finishes that submission instead of uploading the image again
+    plus_id = event.data.get(PLUS_PENDING_ID_KEY)
 
-    if not is_clean_snapshot or image is None or image.size == 0:
-        logger.error(f"Unable to find clean snapshot for event: {event.id}")
-        return JSONResponse(
-            content=(
-                {
-                    "success": False,
-                    "message": "Unable to find clean snapshot for event",
-                }
-            ),
-            status_code=400,
-        )
+    if plus_id is None:
+        try:
+            image, is_clean_snapshot = load_event_snapshot_image(event, clean_only=True)
+        except Exception:
+            logger.error(f"Unable to load clean snapshot for event: {event.id}")
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Unable to load clean snapshot for event",
+                    }
+                ),
+                status_code=400,
+            )
 
-    try:
-        plus_id = await asyncio.to_thread(
-            request.app.frigate_config.plus_api.upload_image, image, event.camera
-        )
-    except Exception as ex:
-        logger.exception(ex)
-        return JSONResponse(
-            content=({"success": False, "message": "Error uploading image"}),
-            status_code=400,
-        )
+        if not is_clean_snapshot or image is None or image.size == 0:
+            logger.error(f"Unable to find clean snapshot for event: {event.id}")
+            return JSONResponse(
+                content=(
+                    {
+                        "success": False,
+                        "message": "Unable to find clean snapshot for event",
+                    }
+                ),
+                status_code=400,
+            )
 
-    # store image id in the database
-    event.plus_id = plus_id
-    event.save()
+        try:
+            plus_id = await asyncio.to_thread(
+                request.app.frigate_config.plus_api.upload_image, image, event.camera
+            )
+        except PlusRateLimitError as err:
+            return plus_rate_limited_response(err)
+        except Exception as ex:
+            logger.exception(ex)
+            return JSONResponse(
+                content=({"success": False, "message": "Error uploading image"}),
+                status_code=400,
+            )
+
+        if include_annotation is not None:
+            # the image isn't marked submitted until its annotation is, or a
+            # failed annotation could never be retried
+            event.data[PLUS_PENDING_ID_KEY] = plus_id
+            event.save()
 
     if include_annotation is not None:
         box = event.data["box"]
@@ -1156,10 +1138,12 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
         try:
             await asyncio.to_thread(
                 request.app.frigate_config.plus_api.add_annotation,
-                event.plus_id,
+                plus_id,
                 box,
                 event.label,
             )
+        except PlusRateLimitError as err:
+            return plus_rate_limited_response(err)
         except ValueError:
             message = "Error uploading annotation, unsupported label provided."
             logger.error(message)
@@ -1173,6 +1157,11 @@ async def send_to_plus(request: Request, event_id: str, body: SubmitPlusBody = N
                 content=({"success": False, "message": "Error uploading annotation"}),
                 status_code=400,
             )
+
+    # store image id in the database
+    event.plus_id = plus_id
+    event.data.pop(PLUS_PENDING_ID_KEY, None)
+    event.save()
 
     return JSONResponse(
         content=({"success": True, "plus_id": plus_id}), status_code=200
@@ -1256,6 +1245,8 @@ async def false_positive(request: Request, event_id: str):
             event.model_type,
             event.detector_type,
         )
+    except PlusRateLimitError as err:
+        return plus_rate_limited_response(err)
     except ValueError:
         message = "Error uploading false positive, unsupported label provided."
         logger.error(message)
@@ -1275,35 +1266,6 @@ async def false_positive(request: Request, event_id: str):
 
     return JSONResponse(
         content=({"success": True, "plus_id": event.plus_id}), status_code=200
-    )
-
-
-@router.delete(
-    "/events/{event_id}/retain",
-    response_model=GenericResponse,
-    dependencies=[Depends(require_role(["admin"]))],
-    summary="Stop event from being retained indefinitely",
-    description="""Stops an event from being retained indefinitely.
-    Returns a success message or an error if the event is not found.
-    NOTE: This is a legacy endpoint and is not supported in the frontend.
-    """,
-)
-async def delete_retain(event_id: str, request: Request):
-    try:
-        event = Event.get(Event.id == event_id)
-        await require_camera_access(event.camera, request=request)
-    except DoesNotExist:
-        return JSONResponse(
-            content=({"success": False, "message": "Event " + event_id + " not found"}),
-            status_code=404,
-        )
-
-    event.retain_indefinitely = False
-    event.save()
-
-    return JSONResponse(
-        content=({"success": True, "message": "Event " + event_id + " un-retained"}),
-        status_code=200,
     )
 
 

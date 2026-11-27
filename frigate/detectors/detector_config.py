@@ -10,7 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from pydantic.fields import PrivateAttr
 
 from frigate.const import DEFAULT_ATTRIBUTE_LABEL_MAP, MODEL_CACHE_DIR
-from frigate.plus import PlusApi, load_plus_model_info
+from frigate.plus import PlusApi, PlusRateLimitError, load_plus_model_info
 from frigate.util.builtin import generate_color_palette, load_labels
 
 logger = logging.getLogger(__name__)
@@ -50,6 +50,16 @@ class ModelTypeEnum(str, Enum):
 # the scene of the model used by cameras that don't name one
 DEFAULT_SCENE = "default"
 SCENE_PATTERN = r"^[A-Za-z0-9_-]+$"
+
+
+def _rate_limited_message(model_id: str, err: PlusRateLimitError) -> str:
+    """Explain a rate limited Frigate+ model download, with the wait if known."""
+    message = f"Frigate+ is rate limiting requests, unable to download model {model_id}"
+
+    if err.retry_after is not None:
+        return f"{message}. Try again in {err.retry_after} seconds"
+
+    return f"{message}. Try again later"
 
 
 class ModelConfig(BaseModel):
@@ -193,6 +203,16 @@ class ModelConfig(BaseModel):
                 raise ValueError(
                     f"Unable to connect to Frigate+ to download model {model_id}"
                 ) from e
+            except PlusRateLimitError as e:
+                raise ValueError(_rate_limited_message(model_id, e)) from e
+
+            # an error body written here would be mistaken for the model on
+            # every later start, since only the file's existence is checked
+            if not r.ok:
+                raise ValueError(
+                    f"Unable to download model {model_id} from Frigate+ "
+                    f"(HTTP {r.status_code})"
+                )
 
             with open(self.path, "wb") as f:
                 f.write(r.content)
@@ -205,6 +225,8 @@ class ModelConfig(BaseModel):
                 raise ValueError(
                     f"Unable to connect to Frigate+ to download model info for {model_id}"
                 ) from e
+            except PlusRateLimitError as e:
+                raise ValueError(_rate_limited_message(model_id, e)) from e
 
             with open(model_info_path, "w") as f:
                 json.dump(model_info, f)

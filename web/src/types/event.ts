@@ -10,7 +10,6 @@ export interface Event {
   thumbnail: string;
   has_clip: boolean;
   has_snapshot: boolean;
-  retain_indefinitely: boolean;
   plus_id?: string;
   model_hash?: string;
   data: {

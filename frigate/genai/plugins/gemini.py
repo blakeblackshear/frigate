@@ -67,6 +67,17 @@ def _decode_data_uri(url: str) -> tuple[str, bytes] | None:
         return None
 
 
+def _tool_names_by_id(messages: list[dict[str, Any]]) -> dict[str, str]:
+    """Map each assistant tool call id to its function name."""
+    return {
+        tc["id"]: (tc.get("function") or {}).get("name") or ""
+        for msg in messages
+        if msg.get("role") == "assistant"
+        for tc in msg.get("tool_calls") or []
+        if tc.get("id")
+    }
+
+
 def _parts_from_content(content: Any) -> list[types.Part]:
     """Convert OpenAI-style message content (str or multimodal list) to Gemini parts."""
     if isinstance(content, list):
@@ -458,6 +469,7 @@ class GeminiClient(GenAIClient):
         try:
             # Convert messages to Gemini format
             gemini_messages: list[types.Content] = []
+            tool_names = _tool_names_by_id(messages)
             for msg in messages:
                 role = msg.get("role", "user")
                 content = msg.get("content", "")
@@ -520,6 +532,7 @@ class GeminiClient(GenAIClient):
                             parts=[
                                 types.Part.from_function_response(
                                     name=msg.get("name")
+                                    or tool_names.get(msg.get("tool_call_id") or "")
                                     or msg.get("tool_call_id")
                                     or "",
                                     response=response_payload,
@@ -714,6 +727,7 @@ class GeminiClient(GenAIClient):
         try:
             # Convert messages to Gemini format
             gemini_messages: list[types.Content] = []
+            tool_names = _tool_names_by_id(messages)
             for msg in messages:
                 role = msg.get("role", "user")
                 content = msg.get("content", "")
@@ -776,6 +790,7 @@ class GeminiClient(GenAIClient):
                             parts=[
                                 types.Part.from_function_response(
                                     name=msg.get("name")
+                                    or tool_names.get(msg.get("tool_call_id") or "")
                                     or msg.get("tool_call_id")
                                     or "",
                                     response=response_payload,

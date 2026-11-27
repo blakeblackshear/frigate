@@ -36,6 +36,7 @@ from frigate.api.defs.query.media_query_parameters import (
     MediaMjpegFeedQueryParams,
 )
 from frigate.api.defs.tags import Tags
+from frigate.api.plus_util import plus_rate_limited_response
 from frigate.camera.state import CameraState
 from frigate.config import FrigateConfig
 from frigate.config.camera.snapshots import SnapshotsConfig
@@ -47,7 +48,11 @@ from frigate.const import (
     STREAM_TYPE_SUB,
 )
 from frigate.models import Event, Previews, Recordings, Regions, ReviewSegment
-from frigate.output.preview import get_most_recent_preview_frame
+from frigate.output.preview import (
+    get_most_recent_preview_frame,
+    is_camera_preview_frame,
+)
+from frigate.plus import PlusRateLimitError
 from frigate.track.object_processing import TrackedObjectProcessor
 from frigate.util.ffmpeg import terminate_ffmpeg_stream
 from frigate.util.file import (
@@ -166,10 +171,13 @@ def imagestream(
         time.sleep(1 / fps)
         frame = detected_frames_processor.get_current_frame(camera_name, draw_options)
         if frame is None:
-            frame = np.zeros((height, int(height * 16 / 9), 3), np.uint8)
+            frame = np.zeros((360, 640, 3), np.uint8)
 
-        width = int(height * frame.shape[1] / frame.shape[0])
-        frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_LINEAR)
+        frame_height = min(height, frame.shape[0])
+        width = int(frame_height * frame.shape[1] / frame.shape[0])
+        frame = cv2.resize(
+            frame, dsize=(width, frame_height), interpolation=cv2.INTER_LINEAR
+        )
 
         ret, jpg = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 70])
         yield (
@@ -278,7 +286,7 @@ async def latest_frame(
                 status_code=500,
             )
 
-        height = int(params.height or str(frame.shape[0]))
+        height = min(params.height or frame.shape[0], frame.shape[0])
         width = int(height * frame.shape[1] / frame.shape[0])
 
         if height < 1 or width < 1:
@@ -320,7 +328,7 @@ async def latest_frame(
 
         frame = cv2.cvtColor(frame, cv2.COLOR_YUV2BGR_I420)
 
-        height = int(params.height or str(frame.shape[0]))
+        height = min(params.height or frame.shape[0], frame.shape[0])
         width = int(height * frame.shape[1] / frame.shape[0])
 
         frame = cv2.resize(frame, dsize=(width, height), interpolation=cv2.INTER_AREA)
@@ -428,7 +436,7 @@ async def get_snapshot_from_recording(
 
 
 @router.post(
-    "/{camera_name}/plus/{frame_time}", dependencies=[Depends(require_camera_access)]
+    "/{camera_name}/plus/{frame_time}", dependencies=[Depends(require_role(["admin"]))]
 )
 async def submit_recording_snapshot_to_plus(
     request: Request, camera_name: str, frame_time: str
@@ -473,9 +481,12 @@ async def submit_recording_snapshot_to_plus(
             )
 
         nd = cv2.imdecode(np.frombuffer(image_data, dtype=np.int8), cv2.IMREAD_COLOR)
-        await asyncio.to_thread(
-            request.app.frigate_config.plus_api.upload_image, nd, camera_name
-        )
+        try:
+            await asyncio.to_thread(
+                request.app.frigate_config.plus_api.upload_image, nd, camera_name
+            )
+        except PlusRateLimitError as err:
+            return plus_rate_limited_response(err)
 
         return JSONResponse(
             content={
@@ -1603,7 +1614,7 @@ async def preview_gif(
         camera_files = [
             entry.name
             for entry in os.scandir(preview_dir)
-            if entry.name.startswith(file_start)
+            if is_camera_preview_frame(entry.name, camera_name)
         ]
         camera_files.sort()
 
@@ -1794,7 +1805,7 @@ async def preview_mp4(
         camera_files = [
             entry.name
             for entry in os.scandir(preview_dir)
-            if entry.name.startswith(file_start)
+            if is_camera_preview_frame(entry.name, camera_name)
         ]
         camera_files.sort()
 
