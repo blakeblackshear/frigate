@@ -191,7 +191,8 @@
       "hr": "Hrvatski (Hırvatça)",
       "zhHant": "繁體中文 (Geleneksel Çince)",
       "bs": "Bosanski (Boşnakça)",
-      "be": "Беларуская (Belarusça)"
+      "be": "Беларуская (Belarusça)",
+      "srLatn": "Srpski (Sırpça, Latin)"
     },
     "withSystem": "Sistem",
     "theme": {
@@ -357,5 +358,9 @@
     "action": {
       "toggleTheme": "Aydınlık veya karanlık moda geç"
     }
+  },
+  "plusRateLimited": {
+    "retryIn": "Frigate+ istek sıklığını sınırlıyor. {{duration}} sonra yeniden deneyin.",
+    "retryLater": "Frigate+ istek sıklığını sınırlıyor. Daha sonra yeniden deneyin."
   }
 }

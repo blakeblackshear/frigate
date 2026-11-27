@@ -45,9 +45,11 @@
     "dropActive": "Görseli buraya bırakın…",
     "maxSize": "Maksimum boyut: {{size}} MB",
     "validation": {
-      "selectImage": "Lütfen bir görsel dosyası seçin."
+      "selectImage": "Lütfen bir görsel dosyası seçin.",
+      "heicConversionFailed": "Bu HEIC görseli dönüştürülemedi. JPEG olarak dışa aktarmayı deneyin."
     },
-    "dropInstructions": "Buraya bir görsel sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın"
+    "dropInstructions": "Buraya bir görsel sürükleyip bırakın, yapıştırın ya da seçmek için tıklayın",
+    "converting": "Görsel dönüştürülüyor…"
   },
   "trainFaceAs": "Yüzü şu olarak eğit:",
   "toast": {

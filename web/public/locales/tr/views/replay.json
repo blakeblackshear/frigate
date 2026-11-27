@@ -24,6 +24,11 @@
             "noRecordings": "Seçili zaman aralığında kayıt bulunamadı",
             "stopError": "Hata ayıklama oynatımı durudulamadı: {{error}}",
             "goToReplay": "Oynatıma Git"
+        },
+        "activeSession": {
+            "description": "{{camera}} için halen çalışan bir hata ayıklama oynatımı oturumu var. Yenisini başlatmak için onu durdurun.",
+            "stop": "Oynatımı Durdur",
+            "stopping": "Durduruluyor..."
         }
     },
     "page": {
