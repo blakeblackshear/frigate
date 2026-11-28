@@ -373,7 +373,7 @@ class OnvifController:
             ]["URI"]
 
             if rel_move_request.Translation is None:
-                if status is not None:
+                if status is not None and status.Position is not None:
                     # seed from current position
                     rel_move_request.Translation = status.Position
                     rel_move_request.Translation.PanTilt.space = fov_uri
