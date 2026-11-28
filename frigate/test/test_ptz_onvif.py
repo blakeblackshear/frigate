@@ -165,6 +165,25 @@ class TestOnvifInitRequests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(await controller._init_onvif(CAMERA))
         self.assertIsNone(controller.cams[CAMERA]["video_source_token"])
 
+    async def test_fov_movement_requires_reported_position(self) -> None:
+        # cameras with StatusPosition="false" omit Position from GetStatus
+        for position in (MagicMock(), None):
+            with self.subTest(position=position):
+                controller = _make_controller(autotracking_enabled=False)
+                ptz = controller.cams[CAMERA]["onvif"].create_ptz_service.return_value
+                ptz_config = MagicMock()
+                ptz_config.Spaces.RelativePanTiltTranslationSpace = [
+                    {"URI": "http://www.onvif.org/TranslationSpaceFov"}
+                ]
+                ptz.GetConfigurationOptions = AsyncMock(return_value=ptz_config)
+                ptz.GetStatus = AsyncMock(return_value=MagicMock(Position=position))
+
+                self.assertTrue(await controller._init_onvif(CAMERA))
+                self.assertEqual(
+                    "pt-r-fov" in controller.cams[CAMERA]["features"],
+                    position is not None,
+                )
+
 
 class TestManualRelativeMoveMetrics(unittest.IsolatedAsyncioTestCase):
     """A manual move from the UI (click to move, drag to zoom) sends move_relative

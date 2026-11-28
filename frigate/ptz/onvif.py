@@ -351,12 +351,13 @@ class OnvifController:
             autotracking_config.enabled_in_config and autotracking_config.enabled
         )
 
-        # setup relative move request when FOV relative movement is supported
-        if (
+        fov_supported = (
             fov_space_id is not None
             and configs.DefaultRelativePanTiltTranslationSpace is not None
-        ):
-            # one-off GetStatus to seed Translation field
+        )
+
+        # relative moves are seeded from the current position
+        if fov_supported:
             status = None
             try:
                 status = await ptz.GetStatus({"ProfileToken": profile.token})
@@ -364,6 +365,15 @@ class OnvifController:
             except Exception as e:
                 logger.warning(f"Unable to get status from camera {camera_name}: {e}")
 
+            if status is None or status.Position is None:
+                logger.warning(
+                    "Disabling relative movement for %s: camera does not report its PTZ position",
+                    camera_name,
+                )
+                fov_supported = False
+
+        # setup relative move request when FOV relative movement is supported
+        if fov_supported:
             rel_move_request = ptz.create_type("RelativeMove")
             rel_move_request.ProfileToken = profile.token
             logger.debug(f"{camera_name}: Relative move request: {rel_move_request}")
@@ -373,15 +383,8 @@ class OnvifController:
             ]["URI"]
 
             if rel_move_request.Translation is None:
-                if status is not None and status.Position is not None:
-                    # seed from current position
-                    rel_move_request.Translation = status.Position
-                    rel_move_request.Translation.PanTilt.space = fov_uri
-                else:
-                    # fallback: construct Translation explicitly
-                    rel_move_request.Translation = {
-                        "PanTilt": {"x": 0, "y": 0, "space": fov_uri}
-                    }
+                rel_move_request.Translation = status.Position
+                rel_move_request.Translation.PanTilt.space = fov_uri
 
             # configure zoom on relative move request
             if (
@@ -497,11 +500,7 @@ class OnvifController:
             except Exception as e:
                 logger.debug(f"Focus not supported for {camera_name}: {e}")
 
-        # detect FOV relative movement support
-        if (
-            fov_space_id is not None
-            and configs.DefaultRelativePanTiltTranslationSpace is not None
-        ):
+        if fov_supported:
             supported_features.append("pt-r-fov")
             cam["relative_fov_range"] = (
                 ptz_config.Spaces.RelativePanTiltTranslationSpace[fov_space_id]
