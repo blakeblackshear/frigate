@@ -58,7 +58,7 @@ export function useHealthProblems(
 
   const muteCheck = useCallback(
     async (id: string) => {
-      await axios.post(`notices/${id}/mute`);
+      await axios.post(`notices/${encodeURIComponent(id)}/mute`);
       mutateMutedChecks();
     },
     [mutateMutedChecks],
@@ -66,7 +66,7 @@ export function useHealthProblems(
 
   const unmuteCheck = useCallback(
     async (id: string) => {
-      await axios.delete(`notices/${id}/hidden`);
+      await axios.delete(`notices/${encodeURIComponent(id)}/hidden`);
       mutateMutedChecks();
     },
     [mutateMutedChecks],

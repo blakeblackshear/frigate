@@ -60,15 +60,17 @@ export function useNotices(showHidden: boolean) {
   );
 
   const acknowledge = useCallback(
-    (id: string) => act(axios.post(`notices/${id}/acknowledge`)),
+    (id: string) =>
+      act(axios.post(`notices/${encodeURIComponent(id)}/acknowledge`)),
     [act],
   );
   const mute = useCallback(
-    (id: string) => act(axios.post(`notices/${id}/mute`)),
+    (id: string) => act(axios.post(`notices/${encodeURIComponent(id)}/mute`)),
     [act],
   );
   const unhide = useCallback(
-    (id: string) => act(axios.delete(`notices/${id}/hidden`)),
+    (id: string) =>
+      act(axios.delete(`notices/${encodeURIComponent(id)}/hidden`)),
     [act],
   );
 

@@ -94,7 +94,7 @@ Recordings on a NAS behave differently, so check what you have before migrating:
 findmnt -T /path/to/your/storage -o TARGET,FSTYPE,OPTIONS
 ```
 
-**SMB and CIFS** don't store per-file ownership at all. It's synthesized from the mount options, so a per-file `chown` fails and isn't needed. Mount the share as the uid and gid Frigate runs as, and every file already looks correct to the sweep:
+**SMB and CIFS** don't store per-file ownership at all. It's synthesized from the mount options, so a per-file `chown` has no effect and isn't needed. Mount the share as the uid and gid Frigate runs as, and every file already looks correct to the sweep:
 
 ```
 //nas/frigate /media/frigate cifs credentials=/root/.smb,uid=1000,gid=1000,file_mode=0664,dir_mode=0775 0 0
